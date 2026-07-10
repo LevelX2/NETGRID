@@ -33,7 +33,10 @@ const effectiveAgendaDifficultyDeps: EffectiveAgendaDifficultyDependencies = {
   serverDifficultyIncreaseFromRunCounters,
   serverDifficultyReductionFromUpgrades,
 };
-export function visibleOwnCard(state: GameState, id: CardInstanceId): VisibleCard {
+export function visibleOwnCard(
+  state: GameState,
+  id: CardInstanceId,
+): VisibleCard {
   return visibleKnownCardWithReferenceViewer(state, id, "own");
 }
 
@@ -69,8 +72,16 @@ function visibleKnownCardWithReferenceViewer(
       : undefined;
   const visibleStrengthModifier =
     visibleStrength !== undefined
-      ? visibleStrengthModifierForKnownCard(state, id, definition, visibleStrength)
+      ? visibleStrengthModifierForKnownCard(
+          state,
+          id,
+          definition,
+          visibleStrength,
+        )
       : undefined;
+  const overadvance = overadvanceViewFields(
+    cardImplementationForDefinitionId(definition.id),
+  );
   return {
     instanceId: id,
     known: true,
@@ -112,9 +123,8 @@ function visibleKnownCardWithReferenceViewer(
               : definition.advancementRequirement,
         }
       : {}),
-    ...(visibleStrength !== undefined
-      ? { strength: visibleStrength }
-      : {}),
+    ...overadvance,
+    ...(visibleStrength !== undefined ? { strength: visibleStrength } : {}),
     ...(visibleStrengthModifier !== undefined
       ? { strengthModifier: visibleStrengthModifier }
       : {}),
@@ -152,7 +162,9 @@ function visibleKnownCardWithReferenceViewer(
     ...(instance.selectedSubtype
       ? {
           selectedSubtype: instance.selectedSubtype,
-          selectedSubtypeLabel: icebreakerSubtypeLabel(instance.selectedSubtype),
+          selectedSubtypeLabel: icebreakerSubtypeLabel(
+            instance.selectedSubtype,
+          ),
         }
       : {}),
     ...(instance.selectedCardId
@@ -167,6 +179,34 @@ function visibleKnownCardWithReferenceViewer(
     owner: instance.owner,
     controller: instance.controller,
   };
+}
+
+export function overadvanceViewFields(
+  implementation: CardImplementationDefinition | undefined,
+):
+  | Pick<VisibleCard, "overadvanceThreshold" | "overadvanceReward">
+  | Record<string, never> {
+  const scoredAgenda = implementation?.scoredAgenda;
+  if (!scoredAgenda) return {};
+  switch (scoredAgenda.kind) {
+    case "overadvance_bonus_agenda_points":
+      return {
+        overadvanceThreshold: scoredAgenda.perExcessAdvancementCounters,
+        overadvanceReward: "agenda_points",
+      };
+    case "overadvance_start_of_corp_turn_actions":
+      return {
+        overadvanceThreshold: scoredAgenda.perExcessAdvancementCounters,
+        overadvanceReward: "start_of_corp_turn_actions",
+      };
+    case "overadvance_start_of_corp_turn_credits":
+      return {
+        overadvanceThreshold: scoredAgenda.perExcessAdvancementCounters,
+        overadvanceReward: "start_of_corp_turn_credits",
+      };
+    default:
+      return {};
+  }
 }
 
 export function visibleCorpIdentityCard(state: GameState): VisibleCard {
@@ -276,9 +316,15 @@ function recurringCreditCounterDisplays(
   definition: CardDefinition,
   instance: CardInstance,
 ): VisibleCard["counterDisplays"] {
-  const amount = Math.max(0, Math.floor(instance.counters?.recurring_credit ?? 0));
+  const amount = Math.max(
+    0,
+    Math.floor(instance.counters?.recurring_credit ?? 0),
+  );
   if (amount <= 0) return undefined;
-  const capacity = Math.max(0, Math.floor(definition.recurringCredits ?? amount));
+  const capacity = Math.max(
+    0,
+    Math.floor(definition.recurringCredits ?? amount),
+  );
   return [
     {
       id: "recurring_credit",
@@ -448,25 +494,24 @@ function specialCounterDisplays(
   instance: CardInstance,
 ): VisibleCard["counterDisplays"] {
   const counters = instance.counters ?? {};
-  const markCounterDisplay =
-    definition.markCounterDisplay
-      ? {
-          id: definition.markCounterDisplay.id,
-          displayKind: "generic_counter" as const,
-          label: definition.markCounterDisplay.label,
-          ariaLabelName: definition.markCounterDisplay.ariaLabelName,
-          counterType: "mark" as const,
-          usageHint: "status_marker" as const,
-        }
-      : {
-          id: definition.type === "ice" ? "ice_mark_modifier" : "mark",
-          displayKind: "generic_counter" as const,
-          label: definition.type === "ice" ? "ICE-Modifikator" : "Mark-Counter",
-          ariaLabelName:
-            definition.type === "ice" ? "ICE-Mark-Modifikator" : "Mark-Counter",
-          counterType: "mark" as const,
-          usageHint: "status_marker" as const,
-        };
+  const markCounterDisplay = definition.markCounterDisplay
+    ? {
+        id: definition.markCounterDisplay.id,
+        displayKind: "generic_counter" as const,
+        label: definition.markCounterDisplay.label,
+        ariaLabelName: definition.markCounterDisplay.ariaLabelName,
+        counterType: "mark" as const,
+        usageHint: "status_marker" as const,
+      }
+    : {
+        id: definition.type === "ice" ? "ice_mark_modifier" : "mark",
+        displayKind: "generic_counter" as const,
+        label: definition.type === "ice" ? "ICE-Modifikator" : "Mark-Counter",
+        ariaLabelName:
+          definition.type === "ice" ? "ICE-Mark-Modifikator" : "Mark-Counter",
+        counterType: "mark" as const,
+        usageHint: "status_marker" as const,
+      };
   return [
     ...singleCounterDisplay(counters.shell, {
       id: "shell",
@@ -578,18 +623,27 @@ function specialCounterDisplays(
   ];
 }
 
-function skivvissCorpCounterDisplays(state: GameState): VisibleCard["counterDisplays"] {
-  return corpProjectedVirusCounterDisplay(state, "draw_extra_cards_per_counter");
+function skivvissCorpCounterDisplays(
+  state: GameState,
+): VisibleCard["counterDisplays"] {
+  return corpProjectedVirusCounterDisplay(
+    state,
+    "draw_extra_cards_per_counter",
+  );
 }
 
-function cockroachCorpCounterDisplays(state: GameState): VisibleCard["counterDisplays"] {
+function cockroachCorpCounterDisplays(
+  state: GameState,
+): VisibleCard["counterDisplays"] {
   return corpProjectedVirusCounterDisplay(
     state,
     "randomize_corp_hq_discards_at_threshold",
   );
 }
 
-function cascadeCorpCounterDisplays(state: GameState): VisibleCard["counterDisplays"] {
+function cascadeCorpCounterDisplays(
+  state: GameState,
+): VisibleCard["counterDisplays"] {
   return corpProjectedVirusCounterDisplay(
     state,
     "trash_faceup_rd_cards_per_two_counters",
@@ -642,8 +696,12 @@ function corpProjectedVirusCounterKindForEffect(
   return undefined;
 }
 
-function corpProjectedVirusCounterKind(definition: CardDefinition): string | undefined {
-  const virusCounter = cardImplementationForDefinitionId(definition.id)?.virusCounter;
+function corpProjectedVirusCounterKind(
+  definition: CardDefinition,
+): string | undefined {
+  const virusCounter = cardImplementationForDefinitionId(
+    definition.id,
+  )?.virusCounter;
   if (
     virusCounter?.startOfCorpTurn?.kind === "draw_extra_cards_per_counter" ||
     virusCounter?.startOfCorpTurn?.kind ===
@@ -655,7 +713,10 @@ function corpProjectedVirusCounterKind(definition: CardDefinition): string | und
   return undefined;
 }
 
-function corpProjectedVirusCounterTotal(state: GameState, kind: string): number {
+function corpProjectedVirusCounterTotal(
+  state: GameState,
+  kind: string,
+): number {
   const corpCounterAmount = Math.max(
     0,
     Math.floor(
@@ -689,7 +750,9 @@ function projectedVirusCounterDisplayId(kind: string): string {
   return kind === "cascade" ? `runner_virus_corp_${kind}` : kind;
 }
 
-function badPublicityCounterDisplays(state: GameState): VisibleCard["counterDisplays"] {
+function badPublicityCounterDisplays(
+  state: GameState,
+): VisibleCard["counterDisplays"] {
   const amount = Math.max(0, Math.floor(state.corp.badPublicity));
   if (amount <= 0) return undefined;
   return [
@@ -842,7 +905,10 @@ function singleCounterDisplay(
 }
 
 function breakerStrengthPenaltyCounterAmount(instance: CardInstance): number {
-  return Math.max(0, Math.floor(instance.counters?.breaker_strength_penalty ?? 0));
+  return Math.max(
+    0,
+    Math.floor(instance.counters?.breaker_strength_penalty ?? 0),
+  );
 }
 
 export function visibleRunnerRigCardForViewer(
@@ -919,7 +985,9 @@ function corpIcePositionLabel(
   id: CardInstanceId,
   serverId: Exclude<ServerId, "new_remote">,
 ): string {
-  const server = state.corp.servers.find((candidate) => candidate.id === serverId);
+  const server = state.corp.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
   const position = server ? server.ice.indexOf(id) + 1 : 0;
   const positionSuffix = position > 0 ? ` Position ${position}` : "";
   return `ICE auf ${serverChoiceDisplayLabel(state, serverId)}${positionSuffix}`;
@@ -963,7 +1031,9 @@ function corpViewerCanSeeCorpCard(
   if (state.corp.archives.includes(id)) return true;
   if (state.corp.scoreArea.includes(id)) return true;
   if (instance.zone.side !== "corp") return false;
-  return instance.zone.zone === "serverIce" || instance.zone.zone === "serverRoot";
+  return (
+    instance.zone.zone === "serverIce" || instance.zone.zone === "serverRoot"
+  );
 }
 
 export function visibleCorpCard(
@@ -985,7 +1055,8 @@ export function visibleCorpCard(
   const viewedApproachedIce =
     viewer === "runner" && state.run?.approachIceExposeViewingIceId === id;
   const viewedInstalledExposeCard =
-    viewer === "runner" && pendingInstalledCorpExposeReviewCardIds(state).has(id);
+    viewer === "runner" &&
+    pendingInstalledCorpExposeReviewCardIds(state).has(id);
   const privateRunnerRdAccess =
     viewer === "corp" &&
     accessed &&
@@ -1039,7 +1110,10 @@ function pendingInstalledCorpExposeReviewCardIds(
   return new Set();
 }
 
-export function visibleCorpArchives(state: GameState, viewer: Side): VisibleCard[] {
+export function visibleCorpArchives(
+  state: GameState,
+  viewer: Side,
+): VisibleCard[] {
   return state.corp.archives
     .filter(
       (id) => viewer === "corp" || mustInstance(state.cardInstances, id).faceup,
@@ -1150,7 +1224,9 @@ function serverDifficultyIncreaseFromRunCounters(
     Math.floor(
       Math.max(
         0,
-        Math.floor(state.serverAgendaCostCountersByServer?.[zone.serverId] ?? 0),
+        Math.floor(
+          state.serverAgendaCostCountersByServer?.[zone.serverId] ?? 0,
+        ),
       ) / 2,
     ),
   );
@@ -1187,12 +1263,15 @@ function hostedProgramStrengthModifier(
   const instance = state.cardInstances[cardId];
   if (!instance?.hostedOn) return 0;
   const definition = definitionFor(state, cardId);
-  if (definition.type !== "program" || !cardHasSubtype(definition, "icebreaker"))
+  if (
+    definition.type !== "program" ||
+    !cardHasSubtype(definition, "icebreaker")
+  )
     return 0;
   const hostDefinition = definitionFor(state, instance.hostedOn);
   const modifiers =
-    cardImplementationForDefinitionId(hostDefinition.id)?.hostedProgramModifiers ??
-    [];
+    cardImplementationForDefinitionId(hostDefinition.id)
+      ?.hostedProgramModifiers ?? [];
   return modifiers.reduce((sum, modifier) => {
     if (
       modifier.appliesTo !== "hosted_icebreakers" ||
@@ -1250,12 +1329,14 @@ function iceStrengthBonusFor(state: GameState, iceId: CardInstanceId): number {
   let bonus = 0;
   for (const agendaId of state.corp.scoreArea) {
     const agendaDefinition = definitionFor(state, agendaId);
-    const scoredAgenda =
-      cardImplementationForDefinitionId(agendaDefinition.id)?.scoredAgenda;
+    const scoredAgenda = cardImplementationForDefinitionId(
+      agendaDefinition.id,
+    )?.scoredAgenda;
     if (scoredAgenda?.kind === "choose_fort_ice_strength_bonus") {
       if (
         iceServerId &&
-        mustInstance(state.cardInstances, agendaId).selectedServerId === iceServerId
+        mustInstance(state.cardInstances, agendaId).selectedServerId ===
+          iceServerId
       )
         bonus += scoredAgenda.amount;
       continue;
@@ -1303,8 +1384,9 @@ function normalizeSubtypeLabel(subtype: string): string {
 }
 
 function stableSubtypeList(subtypes: readonly string[]): string[] {
-  return [...new Set(subtypes.map((subtype) => normalizeSubtypeLabel(subtype)))]
-    .sort();
+  return [
+    ...new Set(subtypes.map((subtype) => normalizeSubtypeLabel(subtype))),
+  ].sort();
 }
 
 function icebreakerSubtypeLabel(subtype: string): string {
@@ -1342,10 +1424,16 @@ function rezzedIceOutsideThisIceCount(
   iceId: CardInstanceId,
 ): number {
   const instance = state.cardInstances[iceId];
-  if (!instance || instance.zone.side !== "corp" || instance.zone.zone !== "serverIce")
+  if (
+    !instance ||
+    instance.zone.side !== "corp" ||
+    instance.zone.zone !== "serverIce"
+  )
     return 0;
   const serverId = instance.zone.serverId;
-  const server = state.corp.servers.find((candidate) => candidate.id === serverId);
+  const server = state.corp.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
   if (!server) return 0;
   const iceIndex = server.ice.indexOf(iceId);
   if (iceIndex < 0) return 0;
@@ -1359,14 +1447,18 @@ function relativeIceStrengthBonusFor(
   state: GameState,
   iceId: CardInstanceId,
 ): number {
-  const relativeIce =
-    cardImplementationForDefinitionId(definitionFor(state, iceId).id)?.relativeIce;
+  const relativeIce = cardImplementationForDefinitionId(
+    definitionFor(state, iceId).id,
+  )?.relativeIce;
   const bonusPerCount = relativeIce?.strengthBonusPerCount;
   if (!bonusPerCount) return 0;
   return rezzedIceOutsideThisIceCount(state, iceId) * bonusPerCount;
 }
 
-export function definitionFor(state: GameState, id: CardInstanceId): CardDefinition {
+export function definitionFor(
+  state: GameState,
+  id: CardInstanceId,
+): CardDefinition {
   const instance = mustInstance(state.cardInstances, id);
   const definition = CARD_DEFINITIONS_BY_ID[instance.definitionId];
   if (!definition)

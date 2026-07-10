@@ -87,7 +87,9 @@ describe("Corp score-conversion hint audit", () => {
     (cardId, signal) => {
       const hint = requiredHint(cardId);
       expect(hint.tacticSignals).toContain(signal);
-      expect(hint.tacticSignals).not.toContain("action.corp_extra_action_burst");
+      expect(hint.tacticSignals).not.toContain(
+        "action.corp_extra_action_burst",
+      );
     },
   );
 

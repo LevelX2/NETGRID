@@ -45,8 +45,9 @@ export function activatedAbilityPayload(
   const advancementMove = ability.effects.find(
     (effect) => effect.kind === "move_advancement_counters",
   );
-  const scoreConversionPayload =
-    scoreConversionCapabilityPayloadForEffects(ability.effects);
+  const scoreConversionPayload = scoreConversionCapabilityPayloadForEffects(
+    ability.effects,
+  );
   return {
     cardId,
     cardImplementationAbility: "activated",

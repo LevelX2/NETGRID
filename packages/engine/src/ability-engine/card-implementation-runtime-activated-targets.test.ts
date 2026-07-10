@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type { ActivatedCardAbilityImplementation } from "./definition-types";
-import { activatedAbilityPayload } from "./card-implementation-runtime-activated-targets";
+import { cardImplementationForDefinitionId } from "../card-implementations/registry";
+import {
+  activatedAbilityPayload,
+  scoreConversionCapabilityPayloadForEffects,
+} from "./card-implementation-runtime-activated-targets";
 
 describe("activatedAbilityPayload advancement semantics", () => {
   it("publishes advancement distribution amount and mode", () => {
@@ -95,3 +99,78 @@ describe("activatedAbilityPayload advancement semantics", () => {
     });
   });
 });
+
+describe("score-conversion card-family contract", () => {
+  it.each([
+    ["onr_v1_304_systematic-layoffs", 2, "any_combination"],
+    ["onr_v1_292_management-shake-up", 3, "any_combination"],
+    ["onr_v1_300_project-consultants", 4, "any_combination"],
+    ["onr_v1_305_team-restructuring", 2, "up_to_distinct_targets_one_each"],
+    ["onr_v1_312_chicago-branch", 2, "single_target"],
+  ] as const)(
+    "%s publishes its exact placement amount and distribution",
+    (definitionId, amount, distribution) => {
+      expect(scoreConversionPayload(definitionId)).toMatchObject({
+        scoreConversionCapability: "place_advancement",
+        scoreConversionAdvancementAmount: amount,
+        scoreConversionAdvancementMode: distribution,
+        scoreConversionTiming: "immediate",
+      });
+    },
+  );
+
+  it.each([
+    ["onr_v1_291_falsified-transactions-expert", "chosen_card", 3],
+    ["onr_v1_347_vapor-ops", "source_card", "all"],
+  ] as const)(
+    "%s publishes its exact transfer source and maximum",
+    (definitionId, sourceMode, maximum) => {
+      expect(
+        scoreConversionPayload(definitionId, "move_advancement_counters"),
+      ).toMatchObject({
+        scoreConversionCapability: "move_advancement",
+        scoreConversionAdvancementMaximum: maximum,
+        scoreConversionSourceMode: sourceMode,
+        scoreConversionTiming: "immediate",
+      });
+    },
+  );
+
+  it.each([
+    ["onr_v1_297_overtime-incentives", 2],
+    ["onr_v1_334_pacifica-regional-ai", 1],
+    ["onr_v1_192_corporate-boon", 1],
+  ] as const)(
+    "%s publishes immediate action capacity",
+    (definitionId, amount) => {
+      expect(
+        scoreConversionPayload(definitionId, "gain_actions"),
+      ).toMatchObject({
+        scoreConversionCapability: "gain_action_capacity",
+        scoreConversionActionGainAmount: amount,
+        scoreConversionTiming: "immediate",
+      });
+    },
+  );
+});
+
+function scoreConversionPayload(
+  definitionId: string,
+  effectKind?: string,
+): Record<string, string | number | boolean> {
+  const implementation = cardImplementationForDefinitionId(
+    definitionId as never,
+  );
+  const ability = implementation?.abilities?.find((candidate) =>
+    effectKind
+      ? candidate.effects.some((effect) => effect.kind === effectKind)
+      : candidate.effects.some(
+          (effect) => effect.kind === "distribute_advancement_counters",
+        ),
+  );
+  expect(
+    ability,
+    `missing score-conversion ability on ${definitionId}`,
+  ).toBeDefined();
+  return scoreConversionCapabilityPayloadForEffects(ability!.effects);
+}

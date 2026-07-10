@@ -1759,6 +1759,11 @@ export type VisibleCard = {
   rezzed?: boolean;
   advancementCounters?: number;
   advancementRequirement?: number;
+  overadvanceThreshold?: number;
+  overadvanceReward?:
+    | "agenda_points"
+    | "start_of_corp_turn_actions"
+    | "start_of_corp_turn_credits";
   strength?: number;
   strengthModifier?: number;
   agendaPoints?: number;
@@ -2320,7 +2325,4 @@ export type AiDecision = {
   reason?: string;
 };
 
-export {
-  CARD_DEFINITIONS,
-  CARD_DEFINITIONS_BY_ID,
-} from "./card-definitions";
+export { CARD_DEFINITIONS, CARD_DEFINITIONS_BY_ID } from "./card-definitions";

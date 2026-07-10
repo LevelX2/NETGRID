@@ -36,6 +36,7 @@ export type CorpScoreConversionPath = {
   clicksGenerated: number;
   creditsRequired: number;
   reservedAdvancementCounters: Record<string, number>;
+  overadvanceReason?: string;
   sameTurnGuaranteed: true;
   steps: CorpScoreConversionStep[];
   evidence: string[];
@@ -63,6 +64,7 @@ type ActionCapacity = {
 
 type CandidatePath = CorpScoreConversionPath & {
   overadvance: number;
+  rewardedOveradvance: boolean;
 };
 
 export function corpSameTurnScoreConversionPaths(
@@ -87,13 +89,44 @@ function conversionPathForTarget(
   const requirement = advancementRequirement(target.card);
   if (requirement === undefined) return undefined;
   const initialCounters = Math.max(0, target.card.advancementCounters ?? 0);
-  const deficit = Math.max(0, requirement - initialCounters);
+  const desiredTargets = [
+    requirement,
+    ...(target.card.overadvanceThreshold && target.card.overadvanceReward
+      ? [requirement + target.card.overadvanceThreshold]
+      : []),
+  ];
+  return desiredTargets
+    .map((desiredCounters) =>
+      conversionPathForDesiredTarget(
+        input,
+        target,
+        requirement,
+        desiredCounters,
+        initialCounters,
+      ),
+    )
+    .filter((path): path is CandidatePath => path !== undefined)
+    .sort(comparePaths)[0];
+}
+
+function conversionPathForDesiredTarget(
+  input: AiDecisionInput,
+  target: ScoreTarget,
+  requirement: number,
+  desiredCounters: number,
+  initialCounters: number,
+): CandidatePath | undefined {
+  const deficit = Math.max(0, desiredCounters - initialCounters);
   if (deficit === 0) {
     const scoreAction = scoreActionForCard(input, target.card.instanceId);
     if (!scoreAction) return undefined;
-    return completedPath(target, requirement, initialCounters, [
-      scoreStep(target, scoreAction),
-    ]);
+    return completedPath(
+      target,
+      requirement,
+      desiredCounters,
+      initialCounters,
+      [scoreStep(target, scoreAction)],
+    );
   }
 
   const installStep = target.installAction
@@ -117,10 +150,7 @@ function conversionPathForTarget(
     const steps = [...capacityResult.steps];
     const sourceCounters = { ...capacityResult.sourceCounters };
     if (installStep) {
-      if (
-        installStep.clickCost > clicks ||
-        installStep.creditCost > credits
-      )
+      if (installStep.clickCost > clicks || installStep.creditCost > credits)
         continue;
       clicks -= installStep.clickCost;
       credits -= installStep.creditCost;
@@ -139,6 +169,7 @@ function conversionPathForTarget(
       target,
       input,
       requirement,
+      desiredCounters,
       initialCounters,
       onCandidate: (candidate) => {
         if (!best || comparePaths(candidate, best) < 0) best = candidate;
@@ -160,6 +191,7 @@ function visitCapabilityCombinations(params: {
   target: ScoreTarget;
   input: AiDecisionInput;
   requirement: number;
+  desiredCounters: number;
   initialCounters: number;
   onCandidate: (candidate: CandidatePath) => void;
 }): void {
@@ -175,6 +207,7 @@ function visitCapabilityCombinations(params: {
       completedPath(
         params.target,
         params.requirement,
+        params.desiredCounters,
         params.initialCounters,
         [...params.steps, ...basicSteps, scoreStep(params.target)],
       ),
@@ -246,9 +279,7 @@ function scoreTargets(input: AiDecisionInput): ScoreTarget[] {
       const cardId = actionCardId(installAction);
       const card = cardId ? hqById.get(cardId) : undefined;
       const serverId = stringPayload(installAction, "serverId");
-      return card && serverId
-        ? { card, serverId, installAction }
-        : undefined;
+      return card && serverId ? { card, serverId, installAction } : undefined;
     })
     .filter((target): target is ScoreTarget => target !== undefined);
   return [...installed, ...installTargets];
@@ -278,14 +309,18 @@ function conversionCapabilities(
     const maximum = action.payload?.scoreConversionAdvancementMaximum;
     if (sourceMode === "source_card") {
       const sourceCardId = actionCardId(action);
-      const source = sourceCardId ? visibleOwnCard(input, sourceCardId) : undefined;
+      const source = sourceCardId
+        ? visibleOwnCard(input, sourceCardId)
+        : undefined;
       const amount = Math.min(
         maximum === "all"
           ? Number.MAX_SAFE_INTEGER
-          : positiveInteger(maximum) ?? 0,
+          : (positiveInteger(maximum) ?? 0),
         source?.advancementCounters ?? 0,
       );
-      return sourceCardId && sourceCardId !== target.card.instanceId && amount > 0
+      return sourceCardId &&
+        sourceCardId !== target.card.instanceId &&
+        amount > 0
         ? [{ kind: "move_advancement" as const, action, amount, sourceCardId }]
         : [];
     }
@@ -293,7 +328,7 @@ function conversionCapabilities(
     const cap =
       maximum === "all"
         ? Number.MAX_SAFE_INTEGER
-        : positiveInteger(maximum) ?? 0;
+        : (positiveInteger(maximum) ?? 0);
     return visibleInstalledCorpCards(input)
       .filter(
         (card) =>
@@ -353,7 +388,8 @@ function applyActionCapacitySet(
   const steps: CorpScoreConversionStep[] = [];
   for (const capacity of [...capacities].sort(
     (left, right) =>
-      right.gain - actionCost(right.action, "clicks") -
+      right.gain -
+        actionCost(right.action, "clicks") -
         (left.gain - actionCost(left.action, "clicks")) ||
       left.action.actionId.localeCompare(right.action.actionId),
   )) {
@@ -371,9 +407,7 @@ function applyActionCapacitySet(
     steps.push({
       kind: "gain_action_capacity",
       actionId: capacity.action.actionId,
-      ...(capacity.sourceCardId
-        ? { sourceCardId: capacity.sourceCardId }
-        : {}),
+      ...(capacity.sourceCardId ? { sourceCardId: capacity.sourceCardId } : {}),
       targetCardId: target.card.instanceId,
       targetServerId: target.serverId,
       advancementAmount: 0,
@@ -392,6 +426,7 @@ function applyActionCapacitySet(
 function completedPath(
   target: ScoreTarget,
   requirement: number,
+  desiredCounters: number,
   initialCounters: number,
   steps: CorpScoreConversionStep[],
 ): CandidatePath {
@@ -411,24 +446,32 @@ function completedPath(
     (sum, step) => sum + step.generatedClicks,
     0,
   );
-  const creditsRequired = steps.reduce(
-    (sum, step) => sum + step.creditCost,
-    0,
-  );
+  const creditsRequired = steps.reduce((sum, step) => sum + step.creditCost, 0);
   const overadvance = Math.max(
     0,
     initialCounters + advancementAdded - requirement,
   );
+  const rewardedOveradvance =
+    desiredCounters > requirement &&
+    overadvance >= desiredCounters - requirement;
+  const overadvanceReason = rewardedOveradvance
+    ? `visible_${target.card.overadvanceReward ?? "overadvance"}_threshold:${
+        target.card.overadvanceThreshold ?? desiredCounters - requirement
+      }`
+    : undefined;
   return {
     agendaCardId: target.card.instanceId,
     targetServerId: target.serverId,
     advancementRequirement: requirement,
     initialAdvancementCounters: initialCounters,
-    desiredAdvancementCounters: requirement,
+    desiredAdvancementCounters: rewardedOveradvance
+      ? desiredCounters
+      : requirement,
     clicksRequired,
     clicksGenerated,
     creditsRequired,
     reservedAdvancementCounters,
+    ...(overadvanceReason ? { overadvanceReason } : {}),
     sameTurnGuaranteed: true,
     steps,
     evidence: [
@@ -437,13 +480,20 @@ function completedPath(
       `corp_score_conversion_agenda:${target.card.instanceId}`,
       `corp_score_conversion_server:${target.serverId}`,
       `corp_score_conversion_requirement:${requirement}`,
+      `corp_score_conversion_desired_counters:${
+        rewardedOveradvance ? desiredCounters : requirement
+      }`,
       `corp_score_conversion_initial_counters:${initialCounters}`,
       `corp_score_conversion_clicks_required:${clicksRequired}`,
       `corp_score_conversion_clicks_generated:${clicksGenerated}`,
       `corp_score_conversion_credits_required:${creditsRequired}`,
       `corp_score_conversion_overadvance:${overadvance}`,
+      ...(overadvanceReason
+        ? [`corp_score_conversion_overadvance_reason:${overadvanceReason}`]
+        : []),
     ],
     overadvance,
+    rewardedOveradvance,
   };
 }
 
@@ -471,7 +521,8 @@ function conversionStep(
   capability: ConversionCapability,
   amount: number,
 ): CorpScoreConversionStep {
-  const sourceCardId = capability.sourceCardId ?? actionCardId(capability.action);
+  const sourceCardId =
+    capability.sourceCardId ?? actionCardId(capability.action);
   return {
     kind: capability.kind,
     actionId: capability.action.actionId,
@@ -592,28 +643,19 @@ function actionCardId(action: LegalAction): string | undefined {
     : undefined;
 }
 
-function actionCost(
-  action: LegalAction,
-  key: "clicks" | "credits",
-): number {
+function actionCost(action: LegalAction, key: "clicks" | "credits"): number {
   return (action.costs ?? []).reduce(
     (sum, cost) => sum + Math.max(0, Number(cost[key] ?? 0)),
     0,
   );
 }
 
-function stringPayload(
-  action: LegalAction,
-  key: string,
-): string | undefined {
+function stringPayload(action: LegalAction, key: string): string | undefined {
   const value = action.payload?.[key];
   return typeof value === "string" && value.length > 0 ? value : undefined;
 }
 
-function numberPayload(
-  action: LegalAction,
-  key: string,
-): number | undefined {
+function numberPayload(action: LegalAction, key: string): number | undefined {
   return positiveInteger(action.payload?.[key]);
 }
 
@@ -638,11 +680,16 @@ function comparePaths(
   const rightNetClicks = right.clicksRequired - right.clicksGenerated;
   const leftOveradvance = "overadvance" in left ? left.overadvance : 0;
   const rightOveradvance = "overadvance" in right ? right.overadvance : 0;
+  const leftRewarded =
+    "rewardedOveradvance" in left && left.rewardedOveradvance ? 1 : 0;
+  const rightRewarded =
+    "rewardedOveradvance" in right && right.rewardedOveradvance ? 1 : 0;
   return (
     left.steps.length - right.steps.length ||
     left.creditsRequired - right.creditsRequired ||
-    leftOveradvance - rightOveradvance ||
     leftNetClicks - rightNetClicks ||
+    rightRewarded - leftRewarded ||
+    leftOveradvance - rightOveradvance ||
     left.agendaCardId.localeCompare(right.agendaCardId) ||
     left.targetServerId.localeCompare(right.targetServerId)
   );

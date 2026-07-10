@@ -28,18 +28,13 @@ describe("Corp same-turn score conversion", () => {
           serverId: "new_remote",
           placement: "root",
         }),
-        action(
-          "transfer",
-          "activated_card_ability",
-          vapor.instanceId,
-          {
-            scoreConversionCapability: "move_advancement",
-            scoreConversionAdvancementMaximum: "all",
-            scoreConversionSourceMode: "source_card",
-            scoreConversionTargetMode: "chosen_installed_advanceable_card",
-            scoreConversionTiming: "immediate",
-          },
-        ),
+        action("transfer", "activated_card_ability", vapor.instanceId, {
+          scoreConversionCapability: "move_advancement",
+          scoreConversionAdvancementMaximum: "all",
+          scoreConversionSourceMode: "source_card",
+          scoreConversionTargetMode: "chosen_installed_advanceable_card",
+          scoreConversionTiming: "immediate",
+        }),
       ],
     });
 
@@ -148,11 +143,7 @@ describe("Corp same-turn score conversion", () => {
       bestCorpSameTurnScoreConversionPath(input)?.steps.map(
         (step) => step.kind,
       ),
-    ).toEqual([
-      "install_score_target",
-      "place_advancement",
-      "score_ready",
-    ]);
+    ).toEqual(["install_score_target", "place_advancement", "score_ready"]);
   });
 
   it("fills a mixed burst path with projected basic advances", () => {
@@ -220,6 +211,162 @@ describe("Corp same-turn score conversion", () => {
     });
 
     expect(corpSameTurnScoreConversionPaths(input)).toEqual([]);
+  });
+
+  it("binds Falsified Transactions to the chosen funded source", () => {
+    const agenda = card("agenda", "agenda", { advancementRequirement: 3 });
+    const funded = card("funded", "asset", { advancementCounters: 3 });
+    const decoy = card("decoy", "asset", { advancementCounters: 1 });
+    const input = corpInput({
+      clicks: 2,
+      credits: 0,
+      hq: [agenda],
+      root: [funded, decoy],
+      actions: [
+        action("install", "install_card", agenda.instanceId, {
+          serverId: "new_remote",
+          placement: "root",
+        }),
+        action("falsified", "play_operation", "falsified", {
+          scoreConversionCapability: "move_advancement",
+          scoreConversionAdvancementMaximum: 3,
+          scoreConversionSourceMode: "chosen_card",
+          scoreConversionTargetMode: "chosen_installed_advanceable_card",
+          scoreConversionTiming: "immediate",
+        }),
+      ],
+    });
+
+    const path = bestCorpSameTurnScoreConversionPath(input);
+
+    expect(path?.reservedAdvancementCounters).toEqual({ funded: 3 });
+    expect(
+      path?.steps.find((step) => step.kind === "move_advancement"),
+    ).toMatchObject({ actionId: "falsified", sourceCardId: "funded" });
+  });
+
+  it("does not double-spend Pacifica counters for actions and transfer", () => {
+    const agenda = card("agenda", "agenda", { advancementRequirement: 3 });
+    const pacifica = card("pacifica", "asset", { advancementCounters: 3 });
+    const input = corpInput({
+      clicks: 1,
+      credits: 0,
+      hq: [agenda],
+      root: [pacifica],
+      actions: [
+        action("install", "install_card", agenda.instanceId, {
+          serverId: "new_remote",
+          placement: "root",
+        }),
+        action(
+          "pacifica-action",
+          "activated_card_ability",
+          pacifica.instanceId,
+          {
+            scoreConversionCapability: "gain_action_capacity",
+            scoreConversionActionGainAmount: 1,
+            scoreConversionTiming: "immediate",
+            cardImplementationAdvancementCounterCost: 1,
+          },
+        ),
+        action("move", "activated_card_ability", pacifica.instanceId, {
+          scoreConversionCapability: "move_advancement",
+          scoreConversionAdvancementMaximum: "all",
+          scoreConversionSourceMode: "source_card",
+          scoreConversionTargetMode: "chosen_installed_advanceable_card",
+          scoreConversionTiming: "immediate",
+        }),
+      ],
+    });
+
+    expect(corpSameTurnScoreConversionPaths(input)).toEqual([]);
+  });
+
+  it("supports exact two-, three-, and four-counter placement families", () => {
+    for (const amount of [2, 3, 4]) {
+      const agenda = card(`agenda-${amount}`, "agenda", {
+        advancementRequirement: amount,
+      });
+      const input = corpInput({
+        clicks: 2,
+        credits: 0,
+        hq: [agenda],
+        actions: [
+          action(`install-${amount}`, "install_card", agenda.instanceId, {
+            serverId: "new_remote",
+            placement: "root",
+          }),
+          placement(`burst-${amount}`, amount),
+        ],
+      });
+
+      expect(bestCorpSameTurnScoreConversionPath(input)?.steps).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            kind: "place_advancement",
+            advancementAmount: amount,
+          }),
+        ]),
+      );
+    }
+  });
+
+  it("takes a visible overadvance threshold only when it costs no extra step", () => {
+    const agenda = card("agenda", "agenda", {
+      advancementRequirement: 3,
+      overadvanceThreshold: 2,
+      overadvanceReward: "agenda_points",
+    });
+    const vapor = card("vapor", "asset", { advancementCounters: 5 });
+    const input = corpInput({
+      clicks: 2,
+      credits: 0,
+      hq: [agenda],
+      root: [vapor],
+      actions: [
+        action("install", "install_card", agenda.instanceId, {
+          serverId: "new_remote",
+          placement: "root",
+        }),
+        action("transfer", "activated_card_ability", vapor.instanceId, {
+          scoreConversionCapability: "move_advancement",
+          scoreConversionAdvancementMaximum: "all",
+          scoreConversionSourceMode: "source_card",
+          scoreConversionTargetMode: "chosen_installed_advanceable_card",
+          scoreConversionTiming: "immediate",
+        }),
+      ],
+    });
+
+    expect(bestCorpSameTurnScoreConversionPath(input)).toMatchObject({
+      desiredAdvancementCounters: 5,
+      overadvanceReason: "visible_agenda_points_threshold:2",
+      reservedAdvancementCounters: { vapor: 5 },
+    });
+  });
+
+  it("keeps exact-fit when an overadvance threshold needs another action", () => {
+    const agenda = card("agenda", "agenda", {
+      advancementRequirement: 3,
+      overadvanceThreshold: 2,
+      overadvanceReward: "agenda_points",
+    });
+    const input = corpInput({
+      clicks: 3,
+      credits: 2,
+      hq: [agenda],
+      actions: [
+        action("install", "install_card", agenda.instanceId, {
+          serverId: "new_remote",
+          placement: "root",
+        }),
+        placement("burst", 3),
+      ],
+    });
+
+    const path = bestCorpSameTurnScoreConversionPath(input);
+    expect(path).toMatchObject({ desiredAdvancementCounters: 3 });
+    expect(path).not.toHaveProperty("overadvanceReason");
   });
 });
 

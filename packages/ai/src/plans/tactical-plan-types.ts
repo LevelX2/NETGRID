@@ -279,6 +279,7 @@ export type TacticalPlanMemorySnapshot = {
   target?: PlanTarget;
   selectedStepKind?: PlanStepKind;
   selectedActionId?: string;
+  scoreConversionDesiredAdvancementCounters?: number;
   blockedBy: string[];
   ttlDecisionsRemaining: number;
   planProgressionReason: string;

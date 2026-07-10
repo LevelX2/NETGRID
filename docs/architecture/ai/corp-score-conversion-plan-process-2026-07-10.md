@@ -120,17 +120,17 @@ wechseln.
 
 ## Paketfolge
 
-| Paket | Titel | Ergebnis |
-| --- | --- | --- |
-| P0 | Prozess und Worktree | verbindlicher Prozess, Branch und Goal |
-| P1 | Capability-Vertrag und Inventar | vollständige Taxonomie und Kartenmatrix |
-| P2 | LegalAction-Semantik | standardisierte ausführbare Capability-Payloads |
-| P3 | Hint-Audit | Engine-/Hint-Konsistenz und automatische Gates |
-| P4 | Pfadberechnung | ressourcenbasierter deterministischer Same-Turn-Solver |
-| P5 | Scoreplan-Integration | alternativer Pfad in `corp.create_score_window` |
-| P6 | Choice und Reservierung | zielgebundene Auswahl und Schutz geplanter Ressourcen |
-| P7 | Szenarien und Regression | Familien-, Mischpfad- und Negativabdeckung |
-| P8 | Abschlussintegration | Full Gates, Main-Abgleich, lokaler Merge und Cleanup |
+| Paket | Titel                           | Ergebnis                                               |
+| ----- | ------------------------------- | ------------------------------------------------------ |
+| P0    | Prozess und Worktree            | verbindlicher Prozess, Branch und Goal                 |
+| P1    | Capability-Vertrag und Inventar | vollständige Taxonomie und Kartenmatrix                |
+| P2    | LegalAction-Semantik            | standardisierte ausführbare Capability-Payloads        |
+| P3    | Hint-Audit                      | Engine-/Hint-Konsistenz und automatische Gates         |
+| P4    | Pfadberechnung                  | ressourcenbasierter deterministischer Same-Turn-Solver |
+| P5    | Scoreplan-Integration           | alternativer Pfad in `corp.create_score_window`        |
+| P6    | Choice und Reservierung         | zielgebundene Auswahl und Schutz geplanter Ressourcen  |
+| P7    | Szenarien und Regression        | Familien-, Mischpfad- und Negativabdeckung             |
+| P8    | Abschlussintegration            | Full Gates, Main-Abgleich, lokaler Merge und Cleanup   |
 
 ## Paketdetails
 

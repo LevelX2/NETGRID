@@ -20,6 +20,8 @@ import {
 } from "../../test-fixtures/mechanic-smoke-fixtures";
 import { passRootRezWindowBeforeAccessIfOpen } from "../../test-fixtures/index-test-helpers";
 import type { CardInstanceId } from "@netgrid/shared";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
+import { overadvanceViewFields } from "./card-view";
 
 describe("PlayerView projection", () => {
   it("does not leak hidden Corp card titles into the Runner view or public events", () => {
@@ -79,8 +81,8 @@ describe("PlayerView projection", () => {
     );
     expect(runnerHiddenAdvancedRoot).not.toHaveProperty("agendaPoints");
     const corpAdvancedRoot = corpView.servers
-        .flatMap((server) => server.root)
-        .find((card) => card.instanceId === advancedAgendaId);
+      .flatMap((server) => server.root)
+      .find((card) => card.instanceId === advancedAgendaId);
     expect(corpAdvancedRoot).toMatchObject({
       known: true,
       title: "Simple Agenda",
@@ -111,6 +113,22 @@ describe("PlayerView projection", () => {
       "Simple Agenda",
     );
   });
+
+  it.each([
+    ["onr_v1_214_project-babylon", 2, "agenda_points"],
+    ["onr_proteus_007_project-venice", 3, "start_of_corp_turn_actions"],
+    ["onr_proteus_008_project-zurich", 2, "start_of_corp_turn_credits"],
+  ] as const)(
+    "projects the authoritative overadvance contract for %s",
+    (definitionId, threshold, reward) => {
+      expect(
+        overadvanceViewFields(cardImplementationForDefinitionId(definitionId)),
+      ).toEqual({
+        overadvanceThreshold: threshold,
+        overadvanceReward: reward,
+      });
+    },
+  );
 
   it("keeps mixed remote root order accessible without leaking hidden root types before access", () => {
     let state = toRunnerTurn(
@@ -174,9 +192,9 @@ describe("PlayerView projection", () => {
     });
     expect(runnerRemoteBefore?.root[2]).not.toHaveProperty("definitionId");
     expect(runnerRemoteBefore?.root[2]).not.toHaveProperty("type");
-    expect(JSON.stringify(getPlayerView(state, "runner").publicEvents)).not.toContain(
-      "simple_upgrade",
-    );
+    expect(
+      JSON.stringify(getPlayerView(state, "runner").publicEvents),
+    ).not.toContain("simple_upgrade");
 
     state = apply(
       state,
@@ -186,14 +204,12 @@ describe("PlayerView projection", () => {
     );
     state = passRootRezWindowBeforeAccessIfOpen(state);
 
-    expect(state.run?.breach?.queue.map((entry) => entry.cardInstanceId)).toEqual([
-      firstUpgradeId,
-      rezzedNodeId,
-      secondUpgradeId,
-    ]);
-    expect(JSON.stringify(getPlayerView(state, "runner").publicEvents)).not.toContain(
-      "simple_upgrade",
-    );
+    expect(
+      state.run?.breach?.queue.map((entry) => entry.cardInstanceId),
+    ).toEqual([firstUpgradeId, rezzedNodeId, secondUpgradeId]);
+    expect(
+      JSON.stringify(getPlayerView(state, "runner").publicEvents),
+    ).not.toContain("simple_upgrade");
 
     state = apply(state, "runner", (action) => action.type === "access_card");
     state = apply(state, "runner", (action) => action.type === "decline_trash");
@@ -214,5 +230,4 @@ describe("PlayerView projection", () => {
     expect(replay.actualFinalStateHash).toBe(hashState(state));
     expect(validateGameState(state).ok).toBe(true);
   });
-
 });

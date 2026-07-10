@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import { mapPlanStepToLegalActions } from "../tactical-plans";
 import { buildCorpTacticalPlans } from "./tactical-plan-corp-plans";
@@ -52,8 +56,12 @@ describe("Corp score-conversion TacticalPlan integration", () => {
       },
     });
     expect(
-      mapPlanStepToLegalActions(plan!, plan!.currentStep, candidates, input)
-        .legalActions.map((action) => action.actionId),
+      mapPlanStepToLegalActions(
+        plan!,
+        plan!.currentStep,
+        candidates,
+        input,
+      ).legalActions.map((action) => action.actionId),
     ).toEqual(["install"]);
   });
 
@@ -187,4 +195,3 @@ function legalAction(
     targetRequirements: [],
   } as unknown as LegalAction;
 }
-

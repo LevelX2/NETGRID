@@ -1,11 +1,5 @@
-import {
-  bankBuildActions,
-  bankToolEvidence,
-} from "./tactical-plan-bank-tools";
-import {
-  createPlanStep,
-  createTacticalPlan,
-} from "./tactical-plan-builders";
+import { bankBuildActions, bankToolEvidence } from "./tactical-plan-bank-tools";
+import { createPlanStep, createTacticalPlan } from "./tactical-plan-builders";
 import {
   advanceCompletesScore,
   corpHasSafeScoreAlternative,
@@ -44,7 +38,9 @@ export function buildCorpTacticalPlans(
     corpGoalForFamily(context, "tag_punish") ??
     corpGoalForFamily(context, "damage_pressure");
   plans.push(...buildCorpScoreConversionPlans(context, scorelineGoal));
-  for (const action of input.legalActions.filter((candidate) => candidate.type === "score_agenda")) {
+  for (const action of input.legalActions.filter(
+    (candidate) => candidate.type === "score_agenda",
+  )) {
     const strategicBoost = tacticalGoalPriorityBoost(scorelineGoal);
     plans.push(
       createTacticalPlan({
@@ -66,13 +62,19 @@ export function buildCorpTacticalPlans(
           "corp_score_sequence:score_now",
           ...tacticalGoalEvidence(scorelineGoal),
         ],
-        scoreBreakdown: tacticalGoalScoreBreakdown(scorelineGoal, strategicBoost),
+        scoreBreakdown: tacticalGoalScoreBreakdown(
+          scorelineGoal,
+          strategicBoost,
+        ),
         stateVersion,
       }),
     );
   }
-  for (const action of input.legalActions.filter((candidate) => candidate.type === "advance_card")) {
-    const serverId = actionServerId(action) ?? visibleSourceServerId(input.playerView, action);
+  for (const action of input.legalActions.filter(
+    (candidate) => candidate.type === "advance_card",
+  )) {
+    const serverId =
+      actionServerId(action) ?? visibleSourceServerId(input.playerView, action);
     const blockers = corpScoreWindowBlockers(
       input,
       serverId,
@@ -96,8 +98,9 @@ export function buildCorpTacticalPlans(
         type: "corp.create_score_window",
         status: blockers.length > 0 ? "blocked" : "active",
         priority:
-          (serverId && remoteIsProtected(input.playerView, serverId) ? 900 : 760) +
-          strategicBoost,
+          (serverId && remoteIsProtected(input.playerView, serverId)
+            ? 900
+            : 760) + strategicBoost,
         horizonTurns: 1,
         ...(serverId ? { target: { kind: "server", id: serverId } } : {}),
         blockers,
@@ -109,7 +112,10 @@ export function buildCorpTacticalPlans(
           ...tacticalGoalEvidence(scorelineGoal),
           ...blockers.flatMap((blocker) => blocker.evidence),
         ],
-        scoreBreakdown: tacticalGoalScoreBreakdown(scorelineGoal, strategicBoost),
+        scoreBreakdown: tacticalGoalScoreBreakdown(
+          scorelineGoal,
+          strategicBoost,
+        ),
         stateVersion,
       }),
     );
@@ -125,7 +131,8 @@ export function buildCorpTacticalPlans(
       candidate.payload?.placement !== "ice" &&
       scorelineInstallActionIds.has(candidate.actionId),
   )) {
-    const serverId = actionServerId(action) ?? visibleSourceServerId(input.playerView, action);
+    const serverId =
+      actionServerId(action) ?? visibleSourceServerId(input.playerView, action);
     if (!serverId || !serverId.startsWith("remote_")) continue;
     const blockers = corpScoreWindowBlockers(
       input,
@@ -141,7 +148,9 @@ export function buildCorpTacticalPlans(
             stepId: `install_or_prepare_agenda:${action.actionId}`,
             kind: "install_or_prepare_agenda",
             desiredActionSemantics: ["install.card", "scoreline"],
-            rationale: ["install scoreline card into an existing scoring remote"],
+            rationale: [
+              "install scoreline card into an existing scoring remote",
+            ],
           });
     plans.push(
       createTacticalPlan({
@@ -163,13 +172,19 @@ export function buildCorpTacticalPlans(
           ...tacticalGoalEvidence(scorelineGoal),
           ...blockers.flatMap((blocker) => blocker.evidence),
         ],
-        scoreBreakdown: tacticalGoalScoreBreakdown(scorelineGoal, strategicBoost),
+        scoreBreakdown: tacticalGoalScoreBreakdown(
+          scorelineGoal,
+          strategicBoost,
+        ),
         stateVersion,
       }),
     );
   }
-  for (const action of input.legalActions.filter((candidate) => candidate.type === "rez_ice")) {
-    const serverId = actionServerId(action) ?? visibleSourceServerId(input.playerView, action);
+  for (const action of input.legalActions.filter(
+    (candidate) => candidate.type === "rez_ice",
+  )) {
+    const serverId =
+      actionServerId(action) ?? visibleSourceServerId(input.playerView, action);
     const strategicBoost = tacticalGoalPriorityBoost(defenseGoal);
     plans.push(
       createTacticalPlan({
@@ -226,13 +241,19 @@ export function buildCorpTacticalPlans(
             "score_flatline_window",
             "flatline",
           ],
-          rationale: ["strategic Corp punish pressure maps to an existing legal action"],
+          rationale: [
+            "strategic Corp punish pressure maps to an existing legal action",
+          ],
         }),
         evidence: [
           `punish_action:${action.actionId}`,
           `punish_semantic:${candidate.semanticActionType}`,
-          ...candidate.actionTacticSignals.map((signal) => `punish_tactic:${signal}`),
-          ...candidate.cardContextSignals.map((signal) => `punish_card_signal:${signal}`),
+          ...candidate.actionTacticSignals.map(
+            (signal) => `punish_tactic:${signal}`,
+          ),
+          ...candidate.cardContextSignals.map(
+            (signal) => `punish_card_signal:${signal}`,
+          ),
           ...tacticalGoalEvidence(punishGoal),
         ],
         scoreBreakdown: tacticalGoalScoreBreakdown(punishGoal, strategicBoost),
@@ -240,7 +261,11 @@ export function buildCorpTacticalPlans(
       }),
     );
   }
-  const bankBuildActionList = bankBuildActions(context, "corp", input.legalActions);
+  const bankBuildActionList = bankBuildActions(
+    context,
+    "corp",
+    input.legalActions,
+  );
   const corpBankToolEvidence = bankToolEvidence(context, "corp");
   const economyStrategicBoost = tacticalGoalPriorityBoost(economyGoal, 100);
   if (
@@ -260,7 +285,10 @@ export function buildCorpTacticalPlans(
         currentStep: createPlanStep({
           stepId: "build_bank_counter:corp",
           kind: "build_bank_counter",
-          desiredActionSemantics: ["card_ability.trigger", "card_ability.unknown"],
+          desiredActionSemantics: [
+            "card_ability.trigger",
+            "card_ability.unknown",
+          ],
           requiredCapabilities: [
             {
               capabilityId: "corp.bank_capacity",
@@ -270,10 +298,14 @@ export function buildCorpTacticalPlans(
               evidence: corpBankToolEvidence,
             },
           ],
-          rationale: ["corp can bank spare credits for future score or rez windows"],
+          rationale: [
+            "corp can bank spare credits for future score or rez windows",
+          ],
         }),
         evidence: [
-          ...bankBuildActionList.map((action) => `bank_build_action:${action.actionId}`),
+          ...bankBuildActionList.map(
+            (action) => `bank_build_action:${action.actionId}`,
+          ),
           ...corpBankToolEvidence,
           ...tacticalGoalEvidence(economyGoal),
         ],

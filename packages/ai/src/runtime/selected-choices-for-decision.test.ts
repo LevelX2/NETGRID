@@ -213,9 +213,7 @@ describe("selectedChoicesForDecision", () => {
         {
           credits: 0,
           servers: [
-            visibleServer("remote_1", [
-              visibleRezCard("colonel_1", "ice", 17),
-            ]),
+            visibleServer("remote_1", [visibleRezCard("colonel_1", "ice", 17)]),
           ],
         },
       ),
@@ -350,7 +348,9 @@ function inputWithChoice(
       pendingChoice: {
         choiceId: "choice_multi",
         side: "corp",
-        source: choice.source ?? "card_implementation.agenda_purge_install_targets:test",
+        source:
+          choice.source ??
+          "card_implementation.agenda_purge_install_targets:test",
         prompt: "Choose targets",
         kind: choice.kind,
         options: choice.options ?? [

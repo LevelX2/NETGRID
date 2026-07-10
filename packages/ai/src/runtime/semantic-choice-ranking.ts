@@ -143,6 +143,21 @@ export function tacticalPlanMappedChoice(
         threshold: 1800,
       });
     }
+    if (
+      tacticalPlanCorpScoreConversionBlocksOffPlanOverride(
+        mapping,
+        overrideChoice,
+        mappedActionIds,
+      )
+    ) {
+      return tacticalPlanBlockedOverrideResult({
+        mappedChoice,
+        overrideChoice,
+        reason: "corp_score_conversion_plan_controller",
+        scoreGap,
+        threshold: Number.POSITIVE_INFINITY,
+      });
+    }
     const mappedNonPositiveAgainstPositive =
       mappedChoice.score <= 0 && overrideChoice.score > 0;
     const deferredDevelopmentInstallShouldYield =
@@ -359,6 +374,25 @@ function tacticalPlanRunnerMappingBlocksOffPlanOverride(
   if (exceptions.corpBoardTriageMismatchShouldYield) return false;
   if (exceptions.deferredDevelopmentInstallShouldYield) return false;
   return !runnerPlanOverrideIsHardInterrupt(mapping.plan, overrideChoice);
+}
+
+function tacticalPlanCorpScoreConversionBlocksOffPlanOverride(
+  mapping: PlanStepMappingResult,
+  overrideChoice: SemanticRuntimeChoice,
+  mappedActionIds: ReadonlySet<string>,
+): boolean {
+  return (
+    mapping.plan.side === "corp" &&
+    mapping.plan.type === "corp.create_score_window" &&
+    mapping.plan.status === "active" &&
+    mapping.plan.evidence.includes(
+      "corp_score_conversion_same_turn_guaranteed:true",
+    ) &&
+    mapping.plan.evidence.includes(
+      "corp_score_sequence:same_turn_conversion",
+    ) &&
+    !mappedActionIds.has(overrideChoice.action.actionId)
+  );
 }
 
 function tacticalPlanDeferredDevelopmentInstallShouldYield(

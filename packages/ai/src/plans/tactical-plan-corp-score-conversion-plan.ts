@@ -87,11 +87,9 @@ function planStepForConversion(
   step: CorpScoreConversionStep,
   legalActionsById: ReadonlyMap<string, LegalAction>,
 ): PlanStep {
-  const currentActionId = currentActionIdForStep(
-    path,
-    step,
-    [...legalActionsById.values()],
-  );
+  const currentActionId = currentActionIdForStep(path, step, [
+    ...legalActionsById.values(),
+  ]);
   const kind = planStepKind(step);
   return createPlanStep({
     stepId: `score_conversion:${step.kind}:${path.agendaCardId}`,
@@ -176,4 +174,3 @@ function actionCardId(action: LegalAction): string | undefined {
     ? action.source
     : undefined;
 }
-

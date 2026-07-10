@@ -168,28 +168,28 @@ Es beschreibt Planrelevanz, nicht Kartenfreischaltung.
 
 ### Direkte Advancement-Platzierung
 
-| Karte | Enginefähigkeit | Planrolle | Aktueller Hintstatus |
-| --- | --- | --- | --- |
-| Management Shake-Up | 3, beliebig verteilt | Burst | Fast-Advance-Signale vorhanden; Benchmark fehlt |
-| Project Consultants | 4, beliebig verteilt | großer Burst | Fast-Advance-Signale vorhanden; Benchmark fehlt |
-| Systematic Layoffs | 2, beliebig verteilt | kleiner Burst | Signale und Benchmark vorhanden |
-| Team Restructuring | je 1 auf bis zu 2 verschiedene Ziele | verteilte Unterstützung | Signale vorhanden; Benchmark fehlt |
-| Chicago Branch | 2 auf ein Ziel, aktivierte Fähigkeit | wiederholbarer Burst | Fast-Advance-/Remote-Signale vorhanden; Benchmark fehlt |
+| Karte               | Enginefähigkeit                      | Planrolle               | Aktueller Hintstatus                                    |
+| ------------------- | ------------------------------------ | ----------------------- | ------------------------------------------------------- |
+| Management Shake-Up | 3, beliebig verteilt                 | Burst                   | Fast-Advance-Signale vorhanden; Benchmark fehlt         |
+| Project Consultants | 4, beliebig verteilt                 | großer Burst            | Fast-Advance-Signale vorhanden; Benchmark fehlt         |
+| Systematic Layoffs  | 2, beliebig verteilt                 | kleiner Burst           | Signale und Benchmark vorhanden                         |
+| Team Restructuring  | je 1 auf bis zu 2 verschiedene Ziele | verteilte Unterstützung | Signale vorhanden; Benchmark fehlt                      |
+| Chicago Branch      | 2 auf ein Ziel, aktivierte Fähigkeit | wiederholbarer Burst    | Fast-Advance-/Remote-Signale vorhanden; Benchmark fehlt |
 
 ### Advancement-Transfer
 
-| Karte | Enginefähigkeit | Planrolle | Aktueller Hintstatus |
-| --- | --- | --- | --- |
-| Vapor Ops | beliebige Menge von der eigenen Karte | Counterbank und Transfer | starke Transfer-/Fast-Advance-Signale; grober PlanRole noch Economy; Benchmark fehlt |
-| Falsified-Transactions Expert | bis zu 3 von gewählter Karte | Counter-Repositionierung | starke Transfer-/Fast-Advance-Signale; Benchmark fehlt |
+| Karte                         | Enginefähigkeit                       | Planrolle                | Aktueller Hintstatus                                                                 |
+| ----------------------------- | ------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------ |
+| Vapor Ops                     | beliebige Menge von der eigenen Karte | Counterbank und Transfer | starke Transfer-/Fast-Advance-Signale; grober PlanRole noch Economy; Benchmark fehlt |
+| Falsified-Transactions Expert | bis zu 3 von gewählter Karte          | Counter-Repositionierung | starke Transfer-/Fast-Advance-Signale; Benchmark fehlt                               |
 
 ### Sofortiger Aktionsgewinn
 
-| Karte | Enginefähigkeit | Planrolle | Aktueller Hintstatus |
-| --- | --- | --- | --- |
-| Overtime Incentives | 2 Aktionen beim Spielen | Burst-Enabler | Action-Burst-Signale vorhanden; PlanRole noch Economy; kein Fast-Advance-Line-Support |
-| Pacifica Regional AI | 1 Advancement-Counter gegen 1 Aktion | Counter-zu-Aktion | Fast-Advance-Engine-Anker vorhanden; Benchmark fehlt |
-| Corporate Boon | 1 Boon-Counter gegen 1 Aktion, einmal pro Zug | situativer Enabler | Action-Tempo-Anker und Benchmark vorhanden |
+| Karte                | Enginefähigkeit                               | Planrolle          | Aktueller Hintstatus                                                                  |
+| -------------------- | --------------------------------------------- | ------------------ | ------------------------------------------------------------------------------------- |
+| Overtime Incentives  | 2 Aktionen beim Spielen                       | Burst-Enabler      | Action-Burst-Signale vorhanden; PlanRole noch Economy; kein Fast-Advance-Line-Support |
+| Pacifica Regional AI | 1 Advancement-Counter gegen 1 Aktion          | Counter-zu-Aktion  | Fast-Advance-Engine-Anker vorhanden; Benchmark fehlt                                  |
+| Corporate Boon       | 1 Boon-Counter gegen 1 Aktion, einmal pro Zug | situativer Enabler | Action-Tempo-Anker und Benchmark vorhanden                                            |
 
 ### Wiederkehrender oder zukünftiger Aktionsgewinn
 
@@ -197,12 +197,12 @@ Diese Karten erhöhen ein späteres Startbudget oder erzeugen wiederkehrendes
 Tempo. Sie sind keine während desselben Pfads neu spielbaren Sofortschritte,
 wenn der Gewinn erst am nächsten Zugbeginn entsteht.
 
-| Karte | Enginefähigkeit | Planrolle | Aktueller Hintstatus |
-| --- | --- | --- | --- |
-| Subsidiary Branch | +1 Aktion am Corp-Zugbeginn | nächster Zug | Action-Tempo-Anker und Benchmark vorhanden |
-| Remote Facility | +1 Aktion am Corp-Zugbeginn | nächster Zug | Repeatable-Action-Signal; Benchmark fehlt |
-| Nevinyrral | +1 Aktion am Corp-Zugbeginn mit Risiko | nächster Zug | Repeatable-Action-/Risikohints; Benchmark fehlt |
-| Project Venice | Overadvance-basierter wiederkehrender Aktionsgewinn | Ziel und nächster Zug | Overadvance-/Action-Signale; Benchmark fehlt |
+| Karte             | Enginefähigkeit                                     | Planrolle             | Aktueller Hintstatus                            |
+| ----------------- | --------------------------------------------------- | --------------------- | ----------------------------------------------- |
+| Subsidiary Branch | +1 Aktion am Corp-Zugbeginn                         | nächster Zug          | Action-Tempo-Anker und Benchmark vorhanden      |
+| Remote Facility   | +1 Aktion am Corp-Zugbeginn                         | nächster Zug          | Repeatable-Action-Signal; Benchmark fehlt       |
+| Nevinyrral        | +1 Aktion am Corp-Zugbeginn mit Risiko              | nächster Zug          | Repeatable-Action-/Risikohints; Benchmark fehlt |
+| Project Venice    | Overadvance-basierter wiederkehrender Aktionsgewinn | Ziel und nächster Zug | Overadvance-/Action-Signale; Benchmark fehlt    |
 
 ### Potenzielle Advancement-Counterquellen
 
@@ -228,11 +228,11 @@ die Engine-Choice beziehungsweise Capability-Payload.
 
 ### Overadvance-Ziele
 
-| Karte | Zielwert | Aktueller Hintstatus |
-| --- | --- | --- |
-| Project Babylon | zusätzliche Agendapunkte an Schwellen | Signale und Benchmark vorhanden |
-| Project Venice | wiederkehrende Aktionen an Schwellen | Signale vorhanden; Benchmark fehlt |
-| Project Zurich | wiederkehrende Credits an Schwellen | Signale vorhanden; Benchmark fehlt |
+| Karte           | Zielwert                              | Aktueller Hintstatus               |
+| --------------- | ------------------------------------- | ---------------------------------- |
+| Project Babylon | zusätzliche Agendapunkte an Schwellen | Signale und Benchmark vorhanden    |
+| Project Venice  | wiederkehrende Aktionen an Schwellen  | Signale vorhanden; Benchmark fehlt |
+| Project Zurich  | wiederkehrende Credits an Schwellen   | Signale vorhanden; Benchmark fehlt |
 
 ## Ausgeschlossene oder nur indirekte Karten
 
@@ -261,4 +261,3 @@ die Engine-Choice beziehungsweise Capability-Payload.
 7. Jede Kartenfamilie besitzt einen positiven und einen negativen Test.
 8. Benchmarkabdeckung ist für alle unmittelbar ausführbaren
    Score-Conversion-Werkzeuge Pflicht.
-

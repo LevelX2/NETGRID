@@ -67,15 +67,16 @@ function tacticalPlanMemoryContextId(input: AiDecisionInput): string {
   return input.seed;
 }
 
-
 function samePlanLine(
   plan: TacticalPlan,
   previousPlan: TacticalPlanMemorySnapshot,
 ): boolean {
   if (plan.type !== previousPlan.type) return false;
   if (!plan.target && !previousPlan.target) return true;
-  return plan.target?.kind === previousPlan.target?.kind &&
-    plan.target?.id === previousPlan.target?.id;
+  return (
+    plan.target?.kind === previousPlan.target?.kind &&
+    plan.target?.id === previousPlan.target?.id
+  );
 }
 
 export function createTacticalPlanMemorySnapshot(params: {
@@ -102,6 +103,7 @@ export function createTacticalPlanMemorySnapshot(params: {
     ...(params.plan.target ? { target: params.plan.target } : {}),
     selectedStepKind: params.step.kind,
     selectedActionId: params.selectedAction.actionId,
+    ...scoreConversionDesiredCountersField(params.plan),
     blockedBy: params.plan.blockers.map((blocker) => blocker.kind),
     ttlDecisionsRemaining,
     planProgressionReason:
@@ -116,6 +118,25 @@ export function createTacticalPlanMemorySnapshot(params: {
   };
 }
 
+function scoreConversionDesiredCountersField(
+  plan: TacticalPlan,
+):
+  | Pick<
+      TacticalPlanMemorySnapshot,
+      "scoreConversionDesiredAdvancementCounters"
+    >
+  | Record<string, never> {
+  if (plan.type !== "corp.create_score_window") return {};
+  const prefix = "corp_score_conversion_desired_counters:";
+  const raw = plan.evidence
+    .find((entry) => entry.startsWith(prefix))
+    ?.slice(prefix.length);
+  const amount = Number(raw);
+  return Number.isInteger(amount) && amount > 0
+    ? { scoreConversionDesiredAdvancementCounters: amount }
+    : {};
+}
+
 function planMemoryStatus(
   plan: TacticalPlan,
   step: PlanStep,
@@ -126,7 +147,10 @@ function planMemoryStatus(
     if (plan.type === "runner.opportunistic_central_run") return "satisfied";
     if (plan.type === "runner.cash_out_credit_bank") return "satisfied";
     if (plan.type === "corp.rez_defense") return "satisfied";
-    if (plan.type === "corp.create_score_window" && step.kind === "score_agenda") {
+    if (
+      plan.type === "corp.create_score_window" &&
+      step.kind === "score_agenda"
+    ) {
       return "satisfied";
     }
     return "progressing";

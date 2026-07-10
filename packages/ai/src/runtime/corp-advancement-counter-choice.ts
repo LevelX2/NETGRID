@@ -8,6 +8,7 @@ export function selectedCorpAdvancementCounterChoiceOptionId(
     AiDecisionInput["playerView"]["pendingChoice"]
   >["options"],
   plannedTargetCardId?: string,
+  plannedDesiredAdvancementCounters?: number,
 ): string | undefined {
   return selectableOptions
     .map((option) => ({
@@ -16,6 +17,7 @@ export function selectedCorpAdvancementCounterChoiceOptionId(
         input,
         option.value,
         plannedTargetCardId,
+        plannedDesiredAdvancementCounters,
       ),
     }))
     .sort(
@@ -29,6 +31,7 @@ function corpAdvancementCounterChoiceScore(
   input: AiDecisionInput,
   value: string | number | boolean | undefined,
   plannedTargetCardId: string | undefined,
+  plannedDesiredAdvancementCounters: number | undefined,
 ): number {
   if (typeof value !== "string") return 0;
   const placements = advancementPlacements(value);
@@ -56,6 +59,11 @@ function corpAdvancementCounterChoiceScore(
       0,
       requirement - (located.card.advancementCounters ?? 0),
     );
+    const plannedRequiredAmount = Math.max(
+      0,
+      (plannedDesiredAdvancementCounters ?? requirement) -
+        (located.card.advancementCounters ?? 0),
+    );
     const serverIce = located.server.ice.length;
     const rezzedIce = located.server.ice.filter(
       (ice) => ice.rezzed === true,
@@ -64,6 +72,11 @@ function corpAdvancementCounterChoiceScore(
       sum +
       placement.amount * 12 +
       (plannedTargetCardId === placement.cardId ? 5000 : 0) +
+      (plannedTargetCardId === placement.cardId &&
+      plannedDesiredAdvancementCounters !== undefined &&
+      placement.amount === plannedRequiredAmount
+        ? 900
+        : 0) +
       (plannedTargetCardId && plannedTargetCardId !== placement.cardId
         ? -1200
         : 0) +

@@ -2,9 +2,33 @@ import { describe, expect, it } from "vitest";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { tacticalPlanMappedChoice } from "./semantic-choice-ranking";
 import type { SemanticRuntimeChoice } from "./semantic-runtime-types";
-import type { PlanStepMappingResult } from "../tactical-plans";
+import {
+  createPlanStep,
+  createTacticalPlan,
+  type PlanStepMappingResult,
+} from "../tactical-plans";
 
 describe("tacticalPlanMappedChoice", () => {
+  it("keeps a guaranteed Corp score-conversion sequence on its exact next action", () => {
+    const installAgenda = legalAction("install-agenda", "install_card");
+    const offPlanCredit = legalAction("gain", "gain_credit");
+    const mapping = scoreConversionMapping([installAgenda]);
+
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [choice(offPlanCredit, 5000), choice(installAgenda, 50)],
+      mapping,
+      choice(offPlanCredit, 5000),
+    );
+
+    expect(result.outcome).toBe("semantic_choice_blocked");
+    expect(result.choice?.action.actionId).toBe("install-agenda");
+    expect(result.overrideBlockedChoice?.action.actionId).toBe("gain");
+    expect(result.overrideBlockedReason).toBe(
+      "corp_score_conversion_plan_controller",
+    );
+  });
+
   it("keeps runner plan mapping over a clear off-plan semantic run gap", () => {
     const gain = legalAction("gain", "gain_credit");
     const run = legalAction("run-rd", "start_run", { serverId: "rd" });
@@ -613,6 +637,38 @@ describe("tacticalPlanMappedChoice", () => {
     expect(result.overrideBlockedReason).toBe("runner_plan_controller");
   });
 });
+
+function scoreConversionMapping(actions: LegalAction[]): PlanStepMappingResult {
+  const step = createPlanStep({
+    stepId: "score_conversion:install_score_target:agenda",
+    kind: "install_or_prepare_agenda",
+    desiredActionSemantics: ["install.card", "scoreline"],
+    actionCandidateIds: actions.map((action) => action.actionId),
+  });
+  return {
+    plan: createTacticalPlan({
+      planId: "corp.create_score_window:conversion:agenda",
+      side: "corp",
+      type: "corp.create_score_window",
+      status: "active",
+      priority: 970,
+      horizonTurns: 1,
+      target: { kind: "card", id: "agenda" },
+      currentStep: step,
+      evidence: [
+        "corp_score_conversion_same_turn_guaranteed:true",
+        "corp_score_sequence:same_turn_conversion",
+      ],
+      stateVersion: 1,
+    }),
+    step,
+    status: "matched",
+    actionCandidateIds: actions.map((action) => action.actionId),
+    actionPriorities: [],
+    legalActions: actions,
+    rationale: [],
+  };
+}
 
 function choice(
   action: LegalAction,

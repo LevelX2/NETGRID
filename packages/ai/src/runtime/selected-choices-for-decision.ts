@@ -143,6 +143,7 @@ export function selectedChoicesForDecision(
       input,
       selectableOptions,
       plannedTargetCardId,
+      planMemory?.scoreConversionDesiredAdvancementCounters,
     );
     return {
       choiceId: choice.choiceId,
@@ -331,9 +332,7 @@ function selectedHqToNewRemoteInstallRezOptionIds(
   return selected.map((option) => option.id);
 }
 
-function choiceCardInstanceId(
-  option: PendingChoiceOptions[number],
-): string {
+function choiceCardInstanceId(option: PendingChoiceOptions[number]): string {
   if (typeof option.value === "string" && option.value.length > 0)
     return option.value;
   return option.id.startsWith("card_") ? option.id.slice(5) : option.id;

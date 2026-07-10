@@ -3,6 +3,32 @@ import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import { selectedCorpAdvancementCounterChoiceOptionId } from "./corp-advancement-counter-choice";
 
 describe("selectedCorpAdvancementCounterChoiceOptionId", () => {
+  it("honors the planned overadvance amount on the bound agenda", () => {
+    const input = decisionInput([
+      card("agenda", "simple_agenda", {
+        type: "agenda",
+        advancementRequirement: 3,
+        advancementCounters: 0,
+      }),
+    ]);
+
+    expect(
+      selectedCorpAdvancementCounterChoiceOptionId(
+        input,
+        [
+          { id: "exact", label: "3", value: "vapor|agenda|3" },
+          {
+            id: "overadvance",
+            label: "5",
+            value: "vapor|agenda|5",
+          },
+        ] as never,
+        "agenda",
+        5,
+      ),
+    ).toBe("overadvance");
+  });
+
   it("concentrates a burst on the agenda that becomes scoreable", () => {
     const agenda = card("agenda", "onr_v1_194_corporate-downsizing", {
       type: "agenda",
