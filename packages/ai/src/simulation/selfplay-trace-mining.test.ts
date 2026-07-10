@@ -887,6 +887,92 @@ describe("SelfplayTraceMining", () => {
     expect(findings).toHaveLength(1);
     expect(findings[0]?.selectedActionId).toBe("install-low-delta");
   });
+
+  it("detects a clearly dominated repeated run selected by the plan", () => {
+    const summary = selfplaySummary([
+      selfplayAction("runner", 81, "start_run", {
+        selectedActionId: "run-rd-negative",
+        targetServerId: "rd",
+        runnerRepeatedLowValueCentralRun: true,
+        runnerRepeatedCentralRunWithoutFreshValue: true,
+        evidence: [
+          "tactical_plan_mapping_outcome:semantic_choice_blocked",
+          "tactical_plan_type:runner.opportunistic_central_run",
+        ],
+        debugFacts: [
+          "selection_score:runtime_raw_score:-1127",
+          "runtime_why_not:alternative:start_run:rawSemanticScore:1643",
+        ],
+      }),
+    ]);
+
+    const findings = detectAiSelfplaySuspiciousDecisions([summary], {
+      detectorIds: ["clearly_dominated_plan_choice"],
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.relevantDebugFacts).toEqual(
+      expect.arrayContaining([
+        "dominated_selected_raw_score:-1127",
+        "dominating_alternative_raw_score:1643",
+      ]),
+    );
+  });
+
+  it("detects a negative committed trash decline with a positive alternative", () => {
+    const summary = selfplaySummary([
+      selfplayAction("runner", 111, "decline_trash", {
+        selectedActionId: "decline-planned-trash",
+        evidence: [
+          "runner_run_plan_objective:trash_asset_or_upgrade",
+          "runner_run_plan_access_trash_policy:trash_if_value_positive",
+          "semantic_score:-1745",
+        ],
+        debugFacts: [
+          "runtime_why_not:alternative:trash_accessed_card:rawSemanticScore:635",
+        ],
+      }),
+    ]);
+
+    const findings = detectAiSelfplaySuspiciousDecisions([summary], {
+      detectorIds: ["clearly_dominated_plan_choice"],
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.selectedActionId).toBe("decline-planned-trash");
+  });
+
+  it("does not classify a fresh-payoff or positive plan choice as dominated", () => {
+    const fresh = selfplaySummary([
+      selfplayAction("runner", 1, "start_run", {
+        runnerRepeatedLowValueCentralRun: true,
+        evidence: [
+          "tactical_plan_mapping_outcome:plan_mapping_selected",
+          "runner_rnd_fresh_memory",
+        ],
+        debugFacts: [
+          "selection_score:runtime_raw_score:-20",
+          "runtime_why_not:alternative:gain_credit:rawSemanticScore:100",
+        ],
+      }),
+    ]);
+    const positive = selfplaySummary([
+      selfplayAction("runner", 2, "start_run", {
+        runnerRepeatedLowValueCentralRun: true,
+        evidence: ["tactical_plan_mapping_outcome:plan_mapping_selected"],
+        debugFacts: [
+          "selection_score:runtime_raw_score:20",
+          "runtime_why_not:alternative:gain_credit:rawSemanticScore:100",
+        ],
+      }),
+    ]);
+
+    expect(
+      detectAiSelfplaySuspiciousDecisions([fresh, positive], {
+        detectorIds: ["clearly_dominated_plan_choice"],
+      }),
+    ).toHaveLength(0);
+  });
 });
 
 function selfplaySummary(

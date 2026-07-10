@@ -23,6 +23,7 @@ export type AiSelfplayTraceMiningDetectorId =
   | "risky_self_damage_action"
   | "blink_low_hand_buffer_run"
   | "duplicate_low_delta_install"
+  | "clearly_dominated_plan_choice"
   | "overdraw_without_urgency"
   | "plan_step_action_mismatch"
   | "semantic_override_suspicious"
@@ -226,6 +227,7 @@ export const DEFAULT_SELFPLAY_TRACE_MINING_DETECTORS: AiSelfplayTraceMiningDetec
     "risky_self_damage_action",
     "blink_low_hand_buffer_run",
     "duplicate_low_delta_install",
+    "clearly_dominated_plan_choice",
     "overdraw_without_urgency",
     "plan_step_action_mismatch",
     "semantic_override_suspicious",
@@ -839,6 +841,71 @@ function selfplayEntryStructuredNumber(
   return undefined;
 }
 
+function selfplayClearlyDominatedPlanChoice(
+  entry: AiSimulationSummary["actionSequence"][number],
+): { selectedScore: number; bestAlternativeScore: number } | undefined {
+  if (entry.side !== "runner") return undefined;
+  const isRepeatedRunPlanChoice =
+    entry.actionType === "start_run" &&
+    (entry.runnerRepeatedLowValueCentralRun === true ||
+      entry.runnerRepeatedCentralRunWithoutFreshValue === true) &&
+    selfplayEntryHasStructuredSignal(entry, [
+      "tactical_plan_mapping_outcome:semantic_choice_blocked",
+      "tactical_plan_mapping_outcome:plan_mapping_selected",
+    ]);
+  const isCommittedTrashDecline =
+    entry.actionType === "decline_trash" &&
+    selfplayEntryHasStructuredSignal(entry, [
+      "runner_run_plan_objective:trash_asset_or_upgrade",
+    ]) &&
+    selfplayEntryHasStructuredSignal(entry, [
+      "runner_run_plan_access_trash_policy:trash_if_value_positive",
+    ]);
+  if (!isRepeatedRunPlanChoice && !isCommittedTrashDecline) return undefined;
+  if (
+    selfplayEntryHasStructuredSignal(entry, [
+      "runner_rnd_fresh_memory",
+      "runner_hq_known_agenda",
+      "runner_run_target_payoff:score_threat",
+      "runner_run_target_score_threat:true",
+    ])
+  ) {
+    return undefined;
+  }
+  const selectedScore = selfplayEntryStructuredNumber(entry, [
+    "selection_score:runtime_raw_score:",
+    "semantic_score:",
+  ]);
+  const bestAlternativeScore = selfplayBestRawAlternativeScore(entry);
+  if (
+    selectedScore === undefined ||
+    selectedScore >= 0 ||
+    bestAlternativeScore === undefined ||
+    bestAlternativeScore <= 0
+  ) {
+    return undefined;
+  }
+  return { selectedScore, bestAlternativeScore };
+}
+
+function selfplayBestRawAlternativeScore(
+  entry: AiSimulationSummary["actionSequence"][number],
+): number | undefined {
+  const scores = [
+    ...(entry.evidence ?? []),
+    ...(entry.debugFacts ?? []),
+  ].flatMap((rawValue) => {
+    const match =
+      /^(?:runtime_why_not|toplevelwhynot):alternative:[^:]+:rawsemanticscore:(-?\d+(?:\.\d+)?)$/i.exec(
+        rawValue,
+      );
+    if (!match?.[1]) return [];
+    const score = Number(match[1]);
+    return Number.isFinite(score) ? [score] : [];
+  });
+  return scores.length > 0 ? Math.max(...scores) : undefined;
+}
+
 function collectSelfplayFindingsForSummary(
   summary: AiSimulationSummary,
   summaryIndex: number,
@@ -1281,6 +1348,23 @@ function selfplayEntryDetectorFindings(
         "duplicate_low_delta_install",
         "medium",
         "Runner installed a duplicate or low-delta setup card.",
+      ),
+    );
+  }
+  const dominatedPlanChoice = selfplayClearlyDominatedPlanChoice(entry);
+  if (enabled.has("clearly_dominated_plan_choice") && dominatedPlanChoice) {
+    findings.push(
+      selfplayEntryFinding(
+        summary,
+        summaryIndex,
+        actionIndex,
+        "clearly_dominated_plan_choice",
+        "high",
+        "Runner plan selected a negative action despite a positive legal alternative.",
+        [
+          `dominated_selected_raw_score:${dominatedPlanChoice.selectedScore}`,
+          `dominating_alternative_raw_score:${dominatedPlanChoice.bestAlternativeScore}`,
+        ],
       ),
     );
   }

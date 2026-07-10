@@ -151,6 +151,7 @@ const DETECTOR_MISTAKE_CLASS_MAP: Record<
   risky_self_damage_action: ["unsafe_run", "ignored_damage_risk"],
   blink_low_hand_buffer_run: ["unsafe_run", "ignored_damage_risk"],
   duplicate_low_delta_install: ["bad_install_redundancy"],
+  clearly_dominated_plan_choice: ["plan_step_mismatch"],
   overdraw_without_urgency: ["plan_step_mismatch"],
   plan_step_action_mismatch: ["plan_step_mismatch"],
   semantic_override_suspicious: ["plan_step_mismatch"],

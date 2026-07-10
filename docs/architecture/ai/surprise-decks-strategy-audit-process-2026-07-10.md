@@ -27,6 +27,12 @@ Die vier am 10. Juli 2026 freigegebenen Folgepunkte werden sequenziell umgesetzt
 - A/B-Vergleich ohne Verschlechterung der harten technischen Gates
 - Regel-/Timing-Aussage getrennt von der strategischen Bewertung; ungeprüfte Vollständigkeit wird nicht als bewiesen dargestellt
 
+## Gepaarter Vergleich
+
+Das bestehende reproduzierbare Matrix-Script `scripts/run-ai-selfplay-trace-matrix.ts` läuft jeweils unverändert auf dem Ausgangsstand `a1cea9fb3` und dem Kandidatenstand. Das Panel umfasst die eingefrorenen Referenzpaare A–D, die Seeds `surprise-strategy-panel-01` bis `surprise-strategy-panel-03` und jeweils höchstens 480 Aktionen. Damit entstehen 12 direkt gepaarte Spiele pro Stand. Verglichen werden harte Gates, Endzustand, Spiellänge, Sieger/Endgrund sowie Detektorverteilung; ein anderer StateHash ist bei beabsichtigter Strategieänderung kein Fehler, muss aber durch die Entscheidungsdifferenz erklärbar sein.
+
+Das Gate `clearly_dominated_plan_choice` ist absichtlich konservativ. Es meldet nur zwei reproduzierte Klassen: einen negativ bewerteten, durch den Plan gehaltenen Wiederholungsrun oder ein negatives Decline eines eingeplanten positiven Trash-Ziels – jeweils nur dann, wenn gleichzeitig eine positiv bewertete legale Alternative im Trace steht. Es behauptet keine globale Spieltheorie-Optimalität.
+
 ## Abschlussprotokoll
 
 | Paket | Status | Commit | Verifikation |
@@ -35,6 +41,6 @@ Die vier am 10. Juli 2026 freigegebenen Folgepunkte werden sequenziell umgesetzt
 | P1 | abgeschlossen | dieser Paket-Commit | 26 Fokustests; negative R&D-Wiederholung weicht positiver anderer Serveroption, Fresh-/Score-Threat-Gegenfälle geschützt |
 | P2 | abgeschlossen | dieser Paket-Commit | 9 Access-Policy-Tests; geplantes Trash-Budget wird nur für positives Ziel und unter separater Sicherheitsreserve ausgegeben |
 | P3 | abgeschlossen | dieser Paket-Commit | 34 Mining-Tests; positive Broker-Backups ausgeschlossen, negative/deferred/redundante Duplikate weiter erkannt |
-| P4 | offen | – | Detektortests + gepaartes Panel |
+| P4 | abgeschlossen | dieser Paket-Commit | 40 Mining-/Runner-Tests; konservatives Dominanzgate und 4×3-Seed-A/B-Panel definiert |
 | P5 | offen | – | 20×480, A/B-Panel, Regel-/Timing-Audit |
 | P6 | offen | – | Breitentests, Typecheck, lokaler Merge |
