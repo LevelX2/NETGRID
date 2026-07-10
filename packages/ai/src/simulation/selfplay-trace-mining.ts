@@ -768,8 +768,7 @@ function actionLimitLowValueRepeatEntry(
   if (
     entry.runnerRepeatedLowValueCentralRun === true ||
     entry.runnerRepeatedCentralRunWithoutFreshValue === true ||
-    entry.runnerLowValueDuplicateInstallAction === true ||
-    entry.runnerJunkyardBbsDuplicateInstall === true ||
+    selfplayDuplicateLowDeltaInstall(entry) ||
     entry.remoteRunSuppressedByKnownLowValueRemote === true ||
     entry.runnerRemoteContestDeclinedAsBaitOrLowValue === true
   ) {
@@ -794,6 +793,50 @@ function countRepeatedActionReasonsWithoutProgress(
     lastSeen.set(key, index);
   }
   return repeats;
+}
+
+function selfplayDuplicateLowDeltaInstall(
+  entry: AiSimulationSummary["actionSequence"][number],
+): boolean {
+  if (entry.runnerJunkyardBbsDuplicateInstall === true) return true;
+  if (entry.runnerLowValueDuplicateInstallAction !== true) return false;
+  if (
+    selfplayEntryHasStructuredSignal(entry, [
+      "why_bank_install_deferred:no_plausible_followup_load",
+      "bankcommitmentstatus:install_deferred",
+      "persistentinstallduplicaterole:redundant_duplicate",
+      "duplicate_role:redundant_duplicate",
+    ])
+  ) {
+    return true;
+  }
+  const semanticScore = selfplayEntryStructuredNumber(entry, [
+    "semantic_score:",
+    "selection_score:runtime_raw_score:",
+  ]);
+  return semanticScore !== undefined && semanticScore <= 0;
+}
+
+function selfplayEntryStructuredNumber(
+  entry: AiSimulationSummary["actionSequence"][number],
+  prefixes: readonly string[],
+): number | undefined {
+  const normalizedPrefixes = prefixes.map((prefix) =>
+    prefix.toLocaleLowerCase("en-US"),
+  );
+  for (const rawValue of [
+    ...(entry.evidence ?? []),
+    ...(entry.debugFacts ?? []),
+  ]) {
+    const value = rawValue.toLocaleLowerCase("en-US");
+    const prefix = normalizedPrefixes.find((candidate) =>
+      value.startsWith(candidate),
+    );
+    if (!prefix) continue;
+    const parsed = Number(value.slice(prefix.length));
+    if (Number.isFinite(parsed)) return parsed;
+  }
+  return undefined;
 }
 
 function collectSelfplayFindingsForSummary(
@@ -1228,8 +1271,7 @@ function selfplayEntryDetectorFindings(
   if (
     enabled.has("duplicate_low_delta_install") &&
     entry.side === "runner" &&
-    (entry.runnerLowValueDuplicateInstallAction === true ||
-      entry.runnerJunkyardBbsDuplicateInstall === true)
+    selfplayDuplicateLowDeltaInstall(entry)
   ) {
     findings.push(
       selfplayEntryFinding(

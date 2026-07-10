@@ -836,6 +836,57 @@ describe("SelfplayTraceMining", () => {
     ).toEqual(["deckOrderish:ok", "privatePayloadish:ok"]);
     expect(isSelfplayTraceRedactionSafe({ cardInstancesish: [] })).toBe(true);
   });
+
+  it("does not report a positive stackable duplicate install as low delta", () => {
+    const summary = selfplaySummary([
+      selfplayAction("runner", 1, "install_card", {
+        selectedActionId: "install-positive-broker",
+        runnerLowValueDuplicateInstallAction: true,
+        evidence: [
+          "semantic_score:854",
+          "bankCommitmentStatus:install_ready",
+          "persistentInstallDuplicateRole:useful_backup",
+          "persistentInstallStackability:action_bank_parallel",
+        ],
+      }),
+    ]);
+
+    expect(
+      detectAiSelfplaySuspiciousDecisions([summary], {
+        detectorIds: ["duplicate_low_delta_install"],
+      }),
+    ).toHaveLength(0);
+  });
+
+  it.each([
+    ["negative total", ["semantic_score:-20"]],
+    [
+      "deferred install",
+      ["semantic_score:220", "bankCommitmentStatus:install_deferred"],
+    ],
+    [
+      "redundant duplicate",
+      [
+        "semantic_score:220",
+        "persistentInstallDuplicateRole:redundant_duplicate",
+      ],
+    ],
+  ])("reports a %s duplicate install", (_label, evidence) => {
+    const summary = selfplaySummary([
+      selfplayAction("runner", 1, "install_card", {
+        selectedActionId: "install-low-delta",
+        runnerLowValueDuplicateInstallAction: true,
+        evidence,
+      }),
+    ]);
+
+    const findings = detectAiSelfplaySuspiciousDecisions([summary], {
+      detectorIds: ["duplicate_low_delta_install"],
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.selectedActionId).toBe("install-low-delta");
+  });
 });
 
 function selfplaySummary(
