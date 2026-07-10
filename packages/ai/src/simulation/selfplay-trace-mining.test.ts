@@ -926,6 +926,8 @@ describe("SelfplayTraceMining", () => {
         evidence: [
           "runner_run_plan_objective:trash_asset_or_upgrade",
           "runner_run_plan_access_trash_policy:trash_if_value_positive",
+          "runner_run_plan_access_reserve:2",
+          "remote_trash_cost:2",
           "semantic_score:-1745",
         ],
         debugFacts: [
@@ -940,6 +942,30 @@ describe("SelfplayTraceMining", () => {
 
     expect(findings).toHaveLength(1);
     expect(findings[0]?.selectedActionId).toBe("decline-planned-trash");
+  });
+
+  it("does not call an over-budget trash decline clearly dominated", () => {
+    const summary = selfplaySummary([
+      selfplayAction("runner", 287, "decline_trash", {
+        selectedActionId: "decline-over-budget-trash",
+        evidence: [
+          "runner_run_plan_objective:trash_asset_or_upgrade",
+          "runner_run_plan_access_trash_policy:trash_if_value_positive",
+          "runner_run_plan_access_reserve:2",
+          "remote_trash_cost:3",
+          "semantic_score:-1745",
+        ],
+        debugFacts: [
+          "runtime_why_not:alternative:trash_accessed_card:rawSemanticScore:600",
+        ],
+      }),
+    ]);
+
+    expect(
+      detectAiSelfplaySuspiciousDecisions([summary], {
+        detectorIds: ["clearly_dominated_plan_choice"],
+      }),
+    ).toHaveLength(0);
   });
 
   it("does not classify a fresh-payoff or positive plan choice as dominated", () => {

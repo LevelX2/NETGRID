@@ -860,7 +860,8 @@ function selfplayClearlyDominatedPlanChoice(
     ]) &&
     selfplayEntryHasStructuredSignal(entry, [
       "runner_run_plan_access_trash_policy:trash_if_value_positive",
-    ]);
+    ]) &&
+    selfplayDeclinedTrashFitsPlannedBudget(entry);
   if (!isRepeatedRunPlanChoice && !isCommittedTrashDecline) return undefined;
   if (
     selfplayEntryHasStructuredSignal(entry, [
@@ -886,6 +887,22 @@ function selfplayClearlyDominatedPlanChoice(
     return undefined;
   }
   return { selectedScore, bestAlternativeScore };
+}
+
+function selfplayDeclinedTrashFitsPlannedBudget(
+  entry: AiSimulationSummary["actionSequence"][number],
+): boolean {
+  const trashCost = selfplayEntryStructuredNumber(entry, [
+    "remote_trash_cost:",
+  ]);
+  const plannedBudget = selfplayEntryStructuredNumber(entry, [
+    "runner_run_plan_access_reserve:",
+  ]);
+  return (
+    trashCost !== undefined &&
+    plannedBudget !== undefined &&
+    trashCost <= plannedBudget
+  );
 }
 
 function selfplayBestRawAlternativeScore(

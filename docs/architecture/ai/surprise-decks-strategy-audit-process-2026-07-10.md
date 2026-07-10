@@ -41,6 +41,6 @@ Das Gate `clearly_dominated_plan_choice` ist absichtlich konservativ. Es meldet 
 | P1 | abgeschlossen | dieser Paket-Commit | 26 Fokustests; negative R&D-Wiederholung weicht positiver anderer Serveroption, Fresh-/Score-Threat-Gegenfälle geschützt |
 | P2 | abgeschlossen | dieser Paket-Commit | 9 Access-Policy-Tests; geplantes Trash-Budget wird nur für positives Ziel und unter separater Sicherheitsreserve ausgegeben |
 | P3 | abgeschlossen | dieser Paket-Commit | 34 Mining-Tests; positive Broker-Backups ausgeschlossen, negative/deferred/redundante Duplikate weiter erkannt |
-| P4 | abgeschlossen | dieser Paket-Commit | 40 Mining-/Runner-Tests; konservatives Dominanzgate und 4×3-Seed-A/B-Panel definiert |
+| P4 | abgeschlossen | zwei Paket-Commits | 41 Mining-/Runner-Tests; Dominanzgate auf tatsächlich eingeplantes Trash-Budget begrenzt, 4×3-Seed-A/B-Panel definiert |
 | P5 | offen | – | 20×480, A/B-Panel, Regel-/Timing-Audit |
 | P6 | offen | – | Breitentests, Typecheck, lokaler Merge |
