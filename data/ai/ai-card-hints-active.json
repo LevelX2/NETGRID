@@ -20325,7 +20325,7 @@
         {
           "kind": "advance",
           "timing": "action",
-          "scope": "installed_advanceable_card",
+          "scope": "installed_card",
           "resource": "advancement_counters",
           "finite": true
         },

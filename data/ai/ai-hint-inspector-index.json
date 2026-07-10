@@ -19,7 +19,7 @@
     "cardsWithOverlays": 6,
     "cardsWithFunctionSignals": 600,
     "cardsWithStrategyAnchors": 256,
-    "cardsWithStrategySupportPairs": 197,
+    "cardsWithStrategySupportPairs": 198,
     "cardsWithWarnings": 116,
     "warningCategoryCounts": {
       "deferred_requires_human_review": 34,
@@ -55042,16 +55042,50 @@
         "tempo.corp_action_burst"
       ],
       "derivedStrategyAnchors": [],
-      "cardLevelStrategyAnchors": [],
+      "cardLevelStrategyAnchors": [
+        "corp.fast_advance"
+      ],
       "derivedPossibleStrategyAnchors": [],
-      "reviewedStrategySupportPairs": [],
+      "reviewedStrategySupportPairs": [
+        {
+          "strategyId": "corp.fast_advance",
+          "role": "enabler",
+          "roleDetail": "extra_action_burst",
+          "confidence": "high",
+          "evidence": [
+            "action.corp_extra_action_burst",
+            "tempo.corp_action_burst"
+          ],
+          "sourceField": "strategySupportPairs",
+          "sourceValue": "corp.fast_advance",
+          "triageCategory": "explicit_strategy_support_pair",
+          "rationale": "Immediate action capacity can complete an otherwise click-blocked same-turn score-conversion path; legality and the gained amount remain Engine/LegalAction facts."
+        }
+      ],
       "supportingEvidenceOnly": [
         "action.corp_extra_action_burst",
         "action.corp_extra_action_support",
         "tempo.corp_action_burst"
       ],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.fast_advance",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.fast_advance"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
+        {
+          "value": "action",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Generic action economy or action use context; not a StrategyGoal source."
+        },
         {
           "value": "economy_operation",
           "category": "alias_to_strategy_goal",
@@ -55071,13 +55105,11 @@
       ],
       "planRolesClassification": [
         {
-          "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "value": "corp_play_operation",
+          "category": "legacy_role_only",
+          "triageCategory": "legacy_role_only",
+          "mapsTo": [],
+          "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
         }
       ],
       "warningCategories": [],
@@ -55098,8 +55130,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "enabler"
+        ],
+        "validValues": [
+          "enabler"
+        ],
         "unknownValues": []
       }
     },
@@ -61257,6 +61293,15 @@
         }
       ],
       "planRolesClassification": [
+        {
+          "value": "remote_asset_agenda_support",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "corp.remote_scoring"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
         {
           "value": "remote_asset_economy",
           "category": "alias_to_strategy_goal",

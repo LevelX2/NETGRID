@@ -2652,6 +2652,7 @@ describe("tactical plan model", () => {
         },
       ),
     ]);
+    input.playerView.own.clicks = 2;
     input.playerView.servers = [
       server("hq"),
       server("rd"),
@@ -2746,6 +2747,7 @@ describe("tactical plan model", () => {
       ),
       legalAction("gain", "corp", "gain_credit"),
     ]);
+    input.playerView.own.clicks = 2;
     input.playerView.opponent.credits = 8;
     input.playerView.opponent.rig = [
       visibleCard("onr_v1_021_dwarf", "runner", "program", {
@@ -2803,6 +2805,7 @@ describe("tactical plan model", () => {
       { source: "remote-ice-2" },
     );
     const input = aiInput("corp", [advance, installIce]);
+    input.playerView.own.clicks = 2;
     input.playerView.own.credits = 5;
     input.playerView.own.gripOrHq = [
       visibleCard("remote-ice-2", "corp", "ice", {

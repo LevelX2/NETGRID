@@ -37,6 +37,11 @@ Stand: 2026-07-10
   Runtime, Kill-Switches und der frühere AI-Monolithtest sind entfernt.
 - Der Coverage-Restpfad ist fail-closed und darf nur ausdrücklich sichere
   Engine-Fortsetzungen auswählen.
+- Der bestehende Plan `corp.create_score_window` erkennt vollständige
+  Same-Turn-Konversionspfade aus Aktionsgewinn, Advancement-Platzierung,
+  Countertransfer und Basic Advances. Vapor Ops und andere Werkzeuge werden
+  funktionsbasiert erkannt; ungeschützte Agenda-Installationen bleiben ohne
+  garantierten Abschluss gesperrt.
 - Aktuelle Benchmarks vergleichen `random_legal_bot` mit
   `current_candidate`; historische Profilnamen sind keine Runtimeoption mehr.
 - Aktive AI-Gates: 616 Hints, 600 durch den Action-Signal-Katalog abgedeckt,
@@ -47,6 +52,8 @@ Stand: 2026-07-10
   - `docs/architecture/ai/README.md`
   - `docs/architecture/ai/ai-current-state-cleanup-process-2026-07-09.md`
   - `docs/reviews/ai/ai-current-state-cleanup-final-review-2026-07-09.md`
+  - `docs/architecture/ai/corp-score-conversion-capability-contract.md`
+  - `docs/architecture/ai/corp-score-conversion-plan-process-2026-07-10.md`
 - Der Proteus-AI-Rollout ist lokal in `main` integriert: 154/154 Karten sind
   technisch `ai_supported`, alle 114 Pilotdeck-Karten sind an elf
   Familien-Szenarien gebunden und vier qualifizierte Snapshots liegen im

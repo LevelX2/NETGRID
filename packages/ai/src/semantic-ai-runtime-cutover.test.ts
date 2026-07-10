@@ -654,7 +654,7 @@ describe("Semantic AI runtime cutover", () => {
         "corp",
         "install_card",
         "Install agenda in a new remote",
-        { credits: 0 },
+        { clicks: 1, credits: 0 },
         {
           source: "agenda-in-hq",
           payload: { placement: "root", serverId: "new_remote" },
@@ -769,7 +769,7 @@ describe("Semantic AI runtime cutover", () => {
         "corp",
         "install_card",
         "Install agenda in protected remote",
-        { credits: 0 },
+        { clicks: 1, credits: 0 },
         {
           source: agenda.instanceId,
           payload: { placement: "root", serverId: "remote_1" },
@@ -3390,10 +3390,17 @@ describe("Semantic AI runtime cutover", () => {
 
   it("uses a fail-closed fallback for a sole legal Runner start-run action", () => {
     const input = aiInput("runner", [
-      legalAction("forced-run-rd", "runner", "start_run", "Run R&D", { credits: 0 }, {
-        source: "game_rule",
-        payload: { serverId: "rd", effectKind: "run" },
-      }),
+      legalAction(
+        "forced-run-rd",
+        "runner",
+        "start_run",
+        "Run R&D",
+        { credits: 0 },
+        {
+          source: "game_rule",
+          payload: { serverId: "rd", effectKind: "run" },
+        },
+      ),
     ]);
 
     const decision = chooseSemanticRuntimeAction(
@@ -3413,11 +3420,18 @@ describe("Semantic AI runtime cutover", () => {
 
   it("fails closed when semantic coverage has only opaque card actions", () => {
     const input = aiInput("corp", [
-      legalAction("opaque-card", "corp", "activated_card_ability", "Opaque", {
-        credits: 0,
-      }, {
-        source: "unknown-card-instance",
-      }),
+      legalAction(
+        "opaque-card",
+        "corp",
+        "activated_card_ability",
+        "Opaque",
+        {
+          credits: 0,
+        },
+        {
+          source: "unknown-card-instance",
+        },
+      ),
     ]);
 
     expect(() =>
@@ -3625,7 +3639,7 @@ function legalAction(
   side: Side,
   type: LegalAction["type"],
   label: string,
-  cost: { credits: number },
+  cost: { credits: number; clicks?: number },
   options: {
     source?: LegalAction["source"];
     payload?: LegalAction["payload"];

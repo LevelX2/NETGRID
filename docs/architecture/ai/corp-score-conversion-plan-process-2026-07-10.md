@@ -2,12 +2,48 @@
 
 ## Status
 
-- Status: in Umsetzung
+- Status: abgeschlossen und lokal verifiziert
 - Datum: 2026-07-10
 - Primärer Agent: `release-implementation-agent`
 - Arbeitsbranch: `codex/corp-score-conversion-plan`
 - Worktree: `C:\Projekte\NETGRID_CORP_SCORE_CONVERSION_PLAN`
 - Integrationsbranch: lokales `main`
+
+## Ergebnis
+
+- `corp.create_score_window` besitzt einen alternativen generischen
+  Same-Turn-Conversion-Pfad; es wurde kein zweiter Scorecontroller angelegt.
+- Der Pfad kombiniert Installation, sofortigen Aktionsgewinn, direkte
+  Advancement-Platzierung, Advancement-Transfer und Basic Advances unter
+  einem gemeinsamen Klick-, Credit- und Counterbudget.
+- Vapor Ops, Falsified-Transactions Expert, Chicago Branch,
+  Advancement-Operations, Overtime Incentives, Pacifica Regional AI und
+  Corporate Boon werden über standardisierte Capability-Payloads statt über
+  Karten-ID-Sonderlogik erkannt.
+- Bekannte Overadvance-Agenden erhalten ihre Schwelle und Belohnungsart aus
+  der Engine-abgeleiteten PlayerView. Der Plan nimmt die erste wertvolle
+  Schwelle nur mit, wenn dadurch kein zusätzlicher Schritt und keine
+  zusätzlichen Credits benötigt werden.
+- Planmemory und Choice-Routing binden Zielagenda und gewünschte Countermenge.
+  Ein garantierter Conversion-Pfad darf nicht durch eine schwächere
+  Off-Plan-Aktion verlassen werden.
+- Unvollständige Pfade, doppelt verplante Quellcounter und ungeschützte
+  Installationen ohne Same-Turn-Closeout bleiben ausgeschlossen.
+
+## Abschlussverifikation
+
+- Monorepo-Typecheck: grün für Shared, Catalog, Engine, Decks, AI, Server und
+  Web.
+- AI-Shards: 94/546, 94/653 und 93/601 Dateien/Tests grün; insgesamt 281
+  Testdateien und 1.800 Tests.
+- Fokussierte Score-Conversion-Suite: 7 Dateien und 75 Tests grün.
+- Engine-Gesamtsuite: 180 Testdateien und 1.618 Tests grün.
+- `check:ai`, Package-Boundaries, Card-Function-Abstraction,
+  Engine-CardImplementation-Architekturziel, Hint-Ontologie und
+  deterministischer Hint-Inspector-Index: grün.
+- Frühere 20-Spiel-Evidence bleibt die Playtest-Baseline. Die dort nicht
+  beobachtete Vapor-/Chicago-Scorekonversion ist nun durch gezielte positive
+  und negative Szenarien deterministisch abgedeckt.
 
 ## Quelle und Vorgabe
 

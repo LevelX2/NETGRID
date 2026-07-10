@@ -1,0 +1,5 @@
+# Deterministically generated or generator-shaped AI artifacts.
+data/ai/ai-card-hints-active.json
+data/ai/ai-card-hints-compiled.json
+data/ai/ai-hint-inspector-index.json
+docs/reviews/ai/ai-derived-basic-facts-gate-2026-05-25.json

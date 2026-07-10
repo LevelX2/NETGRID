@@ -10,6 +10,10 @@
 - Die Engine bleibt alleinige Regelautorität. Die KI erzeugt keine
   LegalActions und führt keine Ersatzaction außerhalb der gewählten Action-ID
   aus.
+- `corp.create_score_window` kann vollständige Same-Turn-Scorepfade aus
+  Installation, Aktionsgewinn, Advancement-Platzierung, Countertransfer und
+  Basic Advances generisch kombinieren. Ungeschützte Agenda-Installationen
+  sind nur bei garantiertem Closeout zulässig.
 - Der Live-Modulgraph ist frei von alten Planern, Baseline-Controllern,
   Shadow-/META-Runtime und Kill-Switches.
 - Der Semantic-Coverage-Restpfad ist fail-closed. Nur ausdrücklich sichere,
@@ -43,6 +47,9 @@
   Coaching.
 - `ai-current-state-cleanup-process-2026-07-09.md`: abgeschlossener
   Runtime-/Legacy-Cleanup.
+- `corp-score-conversion-capability-contract.md` und
+  `corp-score-conversion-plan-process-2026-07-10.md`: Engine-/Hint-/Planvertrag
+  für generische Fast-Advance- und Countertransfer-Scorepfade.
 - `proteus-ai-release-reconciliation-plan-2026-07-09.md`,
   `proteus-ai-release-automation-process-2026-07-09.md` und
   `docs/reviews/ai/proteus-ai-release-reconciliation-final-review-2026-07-09.md`:
