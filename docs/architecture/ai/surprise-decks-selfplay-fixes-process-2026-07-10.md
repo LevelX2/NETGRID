@@ -2,7 +2,7 @@
 
 ## Status
 
-`ready_for_integration`
+`complete`
 
 ## Aktueller Abschlussstand
 
@@ -17,7 +17,9 @@
   `docs/reviews/ai/surprise-decks-20-game-selfplay-rerun-2026-07-10.md`.
 - Finale Verifikation: 275 AI-Testdateien mit 1.737 Tests grün,
   `@netgrid/ai`-Typecheck grün und `git diff --check` grün.
-- Offen ist nur noch die defensive lokale Integration nach `main`.
+- Der Arbeitsbranch wurde per Fast-forward lokal nach `main` integriert; die
+  zuvor vorhandenen fremden Änderungen im Hauptarbeitsbaum blieben
+  unverändert und uncommitted erhalten.
 
 ## Quelle
 
