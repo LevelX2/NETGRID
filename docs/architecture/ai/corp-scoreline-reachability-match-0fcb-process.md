@@ -1,6 +1,6 @@
 # Corp-Scoreline- und Reachability-Prozess fuer Match 0fcb
 
-Status: in Umsetzung
+Status: abgeschlossen
 
 ## Quelle
 
@@ -89,6 +89,17 @@ statt StateVersions speichern.
 - Aktuelles `main` in den Arbeitsbranch integrieren.
 - Relevante Checks erneut ausfuehren.
 - Arbeitsbranch lokal nach `main` mergen und Main-Status pruefen.
+
+## Ergebnis
+
+- P1: `d169c1fa8` - Prozess und Invarianten festgelegt.
+- P2: `7ccc8d919` - Scoreline-Reachability und sichtbare Runner-Oekonomie
+  gehaertet.
+- P3: `614d4601f` - Supportrollen, BBS-Plan und Plancontroller angeglichen.
+- P4: `703399238` - echte Chronicle-Zugnummern in KI-Traces gespeichert.
+- P5: Evidence-, Abschlussbericht und Monatslog aktualisiert.
+- Die fokussierten AI- und Server-Regressionen sowie beide Typechecks sind
+  gruen; der breite Abschlusslauf ist im Final-Report protokolliert.
 
 ## Automatische Fehlerbehandlung
 
