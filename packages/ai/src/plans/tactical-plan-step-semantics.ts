@@ -103,6 +103,21 @@ export function candidateSemanticsMatchStep(
           "agenda",
         ])
       );
+    case "gain_action_capacity":
+      return hasAnyToken(tokens, [
+        "gain_action_capacity",
+        "corp_extra_action_burst",
+        "corp_counter_to_action",
+        "extra_action",
+      ]);
+    case "convert_advancement":
+      return hasAnyToken(tokens, [
+        "place_advancement",
+        "move_advancement",
+        "corp_counter_placement",
+        "corp_counter_transfer",
+        "score_window_support",
+      ]);
     case "advance_score_card":
       return hasAnyToken(tokens, [
         "score.advance_card",
@@ -232,6 +247,19 @@ export function actionTypeMatchesStep(
     case "protect_remote":
     case "install_or_prepare_agenda":
       return actionType === "install_card";
+    case "gain_action_capacity":
+      return (
+        actionType === "play_operation" ||
+        actionType === "trigger_ability" ||
+        actionType === "activated_card_ability"
+      );
+    case "convert_advancement":
+      return (
+        actionType === "play_operation" ||
+        actionType === "trigger_ability" ||
+        actionType === "activated_card_ability" ||
+        actionType === "advance_card"
+      );
     case "build_rez_reserve":
       return (
         actionType === "gain_credit" ||

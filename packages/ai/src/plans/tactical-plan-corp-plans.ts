@@ -29,6 +29,7 @@ import type {
   TacticalPlanBuildContext,
 } from "./tactical-plan-types";
 import { visibleSourceServerId } from "./tactical-plan-visible-cards";
+import { buildCorpScoreConversionPlans } from "./tactical-plan-corp-score-conversion-plan";
 
 export function buildCorpTacticalPlans(
   context: TacticalPlanBuildContext,
@@ -42,6 +43,7 @@ export function buildCorpTacticalPlans(
   const punishGoal =
     corpGoalForFamily(context, "tag_punish") ??
     corpGoalForFamily(context, "damage_pressure");
+  plans.push(...buildCorpScoreConversionPlans(context, scorelineGoal));
   for (const action of input.legalActions.filter((candidate) => candidate.type === "score_agenda")) {
     const strategicBoost = tacticalGoalPriorityBoost(scorelineGoal);
     plans.push(

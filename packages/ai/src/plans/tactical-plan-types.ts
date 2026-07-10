@@ -61,6 +61,8 @@ export type PlanStepKind =
   | "protect_remote"
   | "build_rez_reserve"
   | "install_or_prepare_agenda"
+  | "gain_action_capacity"
+  | "convert_advancement"
   | "build_bank_counter"
   | "cash_out_bank"
   | "run_target"

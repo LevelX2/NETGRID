@@ -82,6 +82,9 @@ export function candidateMatchesStep(
   ) {
     return false;
   }
+  if (step.actionCandidateIds.length > 0) {
+    return step.actionCandidateIds.includes(action.actionId);
+  }
   if (isCoverageAnswerStep(step)) {
     const fit = coverageSearchActionFit(
       plan,
