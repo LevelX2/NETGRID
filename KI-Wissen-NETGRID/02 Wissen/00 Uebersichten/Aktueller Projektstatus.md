@@ -47,9 +47,10 @@ Stand: 2026-07-10
   - `docs/architecture/ai/README.md`
   - `docs/architecture/ai/ai-current-state-cleanup-process-2026-07-09.md`
   - `docs/reviews/ai/ai-current-state-cleanup-final-review-2026-07-09.md`
-- Der Proteus-AI-Rollout läuft parallel auf
-  `codex/proteus-ai-release-reconciliation`; sein Stand wird erst nach lokaler
-  Main-Integration zum führenden Projektstand.
+- Der Proteus-AI-Rollout ist lokal in `main` integriert: 154/154 Karten sind
+  technisch `ai_supported`, alle 114 Pilotdeck-Karten sind an elf
+  Familien-Szenarien gebunden und vier qualifizierte Snapshots liegen im
+  AI-Deckpool 1.1.0. Play-Strength bleibt ein getrenntes Gate.
 
 ## Server, Web und lokaler Betrieb
 
@@ -64,23 +65,30 @@ Stand: 2026-07-10
   entfernt. Produktive Matches laufen über den Multiplayer-Server; das lokale
   Tutorial bleibt ein ausdrücklich isolierter Modus.
 
-## Aktive Strukturarbeit
+## Current-State-Struktur
 
 - `docs/architecture/current-state-project-cleanup-process-2026-07-10.md`
-  führt die aktuelle projektweite Bereinigung aus.
+  dokumentiert die projektweite Bereinigung und ihre Einzelcommits.
 - Historische nummerierte AI-Prozessscripts und ihre Rohreports werden durch
   `docs/reviews/ai/ai-historical-process-rollup-2026-07-10.md` ersetzt.
-- Noch offen sind die Modularisierung von Shared/Card Registry, fachliche
-  Schnitte in großen Web-/Server-/AI-Dateien, feste Teststufen/AI-Shards sowie
-  die Bereinigung mehrfach versionierter Assetderivate.
+- Die Kartenregistrierung liegt in `packages/shared/src/card-definitions.ts`;
+  produktive Consumer verwenden nur `CARD_DEFINITIONS` und
+  `CARD_DEFINITIONS_BY_ID`.
+- Teststufen, drei feste AI-Shards und Package-Boundaries sind unter
+  `docs/architecture/test-tiers-and-package-boundaries-2026-07-10.md`
+  ausführbar festgeschrieben.
+- Für lokalisierte Kartenassets werden nur Art-Quellen und Full-PNGs
+  versioniert. Die Retention-Regel steht in
+  `docs/architecture/card-asset-retention-2026-07-10.md`.
 
 ## Aktuelle Risiken und offene Gates
 
-- `packages/shared/src/index.ts` ist weiterhin zu groß und mischt Verträge,
-  Sanitizer und Kartenregistrierung.
 - `apps/web/app/page.tsx`, `apps/web/app/chronicle.ts`,
   `apps/server/src/multiplayer.test.ts` und mehrere Corp-AI-Scoringdateien sind
   verbleibende Komplexitätsschwerpunkte.
+- Das Engine-Architektur-Zielgate ist grün. Mark-Counter-Anzeigen werden über
+  generische Kartendefinitionsmetadaten statt direkter Karten-ID-Verzweigungen
+  projiziert.
 - Kompatibilitätsnamen in Ability-Payloads sind noch aktiver Engine-Vertrag;
   sie dürfen erst nach Normalisierung aller aktuellen Producer/Consumer
   entfernt werden.

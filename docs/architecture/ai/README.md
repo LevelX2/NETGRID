@@ -43,18 +43,21 @@
   Coaching.
 - `ai-current-state-cleanup-process-2026-07-09.md`: abgeschlossener
   Runtime-/Legacy-Cleanup.
-- `proteus-ai-release-reconciliation-plan-2026-07-09.md` und
-  `proteus-ai-release-automation-process-2026-07-09.md`: paralleler
-  Proteus-Rollout; erst nach Main-Integration führend.
+- `proteus-ai-release-reconciliation-plan-2026-07-09.md`,
+  `proteus-ai-release-automation-process-2026-07-09.md` und
+  `docs/reviews/ai/proteus-ai-release-reconciliation-final-review-2026-07-09.md`:
+  abgeschlossener Proteus-Rollout mit 154/154 technisch unterstützten Karten,
+  114 Pilotkarten, elf Szenarien und vier qualifizierten Deckpool-Snapshots.
 
 ## Aktive Gates
 
 ```text
 corepack pnpm check:ai
 corepack pnpm check:ai:full
+corepack pnpm check:proteus-ai-readiness
 corepack pnpm check:ai-deck-doctrine-strategy
 corepack pnpm --filter @netgrid/ai typecheck
-corepack pnpm --filter @netgrid/ai test
+corepack pnpm test:ai:shards
 ```
 
 Die aktuelle vollständige Derived-Facts-Prüfung umfasst 616 aktive Hints, 527
