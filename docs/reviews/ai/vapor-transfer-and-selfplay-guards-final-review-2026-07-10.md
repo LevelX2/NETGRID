@@ -57,7 +57,7 @@ und endete 8:0 für die Corp.
   Action-Semantic-Signal-Catalog: grün
 - Card-Function-Abstraction: grün
 
-## Offener unabhängiger Folgefund
+## Separat abgeschlossener unabhängiger Folgefund
 
 Der breite Nachtest enthielt eine gezählte IllegalAction in
 `proteus_hq_virus_derez`, Seed 11, StateVersion 152. Nach dem legalen Spielen
@@ -67,11 +67,11 @@ konnte der verzögerte Run nicht gestartet werden
 Action-Limit fortgeführt; es entstand kein Simulation-, Replay- oder
 Redaction-Failure.
 
-Dieser Fund gehört nicht zu den drei freigegebenen Fehlergruppen und wurde
-nicht mit zusätzlicher Kartenlogik vermischt. Geplante Folgemaßnahme nach
-separater Freigabe: LegalAction-/Choice-Revalidierung für verzögerte
-Run-Events gegen Run-Locks und den nach der Zwischeninstallation gültigen
-Runzustand abgleichen, mit direktem Engine-Grenztest und Seed-Regression.
+Dieser Fund gehörte nicht zu den drei damaligen Fehlergruppen und wurde nicht
+mit zusätzlicher KI-Kartenlogik vermischt. Er ist nach separater Freigabe über
+den atomaren generischen Runstart-Optionsvertrag behoben und in
+`docs/reviews/ai/test-spin-choice-run-guard-final-review-2026-07-10.md`
+verifiziert.
 
 ## Rohdaten
 

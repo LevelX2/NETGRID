@@ -2,7 +2,7 @@
 
 ## Status
 
-- Status: in Arbeit
+- Status: abgeschlossen
 - Datum: 2026-07-10
 - Agent: `card-enablement-ai-knowledge-agent`
 - Branch: `codex/test-spin-choice-run-guard`
@@ -117,3 +117,14 @@ das Goal erst danach ab.
 - Positive und negative Engine-Regressionen schützen den Vertrag.
 - Der Fehlerseed läuft ohne IllegalAction; relevante Gates sind grün.
 - Branch ist lokal nach `main` integriert und der Worktree entfernt.
+
+## Abschlussstand
+
+- P0 belegte den synchronen erfolgreichen Leere-Archives-Run als Ursache.
+- P1 übergibt die bereits vorhandenen `testSpinTemporaryInstall`-Metadaten
+  atomar über `StartRunOptions`; der neue Grenztest schützt sofortiges
+  Run-Ende, Rückmischung, PublicPayload und Replay.
+- Seed 11 sowie alle 25 Seeds des Proteus-HQ-Matchups liefen ohne
+  IllegalAction oder Replayfehler und vollständig redaction-safe.
+- Engine-Typecheck, AI-Typecheck, 27 fokussierte/angrenzende Tests und die
+  vollständige Engine-Suite mit 180 Dateien und 1.619 Tests sind grün.

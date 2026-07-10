@@ -123,5 +123,6 @@ das Goal erst danach ab.
   Hint-, Semantic-Signal- und Kartenabstraktionsgates sind grün.
 - Der abschließende 100-Versuche-Lauf hatte keine Simulation-, Replay- oder
   Redaction-Failures. Vapor Ops wurde 14-mal für Advancement-Transfer genutzt.
-- Ein unabhängiger Test-Spin-Choice-Folgefund bleibt bewusst außerhalb dieses
-  freigegebenen Pakets und ist im Final Review dokumentiert.
+- Ein unabhängiger Test-Spin-Choice-Folgefund blieb bewusst außerhalb dieses
+  freigegebenen Pakets und wurde später separat über
+  `test-spin-choice-run-guard-process-2026-07-10.md` abgeschlossen.
