@@ -81,7 +81,7 @@ export function semanticRuntimeCorpObservedRemoteReachability(
       ],
     };
   }
-  if (server.root.some(visibleRootProvidesAgendaStealProtection)) {
+  if (server.root.some(visibleCorpRootProvidesRemoteProtection)) {
     return {
       applies: false,
       successfulAccessEvents: successfulEvents.length,
@@ -105,7 +105,9 @@ export function semanticRuntimeCorpObservedRemoteReachability(
   };
 }
 
-function visibleRootProvidesAgendaStealProtection(card: VisibleCard): boolean {
+export function visibleCorpRootProvidesRemoteProtection(
+  card: VisibleCard,
+): boolean {
   if (card.known === false || !card.definitionId) return false;
   const hint = AI_HINTS_BY_CARD.get(card.definitionId);
   const roles = [...(hint?.roles ?? []), ...(hint?.planRoles ?? [])];

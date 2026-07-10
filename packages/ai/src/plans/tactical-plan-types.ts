@@ -135,6 +135,7 @@ export type PlanBlockerKind =
   | "bank_empty"
   | "score_window_unprotected"
   | "score_window_contestable"
+  | "active_scoreline_priority"
   | "missing_rez_reserve"
   | "missing_credits"
   | "missing_legal_action"

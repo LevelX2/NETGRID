@@ -5,6 +5,8 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 import { assessKnownRezzedIcePath } from "../visible-run-analysis";
+import { semanticRuntimeCorpObservedRemoteReachability } from "../runtime/semantic-runtime-corp-remote-reachability";
+import { visibleRunnerExposureCreditValue } from "../runtime/visible-runner-action-economy";
 import { visibleCardByInstanceId } from "./tactical-plan-visible-cards";
 
 export function remoteIsProtected(
@@ -18,9 +20,10 @@ export function remoteIsProtected(
 }
 
 export function corpRemoteContestabilityAssessment(
-  playerView: PlayerView,
+  input: AiDecisionInput,
   serverId: string,
 ): { contestable: boolean; evidence: string[] } | undefined {
+  const playerView = input.playerView;
   const server = playerView.servers.find(
     (candidate) => candidate.id === serverId,
   );
@@ -33,7 +36,8 @@ export function corpRemoteContestabilityAssessment(
     Math.floor((playerView.opponent.clicks ?? 4) - 1),
   );
   const visibleRunnerExposureContestCredits =
-    visibleRunnerContestCredits + runnerExposureCreditActions;
+    visibleRunnerContestCredits +
+    visibleRunnerExposureCreditValue(input, runnerExposureCreditActions);
   const assessment = assessKnownRezzedIcePath(
     server.ice,
     runnerRig,
@@ -41,8 +45,19 @@ export function corpRemoteContestabilityAssessment(
     server.root,
   );
   if (assessment.assessedKnownIceCount <= 0) return undefined;
+  const observedReachability = semanticRuntimeCorpObservedRemoteReachability(
+    input,
+    serverId,
+    server,
+  );
+  const missingCoverageAffordable =
+    assessment.knownPathBlockedByMissingCoverage === true &&
+    (assessment.visibleBreakCost ?? 0) > 0 &&
+    visibleRunnerExposureContestCredits >= (assessment.visibleBreakCost ?? 0);
   const contestable =
-    assessment.canReachAccess === true && assessment.creditsAfterPath >= 0;
+    observedReachability.applies ||
+    missingCoverageAffordable ||
+    (assessment.canReachAccess === true && assessment.creditsAfterPath >= 0);
   return {
     contestable,
     evidence: [
@@ -50,6 +65,7 @@ export function corpRemoteContestabilityAssessment(
       `runner_credits:${playerView.opponent.credits}`,
       `runner_visible_contest_credits:${visibleRunnerContestCredits}`,
       `runner_exposure_credit_actions:${runnerExposureCreditActions}`,
+      `runner_exposure_credit_value:${visibleRunnerExposureCreditValue(input, runnerExposureCreditActions)}`,
       `runner_visible_exposure_contest_credits:${visibleRunnerExposureContestCredits}`,
       `runner_visible_rig_count:${runnerRig.length}`,
       `assessed_known_ice_count:${assessment.assessedKnownIceCount}`,
@@ -61,6 +77,8 @@ export function corpRemoteContestabilityAssessment(
       ...(assessment.noAccessReason
         ? [`no_access_reason:${assessment.noAccessReason}`]
         : []),
+      `missing_coverage_affordable:${missingCoverageAffordable}`,
+      ...observedReachability.evidence,
     ],
   };
 }

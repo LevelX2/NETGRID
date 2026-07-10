@@ -631,7 +631,7 @@ describe("semanticRuntimeCorpInstallRemoteScore central ICE", () => {
 
     expect(
       installRootScore(raymond, "remote_1", input, ["scoreline_support"]),
-    ).toBe(-900);
+    ).toBe(-2600);
   });
 
   it("bounds advancement-counter remote support rules text to exact tokens", () => {

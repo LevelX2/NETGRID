@@ -1,8 +1,13 @@
-import type { LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 import { createAiHintsByCard } from "../ai-hints";
 import { createPlanStep, createTacticalPlan } from "./tactical-plan-builders";
 import type {
   PlanStep,
+  PlanBlocker,
   TacticalPlan,
   TacticalPlanBuildContext,
 } from "./tactical-plan-types";
@@ -42,15 +47,19 @@ export function buildCorpFiniteEconomyPlans(
     installActionsByCard.set(card.instanceId, actions);
   }
   for (const [cardId, actions] of installActionsByCard) {
+    const scorelineBlocker = finiteEconomyInstallScorelineBlocker(
+      context.input,
+    );
     plans.push(
       createTacticalPlan({
         planId: `corp.develop_finite_economy:${cardId}`,
         side: "corp",
         type: "corp.develop_finite_economy",
-        status: "active",
+        status: scorelineBlocker ? "blocked" : "active",
         priority: 760,
         horizonTurns: 3,
         target: { kind: "card", id: cardId },
+        ...(scorelineBlocker ? { blockers: [scorelineBlocker] } : {}),
         currentStep: createPlanStep({
           stepId: `install_finite_economy:${cardId}`,
           kind: "install_finite_economy",
@@ -65,6 +74,7 @@ export function buildCorpFiniteEconomyPlans(
           "corp_finite_economy_plan:install",
           `corp_finite_economy_card:${cardId}`,
           `corp_finite_economy_install_options:${actions.length}`,
+          ...(scorelineBlocker?.evidence ?? []),
         ],
         scoreBreakdown: [
           {
@@ -79,6 +89,37 @@ export function buildCorpFiniteEconomyPlans(
     );
   }
   return plans;
+}
+
+function finiteEconomyInstallScorelineBlocker(
+  input: AiDecisionInput,
+): PlanBlocker | undefined {
+  const activeScoreline = input.playerView.servers
+    .filter((server) => server.id.startsWith("remote_"))
+    .flatMap((server) =>
+      server.root
+        .filter((card) => card.known !== false && card.type === "agenda")
+        .map((card) => ({ card, serverId: server.id })),
+    )[0];
+  if (!activeScoreline) return undefined;
+  const scoreReady = input.legalActions.some(
+    (action) =>
+      action.type === "score_agenda" &&
+      String(action.source) === activeScoreline.card.instanceId,
+  );
+  return {
+    blockerId: `active_scoreline_priority:${activeScoreline.card.instanceId}`,
+    kind: "active_scoreline_priority",
+    severity: "soft",
+    target: { kind: "server", id: activeScoreline.serverId },
+    removalStepKind: scoreReady ? "score_agenda" : "advance_score_card",
+    evidence: [
+      "corp_finite_economy_deferred_by_active_scoreline:true",
+      `corp_finite_economy_scoreline_server:${activeScoreline.serverId}`,
+      `corp_finite_economy_scoreline_card:${activeScoreline.card.instanceId}`,
+      `corp_finite_economy_score_ready:${scoreReady}`,
+    ],
+  };
 }
 
 function installedFiniteEconomyPlan(

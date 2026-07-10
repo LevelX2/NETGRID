@@ -49,6 +49,43 @@ describe("tacticalPlanMappedChoice", () => {
     expect(result.choice?.action.actionId).toBe("gain");
   });
 
+  it("keeps an active finite Corp economy plan on its mapped action", () => {
+    const installBbs = legalAction("install-bbs", "install_card");
+    const offPlanCredit = legalAction("gain", "gain_credit");
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [choice(offPlanCredit, 5000), choice(installBbs, -1200)],
+      finiteEconomyMapping([installBbs]),
+      choice(offPlanCredit, 5000),
+    );
+
+    expect(result.outcome).toBe("semantic_choice_blocked");
+    expect(result.choice?.action.actionId).toBe("install-bbs");
+    expect(result.overrideBlockedReason).toBe(
+      "corp_finite_economy_plan_controller",
+    );
+  });
+
+  it("keeps a progressing Corp scoreline on its concrete support action", () => {
+    const installProtection = legalAction(
+      "install-protection",
+      "install_card",
+    );
+    const offPlanSupport = legalAction("install-vapor", "install_card");
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [choice(offPlanSupport, 2000), choice(installProtection, -1500)],
+      scorelineSupportMapping([installProtection]),
+      choice(offPlanSupport, 2000),
+    );
+
+    expect(result.outcome).toBe("semantic_choice_blocked");
+    expect(result.choice?.action.actionId).toBe("install-protection");
+    expect(result.overrideBlockedReason).toBe(
+      "corp_scoreline_support_plan_controller",
+    );
+  });
+
   it("does not protect a progressing score window without conversion guarantee", () => {
     const installAgenda = legalAction("install-agenda", "install_card");
     const offPlanCredit = legalAction("gain", "gain_credit");
@@ -702,6 +739,66 @@ function scoreConversionMapping(
         "corp_score_conversion_same_turn_guaranteed:true",
         "corp_score_sequence:same_turn_conversion",
       ],
+      stateVersion: 1,
+    }),
+    step,
+    status: "matched",
+    actionCandidateIds: actions.map((action) => action.actionId),
+    actionPriorities: [],
+    legalActions: actions,
+    rationale: [],
+  };
+}
+
+function finiteEconomyMapping(
+  actions: LegalAction[],
+): PlanStepMappingResult {
+  const step = createPlanStep({
+    stepId: "install_finite_economy:bbs",
+    kind: "install_finite_economy",
+    desiredActionSemantics: ["install.card", "economy.finite_pool"],
+    actionCandidateIds: actions.map((action) => action.actionId),
+  });
+  return {
+    plan: createTacticalPlan({
+      planId: "corp.develop_finite_economy:bbs",
+      side: "corp",
+      type: "corp.develop_finite_economy",
+      status: "active",
+      priority: 760,
+      horizonTurns: 3,
+      target: { kind: "card", id: "bbs" },
+      currentStep: step,
+      stateVersion: 1,
+    }),
+    step,
+    status: "matched",
+    actionCandidateIds: actions.map((action) => action.actionId),
+    actionPriorities: [],
+    legalActions: actions,
+    rationale: [],
+  };
+}
+
+function scorelineSupportMapping(
+  actions: LegalAction[],
+): PlanStepMappingResult {
+  const step = createPlanStep({
+    stepId: "protect_remote:agenda",
+    kind: "protect_remote",
+    desiredActionSemantics: ["install.card", "corp_window.rez"],
+    actionCandidateIds: actions.map((action) => action.actionId),
+  });
+  return {
+    plan: createTacticalPlan({
+      planId: "corp.create_score_window:agenda",
+      side: "corp",
+      type: "corp.create_score_window",
+      status: "progressing",
+      priority: 940,
+      horizonTurns: 3,
+      target: { kind: "server", id: "remote_1" },
+      currentStep: step,
       stateVersion: 1,
     }),
     step,

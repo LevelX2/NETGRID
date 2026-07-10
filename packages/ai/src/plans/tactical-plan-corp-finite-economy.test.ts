@@ -119,6 +119,35 @@ describe("Corp finite economy plans", () => {
 
     expect(plans.some((plan) => plan.type === "corp.rez_defense")).toBe(false);
   });
+
+  it("defers installing a finite economy pool while an agenda scoreline is active", () => {
+    const bbs = bbsCard("bbs-hand");
+    const agenda = card("active-agenda", "simple_agenda", "agenda", {
+      advancementCounters: 1,
+      advancementRequirement: 4,
+    });
+    const installBbs = action(
+      "install-bbs",
+      "install_card",
+      bbs.instanceId,
+      { placement: "root", serverId: "new_remote" },
+    );
+
+    const plans = buildCorpFiniteEconomyPlans({
+      input: corpInput({ hq: [bbs], root: [agenda], actions: [installBbs] }),
+    });
+
+    expect(plans[0]).toMatchObject({
+      type: "corp.develop_finite_economy",
+      status: "blocked",
+      blockers: [
+        expect.objectContaining({ kind: "active_scoreline_priority" }),
+      ],
+    });
+    expect(plans[0]?.evidence).toContain(
+      "corp_finite_economy_deferred_by_active_scoreline:true",
+    );
+  });
 });
 
 function corpInput(params: {

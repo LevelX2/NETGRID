@@ -2881,7 +2881,10 @@ function corpGoalMatchesAction(
         corpActionCandidateHasScoreCloseoutSignal(actionSemanticCandidate)
       );
     case "corp.tactical.advance_scoreline":
-      return action.type === "advance_card";
+      return (
+        action.type === "advance_card" &&
+        (sourceCard === undefined || sourceCard.type === "agenda")
+      );
     case "corp.tactical.rez_relevant_ice":
       return action.type === "rez_ice" && sourceCard?.type === "ice";
     case "corp.tactical.prepare_remote":

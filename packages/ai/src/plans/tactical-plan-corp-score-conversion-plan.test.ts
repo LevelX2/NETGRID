@@ -32,6 +32,39 @@ describe("Corp score-conversion TacticalPlan integration", () => {
     });
   });
 
+  it("does not promote a scoreline-support asset install to an agenda score-window target", () => {
+    const agenda = card("agenda", "simple_agenda", "agenda");
+    const vapor = card("vapor", "onr_v1_347_vapor-ops", "asset");
+    const installVapor = legalAction(
+      "install-vapor",
+      "install_card",
+      vapor.instanceId,
+      { serverId: "remote_1", placement: "root" },
+    );
+    const input = corpInput(agenda, vapor, [installVapor]);
+    input.playerView.own.gripOrHq = [vapor];
+    input.playerView.servers.find((server) => server.id === "remote_1")!.root =
+      [];
+    const candidates = buildActionSemanticCandidates({
+      legalActions: [installVapor],
+      observerSide: "corp",
+      stateVersion: 1,
+      visibleSourceDefinitionsByInstanceId: {
+        [vapor.instanceId]: vapor.definitionId!,
+      },
+    });
+
+    const plans = buildCorpTacticalPlans({ input, candidates });
+
+    expect(
+      plans.some(
+        (plan) =>
+          plan.type === "corp.create_score_window" &&
+          plan.currentStep.actionCandidateIds.includes(installVapor.actionId),
+      ),
+    ).toBe(false);
+  });
+
   it("projects a reviewed advancement operation that becomes legal after agenda installation", () => {
     const agenda = card("zurich", "onr_proteus_008_project-zurich", "agenda", {
       advancementRequirement: 3,

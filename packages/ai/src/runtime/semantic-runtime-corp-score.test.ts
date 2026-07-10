@@ -5274,6 +5274,57 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     }
   });
 
+  it("does not apply the agenda-advance goal to a visible advancement-support asset", () => {
+    const vapor = corpCard("vapor", "asset", {
+      definitionId: "onr_v1_347_vapor-ops",
+      title: "Vapor Ops",
+      advancementCounters: 1,
+    });
+    const advanceVapor = corpAction(
+      "advance-vapor",
+      "advance_card",
+      { serverId: "remote_1" },
+      vapor.instanceId,
+    );
+    const input = corpInputWithGoals(
+      [
+        {
+          goalId: "corp.tactical.advance_scoreline",
+          family: "corp_scoreline",
+          priority: 820,
+          urgency: "high",
+          source: "boardstate",
+          evidence: ["test_goal"],
+        },
+      ],
+      [advanceVapor],
+    );
+    input.playerView.servers = [
+        {
+          id: "remote_1",
+          label: "Remote 1",
+          ice: [],
+          root: [vapor],
+        },
+    ];
+
+    const components = semanticRuntimeCorpScoreComponents(
+      input,
+      advanceVapor,
+      "simple_score_advance",
+      testDependencies(),
+    );
+
+    expect(
+      components.some(
+        (component) =>
+          component.key === "corp_goal_fit_tactical_goal" &&
+          component.reason?.includes("corp.tactical.advance_scoreline") ===
+            true,
+      ),
+    ).toBe(false);
+  });
+
   it("scores structured Corp install roles and ignores substring-only role noise", () => {
     const structuredKeys = componentKeysForInstallRoles([
       "ice_tax",

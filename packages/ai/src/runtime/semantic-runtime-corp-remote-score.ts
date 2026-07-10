@@ -198,7 +198,7 @@ export function semanticRuntimeCorpInstallRemoteScore<
     remoteSupportNeedsScorelineContext &&
     !semanticRuntimeCorpRemoteHasAdvancementContext(server)
   ) {
-    return protectedRemote ? -900 : -1300;
+    return protectedRemote ? -2600 : -3200;
   }
 
   if (
@@ -243,6 +243,10 @@ function semanticRuntimeCorpRemoteSupportNeedsScorelineContext(
       "advancement_counter",
       "scoreline_support",
       "remote_score_support",
+      "remote_asset_agenda_support",
+      "advance.score_window_support",
+      "advance.corp_counter_bank",
+      "advance.corp_counter_transfer",
     ])
   ) {
     return true;

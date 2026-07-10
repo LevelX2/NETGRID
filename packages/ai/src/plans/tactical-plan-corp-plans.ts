@@ -87,7 +87,7 @@ export function buildCorpTacticalPlans(
       action,
       context.corpScorelineWindowAssessment,
     );
-    const currentStep = corpScoreWindowCurrentStep(action, blockers);
+    const currentStep = corpScoreWindowCurrentStep(action, blockers, input);
     const strategicBoost = tacticalGoalPriorityBoost(scorelineGoal);
     if (
       serverId &&
@@ -102,7 +102,12 @@ export function buildCorpTacticalPlans(
         planId: `corp.create_score_window:${action.actionId}`,
         side: "corp",
         type: "corp.create_score_window",
-        status: blockers.length > 0 ? "blocked" : "active",
+        status:
+          blockers.length === 0
+            ? "active"
+            : currentStep.actionCandidateIds.length > 0
+              ? "progressing"
+              : "blocked",
         priority:
           (serverId && remoteIsProtected(input.playerView, serverId)
             ? 900
@@ -126,11 +131,8 @@ export function buildCorpTacticalPlans(
       }),
     );
   }
-  const scorelineInstallActionIds = new Set([
-    ...(context.candidates ?? [])
-      .filter(corpCandidateIsScorelineInstall)
-      .map((candidate) => candidate.actionId),
-    ...input.legalActions
+  const scorelineInstallActionIds = new Set(
+    input.legalActions
       .filter(
         (action) =>
           action.side === "corp" &&
@@ -139,7 +141,7 @@ export function buildCorpTacticalPlans(
           visibleCardForAction(input.playerView, action)?.type === "agenda",
       )
       .map((action) => action.actionId),
-  ]);
+  );
   for (const action of input.legalActions.filter(
     (candidate) =>
       candidate.type === "install_card" &&
@@ -158,7 +160,7 @@ export function buildCorpTacticalPlans(
     const strategicBoost = tacticalGoalPriorityBoost(scorelineGoal);
     const currentStep =
       blockers.length > 0
-        ? corpScoreWindowCurrentStep(action, blockers)
+        ? corpScoreWindowCurrentStep(action, blockers, input)
         : createPlanStep({
             stepId: `install_or_prepare_agenda:${action.actionId}`,
             kind: "install_or_prepare_agenda",
@@ -173,7 +175,12 @@ export function buildCorpTacticalPlans(
         planId: `corp.create_score_window:${action.actionId}`,
         side: "corp",
         type: "corp.create_score_window",
-        status: blockers.length > 0 ? "blocked" : "active",
+        status:
+          blockers.length === 0
+            ? "active"
+            : currentStep.actionCandidateIds.length > 0
+              ? "progressing"
+              : "blocked",
         priority:
           (remoteIsProtected(input.playerView, serverId) ? 940 : 780) +
           strategicBoost,
@@ -338,29 +345,4 @@ export function buildCorpTacticalPlans(
     );
   }
   return plans;
-}
-
-function corpCandidateIsScorelineInstall(
-  candidate: NonNullable<TacticalPlanBuildContext["candidates"]>[number],
-): boolean {
-  if (candidate.actorSide !== "corp") return false;
-  if (candidate.actionType !== "install_card") return false;
-  const signals = [
-    candidate.semanticActionType,
-    ...candidate.actionTacticSignals,
-    ...candidate.cardContextSignals,
-    ...candidate.strategySupport.flatMap((entry) => [
-      entry.strategyId,
-      entry.role,
-    ]),
-    ...candidate.evidence,
-  ].map((entry) => entry.toLocaleLowerCase("en-US"));
-  return signals.some(
-    (signal) =>
-      signal === "scoreline" ||
-      signal === "score_line" ||
-      signal === "corp_score_agenda" ||
-      signal === "corp.scoreline" ||
-      signal === "corp.remote_scoring",
-  );
 }

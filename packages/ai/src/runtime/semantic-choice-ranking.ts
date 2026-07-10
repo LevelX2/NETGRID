@@ -158,6 +158,36 @@ export function tacticalPlanMappedChoice(
         threshold: Number.POSITIVE_INFINITY,
       });
     }
+    if (
+      tacticalPlanCorpFiniteEconomyBlocksOffPlanOverride(
+        mapping,
+        overrideChoice,
+        mappedActionIds,
+      )
+    ) {
+      return tacticalPlanBlockedOverrideResult({
+        mappedChoice,
+        overrideChoice,
+        reason: "corp_finite_economy_plan_controller",
+        scoreGap,
+        threshold: Number.POSITIVE_INFINITY,
+      });
+    }
+    if (
+      tacticalPlanCorpScorelineSupportBlocksOffPlanOverride(
+        mapping,
+        overrideChoice,
+        mappedActionIds,
+      )
+    ) {
+      return tacticalPlanBlockedOverrideResult({
+        mappedChoice,
+        overrideChoice,
+        reason: "corp_scoreline_support_plan_controller",
+        scoreGap,
+        threshold: Number.POSITIVE_INFINITY,
+      });
+    }
     const mappedNonPositiveAgainstPositive =
       mappedChoice.score <= 0 && overrideChoice.score > 0;
     const deferredDevelopmentInstallShouldYield =
@@ -392,6 +422,35 @@ function tacticalPlanCorpScoreConversionBlocksOffPlanOverride(
     mapping.plan.evidence.includes(
       "corp_score_sequence:same_turn_conversion",
     ) &&
+    !mappedActionIds.has(overrideChoice.action.actionId)
+  );
+}
+
+function tacticalPlanCorpFiniteEconomyBlocksOffPlanOverride(
+  mapping: PlanStepMappingResult,
+  overrideChoice: SemanticRuntimeChoice,
+  mappedActionIds: ReadonlySet<string>,
+): boolean {
+  return (
+    mapping.plan.side === "corp" &&
+    mapping.plan.type === "corp.develop_finite_economy" &&
+    (mapping.plan.status === "active" ||
+      mapping.plan.status === "progressing") &&
+    !mappedActionIds.has(overrideChoice.action.actionId)
+  );
+}
+
+function tacticalPlanCorpScorelineSupportBlocksOffPlanOverride(
+  mapping: PlanStepMappingResult,
+  overrideChoice: SemanticRuntimeChoice,
+  mappedActionIds: ReadonlySet<string>,
+): boolean {
+  return (
+    mapping.plan.side === "corp" &&
+    mapping.plan.type === "corp.create_score_window" &&
+    mapping.plan.status === "progressing" &&
+    (mapping.step.kind === "protect_remote" ||
+      mapping.step.kind === "build_rez_reserve") &&
     !mappedActionIds.has(overrideChoice.action.actionId)
   );
 }

@@ -1,6 +1,7 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import type { TacticalGoalLike } from "../decision/semantic-decision-frame";
+import { visibleCorpRootProvidesRemoteProtection } from "../runtime/semantic-runtime-corp-remote-reachability";
 import {
   advanceCanCloseScoreThisTurn,
   advanceCompletesScore,
@@ -8,8 +9,12 @@ import {
   remoteIsProtected,
 } from "./tactical-plan-corp-score-window";
 import { createPlanStep } from "./tactical-plan-builders";
-import { isRemoteServer } from "./tactical-plan-server-targets";
+import {
+  actionServerId,
+  isRemoteServer,
+} from "./tactical-plan-server-targets";
 import { serverHasUnrezzedIce } from "./tactical-plan-run-reachability";
+import { visibleCardByInstanceId } from "./tactical-plan-visible-cards";
 import type {
   PlanBlocker,
   PlanStep,
@@ -107,7 +112,7 @@ export function corpScoreWindowBlockers(
   }
   const remoteContestability =
     serverId && isRemoteServer(serverId)
-      ? corpRemoteContestabilityAssessment(input.playerView, serverId)
+      ? corpRemoteContestabilityAssessment(input, serverId)
       : undefined;
   if (
     serverId &&
@@ -179,6 +184,7 @@ export function corpScoreWindowBlockers(
 export function corpScoreWindowCurrentStep(
   action: LegalAction,
   blockers: readonly PlanBlocker[],
+  input?: AiDecisionInput,
 ): PlanStep {
   if (
     blockers.some(
@@ -187,10 +193,18 @@ export function corpScoreWindowCurrentStep(
         blocker.kind === "score_window_contestable",
     )
   ) {
+    const targetServerId = blockers.find(
+      (blocker) =>
+        blocker.kind === "score_window_unprotected" ||
+        blocker.kind === "score_window_contestable",
+    )?.target?.id;
     return createPlanStep({
       stepId: `protect_remote:${action.actionId}`,
       kind: "protect_remote",
       desiredActionSemantics: ["install.card", "corp_window.rez"],
+      actionCandidateIds: input
+        ? corpRemoteProtectionActionIds(input, targetServerId)
+        : [],
       requiredCapabilities: [
         {
           capabilityId: `remote_protection:${action.actionId}`,
@@ -211,6 +225,10 @@ export function corpScoreWindowCurrentStep(
       stepId: `build_rez_reserve:${action.actionId}`,
       kind: "build_rez_reserve",
       desiredActionSemantics: ["economy.gain_credit", "card_ability.trigger"],
+      actionCandidateIds:
+        input?.legalActions
+          .filter((candidate) => candidate.type === "gain_credit")
+          .map((candidate) => candidate.actionId) ?? [],
       requiredCapabilities: [
         {
           capabilityId: `rez_reserve:${action.actionId}`,
@@ -229,6 +247,38 @@ export function corpScoreWindowCurrentStep(
     actionCandidateIds: [action.actionId],
     rationale: ["advance action progresses a visible score window"],
   });
+}
+
+function corpRemoteProtectionActionIds(
+  input: AiDecisionInput,
+  serverId: string | undefined,
+): string[] {
+  if (!serverId) return [];
+  return input.legalActions
+    .filter(
+      (action) =>
+        action.side === "corp" && actionServerId(action) === serverId,
+    )
+    .filter((action) => {
+      const source = visibleCardByInstanceId(
+        input.playerView,
+        String(action.source),
+      );
+      if (
+        action.type === "install_card" &&
+        action.payload?.placement === "ice"
+      ) {
+        return source?.type === "ice";
+      }
+      if (action.type === "rez_ice") return source?.type === "ice";
+      return (
+        action.type === "install_card" &&
+        action.payload?.placement !== "ice" &&
+        source !== undefined &&
+        visibleCorpRootProvidesRemoteProtection(source)
+      );
+    })
+    .map((action) => action.actionId);
 }
 
 export function corpScoreWindowSequence(actionId: string): PlanStep[] {

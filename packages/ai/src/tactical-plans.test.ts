@@ -2729,7 +2729,7 @@ describe("tactical plan model", () => {
       (plan) => plan.type === "corp.create_score_window",
     );
 
-    expect(scorePlan?.status).toBe("blocked");
+    expect(scorePlan?.status).toBe("progressing");
     expect(scorePlan?.currentStep.kind).toBe("build_rez_reserve");
     expect(scorePlan?.blockers.map((blocker) => blocker.kind)).toEqual(
       expect.arrayContaining(["missing_rez_reserve"]),
@@ -2855,7 +2855,7 @@ describe("tactical plan model", () => {
         input,
       );
 
-    expect(scorePlan?.status).toBe("blocked");
+    expect(scorePlan?.status).toBe("progressing");
     expect(scorePlan?.currentStep.kind).toBe("protect_remote");
     expect(scorePlan?.blockers.map((blocker) => blocker.kind)).toEqual(
       expect.arrayContaining(["score_window_contestable"]),
@@ -2867,6 +2867,79 @@ describe("tactical plan model", () => {
     expect(
       mapping && mapping.legalActions.map((action) => action.actionId),
     ).toEqual(["install-remote-ice"]);
+  });
+
+  it("maps a visible agenda-steal-tax upgrade as score-window protection", () => {
+    const advance = legalAction(
+      "advance-agenda",
+      "corp",
+      "advance_card",
+      { serverId: "remote_1" },
+      { source: "agenda-1" },
+    );
+    const installRedHerrings = legalAction(
+      "install-red-herrings",
+      "corp",
+      "install_card",
+      { placement: "root", serverId: "remote_1" },
+      { source: "red-herrings" },
+    );
+    const input = aiInput("corp", [advance, installRedHerrings]);
+    input.playerView.own.credits = 4;
+    input.playerView.own.clicks = 2;
+    input.playerView.own.gripOrHq = [
+      visibleCard("red-herrings", "corp", "upgrade", {
+        definitionId: "onr_v1_366_red-herrings",
+        title: "Red Herrings",
+      }),
+    ];
+    input.playerView.opponent.credits = 8;
+    input.playerView.opponent.rig = [
+      visibleCard("onr_v1_021_dwarf", "runner", "program", {
+        subtypes: ["Icebreaker", "Worm"],
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server(
+        "remote_1",
+        [
+          visibleCard("onr_v1_279_wall-of-static", "corp", "ice", {
+            rezzed: true,
+          }),
+        ],
+        [
+          visibleCard("agenda-1", "corp", "agenda", {
+            advancementCounters: 1,
+            advancementRequirement: 4,
+          }),
+        ],
+      ),
+    ];
+
+    const plans = buildTacticalPlans({ input });
+    const scorePlan = plans.find(
+      (plan) => plan.type === "corp.create_score_window",
+    );
+    const mapping =
+      scorePlan &&
+      mapPlanStepToLegalActions(
+        scorePlan,
+        scorePlan.currentStep,
+        [candidateForAction(advance), candidateForAction(installRedHerrings)],
+        input,
+      );
+
+    expect(scorePlan?.status).toBe("progressing");
+    expect(scorePlan?.currentStep).toMatchObject({
+      kind: "protect_remote",
+      actionCandidateIds: ["install-red-herrings"],
+    });
+    expect(mapping?.legalActions.map((action) => action.actionId)).toEqual([
+      "install-red-herrings",
+    ]);
   });
 
   it("isolates tactical plan memory by decision context", () => {
@@ -3338,6 +3411,9 @@ describe("tactical plan model", () => {
       { source: "punish-card" },
     );
     const input = aiInput("corp", [installAgenda, punish]);
+    input.playerView.own.gripOrHq = [
+      visibleCard("agenda-1", "corp", "agenda"),
+    ];
     input.playerView.servers = [
       server("hq"),
       server("rd"),

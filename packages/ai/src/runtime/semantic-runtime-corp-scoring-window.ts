@@ -11,6 +11,7 @@ import {
 } from "../visible-run-analysis";
 import { semanticRuntimeCorpCentralPressureAssessment } from "./semantic-runtime-corp-central-pressure";
 import { semanticRuntimeCorpObservedRemoteReachability } from "./semantic-runtime-corp-remote-reachability";
+import { visibleRunnerExposureCreditValue } from "./visible-runner-action-economy";
 
 type CorpServerLike = {
   id: string;
@@ -151,7 +152,7 @@ export function semanticRuntimeCorpScoringWindowAssessment<
     scoreHorizon,
     scoreLineAction,
   );
-  const runnerExposureCredits = scoringWindowRunnerExposureCredits(
+  const runnerExposureCredits = visibleRunnerExposureCreditValue(
     input,
     runnerExposureCreditActions,
   );
@@ -746,33 +747,6 @@ function scoringWindowRunnerExposureCreditActions(
       ? Math.max(0, Math.floor(visibleClicks))
       : 4;
   return Math.max(3, availableRunnerClicks - 1);
-}
-
-function scoringWindowRunnerExposureCredits(
-  input: AiDecisionInput,
-  creditActions: number,
-): number {
-  if (creditActions <= 0) return 0;
-  const bestVisibleCreditAction = (input.playerView.opponent.rig ?? []).reduce(
-    (best, card) => {
-      if (card.known === false || !card.definitionId) return best;
-      const hint = AI_HINTS_BY_CARD.get(card.definitionId);
-      const amount = hint?.effects
-        ?.filter(
-          (effect) =>
-            effect.timing === "action" &&
-            effect.resource === "credits" &&
-            (effect.kind === "economy" || effect.kind === "action_economy"),
-        )
-        .reduce(
-          (maximum, effect) => Math.max(maximum, effect.amount ?? 0),
-          0,
-        );
-      return Math.max(best, amount ?? 0);
-    },
-    1,
-  );
-  return creditActions * bestVisibleCreditAction;
 }
 
 function scoringWindowRezBudget<TServer extends CorpServerLike>(
