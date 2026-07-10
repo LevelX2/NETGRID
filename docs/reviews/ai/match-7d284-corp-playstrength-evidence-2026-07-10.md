@@ -61,3 +61,42 @@
 - Non-ICE-Rez wird wie eine allgemeine sofortige Schutzaktion behandelt und
   kennt keinen spätesten notwendigen Timingpunkt.
 
+## Behebung
+
+1. Eine frühe Central-Baseline priorisiert konkreten R&D-/HQ-Schutz vor dem
+   ersten leeren Remote-Aufbau.
+2. Action-spezifische Score-, Advance-, Punish- und Rez-Schritte tragen
+   konkrete `actionCandidateIds`; Root-Rez wird nicht länger als ICE-Defense
+   geplant.
+3. Der Score-Conversion-Plan projiziert geprüfte sichtbare Advancement-
+   Operationen über die Agenda-Installation hinweg. Scoring kostet korrekt
+   keinen Klick.
+4. Sichtbare Agendas erzeugen auch ohne semantischen Candidate-Hinweis einen
+   Mehrzug-Scoreline-Plan mit drei Zügen Horizont.
+5. Verzögerte, vor dem Score sicher erreichbare Agenda-Linien erhalten einen
+   harten Unsafe-Abzug; ausdrücklich ermittelte Deckout-Notlinien bleiben
+   möglich.
+6. Geprüfte Advancement-Bursts erhalten beim Discard einen starken Keep-Wert,
+   solange eine sichtbare Agenda sie verwerten kann.
+7. Endliche Action-Economy erhält `corp.develop_finite_economy`: BBS wird
+   installiert, gerezzt und vor der nächsten Kopie vollständig geleert.
+8. Dritte und spätere ICE-Layer berücksichtigen Installationskosten und
+   sichtbare reale Breakkosten als Grenznutzen.
+9. Das Budget für innere ICE wird nicht mehr auf einen wirkungslosen
+   zweistelligen Normalisierungsscore reduziert, sondern wirkt als direkter
+   Pfadmalus.
+10. Access-Ambushes wie Setup bleiben verdeckt; runrelevante Root-Karten
+    werden erst beim letzten relevanten ICE-/Zugriffsfenster positiv bewertet.
+
+## Verifikation
+
+- fokussierte Plan-, Scoreline-, Discard-, Economy-, Placement-, Triage- und
+  Rez-Timing-Regressionen: grün;
+- `@netgrid/ai` Typecheck: grün;
+- AI-Shard 1: 95 Dateien, 570 Tests;
+- AI-Shard 2: 94 Dateien, 651 Tests;
+- AI-Shard 3: 94 Dateien, 608 Tests;
+- `check:ai`: grün, vorhandene nicht blockierende Hint-Warnungen unverändert;
+- `check:package-boundaries`: grün;
+- keine Engine-, LegalAction-, Replay-, StateHash-, Randomness- oder
+  Hidden-Info-Vertragsänderung.

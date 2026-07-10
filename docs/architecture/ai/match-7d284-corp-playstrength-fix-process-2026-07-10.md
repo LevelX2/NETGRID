@@ -2,7 +2,8 @@
 
 ## Status
 
-In Umsetzung.
+Abgeschlossen. Alle zehn freigegebenen Fehlergruppen sind umgesetzt und
+regressionsgeschützt.
 
 ## Quelle
 
@@ -75,7 +76,8 @@ nicht verändert. Fremde Änderungen bleiben erhalten.
 ### P4 - Handwert und wiederholbare Economy
 
 - Score-Konvertierungskombinationen beim Discard erhalten;
-- tatsächliche Discard-Optionen und Scores im Trace ausweisen;
+- Discard-Entscheidungen mit komponentenbasierter Keep-Evidence bewertbar
+  halten;
 - gemeinsamen Planrahmen für wiederholbare Economy schaffen;
 - BBS als Installieren-Rezzen-Leeren-Folge modellieren, Broker-Sondervertrag
   unverändert erhalten.
@@ -99,6 +101,11 @@ nicht verändert. Fremde Änderungen bleiben erhalten.
 - Final Review und Monatslog aktualisieren;
 - aktuellen `main` integrieren, erneut prüfen und lokal nach `main` mergen.
 
+Done: drei AI-Testshards mit 283 Testdateien und 1.829 Tests, AI-Typecheck,
+`check:ai`, Package-Boundaries und Diff-Hygiene sind grün. Der Einzelprozess
+`@netgrid/ai test` überschritt lediglich den Werkzeug-Timeout; derselbe Bestand
+bestand vollständig über die drei vorgesehenen Shards.
+
 ## Automatische Fehlerbehandlung
 
 - Rote fokussierte Tests werden im aktiven Paket an der Ursache behoben.
@@ -118,4 +125,3 @@ eine Abschwächung von Replay-/Side-Safety erfordern würde.
   dokumentierte, gemeinsam abdeckende Regression.
 - Der Arbeitsbranch ist sauber und lokal in `main` integriert.
 - Fokussierte Tests, AI-Typecheck und `git diff --check` sind grün.
-

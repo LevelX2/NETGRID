@@ -77,10 +77,9 @@ describe("Corp score-conversion TacticalPlan integration", () => {
       {
         scoreConversionCapability: "place_advancement",
         scoreConversionAdvancementAmount: 2,
-        scoreConversionAdvancementMode: "up_to_distinct_targets_one_each",
+        scoreConversionAdvancementMode: "any_combination",
       },
     );
-    playLayoffs.payload!.scoreConversionAdvancementMode = "single_target";
     playLayoffs.costs = [{ clicks: 1, credits: 5 }];
     const afterInstall = corpInput(
       layoffs,
