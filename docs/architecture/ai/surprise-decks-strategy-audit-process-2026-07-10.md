@@ -33,7 +33,7 @@ Die vier am 10. Juli 2026 freigegebenen Folgepunkte werden sequenziell umgesetzt
 | --- | --- | --- | --- |
 | P0 | abgeschlossen | dieser Prozess-Commit | Ausgangsevidence aus dem 20×480-Rerun: Seeds 15/20, fünf Access-Declines und fünf Broker-Falschpositive |
 | P1 | abgeschlossen | dieser Paket-Commit | 26 Fokustests; negative R&D-Wiederholung weicht positiver anderer Serveroption, Fresh-/Score-Threat-Gegenfälle geschützt |
-| P2 | offen | – | Access-/Budget-Fokustests + reproduzierte Seeds |
+| P2 | abgeschlossen | dieser Paket-Commit | 9 Access-Policy-Tests; geplantes Trash-Budget wird nur für positives Ziel und unter separater Sicherheitsreserve ausgegeben |
 | P3 | offen | – | Mining-Fokustests + Rerun-Fundstellen |
 | P4 | offen | – | Detektortests + gepaartes Panel |
 | P5 | offen | – | 20×480, A/B-Panel, Regel-/Timing-Audit |

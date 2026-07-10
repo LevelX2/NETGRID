@@ -177,10 +177,31 @@ function runnerRunPlanAccessChoice(params: {
   const declineChoice = accessChoices.find(
     (choice) => choice.action.type === "decline_trash",
   );
+  const trashCost = trashChoice ? actionCreditCost(trashChoice.action) : 0;
+  const plannedTrashBudget = Math.max(
+    0,
+    params.plan.accessIntent?.reserveForStealOrTrash ?? 0,
+    params.plan.budget.reservedCreditsForTrash,
+  );
+  const postRunSafetyReserve = Math.max(
+    0,
+    params.plan.reserve.minimumCreditsAfterRun,
+    params.plan.budget.reservedCreditsAfterRun,
+    params.plan.budget.damageSafetyReserve.preventionCreditsReserved,
+    params.plan.budget.tagSafetyReserve.minimumCreditsAfterTags,
+  );
+  const plannedPositiveTrash =
+    trashChoice !== undefined &&
+    params.plan.objective.kind === "trash_asset_or_upgrade" &&
+    params.plan.accessIntent?.trashPolicy === "trash_if_value_positive" &&
+    trashChoice.score > 0 &&
+    (declineChoice === undefined || trashChoice.score > declineChoice.score) &&
+    trashCost <= plannedTrashBudget &&
+    trashCost <= params.plan.objective.maxTrashCost;
   const trashBreaksReserve =
     trashChoice !== undefined &&
-    params.input.playerView.own.credits - actionCreditCost(trashChoice.action) <
-      reserveTarget;
+    params.input.playerView.own.credits - trashCost <
+      (plannedPositiveTrash ? postRunSafetyReserve : reserveTarget);
   const trashPolicy = params.plan.accessIntent?.trashPolicy;
   const declineLowValueChoice =
     declineChoice &&
@@ -196,9 +217,11 @@ function runnerRunPlanAccessChoice(params: {
   const selected =
     trashChoice && trashPolicy === "must_trash_target"
       ? trashChoice
-      : declineChoice && trashBreaksReserve
-        ? declineChoice
-        : (declineLowValueChoice ?? scoreSelected);
+      : trashChoice && plannedPositiveTrash && !trashBreaksReserve
+        ? trashChoice
+        : declineChoice && trashBreaksReserve
+          ? declineChoice
+          : (declineLowValueChoice ?? scoreSelected);
   if (!selected) return undefined;
   return annotateRunnerRunPlanChoice({
     choice: selected,
@@ -209,6 +232,13 @@ function runnerRunPlanAccessChoice(params: {
       `runner_run_plan_access_selected:${selected.action.type}`,
       `runner_run_plan_access_trash_policy:${trashPolicy ?? "none"}`,
       `runner_run_plan_access_reserve:${reserveTarget}`,
+      ...(plannedPositiveTrash
+        ? [
+            "runner_run_plan_access_trash_spends_planned_reserve:true",
+            `runner_run_plan_access_trash_budget:${plannedTrashBudget}`,
+            `runner_run_plan_access_post_run_safety_reserve:${postRunSafetyReserve}`,
+          ]
+        : []),
       ...(trashBreaksReserve
         ? ["runner_run_plan_access_trash_breaks_reserve:true"]
         : []),

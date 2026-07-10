@@ -70,6 +70,59 @@ describe("runner run plan access policy", () => {
     );
   });
 
+  it("spends the reserved trash budget for a positive trash objective", () => {
+    const trash = action("trash_accessed_card", { costs: [{ credits: 2 }] });
+    const decline = action("decline_trash");
+
+    const selected = runnerRunPlanSemanticChoice({
+      input: accessInput([decline, trash], { credits: 2 }),
+      plan: runPlan({
+        objective: {
+          kind: "trash_asset_or_upgrade",
+          maxTrashCost: 2,
+          expectedValue: 100,
+        },
+        reserveForStealOrTrash: 2,
+      }),
+      choices: [choice(decline, -1745), choice(trash, 635)],
+    });
+
+    expect(selected?.action.actionId).toBe(trash.actionId);
+    expect(selected?.evidence).toEqual(
+      expect.arrayContaining([
+        "runner_run_plan_access_trash_spends_planned_reserve:true",
+        "runner_run_plan_access_trash_budget:2",
+        "runner_run_plan_access_post_run_safety_reserve:0",
+      ]),
+    );
+    expect(selected?.evidence).not.toContain(
+      "runner_run_plan_access_trash_breaks_reserve:true",
+    );
+  });
+
+  it("does not spend planned trash budget on a nonpositive target", () => {
+    const trash = action("trash_accessed_card", { costs: [{ credits: 2 }] });
+    const decline = action("decline_trash");
+
+    const selected = runnerRunPlanSemanticChoice({
+      input: accessInput([decline, trash], { credits: 2 }),
+      plan: runPlan({
+        objective: {
+          kind: "trash_asset_or_upgrade",
+          maxTrashCost: 2,
+          expectedValue: 100,
+        },
+        reserveForStealOrTrash: 2,
+      }),
+      choices: [choice(decline, 100), choice(trash, -20)],
+    });
+
+    expect(selected?.action.actionId).toBe(decline.actionId);
+    expect(selected?.evidence).toContain(
+      "runner_run_plan_access_trash_breaks_reserve:true",
+    );
+  });
+
   it("lets semantic trash value override decline-low-value access intent", () => {
     const trash = action("trash_accessed_card");
     const decline = action("decline_trash");
@@ -187,6 +240,7 @@ function runPlan(
     trashPolicy?: NonNullable<RunnerRunPlan["accessIntent"]>["trashPolicy"];
     reserveForStealOrTrash?: number;
     revalidationStatus?: RunnerRunPlan["revalidation"]["status"];
+    objective?: RunnerRunPlan["objective"];
   } = {},
 ): RunnerRunPlan {
   const reserveForStealOrTrash = options.reserveForStealOrTrash ?? 0;
@@ -195,7 +249,10 @@ function runPlan(
     side: "runner",
     lifecycle: "active",
     origin: "basic_start_run",
-    objective: { kind: "access_rnd_top", expectedValue: 100 },
+    objective: options.objective ?? {
+      kind: "access_rnd_top",
+      expectedValue: 100,
+    },
     targetServer: { id: "rd" },
     accessIntent: {
       server: "rd",
