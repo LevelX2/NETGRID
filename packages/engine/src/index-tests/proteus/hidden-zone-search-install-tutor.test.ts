@@ -398,4 +398,60 @@ describe("Proteus PRO018 hidden-zone search/install tutor suite", () => {
     });
     expect(before.runner.credits).toBe(2);
   });
+
+  it("Test Spin cleans up its program when an empty Archives run finishes synchronously", () => {
+    let state = baseState("pro018-test-spin-empty-archives");
+    const testSpinId = addRunnerGrip(
+      state,
+      TEST_SPIN,
+      "pro018_test_spin_empty_archives",
+    );
+    const programId = addRunnerStack(
+      state,
+      JACKHAMMER,
+      "pro018_empty_archives_jackhammer",
+    );
+    const archivedCardIds = state.corp.archives.splice(0);
+    for (const archivedCardId of archivedCardIds) {
+      state.corp.rd.push(archivedCardId);
+      const archivedCard = state.cardInstances[archivedCardId];
+      if (archivedCard) {
+        archivedCard.zone = { side: "corp", zone: "rd" };
+        archivedCard.faceup = false;
+      }
+    }
+    const archivesServer = state.corp.servers.find(
+      (server) => server.id === "archives",
+    );
+    if (!archivesServer) throw new Error("Missing Archives server");
+    archivesServer.ice = [];
+    archivesServer.root = [];
+    const before = structuredClone(state);
+
+    state = applyLegal(
+      state,
+      "runner",
+      playEventAction(state, testSpinId, "archives"),
+    );
+    const optionId = getPlayerView(state, "runner").pendingChoice?.options.find(
+      (option) => option.value === programId,
+    )?.id;
+
+    state = applyChoice(state, "runner", String(optionId));
+
+    expect(state.run).toBeUndefined();
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.runner.rig.programs).not.toContain(programId);
+    expect(state.runner.stack).toContain(programId);
+    expect(state.cardInstances[programId]?.faceup).toBe(false);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneAction: "pro018_stack_install_run_cleanup",
+      installedProgramDefinitionId: JACKHAMMER,
+      returnedProgramDefinitionId: JACKHAMMER,
+      returnedToStack: true,
+      testSpinRunStarted: true,
+      serverId: "archives",
+    });
+    expectReplayStable(before, state);
+  });
 });

@@ -1318,16 +1318,18 @@ export function createHiddenZoneNonSearchRuntime(
       serverId,
       undefined,
       1,
-      { bonusRunNoClick: true, testSpinRun: true },
+      {
+        bonusRunNoClick: true,
+        testSpinRun: true,
+        testSpinTemporaryInstall: {
+          cardId: selectedId,
+          sourceCardId,
+          sourceDefinitionId,
+          installCostPenalty,
+        },
+      },
       legalAction,
     );
-    if (!state.run) throw new Error("Test Spin konnte keinen Run starten.");
-    state.run.testSpinTemporaryInstall = {
-      cardId: selectedId,
-      sourceCardId,
-      sourceDefinitionId,
-      installCostPenalty,
-    };
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       hiddenZoneBarrier: true,
