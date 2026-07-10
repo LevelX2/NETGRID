@@ -43,4 +43,4 @@ Das Gate `clearly_dominated_plan_choice` ist absichtlich konservativ. Es meldet 
 | P3    | abgeschlossen | dieser Paket-Commit     | 34 Mining-Tests; positive Broker-Backups ausgeschlossen, negative/deferred/redundante Duplikate weiter erkannt              |
 | P4    | abgeschlossen | zwei Paket-Commits      | 41 Mining-/Runner-Tests; Dominanzgate auf tatsächlich eingeplantes Trash-Budget begrenzt, 4×3-Seed-A/B-Panel definiert      |
 | P5    | abgeschlossen | Abschlussbericht-Commit | finaler 20×480-Lauf, gepaartes A/B-Panel und separater Regel-/Timing-Audit                                                  |
-| P6    | in Arbeit     | –                       | 179/1.598 Engine- und 275/1.750 KI-Tests grün; Typecheck/AI-Checks/Format grün, lokaler Merge ausstehend                    |
+| P6    | abgeschlossen | dieser Abschluss-Commit | 179/1.598 Engine- und 275/1.750 KI-Tests grün; Typecheck, AI-Checks und Format grün; lokaler Merge folgt unmittelbar        |
