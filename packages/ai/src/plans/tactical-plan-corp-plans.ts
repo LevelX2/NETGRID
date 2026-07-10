@@ -54,6 +54,7 @@ export function buildCorpTacticalPlans(
           stepId: `score_agenda:${action.actionId}`,
           kind: "score_agenda",
           desiredActionSemantics: ["score.agenda"],
+          actionCandidateIds: [action.actionId],
           rationale: ["agenda score action is already legal"],
         }),
         nextSteps: corpScoreWindowSequence(action.actionId),
@@ -148,6 +149,7 @@ export function buildCorpTacticalPlans(
             stepId: `install_or_prepare_agenda:${action.actionId}`,
             kind: "install_or_prepare_agenda",
             desiredActionSemantics: ["install.card", "scoreline"],
+            actionCandidateIds: [action.actionId],
             rationale: [
               "install scoreline card into an existing scoring remote",
             ],
@@ -199,6 +201,7 @@ export function buildCorpTacticalPlans(
           stepId: `rez_outer_ice:${action.actionId}`,
           kind: "rez_outer_ice",
           desiredActionSemantics: ["corp_window.rez"],
+          actionCandidateIds: [action.actionId],
           rationale: ["rez window can turn existing ICE into defense"],
         }),
         evidence: [
@@ -227,6 +230,7 @@ export function buildCorpTacticalPlans(
         currentStep: createPlanStep({
           stepId: `apply_punish_pressure:${action.actionId}`,
           kind: "apply_punish_pressure",
+          actionCandidateIds: [action.actionId],
           desiredActionSemantics: [
             "tag.source",
             "trace.source",
