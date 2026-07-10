@@ -3943,6 +3943,66 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     ).toBeGreaterThan(totalScore(installComponents));
   });
 
+  it("keeps unsafe delayed scoreline penalties active under a forced scoreline clock", () => {
+    const installAgenda = corpAction(
+      "install-forced-unsafe-agenda",
+      "install_card",
+      {
+        placement: "root",
+        serverId: "remote_1",
+        cardType: "agenda",
+      },
+      "agenda-1",
+    );
+    const input = corpInputWithDeckoutFlood(
+      6,
+      [agendaCard("agenda-1"), agendaCard("agenda-2"), agendaCard("agenda-3")],
+      3,
+      [installAgenda, corpAction("gain-credit", "gain_credit", {})],
+    );
+    const dependencies = {
+      ...testDependencies(),
+      corpActionIsScoreLine: (_input: AiDecisionInput, action: LegalAction) =>
+        action.actionId === installAgenda.actionId,
+      corpScoringWindowAssessment: (
+        _input: AiDecisionInput,
+        action: LegalAction,
+      ) =>
+        action.actionId === installAgenda.actionId
+          ? scoringWindow({
+              windowKind: "unsafe",
+              runnerCanContestBeforeScore: true,
+              runnerCanReachAccessBeforeScore: true,
+              agendaStealRelevantBeforeScore: true,
+              recommendedNextStep: "build_remote_ice",
+              evidence: ["test_forced_unsafe_scoreline"],
+            })
+          : undefined,
+    };
+
+    const components = semanticRuntimeCorpScoreComponents(
+      input,
+      installAgenda,
+      "basic_install",
+      dependencies,
+    );
+
+    expect(components).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_board_triage_alignment",
+          reason: expect.stringContaining(
+            "triage_primary:force_scoreline_clock",
+          ),
+        }),
+        expect.objectContaining({
+          key: "corp_unsafe_delayed_scoreline_exposure",
+          value: -4200,
+        }),
+      ]),
+    );
+  });
+
   it("marks draw economy operations as mismatches during deckout agenda flood", () => {
     const dayShift = corpAction(
       "play-day-shift",

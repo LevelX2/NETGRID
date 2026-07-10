@@ -10,6 +10,7 @@ import {
   endTheRunSubroutineCount,
 } from "../visible-run-analysis";
 import { semanticRuntimeCorpCentralPressureAssessment } from "./semantic-runtime-corp-central-pressure";
+import { semanticRuntimeCorpObservedRemoteReachability } from "./semantic-runtime-corp-remote-reachability";
 
 type CorpServerLike = {
   id: string;
@@ -150,12 +151,16 @@ export function semanticRuntimeCorpScoringWindowAssessment<
     scoreHorizon,
     scoreLineAction,
   );
+  const runnerExposureCredits = scoringWindowRunnerExposureCredits(
+    input,
+    runnerExposureCreditActions,
+  );
   const exposureAccess =
     runnerExposureCreditActions > 0
       ? scoringWindowAccessAssessment(
           input,
           projectedServer,
-          runnerExposureCreditActions,
+          runnerExposureCredits,
         )
       : access;
   const hasScorePressure =
@@ -269,6 +274,7 @@ export function semanticRuntimeCorpScoringWindowAssessment<
       `agenda_steal_severity:${agendaStealSeverity}`,
       `delayed_score_exposure_risk:${delayedExposureRisk}`,
       `runner_exposure_credit_actions:${runnerExposureCreditActions}`,
+      `runner_exposure_credits:${runnerExposureCredits}`,
       `pre_exposure_advancement_credit_reserve:${preExposureAdvancementCreditReserve}`,
       `missing_visible_installed_coverage:${access.missingVisibleBreakerCoverage}`,
       `corp_can_rez_relevant_ice:${rezBudget.corpCanRezRelevantIce}`,
@@ -622,6 +628,7 @@ function scoringWindowAccessAssessment(
   unmodeledIceCount: number;
   visibleRunnerIcebreakerCount: number;
   visibleRunnerContestCredits: number;
+  visibleBreakCost?: number;
   evidence: string[];
 } {
   const visibleRunnerBaseContestCredits =
@@ -651,6 +658,7 @@ function scoringWindowAccessAssessment(
       unmodeledIceCount: 0,
       visibleRunnerIcebreakerCount,
       visibleRunnerContestCredits,
+      visibleBreakCost: 0,
       evidence: [
         "remote_access:unprotected",
         `visible_runner_base_contest_credits:${visibleRunnerBaseContestCredits}`,
@@ -675,15 +683,20 @@ function scoringWindowAccessAssessment(
   ).length;
   const unmodeledBlocksVisibleAccess =
     unmodeledIceCount > 0 && visibleRunnerIcebreakerCount === 0;
+  const observedReachability = server
+    ? semanticRuntimeCorpObservedRemoteReachability(input, server.id, server)
+    : undefined;
   const runnerCanReachAccessNow =
-    !unmodeledBlocksVisibleAccess &&
-    assessment.canReachAccess &&
-    assessment.creditsAfterPath >= 0;
+    observedReachability?.applies === true ||
+    (!unmodeledBlocksVisibleAccess &&
+      assessment.canReachAccess &&
+      assessment.creditsAfterPath >= 0);
   const hazardPenalty = assessment.visibleIceHazardPenalty ?? 0;
   const agendaStealRelevantNow =
-    runnerCanReachAccessNow &&
-    hazardPenalty < 600 &&
-    assessment.creditsAfterPath >= 0;
+    observedReachability?.applies === true ||
+    (runnerCanReachAccessNow &&
+      hazardPenalty < 600 &&
+      assessment.creditsAfterPath >= 0);
   const missingVisibleBreakerCoverage =
     assessment.knownPathBlockedByMissingCoverage ||
     assessment.noAccessReason === "missing_breaker_coverage" ||
@@ -696,6 +709,9 @@ function scoringWindowAccessAssessment(
     unmodeledIceCount,
     visibleRunnerIcebreakerCount,
     visibleRunnerContestCredits,
+    ...(assessment.visibleBreakCost !== undefined
+      ? { visibleBreakCost: assessment.visibleBreakCost }
+      : {}),
     evidence: [
       `remote_access:assessed_known_ice:${assessment.assessedKnownIceCount}`,
       `remote_access:can_reach:${assessment.canReachAccess}`,
@@ -712,6 +728,7 @@ function scoringWindowAccessAssessment(
       `visible_runner_base_contest_credits:${visibleRunnerBaseContestCredits}`,
       `visible_runner_extra_exposure_credits:${visibleRunnerExtraCredits}`,
       `visible_runner_pre_run_credit_take_bonus:${visibleRunnerPreRunCreditBonus}`,
+      ...(observedReachability?.evidence ?? []),
     ],
   };
 }
@@ -729,6 +746,33 @@ function scoringWindowRunnerExposureCreditActions(
       ? Math.max(0, Math.floor(visibleClicks))
       : 4;
   return Math.max(3, availableRunnerClicks - 1);
+}
+
+function scoringWindowRunnerExposureCredits(
+  input: AiDecisionInput,
+  creditActions: number,
+): number {
+  if (creditActions <= 0) return 0;
+  const bestVisibleCreditAction = (input.playerView.opponent.rig ?? []).reduce(
+    (best, card) => {
+      if (card.known === false || !card.definitionId) return best;
+      const hint = AI_HINTS_BY_CARD.get(card.definitionId);
+      const amount = hint?.effects
+        ?.filter(
+          (effect) =>
+            effect.timing === "action" &&
+            effect.resource === "credits" &&
+            (effect.kind === "economy" || effect.kind === "action_economy"),
+        )
+        .reduce(
+          (maximum, effect) => Math.max(maximum, effect.amount ?? 0),
+          0,
+        );
+      return Math.max(best, amount ?? 0);
+    },
+    1,
+  );
+  return creditActions * bestVisibleCreditAction;
 }
 
 function scoringWindowRezBudget<TServer extends CorpServerLike>(
@@ -1157,7 +1201,12 @@ function scoringWindowDelayedScoreExposureRisk(params: {
   const richRunnerExposure =
     params.access.visibleRunnerContestCredits >= 8 ||
     params.exposureAccess.visibleRunnerContestCredits >= 10;
-  if (!richRunnerExposure) return false;
+  const coverageAcquisitionAffordable =
+    safetyDependsOnMissingCoverage &&
+    (params.exposureAccess.visibleBreakCost ?? 0) > 0 &&
+    params.exposureAccess.visibleRunnerContestCredits >=
+      (params.exposureAccess.visibleBreakCost ?? Number.POSITIVE_INFINITY);
+  if (!richRunnerExposure && !coverageAcquisitionAffordable) return false;
   const fullRunnerExposureBeforeScore =
     params.scoreHorizon === "next_turn" ||
     params.scoreHorizon === "slow" ||

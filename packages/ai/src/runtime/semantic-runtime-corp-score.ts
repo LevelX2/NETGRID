@@ -895,10 +895,7 @@ function corpUnsafeDelayedScorelineExposureComponent<TConsumer extends string>(
   if (!dependencies.corpActionIsScoreLine(input, action, roles)) {
     return undefined;
   }
-  if (
-    dependencies.corpAdvanceCompletesScore?.(input, action) === true ||
-    boardTriageState.primary === "force_scoreline_clock"
-  ) {
+  if (dependencies.corpAdvanceCompletesScore?.(input, action) === true) {
     return undefined;
   }
   const assessment = dependencies.corpScoringWindowAssessment?.(
@@ -1051,8 +1048,7 @@ function corpActiveRemoteAgendaAdvanceClockComponent<TConsumer extends string>(
     !closesBeforeRunner &&
     scoringWindow?.windowKind === "unsafe" &&
     scoringWindow.runnerCanReachAccessBeforeScore === true &&
-    scoringWindow.agendaStealRelevantBeforeScore === true &&
-    boardTriageState.primary !== "force_scoreline_clock"
+    scoringWindow.agendaStealRelevantBeforeScore === true
   ) {
     return {
       key: "corp_active_remote_agenda_unsafe_advance",

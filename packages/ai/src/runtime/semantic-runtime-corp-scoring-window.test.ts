@@ -163,6 +163,148 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
     expect(assessment?.evidence).toContain("delayed_score_exposure_risk:true");
   });
 
+  it("projects visible repeatable action economy across the runner exposure window", () => {
+    const agenda = agendaCard("agenda-in-hq");
+    const action = corpAction(
+      "install-agenda-against-action-economy",
+      "install_card",
+      {
+        cardType: "agenda",
+        placement: "root",
+        serverId: "remote_1",
+      },
+      agenda.instanceId,
+    );
+
+    const assessment = assess(
+      corpInput({
+        ownCredits: 5,
+        runnerCredits: 0,
+        runnerRig: [
+          simpleFracter("runner-fracter"),
+          newsgroupFilter("runner-action-economy"),
+        ],
+        hq: [agenda],
+        servers: protectedCentralServers([
+          remoteServer("remote_1", [
+            wallIce("remote-wall", { rezzed: true }),
+          ]),
+        ]),
+      }),
+      action,
+    );
+
+    expect(assessment?.evidence).toEqual(
+      expect.arrayContaining([
+        "runner_exposure_credit_actions:3",
+        "runner_exposure_credits:6",
+        "visible_runner_exposure_contest_credits:6",
+      ]),
+    );
+    expect(assessment).toMatchObject({
+      windowKind: "unsafe",
+      recommendedNextStep: "build_remote_ice",
+    });
+  });
+
+  it("keeps an observed successful remote access authoritative for an unchanged rezzed path", () => {
+    const agenda = agendaCard("game-ending-agenda", { agendaPoints: 3 });
+    const action = corpAction(
+      "install-after-observed-remote-access",
+      "install_card",
+      {
+        cardType: "agenda",
+        placement: "root",
+        serverId: "remote_1",
+      },
+      agenda.instanceId,
+    );
+
+    const assessment = assess(
+      corpInput({
+        ownCredits: 3,
+        runnerCredits: 0,
+        runnerAgendaPoints: 5,
+        runnerRig: [simpleFracter("runner-fracter")],
+        hq: [agenda],
+        eventTail: [
+          remoteEvent("evt-remote-access", "access_card", 20, {
+            actor: "runner",
+            serverLabel: "Remote 1",
+          }),
+        ],
+        servers: protectedCentralServers([
+          remoteServer("remote_1", [
+            wallIce("remote-wall-1", { rezzed: true }),
+            wallIce("remote-wall-2", { rezzed: true }),
+          ]),
+        ]),
+      }),
+      action,
+    );
+
+    expect(assessment).toMatchObject({
+      windowKind: "unsafe",
+      runnerCanReachAccessBeforeScore: true,
+      agendaStealRelevantBeforeScore: true,
+      agendaStealSeverity: "game_ending",
+      recommendedNextStep: "build_remote_ice",
+    });
+    expect(assessment?.evidence).toContain(
+      "exposure_corp_remote_observed_reachability:true",
+    );
+  });
+
+  it("invalidates observed remote reachability after new ICE changes the path", () => {
+    const agenda = agendaCard("agenda-in-hq");
+    const action = corpAction(
+      "install-after-remote-path-change",
+      "install_card",
+      {
+        cardType: "agenda",
+        placement: "root",
+        serverId: "remote_1",
+      },
+      agenda.instanceId,
+    );
+
+    const assessment = assess(
+      corpInput({
+        ownCredits: 8,
+        runnerCredits: 0,
+        runnerRig: [simpleFracter("runner-fracter")],
+        hq: [agenda],
+        eventTail: [
+          remoteEvent("evt-remote-access", "access_card", 20, {
+            actor: "runner",
+            serverLabel: "Remote 1",
+          }),
+          remoteEvent("evt-new-remote-ice", "install_card", 24, {
+            actor: "corp",
+            serverLabel: "Remote 1",
+            installPlacement: "ice",
+          }),
+        ],
+        servers: protectedCentralServers([
+          remoteServer("remote_1", [
+            wallIce("remote-wall-1", { rezzed: true }),
+            wallIce("remote-wall-2", { rezzed: true }),
+            wallIce("new-remote-wall", { rezzed: true }),
+          ]),
+        ]),
+      }),
+      action,
+    );
+
+    expect(assessment).toMatchObject({
+      runnerCanReachAccessBeforeScore: false,
+      agendaStealRelevantBeforeScore: false,
+    });
+    expect(assessment?.evidence).toContain(
+      "exposure_corp_remote_observed_reachability_invalidated:install_card",
+    );
+  });
+
   it("allows an unprotected remote install when remaining Corp clicks can close before runner exposure", () => {
     const agenda = agendaCard("agenda-in-hq", {
       advancementRequirement: 2,
@@ -1546,6 +1688,26 @@ function publicLabelEvent(
   };
 }
 
+function remoteEvent(
+  eventId: string,
+  actionType: "access_card" | "install_card",
+  stateVersionAfter: number,
+  payload: Record<string, unknown>,
+): AiDecisionInput["eventTail"][number] {
+  return {
+    eventId,
+    type: actionType,
+    stateVersionBefore: stateVersionAfter - 1,
+    stateVersionAfter,
+    stateHashAfter: `fnv1a:${eventId}`,
+    visibilityClass: "public",
+    publicPayload: {
+      actionType,
+      ...payload,
+    },
+  };
+}
+
 function protectedCentralServers(
   remotes: AiDecisionInput["playerView"]["servers"],
 ): AiDecisionInput["playerView"]["servers"] {
@@ -1838,6 +2000,17 @@ function simpleKiller(instanceId: string): VisibleCard {
     type: "program",
     definitionId: "simple_killer",
     subtypes: ["Icebreaker", "Killer"],
+    owner: "runner",
+  } as VisibleCard;
+}
+
+function newsgroupFilter(instanceId: string): VisibleCard {
+  return {
+    instanceId,
+    known: true,
+    type: "program",
+    title: "Newsgroup Filter",
+    definitionId: "onr_v1_045_newsgroup-filter",
     owner: "runner",
   } as VisibleCard;
 }
