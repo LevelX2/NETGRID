@@ -3267,6 +3267,61 @@ describe("tactical plan model", () => {
     );
   });
 
+  it("keeps a concrete Corp punish plan from mapping an unrelated scored economy ability", () => {
+    const installSetup = legalAction(
+      "install-setup",
+      "corp",
+      "install_card",
+      { placement: "root", serverId: "remote_1" },
+      { source: "setup-card" },
+    );
+    const marineEconomy = legalAction(
+      "marine-economy",
+      "corp",
+      "activated_card_ability",
+      {},
+      { source: "marine-arcology" },
+    );
+    const input = aiInput("corp", [installSetup, marineEconomy]);
+    const setupCandidate = {
+      ...candidateForAction(installSetup),
+      semanticActionType: "install.card",
+      actionTacticSignals: ["install.card", "net_damage"],
+    } satisfies ActionSemanticCandidate;
+    const economyCandidate = {
+      ...candidateForUntargetedAction(marineEconomy),
+      semanticActionType: "card_ability.unknown",
+      actionTacticSignals: [
+        "effect:scored_agenda_action",
+        "effect:economy",
+        "corp.score_progress",
+      ],
+    } satisfies ActionSemanticCandidate;
+
+    const result = evaluateTacticalPlans({
+      input,
+      candidates: [setupCandidate, economyCandidate],
+      tacticalGoals: [
+        {
+          goalId: "corp.intent.punish",
+          family: "tag_punish",
+          priority: 745,
+          urgency: "medium",
+          source: "strategic_intent",
+          evidence: ["test:setup_punish"],
+        },
+      ],
+    });
+
+    expect(result.selectedPlan).toMatchObject({
+      planId: "corp.apply_punish_pressure:install-setup",
+      type: "corp.apply_punish_pressure",
+    });
+    expect(
+      result.selectedMapping?.legalActions.map((action) => action.actionId),
+    ).toEqual(["install-setup"]);
+  });
+
   it("maps Corp scoreline installs into the score-window plan before punish pressure", () => {
     const installAgenda = legalAction(
       "install-scoreline-agenda",

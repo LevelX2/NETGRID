@@ -272,6 +272,15 @@ export function actionTypeMatchesStep(
         actionType === "trigger_ability" ||
         actionType === "activated_card_ability"
       );
+    case "install_finite_economy":
+      return actionType === "install_card";
+    case "rez_finite_economy":
+      return actionType === "rez_ice";
+    case "drain_finite_economy":
+      return (
+        actionType === "trigger_ability" ||
+        actionType === "activated_card_ability"
+      );
     case "run_target":
     case "probe_central":
       return (

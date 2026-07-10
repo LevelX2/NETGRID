@@ -167,6 +167,14 @@ export function semanticRuntimeCorpBoardTriage<TConsumer extends string>(
   );
   if (preScoreCentralProtection) return preScoreCentralProtection;
 
+  const openingCentralBaseline = openingCentralBaselineTriage(
+    input,
+    actions,
+    currentCredits,
+    dependencies,
+  );
+  if (openingCentralBaseline) return openingCentralBaseline;
+
   const forcedScorelinePressure = corpForcedScorelineClockPressure(
     input,
     actions,
@@ -357,6 +365,55 @@ export function semanticRuntimeCorpBoardTriage<TConsumer extends string>(
     severity: "low",
     currentCredits,
     evidence: ["corp_board_triage_primary:low_value"],
+  };
+}
+
+function openingCentralBaselineTriage<TConsumer extends string>(
+  input: AiDecisionInput,
+  actions: readonly ScoredLegalAction[],
+  currentCredits: number,
+  dependencies: CorpBoardTriageDependencies<TConsumer>,
+): CorpBoardTriage | undefined {
+  if (typeof input.actionNumber !== "number" || input.actionNumber > 8) {
+    return undefined;
+  }
+  const hasDevelopedRemote = input.playerView.servers.some(
+    (server) =>
+      server.id.startsWith("remote_") &&
+      (server.ice.length > 0 || server.root.length > 0),
+  );
+  if (hasDevelopedRemote) return undefined;
+  const hasCompetingEmptyRemoteDevelopment = actions.some(
+    (entry) =>
+      entry.action.type === "install_card" &&
+      (entry.serverId === "new_remote" ||
+        entry.serverId?.startsWith("remote_")) &&
+      entry.action.payload?.placement !== "root_agenda",
+  );
+  if (!hasCompetingEmptyRemoteDevelopment) return undefined;
+  const target = (["rd", "hq"] as const).find(
+    (serverId) =>
+      centralServerNeedsProtection(input, serverId) &&
+      concreteCentralProtectionActionExists(
+        input,
+        actions,
+        serverId,
+        dependencies,
+      ),
+  );
+  if (!target) return undefined;
+  return {
+    primary: target === "rd" ? "protect_rd" : "protect_hq",
+    severity: "high",
+    targetServerId: target,
+    currentCredits,
+    evidence: [
+      `corp_board_triage_primary:protect_${target}`,
+      "corp_board_triage_opening_central_baseline:true",
+      "corp_board_triage_opening_remote_development_deferred:true",
+      `corp_board_triage_action_number:${input.actionNumber}`,
+      `corp_board_triage_target:${target}`,
+    ],
   };
 }
 
@@ -784,8 +841,12 @@ function corpActiveScorelineClockPressure<TConsumer extends string>(
 ): ForcedScorelineClockPressure | undefined {
   const entries = actions.filter(
     (entry) =>
-      activeScorelineClockEntryIsPlayable(input, entry, actions, dependencies) &&
-      !corpPunishPrimaryShouldDeferSpeculativeScoreline(input, entry),
+      activeScorelineClockEntryIsPlayable(
+        input,
+        entry,
+        actions,
+        dependencies,
+      ) && !corpPunishPrimaryShouldDeferSpeculativeScoreline(input, entry),
   );
   const preferred = highestPriorityActiveScorelineEntry(entries);
   if (!preferred) return undefined;
@@ -807,11 +868,7 @@ function corpActiveScorelineClockPressure<TConsumer extends string>(
       targetServerId && targetServerId.startsWith("remote_")
         ? targetServerId
         : undefined,
-    requiredRezFloor: scorelineRequiredRezFloor(
-      input,
-      preferred,
-      dependencies,
-    ),
+    requiredRezFloor: scorelineRequiredRezFloor(input, preferred, dependencies),
     hqAgendaCount: input.playerView.own.gripOrHq.filter(
       corpTriageVisibleCardIsAgenda,
     ).length,
@@ -943,9 +1000,7 @@ function remoteServerHasVisibleScoreline(
     input.playerView.servers
       .find((server) => server.id === serverId)
       ?.root.some(
-        (card) =>
-          card.known !== false &&
-          corpTriageVisibleCardIsAgenda(card),
+        (card) => card.known !== false && corpTriageVisibleCardIsAgenda(card),
       ) === true
   );
 }
@@ -1127,12 +1182,12 @@ function corpHqAgendaFloodScorelinePressure<TConsumer extends string>(
         ? [`corp_forced_scoreline_rez_floor:${requiredRezFloor}`]
         : []),
       ...(preferred &&
-        scorelineEntryIsRelativeHqAgendaRelief(
-          input,
-          preferred,
-          actions,
-          dependencies,
-        )
+      scorelineEntryIsRelativeHqAgendaRelief(
+        input,
+        preferred,
+        actions,
+        dependencies,
+      )
         ? ["corp_hq_agenda_relative_remote_relief:true"]
         : []),
       ...(emergencyRemoteConversion
@@ -1264,7 +1319,10 @@ function scorelineEntryIsGameEndingAccessGift(
   if (!assessment) return false;
   if (assessment.scoreHorizon === "immediate") return false;
   if (assessment.agendaStealSeverity !== "game_ending") return false;
-  if (!assessment.runnerCanReachAccessNow || !assessment.agendaStealRelevantNow) {
+  if (
+    !assessment.runnerCanReachAccessNow ||
+    !assessment.agendaStealRelevantNow
+  ) {
     return false;
   }
   return (
@@ -1461,11 +1519,7 @@ function actionKeepsSideSafeSameTurnScoreCloseoutForAction<
   action: LegalAction,
   dependencies: CorpBoardTriageDependencies<TConsumer>,
 ): boolean {
-  return actionKeepsSameTurnScoreCloseoutReachable(
-    input,
-    action,
-    dependencies,
-  );
+  return actionKeepsSameTurnScoreCloseoutReachable(input, action, dependencies);
 }
 
 function scoreNowCentralProtectionInterruptTriage<TConsumer extends string>(
@@ -1511,8 +1565,7 @@ function scoreNowCentralProtectionInterruptTriage<TConsumer extends string>(
     currentCredits + Math.max(0, input.playerView.own.clicks - 1) >=
     rdProtectionFloor.requiredCredits;
   const afterCloseoutCanProtect =
-    closeout.remainingCredits +
-      Math.max(0, closeout.remainingClicks - 1) >=
+    closeout.remainingCredits + Math.max(0, closeout.remainingClicks - 1) >=
     rdProtectionFloor.requiredCredits;
   if (!currentPlanCanProtect || afterCloseoutCanProtect) return undefined;
 
@@ -1575,7 +1628,8 @@ function sameTurnScoreCloseoutResourceState<TConsumer extends string>(
   if (action.type === "score_agenda") {
     return {
       agendaPoints,
-      remainingCredits: input.playerView.own.credits - dependencies.actionCreditCost(action),
+      remainingCredits:
+        input.playerView.own.credits - dependencies.actionCreditCost(action),
       remainingClicks:
         input.playerView.own.clicks -
         Math.max(1, corpTriageActionClickCost(action)),
@@ -1635,7 +1689,12 @@ function fundableCentralProtectionFloor<TConsumer extends string>(
         entry.action.payload?.placement === "ice",
     )
     .map((entry) =>
-      fundableCentralProtectionCandidate(input, entry.action, serverId, dependencies),
+      fundableCentralProtectionCandidate(
+        input,
+        entry.action,
+        serverId,
+        dependencies,
+      ),
     )
     .filter(
       (
@@ -1916,10 +1975,12 @@ function scorelineRequiredRezFloorFromScoringWindowEvidence<
     assessment.corpCanRezRelevantIce === false
       ? minRelevantRezCost
       : assessment.corpCanRezFullPathWithDynamicReserve === false
-        ? fullPathWithDynamicReserve ?? fullPathRezCost ?? minRelevantRezCost
+        ? (fullPathWithDynamicReserve ?? fullPathRezCost ?? minRelevantRezCost)
         : assessment.recommendedNextStep === "gain_credit"
-          ? fullPathWithDynamicReserve ?? fullPathRezCost ?? minRelevantRezCost
-        : minRelevantRezCost;
+          ? (fullPathWithDynamicReserve ??
+            fullPathRezCost ??
+            minRelevantRezCost)
+          : minRelevantRezCost;
   if (floor === undefined || floor <= 0) return undefined;
   return Math.max(
     input.playerView.own.credits + 1,
@@ -1988,11 +2049,12 @@ function existingScoreRemoteNeedsFundingBeforeProtection(
     explicitReserveFloor === undefined &&
     assessment.corpCanRezFullPathWithDynamicReserve === false &&
     input.playerView.own.credits <= 2;
-  const requiredEvidenceFloor = scorelineRequiredRezFloorFromScoringWindowEvidence(
-    input,
-    entry,
-    dependencies,
-  );
+  const requiredEvidenceFloor =
+    scorelineRequiredRezFloorFromScoringWindowEvidence(
+      input,
+      entry,
+      dependencies,
+    );
   const belowFullPathEvidenceFloor =
     explicitReserveFloor === undefined &&
     requiredEvidenceFloor !== undefined &&
@@ -2060,7 +2122,9 @@ function newRemoteScoreRemoteWouldSprawl(
   input: AiDecisionInput,
   entry: ScoredLegalAction,
 ): boolean {
-  return entry.serverId === "new_remote" && existingScoreRemoteOutletExists(input);
+  return (
+    entry.serverId === "new_remote" && existingScoreRemoteOutletExists(input)
+  );
 }
 
 function scoringWindowCanUseMissingCoverageScoreWindow(
@@ -2110,9 +2174,7 @@ function existingScoreRemoteOutletExists(input: AiDecisionInput): boolean {
     (server) =>
       server.id.startsWith("remote_") &&
       (server.root.some(
-        (card) =>
-          card.known !== false &&
-          corpTriageVisibleCardIsAgenda(card),
+        (card) => card.known !== false && corpTriageVisibleCardIsAgenda(card),
       ) ||
         (server.root.length === 0 && server.ice.length > 0)),
   );
@@ -2324,10 +2386,10 @@ function corpTriageIsPunishPrimary(input: AiDecisionInput): boolean {
   const intent = corpTriageStrategicIntent(input);
   return (
     intent?.primaryWinIntent === "corp.punish_runner" ||
-    (intent?.punishPlan?.length ?? 0) > 0 &&
+    ((intent?.punishPlan?.length ?? 0) > 0 &&
       intent?.scorePlan?.some((plan) =>
         ["corp.rush_scoreline", "corp.fast_advance_scoreline"].includes(plan),
-      ) !== true
+      ) !== true)
   );
 }
 
@@ -2400,7 +2462,12 @@ function preScoreCentralProtectionTriage<TConsumer extends string>(
   if (
     hqAgendaCount <= 0 ||
     !centralServerNeedsProtection(input, "hq") ||
-    !concreteCentralProtectionActionExists(input, actions, "hq", dependencies) ||
+    !concreteCentralProtectionActionExists(
+      input,
+      actions,
+      "hq",
+      dependencies,
+    ) ||
     !unprotectedHqAgendaExposureRequiresPreScoreProtection(
       pressureInput,
       hqAgendaCount,
@@ -2801,10 +2868,7 @@ function actionPushesConcreteAgendaScoreline<TConsumer extends string>(
 ): boolean {
   if (
     action.type !== "advance_card" &&
-    !(
-      action.type === "install_card" &&
-      action.payload?.placement !== "ice"
-    )
+    !(action.type === "install_card" && action.payload?.placement !== "ice")
   ) {
     return false;
   }
@@ -3253,8 +3317,8 @@ function corpBoardTriagePositiveInteger(token: string | undefined): number {
 }
 
 function legalEconomyActionExists(input: AiDecisionInput): boolean {
-  return corpLegalActions(input).some(
-    (action) => actionProvidesCredits(action),
+  return corpLegalActions(input).some((action) =>
+    actionProvidesCredits(action),
   );
 }
 

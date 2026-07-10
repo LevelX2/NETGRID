@@ -22,8 +22,12 @@ import type {
   TacticalPlan,
   TacticalPlanBuildContext,
 } from "./tactical-plan-types";
-import { visibleSourceServerId } from "./tactical-plan-visible-cards";
+import {
+  visibleCardForAction,
+  visibleSourceServerId,
+} from "./tactical-plan-visible-cards";
 import { buildCorpScoreConversionPlans } from "./tactical-plan-corp-score-conversion-plan";
+import { buildCorpFiniteEconomyPlans } from "./tactical-plan-corp-finite-economy";
 
 export function buildCorpTacticalPlans(
   context: TacticalPlanBuildContext,
@@ -38,6 +42,7 @@ export function buildCorpTacticalPlans(
     corpGoalForFamily(context, "tag_punish") ??
     corpGoalForFamily(context, "damage_pressure");
   plans.push(...buildCorpScoreConversionPlans(context, scorelineGoal));
+  plans.push(...buildCorpFiniteEconomyPlans(context));
   for (const action of input.legalActions.filter(
     (candidate) => candidate.type === "score_agenda",
   )) {
@@ -54,6 +59,7 @@ export function buildCorpTacticalPlans(
           stepId: `score_agenda:${action.actionId}`,
           kind: "score_agenda",
           desiredActionSemantics: ["score.agenda"],
+          actionCandidateIds: [action.actionId],
           rationale: ["agenda score action is already legal"],
         }),
         nextSteps: corpScoreWindowSequence(action.actionId),
@@ -120,11 +126,20 @@ export function buildCorpTacticalPlans(
       }),
     );
   }
-  const scorelineInstallActionIds = new Set(
-    (context.candidates ?? [])
+  const scorelineInstallActionIds = new Set([
+    ...(context.candidates ?? [])
       .filter(corpCandidateIsScorelineInstall)
       .map((candidate) => candidate.actionId),
-  );
+    ...input.legalActions
+      .filter(
+        (action) =>
+          action.side === "corp" &&
+          action.type === "install_card" &&
+          action.payload?.placement !== "ice" &&
+          visibleCardForAction(input.playerView, action)?.type === "agenda",
+      )
+      .map((action) => action.actionId),
+  ]);
   for (const action of input.legalActions.filter(
     (candidate) =>
       candidate.type === "install_card" &&
@@ -148,6 +163,7 @@ export function buildCorpTacticalPlans(
             stepId: `install_or_prepare_agenda:${action.actionId}`,
             kind: "install_or_prepare_agenda",
             desiredActionSemantics: ["install.card", "scoreline"],
+            actionCandidateIds: [action.actionId],
             rationale: [
               "install scoreline card into an existing scoring remote",
             ],
@@ -161,7 +177,7 @@ export function buildCorpTacticalPlans(
         priority:
           (remoteIsProtected(input.playerView, serverId) ? 940 : 780) +
           strategicBoost,
-        horizonTurns: 1,
+        horizonTurns: 3,
         target: { kind: "server", id: serverId },
         blockers,
         currentStep,
@@ -181,7 +197,9 @@ export function buildCorpTacticalPlans(
     );
   }
   for (const action of input.legalActions.filter(
-    (candidate) => candidate.type === "rez_ice",
+    (candidate) =>
+      candidate.type === "rez_ice" &&
+      visibleCardForAction(input.playerView, candidate)?.type === "ice",
   )) {
     const serverId =
       actionServerId(action) ?? visibleSourceServerId(input.playerView, action);
@@ -199,6 +217,7 @@ export function buildCorpTacticalPlans(
           stepId: `rez_outer_ice:${action.actionId}`,
           kind: "rez_outer_ice",
           desiredActionSemantics: ["corp_window.rez"],
+          actionCandidateIds: [action.actionId],
           rationale: ["rez window can turn existing ICE into defense"],
         }),
         evidence: [
@@ -227,6 +246,7 @@ export function buildCorpTacticalPlans(
         currentStep: createPlanStep({
           stepId: `apply_punish_pressure:${action.actionId}`,
           kind: "apply_punish_pressure",
+          actionCandidateIds: [action.actionId],
           desiredActionSemantics: [
             "tag.source",
             "trace.source",

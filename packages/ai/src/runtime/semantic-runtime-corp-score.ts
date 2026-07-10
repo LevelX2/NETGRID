@@ -18,6 +18,7 @@ import {
 } from "./corp-ice-placement/corp-ice-placement";
 import { corpUpgradeInstallPlacementComponent } from "./corp-upgrade-placement";
 import { visibleCardDefinition } from "./card-definition-lookup";
+import { createAiHintsByCard } from "../ai-hints";
 import { rolesMatch } from "./role-match";
 import type { CorpScoringWindowAssessment } from "./semantic-runtime-corp-scoring-window";
 import type { CorpScorelineWindowAssessment } from "./corp-scoreline/semantic-runtime-corp-scoreline-assessment";
@@ -58,6 +59,7 @@ const CORP_IMMEDIATE_ECONOMY_MIN_ACTION_VALUE = 2;
 const CORP_IMMEDIATE_ECONOMY_STRONG_ACTION_VALUE = 3;
 const CORP_RESERVE_SCORE_NORMALIZATION_DIVISOR = 50;
 const CORP_SCORE_NOW_TEMPO_BLOCKING_REMOTE_ICE_SCORE = 1500;
+const AI_HINTS_BY_CARD = createAiHintsByCard();
 
 export type SemanticRuntimeCorpScoreDependencies<TConsumer extends string> = {
   actionCreditCost: (action: LegalAction) => number;
@@ -178,6 +180,13 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
     dependencies,
   );
   if (gameEndingExposure) components.push(gameEndingExposure);
+  const unsafeDelayedExposure = corpUnsafeDelayedScorelineExposureComponent(
+    input,
+    action,
+    dependencies,
+    boardTriageState,
+  );
+  if (unsafeDelayedExposure) components.push(unsafeDelayedExposure);
   const scorelineFunding = corpScorelineFundingAssessmentComponent(
     input,
     action,
@@ -261,12 +270,18 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
       value: credits >= rezCost ? 750 : -1200,
       reason: `credits:${credits};cost:${rezCost}`,
     });
-    const effectiveDefense = semanticRuntimeCorpEffectiveDefenseContext(
-      input,
-      action,
-      actionSemanticCandidate,
-      { actionCreditCost: dependencies.actionCreditCost },
-    );
+    const sourceCard = visibleSourceCardForAction(input, action);
+    const rootRezTiming = corpRootRezTimingComponent(input, action, sourceCard);
+    if (rootRezTiming) components.push(rootRezTiming);
+    const effectiveDefense =
+      !sourceCard || sourceCard.type === "ice"
+        ? semanticRuntimeCorpEffectiveDefenseContext(
+            input,
+            action,
+            actionSemanticCandidate,
+            { actionCreditCost: dependencies.actionCreditCost },
+          )
+        : undefined;
     if (
       effectiveDefense?.hasImmediateStopPotential ||
       effectiveDefense?.hasMeaningfulTaxOrDamage
@@ -867,6 +882,60 @@ function corpGameEndingScorelineExposurePenaltyComponent<
   };
 }
 
+function corpUnsafeDelayedScorelineExposureComponent<TConsumer extends string>(
+  input: AiDecisionInput,
+  action: LegalAction,
+  dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
+  boardTriageState: ReturnType<typeof semanticRuntimeCorpBoardTriage>,
+): AiDecisionScoreComponent | undefined {
+  if (action.type !== "install_card" && action.type !== "advance_card") {
+    return undefined;
+  }
+  const roles = dependencies.rolesForAction(input, action);
+  if (!dependencies.corpActionIsScoreLine(input, action, roles)) {
+    return undefined;
+  }
+  if (
+    dependencies.corpAdvanceCompletesScore?.(input, action) === true ||
+    boardTriageState.primary === "force_scoreline_clock"
+  ) {
+    return undefined;
+  }
+  const assessment = dependencies.corpScoringWindowAssessment?.(
+    input,
+    action,
+    roles,
+  );
+  if (
+    !assessment ||
+    assessment.scoreHorizon === "immediate" ||
+    assessment.windowKind !== "unsafe"
+  ) {
+    return undefined;
+  }
+  if (
+    !assessment.runnerCanReachAccessBeforeScore ||
+    !assessment.agendaStealRelevantBeforeScore
+  ) {
+    return undefined;
+  }
+  return {
+    key: "corp_unsafe_delayed_scoreline_exposure",
+    label: "Unsichere verzögerte Scoreline",
+    value: -4200,
+    reason: [
+      "unsafe_delayed_scoreline:true",
+      `action:${action.type}`,
+      `server:${assessment.serverId}`,
+      `score_horizon:${assessment.scoreHorizon}`,
+      `recommended_next_step:${assessment.recommendedNextStep}`,
+      `runner_can_reach_access_before_score:${assessment.runnerCanReachAccessBeforeScore}`,
+      `agenda_steal_relevant_before_score:${assessment.agendaStealRelevantBeforeScore}`,
+      ...assessment.evidence,
+    ].join("|"),
+  };
+}
+
 function corpScorelineFundingAssessmentComponent<TConsumer extends string>(
   input: AiDecisionInput,
   action: LegalAction,
@@ -978,6 +1047,29 @@ function corpActiveRemoteAgendaAdvanceClockComponent<TConsumer extends string>(
   const closesBeforeRunner =
     dependencies.corpAdvanceCompletesScore?.(input, action) === true ||
     scoringWindow?.scoreHorizon === "immediate";
+  if (
+    !closesBeforeRunner &&
+    scoringWindow?.windowKind === "unsafe" &&
+    scoringWindow.runnerCanReachAccessBeforeScore === true &&
+    scoringWindow.agendaStealRelevantBeforeScore === true &&
+    boardTriageState.primary !== "force_scoreline_clock"
+  ) {
+    return {
+      key: "corp_active_remote_agenda_unsafe_advance",
+      label: "Unsichere Remote-Agenda",
+      value: -5200,
+      reason: [
+        "active_remote_agenda:true",
+        "unsafe_delayed_advance:true",
+        `server:${state.serverId}`,
+        `card:${state.cardId}`,
+        `score_horizon:${scoringWindow.scoreHorizon}`,
+        `recommended_next_step:${scoringWindow.recommendedNextStep}`,
+        ...scoringWindow.evidence,
+        ...state.evidence,
+      ].join("|"),
+    };
+  }
   const scoringWindowNeedsFunding =
     scoringWindow?.recommendedNextStep === "gain_credit" ||
     scoringWindow?.corpCanRezRelevantIce === false ||
@@ -2310,20 +2402,107 @@ function corpDownstreamRezReserveAssessment<TConsumer extends string>(
   const postRezCredits = input.playerView.own.credits - rezCost;
   if (postRezCredits >= innerRezFloor) return undefined;
   const isCentral = location.server.id === "hq" || location.server.id === "rd";
-  const rawValue = isCentral ? -1500 : -1000;
-  return corpReserveScoreComponent(
-    "corp_downstream_rez_floor_preservation",
-    "Innere ICE-Reserve",
-    rawValue,
-    [
+  const value = isCentral ? -1800 : -1300;
+  return {
+    key: "corp_downstream_rez_floor_preservation",
+    label: "Innere ICE-Reserve",
+    value,
+    reason: [
       "downstream_rez_floor:blocked_after_current_rez",
       `server:${location.server.id}`,
       `post_rez_credits:${postRezCredits}`,
       `inner_rez_floor:${innerRezFloor}`,
       `visible_breaker_coverage:${effectiveDefense.visibleBreakerCoverage}`,
       `zero_effect_risk:${effectiveDefense.zeroEffectRisk}`,
-    ],
+      `downstream_reserve_value:${value}`,
+    ].join("|"),
+  };
+}
+
+function corpRootRezTimingComponent(
+  input: AiDecisionInput,
+  action: LegalAction,
+  sourceCard: VisibleCard | undefined,
+): AiDecisionScoreComponent | undefined {
+  if (!sourceCard || sourceCard.type === "ice" || !sourceCard.definitionId) {
+    return undefined;
+  }
+  const location = input.playerView.servers.find((server) =>
+    server.root.some((card) => card.instanceId === sourceCard.instanceId),
   );
+  if (!location) return undefined;
+  const hint = AI_HINTS_BY_CARD.get(sourceCard.definitionId);
+  const effects = hint?.effects ?? [];
+  const accessAmbushResolvesUnrezzed =
+    hint?.roles.includes("ambush") === true &&
+    effects.some(
+      (effect) => effect.timing === "on_access" && effect.kind === "damage",
+    ) &&
+    hint.conditions?.some(
+      (condition) => condition.kind === "requires_accessed_card",
+    ) === true;
+  if (accessAmbushResolvesUnrezzed) {
+    return {
+      key: "corp_root_rez_unnecessary_access_ambush",
+      label: "Access-Ambush verdeckt lassen",
+      value: -5000,
+      reason: [
+        "root_rez_timing:access_ambush_resolves_unrezzed",
+        `card:${sourceCard.instanceId}`,
+        `server:${location.id}`,
+        `timing:${input.playerView.timingPoint}`,
+      ].join("|"),
+    };
+  }
+  const runRelevant =
+    effects.some((effect) =>
+      ["on_access", "during_run", "successful_run"].includes(effect.timing),
+    ) || hint?.remoteRole?.kind === "agenda_steal_tax";
+  if (!runRelevant) return undefined;
+  const run = input.playerView.run;
+  if (!run || run.attackedServerId !== location.id) {
+    return {
+      key: "corp_root_rez_defer_until_relevant_run",
+      label: "Root-Rez vertagen",
+      value: -2200,
+      reason: [
+        "root_rez_timing:no_relevant_run",
+        `card:${sourceCard.instanceId}`,
+        `server:${location.id}`,
+      ].join("|"),
+    };
+  }
+  const position = run.position;
+  const beforeLastIce =
+    position?.kind === "ice" &&
+    typeof position.iceIndex === "number" &&
+    position.iceIndex > 0;
+  if (beforeLastIce) {
+    return {
+      key: "corp_root_rez_defer_until_last_window",
+      label: "Root-Rez bis zum letzten Fenster vertagen",
+      value: -3600,
+      reason: [
+        "root_rez_timing:before_last_ice",
+        `card:${sourceCard.instanceId}`,
+        `server:${location.id}`,
+        `ice_index:${position.iceIndex}`,
+        `timing:${input.playerView.timingPoint}`,
+      ].join("|"),
+    };
+  }
+  return {
+    key: "corp_root_rez_latest_relevant_window",
+    label: "Root-Rez im letzten relevanten Fenster",
+    value: 1600,
+    reason: [
+      "root_rez_timing:latest_relevant_window",
+      `card:${sourceCard.instanceId}`,
+      `server:${location.id}`,
+      `run_phase:${run.phase}`,
+      `timing:${input.playerView.timingPoint}`,
+    ].join("|"),
+  };
 }
 
 function visibleActionSourceId(action: LegalAction): string | undefined {

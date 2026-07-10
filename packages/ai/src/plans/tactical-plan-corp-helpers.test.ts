@@ -71,6 +71,15 @@ describe("corpPunishCandidates", () => {
 });
 
 describe("corpScoreWindowBlockers", () => {
+  it("binds an unblocked advance step to the concrete advance action", () => {
+    const advance = corpAction("advance-specific-agenda", "remote-agenda");
+
+    expect(corpScoreWindowCurrentStep(advance, [])).toMatchObject({
+      kind: "advance_score_card",
+      actionCandidateIds: [advance.actionId],
+    });
+  });
+
   it("blocks non-closing scoreline advances when the scoreline window needs funding", () => {
     const agenda = corpCard("remote-agenda", {
       advancementRequirement: 5,

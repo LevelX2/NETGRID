@@ -4,6 +4,9 @@ import {
   type LegalAction,
   type VisibleCard,
 } from "@netgrid/shared";
+import { createAiHintsByCard, RUNTIME_CARDS } from "../ai-hints";
+
+const AI_HINTS_BY_CARD = createAiHintsByCard();
 
 export type CorpScoreConversionStepKind =
   | "gain_action_capacity"
@@ -50,9 +53,13 @@ type ScoreTarget = {
 
 type ConversionCapability = {
   kind: "place_advancement" | "move_advancement";
-  action: LegalAction;
+  action?: LegalAction;
+  capabilityId: string;
   amount: number;
   sourceCardId?: string;
+  clickCost: number;
+  creditCost: number;
+  projected: boolean;
 };
 
 type ActionCapacity = {
@@ -218,9 +225,9 @@ function visitCapabilityCombinations(params: {
   visitCapabilityCombinations({ ...params, index: params.index + 1 });
 
   const capability = params.capabilities[params.index]!;
-  if (params.usedActionIds.has(capability.action.actionId)) return;
-  const clickCost = actionCost(capability.action, "clicks");
-  const creditCost = actionCost(capability.action, "credits");
+  if (params.usedActionIds.has(capability.capabilityId)) return;
+  const clickCost = capability.clickCost;
+  const creditCost = capability.creditCost;
   if (clickCost > params.clicks || creditCost > params.credits) return;
   let availableAmount = capability.amount;
   const nextSourceCounters = { ...params.sourceCounters };
@@ -241,7 +248,7 @@ function visitCapabilityCombinations(params: {
       (nextSourceCounters[capability.sourceCardId] ?? 0) - appliedAmount;
   }
   const usedActionIds = new Set(params.usedActionIds);
-  usedActionIds.add(capability.action.actionId);
+  usedActionIds.add(capability.capabilityId);
   visitCapabilityCombinations({
     ...params,
     index: params.index + 1,
@@ -289,59 +296,134 @@ function conversionCapabilities(
   input: AiDecisionInput,
   target: ScoreTarget,
 ): ConversionCapability[] {
-  return input.legalActions.flatMap<ConversionCapability>((action) => {
-    if (action.side !== "corp") return [];
-    const capability = stringPayload(action, "scoreConversionCapability");
-    if (capability === "place_advancement") {
-      const amount = numberPayload(action, "scoreConversionAdvancementAmount");
-      const mode = stringPayload(action, "scoreConversionAdvancementMode");
-      if (!amount || amount <= 0) return [];
-      return [
-        {
-          kind: "place_advancement" as const,
+  const legalCapabilities = input.legalActions.flatMap<ConversionCapability>(
+    (action) => {
+      if (action.side !== "corp") return [];
+      const capability = stringPayload(action, "scoreConversionCapability");
+      if (capability === "place_advancement") {
+        const amount = numberPayload(
           action,
-          amount: mode === "up_to_distinct_targets_one_each" ? 1 : amount,
-        },
-      ];
-    }
-    if (capability !== "move_advancement") return [];
-    const sourceMode = stringPayload(action, "scoreConversionSourceMode");
-    const maximum = action.payload?.scoreConversionAdvancementMaximum;
-    if (sourceMode === "source_card") {
-      const sourceCardId = actionCardId(action);
-      const source = sourceCardId
-        ? visibleOwnCard(input, sourceCardId)
-        : undefined;
-      const amount = Math.min(
+          "scoreConversionAdvancementAmount",
+        );
+        const mode = stringPayload(action, "scoreConversionAdvancementMode");
+        if (!amount || amount <= 0) return [];
+        return [
+          {
+            kind: "place_advancement" as const,
+            action,
+            capabilityId: action.actionId,
+            amount: mode === "up_to_distinct_targets_one_each" ? 1 : amount,
+            clickCost: actionCost(action, "clicks"),
+            creditCost: actionCost(action, "credits"),
+            projected: false,
+          },
+        ];
+      }
+      if (capability !== "move_advancement") return [];
+      const sourceMode = stringPayload(action, "scoreConversionSourceMode");
+      const maximum = action.payload?.scoreConversionAdvancementMaximum;
+      if (sourceMode === "source_card") {
+        const sourceCardId = actionCardId(action);
+        const source = sourceCardId
+          ? visibleOwnCard(input, sourceCardId)
+          : undefined;
+        const amount = Math.min(
+          maximum === "all"
+            ? Number.MAX_SAFE_INTEGER
+            : (positiveInteger(maximum) ?? 0),
+          source?.advancementCounters ?? 0,
+        );
+        return sourceCardId &&
+          sourceCardId !== target.card.instanceId &&
+          amount > 0
+          ? [
+              {
+                kind: "move_advancement" as const,
+                action,
+                capabilityId: action.actionId,
+                amount,
+                sourceCardId,
+                clickCost: actionCost(action, "clicks"),
+                creditCost: actionCost(action, "credits"),
+                projected: false,
+              },
+            ]
+          : [];
+      }
+      if (sourceMode !== "chosen_card") return [];
+      const cap =
         maximum === "all"
           ? Number.MAX_SAFE_INTEGER
-          : (positiveInteger(maximum) ?? 0),
-        source?.advancementCounters ?? 0,
-      );
-      return sourceCardId &&
-        sourceCardId !== target.card.instanceId &&
-        amount > 0
-        ? [{ kind: "move_advancement" as const, action, amount, sourceCardId }]
-        : [];
-    }
-    if (sourceMode !== "chosen_card") return [];
-    const cap =
-      maximum === "all"
-        ? Number.MAX_SAFE_INTEGER
-        : (positiveInteger(maximum) ?? 0);
-    return visibleInstalledCorpCards(input)
-      .filter(
-        (card) =>
-          card.instanceId !== target.card.instanceId &&
-          (card.advancementCounters ?? 0) > 0,
+          : (positiveInteger(maximum) ?? 0);
+      return visibleInstalledCorpCards(input)
+        .filter(
+          (card) =>
+            card.instanceId !== target.card.instanceId &&
+            (card.advancementCounters ?? 0) > 0,
+        )
+        .map((source) => ({
+          kind: "move_advancement" as const,
+          action,
+          capabilityId: `${action.actionId}:${source.instanceId}`,
+          amount: Math.min(cap, source.advancementCounters ?? 0),
+          sourceCardId: source.instanceId,
+          clickCost: actionCost(action, "clicks"),
+          creditCost: actionCost(action, "credits"),
+          projected: false,
+        }));
+    },
+  );
+  if (!target.installAction) return legalCapabilities;
+
+  const legalSourceIds = new Set(
+    legalCapabilities
+      .map((capability) => capability.sourceCardId)
+      .filter((cardId): cardId is string => cardId !== undefined),
+  );
+  const projectedCapabilities = input.playerView.own.gripOrHq
+    .filter(
+      (card) =>
+        card.known !== false &&
+        card.type === "operation" &&
+        card.instanceId !== target.card.instanceId &&
+        !legalSourceIds.has(card.instanceId),
+    )
+    .flatMap<ConversionCapability>((card) => {
+      const hint = card.definitionId
+        ? AI_HINTS_BY_CARD.get(card.definitionId)
+        : undefined;
+      if (
+        !hint ||
+        hint.aiSupportStatus !== "ai_supported" ||
+        hint.quality?.hintReviewed !== true
       )
-      .map((source) => ({
-        kind: "move_advancement" as const,
-        action,
-        amount: Math.min(cap, source.advancementCounters ?? 0),
-        sourceCardId: source.instanceId,
-      }));
-  });
+        return [];
+      const amount = Math.max(
+        0,
+        ...(hint.effects ?? [])
+          .filter(
+            (effect) =>
+              effect.timing === "action" &&
+              effect.resource === "advancement_counters" &&
+              (effect.kind === "advance_burst" ||
+                effect.kind === "score_acceleration"),
+          )
+          .map((effect) => effect.amount ?? 0),
+      );
+      if (amount <= 0) return [];
+      return [
+        {
+          kind: "place_advancement",
+          capabilityId: `projected:${card.instanceId}:place_advancement`,
+          amount,
+          sourceCardId: card.instanceId,
+          clickCost: 1,
+          creditCost: visibleCardCost(card),
+          projected: true,
+        },
+      ];
+    });
+  return [...legalCapabilities, ...projectedCapabilities];
 }
 
 function actionCapacityCapabilities(input: AiDecisionInput): ActionCapacity[] {
@@ -522,20 +604,24 @@ function conversionStep(
   amount: number,
 ): CorpScoreConversionStep {
   const sourceCardId =
-    capability.sourceCardId ?? actionCardId(capability.action);
+    capability.sourceCardId ??
+    (capability.action ? actionCardId(capability.action) : undefined);
   return {
     kind: capability.kind,
-    actionId: capability.action.actionId,
+    ...(capability.action ? { actionId: capability.action.actionId } : {}),
     ...(sourceCardId ? { sourceCardId } : {}),
     targetCardId: target.card.instanceId,
     targetServerId: target.serverId,
     advancementAmount: amount,
-    clickCost: actionCost(capability.action, "clicks"),
-    creditCost: actionCost(capability.action, "credits"),
+    clickCost: capability.clickCost,
+    creditCost: capability.creditCost,
     generatedClicks: 0,
     evidence: [
       `score_conversion:${capability.kind}`,
       `score_conversion_advancement_amount:${amount}`,
+      ...(capability.projected
+        ? ["score_conversion:projected_from_visible_hand"]
+        : []),
     ],
   };
 }
@@ -647,6 +733,27 @@ function actionCost(action: LegalAction, key: "clicks" | "credits"): number {
   return (action.costs ?? []).reduce(
     (sum, cost) => sum + Math.max(0, Number(cost[key] ?? 0)),
     0,
+  );
+}
+
+function visibleCardCost(card: VisibleCard): number {
+  const runtimeNumeric = card.definitionId
+    ? (
+        RUNTIME_CARDS[card.definitionId] as
+          | { numeric?: { cost?: number | null; installCost?: number | null } }
+          | undefined
+      )?.numeric
+    : undefined;
+  const demoCost = card.definitionId
+    ? CARD_DEFINITIONS_BY_ID[card.definitionId]?.cost
+    : undefined;
+  return Math.max(
+    0,
+    card.cost ??
+      runtimeNumeric?.cost ??
+      runtimeNumeric?.installCost ??
+      demoCost ??
+      0,
   );
 }
 

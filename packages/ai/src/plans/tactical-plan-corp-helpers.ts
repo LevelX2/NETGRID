@@ -226,6 +226,7 @@ export function corpScoreWindowCurrentStep(
     stepId: `advance_score_card:${action.actionId}`,
     kind: "advance_score_card",
     desiredActionSemantics: ["score.advance_card"],
+    actionCandidateIds: [action.actionId],
     rationale: ["advance action progresses a visible score window"],
   });
 }
