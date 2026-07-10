@@ -2,7 +2,7 @@
 
 ## Status
 
-`final_verify`
+`ready_for_integration`
 
 ## Aktueller Abschlussstand
 
@@ -15,7 +15,9 @@
   persistierten Summaries.
 - Detailreport:
   `docs/reviews/ai/surprise-decks-20-game-selfplay-rerun-2026-07-10.md`.
-- Offen ist P6 mit finaler Verifikation und lokaler Integration nach `main`.
+- Finale Verifikation: 275 AI-Testdateien mit 1.737 Tests grün,
+  `@netgrid/ai`-Typecheck grün und `git diff --check` grün.
+- Offen ist nur noch die defensive lokale Integration nach `main`.
 
 ## Quelle
 
