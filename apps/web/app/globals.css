@@ -3764,6 +3764,31 @@ select {
   justify-items: stretch;
 }
 
+.opponentCueMessage {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+.opponentCueBody.hasVisual .opponentCueMessage {
+  justify-content: flex-start;
+}
+
+.opponentCueEventIcon {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--interaction-ambience-accent), var(--line) 34%);
+  border-radius: 8px;
+  color: color-mix(in srgb, var(--interaction-ambience-accent), white 24%);
+  background: color-mix(in srgb, var(--interaction-ambience-accent), var(--panel) 84%);
+  box-shadow: 0 8px 20px rgb(0 0 0 / 0.24);
+}
+
 .opponentCueText {
   min-width: 0;
   display: grid;
@@ -4150,11 +4175,43 @@ select {
   --interaction-ambience-position: center;
 }
 
+.ambience-agenda {
+  --interaction-ambience-image: url("/backgrounds/agenda-ability-ambience.png");
+  --interaction-ambience-accent: #d8b861;
+  --interaction-ambience-opacity: 0.14;
+  --interaction-ambience-position: center;
+}
+
+.opponentCueOverlay[class*="ambience-"] {
+  isolation: isolate;
+}
+
+.opponentCueOverlay[class*="ambience-"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    linear-gradient(135deg, rgb(8 12 16 / 0.18), rgb(8 12 16 / 0.08)),
+    var(--interaction-ambience-image);
+  background-position: center, var(--interaction-ambience-position);
+  background-size: cover;
+  opacity: var(--interaction-ambience-opacity);
+}
+
+.opponentCueOverlay[class*="ambience-"] > * {
+  position: relative;
+  z-index: 1;
+}
+
 :where(
   .accessRevealPanel,
   .damageImpactOverlay,
   .runTimeline.overlay,
   .cardChoiceDialog,
+  .scoredAgendaPanel,
   .setupPanel,
   .section
 ).ambience-movement,
@@ -4163,6 +4220,7 @@ select {
   .damageImpactOverlay,
   .runTimeline.overlay,
   .cardChoiceDialog,
+  .scoredAgendaPanel,
   .setupPanel,
   .section
 ).ambience-access,
@@ -4171,6 +4229,7 @@ select {
   .damageImpactOverlay,
   .runTimeline.overlay,
   .cardChoiceDialog,
+  .scoredAgendaPanel,
   .setupPanel,
   .section
 ).ambience-damage,
@@ -4179,6 +4238,7 @@ select {
   .damageImpactOverlay,
   .runTimeline.overlay,
   .cardChoiceDialog,
+  .scoredAgendaPanel,
   .setupPanel,
   .section
 ).ambience-trace,
@@ -4187,6 +4247,7 @@ select {
   .damageImpactOverlay,
   .runTimeline.overlay,
   .cardChoiceDialog,
+  .scoredAgendaPanel,
   .setupPanel,
   .section
 ).ambience-pump,
@@ -4195,11 +4256,25 @@ select {
   .damageImpactOverlay,
   .runTimeline.overlay,
   .cardChoiceDialog,
+  .scoredAgendaPanel,
   .setupPanel,
   .section
-).ambience-trash {
+).ambience-trash,
+:where(
+  .accessRevealPanel,
+  .damageImpactOverlay,
+  .runTimeline.overlay,
+  .cardChoiceDialog,
+  .scoredAgendaPanel,
+  .setupPanel,
+  .section
+).ambience-agenda {
   position: relative;
   isolation: isolate;
+}
+
+.damageImpactOverlay.ambience-damage {
+  position: fixed;
 }
 
 :where(
@@ -4207,6 +4282,7 @@ select {
   .damageImpactOverlay,
   .runTimeline.overlay,
   .cardChoiceDialog,
+  .scoredAgendaPanel,
   .setupPanel,
   .section
 ).ambience-movement::before,
@@ -4215,6 +4291,7 @@ select {
   .damageImpactOverlay,
   .runTimeline.overlay,
   .cardChoiceDialog,
+  .scoredAgendaPanel,
   .setupPanel,
   .section
 ).ambience-access::before,
@@ -4223,6 +4300,7 @@ select {
   .damageImpactOverlay,
   .runTimeline.overlay,
   .cardChoiceDialog,
+  .scoredAgendaPanel,
   .setupPanel,
   .section
 ).ambience-damage::before,
@@ -4231,6 +4309,7 @@ select {
   .damageImpactOverlay,
   .runTimeline.overlay,
   .cardChoiceDialog,
+  .scoredAgendaPanel,
   .setupPanel,
   .section
 ).ambience-trace::before,
@@ -4239,6 +4318,7 @@ select {
   .damageImpactOverlay,
   .runTimeline.overlay,
   .cardChoiceDialog,
+  .scoredAgendaPanel,
   .setupPanel,
   .section
 ).ambience-pump::before,
@@ -4247,19 +4327,30 @@ select {
   .damageImpactOverlay,
   .runTimeline.overlay,
   .cardChoiceDialog,
+  .scoredAgendaPanel,
   .setupPanel,
   .section
-).ambience-trash::before {
+).ambience-trash::before,
+:where(
+  .accessRevealPanel,
+  .damageImpactOverlay,
+  .runTimeline.overlay,
+  .cardChoiceDialog,
+  .scoredAgendaPanel,
+  .setupPanel,
+  .section
+).ambience-agenda::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: 0;
   pointer-events: none;
   background:
-    linear-gradient(135deg, rgb(8 12 16 / 0.78), rgb(8 12 16 / 0.62)),
+    linear-gradient(135deg, rgb(8 12 16 / 0.18), rgb(8 12 16 / 0.08)),
     var(--interaction-ambience-image);
   background-position: center, var(--interaction-ambience-position);
   background-size: cover;
+  border-radius: inherit;
   opacity: var(--interaction-ambience-opacity);
 }
 
@@ -4268,6 +4359,7 @@ select {
   .damageImpactOverlay,
   .runTimeline.overlay,
   .cardChoiceDialog,
+  .scoredAgendaPanel,
   .setupPanel,
   .section
 ).ambience-movement > *,
@@ -4276,6 +4368,7 @@ select {
   .damageImpactOverlay,
   .runTimeline.overlay,
   .cardChoiceDialog,
+  .scoredAgendaPanel,
   .setupPanel,
   .section
 ).ambience-access > *,
@@ -4284,6 +4377,7 @@ select {
   .damageImpactOverlay,
   .runTimeline.overlay,
   .cardChoiceDialog,
+  .scoredAgendaPanel,
   .setupPanel,
   .section
 ).ambience-damage > *,
@@ -4292,6 +4386,7 @@ select {
   .damageImpactOverlay,
   .runTimeline.overlay,
   .cardChoiceDialog,
+  .scoredAgendaPanel,
   .setupPanel,
   .section
 ).ambience-trace > *,
@@ -4300,6 +4395,7 @@ select {
   .damageImpactOverlay,
   .runTimeline.overlay,
   .cardChoiceDialog,
+  .scoredAgendaPanel,
   .setupPanel,
   .section
 ).ambience-pump > *,
@@ -4308,9 +4404,19 @@ select {
   .damageImpactOverlay,
   .runTimeline.overlay,
   .cardChoiceDialog,
+  .scoredAgendaPanel,
   .setupPanel,
   .section
-).ambience-trash > * {
+).ambience-trash > *,
+:where(
+  .accessRevealPanel,
+  .damageImpactOverlay,
+  .runTimeline.overlay,
+  .cardChoiceDialog,
+  .scoredAgendaPanel,
+  .setupPanel,
+  .section
+).ambience-agenda > * {
   position: relative;
   z-index: 1;
 }

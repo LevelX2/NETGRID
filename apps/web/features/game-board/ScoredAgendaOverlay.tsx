@@ -10,7 +10,10 @@ import { useCardScaleSettings } from "../cards/card-display-settings";
 import { CARD_SCALE_PERCENT_MIN, type CardDisplayMode } from "../settings/settings-model";
 import { CardView } from "../cards/CardView";
 import { ScoredAgendaStateLines } from "../cards/ScoredAgendaState";
-import { type ActionContext } from "../../app/action-board-ui";
+import {
+  interactionAmbienceClassName,
+  type ActionContext,
+} from "../../app/action-board-ui";
 import { type DisplayVisibleCard } from "../cards/card-view-model";
 
 const SCORE_AREA_PREVIEW_LIMIT = 18;
@@ -108,7 +111,9 @@ export function ScoredAgendaOverlay({
       className={`scoredAgendaOverlay ${side} ${position.kind === "custom" ? "custom" : ""}`}
       style={overlayPositionStyle}
     >
-      <section className={`scoredAgendaPanel ${side}`}>
+      <section
+        className={`scoredAgendaPanel ${side} ${interactionAmbienceClassName("agenda")}`}
+      >
         <header
           className={`scoredAgendaHead ${side}`}
           onPointerDown={startDrag}

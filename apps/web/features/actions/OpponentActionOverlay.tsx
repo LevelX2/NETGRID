@@ -1,12 +1,29 @@
-import { Activity, Bot, Check, Move, Play, Sparkles, User } from "lucide-react";
+import {
+  Activity,
+  Award,
+  Bot,
+  Check,
+  Gauge,
+  Move,
+  MoveRight,
+  Play,
+  Radar,
+  ScanSearch,
+  Sparkles,
+  Trash2,
+  User,
+} from "lucide-react";
 import { useRef } from "react";
 import type { PointerEvent as ReactPointerEvent, ReactNode } from "react";
 import type { Side, VisibleCard } from "@netgrid/shared";
 
 import {
+  actionCueInteractionAmbience,
   clampCuePosition,
   cuePositionClassName,
   cuePositionStyle,
+  interactionAmbienceClassName,
+  type InteractionAmbienceKind,
   type CuePositionPreference
 } from "../../app/action-board-ui";
 import type { OpponentActionCue } from "../../app/action-cues";
@@ -55,6 +72,14 @@ export function OpponentActionOverlay({
   if (!cue) return null;
 
   const relatedCard = cue.relatedCard ? enrichVisibleCard(cue.relatedCard, cardDetailsById) : null;
+  const cueCardType = relatedCard?.type ?? (cue.cardDefinitionId ? cardDetailsById[cue.cardDefinitionId]?.type : null) ?? null;
+  const ambience = actionCueInteractionAmbience({
+    actionType: cue.actionType,
+    title: cue.title,
+    cardType: cueCardType,
+    visibility: cue.visibility,
+  });
+  const ambienceClass = interactionAmbienceClassName(ambience);
   const cueCardDisplayMode: CardDisplayMode = displayMode === "placeholder" ? displayMode : "placeholder";
   const showHiddenCardBack = cue.visibility === "redacted" && cue.actionType === "install_card";
   const hasCueVisual = Boolean(relatedCard || showHiddenCardBack);
@@ -91,7 +116,7 @@ export function OpponentActionOverlay({
   return (
     <aside
       ref={overlayRef}
-      className={`opponentCueOverlay ${cuePositionClassName(position)} actor-${cue.actor ?? "system"} importance-${cue.importance} visibility-${cue.visibility}`}
+      className={`opponentCueOverlay ${ambienceClass} ${cuePositionClassName(position)} actor-${cue.actor ?? "system"} importance-${cue.importance} visibility-${cue.visibility}`}
       style={cuePositionStyle(position)}
       aria-live="polite"
       data-testid="opponent-cue"
@@ -138,9 +163,12 @@ export function OpponentActionOverlay({
             )}
           </div>
         ) : null}
-        <div className="opponentCueText">
-          <strong>{renderTitle(cue)}</strong>
-          {cue.description ? <p>{cue.description}</p> : null}
+        <div className="opponentCueMessage">
+          <OpponentCueEventIcon ambience={ambience} />
+          <div className="opponentCueText">
+            <strong>{renderTitle(cue)}</strong>
+            {cue.description ? <p>{cue.description}</p> : null}
+          </div>
         </div>
       </div>
       <div className="opponentCueFooter">
@@ -151,6 +179,32 @@ export function OpponentActionOverlay({
         </button>
       </div>
     </aside>
+  );
+}
+
+function OpponentCueEventIcon({
+  ambience,
+}: {
+  ambience: InteractionAmbienceKind | null;
+}) {
+  const Icon = ambience === "agenda"
+    ? Award
+    : ambience === "movement"
+      ? MoveRight
+      : ambience === "access"
+        ? ScanSearch
+        : ambience === "trash"
+          ? Trash2
+          : ambience === "trace"
+            ? Radar
+            : ambience === "pump"
+              ? Gauge
+              : null;
+  if (!Icon) return null;
+  return (
+    <span className={`opponentCueEventIcon ${interactionAmbienceClassName(ambience)}`} aria-hidden="true">
+      <Icon size={28} strokeWidth={1.8} />
+    </span>
   );
 }
 
