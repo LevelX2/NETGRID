@@ -291,15 +291,18 @@ function forceRunAtServer(
 }
 
 describe("PRO019 rule-contract baseline utilities", () => {
-  it("registers exactly the eight PRO019 CardImplementation definitions", () => {
-    const implementations = new Map(
-      CARD_IMPLEMENTATIONS.map((implementation) => [
-        implementation.cardDefinitionId,
-        implementation,
-      ]),
-    );
-    for (const cardDefinitionId of PRO019_IDS)
-      expect(implementations.get(cardDefinitionId)).toBeDefined();
+  it("registers each of the eight PRO019 CardImplementation definitions exactly once", () => {
+    expect(PRO019_IDS).toHaveLength(8);
+    expect(new Set(PRO019_IDS).size).toBe(8);
+    for (const cardDefinitionId of PRO019_IDS) {
+      expect(
+        CARD_IMPLEMENTATIONS.filter(
+          (implementation) =>
+            implementation.cardDefinitionId === cardDefinitionId,
+        ),
+        cardDefinitionId,
+      ).toHaveLength(1);
+    }
   });
 
   it("plays Emergency Rig through LegalActions with bounded nonzero X", () => {
