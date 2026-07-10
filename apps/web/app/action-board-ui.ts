@@ -150,7 +150,8 @@ export type InteractionAmbienceKind =
   | "damage"
   | "trace"
   | "pump"
-  | "trash";
+  | "trash"
+  | "agenda";
 
 const INTERACTION_AMBIENCE_PRIORITY: InteractionAmbienceKind[] = [
   "trash",
@@ -159,6 +160,7 @@ const INTERACTION_AMBIENCE_PRIORITY: InteractionAmbienceKind[] = [
   "damage",
   "access",
   "movement",
+  "agenda",
 ];
 
 export function interactionAmbienceClassName(
@@ -192,6 +194,46 @@ export function actionInteractionAmbience(
     signalTextHasAccess(signalText)
   )
     return "access";
+  if (signalTextHasAgendaAbility(signalText)) return "agenda";
+  return null;
+}
+
+export function actionCueInteractionAmbience(input: {
+  actionType: string;
+  title: string;
+  cardType?: string | null;
+  visibility: string;
+}): InteractionAmbienceKind | null {
+  if (input.visibility === "redacted") return null;
+  const signalText = normalizeInteractionSignalText(
+    `${input.actionType} ${input.title}`,
+  );
+  if (
+    input.actionType === "trash_accessed_card" ||
+    input.actionType === "trash_resource" ||
+    signalTextHasTrash(signalText)
+  )
+    return "trash";
+  if (signalTextHasTrace(signalText)) return "trace";
+  if (
+    input.actionType === "pump_breaker" ||
+    input.actionType === "break_subroutine" ||
+    signalTextHasPump(signalText)
+  )
+    return "pump";
+  if (
+    input.actionType === "access_card" ||
+    input.actionType === "steal_agenda" ||
+    input.actionType === "decline_trash" ||
+    signalTextHasAccess(signalText)
+  )
+    return "access";
+  if (signalTextHasMovement(signalText)) return "movement";
+  if (
+    input.cardType === "agenda" ||
+    signalTextHasAgendaAbility(signalText)
+  )
+    return "agenda";
   return null;
 }
 
@@ -216,7 +258,9 @@ export function choiceInteractionAmbience(
         ? "pump"
         : signalTextHasAccess(signalText)
           ? "access"
-          : null;
+          : signalTextHasAgendaAbility(signalText)
+            ? "agenda"
+            : null;
   return highestPriorityInteractionAmbience([
     choiceAmbience,
     action ? actionInteractionAmbience(action) : null,
@@ -316,6 +360,18 @@ function signalTextHasPump(value: string): boolean {
 
 function signalTextHasAccess(value: string): boolean {
   return /\baccess\b|access_|_access|zugriff|steal|agenda stehlen/.test(value);
+}
+
+function signalTextHasMovement(value: string): boolean {
+  return /\bice passiert\b|\beis passiert\b|\bpassed ice\b|\bpass ice\b|\bweiterlaufen\b/.test(
+    value,
+  );
+}
+
+function signalTextHasAgendaAbility(value: string): boolean {
+  return /agendaability|agenda_ability|scored_agenda|scored-agenda|gescort.*agenda/.test(
+    value,
+  );
 }
 
 export type CardCreditCounterVisual = {

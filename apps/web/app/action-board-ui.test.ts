@@ -20,6 +20,7 @@ import {
   advancementCounterDisplay,
   approachIceExposeViewingIceId,
   actionInteractionAmbience,
+  actionCueInteractionAmbience,
   aiPacingFallbackDelayMs,
   aiPacingDelayMs,
   armoredFridgeAblativeCounterBadge,
@@ -482,12 +483,68 @@ describe("V1.0.5 action board UI helpers", () => {
     };
 
     expect(interactionAmbienceClassName("damage")).toBe("ambience-damage");
+    expect(interactionAmbienceClassName("agenda")).toBe("ambience-agenda");
     expect(actionInteractionAmbience(trashAction)).toBe("trash");
     expect(actionInteractionAmbience(pumpAction)).toBe("pump");
     expect(actionsInteractionAmbience([movementAction, trashAction])).toBe(
       "trash",
     );
     expect(choiceInteractionAmbience(traceChoice)).toBe("trace");
+    expect(
+      actionInteractionAmbience(
+        legalAction(
+          "corp",
+          "gain_credit",
+          "scored_agenda_1",
+          "Agenda-Fähigkeit nutzen",
+          { agendaAbility: "hosted_credit" },
+        ),
+      ),
+    ).toBe("agenda");
+    expect(
+      choiceInteractionAmbience({
+        ...choice("corp"),
+        source: "scored_agenda.choose_target",
+        prompt: "Ziel wählen",
+      }),
+    ).toBe("agenda");
+    expect(
+      actionCueInteractionAmbience({
+        actionType: "activated_card_ability",
+        title: "Die Korp-KI hat Marine Arcology genutzt.",
+        cardType: "agenda",
+        visibility: "public",
+      }),
+    ).toBe("agenda");
+    expect(
+      actionCueInteractionAmbience({
+        actionType: "continue_run",
+        title: "Der Runner hat Simple Barrier ICE passiert.",
+        visibility: "public",
+      }),
+    ).toBe("movement");
+    expect(
+      actionCueInteractionAmbience({
+        actionType: "access_card",
+        title: "Der Runner greift auf eine Karte zu.",
+        visibility: "public",
+      }),
+    ).toBe("access");
+    expect(
+      actionCueInteractionAmbience({
+        actionType: "trash_accessed_card",
+        title: "Der Runner trasht die Karte.",
+        visibility: "public",
+      }),
+    ).toBe("trash");
+    expect(
+      actionCueInteractionAmbience({
+        actionType: "install_card",
+        title: "Die Korp installiert eine verdeckte Karte.",
+        cardType: "agenda",
+        visibility: "redacted",
+      }),
+    ).toBeNull();
     expect(
       runWindowInteractionAmbience(movementRun, [movementAction], "movement"),
     ).toBe("movement");

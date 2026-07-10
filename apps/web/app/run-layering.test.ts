@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 function readCssWithImports(url: URL, seen = new Set<string>()): string {
@@ -10,6 +10,14 @@ function readCssWithImports(url: URL, seen = new Set<string>()): string {
 }
 
 const css = readCssWithImports(new URL("./globals.css", import.meta.url));
+const scoredAgendaOverlaySource = readFileSync(
+  new URL("../features/game-board/ScoredAgendaOverlay.tsx", import.meta.url),
+  "utf8",
+);
+const opponentActionOverlaySource = readFileSync(
+  new URL("../features/actions/OpponentActionOverlay.tsx", import.meta.url),
+  "utf8",
+);
 
 function zLayer(name: string): number {
   const match = css.match(new RegExp(`--${name}:\\s*(\\d+);`));
@@ -67,6 +75,7 @@ describe("run window layering", () => {
       "/backgrounds/trace-signal-ambience.png",
       "/backgrounds/pump-breaker-ambience.png",
       "/backgrounds/trash-shred-ambience.png",
+      "/backgrounds/agenda-ability-ambience.png",
     ]) {
       expect(css).toContain(`url("${asset}")`);
     }
@@ -77,6 +86,7 @@ describe("run window layering", () => {
       "ambience-trace",
       "ambience-pump",
       "ambience-trash",
+      "ambience-agenda",
     ]) {
       expect(css).toContain(`.${ambience}`);
     }
@@ -84,5 +94,37 @@ describe("run window layering", () => {
     expect(css).toContain("--interaction-ambience-opacity: 0.13");
     expect(css).toContain("--interaction-ambience-opacity: 0.14");
     expect(css).toContain("var(--interaction-ambience-image)");
+    expect(css).toContain(".scoredAgendaPanel");
+    expect(scoredAgendaOverlaySource).toContain(
+      'interactionAmbienceClassName("agenda")',
+    );
+    expect(opponentActionOverlaySource).toContain(
+      "actionCueInteractionAmbience",
+    );
+    expect(opponentActionOverlaySource).toContain(
+      "OpponentCueEventIcon",
+    );
+    expect(selectorBlock('.opponentCueOverlay[class*="ambience-"]')).toContain(
+      "isolation: isolate",
+    );
+    expect(
+      selectorBlock('.opponentCueOverlay[class*="ambience-"]::before'),
+    ).toContain("var(--interaction-ambience-image)");
+    expect(selectorBlock(".opponentCueEventIcon")).toContain("width: 48px");
+    expect(
+      existsSync(
+        new URL(
+          "../public/backgrounds/agenda-ability-ambience.png",
+          import.meta.url,
+        ),
+      ),
+    ).toBe(true);
+  });
+
+  it("keeps damage ambience from overriding the fixed damage overlay placement", () => {
+    expect(selectorBlock(".damageImpactOverlay")).toContain("position: fixed");
+    expect(selectorBlock(".damageImpactOverlay.ambience-damage")).toContain("position: fixed");
+    expect(css).toContain("rgb(8 12 16 / 0.18)");
+    expect(css).toContain("border-radius: inherit");
   });
 });
