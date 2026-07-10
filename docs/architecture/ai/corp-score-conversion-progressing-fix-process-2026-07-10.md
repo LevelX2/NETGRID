@@ -2,7 +2,7 @@
 
 ## Status
 
-- Status: in Umsetzung
+- Status: abgeschlossen
 - Datum: 2026-07-10
 - Agent: `release-implementation-agent`
 - Branch: `codex/ai-score-conversion-progressing-fix`
@@ -129,3 +129,18 @@ mergen, Worktree entfernen und das Goal erst danach abschließen.
 - AI-Typecheck, drei AI-Shards und relevante Gates sind grün;
 - identischer 20-Spiel-Nachtest ist ausgewertet;
 - Arbeitsbranch ist lokal in `main` integriert.
+
+## Abschluss
+
+- P0: Evidence und Paketprozess mit Commit `343c915e8` verankert.
+- P1: Der evidence-gebundene Controller schützt garantierte Conversion-Pfade
+  nun in `active` und `progressing`; blockierte und nicht garantierte Pfade
+  bleiben überschreibbar. Commit: `b4a0be2b4`.
+- P2: 47 fokussierte Tests, AI-Typecheck, drei AI-Shards mit 281 Testdateien
+  und 1.803 Tests, `check:ai`, Package-Boundaries, Format und Diff-Check grün.
+- P3: Der identische 20-Spiel-Nachtest schloss alle sechs beobachteten
+  Conversion-Sequenzen im Installationszug mit einem Score ab. Illegale
+  Aktionen, Replayfehler, Redactionfehler und Fallbacks blieben jeweils null.
+- Ergebnisgrenze: Der Fix korrigiert den belegten Planstatusabbruch. Er erzeugt
+  noch keine Vapor-Ops- oder Chicago-Branch-Conversion-Nutzung und behebt keine
+  allgemeinen Action-Limit-Schleifen.
