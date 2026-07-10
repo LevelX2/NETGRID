@@ -401,6 +401,63 @@ describe("corp-operation-resolution", () => {
       cardImplementationEffectKind: "distribute_advancement_counters",
       advancementCounterAmount: 2,
       advancementCounterChoiceMode: "any_combination",
+      scoreConversionCapability: "place_advancement",
+      scoreConversionAdvancementAmount: 2,
+      scoreConversionAdvancementMode: "any_combination",
+      scoreConversionTargetMode: "installed_advanceable_cards",
+      scoreConversionTiming: "immediate",
+    });
+  });
+
+  it("publishes immediate action gain semantics on operation LegalActions", () => {
+    const targetState = state();
+    const host = hostFor(targetState);
+    const printedDefinition = definition("onr_v1_297_overtime-incentives", {
+      title: "Overtime Incentives",
+      cost: 0,
+    });
+
+    const actions = cardImplementationOperationLegalActions(
+      host,
+      OPERATION_ID,
+      printedDefinition,
+    );
+
+    expect(actions).toHaveLength(1);
+    expect(actions[0]?.payload).toMatchObject({
+      cardId: OPERATION_ID,
+      scoreConversionCapability: "gain_action_capacity",
+      scoreConversionActionGainAmount: 2,
+      scoreConversionTiming: "immediate",
+    });
+  });
+
+  it("publishes advancement move semantics on operation LegalActions", () => {
+    const targetState = state();
+    const host = hostFor(targetState);
+    const printedDefinition = definition(
+      "onr_v1_291_falsified-transactions-expert",
+      { title: "Falsified-Transactions Expert", cost: 0 },
+    );
+
+    const actions = cardImplementationOperationLegalActions(
+      host,
+      OPERATION_ID,
+      printedDefinition,
+    );
+
+    expect(actions).toHaveLength(1);
+    expect(actions[0]?.payload).toMatchObject({
+      cardId: OPERATION_ID,
+      cardImplementationEffectKind: "move_advancement_counters",
+      advancementCounterMoveMaximum: 3,
+      advancementCounterMoveSource: "chosen_card",
+      advancementCounterMoveTarget: "chosen_installed_advanceable_card",
+      scoreConversionCapability: "move_advancement",
+      scoreConversionAdvancementMaximum: 3,
+      scoreConversionSourceMode: "chosen_card",
+      scoreConversionTargetMode: "chosen_installed_advanceable_card",
+      scoreConversionTiming: "immediate",
     });
   });
 

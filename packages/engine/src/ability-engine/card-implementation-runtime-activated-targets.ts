@@ -45,6 +45,8 @@ export function activatedAbilityPayload(
   const advancementMove = ability.effects.find(
     (effect) => effect.kind === "move_advancement_counters",
   );
+  const scoreConversionPayload =
+    scoreConversionCapabilityPayloadForEffects(ability.effects);
   return {
     cardId,
     cardImplementationAbility: "activated",
@@ -118,8 +120,10 @@ export function activatedAbilityPayload(
           cardImplementationEffectKind: "move_advancement_counters",
           advancementCounterMoveMaximum: advancementMove.maxAmount,
           advancementCounterMoveSource: advancementMove.source,
+          advancementCounterMoveTarget: advancementMove.target,
         }
       : {}),
+    ...scoreConversionPayload,
     ...(ability.timing === "runner_cost_penalty_support" &&
     state?.runnerCostPenaltySupportWindow
       ? {
@@ -133,6 +137,50 @@ export function activatedAbilityPayload(
         }
       : {}),
   };
+}
+
+export function scoreConversionCapabilityPayloadForEffects(
+  effects: readonly CardEffectImplementation[],
+): Record<string, string | number | boolean> {
+  const advancementDistribution = effects.find(
+    (effect) => effect.kind === "distribute_advancement_counters",
+  );
+  if (advancementDistribution?.kind === "distribute_advancement_counters") {
+    return {
+      scoreConversionCapability: "place_advancement",
+      scoreConversionAdvancementAmount: advancementDistribution.amount,
+      scoreConversionAdvancementMode: advancementDistribution.distribution,
+      scoreConversionTargetMode: advancementDistribution.target,
+      scoreConversionTiming: "immediate",
+    };
+  }
+  const advancementMove = effects.find(
+    (effect) => effect.kind === "move_advancement_counters",
+  );
+  if (advancementMove?.kind === "move_advancement_counters") {
+    return {
+      scoreConversionCapability: "move_advancement",
+      scoreConversionAdvancementMaximum: advancementMove.maxAmount,
+      scoreConversionSourceMode: advancementMove.source,
+      scoreConversionTargetMode: advancementMove.target,
+      scoreConversionTiming: "immediate",
+    };
+  }
+  const actionGainAmount = effects.reduce(
+    (sum, effect) =>
+      effect.kind === "gain_actions" &&
+      (effect.recipient === "corp" || effect.recipient === "controller")
+        ? sum + effect.amount
+        : sum,
+    0,
+  );
+  return actionGainAmount > 0
+    ? {
+        scoreConversionCapability: "gain_action_capacity",
+        scoreConversionActionGainAmount: actionGainAmount,
+        scoreConversionTiming: "immediate",
+      }
+    : {};
 }
 
 export function gainCreditsPerAdvancementCounterOnSourceEffect(

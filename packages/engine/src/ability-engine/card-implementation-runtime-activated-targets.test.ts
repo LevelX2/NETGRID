@@ -25,6 +25,11 @@ describe("activatedAbilityPayload advancement semantics", () => {
       cardImplementationEffectKind: "distribute_advancement_counters",
       advancementCounterAmount: 2,
       advancementCounterChoiceMode: "single_target",
+      scoreConversionCapability: "place_advancement",
+      scoreConversionAdvancementAmount: 2,
+      scoreConversionAdvancementMode: "single_target",
+      scoreConversionTargetMode: "installed_advanceable_cards",
+      scoreConversionTiming: "immediate",
     });
   });
 
@@ -50,6 +55,43 @@ describe("activatedAbilityPayload advancement semantics", () => {
       cardImplementationEffectKind: "move_advancement_counters",
       advancementCounterMoveMaximum: "all",
       advancementCounterMoveSource: "source_card",
+      advancementCounterMoveTarget: "chosen_installed_advanceable_card",
+      scoreConversionCapability: "move_advancement",
+      scoreConversionAdvancementMaximum: "all",
+      scoreConversionSourceMode: "source_card",
+      scoreConversionTargetMode: "chosen_installed_advanceable_card",
+      scoreConversionTiming: "immediate",
+    });
+  });
+
+  it("publishes immediate Corp action-capacity semantics", () => {
+    const ability: ActivatedCardAbilityImplementation = {
+      kind: "activated",
+      timing: "corp_main",
+      costs: [
+        {
+          kind: "source_counter",
+          counterType: "boon",
+          amount: 1,
+          source: "source",
+        },
+      ],
+      effects: [
+        {
+          kind: "gain_actions",
+          recipient: "corp",
+          amount: 2,
+          visibility: "public",
+        },
+      ],
+    };
+
+    expect(
+      activatedAbilityPayload("source" as never, ability, 2),
+    ).toMatchObject({
+      scoreConversionCapability: "gain_action_capacity",
+      scoreConversionActionGainAmount: 2,
+      scoreConversionTiming: "immediate",
     });
   });
 });

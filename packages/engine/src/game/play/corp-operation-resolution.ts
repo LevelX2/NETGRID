@@ -14,6 +14,7 @@ import {
   isPrintedCostOnPlayAbility,
   onPlayCardImplementationClickCost,
 } from "../../ability-engine/card-implementation-runtime-shared";
+import { scoreConversionCapabilityPayloadForEffects } from "../../ability-engine/card-implementation-runtime-activated-targets";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import {
   COUNTER_CREDIT_OPERATION_SOURCE,
@@ -869,6 +870,12 @@ export function cardImplementationOperationLegalActions(
   const advancementDistribution = onPlayCardImplementationEffects(
     definition,
   ).find((effect) => effect.kind === "distribute_advancement_counters");
+  const advancementMove = onPlayCardImplementationEffects(definition).find(
+    (effect) => effect.kind === "move_advancement_counters",
+  );
+  const scoreConversionPayload = scoreConversionCapabilityPayloadForEffects(
+    onPlayCardImplementationEffects(definition),
+  );
   const advancementPayload = advancementDistribution
     ? {
         cardImplementationEffectKind: "distribute_advancement_counters",
@@ -876,7 +883,20 @@ export function cardImplementationOperationLegalActions(
         advancementCounterChoiceMode: advancementDistribution.distribution,
       }
     : {};
-  if (!needsResourceTarget && additionalCost === 0 && !advancementDistribution)
+  const advancementMovePayload =
+    advancementMove?.kind === "move_advancement_counters"
+      ? {
+          cardImplementationEffectKind: "move_advancement_counters",
+          advancementCounterMoveMaximum: advancementMove.maxAmount,
+          advancementCounterMoveSource: advancementMove.source,
+          advancementCounterMoveTarget: advancementMove.target,
+        }
+      : {};
+  if (
+    !needsResourceTarget &&
+    additionalCost === 0 &&
+    Object.keys(scoreConversionPayload).length === 0
+  )
     return [];
   if (!needsResourceTarget)
     return [
@@ -890,6 +910,8 @@ export function cardImplementationOperationLegalActions(
         {
           cardId,
           ...advancementPayload,
+          ...advancementMovePayload,
+          ...scoreConversionPayload,
           ...(additionalCost > 0
             ? { additionalTracePlayCost: additionalCost }
             : {}),
