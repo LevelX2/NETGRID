@@ -27,7 +27,8 @@ wiederholt, verglichen und der fertige Branch lokal nach `main` integriert.
 ## In Scope
 
 1. Budgetierte optionale Mehrfach-Rez-Choice nach `Data Fort Reclamation`.
-2. Zugübergreifende No-Payoff-Behandlung für unveränderte Archives.
+2. Side-sicherer Audit der behaupteten zugübergreifenden Archives-Wiederholung;
+   bei widerlegtem Runtime-Fehler Reclassification in den Detektor-Scope.
 3. Bindende negative Duplicate-/Bank-Install-Evidence gegen Planübersteuerung.
 4. Stabile, idempotente Selfplay-Safety-Findings und weniger
    Run-Mikroschritt-Fehlklassifikationen.
@@ -95,15 +96,17 @@ Es ist immer genau ein Paket aktiv. Kein Paket wird übersprungen.
 - Done-Gate: keine unbezahlbare `selectedOptionIds`-Kombination.
 - Commit: `fix(ai): budget optional multi-rez choices`
 
-### P2 – Archives-No-Payoff über Zuggrenzen
+### P2 – Archives-No-Payoff-Audit
 
 - Aktuellen Archives-Wissens-/Run-Scoring-Pfad lokalisieren.
-- No-Payoff-Zustand bis zur sichtbaren Archives-Änderung erhalten oder bei
-  jeder neuen Start-Run-Bewertung deterministisch rekonstruieren.
-- Tests: unveränderte Archives über zwei Runner-Züge; Invalidierung nach
-  sichtbarer Inhaltsänderung.
-- Done-Gate: kein zweiter Archives-Run ohne neuen sichtbaren Payoff.
-- Commit: `fix(ai): retain archives no-payoff knowledge`
+- Die vier stärksten Replay-Beispiele mit PlayerView-Counts und bekannten
+  Kartentypen side-sicher reproduzieren.
+- Wenn sich die Archives sichtbar geändert haben oder unbekannte Karten einen
+  möglichen Payoff bilden, keinen produktiven Runtime-Fix vornehmen und das
+  Finding in P4 reklassifizieren.
+- Done-Gate: Runtime-Fehler bestätigt und getestet oder nachvollziehbar
+  widerlegt und als Detektor-Follow-up dokumentiert.
+- Commit: `docs(ai): reclassify archives selfplay finding`
 
 ### P3 – Negative Duplicate-/Bank-Install-Fits
 
@@ -123,6 +126,9 @@ Es ist immer genau ein Paket aktiv. Kein Paket wird übersprungen.
   Summaries.
 - Verpflichtende `continue_run`-, Access- und Choice-Mikroschritte nicht als
   Recovery-/Plan-Mismatch-Hauptentscheidung klassifizieren.
+- `repeated_low_value_archives` nur melden, wenn keine sichtbare
+  Inhaltsänderung und keine unbekannte Archives-Karte einen frischen Payoff
+  begründen.
 - Leak-Positivtest bleibt rot beziehungsweise wird weiterhin erkannt.
 - Done-Gate: identische Safety-Findings bei Wiederholung und keine bekannten
   Mikroschritt-Fehlklassifikationen.

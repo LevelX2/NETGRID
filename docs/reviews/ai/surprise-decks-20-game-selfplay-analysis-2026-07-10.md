@@ -82,33 +82,33 @@ Geplante generische Maßnahme:
   gemischte Null-/Hochkostenkarten;
 - `applyAction` bleibt unverändert der finale Guardrail.
 
-### 2. Bekannt wertlose Archives-Runs werden über Zuggrenzen wiederholt
+### 2. Archives-Finding nach side-sicherem Audit als Detektorfehler reklassifiziert
 
 Der Selfplay-Detektor markierte 16 wiederholte Archives-Runs in sechs Seeds.
-Die klarste Folge liegt in Seed `05` bei StateVersion 140 und 148:
+Eine gezielte Reproduktion der stärksten Beispiele belegt jedoch keinen
+Runner-Runtime-Fehler:
 
-- Die Runner-KI startete einen Archives-Run.
-- Im anschließenden Endfenster erkannte die Runtime `known_non_agenda:12` und
-  schloss einen weiteren Archives-Run korrekt aus.
-- Zu Beginn des nächsten Runner-Zugs erhielt derselbe Archives-Run wieder den
-  hohen Score 1.359 und wurde erneut gewählt.
-- Ein legaler Draw lag mit Score 1.328 nahezu gleichauf und hätte sichtbaren
-  Fortschritt erzeugt.
+- Seed `05`, StateVersion 140: 12 Archives-Karten, davon 11 bekannt und 1
+  unbekannt.
+- Seed `05`, StateVersion 148: erneut 12 Karten, davon 11 bekannt und 1
+  unbekannt; die bekannte Typverteilung hatte sich sichtbar verändert.
+- Seed `07`, StateVersion 371: 19 Karten, davon 17 bekannt und 2 unbekannt.
+- Seed `07`, StateVersion 381: 20 Karten, davon 19 bekannt und 1 unbekannt;
+  die Gesamtmenge und bekannte Typverteilung hatten sich verändert.
 
-Dasselbe Muster ist in Seed `07` bei StateVersion 371 und 381 sichtbar. Die
-No-Payoff-Einschätzung wirkt im laufenden Zug, bleibt aber nicht zuverlässig
-über den Zugwechsel erhalten beziehungsweise wird bei der nächsten
-Start-Run-Bewertung nicht wieder angewandt.
+Die Korp hatte zwischen den Runs Karten gespielt oder verworfen. Damit lag
+jeweils mindestens eine für den Runner unbekannte Archives-Karte und ein realer
+möglicher Agenda-Payoff vor. Die erneute Run-Bewertung war fachlich zulässig.
+Eine zugübergreifende No-Payoff-Sperre wäre falsch und könnte echte Agenda-
+Chancen blockieren.
 
-Geplante generische Maßnahme:
+Folgerung:
 
-- side-sicheres Archives-Payoff-Wissen über Zuggrenzen erhalten;
-- einen bekannten No-Agenda-/No-Trash-Zustand bis zu einem sichtbaren
-  Archives-Änderungsereignis als Start-Run-Ausschluss oder starke Abwertung
-  anwenden;
-- Invalidierung testen, sobald neue Karten in Archives gelangen oder ein
-  sonstiger sichtbarer Payoff entsteht;
-- Regression mit zwei Runner-Zügen und unverändertem Archives-Zustand.
+- keine Änderung an Archives-Memory oder produktiver Run-Bewertung;
+- `repeated_low_value_archives` muss in Paket 4 sichtbare Inhaltsänderungen und
+  unbekannte Archives-Karten als frischen Payoff berücksichtigen;
+- Regressionen für unveränderte vollständig bekannte Archives und für neue
+  unbekannte Archives-Karten.
 
 ### 3. Niedrigwertige Broker-Duplikate überstimmen die eigene Defer-Evidence
 
@@ -177,6 +177,8 @@ Geplante generische Maßnahme:
 - 273 allgemeine `repeated_no_progress_run`-Findings betreffen überwiegend
   Zentralserver-Runs. Der Detektor zählt normale Access-Fortschritte zu eng und
   ist ohne Einzelfallprüfung kein Beleg für 273 Fehlentscheidungen.
+- Die 16 `repeated_low_value_archives`-Findings sind ohne Prüfung der
+  sichtbaren Archives-Änderung ebenfalls kein belastbarer Verhaltensbeleg.
 - Aus diesem Lauf folgt keine kartennamenspezifische Sonderregel für die
   Runner-Coup-Karten oder die Korp-Recyclingkarten.
 
@@ -189,4 +191,3 @@ Geplante generische Maßnahme:
   verwendet.
 - Keine Umsetzung darf Hidden-Info, FullState oder eigene LegalAction-Erzeugung
   in die KI einführen.
-
