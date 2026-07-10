@@ -2,7 +2,7 @@
 
 ## Status
 
-`in_progress`
+`complete`
 
 ## Quelle und Zielprüfung
 
@@ -164,7 +164,16 @@ integrate_main -> blocker
    regeneriert. Web-Typecheck, 38 Testdateien mit 485 Tests, Production Build
    und Card-Function-Abstraction sind grün. Fremde Worktrees bleiben wegen
    fehlendem Eigentumsnachweis und aktivem Teststand unangetastet.
-9. `PCS-8 Main-Abgleich, Full Gate und Integration` – `in_progress`
+9. `PCS-8 Main-Abgleich, Full Gate und Integration` – `done`; der
+   Arbeitsbranch ist per Fast-Forward in lokales `main` integriert. Der Full
+   Gate ist mit Projekt-Typecheck, rekursivem Build, 179 Engine-Testdateien
+   mit 1.598 Tests, 275 AI-Testdateien mit 1.728 Tests, 38 Web-Testdateien mit
+   485 Tests, acht Server-Testdateien mit 138 Tests sowie allen Contract-,
+   AI-, Proteus-, Boundary-, Asset- und Architekturchecks grün. Der
+   uncommittete parallele Engine-Teststand bleibt unangetastet und erhöht den
+   abschließenden Main-Lauf auf 1.602 grüne Engine-Tests. Ein veralteter
+   `.next`-Cache mit `/api/game`-Referenz wurde entfernt; Production Build und
+   anschließender Typecheck sind grün.
 
 ## Paketdetails
 
