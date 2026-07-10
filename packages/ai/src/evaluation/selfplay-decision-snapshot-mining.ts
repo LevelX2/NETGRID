@@ -251,7 +251,8 @@ function buildPromotionQueue(
 function promotionCategory(
   candidate: SelfplayDecisionSnapshotCandidate,
 ): SelfplayDecisionSnapshotPromotionCategory {
-  if (candidate.status !== "candidate_snapshot") return "defer_missing_engine_state";
+  if (candidate.status !== "candidate_snapshot")
+    return "defer_missing_engine_state";
   const mistakeClassSet = new Set(candidate.mistakeClasses);
   if (mistakeClassSet.has("target_choice_unavailable")) {
     return "defer_target_choice_gap";
@@ -447,7 +448,9 @@ function mistakeClassesForDetectors(
 ): AiMistakeClass[] {
   return [
     ...new Set(
-      detectorIds.flatMap((detectorId) => DETECTOR_MISTAKE_CLASS_MAP[detectorId]),
+      detectorIds.flatMap(
+        (detectorId) => DETECTOR_MISTAKE_CLASS_MAP[detectorId],
+      ),
     ),
   ].sort();
 }

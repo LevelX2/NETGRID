@@ -1,6 +1,6 @@
 # Strategie- und Regelaudit der Überraschungsdecks
 
-Status: in Arbeit  
+Status: abgeschlossen
 Branch: `codex/surprise-decks-strategy-audit`  
 Worktree: `C:\Projekte\NETGRID_AI_SURPRISE_DECKS_STRATEGY_AUDIT`
 
@@ -35,12 +35,12 @@ Das Gate `clearly_dominated_plan_choice` ist absichtlich konservativ. Es meldet 
 
 ## Abschlussprotokoll
 
-| Paket | Status | Commit | Verifikation |
-| --- | --- | --- | --- |
-| P0 | abgeschlossen | dieser Prozess-Commit | Ausgangsevidence aus dem 20×480-Rerun: Seeds 15/20, fünf Access-Declines und fünf Broker-Falschpositive |
-| P1 | abgeschlossen | dieser Paket-Commit | 26 Fokustests; negative R&D-Wiederholung weicht positiver anderer Serveroption, Fresh-/Score-Threat-Gegenfälle geschützt |
-| P2 | abgeschlossen | dieser Paket-Commit | 9 Access-Policy-Tests; geplantes Trash-Budget wird nur für positives Ziel und unter separater Sicherheitsreserve ausgegeben |
-| P3 | abgeschlossen | dieser Paket-Commit | 34 Mining-Tests; positive Broker-Backups ausgeschlossen, negative/deferred/redundante Duplikate weiter erkannt |
-| P4 | abgeschlossen | zwei Paket-Commits | 41 Mining-/Runner-Tests; Dominanzgate auf tatsächlich eingeplantes Trash-Budget begrenzt, 4×3-Seed-A/B-Panel definiert |
-| P5 | offen | – | 20×480, A/B-Panel, Regel-/Timing-Audit |
-| P6 | offen | – | Breitentests, Typecheck, lokaler Merge |
+| Paket | Status        | Commit                  | Verifikation                                                                                                                |
+| ----- | ------------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| P0    | abgeschlossen | dieser Prozess-Commit   | Ausgangsevidence aus dem 20×480-Rerun: Seeds 15/20, fünf Access-Declines und fünf Broker-Falschpositive                     |
+| P1    | abgeschlossen | dieser Paket-Commit     | 26 Fokustests; negative R&D-Wiederholung weicht positiver anderer Serveroption, Fresh-/Score-Threat-Gegenfälle geschützt    |
+| P2    | abgeschlossen | dieser Paket-Commit     | 9 Access-Policy-Tests; geplantes Trash-Budget wird nur für positives Ziel und unter separater Sicherheitsreserve ausgegeben |
+| P3    | abgeschlossen | dieser Paket-Commit     | 34 Mining-Tests; positive Broker-Backups ausgeschlossen, negative/deferred/redundante Duplikate weiter erkannt              |
+| P4    | abgeschlossen | zwei Paket-Commits      | 41 Mining-/Runner-Tests; Dominanzgate auf tatsächlich eingeplantes Trash-Budget begrenzt, 4×3-Seed-A/B-Panel definiert      |
+| P5    | abgeschlossen | Abschlussbericht-Commit | finaler 20×480-Lauf, gepaartes A/B-Panel und separater Regel-/Timing-Audit                                                  |
+| P6    | in Arbeit     | –                       | 179/1.598 Engine- und 275/1.750 KI-Tests grün; Typecheck/AI-Checks/Format grün, lokaler Merge ausstehend                    |
