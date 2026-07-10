@@ -145,8 +145,15 @@ export function tacticalPlanMappedChoice(
     }
     const mappedNonPositiveAgainstPositive =
       mappedChoice.score <= 0 && overrideChoice.score > 0;
+    const deferredDevelopmentInstallShouldYield =
+      tacticalPlanDeferredDevelopmentInstallShouldYield(
+        mapping,
+        mappedChoice,
+        overrideChoice,
+      );
     if (
       mappedNonPositiveAgainstPositive &&
+      !deferredDevelopmentInstallShouldYield &&
       tacticalPlanNonPositiveMappingStillProtected(
         mapping,
         mappedChoice,
@@ -181,6 +188,7 @@ export function tacticalPlanMappedChoice(
         {
           repeatedRunShouldYield,
           corpBoardTriageMismatchShouldYield,
+          deferredDevelopmentInstallShouldYield,
         },
       )
     ) {
@@ -328,6 +336,7 @@ function tacticalPlanRunnerMappingBlocksOffPlanOverride(
   exceptions: {
     repeatedRunShouldYield: boolean;
     corpBoardTriageMismatchShouldYield: boolean;
+    deferredDevelopmentInstallShouldYield: boolean;
   },
 ): boolean {
   if (mapping.plan.side !== "runner") return false;
@@ -335,7 +344,32 @@ function tacticalPlanRunnerMappingBlocksOffPlanOverride(
   if (mappedActionIds.has(overrideChoice.action.actionId)) return false;
   if (exceptions.repeatedRunShouldYield) return false;
   if (exceptions.corpBoardTriageMismatchShouldYield) return false;
+  if (exceptions.deferredDevelopmentInstallShouldYield) return false;
   return !runnerPlanOverrideIsHardInterrupt(mapping.plan, overrideChoice);
+}
+
+function tacticalPlanDeferredDevelopmentInstallShouldYield(
+  mapping: PlanStepMappingResult,
+  mappedChoice: SemanticRuntimeChoice,
+  overrideChoice: SemanticRuntimeChoice,
+): boolean {
+  if (
+    (mapping.plan.type !== "runner.develop_hand_card" &&
+      mapping.plan.type !== "runner.play_best_hand_card") ||
+    mapping.step.kind !== "install_development_card" ||
+    mappedChoice.action.type !== "install_card" ||
+    mappedChoice.score > 0 ||
+    overrideChoice.score <= 0
+  ) {
+    return false;
+  }
+  return mappedChoice.scoreBreakdown.some(
+    (component) =>
+      component.value < 0 &&
+      (component.key === "runner_bank_install_commitment" ||
+        component.key === "runner_no_run_economy_install_commitment" ||
+        component.key === "runner_persistent_install_fit"),
+  );
 }
 
 function runnerPlanTypeRequiresPlanDominance(

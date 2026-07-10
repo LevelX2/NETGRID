@@ -108,6 +108,52 @@ describe("tacticalPlanMappedChoice", () => {
     expect(result.overrideBlockedReason).toBe("runner_plan_controller");
   });
 
+  it("yields a deferred bank install plan to a positive semantic action", () => {
+    const install = legalAction("install-broker-copy", "install_card");
+    const draw = legalAction("draw", "draw_card");
+    const deferredInstall = choice(install, -1096, [], {
+      key: "runner_bank_install_commitment",
+      value: -1600,
+      reason: "why_bank_install_deferred:no_plausible_followup_load",
+    });
+    const positiveDraw = choice(draw, 78);
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [positiveDraw, deferredInstall],
+      bestHandCardMapping([install]),
+      positiveDraw,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("draw");
+    expect(result.overriddenMappedChoice?.action.actionId).toBe(
+      "install-broker-copy",
+    );
+    expect(result.overrideReason).toBe("mapped_nonpositive_against_positive");
+  });
+
+  it("keeps a positive stackable bank install inside its development plan", () => {
+    const install = legalAction("install-stackable-bank", "install_card");
+    const draw = legalAction("draw", "draw_card");
+    const usefulInstall = choice(install, 854, [], {
+      key: "runner_bank_install_commitment",
+      value: 350,
+      reason: "runner_bank_status:install_ready",
+    });
+    const positiveDraw = choice(draw, 1800);
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [positiveDraw, usefulInstall],
+      bestHandCardMapping([install]),
+      positiveDraw,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_blocked");
+    expect(result.choice?.action.actionId).toBe("install-stackable-bank");
+    expect(result.overrideBlockedChoice?.action.actionId).toBe("draw");
+    expect(result.overrideBlockedReason).toBe("runner_plan_controller");
+  });
+
   it("keeps tag-clear survival plan mapping over off-plan run pressure", () => {
     const removeTag = legalAction("remove-tag", "remove_tag");
     const run = legalAction("run-rd", "start_run", { serverId: "rd" });
@@ -441,6 +487,7 @@ function choice(
   action: LegalAction,
   score: number,
   evidence: string[] = [],
+  component?: { key: string; value: number; reason: string },
 ): SemanticRuntimeChoice {
   return {
     action,
@@ -456,6 +503,16 @@ function choice(
         value: score,
         reason: "test",
       },
+      ...(component
+        ? [
+            {
+              key: component.key,
+              label: "Focused component",
+              value: component.value,
+              reason: component.reason,
+            },
+          ]
+        : []),
     ],
     reasonCode: `runner.semantic.${action.type}`,
     explanation: action.label,
