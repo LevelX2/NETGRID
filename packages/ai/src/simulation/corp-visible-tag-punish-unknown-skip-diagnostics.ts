@@ -1,5 +1,5 @@
 import type { AiDecision, AiDecisionInput, LegalAction } from "@netgrid/shared";
-import { DEMO_CARDS_BY_ID } from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "@netgrid/shared";
 
 import { RUNTIME_CARDS } from "../ai-hints";
 import { titleForCardId } from "../runtime/card-title";
@@ -108,7 +108,7 @@ export function createCorpVisibleTagPunishUnknownSkipDiagnosticsContext(
       );
       const type =
         RUNTIME_CARDS[definitionId]?.type ??
-        DEMO_CARDS_BY_ID[definitionId]?.type;
+        CARD_DEFINITIONS_BY_ID[definitionId]?.type;
       if (type === "agenda") return "install_agenda";
       if (type === "ice" || action.payload?.placement === "ice")
         return "install_ice";

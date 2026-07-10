@@ -1,10 +1,10 @@
-import { DEMO_CARDS_BY_ID, type CardDefinitionId } from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID, type CardDefinitionId } from "@netgrid/shared";
 import { CARD_IMPLEMENTATIONS } from "../card-implementations/registry";
 import type { CardImplementationDefinition } from "../card-implementations/types";
 import type { CardEffectImplementation } from "../ability-engine/definition-types";
 
 function cardDefinitionFor(implementation: CardImplementationDefinition) {
-  return DEMO_CARDS_BY_ID[implementation.cardDefinitionId];
+  return CARD_DEFINITIONS_BY_ID[implementation.cardDefinitionId];
 }
 
 function abilityEffects(

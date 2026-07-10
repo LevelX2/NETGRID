@@ -1,5 +1,5 @@
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type CardInstanceId,
   type GameState,
   type LegalAction,
@@ -18,7 +18,7 @@ export function cardTargetTypeForInstance(
   const definitionId = state.cardInstances[cardId]?.definitionId;
   if (!definitionId) return "unknown";
   const type =
-    DEMO_CARDS_BY_ID[definitionId]?.type ?? RUNTIME_CARDS[definitionId]?.type;
+    CARD_DEFINITIONS_BY_ID[definitionId]?.type ?? RUNTIME_CARDS[definitionId]?.type;
   return progressionCardTargetType(type);
 }
 
@@ -75,7 +75,7 @@ export function remoteHasNearFinalAgenda(
     if (!instance) return false;
     if (cardTargetTypeForInstance(state, cardId) !== "agenda") return false;
     const requirement =
-      DEMO_CARDS_BY_ID[instance.definitionId]?.advancementRequirement ??
+      CARD_DEFINITIONS_BY_ID[instance.definitionId]?.advancementRequirement ??
       RUNTIME_CARDS[instance.definitionId]?.numeric.advancementRequirement ??
       0;
     return Math.max(0, requirement - instance.advancementCounters) <= 2;
@@ -87,7 +87,7 @@ export function rezCostForDefinitionId(
 ): number {
   if (!definitionId) return 0;
   return (
-    DEMO_CARDS_BY_ID[definitionId]?.rezCost ??
+    CARD_DEFINITIONS_BY_ID[definitionId]?.rezCost ??
     RUNTIME_CARDS[definitionId]?.numeric.rezCost ??
     0
   );

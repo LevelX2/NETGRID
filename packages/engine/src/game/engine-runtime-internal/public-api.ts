@@ -20,8 +20,8 @@ export {
   applyEffectCommands,
 } from "./runtime-bootstrap";
 export {
-  DEMO_CARDS,
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS,
+  CARD_DEFINITIONS_BY_ID,
   DEMO_DECKS,
   CURRENT_RULES_BASELINE,
 } from "@netgrid/shared";

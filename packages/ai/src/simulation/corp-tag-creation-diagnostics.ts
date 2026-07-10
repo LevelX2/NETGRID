@@ -4,7 +4,7 @@ import type {
   GameState,
   LegalAction,
 } from "@netgrid/shared";
-import { DEMO_CARDS_BY_ID } from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "@netgrid/shared";
 
 import { RUNTIME_CARDS } from "../ai-hints";
 import { classifyTagSourceFromOntology } from "../tag-punish-ontology-consumer";
@@ -45,7 +45,7 @@ export function createCorpTagCreationDiagnosticsContext(
     );
     const sourceType =
       RUNTIME_CARDS[sourceDefinitionId]?.type ??
-      DEMO_CARDS_BY_ID[sourceDefinitionId]?.type;
+      CARD_DEFINITIONS_BY_ID[sourceDefinitionId]?.type;
     const tagSourceProfile = classifyTagSourceFromOntology(sourceDefinitionId);
     if (sourceType === "agenda" && tagSourceProfile?.traceTagSource)
       diagnostics.corpTagCreatedByScoredAgendaAction = true;

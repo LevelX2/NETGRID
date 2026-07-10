@@ -3,7 +3,7 @@ import { proteusArmageddonImplementation } from "../../card-implementations/prot
 import { proteusScaldanImplementation } from "../../card-implementations/proteus/runner/programs/scaldan";
 import { proteusTaxmanImplementation } from "../../card-implementations/proteus/runner/programs/taxman";
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type ActionType,
   type ChoiceRequest,
   type CardDefinition,

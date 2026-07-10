@@ -5,7 +5,7 @@ import {
   checkWinConditions,
   createGame,
   createGameAfterSetup,
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   DEMO_DECKS,
   eventVisibilityForAction,
   getLegalActions,
@@ -205,7 +205,7 @@ describe("V1.6.1 Mechanikpaket A", () => {
   it("adds a controlled V1.6.1 core card set without opening deferred mechanics", () => {
     expect(ONR_V1_6_1_FINAL_CARD_IDS).toHaveLength(6);
     for (const definitionId of ONR_V1_6_1_FINAL_CARD_IDS) {
-      const definition = DEMO_CARDS_BY_ID[definitionId];
+      const definition = CARD_DEFINITIONS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
       );
@@ -213,27 +213,27 @@ describe("V1.6.1 Mechanikpaket A", () => {
         /hosting|daemon|stealth|worm|search|arrange|shuffle|unique|counter_system|deterministischer_wuerfel/,
       );
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_023_evil-twin"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_023_evil-twin"]).toMatchObject({
       installCost: 6,
       memoryCost: 1,
       strength: 3,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_028_force-shield"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_028_force-shield"]).toMatchObject({
       installCost: 2,
       memoryCost: 1,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_125_dermatech-bodyplating"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_125_dermatech-bodyplating"]).toMatchObject({
       installCost: 0,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_229_code-corpse"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_229_code-corpse"]).toMatchObject({
       rezCost: 10,
       strength: 5,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_231_cortical-scrub"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_231_cortical-scrub"]).toMatchObject({
       rezCost: 7,
       strength: 3,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_254_liche"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_254_liche"]).toMatchObject({
       rezCost: 14,
       strength: 6,
     });
@@ -253,8 +253,8 @@ describe("V1.6.1 Mechanikpaket A", () => {
     expect(corpValidation.ok).toBe(true);
     expect(corpValidation.errors).toEqual([]);
     expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
-    expect(DEMO_CARDS_BY_ID["onr_v1_021_dwarf"]).toBeDefined();
-    expect(DEMO_CARDS_BY_ID["onr_v1_297_overtime-incentives"]).toBeDefined();
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_021_dwarf"]).toBeDefined();
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_297_overtime-incentives"]).toBeDefined();
   });
 
   it("uses runtime prevention windows from Force Shield and Dermatech Bodyplating", () => {
@@ -413,7 +413,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
   it("adds a controlled V1.6.2 core card set without opening deferred mechanics", () => {
     expect(ONR_V1_6_2_FINAL_CARD_IDS).toHaveLength(5);
     for (const definitionId of ONR_V1_6_2_FINAL_CARD_IDS) {
-      const definition = DEMO_CARDS_BY_ID[definitionId];
+      const definition = CARD_DEFINITIONS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
       );
@@ -421,27 +421,27 @@ describe("V1.6.2 Mechanikpaket B", () => {
         /hosting|daemon|stealth|unique_card|uninstall_runner_program|subtype_noisy/,
       );
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_212_priority-requisition"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_212_priority-requisition"]).toMatchObject({
       advancementRequirement: 5,
       agendaPoints: 3,
     });
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_215_security-net-optimization"],
+      CARD_DEFINITIONS_BY_ID["onr_v1_215_security-net-optimization"],
     ).toMatchObject({ advancementRequirement: 5, agendaPoints: 3 });
-    expect(DEMO_CARDS_BY_ID["onr_v1_317_data-masons"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_317_data-masons"]).toMatchObject({
       rezCost: 1,
       trashCost: 1,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_320_encoder-inc"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_320_encoder-inc"]).toMatchObject({
       rezCost: 0,
       trashCost: 1,
       rulesText: expect.stringContaining("cost 1 less to rez"),
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_320_encoder-inc"]?.rulesText).toContain(
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_320_encoder-inc"]?.rulesText).toContain(
       "additional",
     );
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_341_skalderviken-sa-beta-test-site"],
+      CARD_DEFINITIONS_BY_ID["onr_v1_341_skalderviken-sa-beta-test-site"],
     ).toMatchObject({ rezCost: 0, trashCost: 2 });
   });
 
@@ -459,7 +459,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
     expect(corpValidation.ok).toBe(true);
     expect(corpValidation.errors).toEqual([]);
     expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
-    expect(DEMO_CARDS_BY_ID["onr_v1_254_liche"]).toBeDefined();
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_254_liche"]).toBeDefined();
   });
 
   it("projects Department of Truth Enhancement hosted credits as visible stored credits", () => {
@@ -705,7 +705,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
         cardStrengthModifier: () => 0,
         creditCostForAction: () => 0,
         definitionFor: () =>
-          DEMO_CARDS_BY_ID.simple_agenda ?? Object.values(DEMO_CARDS_BY_ID)[0]!,
+          CARD_DEFINITIONS_BY_ID.simple_agenda ?? Object.values(CARD_DEFINITIONS_BY_ID)[0]!,
         pumpAmountForLegalAction: () => 0,
         runnerHqAccessBonus: () => 0,
         v1915InstalledAccessBonus: () => 0,
@@ -1507,7 +1507,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
         ),
         "runner",
       ).run?.encounteredIce?.strength,
-    ).toBe((DEMO_CARDS_BY_ID["onr_v1_232_crystal-wall"]?.strength ?? 0) + 1);
+    ).toBe((CARD_DEFINITIONS_BY_ID["onr_v1_232_crystal-wall"]?.strength ?? 0) + 1);
     expect(
       getPlayerView(
         approachIce(
@@ -1518,7 +1518,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
         ),
         "runner",
       ).run?.encounteredIce?.strength,
-    ).toBe((DEMO_CARDS_BY_ID["onr_v1_232_crystal-wall"]?.strength ?? 0) + 1);
+    ).toBe((CARD_DEFINITIONS_BY_ID["onr_v1_232_crystal-wall"]?.strength ?? 0) + 1);
     expect(
       getPlayerView(
         approachIce(
@@ -1529,7 +1529,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
         ),
         "runner",
       ).run?.encounteredIce?.strength,
-    ).toBe(DEMO_CARDS_BY_ID["onr_v1_230_cortical-scanner"]?.strength);
+    ).toBe(CARD_DEFINITIONS_BY_ID["onr_v1_230_cortical-scanner"]?.strength);
     expect(
       getPlayerView(
         approachIce(
@@ -1540,7 +1540,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
         ),
         "runner",
       ).run?.encounteredIce?.strength,
-    ).toBe(DEMO_CARDS_BY_ID["onr_v1_232_crystal-wall"]?.strength);
+    ).toBe(CARD_DEFINITIONS_BY_ID["onr_v1_232_crystal-wall"]?.strength);
     expect(
       cardImplementationCoverageForDefinitionId("onr_v1_317_data-masons")
         ?.status,
@@ -2262,7 +2262,7 @@ describe("V1.6.3 Mechanikpaket C", () => {
   it("adds a controlled V1.6.3 core card set without opening deferred mechanics", () => {
     expect(ONR_V1_6_3_FINAL_CARD_IDS).toHaveLength(5);
     for (const definitionId of ONR_V1_6_3_FINAL_CARD_IDS) {
-      const definition = DEMO_CARDS_BY_ID[definitionId];
+      const definition = CARD_DEFINITIONS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
       );
@@ -2270,22 +2270,22 @@ describe("V1.6.3 Mechanikpaket C", () => {
         /hosting|daemon|stealth|unique_card|recurring_credit/,
       );
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_233_d-arc-knight"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_233_d-arc-knight"]).toMatchObject({
       rezCost: 6,
       strength: 2,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_267_sentinels-prime"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_267_sentinels-prime"]).toMatchObject({
       rezCost: 8,
       strength: 4,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_273_triggerman"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_273_triggerman"]).toMatchObject({
       rezCost: 7,
       strength: 3,
     });
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_350_antiquated-interface-routines"],
+      CARD_DEFINITIONS_BY_ID["onr_v1_350_antiquated-interface-routines"],
     ).toMatchObject({ rezCost: 2, trashCost: 1 });
-    expect(DEMO_CARDS_BY_ID["onr_v1_371_tokyo-chiba-infighting"]).toMatchObject(
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_371_tokyo-chiba-infighting"]).toMatchObject(
       { rezCost: 0, trashCost: 6 },
     );
   });
@@ -2305,7 +2305,7 @@ describe("V1.6.3 Mechanikpaket C", () => {
     expect(corpValidation.errors).toEqual([]);
     expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_341_skalderviken-sa-beta-test-site"],
+      CARD_DEFINITIONS_BY_ID["onr_v1_341_skalderviken-sa-beta-test-site"],
     ).toBeDefined();
   });
 
@@ -2688,7 +2688,7 @@ describe("V1.7.0 Mechanikpaket D", () => {
   it("adds a controlled V1.7.0 core card set with subtype, hosting, recurring and unique gates", () => {
     expect(ONR_V1_7_0_FINAL_CARD_IDS).toHaveLength(5);
     for (const definitionId of ONR_V1_7_0_FINAL_CARD_IDS) {
-      const definition = DEMO_CARDS_BY_ID[definitionId];
+      const definition = CARD_DEFINITIONS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
       );
@@ -2696,28 +2696,28 @@ describe("V1.7.0 Mechanikpaket D", () => {
         /search|arrange|shuffle|trace_windowing|run_lock|counter_system|deterministischer_wuerfel/,
       );
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_011_cloak"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_011_cloak"]).toMatchObject({
       installCost: 7,
       memoryCost: 1,
       recurringCredits: 3,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_036_jackhammer"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_036_jackhammer"]).toMatchObject({
       installCost: 1,
       memoryCost: 1,
       strength: 0,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_069_succubus"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_069_succubus"]).toMatchObject({
       installCost: 3,
       memoryCost: 1,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_163_floating-runner-bbs"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_163_floating-runner-bbs"]).toMatchObject({
       installCost: 6,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_180_smiths-pawnshop"]?.subtypes).toContain(
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_180_smiths-pawnshop"]?.subtypes).toContain(
       "unique",
     );
-    expect(DEMO_CARDS_BY_ID["onr_v1_021_dwarf"]?.subtypes).toContain("worm");
-    expect(DEMO_CARDS_BY_ID["onr_v1_074_worm"]?.subtypes).toContain("worm");
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_021_dwarf"]?.subtypes).toContain("worm");
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_074_worm"]?.subtypes).toContain("worm");
   });
 
   it("validates V1.7.0 smoke decks and keeps previous releases available", () => {
@@ -2734,7 +2734,7 @@ describe("V1.7.0 Mechanikpaket D", () => {
     expect(corpValidation.ok).toBe(true);
     expect(corpValidation.errors).toEqual([]);
     expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
-    expect(DEMO_CARDS_BY_ID["onr_v1_371_tokyo-chiba-infighting"]).toBeDefined();
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_371_tokyo-chiba-infighting"]).toBeDefined();
   });
 
   it("hosts programs on Succubus without MU cost and trashes hosted programs when the daemon is trashed", () => {
@@ -3067,24 +3067,24 @@ describe("V1.7.1 Mechanikpaket E", () => {
   it("adds a controlled V1.7.1 core card set for search, access replacement and HQ multiaccess", () => {
     expect(ONR_V1_7_1_FINAL_CARD_IDS).toHaveLength(5);
     for (const definitionId of ONR_V1_7_1_FINAL_CARD_IDS) {
-      const definition = DEMO_CARDS_BY_ID[definitionId];
+      const definition = CARD_DEFINITIONS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
       );
     }
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_114_temple-microcode-outlet"],
+      CARD_DEFINITIONS_BY_ID["onr_v1_114_temple-microcode-outlet"],
     ).toMatchObject({ cost: 1 });
-    expect(DEMO_CARDS_BY_ID["onr_v1_106_private-ldl-access"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_106_private-ldl-access"]).toMatchObject({
       cost: 0,
     });
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_118_weather-to-finance-pipe"],
+      CARD_DEFINITIONS_BY_ID["onr_v1_118_weather-to-finance-pipe"],
     ).toMatchObject({ cost: 0 });
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_084_edited-shipping-manifests"],
+      CARD_DEFINITIONS_BY_ID["onr_v1_084_edited-shipping-manifests"],
     ).toMatchObject({ cost: 1 });
-    expect(DEMO_CARDS_BY_ID["onr_v1_129_hq-interface"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_129_hq-interface"]).toMatchObject({
       installCost: 4,
     });
   });
@@ -3103,7 +3103,7 @@ describe("V1.7.1 Mechanikpaket E", () => {
     expect(corpValidation.ok).toBe(true);
     expect(corpValidation.errors).toEqual([]);
     expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
-    expect(DEMO_CARDS_BY_ID["onr_v1_180_smiths-pawnshop"]).toBeDefined();
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_180_smiths-pawnshop"]).toBeDefined();
   });
 
   it("resolves Temple Microcode Outlet as hidden-zone stack search and deterministic shuffle", () => {
@@ -3401,25 +3401,25 @@ describe("V1.7.2 Mechanikpaket F", () => {
   it("adds a controlled V1.7.2 core card set for trace, tag-resource interaction and runner resource actions", () => {
     expect(ONR_V1_7_2_FINAL_CARD_IDS).toHaveLength(5);
     for (const definitionId of ONR_V1_7_2_FINAL_CARD_IDS) {
-      const definition = DEMO_CARDS_BY_ID[definitionId];
+      const definition = CARD_DEFINITIONS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
       );
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_283_audit-of-call-records"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_283_audit-of-call-records"]).toMatchObject({
       cost: 0,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_284_chance-observation"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_284_chance-observation"]).toMatchObject({
       cost: 2,
     });
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_286_corporate-detective-agency"],
+      CARD_DEFINITIONS_BY_ID["onr_v1_286_corporate-detective-agency"],
     ).toMatchObject({ cost: 1 });
-    expect(DEMO_CARDS_BY_ID["onr_v1_158_danshis-second-id"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_158_danshis-second-id"]).toMatchObject({
       installCost: 0,
     });
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_179_silicon-saloon-franchise"],
+      CARD_DEFINITIONS_BY_ID["onr_v1_179_silicon-saloon-franchise"],
     ).toMatchObject({ installCost: 8 });
   });
 
@@ -3437,7 +3437,7 @@ describe("V1.7.2 Mechanikpaket F", () => {
     expect(corpValidation.ok).toBe(true);
     expect(corpValidation.errors).toEqual([]);
     expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
-    expect(DEMO_CARDS_BY_ID["onr_v1_129_hq-interface"]).toBeDefined();
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_129_hq-interface"]).toBeDefined();
   });
 
   it("gates Chance Observation and Audit of Call Records by runner run attempts of the previous turn", () => {
@@ -3744,7 +3744,7 @@ describe("V1.8.0 Mechanikpaket G", () => {
   it("adds a controlled V1.8.0 core card set for agenda difficulty, scored statics and overadvance points", () => {
     expect(ONR_V1_8_0_FINAL_CARD_IDS).toHaveLength(6);
     for (const definitionId of ONR_V1_8_0_FINAL_CARD_IDS) {
-      const definition = DEMO_CARDS_BY_ID[definitionId];
+      const definition = CARD_DEFINITIONS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
       );
@@ -3752,23 +3752,23 @@ describe("V1.8.0 Mechanikpaket G", () => {
         /counter_system|virus|purge|deterministischer_wuerfel/,
       );
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_083_desperate-competitor"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_083_desperate-competitor"]).toMatchObject({
       cost: 0,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_090_hot-tip-for-wns"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_090_hot-tip-for-wns"]).toMatchObject({
       cost: 0,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_156_corporate-ally"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_156_corporate-ally"]).toMatchObject({
       installCost: 3,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_159_databroker"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_159_databroker"]).toMatchObject({
       installCost: 0,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_201_executive-extraction"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_201_executive-extraction"]).toMatchObject({
       advancementRequirement: 3,
       agendaPoints: 1,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_214_project-babylon"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_214_project-babylon"]).toMatchObject({
       advancementRequirement: 3,
       agendaPoints: 1,
     });
@@ -3789,7 +3789,7 @@ describe("V1.8.0 Mechanikpaket G", () => {
     expect(corpValidation.errors).toEqual([]);
     expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_286_corporate-detective-agency"],
+      CARD_DEFINITIONS_BY_ID["onr_v1_286_corporate-detective-agency"],
     ).toBeDefined();
   });
 
@@ -4185,7 +4185,7 @@ describe("V1.8.1 Mechanikpaket H", () => {
   it("adds a controlled V1.8.1 core card set for counter, purge and run-follow-up mechanics", () => {
     expect(ONR_V1_8_1_FINAL_CARD_IDS).toHaveLength(12);
     for (const definitionId of ONR_V1_8_1_FINAL_CARD_IDS) {
-      const definition = DEMO_CARDS_BY_ID[definitionId];
+      const definition = CARD_DEFINITIONS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
       );
@@ -4212,7 +4212,7 @@ describe("V1.8.1 Mechanikpaket H", () => {
     expect(corpValidation.ok).toBe(true);
     expect(corpValidation.errors).toEqual([]);
     expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
-    expect(DEMO_CARDS_BY_ID["onr_v1_214_project-babylon"]).toBeDefined();
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_214_project-babylon"]).toBeDefined();
   });
 
   it("applies Clown encounter strength reduction to encountered ice strength", () => {
@@ -5170,7 +5170,7 @@ describe("V1.9.0 Mechanikpaket I", () => {
   it("adds a controlled V1.9.0 core card set for deterministic die, concrete resolver and ambush foundation scope", () => {
     expect(ONR_V1_9_0_FINAL_CARD_IDS).toHaveLength(5);
     for (const definitionId of ONR_V1_9_0_FINAL_CARD_IDS) {
-      const definition = DEMO_CARDS_BY_ID[definitionId];
+      const definition = CARD_DEFINITIONS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
       );
@@ -5197,7 +5197,7 @@ describe("V1.9.0 Mechanikpaket I", () => {
     expect(corpValidation.ok).toBe(true);
     expect(corpValidation.errors).toEqual([]);
     expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
-    expect(DEMO_CARDS_BY_ID["onr_v1_268_shock-r"]).toBeDefined();
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_268_shock-r"]).toBeDefined();
   });
 
   it("uses a deterministic shared die resolver namespace and replay-stable random records", () => {
@@ -5961,7 +5961,7 @@ describe("V1.9.1 Mechanikpaket J", () => {
       onr_v1_030_grubb: /run_remainder_strength_bonus/,
     };
     for (const definitionId of ONR_V1_9_1_FINAL_CARD_IDS) {
-      const definition = DEMO_CARDS_BY_ID[definitionId];
+      const definition = CARD_DEFINITIONS_BY_ID[definitionId];
       const expectedPattern = expectedMechanics[definitionId];
       expect(expectedPattern, definitionId).toBeDefined();
       expect(definition?.implementationStatus, definitionId).toBe(
@@ -5990,7 +5990,7 @@ describe("V1.9.1 Mechanikpaket J", () => {
     expect(corpValidation.ok).toBe(true);
     expect(corpValidation.errors).toEqual([]);
     expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
-    expect(DEMO_CARDS_BY_ID["onr_v1_275_vacuum-link"]).toBeDefined();
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_275_vacuum-link"]).toBeDefined();
   });
 
   it("randomizes Corp HQ discard deterministically with Cockroach threshold and keeps replay/statehash stable", () => {
@@ -6427,7 +6427,7 @@ describe("V1.9.2 Mechanikpaket K", () => {
       "onr_v1_235_data-naga": /trash_installed_program/,
     };
     for (const definitionId of ONR_V1_9_2_FINAL_CARD_IDS) {
-      const definition = DEMO_CARDS_BY_ID[definitionId];
+      const definition = CARD_DEFINITIONS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
       );
@@ -6454,7 +6454,7 @@ describe("V1.9.2 Mechanikpaket K", () => {
     expect(corpValidation.ok).toBe(true);
     expect(corpValidation.errors).toEqual([]);
     expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
-    expect(DEMO_CARDS_BY_ID["onr_v1_013_cockroach"]).toBeDefined();
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_013_cockroach"]).toBeDefined();
   });
 
   it("grants an All-Nighter bonus run via LegalActions without spending a click on the bonus run", () => {
@@ -6725,7 +6725,7 @@ describe("V1.9.3 Mechanikpaket L", () => {
       "onr_v1_271_tko-2-0": /action_economy/,
     };
     for (const definitionId of ONR_V1_9_3_FINAL_CARD_IDS) {
-      const definition = DEMO_CARDS_BY_ID[definitionId];
+      const definition = CARD_DEFINITIONS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
       );
@@ -6752,7 +6752,7 @@ describe("V1.9.3 Mechanikpaket L", () => {
     expect(corpValidation.ok).toBe(true);
     expect(corpValidation.errors).toEqual([]);
     expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
-    expect(DEMO_CARDS_BY_ID["onr_v1_235_data-naga"]).toBeDefined();
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_235_data-naga"]).toBeDefined();
   });
 
   it("starts V1.9.3 agenda trace actions and keeps Jack Attack jack-out lock active for the run", () => {
@@ -6906,7 +6906,7 @@ describe("V1.9.4 Mechanikpaket M", () => {
   it("adds the V1.9.4 core card set with tagged meat-damage agenda actions", () => {
     expect(ONR_V1_9_4_FINAL_CARD_IDS).toHaveLength(2);
     for (const definitionId of ONR_V1_9_4_FINAL_CARD_IDS) {
-      const definition = DEMO_CARDS_BY_ID[definitionId];
+      const definition = CARD_DEFINITIONS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
       );
@@ -6934,7 +6934,7 @@ describe("V1.9.4 Mechanikpaket M", () => {
     expect(corpValidation.ok).toBe(true);
     expect(corpValidation.errors).toEqual([]);
     expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
-    expect(DEMO_CARDS_BY_ID["onr_v1_251_jack-attack"]).toBeDefined();
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_251_jack-attack"]).toBeDefined();
   });
 
   it("resolves On-Call Solo Team and Strike Force Kali damage actions only while Runner is tagged", () => {
@@ -7011,7 +7011,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
   it("adds the V1.9.5 core card set with agenda strength and asset credit mechanics", () => {
     expect(ONR_V1_9_5_FINAL_CARD_IDS).toHaveLength(2);
     for (const definitionId of ONR_V1_9_5_FINAL_CARD_IDS) {
-      const definition = DEMO_CARDS_BY_ID[definitionId];
+      const definition = CARD_DEFINITIONS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
       );
@@ -7020,13 +7020,13 @@ describe("V1.9.5 Mechanikpaket N", () => {
       );
     }
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_219_superior-net-barriers"]?.mechanics.join(" "),
+      CARD_DEFINITIONS_BY_ID["onr_v1_219_superior-net-barriers"]?.mechanics.join(" "),
     ).toMatch(/ice_strength|strength_modifier/);
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_219_superior-net-barriers"]?.mechanics.join(" "),
+      CARD_DEFINITIONS_BY_ID["onr_v1_219_superior-net-barriers"]?.mechanics.join(" "),
     ).toMatch(/strength/);
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_308_acme-savings-and-loan"]?.mechanics.join(" "),
+      CARD_DEFINITIONS_BY_ID["onr_v1_308_acme-savings-and-loan"]?.mechanics.join(" "),
     ).toMatch(/credit/);
   });
 
@@ -7073,7 +7073,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
       .servers.find((server) => server.id === "rd")
       ?.ice.find((ice) => ice.instanceId === wallId);
     expect(rdWall?.strength).toBe(
-      (DEMO_CARDS_BY_ID["onr_v1_279_wall-of-static"]?.strength ?? 0) + 1,
+      (CARD_DEFINITIONS_BY_ID["onr_v1_279_wall-of-static"]?.strength ?? 0) + 1,
     );
 
     const scoredAgendaId = scoreCorpAgendaForTest(
@@ -7290,7 +7290,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
       .servers.find((server) => server.id === "remote_1")
       ?.ice.find((ice) => ice.instanceId === rezzedWallId);
     expect(rezzedWallView?.strength).toBe(
-      (DEMO_CARDS_BY_ID["onr_v1_237_data-wall"]?.strength ?? 0) + 1,
+      (CARD_DEFINITIONS_BY_ID["onr_v1_237_data-wall"]?.strength ?? 0) + 1,
     );
 
     const beforeChoiceCredits = state.corp.credits;
@@ -7573,7 +7573,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
 describe("V1.9.6 Mechanikpaket O", () => {
   it("adds the V1.9.6 Data Raven core card and validates smoke decks", () => {
     expect(ONR_V1_9_6_FINAL_CARD_IDS).toHaveLength(1);
-    const definition = DEMO_CARDS_BY_ID["onr_v1_236_data-raven"];
+    const definition = CARD_DEFINITIONS_BY_ID["onr_v1_236_data-raven"];
     expect(definition?.implementationStatus).toBe("playable_mvp");
     expect(definition?.mechanics.join(" ")).toMatch(/trace/);
     expect(definition?.mechanics.join(" ")).toMatch(/counter/);
@@ -7639,7 +7639,7 @@ describe("V1.9.6 Mechanikpaket O", () => {
 describe("V1.9.7 Mechanikpaket P", () => {
   it("adds Afreet as a playable daemon host and validates smoke decks", () => {
     expect(ONR_V1_9_7_FINAL_CARD_IDS).toHaveLength(1);
-    const definition = DEMO_CARDS_BY_ID["onr_v1_001_afreet"];
+    const definition = CARD_DEFINITIONS_BY_ID["onr_v1_001_afreet"];
     expect(definition?.implementationStatus).toBe("playable_mvp");
     expect(definition?.mechanics.join(" ")).toMatch(/host/);
     expect(definition?.mechanics.join(" ")).not.toMatch(
@@ -7682,7 +7682,7 @@ describe("V1.9.8 Mechanikpaket Q", () => {
   it("adds Dogcatcher and Dropp as playable breaker longtail cards and validates smoke decks", () => {
     expect(ONR_V1_9_8_FINAL_CARD_IDS).toHaveLength(2);
     for (const definitionId of ONR_V1_9_8_FINAL_CARD_IDS) {
-      const definition = DEMO_CARDS_BY_ID[definitionId];
+      const definition = CARD_DEFINITIONS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
       );
@@ -7746,7 +7746,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
   it("adds the four V1.9.9 upgrade cards and validates smoke decks", () => {
     expect(ONR_V1_9_9_FINAL_CARD_IDS).toHaveLength(4);
     for (const definitionId of ONR_V1_9_9_FINAL_CARD_IDS) {
-      const definition = DEMO_CARDS_BY_ID[definitionId];
+      const definition = CARD_DEFINITIONS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
       );
@@ -7756,20 +7756,20 @@ describe("V1.9.9 Mechanikpaket R", () => {
       );
     }
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_349_aardvark"]?.mechanics.join(" "),
+      CARD_DEFINITIONS_BY_ID["onr_v1_349_aardvark"]?.mechanics.join(" "),
     ).toMatch(/worm/);
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_351_bizarre-encryption-scheme"]?.mechanics.join(
+      CARD_DEFINITIONS_BY_ID["onr_v1_351_bizarre-encryption-scheme"]?.mechanics.join(
         " ",
       ),
     ).toMatch(/delayed_agenda_score/);
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_352_chester-mix"]?.mechanics.join(" "),
+      CARD_DEFINITIONS_BY_ID["onr_v1_352_chester-mix"]?.mechanics.join(" "),
     ).toMatch(/ice_install_cost_mod_server/);
-    expect(DEMO_CARDS_BY_ID["onr_v1_352_chester-mix"]?.rulesText).toContain(
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_352_chester-mix"]?.rulesText).toContain(
       "reduced by 2",
     );
-    expect(DEMO_CARDS_BY_ID["onr_v1_353_chimera"]?.mechanics.join(" ")).toMatch(
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_353_chimera"]?.mechanics.join(" ")).toMatch(
       /daemon_trash_choice/,
     );
     expect(

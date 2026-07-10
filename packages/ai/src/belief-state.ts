@@ -1,5 +1,5 @@
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type AiDecisionInput,
   type PlayerView,
   type PublicGameEvent,
@@ -1442,15 +1442,15 @@ function beliefRemoteServerId(serverId: string): boolean {
 }
 
 function beliefDefinitionType(definitionId: string): string | undefined {
-  return DEMO_CARDS_BY_ID[definitionId]?.type ?? RUNTIME_CARDS[definitionId]?.type;
+  return CARD_DEFINITIONS_BY_ID[definitionId]?.type ?? RUNTIME_CARDS[definitionId]?.type;
 }
 
 function beliefDefinitionSide(definitionId: string): Side | undefined {
-  return DEMO_CARDS_BY_ID[definitionId]?.side ?? RUNTIME_CARDS[definitionId]?.side;
+  return CARD_DEFINITIONS_BY_ID[definitionId]?.side ?? RUNTIME_CARDS[definitionId]?.side;
 }
 
 function beliefDefinitionTrashCost(definitionId: string): number | undefined {
-  return RUNTIME_CARDS[definitionId]?.numeric.trashCost ?? DEMO_CARDS_BY_ID[definitionId]?.trashCost;
+  return RUNTIME_CARDS[definitionId]?.numeric.trashCost ?? CARD_DEFINITIONS_BY_ID[definitionId]?.trashCost;
 }
 
 function deriveRunnerOpponentModel(
@@ -1696,11 +1696,11 @@ function rndInvalidationReason(event: BeliefEventClassification): string | undef
 }
 
 function definitionLooksAgenda(definitionId: string): boolean {
-  return DEMO_CARDS_BY_ID[definitionId]?.type === "agenda";
+  return CARD_DEFINITIONS_BY_ID[definitionId]?.type === "agenda";
 }
 
 function definitionLooksLowValueRndAccess(definitionId: string): boolean {
-  const definition = DEMO_CARDS_BY_ID[definitionId];
+  const definition = CARD_DEFINITIONS_BY_ID[definitionId];
   if (!definition) return false;
   return definition.type !== "agenda" && definition.type !== "asset" && definition.type !== "upgrade";
 }

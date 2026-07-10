@@ -3,7 +3,7 @@ import type {
   VisibleCard,
   VisibleEffectiveIceRunQuote,
 } from "@netgrid/shared";
-import { DEMO_CARDS_BY_ID } from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "@netgrid/shared";
 
 import {
   assessKnownRezzedIcePath,
@@ -65,7 +65,7 @@ export function projectFutureIceForUnbrokenEffects(
     iceDefinitionId: ice.definitionId,
     effectiveStrength: ice.strength ?? cardDefinitionStrength(ice.definitionId),
     subroutines:
-      DEMO_CARDS_BY_ID[ice.definitionId]?.subroutines?.map((subroutine) => ({
+      CARD_DEFINITIONS_BY_ID[ice.definitionId]?.subroutines?.map((subroutine) => ({
         id: subroutine.id,
         type: subroutine.type,
         ...(subroutine.amount !== undefined

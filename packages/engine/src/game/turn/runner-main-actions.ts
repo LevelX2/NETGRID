@@ -1,5 +1,5 @@
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type CardDefinition,
   type CardInstanceId,
   type GameState,
@@ -1391,7 +1391,7 @@ function installedRunnerIcebreakerIds(state: GameState): string[] {
     .filter((cardId) => {
       const definitionId = state.cardInstances[cardId]?.definitionId;
       const definition = definitionId
-        ? DEMO_CARDS_BY_ID[definitionId]
+        ? CARD_DEFINITIONS_BY_ID[definitionId]
         : undefined;
       return definition?.subtypes.includes("icebreaker") === true;
     })

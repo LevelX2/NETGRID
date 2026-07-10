@@ -1,4 +1,4 @@
-import { DEMO_CARDS_BY_ID, type VisibleCard } from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID, type VisibleCard } from "@netgrid/shared";
 import {
   RUNTIME_CARDS,
   createAiHintsByCard,
@@ -314,12 +314,12 @@ function riskPenalty(risk: AiHintCostProfile["reserveRisk"]): number {
 
 function cardDefinition(definitionId: string | undefined) {
   if (!definitionId) return undefined;
-  const direct = DEMO_CARDS_BY_ID[definitionId];
+  const direct = CARD_DEFINITIONS_BY_ID[definitionId];
   if (direct) return direct;
   const runtime = RUNTIME_CARDS[definitionId];
   if (!runtime) return undefined;
   return runtime.engineCardId
-    ? DEMO_CARDS_BY_ID[runtime.engineCardId]
+    ? CARD_DEFINITIONS_BY_ID[runtime.engineCardId]
     : runtime;
 }
 

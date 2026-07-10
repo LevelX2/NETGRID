@@ -1,4 +1,4 @@
-import { DEMO_CARDS_BY_ID } from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "@netgrid/shared";
 import { RUNTIME_CARDS } from "../ai-hints";
 
 export function isLowValueKnownAccessCard(
@@ -6,7 +6,7 @@ export function isLowValueKnownAccessCard(
   runnerCredits: number,
 ): boolean {
   const runtimeDefinition = RUNTIME_CARDS[definitionId];
-  const demoDefinition = DEMO_CARDS_BY_ID[definitionId];
+  const demoDefinition = CARD_DEFINITIONS_BY_ID[definitionId];
   const type = runtimeDefinition?.type ?? demoDefinition?.type;
   if (!type) return false;
   if (type === "agenda") return false;

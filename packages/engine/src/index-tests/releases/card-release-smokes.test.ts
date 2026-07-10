@@ -5,7 +5,7 @@ import {
   checkWinConditions,
   createGame,
   createGameAfterSetup,
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   DEMO_DECKS,
   eventVisibilityForAction,
   getLegalActions,
@@ -201,32 +201,32 @@ describe("V1.0.5K Card Release", () => {
     expect(ONR_V1_0_5K_FINAL_CARD_IDS.length).toBeLessThanOrEqual(20);
     for (const definitionId of ONR_V1_0_5K_FINAL_CARD_IDS) {
       expect(
-        DEMO_CARDS_BY_ID[definitionId]?.implementationStatus,
+        CARD_DEFINITIONS_BY_ID[definitionId]?.implementationStatus,
         definitionId,
       ).toBe("playable_mvp");
     }
 
-    expect(DEMO_CARDS_BY_ID["onr_v1_237_data-wall"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_237_data-wall"]).toMatchObject({
       rezCost: 1,
       strength: 0,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_238_data-wall-2-0"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_238_data-wall-2-0"]).toMatchObject({
       rezCost: 2,
       strength: 1,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_239_endless-corridor"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_239_endless-corridor"]).toMatchObject({
       rezCost: 4,
       strength: 2,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_144_tycho-mem-chip"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_144_tycho-mem-chip"]).toMatchObject({
       installCost: 5,
       memoryLimitBonus: 3,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_146_zetatech-mem-chip"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_146_zetatech-mem-chip"]).toMatchObject({
       installCost: 3,
       memoryLimitBonus: 2,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_203_hostile-takeover"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_203_hostile-takeover"]).toMatchObject({
       advancementRequirement: 3,
       agendaPoints: 1,
     });
@@ -829,36 +829,36 @@ describe("V1.0.6K Card Release", () => {
     expect(ONR_V1_0_6K_FINAL_CARD_IDS).toHaveLength(20);
     for (const definitionId of ONR_V1_0_6K_FINAL_CARD_IDS) {
       expect(
-        DEMO_CARDS_BY_ID[definitionId]?.implementationStatus,
+        CARD_DEFINITIONS_BY_ID[definitionId]?.implementationStatus,
         definitionId,
       ).toBe("playable_mvp");
     }
 
-    expect(DEMO_CARDS_BY_ID["onr_v1_072_wild-card"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_072_wild-card"]).toMatchObject({
       installCost: 0,
       memoryCost: 1,
       strength: 0,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_145_wutech-mem-chip"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_145_wutech-mem-chip"]).toMatchObject({
       installCost: 1,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_220_tycho-extension"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_220_tycho-extension"]).toMatchObject({
       advancementRequirement: 4,
       agendaPoints: 4,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_244_filter"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_244_filter"]).toMatchObject({
       rezCost: 0,
       strength: 0,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_245_fire-wall"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_245_fire-wall"]).toMatchObject({
       rezCost: 5,
       strength: 4,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_252_keeper"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_252_keeper"]).toMatchObject({
       rezCost: 4,
       strength: 4,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_256_mazer"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_256_mazer"]).toMatchObject({
       rezCost: 5,
       strength: 5,
     });
@@ -879,8 +879,8 @@ describe("V1.0.6K Card Release", () => {
     expect(corpValidation.errors).toEqual([]);
     expect(corpValidation.ok).toBe(true);
     expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
-    expect(DEMO_CARDS_BY_ID["onr_v1_015_codeslinger"]).toBeDefined();
-    expect(DEMO_CARDS_BY_ID["onr_v1_203_hostile-takeover"]).toBeDefined();
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_015_codeslinger"]).toBeDefined();
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_203_hostile-takeover"]).toBeDefined();
   });
 
   it("plays V1.0.6K Runner economy/draw cards, installs WuTech and uses Wild Card", () => {
@@ -1160,7 +1160,7 @@ describe("V1.0.6K Card Release", () => {
       state.corp.credits = 20;
 
       expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
-        DEMO_CARDS_BY_ID[definitionId]?.title,
+        CARD_DEFINITIONS_BY_ID[definitionId]?.title,
       );
 
       state = apply(
@@ -1178,7 +1178,7 @@ describe("V1.0.6K Card Release", () => {
       );
 
       expect(JSON.stringify(getPlayerView(state, "runner"))).toContain(
-        DEMO_CARDS_BY_ID[definitionId]?.title,
+        CARD_DEFINITIONS_BY_ID[definitionId]?.title,
       );
       state = apply(
         state,
@@ -1217,7 +1217,7 @@ describe("V1.1.2K Card Release", () => {
   it("adds exactly 20 further O:NR cards backed by existing engine definitions", () => {
     expect(ONR_V1_1_2K_FINAL_CARD_IDS).toHaveLength(20);
     for (const definitionId of ONR_V1_1_2K_FINAL_CARD_IDS) {
-      const definition = DEMO_CARDS_BY_ID[definitionId];
+      const definition = CARD_DEFINITIONS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
       );
@@ -1226,52 +1226,52 @@ describe("V1.1.2K Card Release", () => {
       );
     }
 
-    expect(DEMO_CARDS_BY_ID["onr_v1_006_black-dahlia"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_006_black-dahlia"]).toMatchObject({
       installCost: 10,
       memoryCost: 1,
       strength: 5,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_014_codecracker"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_014_codecracker"]).toMatchObject({
       installCost: 2,
       memoryCost: 1,
       strength: 0,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_016_cyfermaster"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_016_cyfermaster"]).toMatchObject({
       installCost: 4,
       memoryCost: 1,
       strength: 5,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_040_loony-goon"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_040_loony-goon"]).toMatchObject({
       installCost: 4,
       memoryCost: 1,
       strength: 0,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_060_shaka"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_060_shaka"]).toMatchObject({
       installCost: 4,
       memoryCost: 1,
       strength: 2,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_073_wizards-book"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_073_wizards-book"]).toMatchObject({
       installCost: 5,
       memoryCost: 1,
       strength: 2,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_253_laser-wire"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_253_laser-wire"]).toMatchObject({
       rezCost: 4,
       strength: 2,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_257_nerve-labyrinth"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_257_nerve-labyrinth"]).toMatchObject({
       rezCost: 6,
       strength: 4,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_278_wall-of-ice"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_278_wall-of-ice"]).toMatchObject({
       rezCost: 13,
       strength: 6,
     });
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_293_netwatch-credit-voucher"],
+      CARD_DEFINITIONS_BY_ID["onr_v1_293_netwatch-credit-voucher"],
     ).toMatchObject({ cost: 0 });
-    expect(DEMO_CARDS_BY_ID["onr_v1_295_night-shift"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_295_night-shift"]).toMatchObject({
       cost: 0,
     });
   });
@@ -1291,8 +1291,8 @@ describe("V1.1.2K Card Release", () => {
     expect(corpValidation.errors).toEqual([]);
     expect(corpValidation.ok).toBe(true);
     expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
-    expect(DEMO_CARDS_BY_ID["onr_v1_015_codeslinger"]).toBeDefined();
-    expect(DEMO_CARDS_BY_ID["onr_v1_220_tycho-extension"]).toBeDefined();
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_015_codeslinger"]).toBeDefined();
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_220_tycho-extension"]).toBeDefined();
   });
 
   it("installs V1.1.2K breakers and uses the existing code-gate and sentry break rules", () => {
@@ -1501,7 +1501,7 @@ describe("V1.1.2K Card Release", () => {
       state.corp.credits = 30;
 
       expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
-        DEMO_CARDS_BY_ID[definitionId]?.title,
+        CARD_DEFINITIONS_BY_ID[definitionId]?.title,
       );
 
       state = apply(
@@ -1518,7 +1518,7 @@ describe("V1.1.2K Card Release", () => {
           sourceDefinition(state, action) === definitionId,
       );
       expect(JSON.stringify(getPlayerView(state, "runner"))).toContain(
-        DEMO_CARDS_BY_ID[definitionId]?.title,
+        CARD_DEFINITIONS_BY_ID[definitionId]?.title,
       );
 
       const beforeContinue = structuredClone(state);
@@ -1542,7 +1542,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
   it("adds exactly eleven human-playable O:NR cards without opening deferred mechanics", () => {
     expect(ONR_V1_2_3_FINAL_CARD_IDS).toHaveLength(11);
     for (const definitionId of ONR_V1_2_3_FINAL_CARD_IDS) {
-      const definition = DEMO_CARDS_BY_ID[definitionId];
+      const definition = CARD_DEFINITIONS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
       );
@@ -1551,47 +1551,47 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       );
     }
 
-    expect(DEMO_CARDS_BY_ID["onr_v1_021_dwarf"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_021_dwarf"]).toMatchObject({
       installCost: 6,
       memoryCost: 1,
       strength: 3,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_039_krash"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_039_krash"]).toMatchObject({
       installCost: 0,
       memoryCost: 1,
       strength: 0,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_066_snowball"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_066_snowball"]).toMatchObject({
       installCost: 10,
       memoryCost: 1,
       strength: 0,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_074_worm"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_074_worm"]).toMatchObject({
       installCost: 4,
       memoryCost: 1,
       strength: 2,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_081_custodial-position"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_081_custodial-position"]).toMatchObject({
       cost: 2,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_085_executive-wiretaps"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_085_executive-wiretaps"]).toMatchObject({
       cost: 2,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_101_mit-west-tier"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_101_mit-west-tier"]).toMatchObject({
       cost: 3,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_243_fetch-4-0-1"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_243_fetch-4-0-1"]).toMatchObject({
       rezCost: 0,
       strength: 3,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_249_hunter"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_249_hunter"]).toMatchObject({
       rezCost: 2,
       strength: 5,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_297_overtime-incentives"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_297_overtime-incentives"]).toMatchObject({
       cost: 4,
     });
-    expect(DEMO_CARDS_BY_ID["onr_v1_306_trojan-horse"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_306_trojan-horse"]).toMatchObject({
       cost: 2,
     });
   });

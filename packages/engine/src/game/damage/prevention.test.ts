@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   applyAction,
   createGameAfterSetup,
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   getPlayerView,
   hashState,
   replayEvents,
@@ -26,7 +26,7 @@ const PROTEUS_CORTICAL_STIMULATORS =
   "onr_proteus_135_cortical-stimulators";
 
 function ensureProteusProtectionCardDefinitions(): void {
-  DEMO_CARDS_BY_ID[PROTEUS_ENTERPRISE_SHIELDS] ??= {
+  CARD_DEFINITIONS_BY_ID[PROTEUS_ENTERPRISE_SHIELDS] ??= {
     id: PROTEUS_ENTERPRISE_SHIELDS,
     title: "Enterprise, Inc., Shields",
     side: "runner",
@@ -38,7 +38,7 @@ function ensureProteusProtectionCardDefinitions(): void {
     rulesText: "[1]: Prevent up to 2 Net damage. [1]: Prevent 1 brain damage.",
     mechanics: ["install_program", "memory", "damage_prevention"],
   };
-  DEMO_CARDS_BY_ID[PROTEUS_SKULLCAP] ??= {
+  CARD_DEFINITIONS_BY_ID[PROTEUS_SKULLCAP] ??= {
     id: PROTEUS_SKULLCAP,
     title: "Skullcap",
     side: "runner",
@@ -50,7 +50,7 @@ function ensureProteusProtectionCardDefinitions(): void {
     rulesText: "T: Prevent any amount of Net or brain damage.",
     mechanics: ["install_program", "memory", "damage_prevention"],
   };
-  DEMO_CARDS_BY_ID[PROTEUS_CORTICAL_STIMULATORS] ??= {
+  CARD_DEFINITIONS_BY_ID[PROTEUS_CORTICAL_STIMULATORS] ??= {
     id: PROTEUS_CORTICAL_STIMULATORS,
     title: "Cortical Stimulators",
     side: "runner",

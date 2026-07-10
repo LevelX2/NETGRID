@@ -1,5 +1,5 @@
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type AiDecisionInput,
   type LegalAction,
   type VisibleCard,
@@ -448,7 +448,7 @@ function scoringWindowAdvancementRequirement(
   }
   const demoRequirement =
     card.definitionId !== undefined
-      ? DEMO_CARDS_BY_ID[card.definitionId]?.advancementRequirement
+      ? CARD_DEFINITIONS_BY_ID[card.definitionId]?.advancementRequirement
       : undefined;
   if (typeof demoRequirement === "number" && Number.isFinite(demoRequirement)) {
     return Math.max(0, Math.floor(demoRequirement));
@@ -512,7 +512,7 @@ function scoringWindowVisibleOperationCost(card: VisibleCard): number {
       : undefined;
   const demoCost =
     card.definitionId !== undefined
-      ? DEMO_CARDS_BY_ID[card.definitionId]?.cost
+      ? CARD_DEFINITIONS_BY_ID[card.definitionId]?.cost
       : undefined;
   return (
     positiveVisibleNumber(card.cost) ??
@@ -535,7 +535,7 @@ function scoringWindowVisibleCardText(card: VisibleCard): string {
       : undefined;
   const demoText =
     card.definitionId !== undefined
-      ? DEMO_CARDS_BY_ID[card.definitionId]?.rulesText
+      ? CARD_DEFINITIONS_BY_ID[card.definitionId]?.rulesText
       : undefined;
   return [
     card.title,
@@ -1234,7 +1234,7 @@ function visibleAgendaPoints(card: VisibleCard): number {
   }
   const demoAgendaPoints =
     card.definitionId !== undefined
-      ? DEMO_CARDS_BY_ID[card.definitionId]?.agendaPoints
+      ? CARD_DEFINITIONS_BY_ID[card.definitionId]?.agendaPoints
       : undefined;
   if (
     typeof demoAgendaPoints === "number" &&
@@ -1675,6 +1675,6 @@ function iceHasModeledRunImpact(ice: VisibleCard): boolean {
   if (!definitionId) return false;
   return (
     RUNTIME_CARDS[definitionId] !== undefined ||
-    DEMO_CARDS_BY_ID[definitionId] !== undefined
+    CARD_DEFINITIONS_BY_ID[definitionId] !== undefined
   );
 }

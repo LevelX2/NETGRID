@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   createGameAfterSetup,
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   getLegalActions,
   getPlayerView,
   hashState,
@@ -282,7 +282,7 @@ describe("MVP 0.97 Run, Jack-out, Breach and Multiaccess", () => {
       throw new Error("Missing HQ access selection.");
     const accessedHqDefinition =
       state.cardInstances[accessedHqId]?.definitionId;
-    const unaccessedHqTitle = DEMO_CARDS_BY_ID[
+    const unaccessedHqTitle = CARD_DEFINITIONS_BY_ID[
       state.cardInstances[unaccessedHqId]?.definitionId ?? ""
     ]?.title;
     expect(unaccessedHqTitle).toBeDefined();
@@ -343,19 +343,19 @@ describe("MVP 0.97 Run, Jack-out, Breach and Multiaccess", () => {
     );
 
     expect(actionTypes).not.toContain("trigger_ability");
-    expect(DEMO_CARDS_BY_ID.v097_deep_dive_event?.mechanics).toContain(
+    expect(CARD_DEFINITIONS_BY_ID.v097_deep_dive_event?.mechanics).toContain(
       "multiaccess",
     );
-    expect(DEMO_CARDS_BY_ID.v097_deep_dive_event?.mechanics).not.toContain(
+    expect(CARD_DEFINITIONS_BY_ID.v097_deep_dive_event?.mechanics).not.toContain(
       "hosting",
     );
-    expect(DEMO_CARDS_BY_ID.v097_deep_dive_event?.mechanics).not.toContain(
+    expect(CARD_DEFINITIONS_BY_ID.v097_deep_dive_event?.mechanics).not.toContain(
       "virus",
     );
-    expect(DEMO_CARDS_BY_ID.v097_deep_dive_event?.mechanics).not.toContain(
+    expect(CARD_DEFINITIONS_BY_ID.v097_deep_dive_event?.mechanics).not.toContain(
       "prevention",
     );
-    expect(DEMO_CARDS_BY_ID.v097_deep_dive_event?.mechanics).not.toContain(
+    expect(CARD_DEFINITIONS_BY_ID.v097_deep_dive_event?.mechanics).not.toContain(
       "replacement",
     );
   });

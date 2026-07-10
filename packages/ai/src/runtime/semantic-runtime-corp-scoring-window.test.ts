@@ -1,5 +1,5 @@
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type CardDefinition,
   AiDecisionInput,
   LegalAction,
@@ -14,7 +14,7 @@ const DEFINITION_BACKED_AGENDA_ID =
 
 describe("semanticRuntimeCorpScoringWindowAssessment", () => {
   afterEach(() => {
-    delete DEMO_CARDS_BY_ID[DEFINITION_BACKED_AGENDA_ID];
+    delete CARD_DEFINITIONS_BY_ID[DEFINITION_BACKED_AGENDA_ID];
   });
 
   it("allows an unprotected remote scoreline when the score completes before runner exposure", () => {
@@ -477,7 +477,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
   });
 
   it("uses definition-backed advancement requirements for runner exposure before score", () => {
-    DEMO_CARDS_BY_ID[DEFINITION_BACKED_AGENDA_ID] = {
+    CARD_DEFINITIONS_BY_ID[DEFINITION_BACKED_AGENDA_ID] = {
       id: DEFINITION_BACKED_AGENDA_ID,
       title: "Definition Backed Agenda",
       side: "corp",

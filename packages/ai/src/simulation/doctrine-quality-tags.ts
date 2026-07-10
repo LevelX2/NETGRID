@@ -1,5 +1,5 @@
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type AiDecision,
   type AiDecisionInput,
   type LegalAction,
@@ -105,7 +105,7 @@ export function qualityTagsForActionWithDependencies(
       ? undefined
       : dependencies.findVisibleCard(input, action.source);
   const sourceDefinition = sourceCard?.definitionId
-    ? DEMO_CARDS_BY_ID[sourceCard.definitionId]
+    ? CARD_DEFINITIONS_BY_ID[sourceCard.definitionId]
     : undefined;
   const targetServerId =
     typeof action.payload?.serverId === "string"
@@ -117,7 +117,7 @@ export function qualityTagsForActionWithDependencies(
   const agendaInHand = input.playerView.own.gripOrHq.filter(
     (card) =>
       card.definitionId &&
-      DEMO_CARDS_BY_ID[card.definitionId]?.type === "agenda",
+      CARD_DEFINITIONS_BY_ID[card.definitionId]?.type === "agenda",
   ).length;
   const legalScoreAvailable =
     input.side === "corp" &&

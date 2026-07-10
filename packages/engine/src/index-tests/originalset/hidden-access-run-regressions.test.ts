@@ -5,7 +5,7 @@ import {
   checkWinConditions,
   createGame,
   createGameAfterSetup,
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   DEMO_DECKS,
   eventVisibilityForAction,
   getLegalActions,
@@ -1347,7 +1347,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       ["onr_v1_153_back-door-to-orbital-air", 2, 1, 2],
     ] as const;
 
-    expect(DEMO_CARDS_BY_ID["onr_v1_148_access-through-alpha"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_148_access-through-alpha"]).toMatchObject({
       installCost: 9,
     });
 

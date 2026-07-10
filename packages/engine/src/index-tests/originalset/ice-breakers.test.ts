@@ -5,7 +5,7 @@ import {
   checkWinConditions,
   createGame,
   createGameAfterSetup,
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   DEMO_DECKS,
   eventVisibilityForAction,
   getLegalActions,
@@ -444,7 +444,7 @@ describe("Originalset Spotcheck 2026-05-15 Tagged/Wall/Breaker hardening", () =>
       state.corp.credits = rezCost - 1;
       putCorpIceOnServer(state, "rd", definitionId);
       expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
-        DEMO_CARDS_BY_ID[definitionId]?.title,
+        CARD_DEFINITIONS_BY_ID[definitionId]?.title,
       );
       state = apply(
         state,
@@ -832,7 +832,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE/Operation Economy hardening"
           : undefined;
       putCorpIceOnServer(state, "rd", definitionId);
       expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
-        DEMO_CARDS_BY_ID[definitionId]?.title,
+        CARD_DEFINITIONS_BY_ID[definitionId]?.title,
       );
 
       const initial = structuredClone(state);
@@ -871,7 +871,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE/Operation Economy hardening"
 
       state = apply(state, "corp", (action) => action.actionId === rez.actionId);
       expect(JSON.stringify(getPlayerView(state, "runner"))).toContain(
-        DEMO_CARDS_BY_ID[definitionId]?.title,
+        CARD_DEFINITIONS_BY_ID[definitionId]?.title,
       );
       state = apply(state, "runner", (action) => action.type === "continue_run");
       expect(state.run).toBeUndefined();
@@ -1268,7 +1268,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE Trace/Barriers hardening", (
           : undefined;
       putCorpIceOnServer(state, "rd", definitionId);
       expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
-        DEMO_CARDS_BY_ID[definitionId]?.title,
+        CARD_DEFINITIONS_BY_ID[definitionId]?.title,
       );
 
       const initial = structuredClone(state);
@@ -1307,7 +1307,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE Trace/Barriers hardening", (
 
       state = apply(state, "corp", (action) => action.actionId === rez.actionId);
       expect(JSON.stringify(getPlayerView(state, "runner"))).toContain(
-        DEMO_CARDS_BY_ID[definitionId]?.title,
+        CARD_DEFINITIONS_BY_ID[definitionId]?.title,
       );
       state = apply(state, "runner", (action) => action.type === "continue_run");
 
@@ -1369,7 +1369,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
     /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
 
   it("models Pile Driver as Noisy but not as a Stealth credit source", () => {
-    const pileDriver = DEMO_CARDS_BY_ID["onr_v1_047_pile-driver"];
+    const pileDriver = CARD_DEFINITIONS_BY_ID["onr_v1_047_pile-driver"];
 
     expect(pileDriver?.subtypes).toContain("noisy");
     expect(pileDriver?.subtypes).not.toContain("stealth");

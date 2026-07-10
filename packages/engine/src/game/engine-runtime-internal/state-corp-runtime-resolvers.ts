@@ -11,7 +11,7 @@ import { createCorpRuntimeResolvers } from "./corp-runtime-resolvers";
 import { createStateRuntimeResolvers } from "./state-runtime-resolvers";
 import { createTurnRuntimeResolvers } from "./turn-runtime-resolvers";
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type ActionType,
   type ChoiceRequest,
   type CardDefinition,

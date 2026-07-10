@@ -5,7 +5,7 @@ import {
   checkWinConditions,
   createGame,
   createGameAfterSetup,
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   DEMO_DECKS,
   eventVisibilityForAction,
   getLegalActions,
@@ -245,7 +245,7 @@ describe("MVP 0.94 Damage and Flatline", () => {
     const publicHeapCardIds = new Set(state.runner.heap);
     for (const cardId of beforeGripIds.filter((id) => !publicHeapCardIds.has(id))) {
       const title =
-        DEMO_CARDS_BY_ID[state.cardInstances[cardId]?.definitionId ?? ""]
+        CARD_DEFINITIONS_BY_ID[state.cardInstances[cardId]?.definitionId ?? ""]
           ?.title;
       if (title) expect(serializedCorpView).not.toContain(title);
     }
@@ -509,13 +509,13 @@ describe("MVP 0.94 Damage and Flatline", () => {
     expect(actionTypes).not.toContain("resolve_choice");
     expect(actionTypes).not.toContain("trigger_ability");
     expect(actionTypes).not.toContain("remove_tag");
-    expect(DEMO_CARDS_BY_ID.v094_neural_sentry_ice?.mechanics).not.toContain(
+    expect(CARD_DEFINITIONS_BY_ID.v094_neural_sentry_ice?.mechanics).not.toContain(
       "trace",
     );
-    expect(DEMO_CARDS_BY_ID.v094_neural_sentry_ice?.mechanics).not.toContain(
+    expect(CARD_DEFINITIONS_BY_ID.v094_neural_sentry_ice?.mechanics).not.toContain(
       "resource",
     );
-    expect(DEMO_CARDS_BY_ID.v094_neural_sentry_ice?.mechanics).not.toContain(
+    expect(CARD_DEFINITIONS_BY_ID.v094_neural_sentry_ice?.mechanics).not.toContain(
       "prevention",
     );
   });
@@ -525,7 +525,7 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
   it("adds scoped V1.9.13 runtime definitions without pulling in V1.9.15 cards", () => {
     expect(MECHANIC_SMOKE_CARD_IDS.damagePrevention).toHaveLength(17);
     for (const definitionId of MECHANIC_SMOKE_CARD_IDS.damagePrevention) {
-      const definition = DEMO_CARDS_BY_ID[definitionId];
+      const definition = CARD_DEFINITIONS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
       );
@@ -550,10 +550,10 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
       }
     }
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]
+      CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]
         ?.implementationStatus,
     ).toBe("playable_mvp");
-    expect(DEMO_CARDS_BY_ID["onr_v1_234_data-darts"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_234_data-darts"]).toMatchObject({
       rezCost: 5,
       strength: 3,
     });

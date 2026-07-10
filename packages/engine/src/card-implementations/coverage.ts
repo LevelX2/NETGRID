@@ -6,7 +6,7 @@
  * the registry and the ability-engine runtime.
  */
 import type { CardDefinitionId } from "@netgrid/shared";
-import { DEMO_CARDS_BY_ID } from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "@netgrid/shared";
 import { CARD_IMPLEMENTATIONS } from "./registry";
 
 export type CardImplementationCoverageStatus =
@@ -1346,7 +1346,7 @@ export const CARD_IMPLEMENTATION_COVERAGE_BY_DEFINITION_ID: Partial<
   Record<CardDefinitionId, CardImplementationCoverageEntry>
 > = {
   ...Object.fromEntries(
-    Object.keys(DEMO_CARDS_BY_ID).map((cardDefinitionId) => [
+    Object.keys(CARD_DEFINITIONS_BY_ID).map((cardDefinitionId) => [
       cardDefinitionId,
       pendingCoverageFor(cardDefinitionId),
     ]),

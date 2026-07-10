@@ -1,5 +1,5 @@
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type PublicGameEvent,
   type ResolvedGameEffect,
   type Side,
@@ -5841,7 +5841,7 @@ function targetCardTitleFromPayload(
 ): string | undefined {
   const targetDefinitionId = stringValue(payload.targetCardDefinitionId);
   return targetDefinitionId
-    ? DEMO_CARDS_BY_ID[targetDefinitionId]?.title
+    ? CARD_DEFINITIONS_BY_ID[targetDefinitionId]?.title
     : undefined;
 }
 
@@ -5854,7 +5854,7 @@ function publicRevealTitleFromPayload(
 function titleForDefinitionId(
   definitionId: string | undefined,
 ): string | undefined {
-  return definitionId ? DEMO_CARDS_BY_ID[definitionId]?.title : undefined;
+  return definitionId ? CARD_DEFINITIONS_BY_ID[definitionId]?.title : undefined;
 }
 
 function definitionIdsFromCsv(value: string | undefined): string[] {
@@ -5874,7 +5874,7 @@ function titlesForDefinitionIds(value: string | undefined): string[] {
 
 function iceTitlesForDefinitionIds(value: string | undefined): string[] {
   return definitionIdsFromCsv(value)
-    .map((definitionId) => DEMO_CARDS_BY_ID[definitionId])
+    .map((definitionId) => CARD_DEFINITIONS_BY_ID[definitionId])
     .flatMap((definition) =>
       definition?.type === "ice" ? [definition.title] : [],
     );

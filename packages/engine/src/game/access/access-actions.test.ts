@@ -6,7 +6,7 @@ import type {
   CorpServer,
   GameState,
 } from "@netgrid/shared";
-import { DEMO_CARDS_BY_ID } from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import { buildLegalAction } from "../turn/action-builders";
 import {
@@ -15,7 +15,7 @@ import {
 } from "./access-actions";
 
 function demoDefinition(type: CardDefinition["type"], trashCost?: number): CardDefinition {
-  const found = Object.values(DEMO_CARDS_BY_ID).find(
+  const found = Object.values(CARD_DEFINITIONS_BY_ID).find(
     (candidate) => candidate.type === type,
   );
   if (!found) throw new Error(`missing demo ${type}`);

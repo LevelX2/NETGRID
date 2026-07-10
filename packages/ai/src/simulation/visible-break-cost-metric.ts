@@ -1,5 +1,5 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
-import { DEMO_CARDS_BY_ID } from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "@netgrid/shared";
 import {
   assessKnownRezzedIcePath,
   runnerRunPathCreditBudgetWithVisiblePools,
@@ -9,7 +9,7 @@ export function visibleBreakCostForKnownIceDefinition(
   input: AiDecisionInput,
   definitionId: string,
 ): number {
-  const definition = DEMO_CARDS_BY_ID[definitionId];
+  const definition = CARD_DEFINITIONS_BY_ID[definitionId];
   if (!definition) return 0;
   const assessment = assessKnownRezzedIcePath(
     [

@@ -1,5 +1,5 @@
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type LegalAction,
   type PlayerView,
   type PublicGameEvent,
@@ -1186,7 +1186,7 @@ function targetTitleFromDefinition(action: LegalAction): string | null {
       ? action.payload.targetCardDefinitionId
       : undefined;
   return targetDefinitionId
-    ? (DEMO_CARDS_BY_ID[targetDefinitionId]?.title ?? null)
+    ? (CARD_DEFINITIONS_BY_ID[targetDefinitionId]?.title ?? null)
     : null;
 }
 

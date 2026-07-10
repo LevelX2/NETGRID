@@ -32,7 +32,7 @@ export function createCorpZoneRuntimeHosts(
     HQ_AGENDA_REVEAL_ASSET_SOURCE,
     RD_TOP5_REORDER_OPERATION_SOURCE,
     DEAL_WITH_MILITECH_ID,
-    DEMO_CARDS_BY_ID,
+    CARD_DEFINITIONS_BY_ID,
     INITIAL_HAND_SIZE,
     MYSTERY_BOX_ID,
     RONIN_AROUND_ID,
@@ -405,7 +405,7 @@ export function createCorpZoneRuntimeHosts(
     scope: "inside_data_fort" | "any_installed",
   ): { publicPayload: Record<string, string | number | boolean> } {
     const targetDefinition = definitionFor(state, targetCardId);
-    const sourceDefinition = DEMO_CARDS_BY_ID[sourceDefinitionId];
+    const sourceDefinition = CARD_DEFINITIONS_BY_ID[sourceDefinitionId];
     const context = installedCorpCardServerContext(state, targetCardId);
     state.pendingChoice = {
       choiceId: `p3_36_expose_installed_card_review_${state.stateVersion + 1}`,
@@ -1208,7 +1208,7 @@ export function createCorpZoneRuntimeHosts(
         "Es liegt kein outermost ICE zum Exposen in einem Data Fort.",
       );
     const sourceDefinition = sourceDefinitionId
-      ? DEMO_CARDS_BY_ID[sourceDefinitionId]
+      ? CARD_DEFINITIONS_BY_ID[sourceDefinitionId]
       : undefined;
     const payload = {
       hiddenZoneBarrier: true,

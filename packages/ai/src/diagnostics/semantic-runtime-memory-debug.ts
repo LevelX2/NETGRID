@@ -1,5 +1,5 @@
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type AiDecisionInput,
 } from "@netgrid/shared";
 import { RUNTIME_CARDS } from "../ai-hints";
@@ -103,7 +103,7 @@ function semanticRuntimeBeliefEntrySummary(subject: string): string {
 function semanticRuntimeCardLabel(definitionId: string): string {
   return (
     RUNTIME_CARDS[definitionId]?.title ??
-    DEMO_CARDS_BY_ID[definitionId]?.title ??
+    CARD_DEFINITIONS_BY_ID[definitionId]?.title ??
     definitionId
   );
 }
@@ -114,7 +114,7 @@ function semanticRuntimeKnownCardSummary(definitionId: string): {
   type?: string;
 } {
   const runtimeDefinition = RUNTIME_CARDS[definitionId];
-  const demoDefinition = DEMO_CARDS_BY_ID[definitionId];
+  const demoDefinition = CARD_DEFINITIONS_BY_ID[definitionId];
   const type = runtimeDefinition?.type ?? demoDefinition?.type;
   const summary = {
     definitionId,

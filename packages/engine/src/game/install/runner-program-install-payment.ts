@@ -1,5 +1,5 @@
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type CardDefinition,
   type CardInstanceId,
   type GameState,
@@ -299,7 +299,7 @@ function amountSignature(
 function definitionFor(state: GameState, id: CardInstanceId): CardDefinition {
   const instance = state.cardInstances[id];
   if (!instance) throw new Error(`CardInstance fehlt: ${id}`);
-  const definition = DEMO_CARDS_BY_ID[instance.definitionId];
+  const definition = CARD_DEFINITIONS_BY_ID[instance.definitionId];
   if (!definition)
     throw new Error(`Unbekannte Karte: ${instance.definitionId}`);
   return definition;

@@ -4,7 +4,7 @@ import {
   PROTEUS_CARD_IDS,
   PROTEUS_VISIBLE_BASELINE_CARD_IDS,
 } from "@netgrid/catalog";
-import { DEMO_CARDS_BY_ID } from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "@netgrid/shared";
 import { catalogDetailResponse, catalogListResponse } from "./catalog-data";
 
 type CatalogAiHintExpectation = {
@@ -770,7 +770,7 @@ describe("catalog API filters", () => {
       const response = catalogDetailResponse(expectation.cardId);
       expect(response.status, expectation.cardId).toBe(200);
       const body = response.body as { card: { text: string } };
-      const sharedText = DEMO_CARDS_BY_ID[expectation.cardId]?.rulesText ?? "";
+      const sharedText = CARD_DEFINITIONS_BY_ID[expectation.cardId]?.rulesText ?? "";
 
       for (const snippet of expectation.catalogContains) {
         expect(body.card.text, expectation.cardId).toContain(snippet);
@@ -882,7 +882,7 @@ describe("catalog API filters", () => {
       const response = catalogDetailResponse(expectation.cardId);
       expect(response.status, expectation.cardId).toBe(200);
       const body = response.body as { card: { text: string } };
-      const sharedText = DEMO_CARDS_BY_ID[expectation.cardId]?.rulesText ?? "";
+      const sharedText = CARD_DEFINITIONS_BY_ID[expectation.cardId]?.rulesText ?? "";
 
       for (const snippet of expectation.catalogContains) {
         expect(body.card.text, expectation.cardId).toContain(snippet);
@@ -1021,7 +1021,7 @@ describe("catalog API filters", () => {
       const response = catalogDetailResponse(expectation.cardId);
       expect(response.status, expectation.cardId).toBe(200);
       const body = response.body as { card: { text: string } };
-      const sharedText = DEMO_CARDS_BY_ID[expectation.cardId]?.rulesText ?? "";
+      const sharedText = CARD_DEFINITIONS_BY_ID[expectation.cardId]?.rulesText ?? "";
 
       for (const snippet of expectation.catalogContains) {
         expect(body.card.text, expectation.cardId).toContain(snippet);
@@ -1103,7 +1103,7 @@ describe("catalog API filters", () => {
       const response = catalogDetailResponse(expectation.cardId);
       expect(response.status, expectation.cardId).toBe(200);
       const body = response.body as { card: { text: string } };
-      const sharedText = DEMO_CARDS_BY_ID[expectation.cardId]?.rulesText ?? "";
+      const sharedText = CARD_DEFINITIONS_BY_ID[expectation.cardId]?.rulesText ?? "";
 
       for (const snippet of expectation.catalogContains) {
         expect(body.card.text, expectation.cardId).toContain(snippet);

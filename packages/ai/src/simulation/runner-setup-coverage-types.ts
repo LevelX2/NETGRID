@@ -1,5 +1,5 @@
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type AiDecisionInput,
   type LegalAction,
   type VisibleCard,
@@ -148,7 +148,7 @@ export function runnerCoverageSearchActionForMetrics(
       : undefined;
   const sourceDefinition = sourceCard?.definitionId
     ? (RUNTIME_CARDS[sourceCard.definitionId] ??
-      DEMO_CARDS_BY_ID[sourceCard.definitionId])
+      CARD_DEFINITIONS_BY_ID[sourceCard.definitionId])
     : undefined;
   const mechanics =
     sourceDefinition &&
@@ -195,7 +195,7 @@ export function runnerMissingBreakerRolesForMetrics(
   definitionId: string,
 ): string[] {
   const definition =
-    RUNTIME_CARDS[definitionId] ?? DEMO_CARDS_BY_ID[definitionId];
+    RUNTIME_CARDS[definitionId] ?? CARD_DEFINITIONS_BY_ID[definitionId];
   const subtypes = definition?.subtypes ?? [];
   const roles = new Set<string>();
   if (

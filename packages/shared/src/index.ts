@@ -779,6 +779,11 @@ export type CardDefinition = {
   modifiers?: ModifierDefinition[];
   subroutines?: SubroutineDefinition[];
   mechanics: string[];
+  markCounterDisplay?: {
+    id: string;
+    label: string;
+    ariaLabelName: string;
+  };
 };
 
 export type DeckDefinition = {
@@ -2318,6 +2323,4 @@ export type AiDecision = {
 export {
   CARD_DEFINITIONS,
   CARD_DEFINITIONS_BY_ID,
-  DEMO_CARDS,
-  DEMO_CARDS_BY_ID,
 } from "./card-definitions";

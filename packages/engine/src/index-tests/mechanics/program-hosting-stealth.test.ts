@@ -5,7 +5,7 @@ import {
   checkWinConditions,
   createGame,
   createGameAfterSetup,
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   DEMO_DECKS,
   eventVisibilityForAction,
   getLegalActions,
@@ -203,7 +203,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
   it("adds all V1.9.16 WIP runtime definitions without release-promoting the next slice", () => {
     expect(MECHANIC_SMOKE_CARD_IDS.programSubtypeHosting).toHaveLength(16);
     for (const definitionId of MECHANIC_SMOKE_CARD_IDS.programSubtypeHosting) {
-      const definition = DEMO_CARDS_BY_ID[definitionId];
+      const definition = CARD_DEFINITIONS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
       );
@@ -213,7 +213,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]
+      CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]
         ?.implementationStatus,
     ).toBe("playable_mvp");
   });

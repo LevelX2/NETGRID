@@ -1,5 +1,5 @@
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type CardDefinition,
   type CardInstanceId,
   type EventVisibilityClass,
@@ -301,7 +301,7 @@ function revealForPublicEvent(
     return {};
   if (typeof legalAction.payload?.publicRevealDefinitionId === "string") {
     const definition =
-      DEMO_CARDS_BY_ID[legalAction.payload.publicRevealDefinitionId];
+      CARD_DEFINITIONS_BY_ID[legalAction.payload.publicRevealDefinitionId];
     if (definition)
       return { cardDefinitionId: definition.id, title: definition.title };
   }
@@ -365,10 +365,10 @@ function revealForPublicEvent(
       const definition = definitionForEvent(state, cardId);
       return { cardDefinitionId: definition.id, title: definition.title };
     }
-    if (typeof cardId === "string" && DEMO_CARDS_BY_ID[cardId])
+    if (typeof cardId === "string" && CARD_DEFINITIONS_BY_ID[cardId])
       return {
         cardDefinitionId: cardId,
-        title: DEMO_CARDS_BY_ID[cardId]?.title,
+        title: CARD_DEFINITIONS_BY_ID[cardId]?.title,
       };
   }
   return {};
@@ -390,7 +390,7 @@ function definitionForEvent(
 ): CardDefinition {
   const instance = state.cardInstances[id];
   if (!instance) throw new Error(`CardInstance fehlt: ${id}`);
-  const definition = DEMO_CARDS_BY_ID[instance.definitionId];
+  const definition = CARD_DEFINITIONS_BY_ID[instance.definitionId];
   if (!definition)
     throw new Error(`Unbekannte Karte: ${instance.definitionId}`);
   return definition;

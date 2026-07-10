@@ -34,15 +34,12 @@
     "status": "baseline_enforced",
     "tokenSource": "Kartentitel und cardDefinitionId-Slug-/CamelCase-Varianten aus packages/shared/src/card-definitions.ts",
     "tokenCount": 1317,
-    "baselineCount": 142,
+    "baselineCount": 140,
     "summary": {
-      "runtime_state_field_uses_card_name": 2,
       "new_unclassified_card_name_leak": 133,
       "functional_kind_uses_card_name": 7
     },
     "fingerprints": [
-      "packages/engine/src/game/view/card-view.ts|36|42|corporate-retreat|Corporate Retreat|runtime_state_field_uses_card_name",
-      "packages/engine/src/game/view/card-view.ts|458|16|corporate_retreat|Corporate Retreat|runtime_state_field_uses_card_name",
       "packages/shared/src/index.ts|665|5|shellTraders|The Shell Traders|new_unclassified_card_name_leak",
       "scripts/build-ai-compiled-hints.mjs|661|9|selfModifyingCode|Self-Modifying Code|new_unclassified_card_name_leak",
       "scripts/build-ai-compiled-hints.mjs|662|17|self-modifying-code|Self-Modifying Code|new_unclassified_card_name_leak",

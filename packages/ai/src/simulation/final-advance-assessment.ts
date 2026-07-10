@@ -1,5 +1,5 @@
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type AiDecisionInput,
   type CardInstanceId,
   type GameState,
@@ -46,7 +46,7 @@ export function finalAdvanceAssessmentForSimulationAction(
   if (!instance) return { finalAdvance: false };
   const definitionId = instance.definitionId;
   const requirement =
-    DEMO_CARDS_BY_ID[definitionId]?.advancementRequirement ??
+    CARD_DEFINITIONS_BY_ID[definitionId]?.advancementRequirement ??
     RUNTIME_CARDS[definitionId]?.numeric.advancementRequirement ??
     0;
   const countersAfter = instance.advancementCounters + advancementCountersAdded;

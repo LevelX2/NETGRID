@@ -2,7 +2,7 @@
 // Keine State-Mutation, keine LegalAction-Erzeugung, kein Import aus index.ts,
 // keine PublicPayload-Vertragsaenderung.
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type CardDefinition,
   type CardInstance,
   type CardInstanceId,
@@ -33,10 +33,6 @@ const effectiveAgendaDifficultyDeps: EffectiveAgendaDifficultyDependencies = {
   serverDifficultyIncreaseFromRunCounters,
   serverDifficultyReductionFromUpgrades,
 };
-const CORPORATE_RETREAT_ID = "onr_v1_195_corporate-retreat";
-const PROJECT_VENICE_ID = "onr_proteus_007_project-venice";
-const PROJECT_ZURICH_ID = "onr_proteus_008_project-zurich";
-
 export function visibleOwnCard(state: GameState, id: CardInstanceId): VisibleCard {
   return visibleKnownCardWithReferenceViewer(state, id, "own");
 }
@@ -453,33 +449,15 @@ function specialCounterDisplays(
 ): VisibleCard["counterDisplays"] {
   const counters = instance.counters ?? {};
   const markCounterDisplay =
-    definition.id === CORPORATE_RETREAT_ID
+    definition.markCounterDisplay
       ? {
-          id: "corporate_retreat_active",
+          id: definition.markCounterDisplay.id,
           displayKind: "generic_counter" as const,
-          label: "Noch aktiv",
-          ariaLabelName: "Corporate Retreat noch aktiv",
+          label: definition.markCounterDisplay.label,
+          ariaLabelName: definition.markCounterDisplay.ariaLabelName,
           counterType: "mark" as const,
           usageHint: "status_marker" as const,
         }
-      : definition.id === PROJECT_VENICE_ID
-        ? {
-            id: "project_venice_actions_per_turn",
-            displayKind: "generic_counter" as const,
-            label: "Aktion/Zug",
-            ariaLabelName: "Project Venice zusätzliche Aktion pro Corp-Zug",
-            counterType: "mark" as const,
-            usageHint: "status_marker" as const,
-          }
-      : definition.id === PROJECT_ZURICH_ID
-        ? {
-            id: "project_zurich_credits_per_turn",
-            displayKind: "generic_counter" as const,
-            label: "Credit/Zug",
-            ariaLabelName: "Project Zurich zusätzlicher Credit pro Corp-Zug",
-            counterType: "mark" as const,
-            usageHint: "status_marker" as const,
-          }
       : {
           id: definition.type === "ice" ? "ice_mark_modifier" : "mark",
           displayKind: "generic_counter" as const,
@@ -1390,7 +1368,7 @@ function relativeIceStrengthBonusFor(
 
 export function definitionFor(state: GameState, id: CardInstanceId): CardDefinition {
   const instance = mustInstance(state.cardInstances, id);
-  const definition = DEMO_CARDS_BY_ID[instance.definitionId];
+  const definition = CARD_DEFINITIONS_BY_ID[instance.definitionId];
   if (!definition)
     throw new Error(`Unbekannte Karte: ${instance.definitionId}`);
   return definition;

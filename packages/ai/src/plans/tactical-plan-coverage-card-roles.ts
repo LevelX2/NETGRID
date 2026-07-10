@@ -1,5 +1,5 @@
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type AiDecisionInput,
   type LegalAction,
   type VisibleCard,
@@ -57,7 +57,7 @@ export function cardPlanRoleForCoverageSearch(card: VisibleCard): string {
 export function cardDefinitionPlanRoleForCoverageSearch(definitionId: string): string {
   if (cardDefinitionProvidesBreakerCoverage(definitionId, "breaker_coverage"))
     return "breaker";
-  const definition = DEMO_CARDS_BY_ID[definitionId];
+  const definition = CARD_DEFINITIONS_BY_ID[definitionId];
   const tokens = cardCoverageRoleTokens(
     [
       definition?.title,
@@ -153,7 +153,7 @@ export function cardDefinitionProvidesBreakerCoverage(
   definitionId: string,
   requiredCoverage: RequiredCapabilityKind,
 ): boolean {
-  const definition = DEMO_CARDS_BY_ID[definitionId];
+  const definition = CARD_DEFINITIONS_BY_ID[definitionId];
   if (!definition) return false;
   return cardProvidesBreakerCoverage(
     {

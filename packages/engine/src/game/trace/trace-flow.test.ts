@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   applyAction,
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   getLegalActions,
   getPlayerView,
   hashState,
@@ -267,17 +267,17 @@ describe("MVP 0.96 Trace, Link and Bidding", () => {
     );
 
     expect(actionTypes).not.toContain("trigger_ability");
-    expect(DEMO_CARDS_BY_ID.v096_trace_probe_ice?.mechanics).toContain("trace");
-    expect(DEMO_CARDS_BY_ID.v096_trace_probe_ice?.mechanics).not.toContain(
+    expect(CARD_DEFINITIONS_BY_ID.v096_trace_probe_ice?.mechanics).toContain("trace");
+    expect(CARD_DEFINITIONS_BY_ID.v096_trace_probe_ice?.mechanics).not.toContain(
       "multiaccess",
     );
-    expect(DEMO_CARDS_BY_ID.v096_trace_probe_ice?.mechanics).not.toContain(
+    expect(CARD_DEFINITIONS_BY_ID.v096_trace_probe_ice?.mechanics).not.toContain(
       "hosting",
     );
-    expect(DEMO_CARDS_BY_ID.v096_trace_probe_ice?.mechanics).not.toContain(
+    expect(CARD_DEFINITIONS_BY_ID.v096_trace_probe_ice?.mechanics).not.toContain(
       "virus",
     );
-    expect(DEMO_CARDS_BY_ID.v096_trace_probe_ice?.mechanics).not.toContain(
+    expect(CARD_DEFINITIONS_BY_ID.v096_trace_probe_ice?.mechanics).not.toContain(
       "prevention",
     );
   });

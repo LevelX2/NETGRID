@@ -1,6 +1,6 @@
 import * as runtimeDelegates from "./runtime-delegates";
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type ActionType,
   type ChoiceRequest,
   type CardDefinition,
@@ -833,7 +833,7 @@ export function initializeStateRuntimeBootstrap({
     HQ_AGENDA_REVEAL_ASSET_SOURCE,
     RD_TOP5_REORDER_OPERATION_SOURCE,
     DEAL_WITH_MILITECH_ID,
-    DEMO_CARDS_BY_ID,
+    CARD_DEFINITIONS_BY_ID,
     INITIAL_HAND_SIZE,
     HOST_RETURN_HARDWARE_SOURCE,
     MYSTERY_BOX_ID,

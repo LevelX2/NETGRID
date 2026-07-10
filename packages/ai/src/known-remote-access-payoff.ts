@@ -1,5 +1,5 @@
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type AiDecisionInput,
   type VisibleCard,
 } from "@netgrid/shared";
@@ -415,12 +415,12 @@ function changedRemotePayoff(
 function cardDefinitionTrashCost(definitionId: string): number | undefined {
   return (
     RUNTIME_CARDS[definitionId]?.numeric.trashCost ??
-    DEMO_CARDS_BY_ID[definitionId]?.trashCost
+    CARD_DEFINITIONS_BY_ID[definitionId]?.trashCost
   );
 }
 
 function cardDefinitionType(definitionId: string): string | undefined {
   return (
-    RUNTIME_CARDS[definitionId]?.type ?? DEMO_CARDS_BY_ID[definitionId]?.type
+    RUNTIME_CARDS[definitionId]?.type ?? CARD_DEFINITIONS_BY_ID[definitionId]?.type
   );
 }

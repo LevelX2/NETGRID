@@ -1,5 +1,5 @@
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type CardInstanceId,
   type GameState,
   type SubroutineDefinition,
@@ -23,7 +23,7 @@ export function visibleEffectiveIceRunQuote(
 ): VisibleEffectiveIceRunQuote | undefined {
   if (!visibleIce.known || visibleIce.rezzed !== true || !visibleIce.definitionId)
     return undefined;
-  const definition = DEMO_CARDS_BY_ID[visibleIce.definitionId];
+  const definition = CARD_DEFINITIONS_BY_ID[visibleIce.definitionId];
   if (!definition || definition.type !== "ice") return undefined;
   const printedSubroutines =
     printedSubroutinesForCardImplementation(definition) ??
@@ -75,7 +75,7 @@ function runDurationAdditionalSubroutinesForIce(
   if (!iceIsOnCurrentRunServer(state, iceId)) return [];
   const sourceDefinitionId = state.cardInstances[sourceIceId]?.definitionId;
   const sourceTitle = sourceDefinitionId
-    ? DEMO_CARDS_BY_ID[sourceDefinitionId]?.title
+    ? CARD_DEFINITIONS_BY_ID[sourceDefinitionId]?.title
     : undefined;
   return [
     {

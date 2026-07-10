@@ -1,4 +1,4 @@
-import { DEMO_CARDS_BY_ID, type CardDefinitionId, type LegalAction } from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID, type CardDefinitionId, type LegalAction } from "@netgrid/shared";
 import type {
   ActionAbilityBindingMethod,
   ActionGateResult,
@@ -213,7 +213,7 @@ function abilityBindingFromVisibleRuntimeCard(
 ): ResolvedAbilityBinding | undefined {
   if (sourceDefinitionId === undefined) return undefined;
   if (!requiresAbilityBinding(action)) return undefined;
-  const abilities = DEMO_CARDS_BY_ID[sourceDefinitionId]?.abilities ?? [];
+  const abilities = CARD_DEFINITIONS_BY_ID[sourceDefinitionId]?.abilities ?? [];
   const matchingAbilities = abilities.filter(
     (ability) =>
       ability.publicActionType === action.type ||

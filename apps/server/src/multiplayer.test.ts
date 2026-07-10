@@ -10,7 +10,7 @@ import profilesData08 from "../../../data/decks/deck-format-profiles-0.8.json";
 import { beliefStateInvariantSignature, buildAiDecisionInputDto, reconstructBeliefState } from "@netgrid/ai";
 import { createRuntimeCardsById } from "@netgrid/catalog";
 import { computeDeckHash, createDeckSnapshot, type DeckFormatProfile, type DeckSnapshot, type EditableDeck } from "@netgrid/decks";
-import { applyAction, applyEffectCommands, checkWinConditions, createGameAfterSetup, DEMO_CARDS_BY_ID, DEMO_DECKS, getLegalActions, hashState } from "@netgrid/engine";
+import { applyAction, applyEffectCommands, checkWinConditions, createGameAfterSetup, CARD_DEFINITIONS_BY_ID, DEMO_DECKS, getLegalActions, hashState } from "@netgrid/engine";
 import type { ConnectionAuditEvent } from "./connection-audit";
 import { createConfiguredStorage, createNetgridHttpServer, isMaintenanceClientAddressAllowed, startNetgridServer } from "./http-server";
 import { assertInviteLobbyPayloadRedacted, findInviteLobbyPayloadRedactionLeaks } from "./invite-lobby-redaction.test-helper";
@@ -6642,7 +6642,7 @@ async function putTopCorpAgendaForMatch(service: MultiplayerService, matchId: st
   if (!record?.gameState) throw new Error("Missing active game state");
   const gameState = structuredClone(record.gameState);
   const agenda = Object.values(gameState.cardInstances).find((card) => {
-    const definition = DEMO_CARDS_BY_ID[card.definitionId];
+    const definition = CARD_DEFINITIONS_BY_ID[card.definitionId];
     return card.zone.side === "corp" && definition?.side === "corp" && definition.type === "agenda";
   });
   if (!agenda) throw new Error("Missing corp agenda");

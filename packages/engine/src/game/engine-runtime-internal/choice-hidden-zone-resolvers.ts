@@ -6,7 +6,7 @@ import { createCardRuntimeHosts } from "./card-runtime-hosts";
 import { createFlowRuntimeHosts } from "./flow-runtime-hosts";
 import { createStateRuntimeServices } from "./state-runtime-services";
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type ActionType,
   type ChoiceRequest,
   type CardDefinition,
@@ -1195,7 +1195,7 @@ function startRunnerPrivateLookChoice(
   if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
   const cardIds = privateLookCardIds(state, zone, count);
   if (cardIds.length === 0) return false;
-  const sourceDefinition = DEMO_CARDS_BY_ID[sourceDefinitionId];
+  const sourceDefinition = CARD_DEFINITIONS_BY_ID[sourceDefinitionId];
   state.pendingChoice = {
     choiceId: `p3_33_private_look_${zone}_${state.stateVersion + 1}`,
     side: "runner",

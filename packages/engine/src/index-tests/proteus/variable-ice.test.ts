@@ -5,7 +5,7 @@ import {
   checkWinConditions,
   createGame,
   createGameAfterSetup,
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   DEMO_DECKS,
   eventVisibilityForAction,
   getLegalActions,
@@ -825,22 +825,22 @@ describe("Proteus Phase 3c Relative Board-Count ICE", () => {
   }
 
   it("keeps relative ICE base values aligned with the Proteus catalog", () => {
-    expect(DEMO_CARDS_BY_ID[BUG_ZAPPER]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[BUG_ZAPPER]).toMatchObject({
       rezCost: 6,
       strength: 2,
       subtypes: expect.arrayContaining(["ap", "hellbolt", "sentry"]),
     });
-    expect(DEMO_CARDS_BY_ID[DOG_PILE]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[DOG_PILE]).toMatchObject({
       rezCost: 5,
       strength: 0,
       subtypes: expect.arrayContaining(["ap", "sentry"]),
     });
-    expect(DEMO_CARDS_BY_ID[HUNTING_PACK]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[HUNTING_PACK]).toMatchObject({
       rezCost: 1,
       strength: 4,
       subtypes: expect.arrayContaining(["bloodhound", "sentry"]),
     });
-    expect(DEMO_CARDS_BY_ID[MASTERMIND]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[MASTERMIND]).toMatchObject({
       rezCost: 7,
       strength: 0,
       subtypes: expect.arrayContaining(["ap", "black_ice", "sentry", "zombie"]),

@@ -5,7 +5,7 @@ import {
   checkWinConditions,
   createGame,
   createGameAfterSetup,
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   DEMO_DECKS,
   eventVisibilityForAction,
   getLegalActions,
@@ -1742,7 +1742,7 @@ describe("MVP 0.1 engine foundation", () => {
     const agendaCardsInDeck = corpMasterDeck.cards.reduce(
       (sum, entry) =>
         sum +
-        (DEMO_CARDS_BY_ID[entry.id]?.type === "agenda" ? entry.quantity : 0),
+        (CARD_DEFINITIONS_BY_ID[entry.id]?.type === "agenda" ? entry.quantity : 0),
       0,
     );
     expect(agendaCardsInDeck).toBe(12);
@@ -1757,7 +1757,7 @@ describe("MVP 0.1 engine foundation", () => {
       });
       const agendasInHand = state.corp.hq.filter(
         (id) =>
-          DEMO_CARDS_BY_ID[state.cardInstances[id]!.definitionId]?.type ===
+          CARD_DEFINITIONS_BY_ID[state.cardInstances[id]!.definitionId]?.type ===
           "agenda",
       ).length;
       agendaCardsInOpeningHands += agendasInHand;
@@ -2309,7 +2309,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
       expect(state.randomCounter).toBe(randomBefore + 1);
       for (const definitionId of hqDefinitions) {
         expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
-          DEMO_CARDS_BY_ID[definitionId]?.title ?? definitionId,
+          CARD_DEFINITIONS_BY_ID[definitionId]?.title ?? definitionId,
         );
       }
 

@@ -5,7 +5,7 @@ import {
   checkWinConditions,
   createGame,
   createGameAfterSetup,
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   DEMO_DECKS,
   eventVisibilityForAction,
   getLegalActions,
@@ -338,16 +338,16 @@ describe("MVP 0.95 Resources and tag interaction", () => {
 
     expect(actionTypes).not.toContain("resolve_choice");
     expect(actionTypes).not.toContain("trigger_ability");
-    expect(DEMO_CARDS_BY_ID.v095_safehouse_resource?.mechanics).not.toContain(
+    expect(CARD_DEFINITIONS_BY_ID.v095_safehouse_resource?.mechanics).not.toContain(
       "trace",
     );
-    expect(DEMO_CARDS_BY_ID.v095_safehouse_resource?.mechanics).not.toContain(
+    expect(CARD_DEFINITIONS_BY_ID.v095_safehouse_resource?.mechanics).not.toContain(
       "hosting",
     );
-    expect(DEMO_CARDS_BY_ID.v095_safehouse_resource?.mechanics).not.toContain(
+    expect(CARD_DEFINITIONS_BY_ID.v095_safehouse_resource?.mechanics).not.toContain(
       "virus",
     );
-    expect(DEMO_CARDS_BY_ID.v095_safehouse_resource?.mechanics).not.toContain(
+    expect(CARD_DEFINITIONS_BY_ID.v095_safehouse_resource?.mechanics).not.toContain(
       "prevention",
     );
   });
@@ -357,7 +357,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
   it("adds all V1.9.14 WIP runtime definitions without pulling in V1.9.15 cards", () => {
     expect(MECHANIC_SMOKE_CARD_IDS.traceTags).toHaveLength(25);
     for (const definitionId of MECHANIC_SMOKE_CARD_IDS.traceTags) {
-      const definition = DEMO_CARDS_BY_ID[definitionId];
+      const definition = CARD_DEFINITIONS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
       );
@@ -367,7 +367,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]
+      CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]
         ?.implementationStatus,
     ).toBe("playable_mvp");
   });
@@ -408,7 +408,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
 
-    expect(DEMO_CARDS_BY_ID["onr_v1_221_asp"]?.mechanics).toEqual(
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_221_asp"]?.mechanics).toEqual(
       expect.arrayContaining(["trace", "link", "bid_amount", "end_the_run", "run_lock"]),
     );
     expect(state.pendingChoice?.side).toBe("corp");
@@ -581,7 +581,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       state.runner.tags = 1;
       moveRunnerCardToGrip(state, definitionId);
 
-      const definition = DEMO_CARDS_BY_ID[definitionId];
+      const definition = CARD_DEFINITIONS_BY_ID[definitionId];
       const actionType =
         definition?.type === "event" ? "play_event" : "install_card";
       state = apply(

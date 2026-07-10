@@ -1,5 +1,5 @@
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type CardInstance,
   type CardInstanceId,
   type GameState,
@@ -133,7 +133,7 @@ describe("corp rez costs", () => {
       rezCostReductionSourceDefinitionIdsFor(
         noisyState,
         BASKERVILLE_ID,
-        DEMO_CARDS_BY_ID[BASKERVILLE_DEFINITION_ID]!,
+        CARD_DEFINITIONS_BY_ID[BASKERVILLE_DEFINITION_ID]!,
       ),
     ).toEqual([BASKERVILLE_DEFINITION_ID]);
   });

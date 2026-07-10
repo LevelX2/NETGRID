@@ -6,7 +6,7 @@
  * must not contain concrete card IDs or execute modifier effects themselves.
  */
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type CardDefinition,
   type CardInstance,
   type CardInstanceId,
@@ -40,7 +40,7 @@ export function cardDefinitionForInstance(
   id: CardInstanceId,
 ): CardDefinition {
   const instance = cardInstanceFor(state, id);
-  const definition = DEMO_CARDS_BY_ID[instance.definitionId];
+  const definition = CARD_DEFINITIONS_BY_ID[instance.definitionId];
   if (!definition)
     throw new Error(`Unknown card definition: ${instance.definitionId}`);
   return definition;

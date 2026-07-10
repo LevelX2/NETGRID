@@ -1,5 +1,5 @@
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type CardDefinition,
   type CardInstance,
   type CardInstanceId,
@@ -207,7 +207,7 @@ function definitionsFor(
   ice: CardDefinition,
 ): Record<string, CardDefinition> {
   const breakerDefinition =
-    DEMO_CARDS_BY_ID[state.cardInstances.breaker_1!.definitionId]!;
+    CARD_DEFINITIONS_BY_ID[state.cardInstances.breaker_1!.definitionId]!;
   return {
     [breakerDefinition.id]: breakerDefinition,
     [ice.id]: ice,

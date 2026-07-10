@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   applyAction,
   createGameAfterSetup,
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   getPlayerView,
   hashState,
   isHiddenInfoBarrierEvent,
@@ -96,10 +96,10 @@ describe("Proteus Hidden-Resource Foundation Harness", () => {
   const hiddenOriginalSubtypesByDefinitionId = new Map<string, string[]>();
 
   afterEach(() => {
-    delete DEMO_CARDS_BY_ID[hiddenResourceDefinitionId];
+    delete CARD_DEFINITIONS_BY_ID[hiddenResourceDefinitionId];
     for (const [definitionId, subtypes] of hiddenOriginalSubtypesByDefinitionId) {
-      DEMO_CARDS_BY_ID[definitionId] = {
-        ...DEMO_CARDS_BY_ID[definitionId],
+      CARD_DEFINITIONS_BY_ID[definitionId] = {
+        ...CARD_DEFINITIONS_BY_ID[definitionId],
         subtypes,
       } as CardDefinition;
     }
@@ -107,7 +107,7 @@ describe("Proteus Hidden-Resource Foundation Harness", () => {
   });
 
   function ensureHiddenResourceHarnessCard(): void {
-    DEMO_CARDS_BY_ID[hiddenResourceDefinitionId] ??= {
+    CARD_DEFINITIONS_BY_ID[hiddenResourceDefinitionId] ??= {
       id: hiddenResourceDefinitionId,
       title: hiddenResourceTitle,
       side: "runner",
@@ -149,7 +149,7 @@ describe("Proteus Hidden-Resource Foundation Harness", () => {
   function makeExistingCardImplementationResourceHiddenForHarness(
     definitionId = hiddenActivationDefinitionId,
   ): void {
-    const definition = DEMO_CARDS_BY_ID[definitionId];
+    const definition = CARD_DEFINITIONS_BY_ID[definitionId];
     if (!definition)
       throw new Error("Missing hidden activation fixture definition.");
     if (!hiddenOriginalSubtypesByDefinitionId.has(definitionId)) {
@@ -158,7 +158,7 @@ describe("Proteus Hidden-Resource Foundation Harness", () => {
         [...(definition.subtypes ?? [])],
       );
     }
-    DEMO_CARDS_BY_ID[definitionId] = {
+    CARD_DEFINITIONS_BY_ID[definitionId] = {
       ...definition,
       subtypes: [...new Set([...(definition.subtypes ?? []), "hidden"])],
     };
@@ -580,7 +580,7 @@ describe("Proteus Hidden-Resource Foundation Harness", () => {
 
   it("keeps hidden-resource fixture support out of Proteus card promotion", () => {
     ensureHiddenResourceHarnessCard();
-    expect(DEMO_CARDS_BY_ID[hiddenResourceDefinitionId]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID[hiddenResourceDefinitionId]).toMatchObject({
       type: "resource",
       subtypes: ["hidden"],
       mechanics: expect.arrayContaining([
@@ -589,7 +589,7 @@ describe("Proteus Hidden-Resource Foundation Harness", () => {
       ]),
     });
     expect(
-      Object.values(DEMO_CARDS_BY_ID).filter((card) =>
+      Object.values(CARD_DEFINITIONS_BY_ID).filter((card) =>
         card.id.startsWith("onr_proteus_") &&
         card.mechanics.includes("hidden_runner_resource_foundation"),
       ),

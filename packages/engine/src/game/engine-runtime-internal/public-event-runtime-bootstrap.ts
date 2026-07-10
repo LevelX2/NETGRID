@@ -1,6 +1,6 @@
 import * as runtimeDelegates from "./runtime-delegates";
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type ActionType,
   type ChoiceRequest,
   type CardDefinition,
@@ -1203,7 +1203,7 @@ export function validateDeckDefinition(
       `Deck ${deck.id} has side ${deck.side}, expected ${options.expectedSide}.`,
     );
 
-  const identity = DEMO_CARDS_BY_ID[deck.identity];
+  const identity = CARD_DEFINITIONS_BY_ID[deck.identity];
   if (!identity)
     errors.push(
       `Deck ${deck.id} references missing identity ${deck.identity}.`,
@@ -1219,7 +1219,7 @@ export function validateDeckDefinition(
 
   let agendaPointsTotal = 0;
   for (const entry of deck.cards) {
-    const definition = DEMO_CARDS_BY_ID[entry.id];
+    const definition = CARD_DEFINITIONS_BY_ID[entry.id];
     if (!Number.isInteger(entry.quantity) || entry.quantity <= 0)
       errors.push(`Deck ${deck.id} has invalid quantity for ${entry.id}.`);
     if (!definition) {

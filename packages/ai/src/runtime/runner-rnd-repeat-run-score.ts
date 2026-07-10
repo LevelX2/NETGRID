@@ -1,5 +1,5 @@
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type AiDecisionInput,
   type LegalAction,
 } from "@netgrid/shared";
@@ -54,7 +54,7 @@ function rndKnownTopIsAgendaForAi(
   return (
     freshness.knownTopIsAgenda === true ||
     RUNTIME_CARDS[definitionId]?.type === "agenda" ||
-    DEMO_CARDS_BY_ID[definitionId]?.type === "agenda"
+    CARD_DEFINITIONS_BY_ID[definitionId]?.type === "agenda"
   );
 }
 
@@ -64,7 +64,7 @@ function rndKnownTopIsLowValueForAi(
   const definitionId = freshness?.knownTopDefinitionId;
   if (!definitionId) return false;
   const type =
-    RUNTIME_CARDS[definitionId]?.type ?? DEMO_CARDS_BY_ID[definitionId]?.type;
+    RUNTIME_CARDS[definitionId]?.type ?? CARD_DEFINITIONS_BY_ID[definitionId]?.type;
   if (type === "agenda" || type === "asset" || type === "upgrade") return false;
   return freshness.knownTopIsLowValue === true || type !== undefined;
 }

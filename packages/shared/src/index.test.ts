@@ -10,7 +10,6 @@ import {
   CARD_DEFINITIONS,
   CARD_DEFINITIONS_BY_ID,
   CURRENT_RULES_BASELINE as INDEX_CURRENT_RULES_BASELINE,
-  DEMO_CARDS_BY_ID,
   DEMO_DECKS as INDEX_DEMO_DECKS,
   LEGACY_ABILITY_PAYLOAD_FIELDS as INDEX_LEGACY_ABILITY_PAYLOAD_FIELDS,
   sanitizeAiDecisionDebug,
@@ -87,12 +86,12 @@ describe("shared card definition registry", () => {
   it("exposes a current-state registry independent from the shared barrel implementation", () => {
     expect(CARD_DEFINITIONS.length).toBeGreaterThan(0);
     expect(CARD_DEFINITIONS_BY_ID["onr_v1_140_raven-microcyb-eagle"]).toBe(
-      DEMO_CARDS_BY_ID["onr_v1_140_raven-microcyb-eagle"],
+      CARD_DEFINITIONS_BY_ID["onr_v1_140_raven-microcyb-eagle"],
     );
   });
 
   it("keeps Raven Microcyb Eagle on its real deck text and subtype", () => {
-    const raven = DEMO_CARDS_BY_ID["onr_v1_140_raven-microcyb-eagle"];
+    const raven = CARD_DEFINITIONS_BY_ID["onr_v1_140_raven-microcyb-eagle"];
 
     expect(raven?.subtypes).toEqual(["deck"]);
     expect(raven?.rulesText).toContain("Provides +1 MU");

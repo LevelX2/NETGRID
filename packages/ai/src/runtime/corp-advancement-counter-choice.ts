@@ -1,4 +1,4 @@
-import { DEMO_CARDS_BY_ID, type AiDecisionInput } from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID, type AiDecisionInput } from "@netgrid/shared";
 import { RUNTIME_CARDS } from "../ai-hints";
 import { findVisibleCorpServerCard } from "./visible-card-lookup";
 
@@ -42,7 +42,7 @@ function corpAdvancementCounterChoiceScore(
     if (!located) return sum;
     const definitionId = located.card.definitionId;
     const definition = definitionId
-      ? DEMO_CARDS_BY_ID[definitionId]
+      ? CARD_DEFINITIONS_BY_ID[definitionId]
       : undefined;
     const runtime = definitionId ? RUNTIME_CARDS[definitionId] : undefined;
     const isAgenda =

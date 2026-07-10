@@ -1,6 +1,6 @@
 import { applyAction, createGameAfterSetup, getLegalActions } from "../index";
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   CURRENT_RULES_BASELINE,
   type CardInstanceId,
   type ChoiceRequest,
@@ -271,7 +271,7 @@ export const ONR_V1_9_14_WIP_CARD_IDS = [
 ] as const;
 
 export const ONR_V1_9_14_RUNNER_CARD_IDS = ONR_V1_9_14_WIP_CARD_IDS.filter(
-  (cardId) => DEMO_CARDS_BY_ID[cardId]?.side === "runner",
+  (cardId) => CARD_DEFINITIONS_BY_ID[cardId]?.side === "runner",
 );
 
 export const ONR_V1_9_15_WIP_CARD_IDS = [
@@ -2366,7 +2366,7 @@ export function agendaPoints(state: GameState, side: Side): number {
     (sum, id) => {
       const instance = state.cardInstances[id];
       const basePoints =
-        DEMO_CARDS_BY_ID[instance?.definitionId ?? ""]?.agendaPoints ?? 0;
+        CARD_DEFINITIONS_BY_ID[instance?.definitionId ?? ""]?.agendaPoints ?? 0;
       const bonusPoints = instance?.counters?.agenda ?? 0;
       const spentPoints = Math.max(
         0,

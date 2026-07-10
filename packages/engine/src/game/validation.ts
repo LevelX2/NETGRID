@@ -1,7 +1,7 @@
 // Read-only Game invariant validation. This module does not execute actions,
 // mutate state, or build PublicPayloads.
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type CardDefinition,
   type CardDefinitionId,
   type CardInstance,
@@ -468,7 +468,7 @@ function placementForZoneRef(zone: CardInstance["zone"]): string | undefined {
 
 function definitionFor(state: GameState, id: CardInstanceId): CardDefinition {
   const instance = mustInstance(state.cardInstances, id);
-  const definition = DEMO_CARDS_BY_ID[instance.definitionId];
+  const definition = CARD_DEFINITIONS_BY_ID[instance.definitionId];
   if (!definition)
     throw new Error(`Unbekannte Karte: ${instance.definitionId}`);
   return definition;

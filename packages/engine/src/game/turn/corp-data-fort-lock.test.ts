@@ -10,7 +10,7 @@ import { describe, expect, it } from "vitest";
 import {
   applyAction,
   createGame,
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   getLegalActions,
   hashState,
   replayEvents,
@@ -21,7 +21,7 @@ const WALL_OF_STATIC = "onr_v1_279_wall-of-static";
 const VACANT_SOULKILLER = "onr_v1_346_vacant-soulkiller";
 
 function ensurePrecisionBriberyDefinition(): void {
-  DEMO_CARDS_BY_ID[PRECISION_BRIBERY] ??= {
+  CARD_DEFINITIONS_BY_ID[PRECISION_BRIBERY] ??= {
     id: PRECISION_BRIBERY,
     title: "Precision Bribery",
     side: "runner",

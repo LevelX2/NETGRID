@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   applyAction,
   createGameAfterSetup,
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   getLegalActions,
   getPlayerView,
   replayEvents,
@@ -153,7 +153,7 @@ describe("ChoiceView projection", () => {
     const options = optionCardIds.map((cardId) => {
       const definitionId = state.cardInstances[cardId]?.definitionId;
       const definition = definitionId
-        ? DEMO_CARDS_BY_ID[definitionId]
+        ? CARD_DEFINITIONS_BY_ID[definitionId]
         : undefined;
       if (!definition) throw new Error(`Missing definition for ${cardId}`);
       return {

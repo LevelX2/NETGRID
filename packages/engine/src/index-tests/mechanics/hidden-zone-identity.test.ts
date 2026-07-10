@@ -5,7 +5,7 @@ import {
   checkWinConditions,
   createGame,
   createGameAfterSetup,
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   DEMO_DECKS,
   eventVisibilityForAction,
   getLegalActions,
@@ -282,22 +282,22 @@ describe("MVP 0.98a Identity and modifiers", () => {
     );
 
     expect(actionTypes).not.toContain("trigger_ability");
-    expect(DEMO_CARDS_BY_ID.v098_runner_identity?.mechanics).toContain(
+    expect(CARD_DEFINITIONS_BY_ID.v098_runner_identity?.mechanics).toContain(
       "identity_ability",
     );
-    expect(DEMO_CARDS_BY_ID.v098_runner_identity?.mechanics).not.toContain(
+    expect(CARD_DEFINITIONS_BY_ID.v098_runner_identity?.mechanics).not.toContain(
       "hosting",
     );
-    expect(DEMO_CARDS_BY_ID.v098_runner_identity?.mechanics).not.toContain(
+    expect(CARD_DEFINITIONS_BY_ID.v098_runner_identity?.mechanics).not.toContain(
       "virus",
     );
-    expect(DEMO_CARDS_BY_ID.v098_runner_identity?.mechanics).not.toContain(
+    expect(CARD_DEFINITIONS_BY_ID.v098_runner_identity?.mechanics).not.toContain(
       "purge",
     );
-    expect(DEMO_CARDS_BY_ID.v098_runner_identity?.mechanics).not.toContain(
+    expect(CARD_DEFINITIONS_BY_ID.v098_runner_identity?.mechanics).not.toContain(
       "prevention",
     );
-    expect(DEMO_CARDS_BY_ID.v098_runner_identity?.mechanics).not.toContain(
+    expect(CARD_DEFINITIONS_BY_ID.v098_runner_identity?.mechanics).not.toContain(
       "replacement",
     );
   });
@@ -511,7 +511,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
       "onr_v1_272_too-many-doors",
     ];
     for (const definitionId of implementedWipIds) {
-      const definition = DEMO_CARDS_BY_ID[definitionId];
+      const definition = CARD_DEFINITIONS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
       );
@@ -521,7 +521,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
         expect(definition?.mechanics).toContain("hidden_zone_tool");
       }
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus).toBe(
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus).toBe(
       "playable_mvp",
     );
   });

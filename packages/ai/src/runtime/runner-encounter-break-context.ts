@@ -1,5 +1,5 @@
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type AiDecisionInput,
   type LegalAction,
   type VisibleCard,
@@ -50,7 +50,7 @@ export function createRunnerEncounterBreakContext(
     const breaker = dependencies.findVisibleCard(input, action.source);
     if (!breaker?.definitionId) return 1;
     const abilityCosts =
-      DEMO_CARDS_BY_ID[breaker.definitionId]?.abilities
+      CARD_DEFINITIONS_BY_ID[breaker.definitionId]?.abilities
         ?.filter((ability) => ability.type === "break_subroutine")
         .map((ability) =>
           typeof ability.cost?.credits === "number" ? ability.cost.credits : 1,

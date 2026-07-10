@@ -6,7 +6,7 @@ import { createCardRuntimeHosts } from "./card-runtime-hosts";
 import { createFlowRuntimeHosts } from "./flow-runtime-hosts";
 import { createStateRuntimeServices } from "./state-runtime-services";
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type ActionType,
   type ChoiceRequest,
   type CardDefinition,
@@ -1729,7 +1729,7 @@ function automaticStealAgendaEffect(
   };
 }
 function publicCardTitle(definitionId: CardDefinitionId): string {
-  return DEMO_CARDS_BY_ID[definitionId]?.title ?? definitionId;
+  return CARD_DEFINITIONS_BY_ID[definitionId]?.title ?? definitionId;
 }
 function applyScoredAgendaActionEconomyAtCorpStart(
   state: GameState,
@@ -1985,7 +1985,7 @@ function resolveDelayedAccessEffects(state: GameState, effects?: AutomaticEffect
     ) {
       continue;
     }
-    const definition = DEMO_CARDS_BY_ID[instance.definitionId];
+    const definition = CARD_DEFINITIONS_BY_ID[instance.definitionId];
     if (!definition || definition.type !== "agenda") {
       remaining.push(entry);
       continue;

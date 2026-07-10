@@ -2,7 +2,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { DEMO_CARDS_BY_ID } from "../index";
+import { CARD_DEFINITIONS_BY_ID } from "../index";
 import {
   CARD_IMPLEMENTATION_COVERAGE_ENTRIES,
   CARD_IMPLEMENTATION_COVERAGE_OVERRIDES,
@@ -2078,7 +2078,7 @@ describe("CardImplementation coverage and registry invariants", () => {
       ),
     ).toEqual([]);
 
-    for (const definitionId of Object.keys(DEMO_CARDS_BY_ID)) {
+    for (const definitionId of Object.keys(CARD_DEFINITIONS_BY_ID)) {
       const coverage = cardImplementationCoverageForDefinitionId(definitionId);
       expect(coverage, definitionId).toBeDefined();
       expect(coverage?.cardDefinitionId).toBe(definitionId);
@@ -2121,11 +2121,11 @@ describe("CardImplementation coverage and registry invariants", () => {
       );
     }
 
-    const currentReleaseDefinitionIds = Object.keys(DEMO_CARDS_BY_ID).filter(
+    const currentReleaseDefinitionIds = Object.keys(CARD_DEFINITIONS_BY_ID).filter(
       (definitionId) =>
         isCurrentCardImplementationReleaseScopeDefinitionId(definitionId),
     );
-    const outsideScopeDefinitionIds = Object.keys(DEMO_CARDS_BY_ID).filter(
+    const outsideScopeDefinitionIds = Object.keys(CARD_DEFINITIONS_BY_ID).filter(
       (definitionId) =>
         !isCurrentCardImplementationReleaseScopeDefinitionId(definitionId),
     );

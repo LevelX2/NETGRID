@@ -1,5 +1,5 @@
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type CardDefinition,
   type CardInstanceId,
   type GameState,
@@ -673,7 +673,7 @@ function goldenDeps(
 
 function definitionFor(state: GameState, id: CardInstanceId): CardDefinition {
   const definitionId = state.cardInstances[id]?.definitionId ?? id;
-  const definition = DEMO_CARDS_BY_ID[definitionId];
+  const definition = CARD_DEFINITIONS_BY_ID[definitionId];
   if (!definition) throw new Error(`Missing test definition: ${definitionId}`);
   return definition;
 }

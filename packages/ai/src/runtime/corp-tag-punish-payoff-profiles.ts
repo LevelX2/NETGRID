@@ -1,5 +1,5 @@
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type AiDecisionInput,
   type LegalAction,
   type VisibleCard,
@@ -198,7 +198,7 @@ function corpVisibleCardPlayCost(card: VisibleCard): number {
     card.cost ??
     (card.definitionId
       ? (RUNTIME_CARDS[card.definitionId]?.numeric.cost ??
-        DEMO_CARDS_BY_ID[card.definitionId]?.cost)
+        CARD_DEFINITIONS_BY_ID[card.definitionId]?.cost)
       : undefined) ??
     0
   );

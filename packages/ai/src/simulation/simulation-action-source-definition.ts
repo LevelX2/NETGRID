@@ -1,5 +1,5 @@
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type AiDecisionInput,
   type LegalAction,
   type VisibleCard,
@@ -28,7 +28,7 @@ export function createDefinitionForSimulationAction(
   return (input: AiDecisionInput, action: LegalAction) => {
     const definitionId = sourceDefinitionIdForAction(input, action);
     return definitionId
-      ? (RUNTIME_CARDS[definitionId] ?? DEMO_CARDS_BY_ID[definitionId])
+      ? (RUNTIME_CARDS[definitionId] ?? CARD_DEFINITIONS_BY_ID[definitionId])
       : undefined;
   };
 }

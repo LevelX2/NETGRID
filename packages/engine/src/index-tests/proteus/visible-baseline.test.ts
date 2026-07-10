@@ -5,7 +5,7 @@ import {
   checkWinConditions,
   createGame,
   createGameAfterSetup,
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   DEMO_DECKS,
   eventVisibilityForAction,
   getLegalActions,
@@ -296,7 +296,7 @@ describe("Proteus Visible Baseline", () => {
       cardImplementationForDefinitionId(TOUGHONIUM)?.printedSubroutines,
     ).toHaveLength(4);
     expect(
-      DEMO_CARDS_BY_ID[TOUGHONIUM]?.subroutines?.every(
+      CARD_DEFINITIONS_BY_ID[TOUGHONIUM]?.subroutines?.every(
         (subroutine) => subroutine.type === "end_the_run",
       ),
     ).toBe(true);
@@ -359,7 +359,7 @@ describe("Proteus Visible Baseline", () => {
       const regionInstanceId = putCorpRootInRemote(state, regionId);
       const agendaInstanceId = putCorpRootInRemote(state, agendaId);
       const printedDifficulty =
-        DEMO_CARDS_BY_ID[agendaId]?.advancementRequirement ?? 0;
+        CARD_DEFINITIONS_BY_ID[agendaId]?.advancementRequirement ?? 0;
       state.cardInstances[agendaInstanceId] = {
         ...state.cardInstances[agendaInstanceId]!,
         advancementCounters: printedDifficulty - 1,

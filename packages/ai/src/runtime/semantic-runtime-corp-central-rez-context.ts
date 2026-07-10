@@ -1,5 +1,5 @@
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type AiDecisionInput,
   type LegalAction,
   type VisibleCard,
@@ -65,7 +65,7 @@ export function createSemanticRuntimeCorpCentralRezContext(
       sourceCard?.rezCost ??
       (sourceDefinitionId
         ? (RUNTIME_CARDS[sourceDefinitionId]?.numeric.rezCost ??
-          DEMO_CARDS_BY_ID[sourceDefinitionId]?.rezCost)
+          CARD_DEFINITIONS_BY_ID[sourceDefinitionId]?.rezCost)
         : undefined) ??
       0
     );
@@ -224,7 +224,7 @@ function semanticRuntimeCorpVisibleIceRezCost(
     ice.rezCost ??
     (ice.definitionId
       ? (RUNTIME_CARDS[ice.definitionId]?.numeric.rezCost ??
-        DEMO_CARDS_BY_ID[ice.definitionId]?.rezCost)
+        CARD_DEFINITIONS_BY_ID[ice.definitionId]?.rezCost)
       : undefined)
   );
 }

@@ -1,6 +1,6 @@
 import * as runtimeDelegates from "./runtime-delegates";
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type ActionType,
   type ChoiceRequest,
   type CardDefinition,
@@ -1099,7 +1099,7 @@ export function configureFlowRuntimeBootstrap({
   ): { handled: boolean; stateChanged?: boolean } {
     const pending = run.testSpinTemporaryInstall;
     if (!pending) return { handled: false };
-    const sourceDefinition = DEMO_CARDS_BY_ID[pending.sourceDefinitionId];
+    const sourceDefinition = CARD_DEFINITIONS_BY_ID[pending.sourceDefinitionId];
     const instance = state.cardInstances[pending.cardId];
     if (
       instance &&

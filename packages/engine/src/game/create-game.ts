@@ -2,7 +2,7 @@
 // No run/action/access/payment logic belongs here; GameState types stay in @netgrid/shared.
 import {
   CURRENT_RULES_BASELINE,
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   DEMO_DECKS,
   type CardDefinition,
   type CardInstance,
@@ -280,9 +280,9 @@ function createInstance(
     controller: side,
     zone,
     faceup:
-      side === "runner" || DEMO_CARDS_BY_ID[definitionId]?.type === "identity",
+      side === "runner" || CARD_DEFINITIONS_BY_ID[definitionId]?.type === "identity",
     rezzed:
-      side === "runner" || DEMO_CARDS_BY_ID[definitionId]?.type === "identity",
+      side === "runner" || CARD_DEFINITIONS_BY_ID[definitionId]?.type === "identity",
     advancementCounters: 0,
     strengthModifier: 0,
   };
@@ -405,7 +405,7 @@ function identityDefinition(state: GameState, side: Side): CardDefinition {
 
 function definitionFor(state: GameState, id: CardInstanceId): CardDefinition {
   const instance = mustInstance(state.cardInstances, id);
-  const definition = DEMO_CARDS_BY_ID[instance.definitionId];
+  const definition = CARD_DEFINITIONS_BY_ID[instance.definitionId];
   if (!definition)
     throw new Error(`Unbekannte Karte: ${instance.definitionId}`);
   return definition;

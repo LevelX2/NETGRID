@@ -667,7 +667,7 @@ function runSelfTest() {
   const sources = [
     {
       file: "packages/shared/src/card-definitions.ts",
-      text: 'export const DEMO_CARDS = [{\n  id: "onr_v1_001_hacker_tracker",\n  title: "Hacker Tracker",\n}];\n',
+      text: 'export const CARD_DEFINITIONS = [{\n  id: "onr_v1_001_hacker_tracker",\n  title: "Hacker Tracker",\n}];\n',
     },
     {
       file: "packages/engine/src/game/engine-runtime-internal/synthetic-runtime.ts",

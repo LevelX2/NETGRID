@@ -1,4 +1,4 @@
-import { DEMO_CARDS_BY_ID, type CardInstanceId, type GameState } from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID, type CardInstanceId, type GameState } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import { createGame } from "./create-game";
 import {
@@ -98,7 +98,7 @@ describe("win conditions", () => {
 
 function firstAgendaId(state: GameState): CardInstanceId {
   const entry = Object.entries(state.cardInstances).find(
-    ([, instance]) => DEMO_CARDS_BY_ID[instance.definitionId]?.type === "agenda",
+    ([, instance]) => CARD_DEFINITIONS_BY_ID[instance.definitionId]?.type === "agenda",
   );
   if (!entry) throw new Error("No agenda card found in test state.");
   return entry[0];

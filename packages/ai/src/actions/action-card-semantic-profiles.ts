@@ -1,5 +1,5 @@
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type AbilityDefinition,
   type CardDefinitionId,
 } from "@netgrid/shared";
@@ -82,7 +82,7 @@ function actionCardSemanticProfileFromHint(
 ): ActionCardSemanticProfile | undefined {
   const extendedHint = hint as ExtendedAiCardHint;
   const effectSignals = (hint.effects ?? []).flatMap(effectTacticSignals);
-  const abilitySemantics = (DEMO_CARDS_BY_ID[cardId]?.abilities ?? []).map(
+  const abilitySemantics = (CARD_DEFINITIONS_BY_ID[cardId]?.abilities ?? []).map(
     abilitySemanticProfile,
   );
   const compatibilitySignals = uniqueStrings([

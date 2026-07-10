@@ -11,7 +11,7 @@ import type {
   GameState,
   LegalAction,
 } from "@netgrid/shared";
-import { DEMO_CARDS_BY_ID } from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "@netgrid/shared";
 import {
   activeCardImplementationModifiersForCorpRoot,
   activeCardImplementationModifiersForRunnerInstalled,
@@ -174,7 +174,7 @@ function corpAgendaPointTotalForRezCost(state: GameState): number {
   const scoredPoints = state.corp.scoreArea.reduce((sum, cardId) => {
     const definitionId = state.cardInstances[cardId]?.definitionId;
     if (!definitionId) return sum;
-    return sum + Math.max(0, Math.floor(DEMO_CARDS_BY_ID[definitionId]?.agendaPoints ?? 0));
+    return sum + Math.max(0, Math.floor(CARD_DEFINITIONS_BY_ID[definitionId]?.agendaPoints ?? 0));
   }, 0);
   return bonusPoints + scoredPoints;
 }
@@ -293,7 +293,7 @@ function corpRezCostModifierQuoteForMatch(
   match: ActiveCorpRezCostModifier,
 ): CostModifierQuote {
   const { sourceCardInstanceId, sourceDefinitionId, modifier } = match;
-  const sourceDefinition = DEMO_CARDS_BY_ID[sourceDefinitionId];
+  const sourceDefinition = CARD_DEFINITIONS_BY_ID[sourceDefinitionId];
   return {
     sourceCardInstanceId,
     sourceDefinitionId,
@@ -307,7 +307,7 @@ function corpSelfRezCostModifierQuoteForMatch(
   match: ActiveCorpSelfRezCostModifier,
 ): CostModifierQuote {
   const { sourceCardInstanceId, sourceDefinitionId, modifier } = match;
-  const sourceDefinition = DEMO_CARDS_BY_ID[sourceDefinitionId];
+  const sourceDefinition = CARD_DEFINITIONS_BY_ID[sourceDefinitionId];
   return {
     sourceCardInstanceId,
     sourceDefinitionId,
@@ -321,7 +321,7 @@ function corpInstallCostModifierQuoteForMatch(
   match: ActiveCorpInstallCostModifier,
 ): CostModifierQuote {
   const { sourceCardInstanceId, sourceDefinitionId, modifier } = match;
-  const sourceDefinition = DEMO_CARDS_BY_ID[sourceDefinitionId];
+  const sourceDefinition = CARD_DEFINITIONS_BY_ID[sourceDefinitionId];
   return {
     sourceCardInstanceId,
     sourceDefinitionId,
@@ -460,7 +460,7 @@ export function quoteCorpRezCost(
     modifiers.push({
       sourceCardInstanceId: discountedRezSourceCardId,
       sourceDefinitionId,
-      label: DEMO_CARDS_BY_ID[sourceDefinitionId]?.title ?? sourceDefinitionId,
+      label: CARD_DEFINITIONS_BY_ID[sourceDefinitionId]?.title ?? sourceDefinitionId,
       amount: regularFinalCredits - finalCredits,
       kind: "reduction",
     });
@@ -480,7 +480,7 @@ export function quoteCorpRezCost(
     modifiers.push({
       sourceDefinitionId: runRezSurcharge.sourceDefinitionId,
       label:
-        DEMO_CARDS_BY_ID[runRezSurcharge.sourceDefinitionId]?.title ??
+        CARD_DEFINITIONS_BY_ID[runRezSurcharge.sourceDefinitionId]?.title ??
         runRezSurcharge.sourceDefinitionId,
       amount: runRezSurcharge.amount,
       kind: "increase",

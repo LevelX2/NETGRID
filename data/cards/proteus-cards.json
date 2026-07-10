@@ -221,6 +221,11 @@
         "agendaPoints": 2
       },
       "text": "For every three advancement counters over Project Venice 's difficulty that are on Project Venice when you score it, gain an action during each of your turns.",
+      "markCounterDisplay": {
+        "id": "project_venice_actions_per_turn",
+        "label": "Aktion/Zug",
+        "ariaLabelName": "Project Venice zusätzliche Aktion pro Corp-Zug"
+      },
       "displayOnlyText": true,
       "faction": "onr_proteus",
       "setName": "Proteus",
@@ -253,6 +258,11 @@
         "agendaPoints": 2
       },
       "text": "For every two advancement counters over Project Zurich 's difficulty that are on Project Zurich when you score it, gain 1 at the start of each of your turns.",
+      "markCounterDisplay": {
+        "id": "project_zurich_credits_per_turn",
+        "label": "Credit/Zug",
+        "ariaLabelName": "Project Zurich zusätzlicher Credit pro Corp-Zug"
+      },
       "displayOnlyText": true,
       "faction": "onr_proteus",
       "setName": "Proteus",

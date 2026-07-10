@@ -1,5 +1,5 @@
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type CardDefinition,
   type CardDefinitionId,
   type CounterCreditUse,
@@ -1594,7 +1594,7 @@ function projectIceForRunPathEffects(
     iceDefinitionId: ice.definitionId,
     effectiveStrength: ice.strength ?? cardDefinitionStrength(ice.definitionId),
     subroutines:
-      DEMO_CARDS_BY_ID[ice.definitionId]?.subroutines?.map((subroutine) => ({
+      CARD_DEFINITIONS_BY_ID[ice.definitionId]?.subroutines?.map((subroutine) => ({
         id: subroutine.id,
         type: subroutine.type,
         ...(subroutine.amount !== undefined
@@ -2349,10 +2349,10 @@ function visibleRunCardDefinition(
   definitionId: string | undefined,
 ): CardDefinition | undefined {
   if (!definitionId) return undefined;
-  const directDefinition = DEMO_CARDS_BY_ID[definitionId];
+  const directDefinition = CARD_DEFINITIONS_BY_ID[definitionId];
   if (directDefinition) return directDefinition;
   const runtimeEngineId = RUNTIME_CARDS[definitionId]?.engineCardId;
-  return runtimeEngineId ? DEMO_CARDS_BY_ID[runtimeEngineId] : undefined;
+  return runtimeEngineId ? CARD_DEFINITIONS_BY_ID[runtimeEngineId] : undefined;
 }
 
 export function breakerCarriesStrengthAcrossIce(

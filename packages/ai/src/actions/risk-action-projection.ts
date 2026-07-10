@@ -1,5 +1,5 @@
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type AiDecisionInput,
   type LegalAction,
 } from "@netgrid/shared";
@@ -567,7 +567,7 @@ function visibleEndRunSubroutineCountForIce(ice: VisibleServerIce): number {
     ).length;
   }
   return (
-    DEMO_CARDS_BY_ID[ice.definitionId]?.subroutines?.filter(
+    CARD_DEFINITIONS_BY_ID[ice.definitionId]?.subroutines?.filter(
       (subroutine) =>
         subroutine.type === "end_the_run" ||
         subroutine.type === "end_the_run_unless_runner_pays",

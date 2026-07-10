@@ -5,7 +5,7 @@ import {
   checkWinConditions,
   createGame,
   createGameAfterSetup,
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   DEMO_DECKS,
   eventVisibilityForAction,
   getLegalActions,
@@ -205,7 +205,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
   it("adds all V1.9.17 WIP runtime definitions without release-promoting the next slice", () => {
     expect(MECHANIC_SMOKE_CARD_IDS.assetNodeEffects).toHaveLength(18);
     for (const definitionId of MECHANIC_SMOKE_CARD_IDS.assetNodeEffects) {
-      const definition = DEMO_CARDS_BY_ID[definitionId];
+      const definition = CARD_DEFINITIONS_BY_ID[definitionId];
       expect(definition?.side, definitionId).toBe("corp");
       expect(definition?.type, definitionId).toBe("asset");
       expect(definition?.implementationStatus, definitionId).toBe(
@@ -217,7 +217,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]
+      CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]
         ?.implementationStatus,
     ).toBe("playable_mvp");
   });
@@ -1386,7 +1386,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
   it("adds all V1.9.18 WIP runtime definitions without release-promoting the next slice", () => {
     expect(MECHANIC_SMOKE_CARD_IDS.serverUpgrades).toHaveLength(15);
     for (const definitionId of MECHANIC_SMOKE_CARD_IDS.serverUpgrades) {
-      const definition = DEMO_CARDS_BY_ID[definitionId];
+      const definition = CARD_DEFINITIONS_BY_ID[definitionId];
       expect(definition?.side, definitionId).toBe("corp");
       expect(definition?.type, definitionId).toBe("upgrade");
       expect(definition?.implementationStatus, definitionId).toBe(
@@ -1398,7 +1398,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]
+      CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]
         ?.implementationStatus,
     ).toBe("playable_mvp");
   });
@@ -2579,7 +2579,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     );
     const agendaId = putCorpRootInRemote(state, "simple_agenda");
     const printedDifficulty =
-      DEMO_CARDS_BY_ID.simple_agenda?.advancementRequirement ?? 0;
+      CARD_DEFINITIONS_BY_ID.simple_agenda?.advancementRequirement ?? 0;
     state.cardInstances[agendaId] = {
       ...state.cardInstances[agendaId]!,
       advancementCounters: printedDifficulty - 1,

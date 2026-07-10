@@ -5,7 +5,7 @@ import {
   checkWinConditions,
   createGame,
   createGameAfterSetup,
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   DEMO_DECKS,
   eventVisibilityForAction,
   getLegalActions,
@@ -829,7 +829,7 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
       getPlayerView(agendaState, "corp")
         .servers.find((server) => server.id === "hq")
         ?.ice.find((ice) => ice.instanceId === nonBlackIceId)?.strength,
-    ).toBe(DEMO_CARDS_BY_ID.simple_barrier_ice?.strength);
+    ).toBe(CARD_DEFINITIONS_BY_ID.simple_barrier_ice?.strength);
     agendaState.corp.scoreArea = agendaState.corp.scoreArea.filter(
       (cardId) => cardId !== agendaId,
     );

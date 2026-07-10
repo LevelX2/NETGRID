@@ -75,12 +75,11 @@ Die Guard-Nachpflege, der `Quest for Cattekin`-Slice, die `Code Viral Cache`-Ins
 
 ## Automatisch abgeleiteter Guard
 
-Der Derived-Guard erzeugt 1317 Tokens aus Kartentiteln und `cardDefinitionId`-Varianten und hält 142 problemzonenrelevante Fingerprints als Baseline.
+Der Derived-Guard erzeugt 1317 Tokens aus Kartentiteln und `cardDefinitionId`-Varianten und hält 140 problemzonenrelevante Fingerprints als Baseline.
 Die kompakte Fingerprint-Baseline dient nur als New-Leak-Detektor; das lesbare Review-Inventar bleibt die Known-Token-Fundliste unten.
 
 | Kategorie | Anzahl |
 | --- | ---: |
-| runtime_state_field_uses_card_name | 2 |
 | new_unclassified_card_name_leak | 133 |
 | functional_kind_uses_card_name | 7 |
 

@@ -1,5 +1,5 @@
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type CardDefinitionId,
   type CardInstanceId,
   type GameState,
@@ -81,7 +81,7 @@ function strategicPlanningGroupSourceIds(state: GameState): CardInstanceId[] {
       return (
         cardImplementationForDefinitionId(instance.definitionId as CardDefinitionId)
           ?.corpUtility?.kind === "corp_draw_extra_then_bottom_one" &&
-        DEMO_CARDS_BY_ID[instance.definitionId]?.side === "corp"
+        CARD_DEFINITIONS_BY_ID[instance.definitionId]?.side === "corp"
       );
     })
     .sort();

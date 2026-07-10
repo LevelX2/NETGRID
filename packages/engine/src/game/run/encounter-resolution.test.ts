@@ -1,5 +1,5 @@
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type CardInstance,
   type CardInstanceId,
   type GameState,
@@ -102,7 +102,7 @@ describe("encounter resolution boundary", () => {
   it("sets Ball-and-Chain encounter tax markers and leaves payment to run-duration payment", () => {
     const state = makeState();
     const legalAction = { payload: {} } as LegalAction;
-    const definition = DEMO_CARDS_BY_ID["onr_v1_222_ball-and-chain"]!;
+    const definition = CARD_DEFINITIONS_BY_ID["onr_v1_222_ball-and-chain"]!;
     const subroutine = {
       id: "ball_tax",
       type: "set_run_encounter_tax",
@@ -134,7 +134,7 @@ describe("encounter resolution boundary", () => {
   it("sets Viral-15 jack-out and pass-ice program-trash markers without opening the choice early", () => {
     const state = makeState();
     const legalAction = { payload: {} } as LegalAction;
-    const definition = DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]!;
+    const definition = CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]!;
     const viralSubroutine = {
       id: "viral15",
       type: "set_run_active_ice_program_trash",

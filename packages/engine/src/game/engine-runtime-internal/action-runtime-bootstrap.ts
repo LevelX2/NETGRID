@@ -1,6 +1,6 @@
 import * as runtimeDelegates from "./runtime-delegates";
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type ActionType,
   type ChoiceRequest,
   type CardDefinition,

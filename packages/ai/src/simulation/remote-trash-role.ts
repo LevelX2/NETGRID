@@ -1,5 +1,5 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
-import { DEMO_CARDS_BY_ID } from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "@netgrid/shared";
 import { createAiHintsByCard, RUNTIME_CARDS } from "../ai-hints";
 import {
   getStructuredRemoteRoleForCard,
@@ -50,7 +50,7 @@ export function remoteTrashRoleForVisibleCard(
     ? RUNTIME_CARDS[card.definitionId]
     : undefined;
   const demoDefinition = card.definitionId
-    ? DEMO_CARDS_BY_ID[card.definitionId]
+    ? CARD_DEFINITIONS_BY_ID[card.definitionId]
     : undefined;
   const mechanics = [
     ...("mechanics" in (runtimeDefinition ?? {})
@@ -157,7 +157,7 @@ export function remoteTrashCardLooksLikeFinitePoolForMetrics(
     ? RUNTIME_CARDS[card.definitionId]
     : undefined;
   const demoDefinition = card.definitionId
-    ? DEMO_CARDS_BY_ID[card.definitionId]
+    ? CARD_DEFINITIONS_BY_ID[card.definitionId]
     : undefined;
   const mechanics = [
     ...("mechanics" in (runtimeDefinition ?? {})

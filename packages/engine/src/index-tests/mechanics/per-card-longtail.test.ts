@@ -5,7 +5,7 @@ import {
   checkWinConditions,
   createGame,
   createGameAfterSetup,
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   DEMO_DECKS,
   eventVisibilityForAction,
   getLegalActions,
@@ -211,7 +211,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     ] as const;
     expect(MECHANIC_SMOKE_CARD_IDS.longtailEffects).toHaveLength(47);
     for (const definitionId of runnerHardwareIds) {
-      const definition = DEMO_CARDS_BY_ID[definitionId];
+      const definition = CARD_DEFINITIONS_BY_ID[definitionId];
       expect(definition?.side, definitionId).toBe("runner");
       expect(definition?.type, definitionId).toBe("hardware");
       expect(definition?.implementationStatus, definitionId).toBe(
@@ -222,15 +222,15 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         "per_card_longtail",
       );
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus).toBe(
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus).toBe(
       "playable_mvp",
     );
-    expect(DEMO_CARDS_BY_ID["onr_v1_123_bodyweight-data-creche"]).toMatchObject(
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_123_bodyweight-data-creche"]).toMatchObject(
       {
         installCost: 3,
       },
     );
-    expect(DEMO_CARDS_BY_ID["onr_v1_124_corolla-speed-chip"]).toMatchObject({
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_124_corolla-speed-chip"]).toMatchObject({
       installCost: 1,
     });
   });
@@ -513,7 +513,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "onr_v1_117_valu-pak-software-bundle",
     ] as const;
     for (const definitionId of runnerEventIds) {
-      const definition = DEMO_CARDS_BY_ID[definitionId];
+      const definition = CARD_DEFINITIONS_BY_ID[definitionId];
       expect(definition?.side, definitionId).toBe("runner");
       expect(definition?.type, definitionId).toBe("event");
       expect(definition?.implementationStatus, definitionId).toBe(
@@ -6715,7 +6715,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
 
     for (const definitionId of corpLongtailIds) {
       expect(
-        DEMO_CARDS_BY_ID[definitionId]?.implementationStatus,
+        CARD_DEFINITIONS_BY_ID[definitionId]?.implementationStatus,
         definitionId,
       ).toBe("playable_mvp");
     }
@@ -6735,15 +6735,15 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "onr_v1_298_planning-consultants",
     ] as const) {
       expect(
-        DEMO_CARDS_BY_ID[definitionId]?.implementationStatus,
+        CARD_DEFINITIONS_BY_ID[definitionId]?.implementationStatus,
         definitionId,
       ).toBe("playable_mvp");
       expect(
-        DEMO_CARDS_BY_ID[definitionId]?.rulesText,
+        CARD_DEFINITIONS_BY_ID[definitionId]?.rulesText,
         definitionId,
       ).not.toContain("WIP");
       expect(
-        DEMO_CARDS_BY_ID[definitionId]?.mechanics.join(" "),
+        CARD_DEFINITIONS_BY_ID[definitionId]?.mechanics.join(" "),
         definitionId,
       ).toContain("per_card_longtail");
     }

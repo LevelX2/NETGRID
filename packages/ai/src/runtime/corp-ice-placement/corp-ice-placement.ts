@@ -1,5 +1,5 @@
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type AiDecisionInput,
   type AiDecisionScoreComponent,
   type LegalAction,
@@ -489,9 +489,9 @@ export function buildCorpIceCardPlacementProfile(
     ? RUNTIME_CARDS[definitionId]
     : undefined;
   const demoDefinition = definitionId
-    ? (DEMO_CARDS_BY_ID[definitionId] ??
+    ? (CARD_DEFINITIONS_BY_ID[definitionId] ??
       (runtimeDefinition?.engineCardId
-        ? DEMO_CARDS_BY_ID[runtimeDefinition.engineCardId]
+        ? CARD_DEFINITIONS_BY_ID[runtimeDefinition.engineCardId]
         : undefined))
     : undefined;
   const hint = definitionId ? AI_HINTS_BY_CARD.get(definitionId) : undefined;
@@ -1288,7 +1288,7 @@ function cardLooksLikeIce(card: VisibleCard): boolean {
   const definitionId = card.definitionId;
   if (!definitionId) return false;
   return (
-    DEMO_CARDS_BY_ID[definitionId]?.type === "ice" ||
+    CARD_DEFINITIONS_BY_ID[definitionId]?.type === "ice" ||
     RUNTIME_CARDS[definitionId]?.type === "ice"
   );
 }

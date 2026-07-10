@@ -7,7 +7,7 @@
  * Kein Import aus index.ts.
  */
 import {
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   type CardDefinition,
   type CardDefinitionId,
   type CardInstance,
@@ -57,7 +57,7 @@ function mustInstance(
 
 function definitionFor(state: GameState, id: CardInstanceId): CardDefinition {
   const instance = mustInstance(state.cardInstances, id);
-  const definition = DEMO_CARDS_BY_ID[instance.definitionId];
+  const definition = CARD_DEFINITIONS_BY_ID[instance.definitionId];
   if (!definition)
     throw new Error(`Unbekannte Karte: ${instance.definitionId}`);
   return definition;
@@ -184,7 +184,7 @@ function cardImplementationQuoteForAbility(
 export function traceBaseLinkCardImplementationQuotesForDefinition(
   definitionId: CardDefinitionId,
 ): TraceBaseLinkCardImplementationQuote[] {
-  const definition = DEMO_CARDS_BY_ID[definitionId];
+  const definition = CARD_DEFINITIONS_BY_ID[definitionId];
   if (!definition) return [];
   return activatedCardImplementationTraceBaseLinkAbilities(definition)
     .map(({ ability }) => cardImplementationQuoteForAbility(definition, ability))

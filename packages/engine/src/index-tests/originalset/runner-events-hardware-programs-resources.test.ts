@@ -5,7 +5,7 @@ import {
   checkWinConditions,
   createGame,
   createGameAfterSetup,
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   DEMO_DECKS,
   eventVisibilityForAction,
   getLegalActions,
@@ -2671,7 +2671,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
       const state = makeState(`p39-${sourceDefinitionId}`);
       const targetId = putCorpRootInRemote(state, targetDefinitionId);
       const printedDifficulty =
-        DEMO_CARDS_BY_ID[targetDefinitionId]?.advancementRequirement ?? 0;
+        CARD_DEFINITIONS_BY_ID[targetDefinitionId]?.advancementRequirement ?? 0;
       state.cardInstances[targetId] = {
         ...state.cardInstances[targetId]!,
         advancementCounters: printedDifficulty - 1,

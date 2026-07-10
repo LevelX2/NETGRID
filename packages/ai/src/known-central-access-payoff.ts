@@ -1,4 +1,4 @@
-import { DEMO_CARDS_BY_ID, type AiDecisionInput } from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID, type AiDecisionInput } from "@netgrid/shared";
 import { RUNTIME_CARDS, createAiHintsByCard } from "./ai-hints";
 import { reconstructBeliefState, type BeliefState } from "./belief-state";
 import { cardRolesForId } from "./runtime/card-role-lookup";
@@ -927,13 +927,13 @@ function centralAccessScopeIsRd(value: string | undefined): boolean {
 function cardDefinitionTrashCost(definitionId: string): number | undefined {
   return (
     RUNTIME_CARDS[definitionId]?.numeric.trashCost ??
-    DEMO_CARDS_BY_ID[definitionId]?.trashCost
+    CARD_DEFINITIONS_BY_ID[definitionId]?.trashCost
   );
 }
 
 function cardDefinitionType(definitionId: string): string | undefined {
   return (
-    RUNTIME_CARDS[definitionId]?.type ?? DEMO_CARDS_BY_ID[definitionId]?.type
+    RUNTIME_CARDS[definitionId]?.type ?? CARD_DEFINITIONS_BY_ID[definitionId]?.type
   );
 }
 

@@ -5,7 +5,7 @@ import {
   checkWinConditions,
   createGame,
   createGameAfterSetup,
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   DEMO_DECKS,
   eventVisibilityForAction,
   getLegalActions,
@@ -209,9 +209,9 @@ describe("MVP 0.99 Hosting, Viren, Purge und Counter-Familien", () => {
       "card-snapshot-0.99",
     );
     expect(first.deckMetadata?.corp.formatProfileId).toBe("local-demo-v0.99");
-    expect(DEMO_CARDS_BY_ID.v099_host_resource?.mechanics).toContain("hosting");
-    expect(DEMO_CARDS_BY_ID.v099_virus_program?.mechanics).toContain("virus");
-    expect(DEMO_CARDS_BY_ID.v099_recurring_chip?.recurringCredits).toBe(1);
+    expect(CARD_DEFINITIONS_BY_ID.v099_host_resource?.mechanics).toContain("hosting");
+    expect(CARD_DEFINITIONS_BY_ID.v099_virus_program?.mechanics).toContain("virus");
+    expect(CARD_DEFINITIONS_BY_ID.v099_recurring_chip?.recurringCredits).toBe(1);
     expect(hashState(first)).toBe(hashState(second));
     expect(validateGameState(first).ok).toBe(true);
   });
@@ -456,17 +456,17 @@ describe("MVP 0.99 Hosting, Viren, Purge und Counter-Familien", () => {
     );
 
     expect(actionTypes).not.toContain("trigger_ability");
-    expect(DEMO_CARDS_BY_ID.v099_host_resource?.mechanics).not.toContain(
+    expect(CARD_DEFINITIONS_BY_ID.v099_host_resource?.mechanics).not.toContain(
       "prevention",
     );
-    expect(DEMO_CARDS_BY_ID.v099_host_resource?.mechanics).not.toContain(
+    expect(CARD_DEFINITIONS_BY_ID.v099_host_resource?.mechanics).not.toContain(
       "replacement",
     );
-    expect(DEMO_CARDS_BY_ID.v099_virus_program?.mechanics).not.toContain(
+    expect(CARD_DEFINITIONS_BY_ID.v099_virus_program?.mechanics).not.toContain(
       "set_aside",
     );
     expect(
-      DEMO_CARDS_BY_ID.v099_bad_publicity_operation?.mechanics,
+      CARD_DEFINITIONS_BY_ID.v099_bad_publicity_operation?.mechanics,
     ).not.toContain("remove_from_game");
   });
 });
@@ -475,7 +475,7 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
   it("adds scoped V1.9.12 definitions without pulling in later cursor cards", () => {
     expect(MECHANIC_SMOKE_CARD_IDS.counterRecurring).toHaveLength(11);
     for (const definitionId of MECHANIC_SMOKE_CARD_IDS.counterRecurring) {
-      const definition = DEMO_CARDS_BY_ID[definitionId];
+      const definition = CARD_DEFINITIONS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
       );
@@ -484,7 +484,7 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
       );
     }
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]
+      CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]
         ?.implementationStatus,
     ).toBe("playable_mvp");
   });
@@ -700,16 +700,16 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
 
   it("scores V1.9.12 Corp agendas with typed counter and start-of-turn economy paths", () => {
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_198_detroit-police-contract"]?.rulesText,
+      CARD_DEFINITIONS_BY_ID["onr_v1_198_detroit-police-contract"]?.rulesText,
     ).toBe(
       "Put [12] from the bank on Detroit Police Contract when you score it. Take [2] from Detroit Police Contract, if it has any bits, at the start of each of your turns.",
     );
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_198_detroit-police-contract"]
+      CARD_DEFINITIONS_BY_ID["onr_v1_198_detroit-police-contract"]
         ?.advancementRequirement,
     ).toBe(4);
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_198_detroit-police-contract"]?.agendaPoints,
+      CARD_DEFINITIONS_BY_ID["onr_v1_198_detroit-police-contract"]?.agendaPoints,
     ).toBe(1);
     let state = apply(
       MECHANIC_SMOKE_GAMES.counterRecurring("v1912-corp-agendas"),

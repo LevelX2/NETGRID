@@ -5,7 +5,7 @@ import {
   checkWinConditions,
   createGame,
   createGameAfterSetup,
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   DEMO_DECKS,
   eventVisibilityForAction,
   getLegalActions,
@@ -773,7 +773,7 @@ describe("Originalset Spotcheck 2026-05-15 Modifier/Agenda risk hardening", () =
         .servers.find((server) => server.id === "rd")
         ?.ice.find((ice) => ice.definitionId === "simple_code_gate_ice")
         ?.strength,
-    ).toBe((DEMO_CARDS_BY_ID.simple_code_gate_ice?.strength ?? 0) + 2);
+    ).toBe((CARD_DEFINITIONS_BY_ID.simple_code_gate_ice?.strength ?? 0) + 2);
     canisState = continueRunThroughMovement(canisState);
     expect(canisState.run).toBeUndefined();
     const replay = replayEvents(
@@ -2059,11 +2059,11 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
         action.type === "install_card" &&
         String(action.payload?.cardId) === secondInterface,
     );
-    expect(DEMO_CARDS_BY_ID["onr_v1_139_r-and-d-interface"]?.mechanics).toEqual(
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_139_r-and-d-interface"]?.mechanics).toEqual(
       expect.arrayContaining(["access", "breach", "multiaccess"]),
     );
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_139_r-and-d-interface"]?.mechanics,
+      CARD_DEFINITIONS_BY_ID["onr_v1_139_r-and-d-interface"]?.mechanics,
     ).not.toContain("damage_prevention");
 
     const rdServer = state.corp.servers.find((server) => server.id === "rd");

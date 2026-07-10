@@ -15,7 +15,7 @@ import { applyAction, createGame, getLegalActions, getPlayerView, hashState, isH
 import {
   AI_DECISION_DEBUG_SCHEMA_VERSION,
   CURRENT_RULES_BASELINE,
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   sanitizeAiDecisionDebug,
   type ApiAiPacingMode,
   type ApiAiTurnPresentationState,
@@ -3416,7 +3416,7 @@ function aiPrivateHandCardPreview(card: VisibleCard, index: number, credits: num
 function aiPrivateHandCardRulesText(card: VisibleCard): string | undefined {
   const rulesText =
     card.rulesText ??
-    (card.definitionId ? DEMO_CARDS_BY_ID[card.definitionId]?.rulesText : undefined);
+    (card.definitionId ? CARD_DEFINITIONS_BY_ID[card.definitionId]?.rulesText : undefined);
   if (typeof rulesText !== "string") return undefined;
   const normalized = rulesText.trim();
   return normalized.length > 0 ? normalized.slice(0, 1200) : undefined;

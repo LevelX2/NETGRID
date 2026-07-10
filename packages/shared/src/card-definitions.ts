@@ -3967,6 +3967,11 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     agendaPoints: 3,
     rulesText:
       "[A]: Gain 2 credits. This ability is lost after Corp installs or rezzes any card.",
+    markCounterDisplay: {
+      id: "corporate_retreat_active",
+      label: "Noch aktiv",
+      ariaLabelName: "Corporate Retreat noch aktiv",
+    },
     mechanics: [
       "install_remote",
       "advance",
@@ -9458,11 +9463,6 @@ export const CARD_DEFINITIONS_BY_ID: Record<CardDefinitionId, CardDefinition> =
     ...CARD_DEFINITIONS.map((card) => [card.id, card] as const),
   ]);
 
-// Temporary aliases keep parallel worktrees buildable until their current
-// changes are integrated. PCS-8 removes them together with the consumer rename.
-export const DEMO_CARDS = CARD_DEFINITIONS;
-export const DEMO_CARDS_BY_ID = CARD_DEFINITIONS_BY_ID;
-
 type CatalogFallbackCard = {
   cardId: string;
   title: string;
@@ -9480,6 +9480,7 @@ type CatalogFallbackCard = {
     agendaPoints?: number | null;
   };
   text?: string;
+  markCounterDisplay?: CardDefinition["markCounterDisplay"];
 };
 
 function classicCatalogFallbackCards(): CardDefinition[] {
@@ -9517,6 +9518,9 @@ function catalogFallbackCards(
       ...numberField("trashCost", numeric.trashCost),
       ...numberField("advancementRequirement", numeric.advancementRequirement),
       ...numberField("agendaPoints", numeric.agendaPoints),
+      ...(card.markCounterDisplay
+        ? { markCounterDisplay: card.markCounterDisplay }
+        : {}),
       rulesText: card.text ?? "",
       mechanics: [mechanic],
     };

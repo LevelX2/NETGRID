@@ -5,7 +5,7 @@ import {
   checkWinConditions,
   createGame,
   createGameAfterSetup,
-  DEMO_CARDS_BY_ID,
+  CARD_DEFINITIONS_BY_ID,
   DEMO_DECKS,
   eventVisibilityForAction,
   getLegalActions,
@@ -201,7 +201,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
   it("adds all V1.9.19 WIP runtime definitions without release-promoting the next slice", () => {
     expect(MECHANIC_SMOKE_CARD_IDS.agendaScoring).toHaveLength(20);
     for (const definitionId of MECHANIC_SMOKE_CARD_IDS.agendaScoring) {
-      const definition = DEMO_CARDS_BY_ID[definitionId];
+      const definition = CARD_DEFINITIONS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
       );
@@ -210,7 +210,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       );
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus).toBe(
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus).toBe(
       "playable_mvp",
     );
   });
@@ -1272,7 +1272,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
   it("adds all V1.9.20 WIP runtime definitions without release-promoting V1.9.21", () => {
     expect(MECHANIC_SMOKE_CARD_IDS.globalModifiers).toHaveLength(26);
     for (const definitionId of MECHANIC_SMOKE_CARD_IDS.globalModifiers) {
-      const definition = DEMO_CARDS_BY_ID[definitionId];
+      const definition = CARD_DEFINITIONS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
       );
@@ -1281,7 +1281,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
         /persistent_special_state|action_economy|modify_hand_limit|modify_memory_limit|global_static_modifier|meat_damage|tag_condition/,
       );
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus).toBe(
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus).toBe(
       "playable_mvp",
     );
   });
@@ -2864,7 +2864,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     );
     expect(
       getPlayerView(ownServerAfterRez, "runner").run?.encounteredIce?.strength,
-    ).toBe((DEMO_CARDS_BY_ID["onr_v1_232_crystal-wall"]?.strength ?? 0) + 1);
+    ).toBe((CARD_DEFINITIONS_BY_ID["onr_v1_232_crystal-wall"]?.strength ?? 0) + 1);
     const otherServerAfterRez = apply(
       otherServerState,
       "corp",
@@ -2873,7 +2873,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(
       getPlayerView(otherServerAfterRez, "runner").run?.encounteredIce
         ?.strength,
-    ).toBe(DEMO_CARDS_BY_ID["onr_v1_232_crystal-wall"]?.strength);
+    ).toBe(CARD_DEFINITIONS_BY_ID["onr_v1_232_crystal-wall"]?.strength);
     const sameServerNonWallAfterRez = apply(
       sameServerNonWallState,
       "corp",
@@ -2882,7 +2882,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(
       getPlayerView(sameServerNonWallAfterRez, "runner").run?.encounteredIce
         ?.strength,
-    ).toBe(DEMO_CARDS_BY_ID.simple_code_gate_ice?.strength);
+    ).toBe(CARD_DEFINITIONS_BY_ID.simple_code_gate_ice?.strength);
     const unrezzedGrid = approachIce(
       "spotcheck-jerusalem-city-grid-unrezzed",
       "remote_1",
@@ -2915,7 +2915,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(
       getPlayerView(unrezzedGridAfterRez, "runner").run?.encounteredIce
         ?.strength,
-    ).toBe(DEMO_CARDS_BY_ID["onr_v1_232_crystal-wall"]?.strength);
+    ).toBe(CARD_DEFINITIONS_BY_ID["onr_v1_232_crystal-wall"]?.strength);
     expect(
       cardImplementationCoverageForDefinitionId(
         "onr_v1_360_jerusalem-city-grid",
@@ -3031,7 +3031,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
   it("adds all V1.9.21 WIP runtime definitions without release-promoting V1.9.22", () => {
     expect(MECHANIC_SMOKE_CARD_IDS.randomEffects).toHaveLength(6);
     for (const definitionId of MECHANIC_SMOKE_CARD_IDS.randomEffects) {
-      const definition = DEMO_CARDS_BY_ID[definitionId];
+      const definition = CARD_DEFINITIONS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
       );
@@ -3040,7 +3040,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
         "deterministic_random",
       );
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus).toBe(
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus).toBe(
       "playable_mvp",
     );
   });
