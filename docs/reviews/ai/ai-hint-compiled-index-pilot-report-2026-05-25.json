@@ -22923,8 +22923,8 @@
         "cardId": "onr_v1_297_overtime-incentives",
         "side": "corp",
         "cardType": "operation",
-        "roles": ["economy_operation", "operation"],
-        "planRoles": ["recover_economy"],
+        "roles": ["action", "economy_operation", "operation"],
+        "planRoles": ["corp_play_operation"],
         "aiSupportStatus": "ai_supported",
         "effects": [
           {

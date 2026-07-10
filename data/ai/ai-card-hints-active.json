@@ -20280,10 +20280,11 @@
       "cardType": "operation",
       "roles": [
         "economy_operation",
-        "operation"
+        "operation",
+        "action"
       ],
       "planRoles": [
-        "recover_economy"
+        "corp_play_operation"
       ],
       "requiredMechanics": [
         "play_operation"
@@ -20299,7 +20300,7 @@
       "quality": {
         "benchmarkCovered": true,
         "hintReviewed": true,
-        "strategyCovered": false,
+        "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
         "reviewedDate": "2026-07-01",
@@ -20319,9 +20320,25 @@
           "finite": true
         }
       ],
-      "lineSupport": [],
-      "strategicRole": [],
-      "strategySupportPairs": [],
+      "lineSupport": [
+        "corp.fast_advance"
+      ],
+      "strategicRole": [
+        "enabler"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.fast_advance",
+          "role": "enabler",
+          "roleDetail": "extra_action_burst",
+          "evidence": [
+            "action.corp_extra_action_burst",
+            "tempo.corp_action_burst"
+          ],
+          "confidence": "high",
+          "rationale": "Immediate action capacity can complete an otherwise click-blocked same-turn score-conversion path; legality and the gained amount remain Engine/LegalAction facts."
+        }
+      ],
       "conditions": [],
       "manualNotes": [
         "OPS-V2: ändern; priority=high; bucket=action_tempo_candidate / extra_action_burst.",
@@ -24367,13 +24384,15 @@
         "counter"
       ],
       "planRoles": [
-        "remote_asset_economy"
+        "remote_asset_economy",
+        "remote_asset_agenda_support"
       ],
       "requiredMechanics": [
         "install_asset",
         "rez_card",
         "gain_credit",
-        "counter"
+        "counter",
+        "advancement_counter_transfer"
       ],
       "valueHints": {
         "economy": 1
@@ -24395,7 +24414,9 @@
         {
           "kind": "advance",
           "timing": "action",
-          "scope": "installed_card"
+          "scope": "installed_advanceable_card",
+          "resource": "advancement_counters",
+          "finite": true
         },
         {
           "kind": "economy",

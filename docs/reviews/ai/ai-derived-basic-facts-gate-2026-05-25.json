@@ -22226,11 +22226,12 @@
         "side": "corp",
         "cardType": "operation",
         "roles": [
+          "action",
           "economy_operation",
           "operation"
         ],
         "planRoles": [
-          "recover_economy"
+          "corp_play_operation"
         ],
         "effects": [
           {
@@ -22241,10 +22242,12 @@
           }
         ],
         "conditions": [],
-        "lineSupport": [],
+        "lineSupport": [
+          "corp.fast_advance"
+        ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": true,
           "confidence": "high",
           "needsHumanReview": false
