@@ -5,9 +5,12 @@ Output:
 
 ## Status
 
-- Analyse abgeschlossen.
-- Keine KI-, Hint-, Engine- oder Teständerung umgesetzt.
-- Vier Änderungspunkte warten auf Nutzerfreigabe.
+- Baseline-Analyse abgeschlossen.
+- Die vier Änderungspunkte wurden freigegeben und im isolierten Worktree
+  umgesetzt.
+- Der identische 20-mal-480-Wiederholungslauf ist abgeschlossen; Ergebnis und
+  Vergleich stehen in
+  `docs/reviews/ai/surprise-decks-20-game-selfplay-rerun-2026-07-10.md`.
 
 ## Gegenstand
 

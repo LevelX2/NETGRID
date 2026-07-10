@@ -2,7 +2,20 @@
 
 ## Status
 
-`in_progress`
+`final_verify`
+
+## Aktueller Abschlussstand
+
+- P0 bis P5 sind abgeschlossen und jeweils durch fokussierte Tests oder den
+  vollständigen Wiederholungslauf belegt.
+- Wiederholung: 20 Partien, 5.469 Entscheidungen, 14 Runner- und 6 Korp-Siege.
+- Technische Gates: 0 illegale Aktionen, 0 Replay-Fehler, 0 echte
+  Aktionslimits, 0 Fallbacks, 0 Timeouts und 0 Hidden-Info-Marker.
+- Detektions-Idempotenz: 568 Findings im Erstlauf und 568 Findings aus den
+  persistierten Summaries.
+- Detailreport:
+  `docs/reviews/ai/surprise-decks-20-game-selfplay-rerun-2026-07-10.md`.
+- Offen ist P6 mit finaler Verifikation und lokaler Integration nach `main`.
 
 ## Quelle
 
