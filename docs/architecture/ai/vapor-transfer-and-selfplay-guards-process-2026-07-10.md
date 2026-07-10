@@ -2,7 +2,7 @@
 
 ## Status
 
-- Status: in Umsetzung
+- Status: abgeschlossen
 - Datum: 2026-07-10
 - Agent: `card-enablement-ai-knowledge-agent`
 - Branch: `codex/ai-vapor-transfer-and-selfplay-guards`
@@ -115,3 +115,13 @@ das Goal erst danach ab.
   Access-Invariantenabbruch.
 - Relevante AI-/Engine-Gates sind grün.
 - Branch ist lokal nach `main` integriert; fremde Änderungen bleiben erhalten.
+
+## Abschlussstand
+
+- P0 bis P3 wurden mit je einem lokalen Commit abgeschlossen.
+- Alle drei AI-Shards, die vollständige Engine-Suite, beide Typechecks sowie
+  Hint-, Semantic-Signal- und Kartenabstraktionsgates sind grün.
+- Der abschließende 100-Versuche-Lauf hatte keine Simulation-, Replay- oder
+  Redaction-Failures. Vapor Ops wurde 14-mal für Advancement-Transfer genutzt.
+- Ein unabhängiger Test-Spin-Choice-Folgefund bleibt bewusst außerhalb dieses
+  freigegebenen Pakets und ist im Final Review dokumentiert.
