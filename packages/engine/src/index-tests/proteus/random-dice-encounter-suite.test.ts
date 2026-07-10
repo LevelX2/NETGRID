@@ -209,6 +209,12 @@ function encounterIce(
     (action) => action.type === "start_run" && action.payload?.serverId === serverId,
   );
   while (state.run?.encounteredIceId !== iceId && state.run) {
+    if (
+      state.eventLog.some(
+        (event) => event.publicPayload.autoPassedEncounteredIce === true,
+      )
+    )
+      break;
     if (!getLegalActions(state, "runner").some((action) => action.type === "continue_run"))
       break;
     state = apply(state, "runner", (action) => action.type === "continue_run");
@@ -256,6 +262,7 @@ describe("Proteus PRO016 random dice encounter suite", () => {
 
   it("derezzes Roadblock and automatically passes on a 6", () => {
     let state: GameState | undefined;
+    let before: GameState | undefined;
     let roadblock: CardInstanceId | undefined;
     for (let index = 0; index < 40; index += 1) {
       const candidate = baseState(`pro016-roadblock-six-${index}`);
@@ -266,9 +273,19 @@ describe("Proteus PRO016 random dice encounter suite", () => {
         "remote_1",
         true,
       );
+      const candidateBefore = structuredClone(candidate);
       const next = encounterIce(candidate, "remote_1", candidateRoadblock);
-      if (payloadNumber(next.eventLog.at(-1)?.publicPayload, "dieRoll") === 6) {
+      const roadblockPayload = next.eventLog
+        .slice()
+        .reverse()
+        .find(
+          (event) =>
+            event.publicPayload.sourceDefinitionId === ROADBLOCK &&
+            payloadNumber(event.publicPayload, "dieRoll") !== undefined,
+        )?.publicPayload;
+      if (payloadNumber(roadblockPayload, "dieRoll") === 6) {
         state = next;
+        before = candidateBefore;
         roadblock = candidateRoadblock;
         break;
       }
@@ -276,7 +293,15 @@ describe("Proteus PRO016 random dice encounter suite", () => {
     expect(state).toBeDefined();
     expect(roadblock).toBeDefined();
     expect(state!.cardInstances[roadblock!]!.rezzed).toBe(false);
-    expect(state!.run?.lastPassedIceId).toBe(roadblock);
+    if (state!.run) {
+      expect(state!.run?.phase).toBe("movement");
+      expect(state!.timingPoint).toBe("run.jack_out_window");
+    } else {
+      expect(state!.phase).toBe("runner_action_phase");
+      expect(state!.timingPoint).toBe("runner_action.main");
+    }
+    expect(getLegalActions(state!, "runner").length).toBeGreaterThan(0);
+    expectReplayStable(before!, state!);
   });
 
   it("uses Executive Boot Camp only during runs with side-safe random HQ discard", () => {

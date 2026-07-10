@@ -159,3 +159,15 @@ lokal nach main mergen und den Goal erst danach als complete markieren.`
 - fünf Paketcommits vorhanden;
 - Arbeitsbranch sauber und lokal nach `main` integriert;
 - Final Review und Wissenspflege abgeschlossen.
+
+## Paketstatus
+
+- FA001: `completed` – Prozess und Evidence im Worktree verankert; Commit
+  `0e3240f07`.
+- FA002: `completed` – Roadblock-Auto-Pass erhält den bereits fortgeschalteten
+  Runzustand; Pay-or-End-the-Run-Zahlungen suspendieren die
+  Subroutinenauflösung bis Hidden-Payment-Support abgeschlossen ist. Fokussiert
+  grün: 6 Testdateien/46 Tests, Engine-Typecheck und `git diff --check`.
+- FA003: `pending`.
+- FA004: `pending`.
+- FA005: `pending`.

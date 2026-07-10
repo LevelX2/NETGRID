@@ -157,8 +157,6 @@ export function beginEncounter(
     legalAction,
   );
   if (roadblockResult.autoPassed) {
-    host.state.timingPoint = "run.encounter_ice";
-    host.state.activeSide = "runner";
     return {
       handled: true,
       encounterStarted: true,

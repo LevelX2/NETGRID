@@ -172,6 +172,15 @@ function applyLegal(
   });
 }
 
+function expectReplayStable(before: GameState, after: GameState): void {
+  const replay = replayEvents(
+    before,
+    after.eventLog.slice(before.eventLog.length),
+  );
+  expect(replay.ok).toBe(true);
+  expect(hashState(replay.state)).toBe(hashState(after));
+}
+
 function resolveChoice(
   state: GameState,
   side: "corp" | "runner",
@@ -496,6 +505,91 @@ describe("PRO011 hidden resource timing hardening", () => {
     expect(state.runner.credits).toBe(1);
     expect(state.runner.clicks).toBe(3);
     expect(state.run?.attackedServerId).toBe("hq");
+  });
+
+  it("suspends a pay-or-end-the-run subroutine until hidden payment support resolves", () => {
+    let state = runnerState("pro011-snowbank-payment-support");
+    state.runner.credits = 0;
+    const swissId = installHiddenResource(
+      state,
+      "onr_proteus_152_swiss-bank-account",
+      "pro011_snowbank_swiss",
+    );
+    const snowbankId = addCorpServerCard(
+      state,
+      "onr_proteus_038_snowbank",
+      "pro011_snowbank",
+      "rd",
+      "ice",
+    );
+    state.cardInstances[snowbankId] = {
+      ...state.cardInstances[snowbankId]!,
+      faceup: true,
+      rezzed: true,
+    };
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    while (state.run && state.run.encounteredIceId !== snowbankId) {
+      const continuation = getLegalActions(state, "runner").find(
+        (action) => action.type === "continue_run",
+      );
+      expect(continuation).toBeDefined();
+      state = apply(state, "runner", (action) =>
+        action.actionId === continuation!.actionId,
+      );
+    }
+    expect(state.run?.encounteredIceId).toBe(snowbankId);
+
+    const paidContinue = getLegalActions(state, "runner").find(
+      (action) =>
+        action.type === "continue_run" &&
+        action.payload?.payOrEndRunSubroutinePayment === 1,
+    );
+    expect(paidContinue).toBeDefined();
+    const beforeWindow = structuredClone(state);
+    const opened = applyLegal(state, "runner", paidContinue!);
+    expect(opened.ok).toBe(true);
+    state = opened.state;
+    expect(state.runnerCostPenaltySupportWindow).toMatchObject({
+      originalActionId: paidContinue!.actionId,
+      amountDue: 1,
+      runnerCreditTarget: 1,
+      paymentContext: "runner_run",
+    });
+    expect(state.run?.encounteredIceId).toBe(snowbankId);
+    expect(state.run?.phase).toBe("encounter_ice");
+    expect(state.timingPoint).toBe("run.encounter_ice");
+    expectReplayStable(beforeWindow, state);
+
+    const support = supportActionFor(state, swissId);
+    expect(support).toBeDefined();
+    state = applyLegal(state, "runner", support!).state;
+    expect(state.runner.credits).toBe(2);
+    expectHiddenResourceTrashed(
+      state,
+      swissId,
+      "onr_proteus_152_swiss-bank-account",
+    );
+
+    const resumed = getLegalActions(state, "runner").find(
+      (action) => action.actionId === paidContinue!.actionId,
+    );
+    expect(resumed).toBeDefined();
+    const beforeResume = structuredClone(state);
+    const continued = applyLegal(state, "runner", resumed!);
+    expect(continued.ok).toBe(true);
+    state = continued.state;
+    expect(state.runnerCostPenaltySupportWindow).toBeUndefined();
+    expect(state.runner.credits).toBe(1);
+    expect(state.run?.phase).toBe("movement");
+    expect(state.timingPoint).toBe("run.jack_out_window");
+    expect(getLegalActions(state, "runner").length).toBeGreaterThan(0);
+    expectReplayStable(beforeResume, state);
   });
 
   it("opens HQ/R&D Mole only at access start, increases queue size, and keeps central cards hidden before breach", () => {

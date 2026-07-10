@@ -102,6 +102,7 @@ export function continueRun(
     subroutines,
     legalAction,
   );
+  if (state.runnerCostPenaltySupportWindow) return;
   const payOrEndRunIndexesForThisContinue =
     payOrEndRunPayment.payOrEndRunIndexesForThisContinue ?? new Set<number>();
   const paidPayOrEndRunIndexes =
