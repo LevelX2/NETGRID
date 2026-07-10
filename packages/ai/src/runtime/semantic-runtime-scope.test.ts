@@ -4,6 +4,19 @@ import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import { semanticRuntimeScopeForAction } from "./semantic-runtime-scope";
 
 describe("semanticRuntimeScopeForAction", () => {
+  it.each([
+    "score_conversion.move_advancement",
+    "score_conversion.place_advancement",
+    "score_conversion.gain_action_capacity",
+  ])("routes %s through the score scope", (semanticActionType) => {
+    expect(
+      scopeFor(corpAction("conversion", "activated_card_ability"), {
+        semanticActionType,
+        actionTacticSignals: ["score_window_support"],
+      }),
+    ).toBe("simple_score_advance");
+  });
+
   it("does not route non-credit gain_credit wrappers through economy scope", () => {
     expect(scopeFor(corpAction("basic-credit", "gain_credit"))).toBe(
       "basic_economy_draw",

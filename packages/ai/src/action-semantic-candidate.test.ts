@@ -260,6 +260,45 @@ describe("buildActionSemanticCandidates", () => {
     expect(candidate.actionTacticSignals).not.toContain("economy.recover");
   });
 
+  it.each([
+    [
+      "move_advancement",
+      "score_conversion.move_advancement",
+      "corp_counter_transfer",
+    ],
+    [
+      "place_advancement",
+      "score_conversion.place_advancement",
+      "corp_counter_placement",
+    ],
+    [
+      "gain_action_capacity",
+      "score_conversion.gain_action_capacity",
+      "corp_extra_action_burst",
+    ],
+  ] as const)(
+    "projects the exact %s LegalAction capability into score-conversion semantics",
+    (capability, semanticActionType, tacticSignal) => {
+      const [candidate] = buildActionSemanticCandidates({
+        legalActions: [
+          legalAction("activated_card_ability", 1, {
+            side: "corp",
+            source: "generic-conversion-source",
+            payload: { scoreConversionCapability: capability },
+          }),
+        ],
+      });
+
+      expect(candidate).toMatchObject({
+        semanticActionType,
+        primaryProjectionStatus: "projected",
+        confidence: "high",
+      });
+      expect(candidate?.actionTacticSignals).toContain(tacticSignal);
+      expect(candidate?.actionTacticSignals).toContain("score_window_support");
+    },
+  );
+
   it("covers the minimal runtime bridge action families", () => {
     const candidates = buildActionSemanticCandidates({
       legalActions: [

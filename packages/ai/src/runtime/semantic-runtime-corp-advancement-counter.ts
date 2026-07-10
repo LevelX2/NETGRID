@@ -253,16 +253,17 @@ function corpAdvancementCounterPlacementProfileForAction(
     action.type !== "activated_card_ability"
   )
     return undefined;
-  const sourceDefinitionId = dependencies.sourceDefinitionIdForAction(
-    input,
-    action,
-  );
-  if (!sourceDefinitionId) return undefined;
   const effectKind = action.payload?.cardImplementationEffectKind;
-  const payloadAmount = action.payload?.advancementCounterAmount;
-  const payloadMode = action.payload?.advancementCounterChoiceMode;
+  const scoreConversionCapability = action.payload?.scoreConversionCapability;
+  const payloadAmount =
+    action.payload?.advancementCounterAmount ??
+    action.payload?.scoreConversionAdvancementAmount;
+  const payloadMode =
+    action.payload?.advancementCounterChoiceMode ??
+    action.payload?.scoreConversionAdvancementMode;
   if (
-    effectKind === "distribute_advancement_counters" &&
+    (effectKind === "distribute_advancement_counters" ||
+      scoreConversionCapability === "place_advancement") &&
     typeof payloadAmount === "number" &&
     Number.isInteger(payloadAmount) &&
     payloadAmount > 0 &&
@@ -282,7 +283,8 @@ function corpAdvancementCounterPlacementProfileForAction(
   }
   if (
     action.type === "activated_card_ability" &&
-    effectKind === "move_advancement_counters"
+    (effectKind === "move_advancement_counters" ||
+      scoreConversionCapability === "move_advancement")
   ) {
     const sourceCard = dependencies.actionSourceCard(input, action);
     const transferableCounters = sourceCard?.advancementCounters ?? 0;
@@ -297,6 +299,11 @@ function corpAdvancementCounterPlacementProfileForAction(
       transferSourceCardId: sourceCard.instanceId,
     };
   }
+  const sourceDefinitionId = dependencies.sourceDefinitionIdForAction(
+    input,
+    action,
+  );
+  if (!sourceDefinitionId) return undefined;
   const text =
     dependencies.normalizedRulesTextForDefinition(sourceDefinitionId);
   if (

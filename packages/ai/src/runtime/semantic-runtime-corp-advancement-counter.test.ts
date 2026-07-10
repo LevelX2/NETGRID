@@ -226,6 +226,51 @@ describe("semanticRuntimeCorpAdvancementCounterPlacementAssessment", () => {
     expect(assessment?.selectedTargets).toBe(1);
     expect(assessment?.noConcreteConversion).toBe(false);
   });
+
+  it("uses the generic score-conversion capability without card identity metadata", () => {
+    const agenda = corpCard("capability-transfer-agenda", {
+      type: "agenda",
+      advancementCounters: 0,
+      advancementRequirement: 3,
+    });
+    const source = corpCard("capability-transfer-source", {
+      type: "asset",
+      advancementCounters: 3,
+    });
+    const advanceAgenda = corpAction("advance_card", {
+      cardId: agenda.instanceId,
+    });
+    const transfer = corpAction("activated_card_ability", {
+      cardId: source.instanceId,
+      scoreConversionCapability: "move_advancement",
+      scoreConversionAdvancementMaximum: "all",
+      scoreConversionSourceMode: "source_card",
+      scoreConversionTargetMode: "chosen_installed_advanceable_card",
+      scoreConversionTiming: "immediate",
+    });
+    transfer.source = source.instanceId;
+    const input = corpInput({
+      root: [agenda, source],
+      legalActions: [advanceAgenda, transfer],
+    });
+    const dependencies = semanticPayloadDependencies([agenda, source], {
+      [agenda.definitionId!]: "",
+      [source.definitionId!]: "",
+    });
+
+    const assessment = semanticRuntimeCorpAdvancementCounterPlacementAssessment(
+      input,
+      transfer,
+      {
+        ...dependencies,
+        sourceDefinitionIdForAction: () => undefined,
+      },
+    );
+
+    expect(assessment?.advancementWitness).toBe("score_now");
+    expect(assessment?.selectedTargets).toBe(1);
+    expect(assessment?.noConcreteConversion).toBe(false);
+  });
 });
 
 function assessmentForSemanticPayload(input: {

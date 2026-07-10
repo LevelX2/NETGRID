@@ -106,6 +106,9 @@ function semanticRuntimeScopeFromActionSemanticCandidate(
       return "choice_resolution";
     case "score.agenda":
     case "score.advance_card":
+    case "score_conversion.move_advancement":
+    case "score_conversion.place_advancement":
+    case "score_conversion.gain_action_capacity":
       return "simple_score_advance";
     case "corp_window.rez":
     case "corp_window.decline_rez":

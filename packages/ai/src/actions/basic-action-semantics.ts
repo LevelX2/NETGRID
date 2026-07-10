@@ -87,7 +87,11 @@ const BASIC_ACTION_SEMANTICS: Record<
   },
   rez_ice: {
     semanticActionType: "corp_window.rez",
-    tacticSignals: ["corp.ice_activation", "corp.protection", "rez.reserve_spend"],
+    tacticSignals: [
+      "corp.ice_activation",
+      "corp.protection",
+      "rez.reserve_spend",
+    ],
     primaryProjectionStatus: "partial_projected",
     confidence: "medium",
     projectionIssues: ["target_context_unavailable"],
@@ -211,14 +215,17 @@ export function applyBasicActionSemantics(
   action: LegalAction,
 ): ActionSemanticCandidate {
   const actionEffectOverride = knownNonCreditGainActionSemantics(action);
-  const classification = actionEffectOverride
-    ? {
-        semanticActionType: actionEffectOverride.semanticActionType,
-        tacticSignals: actionEffectOverride.tacticSignals,
-        primaryProjectionStatus: "projected" as const,
-        confidence: "high" as const,
-      }
-    : BASIC_ACTION_SEMANTICS[action.type];
+  const scoreConversionOverride = scoreConversionActionSemantics(action);
+  const classification = scoreConversionOverride
+    ? scoreConversionOverride
+    : actionEffectOverride
+      ? {
+          semanticActionType: actionEffectOverride.semanticActionType,
+          tacticSignals: actionEffectOverride.tacticSignals,
+          primaryProjectionStatus: "projected" as const,
+          confidence: "high" as const,
+        }
+      : BASIC_ACTION_SEMANTICS[action.type];
   if (!classification) return candidate;
 
   const sourceKind = basicSourceKindForAction(action);
@@ -246,6 +253,49 @@ export function applyBasicActionSemantics(
   };
 }
 
+function scoreConversionActionSemantics(
+  action: LegalAction,
+): BasicActionSemanticClassification | undefined {
+  const capability = stringPayload(action, "scoreConversionCapability");
+  if (capability === "move_advancement") {
+    return {
+      semanticActionType: "score_conversion.move_advancement",
+      tacticSignals: [
+        "move_advancement",
+        "corp_counter_transfer",
+        "score_window_support",
+      ],
+      primaryProjectionStatus: "projected",
+      confidence: "high",
+    };
+  }
+  if (capability === "place_advancement") {
+    return {
+      semanticActionType: "score_conversion.place_advancement",
+      tacticSignals: [
+        "place_advancement",
+        "corp_counter_placement",
+        "score_window_support",
+      ],
+      primaryProjectionStatus: "projected",
+      confidence: "high",
+    };
+  }
+  if (capability === "gain_action_capacity") {
+    return {
+      semanticActionType: "score_conversion.gain_action_capacity",
+      tacticSignals: [
+        "gain_action_capacity",
+        "corp_extra_action_burst",
+        "score_window_support",
+      ],
+      primaryProjectionStatus: "projected",
+      confidence: "high",
+    };
+  }
+  return undefined;
+}
+
 function dynamicBasicActionSignals(action: LegalAction): string[] {
   const signals: string[] = [];
   const serverId = stringPayload(action, "serverId");
@@ -264,7 +314,8 @@ function dynamicBasicActionSignals(action: LegalAction): string[] {
   }
   if (action.type === "install_card") {
     if (placement !== undefined) signals.push(`install.placement:${placement}`);
-    if (destination !== undefined) signals.push(`install.destination:${destination}`);
+    if (destination !== undefined)
+      signals.push(`install.destination:${destination}`);
     if (placement === "ice") signals.push("install.ice", "corp.protection");
     if (placement === "remote" || serverId === "new_remote") {
       signals.push("install.remote", "corp.remote_build");
@@ -272,8 +323,10 @@ function dynamicBasicActionSignals(action: LegalAction): string[] {
     if (placement === "program" || destination === "install_program") {
       signals.push("install.program", "runner.rig_setup");
     }
-    if (placement === "resource") signals.push("install.resource", "runner.setup");
-    if (placement === "hardware") signals.push("install.hardware", "runner.setup");
+    if (placement === "resource")
+      signals.push("install.resource", "runner.setup");
+    if (placement === "hardware")
+      signals.push("install.hardware", "runner.setup");
   }
   if (
     (action.type === "rez_ice" ||

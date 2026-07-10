@@ -55,6 +55,48 @@ describe("Corp same-turn score conversion", () => {
     ]);
   });
 
+  it("prefers a visible transfer into an installed agenda over paid basic advances", () => {
+    const agenda = card("installed-agenda", "agenda", {
+      advancementRequirement: 3,
+      advancementCounters: 0,
+    });
+    const source = card("counter-source", "asset", {
+      advancementCounters: 3,
+      rezzed: true,
+    });
+    const input = corpInput({
+      clicks: 3,
+      credits: 3,
+      hq: [],
+      root: [agenda, source],
+      actions: [
+        action("advance-agenda", "advance_card", agenda.instanceId, {
+          serverId: "remote_1",
+        }),
+        action("transfer", "activated_card_ability", source.instanceId, {
+          scoreConversionCapability: "move_advancement",
+          scoreConversionAdvancementMaximum: "all",
+          scoreConversionSourceMode: "source_card",
+          scoreConversionTargetMode: "chosen_installed_advanceable_card",
+          scoreConversionTiming: "immediate",
+        }),
+      ],
+    });
+
+    const path = bestCorpSameTurnScoreConversionPath(input);
+
+    expect(path).toMatchObject({
+      agendaCardId: agenda.instanceId,
+      clicksRequired: 1,
+      creditsRequired: 0,
+      reservedAdvancementCounters: { [source.instanceId]: 3 },
+    });
+    expect(path?.steps.map((step) => step.kind)).toEqual([
+      "move_advancement",
+      "score_ready",
+    ]);
+  });
+
   it("combines multiple placement bursts for a high-requirement agenda", () => {
     const agenda = card("agenda", "agenda", { advancementRequirement: 10 });
     const input = corpInput({

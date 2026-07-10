@@ -1,4 +1,8 @@
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 
 type VisibleCorpServer = AiDecisionInput["playerView"]["servers"][number];
 
@@ -62,6 +66,14 @@ export function semanticRuntimeCorpActionSourceCard(
   if (action.source !== "basic_action" && action.source !== "game_rule") {
     const sourceCard = dependencies.findVisibleCard(input, action.source);
     if (sourceCard) return sourceCard;
+  }
+  const payloadCardId =
+    typeof action.payload?.cardId === "string"
+      ? action.payload.cardId
+      : undefined;
+  if (payloadCardId) {
+    const payloadCard = dependencies.findVisibleCard(input, payloadCardId);
+    if (payloadCard) return payloadCard;
   }
   const targetCardId =
     typeof action.payload?.targetCardId === "string"
