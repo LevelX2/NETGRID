@@ -437,6 +437,69 @@ describe("tacticalPlanMappedChoice", () => {
     expect(structured.overrideReason).toBe("repeated_run_mapping_yield");
   });
 
+  it("yields a negative opportunistic repeat run to a positive run on another server", () => {
+    const repeatedRd = legalAction("run-rd", "start_run", { serverId: "rd" });
+    const freshRemote = legalAction("run-remote", "start_run", {
+      serverId: "remote_1",
+    });
+    const result = tacticalPlanMappedChoice(
+      aiInput([runEvent({ serverId: "rd" })]),
+      [choice(freshRemote, 1643), choice(repeatedRd, -1127)],
+      centralRunMapping([repeatedRd]),
+      choice(freshRemote, 1643),
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("run-remote");
+    expect(result.overriddenMappedChoice?.action.actionId).toBe("run-rd");
+    expect(result.overrideReason).toBe("mapped_nonpositive_against_positive");
+  });
+
+  it("keeps a repeated central run with a fresh visible payoff", () => {
+    const repeatedRd = legalAction("run-rd", "start_run", { serverId: "rd" });
+    const remote = legalAction("run-remote", "start_run", {
+      serverId: "remote_1",
+    });
+    const mapped = choice(
+      repeatedRd,
+      -50,
+      scoreComponentEvidence("runner_rnd_fresh_memory"),
+      {
+        key: "runner_rnd_fresh_memory",
+        value: 900,
+        reason: "fresh visible R&D memory",
+      },
+    );
+    const result = tacticalPlanMappedChoice(
+      aiInput([runEvent({ serverId: "rd" })]),
+      [choice(remote, 1200), mapped],
+      centralRunMapping([repeatedRd]),
+      choice(remote, 1200),
+    );
+
+    expect(result.outcome).toBe("semantic_choice_blocked");
+    expect(result.choice?.action.actionId).toBe("run-rd");
+    expect(result.overrideBlockedReason).toBe("runner_plan_controller");
+  });
+
+  it("keeps a repeated run when its plan carries an explicit score threat", () => {
+    const repeatedRd = legalAction("run-rd", "start_run", { serverId: "rd" });
+    const remote = legalAction("run-remote", "start_run", {
+      serverId: "remote_1",
+    });
+    const result = tacticalPlanMappedChoice(
+      aiInput([runEvent({ serverId: "rd" })]),
+      [choice(remote, 1200), choice(repeatedRd, -50)],
+      planMapping("runner.opportunistic_central_run", [repeatedRd], {
+        evidence: ["runner_run_target_payoff:score_threat"],
+      }),
+      choice(remote, 1200),
+    );
+
+    expect(result.outcome).toBe("semantic_choice_blocked");
+    expect(result.choice?.action.actionId).toBe("run-rd");
+  });
+
   it("keeps score-threat remote contest funding over off-plan Archives runs", () => {
     const gain = legalAction("gain", "gain_credit");
     const archives = legalAction("run-archives", "start_run", {

@@ -170,6 +170,7 @@ export function tacticalPlanMappedChoice(
     }
     const repeatedRunShouldYield = tacticalPlanRepeatedRunMappingShouldYield(
       input,
+      mapping,
       mappedChoice,
       overrideChoice,
       scoreGap,
@@ -456,16 +457,34 @@ function tacticalPlanHandBufferMappingBlocksProbeRunOverride(
 
 function tacticalPlanRepeatedRunMappingShouldYield(
   input: AiDecisionInput,
+  mapping: PlanStepMappingResult,
   mappedChoice: SemanticRuntimeChoice,
   overrideChoice: SemanticRuntimeChoice,
   scoreGap: number,
 ): boolean {
   if (scoreGap <= 0) return false;
   if (mappedChoice.action.type !== "start_run") return false;
-  if (overrideChoice.action.type === "start_run") return false;
   const serverId = semanticRuntimeServerId(mappedChoice.action);
   if (!serverId) return false;
-  return semanticRuntimeRecentRunnerStartRunsOnServer(input, serverId) > 0;
+  if (semanticRuntimeRecentRunnerStartRunsOnServer(input, serverId) <= 0) {
+    return false;
+  }
+  if (overrideChoice.action.type !== "start_run") return true;
+  if (
+    mapping.plan.type !== "runner.opportunistic_central_run" ||
+    mappedChoice.score >= 0 ||
+    overrideChoice.score <= 0 ||
+    mapping.plan.evidence.includes("runner_run_target_payoff:score_threat") ||
+    semanticRuntimeChoiceHasAnyScoreComponent(mappedChoice, [
+      "runner_hq_known_agenda",
+      "runner_rnd_fresh_memory",
+      "runner_goal_fit_tactical_goal_run_target",
+    ])
+  ) {
+    return false;
+  }
+  const overrideServerId = semanticRuntimeServerId(overrideChoice.action);
+  return Boolean(overrideServerId && overrideServerId !== serverId);
 }
 
 function tacticalPlanRemoteContestMappingBlocksRunOverride(
