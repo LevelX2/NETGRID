@@ -2,9 +2,8 @@
 
 ## Status
 
-P1 bis P4 abgeschlossen auf `codex/all-window-event-icons` im Worktree
-`C:\Projekte\NETGRID_ALL_WINDOW_EVENT_ICONS`; lokaler Main-Abgleich und Merge
-stehen noch aus.
+Abgeschlossen. P1 bis P4 wurden auf `codex/all-window-event-icons` umgesetzt,
+verifiziert und am 2026-07-11 per Fast-Forward lokal nach `main` integriert.
 
 ## Quelle und Zielprüfung
 
@@ -157,7 +156,9 @@ complete markieren.
 - P2 `72ac8135a`: 13 neue, auf 320 x 320 Pixel normalisierte PNG-Assets.
 - P3 `c6c8b0460`: vollständige Cue-/Choice-Klassifizierung, sichtbarer
   `action`-/`choice`-Fallback, Damage-Zieltext und kompaktes Einzelkartenlayout.
-- P4: finale visuelle und technische Verifikation; Commit folgt mit diesem Stand.
+- P4 `3db442340`: finale visuelle und technische Verifikation.
+- Integration: Arbeitsbranch per Fast-Forward lokal nach `main` übernommen; kein
+  Push und kein Pull Request.
 
 Die Assets wurden mit dem eingebauten Bildgenerator erzeugt. Gemeinsamer
 Promptkern: quadratisches 128-Pixel-UI-Ereignisicon, zentriertes industrielles
