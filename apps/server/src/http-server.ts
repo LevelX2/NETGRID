@@ -51,6 +51,13 @@ import {
 } from "./internet-hardening";
 import type { ApiServerMessage, Side } from "@netgrid/shared";
 import type { AiDifficulty } from "@netgrid/shared";
+import {
+  JsonFileMaintenanceCredentialStore,
+  MAINTENANCE_SESSION_COOKIE_NAME,
+  MAINTENANCE_SESSION_MAX_AGE_MINUTES,
+  MaintenanceAuthService,
+  maintenanceAuthPathFromEnv
+} from "./maintenance-auth";
 
 type ClientWsMessage =
   | { type: "join_match"; payload: { matchId: string; sessionToken: string; side: Side } }
@@ -100,6 +107,7 @@ type NetgridServerOptions = {
   deploymentConfig?: DeploymentConfig;
   rateLimiter?: FixedWindowRateLimiter;
   connectionAudit?: ConnectionAuditLogger;
+  maintenanceAuth?: MaintenanceAuthService;
 };
 
 export class NetgridRealtimeServer {
@@ -506,8 +514,9 @@ export function createNetgridHttpServer(service?: MultiplayerService, options: N
   const activeService = service ?? defaultService(deploymentConfig);
   const rateLimiter = options.rateLimiter ?? createRateLimiter(deploymentConfig.rateLimitProfile);
   const connectionAudit = options.connectionAudit ?? createConnectionAuditLoggerFromEnv();
+  const maintenanceAuth = options.maintenanceAuth ?? new MaintenanceAuthService(new JsonFileMaintenanceCredentialStore(maintenanceAuthPathFromEnv()));
   const realtime = new NetgridRealtimeServer(activeService, deploymentConfig, rateLimiter, connectionAudit);
-  const server = createServer((request, response) => void routeHttp(activeService, realtime, deploymentConfig, rateLimiter, request, response));
+  const server = createServer((request, response) => void routeHttp(activeService, realtime, deploymentConfig, rateLimiter, maintenanceAuth, request, response));
   realtime.attach(server);
   const cleanupTimer = deploymentConfig.profile === "local" ? startMaintenanceCleanupTimer(activeService) : undefined;
   return {
@@ -561,6 +570,7 @@ async function routeHttp(
   realtime: NetgridRealtimeServer,
   deploymentConfig: DeploymentConfig,
   rateLimiter: FixedWindowRateLimiter,
+  maintenanceAuth: MaintenanceAuthService,
   request: IncomingMessage,
   response: ServerResponse
 ): Promise<void> {
@@ -582,8 +592,107 @@ async function routeHttp(
       return;
     }
 
+    if (url.pathname === "/api/storage/maintenance/auth/login" && request.method === "POST") {
+      if (!ensureMaintenanceTransport(response, request, deploymentConfig) || !ensureMaintenanceOrigin(response, request, deploymentConfig)) return;
+      if (!checkRateLimit(response, rateLimiter, "token_probe", request, deploymentConfig, "storage-maintenance-login")) return;
+      if (!(await maintenanceAuth.isInitialized())) {
+        sendJson(response, 503, maintenanceAuthUninitializedPayload());
+        return;
+      }
+      const body = await readJson(request);
+      const created = await maintenanceAuth.createSession(typeof body.password === "string" ? body.password : "");
+      if (!created) {
+        sendJson(response, 401, maintenanceAuthInvalidPayload());
+        return;
+      }
+      response.setHeader("set-cookie", maintenanceSessionCookie(created.sessionToken, request));
+      sendJson(response, 200, { session: created.session, csrfToken: created.csrfToken });
+      return;
+    }
+
+    if (url.pathname === "/api/storage/maintenance/auth/session" && request.method === "GET") {
+      if (!ensureMaintenanceTransport(response, request, deploymentConfig)) return;
+      if (!(await maintenanceAuth.isInitialized())) {
+        sendJson(response, 503, maintenanceAuthUninitializedPayload());
+        return;
+      }
+      const sessionToken = maintenanceSessionToken(request);
+      const auth = await maintenanceAuth.authenticateSession(sessionToken);
+      if (!auth.ok) {
+        sendJson(response, 401, maintenanceAuthRequiredPayload());
+        return;
+      }
+      const csrfToken = await maintenanceAuth.rotateCsrfToken(sessionToken);
+      if (!csrfToken) {
+        sendJson(response, 401, maintenanceAuthRequiredPayload());
+        return;
+      }
+      sendJson(response, 200, { session: auth.session, csrfToken });
+      return;
+    }
+
+    if (url.pathname === "/api/storage/maintenance/auth/logout" && request.method === "POST") {
+      if (!(await ensureMaintenanceMutationAccess(response, request, deploymentConfig, maintenanceAuth))) return;
+      maintenanceAuth.revokeSession(maintenanceSessionToken(request));
+      response.setHeader("set-cookie", clearMaintenanceSessionCookie(request));
+      sendJson(response, 200, { ok: true });
+      return;
+    }
+
+    if (url.pathname === "/api/storage/maintenance/auth/reauthenticate" && request.method === "POST") {
+      if (!(await ensureMaintenanceMutationAccess(response, request, deploymentConfig, maintenanceAuth))) return;
+      if (!checkRateLimit(response, rateLimiter, "token_probe", request, deploymentConfig, "storage-maintenance-reauthenticate")) return;
+      const body = await readJson(request);
+      const result = await maintenanceAuth.reauthenticateSession(maintenanceSessionToken(request), typeof body.password === "string" ? body.password : "");
+      if (!result.ok) {
+        sendJson(response, 401, maintenanceAuthInvalidPayload());
+        return;
+      }
+      sendJson(response, 200, { session: result.session });
+      return;
+    }
+
+    if (url.pathname === "/api/storage/maintenance/auth/password" && request.method === "POST") {
+      if (!(await ensureMaintenanceMutationAccess(response, request, deploymentConfig, maintenanceAuth))) return;
+      if (!checkRateLimit(response, rateLimiter, "token_probe", request, deploymentConfig, "storage-maintenance-password-change")) return;
+      const body = await readJson(request);
+      let changed: boolean;
+      try {
+        changed = await maintenanceAuth.changePassword(
+          maintenanceSessionToken(request),
+          typeof body.currentPassword === "string" ? body.currentPassword : "",
+          typeof body.newPassword === "string" ? body.newPassword : ""
+        );
+      } catch (error) {
+        const code = error instanceof Error ? error.message : "";
+        if (code === "maintenance_password_too_short" || code === "maintenance_password_too_long") {
+          sendJson(response, 400, { error: { code, message: "Das neue Maintenance-Passwort erfüllt die Längenanforderungen nicht." } });
+          return;
+        }
+        throw error;
+      }
+      if (!changed) {
+        sendJson(response, 401, maintenanceAuthInvalidPayload());
+        return;
+      }
+      response.setHeader("set-cookie", clearMaintenanceSessionCookie(request));
+      sendJson(response, 200, { ok: true, sessionsRevoked: true });
+      return;
+    }
+
+    if (url.pathname.startsWith("/api/storage/maintenance/")) {
+      const authenticated =
+        request.method === "GET"
+          ? await ensureMaintenanceAuthenticated(response, request, deploymentConfig, maintenanceAuth)
+          : await ensureMaintenanceMutationAccess(response, request, deploymentConfig, maintenanceAuth);
+      if (!authenticated) return;
+      if (isSensitiveMaintenanceOperation(url.pathname, request.method) && !(await maintenanceAuth.consumeReauthentication(maintenanceSessionToken(request)))) {
+        sendJson(response, 403, maintenanceReauthenticationRequiredPayload());
+        return;
+      }
+    }
+
     if (url.pathname === "/api/storage/maintenance/summary" && request.method === "GET") {
-      if (!ensureMaintenanceAccess(response, request, deploymentConfig)) return;
       if (!checkRateLimit(response, rateLimiter, "token_probe", request, deploymentConfig, "storage-maintenance-summary")) return;
       const summary = await service.storageMaintenanceSummary();
       if (!summary) {
@@ -595,7 +704,6 @@ async function routeHttp(
     }
 
     if (url.pathname === "/api/storage/maintenance/matches" && request.method === "GET") {
-      if (!ensureMaintenanceAccess(response, request, deploymentConfig)) return;
       if (!checkRateLimit(response, rateLimiter, "token_probe", request, deploymentConfig, "storage-maintenance-matches")) return;
       const matches = await service.storageMaintenanceMatches(maintenanceFiltersFromSearch(url.searchParams));
       if (!matches) {
@@ -607,7 +715,6 @@ async function routeHttp(
     }
 
     if (url.pathname === "/api/storage/maintenance/ai-decision-traces/matches" && request.method === "GET") {
-      if (!ensureMaintenanceAccess(response, request, deploymentConfig)) return;
       if (!checkRateLimit(response, rateLimiter, "token_probe", request, deploymentConfig, "storage-maintenance-ai-trace-matches")) return;
       const matches = await service.storageMaintenanceAiDecisionTraceMatches();
       if (!matches) {
@@ -620,7 +727,6 @@ async function routeHttp(
 
     const maintenanceAiTraceEnableRoute = /^\/api\/storage\/maintenance\/ai-decision-traces\/matches\/([^/]+)\/enable$/.exec(url.pathname);
     if (maintenanceAiTraceEnableRoute && request.method === "POST") {
-      if (!ensureMaintenanceAccess(response, request, deploymentConfig)) return;
       const matchId = decodeURIComponent(maintenanceAiTraceEnableRoute[1] ?? "");
       if (!checkRateLimit(response, rateLimiter, "lifecycle", request, deploymentConfig, `storage-maintenance-ai-trace-enable:${matchId}`)) return;
       const body = await readJson(request);
@@ -647,7 +753,6 @@ async function routeHttp(
 
     const maintenanceAiTraceIndexRoute = /^\/api\/storage\/maintenance\/ai-decision-traces\/matches\/([^/]+)$/.exec(url.pathname);
     if (maintenanceAiTraceIndexRoute && request.method === "GET") {
-      if (!ensureMaintenanceAccess(response, request, deploymentConfig)) return;
       const matchId = decodeURIComponent(maintenanceAiTraceIndexRoute[1] ?? "");
       if (!checkRateLimit(response, rateLimiter, "token_probe", request, deploymentConfig, `storage-maintenance-ai-trace-index:${matchId}`)) return;
       const afterDecisionIndex = numberParam(url.searchParams.get("afterDecisionIndex"));
@@ -662,7 +767,6 @@ async function routeHttp(
 
     const maintenanceAiTraceDetailRoute = /^\/api\/storage\/maintenance\/ai-decision-traces\/([^/]+)$/.exec(url.pathname);
     if (maintenanceAiTraceDetailRoute && request.method === "GET") {
-      if (!ensureMaintenanceAccess(response, request, deploymentConfig)) return;
       const traceId = decodeURIComponent(maintenanceAiTraceDetailRoute[1] ?? "");
       if (!checkRateLimit(response, rateLimiter, "token_probe", request, deploymentConfig, `storage-maintenance-ai-trace-detail:${traceId}`)) return;
       const trace = await service.storageMaintenanceAiDecisionTraceDetail(traceId);
@@ -675,7 +779,6 @@ async function routeHttp(
     }
 
     if (url.pathname === "/api/storage/maintenance/cleanup/preview" && request.method === "POST") {
-      if (!ensureMaintenanceAccess(response, request, deploymentConfig)) return;
       if (!checkRateLimit(response, rateLimiter, "lifecycle", request, deploymentConfig, "storage-maintenance-cleanup-preview")) return;
       const body = await readJson(request);
       const preview = await service.storageMaintenanceCleanupPreview(maintenanceCleanupFiltersFromBody(body));
@@ -688,7 +791,6 @@ async function routeHttp(
     }
 
     if (url.pathname === "/api/storage/maintenance/cleanup/apply" && request.method === "POST") {
-      if (!ensureMaintenanceAccess(response, request, deploymentConfig)) return;
       if (!checkRateLimit(response, rateLimiter, "lifecycle", request, deploymentConfig, "storage-maintenance-cleanup-apply")) return;
       const body = await readJson(request);
       const input = maintenanceCleanupApplyFromBody(body);
@@ -711,7 +813,6 @@ async function routeHttp(
     }
 
     if (url.pathname === "/api/storage/maintenance/cleanup/policy" && request.method === "GET") {
-      if (!ensureMaintenanceAccess(response, request, deploymentConfig)) return;
       if (!checkRateLimit(response, rateLimiter, "token_probe", request, deploymentConfig, "storage-maintenance-cleanup-policy")) return;
       const policy = await service.storageMaintenanceCleanupPolicy();
       if (!policy) {
@@ -723,7 +824,6 @@ async function routeHttp(
     }
 
     if (url.pathname === "/api/storage/maintenance/cleanup/policy" && request.method === "POST") {
-      if (!ensureMaintenanceAccess(response, request, deploymentConfig)) return;
       if (!checkRateLimit(response, rateLimiter, "lifecycle", request, deploymentConfig, "storage-maintenance-cleanup-policy-update")) return;
       const body = await readJson(request);
       const policy = await service.setStorageMaintenanceCleanupPolicy(maintenanceCleanupPolicyFromBody(body));
@@ -736,7 +836,6 @@ async function routeHttp(
     }
 
     if (url.pathname === "/api/storage/maintenance/cleanup/policy/run" && request.method === "POST") {
-      if (!ensureMaintenanceAccess(response, request, deploymentConfig)) return;
       if (!checkRateLimit(response, rateLimiter, "lifecycle", request, deploymentConfig, "storage-maintenance-cleanup-policy-run")) return;
       const result = await service.runStorageMaintenanceCleanupPolicy();
       if (!result) {
@@ -748,7 +847,6 @@ async function routeHttp(
     }
 
     if (url.pathname === "/api/storage/maintenance/snapshot-compaction/apply" && request.method === "POST") {
-      if (!ensureMaintenanceAccess(response, request, deploymentConfig)) return;
       if (!checkRateLimit(response, rateLimiter, "lifecycle", request, deploymentConfig, "storage-maintenance-snapshot-compaction")) return;
       try {
         const result = await service.storageMaintenanceCompactSnapshots();
@@ -766,7 +864,6 @@ async function routeHttp(
 
     const maintenanceRetentionRoute = /^\/api\/storage\/maintenance\/matches\/([^/]+)\/retention-protection$/.exec(url.pathname);
     if (maintenanceRetentionRoute && request.method === "POST") {
-      if (!ensureMaintenanceAccess(response, request, deploymentConfig)) return;
       if (!checkRateLimit(response, rateLimiter, "lifecycle", request, deploymentConfig, `storage-maintenance-retention:${maintenanceRetentionRoute[1]}`)) return;
       const body = await readJson(request);
       const matchId = decodeURIComponent(maintenanceRetentionRoute[1] ?? "");
@@ -781,7 +878,6 @@ async function routeHttp(
 
     const maintenanceRecoveryRoute = /^\/api\/storage\/maintenance\/matches\/([^/]+)\/recovery-access$/.exec(url.pathname);
     if (maintenanceRecoveryRoute && request.method === "POST") {
-      if (!ensureMaintenanceAccess(response, request, deploymentConfig)) return;
       if (!checkRateLimit(response, rateLimiter, "lifecycle", request, deploymentConfig, `storage-maintenance-recovery:${maintenanceRecoveryRoute[1]}`)) return;
       const body = await readJson(request);
       const matchId = decodeURIComponent(maintenanceRecoveryRoute[1] ?? "");
@@ -796,7 +892,6 @@ async function routeHttp(
 
     const maintenanceMatchRoute = /^\/api\/storage\/maintenance\/matches\/([^/]+)$/.exec(url.pathname);
     if (maintenanceMatchRoute && request.method === "GET") {
-      if (!ensureMaintenanceAccess(response, request, deploymentConfig)) return;
       const matchId = decodeURIComponent(maintenanceMatchRoute[1] ?? "");
       if (!checkRateLimit(response, rateLimiter, "token_probe", request, deploymentConfig, `storage-maintenance-match:${matchId}`)) return;
       const detail = await service.storageMaintenanceMatchDetail(matchId);
@@ -1235,12 +1330,119 @@ function checkRateLimit(
   return false;
 }
 
-function ensureMaintenanceAccess(response: ServerResponse, request: IncomingMessage, deploymentConfig: DeploymentConfig): boolean {
+function ensureMaintenanceTransport(response: ServerResponse, request: IncomingMessage, deploymentConfig: DeploymentConfig): boolean {
   if (deploymentConfig.profile !== "local" || !isMaintenanceClientAddressAllowed(request.socket.remoteAddress)) {
-    sendJson(response, 403, { error: { code: "maintenance_unavailable", message: "Die Wartungsansicht ist nur lokal oder im privaten Netzwerk verfügbar." } });
+    sendJson(response, 403, { error: { code: "maintenance_unavailable", message: "Die Wartungs-Control-Plane ist in diesem Transportprofil nicht verfügbar." } });
     return false;
   }
   return true;
+}
+
+async function ensureMaintenanceAuthenticated(
+  response: ServerResponse,
+  request: IncomingMessage,
+  deploymentConfig: DeploymentConfig,
+  maintenanceAuth: MaintenanceAuthService
+): Promise<boolean> {
+  if (!ensureMaintenanceTransport(response, request, deploymentConfig)) return false;
+  if (!(await maintenanceAuth.isInitialized())) {
+    sendJson(response, 503, maintenanceAuthUninitializedPayload());
+    return false;
+  }
+  const auth = await maintenanceAuth.authenticateSession(maintenanceSessionToken(request));
+  if (!auth.ok) {
+    sendJson(response, 401, maintenanceAuthRequiredPayload());
+    return false;
+  }
+  return true;
+}
+
+async function ensureMaintenanceMutationAccess(
+  response: ServerResponse,
+  request: IncomingMessage,
+  deploymentConfig: DeploymentConfig,
+  maintenanceAuth: MaintenanceAuthService
+): Promise<boolean> {
+  if (!(await ensureMaintenanceAuthenticated(response, request, deploymentConfig, maintenanceAuth))) return false;
+  if (!ensureMaintenanceOrigin(response, request, deploymentConfig)) return false;
+  const csrfHeader = firstHeaderValue(request.headers["x-netgrid-csrf"]);
+  if (!(await maintenanceAuth.verifyCsrf(maintenanceSessionToken(request), csrfHeader))) {
+    sendJson(response, 403, maintenanceRequestRejectedPayload());
+    return false;
+  }
+  return true;
+}
+
+function ensureMaintenanceOrigin(response: ServerResponse, request: IncomingMessage, deploymentConfig: DeploymentConfig): boolean {
+  const origin = firstHeaderValue(request.headers.origin);
+  if (!origin || !isOriginAllowed(origin, deploymentConfig)) {
+    sendJson(response, 403, maintenanceRequestRejectedPayload());
+    return false;
+  }
+  return true;
+}
+
+function isSensitiveMaintenanceOperation(pathname: string, method: string | undefined): boolean {
+  if (method !== "POST") return false;
+  return (
+    pathname === "/api/storage/maintenance/cleanup/apply" ||
+    pathname === "/api/storage/maintenance/cleanup/policy" ||
+    pathname === "/api/storage/maintenance/cleanup/policy/run" ||
+    pathname === "/api/storage/maintenance/snapshot-compaction/apply" ||
+    /\/api\/storage\/maintenance\/matches\/[^/]+\/recovery-access$/.test(pathname)
+  );
+}
+
+function maintenanceSessionToken(request: IncomingMessage): string | undefined {
+  const cookieHeader = request.headers.cookie;
+  if (!cookieHeader) return undefined;
+  for (const part of cookieHeader.split(";")) {
+    const separator = part.indexOf("=");
+    if (separator < 0) continue;
+    const name = part.slice(0, separator).trim();
+    if (name !== MAINTENANCE_SESSION_COOKIE_NAME) continue;
+    const value = part.slice(separator + 1).trim();
+    return value || undefined;
+  }
+  return undefined;
+}
+
+function maintenanceSessionCookie(sessionToken: string, request: IncomingMessage): string {
+  const secure = isTlsRequest(request) ? "; Secure" : "";
+  return `${MAINTENANCE_SESSION_COOKIE_NAME}=${sessionToken}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${MAINTENANCE_SESSION_MAX_AGE_MINUTES * 60}${secure}`;
+}
+
+function clearMaintenanceSessionCookie(request: IncomingMessage): string {
+  const secure = isTlsRequest(request) ? "; Secure" : "";
+  return `${MAINTENANCE_SESSION_COOKIE_NAME}=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0${secure}`;
+}
+
+function isTlsRequest(request: IncomingMessage): boolean {
+  return (request.socket as IncomingMessage["socket"] & { encrypted?: boolean }).encrypted === true;
+}
+
+function firstHeaderValue(value: string | string[] | undefined): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+function maintenanceAuthUninitializedPayload(): { error: { code: string; message: string } } {
+  return { error: { code: "maintenance_auth_uninitialized", message: "Maintenance-Authentifizierung muss lokal durch den Betreiber initialisiert werden." } };
+}
+
+function maintenanceAuthRequiredPayload(): { error: { code: string; message: string } } {
+  return { error: { code: "maintenance_auth_required", message: "Eine gültige Maintenance-Sitzung ist erforderlich." } };
+}
+
+function maintenanceAuthInvalidPayload(): { error: { code: string; message: string } } {
+  return { error: { code: "maintenance_auth_invalid", message: "Anmeldung oder Passwortbestätigung ist fehlgeschlagen." } };
+}
+
+function maintenanceRequestRejectedPayload(): { error: { code: string; message: string } } {
+  return { error: { code: "maintenance_request_rejected", message: "Die Maintenance-Anfrage wurde aus Sicherheitsgründen abgelehnt." } };
+}
+
+function maintenanceReauthenticationRequiredPayload(): { error: { code: string; message: string } } {
+  return { error: { code: "maintenance_reauthentication_required", message: "Diese Operation verlangt eine frische Passwortbestätigung." } };
 }
 
 function maintenanceUnavailablePayload(): { error: { code: "maintenance_unavailable"; message: string } } {
@@ -1358,15 +1560,9 @@ export function isMaintenanceClientAddressAllowed(value: string | undefined): bo
   const address = normalizeClientAddress(value);
   if (!address) return false;
   if (address === "::1" || address === "localhost") return true;
-  if (address.includes(":")) {
-    const lower = address.toLowerCase();
-    return lower.startsWith("fc") || lower.startsWith("fd") || lower.startsWith("fe80:");
-  }
   const parts = address.split(".").map((part) => Number(part));
   if (parts.length !== 4 || parts.some((part) => !Number.isInteger(part) || part < 0 || part > 255)) return false;
-  const a = parts[0]!;
-  const b = parts[1]!;
-  return a === 127 || a === 10 || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || (a === 169 && b === 254);
+  return parts[0] === 127;
 }
 
 function normalizeClientAddress(value: string | undefined): string | undefined {

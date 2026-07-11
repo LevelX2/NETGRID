@@ -177,7 +177,7 @@ Prüfung:
 
 ### P03 – Fail-closed Maintenance-API und Konsistenzgrenzen
 
-Status: in Umsetzung
+Status: abgeschlossen
 
 Ergebnis:
 
@@ -196,7 +196,7 @@ Prüfung:
 
 ### P04 – Sichere Maintenance-Oberfläche
 
-Status: ausstehend
+Status: in Umsetzung
 
 Ergebnis:
 

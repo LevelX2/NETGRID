@@ -265,6 +265,18 @@ export class MaintenanceAuthService {
     );
   }
 
+  async rotateCsrfToken(
+    sessionToken: string | undefined,
+  ): Promise<string | undefined> {
+    const auth = await this.authenticateSession(sessionToken);
+    if (!auth.ok || !sessionToken) return undefined;
+    const session = this.sessions.get(this.hashSecret("session", sessionToken));
+    if (!session) return undefined;
+    const csrfToken = randomBytes(32).toString("base64url");
+    session.csrfTokenHash = this.hashSecret("csrf", csrfToken);
+    return csrfToken;
+  }
+
   async reauthenticateSession(
     sessionToken: string | undefined,
     password: string,

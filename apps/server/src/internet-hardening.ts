@@ -90,11 +90,12 @@ export function applyCors(request: IncomingMessage, response: ServerResponse, co
   const origin = request.headers.origin;
   response.setHeader("vary", "Origin");
   response.setHeader("access-control-allow-methods", "GET,POST,OPTIONS");
-  response.setHeader("access-control-allow-headers", "content-type,authorization");
+  response.setHeader("access-control-allow-headers", "content-type,authorization,x-netgrid-csrf");
   response.setHeader("access-control-max-age", "600");
   if (!origin) return "allowed";
   if (!isOriginAllowed(origin, config)) return "denied";
   response.setHeader("access-control-allow-origin", origin);
+  response.setHeader("access-control-allow-credentials", "true");
   return "allowed";
 }
 
