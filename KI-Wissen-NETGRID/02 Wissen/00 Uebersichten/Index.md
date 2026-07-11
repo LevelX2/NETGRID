@@ -80,6 +80,9 @@
   `/maintenance`, `docs/runbooks/maintenance-control-plane.md` sowie
   `storage:inspect`, `storage:backup` und `storage:restore`.
 - Browser-E2E: `scripts/run-e2e.mjs` und `tests/e2e/`.
+- Aktueller Playtest-Fund mit Chronicle-, Access-, Window- und Auto-End-
+  Härtung:
+  `docs/reviews/current-game-findings-remediation-final-review-2026-07-11.md`.
 - Monatslogs: [[../../../03 Betrieb/Log]].
 
 ## Dokumentationsregel

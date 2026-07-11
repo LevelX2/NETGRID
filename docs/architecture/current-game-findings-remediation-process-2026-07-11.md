@@ -2,7 +2,12 @@
 
 ## Status
 
-In Umsetzung auf `codex/current-game-findings-20260711`.
+P1 bis P11 sind auf `codex/current-game-findings-20260711` abgeschlossen und
+verifiziert. Der Arbeitsbranch ist zur defensiven lokalen Main-Integration
+freigegeben.
+
+Final Review:
+`docs/reviews/current-game-findings-remediation-final-review-2026-07-11.md`.
 
 ## Quelle und Zielprüfung
 
@@ -276,6 +281,22 @@ einen eigenen Commit und ein dokumentiertes Done-Gate.
   committen, sauberen Status prüfen.
 - Vor Merge: aktuelles `main` integrieren, fokussierte Gesamtsuite plus
   `corepack pnpm typecheck` und relevante Current-State-Gates erneut ausführen.
+
+## Paketabschluss
+
+| Paket | Ergebnis | Commit |
+| --- | --- | --- |
+| P1 | Prozess und `/Goal` festgeschrieben | `9c0b19b83` |
+| P2 | Pattel-Anzeige bei unveränderter Virus-Semantik | `fbbb823f0` |
+| P3 | öffentliche Choice-Chronicle und Reclamation-Nullauswahl | `6de173f6a` |
+| P4 | Pay-to-continue-Warning-Ton | `7dbe0c71c` |
+| P5 | Lockjaw-Tap als Regelvertrag bestätigt | `0e66f0291` |
+| P6 | Dr.-Dreff-Run-/Chronicle-Ablauf | `943448126` |
+| P7 | Central-Root-/Zonen-Herkunft im Access | `23be2f32c` |
+| P8 | seitenspezifische Window-Icon-Sprache | `06b9b7e2d` |
+| P9 | HQ-Rez als Nichtfehler aus Matchtrace erklärt | `b33b7afd5` |
+| P10 | Auto-End-Auflösungsbarriere | `7640ff018` |
+| P11 | Gesamtverifikation, Review und Wissenspflege | dieser Abschlusscommit |
 
 ## Worktree-, Git- und Integrationsregeln
 

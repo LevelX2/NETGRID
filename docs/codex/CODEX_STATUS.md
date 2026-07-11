@@ -70,6 +70,19 @@ corepack pnpm build
 Paketnahe Tests bleiben vor dem Full Gate Pflicht. Tests mit Timeout oder
 abgebrochene Prozesse gelten nicht als bestanden.
 
+## Aktueller Playtest-Fund vom 11. Juli 2026
+
+Der sequenzielle Prozess
+`docs/architecture/current-game-findings-remediation-process-2026-07-11.md`
+schließt zehn Spielbefunde und den Chronicle-Choice-Querschnitt. Pattel-
+Counter, öffentliche Choice-Texte, Pay-to-continue-Ton, Dr.-Dreff-Runfolge,
+Access-Herkunft, seitenspezifische Ereignisicons und die Auto-End-Barriere sind
+gehärtet. `Lockjaw`-Tap und das nicht bezahlbare `Colonel Failure` wurden mit
+Regel- beziehungsweise Match-Evidence als Nichtfehler bestätigt.
+
+Führend ist
+`docs/reviews/current-game-findings-remediation-final-review-2026-07-11.md`.
+
 ## Offene technische Schwerpunkte
 
 - `apps/web/app/page.tsx`, `apps/web/app/chronicle.ts`,

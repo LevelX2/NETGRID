@@ -81,6 +81,12 @@ Stand: 2026-07-11
 - Die verwaiste Next-Demo-Route `/api/game` mit globalem V0.8-GameState ist
   entfernt. Produktive Matches laufen über den Multiplayer-Server; das lokale
   Tutorial bleibt ein ausdrücklich isolierter Modus.
+- Der Playtest-Fund vom 11. Juli 2026 ist als sequenzieller Paketprozess
+  geschlossen: Window- und Access-Darstellung, öffentliche Chronicle-
+  Choice-Texte sowie Auto-End bei offenen Runs und Bestätigungen sind
+  gehärtet. `Lockjaw`-Tap und das nicht bezahlbare HQ-ICE wurden als
+  regelkonforme Nichtfehler belegt. Führend:
+  `docs/reviews/current-game-findings-remediation-final-review-2026-07-11.md`.
 
 ## Current-State-Struktur
 
