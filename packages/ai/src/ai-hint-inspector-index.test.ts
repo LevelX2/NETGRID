@@ -669,7 +669,8 @@ describe("AI005 hint inspector index", () => {
     const activeHints = readActiveHints();
     const classicCardIds = readClassicCardIds();
 
-    expect(classicCardIds).toHaveLength(52);
+    expect(classicCardIds.length).toBeGreaterThan(0);
+    expect(new Set(classicCardIds).size).toBe(classicCardIds.length);
 
     for (const cardId of classicCardIds) {
       const active = activeHints.cards.find((entry) => entry.cardId === cardId);

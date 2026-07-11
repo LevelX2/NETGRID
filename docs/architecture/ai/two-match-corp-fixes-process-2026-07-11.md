@@ -1,6 +1,6 @@
 # Two-Match Corp AI Fixes Process
 
-Status: In Umsetzung
+Status: Verifiziert; lokale Main-Integration ausstehend
 
 ## Quelle und Gesamtziel
 
@@ -101,4 +101,3 @@ Arbeite P1 bis P6 ausschließlich im Worktree
 `codex/ai-two-match-corp-fixes-20260711` ab. Committe jedes abgeschlossene Paket.
 Nutze den Hauptworkspace nur für den finalen lokalen Merge. Markiere das Ziel erst
 nach erfolgreicher Main-Verifikation als abgeschlossen.
-
