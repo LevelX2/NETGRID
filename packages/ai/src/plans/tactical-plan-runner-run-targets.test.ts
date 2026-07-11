@@ -130,6 +130,53 @@ describe("runnerPressureProbeAllowance", () => {
       desiredActionSemantics: ["economy.gain_credit"],
     });
   });
+
+  it("funds only a path gap that can still convert into a run this turn", () => {
+    const hqRun = runAction("run-hq", "hq");
+    const defaultStep = {
+      stepId: "probe_central:hq",
+      kind: "probe_central" as const,
+      desiredActionSemantics: ["run.start"],
+    };
+    const bounded = runTargetEvaluation({
+      actionId: hqRun.actionId,
+      targetServerId: "hq",
+      targetKind: "hq",
+      recommendation: "gain_credits_first",
+      accessPayoff: "unknown",
+      scoreThreat: false,
+      score: -200,
+      pathPassability: "blocked_unpayable",
+      creditsAfterRun: -2,
+    });
+    const distant = runTargetEvaluation({
+      ...bounded,
+      creditsAfterRun: -5,
+    });
+
+    expect(
+      runnerRunTargetCurrentStep(
+        planContext({
+          primaryStrategyId: "runner.hq_pressure",
+          runnerClicks: 4,
+          runTargetEvaluations: [bounded],
+        }),
+        hqRun,
+        defaultStep,
+      ),
+    ).toMatchObject({ kind: "gain_credits" });
+    expect(
+      runnerRunTargetCurrentStep(
+        planContext({
+          primaryStrategyId: "runner.hq_pressure",
+          runnerClicks: 4,
+          runTargetEvaluations: [distant],
+        }),
+        hqRun,
+        defaultStep,
+      ),
+    ).toMatchObject({ kind: "probe_central" });
+  });
 });
 
 function pressureBudget(
@@ -198,7 +245,10 @@ function runTargetEvaluation(
     | "scoreThreat"
     | "targetKind"
     | "targetServerId"
-  >,
+  > &
+    Partial<
+      Pick<RunnerRunTargetEvaluation, "creditsAfterRun" | "pathPassability">
+    >,
 ): RunnerRunTargetEvaluation {
   return {
     actionId: input.actionId,
@@ -206,9 +256,9 @@ function runTargetEvaluation(
     targetKind: input.targetKind,
     recommendation: input.recommendation,
     accessPayoff: input.accessPayoff,
-    pathPassability: "reachable",
+    pathPassability: input.pathPassability ?? "reachable",
     knownAccessState: "unknown",
-    creditsAfterRun: 0,
+    creditsAfterRun: input.creditsAfterRun ?? 0,
     scoreThreat: input.scoreThreat,
     score: input.score,
     evidence: [],

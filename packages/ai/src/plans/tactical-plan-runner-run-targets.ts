@@ -287,9 +287,24 @@ export function runnerRunTargetCurrentStep(
     evaluation.pathPassability === "reachable" &&
     evaluation.creditsAfterRun >= 0 &&
     context.input.playerView.own.clicks <= 1;
+  const fundingGap = Math.max(0, -(evaluation?.creditsAfterRun ?? 0));
+  const preparatoryClicks = Math.max(
+    0,
+    context.input.playerView.own.clicks - 1,
+  );
+  const boundedPathFunding =
+    evaluation?.pathPassability === "blocked_unpayable" &&
+    fundingGap > 0 &&
+    fundingGap <= preparatoryClicks;
+  const urgentContestFunding =
+    evaluation?.scoreThreat === true &&
+    evaluation.pathPassability === "reachable" &&
+    evaluation.creditsAfterRun >= 0 &&
+    preparatoryClicks > 0;
   if (
     evaluation?.recommendation === "gain_credits_first" &&
-    !preserveLastClickForScoreThreat
+    !preserveLastClickForScoreThreat &&
+    (boundedPathFunding || urgentContestFunding)
   ) {
     return createPlanStep({
       stepId: `gain_credits_before_run:${evaluation.targetServerId}`,
@@ -297,6 +312,8 @@ export function runnerRunTargetCurrentStep(
       desiredActionSemantics: ["economy.gain_credit"],
       rationale: [
         "run target evaluation recommends funding before pressure",
+        `run funding gap ${fundingGap}`,
+        `run preparatory clicks ${preparatoryClicks}`,
         ...runnerRunTargetStepRationale(context, action),
       ],
     });
