@@ -27,6 +27,10 @@
   flex: 1 1 auto;
 }
 
+.app.activeMatch.cyberspaceBackgroundEnabled .main {
+  background: url("/backgrounds/cyberspace-board-background.png") center top / cover no-repeat;
+}
+
 .activeMatchWorkspace {
   flex: 1 1 auto;
   width: 100%;
@@ -3764,6 +3768,18 @@ select {
   justify-items: stretch;
 }
 
+.opponentCueHeader {
+  align-items: flex-start;
+}
+
+.opponentCueHeaderActions,
+.accessRevealHeaderActions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
 .opponentCueMessage {
   min-width: 0;
   display: flex;
@@ -3774,19 +3790,6 @@ select {
 
 .opponentCueBody.hasVisual .opponentCueMessage {
   justify-content: flex-start;
-}
-
-.opponentCueEventIcon {
-  width: 48px;
-  height: 48px;
-  flex: 0 0 48px;
-  display: grid;
-  place-items: center;
-  border: 1px solid color-mix(in srgb, var(--interaction-ambience-accent), var(--line) 34%);
-  border-radius: 8px;
-  color: color-mix(in srgb, var(--interaction-ambience-accent), white 24%);
-  background: color-mix(in srgb, var(--interaction-ambience-accent), var(--panel) 84%);
-  box-shadow: 0 8px 20px rgb(0 0 0 / 0.24);
 }
 
 .opponentCueText {
@@ -4143,8 +4146,12 @@ select {
 .ambience-access {
   --interaction-ambience-image: url("/backgrounds/access-scan-ambience.png");
   --interaction-ambience-accent: #e4b45d;
-  --interaction-ambience-opacity: 0.13;
+  --interaction-ambience-opacity: 0.32;
   --interaction-ambience-position: center;
+}
+
+.damageImpactHeader .windowEventIcon {
+  margin: -5px -5px -30px 8px;
 }
 
 .ambience-damage {
@@ -4180,6 +4187,56 @@ select {
   --interaction-ambience-accent: #d8b861;
   --interaction-ambience-opacity: 0.14;
   --interaction-ambience-position: center;
+}
+
+.windowEventIcon {
+  width: 128px;
+  height: 128px;
+  flex: 0 0 128px;
+  display: block;
+  border-radius: 6px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  mix-blend-mode: screen;
+  filter: drop-shadow(0 12px 18px rgb(0 0 0 / 0.34));
+  pointer-events: none;
+}
+
+.windowEventIcon-agenda {
+  background-image: url("/icons/window-events/agenda.png");
+}
+
+.windowEventIcon-ice-pass {
+  background-image: url("/icons/window-events/ice-pass.png");
+}
+
+.windowEventIcon-access {
+  background-image: url("/icons/window-events/access.png");
+}
+
+.windowEventIcon-trash {
+  background-image: url("/icons/window-events/trash.png");
+}
+
+.windowEventIcon-trace {
+  background-image: url("/icons/window-events/trace.png");
+}
+
+.windowEventIcon-pump-break {
+  background-image: url("/icons/window-events/pump-break.png");
+}
+
+.windowEventIcon-net-damage {
+  background-image: url("/icons/window-events/net-damage.png");
+}
+
+.windowEventIcon-meat-damage {
+  background-image: url("/icons/window-events/meat-damage.png");
+}
+
+.windowEventIcon-core-damage {
+  background-image: url("/icons/window-events/core-damage.png");
 }
 
 .opponentCueOverlay[class*="ambience-"] {
@@ -8914,6 +8971,10 @@ select {
   align-items: start;
   justify-content: space-between;
   gap: 12px;
+}
+
+.accessRevealHeadingText {
+  min-width: 0;
 }
 
 .accessRevealHeader h2 {

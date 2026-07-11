@@ -682,6 +682,8 @@ export default function Page() {
   const [priorityWindowHoldEnabled, setPriorityWindowHoldEnabled] =
     useState(false);
   const [topbarStickyEnabled, setTopbarStickyEnabled] = useState(true);
+  const [cyberspaceBackgroundEnabled, setCyberspaceBackgroundEnabled] =
+    useState(true);
   const [resourceStripMode, setResourceStripMode] =
     useState<ResourceStripMode>("auto");
   const [actionPanelMode, setActionPanelMode] =
@@ -1346,6 +1348,7 @@ export default function Page() {
           autoEndTurnEnabled?: unknown;
           priorityWindowHoldEnabled?: unknown;
           topbarStickyEnabled?: unknown;
+          cyberspaceBackgroundEnabled?: unknown;
           resourceStripMode?: unknown;
           actionPanelMode?: unknown;
           aiDecisionDebugOverlayEnabled?: unknown;
@@ -1360,6 +1363,8 @@ export default function Page() {
           setPriorityWindowHoldEnabled(parsed.priorityWindowHoldEnabled);
         if (typeof parsed.topbarStickyEnabled === "boolean")
           setTopbarStickyEnabled(parsed.topbarStickyEnabled);
+        if (typeof parsed.cyberspaceBackgroundEnabled === "boolean")
+          setCyberspaceBackgroundEnabled(parsed.cyberspaceBackgroundEnabled);
         if (typeof parsed.aiDecisionDebugOverlayEnabled === "boolean")
           setAiDecisionDebugOverlayEnabled(
             parsed.aiDecisionDebugOverlayEnabled,
@@ -1388,6 +1393,7 @@ export default function Page() {
         autoEndTurnEnabled,
         priorityWindowHoldEnabled,
         topbarStickyEnabled,
+        cyberspaceBackgroundEnabled,
         resourceStripMode,
         actionPanelMode,
         aiDecisionDebugOverlayEnabled,
@@ -1400,6 +1406,7 @@ export default function Page() {
     autoEndTurnEnabled,
     priorityWindowHoldEnabled,
     topbarStickyEnabled,
+    cyberspaceBackgroundEnabled,
     resourceStripMode,
     actionPanelMode,
     aiDecisionDebugOverlayEnabled,
@@ -2393,6 +2400,7 @@ export default function Page() {
     "app",
     "activeMatch",
     topbarStickyEnabled ? "" : "topbarStickyDisabled",
+    cyberspaceBackgroundEnabled ? "cyberspaceBackgroundEnabled" : "",
     actionPanelMode === "floating" ? "actionPanelFloatingMode" : "",
     `resourceStrip-${resourceStripMode}`,
     resourceStripVisible ? "resourceStripVisible" : "",
@@ -5093,6 +5101,7 @@ export default function Page() {
                       autoDiscardEnabled={autoDiscardEnabled}
                       autoEndTurnEnabled={autoEndTurnEnabled}
                       topbarStickyEnabled={topbarStickyEnabled}
+                      cyberspaceBackgroundEnabled={cyberspaceBackgroundEnabled}
                       resourceStripMode={resourceStripMode}
                       actionPanelMode={actionPanelMode}
                       aiDecisionDebugOverlayEnabled={
@@ -5126,6 +5135,7 @@ export default function Page() {
                       onAutoDiscardEnabled={setAutoDiscardEnabled}
                       onAutoEndTurnEnabled={setAutoEndTurnEnabled}
                       onTopbarStickyEnabled={setTopbarStickyEnabled}
+                      onCyberspaceBackgroundEnabled={setCyberspaceBackgroundEnabled}
                       onResourceStripMode={setResourceStripMode}
                       onActionPanelMode={setActionPanelMode}
                       onAiDecisionDebugOverlayEnabled={
@@ -5791,6 +5801,7 @@ export default function Page() {
                   autoDiscardEnabled,
                   autoEndTurnEnabled,
                   topbarStickyEnabled,
+                  cyberspaceBackgroundEnabled,
                   resourceStripMode,
                   actionPanelMode,
                   aiDecisionDebugOverlayEnabled,
@@ -5820,6 +5831,8 @@ export default function Page() {
                   onAutoDiscardEnabled: setAutoDiscardEnabled,
                   onAutoEndTurnEnabled: setAutoEndTurnEnabled,
                   onTopbarStickyEnabled: setTopbarStickyEnabled,
+                  onCyberspaceBackgroundEnabled:
+                    setCyberspaceBackgroundEnabled,
                   onResourceStripMode: setResourceStripMode,
                   onActionPanelMode: setActionPanelMode,
                   onAiDecisionDebugOverlayEnabled:
@@ -5901,6 +5914,7 @@ export default function Page() {
                   autoDiscardEnabled={autoDiscardEnabled}
                   autoEndTurnEnabled={autoEndTurnEnabled}
                   topbarStickyEnabled={topbarStickyEnabled}
+                  cyberspaceBackgroundEnabled={cyberspaceBackgroundEnabled}
                   resourceStripMode={resourceStripMode}
                   actionPanelMode={actionPanelMode}
                   aiDecisionDebugOverlayEnabled={aiDecisionDebugOverlayEnabled}
@@ -5932,6 +5946,7 @@ export default function Page() {
                   onAutoDiscardEnabled={setAutoDiscardEnabled}
                   onAutoEndTurnEnabled={setAutoEndTurnEnabled}
                   onTopbarStickyEnabled={setTopbarStickyEnabled}
+                  onCyberspaceBackgroundEnabled={setCyberspaceBackgroundEnabled}
                   onResourceStripMode={setResourceStripMode}
                   onActionPanelMode={setActionPanelMode}
                   onAiDecisionDebugOverlayEnabled={

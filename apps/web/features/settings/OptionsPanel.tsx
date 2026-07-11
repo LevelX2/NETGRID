@@ -35,6 +35,7 @@ export function OptionsPanel({
   autoDiscardEnabled,
   autoEndTurnEnabled,
   topbarStickyEnabled,
+  cyberspaceBackgroundEnabled,
   resourceStripMode,
   actionPanelMode,
   aiDecisionDebugOverlayEnabled,
@@ -64,6 +65,7 @@ export function OptionsPanel({
   onAutoDiscardEnabled,
   onAutoEndTurnEnabled,
   onTopbarStickyEnabled,
+  onCyberspaceBackgroundEnabled,
   onResourceStripMode,
   onActionPanelMode,
   onAiDecisionDebugOverlayEnabled,
@@ -94,6 +96,7 @@ export function OptionsPanel({
   autoDiscardEnabled: boolean;
   autoEndTurnEnabled: boolean;
   topbarStickyEnabled: boolean;
+  cyberspaceBackgroundEnabled: boolean;
   resourceStripMode: ResourceStripMode;
   actionPanelMode: ActionPanelMode;
   aiDecisionDebugOverlayEnabled: boolean;
@@ -123,6 +126,7 @@ export function OptionsPanel({
   onAutoDiscardEnabled(value: boolean): void;
   onAutoEndTurnEnabled(value: boolean): void;
   onTopbarStickyEnabled(value: boolean): void;
+  onCyberspaceBackgroundEnabled(value: boolean): void;
   onResourceStripMode(value: ResourceStripMode): void;
   onActionPanelMode(value: ActionPanelMode): void;
   onAiDecisionDebugOverlayEnabled(value: boolean): void;
@@ -183,6 +187,7 @@ export function OptionsPanel({
           autoDiscardEnabled={autoDiscardEnabled}
           autoEndTurnEnabled={autoEndTurnEnabled}
           topbarStickyEnabled={topbarStickyEnabled}
+          cyberspaceBackgroundEnabled={cyberspaceBackgroundEnabled}
           resourceStripMode={resourceStripMode}
           actionPanelMode={actionPanelMode}
           aiDecisionDebugOverlayEnabled={aiDecisionDebugOverlayEnabled}
@@ -190,6 +195,7 @@ export function OptionsPanel({
           onAutoDiscardEnabled={onAutoDiscardEnabled}
           onAutoEndTurnEnabled={onAutoEndTurnEnabled}
           onTopbarStickyEnabled={onTopbarStickyEnabled}
+          onCyberspaceBackgroundEnabled={onCyberspaceBackgroundEnabled}
           onResourceStripMode={onResourceStripMode}
           onActionPanelMode={onActionPanelMode}
           onAiDecisionDebugOverlayEnabled={onAiDecisionDebugOverlayEnabled}
@@ -487,6 +493,7 @@ function GameplaySettings({
   autoDiscardEnabled,
   autoEndTurnEnabled,
   topbarStickyEnabled,
+  cyberspaceBackgroundEnabled,
   resourceStripMode,
   actionPanelMode,
   aiDecisionDebugOverlayEnabled,
@@ -494,6 +501,7 @@ function GameplaySettings({
   onAutoDiscardEnabled,
   onAutoEndTurnEnabled,
   onTopbarStickyEnabled,
+  onCyberspaceBackgroundEnabled,
   onResourceStripMode,
   onActionPanelMode,
   onAiDecisionDebugOverlayEnabled
@@ -502,6 +510,7 @@ function GameplaySettings({
   autoDiscardEnabled: boolean;
   autoEndTurnEnabled: boolean;
   topbarStickyEnabled: boolean;
+  cyberspaceBackgroundEnabled: boolean;
   resourceStripMode: ResourceStripMode;
   actionPanelMode: ActionPanelMode;
   aiDecisionDebugOverlayEnabled: boolean;
@@ -509,6 +518,7 @@ function GameplaySettings({
   onAutoDiscardEnabled(value: boolean): void;
   onAutoEndTurnEnabled(value: boolean): void;
   onTopbarStickyEnabled(value: boolean): void;
+  onCyberspaceBackgroundEnabled(value: boolean): void;
   onResourceStripMode(value: ResourceStripMode): void;
   onActionPanelMode(value: ActionPanelMode): void;
   onAiDecisionDebugOverlayEnabled(value: boolean): void;
@@ -537,6 +547,10 @@ function GameplaySettings({
             <input data-testid="sticky-topbar-toggle" type="checkbox" checked={topbarStickyEnabled} onChange={(event) => onTopbarStickyEnabled(event.target.checked)} />
             Kopfzeile fixieren
           </label>
+          <label className={`settingsToggle ${cyberspaceBackgroundEnabled ? "checked" : ""}`}>
+            <input data-testid="cyberspace-background-toggle" type="checkbox" checked={cyberspaceBackgroundEnabled} onChange={(event) => onCyberspaceBackgroundEnabled(event.target.checked)} />
+            Cyberspace-Hintergrund
+          </label>
           <label className={`settingsToggle ${actionPanelMode === "floating" ? "checked" : ""}`}>
             <input data-testid="floating-action-panel-toggle" type="checkbox" checked={actionPanelMode === "floating"} onChange={(event) => onActionPanelMode(event.target.checked ? "floating" : "docked")} />
             Aktionsfenster schwebend
@@ -557,7 +571,7 @@ function GameplaySettings({
           ))}
         </div>
       </div>
-      <p className="settingsHelp">Korp-Startziehen bestätigt die Pflichtkarte am Zuganfang automatisch, wenn sonst keine Korp-Aktion offen ist. Auto-Zugende beendet Deinen Zug, wenn nur noch Zug beenden offen ist. Auto-Abwerfen bestätigt eine Discard-Auswahl sofort, sobald genau die nötige Anzahl Handkarten gewählt ist. Kopfzeile fixieren hält die aktive Spielkopfzeile beim Scrollen sichtbar. Das schwebende Aktionsfenster zeigt mögliche Nicht-Run-Aktionen lokal verschiebbar an. Das KI-Bewertungsfenster zeigt lokale, redigierte KI-Trace-Daten für laufende KI-Matches. Der Spielstandsstreifen zeigt Credits, Agenda-Punkte und aktuelle Aktionen platzsparend über dem Spielfeld.</p>
+      <p className="settingsHelp">Korp-Startziehen bestätigt die Pflichtkarte am Zuganfang automatisch, wenn sonst keine Korp-Aktion offen ist. Auto-Zugende beendet Deinen Zug, wenn nur noch Zug beenden offen ist. Auto-Abwerfen bestätigt eine Discard-Auswahl sofort, sobald genau die nötige Anzahl Handkarten gewählt ist. Kopfzeile fixieren hält die aktive Spielkopfzeile beim Scrollen sichtbar. Der Cyberspace-Hintergrund legt eine ruhige Netzwerklandschaft hinter das Spielfeld. Das schwebende Aktionsfenster zeigt mögliche Nicht-Run-Aktionen lokal verschiebbar an. Das KI-Bewertungsfenster zeigt lokale, redigierte KI-Trace-Daten für laufende KI-Matches. Der Spielstandsstreifen zeigt Credits, Agenda-Punkte und aktuelle Aktionen platzsparend über dem Spielfeld.</p>
     </div>
   );
 }

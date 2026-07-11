@@ -1,16 +1,10 @@
 import {
   Activity,
-  Award,
   Bot,
   Check,
-  Gauge,
   Move,
-  MoveRight,
   Play,
-  Radar,
-  ScanSearch,
   Sparkles,
-  Trash2,
   User,
 } from "lucide-react";
 import { useRef } from "react";
@@ -23,13 +17,16 @@ import {
   cuePositionClassName,
   cuePositionStyle,
   interactionAmbienceClassName,
-  type InteractionAmbienceKind,
   type CuePositionPreference
 } from "../../app/action-board-ui";
 import type { OpponentActionCue } from "../../app/action-cues";
 import { CardView } from "../cards/CardView";
 import { enrichVisibleCard, type DisplayVisibleCard } from "../cards/card-view-model";
 import type { CardDisplayMode } from "../settings/settings-model";
+import {
+  WindowEventIcon,
+  windowEventIconKindForAmbience,
+} from "./WindowEventIcon";
 
 type OpponentOverlayCatalogDetail = {
   catalogCardId: string;
@@ -129,18 +126,23 @@ export function OpponentActionOverlay({
           <span>{cue.actorLabel}</span>
           {cue.actionUse ? <span className="opponentCueActionUse" title={cue.actionUse.title}>{cueActionUseLabel(cue)}</span> : null}
         </div>
-        <button
-          className="button iconOnly cueDragHandle"
-          onPointerDown={startDrag}
-          onPointerMove={dragCue}
-          onPointerUp={stopDrag}
-          onPointerCancel={stopDrag}
-          aria-label="Hinweis verschieben"
-          title="Hinweis verschieben"
-          type="button"
-        >
-          <Move size={15} />
-        </button>
+        <div className="opponentCueHeaderActions">
+          <WindowEventIcon
+            kind={windowEventIconKindForAmbience(ambience)}
+          />
+          <button
+            className="button iconOnly cueDragHandle"
+            onPointerDown={startDrag}
+            onPointerMove={dragCue}
+            onPointerUp={stopDrag}
+            onPointerCancel={stopDrag}
+            aria-label="Hinweis verschieben"
+            title="Hinweis verschieben"
+            type="button"
+          >
+            <Move size={15} />
+          </button>
+        </div>
       </div>
       <div className={`opponentCueBody${hasCueVisual ? " hasVisual" : ""}`}>
         {relatedCard || showHiddenCardBack ? (
@@ -164,7 +166,6 @@ export function OpponentActionOverlay({
           </div>
         ) : null}
         <div className="opponentCueMessage">
-          <OpponentCueEventIcon ambience={ambience} />
           <div className="opponentCueText">
             <strong>{renderTitle(cue)}</strong>
             {cue.description ? <p>{cue.description}</p> : null}
@@ -179,32 +180,6 @@ export function OpponentActionOverlay({
         </button>
       </div>
     </aside>
-  );
-}
-
-function OpponentCueEventIcon({
-  ambience,
-}: {
-  ambience: InteractionAmbienceKind | null;
-}) {
-  const Icon = ambience === "agenda"
-    ? Award
-    : ambience === "movement"
-      ? MoveRight
-      : ambience === "access"
-        ? ScanSearch
-        : ambience === "trash"
-          ? Trash2
-          : ambience === "trace"
-            ? Radar
-            : ambience === "pump"
-              ? Gauge
-              : null;
-  if (!Icon) return null;
-  return (
-    <span className={`opponentCueEventIcon ${interactionAmbienceClassName(ambience)}`} aria-hidden="true">
-      <Icon size={28} strokeWidth={1.8} />
-    </span>
   );
 }
 

@@ -18,6 +18,23 @@ const opponentActionOverlaySource = readFileSync(
   new URL("../features/actions/OpponentActionOverlay.tsx", import.meta.url),
   "utf8",
 );
+const pageSource = readFileSync(new URL("./page.tsx", import.meta.url), "utf8");
+const optionsPanelSource = readFileSync(
+  new URL("../features/settings/OptionsPanel.tsx", import.meta.url),
+  "utf8",
+);
+const accessReviewModalSource = readFileSync(
+  new URL("../features/actions/AccessReviewModals.tsx", import.meta.url),
+  "utf8",
+);
+const damageImpactOverlaySource = readFileSync(
+  new URL("../features/actions/DamageImpactOverlay.tsx", import.meta.url),
+  "utf8",
+);
+const windowEventIconSource = readFileSync(
+  new URL("../features/actions/WindowEventIcon.tsx", import.meta.url),
+  "utf8",
+);
 
 function zLayer(name: string): number {
   const match = css.match(new RegExp(`--${name}:\\s*(\\d+);`));
@@ -101,16 +118,13 @@ describe("run window layering", () => {
     expect(opponentActionOverlaySource).toContain(
       "actionCueInteractionAmbience",
     );
-    expect(opponentActionOverlaySource).toContain(
-      "OpponentCueEventIcon",
-    );
+    expect(opponentActionOverlaySource).toContain("WindowEventIcon");
     expect(selectorBlock('.opponentCueOverlay[class*="ambience-"]')).toContain(
       "isolation: isolate",
     );
     expect(
       selectorBlock('.opponentCueOverlay[class*="ambience-"]::before'),
     ).toContain("var(--interaction-ambience-image)");
-    expect(selectorBlock(".opponentCueEventIcon")).toContain("width: 48px");
     expect(
       existsSync(
         new URL(
@@ -126,5 +140,56 @@ describe("run window layering", () => {
     expect(selectorBlock(".damageImpactOverlay.ambience-damage")).toContain("position: fixed");
     expect(css).toContain("rgb(8 12 16 / 0.18)");
     expect(css).toContain("border-radius: inherit");
+  });
+
+  it("provides a locally toggleable subdued cyberspace board background", () => {
+    expect(css).toContain("/backgrounds/cyberspace-board-background.png");
+    expect(css).toContain(
+      'background: url("/backgrounds/cyberspace-board-background.png")',
+    );
+    expect(pageSource).toContain("cyberspaceBackgroundEnabled");
+    expect(optionsPanelSource).toContain(
+      'data-testid="cyberspace-background-toggle"',
+    );
+    expect(
+      existsSync(
+        new URL(
+          "../public/backgrounds/cyberspace-board-background.png",
+          import.meta.url,
+        ),
+      ),
+    ).toBe(true);
+  });
+
+  it("keeps the access ambience visible and adds large event icons", () => {
+    expect(css).toContain("--interaction-ambience-opacity: 0.32");
+    expect(css).toMatch(/\.windowEventIcon\s*\{[\s\S]*?width: 128px;/);
+    expect(accessReviewModalSource).toContain(
+      '<WindowEventIcon kind="access" />',
+    );
+    expect(damageImpactOverlaySource).toContain(
+      '<WindowEventIcon kind={`${cue.damageType}-damage`} />',
+    );
+    for (const icon of [
+      "agenda",
+      "ice-pass",
+      "access",
+      "trash",
+      "trace",
+      "pump-break",
+      "net-damage",
+      "meat-damage",
+      "core-damage",
+    ]) {
+      expect(css).toContain(`url("/icons/window-events/${icon}.png")`);
+      expect(
+        existsSync(
+          new URL(`../public/icons/window-events/${icon}.png`, import.meta.url),
+        ),
+      ).toBe(true);
+    }
+    expect(windowEventIconSource).toContain(
+      'if (ambience === "movement") return "ice-pass"',
+    );
   });
 });

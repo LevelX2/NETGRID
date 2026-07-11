@@ -1,4 +1,10 @@
-import { Award as AgendaIcon, Check, Eye, Trash2, X } from "lucide-react";
+import {
+  Award as AgendaIcon,
+  Check,
+  Eye,
+  Trash2,
+  X,
+} from "lucide-react";
 import type { LegalAction, Side, VisibleChoiceRequest } from "@netgrid/shared";
 
 import {
@@ -11,6 +17,7 @@ import { CardView } from "../cards/CardView";
 import type { DisplayVisibleCard } from "../cards/card-view-model";
 import type { CardDisplayMode } from "../settings/settings-model";
 import { CostChips } from "./ActionControls";
+import { WindowEventIcon } from "./WindowEventIcon";
 
 const reviewCardPreviewStyle = {
   justifySelf: "center",
@@ -135,19 +142,22 @@ export function AccessRevealModal({
       <div className="accessRevealBackdrop" aria-hidden="true" />
       <section className={`accessRevealPanel ${accessAmbienceClass}`}>
         <div className="accessRevealHeader">
-          <div>
+          <div className="accessRevealHeadingText">
             <p className="eyebrow">{eyebrow}</p>
             <h2 id="access-reveal-title">{title}</h2>
             <p>{reveal.description}</p>
           </div>
-          <button
-            className="button iconOnly"
-            onClick={onDismiss}
-            aria-label="Fenster schließen"
-            title="Schließen"
-          >
-            <X size={16} />
-          </button>
+          <div className="accessRevealHeaderActions">
+            <WindowEventIcon kind="access" />
+            <button
+              className="button iconOnly"
+              onClick={onDismiss}
+              aria-label="Fenster schließen"
+              title="Schließen"
+            >
+              <X size={16} />
+            </button>
+          </div>
         </div>
         {visibleRevealedCards.length ? (
           <div
@@ -309,14 +319,17 @@ export function ExposeReviewModal({
             <h2 id="expose-review-title">{review.title}</h2>
             <p>{review.description}</p>
           </div>
-          <button
-            className="button iconOnly"
-            onClick={onDismiss}
-            aria-label="Ansehen schließen"
-            title="Ansehen schließen"
-          >
-            <X size={16} />
-          </button>
+          <div className="accessRevealHeaderActions">
+            <WindowEventIcon kind="access" />
+            <button
+              className="button iconOnly"
+              onClick={onDismiss}
+              aria-label="Ansehen schließen"
+              title="Ansehen schließen"
+            >
+              <X size={16} />
+            </button>
+          </div>
         </div>
         <div className="exposeReviewCards" data-testid="expose-review-cards">
           {review.cards.map((card, index) => (

@@ -9,6 +9,7 @@ import { CardView } from "../cards/CardView";
 import { interactionAmbienceClassName } from "../../app/action-board-ui";
 import { type DisplayVisibleCard } from "../cards/card-view-model";
 import { type CardDisplayMode } from "../settings/settings-model";
+import { WindowEventIcon } from "./WindowEventIcon";
 
 type VisibleChoice = NonNullable<PlayerView["pendingChoice"]>;
 type VisibleChoiceOption = VisibleChoice["options"][number];
@@ -88,9 +89,12 @@ export function SecurityPurgeChoicePanel({
             </h2>
             <p className="meta">{choice.prompt}</p>
           </div>
-          <span className="cardChoiceCounter">
-            {selectedOptionIds.length}/{targetCards.length} ICE
-          </span>
+          <div className="cardChoiceHeaderControls">
+            <WindowEventIcon kind="trash" />
+            <span className="cardChoiceCounter">
+              {selectedOptionIds.length}/{targetCards.length} ICE
+            </span>
+          </div>
         </header>
         <div className="securityPurgeCards">
           {cards.map((entry) => {

@@ -20,6 +20,10 @@ import { type DisplayVisibleCard } from "../cards/card-view-model";
 import { type CardDisplayMode } from "../settings/settings-model";
 import { cardChoiceOrderBadge, isRunnerStackTopChooseOneArrangeRestChoice } from "./card-choice-order-badge";
 import { choiceSelectionRangeLabel } from "./card-choice-selection-label";
+import {
+  WindowEventIcon,
+  windowEventIconKindForAmbience,
+} from "./WindowEventIcon";
 
 type VisibleChoice = NonNullable<PlayerView["pendingChoice"]>;
 type VisibleChoiceOption = VisibleChoice["options"][number];
@@ -84,9 +88,8 @@ export function CardChoicePanel({
   const prompt = choice.prompt.trim();
   const effectHint = programInstallTrashInfo?.effectHint ?? cardChoiceEffectHint(choice);
   const orderedSelection = cardChoiceUsesOrderedSelection(choice);
-  const ambienceClass = interactionAmbienceClassName(
-    choiceInteractionAmbience(choice, action),
-  );
+  const ambience = choiceInteractionAmbience(choice, action);
+  const ambienceClass = interactionAmbienceClassName(ambience);
 
   useEffect(() => {
     setSelected([]);
@@ -115,6 +118,9 @@ export function CardChoicePanel({
             {prompt && prompt !== title ? <p className="meta">{prompt}</p> : null}
           </div>
           <div className="cardChoiceHeaderControls">
+            <WindowEventIcon
+              kind={windowEventIconKindForAmbience(ambience)}
+            />
             {hasDisplayOnlyOptions ? (
               <div className="cardChoiceViewToggle" aria-label="Kartenanzeige">
                 <button className={!showOnlySelectable ? "active" : ""} onClick={() => setShowOnlySelectable(false)} type="button" aria-pressed={!showOnlySelectable}>
