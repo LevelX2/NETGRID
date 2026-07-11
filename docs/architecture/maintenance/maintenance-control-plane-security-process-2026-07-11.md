@@ -39,28 +39,28 @@ Die Control Plane bleibt technisch und fachlich von Match-Tokens, Match-Sessions
 5. Eine Passwortänderung widerruft alle vorhandenen Adminsitzungen einschließlich der aktuellen Sitzung.
 6. Ein lokaler Passwort-Reset läuft ausschließlich als Host-CLI/-Script mit Zugriff auf den lokalen Authzustand, nie als ungeschützter HTTP-Endpunkt.
 7. Aktive Matches sind niemals Cleanup-Kandidaten; dieser Schutz wird beim Apply erneut geprüft und nicht nur in der UI dargestellt.
-8. Maintenance-Antworten und Fehler enthalten keine Adminpasswörter, Passwort-Hashes, Sitzungstokens, CSRF-Rohwerte, Match-Tokens oder verdeckten Spieldaten.
+8. Maintenance-Antworten und Fehler enthalten keine Adminpasswörter, Passwort-Hashes, Sitzungstokens, Match-Tokens oder verdeckten Spieldaten. Ein CSRF-Rohwert darf nur gezielt beim Login an den authentifizierten Browser ausgegeben werden und erscheint nie in Logs oder Fehlern.
 9. Adminauthentifizierung erteilt keine Berechtigung für `PlayerActions` und verändert keine Engine-, Replay- oder StateHash-Semantik.
 10. Ohne initialisiertes Adminpasswort bleiben fachliche Maintenance-Endpunkte geschlossen. Nur lokales CLI-Bootstrap darf den Zustand initialisieren.
 
 ## Anforderungen
 
-| ID | Anforderung | Akzeptanznachweis |
-| --- | --- | --- |
-| ARC001-REQ-001 | Private LAN-Adressen gelten nicht länger als Adminnachweis. | Adresstest erlaubt nur Loopback als Transportausnahme; API-Tests lehnen LAN ohne Sitzung ab. |
-| ARC001-REQ-002 | Ein lokaler Bootstrap-/Reset-Befehl setzt ein neues Maintenance-Passwort ohne Webzugriff. | CLI-Test oder isolierter Service-Test; Runbook mit exaktem Aufruf. |
-| ARC001-REQ-003 | Das Passwort liegt nur als starker, gesalzener Hash mit versionierten Parametern vor. | Storage-/Dateitest und Redaction-Scan; kein Klartext im Authartefakt. |
-| ARC001-REQ-004 | Login erzeugt eine kurzlebige, serverseitig widerrufbare Sitzung. | Auth-Service- und HTTP-Test für Erfolg, Falschpasswort, Ablauf und Widerruf. |
-| ARC001-REQ-005 | Sitzung und CSRF sind an sichere Cookies bzw. getrennte Nachweise gebunden. | Cookie-Flags-, CSRF- und Origin-Tests; kein Token in JSON oder URL. |
-| ARC001-REQ-006 | Passwortänderung verlangt aktuelles Passwort und widerruft alle Sitzungen. | Service-/HTTP-Test mit zwei Sitzungen und anschließendem Authfehler. |
-| ARC001-REQ-007 | Read-only-Maintenance-Routen verlangen eine gültige Adminsitzung. | Summary-, Match-, Detail- und AI-Trace-Regressionen. |
-| ARC001-REQ-008 | Mutationen verlangen Sitzung, CSRF und erlaubte Origin. | Negative und positive Tests für Cleanup-Preview, Retention-Schutz und Logout. |
-| ARC001-REQ-009 | Destruktive oder credential-nahe Operationen verlangen frische Reauthentifizierung. | Tests für Cleanup-Apply, Recovery-Zugang und Cleanup-Policy. |
-| ARC001-REQ-010 | Aktive Matches können durch Maintenance-Cleanup nicht gelöscht werden. | Preview- und Apply-Revalidierungstest gegen Statuswechsel/aktive Matches. |
-| ARC001-REQ-011 | Die Maintenance-Oberfläche bietet Login, Sessionstatus, Logout und Passwortänderung ohne Browser-Secretablage. | Web-Tests, Typecheck und Browser-Smoke. |
-| ARC001-REQ-012 | Sichere und unsichere Transportprofile sind fail-closed und dokumentiert. | Konfigurationstests und Betreiber-Runbook für Loopback sowie HTTPS-Proxy. |
-| ARC001-REQ-013 | Reverse-Proxy-Vertrauen ist explizit und begrenzt. | Konfigurationsvalidierung; Doku nennt Bind-, Origin- und Forwarded-Header-Grenze. |
-| ARC001-REQ-014 | Bestehende Engine-, Match-, Reconnect-, Replay- und Public-Health-Flows bleiben unverändert. | Serverpflichtlauf und relevante bestehende Regressionen. |
+| ID             | Anforderung                                                                                                    | Akzeptanznachweis                                                                            |
+| -------------- | -------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| ARC001-REQ-001 | Private LAN-Adressen gelten nicht länger als Adminnachweis.                                                    | Adresstest erlaubt nur Loopback als Transportausnahme; API-Tests lehnen LAN ohne Sitzung ab. |
+| ARC001-REQ-002 | Ein lokaler Bootstrap-/Reset-Befehl setzt ein neues Maintenance-Passwort ohne Webzugriff.                      | CLI-Test oder isolierter Service-Test; Runbook mit exaktem Aufruf.                           |
+| ARC001-REQ-003 | Das Passwort liegt nur als starker, gesalzener Hash mit versionierten Parametern vor.                          | Storage-/Dateitest und Redaction-Scan; kein Klartext im Authartefakt.                        |
+| ARC001-REQ-004 | Login erzeugt eine kurzlebige, serverseitig widerrufbare Sitzung.                                              | Auth-Service- und HTTP-Test für Erfolg, Falschpasswort, Ablauf und Widerruf.                 |
+| ARC001-REQ-005 | Sitzung und CSRF sind an sichere Cookies bzw. getrennte Nachweise gebunden.                                    | Cookie-Flags-, CSRF- und Origin-Tests; kein Token in JSON oder URL.                          |
+| ARC001-REQ-006 | Passwortänderung verlangt aktuelles Passwort und widerruft alle Sitzungen.                                     | Service-/HTTP-Test mit zwei Sitzungen und anschließendem Authfehler.                         |
+| ARC001-REQ-007 | Read-only-Maintenance-Routen verlangen eine gültige Adminsitzung.                                              | Summary-, Match-, Detail- und AI-Trace-Regressionen.                                         |
+| ARC001-REQ-008 | Mutationen verlangen Sitzung, CSRF und erlaubte Origin.                                                        | Negative und positive Tests für Cleanup-Preview, Retention-Schutz und Logout.                |
+| ARC001-REQ-009 | Destruktive oder credential-nahe Operationen verlangen frische Reauthentifizierung.                            | Tests für Cleanup-Apply, Recovery-Zugang und Cleanup-Policy.                                 |
+| ARC001-REQ-010 | Aktive Matches können durch Maintenance-Cleanup nicht gelöscht werden.                                         | Preview- und Apply-Revalidierungstest gegen Statuswechsel/aktive Matches.                    |
+| ARC001-REQ-011 | Die Maintenance-Oberfläche bietet Login, Sessionstatus, Logout und Passwortänderung ohne Browser-Secretablage. | Web-Tests, Typecheck und Browser-Smoke.                                                      |
+| ARC001-REQ-012 | Sichere und unsichere Transportprofile sind fail-closed und dokumentiert.                                      | Konfigurationstests und Betreiber-Runbook für Loopback sowie HTTPS-Proxy.                    |
+| ARC001-REQ-013 | Reverse-Proxy-Vertrauen ist explizit und begrenzt.                                                             | Konfigurationsvalidierung; Doku nennt Bind-, Origin- und Forwarded-Header-Grenze.            |
+| ARC001-REQ-014 | Bestehende Engine-, Match-, Reconnect-, Replay- und Public-Health-Flows bleiben unverändert.                   | Serverpflichtlauf und relevante bestehende Regressionen.                                     |
 
 ## Nicht-Ziele
 
@@ -75,12 +75,12 @@ Die Control Plane bleibt technisch und fachlich von Match-Tokens, Match-Sessions
 
 ## Betriebsprofile
 
-| Profil | Bindung und Transport | Maintenance-Verhalten |
-| --- | --- | --- |
-| `local_loopback` | HTTP nur auf Loopback zulässig | Passwortpflicht; Cookie darf für diesen expliziten Entwicklungsfall ohne `Secure` gesetzt werden, bleibt aber `HttpOnly` und `SameSite=Strict`. |
-| `private_lan` | HTTPS erforderlich, bevorzugt über kontrollierten Reverse Proxy | Passwortpflicht; `Secure`-Cookie; exakte Maintenance-Origin; direkter unsicherer LAN-Zugriff wird abgelehnt. |
-| `private_internet` | HTTPS/WSS und explizite Origins wie im Internet-Hardening-Vertrag | Spieloberfläche kann erreichbar sein, Maintenance bleibt standardmäßig deaktiviert und muss als separate Control Plane bewusst freigeschaltet werden. |
-| späteres Public Hosting | öffentliche Game Plane und private Control Plane getrennt | ARC-001 liefert nur die Sicherheitsgrundlage; Distribution, Mandanten, Accounts, Abuse- und Plattformbetrieb brauchen eigene Gates. |
+| Profil                  | Bindung und Transport                                             | Maintenance-Verhalten                                                                                                                                 |
+| ----------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `local_loopback`        | HTTP nur auf Loopback zulässig                                    | Passwortpflicht; Cookie darf für diesen expliziten Entwicklungsfall ohne `Secure` gesetzt werden, bleibt aber `HttpOnly` und `SameSite=Strict`.       |
+| `private_lan`           | HTTPS erforderlich, bevorzugt über kontrollierten Reverse Proxy   | Passwortpflicht; `Secure`-Cookie; exakte Maintenance-Origin; direkter unsicherer LAN-Zugriff wird abgelehnt.                                          |
+| `private_internet`      | HTTPS/WSS und explizite Origins wie im Internet-Hardening-Vertrag | Spieloberfläche kann erreichbar sein, Maintenance bleibt standardmäßig deaktiviert und muss als separate Control Plane bewusst freigeschaltet werden. |
+| späteres Public Hosting | öffentliche Game Plane und private Control Plane getrennt         | ARC-001 liefert nur die Sicherheitsgrundlage; Distribution, Mandanten, Accounts, Abuse- und Plattformbetrieb brauchen eigene Gates.                   |
 
 Die bevorzugte Zieltopologie lautet:
 
@@ -159,7 +159,7 @@ Prüfung:
 
 ### P02 – Authkern, Credential-Speicher, Sitzungen und lokaler Reset
 
-Status: in Umsetzung
+Status: abgeschlossen
 
 Ergebnis:
 
@@ -177,7 +177,7 @@ Prüfung:
 
 ### P03 – Fail-closed Maintenance-API und Konsistenzgrenzen
 
-Status: ausstehend
+Status: in Umsetzung
 
 Ergebnis:
 
@@ -270,24 +270,24 @@ Prüfung:
 
 ## Testmatrix
 
-| ID | Fall | Erwartung |
-| --- | --- | --- |
-| ARC001-T-001 | LAN-IP ohne Sitzung | Keine Maintenance-Daten; `401` oder geschlossenes Profil. |
-| ARC001-T-002 | Uninitialisiertes Authsystem | Keine Daten und kein Web-Setup; lokaler CLI-Hinweis. |
-| ARC001-T-003 | Passwortpersistenz | Nur versionierter Salt/Hash/Parameterdatensatz, kein Klartext. |
-| ARC001-T-004 | Login | Richtige Credentials setzen sichere Session; falsche bleiben generisch. |
-| ARC001-T-005 | Sessionablauf/-widerruf | Abgelaufene oder widerrufene Sitzung wird abgelehnt. |
-| ARC001-T-006 | Passwortänderung | Aktuelles Passwort Pflicht; alle Sitzungen danach ungültig. |
-| ARC001-T-007 | Read-only-Routen | Alle bestehenden Leseendpunkte verlangen Auth. |
-| ARC001-T-008 | Mutation ohne Origin/CSRF | Anfrage wird ohne Zustandsänderung abgelehnt. |
-| ARC001-T-009 | Destruktive Aktion ohne Reauth | Anfrage wird ohne Zustandsänderung abgelehnt. |
-| ARC001-T-010 | Aktiver Match-Cleanup | Aktive Matches erscheinen nie als Kandidat und werden beim Apply revalidiert. |
-| ARC001-T-011 | Cookie-Flags | `HttpOnly`, `SameSite=Strict`, `Path=/`; außerhalb Loopback zusätzlich `Secure`. |
-| ARC001-T-012 | Browser-Storage/URL | Keine Credential- oder Sitzungsrohwerte. |
-| ARC001-T-013 | Unsicheres LAN-/Internetprofil | Start oder Maintenance-Zugriff scheitert fail-closed. |
-| ARC001-T-014 | Reverse-Proxy-Grenze | Forwarded-Information wird nur im expliziten Vertrauensmodus berücksichtigt. |
-| ARC001-T-015 | Redaction | Antworten, DOM, Logs und Fehler enthalten keine Auth- oder Hidden-Info-Rohwerte. |
-| ARC001-T-016 | Matchregression | Matchstart, Join, Reconnect, Actions, Replay und Health bleiben unverändert. |
+| ID           | Fall                           | Erwartung                                                                        |
+| ------------ | ------------------------------ | -------------------------------------------------------------------------------- |
+| ARC001-T-001 | LAN-IP ohne Sitzung            | Keine Maintenance-Daten; `401` oder geschlossenes Profil.                        |
+| ARC001-T-002 | Uninitialisiertes Authsystem   | Keine Daten und kein Web-Setup; lokaler CLI-Hinweis.                             |
+| ARC001-T-003 | Passwortpersistenz             | Nur versionierter Salt/Hash/Parameterdatensatz, kein Klartext.                   |
+| ARC001-T-004 | Login                          | Richtige Credentials setzen sichere Session; falsche bleiben generisch.          |
+| ARC001-T-005 | Sessionablauf/-widerruf        | Abgelaufene oder widerrufene Sitzung wird abgelehnt.                             |
+| ARC001-T-006 | Passwortänderung               | Aktuelles Passwort Pflicht; alle Sitzungen danach ungültig.                      |
+| ARC001-T-007 | Read-only-Routen               | Alle bestehenden Leseendpunkte verlangen Auth.                                   |
+| ARC001-T-008 | Mutation ohne Origin/CSRF      | Anfrage wird ohne Zustandsänderung abgelehnt.                                    |
+| ARC001-T-009 | Destruktive Aktion ohne Reauth | Anfrage wird ohne Zustandsänderung abgelehnt.                                    |
+| ARC001-T-010 | Aktiver Match-Cleanup          | Aktive Matches erscheinen nie als Kandidat und werden beim Apply revalidiert.    |
+| ARC001-T-011 | Cookie-Flags                   | `HttpOnly`, `SameSite=Strict`, `Path=/`; außerhalb Loopback zusätzlich `Secure`. |
+| ARC001-T-012 | Browser-Storage/URL            | Keine Credential- oder Sitzungsrohwerte.                                         |
+| ARC001-T-013 | Unsicheres LAN-/Internetprofil | Start oder Maintenance-Zugriff scheitert fail-closed.                            |
+| ARC001-T-014 | Reverse-Proxy-Grenze           | Forwarded-Information wird nur im expliziten Vertrauensmodus berücksichtigt.     |
+| ARC001-T-015 | Redaction                      | Antworten, DOM, Logs und Fehler enthalten keine Auth- oder Hidden-Info-Rohwerte. |
+| ARC001-T-016 | Matchregression                | Matchstart, Join, Reconnect, Actions, Replay und Health bleiben unverändert.     |
 
 ## Worktree- und Git-Regeln
 
