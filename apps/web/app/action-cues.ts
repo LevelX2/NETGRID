@@ -7,6 +7,7 @@ import {
   type ChronicleVisibility,
 } from "./chronicle";
 import { serverDisplayLabel } from "./action-board-ui";
+import { publicAccessOwnsOutcomeEvent } from "./access-presentation";
 
 export type OpponentActionCue = {
   cueId: string;
@@ -115,6 +116,7 @@ export function deriveOpponentActionCues(input: CueDerivationInput): OpponentAct
     const payload = event.publicPayload ?? {};
     const actionType = stringValue(payload.actionType) ?? event.type;
     if (actionType === "access_card" && stringValue(payload.cardDefinitionId) && stringValue(payload.title)) return [];
+    if (publicAccessOwnsOutcomeEvent(input.events, event)) return [];
     const actor = sideValue(payload.actor);
     const opponent = Boolean(actor && actor !== input.viewerSide);
     const forcedPublicEffectCue = isForcedPublicEffectCue(actionType, payload);

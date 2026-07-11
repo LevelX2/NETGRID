@@ -357,6 +357,51 @@ describe("deriveOpponentActionCues", () => {
     expect(cues).toHaveLength(0);
   });
 
+  it("does not create duplicate outcome cues for a public access reveal", () => {
+    const access = event("evt_access", "access_card", {
+      actor: "runner",
+      cardDefinitionId: "onr_v1_340_setup",
+      title: "Setup!",
+      serverLabel: "R&D",
+    });
+    const trash = event("evt_trash", "trash_accessed_card", {
+      actor: "runner",
+      cardDefinitionId: "onr_v1_340_setup",
+      title: "Setup!",
+      serverLabel: "R&D",
+    });
+    const cues = deriveOpponentActionCues({
+      viewerSide: "corp",
+      playerView: view("corp"),
+      events: [access, trash],
+    });
+
+    expect(cues).toEqual([]);
+  });
+
+  it("keeps a public trash cue after a redacted R&D access", () => {
+    const access = event("evt_access", "access_card", {
+      actor: "runner",
+      serverLabel: "R&D",
+      redactedKind: "hidden_zone",
+    });
+    const trash = event("evt_trash", "trash_accessed_card", {
+      actor: "runner",
+      cardDefinitionId: "public_after_trash",
+      title: "Public After Trash",
+      serverLabel: "R&D",
+    });
+    const cues = deriveOpponentActionCues({
+      viewerSide: "corp",
+      playerView: view("corp"),
+      events: [access, trash],
+    });
+
+    expect(cues.map((cue) => cue.eventId)).toEqual(["evt_access", "evt_trash"]);
+    expect(JSON.stringify(cues[0])).not.toContain("Public After Trash");
+    expect(JSON.stringify(cues[0])).not.toContain("public_after_trash");
+  });
+
   it("shows Technician Lover private look on use and suppresses the confirmation cue", () => {
     const cues = deriveOpponentActionCues({
       viewerSide: "corp",

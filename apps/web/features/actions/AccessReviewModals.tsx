@@ -43,6 +43,7 @@ export type AccessReveal = {
   actions: LegalAction[];
   trashStatus: string;
   followupStatus?: string;
+  outcomeStatus?: string;
   revealedCardStatus?: string;
   dismissLabel?: string;
   choice?: VisibleChoiceRequest;

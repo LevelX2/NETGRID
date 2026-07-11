@@ -7,12 +7,51 @@ import type {
 import { describe, expect, it } from "vitest";
 
 import {
+  accessRevealFromLatestEvent,
   gypsyScheduleAnalyzerRevealFromPendingChoice,
   hqAgendaRevealFromLatestEvent,
   retainedHqAgendaRevealEvent,
   retainedSecurityPurgeRevealEvent,
   securityPurgeRevealFromLatestEvent,
 } from "../features/actions/access-review-derivation";
+
+describe("Access outcome presentation", () => {
+  it("adds the public trash outcome to the retained Setup access", () => {
+    const access = event("evt_access", {
+      actionType: "access_card",
+      actor: "runner",
+      cardDefinitionId: "onr_v1_340_setup",
+      title: "Setup!",
+      serverLabel: "R&D",
+    });
+    const trash = event("evt_trash", {
+      actionType: "trash_accessed_card",
+      actor: "runner",
+      cardDefinitionId: "onr_v1_340_setup",
+      title: "Setup!",
+      serverLabel: "R&D",
+    });
+
+    expect(
+      accessRevealFromLatestEvent(
+        access,
+        {
+          onr_v1_340_setup: catalogCard(
+            "onr_v1_340_setup",
+            "Setup!",
+            "asset",
+          ),
+        },
+        [],
+        "corp",
+        [access, trash],
+      ),
+    ).toMatchObject({
+      eventId: "evt_access",
+      outcomeStatus: "Der Runner hat Setup! getrasht.",
+    });
+  });
+});
 
 describe("Gypsy Schedule Analyzer reveal review", () => {
   it("opens an empty stepwise R&D reveal review from the pending choice", () => {

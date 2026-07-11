@@ -9,6 +9,7 @@ import {
   accessRevealStatusLabel,
   serverDisplayLabel,
 } from "../../app/action-board-ui";
+import { accessPresentationOutcomeAfter } from "../../app/access-presentation";
 import {
   enrichVisibleCard,
   visibleCardFromCatalogDetail,
@@ -75,6 +76,7 @@ export function accessRevealFromLatestEvent(
     events,
   );
   const highlighterStatus = accessHighlighterStatus(event.publicPayload);
+  const outcome = accessPresentationOutcomeAfter(events, event, viewerSide);
   return {
     eventId: event.eventId,
     kind: "access",
@@ -96,6 +98,7 @@ export function accessRevealFromLatestEvent(
         serverLabel,
       ),
     ...(highlighterStatus ? { followupStatus: highlighterStatus } : {}),
+    ...(outcome ? { outcomeStatus: outcome.status } : {}),
   };
 }
 
@@ -138,6 +141,9 @@ export function accessRevealFromCurrentRun(
     ? accessHighlighterStatus(accessEvent.publicPayload)
     : null;
   const accessFollowupStatus = highlighterStatus ?? followupStatus;
+  const outcome = accessEvent
+    ? accessPresentationOutcomeAfter(events, accessEvent, viewerSide)
+    : null;
   return {
     eventId:
       eventId ??
@@ -162,6 +168,7 @@ export function accessRevealFromCurrentRun(
         serverLabel,
       ),
     ...(accessFollowupStatus ? { followupStatus: accessFollowupStatus } : {}),
+    ...(outcome ? { outcomeStatus: outcome.status } : {}),
   };
 }
 
