@@ -26,6 +26,7 @@ export function runnerAdjustedPlanPriority(
   return (
     basePriority +
     (evaluation ? runnerRunTargetPlanPriorityDelta(evaluation) : 0) +
+    runnerMatchpointRunConversionPriorityBoost(context, evaluation) +
     runnerEconomyTransitionRunPriorityDelta(context, evaluation) +
     runnerDeckStrategyPlanPriorityBoost(context, serverId)
   );
@@ -69,7 +70,28 @@ export function runnerRunTargetPlanScoreBreakdown(
             key: "runner_economy_transition_run_deferral",
             label: "Ökonomie-Transition",
             value: runnerEconomyTransitionRunPriorityDelta(context, evaluation),
-            reason: context.runnerEconomyPosture?.transition?.commitment ?? "none",
+            reason:
+              context.runnerEconomyPosture?.transition?.commitment ?? "none",
+          },
+        ]
+      : []),
+    ...(runnerMatchpointRunConversionPriorityBoost(context, evaluation) !== 0
+      ? [
+          {
+            key: "runner_matchpoint_run_conversion",
+            label: "Matchpoint-Run-Konvertierung",
+            value: runnerMatchpointRunConversionPriorityBoost(
+              context,
+              evaluation,
+            ),
+            reason: evaluation
+              ? [
+                  `target:${evaluation.targetServerId}`,
+                  `funding_gap:${Math.max(0, -evaluation.creditsAfterRun)}`,
+                  `clicks:${context.input.playerView.own.clicks}`,
+                  `payoff:${evaluation.accessPayoff}`,
+                ].join("|")
+              : "missing_evaluation",
           },
         ]
       : []),
@@ -77,12 +99,49 @@ export function runnerRunTargetPlanScoreBreakdown(
   ];
 }
 
+const RUNNER_MATCHPOINT_RUN_CONVERSION_PRIORITY_BOOST = 520;
+
+function runnerMatchpointRunConversionPriorityBoost(
+  context: TacticalPlanBuildContext,
+  evaluation: RunnerRunTargetEvaluation | undefined,
+): number {
+  if (!evaluation) return 0;
+  if (evaluation.targetKind !== "rd" && evaluation.targetKind !== "hq")
+    return 0;
+  const pointsNeeded =
+    context.input.playerView.agendaPointsToWin -
+    context.input.playerView.own.agendaPoints;
+  if (pointsNeeded > 1) return 0;
+  if (
+    evaluation.accessPayoff !== "unknown" &&
+    evaluation.accessPayoff !== "fresh" &&
+    evaluation.accessPayoff !== "access_bonus" &&
+    evaluation.accessPayoff !== "agenda"
+  ) {
+    return 0;
+  }
+  if (
+    evaluation.recommendation !== "gain_credits_first" ||
+    evaluation.pathPassability !== "blocked_unpayable"
+  ) {
+    return 0;
+  }
+  const fundingGap = Math.max(0, -evaluation.creditsAfterRun);
+  const preparatoryClicks = Math.max(
+    0,
+    context.input.playerView.own.clicks - 1,
+  );
+  if (fundingGap === 0 || fundingGap > preparatoryClicks) return 0;
+  return RUNNER_MATCHPOINT_RUN_CONVERSION_PRIORITY_BOOST;
+}
+
 function runnerEconomyTransitionRunPriorityDelta(
   context: TacticalPlanBuildContext,
   evaluation: RunnerRunTargetEvaluation | undefined,
 ): number {
   if (
-    context.runnerEconomyPosture?.transition?.ordinaryPaidRunsDeferred !== true ||
+    context.runnerEconomyPosture?.transition?.ordinaryPaidRunsDeferred !==
+      true ||
     !evaluation ||
     evaluation.pathCost <= 1 ||
     evaluation.scoreThreat ||

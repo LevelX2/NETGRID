@@ -178,6 +178,79 @@ describe("runnerPressureProbeAllowance", () => {
     ).toMatchObject({ kind: "probe_central" });
   });
 
+  it("keeps a fundable matchpoint R&D run above long-term economy plans", () => {
+    const rdRun = runAction("run-rd", "rd");
+    const evaluation = runTargetEvaluation({
+      actionId: rdRun.actionId,
+      targetServerId: "rd",
+      targetKind: "rd",
+      recommendation: "gain_credits_first",
+      accessPayoff: "unknown",
+      scoreThreat: false,
+      score: -460,
+      pathPassability: "blocked_unpayable",
+      creditsAfterRun: -1,
+      pathCost: 6,
+    });
+    const context = planContext({
+      primaryStrategyId: "runner.rig_first",
+      runnerClicks: 4,
+      runnerAgendaPoints: 6,
+      agendaPointsToWin: 7,
+      runTargetEvaluations: [evaluation],
+    });
+
+    expect(runnerAdjustedPlanPriority(context, rdRun, 760)).toBe(1100);
+    expect(runnerAdjustedPlanPriority(context, rdRun, 760)).toBeGreaterThan(
+      940,
+    );
+    expect(
+      runnerRunTargetCurrentStep(context, rdRun, {
+        stepId: "probe_central:rd",
+        kind: "probe_central",
+        desiredActionSemantics: ["run.start"],
+      }),
+    ).toMatchObject({ kind: "gain_credits" });
+    expect(runnerRunTargetPlanScoreBreakdown(context, rdRun, 760)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "runner_matchpoint_run_conversion",
+          value: 520,
+        }),
+      ]),
+    );
+  });
+
+  it("does not boost a matchpoint run that cannot still be funded this turn", () => {
+    const rdRun = runAction("run-rd", "rd");
+    const evaluation = runTargetEvaluation({
+      actionId: rdRun.actionId,
+      targetServerId: "rd",
+      targetKind: "rd",
+      recommendation: "gain_credits_first",
+      accessPayoff: "unknown",
+      scoreThreat: false,
+      score: -460,
+      pathPassability: "blocked_unpayable",
+      creditsAfterRun: -2,
+      pathCost: 6,
+    });
+    const context = planContext({
+      primaryStrategyId: "runner.rig_first",
+      runnerClicks: 2,
+      runnerAgendaPoints: 6,
+      agendaPointsToWin: 7,
+      runTargetEvaluations: [evaluation],
+    });
+
+    expect(runnerAdjustedPlanPriority(context, rdRun, 760)).toBe(580);
+    expect(runnerRunTargetPlanScoreBreakdown(context, rdRun, 760)).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ key: "runner_matchpoint_run_conversion" }),
+      ]),
+    );
+  });
+
   it("defers ordinary paid runs during a binding economy transition", () => {
     const hqRun = runAction("run-hq", "hq");
     const paidRun = runTargetEvaluation({
@@ -192,7 +265,9 @@ describe("runnerPressureProbeAllowance", () => {
     });
     const nearFreeRun = runTargetEvaluation({ ...paidRun, pathCost: 1 });
     const transition: NonNullable<
-      NonNullable<TacticalPlanBuildContext["runnerEconomyPosture"]>["transition"]
+      NonNullable<
+        TacticalPlanBuildContext["runnerEconomyPosture"]
+      >["transition"]
     > = {
       phase: "economy_transition",
       commitment: "fund_economy",
@@ -264,6 +339,8 @@ function planContext(input: {
   primaryStrategyId: string;
   secondaryStrategyIds?: string[];
   runnerClicks?: number;
+  runnerAgendaPoints?: number;
+  agendaPointsToWin?: number;
   runTargetEvaluations?: RunnerRunTargetEvaluation[];
   economyTransition?: NonNullable<
     TacticalPlanBuildContext["runnerEconomyPosture"]
@@ -272,7 +349,13 @@ function planContext(input: {
   return {
     input: {
       side: "runner",
-      playerView: { own: { clicks: input.runnerClicks ?? 4 } },
+      playerView: {
+        agendaPointsToWin: input.agendaPointsToWin ?? 7,
+        own: {
+          clicks: input.runnerClicks ?? 4,
+          agendaPoints: input.runnerAgendaPoints ?? 0,
+        },
+      },
     } as AiDecisionInput,
     strategicIntentState: {
       primaryStrategy: { strategyId: input.primaryStrategyId },
