@@ -1204,19 +1204,23 @@ export function formatChronicleEvent(
           stringValue(payload.publicRevealKind) === "reveal" ||
           Boolean(stringValue(payload.publicRevealDefinitionId)) ||
           Boolean(cardDefinitionId);
+        const searchSource = isPublicReveal
+          ? titleForDefinitionId(sourceDefinitionId)
+          : undefined;
         category = isPublicReveal ? "card" : "hidden";
         importance = "important";
         visibility = isPublicReveal ? "public" : "redacted";
         title = isPublicReveal
           ? phrase(
               subject,
-              `${revealedTitle ?? "eine Karte"} aus dem Stack vorgezeigt und auf die Hand genommen`,
+              `${searchSource ? `${searchSource} genutzt, ` : ""}${revealedTitle ?? "eine Karte"} aus dem Stack vorgezeigt und auf die Hand genommen`,
             )
           : phrase(
               subject,
               `${cardCountText(numberValue(payload.selectedCount) ?? 1)} verdeckt aus dem Stack auf die Hand genommen`,
             );
         chips.push(
+          ...(searchSource ? [searchSource] : []),
           "Stack",
           isPublicReveal ? "Vorgezeigt" : "Verdeckt",
           "Hand",
@@ -1626,6 +1630,30 @@ export function formatChronicleEvent(
       chips.push("Pflichtkarte", ...(turnChip ? [turnChip] : []));
       break;
     case "activated_card_ability":
+      if (hiddenZoneAction === "p3_37_search_stack_to_grip") {
+        const source =
+          titleForDefinitionId(sourceDefinitionId) ??
+          sourceTitle ??
+          cardTitle ??
+          "eine Kartenfähigkeit";
+        const searchesForProgram =
+          (label ?? "").toLocaleLowerCase("de-DE").includes("programm") ||
+          stringValue(payload.searchFilter) === "program";
+        category = "card";
+        importance = "important";
+        visibility = "public";
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        title = phrase(
+          subject,
+          `${source} genutzt, um den Stack nach ${searchesForProgram ? "einem Programm" : "einer passenden Karte"} zu durchsuchen`,
+        );
+        chips.push(
+          source,
+          "Stack-Suche",
+          searchesForProgram ? "Programm" : "Karte",
+        );
+        break;
+      }
       if (stringValue(payload.accessReplacement) === "archives_faceup_to_rd") {
         const movedCount = numberValue(payload.movedCount) ?? 0;
         const shuffledCount =
