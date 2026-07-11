@@ -1189,6 +1189,34 @@ describe("formatChronicleEvent", () => {
     expect(resolved.title).not.toContain("Entscheidung beantwortet");
   });
 
+  it("describes the current Short Circuit activation payload before the choice resolves", () => {
+    const activated = formatChronicleEvent(
+      makeEvent("activated_card_ability", {
+        actor: "runner",
+        label: "The Short Circuit: Stack nach Programm durchsuchen",
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "p3_37_search_stack_to_grip",
+        sourceDefinitionId: "onr_v1_177_the-short-circuit",
+        cardDefinitionId: "onr_v1_177_the-short-circuit",
+        abilityId: "p3_37_search_stack_to_grip",
+        effectKind: "hidden_zone",
+        aiReasonCode: "runner.semantic.coverage_search",
+      }),
+      "corp",
+    );
+
+    expect(activated.title).toBe(
+      "Die Runner-KI hat The Short Circuit genutzt, um den Stack nach einem Programm zu durchsuchen.",
+    );
+    expect(activated.chips).toEqual(
+      expect.arrayContaining([
+        "The Short Circuit",
+        "Stack-Suche",
+        "Programm",
+      ]),
+    );
+  });
+
   it("shows Mystery Box Runner-AI install choices with selected program and run context", () => {
     const item = formatChronicleEvent(
       makeEvent("resolve_choice", {
@@ -4715,7 +4743,7 @@ describe("formatChronicleEvent", () => {
     );
 
     expect(item.title).toBe(
-      "Die Runner-KI hat Krash aus dem Stack vorgezeigt und auf die Hand genommen.",
+      "Die Runner-KI hat Temple Microcode Outlet genutzt, Krash aus dem Stack vorgezeigt und auf die Hand genommen.",
     );
     expect(item.category).toBe("card");
     expect(item.visibility).toBe("public");
@@ -4723,6 +4751,7 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toEqual([
       "Runner",
       "KI",
+      "Temple Microcode Outlet",
       "Stack",
       "Vorgezeigt",
       "Hand",

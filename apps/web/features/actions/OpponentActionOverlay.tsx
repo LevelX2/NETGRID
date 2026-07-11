@@ -23,10 +23,8 @@ import type { OpponentActionCue } from "../../app/action-cues";
 import { CardView } from "../cards/CardView";
 import { enrichVisibleCard, type DisplayVisibleCard } from "../cards/card-view-model";
 import type { CardDisplayMode } from "../settings/settings-model";
-import {
-  WindowEventIcon,
-  windowEventIconKindForAmbience,
-} from "./WindowEventIcon";
+import { WindowEventIcon } from "./WindowEventIcon";
+import { windowEventIconKindForActionCue } from "./window-event-icon-kind";
 
 type OpponentOverlayCatalogDetail = {
   catalogCardId: string;
@@ -77,6 +75,7 @@ export function OpponentActionOverlay({
     visibility: cue.visibility,
   });
   const ambienceClass = interactionAmbienceClassName(ambience);
+  const runHighlight = cue.highlight?.kind === "run" ? cue.highlight : null;
   const cueCardDisplayMode: CardDisplayMode = displayMode === "placeholder" ? displayMode : "placeholder";
   const showHiddenCardBack = cue.visibility === "redacted" && cue.actionType === "install_card";
   const hasCueVisual = Boolean(relatedCard || showHiddenCardBack);
@@ -164,7 +163,14 @@ export function OpponentActionOverlay({
         ) : null}
         <div className="opponentCueMessage">
           <WindowEventIcon
-            kind={windowEventIconKindForAmbience(ambience)}
+            kind={windowEventIconKindForActionCue({
+              actionType: cue.actionType,
+              ambience,
+              ...(runHighlight?.serverId ? { serverId: runHighlight.serverId } : {}),
+              ...(runHighlight?.serverLabel
+                ? { serverLabel: runHighlight.serverLabel }
+                : {}),
+            })}
           />
           <div className="opponentCueText">
             <strong>{renderTitle(cue)}</strong>

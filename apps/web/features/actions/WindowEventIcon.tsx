@@ -1,15 +1,19 @@
-import type { InteractionAmbienceKind } from "../../app/action-board-ui";
+import {
+  Archive,
+  Building2,
+  FlaskConical,
+  Server,
+  type LucideIcon,
+} from "lucide-react";
 
-export type WindowEventIconKind =
-  | "agenda"
-  | "ice-pass"
-  | "access"
-  | "trash"
-  | "trace"
-  | "pump-break"
-  | "net-damage"
-  | "meat-damage"
-  | "core-damage";
+import type { WindowEventIconKind } from "./window-event-icon-kind";
+
+const runTargetIcons: Partial<Record<WindowEventIconKind, LucideIcon>> = {
+  "run-hq": Building2,
+  "run-rd": FlaskConical,
+  "run-archives": Archive,
+  "run-remote": Server,
+};
 
 export function WindowEventIcon({
   kind,
@@ -17,27 +21,18 @@ export function WindowEventIcon({
   kind: WindowEventIconKind | null | undefined;
 }) {
   if (!kind) return null;
+  const RunTargetIcon = runTargetIcons[kind];
   return (
     <span
       className={`windowEventIcon windowEventIcon-${kind}`}
       aria-hidden="true"
       data-window-event-icon={kind}
-    />
+    >
+      {RunTargetIcon ? (
+        <span className="windowEventIconRunTarget">
+          <RunTargetIcon size={28} strokeWidth={1.8} />
+        </span>
+      ) : null}
+    </span>
   );
-}
-
-export function windowEventIconKindForAmbience(
-  ambience: InteractionAmbienceKind | null | undefined,
-): WindowEventIconKind | null {
-  if (ambience === "movement") return "ice-pass";
-  if (ambience === "pump") return "pump-break";
-  if (
-    ambience === "agenda" ||
-    ambience === "access" ||
-    ambience === "trash" ||
-    ambience === "trace"
-  ) {
-    return ambience;
-  }
-  return null;
 }

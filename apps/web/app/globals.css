@@ -4193,6 +4193,7 @@ select {
 }
 
 .windowEventIcon {
+  position: relative;
   width: 128px;
   height: 128px;
   flex: 0 0 128px;
@@ -4240,6 +4241,48 @@ select {
 
 .windowEventIcon-core-damage {
   background-image: url("/icons/window-events/core-damage.png");
+}
+
+.windowEventIcon-run-hq,
+.windowEventIcon-run-rd,
+.windowEventIcon-run-archives,
+.windowEventIcon-run-remote {
+  background-image: url("/icons/window-events/ice-pass.png");
+}
+
+.windowEventIconRunTarget {
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgb(126 228 255 / 0.78);
+  border-radius: 50%;
+  color: #b9f4ff;
+  background: rgb(3 13 22 / 0.9);
+  box-shadow:
+    0 0 0 3px rgb(3 13 22 / 0.72),
+    0 0 18px rgb(44 204 255 / 0.6);
+}
+
+.windowEventIcon-run-hq .windowEventIconRunTarget {
+  color: #ffe49a;
+  border-color: rgb(255 202 93 / 0.84);
+  box-shadow:
+    0 0 0 3px rgb(3 13 22 / 0.72),
+    0 0 18px rgb(255 184 61 / 0.58);
+}
+
+.windowEventIcon-run-archives .windowEventIconRunTarget {
+  color: #d8c8ff;
+  border-color: rgb(178 143 255 / 0.82);
+}
+
+.windowEventIcon-run-remote .windowEventIconRunTarget {
+  color: #bfffc7;
+  border-color: rgb(109 235 137 / 0.82);
 }
 
 .opponentCueOverlay[class*="ambience-"] {
