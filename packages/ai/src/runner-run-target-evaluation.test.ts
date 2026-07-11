@@ -2076,7 +2076,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       desiredCreditReserve: 4,
       fundingNeed: true,
       usefulHandCardsBlockedByCredits: 1,
-      recommendation: "acquire_economy",
+      recommendation: "fund_useful_hand_card",
       economyPriority: "high",
     });
     expect(posture.creditBasePlan.topBlockedHandCandidate).toMatchObject({

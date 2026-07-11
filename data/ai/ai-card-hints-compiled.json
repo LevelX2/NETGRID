@@ -41243,7 +41243,10 @@
       "cardType": "hardware",
       "roles": [
         "hardware",
-        "memory"
+        "memory",
+        "economy",
+        "recurring",
+        "icebreaker_support"
       ],
       "planRoles": [
         "build_rig",
@@ -41251,7 +41254,8 @@
       ],
       "requiredMechanics": [],
       "valueHints": {
-        "memory": 1
+        "memory": 1,
+        "economy": 2
       },
       "riskTags": [],
       "aiSupportStatus": "ai_supported",

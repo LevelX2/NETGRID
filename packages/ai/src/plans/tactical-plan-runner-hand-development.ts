@@ -318,7 +318,16 @@ export function runnerSearchDevelopmentHasConcreteConversion(
     context.deckCapabilities,
   );
   const runner = context.deckCapabilities?.runner;
-  if (!runner) return false;
+  if (!runner || runner.breakerInventory.length === 0) {
+    return context.input.legalActions.some(
+      (action) =>
+        action.type === "start_run" &&
+        runNeedsBreakerCoverage(
+          context.input.playerView,
+          actionServerId(action),
+        ),
+    );
+  }
   const candidateIds = breakerDevelopment.primaryBreakerNeed
     ? runner.breakerInventory
         .filter(

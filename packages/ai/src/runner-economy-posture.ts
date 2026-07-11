@@ -58,6 +58,7 @@ export function buildRunnerEconomyPosture(
     creditReservePolicy,
     riskAdjustedRunReserve,
     handDevelopmentEvaluations: params.handDevelopmentEvaluations ?? [],
+    canDraw: params.input.legalActions.some((action) => action.type === "draw_card"),
   });
   const desiredCreditReserve = creditBasePlan.desiredCreditReserve;
   const fundingNeed = creditBasePlan.fundingNeed;
@@ -228,6 +229,7 @@ function buildRunnerCreditBasePlan(params: {
   creditReservePolicy: RunnerCreditReservePolicy;
   riskAdjustedRunReserve: boolean;
   handDevelopmentEvaluations: readonly RunnerHandDevelopmentEvaluation[];
+  canDraw: boolean;
 }): RunnerCreditBasePlan {
   const usefulBlocked = params.handDevelopmentEvaluations
     .filter(usefulHandEvaluationBlockedByCredits)
@@ -260,6 +262,7 @@ function buildRunnerCreditBasePlan(params: {
     remoteScoreThreat: params.creditReservePolicy.remoteScoreThreat,
     usefulBlockedCount: usefulBlocked.length,
     usefulAffordableCount: usefulAffordable.length,
+    canDraw: params.canDraw,
     ...(topBlockedCandidate
       ? { topBlockedMissingCredits: topBlockedCandidate.missingCredits }
       : {}),
@@ -502,10 +505,12 @@ function creditBaseRecommendation(params: {
   usefulBlockedCount: number;
   usefulAffordableCount: number;
   topBlockedMissingCredits?: number;
+  canDraw: boolean;
 }): RunnerCreditBasePlanRecommendation {
   if (
     params.fundingNeed &&
     params.usefulBlockedCount > 0 &&
+    params.canDraw &&
     (params.topBlockedMissingCredits ?? 0) >= 4
   ) {
     return "acquire_economy";
