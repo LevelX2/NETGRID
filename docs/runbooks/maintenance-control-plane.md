@@ -122,9 +122,10 @@ Caddy setzt den HTTPS-Forwarding-Kontext selbst. Bei anderen Proxies muss `X-For
 3. Login setzt ein `HttpOnly`, `SameSite=Strict`-Cookie; remote zusätzlich `Secure`.
 4. Fremde Origins und fehlender CSRF-Nachweis werden abgelehnt.
 5. Cleanup-Apply, Cleanup-Policy, Policy-Lauf, Snapshot-Kompaktion und Recovery-Zugang verlangen eine frische Passwortbestätigung.
-6. Aktive und andere nicht-terminale Matches erscheinen nicht als Cleanup-Kandidaten.
-7. Passwortänderung oder lokaler Reset meldet alle Geräte ab.
-8. Direkter LAN-Aufruf von Port `8787` bleibt für Maintenance geschlossen.
+6. Der manuelle Cleanup kann auch `active` auswählen. Dabei gelten weiterhin Altersgrenze, Vorschau, ausdrückliche Löschbestätigung und frische Passwortbestätigung; die Vorschau warnt ausdrücklich vor möglichen laufenden Partien.
+7. Der automatische Cleanup akzeptiert weiterhin ausschließlich terminale Matchzustände. Andere nicht-terminale Zustände bleiben generell ausgeschlossen.
+8. Passwortänderung oder lokaler Reset meldet alle Geräte ab.
+9. Direkter LAN-Aufruf von Port `8787` bleibt für Maintenance geschlossen.
 
 ## Öffentliche Selbsthoster-Perspektive
 

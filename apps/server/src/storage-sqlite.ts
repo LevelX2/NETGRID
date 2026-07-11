@@ -1670,12 +1670,13 @@ function isTerminalMaintenanceStatus(status: MatchStatus): boolean {
   return status === "finished" || status === "forfeited" || status === "abandoned" || status === "cancelled";
 }
 
-const CLEANUP_STATUSES: MatchStatus[] = ["cancelled", "abandoned", "forfeited", "finished"];
+const AUTOMATIC_CLEANUP_STATUSES: MatchStatus[] = ["cancelled", "abandoned", "forfeited", "finished"];
+const MANUAL_CLEANUP_STATUSES: MatchStatus[] = ["active", ...AUTOMATIC_CLEANUP_STATUSES];
 
 function normalizeCleanupFilters(filters: StorageMaintenanceCleanupFilters): StorageMaintenanceCleanupFilters {
   const statuses: MatchStatus[] = [];
   for (const status of filters.statuses ?? []) {
-    if (CLEANUP_STATUSES.includes(status) && !statuses.includes(status)) statuses.push(status);
+    if (MANUAL_CLEANUP_STATUSES.includes(status) && !statuses.includes(status)) statuses.push(status);
   }
   const olderThanMinutes = Number.isFinite(filters.olderThanMinutes) ? Math.max(1, Math.floor(filters.olderThanMinutes)) : 60;
   const limit = Number.isFinite(filters.limit) ? Math.max(1, Math.min(500, Math.floor(filters.limit ?? 500))) : 500;
@@ -1687,7 +1688,7 @@ function defaultCleanupPolicy(lastRun?: StorageMaintenanceCleanupPolicyLastRun):
     backendOpsVersion: "Backend 0.5",
     intervalMinutes: 60,
     enabled: false,
-    statuses: CLEANUP_STATUSES,
+    statuses: AUTOMATIC_CLEANUP_STATUSES,
     olderThanDays: 3,
     limit: 500,
     includeProtected: false,
@@ -1699,14 +1700,14 @@ function defaultCleanupPolicy(lastRun?: StorageMaintenanceCleanupPolicyLastRun):
 
 function normalizeCleanupPolicy(input: Partial<StorageMaintenanceCleanupPolicyInput>, updatedAt?: string, lastRun?: StorageMaintenanceCleanupPolicyLastRun): StorageMaintenanceCleanupPolicy {
   const statuses: MatchStatus[] = [];
-  for (const status of input.statuses ?? CLEANUP_STATUSES) {
-    if (CLEANUP_STATUSES.includes(status) && !statuses.includes(status)) statuses.push(status);
+  for (const status of input.statuses ?? AUTOMATIC_CLEANUP_STATUSES) {
+    if (AUTOMATIC_CLEANUP_STATUSES.includes(status) && !statuses.includes(status)) statuses.push(status);
   }
   return {
     backendOpsVersion: "Backend 0.5",
     intervalMinutes: 60,
     enabled: input.enabled === true,
-    statuses: statuses.length > 0 ? statuses : CLEANUP_STATUSES,
+    statuses: statuses.length > 0 ? statuses : AUTOMATIC_CLEANUP_STATUSES,
     olderThanDays: Number.isFinite(input.olderThanDays) ? Math.max(1, Math.min(3650, Math.floor(input.olderThanDays ?? 3))) : 3,
     limit: Number.isFinite(input.limit) ? Math.max(1, Math.min(500, Math.floor(input.limit ?? 500))) : 500,
     includeProtected: input.includeProtected === true,

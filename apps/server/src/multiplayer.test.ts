@@ -814,7 +814,7 @@ describe("Backend 0.5 private storage maintenance", () => {
     }
   });
 
-  it("never previews active cleanup candidates and keeps the result redacted", async () => {
+  it("previews only sufficiently old active cleanup candidates and keeps the result redacted", async () => {
     const dir = await tempStorageDir();
     const storage = new SqliteMatchStorage({ dbPath: join(dir, "netgrid.sqlite"), backupDir: join(dir, "backups") });
     const service = new MultiplayerService(storage, { tokenSalt: "backend-05-cleanup-preview" });
@@ -839,12 +839,12 @@ describe("Backend 0.5 private storage maintenance", () => {
       });
       const preview = (await response.json()) as { matchCount?: number; previewId?: string; matches?: Array<{ matchId: string; status: string }>; warnings?: string[] };
       expect(response.status).toBe(200);
-      expect(preview.matchCount).toBe(1);
+      expect(preview.matchCount).toBe(2);
       expect(preview.previewId).toMatch(/^[a-f0-9]{16}$/);
-      expect(preview.matches?.map((match) => match.matchId)).toEqual([oldFinished.matchId]);
-      expect(preview.matches?.[0]?.status).toBe("finished");
+      expect(preview.matches?.map((match) => match.matchId)).toEqual([oldActive.matchId, oldFinished.matchId]);
+      expect(preview.matches?.map((match) => match.status)).toEqual(["active", "finished"]);
       expect(preview.matches?.map((match) => match.matchId)).not.toContain(freshActive.matchId);
-      expect(preview.matches?.map((match) => match.matchId)).not.toContain(oldActive.matchId);
+      expect(preview.warnings?.join(" ")).toContain("Aktive Matches");
       expect(preview.warnings?.join(" ")).toContain("Finished-Matches");
       expect(JSON.stringify(preview)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|sha256:[a-f0-9]{64}|cardInstances|privateDeckSnapshots|privatePayload|decklist|game_state_json/i);
     } finally {
@@ -861,7 +861,6 @@ describe("Backend 0.5 private storage maintenance", () => {
     const freshActive = await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", displayName: "Frisch Aktiv", seed: "backend-05-keep-fresh-active" });
     const oldRecord = await service.loadForTest(oldActive.matchId);
     if (!oldRecord) throw new Error("Missing old cleanup record");
-    oldRecord.match.status = "abandoned";
     oldRecord.match.updatedAt = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
     await storage.save(oldRecord);
 
@@ -870,7 +869,7 @@ describe("Backend 0.5 private storage maintenance", () => {
       const previewResponse = await maintenance.request("/api/storage/maintenance/cleanup/preview", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ statuses: ["abandoned"], olderThanMinutes: 60, limit: 100 })
+        body: JSON.stringify({ statuses: ["active"], olderThanMinutes: 60, limit: 100 })
       });
       const preview = (await previewResponse.json()) as { previewId?: string; matchCount?: number };
       expect(previewResponse.status).toBe(200);
@@ -879,7 +878,7 @@ describe("Backend 0.5 private storage maintenance", () => {
 
       const applyResponse = await maintenance.request(
         "/api/storage/maintenance/cleanup/apply",
-        { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ statuses: ["abandoned"], olderThanMinutes: 60, limit: 100, previewId: preview.previewId, createBackup: true }) },
+        { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ statuses: ["active"], olderThanMinutes: 60, limit: 100, previewId: preview.previewId, createBackup: true }) },
         { sensitive: true }
       );
       const result = (await applyResponse.json()) as { deletedCount?: number; deletedMatchIds?: string[]; backup?: { backupId?: string; backupDir?: string }; integrityCheck?: string };
@@ -929,10 +928,12 @@ describe("Backend 0.5 private storage maintenance", () => {
 
       const policyResponse = await maintenance.request(
         "/api/storage/maintenance/cleanup/policy",
-        { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ enabled: true, statuses: ["abandoned"], olderThanDays: 3, limit: 100, includeProtected: false }) },
+        { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ enabled: true, statuses: ["active", "abandoned"], olderThanDays: 3, limit: 100, includeProtected: false }) },
         { sensitive: true }
       );
+      const savedPolicy = (await policyResponse.json()) as { statuses?: string[] };
       expect(policyResponse.status).toBe(200);
+      expect(savedPolicy.statuses).toEqual(["abandoned"]);
 
       const runResponse = await maintenance.request("/api/storage/maintenance/cleanup/policy/run", { method: "POST" }, { sensitive: true });
       const run = (await runResponse.json()) as { applyResult?: { deletedCount?: number; deletedMatchIds?: string[]; backupCreated?: boolean; backup?: { backupId?: string } }; policy?: { lastRun?: { deletedCount?: number; backupCreated?: boolean } } };
