@@ -13,6 +13,11 @@ export type GameStanding = {
   viewerAgendaPoints: number;
   opponentAgendaPoints: number;
 };
+export type SeriesScoreUi = {
+  label: "Endergebnis" | "Zwischenstand";
+  score: string;
+  ariaLabel: string;
+};
 
 const SERIES_WIN_MATCH_POINTS = 10;
 
@@ -75,6 +80,19 @@ export function seriesResultHeadline(series: ApiSeriesResultSummary, opponentNam
   if (series.viewerSeriesOutcome === "won") return viewerLabel ? `${viewerLabel} hat die Match-Serie gewonnen.` : "Du hast die Match-Serie gewonnen.";
   if (series.viewerSeriesOutcome === "lost") return `${opponentName ?? "Gegenseite"} hat die Match-Serie gewonnen.`;
   return "Die Match-Serie endet unentschieden.";
+}
+
+export function seriesScoreUi(
+  series: Pick<ApiSeriesResultSummary, "status" | "viewerMatchPoints" | "opponentMatchPoints">,
+  viewerLabel: string,
+  opponentLabel: string
+): SeriesScoreUi {
+  const label = series.status === "finished" ? "Endergebnis" : "Zwischenstand";
+  return {
+    label,
+    score: `${series.viewerMatchPoints} : ${series.opponentMatchPoints}`,
+    ariaLabel: `${label}: ${viewerLabel} ${series.viewerMatchPoints} zu ${opponentLabel} ${series.opponentMatchPoints} Matchpunkte.`
+  };
 }
 
 export function retentionProtectionUi(retentionProtected: boolean): { label: string; title: string } {

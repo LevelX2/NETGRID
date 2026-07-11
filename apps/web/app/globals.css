@@ -9642,13 +9642,16 @@ select {
 }
 
 .seriesStrip {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 10px;
-  border: 1px solid rgb(255 255 255 / 0.12);
-  border-radius: 8px;
-  background: rgb(255 255 255 / 0.06);
+  display: grid;
+  grid-template-columns: minmax(150px, 0.8fr) minmax(190px, 0.7fr) minmax(260px, 1.25fr);
+  align-items: center;
+  gap: 18px;
+  padding: 14px 16px;
+  border: 1px solid color-mix(in srgb, var(--runner), var(--line) 52%);
+  border-radius: 10px;
+  background:
+    linear-gradient(100deg, color-mix(in srgb, var(--runner), transparent 93%), transparent 42%),
+    rgb(255 255 255 / 0.06);
 }
 
 .seriesStrip div:first-child {
@@ -9663,6 +9666,40 @@ select {
 .seriesStrip small,
 .seriesScore {
   color: var(--muted);
+}
+
+.seriesResultScore {
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  min-width: 0;
+  padding: 8px 18px;
+  border-inline: 1px solid color-mix(in srgb, var(--runner), var(--line) 58%);
+  text-align: center;
+}
+
+.seriesResultScore .seriesResultLabel {
+  color: color-mix(in srgb, var(--runner), white 38%);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.seriesResultScore strong {
+  color: var(--text);
+  font-size: clamp(30px, 4vw, 46px);
+  line-height: 1;
+  letter-spacing: 0.04em;
+  text-shadow: 0 0 24px color-mix(in srgb, var(--runner), transparent 58%);
+}
+
+.seriesResultScore small {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 10px;
+  font-size: 10px;
 }
 
 .seriesScore {
@@ -13553,9 +13590,17 @@ select,
     flex-basis: 100%;
   }
 
-  .gameStandingStrip,
-  .seriesStrip {
+  .gameStandingStrip {
     flex-direction: column;
+  }
+
+  .seriesStrip {
+    grid-template-columns: 1fr;
+  }
+
+  .seriesResultScore {
+    border-inline: 0;
+    border-block: 1px solid color-mix(in srgb, var(--runner), var(--line) 58%);
   }
 
   .undoBox,

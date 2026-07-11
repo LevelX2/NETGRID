@@ -1,6 +1,6 @@
 # Prominentes Matchserien-Endergebnis – Prozess
 
-Status: in_progress
+Status: completed
 
 Stand: 2026-07-11
 
@@ -249,3 +249,20 @@ Nach Abschluss: final verifizieren, lokal nach main mergen, main prüfen, Worktr
 - Der Worktree ist entfernt.
 - Engine-, Server-, Serienwertungs-, Replay- und StateHash-Verträge sind
   unverändert.
+
+## Abschlussnachweis
+
+UIPROM-01 hebt den Matchpunktstand in einen eigenen, responsiven Ergebnisblock.
+Abgeschlossene Serien zeigen `Endergebnis`, laufende Serien `Zwischenstand`.
+Der konkrete Nutzerfall `15 : 11` ist im Helper-Test festgeschrieben. Siege,
+Draws und Agenda-Punkte bleiben als Sekundärdetails im Serienbereich sichtbar.
+
+Ausgeführte Paketchecks:
+
+- `corepack pnpm --filter @netgrid/web exec vitest run app/result-modal-ui.test.ts`
+  – 1 Testdatei, 13 Tests grün.
+- `corepack pnpm --filter @netgrid/web typecheck` – grün.
+- `git diff --check` – grün.
+
+Es wurden keine Engine-, Server-, Serienwertungs-, Replay- oder
+StateHash-Verträge geändert.

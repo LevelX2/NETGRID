@@ -16,6 +16,7 @@ import {
   resultWinnerMotifUi,
   retentionProtectionUi,
   seriesResultHeadline,
+  seriesScoreUi,
   type ResultWinnerMotifKind
 } from "../../app/result-modal-ui";
 
@@ -65,6 +66,7 @@ export function GameOverModal({
   const playerStandingLabel = resultPlayerRoleLabel(side, side, playerName, opponentName);
   const opponentStandingLabel = resultPlayerRoleLabel(opponentSideLabel, side, playerName, opponentName);
   const seriesText = result.series ? seriesStatusText(result.series, playerSeriesLabel, opponentSeriesLabel) : null;
+  const seriesScore = result.series ? seriesScoreUi(result.series, playerStandingLabel, opponentStandingLabel) : null;
   const retentionUi = retentionProtectionUi(retentionProtected);
   const exitUi = resultExitButtonUi(Boolean(onNextSeriesGame));
   const handleNewMatch = () => {
@@ -111,14 +113,22 @@ export function GameOverModal({
           <Stat value={result.scoredAgendaCount} unit="Gescored" />
         </div>
         {result.series ? (
-          <div className="seriesStrip">
+          <div className={`seriesStrip ${result.series.status === "finished" ? "finished" : "inProgress"}`}>
             <div>
               <span>Serienspiel {result.series.gameNumber}/{result.series.gamesPlanned}</span>
               <small>{seriesText}</small>
             </div>
+            {seriesScore ? (
+              <div className="seriesResultScore" aria-label={seriesScore.ariaLabel}>
+                <span className="seriesResultLabel">{seriesScore.label}</span>
+                <strong>{seriesScore.score}</strong>
+                <small>
+                  <span>{playerStandingLabel}</span>
+                  <span>{opponentStandingLabel}</span>
+                </small>
+              </div>
+            ) : null}
             <div className="seriesScore">
-              <span>Matchpunkte {playerStandingLabel} {result.series.viewerMatchPoints}</span>
-              <span>Matchpunkte {opponentStandingLabel} {result.series.opponentMatchPoints}</span>
               <span>Siege {playerStandingLabel} {result.series.viewerWins}</span>
               <span>Siege {opponentStandingLabel} {result.series.opponentWins}</span>
               <span>Draws {result.series.draws}</span>

@@ -1,5 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { gameStandingForResult, resultExitButtonUi, resultFooterOutcomeLabel, resultOutcomeHeadline, resultOutcomeText, resultPlayerRoleLabel, resultWinnerMotifFor, resultWinnerMotifUi, retentionProtectionUi, seriesResultHeadline } from "./result-modal-ui";
+import {
+  gameStandingForResult,
+  resultExitButtonUi,
+  resultFooterOutcomeLabel,
+  resultOutcomeHeadline,
+  resultOutcomeText,
+  resultPlayerRoleLabel,
+  resultWinnerMotifFor,
+  resultWinnerMotifUi,
+  retentionProtectionUi,
+  seriesResultHeadline,
+  seriesScoreUi
+} from "./result-modal-ui";
 
 describe("result modal UI helpers", () => {
   it("selects winner motifs for runner, corp and draw results", () => {
@@ -38,6 +50,30 @@ describe("result modal UI helpers", () => {
     expect(seriesResultHeadline(series("draw"), "Korp-KI")).toBe("Die Match-Serie endet unentschieden.");
     expect(seriesResultHeadline({ ...series("won"), status: "between_games" }, "Korp-KI")).toBeNull();
     expect(resultOutcomeText("runner")).toBe("Runner gewinnt.");
+  });
+
+  it("presents the finished match-point score as the final result", () => {
+    expect(
+      seriesScoreUi(
+        { ...series("won"), viewerMatchPoints: 15, opponentMatchPoints: 11 },
+        "Teilnehmer A (Runner)",
+        "Korp KI (Korp)"
+      )
+    ).toEqual({
+      label: "Endergebnis",
+      score: "15 : 11",
+      ariaLabel: "Endergebnis: Teilnehmer A (Runner) 15 zu Korp KI (Korp) 11 Matchpunkte."
+    });
+  });
+
+  it("labels the match-point score as an interim score between series games", () => {
+    expect(
+      seriesScoreUi(
+        { ...series("won"), status: "between_games" },
+        "Teilnehmer A (Korp)",
+        "Korp KI (Runner)"
+      ).label
+    ).toBe("Zwischenstand");
   });
 
   it("uses player names and sides for single-game result headlines", () => {
