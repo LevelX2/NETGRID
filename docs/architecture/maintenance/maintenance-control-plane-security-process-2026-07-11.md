@@ -234,7 +234,7 @@ Prüfung:
 
 ### P06 – Sicherheitsregressionen, Current-State und Final Review
 
-Status: in Umsetzung
+Status: abgeschlossen
 
 Ergebnis:
 
@@ -252,7 +252,7 @@ Prüfung:
 
 ### P07 – Defensive Integration
 
-Status: ausstehend
+Status: in Umsetzung
 
 Ergebnis:
 

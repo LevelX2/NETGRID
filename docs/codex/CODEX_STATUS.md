@@ -1,6 +1,6 @@
 # CODEX_STATUS
 
-Stand: 2026-07-10
+Stand: 2026-07-11
 
 ## Einstieg
 
@@ -48,6 +48,11 @@ ausführbare Verträge.
   dokumentiert und ausführbar.
 - Lokalisierte Kartenassets versionieren Art-Quellen und Full-PNGs; Review-
   Derivate bleiben lokal.
+- ARC-001 ersetzt private-LAN-basierte Maintenance-Freigabe durch eine
+  eigenständige Passwort-/Session-/CSRF-/Reauth-Control-Plane. Lokales HTTP
+  ist Loopback-only; Remote Maintenance ist standardmäßig aus und verlangt
+  HTTPS sowie einen explizit vertrauten Proxy. Führend:
+  `docs/reviews/architecture/maintenance-control-plane-security-final-review-2026-07-11.md`.
 
 ## Aktive Gates
 

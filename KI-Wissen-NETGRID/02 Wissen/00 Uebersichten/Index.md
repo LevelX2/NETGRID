@@ -76,7 +76,8 @@
 - Lokaler Start: `scripts/start-netgrid.ps1`.
 - Lokaler Transfer: `docs/runbooks/netgrid-local-transfer.md` sowie
   `scripts/export-local-transfer.ps1` und `scripts/import-local-transfer.ps1`.
-- SQLite-Wartung: private `/maintenance`-Oberfläche sowie
+- SQLite-Wartung: authentifizierte Maintenance-Control-Plane unter
+  `/maintenance`, `docs/runbooks/maintenance-control-plane.md` sowie
   `storage:inspect`, `storage:backup` und `storage:restore`.
 - Browser-E2E: `scripts/run-e2e.mjs` und `tests/e2e/`.
 - Monatslogs: [[../../../03 Betrieb/Log]].
