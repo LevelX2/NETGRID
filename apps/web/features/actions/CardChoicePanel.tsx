@@ -20,10 +20,8 @@ import { type DisplayVisibleCard } from "../cards/card-view-model";
 import { type CardDisplayMode } from "../settings/settings-model";
 import { cardChoiceOrderBadge, isRunnerStackTopChooseOneArrangeRestChoice } from "./card-choice-order-badge";
 import { choiceSelectionRangeLabel } from "./card-choice-selection-label";
-import {
-  WindowEventIcon,
-  windowEventIconKindForAmbience,
-} from "./WindowEventIcon";
+import { WindowEventIcon } from "./WindowEventIcon";
+import { windowEventIconKindForAmbience } from "./window-event-icon-kind";
 
 type VisibleChoice = NonNullable<PlayerView["pendingChoice"]>;
 type VisibleChoiceOption = VisibleChoice["options"][number];

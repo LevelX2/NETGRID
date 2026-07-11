@@ -35,6 +35,10 @@ const windowEventIconSource = readFileSync(
   new URL("../features/actions/WindowEventIcon.tsx", import.meta.url),
   "utf8",
 );
+const windowEventIconKindSource = readFileSync(
+  new URL("../features/actions/window-event-icon-kind.ts", import.meta.url),
+  "utf8",
+);
 
 function zLayer(name: string): number {
   const match = css.match(new RegExp(`--${name}:\\s*(\\d+);`));
@@ -198,9 +202,15 @@ describe("run window layering", () => {
         ),
       ).toBe(true);
     }
-    expect(windowEventIconSource).toContain(
+    expect(windowEventIconKindSource).toContain(
       'if (ambience === "movement") return "ice-pass"',
     );
+    expect(opponentActionOverlaySource).toContain(
+      "windowEventIconKindForActionCue",
+    );
+    for (const target of ["hq", "rd", "archives", "remote"]) {
+      expect(css).toContain(`.windowEventIcon-run-${target}`);
+    }
   });
 
   it("serializes access damage and AI pacing through one presentation", () => {
