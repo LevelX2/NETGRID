@@ -1,7 +1,7 @@
 # ARC-001 Maintenance-Control-Plane Final Review
 
 Stand: 2026-07-11  
-Status: technisch abgeschlossen, lokale Main-Integration ausstehend  
+Status: abgeschlossen und lokal in `main` integriert
 Arbeitsbranch: `codex/maintenance-control-plane-security`
 
 ## Ergebnis
@@ -40,7 +40,7 @@ ARC-001 schließt die bisherige implizite Adminfreigabe über private LAN-Adress
 - `@netgrid/server` Typecheck: grün.
 - `@netgrid/server` Tests: 11 Dateien, 150 Tests, grün.
 - `@netgrid/web` Typecheck: grün.
-- `@netgrid/web` Tests: 39 Dateien, 500 Tests, grün.
+- `@netgrid/web` Tests nach finalem Main-Abgleich: 39 Dateien, 501 Tests, grün.
 - Projektweiter rekursiver Typecheck: grün.
 - Contracttests: Shared 10/10 sowie Phase-/Visibility-Verträge 5/5, grün.
 - Projektweiter Build einschließlich produktivem Next-Build und statischer Maintenance-Routen: grün.
@@ -68,6 +68,8 @@ Der erste Browser-Smoke verwendete versehentlich die normalen lokalen Ports und 
 - Die Credential-Datei liegt im lokalen Runtime-Bereich. Host-Dateirechte, Backupschutz und Betriebssystemhärtung bleiben Betreiberpflicht.
 - Eine allgemeine öffentliche Selbsthoster-Distribution braucht weiterhin eigene Installations-, Update-, Secret-, Backup-, Datenschutz- und Support-Gates.
 
-## Freigabe vor Integration
+## Freigabe
 
 Der ARC-001-Sicherheitsgrundschnitt ist für den privaten Version-0-Betrieb freigabefähig. Remote-/Tablet-Betrieb ist nur nach ausgefülltem HTTPS-/Proxy-Smoke des konkreten Deployments freigegeben. Öffentlicher Plattformbetrieb ist ausdrücklich nicht freigegeben.
+
+Lokaler Integrationsnachweis: Merge-Commit `12952902d` auf `main`; kein Push und kein Pull Request.

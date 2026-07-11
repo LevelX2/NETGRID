@@ -1,6 +1,6 @@
 # ARC-001 Maintenance-Control-Plane-Sicherheitsprozess
 
-Status: in Umsetzung  
+Status: abgeschlossen
 Stand: 2026-07-11  
 Quelle: strukturelle Architekturprüfung ARC-001 und Nutzerfreigabe vom 2026-07-11  
 Arbeitsbranch: `codex/maintenance-control-plane-security`  
@@ -252,7 +252,7 @@ Prüfung:
 
 ### P07 – Defensive Integration
 
-Status: in Umsetzung
+Status: abgeschlossen
 
 Ergebnis:
 
@@ -267,6 +267,13 @@ Prüfung:
 - sauberer Arbeitsbranch,
 - dokumentierte Merge- und Verify-Nachweise,
 - kein Push und kein Pull Request.
+
+Integrationsnachweis:
+
+- aktuelles `main` wurde zweimal defensiv nachgezogen, zuletzt auf `31bb542d1`,
+- vollständiger Verify auf dem kombinierten Stand war grün,
+- lokaler Merge nach `main`: `12952902d`,
+- die vorbestehende Nutzeränderung an `apps/web/next-env.d.ts` blieb unberührt.
 
 ## Testmatrix
 
