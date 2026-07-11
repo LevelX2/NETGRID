@@ -182,3 +182,35 @@ Wasserzeichen oder Kartenartwork. Die jeweiligen Motive sind in P2 aufgelistet.
   horizontalen Überlauf.
 - Kombinierter Zugriffsschaden zeigt exakt
   `Runner erleidet 2 Net Damage durch Setup!` ohne doppelte Satzendmarke.
+
+## Follow-up: Tag-Erhalt als eigenes Ergebnisereignis
+
+Ein Playtest-Fund vom 2026-07-11 zeigte, dass ein erfolgreicher Manhunt-Trace
+zwar `tagsAdded` öffentlich lieferte, die erhaltene Anzahl aber nur als kleiner
+Chip am Trace-Eintrag erschien. Der Tag-Zuwachs war dadurch weder in der
+normalen Chronicle-Zeile noch als eigenes Meldungsfenster ausreichend sichtbar.
+
+Der Current-State behandelt jeden positiven, side-sicheren Tag-Zuwachs nun als
+eigenes Ergebnisereignis:
+
+- Trace-Zeilen nennen die erhaltene Anzahl direkt, zum Beispiel
+  `Trace erfolgreich; Du hast 6 Tags erhalten`.
+- `formatChronicleEffectItems` erzeugt zusätzlich einen eigenen öffentlichen
+  Chronicle-Eintrag mit Zuwachs, aktuellem Gesamtstand und sichtbarer Quelle,
+  sofern diese aus dem Public Payload bestimmbar ist.
+- Dasselbe Ergebnisitem wird als erzwungene Folge-Aktionsmeldung präsentiert;
+  damit erscheinen auch Tags aus eigenen Trace-Entscheidungen beim Runner.
+- `gain-tag` besitzt ein eigenes, codebasiertes Tracking-/Fadenkreuzicon mit
+  Runner-Seitenmarkierung und `+N`-Badge. Es bleibt klar vom vorhandenen
+  Bitmapmotiv `remove-tag` getrennt.
+- Generische `tagsAdded`-Payloads sowie die bestehenden öffentlichen
+  City-Surveillance-, End-Turn- und Trace-Auto-Success-Felder werden ohne neuen
+  Engine- oder Serververtrag zusammengeführt.
+
+Fokussierte Follow-up-Verifikation:
+
+- `app/chronicle.test.ts`
+- `app/action-cues.test.ts`
+- `features/actions/WindowEventIcon.test.ts`
+- `app/run-layering.test.ts`
+- Web-Typecheck und `git diff --check`

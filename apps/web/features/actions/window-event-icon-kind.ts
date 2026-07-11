@@ -20,6 +20,7 @@ export type WindowEventIconKind =
   | "play-card"
   | "rez-card"
   | "advance-card"
+  | "gain-tag"
   | "remove-tag"
   | "purge"
   | "card-ability"
@@ -31,9 +32,20 @@ export type WindowEventIconKind =
 export function windowEventIconKindForActionCue(input: {
   actionType: string;
   ambience: InteractionAmbienceKind | null | undefined;
+  title?: string;
   serverId?: string;
   serverLabel?: string;
 }): WindowEventIconKind {
+  const signal = `${input.actionType} ${input.title ?? ""}`.toLowerCase();
+  if (
+    signal.includes("tag") &&
+    (signal.includes("erhalten") ||
+      signal.includes("bekommen") ||
+      signal.includes("hinzugefügt")) &&
+    !signal.includes("entfernt")
+  ) {
+    return "gain-tag";
+  }
   if (input.actionType !== "start_run") {
     const ambienceKind = windowEventIconKindForAmbience(input.ambience);
     if (ambienceKind) return ambienceKind;

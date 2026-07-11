@@ -3537,7 +3537,7 @@ describe("formatChronicleEvent", () => {
     expect(effects).toEqual([]);
   });
 
-  it("merges simple play add_tags effects into the played card entry", () => {
+  it("keeps add_tags in the played card entry and adds an explicit tag result", () => {
     const event = makeEvent("play_operation", {
       actor: "corp",
       title: "Datapool® by Zetatech",
@@ -3571,10 +3571,15 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toEqual(
       expect.arrayContaining(["Operation", "+2 Tags"]),
     );
-    expect(effects).toEqual([]);
+    expect(effects).toHaveLength(1);
+    expect(effects[0]).toMatchObject({
+      title: "Du hast 2 Tags erhalten.",
+      description:
+        "Auslöser: Datapool® by Zetatech. Du hast jetzt 3 Tags.",
+    });
   });
 
-  it("merges ordered Netwatch Credit Voucher tag and credit effects into the played card entry", () => {
+  it("keeps ordered Netwatch Credit Voucher effects and adds an explicit tag result", () => {
     const event = makeEvent("play_operation", {
       actor: "corp",
       title: "Netwatch Credit Voucher",
@@ -3623,7 +3628,12 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toEqual(
       expect.arrayContaining(["Operation", "+1 Tag", "+1 Credit"]),
     );
-    expect(effects).toEqual([]);
+    expect(effects).toHaveLength(1);
+    expect(effects[0]).toMatchObject({
+      title: "Du hast 1 Tag erhalten.",
+      description:
+        "Auslöser: Netwatch Credit Voucher. Du hast jetzt 2 Tags.",
+    });
   });
 
   it("merges tagged Corp Operation damage effects into the played card entry", () => {
@@ -3920,7 +3930,14 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toEqual(
       expect.arrayContaining(["City Surveillance", "-2 Credits", "+1 Tag"]),
     );
-    expect(effects).toEqual([]);
+    expect(effects).toHaveLength(1);
+    expect(effects[0]).toMatchObject({
+      title: "Der Runner hat 1 Tag erhalten.",
+      description:
+        "Auslöser: City Surveillance. Der Runner hat jetzt 1 Tag.",
+      cardTitle: "City Surveillance",
+    });
+    expect(effects[0]?.cardDefinitionId).toBeUndefined();
   });
 
   it("adds City Surveillance draw-tax details to other runner draw card events", () => {
@@ -5122,7 +5139,7 @@ describe("formatChronicleEvent", () => {
     expect(corpBid.description).toBe("Trace-Stärke: 6, Runner-Link: 0.");
     expect(corpBid.chips).toContain("Korp-Gebot 2");
     expect(runnerBid.title).toBe(
-      "Trace entschieden: Korp 2 Credits, Du 1 Credit; Trace erfolgreich.",
+      "Trace entschieden: Korp 2 Credits, Du 1 Credit; Trace erfolgreich; Du hast 1 Tag erhalten.",
     );
     expect(runnerBid.description).toBe(
       "Endstand: Trace 6 gegen Runner-Stärke 1.",
@@ -5136,6 +5153,48 @@ describe("formatChronicleEvent", () => {
       "Erfolg",
       "+1 Tag",
     ]);
+  });
+
+  it("shows Manhunt tag gain explicitly in the trace line and as its own chronicle item", () => {
+    const event = makeEvent("resolve_choice", {
+      actor: "runner",
+      traceStep: "runner_bid",
+      sourceDefinitionId: "onr_proteus_050_manhunt",
+      corpBid: 0,
+      traceStrength: 6,
+      runnerBid: 0,
+      runnerStrength: 0,
+      traceSuccessful: true,
+      tagsAdded: 6,
+      runnerTagsAfter: 6,
+    });
+
+    const runnerTrace = formatChronicleEvent(event, "runner");
+    const runnerEffects = formatChronicleEffectItems(event, "runner");
+    const corpEffects = formatChronicleEffectItems(event, "corp");
+
+    expect(runnerTrace.title).toBe(
+      "Trace entschieden: Korp 0 Credits, Du 0 Credits; Trace erfolgreich; Du hast 6 Tags erhalten.",
+    );
+    expect(runnerEffects).toHaveLength(1);
+    expect(runnerEffects[0]).toMatchObject({
+      id: `${event.eventId}:tag-gain`,
+      title: "Du hast 6 Tags erhalten.",
+      description: "Auslöser: Manhunt. Du hast jetzt 6 Tags.",
+      cardDefinitionId: "onr_proteus_050_manhunt",
+      cardTitle: "Manhunt",
+      importance: "important",
+      visibility: "public",
+    });
+    expect(runnerEffects[0]?.chips).toEqual(
+      expect.arrayContaining([
+        "Tag erhalten",
+        "+6 Tags",
+        "Jetzt 6 Tags",
+        "Manhunt",
+      ]),
+    );
+    expect(corpEffects[0]?.title).toBe("Der Runner hat 6 Tags erhalten.");
   });
 
   it("describes trace base-link and post-bid link choices", () => {

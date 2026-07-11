@@ -1,8 +1,10 @@
 import {
   Archive,
   Building2,
+  Crosshair,
   FlaskConical,
   Server,
+  Tag,
   User,
   type LucideIcon,
 } from "lucide-react";
@@ -20,9 +22,11 @@ const runTargetIcons: Partial<Record<WindowEventIconKind, LucideIcon>> = {
 export function WindowEventIcon({
   kind,
   side,
+  badge,
 }: {
   kind: WindowEventIconKind | null | undefined;
   side?: Side | null;
+  badge?: string;
 }) {
   if (!kind) return null;
   const RunTargetIcon = runTargetIcons[kind];
@@ -48,6 +52,13 @@ export function WindowEventIcon({
           <RunTargetIcon size={28} strokeWidth={1.8} />
         </span>
       ) : null}
+      {kind === "gain-tag" ? (
+        <span className="windowEventIconTagGain">
+          <Crosshair size={76} strokeWidth={1.45} />
+          <Tag className="windowEventIconTagGlyph" size={34} strokeWidth={2.1} />
+        </span>
+      ) : null}
+      {badge ? <span className="windowEventIconBadge">{badge}</span> : null}
     </span>
   );
 }

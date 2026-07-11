@@ -2,6 +2,7 @@ import type { PlayerView, PublicGameEvent, Side, VisibleCard } from "@netgrid/sh
 import {
   formatChronicleEffectItems,
   formatChronicleEvent,
+  tagGainAmountFromPublicPayload,
   type ChronicleContext,
   type ChronicleImportance,
   type ChronicleVisibility,
@@ -32,6 +33,7 @@ export type OpponentActionCue = {
   soundCount?: number;
   requiresLocalAttention: boolean;
   aiExplanation?: string;
+  iconBadge?: string;
 };
 
 export type DamageImpactCue = {
@@ -120,7 +122,7 @@ export function deriveOpponentActionCues(input: CueDerivationInput): OpponentAct
     const actor = sideValue(payload.actor);
     const opponent = Boolean(actor && actor !== input.viewerSide);
     const forcedPublicEffectCue = isForcedPublicEffectCue(actionType, payload);
-    const forcedEffectCueItems = formatChronicleEffectItems(event, input.viewerSide).filter(isForcedAccessEffectCueItem);
+    const forcedEffectCueItems = formatChronicleEffectItems(event, input.viewerSide).filter(isForcedEffectCueItem);
     const systemCue = !actor && actionType !== "game_created" && (input.includeAutomaticEffectCues || actionType === "game_end");
     if (
       actionType === "resolve_choice" &&
@@ -167,6 +169,9 @@ export function deriveOpponentActionCues(input: CueDerivationInput): OpponentAct
       ...(aiExplanation ? { aiExplanation } : {})
     };
     const effectCues = forcedEffectCueItems.map((effectItem, index): OpponentActionCue => {
+      const tagGainAmount = effectItem.chips.includes("Tag erhalten")
+        ? tagGainAmountFromPublicPayload(payload)
+        : 0;
       const relatedCard =
         effectItem.cardDefinitionId ? visibleCards.get(effectItem.cardDefinitionId) : undefined;
       const relatedCardPositionBadge = relatedCard
@@ -190,6 +195,7 @@ export function deriveOpponentActionCues(input: CueDerivationInput): OpponentAct
         importance: effectItem.importance,
         ...(relatedCard ? { relatedCard } : {}),
         ...(relatedCardPositionBadge ? { relatedCardPositionBadge } : {}),
+        ...(tagGainAmount > 0 ? { iconBadge: `+${tagGainAmount}` } : {}),
         sound: "tag_or_damage",
         requiresLocalAttention: localAttention,
       };
@@ -438,8 +444,12 @@ function isForcedPublicEffectCue(actionType: string, payload: Record<string, unk
   );
 }
 
-function isForcedAccessEffectCueItem(item: { chips: string[]; category: string; visibility: ChronicleVisibility }): boolean {
-  return item.visibility === "public" && item.category === "danger" && item.chips.includes("Access-Effekt");
+function isForcedEffectCueItem(item: { chips: string[]; category: string; visibility: ChronicleVisibility }): boolean {
+  return (
+    item.visibility === "public" &&
+    item.category === "danger" &&
+    (item.chips.includes("Access-Effekt") || item.chips.includes("Tag erhalten"))
+  );
 }
 
 function turnPhaseSide(phase: PlayerView["phase"]): Side | null {

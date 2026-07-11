@@ -184,6 +184,54 @@ describe("deriveOpponentActionCues", () => {
     expect(runnerCues.at(-1)?.sound).toBe("tag_or_damage");
   });
 
+  it("queues a separate visible tag-result window with the exact gained amount", () => {
+    const tagEvent = event("evt_manhunt_tags", "resolve_choice", {
+      actor: "runner",
+      traceStep: "runner_bid",
+      sourceDefinitionId: "onr_proteus_050_manhunt",
+      corpBid: 0,
+      traceStrength: 6,
+      runnerBid: 0,
+      runnerStrength: 0,
+      traceSuccessful: true,
+      tagsAdded: 6,
+      runnerTagsAfter: 6,
+    });
+
+    const runnerCues = deriveOpponentActionCues({
+      viewerSide: "runner",
+      playerView: view("runner"),
+      events: [tagEvent],
+    });
+    const corpCues = deriveOpponentActionCues({
+      viewerSide: "corp",
+      playerView: view("corp"),
+      events: [tagEvent],
+    });
+    const runnerTagCue = runnerCues.find((cue) =>
+      cue.cueId.includes(":effect:"),
+    );
+    const corpTagCue = corpCues.find((cue) =>
+      cue.cueId.includes(":effect:"),
+    );
+
+    expect(runnerTagCue).toMatchObject({
+      cueId: "runner:evt_manhunt_tags:effect:0",
+      actor: "runner",
+      source: "system",
+      title: "Du hast 6 Tags erhalten.",
+      description: "Auslöser: Manhunt. Du hast jetzt 6 Tags.",
+      cardDefinitionId: "onr_proteus_050_manhunt",
+      cardTitle: "Manhunt",
+      iconBadge: "+6",
+      sound: "tag_or_damage",
+      visibility: "public",
+    });
+    expect(corpTagCue?.title).toBe("Der Runner hat 6 Tags erhalten.");
+    expect(cueHasHiddenLeak(runnerTagCue!)).toBe(false);
+    expect(cueHasHiddenLeak(corpTagCue!)).toBe(false);
+  });
+
   it("derives damage impact cues from public counts without leaking hidden source ids", () => {
     const cues = deriveDamageImpactCues({
       viewerSide: "runner",

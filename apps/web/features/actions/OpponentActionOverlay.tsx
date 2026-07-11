@@ -167,11 +167,13 @@ export function OpponentActionOverlay({
             kind={windowEventIconKindForActionCue({
               actionType: cue.actionType,
               ambience,
+              title: cue.title,
               ...(runHighlight?.serverId ? { serverId: runHighlight.serverId } : {}),
               ...(runHighlight?.serverLabel
                 ? { serverLabel: runHighlight.serverLabel }
                 : {}),
             })}
+            {...(cue.iconBadge ? { badge: cue.iconBadge } : {})}
           />
           <div className="opponentCueText">
             <strong>{renderTitle(cue)}</strong>

@@ -740,7 +740,7 @@ export function formatChronicleEvent(
         const runnerBid = numberValue(payload.runnerBid) ?? 0;
         const traceStrength = numberValue(payload.traceStrength);
         const runnerStrength = numberValue(payload.runnerStrength);
-        const tagsAdded = numberValue(payload.tagsAdded) ?? 0;
+        const tagsAdded = tagGainAmountFromPublicPayload(payload);
         const addedCounterAmount = numberValue(payload.addedCounterAmount) ?? 0;
         const addedCounterLabel =
           addedCounterAmount > 0
@@ -760,7 +760,7 @@ export function formatChronicleEvent(
         category = "danger";
         importance = "important";
         visibility = "public";
-        title = `Trace entschieden: ${traceParticipantLabel("corp", side)} ${creditText(corpBid)}, ${traceParticipantLabel("runner", side)} ${creditText(runnerBid)}; ${successful ? "Trace erfolgreich" : "Trace abgewehrt"}`;
+        title = `Trace entschieden: ${traceParticipantLabel("corp", side)} ${creditText(corpBid)}, ${traceParticipantLabel("runner", side)} ${creditText(runnerBid)}; ${successful ? "Trace erfolgreich" : "Trace abgewehrt"}${tagsAdded > 0 ? `; ${runnerTagGainOutcomeText(side, tagsAdded)}` : ""}`;
         description =
           traceStrength !== undefined && runnerStrength !== undefined
             ? `Endstand: Trace ${traceStrength} gegen Runner-Stärke ${runnerStrength}${payload.runnerRunEnded === true || payload.fangRunEnded === true ? `; Karteneffekt beendet den Run und sperrt weitere Runs bis zur Zahlung von ${creditText(runnerRunLockCreditCost ?? 2)}` : ""}${addedCounterAmount > 0 && addedCounterLabel ? `; Runner erhält ${addedCounterAmount} ${addedCounterLabel}` : ""}${hardwareWreckerEffect ? `; Karteneffekt: ${trashedCount} Hardware getrasht, ${damageAmount} Meat-Schaden${payload.damageCannotBePrevented === true ? " nicht verhinderbar" : ""}, Run endet` : ""}${hackerTrackerCountersAdded > 0 ? `; Hacker Tracker Central erhält ${hackerTrackerCountersAdded} Counter` : ""}.`
@@ -814,6 +814,7 @@ export function formatChronicleEvent(
         const corpBid = numberValue(payload.corpBid) ?? 0;
         const successful = payload.traceSuccessful === true;
         const resolved = typeof payload.traceSuccessful === "boolean";
+        const tagsAdded = tagGainAmountFromPublicPayload(payload);
         const openedNext = payload.postBidTraceLinkChoiceOpened === true;
         const applied =
           payload.eventModificationDecision === "apply" && linkDelta > 0;
@@ -828,6 +829,8 @@ export function formatChronicleEvent(
           : resolved
             ? `Trace entschieden: ${traceParticipantLabel("corp", side)} ${creditText(corpBid)}, ${traceParticipantLabel("runner", side)} ${creditText(runnerBid)}; ${successful ? "Trace erfolgreich" : "Trace abgewehrt"}`
             : phrase(subject, "keine Post-Bid-Link-Fähigkeit genutzt");
+        if (resolved && tagsAdded > 0)
+          title = `${title}; ${runnerTagGainOutcomeText(side, tagsAdded)}`;
         description =
           resolved &&
           traceStrength !== undefined &&
@@ -850,6 +853,9 @@ export function formatChronicleEvent(
             ? [`${traceStrength}:${runnerStrength}`]
             : []),
           ...(resolved ? [successful ? "Erfolg" : "Fehlschlag"] : []),
+          ...(tagsAdded > 0
+            ? [`+${tagsAdded} Tag${tagsAdded === 1 ? "" : "s"}`]
+            : []),
         );
         break;
       }
@@ -3635,11 +3641,100 @@ export function formatChronicleEffectItems(
     event,
     side,
   );
+  const tagGainItem = tagGainChronicleItem(event, side, effects);
   return [
     ...(payloadItem ? [payloadItem] : []),
     ...(traceHardwareWreckerItem ? [traceHardwareWreckerItem] : []),
+    ...(tagGainItem ? [tagGainItem] : []),
     ...effectItems,
   ];
+}
+
+function tagGainChronicleItem(
+  event: PublicGameEvent,
+  side: Side,
+  effects: ResolvedGameEffect[],
+): ChronicleItem | undefined {
+  const payload = event.publicPayload ?? {};
+  const tagsAdded = tagGainAmountFromPublicPayload(payload);
+  if (tagsAdded <= 0) return undefined;
+  const hasSeparateResolvedTagItem = effects.some(
+    (effect) =>
+      effect.kind === "add_tags" &&
+      !shouldMergeCardResolverEffect(event, effect) &&
+      (numberValue(effect.amount) ?? 0) > 0,
+  );
+  if (hasSeparateResolvedTagItem) return undefined;
+
+  const actor: Side = "runner";
+  const drawTaxTagsAdded = Math.max(
+    nonNegativePayloadCount(payload.drawTaxTagsAdded) ?? 0,
+    nonNegativePayloadCount(payload.citySurveillanceTagsAdded) ?? 0,
+    nonNegativePayloadCount(payload.citySurveillanceTags) ?? 0,
+  );
+  const drawTaxOnly =
+    nonNegativePayloadCount(payload.tagsAdded) === undefined &&
+    drawTaxTagsAdded > 0;
+  const sourceDefinitionId =
+    drawTaxOnly
+      ? undefined
+      : stringValue(payload.sourceDefinitionId) ??
+        stringValue(payload.cardDefinitionId) ??
+        stringValue(payload.traceAutoSuccessSourceDefinitionId);
+  const primarySourceTitle =
+    (drawTaxOnly
+      ? "City Surveillance"
+      : titleForDefinitionId(sourceDefinitionId) ??
+        stringValue(payload.sourceTitle) ??
+        stringValue(payload.title));
+  const additionalSourceDefinitionId = stringValue(
+    payload.traceAutoSuccessSourceDefinitionId,
+  );
+  const additionalSourceTitle = titleForDefinitionId(
+    additionalSourceDefinitionId,
+  );
+  const sourceTitles = Array.from(
+    new Set(
+      [primarySourceTitle, additionalSourceTitle].filter(
+        (value): value is string => Boolean(value),
+      ),
+    ),
+  );
+  const runnerTagsAfter = runnerTagsAfterTagGain(payload);
+  const subject = side === "runner" ? "Du" : "Der Runner";
+  const descriptionParts = [
+    sourceTitles.length > 0
+      ? `Auslöser: ${sourceTitles.join(" und ")}`
+      : undefined,
+    runnerTagsAfter !== undefined
+      ? `${subject} ${subject === "Du" ? "hast" : "hat"} jetzt ${tagCountText(runnerTagsAfter)}`
+      : undefined,
+  ].filter((value): value is string => Boolean(value));
+
+  return {
+    id: `${event.eventId}:tag-gain`,
+    category: "danger",
+    importance: "important",
+    visibility: "public",
+    actor,
+    title: ensurePeriod(runnerTagGainOutcomeText(side, tagsAdded)),
+    ...(descriptionParts.length > 0
+      ? { description: ensurePeriod(descriptionParts.join(". ")) }
+      : {}),
+    chips: uniqueChips([
+      ...baseChips(actor, false),
+      "Tag erhalten",
+      `+${tagsAdded} Tag${tagsAdded === 1 ? "" : "s"}`,
+      ...(runnerTagsAfter !== undefined
+        ? [`Jetzt ${runnerTagsAfter} Tag${runnerTagsAfter === 1 ? "" : "s"}`]
+        : []),
+      ...sourceTitles,
+    ]),
+    ...(sourceDefinitionId ? { cardDefinitionId: sourceDefinitionId } : {}),
+    ...(primarySourceTitle ? { cardTitle: primarySourceTitle } : {}),
+    cardDetailLines: [],
+    groupLabel: groupLabelFor("danger", actor, undefined, undefined),
+  };
 }
 
 function traceHardwareWreckerChronicleItem(
@@ -4272,7 +4367,7 @@ function formatChronicleEffect(
         subject,
         `${amount} Tag${amount === 1 ? "" : "s"}${through} erhalten`,
       );
-      chips.push(`+${amount} Tag${amount === 1 ? "" : "s"}`);
+      chips.push("Tag erhalten", `+${amount} Tag${amount === 1 ? "" : "s"}`);
       break;
     case "remove_tags":
       category = "danger";
@@ -5657,6 +5752,43 @@ function privateLookChips(payload: Record<string, unknown>): string[] {
   const zoneChip =
     zone === "rd" ? "R&D" : zone === "hq" ? "HQ" : "Private Look";
   return [zoneChip, `${count} angesehen`];
+}
+
+export function tagGainAmountFromPublicPayload(
+  payload: Record<string, unknown>,
+): number {
+  const directTagsAdded = nonNegativePayloadCount(payload.tagsAdded);
+  const familySpecificTagsAdded = Math.max(
+    nonNegativePayloadCount(payload.drawTaxTagsAdded) ?? 0,
+    nonNegativePayloadCount(payload.citySurveillanceTagsAdded) ?? 0,
+    nonNegativePayloadCount(payload.citySurveillanceTags) ?? 0,
+    nonNegativePayloadCount(payload.endTurnTagIfRunnerReceivedTagAdded) ?? 0,
+  );
+  const additionalTraceTags =
+    nonNegativePayloadCount(payload.traceAutoSuccessAdditionalTagsAdded) ?? 0;
+  return (directTagsAdded ?? familySpecificTagsAdded) + additionalTraceTags;
+}
+
+function runnerTagsAfterTagGain(
+  payload: Record<string, unknown>,
+): number | undefined {
+  const runnerTagsAfter = nonNegativePayloadCount(payload.runnerTagsAfter);
+  if (runnerTagsAfter !== undefined) return runnerTagsAfter;
+  const afterTraceAutoSuccess = nonNegativePayloadCount(
+    payload.runnerTagsAfterTraceAutoSuccess,
+  );
+  if (afterTraceAutoSuccess === undefined) return undefined;
+  return afterTraceAutoSuccess + (nonNegativePayloadCount(payload.tagsAdded) ?? 0);
+}
+
+function runnerTagGainOutcomeText(side: Side, amount: number): string {
+  const subject = side === "runner" ? "Du" : "Der Runner";
+  return `${subject} ${subject === "Du" ? "hast" : "hat"} ${tagCountText(amount)} erhalten`;
+}
+
+function nonNegativePayloadCount(value: unknown): number | undefined {
+  const number = numberValue(value);
+  return number !== undefined && number >= 0 ? Math.floor(number) : undefined;
 }
 
 function tagCountText(amount: number): string {

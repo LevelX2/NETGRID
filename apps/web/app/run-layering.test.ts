@@ -222,6 +222,10 @@ describe("run window layering", () => {
     expect(windowEventIconKindSource).toContain(
       'if (ambience === "movement") return "ice-pass"',
     );
+    expect(windowEventIconSource).toContain('kind === "gain-tag"');
+    expect(windowEventIconSource).toContain("windowEventIconBadge");
+    expect(css).toContain(".windowEventIcon-gain-tag");
+    expect(css).toContain(".windowEventIconBadge");
     expect(opponentActionOverlaySource).toContain(
       "windowEventIconKindForActionCue",
     );

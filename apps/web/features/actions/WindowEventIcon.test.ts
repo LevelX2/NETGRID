@@ -70,6 +70,23 @@ describe("windowEventIconKindForActionCue", () => {
     ).toBe("action");
   });
 
+  it("distinguishes gaining tags from removing them", () => {
+    expect(
+      windowEventIconKindForActionCue({
+        actionType: "resolve_choice",
+        ambience: null,
+        title: "Du hast 6 Tags erhalten.",
+      }),
+    ).toBe("gain-tag");
+    expect(
+      windowEventIconKindForActionCue({
+        actionType: "remove_tag",
+        ambience: null,
+        title: "Du hast 1 Tag entfernt.",
+      }),
+    ).toBe("remove-tag");
+  });
+
   it.each([
     ["search_stack.card", "Karten wählen", "draw-card"],
     ["temporary_program_install", "Programm installieren", "install-card"],
