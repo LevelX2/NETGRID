@@ -2413,9 +2413,50 @@ export function actionButtonTone(
   action: LegalAction,
 ): ActionButtonTone {
   if (isRunnerRunAbortAction(view, action)) return "danger";
+  if (isRunnerPayToContinueOnlyAction(view, action)) return "warning";
   if (isRunnerSubroutineResolutionAction(view, action)) return "danger";
   if (isUnnecessaryBreakerPumpAction(view, action)) return "warning";
   return "default";
+}
+
+function isRunnerPayToContinueOnlyAction(
+  view: PlayerView,
+  action: LegalAction,
+): boolean {
+  const run = view.run;
+  if (
+    !run ||
+    run.phase !== "encounter_ice" ||
+    action.side !== "runner" ||
+    action.type !== "continue_run" ||
+    action.payload?.encounterContinue !== true ||
+    action.payload?.encounterWillEndRun !== false
+  )
+    return false;
+  const payment =
+    Number(action.payload?.payOrEndRunSubroutinePayment ?? 0) +
+    Number(action.payload?.payOrTrashProgramSubroutinePayment ?? 0);
+  if (!Number.isFinite(payment) || payment <= 0) return false;
+  const paidIndexes = new Set([
+    ...commaSeparatedIndexes(action.payload?.payOrEndRunSubroutineIndexes),
+    ...commaSeparatedIndexes(action.payload?.payOrTrashProgramSubroutineIndexes),
+  ]);
+  const unbrokenSubroutineCount = Number(
+    action.payload?.unbrokenSubroutineCount ?? 0,
+  );
+  return (
+    Number.isInteger(unbrokenSubroutineCount) &&
+    unbrokenSubroutineCount > 0 &&
+    paidIndexes.size === unbrokenSubroutineCount
+  );
+}
+
+function commaSeparatedIndexes(value: unknown): number[] {
+  if (typeof value !== "string" || !value.trim()) return [];
+  return value
+    .split(",")
+    .map((part) => Number(part.trim()))
+    .filter((index) => Number.isInteger(index) && index >= 0);
 }
 
 function isRunnerRunAbortAction(

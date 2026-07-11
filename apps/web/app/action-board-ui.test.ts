@@ -867,6 +867,34 @@ describe("V1.0.5 action board UI helpers", () => {
       { encounterContinue: true, unbrokenSubroutineCount: 0 },
       "run.encounter_ice",
     );
+    const paySnowbank = legalAction(
+      "runner",
+      "continue_run",
+      "game_rule",
+      "Subroutinen auslösen (Runner zahlt 1 Credit)",
+      {
+        encounterContinue: true,
+        encounterWillEndRun: false,
+        unbrokenSubroutineCount: 1,
+        payOrEndRunSubroutineIndexes: "0",
+        payOrEndRunSubroutinePayment: 1,
+      },
+      "run.encounter_ice",
+    );
+    const payWithDamage = legalAction(
+      "runner",
+      "continue_run",
+      "game_rule",
+      "Subroutinen auslösen (Runner zahlt 1 Credit)",
+      {
+        encounterContinue: true,
+        encounterWillEndRun: false,
+        unbrokenSubroutineCount: 2,
+        payOrEndRunSubroutineIndexes: "1",
+        payOrEndRunSubroutinePayment: 1,
+      },
+      "run.encounter_ice",
+    );
     const pump = legalAction(
       "runner",
       "pump_breaker",
@@ -879,6 +907,8 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(actionButtonTone(running, jackOut)).toBe("danger");
     expect(actionButtonTone(running, continueRun)).toBe("danger");
     expect(actionButtonTone(running, passIce)).toBe("default");
+    expect(actionButtonTone(running, paySnowbank)).toBe("warning");
+    expect(actionButtonTone(running, payWithDamage)).toBe("danger");
     expect(actionButtonTone(running, pump)).toBe("warning");
     expect(actionButtonTone(underStrengthRunning, pump)).toBe("default");
   });
