@@ -4243,6 +4243,58 @@ select {
   background-image: url("/icons/window-events/core-damage.png");
 }
 
+.windowEventIcon-draw-card {
+  background-image: url("/icons/window-events/draw-card.png");
+}
+
+.windowEventIcon-gain-credit {
+  background-image: url("/icons/window-events/gain-credit.png");
+}
+
+.windowEventIcon-install-card {
+  background-image: url("/icons/window-events/install-card.png");
+}
+
+.windowEventIcon-play-card {
+  background-image: url("/icons/window-events/play-card.png");
+}
+
+.windowEventIcon-rez-card {
+  background-image: url("/icons/window-events/rez-card.png");
+}
+
+.windowEventIcon-advance-card {
+  background-image: url("/icons/window-events/advance-card.png");
+}
+
+.windowEventIcon-remove-tag {
+  background-image: url("/icons/window-events/remove-tag.png");
+}
+
+.windowEventIcon-purge {
+  background-image: url("/icons/window-events/purge.png");
+}
+
+.windowEventIcon-card-ability {
+  background-image: url("/icons/window-events/card-ability.png");
+}
+
+.windowEventIcon-choice {
+  background-image: url("/icons/window-events/choice.png");
+}
+
+.windowEventIcon-run-end {
+  background-image: url("/icons/window-events/run-end.png");
+}
+
+.windowEventIcon-turn-end {
+  background-image: url("/icons/window-events/turn-end.png");
+}
+
+.windowEventIcon-action {
+  background-image: url("/icons/window-events/action.png");
+}
+
 .windowEventIcon-run-hq,
 .windowEventIcon-run-rd,
 .windowEventIcon-run-archives,
@@ -9049,6 +9101,16 @@ select {
 
 .accessRevealCard .card.preview {
   min-height: 0;
+}
+
+.accessRevealSingleRevealedCard {
+  display: grid;
+  justify-items: center;
+  gap: 9px;
+}
+
+.accessRevealSingleRevealedCard .cardSlot {
+  width: min(220px, 100%);
 }
 
 .accessRevealDecision {

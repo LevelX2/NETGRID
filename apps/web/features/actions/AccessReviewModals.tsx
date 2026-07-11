@@ -138,6 +138,13 @@ export function AccessRevealModal({
           ? "R&D Reveal"
           : "Zugriff";
   const visibleRevealedCards = reveal.revealedCards ?? [];
+  const singleRevealedCard =
+    visibleRevealedCards.length === 1 ? visibleRevealedCards[0] : null;
+  const revealedCardsTestId = isGypsyReveal
+    ? "gypsy-rd-reveal-cards"
+    : isSecurityPurgeReveal
+      ? "security-purge-reveal-cards"
+      : "archives-reveal-cards";
   const statusText = reveal.outcomeStatus ?? reveal.trashStatus;
   const choiceOptions =
     reveal.choice && reveal.choiceAction
@@ -172,16 +179,10 @@ export function AccessRevealModal({
             )}
           </div>
         </div>
-        {visibleRevealedCards.length ? (
+        {visibleRevealedCards.length > 1 ? (
           <div
             className="exposeReviewCards"
-            data-testid={
-              isGypsyReveal
-                ? "gypsy-rd-reveal-cards"
-                : isSecurityPurgeReveal
-                  ? "security-purge-reveal-cards"
-                  : "archives-reveal-cards"
-            }
+            data-testid={revealedCardsTestId}
           >
             {visibleRevealedCards.map((card, index) => (
               <div
@@ -203,10 +204,31 @@ export function AccessRevealModal({
             ))}
           </div>
         ) : null}
-        <div className="accessRevealBody">
+        <div
+          className={`accessRevealBody${singleRevealedCard ? " hasSingleRevealedCard" : ""}`}
+        >
           {reveal.card ? (
             <div className="accessRevealCard">
               <CardView card={reveal.card} displayMode={displayMode} preview />
+            </div>
+          ) : singleRevealedCard ? (
+            <div
+              className="accessRevealCard accessRevealSingleRevealedCard"
+              data-testid={revealedCardsTestId}
+            >
+              <CardView
+                card={singleRevealedCard}
+                displayMode={displayMode}
+                preview
+              />
+              <div className="exposeReviewCardText">
+                <strong>{singleRevealedCard.title}</strong>
+                <span>
+                  {isGypsyReveal
+                    ? gypsyRevealCardStatus(singleRevealedCard.type, 0)
+                    : (reveal.revealedCardStatus ?? "Jetzt offen im Archiv")}
+                </span>
+              </div>
             </div>
           ) : null}
           <div className="accessRevealDecision">
@@ -329,6 +351,7 @@ function AccessDamageStage({
 }) {
   const typeLabel = damageTypeLabel(cue.damageType);
   const sourceLabel = sourceTitle ?? cue.sourceLabel;
+  const damageSentence = `Runner erleidet ${cue.amount} ${typeLabel} durch ${sourceLabel}${/[.!?]$/.test(sourceLabel.trim()) ? "" : "."}`;
   return (
     <div
       className={`accessDamageStage damage-${cue.damageType}`}
@@ -336,9 +359,7 @@ function AccessDamageStage({
     >
       <WindowEventIcon kind={`${cue.damageType}-damage`} />
       <strong className="accessDamageTitle">{typeLabel}</strong>
-      <p className="accessRevealStatus">
-        {cue.amount} {typeLabel} durch {sourceLabel}.
-      </p>
+      <p className="accessRevealStatus">{damageSentence}</p>
       <div className="accessDamageStats">
         {cue.runnerGripBefore !== undefined && cue.runnerGripAfter !== undefined ? (
           <span>

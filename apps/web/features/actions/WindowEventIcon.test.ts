@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { windowEventIconKindForActionCue } from "./window-event-icon-kind";
+import {
+  windowEventIconKindForActionCue,
+  windowEventIconKindForChoice,
+} from "./window-event-icon-kind";
 
 describe("windowEventIconKindForActionCue", () => {
   it.each([
@@ -36,5 +39,45 @@ describe("windowEventIconKindForActionCue", () => {
         serverId: "hq",
       }),
     ).toBe("ice-pass");
+  });
+
+  it.each([
+    ["mandatory_draw", "draw-card"],
+    ["gain_credit", "gain-credit"],
+    ["install_card", "install-card"],
+    ["play_event", "play-card"],
+    ["play_operation", "play-card"],
+    ["rez_ice", "rez-card"],
+    ["advance_card", "advance-card"],
+    ["remove_tag", "remove-tag"],
+    ["purge_virus_counters", "purge"],
+    ["activated_card_ability", "card-ability"],
+    ["resolve_choice", "choice"],
+    ["jack_out", "run-end"],
+    ["end_turn", "turn-end"],
+  ])("maps %s to %s", (actionType, expected) => {
+    expect(
+      windowEventIconKindForActionCue({ actionType, ambience: null }),
+    ).toBe(expected);
+  });
+
+  it("uses a visible fallback for unknown future actions", () => {
+    expect(
+      windowEventIconKindForActionCue({
+        actionType: "future_public_action",
+        ambience: null,
+      }),
+    ).toBe("action");
+  });
+
+  it.each([
+    ["search_stack.card", "Karten wählen", "draw-card"],
+    ["temporary_program_install", "Programm installieren", "install-card"],
+    ["corp_installed_economy.credit_choice", "Credits wählen", "gain-credit"],
+    ["generic.source", "Ziel wählen", "choice"],
+  ])("maps choice %s to %s", (source, title, expected) => {
+    expect(
+      windowEventIconKindForChoice({ ambience: null, source, title }),
+    ).toBe(expected);
   });
 });
