@@ -666,6 +666,21 @@ describe("tacticalPlanMappedChoice", () => {
     expect(result.choice?.action.actionId).toBe("run-rd");
   });
 
+  it("lets a nonpositive speculative central run yield to positive economy", () => {
+    const rdRun = legalAction("run-rd", "start_run", { serverId: "rd" });
+    const gain = legalAction("gain", "gain_credit");
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [choice(gain, 120), choice(rdRun, -40)],
+      planMapping("runner.opportunistic_central_run", [rdRun]),
+      choice(gain, 120),
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("gain");
+    expect(result.overrideReason).toBe("mapped_nonpositive_against_positive");
+  });
+
   it("keeps score-threat remote contest funding over off-plan Archives runs", () => {
     const gain = legalAction("gain", "gain_credit");
     const archives = legalAction("run-archives", "start_run", {

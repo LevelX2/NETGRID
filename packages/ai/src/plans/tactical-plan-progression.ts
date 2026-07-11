@@ -27,7 +27,8 @@ export function progressTacticalPlans(
   if (!previousPlan) return { plans: [...plans] };
   const creditBaseShouldYieldToRdOpportunity =
     previousPlan.type === "runner.build_credit_base" &&
-    plans.some(isCheapUnknownRdOpportunityPlan);
+    plans.some(isCheapUnknownRdOpportunityPlan) &&
+    !plans.some(isNearTermCreditBaseFundingPlan);
   const previousCentralProbeSatisfied =
     previousPlan.type === "runner.opportunistic_central_run" &&
     previousPlan.status === "satisfied" &&
@@ -169,6 +170,20 @@ function isCheapUnknownRdOpportunityPlan(plan: TacticalPlan): boolean {
     plan.target.id === "rd" &&
     plan.status === "active" &&
     plan.evidence.includes("rd_unknown_low_cost_opportunity_floor:true")
+  );
+}
+
+function isNearTermCreditBaseFundingPlan(plan: TacticalPlan): boolean {
+  if (plan.type !== "runner.build_credit_base") return false;
+  const prefix = "credit_base_top_missing_credits:";
+  const missingCredits = Number(
+    plan.evidence.find((entry) => entry.startsWith(prefix))?.slice(prefix.length),
+  );
+  return (
+    plan.evidence.includes("credit_base_funding_need:true") &&
+    Number.isFinite(missingCredits) &&
+    missingCredits > 0 &&
+    missingCredits <= 2
   );
 }
 

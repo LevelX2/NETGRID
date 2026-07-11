@@ -37,7 +37,15 @@ export function runnerCreditBasePlans(
   const drawOverflow = assessRunnerDrawOverflow(context);
   const drawOverflowCreditPressure =
     drawOverflow && runnerDrawOverflowSupportsCreditPlan(drawOverflow);
-  if (runnerMeaningfulRunOpportunityAvailable(context)) {
+  const missingCredits = creditBase?.topBlockedHandCandidate?.missingCredits;
+  const nearTermFundingTarget =
+    creditBase?.fundingNeed === true &&
+    missingCredits !== undefined &&
+    missingCredits <= 2;
+  if (
+    runnerMeaningfulRunOpportunityAvailable(context) &&
+    !nearTermFundingTarget
+  ) {
     return [];
   }
   if (
@@ -55,6 +63,18 @@ export function runnerCreditBasePlans(
     ? runnerDrawOverflowCreditPriorityBoost(drawOverflow)
     : 0;
   const priority = Math.min(940, basePriority + overflowBoost);
+  const basicDrawActionAvailable = context.input.legalActions.some(
+    (action) => action.type === "draw_card",
+  );
+  const longBasicCreditFundingHorizon =
+    creditBase?.fundingNeed === true &&
+    creditBase.usefulHandCardsBlockedByCredits > 0 &&
+    missingCredits !== undefined &&
+    missingCredits >= 4 &&
+    context.runnerEconomyPosture?.preferredEconomyRoute ===
+      "basic_credit_fallback" &&
+    basicDrawActionAvailable &&
+    !drawOverflowCreditPressure;
   return [
     createTacticalPlan({
       planId: "runner.build_credit_base",
@@ -62,12 +82,18 @@ export function runnerCreditBasePlans(
       type: "runner.build_credit_base",
       status: "active",
       priority,
-      horizonTurns: 1,
+      horizonTurns: longBasicCreditFundingHorizon ? 2 : 1,
       target: { kind: "capability", id: "runner_credit_base" },
       currentStep: createPlanStep({
-        stepId: "gain_credits:runner_credit_base",
-        kind: "gain_credits",
-        desiredActionSemantics: ["economy.gain_credit"],
+        stepId: longBasicCreditFundingHorizon
+          ? "draw_for_answer:runner_credit_base"
+          : "gain_credits:runner_credit_base",
+        kind: longBasicCreditFundingHorizon
+          ? "draw_for_answer"
+          : "gain_credits",
+        desiredActionSemantics: longBasicCreditFundingHorizon
+          ? ["draw.card"]
+          : ["economy.gain_credit"],
         rationale: [
           creditBase
             ? `creditbase recommends ${creditBase.recommendation}`
@@ -75,6 +101,12 @@ export function runnerCreditBasePlans(
           creditBase
             ? `desired reserve ${creditBase.desiredCreditReserve}`
             : "draw overflow pressure is high",
+          ...(longBasicCreditFundingHorizon
+            ? [
+                `basic credit fallback is ${missingCredits} clicks from the funding target`,
+                "draw for a more efficient economy route",
+              ]
+            : []),
           ...(drawOverflowCreditPressure
             ? runnerDrawOverflowRationale(drawOverflow)
             : []),
@@ -91,6 +123,8 @@ export function runnerCreditBasePlans(
               `credit_reserve_contest:${creditBase.creditReservePolicy.contestReserve}`,
               `credit_reserve_below_now:${creditBase.creditReservePolicy.belowReserveNow}`,
               `credit_base_blocked_hand_cards:${creditBase.usefulHandCardsBlockedByCredits}`,
+              `credit_base_top_missing_credits:${missingCredits ?? 0}`,
+              `credit_base_long_basic_credit_horizon:${longBasicCreditFundingHorizon}`,
               `economy_route:${context.runnerEconomyPosture?.preferredEconomyRoute ?? "unknown"}`,
             ]
           : ["credit_base_recommendation:avoid_overdraw"]),

@@ -220,6 +220,12 @@ export function tacticalPlanMappedChoice(
       overrideChoice,
       scoreGap,
     );
+    const nonPositiveOpportunisticRunShouldYield =
+      tacticalPlanNonPositiveOpportunisticRunShouldYield(
+        mapping,
+        mappedChoice,
+        overrideChoice,
+      );
     const lowValueRecoveryShouldYield =
       tacticalPlanLowValueRecoveryMappingShouldYield(
         mappedChoice,
@@ -239,6 +245,7 @@ export function tacticalPlanMappedChoice(
         mappedActionIds,
         {
           repeatedRunShouldYield,
+          nonPositiveOpportunisticRunShouldYield,
           lowValueRecoveryShouldYield,
           corpBoardTriageMismatchShouldYield,
           deferredDevelopmentInstallShouldYield,
@@ -391,6 +398,7 @@ function tacticalPlanRunnerMappingBlocksOffPlanOverride(
   mappedActionIds: ReadonlySet<string>,
   exceptions: {
     repeatedRunShouldYield: boolean;
+    nonPositiveOpportunisticRunShouldYield: boolean;
     lowValueRecoveryShouldYield: boolean;
     corpBoardTriageMismatchShouldYield: boolean;
     deferredDevelopmentInstallShouldYield: boolean;
@@ -400,6 +408,7 @@ function tacticalPlanRunnerMappingBlocksOffPlanOverride(
   if (!runnerPlanTypeRequiresPlanDominance(mapping.plan.type)) return false;
   if (mappedActionIds.has(overrideChoice.action.actionId)) return false;
   if (exceptions.repeatedRunShouldYield) return false;
+  if (exceptions.nonPositiveOpportunisticRunShouldYield) return false;
   if (exceptions.lowValueRecoveryShouldYield) return false;
   if (exceptions.corpBoardTriageMismatchShouldYield) return false;
   if (exceptions.deferredDevelopmentInstallShouldYield) return false;
@@ -590,6 +599,29 @@ function tacticalPlanRepeatedRunMappingShouldYield(
   }
   const overrideServerId = semanticRuntimeServerId(overrideChoice.action);
   return Boolean(overrideServerId && overrideServerId !== serverId);
+}
+
+function tacticalPlanNonPositiveOpportunisticRunShouldYield(
+  mapping: PlanStepMappingResult,
+  mappedChoice: SemanticRuntimeChoice,
+  overrideChoice: SemanticRuntimeChoice,
+): boolean {
+  if (
+    mapping.plan.type !== "runner.opportunistic_central_run" ||
+    mappedChoice.action.type !== "start_run" ||
+    mappedChoice.score > 0 ||
+    overrideChoice.score <= 0
+  ) {
+    return false;
+  }
+  if (mapping.plan.evidence.includes("runner_run_target_payoff:score_threat")) {
+    return false;
+  }
+  return !semanticRuntimeChoiceHasAnyScoreComponent(mappedChoice, [
+    "runner_hq_known_agenda",
+    "runner_rnd_fresh_memory",
+    "runner_goal_fit_tactical_goal_run_target",
+  ]);
 }
 
 function tacticalPlanLowValueRecoveryMappingShouldYield(

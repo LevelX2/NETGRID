@@ -2419,6 +2419,40 @@ describe("tactical plan model", () => {
     );
   });
 
+  it("draws for a better economy route instead of clicking through a long basic-credit gap", () => {
+    const draw = legalAction("draw", "runner", "draw_card");
+    const gain = legalAction("gain", "runner", "gain_credit");
+    const input = aiInput("runner", [draw, gain]);
+    input.playerView.own.credits = 1;
+
+    const plans = buildTacticalPlans({
+      input,
+      runnerEconomyPosture: runnerEconomyPosture({
+        currentCredits: 1,
+        usefulHandCardsBlockedByCredits: 1,
+        topBlockedMissingCredits: 6,
+        recommendation: "fund_useful_hand_card",
+        economyPriority: "high",
+        preferredEconomyRoute: "basic_credit_fallback",
+      }),
+    });
+    const creditPlan = plans.find(
+      (plan) => plan.type === "runner.build_credit_base",
+    );
+
+    expect(creditPlan?.currentStep).toMatchObject({
+      kind: "draw_for_answer",
+      desiredActionSemantics: ["draw.card"],
+    });
+    expect(creditPlan?.evidence).toEqual(
+      expect.arrayContaining([
+        "credit_base_top_missing_credits:6",
+        "credit_base_long_basic_credit_horizon:true",
+        "economy_route:basic_credit_fallback",
+      ]),
+    );
+  });
+
   it("treats generic credit and draw setup as support when open R&D is available", () => {
     const rdRun = legalAction("run-rd", "runner", "start_run", {
       serverId: "rd",
@@ -3074,7 +3108,7 @@ describe("tactical plan model", () => {
     );
   });
 
-  it("selects unguarded unknown R&D pressure before continued high creditbase setup", () => {
+  it("finishes a near-term hand-card funding target before speculative unknown R&D pressure", () => {
     const rdRun = legalAction("run-rd", "runner", "start_run", {
       serverId: "rd",
     });
@@ -3117,6 +3151,7 @@ describe("tactical plan model", () => {
       runnerEconomyPosture: runnerEconomyPosture({
         currentCredits: 5,
         usefulHandCardsBlockedByCredits: 1,
+        topBlockedMissingCredits: 1,
         recommendation: "fund_useful_hand_card",
         economyPriority: "high",
       }),
@@ -3150,13 +3185,11 @@ describe("tactical plan model", () => {
       pathCost: 0,
       recommendation: "run_now",
     });
-    expect(result.selectedPlan?.planId).toBe(
-      "runner.opportunistic_central_run:rd",
-    );
+    expect(result.selectedPlan?.planId).toBe("runner.build_credit_base");
     expect(result.selectedMapping?.legalActions[0]?.actionId).toBe(
-      rdRun.actionId,
+      gain.actionId,
     );
-    expect(rdPlan?.priority).toBeGreaterThan(creditPlan?.priority ?? -Infinity);
+    expect(creditPlan?.priority).toBeGreaterThan(rdPlan?.priority ?? -Infinity);
     expect(rdPlan?.scoreBreakdown).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -3165,10 +3198,8 @@ describe("tactical plan model", () => {
         }),
       ]),
     );
-    expect(creditPlan).toBeUndefined();
-    expect(result.planProgressionReason).toBe(
-      "previous_credit_base_interrupted_by_rd_opportunity",
-    );
+    expect(creditPlan?.evidence).toContain("credit_base_top_missing_credits:1");
+    expect(result.planProgressionReason).toBe("previous_plan_considered");
   });
 
   it("selects tag cleanup before ordinary runner pressure plans", () => {
@@ -3519,8 +3550,10 @@ function persistentInstallEvaluation(
 function runnerEconomyPosture(overrides: {
   currentCredits: number;
   usefulHandCardsBlockedByCredits?: number;
+  topBlockedMissingCredits?: number;
   recommendation?: RunnerEconomyPosture["creditBasePlan"]["recommendation"];
   economyPriority?: RunnerEconomyPosture["creditBasePlan"]["economyPriority"];
+  preferredEconomyRoute?: RunnerEconomyPosture["preferredEconomyRoute"];
 }): RunnerEconomyPosture {
   const usefulHandCardsBlockedByCredits =
     overrides.usefulHandCardsBlockedByCredits ?? 0;
@@ -3559,6 +3592,19 @@ function runnerEconomyPosture(overrides: {
       fundingNeed: economyPriority === "high",
       usefulHandCardsBlockedByCredits,
       usefulHandCardsAffordableNow: 0,
+      ...(overrides.topBlockedMissingCredits !== undefined
+        ? {
+            topBlockedHandCandidate: {
+              developmentRole: "access_payoff" as const,
+              currentNeed: "useful_now" as const,
+              priority: 650,
+              installOrPlayCost:
+                overrides.currentCredits + overrides.topBlockedMissingCredits,
+              missingCredits: overrides.topBlockedMissingCredits,
+              deferReason: "missing_credits" as const,
+            },
+          }
+        : {}),
       recommendation,
       economyPriority,
       evidence: [],
@@ -3567,6 +3613,9 @@ function runnerEconomyPosture(overrides: {
     buildEconomyBeforePressure: economyPriority !== "low",
     bankToolsRelevant: false,
     fundingNeed: economyPriority === "high",
+    ...(overrides.preferredEconomyRoute
+      ? { preferredEconomyRoute: overrides.preferredEconomyRoute }
+      : {}),
     recommendation: economyPriority === "high" ? "build_economy" : "stable",
     evidence: [],
   };
