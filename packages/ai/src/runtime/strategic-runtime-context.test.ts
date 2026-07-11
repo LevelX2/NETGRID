@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import type { LegalAction, PlayerView, Side, VisibleCard } from "@netgrid/shared";
+import type {
+  LegalAction,
+  PlayerView,
+  Side,
+  VisibleCard,
+} from "@netgrid/shared";
 import type {
   BreakerCoverageKind,
   CoverageState,
@@ -73,11 +78,15 @@ describe("strategic runtime context", () => {
           server("hq"),
           server("rd"),
           server("archives"),
-          server("remote_1", [], [
-            visibleCard("agenda-remote", "corp", "agenda", {
-              advancementRequirement: 3,
-            }),
-          ]),
+          server(
+            "remote_1",
+            [],
+            [
+              visibleCard("agenda-remote", "corp", "agenda", {
+                advancementRequirement: 3,
+              }),
+            ],
+          ),
         ],
       }),
       legalActions: [
@@ -119,11 +128,15 @@ describe("strategic runtime context", () => {
           server("hq"),
           server("rd"),
           server("archives"),
-          server("remote_1", [], [
-            visibleCard("agenda-remote", "corp", "agenda", {
-              advancementRequirement: 3,
-            }),
-          ]),
+          server(
+            "remote_1",
+            [],
+            [
+              visibleCard("agenda-remote", "corp", "agenda", {
+                advancementRequirement: 3,
+              }),
+            ],
+          ),
         ],
       }),
       legalActions: [
@@ -195,6 +208,99 @@ describe("strategic runtime context", () => {
         (candidate) => candidate.strategyId,
       ),
     ).toContain("corp.tag_trace_punish");
+  });
+
+  it("exits completed breaker search into visible central pressure", () => {
+    const context = buildStrategicRuntimeContext({
+      side: "runner",
+      playerView: playerView("runner", { credits: 9 }),
+      legalActions: [
+        action("run-rd", "runner", "start_run", 0, { serverId: "rd" }),
+      ],
+      strategyProfile: multiStrategyProfile("runner", {
+        primary: ["runner.search.breaker", "runner.rig_first"],
+        scores: {
+          "runner.search.breaker": score("runner.search.breaker", {
+            final: 100,
+          }),
+          "runner.rig_first": score("runner.rig_first", { final: 90 }),
+        },
+      }),
+      deckCapabilities: runnerCapabilities({
+        wall: coverage({ installed: true }),
+        code_gate: coverage({ installed: true }),
+        sentry: coverage({ installed: true }),
+      }),
+    });
+
+    expect(context.strategyPortfolio.activeStrategyId).toBe(
+      "runner.rnd_pressure",
+    );
+    expect(context.targetVector).toMatchObject({
+      kind: "central",
+      targetId: "rd",
+    });
+    expect(
+      context.strategyPortfolio.productiveCandidates.find(
+        (candidate) => candidate.strategyId === "runner.rnd_pressure",
+      )?.evidence,
+    ).toContain("runtime_transition:runner_setup_complete");
+  });
+
+  it("keeps breaker search active while visible coverage is incomplete", () => {
+    const context = buildStrategicRuntimeContext({
+      side: "runner",
+      playerView: playerView("runner", { credits: 9 }),
+      legalActions: [
+        action("run-rd", "runner", "start_run", 0, { serverId: "rd" }),
+      ],
+      strategyProfile: multiStrategyProfile("runner", {
+        primary: ["runner.search.breaker"],
+        scores: {
+          "runner.search.breaker": score("runner.search.breaker"),
+        },
+      }),
+      deckCapabilities: runnerCapabilities({
+        wall: coverage({ installed: true }),
+        code_gate: coverage({ inDeckKnown: true, searchableNow: true }),
+        sentry: coverage({ installed: true }),
+      }),
+    });
+
+    expect(context.strategyPortfolio.activeStrategyId).toBe(
+      "runner.search.breaker",
+    );
+    expect(context.targetVector.kind).toBe("coverage");
+  });
+
+  it("marks the completed-setup pressure transition as urgent at matchpoint", () => {
+    const context = buildStrategicRuntimeContext({
+      side: "runner",
+      playerView: playerView("runner", {
+        credits: 9,
+        ownAgendaPoints: 5,
+        opponentAgendaPoints: 6,
+      }),
+      legalActions: [
+        action("run-hq", "runner", "start_run", 0, { serverId: "hq" }),
+      ],
+      strategyProfile: multiStrategyProfile("runner", {
+        primary: ["runner.search.breaker"],
+        scores: {
+          "runner.search.breaker": score("runner.search.breaker"),
+        },
+      }),
+      deckCapabilities: runnerCapabilities({
+        wall: coverage({ installed: true }),
+        code_gate: coverage({ installed: true }),
+        sentry: coverage({ installed: true }),
+      }),
+    });
+
+    const pressure = context.strategyPortfolio.productiveCandidates.find(
+      (candidate) => candidate.strategyId === "runner.hq_pressure",
+    );
+    expect(pressure?.evidence).toContain("runtime_transition_matchpoint:true");
   });
 
   it("does not treat scored shuffle-draw as active Corp economy", () => {
@@ -454,6 +560,8 @@ function playerView(
   options: {
     credits: number;
     servers?: PlayerView["servers"];
+    ownAgendaPoints?: number;
+    opponentAgendaPoints?: number;
   },
 ): PlayerView {
   return {
@@ -466,7 +574,7 @@ function playerView(
       identity: visibleCard(`${side}-identity`, side, "identity"),
       credits: options.credits,
       clicks: 3,
-      agendaPoints: 0,
+      agendaPoints: options.ownAgendaPoints ?? 0,
       gripOrHq: [],
       stackOrRdCount: 20,
       heapOrArchives: [],
@@ -476,10 +584,14 @@ function playerView(
       tags: 0,
     },
     opponent: {
-      identity: visibleCard(`${side}-opponent`, side === "runner" ? "corp" : "runner", "identity"),
+      identity: visibleCard(
+        `${side}-opponent`,
+        side === "runner" ? "corp" : "runner",
+        "identity",
+      ),
       credits: 5,
       clicks: 3,
-      agendaPoints: 0,
+      agendaPoints: options.opponentAgendaPoints ?? 0,
       tags: 0,
       handCount: 5,
       maxHandSize: 5,
@@ -488,7 +600,11 @@ function playerView(
       scoreArea: [],
       rig: [],
     },
-    servers: options.servers ?? [server("hq"), server("rd"), server("archives")],
+    servers: options.servers ?? [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+    ],
     publicEvents: [],
     legalActions: [],
     winner: null,

@@ -3016,6 +3016,83 @@ describe("tactical plan model", () => {
     expect(getTacticalPlanMemorySnapshot(inputB)).toBeUndefined();
   });
 
+  it("keeps an opportunistic central funding step bound until the run starts", () => {
+    resetTacticalPlanMemory();
+    const gain = legalAction("gain", "runner", "gain_credit");
+    const runHq = legalAction("run-hq", "runner", "start_run", {
+      serverId: "hq",
+    });
+    const input = aiInput("runner", [gain, runHq]);
+    input.decisionId = "match-run-funding:1:runner";
+    const fundingStep = createPlanStep({
+      stepId: "gain_credits_before_run:hq",
+      kind: "gain_credits",
+      desiredActionSemantics: ["economy.gain_credit"],
+      mappingStatus: "matched",
+    });
+    const fundingPlan = createTacticalPlan({
+      planId: "runner.opportunistic_central_run:hq",
+      side: "runner",
+      type: "runner.opportunistic_central_run",
+      status: "active",
+      priority: 900,
+      horizonTurns: 1,
+      target: { kind: "server", id: "hq" },
+      currentStep: fundingStep,
+      stateVersion: 1,
+    });
+
+    const fundingMemory = rememberTacticalPlanRuntime(
+      input,
+      {
+        planAlternatives: [fundingPlan],
+        blockedPlans: [],
+        selectedPlan: fundingPlan,
+        selectedStep: fundingStep,
+      },
+      gain,
+    );
+
+    expect(fundingMemory).toMatchObject({
+      type: "runner.opportunistic_central_run",
+      target: { kind: "server", id: "hq" },
+      selectedStepKind: "gain_credits",
+      status: "progressing",
+      ttlDecisionsRemaining: 1,
+    });
+    expect(getTacticalPlanMemorySnapshot(input)?.status).toBe("progressing");
+
+    const runStep = createPlanStep({
+      stepId: "probe_central:hq",
+      kind: "probe_central",
+      desiredActionSemantics: ["run.start"],
+      mappingStatus: "matched",
+    });
+    const runPlan = createTacticalPlan({
+      ...fundingPlan,
+      status: "progressing",
+      currentStep: runStep,
+      stateVersion: 2,
+    });
+    const runMemory = rememberTacticalPlanRuntime(
+      { ...input, decisionId: "match-run-funding:2:runner" },
+      {
+        planAlternatives: [runPlan],
+        blockedPlans: [],
+        selectedPlan: runPlan,
+        selectedStep: runStep,
+        ...(fundingMemory ? { previousPlan: fundingMemory } : {}),
+      },
+      runHq,
+    );
+
+    expect(runMemory).toMatchObject({
+      selectedStepKind: "probe_central",
+      status: "satisfied",
+      ttlDecisionsRemaining: 0,
+    });
+  });
+
   it("returns redacted deck capability facts in runtime results", () => {
     const input = aiInput("runner", [
       legalAction("run-remote", "runner", "start_run", {
@@ -3442,9 +3519,7 @@ describe("tactical plan model", () => {
       { source: "punish-card" },
     );
     const input = aiInput("corp", [installAgenda, punish]);
-    input.playerView.own.gripOrHq = [
-      visibleCard("agenda-1", "corp", "agenda"),
-    ];
+    input.playerView.own.gripOrHq = [visibleCard("agenda-1", "corp", "agenda")];
     input.playerView.servers = [
       server("hq"),
       server("rd"),

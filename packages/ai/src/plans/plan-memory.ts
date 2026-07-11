@@ -91,7 +91,9 @@ export function createTacticalPlanMemorySnapshot(params: {
   const status = planMemoryStatus(params.plan, params.step);
   const ttlDecisionsRemaining =
     params.plan.type === "runner.opportunistic_central_run"
-      ? Math.max(0, (params.previousPlan?.ttlDecisionsRemaining ?? 1) - 1)
+      ? status === "satisfied"
+        ? 0
+        : Math.max(1, (params.previousPlan?.ttlDecisionsRemaining ?? 2) - 1)
       : 2;
   return {
     schemaVersion: TACTICAL_PLAN_SCHEMA_VERSION,
@@ -144,7 +146,9 @@ function planMemoryStatus(
   if (plan.status === "abandoned") return "abandoned";
   if (plan.status === "blocked") return "blocked";
   if (step.mappingStatus === "matched") {
-    if (plan.type === "runner.opportunistic_central_run") return "satisfied";
+    if (plan.type === "runner.opportunistic_central_run") {
+      return step.kind === "probe_central" ? "satisfied" : "progressing";
+    }
     if (plan.type === "runner.cash_out_credit_bank") return "satisfied";
     if (plan.type === "corp.rez_defense") return "satisfied";
     if (

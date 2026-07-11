@@ -29,10 +29,7 @@ export type StrategicRoleStatus =
   | "temporarily_unavailable"
   | "unknown";
 
-export type StrategicIntentCompleteness =
-  | "none"
-  | "partial"
-  | "complete";
+export type StrategicIntentCompleteness = "none" | "partial" | "complete";
 
 export type StrategicIntentFamily =
   | "neutral"
@@ -231,20 +228,21 @@ export function buildStrategicIntentState(
     candidatePrimaryStrategy,
   );
   const primaryStrategy = commitmentSelection.primaryStrategy;
-  const secondaryStrategies = selectSecondaryStrategies(params, primaryStrategy);
-  const portfolioCandidate = params.strategyPortfolio?.productiveCandidates.find(
-    (candidate) => candidate.strategyId === primaryStrategy.strategyId,
+  const secondaryStrategies = selectSecondaryStrategies(
+    params,
+    primaryStrategy,
   );
+  const portfolioCandidate =
+    params.strategyPortfolio?.productiveCandidates.find(
+      (candidate) => candidate.strategyId === primaryStrategy.strategyId,
+    );
   const roleStatuses = sortedRoleStatuses(
     portfolioCandidate?.roleStatuses ?? params.roleStatuses ?? [],
   );
   const reserve =
     portfolioCandidate?.reserve ??
     params.reserveRequirement ??
-    defaultReserveRequirement(
-      primaryStrategy.family,
-      params.availableCredits,
-    );
+    defaultReserveRequirement(primaryStrategy.family, params.availableCredits);
   const blockers = buildBlockers(primaryStrategy, roleStatuses, reserve);
   const targetVector =
     portfolioCandidate?.targetVector ??
@@ -327,9 +325,36 @@ function selectPrimaryStrategy(
     eligibleStrategies.includes(params.preferredStrategyId)
       ? params.preferredStrategyId
       : undefined;
+  const preferredPortfolioCandidate =
+    params.preferredStrategyId && params.strategyPortfolio
+      ? params.strategyPortfolio.productiveCandidates.find(
+          (candidate) =>
+            candidate.strategyId === params.preferredStrategyId &&
+            candidate.evidence.includes(
+              "runtime_transition:runner_setup_complete",
+            ),
+        )
+      : undefined;
+  if (preferredPortfolioCandidate) {
+    return lineFromPortfolioCandidate(preferredPortfolioCandidate);
+  }
   const strategyId = preferredStrategyId ?? eligibleStrategies[0];
   if (!strategyId) return neutralLine(params.side);
   return lineFromScore(strategyId, profile.strategyScores[strategyId]);
+}
+
+function lineFromPortfolioCandidate(
+  candidate: StrategicStrategyPortfolioCandidate,
+): StrategicLineState {
+  return {
+    strategyId: candidate.strategyId,
+    family: candidate.family,
+    confidence: candidate.confidence,
+    completeness: "complete",
+    score: { ...candidate.score },
+    supportGaps: [],
+    evidence: [...candidate.evidence],
+  };
 }
 
 function selectSecondaryStrategies(
@@ -340,7 +365,9 @@ function selectSecondaryStrategies(
   if (!profile || profile.side !== params.side) return [];
   return eligibleStrategyIds(profile)
     .filter((strategyId) => strategyId !== primary.strategyId)
-    .map((strategyId) => lineFromScore(strategyId, profile.strategyScores[strategyId]))
+    .map((strategyId) =>
+      lineFromScore(strategyId, profile.strategyScores[strategyId]),
+    )
     .filter((line) => line.completeness !== "none")
     .sort(
       (left, right) =>
@@ -350,8 +377,13 @@ function selectSecondaryStrategies(
 }
 
 function eligibleStrategyIds(profile: AiDeckStrategyProfile): string[] {
-  return uniqueStrings([...profile.primaryStrategies, ...profile.secondaryStrategies])
-    .filter((strategyId) => strategyEligibleForActiveLine(profile.strategyScores[strategyId]))
+  return uniqueStrings([
+    ...profile.primaryStrategies,
+    ...profile.secondaryStrategies,
+  ])
+    .filter((strategyId) =>
+      strategyEligibleForActiveLine(profile.strategyScores[strategyId]),
+    )
     .sort((left, right) => {
       const leftScore = profile.strategyScores[left];
       const rightScore = profile.strategyScores[right];
@@ -389,7 +421,17 @@ function committedPrimaryStrategy(
   if (previous.primaryStrategy.strategyId === candidate.strategyId) {
     return { primaryStrategy: candidate };
   }
-  if (candidate.family === "neutral" || previous.primaryStrategy.family === "neutral") {
+  if (
+    previous.primaryStrategy.family === "runner_setup" &&
+    candidate.family === "runner_central_pressure" &&
+    candidate.evidence.includes("runtime_transition:runner_setup_complete")
+  ) {
+    return { primaryStrategy: candidate };
+  }
+  if (
+    candidate.family === "neutral" ||
+    previous.primaryStrategy.family === "neutral"
+  ) {
     return { primaryStrategy: candidate };
   }
   if (previous.blockers.some((blocker) => blocker.severity === "hard")) {
@@ -423,7 +465,8 @@ function currentLineForPreviousStrategy(
   previous: StrategicIntentState,
 ): StrategicLineState | undefined {
   const previousStrategyId = previous.primaryStrategy.strategyId;
-  const currentScore = params.strategyProfile?.strategyScores[previousStrategyId];
+  const currentScore =
+    params.strategyProfile?.strategyScores[previousStrategyId];
   if (!currentScore) return undefined;
   return lineFromScore(previousStrategyId, currentScore);
 }
@@ -553,7 +596,8 @@ function buildBlockers(
       blockerId: `${primary.strategyId}:no_anchor`,
       severity: "hard",
       reason: "no_strategy_anchor",
-      removalCondition: "provide a strategy profile with concrete anchor evidence",
+      removalCondition:
+        "provide a strategy profile with concrete anchor evidence",
       evidence: primary.evidence,
     });
   }
@@ -628,7 +672,10 @@ function defaultTargetVector(
         evidence: [`target_from_strategy:${primary.strategyId}`],
       };
     case "corp_tag_trace_punish":
-      return { kind: "tag", evidence: [`target_from_strategy:${primary.strategyId}`] };
+      return {
+        kind: "tag",
+        evidence: [`target_from_strategy:${primary.strategyId}`],
+      };
     case "corp_damage_kill":
     case "corp_ambush":
       return {
@@ -819,7 +866,8 @@ function phaseFor(params: {
   const hardBlocked = params.blockers.some(
     (blocker) => blocker.severity === "hard",
   );
-  if (params.primaryStrategy.family === "neutral" || hardBlocked) return "recover";
+  if (params.primaryStrategy.family === "neutral" || hardBlocked)
+    return "recover";
   if (!params.reserve.satisfied) return "fund";
   if (hasLegalCloseoutWindow(params)) return "closeout";
   if (
@@ -861,7 +909,10 @@ function hasLegalCloseoutWindow(params: {
   ) {
     return true;
   }
-  return roleEvidenceIncludes(params.roleStatuses, "legal_closeout_action:true");
+  return roleEvidenceIncludes(
+    params.roleStatuses,
+    "legal_closeout_action:true",
+  );
 }
 
 function roleEvidenceIncludes(

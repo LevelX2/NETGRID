@@ -68,7 +68,10 @@ describe("StrategicIntentState contract", () => {
       completeness: "partial",
     });
     expect(state.phase).toBe("recover");
-    expect(state.targetVector).toMatchObject({ kind: "central", targetId: "rd" });
+    expect(state.targetVector).toMatchObject({
+      kind: "central",
+      targetId: "rd",
+    });
     expect(state.blockers.map((blocker) => blocker.reason)).toEqual(
       expect.arrayContaining(["support_gap", "reserve_shortfall"]),
     );
@@ -135,7 +138,9 @@ describe("StrategicIntentState contract", () => {
         (candidate) => candidate.strategyId,
       ),
     ).toEqual(["corp.remote_scoring", "corp.ice_tax_glacier"]);
-    expect(first.strategyPortfolio?.activeStrategyId).toBe("corp.remote_scoring");
+    expect(first.strategyPortfolio?.activeStrategyId).toBe(
+      "corp.remote_scoring",
+    );
     expect(continued.transition).toMatchObject({
       status: "continued",
       reason: "same_primary_strategy",
@@ -200,12 +205,93 @@ describe("StrategicIntentState contract", () => {
     expect(held.transition.evidence).toContain(
       "held_candidate:runner.hq_pressure",
     );
-    expect(held.strategyPortfolio?.activeStrategyId).toBe("runner.rnd_pressure");
+    expect(held.strategyPortfolio?.activeStrategyId).toBe(
+      "runner.rnd_pressure",
+    );
     expect(
       held.strategyPortfolio?.productiveCandidates.map(
         (candidate) => candidate.strategyId,
       ),
     ).toEqual(["runner.rnd_pressure", "runner.hq_pressure"]);
+  });
+
+  it("lets completed Runner setup bypass commitment and switch to pressure", () => {
+    const searchProfile = profile("runner", {
+      primary: ["runner.search.breaker"],
+      scores: {
+        "runner.search.breaker": score({
+          anchor: 100,
+          support: 100,
+          final: 100,
+          confidence: "high",
+        }),
+      },
+    });
+    const activeCoverage = [
+      role("runner.breaker.wall", "active", ["installed:true"]),
+      role("runner.breaker.code_gate", "active", ["installed:true"]),
+      role("runner.breaker.sentry", "active", ["installed:true"]),
+    ];
+    const previous = buildStrategicIntentState({
+      side: "runner",
+      stateVersion: 32,
+      strategyProfile: searchProfile,
+      availableCredits: 8,
+      roleStatuses: activeCoverage,
+    });
+    const pressureCandidate = {
+      strategyId: "runner.rnd_pressure",
+      family: "runner_central_pressure" as const,
+      candidateRole: "secondary" as const,
+      runtimeStatus: "productive" as const,
+      runtimeBlockers: [],
+      confidence: "high" as const,
+      score: { anchor: 100, support: 100, final: 100 },
+      selectionScore: 132,
+      roleStatuses: activeCoverage,
+      targetVector: {
+        kind: "central" as const,
+        targetId: "rd",
+        evidence: ["runner_setup_complete_pressure_transition:true"],
+      },
+      reserve: {
+        kind: "credits" as const,
+        required: 4,
+        available: 8,
+        satisfied: true,
+        evidence: ["reserve_satisfied:true"],
+      },
+      evidence: ["runtime_transition:runner_setup_complete"],
+    };
+    const switched = buildStrategicIntentState({
+      side: "runner",
+      stateVersion: 33,
+      strategyProfile: searchProfile,
+      previousState: previous,
+      availableCredits: 8,
+      preferredStrategyId: "runner.rnd_pressure",
+      strategyPortfolio: {
+        activeStrategyId: "runner.rnd_pressure",
+        activeSelectionReason: "highest_runtime_portfolio_score",
+        productiveCandidates: [pressureCandidate],
+        blockedCandidates: [],
+        evidence: ["test:completed_setup_pressure"],
+      },
+      roleStatuses: activeCoverage,
+      targetVector: pressureCandidate.targetVector,
+      reserveRequirement: pressureCandidate.reserve,
+    });
+
+    expect(switched.primaryStrategy).toMatchObject({
+      strategyId: "runner.rnd_pressure",
+      family: "runner_central_pressure",
+      completeness: "complete",
+    });
+    expect(switched.phase).toBe("pressure");
+    expect(switched.transition).toMatchObject({
+      status: "switched",
+      previousStrategyId: "runner.search.breaker",
+    });
   });
 
   it("does not promote blocked strategy scores into the active line", () => {
@@ -389,28 +475,30 @@ function score(params: {
     runtimeStatus: params.runtimeStatus ?? "productive",
     runtimeBlockers: params.runtimeBlockers ?? [],
     supportGaps: params.gaps ?? [],
-    anchorEvidence: params.anchor > 0
-      ? [
-          {
-            cardId: "fixture-card",
-            quantity: 1,
-            source: "derivedStrategyAnchor",
-            strategyId: "fixture.strategy",
-            reason: "test",
-          },
-        ]
-      : [],
-    supportEvidence: params.support > 0
-      ? [
-          {
-            cardId: "fixture-support",
-            quantity: 1,
-            source: "functionSignal",
-            signal: "fixture.support",
-            reason: "test",
-          },
-        ]
-      : [],
+    anchorEvidence:
+      params.anchor > 0
+        ? [
+            {
+              cardId: "fixture-card",
+              quantity: 1,
+              source: "derivedStrategyAnchor",
+              strategyId: "fixture.strategy",
+              reason: "test",
+            },
+          ]
+        : [],
+    supportEvidence:
+      params.support > 0
+        ? [
+            {
+              cardId: "fixture-support",
+              quantity: 1,
+              source: "functionSignal",
+              signal: "fixture.support",
+              reason: "test",
+            },
+          ]
+        : [],
   };
 }
 
