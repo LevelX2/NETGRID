@@ -12,6 +12,7 @@ import { semanticRuntimeCorpEffectiveDefenseContext } from "./semantic-runtime-c
 import {
   semanticRuntimeCorpBoardTriage,
   semanticRuntimeCorpBoardTriageActionComponent,
+  type CorpBoardTriage,
 } from "./semantic-runtime-corp-board-triage";
 import {
   corpIcePlacementCandidateForAction,
@@ -161,6 +162,15 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
     actionSemanticCandidate,
   );
   if (boardTriage) components.push(boardTriage);
+  const unbackedExtraActionBurst = corpUnbackedExtraActionBurstComponent(
+    input,
+    action,
+    dependencies,
+    boardTriageState,
+    boardTriage,
+    actionSemanticCandidate,
+  );
+  if (unbackedExtraActionBurst) components.push(unbackedExtraActionBurst);
   const activeScorelineAdvance = corpActiveRemoteAgendaAdvanceClockComponent(
     input,
     action,
@@ -768,6 +778,55 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
     }
   }
   return components;
+}
+
+function corpUnbackedExtraActionBurstComponent<TConsumer extends string>(
+  input: AiDecisionInput,
+  action: LegalAction,
+  dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
+  boardTriage: CorpBoardTriage,
+  boardTriageComponent: AiDecisionScoreComponent | undefined,
+  actionSemanticCandidate: ActionSemanticCandidate | undefined,
+): AiDecisionScoreComponent | undefined {
+  if (action.type !== "play_operation") return undefined;
+  const source = visibleSourceCardForAction(input, action);
+  const gainedActions = corpExtraActionGainFromRulesText(
+    source?.rulesText ??
+      (source ? visibleCardDefinition(source)?.rulesText : undefined),
+  );
+  if (gainedActions <= 0) return undefined;
+  const clickCost = Math.max(
+    1,
+    semanticRuntimeCorpActionClickCost(action, actionSemanticCandidate),
+  );
+  const netExtraActions = Math.max(0, gainedActions - clickCost);
+  const creditCost = semanticRuntimeCorpActionCreditCost(
+    dependencies,
+    action,
+    actionSemanticCandidate,
+  );
+  if (creditCost <= netExtraActions) return undefined;
+  if (boardTriage.severity !== "high" && boardTriage.severity !== "critical") {
+    return undefined;
+  }
+  if (boardTriageComponent?.key !== "corp_board_triage_context") {
+    return undefined;
+  }
+  return {
+    key: "corp_unbacked_extra_action_burst",
+    label: "Extra-Aktions-Folgeplan",
+    value: -2600,
+    reason: [
+      "extra_action_burst_without_direct_plan_progress:true",
+      `triage_primary:${boardTriage.primary}`,
+      `triage_severity:${boardTriage.severity}`,
+      `gained_actions:${gainedActions}`,
+      `action_click_cost:${clickCost}`,
+      `net_extra_actions:${netExtraActions}`,
+      `credit_cost:${creditCost}`,
+      "basic_action_return_below_credit_cost:true",
+    ].join("|"),
+  };
 }
 
 function corpScoringWindowSuppressesContestableRemotePenalty(
@@ -3345,6 +3404,21 @@ function corpDrawCountFromRulesText(rulesText: string | undefined): number {
   );
   if (drawToken) return numberFromDigitOrWord(drawToken);
   return 0;
+}
+
+function corpExtraActionGainFromRulesText(
+  rulesText: string | undefined,
+): number {
+  const tokens = corpRulesTextTokens(rulesText);
+  const actionToken = tokens.find(
+    (token, index) =>
+      (tokens[index - 1] === "gain" || tokens[index - 1] === "erhalte") &&
+      (tokens[index + 1] === "action" ||
+        tokens[index + 1] === "actions" ||
+        tokens[index + 1] === "aktion" ||
+        tokens[index + 1] === "aktionen"),
+  );
+  return actionToken ? numberFromDigitOrWord(actionToken) : 0;
 }
 
 function corpActionClickCostFromRulesText(

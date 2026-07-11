@@ -4926,6 +4926,167 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("penalizes an expensive extra-action burst without direct urgent-plan progress", () => {
+    const overtime = corpAction(
+      "play-overtime",
+      "play_operation",
+      {},
+      "overtime-incentives",
+    );
+    const installAgenda = corpAction(
+      "install-hostile-takeover",
+      "install_card",
+      { placement: "root", serverId: "remote_1" },
+      "hostile-takeover",
+    );
+    const gainCredit = corpAction(
+      "gain-credit",
+      "gain_credit",
+      {},
+      "basic_action",
+    );
+    const agenda = {
+      instanceId: "hostile-takeover",
+      known: true,
+      title: "Hostile Takeover",
+      type: "agenda",
+      owner: "corp",
+      controller: "corp",
+      advancementRequirement: 3,
+      advancementCounters: 0,
+      agendaPoints: 1,
+    } as VisibleCard;
+    const overtimeCard = economyOperationCard({
+      instanceId: "overtime-incentives",
+      title: "Overtime Incentives",
+      rulesText: "Gain two actions.",
+      cost: 4,
+    });
+    const input = corpInputWithHqCardsAndServers(
+      8,
+      [agenda, overtimeCard],
+      [
+        { id: "hq", label: "HQ", ice: [corpIce("hq-stop")], root: [] },
+        { id: "rd", label: "R&D", ice: [corpIce("rd-stop")], root: [] },
+        {
+          id: "remote_1",
+          label: "Remote 1",
+          ice: [corpIce("remote-filter")],
+          root: [],
+        },
+      ],
+      [installAgenda, overtime, gainCredit],
+    );
+    const dependencies = {
+      ...testDependencies(),
+      corpActionIsScoreLine: (_input: AiDecisionInput, action: LegalAction) =>
+        action.actionId === installAgenda.actionId,
+      corpScoringWindowAssessment: (
+        _input: AiDecisionInput,
+        action: LegalAction,
+      ) =>
+        action.actionId === installAgenda.actionId
+          ? scoringWindow({
+              serverId: "remote_1",
+              windowKind: "unsafe",
+              runnerCanContestBeforeScore: true,
+              runnerCanReachAccessBeforeScore: true,
+              agendaStealRelevantBeforeScore: true,
+              corpCanRezRelevantIce: true,
+              corpCanRezFullPathWithDynamicReserve: true,
+              recommendedNextStep: "build_remote_ice",
+            })
+          : undefined,
+    };
+    const overtimeCandidate = {
+      ...semanticCandidate(
+        overtime.actionId,
+        "play.corp_operation",
+        ["corp_extra_action_burst"],
+        "play_operation",
+      ),
+      costProfile: {
+        costKnownStatus: "known" as const,
+        creditCost: 4,
+        clickCost: 1,
+        additionalCosts: [],
+      },
+    };
+
+    const components = semanticRuntimeCorpScoreComponents(
+      input,
+      overtime,
+      "basic_install",
+      dependencies,
+      overtimeCandidate,
+    );
+
+    expect(components).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_board_triage_context",
+          value: 0,
+        }),
+        expect.objectContaining({
+          key: "corp_unbacked_extra_action_burst",
+          value: -2600,
+          reason: expect.stringContaining(
+            "extra_action_burst_without_direct_plan_progress:true",
+          ),
+        }),
+      ]),
+    );
+    expect(JSON.stringify(components)).toContain("net_extra_actions:1");
+    expect(JSON.stringify(components)).toContain("credit_cost:4");
+  });
+
+  it("allows an extra-action burst whose basic return covers its cost", () => {
+    const overtime = corpAction(
+      "play-free-overtime",
+      "play_operation",
+      {},
+      "free-overtime",
+    );
+    const input = corpInputWithHqCards(
+      0,
+      [
+        economyOperationCard({
+          instanceId: "free-overtime",
+          title: "Efficient Overtime",
+          rulesText: "Gain two actions.",
+          cost: 0,
+        }),
+      ],
+      [overtime],
+    );
+    const candidate = {
+      ...semanticCandidate(
+        overtime.actionId,
+        "play.corp_operation",
+        ["corp_extra_action_burst"],
+        "play_operation",
+      ),
+      costProfile: {
+        costKnownStatus: "known" as const,
+        creditCost: 0,
+        clickCost: 1,
+        additionalCosts: [],
+      },
+    };
+
+    expect(
+      semanticRuntimeCorpScoreComponents(
+        input,
+        overtime,
+        "basic_install",
+        testDependencies(),
+        candidate,
+      ).some(
+        (component) => component.key === "corp_unbacked_extra_action_burst",
+      ),
+    ).toBe(false);
+  });
+
   it("scores bracket notation Corp credit operations", () => {
     const creditConsolidation = corpAction(
       "play-credit-consolidation",
