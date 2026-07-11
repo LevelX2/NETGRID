@@ -45,7 +45,10 @@ export type AccessFlowHost = {
     randomHqAccess: () => CardInstanceId | undefined;
   };
   effects: {
-    executeAccessEffects: (cardId: CardInstanceId, legalAction: LegalAction) => void;
+    executeAccessEffects: (
+      cardId: CardInstanceId,
+      legalAction: LegalAction,
+    ) => void;
     archivesAccessRequiresDecisionOrEffect: (cardId: CardInstanceId) => boolean;
   };
   runner: {
@@ -202,6 +205,7 @@ export function accessCurrentCard(
       serverId: breach.serverId,
       breachId: breach.breachId,
       accessIndex: breach.currentIndex,
+      accessOrigin: publicAccessOrigin(breach.serverId, entry.zone),
       ...accessCountPayloadForBreach(accessFlowBreachStateHost(host), breach),
     };
     markV1915InstalledRevealAccess(host, entry, legalAction);
@@ -271,6 +275,7 @@ export function accessCurrentCard(
     ...(legalAction.payload ?? {}),
     accessedCardId: cardId,
     serverId: server.id,
+    accessOrigin: publicAccessOrigin(server.id, accessQueueZone(server.id)),
   };
   markV1915InstalledRevealAccess(
     host,
@@ -325,7 +330,8 @@ function applyPrearrangedDropAgendaAccess(
   legalAction: LegalAction,
 ): void {
   const flags = host.state.runnerTurnFlags;
-  if (!flags?.nextAgendaAccessCreditGainPending || definition.type !== "agenda") return;
+  if (!flags?.nextAgendaAccessCreditGainPending || definition.type !== "agenda")
+    return;
   flags.nextAgendaAccessCreditGainPending = false;
   host.state.runner.credits += 6;
   legalAction.payload = {
@@ -343,7 +349,10 @@ function applyPromisesPromisesAgendaAccess(
   legalAction: LegalAction,
 ): void {
   const flags = host.state.runnerTurnFlags;
-  if (!flags?.nextAgendaAccessAgendaPointPending || definition.type !== "agenda")
+  if (
+    !flags?.nextAgendaAccessAgendaPointPending ||
+    definition.type !== "agenda"
+  )
     return;
   flags.nextAgendaAccessAgendaPointPending = false;
   host.state.run = {
@@ -352,7 +361,8 @@ function applyPromisesPromisesAgendaAccess(
       sourceDefinitionId:
         flags.nextAgendaAccessAgendaPointSourceDefinitionId ??
         ("card_implementation" as CardDefinition["id"]),
-      sourceTitle: flags.nextAgendaAccessAgendaPointSourceTitle ?? "Promises, Promises",
+      sourceTitle:
+        flags.nextAgendaAccessAgendaPointSourceTitle ?? "Promises, Promises",
       amount: 1,
       cardId,
     },
@@ -529,6 +539,15 @@ export function completeCurrentBreachAccess(
     host.run.finishRun(true, legalAction);
     return { handled: true, runFinished: true, accessFinished: true };
   }
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      serverId: breach.serverId,
+      breachId: breach.breachId,
+      accessIndex: breach.currentIndex,
+      accessOrigin: publicAccessOrigin(breach.serverId, current.zone),
+    };
+  }
   const finalStatus: BreachEntryStatus =
     status === "pending" ? "accessed" : status;
   const queue = breach.queue.map((entry, index) =>
@@ -558,7 +577,9 @@ export function completeCurrentBreachAccess(
       },
     };
     host.state.run = completedRun;
-    if (host.run.startPostAccessInstalledProgramChoice(completedRun, legalAction))
+    if (
+      host.run.startPostAccessInstalledProgramChoice(completedRun, legalAction)
+    )
       return {
         handled: true,
         accessFinished: true,
@@ -601,6 +622,16 @@ export function completeCurrentBreachAccess(
   };
 }
 
+function publicAccessOrigin(
+  serverId: Exclude<ServerId, "new_remote">,
+  zone: AccessQueueZone,
+): "central_root" | AccessQueueZone {
+  return zone === "remote_root" &&
+    (serverId === "hq" || serverId === "rd" || serverId === "archives")
+    ? "central_root"
+    : zone;
+}
+
 function stealAgenda(
   host: AccessFlowHost,
   cardId: string,
@@ -619,10 +650,16 @@ function stealAgenda(
   const flags = host.runner.ensureTurnFlags();
   flags.stoleAgendaThisTurn = true;
   flags.stolenAgendaAdvancementCountersThisTurn =
-    Math.max(0, Math.floor(flags.stolenAgendaAdvancementCountersThisTurn ?? 0)) +
     Math.max(
       0,
-      Math.floor(host.cards.cardInstanceFor(cardId as CardInstanceId).advancementCounters),
+      Math.floor(flags.stolenAgendaAdvancementCountersThisTurn ?? 0),
+    ) +
+    Math.max(
+      0,
+      Math.floor(
+        host.cards.cardInstanceFor(cardId as CardInstanceId)
+          .advancementCounters,
+      ),
     );
   const definition = host.cards.definitionFor(cardId as CardInstanceId);
   if (host.cards.cardHasSubtype(definition, "research"))
@@ -638,7 +675,11 @@ function stealAgenda(
           Math.floor(host.state.run.liberatedBlackOpsAgendaCount ?? 0),
         ) + 1;
   }
-  applyPendingAgendaPointBonusToStolenAgenda(host, cardId as CardInstanceId, legalAction);
+  applyPendingAgendaPointBonusToStolenAgenda(
+    host,
+    cardId as CardInstanceId,
+    legalAction,
+  );
   const agendaPointValue = host.steal.agendaPointsForScoredCard(
     cardId as CardInstanceId,
   );
@@ -662,7 +703,10 @@ function stealAgenda(
     }
   }
   flags.stolenAgendaIdsThisTurn = [
-    ...new Set([...(flags.stolenAgendaIdsThisTurn ?? []), cardId as CardInstanceId]),
+    ...new Set([
+      ...(flags.stolenAgendaIdsThisTurn ?? []),
+      cardId as CardInstanceId,
+    ]),
   ];
   host.state.runner.scoreArea.push(cardId as CardInstanceId);
   host.state.cardInstances[cardId] = {
@@ -720,9 +764,13 @@ function installAccessedAgendaAsRunnerProgram(
     !replacement.scoreAsAgendaAction ||
     !replacement.removeFromGameOnLeavePlay
   )
-    throw new Error("Diese Agenda kann nicht als Runner-Programm installiert werden.");
+    throw new Error(
+      "Diese Agenda kann nicht als Runner-Programm installiert werden.",
+    );
   const memoryCost = Math.max(0, Math.floor(replacement.memoryCost));
-  if (Number(legalAction.payload?.installedRunnerProgramMemoryCost) !== memoryCost)
+  if (
+    Number(legalAction.payload?.installedRunnerProgramMemoryCost) !== memoryCost
+  )
     throw new Error("Die Installationskosten passen nicht mehr zur Agenda.");
   if (host.state.runner.memoryUsed + memoryCost > host.state.runner.memoryLimit)
     throw new Error("Der Runner hat nicht genug MU fuer dieses Programm.");
@@ -882,24 +930,33 @@ function trashAccessedCard(
   const trashCost = overrideCost ?? effectiveCost.totalCost;
   const sourceZone = host.cards.cardInstanceFor(cardId as CardInstanceId).zone;
   if (sourceZone.side === "corp" && sourceZone.zone === "archives") {
-    throw new Error("Karten in Archives können beim Zugriff nicht getrasht werden.");
+    throw new Error(
+      "Karten in Archives können beim Zugriff nicht getrasht werden.",
+    );
   }
   const hiddenResourceSourceCardId = String(
     legalAction?.payload?.hiddenResourceSourceCardId ?? "",
   ) as CardInstanceId;
   if (legalAction?.payload?.hiddenResourceCurrentAccessTrash === true) {
     if (definition.type === "agenda")
-      throw new Error("Agendas koennen nicht als Hidden-Resource-Trash-Ziel gewaehlt werden.");
+      throw new Error(
+        "Agendas koennen nicht als Hidden-Resource-Trash-Ziel gewaehlt werden.",
+      );
     const sourceInstance = host.state.cardInstances[hiddenResourceSourceCardId];
     if (
       !sourceInstance ||
       sourceInstance.controller !== "runner" ||
       !host.state.runner.rig.resources.includes(hiddenResourceSourceCardId)
     )
-      throw new Error("Die Mercenary-Subcontract-Quelle ist nicht installiert.");
-    const sourceDefinition = host.cards.definitionFor(hiddenResourceSourceCardId);
-    const utility =
-      cardImplementationForDefinitionId(sourceDefinition.id)?.runnerUtilityLongtail;
+      throw new Error(
+        "Die Mercenary-Subcontract-Quelle ist nicht installiert.",
+      );
+    const sourceDefinition = host.cards.definitionFor(
+      hiddenResourceSourceCardId,
+    );
+    const utility = cardImplementationForDefinitionId(
+      sourceDefinition.id,
+    )?.runnerUtilityLongtail;
     if (utility?.kind !== "hidden_resource_current_access_free_trash")
       throw new Error("Die Hidden-Resource-Faehigkeit passt nicht zur Quelle.");
     if (utility.cost.kind !== "credit_and_trash_source")
@@ -908,7 +965,9 @@ function trashAccessedCard(
     if ((legalAction.costs[0]?.credits ?? 0) !== expectedCost)
       throw new Error("Die Hidden-Resource-Kosten sind nicht mehr gueltig.");
     if (overrideCost !== 0 || legalAction.payload?.freeAccessTrash !== true)
-      throw new Error("Der Hidden-Resource-Trash ist kein gueltiger kostenloser Trash.");
+      throw new Error(
+        "Der Hidden-Resource-Trash ist kein gueltiger kostenloser Trash.",
+      );
     if (
       expectedCost > 0 &&
       host.state.runner.credits < expectedCost &&
@@ -986,9 +1045,9 @@ function trashAccessedCard(
         : {}),
       ...(upgradeTrashRecurringCreditsSpent > 0
         ? {
-            v1922RunnerProgramAbility:
-              "upgrade_trash_recurring_credit",
-            upgradeTrashRecurringCreditsSpent: upgradeTrashRecurringCreditsSpent,
+            v1922RunnerProgramAbility: "upgrade_trash_recurring_credit",
+            upgradeTrashRecurringCreditsSpent:
+              upgradeTrashRecurringCreditsSpent,
             runnerCreditsSpent: trashPayment.runnerCreditsSpent,
           }
         : {}),
@@ -1014,8 +1073,14 @@ function trashAccessedCard(
       legalAction,
     );
   }
-  host.trash.trashCorpInstalledCardToArchives(cardId as CardInstanceId, legalAction);
-  if (definition.type === "asset" && host.cards.cardHasSubtype(definition, "node")) {
+  host.trash.trashCorpInstalledCardToArchives(
+    cardId as CardInstanceId,
+    legalAction,
+  );
+  if (
+    definition.type === "asset" &&
+    host.cards.cardHasSubtype(definition, "node")
+  ) {
     host.runner.ensureTurnFlags().trashedNodeThisTurn = true;
   }
   if (host.cards.cardHasSubtype(definition, "advertisement")) {
@@ -1057,7 +1122,8 @@ function attachAccessOriginPayload(
   if (!legalAction) return;
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
-    serverId: run.breach?.serverId ?? run.accessServerOverride ?? run.attackedServerId,
+    serverId:
+      run.breach?.serverId ?? run.accessServerOverride ?? run.attackedServerId,
   };
 }
 
@@ -1129,11 +1195,17 @@ export function advanceArchivesBreachPastNonDecisionCards(
   while (true) {
     const current = queue[currentIndex];
     if (!current || current.status !== "pending") break;
-    if (host.effects.archivesAccessRequiresDecisionOrEffect(current.cardInstanceId))
+    if (
+      host.effects.archivesAccessRequiresDecisionOrEffect(
+        current.cardInstanceId,
+      )
+    )
       break;
 
     queue = queue.map((entry, index) =>
-      index === currentIndex ? { ...entry, status: "accessed" as const } : entry,
+      index === currentIndex
+        ? { ...entry, status: "accessed" as const }
+        : entry,
     );
     accessedSummaries = [
       ...accessedSummaries,
@@ -1234,7 +1306,10 @@ function accessQueueZone(
   return "remote_root";
 }
 
-function revealAccessedCard(host: AccessFlowHost, cardId: CardInstanceId): void {
+function revealAccessedCard(
+  host: AccessFlowHost,
+  cardId: CardInstanceId,
+): void {
   const instance = host.cards.cardInstanceFor(cardId);
   host.state.cardInstances[cardId] = { ...instance, faceup: true };
 }

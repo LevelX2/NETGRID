@@ -1209,11 +1209,7 @@ describe("formatChronicleEvent", () => {
       "Die Runner-KI hat The Short Circuit genutzt, um den Stack nach einem Programm zu durchsuchen.",
     );
     expect(activated.chips).toEqual(
-      expect.arrayContaining([
-        "The Short Circuit",
-        "Stack-Suche",
-        "Programm",
-      ]),
+      expect.arrayContaining(["The Short Circuit", "Stack-Suche", "Programm"]),
     );
   });
 
@@ -2543,7 +2539,8 @@ describe("formatChronicleEvent", () => {
       sourceDefinitionId: "onr_classic_018_reclamation-project",
       movedCount: 2,
       archivesRevealCount: 2,
-      archivesRevealDefinitionIds: "onr_v1_245_fire-wall,onr_v1_279_wall-of-static",
+      archivesRevealDefinitionIds:
+        "onr_v1_245_fire-wall,onr_v1_279_wall-of-static",
       archivesRevealTitles: "Fire Wall, Wall of Static",
       aiExplanation: "legal choice",
     });
@@ -2640,6 +2637,39 @@ describe("formatChronicleEvent", () => {
       title: "Die Korp-KI hat auf Dr. Dreff verzichtet.",
       category: "run",
     });
+  });
+
+  it("distinguishes central root and central-card accesses in the chronicle", () => {
+    const root = formatChronicleEvent(
+      makeEvent("access_card", {
+        actor: "runner",
+        cardDefinitionId: "onr_v1_358_dr-dreff",
+        title: "Dr. Dreff",
+        serverLabel: "HQ",
+        accessOrigin: "central_root",
+      }),
+      "runner",
+      { cardTitle: "Dr. Dreff" },
+    );
+    const hq = formatChronicleEvent(
+      makeEvent("access_card", {
+        actor: "runner",
+        cardDefinitionId: "simple_economy_operation",
+        title: "Simple Economy Operation",
+        serverLabel: "HQ",
+        accessOrigin: "hq",
+      }),
+      "runner",
+      { cardTitle: "Simple Economy Operation" },
+    );
+
+    expect(root.title).toBe("Du hast auf Dr. Dreff im HQ-Root zugegriffen.");
+    expect(root.chips).toContain("HQ-Root");
+    expect(hq.title).toBe(
+      "Du hast auf Simple Economy Operation in HQ zugegriffen.",
+    );
+    expect(hq.chips).toContain("HQ");
+    expect(hq.chips).not.toContain("HQ-Root");
   });
 
   it("names Forged Activation Orders target and Corp rez-or-trash decisions in the chronicle", () => {

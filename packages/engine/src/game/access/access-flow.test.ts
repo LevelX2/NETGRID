@@ -47,17 +47,19 @@ function instance(
   } as unknown as CardInstance;
 }
 
-function makeHost(options: {
-  run?: GameState["run"] | null;
-  definitions?: Record<string, CardDefinition>;
-  instances?: Record<string, CardInstance>;
-  servers?: CorpServer[];
-  corpRd?: string[];
-  corpHq?: string[];
-  corpArchives?: string[];
-  runnerScoreArea?: string[];
-  runnerCredits?: number;
-} = {}): {
+function makeHost(
+  options: {
+    run?: GameState["run"] | null;
+    definitions?: Record<string, CardDefinition>;
+    instances?: Record<string, CardInstance>;
+    servers?: CorpServer[];
+    corpRd?: string[];
+    corpHq?: string[];
+    corpArchives?: string[];
+    runnerScoreArea?: string[];
+    runnerCredits?: number;
+  } = {},
+): {
   host: AccessFlowHost;
   state: GameState;
   effects: CardInstanceId[];
@@ -212,7 +214,9 @@ function makeHost(options: {
     },
     zones: {
       removeFromAllZones: (cardId) => {
-        state.runner.scoreArea = state.runner.scoreArea.filter((id) => id !== cardId);
+        state.runner.scoreArea = state.runner.scoreArea.filter(
+          (id) => id !== cardId,
+        );
         state.runner.rig.resources = state.runner.rig.resources.filter(
           (id) => id !== cardId,
         );
@@ -325,6 +329,100 @@ describe("access flow execution", () => {
     expect(legalAction.payload).toMatchObject({
       accessedCardId: "asset",
       serverId: "remote_1",
+      accessOrigin: "remote_root",
+    });
+  });
+
+  it("publishes central root and HQ card access origins without card identity guesses", () => {
+    const hqRoot = instance("hq_root", "asset_def", {
+      side: "corp",
+      zone: "serverRoot",
+      serverId: "hq",
+    } as CardInstance["zone"]);
+    const hqCard = instance("hq_card", "ice_def", {
+      side: "corp",
+      zone: "hq",
+    });
+    const breach = {
+      breachId: "run_hq.breach",
+      serverId: "hq" as Exclude<ServerId, "new_remote">,
+      accessMode: "multi" as const,
+      queue: [
+        {
+          entryId: "root",
+          cardInstanceId: "hq_root" as CardInstanceId,
+          serverId: "hq" as Exclude<ServerId, "new_remote">,
+          zone: "remote_root" as const,
+          status: "pending" as const,
+          hiddenInfo: false,
+        },
+        {
+          entryId: "hq",
+          cardInstanceId: "hq_card" as CardInstanceId,
+          serverId: "hq" as Exclude<ServerId, "new_remote">,
+          zone: "hq" as const,
+          status: "pending" as const,
+          hiddenInfo: true,
+        },
+      ],
+      currentIndex: 0,
+      completed: false,
+      accessedSummaries: [],
+    };
+    const { host, state } = makeHost({
+      run: {
+        runId: "run_hq",
+        attackedServerId: "hq",
+        breach,
+      } as unknown as NonNullable<GameState["run"]>,
+      instances: { hq_root: hqRoot, hq_card: hqCard },
+      corpHq: ["hq_card"],
+      servers: [
+        { id: "hq", ice: [], root: ["hq_root"] },
+        { id: "rd", ice: [], root: [] },
+        { id: "archives", ice: [], root: [] },
+      ] as unknown as CorpServer[],
+    });
+    const rootAction = {
+      side: "runner",
+      type: "access_card",
+      actionId: "runner.access.root",
+      label: "Access",
+      source: "run",
+    } as unknown as LegalAction;
+    handleAccessExecution(host, rootAction);
+    expect(rootAction.payload).toMatchObject({
+      serverId: "hq",
+      accessIndex: 0,
+      accessOrigin: "central_root",
+    });
+
+    state.run!.accessedCardId = "hq_root" as CardInstanceId;
+    const decline = {
+      side: "runner",
+      type: "decline_trash",
+      actionId: "runner.decline.root",
+      label: "Decline",
+      source: "hq_root",
+    } as LegalAction;
+    handleAccessExecution(host, decline);
+    expect(decline.payload).toMatchObject({
+      accessIndex: 0,
+      accessOrigin: "central_root",
+    });
+
+    const hqAction = {
+      side: "runner",
+      type: "access_card",
+      actionId: "runner.access.hq",
+      label: "Access",
+      source: "run",
+    } as unknown as LegalAction;
+    handleAccessExecution(host, hqAction);
+    expect(hqAction.payload).toMatchObject({
+      serverId: "hq",
+      accessIndex: 1,
+      accessOrigin: "hq",
     });
   });
 
@@ -344,7 +442,10 @@ describe("access flow execution", () => {
         ),
       },
       instances: {
-        hq_card: instance("hq_card", "hq_card_def", { side: "corp", zone: "hq" }),
+        hq_card: instance("hq_card", "hq_card_def", {
+          side: "corp",
+          zone: "hq",
+        }),
         asset: instance("asset", "asset_def", {
           side: "corp",
           zone: "serverRoot",
@@ -398,7 +499,8 @@ describe("access flow execution", () => {
       accessedCardId: "hq_card",
       serverId: "hq",
       runnerUtilityAbility: "hq_access_expose_all_installed_corp_cards",
-      hiddenZoneAction: "schematics_search_engine_expose_installed_cards_review",
+      hiddenZoneAction:
+        "schematics_search_engine_expose_installed_cards_review",
       publicRevealKind: "expose",
       sourceDefinitionId: "onr_classic_032_schematics-search-engine",
       revealedCount: 2,
@@ -461,13 +563,15 @@ describe("access flow execution", () => {
   });
 
   it("trashes an accessed card through the existing trash payment and lifecycle callbacks", () => {
-    const { host, state, trashPayments, trashedCards, finishedRuns } = makeHost({
-      run: {
-        runId: "run_1",
-        attackedServerId: "remote_1",
-        accessedCardId: "asset",
-      } as unknown as NonNullable<GameState["run"]>,
-    });
+    const { host, state, trashPayments, trashedCards, finishedRuns } = makeHost(
+      {
+        run: {
+          runId: "run_1",
+          attackedServerId: "remote_1",
+          accessedCardId: "asset",
+        } as unknown as NonNullable<GameState["run"]>,
+      },
+    );
     const legalAction = {
       side: "runner",
       type: "trash_accessed_card",
@@ -660,9 +764,9 @@ describe("access flow execution", () => {
     agendaState.state.runner.rig.resources = ["mercenary" as CardInstanceId];
     const agendaAction = structuredClone(legalAction);
     agendaAction.payload = { ...agendaAction.payload, cardId: "agenda" };
-    expect(() =>
-      handleAccessExecution(agendaState.host, agendaAction),
-    ).toThrow("Agendas koennen nicht als Hidden-Resource-Trash-Ziel");
+    expect(() => handleAccessExecution(agendaState.host, agendaAction)).toThrow(
+      "Agendas koennen nicht als Hidden-Resource-Trash-Ziel",
+    );
 
     const poorState = makeHost({
       run: {

@@ -25,6 +25,8 @@ type CatalogCardSummary = {
   subtypes: string[];
 };
 
+type AccessOrigin = "central_root" | "hq" | "rd" | "archives" | "remote_root";
+
 type CatalogCardDetail = CatalogCardSummary & {
   setId: string;
   setName: string;
@@ -61,6 +63,7 @@ export function accessRevealFromLatestEvent(
   const serverLabel = serverDisplayLabel(
     payloadString(event.publicPayload, "serverLabel") ?? "einen Server",
   );
+  const accessOrigin = payloadAccessOrigin(event.publicPayload);
   const actions = legalActions.filter((action) =>
     [
       "access_card",
@@ -83,9 +86,14 @@ export function accessRevealFromLatestEvent(
     actorSide,
     viewerSide,
     serverLabel,
-    serverTitleLabel: accessServerTitleLabel(serverLabel),
-    serverLocationPhrase: accessServerLocationPhrase(serverLabel),
-    description: accessRevealDescription(actorSide, viewerSide, serverLabel),
+    serverTitleLabel: accessServerTitleLabel(serverLabel, accessOrigin),
+    serverLocationPhrase: accessServerLocationPhrase(serverLabel, accessOrigin),
+    description: accessRevealDescription(
+      actorSide,
+      viewerSide,
+      serverLabel,
+      accessOrigin,
+    ),
     card,
     actions,
     trashStatus:
@@ -119,6 +127,9 @@ export function accessRevealFromCurrentRun(
   const serverLabel = serverDisplayLabel(
     view.run?.breach?.serverId ?? view.run?.attackedServerId ?? "einen Server",
   );
+  const accessOrigin = accessEvent
+    ? payloadAccessOrigin(accessEvent.publicPayload)
+    : null;
   const actions = legalActions.filter((action) =>
     [
       "access_card",
@@ -155,9 +166,14 @@ export function accessRevealFromCurrentRun(
     actorSide,
     viewerSide,
     serverLabel,
-    serverTitleLabel: accessServerTitleLabel(serverLabel),
-    serverLocationPhrase: accessServerLocationPhrase(serverLabel),
-    description: accessRevealDescription(actorSide, viewerSide, serverLabel),
+    serverTitleLabel: accessServerTitleLabel(serverLabel, accessOrigin),
+    serverLocationPhrase: accessServerLocationPhrase(serverLabel, accessOrigin),
+    description: accessRevealDescription(
+      actorSide,
+      viewerSide,
+      serverLabel,
+      accessOrigin,
+    ),
     card,
     actions,
     trashStatus:
@@ -565,9 +581,7 @@ function securityPurgeRevealDescription(
       ? "Du hast"
       : `${accessActorSubject(actorSide)} hat`;
   const object =
-    count === 1
-      ? "die oberste R&D-Karte"
-      : `die obersten ${count} R&D-Karten`;
+    count === 1 ? "die oberste R&D-Karte" : `die obersten ${count} R&D-Karten`;
   return `${subject} ${object} durch ${sourceTitle} aufgedeckt.`;
 }
 
@@ -680,11 +694,14 @@ function accessRevealDescription(
   actorSide: Side,
   viewerSide: Side,
   serverLabel: string,
+  accessOrigin: AccessOrigin | null = null,
 ): string {
-  const location = accessServerLocationPhrase(serverLabel);
+  const location = accessServerLocationPhrase(serverLabel, accessOrigin);
+  const object =
+    accessOrigin === "central_root" ? "ein Root-Upgrade" : "eine Karte";
   if (actorSide === viewerSide)
-    return `Du hast auf eine Karte ${location} zugegriffen.`;
-  return `${accessActorSubject(actorSide)} hat auf eine Karte ${location} zugegriffen.`;
+    return `Du hast auf ${object} ${location} zugegriffen.`;
+  return `${accessActorSubject(actorSide)} hat auf ${object} ${location} zugegriffen.`;
 }
 
 function archivesRevealDescription(
@@ -783,7 +800,8 @@ function isSecurityPurgeTargetChoiceResolvedEvent(
   return (
     payload.agendaPurgeTargetChoiceResolved === true ||
     payload.securityPurgeTargetChoiceResolved === true ||
-    payloadString(payload, "hiddenZoneAction") === "agenda_purge_install_targets"
+    payloadString(payload, "hiddenZoneAction") ===
+      "agenda_purge_install_targets"
   );
 }
 
@@ -835,16 +853,43 @@ function accessActorSubject(side: Side): string {
   return side === "corp" ? "Die Korp" : "Der Runner";
 }
 
-function accessServerTitleLabel(serverLabel: string): string {
+function accessServerTitleLabel(
+  serverLabel: string,
+  accessOrigin: AccessOrigin | null = null,
+): string {
+  if (accessOrigin === "central_root") return `${serverLabel}-Root`;
+  if (accessOrigin === "hq") return "HQ";
+  if (accessOrigin === "rd") return "R&D";
+  if (accessOrigin === "archives") return "Archive";
   if (serverLabel === "HQ") return "Hauptquartier (HQ)";
   return serverLabel;
 }
 
-function accessServerLocationPhrase(serverLabel: string): string {
+function accessServerLocationPhrase(
+  serverLabel: string,
+  accessOrigin: AccessOrigin | null = null,
+): string {
+  if (accessOrigin === "central_root") return `im ${serverLabel}-Root`;
+  if (accessOrigin === "hq") return "in HQ";
+  if (accessOrigin === "rd") return "in R&D";
+  if (accessOrigin === "archives") return "im Archiv";
   if (serverLabel === "HQ") return "im Hauptquartier (HQ)";
   if (serverLabel === "Archive") return "im Archiv";
   if (/^Remote \d+$/.test(serverLabel)) return `in ${serverLabel}`;
   return `in ${serverLabel}`;
+}
+
+function payloadAccessOrigin(
+  payload: Record<string, unknown>,
+): AccessOrigin | null {
+  const value = payload.accessOrigin;
+  return value === "central_root" ||
+    value === "hq" ||
+    value === "rd" ||
+    value === "archives" ||
+    value === "remote_root"
+    ? value
+    : null;
 }
 
 function latestAccessAmbushPaymentStatus(

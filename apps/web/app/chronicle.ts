@@ -1619,9 +1619,7 @@ export function formatChronicleEvent(
         chips.push(...summary.chips);
         break;
       }
-      if (
-        hiddenZoneAction === "classic_corporate_shuffle_hq_to_rd"
-      ) {
+      if (hiddenZoneAction === "classic_corporate_shuffle_hq_to_rd") {
         const source =
           titleForDefinitionId(sourceDefinitionId) ??
           sourceTitle ??
@@ -2613,9 +2611,8 @@ export function formatChronicleEvent(
           stringValue(payload.temporaryIceSourceTitle) ??
           "Dr. Dreff";
         const temporaryIce =
-          titleForDefinitionId(
-            stringValue(payload.temporaryIceDefinitionId),
-          ) ?? "das temporäre ICE";
+          titleForDefinitionId(stringValue(payload.temporaryIceDefinitionId)) ??
+          "das temporäre ICE";
         category = "run";
         importance = "important";
         visibility = "public";
@@ -3012,7 +3009,12 @@ export function formatChronicleEvent(
       importance = "important";
       {
         const highlighterAccess = highlighterAccessExplanation(payload);
-        const location = accessServerLocationSuffix(serverLabel);
+        const accessOrigin = stringValue(payload.accessOrigin);
+        const location = accessServerLocationSuffix(serverLabel, accessOrigin);
+        const accessLocationLabel = accessChronicleLocationLabel(
+          serverLabel,
+          accessOrigin,
+        );
         const schematicsExpose =
           hiddenZoneAction ===
           "schematics_search_engine_expose_installed_cards_review";
@@ -3055,7 +3057,7 @@ export function formatChronicleEvent(
         }
         chips.push(
           "Zugriff",
-          ...(serverLabel ? [serverLabel] : []),
+          ...(accessLocationLabel ? [accessLocationLabel] : []),
           ...(schematicsExpose
             ? [
                 source ?? "Schematics Search Engine",
@@ -3079,11 +3081,21 @@ export function formatChronicleEvent(
       const payment = stealCostPaymentSuffix(payload);
       title = phrase(
         subject,
-        `${cardTitle ?? "eine Agenda"}${accessServerSourceSuffix(serverLabel)} gestohlen${points}${payment}`,
+        `${cardTitle ?? "eine Agenda"}${accessServerSourceSuffix(serverLabel, stringValue(payload.accessOrigin))} gestohlen${points}${payment}`,
       );
       chips.push(
         "Steal",
-        ...(serverLabel ? [serverLabel] : []),
+        ...(accessChronicleLocationLabel(
+          serverLabel,
+          stringValue(payload.accessOrigin),
+        )
+          ? [
+              accessChronicleLocationLabel(
+                serverLabel,
+                stringValue(payload.accessOrigin),
+              )!,
+            ]
+          : []),
         ...agendaPointChips(agendaPoints),
         ...stealCostPaymentChips(payload),
       );
@@ -3094,7 +3106,7 @@ export function formatChronicleEvent(
       importance = "important";
       title = phrase(
         subject,
-        `${cardTitle ?? "die zugegriffene Karte"}${accessServerSourceSuffix(serverLabel)} getrasht`,
+        `${cardTitle ?? "die zugegriffene Karte"}${accessServerSourceSuffix(serverLabel, stringValue(payload.accessOrigin))} getrasht`,
       );
       {
         const freeTrashSource = freeAccessTrashSourceLabel(payload);
@@ -5912,16 +5924,38 @@ function displayServerLabel(label: string | undefined): string | undefined {
   return label;
 }
 
-function accessServerLocationSuffix(serverLabel: string | undefined): string {
+function accessServerLocationSuffix(
+  serverLabel: string | undefined,
+  accessOrigin?: string,
+): string {
   if (!serverLabel) return "";
+  if (accessOrigin === "central_root") return ` im ${serverLabel}-Root`;
+  if (accessOrigin === "hq") return " in HQ";
+  if (accessOrigin === "rd") return " in R&D";
+  if (accessOrigin === "archives") return " im Archiv";
   if (serverLabel === "Archive") return " im Archiv";
   return ` in ${serverLabel}`;
 }
 
-function accessServerSourceSuffix(serverLabel: string | undefined): string {
+function accessServerSourceSuffix(
+  serverLabel: string | undefined,
+  accessOrigin?: string,
+): string {
   if (!serverLabel) return "";
+  if (accessOrigin === "central_root") return ` aus dem ${serverLabel}-Root`;
+  if (accessOrigin === "hq") return " aus HQ";
+  if (accessOrigin === "rd") return " aus R&D";
+  if (accessOrigin === "archives") return " aus dem Archiv";
   if (serverLabel === "Archive") return " aus dem Archiv";
   return ` aus ${serverLabel}`;
+}
+
+function accessChronicleLocationLabel(
+  serverLabel: string | undefined,
+  accessOrigin?: string,
+): string | null {
+  if (!serverLabel) return null;
+  return accessOrigin === "central_root" ? `${serverLabel}-Root` : serverLabel;
 }
 
 function accessServerStatusLabel(serverLabel: string): string {

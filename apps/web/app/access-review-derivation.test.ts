@@ -36,11 +36,7 @@ describe("Access outcome presentation", () => {
       accessRevealFromLatestEvent(
         access,
         {
-          onr_v1_340_setup: catalogCard(
-            "onr_v1_340_setup",
-            "Setup!",
-            "asset",
-          ),
+          onr_v1_340_setup: catalogCard("onr_v1_340_setup", "Setup!", "asset"),
         },
         [],
         "corp",
@@ -49,6 +45,79 @@ describe("Access outcome presentation", () => {
     ).toMatchObject({
       eventId: "evt_access",
       outcomeStatus: "Der Runner hat Setup! getrasht.",
+    });
+  });
+
+  it("separates central root upgrades from HQ, R&D and Archives cards", () => {
+    const details = {
+      root_upgrade: catalogCard("root_upgrade", "Root Upgrade", "upgrade"),
+      central_card: catalogCard("central_card", "Central Card", "operation"),
+    };
+    const hqRoot = accessRevealFromLatestEvent(
+      event("evt_hq_root", {
+        actionType: "access_card",
+        actor: "runner",
+        cardDefinitionId: "root_upgrade",
+        title: "Root Upgrade",
+        serverLabel: "HQ",
+        accessOrigin: "central_root",
+      }),
+      details,
+      [],
+      "runner",
+    );
+    const hqCard = accessRevealFromLatestEvent(
+      event("evt_hq", {
+        actionType: "access_card",
+        actor: "runner",
+        cardDefinitionId: "central_card",
+        title: "Central Card",
+        serverLabel: "HQ",
+        accessOrigin: "hq",
+      }),
+      details,
+      [],
+      "runner",
+    );
+    const rdRoot = accessRevealFromLatestEvent(
+      event("evt_rd_root", {
+        actionType: "access_card",
+        actor: "runner",
+        cardDefinitionId: "root_upgrade",
+        title: "Root Upgrade",
+        serverLabel: "R&D",
+        accessOrigin: "central_root",
+      }),
+      details,
+      [],
+      "runner",
+    );
+    const archivesCard = accessRevealFromLatestEvent(
+      event("evt_archives", {
+        actionType: "access_card",
+        actor: "runner",
+        cardDefinitionId: "central_card",
+        title: "Central Card",
+        serverLabel: "Archive",
+        accessOrigin: "archives",
+      }),
+      details,
+      [],
+      "runner",
+    );
+
+    expect(hqRoot).toMatchObject({
+      serverTitleLabel: "HQ-Root",
+      description: "Du hast auf ein Root-Upgrade im HQ-Root zugegriffen.",
+    });
+    expect(hqCard).toMatchObject({
+      serverTitleLabel: "HQ",
+      description: "Du hast auf eine Karte in HQ zugegriffen.",
+    });
+    expect(rdRoot?.serverTitleLabel).toBe("R&D-Root");
+    expect(archivesCard).toMatchObject({
+      serverTitleLabel: "Archive",
+      description: "Du hast auf eine Karte im Archiv zugegriffen.",
     });
   });
 });
@@ -223,9 +292,10 @@ describe("Security Purge reveal review", () => {
       retainedSecurityPurgeRevealEvent([reveal, laterAction], [])?.eventId,
     ).toBe("evt_security_purge");
     expect(
-      retainedSecurityPurgeRevealEvent([reveal, laterAction], [
-        "evt_security_purge",
-      ]),
+      retainedSecurityPurgeRevealEvent(
+        [reveal, laterAction],
+        ["evt_security_purge"],
+      ),
     ).toBeNull();
   });
 
