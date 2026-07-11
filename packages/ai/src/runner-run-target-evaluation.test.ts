@@ -2076,7 +2076,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       desiredCreditReserve: 4,
       fundingNeed: true,
       usefulHandCardsBlockedByCredits: 1,
-      recommendation: "fund_useful_hand_card",
+      recommendation: "acquire_economy",
       economyPriority: "high",
     });
     expect(posture.creditBasePlan.topBlockedHandCandidate).toMatchObject({
@@ -2088,6 +2088,79 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     expect(evaluation).toMatchObject({
       targetServerId: "hq",
       recommendation: "gain_credits_first",
+    });
+  });
+
+  it("enters a binding economy transition instead of click-funding a long gap", () => {
+    const input = aiInput({
+      credits: 1,
+      opponentCredits: 9,
+      servers: [
+        server("rd", {
+          ice: [barrierIce("outer-tax"), barrierIce("inner-tax")],
+        }),
+      ],
+      legalActions: [
+        runAction("run-rd", "rd"),
+        gainCreditAction("gain-credit"),
+        drawCardAction("draw-card"),
+      ],
+    });
+    const handDevelopmentEvaluations = [
+      handDevelopmentEvaluation({
+        cardInstanceId: "persistent-economy-in-hand",
+        developmentRole: "economy_engine",
+        priority: 920,
+        fundingNeed: {
+          installOrPlayCost: 11,
+          missingCredits: 10,
+          reason: "cannot_pay",
+        },
+      }),
+    ];
+
+    const posture = buildRunnerEconomyPosture({
+      input,
+      handDevelopmentEvaluations,
+    });
+
+    expect(posture).toMatchObject({
+      preferredEconomyRoute: "draw_for_economy",
+      buildEconomyBeforePressure: true,
+      creditBasePlan: {
+        recommendation: "acquire_economy",
+      },
+      transition: {
+        phase: "economy_transition",
+        commitment: "acquire_economy",
+        fundingHorizon: "long",
+        targetCardInstanceId: "persistent-economy-in-hand",
+        missingCredits: 10,
+        sustainableEconomyInstalled: false,
+        ordinaryPaidRunsDeferred: true,
+      },
+    });
+  });
+
+  it("returns to sustainable pressure after a general recurring source is installed", () => {
+    const installedEconomy = visibleCard("installed-economy", {
+      type: "resource",
+      rulesText: "At the start of your turn, gain credits.",
+    });
+    const input = aiInput({
+      credits: 6,
+      opponentCredits: 9,
+      servers: [server("rd", { ice: [barrierIce("tax-1"), barrierIce("tax-2")] })],
+      rig: [installedEconomy],
+      legalActions: [runAction("run-rd", "rd"), gainCreditAction("gain-credit")],
+    });
+
+    const posture = buildRunnerEconomyPosture({ input });
+
+    expect(posture.transition).toMatchObject({
+      phase: "sustainable_pressure",
+      sustainableEconomyInstalled: true,
+      ordinaryPaidRunsDeferred: false,
     });
   });
 
@@ -2456,6 +2529,21 @@ function gainCreditAction(actionId: string): LegalAction {
     side: "runner",
     type: "gain_credit",
     label: "Gain credit",
+    source: "basic_action",
+    timingPoint: "runner_action.main",
+    costs: [{ clicks: 1 }],
+    targetRequirements: [],
+    visibility: "public",
+    expiresAtStateVersion: 2,
+  };
+}
+
+function drawCardAction(actionId: string): LegalAction {
+  return {
+    actionId,
+    side: "runner",
+    type: "draw_card",
+    label: "Draw card",
     source: "basic_action",
     timingPoint: "runner_action.main",
     costs: [{ clicks: 1 }],

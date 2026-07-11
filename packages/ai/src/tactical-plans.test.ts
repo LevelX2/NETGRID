@@ -2453,6 +2453,69 @@ describe("tactical plan model", () => {
     );
   });
 
+  it("maps a long hand-card funding commitment to drawing for economy", () => {
+    const draw = legalAction("draw", "runner", "draw_card");
+    const gain = legalAction("gain", "runner", "gain_credit");
+    const input = aiInput("runner", [draw, gain]);
+    input.playerView.own.credits = 1;
+    const development = runnerHandDevelopmentEvaluation({
+      cardInstanceId: "long-gap-economy",
+      availability: "missing_credits",
+      developmentRole: "economy_engine",
+      strategicFit: "blocked",
+      currentNeed: "useful_now",
+      priority: 920,
+      fundingNeed: {
+        installOrPlayCost: 11,
+        missingCredits: 10,
+        reason: "cannot_pay",
+      },
+      deferReason: "missing_credits",
+    });
+    const posture = runnerEconomyPosture({
+      currentCredits: 1,
+      usefulHandCardsBlockedByCredits: 1,
+      topBlockedMissingCredits: 10,
+      recommendation: "acquire_economy",
+      economyPriority: "high",
+      preferredEconomyRoute: "draw_for_economy",
+      transition: {
+        phase: "economy_transition",
+        commitment: "acquire_economy",
+        fundingHorizon: "long",
+        targetCardInstanceId: "long-gap-economy",
+        missingCredits: 10,
+        sustainableEconomyInstalled: false,
+        ordinaryPaidRunsDeferred: true,
+        evidence: [],
+      },
+    });
+
+    const context = {
+      input,
+      runnerHandDevelopmentEvaluations: [development],
+      runnerEconomyPosture: posture,
+      candidates: [
+        candidateForUntargetedAction(draw),
+        candidateForUntargetedAction(gain),
+      ],
+    };
+    const plans = buildTacticalPlans(context);
+    const result = evaluateTacticalPlans(context);
+    const handPlan = plans.find(
+      (plan) => plan.planId === "runner.develop_hand_card:long-gap-economy",
+    );
+
+    expect(handPlan?.currentStep).toMatchObject({
+      kind: "draw_for_answer",
+      desiredActionSemantics: ["draw.card"],
+    });
+    expect(handPlan?.evidence).toEqual(
+      expect.arrayContaining(["funding_route:acquire_economy"]),
+    );
+    expect(result.selectedMapping?.legalActions[0]?.actionId).toBe(draw.actionId);
+  });
+
   it("treats generic credit and draw setup as support when open R&D is available", () => {
     const rdRun = legalAction("run-rd", "runner", "start_run", {
       serverId: "rd",
@@ -3629,6 +3692,7 @@ function runnerEconomyPosture(overrides: {
   recommendation?: RunnerEconomyPosture["creditBasePlan"]["recommendation"];
   economyPriority?: RunnerEconomyPosture["creditBasePlan"]["economyPriority"];
   preferredEconomyRoute?: RunnerEconomyPosture["preferredEconomyRoute"];
+  transition?: RunnerEconomyPosture["transition"];
 }): RunnerEconomyPosture {
   const usefulHandCardsBlockedByCredits =
     overrides.usefulHandCardsBlockedByCredits ?? 0;
@@ -3691,6 +3755,7 @@ function runnerEconomyPosture(overrides: {
     ...(overrides.preferredEconomyRoute
       ? { preferredEconomyRoute: overrides.preferredEconomyRoute }
       : {}),
+    ...(overrides.transition ? { transition: overrides.transition } : {}),
     recommendation: economyPriority === "high" ? "build_economy" : "stable",
     evidence: [],
   };

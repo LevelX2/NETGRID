@@ -26,6 +26,7 @@ export function runnerAdjustedPlanPriority(
   return (
     basePriority +
     (evaluation ? runnerRunTargetPlanPriorityDelta(evaluation) : 0) +
+    runnerEconomyTransitionRunPriorityDelta(context, evaluation) +
     runnerDeckStrategyPlanPriorityBoost(context, serverId)
   );
 }
@@ -62,8 +63,35 @@ export function runnerRunTargetPlanScoreBreakdown(
           },
         ]
       : []),
+    ...(runnerEconomyTransitionRunPriorityDelta(context, evaluation) !== 0
+      ? [
+          {
+            key: "runner_economy_transition_run_deferral",
+            label: "Ökonomie-Transition",
+            value: runnerEconomyTransitionRunPriorityDelta(context, evaluation),
+            reason: context.runnerEconomyPosture?.transition?.commitment ?? "none",
+          },
+        ]
+      : []),
     ...runnerDeckStrategyPlanScoreBreakdown(context, actionServerId(action)),
   ];
+}
+
+function runnerEconomyTransitionRunPriorityDelta(
+  context: TacticalPlanBuildContext,
+  evaluation: RunnerRunTargetEvaluation | undefined,
+): number {
+  if (
+    context.runnerEconomyPosture?.transition?.ordinaryPaidRunsDeferred !== true ||
+    !evaluation ||
+    evaluation.pathCost <= 1 ||
+    evaluation.scoreThreat ||
+    evaluation.accessPayoff === "agenda" ||
+    evaluation.accessPayoff === "score_threat"
+  ) {
+    return 0;
+  }
+  return -520;
 }
 
 export function runnerCentralRunOpportunityFloor(

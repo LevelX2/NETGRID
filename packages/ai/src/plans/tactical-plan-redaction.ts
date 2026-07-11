@@ -172,6 +172,7 @@ function runnerSpendAllowedDespiteReserveReason(
     case "allow_pressure":
       return "pressure_payoff_or_probe";
     case "build_credit_base":
+    case "acquire_economy":
     case "fund_useful_hand_card":
     case "preserve_reserve":
       return "not_allowed";

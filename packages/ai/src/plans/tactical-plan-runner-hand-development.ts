@@ -413,6 +413,11 @@ function runnerHandFundingPlan(params: {
   const missingCredits = fundingNeed?.missingCredits ?? 0;
   const requiredCredits = fundingNeed?.installOrPlayCost ?? 0;
   const fundingReason = fundingNeed?.reason ?? "unknown";
+  const acquireEconomy =
+    context.runnerEconomyPosture?.transition?.commitment === "acquire_economy" &&
+    context.runnerEconomyPosture.transition.targetCardInstanceId ===
+      evaluation.cardInstanceId &&
+    context.input.legalActions.some((action) => action.type === "draw_card");
   const target = {
     kind: "card" as const,
     id: evaluation.cardInstanceId,
@@ -447,7 +452,7 @@ function runnerHandFundingPlan(params: {
         kind: "missing_credits",
         severity: "soft",
         target,
-        removalStepKind: "gain_credits",
+        removalStepKind: acquireEconomy ? "draw_for_answer" : "gain_credits",
         evidence: [
           `funding_missing_credits:${missingCredits}`,
           `funding_required_credits:${requiredCredits}`,
@@ -456,11 +461,17 @@ function runnerHandFundingPlan(params: {
       },
     ],
     currentStep: createPlanStep({
-      stepId: `gain_credits_for_hand_card:${evaluation.cardInstanceId}`,
-      kind: "gain_credits",
-      desiredActionSemantics: ["economy.gain_credit"],
+      stepId: acquireEconomy
+        ? `draw_economy_for_hand_card:${evaluation.cardInstanceId}`
+        : `gain_credits_for_hand_card:${evaluation.cardInstanceId}`,
+      kind: acquireEconomy ? "draw_for_answer" : "gain_credits",
+      desiredActionSemantics: acquireEconomy
+        ? ["draw.card"]
+        : ["economy.gain_credit"],
       rationale: [
-        `fund hand card ${runnerHandDevelopmentTargetLabel(evaluation)}`,
+        acquireEconomy
+          ? `find efficient economy before funding ${runnerHandDevelopmentTargetLabel(evaluation)}`
+          : `fund hand card ${runnerHandDevelopmentTargetLabel(evaluation)}`,
         `hand development role ${evaluation.developmentRole} is ${evaluation.currentNeed}`,
         `missing credits ${missingCredits}`,
       ],
@@ -484,6 +495,7 @@ function runnerHandFundingPlan(params: {
       `funding_missing_credits:${missingCredits}`,
       `funding_required_credits:${requiredCredits}`,
       `funding_reason:${fundingReason}`,
+      `funding_route:${acquireEconomy ? "acquire_economy" : "direct_funding"}`,
     ],
     runnerGoalEvidence: params.runnerGoalEvidence,
     stateVersion: params.stateVersion,

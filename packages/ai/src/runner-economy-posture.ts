@@ -11,6 +11,7 @@ import type {
   RunnerCreditReservePolicy,
   RunnerEconomyRoute,
   RunnerEconomyPosture,
+  RunnerEconomyTransitionAssessment,
   RunnerRemoteScoreThreat,
 } from "./runner-run-target-evaluation";
 
@@ -61,10 +62,17 @@ export function buildRunnerEconomyPosture(
   const desiredCreditReserve = creditBasePlan.desiredCreditReserve;
   const fundingNeed = creditBasePlan.fundingNeed;
   const hasCashOut = params.input.legalActions.some(isBankPayoutAction);
+  const transition = buildRunnerEconomyTransitionAssessment({
+    ...params,
+    remoteScoreThreat,
+    creditBasePlan,
+  });
   const buildEconomyBeforePressure =
     credits <= 2 ||
     (creditBasePlan.economyPriority === "high" &&
       credits < creditBasePlan.desiredCreditReserve) ||
+    (transition.phase === "economy_transition" &&
+      transition.commitment !== "none") ||
     setupEngine.has("runner.economy_setup_before_pressure");
   const recommendation = fundingNeed && hasCashOut
     ? "cash_out_bank"
@@ -84,6 +92,7 @@ export function buildRunnerEconomyPosture(
     creditReservePolicy,
     creditBasePlan,
     preferredEconomyRoute,
+    transition,
     riskAdjustedRunReserve,
     buildEconomyBeforePressure,
     bankToolsRelevant,
@@ -107,6 +116,7 @@ export function buildRunnerEconomyPosture(
       `funding_need:${fundingNeed}`,
       `economy_recommendation:${recommendation}`,
       `economy_route:${preferredEconomyRoute}`,
+      ...transition.evidence,
     ],
   };
 }
@@ -123,6 +133,17 @@ function runnerPreferredEconomyRoute(
   if (context.fundingNeed && context.hasCashOut) return "bank_cashout";
   if (runnerHasInstalledActionEconomy(params.input)) {
     return "installed_action_economy";
+  }
+  const longFundingGap =
+    params.handDevelopmentEvaluations
+      ?.filter(usefulHandEvaluationBlockedByCredits)
+      .sort(compareHandDevelopmentForCreditBase)[0]
+      ?.fundingNeed?.missingCredits ?? 0;
+  if (
+    longFundingGap >= 4 &&
+    params.input.legalActions.some((action) => action.type === "draw_card")
+  ) {
+    return "draw_for_economy";
   }
   const handEconomyRoute = runnerHandEconomyRoute(
     params.handDevelopmentEvaluations ?? [],
@@ -239,6 +260,9 @@ function buildRunnerCreditBasePlan(params: {
     remoteScoreThreat: params.creditReservePolicy.remoteScoreThreat,
     usefulBlockedCount: usefulBlocked.length,
     usefulAffordableCount: usefulAffordable.length,
+    ...(topBlockedCandidate
+      ? { topBlockedMissingCredits: topBlockedCandidate.missingCredits }
+      : {}),
   });
   const economyPriority = creditBaseEconomyPriority({
     currentCredits: params.currentCredits,
@@ -477,7 +501,15 @@ function creditBaseRecommendation(params: {
   remoteScoreThreat: RunnerRemoteScoreThreat;
   usefulBlockedCount: number;
   usefulAffordableCount: number;
+  topBlockedMissingCredits?: number;
 }): RunnerCreditBasePlanRecommendation {
+  if (
+    params.fundingNeed &&
+    params.usefulBlockedCount > 0 &&
+    (params.topBlockedMissingCredits ?? 0) >= 4
+  ) {
+    return "acquire_economy";
+  }
   if (params.fundingNeed && params.usefulBlockedCount > 0) {
     return "fund_useful_hand_card";
   }
@@ -493,6 +525,138 @@ function creditBaseRecommendation(params: {
   if (params.currentCredits < params.desiredCreditReserve) return "preserve_reserve";
   if (params.currentCredits < 6) return "preserve_reserve";
   return "allow_pressure";
+}
+
+function buildRunnerEconomyTransitionAssessment(
+  params: EconomyPostureParams & {
+    remoteScoreThreat: RunnerRemoteScoreThreat;
+    creditBasePlan: RunnerCreditBasePlan;
+  },
+): RunnerEconomyTransitionAssessment {
+  const sustainableEconomyInstalled = runnerHasInstalledSustainableEconomy(
+    params.input,
+    params.deckCapabilities,
+  );
+  const totalIce = params.input.playerView.servers.reduce(
+    (sum, server) => sum + server.ice.length,
+    0,
+  );
+  const maximumServerDepth = Math.max(
+    0,
+    ...params.input.playerView.servers.map((server) => server.ice.length),
+  );
+  const endgameContest =
+    params.remoteScoreThreat === "urgent" ||
+    params.remoteScoreThreat === "visible" ||
+    params.input.playerView.opponent.agendaPoints >=
+      params.input.playerView.agendaPointsToWin - 2 ||
+    params.input.playerView.own.agendaPoints >=
+      params.input.playerView.agendaPointsToWin - 2;
+  const boardEconomyPressure =
+    maximumServerDepth >= 2 ||
+    totalIce >= 3 ||
+    params.input.playerView.opponent.credits >= 8;
+  const phase = endgameContest
+    ? "endgame_contest"
+    : sustainableEconomyInstalled
+      ? "sustainable_pressure"
+      : boardEconomyPressure || params.input.playerView.stateVersion > 8
+        ? "economy_transition"
+        : "opening_access";
+  const economyEvaluations = (params.handDevelopmentEvaluations ?? [])
+    .filter(
+      (evaluation) =>
+        evaluation.developmentRole === "economy_engine" ||
+        evaluation.developmentRole === "bank_tool",
+    )
+    .sort(compareHandDevelopmentForCreditBase);
+  const legalEconomy = economyEvaluations.find(
+    (evaluation) =>
+      evaluation.availability === "legal_now" &&
+      evaluation.legalActionId !== undefined &&
+      evaluation.currentNeed !== "none" &&
+      evaluation.currentNeed !== "later",
+  );
+  const blockedEconomy = economyEvaluations.find(
+    usefulHandEvaluationBlockedByCredits,
+  );
+  const missingCredits = blockedEconomy?.fundingNeed?.missingCredits;
+  const fundingHorizon = missingCredits === undefined
+    ? "none"
+    : missingCredits <= 3
+      ? "short"
+      : "long";
+  const economyKnownInDeck =
+    params.deckCapabilities?.runner?.economyBankTools.some(
+      (tool) => tool.status === "in_deck",
+    ) === true;
+  const canDraw = params.input.legalActions.some(
+    (action) => action.type === "draw_card",
+  );
+  const canActivateEconomy = runnerHasInstalledActionEconomy(params.input);
+  const commitment = legalEconomy
+    ? "install_economy"
+    : blockedEconomy && fundingHorizon === "short"
+      ? "fund_economy"
+      : blockedEconomy && canDraw
+        ? "acquire_economy"
+        : canActivateEconomy
+          ? "activate_economy"
+          : phase === "economy_transition" && economyKnownInDeck && canDraw
+            ? "acquire_economy"
+            : "none";
+  const ordinaryPaidRunsDeferred =
+    phase === "economy_transition" && commitment !== "none";
+  const targetCardInstanceId = (legalEconomy ?? blockedEconomy)?.cardInstanceId;
+  return {
+    phase,
+    commitment,
+    fundingHorizon,
+    ...(targetCardInstanceId ? { targetCardInstanceId } : {}),
+    ...(missingCredits !== undefined ? { missingCredits } : {}),
+    sustainableEconomyInstalled,
+    ordinaryPaidRunsDeferred,
+    evidence: [
+      `economy_transition_phase:${phase}`,
+      `economy_transition_commitment:${commitment}`,
+      `economy_transition_funding_horizon:${fundingHorizon}`,
+      `economy_transition_sustainable_installed:${sustainableEconomyInstalled}`,
+      `economy_transition_total_ice:${totalIce}`,
+      `economy_transition_max_server_depth:${maximumServerDepth}`,
+      `economy_transition_corp_credits:${params.input.playerView.opponent.credits}`,
+      `economy_transition_paid_runs_deferred:${ordinaryPaidRunsDeferred}`,
+      ...(missingCredits !== undefined
+        ? [`economy_transition_missing_credits:${missingCredits}`]
+        : []),
+    ],
+  };
+}
+
+function runnerHasInstalledSustainableEconomy(
+  input: AiDecisionInput,
+  deckCapabilities: DeckCapabilityProfile | undefined,
+): boolean {
+  if (
+    deckCapabilities?.runner?.economyBankTools.some(
+      (tool) => tool.status === "installed",
+    ) === true
+  ) {
+    return true;
+  }
+  if (runnerHasInstalledActionEconomy(input)) return true;
+  return (input.playerView.own.rig ?? []).some((card) => {
+    const text = `${card.rulesText ?? ""}`.toLowerCase();
+    const renewable =
+      text.includes("recurring credit") ||
+      text.includes("recurring credits") ||
+      text.includes("gain credits") ||
+      text.includes("take credits");
+    const runRestricted =
+      text.includes("only during a run") ||
+      text.includes("only to pay for using icebreakers") ||
+      text.includes("run credits");
+    return renewable && !runRestricted;
+  });
 }
 
 function creditBaseEconomyPriority(params: {

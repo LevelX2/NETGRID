@@ -71,8 +71,10 @@ export function runnerCreditBasePlans(
     creditBase.usefulHandCardsBlockedByCredits > 0 &&
     missingCredits !== undefined &&
     missingCredits >= 4 &&
-    context.runnerEconomyPosture?.preferredEconomyRoute ===
-      "basic_credit_fallback" &&
+    (context.runnerEconomyPosture?.preferredEconomyRoute ===
+      "basic_credit_fallback" ||
+      context.runnerEconomyPosture?.preferredEconomyRoute ===
+        "draw_for_economy") &&
     basicDrawActionAvailable &&
     !drawOverflowCreditPressure;
   return [

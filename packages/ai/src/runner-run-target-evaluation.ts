@@ -184,6 +184,7 @@ export type RunnerBlinkRecoveryAssessment = {
 
 export type RunnerCreditBasePlanRecommendation =
   | "build_credit_base"
+  | "acquire_economy"
   | "fund_useful_hand_card"
   | "preserve_reserve"
   | "allow_setup_spend"
@@ -203,8 +204,31 @@ export type RunnerEconomyRoute =
   | "installed_action_economy"
   | "hand_bank_tool"
   | "hand_economy_engine"
+  | "draw_for_economy"
   | "burst_event"
   | "basic_credit_fallback";
+
+export type RunnerEconomyTransitionPhase =
+  | "opening_access"
+  | "economy_transition"
+  | "sustainable_pressure"
+  | "endgame_contest";
+
+export type RunnerEconomyTransitionAssessment = {
+  phase: RunnerEconomyTransitionPhase;
+  commitment:
+    | "none"
+    | "acquire_economy"
+    | "fund_economy"
+    | "install_economy"
+    | "activate_economy";
+  fundingHorizon: "none" | "short" | "long";
+  targetCardInstanceId?: string;
+  missingCredits?: number;
+  sustainableEconomyInstalled: boolean;
+  ordinaryPaidRunsDeferred: boolean;
+  evidence: string[];
+};
 
 export type RunnerCreditReservePolicy = {
   schemaVersion: 1;
@@ -290,6 +314,7 @@ export type RunnerEconomyPosture = {
   creditReservePolicy: RunnerCreditReservePolicy;
   creditBasePlan: RunnerCreditBasePlan;
   preferredEconomyRoute?: RunnerEconomyRoute;
+  transition?: RunnerEconomyTransitionAssessment;
   riskAdjustedRunReserve: boolean;
   buildEconomyBeforePressure: boolean;
   bankToolsRelevant: boolean;

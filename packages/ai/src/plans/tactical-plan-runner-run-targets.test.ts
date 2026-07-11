@@ -177,6 +177,70 @@ describe("runnerPressureProbeAllowance", () => {
       ),
     ).toMatchObject({ kind: "probe_central" });
   });
+
+  it("defers ordinary paid runs during a binding economy transition", () => {
+    const hqRun = runAction("run-hq", "hq");
+    const paidRun = runTargetEvaluation({
+      actionId: hqRun.actionId,
+      targetServerId: "hq",
+      targetKind: "hq",
+      recommendation: "run_now",
+      accessPayoff: "unknown",
+      scoreThreat: false,
+      score: 400,
+      pathCost: 4,
+    });
+    const nearFreeRun = runTargetEvaluation({ ...paidRun, pathCost: 1 });
+    const transition: NonNullable<
+      NonNullable<TacticalPlanBuildContext["runnerEconomyPosture"]>["transition"]
+    > = {
+      phase: "economy_transition",
+      commitment: "fund_economy",
+      fundingHorizon: "short",
+      sustainableEconomyInstalled: false,
+      ordinaryPaidRunsDeferred: true,
+      evidence: [],
+    };
+
+    const paidPriority = runnerAdjustedPlanPriority(
+      planContext({
+        primaryStrategyId: "runner.hq_pressure",
+        runTargetEvaluations: [paidRun],
+        economyTransition: transition,
+      }),
+      hqRun,
+      760,
+    );
+    const nearFreePriority = runnerAdjustedPlanPriority(
+      planContext({
+        primaryStrategyId: "runner.hq_pressure",
+        runTargetEvaluations: [nearFreeRun],
+        economyTransition: transition,
+      }),
+      hqRun,
+      760,
+    );
+
+    expect(nearFreePriority - paidPriority).toBe(520);
+    expect(
+      runnerRunTargetPlanScoreBreakdown(
+        planContext({
+          primaryStrategyId: "runner.hq_pressure",
+          runTargetEvaluations: [paidRun],
+          economyTransition: transition,
+        }),
+        hqRun,
+        760,
+      ),
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "runner_economy_transition_run_deferral",
+          value: -520,
+        }),
+      ]),
+    );
+  });
 });
 
 function pressureBudget(
@@ -201,6 +265,9 @@ function planContext(input: {
   secondaryStrategyIds?: string[];
   runnerClicks?: number;
   runTargetEvaluations?: RunnerRunTargetEvaluation[];
+  economyTransition?: NonNullable<
+    TacticalPlanBuildContext["runnerEconomyPosture"]
+  >["transition"];
 }): TacticalPlanBuildContext {
   return {
     input: {
@@ -216,6 +283,13 @@ function planContext(input: {
       ),
     } as unknown as TacticalPlanBuildContext["strategicIntentState"],
     runnerRunTargetEvaluations: input.runTargetEvaluations,
+    ...(input.economyTransition
+      ? {
+          runnerEconomyPosture: {
+            transition: input.economyTransition,
+          } as TacticalPlanBuildContext["runnerEconomyPosture"],
+        }
+      : {}),
   } as TacticalPlanBuildContext;
 }
 
@@ -247,7 +321,10 @@ function runTargetEvaluation(
     | "targetServerId"
   > &
     Partial<
-      Pick<RunnerRunTargetEvaluation, "creditsAfterRun" | "pathPassability">
+      Pick<
+        RunnerRunTargetEvaluation,
+        "creditsAfterRun" | "pathPassability" | "pathCost"
+      >
     >,
 ): RunnerRunTargetEvaluation {
   return {
@@ -259,6 +336,7 @@ function runTargetEvaluation(
     pathPassability: input.pathPassability ?? "reachable",
     knownAccessState: "unknown",
     creditsAfterRun: input.creditsAfterRun ?? 0,
+    pathCost: input.pathCost ?? 0,
     scoreThreat: input.scoreThreat,
     score: input.score,
     evidence: [],
