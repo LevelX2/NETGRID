@@ -1,6 +1,6 @@
 # Match ABD9 Runner-Economy-Transition Prozess 2026-07-11
 
-Status: in Arbeit
+Status: umgesetzt und verifiziert
 
 ## Quelle und Evidence
 
@@ -159,3 +159,39 @@ geändert würde oder Side-Safety-/Replay-Regressionen auftreten.
 - Tests und Benchmark sind dokumentiert; der Branch ist lokal nach `main`
   integriert und die fremde Änderung an `apps/web/next-env.d.ts` bleibt
   unangetastet.
+
+## Umsetzung und Verifikation
+
+Umgesetzt wurden:
+
+- generische Hybridklassifikation für erneuerbare, zweckgebundene Credits;
+- vier Economy-Transition-Phasen mit konkretem Acquire-, Fund-, Install- und
+  Activate-Commitment;
+- `draw_for_economy` statt langer Basis-Credit-Finanzierung;
+- Zurückstellung gewöhnlicher bezahlter Runs während eines verbindlichen
+  Aufbaus bei Ausnahmen für nahezu kostenlose und akute hochwertige Zugriffe;
+- deckabhängige Search-Engine-Konversion für Primärabdeckung sowie echte
+  Hybrid- und Spezialistenarchitekturen.
+
+Verifikationsstand:
+
+- vollständige AI-Suite: 286 Testdateien und 1.874 Tests grün;
+- AI-Typecheck grün;
+- Compiled-Hints-, Hint-Inspector- und Hint-Quality-Gates grün;
+- `git diff --check` grün.
+
+Der reproduzierbare 4-mal-25-Benchmark liegt unter
+`docs/reviews/ai/runner-economy-transition-4x25-2026-07-11.json` und `.md`.
+Im relevanten Lauf `current_vs_current` gewann der Runner 12 und die Korp 13
+Spiele. Es gab keine Action-Limits, Fehler, IllegalActions, Replayfehler,
+Fallbacks oder Timeouts. Der Runner erreichte 4,64 Agenda-Punkte, 9,31
+durchschnittliche Credits und 82,9 Prozent Handnutzung; kein Run startete
+gegen einen vollständig bekannt unbezahlbaren Pfad.
+
+Der Benchmark markiert zugleich Folgekalibrierung: 49
+`bank_over_target_without_funding_need`- und 132
+`plan_step_action_mismatch`-Findings sowie 554 Economy-Aktionen bei bereits
+hohen Credits. Diese Funde widerlegen den Controllervertrag nicht, zeigen aber,
+dass Bankziel, Auszahlungszeitpunkt und die Diagnosezuordnung von
+`draw_for_economy` in einem getrennten Folgepaket nachkalibriert werden
+sollten.
