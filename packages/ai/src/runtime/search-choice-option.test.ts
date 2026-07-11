@@ -83,6 +83,73 @@ describe("selectedSearchChoiceOptionIds", () => {
 
     expect(selected).toEqual(["ap-breaker"]);
   });
+
+  it("prefers a new installable support program over breaker copies already in rig and grip", () => {
+    const choice = searchChoice(
+      [
+        option("krash", "Krash", "program", {
+          memoryCost: 1,
+          installCost: 0,
+          subtypes: ["Icebreaker"],
+        }),
+        option("lockjaw", "Lockjaw", "program", {
+          memoryCost: 1,
+          installCost: 0,
+        }),
+      ],
+      1,
+    );
+    const selected = selectedSearchChoiceOptionIds(choice, choice.options, {
+      features: {
+        credits: 4,
+        memoryRemaining: 2,
+        rigRoles: new Set([
+          "breaker_fracter",
+          "breaker_decoder",
+          "breaker_killer",
+        ]),
+        rigDefinitionIds: new Set(["krash"]),
+        gripDefinitionCounts: new Map([["krash", 1]]),
+      },
+      rolesForCardId: (cardId) =>
+        cardId === "krash"
+          ? ["breaker_fracter", "breaker_decoder", "breaker_killer"]
+          : ["icebreaker_support", "run_support"],
+    });
+
+    expect(selected).toEqual(["lockjaw"]);
+  });
+
+  it("prefers a fresh support definition over another copy already in grip", () => {
+    const choice = searchChoice(
+      [
+        option("lockjaw", "Lockjaw", "program", {
+          memoryCost: 1,
+          installCost: 0,
+        }),
+        option("clown", "Clown", "program", {
+          memoryCost: 1,
+          installCost: 4,
+        }),
+      ],
+      1,
+    );
+    const selected = selectedSearchChoiceOptionIds(choice, choice.options, {
+      features: {
+        credits: 4,
+        memoryRemaining: 2,
+        rigRoles: new Set(["breaker_universal"]),
+        rigDefinitionIds: new Set(["krash"]),
+        gripDefinitionCounts: new Map([["lockjaw", 1]]),
+      },
+      rolesForCardId: (cardId) =>
+        cardId === "lockjaw"
+          ? ["icebreaker_support", "run_support"]
+          : ["ice_modifier", "run_support"],
+    });
+
+    expect(selected).toEqual(["clown"]);
+  });
 });
 
 function searchChoice(

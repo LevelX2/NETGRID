@@ -79,6 +79,22 @@ export function discardKeepScore(
     (input.playerView.own.rig ?? []).some(
       (candidate) => candidate.definitionId === card.definitionId,
     );
+  const breakerRoleNeedles = matchingBreakerRoleNeedles(roles);
+  const installedRigRoles =
+    input.side === "runner"
+      ? (input.playerView.own.rig ?? []).flatMap((rigCard) =>
+          dependencies.rolesForCardId(rigCard.definitionId),
+        )
+      : [];
+  const installedSameBreakerRole =
+    input.side === "runner" &&
+    breakerRoleNeedles.some((needle) =>
+      rolesMatch(installedRigRoles, [needle]),
+    );
+  const runnerRedundantBreakerDuplicate =
+    input.side === "runner" &&
+    installedSameBreakerRole &&
+    (installedSameDefinition || duplicateCount > 1);
   const runnerNonAdditiveDuplicate =
     input.side === "runner" &&
     (duplicateCount > 1 || installedSameDefinition) &&
@@ -100,14 +116,7 @@ export function discardKeepScore(
     if (rolesMatch(roles, ["score", "remote"])) baseValue += 70;
     if (corpAdvancementBurstSupportsVisibleAgenda) baseValue += 420;
   } else {
-    const breakerRoleNeedles = matchingBreakerRoleNeedles(roles);
     if (breakerRoleNeedles.length > 0) {
-      const installedRigRoles = (input.playerView.own.rig ?? []).flatMap(
-        (rigCard) => dependencies.rolesForCardId(rigCard.definitionId),
-      );
-      const installedSameBreakerRole = breakerRoleNeedles.some((needle) =>
-        rolesMatch(installedRigRoles, [needle]),
-      );
       baseValue += installedSameBreakerRole ? 95 : 210;
     }
     if (runnerEconomyOrPayout)
@@ -142,6 +151,9 @@ export function discardKeepScore(
   if (duplicateCount > 1 && type !== "agenda")
     baseValue -= (runnerNonAdditiveDuplicate ? 170 : 75) * (duplicateCount - 1);
   if (runnerNonAdditiveDuplicate && installedSameDefinition) baseValue -= 180;
+  if (runnerRedundantBreakerDuplicate) {
+    baseValue -= 220 + Math.max(0, duplicateCount - 1) * 180;
+  }
   if (
     cost > input.playerView.own.credits + 3 &&
     type !== "agenda" &&

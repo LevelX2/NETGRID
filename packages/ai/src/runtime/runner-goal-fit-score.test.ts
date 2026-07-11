@@ -373,6 +373,47 @@ describe("runnerSemanticGoalFitScoreComponent", () => {
       value: 1400,
     });
   });
+
+  it("penalizes coverage search when no visible coverage need exists", () => {
+    const action = {
+      actionId: "program-search",
+      side: "runner",
+      type: "activated_card_ability",
+    } as unknown as LegalAction;
+    const input = runnerInputWithGoals([], {
+      playerView: {
+        own: {
+          tags: 0,
+          credits: 5,
+          gripOrHq: [],
+          rig: [
+            {
+              instanceId: "universal-breaker",
+              definitionId: "universal-breaker",
+              title: "Universal Breaker",
+              type: "program",
+              known: true,
+            },
+          ],
+        },
+        servers: [],
+      },
+    });
+
+    const component = runnerSemanticGoalFitScoreComponent(
+      input,
+      action,
+      "coverage_search",
+      undefined,
+      testDependencies({ sourceRole: "search" }),
+    );
+
+    expect(component).toMatchObject({
+      key: "runner_goal_fit_coverage_search_no_need",
+      value: -1400,
+      reason: "no_visible_unresolved_coverage_need",
+    });
+  });
 });
 
 function runnerInputWithGoals(

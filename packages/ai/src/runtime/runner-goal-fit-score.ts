@@ -6,7 +6,10 @@ import type {
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
 import type { RunnerTacticalGoal } from "../runner-tactical-goals";
-import { runnerCoverageSearchSaturation } from "./runner-search-coverage-need";
+import {
+  runnerCoverageSearchSaturation,
+  runnerVisibleSearchCoverageNeed,
+} from "./runner-search-coverage-need";
 
 export type RunnerSourceCardAnswerRole = "search" | "draw";
 
@@ -55,6 +58,15 @@ export function runnerSemanticGoalFitScoreComponent(
   }
   const sourceRole = dependencies.sourceCardAnswerRole(input, action);
   if (scopeId === "coverage_search" && sourceRole === "search") {
+    const coverageNeed = runnerVisibleSearchCoverageNeed(input);
+    if (!coverageNeed) {
+      return {
+        key: "runner_goal_fit_coverage_search_no_need",
+        label: "Coverage-Suche ohne Bedarf",
+        value: -1400,
+        reason: "no_visible_unresolved_coverage_need",
+      };
+    }
     const saturation = runnerCoverageSearchSaturation(
       input,
       dependencies.rolesForCardId,

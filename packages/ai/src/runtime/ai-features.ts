@@ -24,6 +24,7 @@ export type AiFeatures = {
   handCount: number;
   rigRoles: Set<string>;
   rigDefinitionIds: Set<string>;
+  gripDefinitionCounts: Map<string, number>;
   handRoles: Set<string>;
   eventCounts: Record<string, number>;
   knownServerPressure: number;
@@ -72,6 +73,14 @@ export function extractAiFeatures(
       .map((card) => card.definitionId)
       .filter((id): id is string => Boolean(id)),
   );
+  const gripDefinitionCounts = new Map<string, number>();
+  for (const card of input.playerView.own.gripOrHq) {
+    if (!card.definitionId) continue;
+    gripDefinitionCounts.set(
+      card.definitionId,
+      (gripDefinitionCounts.get(card.definitionId) ?? 0) + 1,
+    );
+  }
   const handRoles = new Set(
     input.playerView.own.gripOrHq.flatMap((card) =>
       dependencies.rolesForCardId(card.definitionId),
@@ -120,6 +129,7 @@ export function extractAiFeatures(
     handCount: input.playerView.own.gripOrHq.length,
     rigRoles,
     rigDefinitionIds,
+    gripDefinitionCounts,
     handRoles: new Set([
       ...handRoles,
       ...ownCards

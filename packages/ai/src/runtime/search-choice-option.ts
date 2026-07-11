@@ -14,6 +14,7 @@ export type SearchChoiceFeatureSnapshot = {
   readonly memoryRemaining: number;
   readonly rigRoles: ReadonlySet<string>;
   readonly rigDefinitionIds: ReadonlySet<string>;
+  readonly gripDefinitionCounts?: ReadonlyMap<string, number>;
 };
 
 export type SearchChoiceScoringContext = {
@@ -127,6 +128,18 @@ function scoreSearchChoiceOption(
         ? 110
         : -160 - (installCost - features.credits) * 30;
   }
+  if (destination === "grip" && card.type === "program") {
+    const memoryCost = card.memoryCost ?? 0;
+    score +=
+      memoryCost <= features.memoryRemaining
+        ? 90
+        : -220 - (memoryCost - features.memoryRemaining) * 40;
+    const installCost = card.installCost ?? card.cost ?? 0;
+    score +=
+      installCost <= features.credits
+        ? 100
+        : -120 - (installCost - features.credits) * 30;
+  }
 
   const breakerRoleNeedles = matchingBreakerRoleNeedles(roles);
   if (
@@ -140,7 +153,7 @@ function scoreSearchChoiceOption(
     score += 220;
     const rigRoles = [...features.rigRoles];
     for (const roleNeedle of breakerRoleNeedles)
-      score += rolesMatch(rigRoles, [roleNeedle]) ? 40 : 180;
+      score += rolesMatch(rigRoles, [roleNeedle]) ? -70 : 180;
     if (features.rigRoles.size === 0) score += 120;
   }
 
@@ -148,8 +161,12 @@ function scoreSearchChoiceOption(
     score += features.memoryRemaining <= 1 ? 170 : 60;
   if (rolesMatch(roles, ["economy"]))
     score += features.credits < 4 ? 90 : 25;
-  if (card.definitionId && features.rigDefinitionIds.has(card.definitionId))
-    score -= 90;
+  if (card.definitionId) {
+    const gripCopies =
+      features.gripDefinitionCounts?.get(card.definitionId) ?? 0;
+    if (features.rigDefinitionIds.has(card.definitionId)) score -= 360;
+    if (gripCopies > 0) score -= 520 + (gripCopies - 1) * 220;
+  }
   score -= Math.max(0, card.memoryCost ?? 0) * 5;
   score -= Math.max(0, card.installCost ?? card.cost ?? 0) * 2;
   return score;

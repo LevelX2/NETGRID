@@ -189,6 +189,41 @@ describe("discard keep score", () => {
 
     expect(installedDuplicate).toBeLessThan(freshUtility - 100);
   });
+
+  it("discards excess copies of an installed breaker before a unique support program", () => {
+    const krash = runnerCard("krash", "program");
+    const secondKrash = {
+      ...runnerCard("krash", "program"),
+      instanceId: "krash-second-instance",
+    };
+    const installedKrash = {
+      ...runnerCard("krash", "program"),
+      instanceId: "krash-installed-instance",
+    };
+    const support = runnerCard("clown", "program");
+    const redundantBreaker = score(
+      krash,
+      ["breaker_fracter", "breaker_decoder", "breaker_killer"],
+      "runner",
+      [installedKrash],
+      {
+        krash: ["breaker_fracter", "breaker_decoder", "breaker_killer"],
+      },
+      { extraGrip: [secondKrash, support] },
+    );
+    const uniqueSupport = score(
+      support,
+      ["ice_modifier", "run_support", "build_rig"],
+      "runner",
+      [installedKrash],
+      {
+        krash: ["breaker_fracter", "breaker_decoder", "breaker_killer"],
+      },
+      { extraGrip: [krash, secondKrash] },
+    );
+
+    expect(redundantBreaker.baseValue).toBeLessThan(uniqueSupport.baseValue);
+  });
 });
 
 function score(
