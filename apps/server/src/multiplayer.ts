@@ -1069,6 +1069,7 @@ export class MultiplayerService {
         ...(nextMode === "human_runner_vs_corp_ai" ? { corpDifficulty: aiDifficulty } : {}),
         ...(nextMode === "human_corp_vs_runner_ai" ? { runnerDifficulty: aiDifficulty } : {}),
         ...(record.match.aiPacingMode ? { aiPacingMode: record.match.aiPacingMode } : {}),
+        ...(record.match.aiTraceMode ? { aiTraceMode: record.match.aiTraceMode } : {}),
         ...(typeof record.match.discoverableInLan === "boolean" ? { discoverableInLan: record.match.discoverableInLan } : {}),
         ...(record.match.deckSetup.aiDeckPolicy ? { aiDeckPolicy: record.match.deckSetup.aiDeckPolicy } : {}),
         settings: record.match.settings,

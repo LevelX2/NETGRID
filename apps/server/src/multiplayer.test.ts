@@ -4452,6 +4452,43 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(duplicate.error.code).toBe("series_next_exists");
   });
 
+  it.each([
+    { requested: "summary" as const, stored: "summary" },
+    { requested: "detailed" as const, stored: "detailed" },
+    { requested: "off" as const, stored: undefined }
+  ])("preserves AI trace mode $requested across a private side-swap series", async ({ requested, stored }) => {
+    const storage = new InMemoryMatchStorage();
+    const service = new MultiplayerService(storage, { tokenSalt: `series-ai-trace-${requested}` });
+    const created = await service.createMatch({
+      hostSide: "corp",
+      playMode: "human_vs_ai",
+      humanSide: "corp",
+      seed: `series-ai-trace-${requested}`,
+      runnerDifficulty: "hard",
+      aiTraceMode: requested,
+      settings: { agendaPointsToWin: 7, matchFormat: "two_game_side_swap" }
+    });
+    const firstRecord = await service.loadForTest(created.matchId);
+    if (!firstRecord?.gameState) throw new Error("Missing first AI series game");
+    firstRecord.match.status = "finished";
+    firstRecord.gameState.winner = "corp";
+    firstRecord.gameState.gameEndReason = "agenda_points";
+    await storage.save(firstRecord);
+
+    const next = await service.startNextSeriesGame(created.matchId, {
+      side: "corp",
+      sessionToken: created.hostSessionToken,
+      displayName: "Trace-Modus-Seitenwechsel"
+    });
+
+    expect("error" in next).toBe(false);
+    if ("error" in next) throw new Error(next.error.message);
+    const nextRecord = await service.loadForTest(next.matchId);
+    expect(next.mode).toBe("human_runner_vs_corp_ai");
+    expect(nextRecord?.match.aiControllers?.corp?.difficulty).toBe("hard");
+    expect(nextRecord?.match.aiTraceMode).toBe(stored);
+  });
+
   it("treats forfeit in game 1 of a private series as a single-game result and keeps series-next available", async () => {
     const match = await joinedMatch("series-forfeit-game-1", { agendaPointsToWin: 7, matchFormat: "two_game_side_swap" });
     const beforeRecord = await match.service.loadForTest(match.matchId);
