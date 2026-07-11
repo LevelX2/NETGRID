@@ -379,6 +379,9 @@ function roleForCard(context: CardContext): RunnerHandDevelopmentRole {
   if (context.duplicateInstalled && !looksRepeatUseful(text)) {
     return "duplicate_or_low_value";
   }
+  if (runnerHandTextHasRecurringBreakerEconomySignal(text)) {
+    return "economy_engine";
+  }
   if (looksLikeMemorySupport(context.card, text)) return "memory_support";
   if (looksLikeBreaker(context.card, text)) return "breaker_or_rig_piece";
   if (looksLikeBankTool(text)) return "bank_tool";
@@ -727,6 +730,13 @@ function deferReasonForCard(
     ) {
       return "missing_mu";
     }
+    if (
+      availability === "legal_now" &&
+      (currentNeed === "acute" || currentNeed === "useful_now") &&
+      persistentInstallEvaluation.finalInstallFit === 0
+    ) {
+      return "none";
+    }
     return "stronger_override";
   }
   if (role === "duplicate_or_low_value") return "duplicate";
@@ -956,9 +966,13 @@ function runnerHandTextHasIceStrengthReductionSignal(text: string): boolean {
 
 function runnerHandTextHasRecurringBreakerEconomySignal(text: string): boolean {
   const tokens = runnerHandTextTokens(text);
+  const renewablePool =
+    runnerHandTokensIncludeAny(tokens, ["recurring"]) ||
+    (runnerHandTokensIncludeAny(tokens, ["replace", "replenish", "refill"]) &&
+      runnerHandTokensIncludePhrase(tokens, ["start", "of", "your", "next", "turn"]));
   return (
-    runnerHandTokensIncludeAny(tokens, ["recurring"]) &&
-    runnerHandTokensIncludeAny(tokens, ["credit", "credits", "economy"]) &&
+    renewablePool &&
+    runnerHandTokensIncludeAny(tokens, ["bit", "bits", "credit", "credits", "economy"]) &&
     runnerHandTokensIncludeAny(tokens, ["breaker", "icebreaker"])
   );
 }

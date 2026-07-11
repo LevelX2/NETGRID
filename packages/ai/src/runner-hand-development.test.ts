@@ -140,6 +140,43 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     expect(evaluation.priority).toBeGreaterThanOrEqual(900);
   });
 
+  it("classifies renewable breaker credits on hybrid hardware as economy", () => {
+    const cybermodem = visibleCard("cortical-cybermodem-1", {
+      definitionId: "onr_proteus_134_cortical-cybermodem",
+      title: "Cortical Cybermodem",
+      type: "hardware",
+      installCost: 11,
+      rulesText:
+        "Provides +2 MU and +2 hand size. Put 2 bits from the bank on this card when installed. Use these bits only to pay for using icebreakers during runs. If you use any of these bits, replace them from the bank at the start of your next turn.",
+    });
+    const input = runnerInput({
+      credits: 14,
+      hand: [cybermodem],
+      legalActions: [installAction("install-cortical-cybermodem", cybermodem, 11)],
+    });
+
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({
+        input,
+        strategicIntent: strategicIntent({
+          setupEngine: ["runner.economy_setup_before_pressure"],
+        }),
+      }),
+      "cortical-cybermodem-1",
+    );
+
+    expect(evaluation).toMatchObject({
+      developmentRole: "economy_engine",
+      availability: "legal_now",
+      currentNeed: "useful_now",
+      strategicFit: "strong",
+      deferReason: "none",
+    });
+    expect(evaluation.evidence.join("|")).toContain(
+      "breaker_recurring_economy",
+    );
+  });
+
   it("uses source identifiers and ignores label-only hand card titles", () => {
     const console = visibleCard("console-1", {
       definitionId: "test-console",

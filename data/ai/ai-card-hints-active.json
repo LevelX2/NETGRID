@@ -29920,11 +29920,12 @@
       "cardId": "onr_proteus_134_cortical-cybermodem",
       "side": "runner",
       "cardType": "hardware",
-      "roles": ["hardware", "memory"],
+      "roles": ["hardware", "memory", "economy", "recurring", "icebreaker_support"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
       "valueHints": {
-        "memory": 1
+        "memory": 1,
+        "economy": 2
       },
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
