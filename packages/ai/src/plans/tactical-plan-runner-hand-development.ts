@@ -1,4 +1,5 @@
 import type { RunnerHandDevelopmentEvaluation } from "../runner-hand-development";
+import { assessRunnerBreakerDevelopment } from "../runner-breaker-development";
 import { cardProvidesBreakerCoverage } from "./tactical-plan-breaker-cards";
 import { missingBreakerCoverageKind } from "./tactical-plan-breaker-coverage";
 import {
@@ -176,6 +177,9 @@ export function runnerHandDevelopmentPlans(
   const handEvaluations = context.runnerHandDevelopmentEvaluations ?? [];
   const usefulEvaluations = handEvaluations
     .filter(usefulLegalRunnerHandDevelopment)
+    .filter((evaluation) =>
+      runnerSearchDevelopmentHasConcreteConversion(context, evaluation),
+    )
     .filter(
       (evaluation) =>
         !runnerHandDevelopmentOwnedByBreakerCoverage(context, evaluation),
@@ -187,6 +191,9 @@ export function runnerHandDevelopmentPlans(
   const fundableEvaluations = canFundHandCardsNow
     ? handEvaluations
         .filter(usefulFundableRunnerHandDevelopment)
+        .filter((evaluation) =>
+          runnerSearchDevelopmentHasConcreteConversion(context, evaluation),
+        )
         .filter(
           (evaluation) =>
             !runnerHandDevelopmentOwnedByBreakerCoverage(context, evaluation),
@@ -291,6 +298,52 @@ export function runnerHandDevelopmentPlans(
     ),
   );
   return plans;
+}
+
+export function runnerSearchDevelopmentHasConcreteConversion(
+  context: TacticalPlanBuildContext,
+  evaluation: RunnerHandDevelopmentEvaluation,
+): boolean {
+  if (evaluation.developmentRole !== "draw_or_search_engine") return true;
+  const coverage = new Set([
+    ...(evaluation.persistentInstallEvaluation?.existingFunctionalCoverage ?? []),
+    ...(evaluation.persistentInstallEvaluation?.newFunctionalCoverage ?? []),
+  ]);
+  const programSearch =
+    coverage.has("non_additive_utility:program_search") ||
+    coverage.has("non_additive_utility:action_gated_search");
+  if (!programSearch) return true;
+
+  const breakerDevelopment = assessRunnerBreakerDevelopment(
+    context.deckCapabilities,
+  );
+  const runner = context.deckCapabilities?.runner;
+  if (!runner) return false;
+  const candidateIds = breakerDevelopment.primaryBreakerNeed
+    ? runner.breakerInventory
+        .filter(
+          (breaker) =>
+            breaker.locations.includes("in_deck") &&
+            !breaker.locations.includes("installed"),
+        )
+        .map((breaker) => breaker.cardId)
+    : breakerDevelopment.optionalBreakerIds;
+  const candidateSet = new Set(candidateIds);
+  const availableMemory = runner.memoryProfile.memoryAvailable;
+  return runner.breakerInventory.some((breaker) => {
+    if (!candidateSet.has(breaker.cardId)) return false;
+    if (!breaker.locations.includes("in_deck")) return false;
+    const fundingGap = Math.max(
+      0,
+      (breaker.installCost ?? 0) - context.input.playerView.own.credits,
+    );
+    const memoryReachable =
+      breaker.memoryCost === undefined ||
+      breaker.memoryCost === 0 ||
+      availableMemory === undefined ||
+      availableMemory >= breaker.memoryCost;
+    return fundingGap <= 3 && memoryReachable;
+  });
 }
 
 function runnerHandDevelopmentPlan(params: {
