@@ -99,7 +99,7 @@ export default function MaintenancePage() {
   const [cleanupPolicy, setCleanupPolicy] = useState<MaintenanceCleanupPolicy | null>(null);
   const [policyDraft, setPolicyDraft] = useState({
     enabled: false,
-    statuses: cleanupStatusOptions.map(([status]) => status),
+    statuses: automaticCleanupStatusOptions.map(([status]) => status),
     olderThanDays: "3",
     limit: "500",
     includeProtected: false,
@@ -933,7 +933,12 @@ export default function MaintenancePage() {
             <button
               type="button"
               style={buttonDanger}
-              onClick={() => queueSensitiveAction(`Das Löschen von ${cleanupPreview?.matchCount ?? 0} Matches wird unmittelbar ausgeführt.`, applyCleanup)}
+              onClick={() => queueSensitiveAction(
+                cleanupPreview?.statusCounts.active
+                  ? `Das Löschen von ${cleanupPreview.matchCount} Matches wird unmittelbar ausgeführt. Darunter sind ${cleanupPreview.statusCounts.active} als aktiv markierte Matches.`
+                  : `Das Löschen von ${cleanupPreview?.matchCount ?? 0} Matches wird unmittelbar ausgeführt.`,
+                applyCleanup
+              )}
               disabled={cleanupLoading || !cleanupPreview || cleanupPreview.matchCount === 0 || !cleanupConfirmed}
               title="Ganze Matches löschen"
             >
@@ -963,13 +968,19 @@ export default function MaintenancePage() {
           </label>
         </div>
         <div style={checkboxGrid}>
-          {cleanupStatusOptions.map(([status, label]) => (
+          {manualCleanupStatusOptions.map(([status, label]) => (
             <label key={status} style={checkField}>
               <input type="checkbox" checked={cleanupFilters.statuses.includes(status)} onChange={() => toggleCleanupStatus(status)} />
               {label}
             </label>
           ))}
         </div>
+        {cleanupFilters.statuses.includes("active") ? (
+          <div style={warningBox}>
+            <AlertTriangle size={18} aria-hidden="true" />
+            <p style={subtle}>Aktive Matches werden ausschließlich anhand ihres letzten Aktualisierungszeitpunkts ausgewählt. Nutze eine ausreichend hohe Altersgrenze und prüfe die Vorschau sorgfältig, damit keine laufende Partie gelöscht wird.</p>
+          </div>
+        ) : null}
         {cleanupLoading ? <p style={infoBox}>Cleanup-Anfrage läuft. Bitte warten, bis Vorschau oder Ergebnis angezeigt wird.</p> : null}
         {cleanupPreview ? (
           <div style={cleanupBox}>
@@ -1064,7 +1075,7 @@ export default function MaintenancePage() {
             </label>
           </div>
           <div style={checkboxGrid}>
-            {cleanupStatusOptions.map(([status, label]) => (
+            {automaticCleanupStatusOptions.map(([status, label]) => (
               <label key={`policy-${status}`} style={checkField}>
                 <input type="checkbox" checked={policyDraft.statuses.includes(status)} onChange={() => togglePolicyStatus(status)} />
                 {label}
@@ -1320,7 +1331,8 @@ const statusOptions: Array<[string, string]> = [
   ["finished", "Beendet"]
 ];
 
-const cleanupStatusOptions = statusOptions.filter(([status]) => ["cancelled", "abandoned", "forfeited", "finished"].includes(status));
+const automaticCleanupStatusOptions = statusOptions.filter(([status]) => ["cancelled", "abandoned", "forfeited", "finished"].includes(status));
+const manualCleanupStatusOptions = statusOptions.filter(([status]) => ["active", "cancelled", "abandoned", "forfeited", "finished"].includes(status));
 
 const terminalOptions: Array<[string, string]> = [
   ["all", "Alle"],
