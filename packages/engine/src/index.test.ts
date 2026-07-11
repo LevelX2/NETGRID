@@ -1372,7 +1372,7 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
     ).toBeUndefined();
   });
 
-  it("applies Lockjaw and Personal Touch only to selected icebreakers", () => {
+  it("taps Lockjaw without trashing it and boosts only the selected icebreaker", () => {
     let state = runnerMain("proteus-pro009-modifiers");
     const lockjawId = addInstalledRunnerProgramForTest(
       state,
@@ -1407,6 +1407,8 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
       (action) => action.actionId === lockjaw.actionId,
     );
     expect(state.cardInstances[lockjawId]?.tapped).toBe(true);
+    expect(state.runner.rig.programs).toContain(lockjawId);
+    expect(state.runner.heap).not.toContain(lockjawId);
     expect(state.run?.remainderStrengthBonusByBreaker?.[targetId]).toBe(2);
     expect(
       state.run?.remainderStrengthBonusByBreaker?.[otherId],

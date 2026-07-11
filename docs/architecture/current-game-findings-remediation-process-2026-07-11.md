@@ -165,6 +165,11 @@ einen eigenen Commit und ein dokumentiertes Done-Gate.
 - Done-Gate: Befund ist entweder mit korrekter Karte behoben oder als
   quellenbelegter Nichtfehler geschlossen; keine Mehrfachnutzung im getappten
   Zustand.
+- Ergebnis: Als Namensverwechslung/Nichtfehler geschlossen. Im aktuellen
+  Kartenbestand existiert nur `Lockjaw` (`onr_proteus_091_lockjaw`); der
+  versionierte Proteus-Kartentext verlangt ausdrücklich `[T]`. Die Regression
+  belegt Tap, Verbleib im Rig, Sperre bis zum Refresh und erneute Nutzbarkeit im
+  folgenden Runner-Zug. Eine Trash-Änderung wäre regelwidrig.
 - Commit: `test(engine): lock Lockjaw tap semantics`.
 
 ### P6: Dr.-Dreff-Runfenster und Chronicle
