@@ -224,6 +224,66 @@ describe("discard keep score", () => {
 
     expect(redundantBreaker.baseValue).toBeLessThan(uniqueSupport.baseValue);
   });
+
+  it("keeps Streetware over redundant Krash copies despite persisted breaker-search intent", () => {
+    const streetware = runnerCard(
+      "onr_proteus_150_streetware-distributor",
+      "resource",
+    );
+    const firstKrash = runnerCard("onr_v1_039_krash", "program");
+    const secondKrash = {
+      ...runnerCard("onr_v1_039_krash", "program"),
+      instanceId: "krash-second-instance",
+    };
+    const pattelsVirus = runnerCard("onr_v1_046_pattels-virus", "program");
+    const cloak = runnerCard("onr_v1_011_cloak", "program");
+    const installedKrash = {
+      ...runnerCard("onr_v1_039_krash", "program"),
+      instanceId: "krash-installed-instance",
+    };
+    const rolesByCardId: Record<string, readonly string[]> = {
+      "onr_v1_039_krash": [
+        "breaker_fracter",
+        "breaker_decoder",
+        "breaker_killer",
+      ],
+      "onr_v1_046_pattels-virus": ["ice_modifier", "run_support"],
+      "onr_v1_011_cloak": ["economy_recurring", "run_support"],
+      "onr_proteus_150_streetware-distributor": [
+        "economy",
+        "economy_recurring",
+      ],
+    };
+    const redundantKrash = score(
+      firstKrash,
+      rolesByCardId["onr_v1_039_krash"],
+      "runner",
+      [installedKrash],
+      rolesByCardId,
+      {
+        credits: 4,
+        extraGrip: [secondKrash, pattelsVirus, cloak, streetware],
+        strategyId: "runner.search.breaker",
+      },
+    );
+    const persistentEconomy = score(
+      streetware,
+      rolesByCardId["onr_proteus_150_streetware-distributor"],
+      "runner",
+      [installedKrash],
+      rolesByCardId,
+      {
+        credits: 4,
+        extraGrip: [firstKrash, secondKrash, pattelsVirus, cloak],
+        strategyId: "runner.search.breaker",
+      },
+    );
+
+    expect(persistentEconomy.total).toBeGreaterThan(redundantKrash.total);
+    expect(persistentEconomy.baseValue).toBeGreaterThan(
+      redundantKrash.baseValue,
+    );
+  });
 });
 
 function score(
@@ -236,6 +296,7 @@ function score(
     credits?: number;
     extraGrip?: readonly VisibleCard[];
     legalActionForCard?: boolean;
+    strategyId?: string;
   } = {},
 ) {
   return discardKeepScore(input(card, side, rig, options), card, {
@@ -260,9 +321,10 @@ function input(
     credits?: number;
     extraGrip?: readonly VisibleCard[];
     legalActionForCard?: boolean;
+    strategyId?: string;
   } = {},
 ): AiDecisionInput {
-  return {
+  const decisionInput = {
     side,
     playerView: {
       side,
@@ -333,6 +395,17 @@ function input(
     actionNumber: 1,
     profileId: side,
   } as unknown as AiDecisionInput;
+  if (options.strategyId) {
+    Object.assign(decisionInput, {
+      ownStrategicIntentState: {
+        primaryStrategy: {
+          strategyId: options.strategyId,
+          family: "runner_setup",
+        },
+      },
+    });
+  }
+  return decisionInput;
 }
 
 function corpCard(definitionId: string, type: string): VisibleCard {
