@@ -25,12 +25,12 @@ export function DamageImpactOverlay({
       ? `Grip jetzt ${damageImpactGripValue(cue.runnerGripAfter, cue.runnerMaxHandSizeAfter)}`
       : "Grip-Pool";
   const summary = preventedDamage
-    ? `${damageTypeLabel(cue.damageType)} durch ${cue.sourceLabel} verhindert.`
+    ? `${damageTypeLabel(cue.damageType)} gegen den Runner durch ${cue.sourceLabel} verhindert.`
     : cue.flatline && cue.runnerGripBefore !== undefined
     ? overkillDamage > 0
-      ? `${cue.amount} ${damageTypeLabel(cue.damageType)} durch ${cue.sourceLabel}; ${overkillDamage} über Flatline-Schwelle.`
-      : `${cue.amount} ${damageTypeLabel(cue.damageType)} durch ${cue.sourceLabel}; Flatline-Schwelle erreicht.`
-    : `${cue.amount} ${damageTypeLabel(cue.damageType)} durch ${cue.sourceLabel}.`;
+      ? `Runner erleidet ${cue.amount} ${damageTypeLabel(cue.damageType)} durch ${cue.sourceLabel}; ${overkillDamage} über Flatline-Schwelle.`
+      : `Runner erleidet ${cue.amount} ${damageTypeLabel(cue.damageType)} durch ${cue.sourceLabel}; Flatline-Schwelle erreicht.`
+    : `Runner erleidet ${cue.amount} ${damageTypeLabel(cue.damageType)} durch ${cue.sourceLabel}.`;
   const thresholdLabel = !preventedDamage && cue.runnerGripBefore !== undefined
     ? cue.flatline
       ? `Null-Linie nach ${cue.runnerGripBefore} Damage`

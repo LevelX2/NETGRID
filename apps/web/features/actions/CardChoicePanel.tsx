@@ -21,7 +21,7 @@ import { type CardDisplayMode } from "../settings/settings-model";
 import { cardChoiceOrderBadge, isRunnerStackTopChooseOneArrangeRestChoice } from "./card-choice-order-badge";
 import { choiceSelectionRangeLabel } from "./card-choice-selection-label";
 import { WindowEventIcon } from "./WindowEventIcon";
-import { windowEventIconKindForAmbience } from "./window-event-icon-kind";
+import { windowEventIconKindForChoice } from "./window-event-icon-kind";
 
 type VisibleChoice = NonNullable<PlayerView["pendingChoice"]>;
 type VisibleChoiceOption = VisibleChoice["options"][number];
@@ -117,7 +117,11 @@ export function CardChoicePanel({
           </div>
           <div className="cardChoiceHeaderControls">
             <WindowEventIcon
-              kind={windowEventIconKindForAmbience(ambience)}
+              kind={windowEventIconKindForChoice({
+                ambience,
+                source: choice.source,
+                title,
+              })}
             />
             {hasDisplayOnlyOptions ? (
               <div className="cardChoiceViewToggle" aria-label="Kartenanzeige">

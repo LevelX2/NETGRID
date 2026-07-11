@@ -194,6 +194,19 @@ describe("run window layering", () => {
       "net-damage",
       "meat-damage",
       "core-damage",
+      "draw-card",
+      "gain-credit",
+      "install-card",
+      "play-card",
+      "rez-card",
+      "advance-card",
+      "remove-tag",
+      "purge",
+      "card-ability",
+      "choice",
+      "run-end",
+      "turn-end",
+      "action",
     ]) {
       expect(css).toContain(`url("/icons/window-events/${icon}.png")`);
       expect(
@@ -211,6 +224,9 @@ describe("run window layering", () => {
     for (const target of ["hq", "rd", "archives", "remote"]) {
       expect(css).toContain(`.windowEventIcon-run-${target}`);
     }
+    expect(accessReviewModalSource).toContain("Runner erleidet {cue.amount}");
+    expect(accessReviewModalSource).toContain("hasSingleRevealedCard");
+    expect(accessReviewModalSource).toContain("accessRevealSingleRevealedCard");
   });
 
   it("serializes access damage and AI pacing through one presentation", () => {
