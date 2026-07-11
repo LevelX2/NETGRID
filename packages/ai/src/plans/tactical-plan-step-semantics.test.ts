@@ -23,6 +23,12 @@ describe("tactical plan step semantics", () => {
         }),
       ),
     ).toBe(true);
+    expect(
+      candidateSemanticsMatchStep(
+        step("find_remote_protection"),
+        candidate({ semanticActionType: "draw.card" }),
+      ),
+    ).toBe(true);
   });
 
   it("ignores label-like free-text evidence", () => {

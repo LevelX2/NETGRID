@@ -93,6 +93,15 @@ export function candidateSemanticsMatchStep(
         "remote_protection",
         "corp_rez_ice",
       ]);
+    case "find_remote_protection":
+      return hasAnyToken(tokens, [
+        "draw.card",
+        "search.rd",
+        "search.deck",
+        "search_ice",
+        "ice_search",
+        "remote_protection",
+      ]);
     case "install_or_prepare_agenda":
       return (
         hasToken(tokens, "install.card") &&
@@ -213,6 +222,13 @@ export function actionTypeMatchesStep(
       return actionType === "draw_card";
     case "draw_hand_buffer":
       return actionType === "draw_card";
+    case "find_remote_protection":
+      return (
+        actionType === "draw_card" ||
+        actionType === "play_operation" ||
+        actionType === "trigger_ability" ||
+        actionType === "activated_card_ability"
+      );
     case "find_survival_answer":
       return (
         actionType === "draw_card" ||

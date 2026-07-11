@@ -9,10 +9,7 @@ import {
   remoteIsProtected,
 } from "./tactical-plan-corp-score-window";
 import { createPlanStep } from "./tactical-plan-builders";
-import {
-  actionServerId,
-  isRemoteServer,
-} from "./tactical-plan-server-targets";
+import { actionServerId, isRemoteServer } from "./tactical-plan-server-targets";
 import { serverHasUnrezzedIce } from "./tactical-plan-run-reachability";
 import { visibleCardByInstanceId } from "./tactical-plan-visible-cards";
 import type {
@@ -20,6 +17,10 @@ import type {
   PlanStep,
   TacticalPlanBuildContext,
 } from "./tactical-plan-types";
+import {
+  corpIcePlacementCandidateForAction,
+  type CorpIcePlacementCandidate,
+} from "../runtime/corp-ice-placement/corp-ice-placement";
 
 const CORP_PUNISH_EXACT_SIGNALS = new Set([
   "tag.source",
@@ -94,7 +95,9 @@ export function corpScoreWindowBlockers(
   scorelineAssessment?: TacticalPlanBuildContext["corpScorelineWindowAssessment"],
 ): PlanBlocker[] {
   const blockers: PlanBlocker[] = [];
-  const target = serverId ? { kind: "server" as const, id: serverId } : undefined;
+  const target = serverId
+    ? { kind: "server" as const, id: serverId }
+    : undefined;
   if (
     serverId &&
     isRemoteServer(serverId) &&
@@ -198,13 +201,80 @@ export function corpScoreWindowCurrentStep(
         blocker.kind === "score_window_unprotected" ||
         blocker.kind === "score_window_contestable",
     )?.target?.id;
+    const protectionPath = input
+      ? corpRemoteProtectionPath(input, targetServerId)
+      : emptyCorpRemoteProtectionPath();
+    if (
+      protectionPath.immediateActionIds.length === 0 &&
+      protectionPath.fundingCandidate
+    ) {
+      const minimumCredits =
+        protectionPath.fundingCandidate.actionCreditCost +
+        protectionPath.fundingCandidate.rezCost;
+      return createPlanStep({
+        stepId: `build_rez_reserve:${action.actionId}`,
+        kind: "build_rez_reserve",
+        desiredActionSemantics: ["economy.gain_credit", "card_ability.trigger"],
+        actionCandidateIds:
+          input?.legalActions
+            .filter((candidate) => candidate.type === "gain_credit")
+            .map((candidate) => candidate.actionId) ?? [],
+        requiredCapabilities: [
+          {
+            capabilityId: `remote_protection_reserve:${action.actionId}`,
+            kind: "rez_reserve",
+            side: "corp",
+            minimumCredits,
+            evidence: [
+              "remote_protection_requires_funding",
+              `protection_action:${protectionPath.fundingCandidate.actionId}`,
+              `protection_rez_cost:${protectionPath.fundingCandidate.rezCost}`,
+              `protection_install_cost:${protectionPath.fundingCandidate.actionCreditCost}`,
+            ],
+          },
+        ],
+        rationale: [
+          `fund concrete remote protection to ${minimumCredits} credits`,
+        ],
+      });
+    }
+    if (protectionPath.immediateActionIds.length === 0) {
+      return createPlanStep({
+        stepId: `find_remote_protection:${action.actionId}`,
+        kind: "find_remote_protection",
+        desiredActionSemantics: [
+          "draw.card",
+          "search.deck",
+          "remote_protection",
+        ],
+        actionCandidateIds: protectionPath.acquisitionActionIds,
+        requiredCapabilities: [
+          {
+            capabilityId: `remote_protection:${action.actionId}`,
+            kind: "remote_protection",
+            side: "corp",
+            evidence: [
+              "no_effective_remote_protection_in_hq",
+              ...protectionPath.evidence,
+            ],
+          },
+          {
+            capabilityId: `remote_protection_draw:${action.actionId}`,
+            kind: "card_draw",
+            side: "corp",
+            evidence: ["find_effective_remote_protection"],
+          },
+        ],
+        rationale: [
+          "find protection that the visible Runner rig cannot nullify",
+        ],
+      });
+    }
     return createPlanStep({
       stepId: `protect_remote:${action.actionId}`,
       kind: "protect_remote",
       desiredActionSemantics: ["install.card", "corp_window.rez"],
-      actionCandidateIds: input
-        ? corpRemoteProtectionActionIds(input, targetServerId)
-        : [],
+      actionCandidateIds: protectionPath.immediateActionIds,
       requiredCapabilities: [
         {
           capabilityId: `remote_protection:${action.actionId}`,
@@ -249,36 +319,102 @@ export function corpScoreWindowCurrentStep(
   });
 }
 
-function corpRemoteProtectionActionIds(
+type CorpRemoteProtectionPath = {
+  immediateActionIds: string[];
+  fundingCandidate?: CorpIcePlacementCandidate;
+  acquisitionActionIds: string[];
+  evidence: string[];
+};
+
+function emptyCorpRemoteProtectionPath(): CorpRemoteProtectionPath {
+  return {
+    immediateActionIds: [],
+    acquisitionActionIds: [],
+    evidence: [],
+  };
+}
+
+function corpRemoteProtectionPath(
   input: AiDecisionInput,
   serverId: string | undefined,
-): string[] {
-  if (!serverId) return [];
-  return input.legalActions
-    .filter(
-      (action) =>
-        action.side === "corp" && actionServerId(action) === serverId,
-    )
-    .filter((action) => {
-      const source = visibleCardByInstanceId(
-        input.playerView,
-        String(action.source),
+): CorpRemoteProtectionPath {
+  if (!serverId) return emptyCorpRemoteProtectionPath();
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
+  const immediateActionIds: string[] = [];
+  const fundingCandidates: CorpIcePlacementCandidate[] = [];
+  const evidence: string[] = [];
+
+  for (const action of input.legalActions.filter(
+    (candidate) =>
+      candidate.side === "corp" && actionServerId(candidate) === serverId,
+  )) {
+    const source = visibleCardByInstanceId(
+      input.playerView,
+      String(action.source),
+    );
+    if (
+      action.type === "install_card" &&
+      action.payload?.placement === "ice" &&
+      source?.type === "ice"
+    ) {
+      const placement = corpIcePlacementCandidateForAction({
+        input,
+        action,
+        serverId,
+        server,
+        sourceCard: source,
+        iceRezCost: source.rezCost,
+      });
+      if (!placement) continue;
+      evidence.push(
+        `protection_candidate:${action.actionId}:${placement.recommendation}`,
+        `protection_candidate_immediate_stop:${action.actionId}:${placement.immediateStop}`,
+        `protection_candidate_zero_effect:${action.actionId}:${placement.visibleZeroEffectRisk}`,
+        `protection_candidate_rez_affordable:${action.actionId}:${placement.rezAffordable}`,
       );
+      const providesConcreteProtection =
+        placement.immediateStop && !placement.visibleZeroEffectRisk;
+      if (!providesConcreteProtection) continue;
       if (
-        action.type === "install_card" &&
-        action.payload?.placement === "ice"
+        placement.rezAffordable &&
+        placement.recommendation === "install_now"
       ) {
-        return source?.type === "ice";
+        immediateActionIds.push(action.actionId);
+      } else if (!placement.rezAffordable) {
+        fundingCandidates.push(placement);
       }
-      if (action.type === "rez_ice") return source?.type === "ice";
-      return (
-        action.type === "install_card" &&
-        action.payload?.placement !== "ice" &&
-        source !== undefined &&
-        visibleCorpRootProvidesRemoteProtection(source)
-      );
-    })
-    .map((action) => action.actionId);
+      continue;
+    }
+    if (action.type === "rez_ice" && source?.type === "ice") {
+      immediateActionIds.push(action.actionId);
+      continue;
+    }
+    if (
+      action.type === "install_card" &&
+      action.payload?.placement !== "ice" &&
+      source !== undefined &&
+      visibleCorpRootProvidesRemoteProtection(source)
+    ) {
+      immediateActionIds.push(action.actionId);
+    }
+  }
+
+  fundingCandidates.sort(
+    (left, right) =>
+      left.actionCreditCost +
+        left.rezCost -
+        (right.actionCreditCost + right.rezCost) || right.score - left.score,
+  );
+  return {
+    immediateActionIds,
+    ...(fundingCandidates[0] ? { fundingCandidate: fundingCandidates[0] } : {}),
+    acquisitionActionIds: input.legalActions
+      .filter((action) => action.side === "corp" && action.type === "draw_card")
+      .map((action) => action.actionId),
+    evidence,
+  };
 }
 
 export function corpScoreWindowSequence(actionId: string): PlanStep[] {

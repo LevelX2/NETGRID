@@ -60,6 +60,7 @@ export type PlanStepKind =
   | "install_development_card"
   | "build_remote"
   | "protect_remote"
+  | "find_remote_protection"
   | "build_rez_reserve"
   | "install_or_prepare_agenda"
   | "gain_action_capacity"

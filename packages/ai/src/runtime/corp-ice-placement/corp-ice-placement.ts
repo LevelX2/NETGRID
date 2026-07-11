@@ -115,6 +115,11 @@ export type CorpIcePlacementCandidate = {
   iceDefinitionId?: string;
   serverId: string;
   resultingPosition: CorpIcePlacementResultingPosition;
+  actionCreditCost: number;
+  rezCost: number;
+  rezAffordable: boolean;
+  immediateStop: boolean;
+  visibleZeroEffectRisk: boolean;
   score: number;
   recommendation: CorpIcePlacementRecommendation;
   components: {
@@ -278,6 +283,11 @@ export function corpIcePlacementCandidateForAction<
       : {}),
     serverId,
     resultingPosition: corpIcePlacementResultingPosition(action),
+    actionCreditCost,
+    rezCost: profile.rezCost,
+    rezAffordable: affordable,
+    immediateStop: profile.immediateStop,
+    visibleZeroEffectRisk: visibleDefenseFit.zeroEffectRisk,
     score,
     recommendation,
     components,

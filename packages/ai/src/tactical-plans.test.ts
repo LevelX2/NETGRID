@@ -2513,7 +2513,9 @@ describe("tactical plan model", () => {
     expect(handPlan?.evidence).toEqual(
       expect.arrayContaining(["funding_route:acquire_economy"]),
     );
-    expect(result.selectedMapping?.legalActions[0]?.actionId).toBe(draw.actionId);
+    expect(result.selectedMapping?.legalActions[0]?.actionId).toBe(
+      draw.actionId,
+    );
   });
 
   it("treats generic credit and draw setup as support when open R&D is available", () => {
@@ -2772,7 +2774,7 @@ describe("tactical plan model", () => {
     );
 
     expect(scorePlan?.status).toBe("blocked");
-    expect(scorePlan?.currentStep.kind).toBe("protect_remote");
+    expect(scorePlan?.currentStep.kind).toBe("find_remote_protection");
     expect(scorePlan?.blockers.map((blocker) => blocker.kind)).toEqual(
       expect.arrayContaining(["score_window_unprotected"]),
     );
@@ -2877,7 +2879,7 @@ describe("tactical plan model", () => {
     );
 
     expect(scorePlan?.status).toBe("blocked");
-    expect(scorePlan?.currentStep.kind).toBe("protect_remote");
+    expect(scorePlan?.currentStep.kind).toBe("find_remote_protection");
     expect(scorePlan?.blockers.map((blocker) => blocker.kind)).toEqual(
       expect.arrayContaining(["score_window_contestable"]),
     );
@@ -2964,6 +2966,138 @@ describe("tactical plan model", () => {
     expect(
       mapping && mapping.legalActions.map((action) => action.actionId),
     ).toEqual(["install-remote-ice"]);
+  });
+
+  it("draws for real remote protection instead of treating non-stopping ICE as progress", () => {
+    const advance = legalAction(
+      "advance-agenda",
+      "corp",
+      "advance_card",
+      { serverId: "remote_1" },
+      { source: "agenda-1" },
+    );
+    const installTaxIce = legalAction(
+      "install-tax-ice",
+      "corp",
+      "install_card",
+      { placement: "ice", serverId: "remote_1" },
+      { source: "tax-ice" },
+    );
+    const draw = legalAction("draw-protection", "corp", "draw_card");
+    const input = aiInput("corp", [advance, installTaxIce, draw]);
+    input.playerView.own.credits = 6;
+    input.playerView.own.gripOrHq = [
+      visibleCard("tax-ice", "corp", "ice", {
+        title: "Trace Tax",
+        rezCost: 2,
+        rulesText: "Trace 2. If successful, give the Runner 1 tag.",
+        subtypes: ["Sentry"],
+      }),
+    ];
+    input.playerView.opponent.credits = 8;
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server(
+        "remote_1",
+        [
+          visibleCard("existing-tax", "corp", "ice", {
+            rezzed: true,
+            rulesText: "Trace 2. If successful, do 1 net damage.",
+          }),
+        ],
+        [
+          visibleCard("agenda-1", "corp", "agenda", {
+            advancementCounters: 0,
+            advancementRequirement: 4,
+          }),
+        ],
+      ),
+    ];
+
+    const scorePlan = buildTacticalPlans({ input }).find(
+      (plan) => plan.type === "corp.create_score_window",
+    );
+
+    expect(scorePlan?.status).toBe("progressing");
+    expect(scorePlan?.currentStep.kind).toBe("find_remote_protection");
+    expect(scorePlan?.currentStep.actionCandidateIds).toEqual([
+      "draw-protection",
+    ]);
+    expect(scorePlan?.currentStep.actionCandidateIds).not.toContain(
+      "install-tax-ice",
+    );
+    expect(JSON.stringify(scorePlan)).toContain(
+      "no_effective_remote_protection_in_hq",
+    );
+  });
+
+  it("builds a concrete reserve for effective but currently unrezzable remote ICE", () => {
+    const advance = legalAction(
+      "advance-agenda",
+      "corp",
+      "advance_card",
+      { serverId: "remote_1" },
+      { source: "agenda-1" },
+    );
+    const installExpensiveIce = legalAction(
+      "install-expensive-ice",
+      "corp",
+      "install_card",
+      { placement: "ice", serverId: "remote_1" },
+      { source: "expensive-ice" },
+    );
+    installExpensiveIce.costs = [{ clicks: 1, credits: 1 }];
+    const gain = legalAction("gain-for-protection", "corp", "gain_credit");
+    const input = aiInput("corp", [advance, installExpensiveIce, gain]);
+    input.playerView.own.credits = 3;
+    input.playerView.own.gripOrHq = [
+      visibleCard("expensive-ice", "corp", "ice", {
+        title: "Heavy Wall",
+        rezCost: 8,
+        rulesText: "End the run.",
+        subtypes: ["Barrier"],
+      }),
+    ];
+    input.playerView.opponent.credits = 8;
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server(
+        "remote_1",
+        [
+          visibleCard("existing-funding-tax", "corp", "ice", {
+            rezzed: true,
+            rulesText: "Trace 2. If successful, do 1 net damage.",
+          }),
+        ],
+        [
+          visibleCard("agenda-1", "corp", "agenda", {
+            advancementCounters: 0,
+            advancementRequirement: 4,
+          }),
+        ],
+      ),
+    ];
+
+    const scorePlan = buildTacticalPlans({ input }).find(
+      (plan) => plan.type === "corp.create_score_window",
+    );
+
+    expect(scorePlan?.status).toBe("progressing");
+    expect(scorePlan?.currentStep.kind).toBe("build_rez_reserve");
+    expect(scorePlan?.currentStep.actionCandidateIds).toEqual([
+      "gain-for-protection",
+    ]);
+    expect(scorePlan?.currentStep.requiredCapabilities[0]).toMatchObject({
+      kind: "rez_reserve",
+      minimumCredits: 9,
+    });
+    expect(JSON.stringify(scorePlan)).toContain(
+      "protection_action:install-expensive-ice",
+    );
   });
 
   it("maps a visible agenda-steal-tax upgrade as score-window protection", () => {
