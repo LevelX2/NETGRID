@@ -3830,7 +3830,14 @@ export default function Page() {
       payload.playerView,
       payload.legalActions,
       session.side,
-      { accessRevealVisible: showAccessReveal },
+      {
+        accessRevealVisible: showAccessReveal,
+        exposeReviewVisible: showExposeReview,
+        damageImpactVisible: Boolean(currentDamageImpact),
+        confirmationVisible: Boolean(confirmationDialog),
+        actionCueVisible:
+          Boolean(currentActionCue) || actionCueQueue.length > 0,
+      },
     );
     if (!action) return;
     const key = `${session.matchId}:${session.side}:${payload.playerView.stateVersion}:${action.actionId}`;
@@ -3845,6 +3852,11 @@ export default function Page() {
     connection,
     submitAction,
     showAccessReveal,
+    showExposeReview,
+    currentDamageImpact,
+    confirmationDialog,
+    currentActionCue,
+    actionCueQueue.length,
   ]);
 
   const submitChoiceOption = (

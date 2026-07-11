@@ -258,10 +258,34 @@ describe("V1.0.5 action board UI helpers", () => {
     );
 
     expect(automaticEndTurnAction(board, [endTurn], "corp")).toBe(endTurn);
+    for (const interaction of [
+      "accessRevealVisible",
+      "exposeReviewVisible",
+      "damageImpactVisible",
+      "confirmationVisible",
+      "actionCueVisible",
+    ] as const) {
+      expect(
+        automaticEndTurnAction(board, [endTurn], "corp", {
+          [interaction]: true,
+        }),
+        interaction,
+      ).toBeUndefined();
+    }
     expect(
-      automaticEndTurnAction(board, [endTurn], "corp", {
-        accessRevealVisible: true,
-      }),
+      automaticEndTurnAction(
+        {
+          ...board,
+          run: {
+            attackedServerId: "hq",
+            phase: "access",
+            position: { kind: "server", serverId: "hq" },
+            successful: true,
+          },
+        },
+        [endTurn],
+        "corp",
+      ),
     ).toBeUndefined();
     expect(
       automaticEndTurnAction(board, [endTurn, scoreAgenda], "corp"),

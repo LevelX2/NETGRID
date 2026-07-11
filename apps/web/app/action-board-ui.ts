@@ -878,9 +878,23 @@ export function automaticEndTurnAction(
   view: PlayerView,
   actions: LegalAction[],
   side: Side,
-  options: { accessRevealVisible?: boolean } = {},
+  options: {
+    accessRevealVisible?: boolean;
+    exposeReviewVisible?: boolean;
+    damageImpactVisible?: boolean;
+    confirmationVisible?: boolean;
+    actionCueVisible?: boolean;
+  } = {},
 ): LegalAction | undefined {
-  if (options.accessRevealVisible) return undefined;
+  if (
+    view.run ||
+    options.accessRevealVisible ||
+    options.exposeReviewVisible ||
+    options.damageImpactVisible ||
+    options.confirmationVisible ||
+    options.actionCueVisible
+  )
+    return undefined;
   if (view.winner || view.pendingChoice || view.activeSide !== side)
     return undefined;
   const ownActions = actions.filter((action) => action.side === side);
