@@ -167,6 +167,15 @@ describe("run window layering", () => {
     expect(accessReviewModalSource).toContain(
       '<WindowEventIcon kind="access" />',
     );
+    expect(accessReviewModalSource).toMatch(
+      /className="accessRevealDecision">\s*<WindowEventIcon kind="access" \/>/,
+    );
+    expect(opponentActionOverlaySource).toMatch(
+      /className="opponentCueMessage">\s*<WindowEventIcon/,
+    );
+    expect(selectorBlock(".opponentCueMessage")).toContain(
+      "grid-template-rows: 128px auto",
+    );
     expect(damageImpactOverlaySource).toContain(
       '<WindowEventIcon kind={`${cue.damageType}-damage`} />',
     );

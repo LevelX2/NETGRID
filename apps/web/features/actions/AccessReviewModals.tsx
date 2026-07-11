@@ -148,7 +148,6 @@ export function AccessRevealModal({
             <p>{reveal.description}</p>
           </div>
           <div className="accessRevealHeaderActions">
-            <WindowEventIcon kind="access" />
             <button
               className="button iconOnly"
               onClick={onDismiss}
@@ -197,6 +196,7 @@ export function AccessRevealModal({
             </div>
           ) : null}
           <div className="accessRevealDecision">
+            <WindowEventIcon kind="access" />
             {reveal.followupStatus ? (
               <p className="accessRevealStatus">{reveal.followupStatus}</p>
             ) : null}

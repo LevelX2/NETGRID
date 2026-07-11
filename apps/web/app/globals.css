@@ -3782,14 +3782,17 @@ select {
 
 .opponentCueMessage {
   min-width: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
+  min-height: 100%;
+  display: grid;
+  grid-template-rows: 128px auto;
+  align-content: center;
+  justify-items: center;
+  gap: 8px;
+  text-align: center;
 }
 
 .opponentCueBody.hasVisual .opponentCueMessage {
-  justify-content: flex-start;
+  justify-content: stretch;
 }
 
 .opponentCueText {
@@ -3801,8 +3804,8 @@ select {
 }
 
 .opponentCueBody.hasVisual .opponentCueText {
-  justify-items: start;
-  text-align: left;
+  justify-items: center;
+  text-align: center;
 }
 
 .opponentCueOverlay small {
@@ -9008,8 +9011,14 @@ select {
 .accessRevealDecision {
   display: grid;
   align-content: center;
+  justify-items: center;
   gap: 12px;
   min-width: 0;
+  text-align: center;
+}
+
+.accessRevealDecision .accessRevealActions {
+  width: 100%;
 }
 
 .accessRevealStatus {

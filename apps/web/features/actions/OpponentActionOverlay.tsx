@@ -127,9 +127,6 @@ export function OpponentActionOverlay({
           {cue.actionUse ? <span className="opponentCueActionUse" title={cue.actionUse.title}>{cueActionUseLabel(cue)}</span> : null}
         </div>
         <div className="opponentCueHeaderActions">
-          <WindowEventIcon
-            kind={windowEventIconKindForAmbience(ambience)}
-          />
           <button
             className="button iconOnly cueDragHandle"
             onPointerDown={startDrag}
@@ -166,6 +163,9 @@ export function OpponentActionOverlay({
           </div>
         ) : null}
         <div className="opponentCueMessage">
+          <WindowEventIcon
+            kind={windowEventIconKindForAmbience(ambience)}
+          />
           <div className="opponentCueText">
             <strong>{renderTitle(cue)}</strong>
             {cue.description ? <p>{cue.description}</p> : null}
