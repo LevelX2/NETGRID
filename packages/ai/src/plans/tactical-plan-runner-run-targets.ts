@@ -301,10 +301,14 @@ export function runnerRunTargetCurrentStep(
     evaluation.pathPassability === "reachable" &&
     evaluation.creditsAfterRun >= 0 &&
     preparatoryClicks > 0;
+  const concreteEconomyFunding =
+    context.runnerEconomyPosture?.fundingNeed === true &&
+    context.input.playerView.own.credits <
+      context.runnerEconomyPosture.desiredCreditReserve;
   if (
     evaluation?.recommendation === "gain_credits_first" &&
     !preserveLastClickForScoreThreat &&
-    (boundedPathFunding || urgentContestFunding)
+    (boundedPathFunding || urgentContestFunding || concreteEconomyFunding)
   ) {
     return createPlanStep({
       stepId: `gain_credits_before_run:${evaluation.targetServerId}`,
@@ -314,6 +318,7 @@ export function runnerRunTargetCurrentStep(
         "run target evaluation recommends funding before pressure",
         `run funding gap ${fundingGap}`,
         `run preparatory clicks ${preparatoryClicks}`,
+        `concrete economy funding ${concreteEconomyFunding}`,
         ...runnerRunTargetStepRationale(context, action),
       ],
     });
