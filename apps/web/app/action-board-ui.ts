@@ -1065,17 +1065,17 @@ export function orderedCardContextActions(
   return actions
     .map((action, index) => ({ action, index }))
     .sort((left, right) => {
-      const leftNewRemoteInstall = isNewRemoteInstallAction(left.action)
-        ? 1
-        : 0;
-      const rightNewRemoteInstall = isNewRemoteInstallAction(right.action)
-        ? 1
-        : 0;
-      return (
-        leftNewRemoteInstall - rightNewRemoteInstall || left.index - right.index
-      );
+      const leftPriority = cardContextActionOrderPriority(left.action);
+      const rightPriority = cardContextActionOrderPriority(right.action);
+      return leftPriority - rightPriority || left.index - right.index;
     })
     .map(({ action }) => action);
+}
+
+function cardContextActionOrderPriority(action: LegalAction): number {
+  if (action.type === "score_agenda") return 2;
+  if (isNewRemoteInstallAction(action)) return 1;
+  return 0;
 }
 
 function triggerAbilityActionLabel(

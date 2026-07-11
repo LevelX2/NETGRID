@@ -3039,6 +3039,36 @@ describe("V1.0.6 resource and card-display helpers", () => {
     ]);
   });
 
+  it("keeps scoring as the last agenda card-context action", () => {
+    const score = legalAction(
+      "corp",
+      "score_agenda",
+      "agenda_1",
+      "Agenda scoren",
+      { cardId: "agenda_1" },
+    );
+    const advance = legalAction(
+      "corp",
+      "advance_card",
+      "agenda_1",
+      "Agenda advancen",
+      { cardId: "agenda_1" },
+    );
+    const ability = legalAction(
+      "corp",
+      "trigger_ability",
+      "agenda_1",
+      "Agenda-Fähigkeit nutzen",
+      { cardId: "agenda_1" },
+    );
+
+    expect(orderedCardContextActions([score, advance, ability])).toEqual([
+      advance,
+      ability,
+      score,
+    ]);
+  });
+
   it("moves rig icebreaker actions to their card context", () => {
     const pump = legalAction(
       "runner",
