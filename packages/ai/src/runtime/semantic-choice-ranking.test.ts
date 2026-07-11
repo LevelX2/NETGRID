@@ -66,11 +66,30 @@ describe("tacticalPlanMappedChoice", () => {
     );
   });
 
-  it("keeps a progressing Corp scoreline on its concrete support action", () => {
-    const installProtection = legalAction(
-      "install-protection",
-      "install_card",
+  it("keeps zero-cost persistent economy activation ahead of an off-plan draw", () => {
+    const rezEconomy = legalAction("rez-economy", "rez_ice");
+    const offPlanDraw = legalAction("draw", "draw_card");
+    const mapping = finiteEconomyMapping([rezEconomy]);
+    mapping.plan.type = "corp.activate_persistent_economy";
+    mapping.plan.currentStep.kind = "rez_persistent_economy";
+    mapping.step.kind = "rez_persistent_economy";
+
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [choice(offPlanDraw, 5000), choice(rezEconomy, 50)],
+      mapping,
+      choice(offPlanDraw, 5000),
     );
+
+    expect(result.outcome).toBe("semantic_choice_blocked");
+    expect(result.choice?.action.actionId).toBe("rez-economy");
+    expect(result.overrideBlockedReason).toBe(
+      "corp_persistent_economy_plan_controller",
+    );
+  });
+
+  it("keeps a progressing Corp scoreline on its concrete support action", () => {
+    const installProtection = legalAction("install-protection", "install_card");
     const offPlanSupport = legalAction("install-vapor", "install_card");
     const result = tacticalPlanMappedChoice(
       aiInput(),
@@ -826,9 +845,7 @@ function scoreConversionMapping(
   };
 }
 
-function finiteEconomyMapping(
-  actions: LegalAction[],
-): PlanStepMappingResult {
+function finiteEconomyMapping(actions: LegalAction[]): PlanStepMappingResult {
   const step = createPlanStep({
     stepId: "install_finite_economy:bbs",
     kind: "install_finite_economy",

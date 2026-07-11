@@ -41,6 +41,7 @@ export type TacticalPlanType =
   | "runner.cash_out_credit_bank"
   | "corp.create_score_window"
   | "corp.develop_finite_economy"
+  | "corp.activate_persistent_economy"
   | "corp.build_credit_bank"
   | "corp.rez_defense"
   | "corp.apply_punish_pressure";
@@ -70,6 +71,8 @@ export type PlanStepKind =
   | "install_finite_economy"
   | "rez_finite_economy"
   | "drain_finite_economy"
+  | "rez_persistent_economy"
+  | "use_persistent_economy"
   | "run_target"
   | "probe_central"
   | "rez_outer_ice"

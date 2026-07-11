@@ -61,6 +61,21 @@ export function candidateSemanticsMatchStep(
         "take_bank",
         "finite_economy_pool",
       ]);
+    case "rez_persistent_economy":
+      return hasAnyToken(tokens, [
+        "corp_window.rez",
+        "economy.persistent",
+        "economy.recurring",
+        "draw.corp_draw",
+      ]);
+    case "use_persistent_economy":
+      return hasAnyToken(tokens, [
+        "economy.persistent",
+        "economy.recurring",
+        "economy.gain_credit",
+        "draw.corp_draw",
+        "card_ability.trigger",
+      ]);
     case "build_rez_reserve":
       return hasAnyToken(tokens, [
         "economy.gain_credit",
@@ -292,6 +307,15 @@ export function actionTypeMatchesStep(
       return actionType === "install_card";
     case "rez_finite_economy":
       return actionType === "rez_ice";
+    case "rez_persistent_economy":
+      return actionType === "rez_ice";
+    case "use_persistent_economy":
+      return (
+        actionType === "gain_credit" ||
+        actionType === "draw_card" ||
+        actionType === "trigger_ability" ||
+        actionType === "activated_card_ability"
+      );
     case "drain_finite_economy":
       return (
         actionType === "trigger_ability" ||

@@ -159,7 +159,7 @@ export function tacticalPlanMappedChoice(
       });
     }
     if (
-      tacticalPlanCorpFiniteEconomyBlocksOffPlanOverride(
+      tacticalPlanCorpEconomyActivationBlocksOffPlanOverride(
         mapping,
         overrideChoice,
         mappedActionIds,
@@ -168,7 +168,10 @@ export function tacticalPlanMappedChoice(
       return tacticalPlanBlockedOverrideResult({
         mappedChoice,
         overrideChoice,
-        reason: "corp_finite_economy_plan_controller",
+        reason:
+          mapping.plan.type === "corp.activate_persistent_economy"
+            ? "corp_persistent_economy_plan_controller"
+            : "corp_finite_economy_plan_controller",
         scoreGap,
         threshold: Number.POSITIVE_INFINITY,
       });
@@ -436,14 +439,15 @@ function tacticalPlanCorpScoreConversionBlocksOffPlanOverride(
   );
 }
 
-function tacticalPlanCorpFiniteEconomyBlocksOffPlanOverride(
+function tacticalPlanCorpEconomyActivationBlocksOffPlanOverride(
   mapping: PlanStepMappingResult,
   overrideChoice: SemanticRuntimeChoice,
   mappedActionIds: ReadonlySet<string>,
 ): boolean {
   return (
     mapping.plan.side === "corp" &&
-    mapping.plan.type === "corp.develop_finite_economy" &&
+    (mapping.plan.type === "corp.develop_finite_economy" ||
+      mapping.plan.type === "corp.activate_persistent_economy") &&
     (mapping.plan.status === "active" ||
       mapping.plan.status === "progressing") &&
     !mappedActionIds.has(overrideChoice.action.actionId)

@@ -28,6 +28,7 @@ import {
 } from "./tactical-plan-visible-cards";
 import { buildCorpScoreConversionPlans } from "./tactical-plan-corp-score-conversion-plan";
 import { buildCorpFiniteEconomyPlans } from "./tactical-plan-corp-finite-economy";
+import { buildCorpPersistentEconomyPlans } from "./tactical-plan-corp-persistent-economy";
 
 export function buildCorpTacticalPlans(
   context: TacticalPlanBuildContext,
@@ -43,6 +44,7 @@ export function buildCorpTacticalPlans(
     corpGoalForFamily(context, "damage_pressure");
   plans.push(...buildCorpScoreConversionPlans(context, scorelineGoal));
   plans.push(...buildCorpFiniteEconomyPlans(context));
+  plans.push(...buildCorpPersistentEconomyPlans(context));
   for (const action of input.legalActions.filter(
     (candidate) => candidate.type === "score_agenda",
   )) {
