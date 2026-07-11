@@ -39,6 +39,7 @@ import {
   type MaintenanceRecoveryAccess,
   type MaintenanceSummary
 } from "../maintenance";
+import { MaintenanceAuthBoundary, MaintenanceReauthenticationDialog, MaintenanceSecurityControls, useMaintenanceAuth } from "../maintenance-auth-ui";
 
 const CONFIGURED_SERVER_HTTP = process.env.NEXT_PUBLIC_NETGRID_SERVER_URL ?? "http://127.0.0.1:8787";
 
@@ -64,6 +65,7 @@ const INITIAL_LOAD_STEPS: MaintenanceLoadStep[] = [
 
 export default function MaintenancePage() {
   const [serverHttp] = useState(() => resolveMaintenanceServerHttp(CONFIGURED_SERVER_HTTP, typeof window === "undefined" ? undefined : window.location.hostname));
+  const auth = useMaintenanceAuth(serverHttp);
   const [summary, setSummary] = useState<MaintenanceSummary | null>(null);
   const [matches, setMatches] = useState<MaintenanceMatchEntry[]>([]);
   const [detail, setDetail] = useState<MaintenanceMatchDetail | null>(null);
@@ -105,11 +107,12 @@ export default function MaintenancePage() {
     createBackup: false
   });
   const [policyLoading, setPolicyLoading] = useState(false);
+  const [sensitiveAction, setSensitiveAction] = useState<{ label: string; run: () => Promise<void> } | null>(null);
 
   const loadSummary = async () => {
     const controller = new AbortController();
     const timeout = window.setTimeout(() => controller.abort(), 10000);
-    const response = await fetch(`${serverHttp}/api/storage/maintenance/summary`, { signal: controller.signal })
+    const response = await auth.request("/api/storage/maintenance/summary", { signal: controller.signal })
       .catch((loadError) => {
         if (loadError instanceof DOMException && loadError.name === "AbortError") throw new Error("Backendstatus hat nach 10 Sekunden nicht geantwortet.");
         throw loadError;
@@ -123,7 +126,7 @@ export default function MaintenancePage() {
   };
 
   const loadMatches = async (nextFilters = filters) => {
-    const response = await fetch(`${serverHttp}/api/storage/maintenance/matches${buildMaintenanceMatchQuery(nextFilters)}`);
+    const response = await auth.request(`/api/storage/maintenance/matches${buildMaintenanceMatchQuery(nextFilters)}`);
     const payload = (await response.json()) as { matches?: MaintenanceMatchEntry[]; error?: { message?: string } };
     if (!response.ok) throw new Error(payload.error?.message ?? "Matchliste konnte nicht geladen werden.");
     const markers = findForbiddenMaintenanceMarkers(payload);
@@ -134,7 +137,7 @@ export default function MaintenancePage() {
   };
 
   const loadAiTraceMatches = async (preserveMatch?: MaintenanceAiTraceMatchEntry, selectTraceMatch = true) => {
-    const response = await fetch(`${serverHttp}/api/storage/maintenance/ai-decision-traces/matches`);
+    const response = await auth.request("/api/storage/maintenance/ai-decision-traces/matches");
     const payload = (await response.json()) as { matches?: MaintenanceAiTraceMatchEntry[]; error?: { message?: string } };
     if (!response.ok) throw new Error(payload.error?.message ?? "KI-Trace-Matches konnten nicht geladen werden.");
     const markers = findForbiddenMaintenanceMarkers(payload);
@@ -156,7 +159,7 @@ export default function MaintenancePage() {
     setOperationNotice({ tone: "working", message: "KI-Tracing wird für das ausgewählte Match ab jetzt aktiviert." });
     setError("");
     try {
-      const response = await fetch(`${serverHttp}${buildMaintenanceAiTraceEnablePath(matchId)}`, {
+      const response = await auth.request(buildMaintenanceAiTraceEnablePath(matchId), {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ mode: "detailed" })
@@ -191,7 +194,7 @@ export default function MaintenancePage() {
       setAiTraceDetail(null);
       return;
     }
-    const response = await fetch(`${serverHttp}${buildMaintenanceAiTraceIndexPath(matchId)}`);
+    const response = await auth.request(buildMaintenanceAiTraceIndexPath(matchId));
     const payload = (await response.json()) as { traces?: MaintenanceAiTraceIndexEntry[]; error?: { message?: string } };
     if (!response.ok) throw new Error(payload.error?.message ?? "KI-Trace-Timeline konnte nicht geladen werden.");
     const markers = findForbiddenMaintenanceMarkers(payload);
@@ -204,7 +207,7 @@ export default function MaintenancePage() {
   const pollAiTraceUpdates = async (matchId: string) => {
     if (!matchId) return;
     const afterDecisionIndex = aiTraceIndex.at(-1)?.decisionIndex;
-    const response = await fetch(`${serverHttp}${buildMaintenanceAiTraceIndexPath(matchId, afterDecisionIndex)}`);
+    const response = await auth.request(buildMaintenanceAiTraceIndexPath(matchId, afterDecisionIndex));
     const payload = (await response.json()) as { traces?: MaintenanceAiTraceIndexEntry[]; error?: { message?: string } };
     if (!response.ok) throw new Error(payload.error?.message ?? "KI-Trace-Live-Follow konnte nicht geladen werden.");
     const markers = findForbiddenMaintenanceMarkers(payload);
@@ -221,7 +224,7 @@ export default function MaintenancePage() {
       setAiTraceDetail(null);
       return;
     }
-    const response = await fetch(`${serverHttp}/api/storage/maintenance/ai-decision-traces/${encodeURIComponent(traceId)}`);
+    const response = await auth.request(`/api/storage/maintenance/ai-decision-traces/${encodeURIComponent(traceId)}`);
     const payload = (await response.json()) as MaintenanceAiTraceDetail | { error?: { message?: string } };
     if (!response.ok) throw new Error("error" in payload ? payload.error?.message ?? "KI-Trace-Detail konnte nicht geladen werden." : "KI-Trace-Detail konnte nicht geladen werden.");
     const markers = findForbiddenMaintenanceMarkers(payload);
@@ -234,7 +237,7 @@ export default function MaintenancePage() {
       setDetail(null);
       return;
     }
-    const response = await fetch(`${serverHttp}/api/storage/maintenance/matches/${encodeURIComponent(matchId)}`);
+    const response = await auth.request(`/api/storage/maintenance/matches/${encodeURIComponent(matchId)}`);
     const payload = (await response.json()) as MaintenanceMatchDetail | { error?: { message?: string } };
     if (!response.ok) throw new Error("error" in payload ? payload.error?.message ?? "Matchdetail konnte nicht geladen werden." : "Matchdetail konnte nicht geladen werden.");
     const markers = findForbiddenMaintenanceMarkers(payload);
@@ -250,7 +253,7 @@ export default function MaintenancePage() {
   };
 
   const loadCleanupPolicy = async () => {
-    const response = await fetch(`${serverHttp}/api/storage/maintenance/cleanup/policy`);
+    const response = await auth.request("/api/storage/maintenance/cleanup/policy");
     const payload = (await response.json()) as MaintenanceCleanupPolicy | { error?: { message?: string } };
     if (!response.ok) throw new Error("error" in payload ? payload.error?.message ?? "Cleanup-Policy konnte nicht geladen werden." : "Cleanup-Policy konnte nicht geladen werden.");
     const markers = findForbiddenMaintenanceMarkers(payload);
@@ -275,7 +278,7 @@ export default function MaintenancePage() {
     setCleanupConfirmed(false);
     setError("");
     try {
-      const response = await fetch(`${serverHttp}/api/storage/maintenance/cleanup/preview`, {
+      const response = await auth.request("/api/storage/maintenance/cleanup/preview", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify(buildMaintenanceCleanupRequest(cleanupFilters))
@@ -301,7 +304,7 @@ export default function MaintenancePage() {
     setOperationNotice({ tone: "working", message: `Löschen läuft: ${cleanupPreview.matchCount} Matches werden verarbeitet.` });
     setError("");
     try {
-      const response = await fetch(`${serverHttp}/api/storage/maintenance/cleanup/apply`, {
+      const response = await auth.request("/api/storage/maintenance/cleanup/apply", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
@@ -352,7 +355,7 @@ export default function MaintenancePage() {
     setOperationNotice({ tone: "working", message: protectedValue ? "Löschschutz wird aktiviert." : "Löschschutz wird aufgehoben." });
     setError("");
     try {
-      const response = await fetch(`${serverHttp}/api/storage/maintenance/matches/${encodeURIComponent(detail.matchId)}/retention-protection`, {
+      const response = await auth.request(`/api/storage/maintenance/matches/${encodeURIComponent(detail.matchId)}/retention-protection`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ protected: protectedValue })
@@ -377,7 +380,7 @@ export default function MaintenancePage() {
     setRecoveryAccess(null);
     setError("");
     try {
-      const response = await fetch(`${serverHttp}/api/storage/maintenance/matches/${encodeURIComponent(detail.matchId)}/recovery-access`, {
+      const response = await auth.request(`/api/storage/maintenance/matches/${encodeURIComponent(detail.matchId)}/recovery-access`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ side: recoverySide })
@@ -421,7 +424,7 @@ export default function MaintenancePage() {
     setOperationNotice({ tone: "working", message: "Cleanup-Policy wird gespeichert." });
     setError("");
     try {
-      const response = await fetch(`${serverHttp}/api/storage/maintenance/cleanup/policy`, {
+      const response = await auth.request("/api/storage/maintenance/cleanup/policy", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
@@ -453,7 +456,7 @@ export default function MaintenancePage() {
     setOperationNotice({ tone: "working", message: "Auto-Cleanup wird geprüft." });
     setError("");
     try {
-      const response = await fetch(`${serverHttp}/api/storage/maintenance/cleanup/policy/run`, { method: "POST" });
+      const response = await auth.request("/api/storage/maintenance/cleanup/policy/run", { method: "POST" });
       const payload = (await response.json()) as { policy?: MaintenanceCleanupPolicy; error?: { message?: string } };
       if (!response.ok) throw new Error(payload.error?.message ?? "Auto-Cleanup konnte nicht ausgeführt werden.");
       const markers = findForbiddenMaintenanceMarkers(payload);
@@ -519,11 +522,12 @@ export default function MaintenancePage() {
   }, []);
 
   useEffect(() => {
-    void refresh(filters, "initial");
-  }, []);
+    if (auth.status === "authenticated") void refresh(filters, "initial");
+  }, [auth.status]);
 
   useEffect(() => {
     let closed = false;
+    if (auth.status !== "authenticated") return;
     if (!selectedMatchId) {
       setDetail(null);
       return;
@@ -540,10 +544,11 @@ export default function MaintenancePage() {
     return () => {
       closed = true;
     };
-  }, [selectedMatchId]);
+  }, [selectedMatchId, auth.status]);
 
   useEffect(() => {
     let closed = false;
+    if (auth.status !== "authenticated") return;
     setAiTraceFollowPaused(false);
     setAiTraceLoading(true);
     setError("");
@@ -557,10 +562,10 @@ export default function MaintenancePage() {
     return () => {
       closed = true;
     };
-  }, [selectedAiTraceMatchId]);
+  }, [selectedAiTraceMatchId, auth.status]);
 
   useEffect(() => {
-    if (!selectedAiTraceMatchId || !aiTraceLiveFollow || aiTraceFollowPaused) return;
+    if (auth.status !== "authenticated" || !selectedAiTraceMatchId || !aiTraceLiveFollow || aiTraceFollowPaused) return;
     let closed = false;
     const poll = () => {
       pollAiTraceUpdates(selectedAiTraceMatchId).catch((traceError) => {
@@ -572,10 +577,11 @@ export default function MaintenancePage() {
       closed = true;
       window.clearInterval(timer);
     };
-  }, [selectedAiTraceMatchId, aiTraceLiveFollow, aiTraceFollowPaused, aiTraceIndex]);
+  }, [selectedAiTraceMatchId, aiTraceLiveFollow, aiTraceFollowPaused, aiTraceIndex, auth.status]);
 
   useEffect(() => {
     let closed = false;
+    if (auth.status !== "authenticated") return;
     setAiTraceLoading(true);
     setError("");
     loadAiTraceDetail(selectedAiTraceId)
@@ -588,7 +594,7 @@ export default function MaintenancePage() {
     return () => {
       closed = true;
     };
-  }, [selectedAiTraceId]);
+  }, [selectedAiTraceId, auth.status]);
 
   const statusRows = useMemo(() => Object.entries(summary?.matchCountsByStatus ?? {}).sort(([a], [b]) => a.localeCompare(b)), [summary]);
   const modeRows = useMemo(() => Object.entries(summary?.matchCountsByMode ?? {}).sort(([a], [b]) => a.localeCompare(b)), [summary]);
@@ -608,6 +614,10 @@ export default function MaintenancePage() {
 
   const applyFilters = () => void refresh(filters, "filters");
 
+  const queueSensitiveAction = (label: string, run: () => Promise<void>) => setSensitiveAction({ label, run });
+
+  if (auth.status !== "authenticated") return <MaintenanceAuthBoundary auth={auth} title="Storage Maintenance" />;
+
   return (
     <main style={pageShell}>
       <div style={page}>
@@ -619,11 +629,26 @@ export default function MaintenancePage() {
             <p style={subtle}>Backend 0.5 · private Storage-Wartungsansicht</p>
           </div>
         </div>
-        <button type="button" style={button} onClick={() => void refresh(filters, "refresh")} disabled={loading} title="Aktualisieren">
-          {loading ? <LoaderCircle size={16} aria-hidden="true" style={spinIcon} /> : <RefreshCcw size={16} aria-hidden="true" />}
-          {loading ? "Lädt" : "Aktualisieren"}
-        </button>
+        <MaintenanceSecurityControls auth={auth}>
+          <button type="button" style={button} onClick={() => void refresh(filters, "refresh")} disabled={loading} title="Aktualisieren">
+            {loading ? <LoaderCircle size={16} aria-hidden="true" style={spinIcon} /> : <RefreshCcw size={16} aria-hidden="true" />}
+            {loading ? "Lädt" : "Aktualisieren"}
+          </button>
+        </MaintenanceSecurityControls>
       </header>
+
+      {sensitiveAction ? (
+        <MaintenanceReauthenticationDialog
+          label={sensitiveAction.label}
+          onCancel={() => setSensitiveAction(null)}
+          onConfirm={async (password) => {
+            await auth.reauthenticate(password);
+            const action = sensitiveAction;
+            setSensitiveAction(null);
+            await action.run();
+          }}
+        />
+      ) : null}
 
       <LoadStatus steps={loadSteps} active={loading} notice={operationNotice} />
 
@@ -799,7 +824,7 @@ export default function MaintenancePage() {
                     </option>
                   ))}
                 </select>
-                <button type="button" style={button} onClick={() => void issueRecoveryAccess()} disabled={recoveryLoading || detail.terminal || detail.participants.length === 0}>
+                <button type="button" style={button} onClick={() => queueSensitiveAction("Ein neuer Fortsetzungszugang widerruft die bisherigen Zugangsdaten dieser Seite.", issueRecoveryAccess)} disabled={recoveryLoading || detail.terminal || detail.participants.length === 0}>
                   {recoveryLoading ? <LoaderCircle size={16} aria-hidden="true" style={spinIcon} /> : <KeyRound size={16} aria-hidden="true" />}
                   {recoveryLoading ? "Erstellt" : "Erstellen"}
                 </button>
@@ -908,7 +933,7 @@ export default function MaintenancePage() {
             <button
               type="button"
               style={buttonDanger}
-              onClick={() => void applyCleanup()}
+              onClick={() => queueSensitiveAction(`Das Löschen von ${cleanupPreview?.matchCount ?? 0} Matches wird unmittelbar ausgeführt.`, applyCleanup)}
               disabled={cleanupLoading || !cleanupPreview || cleanupPreview.matchCount === 0 || !cleanupConfirmed}
               title="Ganze Matches löschen"
             >
@@ -1014,8 +1039,8 @@ export default function MaintenancePage() {
           <div style={panelHeader}>
             <h3 style={h3}>Automatischer Cleanup</h3>
             <div style={buttonRow}>
-              <button type="button" style={button} onClick={() => void saveCleanupPolicy()} disabled={policyLoading}>{policyLoading ? "Speichert" : "Speichern"}</button>
-              <button type="button" style={button} onClick={() => void runCleanupPolicy()} disabled={policyLoading}>{policyLoading ? "Prüft" : "Jetzt prüfen"}</button>
+              <button type="button" style={button} onClick={() => queueSensitiveAction("Die automatische Cleanup-Policy wird dauerhaft geändert.", saveCleanupPolicy)} disabled={policyLoading}>{policyLoading ? "Speichert" : "Speichern"}</button>
+              <button type="button" style={button} onClick={() => queueSensitiveAction("Die Cleanup-Policy wird jetzt ausgeführt und kann Matches löschen.", runCleanupPolicy)} disabled={policyLoading}>{policyLoading ? "Prüft" : "Jetzt prüfen"}</button>
             </div>
           </div>
           <div style={filtersGrid}>
@@ -1295,7 +1320,7 @@ const statusOptions: Array<[string, string]> = [
   ["finished", "Beendet"]
 ];
 
-const cleanupStatusOptions = statusOptions.filter(([status]) => status !== "");
+const cleanupStatusOptions = statusOptions.filter(([status]) => ["cancelled", "abandoned", "forfeited", "finished"].includes(status));
 
 const terminalOptions: Array<[string, string]> = [
   ["all", "Alle"],

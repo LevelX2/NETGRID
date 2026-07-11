@@ -243,7 +243,7 @@ export const EMPTY_MAINTENANCE_FILTERS: MaintenanceFilters = {
 };
 
 export const DEFAULT_MAINTENANCE_CLEANUP_FILTERS: MaintenanceCleanupFilters = {
-  statuses: ["active"],
+  statuses: ["abandoned"],
   olderThanMinutes: "60",
   limit: "100",
   vacuumAfter: false,

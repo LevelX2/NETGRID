@@ -196,7 +196,7 @@ Prüfung:
 
 ### P04 – Sichere Maintenance-Oberfläche
 
-Status: in Umsetzung
+Status: abgeschlossen
 
 Ergebnis:
 
@@ -216,7 +216,7 @@ Prüfung:
 
 ### P05 – HTTPS-/Reverse-Proxy-Vertrag und Betreiberpfad
 
-Status: ausstehend
+Status: in Umsetzung
 
 Ergebnis:
 
