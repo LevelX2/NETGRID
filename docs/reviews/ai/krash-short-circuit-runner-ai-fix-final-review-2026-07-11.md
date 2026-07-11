@@ -1,7 +1,9 @@
 # Krash-/Short-Circuit-Runner-KI: Final Review
 
-Datum: 2026-07-11  
-Quellmatch: `match_ce2b72a6bf4d4e80`  
+Datum: 2026-07-11
+
+Quellmatch: `match_ce2b72a6bf4d4e80`
+
 Status: umgesetzt und verifiziert
 
 ## Ergebnis
