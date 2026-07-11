@@ -1,6 +1,6 @@
 # Two-Match Corp AI Fixes Final Review
 
-Status: Verifiziert; lokale Main-Integration ausstehend
+Status: Abgeschlossen und lokal nach `main` integriert
 
 ## Analysierte Matches
 
@@ -79,6 +79,6 @@ ohne manuelle Zählwertpflege abgedeckt.
 ## Integration
 
 Arbeitsbranch: `codex/ai-two-match-corp-fixes-20260711`.
-Die lokale Main-Integration folgt nach diesem Dokumentationscommit und einer
-erneuten Verifikation gegen den aktuellen Main-Stand.
-
+Der Arbeitsbranch wurde per Fast-Forward lokal nach `main` integriert. Die
+abschließende Main-Verifikation wiederholt fokussierte Regressionen, AI-Typecheck
+und Diff-Hygiene.
