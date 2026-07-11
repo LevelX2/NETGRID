@@ -2,7 +2,7 @@
 
 ## Status
 
-`P1_DONE`
+`P2_DONE`
 
 ## Quelle und Vorgabe
 
