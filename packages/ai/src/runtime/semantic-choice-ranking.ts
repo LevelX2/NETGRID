@@ -176,6 +176,7 @@ export function tacticalPlanMappedChoice(
     if (
       tacticalPlanCorpScorelineSupportBlocksOffPlanOverride(
         mapping,
+        mappedChoice,
         overrideChoice,
         mappedActionIds,
       )
@@ -451,9 +452,19 @@ function tacticalPlanCorpFiniteEconomyBlocksOffPlanOverride(
 
 function tacticalPlanCorpScorelineSupportBlocksOffPlanOverride(
   mapping: PlanStepMappingResult,
+  mappedChoice: SemanticRuntimeChoice,
   overrideChoice: SemanticRuntimeChoice,
   mappedActionIds: ReadonlySet<string>,
 ): boolean {
+  if (
+    tacticalPlanCorpBoardTriageMismatchShouldYield(
+      mappedChoice,
+      overrideChoice,
+      overrideChoice.score - mappedChoice.score,
+    )
+  ) {
+    return false;
+  }
   return (
     mapping.plan.side === "corp" &&
     mapping.plan.type === "corp.create_score_window" &&

@@ -86,6 +86,67 @@ describe("tacticalPlanMappedChoice", () => {
     );
   });
 
+  it("lets board triage reject an overbuilt remote protection target", () => {
+    const remoteIce = legalAction("install-remote-ice", "install_card", {
+      serverId: "remote_1",
+      placement: "ice",
+    });
+    const rdIce = legalAction("install-rd-ice", "install_card", {
+      serverId: "rd",
+      placement: "ice",
+    });
+    const mapped = choice(
+      remoteIce,
+      -636,
+      scoreComponentEvidence("corp_board_triage_mismatch"),
+    );
+    const alternative = choice(
+      rdIce,
+      4193,
+      scoreComponentEvidence("corp_board_triage_context"),
+    );
+
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [alternative, mapped],
+      scorelineSupportMapping([remoteIce]),
+      alternative,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("install-rd-ice");
+    expect(result.overrideReason).toBe("mapped_nonpositive_against_positive");
+  });
+
+  it("lets board triage stop score-window funding after its need is stale", () => {
+    const gain = legalAction("gain", "gain_credit");
+    const rdIce = legalAction("install-rd-ice", "install_card", {
+      serverId: "rd",
+      placement: "ice",
+    });
+    const mapped = choice(
+      gain,
+      119,
+      scoreComponentEvidence("corp_board_triage_mismatch"),
+    );
+    const alternative = choice(
+      rdIce,
+      3943,
+      scoreComponentEvidence("corp_board_triage_context"),
+    );
+
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [alternative, mapped],
+      scorelineSupportMapping([gain], { stepKind: "build_rez_reserve" }),
+      alternative,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("install-rd-ice");
+    expect(result.overrideReason).toBe("corp_board_triage_mismatch_yield");
+  });
+
   it("does not protect a progressing score window without conversion guarantee", () => {
     const installAgenda = legalAction("install-agenda", "install_card");
     const offPlanCredit = legalAction("gain", "gain_credit");
@@ -797,10 +858,14 @@ function finiteEconomyMapping(
 
 function scorelineSupportMapping(
   actions: LegalAction[],
+  overrides: {
+    stepKind?: "protect_remote" | "build_rez_reserve";
+  } = {},
 ): PlanStepMappingResult {
+  const stepKind = overrides.stepKind ?? "protect_remote";
   const step = createPlanStep({
     stepId: "protect_remote:agenda",
-    kind: "protect_remote",
+    kind: stepKind,
     desiredActionSemantics: ["install.card", "corp_window.rez"],
     actionCandidateIds: actions.map((action) => action.actionId),
   });
