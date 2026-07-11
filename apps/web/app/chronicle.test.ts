@@ -2588,6 +2588,60 @@ describe("formatChronicleEvent", () => {
     expect(shouldSuppressChronicleEventItem(event)).toBe(true);
   });
 
+  it("keeps Dr. Dreff choice, temporary encounter, trash and decline in run language", () => {
+    const chosen = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "successful_run_temporary_encounter",
+        sourceDefinitionId: "onr_v1_358_dr-dreff",
+        selectedIceDefinitionId: "onr_v1_261_quandary",
+        rezCostPaid: 1,
+        delayedSuccessfulRun: true,
+        aiExplanation: "legal choice",
+      }),
+      "runner",
+    );
+    const passed = formatChronicleEvent(
+      makeEvent("continue_run", {
+        actor: "runner",
+        sourceDefinitionId: "onr_v1_358_dr-dreff",
+        temporaryIceDefinitionId: "onr_v1_261_quandary",
+        temporaryEncounterTrashed: true,
+        successfulRunFinalizedAfterIntervention: true,
+      }),
+      "runner",
+    );
+    const declined = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "successful_run_intervention_declined",
+        sourceDefinitionId: "onr_v1_358_dr-dreff",
+        delayedSuccessfulRun: false,
+        aiExplanation: "legal choice",
+      }),
+      "runner",
+    );
+
+    expect(chosen).toMatchObject({
+      title:
+        "Die Korp-KI hat Dr. Dreff genutzt und Quandary aus HQ für eine zusätzliche Begegnung gewählt.",
+      category: "run",
+      visibility: "public",
+    });
+    expect(chosen.description).toContain("noch nicht erfolgreich");
+    expect(passed).toMatchObject({
+      title:
+        "Du hast Quandary passiert und nach der Dr. Dreff-Begegnung getrasht.",
+      category: "run",
+    });
+    expect(declined).toMatchObject({
+      title: "Die Korp-KI hat auf Dr. Dreff verzichtet.",
+      category: "run",
+    });
+  });
+
   it("names Forged Activation Orders target and Corp rez-or-trash decisions in the chronicle", () => {
     const runnerChoice = formatChronicleEvent(
       makeEvent("resolve_choice", {

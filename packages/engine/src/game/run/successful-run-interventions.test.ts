@@ -620,9 +620,37 @@ describe("successful run interventions", () => {
     expect(fixture.state.run?.delayedSuccessfulRun).toBeUndefined();
     expect(legalAction.payload).toMatchObject({
       temporaryEncounterTrashed: true,
+      temporaryIceDefinitionId: "hq_ice_def",
+      sourceDefinitionId: "onr_v1_358_dr-dreff",
+      serverId: "remote_1",
       successfulRunFinalizedAfterIntervention: true,
       delayedSuccessfulRun: false,
     });
+  });
+
+  it("records a visibility-safe Dr. Dreff decline inside the run", () => {
+    const fixture = makeHost();
+    fixture.state.pendingChoice = delayedChoice(
+      "temporary_hq_ice_encounter_after_successful_run",
+    );
+    const legalAction = { payload: {}, costs: [] } as unknown as LegalAction;
+
+    const result = resolveSuccessfulRunInterventionChoice(
+      fixture.host,
+      legalAction,
+      {
+        selectedChoices: { selectedOptionIds: ["decline"] },
+      } as unknown as PlayerAction,
+    );
+
+    expect(result).toMatchObject({ handled: true, accessShouldStart: true });
+    expect(legalAction.payload).toMatchObject({
+      hiddenZoneAction: "successful_run_intervention_declined",
+      interventionDecision: "decline",
+      sourceDefinitionId: "onr_v1_358_dr-dreff",
+      delayedSuccessfulRun: false,
+    });
+    expect(legalAction.payload).not.toHaveProperty("selectedIceDefinitionId");
   });
 
   it("builds and resolves False Echo, Netspace and I Spy followups", () => {

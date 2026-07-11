@@ -1678,6 +1678,48 @@ export function formatChronicleEvent(
         );
         break;
       }
+      if (hiddenZoneAction === "successful_run_temporary_encounter") {
+        const source =
+          titleForDefinitionId(sourceDefinitionId) ??
+          stringValue(payload.fortWindowSourceTitle) ??
+          "Dr. Dreff";
+        const selectedIce =
+          titleForDefinitionId(stringValue(payload.selectedIceDefinitionId)) ??
+          "ein ICE aus HQ";
+        const paid = numberValue(payload.rezCostPaid) ?? 0;
+        category = "run";
+        importance = "important";
+        visibility = "public";
+        title = phrase(
+          subject,
+          `${source} genutzt und ${selectedIce} aus HQ für eine zusätzliche Begegnung gewählt`,
+        );
+        description = `Der Run ist noch nicht erfolgreich. Der Runner muss ${selectedIce} passieren; danach wird das temporäre ICE getrasht.${paid > 0 ? ` Die Korp hat ${creditText(paid)} bezahlt.` : ""}`;
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        cardTitle = source;
+        chips.push(
+          source,
+          selectedIce,
+          "Temporäre Begegnung",
+          ...(paid > 0 ? [creditText(paid)] : []),
+        );
+        break;
+      }
+      if (hiddenZoneAction === "successful_run_intervention_declined") {
+        const source =
+          titleForDefinitionId(sourceDefinitionId) ??
+          stringValue(payload.fortWindowSourceTitle) ??
+          "Dr. Dreff";
+        category = "run";
+        visibility = "public";
+        title = phrase(subject, `auf ${source} verzichtet`);
+        description =
+          "Es wurde kein ICE aus HQ gewählt; der erfolgreiche Run setzt mit dem Zugriff fort.";
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        cardTitle = source;
+        chips.push(source, "Verzicht", "Run läuft weiter");
+        break;
+      }
       category = "system";
       visibility = "system";
       title = phrase(subject, "eine Entscheidung beantwortet");
@@ -2562,6 +2604,38 @@ export function formatChronicleEvent(
       }
       break;
     case "continue_run":
+      if (
+        payload.temporaryEncounterTrashed === true &&
+        payload.successfulRunFinalizedAfterIntervention === true
+      ) {
+        const source =
+          titleForDefinitionId(sourceDefinitionId) ??
+          stringValue(payload.temporaryIceSourceTitle) ??
+          "Dr. Dreff";
+        const temporaryIce =
+          titleForDefinitionId(
+            stringValue(payload.temporaryIceDefinitionId),
+          ) ?? "das temporäre ICE";
+        category = "run";
+        importance = "important";
+        visibility = "public";
+        title = phrase(
+          subject,
+          `${temporaryIce} passiert und nach der ${source}-Begegnung getrasht`,
+        );
+        description =
+          "Die zusätzliche Begegnung ist abgeschlossen; der ursprüngliche Run kann jetzt erfolgreich fortgesetzt werden.";
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        cardTitle = source;
+        chips.push(
+          source,
+          temporaryIce,
+          "ICE passiert",
+          "Trash",
+          "Run läuft weiter",
+        );
+        break;
+      }
       if (
         stringValue(payload.corpPostPassIceAbility) ===
         "return_passed_ice_to_hq"

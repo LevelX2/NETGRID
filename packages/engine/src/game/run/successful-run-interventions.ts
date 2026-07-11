@@ -780,6 +780,8 @@ export function resolveSuccessfulRunInterventionChoice(
       sourceDefinitionId: definition.id,
       sourceCardId,
       serverId: run.attackedServerId,
+      hiddenZoneAction: "successful_run_intervention_declined",
+      interventionDecision: "decline",
     };
     host.access.startAccessFromSuccessfulRun(legalAction);
     return {
@@ -924,6 +926,9 @@ export function finalizeDelayedSuccessfulRunAfterPassedIce(
     delayed.installedIceId === passedIceId;
   if (!matched) return { handled: false };
   if (delayed.temporaryIceId) {
+    const temporaryIceDefinitionId = host.cards.definitionFor(
+      delayed.temporaryIceId,
+    ).id;
     trashTemporaryEncounterIce(host, delayed.temporaryIceId, legalAction);
     if (legalAction) {
       legalAction.payload = {
@@ -931,6 +936,7 @@ export function finalizeDelayedSuccessfulRunAfterPassedIce(
         temporaryIceSourceTitle: host.cards.definitionFor(
           delayed.interventionSourceId,
         ).title,
+        temporaryIceDefinitionId,
       };
     }
   }
@@ -943,6 +949,10 @@ export function finalizeDelayedSuccessfulRunAfterPassedIce(
   if (legalAction) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
+      sourceDefinitionId: host.cards.definitionFor(
+        delayed.interventionSourceId,
+      ).id,
+      serverId: delayed.originalServerId,
       successfulRunFinalizedAfterIntervention: true,
       delayedSuccessfulRun: false,
     };

@@ -590,6 +590,8 @@ function chronicleResolveChoiceBelongsToRun(event: PublicGameEvent): boolean {
     payload.ambushPaymentDeclined === true ||
     payload.hiddenZoneAction ===
       "proteus_breaker_strength_penalty_access_counters" ||
+    payload.hiddenZoneAction === "successful_run_temporary_encounter" ||
+    payload.hiddenZoneAction === "successful_run_intervention_declined" ||
     payload.counterType === "breaker_strength_penalty"
   )
     return true;
