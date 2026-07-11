@@ -150,6 +150,66 @@ describe("corpScoreWindowBlockers", () => {
       ]),
     );
   });
+
+  it("binds source scoreline safety blockers to remote protection before agenda exposure", () => {
+    const agenda = corpCard("political-overthrow", {
+      advancementRequirement: 9,
+      advancementCounters: 0,
+      agendaPoints: 6,
+    });
+    const install = {
+      ...corpAction("install-political-overthrow", agenda.instanceId),
+      type: "install_card" as const,
+      payload: { placement: "root", serverId: "remote_1" },
+    } as LegalAction;
+    const draw = {
+      ...corpAction("draw-protection", "game_rule"),
+      type: "draw_card" as const,
+      source: "game_rule",
+      payload: {},
+    } as LegalAction;
+    const input = corpScoreInput({
+      credits: 5,
+      clicks: 3,
+      agenda,
+      legalActions: [install, draw],
+    });
+    input.playerView.own.gripOrHq = [agenda];
+    input.playerView.opponent.agendaPoints = 4;
+
+    const blockers = corpScoreWindowBlockers(
+      input,
+      "remote_1",
+      install,
+      scorelineAssessment({
+        actionId: install.actionId,
+        blockedByCredits: false,
+        recommendedNextStep: "protect_remote",
+        blockers: ["unsafe_remote", "runner_contest"],
+        evidence: ["agenda_steal_severity:game_ending", "score_horizon:slow"],
+      }),
+    );
+    const step = corpScoreWindowCurrentStep(install, blockers, input);
+
+    expect(blockers).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "score_window_contestable",
+          severity: "hard",
+          evidence: expect.arrayContaining([
+            "scoreline_source_safety_gate:true",
+            "scoreline_source_blocker:unsafe_remote",
+            "scoreline_source_blocker:runner_contest",
+            "agenda_steal_severity:game_ending",
+            "score_horizon:slow",
+          ]),
+        }),
+      ]),
+    );
+    expect(step.kind).toBe("find_remote_protection");
+    expect(step.actionCandidateIds).toEqual(["draw-protection"]);
+    expect(step.actionCandidateIds).not.toContain(install.actionId);
+  });
 });
 
 function candidate(
@@ -270,24 +330,30 @@ function corpCard(
 function scorelineAssessment(params: {
   actionId: string;
   blockedByCredits: boolean;
+  recommendedNextStep?: string;
+  blockers?: string[];
+  evidence?: string[];
 }): TacticalPlanBuildContext["corpScorelineWindowAssessment"] {
+  const recommendedNextStep = params.recommendedNextStep ?? "fund_scoreline";
+  const blockers = params.blockers ?? ["credits"];
+  const evidence = params.evidence ?? ["test_scoreline_funding_path"];
   return {
-    recommendedNextStep: "fund_scoreline",
+    recommendedNextStep,
     blockedByCredits: params.blockedByCredits,
     bestPath: {
       actionId: params.actionId,
       serverId: "remote_1",
-      recommendedNextStep: "fund_scoreline",
-      blockers: ["credits"],
-      evidence: ["test_scoreline_funding_path"],
+      recommendedNextStep,
+      blockers,
+      evidence,
     },
     paths: [
       {
         actionId: params.actionId,
         serverId: "remote_1",
-        recommendedNextStep: "fund_scoreline",
-        blockers: ["credits"],
-        evidence: ["test_scoreline_funding_path"],
+        recommendedNextStep,
+        blockers,
+        evidence,
       },
     ],
     evidence: ["test_scoreline_window"],

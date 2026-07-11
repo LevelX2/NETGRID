@@ -98,6 +98,9 @@ export function corpScoreWindowBlockers(
   const target = serverId
     ? { kind: "server" as const, id: serverId }
     : undefined;
+  const scorelinePath = scorelineAssessment?.paths.find(
+    (path) => path.actionId === action.actionId,
+  );
   if (
     serverId &&
     isRemoteServer(serverId) &&
@@ -131,13 +134,40 @@ export function corpScoreWindowBlockers(
       evidence: [`server:${serverId}`, ...remoteContestability.evidence],
     });
   }
-  const scorelineFundingPath = scorelineAssessment?.paths.find(
-    (path) => path.actionId === action.actionId,
+  const sourceScorelineProtectionBlockers = scorelinePath?.blockers.filter(
+    (blocker) =>
+      blocker === "unsafe_remote" ||
+      blocker === "runner_contest" ||
+      blocker === "cheap_contest",
   );
+  if (
+    serverId &&
+    isRemoteServer(serverId) &&
+    sourceScorelineProtectionBlockers &&
+    sourceScorelineProtectionBlockers.length > 0 &&
+    !advanceCompletesScore(input.playerView, action) &&
+    !blockers.some((blocker) => blocker.kind === "score_window_contestable")
+  ) {
+    blockers.push({
+      blockerId: `score_window_contestable:${serverId}`,
+      kind: "score_window_contestable",
+      severity: "hard",
+      ...(target ? { target } : {}),
+      removalStepKind: "protect_remote",
+      evidence: [
+        `server:${serverId}`,
+        "scoreline_source_safety_gate:true",
+        ...sourceScorelineProtectionBlockers.map(
+          (blocker) => `scoreline_source_blocker:${blocker}`,
+        ),
+        ...(scorelinePath?.evidence ?? []),
+      ],
+    });
+  }
   const scorelineNeedsFunding =
     scorelineAssessment?.recommendedNextStep === "fund_scoreline" &&
-    (scorelineFundingPath?.recommendedNextStep === "fund_scoreline" ||
-      scorelineFundingPath?.blockers.includes("credits") === true ||
+    (scorelinePath?.recommendedNextStep === "fund_scoreline" ||
+      scorelinePath?.blockers.includes("credits") === true ||
       scorelineAssessment.blockedByCredits === true);
   if (
     serverId &&
@@ -157,7 +187,7 @@ export function corpScoreWindowBlockers(
         `corp_credits:${input.playerView.own.credits}`,
         "corp_scoreline_recommended_next_step:fund_scoreline",
         "scoreline_funding_path_blocks_advance:true",
-        ...(scorelineFundingPath?.evidence ?? []),
+        ...(scorelinePath?.evidence ?? []),
       ],
     });
   }
