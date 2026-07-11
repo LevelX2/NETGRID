@@ -1,6 +1,6 @@
 # Aktueller Projektstatus
 
-Stand: 2026-07-10
+Stand: 2026-07-11
 
 ## Führender Produktstand
 
@@ -68,6 +68,16 @@ Stand: 2026-07-10
   ist seit dem Current-State-Projekt-Cleanup kein Start-/CLI-/Health-Vertrag
   mehr.
 - Der normale lokale Startpfad ist `scripts/start-netgrid.ps1`.
+- Storage-, Cleanup-, Recovery- und KI-Trace-Maintenance bilden nach ARC-001
+  eine eigenständige Control Plane. Private LAN-Adressen sind kein
+  Adminnachweis mehr. Passwort, kurzlebige serverseitige Sitzung, CSRF und
+  frische Reauthentifizierung schützen die Wartungsfunktionen; aktiver und
+  anderer nicht-terminaler Matchzustand ist vom Cleanup ausgeschlossen.
+- Lokales HTTP ist nur auf Loopback erlaubt. Remote-/Tablet-Maintenance ist im
+  `private_internet`-Profil standardmäßig aus und verlangt eine eigene
+  HTTPS-Origin sowie explizit benannte Proxy-Adressen. Führend sind
+  `docs/architecture/maintenance/maintenance-control-plane-security-process-2026-07-11.md`,
+  `docs/runbooks/maintenance-control-plane.md` und das ARC-001-Final-Review.
 - Die verwaiste Next-Demo-Route `/api/game` mit globalem V0.8-GameState ist
   entfernt. Produktive Matches laufen über den Multiplayer-Server; das lokale
   Tutorial bleibt ein ausdrücklich isolierter Modus.

@@ -23,11 +23,13 @@ import {
   type MaintenanceAiTraceMatchEntry,
   type MaintenanceMatchDetail
 } from "../../maintenance";
+import { MaintenanceAuthBoundary, MaintenanceSecurityControls, useMaintenanceAuth } from "../../maintenance-auth-ui";
 
 const CONFIGURED_SERVER_HTTP = process.env.NEXT_PUBLIC_NETGRID_SERVER_URL ?? "http://127.0.0.1:8787";
 
 export default function AiTraceMaintenancePage() {
   const [serverHttp] = useState(() => resolveMaintenanceServerHttp(CONFIGURED_SERVER_HTTP, typeof window === "undefined" ? undefined : window.location.hostname));
+  const auth = useMaintenanceAuth(serverHttp);
   const [matches, setMatches] = useState<MaintenanceAiTraceMatchEntry[]>([]);
   const [selectedMatchId, setSelectedMatchId] = useState("");
   const [selectedMatchDetail, setSelectedMatchDetail] = useState<MaintenanceMatchDetail | null>(null);
@@ -48,7 +50,7 @@ export default function AiTraceMaintenancePage() {
   const hydratedDisabled = (disabled: boolean) => (clientHydrated && disabled ? true : undefined);
 
   const loadTraceMatches = async (preserveMatch?: MaintenanceAiTraceMatchEntry) => {
-    const response = await fetch(`${serverHttp}/api/storage/maintenance/ai-decision-traces/matches`, { cache: "no-store" });
+    const response = await auth.request("/api/storage/maintenance/ai-decision-traces/matches", { cache: "no-store" });
     const payload = (await response.json()) as { matches?: MaintenanceAiTraceMatchEntry[]; error?: { message?: string } };
     if (!response.ok) throw new Error(payload.error?.message ?? "KI-Trace-Matches konnten nicht geladen werden.");
     const markers = findForbiddenMaintenanceMarkers(payload);
@@ -63,7 +65,7 @@ export default function AiTraceMaintenancePage() {
       setSelectedMatchDetail(null);
       return;
     }
-    const response = await fetch(`${serverHttp}/api/storage/maintenance/matches/${encodeURIComponent(matchId)}`, { cache: "no-store" });
+    const response = await auth.request(`/api/storage/maintenance/matches/${encodeURIComponent(matchId)}`, { cache: "no-store" });
     const payload = (await response.json()) as MaintenanceMatchDetail | { error?: { message?: string } };
     if (!response.ok) throw new Error("error" in payload ? payload.error?.message ?? "Matchdetail konnte nicht geladen werden." : "Matchdetail konnte nicht geladen werden.");
     const markers = findForbiddenMaintenanceMarkers(payload);
@@ -78,7 +80,7 @@ export default function AiTraceMaintenancePage() {
       setTraceDetail(null);
       return;
     }
-    const response = await fetch(`${serverHttp}${buildMaintenanceAiTraceIndexPath(matchId)}`, { cache: "no-store" });
+    const response = await auth.request(buildMaintenanceAiTraceIndexPath(matchId), { cache: "no-store" });
     const payload = (await response.json()) as { traces?: MaintenanceAiTraceIndexEntry[]; error?: { message?: string } };
     if (!response.ok) throw new Error(payload.error?.message ?? "KI-Trace-Timeline konnte nicht geladen werden.");
     const markers = findForbiddenMaintenanceMarkers(payload);
@@ -90,7 +92,7 @@ export default function AiTraceMaintenancePage() {
 
   const pollTraceUpdates = async (matchId: string) => {
     const afterDecisionIndex = traceIndex.at(-1)?.decisionIndex;
-    const response = await fetch(`${serverHttp}${buildMaintenanceAiTraceIndexPath(matchId, afterDecisionIndex)}`, { cache: "no-store" });
+    const response = await auth.request(buildMaintenanceAiTraceIndexPath(matchId, afterDecisionIndex), { cache: "no-store" });
     const payload = (await response.json()) as { traces?: MaintenanceAiTraceIndexEntry[]; error?: { message?: string } };
     if (!response.ok) throw new Error(payload.error?.message ?? "KI-Trace-Live-Follow konnte nicht geladen werden.");
     const markers = findForbiddenMaintenanceMarkers(payload);
@@ -107,7 +109,7 @@ export default function AiTraceMaintenancePage() {
       setTraceDetail(null);
       return;
     }
-    const response = await fetch(`${serverHttp}/api/storage/maintenance/ai-decision-traces/${encodeURIComponent(traceId)}`, { cache: "no-store" });
+    const response = await auth.request(`/api/storage/maintenance/ai-decision-traces/${encodeURIComponent(traceId)}`, { cache: "no-store" });
     const payload = (await response.json()) as MaintenanceAiTraceDetail | { error?: { message?: string } };
     if (!response.ok) throw new Error("error" in payload ? payload.error?.message ?? "KI-Trace-Detail konnte nicht geladen werden." : "KI-Trace-Detail konnte nicht geladen werden.");
     const markers = findForbiddenMaintenanceMarkers(payload);
@@ -136,7 +138,7 @@ export default function AiTraceMaintenancePage() {
     setError("");
     setNotice("");
     try {
-      const response = await fetch(`${serverHttp}${buildMaintenanceAiTraceEnablePath(selectedMatchId)}`, {
+      const response = await auth.request(buildMaintenanceAiTraceEnablePath(selectedMatchId), {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ mode: "detailed" })
@@ -174,29 +176,29 @@ export default function AiTraceMaintenancePage() {
 
   useEffect(() => {
     setSelectedMatchId(initialMatchId());
-    void refresh();
-  }, []);
+    if (auth.status === "authenticated") void refresh();
+  }, [auth.status]);
 
   useEffect(() => {
-    if (!selectedMatchId) return;
+    if (auth.status !== "authenticated" || !selectedMatchId) return;
     setFollowPaused(false);
     setError("");
     void Promise.allSettled([loadMatchDetail(selectedMatchId), loadTraceIndex(selectedMatchId)]).then((results) => {
       const rejected = results.find((result): result is PromiseRejectedResult => result.status === "rejected");
       if (rejected) setError(rejected.reason instanceof Error ? rejected.reason.message : "KI-Trace konnte nicht geladen werden.");
     });
-  }, [selectedMatchId]);
+  }, [selectedMatchId, auth.status]);
 
   useEffect(() => {
-    if (!selectedTraceId) {
+    if (auth.status !== "authenticated" || !selectedTraceId) {
       setTraceDetail(null);
       return;
     }
     void loadTraceDetail(selectedTraceId).catch((detailError) => setError(detailError instanceof Error ? detailError.message : "KI-Trace-Detail konnte nicht geladen werden."));
-  }, [selectedTraceId]);
+  }, [selectedTraceId, auth.status]);
 
   useEffect(() => {
-    if (!selectedMatchId || !liveFollow || followPaused) return;
+    if (auth.status !== "authenticated" || !selectedMatchId || !liveFollow || followPaused) return;
     let closed = false;
     const timer = window.setInterval(() => {
       pollTraceUpdates(selectedMatchId).catch((pollError) => {
@@ -207,7 +209,9 @@ export default function AiTraceMaintenancePage() {
       closed = true;
       window.clearInterval(timer);
     };
-  }, [selectedMatchId, liveFollow, followPaused, traceIndex]);
+  }, [selectedMatchId, liveFollow, followPaused, traceIndex, auth.status]);
+
+  if (auth.status !== "authenticated") return <MaintenanceAuthBoundary auth={auth} title="KI-Trace Maintenance" />;
 
   return (
     <main style={pageShell}>
@@ -220,13 +224,13 @@ export default function AiTraceMaintenancePage() {
               <p style={subtle}>Separate Live-Ansicht für KI-Entscheidungen.</p>
             </div>
           </div>
-          <div style={buttonRow}>
+          <MaintenanceSecurityControls auth={auth}>
             <a href="/maintenance" style={linkButton}>Storage Maintenance</a>
             <button type="button" style={button} onClick={() => void refresh()} disabled={hydratedDisabled(loading)}>
               {loading ? <LoaderCircle size={16} aria-hidden="true" style={spinIcon} /> : <RefreshCcw size={16} aria-hidden="true" />}
               {loading ? "Lädt" : "Aktualisieren"}
             </button>
-          </div>
+          </MaintenanceSecurityControls>
         </header>
 
         {notice ? <p style={successBox} role="status"><CheckCircle2 size={16} aria-hidden="true" />{notice}</p> : null}

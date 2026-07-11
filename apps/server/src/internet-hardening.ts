@@ -5,6 +5,7 @@ import type { StorageHealth } from "./storage-sqlite";
 export const LOCAL_DEFAULT_TOKEN_SALT = "local-dev-netgrid-token-salt";
 export const LOCAL_DEFAULT_WEB_BASE_URL = "http://127.0.0.1:3100";
 export const LOCAL_DEFAULT_SERVER_BASE_URL = "http://127.0.0.1:8787";
+export const LOCAL_DEFAULT_MAINTENANCE_BASE_URL = "http://127.0.0.1:3100";
 
 export type DeploymentProfile = "local" | "private_internet";
 export type RateLimitProfile = "off" | "local" | "private_internet" | "test";
@@ -19,10 +20,14 @@ export type DeploymentConfig = {
   rateLimitProfile: RateLimitProfile;
   trustProxyHeaders: boolean;
   healthDetail: HealthDetail;
+  maintenanceEnabled: boolean;
+  maintenanceBaseUrl: string;
+  maintenanceAllowedOrigins: string[];
+  maintenanceTrustedProxyAddresses: string[];
 };
 
 export class DeploymentConfigError extends Error {
-  constructor(readonly code: "insecure_deployment_config" | "missing_required_secret" | "unsafe_base_url" | "origin_not_allowed", message: string) {
+  constructor(readonly code: "insecure_deployment_config" | "missing_required_secret" | "unsafe_base_url" | "origin_not_allowed" | "proxy_not_trusted", message: string) {
     super(message);
     this.name = "DeploymentConfigError";
   }
@@ -33,6 +38,9 @@ export function loadDeploymentConfig(env: NodeJS.ProcessEnv = process.env): Depl
   const webBaseUrl = trimTrailingSlash(envValue(env, "NETGRID_WEB_BASE_URL") ?? LOCAL_DEFAULT_WEB_BASE_URL);
   const serverBaseUrl = trimTrailingSlash(envValue(env, "NETGRID_SERVER_BASE_URL") ?? LOCAL_DEFAULT_SERVER_BASE_URL);
   const configuredOrigins = parseOrigins(envValue(env, "NETGRID_ALLOWED_ORIGINS"));
+  const maintenanceEnabled = profile === "local" ? envValue(env, "NETGRID_MAINTENANCE_ENABLED") !== "false" : envValue(env, "NETGRID_MAINTENANCE_ENABLED") === "true";
+  const maintenanceBaseUrl = trimTrailingSlash(envValue(env, "NETGRID_MAINTENANCE_BASE_URL") ?? LOCAL_DEFAULT_MAINTENANCE_BASE_URL);
+  const configuredMaintenanceOrigins = parseOrigins(envValue(env, "NETGRID_MAINTENANCE_ALLOWED_ORIGINS"));
   const localOrigins = uniqueOrigins([
     originOf(webBaseUrl),
     originOf(serverBaseUrl),
@@ -42,6 +50,7 @@ export function loadDeploymentConfig(env: NodeJS.ProcessEnv = process.env): Depl
     "http://localhost:8787"
   ]);
   const allowedOrigins = configuredOrigins.length > 0 ? configuredOrigins : localOrigins;
+  const localMaintenanceOrigins = uniqueOrigins([originOf(maintenanceBaseUrl), "http://127.0.0.1:3100", "http://localhost:3100"]);
   const config: DeploymentConfig = {
     profile,
     webBaseUrl,
@@ -49,7 +58,11 @@ export function loadDeploymentConfig(env: NodeJS.ProcessEnv = process.env): Depl
     allowedOrigins,
     rateLimitProfile: rateLimitProfileFromEnv(envValue(env, "NETGRID_RATE_LIMIT_PROFILE"), profile),
     trustProxyHeaders: envValue(env, "NETGRID_TRUST_PROXY_HEADERS") === "true",
-    healthDetail: envValue(env, "NETGRID_HEALTH_DETAIL") === "local_diagnostics" ? "local_diagnostics" : "safe"
+    healthDetail: envValue(env, "NETGRID_HEALTH_DETAIL") === "local_diagnostics" ? "local_diagnostics" : "safe",
+    maintenanceEnabled,
+    maintenanceBaseUrl,
+    maintenanceAllowedOrigins: configuredMaintenanceOrigins.length > 0 ? configuredMaintenanceOrigins : localMaintenanceOrigins,
+    maintenanceTrustedProxyAddresses: parseCommaSeparated(envValue(env, "NETGRID_MAINTENANCE_TRUSTED_PROXY_ADDRESSES"))
   };
   const tokenSalt = envValue(env, "NETGRID_TOKEN_SALT");
   if (tokenSalt) config.tokenSalt = tokenSalt;
@@ -58,21 +71,33 @@ export function loadDeploymentConfig(env: NodeJS.ProcessEnv = process.env): Depl
 }
 
 export function validateDeploymentConfig(config: DeploymentConfig, env: NodeJS.ProcessEnv = process.env): void {
-  if (config.profile !== "private_internet") return;
-  if (!hasEnvValue(env, "NETGRID_WEB_BASE_URL") || !hasEnvValue(env, "NETGRID_SERVER_BASE_URL")) {
-    throw new DeploymentConfigError("insecure_deployment_config", "Private Internet verlangt explizite Web- und Server-Base-URLs.");
+  if (config.profile === "private_internet") {
+    if (!hasEnvValue(env, "NETGRID_WEB_BASE_URL") || !hasEnvValue(env, "NETGRID_SERVER_BASE_URL")) {
+      throw new DeploymentConfigError("insecure_deployment_config", "Private Internet verlangt explizite Web- und Server-Base-URLs.");
+    }
+    if (!isHttpsUrl(config.webBaseUrl) || !isHttpsUrl(config.serverBaseUrl)) {
+      throw new DeploymentConfigError("unsafe_base_url", "Private Internet erlaubt nur HTTPS-Base-URLs; WebSocket-Clients leiten daraus WSS ab.");
+    }
+    if (!hasEnvValue(env, "NETGRID_ALLOWED_ORIGINS") || config.allowedOrigins.length === 0) {
+      throw new DeploymentConfigError("origin_not_allowed", "Private Internet verlangt eine explizite Origin-Allowlist.");
+    }
+    if (config.allowedOrigins.some((origin) => origin === "*" || origin.includes("*"))) {
+      throw new DeploymentConfigError("origin_not_allowed", "Private Internet erlaubt keine Wildcard-Origin.");
+    }
+    if (!config.tokenSalt || config.tokenSalt === LOCAL_DEFAULT_TOKEN_SALT) {
+      throw new DeploymentConfigError("missing_required_secret", "Private Internet verlangt einen eigenen NETGRID_TOKEN_SALT.");
+    }
   }
-  if (!isHttpsUrl(config.webBaseUrl) || !isHttpsUrl(config.serverBaseUrl)) {
-    throw new DeploymentConfigError("unsafe_base_url", "Private Internet erlaubt nur HTTPS-Base-URLs; WebSocket-Clients leiten daraus WSS ab.");
+  if (!config.maintenanceEnabled) return;
+  if (isLoopbackHttpUrl(config.maintenanceBaseUrl) && config.profile === "local") return;
+  if (!hasEnvValue(env, "NETGRID_MAINTENANCE_BASE_URL") || !isHttpsUrl(config.maintenanceBaseUrl)) {
+    throw new DeploymentConfigError("unsafe_base_url", "Remote Maintenance verlangt eine explizite HTTPS-Base-URL.");
   }
-  if (!hasEnvValue(env, "NETGRID_ALLOWED_ORIGINS") || config.allowedOrigins.length === 0) {
-    throw new DeploymentConfigError("origin_not_allowed", "Private Internet verlangt eine explizite Origin-Allowlist.");
+  if (!hasEnvValue(env, "NETGRID_MAINTENANCE_ALLOWED_ORIGINS") || config.maintenanceAllowedOrigins.length === 0 || config.maintenanceAllowedOrigins.some((origin) => origin === "*" || !isHttpsUrl(origin))) {
+    throw new DeploymentConfigError("origin_not_allowed", "Remote Maintenance verlangt eine explizite HTTPS-Origin ohne Wildcard.");
   }
-  if (config.allowedOrigins.some((origin) => origin === "*" || origin.includes("*"))) {
-    throw new DeploymentConfigError("origin_not_allowed", "Private Internet erlaubt keine Wildcard-Origin.");
-  }
-  if (!config.tokenSalt || config.tokenSalt === LOCAL_DEFAULT_TOKEN_SALT) {
-    throw new DeploymentConfigError("missing_required_secret", "Private Internet verlangt einen eigenen NETGRID_TOKEN_SALT.");
+  if (config.maintenanceTrustedProxyAddresses.length === 0) {
+    throw new DeploymentConfigError("proxy_not_trusted", "Remote Maintenance verlangt mindestens eine exakt benannte vertrauenswürdige Proxy-Adresse.");
   }
 }
 
@@ -90,11 +115,12 @@ export function applyCors(request: IncomingMessage, response: ServerResponse, co
   const origin = request.headers.origin;
   response.setHeader("vary", "Origin");
   response.setHeader("access-control-allow-methods", "GET,POST,OPTIONS");
-  response.setHeader("access-control-allow-headers", "content-type,authorization");
+  response.setHeader("access-control-allow-headers", "content-type,authorization,x-netgrid-csrf");
   response.setHeader("access-control-max-age", "600");
   if (!origin) return "allowed";
   if (!isOriginAllowed(origin, config)) return "denied";
   response.setHeader("access-control-allow-origin", origin);
+  response.setHeader("access-control-allow-credentials", "true");
   return "allowed";
 }
 
@@ -324,6 +350,11 @@ function parseOrigins(value: string | undefined): string[] {
   );
 }
 
+function parseCommaSeparated(value: string | undefined): string[] {
+  if (!value) return [];
+  return [...new Set(value.split(",").map((entry) => entry.trim().toLowerCase()).filter(Boolean))];
+}
+
 function uniqueOrigins(values: Array<string | undefined>): string[] {
   return [...new Set(values.filter((entry): entry is string => Boolean(entry)))];
 }
@@ -341,6 +372,15 @@ function originOf(value: string | undefined): string | undefined {
 function isHttpsUrl(value: string): boolean {
   try {
     return new URL(value).protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+function isLoopbackHttpUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" && (url.hostname === "127.0.0.1" || url.hostname === "localhost" || url.hostname === "::1" || url.hostname === "[::1]");
   } catch {
     return false;
   }

@@ -258,13 +258,17 @@ Set-Location $projectRoot
 $lanIp = Get-LanIpv4
 $webUrl = "http://${lanIp}:3100"
 $serverUrl = "http://${lanIp}:8787/health"
-$maintenanceSummaryUrl = "http://${lanIp}:8787/api/storage/maintenance/summary"
 $targetOpenUrl = if ([string]::IsNullOrWhiteSpace($OpenUrl)) {
   Join-WebPath -BaseUrl $webUrl -Path $OpenPath
 } else {
   $OpenUrl.Trim()
 }
-$targetOpenUrl = Convert-LocalWebUrlToLan -Url $targetOpenUrl -LanWebUrl $webUrl
+$maintenanceRequested = $targetOpenUrl -match "/maintenance($|[/?#])"
+if ($maintenanceRequested -and [string]::IsNullOrWhiteSpace($env:NETGRID_MAINTENANCE_BASE_URL)) {
+  $targetOpenUrl = Join-WebPath -BaseUrl $localWebUrl -Path $OpenPath
+} else {
+  $targetOpenUrl = Convert-LocalWebUrlToLan -Url $targetOpenUrl -LanWebUrl $webUrl
+}
 $targetWebUrl = Get-UrlOrigin -Url $targetOpenUrl
 if (-not $targetWebUrl) {
   $targetWebUrl = $webUrl
@@ -286,6 +290,19 @@ $serverEnvironment = @{
   NETGRID_ALLOWED_ORIGINS = "$webUrl,http://127.0.0.1:3100,http://localhost:3100"
 }
 
+foreach ($maintenanceEnvironmentKey in @(
+  "NETGRID_MAINTENANCE_ENABLED",
+  "NETGRID_MAINTENANCE_BASE_URL",
+  "NETGRID_MAINTENANCE_ALLOWED_ORIGINS",
+  "NETGRID_MAINTENANCE_TRUSTED_PROXY_ADDRESSES",
+  "NETGRID_MAINTENANCE_AUTH_PATH"
+)) {
+  $maintenanceEnvironmentValue = [Environment]::GetEnvironmentVariable($maintenanceEnvironmentKey)
+  if (-not [string]::IsNullOrWhiteSpace($maintenanceEnvironmentValue)) {
+    $serverEnvironment[$maintenanceEnvironmentKey] = $maintenanceEnvironmentValue
+  }
+}
+
 $webEnvironment = @{
   NEXT_PUBLIC_NETGRID_SERVER_URL = "http://${lanIp}:8787"
   NETGRID_ALLOWED_DEV_ORIGINS = "localhost,127.0.0.1,${lanIp}"
@@ -293,19 +310,11 @@ $webEnvironment = @{
 
 $serverReadyLanBefore = Test-Endpoint -Url $serverUrl
 $serverReadyLocalBefore = Test-Endpoint -Url $localServerUrl
-$maintenanceRequested = $targetOpenUrl -match "/maintenance($|[/?#])"
-$maintenanceReadyLanBefore = if ($maintenanceRequested) { Test-EndpointOk -Url $maintenanceSummaryUrl } else { $true }
-Write-LauncherLog "Server precheck lan=$serverReadyLanBefore local=$serverReadyLocalBefore maintenanceRequested=$maintenanceRequested maintenanceLan=$maintenanceReadyLanBefore"
+Write-LauncherLog "Server precheck lan=$serverReadyLanBefore local=$serverReadyLocalBefore maintenanceRequested=$maintenanceRequested"
 
 if ($RestartServer) {
   Stop-PortListeners -Ports @(8787)
   Stop-NetgridServerProcessTrees
-  $serverReadyLanBefore = $false
-  $serverReadyLocalBefore = $false
-}
-
-if ($serverReadyLanBefore -and $maintenanceRequested -and -not $maintenanceReadyLanBefore) {
-  Stop-PortListeners -Ports @(8787)
   $serverReadyLanBefore = $false
   $serverReadyLocalBefore = $false
 }

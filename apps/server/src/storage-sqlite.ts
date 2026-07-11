@@ -1670,19 +1670,7 @@ function isTerminalMaintenanceStatus(status: MatchStatus): boolean {
   return status === "finished" || status === "forfeited" || status === "abandoned" || status === "cancelled";
 }
 
-const CLEANUP_STATUSES: MatchStatus[] = [
-  "pending",
-  "waiting_for_runner",
-  "waiting_for_corp",
-  "waiting_for_joiner_decks",
-  "ready_check",
-  "countdown",
-  "active",
-  "cancelled",
-  "abandoned",
-  "forfeited",
-  "finished"
-];
+const CLEANUP_STATUSES: MatchStatus[] = ["cancelled", "abandoned", "forfeited", "finished"];
 
 function normalizeCleanupFilters(filters: StorageMaintenanceCleanupFilters): StorageMaintenanceCleanupFilters {
   const statuses: MatchStatus[] = [];

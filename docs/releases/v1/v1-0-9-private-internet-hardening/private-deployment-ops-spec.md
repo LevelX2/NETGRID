@@ -70,6 +70,17 @@ Wichtig:
 - Forwarded-Headers werden in der App nur vertraut, wenn der Betreiber diesen Proxy kontrolliert.
 - Logs des Proxy dürfen Join-URLs nicht unredaktioniert dauerhaft speichern; wenn das nicht kontrollierbar ist, muss dies als Betriebsrisiko dokumentiert werden.
 
+## Maintenance-Control-Plane nach ARC-001
+
+Die administrative Wartungsfläche ist nicht Teil der öffentlichen Game Plane:
+
+- im Profil `private_internet` standardmäßig deaktiviert,
+- bei Aktivierung eigene `https://`-Base-URL und exakte Origin,
+- eigener Cookie-/Passwort-/CSRF-/Reauth-Vertrag,
+- Forwarded-HTTPS wird nur von Adressen aus `NETGRID_MAINTENANCE_TRUSTED_PROXY_ADDRESSES` akzeptiert,
+- direkter Zugriff auf den Backend-Port bleibt geschlossen,
+- Betreiberablauf und Proxyvertrag stehen in `docs/runbooks/maintenance-control-plane.md`.
+
 ## Health-Vertrag
 
 `/health` bleibt der primäre sichere Verfügbarkeitscheck.

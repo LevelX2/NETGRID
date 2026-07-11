@@ -55,6 +55,16 @@ Standard-Ports:
 
 Direkte Dev-Starts mit `corepack pnpm --filter @netgrid/server dev`, `tsx` oder `next dev` sind nur Diagnose- oder isolierte Testpfade. Für den normalen lokalen Betrieb gilt wieder der Script-Startpfad, damit LAN-IP, Web-/Server-URLs und Origin-Allowlist konsistent bleiben.
 
+## Maintenance-Control-Plane
+
+Die Storage-/KI-Trace-Wartung unter `/maintenance` ist ein eigener administrativer Schutzbereich. Vor der ersten Nutzung wird lokal ein Passwort gesetzt:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\set-maintenance-password.ps1
+```
+
+Der normale lokale Zugriff erfolgt anschließend ausschließlich über `http://127.0.0.1:3100/maintenance`. Für Tablet- oder Remote-Zugriff sind eine eigene HTTPS-Origin und ein kontrollierter Reverse Proxy Pflicht. Passwort, Adminsitzung und Match-Recovery sind voneinander getrennt. Der vollständige Betreiberpfad steht im [Maintenance-Control-Plane-Runbook](docs/runbooks/maintenance-control-plane.md).
+
 ## Konfiguration und Daten
 
 `.env.example` dokumentiert die wichtigsten lokalen Variablen. Das Startscript setzt die für den normalen lokalen Betrieb relevanten Werte selbst; lokale Overrides und Secrets gehören nicht in versionierte Dateien.

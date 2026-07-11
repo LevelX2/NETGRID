@@ -62,8 +62,8 @@ describe("Backend 0.5 maintenance UI helpers", () => {
     expect(findForbiddenMaintenanceMarkers({ sessionToken: "secret", privatePayload: { value: true } }).length).toBeGreaterThan(0);
   });
 
-  it("builds bounded cleanup requests with active older-than-one-hour defaults", () => {
-    expect(buildMaintenanceCleanupRequest(DEFAULT_MAINTENANCE_CLEANUP_FILTERS)).toEqual({ statuses: ["active"], olderThanMinutes: 60, limit: 100, includeProtected: false });
+  it("builds bounded cleanup requests with terminal abandoned defaults", () => {
+    expect(buildMaintenanceCleanupRequest(DEFAULT_MAINTENANCE_CLEANUP_FILTERS)).toEqual({ statuses: ["abandoned"], olderThanMinutes: 60, limit: 100, includeProtected: false });
     expect(
       buildMaintenanceCleanupRequest({
         statuses: ["active", "active", "abandoned"],

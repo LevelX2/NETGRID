@@ -13,6 +13,7 @@ import { computeDeckHash, createDeckSnapshot, type DeckFormatProfile, type DeckS
 import { applyAction, applyEffectCommands, checkWinConditions, createGameAfterSetup, CARD_DEFINITIONS_BY_ID, DEMO_DECKS, getLegalActions, hashState } from "@netgrid/engine";
 import type { ConnectionAuditEvent } from "./connection-audit";
 import { createConfiguredStorage, createNetgridHttpServer, isMaintenanceClientAddressAllowed, startNetgridServer } from "./http-server";
+import { InMemoryMaintenanceCredentialStore, MaintenanceAuthService } from "./maintenance-auth";
 import { assertInviteLobbyPayloadRedacted, findInviteLobbyPayloadRedactionLeaks } from "./invite-lobby-redaction.test-helper";
 import { FixedWindowRateLimiter, createRateLimiter, loadDeploymentConfig, redactSensitiveText, redactedJoinUrl, type DeploymentConfig } from "./internet-hardening";
 import { InMemoryMatchStorage, MultiplayerService, type EventRecord, type JoinMatchResult, type MatchSettings, type MultiplayerStorage, type SidePayload, type StateSnapshot, type StoredMatch } from "./multiplayer";
@@ -161,6 +162,8 @@ describe("V1.0.9 private internet hardening", () => {
     expect(local.profile).toBe("local");
     expect(local.webBaseUrl).toBe("http://127.0.0.1:3100");
     expect(local.allowedOrigins).toContain("http://127.0.0.1:3100");
+    expect(local.maintenanceEnabled).toBe(true);
+    expect(local.maintenanceBaseUrl).toBe("http://127.0.0.1:3100");
 
     expect(() =>
       loadDeploymentConfig({
@@ -195,6 +198,39 @@ describe("V1.0.9 private internet hardening", () => {
       rateLimitProfile: "private_internet"
     });
     expect(privateConfig.allowedOrigins).toEqual(["https://netgrid.example", "https://tablet.netgrid.example"]);
+    expect(privateConfig.maintenanceEnabled).toBe(false);
+
+    expect(() =>
+      loadDeploymentConfig({
+        NETGRID_DEPLOYMENT_PROFILE: "private_internet",
+        NETGRID_WEB_BASE_URL: "https://netgrid.example",
+        NETGRID_SERVER_BASE_URL: "https://api.netgrid.example",
+        NETGRID_ALLOWED_ORIGINS: "https://netgrid.example",
+        NETGRID_TOKEN_SALT: "private-test-salt",
+        NETGRID_MAINTENANCE_ENABLED: "true",
+        NETGRID_MAINTENANCE_BASE_URL: "http://admin.netgrid.example",
+        NETGRID_MAINTENANCE_ALLOWED_ORIGINS: "http://admin.netgrid.example",
+        NETGRID_MAINTENANCE_TRUSTED_PROXY_ADDRESSES: "127.0.0.1"
+      } as NodeJS.ProcessEnv)
+    ).toThrow(/HTTPS/);
+
+    const privateMaintenance = loadDeploymentConfig({
+      NETGRID_DEPLOYMENT_PROFILE: "private_internet",
+      NETGRID_WEB_BASE_URL: "https://netgrid.example",
+      NETGRID_SERVER_BASE_URL: "https://api.netgrid.example",
+      NETGRID_ALLOWED_ORIGINS: "https://netgrid.example",
+      NETGRID_TOKEN_SALT: "private-test-salt",
+      NETGRID_MAINTENANCE_ENABLED: "true",
+      NETGRID_MAINTENANCE_BASE_URL: "https://admin.netgrid.example",
+      NETGRID_MAINTENANCE_ALLOWED_ORIGINS: "https://admin.netgrid.example",
+      NETGRID_MAINTENANCE_TRUSTED_PROXY_ADDRESSES: "127.0.0.1,::1"
+    } as NodeJS.ProcessEnv);
+    expect(privateMaintenance).toMatchObject({
+      maintenanceEnabled: true,
+      maintenanceBaseUrl: "https://admin.netgrid.example",
+      maintenanceAllowedOrigins: ["https://admin.netgrid.example"],
+      maintenanceTrustedProxyAddresses: ["127.0.0.1", "::1"]
+    });
 
     const legacyPrivateConfig = loadDeploymentConfig({
       NETGRID_DEPLOYMENT_PROFILE: "private_internet",
@@ -430,11 +466,12 @@ describe("Invite and lobby redaction harness", () => {
 });
 
 describe("Backend 0.5 private storage maintenance", () => {
-  it("allows maintenance clients from loopback and private LAN addresses only", () => {
+  it("allows only loopback transport and never treats private LAN addresses as admin proof", () => {
     expect(isMaintenanceClientAddressAllowed("127.0.0.1")).toBe(true);
-    expect(isMaintenanceClientAddressAllowed("::ffff:192.168.178.42")).toBe(true);
-    expect(isMaintenanceClientAddressAllowed("10.0.0.25")).toBe(true);
-    expect(isMaintenanceClientAddressAllowed("172.20.1.5")).toBe(true);
+    expect(isMaintenanceClientAddressAllowed("::1")).toBe(true);
+    expect(isMaintenanceClientAddressAllowed("::ffff:192.168.178.42")).toBe(false);
+    expect(isMaintenanceClientAddressAllowed("10.0.0.25")).toBe(false);
+    expect(isMaintenanceClientAddressAllowed("172.20.1.5")).toBe(false);
     expect(isMaintenanceClientAddressAllowed("8.8.8.8")).toBe(false);
     expect(isMaintenanceClientAddressAllowed("203.0.113.10")).toBe(false);
   });
@@ -463,10 +500,9 @@ describe("Backend 0.5 private storage maintenance", () => {
     });
     await storage.save(finishedRecord);
 
-    const handle = createNetgridHttpServer(service, { deploymentConfig: loadDeploymentConfig({} as NodeJS.ProcessEnv) });
-    const baseUrl = await listen(handle);
+    const maintenance = await authenticatedMaintenanceServer(service);
     try {
-      const summaryResponse = await fetch(`${baseUrl}/api/storage/maintenance/summary`);
+      const summaryResponse = await maintenance.request("/api/storage/maintenance/summary");
       const summary = (await summaryResponse.json()) as {
         backendOpsVersion?: string;
         matchCount?: number;
@@ -483,7 +519,7 @@ describe("Backend 0.5 private storage maintenance", () => {
       expect(summary.tableSizes?.some((row) => row.key === "matches" && row.approximatePayloadBytes > 0)).toBe(true);
       expect(JSON.stringify(summary)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|sha256:[a-f0-9]{64}|cardInstances|privateDeckSnapshots|privatePayload|decklist|game_state_json/i);
 
-      const filteredResponse = await fetch(`${baseUrl}/api/storage/maintenance/matches?status=finished&terminal=true&olderThanDays=1&mode=human_runner_vs_corp_ai&largerThanBytes=1`);
+      const filteredResponse = await maintenance.request("/api/storage/maintenance/matches?status=finished&terminal=true&olderThanDays=1&mode=human_runner_vs_corp_ai&largerThanBytes=1");
       const filtered = (await filteredResponse.json()) as { matches?: Array<{ matchId: string; status: string; participants: Array<{ displayName: string }>; sizes: { approximateTotalBytes: number } }> };
       expect(filteredResponse.status).toBe(200);
       expect(filtered.matches?.map((match) => match.matchId)).toEqual([finished.matchId]);
@@ -492,7 +528,7 @@ describe("Backend 0.5 private storage maintenance", () => {
       expect(filtered.matches?.[0]?.sizes.approximateTotalBytes).toBeGreaterThan(0);
       expect(JSON.stringify(filtered)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|sha256:[a-f0-9]{64}|cardInstances|privateDeckSnapshots|privatePayload|decklist|game_state_json/i);
 
-      const detailResponse = await fetch(`${baseUrl}/api/storage/maintenance/matches/${encodeURIComponent(active.matchId)}`);
+      const detailResponse = await maintenance.request(`/api/storage/maintenance/matches/${encodeURIComponent(active.matchId)}`);
       const detail = (await detailResponse.json()) as {
         matchId?: string;
         eventCount?: number;
@@ -508,7 +544,7 @@ describe("Backend 0.5 private storage maintenance", () => {
       expect(detail.cleanupAssessment?.recommendation).toBe("not_active");
       expect(JSON.stringify(detail)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|sha256:[a-f0-9]{64}|cardInstances|privateDeckSnapshots|privatePayload|decklist|game_state_json/i);
     } finally {
-      await handle.close();
+      await maintenance.handle.close();
     }
   });
 
@@ -627,31 +663,30 @@ describe("Backend 0.5 private storage maintenance", () => {
     expect(await reopenedService.storageMaintenanceAiDecisionTraceIndex(untraced.matchId)).toEqual([]);
     expect(JSON.stringify({ matches, index, details })).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|sha256:[a-f0-9]{64}|cardInstances|privatePayload|privateDeckSnapshots|decklist|fullGameState|FullState|AIInput|C:\\Users/i);
 
-    const handle = createNetgridHttpServer(reopenedService, { deploymentConfig: loadDeploymentConfig({} as NodeJS.ProcessEnv) });
-    const baseUrl = await listen(handle);
+    const maintenance = await authenticatedMaintenanceServer(reopenedService);
     try {
-      const matchesResponse = await fetch(`${baseUrl}/api/storage/maintenance/ai-decision-traces/matches`);
+      const matchesResponse = await maintenance.request("/api/storage/maintenance/ai-decision-traces/matches");
       expect(matchesResponse.status).toBe(200);
-      const enableResponse = await fetch(`${baseUrl}/api/storage/maintenance/ai-decision-traces/matches/${encodeURIComponent(untraced.matchId)}/enable`, {
+      const enableResponse = await maintenance.request(`/api/storage/maintenance/ai-decision-traces/matches/${encodeURIComponent(untraced.matchId)}/enable`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ mode: "detailed" })
       });
       expect(enableResponse.status).toBe(200);
       expect(await enableResponse.json()).toMatchObject({ match: { matchId: untraced.matchId, aiTraceMode: "detailed" } });
-      const indexResponse = await fetch(`${baseUrl}/api/storage/maintenance/ai-decision-traces/matches/${encodeURIComponent(traced.matchId)}`);
+      const indexResponse = await maintenance.request(`/api/storage/maintenance/ai-decision-traces/matches/${encodeURIComponent(traced.matchId)}`);
       const httpIndex = (await indexResponse.json()) as { traces?: Array<{ traceId: string }> };
       expect(indexResponse.status).toBe(200);
       expect(httpIndex.traces?.length).toBeGreaterThan(0);
-      const cursorResponse = await fetch(`${baseUrl}/api/storage/maintenance/ai-decision-traces/matches/${encodeURIComponent(traced.matchId)}?afterDecisionIndex=${encodeURIComponent(String(index?.[0]?.decisionIndex ?? 0))}`);
+      const cursorResponse = await maintenance.request(`/api/storage/maintenance/ai-decision-traces/matches/${encodeURIComponent(traced.matchId)}?afterDecisionIndex=${encodeURIComponent(String(index?.[0]?.decisionIndex ?? 0))}`);
       const cursorBody = (await cursorResponse.json()) as { traces?: Array<{ traceId: string }> };
       expect(cursorResponse.status).toBe(200);
       expect(cursorBody.traces?.some((entry) => entry.traceId === httpIndex.traces?.[0]?.traceId)).toBe(false);
-      const detailResponse = await fetch(`${baseUrl}/api/storage/maintenance/ai-decision-traces/${encodeURIComponent(httpIndex.traces?.[0]?.traceId ?? "")}`);
+      const detailResponse = await maintenance.request(`/api/storage/maintenance/ai-decision-traces/${encodeURIComponent(httpIndex.traces?.[0]?.traceId ?? "")}`);
       expect(detailResponse.status).toBe(200);
       expect(JSON.stringify(await detailResponse.json())).not.toMatch(/<html|<div|sessionToken|reconnectToken|joinToken|cardInstances|privatePayload|decklist|AIInput/i);
     } finally {
-      await handle.close();
+      await maintenance.handle.close();
     }
   });
 
@@ -742,14 +777,13 @@ describe("Backend 0.5 private storage maintenance", () => {
     const service = new MultiplayerService(storage, { tokenSalt: "backend-05-recovery-access" });
     const created = await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", displayName: "Ludwig", seed: "backend-05-recovery" });
 
-    const handle = createNetgridHttpServer(service, { deploymentConfig: loadDeploymentConfig({} as NodeJS.ProcessEnv) });
-    const baseUrl = await listen(handle);
+    const maintenance = await authenticatedMaintenanceServer(service);
     try {
-      const response = await fetch(`${baseUrl}/api/storage/maintenance/matches/${encodeURIComponent(created.matchId)}/recovery-access`, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ side: "runner" })
-      });
+      const response = await maintenance.request(
+        `/api/storage/maintenance/matches/${encodeURIComponent(created.matchId)}/recovery-access`,
+        { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ side: "runner" }) },
+        { sensitive: true }
+      );
       const recovery = (await response.json()) as { matchId?: string; side?: Side; access?: string; displayName?: string; matchVersion?: number };
       expect(response.status).toBe(200);
       expect(recovery.matchId).toBe(created.matchId);
@@ -763,7 +797,7 @@ describe("Backend 0.5 private storage maintenance", () => {
       const oldReconnect = await service.reconnectMatch(created.matchId, { side: "runner", reconnectToken: created.hostReconnectToken });
       expect("error" in oldReconnect).toBe(true);
 
-      const reconnectResponse = await fetch(`${baseUrl}/api/matches/${encodeURIComponent(created.matchId)}/reconnect`, {
+      const reconnectResponse = await fetch(`${maintenance.baseUrl}/api/matches/${encodeURIComponent(created.matchId)}/reconnect`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ side: "runner", reconnectToken: recovery.access })
@@ -776,11 +810,11 @@ describe("Backend 0.5 private storage maintenance", () => {
       expect(reconnected.reconnectToken).toBeTruthy();
       expect(reconnected.matchVersion).toBeGreaterThan(recovery.matchVersion ?? 0);
     } finally {
-      await handle.close();
+      await maintenance.handle.close();
     }
   });
 
-  it("previews active cleanup candidates without exposing private storage data", async () => {
+  it("never previews active cleanup candidates and keeps the result redacted", async () => {
     const dir = await tempStorageDir();
     const storage = new SqliteMatchStorage({ dbPath: join(dir, "netgrid.sqlite"), backupDir: join(dir, "backups") });
     const service = new MultiplayerService(storage, { tokenSalt: "backend-05-cleanup-preview" });
@@ -796,26 +830,25 @@ describe("Backend 0.5 private storage maintenance", () => {
     await storage.save(oldActiveRecord);
     await storage.save(oldFinishedRecord);
 
-    const handle = createNetgridHttpServer(service, { deploymentConfig: loadDeploymentConfig({} as NodeJS.ProcessEnv) });
-    const baseUrl = await listen(handle);
+    const maintenance = await authenticatedMaintenanceServer(service);
     try {
-      const response = await fetch(`${baseUrl}/api/storage/maintenance/cleanup/preview`, {
+      const response = await maintenance.request("/api/storage/maintenance/cleanup/preview", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ statuses: ["active"], olderThanMinutes: 60, limit: 100 })
+        body: JSON.stringify({ statuses: ["active", "finished"], olderThanMinutes: 60, limit: 100 })
       });
       const preview = (await response.json()) as { matchCount?: number; previewId?: string; matches?: Array<{ matchId: string; status: string }>; warnings?: string[] };
       expect(response.status).toBe(200);
       expect(preview.matchCount).toBe(1);
       expect(preview.previewId).toMatch(/^[a-f0-9]{16}$/);
-      expect(preview.matches?.map((match) => match.matchId)).toEqual([oldActive.matchId]);
-      expect(preview.matches?.[0]?.status).toBe("active");
+      expect(preview.matches?.map((match) => match.matchId)).toEqual([oldFinished.matchId]);
+      expect(preview.matches?.[0]?.status).toBe("finished");
       expect(preview.matches?.map((match) => match.matchId)).not.toContain(freshActive.matchId);
-      expect(preview.matches?.map((match) => match.matchId)).not.toContain(oldFinished.matchId);
-      expect(preview.warnings?.join(" ")).toContain("Aktive Matches");
+      expect(preview.matches?.map((match) => match.matchId)).not.toContain(oldActive.matchId);
+      expect(preview.warnings?.join(" ")).toContain("Finished-Matches");
       expect(JSON.stringify(preview)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|sha256:[a-f0-9]{64}|cardInstances|privateDeckSnapshots|privatePayload|decklist|game_state_json/i);
     } finally {
-      await handle.close();
+      await maintenance.handle.close();
     }
   });
 
@@ -828,27 +861,27 @@ describe("Backend 0.5 private storage maintenance", () => {
     const freshActive = await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", displayName: "Frisch Aktiv", seed: "backend-05-keep-fresh-active" });
     const oldRecord = await service.loadForTest(oldActive.matchId);
     if (!oldRecord) throw new Error("Missing old cleanup record");
+    oldRecord.match.status = "abandoned";
     oldRecord.match.updatedAt = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
     await storage.save(oldRecord);
 
-    const handle = createNetgridHttpServer(service, { deploymentConfig: loadDeploymentConfig({} as NodeJS.ProcessEnv) });
-    const baseUrl = await listen(handle);
+    const maintenance = await authenticatedMaintenanceServer(service);
     try {
-      const previewResponse = await fetch(`${baseUrl}/api/storage/maintenance/cleanup/preview`, {
+      const previewResponse = await maintenance.request("/api/storage/maintenance/cleanup/preview", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ statuses: ["active"], olderThanMinutes: 60, limit: 100 })
+        body: JSON.stringify({ statuses: ["abandoned"], olderThanMinutes: 60, limit: 100 })
       });
       const preview = (await previewResponse.json()) as { previewId?: string; matchCount?: number };
       expect(previewResponse.status).toBe(200);
       expect(preview.matchCount).toBe(1);
       if (!preview.previewId) throw new Error("Missing cleanup preview id");
 
-      const applyResponse = await fetch(`${baseUrl}/api/storage/maintenance/cleanup/apply`, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ statuses: ["active"], olderThanMinutes: 60, limit: 100, previewId: preview.previewId, createBackup: true })
-      });
+      const applyResponse = await maintenance.request(
+        "/api/storage/maintenance/cleanup/apply",
+        { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ statuses: ["abandoned"], olderThanMinutes: 60, limit: 100, previewId: preview.previewId, createBackup: true }) },
+        { sensitive: true }
+      );
       const result = (await applyResponse.json()) as { deletedCount?: number; deletedMatchIds?: string[]; backup?: { backupId?: string; backupDir?: string }; integrityCheck?: string };
       expect(applyResponse.status).toBe(200);
       expect(result.deletedCount).toBe(1);
@@ -861,7 +894,7 @@ describe("Backend 0.5 private storage maintenance", () => {
       expect((await readdir(backupDir)).length).toBeGreaterThan(0);
       expect(JSON.stringify(result)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|sha256:[a-f0-9]{64}|cardInstances|privateDeckSnapshots|privatePayload|decklist|game_state_json/i);
     } finally {
-      await handle.close();
+      await maintenance.handle.close();
     }
   });
 
@@ -875,15 +908,16 @@ describe("Backend 0.5 private storage maintenance", () => {
     const oldProtected = await service.loadForTest(protectedMatch.matchId);
     const oldCleanup = await service.loadForTest(cleanupMatch.matchId);
     if (!oldProtected || !oldCleanup) throw new Error("Missing retention fixtures");
+    oldProtected.match.status = "abandoned";
+    oldCleanup.match.status = "abandoned";
     oldProtected.match.updatedAt = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString();
     oldCleanup.match.updatedAt = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString();
     await storage.save(oldProtected);
     await storage.save(oldCleanup);
 
-    const handle = createNetgridHttpServer(service, { deploymentConfig: loadDeploymentConfig({} as NodeJS.ProcessEnv) });
-    const baseUrl = await listen(handle);
+    const maintenance = await authenticatedMaintenanceServer(service);
     try {
-      const protectResponse = await fetch(`${baseUrl}/api/matches/${encodeURIComponent(protectedMatch.matchId)}/retention-protection`, {
+      const protectResponse = await fetch(`${maintenance.baseUrl}/api/matches/${encodeURIComponent(protectedMatch.matchId)}/retention-protection`, {
         method: "POST",
         headers: { "content-type": "application/json", authorization: `Bearer ${protectedMatch.hostSessionToken}` },
         body: JSON.stringify({ side: protectedMatch.hostSide, protected: true })
@@ -893,14 +927,14 @@ describe("Backend 0.5 private storage maintenance", () => {
       expect(protection.ok).toBe(true);
       expect(protection.payload?.retentionProtected).toBe(true);
 
-      const policyResponse = await fetch(`${baseUrl}/api/storage/maintenance/cleanup/policy`, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ enabled: true, statuses: ["active"], olderThanDays: 3, limit: 100, includeProtected: false })
-      });
+      const policyResponse = await maintenance.request(
+        "/api/storage/maintenance/cleanup/policy",
+        { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ enabled: true, statuses: ["abandoned"], olderThanDays: 3, limit: 100, includeProtected: false }) },
+        { sensitive: true }
+      );
       expect(policyResponse.status).toBe(200);
 
-      const runResponse = await fetch(`${baseUrl}/api/storage/maintenance/cleanup/policy/run`, { method: "POST" });
+      const runResponse = await maintenance.request("/api/storage/maintenance/cleanup/policy/run", { method: "POST" }, { sensitive: true });
       const run = (await runResponse.json()) as { applyResult?: { deletedCount?: number; deletedMatchIds?: string[]; backupCreated?: boolean; backup?: { backupId?: string } }; policy?: { lastRun?: { deletedCount?: number; backupCreated?: boolean } } };
       expect(runResponse.status).toBe(200);
       expect(run.applyResult?.deletedCount).toBe(1);
@@ -913,7 +947,7 @@ describe("Backend 0.5 private storage maintenance", () => {
       expect((await storage.load(protectedMatch.matchId))?.match.retentionProtection?.protected).toBe(true);
       expect(JSON.stringify(run)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|sha256:[a-f0-9]{64}|cardInstances|privateDeckSnapshots|privatePayload|decklist|game_state_json/i);
     } finally {
-      await handle.close();
+      await maintenance.handle.close();
     }
   });
 
@@ -1174,10 +1208,9 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
 
     const reopenedStorage = new SqliteMatchStorage({ dbPath, backupDir });
     const reopenedService = new MultiplayerService(reopenedStorage, { tokenSalt: "v108-sqlite-legacy-compaction" });
-    const handle = createNetgridHttpServer(reopenedService, { deploymentConfig: loadDeploymentConfig({} as NodeJS.ProcessEnv) });
-    const baseUrl = await listen(handle);
+    const maintenance = await authenticatedMaintenanceServer(reopenedService);
     try {
-      const response = await fetch(`${baseUrl}/api/storage/maintenance/snapshot-compaction/apply`, { method: "POST" });
+      const response = await maintenance.request("/api/storage/maintenance/snapshot-compaction/apply", { method: "POST" }, { sensitive: true });
       const result = (await response.json()) as {
         backupCreated?: boolean;
         backup?: { backupId?: string; backupDir?: string };
@@ -1262,7 +1295,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       if (!accepted.ok) throw new Error(accepted.error.message);
       expect(accepted.requesterPayload.playerView.stateVersion).toBe(0);
     } finally {
-      await handle.close();
+      await maintenance.handle.close();
     }
   });
 
@@ -7589,6 +7622,61 @@ function privateDeploymentConfig(): DeploymentConfig {
     NETGRID_TOKEN_SALT: "private-test-salt",
     NETGRID_RATE_LIMIT_PROFILE: "private_internet"
   } as NodeJS.ProcessEnv);
+}
+
+const MAINTENANCE_TEST_ORIGIN = "http://127.0.0.1:3100";
+const MAINTENANCE_TEST_PASSWORD = "sichere Test-Passphrase";
+
+type MaintenanceTestClient = {
+  handle: ReturnType<typeof createNetgridHttpServer>;
+  baseUrl: string;
+  request(path: string, init?: RequestInit, options?: { sensitive?: boolean }): Promise<Response>;
+};
+
+async function authenticatedMaintenanceServer(service: MultiplayerService, deploymentConfig = loadDeploymentConfig({} as NodeJS.ProcessEnv)): Promise<MaintenanceTestClient> {
+  const maintenanceAuth = new MaintenanceAuthService(new InMemoryMaintenanceCredentialStore(), {
+    passwordKdf: { keyLength: 32, cost: 1024, blockSize: 8, parallelization: 1, maxMemory: 8 * 1024 * 1024 }
+  });
+  await maintenanceAuth.bootstrapPassword(MAINTENANCE_TEST_PASSWORD);
+  const handle = createNetgridHttpServer(service, { deploymentConfig, maintenanceAuth });
+  const baseUrl = await listen(handle);
+  const login = await fetch(`${baseUrl}/api/storage/maintenance/auth/login`, {
+    method: "POST",
+    headers: { "content-type": "application/json", origin: MAINTENANCE_TEST_ORIGIN },
+    body: JSON.stringify({ password: MAINTENANCE_TEST_PASSWORD })
+  });
+  if (!login.ok) throw new Error(`Maintenance test login failed: ${login.status}`);
+  const cookie = login.headers.get("set-cookie")?.split(";", 1)[0];
+  const loginPayload = (await login.json()) as { csrfToken?: string };
+  if (!cookie || !loginPayload.csrfToken) throw new Error("Maintenance test login returned no session proof");
+  let csrfToken = loginPayload.csrfToken;
+  const rawRequest = (path: string, init: RequestInit = {}) => {
+    const headers = new Headers(init.headers);
+    headers.set("cookie", cookie);
+    headers.set("origin", MAINTENANCE_TEST_ORIGIN);
+    if ((init.method ?? "GET") !== "GET") headers.set("x-netgrid-csrf", csrfToken);
+    return fetch(`${baseUrl}${path}`, { ...init, headers });
+  };
+  return {
+    handle,
+    baseUrl,
+    request: async (path, init = {}, options = {}) => {
+      if (options.sensitive) {
+        const reauth = await rawRequest("/api/storage/maintenance/auth/reauthenticate", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ password: MAINTENANCE_TEST_PASSWORD })
+        });
+        if (!reauth.ok) throw new Error(`Maintenance test reauthentication failed: ${reauth.status}`);
+      }
+      const response = await rawRequest(path, init);
+      if (path === "/api/storage/maintenance/auth/session" && response.ok) {
+        const payload = (await response.clone().json()) as { csrfToken?: string };
+        if (payload.csrfToken) csrfToken = payload.csrfToken;
+      }
+      return response;
+    }
+  };
 }
 
 async function listen(handle: ReturnType<typeof createNetgridHttpServer>): Promise<string> {
