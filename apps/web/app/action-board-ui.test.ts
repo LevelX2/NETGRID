@@ -81,6 +81,7 @@ import {
   runWindowActionButtonLabel,
   runWindowActions,
   runWindowStatusLabel,
+  runnerHostedCardsForHost,
   runnerRigMemorySummary,
   serverBoardRows,
   serverCounterChipsForDisplays,
@@ -1032,6 +1033,25 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(
       groups.flatMap((group) => group.cards.map((entry) => entry.instanceId)),
     ).toEqual(["program_1", "hardware_1", "resource_1"]);
+  });
+
+  it("keeps hosted Runner programs beside their visible host instead of in the MU lane", () => {
+    const host = card("spin_chip_1", "Eurocorpse (TM) Spin Chip", "hardware");
+    const hostedKrash = {
+      ...card("krash_1", "Krash", "program"),
+      hostedOn: host.instanceId,
+      hostedOnLabel: "Eurocorpse (TM) Spin Chip",
+    } satisfies VisibleCard;
+    const regularProgram = card("cloak_1", "Cloak", "program");
+    const cards = [hostedKrash, regularProgram, host];
+    const groups = groupRunnerRigCards(cards);
+
+    expect(
+      groups.flatMap((group) => group.cards.map((entry) => entry.instanceId)),
+    ).toEqual(["cloak_1", "spin_chip_1"]);
+    expect(runnerHostedCardsForHost(cards, host.instanceId)).toEqual([
+      hostedKrash,
+    ]);
   });
 
   it("can keep the Runner program group visible for an empty MU display", () => {
@@ -2924,6 +2944,20 @@ describe("V1.0.6 resource and card-display helpers", () => {
         ),
       ),
     ).toBe("Installieren");
+    expect(
+      contextualCardActionLabel(
+        legalAction(
+          "runner",
+          "install_card",
+          "krash_1",
+          "Krash in Eurocorpse (TM) Spin Chip hosten",
+          {
+            cardId: "krash_1",
+            hostOnCardId: "spin_chip_1",
+          },
+        ),
+      ),
+    ).toBe("In Eurocorpse (TM) Spin Chip installieren");
     expect(
       contextualCardActionLabel(
         legalAction(

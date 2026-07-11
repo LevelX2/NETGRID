@@ -229,10 +229,7 @@ export function actionCueInteractionAmbience(input: {
   )
     return "access";
   if (signalTextHasMovement(signalText)) return "movement";
-  if (
-    input.cardType === "agenda" ||
-    signalTextHasAgendaAbility(signalText)
-  )
+  if (input.cardType === "agenda" || signalTextHasAgendaAbility(signalText))
     return "agenda";
   return null;
 }
@@ -273,7 +270,8 @@ export function runWindowInteractionAmbience(
   currentStep: RunTimelineStepId | null,
 ): InteractionAmbienceKind | null {
   const choiceAction =
-    view.pendingChoice && actions.find((action) => action.type === "resolve_choice");
+    view.pendingChoice &&
+    actions.find((action) => action.type === "resolve_choice");
   const choiceAmbience = view.pendingChoice
     ? choiceInteractionAmbience(view.pendingChoice, choiceAction)
     : null;
@@ -353,9 +351,7 @@ function signalTextHasTrace(value: string): boolean {
 }
 
 function signalTextHasPump(value: string): boolean {
-  return /\bpump|pumpen|breaker|eisbrecher|\bstarke\b|\bstrength\b/.test(
-    value,
-  );
+  return /\bpump|pumpen|breaker|eisbrecher|\bstarke\b|\bstrength\b/.test(value);
 }
 
 function signalTextHasAccess(value: string): boolean {
@@ -1341,10 +1337,24 @@ function installContextLabel(action: LegalAction): string {
     typeof action.payload?.runnerInstallPaymentLabel === "string"
       ? action.payload.runnerInstallPaymentLabel
       : null;
+  const hostOnCardId =
+    typeof action.payload?.hostOnCardId === "string"
+      ? action.payload.hostOnCardId
+      : null;
   if (action.payload?.runnerProgramTrashBeforeInstall === true)
     return runnerInstallPaymentLabel
       ? `Mit Programmtrash und ${runnerInstallPaymentLabel.replace(/^Mit\s+/u, "").replace(/^Ohne\s+/u, "ohne ")} installieren`
       : "Mit Programmtrash installieren";
+  if (hostOnCardId) {
+    const hostTitle = hostedProgramInstallTargetTitle(action.label);
+    if (hostTitle)
+      return runnerInstallPaymentLabel
+        ? `${runnerInstallPaymentLabel} in ${hostTitle} installieren`
+        : `In ${hostTitle} installieren`;
+    return runnerInstallPaymentLabel
+      ? `${runnerInstallPaymentLabel} gehostet installieren`
+      : "Gehostet installieren";
+  }
   if (!serverId && selectedServerId)
     return `Auf ${serverDisplayLabel(selectedServerId)} ausrichten`;
   if (!serverId)
@@ -1361,6 +1371,13 @@ function installContextLabel(action: LegalAction): string {
     return `In ${serverLabel} (Node ersetzen)`;
   if (action.payload?.placement === "root") return `In ${serverLabel}`;
   return `Installieren: ${serverLabel}`;
+}
+
+function hostedProgramInstallTargetTitle(label: string): string | null {
+  const match = normalizeVisibleTerms(label).match(
+    /^.*\sin\s+(.+?)\s+hosten(?:\s+\([^)]*\))?$/u,
+  );
+  return match?.[1]?.trim() || null;
 }
 
 function isNewRemoteInstallAction(
@@ -2657,26 +2674,30 @@ export function groupRunnerRigCards(
   cards: VisibleCard[],
   options: { includeEmptyProgramGroup?: boolean } = {},
 ): Array<{ key: string; label: string; cards: VisibleCard[] }> {
+  const visibleRigCardIds = new Set(cards.map((card) => card.instanceId));
+  const topLevelCards = cards.filter(
+    (card) => !card.hostedOn || !visibleRigCardIds.has(card.hostedOn),
+  );
   const groups = [
     {
       key: "program",
       label: "Programme",
-      cards: cards.filter((card) => card.type === "program"),
+      cards: topLevelCards.filter((card) => card.type === "program"),
     },
     {
       key: "hardware",
       label: "Hardware",
-      cards: cards.filter((card) => card.type === "hardware"),
+      cards: topLevelCards.filter((card) => card.type === "hardware"),
     },
     {
       key: "resource",
       label: "Ressourcen",
-      cards: cards.filter((card) => card.type === "resource"),
+      cards: topLevelCards.filter((card) => card.type === "resource"),
     },
     {
       key: "other",
       label: "Sonstiges",
-      cards: cards.filter(
+      cards: topLevelCards.filter(
         (card) =>
           card.type !== "program" &&
           card.type !== "hardware" &&
@@ -2689,6 +2710,13 @@ export function groupRunnerRigCards(
       group.cards.length > 0 ||
       (group.key === "program" && options.includeEmptyProgramGroup),
   );
+}
+
+export function runnerHostedCardsForHost(
+  cards: VisibleCard[],
+  hostCardId: string,
+): VisibleCard[] {
+  return cards.filter((card) => card.hostedOn === hostCardId);
 }
 
 export function runnerRigMemorySummary(
