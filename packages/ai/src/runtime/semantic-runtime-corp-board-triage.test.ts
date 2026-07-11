@@ -252,6 +252,147 @@ describe("semantic runtime corp board triage", () => {
     });
   });
 
+  it("protects the open R&D first layer before adding protection for an HQ agenda", () => {
+    const hostileTakeover = agendaCard("hostile-takeover", 1);
+    const installAgenda = corpAction(
+      "install-hostile-remote",
+      "install_card",
+      { placement: "root", serverId: "remote_1" },
+      hostileTakeover.instanceId,
+    );
+    const installRdIce = corpAction(
+      "install-quandary-rd",
+      "install_card",
+      { placement: "ice", serverId: "rd" },
+      "quandary",
+    );
+    const installRemoteIce = corpAction(
+      "install-quandary-remote",
+      "install_card",
+      { placement: "ice", serverId: "remote_1" },
+      "quandary",
+    );
+    const quandary = iceCard("quandary", {
+      definitionId: "onr_v1_261_quandary",
+      title: "Quandary",
+      rezCost: 2,
+      rulesText: "End the run.",
+    });
+    const input = corpInput({
+      runnerAgendaPoints: 3,
+      corpHq: [hostileTakeover, quandary],
+      legalActions: [installAgenda, installRdIce, installRemoteIce],
+      eventTail: [
+        publicCentralEvent("rd-run-1", "start_run", "rd"),
+        publicCentralEvent("rd-access-1", "access_card", "rd"),
+        publicCentralEvent("rd-run-2", "start_run", "rd"),
+        publicCentralEvent("rd-access-2", "access_card", "rd"),
+      ],
+      servers: [
+        centralServer("hq", [iceCard("hq-stop")]),
+        centralServer("rd", []),
+        remoteServer("remote_1", [iceCard("remote-filter")], []),
+      ],
+    });
+    const dependencies = testDependencies({
+      scoringWindowByActionId: {
+        [installAgenda.actionId]: scoringWindow({
+          serverId: "remote_1",
+          scoreHorizon: "next_turn",
+          windowKind: "unsafe",
+          runnerCanContestBeforeScore: true,
+          runnerCanReachAccessBeforeScore: true,
+          agendaStealRelevantBeforeScore: true,
+          agendaStealSeverity: "normal",
+          runnerAgendaPointsAfterSteal: 4,
+          corpCanRezRelevantIce: true,
+          corpCanRezFullPathWithDynamicReserve: true,
+          recommendedNextStep: "build_remote_ice",
+        }),
+      },
+    });
+
+    const triage = semanticRuntimeCorpBoardTriage(input, dependencies);
+    const rdComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      installRdIce,
+      dependencies,
+    );
+    const remoteComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      installRemoteIce,
+      dependencies,
+    );
+
+    expect(triage).toMatchObject({
+      primary: "protect_rd",
+      severity: "high",
+      targetServerId: "rd",
+    });
+    expect(triage.evidence).toEqual(
+      expect.arrayContaining([
+        "corp_board_triage_central_override:first_layer_before_speculative_remote",
+        "corp_board_triage_repeated_central_access:true",
+      ]),
+    );
+    expect(rdComponent).toMatchObject({
+      key: "corp_board_triage_alignment",
+    });
+    expect(remoteComponent).toMatchObject({
+      key: "corp_board_triage_mismatch",
+    });
+  });
+
+  it("keeps an immediate scoreline conversion ahead of repeated R&D pressure", () => {
+    const fastAgenda = agendaCard("fast-agenda", 1);
+    const installAgenda = corpAction(
+      "install-fast-agenda",
+      "install_card",
+      { placement: "root", serverId: "remote_1" },
+      fastAgenda.instanceId,
+    );
+    const installRdIce = corpAction("install-rd-ice", "install_card", {
+      placement: "ice",
+      serverId: "rd",
+    });
+    const input = corpInput({
+      corpHq: [fastAgenda],
+      legalActions: [installAgenda, installRdIce],
+      eventTail: [
+        publicCentralEvent("rd-run-1", "start_run", "rd"),
+        publicCentralEvent("rd-access-1", "access_card", "rd"),
+        publicCentralEvent("rd-run-2", "start_run", "rd"),
+        publicCentralEvent("rd-access-2", "access_card", "rd"),
+      ],
+      servers: [
+        centralServer("hq", [iceCard("hq-stop")]),
+        centralServer("rd", []),
+        remoteServer("remote_1", [iceCard("remote-stop")], []),
+      ],
+    });
+    const dependencies = testDependencies({
+      scoringWindowByActionId: {
+        [installAgenda.actionId]: scoringWindow({
+          serverId: "remote_1",
+          scoreHorizon: "immediate",
+          windowKind: "unsafe",
+          runnerCanContestBeforeScore: true,
+          runnerCanReachAccessBeforeScore: true,
+          agendaStealRelevantBeforeScore: true,
+          agendaStealSeverity: "normal",
+          runnerAgendaPointsAfterSteal: 1,
+          corpCanRezRelevantIce: true,
+          corpCanRezFullPathWithDynamicReserve: true,
+          recommendedNextStep: "build_remote_ice",
+        }),
+      },
+    });
+
+    expect(
+      semanticRuntimeCorpBoardTriage(input, dependencies).primary,
+    ).not.toBe("protect_rd");
+  });
+
   it("does not override an active scoreline when R&D already has effective stop ICE", () => {
     const remoteScoreline = corpAction("remote-scoreline", "advance_card", {
       serverId: "remote_1",

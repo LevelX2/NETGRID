@@ -2449,6 +2449,23 @@ function preScoreCentralProtectionTriage<TConsumer extends string>(
     ]);
   }
 
+  if (
+    centralPressureIsTriageAcute(pressureInput, rdPressure) &&
+    rdPressure.successfulAccessEvents >= 2 &&
+    centralServerNeedsProtection(input, "rd") &&
+    concreteCentralProtectionActionExists(input, actions, "rd", dependencies) &&
+    speculativeRemoteLayeringWouldDisplaceCentralProtection(
+      input,
+      actions,
+      dependencies,
+    )
+  ) {
+    return centralPressureTriage(rdPressure, rdSeverity, currentCredits, [
+      "corp_board_triage_central_override:first_layer_before_speculative_remote",
+      "corp_board_triage_repeated_central_access:true",
+    ]);
+  }
+
   const hqAgendaCards = input.playerView.own.gripOrHq.filter(
     corpTriageVisibleCardIsAgenda,
   );
@@ -2506,6 +2523,38 @@ function preScoreCentralProtectionTriage<TConsumer extends string>(
       ...hqPressure.evidence.slice(0, 8),
     ],
   };
+}
+
+function speculativeRemoteLayeringWouldDisplaceCentralProtection<
+  TConsumer extends string,
+>(
+  input: AiDecisionInput,
+  actions: readonly ScoredLegalAction[],
+  dependencies: CorpBoardTriageDependencies<TConsumer>,
+): boolean {
+  return actions.some((entry) => {
+    if (
+      entry.action.type !== "install_card" ||
+      entry.action.payload?.placement === "ice" ||
+      !entry.serverId?.startsWith("remote_") ||
+      entry.scoringWindow?.scoreHorizon === "immediate" ||
+      !actionPushesConcreteAgendaScoreline(
+        input,
+        entry.action,
+        dependencies,
+        entry.roles,
+      )
+    ) {
+      return false;
+    }
+    const server = input.playerView.servers.find(
+      (candidate) => candidate.id === entry.serverId,
+    );
+    if (!server || server.root.length > 0 || server.ice.length === 0) {
+      return false;
+    }
+    return scoreRemoteNeedsProtection(input, entry, dependencies);
+  });
 }
 
 function centralPressureMustInterruptActiveScoreline(
