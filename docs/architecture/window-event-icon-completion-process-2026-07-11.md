@@ -2,8 +2,9 @@
 
 ## Status
 
-In Umsetzung auf `codex/all-window-event-icons` im Worktree
-`C:\Projekte\NETGRID_ALL_WINDOW_EVENT_ICONS`.
+P1 bis P4 abgeschlossen auf `codex/all-window-event-icons` im Worktree
+`C:\Projekte\NETGRID_ALL_WINDOW_EVENT_ICONS`; lokaler Main-Abgleich und Merge
+stehen noch aus.
 
 ## Quelle und Zielprüfung
 
@@ -33,6 +34,9 @@ generischen Fallback statt eines leeren Bereichs.
 - Karten- und Hidden-Info-Verträge werden nicht verändert. Die Klassifizierung
   verwendet nur bereits öffentliche Cue- und Choice-Metadaten.
 - Keine Änderung an Engine, KI-Entscheidungslogik, Regeln oder Ereignisreihenfolge.
+- Damage-Fenster nennen den Runner ausdrücklich als getroffene Seite.
+- Genau eine aufgedeckte Archivkarte nutzt das kompakte Zweispaltenlayout; erst
+  mehrere aufgedeckte Karten verwenden die Galerie.
 
 ## Inventar
 
@@ -146,3 +150,34 @@ complete markieren.
 - Cue- und Choice-Klassifizierung haben vollständige Tests inklusive Fallbacks.
 - Web-Typecheck und fokussierte UI-Tests sind grün.
 - Arbeitsbranch ist lokal nach `main` gemerged; der Worktree ist entfernt.
+
+## Umsetzungsergebnis
+
+- P1 `3a661e428`: Inventar, Scope und Controller-Vertrag.
+- P2 `72ac8135a`: 13 neue, auf 320 x 320 Pixel normalisierte PNG-Assets.
+- P3 `c6c8b0460`: vollständige Cue-/Choice-Klassifizierung, sichtbarer
+  `action`-/`choice`-Fallback, Damage-Zieltext und kompaktes Einzelkartenlayout.
+- P4: finale visuelle und technische Verifikation; Commit folgt mit diesem Stand.
+
+Die Assets wurden mit dem eingebauten Bildgenerator erzeugt. Gemeinsamer
+Promptkern: quadratisches 128-Pixel-UI-Ereignisicon, zentriertes industrielles
+3D-Hard-Surface-Objekt auf fast schwarzem Hintergrund, Cyan-/Elektroblau-Kanten,
+ein funktionsbezogener Akzent, starke Silhouette sowie kein Text, Logo,
+Wasserzeichen oder Kartenartwork. Die jeweiligen Motive sind in P2 aufgelistet.
+
+## Verifikationsergebnis
+
+- Vollständige Web-Suite: 39 Testdateien und 501 Vitest-Tests bestanden.
+- `corepack pnpm --filter @netgrid/web typecheck` bestanden.
+- Alle 22 vorhandenen und neuen Ereignisassets sind 320 x 320 Pixel groß und
+  wurden als Kontaktübersicht auf Unterscheidbarkeit geprüft.
+- Desktop-Aktionsmeldung mit Karte: 540 x 336 Pixel; Karte links, 128-Pixel-Icon
+  rechts oben, Text rechts darunter, keine Überlappung.
+- Mobile-Aktionsmeldung bei 390 x 844 Pixel: 351 x 468 Pixel, vertikal gestapelt,
+  vollständig innerhalb des Viewports.
+- Einzelne Archivkarte Desktop: kompaktes Zweispaltenlayout mit Karte links und
+  Zugriffssymbol/Status rechts.
+- Einzelne Archivkarte Mobile: 351 x 607 Pixel, vollständig im Viewport und ohne
+  horizontalen Überlauf.
+- Kombinierter Zugriffsschaden zeigt exakt
+  `Runner erleidet 2 Net Damage durch Setup!` ohne doppelte Satzendmarke.

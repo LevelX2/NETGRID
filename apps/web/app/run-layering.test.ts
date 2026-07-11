@@ -224,7 +224,8 @@ describe("run window layering", () => {
     for (const target of ["hq", "rd", "archives", "remote"]) {
       expect(css).toContain(`.windowEventIcon-run-${target}`);
     }
-    expect(accessReviewModalSource).toContain("Runner erleidet {cue.amount}");
+    expect(accessReviewModalSource).toContain("Runner erleidet ${cue.amount}");
+    expect(accessReviewModalSource).toContain('/[.!?]$/.test(sourceLabel.trim())');
     expect(accessReviewModalSource).toContain("hasSingleRevealedCard");
     expect(accessReviewModalSource).toContain("accessRevealSingleRevealedCard");
   });

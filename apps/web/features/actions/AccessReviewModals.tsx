@@ -351,6 +351,7 @@ function AccessDamageStage({
 }) {
   const typeLabel = damageTypeLabel(cue.damageType);
   const sourceLabel = sourceTitle ?? cue.sourceLabel;
+  const damageSentence = `Runner erleidet ${cue.amount} ${typeLabel} durch ${sourceLabel}${/[.!?]$/.test(sourceLabel.trim()) ? "" : "."}`;
   return (
     <div
       className={`accessDamageStage damage-${cue.damageType}`}
@@ -358,9 +359,7 @@ function AccessDamageStage({
     >
       <WindowEventIcon kind={`${cue.damageType}-damage`} />
       <strong className="accessDamageTitle">{typeLabel}</strong>
-      <p className="accessRevealStatus">
-        Runner erleidet {cue.amount} {typeLabel} durch {sourceLabel}.
-      </p>
+      <p className="accessRevealStatus">{damageSentence}</p>
       <div className="accessDamageStats">
         {cue.runnerGripBefore !== undefined && cue.runnerGripAfter !== undefined ? (
           <span>
