@@ -20,7 +20,7 @@ Stand: 2026-07-11
 
 - Originalset, Classic und Proteus besitzen versionierte Kartendaten,
   Supportmanifeste und Engine-Implementierungen.
-- Classic ist mit 52/52 Karten technisch abgeschlossen und als optionales
+- Classic ist mit 54/54 Karten technisch abgeschlossen und als optionales
   Zusatzset verfügbar.
 - Proteus ist mit 154/154 Karten engine-/human-playable. Technisches
   `ai_supported` ist von Play-Strength-Readiness und Default-/Random-Pool-

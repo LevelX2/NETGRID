@@ -13,11 +13,11 @@
     "mode": "read-only card-catalog inspector index; no hint migration, planner effect, LegalAction effect or runtime state input"
   },
   "summary": {
-    "cardCount": 616,
-    "cardsWithMechanicalFacts": 582,
+    "cardCount": 618,
+    "cardsWithMechanicalFacts": 584,
     "cardsWithGeneratedFacts": 335,
     "cardsWithOverlays": 6,
-    "cardsWithFunctionSignals": 600,
+    "cardsWithFunctionSignals": 602,
     "cardsWithStrategyAnchors": 256,
     "cardsWithStrategySupportPairs": 198,
     "cardsWithWarnings": 116,
@@ -6290,6 +6290,216 @@
           "triageCategory": "function_signal_only",
           "mapsTo": [],
           "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        }
+      ],
+      "warningCategories": [],
+      "descriptorGaps": [],
+      "legacyStatus": {
+        "rolesPresent": true,
+        "planRolesPresent": true,
+        "legacyLineSupportPresent": false,
+        "activeMechanicalFactFields": [
+          "effects",
+          "costProfile"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects",
+          "costProfile"
+        ],
+        "generatedFactFields": [],
+        "overlayFields": []
+      },
+      "strategicRoleStatus": {
+        "values": [
+          "support_tool"
+        ],
+        "validValues": [
+          "support_tool"
+        ],
+        "unknownValues": []
+      }
+    },
+    {
+      "cardId": "onr_classic_053_protected-resources",
+      "side": "corp",
+      "cardType": "asset",
+      "supportStatus": {
+        "aiSupportStatus": "ai_supported",
+        "compiledHintFound": true,
+        "mechanicalFactsFound": true,
+        "generatedFactsFound": false,
+        "overlayFields": [],
+        "legacyFallbackOnly": false,
+        "warningCount": 0
+      },
+      "derivedFunctionSignals": [
+        "economy.corp_action_charged_bank",
+        "economy.corp_charge_bank",
+        "economy.corp_counter_bank",
+        "economy.finite_pool",
+        "economy.generic"
+      ],
+      "derivedStrategyAnchors": [],
+      "cardLevelStrategyAnchors": [
+        "corp.asset_economy"
+      ],
+      "derivedPossibleStrategyAnchors": [],
+      "reviewedStrategySupportPairs": [
+        {
+          "strategyId": "corp.asset_economy",
+          "sourceField": "lineSupport",
+          "sourceValue": "corp.asset_economy",
+          "triageCategory": "normalized_strategy_id",
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
+      "supportingEvidenceOnly": [
+        "economy.corp_action_charged_bank",
+        "economy.corp_charge_bank",
+        "economy.corp_counter_bank",
+        "economy.finite_pool",
+        "economy.generic"
+      ],
+      "lineSupportClassification": [
+        {
+          "value": "corp.asset_economy",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.asset_economy"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
+      "rolesClassification": [
+        {
+          "value": "asset",
+          "category": "legacy_role_only",
+          "triageCategory": "legacy_role_only",
+          "mapsTo": [],
+          "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
+        },
+        {
+          "value": "economy",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
+          "value": "hosting",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Hosting/host relationship function context only."
+        }
+      ],
+      "planRolesClassification": [
+        {
+          "value": "remote_asset_economy",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "corp.asset_economy"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        }
+      ],
+      "warningCategories": [],
+      "descriptorGaps": [],
+      "legacyStatus": {
+        "rolesPresent": true,
+        "planRolesPresent": true,
+        "legacyLineSupportPresent": false,
+        "activeMechanicalFactFields": [
+          "effects",
+          "costProfile"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects",
+          "costProfile"
+        ],
+        "generatedFactFields": [],
+        "overlayFields": []
+      },
+      "strategicRoleStatus": {
+        "values": [
+          "support_tool"
+        ],
+        "validValues": [
+          "support_tool"
+        ],
+        "unknownValues": []
+      }
+    },
+    {
+      "cardId": "onr_classic_054_phone-freak",
+      "side": "runner",
+      "cardType": "resource",
+      "supportStatus": {
+        "aiSupportStatus": "ai_supported",
+        "compiledHintFound": true,
+        "mechanicalFactsFound": true,
+        "generatedFactsFound": false,
+        "overlayFields": [],
+        "legacyFallbackOnly": false,
+        "warningCount": 0
+      },
+      "derivedFunctionSignals": [
+        "economy.recurring"
+      ],
+      "derivedStrategyAnchors": [],
+      "cardLevelStrategyAnchors": [],
+      "derivedPossibleStrategyAnchors": [],
+      "reviewedStrategySupportPairs": [],
+      "supportingEvidenceOnly": [
+        "economy.recurring"
+      ],
+      "lineSupportClassification": [],
+      "rolesClassification": [
+        {
+          "value": "connection",
+          "category": "legacy_role_only",
+          "triageCategory": "legacy_role_only",
+          "mapsTo": [],
+          "rationale": "Runner resource subtype/catalog context."
+        },
+        {
+          "value": "economy",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
+          "value": "link",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
+          "value": "resource",
+          "category": "legacy_role_only",
+          "triageCategory": "legacy_role_only",
+          "mapsTo": [],
+          "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
+        }
+      ],
+      "planRolesClassification": [
+        {
+          "value": "increase_link",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
+          "value": "rig_setup",
+          "category": "legacy_role_only",
+          "triageCategory": "legacy_role_only",
+          "mapsTo": [],
+          "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
         }
       ],
       "warningCategories": [],

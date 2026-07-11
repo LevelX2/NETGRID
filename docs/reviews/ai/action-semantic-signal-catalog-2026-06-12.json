@@ -43,28 +43,28 @@
     ]
   },
   "summary": {
-    "activeCards": 616,
-    "coveredCards": 600,
+    "activeCards": 618,
+    "coveredCards": 602,
     "deferredCards": 34,
     "noSignalCards": 16,
     "targetProfileGapCards": 90,
     "structuralSignalViolationCards": 0,
     "unknownSignalCards": 0,
     "byNoSignalReason": {
-      "none": 600,
+      "none": 602,
       "legacy_fallback_only": 15,
       "no_function_signal": 1
     },
     "bySide": {
-      "corp": 310,
-      "runner": 306
+      "corp": 311,
+      "runner": 307
     },
     "byCardType": {
       "ice": 114,
       "program": 112,
       "event": 86,
-      "resource": 65,
-      "asset": 57,
+      "resource": 66,
+      "asset": 58,
       "agenda": 50,
       "upgrade": 45,
       "operation": 43,
@@ -167,7 +167,7 @@
     "unknownSignalRows": [],
     "baselineDeltas": {
       "baseline": "P2_POST_TARGET_PROFILE_GAP_CLOSURE",
-      "coveredCards": 61,
+      "coveredCards": 63,
       "deferredCards": -11,
       "noSignalCards": -9,
       "targetProfileGapCards": 6
@@ -1854,6 +1854,56 @@
       "cardId": "onr_classic_052_zetatech-portastation",
       "side": "runner",
       "cardType": "hardware",
+      "aiSupportStatus": "ai_supported",
+      "covered": true,
+      "deferred": false,
+      "deferred_review_scope": "none",
+      "deferred_owner": "none",
+      "no_signal_reason": "none",
+      "target_profile_gap": false,
+      "signalCount": 1,
+      "targetProfileCount": 0,
+      "derivedFunctionSignals": ["economy.recurring"],
+      "activeTacticSignals": [],
+      "unknownSignals": [],
+      "structuralOnlySignals": [],
+      "targetProfileExpectedBySignals": [],
+      "warningCategories": []
+    },
+    {
+      "cardId": "onr_classic_053_protected-resources",
+      "side": "corp",
+      "cardType": "asset",
+      "aiSupportStatus": "ai_supported",
+      "covered": true,
+      "deferred": false,
+      "deferred_review_scope": "none",
+      "deferred_owner": "none",
+      "no_signal_reason": "none",
+      "target_profile_gap": false,
+      "signalCount": 5,
+      "targetProfileCount": 0,
+      "derivedFunctionSignals": [
+        "economy.corp_action_charged_bank",
+        "economy.corp_charge_bank",
+        "economy.corp_counter_bank",
+        "economy.finite_pool",
+        "economy.generic"
+      ],
+      "activeTacticSignals": [
+        "economy.corp_action_charged_bank",
+        "economy.corp_counter_bank",
+        "remote.asset_economy"
+      ],
+      "unknownSignals": [],
+      "structuralOnlySignals": [],
+      "targetProfileExpectedBySignals": [],
+      "warningCategories": []
+    },
+    {
+      "cardId": "onr_classic_054_phone-freak",
+      "side": "runner",
+      "cardType": "resource",
       "aiSupportStatus": "ai_supported",
       "covered": true,
       "deferred": false,

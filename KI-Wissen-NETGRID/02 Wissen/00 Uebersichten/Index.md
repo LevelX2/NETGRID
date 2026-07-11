@@ -41,7 +41,9 @@
 - Aktive Kartendaten: `data/cards/`.
 - Aktive Supportmanifeste: `data/manifests/`.
 - Aktive Szenarien: `data/scenarios/`.
-- Classic-Endstand: `docs/releases/classic/final-review.md` – 52/52 Karten
+- Classic-Endstand:
+  `docs/releases/classic/classic-silent-impact-v22b-extension-review-2026-07-11.md`
+  – 54/54 Karten
   engine-/human-playable und technisch AI-supported.
 - Proteus-Endstand: 154/154 Karten engine-/human-playable. Die
   AI-Reconciliation qualifiziert alle 114 Karten der vier Pilotdecks über elf

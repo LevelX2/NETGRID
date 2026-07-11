@@ -21,6 +21,8 @@ import {
   ownRezzedIceTargetIds,
   rezzedInstalledIceTargetIds,
   sameFortSubroutineTargets,
+  transferHostedCreditsEffect,
+  transferHostedCreditsMaximum,
   trashOwnRezzedIceForCreditsEffect,
 } from "./card-implementation-runtime-activated-targets";
 import { canResolveActivatedCardImplementationAbility } from "./card-implementation-runtime-legality";
@@ -228,6 +230,43 @@ export function pushActivatedCardImplementationActionsForTiming(
       deps.installedAdvanceableCorpCardTargetCount(state) === 0
     )
       continue;
+    const transferEffect = transferHostedCreditsEffect(ability);
+    if (transferEffect) {
+      const maximum = transferHostedCreditsMaximum(
+        deps,
+        state,
+        sourceCardId,
+        ability,
+      );
+      for (
+        let amount = transferEffect.amount.min;
+        amount <= maximum;
+        amount += 1
+      ) {
+        actions.push(
+          deps.createAction(
+            state,
+            side,
+            "activated_card_ability",
+            `${definition.title}: ${amount} Bit${amount === 1 ? "" : "s"} ${
+              transferEffect.direction === "controller_to_source"
+                ? "einlagern"
+                : "entnehmen"
+            }`,
+            sourceCardId,
+            activatedAbilityLegalActionCosts(ability),
+            {
+              ...activatedAbilityPayload(sourceCardId, ability, index, state),
+              cardImplementationEffectKind: "transfer_hosted_credits",
+              hostedCreditTransferDirection: transferEffect.direction,
+              hostedCreditTransferAmount: amount,
+              xValue: amount,
+            },
+          ),
+        );
+      }
+      continue;
+    }
     actions.push(
       deps.createAction(
         state,

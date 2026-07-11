@@ -1561,6 +1561,66 @@
         ]
       },
       "blockReasons": []
+    },
+    {
+      "cardId": "onr_classic_053_protected-resources",
+      "setId": "classic",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "support": {
+        "resolverRef": "engine:onr_classic_053_protected-resources",
+        "coverage": [
+          "ai_hint",
+          "compiled_hint",
+          "scenario"
+        ],
+        "aiHintRef": "ai-card-hints-active:onr_classic_053_protected-resources",
+        "scenarioRefs": [
+          "data/scenarios/classic-silent-impact-smoke.json#classic_silent_impact_smoke"
+        ]
+      },
+      "blockReasons": []
+    },
+    {
+      "cardId": "onr_classic_054_phone-freak",
+      "setId": "classic",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "support": {
+        "resolverRef": "engine:onr_classic_054_phone-freak",
+        "coverage": [
+          "ai_hint",
+          "compiled_hint",
+          "scenario"
+        ],
+        "aiHintRef": "ai-card-hints-active:onr_classic_054_phone-freak",
+        "scenarioRefs": [
+          "data/scenarios/classic-silent-impact-smoke.json#classic_silent_impact_smoke"
+        ]
+      },
+      "blockReasons": []
     }
   ]
 }

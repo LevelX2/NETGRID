@@ -1,0 +1,61 @@
+CLASSIC – SILENT IMPACT v2.2b ERGÄNZUNGSSPOILER
+Abruf und Transkription: 2026-07-11
+
+Einordnung
+----------
+Diese beiden von NROHub als Silent-Impact-v2.2b-Ergänzung veröffentlichten
+Karten werden in NETGRID dem bestehenden Set "Classic" zugeschlagen. Die
+historische Quellenbezeichnung bleibt in diesem Ergänzungsspoiler und im
+lokalen Bildpfad erhalten; es wird kein eigenes Runtime-Set mit zwei Karten
+angelegt.
+
+Quellen
+-------
+NROHub Card Sets:
+https://nrohub.blogspot.com/p/card-sets.html
+
+NROHub Silent Impact:
+https://nrohub.blogspot.com/2012/08/silent-impact.html
+
+Google-Drive-Mirror, Ordner "v2.2b Silent Impact":
+https://drive.google.com/drive/folders/1bi8m2e0ThexAsZkkuP2pj_Uc48piDu0s
+
+Karten
+------
+
+Protected Resources
+Side: Corp
+Type: Node-Transactions
+Rez cost: 0
+Trash cost: 8
+Text:
+[1]: Move any number of bits from your bit pool to Protected Resources.
+A: Move any number of bits from Protected Resources to your bit pool.
+Illustration: Romas Kukalis
+Printed version: v2.2b
+Runtime ID: onr_classic_053_protected-resources
+Mirror file ID: 13h-tw8JqjZFZX87F3T2ilHvNdoT76zKq
+SHA-256 (1499 x 2030 PNG):
+E95FB9E40915DF469FFB2F1D78D3C5E300B1E526144216DF2E45D30CE7ABDD8B
+
+Phone Freak
+Side: Runner
+Type: Resource-Connection
+Install cost: 0
+Text:
+Put 3 from the bank on Phone Freak when it is installed. Use these bits only
+to pay for increasing your link. If you use any of these bits, replace them
+from the bank at the start of your next turn.
+Illustration: Debbie Hughes
+Printed version: v2.2b
+Runtime ID: onr_classic_054_phone-freak
+Mirror file ID: 1y4Ey8FcNG5LgTdKX6jjp3a-4j6Ob0gh-
+SHA-256 (1499 x 2030 PNG):
+949D960259BFA4359AB4ACC727065C48B7ECB67C39B9D69A74586F9403C9FD4E
+
+Asset-Entscheidung
+------------------
+Die Kartenbilder sind ausschließlich für die private lokale Referenz und die
+private NETGRID-Instanz bestimmt. Binärdateien werden nicht versioniert oder
+öffentlich weiterverteilt. Die Runtime-Bildauflösung ordnet den lokalen
+Quellpfad "v22b-silent-impact" den beiden Classic-Karten-IDs zu.

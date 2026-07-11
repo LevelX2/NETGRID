@@ -10,14 +10,14 @@ Keine Runtime-Anbindung, keine Action-Auswahl, kein Scoring und keine Hidden-Inf
 
 | Metric                                                         | Count |
 | -------------------------------------------------------------- | ----: |
-| Active cards                                                   |   616 |
-| covered                                                        |   600 |
+| Active cards                                                   |   618 |
+| covered                                                        |   602 |
 | deferred                                                       |    34 |
 | no_signal_reason != none                                       |    16 |
 | target_profile_gap                                             |    90 |
 | structural signal violations                                   |     0 |
 | unknown signals                                                |     0 |
-| covered delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE            |   +61 |
+| covered delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE            |   +63 |
 | deferred delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE           |   -11 |
 | no_signal delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE          |    -9 |
 | target_profile_gap delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE |    +6 |
@@ -26,7 +26,7 @@ Keine Runtime-Anbindung, keine Action-Auswahl, kein Scoring und keine Hidden-Inf
 
 | no_signal_reason       | Cards |
 | ---------------------- | ----: |
-| `none`                 |   600 |
+| `none`                 |   602 |
 | `legacy_fallback_only` |    15 |
 | `no_function_signal`   |     1 |
 

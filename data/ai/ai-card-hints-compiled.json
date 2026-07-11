@@ -49719,6 +49719,143 @@
       "manualNotes": [
         "CLASSIC-AI-03: One recurring hosted credit is restricted to playing preps/events, so this is event-economy support and not a run-pressure anchor."
       ]
+    },
+    {
+      "cardId": "onr_classic_053_protected-resources",
+      "side": "corp",
+      "cardType": "asset",
+      "roles": [
+        "asset",
+        "economy",
+        "hosting"
+      ],
+      "planRoles": [
+        "remote_asset_economy"
+      ],
+      "requiredMechanics": [
+        "install_asset",
+        "rez_card",
+        "hosted_credit_transfer",
+        "trash_on_access"
+      ],
+      "valueHints": {
+        "economy": 2,
+        "remote": 1
+      },
+      "riskTags": [
+        "runner_trash_value",
+        "stored_credit_exposure"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-silent-impact-smoke.json#classic_silent_impact_smoke"
+      ],
+      "tacticSignals": [
+        "economy.corp_action_charged_bank",
+        "economy.corp_counter_bank",
+        "remote.asset_economy"
+      ],
+      "effects": [
+        {
+          "kind": "finite_economy_pool",
+          "timing": "action",
+          "scope": "corp",
+          "target": "economy.corp_charge_bank"
+        },
+        {
+          "kind": "economy",
+          "timing": "action",
+          "scope": "corp",
+          "target": "economy.corp_action_charged_bank"
+        }
+      ],
+      "lineSupport": [
+        "corp.asset_economy"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-11",
+        "reviewedBy": "codex"
+      },
+      "costProfile": {
+        "clicks": 1,
+        "credits": 1,
+        "reserveRisk": "high",
+        "opportunityCost": "medium"
+      },
+      "strategicRole": [
+        "support_tool"
+      ],
+      "manualNotes": [
+        "Silent Impact v2.2b: Protected Resources stores public Corp credits behind an exposed remote asset. Depositing always costs one extra credit; withdrawing spends one action."
+      ]
+    },
+    {
+      "cardId": "onr_classic_054_phone-freak",
+      "side": "runner",
+      "cardType": "resource",
+      "roles": [
+        "resource",
+        "connection",
+        "link",
+        "economy"
+      ],
+      "planRoles": [
+        "increase_link",
+        "rig_setup"
+      ],
+      "requiredMechanics": [
+        "install_resource",
+        "restricted_credit_pool",
+        "trace_link_payment"
+      ],
+      "valueHints": {
+        "traceSafety": 3,
+        "economy": 1
+      },
+      "riskTags": [
+        "restricted_credits"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-silent-impact-smoke.json#classic_silent_impact_smoke"
+      ],
+      "effects": [
+        {
+          "kind": "recurring_economy",
+          "timing": "persistent",
+          "scope": "runner",
+          "resource": "credits",
+          "amount": 3,
+          "target": "link",
+          "repeatable": true
+        }
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-11",
+        "reviewedBy": "codex"
+      },
+      "costProfile": {
+        "clicks": 1,
+        "credits": 0,
+        "reserveRisk": "low",
+        "opportunityCost": "low"
+      },
+      "strategicRole": [
+        "support_tool"
+      ],
+      "manualNotes": [
+        "Silent Impact v2.2b: Three recurring hosted credits are restricted to increasing link and refill only after at least one was used."
+      ]
     }
   ]
 }

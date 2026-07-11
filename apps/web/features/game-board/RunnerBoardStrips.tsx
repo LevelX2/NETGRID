@@ -9,6 +9,7 @@ import {
   actionMatchesContext,
   groupRunnerRigCards,
   runAwareActionButtonLabel,
+  runnerHostedCardsForHost,
   runnerRigMemorySummary,
   type ActionContext,
 } from "../../app/action-board-ui";
@@ -19,6 +20,7 @@ import {
 import { useCardScaleSettings } from "../cards/card-display-settings";
 import { CARD_SCALE_PERCENT_MIN, type CardDisplayMode } from "../settings/settings-model";
 import { CardView } from "../cards/CardView";
+import { RunnerHostedCardCluster } from "./RunnerHostedCardCluster";
 import { SideZoneFrame, zoneSideClass } from "./ZoneFrame";
 
 const RUNNER_OPPONENT_GRIP_PREVIEW_LIMIT = 18;
@@ -263,22 +265,30 @@ export function RunnerRigStrip({
               <div className="cards rigGroupCards rigGroupCardsMini">
                 {group.cards.length > 0 ? (
                   group.cards.map((card) => {
-                    const displayCard = enrichVisibleCard(card, cardDetailsById);
                     return (
-                      <CardView
+                      <RunnerHostedCardCluster
                         key={card.instanceId}
-                        card={displayCard}
-                        compact
-                        displayMode={displayMode}
-                        {...(card.known ? {} : { hiddenSide: "runner" as const })}
-                        selected={selectedContext?.kind === "card" && selectedContext.id === card.instanceId}
-                        actions={cardActionsForRig(card)}
-                        actionDisabled={actionDisabled}
-                        actionLabelForAction={(action) => runAwareActionButtonLabel(view, action)}
-                        {...fieldChoiceCardProps?.(card)}
-                        onFocus={onFocus}
-                        onActionContextSelect={onActionContext}
-                        onAction={onAction}
+                        hostCard={card}
+                        hostedCards={runnerHostedCardsForHost(runnerRig, card.instanceId)}
+                        renderCard={(rigCard) => {
+                          const displayCard = enrichVisibleCard(rigCard, cardDetailsById);
+                          return (
+                            <CardView
+                              card={displayCard}
+                              compact
+                              displayMode={displayMode}
+                              {...(rigCard.known ? {} : { hiddenSide: "runner" as const })}
+                              selected={selectedContext?.kind === "card" && selectedContext.id === rigCard.instanceId}
+                              actions={cardActionsForRig(rigCard)}
+                              actionDisabled={actionDisabled}
+                              actionLabelForAction={(action) => runAwareActionButtonLabel(view, action)}
+                              {...fieldChoiceCardProps?.(rigCard)}
+                              onFocus={onFocus}
+                              onActionContextSelect={onActionContext}
+                              onAction={onAction}
+                            />
+                          );
+                        }}
                       />
                     );
                   })

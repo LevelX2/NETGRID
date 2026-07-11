@@ -238,7 +238,8 @@ export type CardCorpUtilityImplementation = (
       timing: "successful_meat_damage";
       visibility: Extract<EventVisibilityClass, "public">;
     }
-) & CardCorpUtilityPlayCostImplementation;
+) &
+  CardCorpUtilityPlayCostImplementation;
 
 export type CardHiddenReplacementLongtailImplementation =
   | {
@@ -1328,6 +1329,7 @@ export type CardEffectImplementation =
   | EndRunEffectImplementation
   | AddHostedCreditsEffectImplementation
   | TakeHostedCreditsEffectImplementation
+  | TransferHostedCreditsEffectImplementation
   | TrashSourceWhenEmptyEffectImplementation
   | GainActionsEffectImplementation
   | TrashSourceEffectImplementation
@@ -1889,7 +1891,9 @@ export type MakeRunEffectImplementation = {
   eventApproachIceExposeBeforeRez?: boolean;
   runnerCreditGainOnCorpRez?: number;
   damagePreventionPool?: number;
-  badPublicityRunAftermath?: "successful_run_draw_event" | "bad_publicity_run_replacement";
+  badPublicityRunAftermath?:
+    | "successful_run_draw_event"
+    | "bad_publicity_run_replacement";
   visibility: EventVisibilityClass;
 };
 
@@ -1977,6 +1981,16 @@ export type TakeHostedCreditsEffectImplementation = {
   amount?: number;
   mode?: "up_to_amount_if_available" | "all";
   visibility: EventVisibilityClass;
+};
+
+export type TransferHostedCreditsEffectImplementation = {
+  kind: "transfer_hosted_credits";
+  direction: "controller_to_source" | "source_to_controller";
+  amount: {
+    kind: "x_value";
+    min: 1;
+  };
+  visibility: Extract<EventVisibilityClass, "public">;
 };
 
 export type TrashSourceWhenEmptyEffectImplementation = {

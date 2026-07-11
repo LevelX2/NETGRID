@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "netgrid.card-import-source-registry.v1",
+  "registryId": "classic-silent-impact-v22b-2026-07-11",
+  "retrievedAt": "2026-07-11",
+  "runtimeSetId": "classic",
+  "historicalSourceSet": "v2.2b Silent Impact",
+  "sources": [
+    {
+      "kind": "web-page",
+      "url": "https://nrohub.blogspot.com/2012/08/silent-impact.html"
+    },
+    {
+      "kind": "google-drive-folder",
+      "url": "https://drive.google.com/drive/folders/1bi8m2e0ThexAsZkkuP2pj_Uc48piDu0s"
+    }
+  ],
+  "cards": [
+    {
+      "cardId": "onr_classic_053_protected-resources",
+      "sourceFileId": "13h-tw8JqjZFZX87F3T2ilHvNdoT76zKq",
+      "localRuntimeImage": "data/local-assets/card-images/onr-1996/v22b-silent-impact/corp/protected-resources.png",
+      "localRawImage": "data/local/card-import/silent-impact-v2.2b-source/protected-resources.png",
+      "sha256": "E95FB9E40915DF469FFB2F1D78D3C5E300B1E526144216DF2E45D30CE7ABDD8B"
+    },
+    {
+      "cardId": "onr_classic_054_phone-freak",
+      "sourceFileId": "1y4Ey8FcNG5LgTdKX6jjp3a-4j6Ob0gh-",
+      "localRuntimeImage": "data/local-assets/card-images/onr-1996/v22b-silent-impact/runner/phone-freak.png",
+      "localRawImage": "data/local/card-import/silent-impact-v2.2b-source/phone-freak.png",
+      "sha256": "949D960259BFA4359AB4ACC727065C48B7ECB67C39B9D69A74586F9403C9FD4E"
+    }
+  ],
+  "assetPolicy": {
+    "usage": "private-local-reference",
+    "versionBinaryFiles": false,
+    "publicRedistribution": false
+  }
+}

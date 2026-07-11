@@ -4,11 +4,12 @@ import type { CSSProperties } from "react";
 import type { LegalAction, PlayerView, Side, VisibleCard } from "@netgrid/shared";
 
 import type { BoardHighlight } from "../../app/action-cues";
-import type { ActionContext } from "../../app/action-board-ui";
+import { runnerHostedCardsForHost, type ActionContext } from "../../app/action-board-ui";
 import { CardView } from "../cards/CardView";
 import type { DisplayVisibleCard } from "../cards/card-view-model";
 import type { CardDisplayMode } from "../settings/settings-model";
 import type { FieldChoiceCardProps } from "./RunnerBoardStrips";
+import { RunnerHostedCardCluster } from "./RunnerHostedCardCluster";
 import { HandCardsRow, SideZoneFrame, zoneSideClass } from "./ZoneFrame";
 import { formatCardCount, formatHandLimitCount, zoneHighlighted } from "./board-view-helpers";
 
@@ -66,6 +67,7 @@ export function ActiveRunnerZoneBoard({
   onActionContextSelect(card: DisplayVisibleCard, hiddenSide?: Side): void;
 }) {
   if (view.side !== "runner") return null;
+  const runnerRig = view.own.rig ?? [];
 
   return (
     <div className="runnerGripHeapLayout">
@@ -202,19 +204,27 @@ export function ActiveRunnerZoneBoard({
                   <div className="cards rigGroupCards rigGroupCardsFull">
                     {group.cards.length > 0 ? (
                       group.cards.map((card) => {
-                        const displayCard = enrichCard(card);
                         return (
-                          <CardView
+                          <RunnerHostedCardCluster
                             key={card.instanceId}
-                            card={displayCard}
-                            displayMode={cardDisplayMode}
-                            selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
-                            actions={cardActionsFor(card)}
-                            actionDisabled={actionDisabled}
-                            {...fieldChoiceCardProps(card)}
-                            onAction={onAction}
-                            onFocus={onFocus}
-                            onActionContextSelect={onActionContextSelect}
+                            hostCard={card}
+                            hostedCards={runnerHostedCardsForHost(runnerRig, card.instanceId)}
+                            renderCard={(rigCard) => {
+                              const displayCard = enrichCard(rigCard);
+                              return (
+                                <CardView
+                                  card={displayCard}
+                                  displayMode={cardDisplayMode}
+                                  selected={selectedActionContext?.kind === "card" && selectedActionContext.id === rigCard.instanceId}
+                                  actions={cardActionsFor(rigCard)}
+                                  actionDisabled={actionDisabled}
+                                  {...fieldChoiceCardProps(rigCard)}
+                                  onAction={onAction}
+                                  onFocus={onFocus}
+                                  onActionContextSelect={onActionContextSelect}
+                                />
+                              );
+                            }}
                           />
                         );
                       })
