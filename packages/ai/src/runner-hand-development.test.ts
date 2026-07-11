@@ -15,6 +15,8 @@ import {
   RUNNER_STRATEGIC_INTENT_SCHEMA_VERSION,
   type RunnerStrategicIntentProfile,
 } from "./runner-strategic-intent";
+import { discardKeepScore } from "./runtime/discard-keep-score";
+import { selectedSearchChoiceOptionIds } from "./runtime/search-choice-option";
 
 describe("RunnerHandDevelopmentEvaluation", () => {
   it("classifies central access payoff from own hand without leaking card identity in redacted facts", () => {
@@ -574,6 +576,105 @@ describe("RunnerHandDevelopmentEvaluation", () => {
       expect(evaluation.persistentInstallEvaluation?.finalInstallFit).toBeGreaterThan(0);
       expect(evaluation.deferReason).toBe("none");
     }
+  });
+
+  it("carries a Krash support search through install evaluation and discard", () => {
+    const krash = visibleCard("krash-installed", {
+      definitionId: "krash",
+      title: "Krash",
+      type: "program",
+      subtypes: ["icebreaker"],
+      rulesText: "Break any ice subroutine. 2 credits: +1 strength.",
+      memoryCost: 1,
+    });
+    const duplicateKrash = visibleCard("krash-copy", {
+      definitionId: "krash",
+      title: "Krash",
+      type: "program",
+      subtypes: ["icebreaker"],
+      rulesText: "Break any ice subroutine. 2 credits: +1 strength.",
+      memoryCost: 1,
+    });
+    const lockjaw = visibleCard("lockjaw", {
+      definitionId: "lockjaw",
+      title: "Lockjaw",
+      type: "program",
+      rulesText: "Choose an installed icebreaker. That icebreaker has +2 strength.",
+      installCost: 0,
+      memoryCost: 1,
+    });
+    const clown = visibleCard("clown", {
+      definitionId: "clown",
+      title: "Clown",
+      type: "program",
+      rulesText: "All ice is encountered with its strength reduced by 1.",
+      installCost: 4,
+      memoryCost: 1,
+    });
+    const rolesByCardId: Record<string, readonly string[]> = {
+      krash: ["breaker_fracter", "breaker_decoder", "breaker_killer"],
+      lockjaw: ["icebreaker_support", "run_support"],
+      clown: ["ice_modifier", "icebreaker_support", "run_support"],
+    };
+    const searchChoice = {
+      id: "short-circuit-search",
+      source: "stack search",
+      minSelections: 2,
+      maxSelections: 2,
+      options: [duplicateKrash, lockjaw, clown].map((card) => ({
+        id: card.definitionId!,
+        label: card.title!,
+        card,
+      })),
+      cardSearchPresentation: { destination: "grip" as const },
+    } as unknown as NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>;
+
+    expect(
+      selectedSearchChoiceOptionIds(searchChoice, searchChoice.options, {
+        features: {
+          credits: 8,
+          memoryRemaining: 3,
+          rigRoles: new Set(rolesByCardId.krash),
+          rigDefinitionIds: new Set(["krash"]),
+          gripDefinitionCounts: new Map([["krash", 1]]),
+        },
+        rolesForCardId: (cardId) => rolesByCardId[cardId ?? ""] ?? [],
+      }),
+    ).toEqual(["lockjaw", "clown"]);
+
+    const input = runnerInput({
+      credits: 8,
+      hand: [duplicateKrash, lockjaw, clown],
+      rig: [krash],
+      memoryUsed: 1,
+      memoryLimit: 4,
+      legalActions: [
+        installAction("install-lockjaw", lockjaw, 0),
+        installAction("install-clown", clown, 4),
+      ],
+    });
+    const development = evaluateRunnerHandDevelopment({ input });
+    expect(findByInstance(development, "lockjaw").persistentInstallEvaluation?.finalInstallFit)
+      .toBeGreaterThan(0);
+    expect(findByInstance(development, "clown").persistentInstallEvaluation?.finalInstallFit)
+      .toBeGreaterThan(0);
+
+    const dependencies = {
+      rolesForCardId: (cardId: string | undefined) =>
+        rolesByCardId[cardId ?? ""] ?? [],
+      definitionTypeForCardId: () => "program",
+      visibleCardPlayOrInstallCost: (card: VisibleCard) => card.installCost ?? 0,
+      runnerCardAddressesVisibleBreakerNeed: () => false,
+      runnerBadPublicityOrTraceTechCard: () => false,
+      isRunnerEconomyRole: (role: string) => role === "economy",
+      runnerCardLooksLikeCreditPayout: () => false,
+    };
+    const duplicateScore = discardKeepScore(input, duplicateKrash, dependencies);
+    const lockjawScore = discardKeepScore(input, lockjaw, dependencies);
+    const clownScore = discardKeepScore(input, clown, dependencies);
+
+    expect(duplicateScore.baseValue).toBeLessThan(lockjawScore.baseValue);
+    expect(duplicateScore.baseValue).toBeLessThan(clownScore.baseValue);
   });
 
   it("devalues a second risky universal breaker when it adds no capability and reduces buffer", () => {

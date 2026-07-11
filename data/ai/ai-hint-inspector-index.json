@@ -16402,7 +16402,7 @@
       "lineSupportClassification": [],
       "rolesClassification": [
         {
-          "value": "icebreaker",
+          "value": "icebreaker_support",
           "category": "function_signal_only",
           "triageCategory": "function_signal_only",
           "mapsTo": [],
@@ -16414,6 +16414,13 @@
           "triageCategory": "legacy_role_only",
           "mapsTo": [],
           "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
+        },
+        {
+          "value": "run_support",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         }
       ],
       "planRolesClassification": [
@@ -23733,6 +23740,13 @@
           "rationale": "ICE modifier/support function context only."
         },
         {
+          "value": "icebreaker_support",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
           "value": "program",
           "category": "legacy_role_only",
           "triageCategory": "legacy_role_only",
@@ -26474,13 +26488,6 @@
         },
         {
           "value": "icebreaker",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        },
-        {
-          "value": "icebreaker_support",
           "category": "function_signal_only",
           "triageCategory": "function_signal_only",
           "mapsTo": [],
@@ -29901,11 +29908,39 @@
       "lineSupportClassification": [],
       "rolesClassification": [
         {
+          "value": "economy",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
+          "value": "icebreaker_support",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
           "value": "program",
           "category": "legacy_role_only",
           "triageCategory": "legacy_role_only",
           "mapsTo": [],
           "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
+        },
+        {
+          "value": "recurring",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
+          "value": "run_support",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         },
         {
           "value": "stealth",

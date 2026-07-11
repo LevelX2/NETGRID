@@ -2510,7 +2510,7 @@
         "role:hardware": 1,
         "role:hq_pressure": 1,
         "role:icebreaker": 10,
-        "role:icebreaker_support": 9,
+        "role:icebreaker_support": 7,
         "role:memory": 1,
         "role:multiaccess": 5,
         "role:program": 10,
@@ -3627,7 +3627,7 @@
         "role:hq_pressure": 2,
         "role:hq_run": 1,
         "role:icebreaker": 8,
-        "role:icebreaker_support": 8,
+        "role:icebreaker_support": 6,
         "role:memory": 2,
         "role:memory_support": 1,
         "role:multiaccess": 2,
@@ -4296,10 +4296,19 @@
           "runtimeBlockers": []
         },
         "corp.fast_advance": {
-          "anchorScore": 0,
+          "anchorScore": 56,
           "supportScore": 60,
-          "finalScore": 24,
-          "anchorEvidence": [],
+          "finalScore": 58,
+          "anchorEvidence": [
+            {
+              "cardId": "onr_v1_297_overtime-incentives",
+              "quantity": 2,
+              "source": "lineSupport",
+              "signal": "corp.fast_advance",
+              "strategyId": "corp.fast_advance",
+              "reason": "normalized_lineSupport_strategy_goal"
+            }
+          ],
           "supportEvidence": [
             {
               "cardId": "onr_v1_203_hostile-takeover",
@@ -4417,12 +4426,9 @@
           "supportGaps": [
             "low_scoreAcceleration_support"
           ],
-          "confidence": "low",
-          "runtimeStatus": "diagnostic_only",
-          "runtimeBlockers": [
-            "below_productive_score_threshold",
-            "missing_strategy_anchor"
-          ]
+          "confidence": "medium",
+          "runtimeStatus": "productive",
+          "runtimeBlockers": []
         },
         "corp.ice_tax_glacier": {
           "anchorScore": 100,
@@ -5059,6 +5065,7 @@
       },
       "primaryStrategies": [
         "corp.economy_rez_reserve",
+        "corp.fast_advance",
         "corp.overadvance_value"
       ],
       "secondaryStrategies": [],
@@ -5090,16 +5097,19 @@
       },
       "legacySignalCounts": {
         "lineSupport:corp.damage_kill": 1,
+        "lineSupport:corp.fast_advance": 2,
         "lineSupport:corp.ice_tax_glacier": 2,
         "lineSupport:corp.overadvance_value": 1,
         "lineSupport:corp.tag_trace_punish": 2,
         "planRole:bait_runner": 3,
         "planRole:build_scoring_remote": 6,
+        "planRole:corp_play_operation": 2,
         "planRole:protect_hq": 10,
         "planRole:protect_rnd": 10,
-        "planRole:recover_economy": 7,
+        "planRole:recover_economy": 5,
         "planRole:score_next_turn": 5,
         "planRole:score_now": 1,
+        "role:action": 2,
         "role:agenda": 5,
         "role:agenda_1pt": 3,
         "role:agenda_4pt": 1,
@@ -5135,7 +5145,7 @@
         },
         "scoreProfile": {
           "scoreAcceleration": 0,
-          "agendaInstallAdvanceScoreSupport": 5,
+          "agendaInstallAdvanceScoreSupport": 7,
           "remoteScoringProtection": 0,
           "stealTax": 0
         },
@@ -5901,10 +5911,19 @@
           "runtimeBlockers": []
         },
         "corp.fast_advance": {
-          "anchorScore": 0,
+          "anchorScore": 56,
           "supportScore": 60,
-          "finalScore": 24,
-          "anchorEvidence": [],
+          "finalScore": 58,
+          "anchorEvidence": [
+            {
+              "cardId": "onr_v1_297_overtime-incentives",
+              "quantity": 2,
+              "source": "lineSupport",
+              "signal": "corp.fast_advance",
+              "strategyId": "corp.fast_advance",
+              "reason": "normalized_lineSupport_strategy_goal"
+            }
+          ],
           "supportEvidence": [
             {
               "cardId": "onr_v1_203_hostile-takeover",
@@ -6057,12 +6076,9 @@
           "supportGaps": [
             "low_scoreAcceleration_support"
           ],
-          "confidence": "low",
-          "runtimeStatus": "diagnostic_only",
-          "runtimeBlockers": [
-            "below_productive_score_threshold",
-            "missing_strategy_anchor"
-          ]
+          "confidence": "medium",
+          "runtimeStatus": "productive",
+          "runtimeBlockers": []
         },
         "corp.ice_tax_glacier": {
           "anchorScore": 100,
@@ -6842,7 +6858,8 @@
       },
       "primaryStrategies": [
         "corp.tag_trace_punish",
-        "corp.economy_rez_reserve"
+        "corp.economy_rez_reserve",
+        "corp.fast_advance"
       ],
       "secondaryStrategies": [],
       "functionSignalCounts": {
@@ -6870,15 +6887,18 @@
         "trace.source": 2
       },
       "legacySignalCounts": {
+        "lineSupport:corp.fast_advance": 2,
         "lineSupport:corp.ice_tax_glacier": 2,
         "lineSupport:corp.tag_trace_punish": 4,
         "planRole:bait_runner": 5,
         "planRole:build_scoring_remote": 5,
+        "planRole:corp_play_operation": 2,
         "planRole:protect_hq": 10,
         "planRole:protect_rnd": 10,
         "planRole:punish_tagged_runner": 1,
-        "planRole:recover_economy": 9,
+        "planRole:recover_economy": 7,
         "planRole:score_next_turn": 4,
+        "role:action": 2,
         "role:agenda": 4,
         "role:agenda_1pt": 3,
         "role:agenda_4pt": 1,
@@ -6916,7 +6936,7 @@
         },
         "scoreProfile": {
           "scoreAcceleration": 0,
-          "agendaInstallAdvanceScoreSupport": 4,
+          "agendaInstallAdvanceScoreSupport": 6,
           "remoteScoringProtection": 0,
           "stealTax": 0
         },
@@ -6969,6 +6989,7 @@
     ],
     "primaryStrategyCounts": {
       "corp.economy_rez_reserve": 2,
+      "corp.fast_advance": 2,
       "corp.overadvance_value": 1,
       "corp.tag_trace_punish": 1,
       "runner.hq_pressure": 1,
@@ -6980,6 +7001,6 @@
       "inspector:function_signal_descriptor_gap": 1,
       "inspector:legacy_fallback_only": 2
     },
-    "contentSha256": "d9723169406fc5d23045e7da8cafa76d6721d13acec5304ab5b3d8a324283ee8"
+    "contentSha256": "e601407fe95f9a8d673eafa604c53bb8de31f732ac81b77be7d6cf07549964f4"
   }
 }
