@@ -2,7 +2,7 @@
 
 ## Status
 
-`P4_DONE`
+`FINAL_GREEN`
 
 ## Quelle und Vorgabe
 
