@@ -68,9 +68,7 @@ describe("runnerSemanticGoalFitScoreComponent", () => {
       key: "runner_goal_fit_tactical_goal_setup",
       value: 820,
     });
-    expect(component?.reason).toContain(
-      "goal:runner.draw_or_search_for_setup",
-    );
+    expect(component?.reason).toContain("goal:runner.draw_or_search_for_setup");
   });
 
   it("scores start-run actions that match active runner tactical goals", () => {
@@ -414,6 +412,65 @@ describe("runnerSemanticGoalFitScoreComponent", () => {
       reason: "no_visible_unresolved_coverage_need",
     });
   });
+
+  it("keeps a bounded search option for a searchable specialist in a hybrid deck", () => {
+    const action = {
+      actionId: "program-search",
+      side: "runner",
+      type: "activated_card_ability",
+    } as unknown as LegalAction;
+    const input = runnerInputWithGoals(
+      [
+        {
+          schemaVersion: "runner-tactical-goal-v1",
+          goalId: "runner.develop_specialized_breaker",
+          family: "setup",
+          priority: 620,
+          urgency: "low",
+          source: "deck_capability",
+          evidence: [
+            "breaker_architecture:hybrid",
+            "breaker_optional_searchable:efficient-wall-breaker",
+          ],
+        },
+      ],
+      {
+        playerView: {
+          own: {
+            tags: 0,
+            credits: 5,
+            gripOrHq: [],
+            rig: [
+              {
+                instanceId: "universal-breaker",
+                definitionId: "universal-breaker",
+                title: "Universal Breaker",
+                type: "program",
+                known: true,
+              },
+            ],
+          },
+          servers: [],
+        },
+      },
+    );
+
+    const component = runnerSemanticGoalFitScoreComponent(
+      input,
+      action,
+      "coverage_search",
+      undefined,
+      testDependencies({ sourceRole: "search" }),
+    );
+
+    expect(component).toMatchObject({
+      key: "runner_goal_fit_optional_breaker_development",
+      value: 420,
+    });
+    expect(component?.reason).toContain(
+      "breaker_optional_searchable:efficient-wall-breaker",
+    );
+  });
 });
 
 function runnerInputWithGoals(
@@ -428,10 +485,12 @@ function runnerInputWithGoals(
   } as unknown as AiDecisionInput;
 }
 
-function testDependencies(params: {
-  evaluation?: RunnerRunTargetEvaluation;
-  sourceRole?: "search" | "draw";
-} = {}) {
+function testDependencies(
+  params: {
+    evaluation?: RunnerRunTargetEvaluation;
+    sourceRole?: "search" | "draw";
+  } = {},
+) {
   return {
     sourceCardAnswerRole: () => params.sourceRole,
     runActionSpendingCapAssessment: () => ({

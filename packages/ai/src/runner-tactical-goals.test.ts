@@ -77,7 +77,131 @@ describe("Runner TacticalGoalIntegration", () => {
         "runner.avoid_low_value_risk_runs",
       ]),
     );
-    expect(JSON.stringify(goals)).not.toMatch(/onr_v1_|Blink|deckHash|privatePayload/i);
+    expect(JSON.stringify(goals)).not.toMatch(
+      /onr_v1_|Blink|deckHash|privatePayload/i,
+    );
+  });
+
+  it("does not keep primary breaker search urgent after Krash completes deck-aware coverage", () => {
+    const snapshot: AiDeckStrategyDeckSnapshot = {
+      deckSnapshotId: "krash-short-circuit-match-fixture",
+      side: "runner",
+      cards: [
+        { cardId: "onr_v1_039_krash", quantity: 3 },
+        { cardId: "onr_v1_011_cloak", quantity: 2 },
+        { cardId: "onr_v1_012_clown", quantity: 3 },
+        { cardId: "onr_v1_177_the-short-circuit", quantity: 2 },
+      ],
+    };
+    const input = aiInput({
+      credits: 5,
+      servers: [server("rd")],
+      rig: [
+        visibleCard("installed-krash", {
+          definitionId: "onr_v1_039_krash",
+          title: "Krash",
+          type: "program",
+          subtypes: ["icebreaker"],
+        }),
+      ],
+      legalActions: [runAction("run-rd", "rd")],
+    });
+    const deckCapabilities = buildDeckCapabilityProfile({
+      side: "runner",
+      playerView: input.playerView,
+      legalActions: input.legalActions,
+      deckSnapshot: snapshot,
+    });
+    const strategicIntent = buildRunnerStrategicIntentProfile({
+      strategyProfile: buildDeckStrategyProfile(snapshot),
+      deckCapabilities,
+    });
+
+    const goals = buildRunnerTacticalGoals({
+      input,
+      strategicIntent,
+      deckCapabilities,
+    });
+
+    expect(
+      goals.some(
+        (goal) => goal.goalId === "runner.find_or_install_primary_breaker",
+      ),
+    ).toBe(false);
+    expect(
+      goals.some(
+        (goal) => goal.goalId === "runner.develop_specialized_breaker",
+      ),
+    ).toBe(false);
+    expect(deckCapabilities.runner?.breakerInventory).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          cardId: "onr_v1_039_krash",
+          confidence: "high",
+          locations: expect.arrayContaining(["installed"]),
+        }),
+      ]),
+    );
+  });
+
+  it("keeps a distinct deck specialist as low-priority development after universal coverage", () => {
+    const snapshot: AiDeckStrategyDeckSnapshot = {
+      deckSnapshotId: "hybrid-breaker-match-fixture",
+      side: "runner",
+      cards: [
+        { cardId: "onr_v1_039_krash", quantity: 2 },
+        { cardId: "onr_v1_021_dwarf", quantity: 2 },
+        { cardId: "onr_v1_177_the-short-circuit", quantity: 2 },
+      ],
+    };
+    const input = aiInput({
+      credits: 5,
+      servers: [server("rd")],
+      rig: [
+        visibleCard("installed-krash", {
+          definitionId: "onr_v1_039_krash",
+          title: "Krash",
+          type: "program",
+          subtypes: ["icebreaker"],
+        }),
+      ],
+      legalActions: [runAction("run-rd", "rd")],
+    });
+    const deckCapabilities = buildDeckCapabilityProfile({
+      side: "runner",
+      playerView: input.playerView,
+      legalActions: input.legalActions,
+      deckSnapshot: snapshot,
+    });
+    const strategicIntent = buildRunnerStrategicIntentProfile({
+      strategyProfile: buildDeckStrategyProfile(snapshot),
+      deckCapabilities,
+    });
+
+    const goals = buildRunnerTacticalGoals({
+      input,
+      strategicIntent,
+      deckCapabilities,
+    });
+
+    expect(goals).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          goalId: "runner.develop_specialized_breaker",
+          priority: 620,
+          urgency: "low",
+          evidence: expect.arrayContaining([
+            "breaker_architecture:hybrid",
+            "breaker_optional_development:onr_v1_021_dwarf",
+          ]),
+        }),
+      ]),
+    );
+    expect(
+      goals.some(
+        (goal) => goal.goalId === "runner.find_or_install_primary_breaker",
+      ),
+    ).toBe(false);
   });
 
   it("derives a remote-contest setup goal for score threat behind missing coverage", () => {
@@ -171,9 +295,9 @@ describe("Runner TacticalGoalIntegration", () => {
       "credit_reserve_remote_score_threat:urgent",
     );
     expect(result.selectedStep?.kind).toBe("gain_credits");
-    expect(result.selectedMapping?.legalActions.map((action) => action.actionId)).toEqual([
-      "gain-credit",
-    ]);
+    expect(
+      result.selectedMapping?.legalActions.map((action) => action.actionId),
+    ).toEqual(["gain-credit"]);
     expect(JSON.stringify(result.runnerEconomyPostureUsed)).toContain(
       "runner_credit_reserve_contest:8",
     );
@@ -243,9 +367,9 @@ describe("Runner TacticalGoalIntegration", () => {
       canContestIfFunded: true,
     });
     expect(result.selectedStep?.kind).toBe("gain_credits");
-    expect(result.selectedMapping?.legalActions.map((action) => action.actionId)).toEqual([
-      "gain-credit",
-    ]);
+    expect(
+      result.selectedMapping?.legalActions.map((action) => action.actionId),
+    ).toEqual(["gain-credit"]);
     expect(JSON.stringify(result.planAlternatives)).toContain(
       "remote_contest_funding_need",
     );
@@ -285,9 +409,9 @@ describe("Runner TacticalGoalIntegration", () => {
 
     expect(economyPosture.creditBasePlan.economyPriority).toBe("medium");
     expect(result.selectedPlan?.type).toBe("runner.opportunistic_central_run");
-    expect(result.selectedMapping?.legalActions.map((action) => action.actionId)).toEqual([
-      "run-rd",
-    ]);
+    expect(
+      result.selectedMapping?.legalActions.map((action) => action.actionId),
+    ).toEqual(["run-rd"]);
     expect(JSON.stringify(result.planAlternatives)).toContain(
       "pressure_probe_allowed:true",
     );
@@ -356,12 +480,14 @@ describe("Runner TacticalGoalIntegration", () => {
       }),
     });
 
-    expect(result.selectedMapping?.legalActions.map((action) => action.actionId)).toEqual([
-      "run-hq",
-    ]);
-    expect(repeatedResult.selectedMapping?.legalActions.map((action) => action.actionId)).toEqual([
-      "run-hq",
-    ]);
+    expect(
+      result.selectedMapping?.legalActions.map((action) => action.actionId),
+    ).toEqual(["run-hq"]);
+    expect(
+      repeatedResult.selectedMapping?.legalActions.map(
+        (action) => action.actionId,
+      ),
+    ).toEqual(["run-hq"]);
     expect(JSON.stringify(result.planAlternatives)).toContain(
       "bounded_variation_applied:true",
     );
@@ -404,9 +530,9 @@ describe("Runner TacticalGoalIntegration", () => {
       }),
     });
 
-    expect(result.selectedMapping?.legalActions.map((action) => action.actionId)).toEqual([
-      "run-rd",
-    ]);
+    expect(
+      result.selectedMapping?.legalActions.map((action) => action.actionId),
+    ).toEqual(["run-rd"]);
     expect(JSON.stringify(result.planAlternatives)).toContain(
       "near_tie_probe_targets:rd",
     );
@@ -442,9 +568,9 @@ describe("Runner TacticalGoalIntegration", () => {
     });
 
     expect(result.selectedPlan?.target?.id).toBe("rd");
-    expect(result.selectedMapping?.legalActions.map((action) => action.actionId)).toEqual([
-      "run-rd",
-    ]);
+    expect(
+      result.selectedMapping?.legalActions.map((action) => action.actionId),
+    ).toEqual(["run-rd"]);
     expect(input.legalActions.map((action) => action.actionId)).toContain(
       result.selectedMapping?.legalActions[0]?.actionId,
     );
@@ -506,9 +632,9 @@ describe("Runner TacticalGoalIntegration", () => {
       usefulHandCardsBlockedByCredits: 1,
     });
     expect(result.selectedStep?.kind).toBe("gain_credits");
-    expect(result.selectedMapping?.legalActions.map((action) => action.actionId)).toEqual([
-      "gain-credit",
-    ]);
+    expect(
+      result.selectedMapping?.legalActions.map((action) => action.actionId),
+    ).toEqual(["gain-credit"]);
     expect(input.legalActions.map((action) => action.actionId)).toContain(
       result.selectedMapping?.legalActions[0]?.actionId,
     );
@@ -548,9 +674,9 @@ describe("Runner TacticalGoalIntegration", () => {
 
     expect(result.selectedPlan?.type).toBe("runner.play_best_hand_card");
     expect(result.selectedStep?.kind).toBe("install_development_card");
-    expect(result.selectedMapping?.legalActions.map((action) => action.actionId)).toEqual([
-      "install-access-card",
-    ]);
+    expect(
+      result.selectedMapping?.legalActions.map((action) => action.actionId),
+    ).toEqual(["install-access-card"]);
     expect(input.legalActions.map((action) => action.actionId)).toContain(
       result.selectedMapping?.legalActions[0]?.actionId,
     );
@@ -586,9 +712,9 @@ describe("Runner TacticalGoalIntegration", () => {
     ]);
 
     expect(result.selectedPlan?.type).toBe("runner.play_best_hand_card");
-    expect(result.selectedMapping?.legalActions.map((action) => action.actionId)).toEqual([
-      "install-memory",
-    ]);
+    expect(
+      result.selectedMapping?.legalActions.map((action) => action.actionId),
+    ).toEqual(["install-memory"]);
   });
 
   it("does not map defense support without a visible current need", () => {
@@ -626,9 +752,9 @@ describe("Runner TacticalGoalIntegration", () => {
     expect(result.planAlternatives.map((plan) => plan.type)).not.toContain(
       "runner.play_best_hand_card",
     );
-    expect(result.selectedMapping?.legalActions.map((action) => action.actionId)).not.toContain(
-      "install-defense",
-    );
+    expect(
+      result.selectedMapping?.legalActions.map((action) => action.actionId),
+    ).not.toContain("install-defense");
   });
 
   it("lets useful setup beat underfunded unknown remote score-threat pressure", () => {
@@ -636,7 +762,12 @@ describe("Runner TacticalGoalIntegration", () => {
       credits: 5,
       servers: [
         server("remote_2", {
-          root: [visibleCard("remote-root", { known: false, advancementCounters: 2 })],
+          root: [
+            visibleCard("remote-root", {
+              known: false,
+              advancementCounters: 2,
+            }),
+          ],
         }),
       ],
       grip: [
@@ -664,9 +795,9 @@ describe("Runner TacticalGoalIntegration", () => {
     ]);
 
     expect(result.selectedPlan?.type).toBe("runner.play_best_hand_card");
-    expect(result.selectedMapping?.legalActions.map((action) => action.actionId)).toEqual([
-      "install-access-card",
-    ]);
+    expect(
+      result.selectedMapping?.legalActions.map((action) => action.actionId),
+    ).toEqual(["install-access-card"]);
   });
 });
 

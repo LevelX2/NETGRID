@@ -60,6 +60,28 @@ export function runnerSemanticGoalFitScoreComponent(
   if (scopeId === "coverage_search" && sourceRole === "search") {
     const coverageNeed = runnerVisibleSearchCoverageNeed(input);
     if (!coverageNeed) {
+      const optionalDevelopment = highestPriorityGoal(
+        runnerTacticalGoalsForInput(input),
+        ["runner.develop_specialized_breaker"],
+      );
+      const searchableOptional = optionalDevelopment?.evidence.find((entry) =>
+        entry.startsWith("breaker_optional_searchable:"),
+      );
+      if (
+        optionalDevelopment &&
+        searchableOptional &&
+        !searchableOptional.endsWith(":none")
+      ) {
+        return {
+          key: "runner_goal_fit_optional_breaker_development",
+          label: "Optionale Breaker-Weiterentwicklung",
+          value: 420,
+          reason: runnerTacticalGoalReason(optionalDevelopment, [
+            searchableOptional,
+            "minimum_coverage_already_complete:true",
+          ]),
+        };
+      }
       return {
         key: "runner_goal_fit_coverage_search_no_need",
         label: "Coverage-Suche ohne Bedarf",
@@ -179,10 +201,12 @@ function runnerTacticalGoalsForInput(
   input: AiDecisionInput,
 ): readonly RunnerTacticalGoal[] {
   return (
-    input as AiDecisionInput & {
-      ownRunnerTacticalGoals?: readonly RunnerTacticalGoal[];
-    }
-  ).ownRunnerTacticalGoals ?? [];
+    (
+      input as AiDecisionInput & {
+        ownRunnerTacticalGoals?: readonly RunnerTacticalGoal[];
+      }
+    ).ownRunnerTacticalGoals ?? []
+  );
 }
 
 function runnerTacticalGoalNonRunFitScoreComponent(
@@ -197,6 +221,7 @@ function runnerTacticalGoalNonRunFitScoreComponent(
   const setupGoal = highestPriorityGoal(goals, [
     "runner.find_or_install_primary_breaker",
     "runner.draw_or_search_for_setup",
+    "runner.develop_specialized_breaker",
   ]);
   const economyGoal = highestPriorityGoal(goals, [
     "runner.build_economy_base",
@@ -342,8 +367,8 @@ function runnerSetupGoalShouldDeferEconomy(
 ): boolean {
   return Boolean(
     setupGoal &&
-      setupGoal.priority >= 880 &&
-      economyGoal.priority - setupGoal.priority < 120,
+    setupGoal.priority >= 880 &&
+    economyGoal.priority - setupGoal.priority < 120,
   );
 }
 
@@ -375,7 +400,10 @@ function runnerActionHasBypassSignal(
   action: LegalAction,
   candidate: ActionSemanticCandidate | undefined,
 ): boolean {
-  if (action.payload?.bypassFirstIce === true || action.payload?.bypass === true) {
+  if (
+    action.payload?.bypassFirstIce === true ||
+    action.payload?.bypass === true
+  ) {
     return true;
   }
   return actionSemanticCandidateHasSignal(candidate, "bypass");
@@ -398,8 +426,10 @@ function actionSemanticCandidateHasSignal(
   prefix: string,
 ): boolean {
   return Boolean(
-    candidate?.actionTacticSignals.some((signal) => signal.startsWith(prefix)) ||
-      candidate?.cardContextSignals.some((signal) => signal.startsWith(prefix)),
+    candidate?.actionTacticSignals.some((signal) =>
+      signal.startsWith(prefix),
+    ) ||
+    candidate?.cardContextSignals.some((signal) => signal.startsWith(prefix)),
   );
 }
 
@@ -411,9 +441,7 @@ function runnerTacticalGoalReason(
   goal: RunnerTacticalGoal,
   details: readonly string[],
 ): string {
-  return [
-    `goal:${goal.goalId}`,
-    `urgency:${goal.urgency}`,
-    ...details,
-  ].join("|");
+  return [`goal:${goal.goalId}`, `urgency:${goal.urgency}`, ...details].join(
+    "|",
+  );
 }

@@ -5,12 +5,14 @@ import type {
   RunnerRunTargetEvaluation,
 } from "./runner-run-target-evaluation";
 import type { RunnerStrategicIntentProfile } from "./runner-strategic-intent";
+import { assessRunnerBreakerDevelopment } from "./runner-breaker-development";
 
 export const RUNNER_TACTICAL_GOAL_SCHEMA_VERSION =
   "runner-tactical-goal-v1" as const;
 
 export type RunnerTacticalGoalId =
   | "runner.find_or_install_primary_breaker"
+  | "runner.develop_specialized_breaker"
   | "runner.build_economy_base"
   | "runner.draw_or_search_for_setup"
   | "runner.avoid_low_value_risk_runs"
@@ -61,95 +63,123 @@ export function buildRunnerTacticalGoals(
   const runTargets = params.runTargetEvaluations ?? [];
   const economyPosture = params.economyPosture;
   const deckCapabilities = params.deckCapabilities;
+  const breakerDevelopment = assessRunnerBreakerDevelopment(deckCapabilities);
   if (
-    setupEngine.has("runner.search_breaker_setup") ||
-    setupEngine.has("runner.rig_first") ||
-    runnerUniversalCoverageNotInstalled(deckCapabilities)
+    (setupEngine.has("runner.search_breaker_setup") ||
+      setupEngine.has("runner.rig_first") ||
+      runnerUniversalCoverageNotInstalled(deckCapabilities)) &&
+    breakerDevelopment.primaryBreakerNeed
   ) {
-    goals.push(goal({
-      goalId: "runner.find_or_install_primary_breaker",
-      family: "setup",
-      priority: 900,
-      urgency: "high",
-      source: "strategic_intent",
-      evidence: [
-        "setup_engine:breaker_or_rig",
-        `universal_coverage_not_installed:${runnerUniversalCoverageNotInstalled(deckCapabilities)}`,
-      ],
-    }));
+    goals.push(
+      goal({
+        goalId: "runner.find_or_install_primary_breaker",
+        family: "setup",
+        priority: 900,
+        urgency: "high",
+        source: "strategic_intent",
+        evidence: [
+          "setup_engine:breaker_or_rig",
+          `universal_coverage_not_installed:${runnerUniversalCoverageNotInstalled(deckCapabilities)}`,
+          ...breakerDevelopment.evidence,
+        ],
+      }),
+    );
+  }
+  if (breakerDevelopment.optionalBreakerIds.length > 0) {
+    goals.push(
+      goal({
+        goalId: "runner.develop_specialized_breaker",
+        family: "setup",
+        priority: 620,
+        urgency: "low",
+        source: "deck_capability",
+        evidence: breakerDevelopment.evidence,
+      }),
+    );
   }
   if (
     economyPosture?.buildEconomyBeforePressure ||
     economyPosture?.recommendation === "build_economy" ||
     economyPosture?.recommendation === "cash_out_bank"
   ) {
-    goals.push(goal({
-      goalId: "runner.build_economy_base",
-      family: "economy",
-      priority: economyPosture.fundingNeed ? 940 : 780,
-      urgency: economyPosture.fundingNeed ? "high" : "medium",
-      source: "economy_posture",
-      evidence: [
-        `economy_recommendation:${economyPosture.recommendation}`,
-        `desired_credit_reserve:${economyPosture.desiredCreditReserve}`,
-        ...creditBaseGoalEvidence(economyPosture),
-      ],
-    }));
+    goals.push(
+      goal({
+        goalId: "runner.build_economy_base",
+        family: "economy",
+        priority: economyPosture.fundingNeed ? 940 : 780,
+        urgency: economyPosture.fundingNeed ? "high" : "medium",
+        source: "economy_posture",
+        evidence: [
+          `economy_recommendation:${economyPosture.recommendation}`,
+          `desired_credit_reserve:${economyPosture.desiredCreditReserve}`,
+          ...creditBaseGoalEvidence(economyPosture),
+        ],
+      }),
+    );
   }
   if (
     setupEngine.has("runner.draw_or_search_setup") ||
-    setupEngine.has("runner.search_breaker_setup")
+    (setupEngine.has("runner.search_breaker_setup") &&
+      breakerDevelopment.primaryBreakerNeed)
   ) {
-    goals.push(goal({
-      goalId: "runner.draw_or_search_for_setup",
-      family: "setup",
-      priority: 820,
-      urgency: "medium",
-      source: "strategic_intent",
-      evidence: ["setup_engine:draw_or_search"],
-    }));
+    goals.push(
+      goal({
+        goalId: "runner.draw_or_search_for_setup",
+        family: "setup",
+        priority: 820,
+        urgency: "medium",
+        source: "strategic_intent",
+        evidence: ["setup_engine:draw_or_search"],
+      }),
+    );
   }
-  const lowValueRuns = runTargets.filter((target) =>
-    target.recommendation === "do_not_run_now" ||
-    target.recommendation === "draw_for_damage_buffer" ||
-    target.knownAccessState === "known_no_current_payoff"
+  const lowValueRuns = runTargets.filter(
+    (target) =>
+      target.recommendation === "do_not_run_now" ||
+      target.recommendation === "draw_for_damage_buffer" ||
+      target.knownAccessState === "known_no_current_payoff",
   );
   if (
     lowValueRuns.length > 0 ||
     riskProfile.has("runner.risky_universal_breaker_pressure")
   ) {
-    goals.push(goal({
-      goalId: "runner.avoid_low_value_risk_runs",
-      family: "risk_control",
-      priority: lowValueRuns.length > 0 ? 960 : 760,
-      urgency: lowValueRuns.length > 0 ? "high" : "medium",
-      source: lowValueRuns.length > 0
-        ? "run_target_evaluation"
-        : "strategic_intent",
-      evidence: [
-        `low_value_target_count:${lowValueRuns.length}`,
-        `risky_universal_pressure:${riskProfile.has("runner.risky_universal_breaker_pressure")}`,
-      ],
-    }));
+    goals.push(
+      goal({
+        goalId: "runner.avoid_low_value_risk_runs",
+        family: "risk_control",
+        priority: lowValueRuns.length > 0 ? 960 : 760,
+        urgency: lowValueRuns.length > 0 ? "high" : "medium",
+        source:
+          lowValueRuns.length > 0
+            ? "run_target_evaluation"
+            : "strategic_intent",
+        evidence: [
+          `low_value_target_count:${lowValueRuns.length}`,
+          `risky_universal_pressure:${riskProfile.has("runner.risky_universal_breaker_pressure")}`,
+        ],
+      }),
+    );
   }
   for (const target of runTargets.filter(
     (evaluation) =>
       (evaluation.targetKind === "rd" || evaluation.targetKind === "hq") &&
       evaluation.recommendation === "run_now",
   )) {
-    goals.push(goal({
-      goalId: "runner.pressure_good_central_target",
-      family: "pressure",
-      priority: 880 + Math.max(0, Math.min(120, target.score)),
-      urgency: "high",
-      targetServerId: target.targetServerId,
-      source: "run_target_evaluation",
-      evidence: [
-        `target:${target.targetServerId}`,
-        `access_payoff:${target.accessPayoff}`,
-        `recommendation:${target.recommendation}`,
-      ],
-    }));
+    goals.push(
+      goal({
+        goalId: "runner.pressure_good_central_target",
+        family: "pressure",
+        priority: 880 + Math.max(0, Math.min(120, target.score)),
+        urgency: "high",
+        targetServerId: target.targetServerId,
+        source: "run_target_evaluation",
+        evidence: [
+          `target:${target.targetServerId}`,
+          `access_payoff:${target.accessPayoff}`,
+          `recommendation:${target.recommendation}`,
+        ],
+      }),
+    );
   }
   for (const target of runTargets.filter(
     (evaluation) =>
@@ -157,50 +187,56 @@ export function buildRunnerTacticalGoals(
       evaluation.scoreThreat &&
       evaluation.recommendation !== "draw_for_damage_buffer",
   )) {
-    goals.push(goal({
-      goalId: "runner.contest_remote_if_score_threat",
-      family: "remote_contest",
-      priority: target.recommendation === "find_breaker_first" ? 900 : 880,
-      urgency: "high",
-      targetServerId: target.targetServerId,
-      source: "run_target_evaluation",
-      evidence: [
-        `target:${target.targetServerId}`,
-        `path_passability:${target.pathPassability}`,
-        `recommendation:${target.recommendation}`,
-      ],
-    }));
+    goals.push(
+      goal({
+        goalId: "runner.contest_remote_if_score_threat",
+        family: "remote_contest",
+        priority: target.recommendation === "find_breaker_first" ? 900 : 880,
+        urgency: "high",
+        targetServerId: target.targetServerId,
+        source: "run_target_evaluation",
+        evidence: [
+          `target:${target.targetServerId}`,
+          `path_passability:${target.pathPassability}`,
+          `recommendation:${target.recommendation}`,
+        ],
+      }),
+    );
   }
   if (
     economyPosture?.riskAdjustedRunReserve ||
     (economyPosture &&
       params.input.playerView.own.credits < economyPosture.desiredCreditReserve)
   ) {
-    goals.push(goal({
-      goalId: "runner.maintain_credit_and_hand_buffer",
-      family: "risk_control",
-      priority: 740,
-      urgency: economyPosture?.fundingNeed ? "high" : "medium",
-      source: "economy_posture",
-      evidence: [
-        `risk_adjusted_run_reserve:${economyPosture?.riskAdjustedRunReserve === true}`,
-        `credits:${params.input.playerView.own.credits}`,
-        ...creditBaseGoalEvidence(economyPosture),
-      ],
-    }));
+    goals.push(
+      goal({
+        goalId: "runner.maintain_credit_and_hand_buffer",
+        family: "risk_control",
+        priority: 740,
+        urgency: economyPosture?.fundingNeed ? "high" : "medium",
+        source: "economy_posture",
+        evidence: [
+          `risk_adjusted_run_reserve:${economyPosture?.riskAdjustedRunReserve === true}`,
+          `credits:${params.input.playerView.own.credits}`,
+          ...creditBaseGoalEvidence(economyPosture),
+        ],
+      }),
+    );
   }
   if (
     pressureVectors.has("runner.conditional_remote_contest") &&
     runTargets.some((target) => highValueRunTarget(target))
   ) {
-    goals.push(goal({
-      goalId: "runner.use_bypass_for_high_value_access",
-      family: "pressure",
-      priority: 760,
-      urgency: "medium",
-      source: "strategic_intent",
-      evidence: ["pressure_vector:conditional_remote_contest"],
-    }));
+    goals.push(
+      goal({
+        goalId: "runner.use_bypass_for_high_value_access",
+        family: "pressure",
+        priority: 760,
+        urgency: "medium",
+        source: "strategic_intent",
+        evidence: ["pressure_vector:conditional_remote_contest"],
+      }),
+    );
   }
   return dedupeGoals(goals).sort(
     (left, right) =>
@@ -238,15 +274,17 @@ function creditBaseGoalEvidence(
 export function redactedRunnerTacticalGoalFacts(
   goals: readonly RunnerTacticalGoal[],
 ): string[] {
-  return goals.slice(0, 12).map((goal) =>
-    [
-      `runner_tactical_goal:${goal.goalId}`,
-      `family:${goal.family}`,
-      `priority:${goal.priority}`,
-      `urgency:${goal.urgency}`,
-      ...(goal.targetServerId ? [`target:${goal.targetServerId}`] : []),
-    ].join("|"),
-  );
+  return goals
+    .slice(0, 12)
+    .map((goal) =>
+      [
+        `runner_tactical_goal:${goal.goalId}`,
+        `family:${goal.family}`,
+        `priority:${goal.priority}`,
+        `urgency:${goal.urgency}`,
+        ...(goal.targetServerId ? [`target:${goal.targetServerId}`] : []),
+      ].join("|"),
+    );
 }
 
 function goal(
@@ -261,13 +299,14 @@ function goal(
 function runnerUniversalCoverageNotInstalled(
   deckCapabilities: DeckCapabilityProfile | undefined,
 ): boolean {
-  const universalCoverage = deckCapabilities?.runner?.breakerCoverageMatrix.universal;
+  const universalCoverage =
+    deckCapabilities?.runner?.breakerCoverageMatrix.universal;
   return Boolean(
     universalCoverage &&
-      !universalCoverage.installed &&
-      (universalCoverage.inHand ||
-        universalCoverage.inDeckKnown ||
-        universalCoverage.searchableNow),
+    !universalCoverage.installed &&
+    (universalCoverage.inHand ||
+      universalCoverage.inDeckKnown ||
+      universalCoverage.searchableNow),
   );
 }
 
@@ -282,7 +321,9 @@ function highValueRunTarget(target: RunnerRunTargetEvaluation): boolean {
   );
 }
 
-function dedupeGoals(goals: readonly RunnerTacticalGoal[]): RunnerTacticalGoal[] {
+function dedupeGoals(
+  goals: readonly RunnerTacticalGoal[],
+): RunnerTacticalGoal[] {
   const byKey = new Map<string, RunnerTacticalGoal>();
   for (const goal of goals) {
     const key = `${goal.goalId}:${goal.targetServerId ?? ""}`;

@@ -26,6 +26,7 @@ import {
   type StructuredTagPunishLegalActionAssessment,
 } from "../tag-punish-ontology-consumer";
 import { visibleSourceDefinitionsByInstanceId } from "./visible-source-definitions";
+import { assessRunnerBreakerDevelopment } from "../runner-breaker-development";
 
 export type StrategicRuntimeContext = {
   roleStatuses: StrategicRoleStatusSnapshot[];
@@ -190,6 +191,9 @@ function runnerCompletedSetupPressureCandidate(
     params.playerView.opponent.agendaPoints >=
       params.playerView.agendaPointsToWin - 1;
   const transitionBonus = matchpoint ? 52 : 32;
+  const breakerDevelopment = assessRunnerBreakerDevelopment(
+    params.deckCapabilities,
+  );
   const selectionFloor = Math.max(
     ...candidates.map((candidate) => candidate.selectionScore),
   );
@@ -219,6 +223,7 @@ function runnerCompletedSetupPressureCandidate(
       `runtime_transition_to:${strategyId}`,
       `runtime_transition_matchpoint:${matchpoint}`,
       `runtime_transition_bonus:${transitionBonus}`,
+      ...breakerDevelopment.evidence,
     ],
   };
 }
