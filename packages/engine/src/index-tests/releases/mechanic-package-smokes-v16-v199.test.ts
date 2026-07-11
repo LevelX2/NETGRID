@@ -4434,9 +4434,27 @@ describe("V1.8.1 Mechanikpaket H", () => {
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
     state = continueRunThroughMovementWindow(state);
+    const strengthBeforePattelCounter = getPlayerView(state, "runner").servers
+      .find((server) => server.id === "rd")
+      ?.ice.find((ice) => ice.instanceId === iceId)?.strength;
     state = apply(state, "runner", (action) => action.type === "access_card");
     expect(state.cardInstances[iceId]?.counters?.virus).toBe(1);
     expect(state.poxCountersByServer?.rd).toBe(1);
+    const visibleIce = getPlayerView(state, "runner").servers
+      .find((server) => server.id === "rd")
+      ?.ice.find((ice) => ice.instanceId === iceId);
+    expect(visibleIce?.counterDisplays).toContainEqual({
+      id: "pattel",
+      amount: 1,
+      displayKind: "virus",
+      label: "Pattel-Counter",
+      ariaLabel: "1 Pattel-Counter",
+      counterType: "virus",
+      usageHint: "status_marker",
+    });
+    expect(visibleIce?.strength).toBe(
+      Math.max(0, (strengthBeforePattelCounter ?? 0) - 1),
+    );
 
     state = apply(state, "runner", (action) => action.type === "end_turn");
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");

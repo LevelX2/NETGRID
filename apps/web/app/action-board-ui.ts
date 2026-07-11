@@ -598,6 +598,8 @@ export function counterDisplayTooltipText(
 ): string {
   const amount = safeCounterDisplayAmount(display.amount);
   const countLabel = `${amount} ${counterDisplayShortLabel(display.label)}`;
+  if (display.id === "pattel")
+    return `Pattel’s Virus: Jeder Pattel-Counter reduziert die Stärke dieses ICE um 1. Die Pattel-Counter gelten technisch als Virus-Counter und werden durch Virus-Purge entfernt.`;
   switch (display.counterType) {
     case "cockroach":
       return amount >= 2

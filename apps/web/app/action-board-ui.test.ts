@@ -2326,6 +2326,19 @@ describe("V1.0.6 resource and card-display helpers", () => {
     );
     expect(
       counterDisplayTooltipText({
+        id: "pattel",
+        amount: 2,
+        displayKind: "virus",
+        label: "Pattel-Counter",
+        ariaLabel: "2 Pattel-Counter",
+        counterType: "virus",
+        usageHint: "status_marker",
+      }),
+    ).toBe(
+      "Pattel’s Virus: Jeder Pattel-Counter reduziert die Stärke dieses ICE um 1. Die Pattel-Counter gelten technisch als Virus-Counter und werden durch Virus-Purge entfernt.",
+    );
+    expect(
+      counterDisplayTooltipText({
         id: "breaker_strength_penalty",
         amount: 1,
         displayKind: "generic_counter",

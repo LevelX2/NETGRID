@@ -540,10 +540,12 @@ function specialCounterDisplays(
     ...(corpProjectedVirusCounterKind(definition)
       ? []
       : singleCounterDisplay(counters.virus, {
-          id: "virus",
+          id: definition.type === "ice" ? "pattel" : "virus",
           displayKind: "virus",
-          label: "Virus-Counter",
-          ariaLabelName: "Virus-Counter",
+          label:
+            definition.type === "ice" ? "Pattel-Counter" : "Virus-Counter",
+          ariaLabelName:
+            definition.type === "ice" ? "Pattel-Counter" : "Virus-Counter",
           counterType: "virus",
           usageHint: "status_marker",
         })),

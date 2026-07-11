@@ -826,7 +826,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
   },
   {
     id: "onr_v1_046_pattels-virus",
-    title: "Pattel's Virus",
+    title: "Pattel’s Virus",
     side: "runner",
     type: "program",
     subtypes: ["virus"],
