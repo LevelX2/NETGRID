@@ -163,6 +163,7 @@ export function OpponentActionOverlay({
         ) : null}
         <div className="opponentCueMessage">
           <WindowEventIcon
+            {...(cue.actor ? { side: cue.actor } : {})}
             kind={windowEventIconKindForActionCue({
               actionType: cue.actionType,
               ambience,

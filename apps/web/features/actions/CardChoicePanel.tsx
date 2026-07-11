@@ -117,6 +117,7 @@ export function CardChoicePanel({
           </div>
           <div className="cardChoiceHeaderControls">
             <WindowEventIcon
+              side={choice.side}
               kind={windowEventIconKindForChoice({
                 ambience,
                 source: choice.source,

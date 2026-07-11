@@ -169,7 +169,7 @@ describe("run window layering", () => {
     expect(css).toContain("--interaction-ambience-opacity: 0.32");
     expect(css).toMatch(/\.windowEventIcon\s*\{[\s\S]*?width: 128px;/);
     expect(accessReviewModalSource).toContain(
-      '<WindowEventIcon kind="access" />',
+      '<WindowEventIcon kind="access" side={review.actorSide} />',
     );
     expect(accessReviewModalSource).toContain("<AccessDamageStage");
     expect(accessReviewModalSource).toContain(
@@ -182,8 +182,12 @@ describe("run window layering", () => {
       "grid-template-rows: 128px auto",
     );
     expect(damageImpactOverlaySource).toContain(
-      '<WindowEventIcon kind={`${cue.damageType}-damage`} />',
+      '<WindowEventIcon kind={`${cue.damageType}-damage`} side="runner" />',
     );
+    expect(css).toContain(".windowEventIcon-side-runner");
+    expect(css).toContain(".windowEventIcon-side-corp");
+    expect(windowEventIconSource).toContain("data-window-event-side={side ?? undefined}");
+    expect(windowEventIconSource).toContain("data-window-event-side-glyph={side}");
     for (const icon of [
       "agenda",
       "ice-pass",

@@ -51,7 +51,7 @@ export function DamageImpactOverlay({
           <strong>{title}</strong>
           <span>{summary}</span>
         </div>
-        <WindowEventIcon kind={`${cue.damageType}-damage`} />
+        <WindowEventIcon kind={`${cue.damageType}-damage`} side="runner" />
       </div>
       {!preventedDamage ? (
         <div className="damageImpactMeter" aria-label={gripLabel}>

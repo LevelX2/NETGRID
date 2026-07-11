@@ -243,6 +243,7 @@ export function AccessRevealModal({
             ) : (
               <>
                 <WindowEventIcon
+                  side={reveal.actorSide}
                   kind={
                     reveal.outcomeKind === "trashed"
                       ? "trash"
@@ -357,7 +358,7 @@ function AccessDamageStage({
       className={`accessDamageStage damage-${cue.damageType}`}
       data-testid="access-damage-stage"
     >
-      <WindowEventIcon kind={`${cue.damageType}-damage`} />
+      <WindowEventIcon kind={`${cue.damageType}-damage`} side="runner" />
       <strong className="accessDamageTitle">{typeLabel}</strong>
       <p className="accessRevealStatus">{damageSentence}</p>
       <div className="accessDamageStats">
@@ -426,7 +427,7 @@ export function ExposeReviewModal({
             <p>{review.description}</p>
           </div>
           <div className="accessRevealHeaderActions">
-            <WindowEventIcon kind="access" />
+            <WindowEventIcon kind="access" side={review.actorSide} />
             <button
               className="button iconOnly"
               onClick={onDismiss}

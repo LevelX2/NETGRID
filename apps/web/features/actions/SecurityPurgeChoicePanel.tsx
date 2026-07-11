@@ -90,7 +90,7 @@ export function SecurityPurgeChoicePanel({
             <p className="meta">{choice.prompt}</p>
           </div>
           <div className="cardChoiceHeaderControls">
-            <WindowEventIcon kind="trash" />
+            <WindowEventIcon kind="trash" side={choice.side} />
             <span className="cardChoiceCounter">
               {selectedOptionIds.length}/{targetCards.length} ICE
             </span>
