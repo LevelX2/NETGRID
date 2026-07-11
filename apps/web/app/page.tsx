@@ -78,6 +78,10 @@ import {
   type TurnStartAudioState,
 } from "./action-cues";
 import {
+  accessPresentationOwnsActionCue,
+  interactionPresentationBlocksAi,
+} from "./access-presentation";
+import {
   ACTION_CUE_POSITION_STORAGE_KEY,
   DEFAULT_CUE_POSITION,
   LEGACY_ACTION_CUE_POSITION_STORAGE_KEY,
@@ -2178,6 +2182,24 @@ export default function Page() {
     !matchEnded &&
     !dismissedAccessEventIds.includes(accessReveal.eventId),
   );
+  const accessDamageImpact =
+    currentDamageImpact &&
+    accessReveal?.kind === "access" &&
+    currentDamageImpact.eventId === accessReveal.eventId
+      ? currentDamageImpact
+      : null;
+  const standaloneDamageImpact = accessDamageImpact
+    ? null
+    : currentDamageImpact;
+  const accessOutcomeAwaitingConfirmation = Boolean(
+    showAccessReveal &&
+      accessReveal?.kind === "access" &&
+      accessReveal.outcomeStatus,
+  );
+  const interactionPresentationBlocked = interactionPresentationBlocksAi({
+    damageOpen: Boolean(currentDamageImpact),
+    accessOutcomeOpen: accessOutcomeAwaitingConfirmation,
+  });
   const exposeReviewEvent = payload
     ? retainedExposeReviewEvent(payload.eventTail, dismissedExposeReviewEventId)
     : null;
@@ -2902,12 +2924,37 @@ export default function Page() {
   ]);
 
   useEffect(() => {
-    if (currentActionCue || actionCueQueue.length === 0) return;
+    if (!showAccessReveal) return;
+    setCurrentActionCue((current) =>
+      current && accessPresentationOwnsActionCue(current.actionType)
+        ? null
+        : current,
+    );
+    setActionCueQueue((current) =>
+      current.filter(
+        (cue) => !accessPresentationOwnsActionCue(cue.actionType),
+      ),
+    );
+  }, [accessReveal?.eventId, showAccessReveal]);
+
+  useEffect(() => {
+    if (
+      interactionPresentationBlocked ||
+      showAccessReveal ||
+      currentActionCue ||
+      actionCueQueue.length === 0
+    )
+      return;
     const [nextCue, ...rest] = actionCueQueue;
     if (!nextCue) return;
     setCurrentActionCue(nextCue);
     setActionCueQueue(rest);
-  }, [actionCueQueue, currentActionCue]);
+  }, [
+    actionCueQueue,
+    currentActionCue,
+    interactionPresentationBlocked,
+    showAccessReveal,
+  ]);
 
   useEffect(() => {
     if (currentDamageImpact || damageImpactQueue.length === 0) return;
@@ -2919,6 +2966,7 @@ export default function Page() {
 
   useEffect(() => {
     if (!currentActionCue) return;
+    if (interactionPresentationBlocked || showAccessReveal) return;
     if (audioEnabled && currentActionCue.sound)
       playActionCueSound(
         currentActionCue.sound,
@@ -2943,7 +2991,9 @@ export default function Page() {
     audioEnabled,
     audioVolume,
     currentActionCue,
+    interactionPresentationBlocked,
     localAiPacingMode,
+    showAccessReveal,
   ]);
 
   useEffect(() => {
@@ -2952,7 +3002,8 @@ export default function Page() {
       !aiTurnPresentation?.canAdvanceAi ||
       payload.winner ||
       connection !== "online" ||
-      priorityWindowHoldEnabled
+      priorityWindowHoldEnabled ||
+      interactionPresentationBlocked
     )
       return;
     const delayMs = aiPacingDelayMs(
@@ -2999,6 +3050,7 @@ export default function Page() {
     aiTurnPresentation?.canAdvanceAi,
     connection,
     currentActionCue,
+    interactionPresentationBlocked,
     localAiPacingMode,
     payload?.matchId,
     payload?.matchVersion,
@@ -5270,12 +5322,15 @@ export default function Page() {
             />
             {activeMatchIsGame && !matchEnded ? (
               <DamageImpactOverlay
-                cue={currentDamageImpact}
+                cue={standaloneDamageImpact}
                 queued={damageImpactQueue.length}
                 onDismiss={() => setCurrentDamageImpact(null)}
               />
             ) : null}
-            {activeMatchIsGame && !matchEnded ? (
+            {activeMatchIsGame &&
+            !matchEnded &&
+            !currentDamageImpact &&
+            !showAccessReveal ? (
               <OpponentActionOverlay
                 cue={currentActionCue}
                 queued={actionCueQueue.length}
@@ -5879,13 +5934,18 @@ export default function Page() {
                   : {})}
               />
             ) : null}
-            {activeMatchIsGame && showAccessReveal && accessReveal ? (
+            {activeMatchIsGame &&
+            showAccessReveal &&
+            accessReveal &&
+            !standaloneDamageImpact ? (
               <AccessRevealModal
                 reveal={accessReveal}
                 displayMode={cardDisplayMode}
                 disabled={Boolean(payload.winner) || connection !== "online"}
+                damageImpact={accessDamageImpact}
                 onAction={submitAction}
                 onChoiceOption={submitChoiceOption}
+                onDamageDismiss={() => setCurrentDamageImpact(null)}
                 onDismiss={() =>
                   setDismissedAccessEventIds((eventIds) =>
                     eventIds.includes(accessReveal.eventId)

@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import type { PublicGameEvent } from "@netgrid/shared";
 
 import {
+  accessPresentationOwnsActionCue,
   accessPresentationOutcomeAfter,
+  interactionPresentationBlocksAi,
   publicAccessOwnsOutcomeEvent,
 } from "./access-presentation";
 
@@ -101,6 +103,30 @@ describe("access presentation outcome ownership", () => {
       accessPresentationOutcomeAfter([first, second, trash], second, "corp")
         ?.kind,
     ).toBe("trashed");
+  });
+
+  it("defines access-owned cues and blocking presentation stages", () => {
+    expect(accessPresentationOwnsActionCue("start_run")).toBe(true);
+    expect(accessPresentationOwnsActionCue("trash_accessed_card")).toBe(true);
+    expect(accessPresentationOwnsActionCue("pump_breaker")).toBe(false);
+    expect(
+      interactionPresentationBlocksAi({
+        damageOpen: true,
+        accessOutcomeOpen: false,
+      }),
+    ).toBe(true);
+    expect(
+      interactionPresentationBlocksAi({
+        damageOpen: false,
+        accessOutcomeOpen: true,
+      }),
+    ).toBe(true);
+    expect(
+      interactionPresentationBlocksAi({
+        damageOpen: false,
+        accessOutcomeOpen: false,
+      }),
+    ).toBe(false);
   });
 });
 

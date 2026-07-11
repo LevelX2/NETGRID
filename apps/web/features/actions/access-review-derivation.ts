@@ -98,7 +98,9 @@ export function accessRevealFromLatestEvent(
         serverLabel,
       ),
     ...(highlighterStatus ? { followupStatus: highlighterStatus } : {}),
-    ...(outcome ? { outcomeStatus: outcome.status } : {}),
+    ...(outcome
+      ? { outcomeKind: outcome.kind, outcomeStatus: outcome.status }
+      : {}),
   };
 }
 
@@ -168,7 +170,9 @@ export function accessRevealFromCurrentRun(
         serverLabel,
       ),
     ...(accessFollowupStatus ? { followupStatus: accessFollowupStatus } : {}),
-    ...(outcome ? { outcomeStatus: outcome.status } : {}),
+    ...(outcome
+      ? { outcomeKind: outcome.kind, outcomeStatus: outcome.status }
+      : {}),
   };
 }
 

@@ -167,8 +167,9 @@ describe("run window layering", () => {
     expect(accessReviewModalSource).toContain(
       '<WindowEventIcon kind="access" />',
     );
-    expect(accessReviewModalSource).toMatch(
-      /className="accessRevealDecision">\s*<WindowEventIcon kind="access" \/>/,
+    expect(accessReviewModalSource).toContain("<AccessDamageStage");
+    expect(accessReviewModalSource).toContain(
+      'data-testid="access-damage-stage"',
     );
     expect(opponentActionOverlaySource).toMatch(
       /className="opponentCueMessage">\s*<WindowEventIcon/,
@@ -200,5 +201,20 @@ describe("run window layering", () => {
     expect(windowEventIconSource).toContain(
       'if (ambience === "movement") return "ice-pass"',
     );
+  });
+
+  it("serializes access damage and AI pacing through one presentation", () => {
+    expect(pageSource).toContain(
+      "currentDamageImpact.eventId === accessReveal.eventId",
+    );
+    expect(pageSource).toContain("interactionPresentationBlocked");
+    expect(pageSource).toContain("damageImpact={accessDamageImpact}");
+    expect(pageSource).toContain(
+      "interactionPresentationBlocksAi({",
+    );
+    expect(accessReviewModalSource).toContain(
+      'data-testid="access-damage-stage"',
+    );
+    expect(accessReviewModalSource).toContain("reveal.outcomeStatus");
   });
 });

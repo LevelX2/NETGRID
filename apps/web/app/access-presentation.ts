@@ -17,6 +17,25 @@ const ACCESS_OUTCOME_ACTION_TYPES = new Set([
   "decline_trash",
 ]);
 
+const ACCESS_PRESENTATION_CUE_ACTION_TYPES = new Set([
+  "start_run",
+  "access_card",
+  "trash_accessed_card",
+  "steal_agenda",
+  "decline_trash",
+]);
+
+export function accessPresentationOwnsActionCue(actionType: string): boolean {
+  return ACCESS_PRESENTATION_CUE_ACTION_TYPES.has(actionType);
+}
+
+export function interactionPresentationBlocksAi(input: {
+  damageOpen: boolean;
+  accessOutcomeOpen: boolean;
+}): boolean {
+  return input.damageOpen || input.accessOutcomeOpen;
+}
+
 export function publicAccessOwnsOutcomeEvent(
   events: PublicGameEvent[],
   outcomeEvent: PublicGameEvent,

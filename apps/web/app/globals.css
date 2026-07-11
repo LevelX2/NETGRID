@@ -9021,6 +9021,50 @@ select {
   width: 100%;
 }
 
+.accessDamageStage {
+  --access-damage: #39d0ff;
+  width: 100%;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+}
+
+.accessDamageStage.damage-meat {
+  --access-damage: #ff5f57;
+}
+
+.accessDamageStage.damage-core {
+  --access-damage: #b98cff;
+}
+
+.accessDamageTitle {
+  color: color-mix(in srgb, var(--access-damage), var(--text) 24%);
+  font-size: 18px;
+  line-height: 1.15;
+}
+
+.accessDamageStats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+
+.accessDamageStats span {
+  padding: 4px 7px;
+  border: 1px solid color-mix(in srgb, var(--access-damage), transparent 58%);
+  border-radius: 6px;
+  color: color-mix(in srgb, var(--access-damage), var(--text) 26%);
+  background: color-mix(in srgb, var(--access-damage), transparent 90%);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.accessDamageContinue {
+  min-width: 118px;
+  justify-content: center;
+}
+
 .accessRevealStatus {
   margin: 0;
   color: var(--muted);

@@ -6,6 +6,8 @@ import {
   X,
 } from "lucide-react";
 import type { LegalAction, Side, VisibleChoiceRequest } from "@netgrid/shared";
+import type { DamageImpactCue } from "../../app/action-cues";
+import type { AccessPresentationOutcomeKind } from "../../app/access-presentation";
 
 import {
   accessDecisionDisplayLabel,
@@ -43,6 +45,7 @@ export type AccessReveal = {
   actions: LegalAction[];
   trashStatus: string;
   followupStatus?: string;
+  outcomeKind?: AccessPresentationOutcomeKind;
   outcomeStatus?: string;
   revealedCardStatus?: string;
   dismissLabel?: string;
@@ -64,19 +67,23 @@ export function AccessRevealModal({
   reveal,
   displayMode,
   disabled,
+  damageImpact = null,
   onAction,
   onChoiceOption,
+  onDamageDismiss,
   onDismiss,
 }: {
   reveal: AccessReveal;
   displayMode: CardDisplayMode;
   disabled: boolean;
+  damageImpact?: DamageImpactCue | null;
   onAction(action: LegalAction): void;
   onChoiceOption?: (
     action: LegalAction,
     choiceId: string,
     selectedOptionId: string,
   ) => void;
+  onDamageDismiss?(): void;
   onDismiss(): void;
 }) {
   const { primaryActions, declineAction } = accessRevealActionGroups(
@@ -88,7 +95,11 @@ export function AccessRevealModal({
   );
   const accessAmbienceClass = [
     interactionAmbienceClassName("access"),
-    hasTrashDecision ? interactionAmbienceClassName("trash") : "",
+    damageImpact
+      ? interactionAmbienceClassName("damage")
+      : hasTrashDecision || reveal.outcomeKind === "trashed"
+        ? interactionAmbienceClassName("trash")
+        : "",
   ]
     .filter(Boolean)
     .join(" ");
@@ -127,7 +138,7 @@ export function AccessRevealModal({
           ? "R&D Reveal"
           : "Zugriff";
   const visibleRevealedCards = reveal.revealedCards ?? [];
-  const statusText = reveal.trashStatus;
+  const statusText = reveal.outcomeStatus ?? reveal.trashStatus;
   const choiceOptions =
     reveal.choice && reveal.choiceAction
       ? reveal.choice.options.filter((option) => option.selectable !== false)
@@ -149,14 +160,16 @@ export function AccessRevealModal({
             <p>{reveal.description}</p>
           </div>
           <div className="accessRevealHeaderActions">
-            <button
-              className="button iconOnly"
-              onClick={onDismiss}
-              aria-label="Fenster schließen"
-              title="Schließen"
-            >
-              <X size={16} />
-            </button>
+            {damageImpact ? null : (
+              <button
+                className="button iconOnly"
+                onClick={onDismiss}
+                aria-label="Fenster schließen"
+                title="Schließen"
+              >
+                <X size={16} />
+              </button>
+            )}
           </div>
         </div>
         {visibleRevealedCards.length ? (
@@ -197,12 +210,30 @@ export function AccessRevealModal({
             </div>
           ) : null}
           <div className="accessRevealDecision">
-            <WindowEventIcon kind="access" />
-            {reveal.followupStatus ? (
-              <p className="accessRevealStatus">{reveal.followupStatus}</p>
-            ) : null}
-            <p className="accessRevealStatus">{statusText}</p>
-            <div className="accessRevealActions">
+            {damageImpact ? (
+              <AccessDamageStage
+                cue={damageImpact}
+                {...(reveal.card?.title
+                  ? { sourceTitle: reveal.card.title }
+                  : {})}
+                {...(onDamageDismiss ? { onDismiss: onDamageDismiss } : {})}
+              />
+            ) : (
+              <>
+                <WindowEventIcon
+                  kind={
+                    reveal.outcomeKind === "trashed"
+                      ? "trash"
+                      : reveal.outcomeKind === "stolen"
+                        ? "agenda"
+                        : "access"
+                  }
+                />
+                {reveal.followupStatus ? (
+                  <p className="accessRevealStatus">{reveal.followupStatus}</p>
+                ) : null}
+                <p className="accessRevealStatus">{statusText}</p>
+                <div className="accessRevealActions">
               {choiceOptions.length > 0
                 ? choiceOptions.map((option) => (
                     <button
@@ -277,12 +308,65 @@ export function AccessRevealModal({
                   </span>
                 </button>
               ) : null}
-            </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </section>
     </div>
   );
+}
+
+function AccessDamageStage({
+  cue,
+  sourceTitle,
+  onDismiss,
+}: {
+  cue: DamageImpactCue;
+  sourceTitle?: string;
+  onDismiss?: () => void;
+}) {
+  const typeLabel = damageTypeLabel(cue.damageType);
+  const sourceLabel = sourceTitle ?? cue.sourceLabel;
+  return (
+    <div
+      className={`accessDamageStage damage-${cue.damageType}`}
+      data-testid="access-damage-stage"
+    >
+      <WindowEventIcon kind={`${cue.damageType}-damage`} />
+      <strong className="accessDamageTitle">{typeLabel}</strong>
+      <p className="accessRevealStatus">
+        {cue.amount} {typeLabel} durch {sourceLabel}.
+      </p>
+      <div className="accessDamageStats">
+        {cue.runnerGripBefore !== undefined && cue.runnerGripAfter !== undefined ? (
+          <span>
+            Grip {cue.runnerGripBefore} -&gt; {cue.runnerGripAfter}
+          </span>
+        ) : null}
+        <span>Damage {cue.amount}</span>
+        {cue.damageType === "core" && cue.coreDamageAfter !== undefined ? (
+          <span>Core Damage {cue.coreDamageAfter}</span>
+        ) : null}
+      </div>
+      <button
+        className="button primary accessDamageContinue"
+        onClick={onDismiss}
+        disabled={!onDismiss}
+        type="button"
+      >
+        <Check size={15} />
+        Weiter
+      </button>
+    </div>
+  );
+}
+
+function damageTypeLabel(type: DamageImpactCue["damageType"]): string {
+  if (type === "meat") return "Meat Damage";
+  if (type === "core") return "Core Damage";
+  return "Net Damage";
 }
 
 function gypsyRevealCardStatus(
