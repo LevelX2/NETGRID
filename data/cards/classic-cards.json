@@ -1674,6 +1674,56 @@
         "sourceValue": "Common",
         "sourceId": "onr-classic-spoiler"
       }
+    },
+    {
+      "cardId": "onr_classic_053_protected-resources",
+      "setId": "classic",
+      "title": "Protected Resources",
+      "side": "corp",
+      "type": "asset",
+      "subtypes": [
+        "transactions"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 0,
+        "trashCost": 8,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[1]: Move any number of bits from your bit pool to Protected Resources. A: Move any number of bits from Protected Resources to your bit pool.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C053"
+    },
+    {
+      "cardId": "onr_classic_054_phone-freak",
+      "setId": "classic",
+      "title": "Phone Freak",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "connection"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 0,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Put 3 from the bank on Phone Freak when it is installed. Use these bits only to pay for increasing your link. If you use any of these bits, replace them from the bank at the start of your next turn.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C054"
     }
   ]
 }

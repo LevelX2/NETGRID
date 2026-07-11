@@ -622,7 +622,9 @@
         "onr_classic_049_omnitech-wet-drive",
         "onr_classic_050_sandbox-dig",
         "onr_classic_051_vintage-camaro",
-        "onr_classic_052_zetatech-portastation"
+        "onr_classic_052_zetatech-portastation",
+        "onr_classic_053_protected-resources",
+        "onr_classic_054_phone-freak"
       ],
       "expectedDecisionFamilies": [
         "legal_action_selection",

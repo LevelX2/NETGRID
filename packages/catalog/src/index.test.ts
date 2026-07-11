@@ -125,7 +125,7 @@ describe("card set support catalog source", () => {
     expect(TESTSET_CARD_IDS).toHaveLength(38);
     expect(ORIGINALSET_V1_CARD_IDS).toHaveLength(374);
     expect(PROTEUS_CARD_IDS).toHaveLength(154);
-    expect(CLASSIC_CARD_IDS).toHaveLength(52);
+    expect(CLASSIC_CARD_IDS).toHaveLength(54);
     expect(validateLoadedCardSets(sets)).toEqual([]);
   });
 
@@ -308,7 +308,7 @@ describe("card set support catalog source", () => {
     const classicCards = Object.values(createRuntimeCardsById()).filter(
       (card) => card.catalogCardId.startsWith("onr_classic_"),
     );
-    expect(CLASSIC_CARD_IDS).toHaveLength(52);
+    expect(CLASSIC_CARD_IDS).toHaveLength(54);
     expect(classicCards).toHaveLength(CLASSIC_CARD_IDS.length);
     expect(classicCards.every((card) => card.setId === "classic")).toBe(true);
     for (const cardId of CLASSIC_CARD_IDS) {
@@ -336,12 +336,10 @@ describe("card set support catalog source", () => {
       );
       expect(compiledHintsById.has(cardId), cardId).toBe(true);
     }
-    expect(
-      cardsById["onr_classic_001_data-fort-remapping"]?.rarity?.code,
-    ).toBe("common");
-    expect(
-      cardsById["onr_classic_052_zetatech-portastation"]?.title,
-    ).toBe("Zetatech Portastation");
+    expect(cardsById["onr_classic_001_data-fort-remapping"]?.rarity?.code).toBe(
+      "common",
+    );
+    expect(cardsById["onr_classic_054_phone-freak"]?.title).toBe("Phone Freak");
   });
 
   it("creates a valid runtime snapshot, index and public payload", () => {

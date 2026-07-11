@@ -9,6 +9,7 @@ import { printedSubroutinesForCardImplementation } from "./printed-subroutine-im
 import type { CardImplementationRuntimeDependencies } from "./card-implementation-runtime-dependency-types";
 import {
   advancementCounterCostForActivatedAbility,
+  creditCostForActivatedAbility,
   hasTapSourceCostForActivatedAbility,
   hasTrashSourceCostForActivatedAbility,
   randomCorpHqDiscardCostForActivatedAbility,
@@ -138,6 +139,47 @@ export function activatedAbilityPayload(
         }
       : {}),
   };
+}
+
+export function transferHostedCreditsEffect(
+  ability: ActivatedCardAbilityImplementation,
+):
+  | Extract<CardEffectImplementation, { kind: "transfer_hosted_credits" }>
+  | undefined {
+  return ability.effects.find(
+    (effect) => effect.kind === "transfer_hosted_credits",
+  ) as
+    | Extract<CardEffectImplementation, { kind: "transfer_hosted_credits" }>
+    | undefined;
+}
+
+export function transferHostedCreditsMaximum(
+  deps: CardImplementationRuntimeDependencies,
+  state: GameState,
+  sourceCardId: CardInstanceId,
+  ability: ActivatedCardAbilityImplementation,
+): number {
+  const effect = transferHostedCreditsEffect(ability);
+  if (!effect) return 0;
+  if (effect.direction === "source_to_controller")
+    return Math.max(0, deps.cardCounter(state, sourceCardId, "bit"));
+  const controller = deps.mustInstance(
+    state.cardInstances,
+    sourceCardId,
+  ).controller;
+  const reserved =
+    controller === "corp"
+      ? Math.max(
+          0,
+          Math.floor(state.corpTemporaryInstallRezCredits?.remaining ?? 0),
+        )
+      : 0;
+  const credits =
+    controller === "corp" ? state.corp.credits : state.runner.credits;
+  return Math.max(
+    0,
+    credits - reserved - creditCostForActivatedAbility(ability),
+  );
 }
 
 export function scoreConversionCapabilityPayloadForEffects(

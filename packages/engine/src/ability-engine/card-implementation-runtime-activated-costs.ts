@@ -80,6 +80,12 @@ export function activatedAbilityLegalActionCosts(
     : [];
 }
 
+export function creditCostForActivatedAbility(
+  ability: ActivatedCardAbilityImplementation,
+): number {
+  return activatedAbilityLegalActionCosts(ability)[0]?.credits ?? 0;
+}
+
 export function advancementCounterCostForActivatedAbility(
   ability: ActivatedCardAbilityImplementation,
 ): number {
@@ -90,7 +96,10 @@ export function advancementCounterCostForActivatedAbility(
 
 export function sourceCounterCostsForActivatedAbility(
   ability: ActivatedCardAbilityImplementation,
-): Array<{ counterType: Extract<CounterType, "boon" | "remap">; amount: number }> {
+): Array<{
+  counterType: Extract<CounterType, "boon" | "remap">;
+  amount: number;
+}> {
   return ability.costs
     .filter((cost) => cost.kind === "source_counter")
     .map((cost) => ({

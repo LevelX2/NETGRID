@@ -1981,9 +1981,9 @@ describe("CardImplementation coverage and registry invariants", () => {
     process.stdout.write(`${formatClassicCoverageReport(report)}\n`);
 
     expect(report.cardSet.setId).toBe("classic");
-    expect(report.classicCardIds).toHaveLength(52);
+    expect(report.classicCardIds).toHaveLength(54);
     expect(report.manifest.setId).toBe("classic");
-    expect(report.manifest.cards).toHaveLength(52);
+    expect(report.manifest.cards).toHaveLength(54);
     expect([...report.manifestCardIds].sort()).toEqual(
       [...report.classicCardIds].sort(),
     );

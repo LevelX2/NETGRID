@@ -17,6 +17,8 @@ import {
   ownRezzedIceTargetIds,
   rezzedInstalledIceTargetIds,
   sameFortSubroutineTargetForLegalAction,
+  transferHostedCreditsEffect,
+  transferHostedCreditsMaximum,
   trashOwnRezzedIceForCreditsEffect,
 } from "./card-implementation-runtime-activated-targets";
 import { assertActivatedCardImplementationAbilityCanResolve } from "./card-implementation-runtime-legality";
@@ -99,6 +101,22 @@ export function validateActivatedCardImplementationAbility(
       "Diese aktivierte Kartenfaehigkeit gehoert der anderen Seite.",
     );
   validateActivatedAbilityCosts(ability, legalAction);
+  const transferEffect = transferHostedCreditsEffect(ability);
+  if (transferEffect) {
+    const amount = Number(legalAction.payload?.xValue);
+    const maximum = transferHostedCreditsMaximum(deps, state, cardId, ability);
+    if (
+      !Number.isInteger(amount) ||
+      amount < transferEffect.amount.min ||
+      amount > maximum ||
+      legalAction.payload?.hostedCreditTransferDirection !==
+        transferEffect.direction ||
+      legalAction.payload?.hostedCreditTransferAmount !== amount
+    )
+      throw new Error(
+        "Die Anzahl der zu transferierenden Bits ist nicht mehr gültig.",
+      );
+  }
   if (
     !canPayActivatedCardImplementationCosts(
       state,

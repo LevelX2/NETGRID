@@ -70,6 +70,7 @@ async function readLocalOnrImageLookup(): Promise<Map<string, string>> {
   await addLocalOnrV1SnapshotImages(lookup);
   await addLocalOnrSetIndexImages(lookup, "v21-proteus", PROTEUS_CARD_SET_PATH);
   await addLocalOnrSetIndexImages(lookup, "v22-classic", CLASSIC_CARD_SET_PATH);
+  await addLocalOnrSetIndexImages(lookup, "v22b-silent-impact", CLASSIC_CARD_SET_PATH);
   return lookup;
 }
 

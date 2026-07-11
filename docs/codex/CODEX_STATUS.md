@@ -19,7 +19,7 @@ LegalAction-Disziplin, Hidden-Info-Schutz, deterministisches Replay,
 StateHash und seedbasierte RandomDrawRecords sind verbindlich.
 
 Originalset, Classic und Proteus sind technisch spielbar. Classic ist mit
-52/52 Karten abgeschlossen. Proteus ist mit 154/154 Karten technisch
+54/54 Karten abgeschlossen. Proteus ist mit 154/154 Karten technisch
 `ai_supported`; alle 114 Pilotdeck-Karten sind an elf Familien-Szenarien
 gebunden. Vier qualifizierte Proteus-Snapshots sind im AI-Deckpool 1.1.0 für
 poolbewusste feste oder seedbasierte Auswahl freigegeben. Technischer Support

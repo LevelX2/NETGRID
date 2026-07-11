@@ -1,6 +1,8 @@
 import type { CardEffectFamilyInput } from "./family-runtime";
 
-export function executeHostedCreditEffect(input: CardEffectFamilyInput): boolean {
+export function executeHostedCreditEffect(
+  input: CardEffectFamilyInput,
+): boolean {
   const {
     context,
     effect,
@@ -8,6 +10,7 @@ export function executeHostedCreditEffect(input: CardEffectFamilyInput): boolean
     publicPayload,
     resolvedEffects,
     runtime,
+    state,
   } = input;
 
   switch (effect.kind) {
@@ -57,8 +60,13 @@ export function executeHostedCreditEffect(input: CardEffectFamilyInput): boolean
         );
       if (mode === "up_to_amount_if_available") {
         if (effect.amount === undefined)
-          throw new Error("take_hosted_credits amount mode requires an amount.");
-        runtime.assertPositiveIntegerAmount("take_hosted_credits", effect.amount);
+          throw new Error(
+            "take_hosted_credits amount mode requires an amount.",
+          );
+        runtime.assertPositiveIntegerAmount(
+          "take_hosted_credits",
+          effect.amount,
+        );
       }
       if (!context.takeHostedCredits)
         throw new Error(
@@ -88,10 +96,88 @@ export function executeHostedCreditEffect(input: CardEffectFamilyInput): boolean
       });
       return true;
     }
+    case "transfer_hosted_credits": {
+      runtime.assertPublicVisibility(
+        "transfer_hosted_credits",
+        effect.visibility,
+      );
+      const amount = Math.floor(Number(context.xValue ?? 0));
+      runtime.assertPositiveIntegerAmount("transfer_hosted_credits", amount);
+      if (effect.amount.kind !== "x_value" || amount < effect.amount.min)
+        throw new Error("transfer_hosted_credits amount profile is invalid.");
+      if (effect.direction === "controller_to_source") {
+        if (!runtime.spendCreditsIfAvailable(state, context.controller, amount))
+          throw new Error("Nicht genug Credits für den Bit-Transfer.");
+        if (!context.addHostedCredits)
+          throw new Error(
+            "transfer_hosted_credits requires an addHostedCredits execution context.",
+          );
+        const addResult = context.addHostedCredits(
+          context.sourceCardId,
+          amount,
+        );
+        runtime.mergePublicPayload(publicPayload, addResult.publicPayload);
+        resolvedEffects.push({
+          effectId: runtime.publicEffectId(
+            context,
+            index,
+            "add_hosted_credits",
+          ),
+          kind: "add_hosted_credits",
+          visibility: effect.visibility,
+          side: context.controller,
+          amount: addResult.amount,
+          counterType: "bit",
+          addedCounterAmount: addResult.amount,
+          remainingCounters: addResult.hostedCreditsAfter,
+          reason: runtime.effectReason(context),
+          ...(context.sourceDefinitionId
+            ? { sourceDefinitionId: context.sourceDefinitionId }
+            : {}),
+          ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
+        });
+        return true;
+      }
+      if (effect.direction !== "source_to_controller")
+        throw new Error("transfer_hosted_credits direction is invalid.");
+      if (!context.takeHostedCredits)
+        throw new Error(
+          "transfer_hosted_credits requires a takeHostedCredits execution context.",
+        );
+      const takeResult = context.takeHostedCredits(
+        context.sourceCardId,
+        context.controller,
+        amount,
+      );
+      if (takeResult.amount !== amount)
+        throw new Error("Die Quelle enthält nicht genug Bits.");
+      runtime.mergePublicPayload(publicPayload, takeResult.publicPayload);
+      resolvedEffects.push({
+        effectId: runtime.publicEffectId(context, index, "take_hosted_credits"),
+        kind: "take_hosted_credits",
+        visibility: effect.visibility,
+        side: context.controller,
+        amount: takeResult.amount,
+        counterType: "bit",
+        removedCounterAmount: takeResult.amount,
+        remainingCounters: takeResult.hostedCreditsAfter,
+        reason: runtime.effectReason(context),
+        ...(context.sourceDefinitionId
+          ? { sourceDefinitionId: context.sourceDefinitionId }
+          : {}),
+        ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
+      });
+      return true;
+    }
     case "trash_source_when_empty": {
-      runtime.assertPublicVisibility("trash_source_when_empty", effect.visibility);
+      runtime.assertPublicVisibility(
+        "trash_source_when_empty",
+        effect.visibility,
+      );
       if ((effect as { source?: string }).source !== "source")
-        throw new Error("trash_source_when_empty effect source must be source.");
+        throw new Error(
+          "trash_source_when_empty effect source must be source.",
+        );
       if (!context.trashSourceWhenEmpty)
         throw new Error(
           "trash_source_when_empty effect requires a trashSourceWhenEmpty execution context.",
@@ -100,7 +186,11 @@ export function executeHostedCreditEffect(input: CardEffectFamilyInput): boolean
       runtime.mergePublicPayload(publicPayload, trashResult.publicPayload);
       if (!trashResult.sourceTrashed) return true;
       resolvedEffects.push({
-        effectId: runtime.publicEffectId(context, index, "trash_source_when_empty"),
+        effectId: runtime.publicEffectId(
+          context,
+          index,
+          "trash_source_when_empty",
+        ),
         kind: "trash_source_when_empty",
         visibility: effect.visibility,
         side: context.controller,

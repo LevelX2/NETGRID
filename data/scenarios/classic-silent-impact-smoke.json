@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "netgrid.scenario.v1",
+  "scenarioId": "classic-silent-impact-smoke",
+  "release": "Classic Silent Impact v2.2b Ergänzung",
+  "status": "package",
+  "coversCards": [
+    "onr_classic_053_protected-resources",
+    "onr_classic_054_phone-freak"
+  ],
+  "scenarios": [
+    {
+      "id": "classic_silent_impact_smoke",
+      "side": "both",
+      "coversCards": [
+        "onr_classic_053_protected-resources",
+        "onr_classic_054_phone-freak"
+      ],
+      "assertions": [
+        "Protected Resources exposes only affordable positive transfer amounts, charges one additional Corp credit for depositing, and moves the selected public bit amount in either direction.",
+        "Phone Freak receives three public bits on install, spends them only for increasing link, and refills the pool at the start of the next Runner turn after use."
+      ],
+      "sideSafetyAssertions": [
+        "legal_actions_only",
+        "public_payload_only",
+        "no_card_instance_id_leak",
+        "statehash_replay_required"
+      ]
+    }
+  ]
+}
