@@ -79,6 +79,7 @@ import {
 } from "./action-cues";
 import {
   accessPresentationOwnsActionCue,
+  coalesceAccessActionCues,
   interactionPresentationBlocksAi,
 } from "./access-presentation";
 import {
@@ -2881,7 +2882,15 @@ export default function Page() {
       lastPresentedEventId: lastSeen,
     });
     lastSeenCueEventIdRef.current = latestId;
-    if (cues.length > 0) setActionCueQueue((current) => [...current, ...cues]);
+    if (cues.length > 0) {
+      const coalescedCues = coalesceAccessActionCues(
+        currentActionCue,
+        actionCueQueue,
+        cues,
+      );
+      setCurrentActionCue(coalescedCues.current);
+      setActionCueQueue(coalescedCues.queue);
+    }
     if (damageImpacts.length > 0)
       setDamageImpactQueue((current) => [...current, ...damageImpacts]);
     if (!audioEnabled || newEvents.length === 0) return;
@@ -2915,6 +2924,8 @@ export default function Page() {
     automaticEffectCuesEnabled,
     audioEnabled,
     audioVolume,
+    actionCueQueue,
+    currentActionCue,
     matchEnded,
     payload?.eventTail,
     payload?.playerView.stateVersion,

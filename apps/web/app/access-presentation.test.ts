@@ -4,6 +4,7 @@ import type { PublicGameEvent } from "@netgrid/shared";
 import {
   accessPresentationOwnsActionCue,
   accessPresentationOutcomeAfter,
+  coalesceAccessActionCues,
   interactionPresentationBlocksAi,
   publicAccessOwnsOutcomeEvent,
 } from "./access-presentation";
@@ -127,6 +128,31 @@ describe("access presentation outcome ownership", () => {
         accessOutcomeOpen: false,
       }),
     ).toBe(false);
+  });
+
+  it("updates one cue slot from run through hidden access to trash", () => {
+    const run = { actionType: "start_run", id: "run" };
+    const access = { actionType: "access_card", id: "access" };
+    const trash = { actionType: "trash_accessed_card", id: "trash" };
+
+    const accessed = coalesceAccessActionCues(run, [], [access]);
+    expect(accessed).toEqual({ current: access, queue: [] });
+    expect(
+      coalesceAccessActionCues(accessed.current, accessed.queue, [trash]),
+    ).toEqual({ current: trash, queue: [] });
+  });
+
+  it("coalesces a batched run and access while retaining unrelated cues", () => {
+    const credit = { actionType: "gain_credit", id: "credit" };
+    const run = { actionType: "start_run", id: "run" };
+    const access = { actionType: "access_card", id: "access" };
+
+    expect(
+      coalesceAccessActionCues(null, [credit], [run, access]),
+    ).toEqual({
+      current: null,
+      queue: [credit, access],
+    });
   });
 });
 

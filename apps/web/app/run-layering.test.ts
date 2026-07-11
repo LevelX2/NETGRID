@@ -212,6 +212,7 @@ describe("run window layering", () => {
     expect(pageSource).toContain(
       "interactionPresentationBlocksAi({",
     );
+    expect(pageSource).toContain("coalesceAccessActionCues(");
     expect(accessReviewModalSource).toContain(
       'data-testid="access-damage-stage"',
     );

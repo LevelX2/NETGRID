@@ -36,6 +36,55 @@ export function interactionPresentationBlocksAi(input: {
   return input.damageOpen || input.accessOutcomeOpen;
 }
 
+export function coalesceAccessActionCues<
+  T extends { actionType: string },
+>(
+  current: T | null,
+  queued: T[],
+  incoming: T[],
+): { current: T | null; queue: T[] } {
+  let nextCurrent = current;
+  const nextQueue = [...queued];
+  for (const cue of incoming) {
+    if (cue.actionType === "access_card") {
+      if (nextCurrent?.actionType === "start_run") {
+        nextCurrent = cue;
+        continue;
+      }
+      const runIndex = nextQueue.findIndex(
+        (queuedCue) => queuedCue.actionType === "start_run",
+      );
+      if (runIndex >= 0) {
+        nextQueue.splice(runIndex, 1, cue);
+        continue;
+      }
+    }
+    if (ACCESS_OUTCOME_ACTION_TYPES.has(cue.actionType)) {
+      if (nextCurrent?.actionType === "access_card") {
+        nextCurrent = cue;
+        continue;
+      }
+      const accessIndex = lastCueIndex(nextQueue, "access_card");
+      if (accessIndex >= 0) {
+        nextQueue.splice(accessIndex, 1, cue);
+        continue;
+      }
+    }
+    nextQueue.push(cue);
+  }
+  return { current: nextCurrent, queue: nextQueue };
+}
+
+function lastCueIndex<T extends { actionType: string }>(
+  cues: T[],
+  actionType: string,
+): number {
+  for (let index = cues.length - 1; index >= 0; index -= 1) {
+    if (cues[index]?.actionType === actionType) return index;
+  }
+  return -1;
+}
+
 export function publicAccessOwnsOutcomeEvent(
   events: PublicGameEvent[],
   outcomeEvent: PublicGameEvent,

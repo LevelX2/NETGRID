@@ -158,3 +158,13 @@ Lies zuerst AGENTS.md, AGENTS.local.md, agents/release-implementation-agent.md u
 - Allgemeiner Damage funktioniert unverändert.
 - Redigierte R&D-Zugriffe leaken keine Kartenidentität.
 - Alle Paketcommits sind lokal nach `main` integriert.
+
+## Verifikationsergebnis
+
+Paket 4 wurde mit folgenden Nachweisen abgeschlossen:
+
+- Web-Typecheck erfolgreich;
+- 150 fokussierte Tests für Access-Präsentation, Action-Cues, Access-Derivation, Pacing-Helfer und Layering erfolgreich;
+- Desktop: kombinierte Setup!-Access-/Net-Damage-Stufe sowie anschließendes Trash-Outcome im selben Fenster visuell geprüft;
+- Mobile `390 x 844`: gestapelte Karte und Damage-Stufe ohne Überlappung, vollständig sichtbares Icon und bedienbarer Weiter-Button;
+- `git diff --check` erfolgreich.
