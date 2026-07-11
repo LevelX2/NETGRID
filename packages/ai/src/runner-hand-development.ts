@@ -167,6 +167,9 @@ type PersistentFunctionalProfile = {
   damagePrevention: boolean;
   handSizeSupport: boolean;
   memorySupport: boolean;
+  breakerStrengthSupport: boolean;
+  iceStrengthReduction: boolean;
+  recurringBreakerEconomy: boolean;
   bankTool: boolean;
   accessSupport: boolean;
   searchSupport: boolean;
@@ -828,6 +831,10 @@ function persistentFunctionalProfileForCard(
   const handSizeSupport =
     runnerHandTextHasHandSizeSignal(text);
   const memorySupport = looksLikeMemorySupport(card, text);
+  const breakerStrengthSupport = runnerHandTextHasBreakerStrengthSupportSignal(text);
+  const iceStrengthReduction = runnerHandTextHasIceStrengthReductionSignal(text);
+  const recurringBreakerEconomy =
+    runnerHandTextHasRecurringBreakerEconomySignal(text);
   const bankTool = looksLikeBankTool(text);
   const economyTool = looksLikeEconomyTool(text);
   const actionEconomy = runnerHandTextHasActionEconomySignal(text);
@@ -844,6 +851,9 @@ function persistentFunctionalProfileForCard(
     ...breakerCoverage.map((coverage) => `breaker:${coverage}`),
     ...nonAdditiveUtilityFamilies,
     ...(memorySupport ? ["memory"] : []),
+    ...(breakerStrengthSupport ? ["breaker_strength_support"] : []),
+    ...(iceStrengthReduction ? ["ice_strength_reduction"] : []),
+    ...(recurringBreakerEconomy ? ["breaker_recurring_economy"] : []),
     ...(damagePrevention ? ["damage_prevention"] : []),
     ...(handSizeSupport ? ["hand_size"] : []),
     ...(bankTool ? ["bank_tool"] : []),
@@ -865,6 +875,9 @@ function persistentFunctionalProfileForCard(
     damagePrevention,
     handSizeSupport,
     memorySupport,
+    breakerStrengthSupport,
+    iceStrengthReduction,
+    recurringBreakerEconomy,
     bankTool,
     accessSupport,
     searchSupport,
@@ -923,16 +936,30 @@ function runnerHandTextHasTemporaryCounterSignal(text: string): boolean {
   ]);
 }
 
-function runnerHandTextHasBreakerSignal(text: string): boolean {
+function runnerHandTextHasBreakerStrengthSupportSignal(text: string): boolean {
   const tokens = runnerHandTextTokens(text);
   return (
-    runnerHandTokensIncludeAny(tokens, [
-      "breaker",
-      "icebreaker",
-      "fracter",
-      "decoder",
-      "killer",
-    ]) || runnerHandTokensIncludeInOrder(tokens, "break", "subroutine")
+    runnerHandTokensIncludeAny(tokens, ["breaker", "icebreaker"]) &&
+    runnerHandTokensIncludeAny(tokens, ["strength", "pump", "boost"]) &&
+    !runnerHandTokensIncludeInOrder(tokens, "break", "subroutine")
+  );
+}
+
+function runnerHandTextHasIceStrengthReductionSignal(text: string): boolean {
+  const tokens = runnerHandTextTokens(text);
+  return (
+    runnerHandTokensIncludeAny(tokens, ["ice"]) &&
+    runnerHandTokensIncludeAny(tokens, ["strength"]) &&
+    runnerHandTokensIncludeAny(tokens, ["reduce", "reduced", "reduction", "modifier"])
+  );
+}
+
+function runnerHandTextHasRecurringBreakerEconomySignal(text: string): boolean {
+  const tokens = runnerHandTextTokens(text);
+  return (
+    runnerHandTokensIncludeAny(tokens, ["recurring"]) &&
+    runnerHandTokensIncludeAny(tokens, ["credit", "credits", "economy"]) &&
+    runnerHandTokensIncludeAny(tokens, ["breaker", "icebreaker"])
   );
 }
 
@@ -1383,6 +1410,13 @@ function stackabilityClassForPersistentInstall(
   if (profile.memorySupport || profile.damagePrevention || profile.handSizeSupport) {
     return "cumulative_capacity";
   }
+  if (
+    profile.breakerStrengthSupport ||
+    profile.iceStrengthReduction ||
+    profile.recurringBreakerEconomy
+  ) {
+    return "cumulative_capacity";
+  }
   if (profile.bankTool) return "action_bank_parallel";
   if (profile.accessSupport || profile.searchSupport) return "synergy_support";
   if (profile.breakerCoverage.length > 0) {
@@ -1430,6 +1464,15 @@ function capabilityDeltaForPersistentInstall(params: {
     return "risk_reduction";
   }
   if (params.newFunctionalCoverage.length > 0) {
+    if (
+      params.profile.breakerStrengthSupport ||
+      params.profile.iceStrengthReduction
+    ) {
+      return "cost_upgrade";
+    }
+    if (params.profile.recurringBreakerEconomy) {
+      return "cumulative_capacity";
+    }
     if (
       params.profile.memorySupport ||
       params.profile.damagePrevention ||
@@ -1594,6 +1637,19 @@ function cumulativeNeedLevel(
   if (profile.bankTool) {
     if (params.input.playerView.own.credits <= 2) return "high";
     if (params.input.playerView.own.credits <= 5) return "medium";
+  }
+  if (
+    profile.breakerStrengthSupport ||
+    profile.iceStrengthReduction ||
+    profile.recurringBreakerEconomy
+  ) {
+    const hasInstalledBreaker = (params.input.playerView.own.rig ?? []).some(
+      (card) => looksLikeBreaker(card, signalsForCard(card, []).text),
+    );
+    if (hasInstalledBreaker && params.input.playerView.own.credits <= 5) {
+      return "high";
+    }
+    if (hasInstalledBreaker) return "medium";
   }
   if (
     profile.accessSupport &&
@@ -1894,7 +1950,11 @@ function looksLikeBreaker(card: VisibleCard, text: string): boolean {
         "killer",
       ]),
     ) ||
-      runnerHandTextHasBreakerSignal(text))
+      runnerHandTokensIncludeInOrder(
+        runnerHandTextTokens(text),
+        "break",
+        "subroutine",
+      ))
   );
 }
 

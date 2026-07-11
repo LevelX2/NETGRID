@@ -518,6 +518,64 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     expect(noiseEvidence).not.toContain("breaker:");
   });
 
+  it("values breaker support programs without misclassifying them as duplicate breakers", () => {
+    const krash = visibleCard("krash-installed", {
+      definitionId: "test-krash",
+      title: "Krash",
+      type: "program",
+      subtypes: ["icebreaker"],
+      rulesText: "Break any ice subroutine. 2 credits: +1 strength.",
+      memoryCost: 1,
+    });
+    const lockjaw = visibleCard("lockjaw-1", {
+      definitionId: "test-lockjaw",
+      title: "Lockjaw",
+      type: "program",
+      rulesText: "Choose an installed icebreaker. That icebreaker has +2 strength.",
+      installCost: 0,
+      memoryCost: 1,
+    });
+    const clown = visibleCard("clown-1", {
+      definitionId: "test-clown",
+      title: "Clown",
+      type: "program",
+      rulesText: "All ice is encountered with its strength reduced by 1.",
+      installCost: 4,
+      memoryCost: 1,
+    });
+    const vewy = visibleCard("vewy-1", {
+      definitionId: "test-vewy",
+      title: "Vewy Vewy Quiet",
+      type: "program",
+      rulesText:
+        "2 recurring credits. Use these credits only for using an icebreaker during a run.",
+      installCost: 4,
+      memoryCost: 1,
+    });
+    const input = runnerInput({
+      credits: 10,
+      hand: [lockjaw, clown, vewy],
+      rig: [krash],
+      memoryUsed: 1,
+      memoryLimit: 4,
+      legalActions: [
+        installAction("install-lockjaw", lockjaw, 0),
+        installAction("install-clown", clown, 4),
+        installAction("install-vewy", vewy, 4),
+      ],
+    });
+
+    const evaluations = evaluateRunnerHandDevelopment({ input });
+    for (const id of ["lockjaw-1", "clown-1", "vewy-1"]) {
+      const evaluation = findByInstance(evaluations, id);
+      expect(evaluation.evidence.join("|")).not.toContain(
+        "persistent_functional_coverage:breaker:",
+      );
+      expect(evaluation.persistentInstallEvaluation?.finalInstallFit).toBeGreaterThan(0);
+      expect(evaluation.deferReason).toBe("none");
+    }
+  });
+
   it("devalues a second risky universal breaker when it adds no capability and reduces buffer", () => {
     const secondBlink = visibleCard("blink-2", {
       definitionId: "test-risky-universal-breaker",

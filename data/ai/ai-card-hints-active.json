@@ -664,7 +664,12 @@
       "cardId": "onr_v1_012_clown",
       "side": "runner",
       "cardType": "program",
-      "roles": ["ice_modifier", "program", "run_support"],
+      "roles": [
+        "ice_modifier",
+        "icebreaker_support",
+        "program",
+        "run_support"
+      ],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [
         "encounter_ice",
@@ -692,11 +697,12 @@
       },
       "effects": [
         {
-          "kind": "remote_protection",
+          "kind": "global_modifier",
           "timing": "persistent",
           "scope": "ice",
           "resource": "strength",
-          "amount": -1
+          "amount": -1,
+          "target": "encountered_ice"
         }
       ]
     },
@@ -1940,8 +1946,7 @@
         "flex_breaker",
         "breaker_decoder",
         "breaker_fracter",
-        "breaker_killer",
-        "icebreaker_support"
+        "breaker_killer"
       ],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": ["install_program", "memory", "subtype_icebreaker"],
@@ -3664,7 +3669,14 @@
       "cardId": "onr_v1_071_vewy-vewy-quiet",
       "side": "runner",
       "cardType": "program",
-      "roles": ["program", "stealth"],
+      "roles": [
+        "economy",
+        "icebreaker_support",
+        "program",
+        "recurring",
+        "run_support",
+        "stealth"
+      ],
       "planRoles": ["build_rig", "run_support"],
       "requiredMechanics": ["install_program", "stealth"],
       "valueHints": {
@@ -27692,7 +27704,7 @@
       "cardId": "onr_proteus_091_lockjaw",
       "side": "runner",
       "cardType": "program",
-      "roles": ["icebreaker", "program"],
+      "roles": ["icebreaker_support", "program", "run_support"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
       "valueHints": {

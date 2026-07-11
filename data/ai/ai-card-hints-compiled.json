@@ -849,6 +849,7 @@
       "cardType": "program",
       "roles": [
         "ice_modifier",
+        "icebreaker_support",
         "program",
         "run_support"
       ],
@@ -885,9 +886,10 @@
       "effects": [
         {
           "amount": -1,
-          "kind": "remote_protection",
+          "kind": "global_modifier",
           "resource": "strength",
           "scope": "ice",
+          "target": "encountered_ice",
           "timing": "persistent"
         },
         {
@@ -2706,8 +2708,7 @@
         "flex_breaker",
         "breaker_decoder",
         "breaker_fracter",
-        "breaker_killer",
-        "icebreaker_support"
+        "breaker_killer"
       ],
       "planRoles": [
         "build_rig",
@@ -5009,7 +5010,11 @@
       "side": "runner",
       "cardType": "program",
       "roles": [
+        "economy",
+        "icebreaker_support",
         "program",
+        "recurring",
+        "run_support",
         "stealth"
       ],
       "planRoles": [
@@ -38444,8 +38449,9 @@
       "side": "runner",
       "cardType": "program",
       "roles": [
-        "icebreaker",
-        "program"
+        "icebreaker_support",
+        "program",
+        "run_support"
       ],
       "planRoles": [
         "build_rig",
