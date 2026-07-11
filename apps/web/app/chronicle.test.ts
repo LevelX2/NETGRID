@@ -2514,6 +2514,80 @@ describe("formatChronicleEvent", () => {
     );
   });
 
+  it("describes Corporate Shuffle without revealing the selected HQ card", () => {
+    const event = makeEvent("resolve_choice", {
+      actor: "corp",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "classic_corporate_shuffle_hq_to_rd",
+      sourceDefinitionId: "onr_classic_017_corporate-shuffle",
+      movedCount: 1,
+      aiExplanation: "legal choice",
+    });
+    const item = formatChronicleEvent(event, "runner");
+
+    expect(item.title).toBe(
+      "Die Korp-KI hat mit Corporate Shuffle eine verdeckte HQ-Karte in R&D gemischt.",
+    );
+    expect(item.description).toBe(
+      "Die Identität der gewählten HQ-Karte bleibt für den Runner verborgen.",
+    );
+    expect(JSON.stringify(item)).not.toContain("classic_hq_card");
+    expect(shouldSuppressChronicleEventItem(event)).toBe(false);
+  });
+
+  it("names revealed Reclamation Project ICE and handles an empty selection", () => {
+    const revealed = makeEvent("resolve_choice", {
+      actor: "corp",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1922_corp_archives_to_hq",
+      sourceDefinitionId: "onr_classic_018_reclamation-project",
+      movedCount: 2,
+      archivesRevealCount: 2,
+      archivesRevealDefinitionIds: "onr_v1_245_fire-wall,onr_v1_279_wall-of-static",
+      archivesRevealTitles: "Fire Wall, Wall of Static",
+      aiExplanation: "legal choice",
+    });
+    const empty = makeEvent("resolve_choice", {
+      actor: "corp",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1922_corp_archives_to_hq",
+      sourceDefinitionId: "onr_classic_018_reclamation-project",
+      movedCount: 0,
+      archivesRevealCount: 0,
+      archivesRevealDefinitionIds: "",
+      archivesRevealTitles: "",
+      aiExplanation: "legal choice",
+    });
+
+    expect(formatChronicleEvent(revealed, "runner")).toMatchObject({
+      title:
+        "Die Korp-KI hat mit Reclamation Project 2 ICE aus Archives gezeigt und nach HQ genommen.",
+      description: "Gezeigt: Fire Wall und Wall of Static.",
+      visibility: "public",
+      cardDefinitionId: "onr_classic_018_reclamation-project",
+    });
+    expect(formatChronicleEvent(empty, "runner")).toMatchObject({
+      title:
+        "Die Korp-KI hat mit Reclamation Project kein ICE aus Archives gewählt.",
+      description: "Es wurde keine Karte gezeigt oder nach HQ genommen.",
+    });
+  });
+
+  it("suppresses generic resolved choices without a public narrative", () => {
+    const event = makeEvent("resolve_choice", {
+      actor: "corp",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "private_unknown_choice",
+      movedCount: 0,
+      aiExplanation: "legal choice",
+    });
+
+    expect(formatChronicleEvent(event, "runner").title).toBe(
+      "Die Korp-KI hat eine Entscheidung beantwortet.",
+    );
+    expect(shouldSuppressChronicleEventItem(event)).toBe(true);
+  });
+
   it("names Forged Activation Orders target and Corp rez-or-trash decisions in the chronicle", () => {
     const runnerChoice = formatChronicleEvent(
       makeEvent("resolve_choice", {

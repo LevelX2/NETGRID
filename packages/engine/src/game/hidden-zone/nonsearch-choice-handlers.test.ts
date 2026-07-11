@@ -295,6 +295,7 @@ describe("hidden-zone nonsearch choice handlers", () => {
       ice1,
       ice2,
     ]);
+    expect(host.state.pendingChoice?.minSelections).toBe(0);
     expect(host.state.pendingChoice?.maxSelections).toBe(2);
 
     host.playerAction = playerAction([`card_${ice1}`, `card_${ice2}`]);
@@ -305,9 +306,78 @@ describe("hidden-zone nonsearch choice handlers", () => {
     expect(host.state.corp.hq).toEqual([ice1, ice2]);
     expect(host.legalAction.payload).toMatchObject({
       hiddenZoneAction: "v1922_corp_archives_to_hq",
+      sourceDefinitionId: "onr_classic_018_reclamation-project",
       movedCount: 2,
       archivesRevealCount: 2,
       archivesRevealDefinitionIds: "classic_ice_1,classic_ice_2",
+    });
+  });
+
+  it("allows Reclamation Project to choose zero ICE or resolve with no eligible ICE", () => {
+    const ice = "ice_1" as CardInstanceId;
+    const host = makeHost({
+      corpArchives: [sourceId, ice],
+      definitions: {
+        [sourceId]: definition(
+          "onr_classic_018_reclamation-project",
+          "operation",
+          "Reclamation Project",
+        ),
+        [ice]: definition("classic_ice_1", "ice", "Classic ICE 1"),
+      },
+      corpUtilities: {
+        [sourceId]: {
+          kind: "corp_archives_to_hq",
+          filter: { cardType: "ice" },
+          maxSelections: "all",
+          revealToRunner: true,
+          playCost: { kind: "printed", additionalClicks: 1 },
+          visibility: "hidden_info_barrier",
+        },
+      },
+    });
+
+    startCorpArchivesToHqChoice(host, sourceId);
+    host.playerAction = playerAction([]);
+    expect(handleHiddenZoneNonSearchChoice(host)).toMatchObject({
+      handled: true,
+      stateChanged: true,
+      movedCardIds: [],
+    });
+    expect(host.state.corp.archives).toEqual([sourceId, ice]);
+    expect(host.legalAction.payload).toMatchObject({
+      sourceDefinitionId: "onr_classic_018_reclamation-project",
+      movedCount: 0,
+      archivesRevealCount: 0,
+    });
+
+    const emptyHost = makeHost({
+      corpArchives: [sourceId],
+      definitions: {
+        [sourceId]: definition(
+          "onr_classic_018_reclamation-project",
+          "operation",
+          "Reclamation Project",
+        ),
+      },
+      corpUtilities: {
+        [sourceId]: {
+          kind: "corp_archives_to_hq",
+          filter: { cardType: "ice" },
+          maxSelections: "all",
+          revealToRunner: true,
+          playCost: { kind: "printed", additionalClicks: 1 },
+          visibility: "hidden_info_barrier",
+        },
+      },
+    });
+    startCorpArchivesToHqChoice(emptyHost, sourceId);
+    expect(emptyHost.state.pendingChoice).toBeUndefined();
+    expect(emptyHost.legalAction.payload).toMatchObject({
+      sourceDefinitionId: "onr_classic_018_reclamation-project",
+      eligibleCount: 0,
+      movedCount: 0,
+      archivesRevealCount: 0,
     });
   });
 
@@ -343,6 +413,7 @@ describe("hidden-zone nonsearch choice handlers", () => {
     expect(host.legalAction.payload).toMatchObject({
       hiddenZoneBarrier: true,
       hiddenZoneAction: "classic_corporate_shuffle_hq_to_rd",
+      sourceDefinitionId: "onr_classic_017_corporate-shuffle",
       movedCount: 1,
     });
     expect(host.legalAction.payload).not.toHaveProperty("movedCardId");

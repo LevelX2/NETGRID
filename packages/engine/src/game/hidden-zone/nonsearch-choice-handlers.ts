@@ -135,7 +135,24 @@ export function startCorpArchivesToHqChoice(
       cardId !== sourceCardId &&
       corpArchivesToHqFilterMatches(host, cardId, utility),
   );
-  if (archiveCards.length === 0) throw new Error("Archives ist leer.");
+  if (archiveCards.length === 0) {
+    host.legalAction.payload = {
+      ...(host.legalAction.payload ?? {}),
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1922_corp_archives_to_hq",
+      sourceDefinitionId: host.cards.definitionFor(sourceCardId).id,
+      eligibleCount: 0,
+      movedCount: 0,
+      ...(utility?.revealToRunner
+        ? {
+            archivesRevealCount: 0,
+            archivesRevealDefinitionIds: "",
+            archivesRevealTitles: "",
+          }
+        : {}),
+    };
+    return;
+  }
   const maxSelections =
     utility?.maxSelections === "all" ? archiveCards.length : 1;
   host.state.pendingChoice = {
@@ -151,7 +168,7 @@ export function startCorpArchivesToHqChoice(
       const definition = host.cards.definitionFor(cardId);
       return { id: `card_${cardId}`, label: definition.title, value: cardId };
     }),
-    minSelections: 1,
+    minSelections: utility?.maxSelections === "all" ? 0 : 1,
     maxSelections,
     stateVersion: host.state.stateVersion + 1,
     visibility: "hidden_info_barrier",
@@ -467,7 +484,6 @@ function resolveCorpArchivesToHqChoice(
   const selectedSet = new Set(selectedIds);
   const maxSelections = utility?.maxSelections === "all" ? Infinity : 1;
   if (
-    selectedIds.length === 0 ||
     selectedIds.length > maxSelections ||
     selectedSet.size !== selectedIds.length ||
     selectedIds.some(
@@ -493,6 +509,7 @@ function resolveCorpArchivesToHqChoice(
   const payload = {
     hiddenZoneBarrier: true,
     hiddenZoneAction: "v1922_corp_archives_to_hq",
+    sourceDefinitionId: host.cards.definitionFor(sourceCardId).id,
     movedCount: selectedIds.length,
     ...(utility?.revealToRunner
       ? {
@@ -545,6 +562,7 @@ function resolveCorpHqCardToRdChoice(
     ...shuffleResult.publicPayload,
     hiddenZoneBarrier: true,
     hiddenZoneAction: "classic_corporate_shuffle_hq_to_rd",
+    sourceDefinitionId,
     movedCount: 1,
   };
   host.legalAction.payload = { ...(host.legalAction.payload ?? {}), ...payload };

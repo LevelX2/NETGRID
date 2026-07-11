@@ -1619,6 +1619,65 @@ export function formatChronicleEvent(
         chips.push(...summary.chips);
         break;
       }
+      if (
+        hiddenZoneAction === "classic_corporate_shuffle_hq_to_rd"
+      ) {
+        const source =
+          titleForDefinitionId(sourceDefinitionId) ??
+          sourceTitle ??
+          "Corporate Shuffle";
+        const movedCount = numberValue(payload.movedCount) ?? 0;
+        category = "hidden";
+        visibility = "public";
+        title = phrase(
+          subject,
+          movedCount > 0
+            ? `mit ${source} eine verdeckte HQ-Karte in R&D gemischt`
+            : `${source} ohne verschobene HQ-Karte abgeschlossen`,
+        );
+        description =
+          "Die Identität der gewählten HQ-Karte bleibt für den Runner verborgen.";
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        cardTitle = source;
+        chips.push(source, "HQ → R&D", "Verdeckt");
+        break;
+      }
+      if (
+        hiddenZoneAction === "v1922_corp_archives_to_hq" &&
+        numberValue(payload.archivesRevealCount) !== undefined
+      ) {
+        const source =
+          titleForDefinitionId(sourceDefinitionId) ??
+          sourceTitle ??
+          "Reclamation Project";
+        const revealCount = numberValue(payload.archivesRevealCount) ?? 0;
+        const revealedTitles = (stringValue(payload.archivesRevealTitles) ?? "")
+          .split(",")
+          .map((title) => title.trim())
+          .filter(Boolean);
+        category = "card";
+        importance = revealCount > 0 ? "important" : "normal";
+        visibility = "public";
+        title = phrase(
+          subject,
+          revealCount > 0
+            ? `mit ${source} ${revealCount === 1 ? "ein ICE" : `${revealCount} ICE`} aus Archives gezeigt und nach HQ genommen`
+            : `mit ${source} kein ICE aus Archives gewählt`,
+        );
+        description =
+          revealedTitles.length > 0
+            ? `Gezeigt: ${joinChronicleParts(revealedTitles)}.`
+            : "Es wurde keine Karte gezeigt oder nach HQ genommen.";
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        cardTitle = source;
+        chips.push(
+          source,
+          revealCount > 0 ? `${revealCount} Reveal` : "Keine Auswahl",
+          ...revealedTitles,
+          "Archives → HQ",
+        );
+        break;
+      }
       category = "system";
       visibility = "system";
       title = phrase(subject, "eine Entscheidung beantwortet");
@@ -3574,6 +3633,10 @@ export function shouldSuppressChronicleEventItem(
     stringValue(payload.hiddenZoneAction) === "p3_33_private_look"
   )
     return true;
+  if (actionType === "resolve_choice") {
+    const item = formatChronicleEvent(event, "runner");
+    if (item.title.includes("eine Entscheidung beantwortet")) return true;
+  }
   if (actionType !== "continue_run" || payload.encounterContinue !== true)
     return false;
   return resolvedEffectsFromPayload(payload.resolvedEffects).some(
