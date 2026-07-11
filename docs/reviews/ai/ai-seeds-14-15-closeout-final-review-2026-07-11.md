@@ -77,4 +77,4 @@ Die Seed-15-Gegenprobe enthält keinen negativ bewerteten Runner-Funding-Klick m
 
 ## Integrationsstatus
 
-Branch `codex/ai-seeds-14-15-closeout` ist `FINAL_GREEN` und für den im Prozess vorgeschriebenen lokalen Merge nach `main` freigegeben. Kein Push und kein Pull Request sind Teil dieses Abschlusses.
+Branch `codex/ai-seeds-14-15-closeout` wurde nach `FINAL_GREEN` per Fast-Forward lokal nach `main` integriert. Die vollständige AI-Suite, der AI-Typecheck, 291 fokussierte und angrenzende Tests sowie beide deterministischen Seed-Gegenproben wurden auf `main` erneut grün ausgeführt. Kein Push und kein Pull Request sind Teil dieses Abschlusses.

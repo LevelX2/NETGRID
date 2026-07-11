@@ -2,7 +2,7 @@
 
 ## Status
 
-`FINAL_GREEN`
+`MERGED`
 
 ## Quelle und Vorgabe
 
