@@ -1,6 +1,6 @@
 # Match CE2B Runner-Suche und Economy Prozess 2026-07-11
 
-Status: in Arbeit
+Status: abgeschlossen und zur lokalen Integration verifiziert
 
 ## Quelle und Ist-Stand
 
@@ -119,3 +119,13 @@ oder Replay-/Side-Safety-Regressionen erzeugt.
 - Die Chronik benennt Short Circuits Suchzweck und Ergebnis nachvollziehbar.
 - Alle Paketcommits sind lokal nach `main` integriert und die fremde Änderung
   an `apps/web/next-env.d.ts` bleibt unangetastet.
+
+## Ergebnis
+
+Die fachlichen Pakete sind abgeschlossen. Das Krash-Deck schließt seine
+Breaker-Suche nach installierter Universalabdeckung; echte Hybrid- und
+Spezialistensuiten behalten nur eine niedrig priorisierte, konkrete
+Weiterentwicklung. Der Streetware-Discard ist gegen fortgeschriebenen
+Such-Intent abgesichert und die Short-Circuit-Chronik verbindet Aktivierung,
+Suchzweck und öffentliches Ergebnis. Die lokale Main-Integration wird nach dem
+abschließenden Main-Abgleich im Finalstatus festgehalten.
