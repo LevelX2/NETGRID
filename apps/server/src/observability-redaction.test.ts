@@ -49,7 +49,11 @@ describe("V2.7 observability redaction baseline", () => {
       tokenSalt: "private-secret",
       rateLimitProfile: "private_internet",
       trustProxyHeaders: false,
-      healthDetail: "safe"
+      healthDetail: "safe",
+      maintenanceEnabled: false,
+      maintenanceBaseUrl: "https://maintenance.netgrid.example",
+      maintenanceAllowedOrigins: [],
+      maintenanceTrustedProxyAddresses: []
     };
     const health = redactedHealth(
       {

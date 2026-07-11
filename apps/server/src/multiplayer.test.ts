@@ -162,6 +162,8 @@ describe("V1.0.9 private internet hardening", () => {
     expect(local.profile).toBe("local");
     expect(local.webBaseUrl).toBe("http://127.0.0.1:3100");
     expect(local.allowedOrigins).toContain("http://127.0.0.1:3100");
+    expect(local.maintenanceEnabled).toBe(true);
+    expect(local.maintenanceBaseUrl).toBe("http://127.0.0.1:3100");
 
     expect(() =>
       loadDeploymentConfig({
@@ -196,6 +198,39 @@ describe("V1.0.9 private internet hardening", () => {
       rateLimitProfile: "private_internet"
     });
     expect(privateConfig.allowedOrigins).toEqual(["https://netgrid.example", "https://tablet.netgrid.example"]);
+    expect(privateConfig.maintenanceEnabled).toBe(false);
+
+    expect(() =>
+      loadDeploymentConfig({
+        NETGRID_DEPLOYMENT_PROFILE: "private_internet",
+        NETGRID_WEB_BASE_URL: "https://netgrid.example",
+        NETGRID_SERVER_BASE_URL: "https://api.netgrid.example",
+        NETGRID_ALLOWED_ORIGINS: "https://netgrid.example",
+        NETGRID_TOKEN_SALT: "private-test-salt",
+        NETGRID_MAINTENANCE_ENABLED: "true",
+        NETGRID_MAINTENANCE_BASE_URL: "http://admin.netgrid.example",
+        NETGRID_MAINTENANCE_ALLOWED_ORIGINS: "http://admin.netgrid.example",
+        NETGRID_MAINTENANCE_TRUSTED_PROXY_ADDRESSES: "127.0.0.1"
+      } as NodeJS.ProcessEnv)
+    ).toThrow(/HTTPS/);
+
+    const privateMaintenance = loadDeploymentConfig({
+      NETGRID_DEPLOYMENT_PROFILE: "private_internet",
+      NETGRID_WEB_BASE_URL: "https://netgrid.example",
+      NETGRID_SERVER_BASE_URL: "https://api.netgrid.example",
+      NETGRID_ALLOWED_ORIGINS: "https://netgrid.example",
+      NETGRID_TOKEN_SALT: "private-test-salt",
+      NETGRID_MAINTENANCE_ENABLED: "true",
+      NETGRID_MAINTENANCE_BASE_URL: "https://admin.netgrid.example",
+      NETGRID_MAINTENANCE_ALLOWED_ORIGINS: "https://admin.netgrid.example",
+      NETGRID_MAINTENANCE_TRUSTED_PROXY_ADDRESSES: "127.0.0.1,::1"
+    } as NodeJS.ProcessEnv);
+    expect(privateMaintenance).toMatchObject({
+      maintenanceEnabled: true,
+      maintenanceBaseUrl: "https://admin.netgrid.example",
+      maintenanceAllowedOrigins: ["https://admin.netgrid.example"],
+      maintenanceTrustedProxyAddresses: ["127.0.0.1", "::1"]
+    });
 
     const legacyPrivateConfig = loadDeploymentConfig({
       NETGRID_DEPLOYMENT_PROFILE: "private_internet",

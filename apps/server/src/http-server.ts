@@ -574,7 +574,11 @@ async function routeHttp(
   request: IncomingMessage,
   response: ServerResponse
 ): Promise<void> {
-  const corsDecision = applyCors(request, response, deploymentConfig);
+  const url = new URL(request.url ?? "/", "http://localhost");
+  const corsConfig = url.pathname.startsWith("/api/storage/maintenance/") && deploymentConfig.maintenanceEnabled
+    ? { ...deploymentConfig, allowedOrigins: deploymentConfig.maintenanceAllowedOrigins }
+    : deploymentConfig;
+  const corsDecision = applyCors(request, response, corsConfig);
   if (corsDecision === "denied") {
     sendJson(response, 403, originDeniedPayload());
     return;
@@ -585,7 +589,6 @@ async function routeHttp(
     return;
   }
 
-  const url = new URL(request.url ?? "/", "http://localhost");
   try {
     if (request.method === "GET" && url.pathname === "/health") {
       sendJson(response, 200, redactedHealth(await service.storageHealth(), deploymentConfig));
@@ -605,7 +608,7 @@ async function routeHttp(
         sendJson(response, 401, maintenanceAuthInvalidPayload());
         return;
       }
-      response.setHeader("set-cookie", maintenanceSessionCookie(created.sessionToken, request));
+      response.setHeader("set-cookie", maintenanceSessionCookie(created.sessionToken, request, deploymentConfig));
       sendJson(response, 200, { session: created.session, csrfToken: created.csrfToken });
       return;
     }
@@ -634,7 +637,7 @@ async function routeHttp(
     if (url.pathname === "/api/storage/maintenance/auth/logout" && request.method === "POST") {
       if (!(await ensureMaintenanceMutationAccess(response, request, deploymentConfig, maintenanceAuth))) return;
       maintenanceAuth.revokeSession(maintenanceSessionToken(request));
-      response.setHeader("set-cookie", clearMaintenanceSessionCookie(request));
+      response.setHeader("set-cookie", clearMaintenanceSessionCookie(request, deploymentConfig));
       sendJson(response, 200, { ok: true });
       return;
     }
@@ -675,7 +678,7 @@ async function routeHttp(
         sendJson(response, 401, maintenanceAuthInvalidPayload());
         return;
       }
-      response.setHeader("set-cookie", clearMaintenanceSessionCookie(request));
+      response.setHeader("set-cookie", clearMaintenanceSessionCookie(request, deploymentConfig));
       sendJson(response, 200, { ok: true, sessionsRevoked: true });
       return;
     }
@@ -1331,7 +1334,12 @@ function checkRateLimit(
 }
 
 function ensureMaintenanceTransport(response: ServerResponse, request: IncomingMessage, deploymentConfig: DeploymentConfig): boolean {
-  if (deploymentConfig.profile !== "local" || !isMaintenanceClientAddressAllowed(request.socket.remoteAddress)) {
+  if (!deploymentConfig.maintenanceEnabled) {
+    sendJson(response, 403, { error: { code: "maintenance_unavailable", message: "Die Wartungs-Control-Plane ist in diesem Profil nicht aktiviert." } });
+    return false;
+  }
+  if (deploymentConfig.profile === "local" && isMaintenanceClientAddressAllowed(request.socket.remoteAddress)) return true;
+  if (!isMaintenanceTlsRequest(request, deploymentConfig)) {
     sendJson(response, 403, { error: { code: "maintenance_unavailable", message: "Die Wartungs-Control-Plane ist in diesem Transportprofil nicht verfügbar." } });
     return false;
   }
@@ -1375,7 +1383,7 @@ async function ensureMaintenanceMutationAccess(
 
 function ensureMaintenanceOrigin(response: ServerResponse, request: IncomingMessage, deploymentConfig: DeploymentConfig): boolean {
   const origin = firstHeaderValue(request.headers.origin);
-  if (!origin || !isOriginAllowed(origin, deploymentConfig)) {
+  if (!origin || !isOriginAllowed(origin, { ...deploymentConfig, allowedOrigins: deploymentConfig.maintenanceAllowedOrigins })) {
     sendJson(response, 403, maintenanceRequestRejectedPayload());
     return false;
   }
@@ -1407,18 +1415,22 @@ function maintenanceSessionToken(request: IncomingMessage): string | undefined {
   return undefined;
 }
 
-function maintenanceSessionCookie(sessionToken: string, request: IncomingMessage): string {
-  const secure = isTlsRequest(request) ? "; Secure" : "";
+function maintenanceSessionCookie(sessionToken: string, request: IncomingMessage, deploymentConfig: DeploymentConfig): string {
+  const secure = isMaintenanceTlsRequest(request, deploymentConfig) ? "; Secure" : "";
   return `${MAINTENANCE_SESSION_COOKIE_NAME}=${sessionToken}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${MAINTENANCE_SESSION_MAX_AGE_MINUTES * 60}${secure}`;
 }
 
-function clearMaintenanceSessionCookie(request: IncomingMessage): string {
-  const secure = isTlsRequest(request) ? "; Secure" : "";
+function clearMaintenanceSessionCookie(request: IncomingMessage, deploymentConfig: DeploymentConfig): string {
+  const secure = isMaintenanceTlsRequest(request, deploymentConfig) ? "; Secure" : "";
   return `${MAINTENANCE_SESSION_COOKIE_NAME}=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0${secure}`;
 }
 
-function isTlsRequest(request: IncomingMessage): boolean {
-  return (request.socket as IncomingMessage["socket"] & { encrypted?: boolean }).encrypted === true;
+function isMaintenanceTlsRequest(request: IncomingMessage, deploymentConfig: DeploymentConfig): boolean {
+  if ((request.socket as IncomingMessage["socket"] & { encrypted?: boolean }).encrypted === true) return true;
+  const remoteAddress = normalizeClientAddress(request.socket.remoteAddress);
+  const trustedProxy = deploymentConfig.maintenanceTrustedProxyAddresses.some((address) => normalizeClientAddress(address) === remoteAddress);
+  if (!trustedProxy) return false;
+  return firstHeaderValue(request.headers["x-forwarded-proto"])?.split(",")[0]?.trim().toLowerCase() === "https";
 }
 
 function firstHeaderValue(value: string | string[] | undefined): string | undefined {

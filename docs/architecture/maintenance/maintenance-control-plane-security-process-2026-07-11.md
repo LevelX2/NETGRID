@@ -216,7 +216,7 @@ Prüfung:
 
 ### P05 – HTTPS-/Reverse-Proxy-Vertrag und Betreiberpfad
 
-Status: in Umsetzung
+Status: abgeschlossen
 
 Ergebnis:
 
@@ -234,7 +234,7 @@ Prüfung:
 
 ### P06 – Sicherheitsregressionen, Current-State und Final Review
 
-Status: ausstehend
+Status: in Umsetzung
 
 Ergebnis:
 

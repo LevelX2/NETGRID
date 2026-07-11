@@ -108,6 +108,51 @@ describe("ARC-001 maintenance HTTP security", () => {
     expect(await storage.load(created.matchId)).toBeTruthy();
     service.closeStorage();
   });
+
+  it("accepts remote maintenance only through an explicit HTTPS trusted-proxy contract", async () => {
+    const maintenanceAuth = new MaintenanceAuthService(new InMemoryMaintenanceCredentialStore(), { passwordKdf: TEST_KDF });
+    await maintenanceAuth.bootstrapPassword(PASSWORD);
+    const deploymentConfig = loadDeploymentConfig({
+      NETGRID_DEPLOYMENT_PROFILE: "private_internet",
+      NETGRID_WEB_BASE_URL: "https://play.netgrid.example",
+      NETGRID_SERVER_BASE_URL: "https://api.netgrid.example",
+      NETGRID_ALLOWED_ORIGINS: "https://play.netgrid.example",
+      NETGRID_TOKEN_SALT: "private-maintenance-test-salt",
+      NETGRID_MAINTENANCE_ENABLED: "true",
+      NETGRID_MAINTENANCE_BASE_URL: "https://admin.netgrid.example",
+      NETGRID_MAINTENANCE_ALLOWED_ORIGINS: "https://admin.netgrid.example",
+      NETGRID_MAINTENANCE_TRUSTED_PROXY_ADDRESSES: "127.0.0.1"
+    } as NodeJS.ProcessEnv);
+    const handle = createNetgridHttpServer(new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "private-maintenance-http" }), {
+      deploymentConfig,
+      maintenanceAuth
+    });
+    const baseUrl = await listen(handle);
+    try {
+      const directHttp = await fetch(`${baseUrl}/api/storage/maintenance/auth/login`, {
+        method: "POST",
+        headers: { "content-type": "application/json", origin: "https://admin.netgrid.example" },
+        body: JSON.stringify({ password: PASSWORD })
+      });
+      expect(directHttp.status).toBe(403);
+
+      const proxiedHttps = await fetch(`${baseUrl}/api/storage/maintenance/auth/login`, {
+        method: "POST",
+        headers: { "content-type": "application/json", origin: "https://admin.netgrid.example", "x-forwarded-proto": "https" },
+        body: JSON.stringify({ password: PASSWORD })
+      });
+      expect(proxiedHttps.status).toBe(200);
+      expect(proxiedHttps.headers.get("set-cookie")).toContain("; Secure");
+      expect(proxiedHttps.headers.get("access-control-allow-origin")).toBe("https://admin.netgrid.example");
+      expect(proxiedHttps.headers.get("access-control-allow-credentials")).toBe("true");
+
+      const adminOriginOnGamePlane = await fetch(`${baseUrl}/health`, { headers: { origin: "https://admin.netgrid.example" } });
+      expect(adminOriginOnGamePlane.status).toBe(403);
+      expect(await adminOriginOnGamePlane.text()).toContain("origin_not_allowed");
+    } finally {
+      await handle.close();
+    }
+  });
 });
 
 function login(baseUrl: string, password: string): Promise<Response> {
