@@ -104,6 +104,46 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("includes visible purge impact in the actual Corp score breakdown", () => {
+    const purge = {
+      ...corpAction("purge", "purge_virus_counters"),
+      costs: [{ clicks: 3 }],
+    } as LegalAction;
+    const input = corpInputWithGoals([], [purge]);
+    input.playerView.servers = [
+      {
+        id: "rd",
+        label: "R&D",
+        root: [],
+        ice: [
+          corpCard("onr_proteus_012_bug-zapper", "ice", {
+            definitionId: "onr_proteus_012_bug-zapper",
+            rezzed: true,
+            rulesText: "Do 2 net damage. End the run.",
+            counters: { virus: 1 },
+          }),
+        ],
+      },
+    ];
+
+    expect(
+      semanticRuntimeCorpScoreComponents(
+        input,
+        purge,
+        "board_safety",
+        testDependencies(),
+      ),
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_purge_tactical_impact",
+          value: expect.any(Number),
+          reason: expect.stringContaining("purge_visible_counter_total:1"),
+        }),
+      ]),
+    );
+  });
+
   it("does not treat scored shuffle-draw agenda actions as low-credit funding", () => {
     const aiCfoShuffleDraw = corpAction("ai-cfo-shuffle-draw", "gain_credit", {
       agendaAbility: "hq_archives_shuffle_draw",
@@ -5300,12 +5340,12 @@ describe("semanticRuntimeCorpScoreComponents", () => {
       [advanceVapor],
     );
     input.playerView.servers = [
-        {
-          id: "remote_1",
-          label: "Remote 1",
-          ice: [],
-          root: [vapor],
-        },
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: [],
+        root: [vapor],
+      },
     ];
 
     const components = semanticRuntimeCorpScoreComponents(

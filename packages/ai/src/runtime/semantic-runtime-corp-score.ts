@@ -5,6 +5,7 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
+import { corpPurgeImpactScoreComponent } from "./corp-purge-impact";
 import { actionProvidesCredits } from "../actions/action-effect-classification";
 import type { TacticalGoalLike } from "../decision/semantic-decision-frame";
 import { semanticRuntimeCorpEffectiveDefenseContext } from "./semantic-runtime-corp-effective-defense";
@@ -140,6 +141,12 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
   const components: AiDecisionScoreComponent[] = [];
   const credits = input.playerView.own.credits;
   const boardTriageState = semanticRuntimeCorpBoardTriage(input, dependencies);
+  const purgeImpact = corpPurgeImpactScoreComponent(
+    input,
+    action,
+    boardTriageState,
+  );
+  if (purgeImpact) components.push(purgeImpact);
   const tacticalGoalFit = corpTacticalGoalFitScoreComponent(
     input,
     action,
