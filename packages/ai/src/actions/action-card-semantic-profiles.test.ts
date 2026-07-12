@@ -18,6 +18,23 @@ describe("ActionCardSemanticProfiles", () => {
     expect(compatibilitySignals.some(legacyCompatibilitySignal)).toBe(true);
   });
 
+  it("retains reviewed hint tactic signals as compatibility evidence", () => {
+    const profiles = buildActionCardSemanticProfilesByDefinitionId();
+    const researchBunker =
+      profiles["onr_proteus_072_research-bunker"];
+
+    expect(researchBunker?.compatibilitySignals).toEqual(
+      expect.arrayContaining([
+        "remote.agenda_difficulty_discount",
+        "score.agenda_difficulty_discount",
+        "score.research_difficulty_discount",
+      ]),
+    );
+    expect(researchBunker?.tacticSignals).not.toContain(
+      "remote.agenda_difficulty_discount",
+    );
+  });
+
   it("does not generate StrategySupportPairs from broad support or legacy hint anchors", () => {
     const profiles = buildActionCardSemanticProfilesByDefinitionId();
 

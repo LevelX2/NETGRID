@@ -29,6 +29,7 @@ let cachedActionCardSemanticProfiles:
 type ExtendedAiCardHint = AiCardHint & {
   strategicRole?: string[];
   riskTags?: string[];
+  tacticSignals?: string[];
 };
 
 type TacticSignalCatalogEntry = {
@@ -86,6 +87,7 @@ function actionCardSemanticProfileFromHint(
     abilitySemanticProfile,
   );
   const compatibilitySignals = uniqueStrings([
+    ...(extendedHint.tacticSignals ?? []),
     ...hint.roles.map((role) => `role:${role}`),
     ...hint.planRoles.map((role) => `plan_role:${role}`),
     ...(hint.lineSupport ?? []).map((line) => `line_support:${line}`),
