@@ -81,6 +81,30 @@ export function corpUpgradeInstallPlacementComponent(
   return undefined;
 }
 
+export function corpRegionReplacementComponent(
+  params: CorpUpgradePlacementParams,
+): AiDecisionScoreComponent | undefined {
+  if (
+    params.action.type !== "install_card" ||
+    params.action.payload?.placement !== "root" ||
+    params.action.payload?.regionReplacementWarning !== true ||
+    !sourceLooksLikeUpgrade(params)
+  ) {
+    return undefined;
+  }
+  return {
+    key: "corp_upgrade_region_replacement_cost",
+    label: "Region-Ersetzung",
+    value: -2600,
+    reason: [
+      "region_replacement_warning:true",
+      `card:${params.sourceCard?.definitionId ?? params.actionSemanticCandidate?.sourceDefinitionId ?? "unknown"}`,
+      `server:${params.serverId ?? "none"}`,
+      "replacement_requires_demonstrated_marginal_value:true",
+    ].join("|"),
+  };
+}
+
 function agendaDifficultyPlacementComponent(
   serverId: string | undefined,
   server: VisibleCorpServer | undefined,

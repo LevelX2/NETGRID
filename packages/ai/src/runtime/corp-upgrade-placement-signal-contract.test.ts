@@ -7,6 +7,7 @@ import { describe, expect, it } from "vitest";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import { buildActionCardSemanticProfilesByDefinitionId } from "../actions/action-card-semantic-profiles";
 import { corpUpgradeInstallPlacementComponent } from "./corp-upgrade-placement";
+import { corpRegionReplacementComponent } from "./corp-upgrade-placement";
 
 const AGENDA_DIFFICULTY_UPGRADES = [
   "onr_v1_374_washington-d-c-city-grid",
@@ -144,9 +145,45 @@ describe("Corp upgrade placement signal contract", () => {
       }),
     );
   });
+
+  it("prices the explicit loss when a region replaces another region", () => {
+    const replacement = placementScenario(
+      "onr_proteus_072_research-bunker",
+      "remote_1",
+      {
+        regionReplacementWarning: true,
+        remoteIce: [visibleCard("remote-ice", "simple_ice", "ice")],
+      },
+    );
+
+    expect(corpRegionReplacementComponent(replacement)).toEqual(
+      expect.objectContaining({
+        key: "corp_upgrade_region_replacement_cost",
+        value: -2600,
+        reason: expect.stringContaining(
+          "replacement_requires_demonstrated_marginal_value:true",
+        ),
+      }),
+    );
+  });
 });
 
 function placementComponent(
+  definitionId: string,
+  serverId: "hq" | "rd" | "remote_1",
+  options: {
+    regionReplacementWarning?: boolean;
+    hqIce?: VisibleCard[];
+    remoteIce?: VisibleCard[];
+    remoteRoot?: VisibleCard[];
+  } = {},
+) {
+  return corpUpgradeInstallPlacementComponent(
+    placementScenario(definitionId, serverId, options),
+  );
+}
+
+function placementScenario(
   definitionId: string,
   serverId: "hq" | "rd" | "remote_1",
   options: {
@@ -194,7 +231,7 @@ function placementComponent(
   });
   if (!candidate) throw new Error("Expected projected install candidate");
 
-  return corpUpgradeInstallPlacementComponent({
+  return {
     input: {
       playerView: {
         servers: [
@@ -215,7 +252,7 @@ function placementComponent(
     actionSemanticCandidate: candidate,
     sourceCard,
     serverId,
-  });
+  };
 }
 
 function visibleCard(

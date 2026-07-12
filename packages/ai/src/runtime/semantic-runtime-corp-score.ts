@@ -18,7 +18,10 @@ import {
   corpIcePlacementCandidateForAction,
   corpIcePlacementScoreComponent,
 } from "./corp-ice-placement/corp-ice-placement";
-import { corpUpgradeInstallPlacementComponent } from "./corp-upgrade-placement";
+import {
+  corpRegionReplacementComponent,
+  corpUpgradeInstallPlacementComponent,
+} from "./corp-upgrade-placement";
 import { visibleCardDefinition } from "./card-definition-lookup";
 import { createAiHintsByCard } from "../ai-hints";
 import { rolesMatch } from "./role-match";
@@ -348,6 +351,15 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
       serverId: corpInstallServerId(action),
     });
     if (upgradePlacement) components.push(upgradePlacement);
+    const regionReplacement = corpRegionReplacementComponent({
+      input,
+      action,
+      roles,
+      actionSemanticCandidate,
+      sourceCard: visibleSourceCardForAction(input, action),
+      serverId: corpInstallServerId(action),
+    });
+    if (regionReplacement) components.push(regionReplacement);
     if (dependencies.corpActionIsScoreLine(input, action, roles)) {
       components.push({
         key: "corp_install_score_line",

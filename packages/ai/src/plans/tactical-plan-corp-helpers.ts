@@ -235,6 +235,33 @@ export function corpScoreWindowCurrentStep(
       ? corpRemoteProtectionPath(input, targetServerId)
       : emptyCorpRemoteProtectionPath();
     if (
+      input !== undefined &&
+      input.playerView.own.clicks <= 1 &&
+      protectionPath.immediateActionIds.length === 0 &&
+      protectionPath.fallbackActionIds.length > 0
+    ) {
+      return createPlanStep({
+        stepId: `protect_remote_fallback:${action.actionId}`,
+        kind: "protect_remote",
+        desiredActionSemantics: ["install.card", "remote_protection"],
+        actionCandidateIds: protectionPath.fallbackActionIds,
+        requiredCapabilities: [
+          {
+            capabilityId: `remote_protection_fallback:${action.actionId}`,
+            kind: "remote_protection",
+            side: "corp",
+            evidence: [
+              "last_click_requires_protection_followup",
+              "no_click_budget_for_another_draw_then_install",
+            ],
+          },
+        ],
+        rationale: [
+          "use the best affordable non-zero protection before the search click budget expires",
+        ],
+      });
+    }
+    if (
       protectionPath.immediateActionIds.length === 0 &&
       protectionPath.fundingCandidate
     ) {
@@ -351,6 +378,7 @@ export function corpScoreWindowCurrentStep(
 
 type CorpRemoteProtectionPath = {
   immediateActionIds: string[];
+  fallbackActionIds: string[];
   fundingCandidate?: CorpIcePlacementCandidate;
   acquisitionActionIds: string[];
   evidence: string[];
@@ -359,6 +387,7 @@ type CorpRemoteProtectionPath = {
 function emptyCorpRemoteProtectionPath(): CorpRemoteProtectionPath {
   return {
     immediateActionIds: [],
+    fallbackActionIds: [],
     acquisitionActionIds: [],
     evidence: [],
   };
@@ -373,6 +402,7 @@ function corpRemoteProtectionPath(
     (candidate) => candidate.id === serverId,
   );
   const immediateActionIds: string[] = [];
+  const fallbackCandidates: CorpIcePlacementCandidate[] = [];
   const fundingCandidates: CorpIcePlacementCandidate[] = [];
   const evidence: string[] = [];
 
@@ -406,7 +436,12 @@ function corpRemoteProtectionPath(
       );
       const providesConcreteProtection =
         placement.immediateStop && !placement.visibleZeroEffectRisk;
-      if (!providesConcreteProtection) continue;
+      if (!providesConcreteProtection) {
+        if (placement.rezAffordable && !placement.visibleZeroEffectRisk) {
+          fallbackCandidates.push(placement);
+        }
+        continue;
+      }
       if (
         placement.rezAffordable &&
         placement.recommendation === "install_now"
@@ -437,8 +472,13 @@ function corpRemoteProtectionPath(
         left.rezCost -
         (right.actionCreditCost + right.rezCost) || right.score - left.score,
   );
+  fallbackCandidates.sort(
+    (left, right) =>
+      right.score - left.score || left.actionId.localeCompare(right.actionId),
+  );
   return {
     immediateActionIds,
+    fallbackActionIds: fallbackCandidates.map((candidate) => candidate.actionId),
     ...(fundingCandidates[0] ? { fundingCandidate: fundingCandidates[0] } : {}),
     acquisitionActionIds: input.legalActions
       .filter((action) => action.side === "corp" && action.type === "draw_card")

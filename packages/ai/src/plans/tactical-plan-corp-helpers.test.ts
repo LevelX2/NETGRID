@@ -210,6 +210,69 @@ describe("corpScoreWindowBlockers", () => {
     expect(step.actionCandidateIds).toEqual(["draw-protection"]);
     expect(step.actionCandidateIds).not.toContain(install.actionId);
   });
+
+  it("uses affordable fallback protection on the last click instead of drawing without an install click", () => {
+    const agenda = corpCard("political-overthrow", {
+      advancementRequirement: 9,
+      agendaPoints: 6,
+    });
+    const installAgenda = {
+      ...corpAction("install-political-overthrow", agenda.instanceId),
+      type: "install_card" as const,
+      payload: { placement: "root", serverId: "remote_1" },
+    } as LegalAction;
+    const huntingPack = corpCard("hunting-pack", {
+      definitionId: "onr_proteus_026_hunting-pack",
+      title: "Hunting Pack",
+      type: "ice",
+      rezCost: 1,
+      strength: 4,
+      subtypes: ["bloodhound", "sentry"],
+      rulesText:
+        "For each rezzed piece of ice installed outside Hunting Pack, add a Trace 5 tag subroutine.",
+    });
+    const installHuntingPack = {
+      ...corpAction("install-hunting-pack", huntingPack.instanceId),
+      type: "install_card" as const,
+      costs: [{ clicks: 1 }, { credits: 1 }],
+      payload: { placement: "ice", serverId: "remote_1" },
+    } as LegalAction;
+    const draw = {
+      ...corpAction("draw-protection", "game_rule"),
+      type: "draw_card" as const,
+      source: "game_rule",
+      costs: [{ clicks: 1 }],
+      payload: {},
+    } as LegalAction;
+    const input = corpScoreInput({
+      credits: 8,
+      clicks: 1,
+      agenda,
+      legalActions: [installAgenda, installHuntingPack, draw],
+    });
+    input.playerView.own.gripOrHq = [agenda, huntingPack];
+
+    const blockers = corpScoreWindowBlockers(
+      input,
+      "remote_1",
+      installAgenda,
+      scorelineAssessment({
+        actionId: installAgenda.actionId,
+        blockedByCredits: false,
+        recommendedNextStep: "protect_remote",
+        blockers: ["unsafe_remote", "runner_contest"],
+      }),
+    );
+    const step = corpScoreWindowCurrentStep(installAgenda, blockers, input);
+
+    expect(step).toMatchObject({
+      kind: "protect_remote",
+      actionCandidateIds: [installHuntingPack.actionId],
+      rationale: [
+        "use the best affordable non-zero protection before the search click budget expires",
+      ],
+    });
+  });
 });
 
 function candidate(
@@ -258,6 +321,7 @@ function corpScoreInput(params: {
   legalActions: LegalAction[];
 }): AiDecisionInput {
   return {
+    side: "corp",
     actorSide: "corp",
     legalActions: params.legalActions,
     playerView: {
