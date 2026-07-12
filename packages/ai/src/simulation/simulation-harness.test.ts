@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  simulateAiGame,
-  summarizeDoctrineQualityMetrics,
-} from "../simulation";
+import { simulateAiGame, summarizeDoctrineQualityMetrics } from "../simulation";
 
 describe("AI simulation harness", () => {
   it("runs deterministic AI-vs-AI simulations and replays the event log", () => {
@@ -22,6 +19,27 @@ describe("AI simulation harness", () => {
     );
     expect(JSON.stringify(first)).not.toContain("cardInstances");
     expect(JSON.stringify(first)).not.toContain("sessionToken");
+  }, 60_000);
+
+  it("exercises distinct live trajectories instead of relying on one golden seed", () => {
+    const summaries = [
+      "ai-sim-realism-a",
+      "ai-sim-realism-b",
+      "ai-sim-realism-c",
+    ].map((seed) => simulateAiGame({ seed, maxActions: 40 }));
+
+    for (const summary of summaries) {
+      expect(summary.errors, summary.seed).toEqual([]);
+      expect(summary.replayOk, summary.seed).toBe(true);
+      expect(summary.actionSequence.length, summary.seed).toBeGreaterThan(10);
+      expect(
+        new Set(summary.actionSequence.map((entry) => entry.side)),
+        summary.seed,
+      ).toEqual(new Set(["corp", "runner"]));
+    }
+    expect(
+      new Set(summaries.map((summary) => summary.finalStateHash)).size,
+    ).toBe(summaries.length);
   }, 60_000);
 
   it("summarizes doctrine quality error classes from redaction-safe action tags", () => {

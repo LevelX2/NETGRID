@@ -52,7 +52,7 @@ describe("SemanticShadowLeagueDelta", () => {
     expect(delta.pilotEligibilityDelta).toMatchObject({
       baseline: 0.82,
       current: current.metrics.pilotEligibilityRate,
-      delta: 0.013,
+      delta: roundMetric(current.metrics.pilotEligibilityRate! - 0.82),
       direction: "improved",
     });
     expect(delta.pilotReadinessDelta.basic_setup).toMatchObject({
@@ -86,8 +86,7 @@ describe("SemanticShadowLeagueDelta", () => {
       recommendationChanged: false,
     });
     expect(delta.doctrineFitDelta.doctrineGoalsProducedDelta).toMatchObject({
-      baseline:
-        current.metrics.doctrineGoalActionFit.doctrineGoalsProduced - 1,
+      baseline: current.metrics.doctrineGoalActionFit.doctrineGoalsProduced - 1,
       current: current.metrics.doctrineGoalActionFit.doctrineGoalsProduced,
       delta: 1,
       direction: "improved",
@@ -120,8 +119,10 @@ describe("SemanticShadowLeagueDelta", () => {
     ]);
 
     expect(delta.scopeBreakdownDelta.basic_setup).toMatchObject({
-      baselineEligibleCount: current.metrics.scopeBreakdown.basic_setup.eligibleCount - 1,
-      currentEligibleCount: current.metrics.scopeBreakdown.basic_setup.eligibleCount,
+      baselineEligibleCount:
+        current.metrics.scopeBreakdown.basic_setup.eligibleCount - 1,
+      currentEligibleCount:
+        current.metrics.scopeBreakdown.basic_setup.eligibleCount,
       eligibleCountDelta: 1,
       baselineWouldOverrideCount:
         current.metrics.scopeBreakdown.basic_setup.wouldOverrideCount - 1,
