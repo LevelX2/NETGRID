@@ -103,6 +103,7 @@ export function createCorpTaggedRunnerPayoffProfileContext(
       };
     }
     if (assessment.payoffKind === "economic") {
+      if (input.playerView.opponent.credits <= 0) return undefined;
       const runnerCreditPressure =
         input.playerView.opponent.credits <= 2
           ? 300

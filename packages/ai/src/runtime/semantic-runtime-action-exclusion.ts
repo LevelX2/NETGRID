@@ -158,7 +158,6 @@ export function semanticRuntimeActionExclusion(
       dependencies.runnerEmptyRemoteExclusion(server);
     if (emptyRemoteExclusion) return emptyRemoteExclusion;
   }
-  if (action.type !== "start_run") return undefined;
   const assessment = assessKnownRezzedIcePath(
     server.ice,
     input.playerView.own.rig ?? [],

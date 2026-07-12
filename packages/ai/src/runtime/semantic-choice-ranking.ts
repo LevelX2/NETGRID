@@ -178,6 +178,7 @@ export function tacticalPlanMappedChoice(
     if (
       tacticalPlanCorpEconomyActivationBlocksOffPlanOverride(
         mapping,
+        mappedChoice,
         overrideChoice,
         mappedActionIds,
       )
@@ -251,6 +252,7 @@ export function tacticalPlanMappedChoice(
       mapping,
       mappedChoice,
       overrideChoice,
+      scoreGap,
     );
     const lowValueRecoveryShouldYield =
       tacticalPlanLowValueRecoveryMappingShouldYield(
@@ -475,9 +477,19 @@ function tacticalPlanCorpScoreConversionBlocksOffPlanOverride(
 
 function tacticalPlanCorpEconomyActivationBlocksOffPlanOverride(
   mapping: PlanStepMappingResult,
+  mappedChoice: SemanticRuntimeChoice,
   overrideChoice: SemanticRuntimeChoice,
   mappedActionIds: ReadonlySet<string>,
 ): boolean {
+  if (
+    tacticalPlanCorpBoardTriageMismatchShouldYield(
+      mappedChoice,
+      overrideChoice,
+      overrideChoice.score - mappedChoice.score,
+    )
+  ) {
+    return false;
+  }
   return (
     mapping.plan.side === "corp" &&
     (mapping.plan.type === "corp.develop_finite_economy" ||
@@ -593,11 +605,17 @@ function tacticalPlanAcuteHandBufferShouldYield(
   mapping: PlanStepMappingResult,
   mappedChoice: SemanticRuntimeChoice,
   overrideChoice: SemanticRuntimeChoice,
+  scoreGap: number,
 ): boolean {
-  return acuteHandBufferCanInterruptMappedRun(
-    mapping.plan,
-    mappedChoice,
-    overrideChoice,
+  return (
+    acuteHandBufferCanInterruptMappedRun(
+      mapping.plan,
+      mappedChoice,
+      overrideChoice,
+    ) ||
+    (scoreGap > 0 &&
+      mappedChoice.action.type === "gain_credit" &&
+      semanticRuntimeChoiceIsAcuteHandBufferDraw(overrideChoice))
   );
 }
 
@@ -637,7 +655,7 @@ function semanticRuntimeChoiceIsAcuteHandBufferDraw(
   const handMatch = /(?:^|\|)hand:(\d+)(?:\||$)/.exec(
     component.reason ?? "",
   );
-  return handMatch !== null && Number(handMatch[1] ?? Number.NaN) <= 1;
+  return handMatch !== null && Number(handMatch[1] ?? Number.NaN) <= 2;
 }
 
 function semanticRuntimeChoiceHasPositiveDevelopmentCommitment(
@@ -1113,14 +1131,22 @@ function tacticalPlanCorpBoardTriageMismatchShouldYield(
 ): boolean {
   return (
     scoreGap > 0 &&
-    semanticRuntimeChoiceHasScoreComponent(
+    ((semanticRuntimeChoiceHasScoreComponent(
       mappedChoice,
       "corp_board_triage_mismatch",
     ) &&
-    !semanticRuntimeChoiceHasScoreComponent(
-      overrideChoice,
-      "corp_board_triage_mismatch",
-    )
+      !semanticRuntimeChoiceHasScoreComponent(
+        overrideChoice,
+        "corp_board_triage_mismatch",
+      )) ||
+      (semanticRuntimeChoiceHasScoreComponent(
+        overrideChoice,
+        "corp_board_triage_alignment",
+      ) &&
+        !semanticRuntimeChoiceHasScoreComponent(
+          mappedChoice,
+          "corp_board_triage_alignment",
+        )))
   );
 }
 

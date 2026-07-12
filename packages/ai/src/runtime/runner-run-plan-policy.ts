@@ -269,6 +269,34 @@ function runnerRunPlanAbortChoice(params: {
         choice.action.type === "continue_run" &&
         choice.action.payload?.encounterContinue === true,
     );
+    const affordableBreakChoice = [...params.choices]
+      .filter(
+        (choice) =>
+          !choice.exclusion &&
+          choice.action.type === "break_subroutine" &&
+          actionCreditCost(choice.action) <= params.plan.budget.availableCredits,
+      )
+      .sort(
+        (left, right) =>
+          right.score - left.score ||
+          left.action.actionId.localeCompare(right.action.actionId),
+      )[0];
+    if (
+      affordableBreakChoice &&
+      continueChoice &&
+      runnerRunPlanContinueHasBreakAvailablePenalty(continueChoice)
+    ) {
+      return annotateRunnerRunPlanChoice({
+        choice: affordableBreakChoice,
+        plan: params.plan,
+        explanation:
+          "RunnerRunPlan bedient vor dem erzwungenen Runende eine bezahlbare Break-Sequenz.",
+        extraEvidence: [
+          "runner_run_plan_abort_break_before_continue:true",
+          "runner_run_plan_no_jack_out_available:true",
+        ],
+      });
+    }
     if (!continueChoice) return undefined;
     return annotateRunnerRunPlanChoice({
       choice: continueChoice,
@@ -408,6 +436,18 @@ function runnerRunPlanConserveCreditsChoice(params: {
       choice.action.payload?.encounterWillEndRun === true,
   );
   if (!continueChoice) return undefined;
+  const affordableBreakChoice = params.choices.some(
+    (choice) =>
+      !choice.exclusion &&
+      choice.action.type === "break_subroutine" &&
+      actionCreditCost(choice.action) <= params.input.playerView.own.credits,
+  );
+  if (
+    affordableBreakChoice &&
+    runnerRunPlanContinueHasBreakAvailablePenalty(continueChoice)
+  ) {
+    return undefined;
+  }
   if (currentEncounterHasUnbrokenSafetyThreat(params.input)) return undefined;
   return annotateRunnerRunPlanChoice({
     choice: continueChoice,
@@ -421,6 +461,16 @@ function runnerRunPlanConserveCreditsChoice(params: {
       `runner_run_plan_conserve_expected_remaining:${pathQuote.expectedRemainingCredits}`,
     ],
   });
+}
+
+function runnerRunPlanContinueHasBreakAvailablePenalty(
+  choice: SemanticRuntimeChoice,
+): boolean {
+  return choice.scoreBreakdown.some(
+    (component) =>
+      component.key === "runner_continue_run_ends_run_with_break_available" &&
+      component.value < 0,
+  );
 }
 
 function currentEncounterHasUnbrokenSafetyThreat(

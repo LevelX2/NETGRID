@@ -25,6 +25,7 @@ import {
 import { visibleCardDefinition } from "./card-definition-lookup";
 import { createAiHintsByCard } from "../ai-hints";
 import { rolesMatch } from "./role-match";
+import { semanticRuntimeCorpCentralPressureAssessment } from "./semantic-runtime-corp-central-pressure";
 import type { CorpScoringWindowAssessment } from "./semantic-runtime-corp-scoring-window";
 import type { CorpScorelineWindowAssessment } from "./corp-scoreline/semantic-runtime-corp-scoreline-assessment";
 
@@ -402,6 +403,11 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
       actionSemanticCandidate,
     );
     if (icePlacement) components.push(icePlacement);
+    const matchpointHqProtection = corpMatchpointHqProtectionComponent(
+      input,
+      action,
+    );
+    if (matchpointHqProtection) components.push(matchpointHqProtection);
     const scorelineIceFundingPenalty =
       corpRemoteScorelineIceFundingPenaltyComponent(
         input,
@@ -790,6 +796,42 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
     }
   }
   return components;
+}
+
+function corpMatchpointHqProtectionComponent(
+  input: AiDecisionInput,
+  action: LegalAction,
+): AiDecisionScoreComponent | undefined {
+  if (action.type !== "install_card" || action.payload?.placement !== "ice") {
+    return undefined;
+  }
+  const pointsToWin = input.playerView.agendaPointsToWin ?? 7;
+  if (input.playerView.opponent.agendaPoints < pointsToWin - 1) {
+    return undefined;
+  }
+  const hqPressure = semanticRuntimeCorpCentralPressureAssessment(input, "hq");
+  if (
+    !hqPressure.active &&
+    !hqPressure.visibleMultiaccess &&
+    !hqPressure.eventMultiaccess &&
+    hqPressure.successfulAccessEvents <= 0
+  ) {
+    return undefined;
+  }
+  const serverId = corpInstallServerId(action);
+  return {
+    key:
+      serverId === "hq"
+        ? "corp_matchpoint_hq_protection_alignment"
+        : "corp_matchpoint_hq_protection_mismatch",
+    label: "Matchpoint-HQ-Schutz",
+    value: serverId === "hq" ? 2200 : -1800,
+    reason: [
+      "runner_at_match_point:true",
+      `install_server:${serverId ?? "unknown"}`,
+      ...hqPressure.evidence,
+    ].join("|"),
+  };
 }
 
 function corpUnbackedExtraActionBurstComponent<TConsumer extends string>(
@@ -1742,6 +1784,31 @@ function corpPreparedScoreRemoteAgendaSearchComponent<TConsumer extends string>(
     `triage_severity:${boardTriageState.severity}`,
   ];
   if (drawsCards) {
+    const hqPressure = semanticRuntimeCorpCentralPressureAssessment(
+      input,
+      "hq",
+    );
+    const pointsToWin = input.playerView.agendaPointsToWin ?? 7;
+    const runnerAtMatchPoint =
+      input.playerView.opponent.agendaPoints >= pointsToWin - 1;
+    if (
+      runnerAtMatchPoint &&
+      (hqPressure.active ||
+        hqPressure.visibleMultiaccess ||
+        hqPressure.eventMultiaccess ||
+        hqPressure.successfulAccessEvents > 0)
+    ) {
+      return {
+        key: "corp_matchpoint_hq_draw_exposure",
+        label: "Matchpoint-HQ-Exposure",
+        value: -2600,
+        reason: [
+          ...evidence,
+          "runner_at_match_point:true",
+          ...hqPressure.evidence,
+        ].join("|"),
+      };
+    }
     return {
       key: "corp_prepared_score_remote_agenda_search",
       label: "Agenda-Suche fuer vorbereitetes Remote",

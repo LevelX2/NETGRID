@@ -105,6 +105,10 @@ export function discardKeepScore(
     type === "operation" &&
     corpCardIsReviewedAdvancementBurst(card.definitionId) &&
     corpHasVisibleAgendaDevelopmentTarget(input, dependencies);
+  const corpConditionalPayoff =
+    input.side === "corp"
+      ? corpConditionalPayoffKeepAdjustment(input, card.definitionId)
+      : { value: 0, evidence: [] as string[] };
 
   if (input.side === "corp") {
     if (type === "agenda") baseValue += 330;
@@ -162,6 +166,7 @@ export function discardKeepScore(
     !runnerFundingEconomyCard
   )
     baseValue -= 70;
+  baseValue += corpConditionalPayoff.value;
   if (roles.length === 0 && type !== "agenda" && !runnerBadPublicityTraceTech)
     baseValue -= 60;
 
@@ -181,10 +186,55 @@ export function discardKeepScore(
       ...(corpAdvancementBurstSupportsVisibleAgenda
         ? ["discard_score:corp_visible_agenda_advancement_burst"]
         : []),
+      ...corpConditionalPayoff.evidence,
       ...(planFit > 0 ? ["discard_score:planfit"] : []),
       ...(strategicFit > 0 ? ["discard_score:strategicfit"] : []),
     ]),
   };
+}
+
+function corpConditionalPayoffKeepAdjustment(
+  input: AiDecisionInput,
+  definitionId: string,
+): { value: number; evidence: string[] } {
+  const hint = AI_HINTS_BY_CARD.get(definitionId);
+  const signals = new Set(
+    (
+      hint as
+        | { tacticSignals?: readonly string[] }
+        | undefined
+    )?.tacticSignals ?? [],
+  );
+  const runnerTags = input.playerView.opponent.tags;
+  const ownAgendaPoints = input.playerView.own.agendaPoints;
+  if (
+    signals.has("condition.runner_has_two_or_more_tags") ||
+    signals.has("risk.agenda_point_cost")
+  ) {
+    const payoffLive = runnerTags >= 2 && ownAgendaPoints >= 3;
+    return payoffLive
+      ? {
+          value: 320,
+          evidence: ["discard_score:corp_conditional_payoff_live"],
+        }
+      : {
+          value: -420,
+          evidence: ["discard_score:corp_conditional_payoff_blocked"],
+        };
+  }
+  if (signals.has("tag.corp_persistent_source")) {
+    return {
+      value: runnerTags < 2 ? 240 : 120,
+      evidence: ["discard_score:corp_tag_source_enabler"],
+    };
+  }
+  if (signals.has("risk.requires_tagged_runner") && runnerTags <= 0) {
+    return {
+      value: -180,
+      evidence: ["discard_score:corp_tag_payoff_prerequisite_missing"],
+    };
+  }
+  return { value: 0, evidence: [] };
 }
 
 function corpCardIsReviewedAdvancementBurst(definitionId: string): boolean {

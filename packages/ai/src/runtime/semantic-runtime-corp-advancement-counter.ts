@@ -175,9 +175,16 @@ export function semanticRuntimeCorpAdvancementCounterPlacementAssessment(
     !selectedTargetAssessments.some((target) =>
       corpAdvancementCounterWitnessHasConcreteConversion(target.witness),
     );
+  const unfundedImmediateFollowup =
+    bestWitness === "score_next_action" &&
+    action.type === "play_operation" &&
+    (input.playerView.own.clicks - corpAdvancementActionClickCost(action) < 1 ||
+      input.playerView.own.credits - dependencies.actionCreditCost(action) < 1);
   const scoreValue =
     dominatedByBasicAdvance || noConcreteConversion
       ? -5200
+      : unfundedImmediateFollowup
+        ? -2600
       : bestWitness === "score_now"
         ? 5200 + Math.min(2600, Math.max(0, netAdvancementValue) * 4)
         : bestWitness === "score_next_action"
@@ -210,6 +217,7 @@ export function semanticRuntimeCorpAdvancementCounterPlacementAssessment(
     `weak_target_penalty:${weakTargetPenalty}`,
     `net_advancement_value:${netAdvancementValue}`,
     `advancement_witness:${bestWitness}`,
+    `advancement_immediate_followup_funded:${!unfundedImmediateFollowup}`,
     ...selectedTargetAssessments.flatMap((target) => [
       `advancement_target_class:${target.targetClass}`,
       `advancement_target_witness:${target.witness}`,
@@ -241,6 +249,14 @@ export function semanticRuntimeCorpAdvancementCounterPlacementAssessment(
     scoreValue,
     evidence,
   };
+}
+
+function corpAdvancementActionClickCost(action: LegalAction): number {
+  const explicit = (action.costs ?? []).reduce(
+    (sum, cost) => sum + Math.max(0, Number(cost.clicks ?? 0)),
+    0,
+  );
+  return explicit > 0 ? explicit : 1;
 }
 
 function corpAdvancementCounterPlacementProfileForAction(

@@ -487,10 +487,13 @@ function scoringWindowVisibleInTurnAdvancementBurstAvailable<
     const burstCounters = scoringWindowVisibleAdvancementBurstAmount(card);
     if (burstCounters <= 0) return false;
     const operationCost = scoringWindowVisibleOperationCost(card);
-    if (operationCost > creditsAfterAction) return false;
     const basicAdvancesNeeded = Math.max(0, requirement - burstCounters);
     const clicksNeeded = 1 + basicAdvancesNeeded;
-    return remainingCorpClicksAfterAction >= clicksNeeded;
+    const creditsNeeded = operationCost + basicAdvancesNeeded;
+    return (
+      remainingCorpClicksAfterAction >= clicksNeeded &&
+      creditsAfterAction >= creditsNeeded
+    );
   });
 }
 

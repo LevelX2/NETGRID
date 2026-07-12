@@ -117,9 +117,22 @@ function discardChoiceExpectationMatches(
       : [],
   );
   if (!choice || choice.source !== "discard_phase") return false;
+  const definitionIdByInstanceId = new Map(
+    input.playerView.own.gripOrHq.map((card) => [
+      card.instanceId,
+      card.definitionId,
+    ]),
+  );
   const discardedDefinitionIds = choice.options
     .filter((option) => selectedIds.has(option.id))
-    .map((option) => option.card?.definitionId)
+    .map(
+      (option) =>
+        option.card?.definitionId ??
+        definitionIdByInstanceId.get(
+          option.card?.instanceId ??
+            (typeof option.value === "string" ? option.value : ""),
+        ),
+    )
     .filter((definitionId): definitionId is string => Boolean(definitionId));
   const retainedDefinitionIds = input.playerView.own.gripOrHq
     .filter(
