@@ -78,6 +78,7 @@ import {
   type TurnStartAudioState,
 } from "./action-cues";
 import {
+  actionCueAfterAiAdvanceRequest,
   accessPresentationOwnsActionCue,
   coalesceAccessActionCues,
   interactionPresentationBlocksAi,
@@ -3035,7 +3036,8 @@ export default function Page() {
           pendingAiAdvanceKeyRef.current = null;
         return;
       }
-      if (currentActionCue) setCurrentActionCue(null);
+      if (currentActionCue)
+        setCurrentActionCue(actionCueAfterAiAdvanceRequest);
       const sent = advanceAi(
         localAiPacingModeRef.current === "fast" ? "until_human" : "single_step",
       );
@@ -5384,7 +5386,7 @@ export default function Page() {
                 onPosition={setCuePosition}
                 onDismiss={() => setCurrentActionCue(null)}
                 onAdvanceAi={() => {
-                  setCurrentActionCue(null);
+                  setCurrentActionCue(actionCueAfterAiAdvanceRequest);
                   advanceAi(
                     localAiPacingMode === "fast"
                       ? "until_human"

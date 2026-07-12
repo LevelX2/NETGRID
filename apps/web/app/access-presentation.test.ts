@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { PublicGameEvent } from "@netgrid/shared";
 
 import {
+  actionCueAfterAiAdvanceRequest,
   accessPresentationOwnsActionCue,
   accessPresentationOutcomeAfter,
   coalesceAccessActionCues,
@@ -130,6 +131,17 @@ describe("access presentation outcome ownership", () => {
     ).toBe(false);
   });
 
+  it("keeps run and hidden-access cues mounted while AI resolves the access", () => {
+    const run = { actionType: "start_run", id: "run" };
+    const access = { actionType: "access_card", id: "access" };
+    const stolen = { actionType: "steal_agenda", id: "stolen" };
+
+    expect(actionCueAfterAiAdvanceRequest(run)).toBe(run);
+    expect(actionCueAfterAiAdvanceRequest(access)).toBe(access);
+    expect(actionCueAfterAiAdvanceRequest(stolen)).toBeNull();
+    expect(actionCueAfterAiAdvanceRequest(null)).toBeNull();
+  });
+
   it("updates one cue slot from run through hidden access to trash", () => {
     const run = { actionType: "start_run", id: "run" };
     const access = { actionType: "access_card", id: "access" };
@@ -140,6 +152,17 @@ describe("access presentation outcome ownership", () => {
     expect(
       coalesceAccessActionCues(accessed.current, accessed.queue, [trash]),
     ).toEqual({ current: trash, queue: [] });
+  });
+
+  it("updates one mounted cue from hidden R&D access to the stolen agenda", () => {
+    const access = { actionType: "access_card", id: "redacted-access" };
+    const stolen = { actionType: "steal_agenda", id: "viral-breeding-ground" };
+
+    const waiting = actionCueAfterAiAdvanceRequest(access);
+    expect(coalesceAccessActionCues(waiting, [], [stolen])).toEqual({
+      current: stolen,
+      queue: [],
+    });
   });
 
   it("coalesces a batched run and access while retaining unrelated cues", () => {

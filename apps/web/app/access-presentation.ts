@@ -36,6 +36,17 @@ export function interactionPresentationBlocksAi(input: {
   return input.damageOpen || input.accessOutcomeOpen;
 }
 
+export function actionCueAfterAiAdvanceRequest<
+  T extends { actionType: string },
+>(current: T | null): T | null {
+  if (
+    current?.actionType === "start_run" ||
+    current?.actionType === "access_card"
+  )
+    return current;
+  return null;
+}
+
 export function coalesceAccessActionCues<
   T extends { actionType: string },
 >(
