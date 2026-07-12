@@ -734,6 +734,22 @@ export function createCardRuntimeDepsHosts(
     return cardCounter(state, breakerId, "power");
   }
 
+  function currentRunIcebreakerBaseStrength(
+    state: GameState,
+    breakerId: CardInstanceId,
+    breakerDefinition: CardDefinition,
+  ): number {
+    const run = state.run;
+    const runStrength =
+      run?.runStartRandomStrengthByBreaker?.[breakerId] ??
+      (run?.runStartRandomStrengthSourceCardId === breakerId
+        ? run.runStartRandomStrength
+        : undefined);
+    return typeof runStrength === "number"
+      ? runStrength
+      : (breakerDefinition.strength ?? 0);
+  }
+
   function permanentIcebreakerStrengthCounterBonus(
     state: GameState,
     breakerId: CardInstanceId,
@@ -896,7 +912,7 @@ export function createCardRuntimeDepsHosts(
     )
       throw new Error("Der gewählte Icebreaker-Typ passt nicht zum ICE.");
     const breakerStrength =
-      (breakerDefinition.strength ?? 0) +
+      currentRunIcebreakerBaseStrength(state, breakerId, breakerDefinition) +
       mustInstance(state.cardInstances, breakerId).strengthModifier +
       hostedProgramStrengthModifier(state, breakerId) +
       icebreakerEncounterStrengthBonus(state, breakerId, iceId) +
@@ -1044,7 +1060,7 @@ export function createCardRuntimeDepsHosts(
         "Diese Break-Faehigkeit muss als Multi-Break genutzt werden.",
       );
     const breakerStrength =
-      (breakerDefinition.strength ?? 0) +
+      currentRunIcebreakerBaseStrength(state, breakerId, breakerDefinition) +
       mustInstance(state.cardInstances, breakerId).strengthModifier +
       hostedProgramStrengthModifier(state, breakerId) +
       icebreakerEncounterStrengthBonus(state, breakerId, run.encounteredIceId) +

@@ -60,11 +60,20 @@ function visibleKnownCardWithReferenceViewer(
     definition.type === "program"
       ? runRemainderStrengthBonusForBreaker(state.run, id)
       : 0;
+  const runStartStrength =
+    state.run?.runStartRandomStrengthByBreaker?.[id] ??
+    (state.run?.runStartRandomStrengthSourceCardId === id
+      ? state.run.runStartRandomStrength
+      : undefined);
+  const visibleBaseStrength =
+    typeof runStartStrength === "number"
+      ? runStartStrength
+      : definition.strength;
   const visibleStrength =
-    definition.strength !== undefined
+    visibleBaseStrength !== undefined
       ? definition.type === "ice"
         ? iceStrengthFor(state, id)
-        : definition.strength +
+        : visibleBaseStrength +
           instance.strengthModifier +
           hostedProgramStrengthModifier(state, id) +
           runRemainderStrengthBonus -

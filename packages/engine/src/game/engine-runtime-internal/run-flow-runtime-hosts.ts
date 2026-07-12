@@ -719,14 +719,13 @@ export function createRunFlowRuntimeHosts(
       const definition = definitionFor(state, sourceCardId);
       const randomPurpose = `v1921.die.${definition.id}.run_start_strength`;
       const dieRoll = Math.floor(nextRandom(state, randomPurpose) * 6) + 1;
-      const baseStrength = definition.strength ?? 0;
-      const runStrength = baseStrength + dieRoll;
-      state.run.runStartRandomStrengthBonusByBreaker = {
-        ...(state.run.runStartRandomStrengthBonusByBreaker ?? {}),
+      const runStrength = dieRoll;
+      state.run.runStartRandomStrengthByBreaker = {
+        ...(state.run.runStartRandomStrengthByBreaker ?? {}),
         [sourceCardId]: runStrength,
       };
       state.run.runStartRandomStrengthSourceCardId = sourceCardId;
-      state.run.runStartRandomStrengthBonus = runStrength;
+      state.run.runStartRandomStrength = runStrength;
       outcomes.push(`${sourceCardId}:${dieRoll}:${runStrength}`);
       if (legalAction) {
         legalAction.payload = {
@@ -736,7 +735,7 @@ export function createRunFlowRuntimeHosts(
           runStartRandomStrengthSourceCardId: sourceCardId,
           randomPurpose,
           v1921DieRoll: dieRoll,
-          runStartRandomStrengthBonus: runStrength,
+          runStartRandomStrength: runStrength,
           randomCounterAfter: state.randomCounter,
         };
       }
@@ -745,7 +744,7 @@ export function createRunFlowRuntimeHosts(
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
         v1921RunnerProgramAbility: "run_start_random_strength_bonus",
-        runStartRandomStrengthBonusOutcomes: outcomes.join(","),
+        runStartRandomStrengthOutcomes: outcomes.join(","),
         randomCounterAfter: state.randomCounter,
       };
     }

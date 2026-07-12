@@ -3476,10 +3476,9 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 12,
     memoryCost: 1,
-    strength: 2,
     recurringCredits: 1,
     rulesText:
-      "1 Credit: Break 1 sentry subroutine. 1 Credit: +1 strength. At the start of each run, roll a die and add the result to AI Boon's strength for that run.",
+      "1 Credit: Break 1 sentry subroutine. 1 Credit: +1 strength. At the start of each run, roll a die to determine AI Boon's strength for that run.",
     abilities: [
       {
         id: "onr_v1_002_ai-boon_pump",

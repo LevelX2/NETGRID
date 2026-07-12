@@ -259,8 +259,7 @@ describe("Proteus PRO016 random dice encounter suite", () => {
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "hq",
     );
-    const runStrength =
-      state.run?.runStartRandomStrengthBonusByBreaker?.[legacy];
+    const runStrength = state.run?.runStartRandomStrengthByBreaker?.[legacy];
     expect(runStrength).toBeGreaterThanOrEqual(1);
     expect(runStrength).toBeLessThanOrEqual(6);
     expect(state.randomCounter).toBeGreaterThan(before.randomCounter);

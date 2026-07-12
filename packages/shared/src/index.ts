@@ -1149,10 +1149,8 @@ export type RunState = {
     gainCredits?: number;
   };
   runStartRandomStrengthSourceCardId?: CardInstanceId;
-  runStartRandomStrengthBonus?: number;
-  runStartRandomStrengthBonusByBreaker?: Partial<
-    Record<CardInstanceId, number>
-  >;
+  runStartRandomStrength?: number;
+  runStartRandomStrengthByBreaker?: Partial<Record<CardInstanceId, number>>;
   futureEncounterIceStrengthBonus?: number;
   nextEncounterNoBreakSubroutines?: boolean;
   nextEncounterJackOutLock?: boolean;

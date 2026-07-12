@@ -18,7 +18,6 @@ import {
   MYSTERY_BOX_ID,
   SELF_MODIFYING_CODE_ID,
 } from "../../compatibility/runtime-compatibility";
-import { RANDOM_BREAKER_PROGRAM_SOURCE } from "../../mechanics/random-effects";
 import { buildRunnerHiddenStackProgramInstallAction } from "../turn/runner-special-zone-install-actions";
 
 type ActiveRun = NonNullable<GameState["run"]>;
@@ -170,13 +169,15 @@ export function buildRunnerEncounterActions(
         );
       }
     }
+    const storedRunStartStrength =
+      run.runStartRandomStrengthByBreaker?.[breakerId] ??
+      (run.runStartRandomStrengthSourceCardId === breakerId
+        ? run.runStartRandomStrength
+        : undefined);
     const breakerBaseStrength =
-      typeof run.runStartRandomStrengthBonusByBreaker?.[breakerId] === "number"
-        ? run.runStartRandomStrengthBonusByBreaker[breakerId]
-        : breaker.id === RANDOM_BREAKER_PROGRAM_SOURCE &&
-            typeof run.runStartRandomStrengthBonus === "number"
-          ? run.runStartRandomStrengthBonus
-          : (breaker.strength ?? 0);
+      typeof storedRunStartStrength === "number"
+        ? storedRunStartStrength
+        : (breaker.strength ?? 0);
     const breakerStrength =
       breakerBaseStrength +
       host.cards.cardInstanceFor(breakerId).strengthModifier +

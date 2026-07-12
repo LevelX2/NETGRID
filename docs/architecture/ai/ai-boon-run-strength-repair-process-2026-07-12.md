@@ -25,6 +25,8 @@ falls eine KI-Aktion trotz LegalAction-Vertrag abgelehnt wird.
 ## Nicht-Ziele
 
 - Keine direkte Änderung oder Reparatur der lokalen SQLite-Datei.
+- Keine Recovery-Brücke für den alten fehlerhaften Runzustand; das aktuelle
+  Spiel wird durch Zugrücknahme vor den Run zurückgesetzt.
 - Keine Karten-Sonderlogik in der KI.
 - Keine Erweiterung des Kartenpools.
 - Kein Push und kein Pull Request.
