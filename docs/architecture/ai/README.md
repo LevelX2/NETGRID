@@ -67,6 +67,12 @@ corepack pnpm --filter @netgrid/ai typecheck
 corepack pnpm test:ai:shards
 ```
 
+Das Realitätsgate aus
+`docs/reviews/ai/ai-test-realism-audit-2026-07-12.md` und
+`packages/ai/src/evaluation/real-engine-live-runtime.test.ts` verbindet
+Engine-erzeugte Inputs mit dem produktiven Chooser. Unit-, synthetische Live-,
+Live-Engine- und Full-Simulation-Evidence bleiben getrennt.
+
 Die aktuelle vollständige Derived-Facts-Prüfung umfasst 616 aktive Hints, 527
 CardImplementations, 390 generierte Facts und 137 noch über kompilierte Hints
 abgedeckte Karten. Warnungen sind Qualitätsschuld, keine versteckten

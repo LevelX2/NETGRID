@@ -1,7 +1,7 @@
 # Audit: Realitätsgehalt der KI-Tests
 
 Stand: 2026-07-12
-Status: ATR-01 abgeschlossen, Härtung in Arbeit
+Status: Audit und Härtung abgeschlossen; finale Gate- und Main-Integration läuft
 
 ## Kurzurteil
 
@@ -24,20 +24,20 @@ ohne dass eines der bestehenden Gates rot wurde.
 Die Zählung erfolgte über `vitest list --staticParse --json`. Erfasst sind alle
 Testdateien unter `packages/ai/src`; die Gruppierung folgt der Verzeichnisstruktur.
 
-| Gruppe | Testdateien | Testfälle | Primärer Prüfgegenstand |
-|---|---:|---:|---|
-| `runtime/` | 92 | 650 | Scoring, Kontext, Auswahlbausteine und Live-Runtime |
-| Root/Querschnitt | 54 | 632 | Fassade, Hints, Decks, strategische Vertikalschnitte, Gates |
-| `simulation/` | 42 | 149 | Metriken, Diagnostik, Selfplay und Simulation |
-| `evaluation/` | 24 | 73 | Korpora, Snapshots, Readiness und Benchmarks |
-| `decision/` | 23 | 225 | Ziele, Utility, Frames, Piloten und Target Choice |
-| `plans/` | 22 | 85 | Planbildung, Matching, Fortschritt und Coverage |
-| `actions/` | 11 | 66 | Semantikprojektion und Action-Verträge |
-| `access/` | 10 | 39 | Access-Wert, Memory und Trash-/Reserve-Entscheidungen |
-| `diagnostics/` | 9 | 39 | Debug-, Redaction- und Coverage-Ausgaben |
-| `memory/` | 1 | 9 | Access-Outcome-Memory |
-| `reports/` | 1 | 1 | Reportformatierung |
-| **Gesamt** | **289** | **1.968** | |
+| Gruppe           | Testdateien | Testfälle | Primärer Prüfgegenstand                                     |
+| ---------------- | ----------: | --------: | ----------------------------------------------------------- |
+| `runtime/`       |          92 |       650 | Scoring, Kontext, Auswahlbausteine und Live-Runtime         |
+| Root/Querschnitt |          54 |       632 | Fassade, Hints, Decks, strategische Vertikalschnitte, Gates |
+| `simulation/`    |          42 |       149 | Metriken, Diagnostik, Selfplay und Simulation               |
+| `evaluation/`    |          24 |        73 | Korpora, Snapshots, Readiness und Benchmarks                |
+| `decision/`      |          23 |       225 | Ziele, Utility, Frames, Piloten und Target Choice           |
+| `plans/`         |          22 |        85 | Planbildung, Matching, Fortschritt und Coverage             |
+| `actions/`       |          11 |        66 | Semantikprojektion und Action-Verträge                      |
+| `access/`        |          10 |        39 | Access-Wert, Memory und Trash-/Reserve-Entscheidungen       |
+| `diagnostics/`   |           9 |        39 | Debug-, Redaction- und Coverage-Ausgaben                    |
+| `memory/`        |           1 |         9 | Access-Outcome-Memory                                       |
+| `reports/`       |           1 |         1 | Reportformatierung                                          |
+| **Gesamt**       |     **289** | **1.968** |                                                             |
 
 Zusätzlich wurden fünf KI-nahe Testdateien in Server, Web und Shared als
 Randverträge identifiziert. Sie prüfen Transport, Anzeige oder gemeinsame
@@ -76,11 +76,12 @@ Enge dort, wo der Testname eine Auswahl oder ein Verhalten im Spiel behauptet.
 - `simulation-harness.test.ts` enthält einen vollständigen deterministischen
   AI-vs-AI-Lauf. Er prüft Legalität, Fehlerfreiheit, Replay und Redaction, aber
   keine konkrete fachliche Fehlentscheidung.
-- Der Real-Engine-Korpus umfasst 54 Szenarien. Vor der Härtung trugen 22 davon eine
+- Der Real-Engine-Korpus umfasste 54 Szenarien. Vor der Härtung trugen 22 davon eine
   Erwartung an den besten Aktionstyp und konkrete verbotene Fehlerklassen.
-  Eine Erwartung war durch die Engine bereits vollständig erzwungen; nach ihrer
-  korrekten Rückstufung bleiben 21 echte Verhaltensszenarien. Bislang wird für
-  keines davon die produktive Auswahl gegen diese Erwartung geprüft.
+  Eine Erwartung war durch die Engine bereits vollständig erzwungen und ein
+  Szenario redundant. Nach der Bereinigung umfasst der Korpus 53 Szenarien mit
+  20 echten Verhaltensszenarien. Alle 20 laufen nun durch die produktive
+  Semantic Runtime.
 - In 47 von 92 Runtime-Testdateien kommen `as unknown as`-Casts vor. Das ist
   nicht automatisch falsch, erhöht bei behauptetem Spielverhalten aber das
   Risiko, dass ein Engine-Feld oder eine reale Kombination unabsichtlich fehlt.
@@ -172,8 +173,9 @@ Fehlfunktion: Ein Engine-Feld, eine zusätzliche LegalAction oder eine reale
 Action-Form ändert die Auswahl. Sämtliche synthetischen Live-Tests und sämtliche
 diagnostischen Engine-Korpus-Tests bleiben grün.
 
-Härtung: Alle 21 fachlich annotierten Engine-Szenarien durch den öffentlichen
-Chooser schicken; Legalität, Determinismus und erwarteten Aktionstyp prüfen.
+Härtung: Alle fachlich annotierten Engine-Szenarien durch den öffentlichen
+Chooser schicken; Legalität, Determinismus, erwarteten Aktionstyp und explizit
+verbotene Fehlentscheidungen prüfen.
 
 ### P0 – Fixture setzt das Ergebnis indirekt fest
 
@@ -211,17 +213,60 @@ oder diagnostische Projektion prüft.
 Härtung: Evidenzgrenzen im aktuellen Testmatrix-/Review-Artefakt ausdrücklich
 festhalten und Live-Gates separat benennen.
 
-## Geplante Härtung
+## Umgesetzte Härtung
 
-1. Engine-Korpus und produktiven Chooser verbinden.
-2. Für jede fachlich annotierte Situation Legalität, Wiederholbarkeit und den
-   erwarteten Aktionstyp prüfen.
-3. Kritische Verhaltensgruppen um mindestens eine kontrollierte Gegenvariante
-   ergänzen, ohne den Unit-Test-Scope unnötig aufzublähen.
-4. Simulation-Smoke um mehrere deterministische, unterschiedlich verlaufende
-   Seeds ergänzen; strategische Erwartungen bleiben im Szenariogate.
-5. Aktuelle Testmatrix so aktualisieren, dass Unit-, Live-Synthetic-,
-   Live-Engine- und Full-Simulation-Evidenz nicht mehr vermischt werden.
+1. Die 20 aktuellen fachlich annotierten Engine-Szenarien laufen durch den
+   öffentlichen Live-Chooser. Sie prüfen Legalität, Wiederholbarkeit sowie
+   erwartete oder ausdrücklich verbotene Aktionstypen.
+2. Ein Gegenkandidaten-Gate verlangt, dass erwartete und riskante Aktionen
+   tatsächlich neben einer plausiblen Alternative legal sind. Es deckte den
+   vorher erzwungenen Rez-Fall unmittelbar auf.
+3. Zwei vermeintliche Damage-Safety-Szenarien enthielten keine Damage-Gefahr.
+   Sie besitzen nun sichtbare rezzte Sentry-ICE aus einem echten Engine-Zustand
+   und prüfen robust „kein Run“ statt künstlich genau „Draw“.
+4. Eine Mutation Witness ersetzt den Live-Chooser absichtlich durch eine
+   kontextblinde deterministische Auswahl. Das Gate wird dabei nachweislich rot
+   und belegt, dass es die behauptete Fehlfunktion erkennt.
+5. Der Full-Game-Smoke ergänzt den Golden Seed um drei verschiedene Seeds,
+   verlangt Replay-Stabilität, beide Seiten und unterschiedliche StateHashes.
+6. Historische Shadow-League-Magiezahlen wurden dort, wo sie keinen fachlichen
+   Vertrag darstellten, durch Beziehungen zum realen Szenario- und Seitenbestand
+   ersetzt.
+7. Die Testmatrix trennt Unit-, synthetische Live-, Live-Engine- und
+   Full-Simulation-Evidence.
+
+## Ergebnis nach Härtung
+
+- Primäre KI-Suite: 290 Testdateien und 1.972 statisch registrierte Testfälle.
+- Vollständiges Shard-Gate: 290 Testdateien und 1.909 dynamisch ausgeführte
+  Tests grün (590 + 681 + 638). Die abweichende statische Zahl entsteht durch
+  die Sammlung parametrisierter Tests und wird nicht als Laufzahl ausgegeben.
+- Live-Engine-Gate: 53 Korpus-Szenarien, davon 20 mit fachlicher
+  Verhaltensannotation.
+- Evaluation und Simulation: 67 Testdateien mit 228 Tests grün.
+- Die anfänglich vier Live-Engine-Abweichungen waren keine vier neuen
+  Produktdefekte, sondern vier Belege für unzureichende Prüfgegenstände:
+  fehlende Damage-Gefahr, zu enge Economy-Aktionstypen und ein erzwungener bzw.
+  fachlich nicht eindeutiger Rez-Fall.
+- Nach Korrektur der Prüfgegenstände erfüllt die unveränderte produktive
+  Semantic Runtime alle 20 belastbaren Szenarioverträge.
+
+## Finale Verifikation
+
+Grün:
+
+- `corepack pnpm test:ai:shards`
+- `corepack pnpm check:ai`
+- `corepack pnpm check:ai-deck-doctrine-strategy`
+- `corepack pnpm check:proteus-ai-readiness`
+- `corepack pnpm --filter @netgrid/ai typecheck`
+- `git diff --check`
+
+Das übergeordnete `check:ai:full` bleibt ausschließlich wegen eines bereits auf
+lokalem `main` reproduzierbaren, nicht durch diesen Prozess erzeugten Drifts in
+`data/ai/ai-derived-basic-facts-full-cards-2026-05-25.json` rot. Das normale
+`check:ai` ist grün. Der veraltete Full-Inventory-Snapshot wurde nicht als
+fachfremde generierte Änderung in diesen Testrealismus-Prozess aufgenommen.
 
 ## Residualrisiko
 

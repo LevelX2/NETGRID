@@ -2,7 +2,8 @@
 
 ## Status
 
-Aktiv seit 2026-07-12.
+ATR-01 bis ATR-04 abgeschlossen. ATR-05 befindet sich in finaler Verifikation
+und lokaler Integration.
 
 ## Quelle und Vorgabe
 
@@ -22,7 +23,7 @@ Entscheidungswegen und realen Engine-Fixtures.
 
 ## Gesamtziel
 
-Alle 289 primären KI-Testdateien mit 1.968 statisch registrierten Testfällen
+Alle ursprünglich 289 primären KI-Testdateien mit 1.968 statisch registrierten Testfällen
 werden gruppiert und nach ihrem tatsächlichen Prüfniveau klassifiziert. Tests,
 die eine reale Fehlfunktion wegen zu enger Fixtures, fehlender Konkurrenzaktionen,
 direkter Helper-Aufrufe oder übermäßiger Festsetzungen nicht erkennen würden,
