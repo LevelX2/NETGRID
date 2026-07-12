@@ -8,6 +8,7 @@ AGENTS.local.md
 node_modules/
 .pnpm-store/
 .next/
+apps/web/next-env.d.ts
 dist/
 coverage/
 playwright-report/
@@ -21,6 +22,7 @@ __pycache__/
 *.sqlite
 *.sqlite-*
 data/runtime/
+apps/server/data/runtime/
 data/local/
 docs/reviews/ai/ai-replay-decision-cases-*.json
 docs/reviews/ai/ai-replay-decision-candidate-clusters-*.json
