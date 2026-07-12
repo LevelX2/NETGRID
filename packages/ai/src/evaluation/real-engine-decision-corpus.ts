@@ -30,6 +30,7 @@ export type RealEngineDecisionCorpusScenario = {
 export type RealEngineDecisionCorpusLeagueExpectation = {
   expectedTopActionTypes?: readonly string[];
   expectedTopActionIds?: readonly string[];
+  forbiddenTopActionTypes?: readonly string[];
   pilotEligibleScopes?: readonly AiPlayStrengthPilotScope[];
   forbiddenMistakes?: readonly AiMistakeClass[];
   notes?: readonly string[];

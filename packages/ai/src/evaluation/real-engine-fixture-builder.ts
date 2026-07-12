@@ -46,7 +46,12 @@ export class RealEngineFixtureBuilder {
     advancementCounters: number,
     options: { faceup?: boolean; rezzed?: boolean } = {},
   ): this {
-    this.withCorpRootOnServer(serverId, "simple_agenda", advancementCounters, options);
+    this.withCorpRootOnServer(
+      serverId,
+      "simple_agenda",
+      advancementCounters,
+      options,
+    );
     return this;
   }
 
@@ -56,7 +61,12 @@ export class RealEngineFixtureBuilder {
     advancementCounters = 0,
     options: { faceup?: boolean; rezzed?: boolean } = {},
   ): this {
-    this.withCorpRootOnServer(serverId, definitionId, advancementCounters, options);
+    this.withCorpRootOnServer(
+      serverId,
+      definitionId,
+      advancementCounters,
+      options,
+    );
     return this;
   }
 
@@ -77,6 +87,26 @@ export class RealEngineFixtureBuilder {
       zone: { side: "corp", zone: "serverIce", serverId },
       faceup: false,
       rezzed: false,
+    };
+    return this;
+  }
+
+  withRezzedCorpIceOnServer(
+    serverId: Exclude<ServerId, "new_remote">,
+    definitionId: string,
+  ): this {
+    this.withCorpIceOnServer(serverId, definitionId);
+    const server = this.state.corp.servers.find(
+      (candidate) => candidate.id === serverId,
+    );
+    const id = server?.ice.at(-1);
+    if (!id || !this.state.cardInstances[id]) {
+      throw new Error(`Missing installed ICE ${definitionId} on ${serverId}`);
+    }
+    this.state.cardInstances[id] = {
+      ...this.state.cardInstances[id],
+      faceup: true,
+      rezzed: true,
     };
     return this;
   }

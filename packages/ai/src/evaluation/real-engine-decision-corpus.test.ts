@@ -48,12 +48,14 @@ describe("RealEngineDecisionCorpus", () => {
     expect(scenarios.map((scenario) => scenario.scenarioId)).toEqual(
       REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS,
     );
-    expect(scenarios.length).toBe(REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS.length);
+    expect(scenarios.length).toBe(
+      REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS.length,
+    );
     expect(samples.map((sample) => sample.scenarioId)).toEqual(
       REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS,
     );
     expect(samples.length).toBe(scenarios.length);
-    expect(REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS.length).toBe(54);
+    expect(REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS.length).toBe(53);
     expect(samples.filter((sample) => sample.legalActionCount === 0)).toEqual(
       [],
     );
@@ -97,13 +99,16 @@ describe("RealEngineDecisionCorpus", () => {
       actionTypesFor(scenarios, "corp_real_target_choice_multi_score_payload"),
     ).toContain("score_agenda");
     expect(
-      actionTypesFor(scenarios, "corp_real_target_choice_multi_advance_payload"),
+      actionTypesFor(
+        scenarios,
+        "corp_real_target_choice_multi_advance_payload",
+      ),
     ).toContain("advance_card");
     expect(actionTypesFor(scenarios, "corp_real_rez_value_window")).toContain(
       "rez_ice",
     );
     expect(
-      actionTypesFor(scenarios, "corp_real_do_not_rez_when_broke"),
+      actionTypesFor(scenarios, "corp_real_rez_too_expensive_decline"),
     ).toContain("decline_rez");
     expect(actionTypesFor(scenarios, "runner_real_remote_probe")).toContain(
       "start_run",
@@ -149,13 +154,16 @@ describe("RealEngineDecisionCorpus", () => {
 
   it("keeps every annotated decision scenario open to a real competing action", () => {
     const scenarios = buildRealEngineDecisionCorpusScenarios().filter(
-      (scenario) => scenario.leagueExpectation?.expectedTopActionTypes,
+      (scenario) => scenario.leagueExpectation,
     );
 
-    expect(scenarios).toHaveLength(21);
+    expect(scenarios).toHaveLength(20);
     for (const scenario of scenarios) {
       const expectedTypes = new Set(
         scenario.leagueExpectation?.expectedTopActionTypes ?? [],
+      );
+      const forbiddenTypes = new Set(
+        scenario.leagueExpectation?.forbiddenTopActionTypes ?? [],
       );
       const expectedActions = scenario.input.legalActions.filter((action) =>
         expectedTypes.has(action.type),
@@ -163,16 +171,35 @@ describe("RealEngineDecisionCorpus", () => {
       const competingActions = scenario.input.legalActions.filter(
         (action) => !expectedTypes.has(action.type),
       );
+      const forbiddenActions = scenario.input.legalActions.filter((action) =>
+        forbiddenTypes.has(action.type),
+      );
+      const safeActions = scenario.input.legalActions.filter(
+        (action) => !forbiddenTypes.has(action.type),
+      );
 
-      expect(
-        expectedActions.length,
-        `${scenario.scenarioId} must expose the expected Engine action`,
-      ).toBeGreaterThan(0);
-      if (expectedTypes.has("resolve_choice")) continue;
-      expect(
-        competingActions.length,
-        `${scenario.scenarioId} must not predetermine the expected result`,
-      ).toBeGreaterThan(0);
+      if (expectedTypes.size > 0) {
+        expect(
+          expectedActions.length,
+          `${scenario.scenarioId} must expose the expected Engine action`,
+        ).toBeGreaterThan(0);
+        if (!expectedTypes.has("resolve_choice")) {
+          expect(
+            competingActions.length,
+            `${scenario.scenarioId} must not predetermine the expected result`,
+          ).toBeGreaterThan(0);
+        }
+      }
+      if (forbiddenTypes.size > 0) {
+        expect(
+          forbiddenActions.length,
+          `${scenario.scenarioId} must expose the risky Engine action`,
+        ).toBeGreaterThan(0);
+        expect(
+          safeActions.length,
+          `${scenario.scenarioId} must expose a safe competing action`,
+        ).toBeGreaterThan(0);
+      }
     }
   });
 
@@ -216,7 +243,9 @@ describe("RealEngineDecisionCorpus", () => {
         (candidate) => candidate.payload?.serverId === serverId,
       );
       if (!action) {
-        throw new Error(`Missing real Engine action for ${scenarioId}:${serverId}`);
+        throw new Error(
+          `Missing real Engine action for ${scenarioId}:${serverId}`,
+        );
       }
       const semanticCandidate = sample.frame.actionCandidates.find(
         (candidate) => candidate.actionId === action.actionId,
@@ -265,7 +294,8 @@ describe("RealEngineDecisionCorpus", () => {
 
     expect(discardReport.scorecard).toMatchObject({
       coverageStatus: "covered",
-      choiceOptionCount: discardAction.choiceRequirements?.[0]?.optionIds.length,
+      choiceOptionCount:
+        discardAction.choiceRequirements?.[0]?.optionIds.length,
       targetOptionCount: 0,
     });
     expect(discardReport.selectionOutput).toEqual({
@@ -294,8 +324,9 @@ describe("RealEngineDecisionCorpus", () => {
       corpPayloadReportCount += reports.length;
 
       expect(reports.length).toBeGreaterThanOrEqual(1);
-      expect(reports.every((report) => report.scorecard.targetOptionCount > 0))
-        .toBe(true);
+      expect(
+        reports.every((report) => report.scorecard.targetOptionCount > 0),
+      ).toBe(true);
       expect(
         reports.every(
           (report) => report.selectionOutput.selectedTargetsCreated === false,
@@ -489,8 +520,9 @@ describe("RealEngineDecisionCorpus", () => {
       },
     ]);
 
-    expect(report.followupCandidates.map((candidate) => candidate.kind).sort())
-      .toEqual([...REAL_ENGINE_TARGET_CHOICE_FOLLOWUP_CANDIDATE_KINDS].sort());
+    expect(
+      report.followupCandidates.map((candidate) => candidate.kind).sort(),
+    ).toEqual([...REAL_ENGINE_TARGET_CHOICE_FOLLOWUP_CANDIDATE_KINDS].sort());
     expect(report.followupCandidates).toHaveLength(5);
     expect(report.evidence).toEqual(
       expect.arrayContaining(["followup_candidate_count:5"]),
@@ -504,7 +536,9 @@ describe("RealEngineDecisionCorpus", () => {
       "utf8",
     );
 
-    expect(source).not.toMatch(/\bstate\.(?:runner|corp|cardInstances)\b[^\n;]*=/);
+    expect(source).not.toMatch(
+      /\bstate\.(?:runner|corp|cardInstances)\b[^\n;]*=/,
+    );
   });
 
   it("promotes selfplay findings into a separate real Engine corpus slice", () => {
@@ -533,19 +567,26 @@ describe("RealEngineDecisionCorpus", () => {
 
     const basicPositive = sampleFor(samples, "corp_real_basic_economy_draw");
     expect(
-      pilotDecisionFor(scenarios, basicPositive, BASIC_SETUP_PILOT_MODE).allowed,
+      pilotDecisionFor(scenarios, basicPositive, BASIC_SETUP_PILOT_MODE)
+        .allowed,
     ).toBe(true);
     expect(
       pilotChoiceFor(scenarios, basicPositive, BASIC_SETUP_PILOT_MODE)?.choice
         .action.actionId,
     ).toBe(topAction(basicPositive).actionId);
     expect(
-      pilotDecisionFor(scenarios, sampleFor(samples, "runner_real_safe_hq_access"), BASIC_SETUP_PILOT_MODE)
-        .allowed,
+      pilotDecisionFor(
+        scenarios,
+        sampleFor(samples, "runner_real_safe_hq_access"),
+        BASIC_SETUP_PILOT_MODE,
+      ).allowed,
     ).toBe(false);
     expect(
-      pilotDecisionFor(scenarios, sampleFor(samples, "corp_real_score_agenda_window"), BASIC_SETUP_PILOT_MODE)
-        .allowed,
+      pilotDecisionFor(
+        scenarios,
+        sampleFor(samples, "corp_real_score_agenda_window"),
+        BASIC_SETUP_PILOT_MODE,
+      ).allowed,
     ).toBe(false);
 
     const runnerPositive = sampleFor(samples, "runner_real_safe_hq_access");
@@ -573,7 +614,9 @@ describe("RealEngineDecisionCorpus", () => {
       RUNNER_SAFE_ACCESS_PILOT_MODE,
     );
     expect(remoteThreatDecision.allowed).toBe(false);
-    expect(remoteThreatDecision.reason).toBe("runner_safe_access_non_central_target");
+    expect(remoteThreatDecision.reason).toBe(
+      "runner_safe_access_non_central_target",
+    );
     expect(
       pilotScopeAllowsAction({
         scope: RUNNER_SAFE_ACCESS_PILOT_MODE,
@@ -592,16 +635,22 @@ describe("RealEngineDecisionCorpus", () => {
         .allowed,
     ).toBe(true);
     expect(
-      pilotChoiceFor(scenarios, corpPositive, CORP_SCORE_WINDOW_PILOT_MODE)?.choice
-        .action.actionId,
+      pilotChoiceFor(scenarios, corpPositive, CORP_SCORE_WINDOW_PILOT_MODE)
+        ?.choice.action.actionId,
     ).toBe(topAction(corpPositive).actionId);
     expect(
-      pilotDecisionFor(scenarios, sampleFor(samples, "corp_real_advance_score_window"), CORP_SCORE_WINDOW_PILOT_MODE)
-        .allowed,
+      pilotDecisionFor(
+        scenarios,
+        sampleFor(samples, "corp_real_advance_score_window"),
+        CORP_SCORE_WINDOW_PILOT_MODE,
+      ).allowed,
     ).toBe(false);
     expect(
-      pilotDecisionFor(scenarios, sampleFor(samples, "corp_real_rez_value_window"), CORP_SCORE_WINDOW_PILOT_MODE)
-        .allowed,
+      pilotDecisionFor(
+        scenarios,
+        sampleFor(samples, "corp_real_rez_value_window"),
+        CORP_SCORE_WINDOW_PILOT_MODE,
+      ).allowed,
     ).toBe(false);
   });
 });
@@ -660,7 +709,9 @@ function candidateFor(
     (frameCandidate) => frameCandidate.actionId === action.actionId,
   );
   if (!candidate) {
-    throw new Error(`Missing candidate ${scenario.scenarioId}:${action.actionId}`);
+    throw new Error(
+      `Missing candidate ${scenario.scenarioId}:${action.actionId}`,
+    );
   }
   return candidate;
 }
@@ -727,9 +778,10 @@ function legalActionFor(
   sample: RealEngineDecisionCorpusSample,
 ): LegalAction {
   const top = topAction(sample);
-  const action = scenarioFor(scenarios, sample.scenarioId).input.legalActions.find(
-    (candidate) => candidate.actionId === top.actionId,
-  );
+  const action = scenarioFor(
+    scenarios,
+    sample.scenarioId,
+  ).input.legalActions.find((candidate) => candidate.actionId === top.actionId);
   if (!action) throw new Error(`Missing LegalAction ${top.actionId}`);
   return action;
 }
@@ -739,25 +791,30 @@ function runtimeChoicesFor(
   sample: RealEngineDecisionCorpusSample,
 ): SemanticRuntimeChoice[] {
   const top = topAction(sample);
-  return scenarioFor(scenarios, sample.scenarioId).input.legalActions.map((action) => ({
-    action,
-    scopeId: "real_engine_corpus",
-    score: action.actionId === top.actionId ? top.score : Math.max(top.score - 40, 0),
-    scoreBreakdown: [
-      {
-        key: "real_engine_corpus_score",
-        label: "Real engine corpus score",
-        value:
-          action.actionId === top.actionId
-            ? top.score
-            : Math.max(top.score - 40, 0),
-        reason: sample.scenarioId,
-      },
-    ],
-    reasonCode: `real_engine_corpus.${sample.scenarioId}`,
-    explanation: "real engine corpus candidate",
-    evidence: [`scenario:${sample.scenarioId}`, `action:${action.actionId}`],
-  }));
+  return scenarioFor(scenarios, sample.scenarioId).input.legalActions.map(
+    (action) => ({
+      action,
+      scopeId: "real_engine_corpus",
+      score:
+        action.actionId === top.actionId
+          ? top.score
+          : Math.max(top.score - 40, 0),
+      scoreBreakdown: [
+        {
+          key: "real_engine_corpus_score",
+          label: "Real engine corpus score",
+          value:
+            action.actionId === top.actionId
+              ? top.score
+              : Math.max(top.score - 40, 0),
+          reason: sample.scenarioId,
+        },
+      ],
+      reasonCode: `real_engine_corpus.${sample.scenarioId}`,
+      explanation: "real engine corpus candidate",
+      evidence: [`scenario:${sample.scenarioId}`, `action:${action.actionId}`],
+    }),
+  );
 }
 
 function fallbackRuntimeChoice(

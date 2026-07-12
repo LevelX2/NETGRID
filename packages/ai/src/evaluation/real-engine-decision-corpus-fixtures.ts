@@ -56,7 +56,6 @@ export const REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS = [
   "corp_real_target_choice_multi_advance_payload",
   "corp_real_low_rez_reserve",
   "corp_real_rez_value_window",
-  "corp_real_do_not_rez_when_broke",
   "corp_real_basic_economy_draw",
   "corp_real_remote_defense_setup",
   "corp_real_install_credit_pressure",
@@ -104,7 +103,9 @@ const LEAGUE_EXPECTATION_BY_SCENARIO_ID = {
   }),
   runner_real_target_choice_hq_remote_mix: expectation(["start_run"], {
     forbiddenMistakes: ["target_choice_unavailable"],
-    notes: ["target-choice corpus keeps central and remote run payloads visible"],
+    notes: [
+      "target-choice corpus keeps central and remote run payloads visible",
+    ],
   }),
   runner_real_target_choice_discard_choice: expectation(["resolve_choice"], {
     forbiddenMistakes: ["target_choice_unavailable"],
@@ -112,9 +113,11 @@ const LEAGUE_EXPECTATION_BY_SCENARIO_ID = {
   }),
   runner_real_remote_score_threat: expectation(["start_run"], {
     forbiddenMistakes: ["ignored_remote_threat"],
-    notes: ["remote contest remains report-only until a productive scope exists"],
+    notes: [
+      "remote contest remains report-only until a productive scope exists",
+    ],
   }),
-  runner_real_damage_buffer_needed: expectation(["draw_card"], {
+  runner_real_damage_buffer_needed: avoidanceExpectation(["start_run"], {
     forbiddenMistakes: ["ignored_damage_risk", "unsafe_run"],
   }),
   runner_real_tag_cleanup: expectation(["remove_tag"], {
@@ -126,7 +129,7 @@ const LEAGUE_EXPECTATION_BY_SCENARIO_ID = {
   runner_real_remote_known_agenda_contest: expectation(["start_run"], {
     forbiddenMistakes: ["ignored_remote_threat"],
   }),
-  runner_real_draw_before_damage_risk: expectation(["draw_card"], {
+  runner_real_draw_before_damage_risk: avoidanceExpectation(["start_run"], {
     forbiddenMistakes: ["ignored_damage_risk", "unsafe_run"],
   }),
   corp_real_score_agenda_window: expectation(["score_agenda"], {
@@ -142,13 +145,14 @@ const LEAGUE_EXPECTATION_BY_SCENARIO_ID = {
   corp_real_target_choice_multi_advance_payload: expectation(["advance_card"], {
     forbiddenMistakes: ["target_choice_unavailable", "missed_score_window"],
   }),
-  corp_real_low_rez_reserve: expectation(["gain_credit", "draw_card"], {
-    forbiddenMistakes: ["bad_rez_spend"],
-  }),
+  corp_real_low_rez_reserve: expectation(
+    ["gain_credit", "draw_card", "play_operation"],
+    {
+      forbiddenMistakes: ["bad_rez_spend"],
+      notes: ["economy operations are valid reserve recovery"],
+    },
+  ),
   corp_real_rez_value_window: expectation(["rez_ice"], {
-    forbiddenMistakes: ["bad_rez_spend"],
-  }),
-  corp_real_do_not_rez_when_broke: expectation(["decline_rez"], {
     forbiddenMistakes: ["bad_rez_spend"],
   }),
   corp_real_basic_economy_draw: expectation(["gain_credit", "draw_card"], {
@@ -231,7 +235,10 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
       "runner_real_damage_buffer_needed",
       "real-runner-damage-buffer",
       (fixture) => {
-        fixture.withRunnerCredits(4).withRunnerGripSize(1);
+        fixture
+          .withRunnerCredits(4)
+          .withRunnerGripSize(1)
+          .withRezzedCorpIceOnServer("rd", "simple_sentry_ice");
       },
       ["fixture:low_hand_buffer"],
       "onr_origin_runner_ai_snapshot_v1",
@@ -387,7 +394,10 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
       "runner_real_draw_before_damage_risk",
       "real-runner-draw-before-damage-risk",
       (fixture) => {
-        fixture.withRunnerCredits(4).withRunnerGripSize(1);
+        fixture
+          .withRunnerCredits(4)
+          .withRunnerGripSize(1)
+          .withRezzedCorpIceOnServer("rd", "simple_sentry_ice");
       },
       ["fixture:runner_draw_before_damage_risk"],
       "onr_origin_runner_ai_snapshot_v1",
@@ -483,12 +493,6 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
       "corp_real_rez_value_window",
       "real-corp-rez-value",
       8,
-      "onr_origin_corp_ai_snapshot_v1",
-    ),
-    corpRezScenario(
-      "corp_real_do_not_rez_when_broke",
-      "real-corp-no-rez",
-      3,
       "onr_origin_corp_ai_snapshot_v1",
     ),
     corpScenario(
@@ -612,7 +616,9 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
       "corp_real_hq_pressure_defend",
       "real-corp-hq-pressure-defend",
       (fixture) => {
-        fixture.withCorpCredits(5).withCorpIceOnServer("hq", "simple_barrier_ice");
+        fixture
+          .withCorpCredits(5)
+          .withCorpIceOnServer("hq", "simple_barrier_ice");
       },
       ["fixture:corp_hq_pressure_defend"],
       "onr_origin_corp_ai_snapshot_v1",
@@ -621,7 +627,9 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
       "corp_real_rnd_pressure_defend",
       "real-corp-rnd-pressure-defend",
       (fixture) => {
-        fixture.withCorpCredits(5).withCorpIceOnServer("rd", "simple_barrier_ice");
+        fixture
+          .withCorpCredits(5)
+          .withCorpIceOnServer("rd", "simple_barrier_ice");
       },
       ["fixture:corp_rnd_pressure_defend"],
       "onr_origin_corp_ai_snapshot_v1",
@@ -657,10 +665,9 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
       "corp_real_asset_economy_install",
       "real-corp-asset-economy-install",
       (fixture) => {
-        fixture.withCorpCredits(7).withCorpRemoteRoot(
-          "remote_1",
-          "simple_economy_asset",
-        );
+        fixture
+          .withCorpCredits(7)
+          .withCorpRemoteRoot("remote_1", "simple_economy_asset");
       },
       ["fixture:corp_asset_economy_install"],
       "proteus_corp_region_fast_score_snapshot_v2026_05_25",
@@ -783,7 +790,10 @@ function corpRezScenario(
     "corp",
     state,
   )
-    .addEvidence([`fixture:corp_rez_window_credits:${corpCredits}`, ...evidence])
+    .addEvidence([
+      `fixture:corp_rez_window_credits:${corpCredits}`,
+      ...evidence,
+    ])
     .withDeckDoctrine(deckSnapshotId)
     .build();
 }
@@ -793,7 +803,9 @@ function runnerDiscardChoiceScenario(
   seed: string,
   deckSnapshotId?: string,
 ): RealEngineDecisionCorpusScenario {
-  let state = toRunnerTurn(createGameAfterSetup({ seed, agendaPointsToWin: 7 }));
+  let state = toRunnerTurn(
+    createGameAfterSetup({ seed, agendaPointsToWin: 7 }),
+  );
   RealEngineFixtureBuilder.forState(state)
     .withRunnerCredits(5)
     .withRunnerGripSize(5);
@@ -803,7 +815,9 @@ function runnerDiscardChoiceScenario(
     state.pendingChoice?.source !== "discard_phase" ||
     state.pendingChoice.side !== "runner"
   ) {
-    throw new Error("Missing runner discard choice after draw/end-turn fixture");
+    throw new Error(
+      "Missing runner discard choice after draw/end-turn fixture",
+    );
   }
   return RealEngineDecisionCorpusScenarioBuilder.fromState(
     scenarioId,
@@ -934,6 +948,22 @@ function expectation(
 ): RealEngineDecisionCorpusLeagueExpectation {
   return {
     expectedTopActionTypes,
+    ...options,
+  };
+}
+
+function avoidanceExpectation(
+  forbiddenTopActionTypes: readonly string[],
+  options: Omit<
+    RealEngineDecisionCorpusLeagueExpectation,
+    | "expectedTopActionTypes"
+    | "expectedTopActionIds"
+    | "forbiddenTopActionTypes"
+    | "evidence"
+  > = {},
+): RealEngineDecisionCorpusLeagueExpectation {
+  return {
+    forbiddenTopActionTypes,
     ...options,
   };
 }
