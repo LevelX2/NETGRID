@@ -527,6 +527,139 @@ describe("Semantic AI runtime cutover", () => {
     expect(decision.fallbackUsed).toBe(false);
   });
 
+  it("excludes an ICE-dependent upgrade until its target fort has ICE", () => {
+    const rasmin = visibleCard("rasmin-hand", "corp", "upgrade", {
+      definitionId: "onr_proteus_070_rasmin-bridger",
+      title: "Rasmin Bridger",
+    });
+    const install = legalAction(
+      "install-rasmin-hq",
+      "corp",
+      "install_card",
+      "Rasmin Bridger in HQ installieren",
+      { credits: 0 },
+      {
+        source: rasmin.instanceId,
+        payload: { placement: "root", serverId: "hq" },
+      },
+    );
+    const input = aiInput("corp", [
+      install,
+      legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.own.gripOrHq = [rasmin];
+    input.playerView.servers = [server("hq")];
+
+    const decision = chooseCorpAction(input);
+    const alternative = decision.decisionDebug?.actionAlternatives?.find(
+      (entry) => entry.actionId === install.actionId,
+    );
+
+    expect(decision.actionId).toBe("gain-credit");
+    expect(JSON.stringify(alternative)).toContain(
+      "corp_upgrade_ice_support_without_ice",
+    );
+
+    const protectedInput = aiInput("corp", [
+      install,
+      legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    protectedInput.playerView.own.gripOrHq = [rasmin];
+    protectedInput.playerView.servers = [
+      server("hq", [
+        visibleCard("hq-ice", "corp", "ice", {
+          rezzed: true,
+          subtypes: ["wall"],
+        }),
+      ]),
+    ];
+
+    expect(chooseCorpAction(protectedInput).actionId).toBe(install.actionId);
+  });
+
+  it("allows only a region replacement with active marginal utility", () => {
+    const researchBunker = visibleCard(
+      "research-bunker-hand",
+      "corp",
+      "upgrade",
+      {
+        definitionId: "onr_proteus_072_research-bunker",
+        title: "Research Bunker",
+        subtypes: ["region"],
+      },
+    );
+    const install = legalAction(
+      "install-research-bunker",
+      "corp",
+      "install_card",
+      "Research Bunker in Remote 1 installieren",
+      { credits: 0 },
+      {
+        source: researchBunker.instanceId,
+        payload: {
+          placement: "root",
+          serverId: "remote_1",
+          regionReplacementWarning: true,
+        },
+      },
+    );
+    const gainCredit = legalAction(
+      "gain-credit",
+      "corp",
+      "gain_credit",
+      "Gain 1",
+      { credits: 0 },
+    );
+    const networkedCenter = visibleCard(
+      "networked-center-installed",
+      "corp",
+      "upgrade",
+      {
+        definitionId: "onr_proteus_065_networked-center",
+        title: "Networked Center",
+        subtypes: ["region"],
+        rezzed: true,
+      },
+    );
+    const inactiveInput = aiInput("corp", [install, gainCredit]);
+    inactiveInput.playerView.own.gripOrHq = [researchBunker];
+    inactiveInput.playerView.servers = [
+      server("remote_1", [], [networkedCenter]),
+    ];
+
+    const inactiveDecision = chooseCorpAction(inactiveInput);
+    expect(inactiveDecision.actionId).toBe(gainCredit.actionId);
+    expect(
+      JSON.stringify(
+        inactiveDecision.decisionDebug?.actionAlternatives?.find(
+          (entry) => entry.actionId === install.actionId,
+        ),
+      ),
+    ).toContain("region_replacement_without_marginal_value");
+
+    const activeInput = aiInput("corp", [install, gainCredit]);
+    activeInput.playerView.own.gripOrHq = [researchBunker];
+    activeInput.playerView.servers = [
+      server("remote_1", [], [
+        networkedCenter,
+        visibleCard("research-agenda", "corp", "agenda", {
+          subtypes: ["research"],
+          advancementRequirement: 3,
+        }),
+      ]),
+    ];
+
+    const activeDecision = chooseCorpAction(activeInput);
+    expect(activeDecision.actionId).toBe(install.actionId);
+    expect(JSON.stringify(activeDecision)).toContain(
+      "region_replacement_adds_active_utility",
+    );
+  });
+
   it("maps structured Schlaghund tag-damage actions to the corp tag punish reason", () => {
     const schlaghund = legalAction(
       "corp.gain_credit.asset_damage",

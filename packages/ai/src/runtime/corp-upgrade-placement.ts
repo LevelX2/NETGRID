@@ -5,8 +5,10 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
+import { createAiHintsByCard } from "../ai-hints";
 import { visibleCardDefinition } from "./card-definition-lookup";
 import { rolesMatch } from "./role-match";
+import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
 
 type VisibleCorpServer = AiDecisionInput["playerView"]["servers"][number];
 
@@ -24,6 +26,67 @@ const BASIC_INSTALL_SIGNALS = new Set([
   "setup.install",
   "setup.coverage",
 ]);
+const AI_HINTS_BY_CARD = createAiHintsByCard();
+
+export type CorpUpgradePlacementAssessment = {
+  recommendation: "allow" | "defer";
+  reason:
+    | "placement_has_current_value"
+    | "ice_support_without_ice"
+    | "region_replacement_without_marginal_value"
+    | "region_replacement_adds_active_utility";
+  candidateActiveUtility: string[];
+  replacedActiveUtility: string[];
+  marginalUtility: string[];
+  evidence: string[];
+};
+
+export function corpUpgradePlacementAssessment(
+  params: CorpUpgradePlacementParams,
+): CorpUpgradePlacementAssessment | undefined {
+  if (
+    params.action.type !== "install_card" ||
+    params.action.payload?.placement !== "root" ||
+    !sourceLooksLikeUpgrade(params)
+  ) {
+    return undefined;
+  }
+  const signals = semanticSignals(params.actionSemanticCandidate);
+  const server = visibleServer(params.input, params.serverId);
+  if (hasIceSupportSignal(signals) && (server?.ice.length ?? 0) === 0) {
+    return placementAssessment({
+      recommendation: "defer",
+      reason: "ice_support_without_ice",
+      evidence: [
+        "placement_contract:ice_support_requires_installed_ice",
+        `server:${params.serverId ?? "none"}`,
+      ],
+    });
+  }
+  if (params.action.payload?.regionReplacementWarning === true) {
+    return regionReplacementAssessment(params, signals, server);
+  }
+  return placementAssessment({
+    recommendation: "allow",
+    reason: "placement_has_current_value",
+    candidateActiveUtility: activeUpgradeUtility(signals, params.serverId, server),
+    evidence: ["placement_contract:no_defer_condition"],
+  });
+}
+
+export function corpUpgradePlacementExclusion(
+  params: CorpUpgradePlacementParams,
+): SemanticRuntimeExclusion | undefined {
+  const assessment = corpUpgradePlacementAssessment(params);
+  if (!assessment || assessment.recommendation === "allow") return undefined;
+  return {
+    key: `corp_upgrade_${assessment.reason}`,
+    label: assessment.reason === "ice_support_without_ice"
+      ? "Upgrade benötigt zuerst ICE"
+      : "Regionsersatz ohne belegten Mehrwert",
+    reason: assessment.evidence.join("|"),
+  };
+}
 
 export function corpUpgradeInstallPlacementComponent(
   params: CorpUpgradePlacementParams,
@@ -84,24 +147,18 @@ export function corpUpgradeInstallPlacementComponent(
 export function corpRegionReplacementComponent(
   params: CorpUpgradePlacementParams,
 ): AiDecisionScoreComponent | undefined {
-  if (
-    params.action.type !== "install_card" ||
-    params.action.payload?.placement !== "root" ||
-    params.action.payload?.regionReplacementWarning !== true ||
-    !sourceLooksLikeUpgrade(params)
-  ) {
-    return undefined;
-  }
+  if (params.action.payload?.regionReplacementWarning !== true) return undefined;
+  const assessment = corpUpgradePlacementAssessment(params);
+  if (!assessment) return undefined;
   return {
-    key: "corp_upgrade_region_replacement_cost",
-    label: "Region-Ersetzung",
-    value: -2600,
-    reason: [
-      "region_replacement_warning:true",
-      `card:${params.sourceCard?.definitionId ?? params.actionSemanticCandidate?.sourceDefinitionId ?? "unknown"}`,
-      `server:${params.serverId ?? "none"}`,
-      "replacement_requires_demonstrated_marginal_value:true",
-    ].join("|"),
+    key: assessment.recommendation === "allow"
+      ? "corp_upgrade_region_replacement_value"
+      : "corp_upgrade_region_replacement_defer",
+    label: assessment.recommendation === "allow"
+      ? "Regionsersatz mit Mehrwert"
+      : "Regionsersatz vertagen",
+    value: 0,
+    reason: assessment.evidence.join("|"),
   };
 }
 
@@ -261,9 +318,168 @@ function iceSupportPlacementComponent(
   return {
     key: "corp_upgrade_install_placement_defer",
     label: "Upgrade-Placement vertagen",
-    value: -1700,
+    value: 0,
     reason: [...evidence, "defer_reason:ice_support_without_ice"].join("|"),
   };
+}
+
+function regionReplacementAssessment(
+  params: CorpUpgradePlacementParams,
+  candidateSignals: ReadonlySet<string>,
+  server: VisibleCorpServer | undefined,
+): CorpUpgradePlacementAssessment {
+  const replacedRegion = server?.root.find((card) =>
+    card.instanceId !== params.sourceCard?.instanceId && cardIsRegion(card),
+  );
+  const candidateActiveUtility = activeUpgradeUtility(
+    candidateSignals,
+    params.serverId,
+    server,
+  );
+  const replacedActiveUtility = activeUpgradeUtility(
+    signalsForVisibleCard(replacedRegion),
+    params.serverId,
+    server,
+  );
+  const replacedUtility = new Set(replacedActiveUtility);
+  const marginalUtility = candidateActiveUtility.filter(
+    (utility) => !replacedUtility.has(utility),
+  );
+  const recommendation = marginalUtility.length > 0 ? "allow" : "defer";
+  return placementAssessment({
+    recommendation,
+    reason: recommendation === "allow"
+      ? "region_replacement_adds_active_utility"
+      : "region_replacement_without_marginal_value",
+    candidateActiveUtility,
+    replacedActiveUtility,
+    marginalUtility,
+    evidence: [
+      "region_replacement_warning:true",
+      `card:${params.sourceCard?.definitionId ?? params.actionSemanticCandidate?.sourceDefinitionId ?? "unknown"}`,
+      `server:${params.serverId ?? "none"}`,
+      `replaced_region:${replacedRegion?.definitionId ?? "unknown"}`,
+    ],
+  });
+}
+
+function placementAssessment(params: {
+  recommendation: CorpUpgradePlacementAssessment["recommendation"];
+  reason: CorpUpgradePlacementAssessment["reason"];
+  candidateActiveUtility?: string[];
+  replacedActiveUtility?: string[];
+  marginalUtility?: string[];
+  evidence: string[];
+}): CorpUpgradePlacementAssessment {
+  const candidateActiveUtility = params.candidateActiveUtility ?? [];
+  const replacedActiveUtility = params.replacedActiveUtility ?? [];
+  const marginalUtility = params.marginalUtility ?? [];
+  return {
+    recommendation: params.recommendation,
+    reason: params.reason,
+    candidateActiveUtility,
+    replacedActiveUtility,
+    marginalUtility,
+    evidence: [
+      `placement_recommendation:${params.recommendation}`,
+      `placement_reason:${params.reason}`,
+      `candidate_active_utility:${candidateActiveUtility.join(",") || "none"}`,
+      `replaced_active_utility:${replacedActiveUtility.join(",") || "none"}`,
+      `marginal_utility:${marginalUtility.join(",") || "none"}`,
+      ...params.evidence,
+    ],
+  };
+}
+
+function cardIsRegion(card: VisibleCard): boolean {
+  const definition = visibleCardDefinition(card);
+  return [...(card.subtypes ?? []), ...(definition?.subtypes ?? [])]
+    .some((subtype) => normalizedToken(subtype) === "region");
+}
+
+function signalsForVisibleCard(card: VisibleCard | undefined): Set<string> {
+  if (!card?.definitionId) return new Set();
+  const hint = AI_HINTS_BY_CARD.get(card.definitionId);
+  if (!hint) return new Set();
+  return new Set([
+    ...(hint.effects ?? []).flatMap((effect) => [
+      effect.kind,
+      ...("target" in effect && typeof effect.target === "string"
+        ? [effect.target]
+        : []),
+    ]),
+    ...(hint.strategySupportPairs ?? []).flatMap((support) => [
+      support.strategyId,
+      support.role,
+      ...support.evidence,
+    ]),
+    ...(hint.lineSupport ?? []),
+  ]);
+}
+
+function activeUpgradeUtility(
+  signals: ReadonlySet<string>,
+  serverId: string | undefined,
+  server: VisibleCorpServer | undefined,
+): string[] {
+  if (!serverId || !server) return [];
+  const utility = new Set<string>();
+  const agendas = server.root.filter((card) =>
+    card.known !== false &&
+    (card.type === "agenda" || visibleCardDefinition(card)?.type === "agenda"),
+  );
+  const agendaSubtypes = new Set(
+    agendas.flatMap((card) => [
+      ...(card.subtypes ?? []),
+      ...(visibleCardDefinition(card)?.subtypes ?? []),
+    ]).map(normalizedToken),
+  );
+  const specificDifficultySignals = [...signals].filter((signal) => {
+    const match = /^score\.([a-z0-9_]+)_difficulty_discount$/.exec(signal);
+    return Boolean(match && match[1] !== "agenda");
+  });
+  for (const signal of specificDifficultySignals) {
+    const category = signal.slice("score.".length, -"_difficulty_discount".length);
+    if (agendas.length > 0 && agendaSubtypes.has(category)) utility.add(signal);
+  }
+  if (
+    agendas.length > 0 &&
+    specificDifficultySignals.length === 0 &&
+    (signals.has("score.agenda_difficulty_discount") ||
+      signals.has("remote.agenda_difficulty_discount"))
+  ) {
+    utility.add("score.agenda_difficulty_discount");
+  }
+  if (
+    server.ice.length > 0 &&
+    [...signals].some((signal) =>
+      signal.startsWith("ice.corp_") ||
+      signal === "run.corp_pay_or_end_run" ||
+      signal.startsWith("tax.runner_") ||
+      signal === "remote.scoring_protection",
+    )
+  ) {
+    utility.add("ice_supported_run_defense");
+  }
+  if (
+    (serverId === "hq" || serverId === "rd") &&
+    signals.has("access.corp_central_access_reduction")
+  ) {
+    utility.add("central_access_reduction");
+  }
+  if (
+    serverId.startsWith("remote_") &&
+    (server.root.length > 0 || server.ice.length > 0) &&
+    signals.has("remote.capacity_support")
+  ) {
+    utility.add("remote_capacity_support");
+  }
+  return [...utility].sort();
+}
+
+function normalizedToken(value: string): string {
+  return value.trim().toLocaleLowerCase("en-US").replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
 }
 
 function sourceLooksLikeUpgrade(params: CorpUpgradePlacementParams): boolean {

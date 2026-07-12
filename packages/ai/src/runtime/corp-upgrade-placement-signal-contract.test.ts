@@ -6,8 +6,12 @@ import type {
 import { describe, expect, it } from "vitest";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import { buildActionCardSemanticProfilesByDefinitionId } from "../actions/action-card-semantic-profiles";
-import { corpUpgradeInstallPlacementComponent } from "./corp-upgrade-placement";
-import { corpRegionReplacementComponent } from "./corp-upgrade-placement";
+import {
+  corpRegionReplacementComponent,
+  corpUpgradeInstallPlacementComponent,
+  corpUpgradePlacementAssessment,
+  corpUpgradePlacementExclusion,
+} from "./corp-upgrade-placement";
 
 const AGENDA_DIFFICULTY_UPGRADES = [
   "onr_v1_374_washington-d-c-city-grid",
@@ -129,7 +133,7 @@ describe("Corp upgrade placement signal contract", () => {
     ).toEqual(
       expect.objectContaining({
         key: "corp_upgrade_install_placement_defer",
-        value: -1700,
+        value: 0,
         reason: expect.stringContaining("defer_reason:ice_support_without_ice"),
       }),
     );
@@ -146,25 +150,66 @@ describe("Corp upgrade placement signal contract", () => {
     );
   });
 
-  it("prices the explicit loss when a region replaces another region", () => {
+  it("defers a region replacement without active marginal utility", () => {
     const replacement = placementScenario(
       "onr_proteus_072_research-bunker",
       "remote_1",
       {
         regionReplacementWarning: true,
         remoteIce: [visibleCard("remote-ice", "simple_ice", "ice")],
+        remoteRoot: [
+          visibleCard(
+            "networked-center-installed",
+            "onr_proteus_065_networked-center",
+            "upgrade",
+            { subtypes: ["region"] },
+          ),
+        ],
       },
     );
 
     expect(corpRegionReplacementComponent(replacement)).toEqual(
       expect.objectContaining({
-        key: "corp_upgrade_region_replacement_cost",
-        value: -2600,
+        key: "corp_upgrade_region_replacement_defer",
+        value: 0,
         reason: expect.stringContaining(
-          "replacement_requires_demonstrated_marginal_value:true",
+          "placement_reason:region_replacement_without_marginal_value",
         ),
       }),
     );
+    expect(corpUpgradePlacementExclusion(replacement)).toEqual(
+      expect.objectContaining({
+        key: "corp_upgrade_region_replacement_without_marginal_value",
+      }),
+    );
+  });
+
+  it("allows a region replacement that activates the current agenda category", () => {
+    const replacement = placementScenario(
+      "onr_proteus_072_research-bunker",
+      "remote_1",
+      {
+        regionReplacementWarning: true,
+        remoteRoot: [
+          visibleCard(
+            "networked-center-installed",
+            "onr_proteus_065_networked-center",
+            "upgrade",
+            { subtypes: ["region"] },
+          ),
+          visibleCard("research-agenda", "research-agenda", "agenda", {
+            subtypes: ["research"],
+          }),
+        ],
+      },
+    );
+
+    expect(corpUpgradePlacementAssessment(replacement)).toMatchObject({
+      recommendation: "allow",
+      reason: "region_replacement_adds_active_utility",
+      marginalUtility: ["score.research_difficulty_discount"],
+    });
+    expect(corpUpgradePlacementExclusion(replacement)).toBeUndefined();
   });
 });
 

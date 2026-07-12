@@ -11,6 +11,11 @@ type PlayerViewServer = AiDecisionInput["playerView"]["servers"][number];
 type KnownIcePathAssessment = ReturnType<typeof assessKnownRezzedIcePath>;
 
 export type SemanticRuntimeActionExclusionDependencies = {
+  corpUpgradePlacementExclusion?: (
+    input: AiDecisionInput,
+    action: LegalAction,
+    actionSemanticCandidate: ActionSemanticCandidate | undefined,
+  ) => SemanticRuntimeExclusion | undefined;
   planMemoryActionExclusion: (
     input: AiDecisionInput,
     action: LegalAction,
@@ -95,6 +100,13 @@ export function semanticRuntimeActionExclusion(
       reason: corpAdvancementPlacement.evidence.join("|"),
     };
   }
+  const corpUpgradePlacementExclusion =
+    dependencies.corpUpgradePlacementExclusion?.(
+      input,
+      action,
+      actionSemanticCandidate,
+    );
+  if (corpUpgradePlacementExclusion) return corpUpgradePlacementExclusion;
   const selfDamageSurvivalExclusion =
     dependencies.runnerSelfDamageSurvivalExclusion(
       input,

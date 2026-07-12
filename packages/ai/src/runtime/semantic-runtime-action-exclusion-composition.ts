@@ -123,6 +123,12 @@ export function createSemanticRuntimeActionExclusionComposition(
   const { semanticRuntimeActionExclusion } =
     createSemanticRuntimeActionExclusionContext({
       planMemoryActionExclusion: dependencies.planMemoryActionExclusion,
+      ...(dependencies.corpUpgradePlacementExclusion
+        ? {
+            corpUpgradePlacementExclusion:
+              dependencies.corpUpgradePlacementExclusion,
+          }
+        : {}),
       corpAdvancementCounterPlacementAssessment:
         dependencies.corpAdvancementCounterPlacementAssessment,
       runnerSelfDamageSurvivalExclusion: runnerSelfDamageSurvivalExclusion,

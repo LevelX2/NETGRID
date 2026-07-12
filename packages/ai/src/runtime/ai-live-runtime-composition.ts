@@ -14,6 +14,9 @@ import {
   createAiContextDiagnosticsComposition,
   type AiContextDiagnosticsCompositionDependencies,
 } from "./ai-context-diagnostics-composition";
+import { corpUpgradePlacementExclusion } from "./corp-upgrade-placement";
+import { semanticRuntimeServerId } from "./semantic-runtime-scope";
+import { semanticRuntimeVisibleSourceCard } from "./visible-card-lookup";
 
 type RuntimeScoringDependencyObjects = Pick<
   SemanticRuntimeOrchestrationCompositionDependencies,
@@ -211,6 +214,15 @@ function createSemanticRuntimeDependencies(
     },
     corpAdvancementCounterPlacementAssessment:
       corpScoring.semanticRuntimeCorpAdvancementCounterPlacementAssessment,
+    corpUpgradePlacementExclusion: (input, action, actionSemanticCandidate) =>
+      corpUpgradePlacementExclusion({
+        input,
+        action,
+        roles: contextDiagnostics.rolesForAction(input, action),
+        actionSemanticCandidate,
+        sourceCard: semanticRuntimeVisibleSourceCard(input, action),
+        serverId: semanticRuntimeServerId(action),
+      }),
     corpComponents: corpScoring.semanticRuntimeCorpScoreComponents,
     corpEvidence: corpScoring.semanticRuntimeCorpEvidence,
     scorelineWindowAssessment:
