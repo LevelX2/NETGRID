@@ -200,6 +200,7 @@ import {
 import {
   applyDelayedInstallStartOfTurn,
   handleRunnerSpecialTriggerExecution,
+  resolveDelayedInstallStartTurnChoice,
   delayedInstallCounterCost,
   delayedInstallPreparedTargetIds,
   delayedInstallPrepareTargetIds,
@@ -934,6 +935,7 @@ export function initializeStateRuntimeBootstrap({
     resolveReplacementChoice,
     resolveRunnerPrivateLookChoice,
     resolveRunnerProgramTrashBeforeInstallChoice,
+    resolveDelayedInstallStartTurnChoice,
     resolveSenatorialFieldTripChoice,
     resolveHqIceSwapChoice,
     resolveRezInterruptJackOutChoice,

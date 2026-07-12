@@ -14,6 +14,7 @@ import type {
   LegalAction,
   PendingChoiceResolutionHost,
   PlayerAction,
+  ResolvedGameEffect,
   RuntimeDeps,
   ServerId,
   Side,
@@ -121,6 +122,7 @@ export function createPendingChoiceRuntimeHosts(
     resolveReplacementChoice,
     resolveRunnerPrivateLookChoice,
     resolveRunnerProgramTrashBeforeInstallChoice,
+    resolveDelayedInstallStartTurnChoice,
     resolveSenatorialFieldTripChoice,
     resolveHqIceSwapChoice,
     resolveRezInterruptJackOutChoice,
@@ -134,6 +136,7 @@ export function createPendingChoiceRuntimeHosts(
     rezzedCorpRootCardIds,
     rezzedInstalledIceIds,
     rollDeterministicDie,
+    runnerSpecialTriggerExecutionHost,
     runAccessTransitionHost,
     runEndCleanupHost,
     runRezWindowHostForState,
@@ -701,6 +704,26 @@ export function createPendingChoiceRuntimeHosts(
       },
       runner: {
         resolveRunnerProgramTrashBeforeInstallChoice,
+        resolveDelayedInstallStartTurnChoice: (
+          _state,
+          legalAction,
+          playerAction,
+        ) => {
+          const effects: ResolvedGameEffect[] = [];
+          resolveDelayedInstallStartTurnChoice(
+            runnerSpecialTriggerExecutionHost(state),
+            legalAction,
+            playerAction,
+            effects,
+          );
+          if (!state.pendingChoice)
+            applyRunnerStartOfTurnEffects(
+              state,
+              effects,
+              "after_delayed_install_choice",
+            );
+          appendResolvedEffectsToPayload(legalAction, effects);
+        },
       },
       run: {
         resolveHqIceSwapChoice,

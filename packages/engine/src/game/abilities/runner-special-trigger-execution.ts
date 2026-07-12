@@ -6,10 +6,12 @@ import type {
   CounterType,
   GameState,
   LegalAction,
+  PlayerAction,
   ResolvedGameEffect,
   Side,
   SpecialZoneState,
 } from "@netgrid/shared";
+import { selectedChoiceIds } from "../choices/choice-validation";
 import { completeRunnerProgramRigInstall } from "../install/runner-rig-install-finalization";
 
 export type RunnerSpecialTriggerExecutionHost = {
@@ -180,6 +182,7 @@ export function applyDelayedInstallStartOfTurn(
   effects?: ResolvedGameEffect[],
 ): void {
   const { state } = host;
+  if (state.pendingChoice) return;
   const flags = (state.runnerTurnFlags ??= {
     stoleAgendaThisTurn: false,
     stoleAgendaLastTurn: false,
@@ -207,29 +210,161 @@ export function applyDelayedInstallStartOfTurn(
     )
       continue;
     if (resolvedSourceIds.includes(sourceCardId)) continue;
-    const targetCardId = delayedInstallPreparedTargetIds(host)[0];
-    if (!targetCardId) continue;
+    const targetCardIds = delayedInstallPreparedTargetIds(host);
+    if (targetCardIds.length === 0) return;
+    if (targetCardIds.length > 1) {
+      startDelayedInstallStartTurnChoice(host, sourceCardId, targetCardIds);
+      return;
+    }
+    const targetCardId = targetCardIds[0]!;
     resolvedSourceIds.push(sourceCardId);
-    const targetDefinition = host.cards.definitionFor(state, targetCardId);
     const result = removeShellCounterAndMaybeInstall(host, targetCardId);
-    effects?.push({
-      effectId: `runner.start.delayed_install.${sourceCardId}.${targetCardId}`,
-      kind: "counter_change",
-      visibility: "public",
-      side: "runner",
-      amount: result.remainingCounters,
-      reason: "start_of_turn",
-      counterType: "shell",
-      removedCounterAmount: 1,
-      remainingCounters: result.remainingCounters,
-      sourceDefinitionId: host.constants.SHELL_TRADERS_ID,
-      sourceTitle: host.cards.publicTitle(
-        host.constants.SHELL_TRADERS_ID as CardDefinitionId,
+    effects?.push(
+      delayedInstallStartTurnCounterEffect(
+        host,
+        sourceCardId,
+        targetCardId,
+        result,
       ),
-      cardDefinitionId: targetDefinition.id,
-      cardTitle: host.cards.publicTitle(targetDefinition.id),
-    });
+    );
   }
+}
+
+export function resolveDelayedInstallStartTurnChoice(
+  host: RunnerSpecialTriggerExecutionHost,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+  effects?: ResolvedGameEffect[],
+): void {
+  const { state } = host;
+  const choice = state.pendingChoice;
+  if (
+    !choice ||
+    !choice.source.startsWith("v1912.shell_traders_start_turn:")
+  )
+    throw new Error("Es ist keine Shell-Traders-Startzugwahl offen.");
+  if (legalAction.side !== "runner" || playerAction.side !== "runner")
+    throw new Error("Nur der Runner darf das Shell-Traders-Ziel wählen.");
+
+  const sourceCardId = choice.source.split(":")[1] as
+    | CardInstanceId
+    | undefined;
+  if (
+    !sourceCardId ||
+    !state.runner.rig.resources.includes(sourceCardId) ||
+    host.cards.definitionFor(state, sourceCardId).id !==
+      host.constants.SHELL_TRADERS_ID
+  )
+    throw new Error("The Shell Traders ist nicht mehr installiert.");
+
+  const selectedOptionIds = selectedChoiceIds(playerAction.selectedChoices);
+  if (selectedOptionIds.length !== 1)
+    throw new Error("Genau ein Shell-Traders-Ziel muss gewählt werden.");
+  const selectedOption = choice.options.find(
+    (option) => option.id === selectedOptionIds[0],
+  );
+  const targetCardId =
+    typeof selectedOption?.value === "string"
+      ? (selectedOption.value as CardInstanceId)
+      : undefined;
+  if (
+    !targetCardId ||
+    !delayedInstallPreparedTargetIds(host).includes(targetCardId)
+  )
+    throw new Error("Das gewählte Shell-Traders-Ziel ist nicht mehr legal.");
+
+  const targetDefinition = host.cards.definitionFor(state, targetCardId);
+  delete state.pendingChoice;
+  const flags = state.runnerTurnFlags;
+  if (!flags) throw new Error("Runner-Zugstatus fehlt.");
+  const resolvedSourceIds =
+    (flags.delayedInstallStartTurnResolvedSourceIds ??= []);
+  if (!resolvedSourceIds.includes(sourceCardId))
+    resolvedSourceIds.push(sourceCardId);
+  const result = removeShellCounterAndMaybeInstall(host, targetCardId);
+  effects?.push(
+    delayedInstallStartTurnCounterEffect(
+      host,
+      sourceCardId,
+      targetCardId,
+      result,
+    ),
+  );
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    delayedInstallAbility: "start_turn_remove_shell_counter",
+    abilityFamily: "hosting-counters",
+    effectKind: "counter_change",
+    sourceDefinitionId: host.constants.SHELL_TRADERS_ID,
+    targetCardId,
+    targetCardDefinitionId: targetDefinition.id,
+    counterType: "shell",
+    removedCounterAmount: 1,
+    remainingCounters: result.remainingCounters,
+    delayedInstallInstalledTarget: result.installed,
+  };
+}
+
+function startDelayedInstallStartTurnChoice(
+  host: RunnerSpecialTriggerExecutionHost,
+  sourceCardId: CardInstanceId,
+  targetCardIds: CardInstanceId[],
+): void {
+  const { state } = host;
+  const nextStateVersion = state.stateVersion + 1;
+  state.pendingChoice = {
+    choiceId: `v1912_shell_traders_start_turn_${nextStateVersion}_${sourceCardId}`,
+    side: "runner",
+    source: `v1912.shell_traders_start_turn:${sourceCardId}:${nextStateVersion}`,
+    prompt: `${host.cards.publicTitle(
+      host.constants.SHELL_TRADERS_ID as CardDefinitionId,
+    )}: Wähle eine Karte, von der 1 Shell-Counter entfernt wird.`,
+    kind: "select_cards",
+    options: targetCardIds.map((cardId) => {
+      const definition = host.cards.definitionFor(state, cardId);
+      const remainingCounters = host.counters.cardCounter(
+        state,
+        cardId,
+        "shell",
+      );
+      return {
+        id: `card_${cardId}`,
+        label: `${definition.title} (${remainingCounters})`,
+        value: cardId,
+        metadata: { shellTradersRemainingCounters: remainingCounters },
+      };
+    }),
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: nextStateVersion,
+    visibility: "public",
+  };
+}
+
+function delayedInstallStartTurnCounterEffect(
+  host: RunnerSpecialTriggerExecutionHost,
+  sourceCardId: CardInstanceId,
+  targetCardId: CardInstanceId,
+  result: { remainingCounters: number; installed: boolean },
+): ResolvedGameEffect {
+  const targetDefinition = host.cards.definitionFor(host.state, targetCardId);
+  return {
+    effectId: `runner.start.delayed_install.${sourceCardId}.${targetCardId}`,
+    kind: "counter_change",
+    visibility: "public",
+    side: "runner",
+    amount: result.remainingCounters,
+    reason: "start_of_turn",
+    counterType: "shell",
+    removedCounterAmount: 1,
+    remainingCounters: result.remainingCounters,
+    sourceDefinitionId: host.constants.SHELL_TRADERS_ID,
+    sourceTitle: host.cards.publicTitle(
+      host.constants.SHELL_TRADERS_ID as CardDefinitionId,
+    ),
+    cardDefinitionId: targetDefinition.id,
+    cardTitle: host.cards.publicTitle(targetDefinition.id),
+  };
 }
 
 function resolveTopHeapCardReturnAbility(

@@ -33,6 +33,27 @@ describe("pending choice resolution", () => {
     expect(resolveSetupMulliganChoice.mock.calls[0]?.[0]).toBe(state);
   });
 
+  it("dispatches Shell Traders start-of-turn choices through the runner callback", () => {
+    const state = stateWithChoice(
+      "shell_choice",
+      "v1912.shell_traders_start_turn:shell_1:1",
+    );
+    const resolveDelayedInstallStartTurnChoice = vi.fn();
+
+    resolvePendingChoice(
+      pendingChoiceHost(state, {
+        runner: { resolveDelayedInstallStartTurnChoice },
+      }),
+      choiceAction("shell_choice"),
+      playerChoice("shell_choice", ["target"]),
+    );
+
+    expect(resolveDelayedInstallStartTurnChoice).toHaveBeenCalledOnce();
+    expect(resolveDelayedInstallStartTurnChoice.mock.calls[0]?.[0]).toBe(
+      state,
+    );
+  });
+
   it("lets hidden-zone search handlers clear the pending choice", () => {
     const state = stateWithChoice("search_choice", "hidden_zone.search");
 
@@ -138,6 +159,7 @@ function pendingChoiceHost(
   overrides: Partial<{
     setup: Partial<PendingChoiceResolutionHost["setup"]>;
     hiddenZone: Partial<PendingChoiceResolutionHost["hiddenZone"]>;
+    runner: Partial<PendingChoiceResolutionHost["runner"]>;
   }> = {},
 ): PendingChoiceResolutionHost {
   const unexpected = (name: string) => () => {
@@ -239,6 +261,10 @@ function pendingChoiceHost(
       resolveRunnerProgramTrashBeforeInstallChoice: unexpected(
         "resolveRunnerProgramTrashBeforeInstallChoice",
       ),
+      resolveDelayedInstallStartTurnChoice: unexpected(
+        "resolveDelayedInstallStartTurnChoice",
+      ),
+      ...overrides.runner,
     },
     run: {
       resolveHqIceSwapChoice: unexpected(

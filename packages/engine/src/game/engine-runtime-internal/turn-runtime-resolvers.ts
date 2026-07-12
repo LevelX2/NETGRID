@@ -2335,7 +2335,12 @@ function trashFaceupRdCardsForCascade(
 function applyRunnerStartOfTurnEffects(
   state: GameState,
   effects?: AutomaticEffectCollector,
+  resumePoint: "begin" | "after_delayed_install_choice" = "begin",
 ): void {
+  if (resumePoint === "after_delayed_install_choice") {
+    continueRunnerStartOfTurnFromDelayedInstall(state, effects);
+    return;
+  }
   const flags = ensureRunnerTurnFlags(state);
   for (const counterEffect of runnerTraceCounterEffectDefinitions()) {
     if (!counterEffect.startOfRunnerTurn) continue;
@@ -2392,6 +2397,13 @@ function applyRunnerStartOfTurnEffects(
     }
     flags.startOfTurnFloatingCreditsApplied = true;
   }
+  continueRunnerStartOfTurnFromDelayedInstall(state, effects);
+}
+
+function continueRunnerStartOfTurnFromDelayedInstall(
+  state: GameState,
+  effects?: AutomaticEffectCollector,
+): void {
   applyDelayedInstallStartOfTurn(
     runnerSpecialTriggerExecutionHost(state),
     effects,

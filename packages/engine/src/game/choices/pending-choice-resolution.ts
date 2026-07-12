@@ -64,6 +64,7 @@ export type PendingChoiceResolutionHost = {
   };
   runner: {
     resolveRunnerProgramTrashBeforeInstallChoice: HostFn<void>;
+    resolveDelayedInstallStartTurnChoice: HostFn<void>;
   };
   run: {
     resolveHqIceSwapChoice: HostFn<void>;
@@ -191,6 +192,8 @@ export function resolvePendingChoice(
   const scoredAgendaFlowHost = host.corp.scoredAgendaFlowHost;
   const resolveRunnerProgramTrashBeforeInstallChoice =
     host.runner.resolveRunnerProgramTrashBeforeInstallChoice;
+  const resolveDelayedInstallStartTurnChoice =
+    host.runner.resolveDelayedInstallStartTurnChoice;
   const resolveHqIceSwapChoice = host.run.resolveHqIceSwapChoice;
   const fortPassWindowHostForState = host.run.fortPassWindowHostForState;
   const resolveSecretSpendCompareChoiceInRunModule =
@@ -329,6 +332,12 @@ export function resolvePendingChoice(
       legalAction,
       playerAction,
     );
+    return;
+  }
+  if (
+    state.pendingChoice.source.startsWith("v1912.shell_traders_start_turn:")
+  ) {
+    resolveDelayedInstallStartTurnChoice(state, legalAction, playerAction);
     return;
   }
   if (

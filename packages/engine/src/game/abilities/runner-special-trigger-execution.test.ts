@@ -6,6 +6,7 @@ import type {
   CounterType,
   GameState,
   LegalAction,
+  PlayerAction,
   ResolvedGameEffect,
   Side,
   SpecialZoneState,
@@ -19,6 +20,7 @@ import {
   handleRunnerSpecialTriggerExecution,
   delayedInstallPreparedTargetIds,
   delayedInstallPrepareTargetIds,
+  resolveDelayedInstallStartTurnChoice,
   topRunnerHeapCardId,
   type RunnerSpecialTriggerExecutionHost,
 } from "./runner-special-trigger-execution";
@@ -354,6 +356,153 @@ describe("runner special trigger execution", () => {
     expect(state.runner.memoryUsed).toBe(4);
     expect(effects).toHaveLength(1);
     expect(delayedInstallPreparedTargetIds(host)).toEqual([]);
+  });
+
+  it("requires target choices and continues with the next installed Shell Traders copy", () => {
+    const sourceId = "shell_1" as CardInstanceId;
+    const secondSourceId = "shell_2" as CardInstanceId;
+    const firstTargetId = "prepared_alpha" as CardInstanceId;
+    const secondTargetId = "prepared_beta" as CardInstanceId;
+    const state = baseState();
+    state.runner.rig.resources = [sourceId, secondSourceId];
+    state.specialZones = {
+      setAside: [firstTargetId, secondTargetId],
+    } as SpecialZoneState;
+    state.cardInstances[sourceId] = instance(
+      sourceId,
+      SHELL_TRADERS_ID,
+      "runner",
+      "rig",
+    );
+    state.cardInstances[secondSourceId] = instance(
+      secondSourceId,
+      SHELL_TRADERS_ID,
+      "runner",
+      "rig",
+    );
+    for (const [cardId, definitionId] of [
+      [firstTargetId, "program_alpha"],
+      [secondTargetId, "program_beta"],
+    ] as const) {
+      state.cardInstances[cardId] = {
+        ...instance(cardId, definitionId, "runner", "set_aside"),
+        zone: {
+          side: "special",
+          zone: "set_aside",
+          visibility: "public",
+          returnZone: { side: "runner", zone: "rig" },
+        },
+      } as CardInstance;
+    }
+    setCounter(state, firstTargetId, "shell", 2);
+    setCounter(state, secondTargetId, "shell", 3);
+    const host = testHost(state, {
+      [SHELL_TRADERS_ID]: definition(SHELL_TRADERS_ID, "resource"),
+      program_alpha: definition("program_alpha", "program", {
+        title: "Alpha Program",
+        installCost: 2,
+        memoryCost: 1,
+      }),
+      program_beta: definition("program_beta", "program", {
+        title: "Beta Program",
+        installCost: 3,
+        memoryCost: 1,
+      }),
+    });
+    const effects: ResolvedGameEffect[] = [];
+
+    applyDelayedInstallStartOfTurn(host, effects);
+
+    const choice = state.pendingChoice;
+    expect(choice).toMatchObject({
+      side: "runner",
+      kind: "select_cards",
+      minSelections: 1,
+      maxSelections: 1,
+      visibility: "public",
+    });
+    expect(choice?.source).toMatch(
+      /^v1912\.shell_traders_start_turn:shell_1:/,
+    );
+    expect(choice?.options).toEqual([
+      expect.objectContaining({
+        id: `card_${firstTargetId}`,
+        value: firstTargetId,
+        label: "Alpha Program (2)",
+        metadata: { shellTradersRemainingCounters: 2 },
+      }),
+      expect.objectContaining({
+        id: `card_${secondTargetId}`,
+        value: secondTargetId,
+        label: "Beta Program (3)",
+        metadata: { shellTradersRemainingCounters: 3 },
+      }),
+    ]);
+    expect(counter(state, firstTargetId, "shell")).toBe(2);
+    expect(counter(state, secondTargetId, "shell")).toBe(3);
+    expect(effects).toEqual([]);
+    if (!choice) throw new Error("Shell-Traders-Choice fehlt.");
+
+    const legalAction = buildLegalAction(
+      state,
+      "runner",
+      "resolve_choice",
+      choice.prompt,
+      "game_rule",
+      [],
+      {
+        choiceId: choice.choiceId,
+        choiceVisibility: choice.visibility,
+        choiceKind: choice.kind,
+      },
+    );
+    const playerAction: PlayerAction = {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: legalAction.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      selectedChoices: {
+        choiceId: choice.choiceId,
+        selectedOptionIds: [`card_${secondTargetId}`],
+      },
+    };
+
+    resolveDelayedInstallStartTurnChoice(
+      host,
+      legalAction,
+      playerAction,
+      effects,
+    );
+
+    expect(state.pendingChoice).toBeUndefined();
+    expect(counter(state, firstTargetId, "shell")).toBe(2);
+    expect(counter(state, secondTargetId, "shell")).toBe(2);
+    expect(
+      state.runnerTurnFlags?.delayedInstallStartTurnResolvedSourceIds,
+    ).toEqual([sourceId]);
+    expect(legalAction.payload).toMatchObject({
+      delayedInstallAbility: "start_turn_remove_shell_counter",
+      sourceDefinitionId: SHELL_TRADERS_ID,
+      targetCardDefinitionId: "program_beta",
+      removedCounterAmount: 1,
+      remainingCounters: 2,
+    });
+    expect(effects).toEqual([
+      expect.objectContaining({
+        reason: "start_of_turn",
+        cardDefinitionId: "program_beta",
+        removedCounterAmount: 1,
+        remainingCounters: 2,
+      }),
+    ]);
+
+    applyDelayedInstallStartOfTurn(host, effects);
+
+    expect(state.pendingChoice?.source).toMatch(
+      /^v1912\.shell_traders_start_turn:shell_2:/,
+    );
+    expect(counter(state, firstTargetId, "shell")).toBe(2);
+    expect(counter(state, secondTargetId, "shell")).toBe(2);
   });
 
   it("starts the same Self-Modifying Code hidden-zone search after trashing source", () => {

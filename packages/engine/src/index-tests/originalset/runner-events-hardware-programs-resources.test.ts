@@ -2605,6 +2605,115 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
+  it("requires a Runner choice before removing a start-of-turn Shell counter from multiple prepared cards", () => {
+    let state = resourceContactState("shell-counter-start-turn-choice");
+    moveRunnerCardToGrip(state, "onr_v1_176_the-shell-traders");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) ===
+          "onr_v1_176_the-shell-traders",
+    );
+    const programId = moveRunnerCardToGrip(state, "simple_fracter");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.delayedInstallAbility === "set_aside_from_grip" &&
+        action.payload?.targetCardId === programId,
+    );
+    const hardwareId = moveRunnerCardToGrip(
+      state,
+      "simple_setup_hardware",
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.delayedInstallAbility === "set_aside_from_grip" &&
+        action.payload?.targetCardId === hardwareId,
+    );
+    expect(cardCounterAmount(state, programId, "shell")).toBe(2);
+    expect(cardCounterAmount(state, hardwareId, "shell")).toBe(2);
+    setCardCounterForTest(
+      state,
+      state.runner.identity,
+      "trace_tag_counter",
+      1,
+    );
+    const tagsBeforeStart = state.runner.tags;
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+
+    const choice = state.pendingChoice;
+    expect(choice).toMatchObject({
+      side: "runner",
+      kind: "select_cards",
+      minSelections: 1,
+      maxSelections: 1,
+      visibility: "public",
+    });
+    expect(choice?.source).toMatch(
+      /^v1912\.shell_traders_start_turn:/,
+    );
+    expect(cardCounterAmount(state, programId, "shell")).toBe(2);
+    expect(cardCounterAmount(state, hardwareId, "shell")).toBe(2);
+    expect(state.runner.tags).toBe(tagsBeforeStart + 1);
+    const hardwareOption = choice?.options.find(
+      (option) => option.value === hardwareId,
+    );
+    expect(hardwareOption).toMatchObject({
+      label: "Simple Setup Hardware (2)",
+      metadata: { shellTradersRemainingCounters: 2 },
+    });
+    expect(
+      getPlayerView(state, "runner").pendingChoice?.options.find(
+        (option) => option.id === hardwareOption?.id,
+      )?.metadata,
+    ).toMatchObject({ shellTradersRemainingCounters: 2 });
+    if (!hardwareOption) throw new Error("Shell-Traders-Hardwareoption fehlt.");
+
+    state = applyChoice(state, "runner", hardwareOption.id);
+
+    expect(state.pendingChoice).toBeUndefined();
+    expect(cardCounterAmount(state, programId, "shell")).toBe(2);
+    expect(cardCounterAmount(state, hardwareId, "shell")).toBe(1);
+    expect(state.runner.tags).toBe(tagsBeforeStart + 1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      abilityFamily: "hosting-counters",
+      abilityId: "start_turn_remove_shell_counter",
+      effectKind: "counter_change",
+      targets: expect.objectContaining({
+        targetCardDefinitionId: "simple_setup_hardware",
+      }),
+      amounts: expect.objectContaining({
+        removedCounterAmount: 1,
+        remainingCounters: 1,
+      }),
+      resolvedEffects: [
+        expect.objectContaining({
+          kind: "counter_change",
+          reason: "start_of_turn",
+          cardDefinitionId: "simple_setup_hardware",
+          removedCounterAmount: 1,
+          remainingCounters: 1,
+        }),
+      ],
+    });
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("applies P3.9 agenda_difficulty modifiers from scored Corp agendas to score actions and revalidation", () => {
     const p39CardIds = new Set([
       "onr_v1_189_artificial-security-directors",
