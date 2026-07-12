@@ -3419,7 +3419,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
       "The Shell Traders: Karte vorbereiten",
       {
         cardId: "shell_traders_1",
-        shellTradersAbility: "set_aside_from_grip",
+        delayedInstallAbility: "set_aside_from_grip",
         targetCardId: "simple_fracter_1",
         targetCardDefinitionId: "simple_fracter",
         shellCounterAmount: 2,
@@ -3432,7 +3432,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
       "The Shell Traders: 1 Shell-Counter entfernen",
       {
         cardId: "shell_traders_1",
-        shellTradersAbility: "remove_shell_counter",
+        delayedInstallAbility: "remove_shell_counter",
         targetCardId: "simple_fracter_1",
         targetCardDefinitionId: "simple_fracter",
         counterType: "shell",
@@ -3471,7 +3471,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
       "The Shell Traders: Simple Fracter vorbereiten",
       {
         cardId: "shell_traders_1",
-        shellTradersAbility: "set_aside_from_grip",
+        delayedInstallAbility: "set_aside_from_grip",
         targetCardId: "simple_fracter_1",
         targetCardDefinitionId: "simple_fracter",
       },
@@ -3483,7 +3483,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
       "The Shell Traders: Simple Decoder vorbereiten",
       {
         cardId: "shell_traders_1",
-        shellTradersAbility: "set_aside_from_grip",
+        delayedInstallAbility: "set_aside_from_grip",
         targetCardId: "simple_decoder_1",
         targetCardDefinitionId: "simple_decoder",
       },
@@ -3492,6 +3492,42 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect([actionButtonLabel(fracter), actionButtonLabel(decoder)]).toEqual([
       "Simple Fracter zur Seite legen",
       "Simple Decoder zur Seite legen",
+    ]);
+  });
+
+  it("keeps parallel Shell Traders counter actions distinguishable by target", () => {
+    const fracter = legalAction(
+      "runner",
+      "trigger_ability",
+      "shell_traders_1",
+      "The Shell Traders: Shell-Counter entfernen",
+      {
+        cardId: "shell_traders_1",
+        delayedInstallAbility: "remove_shell_counter",
+        targetCardId: "simple_fracter_1",
+        targetCardDefinitionId: "simple_fracter",
+        counterType: "shell",
+        removeCounterAmount: 1,
+      },
+    );
+    const decoder = legalAction(
+      "runner",
+      "trigger_ability",
+      "shell_traders_1",
+      "The Shell Traders: Shell-Counter entfernen",
+      {
+        cardId: "shell_traders_1",
+        delayedInstallAbility: "remove_shell_counter",
+        targetCardId: "simple_decoder_1",
+        targetCardDefinitionId: "simple_decoder",
+        counterType: "shell",
+        removeCounterAmount: 1,
+      },
+    );
+
+    expect([actionButtonLabel(fracter), actionButtonLabel(decoder)]).toEqual([
+      "Shell-Counter von Simple Fracter entfernen",
+      "Shell-Counter von Simple Decoder entfernen",
     ]);
   });
 

@@ -1206,13 +1206,13 @@ function stripTrailingActionSourceParenthetical(label: string): string {
 function resourceAbilityContextLabel(action: LegalAction): string | null {
   if (action.payload?.runnerAbility === "remove_data_raven_counter")
     return "Raven-Counter entfernen";
-  if (action.payload?.shellTradersAbility === "set_aside_from_grip") {
+  if (actionHasAbility(action, "set_aside_from_grip")) {
     const targetTitle = shellTradersTargetTitle(action);
     return targetTitle
       ? `${targetTitle} zur Seite legen`
       : "Karte zur Seite legen";
   }
-  if (action.payload?.shellTradersAbility === "remove_shell_counter") {
+  if (actionHasAbility(action, "remove_shell_counter")) {
     const targetTitle = shellTradersTargetTitle(action);
     return targetTitle
       ? `Shell-Counter von ${targetTitle} entfernen`
@@ -1261,7 +1261,7 @@ function targetTitleFromDefinition(action: LegalAction): string | null {
 function shellTradersTargetTitle(action: LegalAction): string | null {
   const titleFromDefinition = targetTitleFromDefinition(action);
   if (titleFromDefinition) return titleFromDefinition;
-  if (action.payload?.shellTradersAbility === "set_aside_from_grip") {
+  if (actionHasAbility(action, "set_aside_from_grip")) {
     const labelTarget =
       /^The Shell Traders:\s*(.+?)\s+(?:vorbereiten|beiseitelegen|zur Seite legen)$/i
         .exec(action.label.trim())?.[1]
