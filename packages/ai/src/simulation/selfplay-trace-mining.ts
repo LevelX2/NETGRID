@@ -844,6 +844,16 @@ function selfplayEntryStructuredNumber(
 function selfplayClearlyDominatedPlanChoice(
   entry: AiSimulationSummary["actionSequence"][number],
 ): { selectedScore: number; bestAlternativeScore: number } | undefined {
+  if (
+    entry.decisionOpportunity === "forced_terminal" ||
+    entry.decisionOpportunity === "forced_choice" ||
+    selfplayEntryHasStructuredSignal(entry, [
+      "decision_opportunity:forced_terminal",
+      "decision_opportunity:forced_choice",
+    ])
+  ) {
+    return undefined;
+  }
   if (entry.side !== "runner") return undefined;
   const isRepeatedRunPlanChoice =
     entry.actionType === "start_run" &&

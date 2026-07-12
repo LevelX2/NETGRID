@@ -15,10 +15,14 @@ import type {
 } from "../runtime/corp-tag-punish-types";
 import type { RemoteTrashRole } from "./remote-trash-role";
 import type { RunnerSetupMissingCoverageType } from "./runner-setup-coverage-types";
+import type { DecisionOpportunity } from "../runtime/decision-opportunity";
 
 export type AiSimulationActionSequenceEntry = {
   side: Side;
   stateVersionBefore: number;
+  decisionOpportunity?: DecisionOpportunity;
+  legalActionCount?: number;
+  actionableAlternativeCount?: number;
   selectedActionId?: string;
   actionType: LegalAction["type"];
   eventType?: string;

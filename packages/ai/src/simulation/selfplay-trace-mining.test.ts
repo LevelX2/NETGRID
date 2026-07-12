@@ -980,6 +980,31 @@ describe("SelfplayTraceMining", () => {
     );
   });
 
+  it("does not classify a forced decision as a dominated plan choice", () => {
+    const summary = selfplaySummary([
+      selfplayAction("runner", 81, "start_run", {
+        selectedActionId: "forced-run-marker",
+        decisionOpportunity: "forced_choice",
+        runnerRepeatedLowValueCentralRun: true,
+        runnerRepeatedCentralRunWithoutFreshValue: true,
+        evidence: [
+          "tactical_plan_mapping_outcome:semantic_choice_blocked",
+          "decision_opportunity:forced_choice",
+        ],
+        debugFacts: [
+          "selection_score:runtime_raw_score:-1127",
+          "runtime_why_not:alternative:start_run:rawSemanticScore:1643",
+        ],
+      }),
+    ]);
+
+    expect(
+      detectAiSelfplaySuspiciousDecisions([summary], {
+        detectorIds: ["clearly_dominated_plan_choice"],
+      }),
+    ).toHaveLength(0);
+  });
+
   it("detects a negative committed trash decline with a positive alternative", () => {
     const summary = selfplaySummary([
       selfplayAction("runner", 111, "decline_trash", {

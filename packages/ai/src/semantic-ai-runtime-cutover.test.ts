@@ -89,6 +89,27 @@ describe("Semantic AI runtime cutover", () => {
     expect(decision.fallbackUsed).toBe(false);
   });
 
+  it("marks an alternative-free Corp end turn as forced without hiding its raw decision", () => {
+    const input = aiInput("corp", [
+      legalAction("end-turn", "corp", "end_turn", "End turn", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.own.clicks = 0;
+
+    const decision = chooseCorpAction(input);
+
+    expect(decision.actionId).toBe("end-turn");
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "decision_opportunity:forced_terminal",
+        "decision_legal_action_count:1",
+        "decision_actionable_alternative_count:0",
+      ]),
+    );
+    expect(decision.decisionDebug?.scoreBreakdown).toBeDefined();
+  });
+
   it("routes activated tag cleanup cards through tag_removal", () => {
     const input = aiInput("runner", [
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {

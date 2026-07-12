@@ -30,6 +30,7 @@ import { buildMergedTacticalGoals } from "../decision/tactical-goal-merge";
 import { rememberStrategicIntentState } from "../strategic-intent-memory";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import type { AiDecisionRuntimeOptions } from "./choose-ai-action";
+import { assessDecisionOpportunity } from "./decision-opportunity";
 import type {
   SemanticRuntimeChoice,
   SemanticRuntimeCoverageSelectionDebug,
@@ -441,6 +442,10 @@ export function chooseSemanticRuntimeAction(
     isSchlaghundTagDamageAction(input, selectedChoice.action)
       ? "corp.semantic.corp_tag_punish"
       : selectedChoice.reasonCode;
+  const decisionOpportunity = assessDecisionOpportunity(
+    input,
+    selectedChoice.action,
+  );
   return {
     actionId: selectedChoice.action.actionId,
     ...(selectedChoices ? { selectedChoices } : {}),
@@ -453,6 +458,7 @@ export function chooseSemanticRuntimeAction(
       : {}),
     evidence: dependencies.scrubEvidence([
       ...selectedChoice.evidence,
+      ...decisionOpportunity.evidence,
       ...activeRunnerRunPlanRecoveryEvidence,
       ...(coverageSelectionDebug?.evidence ?? []),
       `semantic_runtime_default:true`,
@@ -565,12 +571,14 @@ function semanticCoverageFallbackDecision(
   if (!policy) {
     throw new SemanticCoverageFallbackError(input.side, [action.type]);
   }
+  const decisionOpportunity = assessDecisionOpportunity(input, action);
   const evidence = dependencies.scrubEvidence([
     "semantic_coverage_fallback:true",
     "fallback_reason:no_semantic_candidate",
     `fallback_action_policy:${policy}`,
     `fallback_candidate_count:${actionSemanticCandidates.length}`,
     `fallback_choice_count:${choices.length}`,
+    ...decisionOpportunity.evidence,
     ...(action
       ? [`fallback_action_type:${action.type}`, `fallback_action_id:${action.actionId}`]
       : ["fallback_action:none"]),
