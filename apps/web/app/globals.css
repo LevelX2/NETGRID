@@ -4888,6 +4888,33 @@ select {
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
 }
 
+.choiceTurnActionStatus {
+  --choice-turn-accent: var(--runner-zone-accent);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 9px;
+  margin: 0 0 8px;
+  border: 1px solid color-mix(in srgb, var(--choice-turn-accent), var(--line) 42%);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--choice-turn-accent), transparent 88%);
+}
+
+.choiceTurnActionStatus.side-corp {
+  --choice-turn-accent: var(--corp-status-accent);
+}
+
+.choiceTurnActionStatus > strong {
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.choiceTurnActionStatus .actionAvailability {
+  flex: 0 1 auto;
+  margin: 0;
+}
+
 .choiceCards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
