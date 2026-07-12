@@ -57,6 +57,35 @@ describe("access reveal UI helpers", () => {
     expect(accessDecisionDisplayLabel(steal, "Remote 1")).toBe("Zahlen & stehlen");
   });
 
+  it("keeps agenda access replacements distinct from stealing", () => {
+    const install = legalAction(
+      "steal_agenda",
+      "Theorem Proof als Programm installieren",
+    );
+    install.payload = {
+      agendaAccessReplacement: "install_as_runner_program",
+      installedRunnerProgramMemoryCost: 2,
+    };
+    const decline = legalAction(
+      "decline_trash",
+      "Theorem Proof nicht installieren",
+    );
+    decline.payload = {
+      agendaAccessReplacement: "declined_install_as_runner_program",
+      installedRunnerProgramMemoryCost: 2,
+    };
+
+    expect(accessDecisionLabel(install, "R&D")).toBe(
+      "Theorem Proof als Programm installieren",
+    );
+    expect(accessDecisionDisplayLabel(install, "R&D")).toBe(
+      "Theorem Proof als Programm installieren",
+    );
+    expect(accessDecisionLabel(decline, "R&D")).toBe(
+      "Theorem Proof nicht installieren",
+    );
+  });
+
   it("labels free access trash actions as free", () => {
     const trash = legalAction("trash_accessed_card", "Dog Pile kostenlos trashen");
     trash.payload = {
