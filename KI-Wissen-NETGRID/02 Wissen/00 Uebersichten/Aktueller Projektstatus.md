@@ -44,6 +44,13 @@ Stand: 2026-07-11
   garantierten Abschluss gesperrt.
 - Aktuelle Benchmarks vergleichen `random_legal_bot` mit
   `current_candidate`; historische Profilnamen sind keine Runtimeoption mehr.
+- AI Behavior Baseline v1 ergänzt diese Profilvergleiche um einen festen
+  deckübergreifenden `current_candidate`-Selfplay-Lauf mit sechs Slots, zehn
+  Seeds je Slot, 480 Aktionen und normalisierten Verhaltensraten. Der erste
+  Lauf umfasst 60 Spiele und 11.144 Entscheidungen; alle Safety-Gates außer
+  zwei Aktionslimits im Hybrid-Score/Punish-Slot sind grün. Führend sind
+  `docs/architecture/ai/ai-behavior-baseline-v1-process-2026-07-12.md` und
+  `docs/reviews/ai/ai-behavior-baseline-v1-initial-run-review-2026-07-12.md`.
 - Aktive AI-Gates: 616 Hints, 600 durch den Action-Signal-Katalog abgedeckt,
   34 zurückgestellt, 90 Target-Profile-Gaps. Full Derived Facts: 527
   CardImplementations, 390 generierte Facts und 137 aktuell noch nur über

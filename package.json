@@ -40,6 +40,7 @@
     "check:ai-hint-quality": "node scripts/check-ai-hint-quality.mjs --write-report",
     "check:ai-strategy-taxonomy": "node scripts/check-ai-strategy-taxonomy.mjs --write-reports",
     "check:ai-deck-doctrine-strategy": "corepack pnpm --filter @netgrid/server exec tsx ../../scripts/check-ai-deck-doctrine-strategy.ts",
+    "benchmark:ai-behavior": "corepack pnpm --filter @netgrid/server exec tsx ../../scripts/run-ai-behavior-baseline.ts",
     "check:chronicle-choice-fallbacks": "corepack pnpm --filter @netgrid/server exec tsx ../../scripts/check-chronicle-choice-fallbacks.ts",
     "storage:backup": "corepack pnpm --filter @netgrid/server exec tsx src/storage-cli.ts backup",
     "storage:restore": "corepack pnpm --filter @netgrid/server exec tsx src/storage-cli.ts restore",

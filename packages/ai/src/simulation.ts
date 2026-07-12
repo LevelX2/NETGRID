@@ -40,6 +40,24 @@ export {
 export { formatDoctrineQualityCaseAnalysisReport } from "./reports/simulation-report-formatters";
 export { createBeliefSimulationWorld } from "./simulation/belief-simulation-world";
 export { listMatchProgressionBenchmarkDeckSlots } from "./simulation/benchmark-deck-slot-list";
+export {
+  compareAiBehaviorBaselines,
+  createAiBehaviorBaseline,
+  createAiBehaviorBaselineSlotResult,
+  evaluateAiBehaviorBaselineGate,
+  formatAiBehaviorBaselineReport,
+} from "./simulation/ai-behavior-baseline";
+export type {
+  AiBehaviorBaselineComparison,
+  AiBehaviorBaselineConfig,
+  AiBehaviorBaselineGame,
+  AiBehaviorBaselineGate,
+  AiBehaviorBaselineMetrics,
+  AiBehaviorBaselineResult,
+  AiBehaviorBaselineSlotDescriptor,
+  AiBehaviorBaselineSlotInput,
+  AiBehaviorBaselineSlotResult,
+} from "./simulation/ai-behavior-baseline";
 export type {
   AiBenchmarkCorpArchetype,
   AiBenchmarkDeckReference,
@@ -75,7 +93,10 @@ export type {
   AiDoctrineQualityMetricName,
   AiDoctrineQualityMetrics,
 } from "./simulation/doctrine-quality-tags";
-export type { AiQualityMetrics, AiSoakResult } from "./simulation/quality-metrics";
+export type {
+  AiQualityMetrics,
+  AiSoakResult,
+} from "./simulation/quality-metrics";
 export { detectAiSelfplaySuspiciousDecisions } from "./simulation/selfplay-trace-mining";
 export type {
   AiSelfplayActionLimitClusterId,
