@@ -4,6 +4,7 @@ import { redactedDeckCapabilityFacts } from "./deck-capabilities";
 import { redactedMergedTacticalGoalFacts } from "./decision/tactical-goal-merge";
 import { redactedRunnerHandDevelopmentFacts } from "./runner-hand-development";
 import { redactedRunnerTacticalGoalFacts } from "./runner-tactical-goals";
+import { redactedRemoteDoctrineFacts } from "./remote-doctrine-profile";
 import { createAiHintsByCard } from "./ai-hints";
 import { getTacticalPlanMemorySnapshot } from "./plans/plan-memory";
 import { getPlanPortfolioMemorySnapshot } from "./plans/plan-portfolio-memory";
@@ -109,6 +110,9 @@ export function evaluateTacticalPlans(
   const corpStrategicIntentUsed = context.corpStrategicIntent
     ? redactedCorpStrategicIntentFacts(context.corpStrategicIntent)
     : [];
+  const remoteDoctrineUsed = context.remoteDoctrine
+    ? redactedRemoteDoctrineFacts(context.remoteDoctrine)
+    : [];
   const tacticalGoalsUsed = context.tacticalGoals
     ? redactedMergedTacticalGoalFacts(context.tacticalGoals)
     : [];
@@ -136,16 +140,19 @@ export function evaluateTacticalPlans(
   const accessOutcomeMemoryUsed = context.accessOutcomeMemory
     ? redactedAccessOutcomeMemoryFacts(context.accessOutcomeMemory)
     : [];
+  const previousPlanPortfolio =
+    context.previousPlanPortfolio ??
+    getPlanPortfolioMemorySnapshot(context.input);
   const rawPlans = buildTacticalPlans({
     ...context,
     ...(previousPlan ? { previousPlan } : {}),
+    ...(previousPlanPortfolio ? { previousPlanPortfolio } : {}),
   });
   const progression = progressTacticalPlans(rawPlans, previousPlan);
   const planAlternatives = rankTacticalPlans(progression.plans);
   const blockedPlans = planAlternatives.filter(
     (plan) => plan.status === "blocked",
   );
-  const previousPlanPortfolio = getPlanPortfolioMemorySnapshot(context.input);
   const planPortfolio = buildPlanPortfolio({
     input: context.input,
     tacticalPlans: planAlternatives,
@@ -174,6 +181,7 @@ export function evaluateTacticalPlans(
         ...(corpStrategicIntentUsed.length > 0
           ? { corpStrategicIntentUsed }
           : {}),
+        ...(remoteDoctrineUsed.length > 0 ? { remoteDoctrineUsed } : {}),
         ...(tacticalGoalsUsed.length > 0 ? { tacticalGoalsUsed } : {}),
         ...(runnerStrategicIntentUsed.length > 0
           ? { runnerStrategicIntentUsed }
@@ -217,6 +225,7 @@ export function evaluateTacticalPlans(
       ? { strategicIntentStateUsed }
       : {}),
     ...(corpStrategicIntentUsed.length > 0 ? { corpStrategicIntentUsed } : {}),
+    ...(remoteDoctrineUsed.length > 0 ? { remoteDoctrineUsed } : {}),
     ...(tacticalGoalsUsed.length > 0 ? { tacticalGoalsUsed } : {}),
     ...(runnerStrategicIntentUsed.length > 0
       ? { runnerStrategicIntentUsed }

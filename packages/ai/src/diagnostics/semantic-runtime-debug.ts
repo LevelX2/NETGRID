@@ -904,6 +904,9 @@ export function semanticRuntimeDebugTacticalPlanItems(
     ...(planRuntime.corpStrategicIntentUsed ?? [])
       .slice(0, 12)
       .map((fact) => `corp_strategic_intent_used:${fact}`),
+    ...(planRuntime.remoteDoctrineUsed ?? [])
+      .slice(0, 12)
+      .map((fact) => `remote_doctrine_used:${fact}`),
     ...(planRuntime.tacticalGoalsUsed ?? [])
       .slice(0, 16)
       .map((fact) => `tactical_goal_used:${fact}`),

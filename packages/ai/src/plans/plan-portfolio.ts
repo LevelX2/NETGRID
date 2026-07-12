@@ -28,9 +28,7 @@ export type PlanPortfolioLifecycle =
   | "completed"
   | "abandoned";
 
-export type PlanPortfolioPlanType =
-  | TacticalPlanType
-  | "corp.establish_scoring_remote";
+export type PlanPortfolioPlanType = TacticalPlanType;
 
 export type PlanPortfolioEntry = {
   portfolioEntryId: string;
@@ -267,6 +265,8 @@ export function tacticalPlanExecutionClass(
     case "corp.activate_persistent_economy":
     case "corp.build_credit_bank":
       return "recurring_cycle";
+    case "corp.establish_scoring_remote":
+      return "development_project";
     case "runner.obtain_breaker_coverage":
     case "runner.contest_remote":
     case "runner.opportunistic_central_run":

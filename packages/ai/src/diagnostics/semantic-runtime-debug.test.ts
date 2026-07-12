@@ -589,6 +589,7 @@ describe("SemanticRuntimeDebug", () => {
       deckCapabilitiesUsed: ["coverage:wall"],
       strategicIntentStateUsed: ["strategic_intent_state:runner.rnd_pressure"],
       corpStrategicIntentUsed: ["corp_strategic_intent:corp.score_agendas"],
+      remoteDoctrineUsed: ["remote_doctrine_dependency:primary"],
       tacticalGoalsUsed: ["tactical_goal:runner.build_economy_base"],
       runnerTacticalGoalsUsed: ["goal:contest_remote"],
       planPortfolioUsed: [
@@ -613,6 +614,9 @@ describe("SemanticRuntimeDebug", () => {
     );
     expect(items).toContain(
       "corp_strategic_intent_used:corp_strategic_intent:corp.score_agendas",
+    );
+    expect(items).toContain(
+      "remote_doctrine_used:remote_doctrine_dependency:primary",
     );
     expect(items).toContain(
       "tactical_goal_used:tactical_goal:runner.build_economy_base",

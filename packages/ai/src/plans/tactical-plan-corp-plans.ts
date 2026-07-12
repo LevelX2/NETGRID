@@ -29,6 +29,7 @@ import {
 import { buildCorpScoreConversionPlans } from "./tactical-plan-corp-score-conversion-plan";
 import { buildCorpFiniteEconomyPlans } from "./tactical-plan-corp-finite-economy";
 import { buildCorpPersistentEconomyPlans } from "./tactical-plan-corp-persistent-economy";
+import { buildCorpRemoteProjectPlans } from "./tactical-plan-corp-remote-project";
 
 export function buildCorpTacticalPlans(
   context: TacticalPlanBuildContext,
@@ -45,6 +46,7 @@ export function buildCorpTacticalPlans(
   plans.push(...buildCorpScoreConversionPlans(context, scorelineGoal));
   plans.push(...buildCorpFiniteEconomyPlans(context));
   plans.push(...buildCorpPersistentEconomyPlans(context));
+  plans.push(...buildCorpRemoteProjectPlans(context));
   for (const action of input.legalActions.filter(
     (candidate) => candidate.type === "score_agenda",
   )) {

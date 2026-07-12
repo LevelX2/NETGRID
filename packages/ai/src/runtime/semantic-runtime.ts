@@ -17,6 +17,7 @@ import type {
   RunnerRunTargetEvaluation,
 } from "../runner-run-target-evaluation";
 import type { RunnerStrategicIntentProfile } from "../runner-strategic-intent";
+import { buildRemoteDoctrineProfile } from "../remote-doctrine-profile";
 import type { RunnerTacticalGoal } from "../runner-tactical-goals";
 import type {
   TacticalPlanBuildContext,
@@ -178,8 +179,9 @@ export function chooseSemanticRuntimeAction(
     legalActions: input.legalActions,
     observerSide: input.side,
     stateVersion: input.playerView.stateVersion,
-    visibleSourceDefinitionsByInstanceId:
-      visibleSourceDefinitionsByInstanceId(input.playerView),
+    visibleSourceDefinitionsByInstanceId: visibleSourceDefinitionsByInstanceId(
+      input.playerView,
+    ),
     cardSemanticProfilesByDefinitionId:
       buildActionCardSemanticProfilesByDefinitionId(),
   });
@@ -254,6 +256,17 @@ export function chooseSemanticRuntimeAction(
   const strategicIntentState = inputMetadata.ownStrategicIntentState;
   const corpStrategicIntent =
     input.side === "corp" ? inputMetadata.ownCorpStrategicIntent : undefined;
+  const remoteDoctrine =
+    input.side === "corp"
+      ? buildRemoteDoctrineProfile({
+          ...(inputMetadata.ownDeckStrategyProfile
+            ? { strategyProfile: inputMetadata.ownDeckStrategyProfile }
+            : {}),
+          deckCapabilities,
+          ...(strategicIntentState ? { strategicIntentState } : {}),
+          plannerEffect: "plan_portfolio",
+        })
+      : undefined;
   const corpTacticalGoals =
     input.side === "corp"
       ? buildCorpTacticalGoals(
@@ -297,7 +310,7 @@ export function chooseSemanticRuntimeAction(
   const reactiveChoice =
     activeRunnerRunPlan !== undefined
       ? undefined
-      : choices.find(
+      : (choices.find(
           (candidate) =>
             !candidate.exclusion &&
             candidate.score > 0 &&
@@ -307,7 +320,7 @@ export function chooseSemanticRuntimeAction(
           (candidate) =>
             !candidate.exclusion &&
             dependencies.semanticRuntimeChoiceIsReactive(candidate),
-        );
+        ));
   const goalFrame = buildSemanticDecisionFrame({
     input,
     actionCandidates: actionSemanticCandidates,
@@ -339,6 +352,7 @@ export function chooseSemanticRuntimeAction(
         deckCapabilities,
         ...(strategicIntentState ? { strategicIntentState } : {}),
         ...(corpStrategicIntent ? { corpStrategicIntent } : {}),
+        ...(remoteDoctrine ? { remoteDoctrine } : {}),
         tacticalGoals,
         ...(runnerStrategicIntent ? { runnerStrategicIntent } : {}),
         ...(runnerRunTargetEvaluations ? { runnerRunTargetEvaluations } : {}),
@@ -380,20 +394,21 @@ export function chooseSemanticRuntimeAction(
       dependencies,
     );
   }
-  const effectivePlanRuntime = mappedChoice.outcome === "semantic_choice_selected"
-    ? dependencies.tacticalPlanRuntimeAlignedToChoice(
-        planRuntime,
-        mappedChoice.choice,
-        actionSemanticCandidates,
-        input,
-      )
-    : planRuntime;
+  const effectivePlanRuntime =
+    mappedChoice.outcome === "semantic_choice_selected"
+      ? dependencies.tacticalPlanRuntimeAlignedToChoice(
+          planRuntime,
+          mappedChoice.choice,
+          actionSemanticCandidates,
+          input,
+        )
+      : planRuntime;
   const runOnlyActionAdjusted =
     dependencies.runnerRunOnlyActionAdjustedSemanticChoice(
       input,
       choices,
       initialChoice,
-  );
+    );
   const choice = runOnlyActionAdjusted.choice;
   const selectedChoice = choice;
   const coverageSelectionDebug =
@@ -419,9 +434,7 @@ export function chooseSemanticRuntimeAction(
       ? createRunnerRunPlanForSelectedAction({
           input,
           selectedAction: selectedChoice.action,
-          ...(runnerRunTargetEvaluations
-            ? { runnerRunTargetEvaluations }
-            : {}),
+          ...(runnerRunTargetEvaluations ? { runnerRunTargetEvaluations } : {}),
           ...(runnerTacticalGoals ? { runnerTacticalGoals } : {}),
           ...(runnerStrategicIntent ? { runnerStrategicIntent } : {}),
           actionSemanticCandidates,
@@ -535,10 +548,7 @@ function runtimeTacticalGoalsForInput(
   runnerTacticalGoals: readonly RunnerTacticalGoal[] | undefined,
   corpTacticalGoals: readonly TacticalGoalLike[] | undefined,
 ): TacticalGoalLike[] {
-  return [
-    ...(runnerTacticalGoals ?? []),
-    ...(corpTacticalGoals ?? []),
-  ];
+  return [...(runnerTacticalGoals ?? []), ...(corpTacticalGoals ?? [])];
 }
 
 function semanticCoverageFallbackDecision(
@@ -548,17 +558,22 @@ function semanticCoverageFallbackDecision(
   dependencies: SemanticRuntimeDependencies,
 ): AiDecision {
   const rankedFallbackActions = input.legalActions
-    .filter((action) => failClosedFallbackPolicyForAction(input, action) !== undefined)
+    .filter(
+      (action) =>
+        failClosedFallbackPolicyForAction(input, action) !== undefined,
+    )
     .sort(
-    (left, right) =>
-      fallbackPolicyRank(input, left) - fallbackPolicyRank(input, right) ||
-      left.actionId.localeCompare(right.actionId),
+      (left, right) =>
+        fallbackPolicyRank(input, left) - fallbackPolicyRank(input, right) ||
+        left.actionId.localeCompare(right.actionId),
     );
   const action = rankedFallbackActions[0];
   if (!action) {
     throw new SemanticCoverageFallbackError(
       input.side,
-      [...new Set(input.legalActions.map((candidate) => candidate.type))].sort(),
+      [
+        ...new Set(input.legalActions.map((candidate) => candidate.type)),
+      ].sort(),
     );
   }
   const policy = failClosedFallbackPolicyForAction(input, action);
@@ -572,10 +587,16 @@ function semanticCoverageFallbackDecision(
     `fallback_candidate_count:${actionSemanticCandidates.length}`,
     `fallback_choice_count:${choices.length}`,
     ...(action
-      ? [`fallback_action_type:${action.type}`, `fallback_action_id:${action.actionId}`]
+      ? [
+          `fallback_action_type:${action.type}`,
+          `fallback_action_id:${action.actionId}`,
+        ]
       : ["fallback_action:none"]),
   ]);
-  const selectedChoices = dependencies.selectedChoicesForDecision(input, action);
+  const selectedChoices = dependencies.selectedChoicesForDecision(
+    input,
+    action,
+  );
   if ((action.choiceRequirements?.length ?? 0) > 0 && !selectedChoices) {
     throw new SemanticCoverageFallbackError(input.side, [action.type]);
   }
@@ -586,7 +607,9 @@ function semanticCoverageFallbackDecision(
     reasonCode,
     explanation:
       "Semantic Runtime nutzte einen deterministischen Safety-Fallback auf vorhandenen LegalActions.",
-    consideredActionIds: input.legalActions.map((candidate) => candidate.actionId),
+    consideredActionIds: input.legalActions.map(
+      (candidate) => candidate.actionId,
+    ),
     fallbackUsed: true,
     evidence,
     decisionDebug: semanticCoverageFallbackDebug(input, action, evidence),
@@ -597,7 +620,10 @@ function semanticCoverageFallbackDecision(
   };
 }
 
-function fallbackPolicyRank(input: AiDecisionInput, action: LegalAction): number {
+function fallbackPolicyRank(
+  input: AiDecisionInput,
+  action: LegalAction,
+): number {
   switch (failClosedFallbackPolicyForAction(input, action)) {
     case "mandatory_choice":
       return 0;
@@ -718,7 +744,6 @@ function semanticCoverageFallbackWhyNot(evidence: readonly string[]): string[] {
     ),
   ];
 }
-
 
 function emptyTacticalPlanRuntimeResult(): TacticalPlanRuntimeResult {
   return {

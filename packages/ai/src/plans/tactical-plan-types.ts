@@ -13,6 +13,7 @@ import type { RunnerHandDevelopmentEvaluation } from "../runner-hand-development
 import type { RunnerTacticalGoal } from "../runner-tactical-goals";
 import type { RunnerStrategicIntentProfile } from "../runner-strategic-intent";
 import type { StrategicIntentState } from "../strategic-intent-state";
+import type { RemoteDoctrineProfile } from "../remote-doctrine-profile";
 import type { PlanPortfolioSnapshot } from "./plan-portfolio";
 
 export const TACTICAL_PLAN_SCHEMA_VERSION = "tactical-plan-v1" as const;
@@ -44,6 +45,7 @@ export type TacticalPlanType =
   | "corp.develop_finite_economy"
   | "corp.activate_persistent_economy"
   | "corp.build_credit_bank"
+  | "corp.establish_scoring_remote"
   | "corp.rez_defense"
   | "corp.apply_punish_pressure";
 
@@ -277,6 +279,8 @@ export type TacticalPlanBuildContext = {
   deckCapabilities?: DeckCapabilityProfile;
   strategicIntentState?: StrategicIntentState;
   corpStrategicIntent?: CorpStrategicIntentProfile;
+  remoteDoctrine?: RemoteDoctrineProfile;
+  previousPlanPortfolio?: PlanPortfolioSnapshot;
   tacticalGoals?: readonly TacticalGoalLike[];
   runnerStrategicIntent?: RunnerStrategicIntentProfile;
   runnerRunTargetEvaluations?: readonly RunnerRunTargetEvaluation[];
@@ -335,6 +339,7 @@ export type TacticalPlanRuntimeResult = {
   deckCapabilitiesUsed?: string[];
   strategicIntentStateUsed?: string[];
   corpStrategicIntentUsed?: string[];
+  remoteDoctrineUsed?: string[];
   tacticalGoalsUsed?: string[];
   runnerStrategicIntentUsed?: string[];
   runnerRunTargetEvaluationsUsed?: string[];

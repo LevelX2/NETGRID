@@ -391,7 +391,7 @@ export function corpScoreWindowCurrentStep(
   });
 }
 
-type CorpRemoteProtectionPath = {
+export type CorpRemoteProtectionPath = {
   immediateActionIds: string[];
   fallbackActionIds: string[];
   fundingCandidate?: CorpIcePlacementCandidate;
@@ -408,7 +408,7 @@ function emptyCorpRemoteProtectionPath(): CorpRemoteProtectionPath {
   };
 }
 
-function corpRemoteProtectionPath(
+export function corpRemoteProtectionPath(
   input: AiDecisionInput,
   serverId: string | undefined,
 ): CorpRemoteProtectionPath {
@@ -493,7 +493,9 @@ function corpRemoteProtectionPath(
   );
   return {
     immediateActionIds,
-    fallbackActionIds: fallbackCandidates.map((candidate) => candidate.actionId),
+    fallbackActionIds: fallbackCandidates.map(
+      (candidate) => candidate.actionId,
+    ),
     ...(fundingCandidates[0] ? { fundingCandidate: fundingCandidates[0] } : {}),
     acquisitionActionIds: input.legalActions
       .filter((action) => action.side === "corp" && action.type === "draw_card")

@@ -37,7 +37,7 @@ export type RemoteDoctrineProfile = {
     deckStrategyProfile: "ai_internal_strategy_profile" | "missing";
     deckCapabilities: "ai_internal" | "missing";
     strategicIntentState: "strategic_intent_state_v1" | "missing";
-    plannerEffect: "diagnostic_only";
+    plannerEffect: "diagnostic_only" | "plan_portfolio";
   };
   dependency: RemoteDependency;
   purposes: RemotePurpose[];
@@ -57,6 +57,7 @@ export type BuildRemoteDoctrineProfileParams = {
   strategyProfile?: AiDeckStrategyProfile;
   deckCapabilities?: DeckCapabilityProfile;
   strategicIntentState?: StrategicIntentState;
+  plannerEffect?: RemoteDoctrineProfile["source"]["plannerEffect"];
 };
 
 type RemoteLine =
@@ -129,7 +130,7 @@ export function buildRemoteDoctrineProfile(
       strategicIntentState: strategicIntentState
         ? "strategic_intent_state_v1"
         : "missing",
-      plannerEffect: "diagnostic_only",
+      plannerEffect: params.plannerEffect ?? "diagnostic_only",
     },
     ...clamped,
     confidence,

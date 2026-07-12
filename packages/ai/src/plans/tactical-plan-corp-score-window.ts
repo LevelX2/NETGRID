@@ -22,7 +22,19 @@ export function remoteIsProtected(
 export function corpRemoteContestabilityAssessment(
   input: AiDecisionInput,
   serverId: string,
-): { contestable: boolean; evidence: string[] } | undefined {
+):
+  | {
+      contestable: boolean;
+      visibleRunnerContestCredits: number;
+      visibleRunnerExposureContestCredits: number;
+      assessedKnownIceCount: number;
+      canReachAccess: boolean;
+      creditsAfterPath: number;
+      visibleBreakCost?: number;
+      noAccessReason?: string;
+      evidence: string[];
+    }
+  | undefined {
   const playerView = input.playerView;
   const server = playerView.servers.find(
     (candidate) => candidate.id === serverId,
@@ -60,6 +72,17 @@ export function corpRemoteContestabilityAssessment(
     (assessment.canReachAccess === true && assessment.creditsAfterPath >= 0);
   return {
     contestable,
+    visibleRunnerContestCredits,
+    visibleRunnerExposureContestCredits,
+    assessedKnownIceCount: assessment.assessedKnownIceCount,
+    canReachAccess: assessment.canReachAccess,
+    creditsAfterPath: assessment.creditsAfterPath,
+    ...(assessment.visibleBreakCost !== undefined
+      ? { visibleBreakCost: assessment.visibleBreakCost }
+      : {}),
+    ...(assessment.noAccessReason
+      ? { noAccessReason: assessment.noAccessReason }
+      : {}),
     evidence: [
       `remote_contestable_by_runner:${contestable}`,
       `runner_credits:${playerView.opponent.credits}`,

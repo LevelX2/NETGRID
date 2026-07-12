@@ -198,6 +198,11 @@ export {
   rememberPlanPortfolioSnapshot,
   resetPlanPortfolioMemory,
 } from "./plans/plan-portfolio-memory";
+export { assessCorpRemoteProject } from "./plans/corp-remote-project-assessment";
+export type {
+  CorpRemoteProjectAssessment,
+  CorpRemoteProtectionBand,
+} from "./plans/corp-remote-project-assessment";
 export { evaluatePracticalTacticBenchmark } from "./evaluation/practical-tactic-benchmark";
 export type {
   PracticalTacticBenchmarkCase,

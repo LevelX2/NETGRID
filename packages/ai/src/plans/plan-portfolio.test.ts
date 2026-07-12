@@ -35,6 +35,7 @@ const ALL_TACTICAL_PLAN_TYPES: TacticalPlanType[] = [
   "corp.develop_finite_economy",
   "corp.activate_persistent_economy",
   "corp.build_credit_bank",
+  "corp.establish_scoring_remote",
   "corp.rez_defense",
   "corp.apply_punish_pressure",
 ];
@@ -56,7 +57,7 @@ describe("plan portfolio", () => {
         ["corp.activate_persistent_economy", "recurring_cycle"],
       ]),
     );
-    expect(ALL_TACTICAL_PLAN_TYPES).toHaveLength(18);
+    expect(ALL_TACTICAL_PLAN_TYPES).toHaveLength(19);
   });
 
   it("keeps one foreground and at most two deterministic backgrounds", () => {
