@@ -1,6 +1,6 @@
 # Matchserie 2781: KI-Reparaturprozess
 
-Status: in Umsetzung
+Status: abgeschlossen
 
 ## Quelle und Gesamtziel
 
@@ -119,3 +119,18 @@ Hauptworkspace nur fuer den finalen lokalen Merge. Stoppe bei Side-Safety-,
 LegalAction- oder Engine-Korrektheitsblockern. Markiere das Goal erst nach
 erfolgreicher Main-Integration als complete.`
 
+## Abschlussnachweis
+
+- Paket 1: Evidence und Prozessvertrag mit Match-, Turn- und Decision-Ankern
+  festgeschrieben.
+- Paket 2: effektive ICE-Subtypen und ICE-abhaengige Upgrade-Platzierung teilen
+  jetzt die tatsaechliche Boardsemantik.
+- Paket 3: Regionsersatz hat einen eigenen Mehrwertvertrag; Schutzsuche
+  reserviert die letzte Aktion fuer ein bezahlbares gefundenes ICE.
+- Paket 4: Broker wird vor der Installation mit verbleibenden Credits,
+  Aktionen, Ladefaehigkeit und akutem Runfenster projiziert.
+- Paket 5: direkte Installation, Programmtrash-Variante und Shell Traders
+  verwenden dieselbe Zielkarten- und Grenznutzenbewertung. Reine
+  Breaker-Zahlkosten erzeugen keine falsche Economy-Faehigkeit.
+- Paket 6: 292 AI-Testdateien mit 1.923 Tests, AI-Typecheck und
+  `git diff --check` sind gruen.
