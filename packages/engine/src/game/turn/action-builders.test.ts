@@ -42,4 +42,30 @@ describe("turn action builders", () => {
       ),
     ).toBe("runner.start_run.rd");
   });
+
+  it("distinguishes a bonus run from a normal run on the same server", () => {
+    const normalRun = makeActionId(
+      "start_run",
+      "runner",
+      { serverId: "rd", runStartTaxCredits: 0 },
+      "basic_action",
+    );
+    const bonusRun = makeActionId(
+      "start_run",
+      "runner",
+      {
+        serverId: "rd",
+        runStartTaxCredits: 0,
+        bonusRunNoClick: true,
+        bonusRunSource: "onr_v1_123_bodyweight-data-creche",
+      },
+      "basic_action",
+    );
+
+    expect(normalRun).toBe("runner.start_run.rd");
+    expect(bonusRun).toBe(
+      "runner.start_run.rd.bonus_run.onr_v1_123_bodyweight-data-creche",
+    );
+    expect(bonusRun).not.toBe(normalRun);
+  });
 });

@@ -35,6 +35,7 @@ import {
   cardChoiceUsesOrderedSelection,
   cardChoiceUsesReadableCards,
   choiceInteractionAmbience,
+  shouldShowTurnActionsForChoice,
   counterDisplayUsesCreditBadge,
   counterDisplayUsesRefreshingCreditBadge,
   counterDisplayBadgeView,
@@ -515,6 +516,8 @@ describe("V1.0.5 action board UI helpers", () => {
       "trash",
     );
     expect(choiceInteractionAmbience(traceChoice)).toBe("trace");
+    expect(shouldShowTurnActionsForChoice(traceChoice)).toBe(true);
+    expect(shouldShowTurnActionsForChoice(choice("runner"))).toBe(false);
     expect(
       actionInteractionAmbience(
         legalAction(
@@ -4110,6 +4113,32 @@ describe("V1.0.6 resource and card-display helpers", () => {
         label: "Startup Immolator",
       }),
     ).toBe(true);
+  });
+
+  it("keeps the final continue-to-access action in the Run window during checkpoints", () => {
+    const running = view("runner", {
+      run: {
+        attackedServerId: "rd",
+        phase: "movement",
+        position: { kind: "server", serverId: "rd" },
+        successful: true,
+      },
+    });
+    const continueToAccess = legalAction(
+      "runner",
+      "continue_run",
+      "game_rule",
+      "Run fortsetzen",
+      undefined,
+      "game.checkpoint",
+    );
+
+    expect(runWindowActions(running, [continueToAccess])).toEqual([
+      continueToAccess,
+    ]);
+    expect(runWindowActionButtonLabel(running, continueToAccess)).toBe(
+      "Weiterlaufen: zum Zugriff",
+    );
   });
 
   it("mirrors access and access-resolution actions into the Run window", () => {

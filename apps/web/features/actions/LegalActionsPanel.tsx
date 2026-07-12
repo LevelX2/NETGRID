@@ -24,6 +24,7 @@ import {
   isSingleInstalledCorpExposeChoice,
   interactionAmbienceClassName,
   runAwareActionButtonLabel,
+  shouldShowTurnActionsForChoice,
   shouldUseCardChoicePanel,
   shouldUseFieldCardChoice,
   type ActionContext,
@@ -176,8 +177,12 @@ export function LegalActionsPanel({
     ? primaryActions.find((action) => action.type === "resolve_choice")
     : undefined;
   if (genericChoice && genericChoiceAction) {
+    const genericChoiceAmbience = choiceInteractionAmbience(
+      genericChoice,
+      genericChoiceAction,
+    );
     const genericChoiceAmbienceClass = interactionAmbienceClassName(
-      choiceInteractionAmbience(genericChoice, genericChoiceAction),
+      genericChoiceAmbience,
     );
     if (isSecurityPurgeInstallTargetChoice(genericChoice)) {
       return (
@@ -236,6 +241,16 @@ export function LegalActionsPanel({
         />
       );
     }
+    const currentTurnSide = turnSideForView(view) ?? view.activeSide;
+    const currentTurnClicks =
+      currentTurnSide === view.side ? view.own.clicks : view.opponent.clicks;
+    const currentTurnCapacity = actionCapacities[currentTurnSide];
+    const currentTurnDisplay = actionSlotDisplay(
+      currentTurnSide,
+      currentTurnClicks,
+      currentTurnCapacity,
+      true,
+    );
     return (
       <section
         className={`section setupPanel ${genericChoiceAmbienceClass} ${highlighted ? "cueHighlight" : ""}`}
@@ -245,6 +260,32 @@ export function LegalActionsPanel({
           <Check size={16} />
           {sideLabel(genericChoice.side)}-Entscheidung
         </h2>
+        {shouldShowTurnActionsForChoice(
+          genericChoice,
+          genericChoiceAction,
+        ) ? (
+          <div
+            className={`choiceTurnActionStatus side-${currentTurnSide}`}
+            data-testid="trace-choice-turn-actions"
+            aria-label={`${sideLabel(currentTurnSide)}-Aktionen, ${currentTurnDisplay.label}`}
+          >
+            <strong>{sideLabel(currentTurnSide)}-Aktionen</strong>
+            <div
+              className={`actionAvailability side-${currentTurnSide}`}
+              data-testid="trace-choice-action-availability"
+            >
+              <span className="actionAvailabilityCount">{`noch ${currentTurnDisplay.available}`}</span>
+              <ActionSlotMeter
+                side={currentTurnSide}
+                currentClicks={currentTurnClicks}
+                displayCapacity={currentTurnCapacity}
+                active
+                compact
+                slotsOnly
+              />
+            </div>
+          </div>
+        ) : null}
         <p className="meta">{genericChoice.prompt}</p>
         <div className="actions setupActions">
           {genericChoice.options.map((option) => (

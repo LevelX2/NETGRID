@@ -3667,16 +3667,13 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: ["deck"],
     implementationStatus: "playable_mvp",
     installCost: 3,
-    memoryLimitBonus: 2,
-    recurringCredits: 3,
+    memoryLimitBonus: 1,
     rulesText:
-      "Deck. +2 MU. 3 recurring credits for increasing link. You may have only one deck installed.",
+      "Provides +1 MU. Once per turn, right after making a successful run, you can choose to make another run without taking an action to do so. Only one deck can be in play at a time. Trash any older decks.",
     mechanics: [
       "install_hardware",
       "memory",
       "deck_unique",
-      "recurring_credit",
-      "link_recurring_credit",
       "per_card_longtail",
       ONR_V1_LOCAL_PRIVATE,
     ],

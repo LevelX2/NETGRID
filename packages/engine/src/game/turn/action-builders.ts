@@ -95,6 +95,8 @@ export function makeActionId(
     source === "basic_action" || source === "game_rule" ? "" : source,
   ];
   if (payload?.serverId) parts.push(String(payload.serverId));
+  if (payload?.bonusRunSource)
+    parts.push("bonus_run", String(payload.bonusRunSource));
   if (payload?.selectedServerId) parts.push(String(payload.selectedServerId));
   if (payload?.selectedCardId) parts.push(String(payload.selectedCardId));
   if (payload?.selectedSubtype) parts.push(String(payload.selectedSubtype));

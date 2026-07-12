@@ -118,7 +118,9 @@ describe("runner main action generation", () => {
         bonusRunSource: "onr_proteus_116_pirate-broadcast",
       },
     });
-    expect(actions[0]?.actionId).toBe("runner.start_run.rd");
+    expect(actions[0]?.actionId).toBe(
+      "runner.start_run.rd.bonus_run.onr_proteus_116_pirate-broadcast",
+    );
   });
 
   it("requires two clicks for Classic double prep events", () => {
