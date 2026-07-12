@@ -4,6 +4,7 @@ import type {
   LegalAction,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
+import { persistentDevelopmentActionProjection } from "../actions/persistent-development-action";
 import { runnerBasicActionPenaltyScoreComponents } from "./runner-basic-action-penalty-score";
 import {
   runnerCreditNeedScoreComponents,
@@ -152,9 +153,10 @@ export function runnerScoreComponents(
       dependencies.install,
     ),
   );
+  const persistentDevelopment = persistentDevelopmentActionProjection(action);
   if (
-    action.type === "trigger_ability" &&
-    action.payload?.delayedInstallAbility === "set_aside_from_grip"
+    action.type !== "install_card" &&
+    persistentDevelopment?.appliesInstallFitNow === true
   ) {
     const delayedInstallFit =
       dependencies.install.persistentInstallFitScoreComponent(input, action);

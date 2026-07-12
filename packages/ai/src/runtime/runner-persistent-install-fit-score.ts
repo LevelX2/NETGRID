@@ -3,6 +3,7 @@ import type {
   AiDecisionScoreComponent,
   LegalAction,
 } from "@netgrid/shared";
+import { persistentDevelopmentActionProjection } from "../actions/persistent-development-action";
 
 type RunnerPersistentInstallEvaluation = {
   stackabilityClass: string;
@@ -100,14 +101,11 @@ export function runnerPersistentInstallEvaluationForAction<
     TStrategicIntent
   >,
 ): RunnerPersistentInstallEvaluation | undefined {
-  const developsPersistentCard =
-    action.type === "install_card" ||
-    (action.type === "trigger_ability" &&
-      action.payload?.delayedInstallAbility === "set_aside_from_grip");
+  const development = persistentDevelopmentActionProjection(action);
   if (
     input.side !== "runner" ||
     action.side !== "runner" ||
-    !developsPersistentCard
+    development?.appliesInstallFitNow !== true
   ) {
     return undefined;
   }
@@ -124,22 +122,11 @@ export function runnerPersistentInstallEvaluationForAction<
   if (exact?.persistentInstallEvaluation) {
     return exact.persistentInstallEvaluation;
   }
-  const targetCardId = persistentInstallTargetCardId(action);
+  const targetCardId = development.targetCardId;
   if (!targetCardId) return undefined;
   return evaluations.find(
     (evaluation) => evaluation.cardInstanceId === targetCardId,
   )?.persistentInstallEvaluation;
-}
-
-function persistentInstallTargetCardId(action: LegalAction): string | undefined {
-  const targetCardId = action.payload?.targetCardId;
-  if (typeof targetCardId === "string" && targetCardId.length > 0) {
-    return targetCardId;
-  }
-  if (action.type === "install_card" && typeof action.source === "string") {
-    return action.source;
-  }
-  return undefined;
 }
 
 function sortedUnique(values: string[]): string[] {

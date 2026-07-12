@@ -306,6 +306,35 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     expect(evaluation.priority).toBeGreaterThanOrEqual(500);
   });
 
+  it("does not treat an unrelated target action as hand-card development", () => {
+    const memory = visibleCard("memory-hand", {
+      definitionId: "test-memory-hardware",
+      title: "Memory Hardware",
+      type: "hardware",
+      installCost: 1,
+      rulesText: "+1 MU.",
+    });
+    const unrelatedTargetAction: LegalAction = {
+      ...installAction("unrelated-target-action", memory, 0),
+      type: "activated_card_ability",
+      source: "other-installed-card",
+      payload: { targetCardId: memory.instanceId },
+    };
+    const input = runnerInput({
+      credits: 4,
+      hand: [memory],
+      legalActions: [unrelatedTargetAction],
+    });
+
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({ input }),
+      memory.instanceId,
+    );
+
+    expect(evaluation.availability).toBe("timing_blocked");
+    expect(evaluation.legalActionId).toBeUndefined();
+  });
+
   it("keeps expose tools relevant when the current route needs program displacement", () => {
     const mouse = visibleCard("mouse-1", {
       definitionId: "onr_v1_042_mouse",

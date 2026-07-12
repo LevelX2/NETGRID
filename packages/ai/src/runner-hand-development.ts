@@ -6,6 +6,10 @@ import type {
 } from "./deck-capabilities";
 import type { RunnerStrategicIntentProfile } from "./runner-strategic-intent";
 import { CARD_ROLES_BY_CARD, RUNTIME_CARDS, createAiHintsByCard } from "./ai-hints";
+import {
+  actionDevelopsPersistentCardNow,
+  persistentDevelopmentActionProjection,
+} from "./actions/persistent-development-action";
 
 export const RUNNER_HAND_DEVELOPMENT_EVALUATION_SCHEMA_VERSION =
   "runner-hand-development-evaluation-v1" as const;
@@ -501,7 +505,7 @@ function evaluateRunnerPersistentInstall(
   currentNeed: RunnerHandDevelopmentCurrentNeed,
 ): RunnerPersistentInstallEvaluation | undefined {
   const action = context.legalAction;
-  if (!action || !actionDevelopsPersistentCard(action)) return undefined;
+  if (!action || !actionDevelopsPersistentCardNow(action)) return undefined;
   if (!isPersistentRunnerCard(context.card)) return undefined;
 
   const profile = persistentFunctionalProfileForCard(
@@ -659,14 +663,6 @@ function evaluateRunnerPersistentInstall(
       role,
     }),
   };
-}
-
-function actionDevelopsPersistentCard(action: LegalAction): boolean {
-  return (
-    action.type === "install_card" ||
-    (action.type === "trigger_ability" &&
-      action.payload?.delayedInstallAbility === "set_aside_from_grip")
-  );
 }
 
 function strategicFitForCard(
@@ -1885,6 +1881,14 @@ function runnerUsefulProgramsInHandForPersistent(input: AiDecisionInput): number
 
 function actionMatchesCard(action: LegalAction, card: VisibleCard): boolean {
   if (action.side !== "runner") return false;
+  const persistentDevelopment = persistentDevelopmentActionProjection(action);
+  if (persistentDevelopment) {
+    return (
+      persistentDevelopment.developsGripCard &&
+      (persistentDevelopment.targetCardId === card.instanceId ||
+        persistentDevelopment.targetDefinitionId === card.definitionId)
+    );
+  }
   if (
     action.type !== "install_card" &&
     action.type !== "play_event" &&
@@ -1896,7 +1900,6 @@ function actionMatchesCard(action: LegalAction, card: VisibleCard): boolean {
   const payload = action.payload ?? {};
   return (
     action.source === card.instanceId ||
-    payload.targetCardId === card.instanceId ||
     payload.cardId === card.instanceId ||
     payload.sourceCardId === card.instanceId ||
     payload.sourceDefinitionId === card.definitionId ||
