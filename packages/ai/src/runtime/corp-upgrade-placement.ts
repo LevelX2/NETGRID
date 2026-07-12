@@ -237,7 +237,7 @@ function iceSupportPlacementComponent(
   return {
     key: "corp_upgrade_install_placement_defer",
     label: "Upgrade-Placement vertagen",
-    value: -700,
+    value: -1700,
     reason: [...evidence, "defer_reason:ice_support_without_ice"].join("|"),
   };
 }
@@ -284,6 +284,7 @@ function hasIceSupportSignal(signals: ReadonlySet<string>): boolean {
   return [...signals].some(
     (signal) =>
       signal.startsWith("ice.corp_") ||
+      signal === "run.corp_pay_or_end_run" ||
       signal === "ice.corp_strength_support" ||
       signal === "ice.corp_rez_discount" ||
       signal === "ice.corp_install_discount" ||

@@ -58,6 +58,33 @@ describe("visibleBreakerCardCanAddressIce", () => {
       ),
     ).toBe(true);
   });
+
+  it("treats an effective structured ICE subtype as authoritative over alternate rules text", () => {
+    const pileDriver = visibleProgram("pile-driver", ["Icebreaker"]);
+    const creditBlocks = {
+      ...visibleProgram("credit-blocks", ["Sentry"]),
+      type: "ice" as const,
+      title: "Credit Blocks",
+    };
+    const visibleText = (card: VisibleCard) =>
+      card.definitionId === "credit-blocks"
+        ? "Sentry. End the run. May become a wall instead of a sentry."
+        : "Break up to four wall subroutines on a single piece of ICE.";
+
+    expect(
+      visibleBreakerCardCanAddressIce(pileDriver, creditBlocks, {
+        visibleBreakerRoles,
+        visibleCardText: visibleText,
+      }),
+    ).toBe(false);
+    expect(
+      visibleBreakerCardCanAddressIce(
+        pileDriver,
+        { ...creditBlocks, subtypes: ["Wall"] },
+        { visibleBreakerRoles, visibleCardText: visibleText },
+      ),
+    ).toBe(true);
+  });
 });
 
 function visibleProgram(definitionId: string, subtypes: string[]): VisibleCard {

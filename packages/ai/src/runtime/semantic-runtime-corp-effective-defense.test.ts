@@ -274,6 +274,46 @@ describe("semanticRuntimeCorpEffectiveDefenseContext", () => {
     );
   });
 
+  it("treats Credit Blocks sentry mode as a stop against wall-only coverage", () => {
+    const context = semanticRuntimeCorpEffectiveDefenseContext(
+      corpInput(8, {
+        runnerCredits: 8,
+        runnerRig: [wallOnlyBreaker()],
+        servers: [
+          server("hq", [
+            corpIce("credit-blocks", {
+              definitionId: "onr_proteus_017_credit-blocks",
+              title: "Credit Blocks",
+              subtypes: ["sentry"],
+            }),
+          ]),
+        ],
+      }),
+      rezAction(
+        "credit-blocks-sentry",
+        6,
+        {
+          variableRezKind: "alternate_subtype",
+          selectedSubtypesAfterRez: "sentry",
+        },
+        "Credit Blocks als Sentry rezzen",
+        "credit-blocks",
+      ),
+      rezCandidate("credit-blocks-sentry", 6, [
+        "role:etr_ice",
+        "corp_ice.end_run",
+      ]),
+      { actionCreditCost },
+    );
+
+    expect(context).toMatchObject({
+      isRezzableNow: true,
+      visibleBreakerCoverage: false,
+      hasImmediateStopPotential: true,
+      zeroEffectRisk: false,
+    });
+  });
+
   it("treats Credit Blocks wall mode as a stop when only visible Killer coverage exists", () => {
     const context = semanticRuntimeCorpEffectiveDefenseContext(
       corpInput(5, {
@@ -557,5 +597,21 @@ function earlyWormBreaker(): NonNullable<
     owner: "runner",
     controller: "runner",
     subtypes: ["Icebreaker", "Worm"],
+  };
+}
+
+function wallOnlyBreaker(): NonNullable<
+  AiDecisionInput["playerView"]["opponent"]["rig"]
+>[number] {
+  return {
+    instanceId: "pile-driver",
+    definitionId: "onr_v1_047_pile-driver",
+    title: "Pile Driver",
+    known: true,
+    type: "program",
+    owner: "runner",
+    controller: "runner",
+    subtypes: ["Icebreaker", "Noisy"],
+    rulesText: "Break up to four wall subroutines on a single piece of ICE.",
   };
 }

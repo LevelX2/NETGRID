@@ -62,6 +62,12 @@ export function visibleBreakerCardCanAddressIce(
   ) {
     return true;
   }
+  const explicitIceClasses = visibleIceClasses(ice.subtypes ?? []);
+  if (explicitIceClasses.size > 0) {
+    return [...explicitIceClasses].some((iceClass) =>
+      breakerCanAddressIceClass(roles, breakerTokens, iceClass),
+    );
+  }
   const iceTokens = visibleBreakerTextTokens(dependencies.visibleCardText(ice));
   if (visibleBreakerTokensIncludeAny(iceTokens, ["wall", "barrier"])) {
     return (
@@ -92,6 +98,55 @@ export function visibleBreakerCardCanAddressIce(
   return (
     roles.length > 0 &&
     visibleBreakerTokensIncludeAny(breakerTokens, ["break", "breaks"])
+  );
+}
+
+type VisibleIceClass = "wall" | "code_gate" | "sentry";
+
+function visibleIceClasses(subtypes: readonly string[]): Set<VisibleIceClass> {
+  const classes = new Set<VisibleIceClass>();
+  for (const subtype of subtypes) {
+    const normalized = subtype
+      .trim()
+      .toLocaleLowerCase("en-US")
+      .replace(/[_-]+/g, " ")
+      .replace(/\s+/g, " ");
+    if (normalized === "wall" || normalized === "barrier") {
+      classes.add("wall");
+    } else if (normalized === "code gate" || normalized === "codegate") {
+      classes.add("code_gate");
+    } else if (normalized === "sentry") {
+      classes.add("sentry");
+    }
+  }
+  return classes;
+}
+
+function breakerCanAddressIceClass(
+  roles: readonly string[],
+  breakerTokens: readonly string[],
+  iceClass: VisibleIceClass,
+): boolean {
+  if (iceClass === "wall") {
+    return (
+      rolesMatch(roles, ["fracter"]) ||
+      visibleBreakerTokensIncludeAny(breakerTokens, [
+        "fracter",
+        "wall",
+        "barrier",
+      ])
+    );
+  }
+  if (iceClass === "code_gate") {
+    return (
+      rolesMatch(roles, ["decoder"]) ||
+      visibleBreakerTokensIncludeAny(breakerTokens, ["decoder", "codegate"]) ||
+      visibleBreakerTokensIncludePhrase(breakerTokens, ["code", "gate"])
+    );
+  }
+  return (
+    rolesMatch(roles, ["killer"]) ||
+    visibleBreakerTokensIncludeAny(breakerTokens, ["killer", "sentry"])
   );
 }
 

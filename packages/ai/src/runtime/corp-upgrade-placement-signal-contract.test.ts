@@ -121,6 +121,29 @@ describe("Corp upgrade placement signal contract", () => {
       }),
     );
   });
+
+  it("defers pass-ICE tax upgrades until their fort actually has ICE", () => {
+    expect(
+      placementComponent("onr_proteus_070_rasmin-bridger", "hq"),
+    ).toEqual(
+      expect.objectContaining({
+        key: "corp_upgrade_install_placement_defer",
+        value: -1700,
+        reason: expect.stringContaining("defer_reason:ice_support_without_ice"),
+      }),
+    );
+    expect(
+      placementComponent("onr_proteus_070_rasmin-bridger", "hq", {
+        hqIce: [visibleCard("hq-ice", "simple_ice", "ice")],
+      }),
+    ).toEqual(
+      expect.objectContaining({
+        key: "corp_upgrade_install_placement_fit",
+        value: 750,
+        reason: expect.stringContaining("fit:ice_support_existing_ice"),
+      }),
+    );
+  });
 });
 
 function placementComponent(
@@ -128,6 +151,7 @@ function placementComponent(
   serverId: "hq" | "rd" | "remote_1",
   options: {
     regionReplacementWarning?: boolean;
+    hqIce?: VisibleCard[];
     remoteIce?: VisibleCard[];
     remoteRoot?: VisibleCard[];
   } = {},
@@ -174,7 +198,7 @@ function placementComponent(
     input: {
       playerView: {
         servers: [
-          { id: "hq", label: "HQ", ice: [], root: [] },
+          { id: "hq", label: "HQ", ice: options.hqIce ?? [], root: [] },
           { id: "rd", label: "R&D", ice: [], root: [] },
           { id: "archives", label: "Archives", ice: [], root: [] },
           {
