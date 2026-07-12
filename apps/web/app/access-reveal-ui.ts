@@ -15,6 +15,12 @@ export function accessRevealActionGroups(actions: LegalAction[]): AccessRevealAc
 
 export function accessDecisionLabel(action: LegalAction, serverLabel?: string): string {
   const accessContext = accessDecisionContextLabel(serverLabel);
+  if (
+    action.payload?.agendaAccessReplacement === "install_as_runner_program" ||
+    action.payload?.agendaAccessReplacement ===
+      "declined_install_as_runner_program"
+  )
+    return normalizeVisibleTerms(action.label);
   if (action.type === "access_card") return accessContext ? `Nächste ${accessContext}-Karte` : "Nächste Karte";
   if (action.type === "steal_agenda") {
     const paymentLabel = stealCostPaymentLabel(action.payload);

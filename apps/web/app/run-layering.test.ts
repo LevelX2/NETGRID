@@ -88,6 +88,14 @@ describe("run window layering", () => {
     expect(selectorBlock(".accessRevealActionButton")).toContain("grid-template-columns: auto minmax(0, 1fr) auto");
   });
 
+  it("keeps the access cue mounted in manual and automatic AI advance paths", () => {
+    expect(
+      pageSource.match(
+        /setCurrentActionCue\(actionCueAfterAiAdvanceRequest\)/g,
+      ),
+    ).toHaveLength(2);
+  });
+
   it("defines subtle ambience backgrounds for interaction windows", () => {
     for (const asset of [
       "/backgrounds/run-movement-ambience.png",
