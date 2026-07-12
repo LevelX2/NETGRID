@@ -35,6 +35,7 @@ import {
   cardChoiceUsesOrderedSelection,
   cardChoiceUsesReadableCards,
   choiceInteractionAmbience,
+  shouldShowTurnActionsForChoice,
   counterDisplayUsesCreditBadge,
   counterDisplayUsesRefreshingCreditBadge,
   counterDisplayBadgeView,
@@ -515,6 +516,8 @@ describe("V1.0.5 action board UI helpers", () => {
       "trash",
     );
     expect(choiceInteractionAmbience(traceChoice)).toBe("trace");
+    expect(shouldShowTurnActionsForChoice(traceChoice)).toBe(true);
+    expect(shouldShowTurnActionsForChoice(choice("runner"))).toBe(false);
     expect(
       actionInteractionAmbience(
         legalAction(

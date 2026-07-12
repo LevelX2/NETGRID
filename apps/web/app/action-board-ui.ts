@@ -264,6 +264,13 @@ export function choiceInteractionAmbience(
   ]);
 }
 
+export function shouldShowTurnActionsForChoice(
+  choice: NonNullable<PlayerView["pendingChoice"]>,
+  action?: LegalAction,
+): boolean {
+  return choiceInteractionAmbience(choice, action) === "trace";
+}
+
 export function runWindowInteractionAmbience(
   view: PlayerView,
   actions: LegalAction[],
