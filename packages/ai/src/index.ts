@@ -174,11 +174,15 @@ export {
   advancePlanPortfolioForSelectedAction,
   adaptTacticalPlanToPortfolioEntry,
   aggregatePlanActionContributions,
+  buildPlanPortfolioActionContributions,
   buildPlanPortfolio,
   PLAN_PORTFOLIO_SCHEMA_VERSION,
   planPortfolioTurnKey,
+  planPortfolioEntryCanAct,
+  planPortfolioEntryForPlan,
   portfolioRoleForExecutionClass,
   redactedPlanPortfolioFacts,
+  redactedPlanActionContributionFacts,
   tacticalPlanExecutionClass,
 } from "./plans/plan-portfolio";
 export type {
@@ -198,8 +202,12 @@ export {
   rememberPlanPortfolioSnapshot,
   resetPlanPortfolioMemory,
 } from "./plans/plan-portfolio-memory";
-export { assessCorpRemoteProject } from "./plans/corp-remote-project-assessment";
+export {
+  assessCorpCentralProtectionFloor,
+  assessCorpRemoteProject,
+} from "./plans/corp-remote-project-assessment";
 export type {
+  CorpCentralProtectionFloorAssessment,
   CorpRemoteProjectAssessment,
   CorpRemoteProtectionBand,
 } from "./plans/corp-remote-project-assessment";

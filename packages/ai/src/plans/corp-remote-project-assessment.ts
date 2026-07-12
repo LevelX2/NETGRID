@@ -25,6 +25,14 @@ export type CorpRemoteProjectAssessment = {
   evidence: string[];
 };
 
+export type CorpCentralProtectionFloorAssessment = {
+  requiredIceByServer: { hq: number; rd: number };
+  installedIceByServer: { hq: number; rd: number };
+  missingServerIds: Array<"hq" | "rd">;
+  met: boolean;
+  evidence: string[];
+};
+
 const BAND_RANK: Record<CorpRemoteProtectionBand, number> = {
   none: 0,
   light: 1,
@@ -32,6 +40,37 @@ const BAND_RANK: Record<CorpRemoteProtectionBand, number> = {
   taxing: 3,
   glacier: 4,
 };
+
+export function assessCorpCentralProtectionFloor(
+  input: AiDecisionInput,
+): CorpCentralProtectionFloorAssessment {
+  const installedIceByServer = {
+    hq:
+      input.playerView.servers.find((server) => server.id === "hq")?.ice
+        .length ?? 0,
+    rd:
+      input.playerView.servers.find((server) => server.id === "rd")?.ice
+        .length ?? 0,
+  };
+  const requiredIceByServer = { hq: 1, rd: 1 } as const;
+  const missingServerIds = (["hq", "rd"] as const).filter(
+    (serverId) =>
+      installedIceByServer[serverId] < requiredIceByServer[serverId],
+  );
+  return {
+    requiredIceByServer,
+    installedIceByServer,
+    missingServerIds,
+    met: missingServerIds.length === 0,
+    evidence: [
+      "central_protection_floor_mode:minimum_not_target",
+      `central_protection_floor_hq:${installedIceByServer.hq}/1`,
+      `central_protection_floor_rd:${installedIceByServer.rd}/1`,
+      `central_protection_floor_missing:${missingServerIds.join("|") || "none"}`,
+      `central_protection_floor_met:${missingServerIds.length === 0}`,
+    ],
+  };
+}
 
 export function assessCorpRemoteProject(params: {
   input: AiDecisionInput;

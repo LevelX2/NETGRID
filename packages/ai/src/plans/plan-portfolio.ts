@@ -252,6 +252,68 @@ export function advancePlanPortfolioForSelectedAction(
   };
 }
 
+export function planPortfolioEntryForPlan(
+  portfolio: PlanPortfolioSnapshot,
+  plan: TacticalPlan,
+): PlanPortfolioEntry | undefined {
+  const entryId = tacticalPlanPortfolioEntryId(plan);
+  return allPortfolioEntries(portfolio).find(
+    (entry) => entry.portfolioEntryId === entryId,
+  );
+}
+
+export function planPortfolioEntryCanAct(entry: PlanPortfolioEntry): boolean {
+  if (
+    entry.lifecycle === "suspended" ||
+    entry.lifecycle === "completed" ||
+    entry.lifecycle === "abandoned" ||
+    entry.lifecycle === "blocked"
+  ) {
+    return false;
+  }
+  return (
+    entry.role !== "background" ||
+    entry.cadence.actionsUsedThisTurn < entry.cadence.maxActionsPerTurn
+  );
+}
+
+export function buildPlanPortfolioActionContributions(
+  portfolio: PlanPortfolioSnapshot,
+): PlanActionContribution[] {
+  return allPortfolioEntries(portfolio).flatMap((entry) => {
+    if (!planPortfolioEntryCanAct(entry)) return [];
+    const roleValue =
+      entry.role === "reactive_interrupt"
+        ? 1_000
+        : entry.role === "foreground"
+          ? 800
+          : 300;
+    return entry.actionCandidateIds.map((actionId) => ({
+      actionId,
+      portfolioEntryId: entry.portfolioEntryId,
+      contributionKind: "progress" as const,
+      value: roleValue + Math.min(150, Math.max(0, entry.priority) / 10),
+      milestoneAfter: entry.milestone,
+      evidence: [
+        `plan_contribution_role:${entry.role}`,
+        `plan_contribution_plan:${entry.planType}`,
+      ],
+    }));
+  });
+}
+
+export function redactedPlanActionContributionFacts(
+  scores: readonly PlanActionContributionScore[],
+): string[] {
+  return scores
+    .slice(0, 8)
+    .flatMap((score) => [
+      `plan_action_contribution:${score.actionId}:${Math.round(score.totalValue)}`,
+      `plan_action_contribution_entries:${score.actionId}:${score.portfolioEntryIds.join("|")}`,
+      `plan_action_contribution_multi_plan:${score.actionId}:${score.multiPlanBonus > 0}`,
+    ]);
+}
+
 export function tacticalPlanExecutionClass(
   type: TacticalPlanType,
 ): PlanExecutionClass {

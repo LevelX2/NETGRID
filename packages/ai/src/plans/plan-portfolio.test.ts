@@ -5,9 +5,12 @@ import type { TacticalPlanType } from "./tactical-plan-types";
 import {
   advancePlanPortfolioForSelectedAction,
   aggregatePlanActionContributions,
+  buildPlanPortfolioActionContributions,
   buildPlanPortfolio,
+  planPortfolioEntryCanAct,
   planPortfolioTurnKey,
   redactedPlanPortfolioFacts,
+  redactedPlanActionContributionFacts,
   tacticalPlanExecutionClass,
   type PlanActionContribution,
   type PlanPortfolioSnapshot,
@@ -255,6 +258,52 @@ describe("plan portfolio", () => {
       actionsUsedThisTurn: 1,
       lastProgressTurnKey: "runner:turn:5",
     });
+    const sameTurn = buildPlanPortfolio({
+      input: decisionInput("runner", 71),
+      previous: advanced,
+      turnKey: "runner:turn:5",
+      tacticalPlans: [
+        plan("runner.build_credit_bank", 800, "bank", "bank-a", 71),
+      ],
+    });
+    expect(planPortfolioEntryCanAct(sameTurn.backgrounds[0]!)).toBe(false);
+  });
+
+  it("marks one action that advances foreground and background as a multi-plan contribution", () => {
+    const foreground = plan(
+      "corp.create_score_window",
+      950,
+      "server",
+      "remote_1",
+      80,
+    );
+    const background = plan(
+      "corp.establish_scoring_remote",
+      690,
+      "server",
+      "remote_1",
+      80,
+    );
+    foreground.currentStep.actionCandidateIds = ["install-shared-ice"];
+    background.currentStep.actionCandidateIds = ["install-shared-ice"];
+    const portfolio = buildPlanPortfolio({
+      input: decisionInput("corp", 80),
+      turnKey: "corp:turn:8",
+      tacticalPlans: [foreground, background],
+    });
+    const scores = aggregatePlanActionContributions({
+      portfolio,
+      contributions: buildPlanPortfolioActionContributions(portfolio),
+    });
+
+    expect(scores[0]).toMatchObject({
+      actionId: "install-shared-ice",
+      contributionCount: 2,
+      multiPlanBonus: 80,
+    });
+    expect(redactedPlanActionContributionFacts(scores)).toContain(
+      "plan_action_contribution_multi_plan:install-shared-ice:true",
+    );
   });
 });
 

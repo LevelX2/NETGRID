@@ -9,7 +9,10 @@ import type {
   TacticalPlanBuildContext,
 } from "./tactical-plan-types";
 import { visibleCardByInstanceId } from "./tactical-plan-visible-cards";
-import { assessCorpRemoteProject } from "./corp-remote-project-assessment";
+import {
+  assessCorpCentralProtectionFloor,
+  assessCorpRemoteProject,
+} from "./corp-remote-project-assessment";
 
 export function buildCorpRemoteProjectPlans(
   context: TacticalPlanBuildContext,
@@ -23,6 +26,11 @@ export function buildCorpRemoteProjectPlans(
     serverId: targetServerId,
     doctrine,
   });
+  const centralFloor = assessCorpCentralProtectionFloor(context.input);
+  const centralFloorActionIds = centralProtectionFloorActions(
+    context,
+    centralFloor.missingServerIds,
+  );
   const protectionPath = corpRemoteProtectionPath(
     context.input,
     targetServerId,
@@ -31,21 +39,40 @@ export function buildCorpRemoteProjectPlans(
     context,
     targetServerId,
   ).map((action) => action.actionId);
-  const blockers: PlanBlocker[] = assessment.targetMet
-    ? []
-    : [
-        {
-          blockerId: `remote_project_protection:${targetServerId}`,
-          kind: "missing_remote_protection",
-          severity: "soft",
-          target: { kind: "server", id: targetServerId },
-          removalStepKind: "protect_remote",
-          evidence: assessment.evidence,
-        },
-      ];
+  const blockers: PlanBlocker[] = [
+    ...(!centralFloor.met
+      ? [
+          {
+            blockerId: "remote_project_central_floor",
+            kind: "central_protection_floor" as const,
+            severity: "soft" as const,
+            target: {
+              kind: "server" as const,
+              id: centralFloor.missingServerIds[0] ?? "hq",
+            },
+            removalStepKind: "protect_remote" as const,
+            evidence: centralFloor.evidence,
+          } satisfies PlanBlocker,
+        ]
+      : []),
+    ...(!assessment.targetMet
+      ? [
+          {
+            blockerId: `remote_project_protection:${targetServerId}`,
+            kind: "missing_remote_protection",
+            severity: "soft",
+            target: { kind: "server", id: targetServerId },
+            removalStepKind: "protect_remote",
+            evidence: assessment.evidence,
+          } satisfies PlanBlocker,
+        ]
+      : []),
+  ];
   const currentStep = remoteProjectCurrentStep({
     context,
     targetServerId,
+    centralFloorMet: centralFloor.met,
+    centralFloorActionIds,
     targetMet: assessment.targetMet,
     agendaInstallActionIds,
     protectionPath,
@@ -56,13 +83,14 @@ export function buildCorpRemoteProjectPlans(
       planId: `corp.establish_scoring_remote:${targetServerId}`,
       side: "corp",
       type: "corp.establish_scoring_remote",
-      status: assessment.targetMet
-        ? hasMappedAction
-          ? "active"
-          : "proposed"
-        : hasMappedAction
-          ? "progressing"
-          : "blocked",
+      status:
+        centralFloor.met && assessment.targetMet
+          ? hasMappedAction
+            ? "active"
+            : "proposed"
+          : hasMappedAction
+            ? "progressing"
+            : "blocked",
       priority:
         (doctrine.dependency === "primary" ? 690 : 590) +
         (assessment.targetMet ? 0 : 40),
@@ -77,6 +105,7 @@ export function buildCorpRemoteProjectPlans(
         `remote_project_purposes:${doctrine.purposes.join("|")}`,
         `remote_project_background_actions:${doctrine.investmentBudget.backgroundActionsPerTurn}`,
         ...assessment.evidence,
+        ...centralFloor.evidence,
         ...protectionPath.evidence,
       ],
       scoreBreakdown: [
@@ -173,10 +202,23 @@ function scorelineInstallActions(
 function remoteProjectCurrentStep(params: {
   context: TacticalPlanBuildContext;
   targetServerId: string;
+  centralFloorMet: boolean;
+  centralFloorActionIds: string[];
   targetMet: boolean;
   agendaInstallActionIds: string[];
   protectionPath: ReturnType<typeof corpRemoteProtectionPath>;
 }): PlanStep {
+  if (!params.centralFloorMet) {
+    return createPlanStep({
+      stepId: `remote_project_central_floor:${params.targetServerId}`,
+      kind: "protect_remote",
+      desiredActionSemantics: ["install.card", "central_protection_floor"],
+      actionCandidateIds: params.centralFloorActionIds,
+      rationale: [
+        "satisfy the one-ICE HQ/R&D floor before resuming remote investment",
+      ],
+    });
+  }
   if (params.targetMet) {
     return createPlanStep({
       stepId: `remote_project_payload:${params.targetServerId}`,
@@ -232,6 +274,22 @@ function remoteProjectCurrentStep(params: {
     actionCandidateIds: params.protectionPath.acquisitionActionIds,
     rationale: ["find effective ICE instead of overprotecting central servers"],
   });
+}
+
+function centralProtectionFloorActions(
+  context: TacticalPlanBuildContext,
+  missingServerIds: readonly string[],
+): string[] {
+  const missing = new Set(missingServerIds);
+  return context.input.legalActions
+    .filter(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        missing.has(actionServerId(action) ?? ""),
+    )
+    .map((action) => action.actionId)
+    .sort();
 }
 
 function remoteProjectSequence(serverId: string): PlanStep[] {

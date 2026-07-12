@@ -9,9 +9,18 @@ import { createAiHintsByCard } from "./ai-hints";
 import { getTacticalPlanMemorySnapshot } from "./plans/plan-memory";
 import { getPlanPortfolioMemorySnapshot } from "./plans/plan-portfolio-memory";
 import {
+  aggregatePlanActionContributions,
+  buildPlanPortfolioActionContributions,
   buildPlanPortfolio,
+  planPortfolioEntryCanAct,
+  planPortfolioEntryForPlan,
   planPortfolioTurnKey,
+  redactedPlanActionContributionFacts,
   redactedPlanPortfolioFacts,
+} from "./plans/plan-portfolio";
+import type {
+  PlanActionContributionScore,
+  PlanPortfolioSnapshot,
 } from "./plans/plan-portfolio";
 import {
   redactedAccessCommitmentFacts,
@@ -160,8 +169,22 @@ export function evaluateTacticalPlans(
     turnKey: planPortfolioTurnKey(context.input),
   });
   const planPortfolioUsed = redactedPlanPortfolioFacts(planPortfolio);
+  const planActionContributionScores = aggregatePlanActionContributions({
+    portfolio: planPortfolio,
+    contributions: buildPlanPortfolioActionContributions(planPortfolio),
+  });
+  const planActionContributionsUsed = redactedPlanActionContributionFacts(
+    planActionContributionScores,
+  );
   const candidates = context.candidates ?? [];
-  for (const plan of planAlternatives) {
+  const selectionOrder = tacticalPlanSelectionOrder(
+    planAlternatives,
+    planPortfolio,
+    planActionContributionScores,
+  );
+  for (const plan of selectionOrder) {
+    const portfolioEntry = planPortfolioEntryForPlan(planPortfolio, plan);
+    if (portfolioEntry && !planPortfolioEntryCanAct(portfolioEntry)) continue;
     if (!planCanMapToCurrentAction(plan)) continue;
     const mapping = mapPlanStepToLegalActions(
       plan,
@@ -173,6 +196,7 @@ export function evaluateTacticalPlans(
       return {
         planPortfolio,
         planPortfolioUsed,
+        planActionContributionsUsed,
         ...(previousPlan ? { previousPlan } : {}),
         ...(deckCapabilitiesUsed.length > 0 ? { deckCapabilitiesUsed } : {}),
         ...(strategicIntentStateUsed.length > 0
@@ -219,6 +243,7 @@ export function evaluateTacticalPlans(
   return {
     planPortfolio,
     planPortfolioUsed,
+    planActionContributionsUsed,
     ...(previousPlan ? { previousPlan } : {}),
     ...(deckCapabilitiesUsed.length > 0 ? { deckCapabilitiesUsed } : {}),
     ...(strategicIntentStateUsed.length > 0
@@ -265,5 +290,36 @@ export function mapPlanStepToLegalActions(
     candidates,
     input,
     TACTICAL_PLAN_CREDIT_VALUE_DEPENDENCIES,
+  );
+}
+
+function tacticalPlanSelectionOrder(
+  plans: readonly TacticalPlan[],
+  portfolio: PlanPortfolioSnapshot,
+  contributionScores: readonly PlanActionContributionScore[],
+): TacticalPlan[] {
+  const contributionByAction = new Map(
+    contributionScores.map((score) => [score.actionId, score.totalValue]),
+  );
+  const roleRank = (plan: TacticalPlan): number => {
+    const entry = planPortfolioEntryForPlan(portfolio, plan);
+    if (!entry) return 3;
+    if (entry.role === "reactive_interrupt") return 0;
+    if (entry.role === "foreground") return 1;
+    return 2;
+  };
+  const contributionValue = (plan: TacticalPlan): number =>
+    Math.max(
+      0,
+      ...plan.currentStep.actionCandidateIds.map(
+        (actionId) => contributionByAction.get(actionId) ?? 0,
+      ),
+    );
+  return [...plans].sort(
+    (left, right) =>
+      roleRank(left) - roleRank(right) ||
+      contributionValue(right) - contributionValue(left) ||
+      right.priority - left.priority ||
+      left.planId.localeCompare(right.planId),
   );
 }

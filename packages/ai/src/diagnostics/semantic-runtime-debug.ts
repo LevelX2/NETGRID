@@ -895,6 +895,9 @@ export function semanticRuntimeDebugTacticalPlanItems(
     ...(planRuntime.planPortfolioUsed ?? [])
       .slice(0, 12)
       .map((fact) => `plan_portfolio_used:${fact}`),
+    ...(planRuntime.planActionContributionsUsed ?? [])
+      .slice(0, 24)
+      .map((fact) => `plan_action_contribution_used:${fact}`),
     ...(planRuntime.deckCapabilitiesUsed ?? [])
       .slice(0, 12)
       .map((fact) => `deck_capability_used:${fact}`),

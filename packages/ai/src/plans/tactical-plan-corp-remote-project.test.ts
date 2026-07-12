@@ -4,6 +4,8 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
+import { buildActionSemanticCandidates } from "../action-semantic-candidate";
+import { evaluateTacticalPlans } from "../tactical-plans";
 import type { RemoteDoctrineProfile } from "../remote-doctrine-profile";
 import type { PlanPortfolioSnapshot } from "./plan-portfolio";
 import { assessCorpRemoteProject } from "./corp-remote-project-assessment";
@@ -69,6 +71,65 @@ describe("Corp scoring remote development project", () => {
     expect(plan?.currentStep.actionCandidateIds).toEqual(["draw"]);
   });
 
+  it("treats HQ and R&D coverage as a floor and resumes the bound remote once met", () => {
+    const ice = card("floor-wall", "simple_barrier_ice", "ice", {
+      rezCost: 2,
+      rulesText: "End the run.",
+    });
+    const inputBelowFloor = corpInput({
+      hq: [ice],
+      centralProtected: false,
+      actions: [
+        action("install-hq-floor", "install_card", ice, {
+          placement: "ice",
+          serverId: "hq",
+        }),
+        action("install-remote-too-early", "install_card", ice, {
+          placement: "ice",
+          serverId: "remote_1",
+        }),
+      ],
+    });
+    const [floorPlan] = buildCorpRemoteProjectPlans({
+      input: inputBelowFloor,
+      remoteDoctrine: doctrine("primary", "glacier", ["scoreline"]),
+    });
+
+    expect(floorPlan?.currentStep.actionCandidateIds).toEqual([
+      "install-hq-floor",
+    ]);
+    expect(floorPlan?.blockers).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "central_protection_floor" }),
+      ]),
+    );
+
+    const inputAtFloor = corpInput({
+      hq: [ice],
+      actions: [
+        action("install-extra-hq", "install_card", ice, {
+          placement: "ice",
+          serverId: "hq",
+        }),
+        action("install-remote-after-floor", "install_card", ice, {
+          placement: "ice",
+          serverId: "remote_1",
+        }),
+      ],
+    });
+    const [remotePlan] = buildCorpRemoteProjectPlans({
+      input: inputAtFloor,
+      remoteDoctrine: doctrine("primary", "glacier", ["scoreline"]),
+    });
+
+    expect(remotePlan?.currentStep.actionCandidateIds).toEqual([
+      "install-remote-after-floor",
+    ]);
+    expect(remotePlan?.currentStep.actionCandidateIds).not.toContain(
+      "install-extra-hq",
+    );
+  });
+
   it("does not invent a long remote project for fast advance or pure asset economy", () => {
     const input = corpInput({ actions: [action("gain", "gain_credit")] });
 
@@ -84,6 +145,51 @@ describe("Corp scoring remote development project", () => {
         remoteDoctrine: doctrine("supporting", "light", ["asset_economy"]),
       }),
     ).toEqual([]);
+  });
+
+  it("keeps a legal score as foreground while retaining remote hardening in the background", () => {
+    const agenda = card("ready-agenda", "simple_agenda", "agenda", {
+      advancementCounters: 3,
+      advancementRequirement: 3,
+    });
+    const ice = card("next-wall", "simple_barrier_ice", "ice", {
+      rezCost: 2,
+      rulesText: "End the run.",
+    });
+    const score = action("score-now", "score_agenda", agenda, {
+      serverId: "remote_1",
+    });
+    const harden = action("harden-remote", "install_card", ice, {
+      placement: "ice",
+      serverId: "remote_1",
+    });
+    const input = corpInput({
+      hq: [ice],
+      remote1Root: [agenda],
+      actions: [score, harden],
+    });
+    const candidates = buildActionSemanticCandidates({
+      legalActions: input.legalActions,
+      observerSide: "corp",
+      stateVersion: input.playerView.stateVersion,
+    });
+
+    const result = evaluateTacticalPlans({
+      input,
+      candidates,
+      remoteDoctrine: doctrine("primary", "glacier", ["scoreline"]),
+    });
+
+    expect(result.selectedPlan?.type).toBe("corp.create_score_window");
+    expect(
+      result.selectedMapping?.legalActions.map((entry) => entry.actionId),
+    ).toEqual(["score-now"]);
+    expect(result.planPortfolio?.foreground?.planType).toBe(
+      "corp.create_score_window",
+    );
+    expect(result.planPortfolio?.backgrounds[0]?.planType).toBe(
+      "corp.establish_scoring_remote",
+    );
   });
 
   it("measures a glacier by visible path cost and Runner recovery, not ICE count alone", () => {
@@ -186,8 +292,18 @@ function corpInput(params: {
   hq?: VisibleCard[];
   remote1Ice?: VisibleCard[];
   remote2Ice?: VisibleCard[];
+  remote1Root?: VisibleCard[];
+  centralProtected?: boolean;
   actions: LegalAction[];
 }): AiDecisionInput {
+  const centralIce =
+    params.centralProtected === false
+      ? []
+      : [
+          card("central-floor", "simple_barrier_ice", "ice", {
+            rezzed: false,
+          }),
+        ];
   return {
     side: "corp",
     playerView: {
@@ -225,14 +341,14 @@ function corpInput(params: {
         rig: [],
       },
       servers: [
-        { id: "hq", label: "HQ", ice: [], root: [] },
-        { id: "rd", label: "R&D", ice: [], root: [] },
+        { id: "hq", label: "HQ", ice: centralIce, root: [] },
+        { id: "rd", label: "R&D", ice: centralIce, root: [] },
         { id: "archives", label: "Archives", ice: [], root: [] },
         {
           id: "remote_1",
           label: "Remote 1",
           ice: params.remote1Ice ?? [],
-          root: [],
+          root: params.remote1Root ?? [],
         },
         {
           id: "remote_2",

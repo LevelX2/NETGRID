@@ -596,6 +596,9 @@ describe("SemanticRuntimeDebug", () => {
         "plan_portfolio_backgrounds:runner.build_credit_bank",
         "plan_portfolio_background_lifecycles:runner.build_credit_bank=dormant",
       ],
+      planActionContributionsUsed: [
+        "plan_action_contribution_multi_plan:install-breaker:true",
+      ],
     };
 
     const items = semanticRuntimeDebugTacticalPlanItems(runtime);
@@ -627,6 +630,9 @@ describe("SemanticRuntimeDebug", () => {
     );
     expect(items).toContain(
       "plan_portfolio_used:plan_portfolio_background_lifecycles:runner.build_credit_bank=dormant",
+    );
+    expect(items).toContain(
+      "plan_action_contribution_used:plan_action_contribution_multi_plan:install-breaker:true",
     );
     expect(items).toEqual(
       expect.arrayContaining([

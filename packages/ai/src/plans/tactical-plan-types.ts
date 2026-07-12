@@ -147,6 +147,7 @@ export type PlanBlockerKind =
   | "missing_credits"
   | "missing_legal_action"
   | "missing_remote_protection"
+  | "central_protection_floor"
   | "timing_window_unavailable"
   | "reactive_window";
 
@@ -335,6 +336,7 @@ export type PlanStepMappingResult = {
 export type TacticalPlanRuntimeResult = {
   planPortfolio?: PlanPortfolioSnapshot;
   planPortfolioUsed?: string[];
+  planActionContributionsUsed?: string[];
   previousPlan?: TacticalPlanMemorySnapshot;
   deckCapabilitiesUsed?: string[];
   strategicIntentStateUsed?: string[];
