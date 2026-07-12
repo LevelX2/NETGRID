@@ -1,6 +1,7 @@
 import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "./action-semantic-candidate";
 import type {
+  BreakerCapability,
   BreakerCoverageKind,
   DeckCapabilityProfile,
 } from "./deck-capabilities";
@@ -179,6 +180,13 @@ type PersistentFunctionalProfile = {
   searchSupport: boolean;
   actionGatedUtility: boolean;
   absoluteNonStackable: boolean;
+};
+
+type BreakerVariantAssessment = {
+  supported: boolean;
+  advantages: string[];
+  blockers: string[];
+  evidence: string[];
 };
 
 const AI_HINTS = createAiHintsByCard();
@@ -537,6 +545,11 @@ function evaluateRunnerPersistentInstall(
   const installedSameFunctionalGroupCount = installedProfiles.filter(
     (installed) => persistentProfilesOverlap(profile, installed),
   ).length;
+  const breakerVariant = breakerVariantAssessment(
+    params,
+    context.card,
+    profile,
+  );
   const stackabilityClass = stackabilityClassForPersistentInstall(
     params,
     profile,
@@ -554,6 +567,7 @@ function evaluateRunnerPersistentInstall(
     installedSameDefinitionCount,
     installedSameFunctionalGroupCount,
     currentNeed,
+    breakerVariant,
   });
   const duplicateRole = duplicateRoleForPersistentInstall({
     params,
@@ -563,6 +577,7 @@ function evaluateRunnerPersistentInstall(
     installedSameDefinitionCount,
     installedSameFunctionalGroupCount,
     currentNeed,
+    breakerVariant,
   });
   const installCost = Math.max(0, context.installOrPlayCost ?? actionCreditCost(action) ?? 0);
   const creditsAfterInstall = params.input.playerView.own.credits - installCost;
@@ -661,6 +676,7 @@ function evaluateRunnerPersistentInstall(
       displacementPenalty,
       finalInstallFit,
       role,
+      breakerVariantEvidence: breakerVariant.evidence,
     }),
   };
 }
@@ -1419,6 +1435,146 @@ function breakerCoverageOverlaps(
   return left.some((coverage) => rightCoverage.has(coverage));
 }
 
+function breakerVariantAssessment(
+  params: EvaluateRunnerHandDevelopmentParams,
+  card: VisibleCard,
+  profile: PersistentFunctionalProfile,
+): BreakerVariantAssessment {
+  const inventory = params.deckCapabilities?.runner?.breakerInventory;
+  const matrix = params.deckCapabilities?.runner?.breakerCoverageMatrix;
+  const candidate = card.definitionId
+    ? inventory?.find((entry) => entry.cardId === card.definitionId)
+    : undefined;
+  const installedCapabilities = (params.input.playerView.own.rig ?? [])
+    .filter((installed) => installed.known !== false && installed.definitionId)
+    .filter((installed) => {
+      const installedProfile = persistentFunctionalProfileForCard(
+        installed,
+        signalsForCard(installed, []).text,
+      );
+      return concreteBreakerCoverageOverlaps(
+        profile.breakerCoverage,
+        installedProfile.breakerCoverage,
+      );
+    })
+    .map((installed) =>
+      inventory?.find((entry) => entry.cardId === installed.definitionId),
+    )
+    .filter((entry): entry is BreakerCapability => entry !== undefined);
+  const advantages = candidate
+    ? sortedUnique(
+        installedCapabilities.flatMap((installed) =>
+          breakerVariantAdvantages(candidate, installed),
+        ),
+      )
+    : [];
+  const strategyAligned =
+    params.strategicIntent?.confidence !== "low" &&
+    (params.strategicIntent?.setupEngine.includes("runner.rig_first") === true ||
+      params.strategicIntent?.setupEngine.includes(
+        "runner.search_breaker_setup",
+      ) === true);
+  const deckContainsIntentionalPair =
+    (candidate?.quantityKnownInDeck ?? 0) > 0 &&
+    installedCapabilities.some(
+      (installed) =>
+        installed.cardId !== candidate?.cardId && installed.quantityKnownInDeck > 0,
+    );
+  const pendingPrimaryCoverage = matrix
+    ? (["wall", "code_gate", "sentry"] as const).filter((coverage) => {
+        const state = matrix[coverage];
+        return (
+          !state.installed &&
+          (state.inHand || state.inDeckKnown) &&
+          !profile.breakerCoverage.includes(coverage)
+        );
+      })
+    : [];
+  const blockers = sortedUnique([
+    ...(profile.breakerCoverage.length === 0
+      ? ["candidate_not_breaker"]
+      : []),
+    ...(!candidate ? ["candidate_missing_from_deck_inventory"] : []),
+    ...(installedCapabilities.length === 0
+      ? ["no_overlapping_installed_breaker_profile"]
+      : []),
+    ...(!deckContainsIntentionalPair
+      ? ["deck_does_not_express_breaker_pair"]
+      : []),
+    ...(!strategyAligned ? ["strategy_does_not_support_rig_variants"] : []),
+    ...(advantages.length === 0 ? ["no_concrete_variant_advantage"] : []),
+    ...pendingPrimaryCoverage.map(
+      (coverage) => `primary_coverage_not_installed:${coverage}`,
+    ),
+  ]);
+  return {
+    supported: blockers.length === 0,
+    advantages,
+    blockers,
+    evidence: [
+      `breaker_variant_supported:${blockers.length === 0}`,
+      `breaker_variant_advantages:${advantages.join(",") || "none"}`,
+      `breaker_variant_blockers:${blockers.join(",") || "none"}`,
+      `breaker_variant_deck_pair:${deckContainsIntentionalPair}`,
+      `breaker_variant_strategy_aligned:${strategyAligned}`,
+    ],
+  };
+}
+
+function concreteBreakerCoverageOverlaps(
+  left: readonly BreakerCoverageKind[],
+  right: readonly BreakerCoverageKind[],
+): boolean {
+  if (left.includes("universal") || right.includes("universal")) return true;
+  const concrete = new Set<BreakerCoverageKind>([
+    "wall",
+    "code_gate",
+    "sentry",
+    "ap",
+    "trace",
+  ]);
+  return left.some((coverage) =>
+    concrete.has(coverage) && right.includes(coverage),
+  );
+}
+
+function breakerVariantAdvantages(
+  candidate: BreakerCapability,
+  installed: BreakerCapability,
+): string[] {
+  return [
+    ...(lowerKnownValue(candidate.breakCost, installed.breakCost)
+      ? ["lower_break_cost"]
+      : []),
+    ...(lowerKnownValue(candidate.pumpCost, installed.pumpCost)
+      ? ["lower_pump_cost"]
+      : []),
+    ...(higherKnownValue(candidate.baseStrength, installed.baseStrength)
+      ? ["higher_base_strength"]
+      : []),
+    ...(candidate.risks.length < installed.risks.length
+      ? ["lower_risk"]
+      : []),
+    ...(candidate.restrictions.length < installed.restrictions.length
+      ? ["fewer_restrictions"]
+      : []),
+  ];
+}
+
+function lowerKnownValue(
+  candidate: number | undefined,
+  installed: number | undefined,
+): boolean {
+  return candidate !== undefined && installed !== undefined && candidate < installed;
+}
+
+function higherKnownValue(
+  candidate: number | undefined,
+  installed: number | undefined,
+): boolean {
+  return candidate !== undefined && installed !== undefined && candidate > installed;
+}
+
 function stackabilityClassForPersistentInstall(
   params: EvaluateRunnerHandDevelopmentParams,
   profile: PersistentFunctionalProfile,
@@ -1469,6 +1625,7 @@ function capabilityDeltaForPersistentInstall(params: {
   installedSameDefinitionCount: number;
   installedSameFunctionalGroupCount: number;
   currentNeed: RunnerHandDevelopmentCurrentNeed;
+  breakerVariant: BreakerVariantAssessment;
 }): RunnerPersistentInstallCapabilityDelta {
   if (
     params.profile.absoluteNonStackable &&
@@ -1508,6 +1665,7 @@ function capabilityDeltaForPersistentInstall(params: {
     }
     return "new_coverage";
   }
+  if (params.breakerVariant.supported) return "cost_upgrade";
   if (
     params.stackabilityClass === "cumulative_capacity" &&
     cumulativeNeedLevel(params.params, params.profile) !== "low"
@@ -1538,6 +1696,7 @@ function duplicateRoleForPersistentInstall(params: {
   installedSameDefinitionCount: number;
   installedSameFunctionalGroupCount: number;
   currentNeed: RunnerHandDevelopmentCurrentNeed;
+  breakerVariant: BreakerVariantAssessment;
 }): RunnerPersistentInstallDuplicateRole {
   if (
     params.installedSameDefinitionCount === 0 &&
@@ -1556,6 +1715,7 @@ function duplicateRoleForPersistentInstall(params: {
   if (
     params.capabilityDelta === "risk_reduction" ||
     params.capabilityDelta === "stable_upgrade" ||
+    params.capabilityDelta === "cost_upgrade" ||
     params.capabilityDelta === "new_coverage" ||
     params.capabilityDelta === "synergy_support"
   ) {
@@ -1569,7 +1729,10 @@ function duplicateRoleForPersistentInstall(params: {
   }
   if (
     params.capabilityDelta === "backup_only" &&
-    params.currentNeed === "acute"
+    params.currentNeed === "acute" &&
+    !params.breakerVariant.blockers.some((blocker) =>
+      blocker.startsWith("primary_coverage_not_installed:"),
+    )
   ) {
     return "emergency_redundancy";
   }
@@ -1801,6 +1964,7 @@ function persistentInstallEvidence(params: {
   displacementPenalty: number;
   finalInstallFit: number;
   role: RunnerHandDevelopmentRole;
+  breakerVariantEvidence: readonly string[];
 }): string[] {
   return [
     `persistent_install_role:${params.role}`,
@@ -1810,6 +1974,7 @@ function persistentInstallEvidence(params: {
     `stackability_class:${params.stackabilityClass}`,
     `capability_delta:${params.capabilityDelta}`,
     `duplicate_role:${params.duplicateRole}`,
+    ...params.breakerVariantEvidence,
     `install_cost:${params.installCost}`,
     `credits_after_install:${params.creditsAfterInstall}`,
     `hand_after_install:${params.handAfterInstall}`,

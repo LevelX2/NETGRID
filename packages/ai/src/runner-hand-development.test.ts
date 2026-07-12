@@ -17,6 +17,7 @@ import {
 } from "./runner-strategic-intent";
 import { discardKeepScore } from "./runtime/discard-keep-score";
 import { selectedSearchChoiceOptionIds } from "./runtime/search-choice-option";
+import type { DeckCapabilityProfile } from "./deck-capabilities";
 
 describe("RunnerHandDevelopmentEvaluation", () => {
   it("classifies central access payoff from own hand without leaking card identity in redacted facts", () => {
@@ -545,6 +546,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
       },
     });
     expect(evaluation.persistentInstallEvaluation?.finalInstallFit).toBeGreaterThan(0);
+
   });
 
   it("bounds persistent breaker coverage terms to exact tokens", () => {
@@ -854,6 +856,80 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     });
     expect(evaluation.persistentInstallEvaluation?.finalInstallFit).toBeLessThan(
       0,
+    );
+  });
+
+  it("allows a deck-supported cheaper breaker variant after primary coverage is complete", () => {
+    const dwarf = visibleCard("dwarf-variant", {
+      definitionId: "onr_v1_021_dwarf",
+      title: "Dwarf",
+      type: "program",
+      subtypes: ["icebreaker"],
+      installCost: 0,
+      memoryCost: 1,
+      rulesText: "1 credit: Break wall subroutine. 1 credit: +1 strength.",
+    });
+    const pileDriver = visibleCard("pile-driver-installed", {
+      definitionId: "onr_v1_047_pile-driver",
+      title: "Pile Driver",
+      type: "program",
+      subtypes: ["icebreaker", "noisy"],
+      memoryCost: 1,
+      rulesText: "3 credits: Break up to four wall subroutines.",
+    });
+    const input = runnerInput({
+      credits: 8,
+      hand: [dwarf, visibleCard("buffer", { type: "event" })],
+      rig: [pileDriver],
+      memoryUsed: 1,
+      memoryLimit: 4,
+      legalActions: [installAction("install-dwarf-variant", dwarf, 0)],
+    });
+
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({
+        input,
+        deckCapabilities: breakerVariantDeckCapabilities(),
+        strategicIntent: strategicIntent({
+          setupEngine: ["runner.rig_first"],
+        }),
+      }),
+      dwarf.instanceId,
+    );
+
+    expect(evaluation.persistentInstallEvaluation).toMatchObject({
+      capabilityDelta: "cost_upgrade",
+      duplicateRole: "useful_backup",
+    });
+    expect(evaluation.persistentInstallEvaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "breaker_variant_supported:true",
+        expect.stringContaining("lower_break_cost"),
+      ]),
+    );
+    expect(evaluation.persistentInstallEvaluation?.finalInstallFit).toBeGreaterThan(0);
+
+    const incompleteRig = breakerVariantDeckCapabilities();
+    incompleteRig.runner!.breakerCoverageMatrix.code_gate.installed = false;
+    incompleteRig.runner!.breakerCoverageMatrix.code_gate.inHand = true;
+    const blockedVariant = findByInstance(
+      evaluateRunnerHandDevelopment({
+        input,
+        deckCapabilities: incompleteRig,
+        strategicIntent: strategicIntent({
+          setupEngine: ["runner.rig_first"],
+        }),
+      }),
+      dwarf.instanceId,
+    );
+    expect(blockedVariant.persistentInstallEvaluation).toMatchObject({
+      capabilityDelta: "backup_only",
+      duplicateRole: "redundant_duplicate",
+    });
+    expect(blockedVariant.persistentInstallEvaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("primary_coverage_not_installed:code_gate"),
+      ]),
     );
   });
 
@@ -1242,6 +1318,91 @@ function runnerInput(params: {
     actionNumber: 1,
     profileId: "runner-ai-test",
   };
+}
+
+function breakerVariantDeckCapabilities(): DeckCapabilityProfile {
+  const state = (
+    coverage: string,
+    installed: boolean,
+  ) => ({
+    coverage,
+    inDeckKnown: true,
+    inHand: false,
+    installed,
+    searchableNow: false,
+    drawOnly: false,
+    missing: false,
+    bestKnownCards: [],
+    blockers: [],
+  });
+  return {
+    schemaVersion: "deck-capability-profile-v1",
+    side: "runner",
+    runner: {
+      breakerInventory: [
+        {
+          cardId: "onr_v1_021_dwarf",
+          title: "Dwarf",
+          coverage: ["wall"],
+          breakCost: 1,
+          pumpCost: 1,
+          risks: [],
+          restrictions: [],
+          quantityKnownInDeck: 2,
+          locations: ["in_hand"],
+          confidence: "high",
+          evidence: ["test_deck_variant"],
+        },
+        {
+          cardId: "onr_v1_047_pile-driver",
+          title: "Pile Driver",
+          coverage: ["wall"],
+          breakCost: 3,
+          pumpCost: 1,
+          risks: ["stealth_loss"],
+          restrictions: [],
+          quantityKnownInDeck: 2,
+          locations: ["installed"],
+          confidence: "high",
+          evidence: ["test_deck_variant"],
+        },
+      ],
+      breakerCoverageMatrix: {
+        wall: state("wall", true),
+        code_gate: state("code_gate", true),
+        sentry: state("sentry", true),
+        ap: state("ap", false),
+        trace: state("trace", false),
+        universal: state("universal", false),
+        subtype_limited: state("subtype_limited", false),
+        special: state("special", false),
+      },
+      searchAccess: {
+        tools: [],
+        canSearchProgramsNow: false,
+        canSearchBreakersNow: false,
+        evidence: [],
+      },
+      economyBankTools: [],
+      memoryProfile: {
+        memoryUsed: 1,
+        memoryLimit: 4,
+        memoryAvailable: 3,
+        memoryToolsKnown: 0,
+        missingMemoryPressure: false,
+        evidence: [],
+      },
+      attackPlanProfile: {
+        centralPressureToolsKnown: 0,
+        remoteContestToolsKnown: 0,
+        setupToolsKnown: 2,
+        evidence: [],
+      },
+    },
+    missingCapabilities: [],
+    confidence: "high",
+    evidence: ["test_breaker_variant_profile"],
+  } as DeckCapabilityProfile;
 }
 
 function strategicIntent(
