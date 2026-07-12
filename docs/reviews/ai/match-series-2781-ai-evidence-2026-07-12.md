@@ -68,4 +68,3 @@ keine Duplikat- oder Grenznutzenkomponente.
 - Die nach dem separaten AI-Boon-Fix ausgefuehrten R&D-Runs in Turn 30 und 32
   brechen und passieren das sichtbare ICE korrekt. Dieser Pfad ist kein offener
   Punkt dieses Prozesses.
-
