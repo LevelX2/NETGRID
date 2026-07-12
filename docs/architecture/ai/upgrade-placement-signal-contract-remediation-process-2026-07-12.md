@@ -2,7 +2,7 @@
 
 ## Status
 
-`in_progress`
+`ready_for_integration`
 
 ## Quelle und Evidence
 
