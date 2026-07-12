@@ -100,7 +100,8 @@ Vertrag.
 
 - Eingang: P1 abgeschlossen.
 - Arbeit: fokussierte KI-Abdeckung ergänzen, die für Bodyweight kein
-  wiederkehrendes Link-Budget annimmt.
+  wiederkehrendes Link-Budget annimmt. Ein sichtbarer Hunter-Trace muss mit
+  Bodyweight und nur zwei normalen Credits weiterhin als nicht abdeckbar gelten.
 - Kernartefakt: passender Test im AI-Paket.
 - Checks: fokussierter AI-Test, AI-Typecheck, `git diff --check`.
 - Done-Gate: Die KI kalkuliert kein Phantom-Link-Budget für Bodyweight.

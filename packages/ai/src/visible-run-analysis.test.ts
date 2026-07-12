@@ -290,6 +290,27 @@ describe("visible run analysis trace hazards", () => {
     });
   });
 
+  it("does not count Bodyweight Data Creche as recurring trace-link budget", () => {
+    const assessment = assessKnownRezzedIcePath(
+      [hunterTraceTagIce("rd-hunter")],
+      [bodyweightDataCreche("runner-bodyweight")],
+      2,
+    );
+
+    expect(assessment).toMatchObject({
+      blocked: false,
+      canReachAccess: true,
+      visibleTraceTagHazardUnavoidable: true,
+      unavoidableVisibleIceHazardCount: 1,
+    });
+    expect(assessment.visibleIceRunHazards?.[0]).toMatchObject({
+      kind: "trace_tag",
+      runnerTraceCapacity: 2,
+      baseTraceCovered: false,
+      unavoidable: true,
+    });
+  });
+
   it("distinguishes base trace coverage from visible Corp max coverage", () => {
     const assessment = assessKnownRezzedIcePath(
       [hunterTraceTagIce("rd-hunter")],
@@ -767,6 +788,17 @@ function accessThroughAlpha(instanceId: string): VisibleCard {
     subtypes: ["link"],
     known: true,
     baseLink: 9,
+  };
+}
+
+function bodyweightDataCreche(instanceId: string): VisibleCard {
+  return {
+    instanceId,
+    definitionId: "onr_v1_123_bodyweight-data-creche",
+    title: "Bodyweight Data Creche",
+    type: "hardware",
+    subtypes: ["deck"],
+    known: true,
   };
 }
 
