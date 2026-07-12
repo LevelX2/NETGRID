@@ -1279,12 +1279,26 @@ function shellTradersTargetTitle(action: LegalAction): string | null {
 }
 
 function pumpBreakerActionLabel(action: LegalAction): string {
+  const strengthAmount = pumpBreakerStrengthAmount(action);
   const breakerName =
     breakerNameFromActionLabel(action.label, "pumpen") ??
-    breakerNameFromActionLabel(action.label, "stärke \\+1");
+    breakerNameFromActionLabel(action.label, "stärke \\+\\d+");
   return breakerName
-    ? `Stärke +1 (${normalizeVisibleTerms(breakerName)})`
-    : "Stärke +1";
+    ? `Stärke +${strengthAmount} (${normalizeVisibleTerms(breakerName)})`
+    : `Stärke +${strengthAmount}`;
+}
+
+function pumpBreakerStrengthAmount(action: LegalAction): number {
+  for (const value of [
+    action.payload?.pumpStrengthAmount,
+    action.payload?.pumpAmount,
+  ]) {
+    if (typeof value === "number" && Number.isInteger(value) && value >= 0) {
+      return value;
+    }
+  }
+  const labelAmount = /stärke\s*\+\s*(\d+)/i.exec(action.label)?.[1];
+  return labelAmount !== undefined ? Number(labelAmount) : 1;
 }
 
 function breakSubroutineActionLabel(action: LegalAction): string {
@@ -2642,7 +2656,7 @@ function compactRunWindowBreakerLabel(
 ): string {
   const breakerTitle = sourceCardTitleForAction(view, action);
   if (action.type === "pump_breaker") {
-    return `${breakerTitle ? `${breakerTitle} ` : ""}+1 Stärke`;
+    return `${breakerTitle ? `${breakerTitle} ` : ""}+${pumpBreakerStrengthAmount(action)} Stärke`;
   }
   const subroutineLabel = breakSubroutineTargetLabel(action);
   return `${breakerTitle ? `${breakerTitle}: ` : ""}${subroutineLabel}`;

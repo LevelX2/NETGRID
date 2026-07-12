@@ -3908,6 +3908,46 @@ describe("V1.0.6 resource and card-display helpers", () => {
     ]);
   });
 
+  it("shows the actual strength increase for Matador pump actions", () => {
+    const matador = card("matador_1", "Matador", "program");
+    const running = view("runner", {
+      own: {
+        ...view("runner").own,
+        rig: [matador],
+      },
+      run: {
+        attackedServerId: "hq",
+        phase: "encounter_ice",
+        position: { kind: "ice", serverId: "hq", iceIndex: 0 },
+        encounteredIce: card("ice_1", "Vacuum Link", "ice"),
+        successful: false,
+      },
+    });
+    const pump: LegalAction = {
+      ...legalAction(
+        "runner",
+        "pump_breaker",
+        "matador_1",
+        "Matador: Stärke +5",
+        { breakerId: "matador_1", iceId: "ice_1" },
+        "run.encounter_ice",
+      ),
+      costs: [{ credits: 3 }],
+    };
+
+    expect(actionButtonLabel(pump)).toBe("Stärke +5 (Matador)");
+    expect(contextualCardActionLabel(pump)).toBe("Stärke +5");
+    expect(runWindowActionButtonLabel(running, pump)).toBe(
+      "Matador +5 Stärke",
+    );
+    expect(runBreakerActionHint(running, [pump])).toBe(
+      "Eisbrecher: Matador +5 Stärke",
+    );
+    expect(actionCostChips(pump)).toEqual([
+      { kind: "credit", amount: 3, label: "3 Credits" },
+    ]);
+  });
+
   it("does not show a false missing-breaker hint in the corp encounter view", () => {
     const codecracker: VisibleCard = {
       ...card("codecracker_1", "Codecracker", "program"),
