@@ -2,10 +2,10 @@
 
 ## Status
 
-Aktiv. Die vorletzte abgeschlossene Side-Swap-Serie wird auf dem aktuellen
-KI-Stand geprüft. Historische Auffälligkeiten werden nur dann umgesetzt, wenn
-ein spielgleicher Decision-Checkpoint sie weiterhin als
-`behavior_regression` reproduziert.
+P0 bis P3 abgeschlossen, P4 aktiv. Von den historischen und neu abgeleiteten
+Auffälligkeiten bleibt genau der zentrale Runner-Zielkonflikt bei Decision 32
+als spielgleiche `behavior_regression` reproduzierbar. Die rote Ziel-Evidence
+und die grüne R&D-Gegenprobe sind vor jeder Verhaltenskorrektur versioniert.
 
 ## Quelle
 
