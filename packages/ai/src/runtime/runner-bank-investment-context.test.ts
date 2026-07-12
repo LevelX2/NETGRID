@@ -334,6 +334,53 @@ describe("createRunnerBankInvestmentContext", () => {
       false,
     );
   });
+
+  it("projects install, urgent run and first load when all three clicks remain", () => {
+    const context = createContext({
+      previousPlan: () => undefined,
+      hintEffectsForDefinition: (definitionId) =>
+        definitionId === "custom-runner-credit-bank"
+          ? [{ kind: "economy", target: "economy.temporary_resource_bank" }]
+          : [],
+      actionCreditCost: (action) =>
+        action.type === "install_card" ? 3 : 0,
+    });
+    const bank = visibleRunnerCard("custom-runner-credit-bank");
+    const install = runnerAction("install_card", {
+      actionId: "install-bank",
+      source: bank.instanceId,
+    });
+    const run = runnerAction("start_run", {
+      actionId: "run-known-agenda",
+      serverId: "hq",
+    });
+    const input = runnerInput({
+      credits: 9,
+      clicks: 3,
+      hand: [bank],
+      hqRoot: [
+        visibleRunnerCard("known-agenda", {
+          owner: "corp",
+          controller: "corp",
+          type: "agenda",
+        }),
+      ],
+      rig: [],
+      legalActions: [install, run],
+    });
+
+    expect(
+      context.runnerBankInvestmentCommitmentEvidence(input, install),
+    ).toEqual(
+      expect.arrayContaining([
+        "bankCommitmentStatus:install_ready",
+        "bankProjectedCreditsAfterInstall:6",
+        "bankProjectedClicksAfterInstall:2",
+        "bankProjectedReservedRunClicks:1",
+        "bankProjectedLoadThisTurn:true",
+      ]),
+    );
+  });
 });
 
 function createContext(
@@ -374,6 +421,9 @@ function runnerInput(input: {
   rig: VisibleCard[];
   legalActions: LegalAction[];
   credits?: number;
+  clicks?: number;
+  hand?: VisibleCard[];
+  hqRoot?: VisibleCard[];
 }): AiDecisionInput {
   return {
     side: "runner",
@@ -386,9 +436,9 @@ function runnerInput(input: {
       own: {
         identity: visibleRunnerCard("runner-identity"),
         credits: input.credits ?? 5,
-        clicks: 4,
+        clicks: input.clicks ?? 4,
         agendaPoints: 0,
-        gripOrHq: [],
+        gripOrHq: input.hand ?? [],
         stackOrRdCount: 20,
         heapOrArchives: [],
         scoreArea: [],
@@ -413,7 +463,7 @@ function runnerInput(input: {
           id: "hq",
           label: "HQ",
           ice: [],
-          root: [],
+          root: input.hqRoot ?? [],
         },
       ],
       publicEvents: [],

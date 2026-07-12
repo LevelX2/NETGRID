@@ -75,7 +75,10 @@ export function runnerBankInvestmentCommitmentScoreComponents(
   }
 
   if (dependencies.isInstallAction(input, action)) {
-    const value = assessment.status === "install_deferred" ? -1600 : 350;
+    const value =
+      assessment.status === "install_deferred"
+        ? -1600
+        : Math.max(350, assessment.buildBankPriority);
     return [
       {
         key: "runner_bank_install_commitment",

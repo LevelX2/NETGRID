@@ -2201,6 +2201,9 @@ describe("Semantic AI runtime cutover", () => {
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
         credits: 0,
       }),
+      legalAction("draw", "runner", "draw_card", "Draw", {
+        credits: 0,
+      }),
     ]);
     input.playerView.own.credits = 5;
     input.playerView.own.clicks = 4;
@@ -2886,14 +2889,15 @@ describe("Semantic AI runtime cutover", () => {
         "runner",
         "install_card",
         "Install Broker",
-        { credits: 0 },
+        { credits: 3 },
         { source: "onr_v1_154_broker" },
       ),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
         credits: 0,
       }),
     ]);
-    input.playerView.own.credits = 1;
+    input.playerView.own.credits = 3;
+    input.playerView.own.clicks = 1;
     input.playerView.own.gripOrHq = [
       visibleCard("onr_v1_154_broker", "runner", "resource"),
     ];

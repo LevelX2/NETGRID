@@ -41,6 +41,15 @@ type RunnerBankInvestmentCommitmentAssessment = {
   runOverride?: string;
   buildBankPriority: number;
   cashOutPriority: number;
+  installProjection?: RunnerBankInstallProjection;
+};
+
+type RunnerBankInstallProjection = {
+  plausible: boolean;
+  creditsAfterInstall: number;
+  clicksAfterInstall: number;
+  reservedRunClicks: number;
+  canLoadAfterInstallThisTurn: boolean;
 };
 
 type RunnerBankDefinitionLike = {
@@ -158,6 +167,14 @@ export function createRunnerBankInvestmentContext(
       `bankConcreteFundingNeed:${assessment.concreteFundingNeed}`,
       `bankCriticalReserve:${assessment.criticalReserve}`,
       `bankCashOutThreshold:${assessment.cashOutThresholdMet}`,
+      ...(assessment.installProjection
+        ? [
+            `bankProjectedCreditsAfterInstall:${assessment.installProjection.creditsAfterInstall}`,
+            `bankProjectedClicksAfterInstall:${assessment.installProjection.clicksAfterInstall}`,
+            `bankProjectedReservedRunClicks:${assessment.installProjection.reservedRunClicks}`,
+            `bankProjectedLoadThisTurn:${assessment.installProjection.canLoadAfterInstallThisTurn}`,
+          ]
+        : []),
       ...(isRunnerBankBuildAction(input, action) &&
       assessment.buildBankPriority > 0
         ? [`why_bank_build_over_run:${assessment.status}`]
@@ -275,10 +292,11 @@ export function createRunnerBankInvestmentContext(
     }
 
     if (isRunnerBankInstallAction(input, action)) {
-      const plausibleFollowup = runnerBankInstallHasPlausibleFollowup(
+      const installProjection = runnerBankInstallProjection(
         input,
         action,
       );
+      const plausibleFollowup = installProjection.plausible;
       return {
         active: plausibleFollowup,
         status: plausibleFollowup ? "install_ready" : "install_deferred",
@@ -293,8 +311,9 @@ export function createRunnerBankInvestmentContext(
         concreteFundingNeed,
         criticalReserve,
         cashOutThresholdMet,
+        installProjection,
         ...(runOverride ? { runOverride } : {}),
-        buildBankPriority: plausibleFollowup ? 350 : -1600,
+        buildBankPriority: plausibleFollowup ? 900 : -1600,
         cashOutPriority: 0,
       };
     }
@@ -711,26 +730,39 @@ export function createRunnerBankInvestmentContext(
     });
   }
 
-  function runnerBankInstallHasPlausibleFollowup(
+  function runnerBankInstallProjection(
     input: AiDecisionInput,
     action: LegalAction,
-  ): boolean {
-    if (input.playerView.own.clicks < 2) return false;
-    if (
-      input.legalActions.some(
-        (candidate) =>
-          candidate.type === "start_run" &&
-          Boolean(runnerBankCommitmentRunOverride(input, candidate)),
-      )
+  ): RunnerBankInstallProjection {
+    const installClickCost = Math.max(
+      1,
+      action.costs?.reduce((sum, cost) => sum + (cost.clicks ?? 0), 0) ?? 0,
+    );
+    const reservedRunClicks = input.legalActions.some(
+      (candidate) =>
+        candidate.type === "start_run" &&
+        Boolean(runnerBankCommitmentRunOverride(input, candidate)),
     )
-      return false;
-
+      ? 1
+      : 0;
     const creditsAfterInstall =
       input.playerView.own.credits - dependencies.actionCreditCost(action);
-    if (creditsAfterInstall < 0) return false;
-    if (creditsAfterInstall >= 4 && !runnerBankHasConcreteFundingNeed(input))
-      return true;
-    return input.playerView.own.credits >= 3;
+    const clicksAfterInstall =
+      input.playerView.own.clicks - installClickCost;
+    const canLoadAfterInstallThisTurn =
+      clicksAfterInstall - reservedRunClicks >= 1;
+    const preservesConcreteFunding =
+      !runnerBankHasConcreteFundingNeed(input) || creditsAfterInstall >= 4;
+    return {
+      plausible:
+        creditsAfterInstall >= 0 &&
+        canLoadAfterInstallThisTurn &&
+        preservesConcreteFunding,
+      creditsAfterInstall,
+      clicksAfterInstall,
+      reservedRunClicks,
+      canLoadAfterInstallThisTurn,
+    };
   }
 
   function runnerBankCommitmentRunOverride(
