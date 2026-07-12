@@ -12,7 +12,7 @@ import {
 } from "../tactical-plans";
 
 describe("tacticalPlanMappedChoice", () => {
-  it("promotes an acute one-card hand draw to the plan-override candidate", () => {
+  it("keeps the general override candidate score-based before a mapped run is known", () => {
     const draw = legalAction("draw", "draw_card");
     const gain = legalAction("gain", "gain_credit");
     const drawChoice = choice(draw, 1543, [], {
@@ -26,7 +26,7 @@ describe("tacticalPlanMappedChoice", () => {
       { planAlternatives: [] } as never,
     );
 
-    expect(override?.action.actionId).toBe("draw");
+    expect(override?.action.actionId).toBe("gain");
   });
 
   it("lets an acute one-card hand draw interrupt a speculative run plan", () => {

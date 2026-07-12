@@ -40,12 +40,6 @@ export function bestSemanticRuntimeChoiceForTacticalPlanOverride(
   const viableChoices = choices.filter(
     (choice) => !tacticalPlanBlocksSemanticChoice(planRuntime, choice),
   );
-  const acuteHandBufferChoices = viableChoices.filter(
-    semanticRuntimeChoiceIsAcuteHandBufferDraw,
-  );
-  if (acuteHandBufferChoices.length > 0) {
-    return bestSemanticRuntimeChoice(acuteHandBufferChoices);
-  }
   return bestSemanticRuntimeChoice(viableChoices);
 }
 
@@ -69,6 +63,23 @@ export function tacticalPlanMappedChoice(
     .filter((choice): choice is SemanticRuntimeChoice => Boolean(choice));
   const mappedChoice = bestPlanCompatibleSemanticChoice(mappedChoices, mapping);
   if (!mappedChoice) return {};
+  if (
+    semanticRuntimeChoiceIsProjectedRun(mappedChoice) &&
+    !mappedPlanHasImmediateVisibleRunPayoff(mapping.plan, mappedChoice)
+  ) {
+    const acuteHandBufferOverride = bestSemanticRuntimeChoice(
+      choices.filter(
+        (choice) =>
+          !choice.exclusion && semanticRuntimeChoiceIsAcuteHandBufferDraw(choice),
+      ),
+    );
+    if (
+      acuteHandBufferOverride &&
+      !semanticRuntimeChoiceHasPositiveDevelopmentCommitment(overrideChoice)
+    ) {
+      overrideChoice = acuteHandBufferOverride;
+    }
+  }
   if (
     overrideChoice &&
     overrideChoice.action.actionId !== mappedChoice.action.actionId &&
@@ -627,6 +638,20 @@ function semanticRuntimeChoiceIsAcuteHandBufferDraw(
     component.reason ?? "",
   );
   return handMatch !== null && Number(handMatch[1] ?? Number.NaN) <= 1;
+}
+
+function semanticRuntimeChoiceHasPositiveDevelopmentCommitment(
+  choice: SemanticRuntimeChoice | undefined,
+): boolean {
+  if (!choice) return false;
+  return choice.scoreBreakdown.some(
+    (component) =>
+      component.value > 0 &&
+      [
+        "runner_bank_investment_commitment",
+        "runner_no_run_economy_setup_hold",
+      ].includes(component.key),
+  );
 }
 
 function semanticRuntimeChoiceHasAllowedLoanInterrupt(

@@ -76,6 +76,11 @@ describe("Deck strategy runtime vertical slices", () => {
       snapshot: runnerCentralPressureSnapshot(),
       actions: [runRd, draw],
       credits: 6,
+      gripOrHq: [
+        visibleCard("central-pressure-card-1", "runner", "event"),
+        visibleCard("central-pressure-card-2", "runner", "event"),
+        visibleCard("central-pressure-card-3", "runner", "event"),
+      ],
       servers: [server("hq"), server("rd"), server("archives")],
       targetVector: {
         kind: "central",
