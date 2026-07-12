@@ -79,6 +79,7 @@ export function accessRevealFromLatestEvent(
     events,
   );
   const highlighterStatus = accessHighlighterStatus(event.publicPayload);
+  const progressStatus = accessProgressStatus(event.publicPayload);
   const outcome = accessPresentationOutcomeAfter(events, event, viewerSide);
   return {
     eventId: event.eventId,
@@ -94,6 +95,7 @@ export function accessRevealFromLatestEvent(
       serverLabel,
       accessOrigin,
     ),
+    ...(progressStatus ? { progressStatus } : {}),
     card,
     actions,
     trashStatus:
@@ -153,6 +155,9 @@ export function accessRevealFromCurrentRun(
   const highlighterStatus = accessEvent
     ? accessHighlighterStatus(accessEvent.publicPayload)
     : null;
+  const progressStatus = accessEvent
+    ? accessProgressStatus(accessEvent.publicPayload)
+    : null;
   const accessFollowupStatus = highlighterStatus ?? followupStatus;
   const outcome = accessEvent
     ? accessPresentationOutcomeAfter(events, accessEvent, viewerSide)
@@ -174,6 +179,7 @@ export function accessRevealFromCurrentRun(
       serverLabel,
       accessOrigin,
     ),
+    ...(progressStatus ? { progressStatus } : {}),
     card,
     actions,
     trashStatus:
@@ -688,6 +694,24 @@ function accessHighlighterStatus(
   )
     return null;
   return `Zusätzlicher R&D-Zugriff ${accessIndex + 1} von ${Math.max(accessIndex + 1, effectiveAccessCount)}: Die Korp hat ${highlighterCounterCount} Highlighter-Counter.`;
+}
+
+function accessProgressStatus(payload: Record<string, unknown>): string | null {
+  const accessIndex = payloadNumber(payload, "accessIndex");
+  const effectiveAccessCount = payloadPositiveInteger(
+    payload,
+    "effectiveAccessCount",
+  );
+  if (
+    accessIndex === null ||
+    accessIndex < 0 ||
+    !Number.isInteger(accessIndex) ||
+    effectiveAccessCount === null ||
+    effectiveAccessCount <= 1
+  )
+    return null;
+  const accessNumber = Math.floor(accessIndex) + 1;
+  return `Zugriff ${accessNumber} von ${Math.max(accessNumber, effectiveAccessCount)}`;
 }
 
 function accessRevealDescription(

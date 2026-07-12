@@ -120,6 +120,63 @@ describe("Access outcome presentation", () => {
       description: "Du hast auf eine Karte im Archiv zugegriffen.",
     });
   });
+
+  it("shows generic Rush Hour progress for repeated R&D card definitions", () => {
+    const firstAccess = event("evt_11", {
+      actionType: "access_card",
+      actor: "runner",
+      cardDefinitionId: "onr_v1_237_data-wall",
+      title: "Data Wall",
+      serverLabel: "R&D",
+      accessIndex: 0,
+      baseAccessCount: 4,
+      effectiveAccessCount: 4,
+    });
+    const secondAccess = event("evt_12", {
+      actionType: "access_card",
+      actor: "runner",
+      cardDefinitionId: "onr_v1_307_urban-renewal",
+      title: "Urban Renewal",
+      serverLabel: "R&D",
+      accessIndex: 1,
+      baseAccessCount: 4,
+      effectiveAccessCount: 4,
+    });
+    const thirdAccess = event("evt_13", {
+      actionType: "access_card",
+      actor: "runner",
+      cardDefinitionId: "onr_v1_237_data-wall",
+      title: "Data Wall",
+      serverLabel: "R&D",
+      accessIndex: 2,
+      baseAccessCount: 4,
+      effectiveAccessCount: 4,
+    });
+    const fourthAccess = event("evt_14", {
+      actionType: "access_card",
+      actor: "runner",
+      cardDefinitionId: "onr_v1_307_urban-renewal",
+      title: "Urban Renewal",
+      serverLabel: "R&D",
+      accessIndex: 3,
+      baseAccessCount: 4,
+      effectiveAccessCount: 4,
+    });
+
+    const accesses = [firstAccess, secondAccess, thirdAccess, fourthAccess];
+    expect(
+      accesses.map(
+        (access) =>
+          accessRevealFromLatestEvent(access, {}, [], "runner", accesses)
+            ?.progressStatus,
+      ),
+    ).toEqual([
+      "Zugriff 1 von 4",
+      "Zugriff 2 von 4",
+      "Zugriff 3 von 4",
+      "Zugriff 4 von 4",
+    ]);
+  });
 });
 
 describe("Gypsy Schedule Analyzer reveal review", () => {

@@ -40,6 +40,7 @@ export type AccessReveal = {
   serverTitleLabel: string;
   serverLocationPhrase: string;
   description: string;
+  progressStatus?: string;
   card?: DisplayVisibleCard;
   revealedCards?: DisplayVisibleCard[];
   actions: LegalAction[];
@@ -136,7 +137,7 @@ export function AccessRevealModal({
         ? "HQ Reveal"
         : isSecurityPurgeReveal
           ? "R&D Reveal"
-          : "Zugriff";
+          : reveal.progressStatus ?? "Zugriff";
   const visibleRevealedCards = reveal.revealedCards ?? [];
   const singleRevealedCard =
     visibleRevealedCards.length === 1 ? visibleRevealedCards[0] : null;

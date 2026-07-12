@@ -57,6 +57,7 @@ import type {
   ApiSidePayload,
   LegalAction,
   PlayerView,
+  PublicGameEvent,
   Side,
   VisibleCard,
   Winner,
@@ -83,6 +84,10 @@ import {
   coalesceAccessActionCues,
   interactionPresentationBlocksAi,
 } from "./access-presentation";
+import {
+  appendPendingAccessPresentationEvents,
+  dismissPendingAccessPresentationEvent,
+} from "./access-presentation-queue";
 import {
   ACTION_CUE_POSITION_STORAGE_KEY,
   DEFAULT_CUE_POSITION,
@@ -634,6 +639,8 @@ export default function Page() {
   const [dismissedAccessEventIds, setDismissedAccessEventIds] = useState<
     string[]
   >([]);
+  const [pendingAccessPresentationEvents, setPendingAccessPresentationEvents] =
+    useState<PublicGameEvent[]>([]);
   const [dismissedExposeReviewEventId, setDismissedExposeReviewEventId] =
     useState<string | null>(null);
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
@@ -779,6 +786,7 @@ export default function Page() {
   const resultAudioPrimedRef = useRef(false);
   const lastAudioResultKeyRef = useRef<string | null>(null);
   const lastSeenCueEventIdRef = useRef<string | null>(null);
+  const lastSeenAccessPresentationEventIdRef = useRef<string | null>(null);
   const lastTurnStartAudioStateRef = useRef<TurnStartAudioState | null>(null);
   const lastTurnStartAudioCueKeyRef = useRef<string | null>(null);
   const locallyPlayedActionSoundKeysRef = useRef<Set<string>>(new Set());
@@ -2101,9 +2109,18 @@ export default function Page() {
     ? latestRetainableAccessRevealEvent(payload.eventTail)
     : null;
   const lastDismissedAccessEventId = dismissedAccessEventIds.at(-1) ?? null;
-  const accessRevealEvent = payload
+  const retainedAccessReveal = payload
     ? retainedAccessRevealEvent(payload.eventTail, lastDismissedAccessEventId)
     : null;
+  const queuedAccessRevealEvent =
+    pendingAccessPresentationEvents.find(
+      (event) => !dismissedAccessEventIds.includes(event.eventId),
+    ) ?? null;
+  const accessRevealEvent = queuedAccessRevealEvent ?? retainedAccessReveal;
+  const accessRevealUsesCurrentState = Boolean(
+    accessRevealEvent &&
+    latestAccessRevealEvent?.eventId === accessRevealEvent.eventId,
+  );
   const hqAgendaRevealEvent = payload
     ? retainedHqAgendaRevealEvent(payload.eventTail, dismissedAccessEventIds)
     : null;
@@ -2153,21 +2170,22 @@ export default function Page() {
         payload.side,
       )
     : null;
-  const currentAccessReveal = payload
-    ? accessRevealFromCurrentRun(
-        payload.playerView,
-        catalogDetailsById,
-        payload.legalActions,
-        payload.side,
-        payload.eventTail,
-        latestAccessRevealEvent,
-      )
-    : null;
+  const currentAccessReveal =
+    payload && accessRevealUsesCurrentState
+      ? accessRevealFromCurrentRun(
+          payload.playerView,
+          catalogDetailsById,
+          payload.legalActions,
+          payload.side,
+          payload.eventTail,
+          accessRevealEvent,
+        )
+      : null;
   const retainedEventAccessReveal = payload
     ? accessRevealFromLatestEvent(
         accessRevealEvent ?? undefined,
         catalogDetailsById,
-        payload.legalActions,
+        accessRevealUsesCurrentState ? payload.legalActions : [],
         payload.side,
         payload.eventTail,
       )
@@ -2787,6 +2805,34 @@ export default function Page() {
     lastAudioResultKeyRef.current = resultKey;
     playResultSound(seriesAudioOutcome(resultSummary), audioVolume);
   }, [audioEnabled, audioVolume, resultKey, resultSummary]);
+
+  useEffect(() => {
+    lastSeenAccessPresentationEventIdRef.current =
+      payload?.eventTail.at(-1)?.eventId ?? null;
+    setDismissedAccessEventIds([]);
+    setPendingAccessPresentationEvents([]);
+  }, [payload?.matchId]);
+
+  useEffect(() => {
+    if (!payload) return;
+    const latestId = payload.eventTail.at(-1)?.eventId ?? null;
+    const lastSeen = lastSeenAccessPresentationEventIdRef.current;
+    if (lastSeen === null) {
+      lastSeenAccessPresentationEventIdRef.current = latestId;
+      return;
+    }
+    if (latestId === lastSeen) return;
+    const newEvents = publicEventsAfter(payload.eventTail, lastSeen);
+    lastSeenAccessPresentationEventIdRef.current = latestId;
+    if (newEvents.length === 0) return;
+    setPendingAccessPresentationEvents((current) =>
+      appendPendingAccessPresentationEvents(
+        current,
+        newEvents,
+        dismissedAccessEventIds,
+      ),
+    );
+  }, [payload?.matchId, payload?.eventTail, dismissedAccessEventIds]);
 
   useEffect(() => {
     lastSeenCueEventIdRef.current = payload?.eventTail.at(-1)?.eventId ?? null;
@@ -5971,13 +6017,19 @@ export default function Page() {
                 onAction={submitAction}
                 onChoiceOption={submitChoiceOption}
                 onDamageDismiss={() => setCurrentDamageImpact(null)}
-                onDismiss={() =>
+                onDismiss={() => {
+                  setPendingAccessPresentationEvents((events) =>
+                    dismissPendingAccessPresentationEvent(
+                      events,
+                      accessReveal.eventId,
+                    ),
+                  );
                   setDismissedAccessEventIds((eventIds) =>
                     eventIds.includes(accessReveal.eventId)
                       ? eventIds
                       : [...eventIds, accessReveal.eventId].slice(-30),
-                  )
-                }
+                  );
+                }}
               />
             ) : null}
             {activeMatchIsGame && showExposeReview && exposeReview ? (

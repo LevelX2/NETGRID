@@ -261,4 +261,14 @@ describe("run window layering", () => {
     );
     expect(accessReviewModalSource).toContain("reveal.outcomeStatus");
   });
+
+  it("keeps multiaccess reviews match-scoped and acknowledgment-driven", () => {
+    expect(pageSource).toContain("setDismissedAccessEventIds([])");
+    expect(pageSource).toContain("setPendingAccessPresentationEvents([])");
+    expect(pageSource).toContain("appendPendingAccessPresentationEvents(");
+    expect(pageSource).toContain("dismissPendingAccessPresentationEvent(");
+    expect(accessReviewModalSource).toContain(
+      'reveal.progressStatus ?? "Zugriff"',
+    );
+  });
 });

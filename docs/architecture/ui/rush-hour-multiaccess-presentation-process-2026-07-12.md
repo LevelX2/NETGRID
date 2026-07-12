@@ -19,6 +19,13 @@ vierte Zugriff konnte außerdem verschwinden, weil unmittelbar folgende Events
 (`evt_15` Broker installieren und `evt_16` Zug beenden) die bestehende
 Retention beendeten, bevor der Zugriff bestätigt war.
 
+Der Umsetzungs-Preflight belegte zusätzlich die direkte Ursache für den
+fehlenden dritten Zugriff: Das unmittelbar vorherige erste Serienspiel
+`match_b0080115bddbce23` hatte ebenfalls einen bestätigten Access mit der nur
+matchlokal eindeutigen ID `evt_13`. Der Webclient behielt diese ID beim Wechsel
+in Spiel 2 in `dismissedAccessEventIds`; dadurch wurde der neue Rush-Hour-
+Zugriff `evt_13` fälschlich als bereits bestätigt behandelt.
+
 Der Nutzer hat die direkte Umsetzung nach vorangegangener Analyse und
 Maßnahmenfreigabe mit `$paketprozess-worktree-goal` beauftragt.
 
@@ -39,6 +46,8 @@ dürfen einen noch nicht bestätigten Zugriff nicht verdrängen.
 ## Annahmen
 
 - `accessIndex` ist nullbasiert; `effectiveAccessCount` ist die Gesamtzahl.
+- Event-IDs sind nur innerhalb eines Matches eindeutig. Dismiss- und
+  Queue-Zustände müssen deshalb beim Matchwechsel zurückgesetzt werden.
 - Nur Events mit bereits sichtbarer `cardDefinitionId` und `title` werden als
   Access-Kartenfenster gepuffert.
 - Beim Einstieg oder Reconnect wird die vorhandene Historie nicht vollständig
