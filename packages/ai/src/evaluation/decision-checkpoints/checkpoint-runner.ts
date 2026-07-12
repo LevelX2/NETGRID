@@ -74,7 +74,12 @@ export function runAiDecisionCheckpoint(
   const accepted =
     !acceptable?.length ||
     acceptable.some((matcher) => actionMatches(input, selectedAction, matcher));
-  if (forbidden || !accepted) {
+  const discardChoiceAccepted = discardChoiceExpectationMatches(
+    input,
+    decision,
+    fixture.expectation.discardChoice,
+  );
+  if (forbidden || !accepted || !discardChoiceAccepted) {
     return {
       ok: false,
       code: "behavior_regression",
@@ -91,6 +96,50 @@ export function runAiDecisionCheckpoint(
     decision,
     selectedAction,
   };
+}
+
+function discardChoiceExpectationMatches(
+  input: AiDecisionInput,
+  decision: AiDecision,
+  expectation:
+    | {
+        mustRetainDefinitionIds?: string[];
+        mustDiscardDefinitionIds?: string[];
+      }
+    | undefined,
+): boolean {
+  if (!expectation) return true;
+  const choice = input.playerView.pendingChoice;
+  const rawSelectedIds = decision.selectedChoices?.selectedOptionIds;
+  const selectedIds = new Set(
+    Array.isArray(rawSelectedIds)
+      ? rawSelectedIds.filter((value): value is string => typeof value === "string")
+      : [],
+  );
+  if (!choice || choice.source !== "discard_phase") return false;
+  const discardedDefinitionIds = choice.options
+    .filter((option) => selectedIds.has(option.id))
+    .map((option) => option.card?.definitionId)
+    .filter((definitionId): definitionId is string => Boolean(definitionId));
+  const retainedDefinitionIds = input.playerView.own.gripOrHq
+    .filter(
+      (card) =>
+        !choice.options.some(
+          (option) =>
+            selectedIds.has(option.id) &&
+            option.card?.instanceId === card.instanceId,
+        ),
+    )
+    .map((card) => card.definitionId)
+    .filter((definitionId): definitionId is string => Boolean(definitionId));
+  return (
+    (expectation.mustRetainDefinitionIds ?? []).every((definitionId) =>
+      retainedDefinitionIds.includes(definitionId),
+    ) &&
+    (expectation.mustDiscardDefinitionIds ?? []).every((definitionId) =>
+      discardedDefinitionIds.includes(definitionId),
+    )
+  );
 }
 
 function actionMatches(

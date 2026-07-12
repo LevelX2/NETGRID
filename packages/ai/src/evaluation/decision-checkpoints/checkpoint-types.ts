@@ -21,6 +21,10 @@ export type AiDecisionCheckpointActionMatcher = {
 export type AiDecisionCheckpointExpectationV1 = {
   acceptableActions?: AiDecisionCheckpointActionMatcher[];
   forbiddenActions?: AiDecisionCheckpointActionMatcher[];
+  discardChoice?: {
+    mustRetainDefinitionIds?: string[];
+    mustDiscardDefinitionIds?: string[];
+  };
 };
 
 export type AiDecisionCheckpointV1 = {

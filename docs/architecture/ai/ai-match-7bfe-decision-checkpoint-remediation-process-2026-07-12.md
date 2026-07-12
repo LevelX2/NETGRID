@@ -2,8 +2,10 @@
 
 ## Status
 
-In Umsetzung im Worktree `C:\Projekte\NETGRID_AI_DECISION_CHECKPOINT_TESTZONE`
-auf Branch `codex/ai-decision-checkpoint-testzone`.
+Checkpoint-Infrastruktur und Red-Gate abgeschlossen. Sechs Zieltests
+reproduzieren die fünf freigegebenen Findings als `behavior_regression`; drei
+Gegenproben sind grün. Vor dem Fix-Paket folgt der freigegebene Audit des
+älteren Serienspiels `match_b0080115bddbce23`.
 
 ## Quelle
 
@@ -126,4 +128,3 @@ eine fachliche Gegenprobe.
 - Keine pauschale Begrenzung der BBS-Nutzungen.
 - Keine Abschwächung des korrekten Sechs-Credit-Corporate-War-Closeouts.
 - Keine automatische Erwartungsaktualisierung bei späteren KI-Umbauten.
-

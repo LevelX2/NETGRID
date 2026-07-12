@@ -69,7 +69,8 @@ export function validateAiDecisionCheckpoint(
   }
   if (
     !fixture.expectation.acceptableActions?.length &&
-    !fixture.expectation.forbiddenActions?.length
+    !fixture.expectation.forbiddenActions?.length &&
+    !fixture.expectation.discardChoice
   ) {
     throw new AiDecisionCheckpointValidationError(
       "fixture_invalid",
