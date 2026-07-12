@@ -1,6 +1,6 @@
 # KI-Entscheidungsverträge härten
 
-Status: integrationsbereit
+Status: abgeschlossen
 
 ## Quelle und Zielprüfung
 
@@ -160,6 +160,8 @@ dann als complete.`
 - Das Real-Engine-Gate deckte zusätzlich auf, dass
   `regionReplacementWarning` in der KI-Payload-Allowlist verloren ging. Das
   Feld wird nun vom Engine-LegalAction bis zum produktiven Chooser erhalten.
-- Verifikation vor der Integration: 295 AI-Testdateien mit 1.939 Tests,
-  AI-Typecheck, Deck-Doctrine-Check, Proteus-Readiness und `git diff --check`
-  grün.
+- Verifikation nach Integration des aktuellen `main`: 295 AI-Testdateien mit
+  1.940 Tests, AI-Typecheck, Deck-Doctrine-Check, Proteus-Readiness und
+  `git diff --check` grün.
+- Arbeitsbranch `codex/ai-contract-hardening` wurde lokal per Fast-forward nach
+  `main` integriert.

@@ -44,11 +44,17 @@ Runner-Zustand.
 ## Verifikation
 
 - Fokussierter Real-Engine- und Runtime-Block: 103 Tests grün.
-- Vollständige `@netgrid/ai`-Suite: 295 Testdateien, 1.939 Tests grün.
+- Vollständige `@netgrid/ai`-Suite vor Integration: 295 Testdateien, 1.939
+  Tests grün.
+- Wiederholung nach Integration des aktuellen `main`: 295 Testdateien, 1.940
+  Tests grün.
 - `@netgrid/ai` Typecheck: grün.
 - `check:ai-deck-doctrine-strategy`: grün.
 - `check:proteus-ai-readiness`: grün, 154 Karten und 154 aktive Hints.
 - `git diff --check`: grün.
+
+Der Arbeitsbranch `codex/ai-contract-hardening` wurde lokal per Fast-forward in
+`main` integriert.
 
 ## Restrisiko
 
