@@ -1,4 +1,5 @@
-import type { AiDecisionInput } from "@netgrid/shared";
+import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
+import { createAiHintsByCard, type AiCardHint } from "./ai-hints";
 import {
   deckDoctrineRoleIsAgenda,
   deckDoctrineRoleIsBreaker,
@@ -6,6 +7,8 @@ import {
   rolesForDeckDoctrineCard,
 } from "./deck-doctrine-card-roles";
 import { rolesMatch } from "./runtime/role-match";
+
+const AI_HINTS_BY_CARD = createAiHintsByCard();
 
 export type OpeningHandEvaluation = {
   decision: "keep" | "mulligan";
@@ -20,21 +23,13 @@ export type RunnerOpeningHandEvaluation = OpeningHandEvaluation;
 export function evaluateCorpOpeningHand(
   input: AiDecisionInput,
 ): CorpOpeningHandEvaluation {
-  const handRoleGroups = input.playerView.own.gripOrHq.map((card) =>
-    rolesForDeckDoctrineCard(card.definitionId ?? ""),
+  const handCards = input.playerView.own.gripOrHq.map((card) =>
+    corpOpeningCard(card),
   );
-  const agendaCount = countOpeningCardsWithRole(
-    handRoleGroups,
-    deckDoctrineRoleIsAgenda,
-  );
-  const iceCount = countOpeningCardsWithRole(
-    handRoleGroups,
-    deckDoctrineRoleIsIce,
-  );
-  const economyCount = countOpeningCardsWithRole(
-    handRoleGroups,
-    openingRoleIsEconomy,
-  );
+  const handRoleGroups = handCards.map((card) => card.roles);
+  const agendaCount = handCards.filter((card) => card.type === "agenda").length;
+  const iceCount = handCards.filter((card) => card.type === "ice").length;
+  const economyCount = handCards.filter(corpOpeningCardProvidesLiquidity).length;
   const remoteRootCount = countOpeningCardsWithRole(
     handRoleGroups,
     corpOpeningRoleIsRemoteRoot,
@@ -48,12 +43,22 @@ export function evaluateCorpOpeningHand(
   const hasRemoteProtectionSupport =
     semanticContext.corpRemoteProtectionTools > 0 ||
     strategySet.has("corp.ice_tax_glacier");
+  const strategyAssessment = assessCorpOpeningStrategies(
+    handCards,
+    semanticContext,
+    iceCount,
+    economyCount,
+    input.playerView.own.credits,
+  );
   let score = 0;
   const reasons: string[] = [];
   const evidence = [
     `opening_agendas:${agendaCount}`,
     `opening_ice:${iceCount}`,
     `opening_economy:${economyCount}`,
+    `opening_conditional_cards:${strategyAssessment.conditionalCardCount}`,
+    `opening_executable_strategy_lines:${strategyAssessment.executableLines.join(",") || "none"}`,
+    `opening_supported_strategy_lines:${strategyAssessment.supportedLines.join(",") || "none"}`,
     ...semanticOpeningEvidence(semanticContext),
   ];
 
@@ -84,6 +89,17 @@ export function evaluateCorpOpeningHand(
       : hasRemoteProtectionSupport && iceCount >= 2
         ? 10
         : 5;
+  score += strategyAssessment.score;
+
+  const lacksExecutableOpening =
+    iceCount === 0 &&
+    economyCount === 0 &&
+    strategyAssessment.executableLines.length === 0;
+  if (lacksExecutableOpening) {
+    score = Math.min(score, 42);
+    reasons.push("no_executable_opening_line");
+    evidence.push("opening_viability_cap:42");
+  }
 
   if (agendaCount >= 3 && iceCount === 0) score = Math.min(score, 28);
   if (agendaCount >= 3 && economyCount === 0) score = Math.min(score, 38);
@@ -98,6 +114,175 @@ export function evaluateCorpOpeningHand(
     reasons: reasons.length > 0 ? reasons : ["opening_hand_acceptable"],
     evidence,
   };
+}
+
+type CorpOpeningCard = {
+  card: VisibleCard;
+  type?: string;
+  roles: string[];
+  hint?: AiCardHint;
+};
+
+type CorpOpeningStrategyAssessment = {
+  score: number;
+  conditionalCardCount: number;
+  executableLines: string[];
+  supportedLines: string[];
+};
+
+function corpOpeningCard(card: VisibleCard): CorpOpeningCard {
+  const hint = AI_HINTS_BY_CARD.get(card.definitionId ?? "");
+  const roles = rolesForDeckDoctrineCard(card.definitionId ?? "");
+  const type = card.type ?? hint?.cardType ?? openingTypeFromExactRoles(roles);
+  return {
+    card,
+    ...(type ? { type } : {}),
+    roles,
+    ...(hint ? { hint } : {}),
+  };
+}
+
+function openingTypeFromExactRoles(roles: readonly string[]): string | undefined {
+  if (roles.some((role) => role === "agenda" || role === "corp_score_agenda")) {
+    return "agenda";
+  }
+  if (roles.some((role) => role === "ice" || role === "corp_install_ice")) {
+    return "ice";
+  }
+  return undefined;
+}
+
+function corpOpeningCardProvidesLiquidity(card: CorpOpeningCard): boolean {
+  if (!card.hint) {
+    return card.roles.some(openingRoleIsEconomy);
+  }
+  return (card.hint?.effects ?? []).some(
+    (effect) =>
+      (effect.kind === "economy" ||
+        effect.kind === "action_economy" ||
+        effect.kind === "start_of_turn_economy" ||
+        effect.kind === "recurring_economy") &&
+      effect.scope === "corp" &&
+      effect.resource === "credits" &&
+      (effect.amount ?? 0) > 0,
+  );
+}
+
+function assessCorpOpeningStrategies(
+  cards: readonly CorpOpeningCard[],
+  context: OpeningSemanticContext,
+  iceCount: number,
+  economyCount: number,
+  credits: number,
+): CorpOpeningStrategyAssessment {
+  const strategySet = new Set(context.strategies);
+  const supportedLines: string[] = [];
+  const executableLines: string[] = [];
+  const supports = (card: CorpOpeningCard, strategyId: string) =>
+    card.hint?.lineSupport?.some((line) => line === strategyId) === true ||
+    card.hint?.strategySupportPairs?.some(
+      (pair) => pair.strategyId === strategyId,
+    ) === true;
+  const fastAdvanceTools = cards.filter((card) =>
+    supports(card, "corp.fast_advance"),
+  );
+  const agendas = cards.filter((card) => card.type === "agenda");
+  if (
+    strategySet.has("corp.fast_advance") &&
+    fastAdvanceTools.length > 0
+  ) {
+    supportedLines.push("corp.fast_advance");
+    if (
+      agendas.length > 0 &&
+      (economyCount > 0 || credits >= 5)
+    ) {
+      executableLines.push("corp.fast_advance");
+    }
+  }
+
+  const tagEnablers = cards.filter((card) =>
+    card.hint?.strategySupportPairs?.some(
+      (pair) =>
+        pair.strategyId === "corp.tag_trace_punish" && pair.role === "enabler",
+    ),
+  );
+  const openingReadyTagEnablers = tagEnablers.filter(
+    (card) =>
+      !corpOpeningCardNeedsPriorRunnerActivity(card) &&
+      !(card.type === "asset" && iceCount === 0),
+  );
+  const punishPayoffs = cards.filter((card) =>
+    card.hint?.strategySupportPairs?.some(
+      (pair) =>
+        pair.strategyId === "corp.tag_trace_punish" &&
+        (pair.role === "punish_payoff" || pair.role === "win_condition"),
+    ),
+  );
+  if (
+    strategySet.has("corp.tag_trace_punish") &&
+    (tagEnablers.length > 0 || punishPayoffs.length > 0)
+  ) {
+    supportedLines.push("corp.tag_trace_punish");
+    if (
+      openingReadyTagEnablers.length > 0 &&
+      punishPayoffs.length > 0 &&
+      (economyCount > 0 || credits >= 5)
+    ) {
+      executableLines.push("corp.tag_trace_punish");
+    }
+  }
+
+  const damagePayoffs = cards.filter((card) =>
+    card.hint?.strategySupportPairs?.some(
+      (pair) =>
+        pair.strategyId === "corp.damage_kill" &&
+        (pair.role === "punish_payoff" || pair.role === "win_condition"),
+    ),
+  );
+  if (strategySet.has("corp.damage_kill") && damagePayoffs.length > 0) {
+    supportedLines.push("corp.damage_kill");
+    if (
+      openingReadyTagEnablers.length > 0 &&
+      damagePayoffs.length > 0 &&
+      (economyCount > 0 || credits >= 5)
+    ) {
+      executableLines.push("corp.damage_kill");
+    }
+  }
+
+  const conditionalCardCount = cards.filter(corpOpeningCardIsConditional).length;
+  return {
+    score:
+      Math.min(18, executableLines.length * 12) +
+      Math.min(4, supportedLines.length * 2) -
+      Math.max(0, conditionalCardCount - 2) * 3,
+    conditionalCardCount,
+    executableLines: sortedUnique(executableLines),
+    supportedLines: sortedUnique(supportedLines),
+  };
+}
+
+function corpOpeningCardNeedsPriorRunnerActivity(card: CorpOpeningCard): boolean {
+  return (card.hint?.conditions ?? []).some((condition) =>
+    [
+      "requires_runner_attempted_run_last_turn",
+      "requires_runner_attempted_multiple_runs_last_turn",
+      "requires_runner_trashed_node_last_turn",
+    ].includes(condition.kind),
+  );
+}
+
+function corpOpeningCardIsConditional(card: CorpOpeningCard): boolean {
+  return (card.hint?.conditions ?? []).some((condition) =>
+    [
+      "requires_runner_tagged",
+      "requires_runner_attempted_run_last_turn",
+      "requires_runner_attempted_multiple_runs_last_turn",
+      "requires_installed_advanceable_card",
+      "requires_score_window",
+      "requires_trace_success",
+    ].includes(condition.kind),
+  );
 }
 
 export function evaluateRunnerOpeningHand(
