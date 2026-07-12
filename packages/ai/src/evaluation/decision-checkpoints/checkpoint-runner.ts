@@ -113,7 +113,9 @@ function discardChoiceExpectationMatches(
   const rawSelectedIds = decision.selectedChoices?.selectedOptionIds;
   const selectedIds = new Set(
     Array.isArray(rawSelectedIds)
-      ? rawSelectedIds.filter((value): value is string => typeof value === "string")
+      ? rawSelectedIds.filter(
+          (value): value is string => typeof value === "string",
+        )
       : [],
   );
   if (!choice || choice.source !== "discard_phase") return false;

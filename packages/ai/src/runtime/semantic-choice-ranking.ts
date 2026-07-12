@@ -70,7 +70,8 @@ export function tacticalPlanMappedChoice(
     const acuteHandBufferOverride = bestSemanticRuntimeChoice(
       choices.filter(
         (choice) =>
-          !choice.exclusion && semanticRuntimeChoiceIsAcuteHandBufferDraw(choice),
+          !choice.exclusion &&
+          semanticRuntimeChoiceIsAcuteHandBufferDraw(choice),
       ),
     );
     if (
@@ -308,11 +309,11 @@ export function tacticalPlanMappedChoice(
             ? "repeated_run_mapping_yield"
             : acuteHandBufferShouldYield
               ? "acute_hand_buffer_mapping_yield"
-            : lowValueRecoveryShouldYield
-              ? "low_value_recovery_mapping_yield"
-              : corpBoardTriageMismatchShouldYield
-                ? "corp_board_triage_mismatch_yield"
-                : threshold.reason,
+              : lowValueRecoveryShouldYield
+                ? "low_value_recovery_mapping_yield"
+                : corpBoardTriageMismatchShouldYield
+                  ? "corp_board_triage_mismatch_yield"
+                  : threshold.reason,
         overrideThreshold: threshold.scoreGap,
         scoreGap,
       };
@@ -585,7 +586,13 @@ function runnerPlanOverrideIsHardInterrupt(
   if (semanticRuntimeChoiceHasAllowedLoanInterrupt(overrideChoice)) {
     return true;
   }
-  if (acuteHandBufferCanInterruptMappedRun(mappedPlan, mappedChoice, overrideChoice)) {
+  if (
+    acuteHandBufferCanInterruptMappedRun(
+      mappedPlan,
+      mappedChoice,
+      overrideChoice,
+    )
+  ) {
     return true;
   }
   if (overrideChoice.action.type !== "start_run") return false;
@@ -652,9 +659,7 @@ function semanticRuntimeChoiceIsAcuteHandBufferDraw(
     (entry) => entry.key === "runner_hand_buffer_need",
   );
   if (!component) return false;
-  const handMatch = /(?:^|\|)hand:(\d+)(?:\||$)/.exec(
-    component.reason ?? "",
-  );
+  const handMatch = /(?:^|\|)hand:(\d+)(?:\||$)/.exec(component.reason ?? "");
   return handMatch !== null && Number(handMatch[1] ?? Number.NaN) <= 2;
 }
 
@@ -770,7 +775,9 @@ function semanticRuntimeChoiceIsProjectedRun(
   ]);
   return (
     choice.action.type === "start_run" ||
-    choice.scoreBreakdown.some((component) => runScoreKeys.has(component.key)) ||
+    choice.scoreBreakdown.some((component) =>
+      runScoreKeys.has(component.key),
+    ) ||
     semanticRuntimeChoiceHasAnyScoreComponent(choice, [
       "runner_run_target_semantic_guidance",
       "runner_known_ice_path_no_access",

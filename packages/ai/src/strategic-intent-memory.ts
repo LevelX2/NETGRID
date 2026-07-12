@@ -46,7 +46,10 @@ export function getStrategicIntentMemorySnapshot(
   }
   const snapshot = strategicIntentMemoryByKey.get(key);
   if (!snapshot) return undefined;
-  if (snapshot.side !== input.side || snapshot.deckSnapshotId !== deckId(input, deckSnapshotId)) {
+  if (
+    snapshot.side !== input.side ||
+    snapshot.deckSnapshotId !== deckId(input, deckSnapshotId)
+  ) {
     strategicIntentMemoryByKey.delete(key);
     return undefined;
   }
@@ -137,7 +140,9 @@ function createStrategicIntentMemorySnapshot(params: {
     phase: params.state.phase,
     transitionStatus: params.state.transition.status,
     decisionsCommitted: params.state.commitment.decisionsCommitted,
-    blockerIds: params.state.blockers.map((blocker) => blocker.blockerId).sort(),
+    blockerIds: params.state.blockers
+      .map((blocker) => blocker.blockerId)
+      .sort(),
     ttlDecisionsRemaining,
     updatedAtStateVersion: params.input.playerView.stateVersion,
     state: params.state,

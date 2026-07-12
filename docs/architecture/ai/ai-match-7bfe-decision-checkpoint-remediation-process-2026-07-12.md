@@ -2,10 +2,13 @@
 
 ## Status
 
-Checkpoint-Infrastruktur und beide Red-Gates abgeschlossen. Sechs Zieltests
-reproduzieren die fünf freigegebenen 7BFE-Findings. Der Audit des älteren
-Serienspiels `match_b0080115bddbce23` ergänzt drei weitere aktuell rote Fälle.
-Alle sechs Gegenproben sind grün. Das Fix-Paket darf beginnen.
+Abgeschlossen. Sechs Zieltests reproduzierten vor der Korrektur die fünf
+freigegebenen 7BFE-Findings. Der Audit des älteren Serienspiels
+`match_b0080115bddbce23` ergänzte drei weitere rote Fälle. Nach den generischen
+Korrekturen sind alle neun Zielverträge und sechs Gegenproben grün; die
+vollständige AI-Suite ist ebenfalls grün. Der Abschluss ist im Final Review
+`docs/reviews/ai/ai-match-7bfe-b008-decision-checkpoint-final-review-2026-07-12.md`
+dokumentiert.
 
 ## Quelle
 
@@ -102,7 +105,7 @@ eine fachliche Gegenprobe.
   Infrastruktur-, Legality- oder Fixture-Fehler werden als Rot-Evidence
   akzeptiert.
 
-### P3 – Generische Korrekturen
+### P3 – Generische Korrekturen – abgeschlossen
 
 - Central-Interrupt für finite Economy.
 - vollständige Ressourcenprojektion für Score-Konversion.
@@ -111,7 +114,7 @@ eine fachliche Gegenprobe.
 - Matchpoint-/HQ-Expositionsrisiko für Draw.
 - Gate: alle fünf Checkpoints und Gegenproben grün.
 
-### P4 – Abschluss
+### P4 – Abschluss – abgeschlossen
 
 - Fokussierte Tests, AI-Typecheck, relevante AI-Gates und vollständige
   AI-Suite soweit lokal realistisch.

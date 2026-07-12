@@ -33,14 +33,14 @@ corepack pnpm --filter @netgrid/ai exec vitest run \
 
 ## Erwartete rote Zieltests
 
-| Checkpoint | Aktuelle Auswahl | Verletzter Vertrag |
-| --- | --- | --- |
-| `CP-7BFE-01` | BBS Whispering Campaign aktivieren | bezahlbares R&D-ICE muss Central-Schutz vor weiterem finite-economy drain erhalten |
-| `CP-7BFE-02a` | Corporate War mit 5 Credits installieren | nicht vollständig finanzierbarer Same-Turn-Pfad darf nicht begonnen werden |
-| `CP-7BFE-02b` | Systematic Layoffs mit 5 Credits spielen | nach Operationskosten fehlt der Credit für den letzten Advance |
-| `CP-7BFE-03` | historischer Corp-Discard | BBS und City Surveillance gehen verloren, I Got a Rock bleibt trotz unerfüllter Voraussetzung |
-| `CP-7BFE-04` | Closed Accounts gegen 0 Credits | Operation besitzt keinen marginalen Effekt |
-| `CP-7BFE-05` | Karte ziehen | Agenda-Suche ignoriert Matchpunkt, HQ-Reachability und bekannte Multiaccess-Evidence |
+| Checkpoint    | Aktuelle Auswahl                         | Verletzter Vertrag                                                                            |
+| ------------- | ---------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `CP-7BFE-01`  | BBS Whispering Campaign aktivieren       | bezahlbares R&D-ICE muss Central-Schutz vor weiterem finite-economy drain erhalten            |
+| `CP-7BFE-02a` | Corporate War mit 5 Credits installieren | nicht vollständig finanzierbarer Same-Turn-Pfad darf nicht begonnen werden                    |
+| `CP-7BFE-02b` | Systematic Layoffs mit 5 Credits spielen | nach Operationskosten fehlt der Credit für den letzten Advance                                |
+| `CP-7BFE-03`  | historischer Corp-Discard                | BBS und City Surveillance gehen verloren, I Got a Rock bleibt trotz unerfüllter Voraussetzung |
+| `CP-7BFE-04`  | Closed Accounts gegen 0 Credits          | Operation besitzt keinen marginalen Effekt                                                    |
+| `CP-7BFE-05`  | Karte ziehen                             | Agenda-Suche ignoriert Matchpunkt, HQ-Reachability und bekannte Multiaccess-Evidence          |
 
 Alle sechs Fehler wurden vom Runner als `behavior_regression` klassifiziert.
 Es gab keinen `engine_legality_drift`, `runtime_state_drift`,
@@ -64,4 +64,3 @@ Zieltests und 3 grüne Gegenproben.
 Die Korrekturphase darf beginnen, sobald der checkpoint-basierte Audit des
 älteren Serienspiels abgeschlossen ist. Ein Fix gilt nur dann als erfolgreich,
 wenn die roten Zieltests grün werden und die Gegenproben grün bleiben.
-

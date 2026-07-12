@@ -113,7 +113,11 @@ const fixture: AiDecisionCheckpointV1 = {
   expectation,
 };
 mkdirSync(dirname(resolve(args.out)), { recursive: true });
-writeFileSync(resolve(args.out), `${JSON.stringify(fixture, null, 2)}\n`, "utf8");
+writeFileSync(
+  resolve(args.out),
+  `${JSON.stringify(fixture, null, 2)}\n`,
+  "utf8",
+);
 process.stdout.write(
   `${JSON.stringify({
     ok: true,
@@ -163,11 +167,13 @@ function deckSnapshotFor(
   side: Side,
 ): AiDeckStrategyDeckSnapshot {
   const identityDefinitionId =
-    state.cardInstances[side === "corp" ? state.corp.identity : state.runner.identity]
-      ?.definitionId;
+    state.cardInstances[
+      side === "corp" ? state.corp.identity : state.runner.identity
+    ]?.definitionId;
   const counts = new Map<string, number>();
   for (const card of Object.values(state.cardInstances)) {
-    if (card.owner !== side || card.definitionId === identityDefinitionId) continue;
+    if (card.owner !== side || card.definitionId === identityDefinitionId)
+      continue;
     counts.set(card.definitionId, (counts.get(card.definitionId) ?? 0) + 1);
   }
   const metadata = state.deckMetadata?.[side];

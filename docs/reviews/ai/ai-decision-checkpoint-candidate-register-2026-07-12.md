@@ -3,10 +3,12 @@
 ## Status
 
 Match `match_7bfe82501d0fdcb8` ist abgeschlossen und analysiert. Die fünf
-freigegebenen Findings werden im Prozess
+freigegebenen Findings wurden im Prozess
 `docs/architecture/ai/ai-match-7bfe-decision-checkpoint-remediation-process-2026-07-12.md`
 zuerst als rote Checkpoint-Regressionen und danach als generische Korrekturen
-umgesetzt.
+umgesetzt. Das ältere Match `match_b0080115bddbce23` lieferte drei weitere
+aktuell rote Checkpoints. Alle neun Zielverträge und sechs Gegenproben sind
+nun grün; der Final Review ist führend für den Abschlussstand.
 
 ## Priorität 1 – Aktuelles Planportfolio-/BBS-Match
 
@@ -27,15 +29,25 @@ umgesetzt.
   Schutzbedingungen; keine pauschale Kartenname-Sperre.
 - Memory-Bedarf: PlanPortfolio, TacticalPlan, StrategicIntent, Cadence.
 - Companion Contract: finite Economy gegen fälligen Hintergrundplan.
+- Abschluss: umgesetzt und grün. Finite Economy bleibt wiederholbar, gibt aber
+  bei einer höher bewerteten akuten Board-Triage-Aktion den Vordergrund frei.
 
 ### Weitere freigegebene Checkpoints aus demselben Match
 
-| ID | Decision / StateVersion | Vertrag |
-| --- | --- | --- |
-| `CP-7BFE-02` | 56/57 / 110/111 | Fünf Credits dürfen den sechsstufigen Corporate-War-Pfad nicht beginnen; sechs Credits bleiben positive Gegenprobe. |
-| `CP-7BFE-03` | 92 / 188 | Corp-Discard behält Economy und strategiegeeigneten Enabler vor unerfüllbaren oder redundanten Payoffs. |
-| `CP-7BFE-04` | 116 / 281 | Closed Accounts verliert gegen null Runner-Credits seinen Payoff-Bonus; drei Credits bleiben positive Gegenprobe. |
-| `CP-7BFE-05` | 128 / 302 | Kein Agenda-Draw in ein erreichbares Matchpoint-HQ mit bekannter Multiaccess-Evidence. |
+| ID           | Decision / StateVersion | Vertrag                                                                                                             |
+| ------------ | ----------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `CP-7BFE-02` | 56/57 / 110/111         | Fünf Credits dürfen den sechsstufigen Corporate-War-Pfad nicht beginnen; sechs Credits bleiben positive Gegenprobe. |
+| `CP-7BFE-03` | 92 / 188                | Corp-Discard behält Economy und strategiegeeigneten Enabler vor unerfüllbaren oder redundanten Payoffs.             |
+| `CP-7BFE-04` | 116 / 281               | Closed Accounts verliert gegen null Runner-Credits seinen Payoff-Bonus; drei Credits bleiben positive Gegenprobe.   |
+| `CP-7BFE-05` | 128 / 302               | Kein Agenda-Draw in ein erreichbares Matchpoint-HQ mit bekannter Multiaccess-Evidence.                              |
+
+### Abgeschlossene Checkpoints aus dem älteren Serienspiel
+
+| ID           | Decision / StateVersion | Vertrag                                                                                                            |
+| ------------ | ----------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `CP-B008-01` | 54 / 103                | Bezahlbarer Break vor Programmtrash-/End-the-run-Subroutinen; ohne Budget bleibt Continue zulässig.                |
+| `CP-B008-02` | 67 / 131                | Eingebettete Event-Runs durchlaufen dieselbe bekannte-ICE-Pfadprüfung wie Basis-Runs.                              |
+| `CP-B008-03` | 69 / 134                | Zwei-Karten-Handpuffer darf einen knapp schwächeren Draw vor Credit-Aufbau ziehen; vier Karten bleiben Gegenprobe. |
 
 ## Priorität 2 – Runner-Event-Run ohne post-cost Pfadbudget
 

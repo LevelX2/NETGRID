@@ -274,7 +274,8 @@ function runnerRunPlanAbortChoice(params: {
         (choice) =>
           !choice.exclusion &&
           choice.action.type === "break_subroutine" &&
-          actionCreditCost(choice.action) <= params.plan.budget.availableCredits,
+          actionCreditCost(choice.action) <=
+            params.plan.budget.availableCredits,
       )
       .sort(
         (left, right) =>

@@ -199,11 +199,8 @@ function corpConditionalPayoffKeepAdjustment(
 ): { value: number; evidence: string[] } {
   const hint = AI_HINTS_BY_CARD.get(definitionId);
   const signals = new Set(
-    (
-      hint as
-        | { tacticSignals?: readonly string[] }
-        | undefined
-    )?.tacticSignals ?? [],
+    (hint as { tacticSignals?: readonly string[] } | undefined)
+      ?.tacticSignals ?? [],
   );
   const runnerTags = input.playerView.opponent.tags;
   const ownAgendaPoints = input.playerView.own.agendaPoints;

@@ -1,9 +1,7 @@
 import { hashGameState } from "@netgrid/engine";
 
 import { FORBIDDEN_AI_INPUT_FIELDS } from "../../runtime/ai-decision-input";
-import {
-  AI_RUNTIME_CHECKPOINT_SCHEMA_VERSION,
-} from "./runtime-checkpoint";
+import { AI_RUNTIME_CHECKPOINT_SCHEMA_VERSION } from "./runtime-checkpoint";
 import {
   AI_DECISION_CHECKPOINT_SCHEMA_VERSION,
   type AiDecisionCheckpointV1,

@@ -1,4 +1,8 @@
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 
 import type { StructuredTagPunishPayoffKind } from "../tag-punish-ontology-consumer";
 import type { CorpTaggedRunnerPayoffActionProfile } from "./corp-scoring-assessment-types";
@@ -29,7 +33,9 @@ export type CorpTaggedRunnerPayoffProfileDependencies = {
   ) => string | undefined;
   actionCreditCost: (action: LegalAction) => number;
   runnerDamagePreventionEvidence: (input: AiDecisionInput) => string[];
-  runnerHardwareTrashTarget: (input: AiDecisionInput) => VisibleCard | undefined;
+  runnerHardwareTrashTarget: (
+    input: AiDecisionInput,
+  ) => VisibleCard | undefined;
   runnerHardwarePayoffEvidence: (target: VisibleCard) => string[];
 };
 

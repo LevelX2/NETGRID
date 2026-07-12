@@ -185,13 +185,13 @@ export function semanticRuntimeCorpAdvancementCounterPlacementAssessment(
       ? -5200
       : unfundedImmediateFollowup
         ? -2600
-      : bestWitness === "score_now"
-        ? 5200 + Math.min(2600, Math.max(0, netAdvancementValue) * 4)
-        : bestWitness === "score_next_action"
-          ? 2600 + Math.min(1800, Math.max(0, netAdvancementValue) * 3)
-          : netAdvancementValue > 0
-            ? 1200 + Math.min(2600, netAdvancementValue * 8)
-            : -1200 + netAdvancementValue * 6;
+        : bestWitness === "score_now"
+          ? 5200 + Math.min(2600, Math.max(0, netAdvancementValue) * 4)
+          : bestWitness === "score_next_action"
+            ? 2600 + Math.min(1800, Math.max(0, netAdvancementValue) * 3)
+            : netAdvancementValue > 0
+              ? 1200 + Math.min(2600, netAdvancementValue * 8)
+              : -1200 + netAdvancementValue * 6;
   const sourceDefinitionId = dependencies.sourceDefinitionIdForAction(
     input,
     action,

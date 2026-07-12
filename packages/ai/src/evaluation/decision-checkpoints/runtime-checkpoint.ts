@@ -46,15 +46,11 @@ export function exportAiRuntimeCheckpoint(
   return {
     schemaVersion: AI_RUNTIME_CHECKPOINT_SCHEMA_VERSION,
     ...(tacticalPlan ? { tacticalPlan: structuredClone(tacticalPlan) } : {}),
-    ...(planPortfolio
-      ? { planPortfolio: structuredClone(planPortfolio) }
-      : {}),
+    ...(planPortfolio ? { planPortfolio: structuredClone(planPortfolio) } : {}),
     ...(strategicIntent
       ? { strategicIntent: structuredClone(strategicIntent) }
       : {}),
-    ...(runnerRunPlan
-      ? { runnerRunPlan: structuredClone(runnerRunPlan) }
-      : {}),
+    ...(runnerRunPlan ? { runnerRunPlan: structuredClone(runnerRunPlan) } : {}),
   };
 }
 

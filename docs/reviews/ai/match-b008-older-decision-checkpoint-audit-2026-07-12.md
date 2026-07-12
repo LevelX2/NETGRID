@@ -68,4 +68,3 @@ rote `behavior_regression`-Fälle werden weiterbearbeitet.
 Kontrollierter Lauf: 6 Tests, davon exakt 3 rote Zieltests und 3 grüne
 Gegenproben. Alle roten Fälle sind `behavior_regression`; es gab keinen
 Fixture-, Restore-, Redaction- oder Legality-Fehler.
-

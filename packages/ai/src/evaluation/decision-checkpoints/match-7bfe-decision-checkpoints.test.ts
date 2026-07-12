@@ -60,7 +60,8 @@ describe("match 7BFE exact decision checkpoints", () => {
     const enabledPayoff = mutateFixture(cp03Json, (fixture) => {
       const state = fixture.engine.testOnlyGameState;
       const agendaId = state.runner.scoreArea.shift();
-      if (!agendaId) throw new Error("Missing captured agenda for counterprobe");
+      if (!agendaId)
+        throw new Error("Missing captured agenda for counterprobe");
       state.corp.scoreArea.push(agendaId);
       state.cardInstances[agendaId] = {
         ...state.cardInstances[agendaId]!,
