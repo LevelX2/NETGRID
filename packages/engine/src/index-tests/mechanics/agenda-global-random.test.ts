@@ -571,6 +571,13 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     expect(layoffActions).toHaveLength(1);
     expect(layoffActions[0]?.payload?.targetCardId).toBeUndefined();
     expect(layoffActions[0]?.payload?.secondTargetCardId).toBeUndefined();
+    expect(layoffActions[0]?.payload).toMatchObject({
+      scoreConversionCapability: "place_advancement",
+      scoreConversionAdvancementAmount: 2,
+      scoreConversionAdvancementMode: "any_combination",
+      scoreConversionTargetMode: "installed_advanceable_cards",
+      scoreConversionTiming: "immediate",
+    });
     state = apply(
       state,
       "corp",

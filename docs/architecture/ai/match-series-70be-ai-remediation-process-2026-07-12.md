@@ -17,7 +17,8 @@ nach `main`.
 
 Der Endzustand ist ausreichend präzise:
 
-- unsichere Korp-Scoreline-Installationen sind fail-closed;
+- Korp-Scoreline-Installationen bleiben nur aktiv, wenn ihr vollständiger
+  Same-Turn-Closeout über jede Engine-/AI-Transition ausführbar bleibt;
 - Broker-Aufbau und -Auszahlung überstehen die side-sichere AI-Input-Grenze;
 - Draw-Tax-Entscheidungen bewerten Tags und Credits als Folgekosten;
 - Event-Runs verwenden die Route nach Zahlung ihrer Aktionskosten;
@@ -56,7 +57,7 @@ Der Endzustand ist ausreichend präzise:
 ## State Machine und Paketfolge
 
 1. `P01 evidence`: Prozess, Match-Evidence und reproduzierbare Befunde.
-2. `P02 corp-scoreline`: Unsichere Agenda-Installationen fail-closed machen.
+2. `P02 corp-scoreline`: Same-Turn-Score-Konversion transitionsicher machen.
 3. `P03 runner-action-semantics`: Broker-, Draw-Tax- und Event-Run-Semantik
    durch die Live-Grenzen führen.
 4. `P04 runner-hand-buffer`: Akute Handentwicklung gegen Planbindung härten.
@@ -75,12 +76,14 @@ Der Endzustand ist ausreichend präzise:
 
 ### P02 Korp-Scoreline
 
-- Arbeit: Planbildung und Candidate-Mapping so härten, dass ungeschützte,
-  contestbare Agenda-Installationen nur bei garantiertem Same-Turn-Closeout
-  zulässig sind.
-- Done-Gate: beide gespeicherten Zustandsmuster wählen keine Agenda-Installation;
-  sichere Closeout-Gegenprobe bleibt grün.
-- Commit: `fix(ai): fail closed on unsafe scoreline setup`.
+- Arbeit: generische Score-Konversionssemantik auch für spezialisierte
+  Operation-Resolver durch die Engine-/AI-Grenze führen. Ungeschützte,
+  contestbare Agenda-Installationen bleiben nur bei einem nach jeder Aktion
+  weiterhin ausführbaren Same-Turn-Closeout zulässig.
+- Done-Gate: beide gespeicherten Zustandsmuster führen den vollständigen Pfad
+  `Install → Systematic Layoffs → Advance → Score` aus; fehlt die generische
+  Semantik oder eine Ressource, bleibt der Install fail-closed.
+- Commit: `fix(ai): preserve same-turn score conversion follow-through`.
 
 ### P03 Runner-Action-Semantik
 

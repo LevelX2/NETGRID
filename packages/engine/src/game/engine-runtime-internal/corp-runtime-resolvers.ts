@@ -483,6 +483,7 @@ import {
   resolveCorpOperation,
   type CorpOperationResolutionHost,
 } from "../play/corp-operation-resolution";
+import { scoreConversionCapabilityPayloadForEffects } from "../../ability-engine/card-implementation-runtime-activated-targets";
 import { type BoardStateActionExecutionHost } from "../board/board-state-action-execution";
 import { shuffleRunnerStackAndRefreshZones } from "../hidden-zone/runner-stack-shuffle";
 import { hashState } from "../hash";
@@ -1471,6 +1472,9 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     cardId: CardInstanceId,
     definition: CardDefinition,
   ): LegalAction[] {
+    const scoreConversionPayload = scoreConversionCapabilityPayloadForEffects(
+      onPlayCardImplementationEffects(definition),
+    );
     return [
       action(
         state,
@@ -1479,7 +1483,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
         `${definition.title} spielen`,
         cardId,
         [{ clicks: 1, credits: definition.cost ?? 0 }],
-        { cardId },
+        { cardId, ...scoreConversionPayload },
       ),
     ];
   }

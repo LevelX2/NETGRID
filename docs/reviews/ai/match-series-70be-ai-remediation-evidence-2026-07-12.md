@@ -24,10 +24,15 @@
 - Decision 93 / StateVersion 212: dasselbe Muster bei 8 Credits und bereits
   3 Runner-Punkten; der Trace erkennt die Near-Win-Gefahr.
 - Decisions 94 und 95: erneut Credits; die zweite Agenda beendet das Spiel.
-- Ursache: Planbindung bevorzugt den negativen `corp.create_score_window`-
-  Kandidaten und senkt sichere Nicht-Plan-Aktionen ab.
-- Akzeptanz: kein Agenda-Install in beiden Mustern; garantierter Same-Turn-
-  Closeout bleibt möglich.
+- Vertiefte Ursache: Vor der Installation erkennt der Konversionsplan den
+  legalen Same-Turn-Pfad `Corporate War → Systematic Layoffs (2 Counter) →
+  Advance → Score`. Der spezialisierte Engine-Resolver für
+  `Systematic Layoffs` verliert danach jedoch die generische
+  `scoreConversionCapability`; dadurch bricht der Plan ab und sichere
+  Nicht-Plan-Aktionen werden bevorzugt.
+- Akzeptanz: Der vollständige Same-Turn-Closeout bleibt über jede tatsächliche
+  Engine-/AI-Transition ausführbar. Fehlt die Semantik oder eine benötigte
+  Ressource, darf die contestbare Agenda-Installation nicht beginnen.
 
 ## Befund 2: Broker verliert seine Live-Semantik
 
