@@ -110,6 +110,64 @@ describe("Semantic AI runtime cutover", () => {
     expect(decision.decisionDebug?.scoreBreakdown).toBeDefined();
   });
 
+  it("selects the guaranteed affordable Corp trace bid through the live choice contract", () => {
+    const resolveChoice = legalAction(
+      "resolve-trace-bid",
+      "corp",
+      "resolve_choice",
+      "Trace-Gebot festlegen",
+      { credits: 0 },
+    );
+    const input = aiInput("corp", [resolveChoice]);
+    input.difficulty = "hard";
+    input.playerView.own.credits = 18;
+    input.playerView.own.clicks = 1;
+    input.playerView.opponent.credits = 11;
+    input.playerView.own.gripOrHq = [
+      visibleCard("closed-accounts", "corp", "operation", {
+        definitionId: "onr_v1_285_closed-accounts",
+        title: "Closed Accounts",
+        cost: 1,
+      }),
+      visibleCard("scorched-earth", "corp", "operation", {
+        definitionId: "onr_v1_302_scorched-earth",
+        title: "Scorched Earth",
+        cost: 3,
+      }),
+    ];
+    input.playerView.pendingChoice = {
+      choiceId: "trace-corp-choice",
+      side: "corp",
+      source: "trace:corp",
+      prompt: "Trace-Gebot",
+      kind: "bid_amount",
+      options: Array.from({ length: 12 }, (_, amount) => ({
+        id: `bid_${amount}`,
+        label: String(amount),
+        value: amount,
+      })),
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: 1,
+      visibility: "hidden_info_barrier",
+    };
+    input.eventTail = [
+      publicEvent("trace-started", "trace_started", 0, {
+        traceStrength: 5,
+        runnerLink: 0,
+      }),
+    ];
+
+    const decision = chooseCorpAction(input);
+
+    expect(decision.actionId).toBe(resolveChoice.actionId);
+    expect(decision.selectedChoices).toEqual({
+      choiceId: "trace-corp-choice",
+      selectedOptionIds: ["bid_7"],
+    });
+    expect(decision.evidence).toContain("decision_opportunity:competitive");
+  });
+
   it("routes activated tag cleanup cards through tag_removal", () => {
     const input = aiInput("runner", [
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
@@ -665,13 +723,17 @@ describe("Semantic AI runtime cutover", () => {
     const activeInput = aiInput("corp", [install, gainCredit]);
     activeInput.playerView.own.gripOrHq = [researchBunker];
     activeInput.playerView.servers = [
-      server("remote_1", [], [
-        networkedCenter,
-        visibleCard("research-agenda", "corp", "agenda", {
-          subtypes: ["research"],
-          advancementRequirement: 3,
-        }),
-      ]),
+      server(
+        "remote_1",
+        [],
+        [
+          networkedCenter,
+          visibleCard("research-agenda", "corp", "agenda", {
+            subtypes: ["research"],
+            advancementRequirement: 3,
+          }),
+        ],
+      ),
     ];
 
     const activeDecision = chooseCorpAction(activeInput);

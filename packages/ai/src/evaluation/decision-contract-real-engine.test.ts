@@ -1,5 +1,6 @@
 import {
   applyAction,
+  createGame,
   createGameAfterSetup,
   getLegalActions,
 } from "@netgrid/engine";
@@ -14,6 +15,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { chooseCorpAction, chooseRunnerAction } from "../index";
 import { buildAiDecisionInput } from "../runtime/ai-decision-input";
 import type { AiDeckStrategyDeckSnapshot } from "../deck-strategy-snapshot";
+import type { AiDeckStrategyProfile } from "../deck-doctrine-strategy";
 import { corpUpgradePlacementExclusion } from "../runtime/corp-upgrade-placement";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import { buildActionCardSemanticProfilesByDefinitionId } from "../actions/action-card-semantic-profiles";
@@ -24,6 +26,56 @@ import { RealEngineFixtureBuilder } from "./real-engine-fixture-builder";
 describe("hardened decision contracts on real Engine inputs", () => {
   beforeEach(() => {
     resetTacticalPlanMemory();
+  });
+
+  it("mulligans the historical non-executable Manhunt hand through the real setup contract", () => {
+    let state = createGame({
+      seed: "contract-manhunt-opening",
+      agendaPointsToWin: 7,
+      corpDeck: CORP_DECK,
+    });
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "resolve_choice",
+    );
+    RealEngineFixtureBuilder.forState(state)
+      .withCorpHqSize(0)
+      .withCorpCardInHq("onr_v1_285_closed-accounts")
+      .withCorpCardInHq("onr_v1_313_city-surveillance")
+      .withCorpCardInHq("onr_v1_283_audit-of-call-records")
+      .withCorpCardInHq("onr_v1_302_scorched-earth")
+      .withCorpCardInHq("onr_v1_304_systematic-layoffs");
+    const baseInput = decisionInput(state, "corp", CORP_DECK);
+    const generatedStrategyProfile = (
+      baseInput as typeof baseInput & {
+        ownDeckStrategyProfile?: AiDeckStrategyProfile;
+      }
+    ).ownDeckStrategyProfile;
+    const input = {
+      ...baseInput,
+      difficulty: "hard" as const,
+      ownDeckStrategyProfile: {
+        ...generatedStrategyProfile!,
+        primaryStrategies: [
+          "corp.fast_advance",
+          "corp.tag_trace_punish",
+          "corp.damage_kill",
+        ],
+        secondaryStrategies: [],
+        warnings: [],
+      },
+    };
+
+    const decision = chooseCorpAction(input);
+
+    expect(input.playerView.pendingChoice?.source).toBe("setup.mulligan");
+    expect(input.legalActions).toHaveLength(1);
+    expect(decision.actionId).toBe(input.legalActions[0]?.actionId);
+    expect(decision.selectedChoices).toEqual({
+      choiceId: input.playerView.pendingChoice?.choiceId,
+      selectedOptionIds: ["mulligan"],
+    });
   });
 
   it("defers Rasmin without ICE and makes it eligible after ICE is installed", () => {
@@ -85,7 +137,9 @@ describe("hardened decision contracts on real Engine inputs", () => {
     const inactiveDecision = chooseCorpAction(inactiveInput);
     expect(inactiveDecision.actionId).not.toBe(inactiveInstall.actionId);
     expect(
-      corpUpgradePlacementExclusion(upgradePlacementParams(inactiveInput, inactiveInstall)),
+      corpUpgradePlacementExclusion(
+        upgradePlacementParams(inactiveInput, inactiveInstall),
+      ),
     ).toMatchObject({
       key: "corp_upgrade_region_replacement_without_marginal_value",
     });
@@ -112,7 +166,9 @@ describe("hardened decision contracts on real Engine inputs", () => {
     const activeDecision = chooseCorpAction(activeInput);
     expect(activeDecision.actionId).toBe(activeInstall.actionId);
     expect(
-      corpUpgradePlacementExclusion(upgradePlacementParams(activeInput, activeInstall)),
+      corpUpgradePlacementExclusion(
+        upgradePlacementParams(activeInput, activeInstall),
+      ),
     ).toBeUndefined();
   });
 
@@ -126,10 +182,7 @@ describe("hardened decision contracts on real Engine inputs", () => {
       .withRunnerCardInGrip("onr_v1_016_cyfermaster")
       .withRezzedCorpIceOnServer("rd", "simple_code_gate_ice");
     const input = decisionInput(state, "runner", RUNNER_DECK);
-    const cyfermaster = installAction(
-      input,
-      "onr_v1_016_cyfermaster",
-    );
+    const cyfermaster = installAction(input, "onr_v1_016_cyfermaster");
     const dwarf = installAction(input, "onr_v1_021_dwarf");
     const decision = chooseRunnerAction(input);
 
@@ -138,25 +191,22 @@ describe("hardened decision contracts on real Engine inputs", () => {
   });
 });
 
-const CORP_DECK = deck(
-  DEMO_DECKS.demo_corp_001,
-  "contract-corp-deck",
-  [
-    "onr_proteus_070_rasmin-bridger",
-    "onr_proteus_065_networked-center",
-    "onr_proteus_072_research-bunker",
-    "onr_proteus_001_ai-board-member",
-  ],
-);
-const RUNNER_DECK = deck(
-  DEMO_DECKS.demo_runner_001,
-  "contract-runner-deck",
-  [
-    "onr_v1_047_pile-driver",
-    "onr_v1_021_dwarf",
-    "onr_v1_016_cyfermaster",
-  ],
-);
+const CORP_DECK = deck(DEMO_DECKS.demo_corp_001, "contract-corp-deck", [
+  "onr_proteus_070_rasmin-bridger",
+  "onr_proteus_065_networked-center",
+  "onr_proteus_072_research-bunker",
+  "onr_proteus_001_ai-board-member",
+  "onr_v1_285_closed-accounts",
+  "onr_v1_313_city-surveillance",
+  "onr_v1_283_audit-of-call-records",
+  "onr_v1_302_scorched-earth",
+  "onr_v1_304_systematic-layoffs",
+]);
+const RUNNER_DECK = deck(DEMO_DECKS.demo_runner_001, "contract-runner-deck", [
+  "onr_v1_047_pile-driver",
+  "onr_v1_021_dwarf",
+  "onr_v1_016_cyfermaster",
+]);
 
 function corpMainState(seed: string): GameState {
   return apply(
@@ -168,7 +218,11 @@ function corpMainState(seed: string): GameState {
 
 function runnerTurnState(seed: string): GameState {
   let state = apply(
-    createGameAfterSetup({ seed, agendaPointsToWin: 7, runnerDeck: RUNNER_DECK }),
+    createGameAfterSetup({
+      seed,
+      agendaPointsToWin: 7,
+      runnerDeck: RUNNER_DECK,
+    }),
     "corp",
     (action) => action.type === "mandatory_draw",
   );
@@ -179,11 +233,7 @@ function runnerTurnState(seed: string): GameState {
   return state;
 }
 
-function decisionInput(
-  state: GameState,
-  side: Side,
-  ownDeck: DeckDefinition,
-) {
+function decisionInput(state: GameState, side: Side, ownDeck: DeckDefinition) {
   return buildAiDecisionInput(state, side, {
     decisionId: `decision-contract:${state.matchId}:${state.stateVersion}`,
     profileId: `decision-contract-${side}`,
@@ -225,8 +275,9 @@ function upgradePlacementParams(
     legalActions: [action],
     observerSide: input.side,
     stateVersion: input.playerView.stateVersion,
-    visibleSourceDefinitionsByInstanceId:
-      visibleSourceDefinitionsByInstanceId(input.playerView),
+    visibleSourceDefinitionsByInstanceId: visibleSourceDefinitionsByInstanceId(
+      input.playerView,
+    ),
     cardSemanticProfilesByDefinitionId:
       buildActionCardSemanticProfilesByDefinitionId(),
   })[0];
@@ -236,9 +287,10 @@ function upgradePlacementParams(
     roles: [],
     actionSemanticCandidate: candidate,
     sourceCard,
-    serverId: typeof action.payload?.serverId === "string"
-      ? action.payload.serverId
-      : undefined,
+    serverId:
+      typeof action.payload?.serverId === "string"
+        ? action.payload.serverId
+        : undefined,
   };
 }
 

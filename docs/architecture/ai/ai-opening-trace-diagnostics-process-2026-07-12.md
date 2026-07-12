@@ -2,7 +2,9 @@
 
 ## Status
 
-Direkte Umsetzung im Worktree
+P0 bis P4 abgeschlossen; lokale Integration und Cleanup in P5 ausstehend.
+
+Umsetzung im Worktree
 `C:\Projekte\NETGRID_AI_OPENING_TRACE_DIAGNOSTICS` auf Branch
 `codex/ai-opening-trace-diagnostics`.
 
