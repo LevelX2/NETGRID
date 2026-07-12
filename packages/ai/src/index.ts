@@ -170,6 +170,32 @@ export type {
   RemoteProtectionTarget,
   RemotePurpose,
 } from "./remote-doctrine-profile";
+export {
+  adaptTacticalPlanToPortfolioEntry,
+  aggregatePlanActionContributions,
+  buildPlanPortfolio,
+  PLAN_PORTFOLIO_SCHEMA_VERSION,
+  portfolioRoleForExecutionClass,
+  redactedPlanPortfolioFacts,
+  tacticalPlanExecutionClass,
+} from "./plans/plan-portfolio";
+export type {
+  BuildPlanPortfolioParams,
+  PlanActionContribution,
+  PlanActionContributionKind,
+  PlanActionContributionScore,
+  PlanExecutionClass,
+  PlanPortfolioEntry,
+  PlanPortfolioLifecycle,
+  PlanPortfolioPlanType,
+  PlanPortfolioRole,
+  PlanPortfolioSnapshot,
+} from "./plans/plan-portfolio";
+export {
+  getPlanPortfolioMemorySnapshot,
+  rememberPlanPortfolioSnapshot,
+  resetPlanPortfolioMemory,
+} from "./plans/plan-portfolio-memory";
 export { evaluatePracticalTacticBenchmark } from "./evaluation/practical-tactic-benchmark";
 export type {
   PracticalTacticBenchmarkCase,
