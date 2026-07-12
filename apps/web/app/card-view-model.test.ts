@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { VisibleCard } from "@netgrid/shared";
 
-import { enrichVisibleCard, iceStrengthBadgeValue } from "../features/cards/card-view-model";
+import {
+  aiBoonRunStrengthBadgeValue,
+  enrichVisibleCard,
+  iceStrengthBadgeValue,
+} from "../features/cards/card-view-model";
 
 type CardDetailsById = Parameters<typeof enrichVisibleCard>[1];
 type CardDetail = CardDetailsById[string];
@@ -81,6 +85,46 @@ describe("card view model ICE strength badge", () => {
         known: false,
         type: "ice",
         strength: 6,
+        printedStrength: null,
+      }),
+    ).toBeNull();
+  });
+});
+
+describe("card view model AI Boon run strength badge", () => {
+  it("shows AI Boon's current run strength over its empty printed strength area", () => {
+    const card: VisibleCard = {
+      instanceId: "ai-boon-1",
+      known: true,
+      definitionId: "onr_v1_002_ai-boon",
+      title: "AI Boon",
+      type: "program",
+      strength: 5,
+    };
+    const enriched = enrichVisibleCard(card, {
+      "onr_v1_002_ai-boon": {
+        ...detail("onr_v1_002_ai-boon", null),
+        side: "runner",
+        type: "program",
+        subtypes: ["icebreaker", "random"],
+      },
+    });
+
+    expect(enriched.printedStrength).toBeNull();
+    expect(aiBoonRunStrengthBadgeValue(enriched)).toBe(5);
+    expect(
+      aiBoonRunStrengthBadgeValue(enriched, { preview: true }),
+    ).toBeNull();
+  });
+
+  it("hides the chip when AI Boon has no active run strength", () => {
+    expect(
+      aiBoonRunStrengthBadgeValue({
+        instanceId: "ai-boon-2",
+        known: true,
+        definitionId: "onr_v1_002_ai-boon",
+        title: "AI Boon",
+        type: "program",
         printedStrength: null,
       }),
     ).toBeNull();

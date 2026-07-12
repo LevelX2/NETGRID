@@ -2439,14 +2439,6 @@ export function formatChronicleEvent(
       category = "run";
       importance = "important";
       const target = serverLabel ?? runTargetFromLabel(label);
-      const aiBoonRunStrength = numberValue(payload.runStartRandomStrength);
-      const aiBoonDieRoll = numberValue(payload.v1921DieRoll);
-      const showsAiBoonRunStrength =
-        stringValue(payload.v1921RunnerProgramAbility) ===
-          "run_start_random_strength_bonus" &&
-        sourceDefinitionId === "onr_v1_002_ai-boon" &&
-        aiBoonDieRoll !== undefined &&
-        aiBoonRunStrength !== undefined;
       const isWilsonRun =
         payload.runOnlyAction === true ||
         stringValue(payload.runnerAbility) === "gain_run_only_action" ||
@@ -2456,17 +2448,6 @@ export function formatChronicleEvent(
         `einen ${isWilsonRun ? "Wilson-Run" : "Run"} auf ${target} gestartet`,
       );
       chips.push("Run", target);
-      if (showsAiBoonRunStrength) {
-        visibility = "public";
-        cardDefinitionId = sourceDefinitionId;
-        cardTitle = "AI Boon";
-        description = `AI Boon würfelt eine ${aiBoonDieRoll} und hat für diesen Run Grundstärke ${aiBoonRunStrength}.`;
-        chips.push(
-          "AI Boon",
-          `Wurf ${aiBoonDieRoll}`,
-          `Grundstärke ${aiBoonRunStrength}`,
-        );
-      }
       break;
     }
     case "rez_ice":
@@ -3661,12 +3642,50 @@ export function formatChronicleEffectItems(
     side,
   );
   const tagGainItem = tagGainChronicleItem(event, side, effects);
+  const aiBoonRunStrengthItem = aiBoonRunStrengthChronicleItem(event);
   return [
+    ...(aiBoonRunStrengthItem ? [aiBoonRunStrengthItem] : []),
     ...(payloadItem ? [payloadItem] : []),
     ...(traceHardwareWreckerItem ? [traceHardwareWreckerItem] : []),
     ...(tagGainItem ? [tagGainItem] : []),
     ...effectItems,
   ];
+}
+
+function aiBoonRunStrengthChronicleItem(
+  event: PublicGameEvent,
+): ChronicleItem | undefined {
+  const payload = event.publicPayload ?? {};
+  const dieRoll = numberValue(payload.v1921DieRoll);
+  const runStrength = numberValue(payload.runStartRandomStrength);
+  if (
+    stringValue(payload.v1921RunnerProgramAbility) !==
+      "run_start_random_strength_bonus" ||
+    stringValue(payload.sourceDefinitionId) !== "onr_v1_002_ai-boon" ||
+    dieRoll === undefined ||
+    runStrength === undefined
+  )
+    return undefined;
+  const serverLabel = displayServerLabel(stringValue(payload.serverLabel));
+
+  return {
+    id: `${event.eventId}:ai-boon-run-strength`,
+    category: "run",
+    importance: "important",
+    visibility: "public",
+    actor: "runner",
+    title: `AI Boon würfelt eine ${dieRoll} und hat für diesen Run Grundstärke ${runStrength}.`,
+    chips: uniqueChips([
+      ...baseChips("runner", false),
+      "AI Boon",
+      `Wurf ${dieRoll}`,
+      `Grundstärke ${runStrength}`,
+    ]),
+    cardDefinitionId: "onr_v1_002_ai-boon",
+    cardTitle: "AI Boon",
+    cardDetailLines: [],
+    groupLabel: groupLabelFor("run", "runner", undefined, serverLabel),
+  };
 }
 
 function tagGainChronicleItem(

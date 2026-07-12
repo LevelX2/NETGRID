@@ -14,6 +14,9 @@ Status: grün
 - Das öffentliche Start-Run-Event führt den Wurf und die Run-Grundstärke.
 - Die Spielchronik zeigt für beide Seiten beispielsweise:
   `AI Boon würfelt eine 5 und hat für diesen Run Grundstärke 5.`
+- Der Wurf erscheint als eigener Chronikeintrag auch im einfachen Detailmodus
+  und bei Event-Runs. Während eines aktiven Runs liegt die aktuelle Stärke als
+  Chip unten rechts über AI Boons Stärkebereich; Pumpen aktualisiert den Wert.
 - Lehnt die Engine künftig eine KI-LegalAction ab, meldet der Server
   `ai_engine_action_rejected` samt sicherem Engine-Fehlercode. Die potenziell
   private Engine-Nachricht wird nicht an die Gegenseite ausgegeben.
@@ -21,7 +24,7 @@ Status: grün
 ## Verifikation
 
 - Engine: 3 Testdateien, 59 Tests grün.
-- Web-Chronik: 1 Testdatei, 168 Tests grün.
+- Web-Chronik und Kartenanzeige: 2 Testdateien, 175 Tests grün.
 - Multiplayer-Server: 1 Testdatei, 118 Tests grün.
 - Typechecks: `@netgrid/shared`, `@netgrid/engine`, `@netgrid/web` und
   `@netgrid/server` grün.

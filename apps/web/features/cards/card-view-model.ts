@@ -130,6 +130,24 @@ export function iceStrengthBadgeValue(
   return Math.max(0, Math.floor(card.strength));
 }
 
+export function aiBoonRunStrengthBadgeValue(
+  card: DisplayVisibleCard,
+  options: { preview?: boolean; forceCardBack?: boolean } = {},
+): number | null {
+  if (
+    !card.known ||
+    card.definitionId !== "onr_v1_002_ai-boon" ||
+    card.type !== "program" ||
+    typeof card.strength !== "number" ||
+    options.preview ||
+    options.forceCardBack ||
+    typeof card.printedStrength === "number"
+  ) {
+    return null;
+  }
+  return Math.max(0, Math.floor(card.strength));
+}
+
 function addCatalogSetDisplay(target: DisplayVisibleCard, detail: Pick<CardViewCatalogDetail, "setId" | "setName" | "collectorNumber">): void {
   const shortLabel = catalogSetShortLabelForSetId(detail.setId);
   const detailLabel = catalogSetDetailLabel(detail);

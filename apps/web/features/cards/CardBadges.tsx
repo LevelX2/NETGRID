@@ -101,6 +101,18 @@ export function IceStrengthBadge({ strength }: { strength: number }) {
   );
 }
 
+export function RunStrengthBadge({ strength }: { strength: number }) {
+  return (
+    <span
+      className="runStrengthBadge"
+      aria-label={`Aktuelle Stärke ${strength}`}
+      data-testid="run-strength-badge"
+    >
+      Stärke {strength}
+    </span>
+  );
+}
+
 export function CounterDisplayBadge({ display, scoreState }: { display: NonNullable<VisibleCard["counterDisplays"]>[number]; scoreState: boolean }) {
   const amount = safeCounterDisplayAmount(display.amount);
   if (amount <= 0) return null;

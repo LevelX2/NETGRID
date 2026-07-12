@@ -159,25 +159,40 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toContain("R&D");
   });
 
-  it.each(["runner", "corp"] as const)(
-    "shows AI Boon's public die roll and run base strength for the %s view",
-    (side) => {
-      const item = formatChronicleEvent(
-        makeEvent("start_run", {
-          actor: "runner",
-          aiReasonCode: "runner.plan.central_pressure",
-          label: "Run auf R&D",
-          serverLabel: "R&D",
-          sourceDefinitionId: "onr_v1_002_ai-boon",
-          v1921RunnerProgramAbility: "run_start_random_strength_bonus",
-          v1921DieRoll: 5,
-          runStartRandomStrength: 5,
-        }),
-        side,
-      );
+  it.each([
+    ["start_run", "runner"],
+    ["start_run", "corp"],
+    ["play_event", "runner"],
+    ["play_event", "corp"],
+  ] as const)(
+    "adds a visible AI Boon strength entry for %s in the %s view",
+    (actionType, side) => {
+      const event = makeEvent(actionType, {
+        actor: "runner",
+        aiReasonCode: "runner.plan.central_pressure",
+        label:
+          actionType === "start_run"
+            ? "Run auf R&D"
+            : "Lucidrine Booster Drug auf R&D",
+        serverLabel: "R&D",
+        ...(actionType === "play_event"
+          ? {
+              cardDefinitionId: "onr_v1_098_lucidrine-booster-drug",
+              title: "Lucidrine Booster Drug",
+              runnerEventRun: true,
+            }
+          : {}),
+        sourceDefinitionId: "onr_v1_002_ai-boon",
+        v1921RunnerProgramAbility: "run_start_random_strength_bonus",
+        v1921DieRoll: 5,
+        runStartRandomStrength: 5,
+      });
+      const [item] = formatChronicleEffectItems(event, side);
 
+      expect(item).toBeDefined();
+      if (!item) throw new Error("Expected AI Boon chronicle item");
       expect(item.visibility).toBe("public");
-      expect(item.description).toBe(
+      expect(item.title).toBe(
         "AI Boon würfelt eine 5 und hat für diesen Run Grundstärke 5.",
       );
       expect(item.cardDefinitionId).toBe("onr_v1_002_ai-boon");

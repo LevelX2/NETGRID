@@ -7667,6 +7667,14 @@ select {
   font-size: calc(7px * var(--lane-card-scale, 1));
 }
 
+.lane .runStrengthBadge {
+  right: calc(5px * var(--lane-card-scale, 1));
+  bottom: calc(5px * var(--lane-card-scale, 1));
+  min-height: calc(14px * var(--lane-card-scale, 1));
+  padding: calc(1px * var(--lane-card-scale, 1)) calc(5px * var(--lane-card-scale, 1));
+  font-size: calc(7px * var(--lane-card-scale, 1));
+}
+
 .lane .brokerStoredCreditsBadge,
 .lane .recurringCreditBadge {
   top: calc(5px * var(--lane-card-scale, 1));
@@ -8210,6 +8218,34 @@ select {
   box-shadow:
     0 1px 4px rgb(0 0 0 / 0.26),
     inset 0 0 0 1px rgb(255 255 255 / 0.05);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.runStrengthBadge {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  z-index: 43;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 16px;
+  padding: 2px 7px;
+  border: 1px solid color-mix(in srgb, var(--runner), white 35%);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 30% 20%, rgb(255 255 255 / 0.5), transparent 32%),
+    linear-gradient(135deg, color-mix(in srgb, var(--runner), white 18%), color-mix(in srgb, var(--runner), black 18%));
+  color: white;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  text-shadow: 0 1px 1px rgb(0 0 0 / 0.48);
+  box-shadow:
+    0 1px 4px rgb(0 0 0 / 0.3),
+    inset 0 0 0 1px rgb(255 255 255 / 0.06);
   white-space: nowrap;
   pointer-events: none;
 }
@@ -13101,6 +13137,7 @@ select,
 .serverCount,
 .cardTooltipStat,
 .strengthBoostBadge,
+.runStrengthBadge,
 .variableSubroutineBadge {
   cursor: default;
   user-select: none;
