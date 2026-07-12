@@ -40,6 +40,12 @@ export function bestSemanticRuntimeChoiceForTacticalPlanOverride(
   const viableChoices = choices.filter(
     (choice) => !tacticalPlanBlocksSemanticChoice(planRuntime, choice),
   );
+  const acuteHandBufferChoices = viableChoices.filter(
+    semanticRuntimeChoiceIsAcuteHandBufferDraw,
+  );
+  if (acuteHandBufferChoices.length > 0) {
+    return bestSemanticRuntimeChoice(acuteHandBufferChoices);
+  }
   return bestSemanticRuntimeChoice(viableChoices);
 }
 
@@ -245,6 +251,7 @@ export function tacticalPlanMappedChoice(
     if (
       tacticalPlanRunnerMappingBlocksOffPlanOverride(
         mapping,
+        mappedChoice,
         overrideChoice,
         mappedActionIds,
         {
@@ -398,6 +405,7 @@ function positiveScoreRank(score: number): number {
 
 function tacticalPlanRunnerMappingBlocksOffPlanOverride(
   mapping: PlanStepMappingResult,
+  mappedChoice: SemanticRuntimeChoice,
   overrideChoice: SemanticRuntimeChoice,
   mappedActionIds: ReadonlySet<string>,
   exceptions: {
@@ -416,7 +424,11 @@ function tacticalPlanRunnerMappingBlocksOffPlanOverride(
   if (exceptions.lowValueRecoveryShouldYield) return false;
   if (exceptions.corpBoardTriageMismatchShouldYield) return false;
   if (exceptions.deferredDevelopmentInstallShouldYield) return false;
-  return !runnerPlanOverrideIsHardInterrupt(mapping.plan, overrideChoice);
+  return !runnerPlanOverrideIsHardInterrupt(
+    mapping.plan,
+    mappedChoice,
+    overrideChoice,
+  );
 }
 
 function tacticalPlanCorpScoreConversionBlocksOffPlanOverride(
@@ -523,6 +535,7 @@ function runnerPlanTypeRequiresPlanDominance(
 
 function runnerPlanOverrideIsHardInterrupt(
   mappedPlan: TacticalPlan,
+  mappedChoice: SemanticRuntimeChoice,
   overrideChoice: SemanticRuntimeChoice,
 ): boolean {
   if (
@@ -538,6 +551,13 @@ function runnerPlanOverrideIsHardInterrupt(
   if (semanticRuntimeChoiceHasAllowedLoanInterrupt(overrideChoice)) {
     return true;
   }
+  if (
+    semanticRuntimeChoiceIsAcuteHandBufferDraw(overrideChoice) &&
+    semanticRuntimeChoiceIsProjectedRun(mappedChoice) &&
+    !mappedPlanHasImmediateVisibleRunPayoff(mappedPlan, mappedChoice)
+  ) {
+    return true;
+  }
   if (overrideChoice.action.type !== "start_run") return false;
   if (mappedPlan.type === "runner.survival_defense") {
     return semanticRuntimeChoiceHasAnyScoreComponent(overrideChoice, [
@@ -549,6 +569,33 @@ function runnerPlanOverrideIsHardInterrupt(
     "runner_rnd_fresh_memory",
     "runner_goal_fit_tactical_goal_run_target",
   ]);
+}
+
+function mappedPlanHasImmediateVisibleRunPayoff(
+  plan: TacticalPlan,
+  mappedChoice: SemanticRuntimeChoice,
+): boolean {
+  return (
+    plan.evidence.includes("runner_run_target_payoff:agenda") ||
+    plan.evidence.includes("runner_run_target_payoff:score_threat") ||
+    semanticRuntimeChoiceHasAnyScoreComponent(mappedChoice, [
+      "runner_hq_known_agenda",
+    ])
+  );
+}
+
+function semanticRuntimeChoiceIsAcuteHandBufferDraw(
+  choice: SemanticRuntimeChoice,
+): boolean {
+  if (choice.action.type !== "draw_card") return false;
+  const component = choice.scoreBreakdown.find(
+    (entry) => entry.key === "runner_hand_buffer_need",
+  );
+  if (!component) return false;
+  const handMatch = /(?:^|\|)hand:(\d+)(?:\||$)/.exec(
+    component.reason ?? "",
+  );
+  return handMatch !== null && Number(handMatch[1] ?? Number.NaN) <= 1;
 }
 
 function semanticRuntimeChoiceHasAllowedLoanInterrupt(

@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
-import { tacticalPlanMappedChoice } from "./semantic-choice-ranking";
+import {
+  bestSemanticRuntimeChoiceForTacticalPlanOverride,
+  tacticalPlanMappedChoice,
+} from "./semantic-choice-ranking";
 import type { SemanticRuntimeChoice } from "./semantic-runtime-types";
 import {
   createPlanStep,
@@ -9,6 +12,67 @@ import {
 } from "../tactical-plans";
 
 describe("tacticalPlanMappedChoice", () => {
+  it("promotes an acute one-card hand draw to the plan-override candidate", () => {
+    const draw = legalAction("draw", "draw_card");
+    const gain = legalAction("gain", "gain_credit");
+    const drawChoice = choice(draw, 1543, [], {
+      key: "runner_hand_buffer_need",
+      value: 600,
+      reason: "hand:1|damage_pressure:false",
+    });
+
+    const override = bestSemanticRuntimeChoiceForTacticalPlanOverride(
+      [choice(gain, 1679), drawChoice],
+      { planAlternatives: [] } as never,
+    );
+
+    expect(override?.action.actionId).toBe("draw");
+  });
+
+  it("lets an acute one-card hand draw interrupt a speculative run plan", () => {
+    const draw = legalAction("draw", "draw_card");
+    const run = legalAction("run-rd", "start_run", { serverId: "rd" });
+    const drawChoice = choice(draw, 1543, [], {
+      key: "runner_hand_buffer_need",
+      value: 600,
+      reason: "hand:1|damage_pressure:false",
+    });
+    const runChoice = choice(run, 453);
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [drawChoice, runChoice],
+      centralRunMapping([run]),
+      drawChoice,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("draw");
+  });
+
+  it("keeps a visible immediate agenda run over the acute hand buffer", () => {
+    const draw = legalAction("draw", "draw_card");
+    const run = legalAction("run-hq", "start_run", { serverId: "hq" });
+    const drawChoice = choice(draw, 1543, [], {
+      key: "runner_hand_buffer_need",
+      value: 600,
+      reason: "hand:1|damage_pressure:false",
+    });
+    const runChoice = choice(
+      run,
+      453,
+      scoreComponentEvidence("runner_hq_known_agenda"),
+    );
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [drawChoice, runChoice],
+      centralRunMapping([run]),
+      drawChoice,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_blocked");
+    expect(result.choice?.action.actionId).toBe("run-hq");
+  });
+
   it.each(["active", "progressing"] as const)(
     "keeps a %s guaranteed Corp score-conversion sequence on its exact next action",
     (status) => {
