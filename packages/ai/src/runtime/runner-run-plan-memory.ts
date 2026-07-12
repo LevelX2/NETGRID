@@ -72,6 +72,21 @@ export function resetRunnerRunPlanMemory(): void {
   runnerRunPlanMemoryByKey.clear();
 }
 
+export function restoreRunnerRunPlanMemorySnapshot(
+  input: AiDecisionInput,
+  plan: RunnerRunPlan | undefined,
+): void {
+  const key = runnerRunPlanMemoryKey(input);
+  if (!plan) {
+    runnerRunPlanMemoryByKey.delete(key);
+    return;
+  }
+  if (input.side !== "runner" || !runnerHasActiveRun(input)) {
+    throw new Error("invalid_runner_run_plan_memory_checkpoint");
+  }
+  runnerRunPlanMemoryByKey.set(key, structuredClone(plan));
+}
+
 function runnerRunPlanIsActive(plan: RunnerRunPlan): boolean {
   return (
     plan.lifecycle === "created" ||

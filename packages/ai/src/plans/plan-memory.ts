@@ -81,6 +81,26 @@ export function resetTacticalPlanMemory(): void {
   resetStrategicIntentMemory();
 }
 
+export function restoreTacticalPlanMemorySnapshot(
+  input: AiDecisionInput,
+  snapshot: TacticalPlanMemorySnapshot | undefined,
+): void {
+  const key = tacticalPlanMemoryKey(input);
+  if (!snapshot) {
+    tacticalPlanMemoryByKey.delete(key);
+    return;
+  }
+  if (
+    snapshot.schemaVersion !== TACTICAL_PLAN_SCHEMA_VERSION ||
+    snapshot.memoryId !== key ||
+    snapshot.side !== input.side ||
+    snapshot.updatedAtStateVersion > input.playerView.stateVersion
+  ) {
+    throw new Error("invalid_tactical_plan_memory_checkpoint");
+  }
+  tacticalPlanMemoryByKey.set(key, structuredClone(snapshot));
+}
+
 export function getPlanContinuityMemorySnapshot(
   input: AiDecisionInput,
 ): TacticalPlanMemorySnapshot | PlanContinuityMemorySnapshot | undefined {

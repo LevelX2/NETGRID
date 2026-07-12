@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://netgrid.local/schemas/ai-decision-checkpoint-v1.schema.json",
+  "title": "NETGRID AI Decision Checkpoint v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "checkpointId",
+    "source",
+    "compatibility",
+    "actor",
+    "difficulty",
+    "profileId",
+    "deckSnapshot",
+    "engine",
+    "runtime",
+    "expectation"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "ai-decision-checkpoint-v1" },
+    "checkpointId": { "type": "string", "minLength": 1 },
+    "source": { "type": "object" },
+    "compatibility": { "type": "object" },
+    "actor": { "enum": ["corp", "runner"] },
+    "difficulty": { "enum": ["easy", "normal", "hard"] },
+    "profileId": { "type": "string", "minLength": 1 },
+    "deckSnapshot": { "type": "object" },
+    "engine": { "type": "object" },
+    "runtime": {
+      "type": "object",
+      "required": ["schemaVersion"],
+      "properties": {
+        "schemaVersion": { "const": "ai-runtime-checkpoint-v1" }
+      }
+    },
+    "expectation": { "type": "object" }
+  }
+}

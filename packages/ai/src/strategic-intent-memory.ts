@@ -83,6 +83,29 @@ export function resetStrategicIntentMemory(): void {
   strategicIntentMemoryByKey.clear();
 }
 
+export function restoreStrategicIntentMemorySnapshot(
+  input: AiDecisionInput,
+  snapshot: StrategicIntentMemorySnapshot | undefined,
+  deckSnapshotId?: string,
+): void {
+  const key = strategicIntentMemoryKey(input, deckSnapshotId);
+  if (!snapshot) {
+    strategicIntentMemoryByKey.delete(key);
+    return;
+  }
+  if (
+    snapshot.schemaVersion !== STRATEGIC_INTENT_MEMORY_SCHEMA_VERSION ||
+    snapshot.memoryId !== key ||
+    snapshot.side !== input.side ||
+    snapshot.profileId !== input.profileId ||
+    snapshot.deckSnapshotId !== deckId(input, deckSnapshotId) ||
+    snapshot.updatedAtStateVersion > input.playerView.stateVersion
+  ) {
+    throw new Error("invalid_strategic_intent_memory_checkpoint");
+  }
+  strategicIntentMemoryByKey.set(key, structuredClone(snapshot));
+}
+
 export function redactedStrategicIntentMemoryFacts(
   snapshot: StrategicIntentMemorySnapshot,
 ): string[] {

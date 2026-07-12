@@ -46,6 +46,25 @@ export function resetPlanPortfolioMemory(): void {
   planPortfolioMemoryByKey.clear();
 }
 
+export function restorePlanPortfolioMemorySnapshot(
+  input: AiDecisionInput,
+  snapshot: PlanPortfolioSnapshot | undefined,
+): void {
+  const key = planPortfolioMemoryKey(input);
+  if (!snapshot) {
+    planPortfolioMemoryByKey.delete(key);
+    return;
+  }
+  if (
+    snapshot.side !== input.side ||
+    snapshot.profileId !== input.profileId ||
+    snapshot.stateVersion > input.playerView.stateVersion
+  ) {
+    throw new Error("invalid_plan_portfolio_memory_checkpoint");
+  }
+  planPortfolioMemoryByKey.set(key, structuredClone(snapshot));
+}
+
 function planPortfolioMemoryKey(input: AiDecisionInput): string {
   return [
     planPortfolioMemoryContextId(input),
