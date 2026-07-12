@@ -1,6 +1,7 @@
 import { type AiDecisionInput } from "@netgrid/shared";
 
 import { selectEfficientTraceBidOption } from "../trace-bid-efficiency";
+import { assessCorpTraceBid } from "./corp-trace-bid-assessment";
 import { type LatestTraceContext } from "./trace-context";
 
 type PendingChoice = NonNullable<
@@ -22,7 +23,7 @@ export function selectedBidChoiceOptionId(
   const maxBid = bidOptions.at(-1)?.amount ?? 0;
   let desired = 0;
   if (input.side === "corp") {
-    desired = corpDesiredBidAmount(input, choice, maxBid);
+    desired = corpDesiredBidAmount(input, choice, traceContext, maxBid);
   } else {
     const tieBid = Math.max(
       0,
@@ -47,6 +48,7 @@ export function selectedBidChoiceOptionId(
 function corpDesiredBidAmount(
   input: AiDecisionInput,
   choice: PendingChoice,
+  traceContext: LatestTraceContext,
   maxBid: number,
 ): number {
   if (
@@ -59,9 +61,13 @@ function corpDesiredBidAmount(
       return Math.max(2, Math.ceil(maxBid * 0.75));
     return Math.min(2, maxBid);
   }
-  return input.difficulty === "hard"
-    ? Math.min(2, maxBid)
-    : input.difficulty === "normal"
-      ? Math.min(1, maxBid)
-      : 0;
+  const conservativeBid =
+    input.difficulty === "hard" ? 2 : input.difficulty === "normal" ? 1 : 0;
+  if (input.difficulty === "easy") return 0;
+  return assessCorpTraceBid({
+    input,
+    traceContext,
+    maxBid,
+    conservativeBid,
+  }).recommendedBid;
 }
