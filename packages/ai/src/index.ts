@@ -157,6 +157,19 @@ export type {
   DeckStrategyScore,
   RunnerDeckStrategyProfiles,
 } from "./deck-doctrine-strategy";
+export {
+  buildRemoteDoctrineProfile,
+  redactedRemoteDoctrineFacts,
+  REMOTE_DOCTRINE_PROFILE_SCHEMA_VERSION,
+} from "./remote-doctrine-profile";
+export type {
+  BuildRemoteDoctrineProfileParams,
+  RemoteBuildTiming,
+  RemoteDependency,
+  RemoteDoctrineProfile,
+  RemoteProtectionTarget,
+  RemotePurpose,
+} from "./remote-doctrine-profile";
 export { evaluatePracticalTacticBenchmark } from "./evaluation/practical-tactic-benchmark";
 export type {
   PracticalTacticBenchmarkCase,
