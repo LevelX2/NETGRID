@@ -97,3 +97,35 @@
 - kein Schluss von anderer Deckauswahl der vorherigen Serie auf einen
   kontrollierten Commit-Regressionsnachweis;
 - kein KI-Fix für bloße Agenda-Verteilung oder erfolglose zufällige Accesses.
+
+## Nachher-Evidence
+
+- Korp, StateVersion 200: Die aktuelle Runtime führt aus demselben
+  gespeicherten Zustand `Corporate War installieren → Systematic Layoffs →
+  zwei Counter wählen → advancen → scoren` aus. Das Real-Engine-Gate wendet
+  dieselbe fünfstufige Folge ohne Fixture-Payload-Abkürzung an.
+- Runner, StateVersion 34: `Broker: 3 Credits auf Broker legen` behält im
+  AI-Input `cardImplementationAddsHostedCredits` und
+  `hostedCreditAddAmount: 3`, erhält Score 2.112 und wird gewählt.
+- Runner, StateVersions 22 und 42: Die bezahlte City-Surveillance-Variante
+  erhält Score 1.093; die Tag-Variante erhält wegen der projizierten
+  Tag-Folgekosten nur 228 und wird nicht gewählt.
+- Runner, StateVersions 84 und 114: Rush Hour wird nach den drei Eventkosten
+  gegen den bekannten R&D-Pfad mit null verbleibenden Credits bewertet und
+  nicht mehr vom Run- oder Handentwicklungsplan erzwungen.
+- Runner, StateVersions 124 und 140: Bei einer Handkarte wird jeweils die
+  bezahlte Draw-Variante statt des spekulativen HQ-/R&D-Runs gewählt.
+- Die Gegenprobe mit einem sichtbaren unmittelbar contestbaren Remote-
+  Score-Threat lässt den Run weiterhin zu.
+
+## Gate-Evidence
+
+- `match-series-70be-live-regressions.test.ts` enthält sechs Engine-erzeugte
+  Live-Verträge für Score-Sequenz, Broker, Draw-Tax, Event-Run, Handpuffer und
+  sichtbaren Score-Threat.
+- Der zonentreue Real-Engine-Fixture-Builder verschiebt gekürzte Handkarten
+  zurück nach R&D beziehungsweise Stack; echte `applyAction`-Folgen können
+  dadurch keine ungültigen kartenlosen Zonen mehr verdecken.
+- Vollständige AI-Shards: 297 Dateien, 1.955 Tests grün.
+- Vollständige Engine-Suite, Engine-/AI-Typecheck, `check:ai`,
+  Deck-Doctrine und `git diff --check`: grün.

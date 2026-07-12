@@ -1,6 +1,7 @@
 # Matchserie 70BE: KI-Remediation-Prozess
 
-Status: aktiv
+Status: abgeschlossen; lokale `main`-Integration ist der nachgelagerte
+Integrationsschritt
 
 ## Quelle und Gesamtziel
 
@@ -140,3 +141,18 @@ Mindestens:
 Der Prozess ist erst abgeschlossen, wenn alle sechs Pakete committed, die
 relevanten Checks grün, der Branch lokal nach `main` integriert und der
 Hauptworkspace nach dem Merge sauber verifiziert ist.
+
+## Abschlussstand 2026-07-12
+
+- P01 bis P06 sind umgesetzt und jeweils committed.
+- Die gespeicherten Problemzustände wurden nach der Korrektur erneut über den
+  aktuellen Engine-/AI-Pfad ausgewertet.
+- Das neue Real-Engine-Gate erzeugt die LegalActions selbst und wendet die
+  vollständige Korp-Score-Sequenz tatsächlich an.
+- Die erste breite AI-Suite fand zwei zu weit gefasste Handpuffer-Fixtures;
+  nach der Review-Nachschärfung wirkt der Override nur gegen tatsächlich
+  gemappte spekulative Runs und nicht gegen positive Broker-/No-Run-Verträge.
+- 297 AI-Testdateien mit 1.955 Tests, die vollständige Engine-Suite,
+  Engine-/AI-Typecheck, `check:ai`, Deck-Doctrine und Diff-Hygiene sind grün.
+- Führender Abschlussnachweis:
+  `docs/reviews/ai/match-series-70be-ai-final-review-2026-07-12.md`.
