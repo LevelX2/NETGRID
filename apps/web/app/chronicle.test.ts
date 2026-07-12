@@ -159,6 +159,34 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toContain("R&D");
   });
 
+  it.each(["runner", "corp"] as const)(
+    "shows AI Boon's public die roll and run base strength for the %s view",
+    (side) => {
+      const item = formatChronicleEvent(
+        makeEvent("start_run", {
+          actor: "runner",
+          aiReasonCode: "runner.plan.central_pressure",
+          label: "Run auf R&D",
+          serverLabel: "R&D",
+          sourceDefinitionId: "onr_v1_002_ai-boon",
+          v1921RunnerProgramAbility: "run_start_random_strength_bonus",
+          v1921DieRoll: 5,
+          runStartRandomStrength: 5,
+        }),
+        side,
+      );
+
+      expect(item.visibility).toBe("public");
+      expect(item.description).toBe(
+        "AI Boon würfelt eine 5 und hat für diesen Run Grundstärke 5.",
+      );
+      expect(item.cardDefinitionId).toBe("onr_v1_002_ai-boon");
+      expect(item.chips).toEqual(
+        expect.arrayContaining(["AI Boon", "Wurf 5", "Grundstärke 5"]),
+      );
+    },
+  );
+
   it("labels Wilson runs without adding cap details to chronicle chips", () => {
     const item = formatChronicleEvent(
       makeEvent("start_run", {
