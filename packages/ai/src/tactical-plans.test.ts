@@ -317,7 +317,6 @@ describe("tactical plan model", () => {
         rulesText: "Gain 3 credits.",
       }),
     ];
-
     const mapping = mapPlanStepToLegalActions(
       plan,
       plan.currentStep,
@@ -905,6 +904,7 @@ describe("tactical plan model", () => {
         rulesText: "Draw five cards.",
       }),
     ];
+    input.playerView.own.clicks = 1;
 
     const plans = buildTacticalPlans({ input });
     const coveragePlan = runnerCoverageTargetPlan(plans, "remote_1");
@@ -919,6 +919,11 @@ describe("tactical plan model", () => {
     expect(coveragePlan?.currentStep.rationale).toEqual(
       expect.arrayContaining(["coverage_answer_role:program_search"]),
     );
+    expect(coveragePlan?.currentStep.followupBudget).toMatchObject({
+      recommendation: "acquire_for_next_turn",
+      horizon: "next_turn_allowed",
+      sameTurnReachable: false,
+    });
     expect(mapping.actionCandidateIds).toEqual(["mantis"]);
     expect(mapping.rationale.join("\n")).toContain(
       "coverageAnswerRole:program_search",

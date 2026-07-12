@@ -271,6 +271,56 @@ describe("corpScoreWindowBlockers", () => {
       rationale: [
         "use the best affordable non-zero protection before the search click budget expires",
       ],
+      followupBudget: {
+        recommendation: "convert_now",
+        horizon: "same_turn_required",
+      },
+    });
+  });
+
+  it("does not spend the last urgent click searching without a conversion action", () => {
+    const agenda = corpCard("political-overthrow", {
+      advancementRequirement: 9,
+      agendaPoints: 6,
+    });
+    const installAgenda = {
+      ...corpAction("install-political-overthrow", agenda.instanceId),
+      type: "install_card" as const,
+      payload: { placement: "root", serverId: "remote_1" },
+    } as LegalAction;
+    const draw = {
+      ...corpAction("draw-protection", "game_rule"),
+      type: "draw_card" as const,
+      source: "game_rule",
+      costs: [{ clicks: 1 }],
+      payload: {},
+    } as LegalAction;
+    const input = corpScoreInput({
+      credits: 8,
+      clicks: 1,
+      agenda,
+      legalActions: [installAgenda, draw],
+    });
+    const blockers = corpScoreWindowBlockers(
+      input,
+      "remote_1",
+      installAgenda,
+      scorelineAssessment({
+        actionId: installAgenda.actionId,
+        blockedByCredits: false,
+        recommendedNextStep: "protect_remote",
+        blockers: ["unsafe_remote", "runner_contest"],
+      }),
+    );
+
+    expect(corpScoreWindowCurrentStep(installAgenda, blockers, input)).toMatchObject({
+      kind: "find_remote_protection",
+      actionCandidateIds: [],
+      desiredActionSemantics: [],
+      followupBudget: {
+        recommendation: "defer_acquisition",
+        sameTurnReachable: false,
+      },
     });
   });
 });

@@ -11,6 +11,7 @@ import {
   deckCoverageStateForRequiredCoverage,
 } from "./tactical-plan-deck-coverage";
 import { bestLegalCoverageAnswerRole } from "./tactical-plan-legal-coverage-answers";
+import { assessPlanFollowupActionBudget } from "./tactical-plan-followup-budget";
 import type {
   PlanStep,
   TacticalPlanBuildContext,
@@ -21,6 +22,27 @@ export function runnerBreakerCoverageStep(
   serverId: string,
 ): PlanStep {
   const input = context.input;
+  const acquisitionActionIds = input.legalActions
+    .filter((action) =>
+      action.side === "runner" &&
+      (action.type === "draw_card" ||
+        action.type === "play_event" ||
+        action.type === "trigger_ability" ||
+        action.type === "activated_card_ability"),
+    )
+    .map((action) => action.actionId);
+  const coverageSearchFollowupBudget = assessPlanFollowupActionBudget({
+    input,
+    acquisitionActionIds,
+    requiredFollowupActions: 1,
+    horizon: "next_turn_allowed",
+  });
+  const searchEngineSetupFollowupBudget = assessPlanFollowupActionBudget({
+    input,
+    acquisitionActionIds,
+    requiredFollowupActions: 2,
+    horizon: "next_turn_allowed",
+  });
   const missingCoverage = missingBreakerCoverageKind(input.playerView, serverId);
   const deckState = deckCoverageStateForRequiredCoverage(context, missingCoverage);
   const deckInventoryEntry = bestDeckBreakerForRequiredCoverage(
@@ -119,6 +141,7 @@ export function runnerBreakerCoverageStep(
       rationale: [
         `deck capability has ${missingCoverage} coverage and legal search access`,
       ],
+      followupBudget: coverageSearchFollowupBudget,
     });
   }
   if (deckState?.inDeckKnown) {
@@ -131,6 +154,7 @@ export function runnerBreakerCoverageStep(
         `deck capability has ${missingCoverage} coverage but no legal search access`,
         "deck_capability:draw_only",
       ],
+      followupBudget: coverageSearchFollowupBudget,
     });
   }
   if (deckState?.missing && deckCapabilityHasDeckSnapshot(context)) {
@@ -175,6 +199,7 @@ export function runnerBreakerCoverageStep(
         `legal search or recovery action can find ${missingCoverage} coverage`,
         `coverage_answer_role:${legalAnswerRole}`,
       ],
+      followupBudget: coverageSearchFollowupBudget,
     });
   }
   if (legalAnswerRole === "search_engine_setup") {
@@ -187,6 +212,7 @@ export function runnerBreakerCoverageStep(
         `legal search engine setup can prepare ${missingCoverage} coverage`,
         "coverage_answer_role:search_engine_setup",
       ],
+      followupBudget: searchEngineSetupFollowupBudget,
     });
   }
   if (
@@ -209,6 +235,7 @@ export function runnerBreakerCoverageStep(
           : `basic draw is the fallback path toward ${missingCoverage} coverage`,
         `coverage_answer_role:${legalAnswerRole}`,
       ],
+      followupBudget: coverageSearchFollowupBudget,
     });
   }
   return createPlanStep({

@@ -216,6 +216,22 @@ export type PlanStep = {
   mappingStatus?: PlanMappingStatus;
   actionCandidateIds: string[];
   rationale: string[];
+  followupBudget?: PlanFollowupActionBudget;
+};
+
+export type PlanFollowupActionBudget = {
+  recommendation:
+    | "convert_now"
+    | "acquire_then_convert"
+    | "acquire_for_next_turn"
+    | "defer_acquisition";
+  horizon: "same_turn_required" | "next_turn_allowed";
+  availableActions: number;
+  acquisitionActionCost: number;
+  requiredFollowupActions: number;
+  conversionAvailable: boolean;
+  sameTurnReachable: boolean;
+  evidence: string[];
 };
 
 export type TacticalPlan = {

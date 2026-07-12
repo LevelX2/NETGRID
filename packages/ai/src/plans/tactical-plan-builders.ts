@@ -6,6 +6,7 @@ import {
   type PlanMappingStatus,
   type PlanScoreBreakdown,
   type PlanStep,
+  type PlanFollowupActionBudget,
   type PlanStepKind,
   type PlanTarget,
   type RequiredCapability,
@@ -21,6 +22,7 @@ export function createPlanStep(params: {
   mappingStatus?: PlanMappingStatus;
   actionCandidateIds?: string[];
   rationale?: string[];
+  followupBudget?: PlanFollowupActionBudget;
 }): PlanStep {
   return {
     stepId: params.stepId,
@@ -30,6 +32,14 @@ export function createPlanStep(params: {
     ...(params.mappingStatus ? { mappingStatus: params.mappingStatus } : {}),
     actionCandidateIds: [...(params.actionCandidateIds ?? [])],
     rationale: [...(params.rationale ?? [])],
+    ...(params.followupBudget
+      ? {
+          followupBudget: {
+            ...params.followupBudget,
+            evidence: [...params.followupBudget.evidence],
+          },
+        }
+      : {}),
   };
 }
 

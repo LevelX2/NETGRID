@@ -12,6 +12,7 @@ import { createPlanStep } from "./tactical-plan-builders";
 import { actionServerId, isRemoteServer } from "./tactical-plan-server-targets";
 import { serverHasUnrezzedIce } from "./tactical-plan-run-reachability";
 import { visibleCardByInstanceId } from "./tactical-plan-visible-cards";
+import { assessPlanFollowupActionBudget } from "./tactical-plan-followup-budget";
 import type {
   PlanBlocker,
   PlanStep,
@@ -234,11 +235,19 @@ export function corpScoreWindowCurrentStep(
     const protectionPath = input
       ? corpRemoteProtectionPath(input, targetServerId)
       : emptyCorpRemoteProtectionPath();
+    const protectionFollowupBudget = input
+      ? assessPlanFollowupActionBudget({
+          input,
+          acquisitionActionIds: protectionPath.acquisitionActionIds,
+          conversionActionIds: protectionPath.fallbackActionIds,
+          requiredFollowupActions: 1,
+          horizon: "same_turn_required",
+        })
+      : undefined;
     if (
-      input !== undefined &&
-      input.playerView.own.clicks <= 1 &&
       protectionPath.immediateActionIds.length === 0 &&
-      protectionPath.fallbackActionIds.length > 0
+      protectionPath.fallbackActionIds.length > 0 &&
+      protectionFollowupBudget?.recommendation === "convert_now"
     ) {
       return createPlanStep({
         stepId: `protect_remote_fallback:${action.actionId}`,
@@ -259,6 +268,7 @@ export function corpScoreWindowCurrentStep(
         rationale: [
           "use the best affordable non-zero protection before the search click budget expires",
         ],
+        followupBudget: protectionFollowupBudget,
       });
     }
     if (
@@ -299,12 +309,14 @@ export function corpScoreWindowCurrentStep(
       return createPlanStep({
         stepId: `find_remote_protection:${action.actionId}`,
         kind: "find_remote_protection",
-        desiredActionSemantics: [
-          "draw.card",
-          "search.deck",
-          "remote_protection",
-        ],
-        actionCandidateIds: protectionPath.acquisitionActionIds,
+        desiredActionSemantics:
+          protectionFollowupBudget?.recommendation === "defer_acquisition"
+            ? []
+            : ["draw.card", "search.deck", "remote_protection"],
+        actionCandidateIds:
+          protectionFollowupBudget?.recommendation === "defer_acquisition"
+            ? []
+            : protectionPath.acquisitionActionIds,
         requiredCapabilities: [
           {
             capabilityId: `remote_protection:${action.actionId}`,
@@ -325,6 +337,9 @@ export function corpScoreWindowCurrentStep(
         rationale: [
           "find protection that the visible Runner rig cannot nullify",
         ],
+        ...(protectionFollowupBudget
+          ? { followupBudget: protectionFollowupBudget }
+          : {}),
       });
     }
     return createPlanStep({
