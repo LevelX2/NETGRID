@@ -2,7 +2,7 @@
 
 ## Status
 
-`implementation_complete_integration_pending`
+`complete`
 
 ## Ergebnis
 
@@ -59,3 +59,16 @@ Credit-vs-Draw, dreifache BBS-Nutzung, finite Economy sowie langfristige und
 iterative Planportfolio-Ziele wurden nicht verändert. Diese Punkte können auf
 dem parallelen Planportfolio-Strang weiterentwickelt werden, ohne dass dieses
 Paket ihnen eine Ressourcen- oder Zielhierarchie aufzwingt.
+
+## Lokale Integration
+
+- Branch `codex/ai-opening-trace-diagnostics` wurde per Fast-Forward bis
+  `7be350dab` nach lokalem `main` übernommen.
+- Auf `main` bestanden anschließend erneut 8 Fokusdateien mit 158 Tests,
+  `@netgrid/ai`-Typecheck und Diff-Hygiene.
+- Der saubere Arbeits-Worktree wurde nach einem Windows-Long-Path-Fallback aus
+  Git und Dateisystem entfernt; der vollständig gemergte Arbeitsbranch wurde
+  gelöscht.
+- Der parallele Worktree `NETGRID_AI_PLANPORTFOLIO_REMOTE_DOCTRINE` wurde weder
+  verändert noch integriert.
+- Es erfolgte kein Push und keine Remote-Integration.

@@ -2,7 +2,8 @@
 
 ## Status
 
-P0 bis P4 abgeschlossen; lokale Integration und Cleanup in P5 ausstehend.
+P0 bis P5 abgeschlossen; lokal nach `main` integriert und Arbeits-Worktree
+entfernt.
 
 Umsetzung im Worktree
 `C:\Projekte\NETGRID_AI_OPENING_TRACE_DIAGNOSTICS` auf Branch
@@ -62,6 +63,8 @@ bleiben side-sicher, deterministisch und LegalAction-basiert.
 ## State Machine
 
 `prepared -> opening -> trace -> forced-decision -> verification -> integrated`
+
+Endzustand: `integrated`.
 
 Es ist immer nur ein Paket aktiv. Kein Paket wird ohne bestandenes Done-Gate
 übersprungen.
