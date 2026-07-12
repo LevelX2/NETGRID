@@ -32,12 +32,32 @@ export class RealEngineFixtureBuilder {
   }
 
   withRunnerGripSize(size: number): this {
+    const removed = this.state.runner.grip.slice(size);
     this.state.runner.grip = this.state.runner.grip.slice(0, size);
+    this.state.runner.stack.push(...removed);
+    for (const id of removed) {
+      this.state.cardInstances[id] = {
+        ...this.state.cardInstances[id]!,
+        zone: { side: "runner", zone: "stack" },
+        faceup: false,
+        rezzed: false,
+      };
+    }
     return this;
   }
 
   withCorpHqSize(size: number): this {
+    const removed = this.state.corp.hq.slice(size);
     this.state.corp.hq = this.state.corp.hq.slice(0, size);
+    this.state.corp.rd.push(...removed);
+    for (const id of removed) {
+      this.state.cardInstances[id] = {
+        ...this.state.cardInstances[id]!,
+        zone: { side: "corp", zone: "rd" },
+        faceup: false,
+        rezzed: false,
+      };
+    }
     return this;
   }
 
@@ -76,6 +96,26 @@ export class RealEngineFixtureBuilder {
       zone: { side: "runner", zone: "rig" },
       faceup: true,
       rezzed: true,
+    };
+    return this;
+  }
+
+  withRunnerResourceInstalled(
+    definitionId: string,
+    counters: Partial<Record<"bit" | "power" | "recurring_credit", number>> = {},
+  ): this {
+    const id = this.findCard(definitionId);
+    this.removeEverywhere(id);
+    this.state.runner.rig.resources.push(id);
+    this.state.cardInstances[id] = {
+      ...this.state.cardInstances[id]!,
+      zone: { side: "runner", zone: "rig" },
+      faceup: true,
+      rezzed: true,
+      counters: {
+        ...this.state.cardInstances[id]?.counters,
+        ...counters,
+      },
     };
     return this;
   }

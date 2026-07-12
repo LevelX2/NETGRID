@@ -236,6 +236,11 @@ export function tacticalPlanMappedChoice(
         mappedChoice,
         overrideChoice,
       );
+    const acuteHandBufferShouldYield = tacticalPlanAcuteHandBufferShouldYield(
+      mapping,
+      mappedChoice,
+      overrideChoice,
+    );
     const lowValueRecoveryShouldYield =
       tacticalPlanLowValueRecoveryMappingShouldYield(
         mappedChoice,
@@ -257,6 +262,7 @@ export function tacticalPlanMappedChoice(
         {
           repeatedRunShouldYield,
           nonPositiveProjectedRunShouldYield,
+          acuteHandBufferShouldYield,
           lowValueRecoveryShouldYield,
           corpBoardTriageMismatchShouldYield,
           deferredDevelopmentInstallShouldYield,
@@ -274,6 +280,7 @@ export function tacticalPlanMappedChoice(
     if (
       mappedNonPositiveAgainstPositive ||
       repeatedRunShouldYield ||
+      acuteHandBufferShouldYield ||
       lowValueRecoveryShouldYield ||
       corpBoardTriageMismatchShouldYield ||
       scoreGap > threshold.scoreGap
@@ -286,6 +293,8 @@ export function tacticalPlanMappedChoice(
           ? "mapped_nonpositive_against_positive"
           : repeatedRunShouldYield
             ? "repeated_run_mapping_yield"
+            : acuteHandBufferShouldYield
+              ? "acute_hand_buffer_mapping_yield"
             : lowValueRecoveryShouldYield
               ? "low_value_recovery_mapping_yield"
               : corpBoardTriageMismatchShouldYield
@@ -411,6 +420,7 @@ function tacticalPlanRunnerMappingBlocksOffPlanOverride(
   exceptions: {
     repeatedRunShouldYield: boolean;
     nonPositiveProjectedRunShouldYield: boolean;
+    acuteHandBufferShouldYield: boolean;
     lowValueRecoveryShouldYield: boolean;
     corpBoardTriageMismatchShouldYield: boolean;
     deferredDevelopmentInstallShouldYield: boolean;
@@ -421,6 +431,7 @@ function tacticalPlanRunnerMappingBlocksOffPlanOverride(
   if (mappedActionIds.has(overrideChoice.action.actionId)) return false;
   if (exceptions.repeatedRunShouldYield) return false;
   if (exceptions.nonPositiveProjectedRunShouldYield) return false;
+  if (exceptions.acuteHandBufferShouldYield) return false;
   if (exceptions.lowValueRecoveryShouldYield) return false;
   if (exceptions.corpBoardTriageMismatchShouldYield) return false;
   if (exceptions.deferredDevelopmentInstallShouldYield) return false;
@@ -551,11 +562,7 @@ function runnerPlanOverrideIsHardInterrupt(
   if (semanticRuntimeChoiceHasAllowedLoanInterrupt(overrideChoice)) {
     return true;
   }
-  if (
-    semanticRuntimeChoiceIsAcuteHandBufferDraw(overrideChoice) &&
-    semanticRuntimeChoiceIsProjectedRun(mappedChoice) &&
-    !mappedPlanHasImmediateVisibleRunPayoff(mappedPlan, mappedChoice)
-  ) {
+  if (acuteHandBufferCanInterruptMappedRun(mappedPlan, mappedChoice, overrideChoice)) {
     return true;
   }
   if (overrideChoice.action.type !== "start_run") return false;
@@ -569,6 +576,30 @@ function runnerPlanOverrideIsHardInterrupt(
     "runner_rnd_fresh_memory",
     "runner_goal_fit_tactical_goal_run_target",
   ]);
+}
+
+function tacticalPlanAcuteHandBufferShouldYield(
+  mapping: PlanStepMappingResult,
+  mappedChoice: SemanticRuntimeChoice,
+  overrideChoice: SemanticRuntimeChoice,
+): boolean {
+  return acuteHandBufferCanInterruptMappedRun(
+    mapping.plan,
+    mappedChoice,
+    overrideChoice,
+  );
+}
+
+function acuteHandBufferCanInterruptMappedRun(
+  plan: TacticalPlan,
+  mappedChoice: SemanticRuntimeChoice,
+  overrideChoice: SemanticRuntimeChoice,
+): boolean {
+  return (
+    semanticRuntimeChoiceIsAcuteHandBufferDraw(overrideChoice) &&
+    semanticRuntimeChoiceIsProjectedRun(mappedChoice) &&
+    !mappedPlanHasImmediateVisibleRunPayoff(plan, mappedChoice)
+  );
 }
 
 function mappedPlanHasImmediateVisibleRunPayoff(

@@ -47,6 +47,7 @@ describe("tacticalPlanMappedChoice", () => {
 
     expect(result.outcome).toBe("semantic_choice_selected");
     expect(result.choice?.action.actionId).toBe("draw");
+    expect(result.overrideReason).toBe("acute_hand_buffer_mapping_yield");
   });
 
   it("keeps a visible immediate agenda run over the acute hand buffer", () => {
