@@ -165,6 +165,17 @@ describe("access presentation outcome ownership", () => {
     });
   });
 
+  it("releases a mounted hidden-access cue when the next AI action is unrelated", () => {
+    const access = { actionType: "access_card", id: "redacted-access" };
+    const economy = { actionType: "play_event", id: "economy-event" };
+
+    const waiting = actionCueAfterAiAdvanceRequest(access);
+    expect(coalesceAccessActionCues(waiting, [], [economy])).toEqual({
+      current: economy,
+      queue: [],
+    });
+  });
+
   it("coalesces a batched run and access while retaining unrelated cues", () => {
     const credit = { actionType: "gain_credit", id: "credit" };
     const run = { actionType: "start_run", id: "run" };

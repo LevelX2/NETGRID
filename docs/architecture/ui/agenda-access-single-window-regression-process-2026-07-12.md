@@ -2,7 +2,8 @@
 
 ## Status
 
-In Umsetzung am 12. Juli 2026.
+Technisch abgeschlossen und zur lokalen Integration freigegeben am 12. Juli
+2026.
 
 ## Quelle und Vorgabe
 
@@ -174,4 +175,30 @@ Lies AGENTS.md, AGENTS.local.md, agents/release-implementation-agent.md und dies
 
 ## Verifikationsergebnis
 
-Noch offen.
+Die beobachtete Sequenz wurde in der aktuellen lokalen Match-Datenbank
+read-only nachvollzogen: `start_run` auf R&D, danach ein side-redigiertes
+`access_card` und schließlich `steal_agenda` für `Viral Breeding Ground`. Die
+Trennung der Engine-Events bleibt damit erhalten; geändert wurde ausschließlich
+das Besitz- und Übergabeverhalten der Web-Präsentation.
+
+Die Action-Cue bleibt während des unmittelbar folgenden KI-Schritts nur für
+`start_run` und `access_card` montiert. Ein passendes öffentliches
+Access-/Stehl-Ergebnis aktualisiert denselben Cue-Slot. Folgt nach einem
+redigierten Zugriff kein öffentliches Ergebnis, sondern eine unabhängige
+Aktion, ersetzt diese den Access-Cue, damit kein veraltetes Fenster stehen
+bleibt. Agenda-Ersetzungen wie `Theorem Proof` behalten ihre eigenen
+Installieren-/Ablehnen-Beschriftungen.
+
+Die browsernahe Prüfung lief bewusst isoliert auf Web-Port 3200 und
+Memory-Server-Port 8788. Derselbe Overlay-DOM-Knoten wechselte vom Run-Hinweis
+zum redigierten R&D-Zugriff; ein öffentlicher HQ-Zugriff erschien als einzelnes
+Access-Kartenfenster mit Bild. Der dabei gefundene Gegenfall eines redigierten
+Zugriffs ohne öffentliches Ergebnis ist durch die abschließende Regression
+abgedeckt. Die isolierten Prozesse und Browserartefakte wurden danach entfernt;
+die regulären Ports 3100 und 8787 blieben unberührt.
+
+Abschließende Checks im Paketbranch:
+
+- 6 fokussierte Vitest-Dateien mit 165 bestandenen Tests;
+- `corepack pnpm --filter @netgrid/web typecheck` erfolgreich;
+- `git diff --check` ohne Befund.

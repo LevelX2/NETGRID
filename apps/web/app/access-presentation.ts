@@ -39,10 +39,7 @@ export function interactionPresentationBlocksAi(input: {
 export function actionCueAfterAiAdvanceRequest<
   T extends { actionType: string },
 >(current: T | null): T | null {
-  if (
-    current?.actionType === "start_run" ||
-    current?.actionType === "access_card"
-  )
+  if (current && isAccessPreludeActionType(current.actionType))
     return current;
   return null;
 }
@@ -81,9 +78,17 @@ export function coalesceAccessActionCues<
         continue;
       }
     }
+    if (nextCurrent && isAccessPreludeActionType(nextCurrent.actionType)) {
+      nextCurrent = cue;
+      continue;
+    }
     nextQueue.push(cue);
   }
   return { current: nextCurrent, queue: nextQueue };
+}
+
+function isAccessPreludeActionType(actionType: string): boolean {
+  return actionType === "start_run" || actionType === "access_card";
 }
 
 function lastCueIndex<T extends { actionType: string }>(
