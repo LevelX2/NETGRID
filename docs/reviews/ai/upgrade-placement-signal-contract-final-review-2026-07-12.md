@@ -2,7 +2,7 @@
 
 ## Status
 
-`ready_for_integration`
+`complete`
 
 ## Ergebnis
 
@@ -59,3 +59,15 @@ Bunker wird bereits durch den wiederhergestellten Central-Mismatch verhindert.
 
 Für einen manuellen Gegencheck muss die lokale App über
 `scripts/start-netgrid.ps1` mit dem integrierten Code neu gestartet werden.
+
+## Lokale Integration
+
+- Aktuelles lokales `main` wurde konfliktfrei in den Arbeitsbranch gemergt;
+  die zwischenzeitliche Juli-Logverdichtung blieb erhalten.
+- Der zusammengeführte Arbeitsbranch bestand erneut 120 fokussierte Tests,
+  AI-Typecheck und Diff-Hygiene.
+- `codex/ai-upgrade-placement-signal-contract` wurde anschließend per
+  Fast-Forward bis zum Integrationsstand `a855ea5d2` nach lokalem `main`
+  übernommen.
+- Der Arbeits-Worktree wurde sauber entfernt.
+- Es erfolgte kein Push und keine Remote-Integration.
