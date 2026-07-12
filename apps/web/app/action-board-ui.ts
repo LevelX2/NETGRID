@@ -2470,7 +2470,9 @@ function isRunnerPayToContinueOnlyAction(
   if (!Number.isFinite(payment) || payment <= 0) return false;
   const paidIndexes = new Set([
     ...commaSeparatedIndexes(action.payload?.payOrEndRunSubroutineIndexes),
-    ...commaSeparatedIndexes(action.payload?.payOrTrashProgramSubroutineIndexes),
+    ...commaSeparatedIndexes(
+      action.payload?.payOrTrashProgramSubroutineIndexes,
+    ),
   ]);
   const unbrokenSubroutineCount = Number(
     action.payload?.unbrokenSubroutineCount ?? 0,
@@ -2560,6 +2562,8 @@ export function runWindowActions(
   return actions.filter((action) => {
     if (action.type === "resolve_choice" && view.pendingChoice) return true;
     if (isAccessWindowAction(action)) return true;
+    if (action.type === "continue_run" || action.type === "jack_out")
+      return true;
     if (!action.timingPoint.startsWith("run.")) return false;
     if (action.type === "pump_breaker" || action.type === "break_subroutine")
       return action.payload?.iceId === activeRunIceInstanceId(view);
