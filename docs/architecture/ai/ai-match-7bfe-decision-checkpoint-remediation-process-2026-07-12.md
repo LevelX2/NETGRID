@@ -2,10 +2,10 @@
 
 ## Status
 
-Checkpoint-Infrastruktur und Red-Gate abgeschlossen. Sechs Zieltests
-reproduzieren die fünf freigegebenen Findings als `behavior_regression`; drei
-Gegenproben sind grün. Vor dem Fix-Paket folgt der freigegebene Audit des
-älteren Serienspiels `match_b0080115bddbce23`.
+Checkpoint-Infrastruktur und beide Red-Gates abgeschlossen. Sechs Zieltests
+reproduzieren die fünf freigegebenen 7BFE-Findings. Der Audit des älteren
+Serienspiels `match_b0080115bddbce23` ergänzt drei weitere aktuell rote Fälle.
+Alle sechs Gegenproben sind grün. Das Fix-Paket darf beginnen.
 
 ## Quelle
 
