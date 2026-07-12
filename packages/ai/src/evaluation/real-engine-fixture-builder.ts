@@ -41,6 +41,45 @@ export class RealEngineFixtureBuilder {
     return this;
   }
 
+  withCorpCardInHq(definitionId: string): this {
+    const id = this.findCard(definitionId);
+    this.removeEverywhere(id);
+    this.state.corp.hq.push(id);
+    this.state.cardInstances[id] = {
+      ...this.state.cardInstances[id]!,
+      zone: { side: "corp", zone: "hq" },
+      faceup: false,
+      rezzed: false,
+    };
+    return this;
+  }
+
+  withRunnerCardInGrip(definitionId: string): this {
+    const id = this.findCard(definitionId);
+    this.removeEverywhere(id);
+    this.state.runner.grip.push(id);
+    this.state.cardInstances[id] = {
+      ...this.state.cardInstances[id]!,
+      zone: { side: "runner", zone: "grip" },
+      faceup: false,
+      rezzed: false,
+    };
+    return this;
+  }
+
+  withRunnerProgramInstalled(definitionId: string): this {
+    const id = this.findCard(definitionId);
+    this.removeEverywhere(id);
+    this.state.runner.rig.programs.push(id);
+    this.state.cardInstances[id] = {
+      ...this.state.cardInstances[id]!,
+      zone: { side: "runner", zone: "rig" },
+      faceup: true,
+      rezzed: true,
+    };
+    return this;
+  }
+
   withCorpRemoteAgenda(
     serverId: Exclude<ServerId, "new_remote">,
     advancementCounters: number,

@@ -24,10 +24,7 @@ describe("Corp upgrade placement signal contract", () => {
   it.each(AGENDA_DIFFICULTY_UPGRADES)(
     "carries the active hint for %s through projection into the central mismatch score",
     (definitionId) => {
-      const component = placementComponent(definitionId, "hq", {
-        regionReplacementWarning:
-          definitionId === "onr_proteus_072_research-bunker",
-      });
+      const component = placementComponent(definitionId, "hq");
 
       expect(component).toEqual(
         expect.objectContaining({
@@ -182,6 +179,7 @@ describe("Corp upgrade placement signal contract", () => {
         key: "corp_upgrade_region_replacement_without_marginal_value",
       }),
     );
+    expect(corpUpgradeInstallPlacementComponent(replacement)).toBeUndefined();
   });
 
   it("allows a region replacement that activates the current agenda category", () => {

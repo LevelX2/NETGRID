@@ -99,6 +99,12 @@ export function corpUpgradeInstallPlacementComponent(
   }
   if (!sourceLooksLikeUpgrade(params)) return undefined;
 
+  // Region replacement is governed by the placement contract. Applying the
+  // generic upgrade score as well would mix semantic eligibility with ranking.
+  if (params.action.payload?.regionReplacementWarning === true) {
+    return undefined;
+  }
+
   const signals = semanticSignals(params.actionSemanticCandidate);
   const meaningfulSignals = [...signals].filter(
     (signal) => !BASIC_INSTALL_SIGNALS.has(signal),

@@ -56,6 +56,8 @@ export const AI_DECISION_INPUT_TOP_LEVEL_FIELDS = [
 const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "serverId",
   "placement",
+  "regionReplacementWarning",
+  "rootReplacement",
   "encounterContinue",
   "unbrokenSubroutineCount",
   "delayedInstallAbility",

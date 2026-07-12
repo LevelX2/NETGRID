@@ -1,6 +1,6 @@
 # KI-Entscheidungsverträge härten
 
-Status: in Umsetzung
+Status: integrationsbereit
 
 ## Quelle und Zielprüfung
 
@@ -142,3 +142,24 @@ dann als complete.`
 - Negative und positive Gegenbeispiele sind im produktiven Auswahlpfad grün.
 - Real-Engine-Gates und vollständige AI-Gates sind grün.
 - Arbeitsbranch ist lokal in `main` integriert; Worktree ist entfernt.
+
+## Abschlussnachweis
+
+- Corp-Placement verwendet für ICE-abhängige Upgrades und Regionsersatz einen
+  typisierten Zulassungs- und Defer-Vertrag. Der generische Upgrade-Score greift
+  nicht zusätzlich in einen Regionsersatz ein.
+- Direkte und verzögerte persistente Runner-Installationen verwenden dieselbe
+  Entwicklungsprojektion. Unbeteiligte Target-Aktionen werden nicht mehr als
+  Kartenentwicklung fehlklassifiziert.
+- Zusätzliche Breaker benötigen einen belegten Variantenwert aus Deckprofil,
+  konkreter Kosten-, Stärke- oder Risikodifferenz und vollständiger primärer
+  Breaker-Abdeckung.
+- Suchpläne führen benötigte Folgeaktionen und deren Zeithorizont explizit;
+  insbesondere wird ein letzter Klick nicht als gleichzügige Konversion
+  ausgegeben.
+- Das Real-Engine-Gate deckte zusätzlich auf, dass
+  `regionReplacementWarning` in der KI-Payload-Allowlist verloren ging. Das
+  Feld wird nun vom Engine-LegalAction bis zum produktiven Chooser erhalten.
+- Verifikation vor der Integration: 295 AI-Testdateien mit 1.939 Tests,
+  AI-Typecheck, Deck-Doctrine-Check, Proteus-Readiness und `git diff --check`
+  grün.
