@@ -2,13 +2,16 @@
 
 ## Status
 
-Vorbereitet. Capture und fachliche Erwartung des ersten Kandidaten erfolgen
-erst nach Abschluss der laufenden Partie.
+Match `match_7bfe82501d0fdcb8` ist abgeschlossen und analysiert. Die fünf
+freigegebenen Findings werden im Prozess
+`docs/architecture/ai/ai-match-7bfe-decision-checkpoint-remediation-process-2026-07-12.md`
+zuerst als rote Checkpoint-Regressionen und danach als generische Korrekturen
+umgesetzt.
 
 ## Priorität 1 – Aktuelles Planportfolio-/BBS-Match
 
 - Match: `match_7bfe82501d0fdcb8`.
-- Status bei Vorbereitung: aktiv.
+- Status: abgeschlossen, Runner-Sieg nach Agendapunkten.
 - KI: Corp, `hard`.
 - Beobachtung: `corp.develop_finite_economy` bleibt Vordergrundplan;
   `corp.establish_scoring_remote` bleibt Hintergrund und wird wiederholt
@@ -24,6 +27,15 @@ erst nach Abschluss der laufenden Partie.
   Schutzbedingungen; keine pauschale Kartenname-Sperre.
 - Memory-Bedarf: PlanPortfolio, TacticalPlan, StrategicIntent, Cadence.
 - Companion Contract: finite Economy gegen fälligen Hintergrundplan.
+
+### Weitere freigegebene Checkpoints aus demselben Match
+
+| ID | Decision / StateVersion | Vertrag |
+| --- | --- | --- |
+| `CP-7BFE-02` | 56/57 / 110/111 | Fünf Credits dürfen den sechsstufigen Corporate-War-Pfad nicht beginnen; sechs Credits bleiben positive Gegenprobe. |
+| `CP-7BFE-03` | 92 / 188 | Corp-Discard behält Economy und strategiegeeigneten Enabler vor unerfüllbaren oder redundanten Payoffs. |
+| `CP-7BFE-04` | 116 / 281 | Closed Accounts verliert gegen null Runner-Credits seinen Payoff-Bonus; drei Credits bleiben positive Gegenprobe. |
+| `CP-7BFE-05` | 128 / 302 | Kein Agenda-Draw in ein erreichbares Matchpoint-HQ mit bekannter Multiaccess-Evidence. |
 
 ## Priorität 2 – Runner-Event-Run ohne post-cost Pfadbudget
 
