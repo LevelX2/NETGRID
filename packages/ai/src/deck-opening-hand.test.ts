@@ -8,6 +8,78 @@ import {
 } from "./deck-opening-hand";
 
 describe("deck opening hand role classification", () => {
+  it("mulligans the historical Manhunt hand when its strategy pieces are not opening-executable", () => {
+    const historical = corpOpeningInput(
+      [
+        "onr_v1_285_closed-accounts",
+        "onr_v1_313_city-surveillance",
+        "onr_v1_283_audit-of-call-records",
+        "onr_v1_302_scorched-earth",
+        "onr_v1_304_systematic-layoffs",
+      ],
+      [
+        "corp.fast_advance",
+        "corp.tag_trace_punish",
+        "corp.damage_kill",
+      ],
+    );
+
+    const evaluation = evaluateCorpOpeningHand(historical);
+
+    expect(evaluation.decision).toBe("mulligan");
+    expect(evaluation.evidence).toEqual(
+      expect.arrayContaining([
+        "opening_agendas:0",
+        "opening_ice:0",
+        "opening_economy:0",
+        "opening_executable_strategy_lines:none",
+        "opening_viability_cap:42",
+      ]),
+    );
+    expect(evaluation.reasons).toContain("no_executable_opening_line");
+  });
+
+  it("keeps a legitimate no-ICE fast-advance opening with target, tool and liquidity", () => {
+    const evaluation = evaluateCorpOpeningHand(
+      corpOpeningInput(
+        [
+          "onr_v1_196_corporate-war",
+          "onr_v1_304_systematic-layoffs",
+          "onr_v1_309_bbs-whispering-campaign",
+          "onr_v1_285_closed-accounts",
+          "onr_v1_302_scorched-earth",
+        ],
+        ["corp.fast_advance"],
+      ),
+    );
+
+    expect(evaluation.decision).toBe("keep");
+    expect(evaluation.evidence).toContain(
+      "opening_executable_strategy_lines:corp.fast_advance",
+    );
+    expect(evaluation.evidence).not.toContain("opening_viability_cap:42");
+  });
+
+  it("keeps a protected tag-punish opening whose source and payoffs can work together", () => {
+    const evaluation = evaluateCorpOpeningHand(
+      corpOpeningInput(
+        [
+          "onr_v1_223_banpei",
+          "onr_v1_313_city-surveillance",
+          "onr_v1_285_closed-accounts",
+          "onr_v1_302_scorched-earth",
+          "onr_v1_304_systematic-layoffs",
+        ],
+        ["corp.tag_trace_punish", "corp.damage_kill"],
+      ),
+    );
+
+    expect(evaluation.decision).toBe("keep");
+    expect(evaluation.evidence).toContain(
+      "opening_executable_strategy_lines:corp.damage_kill,corp.tag_trace_punish",
+    );
+  });
+
   it("counts each opening card once per role family", () => {
     CARD_ROLES_BY_CARD.set("local_multi_agenda", {
       cardId: "local_multi_agenda",
@@ -158,4 +230,24 @@ function input(
     },
     ...extra,
   } as unknown as AiDecisionInput;
+}
+
+function corpOpeningInput(
+  definitionIds: string[],
+  primaryStrategies: string[],
+): AiDecisionInput {
+  const result = input("corp", definitionIds, {
+    difficulty: "hard",
+    ownDeckStrategyProfile: {
+      primaryStrategies,
+      secondaryStrategies: [],
+      warnings: [],
+    },
+    ownDeckCapabilities: {
+      confidence: "high",
+      corp: { remotePlanProfile: { remoteProtectionToolsKnown: 8 } },
+    },
+  });
+  result.playerView.own.credits = 5;
+  return result;
 }

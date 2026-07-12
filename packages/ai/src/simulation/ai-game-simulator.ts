@@ -17,6 +17,7 @@ import {
 
 import type { AiDeckStrategyDeckSnapshot } from "../deck-strategy-snapshot";
 import { buildAiDecisionInput, selectAiDecisionSideForState } from "../runtime/ai-decision-input";
+import { assessDecisionOpportunity } from "../runtime/decision-opportunity";
 import { resetRunnerRunPlanMemory } from "../runtime/runner-run-plan-memory";
 import { fnv1a } from "../runtime/stable-hash";
 import { resetTacticalPlanMemory } from "../tactical-plans";
@@ -395,9 +396,14 @@ function simulateAiGame(
         action,
         targetServerId,
       );
+    const decisionOpportunity = assessDecisionOpportunity(input, action);
     actionSequence.push({
       side,
       stateVersionBefore: result.event.stateVersionBefore,
+      decisionOpportunity: decisionOpportunity.kind,
+      legalActionCount: decisionOpportunity.legalActionCount,
+      actionableAlternativeCount:
+        decisionOpportunity.actionableAlternativeCount,
       selectedActionId: simulationSafeSelectedActionId(action, targetServerId),
       actionType: action.type,
       eventType: result.event.type,
