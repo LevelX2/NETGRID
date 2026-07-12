@@ -1,15 +1,16 @@
 # AI-Boon-Run-Stärke: Reparaturprozess
 
-Status: in Umsetzung
+Status: abgeschlossen
 
 ## Quelle und Fehlerbild
 
 Das gespeicherte Match `match_95a8416194bb9ac4` blockiert in
 `run.encounter_ice` an einem gerezzten `Credit Blocks`. Der Runner hat mit
-`AI Boon` beim Runstart eine 5 gewürfelt. Die Engine bietet unmittelbar eine
-Break-Aktion an, obwohl AI Boon ohne Grundstärke bei diesem Wurf zunächst nur
-Stärke 5 gegen ICE-Stärke 6 hat. `applyAction` lehnt die angebotene Aktion
-anschließend ab; der Server reduziert die Ablehnung auf `ai_no_action`.
+`AI Boon` beim Runstart eine 5 gewürfelt. Die LegalAction-Berechnung verwendet
+den irrtümlich als `2 + W6` modellierten Wert 7 und bietet damit eine
+Break-Aktion gegen Credit Blocks mit Stärke 3 an. `applyAction` fällt dagegen
+auf die falsche statische Stärke 2 zurück, lehnt dieselbe Aktion ab und der
+Server reduziert die Ablehnung auf `ai_no_action`.
 
 Das Start-Run-Event enthält den Würfelwurf bereits als `v1921DieRoll` und
 `amounts.randomRoll`, die Spielchronik zeigt ihn jedoch nicht an.
@@ -57,7 +58,8 @@ falls eine KI-Aktion trotz LegalAction-Vertrag abgelehnt wird.
 - W6-Ergebnis als Run-Grundstärke modellieren.
 - LegalActions, PlayerView und Einzel-/Multi-Break-Validierung auf einen
   gemeinsamen effektiven Stärkewert ausrichten.
-- Regressionen für Wurf 5 gegen Stärke 6 sowie Pumpen und Brechen ergänzen.
+- Regressionen für Wurf 5 gegen Credit Blocks Stärke 3 sowie Wurf 2, Pumpen
+  und Brechen ergänzen.
 - Commit: `fix(engine): align AI Boon run strength validation`
 
 ### P02 – Öffentliche Spielchronik
@@ -73,7 +75,7 @@ falls eine KI-Aktion trotz LegalAction-Vertrag abgelehnt wird.
 - Den konkreten redigierten Enginefehler statt eines pauschalen
   `ai_no_action` zurückgeben.
 - Servertest für den Ablehnungspfad ergänzen.
-- Commit: `fix(server): preserve AI engine rejection diagnostics`
+- Commit: `fix(server): expose safe AI engine rejection`
 
 ### P04 – Abschluss
 
@@ -93,9 +95,10 @@ falls eine KI-Aktion trotz LegalAction-Vertrag abgelehnt wird.
 ## Abschlusskriterien
 
 - Ein Wurf von 5 setzt AI Boons Grundstärke für den Run auf 5.
-- Gegen Credit Blocks Stärke 6 wird vor dem Pumpen keine Break-Aktion
-  angeboten.
-- Nach einem Pump auf Stärke 6 wird die Break-Aktion angeboten und akzeptiert.
+- Bei Wurf 2 wird gegen Credit Blocks Stärke 3 vor dem Pumpen keine
+  Break-Aktion angeboten.
+- Nach einem Pump auf Stärke 3 wird die Break-Aktion angeboten und akzeptiert.
+- Bei Wurf 5 wird die angebotene Break-Aktion durch `applyAction` akzeptiert.
 - Die Chronik nennt Wurf 5 und Grundstärke 5.
 - Ein abgelehnter KI-Engine-Schritt meldet einen sicheren konkreten Fehler.
 - Alle Paketcommits sind lokal nach `main` integriert.
