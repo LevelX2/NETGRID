@@ -64,6 +64,14 @@ sicher. Der Lauf hatte vier Aktionslimits gegenüber zwei in der älteren
 Referenz. Da der Arbeitszweig erst auf dem späteren Stand `f3f71ceca` begann,
 ist dieser Vergleich allein nicht zur Ursachenzuordnung geeignet.
 
+Nach Main-Integration wurde der vollständige Standardlauf auf `47f078f77`
+erneut erzeugt und dauerhaft unter
+`data/local/ai-behavior-baseline-v1-planportfolio-remote-doctrine-final-2026-07-12*`
+gespeichert: 60 Spiele, 11.481 Entscheidungen, vier Aktionslimits, 0 verpasste
+Scorefenster, Remote-Contest-Skip-Rate 0,867, Plan-Konversionsrate 0,790 und
+No-Progress 2,387 pro 100 Entscheidungen. Auch hier waren alle übrigen
+Safety-Gates null und die Traces redaction-safe.
+
 ### Isolierter Hybrid-Control-/Candidate-Vergleich
 
 Für den einzigen betroffenen Slot
