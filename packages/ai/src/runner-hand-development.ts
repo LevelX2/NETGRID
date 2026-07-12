@@ -501,7 +501,7 @@ function evaluateRunnerPersistentInstall(
   currentNeed: RunnerHandDevelopmentCurrentNeed,
 ): RunnerPersistentInstallEvaluation | undefined {
   const action = context.legalAction;
-  if (!action || action.type !== "install_card") return undefined;
+  if (!action || !actionDevelopsPersistentCard(action)) return undefined;
   if (!isPersistentRunnerCard(context.card)) return undefined;
 
   const profile = persistentFunctionalProfileForCard(
@@ -659,6 +659,14 @@ function evaluateRunnerPersistentInstall(
       role,
     }),
   };
+}
+
+function actionDevelopsPersistentCard(action: LegalAction): boolean {
+  return (
+    action.type === "install_card" ||
+    (action.type === "trigger_ability" &&
+      action.payload?.delayedInstallAbility === "set_aside_from_grip")
+  );
 }
 
 function strategicFitForCard(
@@ -846,7 +854,8 @@ function persistentFunctionalProfileForCard(
   const recurringBreakerEconomy =
     runnerHandTextHasRecurringBreakerEconomySignal(text);
   const bankTool = looksLikeBankTool(text);
-  const economyTool = looksLikeEconomyTool(text);
+  const economyTool =
+    breakerCoverage.length === 0 && looksLikeEconomyTool(text);
   const actionEconomy = runnerHandTextHasActionEconomySignal(text);
   const accessSupport = looksLikeAccessPayoff(text);
   const searchSupport = looksLikeDrawOrSearch(text);
@@ -1354,6 +1363,13 @@ function persistentCoverageAlreadyPresent(
   }
   if (existingCoverage.has(coverage)) return true;
   const coverageKind = coverage.slice("breaker:".length);
+  if (coverageKind === "subtype_limited") {
+    return existingFunctionalCoverage.some(
+      (existing) =>
+        existing.startsWith("breaker:") &&
+        existing !== "breaker:special",
+    );
+  }
   return coverageKind !== "universal" &&
     existingCoverage.has("breaker:universal");
 }
@@ -1880,6 +1896,7 @@ function actionMatchesCard(action: LegalAction, card: VisibleCard): boolean {
   const payload = action.payload ?? {};
   return (
     action.source === card.instanceId ||
+    payload.targetCardId === card.instanceId ||
     payload.cardId === card.instanceId ||
     payload.sourceCardId === card.instanceId ||
     payload.sourceDefinitionId === card.definitionId ||

@@ -32,6 +32,7 @@ export type RunnerPersistentInstallContextDependencies<
     deckCapabilities: TDeckCapabilities;
     strategicIntent: TStrategicIntent;
   }) => readonly {
+    cardInstanceId: string;
     legalActionId?: string;
     persistentInstallEvaluation?: RunnerPersistentInstallEvaluation;
   }[];

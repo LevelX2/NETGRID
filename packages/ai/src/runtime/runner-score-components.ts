@@ -152,6 +152,14 @@ export function runnerScoreComponents(
       dependencies.install,
     ),
   );
+  if (
+    action.type === "trigger_ability" &&
+    action.payload?.delayedInstallAbility === "set_aside_from_grip"
+  ) {
+    const delayedInstallFit =
+      dependencies.install.persistentInstallFitScoreComponent(input, action);
+    if (delayedInstallFit) components.push(delayedInstallFit);
+  }
   const damageThreatRunRisk = runnerDamageThreatRunScoreComponent(
     input,
     action,

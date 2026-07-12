@@ -2227,6 +2227,121 @@ describe("Semantic AI runtime cutover", () => {
     );
   });
 
+  it("does not let a program-trash install variant bypass duplicate breaker utility", () => {
+    const cyfermasterHand = visibleCard(
+      "cyfermaster-hand",
+      "runner",
+      "program",
+      {
+        definitionId: "onr_v1_016_cyfermaster",
+        title: "Cyfermaster",
+        subtypes: ["icebreaker"],
+        rulesText: "Break code gate subroutine. +1 strength.",
+      },
+    );
+    const input = aiInput("runner", [
+      legalAction(
+        "install-second-cyfermaster-with-program-trash",
+        "runner",
+        "install_card",
+        "Cyfermaster mit Programmtrash installieren",
+        { credits: 4 },
+        {
+          source: cyfermasterHand.instanceId,
+          payload: { runnerProgramTrashBeforeInstall: true },
+        },
+      ),
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.own.credits = 5;
+    input.playerView.own.gripOrHq = [cyfermasterHand];
+    input.playerView.own.rig = [
+      visibleCard("cyfermaster-installed", "runner", "program", {
+        definitionId: "onr_v1_016_cyfermaster",
+        title: "Cyfermaster",
+        subtypes: ["icebreaker"],
+        rulesText: "Break code gate subroutine. +1 strength.",
+      }),
+    ];
+
+    const decision = chooseRunnerAction(input);
+    const installAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (entry) =>
+        entry.actionId === "install-second-cyfermaster-with-program-trash",
+    );
+
+    expect(decision.actionId).toBe("gain-credit");
+    expect(installAlternative?.scoreBreakdown).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "runner_persistent_install_fit",
+          value: expect.any(Number),
+        }),
+      ]),
+    );
+    expect(
+      installAlternative?.scoreBreakdown?.find(
+        (component) => component.key === "runner_persistent_install_fit",
+      )?.value,
+    ).toBeLessThan(0);
+  });
+
+  it("does not prepare a redundant wall breaker through Shell Traders", () => {
+    const dwarf = visibleCard("dwarf-hand", "runner", "program", {
+      definitionId: "onr_v1_021_dwarf",
+      title: "Dwarf",
+      subtypes: ["icebreaker"],
+      rulesText: "Break wall subroutine. +1 strength.",
+    });
+    const input = aiInput("runner", [
+      legalAction(
+        "prepare-dwarf",
+        "runner",
+        "trigger_ability",
+        "The Shell Traders: Dwarf vorbereiten",
+        { credits: 0 },
+        {
+          source: "shell-traders-installed",
+          payload: {
+            delayedInstallAbility: "set_aside_from_grip",
+            targetCardId: dwarf.instanceId,
+            ...(dwarf.definitionId
+              ? { targetCardDefinitionId: dwarf.definitionId }
+              : {}),
+          },
+        },
+      ),
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.own.credits = 5;
+    input.playerView.own.gripOrHq = [dwarf];
+    input.playerView.own.rig = [
+      visibleCard("pile-driver-installed", "runner", "program", {
+        definitionId: "onr_v1_047_pile-driver",
+        title: "Pile Driver",
+        subtypes: ["icebreaker", "noisy"],
+        rulesText:
+          "Break up to four wall subroutines on a single piece of ICE.",
+      }),
+    ];
+
+    const decision = chooseRunnerAction(input);
+    const prepareAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (entry) => entry.actionId === "prepare-dwarf",
+    );
+
+    expect(decision.actionId).toBe("gain-credit");
+    expect(
+      prepareAlternative?.scoreBreakdown?.find(
+        (component) => component.key === "runner_persistent_install_fit",
+      )?.value,
+    ).toBeLessThan(0);
+  });
+
   it("keeps loading Broker below its multi-load value target", () => {
     const input = aiInput("runner", [
       legalAction(

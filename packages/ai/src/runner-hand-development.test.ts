@@ -767,6 +767,67 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     );
   });
 
+  it("carries breaker marginal utility through a Shell Traders preparation route", () => {
+    const dwarf = visibleCard("dwarf-hand", {
+      definitionId: "onr_v1_021_dwarf",
+      title: "Dwarf",
+      type: "program",
+      subtypes: ["icebreaker"],
+      installCost: 5,
+      memoryCost: 1,
+      rulesText: "Break wall subroutine. +1 strength.",
+    });
+    const pileDriver = visibleCard("pile-driver-installed", {
+      definitionId: "onr_v1_047_pile-driver",
+      title: "Pile Driver",
+      type: "program",
+      subtypes: ["icebreaker", "noisy"],
+      memoryCost: 1,
+      rulesText: "Break up to four wall subroutines on a single piece of ICE.",
+    });
+    const prepare: LegalAction = {
+      actionId: "prepare-dwarf",
+      side: "runner",
+      type: "trigger_ability",
+      source: "shell-traders-installed",
+      label: "The Shell Traders: Dwarf vorbereiten",
+      timingPoint: "runner_action.main",
+      costs: [{ clicks: 1 }],
+      targetRequirements: [],
+      visibility: "private_to_actor",
+      expiresAtStateVersion: 2,
+      payload: {
+        delayedInstallAbility: "set_aside_from_grip",
+        targetCardId: dwarf.instanceId,
+        ...(dwarf.definitionId
+          ? { targetCardDefinitionId: dwarf.definitionId }
+          : {}),
+      },
+    };
+    const input = runnerInput({
+      credits: 5,
+      hand: [dwarf],
+      rig: [pileDriver],
+      memoryUsed: 1,
+      memoryLimit: 4,
+      legalActions: [prepare],
+    });
+
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({ input }),
+      dwarf.instanceId,
+    );
+
+    expect(evaluation.legalActionId).toBe(prepare.actionId);
+    expect(evaluation.persistentInstallEvaluation).toMatchObject({
+      capabilityDelta: "backup_only",
+      duplicateRole: "redundant_duplicate",
+    });
+    expect(evaluation.persistentInstallEvaluation?.finalInstallFit).toBeLessThan(
+      0,
+    );
+  });
+
   it("devalues a second Junkyard BBS as non-additive recovery utility", () => {
     const secondJunkyard = visibleCard("junkyard-2", {
       definitionId: "onr_v1_165_junkyard-bbs",

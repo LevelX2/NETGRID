@@ -33,6 +33,7 @@ export type RunnerPersistentInstallEvaluationForActionDependencies<
     deckCapabilities: TDeckCapabilities;
     strategicIntent: TStrategicIntent;
   }) => readonly {
+    cardInstanceId: string;
     legalActionId?: string;
     persistentInstallEvaluation?: RunnerPersistentInstallEvaluation;
   }[];
@@ -99,23 +100,46 @@ export function runnerPersistentInstallEvaluationForAction<
     TStrategicIntent
   >,
 ): RunnerPersistentInstallEvaluation | undefined {
+  const developsPersistentCard =
+    action.type === "install_card" ||
+    (action.type === "trigger_ability" &&
+      action.payload?.delayedInstallAbility === "set_aside_from_grip");
   if (
     input.side !== "runner" ||
     action.side !== "runner" ||
-    action.type !== "install_card"
+    !developsPersistentCard
   ) {
     return undefined;
   }
   const deckCapabilities = dependencies.deckCapabilities(input);
   const strategicIntent = dependencies.strategicIntent(input, deckCapabilities);
-  return dependencies
-    .handDevelopmentEvaluations({
-      input,
-      deckCapabilities,
-      strategicIntent,
-    })
-    .find((evaluation) => evaluation.legalActionId === action.actionId)
-    ?.persistentInstallEvaluation;
+  const evaluations = dependencies.handDevelopmentEvaluations({
+    input,
+    deckCapabilities,
+    strategicIntent,
+  });
+  const exact = evaluations.find(
+    (evaluation) => evaluation.legalActionId === action.actionId,
+  );
+  if (exact?.persistentInstallEvaluation) {
+    return exact.persistentInstallEvaluation;
+  }
+  const targetCardId = persistentInstallTargetCardId(action);
+  if (!targetCardId) return undefined;
+  return evaluations.find(
+    (evaluation) => evaluation.cardInstanceId === targetCardId,
+  )?.persistentInstallEvaluation;
+}
+
+function persistentInstallTargetCardId(action: LegalAction): string | undefined {
+  const targetCardId = action.payload?.targetCardId;
+  if (typeof targetCardId === "string" && targetCardId.length > 0) {
+    return targetCardId;
+  }
+  if (action.type === "install_card" && typeof action.source === "string") {
+    return action.source;
+  }
+  return undefined;
 }
 
 function sortedUnique(values: string[]): string[] {
