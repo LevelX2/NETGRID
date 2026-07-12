@@ -826,6 +826,52 @@ describe("tacticalPlanMappedChoice", () => {
     expect(result.overrideReason).toBe("mapped_nonpositive_against_positive");
   });
 
+  it("lets a substantially better central target override an opportunistic run plan", () => {
+    const rdRun = legalAction("run-rd", "start_run", { serverId: "rd" });
+    const archivesRun = legalAction("run-archives", "start_run", {
+      serverId: "archives",
+    });
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [
+        choice(archivesRun, 1359),
+        choice(rdRun, 453, [], {
+          key: "runner_visible_ice_path_cost",
+          value: -1360,
+          reason: "server:rd;known_ice:2;break_cost:3;credits_after:0",
+        }),
+      ],
+      centralRunMapping([rdRun]),
+      choice(archivesRun, 1359),
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("run-archives");
+    expect(result.overrideReason).toBe("inferior_run_target_mapping_yield");
+  });
+
+  it("keeps an opportunistic R&D plan with fresh-card memory", () => {
+    const rdRun = legalAction("run-rd", "start_run", { serverId: "rd" });
+    const archivesRun = legalAction("run-archives", "start_run", {
+      serverId: "archives",
+    });
+    const plannedRun = choice(
+      rdRun,
+      453,
+      scoreComponentEvidence("runner_rnd_fresh_memory"),
+    );
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [choice(archivesRun, 1359), plannedRun],
+      centralRunMapping([rdRun]),
+      choice(archivesRun, 1359),
+    );
+
+    expect(result.outcome).toBe("semantic_choice_blocked");
+    expect(result.choice?.action.actionId).toBe("run-rd");
+    expect(result.overrideBlockedReason).toBe("runner_plan_controller");
+  });
+
   it("lets an unpayable nonpositive run event yield to a positive action", () => {
     const rushHour = legalAction("rush-hour-rd", "play_event", {
       serverId: "rd",

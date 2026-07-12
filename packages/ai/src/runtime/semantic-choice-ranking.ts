@@ -261,6 +261,14 @@ export function tacticalPlanMappedChoice(
         overrideChoice,
         scoreGap,
       );
+    const inferiorRunTargetShouldYield =
+      tacticalPlanInferiorRunTargetMappingShouldYield(
+        mapping,
+        mappedChoice,
+        overrideChoice,
+        scoreGap,
+        threshold.scoreGap,
+      );
     const corpBoardTriageMismatchShouldYield =
       tacticalPlanCorpBoardTriageMismatchShouldYield(
         mappedChoice,
@@ -278,6 +286,7 @@ export function tacticalPlanMappedChoice(
           nonPositiveProjectedRunShouldYield,
           acuteHandBufferShouldYield,
           lowValueRecoveryShouldYield,
+          inferiorRunTargetShouldYield,
           corpBoardTriageMismatchShouldYield,
           deferredDevelopmentInstallShouldYield,
         },
@@ -296,6 +305,7 @@ export function tacticalPlanMappedChoice(
       repeatedRunShouldYield ||
       acuteHandBufferShouldYield ||
       lowValueRecoveryShouldYield ||
+      inferiorRunTargetShouldYield ||
       corpBoardTriageMismatchShouldYield ||
       scoreGap > threshold.scoreGap
     ) {
@@ -311,9 +321,11 @@ export function tacticalPlanMappedChoice(
               ? "acute_hand_buffer_mapping_yield"
               : lowValueRecoveryShouldYield
                 ? "low_value_recovery_mapping_yield"
-                : corpBoardTriageMismatchShouldYield
-                  ? "corp_board_triage_mismatch_yield"
-                  : threshold.reason,
+                : inferiorRunTargetShouldYield
+                  ? "inferior_run_target_mapping_yield"
+                  : corpBoardTriageMismatchShouldYield
+                    ? "corp_board_triage_mismatch_yield"
+                    : threshold.reason,
         overrideThreshold: threshold.scoreGap,
         scoreGap,
       };
@@ -436,6 +448,7 @@ function tacticalPlanRunnerMappingBlocksOffPlanOverride(
     nonPositiveProjectedRunShouldYield: boolean;
     acuteHandBufferShouldYield: boolean;
     lowValueRecoveryShouldYield: boolean;
+    inferiorRunTargetShouldYield: boolean;
     corpBoardTriageMismatchShouldYield: boolean;
     deferredDevelopmentInstallShouldYield: boolean;
   },
@@ -447,12 +460,59 @@ function tacticalPlanRunnerMappingBlocksOffPlanOverride(
   if (exceptions.nonPositiveProjectedRunShouldYield) return false;
   if (exceptions.acuteHandBufferShouldYield) return false;
   if (exceptions.lowValueRecoveryShouldYield) return false;
+  if (exceptions.inferiorRunTargetShouldYield) return false;
   if (exceptions.corpBoardTriageMismatchShouldYield) return false;
   if (exceptions.deferredDevelopmentInstallShouldYield) return false;
   return !runnerPlanOverrideIsHardInterrupt(
     mapping.plan,
     mappedChoice,
     overrideChoice,
+  );
+}
+
+function tacticalPlanInferiorRunTargetMappingShouldYield(
+  mapping: PlanStepMappingResult,
+  mappedChoice: SemanticRuntimeChoice,
+  overrideChoice: SemanticRuntimeChoice,
+  scoreGap: number,
+  threshold: number,
+): boolean {
+  if (
+    mapping.plan.type !== "runner.opportunistic_central_run" ||
+    mappedChoice.action.type !== "start_run" ||
+    overrideChoice.action.type !== "start_run" ||
+    scoreGap <= threshold
+  ) {
+    return false;
+  }
+  const mappedServerId = semanticRuntimeServerId(mappedChoice.action);
+  const overrideServerId = semanticRuntimeServerId(overrideChoice.action);
+  if (
+    !mappedServerId ||
+    !overrideServerId ||
+    mappedServerId === overrideServerId
+  ) {
+    return false;
+  }
+  if (
+    !mappedChoice.scoreBreakdown.some(
+      (component) =>
+        component.key === "runner_visible_ice_path_cost" && component.value < 0,
+    )
+  ) {
+    return false;
+  }
+  if (mappedPlanHasImmediateVisibleRunPayoff(mapping.plan, mappedChoice)) {
+    return false;
+  }
+  return !(
+    semanticRuntimeChoiceHasScoreComponent(
+      mappedChoice,
+      "runner_rnd_fresh_memory",
+    ) ||
+    mappedChoice.scoreBreakdown.some(
+      (component) => component.key === "runner_rnd_fresh_memory",
+    )
   );
 }
 
