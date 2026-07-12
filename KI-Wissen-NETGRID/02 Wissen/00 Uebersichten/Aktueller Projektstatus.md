@@ -1,6 +1,6 @@
 # Aktueller Projektstatus
 
-Stand: 2026-07-11
+Stand: 2026-07-12
 
 ## Führender Produktstand
 
@@ -42,6 +42,14 @@ Stand: 2026-07-11
   Countertransfer und Basic Advances. Vapor Ops und andere Werkzeuge werden
   funktionsbasiert erkannt; ungeschützte Agenda-Installationen bleiben ohne
   garantierten Abschluss gesperrt.
+- Die Planebene besitzt zusätzlich ein begrenztes Planportfolio: kurzfristige
+  Score- und Gefahrenpläne bleiben Vordergrund beziehungsweise Interrupt,
+  während Broker-/Bank-Zyklen und langfristige Corp-Scoring-Remotes mit
+  höchstens einer Hintergrundaktion pro Zug fortgesetzt werden können.
+  `RemoteDoctrineProfile` leitet den Remote-Bedarf aus der eigenen Deckstrategie
+  ab; Fast Advance erzeugt keinen pauschalen Glacier-Ausbau. Zielremotes werden
+  über Züge gebunden und anhand sichtbarer Pfadkosten sowie Runner-Erholung
+  statt nur ICE-Anzahl bewertet.
 - Aktuelle Benchmarks vergleichen `random_legal_bot` mit
   `current_candidate`; historische Profilnamen sind keine Runtimeoption mehr.
 - AI Behavior Baseline v1 ergänzt diese Profilvergleiche um einen festen
@@ -51,6 +59,13 @@ Stand: 2026-07-11
   zwei Aktionslimits im Hybrid-Score/Punish-Slot sind grün. Führend sind
   `docs/architecture/ai/ai-behavior-baseline-v1-process-2026-07-12.md` und
   `docs/reviews/ai/ai-behavior-baseline-v1-initial-run-review-2026-07-12.md`.
+- Der Planportfolio-Rollout wurde zusätzlich gegen einen isolierten
+  Hybrid-Control am exakten Ausgangs-Commit geprüft. Control und Kandidat
+  besitzen jeweils vier bereits vorhandene Aktionslimit-Partien; alle übrigen
+  Safety-Gates sind grün. Plan-Konversion und No-Progress verbesserten sich
+  leicht, gestiegene Bank-/Plan-Mismatch-Findings und eine Seed-Verschiebung
+  bleiben offenes Review-Risiko. Führend:
+  `docs/reviews/ai/ai-planportfolio-remote-doctrine-final-review-2026-07-12.md`.
 - Aktive AI-Gates: 616 Hints, 600 durch den Action-Signal-Katalog abgedeckt,
   34 zurückgestellt, 90 Target-Profile-Gaps. Full Derived Facts: 527
   CardImplementations, 390 generierte Facts und 137 aktuell noch nur über

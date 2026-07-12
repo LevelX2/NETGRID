@@ -14,6 +14,14 @@
   Installation, Aktionsgewinn, Advancement-Platzierung, Countertransfer und
   Basic Advances generisch kombinieren. Ungeschützte Agenda-Installationen
   sind nur bei garantiertem Closeout zulässig.
+- `PlanPortfolioSnapshot` koordiniert einen Interrupt, einen Vordergrundplan
+  und höchstens zwei fortsetzbare Hintergrundprojekte. Broker-/Bank-Zyklen und
+  strategieabhängige Corp-Scoring-Remotes besitzen begrenzte Zugkadenz,
+  redigierte Mehrplan-Beiträge und deterministische Zielbindung.
+- `RemoteDoctrineProfile` leitet aus eigenem Deckstrategieprofil,
+  DeckCapabilities und StrategicIntent ab, ob ein Deck keinen,
+  opportunistischen, unterstützenden oder primären Remote-Bedarf besitzt.
+  Fast-Advance-Decks erhalten dadurch keinen pauschalen Glacier-Auftrag.
 - Der Live-Modulgraph ist frei von alten Planern, Baseline-Controllern,
   Shadow-/META-Runtime und Kill-Switches.
 - Der Semantic-Coverage-Restpfad ist fail-closed. Nur ausdrücklich sichere,
@@ -50,6 +58,10 @@
 - `corp-score-conversion-capability-contract.md` und
   `corp-score-conversion-plan-process-2026-07-10.md`: Engine-/Hint-/Planvertrag
   für generische Fast-Advance- und Countertransfer-Scorepfade.
+- `ai-planportfolio-remote-doctrine-contract.md` und
+  `docs/reviews/ai/ai-planportfolio-remote-doctrine-final-review-2026-07-12.md`:
+  aktueller Vertrag für kurze Plansequenzen, wiederkehrende Zyklen,
+  Entwicklungsprojekte und strategieabhängigen Remote-Ausbau.
 - `proteus-ai-release-reconciliation-plan-2026-07-09.md`,
   `proteus-ai-release-automation-process-2026-07-09.md` und
   `docs/reviews/ai/proteus-ai-release-reconciliation-final-review-2026-07-09.md`:
