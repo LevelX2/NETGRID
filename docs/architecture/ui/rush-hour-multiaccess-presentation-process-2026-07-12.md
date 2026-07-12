@@ -2,7 +2,8 @@
 
 ## Status
 
-In Umsetzung am 12. Juli 2026.
+Technisch abgeschlossen und zur lokalen Integration freigegeben am 12. Juli
+2026.
 
 ## Quelle und Vorgabe
 
@@ -180,3 +181,21 @@ Lies AGENTS.md, AGENTS.local.md, agents/release-implementation-agent.md und dies
 - Fokussierte Tests, Web-Typecheck und `git diff --check` sind grün.
 - Alle Paketcommits sind lokal nach `main` integriert und Worktree/Branch sind
   verifiziert entfernt.
+
+## Verifikationsergebnis
+
+Die Umsetzung belegt neben der ursprünglichen Retention-Lücke eine
+matchübergreifende ID-Kollision: `evt_13` war im ersten Serienspiel bereits als
+Access bestätigt und wurde im zweiten Spiel ohne Reset fälschlich erneut als
+bestätigt behandelt. Der Dismiss- und Queue-Zustand ist nun matchgebunden.
+
+Neue öffentliche Karten-Accesses werden in Eventreihenfolge gehalten, bis ihre
+konkrete Event-ID bestätigt wird. Der generische Fortschritt zeigt für den
+beobachteten Rush-Hour-Ablauf `Zugriff 1 von 4` bis `Zugriff 4 von 4`.
+Redigierte Zugriffe werden nicht in die Queue aufgenommen; ältere Reviews
+erhalten keine LegalActions eines neueren PlayerView-State.
+
+Vor der Main-Integration sind 135 fokussierte Webtests, die vollständige
+Web-Suite mit 41 Testdateien und 559 Tests, der Web-Typecheck und `git diff
+--check` grün. Der detaillierte Abschlussnachweis liegt unter
+`docs/reviews/ui/rush-hour-multiaccess-presentation-final-review-2026-07-12.md`.
