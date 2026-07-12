@@ -6271,6 +6271,74 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(afterAdvance?.gameState?.stateVersion).toBe(beforeStateVersion);
   });
 
+  it("reports an engine rejection of an AI LegalAction without exposing its private message", async () => {
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "ai-engine-action-rejected",
+      chooseAiAction: (input): AiDecision => {
+        const action = input.legalActions[0];
+        if (!action) throw new Error("Missing legal AI action for rejection test");
+        return {
+          actionId: action.actionId,
+          reasonCode: "test.engine_rejection",
+          explanation: "Select the first LegalAction for the rejection path.",
+          consideredActionIds: [action.actionId],
+          fallbackUsed: false,
+          evidence: ["test_engine_rejection"],
+          timeoutUsed: false,
+          profileId: input.profileId,
+          difficulty: input.difficulty,
+          confidence: 1,
+          reason: "test.engine_rejection"
+        };
+      },
+      applyAction: (state) => ({
+        ok: false,
+        error: {
+          code: "ERR_INVALID_TARGET",
+          message: "Private target detail must not reach the opponent."
+        },
+        state
+      })
+    });
+    const created = await service.createMatch({
+      mode: "human_runner_vs_corp_ai",
+      hostSide: "runner",
+      seed: "ai-engine-action-rejected",
+      corpDifficulty: "normal"
+    });
+    const afterSetup = await submitChoice(
+      service,
+      created.matchId,
+      {
+        side: "runner",
+        sessionToken: created.hostSessionToken,
+        reconnectToken: created.hostReconnectToken
+      },
+      "keep",
+      "ai-engine-action-rejected-setup"
+    );
+    const before = await service.loadForTest(created.matchId);
+    if (!before?.gameState) throw new Error("Missing active match before rejection");
+
+    const advanced = await service.advanceAi({
+      matchId: created.matchId,
+      side: "runner",
+      sessionToken: created.hostSessionToken,
+      knownStateVersion: afterSetup.playerView.stateVersion,
+      knownMatchVersion: afterSetup.matchVersion,
+      mode: "single_step"
+    });
+
+    expect(advanced.ok).toBe(false);
+    if (advanced.ok) throw new Error("Expected AI engine rejection");
+    expect(advanced.error.code).toBe("ai_engine_action_rejected");
+    expect(advanced.error.message).toContain("ERR_INVALID_TARGET");
+    expect(advanced.error.message).not.toContain("Private target detail");
+    const after = await service.loadForTest(created.matchId);
+    expect(after?.eventLog).toHaveLength(before.eventLog.length);
+    expect(after?.gameState?.stateVersion).toBe(before.gameState.stateVersion);
+  });
+
   it("keeps tactical plan ranking detail sections in AI previews", async () => {
     const service = new MultiplayerService(new InMemoryMatchStorage(), {
       tokenSalt: "ai-preview-tactical-plan-sections",

@@ -48,6 +48,7 @@ import {
   type AiDecisionDebug,
   type AiDecisionInput,
   type DeckPublicMetadata,
+  type EngineError,
   type GameEvent,
   type GameState,
   type LegalAction,
@@ -632,13 +633,19 @@ export type PreviewAiResult =
     };
 
 type AiDecisionChooser = typeof chooseAiAction;
+type EngineActionApplier = typeof applyAction;
 type AiStepFailureCode =
   | "ai_no_action"
   | "ai_decision_action_not_legal"
+  | "ai_engine_action_rejected"
   | AiDeckSnapshotRuntimeErrorCode;
 type AiStepResult =
   | { ok: true }
-  | { ok: false; code: AiStepFailureCode };
+  | {
+      ok: false;
+      code: AiStepFailureCode;
+      engineErrorCode?: EngineError["code"];
+    };
 
 export class InMemoryMatchStorage implements MultiplayerStorage {
   private readonly records = new Map<string, StoredMatch>();
@@ -717,6 +724,7 @@ export class MultiplayerService {
   private readonly allowHiddenInfoUndo: boolean;
   private readonly now: () => string;
   private readonly chooseAiAction: AiDecisionChooser;
+  private readonly applyEngineAction: EngineActionApplier;
 
   constructor(
     private readonly storage: MultiplayerStorage = new InMemoryMatchStorage(),
@@ -727,6 +735,7 @@ export class MultiplayerService {
       allowHiddenInfoUndo?: boolean;
       now?: () => string;
       chooseAiAction?: AiDecisionChooser;
+      applyAction?: EngineActionApplier;
     } = {}
   ) {
     this.tokenSalt = options.tokenSalt ?? envValue(process.env, "NETGRID_TOKEN_SALT") ?? LOCAL_DEFAULT_TOKEN_SALT;
@@ -735,6 +744,7 @@ export class MultiplayerService {
     this.allowHiddenInfoUndo = options.allowHiddenInfoUndo ?? false;
     this.now = options.now ?? (() => new Date().toISOString());
     this.chooseAiAction = options.chooseAiAction ?? chooseAiAction;
+    this.applyEngineAction = options.applyAction ?? applyAction;
   }
 
   async createMatch(input: {
@@ -1638,6 +1648,22 @@ export class MultiplayerService {
         return {
           ok: false,
           error: safeError("ai_decision_action_not_legal", "Die KI wählte keine aktuell legale Aktion.", record.gameState, input.side),
+          payload: this.payloadFor(record, input.side)
+        };
+      }
+      if (!aiStepResult.ok && aiStepResult.code === "ai_engine_action_rejected") {
+        await this.storage.save(record);
+        const engineErrorSuffix = aiStepResult.engineErrorCode
+          ? ` (${aiStepResult.engineErrorCode})`
+          : "";
+        return {
+          ok: false,
+          error: safeError(
+            "ai_engine_action_rejected",
+            `Die von der KI gewählte LegalAction wurde von der Engine abgelehnt${engineErrorSuffix}.`,
+            record.gameState,
+            input.side
+          ),
           payload: this.payloadFor(record, input.side)
         };
       }
@@ -2713,7 +2739,7 @@ export class MultiplayerService {
     const legalAction = legalActionForAiDecision(decision, legalActions);
     if (!legalAction) return { ok: false, code: "ai_decision_action_not_legal" };
     const snapshot = this.snapshotFor(record.match.matchId, state, record.match.matchVersion, `snap_before_${state.stateVersion + 1}`, false);
-    const result = applyAction(
+    const result = this.applyEngineAction(
       state,
       {
         matchId: record.match.matchId,
@@ -2725,7 +2751,13 @@ export class MultiplayerService {
       },
       { publicEventsMode: "latest" }
     );
-    if (!result.ok) return { ok: false, code: "ai_no_action" };
+    if (!result.ok) {
+      return {
+        ok: false,
+        code: "ai_engine_action_rejected",
+        engineErrorCode: result.error.code
+      };
+    }
     const event: GameEvent = {
       ...result.event,
       publicPayload: {
