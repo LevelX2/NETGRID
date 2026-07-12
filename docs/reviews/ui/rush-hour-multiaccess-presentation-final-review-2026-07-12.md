@@ -84,6 +84,13 @@ Die fokussierte Matrix deckt ab:
 
 ## Integrationsstatus
 
-Paket 3 ist fachlich und technisch zur Integration des aktuellen `main` in den
-Arbeitsbranch freigegeben. Main-Merge und Cleanup werden anschließend gemäß
-Paketprozess verifiziert.
+Die drei Paketcommits wurden per Fast-Forward lokal nach `main` integriert.
+Auf `main` bestanden anschließend erneut 135 fokussierte Tests, der
+Web-Typecheck und `git diff --check`.
+
+Der normale Worktree-Remove erreichte unter Windows die bekannte
+Pfadlängengrenze. Git hatte den Worktree bereits ausgetragen; nach erneuter
+Prüfung von Zielpfad, sauberem Arbeitsstand und vollständiger Main-Integration
+wurde ausschließlich der validierte Restpfad entfernt. Dateipfad und
+Git-Registrierung sind nicht mehr vorhanden, der gemergte Arbeitsbranch ist
+gelöscht. Es erfolgte kein Push.

@@ -2,8 +2,7 @@
 
 ## Status
 
-Technisch abgeschlossen und zur lokalen Integration freigegeben am 12. Juli
-2026.
+Abgeschlossen, lokal nach `main` integriert und bereinigt am 12. Juli 2026.
 
 ## Quelle und Vorgabe
 
@@ -199,3 +198,7 @@ Vor der Main-Integration sind 135 fokussierte Webtests, die vollständige
 Web-Suite mit 41 Testdateien und 559 Tests, der Web-Typecheck und `git diff
 --check` grün. Der detaillierte Abschlussnachweis liegt unter
 `docs/reviews/ui/rush-hour-multiaccess-presentation-final-review-2026-07-12.md`.
+
+Nach dem Fast-Forward auf `main` bestanden erneut 135 fokussierte Tests,
+Web-Typecheck und Diff-Hygiene. Worktreepfad, Git-Worktree-Registrierung und
+gemergter Arbeitsbranch sind entfernt; es erfolgte kein Push.
