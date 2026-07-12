@@ -162,9 +162,6 @@ const LEAGUE_EXPECTATION_BY_SCENARIO_ID = {
   corp_real_advance_not_score_yet: expectation(["advance_card"], {
     forbiddenMistakes: ["missed_score_window"],
   }),
-  corp_real_rez_too_expensive_decline: expectation(["decline_rez"], {
-    forbiddenMistakes: ["bad_rez_spend"],
-  }),
 } as const satisfies Partial<
   Record<
     (typeof REAL_ENGINE_DECISION_CORPUS_SCENARIO_IDS)[number],
@@ -491,7 +488,7 @@ export function buildRealEngineDecisionCorpusScenarios(): RealEngineDecisionCorp
     corpRezScenario(
       "corp_real_do_not_rez_when_broke",
       "real-corp-no-rez",
-      0,
+      3,
       "onr_origin_corp_ai_snapshot_v1",
     ),
     corpScenario(

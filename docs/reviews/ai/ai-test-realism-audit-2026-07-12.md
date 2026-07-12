@@ -76,10 +76,11 @@ Enge dort, wo der Testname eine Auswahl oder ein Verhalten im Spiel behauptet.
 - `simulation-harness.test.ts` enthält einen vollständigen deterministischen
   AI-vs-AI-Lauf. Er prüft Legalität, Fehlerfreiheit, Replay und Redaction, aber
   keine konkrete fachliche Fehlentscheidung.
-- Der Real-Engine-Korpus umfasst 54 Szenarien. 22 davon tragen bereits eine
+- Der Real-Engine-Korpus umfasst 54 Szenarien. Vor der Härtung trugen 22 davon eine
   Erwartung an den besten Aktionstyp und konkrete verbotene Fehlerklassen.
-  Bislang wird für keines dieser 22 Szenarien die produktive Auswahl gegen diese
-  Erwartung geprüft.
+  Eine Erwartung war durch die Engine bereits vollständig erzwungen; nach ihrer
+  korrekten Rückstufung bleiben 21 echte Verhaltensszenarien. Bislang wird für
+  keines davon die produktive Auswahl gegen diese Erwartung geprüft.
 - In 47 von 92 Runtime-Testdateien kommen `as unknown as`-Casts vor. Das ist
   nicht automatisch falsch, erhöht bei behauptetem Spielverhalten aber das
   Risiko, dass ein Engine-Feld oder eine reale Kombination unabsichtlich fehlt.
@@ -171,7 +172,7 @@ Fehlfunktion: Ein Engine-Feld, eine zusätzliche LegalAction oder eine reale
 Action-Form ändert die Auswahl. Sämtliche synthetischen Live-Tests und sämtliche
 diagnostischen Engine-Korpus-Tests bleiben grün.
 
-Härtung: Alle 22 fachlich annotierten Engine-Szenarien durch den öffentlichen
+Härtung: Alle 21 fachlich annotierten Engine-Szenarien durch den öffentlichen
 Chooser schicken; Legalität, Determinismus und erwarteten Aktionstyp prüfen.
 
 ### P0 – Fixture setzt das Ergebnis indirekt fest

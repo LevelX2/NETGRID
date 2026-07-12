@@ -147,6 +147,35 @@ describe("RealEngineDecisionCorpus", () => {
     );
   });
 
+  it("keeps every annotated decision scenario open to a real competing action", () => {
+    const scenarios = buildRealEngineDecisionCorpusScenarios().filter(
+      (scenario) => scenario.leagueExpectation?.expectedTopActionTypes,
+    );
+
+    expect(scenarios).toHaveLength(21);
+    for (const scenario of scenarios) {
+      const expectedTypes = new Set(
+        scenario.leagueExpectation?.expectedTopActionTypes ?? [],
+      );
+      const expectedActions = scenario.input.legalActions.filter((action) =>
+        expectedTypes.has(action.type),
+      );
+      const competingActions = scenario.input.legalActions.filter(
+        (action) => !expectedTypes.has(action.type),
+      );
+
+      expect(
+        expectedActions.length,
+        `${scenario.scenarioId} must expose the expected Engine action`,
+      ).toBeGreaterThan(0);
+      if (expectedTypes.has("resolve_choice")) continue;
+      expect(
+        competingActions.length,
+        `${scenario.scenarioId} must not predetermine the expected result`,
+      ).toBeGreaterThan(0);
+    }
+  });
+
   it("keeps real run target payloads side-safe and target-alignable", () => {
     const samples = buildRealEngineDecisionCorpus(
       buildRealEngineDecisionCorpusScenarios(),
