@@ -58,13 +58,13 @@ Archives generell abwerten.
 
 ## Nicht als Fehler eingefrorene Fälle
 
-| Match / Decision | Aktueller Nachweis | Einordnung |
-| --- | --- | --- |
-| A199 / 25 | Draw statt stark negativ bewerteter BBS-Installation | bereits grün |
-| A199 / 88 und 93 | jeweils `Corporate War → Systematic Layoffs → Choice → Advance → Score` | damaliger Abbruch behoben; Einzelinstallation isoliert zu verbieten wäre falsch |
-| 3BB / 27 | kostenlose verdeckte HQ-Mole-Vorbereitung bei einem verbleibenden Klick | vertretbare Strategieentscheidung, kein harter Fehler |
-| 3BB / 44 und 63 | kein unfinanzierter Rush-Hour-Run mehr | bereits grün |
-| 3BB / 50, 68 und 77 | bezahlter Draw statt historischer spekulativer Runs | bereits grün |
+| Match / Decision    | Aktueller Nachweis                                                      | Einordnung                                                                      |
+| ------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| A199 / 25           | Draw statt stark negativ bewerteter BBS-Installation                    | bereits grün                                                                    |
+| A199 / 88 und 93    | jeweils `Corporate War → Systematic Layoffs → Choice → Advance → Score` | damaliger Abbruch behoben; Einzelinstallation isoliert zu verbieten wäre falsch |
+| 3BB / 27            | kostenlose verdeckte HQ-Mole-Vorbereitung bei einem verbleibenden Klick | vertretbare Strategieentscheidung, kein harter Fehler                           |
+| 3BB / 44 und 63     | kein unfinanzierter Rush-Hour-Run mehr                                  | bereits grün                                                                    |
+| 3BB / 50, 68 und 77 | bezahlter Draw statt historischer spekulativer Runs                     | bereits grün                                                                    |
 
 Die früher freigegebenen Broker- und Draw-Tax-Fehler sind im Warmup ebenfalls
 nicht mehr reproduzierbar: Die aktuelle KI lädt Broker beziehungsweise wählt

@@ -2,10 +2,12 @@
 
 ## Status
 
-P0 bis P3 abgeschlossen, P4 aktiv. Von den historischen und neu abgeleiteten
-Auffälligkeiten bleibt genau der zentrale Runner-Zielkonflikt bei Decision 32
+P0 bis P5 abgeschlossen; der Arbeitsbranch ist lokal nach `main` integriert
+und der isolierte Worktree entfernt. Von den historischen und neu abgeleiteten
+Auffälligkeiten blieb genau der zentrale Runner-Zielkonflikt bei Decision 32
 als spielgleiche `behavior_regression` reproduzierbar. Die rote Ziel-Evidence
-und die grüne R&D-Gegenprobe sind vor jeder Verhaltenskorrektur versioniert.
+und die grüne R&D-Gegenprobe wurden vor jeder Verhaltenskorrektur versioniert
+und sind nach der generischen Korrektur unverändert grün.
 
 ## Quelle
 

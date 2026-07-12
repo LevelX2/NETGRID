@@ -60,6 +60,13 @@ nun grün; der Final Review ist führend für den Abschlussstand.
 - Strenge: verbotene Event-Run-Aktion plus finanzierbare Multiaccess-
   Gegenprobe.
 - Memory-Bedarf: TacticalPlan/RunnerRunPlan und Run-Target-Evaluation.
+- Abschluss: Die historischen Rush-Hour-Entscheidungen sind im spielgleichen
+  Rebase-Audit bereits grün. Zusätzlich wurde Decision 32 / StateVersion 67
+  als weiterhin rote Zentralziel-Regressionssituation gefunden, als
+  `CP-MRGSG-01` konserviert und geschlossen: Ein vollständig durch sichtbare
+  ICE-Kosten besteuerter R&D-Plan darf einem mehr als 600 Punkte besseren
+  offenen Archives-Run weichen. Offenes R&D, frische R&D-Evidence und
+  sichtbare Sofortpayoffs bleiben Gegenverträge.
 
 ## Priorität 3 – Corp-Opening und Trace-Follow-up
 
