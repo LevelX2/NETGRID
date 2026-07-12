@@ -1,7 +1,7 @@
 # Realismus-Audit der NETGRID-Tests außerhalb der KI
 
 Stand: 12. Juli 2026  
-Status: Umsetzung läuft  
+Status: abgeschlossen und verifiziert
 Gegenstand: alle Testdateien außerhalb von `packages/ai`
 
 ## Ergebnisübersicht vor Änderungen
@@ -19,6 +19,22 @@ Gegenstand: alle Testdateien außerhalb von `packages/ai`
 | **Gesamt** | **240** | **2.889** | **2.882** | sieben Prüfungen waren grün wirkungslos, weil sie nicht gesammelt wurden |
 
 Die Zahlen sind statische Registrierungen. Parameterisierte Fälle innerhalb von `it.each` können zur Laufzeit mehr Einzelresultate erzeugen. Browser-E2E ist separat vom normalen Vitest-Lauf gezählt.
+
+## Ergebnisübersicht nach der Härtung
+
+| Gruppe | physische Testdateien | statisch registrierte Prüfungen | dynamisch im Abschlusslauf | Ergebnis |
+| --- | ---: | ---: | ---: | --- |
+| Engine | 182 | 2.060 | 1.632 | drei Seed-Varianten durchlaufen einen gemeinsamen echten LegalActions-/ApplyAction-/Choice-/View-/Replay-Pfad |
+| Web | 40 | 512 | 541 | alle Dateien gesammelt; Kartenbild-`GET` selbst für 200, 304 und sichere 404 geprüft |
+| Server | 11 | 264 | 153 | bestehende Service-, HTTP-, WebSocket-, Speicher- und Sitzungspfade grün |
+| Catalog | 3 | 16 | 16 | Daten- und Registry-Verträge grün |
+| Decks | 1 | 18 | 18 | Parser-/Validierungsvertrag grün |
+| Shared | 1 | 10 | 10 | Schema- und Payload-Verträge grün |
+| Root-Verträge | 3 | 8 | 8 | Leak-Scanner erkennen absichtlich kontaminierte Proben |
+| Browser-E2E | 1 | 8 | 8 | alle realen Browserflüsse grün |
+| **Gesamt** | **242** | **2.896** | **2.386** | jede physische Testdatei besitzt nun ein reguläres Gate |
+
+Statische Vitest-Analyse und dynamischer Lauf zählen parametrisierte und zur Laufzeit erzeugte Fälle unterschiedlich; deshalb werden beide Werte bewusst getrennt ausgewiesen und nicht gegeneinander saldiert.
 
 ## Bewertungsmaßstab
 
@@ -86,10 +102,10 @@ Bewertung: **hoch** für die ausgeführten Browserflüsse; **mittel** für Leak-
 
 | Priorität | Finding | Warum ein Problem unentdeckt bliebe | Maßnahme |
 | --- | --- | --- | --- |
-| P0 | Web-Testdatei nicht gesammelt | Änderungen an der Window-Event-Icon-Zuordnung konnten trotz grünem Root-Testlauf ungeprüft bleiben | Web-Include korrigieren und Discovery-Vertrag ergänzen |
-| P1 | Card-Image-Route nur über Helfer geprüft | Exportierter `GET`-Handler konnte bei Datei-, Header-, 304- oder Fehlerpfaden brechen | echte Handler-Aufrufe für 200, 304 und sichere 404-Antwort ergänzen |
-| P1 | Leak-Scanner ohne Fehlerprobe | aus Versehen leere oder abgeschwächte Forbidden-Listen könnten weiterhin grün sein | absichtlich kontaminierte DOM-/Storage-/WebSocket-Proben müssen den Prüfer rot machen |
-| P2 | Evidenzarten nicht explizit getrennt | schmale Architektur-, Fixture- oder Ableitungstests könnten als volle Laufzeitabdeckung missverstanden werden | Testmatrix und dauerhaften Auditprozess dokumentieren |
+| P0 | Web-Testdatei nicht gesammelt | Änderungen an der Window-Event-Icon-Zuordnung konnten trotz grünem Root-Testlauf ungeprüft bleiben | **geschlossen:** Web-Include korrigiert; Discovery-Gate vergleicht alle physischen Pakettests mit der echten Vitest-Liste |
+| P1 | Card-Image-Route nur über Helfer geprüft | Exportierter `GET`-Handler konnte bei Datei-, Header-, 304- oder Fehlerpfaden brechen | **geschlossen:** echte Handler-Aufrufe für 200, 304 und sichere 404-Antwort ergänzt |
+| P1 | Leak-Scanner ohne Fehlerprobe | aus Versehen leere oder abgeschwächte Forbidden-Listen könnten weiterhin grün sein | **geschlossen:** absichtlich kontaminierte DOM-/Storage-/WebSocket-Proben werden nachweislich abgelehnt |
+| P2 | Evidenzarten nicht explizit getrennt | schmale Architektur-, Fixture- oder Ableitungstests könnten als volle Laufzeitabdeckung missverstanden werden | **geschlossen:** Testmatrix und dauerhafter Auditprozess dokumentiert |
 
 ## Nicht als Fehler gewertete Muster
 
@@ -99,6 +115,14 @@ Bewertung: **hoch** für die ausgeführten Browserflüsse; **mittel** für Leak-
 - Mocks sind zulässig, wenn ein schmaler Adaptervertrag geprüft wird und der echte Grenzpfad an anderer Stelle integriert abgedeckt ist.
 - Ein Test muss nicht zufällige Produktionszustände erzeugen. Er muss aber genug konkurrierende oder fehlerhafte Eingaben besitzen, dass die behauptete Auswahl oder Ablehnung unterscheidbar ist.
 
-## Abschlusskriterien
+## Abschlussverifikation
 
-Der Audit ist abgeschlossen, wenn die Discovery-Lücke geschlossen ist, die Card-Image-Route selbst geprüft wird, die Leak-Scanner ihre Wirksamkeit an absichtlich fehlerhaften Proben zeigen, alle betroffenen Gruppentests grün sind und der vollständige Nicht-KI-Testlauf keine neue Regression meldet.
+- Nicht-KI-Pakete: 238 Testdateien und 2.370 dynamische Vitest-Fälle grün.
+- Root-Verträge: 3 Dateien und 8 Fälle grün.
+- Browser-E2E: 8 von 8 Fällen grün gegen isolierte lokale Server und temporäre SQLite-Laufzeit.
+- Vitest-Discovery: jede physische Paket-Testdatei gesammelt.
+- TypeScript: alle Workspace-Typechecks grün.
+- Architektur: Package-Boundaries für 1.706 Dateien sowie vier Selbsttest-Verstöße grün.
+- Hygiene: `git diff --check` grün.
+
+Die verbleibende Grenze ist bewusst: Node-basierte Web-Ableitungstests sind kein vollständiger visueller DOM-Nachweis, und acht Browserflüsse decken nicht jede mögliche Kartenkombination ab. Für die behaupteten Prüfgegenstände besteht nach der Härtung jedoch kein kritisches Scheintest-Finding mehr.

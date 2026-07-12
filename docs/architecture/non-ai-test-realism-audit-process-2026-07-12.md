@@ -2,7 +2,8 @@
 
 ## Status
 
-Aktiv seit 2026-07-12.
+Fachlich abgeschlossen und vollständig verifiziert am 2026-07-12. Der
+Paketbranch wird anschließend gemäß Controller lokal nach `main` integriert.
 
 ## Quelle und Zielprüfung
 
@@ -184,3 +185,23 @@ entfernen und das Goal erst dann als complete markieren.
 - Evidence-Stufen und Residualrisiken sind dokumentiert.
 - Paketcommits, finale Verifikation, lokale Main-Integration und Cleanup sind
   abgeschlossen.
+
+## Abschlussnachweis
+
+Die Pakete NTR-01 bis NTR-05 wurden sequenziell bearbeitet. Der Ausgangsbestand
+von 240 physischen Dateien und 2.889 statischen Registrierungen wurde auf 242
+Dateien und 2.896 Registrierungen erweitert. Sämtliche 242 Dateien besitzen nun
+ein wirksames reguläres Gate; die zuvor verwaiste Web-Datei wird gesammelt.
+
+Verifikation:
+
+- alle Nicht-KI-Paketsuiten grün: Engine 182 Dateien/1.632 dynamische Fälle,
+  Web 40/541, Server 11/153, Catalog 3/16, Decks 1/18, Shared 1/10;
+- Root-Verträge einschließlich Leak-Mutation-Witness 3 Dateien/8 Fälle grün;
+- Browser-E2E 8 von 8 grün gegen isolierte Server, Web-App und temporäre
+  SQLite-Laufzeit;
+- alle Workspace-Typechecks grün;
+- Vitest-Discovery-Abgleich grün;
+- Package-Boundaries über 1.706 Dateien und vier absichtliche
+  Selbsttest-Verstöße grün;
+- `git diff --check` grün.
