@@ -26,6 +26,7 @@ import {
   AI_RUNTIME_CHECKPOINT_SCHEMA_VERSION,
   exportAiRuntimeCheckpoint,
 } from "../packages/ai/src/evaluation/decision-checkpoints/runtime-checkpoint";
+import { replayAiDecisionCheckpointWarmup } from "../packages/ai/src/evaluation/decision-checkpoints/checkpoint-warmup";
 import { resetTacticalPlanMemory } from "../packages/ai/src/plans/plan-memory";
 
 type TraceRow = {
@@ -62,16 +63,22 @@ const warmup = db
      order by decision_index`,
   )
   .all(args.matchId, actor, args.decisionIndex) as TraceRow[];
-for (const row of warmup) {
-  const state = stateAt(row.state_version);
-  const input = inputFor(state, eventPrefixFor(row.state_version, actor));
-  const decision = chooseAiAction(input);
-  if (decision.actionId !== row.selected_action_id) {
-    throw new Error(
-      `warmup_behavior_drift:decision=${row.decision_index}:expected=${row.selected_action_id}:actual=${decision.actionId}`,
-    );
-  }
-}
+const warmupResult = replayAiDecisionCheckpointWarmup({
+  rows: warmup.map((row) => ({
+    stateVersion: row.state_version,
+    decisionIndex: row.decision_index,
+    side: row.side,
+    selectedActionId: row.selected_action_id,
+  })),
+  policy: args.warmupPolicy,
+  inputForStateVersion: (stateVersion) => {
+    const state = stateAt(stateVersion);
+    return inputFor(state, eventPrefixFor(stateVersion, actor));
+  },
+  choose: (input, persistTacticalPlanMemory) =>
+    chooseAiAction(input, { persistTacticalPlanMemory }),
+  resetMemory: resetTacticalPlanMemory,
+});
 
 const targetInput = inputFor(
   targetState,
@@ -123,7 +130,12 @@ process.stdout.write(
     ok: true,
     out: resolve(args.out),
     checkpointId: fixture.checkpointId,
-    warmupDecisions: warmup.length,
+    warmupDecisions: warmupResult.warmupDecisions,
+    warmupPolicy: args.warmupPolicy,
+    warmupDriftCount: warmupResult.warmupDrifts.length,
+    compatibleWarmupSuffixDecisions:
+      warmupResult.compatibleSuffixDecisions,
+    warmupDrifts: warmupResult.warmupDrifts,
     eventPrefix: fixture.engine.eventPrefix.length,
     runtime: {
       tacticalPlan: Boolean(runtime.tacticalPlan),
@@ -228,6 +240,7 @@ function parseArgs(values: string[]): {
   findingId: string;
   expectationBase64: string;
   out: string;
+  warmupPolicy: "strict" | "rebase";
 } {
   const value = (name: string): string => {
     const index = values.indexOf(name);
@@ -239,6 +252,10 @@ function parseArgs(values: string[]): {
   if (!Number.isInteger(decisionIndex) || decisionIndex <= 0) {
     throw new Error("invalid_argument:--decision-index");
   }
+  const warmupPolicyValue = optionalValue(values, "--warmup-policy") ?? "strict";
+  if (warmupPolicyValue !== "strict" && warmupPolicyValue !== "rebase") {
+    throw new Error("invalid_argument:--warmup-policy");
+  }
   return {
     db: value("--db"),
     matchId: value("--match-id"),
@@ -247,5 +264,11 @@ function parseArgs(values: string[]): {
     findingId: value("--finding-id"),
     expectationBase64: value("--expectation-base64"),
     out: value("--out"),
+    warmupPolicy: warmupPolicyValue,
   };
+}
+
+function optionalValue(values: string[], name: string): string | undefined {
+  const index = values.indexOf(name);
+  return index >= 0 ? values[index + 1] : undefined;
 }
