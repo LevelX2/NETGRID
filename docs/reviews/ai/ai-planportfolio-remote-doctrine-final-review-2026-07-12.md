@@ -98,7 +98,8 @@ bleiben konkrete Folgeanalyse, nicht verdeckte Freigabe.
   Semantic-Runtime-Tests sind grün.
 - Der breite fokussierte Lauf umfasste zuletzt 171 Tests; nach der
   Auswahlgrenzen-Korrektur waren weitere 158 Tests grün.
-- Alle drei AI-Shards waren mit 301 Testdateien und 1.982 Tests grün.
+- Nach Integration des aktuellen `main` waren alle drei AI-Shards mit 302
+  Testdateien und 1.997 Tests grün.
 - `@netgrid/ai`-Typecheck, `check:ai` und `git diff --check` waren grün. Die
   bestehenden Derived-Facts-/Hint-Warnungen blieben nichtblockierende
   Qualitätsschuld; alle Checks meldeten null Fehler.
