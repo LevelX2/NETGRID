@@ -86,7 +86,9 @@ Vertrag.
   Kartentest auf exaktes `+1 MU`, null Credit-Counter, keine Credit-Anzeige,
   Installkosten 3, Deckersetzung und einen einzigen Bonus-Run pro Zug härten;
   insbesondere einen erfolgreichen Bonus-Run vollständig abschließen und
-  nachweisen, dass kein weiterer Bodyweight-Bonus-Run angeboten wird.
+  nachweisen, dass kein weiterer Bodyweight-Bonus-Run angeboten wird. Normale
+  und kostenlose Runs auf dasselbe Data Fort müssen verschiedene stabile
+  `actionId`s besitzen, damit die Revalidierung die ausgewählte Run-Art anwendet.
 - Kernartefakte: `packages/shared/src/card-definitions.ts` und der fokussierte
   Originalset-Kartentest.
 - Checks: fokussierter Engine-Test, Engine-Typecheck, `git diff --check`.

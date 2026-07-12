@@ -677,7 +677,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     );
   });
 
-  it("enforces Bodyweight Data Creche install cost, MU, deck replacement and bonus run", () => {
+  it("enforces Bodyweight Data Creche contract and only one bonus run per turn", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "spotcheck-bodyweight-creche",
@@ -696,6 +696,9 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     state.runner.credits = 20;
     moveRunnerCardToGrip(state, "onr_v1_122_artemis-2020");
     moveRunnerCardToGrip(state, "onr_v1_123_bodyweight-data-creche");
+    const baseMemory = getPlayerView(state, "runner").own.memoryLimit;
+    expect(baseMemory).toBeDefined();
+    if (baseMemory === undefined) throw new Error("Missing runner memory limit");
     state = apply(
       state,
       "runner",
@@ -705,16 +708,42 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       (id) =>
         state.cardInstances[id]?.definitionId === "onr_v1_122_artemis-2020",
     );
-    const memoryBefore = state.runner.memoryLimit;
+    expect(getPlayerView(state, "runner").own.memoryLimit).toBe(baseMemory + 2);
     state = apply(
       state,
       "runner",
       (action) =>
         sourceDefinition(state, action) === "onr_v1_123_bodyweight-data-creche",
     );
-    expect(state.runner.memoryLimit).toBeGreaterThanOrEqual(
-      memoryBefore - 1,
+    const bodyweightId = state.runner.rig.hardware.find(
+      (id) =>
+        state.cardInstances[id]?.definitionId ===
+        "onr_v1_123_bodyweight-data-creche",
     );
+    expect(bodyweightId).toBeDefined();
+    if (!bodyweightId) throw new Error("Missing Bodyweight Data Creche");
+    expect(getPlayerView(state, "runner").own.memoryLimit).toBe(baseMemory + 1);
+    expect(cardCounterAmount(state, bodyweightId, "recurring_credit")).toBe(0);
+    expect(
+      getPlayerView(state, "runner").own.rig?.find(
+        (card) => card.instanceId === bodyweightId,
+      )?.counterDisplays,
+    ).toBeUndefined();
+    expect(
+      CARD_DEFINITIONS_BY_ID["onr_v1_123_bodyweight-data-creche"],
+    ).toMatchObject({
+      installCost: 3,
+      memoryLimitBonus: 1,
+    });
+    expect(
+      CARD_DEFINITIONS_BY_ID["onr_v1_123_bodyweight-data-creche"]
+        ?.recurringCredits,
+    ).toBeUndefined();
+    expect(
+      CARD_DEFINITIONS_BY_ID[
+        "onr_v1_123_bodyweight-data-creche"
+      ]?.mechanics,
+    ).not.toContain("link_recurring_credit");
     if (oldDeckId) expect(state.runner.heap).toContain(oldDeckId);
     putCorpCardOnTopOfRd(state, "simple_economy_operation");
     state = apply(
@@ -731,12 +760,34 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
         action.type === "start_run" &&
         action.payload?.bonusRunSource === "onr_v1_123_bodyweight-data-creche",
     );
+    const regularRunOnSameServer = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" &&
+        action.payload?.serverId === bonusRun.payload?.serverId &&
+        action.payload?.bonusRunSource === undefined,
+    );
+    expect(bonusRun.actionId).not.toBe(regularRunOnSameServer.actionId);
     const clicksBeforeBonus = state.runner.clicks;
     expect(bonusRun.costs).not.toContainEqual(
       expect.objectContaining({ clicks: expect.any(Number) }),
     );
     state = apply(state, "runner", (action) => action.actionId === bonusRun.actionId);
-    expect(state.runner.clicks).toBeLessThanOrEqual(clicksBeforeBonus);
+    expect(state.runner.clicks).toBe(clicksBeforeBonus);
+    expect(state.runnerTurnFlags).toMatchObject({
+      successfulRunExtraRunPending: false,
+      successfulRunExtraRunUsedThisTurn: true,
+    });
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "start_run" &&
+          action.payload?.bonusRunSource ===
+            "onr_v1_123_bodyweight-data-creche",
+      ),
+    ).toBe(false);
   });
 
   it("lets the Runner remove Data Raven counters for an action and 1 credit", () => {
