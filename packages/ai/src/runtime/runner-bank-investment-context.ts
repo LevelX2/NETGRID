@@ -66,7 +66,15 @@ type RunnerBankHintEffectLike = {
 };
 
 export type RunnerBankInvestmentContextDependencies = {
-  previousPlan: (input: AiDecisionInput) => { type?: string } | undefined;
+  previousPlan: (input: AiDecisionInput) =>
+    | {
+        type?: string;
+        portfolioRole?: "background";
+        portfolioLifecycle?: string;
+        actionsUsedThisTurn?: number;
+        turnKey?: string;
+      }
+    | undefined;
   runnerHandFundingTarget: (input: AiDecisionInput) => unknown;
   findVisibleCard: (
     input: AiDecisionInput,
@@ -150,6 +158,7 @@ export function createRunnerBankInvestmentContext(
       action.type === "start_run";
     if (!isBankRelevantAction) return [];
     const assessment = runnerBankInvestmentCommitmentAssessment(input, action);
+    const planContinuity = dependencies.previousPlan(input);
     if (!assessment.active && assessment.status === "inactive") return [];
     return [
       `bankCommitmentActive:${assessment.active}`,
@@ -202,6 +211,14 @@ export function createRunnerBankInvestmentContext(
                     : "bank_threshold"
                 : "no_funding_need"
             }`,
+          ]
+        : []),
+      ...(planContinuity?.portfolioRole === "background"
+        ? [
+            "bankPortfolioRole:background",
+            `bankPortfolioLifecycle:${planContinuity.portfolioLifecycle ?? "unknown"}`,
+            `bankPortfolioActionsThisTurn:${planContinuity.actionsUsedThisTurn ?? 0}`,
+            `bankPortfolioTurnKey:${planContinuity.turnKey ?? "unknown"}`,
           ]
         : []),
     ];
@@ -292,10 +309,7 @@ export function createRunnerBankInvestmentContext(
     }
 
     if (isRunnerBankInstallAction(input, action)) {
-      const installProjection = runnerBankInstallProjection(
-        input,
-        action,
-      );
+      const installProjection = runnerBankInstallProjection(input, action);
       const plausibleFollowup = installProjection.plausible;
       return {
         active: plausibleFollowup,
@@ -747,8 +761,7 @@ export function createRunnerBankInvestmentContext(
       : 0;
     const creditsAfterInstall =
       input.playerView.own.credits - dependencies.actionCreditCost(action);
-    const clicksAfterInstall =
-      input.playerView.own.clicks - installClickCost;
+    const clicksAfterInstall = input.playerView.own.clicks - installClickCost;
     const canLoadAfterInstallThisTurn =
       clicksAfterInstall - reservedRunClicks >= 1;
     const preservesConcreteFunding =

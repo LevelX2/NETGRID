@@ -1,6 +1,4 @@
-import {
-  type AiDecisionInput,
-} from "@netgrid/shared";
+import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "./action-semantic-candidate";
 import { redactedDeckCapabilityFacts } from "./deck-capabilities";
 import { redactedMergedTacticalGoalFacts } from "./decision/tactical-goal-merge";
@@ -8,6 +6,12 @@ import { redactedRunnerHandDevelopmentFacts } from "./runner-hand-development";
 import { redactedRunnerTacticalGoalFacts } from "./runner-tactical-goals";
 import { createAiHintsByCard } from "./ai-hints";
 import { getTacticalPlanMemorySnapshot } from "./plans/plan-memory";
+import { getPlanPortfolioMemorySnapshot } from "./plans/plan-portfolio-memory";
+import {
+  buildPlanPortfolio,
+  planPortfolioTurnKey,
+  redactedPlanPortfolioFacts,
+} from "./plans/plan-portfolio";
 import {
   redactedAccessCommitmentFacts,
   redactedAccessOutcomeMemoryFacts,
@@ -17,9 +21,7 @@ import {
   redactedRunnerStrategicIntentFacts,
   redactedStrategicIntentStateFacts,
 } from "./plans/tactical-plan-redaction";
-import {
-  visibleCardForAction,
-} from "./plans/tactical-plan-visible-cards";
+import { visibleCardForAction } from "./plans/tactical-plan-visible-cards";
 import { buildCorpTacticalPlans } from "./plans/tactical-plan-corp-plans";
 import { buildRunnerTacticalPlans } from "./plans/tactical-plan-runner-plans";
 import type { TacticalPlanCreditValueDependencies } from "./plans/tactical-plan-action-values";
@@ -34,14 +36,15 @@ import type {
   TacticalPlan,
   TacticalPlanBuildContext,
   PlanStepMappingResult,
-  TacticalPlanRuntimeResult
+  TacticalPlanRuntimeResult,
 } from "./plans/tactical-plan-types";
 
 const AI_HINTS_BY_CARD = createAiHintsByCard();
-const TACTICAL_PLAN_CREDIT_VALUE_DEPENDENCIES: TacticalPlanCreditValueDependencies = {
-  aiHintsByCard: AI_HINTS_BY_CARD,
-  visibleCardForAction,
-};
+const TACTICAL_PLAN_CREDIT_VALUE_DEPENDENCIES: TacticalPlanCreditValueDependencies =
+  {
+    aiHintsByCard: AI_HINTS_BY_CARD,
+    visibleCardForAction,
+  };
 
 export {
   createPlanStep,
@@ -50,10 +53,12 @@ export {
 export { TACTICAL_PLAN_SCHEMA_VERSION } from "./plans/tactical-plan-types";
 export {
   createTacticalPlanMemorySnapshot,
+  getPlanContinuityMemorySnapshot,
   getTacticalPlanMemorySnapshot,
   rememberTacticalPlanRuntime,
   resetTacticalPlanMemory,
 } from "./plans/plan-memory";
+export type { PlanContinuityMemorySnapshot } from "./plans/plan-memory";
 export { rankTacticalPlans } from "./plans/tactical-plan-progression";
 export type {
   PlanLifecycle,
@@ -77,7 +82,7 @@ export type {
   TacticalPlanMemorySnapshot,
   TacticalPlanSnapshot,
   PlanStepMappingResult,
-  TacticalPlanRuntimeResult
+  TacticalPlanRuntimeResult,
 } from "./plans/tactical-plan-types";
 
 // TacticalPlans are a mapping layer: they organize TacticalGoals, capabilities,
@@ -93,7 +98,8 @@ export function buildTacticalPlans(
 export function evaluateTacticalPlans(
   context: TacticalPlanBuildContext,
 ): TacticalPlanRuntimeResult {
-  const previousPlan = context.previousPlan ?? getTacticalPlanMemorySnapshot(context.input);
+  const previousPlan =
+    context.previousPlan ?? getTacticalPlanMemorySnapshot(context.input);
   const deckCapabilitiesUsed = context.deckCapabilities
     ? redactedDeckCapabilityFacts(context.deckCapabilities)
     : [];
@@ -115,9 +121,12 @@ export function evaluateTacticalPlans(
   const runnerEconomyPostureUsed = context.runnerEconomyPosture
     ? redactedRunnerEconomyPostureFacts(context.runnerEconomyPosture)
     : [];
-  const runnerHandDevelopmentEvaluationsUsed = context.runnerHandDevelopmentEvaluations
-    ? redactedRunnerHandDevelopmentFacts(context.runnerHandDevelopmentEvaluations)
-    : [];
+  const runnerHandDevelopmentEvaluationsUsed =
+    context.runnerHandDevelopmentEvaluations
+      ? redactedRunnerHandDevelopmentFacts(
+          context.runnerHandDevelopmentEvaluations,
+        )
+      : [];
   const runnerTacticalGoalsUsed = context.runnerTacticalGoals
     ? redactedRunnerTacticalGoalFacts(context.runnerTacticalGoals)
     : [];
@@ -133,7 +142,17 @@ export function evaluateTacticalPlans(
   });
   const progression = progressTacticalPlans(rawPlans, previousPlan);
   const planAlternatives = rankTacticalPlans(progression.plans);
-  const blockedPlans = planAlternatives.filter((plan) => plan.status === "blocked");
+  const blockedPlans = planAlternatives.filter(
+    (plan) => plan.status === "blocked",
+  );
+  const previousPlanPortfolio = getPlanPortfolioMemorySnapshot(context.input);
+  const planPortfolio = buildPlanPortfolio({
+    input: context.input,
+    tacticalPlans: planAlternatives,
+    ...(previousPlanPortfolio ? { previous: previousPlanPortfolio } : {}),
+    turnKey: planPortfolioTurnKey(context.input),
+  });
+  const planPortfolioUsed = redactedPlanPortfolioFacts(planPortfolio);
   const candidates = context.candidates ?? [];
   for (const plan of planAlternatives) {
     if (!planCanMapToCurrentAction(plan)) continue;
@@ -145,22 +164,36 @@ export function evaluateTacticalPlans(
     );
     if (mapping.status === "matched" && mapping.legalActions.length > 0) {
       return {
+        planPortfolio,
+        planPortfolioUsed,
         ...(previousPlan ? { previousPlan } : {}),
         ...(deckCapabilitiesUsed.length > 0 ? { deckCapabilitiesUsed } : {}),
         ...(strategicIntentStateUsed.length > 0
           ? { strategicIntentStateUsed }
           : {}),
-        ...(corpStrategicIntentUsed.length > 0 ? { corpStrategicIntentUsed } : {}),
+        ...(corpStrategicIntentUsed.length > 0
+          ? { corpStrategicIntentUsed }
+          : {}),
         ...(tacticalGoalsUsed.length > 0 ? { tacticalGoalsUsed } : {}),
-        ...(runnerStrategicIntentUsed.length > 0 ? { runnerStrategicIntentUsed } : {}),
-        ...(runnerRunTargetEvaluationsUsed.length > 0 ? { runnerRunTargetEvaluationsUsed } : {}),
-        ...(runnerEconomyPostureUsed.length > 0 ? { runnerEconomyPostureUsed } : {}),
+        ...(runnerStrategicIntentUsed.length > 0
+          ? { runnerStrategicIntentUsed }
+          : {}),
+        ...(runnerRunTargetEvaluationsUsed.length > 0
+          ? { runnerRunTargetEvaluationsUsed }
+          : {}),
+        ...(runnerEconomyPostureUsed.length > 0
+          ? { runnerEconomyPostureUsed }
+          : {}),
         ...(runnerHandDevelopmentEvaluationsUsed.length > 0
           ? { runnerHandDevelopmentEvaluationsUsed }
           : {}),
-        ...(runnerTacticalGoalsUsed.length > 0 ? { runnerTacticalGoalsUsed } : {}),
+        ...(runnerTacticalGoalsUsed.length > 0
+          ? { runnerTacticalGoalsUsed }
+          : {}),
         ...(accessCommitmentUsed.length > 0 ? { accessCommitmentUsed } : {}),
-        ...(accessOutcomeMemoryUsed.length > 0 ? { accessOutcomeMemoryUsed } : {}),
+        ...(accessOutcomeMemoryUsed.length > 0
+          ? { accessOutcomeMemoryUsed }
+          : {}),
         planAlternatives,
         blockedPlans,
         selectedPlan: plan,
@@ -176,6 +209,8 @@ export function evaluateTacticalPlans(
     }
   }
   return {
+    planPortfolio,
+    planPortfolioUsed,
     ...(previousPlan ? { previousPlan } : {}),
     ...(deckCapabilitiesUsed.length > 0 ? { deckCapabilitiesUsed } : {}),
     ...(strategicIntentStateUsed.length > 0
@@ -183,9 +218,15 @@ export function evaluateTacticalPlans(
       : {}),
     ...(corpStrategicIntentUsed.length > 0 ? { corpStrategicIntentUsed } : {}),
     ...(tacticalGoalsUsed.length > 0 ? { tacticalGoalsUsed } : {}),
-    ...(runnerStrategicIntentUsed.length > 0 ? { runnerStrategicIntentUsed } : {}),
-    ...(runnerRunTargetEvaluationsUsed.length > 0 ? { runnerRunTargetEvaluationsUsed } : {}),
-    ...(runnerEconomyPostureUsed.length > 0 ? { runnerEconomyPostureUsed } : {}),
+    ...(runnerStrategicIntentUsed.length > 0
+      ? { runnerStrategicIntentUsed }
+      : {}),
+    ...(runnerRunTargetEvaluationsUsed.length > 0
+      ? { runnerRunTargetEvaluationsUsed }
+      : {}),
+    ...(runnerEconomyPostureUsed.length > 0
+      ? { runnerEconomyPostureUsed }
+      : {}),
     ...(runnerHandDevelopmentEvaluationsUsed.length > 0
       ? { runnerHandDevelopmentEvaluationsUsed }
       : {}),

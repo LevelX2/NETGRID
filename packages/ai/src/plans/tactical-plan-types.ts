@@ -13,6 +13,7 @@ import type { RunnerHandDevelopmentEvaluation } from "../runner-hand-development
 import type { RunnerTacticalGoal } from "../runner-tactical-goals";
 import type { RunnerStrategicIntentProfile } from "../runner-strategic-intent";
 import type { StrategicIntentState } from "../strategic-intent-state";
+import type { PlanPortfolioSnapshot } from "./plan-portfolio";
 
 export const TACTICAL_PLAN_SCHEMA_VERSION = "tactical-plan-v1" as const;
 
@@ -328,6 +329,8 @@ export type PlanStepMappingResult = {
 };
 
 export type TacticalPlanRuntimeResult = {
+  planPortfolio?: PlanPortfolioSnapshot;
+  planPortfolioUsed?: string[];
   previousPlan?: TacticalPlanMemorySnapshot;
   deckCapabilitiesUsed?: string[];
   strategicIntentStateUsed?: string[];

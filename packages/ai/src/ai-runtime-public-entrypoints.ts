@@ -158,6 +158,7 @@ import { applyTagPunishOntologyDiagnostics } from "./simulation/tag-punish-ontol
 import { visibleRootIsKnownAgendaForMetrics } from "./simulation/visible-root-agenda-metrics";
 import {
   evaluateTacticalPlans,
+  getPlanContinuityMemorySnapshot,
   getTacticalPlanMemorySnapshot,
   rememberTacticalPlanRuntime,
 } from "./tactical-plans";
@@ -231,7 +232,7 @@ export const aiLiveRuntimeDependencies = {
   handDevelopmentEvaluations: evaluateRunnerHandDevelopment,
   economyPosture: buildRunnerEconomyPosture,
   runTargets: evaluateRunnerRunTargets,
-  previousPlan: getTacticalPlanMemorySnapshot,
+  previousPlan: getPlanContinuityMemorySnapshot,
   mechanicsForDefinition: runnerCardMechanicsForAi,
   actionTypeIsReactive: semanticRuntimeActionTypeIsReactive,
   evaluatePracticalRunnerRunTargets: evaluateRunnerRunTargets,
@@ -306,11 +307,8 @@ export const aiLiveRuntimeDependencies = {
   rememberTacticalPlanRuntime,
 };
 
-const {
-  chooseAiAction,
-  chooseCorpAction,
-  chooseRunnerAction,
-} = createAiLiveRuntimeComposition(aiLiveRuntimeDependencies);
+const { chooseAiAction, chooseCorpAction, chooseRunnerAction } =
+  createAiLiveRuntimeComposition(aiLiveRuntimeDependencies);
 
 /*
  * Keep the dependency object in this module as the single live wiring source.
@@ -318,8 +316,4 @@ const {
  * the default package graph.
  */
 
-export {
-  chooseAiAction,
-  chooseCorpAction,
-  chooseRunnerAction,
-};
+export { chooseAiAction, chooseCorpAction, chooseRunnerAction };

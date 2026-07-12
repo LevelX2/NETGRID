@@ -171,10 +171,12 @@ export type {
   RemotePurpose,
 } from "./remote-doctrine-profile";
 export {
+  advancePlanPortfolioForSelectedAction,
   adaptTacticalPlanToPortfolioEntry,
   aggregatePlanActionContributions,
   buildPlanPortfolio,
   PLAN_PORTFOLIO_SCHEMA_VERSION,
+  planPortfolioTurnKey,
   portfolioRoleForExecutionClass,
   redactedPlanPortfolioFacts,
   tacticalPlanExecutionClass,

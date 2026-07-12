@@ -118,7 +118,7 @@ const MULTI_PLAN_ACTION_BONUS = 80;
 export function buildPlanPortfolio(
   params: BuildPlanPortfolioParams,
 ): PlanPortfolioSnapshot {
-  const turnKey = params.turnKey ?? defaultTurnKey(params.input);
+  const turnKey = params.turnKey ?? planPortfolioTurnKey(params.input);
   const previous = validPreviousPortfolio(params.input, params.previous);
   const currentEntries = params.tacticalPlans
     .filter(planEligibleForPortfolio)
@@ -188,6 +188,70 @@ export function buildPlanPortfolio(
     ],
   };
   return snapshot;
+}
+
+export function planPortfolioTurnKey(input: AiDecisionInput): string {
+  const byId = new Map(
+    [...input.playerView.publicEvents, ...input.eventTail].map((event) => [
+      event.eventId,
+      event,
+    ]),
+  );
+  const history = [...byId.values()].sort(
+    (left, right) =>
+      left.stateVersionAfter - right.stateVersionAfter ||
+      left.eventId.localeCompare(right.eventId),
+  );
+  const turnStarts = history.filter((event) => {
+    const actionType =
+      typeof event.publicPayload.actionType === "string"
+        ? event.publicPayload.actionType
+        : event.type;
+    const actor =
+      typeof event.publicPayload.actor === "string"
+        ? event.publicPayload.actor
+        : undefined;
+    if (input.side === "corp") {
+      return actionType === "mandatory_draw" && actor === "corp";
+    }
+    return actionType === "end_turn" && actor === "corp";
+  }).length;
+  return `${input.side}:turn:${turnStarts}`;
+}
+
+export function advancePlanPortfolioForSelectedAction(
+  portfolio: PlanPortfolioSnapshot,
+  selectedActionId: string,
+): PlanPortfolioSnapshot {
+  const advance = (entry: PlanPortfolioEntry): PlanPortfolioEntry => {
+    if (!entry.actionCandidateIds.includes(selectedActionId)) return entry;
+    return {
+      ...entry,
+      lifecycle: entry.lifecycle === "suspended" ? "suspended" : "active",
+      progress: Math.min(1, entry.progress + 0.1),
+      cadence: {
+        ...entry.cadence,
+        actionsUsedThisTurn: entry.cadence.actionsUsedThisTurn + 1,
+        lastProgressTurnKey: portfolio.turnKey,
+      },
+      evidence: [
+        ...entry.evidence,
+        `plan_portfolio_action_progress:${selectedActionId}`,
+      ],
+    };
+  };
+  return {
+    ...portfolio,
+    ...(portfolio.interrupt ? { interrupt: advance(portfolio.interrupt) } : {}),
+    ...(portfolio.foreground
+      ? { foreground: advance(portfolio.foreground) }
+      : {}),
+    backgrounds: portfolio.backgrounds.map(advance),
+    evidence: [
+      ...portfolio.evidence,
+      `plan_portfolio_selected_action:${selectedActionId}`,
+    ],
+  };
 }
 
 export function tacticalPlanExecutionClass(
@@ -530,10 +594,6 @@ function validPreviousPortfolio(
   }
   if (previous.stateVersion > input.playerView.stateVersion) return undefined;
   return previous;
-}
-
-function defaultTurnKey(input: AiDecisionInput): string {
-  return `${input.side}:${input.actionNumber}:${input.playerView.phase}`;
 }
 
 function maximumContributionValue(

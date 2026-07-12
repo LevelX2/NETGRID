@@ -591,6 +591,10 @@ describe("SemanticRuntimeDebug", () => {
       corpStrategicIntentUsed: ["corp_strategic_intent:corp.score_agendas"],
       tacticalGoalsUsed: ["tactical_goal:runner.build_economy_base"],
       runnerTacticalGoalsUsed: ["goal:contest_remote"],
+      planPortfolioUsed: [
+        "plan_portfolio_backgrounds:runner.build_credit_bank",
+        "plan_portfolio_background_lifecycles:runner.build_credit_bank=dormant",
+      ],
     };
 
     const items = semanticRuntimeDebugTacticalPlanItems(runtime);
@@ -614,6 +618,12 @@ describe("SemanticRuntimeDebug", () => {
       "tactical_goal_used:tactical_goal:runner.build_economy_base",
     );
     expect(items).toContain("runner_tactical_goal_used:goal:contest_remote");
+    expect(items).toContain(
+      "plan_portfolio_used:plan_portfolio_backgrounds:runner.build_credit_bank",
+    );
+    expect(items).toContain(
+      "plan_portfolio_used:plan_portfolio_background_lifecycles:runner.build_credit_bank=dormant",
+    );
     expect(items).toEqual(
       expect.arrayContaining([
         expect.stringContaining("plan_rank|rank=1|id=plan-coverage"),

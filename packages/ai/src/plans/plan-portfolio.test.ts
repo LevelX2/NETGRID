@@ -3,8 +3,10 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { createPlanStep, createTacticalPlan } from "./tactical-plan-builders";
 import type { TacticalPlanType } from "./tactical-plan-types";
 import {
+  advancePlanPortfolioForSelectedAction,
   aggregatePlanActionContributions,
   buildPlanPortfolio,
+  planPortfolioTurnKey,
   redactedPlanPortfolioFacts,
   tacticalPlanExecutionClass,
   type PlanActionContribution,
@@ -223,6 +225,36 @@ describe("plan portfolio", () => {
     );
     expect(JSON.stringify(facts)).not.toContain("hidden-own-card");
   });
+
+  it("derives a stable runner turn key from public Corp end-turn events", () => {
+    const input = decisionInput("runner", 60);
+    const firstEnd = publicEvent("corp-end-1", 20, "corp", "end_turn");
+    const secondEnd = publicEvent("corp-end-2", 50, "corp", "end_turn");
+    input.playerView.publicEvents = [firstEnd, secondEnd];
+    input.eventTail = [secondEnd];
+
+    expect(planPortfolioTurnKey(input)).toBe("runner:turn:2");
+  });
+
+  it("records background cadence when its mapped action is selected", () => {
+    const portfolio = buildPlanPortfolio({
+      input: decisionInput("runner", 70),
+      turnKey: "runner:turn:5",
+      tacticalPlans: [
+        plan("runner.build_credit_bank", 800, "bank", "bank-a", 70),
+      ],
+    });
+    const advanced = advancePlanPortfolioForSelectedAction(
+      portfolio,
+      "action:bank-a",
+    );
+
+    expect(advanced.backgrounds[0]?.cadence).toMatchObject({
+      turnKey: "runner:turn:5",
+      actionsUsedThisTurn: 1,
+      lastProgressTurnKey: "runner:turn:5",
+    });
+  });
 });
 
 function plan(
@@ -313,5 +345,22 @@ function decisionInput(
     decisionId,
     actionNumber: stateVersion,
     profileId,
+  };
+}
+
+function publicEvent(
+  eventId: string,
+  stateVersionAfter: number,
+  actor: Side,
+  actionType: string,
+) {
+  return {
+    eventId,
+    type: actionType,
+    stateVersionBefore: stateVersionAfter - 1,
+    stateVersionAfter,
+    stateHashAfter: `fnv1a:${eventId}`,
+    visibilityClass: "public" as const,
+    publicPayload: { actor, actionType },
   };
 }

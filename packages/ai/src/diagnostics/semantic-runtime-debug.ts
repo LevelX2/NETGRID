@@ -161,18 +161,16 @@ function semanticRuntimeDebugActionSemanticProjectionItems(
 function semanticRuntimeDebugAbilitySemanticBindingItems(
   candidates: readonly ActionSemanticCandidate[],
 ): string[] {
-  const abilityCandidates = candidates.filter(
-    (candidate) => {
-      const projectionIssueSet = new Set(candidate.projectionIssues);
-      return (
-        candidate.sourceKind === "card" ||
-        candidate.abilityBindingMethod !== "unresolved" ||
-        candidate.abilityId !== undefined ||
-        candidate.sourceDefinitionId !== undefined ||
-        projectionIssueSet.has("ability_unresolved")
-      );
-    },
-  );
+  const abilityCandidates = candidates.filter((candidate) => {
+    const projectionIssueSet = new Set(candidate.projectionIssues);
+    return (
+      candidate.sourceKind === "card" ||
+      candidate.abilityBindingMethod !== "unresolved" ||
+      candidate.abilityId !== undefined ||
+      candidate.sourceDefinitionId !== undefined ||
+      projectionIssueSet.has("ability_unresolved")
+    );
+  });
   if (abilityCandidates.length === 0) return [];
   return scrubEvidence(
     abilityCandidates
@@ -198,15 +196,13 @@ function semanticRuntimeDebugAbilitySemanticBindingItems(
 function semanticRuntimeDebugTargetContextItems(
   candidates: readonly ActionSemanticCandidate[],
 ): string[] {
-  const targetCandidates = candidates.filter(
-    (candidate) => {
-      const projectionIssueSet = new Set(candidate.projectionIssues);
-      return (
-        candidate.targetContext !== undefined ||
-        projectionIssueSet.has("target_context_unavailable")
-      );
-    },
-  );
+  const targetCandidates = candidates.filter((candidate) => {
+    const projectionIssueSet = new Set(candidate.projectionIssues);
+    return (
+      candidate.targetContext !== undefined ||
+      projectionIssueSet.has("target_context_unavailable")
+    );
+  });
   if (targetCandidates.length === 0) return [];
   return scrubEvidence(
     targetCandidates.slice(0, 12).flatMap((candidate) => {
@@ -721,7 +717,10 @@ export function semanticRuntimeDebugRankedAlternatives(params: {
         visibleReasons: params.scrubEvidence(choice.evidence).slice(0, 4),
         scoreBreakdown: choice.scoreBreakdown,
         whyNot: selected
-          ? ["selected_action", ...semanticRuntimeDebugActionWhyChosen(choice, context)]
+          ? [
+              "selected_action",
+              ...semanticRuntimeDebugActionWhyChosen(choice, context),
+            ]
           : semanticRuntimeDebugActionWhyNot(choice, choice.score, context),
       };
     });
@@ -893,6 +892,9 @@ export function semanticRuntimeDebugTacticalPlanItems(
             .join(",")}`,
       ),
     ...planRankItems,
+    ...(planRuntime.planPortfolioUsed ?? [])
+      .slice(0, 12)
+      .map((fact) => `plan_portfolio_used:${fact}`),
     ...(planRuntime.deckCapabilitiesUsed ?? [])
       .slice(0, 12)
       .map((fact) => `deck_capability_used:${fact}`),

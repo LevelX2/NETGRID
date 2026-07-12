@@ -9,6 +9,20 @@ import type {
   TacticalPlanRuntimeResult,
 } from "./tactical-plan-types";
 import { resetRunnerRunPlanMemory } from "../runtime/runner-run-plan-memory";
+import {
+  getPlanPortfolioMemorySnapshot,
+  rememberPlanPortfolioSnapshot,
+  resetPlanPortfolioMemory,
+} from "./plan-portfolio-memory";
+import { advancePlanPortfolioForSelectedAction } from "./plan-portfolio";
+
+export type PlanContinuityMemorySnapshot = {
+  type?: string;
+  portfolioRole?: "background";
+  portfolioLifecycle?: string;
+  actionsUsedThisTurn?: number;
+  turnKey?: string;
+};
 
 const tacticalPlanMemoryByKey = new Map<string, TacticalPlanMemorySnapshot>();
 
@@ -30,6 +44,15 @@ export function rememberTacticalPlanRuntime(
   if (input.playerView.winner !== null) {
     tacticalPlanMemoryByKey.delete(tacticalPlanMemoryKey(input));
     return undefined;
+  }
+  if (result.planPortfolio) {
+    rememberPlanPortfolioSnapshot(
+      input,
+      advancePlanPortfolioForSelectedAction(
+        result.planPortfolio,
+        selectedAction.actionId,
+      ),
+    );
   }
   const selectedPlan = result.selectedPlan;
   const selectedStep = result.selectedStep;
@@ -53,8 +76,27 @@ export function rememberTacticalPlanRuntime(
 
 export function resetTacticalPlanMemory(): void {
   tacticalPlanMemoryByKey.clear();
+  resetPlanPortfolioMemory();
   resetRunnerRunPlanMemory();
   resetStrategicIntentMemory();
+}
+
+export function getPlanContinuityMemorySnapshot(
+  input: AiDecisionInput,
+): TacticalPlanMemorySnapshot | PlanContinuityMemorySnapshot | undefined {
+  const bankBackground = getPlanPortfolioMemorySnapshot(
+    input,
+  )?.backgrounds.find((entry) => entry.planType === "runner.build_credit_bank");
+  if (bankBackground) {
+    return {
+      type: bankBackground.planType,
+      portfolioRole: "background",
+      portfolioLifecycle: bankBackground.lifecycle,
+      actionsUsedThisTurn: bankBackground.cadence.actionsUsedThisTurn,
+      turnKey: bankBackground.cadence.turnKey,
+    };
+  }
+  return getTacticalPlanMemorySnapshot(input);
 }
 
 function tacticalPlanMemoryKey(input: AiDecisionInput): string {
