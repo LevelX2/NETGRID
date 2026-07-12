@@ -150,5 +150,5 @@ AI-Typecheck sowie `git diff --check` erneut.
 - Engine: 183 Testdateien und 1.639 Tests grün.
 - AI: drei vollständige Shards mit zusammen 292 Testdateien und 1.924 Tests
   grün.
-- Shared-, Engine- und AI-Typechecks waren vor dem finalen Main-Abgleich grün;
-  sie werden nach der Integration erneut ausgeführt.
+- Shared-, Engine- und AI-Typechecks sowie die vier fokussierten Regressionen
+  sind auch nach dem finalen Main-Abgleich grün.
