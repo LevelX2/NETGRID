@@ -2,7 +2,8 @@
 
 ## Status
 
-Aktiv am 2026-07-12. Arbeitsbranch: `codex/bodyweight-data-creche-fix`.
+Umsetzung am 2026-07-12 abgeschlossen und für die lokale Integration
+freigegeben. Arbeitsbranch: `codex/bodyweight-data-creche-fix`.
 
 ## Quelle und Vorgabe
 
@@ -136,3 +137,18 @@ AI-Typecheck sowie `git diff --check` erneut.
 - Kein KI-Phantom-Link-Budget.
 - Alle Paketcommits und finalen Checks grün.
 - Arbeitsbranch lokal nach `main` integriert und Worktree entfernt.
+
+## Umsetzungs- und Verifikationsnachweis
+
+- P0 `d313e2810`: Prozess-Freeze erstellt.
+- P1 `4cae43a1b`: Shared-Runtimevertrag korrigiert, Phantom-Credits entfernt,
+  normale und kostenlose Runs über eindeutige `actionId`s getrennt und der
+  Bodyweight-End-to-End-Test auf exakt einen Bonus-Run pro Zug gehärtet.
+- P2 `29e9e2724`: KI-Regression gegen Phantom-Link-Budget ergänzt.
+- Verify-Follow-up `aa6d55bb0`: bestehende Multi-Server-Sequenz-Assertion auf
+  den eindeutigen Bonus-Run-ID-Vertrag angeglichen.
+- Engine: 183 Testdateien und 1.639 Tests grün.
+- AI: drei vollständige Shards mit zusammen 292 Testdateien und 1.924 Tests
+  grün.
+- Shared-, Engine- und AI-Typechecks waren vor dem finalen Main-Abgleich grün;
+  sie werden nach der Integration erneut ausgeführt.
