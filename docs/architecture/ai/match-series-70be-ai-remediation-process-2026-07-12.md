@@ -1,7 +1,6 @@
 # Matchserie 70BE: KI-Remediation-Prozess
 
-Status: abgeschlossen; lokale `main`-Integration ist der nachgelagerte
-Integrationsschritt
+Status: abgeschlossen und lokal nach `main` integriert
 
 ## Quelle und Gesamtziel
 
@@ -156,3 +155,5 @@ Hauptworkspace nach dem Merge sauber verifiziert ist.
   Engine-/AI-Typecheck, `check:ai`, Deck-Doctrine und Diff-Hygiene sind grün.
 - Führender Abschlussnachweis:
   `docs/reviews/ai/match-series-70be-ai-final-review-2026-07-12.md`.
+- Der Arbeitsbranch wurde konfliktfrei per Fast-forward lokal nach `main`
+  integriert.
