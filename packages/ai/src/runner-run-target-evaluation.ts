@@ -401,11 +401,19 @@ function evaluateRunnerRunTarget(
   const accessServer = params.input.playerView.servers.find(
     (candidate) => candidate.id === accessServerId,
   );
+  const actionCreditCost = projection.action.costs.reduce(
+    (sum, cost) => sum + Math.max(0, cost.credits ?? 0),
+    0,
+  );
+  const creditsAfterAction = Math.max(
+    0,
+    params.input.playerView.own.credits - actionCreditCost,
+  );
   const path = assessKnownRezzedIcePath(
     server?.ice ?? [],
     params.input.playerView.own.rig ?? [],
     runnerRunPathCreditBudgetWithVisiblePools(
-      params.input.playerView.own.credits,
+      creditsAfterAction,
       params.input.playerView.own.rig ?? [],
     ),
     server?.root ?? [],
@@ -550,6 +558,8 @@ function evaluateRunnerRunTarget(
         ? [`missing_coverage:${path.missingCoverage.join("|")}`]
         : []),
       `path_cost:${path.visibleBreakCost ?? 0}`,
+      `run_action_credit_cost:${actionCreditCost}`,
+      `credits_after_run_action:${creditsAfterAction}`,
       `credits_after_run:${creditsAfterRun}`,
       `visible_ice_hazard_penalty:${visibleIceHazardPenalty}`,
       `visible_ice_hazard_avoidance_cost:${visibleIceHazardAvoidanceCost}`,

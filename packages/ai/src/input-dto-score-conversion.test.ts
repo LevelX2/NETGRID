@@ -29,6 +29,35 @@ describe("AI input DTO score-conversion contract", () => {
     });
     expect(input.legalActions[0]?.payload).not.toHaveProperty("privateProbe");
   });
+
+  it("preserves side-safe hosted-credit and run-action semantics", () => {
+    const action = runnerSemanticAction();
+    const input = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: playerView(action, "runner"),
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "runner-action-semantics-dto",
+      decisionId: "runner-action-semantics-dto:runner:1",
+      actionNumber: 1,
+      profileId: "runner-action-semantics-dto-test",
+    });
+
+    expect(input.legalActions[0]?.payload).toMatchObject({
+      cardImplementationAddsHostedCredits: true,
+      hostedCreditAddAmount: 3,
+      cardImplementationTakesHostedCredits: false,
+      hostedCreditTakeAmount: 0,
+      hostedCreditTakeMode: "all",
+      runnerEventRun: true,
+    });
+    expect(input.playerView.legalActions[0]?.payload).toMatchObject({
+      cardImplementationAddsHostedCredits: true,
+      runnerEventRun: true,
+    });
+    expect(input.legalActions[0]?.payload).not.toHaveProperty("privateProbe");
+  });
 });
 
 function conversionAction(): LegalAction {
@@ -55,17 +84,45 @@ function conversionAction(): LegalAction {
   };
 }
 
-function playerView(action: LegalAction): PlayerView {
+function runnerSemanticAction(): LegalAction {
+  return {
+    actionId: "runner.hosted-credit.build",
+    side: "runner",
+    type: "activated_card_ability",
+    label: "Credit-Bank laden",
+    source: "runner-bank",
+    timingPoint: "runner_action.main",
+    costs: [{ clicks: 1, credits: 1 }],
+    targetRequirements: [],
+    visibility: "public",
+    expiresAtStateVersion: 1,
+    payload: {
+      cardId: "runner-bank",
+      cardImplementationAddsHostedCredits: true,
+      hostedCreditAddAmount: 3,
+      cardImplementationTakesHostedCredits: false,
+      hostedCreditTakeAmount: 0,
+      hostedCreditTakeMode: "all",
+      runnerEventRun: true,
+      privateProbe: "must-not-cross-dto",
+    },
+  };
+}
+
+function playerView(
+  action: LegalAction,
+  side: "corp" | "runner" = "corp",
+): PlayerView {
   const corpIdentity = identity("corp");
   const runnerIdentity = identity("runner");
   return {
-    side: "corp",
+    side,
     stateVersion: 1,
-    timingPoint: "corp_action.main",
-    activeSide: "corp",
+    timingPoint: side === "corp" ? "corp_action.main" : "runner_action.main",
+    activeSide: side,
     phase: "action",
     own: {
-      identity: corpIdentity,
+      identity: side === "corp" ? corpIdentity : runnerIdentity,
       credits: 5,
       clicks: 3,
       agendaPoints: 0,
@@ -77,7 +134,7 @@ function playerView(action: LegalAction): PlayerView {
       tags: 0,
     },
     opponent: {
-      identity: runnerIdentity,
+      identity: side === "corp" ? runnerIdentity : corpIdentity,
       credits: 5,
       clicks: 4,
       agendaPoints: 0,

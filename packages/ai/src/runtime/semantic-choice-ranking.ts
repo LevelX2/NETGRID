@@ -224,8 +224,8 @@ export function tacticalPlanMappedChoice(
       overrideChoice,
       scoreGap,
     );
-    const nonPositiveOpportunisticRunShouldYield =
-      tacticalPlanNonPositiveOpportunisticRunShouldYield(
+    const nonPositiveProjectedRunShouldYield =
+      tacticalPlanNonPositiveProjectedRunShouldYield(
         mapping,
         mappedChoice,
         overrideChoice,
@@ -249,7 +249,7 @@ export function tacticalPlanMappedChoice(
         mappedActionIds,
         {
           repeatedRunShouldYield,
-          nonPositiveOpportunisticRunShouldYield,
+          nonPositiveProjectedRunShouldYield,
           lowValueRecoveryShouldYield,
           corpBoardTriageMismatchShouldYield,
           deferredDevelopmentInstallShouldYield,
@@ -402,7 +402,7 @@ function tacticalPlanRunnerMappingBlocksOffPlanOverride(
   mappedActionIds: ReadonlySet<string>,
   exceptions: {
     repeatedRunShouldYield: boolean;
-    nonPositiveOpportunisticRunShouldYield: boolean;
+    nonPositiveProjectedRunShouldYield: boolean;
     lowValueRecoveryShouldYield: boolean;
     corpBoardTriageMismatchShouldYield: boolean;
     deferredDevelopmentInstallShouldYield: boolean;
@@ -412,7 +412,7 @@ function tacticalPlanRunnerMappingBlocksOffPlanOverride(
   if (!runnerPlanTypeRequiresPlanDominance(mapping.plan.type)) return false;
   if (mappedActionIds.has(overrideChoice.action.actionId)) return false;
   if (exceptions.repeatedRunShouldYield) return false;
-  if (exceptions.nonPositiveOpportunisticRunShouldYield) return false;
+  if (exceptions.nonPositiveProjectedRunShouldYield) return false;
   if (exceptions.lowValueRecoveryShouldYield) return false;
   if (exceptions.corpBoardTriageMismatchShouldYield) return false;
   if (exceptions.deferredDevelopmentInstallShouldYield) return false;
@@ -616,14 +616,14 @@ function tacticalPlanRepeatedRunMappingShouldYield(
   return Boolean(overrideServerId && overrideServerId !== serverId);
 }
 
-function tacticalPlanNonPositiveOpportunisticRunShouldYield(
+function tacticalPlanNonPositiveProjectedRunShouldYield(
   mapping: PlanStepMappingResult,
   mappedChoice: SemanticRuntimeChoice,
   overrideChoice: SemanticRuntimeChoice,
 ): boolean {
   if (
-    mapping.plan.type !== "runner.opportunistic_central_run" ||
-    mappedChoice.action.type !== "start_run" ||
+    mapping.plan.side !== "runner" ||
+    !semanticRuntimeChoiceIsProjectedRun(mappedChoice) ||
     mappedChoice.score > 0 ||
     overrideChoice.score <= 0
   ) {
@@ -637,6 +637,25 @@ function tacticalPlanNonPositiveOpportunisticRunShouldYield(
     "runner_rnd_fresh_memory",
     "runner_goal_fit_tactical_goal_run_target",
   ]);
+}
+
+function semanticRuntimeChoiceIsProjectedRun(
+  choice: SemanticRuntimeChoice,
+): boolean {
+  const runScoreKeys = new Set([
+    "runner_run_target_semantic_guidance",
+    "runner_known_ice_path_no_access",
+    "runner_visible_ice_path_cost",
+  ]);
+  return (
+    choice.action.type === "start_run" ||
+    choice.scoreBreakdown.some((component) => runScoreKeys.has(component.key)) ||
+    semanticRuntimeChoiceHasAnyScoreComponent(choice, [
+      "runner_run_target_semantic_guidance",
+      "runner_known_ice_path_no_access",
+      "runner_visible_ice_path_cost",
+    ])
+  );
 }
 
 function tacticalPlanLowValueRecoveryMappingShouldYield(
@@ -685,6 +704,7 @@ function tacticalPlanNonPositiveMappingStillProtected(
   overrideChoice: SemanticRuntimeChoice,
 ): boolean {
   if (mappedChoice.score < -500) return false;
+  if (semanticRuntimeChoiceIsProjectedRun(mappedChoice)) return false;
   if (
     (mapping.plan.type !== "runner.develop_hand_card" &&
       mapping.plan.type !== "runner.play_best_hand_card") ||

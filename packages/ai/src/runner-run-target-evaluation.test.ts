@@ -1303,6 +1303,44 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     expect(evaluation.evidence).toContain("run_action_payoff:rd:multiaccess");
   });
 
+  it("quotes a paid run event against the known path after paying the event cost", () => {
+    const rushHour = runEventAction(
+      "rush-hour-rd-paid",
+      RUSH_HOUR_DEFINITION_ID,
+      "Rush Hour",
+    );
+    rushHour.costs = [{ clicks: 1, credits: 3 }];
+    const input = aiInput({
+      credits: 3,
+      servers: [server("rd", { ice: [barrierIce("rd-barrier")] })],
+      rig: [
+        visibleCard("runner-efficient-fracter", {
+          definitionId: "efficient_fracter",
+          title: "Efficient Fracter",
+          type: "program",
+          subtypes: ["icebreaker", "fracter"],
+          strength: 3,
+        }),
+      ],
+      legalActions: [rushHour, gainCreditAction("gain-credit")],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(evaluation).toMatchObject({
+      actionId: "rush-hour-rd-paid",
+      targetServerId: "rd",
+      pathPassability: "blocked_unpayable",
+      recommendation: "gain_credits_first",
+    });
+    expect(evaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "run_action_credit_cost:3",
+        "credits_after_run_action:0",
+      ]),
+    );
+  });
+
   it("keeps run-event projections conservative when no side-safe target options exist", () => {
     const input = aiInput({
       credits: 6,

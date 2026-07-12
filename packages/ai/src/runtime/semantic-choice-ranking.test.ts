@@ -761,6 +761,51 @@ describe("tacticalPlanMappedChoice", () => {
     expect(result.overrideReason).toBe("mapped_nonpositive_against_positive");
   });
 
+  it("lets an unpayable nonpositive run event yield to a positive action", () => {
+    const rushHour = legalAction("rush-hour-rd", "play_event", {
+      serverId: "rd",
+      runnerEventRun: true,
+    });
+    const gain = legalAction("gain", "gain_credit");
+    const mapped = choice(rushHour, -60, [
+      "semantic_score_component:runner_run_target_semantic_guidance",
+    ]);
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [choice(gain, 120), mapped],
+      planMapping("runner.opportunistic_central_run", [rushHour]),
+      choice(gain, 120),
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("gain");
+    expect(result.overrideReason).toBe("mapped_nonpositive_against_positive");
+  });
+
+  it("does not let a hand-development plan force a nonpositive run event", () => {
+    const rushHour = legalAction("rush-hour-rd", "play_event", {
+      serverId: "rd",
+      runnerEventRun: true,
+    });
+    const gain = legalAction("gain", "gain_credit");
+    const mapped = choice(rushHour, -60, [
+      "semantic_score_component:runner_run_target_semantic_guidance",
+    ]);
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [choice(gain, 120), mapped],
+      planMapping("runner.play_best_hand_card", [rushHour], {
+        stepKind: "install_development_card",
+        priority: 920,
+        evidence: ["economy_route:event_setup"],
+      }),
+      choice(gain, 120),
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("gain");
+  });
+
   it("keeps score-threat remote contest funding over off-plan Archives runs", () => {
     const gain = legalAction("gain", "gain_credit");
     const archives = legalAction("run-archives", "start_run", {

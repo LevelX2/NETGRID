@@ -44,6 +44,7 @@ import {
   runnerDirectTagCleanupFallbackScoreComponent,
   runnerTagCleanupScoreComponent,
 } from "./runner-tag-cleanup-score";
+import { runnerDrawTaxLiabilityScoreComponent } from "./runner-draw-tax-liability-score";
 
 export type RunnerScoreComponentsDependencies = {
   loanLiabilityAssessment: (
@@ -125,6 +126,8 @@ export function runnerScoreComponents(
     tagCleanup,
   );
   if (tagCleanupFallback) components.push(tagCleanupFallback);
+  const drawTaxLiability = runnerDrawTaxLiabilityScoreComponent(input, action);
+  if (drawTaxLiability) components.push(drawTaxLiability);
   const creditYield = runnerCreditYieldScoreComponent(
     input,
     action,
