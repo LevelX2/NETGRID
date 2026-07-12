@@ -18,10 +18,6 @@ import {
   redactedPlanActionContributionFacts,
   redactedPlanPortfolioFacts,
 } from "./plans/plan-portfolio";
-import type {
-  PlanActionContributionScore,
-  PlanPortfolioSnapshot,
-} from "./plans/plan-portfolio";
 import {
   redactedAccessCommitmentFacts,
   redactedAccessOutcomeMemoryFacts,
@@ -177,12 +173,7 @@ export function evaluateTacticalPlans(
     planActionContributionScores,
   );
   const candidates = context.candidates ?? [];
-  const selectionOrder = tacticalPlanSelectionOrder(
-    planAlternatives,
-    planPortfolio,
-    planActionContributionScores,
-  );
-  for (const plan of selectionOrder) {
+  for (const plan of planAlternatives) {
     const portfolioEntry = planPortfolioEntryForPlan(planPortfolio, plan);
     if (portfolioEntry && !planPortfolioEntryCanAct(portfolioEntry)) continue;
     if (!planCanMapToCurrentAction(plan)) continue;
@@ -290,36 +281,5 @@ export function mapPlanStepToLegalActions(
     candidates,
     input,
     TACTICAL_PLAN_CREDIT_VALUE_DEPENDENCIES,
-  );
-}
-
-function tacticalPlanSelectionOrder(
-  plans: readonly TacticalPlan[],
-  portfolio: PlanPortfolioSnapshot,
-  contributionScores: readonly PlanActionContributionScore[],
-): TacticalPlan[] {
-  const contributionByAction = new Map(
-    contributionScores.map((score) => [score.actionId, score.totalValue]),
-  );
-  const roleRank = (plan: TacticalPlan): number => {
-    const entry = planPortfolioEntryForPlan(portfolio, plan);
-    if (!entry) return 3;
-    if (entry.role === "reactive_interrupt") return 0;
-    if (entry.role === "foreground") return 1;
-    return 2;
-  };
-  const contributionValue = (plan: TacticalPlan): number =>
-    Math.max(
-      0,
-      ...plan.currentStep.actionCandidateIds.map(
-        (actionId) => contributionByAction.get(actionId) ?? 0,
-      ),
-    );
-  return [...plans].sort(
-    (left, right) =>
-      roleRank(left) - roleRank(right) ||
-      contributionValue(right) - contributionValue(left) ||
-      right.priority - left.priority ||
-      left.planId.localeCompare(right.planId),
   );
 }
