@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { PlayerView } from "@netgrid/shared";
 
-import { cardChoiceOrderBadge } from "../features/actions/card-choice-order-badge";
+import {
+  cardChoiceOrderBadge,
+  cardChoiceReadonlyPositionBadge,
+  cardChoiceReadonlyPositionHint,
+} from "../features/actions/card-choice-order-badge";
 import { choiceSelectionRangeLabel } from "../features/actions/card-choice-selection-label";
 
 type VisibleChoice = NonNullable<PlayerView["pendingChoice"]>;
@@ -48,6 +52,49 @@ describe("cardChoiceOrderBadge", () => {
       label: "1",
       ariaLabel: "Auswahlposition 1",
     });
+  });
+});
+
+describe("read-only R&D position labels", () => {
+  const choice: VisibleChoice = {
+    ...orderedChoice("p3_33.private_look:successful_run:protocol_files:rd:2"),
+    options: [
+      { id: "card_a", label: "A", value: "a", selectable: false },
+      { id: "card_b", label: "B", value: "b", selectable: false },
+      { id: "card_c", label: "C", value: "c", selectable: false },
+      { id: "card_d", label: "D", value: "d", selectable: false },
+      { id: "card_e", label: "E", value: "e", selectable: false },
+      { id: "done", label: "Fertig", value: "done" },
+    ],
+  };
+
+  it("marks the R&D top, intermediate positions, and the bottom of the viewed cards", () => {
+    expect(cardChoiceReadonlyPositionBadge(choice, "card_a")).toEqual({
+      label: "1 · R&D-Spitze",
+      ariaLabel: "Position 1: oberste Karte von R&D",
+    });
+    expect(cardChoiceReadonlyPositionBadge(choice, "card_c")).toEqual({
+      label: "3",
+      ariaLabel: "Position 3 von 5 in R&D",
+    });
+    expect(cardChoiceReadonlyPositionBadge(choice, "card_e")).toEqual({
+      label: "5 · Unterste",
+      ariaLabel: "Position 5: unterste der 5 angesehenen R&D-Karten",
+    });
+  });
+
+  it("explains the same order and leaves single-card looks unmarked", () => {
+    expect(cardChoiceReadonlyPositionHint(choice)).toBe(
+      "Die Nummerierung folgt der R&D-Reihenfolge: 1 ist die R&D-Spitze; 5 ist die unterste der 5 angesehenen Karten.",
+    );
+    const singleCardChoice: VisibleChoice = {
+      ...choice,
+      options: [choice.options[0]!, choice.options.at(-1)!],
+    };
+    expect(
+      cardChoiceReadonlyPositionBadge(singleCardChoice, "card_a"),
+    ).toBeNull();
+    expect(cardChoiceReadonlyPositionHint(singleCardChoice)).toBeNull();
   });
 });
 

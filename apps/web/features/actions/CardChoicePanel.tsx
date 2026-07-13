@@ -18,7 +18,12 @@ import {
 import { CardView } from "../cards/CardView";
 import { type DisplayVisibleCard } from "../cards/card-view-model";
 import { type CardDisplayMode } from "../settings/settings-model";
-import { cardChoiceOrderBadge, isRunnerStackTopChooseOneArrangeRestChoice } from "./card-choice-order-badge";
+import {
+  cardChoiceOrderBadge,
+  cardChoiceReadonlyPositionBadge,
+  cardChoiceReadonlyPositionHint,
+  isRunnerStackTopChooseOneArrangeRestChoice,
+} from "./card-choice-order-badge";
 import { choiceSelectionRangeLabel } from "./card-choice-selection-label";
 import { WindowEventIcon } from "./WindowEventIcon";
 import { windowEventIconKindForChoice } from "./window-event-icon-kind";
@@ -84,7 +89,10 @@ export function CardChoicePanel({
   const singleSelection = maxSelections === 1;
   const title = programInstallTrashInfo?.title ?? cardChoiceReadonlyPrivateLookTitle(choice, view) ?? cardChoiceTitle(choice);
   const prompt = choice.prompt.trim();
-  const effectHint = programInstallTrashInfo?.effectHint ?? cardChoiceEffectHint(choice);
+  const effectHint =
+    programInstallTrashInfo?.effectHint ??
+    (readonlyPrivateLook ? cardChoiceReadonlyPositionHint(choice) : null) ??
+    cardChoiceEffectHint(choice);
   const orderedSelection = cardChoiceUsesOrderedSelection(choice);
   const ambience = choiceInteractionAmbience(choice, action);
   const ambienceClass = interactionAmbienceClassName(ambience);
@@ -147,11 +155,19 @@ export function CardChoicePanel({
                 const card = option.card ? enrichCard(option.card) : null;
                 const cardChoiceDisplayMode: CardDisplayMode = card?.imageUrl ? "placeholder" : "text-card";
                 const orderBadge = orderedSelection && selectionIndex >= 0 ? cardChoiceOrderBadge(choice, selectionIndex) : null;
+                const readonlyPositionBadge = readonlyPrivateLook
+                  ? cardChoiceReadonlyPositionBadge(choice, option.id)
+                  : null;
+                const visibleOrderBadge = orderBadge ?? readonlyPositionBadge;
                 return (
                   <div className={`cardChoiceOptionSlot ${active ? "selected" : ""}${selectable ? "" : " displayOnly"}`} key={option.id}>
-                    {orderBadge ? (
-                      <span className="cardChoiceOrderBadge" aria-label={orderBadge.ariaLabel} title={orderBadge.ariaLabel}>
-                        {orderBadge.label}
+                    {visibleOrderBadge ? (
+                      <span
+                        className="cardChoiceOrderBadge"
+                        aria-label={visibleOrderBadge.ariaLabel}
+                        title={visibleOrderBadge.ariaLabel}
+                      >
+                        {visibleOrderBadge.label}
                       </span>
                     ) : null}
                     {card ? (
