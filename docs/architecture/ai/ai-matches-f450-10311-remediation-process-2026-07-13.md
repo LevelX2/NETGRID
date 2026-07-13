@@ -1,6 +1,6 @@
 # KI-Remediation der Matches F450 und 10311 (2026-07-13)
 
-Status: Aktiv; P0 bis P4 abgeschlossen, P5 in Arbeit
+Status: Abgeschlossen; P0 bis P5 umgesetzt, lokal integriert und bereinigt
 
 ## Quelle und Gesamtziel
 
@@ -166,3 +166,25 @@ Ergebnis:
   behalten nun ihr Mehrlade-/Auszahlungsziel; die Deckout-Gegenprobe prüft
   weiterhin strikt gegen vorzeitiges Zugende. Der vollständige
   Wiederholungslauf ist grün.
+
+## Abschlussstand P5
+
+- `codex/ai-f450-10311-remediation` wurde lokal per Fast-Forward von
+  `2260d0e5b` bis `95edd0eae` nach `main` integriert. Der Branch enthielt den
+  unveränderten aktuellen Main-Ausgangspunkt; ein zusätzlicher Merge-Commit
+  war nicht erforderlich.
+- Direkt im Hauptworkspace sind die fünf relevanten Checkpoint-/Run-/Plan-
+  Testdateien mit 86 Tests, der AI-Typecheck und die Diff-Hygiene des
+  integrierten Commitbereichs grün.
+- `git worktree remove` entfernte die Git-Registrierung, konnte den
+  Verzeichnisrest wegen eines Windows-Long-Path-Fehlers jedoch nicht löschen.
+  Nach exakter Pfad-, Link-, Sauberkeits- und Registrierungsprüfung wurde nur
+  dieser Restpfad mit PowerShell-Long-Path-Unterstützung entfernt und
+  `git worktree prune` ausgeführt.
+- Der Pfad
+  `C:\Projekte\NETGRID_AI_F450_10311_REMEDIATION_20260713` ist weder
+  registriert noch im Dateisystem vorhanden. Der vollständig gemergte
+  Arbeitsbranch wurde mit `git branch -d` gelöscht.
+- Im Hauptworkspace bleiben ausschließlich die zwei fremden, nicht
+  überlappenden Engine-Änderungen offen; sie wurden weder gestaged noch
+  verändert. Push und Pull Request waren nicht Teil des Auftrags.

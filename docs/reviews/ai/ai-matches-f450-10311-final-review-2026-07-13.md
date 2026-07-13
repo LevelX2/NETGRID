@@ -121,9 +121,16 @@ beauftragten Verifikationsumfang ab.
 
 ## Git- und Integrationsstand
 
-P0 bis P4 sind auf `codex/ai-f450-10311-remediation` paketweise committed.
-Der Arbeitsbranch enthält den aktuellen Ausgangs-Main `2260d0e5b`. Der lokale
-Fast-Forward nach `main`, die erneute Kernprüfung im Hauptworkspace und der
-verifizierte Worktree-/Branch-Cleanup sind die verbleibenden Schritte von P5.
-Die zwei fremden uncommitteten Engine-Dateien im Hauptworkspace überschneiden
-sich nicht mit diesem KI-Scope und bleiben unangetastet.
+P0 bis P5 wurden auf `codex/ai-f450-10311-remediation` paketweise committed
+und lokal per Fast-Forward von `2260d0e5b` bis `95edd0eae` nach `main`
+integriert. Direkt im Hauptworkspace sind die fünf relevanten
+Checkpoint-/Run-/Plan-Testdateien mit 86 Tests, der AI-Typecheck und die
+Diff-Hygiene des integrierten Commitbereichs grün.
+
+Der Worktree
+`C:\Projekte\NETGRID_AI_F450_10311_REMEDIATION_20260713` ist nach dem
+kontrollierten Windows-Long-Path-Cleanup weder in Git registriert noch im
+Dateisystem vorhanden. `codex/ai-f450-10311-remediation` wurde als vollständig
+gemergter Branch mit `git branch -d` gelöscht. Die zwei fremden uncommitteten
+Engine-Dateien im Hauptworkspace überschneiden sich nicht mit diesem KI-Scope
+und blieben unangetastet. Es erfolgte kein Push und kein Pull Request.
