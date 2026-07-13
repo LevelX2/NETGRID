@@ -662,18 +662,13 @@
           "corp_onr_v1_285_closed-accounts_2",
           "corp_onr_v1_307_urban-renewal_3"
         ],
-        "scoreArea": [
-          "corp_onr_v1_196_corporate-war_1"
-        ],
+        "scoreArea": ["corp_onr_v1_196_corporate-war_1"],
         "servers": [
           {
             "id": "hq",
             "kind": "hq",
             "label": "HQ",
-            "ice": [
-              "corp_onr_v1_261_quandary_3",
-              "corp_onr_v1_261_quandary_2"
-            ],
+            "ice": ["corp_onr_v1_261_quandary_3", "corp_onr_v1_261_quandary_2"],
             "root": []
           },
           {
@@ -698,12 +693,8 @@
             "id": "remote_1",
             "kind": "remote",
             "label": "Remote 1",
-            "ice": [
-              "corp_onr_v1_244_filter_3"
-            ],
-            "root": [
-              "corp_onr_v1_309_bbs-whispering-campaign_1"
-            ]
+            "ice": ["corp_onr_v1_244_filter_3"],
+            "root": ["corp_onr_v1_309_bbs-whispering-campaign_1"]
           }
         ]
       },
@@ -766,9 +757,7 @@
             "runner_onr_classic_028_matador_2",
             "runner_onr_proteus_081_boring-bit_1"
           ],
-          "hardware": [
-            "runner_onr_v1_123_bodyweight-data-creche_1"
-          ],
+          "hardware": ["runner_onr_v1_123_bodyweight-data-creche_1"],
           "resources": [
             "runner_onr_proteus_147_r-and-d-mole_2",
             "runner_onr_proteus_142_hq-mole_2",
@@ -6335,9 +6324,7 @@
               "support": 85,
               "final": 94
             },
-            "supportGaps": [
-              "low_ambush_support"
-            ],
+            "supportGaps": ["low_ambush_support"],
             "evidence": [
               "strategy:corp.damage_kill",
               "confidence:high",
@@ -6389,9 +6376,7 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "corp.fast_advance",
-          "evidence": [
-            "continued:corp.fast_advance"
-          ]
+          "evidence": ["continued:corp.fast_advance"]
         },
         "commitment": {
           "strategyId": "corp.fast_advance",
@@ -6595,9 +6580,7 @@
               "family": "corp_ice_tax",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 100,
@@ -6655,9 +6638,7 @@
               "family": "corp_asset_economy",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 100,
@@ -6688,10 +6669,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6710,9 +6688,7 @@
               "family": "corp_economy_reserve",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:corp.economy_rez_reserve"
-              ],
+              "runtimeBlockers": ["supporting_only:corp.economy_rez_reserve"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -6743,10 +6719,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6800,10 +6773,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6982,10 +6952,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -7027,10 +6994,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",

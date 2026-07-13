@@ -2308,9 +2308,7 @@
               "support": 85,
               "final": 94
             },
-            "supportGaps": [
-              "low_ambush_support"
-            ],
+            "supportGaps": ["low_ambush_support"],
             "evidence": [
               "strategy:corp.damage_kill",
               "confidence:high",
@@ -2361,9 +2359,7 @@
         "transition": {
           "status": "selected",
           "reason": "initial_strategy_selection",
-          "evidence": [
-            "selected:corp.fast_advance"
-          ]
+          "evidence": ["selected:corp.fast_advance"]
         },
         "commitment": {
           "strategyId": "corp.fast_advance",
@@ -2567,9 +2563,7 @@
               "family": "corp_ice_tax",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 100,
@@ -2627,9 +2621,7 @@
               "family": "corp_asset_economy",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 100,
@@ -2660,10 +2652,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -2682,9 +2671,7 @@
               "family": "corp_economy_reserve",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:corp.economy_rez_reserve"
-              ],
+              "runtimeBlockers": ["supporting_only:corp.economy_rez_reserve"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -2715,10 +2702,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -2772,10 +2756,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -2954,10 +2935,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -2999,10 +2977,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3050,16 +3025,9 @@
   },
   "expectation": {
     "strategicIntent": {
-      "acceptableFamilies": [
-        "corp_tag_trace_punish",
-        "corp_damage_kill"
-      ],
-      "forbiddenPrimaryStrategyIds": [
-        "corp.fast_advance"
-      ],
-      "forbiddenTargetKinds": [
-        "scoreline"
-      ]
+      "acceptableFamilies": ["corp_tag_trace_punish", "corp_damage_kill"],
+      "forbiddenPrimaryStrategyIds": ["corp.fast_advance"],
+      "forbiddenTargetKinds": ["scoreline"]
     }
   }
 }
