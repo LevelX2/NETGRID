@@ -18,7 +18,7 @@ import { assertInviteLobbyPayloadRedacted, findInviteLobbyPayloadRedactionLeaks 
 import { FixedWindowRateLimiter, createRateLimiter, loadDeploymentConfig, redactSensitiveText, redactedJoinUrl, type DeploymentConfig } from "./internet-hardening";
 import { InMemoryMatchStorage, MultiplayerService, type EventRecord, type JoinMatchResult, type MatchSettings, type MultiplayerStorage, type SidePayload, type StateSnapshot, type StoredMatch } from "./multiplayer";
 import { SqliteMatchStorage, StorageError, inspectSqliteStorage, restoreSqliteStorageBackup } from "./storage-sqlite";
-import { AI_DECISION_DEBUG_SCHEMA_VERSION, CURRENT_RULES_BASELINE, type AiDecision, type CardInstanceId, type ChoiceRequest, type DeckDefinition, type GameEvent, type GameState, type LegalAction, type PublicGameEvent, type Side } from "@netgrid/shared";
+import { AI_DECISION_DEBUG_SCHEMA_VERSION, CURRENT_RULES_BASELINE, type AiDecision, type ApiCreateMatchResponse, type CardInstanceId, type ChoiceRequest, type DeckDefinition, type GameEvent, type GameState, type LegalAction, type PublicGameEvent, type Side } from "@netgrid/shared";
 
 function expectCurrentRulesBaseline(state: Pick<GameState, "baseline">): void {
   expect(state.baseline).toStrictEqual(CURRENT_RULES_BASELINE);
@@ -276,6 +276,45 @@ describe("V1.0.9 private internet hardening", () => {
       expect(body.storage?.kind).toBe("memory");
       expect(body.storage?.matchCount).toBeUndefined();
       expect(JSON.stringify(body)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|cardInstances|privateDeckSnapshots|privatePayload|decklist/i);
+    } finally {
+      await handle.close();
+    }
+  });
+
+  it("creates an observable AI-vs-AI match through the public REST contract", async () => {
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "observable-ai-vs-ai-http-salt",
+      publicWebBaseUrl: "https://netgrid.example",
+      publicServerBaseUrl: "https://api.netgrid.example"
+    });
+    const handle = createNetgridHttpServer(service, { deploymentConfig: privateDeploymentConfig() });
+    const baseUrl = await listen(handle);
+    try {
+      const response = await fetch(`${baseUrl}/api/matches`, {
+        method: "POST",
+        headers: { "content-type": "application/json", origin: "https://netgrid.example" },
+        body: JSON.stringify({
+          mode: "ai_vs_ai",
+          hostSide: "runner",
+          seed: "observable-ai-vs-ai-http",
+          aiDeckPolicy: "fixed",
+          runnerDifficulty: "normal",
+          corpDifficulty: "normal",
+          settings: { matchFormat: "two_game_side_swap", playerClock: { mode: "player_clock", startingTimeMs: 1_000 } }
+        })
+      });
+      const body = (await response.json()) as ApiCreateMatchResponse;
+      expect(response.status).toBe(201);
+      expect(body).toMatchObject({
+        mode: "ai_vs_ai",
+        matchStatus: "active",
+        hostSide: "runner",
+        legalActions: [],
+        aiTurnPresentation: { canAdvanceAi: true }
+      });
+      expect(body.playerView).toBeDefined();
+      expect(body.joinUrl).toBeUndefined();
+      expect(JSON.stringify(body)).not.toMatch(/cardInstances|privatePayload|decklist|AIInput|FullState/i);
     } finally {
       await handle.close();
     }
@@ -5342,6 +5381,86 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(afterCancel.match.winner).toBeUndefined();
     expect(afterCancel.tokens.every((token) => Boolean(token.revokedAt))).toBe(true);
   });
+
+  it("runs an observable AI-vs-AI match beyond 120 actions to a regular replayable ending", async () => {
+    const storage = new InMemoryMatchStorage();
+    const service = new MultiplayerService(storage, { tokenSalt: "observable-ai-vs-ai-long-run-service" });
+    const created = await service.createMatch({
+      mode: "ai_vs_ai",
+      hostSide: "runner",
+      seed: "observable-ai-vs-ai-long-run",
+      runnerDifficulty: "normal",
+      corpDifficulty: "normal",
+      aiDeckPolicy: "fixed",
+      aiTraceMode: "detailed",
+      settings: { agendaPointsToWin: 7, matchFormat: "rules_match", playerClock: { mode: "none" } }
+    });
+
+    let sessionToken = created.hostSessionToken;
+    let reconnectToken = created.hostReconnectToken;
+    let stateVersion = created.playerView.stateVersion;
+    let matchVersion = created.matchVersion;
+    let actions = 0;
+    let lastPayload: { winner?: Side | "draw"; matchStatus?: string } = created;
+    const initial = await service.loadForTest(created.matchId);
+    if (!initial?.gameState) throw new Error("Missing initial observable AI-vs-AI state");
+    const initialEventCount = initial.eventLog.length;
+
+    while (!lastPayload.winner && actions < 400) {
+      const advanced = await service.advanceAi({
+        matchId: created.matchId,
+        side: "runner",
+        sessionToken,
+        knownStateVersion: stateVersion,
+        knownMatchVersion: matchVersion,
+        mode: "until_human"
+      });
+      expect(advanced.ok).toBe(true);
+      if (!advanced.ok) throw new Error(advanced.error.message);
+      actions += 1;
+      expect(advanced.requesterPayload.playerView.stateVersion).toBe(stateVersion + 1);
+      expect(advanced.requesterPayload.legalActions).toEqual([]);
+      stateVersion = advanced.requesterPayload.playerView.stateVersion;
+      matchVersion = advanced.requesterPayload.matchVersion;
+      lastPayload = advanced.requesterPayload;
+
+      if (actions === 121) {
+        expect(lastPayload.matchStatus).toBe("active");
+        expect(lastPayload.winner).toBeUndefined();
+        const reconnected = await service.reconnectMatch(created.matchId, {
+          side: "runner",
+          reconnectToken
+        });
+        expect("error" in reconnected).toBe(false);
+        if ("error" in reconnected) throw new Error(reconnected.error.message);
+        expect(reconnected.playerView?.stateVersion).toBe(stateVersion);
+        expect(reconnected.legalActions).toEqual([]);
+        expect(reconnected.aiTurnPresentation).toMatchObject({ canAdvanceAi: true });
+        sessionToken = reconnected.sessionToken;
+        reconnectToken = reconnected.reconnectToken;
+        matchVersion = reconnected.matchVersion;
+      }
+    }
+
+    expect(actions).toBeGreaterThan(120);
+    expect(actions).toBeLessThan(400);
+    expect(lastPayload.matchStatus).toBe("finished");
+    expect(lastPayload.winner).toBe("runner");
+    const finished = await service.loadForTest(created.matchId);
+    if (!finished?.gameState) throw new Error("Missing completed observable AI-vs-AI state");
+    expect(finished.gameState.stateVersion).toBe(created.playerView.stateVersion + actions);
+    expect(finished.eventLog).toHaveLength(initialEventCount + actions);
+    expect(finished.aiDecisionTraces).toHaveLength(actions);
+    expect(finished.lifecycleResult).toBeUndefined();
+    expect(finished.gameState.gameEndReason).toBe("corp_deck_empty");
+
+    const replay = await service.replayMatch(created.matchId);
+    expect(replay).toEqual({
+      ok: true,
+      finalStateHash: hashState(finished.gameState),
+      errors: []
+    });
+  }, 60_000);
 
   it("rejects AI match start when the selected AI snapshot is internally invalid", async () => {
     const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "ai-invalid-runtime-snapshot-start" });
