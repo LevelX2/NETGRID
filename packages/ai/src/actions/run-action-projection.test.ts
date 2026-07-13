@@ -331,6 +331,45 @@ describe("projectRunnerRunActions", () => {
         ?.targetServerId,
     ).toBeUndefined();
   });
+
+  it("projects Bodyweight's click-free followup as a bonus run without treating decline as a run", () => {
+    const bonusRun = action({
+      actionId: "bodyweight-run-rd",
+      type: "start_run",
+      source: "basic_action",
+      label: "Bonus-Run auf R&D",
+      payload: {
+        serverId: "rd",
+        bonusRunNoClick: true,
+        bonusRunSource: "onr_v1_123_bodyweight-data-creche",
+      },
+    });
+    const decline = action({
+      actionId: "bodyweight-decline",
+      type: "trigger_ability",
+      source: "bodyweight_1",
+      payload: {
+        cardId: "bodyweight_1",
+        sourceDefinitionId: "onr_v1_123_bodyweight-data-creche",
+        runnerAbility: "decline_successful_run_extra_run",
+        successfulRunExtraRunDecision: "decline",
+      },
+    });
+
+    const projections = projectRunnerRunActions({
+      input: input([bonusRun, decline]),
+    });
+
+    expect(projections).toEqual([
+      expect.objectContaining({
+        actionId: "bodyweight-run-rd",
+        actionType: "start_run",
+        structure: "bonus_run",
+        targetServerId: "rd",
+        projectionStatus: "concrete_target",
+      }),
+    ]);
+  });
 });
 
 function input(legalActions: LegalAction[]): AiDecisionInput {

@@ -190,6 +190,42 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(actionButtonLabel(bonusRun)).toBe("Bonus-Run auf HQ");
   });
 
+  it("keeps Bodyweight bonus runs and their immediate decline visible together", () => {
+    const bonusRun = legalAction(
+      "runner",
+      "start_run",
+      "basic_action",
+      "Bonus-Run auf R&D",
+      {
+        serverId: "rd",
+        bonusRunNoClick: true,
+        bonusRunSource: "onr_v1_123_bodyweight-data-creche",
+      },
+      "runner_action.main",
+    );
+    const decline = legalAction(
+      "runner",
+      "trigger_ability",
+      "bodyweight_1",
+      "Bodyweight Data Crèche: keinen Bonus-Run starten",
+      {
+        cardId: "bodyweight_1",
+        sourceDefinitionId: "onr_v1_123_bodyweight-data-creche",
+        runnerAbility: "decline_successful_run_extra_run",
+        successfulRunExtraRunDecision: "decline",
+      },
+      "runner_action.main",
+    );
+
+    const split = splitLegalActions([bonusRun, decline]);
+
+    expect(split.primaryActions).toEqual([bonusRun, decline]);
+    expect(split.contextualActions).toEqual([]);
+    expect(actionButtonLabel(decline)).toBe(
+      "Bodyweight Data Crèche: keinen Bonus-Run starten",
+    );
+  });
+
   it("keeps Corp Spy-counter removal visible in the main action panel", () => {
     const removeSpyCounter = legalAction(
       "corp",

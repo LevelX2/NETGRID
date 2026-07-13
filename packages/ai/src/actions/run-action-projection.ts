@@ -371,6 +371,11 @@ function runActionStructure(
   action: LegalAction,
   signals: readonly string[],
 ): RunnerRunActionStructure {
+  if (
+    action.type === "start_run" &&
+    booleanPayloadValue(action, "bonusRunNoClick")
+  )
+    return "bonus_run";
   if (action.type === "start_run") return "direct_start_run";
   if (runActionHasStructuredSignal(signals, ["multi_run_sequence"]))
     return "multi_run_sequence";

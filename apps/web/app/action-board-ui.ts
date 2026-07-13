@@ -961,6 +961,7 @@ export function isContextualLegalAction(action: LegalAction): boolean {
     return true;
   if (isApproachIceExposeAction(action)) return false;
   if (isRemoveSpyCounterAction(action)) return false;
+  if (isSuccessfulRunExtraRunDeclineAction(action)) return false;
   if (action.type === "trigger_ability" && cardRefsForAction(action).length > 0)
     return true;
   if (isPriorityAction(action)) return false;
@@ -2935,6 +2936,15 @@ function isRemoveSpyCounterAction(
   return (
     action.type === "trigger_ability" &&
     action.payload?.corpAbility === "remove_spy_counter"
+  );
+}
+
+function isSuccessfulRunExtraRunDeclineAction(
+  action: Partial<Pick<LegalAction, "type" | "payload">>,
+): boolean {
+  return (
+    action.type === "trigger_ability" &&
+    action.payload?.runnerAbility === "decline_successful_run_extra_run"
   );
 }
 

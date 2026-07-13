@@ -111,7 +111,7 @@ Commit:
 
 ### BDC-03 – UI-/KI-Verbrauchervertrag
 
-Status: `active`
+Status: `complete`
 
 Ziel:
 
@@ -131,7 +131,7 @@ Commit:
 
 ### BDC-04 – Abschluss, Wissenspflege und Integration
 
-Status: `pending`
+Status: `active`
 
 Ziel:
 
