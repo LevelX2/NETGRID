@@ -5639,16 +5639,10 @@
     }
   },
   "expectation": {
-    "acceptableActions": [
-      {
-        "type": "start_run",
-        "targetServerId": "archives"
-      }
-    ],
     "forbiddenActions": [
       {
         "type": "start_run",
-        "targetServerId": "rd"
+        "targetServerId": "archives"
       }
     ]
   }

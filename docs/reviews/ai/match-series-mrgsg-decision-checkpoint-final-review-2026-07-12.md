@@ -8,6 +8,22 @@ Fehler bei Score-Konversion, Broker, Draw-Tax, Rush Hour und Handpuffer sind
 unter den damaligen Zuständen bereits korrigiert. Genau ein zusätzlicher
 Fehler blieb spielgleich reproduzierbar und ist nun geschlossen.
 
+## Nachtrag vom 13. Juli 2026
+
+Der damalige Zielvertrag von `CP-MRGSG-01` wurde durch die später ausdrücklich
+festgelegte Archives-Disziplin ersetzt. Im exakten Zustand liegen zwei
+unbekannte Karten in Archives, aber weder Corp-Deckout-/Matchdruck noch ein
+sichtbarer zufälliger HQ-Abwurf vor. Außerdem sind Draw und Credit-Recovery mit
+1.293 beziehungsweise 1.254 Rohpunkten konkrete interessantere Alternativen.
+
+Der spielgleiche Checkpoint bleibt erhalten, verbietet nun aber gezielt den
+unbegründeten Archives-Run, ohne den vollständig besteuerten R&D-Run als einzig
+richtige Aktion festzuschreiben. Der Red-Evidence-Bericht bleibt als
+historischer Nachweis der damals gültigen Anforderung unverändert. Die
+Plan-Zielkorrektur `inferior_run_target_mapping_yield` selbst wird dadurch
+nicht zurückgenommen; sie bleibt für Alternativen mit aktuellem, fachlich
+qualifiziertem Payoff gültig.
+
 ## Analysierte Spiele
 
 - `match_a199d04c94d5a906`: menschlicher Runner gegen Hard-Corp-KI;

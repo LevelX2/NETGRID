@@ -43,9 +43,7 @@ describe("Manhunt vs. Coup exact selfplay decision checkpoints", () => {
     const knownAgenda = mutateFixture(lowValueArchivesJson, (checkpoint) => {
       moveCorpCardToArchives(checkpoint, CORPORATE_WAR);
       checkpoint.expectation = {
-        acceptableActions: [
-          { type: "start_run", targetServerId: "archives" },
-        ],
+        acceptableActions: [{ type: "start_run", targetServerId: "archives" }],
       };
     });
 
@@ -98,7 +96,8 @@ function moveCorpCardToArchives(
 ): void {
   const state = checkpoint.engine.testOnlyGameState;
   const instanceId = [...state.corp.hq, ...state.corp.rd].find(
-    (candidate) => state.cardInstances[candidate]?.definitionId === definitionId,
+    (candidate) =>
+      state.cardInstances[candidate]?.definitionId === definitionId,
   );
   if (!instanceId) throw new Error(`missing_corp_card:${definitionId}`);
   state.corp.hq = state.corp.hq.filter((candidate) => candidate !== instanceId);

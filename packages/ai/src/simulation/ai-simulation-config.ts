@@ -8,7 +8,10 @@ import type {
 } from "@netgrid/shared";
 import type { AiDeckStrategyDeckSnapshot } from "../deck-strategy-snapshot";
 import type { AiDecisionRuntimeOptions } from "../runtime/choose-ai-action";
-import type { SimulationControllerMode, SimulationWorld } from "./simulation-types";
+import type {
+  SimulationControllerMode,
+  SimulationWorld,
+} from "./simulation-types";
 
 export type AiSimulationDecisionCheckpointCapture = {
   seed: string;

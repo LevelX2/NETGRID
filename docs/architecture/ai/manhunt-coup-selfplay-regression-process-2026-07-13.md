@@ -1,6 +1,6 @@
 # Manhunt-vs.-Coup-Selfplay-Regressionsprozess (2026-07-13)
 
-Status: aktiv – P0 Prozessverankerung
+Status: P0 bis P5 abgeschlossen; P6 lokale Integration und Cleanup offen
 
 ## Ziel
 

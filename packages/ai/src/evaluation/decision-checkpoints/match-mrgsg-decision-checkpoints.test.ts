@@ -6,7 +6,7 @@ import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 describe("match MRGSG exact decision checkpoints", () => {
-  it("prefers the open Archives opportunity over a fully taxed R&D path", () => {
+  it("does not treat unknown Archives cards as payoff while stronger visible options remain", () => {
     const result = runAiDecisionCheckpoint(fixture(cp01Json));
 
     expect(result.ok, result.message).toBe(true);
