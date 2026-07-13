@@ -4,7 +4,7 @@ import readinessData from "../../../data/ai/card-set-ai-readiness-v1.json";
 export type PlayMode = "human_vs_human" | "human_vs_ai" | "ai_vs_ai";
 export type HumanSideSelection = "runner" | "corp" | "random";
 export type HumanAiSideSelection = "runner" | "corp" | "random";
-export type TechnicalMatchMode = "human_vs_human" | "human_runner_vs_corp_ai" | "human_corp_vs_runner_ai";
+export type TechnicalMatchMode = "human_vs_human" | "human_runner_vs_corp_ai" | "human_corp_vs_runner_ai" | "ai_vs_ai";
 export type MatchFormatSelection = "rules_match" | "two_game_side_swap";
 export const MATCH_CARD_POOL_OPTIONS = ["originalset", "originalset_classic", "originalset_proteus", "originalset_classic_proteus"] as const;
 export type MatchCardPoolSelection = (typeof MATCH_CARD_POOL_OPTIONS)[number];
@@ -37,11 +37,10 @@ export type DerivedMatchStart = {
   technicalMode?: TechnicalMatchMode;
   hostSide: HumanSideSelection;
   hasAiOpponent: boolean;
-  isSimulation: boolean;
   createRequest:
     | { mode: "human_vs_human"; hostSide: HumanSideSelection }
     | { playMode: "human_vs_ai"; humanSide: HumanAiSideSelection; hostSide: HumanSideSelection }
-    | { simulation: "ai_vs_ai"; hostSide: "runner" };
+    | { mode: "ai_vs_ai"; hostSide: "runner" };
 };
 
 export function deriveMatchStart(input: {
@@ -52,10 +51,10 @@ export function deriveMatchStart(input: {
   if (input.playMode === "ai_vs_ai") {
     return {
       requestedPlayMode: "ai_vs_ai",
+      technicalMode: "ai_vs_ai",
       hostSide: "runner",
       hasAiOpponent: true,
-      isSimulation: true,
-      createRequest: { simulation: "ai_vs_ai", hostSide: "runner" }
+      createRequest: { mode: "ai_vs_ai", hostSide: "runner" }
     };
   }
 
@@ -67,7 +66,6 @@ export function deriveMatchStart(input: {
       ...(technicalMode ? { technicalMode } : {}),
       hostSide: input.humanAiSideSelection,
       hasAiOpponent: true,
-      isSimulation: false,
       createRequest: { playMode: "human_vs_ai", humanSide: input.humanAiSideSelection, hostSide: input.humanAiSideSelection }
     };
   }
@@ -77,7 +75,6 @@ export function deriveMatchStart(input: {
     technicalMode: "human_vs_human",
     hostSide: input.humanSideSelection,
     hasAiOpponent: false,
-    isSimulation: false,
     createRequest: { mode: "human_vs_human", hostSide: input.humanSideSelection }
   };
 }

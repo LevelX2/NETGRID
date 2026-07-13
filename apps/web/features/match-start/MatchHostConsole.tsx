@@ -16,7 +16,6 @@ import type {
   MatchStartPlayerClockMode
 } from "../../app/match-start-storage";
 import { DeckMetadataLine, DeckSlotSelect } from "../decks/DeckSelectionControls";
-import { SimulationResult, type AiSimulationSummary } from "../results/SimulationResult";
 import { MatchStartAdvancedOptions } from "./MatchStartAdvancedOptions";
 import { MatchStartChoiceSections } from "./MatchStartChoiceSections";
 
@@ -59,8 +58,6 @@ export function MatchHostConsole({
   isHumanVsHuman,
   testSetupMode,
   startSummary,
-  simulationPending,
-  simulationStatusText,
   hasAiOpponent,
   humanSideSelection,
   countdownSeconds,
@@ -80,7 +77,6 @@ export function MatchHostConsole({
   selectedParticipantBCorpLocalDeckId,
   aiSlotDisabled,
   visibleDeckMetadataEntries,
-  simulation,
   onPlayMode,
   onMatchFormat,
   onMatchCardPool,
@@ -134,8 +130,6 @@ export function MatchHostConsole({
   isHumanVsHuman: boolean;
   testSetupMode: boolean;
   startSummary: string[];
-  simulationPending: boolean;
-  simulationStatusText: string;
   hasAiOpponent: boolean;
   humanSideSelection: HumanSideSelection;
   countdownSeconds: 3 | 5 | 10;
@@ -155,7 +149,6 @@ export function MatchHostConsole({
   selectedParticipantBCorpLocalDeckId: string;
   aiSlotDisabled: boolean;
   visibleDeckMetadataEntries: Array<{ label: string; metadata: { deckName: string } | undefined }>;
-  simulation: AiSimulationSummary | null;
   onPlayMode(mode: PlayMode): void;
   onMatchFormat(format: MatchFormatSelection): void;
   onMatchCardPool(cardPool: MatchCardPoolSelection): void;
@@ -267,18 +260,14 @@ export function MatchHostConsole({
           <span key={item}>{item}</span>
         ))}
       </div>
-      <button className="button primary wide" onClick={onCreateMatch} data-testid="create-match" disabled={simulationPending}>
+      <button className="button primary wide" onClick={onCreateMatch} data-testid="create-match">
         {gameMode === "ai_vs_ai" ? <Bot size={16} /> : <UserPlus size={16} />}
-        {gameMode === "ai_vs_ai" ? (simulationPending ? "Simulation läuft" : "Simulation starten") : isHumanVsHuman ? "Lobby erstellen" : "Match erstellen"}
+        {gameMode === "ai_vs_ai" ? "Simulation beobachten" : isHumanVsHuman ? "Lobby erstellen" : "Match erstellen"}
       </button>
-      {simulationStatusText ? (
-        <p className="notice startFeedback" role="status" aria-live="polite">
-          {simulationStatusText}
-        </p>
-      ) : null}
       <MatchStartAdvancedOptions
         isHumanVsHuman={isHumanVsHuman}
         isHumanVsAi={isHumanVsAi}
+        isAiVsAi={gameMode === "ai_vs_ai"}
         hasAiOpponent={hasAiOpponent}
         matchCardPool={matchCardPool}
         humanSideSelection={humanSideSelection}
@@ -325,7 +314,6 @@ export function MatchHostConsole({
         onSelectedParticipantBCorpLocalDeckId={onSelectedParticipantBCorpLocalDeckId}
       />
       <DeckMetadataLine entries={visibleDeckMetadataEntries} />
-      {simulation ? <SimulationResult summary={simulation} /> : null}
     </div>
   );
 }

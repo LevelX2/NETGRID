@@ -37,6 +37,7 @@ export function GameOverModal({
   playerName,
   retentionProtected,
   onRetentionProtection,
+  observerMode = false,
   nextSeriesPending = false
 }: {
   result: GameResultSummary;
@@ -48,9 +49,16 @@ export function GameOverModal({
   playerName?: string;
   retentionProtected: boolean;
   onRetentionProtection(protectedValue: boolean): void;
+  observerMode?: boolean;
   nextSeriesPending?: boolean;
 }) {
-  const outcomeText = resultOutcomeHeadline(result.winner, side, playerName, opponentName);
+  const observerOutcomeText =
+    result.winner === "draw"
+      ? "Simulation endet unentschieden"
+      : `${result.winner === "runner" ? "Runner-KI" : "Korp-KI"} gewinnt`;
+  const outcomeText = observerMode
+    ? observerOutcomeText
+    : resultOutcomeHeadline(result.winner, side, playerName, opponentName);
   const seriesHeadline = result.series ? seriesResultHeadline(result.series, opponentName, playerName) : null;
   const headlineText = seriesHeadline ?? outcomeText;
   const lastGameOutcomeText = resultOutcomeText(result.winner);
@@ -139,7 +147,7 @@ export function GameOverModal({
         ) : null}
         <div className="gameOverFooter">
           <div>
-            <span>{resultFooterOutcomeLabel(result.winner, side, opponentName)}</span>
+            <span>{observerMode ? observerOutcomeText : resultFooterOutcomeLabel(result.winner, side, opponentName)}</span>
             <small>{shortDiagnosticsHash(result.finalStateHash)}</small>
           </div>
           <div className="gameOverActions">

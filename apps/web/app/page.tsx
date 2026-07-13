@@ -95,6 +95,7 @@ import {
   actionConsumesClick,
   actionContextStillVisible,
   actionCostChips,
+  aiAdvanceRequestMode,
   aiPacingFallbackDelayMs,
   aiPacingDelayMs,
   actionMatchesContext,
@@ -308,7 +309,6 @@ import {
 import { scoreCardStateBadges } from "../features/cards/ScoredAgendaState";
 import { CardPreviewPanel } from "../features/cards/CardPreviewPanel";
 import { GameOverModal } from "../features/results/GameOverModal";
-import { type AiSimulationSummary } from "../features/results/SimulationResult";
 import {
   CARD_SCALE_PERCENT_MIN,
   CARD_TOOLTIP_HOVER_OPEN_DELAY_MS,
@@ -552,10 +552,6 @@ export default function Page() {
   const [matchClockAnchor, setMatchClockAnchor] =
     useState<LocalMatchClockAnchor | null>(null);
   const [lobbyChatText, setLobbyChatText] = useState("");
-  const [simulation, setSimulation] = useState<AiSimulationSummary | null>(
-    null,
-  );
-  const [simulationPending, setSimulationPending] = useState(false);
   const [connection, setConnection] = useState<ConnectionState>("offline");
   const [notice, setNotice] = useState("");
   const [undoNotice, setUndoNotice] = useState("");
@@ -819,6 +815,11 @@ export default function Page() {
     }
     setRecoveryTabSelected(false);
     setMode(nextMode);
+  };
+
+  const updatePlayMode = (nextPlayMode: PlayMode) => {
+    setPlayMode(nextPlayMode);
+    if (nextPlayMode === "ai_vs_ai") setMatchFormat("rules_match");
   };
 
   const updateCardPreviewCollapsed = (collapsed: boolean) => {
@@ -1803,15 +1804,17 @@ export default function Page() {
     humanSideSelection,
     humanAiSideSelection,
   });
-  const gameMode: GameMode = matchStart.isSimulation
-    ? "ai_vs_ai"
-    : (matchStart.technicalMode ??
-      (playMode === "human_vs_ai"
-        ? "human_runner_vs_corp_ai"
-        : "human_vs_human"));
+  const gameMode: GameMode =
+    matchStart.technicalMode ??
+    (playMode === "human_vs_ai"
+      ? "human_runner_vs_corp_ai"
+      : "human_vs_human");
   const hasAiOpponent = matchStart.hasAiOpponent;
   const isHumanVsHuman = playMode === "human_vs_human";
   const isHumanVsAi = playMode === "human_vs_ai";
+  const isAiVsAiMatch = session?.mode === "ai_vs_ai";
+  const effectiveStartMatchFormat =
+    gameMode === "ai_vs_ai" ? "rules_match" : matchFormat;
   const aiTurnPresentation = effectiveAiTurnPresentation(payload);
   const hasPendingAiCue =
     currentActionCue?.source === "ai" ||
@@ -1828,18 +1831,20 @@ export default function Page() {
     payload?.winner ||
     resultSummary ||
     payload?.matchStatus === "finished" ||
-    payload?.matchStatus === "forfeited",
+    payload?.matchStatus === "forfeited" ||
+    payload?.matchStatus === "cancelled",
   );
   const showAiPacingFallbackControls = Boolean(
     aiTurnPresentation?.canAdvanceAi &&
     !matchEnded &&
-    aiPacingFallbackDelay !== null &&
-    (aiPacingFallbackDelay === 0 || aiPacingFallbackVisible),
+    (isAiVsAiMatch ||
+      (aiPacingFallbackDelay !== null &&
+        (aiPacingFallbackDelay === 0 || aiPacingFallbackVisible))),
   );
   const startSummary = matchStartSummary({
     playMode,
     matchFormat:
-      matchFormat === "two_game_side_swap"
+      effectiveStartMatchFormat === "two_game_side_swap"
         ? "two_game_side_swap"
         : "rules_match",
     matchCardPool,
@@ -1848,7 +1853,7 @@ export default function Page() {
     aiDeckPolicy,
     testSetupMode,
   }).concat(
-    playerClockMode === "player_clock"
+    gameMode !== "ai_vs_ai" && playerClockMode === "player_clock"
       ? [
           `Spielerzeit ${playerClockMinutes} Min · ${playerClockGraceSeconds} s Kulanz`,
         ]
@@ -1896,11 +1901,6 @@ export default function Page() {
                 },
               ]),
         ];
-  const simulationStatusText = simulationPending
-    ? "Simulation läuft..."
-    : gameMode === "ai_vs_ai"
-      ? notice
-      : "";
   const selectedLocalDeck =
     localDecks.find((deck) => deck.deckId === selectedLocalDeckId) ?? null;
   const selectedDeckDirty = selectedLocalDeck
@@ -2252,7 +2252,8 @@ export default function Page() {
     (resultSummary ||
       payload.winner ||
       payload.matchStatus === "finished" ||
-      payload.matchStatus === "forfeited"),
+      payload.matchStatus === "forfeited" ||
+      payload.matchStatus === "cancelled"),
   );
   const canStartNextSeriesGame = Boolean(resultSummary?.series?.nextAvailable);
   const opponentDisplayName =
@@ -2260,7 +2261,13 @@ export default function Page() {
     lobby?.opponentStatus.displayName ??
     null;
   const canForfeit = Boolean(
-    payload && payload.matchStatus === "active" && !payload.winner,
+    payload &&
+      payload.matchStatus === "active" &&
+      !payload.winner &&
+      !isAiVsAiMatch,
+  );
+  const canCancelSimulation = Boolean(
+    isAiVsAiMatch && payload?.matchStatus === "active" && !payload.winner,
   );
   const matchClockDisplay =
     payload && activeView && matchClockAnchor?.matchId === payload.matchId
@@ -3085,7 +3092,7 @@ export default function Page() {
       if (currentActionCue)
         setCurrentActionCue(actionCueAfterAiAdvanceRequest);
       const sent = advanceAi(
-        localAiPacingModeRef.current === "fast" ? "until_human" : "single_step",
+        aiAdvanceRequestMode(localAiPacingModeRef.current, isAiVsAiMatch),
       );
       if (!sent && pendingAiAdvanceKeyRef.current === advanceKey)
         pendingAiAdvanceKeyRef.current = null;
@@ -3110,6 +3117,7 @@ export default function Page() {
     connection,
     currentActionCue,
     interactionPresentationBlocked,
+    isAiVsAiMatch,
     localAiPacingMode,
     payload?.matchId,
     payload?.matchVersion,
@@ -3148,11 +3156,6 @@ export default function Page() {
 
   const createMatch = async () => {
     setNotice("");
-    setSimulation(null);
-    if (matchStart.isSimulation) {
-      await runSimulation();
-      return;
-    }
     let deckPayload: Record<string, unknown>;
     try {
       deckPayload = await matchDeckPayload();
@@ -3181,11 +3184,11 @@ export default function Page() {
         ...(isHumanVsHuman ? { countdownSeconds } : {}),
         ...(isHumanVsHuman ? { discoverableInLan } : {}),
         settings: {
-          matchFormat,
+          matchFormat: effectiveStartMatchFormat,
           cardPool: matchCardPool,
           agendaPointsToWin: effectiveAgendaTarget,
           playerClock:
-            playerClockMode === "player_clock"
+            gameMode !== "ai_vs_ai" && playerClockMode === "player_clock"
               ? {
                   mode: "player_clock",
                   startingTimeMs: playerClockMinutes * 60_000,
@@ -3205,6 +3208,7 @@ export default function Page() {
       setNotice(created.error.message);
       return;
     }
+    if (created.mode === "ai_vs_ai") updateLocalAiPacingMode("paced");
     rememberDisplayName(displayName);
     setSeed(createMatchSeed());
     const nextSession: SessionInfo = {
@@ -3214,6 +3218,7 @@ export default function Page() {
       reconnectToken: created.hostReconnectToken,
       webSocketUrl: created.webSocketUrl,
       displayName,
+      mode: created.mode,
       ...(created.pendingDeckHandshake ? { pendingDeckHandshake: true } : {}),
       ...(created.joinUrl ? { joinUrl: created.joinUrl } : {}),
     };
@@ -3236,7 +3241,9 @@ export default function Page() {
     setPayload(fromInitialResponse(created, created.hostSide));
     setLobby(null);
     setNotice(
-      `Match erstellt. Du startest als ${sideLabel(created.hostSide)}.${aiTraceNotice}`,
+      created.mode === "ai_vs_ai"
+        ? `Simulation bereit. Beide KI-Seiten sind sichtbar; sie startet getaktet und kann jederzeit pausiert, schrittweise fortgesetzt oder abgebrochen werden.${aiTraceNotice}`
+        : `Match erstellt. Du startest als ${sideLabel(created.hostSide)}.${aiTraceNotice}`,
     );
   };
 
@@ -3268,6 +3275,7 @@ export default function Page() {
         reconnectToken: next.hostReconnectToken,
         webSocketUrl: next.webSocketUrl,
         displayName: session.displayName,
+        mode: next.mode,
         ...(next.joinUrl ? { joinUrl: next.joinUrl } : {}),
       };
       persistSession(nextSession);
@@ -3292,45 +3300,7 @@ export default function Page() {
     }
   };
 
-  const runSimulation = async () => {
-    setNotice("");
-    setSimulation(null);
-    setSimulationPending(true);
-    try {
-      const deckPayload = await matchDeckPayload();
-      const result = await postJson<{
-        summary?: AiSimulationSummary;
-        error?: { message: string };
-      }>("/api/simulations/ai-vs-ai", {
-        seed,
-        runnerDifficulty,
-        corpDifficulty,
-        ...deckPayload,
-        settings: { cardPool: matchCardPool },
-        agendaPointsToWin: effectiveAgendaTarget,
-        maxActions: 120,
-      });
-      if (result.error) {
-        setNotice(result.error.message);
-        return;
-      }
-      if (!result.summary) {
-        setNotice("Simulation konnte keine Ergebnisdaten liefern.");
-        return;
-      }
-      setSimulation(result.summary);
-      setNotice("Simulation abgeschlossen.");
-    } catch (error) {
-      setNotice(
-        serverErrorNotice(error, "Simulation konnte nicht gestartet werden."),
-      );
-    } finally {
-      setSimulationPending(false);
-    }
-  };
-
   async function matchDeckPayload() {
-    if (gameMode === "ai_vs_ai") return await simulationDeckPayload();
     return {
       participantADecks: await deckPairPayload(
         runnerDeckSource,
@@ -3354,26 +3324,6 @@ export default function Page() {
           }
         : {}),
       ...(hasAiOpponent ? { aiDeckPolicy } : {}),
-    };
-  }
-
-  async function simulationDeckPayload() {
-    if (aiDeckPolicy === "fixed" || aiDeckPolicy === "seeded_random")
-      return { aiDeckPolicy };
-    return {
-      aiDeckPolicy,
-      ...(await deckSidePayload(
-        "runner",
-        runnerDeckSource,
-        selectedRunnerSnapshotId,
-        selectedRunnerLocalDeckId,
-      )),
-      ...(await deckSidePayload(
-        "corp",
-        corpDeckSource,
-        selectedCorpSnapshotId,
-        selectedCorpLocalDeckId,
-      )),
     };
   }
 
@@ -4023,7 +3973,9 @@ export default function Page() {
     }
     applyRemotePayload(result.actorPayload);
     setNotice(
-      "Match abgebrochen. Der alte Link und die alten Tokens sind ungültig.",
+      isAiVsAiMatch
+        ? "Simulation abgebrochen. Der letzte echte Spielzustand bleibt sichtbar; es wurde kein Sieger erzeugt."
+        : "Match abgebrochen. Der alte Link und die alten Tokens sind ungültig.",
     );
   };
 
@@ -4112,6 +4064,19 @@ export default function Page() {
     });
   };
 
+  const requestCancelSimulation = () => {
+    if (!canCancelSimulation) return;
+    updateLocalAiPacingMode("manual");
+    setConfirmationDialog({
+      title: "Simulation abbrechen?",
+      message:
+        "Die KI-gegen-KI-Simulation endet ohne Sieger. Der letzte echte Engine-Zustand bleibt auf dem Board sichtbar.",
+      confirmLabel: "Simulation abbrechen",
+      tone: "danger",
+      onConfirm: cancelMatchLifecycle,
+    });
+  };
+
   const setRetentionProtection = async (protectedValue: boolean) => {
     if (!session) return;
     let result: RetentionProtectionResponse;
@@ -4179,6 +4144,7 @@ export default function Page() {
       reconnectToken: recreated.hostReconnectToken,
       webSocketUrl: recreated.webSocketUrl,
       displayName: session.displayName,
+      mode: recreated.mode,
       ...(recreated.pendingDeckHandshake ? { pendingDeckHandshake: true } : {}),
       ...(recreated.joinUrl ? { joinUrl: recreated.joinUrl } : {}),
     };
@@ -4271,7 +4237,6 @@ export default function Page() {
     setSession(null);
     setPayload(null);
     setLobby(null);
-    setSimulation(null);
     setConnection("offline");
     setSeriesTransitioning(false);
     setNotice("");
@@ -5002,7 +4967,7 @@ export default function Page() {
                       ) : activeStartTab === "host" ? (
                         <MatchHostConsole
                           playMode={playMode}
-                          matchFormat={matchFormat}
+                          matchFormat={effectiveStartMatchFormat}
                           matchCardPool={matchCardPool}
                           displayName={displayName}
                           isHumanVsAi={isHumanVsAi}
@@ -5025,8 +4990,6 @@ export default function Page() {
                           isHumanVsHuman={isHumanVsHuman}
                           testSetupMode={testSetupMode}
                           startSummary={startSummary}
-                          simulationPending={simulationPending}
-                          simulationStatusText={simulationStatusText}
                           hasAiOpponent={hasAiOpponent}
                           humanSideSelection={humanSideSelection}
                           countdownSeconds={countdownSeconds}
@@ -5062,8 +5025,7 @@ export default function Page() {
                           visibleDeckMetadataEntries={
                             visibleDeckMetadataEntries
                           }
-                          simulation={simulation}
-                          onPlayMode={setPlayMode}
+                          onPlayMode={updatePlayMode}
                           onMatchFormat={setMatchFormat}
                           onMatchCardPool={setMatchCardPool}
                           onDisplayName={updateDisplayName}
@@ -5331,6 +5293,7 @@ export default function Page() {
               seriesTransitioning={seriesTransitioning}
               canReturnToStart={canReturnToStart}
               canForfeit={canForfeit}
+              canCancelSimulation={canCancelSimulation}
               rightRailCollapsed={rightRailCollapsed}
               onWorkspace={setActiveMatchWorkspace}
               onToggleUndoPanel={() => setUndoPanelOpen((open) => !open)}
@@ -5339,6 +5302,7 @@ export default function Page() {
               onStartNextSeriesGame={startNextSeriesGame}
               onLeaveMatch={leaveMatch}
               onRequestForfeitMatch={requestForfeitMatch}
+              onRequestCancelSimulation={requestCancelSimulation}
               onToggleRightRail={() =>
                 setRightRailCollapsed((current) => !current)
               }
@@ -5434,9 +5398,7 @@ export default function Page() {
                 onAdvanceAi={() => {
                   setCurrentActionCue(actionCueAfterAiAdvanceRequest);
                   advanceAi(
-                    localAiPacingMode === "fast"
-                      ? "until_human"
-                      : "single_step",
+                    aiAdvanceRequestMode(localAiPacingMode, isAiVsAiMatch),
                   );
                 }}
               />
@@ -5571,6 +5533,7 @@ export default function Page() {
                 actionCapacities={actionSlotCapacities}
                 ariaHidden={!resourceStripVisible}
                 topOffsetPx={topbarStickyEnabled ? topbarHeightPx : 0}
+                observerMode={isAiVsAiMatch}
               />
             ) : null}
 
@@ -5606,13 +5569,17 @@ export default function Page() {
                       presentation={aiTurnPresentation}
                       mode={localAiPacingMode}
                       connection={connection}
-                      onAdvance={() =>
+                      observerMode={isAiVsAiMatch}
+                      onMode={updateLocalAiPacingMode}
+                      onAdvance={() => {
+                        if (isAiVsAiMatch) updateLocalAiPacingMode("manual");
                         advanceAi(
-                          localAiPacingMode === "fast"
-                            ? "until_human"
-                            : "single_step",
-                        )
-                      }
+                          aiAdvanceRequestMode(
+                            localAiPacingMode,
+                            isAiVsAiMatch,
+                          ),
+                        );
+                      }}
                     />
                   ) : null}
                   {actionPanelMode === "floating" ? (
@@ -5660,7 +5627,11 @@ export default function Page() {
                   )}
                   <PlayerPanel
                     view={activeView}
-                    title={`Du · ${sideLabel(activeView.side)}`}
+                    title={
+                      isAiVsAiMatch
+                        ? `Runner-KI · ${sideLabel(activeView.side)}`
+                        : `Du · ${sideLabel(activeView.side)}`
+                    }
                     scoreAreaCards={scoreAreaCardsBySide(activeView.side)}
                     scoreAreaOpen={scoreAreaOverlays[activeView.side]}
                     agendaPointsToWin={effectiveAgendaTarget}
@@ -5989,7 +5960,8 @@ export default function Page() {
               <GameOverModal
                 result={resultSummary}
                 side={session.side}
-                playerName={session.displayName}
+                playerName={isAiVsAiMatch ? "Runner-KI" : session.displayName}
+                observerMode={isAiVsAiMatch}
                 onDismiss={() => {
                   if (resultKey) setDismissedResultKey(resultKey);
                 }}
@@ -5997,9 +5969,11 @@ export default function Page() {
                 nextSeriesPending={seriesTransitioning}
                 retentionProtected={payload?.retentionProtected === true}
                 onRetentionProtection={setRetentionProtection}
-                {...(opponentDisplayName
-                  ? { opponentName: opponentDisplayName }
-                  : {})}
+                {...(isAiVsAiMatch
+                  ? { opponentName: "Korp-KI" }
+                  : opponentDisplayName
+                    ? { opponentName: opponentDisplayName }
+                    : {})}
                 {...(canStartNextSeriesGame
                   ? { onNextSeriesGame: startNextSeriesGame }
                   : {})}

@@ -57,7 +57,10 @@ export function MatchStartChoiceSections({
       <section className="matchStartSection" aria-label="Spielziel">
         <p className="eyebrow">Format</p>
         <div className="choiceCardGrid formatCards">
-          {(["rules_match", "two_game_side_swap"] as MatchFormatSelection[]).map((option) => {
+          {(playMode === "ai_vs_ai"
+            ? (["rules_match"] as MatchFormatSelection[])
+            : (["rules_match", "two_game_side_swap"] as MatchFormatSelection[])
+          ).map((option) => {
             const label = matchFormatCardLabel(option);
             return (
               <button

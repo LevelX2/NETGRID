@@ -35,10 +35,11 @@ describe("V1.0.4 match start derivation", () => {
     });
   });
 
-  it("routes AI-vs-AI to the simulation path", () => {
+  it("routes AI-vs-AI to the persisted observable match path", () => {
     expect(deriveMatchStart({ playMode: "ai_vs_ai", humanSideSelection: "random", humanAiSideSelection: "random" })).toMatchObject({
-      isSimulation: true,
-      createRequest: { simulation: "ai_vs_ai" }
+      technicalMode: "ai_vs_ai",
+      hostSide: "runner",
+      createRequest: { mode: "ai_vs_ai", hostSide: "runner" }
     });
   });
 

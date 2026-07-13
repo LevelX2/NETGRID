@@ -36,6 +36,7 @@ type MatchStartLocalDeck = {
 export function MatchStartAdvancedOptions({
   isHumanVsHuman,
   isHumanVsAi,
+  isAiVsAi,
   hasAiOpponent,
   matchCardPool,
   humanSideSelection,
@@ -83,6 +84,7 @@ export function MatchStartAdvancedOptions({
 }: {
   isHumanVsHuman: boolean;
   isHumanVsAi: boolean;
+  isAiVsAi: boolean;
   hasAiOpponent: boolean;
   matchCardPool: MatchCardPoolSelection;
   humanSideSelection: HumanSideSelection;
@@ -164,11 +166,12 @@ export function MatchStartAdvancedOptions({
         ) : null}
         <label>
           Spielerzeit
-          <select value={playerClockMode} onChange={(event) => onPlayerClockMode(event.target.value as MatchStartPlayerClockMode)}>
+          <select value={isAiVsAi ? "none" : playerClockMode} onChange={(event) => onPlayerClockMode(event.target.value as MatchStartPlayerClockMode)} disabled={isAiVsAi}>
             <option value="none">Keine Zeitbegrenzung</option>
             <option value="player_clock">Zeitbegrenzung aktiv</option>
           </select>
         </label>
+        {isAiVsAi ? <p className="meta">Beobachtete KI-Simulationen laufen ohne Spielerzeit und bis zu einem regulären Spielende.</p> : null}
         <label>
           Zeit pro Seite
           <select value={playerClockMinutes} onChange={(event) => onPlayerClockMinutes(Number(event.target.value) as MatchStartPlayerClockMinutes)} disabled={playerClockDetailControlsDisabled}>

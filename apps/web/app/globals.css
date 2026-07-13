@@ -5779,6 +5779,24 @@ select {
   cursor: not-allowed;
 }
 
+.aiPacingModeButtons {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.aiPacingModeButtons .button {
+  min-width: 0;
+  justify-content: center;
+  padding-inline: 7px;
+}
+
+.aiPacingModeButtons .button.active {
+  border-color: color-mix(in srgb, var(--ice), transparent 20%);
+  background: color-mix(in srgb, var(--ice), transparent 84%);
+  color: var(--text);
+}
+
 .cueHighlight,
 .cueHighlightSoft {
   position: relative;
