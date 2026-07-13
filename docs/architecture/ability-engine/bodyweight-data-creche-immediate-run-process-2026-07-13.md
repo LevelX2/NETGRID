@@ -2,7 +2,7 @@
 
 ## Status
 
-`in_implementation`
+`implementation_complete_pending_local_integration`
 
 ## /Goal
 
@@ -150,6 +150,17 @@ Akzeptanzkriterien:
 Commit:
 
 - `docs: close Bodyweight timing correction`
+
+## Umsetzungs- und Verifikationsnachweis
+
+- BDC-01 `3ee7d7081`: Prozess, Regelvertrag und Zustandsautomat festgelegt.
+- BDC-02 `5d9448151`: Angebot und Verwendung getrennt, unmittelbares LegalAction-Fenster eingeführt, Ablehnung und erneute Auslösung umgesetzt sowie Start-Run-Revalidation gehärtet.
+- BDC-03 `4304b4a64`: Ablehnung in der UI neben den Bonus-Runs sichtbar gemacht und klickfreie Bonus-Runs in der KI-Projektion als `bonus_run` klassifiziert.
+- Engine: fünf fokussierte Testdateien mit 60 Tests grün; Engine-Typecheck grün.
+- Web: `action-board-ui.test.ts` mit 101 Tests grün; Web-Typecheck einschließlich Next-Typegen grün.
+- KI: `run-action-projection.test.ts` mit 11 Tests grün; KI-Typecheck grün.
+- `git diff --check` ist sauber.
+- Lokale Integration, Main-Nachprüfung und Cleanup werden erst nach dem finalen Main-Abgleich als abgeschlossen markiert.
 
 ## Fehler- und Sicherheitsbehandlung
 

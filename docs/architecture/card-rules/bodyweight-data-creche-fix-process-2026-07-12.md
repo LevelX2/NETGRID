@@ -152,3 +152,21 @@ AI-Typecheck sowie `git diff --check` erneut.
   grün.
 - Shared-, Engine- und AI-Typechecks sowie die vier fokussierten Regressionen
   sind auch nach dem finalen Main-Abgleich grün.
+
+## Timing-Follow-up 2026-07-13
+
+Die damalige Annahme, der Bonus-Run-Resolver sei bereits vollständig fachlich
+korrekt, ist durch einen weiteren Playtest-Fund überholt. Das Angebot setzte
+`successfulRunExtraRunUsedThisTurn` zu früh und ließ den Bonus-Run zugleich
+über normale Runner-Aktionen hinweg offen.
+
+Der führende Folgevertrag steht in
+`docs/architecture/ability-engine/bodyweight-data-creche-immediate-run-process-2026-07-13.md`:
+
+- Direkt nach jedem erfolgreichen Run öffnet sich ein exklusives optionales
+  Fenster, solange die Fähigkeit in diesem Zug noch nicht tatsächlich genutzt
+  wurde.
+- Ablehnen schließt nur dieses Fenster und verbraucht die Fähigkeit nicht.
+- Ein späterer erfolgreicher Run desselben Zugs darf ein neues Fenster öffnen.
+- Erst der tatsächliche Start des klickfreien Bonus-Runs verbraucht die
+  Once-per-turn-Fähigkeit.
