@@ -1,6 +1,6 @@
 # Manhunt-Ausführungspräzisierung (2026-07-13)
 
-Status: P0 aktiv; P1 bis P6 offen
+Status: P0 bis P5 abgeschlossen; P6 zur lokalen Integration freigegeben
 
 ## Quelle und Gesamtziel
 
