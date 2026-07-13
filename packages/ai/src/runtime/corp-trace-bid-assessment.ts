@@ -9,7 +9,8 @@ export type CorpTraceBidAssessment = {
   recommendedBid: number;
   reason:
     | "guaranteed_visible_payoff"
-    | "conservative_tax"
+    | "no_visible_payoff"
+    | "unconvertible_visible_payoff"
     | "unknown_trace_context";
   minimumGuaranteedBid?: number;
   followupCreditReserve?: number;
@@ -20,7 +21,6 @@ export function assessCorpTraceBid(params: {
   input: AiDecisionInput;
   traceContext: LatestTraceContext;
   maxBid: number;
-  conservativeBid: number;
 }): CorpTraceBidAssessment {
   const traceStrength = params.traceContext.traceStrength;
   const runnerLink = params.traceContext.runnerLink;
@@ -31,12 +31,18 @@ export function assessCorpTraceBid(params: {
     typeof runnerLink !== "number"
   ) {
     return {
-      recommendedBid: Math.min(params.maxBid, params.conservativeBid),
+      recommendedBid: 0,
       reason: "unknown_trace_context",
     };
   }
 
   const payoff = cheapestVisibleTagPunishPayoff(params.input);
+  if (!payoff) {
+    return {
+      recommendedBid: 0,
+      reason: "no_visible_payoff",
+    };
+  }
   const followupClicks = params.input.playerView.own.clicks;
   const minimumGuaranteedBid = Math.max(
     0,
@@ -45,7 +51,7 @@ export function assessCorpTraceBid(params: {
       Math.max(0, traceStrength) +
       1,
   );
-  if (payoff && followupClicks >= 1) {
+  if (followupClicks >= 1) {
     const maximumBidWithFollowup = Math.max(
       0,
       params.input.playerView.own.credits - payoff.cost,
@@ -65,15 +71,11 @@ export function assessCorpTraceBid(params: {
   }
 
   return {
-    recommendedBid: Math.min(params.maxBid, params.conservativeBid),
-    reason: "conservative_tax",
+    recommendedBid: 0,
+    reason: "unconvertible_visible_payoff",
     minimumGuaranteedBid,
-    ...(payoff
-      ? {
-          followupCreditReserve: payoff.cost,
-          followupCardId: payoff.card.instanceId,
-        }
-      : {}),
+    followupCreditReserve: payoff.cost,
+    followupCardId: payoff.card.instanceId,
   };
 }
 

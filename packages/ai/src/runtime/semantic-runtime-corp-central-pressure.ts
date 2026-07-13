@@ -15,6 +15,8 @@ export type CorpCentralPressureAssessment = {
   pressure: number;
   runOrAccessEvents: number;
   successfulAccessEvents: number;
+  recentRunOrAccessEvents: number;
+  recentSuccessfulAccessEvents: number;
   visibleMultiaccess: boolean;
   visibleVirusPressure: boolean;
   eventMultiaccess: boolean;
@@ -44,6 +46,15 @@ export function semanticRuntimeCorpCentralPressureAssessment(
     centralRunOrAccessActionType(event),
   ).length;
   const successfulAccessEvents = events.filter((event) =>
+    centralSuccessfulAccessActionType(event),
+  ).length;
+  const recentEvents = events.filter(
+    (event) => event.stateVersionAfter >= input.playerView.stateVersion - 32,
+  );
+  const recentRunOrAccessEvents = recentEvents.filter((event) =>
+    centralRunOrAccessActionType(event),
+  ).length;
+  const recentSuccessfulAccessEvents = recentEvents.filter((event) =>
     centralSuccessfulAccessActionType(event),
   ).length;
   const eventMultiaccess = events.some((event) =>
@@ -84,6 +95,8 @@ export function semanticRuntimeCorpCentralPressureAssessment(
     pressure,
     runOrAccessEvents,
     successfulAccessEvents,
+    recentRunOrAccessEvents,
+    recentSuccessfulAccessEvents,
     visibleMultiaccess,
     visibleVirusPressure,
     eventMultiaccess,
@@ -93,6 +106,8 @@ export function semanticRuntimeCorpCentralPressureAssessment(
       `corp_central_pressure_server:${serverId}`,
       `corp_central_pressure_events:${runOrAccessEvents}`,
       `corp_central_successful_access_events:${successfulAccessEvents}`,
+      `corp_central_recent_events:${recentRunOrAccessEvents}`,
+      `corp_central_recent_successful_access_events:${recentSuccessfulAccessEvents}`,
       `corp_central_visible_multiaccess:${visibleMultiaccess}`,
       `corp_central_visible_virus_pressure:${visibleVirusPressure}`,
       `corp_central_event_multiaccess:${eventMultiaccess}`,
@@ -149,7 +164,8 @@ export function semanticRuntimeCorpCentralServerIdFromPayload(
   ];
   for (const nested of nestedTargets) {
     if (!nested) continue;
-    const nestedServerId = semanticRuntimeCorpCentralServerIdFromPayload(nested);
+    const nestedServerId =
+      semanticRuntimeCorpCentralServerIdFromPayload(nested);
     if (nestedServerId) return nestedServerId;
   }
   return undefined;
@@ -231,9 +247,10 @@ function visibleCardProvidesCentralMultiaccess(
     serverId === "rd" ? "access.rnd_multiaccess" : "access.hq_multiaccess";
   if (hint?.tacticSignals?.includes(serverNeedle)) return true;
   if (
-    rolesMatch([...(hint?.roles ?? []), ...(hint?.planRoles ?? [])], [
-      serverId === "rd" ? "rd_multiaccess" : "hq_multiaccess",
-    ])
+    rolesMatch(
+      [...(hint?.roles ?? []), ...(hint?.planRoles ?? [])],
+      [serverId === "rd" ? "rd_multiaccess" : "hq_multiaccess"],
+    )
   ) {
     return true;
   }
@@ -285,12 +302,7 @@ function visibleCardCreatesCentralVirusPressure(
         )
       : signals.some((signal) => signalHasAnyToken(signal, ["hq"]));
   const payoffSignal = signals.some((signal) =>
-    signalHasAnyToken(signal, [
-      "virus",
-      "multiaccess",
-      "free_trash",
-      "access",
-    ]),
+    signalHasAnyToken(signal, ["virus", "multiaccess", "free_trash", "access"]),
   );
   if (serverSignal && payoffSignal) return true;
 
@@ -318,7 +330,10 @@ function visibleCardCreatesCentralVirusPressure(
   return counterOrVirus && payoff;
 }
 
-function signalHasAnyToken(signal: string, needles: readonly string[]): boolean {
+function signalHasAnyToken(
+  signal: string,
+  needles: readonly string[],
+): boolean {
   const needleSet = new Set(needles);
   const tokens = signal.split(/[._:-]+/).filter(Boolean);
   return tokens.some((token) => needleSet.has(token));

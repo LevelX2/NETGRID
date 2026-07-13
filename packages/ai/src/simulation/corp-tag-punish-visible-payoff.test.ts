@@ -1,146 +1,89 @@
-import { describe, expect, it, vi } from "vitest";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
+import { describe, expect, it } from "vitest";
 
-const mockedHints = vi.hoisted(
-  () =>
-    new Map([
-      [
-        "damage-support",
-        hint(["support_damage_prevention"], []),
-      ],
-      [
-        "damage-noise",
-        hint(["damage_preventionish_noise"], []),
-      ],
-      [
-        "meat-support",
-        hint([], ["survive_meat_damage"]),
-      ],
-      [
-        "meat-noise",
-        hint([], ["survive_meat_damageish_noise"]),
-      ],
-      [
-        "meat-effect-support",
-        hint([], [], [
-          { kind: "prevention_replacement", target: "prevention.meat_damage" },
-        ]),
-      ],
-      [
-        "meat-effect-noise",
-        hint([], [], [
-          { kind: "prevention_replacement", target: "meat_damageish_noise" },
-        ]),
-      ],
-      [
-        "trace-support",
-        hint([], ["support_trace_defense"]),
-      ],
-      [
-        "trace-noise",
-        hint([], ["trace_defenseish_noise"]),
-      ],
-    ]),
-);
+import { corpVisibleMeatDamagePayoff } from "./corp-tag-punish-visible-payoff";
 
-vi.mock("../ai-hints", () => ({
-  createAiHintsByCard: () => mockedHints,
-}));
+describe("corpVisibleMeatDamagePayoff", () => {
+  it("does not treat an Archives card as a live damage payoff", () => {
+    const scorched = card("scorched", "onr_v1_302_scorched-earth");
+    const input = corpInput();
+    input.playerView.own.heapOrArchives = [scorched];
+    input.playerView.servers = [
+      {
+        id: "archives",
+        label: "Archives",
+        ice: [],
+        root: [scorched],
+      },
+    ];
 
-import {
-  corpVisibleRunnerDamagePreventionEvidence,
-  corpVisibleRunnerResourceTrashEvidence,
-} from "./corp-tag-punish-visible-payoff";
+    expect(corpVisibleMeatDamagePayoff(input)).toBe(false);
 
-describe("corp tag punish visible payoff", () => {
-  it("matches visible runner defense hints by bounded role terms", () => {
-    expect(
-      corpVisibleRunnerDamagePreventionEvidence(inputWithRig("damage-support")),
-    ).toContain("runner_damage_prevention_visible:true");
-    expect(
-      corpVisibleRunnerDamagePreventionEvidence(inputWithRig("damage-noise")),
-    ).toEqual([]);
+    input.playerView.own.heapOrArchives = [];
+    input.playerView.own.gripOrHq = [scorched];
+    input.playerView.servers = [];
 
-    expect(
-      corpVisibleRunnerDamagePreventionEvidence(inputWithRig("meat-support")),
-    ).toContain("runner_meat_damage_prevention_visible:true");
-    expect(
-      corpVisibleRunnerDamagePreventionEvidence(inputWithRig("meat-noise")),
-    ).toEqual([]);
-    expect(
-      corpVisibleRunnerDamagePreventionEvidence(
-        inputWithRig("meat-effect-support"),
-      ),
-    ).toContain("runner_meat_damage_prevention_visible:true");
-    expect(
-      corpVisibleRunnerDamagePreventionEvidence(
-        inputWithRig("meat-effect-noise"),
-      ),
-    ).toEqual([]);
-
-    expect(
-      corpVisibleRunnerResourceTrashEvidence(
-        taggedInput(),
-        visibleCard("trace-support"),
-      ).evidence,
-    ).toContain("runner_resource_trace_defense_visible:true");
-    expect(
-      corpVisibleRunnerResourceTrashEvidence(
-        taggedInput(),
-        visibleCard("trace-noise"),
-      ).evidence,
-    ).toEqual([]);
+    expect(corpVisibleMeatDamagePayoff(input)).toBe(true);
   });
 });
 
-function hint(
-  roles: string[],
-  planRoles: string[],
-  effects: Array<Record<string, unknown>> = [],
-) {
+function corpInput(): AiDecisionInput {
   return {
-    cardId: "test-card",
-    side: "runner",
-    roles,
-    planRoles,
-    aiSupportStatus: "hinted_only",
-    effects,
+    side: "corp",
+    difficulty: "hard",
+    profileId: "visible-payoff-test",
+    seed: "visible-payoff-test",
+    decisionId: "visible-payoff-test",
+    actionNumber: 1,
+    legalActions: [],
+    eventTail: [],
+    playerView: {
+      side: "corp",
+      stateVersion: 1,
+      timingPoint: "corp_action.main",
+      activeSide: "corp",
+      phase: "corp_action_phase",
+      own: {
+        identity: card("corp-identity", "corp-identity"),
+        credits: 5,
+        clicks: 3,
+        agendaPoints: 0,
+        gripOrHq: [],
+        stackOrRdCount: 20,
+        heapOrArchives: [],
+        scoreArea: [],
+        maxHandSize: 5,
+        tags: 0,
+      },
+      opponent: {
+        identity: card("runner-identity", "runner-identity"),
+        credits: 5,
+        clicks: 3,
+        agendaPoints: 0,
+        tags: 0,
+        handCount: 5,
+        maxHandSize: 5,
+        deckCount: 20,
+        discardCount: 0,
+        scoreArea: [],
+      },
+      servers: [],
+      publicEvents: [],
+      legalActions: [],
+      winner: null,
+      agendaPointsToWin: 7,
+    },
   };
 }
 
-function inputWithRig(definitionId: string): AiDecisionInput {
+function card(instanceId: string, definitionId: string): VisibleCard {
   return {
-    side: "corp",
-    playerView: {
-      opponent: {
-        tags: 0,
-        rig: [visibleCard(definitionId)],
-      },
-    },
-    legalActions: [],
-  } as unknown as AiDecisionInput;
-}
-
-function taggedInput(): AiDecisionInput {
-  return {
-    side: "corp",
-    playerView: {
-      opponent: {
-        tags: 7,
-      },
-    },
-    legalActions: [],
-  } as unknown as AiDecisionInput;
-}
-
-function visibleCard(definitionId: string): VisibleCard {
-  return {
-    instanceId: `${definitionId}-instance`,
+    instanceId,
     definitionId,
     title: definitionId,
-    type: "resource",
+    type: "operation",
     known: true,
-    owner: "runner",
-    controller: "runner",
+    owner: "corp",
+    controller: "corp",
   };
 }

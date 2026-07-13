@@ -56,6 +56,7 @@ export type AiDecisionSideSelection =
     };
 
 export type AiDecisionInputWithDeckCapabilities = AiDecisionInput & {
+  ownDeckSnapshot?: AiDeckStrategyDeckSnapshot;
   ownDeckCapabilities?: DeckCapabilityProfile;
   ownDeckStrategyProfile?: AiDeckStrategyProfile;
   // Report-only diagnostic: keep it available for audits and debug reports, but
@@ -178,6 +179,7 @@ export function buildAiDecisionInput(
       : undefined;
   const enriched: AiDecisionInputWithDeckCapabilities = {
     ...input,
+    ownDeckSnapshot,
     ownDeckCapabilities,
     ownDeckStrategyProfile,
     ownDeckDoctrineV2Diagnostic,

@@ -14,7 +14,9 @@ describe("createCorpTagSourcePayoffContext", () => {
       tagPunishAssessmentForAction: () => undefined,
       tagSourceProfileForDefinition: () => undefined,
       payoffProfileForDefinition: (definitionId) =>
-        definitionId === "custom-economic-punish" ? { kind: "economic" } : undefined,
+        definitionId === "custom-economic-punish"
+          ? { kind: "economic" }
+          : undefined,
     });
 
     expect(
@@ -94,6 +96,44 @@ describe("createCorpTagSourcePayoffContext", () => {
         }),
       ),
     ).toBe(false);
+  });
+
+  it("values persistent tag-engine activation only with a visible payoff", () => {
+    const context = createCorpTagSourcePayoffContext({
+      sourceDefinitionIdForAction: (_input, action) => {
+        const cardId = action.payload?.cardId;
+        return typeof cardId === "string" ? cardId : undefined;
+      },
+      visibleMeatDamagePayoff: () => false,
+      tagPunishAssessmentForAction: () => undefined,
+      tagSourceProfileForDefinition: (definitionId) =>
+        definitionId === "custom-persistent-tag-asset"
+          ? { tagSource: true }
+          : undefined,
+      payoffProfileForDefinition: (definitionId) =>
+        definitionId === "custom-economic-punish"
+          ? { kind: "economic" }
+          : undefined,
+    });
+    const rezEngine = corpAction("rez_ice", {
+      cardId: "custom-persistent-tag-asset",
+    });
+
+    expect(
+      context.corpPersistentTagEngineVisiblePayoffProfile(
+        inputWithHqCard(visibleCard("custom-economic-punish")),
+        rezEngine,
+      ),
+    ).toMatchObject({
+      kind: "tag_source",
+      value: 1650,
+    });
+    expect(
+      context.corpPersistentTagEngineVisiblePayoffProfile(
+        inputWithHqCard(visibleCard("unprofiled-card")),
+        rezEngine,
+      ),
+    ).toBeUndefined();
   });
 });
 

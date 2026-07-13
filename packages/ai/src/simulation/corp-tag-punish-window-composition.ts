@@ -21,8 +21,10 @@ export type CorpTagPunishWindowCompositionDependencies =
     Omit<
       CorpTaggedRunnerPayoffCompositionDependencies,
       | "immediateTagSourceAvailable"
+      | "immediateTagSourceAction"
       | "unprotectedPersistentTagAssetSetup"
       | "immediateTagSourceVisiblePayoffProfile"
+      | "persistentTagEngineVisiblePayoffProfile"
       | "installedEconomyActionProfile"
       | "tagPunishPayoffFundingProfile"
     > &
@@ -38,8 +40,7 @@ export function createCorpTagPunishWindowComposition(
     corpInstalledEconomyActionProfile,
     corpTagPunishPayoffFundingProfile,
   } = createCorpTagPunishPayoffProfileContext({
-    installedEconomyCreditAmount:
-      dependencies.installedEconomyCreditAmount,
+    installedEconomyCreditAmount: dependencies.installedEconomyCreditAmount,
     sourceDefinitionIdForAction: dependencies.sourceDefinitionIdForAction,
     actionSourceCard: dependencies.actionSourceCard,
     visibleCardStoredCredits: dependencies.visibleCardStoredCredits,
@@ -50,17 +51,16 @@ export function createCorpTagPunishWindowComposition(
   const {
     corpImmediateTagSourceVisiblePayoffProfile,
     corpImmediateTagSourceAvailable,
+    corpImmediateTagSourceAction,
+    corpPersistentTagEngineVisiblePayoffProfile,
     corpUnprotectedPersistentTagAssetSetup,
     corpOntologyPayoffAvailableForTagSource,
   } = createCorpTagSourcePayoffContext({
     sourceDefinitionIdForAction: dependencies.sourceDefinitionIdForAction,
     visibleMeatDamagePayoff: dependencies.visibleMeatDamagePayoff,
-    tagPunishAssessmentForAction:
-      dependencies.tagPunishAssessmentForAction,
-    payoffProfileForDefinition:
-      dependencies.payoffProfileForDefinition,
-    tagSourceProfileForDefinition:
-      dependencies.tagSourceProfileForDefinition,
+    tagPunishAssessmentForAction: dependencies.tagPunishAssessmentForAction,
+    payoffProfileForDefinition: dependencies.payoffProfileForDefinition,
+    tagSourceProfileForDefinition: dependencies.tagSourceProfileForDefinition,
   });
 
   const { tagPunishWindowDiagnosticsForSimulationAction } =
@@ -92,26 +92,23 @@ export function createCorpTagPunishWindowComposition(
   } = createCorpTaggedRunnerPayoffComposition({
     runnerRigTrashTarget: dependencies.runnerRigTrashTarget,
     visibleCardStoredCredits: dependencies.visibleCardStoredCredits,
-    runnerResourceTrashEvidence:
-      dependencies.runnerResourceTrashEvidence,
-    tagPunishAssessmentForAction:
-      dependencies.tagPunishAssessmentForAction,
+    runnerResourceTrashEvidence: dependencies.runnerResourceTrashEvidence,
+    tagPunishAssessmentForAction: dependencies.tagPunishAssessmentForAction,
     sourceDefinitionIdForAction: dependencies.sourceDefinitionIdForAction,
     actionCreditCost: dependencies.actionCreditCost,
-    runnerDamagePreventionEvidence:
-      dependencies.runnerDamagePreventionEvidence,
-    runnerHardwareTrashTarget:
-      dependencies.runnerHardwareTrashTarget,
-    runnerHardwarePayoffEvidence:
-      dependencies.runnerHardwarePayoffEvidence,
+    runnerDamagePreventionEvidence: dependencies.runnerDamagePreventionEvidence,
+    runnerHardwareTrashTarget: dependencies.runnerHardwareTrashTarget,
+    runnerHardwarePayoffEvidence: dependencies.runnerHardwarePayoffEvidence,
     immediateTagSourceAvailable: corpImmediateTagSourceAvailable,
-    unprotectedPersistentTagAssetSetup:
-      corpUnprotectedPersistentTagAssetSetup,
+    immediateTagSourceAction: corpImmediateTagSourceAction,
+    unprotectedPersistentTagAssetSetup: corpUnprotectedPersistentTagAssetSetup,
     advanceCompletesScore: dependencies.advanceCompletesScore,
     actionIsScoreLine: dependencies.actionIsScoreLine,
     visibleMeatDamagePayoff: dependencies.visibleMeatDamagePayoff,
     immediateTagSourceVisiblePayoffProfile:
       corpImmediateTagSourceVisiblePayoffProfile,
+    persistentTagEngineVisiblePayoffProfile:
+      corpPersistentTagEngineVisiblePayoffProfile,
     installedEconomyActionProfile: corpInstalledEconomyActionProfile,
     tagPunishPayoffFundingProfile: corpTagPunishPayoffFundingProfile,
   });
