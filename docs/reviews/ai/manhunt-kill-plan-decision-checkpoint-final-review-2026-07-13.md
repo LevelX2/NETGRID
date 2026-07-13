@@ -103,6 +103,8 @@ hinzu.
 
 ## Integration
 
-Der Arbeitsbranch `codex/ai-manhunt-kill-plan` ist nach den grünen Gates für den
-lokalen Merge nach `main` freigegeben. Push und Pull Request sind nicht Teil
-dieses Abschlusses.
+Der Arbeitsbranch `codex/ai-manhunt-kill-plan` wurde nach den grünen Gates lokal
+per Fast-Forward nach `main` integriert. Die beiden entscheidenden
+Checkpoint-Dateien liefen auf `main` erneut mit 20/20 Tests grün. Worktree und
+gemergter Branch wurden anschließend verifiziert entfernt. Es erfolgte kein
+Push und kein Pull Request.

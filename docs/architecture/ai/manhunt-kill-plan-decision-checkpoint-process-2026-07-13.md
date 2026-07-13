@@ -2,12 +2,13 @@
 
 ## Status
 
-P0 bis P4 abgeschlossen. Vier Fehler wurden auf dem damaligen
+P0 bis P5 abgeschlossen. Vier Fehler wurden auf dem damaligen
 Produktions-Chooser als `behavior_regression` rot reproduziert und danach ohne
 Änderung ihrer Erwartungen geschlossen. Zwei historische Abwurffälle waren
 bereits grün und bleiben ohne neuen Fix als Regressionstests erhalten. Alle elf
-Manhunt-Prüfungen sowie die vollständige AI-Suite sind grün. P5 ist der nächste
-und letzte Zustand: lokale Main-Integration und verifizierter Cleanup.
+Manhunt-Prüfungen sowie die vollständige AI-Suite sind grün. Der Arbeitsbranch
+ist lokal nach `main` integriert; Worktree und gemergter Branch sind verifiziert
+entfernt.
 
 ## Umsetzungsergebnis
 
