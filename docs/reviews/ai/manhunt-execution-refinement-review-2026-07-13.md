@@ -1,6 +1,6 @@
 # Manhunt-Ausführungspräzisierung – Abschlussreview (2026-07-13)
 
-Status: P0 bis P5 abgeschlossen; lokale Integration freigegeben
+Status: abgeschlossen; lokal integriert mit `ea4ceb2b7`
 
 ## Quelle und Scope
 
