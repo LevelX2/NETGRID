@@ -7,7 +7,15 @@ import type {
 import type { CorpTaggedRunnerPayoffActionProfile } from "./corp-scoring-assessment-types";
 
 export type CorpTaggedRunnerPayoffPressureDependencies = {
+  immediateTagSourceAction: (
+    input: AiDecisionInput,
+    action: LegalAction,
+  ) => boolean;
   immediateTagSourceVisiblePayoffProfile: (
+    input: AiDecisionInput,
+    action: LegalAction,
+  ) => CorpTaggedRunnerPayoffActionProfile | undefined;
+  persistentTagEngineVisiblePayoffProfile: (
     input: AiDecisionInput,
     action: LegalAction,
   ) => CorpTaggedRunnerPayoffActionProfile | undefined;
@@ -45,6 +53,28 @@ export function createCorpTaggedRunnerPayoffPressureContext(
         label: "Sofortiger Tag-Source",
         value: immediateTagSource.value,
         reason: immediateTagSource.evidence.join("|"),
+      };
+    }
+    if (dependencies.immediateTagSourceAction(input, action)) {
+      return {
+        key: "corp_tag_source_without_conversion_penalty",
+        label: "Tag-Source ohne Umwandlung",
+        value: -1700,
+        reason: [
+          "corp_punish_conversion_window:none",
+          "immediate_operation_tag_source_available:true",
+          "visible_tag_punish_payoff:false",
+        ].join("|"),
+      };
+    }
+    const persistentTagEngine =
+      dependencies.persistentTagEngineVisiblePayoffProfile(input, action);
+    if (persistentTagEngine) {
+      return {
+        key: "corp_persistent_tag_engine_activation_pressure",
+        label: "Persistente Tag-Engine aktivieren",
+        value: persistentTagEngine.value,
+        reason: persistentTagEngine.evidence.join("|"),
       };
     }
     const installedEconomy = dependencies.installedEconomyActionProfile(

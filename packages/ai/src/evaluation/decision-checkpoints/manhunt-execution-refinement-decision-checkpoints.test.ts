@@ -202,6 +202,13 @@ function diagnostic(result: AiDecisionCheckpointRunResult): string {
     ownHq: result.input.playerView.own.gripOrHq.map(
       (card) => card.definitionId,
     ),
+    ownBoard: result.input.playerView.servers.flatMap((server) =>
+      [...server.ice, ...server.root].map((card) => card.definitionId),
+    ),
+    ownArchives: result.input.playerView.own.heapOrArchives.map(
+      (card) => card.definitionId,
+    ),
     lastEvent: result.input.eventTail.at(-1)?.publicPayload,
+    scoreBreakdown: result.decision?.decisionDebug?.scoreBreakdown,
   });
 }

@@ -8,15 +8,16 @@ type AiCardHintWithSignals = AiCardHint & { tacticSignals?: string[] };
 
 const AI_HINTS = createAiHintsByCard();
 
-export function corpVisibleMeatDamagePayoff(
-  input: AiDecisionInput,
-): boolean {
+export function corpVisibleMeatDamagePayoff(input: AiDecisionInput): boolean {
+  const archivedCardIds = new Set(
+    input.playerView.own.heapOrArchives.map((card) => card.instanceId),
+  );
   const ownVisibleCards = [
     ...input.playerView.own.gripOrHq,
     ...input.playerView.own.scoreArea,
     ...input.playerView.servers.flatMap((server) => [
-      ...server.ice,
-      ...server.root,
+      ...server.ice.filter((card) => !archivedCardIds.has(card.instanceId)),
+      ...server.root.filter((card) => !archivedCardIds.has(card.instanceId)),
     ]),
   ];
   return ownVisibleCards.some(visibleCardHasMeatDamagePayoff);
@@ -120,7 +121,10 @@ function hintForVisibleCard(card: VisibleCard): AiCardHint | undefined {
 }
 
 function hintHasRole(hint: AiCardHint | undefined, role: string): boolean {
-  return rolesMatch([...(hint?.roles ?? []), ...(hint?.planRoles ?? [])], [role]);
+  return rolesMatch(
+    [...(hint?.roles ?? []), ...(hint?.planRoles ?? [])],
+    [role],
+  );
 }
 
 function effectTargetMatchesTerm(effect: unknown, term: string): boolean {
@@ -140,7 +144,5 @@ function hintHasEffectKind(
   hint: AiCardHint | undefined,
   kinds: string[],
 ): boolean {
-  return (
-    hint?.effects?.some((effect) => kinds.includes(effect.kind)) === true
-  );
+  return hint?.effects?.some((effect) => kinds.includes(effect.kind)) === true;
 }

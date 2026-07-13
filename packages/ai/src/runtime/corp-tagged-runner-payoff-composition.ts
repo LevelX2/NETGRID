@@ -26,24 +26,19 @@ export function createCorpTaggedRunnerPayoffComposition(
     createCorpTaggedRunnerPayoffProfileContext({
       runnerRigTrashTarget: dependencies.runnerRigTrashTarget,
       visibleCardStoredCredits: dependencies.visibleCardStoredCredits,
-      runnerResourceTrashEvidence:
-        dependencies.runnerResourceTrashEvidence,
-      tagPunishAssessmentForAction:
-        dependencies.tagPunishAssessmentForAction,
+      runnerResourceTrashEvidence: dependencies.runnerResourceTrashEvidence,
+      tagPunishAssessmentForAction: dependencies.tagPunishAssessmentForAction,
       sourceDefinitionIdForAction: dependencies.sourceDefinitionIdForAction,
       actionCreditCost: dependencies.actionCreditCost,
       runnerDamagePreventionEvidence:
         dependencies.runnerDamagePreventionEvidence,
-      runnerHardwareTrashTarget:
-        dependencies.runnerHardwareTrashTarget,
-      runnerHardwarePayoffEvidence:
-        dependencies.runnerHardwarePayoffEvidence,
+      runnerHardwareTrashTarget: dependencies.runnerHardwareTrashTarget,
+      runnerHardwarePayoffEvidence: dependencies.runnerHardwarePayoffEvidence,
     });
 
   const { corpTaggedPayoffWindowPassiveActionPenalty } =
     createCorpTaggedPayoffWindowContext({
-      immediateTagSourceAvailable:
-        dependencies.immediateTagSourceAvailable,
+      immediateTagSourceAvailable: dependencies.immediateTagSourceAvailable,
       unprotectedPersistentTagAssetSetup:
         dependencies.unprotectedPersistentTagAssetSetup,
       taggedRunnerPayoffProfile: corpTaggedRunnerPayoffProfile,
@@ -54,12 +49,13 @@ export function createCorpTaggedRunnerPayoffComposition(
 
   const { corpTaggedRunnerPayoffPressure } =
     createCorpTaggedRunnerPayoffPressureContext({
+      immediateTagSourceAction: dependencies.immediateTagSourceAction,
       immediateTagSourceVisiblePayoffProfile:
         dependencies.immediateTagSourceVisiblePayoffProfile,
-      installedEconomyActionProfile:
-        dependencies.installedEconomyActionProfile,
-      tagPunishPayoffFundingProfile:
-        dependencies.tagPunishPayoffFundingProfile,
+      persistentTagEngineVisiblePayoffProfile:
+        dependencies.persistentTagEngineVisiblePayoffProfile,
+      installedEconomyActionProfile: dependencies.installedEconomyActionProfile,
+      tagPunishPayoffFundingProfile: dependencies.tagPunishPayoffFundingProfile,
       taggedRunnerPayoffProfile: corpTaggedRunnerPayoffProfile,
     });
 
