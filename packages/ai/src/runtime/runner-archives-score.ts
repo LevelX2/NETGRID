@@ -3,6 +3,11 @@ import type {
   AiDecisionScoreComponent,
   LegalAction,
 } from "@netgrid/shared";
+import {
+  findLastHistoryIndex,
+  isArchivesAccessEvent,
+  mergedPublicHistory,
+} from "./public-event-history";
 
 type RunnerArchivesServer = AiDecisionInput["playerView"]["servers"][number];
 
@@ -24,7 +29,10 @@ export function runnerArchivesScoreComponents(
   server: RunnerArchivesServer | undefined,
   dependencies: RunnerArchivesScoreDependencies,
 ): AiDecisionScoreComponent[] {
-  if (dependencies.evaluationForAction(input, action)?.accessServerId !== "archives")
+  if (
+    dependencies.evaluationForAction(input, action)?.accessServerId !==
+    "archives"
+  )
     return [];
   const root = server?.root ?? [];
   const knownRoot = root.filter(
@@ -53,14 +61,71 @@ export function runnerArchivesScoreComponents(
     ];
   }
   if (hiddenArchivesCount > 0) {
+    const pressure = hiddenArchivesPressureContext(input);
+    const randomDiscard = unresolvedRandomCorpDiscard(input);
+    const meaningfulAlternative = input.legalActions.some(
+      (candidate) =>
+        candidate.actionId !== action.actionId &&
+        candidate.type !== "end_turn" &&
+        !(
+          candidate.type === "start_run" &&
+          candidate.payload?.serverId === "archives"
+        ),
+    );
+    const supported = pressure.active || randomDiscard;
     return [
       {
-        key: "runner_archives_hidden_cards",
-        label: "Archives verdeckte Karten",
-        value: 700,
-        reason: `hidden_archives:${hiddenArchivesCount}`,
+        key: supported
+          ? "runner_archives_hidden_cards_with_pressure"
+          : "runner_archives_unqualified_hidden_cards",
+        label: supported
+          ? "Archives verdeckte Karten mit Anlass"
+          : "Archives verdeckte Karten ohne Anlass",
+        value: supported ? 700 : meaningfulAlternative ? -900 : 250,
+        reason: [
+          `hidden_archives:${hiddenArchivesCount}`,
+          `corp_deck_count:${input.playerView.opponent.deckCount}`,
+          `runner_agenda_points:${input.playerView.own.agendaPoints}`,
+          `archives_corp_deck_pressure:${pressure.corpDeckPressure}`,
+          `archives_runner_match_pressure:${pressure.runnerMatchPressure}`,
+          `archives_random_discard_unseen:${randomDiscard}`,
+          `archives_meaningful_alternative:${meaningfulAlternative}`,
+        ].join("|"),
       },
     ];
   }
   return [];
+}
+
+function hiddenArchivesPressureContext(input: AiDecisionInput): {
+  active: boolean;
+  corpDeckPressure: boolean;
+  runnerMatchPressure: boolean;
+} {
+  const corpDeckPressure = input.playerView.opponent.deckCount <= 6;
+  const runnerMatchPressure =
+    input.playerView.own.agendaPoints >=
+    Math.max(1, input.playerView.agendaPointsToWin - 2);
+  return {
+    active: corpDeckPressure || runnerMatchPressure,
+    corpDeckPressure,
+    runnerMatchPressure,
+  };
+}
+
+function unresolvedRandomCorpDiscard(input: AiDecisionInput): boolean {
+  const history = mergedPublicHistory(input);
+  const lastArchivesAccessIndex = findLastHistoryIndex(history, (event) =>
+    isArchivesAccessEvent(event),
+  );
+  return history.slice(lastArchivesAccessIndex + 1).some((event) => {
+    const payload = event.publicPayload;
+    return (
+      payload.actor === "corp" &&
+      (payload.hiddenZoneAction === "hq_random_discard" ||
+        payload.randomizedByCockroach === true ||
+        (typeof payload.cardImplementationRandomHqDiscardCost === "number" &&
+          payload.cardImplementationRandomHqDiscardCost > 0))
+    );
+  });
 }
