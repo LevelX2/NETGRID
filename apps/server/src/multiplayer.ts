@@ -778,8 +778,8 @@ export class MultiplayerService {
     const mode = input.playMode === "human_vs_ai" ? (resolvedHumanSide === "runner" ? "human_runner_vs_corp_ai" : "human_corp_vs_runner_ai") : input.mode ?? "human_vs_human";
     const hostSide = mode === "human_runner_vs_corp_ai" || mode === "ai_vs_ai" ? "runner" : mode === "human_corp_vs_runner_ai" ? "corp" : input.hostSide === "random" ? deterministicHostSide(seed) : input.hostSide;
     const joinSide = opposite(hostSide);
-    const runnerPlayer = mode === "ai_vs_ai" ? "player_a" : input.series?.runnerPlayer ?? (hostSide === "runner" ? "player_a" : "player_b");
-    const corpPlayer = mode === "ai_vs_ai" ? "player_a" : input.series?.corpPlayer ?? (hostSide === "corp" ? "player_a" : "player_b");
+    const runnerPlayer = input.series?.runnerPlayer ?? (mode === "ai_vs_ai" || hostSide === "runner" ? "player_a" : "player_b");
+    const corpPlayer = input.series?.corpPlayer ?? (mode === "ai_vs_ai" ? "player_b" : hostSide === "corp" ? "player_a" : "player_b");
     const aiPlayer = aiPlayerForMode(mode);
     const aiDeckPolicy = aiPlayer ? input.aiDeckPolicy ?? "selected" : undefined;
     const aiPacingMode = input.aiPacingMode ?? (aiPlayer ? "paced" : undefined);
@@ -789,7 +789,7 @@ export class MultiplayerService {
     const hostSessionToken = generateToken();
     const hostReconnectToken = generateToken();
     const joinToken = mode === "human_vs_human" ? generateToken() : undefined;
-    const matchFormat = mode === "ai_vs_ai" ? "rules_match" : normalizeMatchFormat(input.settings?.matchFormat);
+    const matchFormat = normalizeMatchFormat(input.settings?.matchFormat);
     const cardPool = normalizeMatchCardPool(input.settings?.cardPool);
     const playerClockConfig = mode === "ai_vs_ai" ? { mode: "none" as const } : normalizePlayerClockConfig(input.settings?.playerClock);
     const countdownSeconds = normalizeCountdownSeconds(input.countdownSeconds);
@@ -903,7 +903,17 @@ export class MultiplayerService {
         ...(lobbyPayload.startLobby ? { lobby: lobbyPayload.startLobby } : {})
       };
     }
-    const participantDecks = resolveParticipantDeckSetup(input, { seed, ...(aiPlayer ? { aiPlayer } : {}), ...(aiDeckPolicy ? { aiDeckPolicy } : {}), cardPool });
+    const participantDeckInput = mode === "ai_vs_ai" && !input.participantBDecks && input.participantADecks
+      ? { ...input, participantBDecks: input.participantADecks }
+      : input;
+    const deckResolutionPolicy = input.series && aiDeckPolicy ? "selected" : aiDeckPolicy;
+    const participantDecks = resolveParticipantDeckSetup(participantDeckInput, {
+      seed,
+      ...(aiPlayer ? { aiPlayer } : {}),
+      ...(mode === "ai_vs_ai" ? { aiPlayers: ["player_a", "player_b"] as SeriesPlayerSlot[] } : {}),
+      ...(deckResolutionPolicy ? { aiDeckPolicy: deckResolutionPolicy } : {}),
+      cardPool
+    });
     const deckSetup = deckSetupForParticipants(participantDecks, { runnerPlayer, corpPlayer });
     const settings: MatchSettings = {
       agendaPointsToWin: agendaPointsToWinFor(matchFormat, input.settings?.agendaPointsToWin),
@@ -1066,10 +1076,12 @@ export class MultiplayerService {
 
       const requesterPlayer = seriesPlayerForSide(series, input.side);
       const opponentPlayer = oppositeSeriesPlayer(requesterPlayer);
-      const nextHostSide = opposite(input.side);
+      const nextHostSide = record.match.mode === "ai_vs_ai" ? "runner" : opposite(input.side);
       const nextGameNumber = series.gameNumber + 1;
       const nextMode = nextModeForSideSwap(record.match.mode);
       const aiDifficulty = record.match.aiControllers?.runner?.difficulty ?? record.match.aiControllers?.corp?.difficulty ?? "normal";
+      const nextRunnerPlayer = record.match.mode === "ai_vs_ai" ? series.corpPlayer : nextHostSide === "runner" ? requesterPlayer : opponentPlayer;
+      const nextCorpPlayer = record.match.mode === "ai_vs_ai" ? series.runnerPlayer : nextHostSide === "corp" ? requesterPlayer : opponentPlayer;
       const participantDecks = participantDeckInputsForRecord(record);
       const next = await this.createMatch({
         hostSide: nextHostSide,
@@ -1078,6 +1090,12 @@ export class MultiplayerService {
         mode: nextMode,
         ...(nextMode === "human_runner_vs_corp_ai" ? { corpDifficulty: aiDifficulty } : {}),
         ...(nextMode === "human_corp_vs_runner_ai" ? { runnerDifficulty: aiDifficulty } : {}),
+        ...(nextMode === "ai_vs_ai"
+          ? {
+              runnerDifficulty: record.match.aiControllers?.corp?.difficulty ?? "normal",
+              corpDifficulty: record.match.aiControllers?.runner?.difficulty ?? "normal"
+            }
+          : {}),
         ...(record.match.aiPacingMode ? { aiPacingMode: record.match.aiPacingMode } : {}),
         ...(record.match.aiTraceMode ? { aiTraceMode: record.match.aiTraceMode } : {}),
         ...(typeof record.match.discoverableInLan === "boolean" ? { discoverableInLan: record.match.discoverableInLan } : {}),
@@ -1089,8 +1107,8 @@ export class MultiplayerService {
           seriesId: series.seriesId,
           gameNumber: nextGameNumber,
           gamesPlanned: series.gamesPlanned,
-          runnerPlayer: nextHostSide === "runner" ? requesterPlayer : opponentPlayer,
-          corpPlayer: nextHostSide === "corp" ? requesterPlayer : opponentPlayer,
+          runnerPlayer: nextRunnerPlayer,
+          corpPlayer: nextCorpPlayer,
           previousResults: series.results,
           previousMatchId: record.match.matchId
         }
@@ -3762,6 +3780,7 @@ function singleGameMatchPointsFor(winner: Winner, side: Side, agendaPoints: numb
 }
 
 function publicDisplayNameForSeriesPlayer(record: StoredMatch, player: SeriesPlayerSlot): string {
+  if (record.match.mode === "ai_vs_ai") return player === "player_a" ? "KI A" : "KI B";
   const series = record.match.series;
   if (!series) return player === "player_a" ? "Spieler A" : "Spieler B";
   if (series.runnerPlayer === player) return publicDisplayNameForSide(record, "runner");
@@ -3779,7 +3798,7 @@ function publicDisplayNameForSide(record: StoredMatch, side: Side): string {
 function seriesSummaryFor(record: StoredMatch, viewerSide: Side): SeriesResultSummary {
   const series = record.match.series;
   if (!series) throw new Error("series_missing");
-  const viewerPlayer = seriesPlayerForSide(series, viewerSide);
+  const viewerPlayer = record.match.mode === "ai_vs_ai" ? "player_a" : seriesPlayerForSide(series, viewerSide);
   const wins = { player_a: 0, player_b: 0 };
   const agendaPoints = { player_a: 0, player_b: 0 };
   const matchPoints = { player_a: 0, player_b: 0 };
@@ -4026,6 +4045,7 @@ function opposite(side: Side): Side {
 function nextModeForSideSwap(mode: MatchMode): MatchMode {
   if (mode === "human_runner_vs_corp_ai") return "human_corp_vs_runner_ai";
   if (mode === "human_corp_vs_runner_ai") return "human_runner_vs_corp_ai";
+  if (mode === "ai_vs_ai") return "ai_vs_ai";
   return "human_vs_human";
 }
 

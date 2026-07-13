@@ -4,6 +4,7 @@ import { Activity, Bot, Flag, Layers3, Link2 } from "lucide-react";
 
 import {
   MATCH_CARD_POOL_OPTIONS,
+  MATCH_FORMAT_OPTIONS,
   matchCardPoolCardLabel,
   matchFormatCardLabel,
   playModeCardLabel,
@@ -57,10 +58,7 @@ export function MatchStartChoiceSections({
       <section className="matchStartSection" aria-label="Spielziel">
         <p className="eyebrow">Format</p>
         <div className="choiceCardGrid formatCards">
-          {(playMode === "ai_vs_ai"
-            ? (["rules_match"] as MatchFormatSelection[])
-            : (["rules_match", "two_game_side_swap"] as MatchFormatSelection[])
-          ).map((option) => {
+          {MATCH_FORMAT_OPTIONS.map((option) => {
             const label = matchFormatCardLabel(option);
             return (
               <button

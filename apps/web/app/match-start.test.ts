@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { aiDeckReadinessLabel, deriveMatchStart, matchCardPoolCardLabel, matchFormatCardLabel, matchStartLobbyBlocksSetup, matchStartPlayerClockLabel, matchStartSummary, parseJoinLinkInput, playModeCardLabel } from "./match-start";
+import { MATCH_FORMAT_OPTIONS, aiDeckReadinessLabel, deriveMatchStart, matchCardPoolCardLabel, matchFormatCardLabel, matchStartLobbyBlocksSetup, matchStartPlayerClockLabel, matchStartSummary, parseJoinLinkInput, playModeCardLabel } from "./match-start";
 
 describe("V1.0.4 match start derivation", () => {
   it("keeps Human-vs-Human side assignment server-readable", () => {
@@ -41,6 +41,7 @@ describe("V1.0.4 match start derivation", () => {
       hostSide: "runner",
       createRequest: { mode: "ai_vs_ai", hostSide: "runner" }
     });
+    expect(MATCH_FORMAT_OPTIONS).toEqual(["rules_match", "two_game_side_swap"]);
   });
 
   it("labels V1.1.2 play mode and format cards without changing technical modes", () => {

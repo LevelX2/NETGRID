@@ -37,6 +37,7 @@ export function MatchStartAdvancedOptions({
   isHumanVsHuman,
   isHumanVsAi,
   isAiVsAi,
+  isAiVsAiSeries,
   hasAiOpponent,
   matchCardPool,
   humanSideSelection,
@@ -85,6 +86,7 @@ export function MatchStartAdvancedOptions({
   isHumanVsHuman: boolean;
   isHumanVsAi: boolean;
   isAiVsAi: boolean;
+  isAiVsAiSeries: boolean;
   hasAiOpponent: boolean;
   matchCardPool: MatchCardPoolSelection;
   humanSideSelection: HumanSideSelection;
@@ -250,11 +252,11 @@ export function MatchStartAdvancedOptions({
           </label>
         ) : null}
       </div>
-      {(isHumanVsHuman && testSetupMode) || (isHumanVsAi && aiDeckPolicy === "selected") ? (
+      {(isHumanVsHuman && testSetupMode) || ((isHumanVsAi || isAiVsAiSeries) && aiDeckPolicy === "selected") ? (
         <div className="deckSlotGrid advancedDeckSlots">
           <>
             <DeckSlotSelect
-              label={hasAiOpponent ? "KI · Runner-Deck" : "Teilnehmer B · Runner-Deck"}
+              label={isAiVsAiSeries ? "KI B · Runner-Deck" : hasAiOpponent ? "KI · Runner-Deck" : "Teilnehmer B · Runner-Deck"}
               side="runner"
               snapshots={runnerSnapshots}
               localDecks={localDecks.filter((deck) => deck.side === "runner")}
@@ -267,7 +269,7 @@ export function MatchStartAdvancedOptions({
               onLocalDeck={onSelectedParticipantBRunnerLocalDeckId}
             />
             <DeckSlotSelect
-              label={hasAiOpponent ? "KI · Korp-Deck" : "Teilnehmer B · Korp-Deck"}
+              label={isAiVsAiSeries ? "KI B · Korp-Deck" : hasAiOpponent ? "KI · Korp-Deck" : "Teilnehmer B · Korp-Deck"}
               side="corp"
               snapshots={corpSnapshots}
               localDecks={localDecks.filter((deck) => deck.side === "corp")}

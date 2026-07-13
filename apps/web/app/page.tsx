@@ -31,7 +31,7 @@ import {
   X,
   ZoomIn,
 } from "lucide-react";
-import { Fragment, useEffect, useId, useMemo, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type {
   CSSProperties,
@@ -83,6 +83,7 @@ import {
   accessPresentationOwnsActionCue,
   coalesceAccessActionCues,
   interactionPresentationBlocksAi,
+  observerAccessAutoDismissMs,
 } from "./access-presentation";
 import {
   appendPendingAccessPresentationEvents,
@@ -819,7 +820,6 @@ export default function Page() {
 
   const updatePlayMode = (nextPlayMode: PlayMode) => {
     setPlayMode(nextPlayMode);
-    if (nextPlayMode === "ai_vs_ai") setMatchFormat("rules_match");
   };
 
   const updateCardPreviewCollapsed = (collapsed: boolean) => {
@@ -1813,8 +1813,8 @@ export default function Page() {
   const isHumanVsHuman = playMode === "human_vs_human";
   const isHumanVsAi = playMode === "human_vs_ai";
   const isAiVsAiMatch = session?.mode === "ai_vs_ai";
-  const effectiveStartMatchFormat =
-    gameMode === "ai_vs_ai" ? "rules_match" : matchFormat;
+  const effectiveStartMatchFormat = matchFormat;
+  const isAiVsAiStartSeries = gameMode === "ai_vs_ai" && effectiveStartMatchFormat === "two_game_side_swap";
   const aiTurnPresentation = effectiveAiTurnPresentation(payload);
   const hasPendingAiCue =
     currentActionCue?.source === "ai" ||
@@ -1881,8 +1881,14 @@ export default function Page() {
     gameMode === "ai_vs_ai"
       ? aiDeckPolicyUsesPrimaryDeckSlots
         ? [
-            { label: "Runner-KI", metadata: participantARunnerMetadata },
-            { label: "Korp-KI", metadata: participantACorpMetadata },
+            { label: isAiVsAiStartSeries ? "KI A · Runner" : "Runner-KI", metadata: participantARunnerMetadata },
+            { label: isAiVsAiStartSeries ? "KI A · Korp" : "Korp-KI", metadata: participantACorpMetadata },
+            ...(isAiVsAiStartSeries && aiDeckPolicy === "selected"
+              ? [
+                  { label: "KI B · Runner", metadata: participantBRunnerMetadata },
+                  { label: "KI B · Korp", metadata: participantBCorpMetadata }
+                ]
+              : [])
           ]
         : []
       : [
@@ -2202,6 +2208,11 @@ export default function Page() {
     !matchEnded &&
     !dismissedAccessEventIds.includes(accessReveal.eventId),
   );
+  const dismissAccessPresentation = useCallback((eventId: string) => {
+    setPendingAccessPresentationEvents((events) => dismissPendingAccessPresentationEvent(events, eventId));
+    setDismissedAccessEventIds((eventIds) => eventIds.includes(eventId) ? eventIds : [...eventIds, eventId].slice(-30));
+    setCurrentDamageImpact((current) => current?.eventId === eventId ? null : current);
+  }, []);
   const accessDamageImpact =
     currentDamageImpact &&
     accessReveal?.kind === "access" &&
@@ -3003,6 +3014,27 @@ export default function Page() {
   }, [accessReveal?.eventId, showAccessReveal]);
 
   useEffect(() => {
+    if (!isAiVsAiMatch || !showAccessReveal || !accessReveal) return;
+    const autoDismissMs = observerAccessAutoDismissMs({
+      observerMode: isAiVsAiMatch,
+      pacingMode: localAiPacingMode,
+      configuredAutoDismissMs: actionCueAutoDismissMs
+    });
+    if (autoDismissMs === null) return;
+    const eventId = accessReveal.eventId;
+    const timeout = window.setTimeout(() => dismissAccessPresentation(eventId), autoDismissMs);
+    return () => window.clearTimeout(timeout);
+  }, [
+    accessReveal?.eventId,
+    accessReveal?.outcomeStatus,
+    actionCueAutoDismissMs,
+    dismissAccessPresentation,
+    isAiVsAiMatch,
+    localAiPacingMode,
+    showAccessReveal
+  ]);
+
+  useEffect(() => {
     if (
       interactionPresentationBlocked ||
       showAccessReveal ||
@@ -3311,7 +3343,7 @@ export default function Page() {
         selectedCorpLocalDeckId,
       ),
       ...((isHumanVsHuman && testSetupMode) ||
-      (isHumanVsAi && aiDeckPolicy === "selected")
+      ((isHumanVsAi || isAiVsAiStartSeries) && aiDeckPolicy === "selected")
         ? {
             participantBDecks: await deckPairPayload(
               participantBRunnerDeckSource,
@@ -5991,19 +6023,7 @@ export default function Page() {
                 onAction={submitAction}
                 onChoiceOption={submitChoiceOption}
                 onDamageDismiss={() => setCurrentDamageImpact(null)}
-                onDismiss={() => {
-                  setPendingAccessPresentationEvents((events) =>
-                    dismissPendingAccessPresentationEvent(
-                      events,
-                      accessReveal.eventId,
-                    ),
-                  );
-                  setDismissedAccessEventIds((eventIds) =>
-                    eventIds.includes(accessReveal.eventId)
-                      ? eventIds
-                      : [...eventIds, accessReveal.eventId].slice(-30),
-                  );
-                }}
+                onDismiss={() => dismissAccessPresentation(accessReveal.eventId)}
               />
             ) : null}
             {activeMatchIsGame && showExposeReview && exposeReview ? (

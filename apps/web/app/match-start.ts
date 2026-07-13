@@ -6,6 +6,7 @@ export type HumanSideSelection = "runner" | "corp" | "random";
 export type HumanAiSideSelection = "runner" | "corp" | "random";
 export type TechnicalMatchMode = "human_vs_human" | "human_runner_vs_corp_ai" | "human_corp_vs_runner_ai" | "ai_vs_ai";
 export type MatchFormatSelection = "rules_match" | "two_game_side_swap";
+export const MATCH_FORMAT_OPTIONS: MatchFormatSelection[] = ["rules_match", "two_game_side_swap"];
 export const MATCH_CARD_POOL_OPTIONS = ["originalset", "originalset_classic", "originalset_proteus", "originalset_classic_proteus"] as const;
 export type MatchCardPoolSelection = (typeof MATCH_CARD_POOL_OPTIONS)[number];
 export type AiDeckPolicySelection = "selected" | "fixed" | "seeded_random" | "same_as_participant_a";

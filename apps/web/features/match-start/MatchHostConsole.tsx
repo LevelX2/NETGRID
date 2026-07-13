@@ -180,6 +180,7 @@ export function MatchHostConsole({
   onSelectedParticipantBRunnerLocalDeckId(deckId: string): void;
   onSelectedParticipantBCorpLocalDeckId(deckId: string): void;
 }) {
+  const isAiVsAiSeries = gameMode === "ai_vs_ai" && matchFormat === "two_game_side_swap";
   return (
     <div className="matchStartConsole">
       <MatchStartChoiceSections
@@ -207,7 +208,7 @@ export function MatchHostConsole({
         ) : null}
         {gameMode === "ai_vs_ai" ? (
           <label>
-            Runner-KI
+            {isAiVsAiSeries ? "KI A · startet als Runner" : "Runner-KI"}
             <select value={runnerDifficulty} onChange={(event) => onRunnerDifficulty(event.target.value as AiDifficulty)}>
               <option value="easy">Easy</option>
               <option value="normal">Normal</option>
@@ -217,7 +218,7 @@ export function MatchHostConsole({
         ) : null}
         {gameMode === "ai_vs_ai" ? (
           <label>
-            Korp-KI
+            {isAiVsAiSeries ? "KI B · startet als Korp" : "Korp-KI"}
             <select value={corpDifficulty} onChange={(event) => onCorpDifficulty(event.target.value as AiDifficulty)}>
               <option value="easy">Easy</option>
               <option value="normal">Normal</option>
@@ -229,7 +230,7 @@ export function MatchHostConsole({
       {gameMode !== "ai_vs_ai" || aiDeckPolicyUsesPrimaryDeckSlots ? (
         <div className="deckSlotGrid">
           <DeckSlotSelect
-            label={gameMode === "ai_vs_ai" ? "Runner-KI · Runner-Deck" : "Dein Runner-Deck"}
+            label={gameMode === "ai_vs_ai" ? `${isAiVsAiSeries ? "KI A" : "Runner-KI"} · Runner-Deck` : "Dein Runner-Deck"}
             side="runner"
             snapshots={runnerSnapshots}
             localDecks={localDecks.filter((deck) => deck.side === "runner")}
@@ -241,7 +242,7 @@ export function MatchHostConsole({
             onLocalDeck={onSelectedRunnerLocalDeckId}
           />
           <DeckSlotSelect
-            label={gameMode === "ai_vs_ai" ? "Korp-KI · Korp-Deck" : "Dein Korp-Deck"}
+            label={gameMode === "ai_vs_ai" ? `${isAiVsAiSeries ? "KI A" : "Korp-KI"} · Korp-Deck` : "Dein Korp-Deck"}
             side="corp"
             snapshots={corpSnapshots}
             localDecks={localDecks.filter((deck) => deck.side === "corp")}
@@ -270,6 +271,7 @@ export function MatchHostConsole({
         isHumanVsHuman={isHumanVsHuman}
         isHumanVsAi={isHumanVsAi}
         isAiVsAi={gameMode === "ai_vs_ai"}
+        isAiVsAiSeries={isAiVsAiSeries}
         hasAiOpponent={hasAiOpponent}
         matchCardPool={matchCardPool}
         humanSideSelection={humanSideSelection}

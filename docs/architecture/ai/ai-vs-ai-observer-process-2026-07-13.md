@@ -53,8 +53,12 @@ Konservative Annahmen:
 - `Einzelschritt` ist zugleich der pausierte Zustand. `Getaktet` und `Schnell`
   steuern nur die lokale Verzögerung; auch `Schnell` sendet ausschließlich
   einzelne AI-Advance-Anforderungen.
-- `Regelmatch` ist der verbindliche erste Slice. Eine KI-vs-KI-Matchserie wird
-  nicht stillschweigend simuliert und bleibt außerhalb dieses Prozesses.
+- `Regelmatch` und `Matchserie` sind auswählbar. In der Matchserie werden KI A
+  und KI B im zweiten vollständig beobachtbaren Spiel regelkonform den Seiten
+  gewechselt; Deckpaar und Schwierigkeit bleiben der jeweiligen KI zugeordnet.
+- Sichtbare Zugriffsfenster bleiben im Einzelschrittmodus bis zur Bestätigung
+  offen. Im getakteten und schnellen Beobachtungsmodus schließen sie nach der
+  sichtbaren Präsentationszeit automatisch, damit die Simulation weiterläuft.
 
 ## Gesamtziel
 
@@ -94,7 +98,7 @@ verwendet.
 - Kein menschlicher Eingriff in KI-`LegalActions`.
 - Keine neue Engine-Aktion, kein geändertes Siegkriterium und kein künstlicher
   Draw nach einer festen Aktionszahl.
-- Keine neue Matchserienlogik für zwei KI-Seiten.
+- Keine von der vorhandenen Zwei-Spiele-Matchserie abweichende Serienwertung.
 
 ## Controller-Invarianten
 
