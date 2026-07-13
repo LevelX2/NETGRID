@@ -4,7 +4,12 @@ import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { resetTacticalPlanMemory } from "../../plans/plan-memory";
 import { buildAiDecisionInput } from "../../runtime/ai-decision-input";
 import {
+  getStrategicIntentMemorySnapshot,
+  type StrategicIntentMemorySnapshot,
+} from "../../strategic-intent-memory";
+import {
   type AiDecisionCheckpointActionMatcher,
+  type AiDecisionCheckpointExpectationV1,
   type AiDecisionCheckpointErrorCode,
   type AiDecisionCheckpointV1,
 } from "./checkpoint-types";
@@ -18,6 +23,7 @@ export type AiDecisionCheckpointRunResult = {
   input: AiDecisionInput;
   decision?: AiDecision;
   selectedAction?: LegalAction;
+  strategicIntent?: StrategicIntentMemorySnapshot;
 };
 
 export function runAiDecisionCheckpoint(
@@ -55,6 +61,10 @@ export function runAiDecisionCheckpoint(
   }
   const input = buildAiDecisionInput(state, fixture.actor, options);
   const decision = chooseAiAction(input);
+  const strategicIntent = getStrategicIntentMemorySnapshot(
+    input,
+    fixture.deckSnapshot.deckSnapshotId,
+  );
   const selectedAction = input.legalActions.find(
     (action) => action.actionId === decision.actionId,
   );
@@ -65,6 +75,7 @@ export function runAiDecisionCheckpoint(
       message: `Selected action is not legal: ${decision.actionId}`,
       input,
       decision,
+      ...(strategicIntent ? { strategicIntent } : {}),
     };
   }
   const forbidden = fixture.expectation.forbiddenActions?.some((matcher) =>
@@ -79,7 +90,16 @@ export function runAiDecisionCheckpoint(
     decision,
     fixture.expectation.discardChoice,
   );
-  if (forbidden || !accepted || !discardChoiceAccepted) {
+  const strategicIntentAccepted = strategicIntentExpectationMatches(
+    strategicIntent,
+    fixture.expectation.strategicIntent,
+  );
+  if (
+    forbidden ||
+    !accepted ||
+    !discardChoiceAccepted ||
+    !strategicIntentAccepted
+  ) {
     return {
       ok: false,
       code: "behavior_regression",
@@ -87,6 +107,7 @@ export function runAiDecisionCheckpoint(
       input,
       decision,
       selectedAction,
+      ...(strategicIntent ? { strategicIntent } : {}),
     };
   }
   return {
@@ -95,7 +116,27 @@ export function runAiDecisionCheckpoint(
     input,
     decision,
     selectedAction,
+    ...(strategicIntent ? { strategicIntent } : {}),
   };
+}
+
+function strategicIntentExpectationMatches(
+  actual: StrategicIntentMemorySnapshot | undefined,
+  expectation: AiDecisionCheckpointExpectationV1["strategicIntent"] | undefined,
+): boolean {
+  if (!expectation) return true;
+  if (!actual) return false;
+  const strategyId = actual.primaryStrategyId;
+  const family = actual.state.primaryStrategy.family;
+  const targetKind = actual.state.targetVector.kind;
+  return (
+    (!expectation.acceptablePrimaryStrategyIds?.length ||
+      expectation.acceptablePrimaryStrategyIds.includes(strategyId)) &&
+    !expectation.forbiddenPrimaryStrategyIds?.includes(strategyId) &&
+    (!expectation.acceptableFamilies?.length ||
+      expectation.acceptableFamilies.includes(family)) &&
+    !expectation.forbiddenTargetKinds?.includes(targetKind)
+  );
 }
 
 function discardChoiceExpectationMatches(

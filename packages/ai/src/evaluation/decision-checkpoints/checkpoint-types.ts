@@ -6,6 +6,10 @@ import type {
 } from "@netgrid/shared";
 
 import type { AiDeckStrategyDeckSnapshot } from "../../deck-strategy-snapshot";
+import type {
+  StrategicIntentFamily,
+  StrategicTargetVector,
+} from "../../strategic-intent-state";
 import type { AiRuntimeCheckpointV1 } from "./runtime-checkpoint";
 
 export const AI_DECISION_CHECKPOINT_SCHEMA_VERSION =
@@ -24,6 +28,12 @@ export type AiDecisionCheckpointExpectationV1 = {
   discardChoice?: {
     mustRetainDefinitionIds?: string[];
     mustDiscardDefinitionIds?: string[];
+  };
+  strategicIntent?: {
+    acceptablePrimaryStrategyIds?: string[];
+    forbiddenPrimaryStrategyIds?: string[];
+    acceptableFamilies?: StrategicIntentFamily[];
+    forbiddenTargetKinds?: StrategicTargetVector["kind"][];
   };
 };
 

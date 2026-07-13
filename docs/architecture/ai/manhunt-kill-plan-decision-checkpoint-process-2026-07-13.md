@@ -2,9 +2,11 @@
 
 ## Status
 
-P0 aktiv. Die fachliche Analyse von `match_606a546d0ba02826` ist freigegeben;
-vor der ersten Verhaltensänderung werden alle weiterhin reproduzierbaren
-Fehler als rote spielgleiche Checkpoints mit grünen Gegenproben versioniert.
+P0 und P1 abgeschlossen. Vier Fehler sind auf dem aktuellen
+Produktions-Chooser als `behavior_regression` rot reproduziert; zwei historische
+Abwurffälle sind bereits grün und bleiben ohne neuen Fix als Regressionstests
+erhalten. Die roten Zieltests und sieben grünen Kontrollen sind vor der ersten
+Verhaltensänderung versioniert. P2 hat noch nicht begonnen.
 
 ## Quelle und Arbeitsbereich
 

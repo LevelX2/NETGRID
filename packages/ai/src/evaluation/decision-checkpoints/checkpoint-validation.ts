@@ -68,7 +68,8 @@ export function validateAiDecisionCheckpoint(
   if (
     !fixture.expectation.acceptableActions?.length &&
     !fixture.expectation.forbiddenActions?.length &&
-    !fixture.expectation.discardChoice
+    !fixture.expectation.discardChoice &&
+    !fixture.expectation.strategicIntent
   ) {
     throw new AiDecisionCheckpointValidationError(
       "fixture_invalid",

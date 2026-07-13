@@ -46,6 +46,32 @@ describe("AI decision checkpoints", () => {
     ).toBe(true);
   });
 
+  it("matches stable strategic-intent expectations after the productive chooser", () => {
+    const baseline = runAiDecisionCheckpoint(fixture());
+    const primaryStrategyId = baseline.strategicIntent?.primaryStrategyId;
+    const family = baseline.strategicIntent?.state.primaryStrategy.family;
+    if (!primaryStrategyId || !family) {
+      throw new Error("Missing strategic intent in checkpoint smoke fixture");
+    }
+
+    const accepted = fixture();
+    accepted.expectation.strategicIntent = {
+      acceptablePrimaryStrategyIds: [primaryStrategyId],
+      acceptableFamilies: [family],
+      forbiddenTargetKinds: ["survival"],
+    };
+    expect(runAiDecisionCheckpoint(accepted)).toMatchObject({ ok: true });
+
+    const rejected = fixture();
+    rejected.expectation.strategicIntent = {
+      forbiddenPrimaryStrategyIds: [primaryStrategyId],
+    };
+    expect(runAiDecisionCheckpoint(rejected)).toMatchObject({
+      ok: false,
+      code: "behavior_regression",
+    });
+  });
+
   it("roundtrips tactical runtime memory fail-closed by match context", () => {
     const current = fixture();
     const input = buildInput(current.engine.testOnlyGameState);

@@ -34,6 +34,36 @@
         "schemaVersion": { "const": "ai-runtime-checkpoint-v1" }
       }
     },
-    "expectation": { "type": "object" }
+    "expectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "acceptableActions": { "type": "array" },
+        "forbiddenActions": { "type": "array" },
+        "discardChoice": { "type": "object" },
+        "strategicIntent": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "acceptablePrimaryStrategyIds": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "forbiddenPrimaryStrategyIds": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "acceptableFamilies": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "forbiddenTargetKinds": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
   }
 }
