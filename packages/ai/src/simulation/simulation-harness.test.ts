@@ -2,6 +2,29 @@ import { describe, expect, it } from "vitest";
 import { simulateAiGame, summarizeDoctrineQualityMetrics } from "../simulation";
 
 describe("AI simulation harness", () => {
+  it("captures defensive exact-state copies before requested selfplay decisions", () => {
+    const captures: Array<{ actionIndex: number; stateVersion: number }> = [];
+    const result = simulateAiGame({
+      seed: "ai-sim-checkpoint-capture",
+      maxActions: 3,
+      testOnlyDecisionCheckpointCapture: {
+        actionIndices: [1],
+        capture: (snapshot) => {
+          captures.push({
+            actionIndex: snapshot.actionIndex,
+            stateVersion: snapshot.state.stateVersion,
+          });
+          snapshot.state.stateVersion = 999;
+          snapshot.input.legalActions.splice(0);
+        },
+      },
+    });
+
+    expect(captures).toEqual([{ actionIndex: 1, stateVersion: 1 }]);
+    expect(result.actions).toBe(3);
+    expect(result.errors).toEqual([]);
+  });
+
   it("runs deterministic AI-vs-AI simulations and replays the event log", () => {
     const first = simulateAiGame({ seed: "ai-sim-golden", maxActions: 80 });
     const second = simulateAiGame({ seed: "ai-sim-golden", maxActions: 80 });

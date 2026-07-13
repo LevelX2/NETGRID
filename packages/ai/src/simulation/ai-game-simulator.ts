@@ -259,6 +259,18 @@ function simulateAiGame(
       );
       break;
     }
+    if (
+      config.testOnlyDecisionCheckpointCapture?.actionIndices.includes(index)
+    ) {
+      config.testOnlyDecisionCheckpointCapture.capture({
+        seed,
+        actionIndex: index,
+        side,
+        state: structuredClone(state),
+        input: structuredClone(input),
+        deckSnapshot: structuredClone(deckSnapshots[side]),
+      });
+    }
     const decision = chooseDecisionForSimulation(
       side,
       input,

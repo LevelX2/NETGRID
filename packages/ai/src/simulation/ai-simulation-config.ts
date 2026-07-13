@@ -1,10 +1,23 @@
 import type {
+  AiDecisionInput,
   AiDifficulty,
   DeckDefinition,
   DeckPublicMetadata,
+  GameState,
+  Side,
 } from "@netgrid/shared";
+import type { AiDeckStrategyDeckSnapshot } from "../deck-strategy-snapshot";
 import type { AiDecisionRuntimeOptions } from "../runtime/choose-ai-action";
 import type { SimulationControllerMode, SimulationWorld } from "./simulation-types";
+
+export type AiSimulationDecisionCheckpointCapture = {
+  seed: string;
+  actionIndex: number;
+  side: Side;
+  state: GameState;
+  input: AiDecisionInput;
+  deckSnapshot: AiDeckStrategyDeckSnapshot;
+};
 
 export type AiSimulationConfig = {
   seed?: string;
@@ -46,4 +59,13 @@ export type AiSimulationConfig = {
     seed: string;
     actionIndices: number[];
   }>;
+  /**
+   * Test- und Diagnosehaken zum Einfrieren des exakten Zustands unmittelbar
+   * vor einer Selfplay-Entscheidung. Die übergebenen Werte sind defensive
+   * Kopien und fließen nie in das redigierte Simulationsergebnis ein.
+   */
+  testOnlyDecisionCheckpointCapture?: {
+    actionIndices: number[];
+    capture: (snapshot: AiSimulationDecisionCheckpointCapture) => void;
+  };
 };

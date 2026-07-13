@@ -41,7 +41,7 @@ export type AiDecisionCheckpointV1 = {
   schemaVersion: typeof AI_DECISION_CHECKPOINT_SCHEMA_VERSION;
   checkpointId: string;
   source: {
-    kind: "captured_match" | "synthetic_companion";
+    kind: "captured_match" | "captured_selfplay" | "synthetic_companion";
     findingId: string;
     capturedAt: string;
     matchId?: string;
