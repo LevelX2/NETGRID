@@ -81,7 +81,9 @@ export function buildSidePayload(
     side,
     playerView,
     legalActions:
-      record.match.status === "active" ? getLegalActions(record.gameState, side) : [],
+      record.match.status === "active" && !deps.isAiSide(side)
+        ? getLegalActions(record.gameState, side)
+        : [],
     eventTail,
     opponentStatus: {
       side: opponentSide,
