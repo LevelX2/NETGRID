@@ -139,6 +139,7 @@ export function buildAiDecisionInput(
     legalActions,
     strategyProfile: ownDeckStrategyProfile,
     deckCapabilities: ownDeckCapabilities,
+    deckSnapshot: ownDeckSnapshot,
   });
   const ownStrategicIntentState = buildStrategicIntentState({
     side,

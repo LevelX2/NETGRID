@@ -150,12 +150,46 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
     ).toBeGreaterThan(70);
     expect(profile.corpProfile?.punishProfile.tagSources).toBeGreaterThan(0);
     expect(profile.corpProfile?.punishProfile.tagPayoff).toBeGreaterThan(0);
-    expect(
-      profile.strategyScores["corp.tag_trace_punish"]?.runtimeStatus,
-    ).toBe("productive");
+    expect(profile.strategyScores["corp.tag_trace_punish"]?.runtimeStatus).toBe(
+      "productive",
+    );
     expect(
       profile.strategyScores["corp.tag_trace_punish"]?.runtimeBlockers,
     ).toEqual([]);
+  });
+
+  it("ranks a dense tag-damage line above Fast Advance in a low-agenda Corp deck", () => {
+    const profile = buildDeckStrategyProfile({
+      deckSnapshotId: "manhunt-low-agenda-kill-line",
+      side: "corp",
+      cards: [
+        { cardId: "onr_v1_196_corporate-war", quantity: 3 },
+        { cardId: "onr_v1_223_banpei", quantity: 2 },
+        { cardId: "onr_v1_237_data-wall", quantity: 3 },
+        { cardId: "onr_v1_244_filter", quantity: 3 },
+        { cardId: "onr_v1_252_keeper", quantity: 2 },
+        { cardId: "onr_v1_261_quandary", quantity: 3 },
+        { cardId: "onr_v1_275_vacuum-link", quantity: 2 },
+        { cardId: "onr_v1_279_wall-of-static", quantity: 2 },
+        { cardId: "onr_v1_283_audit-of-call-records", quantity: 3 },
+        { cardId: "onr_v1_284_chance-observation", quantity: 3 },
+        { cardId: "onr_v1_285_closed-accounts", quantity: 3 },
+        { cardId: "onr_v1_299_power-grid-overload", quantity: 1 },
+        { cardId: "onr_v1_302_scorched-earth", quantity: 3 },
+        { cardId: "onr_v1_304_systematic-layoffs", quantity: 3 },
+        { cardId: "onr_v1_307_urban-renewal", quantity: 3 },
+        { cardId: "onr_v1_309_bbs-whispering-campaign", quantity: 3 },
+        { cardId: "onr_v1_313_city-surveillance", quantity: 2 },
+        { cardId: "onr_v1_327_i-got-a-rock", quantity: 1 },
+      ],
+    });
+
+    expect(profile.primaryStrategies[0]).toBe("corp.tag_trace_punish");
+    expect(
+      profile.strategyScores["corp.fast_advance"]?.finalScore,
+    ).toBeLessThan(
+      profile.strategyScores["corp.tag_trace_punish"]?.finalScore ?? 0,
+    );
   });
 
   it("detects Corp remote-scoring evidence from remote protection and safe lineSupport anchors", () => {

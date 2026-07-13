@@ -390,7 +390,11 @@ export function buildDeckStrategyProfile(
     );
     const anchorScore = scoreAnchors(anchorEvidence);
     const support = scoreSupport(goal, stats, anchorEvidence);
-    const finalScore = scoreFinal(goal, anchorScore, support.score);
+    const finalScore = adjustCorpWinConditionScore(
+      goal,
+      stats,
+      scoreFinal(goal, anchorScore, support.score),
+    );
     const runtimeReadiness = strategyRuntimeReadiness(
       goal,
       anchorScore,
@@ -419,7 +423,10 @@ export function buildDeckStrategyProfile(
       left[0].localeCompare(right[0]),
   );
   const primaryStrategies = rankedStrategies
-    .filter(([, score]) => score.finalScore >= 45 && score.runtimeStatus === "productive")
+    .filter(
+      ([, score]) =>
+        score.finalScore >= 45 && score.runtimeStatus === "productive",
+    )
     .slice(0, 3)
     .map(([strategyId]) => strategyId);
   const primaryStrategySet = new Set(primaryStrategies);
@@ -964,6 +971,39 @@ function scoreAnchors(evidence: DeckStrategyEvidence[]): number {
     return sum + base * entry.quantity;
   }, 0);
   return clampRound(points, 0, 100);
+}
+
+function adjustCorpWinConditionScore(
+  goal: StrategyGoal,
+  stats: DeckStrategyStats,
+  score: number,
+): number {
+  if (stats.side !== "corp" || goal.strategyId !== "corp.fast_advance") {
+    return score;
+  }
+  const agendaCount = stats.cardTypeCounts.agenda ?? 0;
+  const agendaDensity = agendaCount / Math.max(1, stats.cardCount);
+  const tagSources = stats.functionSignalCounts["tag.source"] ?? 0;
+  const damagePayoffs = stats.functionSignalCounts["damage.payoff"] ?? 0;
+  const completeKillLineDepth = Math.min(tagSources, damagePayoffs);
+  if (
+    agendaDensity > 0.12 ||
+    tagSources < 2 ||
+    damagePayoffs < 2 ||
+    completeKillLineDepth <= agendaCount
+  ) {
+    return score;
+  }
+  const densityPressure = Math.round((0.12 - agendaDensity) * 100);
+  const lineDepthPressure = Math.min(
+    12,
+    (completeKillLineDepth - agendaCount) * 2,
+  );
+  return clampRound(
+    score - Math.min(24, 8 + densityPressure + lineDepthPressure),
+    0,
+    100,
+  );
 }
 
 function scoreSupport(
@@ -1869,7 +1909,10 @@ function cardIdHasTokenPhrase(
   cardId: string,
   phrase: readonly string[],
 ): boolean {
-  const tokens = cardId.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+  const tokens = cardId
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean);
   return tokens.some(
     (token, index) =>
       token === phrase[0] &&

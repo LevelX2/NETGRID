@@ -12,6 +12,7 @@ import type {
   TacticalPlanBuildContext,
 } from "./tactical-plan-types";
 import { visibleCardForAction } from "./tactical-plan-visible-cards";
+import { corpStrategicKillLineFundingActive } from "../runtime/corp-visible-kill-line";
 
 const AI_HINTS_BY_CARD = createAiHintsByCard();
 
@@ -19,9 +20,11 @@ export function buildCorpFiniteEconomyPlans(
   context: TacticalPlanBuildContext,
 ): TacticalPlan[] {
   const installed = context.input.playerView.servers.flatMap((server) =>
-    server.root
-      .filter(isReviewedFiniteActionEconomyAsset)
-      .map((card) => ({ card, serverId: server.id })),
+    server.id.startsWith("remote_")
+      ? server.root
+          .filter(isReviewedFiniteActionEconomyAsset)
+          .map((card) => ({ card, serverId: server.id }))
+      : [],
   );
   const activeInstalled = installed.filter(
     ({ card }) => visibleHostedCredits(card) !== 0,
@@ -47,6 +50,12 @@ export function buildCorpFiniteEconomyPlans(
     installActionsByCard.set(card.instanceId, actions);
   }
   for (const [cardId, actions] of installActionsByCard) {
+    if (
+      context.input.playerView.own.credits <= 1 &&
+      !finiteEconomyPreservesVisibleKillLine(context)
+    ) {
+      continue;
+    }
     const scorelineBlocker = finiteEconomyInstallScorelineBlocker(
       context.input,
     );
@@ -89,6 +98,15 @@ export function buildCorpFiniteEconomyPlans(
     );
   }
   return plans;
+}
+
+function finiteEconomyPreservesVisibleKillLine(
+  context: TacticalPlanBuildContext,
+): boolean {
+  return corpStrategicKillLineFundingActive(
+    context.input,
+    context.strategicIntentState?.primaryStrategy.family,
+  );
 }
 
 function finiteEconomyInstallScorelineBlocker(

@@ -131,6 +131,31 @@ describe("tacticalPlanMappedChoice", () => {
     );
   });
 
+  it("lets a strong strategic punish action interrupt finite economy", () => {
+    const drainEconomy = legalAction("drain-bbs", "activated_card_ability");
+    const genericInstall = legalAction("install-ice", "install_card");
+    const applyTag = legalAction("apply-tag", "play_operation");
+    const strategicTagChoice = choice(applyTag, 2607, [
+      "semantic_strategic_action_fit:true",
+      "strategic_action_fit_target_match:kind",
+    ]);
+
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [
+        choice(genericInstall, 3104),
+        strategicTagChoice,
+        choice(drainEconomy, 1970),
+      ],
+      finiteEconomyMapping([drainEconomy]),
+      choice(genericInstall, 3104),
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("apply-tag");
+    expect(result.overrideReason).toBe("strategic_kind_score_gap");
+  });
+
   it("keeps zero-cost persistent economy activation ahead of an off-plan draw", () => {
     const rezEconomy = legalAction("rez-economy", "rez_ice");
     const offPlanDraw = legalAction("draw", "draw_card");

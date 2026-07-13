@@ -63,6 +63,24 @@ export function tacticalPlanMappedChoice(
     .filter((choice): choice is SemanticRuntimeChoice => Boolean(choice));
   const mappedChoice = bestPlanCompatibleSemanticChoice(mappedChoices, mapping);
   if (!mappedChoice) return {};
+  const mappedStrategicFit =
+    semanticRuntimeChoiceStrategicFitLevel(mappedChoice);
+  if (mappedStrategicFit === "none") {
+    const strategicOverrideChoice = bestSemanticRuntimeChoice(
+      choices.filter(
+        (choice) =>
+          !choice.exclusion &&
+          semanticRuntimeChoiceStrategicFitLevel(choice) !== "none",
+      ),
+    );
+    if (
+      strategicOverrideChoice &&
+      strategicOverrideChoice.score > 0 &&
+      strategicOverrideChoice.score > mappedChoice.score
+    ) {
+      overrideChoice = strategicOverrideChoice;
+    }
+  }
   if (
     semanticRuntimeChoiceIsProjectedRun(mappedChoice) &&
     !mappedPlanHasImmediateVisibleRunPayoff(mapping.plan, mappedChoice)
@@ -548,6 +566,13 @@ function tacticalPlanCorpEconomyActivationBlocksOffPlanOverride(
       overrideChoice,
       overrideChoice.score - mappedChoice.score,
     )
+  ) {
+    return false;
+  }
+  if (
+    overrideChoice.score > mappedChoice.score &&
+    semanticRuntimeChoiceStrategicFitLevel(overrideChoice) !== "none" &&
+    semanticRuntimeChoiceStrategicFitLevel(mappedChoice) === "none"
   ) {
     return false;
   }

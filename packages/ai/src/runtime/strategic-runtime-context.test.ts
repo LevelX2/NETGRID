@@ -210,6 +210,42 @@ describe("strategic runtime context", () => {
     ).toContain("corp.tag_trace_punish");
   });
 
+  it("hard-blocks a Corp scoreline when the deck cannot reach the agenda win target", () => {
+    const context = buildStrategicRuntimeContext({
+      side: "corp",
+      playerView: playerView("corp", {
+        credits: 4,
+        ownAgendaPoints: 3,
+        opponentAgendaPoints: 6,
+      }),
+      legalActions: [action("draw", "corp", "draw_card", 0)],
+      strategyProfile: multiStrategyProfile("corp", {
+        primary: ["corp.fast_advance", "corp.tag_trace_punish"],
+        scores: {
+          "corp.fast_advance": score("corp.fast_advance", { final: 100 }),
+          "corp.tag_trace_punish": score("corp.tag_trace_punish", {
+            final: 90,
+          }),
+        },
+      }),
+      deckCapabilities: corpCapabilities(),
+      deckSnapshot: {
+        deckSnapshotId: "three-corporate-war",
+        side: "corp",
+        cards: [{ cardId: "onr_v1_196_corporate-war", quantity: 3 }],
+      },
+    });
+
+    expect(context.strategyPortfolio.activeStrategyId).toBe(
+      "corp.tag_trace_punish",
+    );
+    expect(
+      context.strategyPortfolio.blockedCandidates.find(
+        (candidate) => candidate.strategyId === "corp.fast_advance",
+      )?.runtimeBlockers,
+    ).toContain("hard_runtime_blocker:scoreline_unreachable");
+  });
+
   it("exits completed breaker search into visible central pressure", () => {
     const context = buildStrategicRuntimeContext({
       side: "runner",

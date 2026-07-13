@@ -21,6 +21,7 @@ import type {
   CorpScoringWindowAgendaStealSeverity,
 } from "./semantic-runtime-corp-scoring-window";
 import { semanticRuntimeVisibleSourceCard } from "./visible-card-lookup";
+import { corpStrategicKillLineFundingActive } from "./corp-visible-kill-line";
 
 export type CorpBoardTriagePrimary =
   | "score_now"
@@ -3237,6 +3238,18 @@ function actionProvidesEconomy<TConsumer extends string>(
   actionSemanticCandidate: ActionSemanticCandidate | undefined,
 ): boolean {
   if (actionProvidesCredits(action)) return true;
+  if (
+    action.type === "install_card" &&
+    (input.playerView.own.credits > 1 ||
+      corpStrategicKillLineFundingActive(input)) &&
+    actionCandidateHasVisibleSignal(actionSemanticCandidate, [
+      "finite_economy_pool",
+      "economy.finite_pool",
+      "remote.asset_economy",
+    ])
+  ) {
+    return true;
+  }
   const payoffPressure = dependencies.corpTaggedRunnerPayoffPressure?.(
     input,
     action,

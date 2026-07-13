@@ -88,6 +88,34 @@ describe("Corp finite economy plans", () => {
     expect(JSON.stringify(plans)).not.toContain("install-next-bbs");
   });
 
+  it("does not treat a discarded finite economy asset as installed", () => {
+    const discardedBbs = bbsCard("bbs-discarded");
+    const handBbs = bbsCard("bbs-hand");
+    const install = action(
+      "install-hand-bbs",
+      "install_card",
+      handBbs.instanceId,
+      { placement: "root", serverId: "remote_1" },
+    );
+
+    const plans = buildCorpFiniteEconomyPlans({
+      input: corpInput({
+        hq: [handBbs],
+        archivesRoot: [discardedBbs],
+        actions: [install],
+      }),
+    });
+
+    expect(plans).toHaveLength(1);
+    expect(plans[0]).toMatchObject({
+      planId: "corp.develop_finite_economy:bbs-hand",
+      currentStep: {
+        kind: "install_finite_economy",
+        actionCandidateIds: ["install-hand-bbs"],
+      },
+    });
+  });
+
   it("rezzes an installed pool before trying to drain it", () => {
     const installedBbs = bbsCard("bbs-installed", {
       rezzed: false,
@@ -126,12 +154,10 @@ describe("Corp finite economy plans", () => {
       advancementCounters: 1,
       advancementRequirement: 4,
     });
-    const installBbs = action(
-      "install-bbs",
-      "install_card",
-      bbs.instanceId,
-      { placement: "root", serverId: "new_remote" },
-    );
+    const installBbs = action("install-bbs", "install_card", bbs.instanceId, {
+      placement: "root",
+      serverId: "new_remote",
+    });
 
     const plans = buildCorpFiniteEconomyPlans({
       input: corpInput({ hq: [bbs], root: [agenda], actions: [installBbs] }),
@@ -153,6 +179,7 @@ describe("Corp finite economy plans", () => {
 function corpInput(params: {
   hq?: VisibleCard[];
   root?: VisibleCard[];
+  archivesRoot?: VisibleCard[];
   actions: LegalAction[];
 }): AiDecisionInput {
   return {
@@ -190,7 +217,12 @@ function corpInput(params: {
       servers: [
         { id: "hq", label: "HQ", ice: [], root: [] },
         { id: "rd", label: "R&D", ice: [], root: [] },
-        { id: "archives", label: "Archives", ice: [], root: [] },
+        {
+          id: "archives",
+          label: "Archives",
+          ice: [],
+          root: params.archivesRoot ?? [],
+        },
         { id: "remote_1", label: "Remote 1", ice: [], root: params.root ?? [] },
       ],
       publicEvents: [],

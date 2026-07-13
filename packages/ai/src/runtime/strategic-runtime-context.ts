@@ -11,6 +11,8 @@ import type {
   DeckCapabilityProfile,
 } from "../deck-capabilities";
 import type { AiDeckStrategyProfile } from "../deck-doctrine-strategy";
+import type { AiDeckStrategyDeckSnapshot } from "../deck-strategy-snapshot";
+import { RUNTIME_CARDS } from "../ai-hints";
 import { actionProvidesCredits } from "../actions/action-effect-classification";
 import type {
   StrategicIntentFamily,
@@ -41,6 +43,7 @@ export type BuildStrategicRuntimeContextParams = {
   legalActions: readonly LegalAction[];
   strategyProfile?: AiDeckStrategyProfile;
   deckCapabilities?: DeckCapabilityProfile;
+  deckSnapshot?: AiDeckStrategyDeckSnapshot;
 };
 
 export function buildStrategicRuntimeContext(
@@ -240,7 +243,17 @@ function runtimePortfolioCandidate(
   const roleStatuses = roleStatusesForFamily(params, family);
   const targetVector = targetVectorForFamily(params, family, strategyId);
   const reserve = reserveRequirementForFamily(params, family);
-  const runtimeStatus = score.runtimeStatus ?? "legacy_unspecified";
+  const scorelineFeasibility = corpScorelineFeasibility(params, family);
+  const scorelineUnreachable = scorelineFeasibility?.feasible === false;
+  const runtimeStatus = scorelineUnreachable
+    ? "blocked"
+    : (score.runtimeStatus ?? "legacy_unspecified");
+  const runtimeBlockers = uniqueStrings([
+    ...(score.runtimeBlockers ?? []),
+    ...(scorelineUnreachable
+      ? ["hard_runtime_blocker:scoreline_unreachable"]
+      : []),
+  ]).sort();
   const primaryStrategySet = new Set(profile.primaryStrategies);
   const selectionScore =
     score.finalScore +
@@ -255,7 +268,7 @@ function runtimePortfolioCandidate(
       forcedRole ??
       (primaryStrategySet.has(strategyId) ? "primary" : "secondary"),
     runtimeStatus,
-    runtimeBlockers: [...(score.runtimeBlockers ?? [])].sort(),
+    runtimeBlockers,
     confidence: score.confidence,
     score: {
       anchor: score.anchorScore,
@@ -276,6 +289,13 @@ function runtimePortfolioCandidate(
       `role_bonus:${roleReadinessBonus(roleStatuses)}`,
       `target_bonus:${targetOpportunityBonus(targetVector)}`,
       `reserve_bonus:${reserveReadinessBonus(reserve)}`,
+      ...(scorelineFeasibility
+        ? [
+            `scoreline_feasible:${scorelineFeasibility.feasible}`,
+            `scoreline_total_agenda_points:${scorelineFeasibility.totalAgendaPoints}`,
+            `scoreline_max_reachable_points:${scorelineFeasibility.maxReachablePoints}`,
+          ]
+        : []),
     ],
   };
 }
@@ -727,6 +747,7 @@ function corpTargetVector(
   strategyId: string,
 ): StrategicTargetVector {
   if (family === "corp_scoreline" || family === "corp_fast_advance") {
+    const feasibility = corpScorelineFeasibility(params, family);
     return {
       kind: "scoreline",
       evidence: [
@@ -734,6 +755,12 @@ function corpTargetVector(
         `target_strategy:${strategyId}`,
         `legal_score:${hasLegalAction(params.legalActions, "score_agenda")}`,
         `legal_advance:${hasLegalAction(params.legalActions, "advance_card")}`,
+        ...(feasibility
+          ? [
+              `scoreline_feasible:${feasibility.feasible}`,
+              `scoreline_max_reachable_points:${feasibility.maxReachablePoints}`,
+            ]
+          : []),
       ],
     };
   }
@@ -749,13 +776,20 @@ function corpTargetVector(
   }
   if (family === "corp_tag_trace_punish") {
     const assessments = corpPunishAssessments(params);
+    const punishProfile = params.strategyProfile?.corpProfile?.punishProfile;
+    const deckHasCompleteTagDamageLine = Boolean(
+      punishProfile &&
+      punishProfile.tagSources > 0 &&
+      (punishProfile.tagPayoff > 0 || punishProfile.damagePayoff > 0),
+    );
     if (
       !assessments.some(
         (assessment) =>
           assessment.playablePayoff ||
           assessment.isTagSource ||
           assessment.isTraceTagSource,
-      )
+      ) &&
+      !deckHasCompleteTagDamageLine
     ) {
       return {
         kind: "none",
@@ -773,12 +807,22 @@ function corpTargetVector(
         `target_strategy:${strategyId}`,
         `runner_tags:${params.playerView.opponent.tags}`,
         `semantic_punish_actions:${assessments.length}`,
+        `deck_complete_tag_damage_line:${deckHasCompleteTagDamageLine}`,
       ],
     };
   }
   if (family === "corp_damage_kill" || family === "corp_ambush") {
     const assessments = corpPunishAssessments(params);
-    if (!assessments.some((assessment) => assessment.playablePayoff)) {
+    const punishProfile = params.strategyProfile?.corpProfile?.punishProfile;
+    const deckHasCompleteTagDamageLine = Boolean(
+      punishProfile &&
+      punishProfile.tagSources > 0 &&
+      punishProfile.damagePayoff > 0,
+    );
+    if (
+      !assessments.some((assessment) => assessment.playablePayoff) &&
+      !deckHasCompleteTagDamageLine
+    ) {
       return {
         kind: "none",
         evidence: [
@@ -794,6 +838,7 @@ function corpTargetVector(
         "target_source:runtime_context",
         `target_strategy:${strategyId}`,
         `semantic_punish_actions:${assessments.length}`,
+        `deck_complete_tag_damage_line:${deckHasCompleteTagDamageLine}`,
       ],
     };
   }
@@ -809,6 +854,42 @@ function corpTargetVector(
   return {
     kind: "none",
     evidence: ["target_source:runtime_context", `target_unknown:${strategyId}`],
+  };
+}
+
+function corpScorelineFeasibility(
+  params: BuildStrategicRuntimeContextParams,
+  family: StrategicIntentFamily,
+):
+  | {
+      feasible: boolean;
+      totalAgendaPoints: number;
+      maxReachablePoints: number;
+    }
+  | undefined {
+  if (
+    params.side !== "corp" ||
+    (family !== "corp_scoreline" && family !== "corp_fast_advance") ||
+    !params.deckSnapshot
+  ) {
+    return undefined;
+  }
+  const totalAgendaPoints = params.deckSnapshot.cards.reduce((sum, entry) => {
+    const agendaPoints = RUNTIME_CARDS[entry.cardId]?.numeric.agendaPoints;
+    return (
+      sum +
+      (typeof agendaPoints === "number" ? agendaPoints * entry.quantity : 0)
+    );
+  }, 0);
+  if (totalAgendaPoints <= 0) return undefined;
+  const maxReachablePoints = Math.max(
+    params.playerView.own.agendaPoints,
+    totalAgendaPoints - params.playerView.opponent.agendaPoints,
+  );
+  return {
+    feasible: maxReachablePoints >= params.playerView.agendaPointsToWin,
+    totalAgendaPoints,
+    maxReachablePoints,
   };
 }
 

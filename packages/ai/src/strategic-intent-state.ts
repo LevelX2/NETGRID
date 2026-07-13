@@ -437,11 +437,34 @@ function committedPrimaryStrategy(
   if (previous.blockers.some((blocker) => blocker.severity === "hard")) {
     return { primaryStrategy: candidate };
   }
+  if (previousStrategyHasNewHardRuntimeBlocker(params, previous)) {
+    return { primaryStrategy: candidate };
+  }
   const previousCurrent = currentLineForPreviousStrategy(params, previous);
   if (!previousCurrent || previousCurrent.completeness === "none") {
     return { primaryStrategy: candidate };
   }
   const candidateLead = candidate.score.final - previousCurrent.score.final;
+  if (
+    previous.transition.reason === "initial_strategy_selection" &&
+    previous.commitment.decisionsCommitted <
+      previous.commitment.minCommitmentDecisions &&
+    candidateLead >= previous.commitment.switchMargin
+  ) {
+    return { primaryStrategy: candidate };
+  }
+  if (
+    feasibleCommittedScorelineHasNoImmediateAlternate(
+      params,
+      previous,
+      candidate,
+    )
+  ) {
+    return {
+      primaryStrategy: previousCurrent,
+      holdReason: "switch_margin_not_met",
+    };
+  }
   if (
     previous.commitment.decisionsCommitted <
     previous.commitment.minCommitmentDecisions
@@ -458,6 +481,49 @@ function committedPrimaryStrategy(
     };
   }
   return { primaryStrategy: candidate };
+}
+
+function feasibleCommittedScorelineHasNoImmediateAlternate(
+  params: BuildStrategicIntentStateParams,
+  previous: StrategicIntentState,
+  candidate: StrategicLineState,
+): boolean {
+  if (
+    previous.primaryStrategy.family !== "corp_scoreline" &&
+    previous.primaryStrategy.family !== "corp_fast_advance"
+  ) {
+    return false;
+  }
+  const previousRuntime = params.strategyPortfolio?.productiveCandidates.find(
+    (entry) => entry.strategyId === previous.primaryStrategy.strategyId,
+  );
+  const alternateRuntime = params.strategyPortfolio?.productiveCandidates.find(
+    (entry) => entry.strategyId === candidate.strategyId,
+  );
+  return Boolean(
+    previousRuntime?.targetVector.evidence.includes(
+      "scoreline_feasible:true",
+    ) &&
+    alternateRuntime?.targetVector.evidence.includes(
+      "semantic_punish_actions:0",
+    ),
+  );
+}
+
+function previousStrategyHasNewHardRuntimeBlocker(
+  params: BuildStrategicIntentStateParams,
+  previous: StrategicIntentState,
+): boolean {
+  return Boolean(
+    params.strategyPortfolio?.blockedCandidates
+      .find(
+        (candidate) =>
+          candidate.strategyId === previous.primaryStrategy.strategyId,
+      )
+      ?.runtimeBlockers.some((blocker) =>
+        blocker.startsWith("hard_runtime_blocker:"),
+      ),
+  );
 }
 
 function currentLineForPreviousStrategy(
