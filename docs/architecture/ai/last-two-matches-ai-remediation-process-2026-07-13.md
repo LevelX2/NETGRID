@@ -1,6 +1,7 @@
 # KI-Remediation der letzten zwei Spiele (2026-07-13)
 
-Status: P0 bis P4 abgeschlossen; P5 aktiv
+Status: Abgeschlossen; P0 bis P5 erfüllt, lokal nach `main` integriert und
+Arbeits-Worktree sowie Arbeitsbranch verifiziert entfernt
 
 ## Quelle und Gesamtziel
 
@@ -165,6 +166,23 @@ Ergebnis:
 - AI-Typecheck und Diff-Hygiene grün;
 - kein Benchmark- oder Selfplay-Langlauf; diese waren nicht Teil des
   Verifikationsvertrags.
+
+## Abschlussstand P5
+
+- `codex/ai-last-two-matches-20260713` wurde lokal per Fast-Forward von
+  `1f2a66b91` bis `a55132982` nach `main` integriert.
+- Direkt im Hauptworkspace sind sieben relevante Testdateien mit 74 Tests,
+  der AI-Typecheck und `git diff --check` grün.
+- `git worktree remove` entfernte die Git-Registrierung, konnte den
+  Verzeichnisrest wegen eines Windows-Long-Path-Fehlers jedoch nicht löschen.
+  Nach exakter Pfad-, Sauberkeits- und Registrierungsprüfung wurde nur dieser
+  Restpfad per PowerShell entfernt und `git worktree prune` ausgeführt.
+- Der Pfad
+  `C:\Projekte\NETGRID_AI_LAST_TWO_MATCHES_20260713` ist weder registriert noch
+  im Dateisystem vorhanden. Der vollständig gemergte Arbeitsbranch wurde mit
+  `git branch -d` gelöscht.
+- Im Hauptworkspace bleiben ausschließlich zwei fremde, nicht überlappende
+  Engine-Änderungen offen; sie wurden weder gestaged noch verändert.
 
 ## Controller-Regeln
 

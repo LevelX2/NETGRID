@@ -108,9 +108,15 @@ beauftragten Verifikationsumfangs.
 
 ## Git- und Integrationsstand
 
-P0 bis P4 sind auf `codex/ai-last-two-matches-20260713` paketweise committed.
-Der Arbeitsbranch enthält den aktuellen Ausgangs-Main `1f2a66b91`. Der lokale
-Fast-Forward nach `main`, die erneute Kernprüfung im Hauptworkspace und der
-verifizierte Worktree-/Branch-Cleanup sind die verbleibenden Schritte von P5.
-Die zwei fremden uncommitteten Engine-Dateien im Hauptworkspace überschneiden
-sich nicht mit diesem KI-Scope und bleiben unangetastet.
+P0 bis P5 wurden paketweise committed und lokal per Fast-Forward von
+`1f2a66b91` bis `a55132982` nach `main` integriert. Direkt im Hauptworkspace
+sind sieben relevante Testdateien mit 74 Tests, der AI-Typecheck und
+Diff-Hygiene grün.
+
+Der Worktree
+`C:\Projekte\NETGRID_AI_LAST_TWO_MATCHES_20260713` ist nach dem kontrollierten
+Windows-Long-Path-Cleanup weder in Git registriert noch im Dateisystem
+vorhanden. `codex/ai-last-two-matches-20260713` wurde als vollständig gemergter
+Branch mit `git branch -d` gelöscht. Die zwei fremden uncommitteten
+Engine-Dateien im Hauptworkspace überschneiden sich nicht mit diesem KI-Scope
+und blieben unangetastet.
