@@ -1642,6 +1642,7 @@ export class MultiplayerService {
       const aiStepResult = input.mode === "until_human"
         ? this.runAiUntilNextHuman(record)
         : this.runAiStep(record);
+      this.syncPlayerClock(record);
 
       if (!aiStepResult.ok && aiStepResult.code === "ai_decision_action_not_legal") {
         await this.storage.save(record);

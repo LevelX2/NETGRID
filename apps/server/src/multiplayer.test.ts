@@ -2269,6 +2269,54 @@ describe("MVP 0.2 multiplayer service", () => {
     expect((await service.replayMatch(created.matchId)).finalStateHash).toBe(beforeHash);
   });
 
+  it("moves the displayed player time to the Runner as soon as paced Corp AI finishes", async () => {
+    const startMs = Date.parse("2026-07-13T08:00:00.000Z");
+    let nowMs = startMs;
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "player-clock-paced-corp-ai",
+      now: () => new Date(nowMs).toISOString()
+    });
+    const created = await service.createMatch({
+      mode: "human_runner_vs_corp_ai",
+      hostSide: "runner",
+      seed: "player-clock-paced-corp-ai",
+      corpDifficulty: "normal",
+      aiPacingMode: "paced"
+    });
+    const runner = { side: "runner" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken };
+    const afterSetup = await submitChoice(service, created.matchId, runner, "keep", "player-clock-paced-corp-ai-setup");
+    expect(afterSetup.playerClock).toMatchObject({
+      mode: "none",
+      decisionOwnerSide: "corp",
+      consumedMs: { runner: 0, corp: 0 }
+    });
+
+    nowMs = startMs + 2_000;
+    const advanced = await service.advanceAi({
+      matchId: created.matchId,
+      side: "runner",
+      sessionToken: created.hostSessionToken,
+      knownStateVersion: afterSetup.playerView.stateVersion,
+      mode: "until_human"
+    });
+    expect(advanced.ok).toBe(true);
+    if (!advanced.ok) throw new Error(advanced.error.message);
+    expect(advanced.requesterPayload.playerView.activeSide).toBe("runner");
+    expect(advanced.requesterPayload.playerClock).toMatchObject({
+      mode: "none",
+      decisionOwnerSide: "runner",
+      activityStartedAtMs: nowMs,
+      consumedMs: { runner: 0, corp: 2_000 }
+    });
+
+    nowMs = startMs + 5_000;
+    const runnerTurn = await bootstrap(service, created.matchId, runner);
+    expect(runnerTurn.playerClock).toMatchObject({
+      decisionOwnerSide: "runner",
+      consumedMs: { runner: 3_000, corp: 2_000 }
+    });
+  });
+
   it("tracks no-limit consumed player time without time-expiry losses", async () => {
     const startMs = Date.parse("2026-05-21T08:00:00.000Z");
     let nowMs = startMs;
