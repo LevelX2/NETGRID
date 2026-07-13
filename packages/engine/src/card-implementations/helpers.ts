@@ -32,7 +32,7 @@ export function basicIcebreakerAbilities(input: {
   breakCount?: number;
   pumpCost: number;
   pumpAmount?: number;
-  pumpDuration?: "current_encounter" | "current_run";
+  pumpDuration?: "current_encounter" | "current_run" | "current_turn";
 }): readonly CardIcebreakerAbilityImplementation[] {
   const breakAbility: CardIcebreakerAbilityImplementation = {
     kind: "break_subroutine",

@@ -319,6 +319,53 @@ describe("runner-breaker-action-execution", () => {
     expect(calls).toEqual([`spend:3:${BREAKER_ID}`, "finish:false"]);
   });
 
+  it("stacks current-turn strength independently from the active run", () => {
+    const calls: string[] = [];
+    const targetState = state();
+    targetState.turnSerial = 7;
+    const host = hostFor(targetState, calls, {
+      breaker: {
+        pumpAmountForLegalAction: () => 1,
+        pumpDurationForLegalAction: () => "current_turn",
+      },
+    });
+    const firstAction = legalAction("pump_breaker", {
+      breakerId: BREAKER_ID,
+    });
+    const secondAction = legalAction("pump_breaker", {
+      breakerId: BREAKER_ID,
+    });
+
+    handleRunnerBreakerActionExecution(host, firstAction);
+    delete targetState.run;
+    handleRunnerBreakerActionExecution(host, secondAction);
+
+    expect(
+      targetState.temporaryBreakerStrengthModifiersUntilEndOfTurn,
+    ).toEqual([
+      {
+        sourceCardInstanceId: BREAKER_ID,
+        sourceDefinitionId: "breaker_definition",
+        targetBreakerId: BREAKER_ID,
+        amount: 2,
+        turnSerial: 7,
+        expires: "turn_end",
+      },
+    ]);
+    expect(firstAction.payload).toMatchObject({
+      turnStrengthBonusApplied: true,
+      turnStrengthBonusAfter: 1,
+    });
+    expect(secondAction.payload).toMatchObject({
+      turnStrengthBonusApplied: true,
+      turnStrengthBonusAfter: 2,
+    });
+    expect(calls).toEqual([
+      `spend:1:${BREAKER_ID}`,
+      `spend:1:${BREAKER_ID}`,
+    ]);
+  });
+
   it("opens Aardvark interception and stops pump execution", () => {
     const calls: string[] = [];
 

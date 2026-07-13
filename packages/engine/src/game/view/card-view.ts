@@ -27,6 +27,9 @@ import type { RestrictedHostedCreditUse } from "../../ability-engine/definition-
 import { SERVER_DIFFICULTY_UPGRADE_SOURCES } from "../../mechanics/agenda-scoring";
 import type { CardImplementationDefinition } from "../../card-implementations/types";
 import { serverChoiceDisplayLabel } from "./server-view";
+import {
+  temporaryBreakerStrengthBonusUntilEndOfTurn,
+} from "../state/temporary-breaker-strength";
 
 const effectiveAgendaDifficultyDeps: EffectiveAgendaDifficultyDependencies = {
   definitionFor,
@@ -76,6 +79,7 @@ function visibleKnownCardWithReferenceViewer(
         : visibleBaseStrength +
           instance.strengthModifier +
           hostedProgramStrengthModifier(state, id) +
+          temporaryBreakerStrengthBonusUntilEndOfTurn(state, id) +
           runRemainderStrengthBonus -
           breakerStrengthPenaltyCounterAmount(instance)
       : undefined;

@@ -29,7 +29,7 @@ export type RuntimeIcebreakerSpecialEffect =
 export type RuntimeIcebreakerAbility = AbilityDefinition & {
   iceSubtypes?: readonly string[];
   selectedIceSubtypeFromBreaker?: true;
-  strengthDuration?: "current_encounter" | "current_run";
+  strengthDuration?: "current_encounter" | "current_run" | "current_turn";
   variableStrength?: { min: number };
   postBreakStealthLossMode?: "total_if_available" | "up_to_if_available";
   onUseEndRun?: boolean;
