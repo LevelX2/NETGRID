@@ -2,7 +2,7 @@
 
 ## Status
 
-`implementation_complete_pending_local_integration`
+`complete`
 
 ## /Goal
 
@@ -131,7 +131,7 @@ Commit:
 
 ### BDC-04 – Abschluss, Wissenspflege und Integration
 
-Status: `active`
+Status: `complete`
 
 Ziel:
 
@@ -156,11 +156,14 @@ Commit:
 - BDC-01 `3ee7d7081`: Prozess, Regelvertrag und Zustandsautomat festgelegt.
 - BDC-02 `5d9448151`: Angebot und Verwendung getrennt, unmittelbares LegalAction-Fenster eingeführt, Ablehnung und erneute Auslösung umgesetzt sowie Start-Run-Revalidation gehärtet.
 - BDC-03 `4304b4a64`: Ablehnung in der UI neben den Bonus-Runs sichtbar gemacht und klickfreie Bonus-Runs in der KI-Projektion als `bonus_run` klassifiziert.
-- Engine: fünf fokussierte Testdateien mit 60 Tests grün; Engine-Typecheck grün.
-- Web: `action-board-ui.test.ts` mit 101 Tests grün; Web-Typecheck einschließlich Next-Typegen grün.
+- Engine: nach dem Main-Abgleich sechs relevante Testdateien mit 61 Tests grün; Engine-Typecheck grün.
+- Web: nach dem Main-Abgleich `action-board-ui.test.ts` mit 102 Tests grün; Web-Typecheck einschließlich Next-Typegen grün.
 - KI: `run-action-projection.test.ts` mit 11 Tests grün; KI-Typecheck grün.
 - `git diff --check` ist sauber.
-- Lokale Integration, Main-Nachprüfung und Cleanup werden erst nach dem finalen Main-Abgleich als abgeschlossen markiert.
+- Aktuelles lokales `main` wurde konfliktbereinigt in den Arbeitsbranch übernommen; der einzige Logkonflikt erhielt beide chronologisch passenden Einträge.
+- Der geprüfte Arbeitsstand wurde per Fast-forward nach lokalem `main` integriert und auf `main` erneut mit denselben Gates geprüft.
+- Der Worktree `C:\Projekte\NETGRID_BODYWEIGHT_DATA_CRECHE_TIMING` fehlt sowohl in `git worktree list` als auch im Dateisystem.
+- Der vollständig gemergte Branch `codex/bodyweight-data-creche-timing` wurde mit `git branch -d` gelöscht.
 
 ## Fehler- und Sicherheitsbehandlung
 
