@@ -104,6 +104,67 @@ describe("trigger ability execution", () => {
     expect(calls).toEqual(["runner-special"]);
   });
 
+  it("declines only the current Bodyweight bonus-run window without using the ability", () => {
+    const state = createGame({
+      seed: "bodyweight-decline-immediate-window",
+      setupMode: "completed",
+    });
+    state.activeSide = "runner";
+    state.phase = "runner_action_phase";
+    state.timingPoint = "runner_action.main";
+    const sourceCardId = "bodyweight_1" as CardInstanceId;
+    state.runner.rig.hardware.push(sourceCardId);
+    state.cardInstances[sourceCardId] = instance(
+      sourceCardId,
+      "onr_v1_123_bodyweight-data-creche",
+      "runner",
+    );
+    state.runnerTurnFlags = {
+      ...(state.runnerTurnFlags ?? {}),
+      successfulRunExtraRunPending: true,
+      successfulRunExtraRunUsedThisTurn: false,
+      bonusRunPending: true,
+    } as NonNullable<GameState["runnerTurnFlags"]>;
+    const action = buildLegalAction(
+      state,
+      "runner",
+      "trigger_ability",
+      "Bodyweight Data Crèche: keinen Bonus-Run starten",
+      sourceCardId,
+      [],
+      {
+        runnerAbility: "decline_successful_run_extra_run",
+        cardId: sourceCardId,
+        sourceDefinitionId: "onr_v1_123_bodyweight-data-creche",
+        successfulRunExtraRunDecision: "decline",
+      },
+    );
+
+    expect(() =>
+      handleTriggerAbilityExecution(testHost(state), {
+        ...action,
+        side: "corp",
+      }),
+    ).toThrow("Nur der Runner");
+
+    expect(
+      handleTriggerAbilityExecution(testHost(state), action),
+    ).toMatchObject({
+      handled: true,
+      actionType: "trigger_ability",
+    });
+    expect(state.runnerTurnFlags).toMatchObject({
+      successfulRunExtraRunPending: false,
+      successfulRunExtraRunUsedThisTurn: false,
+      bonusRunPending: false,
+    });
+    expect(action.payload).toMatchObject({
+      successfulRunExtraRunDecision: "decline",
+      successfulRunExtraRunPending: false,
+      successfulRunExtraRunUsedThisTurn: false,
+    });
+  });
+
   it("keeps the legacy generic-trigger error for unsupported triggers", () => {
     const state = createGame({
       seed: "arch-70-trigger-ability-unsupported",

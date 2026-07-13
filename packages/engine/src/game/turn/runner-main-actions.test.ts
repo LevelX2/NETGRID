@@ -123,6 +123,75 @@ describe("runner main action generation", () => {
     );
   });
 
+  it("gives the immediate Bodyweight decision priority over normal actions and pending run sequences", () => {
+    const state = minimalRunnerMainState("bodyweight-immediate-window");
+    const sourceCardId = "bodyweight_1" as CardInstanceId;
+    state.runner.rig.hardware = [sourceCardId];
+    state.cardInstances[sourceCardId] = {
+      id: sourceCardId,
+      instanceId: sourceCardId,
+      definitionId: "bodyweight_data_creche",
+      owner: "runner",
+      controller: "runner",
+      zone: { side: "runner", zone: "rig" },
+      faceup: true,
+      rezzed: true,
+      advancementCounters: 0,
+      strengthModifier: 0,
+    } as never;
+    state.runnerTurnFlags = {
+      ...(state.runnerTurnFlags ?? {}),
+      bonusRunPending: true,
+      successfulRunExtraRunPending: true,
+      successfulRunExtraRunUsedThisTurn: false,
+      pendingSequences: [
+        {
+          kind: "multi_server_success_sequence",
+          sequence: "run_each_data_fort",
+          sourceCardId: "pirate_1",
+          sourceDefinitionId: "onr_proteus_116_pirate-broadcast",
+          sourceTitle: "Pirate Broadcast",
+          pendingServerIds: ["rd", "archives"],
+          successfulServerIds: ["hq"],
+          onAllSuccessful: "gain_runner_event_agenda_point",
+          onAnyUnsuccessful: "forgo_next_action",
+          advanceOnSuccessfulRun: true,
+          failOnUnsuccessfulRun: true,
+        },
+      ],
+    } as NonNullable<GameState["runnerTurnFlags"]>;
+    const host = testRunnerMainHost(state);
+    host.cards.definitionFor = (_state, cardId) => {
+      if (cardId !== sourceCardId)
+        throw new Error(`Unexpected card: ${cardId}`);
+      return {
+        id: "bodyweight_data_creche",
+        title: "Bodyweight Data Crèche",
+        side: "runner",
+        type: "hardware",
+      } as never;
+    };
+
+    const actions = buildRunnerMainActions(host);
+
+    expect(actions).toHaveLength(4);
+    expect(
+      actions.filter((candidate) => candidate.type === "start_run"),
+    ).toHaveLength(3);
+    expect(
+      actions.every(
+        (candidate) =>
+          (candidate.type === "start_run" &&
+            candidate.payload?.bonusRunNoClick === true &&
+            candidate.payload?.bonusRunSource === "bodyweight_data_creche" &&
+            candidate.payload?.multiServerSuccessSequenceRun !== true) ||
+          (candidate.type === "trigger_ability" &&
+            candidate.payload?.runnerAbility ===
+              "decline_successful_run_extra_run"),
+      ),
+    ).toBe(true);
+  });
+
   it("requires two clicks for Classic double prep events", () => {
     const eventCardId = "classic_networking_1" as CardInstanceId;
     const state = minimalRunnerMainState("classic-03-runner-double-prep");
@@ -150,8 +219,9 @@ describe("runner main action generation", () => {
       }) as never;
     host.cards.isUniqueCard = () => false;
     host.cards.hasInstalledUniqueCardDefinition = () => false;
-    host.cardImplementation.cardImplementationForDefinitionId = (definitionId) =>
-      cardImplementationForDefinitionId(definitionId);
+    host.cardImplementation.cardImplementationForDefinitionId = (
+      definitionId,
+    ) => cardImplementationForDefinitionId(definitionId);
     host.cardImplementation.canPlayPrintedCostOnPlayImplementation = () => true;
 
     state.runner.clicks = 1;

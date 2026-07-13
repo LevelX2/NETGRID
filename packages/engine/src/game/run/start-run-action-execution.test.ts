@@ -33,8 +33,8 @@ function state(): GameState {
       servers: [],
     },
     runnerTurnFlags: {
-      bonusRunPending: true,
-      successfulRunExtraRunPending: true,
+      bonusRunPending: false,
+      successfulRunExtraRunPending: false,
     },
     cardInstances: {},
     eventLog: [],
@@ -157,21 +157,58 @@ describe("start-run-action-execution", () => {
     ]);
   });
 
-  it("clears bonus-run flags without spending a click", () => {
+  it("clears Bodyweight bonus-run flags, marks the ability used, and spends no click", () => {
     const gameState = state();
     const calls: string[] = [];
+    gameState.runnerTurnFlags!.bonusRunPending = true;
+    gameState.runnerTurnFlags!.successfulRunExtraRunPending = true;
 
     handleStartRunActionExecution(
       hostFor(gameState, calls),
-      action({ serverId: "hq", bonusRunNoClick: true }),
+      action({
+        serverId: "hq",
+        bonusRunNoClick: true,
+        bonusRunSource: "onr_v1_123_bodyweight-data-creche",
+      }),
     );
 
     expect(gameState.runner.clicks).toBe(3);
     expect(gameState.runnerTurnFlags?.bonusRunPending).toBe(false);
-    expect(gameState.runnerTurnFlags?.successfulRunExtraRunPending).toBe(
-      false,
+    expect(gameState.runnerTurnFlags?.successfulRunExtraRunPending).toBe(false);
+    expect(gameState.runnerTurnFlags?.successfulRunExtraRunUsedThisTurn).toBe(
+      true,
     );
     expect(calls).toEqual(["validate:hq", "pay_tax:0", "start:hq:start_run"]);
+  });
+
+  it("rejects normal or foreign runs while the immediate Bodyweight window is open", () => {
+    const gameState = state();
+    gameState.runnerTurnFlags!.bonusRunPending = true;
+    gameState.runnerTurnFlags!.successfulRunExtraRunPending = true;
+
+    expect(() =>
+      handleStartRunActionExecution(
+        hostFor(gameState, []),
+        action({ serverId: "hq" }),
+      ),
+    ).toThrow("Das unmittelbare Bodyweight-Fenster");
+    expect(() =>
+      handleStartRunActionExecution(
+        hostFor(gameState, []),
+        action({
+          serverId: "hq",
+          bonusRunNoClick: true,
+          bonusRunSource: "onr_v1_076_all-nighter",
+        }),
+      ),
+    ).toThrow("Das unmittelbare Bodyweight-Fenster");
+    expect(gameState.runnerTurnFlags).toMatchObject({
+      bonusRunPending: true,
+      successfulRunExtraRunPending: true,
+    });
+    expect(
+      gameState.runnerTurnFlags?.successfulRunExtraRunUsedThisTurn,
+    ).toBeUndefined();
   });
 
   it("applies direct run-only action and spending-cap payload", () => {

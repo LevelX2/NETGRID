@@ -19,12 +19,8 @@ import {
 } from "../../index";
 import { collectActiveModifiers } from "../../ability-engine/active-modifiers";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
-import {
-  cardImplementationCoverageForDefinitionId,
-} from "../../card-implementations/coverage";
-import {
-  cardImplementationForDefinitionId,
-} from "../../card-implementations/registry";
+import { cardImplementationCoverageForDefinitionId } from "../../card-implementations/coverage";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { buildPublicAbilitySchemaContext } from "../../mechanics/public-payload-schema";
 import { publicContextForAction } from "../../public-context";
 import {
@@ -365,8 +361,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     state = apply(
       state,
       "runner",
-      (action) =>
-        sourceDefinition(state, action) === "onr_v1_064_skivviss",
+      (action) => sourceDefinition(state, action) === "onr_v1_064_skivviss",
     );
     const skivvissId = state.runner.rig.programs.find(
       (id) => state.cardInstances[id]?.definitionId === "onr_v1_064_skivviss",
@@ -442,8 +437,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     state = apply(
       state,
       "runner",
-      (action) =>
-        sourceDefinition(state, action) === "onr_v1_010_cascade",
+      (action) => sourceDefinition(state, action) === "onr_v1_010_cascade",
     );
     const cascadeId = state.runner.rig.programs.find(
       (id) => state.cardInstances[id]?.definitionId === "onr_v1_010_cascade",
@@ -470,7 +464,8 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     expect(visibleCascade?.counters?.virus).toBeUndefined();
     expect(
       visibleCascade?.counterDisplays?.some(
-        (display) => display.id === "virus" || display.id === "runner_virus_corp_cascade",
+        (display) =>
+          display.id === "virus" || display.id === "runner_virus_corp_cascade",
       ),
     ).not.toBe(true);
     expect(
@@ -517,8 +512,12 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       "onr_v1_064_skivviss",
     ] as const;
     for (const definitionId of p349VirusCards) {
-      expect(cardImplementationForDefinitionId(definitionId)?.virusCounter).toBeDefined();
-      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+      expect(
+        cardImplementationForDefinitionId(definitionId)?.virusCounter,
+      ).toBeDefined();
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId),
+      ).toMatchObject({
         cardDefinitionId: definitionId,
         status: "implemented",
       });
@@ -566,9 +565,21 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     moveCorpCardToHq(boardwalk, "simple_economy_operation");
     moveCorpCardToHq(boardwalk, "onr_v1_279_wall-of-static");
     boardwalk.corp.maxHandSize = 100;
-    boardwalk = apply(boardwalk, "runner", (action) => action.type === "end_turn");
-    boardwalk = apply(boardwalk, "corp", (action) => action.type === "mandatory_draw");
-    boardwalk = apply(boardwalk, "corp", (action) => action.type === "end_turn");
+    boardwalk = apply(
+      boardwalk,
+      "runner",
+      (action) => action.type === "end_turn",
+    );
+    boardwalk = apply(
+      boardwalk,
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    boardwalk = apply(
+      boardwalk,
+      "corp",
+      (action) => action.type === "end_turn",
+    );
     expect(boardwalk.pendingChoice?.source).toContain(
       "p3_33.private_look:ability:onr_v1_008_boardwalk:hq",
     );
@@ -582,12 +593,19 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     let thought = p349VirusGame("p349-deep-thought-hidden-look", [
       "onr_v1_017_deep-thought",
     ]);
-    const thoughtId = installRunnerProgramForTest(thought, "onr_v1_017_deep-thought");
+    const thoughtId = installRunnerProgramForTest(
+      thought,
+      "onr_v1_017_deep-thought",
+    );
     setCardCounterForTest(thought, thoughtId, "virus", 3);
     putCorpCardOnTopOfRd(thought, "simple_economy_operation");
     thought.corp.maxHandSize = 100;
     thought = apply(thought, "runner", (action) => action.type === "end_turn");
-    thought = apply(thought, "corp", (action) => action.type === "mandatory_draw");
+    thought = apply(
+      thought,
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
     thought = apply(thought, "corp", (action) => action.type === "end_turn");
     expect(thought.pendingChoice?.source).toContain(
       "p3_33.private_look:ability:runner_onr_v1_017_deep-thought",
@@ -597,8 +615,14 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     let cascade = p349VirusGame("p349-cascade-start-trash", [
       "onr_v1_010_cascade",
     ]);
-    const cascadeId = installRunnerProgramForTest(cascade, "onr_v1_010_cascade");
-    const rdFaceupId = putCorpCardOnTopOfRd(cascade, "simple_economy_operation");
+    const cascadeId = installRunnerProgramForTest(
+      cascade,
+      "onr_v1_010_cascade",
+    );
+    const rdFaceupId = putCorpCardOnTopOfRd(
+      cascade,
+      "simple_economy_operation",
+    );
     cascade.cardInstances[rdFaceupId] = {
       ...cascade.cardInstances[rdFaceupId]!,
       faceup: true,
@@ -614,7 +638,10 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     const gremlins = p349VirusGame("p349-gremlins-hand-size", [
       "onr_v1_029_gremlins",
     ]);
-    const gremlinsId = installRunnerProgramForTest(gremlins, "onr_v1_029_gremlins");
+    const gremlinsId = installRunnerProgramForTest(
+      gremlins,
+      "onr_v1_029_gremlins",
+    );
     gremlins.corp.maxHandSize = 6;
     setCardCounterForTest(gremlins, gremlinsId, "virus", 4);
     expect(getPlayerView(gremlins, "corp").own.maxHandSize).toBe(4);
@@ -622,7 +649,9 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
   });
 
   it("uses The Short Circuit as a repeatable paid private stack tutor", () => {
-    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("spotcheck-short-circuit"));
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.hiddenZone("spotcheck-short-circuit"),
+    );
     state.runner.credits = 20;
     moveRunnerCardToGrip(state, "onr_v1_177_the-short-circuit");
     const targetProgramId = putRunnerCardOnTopOfStack(state, "simple_decoder");
@@ -677,7 +706,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     );
   });
 
-  it("enforces Bodyweight Data Creche contract and only one bonus run per turn", () => {
+  it("enforces the immediate Bodyweight Data Creche window and only uses it on bonus-run start", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "spotcheck-bodyweight-creche",
@@ -698,7 +727,8 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     moveRunnerCardToGrip(state, "onr_v1_123_bodyweight-data-creche");
     const baseMemory = getPlayerView(state, "runner").own.memoryLimit;
     expect(baseMemory).toBeDefined();
-    if (baseMemory === undefined) throw new Error("Missing runner memory limit");
+    if (baseMemory === undefined)
+      throw new Error("Missing runner memory limit");
     state = apply(
       state,
       "runner",
@@ -740,9 +770,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
         ?.recurringCredits,
     ).toBeUndefined();
     expect(
-      CARD_DEFINITIONS_BY_ID[
-        "onr_v1_123_bodyweight-data-creche"
-      ]?.mechanics,
+      CARD_DEFINITIONS_BY_ID["onr_v1_123_bodyweight-data-creche"]?.mechanics,
     ).not.toContain("link_recurring_credit");
     if (oldDeckId) expect(state.runner.heap).toContain(oldDeckId);
     putCorpCardOnTopOfRd(state, "simple_economy_operation");
@@ -753,6 +781,79 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
         action.type === "start_run" && action.payload?.serverId === "rd",
     );
     state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(state.runnerTurnFlags).toMatchObject({
+      successfulRunExtraRunPending: true,
+      successfulRunExtraRunUsedThisTurn: false,
+    });
+    const firstWindowActions = getLegalActions(state, "runner");
+    expect(firstWindowActions.length).toBeGreaterThan(1);
+    expect(
+      firstWindowActions.every(
+        (action) =>
+          (action.type === "start_run" &&
+            action.payload?.bonusRunSource ===
+              "onr_v1_123_bodyweight-data-creche") ||
+          (action.type === "trigger_ability" &&
+            action.payload?.runnerAbility ===
+              "decline_successful_run_extra_run"),
+      ),
+    ).toBe(true);
+    expect(
+      firstWindowActions.some((action) =>
+        ["draw_card", "gain_credit", "end_turn"].includes(action.type),
+      ),
+    ).toBe(false);
+    const decline = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.runnerAbility === "decline_successful_run_extra_run",
+    );
+    expect(
+      applyAction(state, {
+        matchId: state.matchId,
+        side: "corp",
+        actionId: decline.actionId,
+        clientKnownStateVersion: state.stateVersion,
+      }).ok,
+    ).toBe(false);
+    expect(
+      applyAction(state, {
+        matchId: state.matchId,
+        side: "runner",
+        actionId: decline.actionId,
+        clientKnownStateVersion: state.stateVersion - 1,
+      }).ok,
+    ).toBe(false);
+    const clicksBeforeDecline = state.runner.clicks;
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === decline.actionId,
+    );
+    expect(state.runner.clicks).toBe(clicksBeforeDecline);
+    expect(state.runnerTurnFlags).toMatchObject({
+      successfulRunExtraRunPending: false,
+      successfulRunExtraRunUsedThisTurn: false,
+      bonusRunPending: false,
+    });
+
+    state.runner.clicks = 3;
+    state = apply(state, "runner", (action) => action.type === "draw_card");
+    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(state.runnerTurnFlags).toMatchObject({
+      successfulRunExtraRunPending: true,
+      successfulRunExtraRunUsedThisTurn: false,
+    });
+    state.runner.clicks = 0;
     const bonusRun = mustAction(
       state,
       "runner",
@@ -760,20 +861,15 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
         action.type === "start_run" &&
         action.payload?.bonusRunSource === "onr_v1_123_bodyweight-data-creche",
     );
-    const regularRunOnSameServer = mustAction(
-      state,
-      "runner",
-      (action) =>
-        action.type === "start_run" &&
-        action.payload?.serverId === bonusRun.payload?.serverId &&
-        action.payload?.bonusRunSource === undefined,
-    );
-    expect(bonusRun.actionId).not.toBe(regularRunOnSameServer.actionId);
     const clicksBeforeBonus = state.runner.clicks;
     expect(bonusRun.costs).not.toContainEqual(
       expect.objectContaining({ clicks: expect.any(Number) }),
     );
-    state = apply(state, "runner", (action) => action.actionId === bonusRun.actionId);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === bonusRun.actionId,
+    );
     expect(state.runner.clicks).toBe(clicksBeforeBonus);
     expect(state.runnerTurnFlags).toMatchObject({
       successfulRunExtraRunPending: false,
@@ -791,7 +887,9 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
   });
 
   it("lets the Runner remove Data Raven counters for an action and 1 credit", () => {
-    let state = toRunnerTurn(v196CardReleaseGame("spotcheck-data-raven-remove"));
+    let state = toRunnerTurn(
+      v196CardReleaseGame("spotcheck-data-raven-remove"),
+    );
     state.runner.credits = 5;
     putCorpIceOnServer(state, "rd", "onr_v1_236_data-raven");
     setCardCounterForTest(state, state.runner.identity, "trace_tag_counter", 2);
@@ -812,7 +910,9 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
         action.payload?.runnerAbility === "remove_runner_trace_counter" &&
         action.payload?.counterType === "trace_tag_counter",
     );
-    expect(cardCounterAmount(state, state.runner.identity, "trace_tag_counter")).toBe(1);
+    expect(
+      cardCounterAmount(state, state.runner.identity, "trace_tag_counter"),
+    ).toBe(1);
     expect(state.runner.credits).toBe(4);
     expect(state.runner.clicks).toBe(3);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -859,7 +959,10 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     );
 
     expect(state.timingPoint).toBe("run.jack_out_window");
-    expect(state.run?.position).toEqual({ kind: "server", serverId: "remote_1" });
+    expect(state.run?.position).toEqual({
+      kind: "server",
+      serverId: "remote_1",
+    });
     expect(getLegalActions(state, "runner")).toEqual([]);
     const corpActions = getLegalActions(state, "corp");
     expect(corpActions).toEqual(
@@ -887,7 +990,9 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
         action.type === "decline_rez" &&
         action.payload?.runRootRezPass === true,
     );
-    expect(state.cardInstances[programTrashByAdvancementAssetId]?.rezzed).toBe(false);
+    expect(state.cardInstances[programTrashByAdvancementAssetId]?.rezzed).toBe(
+      false,
+    );
     state = apply(state, "runner", (action) => action.type === "continue_run");
     expect(state.timingPoint).toBe("access.resolve_card");
     state = apply(state, "runner", (action) => action.type === "access_card");
@@ -946,7 +1051,9 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
         sourceDefinition(state, action) === "onr_v1_323_experimental-ai",
     );
 
-    expect(state.cardInstances[programTrashByAdvancementAssetId]?.rezzed).toBe(true);
+    expect(state.cardInstances[programTrashByAdvancementAssetId]?.rezzed).toBe(
+      true,
+    );
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "rez_ice",
       cardDefinitionId: "onr_v1_323_experimental-ai",
@@ -1002,9 +1109,9 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
     state = apply(state, "runner", (action) => action.type === "access_card");
-    expect(state.runner.heap.map((id) => state.cardInstances[id]?.definitionId)).toEqual(
-      expect.arrayContaining(["simple_decoder", "simple_fracter"]),
-    );
+    expect(
+      state.runner.heap.map((id) => state.cardInstances[id]?.definitionId),
+    ).toEqual(expect.arrayContaining(["simple_decoder", "simple_fracter"]));
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       ambushDefinitionId: "onr_v1_323_experimental-ai",
       advancementCounterCount: 2,
@@ -1034,7 +1141,9 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       state,
       "onr_v1_362_new-galveston-city-grid",
     );
-    const server = state.corp.servers.find((candidate) => candidate.id === "remote_1");
+    const server = state.corp.servers.find(
+      (candidate) => candidate.id === "remote_1",
+    );
     expect(server).toBeDefined();
     if (!server) throw new Error("Missing remote");
     server.root = [assetId, gridId];
@@ -1064,11 +1173,14 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     expect(trashAction.payload?.accessTrashCostSourceDefinitionIds).toBe(
       "onr_v1_362_new-galveston-city-grid",
     );
-    state = apply(state, "runner", (action) => action.actionId === trashAction.actionId);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === trashAction.actionId,
+    );
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       accessTrashCostModifier: 2,
-      accessTrashCostSourceDefinitionIds:
-        "onr_v1_362_new-galveston-city-grid",
+      accessTrashCostSourceDefinitionIds: "onr_v1_362_new-galveston-city-grid",
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"rd"|R&D|cardInstances/,
@@ -1129,7 +1241,11 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
-    upgradeState = apply(upgradeState, "runner", (action) => action.type === "access_card");
+    upgradeState = apply(
+      upgradeState,
+      "runner",
+      (action) => action.type === "access_card",
+    );
     const trashUpgrade = mustAction(
       upgradeState,
       "runner",
@@ -1140,8 +1256,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       accessTrashBaseCost: 4,
       accessTrashCostModifier: 2,
       accessTrashTotalCost: 6,
-      accessTrashCostSourceDefinitionIds:
-        "onr_v1_362_new-galveston-city-grid",
+      accessTrashCostSourceDefinitionIds: "onr_v1_362_new-galveston-city-grid",
     });
 
     const stale = structuredClone(upgradeState);
@@ -1180,7 +1295,9 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     });
     const otherUpgradeId = findCard(otherFort, "simple_upgrade");
     removeEverywhere(otherFort, otherUpgradeId);
-    otherFort.corp.servers.find((candidate) => candidate.id === "remote_2")?.root.push(otherUpgradeId);
+    otherFort.corp.servers
+      .find((candidate) => candidate.id === "remote_2")
+      ?.root.push(otherUpgradeId);
     otherFort.cardInstances[otherUpgradeId] = {
       ...otherFort.cardInstances[otherUpgradeId]!,
       zone: { side: "corp", zone: "serverRoot", serverId: "remote_2" },
@@ -1193,10 +1310,17 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "remote_2",
     );
-    otherFort = apply(otherFort, "runner", (action) => action.type === "access_card");
+    otherFort = apply(
+      otherFort,
+      "runner",
+      (action) => action.type === "access_card",
+    );
     expect(
-      mustAction(otherFort, "runner", (action) => action.type === "trash_accessed_card")
-        .costs,
+      mustAction(
+        otherFort,
+        "runner",
+        (action) => action.type === "trash_accessed_card",
+      ).costs,
     ).toEqual([{ credits: 4 }]);
 
     let agendaAccess = newGalvestonGame("p312-new-galveston-agenda");
@@ -1222,10 +1346,17 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
-    agendaAccess = apply(agendaAccess, "runner", (action) => action.type === "access_card");
+    agendaAccess = apply(
+      agendaAccess,
+      "runner",
+      (action) => action.type === "access_card",
+    );
     expect(
-      mustAction(agendaAccess, "runner", (action) => action.type === "steal_agenda")
-        .costs,
+      mustAction(
+        agendaAccess,
+        "runner",
+        (action) => action.type === "steal_agenda",
+      ).costs,
     ).toEqual([]);
   });
 });
@@ -1284,8 +1415,7 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
       runnerCreditsAfter: runnerState.runner.credits,
       resolvedEffects: [
         expect.objectContaining({
-          effectId:
-            "onr_v1_097_livewires-contacts.effect.0.gain_credits",
+          effectId: "onr_v1_097_livewires-contacts.effect.0.gain_credits",
           kind: "gain_credits",
           visibility: "public",
           side: "runner",
@@ -1312,7 +1442,11 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
       corpDeck: ONR_V1_0_6K_CORP_DECK,
       agendaPointsToWin: 7,
     });
-    corpState = apply(corpState, "corp", (action) => action.type === "mandatory_draw");
+    corpState = apply(
+      corpState,
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
     corpState.corp.credits = 5;
     corpState.corp.clicks = 3;
     const efficiencyId = moveCorpCardToHq(
@@ -1324,8 +1458,7 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(corpState, action) ===
-          "onr_v1_290_efficiency-experts",
+        sourceDefinition(corpState, action) === "onr_v1_290_efficiency-experts",
     );
     expect(efficiency.costs[0]).toMatchObject({ clicks: 1, credits: 0 });
     expect(
@@ -1364,8 +1497,7 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
       corpCreditsAfter: corpState.corp.credits,
       resolvedEffects: [
         expect.objectContaining({
-          effectId:
-            "onr_v1_290_efficiency-experts.effect.0.gain_credits",
+          effectId: "onr_v1_290_efficiency-experts.effect.0.gain_credits",
           kind: "gain_credits",
           visibility: "public",
           side: "corp",
@@ -1437,7 +1569,11 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
           sourceDefinition(state, candidate) ===
             "onr_v1_079_bodyweight-synthetic-blood",
       );
-      state = apply(state, "runner", (candidate) => candidate.actionId === action.actionId);
+      state = apply(
+        state,
+        "runner",
+        (candidate) => candidate.actionId === action.actionId,
+      );
       expect(state.runner.heap).toContain(eventId);
       expect(state.runner.grip.length).toBe(gripBefore - 1 + expectedDrawn);
       expect(state.runner.stack).toHaveLength(0);
@@ -1459,11 +1595,15 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
           }),
         ],
       });
-      const publicPayload = JSON.stringify(state.eventLog.at(-1)?.publicPayload);
+      const publicPayload = JSON.stringify(
+        state.eventLog.at(-1)?.publicPayload,
+      );
       expect(publicPayload).not.toMatch(
         /simple_economy_event|jack-n-joe|livewires|score|wutech|runner_/,
       );
-      const corpOpponentView = JSON.stringify(getPlayerView(state, "corp").opponent);
+      const corpOpponentView = JSON.stringify(
+        getPlayerView(state, "corp").opponent,
+      );
       expect(corpOpponentView).toContain('"handCount":');
       expect(corpOpponentView).not.toContain("gripOrHq");
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
@@ -1531,9 +1671,9 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
             damageAmount: 2,
             cardsTrashed: 2,
           });
-          expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
-            /runner_|grip|stack|cardInstances|privatePayload/,
-          );
+          expect(
+            JSON.stringify(state.eventLog.at(-1)?.publicPayload),
+          ).not.toMatch(/runner_|grip|stack|cardInstances|privatePayload/);
         },
       },
     ] as const) {
@@ -1543,7 +1683,11 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
         corpDeck: ONR_V1_0_6K_CORP_DECK,
         agendaPointsToWin: 7,
       });
-      noTagState = apply(noTagState, "corp", (action) => action.type === "mandatory_draw");
+      noTagState = apply(
+        noTagState,
+        "corp",
+        (action) => action.type === "mandatory_draw",
+      );
       noTagState.corp.credits = 10;
       noTagState.corp.clicks = 3;
       moveCorpCardToHq(noTagState, spec.definitionId);
@@ -1606,8 +1750,16 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
 
       const initial = structuredClone(state);
       const replayStart = state.eventLog.length;
-      state = apply(state, "corp", (candidate) => candidate.actionId === action.actionId);
-      expect(state.corp.archives.some((id) => state.cardInstances[id]?.definitionId === spec.definitionId)).toBe(true);
+      state = apply(
+        state,
+        "corp",
+        (candidate) => candidate.actionId === action.actionId,
+      );
+      expect(
+        state.corp.archives.some(
+          (id) => state.cardInstances[id]?.definitionId === spec.definitionId,
+        ),
+      ).toBe(true);
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
         actionType: "play_operation",
         cardDefinitionId: spec.definitionId,
@@ -1781,9 +1933,9 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
             }),
           ],
         });
-        expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
-          /runner_|grip|stack|cardInstances|privatePayload/,
-        );
+        expect(
+          JSON.stringify(state.eventLog.at(-1)?.publicPayload),
+        ).not.toMatch(/runner_|grip|stack|cardInstances|privatePayload/);
       }
 
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
@@ -1898,7 +2050,11 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
     const soloInitial = structuredClone(solo);
     const soloReplayStart = solo.eventLog.length;
     const soloClicksBefore = solo.corp.clicks;
-    solo = apply(solo, "corp", (action) => action.actionId === soloAction.actionId);
+    solo = apply(
+      solo,
+      "corp",
+      (action) => action.actionId === soloAction.actionId,
+    );
     expect(solo.corp.clicks).toBe(soloClicksBefore - 1);
     expect(solo.runner.heap).toHaveLength(1);
     expect(solo.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -1926,7 +2082,10 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
     expect(JSON.stringify(solo.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /runner_|grip|stack|cardInstances|privatePayload/,
     );
-    const soloReplay = replayEvents(soloInitial, solo.eventLog.slice(soloReplayStart));
+    const soloReplay = replayEvents(
+      soloInitial,
+      solo.eventLog.slice(soloReplayStart),
+    );
     expect(soloReplay.ok).toBe(true);
     expect(hashState(soloReplay.state)).toBe(hashState(solo));
 
@@ -1947,7 +2106,11 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
         corpDeck: corpDeckWith(definitionId),
         agendaPointsToWin: 7,
       });
-      state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+      state = apply(
+        state,
+        "corp",
+        (action) => action.type === "mandatory_draw",
+      );
       state.corp.credits = 20;
       state.corp.clicks = 5;
       state.runner.tags = 1;
@@ -2008,7 +2171,11 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
       const initial = structuredClone(state);
       const replayStart = state.eventLog.length;
       const clicksBefore = state.corp.clicks;
-      state = apply(state, "corp", (candidate) => candidate.actionId === action.actionId);
+      state = apply(
+        state,
+        "corp",
+        (candidate) => candidate.actionId === action.actionId,
+      );
       expect(state.corp.clicks).toBe(clicksBefore - 1);
       expect(state.runner.heap).toHaveLength(expectedDamage);
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -2052,7 +2219,8 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
     state = apply(
       state,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     state = apply(
       state,
@@ -2088,7 +2256,11 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
         idempotencyKey: "spotcheck-nerve-stale",
       }).ok,
     ).toBe(false);
-    state = apply(state, "runner", (action) => action.actionId === continueAction.actionId);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === continueAction.actionId,
+    );
     expect(state.run).toBeUndefined();
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "continue_run",
@@ -2121,7 +2293,8 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
     piState = apply(
       piState,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     piState = apply(
       piState,
@@ -2172,24 +2345,34 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
         idempotencyKey: "spotcheck-pi-stale",
       }).ok,
     ).toBe(false);
-    piState = apply(piState, "runner", (action) => action.actionId === piBreak.actionId);
+    piState = apply(
+      piState,
+      "runner",
+      (action) => action.actionId === piBreak.actionId,
+    );
     expect(piState.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "break_subroutine",
       subroutineIndex: 0,
       targetIceDefinitionId: "onr_v1_259_in-the-face",
     });
     piState = continueRunThroughMovementWindow(piState);
-    const piReplay = replayEvents(piInitial, piState.eventLog.slice(piReplayStart));
+    const piReplay = replayEvents(
+      piInitial,
+      piState.eventLog.slice(piReplayStart),
+    );
     expect(piReplay.ok).toBe(true);
     expect(hashState(piReplay.state)).toBe(hashState(piState));
 
-    let piUnbroken = toRunnerTurn(v112kCardReleaseGame("spotcheck-pi-unbroken"));
+    let piUnbroken = toRunnerTurn(
+      v112kCardReleaseGame("spotcheck-pi-unbroken"),
+    );
     piUnbroken.corp.credits = 20;
     putCorpIceOnServer(piUnbroken, "rd", "onr_v1_259_in-the-face");
     piUnbroken = apply(
       piUnbroken,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     piUnbroken = apply(
       piUnbroken,
@@ -2210,7 +2393,9 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
       result: "ended",
     });
 
-    let corridor = toRunnerTurn(v105kCardReleaseGame("spotcheck-endless-corridor"));
+    let corridor = toRunnerTurn(
+      v105kCardReleaseGame("spotcheck-endless-corridor"),
+    );
     corridor.runner.credits = 20;
     corridor.corp.credits = 20;
     installRunnerProgramForTest(corridor, "onr_v1_052_raffles");
@@ -2220,7 +2405,8 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
     corridor = apply(
       corridor,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     corridor = apply(
       corridor,
@@ -2235,10 +2421,9 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
         action.type === "break_subroutine" &&
         sourceDefinition(corridor, action) === "onr_v1_052_raffles",
     );
-    expect(corridorBreaks.map((action) => action.payload?.subroutineIndex)).toEqual([
-      0,
-      1,
-    ]);
+    expect(
+      corridorBreaks.map((action) => action.payload?.subroutineIndex),
+    ).toEqual([0, 1]);
     const firstBreak = corridorBreaks[0];
     expect(firstBreak).toBeDefined();
     if (!firstBreak) throw new Error("Missing Endless Corridor break action");
@@ -2260,7 +2445,11 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
         idempotencyKey: "spotcheck-corridor-stale",
       }).ok,
     ).toBe(false);
-    corridor = apply(corridor, "runner", (action) => action.actionId === firstBreak.actionId);
+    corridor = apply(
+      corridor,
+      "runner",
+      (action) => action.actionId === firstBreak.actionId,
+    );
     corridor = apply(
       corridor,
       "runner",
@@ -2278,13 +2467,16 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
     expect(corridorReplay.ok).toBe(true);
     expect(hashState(corridorReplay.state)).toBe(hashState(corridor));
 
-    let unbroken = toRunnerTurn(v105kCardReleaseGame("spotcheck-endless-unbroken"));
+    let unbroken = toRunnerTurn(
+      v105kCardReleaseGame("spotcheck-endless-unbroken"),
+    );
     unbroken.corp.credits = 20;
     putCorpIceOnServer(unbroken, "rd", "onr_v1_239_endless-corridor");
     unbroken = apply(
       unbroken,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     unbroken = apply(
       unbroken,
@@ -2294,7 +2486,11 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
         sourceDefinition(unbroken, action) === "onr_v1_239_endless-corridor",
     );
     unbroken = enterEncounterFromMovementWindow(unbroken);
-    unbroken = apply(unbroken, "runner", (action) => action.type === "continue_run");
+    unbroken = apply(
+      unbroken,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
     expect(unbroken.run).toBeUndefined();
     expect(unbroken.eventLog.at(-1)?.publicPayload).toMatchObject({
       sourceDefinitionId: "onr_v1_239_endless-corridor",
@@ -2342,7 +2538,11 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
         idempotencyKey: "spotcheck-antiquated-stale",
       }).ok,
     ).toBe(false);
-    state = apply(state, "corp", (action) => action.actionId === rezUpgrade.actionId);
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === rezUpgrade.actionId,
+    );
     expect(JSON.stringify(getPlayerView(state, "runner"))).toContain(
       "Antiquated Interface Routines",
     );
@@ -2361,13 +2561,16 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
         action.type === "rez_ice" &&
         sourceDefinition(state, action) === "onr_v1_232_crystal-wall",
     );
-    expect(getPlayerView(state, "runner").run?.encounteredIce?.strength).toBe(4);
+    expect(getPlayerView(state, "runner").run?.encounteredIce?.strength).toBe(
+      4,
+    );
     state = apply(state, "runner", (action) => action.type === "continue_run");
 
     state = apply(
       state,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     state = apply(
       state,
@@ -2376,7 +2579,9 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
         action.type === "rez_ice" &&
         sourceDefinition(state, action) === "onr_v1_233_d-arc-knight",
     );
-    expect(getPlayerView(state, "runner").run?.encounteredIce?.strength).toBe(2);
+    expect(getPlayerView(state, "runner").run?.encounteredIce?.strength).toBe(
+      2,
+    );
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
@@ -2461,7 +2666,8 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" && action.payload?.cardId === endlessCorridorId,
+        action.type === "rez_ice" &&
+        action.payload?.cardId === endlessCorridorId,
     );
     expect(state.corp.credits).toBe(0);
     expect(state.cardInstances[endlessCorridorId]?.rezzed).toBe(true);
@@ -2509,7 +2715,11 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
     const wrongSide = applyAction(state, {
       matchId: state.matchId,
       side: "runner",
-      actionId: mustAction(state, "corp", (action) => action.type === "resolve_choice").actionId,
+      actionId: mustAction(
+        state,
+        "corp",
+        (action) => action.type === "resolve_choice",
+      ).actionId,
       clientKnownStateVersion: state.stateVersion,
       selectedChoices: {
         choiceId: state.pendingChoice?.choiceId,
@@ -2544,7 +2754,11 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       },
       agendaPointsToWin: 7,
     });
-    cancelState = apply(cancelState, "corp", (action) => action.type === "mandatory_draw");
+    cancelState = apply(
+      cancelState,
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
     cancelState.runner.tags = 1;
     cancelState.corp.credits = 10;
     installRunnerResourceForTest(cancelState, "onr_v1_160_diplomatic-immunity");
@@ -2555,7 +2769,8 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(cancelState, action) === "onr_v1_301_punitive-counterstrike",
+        sourceDefinition(cancelState, action) ===
+          "onr_v1_301_punitive-counterstrike",
     );
     cancelState = applyChoice(cancelState, "corp", "pass");
     expect(cancelState.corp.scoreArea).toContain(agendaId);
@@ -2571,9 +2786,9 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       damageAmount: 2,
       cardsTrashed: 2,
     });
-    expect(Number(cancelPayload?.agendaPointCostPaid ?? 0)).toBeGreaterThanOrEqual(
-      1,
-    );
+    expect(
+      Number(cancelPayload?.agendaPointCostPaid ?? 0),
+    ).toBeGreaterThanOrEqual(1);
   });
 
   it("hardens AI Chief Financial Officer source binding, short decks and payload redaction", () => {
@@ -2630,7 +2845,11 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
     ).toBe(false);
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
-    state = apply(state, "corp", (action) => action.actionId === legal.actionId);
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === legal.actionId,
+    );
     expect(state.corp.hq.length).toBeLessThanOrEqual(5);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       agendaAbility: "hq_archives_shuffle_draw",
@@ -2641,7 +2860,9 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"hq"|"rd"|"archives"|"cardInstances"|"privatePayload"|simple_agenda/,
     );
-    expect(state.corp.scoreArea).toEqual(expect.arrayContaining([firstCfo, secondCfo]));
+    expect(state.corp.scoreArea).toEqual(
+      expect.arrayContaining([firstCfo, secondCfo]),
+    );
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
@@ -2660,7 +2881,11 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       },
       agendaPointsToWin: 7,
     });
-    warState = apply(warState, "corp", (action) => action.type === "mandatory_draw");
+    warState = apply(
+      warState,
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
     warState.corp.credits = 12;
     warState.corp.clicks = 10;
     const warId = putCorpRootInRemote(warState, "onr_v1_196_corporate-war");
@@ -2682,7 +2907,9 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       scoreCreditSwingThresholdMet: true,
       onScoreGainCredits: 12,
     });
-    expect(replayEvents(warInitial, warState.eventLog.slice(warReplayStart)).ok).toBe(true);
+    expect(
+      replayEvents(warInitial, warState.eventLog.slice(warReplayStart)).ok,
+    ).toBe(true);
 
     let coupState = createGameAfterSetup({
       seed: "spotcheck-political-coup",
@@ -2690,9 +2917,19 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       corpDeck: ONR_V1_8_1_CORP_DECK,
       agendaPointsToWin: 7,
     });
-    coupState = apply(coupState, "corp", (action) => action.type === "mandatory_draw");
-    const firstCoup = scoreCorpAgendaForTest(coupState, "onr_v1_209_political-coup");
-    const secondCoup = scoreCorpAgendaForTest(coupState, "onr_v1_209_political-coup");
+    coupState = apply(
+      coupState,
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    const firstCoup = scoreCorpAgendaForTest(
+      coupState,
+      "onr_v1_209_political-coup",
+    );
+    const secondCoup = scoreCorpAgendaForTest(
+      coupState,
+      "onr_v1_209_political-coup",
+    );
     setCardCounterForTest(coupState, firstCoup, "bit", 12);
     setCardCounterForTest(coupState, secondCoup, "bit", 12);
     const coup = mustAction(
@@ -2704,7 +2941,11 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
         action.payload?.cardId === secondCoup,
     );
     const coupInitial = structuredClone(coupState);
-    coupState = apply(coupState, "corp", (action) => action.actionId === coup.actionId);
+    coupState = apply(
+      coupState,
+      "corp",
+      (action) => action.actionId === coup.actionId,
+    );
     expect(cardCounterAmount(coupState, firstCoup, "bit")).toBe(12);
     expect(cardCounterAmount(coupState, secondCoup, "bit")).toBe(9);
     expect(coupState.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -2721,7 +2962,12 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
         }),
       ],
     });
-    expect(replayEvents(coupInitial, coupState.eventLog.slice(coupInitial.eventLog.length)).ok).toBe(true);
+    expect(
+      replayEvents(
+        coupInitial,
+        coupState.eventLog.slice(coupInitial.eventLog.length),
+      ).ok,
+    ).toBe(true);
   });
 
   it("resolves Cinderella and Homewrecker as unpreventable hardware-trash trace ICE", () => {
@@ -2729,22 +2975,28 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       ["onr_v1_228_cinderella", 6],
       ["onr_v1_248_homewrecker", 5],
     ] as const) {
-      let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.traceTags(`spotcheck-${definitionId}`));
+      let state = toRunnerTurn(
+        MECHANIC_SMOKE_GAMES.traceTags(`spotcheck-${definitionId}`),
+      );
       state.runner.credits = 20;
       state.corp.credits = 20;
-      installRunnerHardwareForTest(state, "onr_v1_120_armadillo-armored-road-home");
       installRunnerHardwareForTest(
         state,
-        "onr_v1_132_microtech-trode-set",
+        "onr_v1_120_armadillo-armored-road-home",
       );
-      installRunnerResourceForTest(state, "onr_v1_167_leland-corporate-bodyguard");
+      installRunnerHardwareForTest(state, "onr_v1_132_microtech-trode-set");
+      installRunnerResourceForTest(
+        state,
+        "onr_v1_167_leland-corporate-bodyguard",
+      );
       putCorpIceOnServer(state, "rd", definitionId);
       const initial = structuredClone(state);
       const replayStart = state.eventLog.length;
       state = apply(
         state,
         "runner",
-        (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+        (action) =>
+          action.type === "start_run" && action.payload?.serverId === "rd",
       );
       state = apply(
         state,
@@ -2753,7 +3005,11 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
           action.type === "rez_ice" &&
           sourceDefinition(state, action) === definitionId,
       );
-      state = apply(state, "runner", (action) => action.type === "continue_run");
+      state = apply(
+        state,
+        "runner",
+        (action) => action.type === "continue_run",
+      );
       expect(state.trace).toMatchObject({ baseTraceStrength: traceStrength });
       state = applyChoice(state, "corp", "bid_10");
       state = applyChoice(state, "runner", "bid_0");
@@ -2776,42 +3032,80 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       expect(replay.ok).toBe(true);
       expect(hashState(replay.state)).toBe(hashState(state));
 
-      let miss = toRunnerTurn(MECHANIC_SMOKE_GAMES.traceTags(`spotcheck-${definitionId}-miss`));
+      let miss = toRunnerTurn(
+        MECHANIC_SMOKE_GAMES.traceTags(`spotcheck-${definitionId}-miss`),
+      );
       miss.runner.credits = 20;
       miss.corp.credits = 20;
       installRunnerHardwareForTest(miss, "onr_v1_132_microtech-trode-set");
       putCorpIceOnServer(miss, "rd", definitionId);
-      miss = apply(miss, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
-      miss = apply(miss, "corp", (action) => action.type === "rez_ice" && sourceDefinition(miss, action) === definitionId);
+      miss = apply(
+        miss,
+        "runner",
+        (action) =>
+          action.type === "start_run" && action.payload?.serverId === "rd",
+      );
+      miss = apply(
+        miss,
+        "corp",
+        (action) =>
+          action.type === "rez_ice" &&
+          sourceDefinition(miss, action) === definitionId,
+      );
       miss = apply(miss, "runner", (action) => action.type === "continue_run");
       miss = applyChoice(miss, "corp", "bid_0");
       miss = applyChoice(miss, "runner", "bid_20");
       expect(miss.run?.phase).toBe("encounter_ice");
-      expect(miss.runner.heap.some((id) => miss.cardInstances[id]?.definitionId === "onr_v1_132_microtech-trode-set")).toBe(false);
+      expect(
+        miss.runner.heap.some(
+          (id) =>
+            miss.cardInstances[id]?.definitionId ===
+            "onr_v1_132_microtech-trode-set",
+        ),
+      ).toBe(false);
     }
   });
 
   it("documents Cinderella failure without keeping stale break options or applying break costs", () => {
-    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.traceTags("spotcheck-cinderella-failed-trace-break-cost"));
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.traceTags(
+        "spotcheck-cinderella-failed-trace-break-cost",
+      ),
+    );
     state.runner.credits = 20;
     state.corp.credits = 20;
-    const hardwareId = installRunnerHardwareForTest(state, "onr_v1_120_armadillo-armored-road-home");
-    const replicatorId = installRunnerProgramForTest(state, "onr_v1_056_replicator");
+    const hardwareId = installRunnerHardwareForTest(
+      state,
+      "onr_v1_120_armadillo-armored-road-home",
+    );
+    const replicatorId = installRunnerProgramForTest(
+      state,
+      "onr_v1_056_replicator",
+    );
     state.cardInstances[replicatorId] = {
       ...state.cardInstances[replicatorId]!,
       strengthModifier: 4,
     };
     putCorpIceOnServer(state, "rd", "onr_v1_228_cinderella");
-    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
     state = apply(
       state,
       "corp",
-      (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_228_cinderella",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "onr_v1_228_cinderella",
     );
     const visibleBreakBeforeTrace = mustAction(
       state,
       "runner",
-      (action) => action.type === "break_subroutine" && sourceDefinition(state, action) === "onr_v1_056_replicator",
+      (action) =>
+        action.type === "break_subroutine" &&
+        sourceDefinition(state, action) === "onr_v1_056_replicator",
     );
     expect(visibleBreakBeforeTrace.payload).toMatchObject({
       targetIceDefinitionId: "onr_v1_228_cinderella",
@@ -2844,7 +3138,9 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
     expect(state.run?.phase).toBe("encounter_ice");
     expect(
       getLegalActions(state, "runner").some(
-        (action) => action.type === "break_subroutine" && sourceDefinition(state, action) === "onr_v1_056_replicator",
+        (action) =>
+          action.type === "break_subroutine" &&
+          sourceDefinition(state, action) === "onr_v1_056_replicator",
       ),
     ).toBe(false);
     expect(
@@ -2856,18 +3152,34 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       }).ok,
     ).toBe(false);
 
-    let successful = toRunnerTurn(MECHANIC_SMOKE_GAMES.traceTags("spotcheck-cinderella-success-trace-cost"));
+    let successful = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.traceTags("spotcheck-cinderella-success-trace-cost"),
+    );
     successful.runner.credits = 20;
     successful.corp.credits = 20;
-    installRunnerHardwareForTest(successful, "onr_v1_120_armadillo-armored-road-home");
+    installRunnerHardwareForTest(
+      successful,
+      "onr_v1_120_armadillo-armored-road-home",
+    );
     putCorpIceOnServer(successful, "rd", "onr_v1_228_cinderella");
-    successful = apply(successful, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    successful = apply(
+      successful,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
     successful = apply(
       successful,
       "corp",
-      (action) => action.type === "rez_ice" && sourceDefinition(successful, action) === "onr_v1_228_cinderella",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(successful, action) === "onr_v1_228_cinderella",
     );
-    successful = apply(successful, "runner", (action) => action.type === "continue_run");
+    successful = apply(
+      successful,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
     successful = applyChoice(successful, "corp", "bid_1");
     const runnerCreditsBeforeSuccessBid = successful.runner.credits;
     successful = applyChoice(successful, "runner", "bid_0");
@@ -2882,11 +3194,16 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
   });
 
   it("places Management Shake-Up advancement counters and scales Shattered Remains hardware trash", () => {
-    let state = MECHANIC_SMOKE_GAMES.agendaScoring("spotcheck-management-shake-up");
+    let state = MECHANIC_SMOKE_GAMES.agendaScoring(
+      "spotcheck-management-shake-up",
+    );
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state.corp.credits = 50;
     state.corp.clicks = 10;
-    const agendaId = putCorpRootInRemote(state, "onr_v1_202_genetics-visionary-acquisition");
+    const agendaId = putCorpRootInRemote(
+      state,
+      "onr_v1_202_genetics-visionary-acquisition",
+    );
     const virusId = putCorpRootInRemote(state, "onr_v1_348_virus-test-site");
     moveCorpCardToHq(state, "onr_v1_292_management-shake-up");
     const initial = structuredClone(state);
@@ -2937,8 +3254,14 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       }),
     );
     access.runner.credits = 20;
-    const firstHardware = installRunnerHardwareForTest(access, "simple_setup_hardware");
-    const secondHardware = moveRunnerCardCopyToGrip(access, "simple_setup_hardware");
+    const firstHardware = installRunnerHardwareForTest(
+      access,
+      "simple_setup_hardware",
+    );
+    const secondHardware = moveRunnerCardCopyToGrip(
+      access,
+      "simple_setup_hardware",
+    );
     removeEverywhere(access, secondHardware);
     access.runner.rig.hardware.push(secondHardware);
     access.cardInstances[secondHardware] = {
@@ -2957,32 +3280,68 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
     };
     const accessInitial = structuredClone(access);
     const accessReplayStart = access.eventLog.length;
-    access = apply(access, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+    access = apply(
+      access,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
     access = passRootRezWindowBeforeAccessIfOpen(access);
     access = apply(access, "runner", (action) => action.type === "access_card");
-    expect(access.runner.heap).toEqual(expect.arrayContaining([firstHardware, secondHardware]));
+    expect(access.runner.heap).toEqual(
+      expect.arrayContaining([firstHardware, secondHardware]),
+    );
     expect(access.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneAction: "v1919_access_ambush_trash_installed",
       ambushDefinitionId: "onr_v1_315_corprunners-shattered-remains",
       advancementCounterCount: 2,
       trashedCount: 2,
     });
-    expect(replayEvents(accessInitial, access.eventLog.slice(accessReplayStart)).ok).toBe(true);
+    expect(
+      replayEvents(accessInitial, access.eventLog.slice(accessReplayStart)).ok,
+    ).toBe(true);
   });
 
   it("keeps Ball and Chain tax and Tokyo-Chiba Infighting run bonus scoped to the current run/server", () => {
-    let taxState = toRunnerTurn(v181CardReleaseGame("spotcheck-ball-chain-tax"));
+    let taxState = toRunnerTurn(
+      v181CardReleaseGame("spotcheck-ball-chain-tax"),
+    );
     taxState.runner.credits = 0;
     taxState.corp.credits = 20;
     putCorpIceOnServer(taxState, "rd", "simple_barrier_ice");
     putCorpIceOnServer(taxState, "rd", "onr_v1_222_ball-and-chain");
-    taxState = apply(taxState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
-    taxState = apply(taxState, "corp", (action) => action.type === "rez_ice" && sourceDefinition(taxState, action) === "onr_v1_222_ball-and-chain");
-    taxState = apply(taxState, "runner", (action) => action.type === "continue_run");
+    taxState = apply(
+      taxState,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    taxState = apply(
+      taxState,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(taxState, action) === "onr_v1_222_ball-and-chain",
+    );
+    taxState = apply(
+      taxState,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
     const initial = structuredClone(taxState);
     const replayStart = taxState.eventLog.length;
-    taxState = apply(taxState, "runner", (action) => action.type === "continue_run");
-    taxState = apply(taxState, "corp", (action) => action.type === "rez_ice" && sourceDefinition(taxState, action) === "simple_barrier_ice");
+    taxState = apply(
+      taxState,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
+    taxState = apply(
+      taxState,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(taxState, action) === "simple_barrier_ice",
+    );
     expect(taxState.run).toBeUndefined();
     expect(taxState.eventLog.at(-1)?.publicPayload).toMatchObject({
       encounterTaxForFutureIce: 2,
@@ -2990,13 +3349,18 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       encounterTaxSource: "onr_v1_222_ball-and-chain",
       result: "ended",
     });
-    expect(replayEvents(initial, taxState.eventLog.slice(replayStart)).ok).toBe(true);
+    expect(replayEvents(initial, taxState.eventLog.slice(replayStart)).ok).toBe(
+      true,
+    );
 
     let tokyo = v163CardReleaseGame("spotcheck-tokyo-chiba-bonus");
     tokyo = apply(tokyo, "corp", (action) => action.type === "mandatory_draw");
     tokyo.corp.credits = 10;
     tokyo.corp.clicks = 3;
-    const tokyoId = putCorpRootInRemote(tokyo, "onr_v1_371_tokyo-chiba-infighting");
+    const tokyoId = putCorpRootInRemote(
+      tokyo,
+      "onr_v1_371_tokyo-chiba-infighting",
+    );
     putCorpIceOnServer(tokyo, "remote_1", "onr_v1_232_crystal-wall");
     tokyo.cardInstances[tokyoId] = {
       ...tokyo.cardInstances[tokyoId]!,
@@ -3004,8 +3368,19 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       rezzed: true,
     };
     tokyo = toRunnerTurnFromCorpMain(tokyo);
-    tokyo = apply(tokyo, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
-    tokyo = apply(tokyo, "corp", (action) => action.type === "rez_ice" && sourceDefinition(tokyo, action) === "onr_v1_232_crystal-wall");
+    tokyo = apply(
+      tokyo,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    tokyo = apply(
+      tokyo,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(tokyo, action) === "onr_v1_232_crystal-wall",
+    );
     const creditsBefore = tokyo.corp.credits;
     tokyo = apply(tokyo, "runner", (action) => action.type === "continue_run");
     expect(tokyo.corp.credits).toBe(creditsBefore + 2);

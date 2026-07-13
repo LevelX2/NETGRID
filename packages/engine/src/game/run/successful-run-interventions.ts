@@ -949,9 +949,8 @@ export function finalizeDelayedSuccessfulRunAfterPassedIce(
   if (legalAction) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      sourceDefinitionId: host.cards.definitionFor(
-        delayed.interventionSourceId,
-      ).id,
+      sourceDefinitionId: host.cards.definitionFor(delayed.interventionSourceId)
+        .id,
       serverId: delayed.originalServerId,
       successfulRunFinalizedAfterIntervention: true,
       delayedSuccessfulRun: false,
@@ -985,8 +984,10 @@ export function applyDirectSuccessfulRunTriggers(
   host: SuccessfulRunInterventionHost,
   legalAction?: LegalAction,
 ): SuccessfulRunFollowupExecutionResult {
-  const responseTeamResult =
-    applyCorpShuffleRunnerGripAfterSuccessfulRun(host, legalAction);
+  const responseTeamResult = applyCorpShuffleRunnerGripAfterSuccessfulRun(
+    host,
+    legalAction,
+  );
   const karlSources = host.state.runner.rig.resources
     .slice()
     .sort()
@@ -1022,7 +1023,8 @@ export function applyDirectSuccessfulRunTriggers(
       runnerCreditsAfter: host.state.runner.credits,
     };
   }
-  if (!responseTeamResult.handled && gainedCredits <= 0) return { handled: false };
+  if (!responseTeamResult.handled && gainedCredits <= 0)
+    return { handled: false };
   return {
     handled: true,
     ...(gainedCredits > 0 ? { creditsGained: gainedCredits } : {}),
@@ -1050,12 +1052,13 @@ function applyCorpShuffleRunnerGripAfterSuccessfulRun(
       )
         return false;
       return (
-        cardImplementationForDefinitionId(instance.definitionId as CardDefinitionId)
-          ?.successfulRunFollowups?.some(
-            (followup) =>
-              followup.kind ===
-              "corp_optional_shuffle_runner_grip_into_stack_then_draw_same_count",
-          ) === true
+        cardImplementationForDefinitionId(
+          instance.definitionId as CardDefinitionId,
+        )?.successfulRunFollowups?.some(
+          (followup) =>
+            followup.kind ===
+            "corp_optional_shuffle_runner_grip_into_stack_then_draw_same_count",
+        ) === true
       );
     })
     .sort();
@@ -1124,7 +1127,7 @@ export function applySuccessfulRunExtraRunFollowup(
   )
     return { handled: false };
   flags.successfulRunExtraRunPending = true;
-  flags.successfulRunExtraRunUsedThisTurn = true;
+  flags.successfulRunExtraRunUsedThisTurn = false;
   flags.bonusRunPending = true;
   if (legalAction) {
     legalAction.payload = {
@@ -1309,10 +1312,7 @@ function resolveSuccessfulRunRemoteCounter(
     throw new Error("Fait Accompli markiert nur subsidiary data forts.");
   if (!host.state.runner.rig.programs.includes(sourceCardId))
     throw new Error("Fait Accompli ist nicht installiert.");
-  if (
-    host.cards.definitionFor(sourceCardId).id !==
-    COUNTER_GAIN_PROGRAM_SOURCE
-  )
+  if (host.cards.definitionFor(sourceCardId).id !== COUNTER_GAIN_PROGRAM_SOURCE)
     throw new Error("Die Fait-Accompli-Faehigkeit passt nicht zur Karte.");
   const used = run.successfulRunAbilityUsedSourceIds ?? [];
   if (used.includes(sourceCardId))

@@ -262,8 +262,7 @@ export function buildRunnerMainActions(
     host.cardImplementation.pushActivatedActions;
   const runnerDrawActionContext = host.runner.runnerDrawActionContext;
   const exposedCorpCardInServer = host.hiddenZone.exposedCorpCardInServer;
-  const topHostedProgramOnHardware =
-    host.hiddenZone.topHostedProgramOnHardware;
+  const topHostedProgramOnHardware = host.hiddenZone.topHostedProgramOnHardware;
   const hostedProgramIdsOnHardware = host.hiddenZone.hostedProgramIdsOnHardware;
   const runnerUtilityLongtailKindForCard =
     host.runner.runnerUtilityLongtailKindForCard;
@@ -288,8 +287,7 @@ export function buildRunnerMainActions(
     host.constants.BOARDWALK_RANDOM_PROGRAM_SOURCE;
   const HOST_RETURN_HARDWARE_SOURCE =
     host.constants.HOST_RETURN_HARDWARE_SOURCE;
-  const RANDOM_RESOURCE_SOURCE =
-    host.constants.RANDOM_RESOURCE_SOURCE;
+  const RANDOM_RESOURCE_SOURCE = host.constants.RANDOM_RESOURCE_SOURCE;
   const STACK_TOP_REORDER_RESOURCE_SOURCE =
     host.constants.STACK_TOP_REORDER_RESOURCE_SOURCE;
   const JUNKYARD_BBS_ID = host.constants.JUNKYARD_BBS_ID;
@@ -306,9 +304,8 @@ export function buildRunnerMainActions(
     actions.push(
       ...expandRunnerProgramInstallPaymentActions(state, installAction, {
         installCost: definition.installCost ?? 0,
-        availableProgramInstallCredits: availableRunnerProgramInstallCredits(
-          state,
-        ),
+        availableProgramInstallCredits:
+          availableRunnerProgramInstallCredits(state),
       }),
     );
   };
@@ -320,14 +317,20 @@ export function buildRunnerMainActions(
     (sourceCardId) =>
       !(flags.runOnlyActionUsedSourceIdsThisTurn ?? []).includes(sourceCardId),
   );
+  const bodyweightExtraRunPending = flags.successfulRunExtraRunPending === true;
   const pendingSequence = nextMultiServerSuccessSequence(flags);
-  const nextSequenceServerId = pendingSequence?.pendingServerIds[0];
+  const nextSequenceServerId = bodyweightExtraRunPending
+    ? undefined
+    : pendingSequence?.pendingServerIds[0];
   if (pendingSequence && nextSequenceServerId) {
-    const forcedRunActions = buildMultiServerSuccessSequenceForcedRunActions(host, {
-      pendingSequence,
-      nextSequenceServerId,
-      runDurationPaymentHost: runDurationPaymentHost(state),
-    });
+    const forcedRunActions = buildMultiServerSuccessSequenceForcedRunActions(
+      host,
+      {
+        pendingSequence,
+        nextSequenceServerId,
+        runDurationPaymentHost: runDurationPaymentHost(state),
+      },
+    );
     if (forcedRunActions.length > 0) return forcedRunActions;
     return [
       action(
@@ -347,8 +350,7 @@ export function buildRunnerMainActions(
     ];
   }
   const bonusRunPending =
-    flags.bonusRunPending === true ||
-    nextSequenceServerId !== undefined;
+    flags.bonusRunPending === true || nextSequenceServerId !== undefined;
   if (
     !hasClicks &&
     !bonusRunPending &&
@@ -806,7 +808,8 @@ export function buildRunnerMainActions(
         !cardImplementationForDefinitionId(definition.id) &&
         definition.id !== SELF_MODIFYING_CODE_ID &&
         (definition.id !== PAID_STACK_SEARCH_RESOURCE_SOURCE ||
-          state.runner.credits + runnerCostPenaltySupportCreditCapacity(state) >=
+          state.runner.credits +
+            runnerCostPenaltySupportCreditCapacity(state) >=
             1) &&
         (definition.id === DAILY_CREDIT_RESOURCE_SOURCE
           ? state.runner.stack.length > 0
@@ -932,8 +935,7 @@ export function buildRunnerMainActions(
             {
               cardId,
               targetProgramId: topHostedId,
-              v1922RunnerHardwareAbility:
-                "return_top_hosted_program",
+              v1922RunnerHardwareAbility: "return_top_hosted_program",
               hostedProgramCount: hostedProgramIdsOnHardware(state, cardId)
                 .length,
             },
@@ -1039,7 +1041,8 @@ export function buildRunnerMainActions(
       if (
         definition.id === JUNKYARD_BBS_ID &&
         !cardImplementationForDefinitionId(definition.id) &&
-        state.runner.credits + runnerCostPenaltySupportCreditCapacity(state) >= 1
+        state.runner.credits + runnerCostPenaltySupportCreditCapacity(state) >=
+          1
       ) {
         const targetCardId = topRunnerHeapCardId(state);
         if (targetCardId) {
@@ -1080,7 +1083,8 @@ export function buildRunnerMainActions(
       if (definition.id === SHELL_TRADERS_ID) {
         for (const targetCardId of delayedInstallPrepareTargetIds(state)) {
           const targetDefinition = definitionFor(state, targetCardId);
-          const shellCounterAmount = delayedInstallCounterCost(targetDefinition);
+          const shellCounterAmount =
+            delayedInstallCounterCost(targetDefinition);
           actions.push(
             buildRunnerDelayedInstallSetAsideAction(state, {
               sourceCardId: resourceId,
@@ -1093,7 +1097,8 @@ export function buildRunnerMainActions(
           );
         }
         if (
-          state.runner.credits + runnerCostPenaltySupportCreditCapacity(state) >=
+          state.runner.credits +
+            runnerCostPenaltySupportCreditCapacity(state) >=
           1
         ) {
           for (const targetCardId of delayedInstallPreparedTargetIds(state)) {
@@ -1301,7 +1306,42 @@ export function buildRunnerMainActions(
     actions,
   );
   actions.push(buildRunnerEndTurnAction(state));
-  return filterActionsForRestrictedExtraActions(state, "runner", actions);
+  const filteredActions = filterActionsForRestrictedExtraActions(
+    state,
+    "runner",
+    actions,
+  );
+  if (!bodyweightExtraRunPending) return filteredActions;
+
+  const sourceCardId = state.runner.rig.hardware
+    .slice()
+    .sort()
+    .find(
+      (cardId) => definitionFor(state, cardId).id === BODYWEIGHT_DATA_CRECHE_ID,
+    );
+  const immediateRunActions = filteredActions.filter(
+    (candidate) =>
+      candidate.type === "start_run" &&
+      candidate.payload?.bonusRunNoClick === true &&
+      candidate.payload?.bonusRunSource === BODYWEIGHT_DATA_CRECHE_ID,
+  );
+  immediateRunActions.push(
+    action(
+      state,
+      "runner",
+      "trigger_ability",
+      "Bodyweight Data Crèche: keinen Bonus-Run starten",
+      sourceCardId ?? "game_rule",
+      [],
+      {
+        runnerAbility: "decline_successful_run_extra_run",
+        ...(sourceCardId ? { cardId: sourceCardId } : {}),
+        sourceDefinitionId: BODYWEIGHT_DATA_CRECHE_ID,
+        successfulRunExtraRunDecision: "decline",
+      },
+    ),
+  );
+  return immediateRunActions;
 }
 
 function nextMultiServerSuccessSequence(
@@ -1339,8 +1379,7 @@ function buildMultiServerSuccessSequenceForcedRunActions(
     server.id,
   );
   const rootAssetRunTax = host.run.runStartTaxForCorpRootAssets(state);
-  const runStartTaxCredits =
-    upgradeRunStartTax.amount + rootAssetRunTax.amount;
+  const runStartTaxCredits = upgradeRunStartTax.amount + rootAssetRunTax.amount;
   const runStartTaxSourceDefinitionIds = [
     ...upgradeRunStartTax.sourceDefinitionIds,
     ...rootAssetRunTax.sourceDefinitionIds,

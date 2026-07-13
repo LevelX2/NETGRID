@@ -7,6 +7,7 @@ import type {
 } from "@netgrid/shared";
 import type { StartRunOptions } from "./run-core-execution";
 import type { RunTaxPaymentResult } from "./run-duration-payment";
+import { BODYWEIGHT_DATA_CRECHE_ID } from "../../compatibility/runtime-compatibility";
 
 export type StartRunActionExecutionHost = {
   state: GameState;
@@ -54,7 +55,17 @@ export function executeStartRunAction(
   const flags = host.turn.ensureRunnerTurnFlags();
   const pendingSequence = nextMultiServerSuccessSequence(flags);
   const nextSequenceServerId = pendingSequence?.pendingServerIds[0];
-  if (pendingSequence && nextSequenceServerId) {
+  const bodyweightExtraRunPending = flags.successfulRunExtraRunPending === true;
+  if (bodyweightExtraRunPending) {
+    if (
+      legalAction.payload?.bonusRunNoClick !== true ||
+      legalAction.payload?.bonusRunSource !== BODYWEIGHT_DATA_CRECHE_ID ||
+      legalAction.payload?.multiServerSuccessSequenceRun === true
+    )
+      throw new Error(
+        "Das unmittelbare Bodyweight-Fenster erlaubt nur den angebotenen Bonus-Run.",
+      );
+  } else if (pendingSequence && nextSequenceServerId) {
     if (
       legalAction.payload?.multiServerSuccessSequenceRun !== true ||
       legalAction.payload?.bonusRunNoClick !== true
@@ -67,8 +78,7 @@ export function executeStartRunAction(
         "Die offene Run-Sequenz verlangt den naechsten Data Fort.",
       );
     if (
-      legalAction.payload?.bonusRunSource !==
-      pendingSequence.sourceDefinitionId
+      legalAction.payload?.bonusRunSource !== pendingSequence.sourceDefinitionId
     )
       throw new Error("Die Sequenzquelle passt nicht zur offenen Run-Sequenz.");
   } else if (legalAction.payload?.multiServerSuccessSequenceRun === true) {
@@ -95,7 +105,10 @@ export function executeStartRunAction(
   }
   const taxPayment = host.payment.payRunStartTaxCredits(legalAction);
   if (taxPayment.handled && taxPayment.paid === false) return;
-  if (legalAction.payload?.runOnlyAction === true && runOnlyActionSourceCardId) {
+  if (
+    legalAction.payload?.runOnlyAction === true &&
+    runOnlyActionSourceCardId
+  ) {
     const used = flags.runOnlyActionUsedSourceIdsThisTurn ?? [];
     flags.runOnlyActionUsedSourceIdsThisTurn = [
       ...used,
@@ -107,6 +120,8 @@ export function executeStartRunAction(
     if (legalAction.payload?.multiServerSuccessSequenceRun !== true) {
       flags.bonusRunPending = false;
       flags.successfulRunExtraRunPending = false;
+      if (bodyweightExtraRunPending)
+        flags.successfulRunExtraRunUsedThisTurn = true;
     }
   } else {
     host.payment.spendRunnerClick();

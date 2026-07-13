@@ -305,7 +305,7 @@ function makeHost(
           ...(instance.counters ?? {}),
           [counterType]:
             Math.max(0, Math.floor(instance.counters?.[counterType] ?? 0)) +
-          amount,
+            amount,
         };
       },
     },
@@ -677,7 +677,8 @@ describe("successful run interventions", () => {
 
     const falseEchoAction = actions.find(
       (action) =>
-        action.payload?.v1922RunnerProgramAbility === "successful_run_force_rez",
+        action.payload?.v1922RunnerProgramAbility ===
+        "successful_run_force_rez",
     )!;
     resolveSuccessfulRunFollowupAbility(fixture.host, falseEchoAction);
     expect(fixture.state.runner.credits).toBe(3);
@@ -708,7 +709,8 @@ describe("successful run interventions", () => {
     };
     const iSpyAction = actions.find(
       (action) =>
-        action.payload?.runnerUtilityAbility === "successful_run_fort_counter_expose",
+        action.payload?.runnerUtilityAbility ===
+        "successful_run_fort_counter_expose",
     )!;
     resolveSuccessfulRunFollowupAbility(fixture.host, iSpyAction);
     expect(fixture.trashedRunnerIds).toEqual(["i_spy"]);
@@ -797,9 +799,9 @@ describe("successful run interventions", () => {
     expect(legacyFixture.state.cardInstances.credit_subversion?.faceup).toBe(
       true,
     );
-    expect(legacyFixture.state.cardInstances.credit_subversion?.tapped).not.toBe(
-      true,
-    );
+    expect(
+      legacyFixture.state.cardInstances.credit_subversion?.tapped,
+    ).not.toBe(true);
   });
 
   it("builds and resolves Armageddon R&D access replacement through Runner followups", () => {
@@ -884,7 +886,7 @@ describe("successful run interventions", () => {
     expect(fixture.state.runner.credits).toBe(6);
     expect(fixture.state.runnerTurnFlags).toMatchObject({
       successfulRunExtraRunPending: true,
-      successfulRunExtraRunUsedThisTurn: true,
+      successfulRunExtraRunUsedThisTurn: false,
       bonusRunPending: true,
     });
     expect(legalAction.payload).toMatchObject({

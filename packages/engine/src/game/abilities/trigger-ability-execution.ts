@@ -9,18 +9,11 @@ import {
   closeRunnerCostPenaltySupportWindowForPayment,
   openRunnerCostPenaltySupportWindow,
 } from "../payment/runner-payment-support";
-import type {
-  RunFortTriggerExecutionResult,
-} from "./run-fort-trigger-execution";
-import type {
-  RunnerSpecialTriggerExecutionResult,
-} from "./runner-special-trigger-execution";
-import type {
-  CounterUtilityTriggerExecutionResult,
-} from "./counter-utility-trigger-execution";
-import type {
-  HiddenZoneTriggerExecutionResult,
-} from "./hidden-zone-trigger-execution";
+import type { RunFortTriggerExecutionResult } from "./run-fort-trigger-execution";
+import type { RunnerSpecialTriggerExecutionResult } from "./runner-special-trigger-execution";
+import type { CounterUtilityTriggerExecutionResult } from "./counter-utility-trigger-execution";
+import type { HiddenZoneTriggerExecutionResult } from "./hidden-zone-trigger-execution";
+import { BODYWEIGHT_DATA_CRECHE_ID } from "../../compatibility/runtime-compatibility";
 
 export type TriggerAbilityExecutionHost = {
   state: GameState;
@@ -53,10 +46,22 @@ export type TriggerAbilityExecutionHost = {
     removeActiveObligation: (state: GameState) => void;
   };
   actionEconomy?: {
-    acceptExtraActionOffer: (state: GameState, legalAction: LegalAction) => void;
-    declineExtraActionOffer: (state: GameState, legalAction: LegalAction) => void;
-    resolvePdcaCounterAction: (state: GameState, legalAction: LegalAction) => void;
-    resolveForcedActionNotPossible: (state: GameState, legalAction: LegalAction) => void;
+    acceptExtraActionOffer: (
+      state: GameState,
+      legalAction: LegalAction,
+    ) => void;
+    declineExtraActionOffer: (
+      state: GameState,
+      legalAction: LegalAction,
+    ) => void;
+    resolvePdcaCounterAction: (
+      state: GameState,
+      legalAction: LegalAction,
+    ) => void;
+    resolveForcedActionNotPossible: (
+      state: GameState,
+      legalAction: LegalAction,
+    ) => void;
   };
   runnerSpecial: {
     handleRunnerSpecialTriggerExecution: (
@@ -109,27 +114,37 @@ export function handleTriggerAbilityExecution(
       runnerCreditCost,
     );
   }
-  if (legalAction.payload?.actionEconomyAbility === "accept_extra_action_offer") {
+  if (
+    legalAction.payload?.actionEconomyAbility === "accept_extra_action_offer"
+  ) {
     if (!host.actionEconomy) throw new Error("Action-Economy-Host fehlt.");
     host.actionEconomy.acceptExtraActionOffer(state, legalAction);
     return handled(legalAction);
   }
-  if (legalAction.payload?.actionEconomyAbility === "decline_extra_action_offer") {
+  if (
+    legalAction.payload?.actionEconomyAbility === "decline_extra_action_offer"
+  ) {
     if (!host.actionEconomy) throw new Error("Action-Economy-Host fehlt.");
     host.actionEconomy.declineExtraActionOffer(state, legalAction);
     return handled(legalAction);
   }
-  if (legalAction.payload?.actionEconomyAbility === "pdca_counter_gain_action") {
+  if (
+    legalAction.payload?.actionEconomyAbility === "pdca_counter_gain_action"
+  ) {
     if (!host.actionEconomy) throw new Error("Action-Economy-Host fehlt.");
     host.actionEconomy.resolvePdcaCounterAction(state, legalAction);
     return handled(legalAction);
   }
-  if (legalAction.payload?.actionEconomyAbility === "forced_action_not_possible") {
+  if (
+    legalAction.payload?.actionEconomyAbility === "forced_action_not_possible"
+  ) {
     if (!host.actionEconomy) throw new Error("Action-Economy-Host fehlt.");
     host.actionEconomy.resolveForcedActionNotPossible(state, legalAction);
     return handled(legalAction);
   }
-  if (host.runnerSpecial.handleRunnerSpecialTriggerExecution(legalAction).handled)
+  if (
+    host.runnerSpecial.handleRunnerSpecialTriggerExecution(legalAction).handled
+  )
     return handled(legalAction);
   if (
     legalAction.payload?.corpAbility ===
@@ -150,16 +165,18 @@ export function handleTriggerAbilityExecution(
     const definition = host.cards.definitionFor(state, sourceCardId);
     if (definition.type !== "resource")
       throw new Error("Die Corp-Trash-Ability passt nicht zu diesem Ziel.");
-    const corpTrashAbility =
-      host.cards.cardImplementationForDefinitionId?.(definition.id)
-        ?.corpTrashInstalledRunnerSource;
+    const corpTrashAbility = host.cards.cardImplementationForDefinitionId?.(
+      definition.id,
+    )?.corpTrashInstalledRunnerSource;
     if (
       !corpTrashAbility ||
       corpTrashAbility.kind !== "corp_trash_installed_runner_resource" ||
       corpTrashAbility.timing !== "corp_main" ||
       corpTrashAbility.target !== "source"
     )
-      throw new Error("Die Runner-Resource deklariert keine Corp-Trash-Ability.");
+      throw new Error(
+        "Die Runner-Resource deklariert keine Corp-Trash-Ability.",
+      );
     host.actions.spendClick(state, "corp");
     host.credits.spend(state, "corp", corpTrashAbility.cost.credits);
     host.runner.trashInstalledCardToHeap(state, sourceCardId);
@@ -172,18 +189,57 @@ export function handleTriggerAbilityExecution(
     };
     return handled(legalAction);
   }
-  if (host.counterUtility.handleCounterUtilityTriggerExecution(legalAction).handled)
+  if (
+    host.counterUtility.handleCounterUtilityTriggerExecution(legalAction)
+      .handled
+  )
     return handled(legalAction);
   if (host.runFort.handleRunFortTriggerExecution(legalAction).handled)
     return handled(legalAction);
   if (host.hiddenZone.handleHiddenZoneTriggerExecution(legalAction).handled)
     return handled(legalAction);
   if (
+    legalAction.payload?.runnerAbility === "decline_successful_run_extra_run"
+  ) {
+    if (legalAction.side !== "runner")
+      throw new Error("Nur der Runner darf den Bodyweight-Bonus-Run ablehnen.");
+    if (state.phase !== "runner_action_phase" || state.activeSide !== "runner")
+      throw new Error(
+        "Der Bodyweight-Bonus-Run kann nur im unmittelbaren Runner-Fenster abgelehnt werden.",
+      );
+    const flags = host.runner.ensureTurnFlags(state);
+    if (flags.successfulRunExtraRunPending !== true)
+      throw new Error("Es ist kein Bodyweight-Bonus-Run offen.");
+    const sourceCardId = String(
+      legalAction.payload?.cardId ?? legalAction.source ?? "",
+    ) as CardInstanceId;
+    if (!sourceCardId || !state.runner.rig.hardware.includes(sourceCardId))
+      throw new Error("Bodyweight Data Crèche ist nicht installiert.");
+    const sourceDefinitionId = host.cards.definitionFor(state, sourceCardId).id;
+    if (
+      sourceDefinitionId !== BODYWEIGHT_DATA_CRECHE_ID ||
+      legalAction.payload?.sourceDefinitionId !== BODYWEIGHT_DATA_CRECHE_ID
+    )
+      throw new Error("Die Quelle des Bodyweight-Fensters ist ungültig.");
+    flags.successfulRunExtraRunPending = false;
+    flags.bonusRunPending = false;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      successfulRunExtraRunDecision: "decline",
+      successfulRunExtraRunPending: false,
+      successfulRunExtraRunUsedThisTurn:
+        flags.successfulRunExtraRunUsedThisTurn === true,
+    };
+    return handled(legalAction);
+  }
+  if (
     legalAction.payload?.runnerAbility ===
     "multi_server_success_sequence_failed"
   ) {
     if (legalAction.side !== "runner")
-      throw new Error("Nur der Runner darf die offene Run-Sequenz abschliessen.");
+      throw new Error(
+        "Nur der Runner darf die offene Run-Sequenz abschliessen.",
+      );
     if (state.phase !== "runner_action_phase" || state.activeSide !== "runner")
       throw new Error(
         "Die offene Run-Sequenz kann nur im Runner-Aktionsfenster scheitern.",
@@ -215,13 +271,15 @@ export function handleTriggerAbilityExecution(
   if (legalAction.payload?.runnerAbility === "change_icebreaker_subtype") {
     if (legalAction.side !== "runner")
       throw new Error("Nur der Runner darf den Icebreaker-Typ ändern.");
-    const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
+    const sourceCardId = String(
+      legalAction.payload?.cardId ?? "",
+    ) as CardInstanceId;
     if (!state.runner.rig.programs.includes(sourceCardId))
       throw new Error("Der Icebreaker ist nicht installiert.");
     const definition = host.cards.definitionFor(state, sourceCardId);
-    const change =
-      host.cards.cardImplementationForDefinitionId?.(definition.id)
-        ?.icebreakerSubtypeChange;
+    const change = host.cards.cardImplementationForDefinitionId?.(
+      definition.id,
+    )?.icebreakerSubtypeChange;
     const selectedSubtype = String(legalAction.payload?.selectedSubtype ?? "");
     if (!change || !change.choices.includes(selectedSubtype))
       throw new Error("Der gewählte Icebreaker-Typ ist nicht gültig.");
@@ -229,12 +287,18 @@ export function handleTriggerAbilityExecution(
       change.timing === "runner_main" &&
       (state.phase !== "runner_action_phase" || state.activeSide !== "runner")
     )
-      throw new Error("Der Icebreaker-Typ kann nur im Runner-Zug geändert werden.");
+      throw new Error(
+        "Der Icebreaker-Typ kann nur im Runner-Zug geändert werden.",
+      );
     if (
       change.timing === "during_run" &&
-      (!state.run || state.run.phase !== "encounter_ice" || state.activeSide !== "runner")
+      (!state.run ||
+        state.run.phase !== "encounter_ice" ||
+        state.activeSide !== "runner")
     )
-      throw new Error("Der Icebreaker-Typ kann nur im Encounter geändert werden.");
+      throw new Error(
+        "Der Icebreaker-Typ kann nur im Encounter geändert werden.",
+      );
     if (
       change.limit === "once_until_selected" &&
       state.cardInstances[sourceCardId]?.selectedSubtype
@@ -259,7 +323,9 @@ export function handleTriggerAbilityExecution(
       throw new Error("Nur der Runner darf den Icebreaker verstärken.");
     if (!state.run)
       throw new Error("Die Stärkeverstärkung gilt nur während eines Runs.");
-    const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
+    const sourceCardId = String(
+      legalAction.payload?.cardId ?? "",
+    ) as CardInstanceId;
     const targetCardId = String(
       legalAction.payload?.targetCardId ?? "",
     ) as CardInstanceId;
@@ -270,16 +336,18 @@ export function handleTriggerAbilityExecution(
     const targetDefinition = host.cards.definitionFor(state, targetCardId);
     if (!targetDefinition.subtypes.includes("icebreaker"))
       throw new Error("Das Ziel ist kein Icebreaker.");
-    const boost =
-      host.cards.cardImplementationForDefinitionId?.(
-        host.cards.definitionFor(state, sourceCardId).id,
-      )?.runnerRunStrengthBoost;
-    if (!boost) throw new Error("Die Support-Quelle hat keine Run-Verstärkung.");
+    const boost = host.cards.cardImplementationForDefinitionId?.(
+      host.cards.definitionFor(state, sourceCardId).id,
+    )?.runnerRunStrengthBoost;
+    if (!boost)
+      throw new Error("Die Support-Quelle hat keine Run-Verstärkung.");
     if (state.cardInstances[sourceCardId]?.tapped)
       throw new Error("Die Support-Quelle ist bereits getappt.");
     const used = state.run.runStrengthBoostUsedSourceIds ?? [];
     if (used.includes(sourceCardId))
-      throw new Error("Diese Support-Quelle wurde in diesem Run bereits genutzt.");
+      throw new Error(
+        "Diese Support-Quelle wurde in diesem Run bereits genutzt.",
+      );
     if (boost.cost?.tap) {
       state.cardInstances[sourceCardId] = {
         ...state.cardInstances[sourceCardId]!,
@@ -305,8 +373,7 @@ export function handleTriggerAbilityExecution(
     return handled(legalAction);
   }
   if (
-    legalAction.payload?.v1920RunnerRunLockAbility ===
-    "pay_to_remove_run_lock"
+    legalAction.payload?.v1920RunnerRunLockAbility === "pay_to_remove_run_lock"
   ) {
     if (legalAction.side !== "runner")
       throw new Error("Nur der Runner darf die Run-Sperre entfernen.");
@@ -353,8 +420,7 @@ export function handleTriggerAbilityExecution(
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       obligationDebtCountBefore: obligationsBefore,
-      obligationDebtCountAfter:
-        host.corp.activeObligationCount(state),
+      obligationDebtCountAfter: host.corp.activeObligationCount(state),
       obligationDebtActive: host.corp.activeObligationCount(state) > 0,
       obligationDebtPaymentPaid: creditCost,
       gainedAgendaPoints: scorePoints,

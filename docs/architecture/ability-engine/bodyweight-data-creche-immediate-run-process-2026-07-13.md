@@ -88,7 +88,7 @@ Commit:
 
 ### BDC-02 – Engine-Regressionsschutz und Timingkorrektur
 
-Status: `active`
+Status: `complete`
 
 Ziel:
 
@@ -111,7 +111,7 @@ Commit:
 
 ### BDC-03 – UI-/KI-Verbrauchervertrag
 
-Status: `pending`
+Status: `active`
 
 Ziel:
 
