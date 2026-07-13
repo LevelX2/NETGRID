@@ -5,7 +5,7 @@ import type { CardImplementationDefinition } from "../../../types";
 export const classicUnlistedResearchLabImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_classic_003_unlisted-research-lab",
   scoredAgenda: {
-    kind: "corp_start_turn_optional_draw",
+    kind: "corp_start_turn_mandatory_draw",
     drawCount: 1,
     visibility: "public",
   },

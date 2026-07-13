@@ -1001,6 +1001,11 @@ export type CardScoredAgendaImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
+      kind: "corp_start_turn_mandatory_draw";
+      drawCount: 1;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
       kind: "corp_damage_replacement_pdca_action_counter";
       counterType: Extract<CounterType, "pdca">;
       visibility: Extract<EventVisibilityClass, "public">;
