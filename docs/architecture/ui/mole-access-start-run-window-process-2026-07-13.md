@@ -2,7 +2,8 @@
 
 ## Status
 
-In Umsetzung am 13. Juli 2026.
+Umsetzung und Paketverifikation am 13. Juli 2026 abgeschlossen; für die
+abschließende lokale Integration nach `main` freigegeben.
 
 ## Quelle und Vorgabe
 
@@ -49,9 +50,11 @@ Für HQ Mole und R&D Mole gilt:
 - Jede Aktivierung erhöht den passenden zentralen Access um zwei Karten.
 - Mehrere Kopien bleiben kumulativ und einzeln aktivierbar.
 - Ein Rush-Hour-R&D-Run entwickelt sich damit von 4 auf 6 und bei zwei
-  aktivierten Kopien auf 8 Zugriffe.
+  aktivierten Kopien auf 8 angeforderte Zugriffe.
 - Ein normaler HQ-Run entwickelt sich von 1 auf 3 und bei zwei aktivierten
-  Kopien auf 5 Zugriffe.
+  Kopien auf 5 angeforderte Zugriffe.
+- Die tatsächlich aufgebaute Access-Queue bleibt durch die Zahl der zu diesem
+  Zeitpunkt vorhandenen Karten im angegriffenen Zentralserver begrenzt.
 
 ## Annahmen
 
@@ -220,7 +223,8 @@ Lies AGENTS.md, AGENTS.local.md, agents/release-implementation-agent.md und dies
 - HQ Mole und R&D Mole erscheinen im passenden Access-Start-Runfenster.
 - `Access beginnen` bleibt als Fortsetzungsoption sichtbar.
 - Rush Hour plus ein beziehungsweise zwei R&D Moles ergibt 6 beziehungsweise
-  8 R&D-Zugriffe.
+  8 angeforderte R&D-Zugriffe; die Queue wird auf die vorhandenen R&D-Karten
+  begrenzt.
 - Ein normaler HQ-Run plus ein beziehungsweise zwei HQ Moles ergibt 3
   beziehungsweise 5 HQ-Zugriffe, soweit ausreichend Karten vorhanden sind.
 - Kosten, Trash/Reveal, Hidden-Info, Replay und StateHash sind abgesichert.
