@@ -176,6 +176,9 @@ export function runnerRunPlanCurrentEncounterSequence(params: {
   input: AiDecisionInput;
   plan: RunnerRunPlan;
 }): RunnerRunEncounterActionSequence | undefined {
+  if (params.input.playerView.run?.phase !== "encounter_ice") {
+    return undefined;
+  }
   return quoteRunnerRunPath(params.input, params.plan).iceQuotes.find(
     (quote) =>
       quote.iceRef.instanceId ===
@@ -187,6 +190,9 @@ export function runnerRunPlanCurrentEncounterSafeSequence(params: {
   input: AiDecisionInput;
   plan: RunnerRunPlan;
 }): RunnerRunEncounterActionSequence | undefined {
+  if (params.input.playerView.run?.phase !== "encounter_ice") {
+    return undefined;
+  }
   return quoteRunnerRunPath(params.input, params.plan).iceQuotes.find(
     (quote) =>
       quote.iceRef.instanceId ===
@@ -197,6 +203,9 @@ export function runnerRunPlanCurrentEncounterSafeSequence(params: {
 export function runnerRunPlanCurrentEncounterRequiresBreak(params: {
   input: AiDecisionInput;
 }): boolean {
+  if (params.input.playerView.run?.phase !== "encounter_ice") {
+    return false;
+  }
   const currentEncounter = currentEncounteredIceCard(params.input);
   return currentEncounter
     ? currentRequiredBreakSubroutineIndexes(params.input, currentEncounter)

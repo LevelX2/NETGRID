@@ -11,6 +11,7 @@ import {
   actionDevelopsPersistentCardNow,
   persistentDevelopmentActionProjection,
 } from "./actions/persistent-development-action";
+import { actionClickCost } from "./runtime/action-cost";
 
 export const RUNNER_HAND_DEVELOPMENT_EVALUATION_SCHEMA_VERSION =
   "runner-hand-development-evaluation-v1" as const;
@@ -149,6 +150,7 @@ type CardSignals = {
   roles: string[];
   planRoles: string[];
   candidateSignals: string[];
+  requiresSameTurnAccess: boolean;
 };
 
 type CardContext = {
@@ -161,6 +163,7 @@ type CardContext = {
   memoryCost?: number;
   memoryAvailable?: number;
   duplicateInstalled: boolean;
+  sameTurnAccessFollowupAvailable?: boolean;
 };
 
 type PersistentFunctionalProfile = {
@@ -327,6 +330,13 @@ function buildCardContext(
     (params.input.playerView.own.rig ?? []).some(
       (installed) => installed.definitionId === card.definitionId,
     );
+  const sameTurnAccessFollowupAvailable = signals.requiresSameTurnAccess
+    ? legalAction !== undefined &&
+      sameTurnAccessFollowupAvailableAfter(
+        params.input,
+        legalAction,
+      )
+    : undefined;
 
   return {
     card,
@@ -338,6 +348,9 @@ function buildCardContext(
     ...(memoryCost !== undefined ? { memoryCost } : {}),
     ...(memoryAvailable !== undefined ? { memoryAvailable } : {}),
     duplicateInstalled,
+    ...(sameTurnAccessFollowupAvailable !== undefined
+      ? { sameTurnAccessFollowupAvailable }
+      : {}),
   };
 }
 
@@ -383,7 +396,19 @@ function signalsForCard(
     .filter((entry): entry is string => typeof entry === "string")
     .join(" ")
     .toLowerCase();
-  return { text, roles, planRoles, candidateSignals };
+  const requiresSameTurnAccess =
+    (hint?.effects ?? []).some((effect) => effect.timing === "on_access") &&
+    [card.rulesText, definition?.text].some(
+      (rulesText) =>
+        typeof rulesText === "string" && /\bthis turn\b/i.test(rulesText),
+    );
+  return {
+    text,
+    roles,
+    planRoles,
+    candidateSignals,
+    requiresSameTurnAccess,
+  };
 }
 
 function roleForCard(context: CardContext): RunnerHandDevelopmentRole {
@@ -410,6 +435,13 @@ function availabilityForCard(
   context: CardContext,
   role: RunnerHandDevelopmentRole,
 ): RunnerHandDevelopmentAvailability {
+  if (
+    context.legalAction &&
+    context.signals.requiresSameTurnAccess &&
+    context.sameTurnAccessFollowupAvailable !== true
+  ) {
+    return "timing_blocked";
+  }
   if (context.legalAction) return "legal_now";
   if (role === "duplicate_or_low_value" || role === "unknown") {
     return "not_relevant_now";
@@ -807,6 +839,12 @@ function redactedEvidenceForCard(params: {
     `legal_action_present:${params.context.legalAction !== undefined}`,
     `matching_action_candidates:${params.context.matchingCandidates.length}`,
     `duplicate_installed:${params.context.duplicateInstalled}`,
+    ...(params.context.signals.requiresSameTurnAccess
+      ? [
+          "same_turn_access_required:true",
+          `same_turn_access_followup_available:${params.context.sameTurnAccessFollowupAvailable === true}`,
+        ]
+      : []),
     ...(params.context.memoryAvailable !== undefined
       ? [`memory_available:${params.context.memoryAvailable}`]
       : []),
@@ -838,6 +876,33 @@ function redactedEvidenceForCard(params: {
         ]
       : []),
   ];
+}
+
+function sameTurnAccessFollowupAvailableAfter(
+  input: AiDecisionInput,
+  preparationAction: LegalAction,
+): boolean {
+  const remainingClicks =
+    input.playerView.own.clicks - actionClickCost(preparationAction);
+  if (remainingClicks <= 0) return false;
+  const remainingCredits =
+    input.playerView.own.credits - (actionCreditCost(preparationAction) ?? 0);
+  return input.legalActions.some(
+    (action) =>
+      action.actionId !== preparationAction.actionId &&
+      actionCanInitiateRunnerAccess(action) &&
+      actionClickCost(action) <= remainingClicks &&
+      (actionCreditCost(action) ?? 0) <= remainingCredits,
+  );
+}
+
+function actionCanInitiateRunnerAccess(action: LegalAction): boolean {
+  return (
+    action.side === "runner" &&
+    (action.type === "start_run" ||
+      action.payload?.runnerEventRun === true ||
+      action.payload?.effectKind === "run")
+  );
 }
 
 function isPersistentRunnerCard(card: VisibleCard): boolean {

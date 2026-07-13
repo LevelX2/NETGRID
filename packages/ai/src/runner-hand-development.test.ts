@@ -56,6 +56,60 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     expect(evaluation.evidence.join("\n")).not.toMatch(/R&D Interface|test-rd-interface|rd-interface-1/);
   });
 
+  it("requires a same-turn access action after turn-limited preparation", () => {
+    const preparation = visibleCard("prearranged-drop-1", {
+      definitionId: "onr_proteus_118_prearranged-drop",
+      title: "Prearranged Drop",
+      type: "event",
+      cost: 0,
+      rulesText: "The next time you access an agenda this turn, gain [6].",
+    });
+    const playPreparation = playEventAction(
+      "play-prearranged-drop",
+      preparation,
+      0,
+    );
+    const runRAndD = startRunAction("run-rd", "rd");
+    const blocked = findByInstance(
+      evaluateRunnerHandDevelopment({
+        input: runnerInput({
+          credits: 8,
+          clicks: 1,
+          hand: [preparation],
+          legalActions: [playPreparation, runRAndD],
+        }),
+      }),
+      preparation.instanceId,
+    );
+    const executable = findByInstance(
+      evaluateRunnerHandDevelopment({
+        input: runnerInput({
+          credits: 8,
+          clicks: 2,
+          hand: [preparation],
+          legalActions: [playPreparation, runRAndD],
+        }),
+      }),
+      preparation.instanceId,
+    );
+
+    expect(blocked).toMatchObject({
+      availability: "timing_blocked",
+      deferReason: "timing",
+    });
+    expect(blocked.evidence).toContain("same_turn_access_required:true");
+    expect(blocked.evidence).toContain(
+      "same_turn_access_followup_available:false",
+    );
+    expect(executable).toMatchObject({
+      availability: "legal_now",
+      deferReason: "none",
+    });
+    expect(executable.evidence).toContain(
+      "same_turn_access_followup_available:true",
+    );
+  });
+
   it("separates MU-blocked breaker setup from missing-credit setup", () => {
     const breaker = visibleCard("breaker-1", {
       definitionId: "test-code-breaker",
@@ -1261,6 +1315,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
 function runnerInput(params: {
   credits: number;
+  clicks?: number;
   hand: VisibleCard[];
   legalActions: LegalAction[];
   rig?: VisibleCard[];
@@ -1277,7 +1332,7 @@ function runnerInput(params: {
     own: {
       identity: visibleIdentity("runner"),
       credits: params.credits,
-      clicks: 3,
+      clicks: params.clicks ?? 3,
       agendaPoints: 0,
       gripOrHq: params.hand,
       stackOrRdCount: 20,
@@ -1452,6 +1507,45 @@ function installAction(
       cardId: card.instanceId,
       ...(card.definitionId ? { cardDefinitionId: card.definitionId } : {}),
     },
+  };
+}
+
+function playEventAction(
+  actionId: string,
+  card: VisibleCard,
+  creditCost: number,
+): LegalAction {
+  return {
+    actionId,
+    side: "runner",
+    type: "play_event",
+    label: `Play ${card.title ?? card.instanceId}`,
+    source: card.instanceId,
+    timingPoint: "runner_action.main",
+    costs: [{ clicks: 1 }, ...(creditCost > 0 ? [{ credits: creditCost }] : [])],
+    targetRequirements: [],
+    visibility: "private_to_actor",
+    expiresAtStateVersion: 2,
+    payload: {
+      cardId: card.instanceId,
+      ...(card.definitionId ? { cardDefinitionId: card.definitionId } : {}),
+    },
+  };
+}
+
+function startRunAction(actionId: string, serverId: string): LegalAction {
+  return {
+    actionId,
+    side: "runner",
+    type: "start_run",
+    label: `Run ${serverId}`,
+    source: "basic_action",
+    timingPoint: "runner_action.main",
+    costs: [{ clicks: 1 }],
+    targetRequirements: [],
+    visibility: "public",
+    expiresAtStateVersion: 2,
+    payload: { serverId },
   };
 }
 

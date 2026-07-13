@@ -331,6 +331,9 @@ function runnerRunPlanEncounterChoice(params: {
   plan: RunnerRunPlan;
   choices: readonly SemanticRuntimeChoice[];
 }): SemanticRuntimeChoice | undefined {
+  if (params.input.playerView.run?.phase !== "encounter_ice") {
+    return undefined;
+  }
   const safeSequence = runnerRunPlanCurrentEncounterSafeSequence({
     input: params.input,
     plan: params.plan,
@@ -477,6 +480,7 @@ function runnerRunPlanContinueHasBreakAvailablePenalty(
 function currentEncounterHasUnbrokenSafetyThreat(
   input: AiDecisionInput,
 ): boolean {
+  if (input.playerView.run?.phase !== "encounter_ice") return false;
   const continueAction = input.legalActions.find(
     (action) =>
       action.type === "continue_run" &&

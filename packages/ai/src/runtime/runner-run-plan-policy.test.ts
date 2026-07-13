@@ -156,7 +156,7 @@ describe("runner run plan policy", () => {
       subroutines: [
         {
           id: "cortical-scrub-core-damage",
-          type: "do_damage",
+          type: "trash_installed_program",
           unbrokenRunEffect: { causesDamageOrProgramTrash: true },
         },
         {
@@ -501,6 +501,66 @@ describe("runner run plan policy", () => {
     );
     expect(selected?.evidence).not.toContain(
       "runner_run_plan_abort_recommended:true",
+    );
+  });
+
+  it("does not treat approached movement ICE as the active encounter", () => {
+    const continueRun = action("continue_run", {
+      actionId: "continue-run-to-banpei",
+      source: "game_rule",
+      costs: [],
+      timingPoint: "run.jack_out_window",
+      expiresAtStateVersion: 144,
+      payload: {},
+    });
+    const jackOut = action("jack_out", {
+      actionId: "jack-out-before-banpei",
+      source: "game_rule",
+      costs: [],
+      timingPoint: "run.jack_out_window",
+      expiresAtStateVersion: 144,
+      payload: {},
+    });
+    const input = runnerEncounterInput({
+      iceDefinitionId: "onr_v1_223_banpei",
+      iceTitle: "Banpei",
+      iceStrength: 4,
+      subroutines: [
+        {
+          id: "banpei-trash-program",
+          type: "do_damage",
+          unbrokenRunEffect: { causesDamageOrProgramTrash: true },
+        },
+        { id: "banpei-end-run", type: "end_the_run" },
+      ],
+      legalActions: [jackOut, continueRun],
+    });
+    input.playerView.timingPoint = "run.jack_out_window";
+    input.playerView.run = {
+      ...input.playerView.run!,
+      phase: "movement",
+    };
+    const plan = {
+      ...runPlan(),
+      currentEncounter: {
+        server: "rd" as const,
+        phase: "movement" as const,
+        iceIndex: 0,
+      },
+    };
+
+    const selected = runnerRunPlanSemanticChoice({
+      input,
+      plan,
+      choices: [
+        choice(jackOut, "simple_run_choice", -351),
+        choice(continueRun, "simple_run_choice", 103),
+      ],
+    });
+
+    expect(selected?.action.actionId).toBe(continueRun.actionId);
+    expect(selected?.evidence).not.toContain(
+      "runner_run_plan_encounter_required_break_missing:true",
     );
   });
 
