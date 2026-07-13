@@ -94,7 +94,7 @@ describe("V1.0.4 match start derivation", () => {
       aiDeckPolicy: "same_as_participant_a"
     });
 
-    expect(summary).toContain("KI-Decks: wie Teilnehmer A");
+    expect(summary).toContain("KI-Decks: wie du");
     expect(summary.join(" ")).not.toMatch(/token|hash|deck_/i);
   });
 

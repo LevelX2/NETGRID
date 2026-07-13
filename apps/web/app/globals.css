@@ -1020,17 +1020,98 @@ select {
 }
 
 .deckSlotSelect {
+  --deck-slot-accent: var(--runner);
   display: grid;
   width: 100%;
   min-width: 0;
-  gap: 6px;
-  color: var(--muted);
+  gap: 9px;
+  padding: 10px;
+  border: 1px solid color-mix(in srgb, var(--deck-slot-accent), var(--line) 58%);
+  border-radius: 8px;
+  color: var(--text);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--deck-slot-accent), transparent 88%), transparent 62%),
+    var(--field-bg);
   font-size: 13px;
+  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--deck-slot-accent), transparent 18%);
+  transition:
+    border-color 120ms ease,
+    background 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.deckSlotSelect.corp {
+  --deck-slot-accent: var(--corp-status-accent);
+}
+
+.deckSlotSelect:focus-within {
+  border-color: color-mix(in srgb, var(--deck-slot-accent), white 16%);
+  box-shadow:
+    inset 3px 0 0 var(--deck-slot-accent),
+    0 0 0 2px color-mix(in srgb, var(--deck-slot-accent), transparent 82%);
+}
+
+.deckSlotSelect:has(select:disabled) {
+  opacity: 0.58;
+}
+
+.deckSlotHeading {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.deckSlotSideIcon {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--deck-slot-accent), var(--line) 38%);
+  border-radius: 7px;
+  color: color-mix(in srgb, var(--deck-slot-accent), white 18%);
+  background: color-mix(in srgb, var(--deck-slot-accent), var(--panel) 82%);
+}
+
+.deckSlotHeadingText {
+  min-width: 0;
+  display: grid;
+  gap: 1px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.deckSlotHeadingText small {
+  color: var(--deck-slot-accent);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.deckSlotControl {
+  min-width: 0;
+  position: relative;
+  display: block;
+}
+
+.deckSlotControlIcon {
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  z-index: 1;
+  color: color-mix(in srgb, var(--deck-slot-accent), white 10%);
+  pointer-events: none;
+  transform: translateY(-50%);
 }
 
 .deckSlotSelect select {
   width: 100%;
   min-width: 0;
+  border-color: color-mix(in srgb, var(--deck-slot-accent), var(--line) 66%);
+  padding-left: 34px;
+  background: color-mix(in srgb, var(--panel), transparent 10%);
 }
 
 .notice {

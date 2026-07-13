@@ -239,7 +239,7 @@ export function MatchStartAdvancedOptions({
             KI-Decks
             <select value={aiDeckPolicy} onChange={(event) => onAiDeckPolicy(event.target.value as AiDeckPolicy)}>
               <option value="selected">Explizit gewählte KI-Decks</option>
-              <option value="same_as_participant_a">Gleiche Decks wie Teilnehmer A</option>
+              <option value="same_as_participant_a">Gleiche Decks wie du</option>
               <option value="fixed">Feste Standard-Decks</option>
               <option value="seeded_random">Deterministisch zufällig</option>
             </select>
@@ -255,6 +255,7 @@ export function MatchStartAdvancedOptions({
           <>
             <DeckSlotSelect
               label={hasAiOpponent ? "KI · Runner-Deck" : "Teilnehmer B · Runner-Deck"}
+              side="runner"
               snapshots={runnerSnapshots}
               localDecks={localDecks.filter((deck) => deck.side === "runner")}
               source={participantBRunnerDeckSource}
@@ -267,6 +268,7 @@ export function MatchStartAdvancedOptions({
             />
             <DeckSlotSelect
               label={hasAiOpponent ? "KI · Korp-Deck" : "Teilnehmer B · Korp-Deck"}
+              side="corp"
               snapshots={corpSnapshots}
               localDecks={localDecks.filter((deck) => deck.side === "corp")}
               source={participantBCorpDeckSource}

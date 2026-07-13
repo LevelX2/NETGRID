@@ -1886,8 +1886,8 @@ export default function Page() {
           ]
         : []
       : [
-          { label: "A Runner", metadata: participantARunnerMetadata },
-          { label: "A Korp", metadata: participantACorpMetadata },
+          { label: "Dein Runner-Deck", metadata: participantARunnerMetadata },
+          { label: "Dein Korp-Deck", metadata: participantACorpMetadata },
           ...(aiSlotDisabled || (isHumanVsHuman && !testSetupMode)
             ? []
             : [

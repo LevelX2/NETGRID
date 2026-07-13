@@ -157,7 +157,7 @@ export function matchStartSummary(input: {
           : input.aiDeckPolicy === "seeded_random"
             ? "KI-Decks: deterministisch zufällig"
             : input.aiDeckPolicy === "same_as_participant_a"
-              ? "KI-Decks: wie Teilnehmer A"
+              ? "KI-Decks: wie du"
               : "KI-Decks: ausgewählt"
         : input.aiDeckPolicy === "seeded_random"
           ? "Simulationsdecks: deterministisch zufällig"

@@ -229,7 +229,8 @@ export function MatchHostConsole({
       {gameMode !== "ai_vs_ai" || aiDeckPolicyUsesPrimaryDeckSlots ? (
         <div className="deckSlotGrid">
           <DeckSlotSelect
-            label={gameMode === "ai_vs_ai" ? "Runner-KI · Runner-Deck" : "Teilnehmer A · Runner-Deck"}
+            label={gameMode === "ai_vs_ai" ? "Runner-KI · Runner-Deck" : "Dein Runner-Deck"}
+            side="runner"
             snapshots={runnerSnapshots}
             localDecks={localDecks.filter((deck) => deck.side === "runner")}
             source={runnerDeckSource}
@@ -240,7 +241,8 @@ export function MatchHostConsole({
             onLocalDeck={onSelectedRunnerLocalDeckId}
           />
           <DeckSlotSelect
-            label={gameMode === "ai_vs_ai" ? "Korp-KI · Korp-Deck" : "Teilnehmer A · Korp-Deck"}
+            label={gameMode === "ai_vs_ai" ? "Korp-KI · Korp-Deck" : "Dein Korp-Deck"}
+            side="corp"
             snapshots={corpSnapshots}
             localDecks={localDecks.filter((deck) => deck.side === "corp")}
             source={corpDeckSource}
