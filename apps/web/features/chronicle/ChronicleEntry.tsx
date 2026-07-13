@@ -1,10 +1,11 @@
 "use client";
 
-import { Activity, Award, Eye, Layers3, PanelRightOpen, Plus, Route, X } from "lucide-react";
+import { Activity, Award, CopyX, Eye, Layers3, PanelRightOpen, Plus, Route, X } from "lucide-react";
 
 import {
   CHRONICLE_CATEGORY_LABELS,
   type ChronicleCategory,
+  type ChronicleIcon as ChronicleIconKind,
   type ChronicleItem,
 } from "../../app/chronicle";
 import {
@@ -41,7 +42,7 @@ export function ChronicleEntry({
     <article className={`chronicleEntry chronicle-${item.category} importance-${item.importance} visibility-${item.visibility} detail-${detailMode} group-${groupKind}`}>
       <div className="chronicleRail" aria-hidden={!item.actionUse}>
         <span className="chronicleRailIcon">
-          <ChronicleIcon category={item.category} />
+          <ChronicleIcon category={item.category} icon={item.icon} />
         </span>
         {item.actionUse ? (
           <span className="chronicleActionOrdinal" tabIndex={0} aria-label={item.actionUse.title}>
@@ -121,7 +122,14 @@ function ChronicleTitle({
   );
 }
 
-function ChronicleIcon({ category }: { category: ChronicleCategory }) {
+function ChronicleIcon({
+  category,
+  icon,
+}: {
+  category: ChronicleCategory;
+  icon: ChronicleIconKind | undefined;
+}) {
+  if (icon === "discard") return <CopyX size={15} />;
   switch (category) {
     case "turn":
       return <Activity size={15} />;

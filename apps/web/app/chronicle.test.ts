@@ -120,6 +120,23 @@ describe("formatChronicleEvent", () => {
     expect(legacy.title).not.toContain("Setup-Entscheidung");
   });
 
+  it("marks hidden discard resolutions with a dedicated discard icon", () => {
+    const item = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        discardResolved: true,
+        discardCount: 1,
+        discardZone: "archives",
+      }),
+      "runner",
+    );
+
+    expect(item.title).toBe("Die Korp hat eine Karte abgeworfen.");
+    expect(item.category).toBe("hidden");
+    expect(item.visibility).toBe("redacted");
+    expect(item.icon).toBe("discard");
+  });
+
   it("redacts hidden Corp installs from the Runner perspective", () => {
     const item = formatChronicleEvent(
       makeEvent("install_card", {

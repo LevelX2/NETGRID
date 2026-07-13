@@ -25,6 +25,7 @@ export type ChronicleCategory =
   | "hidden";
 export type ChronicleImportance = "normal" | "important" | "critical";
 export type ChronicleVisibility = "public" | "side" | "redacted" | "system";
+export type ChronicleIcon = "discard";
 
 export type ChronicleContext = {
   side: Side;
@@ -43,6 +44,7 @@ export type ChronicleItem = {
   category: ChronicleCategory;
   importance: ChronicleImportance;
   visibility: ChronicleVisibility;
+  icon?: ChronicleIcon;
   actor?: Side;
   actionUse?: ChronicleActionUse;
   title: string;
@@ -167,6 +169,7 @@ export function formatChronicleEvent(
   let category: ChronicleCategory = effect.category ?? categoryFor(actionType);
   let importance: ChronicleImportance = "normal";
   let visibility: ChronicleVisibility = "public";
+  let icon: ChronicleIcon | undefined;
   let title = "";
   let description: string | undefined;
   const chips = [...baseChipList];
@@ -321,6 +324,7 @@ export function formatChronicleEvent(
       if (payload.discardResolved === true) {
         category = "hidden";
         visibility = "redacted";
+        icon = "discard";
         title = phrase(
           subject,
           `${cardCountText(numberValue(payload.discardCount) ?? 0)} abgeworfen`,
@@ -3604,6 +3608,7 @@ export function formatChronicleEvent(
     category,
     importance,
     visibility,
+    ...(icon ? { icon } : {}),
     ...(actor ? { actor } : {}),
     ...(actionUse ? { actionUse } : {}),
     title: ensurePeriod(title),
