@@ -199,5 +199,9 @@ function diagnostic(result: AiDecisionCheckpointRunResult): string {
     selectedActionId: result.selectedAction?.actionId,
     selectedActionType: result.selectedAction?.type,
     selectedChoices: result.decision?.selectedChoices,
+    ownHq: result.input.playerView.own.gripOrHq.map(
+      (card) => card.definitionId,
+    ),
+    lastEvent: result.input.eventTail.at(-1)?.publicPayload,
   });
 }

@@ -8,14 +8,14 @@ type PendingChoice = NonNullable<
 >;
 
 describe("selectedBidChoiceOptionId", () => {
-  it("keeps normal Corp trace bids conservative", () => {
+  it("does not spend on a Corp trace without public trace context", () => {
     expect(
       selectedBidChoiceOptionId(
         input("corp", "hard"),
         bidChoice("trace:corp", [0, 1, 2, 3, 4]),
         {},
       ),
-    ).toBe("bid_2");
+    ).toBe("bid_0");
   });
 
   it("uses the minimum guaranteed bid for the historical visible punish window", () => {
@@ -36,7 +36,7 @@ describe("selectedBidChoiceOptionId", () => {
     ).toBe("bid_7");
   });
 
-  it("does not overbid without a visible tag-punish followup", () => {
+  it("bids zero without a visible tag-punish followup", () => {
     expect(
       selectedBidChoiceOptionId(
         input("corp", "hard", {
@@ -47,10 +47,10 @@ describe("selectedBidChoiceOptionId", () => {
         bidChoice("trace:corp", range(0, 11)),
         { traceStrength: 5, runnerLink: 0 },
       ),
-    ).toBe("bid_2");
+    ).toBe("bid_0");
   });
 
-  it("preserves payoff credits when a guaranteed trace is unaffordable", () => {
+  it("bids zero when guarantee plus payoff is unaffordable", () => {
     expect(
       selectedBidChoiceOptionId(
         input("corp", "hard", {
@@ -62,7 +62,7 @@ describe("selectedBidChoiceOptionId", () => {
         bidChoice("trace:corp", range(0, 11)),
         { traceStrength: 5, runnerLink: 0 },
       ),
-    ).toBe("bid_2");
+    ).toBe("bid_0");
   });
 
   it("uses the smallest winning bid instead of the difficulty cap", () => {
@@ -80,7 +80,7 @@ describe("selectedBidChoiceOptionId", () => {
     ).toBe("bid_1");
   });
 
-  it("does not commit payoff credits when no followup click remains", () => {
+  it("bids zero when no followup click remains", () => {
     expect(
       selectedBidChoiceOptionId(
         input("corp", "hard", {
@@ -92,7 +92,7 @@ describe("selectedBidChoiceOptionId", () => {
         bidChoice("trace:corp", range(0, 11)),
         { traceStrength: 5, runnerLink: 0 },
       ),
-    ).toBe("bid_2");
+    ).toBe("bid_0");
   });
 
   it("biases Social Engineering guesses high on hard without hidden Runner data", () => {
