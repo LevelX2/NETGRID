@@ -68,6 +68,7 @@ export function validateAiDecisionCheckpoint(
   if (
     !fixture.expectation.acceptableActions?.length &&
     !fixture.expectation.forbiddenActions?.length &&
+    !fixture.expectation.choice &&
     !fixture.expectation.discardChoice &&
     !fixture.expectation.strategicIntent
   ) {

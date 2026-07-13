@@ -38,6 +38,10 @@ export function createCorpTagSourcePayoffContext(
     input: AiDecisionInput,
     action: LegalAction,
   ) => boolean;
+  corpPersistentTagEngineVisiblePayoffProfile: (
+    input: AiDecisionInput,
+    action: LegalAction,
+  ) => CorpTaggedRunnerPayoffActionProfile | undefined;
   corpUnprotectedPersistentTagAssetSetup: (
     input: AiDecisionInput,
     action: LegalAction,
@@ -61,8 +65,8 @@ export function createCorpTagSourcePayoffContext(
     )
       return false;
     return (
-      dependencies.tagPunishAssessmentForAction(input, action)
-        ?.isTagSource === true
+      dependencies.tagPunishAssessmentForAction(input, action)?.isTagSource ===
+      true
     );
   };
 
@@ -125,6 +129,26 @@ export function createCorpTagSourcePayoffContext(
     );
   };
 
+  const corpPersistentTagEngineVisiblePayoffProfile = (
+    input: AiDecisionInput,
+    action: LegalAction,
+  ): CorpTaggedRunnerPayoffActionProfile | undefined => {
+    if (!corpUnprotectedPersistentTagAssetSetup(input, action)) {
+      return undefined;
+    }
+    const payoffKind = corpVisibleTagPunishPayoffKind(input);
+    if (!payoffKind) return undefined;
+    return {
+      kind: "tag_source",
+      value: payoffKind === "damage" ? 1850 : 1650,
+      evidence: [
+        "corp_persistent_tag_engine_activation:true",
+        `corp_visible_tag_punish_payoff_kind:${payoffKind}`,
+        `engine_action:${action.type}`,
+      ],
+    };
+  };
+
   const corpOntologyPayoffAvailableForTagSource = (
     input: AiDecisionInput,
     sourceAction: LegalAction,
@@ -138,18 +162,21 @@ export function createCorpTagSourcePayoffContext(
       })
     )
       return true;
+    const archivedCardIds = new Set(
+      input.playerView.own.heapOrArchives.map((card) => card.instanceId),
+    );
     return [
       ...input.playerView.own.gripOrHq,
       ...input.playerView.own.scoreArea,
       ...input.playerView.servers.flatMap((server) => [
-        ...server.ice,
-        ...server.root,
+        ...server.ice.filter((card) => !archivedCardIds.has(card.instanceId)),
+        ...server.root.filter((card) => !archivedCardIds.has(card.instanceId)),
       ]),
     ].some((card) =>
       Boolean(
         card.known &&
-          card.definitionId &&
-          dependencies.payoffProfileForDefinition(card.definitionId),
+        card.definitionId &&
+        dependencies.payoffProfileForDefinition(card.definitionId),
       ),
     );
   };
@@ -158,6 +185,7 @@ export function createCorpTagSourcePayoffContext(
     corpImmediateTagSourceVisiblePayoffProfile,
     corpImmediateTagSourceAvailable,
     corpImmediateTagSourceAction,
+    corpPersistentTagEngineVisiblePayoffProfile,
     corpUnprotectedPersistentTagAssetSetup,
     corpVisibleTagPunishPayoffKind,
     corpOntologyPayoffAvailableForTagSource,

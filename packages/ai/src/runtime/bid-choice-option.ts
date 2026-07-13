@@ -61,13 +61,10 @@ function corpDesiredBidAmount(
       return Math.max(2, Math.ceil(maxBid * 0.75));
     return Math.min(2, maxBid);
   }
-  const conservativeBid =
-    input.difficulty === "hard" ? 2 : input.difficulty === "normal" ? 1 : 0;
   if (input.difficulty === "easy") return 0;
   return assessCorpTraceBid({
     input,
     traceContext,
     maxBid,
-    conservativeBid,
   }).recommendedBid;
 }

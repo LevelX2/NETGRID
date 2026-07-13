@@ -72,6 +72,37 @@ describe("AI decision checkpoints", () => {
     });
   });
 
+  it("matches selected choice values through the productive chooser", () => {
+    const current = fixture();
+    const state = current.engine.testOnlyGameState;
+    state.phase = "corp_action_phase";
+    state.timingPoint = "corp_action.main";
+    state.pendingChoice = {
+      choiceId: "checkpoint-trace-bid",
+      side: "corp",
+      source: "trace:checkpoint",
+      prompt: "Trace-Gebot",
+      kind: "bid_amount",
+      options: [0, 1, 2].map((amount) => ({
+        id: `bid_${amount}`,
+        label: String(amount),
+        value: amount,
+      })),
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: state.stateVersion,
+      visibility: "public",
+    };
+    current.engine.stateHash = hashGameState(state);
+    current.expectation = {
+      choice: { mustSelectValues: [0], mustNotSelectValues: [1] },
+    };
+
+    const result = runAiDecisionCheckpoint(current);
+
+    expect(result.ok, result.message).toBe(true);
+  });
+
   it("roundtrips tactical runtime memory fail-closed by match context", () => {
     const current = fixture();
     const input = buildInput(current.engine.testOnlyGameState);
