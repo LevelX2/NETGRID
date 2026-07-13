@@ -2270,6 +2270,81 @@ describe("formatChronicleEvent", () => {
     expect(JSON.stringify(items)).not.toContain("runner_card_");
   });
 
+  it("shows Brain Drain's die roll for both miss and damage outcomes", () => {
+    const miss = formatChronicleEffectItems(
+      makeEvent("continue_run", {
+        actor: "runner",
+        resolvedEffects: [
+          {
+            effectId: "subroutine_1",
+            kind: "resolve_subroutine",
+            visibility: "public",
+            side: "runner",
+            sourceDefinitionId: "onr_classic_007_brain-drain",
+            sourceTitle: "Brain Drain",
+            subroutineIndex: 0,
+            subroutineType: "random_damage",
+            dieRoll: 2,
+            randomDamageApplied: false,
+            damageType: "core",
+          },
+        ],
+      }),
+      "runner",
+    );
+    const hit = formatChronicleEffectItems(
+      makeEvent("continue_run", {
+        actor: "runner",
+        damageResolved: true,
+        damageType: "core",
+        damageAmount: 3,
+        cardsTrashed: 3,
+        resolvedEffects: [
+          {
+            effectId: "subroutine_1",
+            kind: "resolve_subroutine",
+            visibility: "public",
+            side: "runner",
+            sourceDefinitionId: "onr_classic_007_brain-drain",
+            sourceTitle: "Brain Drain",
+            subroutineIndex: 0,
+            subroutineType: "random_damage",
+            dieRoll: 1,
+            randomDamageApplied: true,
+            damageType: "core",
+            amount: 3,
+            cardsTrashed: 3,
+          },
+        ],
+      }),
+      "runner",
+    );
+
+    expect(miss[0]?.title).toBe(
+      "Brain Drain: Subroutine 1 würfelt eine 2; kein Core Damage.",
+    );
+    expect(miss[0]?.chips).toEqual(
+      expect.arrayContaining([
+        "Subroutine 1",
+        "Wurf 2",
+        "Kein Core Damage",
+        "Brain Drain",
+      ]),
+    );
+    expect(hit[0]?.title).toBe(
+      "Brain Drain: Subroutine 1 würfelt eine 1 und macht 3 Core Damage.",
+    );
+    expect(hit[0]?.description).toBe("3 Karten wurden in den Heap bewegt.");
+    expect(hit[0]?.chips).toEqual(
+      expect.arrayContaining([
+        "Subroutine 1",
+        "Wurf 1",
+        "3 Core Damage",
+        "Brain Drain",
+      ]),
+    );
+  });
+
   it("explains prevented subroutine damage with original, prevented and final amounts", () => {
     const preventedItems = formatChronicleEffectItems(
       makeEvent("resolve_choice", {

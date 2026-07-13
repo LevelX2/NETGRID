@@ -327,6 +327,15 @@ describe("encounter printed effects boundary", () => {
       printedRandomDamageApplies: false,
       printedRandomDamageResults: "1",
     });
+    expect(legalAction.resolvedEffects).toEqual([
+      expect.objectContaining({
+        kind: "resolve_subroutine",
+        subroutineType: "random_damage",
+        dieRoll: 4,
+        randomDamageApplied: false,
+        damageType: "core",
+      }),
+    ]);
   });
 
   it("rolls printed random damage deterministically and applies damage on matching results", () => {
@@ -366,6 +375,16 @@ describe("encounter printed effects boundary", () => {
       damageType: "core",
       damageAmount: 3,
     });
+    expect(legalAction.resolvedEffects).toEqual([
+      expect.objectContaining({
+        kind: "resolve_subroutine",
+        subroutineType: "random_damage",
+        dieRoll: 1,
+        randomDamageApplied: true,
+        damageType: "core",
+        amount: 3,
+      }),
+    ]);
   });
 
   it("resolves zero printed damage without opening a damage event", () => {

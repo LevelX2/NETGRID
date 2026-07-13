@@ -425,6 +425,8 @@ export type ResolvedGameEffect = {
   redactedKind?: string;
   subroutineIndex?: number;
   subroutineType?: SubroutineType;
+  dieRoll?: number;
+  randomDamageApplied?: boolean;
   damageType?: DamageType;
   cardsTrashed?: number;
   endedRun?: boolean;

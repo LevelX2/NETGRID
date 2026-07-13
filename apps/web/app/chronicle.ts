@@ -4454,6 +4454,8 @@ function formatChronicleEffect(
           ? `Subroutine ${subroutineNumber}`
           : "Subroutine";
       const subroutineType = stringValue(effect.subroutineType);
+      const dieRoll = numberValue(effect.dieRoll);
+      const randomDamageApplied = effect.randomDamageApplied === true;
       const damageType = stringValue(effect.damageType);
       const cardsTrashed = numberValue(effect.cardsTrashed) ?? 0;
       const damageLabel = damageTypeLabel(damageType);
@@ -4469,22 +4471,36 @@ function formatChronicleEffect(
             cardTitle ??
             "ein Programm")
           : undefined;
-      category = subroutineType === "do_damage" ? "danger" : "run";
+      category =
+        subroutineType === "do_damage" ||
+        (subroutineType === "random_damage" && randomDamageApplied)
+          ? "danger"
+          : "run";
       importance =
-        subroutineType === "do_damage" || effect.endedRun === true
+        subroutineType === "do_damage" ||
+        (subroutineType === "random_damage" && randomDamageApplied) ||
+        effect.endedRun === true
           ? "critical"
           : "important";
       title =
-        subroutineType === "do_damage" && preventionSummary
-          ? `${source}: ${subroutineChip} macht ${preventionSummary.originalAmount} ${damageLabel}; ${preventionSummary.preventedAmount} durch ${preventionSummary.sourceTitle} verhindert, Ergebnis ${preventionSummary.finalAmount} ${damageLabel}`
-          : subroutineType === "do_damage"
-            ? `${source}: ${subroutineChip} macht ${amount} ${damageLabel}`
-            : trashedProgramTitle
-              ? `${source}: ${subroutineChip} trasht ${trashedProgramTitle}`
-              : effect.endedRun === true
-                ? `${source}: ${subroutineChip} beendet den Run`
-                : `${source}: ${subroutineChip} aufgelöst`;
-      if (subroutineType === "do_damage" && cardsTrashed > 0)
+        subroutineType === "random_damage" && dieRoll !== undefined
+          ? randomDamageApplied
+            ? `${source}: ${subroutineChip} würfelt eine ${dieRoll} und macht ${amount} ${damageLabel}`
+            : `${source}: ${subroutineChip} würfelt eine ${dieRoll}; kein ${damageLabel}`
+          : subroutineType === "do_damage" && preventionSummary
+            ? `${source}: ${subroutineChip} macht ${preventionSummary.originalAmount} ${damageLabel}; ${preventionSummary.preventedAmount} durch ${preventionSummary.sourceTitle} verhindert, Ergebnis ${preventionSummary.finalAmount} ${damageLabel}`
+            : subroutineType === "do_damage"
+              ? `${source}: ${subroutineChip} macht ${amount} ${damageLabel}`
+              : trashedProgramTitle
+                ? `${source}: ${subroutineChip} trasht ${trashedProgramTitle}`
+                : effect.endedRun === true
+                  ? `${source}: ${subroutineChip} beendet den Run`
+                  : `${source}: ${subroutineChip} aufgelöst`;
+      if (
+        (subroutineType === "do_damage" ||
+          (subroutineType === "random_damage" && randomDamageApplied)) &&
+        cardsTrashed > 0
+      )
         description = `${cardCountText(cardsTrashed)} ${cardsTrashed === 1 ? "wurde" : "wurden"} in den Heap bewegt.`;
       if (
         subroutineType === "do_damage" &&
@@ -4496,6 +4512,14 @@ function formatChronicleEffect(
         description = `${trashedProgramTitle} wurde in den Heap bewegt.`;
       chips.push(
         subroutineChip,
+        ...(subroutineType === "random_damage" && dieRoll !== undefined
+          ? [
+              `Wurf ${dieRoll}`,
+              randomDamageApplied
+                ? `${amount} ${damageLabel}`
+                : `Kein ${damageLabel}`,
+            ]
+          : []),
         ...(subroutineType === "do_damage"
           ? [
               ...(preventionSummary
