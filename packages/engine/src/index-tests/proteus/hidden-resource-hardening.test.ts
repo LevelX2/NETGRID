@@ -214,6 +214,17 @@ function supportActionFor(
   );
 }
 
+function accessStartActionFor(
+  state: GameState,
+  cardId: CardInstanceId,
+): LegalAction | undefined {
+  return getLegalActions(state, "runner").find(
+    (candidate) =>
+      candidate.payload?.cardId === cardId &&
+      candidate.payload?.cardImplementationAbilityTiming === "access_start",
+  );
+}
+
 describe("PRO011 hidden resource timing hardening", () => {
   it("removes a dominated lower-net bank action when both would trash the same source", () => {
     const state = runnerState("pro011-bank-dominance");
@@ -659,6 +670,206 @@ describe("PRO011 hidden resource timing hardening", () => {
     expect(
       state.run?.breach?.queue.filter((entry) => entry.zone === "hq"),
     ).toHaveLength(Math.min(3, hqBefore.length));
+    const replay = replayEvents(
+      replayInitial,
+      state.eventLog.slice(replayStart),
+    );
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("stacks two R&D Moles onto Rush Hour before building the breach queue", () => {
+    let state = runnerState("pro011-1-rd-mole-rush-hour-stack");
+    state.runner.credits = 17;
+    const firstMoleId = installHiddenResource(
+      state,
+      "onr_proteus_147_r-and-d-mole",
+      "pro011_rd_mole_first",
+    );
+    const secondMoleId = installHiddenResource(
+      state,
+      "onr_proteus_147_r-and-d-mole",
+      "pro011_rd_mole_second",
+    );
+    state.run = {
+      runId: "pro011_rush_hour_rd_run",
+      attackedServerId: "rd",
+      phase: "movement",
+      position: { kind: "server", serverId: "rd" },
+      brokenSubroutineIndexes: [],
+      resolvedSubroutineIndexes: [],
+      successful: true,
+      accessCount: 4,
+      successfulRunSourceDefinitionId: "onr_proteus_122_rush-hour",
+      successfulRunSourceTitle: "Rush Hour",
+      hiddenRunnerResourceAccessStartServerId: "rd",
+    };
+    state.timingPoint = "game.checkpoint";
+    state.activeSide = "runner";
+    const rdBefore = state.corp.rd.slice();
+    const replayInitial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    expect(
+      getLegalActions(state, "runner").filter(
+        (candidate) =>
+          candidate.payload?.cardImplementationAbilityTiming ===
+          "access_start",
+      ),
+    ).toHaveLength(2);
+    expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain(
+      "R&D Mole",
+    );
+
+    for (const [index, moleId] of [firstMoleId, secondMoleId].entries()) {
+      const action = accessStartActionFor(state, moleId);
+      expect(action).toMatchObject({
+        type: "activated_card_ability",
+        timingPoint: "game.checkpoint",
+        costs: [{ credits: 4 }],
+        payload: {
+          cardImplementationAbilityTiming: "access_start",
+          cardImplementationTrashSourceCost: true,
+        },
+      });
+      const creditsBefore = state.runner.credits;
+      state = apply(
+        state,
+        "runner",
+        (candidate) => candidate.actionId === action!.actionId,
+      );
+      expect(state.runner.credits).toBe(creditsBefore - 4);
+      expect(state.run?.accessCount).toBe(index === 0 ? 6 : 8);
+      expectHiddenResourceTrashed(
+        state,
+        moleId,
+        "onr_proteus_147_r-and-d-mole",
+      );
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        actionType: "activated_card_ability",
+        cardDefinitionId: "onr_proteus_147_r-and-d-mole",
+        title: "R&D Mole",
+        sourceTrashed: true,
+        hiddenRunnerResourceRevealed: true,
+      });
+    }
+
+    expect(state.corp.rd).toEqual(rdBefore);
+    expect(getPlayerView(state, "runner").run?.breach).toBeUndefined();
+    const continueAction = getLegalActions(state, "runner").find(
+      (candidate) =>
+        candidate.type === "continue_run" &&
+        candidate.payload?.hiddenRunnerResourceAccessStartContinue === true,
+    );
+    expect(continueAction).toBeDefined();
+    state = apply(
+      state,
+      "runner",
+      (candidate) => candidate.actionId === continueAction!.actionId,
+    );
+    expect(state.run?.breach?.serverId).toBe("rd");
+    expect(
+      state.run?.breach?.queue.filter((entry) => entry.zone === "rd"),
+    ).toHaveLength(Math.min(8, rdBefore.length));
+    const replay = replayEvents(
+      replayInitial,
+      state.eventLog.slice(replayStart),
+    );
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("stacks two HQ Moles before building the breach queue", () => {
+    let state = runnerState("pro011-1-hq-mole-stack");
+    state.runner.credits = 11;
+    const firstMoleId = installHiddenResource(
+      state,
+      "onr_proteus_142_hq-mole",
+      "pro011_hq_mole_first",
+    );
+    const secondMoleId = installHiddenResource(
+      state,
+      "onr_proteus_142_hq-mole",
+      "pro011_hq_mole_second",
+    );
+    state.run = {
+      runId: "pro011_hq_mole_stack_run",
+      attackedServerId: "hq",
+      phase: "movement",
+      position: { kind: "server", serverId: "hq" },
+      brokenSubroutineIndexes: [],
+      resolvedSubroutineIndexes: [],
+      successful: true,
+      accessCount: 1,
+      hiddenRunnerResourceAccessStartServerId: "hq",
+    };
+    state.timingPoint = "game.checkpoint";
+    state.activeSide = "runner";
+    const hqBefore = state.corp.hq.slice();
+    const replayInitial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    expect(
+      getLegalActions(state, "runner").filter(
+        (candidate) =>
+          candidate.payload?.cardImplementationAbilityTiming ===
+          "access_start",
+      ),
+    ).toHaveLength(2);
+    expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain(
+      "HQ Mole",
+    );
+
+    for (const [index, moleId] of [firstMoleId, secondMoleId].entries()) {
+      const action = accessStartActionFor(state, moleId);
+      expect(action).toMatchObject({
+        type: "activated_card_ability",
+        timingPoint: "game.checkpoint",
+        costs: [{ credits: 4 }],
+        payload: {
+          cardImplementationAbilityTiming: "access_start",
+          cardImplementationTrashSourceCost: true,
+        },
+      });
+      const creditsBefore = state.runner.credits;
+      state = apply(
+        state,
+        "runner",
+        (candidate) => candidate.actionId === action!.actionId,
+      );
+      expect(state.runner.credits).toBe(creditsBefore - 4);
+      expect(state.run?.accessCount).toBe(index === 0 ? 3 : 5);
+      expectHiddenResourceTrashed(
+        state,
+        moleId,
+        "onr_proteus_142_hq-mole",
+      );
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        actionType: "activated_card_ability",
+        cardDefinitionId: "onr_proteus_142_hq-mole",
+        title: "HQ Mole",
+        sourceTrashed: true,
+        hiddenRunnerResourceRevealed: true,
+      });
+    }
+
+    expect(state.corp.hq).toEqual(hqBefore);
+    expect(getPlayerView(state, "runner").run?.breach).toBeUndefined();
+    const continueAction = getLegalActions(state, "runner").find(
+      (candidate) =>
+        candidate.type === "continue_run" &&
+        candidate.payload?.hiddenRunnerResourceAccessStartContinue === true,
+    );
+    expect(continueAction).toBeDefined();
+    state = apply(
+      state,
+      "runner",
+      (candidate) => candidate.actionId === continueAction!.actionId,
+    );
+    expect(state.run?.breach?.serverId).toBe("hq");
+    expect(
+      state.run?.breach?.queue.filter((entry) => entry.zone === "hq"),
+    ).toHaveLength(Math.min(5, hqBefore.length));
     const replay = replayEvents(
       replayInitial,
       state.eventLog.slice(replayStart),
