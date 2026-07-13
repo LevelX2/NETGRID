@@ -2,11 +2,38 @@
 
 ## Status
 
-P0 und P1 abgeschlossen. Vier Fehler sind auf dem aktuellen
-Produktions-Chooser als `behavior_regression` rot reproduziert; zwei historische
-Abwurffälle sind bereits grün und bleiben ohne neuen Fix als Regressionstests
-erhalten. Die roten Zieltests und sieben grünen Kontrollen sind vor der ersten
-Verhaltensänderung versioniert. P2 hat noch nicht begonnen.
+P0 bis P4 abgeschlossen. Vier Fehler wurden auf dem damaligen
+Produktions-Chooser als `behavior_regression` rot reproduziert und danach ohne
+Änderung ihrer Erwartungen geschlossen. Zwei historische Abwurffälle waren
+bereits grün und bleiben ohne neuen Fix als Regressionstests erhalten. Alle elf
+Manhunt-Prüfungen sowie die vollständige AI-Suite sind grün. P5 ist der nächste
+und letzte Zustand: lokale Main-Integration und verifizierter Cleanup.
+
+## Umsetzungsergebnis
+
+- Ein Corp-Deck mit sehr niedriger Agendadichte und tiefer gekoppelter
+  Tag-/Schadenslinie führt Fast Advance nicht mehr automatisch als primäre
+  Siegbedingung.
+- Die StrategicIntent-Laufzeit prüft aus dem Decksnapshot und den öffentlich
+  bekannten Agendapunkten, ob die Corp die Scoreline überhaupt noch erreichen
+  kann. Eine unmögliche Scoreline erhält einen harten Runtime-Blocker.
+- Deckweit vorhandene Tag-/Schadenslinien bleiben als erreichbares Ziel
+  sichtbar, auch wenn der konkrete Payoff im aktuellen Klick noch nicht legal
+  ist.
+- Ein strategischer Zug darf einen bestehenden Plan nur unterbrechen, wenn er
+  nicht nur besser passt, sondern auch eine positive Gesamtbewertung besitzt.
+  Diese Grenze wurde durch den bestehenden Checkpoint `CP-7BFE-02a` zusätzlich
+  abgesichert.
+- Finite Corp-Economy zählt nur tatsächlich installierte Remote-Assets als
+  aktiv. Bei einem Credit wird ihre Installation nur vorgezogen, wenn sie ein
+  sichtbares Tag-/Schadenspaar finanziert; ohne dieses Paar bleibt der einfache
+  Creditzug zulässig.
+- CP03 und CP06 bestätigten, dass die aktuelle Abwurflogik die erreichbaren
+  Killbausteine bereits erhält. Deshalb wurde P3 ohne zusätzliche produktive
+  Discard- oder Draw-Sonderlogik geschlossen.
+
+Führende Abschluss-Evidence ist
+`docs/reviews/ai/manhunt-kill-plan-decision-checkpoint-final-review-2026-07-13.md`.
 
 ## Quelle und Arbeitsbereich
 
