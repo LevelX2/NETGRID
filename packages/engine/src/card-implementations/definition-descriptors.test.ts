@@ -1605,7 +1605,7 @@ describe("CardImplementation definition descriptors", () => {
         kind: "increase_strength",
         cost: { kind: "credit", amount: 2 },
         amount: 1,
-        duration: "current_run",
+        duration: "current_turn",
       },
     ]);
     expect(

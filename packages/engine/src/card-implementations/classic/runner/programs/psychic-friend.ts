@@ -9,6 +9,6 @@ export const classicPsychicFriendImplementation: CardImplementationDefinition = 
     breakCost: 1,
     matches: { kind: "ice_subtype", subtype: "code_gate" },
     pumpCost: 2,
-    pumpDuration: "current_run",
+    pumpDuration: "current_turn",
   }),
 };

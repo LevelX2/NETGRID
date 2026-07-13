@@ -2248,7 +2248,7 @@ export type CardIcebreakerAbilityImplementation =
         amount: number;
       };
       amount: number;
-      duration: "current_encounter" | "current_run";
+      duration: "current_encounter" | "current_run" | "current_turn";
       variableAmount?: {
         kind: "paid_amount";
         min: number;

@@ -29,7 +29,7 @@
         "Early Worm breaks wall subroutines for one credit and pumps plus three strength for two credits.",
         "Matador breaks sentry subroutines for one credit and pumps plus five strength for three credits.",
         "MS-todon breaks sentry subroutines, pumps normally, and only once per run loses all stealth bits and receives one tag after a successful break.",
-        "Psychic Friend breaks code gate subroutines and its pump bonus persists for the current run.",
+        "Psychic Friend breaks code gate subroutines and its pump bonus persists until the end of the Runner turn, including across later runs.",
         "Rent-I-Con breaks any ice subroutine and trashes itself at the end of a run in which it was used.",
         "Schematics Search Engine exposes all installed Corp cards whenever the Runner accesses cards from HQ without leaking CardInstanceIds.",
         "Superglue offers a post-pass action only after all subroutines of the passed ICE are broken, taps itself, derezzes that ICE, and does not end the run."

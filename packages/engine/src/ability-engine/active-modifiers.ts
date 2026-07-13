@@ -22,6 +22,9 @@ import {
   isPublicScoredCorpAgendaModifier,
 } from "./card-implementation-modifiers";
 import { BREAK_COST_MODIFIER_SOURCE } from "../compatibility/runtime-compatibility";
+import {
+  currentTemporaryBreakerStrengthModifiers,
+} from "../game/state/temporary-breaker-strength";
 
 export type ActiveModifierDuration =
   | "encounter"
@@ -262,6 +265,43 @@ export function collectActiveModifiers(state: GameState): ActiveModifier[] {
           ? { subtype: active.modifier.appliesTo.subtype }
           : {}),
       },
+      visibility: "public",
+    });
+  }
+
+  const turnBreakerBonuses = new Map<
+    string,
+    {
+      sourceCardInstanceId: CardInstanceId;
+      sourceDefinitionId: CardDefinitionId;
+      targetBreakerId: CardInstanceId;
+      amount: number;
+    }
+  >();
+  for (const modifier of currentTemporaryBreakerStrengthModifiers(state)) {
+    const key = `${modifier.sourceCardInstanceId}:${modifier.targetBreakerId}`;
+    const current = turnBreakerBonuses.get(key);
+    turnBreakerBonuses.set(key, {
+      sourceCardInstanceId: modifier.sourceCardInstanceId,
+      sourceDefinitionId: modifier.sourceDefinitionId,
+      targetBreakerId: modifier.targetBreakerId,
+      amount: (current?.amount ?? 0) + modifier.amount,
+    });
+  }
+  for (const [key, bonus] of [...turnBreakerBonuses.entries()].sort(
+    ([left], [right]) => left.localeCompare(right),
+  )) {
+    if (bonus.amount <= 0 || !state.cardInstances[bonus.targetBreakerId])
+      continue;
+    modifiers.push({
+      id: `turn.breaker_strength.${key}`,
+      sourceCardInstanceId: bonus.sourceCardInstanceId,
+      sourceDefinitionId: bonus.sourceDefinitionId,
+      kind: "breaker_strength",
+      side: "runner",
+      amount: bonus.amount,
+      duration: "turn",
+      target: { kind: "card", id: bonus.targetBreakerId },
       visibility: "public",
     });
   }

@@ -108,6 +108,9 @@ import {
   spendCardCounter,
 } from "../state/turn-flags-counters";
 import {
+  temporaryBreakerStrengthBonusUntilEndOfTurn,
+} from "../state/temporary-breaker-strength";
+import {
   cleanupEmptyRemotes,
   createRemote,
   ensureSpecialZones,
@@ -827,7 +830,7 @@ export function createCardRuntimeDepsHosts(
   function pumpDurationForLegalAction(
     state: GameState,
     legalAction: LegalAction,
-  ): "current_encounter" | "current_run" {
+  ): "current_encounter" | "current_run" | "current_turn" {
     const breakerId = String(legalAction.payload?.breakerId ?? "");
     const abilityId = legalAction.abilityRef?.abilityId;
     const definition = state.cardInstances[breakerId]
@@ -920,6 +923,7 @@ export function createCardRuntimeDepsHosts(
       permanentIcebreakerStrengthCounterBonus(state, breakerId) +
       cardCounter(state, breakerId, "breaker_strength_penalty") * -1 +
       dupreStrengthCounterBonus(state, breakerId) +
+      temporaryBreakerStrengthBonusUntilEndOfTurn(state, breakerId) +
       runRemainderStrengthBonusForBreaker(run, breakerId);
     if (breakerStrength < iceStrengthFor(state, iceId))
       throw new Error("Der Icebreaker ist nicht stark genug fuer dieses ICE.");
@@ -1068,6 +1072,7 @@ export function createCardRuntimeDepsHosts(
       permanentIcebreakerStrengthCounterBonus(state, breakerId) +
       cardCounter(state, breakerId, "breaker_strength_penalty") * -1 +
       dupreStrengthCounterBonus(state, breakerId) +
+      temporaryBreakerStrengthBonusUntilEndOfTurn(state, breakerId) +
       runRemainderStrengthBonusForBreaker(run, breakerId);
     if (breakerStrength < iceStrengthFor(state, run.encounteredIceId))
       throw new Error("Der Icebreaker ist nicht stark genug fuer dieses ICE.");

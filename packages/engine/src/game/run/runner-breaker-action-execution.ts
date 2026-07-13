@@ -10,6 +10,9 @@ import {
   icebreakerAbilityHasSpecialEffect,
   type RuntimeIcebreakerAbility,
 } from "../../ability-engine/icebreaker-abilities";
+import {
+  addTemporaryBreakerStrengthModifierUntilEndOfTurn,
+} from "../state/temporary-breaker-strength";
 import type { RunnerRunCreditSpendResult } from "./run-duration-payment";
 
 type ActiveRun = NonNullable<GameState["run"]>;
@@ -43,7 +46,7 @@ export type RunnerBreakerActionExecutionHost = {
     pumpAmountForLegalAction: (legalAction: LegalAction) => number;
     pumpDurationForLegalAction: (
       legalAction: LegalAction,
-    ) => "current_encounter" | "current_run";
+    ) => "current_encounter" | "current_run" | "current_turn";
     breakAbilityForLegalAction: (
       legalAction: LegalAction,
     ) => RuntimeIcebreakerAbility | undefined;
@@ -173,6 +176,24 @@ function executePumpBreakerAction(
       ...(legalAction.payload ?? {}),
       runRemainderStrengthBonusApplied: true,
       runRemainderStrengthBonusAfter: previous + pumpAmount,
+    };
+    if (pumpAbility?.onUseEndRun) host.run.finishRun(false, legalAction);
+    return;
+  }
+  if (
+    breakerId &&
+    host.breaker.pumpDurationForLegalAction(legalAction) === "current_turn"
+  ) {
+    const strengthBonusAfter =
+      addTemporaryBreakerStrengthModifierUntilEndOfTurn(host.state, {
+        sourceCardInstanceId: breakerId,
+        targetBreakerId: breakerId,
+        amount: pumpAmount,
+      });
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      turnStrengthBonusApplied: true,
+      turnStrengthBonusAfter: strengthBonusAfter,
     };
     if (pumpAbility?.onUseEndRun) host.run.finishRun(false, legalAction);
     return;

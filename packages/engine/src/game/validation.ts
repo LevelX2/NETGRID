@@ -196,6 +196,27 @@ export function validateGameState(state: GameState): ValidationResult {
       }
     }
   }
+  for (const modifier of
+    state.temporaryBreakerStrengthModifiersUntilEndOfTurn ?? []) {
+    const source = state.cardInstances[modifier.sourceCardInstanceId];
+    const target = state.cardInstances[modifier.targetBreakerId];
+    if (!source)
+      errors.push("Temporary breaker strength modifier source is missing.");
+    if (!target)
+      errors.push("Temporary breaker strength modifier target is missing.");
+    if (source && source.definitionId !== modifier.sourceDefinitionId)
+      errors.push(
+        "Temporary breaker strength modifier source definition does not match.",
+      );
+    if (
+      !Number.isInteger(modifier.amount) ||
+      modifier.amount <= 0 ||
+      !Number.isInteger(modifier.turnSerial) ||
+      modifier.turnSerial < 0 ||
+      modifier.expires !== "turn_end"
+    )
+      errors.push("Temporary breaker strength modifier is invalid.");
+  }
   if (state.run?.breach) {
     const effectiveAccessServerId =
       state.run.accessServerOverride ?? state.run.attackedServerId;
