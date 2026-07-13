@@ -284,6 +284,75 @@ describe("createRunnerBankInvestmentContext", () => {
     );
   });
 
+  it("holds bank building once liquid credits are already comfortable", () => {
+    const context = createContext({
+      hintEffectsForDefinition: (definitionId) =>
+        definitionId === "custom-runner-credit-bank"
+          ? [{ kind: "economy", target: "economy.temporary_resource_bank" }]
+          : [],
+    });
+    const bank = visibleRunnerCard("custom-runner-credit-bank", {
+      counters: { power: 0 },
+    });
+    const buildAction = runnerAction("activated_card_ability", {
+      actionId: "structured-build",
+      source: bank.instanceId,
+      cardImplementationAddsHostedCredits: true,
+    });
+    const input = runnerInput({
+      credits: 23,
+      rig: [bank],
+      legalActions: [buildAction],
+    });
+
+    expect(
+      context.runnerBankInvestmentCommitmentEvidence(input, buildAction),
+    ).toEqual(
+      expect.arrayContaining([
+        "bankComfortableCreditPool:true",
+        "bankCommitmentStatus:hold",
+      ]),
+    );
+    expect(
+      context.runnerBankInvestmentCommitmentScoreComponents(
+        input,
+        buildAction,
+      )[0]?.value,
+    ).toBe(-300);
+  });
+
+  it("treats liquid plus stored credits as a comfortable combined pool", () => {
+    const context = createContext({
+      hintEffectsForDefinition: (definitionId) =>
+        definitionId === "custom-runner-credit-bank"
+          ? [{ kind: "economy", target: "economy.temporary_resource_bank" }]
+          : [],
+    });
+    const bank = visibleRunnerCard("custom-runner-credit-bank", {
+      counters: { power: 3 },
+    });
+    const buildAction = runnerAction("activated_card_ability", {
+      actionId: "structured-build",
+      source: bank.instanceId,
+      cardImplementationAddsHostedCredits: true,
+    });
+    const input = runnerInput({
+      credits: 9,
+      rig: [bank],
+      legalActions: [buildAction],
+    });
+
+    expect(
+      context.runnerBankInvestmentCommitmentEvidence(input, buildAction),
+    ).toEqual(
+      expect.arrayContaining([
+        "bankCombinedCreditAccess:12",
+        "bankComfortableCreditPool:true",
+        "bankCommitmentStatus:hold",
+      ]),
+    );
+  });
+
   it("ignores build-action substring noise in credit-bank action text", () => {
     const context = createContext({
       hintEffectsForDefinition: (definitionId) =>

@@ -1,6 +1,6 @@
 # KI-Remediation der Matches F450 und 10311 (2026-07-13)
 
-Status: Aktiv; P0 abgeschlossen, P1 Red-Evidence erfasst
+Status: Aktiv; P0 bis P2 abgeschlossen, P3 in Arbeit
 
 ## Quelle und Gesamtziel
 

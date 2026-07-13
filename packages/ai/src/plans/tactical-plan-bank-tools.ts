@@ -117,6 +117,8 @@ export function runnerCreditBankAssessment(
   const shouldBuild =
     buildActions.length > 0 &&
     !concreteFundingNeed &&
+    ownCredits < RUNNER_BANK_COMFORTABLE_CREDITS &&
+    ownCredits + currentStoredCredits < RUNNER_BANK_VALUE_BUILD_TARGET &&
     currentStoredCredits < buildTarget;
   const cashOutReason =
     payoutActions.length === 0 || estimatedPayout <= 0
