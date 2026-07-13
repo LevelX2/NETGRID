@@ -70,7 +70,9 @@ check:ai: alle fünf Teilchecks grün, errors=0; bestehende Warninventare bleibe
 Vollständige AI-Suite: 310 Dateien, 2053/2053 Tests grün
 AI Behavior Baseline v1: 60 Spiele; technisch side-safe, attention_required wegen 6 geerbter Action-Limits
 Gezielte Main-Kontrolle der zwei gegenüber der alten Referenz neuen Limit-Seeds: beide bereits auf Start-main 5a2f9a532 rot, Hard-Gate-Delta dieses Strangs 0
-Changed-Files-Prettier und git diff --check: grün
+Neue und gezielt geänderte Runtime-, Test- und Review-Dateien: Prettier grün
+Simulator-Capture: bestehende Dateiformatierung beibehalten, um reinen Formatierungsdiff zu vermeiden
+git diff --check: grün
 ```
 
 ## Behavior-Baseline
@@ -121,3 +123,17 @@ gesondert gegen die Worktree-Basis kontrolliert.
 - Der bestehende Behavior-Baseline-Referenzstand besitzt bereits bekannte
   Action-Limit-Spiele. Entscheidend ist deshalb neben dem Gesamtzähler auch,
   ob neue Slots oder Seeds betroffen sind.
+
+## Lokale Integration und Cleanup
+
+Der Arbeitsbranch wurde per Fast-Forward lokal nach `main` integriert. Der
+anschließend erkannte reine Ganzdatei-Formatierungsdiff im Simulator wurde auf
+die zwölf tatsächlich benötigten Capture-Zeilen gegenüber der Ausgangsbasis
+reduziert und mit den Simulator- sowie Manhunt-vs.-Coup-Checkpoint-Tests und
+dem AI-Typecheck erneut grün geprüft.
+
+Der vollständige Baseline-Kompaktlauf, die redigierten Rohdaten und die
+zugehörigen Logs liegen unter `data/local/` im Haupt-Workspace. Danach wurden
+der Arbeits-Worktree im Dateisystem und in `git worktree list` entfernt sowie
+der gemergte Arbeitsbranch gelöscht. Es erfolgte weder ein Push noch die
+Erstellung eines Pull Requests.

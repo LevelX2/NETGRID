@@ -1,6 +1,6 @@
 # Manhunt-vs.-Coup-Selfplay-Regressionsprozess (2026-07-13)
 
-Status: P0 bis P5 abgeschlossen; P6 lokale Integration und Cleanup offen
+Status: P0 bis P6 abgeschlossen; lokal nach `main` integriert, Arbeits-Worktree und Branch entfernt
 
 ## Ziel
 
@@ -8,9 +8,9 @@ Die drei freigegebenen Fehlersituationen aus den fünf deterministischen Selfpla
 
 `/Goal`: Die drei freigegebenen KI-Fehler aus den fünf Manhunt-vs.-Coup-Selfplays sequenziell im eigenen Worktree zuerst als spielgleiche rote Decision-Checkpoints sichern, danach generisch beheben, vollständig verifizieren, lokal nach `main` integrieren und Worktree sowie Arbeitsbranch sauber entfernen.
 
-Arbeitsbranch: `codex/ai-manhunt-coup-selfplay-regressions`
+Arbeitsbranch: `codex/ai-manhunt-coup-selfplay-regressions` (nach Integration gelöscht)
 
-Worktree: `C:\Projekte\NETGRID_AI_MANHUNT_COUP_SELFPLAY_REGRESSIONS`
+Worktree: `C:\Projekte\NETGRID_AI_MANHUNT_COUP_SELFPLAY_REGRESSIONS` (nach Integration entfernt)
 
 ## Eingefrorene Quelle
 
