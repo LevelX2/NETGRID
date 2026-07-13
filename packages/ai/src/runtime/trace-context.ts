@@ -10,9 +10,7 @@ export type LatestTraceContext = {
   postBidTraceLinkBonus?: number;
 };
 
-export function latestTraceContext(
-  input: AiDecisionInput,
-): LatestTraceContext {
+export function latestTraceContext(input: AiDecisionInput): LatestTraceContext {
   const visibleRunnerLink = visibleRunnerLinkAtCorpBid(input);
   for (const event of input.eventTail.slice().reverse()) {
     const traceStrength =

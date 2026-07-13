@@ -95,7 +95,7 @@ describe("AI decision checkpoints", () => {
     };
     current.engine.stateHash = hashGameState(state);
     current.expectation = {
-      choice: { mustSelectValues: [2], mustNotSelectValues: [1] },
+      choice: { mustSelectValues: [0], mustNotSelectValues: [1] },
     };
 
     const result = runAiDecisionCheckpoint(current);

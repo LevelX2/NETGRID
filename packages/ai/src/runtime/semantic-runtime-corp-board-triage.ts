@@ -2282,8 +2282,7 @@ function centralTriageSeverity(
   if (
     pressure.serverId === "rd" &&
     pressure.successfulAccessEvents >= 2 &&
-    (pressure.recentSuccessfulAccessEvents >= 2 ||
-      pressure.visibleVirusPressure ||
+    (pressure.visibleVirusPressure ||
       pressure.visibleMultiaccess ||
       pressure.eventMultiaccess ||
       pressure.runOrAccessEvents >= 6)

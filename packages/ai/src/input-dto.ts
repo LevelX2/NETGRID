@@ -335,18 +335,21 @@ const PUBLIC_DECK_METADATA_KEYS = new Set([
   "cardPoolSnapshotId",
 ]);
 
-const ALLOWED_ABILITY_FAMILIES: ReadonlySet<AiPublicPayloadAbilityFamily> = new Set([
-  "agenda-scoring",
-  "damage-prevention",
-  "hidden-zone",
-  "hosting-counters",
-  "payment-costs",
-  "random-effects",
-  "run-access",
-  "trace-tags",
-]);
+const ALLOWED_ABILITY_FAMILIES: ReadonlySet<AiPublicPayloadAbilityFamily> =
+  new Set([
+    "agenda-scoring",
+    "damage-prevention",
+    "hidden-zone",
+    "hosting-counters",
+    "payment-costs",
+    "random-effects",
+    "run-access",
+    "trace-tags",
+  ]);
 
-export function buildAiDecisionInputDto(params: BuildAiDecisionInputDtoParams): AiDecisionInput {
+export function buildAiDecisionInputDto(
+  params: BuildAiDecisionInputDtoParams,
+): AiDecisionInput {
   return {
     side: params.side,
     playerView: sanitizePlayerView(params.playerView),
@@ -377,10 +380,16 @@ function sanitizePlayerView(view: PlayerView): PlayerView {
       heapOrArchives: view.own.heapOrArchives.map(sanitizeVisibleCard),
       scoreArea: view.own.scoreArea.map(sanitizeVisibleCard),
       ...(view.own.rig ? { rig: view.own.rig.map(sanitizeVisibleCard) } : {}),
-      ...(view.own.memoryUsed !== undefined ? { memoryUsed: view.own.memoryUsed } : {}),
-      ...(view.own.memoryLimit !== undefined ? { memoryLimit: view.own.memoryLimit } : {}),
+      ...(view.own.memoryUsed !== undefined
+        ? { memoryUsed: view.own.memoryUsed }
+        : {}),
+      ...(view.own.memoryLimit !== undefined
+        ? { memoryLimit: view.own.memoryLimit }
+        : {}),
       maxHandSize: view.own.maxHandSize,
-      ...(view.own.coreDamage !== undefined ? { coreDamage: view.own.coreDamage } : {}),
+      ...(view.own.coreDamage !== undefined
+        ? { coreDamage: view.own.coreDamage }
+        : {}),
       tags: view.own.tags,
     },
     opponent: {
@@ -391,11 +400,15 @@ function sanitizePlayerView(view: PlayerView): PlayerView {
       tags: view.opponent.tags,
       handCount: view.opponent.handCount,
       maxHandSize: view.opponent.maxHandSize,
-      ...(view.opponent.coreDamage !== undefined ? { coreDamage: view.opponent.coreDamage } : {}),
+      ...(view.opponent.coreDamage !== undefined
+        ? { coreDamage: view.opponent.coreDamage }
+        : {}),
       deckCount: view.opponent.deckCount,
       discardCount: view.opponent.discardCount,
       scoreArea: view.opponent.scoreArea.map(sanitizeVisibleCard),
-      ...(view.opponent.rig ? { rig: view.opponent.rig.map(sanitizeVisibleCard) } : {}),
+      ...(view.opponent.rig
+        ? { rig: view.opponent.rig.map(sanitizeVisibleCard) }
+        : {}),
     },
     servers: view.servers.map((server) => ({
       id: server.id,
@@ -404,9 +417,7 @@ function sanitizePlayerView(view: PlayerView): PlayerView {
       root: server.root.map(sanitizeVisibleCard),
       ...(server.counterDisplays
         ? {
-            counterDisplays: server.counterDisplays.map(
-              sanitizeCounterDisplay,
-            ),
+            counterDisplays: server.counterDisplays.map(sanitizeCounterDisplay),
           }
         : {}),
     })),
@@ -414,7 +425,8 @@ function sanitizePlayerView(view: PlayerView): PlayerView {
       ? {
           specialZones: {
             setAside: view.specialZones.setAside.map(sanitizeVisibleCard),
-            removedFromGame: view.specialZones.removedFromGame.map(sanitizeVisibleCard),
+            removedFromGame:
+              view.specialZones.removedFromGame.map(sanitizeVisibleCard),
             setAsideCount: view.specialZones.setAsideCount,
             removedFromGameCount: view.specialZones.removedFromGameCount,
           },
@@ -425,9 +437,15 @@ function sanitizePlayerView(view: PlayerView): PlayerView {
           run: {
             attackedServerId: view.run.attackedServerId,
             phase: view.run.phase,
-            ...(view.run.position ? { position: structuredClone(view.run.position) } : {}),
-            ...(view.run.encounteredIce ? { encounteredIce: sanitizeVisibleCard(view.run.encounteredIce) } : {}),
-            ...(view.run.accessedCard ? { accessedCard: sanitizeVisibleCard(view.run.accessedCard) } : {}),
+            ...(view.run.position
+              ? { position: structuredClone(view.run.position) }
+              : {}),
+            ...(view.run.encounteredIce
+              ? { encounteredIce: sanitizeVisibleCard(view.run.encounteredIce) }
+              : {}),
+            ...(view.run.accessedCard
+              ? { accessedCard: sanitizeVisibleCard(view.run.accessedCard) }
+              : {}),
             ...(view.run.breach
               ? {
                   breach: {
@@ -439,7 +457,9 @@ function sanitizePlayerView(view: PlayerView): PlayerView {
                   },
                 }
               : {}),
-            ...(view.run.badPublicityCredits !== undefined ? { badPublicityCredits: view.run.badPublicityCredits } : {}),
+            ...(view.run.badPublicityCredits !== undefined
+              ? { badPublicityCredits: view.run.badPublicityCredits }
+              : {}),
             successful: view.run.successful,
           },
         }
@@ -452,7 +472,9 @@ function sanitizePlayerView(view: PlayerView): PlayerView {
           },
         }
       : {}),
-    ...(view.pendingChoice ? { pendingChoice: sanitizeVisibleChoiceRequest(view.pendingChoice) } : {}),
+    ...(view.pendingChoice
+      ? { pendingChoice: sanitizeVisibleChoiceRequest(view.pendingChoice) }
+      : {}),
     publicEvents: view.publicEvents.map(sanitizePublicGameEvent),
     legalActions: view.legalActions.map(sanitizeLegalAction),
     winner: view.winner,
@@ -466,22 +488,36 @@ function sanitizeVisibleCard(card: VisibleCard): VisibleCard {
     instanceId: card.instanceId,
     known: card.known,
     ...(card.title !== undefined ? { title: card.title } : {}),
-    ...(card.definitionId !== undefined ? { definitionId: card.definitionId } : {}),
+    ...(card.definitionId !== undefined
+      ? { definitionId: card.definitionId }
+      : {}),
     ...(card.type !== undefined ? { type: card.type } : {}),
     ...(card.subtypes !== undefined ? { subtypes: card.subtypes.slice() } : {}),
     ...(card.rulesText !== undefined ? { rulesText: card.rulesText } : {}),
     ...(card.cost !== undefined ? { cost: card.cost } : {}),
-    ...(card.installCost !== undefined ? { installCost: card.installCost } : {}),
+    ...(card.installCost !== undefined
+      ? { installCost: card.installCost }
+      : {}),
     ...(card.memoryCost !== undefined ? { memoryCost: card.memoryCost } : {}),
-    ...(card.memoryLimitBonus !== undefined ? { memoryLimitBonus: card.memoryLimitBonus } : {}),
-    ...(card.maxHandSizeBonus !== undefined ? { maxHandSizeBonus: card.maxHandSizeBonus } : {}),
+    ...(card.memoryLimitBonus !== undefined
+      ? { memoryLimitBonus: card.memoryLimitBonus }
+      : {}),
+    ...(card.maxHandSizeBonus !== undefined
+      ? { maxHandSizeBonus: card.maxHandSizeBonus }
+      : {}),
     ...(card.rezCost !== undefined ? { rezCost: card.rezCost } : {}),
     ...(card.baseLink !== undefined ? { baseLink: card.baseLink } : {}),
     ...(card.rezzed !== undefined ? { rezzed: card.rezzed } : {}),
-    ...(card.advancementCounters !== undefined ? { advancementCounters: card.advancementCounters } : {}),
-    ...(card.advancementRequirement !== undefined ? { advancementRequirement: card.advancementRequirement } : {}),
+    ...(card.advancementCounters !== undefined
+      ? { advancementCounters: card.advancementCounters }
+      : {}),
+    ...(card.advancementRequirement !== undefined
+      ? { advancementRequirement: card.advancementRequirement }
+      : {}),
     ...(card.strength !== undefined ? { strength: card.strength } : {}),
-    ...(card.agendaPoints !== undefined ? { agendaPoints: card.agendaPoints } : {}),
+    ...(card.agendaPoints !== undefined
+      ? { agendaPoints: card.agendaPoints }
+      : {}),
     ...(card.trashCost !== undefined ? { trashCost: card.trashCost } : {}),
     ...(card.counters !== undefined ? { counters: { ...card.counters } } : {}),
     ...(card.counterDisplays !== undefined
@@ -491,7 +527,11 @@ function sanitizeVisibleCard(card: VisibleCard): VisibleCard {
     ...(card.owner !== undefined ? { owner: card.owner } : {}),
     ...(card.controller !== undefined ? { controller: card.controller } : {}),
     ...(card.effectiveRunQuote
-      ? { effectiveRunQuote: sanitizeVisibleEffectiveIceRunQuote(card.effectiveRunQuote) }
+      ? {
+          effectiveRunQuote: sanitizeVisibleEffectiveIceRunQuote(
+            card.effectiveRunQuote,
+          ),
+        }
       : {}),
   };
 }
@@ -520,7 +560,9 @@ function sanitizeCounterCreditPool(
 ): NonNullable<CounterDisplay["creditPool"]> {
   return {
     kind: creditPool.kind,
-    ...(creditPool.capacity !== undefined ? { capacity: creditPool.capacity } : {}),
+    ...(creditPool.capacity !== undefined
+      ? { capacity: creditPool.capacity }
+      : {}),
     ...(creditPool.uses !== undefined ? { uses: creditPool.uses.slice() } : {}),
     ...(creditPool.refresh !== undefined
       ? {
@@ -554,11 +596,15 @@ function sanitizeVisibleEffectiveIceRunQuote(
             ),
           }
         : {}),
-      ...(subroutine.breakTags ? { breakTags: subroutine.breakTags.slice() } : {}),
+      ...(subroutine.breakTags
+        ? { breakTags: subroutine.breakTags.slice() }
+        : {}),
       ...(subroutine.sourceDefinitionId
         ? { sourceDefinitionId: subroutine.sourceDefinitionId }
         : {}),
-      ...(subroutine.sourceTitle ? { sourceTitle: subroutine.sourceTitle } : {}),
+      ...(subroutine.sourceTitle
+        ? { sourceTitle: subroutine.sourceTitle }
+        : {}),
       ...(subroutine.dynamicSourceKind
         ? { dynamicSourceKind: subroutine.dynamicSourceKind }
         : {}),
@@ -603,7 +649,10 @@ function sanitizeVisibleEffectiveIceRunQuote(
                   }
                 : {}),
               ...(subroutine.unbrokenRunEffect.preventsJackOut !== undefined
-                ? { preventsJackOut: subroutine.unbrokenRunEffect.preventsJackOut }
+                ? {
+                    preventsJackOut:
+                      subroutine.unbrokenRunEffect.preventsJackOut,
+                  }
                 : {}),
               ...(subroutine.unbrokenRunEffect.causesDamageOrProgramTrash !==
               undefined
@@ -650,9 +699,15 @@ function sanitizeTraceSuccessEffect(
   return { ...effect };
 }
 
-function sanitizeVisibleChoiceRequest(choice: VisibleChoiceRequest): VisibleChoiceRequest {
-  const stackSearchResolution = sanitizeStackSearchResolution(choice.stackSearchResolution);
-  const cardSearchPresentation = sanitizeCardSearchPresentation(choice.cardSearchPresentation);
+function sanitizeVisibleChoiceRequest(
+  choice: VisibleChoiceRequest,
+): VisibleChoiceRequest {
+  const stackSearchResolution = sanitizeStackSearchResolution(
+    choice.stackSearchResolution,
+  );
+  const cardSearchPresentation = sanitizeCardSearchPresentation(
+    choice.cardSearchPresentation,
+  );
   return {
     choiceId: choice.choiceId,
     side: choice.side,
@@ -665,9 +720,13 @@ function sanitizeVisibleChoiceRequest(choice: VisibleChoiceRequest): VisibleChoi
       return {
         id: option.id,
         label: option.label,
-        ...(option.publicLabel !== undefined ? { publicLabel: option.publicLabel } : {}),
+        ...(option.publicLabel !== undefined
+          ? { publicLabel: option.publicLabel }
+          : {}),
         ...(value !== undefined ? { value } : {}),
-        ...(option.selectable !== undefined ? { selectable: option.selectable } : {}),
+        ...(option.selectable !== undefined
+          ? { selectable: option.selectable }
+          : {}),
         ...(metadata ? { metadata } : {}),
         ...(option.card ? { card: sanitizeVisibleCard(option.card) } : {}),
       };
@@ -682,7 +741,9 @@ function sanitizeVisibleChoiceRequest(choice: VisibleChoiceRequest): VisibleChoi
 }
 
 function sanitizeLegalAction(action: LegalAction): LegalAction {
-  const payload = action.payload ? sanitizeLegalActionPayload(action.payload as Record<string, unknown>) : undefined;
+  const payload = action.payload
+    ? sanitizeLegalActionPayload(action.payload as Record<string, unknown>)
+    : undefined;
   return {
     actionId: action.actionId,
     side: action.side,
@@ -691,11 +752,32 @@ function sanitizeLegalAction(action: LegalAction): LegalAction {
     source: action.source,
     timingPoint: action.timingPoint,
     costs: action.costs.map(sanitizeCost),
-    targetRequirements: action.targetRequirements.map(sanitizeTargetRequirement),
-    ...(action.choiceRequirements ? { choiceRequirements: action.choiceRequirements.map(sanitizeChoiceRequirement) } : {}),
-    ...(action.abilityRef ? { abilityRef: { sourceCardInstanceId: action.abilityRef.sourceCardInstanceId, abilityId: action.abilityRef.abilityId } } : {}),
+    targetRequirements: action.targetRequirements.map(
+      sanitizeTargetRequirement,
+    ),
+    ...(action.choiceRequirements
+      ? {
+          choiceRequirements: action.choiceRequirements.map(
+            sanitizeChoiceRequirement,
+          ),
+        }
+      : {}),
+    ...(action.abilityRef
+      ? {
+          abilityRef: {
+            sourceCardInstanceId: action.abilityRef.sourceCardInstanceId,
+            abilityId: action.abilityRef.abilityId,
+          },
+        }
+      : {}),
     ...(action.effectRef ? { effectRef: action.effectRef } : {}),
-    ...(action.resolvedEffects ? { resolvedEffects: action.resolvedEffects.map(sanitizeResolvedGameEffect) } : {}),
+    ...(action.resolvedEffects
+      ? {
+          resolvedEffects: action.resolvedEffects.map(
+            sanitizeResolvedGameEffect,
+          ),
+        }
+      : {}),
     visibility: action.visibility,
     expiresAtStateVersion: action.expiresAtStateVersion,
     ...(payload ? { payload } : {}),
@@ -709,20 +791,32 @@ function sanitizeCost(cost: Cost): Cost {
   };
 }
 
-function sanitizeTargetRequirement(requirement: TargetRequirement): TargetRequirement {
+function sanitizeTargetRequirement(
+  requirement: TargetRequirement,
+): TargetRequirement {
   return {
     id: requirement.id,
     kind: requirement.kind,
-    ...(requirement.zoneScope ? { zoneScope: requirement.zoneScope.slice() } : {}),
+    ...(requirement.zoneScope
+      ? { zoneScope: requirement.zoneScope.slice() }
+      : {}),
     ...(requirement.side ? { side: requirement.side } : {}),
     ...(requirement.visibility ? { visibility: requirement.visibility } : {}),
-    ...(requirement.allowedServers ? { allowedServers: requirement.allowedServers.slice() } : {}),
-    ...(requirement.sourceIceRef ? { sourceIceRef: requirement.sourceIceRef } : {}),
-    ...(requirement.allowedSides ? { allowedSides: requirement.allowedSides.slice() } : {}),
+    ...(requirement.allowedServers
+      ? { allowedServers: requirement.allowedServers.slice() }
+      : {}),
+    ...(requirement.sourceIceRef
+      ? { sourceIceRef: requirement.sourceIceRef }
+      : {}),
+    ...(requirement.allowedSides
+      ? { allowedSides: requirement.allowedSides.slice() }
+      : {}),
   };
 }
 
-function sanitizeChoiceRequirement(requirement: ChoiceRequirement): ChoiceRequirement {
+function sanitizeChoiceRequirement(
+  requirement: ChoiceRequirement,
+): ChoiceRequirement {
   return {
     choiceId: requirement.choiceId,
     minSelections: requirement.minSelections,
@@ -731,7 +825,9 @@ function sanitizeChoiceRequirement(requirement: ChoiceRequirement): ChoiceRequir
   };
 }
 
-function sanitizeResolvedGameEffect(effect: ResolvedGameEffect): ResolvedGameEffect {
+function sanitizeResolvedGameEffect(
+  effect: ResolvedGameEffect,
+): ResolvedGameEffect {
   return {
     effectId: effect.effectId,
     kind: effect.kind,
@@ -740,14 +836,26 @@ function sanitizeResolvedGameEffect(effect: ResolvedGameEffect): ResolvedGameEff
     ...(effect.amount !== undefined ? { amount: effect.amount } : {}),
     ...(effect.reason ? { reason: effect.reason } : {}),
     ...(effect.counterType ? { counterType: effect.counterType } : {}),
-    ...(effect.removedCounterAmount !== undefined ? { removedCounterAmount: effect.removedCounterAmount } : {}),
-    ...(effect.remainingCounters !== undefined ? { remainingCounters: effect.remainingCounters } : {}),
-    ...(effect.addedCounterAmount !== undefined ? { addedCounterAmount: effect.addedCounterAmount } : {}),
-    ...(effect.runnerTagsAfter !== undefined ? { runnerTagsAfter: effect.runnerTagsAfter } : {}),
+    ...(effect.removedCounterAmount !== undefined
+      ? { removedCounterAmount: effect.removedCounterAmount }
+      : {}),
+    ...(effect.remainingCounters !== undefined
+      ? { remainingCounters: effect.remainingCounters }
+      : {}),
+    ...(effect.addedCounterAmount !== undefined
+      ? { addedCounterAmount: effect.addedCounterAmount }
+      : {}),
+    ...(effect.runnerTagsAfter !== undefined
+      ? { runnerTagsAfter: effect.runnerTagsAfter }
+      : {}),
     ...(effect.redactedKind ? { redactedKind: effect.redactedKind } : {}),
-    ...(effect.sourceDefinitionId ? { sourceDefinitionId: effect.sourceDefinitionId } : {}),
+    ...(effect.sourceDefinitionId
+      ? { sourceDefinitionId: effect.sourceDefinitionId }
+      : {}),
     ...(effect.sourceTitle ? { sourceTitle: effect.sourceTitle } : {}),
-    ...(effect.cardDefinitionId ? { cardDefinitionId: effect.cardDefinitionId } : {}),
+    ...(effect.cardDefinitionId
+      ? { cardDefinitionId: effect.cardDefinitionId }
+      : {}),
     ...(effect.cardTitle ? { cardTitle: effect.cardTitle } : {}),
     ...(effect.serverId ? { serverId: effect.serverId } : {}),
     ...(effect.serverLabel ? { serverLabel: effect.serverLabel } : {}),
@@ -761,28 +869,47 @@ function sanitizePublicGameEvent(event: PublicGameEvent): PublicGameEvent {
     stateVersionBefore: event.stateVersionBefore,
     stateVersionAfter: event.stateVersionAfter,
     stateHashAfter: event.stateHashAfter,
-    ...(event.visibilityClass ? { visibilityClass: event.visibilityClass } : {}),
+    ...(event.visibilityClass
+      ? { visibilityClass: event.visibilityClass }
+      : {}),
     publicPayload: sanitizePublicPayload(event.publicPayload),
   };
 }
 
-function sanitizePublicPayload(payload: Record<string, unknown>): Record<string, unknown> {
-  const result: Record<string, unknown> = sanitizeAllowedPrimitiveRecord(payload, PUBLIC_PAYLOAD_PRIMITIVE_KEYS);
+function sanitizePublicPayload(
+  payload: Record<string, unknown>,
+): Record<string, unknown> {
+  const result: Record<string, unknown> = sanitizeAllowedPrimitiveRecord(
+    payload,
+    PUBLIC_PAYLOAD_PRIMITIVE_KEYS,
+  );
   for (const key of PUBLIC_PAYLOAD_STRING_ARRAY_KEYS) {
     const value = sanitizeStringArray(payload[key]);
     if (value) result[key] = value;
   }
   const amounts = sanitizeNumberRecord(payload.amounts, PUBLIC_AMOUNT_KEYS);
   if (amounts) result.amounts = amounts;
-  const targets = sanitizeAllowedPrimitiveRecord(payload.targets, PUBLIC_TARGET_KEYS);
+  const targets = sanitizeAllowedPrimitiveRecord(
+    payload.targets,
+    PUBLIC_TARGET_KEYS,
+  );
   if (Object.keys(targets).length > 0) result.targets = targets;
   const visibility = sanitizePublicVisibility(payload.visibility);
   if (visibility) result.visibility = visibility;
-  const baseline = sanitizeAllowedPrimitiveRecord(payload.baseline, PUBLIC_BASELINE_KEYS);
+  const baseline = sanitizeAllowedPrimitiveRecord(
+    payload.baseline,
+    PUBLIC_BASELINE_KEYS,
+  );
   if (Object.keys(baseline).length > 0) result.baseline = baseline;
-  const runnerDeck = sanitizeAllowedPrimitiveRecord(payload.runnerDeck, PUBLIC_DECK_METADATA_KEYS);
+  const runnerDeck = sanitizeAllowedPrimitiveRecord(
+    payload.runnerDeck,
+    PUBLIC_DECK_METADATA_KEYS,
+  );
   if (Object.keys(runnerDeck).length > 0) result.runnerDeck = runnerDeck;
-  const corpDeck = sanitizeAllowedPrimitiveRecord(payload.corpDeck, PUBLIC_DECK_METADATA_KEYS);
+  const corpDeck = sanitizeAllowedPrimitiveRecord(
+    payload.corpDeck,
+    PUBLIC_DECK_METADATA_KEYS,
+  );
   if (Object.keys(corpDeck).length > 0) result.corpDeck = corpDeck;
   return result;
 }
@@ -796,18 +923,32 @@ function sanitizeLegalActionPayload(
   return result;
 }
 
-function sanitizeAllowedPrimitiveRecord(value: unknown, allowedKeys: ReadonlySet<string>): Record<string, string | number | boolean> {
+function sanitizeAllowedPrimitiveRecord(
+  value: unknown,
+  allowedKeys: ReadonlySet<string>,
+): Record<string, string | number | boolean> {
   const result: Record<string, string | number | boolean> = {};
-  if (!value || typeof value !== "object" || Array.isArray(value)) return result;
+  if (!value || typeof value !== "object" || Array.isArray(value))
+    return result;
   for (const key of allowedKeys) {
-    const sanitized = sanitizePrimitive((value as Record<string, unknown>)[key]);
+    const sanitized = sanitizePrimitive(
+      (value as Record<string, unknown>)[key],
+    );
     if (sanitized !== undefined) result[key] = sanitized;
   }
-  if (typeof result.abilityFamily === "string" && !ALLOWED_ABILITY_FAMILIES.has(result.abilityFamily as AiPublicPayloadAbilityFamily)) delete result.abilityFamily;
+  if (
+    typeof result.abilityFamily === "string" &&
+    !ALLOWED_ABILITY_FAMILIES.has(
+      result.abilityFamily as AiPublicPayloadAbilityFamily,
+    )
+  )
+    delete result.abilityFamily;
   return result;
 }
 
-function sanitizePrimitive(value: unknown): string | number | boolean | undefined {
+function sanitizePrimitive(
+  value: unknown,
+): string | number | boolean | undefined {
   if (typeof value === "string" || typeof value === "boolean") return value;
   if (typeof value === "number" && Number.isFinite(value)) return value;
   return undefined;
@@ -815,8 +956,11 @@ function sanitizePrimitive(value: unknown): string | number | boolean | undefine
 
 function sanitizeChoiceOptionMetadata(
   value: unknown,
-): NonNullable<VisibleChoiceRequest["options"][number]["metadata"]> | undefined {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+):
+  | NonNullable<VisibleChoiceRequest["options"][number]["metadata"]>
+  | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value))
+    return undefined;
   const metadata = value as Record<string, unknown>;
   const result: NonNullable<
     VisibleChoiceRequest["options"][number]["metadata"]
@@ -840,42 +984,59 @@ function sanitizeChoiceOptionMetadata(
 
 function sanitizeStringArray(value: unknown): string[] | undefined {
   if (!Array.isArray(value)) return undefined;
-  const entries = value.filter((entry): entry is string => typeof entry === "string");
+  const entries = value.filter(
+    (entry): entry is string => typeof entry === "string",
+  );
   return entries.length > 0 ? entries : undefined;
 }
 
-
-function sanitizeNumberRecord(value: unknown, allowedKeys: ReadonlySet<string>): Record<string, number> | undefined {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+function sanitizeNumberRecord(
+  value: unknown,
+  allowedKeys: ReadonlySet<string>,
+): Record<string, number> | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value))
+    return undefined;
   const result: Record<string, number> = {};
   for (const key of allowedKeys) {
     const candidate = (value as Record<string, unknown>)[key];
-    if (typeof candidate === "number" && Number.isFinite(candidate)) result[key] = candidate;
+    if (typeof candidate === "number" && Number.isFinite(candidate))
+      result[key] = candidate;
   }
   return Object.keys(result).length > 0 ? result : undefined;
 }
 
-function sanitizePublicVisibility(value: unknown): Record<string, string | boolean> | undefined {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+function sanitizePublicVisibility(
+  value: unknown,
+): Record<string, string | boolean> | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value))
+    return undefined;
   const raw = value as Record<string, unknown>;
   const result: Record<string, string | boolean> = {};
   if (typeof raw.class === "string") result.class = raw.class;
-  if (typeof raw.hiddenZoneBarrier === "boolean") result.hiddenZoneBarrier = raw.hiddenZoneBarrier;
-  if (typeof raw.redactedKind === "string") result.redactedKind = raw.redactedKind;
+  if (typeof raw.hiddenZoneBarrier === "boolean")
+    result.hiddenZoneBarrier = raw.hiddenZoneBarrier;
+  if (typeof raw.redactedKind === "string")
+    result.redactedKind = raw.redactedKind;
   return Object.keys(result).length > 0 ? result : undefined;
 }
 
-function sanitizeStackSearchResolution(value: VisibleChoiceRequest["stackSearchResolution"]): VisibleChoiceRequest["stackSearchResolution"] | undefined {
+function sanitizeStackSearchResolution(
+  value: VisibleChoiceRequest["stackSearchResolution"],
+): VisibleChoiceRequest["stackSearchResolution"] | undefined {
   if (!value) return undefined;
   return {
     reveal: value.reveal,
     destination: value.destination,
     shuffleAfter: value.shuffleAfter,
-    ...(value.publicRevealKind ? { publicRevealKind: value.publicRevealKind } : {}),
+    ...(value.publicRevealKind
+      ? { publicRevealKind: value.publicRevealKind }
+      : {}),
   };
 }
 
-function sanitizeCardSearchPresentation(value: VisibleChoiceRequest["cardSearchPresentation"]): VisibleChoiceRequest["cardSearchPresentation"] | undefined {
+function sanitizeCardSearchPresentation(
+  value: VisibleChoiceRequest["cardSearchPresentation"],
+): VisibleChoiceRequest["cardSearchPresentation"] | undefined {
   if (!value) return undefined;
   return {
     sourceZone: value.sourceZone,
@@ -884,7 +1045,9 @@ function sanitizeCardSearchPresentation(value: VisibleChoiceRequest["cardSearchP
     destination: value.destination,
     shuffleAfter: value.shuffleAfter,
     showNonMatchingCards: value.showNonMatchingCards,
-    ...(value.publicRevealKind ? { publicRevealKind: value.publicRevealKind } : {}),
+    ...(value.publicRevealKind
+      ? { publicRevealKind: value.publicRevealKind }
+      : {}),
     ...(value.temporaryReturnAtEndOfTurn
       ? { temporaryReturnAtEndOfTurn: value.temporaryReturnAtEndOfTurn }
       : {}),
