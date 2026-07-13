@@ -218,6 +218,7 @@ export function semanticRuntimeCorpBoardTriage<TConsumer extends string>(
       centralPressureMustInterruptActiveScoreline(
         pressureInput,
         centralPressure,
+        activeScorelineClock,
       )
     ) {
       return centralPressureTriage(
@@ -698,6 +699,19 @@ function corpBoardTriageActionAlignment<TConsumer extends string>(
         : "neutral";
     case "protect_hq":
     case "protect_rd":
+      if (
+        triage.evidence.includes(
+          "corp_board_triage_central_override:first_layer_before_speculative_remote",
+        ) &&
+        actionProvidesEconomy(
+          input,
+          action,
+          dependencies,
+          actionSemanticCandidate,
+        )
+      ) {
+        return "match";
+      }
       if (
         actionRelievesHqAgendaPressureViaSafeRemote(
           input,
@@ -2268,7 +2282,8 @@ function centralTriageSeverity(
   if (
     pressure.serverId === "rd" &&
     pressure.successfulAccessEvents >= 2 &&
-    (pressure.visibleVirusPressure ||
+    (pressure.recentSuccessfulAccessEvents >= 2 ||
+      pressure.visibleVirusPressure ||
       pressure.visibleMultiaccess ||
       pressure.eventMultiaccess ||
       pressure.runOrAccessEvents >= 6)
@@ -2485,7 +2500,11 @@ function preScoreCentralProtectionTriage<TConsumer extends string>(
     );
     if (
       activeScorelineClock &&
-      !centralPressureMustInterruptActiveScoreline(pressureInput, rdPressure)
+      !centralPressureMustInterruptActiveScoreline(
+        pressureInput,
+        rdPressure,
+        activeScorelineClock,
+      )
     ) {
       return undefined;
     }
@@ -2496,9 +2515,8 @@ function preScoreCentralProtectionTriage<TConsumer extends string>(
 
   if (
     centralPressureIsTriageAcute(pressureInput, rdPressure) &&
-    rdPressure.successfulAccessEvents >= 2 &&
+    rdPressure.recentSuccessfulAccessEvents >= 2 &&
     centralServerNeedsProtection(input, "rd") &&
-    concreteCentralProtectionActionExists(input, actions, "rd", dependencies) &&
     speculativeRemoteLayeringWouldDisplaceCentralProtection(
       input,
       actions,
@@ -2581,8 +2599,20 @@ function speculativeRemoteLayeringWouldDisplaceCentralProtection<
     if (
       entry.action.type !== "install_card" ||
       entry.action.payload?.placement === "ice" ||
-      !entry.serverId?.startsWith("remote_") ||
-      entry.scoringWindow?.scoreHorizon === "immediate" ||
+      (!entry.serverId?.startsWith("remote_") &&
+        entry.serverId !== "new_remote") ||
+      entry.scoringWindow?.scoreHorizon === "immediate"
+    ) {
+      return false;
+    }
+    if (entry.serverId === "new_remote") {
+      return (
+        entry.scoringWindow?.windowKind === "unsafe" &&
+        ((entry.scoringWindow.agendaPointsAtRisk ?? 0) > 0 ||
+          entry.scoringWindow.agendaStealRelevantBeforeScore)
+      );
+    }
+    if (
       !actionPushesConcreteAgendaScoreline(
         input,
         entry.action,
@@ -2605,6 +2635,7 @@ function speculativeRemoteLayeringWouldDisplaceCentralProtection<
 function centralPressureMustInterruptActiveScoreline(
   input: AiDecisionInput,
   pressure: ReturnType<typeof semanticRuntimeCorpCentralPressureAssessment>,
+  activeScorelineClock: ForcedScorelineClockPressure,
 ): boolean {
   const runnerAgendaPoints =
     corpTriagePositiveNumber(input.playerView.opponent?.agendaPoints) ?? 0;
@@ -2613,6 +2644,13 @@ function centralPressureMustInterruptActiveScoreline(
     pressure.visibleMultiaccess ||
     pressure.visibleVirusPressure ||
     pressure.eventMultiaccess
+  ) {
+    return true;
+  }
+  if (
+    pressure.serverId === "rd" &&
+    pressure.recentSuccessfulAccessEvents >= 2 &&
+    activeScorelineClock.targetServerId === "new_remote"
   ) {
     return true;
   }

@@ -39,16 +39,39 @@ describe("semanticRuntimeCorpCentralPressureAssessment", () => {
     expect(pressure.visibleVirusPressure).toBe(false);
     expect(pressure.active).toBe(false);
   });
+
+  it("keeps historical access evidence but expires it from recent R&D urgency", () => {
+    const input = corpInput({
+      stateVersion: 100,
+      eventTail: [
+        publicCentralEvent("rd-access-old", "access_card", "rd", 40),
+        publicCentralEvent("rd-access-recent", "access_card", "rd", 90),
+      ],
+    });
+
+    const pressure = semanticRuntimeCorpCentralPressureAssessment(input, "rd");
+
+    expect(pressure).toMatchObject({
+      runOrAccessEvents: 2,
+      successfulAccessEvents: 2,
+      recentRunOrAccessEvents: 1,
+      recentSuccessfulAccessEvents: 1,
+    });
+  });
 });
 
-function corpInput(overrides: {
-  runnerRig?: VisibleCard[];
-  eventTail?: AiDecisionInput["eventTail"];
-} = {}): AiDecisionInput {
+function corpInput(
+  overrides: {
+    runnerRig?: VisibleCard[];
+    eventTail?: AiDecisionInput["eventTail"];
+    stateVersion?: number;
+  } = {},
+): AiDecisionInput {
   return {
     side: "corp",
     eventTail: overrides.eventTail ?? [],
     playerView: {
+      stateVersion: overrides.stateVersion ?? 2,
       own: {
         credits: 5,
         clicks: 3,
@@ -92,12 +115,13 @@ function publicCentralEvent(
   eventId: string,
   actionType: "start_run" | "access_card",
   serverId: "hq" | "rd",
+  stateVersionAfter = 2,
 ): AiDecisionInput["eventTail"][number] {
   return {
     eventId,
     type: actionType,
-    stateVersionBefore: 1,
-    stateVersionAfter: 2,
+    stateVersionBefore: Math.max(0, stateVersionAfter - 1),
+    stateVersionAfter,
     stateHashAfter: `fnv1a:${eventId}`,
     visibilityClass: "public",
     publicPayload: {

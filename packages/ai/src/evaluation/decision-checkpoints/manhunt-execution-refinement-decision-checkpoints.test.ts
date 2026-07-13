@@ -78,6 +78,14 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
     const result = runAiDecisionCheckpoint(fixture(cp05Json));
 
     expect(result.ok, diagnostic(result)).toBe(true);
+    expect(
+      actionAlternativeHasComponent(
+        result,
+        WALL_OF_STATIC,
+        "hq",
+        "corp_matchpoint_hq_protection_alignment",
+      ),
+    ).toBe(false);
   });
 
   it("keeps HQ matchpoint defense when agenda points remain stealable", () => {
@@ -86,9 +94,8 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
       current.expectation = {
         acceptableActions: [
           {
-            type: "install_card",
-            sourceDefinitionId: WALL_OF_STATIC,
-            targetServerId: "new_remote",
+            type: "rez_ice",
+            sourceDefinitionId: "onr_v1_313_city-surveillance",
           },
         ],
       };
@@ -97,6 +104,14 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
     const result = runAiDecisionCheckpoint(liveAgendaInventory);
 
     expect(result.ok, diagnostic(result)).toBe(true);
+    expect(
+      actionAlternativeHasComponent(
+        result,
+        WALL_OF_STATIC,
+        "hq",
+        "corp_matchpoint_hq_protection_alignment",
+      ),
+    ).toBe(true);
   });
 
   it("bids zero when the trace has no visible punish conversion", () => {
@@ -211,4 +226,29 @@ function diagnostic(result: AiDecisionCheckpointRunResult): string {
     lastEvent: result.input.eventTail.at(-1)?.publicPayload,
     scoreBreakdown: result.decision?.decisionDebug?.scoreBreakdown,
   });
+}
+
+function actionAlternativeHasComponent(
+  result: AiDecisionCheckpointRunResult,
+  sourceDefinitionId: string,
+  serverId: string,
+  componentKey: string,
+): boolean {
+  const sourceInstanceIds = new Set(
+    result.input.playerView.own.gripOrHq
+      .filter((card) => card.definitionId === sourceDefinitionId)
+      .map((card) => card.instanceId),
+  );
+  return (
+    result.decision?.decisionDebug?.actionAlternatives?.some(
+      (entry) =>
+        entry.actionId.includes(`.${serverId}.`) &&
+        [...sourceInstanceIds].some((instanceId) =>
+          entry.actionId.includes(instanceId),
+        ) &&
+        entry.scoreBreakdown?.some(
+          (component) => component.key === componentKey,
+        ),
+    ) === true
+  );
 }

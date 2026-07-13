@@ -28,6 +28,7 @@ import { rolesMatch } from "./role-match";
 import { semanticRuntimeCorpCentralPressureAssessment } from "./semantic-runtime-corp-central-pressure";
 import type { CorpScoringWindowAssessment } from "./semantic-runtime-corp-scoring-window";
 import type { CorpScorelineWindowAssessment } from "./corp-scoreline/semantic-runtime-corp-scoreline-assessment";
+import { corpKnownAgendaInventory } from "./corp-known-agenda-inventory";
 
 type SemanticRuntimeCorpSafetyGate = {
   allowed: boolean;
@@ -809,6 +810,10 @@ function corpMatchpointHqProtectionComponent(
   if (input.playerView.opponent.agendaPoints < pointsToWin - 1) {
     return undefined;
   }
+  const agendaInventory = corpKnownAgendaInventory(input);
+  if (agendaInventory?.remainingStealableAgendaPoints === 0) {
+    return undefined;
+  }
   const hqPressure = semanticRuntimeCorpCentralPressureAssessment(input, "hq");
   if (
     !hqPressure.active &&
@@ -829,6 +834,7 @@ function corpMatchpointHqProtectionComponent(
     reason: [
       "runner_at_match_point:true",
       `install_server:${serverId ?? "unknown"}`,
+      ...(agendaInventory?.evidence ?? []),
       ...hqPressure.evidence,
     ].join("|"),
   };
@@ -1748,6 +1754,9 @@ function corpPreparedScoreRemoteAgendaSearchComponent<TConsumer extends string>(
   actionSemanticCandidate: ActionSemanticCandidate | undefined,
   boardTriageState: ReturnType<typeof semanticRuntimeCorpBoardTriage>,
 ): AiDecisionScoreComponent | undefined {
+  if (corpKnownAgendaInventory(input)?.remainingStealableAgendaPoints === 0) {
+    return undefined;
+  }
   if (corpActiveRemoteScorelineState(input)) return undefined;
   const pipeline = corpPreparedScoreRemotePipeline(input);
   if (!pipeline) return undefined;
