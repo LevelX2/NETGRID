@@ -90,6 +90,11 @@ export function runAiDecisionCheckpoint(
     decision,
     fixture.expectation.discardChoice,
   );
+  const choiceAccepted = choiceExpectationMatches(
+    input,
+    decision,
+    fixture.expectation.choice,
+  );
   const strategicIntentAccepted = strategicIntentExpectationMatches(
     strategicIntent,
     fixture.expectation.strategicIntent,
@@ -97,6 +102,7 @@ export function runAiDecisionCheckpoint(
   if (
     forbidden ||
     !accepted ||
+    !choiceAccepted ||
     !discardChoiceAccepted ||
     !strategicIntentAccepted
   ) {
@@ -118,6 +124,41 @@ export function runAiDecisionCheckpoint(
     selectedAction,
     ...(strategicIntent ? { strategicIntent } : {}),
   };
+}
+
+function choiceExpectationMatches(
+  input: AiDecisionInput,
+  decision: AiDecision,
+  expectation: AiDecisionCheckpointExpectationV1["choice"] | undefined,
+): boolean {
+  if (!expectation) return true;
+  const choice = input.playerView.pendingChoice;
+  if (!choice) return false;
+  const rawSelectedIds = decision.selectedChoices?.selectedOptionIds;
+  const selectedIds = new Set(
+    Array.isArray(rawSelectedIds)
+      ? rawSelectedIds.filter(
+          (value): value is string => typeof value === "string",
+        )
+      : [],
+  );
+  const selectedValues = choice.options
+    .filter((option) => selectedIds.has(option.id))
+    .flatMap((option) => (option.value === undefined ? [] : [option.value]));
+  return (
+    (expectation.mustSelectOptionIds ?? []).every((optionId) =>
+      selectedIds.has(optionId),
+    ) &&
+    !(expectation.mustNotSelectOptionIds ?? []).some((optionId) =>
+      selectedIds.has(optionId),
+    ) &&
+    (expectation.mustSelectValues ?? []).every((value) =>
+      selectedValues.includes(value),
+    ) &&
+    !(expectation.mustNotSelectValues ?? []).some((value) =>
+      selectedValues.includes(value),
+    )
+  );
 }
 
 function strategicIntentExpectationMatches(

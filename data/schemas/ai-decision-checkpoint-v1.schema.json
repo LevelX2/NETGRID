@@ -40,6 +40,28 @@
       "properties": {
         "acceptableActions": { "type": "array" },
         "forbiddenActions": { "type": "array" },
+        "choice": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "mustSelectOptionIds": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "mustNotSelectOptionIds": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "mustSelectValues": {
+              "type": "array",
+              "items": { "type": ["string", "number", "boolean"] }
+            },
+            "mustNotSelectValues": {
+              "type": "array",
+              "items": { "type": ["string", "number", "boolean"] }
+            }
+          }
+        },
         "discardChoice": { "type": "object" },
         "strategicIntent": {
           "type": "object",
