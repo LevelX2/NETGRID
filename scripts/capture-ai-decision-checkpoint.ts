@@ -38,7 +38,10 @@ type TraceRow = {
 };
 
 const args = parseArgs(process.argv.slice(2));
-const db = new DatabaseSync(resolve(args.db), { readOnly: true });
+const db = new DatabaseSync(resolve(args.db), {
+  readOnly: true,
+  timeout: 10_000,
+});
 const target = db
   .prepare(
     `select state_version, decision_index, side, selected_action_id, trace_json
