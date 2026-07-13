@@ -515,6 +515,8 @@ function corpBoardTriageActionAlignment<TConsumer extends string>(
       const activeScorelineLock = triageIsActiveScorelineLock(triage);
       const emergencyRemoteConversion =
         triageIsEmergencyHqAgendaRemoteConversion(triage);
+      const lastViableDeckoutMatchpoint =
+        triageIsLastViableDeckoutMatchpoint(triage);
       const needsFunding =
         triage.requiredRezFloor !== undefined &&
         triage.currentCredits !== undefined &&
@@ -547,6 +549,13 @@ function corpBoardTriageActionAlignment<TConsumer extends string>(
         return "mismatch";
       }
       if (actionPushesConcreteAgendaScoreline(input, action, dependencies)) {
+        if (
+          lastViableDeckoutMatchpoint &&
+          actionUsesVisibleMatchpointAgenda(input, action) &&
+          (!triage.targetServerId || actionServerId === triage.targetServerId)
+        ) {
+          return "match";
+        }
         if (needsFunding && legalEconomyAvailable) {
           return "mismatch";
         }
@@ -579,7 +588,7 @@ function corpBoardTriageActionAlignment<TConsumer extends string>(
           actionSemanticCandidate,
         )
       ) {
-        return "match";
+        return lastViableDeckoutMatchpoint ? "mismatch" : "match";
       }
       return actionDelaysForcedScoreline(
         input,
@@ -1037,11 +1046,34 @@ function corpDeckoutAgendaFloodPressure<TConsumer extends string>(
     (sum, card) => sum + corpTriageVisibleAgendaPoints(card),
     0,
   );
-  if (hqAgendaCount < 2 && hqAgendaPoints < 4) return undefined;
-
-  const scorelineEntries = actions.filter((entry) =>
+  const corpAgendaPoints =
+    corpTriagePositiveNumber(input.playerView.own.agendaPoints) ?? 0;
+  const pointsToWin =
+    corpTriagePositiveNumber(input.playerView.agendaPointsToWin) ?? 7;
+  const matchpointAgendaIds = new Set(
+    hqAgendaCards
+      .filter(
+        (card) =>
+          corpAgendaPoints + corpTriageVisibleAgendaPoints(card) >= pointsToWin,
+      )
+      .map((card) => card.instanceId),
+  );
+  const allScorelineEntries = actions.filter((entry) =>
     actionPushesConcreteAgendaScoreline(input, entry.action, dependencies),
   );
+  const matchpointScorelineEntries = allScorelineEntries.filter(
+    (entry) =>
+      typeof entry.action.source === "string" &&
+      matchpointAgendaIds.has(entry.action.source),
+  );
+  const lastViableDeckoutMatchpoint =
+    rdCount <= 1 && matchpointScorelineEntries.length > 0;
+  const agendaFlood = hqAgendaCount >= 2 || hqAgendaPoints >= 4;
+  if (!agendaFlood && !lastViableDeckoutMatchpoint) return undefined;
+
+  const scorelineEntries = lastViableDeckoutMatchpoint
+    ? matchpointScorelineEntries
+    : allScorelineEntries;
   if (scorelineEntries.length === 0) return undefined;
 
   const preferred = highestPriorityDeckoutScorelineEntry(scorelineEntries);
@@ -1050,7 +1082,11 @@ function corpDeckoutAgendaFloodPressure<TConsumer extends string>(
     : undefined;
   const targetServerId = preferred?.serverId;
   const severity =
-    rdCount <= 2 || (rdCount <= 4 && hqAgendaPoints >= 6) ? "critical" : "high";
+    lastViableDeckoutMatchpoint ||
+    rdCount <= 2 ||
+    (rdCount <= 4 && hqAgendaPoints >= 6)
+      ? "critical"
+      : "high";
   return {
     severity,
     targetServerId,
@@ -1063,10 +1099,18 @@ function corpDeckoutAgendaFloodPressure<TConsumer extends string>(
     hqAgendaPoints,
     rdCount,
     evidence: [
-      "corp_deckout_agenda_flood:true",
+      ...(agendaFlood ? ["corp_deckout_agenda_flood:true"] : []),
       `corp_rd_count:${rdCount}`,
       `corp_hq_agenda_count:${hqAgendaCount}`,
       `corp_hq_agenda_points:${hqAgendaPoints}`,
+      ...(lastViableDeckoutMatchpoint
+        ? [
+            "corp_deckout_matchpoint_scoreline:true",
+            "corp_deckout_last_viable_window:true",
+            `corp_agenda_points:${corpAgendaPoints}`,
+            `corp_points_to_win:${pointsToWin}`,
+          ]
+        : []),
       ...(targetServerId
         ? [`corp_forced_scoreline_target:${targetServerId}`]
         : []),
@@ -3484,6 +3528,34 @@ function triageIsEmergencyHqAgendaRemoteConversion(
 ): boolean {
   return triage.evidence.includes(
     "corp_hq_agenda_emergency_remote_conversion:true",
+  );
+}
+
+function triageIsLastViableDeckoutMatchpoint(triage: CorpBoardTriage): boolean {
+  return (
+    triage.evidence.includes("corp_deckout_matchpoint_scoreline:true") &&
+    triage.evidence.includes("corp_deckout_last_viable_window:true")
+  );
+}
+
+function actionUsesVisibleMatchpointAgenda(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  const source = semanticRuntimeVisibleSourceCard(input, action);
+  if (
+    !source ||
+    source.known === false ||
+    !corpTriageVisibleCardIsAgenda(source)
+  ) {
+    return false;
+  }
+  const corpAgendaPoints =
+    corpTriagePositiveNumber(input.playerView.own.agendaPoints) ?? 0;
+  const pointsToWin =
+    corpTriagePositiveNumber(input.playerView.agendaPointsToWin) ?? 7;
+  return (
+    corpAgendaPoints + corpTriageVisibleAgendaPoints(source) >= pointsToWin
   );
 }
 

@@ -3154,6 +3154,117 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("commits the visible matchpoint agenda in the last deckout window even when the remote is unsafe", () => {
+    const installAgenda = corpAction(
+      "install-matchpoint-agenda",
+      "install_card",
+      {
+        placement: "root",
+        serverId: "remote_1",
+        cardType: "agenda",
+      },
+      "matchpoint-agenda",
+    );
+    const gainCredit = corpAction(
+      "gain-credit",
+      "gain_credit",
+      {},
+      "basic_action",
+    );
+    const input = corpInputWithDeckoutFlood(
+      2,
+      [agendaCard("matchpoint-agenda", 3)],
+      1,
+      [installAgenda, gainCredit],
+    );
+    input.playerView.own.agendaPoints = 6;
+    input.playerView.agendaPointsToWin = 7;
+    input.playerView.servers = [
+      { id: "hq", label: "HQ", ice: [], root: [] },
+      { id: "rd", label: "R&D", ice: [], root: [] },
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: [corpIce("remote-ice", { rezCost: 2, rezzed: false })],
+        root: [],
+      },
+    ];
+    (
+      input as AiDecisionInput & {
+        ownCorpStrategicIntent?: { primaryWinIntent: string };
+      }
+    ).ownCorpStrategicIntent = {
+      primaryWinIntent: "corp.punish_runner",
+    };
+    const dependencies = {
+      ...testDependencies(),
+      corpActionIsScoreLine: (_input: AiDecisionInput, action: LegalAction) =>
+        action.actionId === installAgenda.actionId,
+      corpScoringWindowAssessment: (
+        _input: AiDecisionInput,
+        action: LegalAction,
+      ) =>
+        action.actionId === installAgenda.actionId
+          ? scoringWindow({
+              serverId: "remote_1",
+              windowKind: "unsafe",
+              scoreHorizon: "next_turn",
+              runnerCanContestBeforeScore: true,
+              runnerCanReachAccessBeforeScore: true,
+              agendaStealRelevantBeforeScore: true,
+              agendaStealSeverity: "normal",
+              runnerAgendaPointsAfterSteal: 3,
+              dynamicProtectionReserve: 3,
+              corpCanRezRelevantIce: true,
+              corpCanRezFullPathWithDynamicReserve: false,
+              recommendedNextStep: "gain_credit",
+              evidence: ["test_last_viable_deckout_matchpoint"],
+            })
+          : undefined,
+    };
+
+    const installComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      installAgenda,
+      "basic_install",
+      dependencies,
+    );
+    const creditComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      gainCredit,
+      "basic_economy_draw",
+      dependencies,
+    );
+
+    expect(installComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_board_triage_alignment",
+          reason: expect.stringContaining(
+            "corp_deckout_last_viable_window:true",
+          ),
+        }),
+      ]),
+    );
+    expect(installComponents.map((component) => component.key)).not.toContain(
+      "corp_unsafe_delayed_scoreline_exposure",
+    );
+    expect(installComponents.map((component) => component.key)).not.toContain(
+      "corp_punish_primary_speculative_scoreline_dampen",
+    );
+    expect(creditComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_board_triage_mismatch",
+          value: -5200,
+        }),
+      ]),
+    );
+    expect(totalScore(installComponents)).toBeGreaterThan(
+      totalScore(creditComponents),
+    );
+  });
+
   it("forces a playable existing remote agenda install under HQ agenda pressure", () => {
     const installAgenda = corpAction(
       "install-agenda-remote-1",

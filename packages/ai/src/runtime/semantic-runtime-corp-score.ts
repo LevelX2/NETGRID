@@ -1018,6 +1018,11 @@ function corpUnsafeDelayedScorelineExposureComponent<TConsumer extends string>(
   if (dependencies.corpAdvanceCompletesScore?.(input, action) === true) {
     return undefined;
   }
+  if (
+    corpIsLastViableDeckoutMatchpointScoreline(input, action, boardTriageState)
+  ) {
+    return undefined;
+  }
   const assessment = dependencies.corpScoringWindowAssessment?.(
     input,
     action,
@@ -1976,6 +1981,11 @@ function corpPunishPrimarySpeculativeScorelineDampenComponent<
   if (!dependencies.corpActionIsScoreLine(input, action, roles)) {
     return undefined;
   }
+  if (
+    corpIsLastViableDeckoutMatchpointScoreline(input, action, boardTriageState)
+  ) {
+    return undefined;
+  }
   const assessment = dependencies.corpScoringWindowAssessment?.(
     input,
     action,
@@ -2022,6 +2032,40 @@ function corpPunishPrimarySpeculativeScorelineDampenComponent<
         : "score_horizon:unknown",
     ].join("|"),
   };
+}
+
+function corpIsLastViableDeckoutMatchpointScoreline(
+  input: AiDecisionInput,
+  action: LegalAction,
+  boardTriageState: ReturnType<typeof semanticRuntimeCorpBoardTriage>,
+): boolean {
+  if (boardTriageState.primary !== "force_scoreline_clock") return false;
+  if (
+    !boardTriageState.evidence.includes(
+      "corp_deckout_matchpoint_scoreline:true",
+    ) ||
+    !boardTriageState.evidence.includes("corp_deckout_last_viable_window:true")
+  ) {
+    return false;
+  }
+  const source = visibleSourceCardForAction(input, action);
+  if (
+    !source ||
+    source.known === false ||
+    (source.type ?? visibleCardDefinition(source)?.type) !== "agenda"
+  ) {
+    return false;
+  }
+  const corpAgendaPoints =
+    positiveOrZeroNumber(input.playerView.own.agendaPoints) ?? 0;
+  const pointsToWin =
+    positiveOrZeroNumber(input.playerView.agendaPointsToWin) ?? 7;
+  if (corpAgendaPoints + corpVisibleAgendaPoints(source) < pointsToWin) {
+    return false;
+  }
+  const targetServerId =
+    boardTriageState.scoreRemoteServerId ?? boardTriageState.targetServerId;
+  return !targetServerId || corpInstallServerId(action) === targetServerId;
 }
 
 function corpPunishPrimaryPreparedScoreRemoteCommitment(
