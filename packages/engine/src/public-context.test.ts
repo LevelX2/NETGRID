@@ -1,5 +1,6 @@
 import type { GameState, LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
+import { eventVisibilityForAction } from "./game/events/build-event";
 import { publicContextForAction } from "./public-context";
 
 describe("publicContextForAction", () => {
@@ -108,5 +109,65 @@ describe("publicContextForAction", () => {
       highlighterCounterCount: 3,
       highlighterAccessBonus: 2,
     });
+  });
+
+  it("publishes a paid Classic Deflector redirect without ICE instance details", () => {
+    const state = {
+      corp: {
+        servers: [
+          {
+            id: "remote_1",
+            kind: "remote",
+            label: "Remote 1",
+            ice: ["outer_rezzed_ice"],
+            root: [],
+          },
+        ],
+      },
+      cardInstances: {},
+    } as unknown as GameState;
+    const action = {
+      side: "corp",
+      type: "resolve_choice",
+      payload: {
+        choiceVisibility: "public",
+        classicDeflector: true,
+        sourceDefinitionId: "onr_classic_010_entrapment",
+        deflectedRun: true,
+        redirectedServerId: "remote_1",
+        redirectedToIceId: "outer_rezzed_ice",
+        redirectedToRezzedIce: true,
+        lastPassedIceId: "hidden_inner_ice",
+        paidCredits: 2,
+        corpCreditsAfter: 3,
+      },
+    } as unknown as LegalAction;
+
+    const context = publicContextForAction(state, action, {
+      agendaPointsForScoredCard: () => 0,
+      cardCounter: () => 0,
+      cardStrengthModifier: () => 0,
+      creditCostForAction: () => 0,
+      definitionFor: () => {
+        throw new Error("not needed");
+      },
+      pumpAmountForLegalAction: () => 0,
+      runnerHqAccessBonus: () => 0,
+      v1915InstalledAccessBonus: () => 0,
+    });
+
+    expect(context).toMatchObject({
+      classicDeflector: true,
+      sourceDefinitionId: "onr_classic_010_entrapment",
+      deflectedRun: true,
+      selectedServerId: "remote_1",
+      selectedServerLabel: "Remote 1",
+      redirectedToRezzedIce: true,
+      paidCredits: 2,
+      corpCreditsAfter: 3,
+    });
+    expect(context).not.toHaveProperty("redirectedToIceId");
+    expect(context).not.toHaveProperty("lastPassedIceId");
+    expect(eventVisibilityForAction(action)).toBe("public");
   });
 });

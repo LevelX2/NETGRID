@@ -420,6 +420,121 @@ describe("formatChronicleEvent", () => {
     );
   });
 
+  it("shows paid Entrapment redirects publicly for both sides", () => {
+    const redirectedToIce = makeEvent("resolve_choice", {
+      actor: "corp",
+      choiceVisibility: "public",
+      classicDeflector: true,
+      sourceDefinitionId: "onr_classic_010_entrapment",
+      deflectedRun: true,
+      selectedServerId: "remote_1",
+      selectedServerLabel: "Remote 1",
+      redirectedToRezzedIce: true,
+      paidCredits: 2,
+      corpCreditsAfter: 3,
+      resolvedEffects: [
+        {
+          effectId: "subroutine_1",
+          kind: "resolve_subroutine",
+          visibility: "public",
+          side: "runner",
+          reason: "ice_subroutine",
+          sourceDefinitionId: "onr_classic_010_entrapment",
+          sourceTitle: "Entrapment",
+          subroutineIndex: 0,
+          subroutineType: "deflect_run",
+          paidCredits: 2,
+        },
+      ],
+    });
+
+    const runnerItem = formatChronicleEffectItems(
+      redirectedToIce,
+      "runner",
+    )[0]!;
+    const corpItem = formatChronicleEffectItems(redirectedToIce, "corp")[0]!;
+
+    expect(runnerItem.title).toBe(
+      "Die Korp hat 2 Credits für Entrapment bezahlt und den Run auf Remote 1 umgeleitet.",
+    );
+    expect(corpItem.title).toBe(
+      "Du hast 2 Credits für Entrapment bezahlt und den Run auf Remote 1 umgeleitet.",
+    );
+    expect(runnerItem.description).toBe(
+      "Der Runner begegnet dort dem äußersten gerezzten ICE.",
+    );
+    expect(runnerItem.chips).toEqual(
+      expect.arrayContaining([
+        "Entrapment",
+        "Subroutine 1",
+        "Run umgeleitet",
+        "Remote 1",
+        "2 Credits bezahlt",
+        "Äußerstes gerezztes ICE",
+      ]),
+    );
+    expect(runnerItem.groupLabel).toBe("Run auf Remote 1");
+    expect(chronicleRunGroupLabelFromEvent(redirectedToIce)).toBe(
+      "Run auf Remote 1",
+    );
+  });
+
+  it("distinguishes Entrapment redirects without rezzed ICE and declined payment", () => {
+    const resolvedEffect = {
+      effectId: "subroutine_1",
+      kind: "resolve_subroutine",
+      visibility: "public",
+      side: "runner",
+      reason: "ice_subroutine",
+      sourceDefinitionId: "onr_classic_010_entrapment",
+      sourceTitle: "Entrapment",
+      subroutineIndex: 0,
+      subroutineType: "deflect_run",
+      paidCredits: 2,
+    };
+    const withoutRezzedIce = formatChronicleEffectItems(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        choiceVisibility: "public",
+        classicDeflector: true,
+        sourceDefinitionId: "onr_classic_010_entrapment",
+        deflectedRun: true,
+        selectedServerId: "remote_1",
+        selectedServerLabel: "Remote 1",
+        redirectedToRezzedIce: false,
+        paidCredits: 2,
+        resolvedEffects: [resolvedEffect],
+      }),
+      "runner",
+    )[0]!;
+    const declined = formatChronicleEffectItems(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        choiceVisibility: "public",
+        classicDeflector: true,
+        sourceDefinitionId: "onr_classic_010_entrapment",
+        deflectedRun: false,
+        paidCredits: 0,
+        resolvedEffects: [{ ...resolvedEffect, paidCredits: 0 }],
+      }),
+      "runner",
+    )[0]!;
+
+    expect(withoutRezzedIce.description).toBe(
+      "Der Runner gilt dort als am letzten ICE des Data Forts vorbeigekommen.",
+    );
+    expect(withoutRezzedIce.chips).toContain("Letztes ICE passiert");
+    expect(declined.title).toBe(
+      "Die Korp hat nicht für Entrapment bezahlt; der Run wurde nicht umgeleitet.",
+    );
+    expect(declined.description).toBe(
+      "Die Begegnung mit Entrapment wird normal fortgesetzt.",
+    );
+    expect(declined.chips).toEqual(
+      expect.arrayContaining(["Entrapment", "Nicht bezahlt", "Kein Redirect"]),
+    );
+  });
+
   it("explains public post-pass ICE return decisions", () => {
     const returned = formatChronicleEvent(
       makeEvent("continue_run", {
