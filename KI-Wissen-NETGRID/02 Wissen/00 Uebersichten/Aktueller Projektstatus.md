@@ -1,12 +1,13 @@
 # Aktueller Projektstatus
 
-Stand: 2026-07-12
+Stand: 2026-07-13
 
 ## Führender Produktstand
 
 - NETGRID ist eine private Version-0-Webanwendung mit deterministischer Rules
   Engine, lokalem/private-LAN-Multiplayer, SQLite-Storage, Deckbibliothek,
-  Kartenkatalog, Replay-/Undo-Grundlage, Human-vs-Human und Human-vs-KI.
+  Kartenkatalog, Replay-/Undo-Grundlage, Human-vs-Human, Human-vs-KI und einem
+  beobachtbaren KI-vs-KI-Matchmodus.
 - Die Engine ist alleinige Regelautorität. UI, Server und KI reichen nur
   vorhandene `LegalActions` ein; `applyAction` revalidiert den vollständigen
   Vertrag.
@@ -83,6 +84,15 @@ Stand: 2026-07-12
 
 ## Server, Web und lokaler Betrieb
 
+- Der Spielstart `Simulation` erstellt ein persistiertes `ai_vs_ai`-Regelmatch
+  und öffnet das normale side-sichere Spielbrett. Pause, Einzelschritt,
+  getaktetes Weiter, schneller Einzelschritt-Takt und aktiver Abbruch sind
+  verfügbar; der frühere interaktive Batchlauf mit 120-Aktionen-Limit ist aus
+  diesem Startpfad entfernt. Ein deterministischer Regressionslauf endete nach
+  183 Aktionen regulär und blieb nach Reconnect, Replay und StateHash grün.
+  Führend sind
+  `docs/architecture/ai/ai-vs-ai-observer-process-2026-07-13.md` und
+  `docs/reviews/ai/ai-vs-ai-observer-implementation-review-2026-07-13.md`.
 - SQLite ist der aktuelle Standardstorage. Backup, Restore, Inspect,
   Maintenance, Retention-Schutz und Cleanup arbeiten auf der aktuellen
   SQLite-Datenbank.

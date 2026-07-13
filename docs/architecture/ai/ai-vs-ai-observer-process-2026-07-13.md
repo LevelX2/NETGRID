@@ -1,6 +1,6 @@
 # Beobachtbare KI-gegen-KI-Simulation Prozess
 
-Status: in_progress
+Status: completed
 Stand: 2026-07-13
 Primärer Agent: release-implementation-agent
 Arbeitsbranch: `codex/ai-vs-ai-observer`
@@ -410,3 +410,15 @@ Nach Abschluss: final verifizieren, lokal nach main mergen, main prüfen, den sa
   deterministisch.
 - Pakete sind separat committed, nach `main` integriert und der Arbeits-Worktree
   sowie Branch sind verifiziert entfernt.
+
+## Abschlussnachweis
+
+- AIVIEW-00: `a00e78bb0`
+- AIVIEW-01: `764065cc3`
+- AIVIEW-02: `23e2da284`
+- AIVIEW-03: `6ab4e67ab`
+- AIVIEW-04: Review, Status und Projektlog vom 2026-07-13
+- Long-Run: Reconnect nach Aktion 121, reguläres Ende nach 183 Aktionen,
+  vollständige AI-Traces und grüner Replay-StateHash
+- Browser-Evidence: sichtbares Board, Pause, genau ein manueller Schritt und
+  Abbruch ohne Sieger bei erhaltenem letzten Engine-State
