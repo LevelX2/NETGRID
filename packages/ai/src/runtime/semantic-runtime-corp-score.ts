@@ -2004,13 +2004,19 @@ function corpPunishPrimarySpeculativeScorelineDampenComponent<
   ) {
     return undefined;
   }
+  const unsafeBeforeScore =
+    assessment?.windowKind === "unsafe" &&
+    (assessment.runnerCanContestBeforeScore ||
+      assessment.runnerCanReachAccessBeforeScore ||
+      assessment.agendaStealRelevantBeforeScore);
   return {
     key: "corp_punish_primary_speculative_scoreline_dampen",
     label: "Punish-Deck-Scoreline",
-    value: -1800,
+    value: unsafeBeforeScore ? -5600 : -1800,
     reason: [
       "corp_primary_win_intent:punish_runner",
       "speculative_scoreline_install:true",
+      `unsafe_before_score:${unsafeBeforeScore}`,
       assessment?.scoreHorizon
         ? `score_horizon:${assessment.scoreHorizon}`
         : "score_horizon:unknown",

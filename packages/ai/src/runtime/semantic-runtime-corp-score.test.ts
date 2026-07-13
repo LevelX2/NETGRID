@@ -342,6 +342,58 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("strongly dampens a delayed punish-primary agenda that becomes reachable before scoring", () => {
+    const remoteAgenda = corpAction(
+      "install-unsafe-delayed-agenda",
+      "install_card",
+      {
+        placement: "root",
+        serverId: "remote_1",
+      },
+    );
+    const input = {
+      ...corpInputWithHqCards(5, [agendaCard("hq-agenda")], [remoteAgenda]),
+      ownCorpStrategicIntent: {
+        primaryWinIntent: "corp.punish_runner",
+        scorePlan: ["corp.remote_scoreline"],
+        punishPlan: ["corp.damage_kill", "corp.tag_trace_punish"],
+      },
+    } as unknown as AiDecisionInput;
+    const dependencies = {
+      ...testDependencies(),
+      corpActionIsScoreLine: () => true,
+      corpScoringWindowAssessment: () =>
+        scoringWindow({
+          serverId: "remote_1",
+          windowKind: "unsafe",
+          scoreHorizon: "next_turn",
+          runnerCanContestBeforeScore: true,
+          runnerCanReachAccessBeforeScore: true,
+          agendaStealRelevantBeforeScore: true,
+          agendaStealSeverity: "near_win",
+          runnerAgendaPointsAfterSteal: 4,
+          recommendedNextStep: "build_remote_ice",
+        }),
+    };
+
+    const components = semanticRuntimeCorpScoreComponents(
+      input,
+      remoteAgenda,
+      "basic_install",
+      dependencies,
+    );
+
+    expect(components).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_punish_primary_speculative_scoreline_dampen",
+          value: -5600,
+          reason: expect.stringContaining("unsafe_before_score:true"),
+        }),
+      ]),
+    );
+  });
+
   it("does not dampen a punish-primary scoreline install into a prepared safe remote", () => {
     const agenda = agendaCard("hq-agenda");
     const remoteAgenda = corpAction(
