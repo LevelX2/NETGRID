@@ -19,6 +19,9 @@ import {
   SELF_MODIFYING_CODE_ID,
 } from "../../compatibility/runtime-compatibility";
 import { buildRunnerHiddenStackProgramInstallAction } from "../turn/runner-special-zone-install-actions";
+import {
+  temporaryBreakerStrengthBonusUntilEndOfTurn,
+} from "../state/temporary-breaker-strength";
 
 type ActiveRun = NonNullable<GameState["run"]>;
 type Subroutine = NonNullable<CardDefinition["subroutines"]>[number];
@@ -190,6 +193,7 @@ export function buildRunnerEncounterActions(
       (host.cards.permanentIcebreakerStrengthCounterBonus?.(breakerId) ?? 0) +
       host.cards.cardCounter(breakerId, "breaker_strength_penalty") * -1 +
       host.breaker.dupreStrengthCounterBonus(breakerId) +
+      temporaryBreakerStrengthBonusUntilEndOfTurn(host.state, breakerId) +
       host.run.runRemainderStrengthBonusForBreaker(breakerId);
     const breakerAbilities = icebreakerAbilitiesForDefinition(breaker);
     const breakAbilities = breakerAbilities.filter(

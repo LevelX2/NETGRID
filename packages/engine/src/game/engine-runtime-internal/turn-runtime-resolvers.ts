@@ -1370,6 +1370,7 @@ function endTurn(
     ensureRunnerTurnFlags(state).runnerReceivedTagThisTurn = false;
   }
   clearTemporaryIceStrengthModifiersUntilEndOfTurn(state, legalAction);
+  clearTemporaryBreakerStrengthModifiersUntilEndOfTurn(state, legalAction);
   clearTemporaryRunnerMemoryLimitModifiersUntilEndOfTurn(state, legalAction);
   delete state.cancelledDamagePreventionSourceIdsUntilEndOfTurn;
   startDiscardPhase(state, side, legalAction);
@@ -1412,6 +1413,34 @@ function clearTemporaryIceStrengthModifiersUntilEndOfTurn(
     temporaryIceStrengthRemoved: removedAmount,
     temporaryIceStrengthTargetDefinitionIds:
       affectedDefinitionIds.sort().join(","),
+  };
+}
+
+function clearTemporaryBreakerStrengthModifiersUntilEndOfTurn(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  const modifiers =
+    state.temporaryBreakerStrengthModifiersUntilEndOfTurn ?? [];
+  if (modifiers.length === 0) return;
+  const currentSerial = currentTurnSerial(state);
+  const remaining = modifiers.filter(
+    (modifier) => modifier.turnSerial > currentSerial,
+  );
+  const expired = modifiers.filter(
+    (modifier) => modifier.turnSerial <= currentSerial,
+  );
+  if (remaining.length > 0)
+    state.temporaryBreakerStrengthModifiersUntilEndOfTurn = remaining;
+  else delete state.temporaryBreakerStrengthModifiersUntilEndOfTurn;
+  if (expired.length === 0) return;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    turnBreakerStrengthModifiersExpired: expired.length,
+    turnBreakerStrengthBonusExpiredAmount: expired.reduce(
+      (sum, modifier) => sum + modifier.amount,
+      0,
+    ),
   };
 }
 

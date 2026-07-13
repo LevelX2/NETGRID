@@ -4217,6 +4217,82 @@ describe("V1.0.6 resource and card-display helpers", () => {
     );
   });
 
+  it("mirrors every access-start card ability into the Run window without admitting unrelated checkpoints", () => {
+    const running = view("runner", {
+      run: {
+        attackedServerId: "rd",
+        phase: "movement",
+        position: { kind: "server", serverId: "rd" },
+        successful: true,
+      },
+    });
+    const firstMole: LegalAction = {
+      ...legalAction(
+        "runner",
+        "activated_card_ability",
+        "rd_mole_1",
+        "R&D Mole: zwei zusätzliche R&D-Karten accessen",
+        {
+          cardId: "rd_mole_1",
+          cardImplementationAbilityTiming: "access_start",
+          cardImplementationTrashSourceCost: true,
+        },
+        "game.checkpoint",
+      ),
+      costs: [{ credits: 4 }],
+    };
+    const secondMole: LegalAction = {
+      ...legalAction(
+        "runner",
+        "activated_card_ability",
+        "rd_mole_2",
+        "R&D Mole: zwei zusätzliche R&D-Karten accessen",
+        {
+          cardId: "rd_mole_2",
+          cardImplementationAbilityTiming: "access_start",
+          cardImplementationTrashSourceCost: true,
+        },
+        "game.checkpoint",
+      ),
+      costs: [{ credits: 4 }],
+    };
+    const continueToAccess = legalAction(
+      "runner",
+      "continue_run",
+      "game_rule",
+      "Access beginnen",
+      { hiddenRunnerResourceAccessStartContinue: true, serverId: "rd" },
+      "game.checkpoint",
+    );
+    const unrelatedCheckpoint = legalAction(
+      "runner",
+      "activated_card_ability",
+      "broker_1",
+      "Broker: Credits nehmen",
+      {
+        cardId: "broker_1",
+        cardImplementationAbilityTiming: "runner_main",
+      },
+      "game.checkpoint",
+    );
+
+    const mirrored = runWindowActions(running, [
+      firstMole,
+      secondMole,
+      continueToAccess,
+      unrelatedCheckpoint,
+    ]);
+
+    expect(mirrored).toEqual([firstMole, secondMole, continueToAccess]);
+    expect(mirrored.map((action) => action.actionId)).toHaveLength(3);
+    expect(actionCostChips(firstMole)).toEqual([
+      { kind: "credit", amount: 4, label: "4 Credits" },
+    ]);
+    expect(runWindowActionButtonLabel(running, firstMole)).toBe(
+      "R&D Mole: zwei zusätzliche R&D-Karten accessen",
+    );
+  });
+
   it("mirrors access and access-resolution actions into the Run window", () => {
     const running = view("runner", {
       run: {

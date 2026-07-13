@@ -1,19 +1,28 @@
 ---
 activityId: act-2026-07-13-psychic-friend-turn-duration-pump
-status: inbox
+status: done
 kind: fix
 area: engine
 priority: hotfix
-primaryAgent: card-enablement-ai-knowledge-agent
+primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-07-13
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-07-13
+completedAt: 2026-07-13
+branch: codex/act-2026-07-13-psychic-friend-turn-duration
 releaseTarget: Classic current-state correction
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/engine/src/game/state/temporary-breaker-strength.ts
+  - packages/engine/src/index-tests/mechanics/classic-psychic-friend-turn-duration.test.ts
+  - docs/releases/classic/classic-rule-decisions-2026-06-30.md
+  - data/scenarios/classic-04-runner-program-smoke.json
+checks:
+  - 44 fokussierte Vitest-Regressionen grün
+  - Engine-Typecheck grün
+  - Package-Boundaries grün
+  - git diff --check grün
+  - Architektur-Gate weiterhin rot nur durch fünf bestehende Shell-Traders-Treffer außerhalb dieses Pakets
 ---
 
 # Psychic Friend: Stärke-Pump bis zum Zugende erhalten
@@ -59,19 +68,19 @@ checks: []
 
 ## Akzeptanzkriterien
 
-- [ ] Psychic Friend bietet im Code-Gate-Encounter weiterhin eine Break-Aktion für 1 Credit und eine Pump-Aktion für 2 Credits an.
-- [ ] Ein einmaliger Pump erhöht die effektive Stärke sofort um 1; zwei Pumps erhöhen sie kumuliert um 2.
-- [ ] Der Pump bleibt nach Verlassen des aktuellen ICE und nach Beendigung des aktuellen Runs erhalten.
-- [ ] In einem zweiten Run desselben Runner-Zuges wird derselbe Turn-Bonus bei der Legalität und Auflösung von Break-Aktionen berücksichtigt, ohne erneut bezahlt werden zu müssen.
-- [ ] Erfolgreiches Run-Ende, `jack_out` und ein durch eine Subroutine beendeter Run entfernen den Turn-Bonus jeweils nicht.
-- [ ] Erst das Ende des Runner-Zuges entfernt alle in diesem Zug erzeugten Psychic-Friend-Turn-Boni; im nächsten Runner-Zug gilt wieder die gedruckte Basisstärke, sofern keine anderen Modifier wirken.
-- [ ] Encounter-, Run-, Turn- und permanente Stärkeanteile stapeln und bereinigen sich unabhängig; Run-End-Cleanup löscht keinen Turn- oder permanenten Anteil.
-- [ ] Stale oder manipulierte Pump-Aktionen werden weiterhin durch `applyAction` und die vorhandene Kosten-/Timing-Revalidierung abgewiesen.
-- [ ] PlayerView beziehungsweise öffentliche ActiveModifier-Evidence zeigt den aktiven Breaker-Bonus mit Dauer `turn`, ohne verdeckte Karten- oder Zielinformationen zu leaken.
-- [ ] Replay desselben Seeds und derselben Aktionen bleibt deterministisch; StateHash berücksichtigt den neuen Turn-Dauer-Zustand.
-- [ ] `docs/releases/classic/classic-rule-decisions-2026-06-30.md` und `data/scenarios/classic-04-runner-program-smoke.json` behaupten nicht länger fälschlich `current_run`.
-- [ ] Fokussierte Engine-Regressionen decken mindestens Stapeln, zwei Runs im selben Zug, alle relevanten Run-End-Arten und Cleanup am Runner-Zugende ab.
-- [ ] Die relevanten Engine-Tests, Engine-Typecheck und `git diff --check` sind grün oder ein bereits bestehender paketfremder Fehler ist klar benannt.
+- [x] Psychic Friend bietet im Code-Gate-Encounter weiterhin eine Break-Aktion für 1 Credit und eine Pump-Aktion für 2 Credits an.
+- [x] Ein einmaliger Pump erhöht die effektive Stärke sofort um 1; zwei Pumps erhöhen sie kumuliert um 2.
+- [x] Der Pump bleibt nach Verlassen des aktuellen ICE und nach Beendigung des aktuellen Runs erhalten.
+- [x] In einem zweiten Run desselben Runner-Zuges wird derselbe Turn-Bonus bei der Legalität und Auflösung von Break-Aktionen berücksichtigt, ohne erneut bezahlt werden zu müssen.
+- [x] Erfolgreiches Run-Ende, `jack_out` und ein durch eine Subroutine beendeter Run entfernen den Turn-Bonus jeweils nicht.
+- [x] Erst das Ende des Runner-Zuges entfernt alle in diesem Zug erzeugten Psychic-Friend-Turn-Boni; im nächsten Runner-Zug gilt wieder die gedruckte Basisstärke, sofern keine anderen Modifier wirken.
+- [x] Encounter-, Run-, Turn- und permanente Stärkeanteile stapeln und bereinigen sich unabhängig; Run-End-Cleanup löscht keinen Turn- oder permanenten Anteil.
+- [x] Stale oder manipulierte Pump-Aktionen werden weiterhin durch `applyAction` und die vorhandene Kosten-/Timing-Revalidierung abgewiesen.
+- [x] PlayerView beziehungsweise öffentliche ActiveModifier-Evidence zeigt den aktiven Breaker-Bonus mit Dauer `turn`, ohne verdeckte Karten- oder Zielinformationen zu leaken.
+- [x] Replay desselben Seeds und derselben Aktionen bleibt deterministisch; StateHash berücksichtigt den neuen Turn-Dauer-Zustand.
+- [x] `docs/releases/classic/classic-rule-decisions-2026-06-30.md` und `data/scenarios/classic-04-runner-program-smoke.json` behaupten nicht länger fälschlich `current_run`.
+- [x] Fokussierte Engine-Regressionen decken mindestens Stapeln, zwei Runs im selben Zug, alle relevanten Run-End-Arten und Cleanup am Runner-Zugende ab.
+- [x] Die relevanten Engine-Tests, Engine-Typecheck und `git diff --check` sind grün oder ein bereits bestehender paketfremder Fehler ist klar benannt.
 
 ## Umsetzungshinweise
 
@@ -91,4 +100,4 @@ checks: []
 
 ## Ergebnisnotiz
 
-Noch offen.
+Psychic Friend verwendet jetzt die neutrale Icebreaker-Pump-Dauer `current_turn`. Der kumulierte Bonus liegt getrennt von Encounter-, Run- und permanenten Stärkeanteilen im deterministischen GameState, wirkt in LegalActions und PlayerView, bleibt über erzwungene, freiwillige und erfolgreiche Run-Enden bestehen und verfällt erst am Runner-Zugende. Die KI-Pfade lesen Engine-LegalActions und die sichtbare Breaker-Stärke; daher war keine KI-Sonderlogik erforderlich.

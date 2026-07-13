@@ -1410,6 +1410,14 @@ export type GameState = {
     turnSerial: number;
     expires: "turn_end";
   }>;
+  temporaryBreakerStrengthModifiersUntilEndOfTurn?: Array<{
+    sourceCardInstanceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    targetBreakerId: CardInstanceId;
+    amount: number;
+    turnSerial: number;
+    expires: "turn_end";
+  }>;
   temporaryRunnerMemoryLimitModifiersUntilEndOfTurn?: Array<{
     sourceCardInstanceId: CardInstanceId;
     sourceDefinitionId: CardDefinitionId;

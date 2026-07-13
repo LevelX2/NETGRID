@@ -2595,7 +2595,10 @@ export function runWindowActions(
 
 function isAccessWindowAction(action: LegalAction): boolean {
   return (
-    action.type === "access_card" || action.timingPoint.startsWith("access.")
+    action.type === "access_card" ||
+    action.timingPoint.startsWith("access.") ||
+    (action.type === "activated_card_ability" &&
+      action.payload?.cardImplementationAbilityTiming === "access_start")
   );
 }
 
