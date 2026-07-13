@@ -16,13 +16,15 @@ export function ActiveMatchResourceStrip({
   agendaPointsToWin,
   actionCapacities,
   topOffsetPx,
-  ariaHidden
+  ariaHidden,
+  observerMode = false
 }: {
   view: PlayerView;
   agendaPointsToWin: number;
   actionCapacities: Record<Side, number>;
   topOffsetPx: number;
   ariaHidden: boolean;
+  observerMode?: boolean;
 }) {
   const opponent = opponentSide(view.side);
   const turnSide = turnSideForView(view) ?? view.activeSide;
@@ -33,7 +35,7 @@ export function ActiveMatchResourceStrip({
   return (
     <section className="matchResourceStrip" style={stripStyle} aria-hidden={ariaHidden} data-testid="match-resource-strip">
       <CompactResourceSide
-        label="Gegner"
+        label={observerMode ? `${sideLabel(opponent)}-KI` : "Gegner"}
         side={opponent}
         credits={view.opponent.credits}
         agendaPoints={view.opponent.agendaPoints}
@@ -48,7 +50,7 @@ export function ActiveMatchResourceStrip({
         <ActionSlotMeter side={turnSide} currentClicks={turnClicks} displayCapacity={turnCapacity} active compact slotsOnly />
       </div>
       <CompactResourceSide
-        label="Du"
+        label={observerMode ? `${sideLabel(view.side)}-KI` : "Du"}
         side={view.side}
         credits={view.own.credits}
         agendaPoints={view.own.agendaPoints}

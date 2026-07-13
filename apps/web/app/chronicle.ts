@@ -4003,8 +4003,8 @@ function formatChronicleEffect(
   index: number,
   side: Side,
 ): ChronicleItem {
-  const actor = sideValue(effect.side);
-  const subject = subjectFor(actor, side, false);
+  let actor = sideValue(effect.side);
+  let subject = subjectFor(actor, side, false);
   const sourceTitle = stringValue(effect.sourceTitle);
   const sourceDefinitionId = stringValue(effect.sourceDefinitionId);
   let displayCardDefinitionId = sourceDefinitionId;
@@ -4018,6 +4018,7 @@ function formatChronicleEffect(
   let visibility: ChronicleVisibility = chronicleEffectVisibility(effect, side);
   let title = "Ein automatischer Effekt wurde aufgelöst";
   let description: string | undefined;
+  let groupServerLabel = displayServerLabel(effect.serverLabel);
   const through =
     sourceTitle && sourceTitle !== cardTitle ? ` durch ${sourceTitle}` : "";
 
@@ -4454,6 +4455,8 @@ function formatChronicleEffect(
           ? `Subroutine ${subroutineNumber}`
           : "Subroutine";
       const subroutineType = stringValue(effect.subroutineType);
+      const dieRoll = numberValue(effect.dieRoll);
+      const randomDamageApplied = effect.randomDamageApplied === true;
       const damageType = stringValue(effect.damageType);
       const cardsTrashed = numberValue(effect.cardsTrashed) ?? 0;
       const damageLabel = damageTypeLabel(damageType);
@@ -4469,22 +4472,95 @@ function formatChronicleEffect(
             cardTitle ??
             "ein Programm")
           : undefined;
-      category = subroutineType === "do_damage" ? "danger" : "run";
+      category =
+        subroutineType === "do_damage" ||
+        (subroutineType === "random_damage" && randomDamageApplied)
+          ? "danger"
+          : "run";
       importance =
-        subroutineType === "do_damage" || effect.endedRun === true
+        subroutineType === "do_damage" ||
+        (subroutineType === "random_damage" && randomDamageApplied) ||
+        effect.endedRun === true
           ? "critical"
           : "important";
-      title =
-        subroutineType === "do_damage" && preventionSummary
-          ? `${source}: ${subroutineChip} macht ${preventionSummary.originalAmount} ${damageLabel}; ${preventionSummary.preventedAmount} durch ${preventionSummary.sourceTitle} verhindert, Ergebnis ${preventionSummary.finalAmount} ${damageLabel}`
-          : subroutineType === "do_damage"
-            ? `${source}: ${subroutineChip} macht ${amount} ${damageLabel}`
-            : trashedProgramTitle
-              ? `${source}: ${subroutineChip} trasht ${trashedProgramTitle}`
-              : effect.endedRun === true
-                ? `${source}: ${subroutineChip} beendet den Run`
-                : `${source}: ${subroutineChip} aufgelöst`;
-      if (subroutineType === "do_damage" && cardsTrashed > 0)
+      if (
+        subroutineType === "deflect_run" &&
+        event.publicPayload.classicDeflector === true
+      ) {
+        const decisionActor = sideValue(event.publicPayload.actor);
+        if (decisionActor) {
+          actor = decisionActor;
+          subject = subjectFor(actor, side, false);
+          chips.splice(0, chips.length, ...baseChips(actor, false));
+        }
+        const paidCredits =
+          numberValue(effect.paidCredits) ??
+          numberValue(event.publicPayload.paidCredits) ??
+          0;
+        const targetServerLabel =
+          displayServerLabel(
+            stringValue(event.publicPayload.selectedServerLabel),
+          ) ??
+          displayServerLabel(stringValue(event.publicPayload.selectedServerId));
+        const deflectedRun = event.publicPayload.deflectedRun === true;
+        const choiceResolved =
+          (stringValue(event.publicPayload.actionType) ?? event.type) ===
+          "resolve_choice";
+        if (deflectedRun && targetServerLabel) {
+          title =
+            paidCredits > 0
+              ? phrase(
+                  subject,
+                  `${creditText(paidCredits)} für ${source} bezahlt und den Run auf ${targetServerLabel} umgeleitet`,
+                )
+              : `${source}: ${subroutineChip} leitet den Run auf ${targetServerLabel} um`;
+          description =
+            event.publicPayload.redirectedToRezzedIce === true
+              ? "Der Runner begegnet dort dem äußersten gerezzten ICE."
+              : "Der Runner gilt dort als am letzten ICE des Data Forts vorbeigekommen.";
+          groupServerLabel = targetServerLabel;
+          chips.push(
+            "Run umgeleitet",
+            targetServerLabel,
+            ...(paidCredits > 0
+              ? [`${creditText(paidCredits)} bezahlt`]
+              : []),
+            event.publicPayload.redirectedToRezzedIce === true
+              ? "Äußerstes gerezztes ICE"
+              : "Letztes ICE passiert",
+          );
+        } else if (choiceResolved) {
+          title = phrase(
+            subject,
+            `nicht für ${source} bezahlt; der Run wurde nicht umgeleitet`,
+          );
+          description = "Die Begegnung mit Entrapment wird normal fortgesetzt.";
+          chips.push("Nicht bezahlt", "Kein Redirect");
+        } else {
+          title = `${source}: ${subroutineChip} leitet den Run nicht um`;
+          chips.push("Kein Redirect");
+        }
+      } else {
+        title =
+          subroutineType === "random_damage" && dieRoll !== undefined
+            ? randomDamageApplied
+              ? `${source}: ${subroutineChip} würfelt eine ${dieRoll} und macht ${amount} ${damageLabel}`
+              : `${source}: ${subroutineChip} würfelt eine ${dieRoll}; kein ${damageLabel}`
+            : subroutineType === "do_damage" && preventionSummary
+              ? `${source}: ${subroutineChip} macht ${preventionSummary.originalAmount} ${damageLabel}; ${preventionSummary.preventedAmount} durch ${preventionSummary.sourceTitle} verhindert, Ergebnis ${preventionSummary.finalAmount} ${damageLabel}`
+              : subroutineType === "do_damage"
+                ? `${source}: ${subroutineChip} macht ${amount} ${damageLabel}`
+                : trashedProgramTitle
+                  ? `${source}: ${subroutineChip} trasht ${trashedProgramTitle}`
+                  : effect.endedRun === true
+                    ? `${source}: ${subroutineChip} beendet den Run`
+                    : `${source}: ${subroutineChip} aufgelöst`;
+      }
+      if (
+        (subroutineType === "do_damage" ||
+          (subroutineType === "random_damage" && randomDamageApplied)) &&
+        cardsTrashed > 0
+      )
         description = `${cardCountText(cardsTrashed)} ${cardsTrashed === 1 ? "wurde" : "wurden"} in den Heap bewegt.`;
       if (
         subroutineType === "do_damage" &&
@@ -4496,6 +4572,14 @@ function formatChronicleEffect(
         description = `${trashedProgramTitle} wurde in den Heap bewegt.`;
       chips.push(
         subroutineChip,
+        ...(subroutineType === "random_damage" && dieRoll !== undefined
+          ? [
+              `Wurf ${dieRoll}`,
+              randomDamageApplied
+                ? `${amount} ${damageLabel}`
+                : `Kein ${damageLabel}`,
+            ]
+          : []),
         ...(subroutineType === "do_damage"
           ? [
               ...(preventionSummary
@@ -4537,7 +4621,7 @@ function formatChronicleEffect(
       category,
       actor,
       undefined,
-      displayServerLabel(effect.serverLabel),
+      groupServerLabel,
       undefined,
     ),
   };
@@ -6369,9 +6453,13 @@ export function chronicleRunGroupLabelFromEvent(
     (actionType === "resolve_choice" &&
       (event.publicPayload.socialEngineeringRun === true ||
         payloadBooleanValue(event.publicPayload, "autoPassChosenIce") ===
-          true));
+          true ||
+        (event.publicPayload.classicDeflector === true &&
+          event.publicPayload.deflectedRun === true)));
   if (!startsRun) return null;
-  const serverLabel = stringValue(event.publicPayload.serverLabel);
+  const serverLabel =
+    stringValue(event.publicPayload.selectedServerLabel) ??
+    stringValue(event.publicPayload.serverLabel);
   const label = stringValue(event.publicPayload.label);
   const target =
     (serverLabel

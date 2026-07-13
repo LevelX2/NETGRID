@@ -776,10 +776,10 @@ export class MultiplayerService {
     const requestedHumanSide = input.humanSide ?? input.hostSide;
     const resolvedHumanSide = requestedHumanSide === "random" ? deterministicHostSide(seed) : requestedHumanSide;
     const mode = input.playMode === "human_vs_ai" ? (resolvedHumanSide === "runner" ? "human_runner_vs_corp_ai" : "human_corp_vs_runner_ai") : input.mode ?? "human_vs_human";
-    const hostSide = mode === "human_runner_vs_corp_ai" ? "runner" : mode === "human_corp_vs_runner_ai" ? "corp" : input.hostSide === "random" ? deterministicHostSide(seed) : input.hostSide;
+    const hostSide = mode === "human_runner_vs_corp_ai" || mode === "ai_vs_ai" ? "runner" : mode === "human_corp_vs_runner_ai" ? "corp" : input.hostSide === "random" ? deterministicHostSide(seed) : input.hostSide;
     const joinSide = opposite(hostSide);
-    const runnerPlayer = input.series?.runnerPlayer ?? (hostSide === "runner" ? "player_a" : "player_b");
-    const corpPlayer = input.series?.corpPlayer ?? (hostSide === "corp" ? "player_a" : "player_b");
+    const runnerPlayer = input.series?.runnerPlayer ?? (mode === "ai_vs_ai" || hostSide === "runner" ? "player_a" : "player_b");
+    const corpPlayer = input.series?.corpPlayer ?? (mode === "ai_vs_ai" ? "player_b" : hostSide === "corp" ? "player_a" : "player_b");
     const aiPlayer = aiPlayerForMode(mode);
     const aiDeckPolicy = aiPlayer ? input.aiDeckPolicy ?? "selected" : undefined;
     const aiPacingMode = input.aiPacingMode ?? (aiPlayer ? "paced" : undefined);
@@ -791,7 +791,7 @@ export class MultiplayerService {
     const joinToken = mode === "human_vs_human" ? generateToken() : undefined;
     const matchFormat = normalizeMatchFormat(input.settings?.matchFormat);
     const cardPool = normalizeMatchCardPool(input.settings?.cardPool);
-    const playerClockConfig = normalizePlayerClockConfig(input.settings?.playerClock);
+    const playerClockConfig = mode === "ai_vs_ai" ? { mode: "none" as const } : normalizePlayerClockConfig(input.settings?.playerClock);
     const countdownSeconds = normalizeCountdownSeconds(input.countdownSeconds);
     const sideAssignmentMode = mode === "human_vs_human" && input.hostSide === "random" ? "random_pending" : "fixed";
     const pendingDeckHandshake = mode === "human_vs_human" && Boolean(input.participantADecks) && !input.participantBDecks;
@@ -903,7 +903,17 @@ export class MultiplayerService {
         ...(lobbyPayload.startLobby ? { lobby: lobbyPayload.startLobby } : {})
       };
     }
-    const participantDecks = resolveParticipantDeckSetup(input, { seed, ...(aiPlayer ? { aiPlayer } : {}), ...(aiDeckPolicy ? { aiDeckPolicy } : {}), cardPool });
+    const participantDeckInput = mode === "ai_vs_ai" && !input.participantBDecks && input.participantADecks
+      ? { ...input, participantBDecks: input.participantADecks }
+      : input;
+    const deckResolutionPolicy = input.series && aiDeckPolicy ? "selected" : aiDeckPolicy;
+    const participantDecks = resolveParticipantDeckSetup(participantDeckInput, {
+      seed,
+      ...(aiPlayer ? { aiPlayer } : {}),
+      ...(mode === "ai_vs_ai" ? { aiPlayers: ["player_a", "player_b"] as SeriesPlayerSlot[] } : {}),
+      ...(deckResolutionPolicy ? { aiDeckPolicy: deckResolutionPolicy } : {}),
+      cardPool
+    });
     const deckSetup = deckSetupForParticipants(participantDecks, { runnerPlayer, corpPlayer });
     const settings: MatchSettings = {
       agendaPointsToWin: agendaPointsToWinFor(matchFormat, input.settings?.agendaPointsToWin),
@@ -933,7 +943,7 @@ export class MultiplayerService {
       sessionId: randomId("session"),
       matchId,
       side: hostSide,
-        displayName: input.displayName?.trim() || (hostSide === "runner" ? "Runner" : "Korp"),
+      displayName: input.displayName?.trim() || (mode === "ai_vs_ai" ? "Beobachter" : hostSide === "runner" ? "Runner" : "Korp"),
       sessionTokenHash: this.hashToken(hostSessionToken),
       reconnectTokenHash: this.hashToken(hostReconnectToken),
       connected: false,
@@ -1011,7 +1021,7 @@ export class MultiplayerService {
       stateSnapshots: [this.snapshotFor(matchId, gameState, 1, "snap_initial", false)]
     };
 
-    this.maybeRunAiAfterTransition(record);
+    if (mode !== "ai_vs_ai") this.maybeRunAiAfterTransition(record);
     this.syncPlayerClock(record, now);
     await this.storage.save(record);
     const payload = this.payloadFor(record, hostSide);
@@ -1066,10 +1076,12 @@ export class MultiplayerService {
 
       const requesterPlayer = seriesPlayerForSide(series, input.side);
       const opponentPlayer = oppositeSeriesPlayer(requesterPlayer);
-      const nextHostSide = opposite(input.side);
+      const nextHostSide = record.match.mode === "ai_vs_ai" ? "runner" : opposite(input.side);
       const nextGameNumber = series.gameNumber + 1;
       const nextMode = nextModeForSideSwap(record.match.mode);
       const aiDifficulty = record.match.aiControllers?.runner?.difficulty ?? record.match.aiControllers?.corp?.difficulty ?? "normal";
+      const nextRunnerPlayer = record.match.mode === "ai_vs_ai" ? series.corpPlayer : nextHostSide === "runner" ? requesterPlayer : opponentPlayer;
+      const nextCorpPlayer = record.match.mode === "ai_vs_ai" ? series.runnerPlayer : nextHostSide === "corp" ? requesterPlayer : opponentPlayer;
       const participantDecks = participantDeckInputsForRecord(record);
       const next = await this.createMatch({
         hostSide: nextHostSide,
@@ -1078,6 +1090,12 @@ export class MultiplayerService {
         mode: nextMode,
         ...(nextMode === "human_runner_vs_corp_ai" ? { corpDifficulty: aiDifficulty } : {}),
         ...(nextMode === "human_corp_vs_runner_ai" ? { runnerDifficulty: aiDifficulty } : {}),
+        ...(nextMode === "ai_vs_ai"
+          ? {
+              runnerDifficulty: record.match.aiControllers?.corp?.difficulty ?? "normal",
+              corpDifficulty: record.match.aiControllers?.runner?.difficulty ?? "normal"
+            }
+          : {}),
         ...(record.match.aiPacingMode ? { aiPacingMode: record.match.aiPacingMode } : {}),
         ...(record.match.aiTraceMode ? { aiTraceMode: record.match.aiTraceMode } : {}),
         ...(typeof record.match.discoverableInLan === "boolean" ? { discoverableInLan: record.match.discoverableInLan } : {}),
@@ -1089,8 +1107,8 @@ export class MultiplayerService {
           seriesId: series.seriesId,
           gameNumber: nextGameNumber,
           gamesPlanned: series.gamesPlanned,
-          runnerPlayer: nextHostSide === "runner" ? requesterPlayer : opponentPlayer,
-          corpPlayer: nextHostSide === "corp" ? requesterPlayer : opponentPlayer,
+          runnerPlayer: nextRunnerPlayer,
+          corpPlayer: nextCorpPlayer,
           previousResults: series.results,
           previousMatchId: record.match.matchId
         }
@@ -1348,7 +1366,8 @@ export class MultiplayerService {
       if (!session) return { ok: false, error: safeError("unauthorized", "Die Session ist nicht gültig.") };
       if (isTerminalStatus(record.match.status)) return { ok: true, actorPayload: this.safePayloadFor(record, input.side) };
       if (!isHostSession(record, session)) return { ok: false, error: safeError("host_required", "Nur der Host kann dieses Match abbrechen."), payload: this.safePayloadFor(record, input.side) };
-      if (!isCancellableLobbyStatus(record.match.status)) {
+      const activeAiSimulation = record.match.mode === "ai_vs_ai" && record.match.status === "active";
+      if (!isCancellableLobbyStatus(record.match.status) && !activeAiSimulation) {
         return { ok: false, error: safeError("match_not_cancellable", "Dieses Match kann nicht mehr abgebrochen werden."), payload: this.safePayloadFor(record, input.side) };
       }
 
@@ -1515,6 +1534,18 @@ export class MultiplayerService {
       if (!record) return { ok: false, error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
       const session = this.authenticate(record, input.side, input.sessionToken);
       if (!session) return { ok: false, error: safeError("unauthorized", "Die Session ist nicht gültig.") };
+      if (this.isAiSide(record, input.side)) {
+        return {
+          ok: false,
+          error: safeError(
+            "ai_action_forbidden",
+            "Die Beobachtersession darf keine Aktion für eine KI-Seite ausführen.",
+            record.gameState,
+            input.side
+          ),
+          payload: this.payloadFor(record, input.side)
+        };
+      }
       if (record.match.status !== "active") {
         return { ok: false, error: safeError("match_not_active", "Das Match ist noch nicht aktiv.") };
       }
@@ -1621,7 +1652,8 @@ export class MultiplayerService {
       if (!record) return { ok: false, error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
       const session = this.authenticate(record, input.side, input.sessionToken);
       if (!session) return { ok: false, error: safeError("unauthorized", "Die Session ist nicht gültig.") };
-      if (this.isAiSide(record, input.side)) return { ok: false, error: safeError("ai_session_forbidden", "Nur eine menschliche Session darf die KI fortsetzen.") };
+      if (this.isAiSide(record, input.side) && record.match.mode !== "ai_vs_ai") return { ok: false, error: safeError("ai_session_forbidden", "Nur eine menschliche Session darf die KI fortsetzen.") };
+      if (record.match.mode === "ai_vs_ai" && !isHostSession(record, session)) return { ok: false, error: safeError("host_required", "Nur die Beobachtersession darf die Simulation fortsetzen.") };
       if (record.match.status !== "active" || !record.gameState) return { ok: false, error: safeError("match_not_active", "Das Match ist noch nicht aktiv.") };
       if (this.syncPlayerClock(record)) {
         await this.storage.save(record);
@@ -1639,7 +1671,7 @@ export class MultiplayerService {
       }
 
       const beforeEventCount = record.eventLog.length;
-      const aiStepResult = input.mode === "until_human"
+      const aiStepResult = input.mode === "until_human" && record.match.mode !== "ai_vs_ai"
         ? this.runAiUntilNextHuman(record)
         : this.runAiStep(record);
       this.syncPlayerClock(record);
@@ -1706,7 +1738,8 @@ export class MultiplayerService {
       if (!record) return { ok: false, error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
       const session = this.authenticate(record, input.side, input.sessionToken);
       if (!session) return { ok: false, error: safeError("unauthorized", "Die Session ist nicht gültig.") };
-      if (this.isAiSide(record, input.side)) return { ok: false, error: safeError("ai_session_forbidden", "Nur eine menschliche Session darf die KI bewerten.") };
+      if (this.isAiSide(record, input.side) && record.match.mode !== "ai_vs_ai") return { ok: false, error: safeError("ai_session_forbidden", "Nur eine menschliche Session darf die KI bewerten.") };
+      if (record.match.mode === "ai_vs_ai" && !isHostSession(record, session)) return { ok: false, error: safeError("host_required", "Nur die Beobachtersession darf die Simulation bewerten.") };
       if (record.match.status !== "active" || !record.gameState) return { ok: false, error: safeError("match_not_active", "Das Match ist noch nicht aktiv.") };
       const activeAiSide = this.aiControllableSide(record);
       if (!activeAiSide) {
@@ -2211,6 +2244,7 @@ export class MultiplayerService {
   }
 
   private safePayloadFor(record: StoredMatch, side: Side): LobbyPayload | SidePayload {
+    if (record.match.mode === "ai_vs_ai" && record.gameState) return this.payloadFor(record, side);
     return this.shouldUseLobbyPayload(record) ? this.lobbyPayloadFor(record, side) : this.payloadFor(record, side);
   }
 
@@ -2559,10 +2593,10 @@ export class MultiplayerService {
   }
 
   private safeDisplayNameFor(record: StoredMatch, side: Side): string | undefined {
-    const session = record.sessions.find((candidate) => candidate.side === side);
-    if (session?.displayName) return session.displayName;
     const controller = record.match.aiControllers?.[side];
     if (controller?.displayName) return controller.displayName;
+    const session = record.sessions.find((candidate) => candidate.side === side);
+    if (session?.displayName) return session.displayName;
     return undefined;
   }
 
@@ -2799,7 +2833,7 @@ export class MultiplayerService {
     const activeAiSide = this.aiControllableSide(record);
     return {
       ...(activeAiSide ? { activeAiSide } : {}),
-      canAdvanceAi: Boolean(record.match.status === "active" && activeAiSide && !this.isAiSide(record, side) && !record.gameState.winner),
+      canAdvanceAi: Boolean(record.match.status === "active" && activeAiSide && (record.match.mode === "ai_vs_ai" || !this.isAiSide(record, side)) && !record.gameState.winner),
       pacingMode: record.match.aiPacingMode ?? "fast"
     };
   }
@@ -3746,6 +3780,7 @@ function singleGameMatchPointsFor(winner: Winner, side: Side, agendaPoints: numb
 }
 
 function publicDisplayNameForSeriesPlayer(record: StoredMatch, player: SeriesPlayerSlot): string {
+  if (record.match.mode === "ai_vs_ai") return player === "player_a" ? "KI A" : "KI B";
   const series = record.match.series;
   if (!series) return player === "player_a" ? "Spieler A" : "Spieler B";
   if (series.runnerPlayer === player) return publicDisplayNameForSide(record, "runner");
@@ -3754,23 +3789,16 @@ function publicDisplayNameForSeriesPlayer(record: StoredMatch, player: SeriesPla
 }
 
 function publicDisplayNameForSide(record: StoredMatch, side: Side): string {
+  if (record.match.aiControllers?.[side]?.type === "ai") return side === "runner" ? "Runner-KI" : "Korp-KI";
   const sessionName = record.sessions.find((session) => session.side === side)?.displayName?.trim();
   if (sessionName) return sessionName;
-  const aiSide = aiSideForMode(record.match.mode);
-  if (aiSide === side) return side === "runner" ? "Runner-KI" : "Korp-KI";
   return side === "runner" ? "Runner" : "Korp";
-}
-
-function aiSideForMode(mode: MatchMode): Side | undefined {
-  if (mode === "human_runner_vs_corp_ai") return "corp";
-  if (mode === "human_corp_vs_runner_ai") return "runner";
-  return undefined;
 }
 
 function seriesSummaryFor(record: StoredMatch, viewerSide: Side): SeriesResultSummary {
   const series = record.match.series;
   if (!series) throw new Error("series_missing");
-  const viewerPlayer = seriesPlayerForSide(series, viewerSide);
+  const viewerPlayer = record.match.mode === "ai_vs_ai" ? "player_a" : seriesPlayerForSide(series, viewerSide);
   const wins = { player_a: 0, player_b: 0 };
   const agendaPoints = { player_a: 0, player_b: 0 };
   const matchPoints = { player_a: 0, player_b: 0 };
@@ -4017,11 +4045,13 @@ function opposite(side: Side): Side {
 function nextModeForSideSwap(mode: MatchMode): MatchMode {
   if (mode === "human_runner_vs_corp_ai") return "human_corp_vs_runner_ai";
   if (mode === "human_corp_vs_runner_ai") return "human_runner_vs_corp_ai";
+  if (mode === "ai_vs_ai") return "ai_vs_ai";
   return "human_vs_human";
 }
 
 function aiPlayerForMode(mode: MatchMode): SeriesPlayerSlot | undefined {
-  return mode === "human_vs_human" ? undefined : "player_b";
+  if (mode === "human_vs_human") return undefined;
+  return mode === "ai_vs_ai" ? "player_a" : "player_b";
 }
 
 function deterministicHostSide(seed: string): Side {
@@ -4038,6 +4068,12 @@ function controllersForMode(
   hostSide: Side,
   difficulties: { runnerDifficulty: AiDifficulty; corpDifficulty: AiDifficulty }
 ): { runner: PlayerController; corp: PlayerController } {
+  if (mode === "ai_vs_ai") {
+    return {
+      runner: { controllerId: "runner-ai", side: "runner", type: "ai", displayName: "Runner KI", difficulty: difficulties.runnerDifficulty, profileId: `runner-ai-v0.9-${difficulties.runnerDifficulty}` },
+      corp: { controllerId: "corp-ai", side: "corp", type: "ai", displayName: "Korp KI", difficulty: difficulties.corpDifficulty, profileId: `corp-ai-v0.9-${difficulties.corpDifficulty}` }
+    };
+  }
   if (mode === "human_runner_vs_corp_ai") {
     return {
       runner: { controllerId: "runner-human", side: "runner", type: "human_remote", displayName: "Runner" },

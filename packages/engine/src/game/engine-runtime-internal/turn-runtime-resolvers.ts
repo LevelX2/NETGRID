@@ -1808,6 +1808,29 @@ function applyScoredAgendaCreditEconomyAtCorpStart(
   }
 }
 
+function applyScoredAgendaMandatoryDrawAtCorpStart(
+  state: GameState,
+  effects?: AutomaticEffectCollector,
+): void {
+  for (const cardId of state.corp.scoreArea.slice().sort()) {
+    const definition = definitionFor(state, cardId);
+    const implementation = scoredAgendaImplementationForDefinition(definition);
+    if (implementation?.kind !== "corp_start_turn_mandatory_draw") continue;
+    const rdBefore = state.corp.rd.length;
+    drawCorpCards(state, implementation.drawCount);
+    const drawnCount = rdBefore - state.corp.rd.length;
+    effects?.push(
+      automaticDrawCardsEffect(
+        `corp.start.scored_agenda.mandatory_draw.${cardId}`,
+        "corp",
+        drawnCount,
+        definition.id,
+      ),
+    );
+    if (state.winner) return;
+  }
+}
+
 function resolvePdcaCounterAction(state: GameState, legalAction: LegalAction): void {
   if (legalAction.side !== "corp")
     throw new Error("Nur die Korp darf PDCA-Counter nutzen.");
@@ -2180,6 +2203,8 @@ function applyCorpStartOfTurnEffects(
       continue;
     }
   }
+  applyScoredAgendaMandatoryDrawAtCorpStart(state, effects);
+  if (state.winner) return;
   if (!state.pendingChoice)
     startCorpHqAgendaRevealChoice(
       corpZoneChoiceHandlerHost(

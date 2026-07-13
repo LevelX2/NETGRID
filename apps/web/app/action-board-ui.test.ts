@@ -21,6 +21,7 @@ import {
   approachIceExposeViewingIceId,
   actionInteractionAmbience,
   actionCueInteractionAmbience,
+  aiAdvanceRequestMode,
   aiPacingFallbackDelayMs,
   aiPacingDelayMs,
   armoredFridgeAblativeCounterBadge,
@@ -1406,6 +1407,13 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(aiPacingFallbackDelayMs("paced", false)).toBe(4000);
     expect(aiPacingFallbackDelayMs("fast", false)).toBe(4000);
     expect(aiPacingFallbackDelayMs("paced", true)).toBeNull();
+  });
+
+  it("keeps every observed AI-vs-AI advance to one visible server step", () => {
+    expect(aiAdvanceRequestMode("fast", true)).toBe("single_step");
+    expect(aiAdvanceRequestMode("paced", true)).toBe("single_step");
+    expect(aiAdvanceRequestMode("manual", true)).toBe("single_step");
+    expect(aiAdvanceRequestMode("fast", false)).toBe("until_human");
   });
 
   it("routes hidden multi-card choices through the explicit selection panel", () => {

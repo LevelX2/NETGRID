@@ -7,7 +7,8 @@ const session: SessionInfo = {
   sessionToken: "session_secret_for_restart",
   reconnectToken: "reconnect_secret_for_restart",
   webSocketUrl: "ws://127.0.0.1:8787/ws",
-  displayName: "Meister"
+  displayName: "Meister",
+  mode: "ai_vs_ai"
 };
 
 describe("session recovery storage", () => {

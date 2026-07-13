@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { aiDeckReadinessLabel, deriveMatchStart, matchCardPoolCardLabel, matchFormatCardLabel, matchStartLobbyBlocksSetup, matchStartPlayerClockLabel, matchStartSummary, parseJoinLinkInput, playModeCardLabel } from "./match-start";
+import { MATCH_FORMAT_OPTIONS, aiDeckReadinessLabel, deriveMatchStart, matchCardPoolCardLabel, matchFormatCardLabel, matchStartLobbyBlocksSetup, matchStartPlayerClockLabel, matchStartSummary, parseJoinLinkInput, playModeCardLabel } from "./match-start";
 
 describe("V1.0.4 match start derivation", () => {
   it("keeps Human-vs-Human side assignment server-readable", () => {
@@ -35,11 +35,13 @@ describe("V1.0.4 match start derivation", () => {
     });
   });
 
-  it("routes AI-vs-AI to the simulation path", () => {
+  it("routes AI-vs-AI to the persisted observable match path", () => {
     expect(deriveMatchStart({ playMode: "ai_vs_ai", humanSideSelection: "random", humanAiSideSelection: "random" })).toMatchObject({
-      isSimulation: true,
-      createRequest: { simulation: "ai_vs_ai" }
+      technicalMode: "ai_vs_ai",
+      hostSide: "runner",
+      createRequest: { mode: "ai_vs_ai", hostSide: "runner" }
     });
+    expect(MATCH_FORMAT_OPTIONS).toEqual(["rules_match", "two_game_side_swap"]);
   });
 
   it("labels V1.1.2 play mode and format cards without changing technical modes", () => {
@@ -93,7 +95,7 @@ describe("V1.0.4 match start derivation", () => {
       aiDeckPolicy: "same_as_participant_a"
     });
 
-    expect(summary).toContain("KI-Decks: wie Teilnehmer A");
+    expect(summary).toContain("KI-Decks: wie du");
     expect(summary.join(" ")).not.toMatch(/token|hash|deck_/i);
   });
 

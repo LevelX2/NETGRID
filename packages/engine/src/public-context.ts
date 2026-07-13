@@ -1422,6 +1422,27 @@ export function publicContextForAction(
       state,
       legalAction.payload.selectedServerId as Exclude<ServerId, "new_remote">,
     );
+  if (legalAction.payload?.classicDeflector === true) {
+    context.classicDeflector = true;
+    for (const key of [
+      "deflectedRun",
+      "deflectorChoiceOpened",
+      "deflectorAutoBroken",
+      "redirectedToRezzedIce",
+    ]) {
+      const value = legalAction.payload[key];
+      if (typeof value === "boolean") context[key] = value;
+    }
+    if (typeof legalAction.payload.redirectedServerId === "string") {
+      const redirectedServerId = legalAction.payload
+        .redirectedServerId as Exclude<ServerId, "new_remote">;
+      context.selectedServerId = redirectedServerId;
+      context.selectedServerLabel = serverChoiceDisplayLabel(
+        state,
+        redirectedServerId,
+      );
+    }
+  }
   if (typeof legalAction.payload?.agendaAbility === "string")
     context.agendaAbility = legalAction.payload.agendaAbility;
   if (typeof legalAction.payload?.cardDefinitionId === "string")

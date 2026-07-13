@@ -1616,6 +1616,14 @@ export function aiPacingFallbackDelayMs(
   return 4000;
 }
 
+export function aiAdvanceRequestMode(
+  pacingMode: AiPacingTriggerMode,
+  observableAiVsAi: boolean,
+): "single_step" | "until_human" {
+  if (observableAiVsAi) return "single_step";
+  return pacingMode === "fast" ? "until_human" : "single_step";
+}
+
 export function serverBoardRows<T extends { id: string }>(
   servers: T[],
   viewerSide: Side,

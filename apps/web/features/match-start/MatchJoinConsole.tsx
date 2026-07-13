@@ -139,6 +139,7 @@ export function MatchJoinConsole({
       <div className="deckSlotGrid">
         <DeckSlotSelect
           label="Dein Runner-Deck"
+          side="runner"
           snapshots={runnerSnapshots}
           localDecks={localDecks.filter((deck) => deck.side === "runner")}
           source={participantBRunnerDeckSource}
@@ -150,6 +151,7 @@ export function MatchJoinConsole({
         />
         <DeckSlotSelect
           label="Dein Korp-Deck"
+          side="corp"
           snapshots={corpSnapshots}
           localDecks={localDecks.filter((deck) => deck.side === "corp")}
           source={participantBCorpDeckSource}

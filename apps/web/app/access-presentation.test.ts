@@ -7,10 +7,18 @@ import {
   accessPresentationOutcomeAfter,
   coalesceAccessActionCues,
   interactionPresentationBlocksAi,
+  observerAccessAutoDismissMs,
   publicAccessOwnsOutcomeEvent,
 } from "./access-presentation";
 
 describe("access presentation outcome ownership", () => {
+  it("auto-dismisses access windows only while an observed simulation is running", () => {
+    expect(observerAccessAutoDismissMs({ observerMode: true, pacingMode: "paced", configuredAutoDismissMs: 2500 })).toBe(2500);
+    expect(observerAccessAutoDismissMs({ observerMode: true, pacingMode: "fast", configuredAutoDismissMs: 0 })).toBe(750);
+    expect(observerAccessAutoDismissMs({ observerMode: true, pacingMode: "manual", configuredAutoDismissMs: 2500 })).toBeNull();
+    expect(observerAccessAutoDismissMs({ observerMode: false, pacingMode: "paced", configuredAutoDismissMs: 2500 })).toBeNull();
+  });
+
   it("folds a public Setup trash into its access presentation", () => {
     const access = event("evt_9", "access_card", {
       actor: "runner",

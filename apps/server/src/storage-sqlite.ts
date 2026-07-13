@@ -1937,7 +1937,7 @@ function isMatchStatus(value: unknown): value is MatchStatus {
 }
 
 function isMatchMode(value: unknown): value is MatchMode {
-  return value === "human_vs_human" || value === "human_runner_vs_corp_ai" || value === "human_corp_vs_runner_ai";
+  return value === "human_vs_human" || value === "human_runner_vs_corp_ai" || value === "human_corp_vs_runner_ai" || value === "ai_vs_ai";
 }
 
 function isSha256Hash(value: unknown): boolean {

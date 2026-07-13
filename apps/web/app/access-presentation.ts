@@ -36,6 +36,16 @@ export function interactionPresentationBlocksAi(input: {
   return input.damageOpen || input.accessOutcomeOpen;
 }
 
+export function observerAccessAutoDismissMs(input: {
+  observerMode: boolean;
+  pacingMode: "manual" | "paced" | "fast";
+  configuredAutoDismissMs: number;
+}): number | null {
+  if (!input.observerMode || input.pacingMode === "manual") return null;
+  if (input.configuredAutoDismissMs > 0) return input.configuredAutoDismissMs;
+  return input.pacingMode === "fast" ? 750 : 900;
+}
+
 export function actionCueAfterAiAdvanceRequest<
   T extends { actionType: string },
 >(current: T | null): T | null {

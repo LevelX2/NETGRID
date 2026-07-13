@@ -934,7 +934,7 @@ async function routeHttp(
         createInput.playMode = "human_vs_ai";
         createInput.humanSide = body.humanSide === "runner" || body.humanSide === "corp" || body.humanSide === "random" ? body.humanSide : "random";
       }
-      if (body.mode === "human_vs_human" || body.mode === "human_runner_vs_corp_ai" || body.mode === "human_corp_vs_runner_ai") createInput.mode = body.mode;
+      if (body.mode === "human_vs_human" || body.mode === "human_runner_vs_corp_ai" || body.mode === "human_corp_vs_runner_ai" || body.mode === "ai_vs_ai") createInput.mode = body.mode;
       if (typeof body.displayName === "string") createInput.displayName = body.displayName;
       if (typeof body.seed === "string") createInput.seed = body.seed;
       if (typeof body.countdownSeconds === "number") createInput.countdownSeconds = body.countdownSeconds;
@@ -1552,7 +1552,7 @@ function maintenanceStatus(value: string | null): MatchStatus | undefined {
 }
 
 function maintenanceMode(value: string | null): MatchMode | undefined {
-  if (value === "human_vs_human" || value === "human_runner_vs_corp_ai" || value === "human_corp_vs_runner_ai") return value;
+  if (value === "human_vs_human" || value === "human_runner_vs_corp_ai" || value === "human_corp_vs_runner_ai" || value === "ai_vs_ai") return value;
   return undefined;
 }
 

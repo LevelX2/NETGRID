@@ -1,4 +1,4 @@
-import type { Side } from "@netgrid/shared";
+import type { ApiMatchMode, Side } from "@netgrid/shared";
 
 export type MatchStatus =
   | "pending"
@@ -21,6 +21,7 @@ export type SessionInfo = {
   webSocketUrl: string;
   joinUrl?: string;
   displayName: string;
+  mode?: ApiMatchMode;
   pendingDeckHandshake?: boolean;
 };
 
@@ -48,6 +49,7 @@ type RecoverableSessionRecord = {
   r: string;
   w: string;
   d: string;
+  o?: ApiMatchMode;
   p?: boolean;
 };
 
@@ -130,6 +132,7 @@ export function serializeRecoverableSessionForStorage(session: SessionInfo): str
     r: session.reconnectToken,
     w: session.webSocketUrl,
     d: session.displayName,
+    ...(session.mode ? { o: session.mode } : {}),
     ...(session.pendingDeckHandshake ? { p: true } : {})
   };
   return JSON.stringify(record);
@@ -148,11 +151,21 @@ export function parseRecoverableSessionFromStorage(raw: string | null): SessionI
       reconnectToken: parsed.r,
       webSocketUrl: parsed.w,
       displayName: parsed.d?.trim() || "Du",
+      ...(isKnownMatchMode(parsed.o) ? { mode: parsed.o } : {}),
       ...(parsed.p ? { pendingDeckHandshake: true } : {})
     };
   } catch {
     return null;
   }
+}
+
+function isKnownMatchMode(mode: unknown): mode is ApiMatchMode {
+  return (
+    mode === "human_vs_human" ||
+    mode === "human_runner_vs_corp_ai" ||
+    mode === "human_corp_vs_runner_ai" ||
+    mode === "ai_vs_ai"
+  );
 }
 
 function persistRecoverableSession(session: SessionInfo): void {

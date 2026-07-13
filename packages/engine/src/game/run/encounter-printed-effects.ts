@@ -283,6 +283,8 @@ export function resolvePrintedRandomDamageSubroutine(
       definition,
       subroutineIndex,
       subroutine,
+      undefined,
+      { dieRoll, randomDamageApplied: false },
     );
     return {
       handled: true,
@@ -335,6 +337,7 @@ export function resolvePrintedRandomDamageSubroutine(
     subroutineIndex,
     subroutine,
     summary,
+    { dieRoll, randomDamageApplied: true },
   );
   if (legalAction)
     host.callbacks.setDamagePayload(aggregateDamageSummaries(options.damageSummaries));

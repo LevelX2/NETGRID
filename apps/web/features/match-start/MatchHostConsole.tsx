@@ -16,7 +16,6 @@ import type {
   MatchStartPlayerClockMode
 } from "../../app/match-start-storage";
 import { DeckMetadataLine, DeckSlotSelect } from "../decks/DeckSelectionControls";
-import { SimulationResult, type AiSimulationSummary } from "../results/SimulationResult";
 import { MatchStartAdvancedOptions } from "./MatchStartAdvancedOptions";
 import { MatchStartChoiceSections } from "./MatchStartChoiceSections";
 
@@ -59,8 +58,6 @@ export function MatchHostConsole({
   isHumanVsHuman,
   testSetupMode,
   startSummary,
-  simulationPending,
-  simulationStatusText,
   hasAiOpponent,
   humanSideSelection,
   countdownSeconds,
@@ -80,7 +77,6 @@ export function MatchHostConsole({
   selectedParticipantBCorpLocalDeckId,
   aiSlotDisabled,
   visibleDeckMetadataEntries,
-  simulation,
   onPlayMode,
   onMatchFormat,
   onMatchCardPool,
@@ -134,8 +130,6 @@ export function MatchHostConsole({
   isHumanVsHuman: boolean;
   testSetupMode: boolean;
   startSummary: string[];
-  simulationPending: boolean;
-  simulationStatusText: string;
   hasAiOpponent: boolean;
   humanSideSelection: HumanSideSelection;
   countdownSeconds: 3 | 5 | 10;
@@ -155,7 +149,6 @@ export function MatchHostConsole({
   selectedParticipantBCorpLocalDeckId: string;
   aiSlotDisabled: boolean;
   visibleDeckMetadataEntries: Array<{ label: string; metadata: { deckName: string } | undefined }>;
-  simulation: AiSimulationSummary | null;
   onPlayMode(mode: PlayMode): void;
   onMatchFormat(format: MatchFormatSelection): void;
   onMatchCardPool(cardPool: MatchCardPoolSelection): void;
@@ -187,6 +180,7 @@ export function MatchHostConsole({
   onSelectedParticipantBRunnerLocalDeckId(deckId: string): void;
   onSelectedParticipantBCorpLocalDeckId(deckId: string): void;
 }) {
+  const isAiVsAiSeries = gameMode === "ai_vs_ai" && matchFormat === "two_game_side_swap";
   return (
     <div className="matchStartConsole">
       <MatchStartChoiceSections
@@ -214,7 +208,7 @@ export function MatchHostConsole({
         ) : null}
         {gameMode === "ai_vs_ai" ? (
           <label>
-            Runner-KI
+            {isAiVsAiSeries ? "KI A · startet als Runner" : "Runner-KI"}
             <select value={runnerDifficulty} onChange={(event) => onRunnerDifficulty(event.target.value as AiDifficulty)}>
               <option value="easy">Easy</option>
               <option value="normal">Normal</option>
@@ -224,7 +218,7 @@ export function MatchHostConsole({
         ) : null}
         {gameMode === "ai_vs_ai" ? (
           <label>
-            Korp-KI
+            {isAiVsAiSeries ? "KI B · startet als Korp" : "Korp-KI"}
             <select value={corpDifficulty} onChange={(event) => onCorpDifficulty(event.target.value as AiDifficulty)}>
               <option value="easy">Easy</option>
               <option value="normal">Normal</option>
@@ -236,7 +230,8 @@ export function MatchHostConsole({
       {gameMode !== "ai_vs_ai" || aiDeckPolicyUsesPrimaryDeckSlots ? (
         <div className="deckSlotGrid">
           <DeckSlotSelect
-            label={gameMode === "ai_vs_ai" ? "Runner-KI · Runner-Deck" : "Teilnehmer A · Runner-Deck"}
+            label={gameMode === "ai_vs_ai" ? `${isAiVsAiSeries ? "KI A" : "Runner-KI"} · Runner-Deck` : "Dein Runner-Deck"}
+            side="runner"
             snapshots={runnerSnapshots}
             localDecks={localDecks.filter((deck) => deck.side === "runner")}
             source={runnerDeckSource}
@@ -247,7 +242,8 @@ export function MatchHostConsole({
             onLocalDeck={onSelectedRunnerLocalDeckId}
           />
           <DeckSlotSelect
-            label={gameMode === "ai_vs_ai" ? "Korp-KI · Korp-Deck" : "Teilnehmer A · Korp-Deck"}
+            label={gameMode === "ai_vs_ai" ? `${isAiVsAiSeries ? "KI A" : "Korp-KI"} · Korp-Deck` : "Dein Korp-Deck"}
+            side="corp"
             snapshots={corpSnapshots}
             localDecks={localDecks.filter((deck) => deck.side === "corp")}
             source={corpDeckSource}
@@ -267,18 +263,15 @@ export function MatchHostConsole({
           <span key={item}>{item}</span>
         ))}
       </div>
-      <button className="button primary wide" onClick={onCreateMatch} data-testid="create-match" disabled={simulationPending}>
+      <button className="button primary wide" onClick={onCreateMatch} data-testid="create-match">
         {gameMode === "ai_vs_ai" ? <Bot size={16} /> : <UserPlus size={16} />}
-        {gameMode === "ai_vs_ai" ? (simulationPending ? "Simulation läuft" : "Simulation starten") : isHumanVsHuman ? "Lobby erstellen" : "Match erstellen"}
+        {gameMode === "ai_vs_ai" ? "Simulation beobachten" : isHumanVsHuman ? "Lobby erstellen" : "Match erstellen"}
       </button>
-      {simulationStatusText ? (
-        <p className="notice startFeedback" role="status" aria-live="polite">
-          {simulationStatusText}
-        </p>
-      ) : null}
       <MatchStartAdvancedOptions
         isHumanVsHuman={isHumanVsHuman}
         isHumanVsAi={isHumanVsAi}
+        isAiVsAi={gameMode === "ai_vs_ai"}
+        isAiVsAiSeries={isAiVsAiSeries}
         hasAiOpponent={hasAiOpponent}
         matchCardPool={matchCardPool}
         humanSideSelection={humanSideSelection}
@@ -325,7 +318,6 @@ export function MatchHostConsole({
         onSelectedParticipantBCorpLocalDeckId={onSelectedParticipantBCorpLocalDeckId}
       />
       <DeckMetadataLine entries={visibleDeckMetadataEntries} />
-      {simulation ? <SimulationResult summary={simulation} /> : null}
     </div>
   );
 }

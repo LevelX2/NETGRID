@@ -8,6 +8,7 @@ import {
   PanelRightClose,
   PanelRightOpen,
   Play,
+  Square,
   RotateCcw
 } from "lucide-react";
 import type { RefObject } from "react";
@@ -41,6 +42,7 @@ export function ActiveMatchTopbar({
   seriesTransitioning,
   canReturnToStart,
   canForfeit,
+  canCancelSimulation,
   rightRailCollapsed,
   onWorkspace,
   onToggleUndoPanel,
@@ -49,6 +51,7 @@ export function ActiveMatchTopbar({
   onStartNextSeriesGame,
   onLeaveMatch,
   onRequestForfeitMatch,
+  onRequestCancelSimulation,
   onToggleRightRail
 }: {
   topbarRef: RefObject<HTMLElement | null>;
@@ -68,6 +71,7 @@ export function ActiveMatchTopbar({
   seriesTransitioning: boolean;
   canReturnToStart: boolean;
   canForfeit: boolean;
+  canCancelSimulation: boolean;
   rightRailCollapsed: boolean;
   onWorkspace(workspace: ActiveMatchWorkspace): void;
   onToggleUndoPanel(): void;
@@ -76,6 +80,7 @@ export function ActiveMatchTopbar({
   onStartNextSeriesGame(): void;
   onLeaveMatch(): void;
   onRequestForfeitMatch(): void;
+  onRequestCancelSimulation(): void;
   onToggleRightRail(): void;
 }) {
   const undoLabel = pendingUndo?.needsResponse ? "Zurücknahme beantworten" : "Zurücknahme anfragen";
@@ -144,6 +149,12 @@ export function ActiveMatchTopbar({
             <button className="button dangerButton" onClick={onRequestForfeitMatch} title="Spiel aufgeben" type="button">
               <Flag size={16} />
               Aufgeben
+            </button>
+          ) : null}
+          {canCancelSimulation ? (
+            <button className="button dangerButton" onClick={onRequestCancelSimulation} title="KI-gegen-KI-Simulation abbrechen" type="button">
+              <Square size={15} />
+              Simulation abbrechen
             </button>
           ) : null}
           <button

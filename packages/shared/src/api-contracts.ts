@@ -22,9 +22,10 @@ export type ApiMatchStatus =
 export type ApiMatchMode =
   | "human_vs_human"
   | "human_runner_vs_corp_ai"
-  | "human_corp_vs_runner_ai";
+  | "human_corp_vs_runner_ai"
+  | "ai_vs_ai";
 
-export type ApiClientGameMode = ApiMatchMode | "ai_vs_ai";
+export type ApiClientGameMode = ApiMatchMode;
 export type ApiMatchFormat = "single_game" | "rules_match" | "two_game_side_swap";
 export type ApiMatchCardPool = "originalset" | "originalset_classic" | "originalset_proteus" | "originalset_classic_proteus";
 export type ApiAiPacingMode = "fast" | "paced" | "manual";

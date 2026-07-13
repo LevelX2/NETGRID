@@ -802,6 +802,8 @@ export function appendResolvedSubroutineEffect(
     cardDefinitionId?: string;
     cardTitle?: string;
     cardsTrashed?: number;
+    dieRoll?: number;
+    randomDamageApplied?: boolean;
   } = {},
 ): void {
   if (!legalAction) return;
@@ -818,6 +820,13 @@ export function appendResolvedSubroutineEffect(
       sourceTitle: definition.title,
       subroutineIndex,
       subroutineType: subroutine.type,
+      ...(options.dieRoll !== undefined ? { dieRoll: options.dieRoll } : {}),
+      ...(options.randomDamageApplied !== undefined
+        ? { randomDamageApplied: options.randomDamageApplied }
+        : {}),
+      ...(subroutine.type === "random_damage" && subroutine.damageType
+        ? { damageType: subroutine.damageType }
+        : {}),
       ...(dynamicAttribution
         ? {
             cardDefinitionId: dynamicAttribution.sourceDefinitionId,

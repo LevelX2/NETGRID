@@ -120,11 +120,13 @@ export function resolveParticipantDeckSetup(
   options: {
     seed: string;
     aiPlayer?: SeriesPlayerSlot;
+    aiPlayers?: SeriesPlayerSlot[];
     aiDeckPolicy?: AiDeckPolicy;
     cardPool?: MatchCardPool;
   } = { seed: "default" },
 ): ResolvedParticipantDeckSetup {
   const policy = options.aiDeckPolicy ?? input.aiDeckPolicy ?? "selected";
+  const aiPlayers = options.aiPlayers ?? (options.aiPlayer ? [options.aiPlayer] : []);
   const participantAInput = input.participantADecks ?? {};
   const setup: ResolvedParticipantDeckSetup = {
     player_a: resolveParticipantPair(
@@ -133,7 +135,7 @@ export function resolveParticipantDeckSetup(
         participantAInput,
         participantAInput,
         options.seed,
-        options.aiPlayer,
+        aiPlayers.includes("player_a"),
         policy,
         options.cardPool,
       ),
@@ -145,15 +147,15 @@ export function resolveParticipantDeckSetup(
         input.participantBDecks ?? {},
         participantAInput,
         options.seed,
-        options.aiPlayer,
+        aiPlayers.includes("player_b"),
         policy,
         options.cardPool,
       ),
       options.cardPool,
     ),
   };
-  if (options.aiPlayer) {
-    const aiPair = setup[options.aiPlayer];
+  for (const aiPlayer of aiPlayers) {
+    const aiPair = setup[aiPlayer];
     if (!participantPairUsesAiSupportedCards(aiPair)) {
       throw new Error("ai_deck_snapshot_not_supported");
     }
@@ -223,11 +225,11 @@ function deckInputForPlayer(
   selected: ParticipantDeckPairInput,
   participantAInput: ParticipantDeckPairInput,
   seed: string,
-  aiPlayer: SeriesPlayerSlot | undefined,
+  isAiPlayer: boolean,
   policy: AiDeckPolicy,
   cardPool: MatchCardPool | undefined,
 ): ParticipantDeckPairInput {
-  if (player !== aiPlayer) return selected;
+  if (!isAiPlayer) return selected;
   if (policy === "fixed") return fixedDeckInput(cardPool);
   if (policy === "same_as_participant_a") return participantAInput;
   if (policy === "seeded_random") {

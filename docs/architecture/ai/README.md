@@ -55,6 +55,11 @@
   Coaching.
 - `ai-current-state-cleanup-process-2026-07-09.md`: abgeschlossener
   Runtime-/Legacy-Cleanup.
+- `ai-vs-ai-observer-process-2026-07-13.md` und
+  `docs/reviews/ai/ai-vs-ai-observer-implementation-review-2026-07-13.md`:
+  persistierter, side-sicher beobachtbarer KI-gegen-KI-Modus mit sichtbaren
+  Einzelschritten, Tempo-Steuerung, Reconnect, regulärem Ende und Abbruch ohne
+  künstlichen Sieger.
 - `corp-score-conversion-capability-contract.md` und
   `corp-score-conversion-plan-process-2026-07-10.md`: Engine-/Hint-/Planvertrag
   für generische Fast-Advance- und Countertransfer-Scorepfade.

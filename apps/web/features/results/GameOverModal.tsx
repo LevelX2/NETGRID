@@ -37,6 +37,7 @@ export function GameOverModal({
   playerName,
   retentionProtected,
   onRetentionProtection,
+  observerMode = false,
   nextSeriesPending = false
 }: {
   result: GameResultSummary;
@@ -48,25 +49,34 @@ export function GameOverModal({
   playerName?: string;
   retentionProtected: boolean;
   onRetentionProtection(protectedValue: boolean): void;
+  observerMode?: boolean;
   nextSeriesPending?: boolean;
 }) {
-  const outcomeText = resultOutcomeHeadline(result.winner, side, playerName, opponentName);
-  const seriesHeadline = result.series ? seriesResultHeadline(result.series, opponentName, playerName) : null;
+  const observerOutcomeText =
+    result.winner === "draw"
+      ? "Simulation endet unentschieden"
+      : `${result.winner === "runner" ? "Runner-KI" : "Korp-KI"} gewinnt`;
+  const outcomeText = observerMode
+    ? observerOutcomeText
+    : resultOutcomeHeadline(result.winner, side, playerName, opponentName);
+  const gameStanding = gameStandingForResult(result, side, playerName, opponentName);
+  const winnerMotif = resultWinnerMotifFor(result.winner);
+  const winnerMotifUi = resultWinnerMotifUi(winnerMotif);
+  const opponentSideLabel = opponentSide(side);
+  const playerSeriesLabel = observerMode ? "KI A" : resultPlayerLabel(side, side, playerName, opponentName);
+  const opponentSeriesLabel = observerMode ? "KI B" : resultPlayerLabel(opponentSideLabel, side, playerName, opponentName);
+  const playerStandingLabel = resultPlayerRoleLabel(side, side, playerName, opponentName);
+  const opponentStandingLabel = resultPlayerRoleLabel(opponentSideLabel, side, playerName, opponentName);
+  const seriesViewerScoreLabel = observerMode ? playerSeriesLabel : playerStandingLabel;
+  const seriesOpponentScoreLabel = observerMode ? opponentSeriesLabel : opponentStandingLabel;
+  const seriesHeadline = result.series ? seriesResultHeadline(result.series, opponentSeriesLabel, playerSeriesLabel) : null;
   const headlineText = seriesHeadline ?? outcomeText;
   const lastGameOutcomeText = resultOutcomeText(result.winner);
   const reasonText = seriesHeadline
     ? `Letztes Spiel: ${lastGameOutcomeText} ${resultReasonLabel(result.reason, result.winner)}`
     : resultReasonLabel(result.reason, result.winner);
-  const gameStanding = gameStandingForResult(result, side, playerName, opponentName);
-  const winnerMotif = resultWinnerMotifFor(result.winner);
-  const winnerMotifUi = resultWinnerMotifUi(winnerMotif);
-  const opponentSideLabel = opponentSide(side);
-  const playerSeriesLabel = resultPlayerLabel(side, side, playerName, opponentName);
-  const opponentSeriesLabel = resultPlayerLabel(opponentSideLabel, side, playerName, opponentName);
-  const playerStandingLabel = resultPlayerRoleLabel(side, side, playerName, opponentName);
-  const opponentStandingLabel = resultPlayerRoleLabel(opponentSideLabel, side, playerName, opponentName);
   const seriesText = result.series ? seriesStatusText(result.series, playerSeriesLabel, opponentSeriesLabel) : null;
-  const seriesScore = result.series ? seriesScoreUi(result.series, playerStandingLabel, opponentStandingLabel) : null;
+  const seriesScore = result.series ? seriesScoreUi(result.series, seriesViewerScoreLabel, seriesOpponentScoreLabel) : null;
   const retentionUi = retentionProtectionUi(retentionProtected);
   const exitUi = resultExitButtonUi(Boolean(onNextSeriesGame));
   const handleNewMatch = () => {
@@ -123,23 +133,23 @@ export function GameOverModal({
                 <span className="seriesResultLabel">{seriesScore.label}</span>
                 <strong>{seriesScore.score}</strong>
                 <small>
-                  <span>{playerStandingLabel}</span>
-                  <span>{opponentStandingLabel}</span>
+                  <span>{seriesViewerScoreLabel}</span>
+                  <span>{seriesOpponentScoreLabel}</span>
                 </small>
               </div>
             ) : null}
             <div className="seriesScore">
-              <span>Siege {playerStandingLabel} {result.series.viewerWins}</span>
-              <span>Siege {opponentStandingLabel} {result.series.opponentWins}</span>
+              <span>Siege {seriesViewerScoreLabel} {result.series.viewerWins}</span>
+              <span>Siege {seriesOpponentScoreLabel} {result.series.opponentWins}</span>
               <span>Draws {result.series.draws}</span>
-              <span>Agenda {playerStandingLabel} {result.series.viewerAgendaPoints}</span>
-              <span>Agenda {opponentStandingLabel} {result.series.opponentAgendaPoints}</span>
+              <span>Agenda {seriesViewerScoreLabel} {result.series.viewerAgendaPoints}</span>
+              <span>Agenda {seriesOpponentScoreLabel} {result.series.opponentAgendaPoints}</span>
             </div>
           </div>
         ) : null}
         <div className="gameOverFooter">
           <div>
-            <span>{resultFooterOutcomeLabel(result.winner, side, opponentName)}</span>
+            <span>{observerMode ? observerOutcomeText : resultFooterOutcomeLabel(result.winner, side, opponentName)}</span>
             <small>{shortDiagnosticsHash(result.finalStateHash)}</small>
           </div>
           <div className="gameOverActions">

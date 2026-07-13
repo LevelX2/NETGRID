@@ -36,6 +36,8 @@ type MatchStartLocalDeck = {
 export function MatchStartAdvancedOptions({
   isHumanVsHuman,
   isHumanVsAi,
+  isAiVsAi,
+  isAiVsAiSeries,
   hasAiOpponent,
   matchCardPool,
   humanSideSelection,
@@ -83,6 +85,8 @@ export function MatchStartAdvancedOptions({
 }: {
   isHumanVsHuman: boolean;
   isHumanVsAi: boolean;
+  isAiVsAi: boolean;
+  isAiVsAiSeries: boolean;
   hasAiOpponent: boolean;
   matchCardPool: MatchCardPoolSelection;
   humanSideSelection: HumanSideSelection;
@@ -164,11 +168,12 @@ export function MatchStartAdvancedOptions({
         ) : null}
         <label>
           Spielerzeit
-          <select value={playerClockMode} onChange={(event) => onPlayerClockMode(event.target.value as MatchStartPlayerClockMode)}>
+          <select value={isAiVsAi ? "none" : playerClockMode} onChange={(event) => onPlayerClockMode(event.target.value as MatchStartPlayerClockMode)} disabled={isAiVsAi}>
             <option value="none">Keine Zeitbegrenzung</option>
             <option value="player_clock">Zeitbegrenzung aktiv</option>
           </select>
         </label>
+        {isAiVsAi ? <p className="meta">Beobachtete KI-Simulationen laufen ohne Spielerzeit und bis zu einem regulären Spielende.</p> : null}
         <label>
           Zeit pro Seite
           <select value={playerClockMinutes} onChange={(event) => onPlayerClockMinutes(Number(event.target.value) as MatchStartPlayerClockMinutes)} disabled={playerClockDetailControlsDisabled}>
@@ -236,7 +241,7 @@ export function MatchStartAdvancedOptions({
             KI-Decks
             <select value={aiDeckPolicy} onChange={(event) => onAiDeckPolicy(event.target.value as AiDeckPolicy)}>
               <option value="selected">Explizit gewählte KI-Decks</option>
-              <option value="same_as_participant_a">Gleiche Decks wie Teilnehmer A</option>
+              <option value="same_as_participant_a">Gleiche Decks wie du</option>
               <option value="fixed">Feste Standard-Decks</option>
               <option value="seeded_random">Deterministisch zufällig</option>
             </select>
@@ -247,11 +252,12 @@ export function MatchStartAdvancedOptions({
           </label>
         ) : null}
       </div>
-      {(isHumanVsHuman && testSetupMode) || (isHumanVsAi && aiDeckPolicy === "selected") ? (
+      {(isHumanVsHuman && testSetupMode) || ((isHumanVsAi || isAiVsAiSeries) && aiDeckPolicy === "selected") ? (
         <div className="deckSlotGrid advancedDeckSlots">
           <>
             <DeckSlotSelect
-              label={hasAiOpponent ? "KI · Runner-Deck" : "Teilnehmer B · Runner-Deck"}
+              label={isAiVsAiSeries ? "KI B · Runner-Deck" : hasAiOpponent ? "KI · Runner-Deck" : "Teilnehmer B · Runner-Deck"}
+              side="runner"
               snapshots={runnerSnapshots}
               localDecks={localDecks.filter((deck) => deck.side === "runner")}
               source={participantBRunnerDeckSource}
@@ -263,7 +269,8 @@ export function MatchStartAdvancedOptions({
               onLocalDeck={onSelectedParticipantBRunnerLocalDeckId}
             />
             <DeckSlotSelect
-              label={hasAiOpponent ? "KI · Korp-Deck" : "Teilnehmer B · Korp-Deck"}
+              label={isAiVsAiSeries ? "KI B · Korp-Deck" : hasAiOpponent ? "KI · Korp-Deck" : "Teilnehmer B · Korp-Deck"}
+              side="corp"
               snapshots={corpSnapshots}
               localDecks={localDecks.filter((deck) => deck.side === "corp")}
               source={participantBCorpDeckSource}

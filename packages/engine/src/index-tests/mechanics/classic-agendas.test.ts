@@ -1,9 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { createGameAfterSetup, getLegalActions } from "../../index";
+import {
+  createGameAfterSetup,
+  getLegalActions,
+  hashState,
+  replayEvents,
+} from "../../index";
 import {
   agendaPoints,
   apply,
-  applyChoice,
   cardCounterAmount,
   putCorpCardOnTopOfRd,
   putCorpRootInRemote,
@@ -143,28 +147,45 @@ describe("Classic Agenda Implementation Smokes", () => {
     });
   });
 
-  it("offers Unlisted Research Lab's scored start-turn draw choice", () => {
+  it("draws Unlisted Research Lab's additional start-turn card mandatorily", () => {
     let state = corpMainClassicAgendaGame("classic-unlisted-research-lab");
     state = scoreClassicAgenda(state, UNLISTED_RESEARCH_LAB, 3).state;
+    const runnerTurn = apply(
+      state,
+      "corp",
+      (action) => action.type === "end_turn",
+    );
+    const hqBeforeTurnStart = runnerTurn.corp.hq.length;
+    const startTurnInitial = structuredClone(runnerTurn);
+    const startTurnReplayStart = runnerTurn.eventLog.length;
     const nextTurnStart = apply(
-      apply(state, "corp", (action) => action.type === "end_turn"),
+      runnerTurn,
       "runner",
       (action) => action.type === "end_turn",
     );
 
-    expect(nextTurnStart.pendingChoice?.source).toContain(
-      "scored_agenda.start_draw_choice",
-    );
-    const hqBeforeDraw = nextTurnStart.corp.hq.length;
-    const afterDraw = applyChoice(nextTurnStart, "corp", "draw");
-
-    expect(afterDraw.corp.hq.length).toBe(hqBeforeDraw + 1);
-    expect(afterDraw.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "resolve_choice",
-      sourceDefinitionId: UNLISTED_RESEARCH_LAB,
-      scoredAgendaStartDrawDecision: "draw",
-      drawnCards: 1,
+    expect(nextTurnStart.pendingChoice).toBeUndefined();
+    expect(nextTurnStart.corp.hq.length).toBe(hqBeforeTurnStart + 1);
+    expect(
+      getLegalActions(nextTurnStart, "corp").map((action) => action.type),
+    ).toEqual(["mandatory_draw"]);
+    expect(nextTurnStart.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "end_turn",
+      resolvedEffects: [
+        expect.objectContaining({
+          kind: "draw_cards",
+          amount: 1,
+          reason: "start_of_turn",
+          sourceDefinitionId: UNLISTED_RESEARCH_LAB,
+        }),
+      ],
     });
+    const startTurnReplay = replayEvents(
+      startTurnInitial,
+      nextTurnStart.eventLog.slice(startTurnReplayStart),
+    );
+    expect(startTurnReplay.ok).toBe(true);
+    expect(hashState(startTurnReplay.state)).toBe(hashState(nextTurnStart));
   });
 
   it("installs accessed Theorem Proof as a 2 MU program before the Runner scores it", () => {
