@@ -52,7 +52,7 @@ describe("last two matches exact decision checkpoints", () => {
         rezzed: false,
       };
       fixture.expectation = {
-        acceptableActions: [{ type: "activated_card_ability" }],
+        forbiddenActions: [{ type: "end_turn" }],
       };
     });
 

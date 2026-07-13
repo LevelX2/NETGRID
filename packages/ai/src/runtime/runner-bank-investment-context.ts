@@ -240,6 +240,7 @@ export function createRunnerBankInvestmentContext(
     const comfortableCreditPool = runnerBankHasComfortableCreditPool(
       input,
       storedCredits,
+      cashOutActionLegal,
     );
     const desiredBankTarget = runnerBankDesiredTarget(storedCredits, {
       comfortableCreditPool,
@@ -260,7 +261,7 @@ export function createRunnerBankInvestmentContext(
     const stableBuildWindow =
       input.playerView.own.clicks >= 1 &&
       !concreteFundingNeed &&
-      !comfortableCreditPool;
+      (!comfortableCreditPool || cashOutActionLegal);
     const active =
       buildActionLegal ||
       cashOutActionLegal ||
@@ -450,11 +451,14 @@ export function createRunnerBankInvestmentContext(
   function runnerBankHasComfortableCreditPool(
     input: AiDecisionInput,
     storedCredits: number,
+    cashOutActionLegal: boolean,
   ): boolean {
     return (
       input.playerView.own.credits >= 10 ||
-      input.playerView.own.credits + storedCredits >=
+      (!cashOutActionLegal &&
+        input.playerView.own.credits + storedCredits >=
         RUNNER_BANK_VALUE_CASHOUT_TARGET
+      )
     );
   }
 

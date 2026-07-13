@@ -1,6 +1,6 @@
 # KI-Remediation der Matches F450 und 10311 (2026-07-13)
 
-Status: Aktiv; P0 bis P3 abgeschlossen, P4 in Arbeit
+Status: Aktiv; P0 bis P4 abgeschlossen, P5 in Arbeit
 
 ## Quelle und Gesamtziel
 
@@ -135,3 +135,34 @@ werden seine Checks ausgeführt, nur zugehörige Dateien gestaged und ein eigene
 Commit erstellt. Vor dem finalen Merge wird aktuelles `main` in den
 Arbeitsbranch integriert. Push oder Pull Request sind nicht Teil dieses
 Prozesses.
+
+## Verifikationsstand P4
+
+Am 13. Juli 2026 wurden im Arbeits-Worktree ausgeführt:
+
+```powershell
+corepack pnpm --filter @netgrid/ai exec vitest run `
+  src/evaluation/decision-checkpoints/f450-10311-decision-checkpoints.test.ts `
+  src/runtime/runner-run-plan-revalidation.test.ts `
+  src/runtime/runner-run-plan-policy.test.ts `
+  src/runtime/runner-run-plan-path-quote.test.ts `
+  src/runtime/semantic-choice-ranking.test.ts `
+  --maxWorkers=1 --testTimeout=30000 --reporter=dot
+corepack pnpm --filter @netgrid/ai typecheck
+corepack pnpm --filter @netgrid/ai test
+git diff --check
+```
+
+Ergebnis:
+
+- alle vier historischen Zielentscheidungen und drei neuen
+  Checkpoint-Gegenproben grün;
+- fünf fokussierte Checkpoint-/Run-/Plan-Testdateien mit 86 Tests grün;
+- drei P2-Unit-Testdateien mit 20 Tests grün;
+- vollständige AI-Suite: 318 Testdateien, 2.102 Tests, vollständig grün;
+- AI-Typecheck und Diff-Hygiene grün;
+- der erste Volltest deckte drei zu breite Bank-Komfortfälle sowie eine zu
+  konkrete ältere Deckout-Gegenprobe auf. Wiederverwendbare Auszahlungsbanken
+  behalten nun ihr Mehrlade-/Auszahlungsziel; die Deckout-Gegenprobe prüft
+  weiterhin strikt gegen vorzeitiges Zugende. Der vollständige
+  Wiederholungslauf ist grün.
