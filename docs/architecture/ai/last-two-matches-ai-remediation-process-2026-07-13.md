@@ -1,6 +1,6 @@
 # KI-Remediation der letzten zwei Spiele (2026-07-13)
 
-Status: P0 bis P2 abgeschlossen; P3 aktiv; P4 und P5 offen
+Status: P0 bis P3 abgeschlossen; P4 aktiv; P5 offen
 
 ## Quelle und Gesamtziel
 
@@ -117,7 +117,7 @@ Commits werden nicht eigenmächtig übernommen.
   Endgame-Unit-Tests, `git diff --check`.
 - Done-Gate: SV529 verlangt exakt das kleinste garantierende und
   payoff-erhaltende Gebot; Deckout-Ziel und Gegenprobe sind grün.
-- Commit: `fix(ai): bind trace choices and lock deckout wins`
+- Commit: `fix(ai): lock inevitable Corp deckout wins`
 
 ### P4 – Breite Verifikation
 

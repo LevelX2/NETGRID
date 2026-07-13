@@ -47,6 +47,7 @@ import {
 import { runnerRunPlanSemanticChoice } from "./runner-run-plan-policy";
 import { revalidateRunnerRunPlan } from "./runner-run-plan-revalidation";
 import { createRunnerRunPlanForSelectedAction } from "./runner-run-plan-start";
+import { runnerInevitableCorpDeckoutSemanticChoice } from "./runner-inevitable-corp-deckout-choice";
 import { sourceDefinitionIdForAction } from "./visible-card-lookup";
 import { visibleSourceDefinitionsByInstanceId } from "./visible-source-definitions";
 
@@ -381,8 +382,11 @@ export function chooseSemanticRuntimeAction(
   );
   const selfDamageImmediateWinChoice =
     dependencies.runnerSelfDamageImmediateWinSemanticChoice(input, choices);
+  const inevitableCorpDeckoutChoice =
+    runnerInevitableCorpDeckoutSemanticChoice(input, choices);
   const initialChoice =
     runPlanChoice ??
+    inevitableCorpDeckoutChoice ??
     reactiveChoice ??
     selfDamageImmediateWinChoice ??
     mappedChoice.choice ??
