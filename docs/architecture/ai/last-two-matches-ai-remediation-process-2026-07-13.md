@@ -1,6 +1,6 @@
 # KI-Remediation der letzten zwei Spiele (2026-07-13)
 
-Status: P0 bis P3 abgeschlossen; P4 aktiv; P5 offen
+Status: P0 bis P4 abgeschlossen; P5 aktiv
 
 ## Quelle und Gesamtziel
 
@@ -139,6 +139,32 @@ Commits werden nicht eigenmächtig übernommen.
 - Done-Gate: lokales `main` enthält alle Pakete und ist geprüft; Worktree und
   Arbeitsbranch existieren nicht mehr.
 - Commit: `docs(ai): close last-two-matches remediation`
+
+## Verifikationsstand P4
+
+Am 13. Juli 2026 wurden im Arbeits-Worktree ausgeführt:
+
+```powershell
+corepack pnpm --filter @netgrid/ai exec vitest run `
+  src/evaluation/decision-checkpoints/last-two-matches-decision-checkpoints.test.ts `
+  src/runtime/runner-inevitable-corp-deckout-choice.test.ts `
+  src/runtime/trace-context.test.ts `
+  src/runtime/bid-choice-option.test.ts `
+  src/evaluation/decision-checkpoints/manhunt-execution-refinement-decision-checkpoints.test.ts `
+  --maxWorkers=1 --testTimeout=30000 --reporter=dot
+corepack pnpm --filter @netgrid/ai test
+corepack pnpm --filter @netgrid/ai typecheck
+git diff --check
+```
+
+Ergebnis:
+
+- alle fünf historischen Zielentscheidungen und drei neuen Gegenproben grün;
+- fünf angrenzende Trace-/Choice-/Deckout-Testdateien mit 31 Tests grün;
+- vollständige AI-Suite: 315 Testdateien, 2.084 Tests, vollständig grün;
+- AI-Typecheck und Diff-Hygiene grün;
+- kein Benchmark- oder Selfplay-Langlauf; diese waren nicht Teil des
+  Verifikationsvertrags.
 
 ## Controller-Regeln
 
