@@ -59,7 +59,7 @@ describe("runner run plan revalidation", () => {
     );
   });
 
-  it("marks a plan invalid when the active run target no longer matches", () => {
+  it("rebases a redirected target and aborts only when its current path is blocked", () => {
     const input = runnerEncounterInput({
       attackedServerId: "hq",
       iceDefinitionId: "onr_v1_261_quandary",
@@ -70,10 +70,40 @@ describe("runner run plan revalidation", () => {
 
     const revalidated = revalidateRunnerRunPlan(input, runPlan());
 
-    expect(revalidated.revalidation.status).toBe("invalid");
-    expect(revalidated.lifecycle).toBe("invalid");
+    expect(revalidated.revalidation.status).toBe("abort_recommended");
+    expect(revalidated.lifecycle).toBe("abort_recommended");
+    expect(revalidated.origin).toBe("redirected_run");
+    expect(revalidated.targetServer.id).toBe("hq");
+    expect(revalidated.accessIntent?.server).toBe("hq");
     expect(revalidated.revalidation.reasons).toContain("target_server_changed");
     expect(revalidated.revalidation.reasons).toContain("current_target:hq");
+  });
+
+  it("rebases a redirected target when the current rest path reaches access", () => {
+    const input = runnerEncounterInput({
+      attackedServerId: "hq",
+      iceDefinitionId: "onr_v1_261_quandary",
+      iceTitle: "Quandary",
+      iceStrength: 2,
+      legalActions: [],
+    });
+    const { encounteredIce: _encounteredIce, ...run } =
+      input.playerView.run!;
+    input.playerView.run = {
+      ...run,
+      phase: "movement",
+      position: { kind: "server", serverId: "hq" },
+    };
+    input.playerView.servers[0]!.ice = [];
+
+    const revalidated = revalidateRunnerRunPlan(input, runPlan());
+
+    expect(revalidated.revalidation.status).toBe("adjusted");
+    expect(revalidated.lifecycle).toBe("adjusted");
+    expect(revalidated.origin).toBe("redirected_run");
+    expect(revalidated.targetServer.id).toBe("hq");
+    expect(revalidated.pathQuote.server).toBe("hq");
+    expect(revalidated.pathQuote.canReachAccess).toBe(true);
   });
 });
 

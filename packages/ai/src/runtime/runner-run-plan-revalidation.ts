@@ -19,16 +19,18 @@ export function revalidateRunnerRunPlan(
     : undefined;
   const targetChanged =
     currentTarget !== undefined && currentTarget !== plan.targetServer.id;
-  const pathQuote = targetChanged
-    ? plan.pathQuote
-    : quoteRunnerRunPath(input, plan);
-  const nextEncounter = currentEncounterRef(input, plan.targetServer.id);
+  const currentPlan =
+    targetChanged && currentTarget
+      ? redirectedRunnerRunPlan(plan, currentTarget)
+      : plan;
+  const pathQuote = quoteRunnerRunPath(input, currentPlan);
+  const nextEncounter = currentEncounterRef(input, currentPlan.targetServer.id);
   const previousFingerprint = plan.revalidation.reasons.find((reason) =>
     reason.startsWith("fingerprint:"),
   );
   const nextFingerprint = `fingerprint:${runnerRunPlanRevalidationFingerprint(
     input,
-    plan.targetServer.id,
+    currentPlan.targetServer.id,
   )}`;
   const fingerprintChanged =
     previousFingerprint !== undefined && previousFingerprint !== nextFingerprint;
@@ -71,7 +73,7 @@ export function revalidateRunnerRunPlan(
     canReachAccess: pathQuote.canReachAccess,
   });
   return {
-    ...plan,
+    ...currentPlan,
     lifecycle: lifecycleForRevalidation(status, plan.lifecycle),
     pathQuote,
     ...(nextEncounter ? { currentEncounter: nextEncounter } : {}),
@@ -91,9 +93,9 @@ function revalidationStatusFor(params: {
   fingerprintChanged: boolean;
   canReachAccess: boolean;
 }): RunnerRunPlanRevalidationStatus {
-  if (params.targetChanged) return "invalid";
   if (!params.canReachAccess) return "abort_recommended";
   if (
+    params.targetChanged ||
     params.pathQuoteChanged ||
     params.encounterChanged ||
     params.fingerprintChanged
@@ -101,6 +103,33 @@ function revalidationStatusFor(params: {
     return "adjusted";
   }
   return "valid";
+}
+
+function redirectedRunnerRunPlan(
+  plan: RunnerRunPlan,
+  currentTarget: RunnerRunPlanServerId,
+): RunnerRunPlan {
+  return {
+    ...plan,
+    origin: "redirected_run",
+    targetServer: { id: currentTarget },
+    ...(plan.accessIntent
+      ? {
+          accessIntent: {
+            ...plan.accessIntent,
+            server: currentTarget,
+          },
+        }
+      : {}),
+    debug: {
+      summary: `${plan.debug.summary} -> ${currentTarget}`,
+      items: [
+        ...plan.debug.items,
+        "runner_run_plan_redirected:true",
+        `runner_run_plan_redirect_target:${currentTarget}`,
+      ],
+    },
+  };
 }
 
 function lifecycleForRevalidation(

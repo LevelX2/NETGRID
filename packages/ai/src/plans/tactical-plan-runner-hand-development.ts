@@ -175,7 +175,16 @@ export function runnerHandDevelopmentPlans(
   dependencies: TacticalPlanCreditValueDependencies,
 ): TacticalPlan[] {
   const handEvaluations = context.runnerHandDevelopmentEvaluations ?? [];
+  const fundedContinuation = runnerFundedHandDevelopmentContinuation(
+    context,
+    handEvaluations,
+  );
+  const fundedContinuationCardId = fundedContinuation?.cardInstanceId;
   const usefulEvaluations = handEvaluations
+    .filter(
+      (evaluation) =>
+        evaluation.cardInstanceId !== fundedContinuationCardId,
+    )
     .filter(usefulLegalRunnerHandDevelopment)
     .filter((evaluation) =>
       runnerSearchDevelopmentHasConcreteConversion(context, evaluation),
@@ -190,6 +199,10 @@ export function runnerHandDevelopmentPlans(
   );
   const fundableEvaluations = canFundHandCardsNow
     ? handEvaluations
+        .filter(
+          (evaluation) =>
+            evaluation.cardInstanceId !== fundedContinuationCardId,
+        )
         .filter(usefulFundableRunnerHandDevelopment)
         .filter((evaluation) =>
           runnerSearchDevelopmentHasConcreteConversion(context, evaluation),
@@ -200,6 +213,10 @@ export function runnerHandDevelopmentPlans(
         )
     : [];
   const deferredEvaluations = handEvaluations
+    .filter(
+      (evaluation) =>
+        evaluation.cardInstanceId !== fundedContinuationCardId,
+    )
     .filter(
       (evaluation) =>
         !usefulLegalRunnerHandDevelopment(evaluation) &&
@@ -222,6 +239,33 @@ export function runnerHandDevelopmentPlans(
     ? runnerPlayBestHandCardPlanPriority(context, bestEvaluation)
     : undefined;
   const plans: TacticalPlan[] = [];
+  if (fundedContinuation) {
+    plans.push(
+      runnerHandDevelopmentPlan({
+        context,
+        evaluation: fundedContinuation,
+        type: "runner.develop_hand_card",
+        planId: `runner.develop_hand_card:${fundedContinuation.cardInstanceId}`,
+        stepId: `install_funded_hand_card:${fundedContinuation.cardInstanceId}`,
+        priority: Math.max(
+          1_100,
+          runnerHandDevelopmentPlanPriority(context, fundedContinuation),
+        ),
+        scoreKey: "runner_funded_hand_development_continuation",
+        scoreLabel: "Finanzierter Handkartenplan",
+        extraRationale: [
+          "complete the just-funded hand-card plan before ordinary pressure",
+        ],
+        extraEvidence: [
+          "funded_hand_development_continuation:true",
+          `funded_hand_development_previous_step:${context.previousPlan?.selectedStepKind ?? "unknown"}`,
+          `funded_hand_development_previous_state:${context.previousPlan?.updatedAtStateVersion ?? -1}`,
+        ],
+        runnerGoalEvidence,
+        stateVersion,
+      }),
+    );
+  }
   if (bestEvaluation) {
     plans.push(
       runnerHandDevelopmentPlan({
@@ -298,6 +342,44 @@ export function runnerHandDevelopmentPlans(
     ),
   );
   return plans;
+}
+
+export function runnerFundedHandDevelopmentContinuation(
+  context: TacticalPlanBuildContext,
+  evaluations: readonly RunnerHandDevelopmentEvaluation[],
+): RunnerHandDevelopmentEvaluation | undefined {
+  const previousPlan = context.previousPlan;
+  if (
+    previousPlan?.type !== "runner.develop_hand_card" ||
+    previousPlan.status !== "progressing" ||
+    previousPlan.target?.kind !== "card" ||
+    previousPlan.selectedStepKind !== "gain_credits" ||
+    previousPlan.ttlDecisionsRemaining <= 0 ||
+    !previousPlan.blockedBy.some((blocker) => blocker === "missing_credits") ||
+    context.input.playerView.stateVersion !==
+      previousPlan.updatedAtStateVersion + 1
+  ) {
+    return undefined;
+  }
+  const evaluation = evaluations.find(
+    (candidate) => candidate.cardInstanceId === previousPlan.target?.id,
+  );
+  if (
+    !evaluation ||
+    evaluation.availability !== "legal_now" ||
+    !evaluation.legalActionId ||
+    evaluation.currentNeed === "none" ||
+    evaluation.currentNeed === "later" ||
+    evaluation.deferReason === "missing_mu" ||
+    evaluation.persistentInstallEvaluation?.duplicateRole ===
+      "redundant_duplicate" ||
+    !context.input.legalActions.some(
+      (action) => action.actionId === evaluation.legalActionId,
+    )
+  ) {
+    return undefined;
+  }
+  return evaluation;
 }
 
 export function runnerSearchDevelopmentHasConcreteConversion(

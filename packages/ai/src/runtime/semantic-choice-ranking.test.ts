@@ -376,6 +376,23 @@ describe("tacticalPlanMappedChoice", () => {
     expect(result.overrideBlockedReason).toBe("runner_plan_controller");
   });
 
+  it("keeps a just-funded development install over ordinary run pressure", () => {
+    const install = legalAction("install-funded-card", "install_card");
+    const run = legalAction("run-rd", "start_run", { serverId: "rd" });
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [choice(run, 1903), choice(install, -156)],
+      fundedDevelopmentMapping([install]),
+      choice(run, 1903),
+    );
+
+    expect(result.outcome).toBe("semantic_choice_blocked");
+    expect(result.choice?.action.actionId).toBe("install-funded-card");
+    expect(result.overrideBlockedReason).toBe(
+      "funded_development_plan_controller",
+    );
+  });
+
   it("yields a deferred bank install plan to a positive semantic action", () => {
     const install = legalAction("install-broker-copy", "install_card");
     const draw = legalAction("draw", "draw_card");
@@ -1158,6 +1175,15 @@ function bestHandCardMapping(
 ): PlanStepMappingResult {
   return planMapping("runner.play_best_hand_card", legalActions, {
     stepKind: "install_development_card",
+  });
+}
+
+function fundedDevelopmentMapping(
+  legalActions: LegalAction[],
+): PlanStepMappingResult {
+  return planMapping("runner.develop_hand_card", legalActions, {
+    stepKind: "install_development_card",
+    evidence: ["funded_hand_development_continuation:true"],
   });
 }
 

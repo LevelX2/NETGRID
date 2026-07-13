@@ -114,6 +114,20 @@ export function tacticalPlanMappedChoice(
       overrideChoice,
     );
     if (
+      tacticalPlanFundedDevelopmentContinuationBlocksOverride(
+        mapping,
+        mappedChoice,
+      )
+    ) {
+      return tacticalPlanBlockedOverrideResult({
+        mappedChoice,
+        overrideChoice,
+        reason: "funded_development_plan_controller",
+        scoreGap,
+        threshold: Number.POSITIVE_INFINITY,
+      });
+    }
+    if (
       tacticalPlanRemoteContestMappingBlocksRunOverride(
         mapping,
         mappedChoice,
@@ -372,6 +386,20 @@ export function tacticalPlanMappedChoice(
       tacticalPlanMappingSelectedEvidence(mapping, mappedChoice),
     ),
   };
+}
+
+function tacticalPlanFundedDevelopmentContinuationBlocksOverride(
+  mapping: PlanStepMappingResult,
+  mappedChoice: SemanticRuntimeChoice,
+): boolean {
+  return (
+    mapping.plan.type === "runner.develop_hand_card" &&
+    mapping.plan.evidence.includes(
+      "funded_hand_development_continuation:true",
+    ) &&
+    (mappedChoice.action.type === "install_card" ||
+      mappedChoice.action.type === "play_event")
+  );
 }
 
 function bestPlanCompatibleSemanticChoice(
