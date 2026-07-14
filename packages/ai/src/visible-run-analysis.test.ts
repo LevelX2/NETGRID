@@ -178,6 +178,93 @@ describe("visible run analysis text-derived breaker costs", () => {
   });
 });
 
+describe("visible run analysis Deflector paths", () => {
+  it("prices a live Deflector as a required access-preserving break", () => {
+    const assessment = assessKnownRezzedIcePath(
+      [trapdoorDeflectorIce("rd-trapdoor")],
+      [krashBreaker("runner-krash")],
+      10,
+      [],
+      0,
+      { visibleRemoteServerCount: 1, visibleCorpCredits: 0 },
+    );
+
+    expect(assessment).toMatchObject({
+      blocked: false,
+      canReachAccess: true,
+      visibleBreakCost: 8,
+      creditsAfterPath: 2,
+    });
+  });
+
+  it("blocks a live Deflector path when the access-preserving break is unaffordable", () => {
+    const assessment = assessKnownRezzedIcePath(
+      [trapdoorDeflectorIce("rd-trapdoor")],
+      [krashBreaker("runner-krash")],
+      7,
+      [],
+      0,
+      { visibleRemoteServerCount: 1, visibleCorpCredits: 0 },
+    );
+
+    expect(assessment).toMatchObject({
+      blocked: true,
+      canReachAccess: false,
+      visibleBreakCost: 8,
+      unpayableReason: "ice_unaffordable",
+    });
+  });
+
+  it("does not charge for an auto-broken Deflector without a visible target", () => {
+    const assessment = assessKnownRezzedIcePath(
+      [trapdoorDeflectorIce("rd-trapdoor")],
+      [krashBreaker("runner-krash")],
+      0,
+      [],
+      0,
+      { visibleRemoteServerCount: 0, visibleCorpCredits: 0 },
+    );
+
+    expect(assessment).toMatchObject({
+      blocked: false,
+      canReachAccess: true,
+      creditsAfterPath: 0,
+    });
+    expect(assessment.visibleBreakCost).toBeUndefined();
+  });
+
+  it("keeps an any-data-fort Deflector live without a remote", () => {
+    const assessment = assessKnownRezzedIcePath(
+      [
+        {
+          ...trapdoorDeflectorIce("rd-entrapment"),
+          effectiveRunQuote: {
+            ...trapdoorDeflectorIce("rd-entrapment").effectiveRunQuote!,
+            subroutines: [
+              {
+                id: "rd-entrapment_deflect",
+                type: "deflect_run",
+                deflectorTarget: "any_data_fort",
+              },
+            ],
+          },
+        },
+      ],
+      [krashBreaker("runner-krash")],
+      7,
+      [],
+      0,
+      { visibleRemoteServerCount: 0, visibleCorpCredits: 0 },
+    );
+
+    expect(assessment).toMatchObject({
+      blocked: true,
+      canReachAccess: false,
+      visibleBreakCost: 8,
+    });
+  });
+});
+
 describe("visible run analysis runner run credit pools", () => {
   it("uses visible non-noisy breaker credits for a Codecracker known path", () => {
     const rig = [
@@ -631,6 +718,44 @@ function caryatidAsCodeGateIce(instanceId: string): VisibleCard {
         },
       ],
     },
+  };
+}
+
+function trapdoorDeflectorIce(instanceId: string): VisibleCard {
+  return {
+    instanceId,
+    definitionId: "onr_classic_014_trapdoor",
+    title: "Trapdoor",
+    type: "ice",
+    subtypes: ["code_gate", "deflector"],
+    known: true,
+    rezzed: true,
+    strength: 3,
+    effectiveRunQuote: {
+      iceInstanceId: instanceId,
+      iceDefinitionId: "onr_classic_014_trapdoor",
+      effectiveStrength: 3,
+      subroutines: [
+        {
+          id: `${instanceId}_deflect`,
+          type: "deflect_run",
+          deflectorTarget: "subsidiary_data_fort",
+          deflectorAutoBreakIfNoTarget: true,
+        },
+      ],
+    },
+  };
+}
+
+function krashBreaker(instanceId: string): VisibleCard {
+  return {
+    instanceId,
+    definitionId: "onr_v1_039_krash",
+    title: "Krash",
+    type: "program",
+    subtypes: ["icebreaker"],
+    known: true,
+    strength: 0,
   };
 }
 

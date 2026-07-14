@@ -8,6 +8,7 @@ import {
   isEndRunSubroutine,
   isImmediateSafetyThreatSubroutine,
 } from "./encounter-subroutine";
+import { visibleDeflectorSubroutineCanResolve } from "../visible-run-analysis";
 import { currentEncounteredIceCard } from "./current-encounter";
 import { breakSubroutineIndexesForAction } from "./subroutine-indexes";
 
@@ -32,9 +33,19 @@ export function runnerEncounterBreakScoreComponents(
     isImmediateSafetyThreatSubroutine,
   ).length;
   const endRunCount = targetSubroutines.filter(isEndRunSubroutine).length;
+  const deflectorCount = targetSubroutines.filter((subroutine) =>
+    visibleDeflectorSubroutineCanResolve(subroutine, {
+      visibleRemoteServerCount: input.playerView.servers.filter((candidate) =>
+        candidate.id.startsWith("remote_"),
+      ).length,
+      visibleCorpCredits: input.playerView.opponent.credits,
+    }),
+  ).length;
   const extraSubroutineCount = Math.max(0, breakIndexes.size - 1);
   const value =
-    immediateThreatCount * 500 + endRunCount * 600 + extraSubroutineCount * 90;
+    immediateThreatCount * 500 +
+    (endRunCount + deflectorCount) * 600 +
+    extraSubroutineCount * 90;
   if (value <= 0) return [];
   return [
     {
@@ -45,6 +56,7 @@ export function runnerEncounterBreakScoreComponents(
         `indexes:${[...breakIndexes].sort((left, right) => left - right).join(",")}`,
         `immediate_threats:${immediateThreatCount}`,
         `end_run:${endRunCount}`,
+        `deflector:${deflectorCount}`,
         `extra_subroutines:${extraSubroutineCount}`,
       ].join("|"),
     },

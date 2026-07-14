@@ -62,6 +62,7 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "unbrokenSubroutineCount",
   "delayedInstallAbility",
   "encounterWillEndRun",
+  "encounterSourceWillTrashAtEndOfTurn",
   "shellTradersAbility",
   "abilityFamily",
   "abilityId",
@@ -75,6 +76,7 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "cardImplementationTakesHostedCredits",
   "hostedCreditTakeAmount",
   "hostedCreditTakeMode",
+  "cardImplementationScoresSourceAsAgenda",
   "runnerEventRun",
   "scoreConversionCapability",
   "scoreConversionAdvancementAmount",
@@ -594,6 +596,18 @@ function sanitizeVisibleEffectiveIceRunQuote(
             traceSuccessEffect: sanitizeTraceSuccessEffect(
               subroutine.traceSuccessEffect,
             ),
+          }
+        : {}),
+      ...(subroutine.deflectorTarget
+        ? { deflectorTarget: subroutine.deflectorTarget }
+        : {}),
+      ...(subroutine.deflectorCost !== undefined
+        ? { deflectorCost: subroutine.deflectorCost }
+        : {}),
+      ...(subroutine.deflectorAutoBreakIfNoTarget !== undefined
+        ? {
+            deflectorAutoBreakIfNoTarget:
+              subroutine.deflectorAutoBreakIfNoTarget,
           }
         : {}),
       ...(subroutine.breakTags

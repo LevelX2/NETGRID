@@ -1721,6 +1721,9 @@ export type VisibleEffectiveSubroutine = {
   amount?: number;
   baseTraceStrength?: number;
   traceSuccessEffect?: TraceSuccessEffect;
+  deflectorTarget?: "archives" | "any_data_fort" | "subsidiary_data_fort";
+  deflectorCost?: number;
+  deflectorAutoBreakIfNoTarget?: boolean;
   breakTags?: string[];
   sourceDefinitionId?: CardDefinitionId;
   sourceTitle?: string;

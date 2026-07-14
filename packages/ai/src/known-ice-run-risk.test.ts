@@ -86,6 +86,43 @@ describe("known visible ICE run risk", () => {
     );
   });
 
+  it("preserves public Deflector fields through Engine PlayerView DTO into runner AI", () => {
+    const state = engineRunnerTurnWithRezzedIce(
+      "known-deflector-run-quote-engine-dto",
+      "onr_classic_014_trapdoor",
+    );
+    const playerView = getPlayerView(state, "runner");
+    const playerViewTrapdoor = playerView.servers.find(
+      (serverView) => serverView.id === "rd",
+    )?.ice[0];
+
+    expect(playerViewTrapdoor?.effectiveRunQuote?.subroutines[0]).toMatchObject({
+      type: "deflect_run",
+      deflectorTarget: "subsidiary_data_fort",
+      deflectorAutoBreakIfNoTarget: true,
+    });
+
+    const input = buildAiDecisionInputDto({
+      side: "runner",
+      playerView,
+      eventTail: [],
+      legalActions: getLegalActions(state, "runner"),
+      difficulty: "normal",
+      seed: state.seed,
+      decisionId: "known-deflector-run-quote-engine-dto:runner:1",
+      actionNumber: 1,
+      profileId: "known-deflector-run-quote-test",
+    });
+    const dtoTrapdoor = input.playerView.servers.find(
+      (serverView) => serverView.id === "rd",
+    )?.ice[0];
+    expect(dtoTrapdoor?.effectiveRunQuote?.subroutines[0]).toMatchObject({
+      type: "deflect_run",
+      deflectorTarget: "subsidiary_data_fort",
+      deflectorAutoBreakIfNoTarget: true,
+    });
+  });
+
   it("chooses credits over an unknown R&D run through unavoidable visible Hunter", () => {
     process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
     const run = runAction("run-rd", "rd");

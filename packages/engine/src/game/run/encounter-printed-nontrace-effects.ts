@@ -524,9 +524,13 @@ function startClassicDeflectorChoice(
         : []),
       ...input.targets.map((server) => {
         const label = host.servers.publicServerLabel(server.id) ?? server.id;
+        const optionLabel =
+          input.cost > 0
+            ? `${label} (${input.cost} ${input.cost === 1 ? "Credit" : "Credits"})`
+            : label;
         return {
           id: `server_${server.id}`,
-          label,
+          label: optionLabel,
           publicLabel: label,
           value: server.id,
         };

@@ -19,9 +19,7 @@ import {
   SELF_MODIFYING_CODE_ID,
 } from "../../compatibility/runtime-compatibility";
 import { buildRunnerHiddenStackProgramInstallAction } from "../turn/runner-special-zone-install-actions";
-import {
-  temporaryBreakerStrengthBonusUntilEndOfTurn,
-} from "../state/temporary-breaker-strength";
+import { temporaryBreakerStrengthBonusUntilEndOfTurn } from "../state/temporary-breaker-strength";
 
 type ActiveRun = NonNullable<GameState["run"]>;
 type Subroutine = NonNullable<CardDefinition["subroutines"]>[number];
@@ -383,13 +381,20 @@ export function buildRunnerEncounterActions(
     run,
     encounterSubroutines,
   );
+  const encounterSourceWillTrashAtEndOfTurn = nextSubroutines.some(
+    (subroutine) =>
+      subroutine.type === "end_the_run_and_trash_source_at_end_of_turn",
+  );
   const willEndRun = nextSubroutines.some(
     (subroutine) =>
       subroutine.type === "end_the_run" ||
-      subroutine.type === "end_the_run_unless_runner_pays",
+      subroutine.type === "end_the_run_unless_runner_pays" ||
+      subroutine.type === "end_the_run_and_trash_source_at_end_of_turn",
   );
   const hardEndRun = nextSubroutines.some(
-    (subroutine) => subroutine.type === "end_the_run",
+    (subroutine) =>
+      subroutine.type === "end_the_run" ||
+      subroutine.type === "end_the_run_and_trash_source_at_end_of_turn",
   );
   const payOrEndRunEntries = nextSubroutineIndexes
     .map((index) => ({ index, subroutine: encounterSubroutines[index] }))
@@ -447,6 +452,7 @@ export function buildRunnerEncounterActions(
           sourceDefinitionId: iceDefinition.id,
           unbrokenSubroutineCount: nextSubroutines.length,
           encounterWillEndRun: false,
+          encounterSourceWillTrashAtEndOfTurn,
           encounterSubroutineIds,
           payOrEndRunSubroutineIndexes: payOrEndRunEntries
             .map((entry) => entry.index)
@@ -471,6 +477,7 @@ export function buildRunnerEncounterActions(
         sourceDefinitionId: iceDefinition.id,
         unbrokenSubroutineCount: nextSubroutines.length,
         encounterWillEndRun: willEndRun,
+        encounterSourceWillTrashAtEndOfTurn,
         encounterSubroutineIds,
       },
     ),

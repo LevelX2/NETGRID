@@ -50,11 +50,15 @@ describe("AI input DTO score-conversion contract", () => {
       cardImplementationTakesHostedCredits: false,
       hostedCreditTakeAmount: 0,
       hostedCreditTakeMode: "all",
+      cardImplementationScoresSourceAsAgenda: true,
       runnerEventRun: true,
+      encounterSourceWillTrashAtEndOfTurn: true,
     });
     expect(input.playerView.legalActions[0]?.payload).toMatchObject({
       cardImplementationAddsHostedCredits: true,
+      cardImplementationScoresSourceAsAgenda: true,
       runnerEventRun: true,
+      encounterSourceWillTrashAtEndOfTurn: true,
     });
     expect(input.legalActions[0]?.payload).not.toHaveProperty("privateProbe");
   });
@@ -103,7 +107,9 @@ function runnerSemanticAction(): LegalAction {
       cardImplementationTakesHostedCredits: false,
       hostedCreditTakeAmount: 0,
       hostedCreditTakeMode: "all",
+      cardImplementationScoresSourceAsAgenda: true,
       runnerEventRun: true,
+      encounterSourceWillTrashAtEndOfTurn: true,
       privateProbe: "must-not-cross-dto",
     },
   };

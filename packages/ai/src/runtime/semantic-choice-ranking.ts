@@ -117,6 +117,7 @@ export function tacticalPlanMappedChoice(
       tacticalPlanFundedDevelopmentContinuationBlocksOverride(
         mapping,
         mappedChoice,
+        overrideChoice,
       )
     ) {
       return tacticalPlanBlockedOverrideResult({
@@ -391,6 +392,7 @@ export function tacticalPlanMappedChoice(
 function tacticalPlanFundedDevelopmentContinuationBlocksOverride(
   mapping: PlanStepMappingResult,
   mappedChoice: SemanticRuntimeChoice,
+  overrideChoice: SemanticRuntimeChoice,
 ): boolean {
   return (
     mapping.plan.type === "runner.develop_hand_card" &&
@@ -398,7 +400,11 @@ function tacticalPlanFundedDevelopmentContinuationBlocksOverride(
       "funded_hand_development_continuation:true",
     ) &&
     (mappedChoice.action.type === "install_card" ||
-      mappedChoice.action.type === "play_event")
+      mappedChoice.action.type === "play_event") &&
+    !semanticRuntimeChoiceHasScoreComponent(
+      overrideChoice,
+      "runner_activated_agenda_score",
+    )
   );
 }
 
@@ -686,6 +692,14 @@ function runnerPlanOverrideIsHardInterrupt(
   mappedChoice: SemanticRuntimeChoice,
   overrideChoice: SemanticRuntimeChoice,
 ): boolean {
+  if (
+    semanticRuntimeChoiceHasScoreComponent(
+      overrideChoice,
+      "runner_activated_agenda_score",
+    )
+  ) {
+    return true;
+  }
   if (
     runnerEconomyCommitmentCanInterruptPlan(mappedPlan.type) &&
     semanticRuntimeChoiceHasAnyScoreComponent(overrideChoice, [

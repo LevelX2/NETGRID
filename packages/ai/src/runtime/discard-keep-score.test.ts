@@ -61,6 +61,61 @@ describe("discard keep score", () => {
     );
   });
 
+  it("preserves a conditional Corp payoff only while a tag source remains reachable", () => {
+    const payoff = corpCard("onr_v1_327_i-got-a-rock", "asset");
+    const reachable = score(
+      payoff,
+      [],
+      "corp",
+      [],
+      {},
+      {
+        agendaPoints: 3,
+        corpTagSourceState: "stack",
+      },
+    );
+    const exhausted = score(
+      payoff,
+      [],
+      "corp",
+      [],
+      {},
+      {
+        agendaPoints: 3,
+        corpTagSourceState: "archives",
+      },
+    );
+
+    expect(reachable.baseValue).toBeGreaterThan(exhausted.baseValue + 500);
+    expect(reachable.evidence).toContain(
+      "discard_score:corp_conditional_payoff_reachable",
+    );
+    expect(exhausted.evidence).toContain(
+      "discard_score:corp_conditional_payoff_blocked",
+    );
+  });
+
+  it("preserves a visible Corp tag source while a coupled payoff remains reachable", () => {
+    const tagSource = corpCard("onr_v1_283_audit-of-call-records", "operation");
+    const payoff = corpCard("onr_v1_327_i-got-a-rock", "asset");
+    const paired = score(
+      tagSource,
+      [],
+      "corp",
+      [],
+      {},
+      {
+        agendaPoints: 3,
+        extraGrip: [payoff],
+        corpTagSourceState: "stack",
+      },
+    );
+    const unpaired = score(tagSource);
+
+    expect(paired.baseValue).toBeGreaterThan(unpaired.baseValue + 300);
+    expect(paired.evidence).toContain("discard_score:corp_tag_source_enabler");
+  });
+
   it("ignores substring-only Corp discard role noise", () => {
     const benignRole = score(corpCard("benign-role", "operation"), [
       "neutral_support",
@@ -173,6 +228,62 @@ describe("discard keep score", () => {
     expect(economy).toBeGreaterThan(neutral + 300);
   });
 
+  it("preserves program search while known breaker coverage is only in the stack", () => {
+    const search = runnerCard("runner-program-search", "event");
+    const unavailableBreaker = score(
+      search,
+      ["program_search"],
+      "runner",
+      [],
+      {},
+      { breakerCoverage: "stack_only" },
+    );
+    const installedBreaker = score(
+      search,
+      ["program_search"],
+      "runner",
+      [],
+      {},
+      { breakerCoverage: "installed" },
+    );
+
+    expect(unavailableBreaker.baseValue).toBeGreaterThan(
+      installedBreaker.baseValue + 300,
+    );
+    expect(unavailableBreaker.evidence).toContain(
+      "discard_score:runner_missing_breaker_search_access",
+    );
+    expect(installedBreaker.evidence).not.toContain(
+      "discard_score:runner_missing_breaker_search_access",
+    );
+  });
+
+  it("protects a reachable hard damage payoff over an inactive soft tag payoff", () => {
+    const hardDamage = score(
+      corpCard("onr_v1_302_scorched-earth", "operation"),
+      [],
+      "corp",
+      [],
+      {},
+      { corpTagSourceState: "stack" },
+    );
+    const softCreditPunish = score(
+      corpCard("onr_v1_285_closed-accounts", "operation"),
+      [],
+      "corp",
+      [],
+      {},
+      { corpTagSourceState: "stack" },
+    );
+
+    expect(hardDamage.baseValue).toBeGreaterThan(
+      softCreditPunish.baseValue + 300,
+    );
+    expect(softCreditPunish.evidence).toContain(
+      "discard_score:corp_soft_tag_payoff_not_live",
+    );
+  });
+
   it("devalues non-additive Runner utility duplicates already represented in the rig", () => {
     const freshUtility = score(
       runnerCard("runner-stack-filter", "resource"),
@@ -242,13 +353,13 @@ describe("discard keep score", () => {
       instanceId: "krash-installed-instance",
     };
     const rolesByCardId: Record<string, readonly string[]> = {
-      "onr_v1_039_krash": [
+      onr_v1_039_krash: [
         "breaker_fracter",
         "breaker_decoder",
         "breaker_killer",
       ],
       "onr_v1_046_pattels-virus": ["ice_modifier", "run_support"],
-      "onr_v1_011_cloak": ["economy_recurring", "run_support"],
+      onr_v1_011_cloak: ["economy_recurring", "run_support"],
       "onr_proteus_150_streetware-distributor": [
         "economy",
         "economy_recurring",
@@ -297,6 +408,9 @@ function score(
     extraGrip?: readonly VisibleCard[];
     legalActionForCard?: boolean;
     strategyId?: string;
+    breakerCoverage?: "stack_only" | "installed";
+    agendaPoints?: number;
+    corpTagSourceState?: "stack" | "archives";
   } = {},
 ) {
   return discardKeepScore(input(card, side, rig, options), card, {
@@ -322,6 +436,9 @@ function input(
     extraGrip?: readonly VisibleCard[];
     legalActionForCard?: boolean;
     strategyId?: string;
+    breakerCoverage?: "stack_only" | "installed";
+    agendaPoints?: number;
+    corpTagSourceState?: "stack" | "archives";
   } = {},
 ): AiDecisionInput {
   const decisionInput = {
@@ -339,11 +456,14 @@ function input(
             : runnerCard("runner-identity", "identity"),
         credits: options.credits ?? 5,
         clicks: 0,
-        agendaPoints: 0,
+        agendaPoints: options.agendaPoints ?? 0,
         gripOrHq: [card, ...(options.extraGrip ?? [])],
         rig: [...rig],
         stackOrRdCount: 20,
-        heapOrArchives: [],
+        heapOrArchives:
+          side === "corp" && options.corpTagSourceState === "archives"
+            ? [corpCard("onr_v1_284_chance-observation", "operation")]
+            : [],
         scoreArea: [],
         maxHandSize: 5,
         tags: 0,
@@ -401,6 +521,43 @@ function input(
         primaryStrategy: {
           strategyId: options.strategyId,
           family: "runner_setup",
+        },
+      },
+    });
+  }
+  if (side === "corp" && options.corpTagSourceState) {
+    Object.assign(decisionInput, {
+      ownDeckSnapshot: {
+        cards: [
+          { cardId: card.definitionId, quantity: 1 },
+          { cardId: "onr_v1_284_chance-observation", quantity: 1 },
+        ],
+      },
+    });
+  }
+  if (side === "runner" && options.breakerCoverage) {
+    const installed = options.breakerCoverage === "installed";
+    Object.assign(decisionInput, {
+      ownDeckCapabilities: {
+        side: "runner",
+        runner: {
+          breakerCoverageMatrix: {
+            wall: {
+              inDeckKnown: true,
+              inHand: false,
+              installed,
+            },
+            code_gate: {
+              inDeckKnown: true,
+              inHand: false,
+              installed,
+            },
+            sentry: {
+              inDeckKnown: true,
+              inHand: false,
+              installed,
+            },
+          },
         },
       },
     });
