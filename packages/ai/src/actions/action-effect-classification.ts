@@ -5,9 +5,7 @@ export function actionProvidesCredits(action: LegalAction): boolean {
   return !isKnownNonCreditGainAction(action);
 }
 
-export function knownNonCreditGainActionSemantics(
-  action: LegalAction,
-):
+export function knownNonCreditGainActionSemantics(action: LegalAction):
   | {
       semanticActionType: string;
       tacticSignals: readonly string[];
@@ -35,6 +33,28 @@ export function knownNonCreditGainActionSemantics(
   return undefined;
 }
 
+export function knownCreditGainAbilitySemantics(action: LegalAction):
+  | {
+      semanticActionType: string;
+      tacticSignals: readonly string[];
+    }
+  | undefined {
+  if (
+    action.type !== "activated_card_ability" &&
+    action.type !== "trigger_ability"
+  ) {
+    return undefined;
+  }
+  const amount = action.payload?.gainCreditsAmount;
+  if (typeof amount !== "number" || !Number.isFinite(amount) || amount <= 0) {
+    return undefined;
+  }
+  return {
+    semanticActionType: "economy.gain_credit",
+    tacticSignals: ["economy.action", "economy.recover"],
+  };
+}
+
 function isKnownNonCreditGainAction(action: LegalAction): boolean {
   return knownNonCreditGainActionSemantics(action) !== undefined;
 }
@@ -49,7 +69,9 @@ function gainCreditActionHasHiddenZonePayload(action: LegalAction): boolean {
   );
 }
 
-function gainCreditActionHasExplicitNoCreditPayload(action: LegalAction): boolean {
+function gainCreditActionHasExplicitNoCreditPayload(
+  action: LegalAction,
+): boolean {
   const amount = action.payload?.gainCreditsAmount;
   return typeof amount === "number" && Number.isFinite(amount) && amount <= 0;
 }

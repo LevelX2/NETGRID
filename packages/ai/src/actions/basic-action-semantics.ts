@@ -7,7 +7,10 @@ import type {
   ActionSemanticConfidence,
   ActionSemanticSourceKind,
 } from "../action-semantic-candidate";
-import { knownNonCreditGainActionSemantics } from "./action-effect-classification";
+import {
+  knownCreditGainAbilitySemantics,
+  knownNonCreditGainActionSemantics,
+} from "./action-effect-classification";
 
 export type BasicActionSemanticClassification = {
   semanticActionType: string;
@@ -214,7 +217,9 @@ export function applyBasicActionSemantics(
   candidate: ActionSemanticCandidate,
   action: LegalAction,
 ): ActionSemanticCandidate {
-  const actionEffectOverride = knownNonCreditGainActionSemantics(action);
+  const actionEffectOverride =
+    knownNonCreditGainActionSemantics(action) ??
+    knownCreditGainAbilitySemantics(action);
   const scoreConversionOverride = scoreConversionActionSemantics(action);
   const classification = scoreConversionOverride
     ? scoreConversionOverride

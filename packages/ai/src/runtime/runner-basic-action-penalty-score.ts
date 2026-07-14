@@ -3,6 +3,7 @@ import type {
   AiDecisionScoreComponent,
   LegalAction,
 } from "@netgrid/shared";
+import { runnerHasMeaningfulCreditConversionAlternative } from "./runner-marginal-credit-value";
 
 export function runnerBasicActionPenaltyScoreComponents(
   input: AiDecisionInput,
@@ -83,6 +84,19 @@ export function runnerBasicActionPenaltyScoreComponents(
         `target:${pressureGoal?.targetServerId}`,
         `run_action:${matchingPressureRun.actionId}`,
       ].join("|"),
+    });
+  }
+  if (
+    action.type === "gain_credit" &&
+    action.source === "basic_action" &&
+    input.playerView.own.credits >= 10 &&
+    runnerHasMeaningfulCreditConversionAlternative(input, action)
+  ) {
+    components.push({
+      key: "runner_rich_basic_credit_without_conversion",
+      label: "Weitere Basis-Credits statt Konversion",
+      value: -1200,
+      reason: `credits:${input.playerView.own.credits}|conversion_alternative:true`,
     });
   }
   return components;

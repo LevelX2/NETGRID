@@ -1,6 +1,6 @@
 # KI-Remediation für Baseline-Seed 03 und Seed 05 (2026-07-14)
 
-Status: Aktiv; P0 und P1 erfüllt, P2 in Vorbereitung
+Status: Aktiv; P0 bis P2 erfüllt, P3 in Vorbereitung
 
 ## Quelle und Zielprüfung
 

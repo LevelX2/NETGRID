@@ -73,7 +73,82 @@ describe("runnerCreditYieldScoreComponent", () => {
 
     expect(component).toBeUndefined();
   });
+
+  it("damps repeatable credit yield above reserve when development is legal", () => {
+    const economy = legalAction({
+      actionId: "newsgroup",
+      type: "activated_card_ability",
+      payload: { gainCreditsAmount: 2 },
+    });
+    const decisionInput = input();
+    decisionInput.playerView.own.credits = 53;
+    decisionInput.legalActions = [
+      economy,
+      legalAction({ actionId: "draw", type: "draw_card" }),
+    ];
+
+    const component = runnerCreditYieldScoreComponent(
+      decisionInput,
+      economy,
+      dependencies("onr_v1_045_newsgroup-filter"),
+    );
+
+    expect(component).toMatchObject({
+      key: "runner_credit_action_yield",
+      value: 120,
+      reason: expect.stringContaining("marginal_multiplier:0.1"),
+    });
+  });
+
+  it("keeps full repeatable credit yield below reserve", () => {
+    const economy = legalAction({
+      actionId: "newsgroup",
+      type: "activated_card_ability",
+      payload: { gainCreditsAmount: 2 },
+    });
+    const decisionInput = input();
+    decisionInput.playerView.own.credits = 2;
+    decisionInput.legalActions = [
+      economy,
+      legalAction({ actionId: "draw", type: "draw_card" }),
+    ];
+
+    expect(
+      runnerCreditYieldScoreComponent(
+        decisionInput,
+        economy,
+        dependencies("onr_v1_045_newsgroup-filter"),
+      ),
+    ).toMatchObject({ value: 1200 });
+  });
+
+  it("keeps full repeatable credit yield when no conversion action exists", () => {
+    const economy = legalAction({
+      actionId: "newsgroup",
+      type: "activated_card_ability",
+      payload: { gainCreditsAmount: 2 },
+    });
+    const decisionInput = input();
+    decisionInput.playerView.own.credits = 53;
+    decisionInput.legalActions = [economy];
+
+    expect(
+      runnerCreditYieldScoreComponent(
+        decisionInput,
+        economy,
+        dependencies("onr_v1_045_newsgroup-filter"),
+      ),
+    ).toMatchObject({ value: 1200 });
+  });
 });
+
+function dependencies(sourceDefinitionId: string) {
+  return {
+    sourceDefinitionIdForAction: () => sourceDefinitionId,
+    hintForDefinitionId: () => undefined,
+    actionCreditCost: () => 0,
+  };
+}
 
 function input(): AiDecisionInput {
   return {

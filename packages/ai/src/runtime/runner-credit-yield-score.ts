@@ -4,6 +4,7 @@ import type {
   LegalAction,
 } from "@netgrid/shared";
 import { actionProvidesCredits } from "../actions/action-effect-classification";
+import { runnerMarginalCreditYieldMultiplier } from "./runner-marginal-credit-value";
 
 export type RunnerCreditYieldScoreHint = {
   effects?: readonly unknown[];
@@ -30,21 +31,32 @@ export function runnerCreditYieldScoreComponent(
   if (isBasicCreditAction(action)) return undefined;
   const grossGain = runnerKnownCreditGain(input, action, dependencies);
   if (grossGain <= 0) return undefined;
-  const netGain = Math.max(0, grossGain - dependencies.actionCreditCost(action));
+  const netGain = Math.max(
+    0,
+    grossGain - dependencies.actionCreditCost(action),
+  );
   if (netGain <= 0) return undefined;
   const sourceDefinitionId = dependencies.sourceDefinitionIdForAction(
     input,
     action,
   );
+  const marginalMultiplier = runnerMarginalCreditYieldMultiplier(input, action);
   return {
     key: "runner_credit_action_yield",
     label: "Credit-Ertrag",
-    value: Math.round(netGain * 600),
+    value: Math.round(netGain * 600 * marginalMultiplier),
     reason: [
       `net_gain:${netGain}`,
       `gross_gain:${grossGain}`,
       `action:${action.type}`,
       `source:${sourceDefinitionId || "unknown"}`,
+      ...(marginalMultiplier < 1
+        ? [
+            `marginal_multiplier:${marginalMultiplier}`,
+            `current_credits:${input.playerView.own.credits}`,
+            "conversion_alternative:true",
+          ]
+        : []),
     ].join("|"),
   };
 }
@@ -64,11 +76,7 @@ function runnerKnownCreditGain(
     action.type === "gain_credit" && actionProvidesCredits(action)
       ? Math.max(1, numericPayload(action, "amount"))
       : 0;
-  return Math.max(
-    0,
-    explicitPayloadGain,
-    gainCreditActionAmount,
-  );
+  return Math.max(0, explicitPayloadGain, gainCreditActionAmount);
 }
 
 function runnerHintCreditGain(
@@ -93,7 +101,9 @@ function runnerHintCreditGain(
     : 0;
 }
 
-function isRunnerActionCreditEffect(effect: unknown): effect is Record<string, unknown> {
+function isRunnerActionCreditEffect(
+  effect: unknown,
+): effect is Record<string, unknown> {
   if (!effect || typeof effect !== "object") return false;
   const record = effect as Record<string, unknown>;
   const kind = stringRecordValue(record, "kind");
@@ -123,7 +133,10 @@ function numericPayload(action: LegalAction, key: string): number {
   return numericValue(action.payload?.[key]);
 }
 
-function numericRecordValue(record: Record<string, unknown>, key: string): number {
+function numericRecordValue(
+  record: Record<string, unknown>,
+  key: string,
+): number {
   return numericValue(record[key]);
 }
 

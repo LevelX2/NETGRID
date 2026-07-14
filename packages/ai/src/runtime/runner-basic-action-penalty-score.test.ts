@@ -131,6 +131,44 @@ describe("runnerBasicActionPenaltyScoreComponents", () => {
       ]),
     );
   });
+
+  it("penalizes another basic credit when a rich runner can develop", () => {
+    const gain = action("gain_credit");
+    gain.source = "basic_action";
+    const decisionInput = inputWithActions([gain, action("install_card")]);
+    decisionInput.playerView.own.credits = 15;
+
+    expect(
+      runnerBasicActionPenaltyScoreComponents(
+        decisionInput,
+        gain,
+        "basic_economy_draw",
+      ),
+    ).toContainEqual(
+      expect.objectContaining({
+        key: "runner_rich_basic_credit_without_conversion",
+        value: -1200,
+      }),
+    );
+  });
+
+  it("does not penalize the only useful action even at a high credit pool", () => {
+    const gain = action("gain_credit");
+    gain.source = "basic_action";
+    const decisionInput = inputWithActions([gain, action("end_turn")]);
+    decisionInput.playerView.own.credits = 15;
+
+    expect(
+      runnerBasicActionPenaltyScoreComponents(
+        decisionInput,
+        gain,
+        "basic_economy_draw",
+      ).some(
+        (component) =>
+          component.key === "runner_rich_basic_credit_without_conversion",
+      ),
+    ).toBe(false);
+  });
 });
 
 function inputWithActions(legalActions: LegalAction[]): AiDecisionInput {

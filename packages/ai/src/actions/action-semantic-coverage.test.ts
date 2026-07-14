@@ -107,7 +107,11 @@ describe("Action semantic coverage", () => {
         timingPoint: action.timingPoint,
       });
       expect(candidate.boardContext.notes).toContain(
-        `payload_keys:${Object.keys(action.payload ?? {}).sort().join(",") || "none"}`,
+        `payload_keys:${
+          Object.keys(action.payload ?? {})
+            .sort()
+            .join(",") || "none"
+        }`,
       );
       expect(candidate.primaryProjectionStatus).toMatch(
         /^(projected|neutral_projected|partial_projected|blocked|schema_gap|hidden_info_blocked)$/,
@@ -239,6 +243,31 @@ describe("Action semantic coverage", () => {
     }
     expect(candidates[2]?.targetContext?.availableTargetsStatus).toBe(
       "engine_provided",
+    );
+  });
+
+  it("projects an explicitly quantified card credit ability as economy", () => {
+    const action = legalAction("activated_card_ability", 0, {
+      source: "newsgroup-instance",
+      payload: { gainCreditsAmount: 2, cardId: "newsgroup-instance" },
+    });
+
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [action],
+      visibleSourceDefinitionsByInstanceId: {
+        "newsgroup-instance": "onr_v1_045_newsgroup-filter",
+      },
+    });
+
+    expect(candidate).toMatchObject({
+      sourceKind: "card",
+      sourceDefinitionId: "onr_v1_045_newsgroup-filter",
+      semanticActionType: "economy.gain_credit",
+      primaryProjectionStatus: "projected",
+      confidence: "high",
+    });
+    expect(candidate?.actionTacticSignals).toEqual(
+      expect.arrayContaining(["economy.action", "economy.recover"]),
     );
   });
 
