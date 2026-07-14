@@ -119,6 +119,6 @@ Prozess weder verändert noch verdeckt.
 ## Freigabe
 
 Der City-Surveillance-Regelvertrag, die Human-/KI-Pfade und die
-Hidden-Info-/Replay-Gates sind geschlossen. Der Arbeitsbranch ist für den
-defensiven Abgleich mit dem aktuellen lokalen `main` und die anschließende
-lokale Integration freigegeben.
+Hidden-Info-/Replay-Gates sind geschlossen. Der Arbeitsbranch wurde nach dem
+defensiven Abgleich mit dem aktuellen lokalen `main` integriert; Worktree und
+Branch wurden verifiziert entfernt.

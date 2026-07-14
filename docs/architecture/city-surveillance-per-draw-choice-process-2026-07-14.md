@@ -2,10 +2,11 @@
 
 ## Status
 
-P01 bis P06 sind fachlich abgeschlossen. Die lokale Main-Integration und der
-verifizierte Worktree-/Branch-Cleanup stehen noch aus. Umsetzung im Worktree
+Abgeschlossen am 2026-07-14. P01 bis P06 wurden im Worktree
 `C:\Projekte\NETGRID_CITY_SURVEILLANCE_DRAW_CHOICES` auf Branch
-`codex/city-surveillance-draw-choices`.
+`codex/city-surveillance-draw-choices` umgesetzt. Der Branch wurde nach dem
+defensiven Abgleich mit dem aktuellen lokalen `main` als Commit `54fc1bb65`
+integriert; Worktree und Arbeitsbranch wurden danach verifiziert entfernt.
 
 Paketfortschritt:
 
