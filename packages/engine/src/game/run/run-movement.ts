@@ -328,7 +328,7 @@ export function passApproachedIce(
     return movePastCurrentIce(host, legalAction);
   }
   if (ice.rezzed) {
-    host.encounter.beginEncounter(run.approachedIceId);
+    host.encounter.beginEncounter(run.approachedIceId, legalAction);
     return {
       handled: true,
       approachStarted: true,

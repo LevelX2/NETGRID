@@ -611,6 +611,31 @@ describe("PublicContext golden payload gate", () => {
       expect(pinned.has(field), field).toBe(true);
     }
   });
+
+  it("forwards encounter-tax outcomes independently of the encounter-entry action type", () => {
+    const state = goldenState("public-context-encounter-tax");
+    const payload = {
+      encounterTaxForFutureIce: 2,
+      encounterTaxPaid: 2,
+      encounterTaxSource: "onr_v1_222_ball-and-chain",
+      targetIceDefinitionId: "simple_barrier_ice",
+    };
+
+    for (const type of ["continue_run", "rez_ice", "decline_rez"] as const) {
+      const context = goldenContext(
+        state,
+        goldenAction({
+          type,
+          payload,
+        }),
+      );
+
+      expect(context).toMatchObject({
+        ...payload,
+        result: "ended",
+      });
+    }
+  });
 });
 
 function goldenState(seed: string): GameState {

@@ -743,6 +743,123 @@ describe("formatChronicleEvent", () => {
     ]);
   });
 
+  it("shows Ball and Chain payments for already rezzed and newly rezzed later ice", () => {
+    const alreadyRezzed = formatChronicleEffectItems(
+      makeEvent("continue_run", {
+        actor: "runner",
+        targetIceDefinitionId: "simple_barrier_ice",
+        serverLabel: "R&D",
+        encounterTaxForFutureIce: 2,
+        encounterTaxPaid: 2,
+        encounterTaxSource: "onr_v1_222_ball-and-chain",
+      }),
+      "runner",
+    )[0];
+    const newlyRezzedWithoutCredits = formatChronicleEffectItems(
+      makeEvent("rez_ice", {
+        actor: "corp",
+        targetIceDefinitionId: "simple_code_gate_ice",
+        serverLabel: "R&D",
+        encounterTaxForFutureIce: 2,
+        encounterTaxPaid: 0,
+        encounterTaxSource: "onr_v1_222_ball-and-chain",
+        result: "ended",
+      }),
+      "corp",
+    )[0];
+
+    expect(alreadyRezzed).toMatchObject({
+      category: "run",
+      importance: "important",
+      actor: "runner",
+      cardDefinitionId: "onr_v1_222_ball-and-chain",
+      cardTitle: "Ball and Chain",
+      groupLabel: "Run auf R&D",
+    });
+    expect(alreadyRezzed?.title).toBe(
+      "Du hast wegen Ball and Chain 2 Credits für die Begegnung mit Simple Barrier ICE bezahlt.",
+    );
+    expect(alreadyRezzed?.chips).toEqual(
+      expect.arrayContaining([
+        "Ball and Chain",
+        "2 Credits bezahlt",
+        "Simple Barrier ICE",
+        "Run läuft weiter",
+      ]),
+    );
+    expect(newlyRezzedWithoutCredits?.title).toBe(
+      "Der Runner konnte die von Ball and Chain verlangten 2 Credits nicht bezahlen; der Run endete bei der Begegnung mit Simple Code Gate ICE.",
+    );
+    expect(newlyRezzedWithoutCredits).toMatchObject({
+      importance: "critical",
+      groupLabel: "Run auf R&D",
+    });
+    expect(newlyRezzedWithoutCredits?.chips).toEqual(
+      expect.arrayContaining(["2 Credits fehlen", "Run endet"]),
+    );
+  });
+
+  it("names Virizz when a later icebreak payment contains its run-wide surcharge", () => {
+    const item = formatChronicleEvent(
+      makeEvent("break_subroutine", {
+        actor: "runner",
+        cardDefinitionId: "onr_v1_031_hammer",
+        title: "Hammer",
+        targetIceTitle: "Wall of Static",
+        subroutineIndex: 0,
+        breakSubroutineBaseCost: 1,
+        breakSubroutineAdditionalCost: 1,
+        breakSubroutineTotalCost: 2,
+        v1922CorpIceAbility: "virizz_break_cost_modifier",
+      }),
+      "corp",
+    );
+
+    expect(item.description).toBe(
+      "2 Credits: Subroutine 1 auf Wall of Static gebrochen. Die Gesamtkosten enthalten Zusatzkosten durch Virizz.",
+    );
+    expect(item.chips).toEqual(
+      expect.arrayContaining(["Virizz", "1 Credit Zusatzkosten gesamt"]),
+    );
+  });
+
+  it("explains Coyote's payment that prevents the strength bonus on later ice", () => {
+    const item = formatChronicleEvent(
+      makeEvent("continue_run", {
+        actor: "runner",
+        postPassFutureStrengthAbility: "cancel_future_ice_strength_bonus",
+        sourceDefinitionId: "onr_proteus_016_coyote",
+        passedIceDefinitionId: "onr_proteus_016_coyote",
+        serverLabel: "R&D",
+        decision: "pay",
+        paymentAmount: 2,
+        paidCredits: 2,
+        strengthBonusAmount: 1,
+        futureEncounterIceStrengthBonus: 0,
+      }),
+      "corp",
+    );
+
+    expect(item.title).toBe(
+      "Der Runner hat 2 Credits beim Passieren von Coyote bezahlt.",
+    );
+    expect(item.description).toBe(
+      "Der +1-Stärke-Bonus von Coyote für alle weiteren ICE in diesem Run wurde verhindert.",
+    );
+    expect(item).toMatchObject({
+      cardDefinitionId: "onr_proteus_016_coyote",
+      cardTitle: "Coyote",
+      groupLabel: "Run auf R&D",
+    });
+    expect(item.chips).toEqual(
+      expect.arrayContaining([
+        "Coyote",
+        "2 Credits bezahlt",
+        "Folge-ICE-Bonus verhindert",
+      ]),
+    );
+  });
+
   it("describes Viral 15 paid jack-out as rig protection", () => {
     const item = formatChronicleEvent(
       makeEvent("jack_out", {
@@ -3954,8 +4071,7 @@ describe("formatChronicleEvent", () => {
     expect(effects).toHaveLength(1);
     expect(effects[0]).toMatchObject({
       title: "Du hast 2 Tags erhalten.",
-      description:
-        "Auslöser: Datapool® by Zetatech. Du hast jetzt 3 Tags.",
+      description: "Auslöser: Datapool® by Zetatech. Du hast jetzt 3 Tags.",
     });
   });
 
@@ -4011,8 +4127,7 @@ describe("formatChronicleEvent", () => {
     expect(effects).toHaveLength(1);
     expect(effects[0]).toMatchObject({
       title: "Du hast 1 Tag erhalten.",
-      description:
-        "Auslöser: Netwatch Credit Voucher. Du hast jetzt 2 Tags.",
+      description: "Auslöser: Netwatch Credit Voucher. Du hast jetzt 2 Tags.",
     });
   });
 
@@ -4313,8 +4428,7 @@ describe("formatChronicleEvent", () => {
     expect(effects).toHaveLength(1);
     expect(effects[0]).toMatchObject({
       title: "Der Runner hat 1 Tag erhalten.",
-      description:
-        "Auslöser: City Surveillance. Der Runner hat jetzt 1 Tag.",
+      description: "Auslöser: City Surveillance. Der Runner hat jetzt 1 Tag.",
       cardTitle: "City Surveillance",
     });
     expect(effects[0]?.cardDefinitionId).toBeUndefined();

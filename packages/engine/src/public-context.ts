@@ -290,8 +290,6 @@ export function publicContextForAction(
         ? "Remote"
         : "ICE";
   if (legalAction.type === "rez_ice") {
-    if (legalAction.payload?.encounterTaxForFutureIce !== undefined)
-      context.result = state.run ? "continued" : "ended";
     for (const key of [
       "rezCostPaid",
       "rezCostReductionAmount",
@@ -311,9 +309,6 @@ export function publicContextForAction(
       "discountedRezCostBase",
       "temporaryDerezAfterRun",
       "temporaryDiscountedRunEndDerez",
-      "encounterTaxForFutureIce",
-      "encounterTaxPaid",
-      "encounterTaxSource",
       "v1922RunnerProgramAbility",
       "sourceDefinitionId",
       "counterType",
@@ -327,6 +322,18 @@ export function publicContextForAction(
       "rezInterruptChoiceOpened",
     ]) {
       const value = legalAction.payload?.[key];
+      if (value !== undefined) context[key] = value;
+    }
+  }
+  if (legalAction.payload?.encounterTaxForFutureIce !== undefined) {
+    context.result = state.run ? "continued" : "ended";
+    for (const key of [
+      "encounterTaxForFutureIce",
+      "encounterTaxPaid",
+      "encounterTaxSource",
+      "targetIceDefinitionId",
+    ]) {
+      const value = legalAction.payload[key];
       if (value !== undefined) context[key] = value;
     }
   }
@@ -627,10 +634,27 @@ export function publicContextForAction(
         if (value !== undefined) context[key] = value;
       }
     }
+    if (
+      legalAction.payload?.postPassFutureStrengthAbility ===
+      "cancel_future_ice_strength_bonus"
+    ) {
+      for (const key of [
+        "postPassFutureStrengthAbility",
+        "sourceDefinitionId",
+        "passedIceDefinitionId",
+        "serverLabel",
+        "decision",
+        "paymentAmount",
+        "paidCredits",
+        "strengthBonusAmount",
+        "futureEncounterIceStrengthBonus",
+        "runnerCreditsAfter",
+      ]) {
+        const value = legalAction.payload?.[key];
+        if (value !== undefined) context[key] = value;
+      }
+    }
     for (const key of [
-      "encounterTaxForFutureIce",
-      "encounterTaxPaid",
-      "encounterTaxSource",
       "unsuccessfulRunCorpCreditBonus",
       "corpCreditsGained",
       "corpCreditsAfter",
@@ -1396,9 +1420,7 @@ export function publicContextForAction(
     context.bypassFirstIce = true;
   if (legalAction.payload?.insideJobAutoPassedIce === true) {
     context.insideJobAutoPassedIce = true;
-    if (
-      typeof legalAction.payload.insideJobPassedIceDefinitionId === "string"
-    )
+    if (typeof legalAction.payload.insideJobPassedIceDefinitionId === "string")
       context.insideJobPassedIceDefinitionId =
         legalAction.payload.insideJobPassedIceDefinitionId;
   }
