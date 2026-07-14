@@ -96,6 +96,12 @@
   spielgleiche Verträge und vollständige Seed-03/05-Evidence für marginale
   Economy, erfolgsbasierte Planfortschreibung, Trace-Konversion und
   probabilistische Coverage.
+- `ai-match-dfe6-decision-remediation-process-2026-07-15.md` und
+  `docs/reviews/ai/ai-match-dfe6-decision-remediation-final-2026-07-15.md`:
+  spielgleiche Verträge für begründete Archives-Runs, schadenskompatible
+  Survival-Planabbildung und vollständig viable Encounter-Breakpfade; der
+  Checkpoint-Vertrag kann zusätzlich ausgewählte Score-Komponenten nach
+  stabilen Schlüsseln verlangen oder verbieten, ohne Zahlenwerte festzuschreiben.
 - `proteus-ai-release-reconciliation-plan-2026-07-09.md`,
   `proteus-ai-release-automation-process-2026-07-09.md` und
   `docs/reviews/ai/proteus-ai-release-reconciliation-final-review-2026-07-09.md`:

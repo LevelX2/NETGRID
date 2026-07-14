@@ -1,6 +1,6 @@
 # KI-Decision-Remediation für Match DFE6 (2026-07-15)
 
-Status: In Arbeit; P0 aktiv
+Status: Verifiziert; P0 bis P5 abgeschlossen, P6 ausstehend
 
 ## Quelle und Zielprüfung
 
@@ -124,7 +124,7 @@ Arbeitsbranch verifiziert entfernen.
 - Checks: DFE6-Archives-Checkpoint, `runner-archives-score.test.ts`, angrenzende
   Target- und Runtime-Tests, `git diff --check`.
 - Done-Gate: unveränderte Ziel- und Gegenverträge sind grün.
-- Commit: `fix(ai): require qualified archives pressure`
+- Commit: `fix(ai): require evidence for hidden Archives runs`
 
 ### P3 – Threat-kompatible Survival-Planabbildung
 
@@ -137,7 +137,7 @@ Arbeitsbranch verifiziert entfernen.
   Handbuffer-Tests, `git diff --check`.
 - Done-Gate: der unveränderte DFE6-Vertrag wählt Draw; Gegenproben bleiben
   grün.
-- Commit: `fix(ai): align survival plans with active threat`
+- Commit: `fix(ai): match survival plans to damage answers`
 
 ### P4 – Vollständige Encounter-Breakpfadquote
 
@@ -149,7 +149,7 @@ Arbeitsbranch verifiziert entfernen.
   Run-Analyse- und RunPlan-Tests, `git diff --check`.
 - Done-Gate: die gewählte DFE6-Aktion bleibt korrekt, aber die falsche
   `break_or_pump_available`-Begründung entfällt; Gegenprobe grün.
-- Commit: `fix(ai): quote complete encounter break paths`
+- Commit: `fix(ai): gate encounter loss penalty on viable breaks`
 
 ### P5 – Verifikation, Review und Wissenspflege
 
