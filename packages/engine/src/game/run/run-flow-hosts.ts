@@ -735,7 +735,7 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
             state.cardInstances[approachedIceId]?.rezzed === true &&
             !corpRunRootRezActionsAvailable(runRezWindowHostForState(state))
           ) {
-            passApproachedIce(runMovementHostForState(state));
+            passApproachedIce(runMovementHostForState(state), legalAction);
             return;
           }
           continueAfterCorpRootRezIfWindowIsComplete(

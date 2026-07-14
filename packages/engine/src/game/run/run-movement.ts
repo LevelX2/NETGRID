@@ -311,17 +311,21 @@ export function jackOutRunner(
   };
 }
 
-export function passApproachedIce(host: RunMovementHost): RunMovementResult {
+export function passApproachedIce(
+  host: RunMovementHost,
+  legalAction?: LegalAction,
+): RunMovementResult {
   const run = mustRun(host.state);
   if (!run.approachedIceId) throw new Error("Kein ICE wird approached.");
   if (run.secretSpendGuessRunAutoPassIceId === run.approachedIceId) {
     delete run.secretSpendGuessRunAutoPassIceId;
-    return movePastCurrentIce(host);
+    return movePastCurrentIce(host, legalAction);
   }
   const ice = host.cards.cardInstanceFor(run.approachedIceId);
   if (ice.rezzed && run.bypassFirstIceRemaining) {
+    markInsideJobAutoPass(host, run.approachedIceId, legalAction);
     run.bypassFirstIceRemaining = false;
-    return movePastCurrentIce(host);
+    return movePastCurrentIce(host, legalAction);
   }
   if (ice.rezzed) {
     host.encounter.beginEncounter(run.approachedIceId);
@@ -368,10 +372,11 @@ export function approachOrEncounterIce(
         stateChanged: true,
       };
     }
-    if (secretSpendAutoPass) return passApproachedIce(host);
+    if (secretSpendAutoPass) return passApproachedIce(host, legalAction);
     if (run.bypassFirstIceRemaining) {
+      markInsideJobAutoPass(host, approachedIceId, legalAction);
       run.bypassFirstIceRemaining = false;
-      return movePastCurrentIce(host);
+      return movePastCurrentIce(host, legalAction);
     }
     host.encounter.beginEncounter(approachedIceId, legalAction);
     return {
@@ -487,7 +492,7 @@ export function movePastCurrentIce(
       brokenSubroutineIndexes: [],
       resolvedSubroutineIndexes: [],
     };
-    const approach = approachOrEncounterIce(host, approachedIceId);
+    const approach = approachOrEncounterIce(host, approachedIceId, legalAction);
     return {
       ...approach,
       movedPastIceId: passedIceId,
@@ -555,7 +560,7 @@ export function continueFromMovement(
       run.approachedIceId ??
       mustArrayValue(server.ice, run.position.iceIndex, "Naechstes ICE fehlt.");
     state.run = { ...run, phase: "approach_ice", approachedIceId };
-    const approach = approachOrEncounterIce(host, approachedIceId);
+    const approach = approachOrEncounterIce(host, approachedIceId, legalAction);
     return {
       ...approach,
       nextIceId: approachedIceId,
@@ -890,6 +895,23 @@ function markSecretSpendGuessAutoPass(
     ...(legalAction.payload ?? {}),
     autoPassChosenIce: true,
     secretSpendGuessRunAutoPassedIce: true,
+  };
+}
+
+function markInsideJobAutoPass(
+  host: RunMovementHost,
+  passedIceId: CardInstanceId,
+  legalAction: LegalAction | undefined,
+): void {
+  if (!legalAction) return;
+  const run = mustRun(host.state);
+  const serverLabel = host.servers.publicServerLabel(run.attackedServerId);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    insideJobAutoPassedIce: true,
+    insideJobPassedIceDefinitionId: host.cards.definitionFor(passedIceId).id,
+    serverId: run.attackedServerId,
+    ...(serverLabel ? { serverLabel } : {}),
   };
 }
 

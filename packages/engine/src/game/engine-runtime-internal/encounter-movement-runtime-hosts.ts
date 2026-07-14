@@ -1063,8 +1063,8 @@ export function createEncounterMovementRuntimeHosts(
             runRezWindowHostForState(state),
             legalAction,
           ),
-        passApproachedIce: () =>
-          passApproachedIce(runMovementHostForState(state)),
+        passApproachedIce: (legalAction) =>
+          passApproachedIce(runMovementHostForState(state), legalAction),
       },
     };
   }

@@ -4610,6 +4610,8 @@ describe("V1.8.1 Mechanikpaket H", () => {
       "rd",
       "simple_barrier_ice",
     );
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
     state = apply(
       state,
       "runner",
@@ -4637,6 +4639,15 @@ describe("V1.8.1 Mechanikpaket H", () => {
     );
     expect(state.run?.bypassFirstIceRemaining).toBe(false);
     expect(state.timingPoint).toBe("run.jack_out_window");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "rez_ice",
+      insideJobAutoPassedIce: true,
+      insideJobPassedIceDefinitionId: "simple_code_gate_ice",
+      serverLabel: "R&D",
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
+      innerIceId,
+    );
     state = apply(state, "runner", (action) => action.type === "continue_run");
     expect(state.timingPoint).toBe("access.resolve_card");
     expect(
@@ -4644,6 +4655,9 @@ describe("V1.8.1 Mechanikpaket H", () => {
         (action) => action.type === "access_card",
       ),
     ).toBe(true);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
   });
 
   it("keeps Restrictive action IDs server-distinct and applies Restrictive plus Pox install tax deterministically", () => {

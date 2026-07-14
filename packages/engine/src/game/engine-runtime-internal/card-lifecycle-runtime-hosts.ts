@@ -927,7 +927,7 @@ export function createCardLifecycleRuntimeHosts(
             (run.secretSpendGuessRunAutoPassIceId === cardId ||
               run.bypassFirstIceRemaining === true)
           ) {
-            passApproachedIce(runMovementHostForState(state));
+            passApproachedIce(runMovementHostForState(state), legalAction);
             return true;
           }
           const continuation = continueAfterCorpRootRezIfWindowIsComplete(

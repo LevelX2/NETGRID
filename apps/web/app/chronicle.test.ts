@@ -683,6 +683,44 @@ describe("formatChronicleEvent", () => {
     );
   });
 
+  it("names the ICE automatically passed by Inside Job", () => {
+    const event = makeEvent("rez_ice", {
+      actor: "corp",
+      insideJobAutoPassedIce: true,
+      insideJobPassedIceDefinitionId: "simple_code_gate_ice",
+      serverLabel: "R&D",
+    });
+    const runnerItem = formatChronicleEffectItems(event, "runner")[0]!;
+    const corpItem = formatChronicleEffectItems(event, "corp")[0]!;
+
+    expect(runnerItem.title).toBe(
+      "Du hast Simple Code Gate ICE durch Inside Job automatisch passiert.",
+    );
+    expect(corpItem.title).toBe(
+      "Der Runner hat Simple Code Gate ICE durch Inside Job automatisch passiert.",
+    );
+    expect(runnerItem.description).toBe(
+      "Das war das erste gerezzte ICE, dem der Runner in diesem Run begegnet ist; seine Subroutinen wurden nicht abgearbeitet.",
+    );
+    expect(runnerItem).toMatchObject({
+      category: "run",
+      importance: "important",
+      visibility: "public",
+      actor: "runner",
+      cardDefinitionId: "onr_v1_094_inside-job",
+      cardTitle: "Inside Job",
+      groupLabel: "Run auf R&D",
+    });
+    expect(runnerItem.chips).toEqual(
+      expect.arrayContaining([
+        "Inside Job",
+        "Auto-Pass",
+        "Simple Code Gate ICE",
+        "R&D",
+      ]),
+    );
+  });
+
   it("describes Runner jack-out as a run abort without access", () => {
     const item = formatChronicleEvent(
       makeEvent("jack_out", {

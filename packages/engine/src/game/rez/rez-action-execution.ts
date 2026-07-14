@@ -11,7 +11,7 @@ export type RezActionExecutionHost = {
   };
   run: {
     passCorpRunRootRezWindow: (legalAction: LegalAction) => void;
-    passApproachedIce: () => void;
+    passApproachedIce: (legalAction: LegalAction) => void;
   };
 };
 
@@ -55,5 +55,5 @@ function executeDeclineRezAction(
     host.run.passCorpRunRootRezWindow(legalAction);
     return;
   }
-  host.run.passApproachedIce();
+  host.run.passApproachedIce(legalAction);
 }

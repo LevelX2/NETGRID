@@ -819,7 +819,8 @@ export function createInstallRezRuntimeHosts(deps: RuntimeDeps) {
       run: {
         passCorpRunRootRezWindow: (legalAction) =>
           passCorpRunRootRezWindow(runRezWindowHostForState(state), legalAction),
-        passApproachedIce: () => passApproachedIce(runMovementHostForState(state)),
+        passApproachedIce: (legalAction) =>
+          passApproachedIce(runMovementHostForState(state), legalAction),
       },
     };
   }

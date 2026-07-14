@@ -82,6 +82,7 @@ const SKIVVISS_ID = "onr_v1_064_skivviss";
 const QUEST_FOR_CATTEKIN_ID = "onr_v1_172_quest-for-cattekin";
 const VACUUM_LINK_ID = "onr_v1_275_vacuum-link";
 const BLINK_ID = "onr_v1_007_blink";
+const INSIDE_JOB_ID = "onr_v1_094_inside-job";
 const SOCIAL_ENGINEERING_ID = "onr_v1_111_social-engineering";
 const VIRAL_15_ID = "onr_v1_276_viral-15";
 const PLAYFUL_AI_ID = "onr_v1_104_playful-ai";
@@ -3648,13 +3649,52 @@ export function formatChronicleEffectItems(
   );
   const tagGainItem = tagGainChronicleItem(event, side, effects);
   const aiBoonRunStrengthItem = aiBoonRunStrengthChronicleItem(event);
+  const insideJobAutoPassItem = insideJobAutoPassChronicleItem(event, side);
   return [
     ...(aiBoonRunStrengthItem ? [aiBoonRunStrengthItem] : []),
+    ...(insideJobAutoPassItem ? [insideJobAutoPassItem] : []),
     ...(payloadItem ? [payloadItem] : []),
     ...(traceHardwareWreckerItem ? [traceHardwareWreckerItem] : []),
     ...(tagGainItem ? [tagGainItem] : []),
     ...effectItems,
   ];
+}
+
+function insideJobAutoPassChronicleItem(
+  event: PublicGameEvent,
+  side: Side,
+): ChronicleItem | undefined {
+  const payload = event.publicPayload ?? {};
+  if (payload.insideJobAutoPassedIce !== true) return undefined;
+  const passedIceDefinitionId = stringValue(
+    payload.insideJobPassedIceDefinitionId,
+  );
+  const passedIceTitle =
+    titleForDefinitionId(passedIceDefinitionId) ?? "ein gerezztes ICE";
+  const serverLabel = displayServerLabel(stringValue(payload.serverLabel));
+  const subject = side === "runner" ? "Du hast" : "Der Runner hat";
+
+  return {
+    id: `${event.eventId}:inside-job-auto-pass`,
+    category: "run",
+    importance: "important",
+    visibility: "public",
+    actor: "runner",
+    title: `${subject} ${passedIceTitle} durch Inside Job automatisch passiert.`,
+    description:
+      "Das war das erste gerezzte ICE, dem der Runner in diesem Run begegnet ist; seine Subroutinen wurden nicht abgearbeitet.",
+    chips: uniqueChips([
+      ...baseChips("runner", false),
+      "Inside Job",
+      "Auto-Pass",
+      passedIceTitle,
+      ...(serverLabel ? [serverLabel] : []),
+    ]),
+    cardDefinitionId: INSIDE_JOB_ID,
+    cardTitle: "Inside Job",
+    cardDetailLines: [],
+    groupLabel: groupLabelFor("run", "runner", undefined, serverLabel),
+  };
 }
 
 function aiBoonRunStrengthChronicleItem(
