@@ -5,10 +5,23 @@ import type {
 } from "@netgrid/shared";
 import { runnerHasMeaningfulCreditConversionAlternative } from "./runner-marginal-credit-value";
 
+export type RunnerBasicActionPenaltyScoreDependencies = {
+  encounterActionIsViable: (
+    input: AiDecisionInput,
+    action: LegalAction,
+  ) => boolean;
+};
+
+const DEFAULT_DEPENDENCIES: RunnerBasicActionPenaltyScoreDependencies = {
+  encounterActionIsViable: () => true,
+};
+
 export function runnerBasicActionPenaltyScoreComponents(
   input: AiDecisionInput,
   action: LegalAction,
   scopeId: string,
+  dependencies: RunnerBasicActionPenaltyScoreDependencies =
+    DEFAULT_DEPENDENCIES,
 ): AiDecisionScoreComponent[] {
   const components: AiDecisionScoreComponent[] = [];
   if (action.type === "jack_out" && scopeId === "simple_run_choice") {
@@ -26,8 +39,9 @@ export function runnerBasicActionPenaltyScoreComponents(
     action.payload?.encounterSourceWillTrashAtEndOfTurn !== true &&
     input.legalActions.some(
       (candidate) =>
-        candidate.type === "break_subroutine" ||
-        candidate.type === "pump_breaker",
+        (candidate.type === "break_subroutine" ||
+          candidate.type === "pump_breaker") &&
+        dependencies.encounterActionIsViable(input, candidate),
     )
   ) {
     components.push({

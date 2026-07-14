@@ -5,6 +5,7 @@ import {
 } from "./runner-blink-break-exclusion";
 import {
   createRunnerEncounterActionExclusionContext,
+  type RunnerEncounterActionExclusionContext,
   type RunnerEncounterActionExclusionDependencies,
 } from "./runner-encounter-action-exclusion";
 import {
@@ -70,6 +71,7 @@ export function createSemanticRuntimeActionExclusionComposition(
   dependencies: SemanticRuntimeActionExclusionCompositionDependencies,
 ): RunnerSourceCardAnswerRoleContext &
   Omit<RunnerSelfDamageContext, "runnerSelfDamageSurvivalExclusion"> &
+  RunnerEncounterActionExclusionContext &
   ReturnType<typeof createSemanticRuntimeActionExclusionContext> {
   const { semanticRuntimeRunnerSourceCardAnswerRole } =
     createRunnerSourceCardAnswerRoleContext({
@@ -150,6 +152,7 @@ export function createSemanticRuntimeActionExclusionComposition(
     semanticRuntimeRunnerSourceCardAnswerRole,
     runnerSelfDamageImmediateWinSemanticChoice,
     runnerSelfDamageSurvivalAssessment,
+    runnerEncounterActionExclusion,
     semanticRuntimeActionExclusion,
   };
 }

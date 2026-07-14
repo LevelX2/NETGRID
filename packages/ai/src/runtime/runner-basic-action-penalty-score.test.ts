@@ -76,6 +76,29 @@ describe("runnerBasicActionPenaltyScoreComponents", () => {
     ).toBe(false);
   });
 
+  it("does not penalize continuing when the legal pump cannot fund a break", () => {
+    const continueRun = action("continue_run", {
+      encounterContinue: true,
+      encounterWillEndRun: true,
+    });
+    const pump = action("pump_breaker", { encounterWillEndRun: false });
+    const input = inputWithActions([continueRun, pump]);
+
+    expect(
+      runnerBasicActionPenaltyScoreComponents(
+        input,
+        continueRun,
+        "simple_run_choice",
+        {
+          encounterActionIsViable: (_input, candidate) => candidate !== pump,
+        },
+      ).some(
+        (component) =>
+          component.key === "runner_continue_run_ends_run_with_break_available",
+      ),
+    ).toBe(false);
+  });
+
   it("does not treat accepting a delayed ICE self-trash as an ordinary avoidable end-run loss", () => {
     const continueRun = action("continue_run", {
       encounterContinue: true,

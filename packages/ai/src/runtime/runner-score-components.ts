@@ -5,7 +5,10 @@ import type {
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import { persistentDevelopmentActionProjection } from "../actions/persistent-development-action";
-import { runnerBasicActionPenaltyScoreComponents } from "./runner-basic-action-penalty-score";
+import {
+  runnerBasicActionPenaltyScoreComponents,
+  type RunnerBasicActionPenaltyScoreDependencies,
+} from "./runner-basic-action-penalty-score";
 import { runnerActivatedAgendaScoreComponents } from "./runner-activated-agenda-score";
 import {
   runnerCreditNeedScoreComponents,
@@ -59,6 +62,7 @@ export type RunnerScoreComponentsDependencies = {
   install: RunnerInstallScoreDependencies;
   startRun: RunnerStartRunScoreDependencies;
   followup: RunnerFollowupScoreDependencies;
+  encounterActionIsViable: RunnerBasicActionPenaltyScoreDependencies["encounterActionIsViable"];
 };
 
 export type RunnerScoreComponentsContext = {
@@ -180,7 +184,9 @@ export function runnerScoreComponents(
     ...runnerFollowupScoreComponents(input, action, dependencies.followup),
   );
   components.push(
-    ...runnerBasicActionPenaltyScoreComponents(input, action, scopeId),
+    ...runnerBasicActionPenaltyScoreComponents(input, action, scopeId, {
+      encounterActionIsViable: dependencies.encounterActionIsViable,
+    }),
   );
   return components;
 }

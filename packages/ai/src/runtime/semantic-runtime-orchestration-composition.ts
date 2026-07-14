@@ -25,7 +25,7 @@ export type SemanticRuntimeOrchestrationCompositionDependencies =
   SemanticRuntimeActionExclusionCompositionDependencies &
     Omit<
       RunnerScoringSupportCompositionDependencies,
-      "badPublicityRelevance" | "goalFit"
+      "badPublicityRelevance" | "goalFit" | "encounterActionIsViable"
     > & {
       badPublicityRelevance: RunnerBadPublicityRelevanceWithoutSelfDamage;
       goalFit: RunnerGoalFitWithoutSourceRole;
@@ -59,6 +59,9 @@ export function createSemanticRuntimeOrchestrationComposition(
         sourceCardAnswerRole:
           actionExclusion.semanticRuntimeRunnerSourceCardAnswerRole,
       },
+      encounterActionIsViable: (input, action) =>
+        actionExclusion.runnerEncounterActionExclusion(input, action) ===
+        undefined,
     });
 
   return createSemanticRuntimeEntrypointsComposition({

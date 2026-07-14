@@ -243,5 +243,6 @@ export function createRunnerScoringSupportComposition(
       badPublicityRelevanceScoreComponent:
         runnerBadPublicityRelevanceScoreComponent,
     },
+    encounterActionIsViable: dependencies.encounterActionIsViable,
   });
 }
