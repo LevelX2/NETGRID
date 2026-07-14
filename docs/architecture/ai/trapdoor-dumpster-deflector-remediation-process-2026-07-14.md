@@ -1,6 +1,6 @@
 # Trapdoor-/Dumpster-Deflector-Remediation (2026-07-14)
 
-Status: P1 abgeschlossen; P2 aktiv
+Status: P2 abgeschlossen; P3 aktiv
 
 ## Quelle und Gesamtziel
 
@@ -44,9 +44,13 @@ Runtime-Events ohne die nötigen Public-Payload-Felder werden nicht migriert.
 - Produktiver Code erhält keine Match-, Seed-, Deck- oder Kartennamenlogik.
 - Deflector-Projektion verwendet ausschließlich sichtbare gerezzte ICE,
   öffentliche Serverstruktur und im PlayerView verfügbare Regelmetadaten.
+- `VisibleEffectiveSubroutine` transportiert für bekannte gerezzte ICE die
+  öffentlichen Felder `deflectorTarget`, `deflectorCost` und
+  `deflectorAutoBreakIfNoTarget`; der AI-DTO-Sanitizer übernimmt genau diese
+  Felder ohne Instanz- oder Hidden-Zone-Zusatzdaten.
 - Bei mehreren Korp-Zieloptionen darf die Runner-KI keinen für sie günstigen
   Zielentscheid unterstellen.
-- Die zwei fremden offenen Engine-Aenderungen im Hauptworkspace werden weder
+- Die zwei fremden offenen Engine-Änderungen im Hauptworkspace werden weder
   verändert noch übernommen.
 
 ## Sicherheitsblocker und automatische Fehlerbehandlung
@@ -80,10 +84,14 @@ eigenen Commit abgeschlossen.
 
 - Capture DI52/SV92: Bei 10 Credits muss die bezahlbare Krash-Sequenz mit
   `pump_breaker` beginnen, damit Trapdoor gebrochen und R&D erhalten wird.
-- Capture DI56/SV96: Bei nur 7 Credits darf der bekannte aussichtslose
-  R&D-Pfad nicht erneut gestartet werden.
-- Capture DI57/SV97 als Gegenprobe: Ist die Trapdoor-Sequenz im Encounter
-  unbezahlbar, bleibt das Auslösen der Subroutine zulässig.
+- Capture DI56/SV96: Mit 7 Credits plus 2 sichtbaren Cybermodem-Run-Bits ist
+  der konservativ mit 8 Credits kalkulierte R&D-Pfad bezahlbar und darf
+  gestartet werden.
+- Capture DI57/SV97: Die zweite bezahlbare Trapdoor-Sequenz muss ebenfalls
+  mit einem Break-Vorbereitungsschritt beginnen.
+- Synthetische SV96-Gegenprobe: Mit nur 1 Credit plus 2 Run-Bits ist selbst
+  die sichtbare Lockjaw-unterstützte Sequenz nicht finanzierbar; R&D darf
+  dann nicht gestartet werden.
 - Capture DI59/SV99: Nach der vollzogenen Dumpster-Umleitung auf freie
   Archives soll der aktuelle Run fortgesetzt werden; ein bereits grüner
   Checkpoint bestätigt die vorhandene Revalidation ohne neuen Fix.
@@ -97,7 +105,8 @@ eigenen Commit abgeschlossen.
   Start-Run-Pfadbewertung, Pump-Viability und Break-Priorisierung abbilden.
 - Die Projektion muss den Erhalt des ursprünglichen Zugriffs durch Brechen,
   die sichtbaren Redirect-Ziele sowie die Bezahlbarkeit unterscheiden.
-- Gate: unveränderte Checkpoint-Erwartungen und Unit-Gegenproben grün;
+- Gate: fachlich ressourcenbereinigte Checkpoint-Erwartungen und
+  Unit-Gegenproben grün;
   keine Sonderprüfung auf Trapdoor- oder Dumpster-Kartennamen.
 - Commit: `fix(ai): model visible deflector run paths`
 

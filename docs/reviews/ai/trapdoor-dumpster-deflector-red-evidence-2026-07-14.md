@@ -1,13 +1,15 @@
 # Rote Evidence: Trapdoor-/Dumpster-Deflector (2026-07-14)
 
-Status: Vor dem Deflector-Fix reproduziert
+Status: Vor dem Deflector-Fix reproduziert; Ressourcenklassifikation in P2 korrigiert
 
 ## Ergebnis
 
-Zwei freigegebene Runner-KI-Fehler sind auf aktuellem `main`
-`d60f82a5d` als reine `behavior_regression` reproduziert. Drei Gegenverträge
-sind bereits grün. Engine-Legalität, Fixture-Schema, Redaction und StateHash
-sind stabil.
+Die fehlende Deflector-Wirkung ist auf `main` `d60f82a5d` als reine
+`behavior_regression` reproduziert. Die erste rote Klassifikation enthielt
+zusätzlich eine falsche Ressourcenannahme: Cortical Cybermodem stellt 2
+sichtbare Run-Bits bereit und Lockjaw kann Krash im Encounter kostenlos um 2
+Stärke erhöhen. Engine-Legalität, Fixture-Schema, Redaction und StateHash sind
+stabil.
 
 Quelle ist das aktive Hard-Runner-KI-Spiel `match_f450485d3e5be1ab` aus der
 read-only geöffneten SQLite-Datei
@@ -18,8 +20,8 @@ read-only geöffneten SQLite-Datei
 | Checkpoint | Decision / StateVersion | StateHash | Erwartung | Baseline |
 | --- | --- | --- | --- | --- |
 | `cp-trapdoor-dumpster-deflector-01-pump` | DI52 / SV92 | `fnv1a:de36867f` | bezahlbare Krash-Sequenz mit `pump_breaker` beginnen | rot: `continue_run`, `behavior_regression` |
-| `cp-trapdoor-dumpster-deflector-02-no-run` | DI56 / SV96 | `fnv1a:d499214e` | den bekannten unbezahlbaren R&D-Redirect-Pfad nicht starten | rot: `runner.start_run.rd`, `behavior_regression` |
-| `cp-trapdoor-dumpster-deflector-03-unaffordable-control` | DI57 / SV97 | `fnv1a:d3dabd03` | im bereits laufenden, unbezahlbaren Encounter `continue_run` zulassen | grün |
+| `cp-trapdoor-dumpster-deflector-02-no-run` | DI56 / SV96 | `fnv1a:d499214e` | den mit 7 Credits plus 2 Run-Bits bezahlbaren R&D-Pfad starten | grün; ursprüngliche No-Run-Erwartung war fachlich falsch |
+| `cp-trapdoor-dumpster-deflector-03-unaffordable-control` | DI57 / SV97 | `fnv1a:d3dabd03` | die zweite bezahlbare Krash-Break-Sequenz beginnen | rot: `continue_run`, Deflector nicht als Break-Ziel erkannt |
 | `cp-trapdoor-dumpster-deflector-04-archives-continue` | DI59 / SV99 | `fnv1a:2f129234` | nach Dumpster auf freien Archives `continue_run` | grün |
 
 Alle Fixtures enthalten den exakten historischen GameState und ausschließlich
@@ -41,31 +43,33 @@ mit `pump_cannot_lead_to_useful_break` aus und wählt
 Damit liegt kein Engine- oder Break-Legalitätsfehler vor, sondern eine
 fehlende Deflector-Wirkung in der Encounter-Viability.
 
-## Roter Vertrag 2: unbezahlbaren bekannten Pfad nicht erneut starten
+## Korrigierter Ressourcenvertrag am zweiten Run
 
 Bei SV96 sind Trapdoor auf R&D und Dumpster auf der einzigen Remote gerezzt
-und für Runner sichtbar. Runner besitzt nach der Mem-Chip-Installation nur
-noch 7 Credits. Die Trapdoor-Sequenz kostet weiterhin 8 Credits und ist daher
-nicht zugriffserhaltend bezahlbar. Trotzdem wählt die KI erneut
-`runner.start_run.rd`.
+und für Runner sichtbar. Runner besitzt nach der Mem-Chip-Installation 7
+Credits sowie 2 sichtbare, für Icebreaker während Runs nutzbare
+Cybermodem-Bits. Der konservativ ohne Lockjaw kalkulierte Trapdoor-Break für
+8 Credits ist daher bereits bezahlbar. Zusätzlich kann Lockjaw Krash im
+Encounter kostenlos +2 Stärke geben. `runner.start_run.rd` ist in diesem
+konkreten Zustand folglich keine Fehlentscheidung.
 
-Die Run-Bewertung enthält keinen Deflector-Pfadvertrag und behandelt R&D als
-erreichbares Druckziel. Die Kette
-`R&D -> Trapdoor -> Remote 1 -> Dumpster -> Archives` wird vor dem Run nicht
-als sichtbare Zieländerung bewertet.
+Die alte Run-Bewertung enthielt zwar keinen Deflector-Pfadvertrag und setzte
+fälschlich 0 statt 8 bekannte Pfadkosten an. Nach Einbeziehung der sichtbaren
+Run-Bits bleibt der Pfad aber erreichbar. Eine synthetische Gegenprobe mit nur
+1 Credit plus den 2 Run-Bits sichert nun das echte Negativkriterium: Reichen
+alle sichtbaren Breaker-Ressourcen nicht, darf R&D nicht gestartet werden.
 
 ## Grüne Gegenproben
 
-- DI57/SV97 bestätigt, dass die KI in einem bereits laufenden Encounter keine
-  unbezahlbare Pump-Sequenz beginnen muss. Das Auslösen der Trapdoor-Routine
-  bleibt korrekt zulässig.
+- DI57/SV97 reproduziert denselben Planungsfehler ein zweites Mal: Trotz 7
+  Credits, 2 Run-Bits und Lockjaw lässt die KI Trapdoor ungeblockt auslösen.
 - DI59/SV99 bestätigt die bereits integrierte Redirect-Revalidation: Nach der
   Dumpster-Umleitung auf freie Archives wird der Run fortgesetzt und nicht
   mehr wegen des alten R&D-Ziels abgebrochen.
-- Eine synthetische Gegenprobe auf dem exakten SV96-Zustand mit 10 statt 7
-  Credits erlaubt weiterhin `start_run` auf R&D. Der spätere Fix darf den
-  sichtbaren Pfad nicht pauschal sperren, wenn das zugriffserhaltende Brechen
-  bezahlbar ist.
+- Eine synthetische Gegenprobe auf dem SV96-Zustand mit nur 1 statt 7 Credits
+  verbietet `start_run` auf R&D. Der Fix darf den sichtbaren Pfad nur sperren,
+  wenn das zugriffserhaltende Brechen unter Einbeziehung der sichtbaren
+  Icebreaker-Ressourcen wirklich unbezahlbar ist.
 
 ## Warmup-Einordnung
 
@@ -93,5 +97,5 @@ Test Files  1 failed (1)
 Tests       2 failed | 3 passed (5)
 ```
 
-Die zwei Fehlschläge sind ab jetzt die unveränderten Fix-Gates.
-
+Die beiden Encounter-Zeitpunkte und die wirklich unterfinanzierte synthetische
+Gegenprobe sind die fachlich korrigierten Fix-Gates.

@@ -127,6 +127,18 @@ function visibleEffectiveSubroutine(
     ...(subroutine.traceSuccessEffect
       ? { traceSuccessEffect: subroutine.traceSuccessEffect }
       : {}),
+    ...(subroutine.deflectorTarget
+      ? { deflectorTarget: subroutine.deflectorTarget }
+      : {}),
+    ...(subroutine.deflectorCost !== undefined
+      ? { deflectorCost: subroutine.deflectorCost }
+      : {}),
+    ...(subroutine.deflectorAutoBreakIfNoTarget !== undefined
+      ? {
+          deflectorAutoBreakIfNoTarget:
+            subroutine.deflectorAutoBreakIfNoTarget,
+        }
+      : {}),
     ...(subroutine.breakTags ? { breakTags: subroutine.breakTags.slice() } : {}),
     ...(dynamic
       ? {

@@ -6,6 +6,7 @@ import {
   creditsToBreakEndTheRunSubroutinesWithBreaker,
   endTheRunSubroutineCount,
   type RunnerRunPathCreditBudget,
+  visibleDeflectorSubroutineCanResolve,
   visibleRunnerRunPathCreditBudgetForRig,
 } from "../visible-run-analysis";
 import { currentEncounteredIceCard } from "./current-encounter";
@@ -120,6 +121,17 @@ export function createRunnerPumpViabilityContext(
     const endTheRunCount = endTheRunSubroutineCount(
       encounteredIce.definitionId,
     );
+    const currentQuote = currentEncounteredIceCard(input)?.effectiveRunQuote;
+    const deflectorContext = {
+      visibleRemoteServerCount: input.playerView.servers.filter((candidate) =>
+        candidate.id.startsWith("remote_"),
+      ).length,
+      visibleCorpCredits: input.playerView.opponent.credits,
+    };
+    const accessRedirectCount =
+      currentQuote?.subroutines.filter((subroutine) =>
+        visibleDeflectorSubroutineCanResolve(subroutine, deflectorContext),
+      ).length ?? 0;
     const runEffect =
       dependencies.encounterRunRemainderEffectAssessment(input);
     const hasUsefulRunRemainderEffect =
@@ -131,6 +143,7 @@ export function createRunnerPumpViabilityContext(
       dependencies.encounterHasImmediateUnbrokenThreat(input);
     if (
       endTheRunCount === 0 &&
+      accessRedirectCount === 0 &&
       !hasUsefulRunRemainderEffect &&
       !hasImmediateThreat
     ) {
@@ -177,11 +190,14 @@ export function createRunnerPumpViabilityContext(
         ],
       };
 
-    const currentQuote = currentEncounteredIceCard(input)?.effectiveRunQuote;
     const requiredBreakCount =
       currentQuote?.subroutines.filter(
         (subroutine) =>
           isImmediateSafetyThreatSubroutine(subroutine) ||
+          visibleDeflectorSubroutineCanResolve(
+            subroutine,
+            deflectorContext,
+          ) ||
           (encounterContinue?.payload?.encounterWillEndRun === true &&
             isEndRunSubroutine(subroutine)),
       ).length ??
@@ -271,6 +287,7 @@ export function createRunnerPumpViabilityContext(
     const reserveTarget = dependencies.runnerCreditReserveTarget(input);
     if (
       !runEffect.mustBreak &&
+      accessRedirectCount === 0 &&
       !hasImmediateThreat &&
       creditsAfterPumpAndBreak < Math.max(2, reserveTarget - 1)
     ) {

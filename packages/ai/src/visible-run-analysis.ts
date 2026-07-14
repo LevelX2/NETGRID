@@ -34,6 +34,10 @@ type RunPathProjection = {
   effect: RunPathProjectionEffect;
   sourceSubroutine: VisibleEffectiveSubroutine;
 };
+export type VisibleDeflectorContext = {
+  visibleRemoteServerCount?: number;
+  visibleCorpCredits?: number;
+};
 type HardUnbrokenRunEffectKind =
   | "damage_or_program_trash"
   | "run_lock_or_action_tax"
@@ -447,6 +451,7 @@ export function assessKnownRezzedIcePath(
   runnerCredits: RunnerRunPathCreditBudgetInput,
   rootCards: RootCardLike[] = [],
   visibleCorpBidCapacity = 0,
+  deflectorContext: VisibleDeflectorContext = {},
 ): KnownRezzedIcePathAssessment {
   return assessKnownRezzedIcePathInternal(
     iceCards,
@@ -456,6 +461,13 @@ export function assessKnownRezzedIcePath(
     normalizeVisibleCorpBidCapacity(visibleCorpBidCapacity),
     [],
     { allowBreakingRunPathEffects: true },
+    undefined,
+    {
+      ...deflectorContext,
+      visibleCorpCredits:
+        deflectorContext.visibleCorpCredits ??
+        normalizeVisibleCorpBidCapacity(visibleCorpBidCapacity),
+    },
   );
 }
 
@@ -468,6 +480,7 @@ function assessKnownRezzedIcePathInternal(
   initialRunPathEffects: RunPathProjectionEffect[],
   options: { allowBreakingRunPathEffects: boolean },
   initialBreakerStrengths?: Map<string, number>,
+  deflectorContext: VisibleDeflectorContext = {},
 ): KnownRezzedIcePathAssessment {
   const creditBudget = normalizeRunnerRunPathCreditBudget(runnerCredits);
   let visibleBreakCost = 0;
@@ -502,6 +515,11 @@ function assessKnownRezzedIcePathInternal(
           (subroutine) => subroutine.type === "end_the_run",
         ).length
       : endTheRunSubroutineCount(iceDefinitionId);
+    const deflectorCount =
+      quote?.subroutines.filter((subroutine) =>
+        visibleDeflectorSubroutineCanResolve(subroutine, deflectorContext),
+      ).length ?? 0;
+    const accessPreservingBreakCount = endTheRunCount + deflectorCount;
     const additionalBreakCostPerSubroutine =
       quote?.breakSubroutineAdditionalCostPerSubroutine ?? 0;
     const encounterTax = activeRunPathEffects.reduce(
@@ -530,7 +548,7 @@ function assessKnownRezzedIcePathInternal(
       spendGeneralCredits(creditBudget, encounterTax);
       creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
     }
-    if (endTheRunCount > 0) {
+    if (accessPreservingBreakCount > 0) {
       const breakAssessment = runPathEffectsPreventFutureBreaking(
         activeRunPathEffects,
       )
@@ -538,7 +556,7 @@ function assessKnownRezzedIcePathInternal(
         : minimumCreditsToBreakEndTheRunSubroutines(
             effectiveIceForQuote(effectiveIce, quote),
             rigCards,
-            endTheRunCount,
+            accessPreservingBreakCount,
             breakerStrengths,
             additionalBreakCostPerSubroutine,
           );
@@ -742,6 +760,7 @@ function assessKnownRezzedIcePathInternal(
             rootCards,
             creditBudget,
             visibleCorpBidCapacity,
+            deflectorContext,
             breakerStrengths,
             additionalBreakCostPerSubroutine,
           })
@@ -782,6 +801,26 @@ function assessKnownRezzedIcePathInternal(
   };
 }
 
+export function visibleDeflectorSubroutineCanResolve(
+  subroutine: VisibleEffectiveSubroutine,
+  context: VisibleDeflectorContext = {},
+): boolean {
+  if (subroutine.type !== "deflect_run") return false;
+  const cost = Math.max(0, Math.floor(subroutine.deflectorCost ?? 0));
+  if (
+    context.visibleCorpCredits !== undefined &&
+    context.visibleCorpCredits < cost
+  )
+    return false;
+  if (subroutine.deflectorTarget === "subsidiary_data_fort") {
+    return (
+      context.visibleRemoteServerCount === undefined ||
+      context.visibleRemoteServerCount > 0
+    );
+  }
+  return true;
+}
+
 function runPathEffectBreakAssessment(params: {
   iceCards: IceCardLike[];
   iceIndex: number;
@@ -793,6 +832,7 @@ function runPathEffectBreakAssessment(params: {
   rootCards: RootCardLike[];
   creditBudget: MutableRunnerRunPathCreditBudget;
   visibleCorpBidCapacity: number;
+  deflectorContext: VisibleDeflectorContext;
   breakerStrengths: Map<string, number>;
   additionalBreakCostPerSubroutine: number;
 }): BreakAssessment | undefined {
@@ -822,6 +862,7 @@ function runPathEffectBreakAssessment(params: {
     params.activeRunPathEffects,
     { allowBreakingRunPathEffects: false },
     new Map(params.breakerStrengths),
+    params.deflectorContext,
   );
   const futureWithEffect = assessKnownRezzedIcePathInternal(
     futureIce,
@@ -832,6 +873,7 @@ function runPathEffectBreakAssessment(params: {
     [...params.activeRunPathEffects, params.effect],
     { allowBreakingRunPathEffects: false },
     new Map(params.breakerStrengths),
+    params.deflectorContext,
   );
   const breakerStrengthsAfterBreak = new Map(params.breakerStrengths);
   if (breakAssessment.carriesStrengthAcrossIce) {
@@ -851,6 +893,7 @@ function runPathEffectBreakAssessment(params: {
     params.activeRunPathEffects,
     { allowBreakingRunPathEffects: false },
     breakerStrengthsAfterBreak,
+    params.deflectorContext,
   );
   if (!futureAfterBreak.canReachAccess) return undefined;
   const effectCreatesNoAccess =

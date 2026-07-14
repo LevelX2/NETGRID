@@ -166,6 +166,13 @@ export function semanticRuntimeActionExclusion(
       input.playerView.own.rig ?? [],
     ),
     server.root,
+    input.playerView.opponent.credits,
+    {
+      visibleRemoteServerCount: input.playerView.servers.filter((candidate) =>
+        candidate.id.startsWith("remote_"),
+      ).length,
+      visibleCorpCredits: input.playerView.opponent.credits,
+    },
   );
   if (assessment.assessedKnownIceCount <= 0 || assessment.canReachAccess)
     return undefined;

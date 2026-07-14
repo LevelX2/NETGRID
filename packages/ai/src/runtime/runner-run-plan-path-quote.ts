@@ -10,6 +10,7 @@ import {
   creditsToBreakEndTheRunSubroutinesWithBreaker,
   endTheRunSubroutineCount,
   minimumCreditsToBreakEndTheRunSubroutines,
+  visibleDeflectorSubroutineCanResolve,
 } from "../visible-run-analysis";
 import { actionCreditCost } from "./action-cost";
 import {
@@ -279,7 +280,10 @@ function cheapestCurrentEncounterSequence(params: {
       totalCost: actionCreditCost(continueAction),
       usesPump: false,
       usesBreak: false,
-      evidence: ["encounter_no_etr_break_required:true"],
+      evidence: [
+        "encounter_no_etr_break_required:true",
+        "encounter_no_access_break_required:true",
+      ],
       plan,
       input,
     });
@@ -358,12 +362,12 @@ function cheapestKnownIceSequence(params: {
 }): RunnerRunEncounterActionSequence | undefined {
   const { input, plan, ice } = params;
   if (!ice.known || ice.rezzed === false || !ice.definitionId) return undefined;
-  const endRunThreatCount = endTheRunSubroutineCount(ice.definitionId);
-  if (endRunThreatCount <= 0) return undefined;
+  const accessThreatCount = accessPreservingThreatCount(input, ice);
+  if (accessThreatCount <= 0) return undefined;
   const assessment = minimumCreditsToBreakEndTheRunSubroutines(
     iceBreakEstimateInput(ice),
     input.playerView.own.rig ?? [],
-    endRunThreatCount,
+    accessThreatCount,
     new Map(),
     ice.effectiveRunQuote?.breakSubroutineAdditionalCostPerSubroutine ?? 0,
   );
@@ -645,15 +649,13 @@ function breakerCoverageQuotesForIce(
         breaker.definitionId &&
         canBreakerDefinitionBreakIce(breaker.definitionId, ice.definitionId!),
       );
-      const endRunThreatCount = ice.definitionId
-        ? endTheRunSubroutineCount(ice.definitionId)
-        : 0;
+      const accessThreatCount = accessPreservingThreatCount(input, ice);
       const assessment =
-        canBreak && endRunThreatCount > 0
+        canBreak && accessThreatCount > 0
           ? creditsToBreakEndTheRunSubroutinesWithBreaker(
               breaker,
               iceBreakEstimateInput(ice),
-              endRunThreatCount,
+              accessThreatCount,
               breaker.strength ?? cardDefinitionStrength(breaker.definitionId),
               ice.effectiveRunQuote
                 ?.breakSubroutineAdditionalCostPerSubroutine ?? 0,
@@ -693,10 +695,14 @@ function subroutineQuotesForIce(
     : undefined;
   if (quoteSubroutines.length > 0) {
     return quoteSubroutines.map((subroutine, index) => {
-      const baseThreatClass = threatClassForSubroutine(subroutine);
+      const baseThreatClass = threatClassForSubroutine(input, subroutine);
       const threatClass = allBroken
         ? "irrelevant_to_current_plan"
-        : currentThreatClassForSubroutine(subroutine, futurePathAssessment);
+        : currentThreatClassForSubroutine(
+            input,
+            subroutine,
+            futurePathAssessment,
+          );
       return {
         index,
         threatClass,
@@ -726,12 +732,13 @@ function subroutineQuotesForIce(
 }
 
 function currentThreatClassForSubroutine(
+  input: AiDecisionInput,
   subroutine: NonNullable<
     VisibleCard["effectiveRunQuote"]
   >["subroutines"][number],
   futurePathAssessment: EncounterRunRemainderEffectAssessment | undefined,
 ): RunnerRunSubroutineThreatClass {
-  const threatClass = threatClassForSubroutine(subroutine);
+  const threatClass = threatClassForSubroutine(input, subroutine);
   if (
     threatClass === "future_path_modifier" &&
     futurePathAssessment?.mustBreak === true
@@ -742,11 +749,19 @@ function currentThreatClassForSubroutine(
 }
 
 function threatClassForSubroutine(
+  input: AiDecisionInput,
   subroutine: NonNullable<
     VisibleCard["effectiveRunQuote"]
   >["subroutines"][number],
 ): RunnerRunSubroutineThreatClass {
   if (isEndRunSubroutine(subroutine)) return "must_break_for_access";
+  if (
+    visibleDeflectorSubroutineCanResolve(
+      subroutine,
+      visibleDeflectorContextForInput(input),
+    )
+  )
+    return "must_break_for_access";
   if (isImmediateSafetyThreatSubroutine(subroutine)) {
     return "must_break_for_survival";
   }
@@ -926,7 +941,14 @@ function currentRequiredBreakSubroutineIndexes(
       continueAction?.payload?.encounterWillEndRun === true;
     return new Set(
       quoteSubroutines.flatMap((subroutine, index) => {
-        const threatClass = threatClassForSubroutine(subroutine);
+        if (
+          visibleDeflectorSubroutineCanResolve(
+            subroutine,
+            visibleDeflectorContextForInput(input),
+          )
+        )
+          return [index];
+        const threatClass = threatClassForSubroutine(input, subroutine);
         if (threatClass === "must_break_for_access") {
           return continueWillEndRun ? [index] : [];
         }
@@ -962,7 +984,8 @@ function currentSafetyBreakSubroutineIndexes(
   if (quoteSubroutines.length > 0) {
     return new Set(
       quoteSubroutines.flatMap((subroutine, index) =>
-        threatClassForSubroutine(subroutine) === "must_break_for_survival"
+        threatClassForSubroutine(input, subroutine) ===
+        "must_break_for_survival"
           ? [index]
           : [],
       ),
@@ -993,6 +1016,28 @@ function encounterContinueAction(
       action.type === "continue_run" &&
       action.payload?.encounterContinue === true,
   );
+}
+
+function accessPreservingThreatCount(
+  input: AiDecisionInput,
+  ice: VisibleCard,
+): number {
+  const quoted = ice.effectiveRunQuote?.subroutines;
+  if (quoted?.length) {
+    return quoted.filter((subroutine) =>
+      subroutineRequiresBreak(threatClassForSubroutine(input, subroutine)),
+    ).length;
+  }
+  return ice.definitionId ? endTheRunSubroutineCount(ice.definitionId) : 0;
+}
+
+function visibleDeflectorContextForInput(input: AiDecisionInput) {
+  return {
+    visibleRemoteServerCount: input.playerView.servers.filter((candidate) =>
+      candidate.id.startsWith("remote_"),
+    ).length,
+    visibleCorpCredits: input.playerView.opponent.credits,
+  };
 }
 
 function effectiveIceStrength(ice: VisibleCard): number | undefined {

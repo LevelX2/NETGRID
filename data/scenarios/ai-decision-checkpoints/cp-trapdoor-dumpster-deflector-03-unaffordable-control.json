@@ -6488,7 +6488,8 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "continue_run"
+        "type": "pump_breaker",
+        "sourceDefinitionId": "onr_v1_039_krash"
       }
     ]
   }

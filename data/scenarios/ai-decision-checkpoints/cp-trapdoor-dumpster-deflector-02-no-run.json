@@ -5091,7 +5091,7 @@
     "schemaVersion": "ai-runtime-checkpoint-v1"
   },
   "expectation": {
-    "forbiddenActions": [
+    "acceptableActions": [
       {
         "type": "start_run",
         "targetServerId": "rd"

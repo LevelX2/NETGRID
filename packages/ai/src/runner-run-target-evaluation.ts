@@ -418,6 +418,12 @@ function evaluateRunnerRunTarget(
     ),
     server?.root ?? [],
     params.input.playerView.opponent.credits,
+    {
+      visibleRemoteServerCount: params.input.playerView.servers.filter(
+        (candidate) => candidate.id.startsWith("remote_"),
+      ).length,
+      visibleCorpCredits: params.input.playerView.opponent.credits,
+    },
   );
   const payoff = payoffForTarget(params, accessServerId, accessTargetKind);
   const installedRunPayoff = installedRunPayoffForTarget(

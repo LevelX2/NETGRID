@@ -11,8 +11,8 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 describe("Trapdoor and Dumpster exact decision checkpoints", () => {
   it.each([
     ["starts the affordable Trapdoor break sequence", pumpTrapdoorJson],
-    ["avoids the known unaffordable R&D redirect path", avoidUnaffordableRunJson],
-    ["accepts an unaffordable Trapdoor redirect in the encounter", unaffordableEncounterControlJson],
+    ["starts the visible R&D path with restricted breaker credits", avoidUnaffordableRunJson],
+    ["starts the second affordable Trapdoor break sequence", unaffordableEncounterControlJson],
     ["continues the redirected run on free Archives", archivesContinueJson],
   ])("%s", (_label, json) => {
     const result = runAiDecisionCheckpoint(fixture(json));
@@ -20,17 +20,17 @@ describe("Trapdoor and Dumpster exact decision checkpoints", () => {
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
   });
 
-  it("may start the same visible R&D path when Trapdoor is affordable", () => {
-    const affordable = fixture(avoidUnaffordableRunJson);
-    affordable.engine.testOnlyGameState.runner.credits = 10;
-    affordable.engine.stateHash = hashGameState(
-      affordable.engine.testOnlyGameState,
+  it("avoids the same visible R&D path when all breaker resources are insufficient", () => {
+    const underfunded = fixture(avoidUnaffordableRunJson);
+    underfunded.engine.testOnlyGameState.runner.credits = 1;
+    underfunded.engine.stateHash = hashGameState(
+      underfunded.engine.testOnlyGameState,
     );
-    affordable.expectation = {
-      acceptableActions: [{ type: "start_run", targetServerId: "rd" }],
+    underfunded.expectation = {
+      forbiddenActions: [{ type: "start_run", targetServerId: "rd" }],
     };
 
-    const result = runAiDecisionCheckpoint(affordable);
+    const result = runAiDecisionCheckpoint(underfunded);
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
   });
 });
