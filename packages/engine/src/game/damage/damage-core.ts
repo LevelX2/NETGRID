@@ -79,7 +79,7 @@ export type DamageCoreHost = {
     ) => void;
   };
   runner: {
-    drawRunnerCard: (state: GameState) => unknown;
+    drawRunnerCard: (state: GameState, drawTaxDecision?: "none") => unknown;
     ensureRunnerTurnFlags: (
       state: GameState,
     ) => NonNullable<GameState["runnerTurnFlags"]>;
@@ -194,8 +194,8 @@ function returnRunnerInstalledCardToGrip(
   requireDamageCoreHost().zones.returnRunnerInstalledCardToGrip(state, cardId);
 }
 
-function drawRunnerCard(state: GameState): unknown {
-  return requireDamageCoreHost().runner.drawRunnerCard(state);
+function drawRunnerCard(state: GameState, drawTaxDecision?: "none"): unknown {
+  return requireDamageCoreHost().runner.drawRunnerCard(state, drawTaxDecision);
 }
 
 function ensureRunnerTurnFlags(
@@ -2464,7 +2464,9 @@ function resolveGripFlatlineTagReplacement(
     state.runner.grip.length < targetHandSize &&
     state.runner.stack.length > 0
   ) {
-    drawRunnerCard(state);
+    // "Refresh your hand" does not say "draw" and therefore does not
+    // trigger City Surveillance's per-draw additional cost.
+    drawRunnerCard(state, "none");
     if (state.winner) break;
     drawnCards += 1;
   }

@@ -111,7 +111,7 @@ describe("match series 70BE real Engine regressions", () => {
     const decision = chooseRunnerAction(choiceInput);
 
     expect(choiceInput.playerView.pendingChoice?.source).toContain(
-      "runner_draw.city_surveillance",
+      "runner_draw.draw_tax",
     );
     expect(decision.actionId).toBe(choiceInput.legalActions[0]?.actionId);
     expect(decision.selectedChoices).toEqual({
@@ -143,7 +143,7 @@ describe("match series 70BE real Engine regressions", () => {
     const decision = chooseCorpAction(choiceInput);
 
     expect(choiceInput.playerView.pendingChoice?.source).toContain(
-      "runner_draw.city_surveillance_rez",
+      "runner_draw.draw_tax_rez",
     );
     expect(decision.actionId).toBe(choiceInput.legalActions[0]?.actionId);
     expect(decision.selectedChoices?.selectedOptionIds).toEqual([
@@ -153,9 +153,7 @@ describe("match series 70BE real Engine regressions", () => {
 
     expect(state.corp.credits).toBe(0);
     expect(state.pendingChoice?.side).toBe("runner");
-    expect(state.pendingChoice?.source).toContain(
-      "runner_draw.city_surveillance",
-    );
+    expect(state.pendingChoice?.source).toContain("runner_draw.draw_tax");
   });
 
   it("quotes Rush Hour after its Engine-produced event cost", () => {

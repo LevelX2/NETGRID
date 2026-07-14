@@ -107,7 +107,7 @@ describe("pending choice resolution", () => {
   it("dispatches City Surveillance draw decisions through the sequence resolver", () => {
     const state = stateWithChoice(
       "city_choice",
-      "runner_draw.city_surveillance:1:city_1:0",
+      "runner_draw.draw_tax:1:city_1:0",
     );
     const resolveRunnerDrawSequenceChoice = vi.fn();
 
@@ -126,7 +126,7 @@ describe("pending choice resolution", () => {
   it("dispatches City Surveillance pre-draw rez decisions through the sequence resolver", () => {
     const state = stateWithChoice(
       "city_rez_choice",
-      "runner_draw.city_surveillance_rez:1",
+      "runner_draw.draw_tax_rez:1",
     );
     const resolveRunnerDrawSequenceChoice = vi.fn();
 

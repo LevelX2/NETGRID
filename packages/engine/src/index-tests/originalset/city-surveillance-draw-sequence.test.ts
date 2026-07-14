@@ -47,7 +47,7 @@ describe("City Surveillance per-draw decisions", () => {
     expect(state.runner.stack).toHaveLength(stackBefore - 1);
     expect(state.pendingChoice).toMatchObject({
       side: "runner",
-      source: expect.stringContaining("runner_draw.city_surveillance"),
+      source: expect.stringContaining("runner_draw.draw_tax"),
     });
     expect(state.pendingChoice?.options.map((option) => option.id)).toEqual([
       "pay_credit",
@@ -145,9 +145,7 @@ describe("City Surveillance per-draw decisions", () => {
     ] as const;
     for (const [index, decision] of decisions.entries()) {
       expect(state.runner.stack).toHaveLength(stackBefore - index - 1);
-      expect(state.pendingChoice?.source).toContain(
-        "runner_draw.city_surveillance",
-      );
+      expect(state.pendingChoice?.source).toContain("runner_draw.draw_tax");
       state = applyChoice(state, "runner", decision);
     }
 
@@ -185,9 +183,7 @@ describe("City Surveillance per-draw decisions", () => {
         action.type === "play_event" && action.payload?.cardId === bodyweightId,
     );
     let decisions = 0;
-    while (
-      state.pendingChoice?.source.startsWith("runner_draw.city_surveillance:")
-    ) {
+    while (state.pendingChoice?.source.startsWith("runner_draw.draw_tax:")) {
       decisions += 1;
       state = applyChoice(state, "runner", "take_tag");
     }
@@ -295,7 +291,7 @@ describe("City Surveillance per-draw decisions", () => {
     expect(state.runner.stack).toHaveLength(stackBefore);
     expect(state.pendingChoice).toMatchObject({
       side: "corp",
-      source: expect.stringContaining("runner_draw.city_surveillance_rez"),
+      source: expect.stringContaining("runner_draw.draw_tax_rez"),
     });
     expect(state.pendingChoice?.options.map((option) => option.id)).toEqual([
       `rez_${cityId}`,
@@ -333,7 +329,7 @@ describe("City Surveillance per-draw decisions", () => {
     for (let index = 0; index < 3; index += 1) {
       expect(state.pendingChoice).toMatchObject({
         side: "corp",
-        source: expect.stringContaining("runner_draw.city_surveillance_rez"),
+        source: expect.stringContaining("runner_draw.draw_tax_rez"),
       });
       state = applyChoice(state, "corp", "pass");
       expect(state.runner.stack).toHaveLength(stackBefore - index - 1);

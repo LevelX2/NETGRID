@@ -213,7 +213,7 @@ export function selectedChoicesForDecision(
       ? { choiceId: choice.choiceId, selectedOptionIds: [selectedOptionId] }
       : { choiceId: choice.choiceId, selectedOptionIds: [] };
   }
-  if (choice.source.startsWith("runner_draw.city_surveillance:")) {
+  if (choice.source.startsWith("runner_draw.draw_tax:")) {
     const selectedOptionId =
       selectableOptions.find((option) => option.id === "pay_credit")?.id ??
       selectableOptions.find((option) => option.id === "take_tag")?.id;
@@ -221,7 +221,7 @@ export function selectedChoicesForDecision(
       ? { choiceId: choice.choiceId, selectedOptionIds: [selectedOptionId] }
       : { choiceId: choice.choiceId, selectedOptionIds: [] };
   }
-  if (choice.source.startsWith("runner_draw.city_surveillance_rez:")) {
+  if (choice.source.startsWith("runner_draw.draw_tax_rez:")) {
     const selectedOptionId =
       selectableOptions.find((option) => option.id.startsWith("rez_"))?.id ??
       selectableOptions.find((option) => option.id === "pass")?.id;

@@ -793,7 +793,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     });
   });
 
-  it("uses V1.9.19 Runner agenda-cost paths for Fait Accompli and Arasaka Owns You", () => {
+  it("uses V1.9.19 Runner agenda-cost paths and keeps Arasaka's refresh distinct from drawing", () => {
     let faitState = toRunnerTurn(
       MECHANIC_SMOKE_GAMES.agendaScoring("v1919-fait-accompli"),
     );
@@ -819,7 +819,19 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     });
 
     let arasakaState = toRunnerTurn(
-      MECHANIC_SMOKE_GAMES.agendaScoring("v1919-arasaka-owns-you"),
+      createGameAfterSetup({
+        seed: "v1919-arasaka-owns-you",
+        runnerDeck: MECHANIC_SMOKE_DECKS.agendaScoring.runner,
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.agendaScoring.corp,
+          id: `${MECHANIC_SMOKE_DECKS.agendaScoring.corp.id}_with_city_surveillance`,
+          cards: [
+            ...MECHANIC_SMOKE_DECKS.agendaScoring.corp.cards,
+            { id: "onr_v1_313_city-surveillance", quantity: 1 },
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
     );
     arasakaState.runner.credits = 20;
     arasakaState.corp.credits = 20;
@@ -829,6 +841,15 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       arasakaState,
       "onr_v1_078_arasaka-owns-you",
     );
+    const cityId = putCorpRootInRemote(
+      arasakaState,
+      "onr_v1_313_city-surveillance",
+    );
+    arasakaState.cardInstances[cityId] = {
+      ...arasakaState.cardInstances[cityId]!,
+      faceup: true,
+      rezzed: true,
+    };
     for (const cardId of arasakaState.runner.grip.slice()) {
       if (cardId === arasakaId) continue;
       removeEverywhere(arasakaState, cardId);
@@ -862,6 +883,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     )?.id;
     arasakaState = applyChoice(arasakaState, "runner", String(arasakaOption));
     expect(arasakaState.winner).toBeNull();
+    expect(arasakaState.pendingChoice).toBeUndefined();
     expect(arasakaState.runner.tags).toBe(0);
     expect(arasakaState.runner.coreDamage).toBe(0);
     expect(arasakaState.runner.credits).toBe(30);

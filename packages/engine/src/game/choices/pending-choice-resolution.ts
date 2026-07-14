@@ -404,8 +404,8 @@ export function resolvePendingChoice(
     return;
   }
   if (
-    state.pendingChoice.source.startsWith("runner_draw.city_surveillance:") ||
-    state.pendingChoice.source.startsWith("runner_draw.city_surveillance_rez:")
+    state.pendingChoice.source.startsWith("runner_draw.draw_tax:") ||
+    state.pendingChoice.source.startsWith("runner_draw.draw_tax_rez:")
   ) {
     resolveRunnerDrawSequenceChoice(state, legalAction, playerAction);
     return;

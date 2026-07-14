@@ -2,19 +2,22 @@
 
 ## Status
 
-Aktiv seit 2026-07-14. Umsetzung im Worktree
+P01 bis P06 sind fachlich abgeschlossen. Die lokale Main-Integration und der
+verifizierte Worktree-/Branch-Cleanup stehen noch aus. Umsetzung im Worktree
 `C:\Projekte\NETGRID_CITY_SURVEILLANCE_DRAW_CHOICES` auf Branch
 `codex/city-surveillance-draw-choices`.
 
 Paketfortschritt:
 
-- P01 abgeschlossen: Der fokussierte Lauf
-  `corepack pnpm exec vitest run packages/engine/src/index-tests/originalset/city-surveillance-draw-sequence.test.ts`
-  ist mit drei erwarteten roten Regelabweichungen reproduziert. Jack 'n' Joe
-  zieht aktuell alle drei Karten atomar, mehrere rezzed Quellen öffnen keine
-  Einzelchoices und eine unrezzed City Surveillance erhält kein
-  Rez-vor-Draw-Fenster.
-- P02 ist der nächste aktive Umsetzungsschritt.
+- P01: rote Regel-Evidence, Commit `3e560570e`.
+- P02: fortsetzbare Einzelziehsequenz, Commit `03623a079`.
+- P03: Mehrfachziehen, mehrere Quellen, Stack-Ende und Crash Everett, Commit
+  `6cfa795fa`.
+- P04: gedrucktes Pre-Draw-Rez-/Pass-Fenster, Commit `ab95d6edf`.
+- P05: generische UI-, produktive KI-, PlayerView- und Replay-Härtung, Commit
+  `06e110735`.
+- P06: unabhängiger Abschlussreview, Arasaka-Nicht-Draw-Gegenprobe,
+  Wissenspflege und vollständige Verifikation abgeschlossen.
 
 ## Quelle und Vorgabe
 
@@ -153,7 +156,7 @@ city_source_decision* -> next_draw_or_complete -> idle`
 - Done-Gate: Eine Mehrfachziehaktion kann ohne City Surveillance vollständig,
   deterministisch und ohne zusätzliche Nutzeraktion aufgelöst werden; mit
   aktiver Quelle pausiert sie am richtigen Schritt.
-- Commit: `feat(engine): add resumable runner draw sequences`.
+- Commit: `fix(engine): sequence City Surveillance draw choices`.
 
 ### P03 – Mehrfachziehen, mehrere Quellen und Draw-Ersatzfälle
 
@@ -167,7 +170,7 @@ city_source_decision* -> next_draw_or_complete -> idle`
   Replay/StateHash, `git diff --check`.
 - Done-Gate: Jede Kombination ist legal und reproduzierbar; keine automatische
   Zahlung verbleibt.
-- Commit: `fix(engine): resolve City Surveillance per drawn card`.
+- Commit: `test(engine): cover City Surveillance draw combinations`.
 
 ### P04 – Gedrucktes City-Surveillance-Rez-Fenster
 
@@ -195,7 +198,7 @@ city_source_decision* -> next_draw_or_complete -> idle`
   `git diff --check`.
 - Done-Gate: Human- und AI-Pfade können jede neue Action legal wählen; keine
   private Kartenidentität wird öffentlich.
-- Commit: `fix(ai-ui): support City Surveillance draw windows`.
+- Commit: `test(ai-ui): harden City Surveillance choice surfaces`.
 
 ### P06 – Final Review, Wissenspflege und Gesamtverifikation
 
@@ -209,7 +212,7 @@ city_source_decision* -> next_draw_or_complete -> idle`
   `git diff --check`.
 - Done-Gate: Regelvertrag, Tests, Review und Wissensstand stimmen überein; der
   Worktree ist sauber.
-- Commit: `docs(review): close City Surveillance draw choice process`.
+- Commit: `fix(engine): close City Surveillance draw review`.
 
 ## Verifikationsregeln
 

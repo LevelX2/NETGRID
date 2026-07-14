@@ -9,7 +9,7 @@ describe("selectedChoicesForDecision", () => {
       inputWithChoice(
         {
           kind: "select_option",
-          source: "runner_draw.city_surveillance:12:city_1:0",
+          source: "runner_draw.draw_tax:12:city_1:0",
           minSelections: 1,
           maxSelections: 1,
           options: [
@@ -34,7 +34,7 @@ describe("selectedChoicesForDecision", () => {
       inputWithChoice(
         {
           kind: "select_option",
-          source: "runner_draw.city_surveillance:12:city_1:0",
+          source: "runner_draw.draw_tax:12:city_1:0",
           minSelections: 1,
           maxSelections: 1,
           options: [{ id: "take_tag", label: "1 Tag nehmen" }],
@@ -55,7 +55,7 @@ describe("selectedChoicesForDecision", () => {
     const decision = selectedChoicesForDecision(
       inputWithChoice({
         kind: "select_option",
-        source: "runner_draw.city_surveillance_rez:12",
+        source: "runner_draw.draw_tax_rez:12",
         minSelections: 1,
         maxSelections: 1,
         options: [

@@ -358,10 +358,10 @@ export function validateGameState(state: GameState): ValidationResult {
     if (typeof sequence.preDrawRezWindowPassed !== "boolean")
       errors.push("Runner draw sequence has invalid pre-draw rez state.");
     const resolvingDrawTax = state.pendingChoice?.source.startsWith(
-      "runner_draw.city_surveillance:",
+      "runner_draw.draw_tax:",
     );
     const resolvingDrawTaxRez = state.pendingChoice?.source.startsWith(
-      "runner_draw.city_surveillance_rez:",
+      "runner_draw.draw_tax_rez:",
     );
     if (
       resolvingDrawTax &&
@@ -377,8 +377,8 @@ export function validateGameState(state: GameState): ValidationResult {
     if (!resolvingDrawTax && !resolvingDrawTaxRez)
       errors.push("Runner draw sequence requires its pending choice.");
   } else if (
-    state.pendingChoice?.source.startsWith("runner_draw.city_surveillance:") ||
-    state.pendingChoice?.source.startsWith("runner_draw.city_surveillance_rez:")
+    state.pendingChoice?.source.startsWith("runner_draw.draw_tax:") ||
+    state.pendingChoice?.source.startsWith("runner_draw.draw_tax_rez:")
   ) {
     errors.push("City Surveillance choice requires a runner draw sequence.");
   }

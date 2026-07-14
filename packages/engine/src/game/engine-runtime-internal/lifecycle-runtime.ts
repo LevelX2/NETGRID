@@ -501,6 +501,7 @@ export function createLifecycleRuntime(deps: RuntimeDeps) {
     if (!cardId) return summary;
     summary.drawnCount = 1;
     (summary.drawnCardIds ??= []).push(cardId);
+    if (drawTaxDecision === "none") return summary;
     const drawTaxSourceCardIds = drawTaxSourceIds(state);
     summary.drawTaxSourceCount = drawTaxSourceCardIds.length;
     for (const _sourceId of drawTaxSourceCardIds) {
@@ -546,9 +547,9 @@ export function createLifecycleRuntime(deps: RuntimeDeps) {
       },
     ];
     state.pendingChoice = {
-      choiceId: `runner_draw_city_surveillance_${sequence.sequenceId}_${sequence.currentDrawTaxSourceIndex}_${state.stateVersion + 1}`,
+      choiceId: `runner_draw_draw_tax_${sequence.sequenceId}_${sequence.currentDrawTaxSourceIndex}_${state.stateVersion + 1}`,
       side: "runner",
-      source: `runner_draw.city_surveillance:${sequence.sequenceId}:${sourceCardId}:${sequence.currentDrawTaxSourceIndex}`,
+      source: `runner_draw.draw_tax:${sequence.sequenceId}:${sourceCardId}:${sequence.currentDrawTaxSourceIndex}`,
       prompt: "City Surveillance: 1 Credit zahlen oder 1 Tag nehmen?",
       kind: "select_option",
       options,
@@ -583,9 +584,9 @@ export function createLifecycleRuntime(deps: RuntimeDeps) {
     if (state.pendingChoice)
       throw new Error("Es ist bereits eine Choice offen.");
     state.pendingChoice = {
-      choiceId: `runner_draw_city_surveillance_rez_${sequence.sequenceId}_${state.stateVersion + 1}`,
+      choiceId: `runner_draw_draw_tax_rez_${sequence.sequenceId}_${state.stateVersion + 1}`,
       side: "corp",
-      source: `runner_draw.city_surveillance_rez:${sequence.sequenceId}`,
+      source: `runner_draw.draw_tax_rez:${sequence.sequenceId}`,
       prompt: "City Surveillance unmittelbar vor dem Ziehen rezzen?",
       kind: "select_option",
       options: [
@@ -771,11 +772,11 @@ export function createLifecycleRuntime(deps: RuntimeDeps) {
     const sequence = state.runnerDrawSequence;
     if (!choice || !sequence)
       throw new Error("Es ist keine City-Surveillance-Choice offen.");
-    if (choice.source.startsWith("runner_draw.city_surveillance_rez:")) {
+    if (choice.source.startsWith("runner_draw.draw_tax_rez:")) {
       resolveRunnerDrawTaxRezChoice(state, legalAction, playerAction, choice);
       return;
     }
-    if (!choice.source.startsWith("runner_draw.city_surveillance:"))
+    if (!choice.source.startsWith("runner_draw.draw_tax:"))
       throw new Error("Es ist keine City-Surveillance-Choice offen.");
     if (choice.side !== "runner" || legalAction.side !== "runner")
       throw new Error("Nur der Runner darf City Surveillance aufloesen.");

@@ -4385,9 +4385,9 @@ describe("V1.0.6 resource and card-display helpers", () => {
       "Karte ziehen",
     );
     const runnerChoice: NonNullable<PlayerView["pendingChoice"]> = {
-      choiceId: "runner_draw_city_surveillance_12_0_13",
+      choiceId: "runner_draw_draw_tax_12_0_13",
       side: "runner",
-      source: "runner_draw.city_surveillance:12:city_1:0",
+      source: "runner_draw.draw_tax:12:city_1:0",
       prompt: "City Surveillance: 1 Credit zahlen oder 1 Tag nehmen?",
       kind: "select_option",
       options: [
@@ -4401,9 +4401,9 @@ describe("V1.0.6 resource and card-display helpers", () => {
     };
     const corpRezChoice: NonNullable<PlayerView["pendingChoice"]> = {
       ...runnerChoice,
-      choiceId: "runner_draw_city_surveillance_rez_12_13",
+      choiceId: "runner_draw_draw_tax_rez_12_13",
       side: "corp",
-      source: "runner_draw.city_surveillance_rez:12",
+      source: "runner_draw.draw_tax_rez:12",
       prompt: "City Surveillance unmittelbar vor dem Ziehen rezzen?",
       options: [
         { id: "rez_city_1", label: "City Surveillance für 1 Credit rezzen" },
