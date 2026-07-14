@@ -4595,11 +4595,21 @@ describe("V1.8.1 Mechanikpaket H", () => {
     });
   });
 
-  it("runs Inside Job as deterministic first-ice bypass", () => {
+  it("preserves Inside Job past unrezzed ICE and bypasses the first encountered ICE", () => {
     let state = toRunnerTurn(v181CardReleaseGame("v181-inside-job"));
     state.runner.credits = 30;
+    state.corp.credits = 30;
     moveRunnerCardToGrip(state, "onr_v1_094_inside-job");
-    putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    const innerIceId = putCorpIceOnServer(
+      state,
+      "rd",
+      "simple_code_gate_ice",
+    );
+    const outerIceId = putCorpIceOnServer(
+      state,
+      "rd",
+      "simple_barrier_ice",
+    );
     state = apply(
       state,
       "runner",
@@ -4609,6 +4619,22 @@ describe("V1.8.1 Mechanikpaket H", () => {
         action.payload?.serverId === "rd",
     );
     expect(state.run?.attackedServerId).toBe("rd");
+    expect(state.run?.approachedIceId).toBe(outerIceId);
+    expect(state.run?.bypassFirstIceRemaining).toBe(true);
+    expect(state.timingPoint).toBe("run.approach_ice");
+    state = apply(state, "corp", (action) => action.type === "decline_rez");
+    expect(state.run?.bypassFirstIceRemaining).toBe(true);
+    expect(state.timingPoint).toBe("run.jack_out_window");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(state.run?.approachedIceId).toBe(innerIceId);
+    expect(state.run?.bypassFirstIceRemaining).toBe(true);
+    expect(state.timingPoint).toBe("run.approach_ice");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" && action.payload?.cardId === innerIceId,
+    );
     expect(state.run?.bypassFirstIceRemaining).toBe(false);
     expect(state.timingPoint).toBe("run.jack_out_window");
     state = apply(state, "runner", (action) => action.type === "continue_run");

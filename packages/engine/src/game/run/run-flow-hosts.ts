@@ -108,6 +108,7 @@ import {
 } from "./fort-run-side-families";
 import {
   approachOrEncounterIce,
+  passApproachedIce,
   type RunMovementHost,
 } from "./run-movement";
 import type { RunnerEncounterActionHost } from "./encounter-actions";
@@ -723,11 +724,25 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         selectedChoiceIds: (selectedChoices) => selectedChoiceIds(selectedChoices),
       },
       callbacks: {
-        continueAfterRootRez: (legalAction) =>
+        continueAfterRootRez: (legalAction) => {
+          const run = state.run;
+          const approachedIceId = run?.approachedIceId;
+          if (
+            state.timingPoint === "run.approach_ice" &&
+            run?.phase === "approach_ice" &&
+            run.bypassFirstIceRemaining === true &&
+            approachedIceId !== undefined &&
+            state.cardInstances[approachedIceId]?.rezzed === true &&
+            !corpRunRootRezActionsAvailable(runRezWindowHostForState(state))
+          ) {
+            passApproachedIce(runMovementHostForState(state));
+            return;
+          }
           continueAfterCorpRootRezIfWindowIsComplete(
             encounterEntryHostForState(state),
             legalAction,
-          ),
+          );
+        },
         finishRun: (successful, legalAction) =>
           host.callbacks.finishRun(state, successful, legalAction),
         trashCorpInstalledCardToArchives: (cardId, legalAction) =>

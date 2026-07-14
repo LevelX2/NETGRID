@@ -319,6 +319,10 @@ export function passApproachedIce(host: RunMovementHost): RunMovementResult {
     return movePastCurrentIce(host);
   }
   const ice = host.cards.cardInstanceFor(run.approachedIceId);
+  if (ice.rezzed && run.bypassFirstIceRemaining) {
+    run.bypassFirstIceRemaining = false;
+    return movePastCurrentIce(host);
+  }
   if (ice.rezzed) {
     host.encounter.beginEncounter(run.approachedIceId);
     return {
@@ -345,10 +349,6 @@ export function approachOrEncounterIce(
   if (secretSpendAutoPass) {
     markSecretSpendGuessAutoPass(legalAction);
   }
-  if (run.bypassFirstIceRemaining) {
-    run.bypassFirstIceRemaining = false;
-    return movePastCurrentIce(host);
-  }
   if (ice.rezzed) {
     if (host.rules.corpRunRootRezActionsAvailable()) {
       const { encounteredIceId: _encounteredIceId, ...runWithoutEncounter } =
@@ -369,6 +369,10 @@ export function approachOrEncounterIce(
       };
     }
     if (secretSpendAutoPass) return passApproachedIce(host);
+    if (run.bypassFirstIceRemaining) {
+      run.bypassFirstIceRemaining = false;
+      return movePastCurrentIce(host);
+    }
     host.encounter.beginEncounter(approachedIceId, legalAction);
     return {
       handled: true,
