@@ -1,6 +1,6 @@
 # KI-Remediation für Match E676 (2026-07-14)
 
-Status: In Bearbeitung; P0 aktiv
+Status: In Bearbeitung; P0 bis P2 abgeschlossen, P3 aktiv
 
 ## Quelle und Gesamtziel
 
