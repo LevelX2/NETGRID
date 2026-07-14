@@ -12,12 +12,15 @@ import {
   ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
   ONR_V1_RUNNER_DECK,
   putCorpRootInRemote,
+  removeEverywhere,
   toRunnerTurn,
 } from "../../test-fixtures/mechanic-smoke-fixtures";
 import type { CardInstanceId, GameState } from "@netgrid/shared";
 
 const CITY_SURVEILLANCE_ID = "onr_v1_313_city-surveillance";
 const JACK_N_JOE_ID = "onr_v1_095_jack-n-joe";
+const BODYWEIGHT_ID = "onr_v1_079_bodyweight-synthetic-blood";
+const CRASH_EVERETT_ID = "onr_v1_157_crash-everett-inventive-fixer";
 
 describe("City Surveillance per-draw decisions", () => {
   it("lets Jack 'n' Joe resolve three independent pay-or-tag decisions", () => {
@@ -37,7 +40,6 @@ describe("City Surveillance per-draw decisions", () => {
       (action) =>
         action.type === "play_event" && action.payload?.cardId === jackId,
     );
-
     expect(state.runner.stack).toHaveLength(stackBefore - 1);
     expect(state.pendingChoice).toMatchObject({
       side: "runner",
@@ -98,6 +100,131 @@ describe("City Surveillance per-draw decisions", () => {
     expect(state.pendingChoice).toBeUndefined();
   });
 
+  it("pauses a five-card Bodyweight draw once per card", () => {
+    let state = cityGame("city-surveillance-bodyweight-five");
+    const cityId = putCorpRootInRemote(state, CITY_SURVEILLANCE_ID);
+    rezForTest(state, cityId);
+    state.runner.credits = 10;
+    state.runner.tags = 0;
+    const bodyweightId = moveRunnerCardToGrip(state, BODYWEIGHT_ID);
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const stackBefore = state.runner.stack.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "play_event" && action.payload?.cardId === bodyweightId,
+    );
+    const creditsAfterPlay = state.runner.credits;
+
+    const decisions = [
+      "pay_credit",
+      "take_tag",
+      "pay_credit",
+      "take_tag",
+      "pay_credit",
+    ] as const;
+    for (const [index, decision] of decisions.entries()) {
+      expect(state.runner.stack).toHaveLength(stackBefore - index - 1);
+      expect(state.pendingChoice?.source).toContain(
+        "runner_draw.city_surveillance",
+      );
+      state = applyChoice(state, "runner", decision);
+    }
+
+    expect(state.runner.stack).toHaveLength(stackBefore - 5);
+    expect(state.runner.credits).toBe(creditsAfterPlay - 3);
+    expect(state.runner.tags).toBe(2);
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.runnerDrawSequence).toBeUndefined();
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("stops a five-card draw cleanly when the stack runs out", () => {
+    let state = cityGame("city-surveillance-short-stack");
+    const cityId = putCorpRootInRemote(state, CITY_SURVEILLANCE_ID);
+    rezForTest(state, cityId);
+    state.runner.credits = 10;
+    const bodyweightId = moveRunnerCardToGrip(state, BODYWEIGHT_ID);
+    for (const cardId of state.runner.stack.slice(2)) {
+      removeEverywhere(state, cardId);
+      state.runner.heap.push(cardId);
+      state.cardInstances[cardId] = {
+        ...state.cardInstances[cardId]!,
+        faceup: true,
+        rezzed: true,
+        zone: { side: "runner", zone: "heap" },
+      };
+    }
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "play_event" && action.payload?.cardId === bodyweightId,
+    );
+    let decisions = 0;
+    while (
+      state.pendingChoice?.source.startsWith("runner_draw.city_surveillance:")
+    ) {
+      decisions += 1;
+      state = applyChoice(state, "runner", "take_tag");
+    }
+
+    expect(decisions).toBe(2);
+    expect(state.runner.stack).toHaveLength(0);
+    expect(state.runner.tags).toBe(2);
+    expect(state.runnerDrawSequence).toBeUndefined();
+  });
+
+  it("taxes the Crash Everett extra draw before opening its hidden choice", () => {
+    let state = cityGameWithCrash("city-surveillance-crash-extra-draw");
+    state.runner.credits = 10;
+    const crashId = moveRunnerCardToGrip(state, CRASH_EVERETT_ID);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" && action.payload?.cardId === crashId,
+    );
+    const cityId = putCorpRootInRemote(state, CITY_SURVEILLANCE_ID);
+    rezForTest(state, cityId);
+    state.runner.credits = 1;
+    state.runner.tags = 0;
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const stackBefore = state.runner.stack.length;
+
+    state = apply(state, "runner", (action) => action.type === "draw_card");
+    state = applyChoice(state, "runner", "pay_credit");
+    state = applyChoice(state, "runner", "take_tag");
+
+    expect(state.runner.stack).toHaveLength(stackBefore - 2);
+    expect(state.runner.credits).toBe(0);
+    expect(state.runner.tags).toBe(1);
+    expect(state.pendingChoice?.source).toContain("p3_61.crash_draw");
+    expect(state.pendingChoice?.options).toHaveLength(4);
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+    const topOption = state.pendingChoice?.options.find((option) =>
+      option.id.startsWith("top_"),
+    );
+    const returnedCardId = String(topOption?.value ?? "").split(":")[0];
+    state = applyChoice(state, "runner", topOption?.id ?? "");
+    expect(state.runner.stack[0]).toBe(returnedCardId);
+    expect(
+      JSON.stringify(
+        state.eventLog.slice(replayStart).map((event) => event.publicPayload),
+      ),
+    ).not.toContain(returnedCardId);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("offers the Corp the printed rez window before the first Jack 'n' Joe draw", () => {
     let state = cityGame("city-surveillance-pre-draw-rez");
     const cityId = putCorpRootInRemote(state, CITY_SURVEILLANCE_ID);
@@ -137,6 +264,25 @@ function cityGame(seed: string): GameState {
     createGameAfterSetup({
       seed,
       runnerDeck: ONR_V1_RUNNER_DECK,
+      corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+      agendaPointsToWin: 7,
+    }),
+  );
+}
+
+function cityGameWithCrash(seed: string): GameState {
+  return toRunnerTurn(
+    createGameAfterSetup({
+      seed,
+      runnerDeck: {
+        ...ONR_V1_RUNNER_DECK,
+        id: `${ONR_V1_RUNNER_DECK.id}_crash`,
+        name: `${ONR_V1_RUNNER_DECK.name} + Crash Everett`,
+        cards: [
+          ...ONR_V1_RUNNER_DECK.cards,
+          { id: CRASH_EVERETT_ID, quantity: 1 },
+        ],
+      },
       corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
       agendaPointsToWin: 7,
     }),
