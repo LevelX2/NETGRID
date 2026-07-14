@@ -70,6 +70,7 @@ export function beginEncounter(
   legalAction?: LegalAction,
 ): EncounterEntryResult {
   const run = mustRun(host.state);
+  const encounteredDefinition = host.cards.definitionFor(encounteredIceId);
   bindOrExpireNextSentryFreeBreak(run, encounteredIceId, host);
   run.phase = "encounter_ice";
   run.encounteredIceId = encounteredIceId;
@@ -106,6 +107,12 @@ export function beginEncounter(
     runDurationPaymentHost(host.state),
     legalAction,
   );
+  if (encounterTaxPayment.handled && legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      targetIceDefinitionId: encounteredDefinition.id,
+    };
+  }
   if (
     encounterTaxPayment.handled &&
     encounterTaxPayment.paid === false &&
@@ -128,7 +135,6 @@ export function beginEncounter(
       resolvedPayload: legalAction?.payload,
     };
   }
-  const encounteredDefinition = host.cards.definitionFor(encounteredIceId);
   if (
     encounteredDefinition.type === "ice" &&
     host.cards

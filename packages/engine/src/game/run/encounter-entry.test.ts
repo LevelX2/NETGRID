@@ -155,7 +155,7 @@ function definitionsFor(state: GameState): Record<string, CardDefinition> {
       "onr_v1_260_pocket-virtual-reality",
       { title: "Pocket Virtual Reality" },
     ),
-    "onr_v1_065_smarteye": definition("onr_v1_065_smarteye", {
+    onr_v1_065_smarteye: definition("onr_v1_065_smarteye", {
       title: "Smarteye",
       side: "runner",
       type: "program",
@@ -273,6 +273,29 @@ describe("encounter entry", () => {
     });
     expect(state.timingPoint).toBe("run.encounter_ice");
     expect(state.activeSide).toBe("runner");
+  });
+
+  it("attaches a paid run-wide encounter tax and its public ICE target to the entry action", () => {
+    const state = makeState({ iceDefinitionId: "simple_ice" });
+    state.run!.encounterTaxForFutureIce = 2;
+    const { host, calls } = hostFor(state);
+    const legalAction = runnerAction(state);
+
+    const result = beginEncounter(host, "ice_1" as CardInstanceId, legalAction);
+
+    expect(result).toMatchObject({
+      handled: true,
+      encounterStarted: true,
+      sourceDefinitionId: "simple_ice",
+    });
+    expect(state.runner.credits).toBe(3);
+    expect(legalAction.payload).toMatchObject({
+      encounterTaxForFutureIce: 2,
+      encounterTaxPaid: 2,
+      encounterTaxSource: "onr_v1_222_ball-and-chain",
+      targetIceDefinitionId: "simple_ice",
+    });
+    expect(calls.finish).toEqual([]);
   });
 
   it("binds pending next-sentry free breaks only to the next encountered ICE", () => {
@@ -398,5 +421,4 @@ describe("encounter entry", () => {
     });
     expect(state.activeSide).toBe("corp");
   });
-
 });

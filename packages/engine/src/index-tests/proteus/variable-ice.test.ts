@@ -2074,6 +2074,16 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
       (action) => action.actionId === pay.actionId,
     );
     expect(state.run?.futureEncounterIceStrengthBonus).toBe(0);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "continue_run",
+      postPassFutureStrengthAbility: "cancel_future_ice_strength_bonus",
+      sourceDefinitionId: COYOTE,
+      decision: "pay",
+      paymentAmount: 2,
+      paidCredits: 2,
+      strengthBonusAmount: 1,
+      futureEncounterIceStrengthBonus: 0,
+    });
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));

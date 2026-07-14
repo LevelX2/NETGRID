@@ -84,6 +84,7 @@ const VACUUM_LINK_ID = "onr_v1_275_vacuum-link";
 const BLINK_ID = "onr_v1_007_blink";
 const INSIDE_JOB_ID = "onr_v1_094_inside-job";
 const SOCIAL_ENGINEERING_ID = "onr_v1_111_social-engineering";
+const BALL_AND_CHAIN_ID = "onr_v1_222_ball-and-chain";
 const VIRAL_15_ID = "onr_v1_276_viral-15";
 const PLAYFUL_AI_ID = "onr_v1_104_playful-ai";
 const GYPSY_SCHEDULE_ANALYZER_ID = "onr_classic_038_gypsytm-schedule-analyzer";
@@ -2541,6 +2542,14 @@ export function formatChronicleEvent(
         const breakSubroutineTotalCost =
           numberValue(payload.breakSubroutineTotalCost) ??
           breakSubroutineBaseCost;
+        const breakSubroutineAdditionalCost = numberValue(
+          payload.breakSubroutineAdditionalCost,
+        );
+        const virizzBreakCostApplied =
+          stringValue(payload.v1922CorpIceAbility) ===
+            "virizz_break_cost_modifier" &&
+          breakSubroutineAdditionalCost !== undefined &&
+          breakSubroutineAdditionalCost > 0;
         const subroutineLabel = breakSubroutineLabel(
           payload,
           breakSubroutineCount,
@@ -2592,7 +2601,7 @@ export function formatChronicleEvent(
               );
           break;
         }
-        description = `${breakSubroutineTotalCost !== undefined ? `${creditText(breakSubroutineTotalCost)}: ` : ""}${subroutineLabel}${targetIceSuffix} gebrochen${endsRunAfterBreak ? "; der Run endet durch diesen Break-Effekt, ohne dass das ICE als passiert gilt" : ""}.`;
+        description = `${breakSubroutineTotalCost !== undefined ? `${creditText(breakSubroutineTotalCost)}: ` : ""}${subroutineLabel}${targetIceSuffix} gebrochen${endsRunAfterBreak ? "; der Run endet durch diesen Break-Effekt, ohne dass das ICE als passiert gilt" : ""}.${virizzBreakCostApplied ? " Die Gesamtkosten enthalten Zusatzkosten durch Virizz." : ""}`;
         chips.push(
           "Subroutine",
           subroutineLabel,
@@ -2601,6 +2610,12 @@ export function formatChronicleEvent(
           ...(breakSubroutineTotalCost !== undefined
             ? [
                 `${breakSubroutineTotalCost} ${creditLabel(breakSubroutineTotalCost)}`,
+              ]
+            : []),
+          ...(virizzBreakCostApplied
+            ? [
+                "Virizz",
+                `${breakSubroutineAdditionalCost} ${creditLabel(breakSubroutineAdditionalCost)} Zusatzkosten gesamt`,
               ]
             : []),
           ...(cardTitle ? [cardTitle] : []),
@@ -2642,6 +2657,48 @@ export function formatChronicleEvent(
           "Trash",
           "Run läuft weiter",
         );
+        break;
+      }
+      if (
+        stringValue(payload.postPassFutureStrengthAbility) ===
+        "cancel_future_ice_strength_bonus"
+      ) {
+        const source =
+          titleForDefinitionId(sourceDefinitionId) ??
+          sourceTitle ??
+          cardTitle ??
+          "Coyote";
+        const decision = stringValue(payload.decision);
+        const paymentAmount =
+          numberValue(payload.paidCredits) ??
+          numberValue(payload.paymentAmount) ??
+          0;
+        const strengthBonusAmount =
+          numberValue(payload.strengthBonusAmount) ?? 1;
+        category = "run";
+        importance = "important";
+        visibility = "public";
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        cardTitle = source;
+        if (decision === "pay") {
+          title = phrase(
+            subject,
+            `${creditText(paymentAmount)} beim Passieren von ${source} bezahlt`,
+          );
+          description = `Der +${strengthBonusAmount}-Stärke-Bonus von ${source} für alle weiteren ICE in diesem Run wurde verhindert.`;
+          chips.push(
+            source,
+            `${paymentAmount} ${creditLabel(paymentAmount)} bezahlt`,
+            "Folge-ICE-Bonus verhindert",
+          );
+          break;
+        }
+        title = phrase(
+          subject,
+          `den Stärke-Bonus von ${source} für spätere ICE zugelassen`,
+        );
+        description = `Alle weiteren ICE werden in diesem Run mit +${strengthBonusAmount} Stärke begegnet.`;
+        chips.push(source, `+${strengthBonusAmount} Stärke`, "Weitere ICE");
         break;
       }
       if (
@@ -3650,14 +3707,77 @@ export function formatChronicleEffectItems(
   const tagGainItem = tagGainChronicleItem(event, side, effects);
   const aiBoonRunStrengthItem = aiBoonRunStrengthChronicleItem(event);
   const insideJobAutoPassItem = insideJobAutoPassChronicleItem(event, side);
+  const encounterTaxItem = encounterTaxChronicleItem(event, side);
   return [
     ...(aiBoonRunStrengthItem ? [aiBoonRunStrengthItem] : []),
     ...(insideJobAutoPassItem ? [insideJobAutoPassItem] : []),
+    ...(encounterTaxItem ? [encounterTaxItem] : []),
     ...(payloadItem ? [payloadItem] : []),
     ...(traceHardwareWreckerItem ? [traceHardwareWreckerItem] : []),
     ...(tagGainItem ? [tagGainItem] : []),
     ...effectItems,
   ];
+}
+
+function encounterTaxChronicleItem(
+  event: PublicGameEvent,
+  side: Side,
+): ChronicleItem | undefined {
+  const payload = event.publicPayload ?? {};
+  const requiredAmount = positiveIntegerValue(payload.encounterTaxForFutureIce);
+  const paidAmount = numberValue(payload.encounterTaxPaid);
+  if (!requiredAmount || paidAmount === undefined) return undefined;
+
+  const sourceDefinitionId =
+    stringValue(payload.encounterTaxSource) ?? BALL_AND_CHAIN_ID;
+  const sourceTitle =
+    titleForDefinitionId(sourceDefinitionId) ?? "Ball and Chain";
+  const encounteredIceDefinitionId =
+    stringValue(payload.targetIceDefinitionId) ??
+    stringValue(payload.cardDefinitionId);
+  const encounteredIceTitle =
+    titleForDefinitionId(encounteredIceDefinitionId) ??
+    stringValue(payload.targetIceTitle) ??
+    stringValue(payload.title);
+  const encounteredIceSuffix =
+    encounteredIceTitle && encounteredIceTitle !== sourceTitle
+      ? ` mit ${encounteredIceTitle}`
+      : "";
+  const serverLabel = displayServerLabel(stringValue(payload.serverLabel));
+  const paid = paidAmount > 0;
+  const runnerSubject = side === "runner" ? "Du hast" : "Der Runner hat";
+  const runnerCouldNotPay =
+    side === "runner" ? "Du konntest" : "Der Runner konnte";
+
+  return {
+    id: `${event.eventId}:encounter-tax`,
+    category: "run",
+    importance: paid ? "important" : "critical",
+    visibility: "public",
+    actor: "runner",
+    title: paid
+      ? `${runnerSubject} wegen ${sourceTitle} ${creditText(paidAmount)} für die Begegnung${encounteredIceSuffix} bezahlt.`
+      : `${runnerCouldNotPay} die von ${sourceTitle} verlangten ${creditText(requiredAmount)} nicht bezahlen; der Run endete bei der Begegnung${encounteredIceSuffix}.`,
+    description: paid
+      ? `Die ungebrochene Subroutine von ${sourceTitle} gilt für den restlichen Run; nach der Zahlung läuft der Run weiter.`
+      : `Die ungebrochene Subroutine von ${sourceTitle} verlangt bei jeder weiteren ICE-Begegnung ${creditText(requiredAmount)}; ohne Zahlung endet der Run.`,
+    chips: uniqueChips([
+      ...baseChips("runner", false),
+      sourceTitle,
+      paid
+        ? `${paidAmount} ${creditLabel(paidAmount)} bezahlt`
+        : `${requiredAmount} ${creditLabel(requiredAmount)} fehlen`,
+      ...(encounteredIceTitle && encounteredIceTitle !== sourceTitle
+        ? [encounteredIceTitle]
+        : []),
+      ...(serverLabel ? [serverLabel] : []),
+      paid ? "Run läuft weiter" : "Run endet",
+    ]),
+    cardDefinitionId: sourceDefinitionId,
+    cardTitle: sourceTitle,
+    cardDetailLines: [],
+    groupLabel: groupLabelFor("run", "runner", undefined, serverLabel),
+  };
 }
 
 function insideJobAutoPassChronicleItem(
@@ -3758,18 +3878,16 @@ function tagGainChronicleItem(
   const drawTaxOnly =
     nonNegativePayloadCount(payload.tagsAdded) === undefined &&
     drawTaxTagsAdded > 0;
-  const sourceDefinitionId =
-    drawTaxOnly
-      ? undefined
-      : stringValue(payload.sourceDefinitionId) ??
-        stringValue(payload.cardDefinitionId) ??
-        stringValue(payload.traceAutoSuccessSourceDefinitionId);
-  const primarySourceTitle =
-    (drawTaxOnly
-      ? "City Surveillance"
-      : titleForDefinitionId(sourceDefinitionId) ??
-        stringValue(payload.sourceTitle) ??
-        stringValue(payload.title));
+  const sourceDefinitionId = drawTaxOnly
+    ? undefined
+    : (stringValue(payload.sourceDefinitionId) ??
+      stringValue(payload.cardDefinitionId) ??
+      stringValue(payload.traceAutoSuccessSourceDefinitionId));
+  const primarySourceTitle = drawTaxOnly
+    ? "City Surveillance"
+    : (titleForDefinitionId(sourceDefinitionId) ??
+      stringValue(payload.sourceTitle) ??
+      stringValue(payload.title));
   const additionalSourceDefinitionId = stringValue(
     payload.traceAutoSuccessSourceDefinitionId,
   );
@@ -4562,9 +4680,7 @@ function formatChronicleEffect(
           chips.push(
             "Run umgeleitet",
             targetServerLabel,
-            ...(paidCredits > 0
-              ? [`${creditText(paidCredits)} bezahlt`]
-              : []),
+            ...(paidCredits > 0 ? [`${creditText(paidCredits)} bezahlt`] : []),
             event.publicPayload.redirectedToRezzedIce === true
               ? "Äußerstes gerezztes ICE"
               : "Letztes ICE passiert",
@@ -5945,7 +6061,9 @@ function runnerTagsAfterTagGain(
     payload.runnerTagsAfterTraceAutoSuccess,
   );
   if (afterTraceAutoSuccess === undefined) return undefined;
-  return afterTraceAutoSuccess + (nonNegativePayloadCount(payload.tagsAdded) ?? 0);
+  return (
+    afterTraceAutoSuccess + (nonNegativePayloadCount(payload.tagsAdded) ?? 0)
+  );
 }
 
 function runnerTagGainOutcomeText(side: Side, amount: number): string {
