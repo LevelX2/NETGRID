@@ -317,6 +317,7 @@ function actionMatches(
     const source = [
       ...input.playerView.own.gripOrHq,
       ...(input.playerView.own.rig ?? []),
+      ...input.playerView.own.scoreArea,
       ...input.playerView.servers.flatMap((server) => [
         ...server.ice,
         ...server.root,

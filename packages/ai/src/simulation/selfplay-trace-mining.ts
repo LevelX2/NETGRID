@@ -20,6 +20,7 @@ export type AiSelfplayTraceMiningDetectorId =
   | "repeated_low_value_archives"
   | "recovery_low_value_loop"
   | "bank_over_target_without_funding_need"
+  | "repeatable_action_no_progress_loop"
   | "risky_self_damage_action"
   | "blink_low_hand_buffer_run"
   | "duplicate_low_delta_install"
@@ -224,6 +225,7 @@ export const DEFAULT_SELFPLAY_TRACE_MINING_DETECTORS: AiSelfplayTraceMiningDetec
     "repeated_low_value_archives",
     "recovery_low_value_loop",
     "bank_over_target_without_funding_need",
+    "repeatable_action_no_progress_loop",
     "risky_self_damage_action",
     "blink_low_hand_buffer_run",
     "duplicate_low_delta_install",

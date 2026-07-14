@@ -305,6 +305,29 @@ describe("SelfplayTraceMining", () => {
     expect(findings[0]?.selectedActionId).toBe("bank-positive");
   });
 
+  it("detects a coupled repeatable credit and trace loop without board progress", () => {
+    const actions = [
+      ...repeatableActions("corp", "netwatch", 1, 3, 108, -2),
+      ...repeatableActions("runner", "newsgroup", 4, 4, 102, 2),
+      ...repeatableActions("corp", "netwatch", 8, 3, 110, -2),
+      ...repeatableActions("runner", "newsgroup", 11, 4, 104, 2),
+    ];
+    const summary = selfplaySummary(actions);
+
+    const findings = detectAiSelfplaySuspiciousDecisions([summary], {
+      detectorIds: ["repeatable_action_no_progress_loop"],
+    });
+
+    expect(findings.length).toBeGreaterThan(0);
+    expect(findings.some((finding) => finding.side === "runner")).toBe(true);
+    expect(findings.some((finding) => finding.side === "corp")).toBe(true);
+    expect(
+      findings.every((finding) =>
+        finding.detectorIds.includes("repeatable_action_no_progress_loop"),
+      ),
+    ).toBe(true);
+  });
+
   it("bounds risky self-damage signals to structured entries", () => {
     const positive = selfplaySummary([
       selfplayAction("runner", 1, "trigger_ability", {
@@ -1146,4 +1169,32 @@ function selfplayAction(
     qualityTags: overrides.qualityTags ?? [],
     stateHashAfter: overrides.stateHashAfter ?? `fnv1a:${stateVersionBefore}`,
   };
+}
+
+function repeatableActions(
+  side: "corp" | "runner",
+  selectedActionId: string,
+  firstStateVersion: number,
+  count: number,
+  runnerCreditsBefore: number,
+  runnerCreditDelta: number,
+): AiSimulationSummary["actionSequence"] {
+  return Array.from({ length: count }, (_, index) => {
+    const creditsBefore = runnerCreditsBefore + index * runnerCreditDelta;
+    return selfplayAction(
+      side,
+      firstStateVersion + index,
+      "activated_card_ability",
+      {
+        selectedActionId,
+        planKind:
+          side === "corp" ? "corp.apply_punish_pressure" : "basic_install",
+        runnerCreditsBefore: creditsBefore,
+        runnerCreditsAfter: creditsBefore + runnerCreditDelta,
+        runnerCreditDelta,
+        legalActionCount: 9,
+        actionableAlternativeCount: 8,
+      },
+    );
+  });
 }
