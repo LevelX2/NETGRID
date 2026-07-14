@@ -3325,6 +3325,7 @@ function aiDecisionTraceJson(debug: AiDecisionDebug, actor: Side, legalAction: L
   const debugSelectedActionType = typeof debug.selectedActionType === "string" ? debug.selectedActionType : undefined;
   const result: Record<string, unknown> = {
     schemaVersion: "ai-decision-trace-v1",
+    traceMode: mode,
     debugSchemaVersion: debug.schemaVersion,
     actor,
     aiLevel: debug.aiLevel,
@@ -3354,6 +3355,12 @@ function aiDecisionTraceJson(debug: AiDecisionDebug, actor: Side, legalAction: L
   if (Array.isArray(debug.rankedAlternatives)) result.rankedAlternatives = debug.rankedAlternatives.slice(0, mode === "summary" ? 6 : 24);
   if (Array.isArray(debug.actionAlternatives)) result.actionAlternatives = debug.actionAlternatives.slice(0, 32);
   if (Array.isArray(debug.scoreBreakdown)) result.scoreBreakdown = debug.scoreBreakdown.slice(0, 16);
+  if (debug.decisionChain) {
+    result.decisionChain = aiDecisionTraceDecisionChain(
+      debug.decisionChain,
+      mode,
+    );
+  }
   if (mode === "detailed") {
     for (const field of ["facts", "hypotheses", "invalidations", "beliefUncertainty", "evidence"] as const) {
       const value = debug[field];
@@ -3367,6 +3374,50 @@ function aiDecisionTraceJson(debug: AiDecisionDebug, actor: Side, legalAction: L
     if (debug.opponentModel) result.opponentModel = debug.opponentModel;
   }
   return result;
+}
+
+function aiDecisionTraceDecisionChain(
+  chain: NonNullable<AiDecisionDebug["decisionChain"]>,
+  mode: Exclude<AiDecisionTraceMode, "off">,
+): Record<string, unknown> {
+  if (mode === "detailed") {
+    return {
+      traceLevel: "detailed",
+      ...chain,
+    };
+  }
+  const choiceResolution = chain.finalSelection.choiceResolution;
+  return {
+    traceLevel: "summary",
+    schemaVersion: chain.schemaVersion,
+    legalActionCount: chain.legalActionCount,
+    excludedActionCount: chain.exclusions.length,
+    ...(chain.rawScoreWinner
+      ? { rawScoreWinner: chain.rawScoreWinner }
+      : {}),
+    ...(chain.planSelection ? { planSelection: chain.planSelection } : {}),
+    ...(chain.planArbitration
+      ? { planArbitration: chain.planArbitration }
+      : {}),
+    priorityCandidates: chain.priorityCandidates,
+    initialSelection: chain.initialSelection,
+    adjustmentCount: chain.adjustments.length,
+    adjustments: chain.adjustments,
+    finalSelection: {
+      actionId: chain.finalSelection.actionId,
+      selectedOptionCount: chain.finalSelection.selectedOptionCount,
+      ...(choiceResolution
+        ? {
+            choiceResolution: {
+              choiceId: choiceResolution.choiceId,
+              kind: choiceResolution.kind,
+              source: choiceResolution.source,
+              selectedOptionCount: choiceResolution.selectedOptionIds.length,
+            },
+          }
+        : {}),
+    },
+  };
 }
 
 function aiDecisionTraceDetailSections(

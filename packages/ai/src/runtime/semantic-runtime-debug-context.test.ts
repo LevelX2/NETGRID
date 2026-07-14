@@ -15,7 +15,11 @@ import type { SemanticRuntimeChoice } from "./semantic-runtime-types";
 
 describe("SemanticRuntimeDebugContext", () => {
   it("uses action semantic candidates for selected and alternative score breakdowns", () => {
-    const selectedAction = legalAction("install-agenda", "corp", "install_card");
+    const selectedAction = legalAction(
+      "install-agenda",
+      "corp",
+      "install_card",
+    );
     const alternativeAction = legalAction("gain-credit", "corp", "gain_credit");
     const selectedChoice = choice(selectedAction, "scoreline", 100, {
       evidence: "selected candidate evidence",
@@ -50,6 +54,25 @@ describe("SemanticRuntimeDebugContext", () => {
       [selectedChoice, alternativeChoice],
       emptyPlanRuntime(),
       [selectedCandidate, alternativeCandidate],
+      {
+        schemaVersion: "ai-decision-chain-debug-v1",
+        legalActionCount: 2,
+        legalActionIds: ["install-agenda", "gain-credit"],
+        exclusions: [],
+        rawScoreWinner: { actionId: "install-agenda", score: 100 },
+        priorityCandidates: [
+          { route: "semantic_score", actionId: "install-agenda" },
+        ],
+        initialSelection: {
+          route: "semantic_score",
+          actionId: "install-agenda",
+        },
+        adjustments: [],
+        finalSelection: {
+          actionId: "install-agenda",
+          selectedOptionCount: 0,
+        },
+      },
     );
 
     expect(debug.scoreBreakdown).toEqual(
@@ -200,7 +223,10 @@ function aiInput(side: Side, legalActions: LegalAction[]): AiDecisionInput {
         tags: 0,
       },
       opponent: {
-        identity: visibleCard("runner-identity", side === "corp" ? "runner" : "corp"),
+        identity: visibleCard(
+          "runner-identity",
+          side === "corp" ? "runner" : "corp",
+        ),
         credits: 5,
         clicks: 3,
         agendaPoints: 0,

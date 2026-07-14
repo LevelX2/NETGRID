@@ -1,5 +1,6 @@
 import {
   AI_DECISION_DEBUG_SCHEMA_VERSION,
+  type AiDecisionChainDebug,
   type AiDecisionDebug,
   type AiDecisionInput,
 } from "@netgrid/shared";
@@ -10,6 +11,7 @@ import type {
 } from "../runtime/semantic-runtime-types";
 import { scrubEvidence } from "../runtime/semantic-runtime-score-components";
 import type { TacticalPlanRuntimeResult } from "../tactical-plans";
+import { buildSemanticDecisionChainDetailSection } from "./semantic-decision-chain-debug";
 import { buildSemanticDecisionDebugDiagnostics } from "./decision-debug";
 import { semanticRuntimeMemoryDebug } from "./semantic-runtime-memory-debug";
 import {
@@ -38,6 +40,7 @@ export type BuildSemanticRuntimeDecisionDebugInput = {
   selectedScoreBreakdown: NonNullable<AiDecisionDebug["scoreBreakdown"]>;
   rankedAlternatives: NonNullable<AiDecisionDebug["rankedAlternatives"]>;
   actionAlternatives: NonNullable<AiDecisionDebug["actionAlternatives"]>;
+  decisionChain: AiDecisionChainDebug;
 };
 
 export function buildSemanticRuntimeDecisionDebug({
@@ -49,6 +52,7 @@ export function buildSemanticRuntimeDecisionDebug({
   selectedScoreBreakdown,
   rankedAlternatives,
   actionAlternatives,
+  decisionChain,
 }: BuildSemanticRuntimeDecisionDebugInput): AiDecisionDebug {
   const memoryDebug = semanticRuntimeMemoryDebug(input);
   const actionPrecisionDebug = semanticRuntimeDebugActionPrecisionItems(
@@ -182,7 +186,11 @@ export function buildSemanticRuntimeDecisionDebug({
     ...(debugDiagnostics.warnings.length > 0
       ? { warnings: debugDiagnostics.warnings }
       : {}),
-    detailSections: debugDiagnostics.detailSections,
+    detailSections: [
+      ...debugDiagnostics.detailSections,
+      buildSemanticDecisionChainDetailSection(decisionChain),
+    ],
+    decisionChain,
     evidence: scrubEvidence([...selected.evidence]).slice(0, 12),
     fallbackUsed: false,
     profileId: input.profileId,

@@ -88,6 +88,14 @@ Empfohlene Spalten:
 
 `traceJson` enthält nur das versionierte Schema. Anzeige-ViewModels werden serverseitig daraus abgeleitet. HTML entsteht erst im Webclient oder in der lokalen Maintenance-Ansicht.
 
+Die Entscheidungskette nutzt denselben Persistenzvertrag. Bei
+`aiTraceMode: summary` enthält `traceJson.decisionChain` die kompakte
+`traceLevel: summary`-Projektion; bei `aiTraceMode: detailed` enthält derselbe
+Schlüssel die vollständige sanitizierte `AiDecisionChainDebug` mit
+`traceLevel: detailed`. Es gibt dafür keine weitere Tabelle oder Logdatei.
+Die genaue Feldabgrenzung führt
+`semantic-decision-chain-observability-contract-2026-07-14.md`.
+
 ## Metaebene
 
 Die Metaebene ist die Standardansicht pro Entscheidung. Sie muss ohne Drilldown verständlich sein und darf keine verdeckten Details preisgeben.

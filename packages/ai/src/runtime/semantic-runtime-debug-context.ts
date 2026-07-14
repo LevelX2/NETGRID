@@ -1,4 +1,5 @@
 import type {
+  AiDecisionChainDebug,
   AiDecisionDebug,
   AiDecisionInput,
   LegalAction,
@@ -29,6 +30,7 @@ export type SemanticRuntimeDebugContext = {
     rankedChoices: SemanticRuntimeChoice[],
     planRuntime: TacticalPlanRuntimeResult,
     actionSemanticCandidates: readonly ActionSemanticCandidate[],
+    decisionChain: AiDecisionChainDebug,
   ) => AiDecisionDebug;
   semanticRuntimeCoverageSelectionDebug: (
     input: AiDecisionInput,
@@ -94,6 +96,7 @@ export function createSemanticRuntimeDebugContext(
       rankedChoices,
       planRuntime,
       actionSemanticCandidates,
+      decisionChain,
     ) => {
       const coverageSelection = coverageSelectionDebug(
         input,
@@ -117,6 +120,7 @@ export function createSemanticRuntimeDebugContext(
           selected.action.actionId,
           planRuntime,
         ),
+        decisionChain,
       });
     },
     semanticRuntimeCoverageSelectionDebug: coverageSelectionDebug,

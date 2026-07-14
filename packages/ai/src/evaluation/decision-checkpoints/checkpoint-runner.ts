@@ -99,12 +99,18 @@ export function runAiDecisionCheckpoint(
     strategicIntent,
     fixture.expectation.strategicIntent,
   );
+  const decisionChainAccepted = decisionChainExpectationMatches(
+    input,
+    decision,
+    fixture.expectation.decisionChain,
+  );
   if (
     forbidden ||
     !accepted ||
     !choiceAccepted ||
     !discardChoiceAccepted ||
-    !strategicIntentAccepted
+    !strategicIntentAccepted ||
+    !decisionChainAccepted
   ) {
     return {
       ok: false,
@@ -124,6 +130,57 @@ export function runAiDecisionCheckpoint(
     selectedAction,
     ...(strategicIntent ? { strategicIntent } : {}),
   };
+}
+
+function decisionChainExpectationMatches(
+  input: AiDecisionInput,
+  decision: AiDecision,
+  expectation: AiDecisionCheckpointExpectationV1["decisionChain"] | undefined,
+): boolean {
+  if (!expectation) return true;
+  const chain = decision.decisionDebug?.decisionChain;
+  if (!chain) return false;
+  if (
+    expectation.selectionRoute !== undefined &&
+    chain.initialSelection.route !== expectation.selectionRoute
+  ) {
+    return false;
+  }
+  if (expectation.rawScoreWinner) {
+    const rawScoreWinner = input.legalActions.find(
+      (action) => action.actionId === chain.rawScoreWinner?.actionId,
+    );
+    if (
+      !rawScoreWinner ||
+      !actionMatches(input, rawScoreWinner, expectation.rawScoreWinner)
+    ) {
+      return false;
+    }
+  }
+  if (expectation.planMappedAction) {
+    const mappedActions = new Set(chain.planSelection?.mappedActionIds ?? []);
+    if (
+      !input.legalActions.some(
+        (action) =>
+          mappedActions.has(action.actionId) &&
+          actionMatches(input, action, expectation.planMappedAction!),
+      )
+    ) {
+      return false;
+    }
+  }
+  if (
+    expectation.arbitrationOutcome !== undefined &&
+    chain.planArbitration?.outcome !== expectation.arbitrationOutcome
+  ) {
+    return false;
+  }
+  const adjustmentKinds = new Set(
+    chain.adjustments.map((adjustment) => adjustment.kind),
+  );
+  return (expectation.requiredAdjustmentKinds ?? []).every((kind) =>
+    adjustmentKinds.has(kind),
+  );
 }
 
 function choiceExpectationMatches(

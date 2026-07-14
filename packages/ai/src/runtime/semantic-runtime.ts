@@ -1,5 +1,6 @@
 import type {
   AiDecision,
+  AiDecisionChainDebug,
   AiDecisionDebug,
   AiDecisionInput,
   LegalAction,
@@ -28,10 +29,16 @@ import { buildCorpTacticalGoals } from "../decision/corp-tactical-goals";
 import { buildSemanticDecisionFrame } from "../decision/semantic-decision-frame";
 import type { TacticalGoalLike } from "../decision/semantic-decision-frame";
 import { buildMergedTacticalGoals } from "../decision/tactical-goal-merge";
+import { buildSemanticDecisionChainDetailSection } from "../diagnostics/semantic-decision-chain-debug";
 import { rememberStrategicIntentState } from "../strategic-intent-memory";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import type { AiDecisionRuntimeOptions } from "./choose-ai-action";
 import { assessDecisionOpportunity } from "./decision-opportunity";
+import {
+  buildSemanticCoverageFallbackDecisionChainDebug,
+  buildSemanticDecisionChainDebug,
+  selectSemanticRuntimeInitialChoice,
+} from "./semantic-decision-chain";
 import type {
   SemanticRuntimeChoice,
   SemanticRuntimeCoverageSelectionDebug,
@@ -170,6 +177,7 @@ export type SemanticRuntimeDependencies = {
     rankedChoices: SemanticRuntimeChoice[],
     planRuntime: TacticalPlanRuntimeResult,
     actionSemanticCandidates: readonly ActionSemanticCandidate[],
+    decisionChain: AiDecisionChainDebug,
   ) => AiDecisionDebug;
 };
 
@@ -383,8 +391,10 @@ export function chooseSemanticRuntimeAction(
   );
   const selfDamageImmediateWinChoice =
     dependencies.runnerSelfDamageImmediateWinSemanticChoice(input, choices);
-  const inevitableCorpDeckoutChoice =
-    runnerInevitableCorpDeckoutSemanticChoice(input, choices);
+  const inevitableCorpDeckoutChoice = runnerInevitableCorpDeckoutSemanticChoice(
+    input,
+    choices,
+  );
   const opponentMatchpointContestChoice =
     runnerRunTargetEvaluations !== undefined
       ? runnerOpponentMatchpointContestSemanticChoice(
@@ -393,15 +403,18 @@ export function chooseSemanticRuntimeAction(
           runnerRunTargetEvaluations,
         )
       : undefined;
-  const initialChoice =
-    runPlanChoice ??
-    inevitableCorpDeckoutChoice ??
-    reactiveChoice ??
-    selfDamageImmediateWinChoice ??
-    opponentMatchpointContestChoice ??
-    mappedChoice.choice ??
-    bestChoice;
-  if (!initialChoice) {
+  const initialSelection = selectSemanticRuntimeInitialChoice({
+    ...(runPlanChoice ? { runPlanChoice } : {}),
+    ...(inevitableCorpDeckoutChoice ? { inevitableCorpDeckoutChoice } : {}),
+    ...(reactiveChoice ? { reactiveChoice } : {}),
+    ...(selfDamageImmediateWinChoice ? { selfDamageImmediateWinChoice } : {}),
+    ...(opponentMatchpointContestChoice
+      ? { opponentMatchpointContestChoice }
+      : {}),
+    mappedChoice,
+    ...(bestChoice ? { bestChoice } : {}),
+  });
+  if (!initialSelection) {
     return semanticCoverageFallbackDecision(
       input,
       actionSemanticCandidates,
@@ -409,6 +422,7 @@ export function chooseSemanticRuntimeAction(
       dependencies,
     );
   }
+  const initialChoice = initialSelection.choice;
   const effectivePlanRuntime =
     mappedChoice.outcome === "semantic_choice_selected"
       ? dependencies.tacticalPlanRuntimeAlignedToChoice(
@@ -436,6 +450,16 @@ export function chooseSemanticRuntimeAction(
     input,
     selectedChoice.action,
   );
+  const decisionChain = buildSemanticDecisionChainDebug({
+    input,
+    choices,
+    ...(bestChoice ? { bestChoice } : {}),
+    planRuntime,
+    mappedChoice,
+    initialSelection,
+    runOnlyActionAdjustment: runOnlyActionAdjusted,
+    ...(selectedChoices ? { selectedChoices } : {}),
+  });
   const persistTacticalPlanMemory = options.persistTacticalPlanMemory !== false;
   const updatedPlanMemory = persistTacticalPlanMemory
     ? dependencies.rememberTacticalPlanRuntime(
@@ -490,6 +514,7 @@ export function chooseSemanticRuntimeAction(
       ...(coverageSelectionDebug?.evidence ?? []),
       `semantic_runtime_default:true`,
       `semantic_runtime_scope:${selectedChoice.scopeId}`,
+      `semantic_decision_selection_route:${decisionChain.initialSelection.route}`,
       ...(effectivePlanRuntime.selectedPlan
         ? [
             `tactical_plan:${effectivePlanRuntime.selectedPlan.planId}`,
@@ -534,6 +559,7 @@ export function chooseSemanticRuntimeAction(
       runOnlyActionAdjusted.rankedChoices,
       effectivePlanRuntime,
       actionSemanticCandidates,
+      decisionChain,
     ),
     timeoutUsed: false,
     profileId: input.profileId,
@@ -607,6 +633,7 @@ function semanticCoverageFallbackDecision(
     `fallback_action_policy:${policy}`,
     `fallback_candidate_count:${actionSemanticCandidates.length}`,
     `fallback_choice_count:${choices.length}`,
+    "semantic_decision_selection_route:semantic_coverage_fallback",
     ...decisionOpportunity.evidence,
     ...(action
       ? [
@@ -622,6 +649,12 @@ function semanticCoverageFallbackDecision(
   if ((action.choiceRequirements?.length ?? 0) > 0 && !selectedChoices) {
     throw new SemanticCoverageFallbackError(input.side, [action.type]);
   }
+  const decisionChain = buildSemanticCoverageFallbackDecisionChainDebug({
+    input,
+    choices,
+    actionId: action.actionId,
+    ...(selectedChoices ? { selectedChoices } : {}),
+  });
   const reasonCode = `${input.side}.semantic.coverage_fallback.${policy}`;
   return {
     actionId: action.actionId,
@@ -634,7 +667,12 @@ function semanticCoverageFallbackDecision(
     ),
     fallbackUsed: true,
     evidence,
-    decisionDebug: semanticCoverageFallbackDebug(input, action, evidence),
+    decisionDebug: semanticCoverageFallbackDebug(
+      input,
+      action,
+      evidence,
+      decisionChain,
+    ),
     timeoutUsed: false,
     profileId: input.profileId,
     difficulty: input.difficulty,
@@ -730,6 +768,7 @@ function semanticCoverageFallbackDebug(
   input: AiDecisionInput,
   action: LegalAction | undefined,
   evidence: readonly string[],
+  decisionChain: AiDecisionChainDebug,
 ): AiDecisionDebug {
   return {
     schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
@@ -745,6 +784,8 @@ function semanticCoverageFallbackDebug(
     actionAlternatives: [],
     scoreBreakdown: [],
     whyNot: semanticCoverageFallbackWhyNot(evidence),
+    detailSections: [buildSemanticDecisionChainDetailSection(decisionChain)],
+    decisionChain,
     evidence: [...evidence].slice(0, 12),
     fallbackUsed: true,
     profileId: input.profileId,

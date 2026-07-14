@@ -1,5 +1,7 @@
 import type {
+  AiDecisionChainDebug,
   AiDifficulty,
+  AiDecisionSelectionRoute,
   GameState,
   PublicGameEvent,
   Side,
@@ -23,6 +25,7 @@ export type AiDecisionCheckpointActionMatcher = {
 };
 
 export type AiDecisionCheckpointExpectationV1 = {
+  contractKind?: "correctness" | "equivalence_only";
   acceptableActions?: AiDecisionCheckpointActionMatcher[];
   forbiddenActions?: AiDecisionCheckpointActionMatcher[];
   choice?: {
@@ -40,6 +43,17 @@ export type AiDecisionCheckpointExpectationV1 = {
     forbiddenPrimaryStrategyIds?: string[];
     acceptableFamilies?: StrategicIntentFamily[];
     forbiddenTargetKinds?: StrategicTargetVector["kind"][];
+  };
+  decisionChain?: {
+    selectionRoute?: AiDecisionSelectionRoute;
+    rawScoreWinner?: AiDecisionCheckpointActionMatcher;
+    planMappedAction?: AiDecisionCheckpointActionMatcher;
+    arbitrationOutcome?: NonNullable<
+      AiDecisionChainDebug["planArbitration"]
+    >["outcome"];
+    requiredAdjustmentKinds?: Array<
+      AiDecisionChainDebug["adjustments"][number]["kind"]
+    >;
   };
 };
 

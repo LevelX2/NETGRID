@@ -38,6 +38,16 @@ Stand: 2026-07-13
   Runtime, Kill-Switches und der frühere AI-Monolithtest sind entfernt.
 - Der Coverage-Restpfad ist fail-closed und darf nur ausdrücklich sichere
   Engine-Fortsetzungen auswählen.
+- Der produktive Auswahlweg ist über `AiDecisionDebug.decisionChain`
+  verhaltensneutral beobachtbar: LegalActions, semantische Ausschlüsse,
+  Rohscore-Sieger, Plan-Mapping, Plan-vs.-Score-Arbitration, feste
+  Sonderprioritäten, nachgelagerte Anpassung und Choice-Auflösung werden
+  side-sicher getrennt ausgewiesen. Spielgleiche Decision-Checkpoints können
+  diese Auswahlroute zusätzlich zur finalen Action prüfen.
+- Der bestehende SQLite-KI-Trace ist die einzige dauerhafte Diagnoseablage für
+  diese Kette: `summary` speichert sie kompakt, `detailed` vollständig im
+  gleichen `ai_decision_traces.trace_json`; ein zweiter Speicherpfad entsteht
+  nicht.
 - Der bestehende Plan `corp.create_score_window` erkennt vollständige
   Same-Turn-Konversionspfade aus Aktionsgewinn, Advancement-Platzierung,
   Countertransfer und Basic Advances. Vapor Ops und andere Werkzeuge werden

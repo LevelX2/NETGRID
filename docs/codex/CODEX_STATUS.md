@@ -1,6 +1,6 @@
 # CODEX_STATUS
 
-Stand: 2026-07-11
+Stand: 2026-07-14
 
 ## Einstieg
 
@@ -29,6 +29,12 @@ Die Semantic Runtime ist der einzige produktive KI-Entscheidungsweg. Alte
 Planer, Shadow-/META-Runtime, historisch benannte Controllerprofile und
 stille Legacy-Fallbacks sind kein aktueller Vertrag. Der Coverage-Restpfad
 ist fail-closed und darf nur vorhandene sichere LegalActions auswählen.
+Der produktive Auswahlweg ist über den side-sicheren
+`AiDecisionDebug.decisionChain` bis zur finalen Action und Choice getrennt
+beobachtbar; diese Observability verändert weder Scoring noch Planpriorität.
+Der vorhandene SQLite-KI-Trace persistiert die Kette im normalen
+`summary`-Modus kompakt und im erweiterten `detailed`-Modus vollständig unter
+demselben `trace_json`-Pfad.
 
 ## Current-State-Cleanup
 

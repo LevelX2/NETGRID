@@ -1907,6 +1907,7 @@ export const AI_DECISION_DEBUG_REPLAY_FIELDS = [
   "longTermPlan",
   "warnings",
   "detailSections",
+  "decisionChain",
 ] as const;
 
 export type AiDecisionScoreComponent = {
@@ -1964,6 +1965,77 @@ export type AiDecisionDetailSection = {
   items: string[];
 };
 
+export const AI_DECISION_CHAIN_DEBUG_SCHEMA_VERSION =
+  "ai-decision-chain-debug-v1" as const;
+
+export type AiDecisionSelectionRoute =
+  | "runner_run_plan"
+  | "inevitable_corp_deckout"
+  | "reactive_choice"
+  | "self_damage_immediate_win"
+  | "opponent_matchpoint_contest"
+  | "tactical_plan_mapping"
+  | "tactical_plan_override"
+  | "semantic_score"
+  | "semantic_coverage_fallback";
+
+export type AiDecisionChainDebug = {
+  schemaVersion: typeof AI_DECISION_CHAIN_DEBUG_SCHEMA_VERSION;
+  legalActionCount: number;
+  legalActionIds: string[];
+  exclusions: Array<{
+    actionId: string;
+    key: string;
+  }>;
+  rawScoreWinner?: {
+    actionId: string;
+    score: number;
+  };
+  planSelection?: {
+    planId: string;
+    planKind: string;
+    mappedActionIds: string[];
+    contributionMode: "diagnostic_only";
+  };
+  planArbitration?: {
+    outcome?:
+      | "plan_mapping_selected"
+      | "semantic_choice_selected"
+      | "semantic_choice_blocked";
+    selectedActionId?: string;
+    mappedActionId?: string;
+    overrideActionId?: string;
+    overrideBlockedActionId?: string;
+    reason?: string;
+    scoreGap?: number;
+    threshold?: number | "absolute";
+    policy?: "score_gap" | "absolute_plan_control";
+  };
+  priorityCandidates: Array<{
+    route: AiDecisionSelectionRoute;
+    actionId: string;
+  }>;
+  initialSelection: {
+    route: AiDecisionSelectionRoute;
+    actionId: string;
+  };
+  adjustments: Array<{
+    kind: "runner_run_only_adjustment";
+    fromActionId: string;
+    toActionId: string;
+  }>;
+  finalSelection: {
+    actionId: string;
+    selectedOptionCount: number;
+    choiceResolution?: {
+      choiceId: string;
+      kind: string;
+      source: string;
+      selectedOptionIds: string[];
+    };
+  };
+};
+
 export type AiDecisionDebug = {
   schemaVersion: typeof AI_DECISION_DEBUG_SCHEMA_VERSION;
   aiLevel: number;
@@ -1981,6 +2053,7 @@ export type AiDecisionDebug = {
   longTermPlan?: string[];
   warnings?: string[];
   detailSections?: AiDecisionDetailSection[];
+  decisionChain?: AiDecisionChainDebug;
   uncertainty?: string[];
   evidence?: string[];
   fallbackUsed?: boolean;
@@ -2072,6 +2145,8 @@ export function sanitizeAiDecisionDebug(
     source.detailSections,
   );
   if (detailSections) result.detailSections = detailSections;
+  const decisionChain = sanitizeAiDecisionChainDebug(source.decisionChain);
+  if (decisionChain) result.decisionChain = decisionChain;
   const opponentModel = sanitizeAiDecisionDebugJson(source.opponentModel);
   if (
     opponentModel &&
@@ -2297,6 +2372,31 @@ function sanitizeAiDecisionDebugJson(value: unknown, depth = 0): unknown {
     if (sanitized !== undefined) result[key] = sanitized;
   }
   return result;
+}
+
+function sanitizeAiDecisionChainDebug(
+  value: unknown,
+): AiDecisionChainDebug | undefined {
+  const sanitized = sanitizeAiDecisionDebugJson(value);
+  if (!sanitized || typeof sanitized !== "object" || Array.isArray(sanitized)) {
+    return undefined;
+  }
+  const candidate = sanitized as Record<string, unknown>;
+  if (
+    candidate.schemaVersion !== AI_DECISION_CHAIN_DEBUG_SCHEMA_VERSION ||
+    typeof candidate.legalActionCount !== "number" ||
+    !Array.isArray(candidate.legalActionIds) ||
+    !Array.isArray(candidate.exclusions) ||
+    !Array.isArray(candidate.priorityCandidates) ||
+    !candidate.initialSelection ||
+    typeof candidate.initialSelection !== "object" ||
+    !Array.isArray(candidate.adjustments) ||
+    !candidate.finalSelection ||
+    typeof candidate.finalSelection !== "object"
+  ) {
+    return undefined;
+  }
+  return sanitized as AiDecisionChainDebug;
 }
 
 function sanitizeAiDecisionDebugStringArray(

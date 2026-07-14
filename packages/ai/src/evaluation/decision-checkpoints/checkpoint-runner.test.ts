@@ -72,6 +72,33 @@ describe("AI decision checkpoints", () => {
     });
   });
 
+  it("matches the productive decision-chain route without blessing score values", () => {
+    const baseline = runAiDecisionCheckpoint(fixture());
+    const chain = baseline.decision?.decisionDebug?.decisionChain;
+    if (!chain) throw new Error("Missing decision chain in checkpoint result");
+
+    const accepted = fixture();
+    accepted.expectation.decisionChain = {
+      selectionRoute: chain.initialSelection.route,
+      ...(chain.rawScoreWinner
+        ? { rawScoreWinner: { actionId: chain.rawScoreWinner.actionId } }
+        : {}),
+    };
+    expect(runAiDecisionCheckpoint(accepted)).toMatchObject({ ok: true });
+
+    const rejected = fixture();
+    rejected.expectation.decisionChain = {
+      selectionRoute:
+        chain.initialSelection.route === "semantic_coverage_fallback"
+          ? "semantic_score"
+          : "semantic_coverage_fallback",
+    };
+    expect(runAiDecisionCheckpoint(rejected)).toMatchObject({
+      ok: false,
+      code: "behavior_regression",
+    });
+  });
+
   it("matches selected choice values through the productive chooser", () => {
     const current = fixture();
     const state = current.engine.testOnlyGameState;

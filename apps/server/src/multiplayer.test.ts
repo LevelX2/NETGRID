@@ -7,7 +7,7 @@ import { WebSocket } from "ws";
 import snapshotsData from "../../../data/decks/deck-snapshots-0.6.json";
 import snapshotsData08 from "../../../data/decks/deck-snapshots-0.8.json";
 import profilesData08 from "../../../data/decks/deck-format-profiles-0.8.json";
-import { beliefStateInvariantSignature, buildAiDecisionInputDto, reconstructBeliefState } from "@netgrid/ai";
+import { beliefStateInvariantSignature, buildAiDecisionInputDto, chooseAiAction as chooseRuntimeAiAction, reconstructBeliefState } from "@netgrid/ai";
 import { createRuntimeCardsById } from "@netgrid/catalog";
 import { computeDeckHash, createDeckSnapshot, type DeckFormatProfile, type DeckSnapshot, type EditableDeck } from "@netgrid/decks";
 import { applyAction, applyEffectCommands, checkWinConditions, createGameAfterSetup, CARD_DEFINITIONS_BY_ID, DEMO_DECKS, getLegalActions, hashState } from "@netgrid/engine";
@@ -18,7 +18,7 @@ import { assertInviteLobbyPayloadRedacted, findInviteLobbyPayloadRedactionLeaks 
 import { FixedWindowRateLimiter, createRateLimiter, loadDeploymentConfig, redactSensitiveText, redactedJoinUrl, type DeploymentConfig } from "./internet-hardening";
 import { InMemoryMatchStorage, MultiplayerService, type EventRecord, type JoinMatchResult, type MatchSettings, type MultiplayerStorage, type SidePayload, type StateSnapshot, type StoredMatch } from "./multiplayer";
 import { SqliteMatchStorage, StorageError, inspectSqliteStorage, restoreSqliteStorageBackup } from "./storage-sqlite";
-import { AI_DECISION_DEBUG_SCHEMA_VERSION, CURRENT_RULES_BASELINE, type AiDecision, type ApiCreateMatchResponse, type CardInstanceId, type ChoiceRequest, type DeckDefinition, type GameEvent, type GameState, type LegalAction, type PublicGameEvent, type Side } from "@netgrid/shared";
+import { AI_DECISION_CHAIN_DEBUG_SCHEMA_VERSION, AI_DECISION_DEBUG_SCHEMA_VERSION, CURRENT_RULES_BASELINE, type AiDecision, type ApiCreateMatchResponse, type CardInstanceId, type ChoiceRequest, type DeckDefinition, type GameEvent, type GameState, type LegalAction, type PublicGameEvent, type Side } from "@netgrid/shared";
 
 function expectCurrentRulesBaseline(state: Pick<GameState, "baseline">): void {
   expect(state.baseline).toStrictEqual(CURRENT_RULES_BASELINE);
@@ -729,6 +729,171 @@ describe("Backend 0.5 private storage maintenance", () => {
       expect(JSON.stringify(await detailResponse.json())).not.toMatch(/<html|<div|sessionToken|reconnectToken|joinToken|cardInstances|privatePayload|decklist|AIInput/i);
     } finally {
       await maintenance.handle.close();
+    }
+  });
+
+  it("stores compact and detailed decision chains in the same SQLite AI trace path", async () => {
+    const dir = await tempStorageDir();
+    const dbPath = join(dir, "netgrid.sqlite");
+    const backupDir = join(dir, "backups");
+    const storage = new SqliteMatchStorage({ dbPath, backupDir });
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "sqlite-ai-decision-chain-trace-levels",
+      chooseAiAction: (input): AiDecision => {
+        const runtimeDecision = chooseRuntimeAiAction(input);
+        const action = input.legalActions.find(
+          (candidate) => candidate.actionId === runtimeDecision.actionId,
+        );
+        if (!action) throw new Error("Missing legal action for decision-chain trace test");
+        const alternative = input.legalActions[1] ?? action;
+        return {
+          ...runtimeDecision,
+          decisionDebug: {
+            ...(runtimeDecision.decisionDebug ?? {
+              schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+              aiLevel: 2,
+              fallbackUsed: runtimeDecision.fallbackUsed,
+            }),
+            decisionChain: {
+              schemaVersion: AI_DECISION_CHAIN_DEBUG_SCHEMA_VERSION,
+              legalActionCount: input.legalActions.length,
+              legalActionIds: input.legalActions.map((candidate) => candidate.actionId),
+              exclusions: [{ actionId: alternative.actionId, key: "test_exclusion" }],
+              rawScoreWinner: { actionId: alternative.actionId, score: 73 },
+              planSelection: {
+                planId: "test.plan",
+                planKind: "test.plan_kind",
+                mappedActionIds: [action.actionId],
+                contributionMode: "diagnostic_only",
+              },
+              planArbitration: {
+                outcome: "plan_mapping_selected",
+                selectedActionId: action.actionId,
+                mappedActionId: action.actionId,
+                reason: "test_plan_mapping",
+                scoreGap: 4,
+                threshold: 10,
+                policy: "score_gap",
+              },
+              priorityCandidates: [
+                { route: "tactical_plan_mapping", actionId: action.actionId },
+              ],
+              initialSelection: {
+                route: "tactical_plan_mapping",
+                actionId: action.actionId,
+              },
+              adjustments: [],
+              finalSelection: {
+                actionId: action.actionId,
+                selectedOptionCount: 1,
+                choiceResolution: {
+                  choiceId: "test_choice",
+                  kind: "test_kind",
+                  source: "test_source",
+                  selectedOptionIds: ["test_option"],
+                },
+              },
+            },
+          },
+        };
+      },
+    });
+
+    const createAndAdvance = async (
+      aiTraceMode: "summary" | "detailed",
+    ): Promise<string> => {
+      const created = await service.createMatch({
+        mode: "human_runner_vs_corp_ai",
+        hostSide: "runner",
+        seed: `sqlite-ai-decision-chain-${aiTraceMode}`,
+        corpDifficulty: "normal",
+        aiTraceMode,
+      });
+      const setup = await submitChoice(
+        service,
+        created.matchId,
+        {
+          side: "runner",
+          sessionToken: created.hostSessionToken,
+          reconnectToken: created.hostReconnectToken,
+        },
+        "keep",
+        `sqlite-ai-decision-chain-${aiTraceMode}-setup`,
+      );
+      const advanced = await service.advanceAi({
+        matchId: created.matchId,
+        side: "runner",
+        sessionToken: created.hostSessionToken,
+        knownStateVersion: setup.playerView.stateVersion,
+        mode: "single_step",
+      });
+      if (!advanced.ok) throw new Error(advanced.error.message);
+      return created.matchId;
+    };
+
+    const summaryMatchId = await createAndAdvance("summary");
+    const detailedMatchId = await createAndAdvance("detailed");
+    storage.close?.();
+
+    const database = new DatabaseSync(dbPath);
+    try {
+      const rows = database
+        .prepare(
+          `SELECT match_id AS matchId, trace_json AS traceJson
+           FROM ai_decision_traces
+           ORDER BY decision_index ASC`,
+        )
+        .all() as Array<{ matchId: string; traceJson: string }>;
+      const traceFor = (matchId: string): Record<string, unknown> => {
+        const row = rows.find((candidate) => candidate.matchId === matchId);
+        if (!row) throw new Error(`Missing persisted AI trace for ${matchId}`);
+        return JSON.parse(row.traceJson) as Record<string, unknown>;
+      };
+
+      const summaryTrace = traceFor(summaryMatchId);
+      expect(summaryTrace).toMatchObject({
+        schemaVersion: "ai-decision-trace-v1",
+        traceMode: "summary",
+        decisionChain: {
+          traceLevel: "summary",
+          schemaVersion: AI_DECISION_CHAIN_DEBUG_SCHEMA_VERSION,
+          rawScoreWinner: { score: 73 },
+          planArbitration: { outcome: "plan_mapping_selected" },
+          initialSelection: { route: "tactical_plan_mapping" },
+          finalSelection: {
+            selectedOptionCount: 1,
+            choiceResolution: { selectedOptionCount: 1 },
+          },
+        },
+      });
+      const summaryChain = summaryTrace.decisionChain as Record<string, unknown>;
+      expect(summaryChain).not.toHaveProperty("legalActionIds");
+      expect(summaryChain).not.toHaveProperty("exclusions");
+      expect(
+        (summaryChain.finalSelection as Record<string, unknown>)
+          .choiceResolution,
+      ).not.toHaveProperty("selectedOptionIds");
+
+      const detailedTrace = traceFor(detailedMatchId);
+      expect(detailedTrace).toMatchObject({
+        schemaVersion: "ai-decision-trace-v1",
+        traceMode: "detailed",
+        decisionChain: {
+          traceLevel: "detailed",
+          schemaVersion: AI_DECISION_CHAIN_DEBUG_SCHEMA_VERSION,
+          legalActionIds: expect.any(Array),
+          exclusions: [{ key: "test_exclusion" }],
+          priorityCandidates: [{ route: "tactical_plan_mapping" }],
+          finalSelection: {
+            choiceResolution: { selectedOptionIds: ["test_option"] },
+          },
+        },
+      });
+      expect(JSON.stringify({ summaryTrace, detailedTrace })).not.toMatch(
+        /sessionToken|reconnectToken|joinToken|tokenHash|cardInstances|privatePayload|privateDeckSnapshots|decklist|fullGameState|FullState|AIInput/i,
+      );
+    } finally {
+      database.close();
     }
   });
 

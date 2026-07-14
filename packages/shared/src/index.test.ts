@@ -181,4 +181,52 @@ describe("AI decision debug sanitizing", () => {
       priority: 1229,
     });
   });
+
+  it("keeps the side-safe semantic decision chain and redacts forbidden values", () => {
+    const sanitized = sanitizeAiDecisionDebug({
+      schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+      aiLevel: 2,
+      decisionChain: {
+        schemaVersion: "ai-decision-chain-debug-v1",
+        legalActionCount: 2,
+        legalActionIds: ["corp.gain_credit", "corp.install"],
+        exclusions: [
+          {
+            actionId: "corp.install",
+            key: "hidden-card",
+          },
+        ],
+        rawScoreWinner: { actionId: "corp.gain_credit", score: 700 },
+        priorityCandidates: [
+          { route: "semantic_score", actionId: "corp.gain_credit" },
+        ],
+        initialSelection: {
+          route: "semantic_score",
+          actionId: "corp.gain_credit",
+        },
+        adjustments: [],
+        finalSelection: {
+          actionId: "corp.gain_credit",
+          selectedOptionCount: 0,
+        },
+      },
+    });
+
+    expect(sanitized?.decisionChain).toMatchObject({
+      schemaVersion: "ai-decision-chain-debug-v1",
+      legalActionCount: 2,
+      rawScoreWinner: { actionId: "corp.gain_credit", score: 700 },
+      initialSelection: {
+        route: "semantic_score",
+        actionId: "corp.gain_credit",
+      },
+      finalSelection: {
+        actionId: "corp.gain_credit",
+        selectedOptionCount: 0,
+      },
+    });
+    expect(sanitized?.decisionChain?.exclusions[0]?.key).toBe(
+      "[redacted-debug-value]",
+    );
+  });
 });

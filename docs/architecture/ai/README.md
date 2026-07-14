@@ -26,6 +26,13 @@
   Shadow-/META-Runtime und Kill-Switches.
 - Der Semantic-Coverage-Restpfad ist fail-closed. Nur ausdrücklich sichere,
   nebenwirkungsarme Engine-Fortsetzungen sind erlaubt.
+- `AiDecisionDebug.decisionChain` legt den produktiven Auswahlweg von
+  LegalActions und Ausschlüssen über Rohscore, Plan-Mapping, Arbitration und
+  feste Sonderprioritäten bis zur finalen Action beziehungsweise Choice
+  side-sicher offen. Die Observability verändert keine Bewertung oder Auswahl.
+  Der bestehende SQLite-Trace speichert dieselbe Kette unter
+  `ai_decision_traces.trace_json`: `summary` kompakt und `detailed` vollständig,
+  ohne zweiten Speicherpfad.
 - Ausführbare Benchmarkprofile sind `random_legal_bot` und
   `current_candidate`.
 - Technisches `ai_supported`, semantische Coverage, Szenario-Evidence,
@@ -67,6 +74,9 @@
   `docs/reviews/ai/ai-planportfolio-remote-doctrine-final-review-2026-07-12.md`:
   aktueller Vertrag für kurze Plansequenzen, wiederkehrende Zyklen,
   Entwicklungsprojekte und strategieabhängigen Remote-Ausbau.
+- `semantic-decision-chain-observability-contract-2026-07-14.md`: aktueller
+  verhaltensneutraler Debug-, Arbitration- und Decision-Checkpoint-Vertrag für
+  den produktiven Semantic-Runtime-Auswahlweg.
 - `proteus-ai-release-reconciliation-plan-2026-07-09.md`,
   `proteus-ai-release-automation-process-2026-07-09.md` und
   `docs/reviews/ai/proteus-ai-release-reconciliation-final-review-2026-07-09.md`:
