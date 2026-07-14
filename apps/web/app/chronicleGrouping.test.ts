@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  chronicleResolveChoiceBelongsToRunPayload,
   groupChronicleEntriesForRender,
   orderChronicleEntriesForDisplay,
   type ChronicleGroupableEntry,
@@ -42,6 +43,18 @@ function debtEntry(
 }
 
 describe("groupChronicleEntriesForRender", () => {
+  it("keeps Fall Guy tag avoidance eligible for the active run group", () => {
+    expect(
+      chronicleResolveChoiceBelongsToRunPayload({
+        eventModificationKind: "avoid",
+        eventModificationDecision: "apply",
+        eventModificationOutcome: "avoided",
+        imminentEventType: "add_tag",
+        sourceDefinitionId: "onr_v1_161_fall-guy",
+      }),
+    ).toBe(true);
+  });
+
   it("keeps consecutive runs on the same target as separate render groups", () => {
     const groups = groupChronicleEntriesForRender([
       entry("evt_run_2_end", "Run auf HQ", "run", "run:evt_run_2_start"),

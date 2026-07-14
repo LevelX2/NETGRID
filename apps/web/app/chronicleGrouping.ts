@@ -110,6 +110,39 @@ export function orderChronicleEntriesForDisplay<
   return ordered;
 }
 
+export function chronicleResolveChoiceBelongsToRunPayload(
+  payload: Record<string, unknown>,
+): boolean {
+  if (
+    payload.socialEngineeringRun === true ||
+    chroniclePayloadTargetBoolean(payload, "autoPassChosenIce") === true ||
+    typeof payload.traceStep === "string" ||
+    (typeof payload.eventModificationKind === "string" &&
+      typeof payload.eventModificationDecision === "string") ||
+    payload.ambushDefinitionId ||
+    payload.accessEffectSourceDefinitionId ||
+    payload.ambushPaidCost !== undefined ||
+    payload.ambushPaymentDeclined === true ||
+    payload.hiddenZoneAction ===
+      "proteus_breaker_strength_penalty_access_counters" ||
+    payload.hiddenZoneAction === "successful_run_temporary_encounter" ||
+    payload.hiddenZoneAction === "successful_run_intervention_declined" ||
+    payload.counterType === "breaker_strength_penalty"
+  )
+    return true;
+  const effects = Array.isArray(payload.resolvedEffects)
+    ? payload.resolvedEffects
+    : [];
+  return effects.some(
+    (effect) =>
+      effect &&
+      typeof effect === "object" &&
+      ((effect as Record<string, unknown>).reason === "access_effect" ||
+        (effect as Record<string, unknown>).counterType ===
+          "breaker_strength_penalty"),
+  );
+}
+
 function chronicleEntriesShareRenderGroup<T extends ChronicleGroupableEntry>(
   currentGroup: ChronicleRenderGroup<T>,
   entry: T,
@@ -133,4 +166,16 @@ function positiveInteger(value: unknown): number | null {
   return typeof value === "number" && Number.isInteger(value) && value > 0
     ? value
     : null;
+}
+
+function chroniclePayloadTargetBoolean(
+  payload: Record<string, unknown>,
+  key: string,
+): boolean | null {
+  const direct = payload[key];
+  if (typeof direct === "boolean") return direct;
+  const targets = payload.targets;
+  if (!targets || typeof targets !== "object") return null;
+  const nested = (targets as Record<string, unknown>)[key];
+  return typeof nested === "boolean" ? nested : null;
 }

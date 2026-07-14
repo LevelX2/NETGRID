@@ -21,6 +21,7 @@ import {
 } from "../../app/chronicle";
 import { localizedDeCardTitle } from "../../app/card-image-manifest";
 import {
+  chronicleResolveChoiceBelongsToRunPayload,
   groupChronicleEntriesForRender,
   orderChronicleEntriesForDisplay,
 } from "../../app/chronicleGrouping";
@@ -552,7 +553,7 @@ function chronicleEventBelongsToActiveRun(
     return true;
   if (
     actionType === "resolve_choice" &&
-    chronicleResolveChoiceBelongsToRun(event)
+    chronicleResolveChoiceBelongsToRunPayload(event.publicPayload)
   )
     return true;
   if (
@@ -576,48 +577,6 @@ function chronicleEventBelongsToActiveRun(
         chronicleGroupLabel(item).startsWith("Run") || item.category === "run",
     )
   );
-}
-
-function chronicleResolveChoiceBelongsToRun(event: PublicGameEvent): boolean {
-  const payload = event.publicPayload ?? {};
-  if (
-    payload.socialEngineeringRun === true ||
-    chroniclePayloadTargetBoolean(payload, "autoPassChosenIce") === true ||
-    typeof payload.traceStep === "string" ||
-    payload.ambushDefinitionId ||
-    payload.accessEffectSourceDefinitionId ||
-    payload.ambushPaidCost !== undefined ||
-    payload.ambushPaymentDeclined === true ||
-    payload.hiddenZoneAction ===
-      "proteus_breaker_strength_penalty_access_counters" ||
-    payload.hiddenZoneAction === "successful_run_temporary_encounter" ||
-    payload.hiddenZoneAction === "successful_run_intervention_declined" ||
-    payload.counterType === "breaker_strength_penalty"
-  )
-    return true;
-  const effects = Array.isArray(payload.resolvedEffects)
-    ? payload.resolvedEffects
-    : [];
-  return effects.some(
-    (effect) =>
-      effect &&
-      typeof effect === "object" &&
-      ((effect as Record<string, unknown>).reason === "access_effect" ||
-        (effect as Record<string, unknown>).counterType ===
-          "breaker_strength_penalty"),
-  );
-}
-
-function chroniclePayloadTargetBoolean(
-  payload: Record<string, unknown>,
-  key: string,
-): boolean | null {
-  const direct = payload[key];
-  if (typeof direct === "boolean") return direct;
-  const targets = payload.targets;
-  if (!targets || typeof targets !== "object") return null;
-  const nested = (targets as Record<string, unknown>)[key];
-  return typeof nested === "boolean" ? nested : null;
 }
 
 const chronicleRunContextActionTypes = new Set([
