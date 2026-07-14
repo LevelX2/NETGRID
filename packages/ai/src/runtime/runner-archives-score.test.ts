@@ -49,6 +49,19 @@ describe("runnerArchivesScoreComponents", () => {
     ]);
   });
 
+  it("does not treat Runner match point alone as hidden Archives evidence", () => {
+    const input = aiInput({ hiddenArchives: 1, corpDeckCount: 14 });
+    input.playerView.own.agendaPoints = 5;
+
+    expect(components(input)).toEqual([
+      expect.objectContaining({
+        key: "runner_archives_unqualified_hidden_cards",
+        value: -900,
+        reason: expect.stringContaining("archives_runner_match_pressure:true"),
+      }),
+    ]);
+  });
+
   it("values a still-unseen random HQ discard", () => {
     const randomDiscard = publicEvent(3, {
       actor: "corp",

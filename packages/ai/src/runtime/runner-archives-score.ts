@@ -107,7 +107,7 @@ function hiddenArchivesPressureContext(input: AiDecisionInput): {
     input.playerView.own.agendaPoints >=
     Math.max(1, input.playerView.agendaPointsToWin - 2);
   return {
-    active: corpDeckPressure || runnerMatchPressure,
+    active: corpDeckPressure,
     corpDeckPressure,
     runnerMatchPressure,
   };
