@@ -21,7 +21,7 @@ describe("F450 and 10311 exact decision checkpoints", () => {
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
   });
 
-  it("does not force a contest without opponent matchpoint", () => {
+  it("still scores an installed agenda without opponent matchpoint", () => {
     const noMatchpoint = mutateFixture(cp02Json, (checkpoint) => {
       const state = checkpoint.engine.testOnlyGameState;
       const agendaId = state.corp.scoreArea.at(-1);
@@ -36,7 +36,12 @@ describe("F450 and 10311 exact decision checkpoints", () => {
         rezzed: false,
       };
       checkpoint.expectation = {
-        acceptableActions: [{ type: "draw_card" }],
+        acceptableActions: [
+          {
+            type: "activated_card_ability",
+            sourceDefinitionId: "onr_classic_004_theorem-proof",
+          },
+        ],
       };
     });
 

@@ -61,6 +61,61 @@ describe("discard keep score", () => {
     );
   });
 
+  it("preserves a conditional Corp payoff only while a tag source remains reachable", () => {
+    const payoff = corpCard("onr_v1_327_i-got-a-rock", "asset");
+    const reachable = score(
+      payoff,
+      [],
+      "corp",
+      [],
+      {},
+      {
+        agendaPoints: 3,
+        corpTagSourceState: "stack",
+      },
+    );
+    const exhausted = score(
+      payoff,
+      [],
+      "corp",
+      [],
+      {},
+      {
+        agendaPoints: 3,
+        corpTagSourceState: "archives",
+      },
+    );
+
+    expect(reachable.baseValue).toBeGreaterThan(exhausted.baseValue + 500);
+    expect(reachable.evidence).toContain(
+      "discard_score:corp_conditional_payoff_reachable",
+    );
+    expect(exhausted.evidence).toContain(
+      "discard_score:corp_conditional_payoff_blocked",
+    );
+  });
+
+  it("preserves a visible Corp tag source while a coupled payoff remains reachable", () => {
+    const tagSource = corpCard("onr_v1_283_audit-of-call-records", "operation");
+    const payoff = corpCard("onr_v1_327_i-got-a-rock", "asset");
+    const paired = score(
+      tagSource,
+      [],
+      "corp",
+      [],
+      {},
+      {
+        agendaPoints: 3,
+        extraGrip: [payoff],
+        corpTagSourceState: "stack",
+      },
+    );
+    const unpaired = score(tagSource);
+
+    expect(paired.baseValue).toBeGreaterThan(unpaired.baseValue + 300);
+    expect(paired.evidence).toContain("discard_score:corp_tag_source_enabler");
+  });
+
   it("ignores substring-only Corp discard role noise", () => {
     const benignRole = score(corpCard("benign-role", "operation"), [
       "neutral_support",
@@ -328,6 +383,8 @@ function score(
     legalActionForCard?: boolean;
     strategyId?: string;
     breakerCoverage?: "stack_only" | "installed";
+    agendaPoints?: number;
+    corpTagSourceState?: "stack" | "archives";
   } = {},
 ) {
   return discardKeepScore(input(card, side, rig, options), card, {
@@ -354,6 +411,8 @@ function input(
     legalActionForCard?: boolean;
     strategyId?: string;
     breakerCoverage?: "stack_only" | "installed";
+    agendaPoints?: number;
+    corpTagSourceState?: "stack" | "archives";
   } = {},
 ): AiDecisionInput {
   const decisionInput = {
@@ -371,11 +430,14 @@ function input(
             : runnerCard("runner-identity", "identity"),
         credits: options.credits ?? 5,
         clicks: 0,
-        agendaPoints: 0,
+        agendaPoints: options.agendaPoints ?? 0,
         gripOrHq: [card, ...(options.extraGrip ?? [])],
         rig: [...rig],
         stackOrRdCount: 20,
-        heapOrArchives: [],
+        heapOrArchives:
+          side === "corp" && options.corpTagSourceState === "archives"
+            ? [corpCard("onr_v1_284_chance-observation", "operation")]
+            : [],
         scoreArea: [],
         maxHandSize: 5,
         tags: 0,
@@ -434,6 +496,16 @@ function input(
           strategyId: options.strategyId,
           family: "runner_setup",
         },
+      },
+    });
+  }
+  if (side === "corp" && options.corpTagSourceState) {
+    Object.assign(decisionInput, {
+      ownDeckSnapshot: {
+        cards: [
+          { cardId: card.definitionId, quantity: 1 },
+          { cardId: "onr_v1_284_chance-observation", quantity: 1 },
+        ],
       },
     });
   }
