@@ -1,6 +1,6 @@
 # Follow-up-Prozess zu den KI-Spielen f450 und 10311
 
-Status: In Arbeit
+Status: Fachlich abgeschlossen; lokale Integration ausstehend
 
 ## Quelle und Gesamtziel
 
@@ -53,13 +53,13 @@ generisch, side-safe und ohne kartennamenspezifische KI-Sonderfälle zu beheben.
 
 ## Paketfolge
 
-### P0: Preflight und Prozessvertrag
+### P0: Preflight und Prozessvertrag (abgeschlossen)
 
 - Worktree, Branch, Ausgangsstand, Nutzeränderungen und Scope festhalten.
 - Done-Gate: Prozessartefakt vorhanden und `git diff --check` grün.
 - Commit: `docs(ai): plan f450 10311 followup remediation`
 
-### P1: Spielgleiche rote Evidence
+### P1: Spielgleiche rote Evidence (abgeschlossen)
 
 - Die drei historischen Theorem-Proof-Fenster als Decision-Checkpoints sichern.
 - Den Temple-Discard als Decision-Checkpoint sichern.
@@ -70,7 +70,7 @@ generisch, side-safe und ohne kartennamenspezifische KI-Sonderfälle zu beheben.
   Ausgangscode rot klassifiziert; Kontrollen sind grün.
 - Commit: `test(ai): capture f450 10311 followup regressions`
 
-### P2: Aktiviertes Agenda-Scoring
+### P2: Aktiviertes Agenda-Scoring (abgeschlossen)
 
 - Scoren über eine aktivierte Kartenfähigkeit mit generischen, enginegelieferten
   LegalAction-Metadaten als unmittelbaren Punktfortschritt bewerten.
@@ -78,7 +78,7 @@ generisch, side-safe und ohne kartennamenspezifische KI-Sonderfälle zu beheben.
   grün.
 - Commit: `fix(ai): value activated agenda scoring`
 
-### P3: Breaker-Suchkarte im Discard
+### P3: Breaker-Suchkarte im Discard (abgeschlossen)
 
 - Beim Handkartenabwurf eine sichtbare Suchoption für fehlende Rig-Funktionalität
   kontextuell erhalten, ohne Suchkarten generell unabwählbar zu machen.
@@ -86,7 +86,7 @@ generisch, side-safe und ohne kartennamenspezifische KI-Sonderfälle zu beheben.
   vorhandener Abdeckung grün.
 - Commit: `fix(ai): retain missing breaker search access`
 
-### P4: Puzzle-Begegnungsmetadaten
+### P4: Puzzle-Begegnungsmetadaten (abgeschlossen)
 
 - Das tatsächliche Ende-des-Runs-Risiko und den sichtbaren
   Ende-des-Zugs-Selbst-Trash der Begegnungsquelle generisch in LegalActions
@@ -95,7 +95,7 @@ generisch, side-safe und ohne kartennamenspezifische KI-Sonderfälle zu beheben.
   angrenzende Encounter-Tests grün.
 - Commit: `fix(engine): expose encounter source self trash`
 
-### P5: Breite Verifikation und Wissenspflege
+### P5: Breite Verifikation und Wissenspflege (abgeschlossen)
 
 - Fokussierte Checkpoints, angrenzende AI-/Engine-Tests, Typechecks und
   `git diff --check` ausführen.
@@ -115,6 +115,21 @@ Ein unerwartet roter Check wird innerhalb seines Pakets ursächlich untersucht.
 Das nächste Paket beginnt erst nach erfülltem Done-Gate. Ein Side-Safety-Leak,
 eine Abweichung von der Rules Engine oder eine Kollision mit Nutzeränderungen ist
 ein Stop-Blocker und wird nicht durch Ranking-Heuristik umgangen.
+
+## Abschlussnachweis vor lokaler Integration
+
+- Die fünf roten Zielverträge und drei grünen Kontrollen aus P1 sind auf dem
+  finalen Arbeitsstand 8 von 8 grün.
+- Der korrigierte Retain-Checker deckte zusätzlich zuvor falsch-grüne
+  Discard-Verträge auf. Erreichbare Corp-Tag-/Payoff-Paare, die Abgrenzung des
+  Archives-Zentralservers und schrittweise Mehrfach-Discard-Bewertung wurden
+  generisch nachgezogen; die zugehörigen 65 fokussierten Prüfungen sind grün.
+- Vollständige AI-Suite: 321 von 321 Testdateien und 2122 von 2122 Tests grün.
+- Vollständige Engine-Suite: 184 von 184 Testdateien und 1649 von 1649 Tests
+  grün.
+- AI- und Engine-Typecheck sowie `git diff --check` sind grün.
+- Führender Review:
+  `docs/reviews/ai/ai-matches-f450-10311-followup-final-review-2026-07-14.md`.
 
 ## /Goal
 
