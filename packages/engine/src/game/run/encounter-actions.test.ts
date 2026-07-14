@@ -33,9 +33,7 @@ function instance(
   } as CardInstance;
 }
 
-function iceDefinition(
-  options: Partial<CardDefinition> = {},
-): CardDefinition {
+function iceDefinition(options: Partial<CardDefinition> = {}): CardDefinition {
   return {
     id: "test_sentry_ice",
     title: "Test Sentry",
@@ -270,6 +268,33 @@ describe("runner encounter action generation", () => {
     expect(state).toEqual(before);
   });
 
+  it("describes a combined end-run and delayed source-trash subroutine", () => {
+    const state = makeState();
+    const ice = iceDefinition({
+      subroutines: [
+        {
+          id: "test_sentry_etr_and_delayed_self_trash",
+          type: "end_the_run_and_trash_source_at_end_of_turn",
+        },
+      ],
+    });
+
+    const result = buildRunnerEncounterActions(
+      hostFor(state, definitionsFor(state, ice)),
+    );
+    const continueRun = result.legalActions.find(
+      (action) => action.type === "continue_run",
+    );
+
+    expect(continueRun?.label).toBe("Subroutinen auslösen (Run endet)");
+    expect(continueRun?.payload).toMatchObject({
+      encounterContinue: true,
+      encounterWillEndRun: true,
+      encounterSourceWillTrashAtEndOfTurn: true,
+      encounterSubroutineIds: "test_sentry_etr_and_delayed_self_trash",
+    });
+  });
+
   it("does not offer break or pump actions for an ineligible breaker", () => {
     const state = makeState({ breakerDefinitionId: "simple_decoder" });
     const ice = iceDefinition();
@@ -418,7 +443,9 @@ describe("runner encounter action generation", () => {
         breakerDefinitionId: testCase.definitionId,
         runnerCredits: 20,
       });
-      const breakerDefinition = proteusTestCardDefinition(testCase.definitionId);
+      const breakerDefinition = proteusTestCardDefinition(
+        testCase.definitionId,
+      );
       const matchingIce = iceDefinition({
         id: "test_sentry_ice",
         title: `Test ${testCase.iceSubtype}`,
