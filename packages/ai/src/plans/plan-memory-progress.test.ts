@@ -1,7 +1,14 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
-import { createTacticalPlanMemorySnapshot } from "./plan-memory";
+import type { RunnerEconomyPosture } from "../runner-run-target-evaluation";
+import {
+  createTacticalPlanMemorySnapshot,
+  getTacticalPlanMemorySnapshot,
+  rememberTacticalPlanRuntime,
+  resetTacticalPlanMemory,
+  restoreTacticalPlanMemorySnapshot,
+} from "./plan-memory";
 import { createPlanStep, createTacticalPlan } from "./tactical-plan-builders";
 import type { TacticalPlanMemorySnapshot } from "./tactical-plan-types";
 
@@ -53,6 +60,49 @@ describe("tactical plan observable progress", () => {
       planProgressionReason: "no_observable_progress",
     });
   });
+
+  it("forgets a credit-base plan after its visible reserve target is satisfied", () => {
+    resetTacticalPlanMemory();
+    const decisionInput = runnerInput(202, 18);
+    const previousPlan: TacticalPlanMemorySnapshot = {
+      schemaVersion: "tactical-plan-v1",
+      memoryId: "plan-progress:runner:current_candidate",
+      side: "runner",
+      planId: "runner.build_credit_base",
+      type: "runner.build_credit_base",
+      status: "progressing",
+      target: { kind: "capability", id: "runner_credit_base" },
+      selectedStepKind: "gain_credits",
+      selectedActionId: "runner.newsgroup",
+      blockedBy: [],
+      ttlDecisionsRemaining: 2,
+      planProgressionReason: "continued_previous_plan",
+      progressBaseline: {
+        ownCredits: 5,
+        opponentCredits: 6,
+        ownAgendaPoints: 0,
+        opponentAgendaPoints: 2,
+        opponentTags: 0,
+        opponentCoreDamage: 0,
+      },
+      updatedAtStateVersion: 201,
+    };
+    restoreTacticalPlanMemorySnapshot(decisionInput, previousPlan);
+
+    rememberTacticalPlanRuntime(
+      decisionInput,
+      { planAlternatives: [], blockedPlans: [] },
+      runnerCreditAction(),
+      {
+        runnerEconomyPosture: {
+          fundingNeed: false,
+          desiredCreditReserve: 6,
+        } as RunnerEconomyPosture,
+      },
+    );
+
+    expect(getTacticalPlanMemorySnapshot(decisionInput)).toBeUndefined();
+  });
 });
 
 function previousMemory(
@@ -88,6 +138,53 @@ function netwatchAction(): LegalAction {
     visibility: "private_to_actor",
     expiresAtStateVersion: 200,
   };
+}
+
+function runnerCreditAction(): LegalAction {
+  return {
+    ...netwatchAction(),
+    actionId: "runner.newsgroup",
+    side: "runner",
+    label: "2 Credits nehmen",
+    source: "newsgroup",
+    timingPoint: "runner_action.main",
+  };
+}
+
+function runnerInput(stateVersion: number, credits: number): AiDecisionInput {
+  const decisionInput = input(stateVersion);
+  return {
+    ...decisionInput,
+    side: "runner",
+    decisionId: `plan-progress:${stateVersion}:runner`,
+    playerView: {
+      ...decisionInput.playerView,
+      side: "runner",
+      activeSide: "runner",
+      timingPoint: "runner_action.main",
+      phase: "runner_action_phase",
+      own: {
+        ...decisionInput.playerView.opponent,
+        identity: { instanceId: "runner-id", known: true },
+        credits,
+        clicks: 4,
+        gripOrHq: [],
+        stackOrRdCount: 20,
+        heapOrArchives: [],
+        agendaPoints: 0,
+        tags: 0,
+      },
+      opponent: {
+        ...decisionInput.playerView.own,
+        identity: { instanceId: "corp-id", known: true },
+        handCount: 5,
+        deckCount: 20,
+        discardCount: 0,
+        agendaPoints: 2,
+        tags: 0,
+      },
+    },
+  } as AiDecisionInput;
 }
 
 function input(stateVersion: number): AiDecisionInput {

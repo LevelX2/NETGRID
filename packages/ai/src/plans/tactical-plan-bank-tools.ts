@@ -129,8 +129,7 @@ export function runnerCreditBankAssessment(
       ? undefined
       : concreteFundingNeed
         ? "concrete_funding_need"
-        : ownCredits <= 3 &&
-            estimatedPayout >= RUNNER_BANK_MIN_CRITICAL_CASHOUT
+        : ownCredits <= 3 && estimatedPayout >= RUNNER_BANK_MIN_CRITICAL_CASHOUT
           ? "urgent_credit_floor"
           : ownCredits < RUNNER_BANK_COMFORTABLE_CREDITS &&
               estimatedPayout >= RUNNER_BANK_VALUE_BUILD_TARGET

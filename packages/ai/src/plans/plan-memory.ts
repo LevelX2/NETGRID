@@ -15,6 +15,7 @@ import {
   resetPlanPortfolioMemory,
 } from "./plan-portfolio-memory";
 import { advancePlanPortfolioForSelectedAction } from "./plan-portfolio";
+import type { RunnerEconomyPosture } from "../runner-run-target-evaluation";
 
 export type PlanContinuityMemorySnapshot = {
   type?: string;
@@ -40,6 +41,7 @@ export function rememberTacticalPlanRuntime(
   input: AiDecisionInput,
   result: TacticalPlanRuntimeResult,
   selectedAction: LegalAction,
+  context: { runnerEconomyPosture?: RunnerEconomyPosture } = {},
 ): TacticalPlanMemorySnapshot | undefined {
   if (input.playerView.winner !== null) {
     tacticalPlanMemoryByKey.delete(tacticalPlanMemoryKey(input));
@@ -56,7 +58,21 @@ export function rememberTacticalPlanRuntime(
   }
   const selectedPlan = result.selectedPlan;
   const selectedStep = result.selectedStep;
-  if (!selectedPlan || !selectedStep) return undefined;
+  if (!selectedPlan || !selectedStep) {
+    const key = tacticalPlanMemoryKey(input);
+    const previousPlan = tacticalPlanMemoryByKey.get(key);
+    if (
+      previousPlan &&
+      previousCreditBaseGoalIsSatisfied(
+        input,
+        previousPlan,
+        context.runnerEconomyPosture,
+      )
+    ) {
+      tacticalPlanMemoryByKey.delete(key);
+    }
+    return undefined;
+  }
   const snapshot = createTacticalPlanMemorySnapshot({
     input,
     plan: selectedPlan,
@@ -72,6 +88,20 @@ export function rememberTacticalPlanRuntime(
   });
   tacticalPlanMemoryByKey.set(tacticalPlanMemoryKey(input), snapshot);
   return snapshot;
+}
+
+function previousCreditBaseGoalIsSatisfied(
+  input: AiDecisionInput,
+  previousPlan: TacticalPlanMemorySnapshot,
+  economyPosture: RunnerEconomyPosture | undefined,
+): boolean {
+  return (
+    input.side === "runner" &&
+    previousPlan.type === "runner.build_credit_base" &&
+    economyPosture !== undefined &&
+    !economyPosture.fundingNeed &&
+    input.playerView.own.credits >= economyPosture.desiredCreditReserve
+  );
 }
 
 export function resetTacticalPlanMemory(): void {

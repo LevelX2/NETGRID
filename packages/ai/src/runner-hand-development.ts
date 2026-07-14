@@ -1,4 +1,8 @@
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "./action-semantic-candidate";
 import type {
   BreakerCapability,
@@ -6,11 +10,16 @@ import type {
   DeckCapabilityProfile,
 } from "./deck-capabilities";
 import type { RunnerStrategicIntentProfile } from "./runner-strategic-intent";
-import { CARD_ROLES_BY_CARD, RUNTIME_CARDS, createAiHintsByCard } from "./ai-hints";
+import {
+  CARD_ROLES_BY_CARD,
+  RUNTIME_CARDS,
+  createAiHintsByCard,
+} from "./ai-hints";
 import {
   actionDevelopsPersistentCardNow,
   persistentDevelopmentActionProjection,
 } from "./actions/persistent-development-action";
+import { randomBreakOrDamageRiskProfileForDefinitionId } from "./actions/risk-action-projection";
 import { actionClickCost } from "./runtime/action-cost";
 
 export const RUNNER_HAND_DEVELOPMENT_EVALUATION_SCHEMA_VERSION =
@@ -172,6 +181,9 @@ type PersistentFunctionalProfile = {
   nonAdditiveUtilityFamilies: string[];
   breakerCoverage: BreakerCoverageKind[];
   riskyBreaker: boolean;
+  randomBreakOrDamageProfileId?: string;
+  randomBreakSuccessProbabilityPerAttempt?: number;
+  randomBreakMaxSingleFailureDamage?: number;
   damagePrevention: boolean;
   handSizeSupport: boolean;
   memorySupport: boolean;
@@ -212,27 +224,29 @@ export function evaluateRunnerHandDevelopment(
 export function redactedRunnerHandDevelopmentFacts(
   evaluations: readonly RunnerHandDevelopmentEvaluation[],
 ): string[] {
-  return evaluations.slice(0, 10).map((evaluation) =>
-    [
-      `runner_hand_development:${evaluation.developmentRole}`,
-      `availability:${evaluation.availability}`,
-      `need:${evaluation.currentNeed}`,
-      `fit:${evaluation.strategicFit}`,
-      `priority:${evaluation.priority}`,
-      ...(evaluation.fundingNeed
-        ? [`missing_credits:${evaluation.fundingNeed.missingCredits}`]
-        : []),
-      `defer:${evaluation.deferReason}`,
-      ...(evaluation.persistentInstallEvaluation
-        ? [
-            `stackability:${evaluation.persistentInstallEvaluation.stackabilityClass}`,
-            `delta:${evaluation.persistentInstallEvaluation.capabilityDelta}`,
-            `duplicate:${evaluation.persistentInstallEvaluation.duplicateRole}`,
-            `install_fit:${evaluation.persistentInstallEvaluation.finalInstallFit}`,
-          ]
-        : []),
-    ].join("|"),
-  );
+  return evaluations
+    .slice(0, 10)
+    .map((evaluation) =>
+      [
+        `runner_hand_development:${evaluation.developmentRole}`,
+        `availability:${evaluation.availability}`,
+        `need:${evaluation.currentNeed}`,
+        `fit:${evaluation.strategicFit}`,
+        `priority:${evaluation.priority}`,
+        ...(evaluation.fundingNeed
+          ? [`missing_credits:${evaluation.fundingNeed.missingCredits}`]
+          : []),
+        `defer:${evaluation.deferReason}`,
+        ...(evaluation.persistentInstallEvaluation
+          ? [
+              `stackability:${evaluation.persistentInstallEvaluation.stackabilityClass}`,
+              `delta:${evaluation.persistentInstallEvaluation.capabilityDelta}`,
+              `duplicate:${evaluation.persistentInstallEvaluation.duplicateRole}`,
+              `install_fit:${evaluation.persistentInstallEvaluation.finalInstallFit}`,
+            ]
+          : []),
+      ].join("|"),
+    );
 }
 
 function evaluateHandCard(
@@ -240,15 +254,43 @@ function evaluateHandCard(
   card: VisibleCard,
 ): RunnerHandDevelopmentEvaluation {
   const context = buildCardContext(params, card);
-  const developmentRole = roleForCard(context);
-  const availability = availabilityForCard(context, developmentRole);
-  const baseNeed = currentNeedForCard(params, context, developmentRole);
-  const persistentInstallEvaluation = evaluateRunnerPersistentInstall(
+  const initialDevelopmentRole = roleForCard(context);
+  const initialAvailability = availabilityForCard(
+    context,
+    initialDevelopmentRole,
+  );
+  const initialBaseNeed = currentNeedForCard(
     params,
     context,
-    developmentRole,
-    baseNeed,
+    initialDevelopmentRole,
   );
+  const initialPersistentInstallEvaluation = evaluateRunnerPersistentInstall(
+    params,
+    context,
+    initialDevelopmentRole,
+    initialBaseNeed,
+  );
+  const developmentRole = roleAdjustedByPersistentInstall(
+    initialDevelopmentRole,
+    initialPersistentInstallEvaluation,
+  );
+  const availability =
+    developmentRole === initialDevelopmentRole
+      ? initialAvailability
+      : availabilityForCard(context, developmentRole);
+  const baseNeed =
+    developmentRole === initialDevelopmentRole
+      ? initialBaseNeed
+      : currentNeedForCard(params, context, developmentRole);
+  const persistentInstallEvaluation =
+    developmentRole === initialDevelopmentRole
+      ? initialPersistentInstallEvaluation
+      : evaluateRunnerPersistentInstall(
+          params,
+          context,
+          developmentRole,
+          baseNeed,
+        );
   const currentNeed = currentNeedAdjustedByPersistentInstall(
     baseNeed,
     persistentInstallEvaluation,
@@ -288,7 +330,9 @@ function evaluateHandCard(
     priority,
     ...(fundingNeed ? { fundingNeed } : {}),
     deferReason,
-    ...(context.legalAction ? { legalActionId: context.legalAction.actionId } : {}),
+    ...(context.legalAction
+      ? { legalActionId: context.legalAction.actionId }
+      : {}),
     ...(persistentInstallEvaluation ? { persistentInstallEvaluation } : {}),
     evidence: redactedEvidenceForCard({
       context,
@@ -302,15 +346,33 @@ function evaluateHandCard(
   };
 }
 
+function roleAdjustedByPersistentInstall(
+  role: RunnerHandDevelopmentRole,
+  evaluation: RunnerPersistentInstallEvaluation | undefined,
+): RunnerHandDevelopmentRole {
+  if (
+    role === "duplicate_or_low_value" &&
+    evaluation?.stackabilityClass === "risk_mitigation" &&
+    evaluation.capabilityDelta === "risk_reduction" &&
+    evaluation.duplicateRole === "useful_backup" &&
+    evaluation.finalInstallFit > 0
+  ) {
+    return "breaker_or_rig_piece";
+  }
+  return role;
+}
+
 function buildCardContext(
   params: EvaluateRunnerHandDevelopmentParams,
   card: VisibleCard,
 ): CardContext {
-  const matchingCandidates = (params.actionCandidates ?? []).filter((candidate) =>
-    candidateMatchesCard(candidate, card),
+  const matchingCandidates = (params.actionCandidates ?? []).filter(
+    (candidate) => candidateMatchesCard(candidate, card),
   );
   const legalAction =
-    params.input.legalActions.find((action) => actionMatchesCard(action, card)) ??
+    params.input.legalActions.find((action) =>
+      actionMatchesCard(action, card),
+    ) ??
     matchingCandidates
       .map((candidate) =>
         params.input.legalActions.find(
@@ -322,20 +384,19 @@ function buildCardContext(
   const actionCost =
     legalAction !== undefined ? actionCreditCost(legalAction) : undefined;
   const installOrPlayCost =
-    actionCost ?? visibleOrRuntimeNumber(card, "installCost") ??
+    actionCost ??
+    visibleOrRuntimeNumber(card, "installCost") ??
     visibleOrRuntimeNumber(card, "cost");
   const memoryCost = visibleOrRuntimeNumber(card, "memoryCost");
   const memoryAvailable = memoryAvailableFor(params);
-  const duplicateInstalled = card.definitionId !== undefined &&
+  const duplicateInstalled =
+    card.definitionId !== undefined &&
     (params.input.playerView.own.rig ?? []).some(
       (installed) => installed.definitionId === card.definitionId,
     );
   const sameTurnAccessFollowupAvailable = signals.requiresSameTurnAccess
     ? legalAction !== undefined &&
-      sameTurnAccessFollowupAvailableAfter(
-        params.input,
-        legalAction,
-      )
+      sameTurnAccessFollowupAvailableAfter(params.input, legalAction)
     : undefined;
 
   return {
@@ -358,7 +419,9 @@ function signalsForCard(
   card: VisibleCard,
   candidates: readonly ActionSemanticCandidate[],
 ): CardSignals {
-  const definition = card.definitionId ? runtimeDefinition(card.definitionId) : undefined;
+  const definition = card.definitionId
+    ? runtimeDefinition(card.definitionId)
+    : undefined;
   const hint = card.definitionId ? AI_HINTS.get(card.definitionId) : undefined;
   const roleRecord = card.definitionId
     ? CARD_ROLES_BY_CARD.get(card.definitionId)
@@ -470,8 +533,8 @@ function currentNeedForCard(
   const credits = params.input.playerView.own.credits;
   switch (role) {
     case "memory_support":
-      return params.deckCapabilities?.runner?.memoryProfile.missingMemoryPressure ||
-        context.memoryAvailable === 0
+      return params.deckCapabilities?.runner?.memoryProfile
+        .missingMemoryPressure || context.memoryAvailable === 0
         ? "acute"
         : setupEngine.has("runner.rig_first")
           ? "useful_now"
@@ -529,10 +592,7 @@ function currentNeedAdjustedByPersistentInstall(
   ) {
     return "useful_now";
   }
-  if (
-    currentNeed === "later" &&
-    evaluation.finalInstallFit >= 500
-  ) {
+  if (currentNeed === "later" && evaluation.finalInstallFit >= 500) {
     return "setup";
   }
   return currentNeed;
@@ -555,10 +615,7 @@ function evaluateRunnerPersistentInstall(
   const installedProfiles = (params.input.playerView.own.rig ?? [])
     .filter((card) => card.known !== false)
     .map((card) =>
-      persistentFunctionalProfileForCard(
-        card,
-        signalsForCard(card, []).text,
-      ),
+      persistentFunctionalProfileForCard(card, signalsForCard(card, []).text),
     );
   const existingFunctionalCoverage = sortedUnique(
     installedProfiles.flatMap((installed) => installed.functionalCoverage),
@@ -577,6 +634,14 @@ function evaluateRunnerPersistentInstall(
   const installedSameFunctionalGroupCount = installedProfiles.filter(
     (installed) => persistentProfilesOverlap(profile, installed),
   ).length;
+  const installedSameRandomBreakProfileCount =
+    profile.randomBreakOrDamageProfileId
+      ? installedProfiles.filter(
+          (installed) =>
+            installed.randomBreakOrDamageProfileId ===
+            profile.randomBreakOrDamageProfileId,
+        ).length
+      : 0;
   const breakerVariant = breakerVariantAssessment(
     params,
     context.card,
@@ -611,7 +676,10 @@ function evaluateRunnerPersistentInstall(
     currentNeed,
     breakerVariant,
   });
-  const installCost = Math.max(0, context.installOrPlayCost ?? actionCreditCost(action) ?? 0);
+  const installCost = Math.max(
+    0,
+    context.installOrPlayCost ?? actionCreditCost(action) ?? 0,
+  );
   const creditsAfterInstall = params.input.playerView.own.credits - installCost;
   const handAfterInstall = Math.max(
     0,
@@ -708,6 +776,7 @@ function evaluateRunnerPersistentInstall(
       displacementPenalty,
       finalInstallFit,
       role,
+      installedSameRandomBreakProfileCount,
       breakerVariantEvidence: breakerVariant.evidence,
     }),
   };
@@ -749,7 +818,10 @@ function fundingNeedForCard(
   if (installOrPlayCost === undefined) return undefined;
   return {
     installOrPlayCost,
-    missingCredits: Math.max(0, installOrPlayCost - input.playerView.own.credits),
+    missingCredits: Math.max(
+      0,
+      installOrPlayCost - input.playerView.own.credits,
+    ),
     reason: "cannot_pay",
   };
 }
@@ -760,9 +832,7 @@ function deferReasonForCard(
   currentNeed: RunnerHandDevelopmentCurrentNeed,
   persistentInstallEvaluation?: RunnerPersistentInstallEvaluation,
 ): RunnerHandDevelopmentDeferReason {
-  if (
-    persistentInstallEvaluation?.duplicateRole === "redundant_duplicate"
-  ) {
+  if (persistentInstallEvaluation?.duplicateRole === "redundant_duplicate") {
     return "duplicate";
   }
   if (
@@ -918,16 +988,19 @@ function persistentFunctionalProfileForCard(
   text: string,
 ): PersistentFunctionalProfile {
   const breakerCoverage = breakerCoverageForPersistentCard(card, text);
+  const randomBreakOrDamageProfile =
+    randomBreakOrDamageRiskProfileForDefinitionId(card.definitionId);
   const riskyBreaker =
     breakerCoverage.length > 0 &&
-    runnerHandTextHasRiskyBreakerSignal(text);
-  const damagePrevention =
-    runnerHandTextHasDamagePreventionSignal(text);
-  const handSizeSupport =
-    runnerHandTextHasHandSizeSignal(text);
+    (randomBreakOrDamageProfile !== undefined ||
+      runnerHandTextHasRiskyBreakerSignal(text));
+  const damagePrevention = runnerHandTextHasDamagePreventionSignal(text);
+  const handSizeSupport = runnerHandTextHasHandSizeSignal(text);
   const memorySupport = looksLikeMemorySupport(card, text);
-  const breakerStrengthSupport = runnerHandTextHasBreakerStrengthSupportSignal(text);
-  const iceStrengthReduction = runnerHandTextHasIceStrengthReductionSignal(text);
+  const breakerStrengthSupport =
+    runnerHandTextHasBreakerStrengthSupportSignal(text);
+  const iceStrengthReduction =
+    runnerHandTextHasIceStrengthReductionSignal(text);
   const recurringBreakerEconomy =
     runnerHandTextHasRecurringBreakerEconomySignal(text);
   const bankTool = looksLikeBankTool(text);
@@ -938,8 +1011,8 @@ function persistentFunctionalProfileForCard(
   const searchSupport = looksLikeDrawOrSearch(text);
   const nonAdditiveUtilityFamilies =
     nonAdditiveUtilityFamiliesForPersistentCard(card, text);
-  const actionGatedUtility = nonAdditiveUtilityFamilies.length > 0 ||
-    actionEconomy;
+  const actionGatedUtility =
+    nonAdditiveUtilityFamilies.length > 0 || actionEconomy;
   const absoluteNonStackable =
     runnerHandTextHasAbsoluteLinkSignal(text) &&
     !runnerHandTextHasTemporaryCounterSignal(text);
@@ -959,15 +1032,25 @@ function persistentFunctionalProfileForCard(
     ...(searchSupport ? ["search_support"] : []),
     ...(absoluteNonStackable ? ["absolute_link"] : []),
   ]);
-  const primaryGroups = functionalCoverage.length > 0
-    ? functionalCoverage
-    : [`type:${card.type ?? "unknown"}`];
+  const primaryGroups =
+    functionalCoverage.length > 0
+      ? functionalCoverage
+      : [`type:${card.type ?? "unknown"}`];
   return {
     functionalCoverage,
     primaryGroups,
     nonAdditiveUtilityFamilies,
     breakerCoverage,
     riskyBreaker,
+    ...(randomBreakOrDamageProfile
+      ? {
+          randomBreakOrDamageProfileId: randomBreakOrDamageProfile.profileId,
+          randomBreakSuccessProbabilityPerAttempt:
+            randomBreakOrDamageProfile.successProbabilityPerAttempt,
+          randomBreakMaxSingleFailureDamage:
+            randomBreakOrDamageProfile.maxSingleFailureDamage,
+        }
+      : {}),
     damagePrevention,
     handSizeSupport,
     memorySupport,
@@ -1046,7 +1129,12 @@ function runnerHandTextHasIceStrengthReductionSignal(text: string): boolean {
   return (
     runnerHandTokensIncludeAny(tokens, ["ice"]) &&
     runnerHandTokensIncludeAny(tokens, ["strength"]) &&
-    runnerHandTokensIncludeAny(tokens, ["reduce", "reduced", "reduction", "modifier"])
+    runnerHandTokensIncludeAny(tokens, [
+      "reduce",
+      "reduced",
+      "reduction",
+      "modifier",
+    ])
   );
 }
 
@@ -1055,10 +1143,22 @@ function runnerHandTextHasRecurringBreakerEconomySignal(text: string): boolean {
   const renewablePool =
     runnerHandTokensIncludeAny(tokens, ["recurring"]) ||
     (runnerHandTokensIncludeAny(tokens, ["replace", "replenish", "refill"]) &&
-      runnerHandTokensIncludePhrase(tokens, ["start", "of", "your", "next", "turn"]));
+      runnerHandTokensIncludePhrase(tokens, [
+        "start",
+        "of",
+        "your",
+        "next",
+        "turn",
+      ]));
   return (
     renewablePool &&
-    runnerHandTokensIncludeAny(tokens, ["bit", "bits", "credit", "credits", "economy"]) &&
+    runnerHandTokensIncludeAny(tokens, [
+      "bit",
+      "bits",
+      "credit",
+      "credits",
+      "economy",
+    ]) &&
     runnerHandTokensIncludeAny(tokens, ["breaker", "icebreaker"])
   );
 }
@@ -1153,12 +1253,15 @@ function runnerHandTextHasAccessPayoffSignal(text: string): boolean {
 }
 
 function runnerHandTextHasRunEventSignal(text: string): boolean {
-  return runnerHandTokensIncludeAny(runnerHandTextTokens(text), [
-    "run",
-    "bypass",
-    "access",
-    "approach",
-  ]) || runnerHandTokensIncludePhrase(runnerHandTextTokens(text), ["jack", "out"]);
+  return (
+    runnerHandTokensIncludeAny(runnerHandTextTokens(text), [
+      "run",
+      "bypass",
+      "access",
+      "approach",
+    ]) ||
+    runnerHandTokensIncludePhrase(runnerHandTextTokens(text), ["jack", "out"])
+  );
 }
 
 function runnerHandTextHasRepeatUsefulSignal(text: string): boolean {
@@ -1195,7 +1298,12 @@ function runnerHandTextHasRecoveryUtilitySignal(text: string): boolean {
   return (
     runnerHandTokensIncludePhrase(tokens, ["trash", "recovery"]) ||
     runnerHandTokensIncludePhrase(tokens, ["setup", "recovery"]) ||
-    runnerHandTokensIncludePhrase(tokens, ["setup", "top", "trash", "recovery"]) ||
+    runnerHandTokensIncludePhrase(tokens, [
+      "setup",
+      "top",
+      "trash",
+      "recovery",
+    ]) ||
     runnerHandTokensIncludePhrase(tokens, ["search", "trash"]) ||
     runnerHandTokensIncludePhrase(tokens, [
       "top",
@@ -1233,10 +1341,29 @@ function runnerHandTextHasStackSearchUtilitySignal(text: string): boolean {
     runnerHandTokensIncludePhrase(tokens, ["search", "stack"]) ||
     runnerHandTokensIncludePhrase(tokens, ["setup", "stack", "filter"]) ||
     runnerHandTokensIncludePhrase(tokens, ["setup", "card", "search"]) ||
-    runnerHandTokensIncludePhrase(tokens, ["setup", "prep", "resource", "search"]) ||
+    runnerHandTokensIncludePhrase(tokens, [
+      "setup",
+      "prep",
+      "resource",
+      "search",
+    ]) ||
     runnerHandTokensIncludePhrase(tokens, ["setup", "hardware", "search"]) ||
-    runnerHandTokensIncludePhrase(tokens, ["top", "four", "cards", "of", "your", "stack"]) ||
-    runnerHandTokensIncludePhrase(tokens, ["top", "five", "cards", "of", "your", "stack"])
+    runnerHandTokensIncludePhrase(tokens, [
+      "top",
+      "four",
+      "cards",
+      "of",
+      "your",
+      "stack",
+    ]) ||
+    runnerHandTokensIncludePhrase(tokens, [
+      "top",
+      "five",
+      "cards",
+      "of",
+      "your",
+      "stack",
+    ])
   );
 }
 
@@ -1402,7 +1529,8 @@ function nonAdditiveUtilityFamiliesForPersistentCard(
   if (programSearch) families.add("non_additive_utility:program_search");
   if (stackSearch) families.add("non_additive_utility:stack_search");
   if (hiddenZoneSearch) families.add("non_additive_utility:hidden_zone_search");
-  if (families.size > 0) families.add("non_additive_utility:action_gated_search");
+  if (families.size > 0)
+    families.add("non_additive_utility:action_gated_search");
   return [...families].sort();
 }
 
@@ -1443,12 +1571,12 @@ function persistentCoverageAlreadyPresent(
   if (coverageKind === "subtype_limited") {
     return existingFunctionalCoverage.some(
       (existing) =>
-        existing.startsWith("breaker:") &&
-        existing !== "breaker:special",
+        existing.startsWith("breaker:") && existing !== "breaker:special",
     );
   }
-  return coverageKind !== "universal" &&
-    existingCoverage.has("breaker:universal");
+  return (
+    coverageKind !== "universal" && existingCoverage.has("breaker:universal")
+  );
 }
 
 function persistentProfilesOverlap(
@@ -1459,7 +1587,10 @@ function persistentProfilesOverlap(
   if (
     candidate.breakerCoverage.length > 0 &&
     installed.breakerCoverage.length > 0 &&
-    breakerCoverageOverlaps(candidate.breakerCoverage, installed.breakerCoverage)
+    breakerCoverageOverlaps(
+      candidate.breakerCoverage,
+      installed.breakerCoverage,
+    )
   ) {
     return true;
   }
@@ -1535,7 +1666,8 @@ function breakerVariantAssessment(
     : [];
   const strategyAligned =
     params.strategicIntent?.confidence !== "low" &&
-    (params.strategicIntent?.setupEngine.includes("runner.rig_first") === true ||
+    (params.strategicIntent?.setupEngine.includes("runner.rig_first") ===
+      true ||
       params.strategicIntent?.setupEngine.includes(
         "runner.search_breaker_setup",
       ) === true);
@@ -1543,7 +1675,8 @@ function breakerVariantAssessment(
     (candidate?.quantityKnownInDeck ?? 0) > 0 &&
     installedCapabilities.some(
       (installed) =>
-        installed.cardId !== candidate?.cardId && installed.quantityKnownInDeck > 0,
+        installed.cardId !== candidate?.cardId &&
+        installed.quantityKnownInDeck > 0,
     );
   const pendingPrimaryCoverage = matrix
     ? (["wall", "code_gate", "sentry"] as const).filter((coverage) => {
@@ -1556,9 +1689,7 @@ function breakerVariantAssessment(
       })
     : [];
   const blockers = sortedUnique([
-    ...(profile.breakerCoverage.length === 0
-      ? ["candidate_not_breaker"]
-      : []),
+    ...(profile.breakerCoverage.length === 0 ? ["candidate_not_breaker"] : []),
     ...(!candidate ? ["candidate_missing_from_deck_inventory"] : []),
     ...(installedCapabilities.length === 0
       ? ["no_overlapping_installed_breaker_profile"]
@@ -1598,8 +1729,8 @@ function concreteBreakerCoverageOverlaps(
     "ap",
     "trace",
   ]);
-  return left.some((coverage) =>
-    concrete.has(coverage) && right.includes(coverage),
+  return left.some(
+    (coverage) => concrete.has(coverage) && right.includes(coverage),
   );
 }
 
@@ -1617,9 +1748,7 @@ function breakerVariantAdvantages(
     ...(higherKnownValue(candidate.baseStrength, installed.baseStrength)
       ? ["higher_base_strength"]
       : []),
-    ...(candidate.risks.length < installed.risks.length
-      ? ["lower_risk"]
-      : []),
+    ...(candidate.risks.length < installed.risks.length ? ["lower_risk"] : []),
     ...(candidate.restrictions.length < installed.restrictions.length
       ? ["fewer_restrictions"]
       : []),
@@ -1630,14 +1759,18 @@ function lowerKnownValue(
   candidate: number | undefined,
   installed: number | undefined,
 ): boolean {
-  return candidate !== undefined && installed !== undefined && candidate < installed;
+  return (
+    candidate !== undefined && installed !== undefined && candidate < installed
+  );
 }
 
 function higherKnownValue(
   candidate: number | undefined,
   installed: number | undefined,
 ): boolean {
-  return candidate !== undefined && installed !== undefined && candidate > installed;
+  return (
+    candidate !== undefined && installed !== undefined && candidate > installed
+  );
 }
 
 function stackabilityClassForPersistentInstall(
@@ -1651,10 +1784,19 @@ function stackabilityClassForPersistentInstall(
   if (hasInstalledNonAdditiveUtilityOverlap(profile, installedProfiles)) {
     return "absolute_non_stackable";
   }
+  if (
+    persistentInstallImprovesRandomBreakProbability(profile, installedProfiles)
+  ) {
+    return "risk_mitigation";
+  }
   if (persistentInstallReducesRisk(profile, installedProfiles)) {
     return "risk_mitigation";
   }
-  if (profile.memorySupport || profile.damagePrevention || profile.handSizeSupport) {
+  if (
+    profile.memorySupport ||
+    profile.damagePrevention ||
+    profile.handSizeSupport
+  ) {
     return "cumulative_capacity";
   }
   if (
@@ -1667,7 +1809,8 @@ function stackabilityClassForPersistentInstall(
   if (profile.bankTool) return "action_bank_parallel";
   if (profile.accessSupport || profile.searchSupport) return "synergy_support";
   if (profile.breakerCoverage.length > 0) {
-    return installedSameDefinitionCount > 0 || installedSameFunctionalGroupCount > 0
+    return installedSameDefinitionCount > 0 ||
+      installedSameFunctionalGroupCount > 0
       ? "backup_redundancy"
       : "replacement_upgrade";
   }
@@ -1707,8 +1850,14 @@ function capabilityDeltaForPersistentInstall(params: {
     return "backup_only";
   }
   if (
-    persistentInstallReducesRisk(params.profile, params.installedProfiles)
+    persistentInstallImprovesRandomBreakProbability(
+      params.profile,
+      params.installedProfiles,
+    )
   ) {
+    return "risk_reduction";
+  }
+  if (persistentInstallReducesRisk(params.profile, params.installedProfiles)) {
     return "risk_reduction";
   }
   if (params.newFunctionalCoverage.length > 0) {
@@ -1814,8 +1963,25 @@ function persistentInstallReducesRisk(
     installedProfiles.some(
       (installed) =>
         installed.riskyBreaker &&
-        breakerCoverageOverlaps(profile.breakerCoverage, installed.breakerCoverage),
+        breakerCoverageOverlaps(
+          profile.breakerCoverage,
+          installed.breakerCoverage,
+        ),
     )
+  );
+}
+
+function persistentInstallImprovesRandomBreakProbability(
+  profile: PersistentFunctionalProfile,
+  installedProfiles: readonly PersistentFunctionalProfile[],
+): boolean {
+  return Boolean(
+    profile.randomBreakOrDamageProfileId &&
+    installedProfiles.some(
+      (installed) =>
+        installed.randomBreakOrDamageProfileId ===
+        profile.randomBreakOrDamageProfileId,
+    ),
   );
 }
 
@@ -1875,7 +2041,8 @@ function cumulativeNeedLevel(
     if (memory?.missingMemoryPressure || (memory?.memoryAvailable ?? 99) <= 0) {
       return "high";
     }
-    if (runnerUsefulProgramsInHandForPersistent(params.input) > 0) return "medium";
+    if (runnerUsefulProgramsInHandForPersistent(params.input) > 0)
+      return "medium";
   }
   if (profile.damagePrevention || profile.handSizeSupport) {
     if (
@@ -1884,7 +2051,10 @@ function cumulativeNeedLevel(
     ) {
       return "high";
     }
-    if (profile.handSizeSupport && params.input.playerView.own.gripOrHq.length <= 3) {
+    if (
+      profile.handSizeSupport &&
+      params.input.playerView.own.gripOrHq.length <= 3
+    ) {
       return "medium";
     }
   }
@@ -1914,7 +2084,9 @@ function cumulativeNeedLevel(
   return "low";
 }
 
-function diminishingReturnFactor(installedSameFunctionalGroupCount: number): number {
+function diminishingReturnFactor(
+  installedSameFunctionalGroupCount: number,
+): number {
   if (installedSameFunctionalGroupCount <= 0) return 1;
   if (installedSameFunctionalGroupCount === 1) return 0.6;
   if (installedSameFunctionalGroupCount === 2) return 0.3;
@@ -1931,10 +2103,7 @@ function opportunityPenaltyForPersistentInstall(params: {
   let penalty = 0;
   if (params.duplicateRole === "redundant_duplicate") penalty -= 480;
   if (params.duplicateRole === "useful_backup") penalty -= 80;
-  if (
-    params.profile.riskyBreaker &&
-    params.capabilityDelta === "backup_only"
-  ) {
+  if (params.profile.riskyBreaker && params.capabilityDelta === "backup_only") {
     penalty -= 260;
   }
   if (
@@ -1977,7 +2146,16 @@ function handBufferPenaltyForPersistentInstall(params: {
   handAfterInstall: number;
   duplicateRole: RunnerPersistentInstallDuplicateRole;
 }): number {
-  if (params.profile.damagePrevention || params.profile.handSizeSupport) return 0;
+  if (params.profile.damagePrevention || params.profile.handSizeSupport)
+    return 0;
+  if (
+    params.profile.randomBreakOrDamageProfileId &&
+    params.duplicateRole !== "none" &&
+    params.handAfterInstall <
+      (params.profile.randomBreakMaxSingleFailureDamage ?? 1)
+  ) {
+    return -1800;
+  }
   if (
     params.duplicateRole === "redundant_duplicate" &&
     params.profile.actionGatedUtility
@@ -2029,8 +2207,25 @@ function persistentInstallEvidence(params: {
   displacementPenalty: number;
   finalInstallFit: number;
   role: RunnerHandDevelopmentRole;
+  installedSameRandomBreakProfileCount: number;
   breakerVariantEvidence: readonly string[];
 }): string[] {
+  const randomBreakProbability =
+    params.profile.randomBreakSuccessProbabilityPerAttempt;
+  const randomBreakProbabilityBefore =
+    randomBreakProbability !== undefined
+      ? combinedIndependentSuccessProbability(
+          randomBreakProbability,
+          params.installedSameRandomBreakProfileCount,
+        )
+      : undefined;
+  const randomBreakProbabilityAfter =
+    randomBreakProbability !== undefined
+      ? combinedIndependentSuccessProbability(
+          randomBreakProbability,
+          params.installedSameRandomBreakProfileCount + 1,
+        )
+      : undefined;
   return [
     `persistent_install_role:${params.role}`,
     `persistent_functional_coverage:${params.profile.functionalCoverage.join("|") || "none"}`,
@@ -2039,6 +2234,20 @@ function persistentInstallEvidence(params: {
     `stackability_class:${params.stackabilityClass}`,
     `capability_delta:${params.capabilityDelta}`,
     `duplicate_role:${params.duplicateRole}`,
+    ...(params.profile.randomBreakOrDamageProfileId
+      ? [
+          `random_break_or_damage_profile:${params.profile.randomBreakOrDamageProfileId}`,
+          `random_break_attempts_before:${params.installedSameRandomBreakProfileCount}`,
+          `random_break_success_probability_before:${formatProbability(randomBreakProbabilityBefore)}`,
+          `random_break_success_probability_after:${formatProbability(randomBreakProbabilityAfter)}`,
+          `random_break_success_probability_delta:${formatProbability(
+            randomBreakProbabilityAfter !== undefined &&
+              randomBreakProbabilityBefore !== undefined
+              ? randomBreakProbabilityAfter - randomBreakProbabilityBefore
+              : undefined,
+          )}`,
+        ]
+      : []),
     ...params.breakerVariantEvidence,
     `install_cost:${params.installCost}`,
     `credits_after_install:${params.creditsAfterInstall}`,
@@ -2079,10 +2288,28 @@ function persistentInstallEvidence(params: {
   ];
 }
 
+function combinedIndependentSuccessProbability(
+  successProbabilityPerAttempt: number,
+  attempts: number,
+): number {
+  const boundedProbability = Math.max(
+    0,
+    Math.min(1, successProbabilityPerAttempt),
+  );
+  return 1 - (1 - boundedProbability) ** Math.max(0, attempts);
+}
+
+function formatProbability(value: number | undefined): string {
+  return value === undefined
+    ? "unknown"
+    : String(Math.round(value * 1000) / 1000);
+}
+
 function runnerHasRiskyInstalledBreaker(input: AiDecisionInput): boolean {
-  return (input.playerView.own.rig ?? []).some((card) =>
-    persistentFunctionalProfileForCard(card, signalsForCard(card, []).text)
-      .riskyBreaker,
+  return (input.playerView.own.rig ?? []).some(
+    (card) =>
+      persistentFunctionalProfileForCard(card, signalsForCard(card, []).text)
+        .riskyBreaker,
   );
 }
 
@@ -2100,7 +2327,9 @@ function runnerVisibleRemoteScoreThreat(input: AiDecisionInput): boolean {
   );
 }
 
-function runnerUsefulProgramsInHandForPersistent(input: AiDecisionInput): number {
+function runnerUsefulProgramsInHandForPersistent(
+  input: AiDecisionInput,
+): number {
   return input.playerView.own.gripOrHq.filter(
     (card) =>
       card.known !== false &&
@@ -2174,7 +2403,9 @@ type RuntimeCardInfo = {
   type?: string;
   subtypes?: readonly string[];
   text?: string;
-  numeric?: Partial<Record<"installCost" | "cost" | "memoryCost", number | null>>;
+  numeric?: Partial<
+    Record<"installCost" | "cost" | "memoryCost", number | null>
+  >;
 };
 
 function runtimeDefinition(cardId: string): RuntimeCardInfo | undefined {
@@ -2272,7 +2503,9 @@ function runnerNeedsCoverageFromHand(
 ): boolean {
   const matrix = deckCapabilities?.runner?.breakerCoverageMatrix;
   if (!matrix) return false;
-  return Object.values(matrix).some((state) => state.inHand && !state.installed);
+  return Object.values(matrix).some(
+    (state) => state.inHand && !state.installed,
+  );
 }
 
 function roleMatchesStrategicIntent(
@@ -2303,7 +2536,8 @@ function roleMatchesStrategicIntent(
   }
   if (
     (role === "access_payoff" || role === "run_event") &&
-    (intentHasPressure(intent) || intent.executionStyle === "runner.run_event_tempo")
+    (intentHasPressure(intent) ||
+      intent.executionStyle === "runner.run_event_tempo")
   ) {
     return true;
   }
@@ -2326,12 +2560,7 @@ function visibleRunnerThreat(input: AiDecisionInput): boolean {
 function visibleCardShowsRunnerThreat(card: VisibleCard): boolean {
   if (!card.known) return false;
   return runnerHandTextHasVisibleThreatSignal(
-    [
-      card.title,
-      card.rulesText,
-      card.definitionId,
-      ...(card.subtypes ?? []),
-    ]
+    [card.title, card.rulesText, card.definitionId, ...(card.subtypes ?? [])]
       .filter((entry): entry is string => typeof entry === "string")
       .join(" "),
   );

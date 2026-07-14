@@ -68,6 +68,32 @@ describe("corpPunishCandidates", () => {
       "compound-flatline",
     ]);
   });
+
+  it("does not create a punish plan from a last-click trace without payoff", () => {
+    const traceOnly = candidate("trace-only", {
+      actionTacticSignals: ["trace.source", "tag.source"],
+    });
+    const traceDamage = candidate("trace-damage", {
+      actionTacticSignals: ["trace.source", "tag.source", "damage.payoff"],
+    });
+    const agenda = corpCard("remote-agenda", { type: "agenda" });
+    const input = corpScoreInput({
+      credits: 6,
+      clicks: 1,
+      agenda,
+      legalActions: [],
+    });
+
+    expect(
+      corpPunishCandidates(
+        {
+          input,
+          candidates: [traceOnly, traceDamage],
+        } as TacticalPlanBuildContext,
+        { goalId: "corp.apply_punish_pressure" } as TacticalGoalLike,
+      ).map((entry) => entry.actionId),
+    ).toEqual(["trace-damage"]);
+  });
 });
 
 describe("corpScoreWindowBlockers", () => {
@@ -313,7 +339,9 @@ describe("corpScoreWindowBlockers", () => {
       }),
     );
 
-    expect(corpScoreWindowCurrentStep(installAgenda, blockers, input)).toMatchObject({
+    expect(
+      corpScoreWindowCurrentStep(installAgenda, blockers, input),
+    ).toMatchObject({
       kind: "find_remote_protection",
       actionCandidateIds: [],
       desiredActionSemantics: [],

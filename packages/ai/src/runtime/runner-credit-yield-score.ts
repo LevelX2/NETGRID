@@ -41,10 +41,16 @@ export function runnerCreditYieldScoreComponent(
     action,
   );
   const marginalMultiplier = runnerMarginalCreditYieldMultiplier(input, action);
+  const saturatedRepeatableOpportunityPenalty =
+    marginalMultiplier <= 0.1 && action.type === "activated_card_ability"
+      ? 360
+      : 0;
   return {
     key: "runner_credit_action_yield",
-    label: "Credit-Ertrag",
-    value: Math.round(netGain * 600 * marginalMultiplier),
+    label: "Marginaler Credit-Nutzen",
+    value:
+      Math.round(netGain * 600 * marginalMultiplier) -
+      saturatedRepeatableOpportunityPenalty,
     reason: [
       `net_gain:${netGain}`,
       `gross_gain:${grossGain}`,
@@ -55,6 +61,11 @@ export function runnerCreditYieldScoreComponent(
             `marginal_multiplier:${marginalMultiplier}`,
             `current_credits:${input.playerView.own.credits}`,
             "conversion_alternative:true",
+          ]
+        : []),
+      ...(saturatedRepeatableOpportunityPenalty > 0
+        ? [
+            `repeatable_saturation_opportunity_penalty:${saturatedRepeatableOpportunityPenalty}`,
           ]
         : []),
     ].join("|"),

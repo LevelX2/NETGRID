@@ -169,6 +169,7 @@ export type SemanticRuntimeDependencies = {
     input: AiDecisionInput,
     result: TacticalPlanRuntimeResult,
     selectedAction: LegalAction,
+    context?: { runnerEconomyPosture?: RunnerEconomyPosture },
   ) => TacticalPlanMemorySnapshot | undefined;
   scrubEvidence: (evidence: string[]) => string[];
   semanticRuntimeDecisionDebug: (
@@ -466,6 +467,7 @@ export function chooseSemanticRuntimeAction(
         input,
         effectivePlanRuntime,
         runOnlyActionAdjusted.memoryAction ?? selectedChoice.action,
+        runnerEconomyPosture ? { runnerEconomyPosture } : {},
       )
     : undefined;
   const newRunnerRunPlan =

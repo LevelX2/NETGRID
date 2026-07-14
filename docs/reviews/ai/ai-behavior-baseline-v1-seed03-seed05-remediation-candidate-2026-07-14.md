@@ -18,34 +18,34 @@ Generated: 2026-07-14T19:38:07.979Z
 Accepted: no
 Hard failures: action_limit_games:1
 
-| Metric | Value |
-| --- | ---: |
-| illegalActions | 0 |
-| replayFailures | 0 |
-| actionLimitGames | 1 |
-| fallbackActions | 0 |
-| timeoutActions | 0 |
-| runtimeErrors | 0 |
-| hiddenInfoFindings | 0 |
-| noLegalActionFailures | 0 |
-| redactionSafe | yes |
+| Metric                | Value |
+| --------------------- | ----: |
+| illegalActions        |     0 |
+| replayFailures        |     0 |
+| actionLimitGames      |     1 |
+| fallbackActions       |     0 |
+| timeoutActions        |     0 |
+| runtimeErrors         |     0 |
+| hiddenInfoFindings    |     0 |
+| noLegalActionFailures |     0 |
+| redactionSafe         |   yes |
 
 ## Behavioural metrics
 
-| Metric | Value |
-| --- | ---: |
-| Missed score window rate | 0.000 |
-| Advanced remote contest skip rate | n/a |
-| Plan conversion rate | 0.700 |
-| Strategic no-progress repeats / 100 decisions | 2.762 |
-| Clearly dominated plan choices / 100 decisions | 0 |
-| Trace findings / 100 decisions | 1.453 |
+| Metric                                         | Value |
+| ---------------------------------------------- | ----: |
+| Missed score window rate                       | 0.000 |
+| Advanced remote contest skip rate              |   n/a |
+| Plan conversion rate                           | 0.700 |
+| Strategic no-progress repeats / 100 decisions  | 2.762 |
+| Clearly dominated plan choices / 100 decisions |     0 |
+| Trace findings / 100 decisions                 | 1.453 |
 
 ## Deck slots
 
-| Slot | Runner | Corp | Games | Decisions | Missed score rate | Remote contest skip rate | Plan conversion rate | No-progress / 100 | Dominated / 100 | Limits |
-| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| strategy_panel_hybrid_score_punish_cheap_bag | rig_economy_pressure | hybrid_score_punish | 2 | 688 | 0.000 | n/a | 0.700 | 2.762 | 0 | 1 |
+| Slot                                         | Runner               | Corp                | Games | Decisions | Missed score rate | Remote contest skip rate | Plan conversion rate | No-progress / 100 | Dominated / 100 | Limits |
+| -------------------------------------------- | -------------------- | ------------------- | ----: | --------: | ----------------: | -----------------------: | -------------------: | ----------------: | --------------: | -----: |
+| strategy_panel_hybrid_score_punish_cheap_bag | rig_economy_pressure | hybrid_score_punish |     2 |       688 |             0.000 |                      n/a |                0.700 |             2.762 |               0 |      1 |
 
 ## Outcome context
 
@@ -62,10 +62,10 @@ Hard failures: action_limit_games:1
 Vergleichsbasis ist der analysierte Lauf auf `4dfe4b80a` aus
 `ai-behavior-baseline-v1-seeds-03-05-deep-dive-2026-07-14.md`.
 
-| Seed | Vorher | Zwischenlauf `51eaec030` | Bewertung |
-| --- | --- | --- | --- |
-| 03 | Action Limit nach 480 Aktionen, Runner 4 : Korp 3 | reguläres Spielende nach 208 Aktionen, Runner 7 : Korp 0 | Die Broker-/Basic-Credit-Schleife konvertiert jetzt in Runs und Spielende. |
-| 05 | Action Limit nach 480 Aktionen, Runner 0 : Korp 5 | weiterhin Action Limit nach 480 Aktionen, Runner 0 : Korp 5 | Deutlich mehr Entwicklung und Druck, aber eine späte Newsgroup-Schleife bleibt. |
+| Seed | Vorher                                            | Zwischenlauf `51eaec030`                                    | Bewertung                                                                       |
+| ---- | ------------------------------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| 03   | Action Limit nach 480 Aktionen, Runner 4 : Korp 3 | reguläres Spielende nach 208 Aktionen, Runner 7 : Korp 0    | Die Broker-/Basic-Credit-Schleife konvertiert jetzt in Runs und Spielende.      |
+| 05   | Action Limit nach 480 Aktionen, Runner 0 : Korp 5 | weiterhin Action Limit nach 480 Aktionen, Runner 0 : Korp 5 | Deutlich mehr Entwicklung und Druck, aber eine späte Newsgroup-Schleife bleibt. |
 
 Seed 05 verbessert sich qualitativ von 107 auf 68 Runner-Aktivierungen und
 erzeugt nun 18 Draws, 13 Installationen, 20 Events, 5 Runs und 4 Accesses.

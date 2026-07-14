@@ -591,6 +591,38 @@ describe("tacticalPlanMappedChoice", () => {
     expect(result.overrideBlockedReason).toBeUndefined();
   });
 
+  it("lets a clearly better action override background bank building without funding need", () => {
+    const broker = legalAction("broker-load", "activated_card_ability");
+    const draw = legalAction("draw", "draw_card");
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [choice(draw, 1478), choice(broker, 782)],
+      bankBuildMapping([broker]),
+      choice(draw, 1478),
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("draw");
+    expect(result.overriddenMappedChoice?.action.actionId).toBe("broker-load");
+    expect(result.overrideReason).toBe("background_bank_build_mapping_yield");
+    expect(result.overrideThreshold).toBe(600);
+  });
+
+  it("keeps useful background bank building when alternatives are only marginally better", () => {
+    const broker = legalAction("broker-load", "activated_card_ability");
+    const draw = legalAction("draw", "draw_card");
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [choice(draw, 982), choice(broker, 782)],
+      bankBuildMapping([broker]),
+      choice(draw, 982),
+    );
+
+    expect(result.outcome).toBe("semantic_choice_blocked");
+    expect(result.choice?.action.actionId).toBe("broker-load");
+    expect(result.overrideBlockedReason).toBe("runner_plan_controller");
+  });
+
   it("lets no-run economy setup hold interrupt generic central pressure", () => {
     const gain = legalAction("gain", "gain_credit");
     const run = legalAction("run-rd", "start_run", { serverId: "rd" });
@@ -1248,6 +1280,13 @@ function creditBaseMapping(
 
 function centralRunMapping(legalActions: LegalAction[]): PlanStepMappingResult {
   return planMapping("runner.opportunistic_central_run", legalActions);
+}
+
+function bankBuildMapping(legalActions: LegalAction[]): PlanStepMappingResult {
+  return planMapping("runner.build_credit_bank", legalActions, {
+    stepKind: "build_bank_counter",
+    evidence: ["runner_bank_concrete_funding_need:false"],
+  });
 }
 
 function bestHandCardMapping(

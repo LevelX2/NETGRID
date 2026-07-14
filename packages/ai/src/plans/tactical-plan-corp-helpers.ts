@@ -24,6 +24,7 @@ import {
 } from "../runtime/corp-ice-placement/corp-ice-placement";
 import {
   candidateRequiresSuccessfulTrace,
+  traceActionLeavesImmediatePunishWindow,
   traceTagExpectedSuccessEstimate,
 } from "../runtime/trace-tag-success-estimate";
 
@@ -52,7 +53,8 @@ export function corpPunishCandidates(
     }
     if (
       candidateRequiresSuccessfulTrace(candidate) &&
-      traceTagExpectedSuccessEstimate(context.input) === 0
+      (traceTagExpectedSuccessEstimate(context.input) === 0 ||
+        !traceActionLeavesImmediatePunishWindow(context.input, candidate))
     ) {
       return false;
     }

@@ -23,6 +23,7 @@ const STRATEGIC_EXACT_OVERRIDE_SCORE_GAP = 320;
 const STRATEGIC_KIND_OVERRIDE_SCORE_GAP = 480;
 const STRATEGIC_EXACT_MAPPING_PROTECTION_SCORE_GAP = 900;
 const STRATEGIC_KIND_MAPPING_PROTECTION_SCORE_GAP = 720;
+const BACKGROUND_BANK_BUILD_MAX_SCORE_GAP = 300;
 
 export function bestSemanticRuntimeChoice(
   choices: readonly SemanticRuntimeChoice[],
@@ -309,6 +310,12 @@ export function tacticalPlanMappedChoice(
         overrideChoice,
         scoreGap,
       );
+    const backgroundBankBuildShouldYield =
+      tacticalPlanBackgroundBankBuildShouldYield(
+        mapping,
+        overrideChoice,
+        scoreGap,
+      );
     if (
       tacticalPlanRunnerMappingBlocksOffPlanOverride(
         mapping,
@@ -323,6 +330,7 @@ export function tacticalPlanMappedChoice(
           inferiorRunTargetShouldYield,
           corpBoardTriageMismatchShouldYield,
           deferredDevelopmentInstallShouldYield,
+          backgroundBankBuildShouldYield,
         },
       )
     ) {
@@ -341,6 +349,7 @@ export function tacticalPlanMappedChoice(
       lowValueRecoveryShouldYield ||
       inferiorRunTargetShouldYield ||
       corpBoardTriageMismatchShouldYield ||
+      backgroundBankBuildShouldYield ||
       scoreGap > threshold.scoreGap
     ) {
       const result = {
@@ -359,7 +368,9 @@ export function tacticalPlanMappedChoice(
                   ? "inferior_run_target_mapping_yield"
                   : corpBoardTriageMismatchShouldYield
                     ? "corp_board_triage_mismatch_yield"
-                    : threshold.reason,
+                    : backgroundBankBuildShouldYield
+                      ? "background_bank_build_mapping_yield"
+                      : threshold.reason,
         overrideThreshold: threshold.scoreGap,
         scoreGap,
       };
@@ -504,6 +515,7 @@ function tacticalPlanRunnerMappingBlocksOffPlanOverride(
     inferiorRunTargetShouldYield: boolean;
     corpBoardTriageMismatchShouldYield: boolean;
     deferredDevelopmentInstallShouldYield: boolean;
+    backgroundBankBuildShouldYield: boolean;
   },
 ): boolean {
   if (mapping.plan.side !== "runner") return false;
@@ -516,10 +528,25 @@ function tacticalPlanRunnerMappingBlocksOffPlanOverride(
   if (exceptions.inferiorRunTargetShouldYield) return false;
   if (exceptions.corpBoardTriageMismatchShouldYield) return false;
   if (exceptions.deferredDevelopmentInstallShouldYield) return false;
+  if (exceptions.backgroundBankBuildShouldYield) return false;
   return !runnerPlanOverrideIsHardInterrupt(
     mapping.plan,
     mappedChoice,
     overrideChoice,
+  );
+}
+
+function tacticalPlanBackgroundBankBuildShouldYield(
+  mapping: PlanStepMappingResult,
+  overrideChoice: SemanticRuntimeChoice,
+  scoreGap: number,
+): boolean {
+  return (
+    mapping.plan.type === "runner.build_credit_bank" &&
+    mapping.step.kind === "build_bank_counter" &&
+    mapping.plan.evidence.includes("runner_bank_concrete_funding_need:false") &&
+    overrideChoice.score > 0 &&
+    scoreGap > BACKGROUND_BANK_BUILD_MAX_SCORE_GAP
   );
 }
 

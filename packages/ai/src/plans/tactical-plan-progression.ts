@@ -243,7 +243,9 @@ function isNearTermCreditBaseFundingPlan(plan: TacticalPlan): boolean {
   if (plan.type !== "runner.build_credit_base") return false;
   const prefix = "credit_base_top_missing_credits:";
   const missingCredits = Number(
-    plan.evidence.find((entry) => entry.startsWith(prefix))?.slice(prefix.length),
+    plan.evidence
+      .find((entry) => entry.startsWith(prefix))
+      ?.slice(prefix.length),
   );
   return (
     plan.evidence.includes("credit_base_funding_need:true") &&

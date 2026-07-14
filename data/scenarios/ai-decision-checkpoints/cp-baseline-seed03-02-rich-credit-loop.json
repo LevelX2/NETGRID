@@ -1135,10 +1135,7 @@
             "id": "hq",
             "kind": "hq",
             "label": "HQ",
-            "ice": [
-              "corp_onr_v1_237_data-wall_1",
-              "corp_onr_v1_240_fang_1"
-            ],
+            "ice": ["corp_onr_v1_237_data-wall_1", "corp_onr_v1_240_fang_1"],
             "root": []
           },
           {
@@ -1170,9 +1167,7 @@
               "corp_onr_v1_249_hunter_1",
               "corp_onr_v1_225_canis-major_1"
             ],
-            "root": [
-              "corp_onr_v1_367_rio-de-janeiro-city-grid_1"
-            ]
+            "root": ["corp_onr_v1_367_rio-de-janeiro-city-grid_1"]
           },
           {
             "id": "remote_2",
@@ -1184,9 +1179,7 @@
               "corp_onr_v1_244_filter_1",
               "corp_onr_v1_266_scramble_1"
             ],
-            "root": [
-              "corp_onr_v1_207_netwatch-operations-office_1"
-            ]
+            "root": ["corp_onr_v1_207_netwatch-operations-office_1"]
           }
         ]
       },
@@ -1243,9 +1236,7 @@
           "runner_onr_v1_076_all-nighter_2",
           "runner_onr_v1_168_loan-from-chiba_2"
         ],
-        "scoreArea": [
-          "corp_onr_v1_220_tycho-extension_1"
-        ],
+        "scoreArea": ["corp_onr_v1_220_tycho-extension_1"],
         "rig": {
           "programs": [
             "runner_onr_v1_007_blink_1",
@@ -2830,9 +2821,7 @@
                 "clientKnownStateVersion": 0,
                 "selectedChoices": {
                   "choiceId": "setup_mulligan_runner_0",
-                  "selectedOptionIds": [
-                    "mulligan"
-                  ]
+                  "selectedOptionIds": ["mulligan"]
                 },
                 "idempotencyKey": "ai-sim-0"
               },
@@ -2852,10 +2841,7 @@
                     "choiceId": "setup_mulligan_runner_0",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "keep",
-                      "mulligan"
-                    ]
+                    "optionIds": ["keep", "mulligan"]
                   }
                 ],
                 "payload": {
@@ -2914,9 +2900,7 @@
                 "clientKnownStateVersion": 1,
                 "selectedChoices": {
                   "choiceId": "setup_mulligan_corp_1",
-                  "selectedOptionIds": [
-                    "keep"
-                  ]
+                  "selectedOptionIds": ["keep"]
                 },
                 "idempotencyKey": "ai-sim-1"
               },
@@ -2936,10 +2920,7 @@
                     "choiceId": "setup_mulligan_corp_1",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "keep",
-                      "mulligan"
-                    ]
+                    "optionIds": ["keep", "mulligan"]
                   }
                 ],
                 "payload": {
@@ -3513,9 +3494,7 @@
                     "id": "resourceCard",
                     "kind": "card",
                     "side": "runner",
-                    "zoneScope": [
-                      "runner.grip"
-                    ],
+                    "zoneScope": ["runner.grip"],
                     "visibility": "known_to_actor"
                   }
                 ],
@@ -7196,9 +7175,7 @@
                 "clientKnownStateVersion": 71,
                 "selectedChoices": {
                   "choiceId": "secret_spend_guess_then_targeted_bypass_run_hide_71",
-                  "selectedOptionIds": [
-                    "hide_2"
-                  ]
+                  "selectedOptionIds": ["hide_2"]
                 },
                 "idempotencyKey": "ai-sim-71"
               },
@@ -7218,10 +7195,7 @@
                     "choiceId": "secret_spend_guess_then_targeted_bypass_run_hide_71",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "hide_2",
-                      "hide_3"
-                    ]
+                    "optionIds": ["hide_2", "hide_3"]
                   }
                 ],
                 "payload": {
@@ -7278,9 +7252,7 @@
                 "clientKnownStateVersion": 72,
                 "selectedChoices": {
                   "choiceId": "secret_spend_guess_then_targeted_bypass_run_guess_72",
-                  "selectedOptionIds": [
-                    "guess_3"
-                  ]
+                  "selectedOptionIds": ["guess_3"]
                 },
                 "idempotencyKey": "ai-sim-72"
               },
@@ -7300,12 +7272,7 @@
                     "choiceId": "secret_spend_guess_then_targeted_bypass_run_guess_72",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "guess_0",
-                      "guess_1",
-                      "guess_2",
-                      "guess_3"
-                    ]
+                    "optionIds": ["guess_0", "guess_1", "guess_2", "guess_3"]
                   }
                 ],
                 "payload": {
@@ -7372,9 +7339,7 @@
                 "clientKnownStateVersion": 73,
                 "selectedChoices": {
                   "choiceId": "secret_spend_guess_then_targeted_bypass_run_target_73",
-                  "selectedOptionIds": [
-                    "ice_corp_onr_v1_237_data-wall_1"
-                  ]
+                  "selectedOptionIds": ["ice_corp_onr_v1_237_data-wall_1"]
                 },
                 "idempotencyKey": "ai-sim-73"
               },
@@ -11685,9 +11650,7 @@
                     "id": "resourceCard",
                     "kind": "card",
                     "side": "runner",
-                    "zoneScope": [
-                      "runner.grip"
-                    ],
+                    "zoneScope": ["runner.grip"],
                     "visibility": "known_to_actor"
                   }
                 ],
@@ -13391,9 +13354,7 @@
                 "clientKnownStateVersion": 177,
                 "selectedChoices": {
                   "choiceId": "run_175.corp_onr_v1_240_fang_2.0.trace.corp.bid.177",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-177"
               },
@@ -13413,12 +13374,7 @@
                     "choiceId": "run_175.corp_onr_v1_240_fang_2.0.trace.corp.bid.177",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0",
-                      "bid_1",
-                      "bid_2",
-                      "bid_3"
-                    ]
+                    "optionIds": ["bid_0", "bid_1", "bid_2", "bid_3"]
                   }
                 ],
                 "payload": {
@@ -13486,9 +13442,7 @@
                 "clientKnownStateVersion": 178,
                 "selectedChoices": {
                   "choiceId": "run_175.corp_onr_v1_240_fang_2.0.trace.runner.bid.178",
-                  "selectedOptionIds": [
-                    "bid_4"
-                  ]
+                  "selectedOptionIds": ["bid_4"]
                 },
                 "idempotencyKey": "ai-sim-178"
               },
@@ -14420,9 +14374,7 @@
                 "clientKnownStateVersion": 193,
                 "selectedChoices": {
                   "choiceId": "run_192.corp_onr_v1_240_fang_2.0.trace.corp.bid.193",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-193"
               },
@@ -14442,13 +14394,7 @@
                     "choiceId": "run_192.corp_onr_v1_240_fang_2.0.trace.corp.bid.193",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0",
-                      "bid_1",
-                      "bid_2",
-                      "bid_3",
-                      "bid_4"
-                    ]
+                    "optionIds": ["bid_0", "bid_1", "bid_2", "bid_3", "bid_4"]
                   }
                 ],
                 "payload": {
@@ -14518,9 +14464,7 @@
                 "clientKnownStateVersion": 194,
                 "selectedChoices": {
                   "choiceId": "run_192.corp_onr_v1_240_fang_2.0.trace.runner.bid.194",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-194"
               },
@@ -14540,10 +14484,7 @@
                     "choiceId": "run_192.corp_onr_v1_240_fang_2.0.trace.runner.bid.194",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0",
-                      "bid_1"
-                    ]
+                    "optionIds": ["bid_0", "bid_1"]
                   }
                 ],
                 "payload": {
@@ -14895,9 +14836,7 @@
                 "clientKnownStateVersion": 199,
                 "selectedChoices": {
                   "choiceId": "run_197.corp_onr_v1_240_fang_2.0.trace.corp.bid.199",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-199"
               },
@@ -14917,13 +14856,7 @@
                     "choiceId": "run_197.corp_onr_v1_240_fang_2.0.trace.corp.bid.199",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0",
-                      "bid_1",
-                      "bid_2",
-                      "bid_3",
-                      "bid_4"
-                    ]
+                    "optionIds": ["bid_0", "bid_1", "bid_2", "bid_3", "bid_4"]
                   }
                 ],
                 "payload": {
@@ -14993,9 +14926,7 @@
                 "clientKnownStateVersion": 200,
                 "selectedChoices": {
                   "choiceId": "run_197.corp_onr_v1_240_fang_2.0.trace.runner.bid.200",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-200"
               },
@@ -15015,10 +14946,7 @@
                     "choiceId": "run_197.corp_onr_v1_240_fang_2.0.trace.runner.bid.200",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0",
-                      "bid_1"
-                    ]
+                    "optionIds": ["bid_0", "bid_1"]
                   }
                 ],
                 "payload": {
@@ -16286,9 +16214,7 @@
                 "clientKnownStateVersion": 224,
                 "selectedChoices": {
                   "choiceId": "discard_runner_224",
-                  "selectedOptionIds": [
-                    "card_runner_onr_v1_076_all-nighter_2"
-                  ]
+                  "selectedOptionIds": ["card_runner_onr_v1_076_all-nighter_2"]
                 },
                 "idempotencyKey": "ai-sim-224"
               },
@@ -16642,9 +16568,7 @@
                     "id": "resourceCard",
                     "kind": "card",
                     "side": "runner",
-                    "zoneScope": [
-                      "runner.grip"
-                    ],
+                    "zoneScope": ["runner.grip"],
                     "visibility": "known_to_actor"
                   }
                 ],
@@ -16740,9 +16664,7 @@
                     "id": "resourceCard",
                     "kind": "card",
                     "side": "runner",
-                    "zoneScope": [
-                      "runner.grip"
-                    ],
+                    "zoneScope": ["runner.grip"],
                     "visibility": "known_to_actor"
                   }
                 ],
@@ -17416,9 +17338,7 @@
                     "id": "resourceCard",
                     "kind": "card",
                     "side": "runner",
-                    "zoneScope": [
-                      "runner.grip"
-                    ],
+                    "zoneScope": ["runner.grip"],
                     "visibility": "known_to_actor"
                   }
                 ],
@@ -19556,9 +19476,7 @@
                 "clientKnownStateVersion": 280,
                 "selectedChoices": {
                   "choiceId": "discard_corp_280",
-                  "selectedOptionIds": [
-                    "card_corp_onr_v1_340_setup_1"
-                  ]
+                  "selectedOptionIds": ["card_corp_onr_v1_340_setup_1"]
                 },
                 "idempotencyKey": "ai-sim-280"
               },
@@ -25950,19 +25868,14 @@
           "kind": "none",
           "required": 0,
           "satisfied": true,
-          "evidence": [
-            "reserve_source:runtime_context",
-            "reserve:none"
-          ]
+          "evidence": ["reserve_source:runtime_context", "reserve:none"]
         },
         "blockers": [],
         "transition": {
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "runner.run_event_tempo",
-          "evidence": [
-            "continued:runner.run_event_tempo"
-          ]
+          "evidence": ["continued:runner.run_event_tempo"]
         },
         "commitment": {
           "strategyId": "runner.run_event_tempo",
@@ -26046,10 +25959,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -26129,10 +26039,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -26212,10 +26119,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -26266,10 +26170,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -26291,9 +26192,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -26353,10 +26252,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",

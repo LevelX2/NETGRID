@@ -21,6 +21,7 @@ export type RandomBreakOrDamageRiskProfile = {
   kind: "random_break_or_damage";
   profileId: "blink";
   definitionIds: readonly string[];
+  successProbabilityPerAttempt: number;
   failureDamageType: "net";
   maxSingleFailureDamage: number;
 };
@@ -30,6 +31,7 @@ export const BLINK_RANDOM_BREAK_OR_DAMAGE_RISK_PROFILE: RandomBreakOrDamageRiskP
     kind: "random_break_or_damage",
     profileId: "blink",
     definitionIds: [BLINK_CARD_ID],
+    successProbabilityPerAttempt: 0.5,
     failureDamageType: "net",
     maxSingleFailureDamage: 3,
   };

@@ -31,7 +31,7 @@ describe("runnerCreditYieldScoreComponent", () => {
 
     expect(component).toEqual({
       key: "runner_credit_action_yield",
-      label: "Credit-Ertrag",
+      label: "Marginaler Credit-Nutzen",
       value: 1800,
       reason:
         "net_gain:3|gross_gain:3|action:play_event|source:onr_v1_097_livewires-contacts",
@@ -95,9 +95,34 @@ describe("runnerCreditYieldScoreComponent", () => {
 
     expect(component).toMatchObject({
       key: "runner_credit_action_yield",
-      value: 120,
+      value: -240,
       reason: expect.stringContaining("marginal_multiplier:0.1"),
     });
+    expect(component?.reason).toContain(
+      "repeatable_saturation_opportunity_penalty:360",
+    );
+  });
+
+  it("keeps repeatable economy positive while the reserve is only moderately exceeded", () => {
+    const economy = legalAction({
+      actionId: "newsgroup",
+      type: "activated_card_ability",
+      payload: { gainCreditsAmount: 2 },
+    });
+    const decisionInput = input();
+    decisionInput.playerView.own.credits = 8;
+    decisionInput.legalActions = [
+      economy,
+      legalAction({ actionId: "develop", type: "install_card" }),
+    ];
+
+    expect(
+      runnerCreditYieldScoreComponent(
+        decisionInput,
+        economy,
+        dependencies("onr_v1_045_newsgroup-filter"),
+      ),
+    ).toMatchObject({ value: 600 });
   });
 
   it("keeps full repeatable credit yield below reserve", () => {

@@ -1607,7 +1607,10 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
           ice: [caryatidAsCodeGateIce("hq-caryatid")],
         }),
       ],
-      legalActions: [runAction("run-hq", "hq"), gainCreditAction("gain-credit")],
+      legalActions: [
+        runAction("run-hq", "hq"),
+        gainCreditAction("gain-credit"),
+      ],
     });
 
     const [evaluation] = evaluateRunnerRunTargets({ input });
@@ -2125,10 +2128,12 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       fundingNeed: true,
       recommendation: "build_economy",
     });
-    expect(buildRunnerEconomyPosture({ input: structuredInput })).toMatchObject({
-      fundingNeed: true,
-      recommendation: "cash_out_bank",
-    });
+    expect(buildRunnerEconomyPosture({ input: structuredInput })).toMatchObject(
+      {
+        fundingNeed: true,
+        recommendation: "cash_out_bank",
+      },
+    );
   });
 
   it("builds a creditbase funding need for useful hand cards blocked by credits", () => {
@@ -2239,9 +2244,14 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     const input = aiInput({
       credits: 6,
       opponentCredits: 9,
-      servers: [server("rd", { ice: [barrierIce("tax-1"), barrierIce("tax-2")] })],
+      servers: [
+        server("rd", { ice: [barrierIce("tax-1"), barrierIce("tax-2")] }),
+      ],
       rig: [installedEconomy],
-      legalActions: [runAction("run-rd", "rd"), gainCreditAction("gain-credit")],
+      legalActions: [
+        runAction("run-rd", "rd"),
+        gainCreditAction("gain-credit"),
+      ],
     });
 
     const posture = buildRunnerEconomyPosture({ input });

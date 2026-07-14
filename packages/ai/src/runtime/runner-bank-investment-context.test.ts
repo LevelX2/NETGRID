@@ -454,8 +454,7 @@ describe("createRunnerBankInvestmentContext", () => {
         definitionId === "custom-runner-credit-bank"
           ? [{ kind: "economy", target: "economy.temporary_resource_bank" }]
           : [],
-      actionCreditCost: (action) =>
-        action.type === "install_card" ? 3 : 0,
+      actionCreditCost: (action) => (action.type === "install_card" ? 3 : 0),
     });
     const bank = visibleRunnerCard("custom-runner-credit-bank");
     const install = runnerAction("install_card", {

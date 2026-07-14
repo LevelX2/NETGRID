@@ -1070,9 +1070,7 @@
           "corp_onr_v1_325_hacker-tracker-central_1",
           "corp_onr_v1_337_rockerboy-promotion_1"
         ],
-        "scoreArea": [
-          "corp_onr_v1_207_netwatch-operations-office_1"
-        ],
+        "scoreArea": ["corp_onr_v1_207_netwatch-operations-office_1"],
         "servers": [
           {
             "id": "hq",
@@ -1094,9 +1092,7 @@
               "corp_onr_v1_238_data-wall-2-0_1",
               "corp_onr_v1_264_rex_2"
             ],
-            "root": [
-              "corp_onr_v1_363_olivia-salazar_1"
-            ]
+            "root": ["corp_onr_v1_363_olivia-salazar_1"]
           },
           {
             "id": "archives",
@@ -1115,21 +1111,14 @@
               "corp_onr_v1_222_ball-and-chain_1",
               "corp_onr_v1_225_canis-major_1"
             ],
-            "root": [
-              "corp_onr_v1_190_bioweapons-engineering_1"
-            ]
+            "root": ["corp_onr_v1_190_bioweapons-engineering_1"]
           },
           {
             "id": "remote_2",
             "kind": "remote",
             "label": "Remote 2",
-            "ice": [
-              "corp_onr_v1_244_filter_2",
-              "corp_onr_v1_240_fang_2"
-            ],
-            "root": [
-              "corp_onr_v1_367_rio-de-janeiro-city-grid_1"
-            ]
+            "ice": ["corp_onr_v1_244_filter_2", "corp_onr_v1_240_fang_2"],
+            "root": ["corp_onr_v1_367_rio-de-janeiro-city-grid_1"]
           }
         ]
       },
@@ -2774,9 +2763,7 @@
                 "clientKnownStateVersion": 0,
                 "selectedChoices": {
                   "choiceId": "setup_mulligan_runner_0",
-                  "selectedOptionIds": [
-                    "keep"
-                  ]
+                  "selectedOptionIds": ["keep"]
                 },
                 "idempotencyKey": "ai-sim-0"
               },
@@ -2796,10 +2783,7 @@
                     "choiceId": "setup_mulligan_runner_0",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "keep",
-                      "mulligan"
-                    ]
+                    "optionIds": ["keep", "mulligan"]
                   }
                 ],
                 "payload": {
@@ -2858,9 +2842,7 @@
                 "clientKnownStateVersion": 1,
                 "selectedChoices": {
                   "choiceId": "setup_mulligan_corp_1",
-                  "selectedOptionIds": [
-                    "keep"
-                  ]
+                  "selectedOptionIds": ["keep"]
                 },
                 "idempotencyKey": "ai-sim-1"
               },
@@ -2880,10 +2862,7 @@
                     "choiceId": "setup_mulligan_corp_1",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "keep",
-                      "mulligan"
-                    ]
+                    "optionIds": ["keep", "mulligan"]
                   }
                 ],
                 "payload": {
@@ -3416,9 +3395,7 @@
                 "clientKnownStateVersion": 10,
                 "selectedChoices": {
                   "choiceId": "run_8.corp_onr_v1_264_rex_1.0.trace.corp.bid.10",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-10"
               },
@@ -3438,9 +3415,7 @@
                     "choiceId": "run_8.corp_onr_v1_264_rex_1.0.trace.corp.bid.10",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0"
-                    ]
+                    "optionIds": ["bid_0"]
                   }
                 ],
                 "payload": {
@@ -3508,9 +3483,7 @@
                 "clientKnownStateVersion": 11,
                 "selectedChoices": {
                   "choiceId": "run_8.corp_onr_v1_264_rex_1.0.trace.runner.bid.11",
-                  "selectedOptionIds": [
-                    "bid_3"
-                  ]
+                  "selectedOptionIds": ["bid_3"]
                 },
                 "idempotencyKey": "ai-sim-11"
               },
@@ -4655,9 +4628,7 @@
                 "clientKnownStateVersion": 30,
                 "selectedChoices": {
                   "choiceId": "run_28.corp_onr_v1_249_hunter_1.0.trace.corp.bid.30",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-30"
               },
@@ -4677,10 +4648,7 @@
                     "choiceId": "run_28.corp_onr_v1_249_hunter_1.0.trace.corp.bid.30",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0",
-                      "bid_1"
-                    ]
+                    "optionIds": ["bid_0", "bid_1"]
                   }
                 ],
                 "payload": {
@@ -4750,9 +4718,7 @@
                 "clientKnownStateVersion": 31,
                 "selectedChoices": {
                   "choiceId": "run_28.corp_onr_v1_249_hunter_1.0.trace.runner.bid.31",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-31"
               },
@@ -4772,13 +4738,7 @@
                     "choiceId": "run_28.corp_onr_v1_249_hunter_1.0.trace.runner.bid.31",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0",
-                      "bid_1",
-                      "bid_2",
-                      "bid_3",
-                      "bid_4"
-                    ]
+                    "optionIds": ["bid_0", "bid_1", "bid_2", "bid_3", "bid_4"]
                   }
                 ],
                 "payload": {
@@ -5282,9 +5242,7 @@
                 "clientKnownStateVersion": 40,
                 "selectedChoices": {
                   "choiceId": "run_39.corp_onr_v1_264_rex_1.0.trace.corp.bid.40",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-40"
               },
@@ -5304,10 +5262,7 @@
                     "choiceId": "run_39.corp_onr_v1_264_rex_1.0.trace.corp.bid.40",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0",
-                      "bid_1"
-                    ]
+                    "optionIds": ["bid_0", "bid_1"]
                   }
                 ],
                 "payload": {
@@ -5375,9 +5330,7 @@
                 "clientKnownStateVersion": 41,
                 "selectedChoices": {
                   "choiceId": "run_39.corp_onr_v1_264_rex_1.0.trace.runner.bid.41",
-                  "selectedOptionIds": [
-                    "bid_3"
-                  ]
+                  "selectedOptionIds": ["bid_3"]
                 },
                 "idempotencyKey": "ai-sim-41"
               },
@@ -5397,12 +5350,7 @@
                     "choiceId": "run_39.corp_onr_v1_264_rex_1.0.trace.runner.bid.41",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0",
-                      "bid_1",
-                      "bid_2",
-                      "bid_3"
-                    ]
+                    "optionIds": ["bid_0", "bid_1", "bid_2", "bid_3"]
                   }
                 ],
                 "payload": {
@@ -6766,9 +6714,7 @@
                     "id": "resourceCard",
                     "kind": "card",
                     "side": "runner",
-                    "zoneScope": [
-                      "runner.grip"
-                    ],
+                    "zoneScope": ["runner.grip"],
                     "visibility": "known_to_actor"
                   }
                 ],
@@ -7154,9 +7100,7 @@
                 "clientKnownStateVersion": 68,
                 "selectedChoices": {
                   "choiceId": "discard_runner_68",
-                  "selectedOptionIds": [
-                    "card_runner_onr_v1_095_jack-n-joe_1"
-                  ]
+                  "selectedOptionIds": ["card_runner_onr_v1_095_jack-n-joe_1"]
                 },
                 "idempotencyKey": "ai-sim-68"
               },
@@ -7588,9 +7532,7 @@
                     "id": "resourceCard",
                     "kind": "card",
                     "side": "runner",
-                    "zoneScope": [
-                      "runner.grip"
-                    ],
+                    "zoneScope": ["runner.grip"],
                     "visibility": "known_to_actor"
                   }
                 ],
@@ -7830,9 +7772,7 @@
                 "clientKnownStateVersion": 78,
                 "selectedChoices": {
                   "choiceId": "p3_37_search_stack_to_grip_78",
-                  "selectedOptionIds": [
-                    "card_runner_onr_v1_007_blink_1"
-                  ]
+                  "selectedOptionIds": ["card_runner_onr_v1_007_blink_1"]
                 },
                 "idempotencyKey": "ai-sim-78"
               },
@@ -8808,9 +8748,7 @@
                 "clientKnownStateVersion": 94,
                 "selectedChoices": {
                   "choiceId": "run_87.corp_onr_v1_264_rex_1.0.trace.corp.bid.94",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-94"
               },
@@ -8909,9 +8847,7 @@
                 "clientKnownStateVersion": 95,
                 "selectedChoices": {
                   "choiceId": "run_87.corp_onr_v1_264_rex_1.0.trace.runner.bid.95",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-95"
               },
@@ -8931,9 +8867,7 @@
                     "choiceId": "run_87.corp_onr_v1_264_rex_1.0.trace.runner.bid.95",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0"
-                    ]
+                    "optionIds": ["bid_0"]
                   }
                 ],
                 "payload": {
@@ -9298,9 +9232,7 @@
                 "clientKnownStateVersion": 101,
                 "selectedChoices": {
                   "choiceId": "op_trace.101.onr_v1_284_chance-observation.corp_onr_v1_284_chance-observation_2.corp.bid.101",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-101"
               },
@@ -9396,9 +9328,7 @@
                 "clientKnownStateVersion": 102,
                 "selectedChoices": {
                   "choiceId": "op_trace.101.onr_v1_284_chance-observation.corp_onr_v1_284_chance-observation_2.runner.bid.102",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-102"
               },
@@ -9418,11 +9348,7 @@
                     "choiceId": "op_trace.101.onr_v1_284_chance-observation.corp_onr_v1_284_chance-observation_2.runner.bid.102",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0",
-                      "bid_1",
-                      "bid_2"
-                    ]
+                    "optionIds": ["bid_0", "bid_1", "bid_2"]
                   }
                 ],
                 "payload": {
@@ -9494,9 +9420,7 @@
                     "id": "resource",
                     "kind": "card",
                     "side": "runner",
-                    "zoneScope": [
-                      "runner.rig.resources"
-                    ],
+                    "zoneScope": ["runner.rig.resources"],
                     "visibility": "public"
                   }
                 ],
@@ -10330,9 +10254,7 @@
                 "clientKnownStateVersion": 117,
                 "selectedChoices": {
                   "choiceId": "secret_spend_guess_then_targeted_bypass_run_hide_117",
-                  "selectedOptionIds": [
-                    "hide_5"
-                  ]
+                  "selectedOptionIds": ["hide_5"]
                 },
                 "idempotencyKey": "ai-sim-117"
               },
@@ -10352,12 +10274,7 @@
                     "choiceId": "secret_spend_guess_then_targeted_bypass_run_hide_117",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "hide_2",
-                      "hide_3",
-                      "hide_4",
-                      "hide_5"
-                    ]
+                    "optionIds": ["hide_2", "hide_3", "hide_4", "hide_5"]
                   }
                 ],
                 "payload": {
@@ -10414,9 +10331,7 @@
                 "clientKnownStateVersion": 118,
                 "selectedChoices": {
                   "choiceId": "secret_spend_guess_then_targeted_bypass_run_guess_118",
-                  "selectedOptionIds": [
-                    "guess_4"
-                  ]
+                  "selectedOptionIds": ["guess_4"]
                 },
                 "idempotencyKey": "ai-sim-118"
               },
@@ -10510,9 +10425,7 @@
                 "clientKnownStateVersion": 119,
                 "selectedChoices": {
                   "choiceId": "secret_spend_guess_then_targeted_bypass_run_target_119",
-                  "selectedOptionIds": [
-                    "ice_corp_onr_v1_266_scramble_1"
-                  ]
+                  "selectedOptionIds": ["ice_corp_onr_v1_266_scramble_1"]
                 },
                 "idempotencyKey": "ai-sim-119"
               },
@@ -10669,9 +10582,7 @@
                 "clientKnownStateVersion": 121,
                 "selectedChoices": {
                   "choiceId": "run_120.corp_onr_v1_249_hunter_1.0.trace.corp.bid.121",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-121"
               },
@@ -10768,9 +10679,7 @@
                 "clientKnownStateVersion": 122,
                 "selectedChoices": {
                   "choiceId": "run_120.corp_onr_v1_249_hunter_1.0.trace.runner.bid.122",
-                  "selectedOptionIds": [
-                    "bid_5"
-                  ]
+                  "selectedOptionIds": ["bid_5"]
                 },
                 "idempotencyKey": "ai-sim-122"
               },
@@ -11798,9 +11707,7 @@
                     "id": "resourceCard",
                     "kind": "card",
                     "side": "runner",
-                    "zoneScope": [
-                      "runner.grip"
-                    ],
+                    "zoneScope": ["runner.grip"],
                     "visibility": "known_to_actor"
                   }
                 ],
@@ -13423,9 +13330,7 @@
                 "clientKnownStateVersion": 161,
                 "selectedChoices": {
                   "choiceId": "secret_spend_guess_then_targeted_bypass_run_hide_161",
-                  "selectedOptionIds": [
-                    "hide_5"
-                  ]
+                  "selectedOptionIds": ["hide_5"]
                 },
                 "idempotencyKey": "ai-sim-161"
               },
@@ -13510,9 +13415,7 @@
                 "clientKnownStateVersion": 162,
                 "selectedChoices": {
                   "choiceId": "secret_spend_guess_then_targeted_bypass_run_guess_162",
-                  "selectedOptionIds": [
-                    "guess_5"
-                  ]
+                  "selectedOptionIds": ["guess_5"]
                 },
                 "idempotencyKey": "ai-sim-162"
               },
@@ -14604,9 +14507,7 @@
                 "clientKnownStateVersion": 176,
                 "selectedChoices": {
                   "choiceId": "discard_runner_176",
-                  "selectedOptionIds": [
-                    "card_runner_onr_v1_094_inside-job_1"
-                  ]
+                  "selectedOptionIds": ["card_runner_onr_v1_094_inside-job_1"]
                 },
                 "idempotencyKey": "ai-sim-176"
               },
@@ -15108,9 +15009,7 @@
                     "id": "resourceCard",
                     "kind": "card",
                     "side": "runner",
-                    "zoneScope": [
-                      "runner.grip"
-                    ],
+                    "zoneScope": ["runner.grip"],
                     "visibility": "known_to_actor"
                   }
                 ],
@@ -15927,9 +15826,7 @@
                 "clientKnownStateVersion": 193,
                 "selectedChoices": {
                   "choiceId": "secret_spend_guess_then_targeted_bypass_run_hide_193",
-                  "selectedOptionIds": [
-                    "hide_5"
-                  ]
+                  "selectedOptionIds": ["hide_5"]
                 },
                 "idempotencyKey": "ai-sim-193"
               },
@@ -16014,9 +15911,7 @@
                 "clientKnownStateVersion": 194,
                 "selectedChoices": {
                   "choiceId": "secret_spend_guess_then_targeted_bypass_run_guess_194",
-                  "selectedOptionIds": [
-                    "guess_5"
-                  ]
+                  "selectedOptionIds": ["guess_5"]
                 },
                 "idempotencyKey": "ai-sim-194"
               },
@@ -18406,9 +18301,7 @@
                 "clientKnownStateVersion": 229,
                 "selectedChoices": {
                   "choiceId": "discard_corp_229",
-                  "selectedOptionIds": [
-                    "card_corp_onr_v1_307_urban-renewal_1"
-                  ]
+                  "selectedOptionIds": ["card_corp_onr_v1_307_urban-renewal_1"]
                 },
                 "idempotencyKey": "ai-sim-229"
               },
@@ -18967,9 +18860,7 @@
                 "clientKnownStateVersion": 237,
                 "selectedChoices": {
                   "choiceId": "op_trace.237.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.corp.bid.237",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-237"
               },
@@ -19063,9 +18954,7 @@
                 "clientKnownStateVersion": 238,
                 "selectedChoices": {
                   "choiceId": "op_trace.237.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.runner.bid.238",
-                  "selectedOptionIds": [
-                    "bid_2"
-                  ]
+                  "selectedOptionIds": ["bid_2"]
                 },
                 "idempotencyKey": "ai-sim-238"
               },
@@ -19232,9 +19121,7 @@
                 "clientKnownStateVersion": 240,
                 "selectedChoices": {
                   "choiceId": "op_trace.240.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.corp.bid.240",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-240"
               },
@@ -19328,9 +19215,7 @@
                 "clientKnownStateVersion": 241,
                 "selectedChoices": {
                   "choiceId": "op_trace.240.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.runner.bid.241",
-                  "selectedOptionIds": [
-                    "bid_2"
-                  ]
+                  "selectedOptionIds": ["bid_2"]
                 },
                 "idempotencyKey": "ai-sim-241"
               },
@@ -19495,9 +19380,7 @@
                 "clientKnownStateVersion": 243,
                 "selectedChoices": {
                   "choiceId": "op_trace.243.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.corp.bid.243",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-243"
               },
@@ -19591,9 +19474,7 @@
                 "clientKnownStateVersion": 244,
                 "selectedChoices": {
                   "choiceId": "op_trace.243.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.runner.bid.244",
-                  "selectedOptionIds": [
-                    "bid_2"
-                  ]
+                  "selectedOptionIds": ["bid_2"]
                 },
                 "idempotencyKey": "ai-sim-244"
               },
@@ -19724,9 +19605,7 @@
                 "clientKnownStateVersion": 246,
                 "selectedChoices": {
                   "choiceId": "discard_corp_246",
-                  "selectedOptionIds": [
-                    "card_corp_onr_v1_306_trojan-horse_2"
-                  ]
+                  "selectedOptionIds": ["card_corp_onr_v1_306_trojan-horse_2"]
                 },
                 "idempotencyKey": "ai-sim-246"
               },
@@ -20130,9 +20009,7 @@
                 "clientKnownStateVersion": 251,
                 "selectedChoices": {
                   "choiceId": "run_250.corp_onr_v1_264_rex_2.0.trace.corp.bid.251",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-251"
               },
@@ -20227,9 +20104,7 @@
                 "clientKnownStateVersion": 252,
                 "selectedChoices": {
                   "choiceId": "run_250.corp_onr_v1_264_rex_2.0.trace.runner.bid.252",
-                  "selectedOptionIds": [
-                    "bid_3"
-                  ]
+                  "selectedOptionIds": ["bid_3"]
                 },
                 "idempotencyKey": "ai-sim-252"
               },
@@ -21349,9 +21224,7 @@
                     "id": "resourceCard",
                     "kind": "card",
                     "side": "runner",
-                    "zoneScope": [
-                      "runner.grip"
-                    ],
+                    "zoneScope": ["runner.grip"],
                     "visibility": "known_to_actor"
                   }
                 ],
@@ -21791,9 +21664,7 @@
                 "clientKnownStateVersion": 277,
                 "selectedChoices": {
                   "choiceId": "op_trace.277.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.corp.bid.277",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-277"
               },
@@ -21888,9 +21759,7 @@
                 "clientKnownStateVersion": 278,
                 "selectedChoices": {
                   "choiceId": "op_trace.277.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.runner.bid.278",
-                  "selectedOptionIds": [
-                    "bid_2"
-                  ]
+                  "selectedOptionIds": ["bid_2"]
                 },
                 "idempotencyKey": "ai-sim-278"
               },
@@ -22054,9 +21923,7 @@
                 "clientKnownStateVersion": 280,
                 "selectedChoices": {
                   "choiceId": "op_trace.280.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.corp.bid.280",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-280"
               },
@@ -22151,9 +22018,7 @@
                 "clientKnownStateVersion": 281,
                 "selectedChoices": {
                   "choiceId": "op_trace.280.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.runner.bid.281",
-                  "selectedOptionIds": [
-                    "bid_2"
-                  ]
+                  "selectedOptionIds": ["bid_2"]
                 },
                 "idempotencyKey": "ai-sim-281"
               },
@@ -22173,13 +22038,7 @@
                     "choiceId": "op_trace.280.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.runner.bid.281",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0",
-                      "bid_1",
-                      "bid_2",
-                      "bid_3",
-                      "bid_4"
-                    ]
+                    "optionIds": ["bid_0", "bid_1", "bid_2", "bid_3", "bid_4"]
                   }
                 ],
                 "payload": {
@@ -22740,9 +22599,7 @@
                 "clientKnownStateVersion": 290,
                 "selectedChoices": {
                   "choiceId": "op_trace.290.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.corp.bid.290",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-290"
               },
@@ -22837,9 +22694,7 @@
                 "clientKnownStateVersion": 291,
                 "selectedChoices": {
                   "choiceId": "op_trace.290.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.runner.bid.291",
-                  "selectedOptionIds": [
-                    "bid_2"
-                  ]
+                  "selectedOptionIds": ["bid_2"]
                 },
                 "idempotencyKey": "ai-sim-291"
               },
@@ -23003,9 +22858,7 @@
                 "clientKnownStateVersion": 293,
                 "selectedChoices": {
                   "choiceId": "op_trace.293.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.corp.bid.293",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-293"
               },
@@ -23100,9 +22953,7 @@
                 "clientKnownStateVersion": 294,
                 "selectedChoices": {
                   "choiceId": "op_trace.293.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.runner.bid.294",
-                  "selectedOptionIds": [
-                    "bid_2"
-                  ]
+                  "selectedOptionIds": ["bid_2"]
                 },
                 "idempotencyKey": "ai-sim-294"
               },
@@ -23122,13 +22973,7 @@
                     "choiceId": "op_trace.293.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.runner.bid.294",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0",
-                      "bid_1",
-                      "bid_2",
-                      "bid_3",
-                      "bid_4"
-                    ]
+                    "optionIds": ["bid_0", "bid_1", "bid_2", "bid_3", "bid_4"]
                   }
                 ],
                 "payload": {
@@ -23264,9 +23109,7 @@
                 "clientKnownStateVersion": 296,
                 "selectedChoices": {
                   "choiceId": "op_trace.296.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.corp.bid.296",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-296"
               },
@@ -23361,9 +23204,7 @@
                 "clientKnownStateVersion": 297,
                 "selectedChoices": {
                   "choiceId": "op_trace.296.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.runner.bid.297",
-                  "selectedOptionIds": [
-                    "bid_2"
-                  ]
+                  "selectedOptionIds": ["bid_2"]
                 },
                 "idempotencyKey": "ai-sim-297"
               },
@@ -23383,11 +23224,7 @@
                     "choiceId": "op_trace.296.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.runner.bid.297",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0",
-                      "bid_1",
-                      "bid_2"
-                    ]
+                    "optionIds": ["bid_0", "bid_1", "bid_2"]
                   }
                 ],
                 "payload": {
@@ -23491,9 +23328,7 @@
                 "clientKnownStateVersion": 299,
                 "selectedChoices": {
                   "choiceId": "discard_corp_299",
-                  "selectedOptionIds": [
-                    "card_corp_onr_v1_233_d-arc-knight_1"
-                  ]
+                  "selectedOptionIds": ["card_corp_onr_v1_233_d-arc-knight_1"]
                 },
                 "idempotencyKey": "ai-sim-299"
               },
@@ -24207,9 +24042,7 @@
                 "clientKnownStateVersion": 308,
                 "selectedChoices": {
                   "choiceId": "op_trace.308.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.corp.bid.308",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-308"
               },
@@ -24304,9 +24137,7 @@
                 "clientKnownStateVersion": 309,
                 "selectedChoices": {
                   "choiceId": "op_trace.308.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.runner.bid.309",
-                  "selectedOptionIds": [
-                    "bid_2"
-                  ]
+                  "selectedOptionIds": ["bid_2"]
                 },
                 "idempotencyKey": "ai-sim-309"
               },
@@ -24326,13 +24157,7 @@
                     "choiceId": "op_trace.308.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.runner.bid.309",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0",
-                      "bid_1",
-                      "bid_2",
-                      "bid_3",
-                      "bid_4"
-                    ]
+                    "optionIds": ["bid_0", "bid_1", "bid_2", "bid_3", "bid_4"]
                   }
                 ],
                 "payload": {
@@ -24468,9 +24293,7 @@
                 "clientKnownStateVersion": 311,
                 "selectedChoices": {
                   "choiceId": "op_trace.311.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.corp.bid.311",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-311"
               },
@@ -24565,9 +24388,7 @@
                 "clientKnownStateVersion": 312,
                 "selectedChoices": {
                   "choiceId": "op_trace.311.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.runner.bid.312",
-                  "selectedOptionIds": [
-                    "bid_2"
-                  ]
+                  "selectedOptionIds": ["bid_2"]
                 },
                 "idempotencyKey": "ai-sim-312"
               },
@@ -24587,11 +24408,7 @@
                     "choiceId": "op_trace.311.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.runner.bid.312",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0",
-                      "bid_1",
-                      "bid_2"
-                    ]
+                    "optionIds": ["bid_0", "bid_1", "bid_2"]
                   }
                 ],
                 "payload": {
@@ -24727,9 +24544,7 @@
                 "clientKnownStateVersion": 314,
                 "selectedChoices": {
                   "choiceId": "op_trace.314.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.corp.bid.314",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-314"
               },
@@ -24834,9 +24649,7 @@
                 "clientKnownStateVersion": 315,
                 "selectedChoices": {
                   "choiceId": "op_trace.314.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.runner.bid.315",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-315"
               },
@@ -24856,9 +24669,7 @@
                     "choiceId": "op_trace.314.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.runner.bid.315",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0"
-                    ]
+                    "optionIds": ["bid_0"]
                   }
                 ],
                 "payload": {
@@ -24934,9 +24745,7 @@
                 "clientKnownStateVersion": 316,
                 "selectedChoices": {
                   "choiceId": "v120_choice_v120_window_imminent_tag_316_trace_onr_v1_207_netwatch-operations-office_op_trace.314.onr_v1_207_netwatch-ope",
-                  "selectedOptionIds": [
-                    "pass"
-                  ]
+                  "selectedOptionIds": ["pass"]
                 },
                 "idempotencyKey": "ai-sim-316"
               },
@@ -25063,9 +24872,7 @@
                 "clientKnownStateVersion": 318,
                 "selectedChoices": {
                   "choiceId": "discard_corp_318",
-                  "selectedOptionIds": [
-                    "card_corp_onr_v1_228_cinderella_1"
-                  ]
+                  "selectedOptionIds": ["card_corp_onr_v1_228_cinderella_1"]
                 },
                 "idempotencyKey": "ai-sim-318"
               },
@@ -25641,9 +25448,7 @@
                 "clientKnownStateVersion": 326,
                 "selectedChoices": {
                   "choiceId": "op_trace.326.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.corp.bid.326",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-326"
               },
@@ -25738,9 +25543,7 @@
                 "clientKnownStateVersion": 327,
                 "selectedChoices": {
                   "choiceId": "op_trace.326.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.runner.bid.327",
-                  "selectedOptionIds": [
-                    "bid_2"
-                  ]
+                  "selectedOptionIds": ["bid_2"]
                 },
                 "idempotencyKey": "ai-sim-327"
               },
@@ -25903,9 +25706,7 @@
                 "clientKnownStateVersion": 329,
                 "selectedChoices": {
                   "choiceId": "op_trace.329.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.corp.bid.329",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-329"
               },
@@ -26000,9 +25801,7 @@
                 "clientKnownStateVersion": 330,
                 "selectedChoices": {
                   "choiceId": "op_trace.329.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.runner.bid.330",
-                  "selectedOptionIds": [
-                    "bid_2"
-                  ]
+                  "selectedOptionIds": ["bid_2"]
                 },
                 "idempotencyKey": "ai-sim-330"
               },
@@ -26022,12 +25821,7 @@
                     "choiceId": "op_trace.329.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.runner.bid.330",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0",
-                      "bid_1",
-                      "bid_2",
-                      "bid_3"
-                    ]
+                    "optionIds": ["bid_0", "bid_1", "bid_2", "bid_3"]
                   }
                 ],
                 "payload": {
@@ -26163,9 +25957,7 @@
                 "clientKnownStateVersion": 332,
                 "selectedChoices": {
                   "choiceId": "op_trace.332.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.corp.bid.332",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-332"
               },
@@ -26270,9 +26062,7 @@
                 "clientKnownStateVersion": 333,
                 "selectedChoices": {
                   "choiceId": "op_trace.332.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.runner.bid.333",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-333"
               },
@@ -26292,10 +26082,7 @@
                     "choiceId": "op_trace.332.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.runner.bid.333",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0",
-                      "bid_1"
-                    ]
+                    "optionIds": ["bid_0", "bid_1"]
                   }
                 ],
                 "payload": {
@@ -26371,9 +26158,7 @@
                 "clientKnownStateVersion": 334,
                 "selectedChoices": {
                   "choiceId": "v120_choice_v120_window_imminent_tag_334_trace_onr_v1_207_netwatch-operations-office_op_trace.332.onr_v1_207_netwatch-ope",
-                  "selectedOptionIds": [
-                    "pass"
-                  ]
+                  "selectedOptionIds": ["pass"]
                 },
                 "idempotencyKey": "ai-sim-334"
               },
@@ -26500,9 +26285,7 @@
                 "clientKnownStateVersion": 336,
                 "selectedChoices": {
                   "choiceId": "discard_corp_336",
-                  "selectedOptionIds": [
-                    "card_corp_onr_v1_307_urban-renewal_3"
-                  ]
+                  "selectedOptionIds": ["card_corp_onr_v1_307_urban-renewal_3"]
                 },
                 "idempotencyKey": "ai-sim-336"
               },
@@ -27046,9 +26829,7 @@
                 "clientKnownStateVersion": 344,
                 "selectedChoices": {
                   "choiceId": "op_trace.344.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.corp.bid.344",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-344"
               },
@@ -27143,9 +26924,7 @@
                 "clientKnownStateVersion": 345,
                 "selectedChoices": {
                   "choiceId": "op_trace.344.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.runner.bid.345",
-                  "selectedOptionIds": [
-                    "bid_2"
-                  ]
+                  "selectedOptionIds": ["bid_2"]
                 },
                 "idempotencyKey": "ai-sim-345"
               },
@@ -27165,12 +26944,7 @@
                     "choiceId": "op_trace.344.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.runner.bid.345",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0",
-                      "bid_1",
-                      "bid_2",
-                      "bid_3"
-                    ]
+                    "optionIds": ["bid_0", "bid_1", "bid_2", "bid_3"]
                   }
                 ],
                 "payload": {
@@ -27306,9 +27080,7 @@
                 "clientKnownStateVersion": 347,
                 "selectedChoices": {
                   "choiceId": "op_trace.347.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.corp.bid.347",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-347"
               },
@@ -27413,9 +27185,7 @@
                 "clientKnownStateVersion": 348,
                 "selectedChoices": {
                   "choiceId": "op_trace.347.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.runner.bid.348",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-348"
               },
@@ -27435,10 +27205,7 @@
                     "choiceId": "op_trace.347.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.runner.bid.348",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0",
-                      "bid_1"
-                    ]
+                    "optionIds": ["bid_0", "bid_1"]
                   }
                 ],
                 "payload": {
@@ -27514,9 +27281,7 @@
                 "clientKnownStateVersion": 349,
                 "selectedChoices": {
                   "choiceId": "v120_choice_v120_window_imminent_tag_349_trace_onr_v1_207_netwatch-operations-office_op_trace.347.onr_v1_207_netwatch-ope",
-                  "selectedOptionIds": [
-                    "pass"
-                  ]
+                  "selectedOptionIds": ["pass"]
                 },
                 "idempotencyKey": "ai-sim-349"
               },
@@ -27610,9 +27375,7 @@
                     "id": "resource",
                     "kind": "card",
                     "side": "runner",
-                    "zoneScope": [
-                      "runner.rig.resources"
-                    ],
+                    "zoneScope": ["runner.rig.resources"],
                     "visibility": "public"
                   }
                 ],
@@ -27707,9 +27470,7 @@
                 "clientKnownStateVersion": 352,
                 "selectedChoices": {
                   "choiceId": "discard_corp_352",
-                  "selectedOptionIds": [
-                    "card_corp_onr_v1_244_filter_1"
-                  ]
+                  "selectedOptionIds": ["card_corp_onr_v1_244_filter_1"]
                 },
                 "idempotencyKey": "ai-sim-352"
               },
@@ -28401,9 +28162,7 @@
                 "clientKnownStateVersion": 362,
                 "selectedChoices": {
                   "choiceId": "op_trace.362.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.corp.bid.362",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-362"
               },
@@ -28498,9 +28257,7 @@
                 "clientKnownStateVersion": 363,
                 "selectedChoices": {
                   "choiceId": "op_trace.362.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.runner.bid.363",
-                  "selectedOptionIds": [
-                    "bid_2"
-                  ]
+                  "selectedOptionIds": ["bid_2"]
                 },
                 "idempotencyKey": "ai-sim-363"
               },
@@ -28922,9 +28679,7 @@
                     "id": "resourceCard",
                     "kind": "card",
                     "side": "runner",
-                    "zoneScope": [
-                      "runner.grip"
-                    ],
+                    "zoneScope": ["runner.grip"],
                     "visibility": "known_to_actor"
                   }
                 ],
@@ -29078,9 +28833,7 @@
                 "clientKnownStateVersion": 370,
                 "selectedChoices": {
                   "choiceId": "p3_37_search_stack_to_grip_370",
-                  "selectedOptionIds": [
-                    "card_runner_onr_v1_007_blink_2"
-                  ]
+                  "selectedOptionIds": ["card_runner_onr_v1_007_blink_2"]
                 },
                 "idempotencyKey": "ai-sim-370"
               },
@@ -29315,9 +29068,7 @@
                 "clientKnownStateVersion": 374,
                 "selectedChoices": {
                   "choiceId": "op_trace.374.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.corp.bid.374",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-374"
               },
@@ -29412,9 +29163,7 @@
                 "clientKnownStateVersion": 375,
                 "selectedChoices": {
                   "choiceId": "op_trace.374.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.runner.bid.375",
-                  "selectedOptionIds": [
-                    "bid_2"
-                  ]
+                  "selectedOptionIds": ["bid_2"]
                 },
                 "idempotencyKey": "ai-sim-375"
               },
@@ -29434,12 +29183,7 @@
                     "choiceId": "op_trace.374.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.runner.bid.375",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0",
-                      "bid_1",
-                      "bid_2",
-                      "bid_3"
-                    ]
+                    "optionIds": ["bid_0", "bid_1", "bid_2", "bid_3"]
                   }
                 ],
                 "payload": {
@@ -29575,9 +29319,7 @@
                 "clientKnownStateVersion": 377,
                 "selectedChoices": {
                   "choiceId": "op_trace.377.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.corp.bid.377",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-377"
               },
@@ -29682,9 +29424,7 @@
                 "clientKnownStateVersion": 378,
                 "selectedChoices": {
                   "choiceId": "op_trace.377.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.runner.bid.378",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-378"
               },
@@ -29704,10 +29444,7 @@
                     "choiceId": "op_trace.377.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.runner.bid.378",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0",
-                      "bid_1"
-                    ]
+                    "optionIds": ["bid_0", "bid_1"]
                   }
                 ],
                 "payload": {
@@ -29783,9 +29520,7 @@
                 "clientKnownStateVersion": 379,
                 "selectedChoices": {
                   "choiceId": "v120_choice_v120_window_imminent_tag_379_trace_onr_v1_207_netwatch-operations-office_op_trace.377.onr_v1_207_netwatch-ope",
-                  "selectedOptionIds": [
-                    "pass"
-                  ]
+                  "selectedOptionIds": ["pass"]
                 },
                 "idempotencyKey": "ai-sim-379"
               },
@@ -29879,9 +29614,7 @@
                     "id": "resource",
                     "kind": "card",
                     "side": "runner",
-                    "zoneScope": [
-                      "runner.rig.resources"
-                    ],
+                    "zoneScope": ["runner.rig.resources"],
                     "visibility": "public"
                   }
                 ],
@@ -29976,9 +29709,7 @@
                 "clientKnownStateVersion": 382,
                 "selectedChoices": {
                   "choiceId": "discard_corp_382",
-                  "selectedOptionIds": [
-                    "card_corp_onr_v1_245_fire-wall_1"
-                  ]
+                  "selectedOptionIds": ["card_corp_onr_v1_245_fire-wall_1"]
                 },
                 "idempotencyKey": "ai-sim-382"
               },
@@ -30670,9 +30401,7 @@
                 "clientKnownStateVersion": 392,
                 "selectedChoices": {
                   "choiceId": "op_trace.392.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.corp.bid.392",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-392"
               },
@@ -30767,9 +30496,7 @@
                 "clientKnownStateVersion": 393,
                 "selectedChoices": {
                   "choiceId": "op_trace.392.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.runner.bid.393",
-                  "selectedOptionIds": [
-                    "bid_2"
-                  ]
+                  "selectedOptionIds": ["bid_2"]
                 },
                 "idempotencyKey": "ai-sim-393"
               },
@@ -30900,9 +30627,7 @@
                 "clientKnownStateVersion": 395,
                 "selectedChoices": {
                   "choiceId": "discard_corp_395",
-                  "selectedOptionIds": [
-                    "card_corp_onr_v1_347_vapor-ops_1"
-                  ]
+                  "selectedOptionIds": ["card_corp_onr_v1_347_vapor-ops_1"]
                 },
                 "idempotencyKey": "ai-sim-395"
               },
@@ -31538,9 +31263,7 @@
                 "clientKnownStateVersion": 403,
                 "selectedChoices": {
                   "choiceId": "op_trace.403.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.corp.bid.403",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-403"
               },
@@ -31635,9 +31358,7 @@
                 "clientKnownStateVersion": 404,
                 "selectedChoices": {
                   "choiceId": "op_trace.403.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.runner.bid.404",
-                  "selectedOptionIds": [
-                    "bid_2"
-                  ]
+                  "selectedOptionIds": ["bid_2"]
                 },
                 "idempotencyKey": "ai-sim-404"
               },
@@ -31806,9 +31527,7 @@
                 "clientKnownStateVersion": 406,
                 "selectedChoices": {
                   "choiceId": "op_trace.406.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.corp.bid.406",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-406"
               },
@@ -31903,9 +31622,7 @@
                 "clientKnownStateVersion": 407,
                 "selectedChoices": {
                   "choiceId": "op_trace.406.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.runner.bid.407",
-                  "selectedOptionIds": [
-                    "bid_2"
-                  ]
+                  "selectedOptionIds": ["bid_2"]
                 },
                 "idempotencyKey": "ai-sim-407"
               },
@@ -32072,9 +31789,7 @@
                 "clientKnownStateVersion": 409,
                 "selectedChoices": {
                   "choiceId": "op_trace.409.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.corp.bid.409",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-409"
               },
@@ -32169,9 +31884,7 @@
                 "clientKnownStateVersion": 410,
                 "selectedChoices": {
                   "choiceId": "op_trace.409.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.runner.bid.410",
-                  "selectedOptionIds": [
-                    "bid_2"
-                  ]
+                  "selectedOptionIds": ["bid_2"]
                 },
                 "idempotencyKey": "ai-sim-410"
               },
@@ -32304,9 +32017,7 @@
                 "clientKnownStateVersion": 412,
                 "selectedChoices": {
                   "choiceId": "discard_corp_412",
-                  "selectedOptionIds": [
-                    "card_corp_onr_v1_295_night-shift_2"
-                  ]
+                  "selectedOptionIds": ["card_corp_onr_v1_295_night-shift_2"]
                 },
                 "idempotencyKey": "ai-sim-412"
               },
@@ -32896,9 +32607,7 @@
                 "clientKnownStateVersion": 420,
                 "selectedChoices": {
                   "choiceId": "op_trace.420.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.corp.bid.420",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-420"
               },
@@ -32993,9 +32702,7 @@
                 "clientKnownStateVersion": 421,
                 "selectedChoices": {
                   "choiceId": "op_trace.420.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.runner.bid.421",
-                  "selectedOptionIds": [
-                    "bid_2"
-                  ]
+                  "selectedOptionIds": ["bid_2"]
                 },
                 "idempotencyKey": "ai-sim-421"
               },
@@ -33164,9 +32871,7 @@
                 "clientKnownStateVersion": 423,
                 "selectedChoices": {
                   "choiceId": "op_trace.423.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.corp.bid.423",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-423"
               },
@@ -33261,9 +32966,7 @@
                 "clientKnownStateVersion": 424,
                 "selectedChoices": {
                   "choiceId": "op_trace.423.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.runner.bid.424",
-                  "selectedOptionIds": [
-                    "bid_2"
-                  ]
+                  "selectedOptionIds": ["bid_2"]
                 },
                 "idempotencyKey": "ai-sim-424"
               },
@@ -33430,9 +33133,7 @@
                 "clientKnownStateVersion": 426,
                 "selectedChoices": {
                   "choiceId": "op_trace.426.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.corp.bid.426",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-426"
               },
@@ -33527,9 +33228,7 @@
                 "clientKnownStateVersion": 427,
                 "selectedChoices": {
                   "choiceId": "op_trace.426.onr_v1_207_netwatch-operations-office.corp_onr_v1_207_netwatch-operations-office_1.runner.bid.427",
-                  "selectedOptionIds": [
-                    "bid_2"
-                  ]
+                  "selectedOptionIds": ["bid_2"]
                 },
                 "idempotencyKey": "ai-sim-427"
               },
@@ -34579,9 +34278,7 @@
                     "id": "resourceCard",
                     "kind": "card",
                     "side": "runner",
-                    "zoneScope": [
-                      "runner.grip"
-                    ],
+                    "zoneScope": ["runner.grip"],
                     "visibility": "known_to_actor"
                   }
                 ],
@@ -46501,19 +46198,14 @@
           "kind": "none",
           "required": 0,
           "satisfied": true,
-          "evidence": [
-            "reserve_source:runtime_context",
-            "reserve:none"
-          ]
+          "evidence": ["reserve_source:runtime_context", "reserve:none"]
         },
         "blockers": [],
         "transition": {
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "runner.run_event_tempo",
-          "evidence": [
-            "continued:runner.run_event_tempo"
-          ]
+          "evidence": ["continued:runner.run_event_tempo"]
         },
         "commitment": {
           "strategyId": "runner.run_event_tempo",
@@ -46597,10 +46289,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -46680,10 +46369,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -46763,10 +46449,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -46817,10 +46500,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -46842,9 +46522,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -46904,10 +46582,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -47410,6 +47085,12 @@
   },
   "expectation": {
     "contractKind": "correctness",
+    "acceptableActions": [
+      {
+        "actionId": "runner.trigger_ability",
+        "type": "trigger_ability"
+      }
+    ],
     "forbiddenActions": [
       {
         "type": "activated_card_ability",

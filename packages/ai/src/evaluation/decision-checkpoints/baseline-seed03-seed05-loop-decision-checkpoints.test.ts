@@ -6,6 +6,8 @@ import newsgroupRichLoopJson from "../../../../../data/scenarios/ai-decision-che
 import newsgroupLowCreditControlJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-baseline-seed05-02-newsgroup-low-credit-control.json";
 import netwatchNoConversionJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-baseline-seed05-03-netwatch-no-conversion.json";
 import postRemediationNewsgroupLoopJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-baseline-seed05-04-post-remediation-newsgroup-loop.json";
+import thirdTraceWithoutPayoffJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-baseline-seed05-05-third-trace-without-payoff.json";
+import backgroundBankYieldsJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-baseline-seed05-06-background-bank-yields.json";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
@@ -28,8 +30,16 @@ describe("baseline seed 03 and seed 05 exact loop checkpoints", () => {
       netwatchNoConversionJson,
     ],
     [
-      "does not continue late Newsgroup economy over legal pressure development",
+      "pays the run lock instead of continuing late Newsgroup economy",
       postRemediationNewsgroupLoopJson,
+    ],
+    [
+      "funds the protected agenda instead of landing an unconvertible last-click tag",
+      thirdTraceWithoutPayoffJson,
+    ],
+    [
+      "lets a clearly better draw override background Broker investment",
+      backgroundBankYieldsJson,
     ],
   ])("%s", (_label, json) => {
     expectCheckpointToPass(fixture(json));

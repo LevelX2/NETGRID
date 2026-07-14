@@ -466,16 +466,16 @@ function evaluateRunnerRunTarget(
     (path.visibleBreakCost ?? 0) > projection.spendLimit;
   const probabilisticUniversalPathReachable = Boolean(
     blinkRiskAssessment?.pathDependsOnBlink &&
-      !blinkRiskAssessment.blockedByHandBuffer &&
-      !blinkRiskAssessment.breakWouldBeExcludedInEncounter,
+    !blinkRiskAssessment.blockedByHandBuffer &&
+    !blinkRiskAssessment.breakWouldBeExcludedInEncounter,
   );
   const pathPassability = blinkRiskAssessment?.blockedByHandBuffer
     ? "blocked_by_blink_hand_buffer"
     : probabilisticUniversalPathReachable
       ? "reachable"
-    : spendLimitBlocksPath
-      ? "blocked_unpayable"
-      : basePathPassability;
+      : spendLimitBlocksPath
+        ? "blocked_unpayable"
+        : basePathPassability;
   const creditsAfterRun = path.creditsAfterPath;
   const multiaccessAvailable = combinedRunPayoff.multiaccessAvailable;
   const stealOrTrashAffordable = stealOrTrashAffordableFor(accessPayoff);

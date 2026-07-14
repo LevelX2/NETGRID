@@ -460,8 +460,7 @@ export function createRunnerBankInvestmentContext(
       input.playerView.own.credits >= 10 ||
       (!cashOutActionLegal &&
         input.playerView.own.credits + storedCredits >=
-        RUNNER_BANK_VALUE_CASHOUT_TARGET
-      )
+          RUNNER_BANK_VALUE_CASHOUT_TARGET)
     );
   }
 

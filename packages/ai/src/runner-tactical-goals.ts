@@ -204,9 +204,8 @@ export function buildRunnerTacticalGoals(
     );
   }
   if (
-    economyPosture?.riskAdjustedRunReserve ||
-    (economyPosture &&
-      params.input.playerView.own.credits < economyPosture.desiredCreditReserve)
+    economyPosture &&
+    params.input.playerView.own.credits < economyPosture.desiredCreditReserve
   ) {
     goals.push(
       goal({

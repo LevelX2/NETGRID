@@ -31,6 +31,7 @@ import type { CorpScorelineWindowAssessment } from "./corp-scoreline/semantic-ru
 import { corpKnownAgendaInventory } from "./corp-known-agenda-inventory";
 import {
   candidateRequiresSuccessfulTrace,
+  traceActionLeavesImmediatePunishWindow,
   traceTagExpectedSuccessEstimate,
 } from "./trace-tag-success-estimate";
 
@@ -180,13 +181,40 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
       ].join("|"),
     });
   }
+  if (
+    candidateRequiresSuccessfulTrace(actionSemanticCandidate) &&
+    !traceActionLeavesImmediatePunishWindow(input, actionSemanticCandidate)
+  ) {
+    components.push({
+      key: "corp_last_click_trace_without_payoff",
+      label: "Letzter Trace ohne Payoff",
+      value: -2400,
+      reason: [
+        `corp_clicks:${input.playerView.own.clicks}`,
+        `trace_click_cost:${actionSemanticCandidate?.costProfile.clickCost ?? 1}`,
+        "immediate_punish_payoff:false",
+      ].join("|"),
+    });
+  }
+  const activeScoreRemoteFunding = corpActiveScoreRemoteReserveFundingComponent(
+    input,
+    action,
+  );
   const boardTriage = semanticRuntimeCorpBoardTriageActionComponent(
     input,
     action,
     dependencies,
     actionSemanticCandidate,
   );
-  if (boardTriage) components.push(boardTriage);
+  if (
+    boardTriage &&
+    !(
+      activeScoreRemoteFunding &&
+      boardTriage.key === "corp_board_triage_mismatch"
+    )
+  ) {
+    components.push(boardTriage);
+  }
   const unbackedExtraActionBurst = corpUnbackedExtraActionBurstComponent(
     input,
     action,
@@ -203,10 +231,6 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
     boardTriageState,
   );
   if (activeScorelineAdvance) components.push(activeScorelineAdvance);
-  const activeScoreRemoteFunding = corpActiveScoreRemoteReserveFundingComponent(
-    input,
-    action,
-  );
   if (activeScoreRemoteFunding) components.push(activeScoreRemoteFunding);
   const activeScorelineOffPath = corpActiveScorelineOffPathPenaltyComponent(
     input,

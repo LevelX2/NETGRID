@@ -242,10 +242,7 @@ export function buildRunnerTacticalPlans(
         planId: `runner.contest_remote:${serverId}`,
         side: "runner",
         type: "runner.contest_remote",
-        status: coveragePlanStatusForRequiredCoverage(
-          context,
-          missingCoverage,
-        ),
+        status: coveragePlanStatusForRequiredCoverage(context, missingCoverage),
         priority: 940,
         horizonTurns: 2,
         target: { kind: "server", id: serverId },

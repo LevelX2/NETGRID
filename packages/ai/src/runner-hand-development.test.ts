@@ -52,8 +52,12 @@ describe("RunnerHandDevelopmentEvaluation", () => {
       deferReason: "none",
     });
     expect(evaluation.priority).toBeGreaterThanOrEqual(900);
-    expect(redacted.join("\n")).not.toMatch(/R&D Interface|test-rd-interface|rd-interface-1/);
-    expect(evaluation.evidence.join("\n")).not.toMatch(/R&D Interface|test-rd-interface|rd-interface-1/);
+    expect(redacted.join("\n")).not.toMatch(
+      /R&D Interface|test-rd-interface|rd-interface-1/,
+    );
+    expect(evaluation.evidence.join("\n")).not.toMatch(
+      /R&D Interface|test-rd-interface|rd-interface-1/,
+    );
   });
 
   it("requires a same-turn access action after turn-limited preparation", () => {
@@ -145,7 +149,10 @@ describe("RunnerHandDevelopmentEvaluation", () => {
       }),
     });
     const breakerEvaluation = findByInstance(evaluations, "breaker-1");
-    const economyEvaluation = findByInstance(evaluations, "expensive-economy-1");
+    const economyEvaluation = findByInstance(
+      evaluations,
+      "expensive-economy-1",
+    );
 
     expect(breakerEvaluation).toMatchObject({
       developmentRole: "breaker_or_rig_piece",
@@ -207,7 +214,9 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     const input = runnerInput({
       credits: 14,
       hand: [cybermodem],
-      legalActions: [installAction("install-cortical-cybermodem", cybermodem, 11)],
+      legalActions: [
+        installAction("install-cortical-cybermodem", cybermodem, 11),
+      ],
     });
 
     const evaluation = findByInstance(
@@ -435,7 +444,9 @@ describe("RunnerHandDevelopmentEvaluation", () => {
         displacementPenalty: -1200,
       },
     });
-    expect(evaluation.persistentInstallEvaluation?.finalInstallFit).toBeLessThan(0);
+    expect(
+      evaluation.persistentInstallEvaluation?.finalInstallFit,
+    ).toBeLessThan(0);
     expect(evaluation.priority).toBeGreaterThanOrEqual(300);
   });
 
@@ -599,8 +610,70 @@ describe("RunnerHandDevelopmentEvaluation", () => {
         stackabilityClass: "replacement_upgrade",
       },
     });
-    expect(evaluation.persistentInstallEvaluation?.finalInstallFit).toBeGreaterThan(0);
+    expect(
+      evaluation.persistentInstallEvaluation?.finalInstallFit,
+    ).toBeGreaterThan(0);
+  });
 
+  it("values a second structured random breaker by its independent success gain", () => {
+    const installedBlink = visibleCard("blink-installed", {
+      definitionId: "onr_v1_007_blink",
+      title: "Blink",
+      type: "program",
+      subtypes: ["icebreaker"],
+      memoryCost: 1,
+    });
+    const secondBlink = visibleCard("blink-2", {
+      definitionId: "onr_v1_007_blink",
+      title: "Blink",
+      type: "program",
+      subtypes: ["icebreaker"],
+      installCost: 2,
+      memoryCost: 1,
+    });
+    const handBuffer = Array.from({ length: 4 }, (_, index) =>
+      visibleCard(`buffer-${index}`, {
+        definitionId: `buffer-${index}`,
+        title: "Buffer",
+        type: "event",
+      }),
+    );
+    const input = runnerInput({
+      credits: 8,
+      hand: [secondBlink, ...handBuffer],
+      rig: [installedBlink],
+      memoryUsed: 1,
+      memoryLimit: 4,
+      legalActions: [installAction("install-second-blink", secondBlink, 2)],
+    });
+
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({ input }),
+      "blink-2",
+    );
+
+    expect(evaluation).toMatchObject({
+      developmentRole: "breaker_or_rig_piece",
+      availability: "legal_now",
+      deferReason: "none",
+      persistentInstallEvaluation: {
+        capabilityDelta: "risk_reduction",
+        duplicateRole: "useful_backup",
+        stackabilityClass: "risk_mitigation",
+      },
+    });
+    expect(
+      evaluation.persistentInstallEvaluation?.finalInstallFit,
+    ).toBeGreaterThan(0);
+    expect(evaluation.persistentInstallEvaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "random_break_or_damage_profile:blink",
+        "random_break_attempts_before:1",
+        "random_break_success_probability_before:0.5",
+        "random_break_success_probability_after:0.75",
+        "random_break_success_probability_delta:0.25",
+      ]),
+    );
   });
 
   it("bounds persistent breaker coverage terms to exact tokens", () => {
@@ -632,10 +705,14 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     });
 
     const evaluations = evaluateRunnerHandDevelopment({ input });
-    const positiveEvidence = findByInstance(evaluations, "fracter-1")
-      .evidence.join("|");
-    const noiseEvidence = findByInstance(evaluations, "fracteroid-1")
-      .evidence.join("|");
+    const positiveEvidence = findByInstance(
+      evaluations,
+      "fracter-1",
+    ).evidence.join("|");
+    const noiseEvidence = findByInstance(
+      evaluations,
+      "fracteroid-1",
+    ).evidence.join("|");
 
     expect(positiveEvidence).toContain("breaker:wall");
     expect(positiveEvidence).toContain("breaker:subtype_limited");
@@ -655,7 +732,8 @@ describe("RunnerHandDevelopmentEvaluation", () => {
       definitionId: "test-lockjaw",
       title: "Lockjaw",
       type: "program",
-      rulesText: "Choose an installed icebreaker. That icebreaker has +2 strength.",
+      rulesText:
+        "Choose an installed icebreaker. That icebreaker has +2 strength.",
       installCost: 0,
       memoryCost: 1,
     });
@@ -695,7 +773,9 @@ describe("RunnerHandDevelopmentEvaluation", () => {
       expect(evaluation.evidence.join("|")).not.toContain(
         "persistent_functional_coverage:breaker:",
       );
-      expect(evaluation.persistentInstallEvaluation?.finalInstallFit).toBeGreaterThan(0);
+      expect(
+        evaluation.persistentInstallEvaluation?.finalInstallFit,
+      ).toBeGreaterThan(0);
       expect(evaluation.deferReason).toBe("none");
     }
   });
@@ -721,7 +801,8 @@ describe("RunnerHandDevelopmentEvaluation", () => {
       definitionId: "lockjaw",
       title: "Lockjaw",
       type: "program",
-      rulesText: "Choose an installed icebreaker. That icebreaker has +2 strength.",
+      rulesText:
+        "Choose an installed icebreaker. That icebreaker has +2 strength.",
       installCost: 0,
       memoryCost: 1,
     });
@@ -776,22 +857,31 @@ describe("RunnerHandDevelopmentEvaluation", () => {
       ],
     });
     const development = evaluateRunnerHandDevelopment({ input });
-    expect(findByInstance(development, "lockjaw").persistentInstallEvaluation?.finalInstallFit)
-      .toBeGreaterThan(0);
-    expect(findByInstance(development, "clown").persistentInstallEvaluation?.finalInstallFit)
-      .toBeGreaterThan(0);
+    expect(
+      findByInstance(development, "lockjaw").persistentInstallEvaluation
+        ?.finalInstallFit,
+    ).toBeGreaterThan(0);
+    expect(
+      findByInstance(development, "clown").persistentInstallEvaluation
+        ?.finalInstallFit,
+    ).toBeGreaterThan(0);
 
     const dependencies = {
       rolesForCardId: (cardId: string | undefined) =>
         rolesByCardId[cardId ?? ""] ?? [],
       definitionTypeForCardId: () => "program",
-      visibleCardPlayOrInstallCost: (card: VisibleCard) => card.installCost ?? 0,
+      visibleCardPlayOrInstallCost: (card: VisibleCard) =>
+        card.installCost ?? 0,
       runnerCardAddressesVisibleBreakerNeed: () => false,
       runnerBadPublicityOrTraceTechCard: () => false,
       isRunnerEconomyRole: (role: string) => role === "economy",
       runnerCardLooksLikeCreditPayout: () => false,
     };
-    const duplicateScore = discardKeepScore(input, duplicateKrash, dependencies);
+    const duplicateScore = discardKeepScore(
+      input,
+      duplicateKrash,
+      dependencies,
+    );
     const lockjawScore = discardKeepScore(input, lockjaw, dependencies);
     const clownScore = discardKeepScore(input, clown, dependencies);
 
@@ -843,7 +933,9 @@ describe("RunnerHandDevelopmentEvaluation", () => {
         installedSameDefinitionCount: 1,
       },
     });
-    expect(evaluation.persistentInstallEvaluation?.finalInstallFit).toBeLessThan(0);
+    expect(
+      evaluation.persistentInstallEvaluation?.finalInstallFit,
+    ).toBeLessThan(0);
     expect(evaluation.persistentInstallEvaluation?.evidence).toEqual(
       expect.arrayContaining([
         "why_duplicate_install_deferred:low_marginal_utility",
@@ -908,9 +1000,9 @@ describe("RunnerHandDevelopmentEvaluation", () => {
       capabilityDelta: "backup_only",
       duplicateRole: "redundant_duplicate",
     });
-    expect(evaluation.persistentInstallEvaluation?.finalInstallFit).toBeLessThan(
-      0,
-    );
+    expect(
+      evaluation.persistentInstallEvaluation?.finalInstallFit,
+    ).toBeLessThan(0);
   });
 
   it("allows a deck-supported cheaper breaker variant after primary coverage is complete", () => {
@@ -961,7 +1053,9 @@ describe("RunnerHandDevelopmentEvaluation", () => {
         expect.stringContaining("lower_break_cost"),
       ]),
     );
-    expect(evaluation.persistentInstallEvaluation?.finalInstallFit).toBeGreaterThan(0);
+    expect(
+      evaluation.persistentInstallEvaluation?.finalInstallFit,
+    ).toBeGreaterThan(0);
 
     const incompleteRig = breakerVariantDeckCapabilities();
     incompleteRig.runner!.breakerCoverageMatrix.code_gate.installed = false;
@@ -1011,7 +1105,9 @@ describe("RunnerHandDevelopmentEvaluation", () => {
         visibleCard("buffer-4", { type: "event" }),
       ],
       rig: [installedJunkyard],
-      legalActions: [installAction("install-second-junkyard", secondJunkyard, 0)],
+      legalActions: [
+        installAction("install-second-junkyard", secondJunkyard, 0),
+      ],
     });
 
     const evaluation = findByInstance(
@@ -1030,8 +1126,12 @@ describe("RunnerHandDevelopmentEvaluation", () => {
         installedSameFunctionalGroupCount: 1,
       },
     });
-    expect(evaluation.persistentInstallEvaluation?.finalInstallFit).toBeLessThan(0);
-    expect(evaluation.persistentInstallEvaluation?.handBufferPenalty).toBeLessThan(0);
+    expect(
+      evaluation.persistentInstallEvaluation?.finalInstallFit,
+    ).toBeLessThan(0);
+    expect(
+      evaluation.persistentInstallEvaluation?.handBufferPenalty,
+    ).toBeLessThan(0);
     expect(evaluation.persistentInstallEvaluation?.evidence).toEqual(
       expect.arrayContaining([
         "non_additive_utility_duplicate",
@@ -1091,8 +1191,12 @@ describe("RunnerHandDevelopmentEvaluation", () => {
         installedSameFunctionalGroupCount: 1,
       },
     });
-    expect(evaluation.persistentInstallEvaluation?.newFunctionalCoverage).toEqual([]);
-    expect(evaluation.persistentInstallEvaluation?.finalInstallFit).toBeLessThan(0);
+    expect(
+      evaluation.persistentInstallEvaluation?.newFunctionalCoverage,
+    ).toEqual([]);
+    expect(
+      evaluation.persistentInstallEvaluation?.finalInstallFit,
+    ).toBeLessThan(0);
     expect(evaluation.persistentInstallEvaluation?.evidence).toEqual(
       expect.arrayContaining([
         "non_additive_utility_duplicate",
@@ -1135,7 +1239,9 @@ describe("RunnerHandDevelopmentEvaluation", () => {
         "non_additive_utility:hidden_zone_search",
       ]),
     );
-    expect(noise.persistentInstallEvaluation?.newFunctionalCoverage).not.toEqual(
+    expect(
+      noise.persistentInstallEvaluation?.newFunctionalCoverage,
+    ).not.toEqual(
       expect.arrayContaining([
         "non_additive_utility:program_search",
         "non_additive_utility:hidden_zone_search",
@@ -1174,7 +1280,9 @@ describe("RunnerHandDevelopmentEvaluation", () => {
         installedSameFunctionalGroupCount: 0,
       },
     });
-    expect(evaluation.persistentInstallEvaluation?.finalInstallFit).toBeGreaterThan(0);
+    expect(
+      evaluation.persistentInstallEvaluation?.finalInstallFit,
+    ).toBeGreaterThan(0);
     expect(evaluation.persistentInstallEvaluation?.evidence).not.toEqual(
       expect.arrayContaining(["non_additive_utility_duplicate"]),
     );
@@ -1224,7 +1332,9 @@ describe("RunnerHandDevelopmentEvaluation", () => {
         stackabilityClass: "cumulative_capacity",
       },
     });
-    expect(evaluation.persistentInstallEvaluation?.finalInstallFit).toBeGreaterThan(0);
+    expect(
+      evaluation.persistentInstallEvaluation?.finalInstallFit,
+    ).toBeGreaterThan(0);
     expect(evaluation.persistentInstallEvaluation?.evidence).toEqual(
       expect.arrayContaining([
         "why_cumulative_copy_still_useful:bounded_diminishing_returns",
@@ -1261,7 +1371,9 @@ describe("RunnerHandDevelopmentEvaluation", () => {
       rig: [installedBlink],
       memoryUsed: 1,
       memoryLimit: 4,
-      legalActions: [installAction("install-stable-wall", stableWallBreaker, 1)],
+      legalActions: [
+        installAction("install-stable-wall", stableWallBreaker, 1),
+      ],
     });
 
     const evaluation = findByInstance(
@@ -1277,7 +1389,9 @@ describe("RunnerHandDevelopmentEvaluation", () => {
         stackabilityClass: "risk_mitigation",
       },
     });
-    expect(evaluation.persistentInstallEvaluation?.finalInstallFit).toBeGreaterThan(0);
+    expect(
+      evaluation.persistentInstallEvaluation?.finalInstallFit,
+    ).toBeGreaterThan(0);
   });
 
   it("marks useful but currently unavailable run events as timing-blocked", () => {
@@ -1339,8 +1453,12 @@ function runnerInput(params: {
       heapOrArchives: [],
       scoreArea: [],
       rig: params.rig ?? [],
-      ...(params.memoryUsed !== undefined ? { memoryUsed: params.memoryUsed } : {}),
-      ...(params.memoryLimit !== undefined ? { memoryLimit: params.memoryLimit } : {}),
+      ...(params.memoryUsed !== undefined
+        ? { memoryUsed: params.memoryUsed }
+        : {}),
+      ...(params.memoryLimit !== undefined
+        ? { memoryLimit: params.memoryLimit }
+        : {}),
       maxHandSize: 5,
       tags: 0,
     },
@@ -1376,10 +1494,7 @@ function runnerInput(params: {
 }
 
 function breakerVariantDeckCapabilities(): DeckCapabilityProfile {
-  const state = (
-    coverage: string,
-    installed: boolean,
-  ) => ({
+  const state = (coverage: string, installed: boolean) => ({
     coverage,
     inDeckKnown: true,
     inHand: false,
@@ -1477,7 +1592,9 @@ function strategicIntent(
       plannerEffect: "runtime_projection",
     },
     primaryWinIntent: "runner.steal_agendas_default",
-    ...(overrides.executionStyle ? { executionStyle: overrides.executionStyle } : {}),
+    ...(overrides.executionStyle
+      ? { executionStyle: overrides.executionStyle }
+      : {}),
     setupEngine: overrides.setupEngine ?? [],
     pressureVectors: overrides.pressureVectors ?? [],
     riskProfile: [],
@@ -1499,7 +1616,10 @@ function installAction(
     label: `Install ${card.title ?? card.instanceId}`,
     source: card.instanceId,
     timingPoint: "runner_action.main",
-    costs: [{ clicks: 1 }, ...(creditCost > 0 ? [{ credits: creditCost }] : [])],
+    costs: [
+      { clicks: 1 },
+      ...(creditCost > 0 ? [{ credits: creditCost }] : []),
+    ],
     targetRequirements: [],
     visibility: "private_to_actor",
     expiresAtStateVersion: 2,
@@ -1522,7 +1642,10 @@ function playEventAction(
     label: `Play ${card.title ?? card.instanceId}`,
     source: card.instanceId,
     timingPoint: "runner_action.main",
-    costs: [{ clicks: 1 }, ...(creditCost > 0 ? [{ credits: creditCost }] : [])],
+    costs: [
+      { clicks: 1 },
+      ...(creditCost > 0 ? [{ credits: creditCost }] : []),
+    ],
     targetRequirements: [],
     visibility: "private_to_actor",
     expiresAtStateVersion: 2,
@@ -1563,7 +1686,10 @@ function visibleIdentity(side: Side): VisibleCard {
 
 function visibleCard(
   instanceId: string,
-  overrides: Omit<Partial<VisibleCard>, "instanceId" | "known" | "owner" | "controller">,
+  overrides: Omit<
+    Partial<VisibleCard>,
+    "instanceId" | "known" | "owner" | "controller"
+  >,
 ): VisibleCard {
   return {
     instanceId,

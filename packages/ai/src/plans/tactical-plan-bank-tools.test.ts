@@ -2,9 +2,7 @@ import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
 import type { DeckCapabilityProfile } from "../deck-capabilities";
-import {
-  runnerCreditBankAssessment,
-} from "./tactical-plan-bank-tools";
+import { runnerCreditBankAssessment } from "./tactical-plan-bank-tools";
 import type { TacticalPlanBuildContext } from "./tactical-plan-types";
 
 describe("runnerCreditBankAssessment", () => {

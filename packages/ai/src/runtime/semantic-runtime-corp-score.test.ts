@@ -104,6 +104,36 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("penalizes a last-click trace without an immediate punish payoff", () => {
+    const trace = corpAction("trace", "trigger_ability");
+    const input = corpInputWithGoals([], [trace]);
+    input.playerView.own.clicks = 1;
+    input.playerView.own.credits = 6;
+    input.playerView.opponent.credits = 0;
+
+    const components = semanticRuntimeCorpScoreComponents(
+      input,
+      trace,
+      "card_ability",
+      testDependencies(),
+      semanticCandidate(
+        trace.actionId,
+        "corp.trace",
+        ["trace.source", "tag.source"],
+        "trigger_ability",
+      ),
+    );
+
+    expect(components).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_last_click_trace_without_payoff",
+          value: -2400,
+        }),
+      ]),
+    );
+  });
+
   it("includes visible purge impact in the actual Corp score breakdown", () => {
     const purge = {
       ...corpAction("purge", "purge_virus_counters"),
@@ -1523,6 +1553,9 @@ describe("semanticRuntimeCorpScoreComponents", () => {
           reason: expect.stringContaining("reserve_floor:7"),
         }),
       ]),
+    );
+    expect(creditComponents.map((component) => component.key)).not.toContain(
+      "corp_board_triage_mismatch",
     );
     expect(rezComponents).toEqual(
       expect.arrayContaining([

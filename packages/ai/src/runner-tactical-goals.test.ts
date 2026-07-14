@@ -82,6 +82,49 @@ describe("Runner TacticalGoalIntegration", () => {
     );
   });
 
+  it("saturates the deck economy setup goal once the reserve is funded", () => {
+    const snapshot = benchmarkSnapshotById(
+      "local_realistic_runner_blink_pressure_rig_snapshot_v1",
+    );
+    const input = aiInput({
+      credits: 18,
+      servers: [server("rd")],
+      legalActions: [gainCreditAction("newsgroup")],
+    });
+    const deckCapabilities = buildDeckCapabilityProfile({
+      side: "runner",
+      playerView: input.playerView,
+      legalActions: input.legalActions,
+      deckSnapshot: snapshot,
+    });
+    const strategicIntent = buildRunnerStrategicIntentProfile({
+      strategyProfile: buildDeckStrategyProfile(snapshot),
+      deckCapabilities,
+    });
+    const economyPosture = buildRunnerEconomyPosture({
+      input,
+      strategicIntent,
+      deckCapabilities,
+    });
+
+    const goals = buildRunnerTacticalGoals({
+      input,
+      strategicIntent,
+      economyPosture,
+      deckCapabilities,
+    });
+
+    expect(economyPosture).toMatchObject({
+      buildEconomyBeforePressure: false,
+      fundingNeed: false,
+      recommendation: "stable",
+    });
+    expect(economyPosture.creditBasePlan.economyPriority).toBe("low");
+    expect(
+      goals.some((goal) => goal.goalId === "runner.build_economy_base"),
+    ).toBe(false);
+  });
+
   it("does not keep primary breaker search urgent after Krash completes deck-aware coverage", () => {
     const snapshot: AiDeckStrategyDeckSnapshot = {
       deckSnapshotId: "krash-short-circuit-match-fixture",

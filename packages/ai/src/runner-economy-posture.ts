@@ -58,7 +58,9 @@ export function buildRunnerEconomyPosture(
     creditReservePolicy,
     riskAdjustedRunReserve,
     handDevelopmentEvaluations: params.handDevelopmentEvaluations ?? [],
-    canDraw: params.input.legalActions.some((action) => action.type === "draw_card"),
+    canDraw: params.input.legalActions.some(
+      (action) => action.type === "draw_card",
+    ),
   });
   const desiredCreditReserve = creditBasePlan.desiredCreditReserve;
   const fundingNeed = creditBasePlan.fundingNeed;
@@ -74,12 +76,15 @@ export function buildRunnerEconomyPosture(
       credits < creditBasePlan.desiredCreditReserve) ||
     (transition.phase === "economy_transition" &&
       transition.commitment !== "none") ||
-    setupEngine.has("runner.economy_setup_before_pressure");
-  const recommendation = fundingNeed && hasCashOut
-    ? "cash_out_bank"
-    : fundingNeed || (buildEconomyBeforePressure && credits < desiredCreditReserve)
-      ? "build_economy"
-      : "stable";
+    (setupEngine.has("runner.economy_setup_before_pressure") &&
+      credits < creditBasePlan.desiredCreditReserve);
+  const recommendation =
+    fundingNeed && hasCashOut
+      ? "cash_out_bank"
+      : fundingNeed ||
+          (buildEconomyBeforePressure && credits < desiredCreditReserve)
+        ? "build_economy"
+        : "stable";
   const preferredEconomyRoute = runnerPreferredEconomyRoute(params, {
     bankToolsRelevant,
     buildEconomyBeforePressure,
@@ -138,8 +143,8 @@ function runnerPreferredEconomyRoute(
   const longFundingGap =
     params.handDevelopmentEvaluations
       ?.filter(usefulHandEvaluationBlockedByCredits)
-      .sort(compareHandDevelopmentForCreditBase)[0]
-      ?.fundingNeed?.missingCredits ?? 0;
+      .sort(compareHandDevelopmentForCreditBase)[0]?.fundingNeed
+      ?.missingCredits ?? 0;
   if (
     longFundingGap >= 4 &&
     params.input.legalActions.some((action) => action.type === "draw_card")
@@ -194,7 +199,8 @@ function runnerHasInstalledActionEconomy(input: AiDecisionInput): boolean {
     (action) =>
       (action.type === "activated_card_ability" ||
         action.type === "trigger_ability") &&
-      (isBankPayoutAction(action) || runnerLegalActionPayloadCreditGain(action) > 1),
+      (isBankPayoutAction(action) ||
+        runnerLegalActionPayloadCreditGain(action) > 1),
   );
 }
 
@@ -527,7 +533,8 @@ function creditBaseRecommendation(params: {
     return "allow_setup_spend";
   }
   if (params.currentCredits >= 6) return "allow_pressure";
-  if (params.currentCredits < params.desiredCreditReserve) return "preserve_reserve";
+  if (params.currentCredits < params.desiredCreditReserve)
+    return "preserve_reserve";
   if (params.currentCredits < 6) return "preserve_reserve";
   return "allow_pressure";
 }
@@ -586,11 +593,12 @@ function buildRunnerEconomyTransitionAssessment(
     usefulHandEvaluationBlockedByCredits,
   );
   const missingCredits = blockedEconomy?.fundingNeed?.missingCredits;
-  const fundingHorizon = missingCredits === undefined
-    ? "none"
-    : missingCredits <= 3
-      ? "short"
-      : "long";
+  const fundingHorizon =
+    missingCredits === undefined
+      ? "none"
+      : missingCredits <= 3
+        ? "short"
+        : "long";
   const economyKnownInDeck =
     params.deckCapabilities?.runner?.economyBankTools.some(
       (tool) => tool.status === "in_deck",
@@ -680,19 +688,15 @@ function creditBaseEconomyPriority(params: {
   return "low";
 }
 
-
-function hasRiskyUniversalPressure(
-  params: EconomyPostureParams,
-): boolean {
+function hasRiskyUniversalPressure(params: EconomyPostureParams): boolean {
   const riskProfile = new Set(params.strategicIntent?.riskProfile ?? []);
   return (
     riskProfile.has("runner.risky_universal_breaker_pressure") ||
-    (params.deckCapabilities?.runner?.breakerInventory.some(
-      (breaker) => {
-        const coverage = new Set(breaker.coverage);
-        return coverage.has("universal") && breaker.risks.length > 0;
-      },
-    ) ?? false)
+    (params.deckCapabilities?.runner?.breakerInventory.some((breaker) => {
+      const coverage = new Set(breaker.coverage);
+      return coverage.has("universal") && breaker.risks.length > 0;
+    }) ??
+      false)
   );
 }
 
@@ -702,7 +706,8 @@ function runnerCreditReservePhase(
 ): RunnerCreditReservePhase {
   if (
     remoteScoreThreat === "urgent" ||
-    input.playerView.opponent.agendaPoints >= input.playerView.agendaPointsToWin - 2
+    input.playerView.opponent.agendaPoints >=
+      input.playerView.agendaPointsToWin - 2
   ) {
     return "late_contest";
   }
@@ -710,7 +715,9 @@ function runnerCreditReservePhase(
   return input.playerView.stateVersion <= 8 ? "opening" : "midgame";
 }
 
-function runnerRemoteScoreThreat(input: AiDecisionInput): RunnerRemoteScoreThreat {
+function runnerRemoteScoreThreat(
+  input: AiDecisionInput,
+): RunnerRemoteScoreThreat {
   let threat: RunnerRemoteScoreThreat = "none";
   for (const server of input.playerView.servers) {
     if (!server.id.startsWith("remote_")) continue;
@@ -727,7 +734,8 @@ function runnerRemoteScoreThreat(input: AiDecisionInput): RunnerRemoteScoreThrea
     if (
       urgentRoot ||
       knownAgenda ||
-      input.playerView.opponent.agendaPoints >= input.playerView.agendaPointsToWin - 2
+      input.playerView.opponent.agendaPoints >=
+        input.playerView.agendaPointsToWin - 2
     ) {
       return "urgent";
     }

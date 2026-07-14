@@ -35,15 +35,22 @@
     "status": "baseline_enforced",
     "tokenSource": "Kartentitel und cardDefinitionId-Slug-/CamelCase-Varianten aus packages/shared/src/card-definitions.ts",
     "tokenCount": 1317,
-    "baselineCount": 141,
+    "baselineCount": 148,
     "summary": {
-      "runtime_state_field_uses_card_name": 1,
+      "runtime_state_field_uses_card_name": 8,
       "new_unclassified_card_name_leak": 133,
       "functional_kind_uses_card_name": 7
     },
     "fingerprints": [
       "packages/engine/src/game/abilities/runner-special-trigger-execution.ts|334|21|shellTraders|The Shell Traders|runtime_state_field_uses_card_name",
-      "packages/shared/src/index.ts|665|5|shellTraders|The Shell Traders|new_unclassified_card_name_leak",
+      "packages/engine/src/game/run/run-movement.ts|326|9|InsideJob|Inside Job|runtime_state_field_uses_card_name",
+      "packages/engine/src/game/run/run-movement.ts|377|11|InsideJob|Inside Job|runtime_state_field_uses_card_name",
+      "packages/engine/src/game/run/run-movement.ts|901|14|InsideJob|Inside Job|runtime_state_field_uses_card_name",
+      "packages/engine/src/game/run/run-movement.ts|911|5|insideJob|Inside Job|runtime_state_field_uses_card_name",
+      "packages/engine/src/game/run/run-movement.ts|912|5|insideJob|Inside Job|runtime_state_field_uses_card_name",
+      "packages/engine/src/mechanics/public-payload-schema.ts|152|4|insideJob|Inside Job|runtime_state_field_uses_card_name",
+      "packages/engine/src/mechanics/public-payload-schema.ts|180|4|insideJob|Inside Job|runtime_state_field_uses_card_name",
+      "packages/shared/src/index.ts|667|5|shellTraders|The Shell Traders|new_unclassified_card_name_leak",
       "scripts/build-ai-compiled-hints.mjs|661|9|selfModifyingCode|Self-Modifying Code|new_unclassified_card_name_leak",
       "scripts/build-ai-compiled-hints.mjs|662|17|self-modifying-code|Self-Modifying Code|new_unclassified_card_name_leak",
       "scripts/build-ai-compiled-hints.mjs|665|5|selfModifyingCode|Self-Modifying Code|new_unclassified_card_name_leak",
@@ -348,7 +355,7 @@
   "findings": [
     {
       "path": "packages/engine/src/card-implementations/coverage.test.ts",
-      "line": 799,
+      "line": 838,
       "column": 19,
       "token": "disinfectant",
       "cardTitle": "Disinfectant",
@@ -359,7 +366,7 @@
     },
     {
       "path": "packages/engine/src/card-implementations/coverage.test.ts",
-      "line": 801,
+      "line": 840,
       "column": 19,
       "token": "krumz",
       "cardTitle": "Krumz",
@@ -370,7 +377,7 @@
     },
     {
       "path": "packages/engine/src/card-implementations/coverage.test.ts",
-      "line": 817,
+      "line": 856,
       "column": 53,
       "token": "disinfectant",
       "cardTitle": "Disinfectant",
@@ -381,7 +388,7 @@
     },
     {
       "path": "packages/engine/src/card-implementations/coverage.test.ts",
-      "line": 821,
+      "line": 860,
       "column": 53,
       "token": "krumz",
       "cardTitle": "Krumz",
@@ -1052,7 +1059,7 @@
     },
     {
       "path": "packages/engine/src/game/choices/pending-choice-resolution.ts",
-      "line": 338,
+      "line": 341,
       "column": 50,
       "token": "shell_traders",
       "cardTitle": "Shell Traders",
