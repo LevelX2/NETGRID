@@ -99,6 +99,29 @@ describe("AI decision checkpoints", () => {
     });
   });
 
+  it("matches selected score-component contracts without fixing score values", () => {
+    const baseline = runAiDecisionCheckpoint(fixture());
+    const componentKey = baseline.decision?.decisionDebug?.scoreBreakdown?.[0]?.key;
+    if (!componentKey) {
+      throw new Error("Missing selected score breakdown in checkpoint fixture");
+    }
+
+    const accepted = fixture();
+    accepted.expectation = {
+      selectedScoreBreakdown: { requiredComponentKeys: [componentKey] },
+    };
+    expect(runAiDecisionCheckpoint(accepted)).toMatchObject({ ok: true });
+
+    const rejected = fixture();
+    rejected.expectation = {
+      selectedScoreBreakdown: { forbiddenComponentKeys: [componentKey] },
+    };
+    expect(runAiDecisionCheckpoint(rejected)).toMatchObject({
+      ok: false,
+      code: "behavior_regression",
+    });
+  });
+
   it("matches selected choice values through the productive chooser", () => {
     const current = fixture();
     const state = current.engine.testOnlyGameState;

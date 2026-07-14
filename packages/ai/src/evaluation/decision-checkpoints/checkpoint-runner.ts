@@ -99,6 +99,11 @@ export function runAiDecisionCheckpoint(
     strategicIntent,
     fixture.expectation.strategicIntent,
   );
+  const selectedScoreBreakdownAccepted =
+    selectedScoreBreakdownExpectationMatches(
+      decision,
+      fixture.expectation.selectedScoreBreakdown,
+    );
   const decisionChainAccepted = decisionChainExpectationMatches(
     input,
     decision,
@@ -110,6 +115,7 @@ export function runAiDecisionCheckpoint(
     !choiceAccepted ||
     !discardChoiceAccepted ||
     !strategicIntentAccepted ||
+    !selectedScoreBreakdownAccepted ||
     !decisionChainAccepted
   ) {
     return {
@@ -130,6 +136,27 @@ export function runAiDecisionCheckpoint(
     selectedAction,
     ...(strategicIntent ? { strategicIntent } : {}),
   };
+}
+
+function selectedScoreBreakdownExpectationMatches(
+  decision: AiDecision,
+  expectation:
+    | AiDecisionCheckpointExpectationV1["selectedScoreBreakdown"]
+    | undefined,
+): boolean {
+  if (!expectation) return true;
+  const componentKeys = new Set(
+    decision.decisionDebug?.scoreBreakdown?.map((component) => component.key) ??
+      [],
+  );
+  return (
+    (expectation.requiredComponentKeys ?? []).every((key) =>
+      componentKeys.has(key),
+    ) &&
+    !(expectation.forbiddenComponentKeys ?? []).some((key) =>
+      componentKeys.has(key),
+    )
+  );
 }
 
 function decisionChainExpectationMatches(

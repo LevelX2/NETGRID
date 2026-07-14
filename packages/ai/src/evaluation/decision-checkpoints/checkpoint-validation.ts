@@ -71,6 +71,7 @@ export function validateAiDecisionCheckpoint(
     !fixture.expectation.choice &&
     !fixture.expectation.discardChoice &&
     !fixture.expectation.strategicIntent &&
+    !fixture.expectation.selectedScoreBreakdown &&
     !fixture.expectation.decisionChain
   ) {
     throw new AiDecisionCheckpointValidationError(

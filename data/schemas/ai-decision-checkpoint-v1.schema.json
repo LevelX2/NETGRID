@@ -84,6 +84,20 @@
               "items": { "type": "string" }
             }
           }
+        },
+        "selectedScoreBreakdown": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "requiredComponentKeys": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "forbiddenComponentKeys": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
         }
       }
     }

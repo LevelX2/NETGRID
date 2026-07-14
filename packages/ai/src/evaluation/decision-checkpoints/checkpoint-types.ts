@@ -44,6 +44,10 @@ export type AiDecisionCheckpointExpectationV1 = {
     acceptableFamilies?: StrategicIntentFamily[];
     forbiddenTargetKinds?: StrategicTargetVector["kind"][];
   };
+  selectedScoreBreakdown?: {
+    requiredComponentKeys?: string[];
+    forbiddenComponentKeys?: string[];
+  };
   decisionChain?: {
     selectionRoute?: AiDecisionSelectionRoute;
     rawScoreWinner?: AiDecisionCheckpointActionMatcher;
