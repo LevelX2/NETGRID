@@ -173,6 +173,36 @@ describe("discard keep score", () => {
     expect(economy).toBeGreaterThan(neutral + 300);
   });
 
+  it("preserves program search while known breaker coverage is only in the stack", () => {
+    const search = runnerCard("runner-program-search", "event");
+    const unavailableBreaker = score(
+      search,
+      ["program_search"],
+      "runner",
+      [],
+      {},
+      { breakerCoverage: "stack_only" },
+    );
+    const installedBreaker = score(
+      search,
+      ["program_search"],
+      "runner",
+      [],
+      {},
+      { breakerCoverage: "installed" },
+    );
+
+    expect(unavailableBreaker.baseValue).toBeGreaterThan(
+      installedBreaker.baseValue + 300,
+    );
+    expect(unavailableBreaker.evidence).toContain(
+      "discard_score:runner_missing_breaker_search_access",
+    );
+    expect(installedBreaker.evidence).not.toContain(
+      "discard_score:runner_missing_breaker_search_access",
+    );
+  });
+
   it("devalues non-additive Runner utility duplicates already represented in the rig", () => {
     const freshUtility = score(
       runnerCard("runner-stack-filter", "resource"),
@@ -242,13 +272,13 @@ describe("discard keep score", () => {
       instanceId: "krash-installed-instance",
     };
     const rolesByCardId: Record<string, readonly string[]> = {
-      "onr_v1_039_krash": [
+      onr_v1_039_krash: [
         "breaker_fracter",
         "breaker_decoder",
         "breaker_killer",
       ],
       "onr_v1_046_pattels-virus": ["ice_modifier", "run_support"],
-      "onr_v1_011_cloak": ["economy_recurring", "run_support"],
+      onr_v1_011_cloak: ["economy_recurring", "run_support"],
       "onr_proteus_150_streetware-distributor": [
         "economy",
         "economy_recurring",
@@ -297,6 +327,7 @@ function score(
     extraGrip?: readonly VisibleCard[];
     legalActionForCard?: boolean;
     strategyId?: string;
+    breakerCoverage?: "stack_only" | "installed";
   } = {},
 ) {
   return discardKeepScore(input(card, side, rig, options), card, {
@@ -322,6 +353,7 @@ function input(
     extraGrip?: readonly VisibleCard[];
     legalActionForCard?: boolean;
     strategyId?: string;
+    breakerCoverage?: "stack_only" | "installed";
   } = {},
 ): AiDecisionInput {
   const decisionInput = {
@@ -401,6 +433,33 @@ function input(
         primaryStrategy: {
           strategyId: options.strategyId,
           family: "runner_setup",
+        },
+      },
+    });
+  }
+  if (side === "runner" && options.breakerCoverage) {
+    const installed = options.breakerCoverage === "installed";
+    Object.assign(decisionInput, {
+      ownDeckCapabilities: {
+        side: "runner",
+        runner: {
+          breakerCoverageMatrix: {
+            wall: {
+              inDeckKnown: true,
+              inHand: false,
+              installed,
+            },
+            code_gate: {
+              inDeckKnown: true,
+              inHand: false,
+              installed,
+            },
+            sentry: {
+              inDeckKnown: true,
+              inHand: false,
+              installed,
+            },
+          },
         },
       },
     });

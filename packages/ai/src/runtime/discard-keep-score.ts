@@ -10,6 +10,7 @@ import { matchingBreakerRoleNeedles } from "./breaker-role-match";
 import { rolesMatch } from "./role-match";
 import { isRunnerNonAdditiveUtilityRole } from "./runner-role-classification";
 import { createAiHintsByCard } from "../ai-hints";
+import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 
 const AI_HINTS_BY_CARD = createAiHintsByCard();
 
@@ -71,6 +72,10 @@ export function discardKeepScore(
     input.side === "runner" &&
     cost > input.playerView.own.credits &&
     runnerEconomyOrPayout;
+  const runnerMissingBreakerSearchAccess =
+    input.side === "runner" &&
+    rolesMatch(roles, ["program_search", "breaker_search"]) &&
+    runnerHasDeckBreakerCoverageUnavailableOutsideStack(input);
   const duplicateCount = input.playerView.own.gripOrHq.filter(
     (candidate) => candidate.definitionId === card.definitionId,
   ).length;
@@ -130,6 +135,7 @@ export function discardKeepScore(
     if (rolesMatch(roles, ["run_pressure"]))
       baseValue += input.playerView.own.credits < 4 ? 20 : 90;
     if (runnerPlanRelevantBreaker) baseValue += 360;
+    if (runnerMissingBreakerSearchAccess) baseValue += 420;
     if (runnerBadPublicityTraceTech) baseValue += 240;
     if (runnerFundingEconomyCard) baseValue += 260;
     if (
@@ -140,6 +146,7 @@ export function discardKeepScore(
         rolesMatch(roles, ["memory", "setup", "build_rig", "draw"]) ||
         rolesMatch(roles, ["run_pressure"]) ||
         runnerPlanRelevantBreaker ||
+        runnerMissingBreakerSearchAccess ||
         runnerBadPublicityTraceTech)
     ) {
       baseValue += 110;
@@ -186,11 +193,31 @@ export function discardKeepScore(
       ...(corpAdvancementBurstSupportsVisibleAgenda
         ? ["discard_score:corp_visible_agenda_advancement_burst"]
         : []),
+      ...(runnerMissingBreakerSearchAccess
+        ? ["discard_score:runner_missing_breaker_search_access"]
+        : []),
       ...corpConditionalPayoff.evidence,
       ...(planFit > 0 ? ["discard_score:planfit"] : []),
       ...(strategicFit > 0 ? ["discard_score:strategicfit"] : []),
     ]),
   };
+}
+
+function runnerHasDeckBreakerCoverageUnavailableOutsideStack(
+  input: AiDecisionInput,
+): boolean {
+  const semanticInput = input as AiDecisionInputWithDeckCapabilities;
+  const matrix =
+    semanticInput.ownDeckCapabilities?.runner?.breakerCoverageMatrix;
+  if (!matrix) return false;
+  return (["wall", "code_gate", "sentry"] as const).some((coverage) => {
+    const status = matrix[coverage];
+    return (
+      status.inDeckKnown === true &&
+      status.installed !== true &&
+      status.inHand !== true
+    );
+  });
 }
 
 function corpConditionalPayoffKeepAdjustment(
