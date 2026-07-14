@@ -49,6 +49,9 @@ export function activatedAbilityPayload(
   const scoreConversionPayload = scoreConversionCapabilityPayloadForEffects(
     ability.effects,
   );
+  const scoresSourceAsAgenda = ability.effects.some(
+    (effect) => effect.kind === "score_source_as_agenda",
+  );
   return {
     cardId,
     cardImplementationAbility: "activated",
@@ -109,6 +112,9 @@ export function activatedAbilityPayload(
           cardImplementationRandomHqDiscardCost:
             randomCorpHqDiscardCostForActivatedAbility(ability),
         }
+      : {}),
+    ...(scoresSourceAsAgenda
+      ? { cardImplementationScoresSourceAsAgenda: true }
       : {}),
     ...(advancementDistribution
       ? {

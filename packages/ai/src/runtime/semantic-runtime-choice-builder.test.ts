@@ -32,10 +32,7 @@ describe("buildSemanticRuntimeChoices", () => {
     });
 
     expect(choice?.evidence).toEqual(
-      expect.arrayContaining([
-        "credit_cost:4",
-        "evidence_candidate_cost:4",
-      ]),
+      expect.arrayContaining(["credit_cost:4", "evidence_candidate_cost:4"]),
     );
   });
 
@@ -103,6 +100,24 @@ describe("buildSemanticRuntimeChoices", () => {
     );
     expect(choice?.evidence).not.toContain(
       "semantic_score_component:corp_install_remote_context",
+    );
+  });
+
+  it("exposes immediate Runner agenda scoring as hard-interrupt evidence", () => {
+    const action = paidAction();
+    const [choice] = buildSemanticRuntimeChoices(runnerInput(action), [], {
+      ...dependencies(),
+      scoreBreakdown: () => [
+        {
+          key: "runner_activated_agenda_score",
+          label: "Agenda unmittelbar scoren",
+          value: 9600,
+        },
+      ],
+    });
+
+    expect(choice?.evidence).toContain(
+      "semantic_score_component:runner_activated_agenda_score",
     );
   });
 });

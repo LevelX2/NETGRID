@@ -7,6 +7,26 @@ import {
 } from "./card-implementation-runtime-activated-targets";
 
 describe("activatedAbilityPayload advancement semantics", () => {
+  it("publishes scoring the visible source as an agenda", () => {
+    const ability: ActivatedCardAbilityImplementation = {
+      kind: "activated",
+      timing: "runner_main",
+      costs: [{ kind: "action", amount: 1 }],
+      effects: [
+        {
+          kind: "score_source_as_agenda",
+          visibility: "public",
+        },
+      ],
+    };
+
+    expect(
+      activatedAbilityPayload("source" as never, ability, 0),
+    ).toMatchObject({
+      cardImplementationScoresSourceAsAgenda: true,
+    });
+  });
+
   it("publishes advancement distribution amount and mode", () => {
     const ability: ActivatedCardAbilityImplementation = {
       kind: "activated",

@@ -75,6 +75,7 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "cardImplementationTakesHostedCredits",
   "hostedCreditTakeAmount",
   "hostedCreditTakeMode",
+  "cardImplementationScoresSourceAsAgenda",
   "runnerEventRun",
   "scoreConversionCapability",
   "scoreConversionAdvancementAmount",

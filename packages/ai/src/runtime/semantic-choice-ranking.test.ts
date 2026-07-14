@@ -393,6 +393,33 @@ describe("tacticalPlanMappedChoice", () => {
     );
   });
 
+  it("lets an immediate agenda score interrupt funded hand development", () => {
+    const install = legalAction("install-funded-card", "install_card");
+    const score = legalAction("score-visible-agenda", "activated_card_ability");
+    const scoreChoice = choice(
+      score,
+      9662,
+      scoreComponentEvidence("runner_activated_agenda_score"),
+      {
+        key: "runner_activated_agenda_score",
+        value: 9600,
+        reason: "agenda_points:3|source_visible:true|engine_effect:true",
+      },
+    );
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [scoreChoice, choice(install, 3252)],
+      fundedDevelopmentMapping([install]),
+      scoreChoice,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("score-visible-agenda");
+    expect(result.overriddenMappedChoice?.action.actionId).toBe(
+      "install-funded-card",
+    );
+  });
+
   it("yields a deferred bank install plan to a positive semantic action", () => {
     const install = legalAction("install-broker-copy", "install_card");
     const draw = legalAction("draw", "draw_card");
