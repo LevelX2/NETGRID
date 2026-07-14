@@ -6,6 +6,7 @@ import type {
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import { persistentDevelopmentActionProjection } from "../actions/persistent-development-action";
 import { runnerBasicActionPenaltyScoreComponents } from "./runner-basic-action-penalty-score";
+import { runnerActivatedAgendaScoreComponents } from "./runner-activated-agenda-score";
 import {
   runnerCreditNeedScoreComponents,
   type RunnerCreditNeedScoreDependencies,
@@ -98,6 +99,7 @@ export function runnerScoreComponents(
   dependencies: RunnerScoreComponentsDependencies,
 ): AiDecisionScoreComponent[] {
   const components: AiDecisionScoreComponent[] = [];
+  components.push(...runnerActivatedAgendaScoreComponents(input, action));
   const loanLiabilityAssessment = dependencies.loanLiabilityAssessment(
     input,
     action,

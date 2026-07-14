@@ -10,6 +10,7 @@ import { matchingBreakerRoleNeedles } from "./breaker-role-match";
 import { rolesMatch } from "./role-match";
 import { isRunnerNonAdditiveUtilityRole } from "./runner-role-classification";
 import { createAiHintsByCard } from "../ai-hints";
+import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 
 const AI_HINTS_BY_CARD = createAiHintsByCard();
 
@@ -71,6 +72,10 @@ export function discardKeepScore(
     input.side === "runner" &&
     cost > input.playerView.own.credits &&
     runnerEconomyOrPayout;
+  const runnerMissingBreakerSearchAccess =
+    input.side === "runner" &&
+    rolesMatch(roles, ["program_search", "breaker_search"]) &&
+    runnerHasDeckBreakerCoverageUnavailableOutsideStack(input);
   const duplicateCount = input.playerView.own.gripOrHq.filter(
     (candidate) => candidate.definitionId === card.definitionId,
   ).length;
@@ -130,6 +135,7 @@ export function discardKeepScore(
     if (rolesMatch(roles, ["run_pressure"]))
       baseValue += input.playerView.own.credits < 4 ? 20 : 90;
     if (runnerPlanRelevantBreaker) baseValue += 360;
+    if (runnerMissingBreakerSearchAccess) baseValue += 420;
     if (runnerBadPublicityTraceTech) baseValue += 240;
     if (runnerFundingEconomyCard) baseValue += 260;
     if (
@@ -140,6 +146,7 @@ export function discardKeepScore(
         rolesMatch(roles, ["memory", "setup", "build_rig", "draw"]) ||
         rolesMatch(roles, ["run_pressure"]) ||
         runnerPlanRelevantBreaker ||
+        runnerMissingBreakerSearchAccess ||
         runnerBadPublicityTraceTech)
     ) {
       baseValue += 110;
@@ -186,11 +193,31 @@ export function discardKeepScore(
       ...(corpAdvancementBurstSupportsVisibleAgenda
         ? ["discard_score:corp_visible_agenda_advancement_burst"]
         : []),
+      ...(runnerMissingBreakerSearchAccess
+        ? ["discard_score:runner_missing_breaker_search_access"]
+        : []),
       ...corpConditionalPayoff.evidence,
       ...(planFit > 0 ? ["discard_score:planfit"] : []),
       ...(strategicFit > 0 ? ["discard_score:strategicfit"] : []),
     ]),
   };
+}
+
+function runnerHasDeckBreakerCoverageUnavailableOutsideStack(
+  input: AiDecisionInput,
+): boolean {
+  const semanticInput = input as AiDecisionInputWithDeckCapabilities;
+  const matrix =
+    semanticInput.ownDeckCapabilities?.runner?.breakerCoverageMatrix;
+  if (!matrix) return false;
+  return (["wall", "code_gate", "sentry"] as const).some((coverage) => {
+    const status = matrix[coverage];
+    return (
+      status.inDeckKnown === true &&
+      status.installed !== true &&
+      status.inHand !== true
+    );
+  });
 }
 
 function corpConditionalPayoffKeepAdjustment(
@@ -204,20 +231,28 @@ function corpConditionalPayoffKeepAdjustment(
   );
   const runnerTags = input.playerView.opponent.tags;
   const ownAgendaPoints = input.playerView.own.agendaPoints;
+  const reachableTagSource = corpHasReachableTagSource(input);
   if (
     signals.has("condition.runner_has_two_or_more_tags") ||
     signals.has("risk.agenda_point_cost")
   ) {
     const payoffLive = runnerTags >= 2 && ownAgendaPoints >= 3;
-    return payoffLive
-      ? {
-          value: 320,
-          evidence: ["discard_score:corp_conditional_payoff_live"],
-        }
-      : {
-          value: -420,
-          evidence: ["discard_score:corp_conditional_payoff_blocked"],
-        };
+    if (payoffLive) {
+      return {
+        value: 320,
+        evidence: ["discard_score:corp_conditional_payoff_live"],
+      };
+    }
+    if (ownAgendaPoints >= 3 && reachableTagSource) {
+      return {
+        value: 300,
+        evidence: ["discard_score:corp_conditional_payoff_reachable"],
+      };
+    }
+    return {
+      value: -420,
+      evidence: ["discard_score:corp_conditional_payoff_blocked"],
+    };
   }
   if (signals.has("tag.corp_persistent_source")) {
     return {
@@ -225,13 +260,94 @@ function corpConditionalPayoffKeepAdjustment(
       evidence: ["discard_score:corp_tag_source_enabler"],
     };
   }
+  if (
+    signals.has("tag.source") &&
+    corpHasReachableCardWithAnySignal(input, ["tag.payoff", "damage.payoff"])
+  ) {
+    return {
+      value: 320,
+      evidence: ["discard_score:corp_tag_source_enabler"],
+    };
+  }
   if (signals.has("risk.requires_tagged_runner") && runnerTags <= 0) {
+    if (reachableTagSource) {
+      const hardDamagePayoff =
+        signals.has("damage.corp_tagged_meat_payoff") ||
+        signals.has("damage.payoff");
+      return hardDamagePayoff
+        ? {
+            value: 240,
+            evidence: ["discard_score:corp_conditional_payoff_reachable"],
+          }
+        : {
+            value: -80,
+            evidence: ["discard_score:corp_soft_tag_payoff_not_live"],
+          };
+    }
     return {
       value: -180,
       evidence: ["discard_score:corp_tag_payoff_prerequisite_missing"],
     };
   }
   return { value: 0, evidence: [] };
+}
+
+function corpHasReachableTagSource(input: AiDecisionInput): boolean {
+  return corpHasReachableCardWithAnySignal(input, ["tag.source"]);
+}
+
+function corpHasReachableCardWithAnySignal(
+  input: AiDecisionInput,
+  signals: readonly string[],
+): boolean {
+  const semanticInput = input as AiDecisionInputWithDeckCapabilities;
+  const snapshot = semanticInput.ownDeckSnapshot;
+  if (input.side !== "corp") return false;
+  const activeVisibleCards = [
+    ...input.playerView.own.gripOrHq,
+    ...input.playerView.servers
+      .filter((server) => server.id !== "archives")
+      .flatMap((server) => [...server.ice, ...server.root]),
+  ];
+  if (
+    activeVisibleCards.some(
+      (card) =>
+        card.definitionId && cardHasAnyTacticSignal(card.definitionId, signals),
+    )
+  ) {
+    return true;
+  }
+  if (!snapshot) return false;
+  const allVisibleCards = [
+    ...activeVisibleCards,
+    ...input.playerView.own.heapOrArchives,
+    ...input.playerView.own.scoreArea,
+  ];
+  const visibleCountByDefinitionId = new Map<string, number>();
+  for (const card of allVisibleCards) {
+    if (!card.definitionId) continue;
+    visibleCountByDefinitionId.set(
+      card.definitionId,
+      (visibleCountByDefinitionId.get(card.definitionId) ?? 0) + 1,
+    );
+  }
+  return snapshot.cards.some(
+    (entry) =>
+      cardHasAnyTacticSignal(entry.cardId, signals) &&
+      entry.quantity > (visibleCountByDefinitionId.get(entry.cardId) ?? 0),
+  );
+}
+
+function cardHasAnyTacticSignal(
+  definitionId: string,
+  signals: readonly string[],
+): boolean {
+  const hint = AI_HINTS_BY_CARD.get(definitionId);
+  const cardSignals = new Set(
+    (hint as { tacticSignals?: readonly string[] } | undefined)
+      ?.tacticSignals ?? [],
+  );
+  return signals.some((signal) => cardSignals.has(signal));
 }
 
 function corpCardIsReviewedAdvancementBurst(definitionId: string): boolean {

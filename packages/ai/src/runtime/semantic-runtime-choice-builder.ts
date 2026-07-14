@@ -110,7 +110,8 @@ function scoreSemanticRuntimeAction(
   const reasonCode =
     input.side === "corp" &&
     scoreBreakdown.some(
-      (component) => component.key === "corp_tagged_meat_damage_payoff_pressure",
+      (component) =>
+        component.key === "corp_tagged_meat_damage_payoff_pressure",
     )
       ? "corp.semantic.corp_tag_punish"
       : `${input.side}.semantic.${scopeId}`;
@@ -151,12 +152,7 @@ function scoreSemanticRuntimeAction(
         actionSemanticCandidate,
       ),
       ...semanticRuntimeScoreComponentEvidence(scoreBreakdown),
-      ...dependencies.evidence(
-        input,
-        action,
-        scopeId,
-        actionSemanticCandidate,
-      ),
+      ...dependencies.evidence(input, action, scopeId, actionSemanticCandidate),
     ],
     confidence: semanticRuntimeConfidence(scopeId, score),
   };
@@ -165,7 +161,10 @@ function scoreSemanticRuntimeAction(
 function semanticRuntimeChoiceCreditCostEvidence(params: {
   action: LegalAction;
   actionSemanticCandidate: ActionSemanticCandidate | undefined;
-  dependencies: Pick<SemanticRuntimeChoiceBuilderDependencies, "actionCreditCost">;
+  dependencies: Pick<
+    SemanticRuntimeChoiceBuilderDependencies,
+    "actionCreditCost"
+  >;
 }): number {
   const costProfile = params.actionSemanticCandidate?.costProfile;
   if (costProfile === undefined) {
@@ -197,4 +196,5 @@ const SEMANTIC_RUNTIME_CHOICE_SCORE_COMPONENT_EVIDENCE_KEYS = new Set([
   "runner_bank_cashout_gate",
   "runner_bank_investment_commitment",
   "runner_no_run_economy_setup_hold",
+  "runner_activated_agenda_score",
 ]);

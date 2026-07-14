@@ -6,7 +6,9 @@ import {
   stableDiscardChoiceOptionIds,
 } from "./discard-choice-option";
 
-type PendingChoice = NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>;
+type PendingChoice = NonNullable<
+  AiDecisionInput["playerView"]["pendingChoice"]
+>;
 type PendingChoiceOption = PendingChoice["options"][number];
 type DiscardScore = {
   readonly total: number;
@@ -32,29 +34,70 @@ export function selectedDiscardChoiceOptionIds(
       .filter((card) => card.known)
       .map((card) => [card.instanceId, card]),
   );
-  const scored = selectableOptions.map((option) => {
+  const candidates = selectableOptions.map((option) => {
     const instanceId = discardOptionInstanceId(option);
     const card = instanceId ? handByInstanceId.get(instanceId) : undefined;
     if (!card || !card.definitionId) return undefined;
-    return { option, score: scoreDiscardCandidate(input, card) };
+    return { option, card };
   });
-  if (scored.some((entry) => !entry))
+  if (candidates.some((entry) => !entry))
     return stableDiscardChoiceOptionIds(selectableOptions, count);
-  return scored
-    .filter(
-      (
-        entry,
-      ): entry is {
-        option: (typeof selectableOptions)[number];
-        score: DiscardScore;
-      } => Boolean(entry),
-    )
-    .sort(
-      (left, right) =>
-        left.score.total - right.score.total ||
-        left.option.label.localeCompare(right.option.label, "de") ||
-        left.option.id.localeCompare(right.option.id),
-    )
-    .slice(0, count)
-    .map((entry) => entry.option.id);
+  const remaining = candidates.filter(
+    (
+      entry,
+    ): entry is {
+      option: (typeof selectableOptions)[number];
+      card: VisibleCard;
+    } => Boolean(entry),
+  );
+  const selectedOptionIds: string[] = [];
+  let scoringInput = input;
+  while (selectedOptionIds.length < count && remaining.length > 0) {
+    const ranked = remaining
+      .map((entry) => ({
+        ...entry,
+        score: scoreDiscardCandidate(scoringInput, entry.card),
+      }))
+      .sort(compareDiscardCandidates);
+    const selected = ranked[0]!;
+    selectedOptionIds.push(selected.option.id);
+    remaining.splice(
+      remaining.findIndex((entry) => entry.option.id === selected.option.id),
+      1,
+    );
+    scoringInput = inputWithoutDiscardedCard(
+      scoringInput,
+      selected.card.instanceId,
+    );
+  }
+  return selectedOptionIds;
+}
+
+function compareDiscardCandidates(
+  left: { option: PendingChoiceOption; score: DiscardScore },
+  right: { option: PendingChoiceOption; score: DiscardScore },
+): number {
+  return (
+    left.score.total - right.score.total ||
+    left.option.label.localeCompare(right.option.label, "de") ||
+    left.option.id.localeCompare(right.option.id)
+  );
+}
+
+function inputWithoutDiscardedCard(
+  input: AiDecisionInput,
+  instanceId: string,
+): AiDecisionInput {
+  return {
+    ...input,
+    playerView: {
+      ...input.playerView,
+      own: {
+        ...input.playerView.own,
+        gripOrHq: input.playerView.own.gripOrHq.filter(
+          (card) => card.instanceId !== instanceId,
+        ),
+      },
+    },
+  };
 }

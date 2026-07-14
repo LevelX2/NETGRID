@@ -71,8 +71,30 @@ describe("runnerBasicActionPenaltyScoreComponents", () => {
         "simple_run_choice",
       ).some(
         (component) =>
-          component.key ===
-          "runner_continue_run_ends_run_with_break_available",
+          component.key === "runner_continue_run_ends_run_with_break_available",
+      ),
+    ).toBe(false);
+  });
+
+  it("does not treat accepting a delayed ICE self-trash as an ordinary avoidable end-run loss", () => {
+    const continueRun = action("continue_run", {
+      encounterContinue: true,
+      encounterWillEndRun: true,
+      encounterSourceWillTrashAtEndOfTurn: true,
+    });
+    const input = inputWithActions([
+      continueRun,
+      action("pump_breaker", { encounterWillEndRun: false }),
+    ]);
+
+    expect(
+      runnerBasicActionPenaltyScoreComponents(
+        input,
+        continueRun,
+        "simple_run_choice",
+      ).some(
+        (component) =>
+          component.key === "runner_continue_run_ends_run_with_break_available",
       ),
     ).toBe(false);
   });
@@ -83,8 +105,9 @@ describe("runnerBasicActionPenaltyScoreComponents", () => {
     const run = action("start_run", { serverId: "rd" });
     const input = inputWithActions([gain, run]);
     input.playerView.own.credits = 8;
-    (input as AiDecisionInput & { ownRunnerTacticalGoals: unknown[] })
-      .ownRunnerTacticalGoals = [
+    (
+      input as AiDecisionInput & { ownRunnerTacticalGoals: unknown[] }
+    ).ownRunnerTacticalGoals = [
       {
         goalId: "runner.pressure_good_central_target",
         priority: 900,

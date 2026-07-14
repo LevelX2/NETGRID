@@ -22,6 +22,7 @@ export function runnerBasicActionPenaltyScoreComponents(
     action.type === "continue_run" &&
     scopeId === "simple_run_choice" &&
     action.payload?.encounterWillEndRun === true &&
+    action.payload?.encounterSourceWillTrashAtEndOfTurn !== true &&
     input.legalActions.some(
       (candidate) =>
         candidate.type === "break_subroutine" ||
