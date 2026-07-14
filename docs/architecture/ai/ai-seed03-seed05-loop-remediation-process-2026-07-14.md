@@ -1,6 +1,6 @@
 # KI-Remediation für Baseline-Seed 03 und Seed 05 (2026-07-14)
 
-Status: P0 bis P6 erfüllt; P7 Main-Integration und Cleanup ausstehend
+Status: Abgeschlossen; P0 bis P7 erfüllt
 
 ## Quelle und Zielprüfung
 
@@ -241,6 +241,20 @@ Fundingbedarf sind im finalen Lauf verschwunden.
   `main`, doppelte Worktree-Entfernungskontrolle, `git branch -d`.
 - Done-Gate: `main` enthält den vollständigen Prozess; Worktree-Pfad und
   Arbeitsbranch existieren nicht mehr.
+
+Erfüllt am 2026-07-14:
+
+- `main` stand unverändert auf dem gemeinsamen Ausgangscommit und übernahm den
+  Arbeitsbranch konfliktfrei per Fast-Forward bis `c33cb18b3`;
+- auf dem integrierten `main` blieben 65 entscheidungsnahe Tests einschließlich
+  aller acht spielgleichen Checkpoints und der AI-Typecheck grün;
+- Haupt- und Arbeits-Worktree waren vor dem Cleanup sauber;
+- Git-Worktree-Metadaten und Branch
+  `codex/ai-seed03-seed05-remediation` wurden entfernt;
+- der durch Windows-Langpfade zunächst verbliebene physische Worktree-Ordner
+  wurde nach exakter Pfadprüfung entfernt und anschließend als nicht mehr
+  existent verifiziert;
+- ein Push oder Pull Request erfolgte nicht.
 
 ## Controller-Prompt-Kern
 
