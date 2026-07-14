@@ -766,12 +766,8 @@
             "id": "hq",
             "kind": "hq",
             "label": "HQ",
-            "ice": [
-              "corp_onr_v1_247_haunting-inquisition_2"
-            ],
-            "root": [
-              "corp_onr_v1_352_chester-mix_1"
-            ]
+            "ice": ["corp_onr_v1_247_haunting-inquisition_2"],
+            "root": ["corp_onr_v1_352_chester-mix_1"]
           },
           {
             "id": "rd",
@@ -799,9 +795,7 @@
               "corp_onr_v1_237_data-wall_2",
               "corp_onr_v1_268_shock-r_1"
             ],
-            "root": [
-              "corp_onr_v1_313_city-surveillance_1"
-            ]
+            "root": ["corp_onr_v1_313_city-surveillance_1"]
           }
         ]
       },
@@ -857,9 +851,7 @@
           "runner_onr_v1_161_fall-guy_1",
           "runner_onr_v1_161_fall-guy_2"
         ],
-        "scoreArea": [
-          "corp_onr_v1_220_tycho-extension_2"
-        ],
+        "scoreArea": ["corp_onr_v1_220_tycho-extension_2"],
         "rig": {
           "programs": [
             "runner_onr_v1_016_cyfermaster_2",
@@ -8477,9 +8469,7 @@
       },
       "selectedStepKind": "build_rez_reserve",
       "selectedActionId": "corp.gain_credit",
-      "blockedBy": [
-        "missing_remote_protection"
-      ],
+      "blockedBy": ["missing_remote_protection"],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_plan_considered",
       "updatedAtStateVersion": 212
@@ -8508,9 +8498,7 @@
           "milestone": "build_rez_reserve",
           "progress": 0.6,
           "selectedStepKind": "build_rez_reserve",
-          "actionCandidateIds": [
-            "corp.gain_credit"
-          ],
+          "actionCandidateIds": ["corp.gain_credit"],
           "cadence": {
             "turnKey": "corp:turn:16",
             "maxActionsPerTurn": 1,
@@ -8668,9 +8656,7 @@
               "support": 85,
               "final": 94
             },
-            "supportGaps": [
-              "low_ambush_support"
-            ],
+            "supportGaps": ["low_ambush_support"],
             "evidence": [
               "strategy:corp.damage_kill",
               "confidence:high",
@@ -8990,10 +8976,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -9015,9 +8998,7 @@
               "family": "corp_ice_tax",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 100,
@@ -9075,9 +9056,7 @@
               "family": "corp_asset_economy",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 100,
@@ -9108,10 +9087,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -9130,9 +9106,7 @@
               "family": "corp_central_defense",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "medium",
               "score": {
                 "anchor": 28,
@@ -9164,10 +9138,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -9357,10 +9328,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -9402,10 +9370,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -9447,10 +9412,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",

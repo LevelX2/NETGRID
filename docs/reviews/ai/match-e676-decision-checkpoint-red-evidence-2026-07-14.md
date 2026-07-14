@@ -27,11 +27,11 @@ unveränderten Ausgangsstand `5140d468bc` ausgeführt.
   StrategicIntent. Ein RunnerRunPlan ist für diese Corp-Hauptphasen nicht
   vorhanden.
 
-| Checkpoint | Zustand | Warmup | Eventpräfix | Unveränderte Erwartung |
-| --- | --- | --- | ---: | --- |
-| CP01 | SV162 / DI78 | strikt, 77 Entscheidungen, 0 Drift | 163 | Tycho Extension nicht in Remote 1 installieren |
-| CP02 | SV221 / DI101 | Rebase, 100 Entscheidungen, 1 früher Drift, kompatibler Suffix 22 | 222 | Chester Mix vor der HQ-ICE-Installation rezzen |
-| CP03 | SV340 / DI158 | Rebase, 157 Entscheidungen, 2 frühere Drifts, kompatibler Suffix 28 | 341 | Night Shift statt Basis-Credit spielen |
+| Checkpoint | Zustand       | Warmup                                                              | Eventpräfix | Unveränderte Erwartung                         |
+| ---------- | ------------- | ------------------------------------------------------------------- | ----------: | ---------------------------------------------- |
+| CP01       | SV162 / DI78  | strikt, 77 Entscheidungen, 0 Drift                                  |         163 | Tycho Extension nicht in Remote 1 installieren |
+| CP02       | SV221 / DI101 | Rebase, 100 Entscheidungen, 1 früher Drift, kompatibler Suffix 22   |         222 | Chester Mix vor der HQ-ICE-Installation rezzen |
+| CP03       | SV340 / DI158 | Rebase, 157 Entscheidungen, 2 frühere Drifts, kompatibler Suffix 28 |         341 | Night Shift statt Basis-Credit spielen         |
 
 CP02 und CP03 benötigen Rebase-Warmup, weil der aktuelle Chooser bereits bei
 DI78 von der historischen Serverpartie abweicht. CP03 enthält zusätzlich eine
@@ -42,11 +42,11 @@ Checkpoint wiederhergestellt.
 
 ## Ergebnisse auf unverändertem Code
 
-| Checkpoint | Aktuelle Auswahl | Ergebnis |
-| --- | --- | --- |
-| CP01 | `corp.gain_credit` | grün; historischer Fehler aktuell nicht reproduzierbar |
-| CP02 | Fetch 4.0.1 vor HQ installieren | rot; `behavior_regression` |
-| CP03 | `corp.gain_credit` | rot; `behavior_regression` |
+| Checkpoint | Aktuelle Auswahl                | Ergebnis                                               |
+| ---------- | ------------------------------- | ------------------------------------------------------ |
+| CP01       | `corp.gain_credit`              | grün; historischer Fehler aktuell nicht reproduzierbar |
+| CP02       | Fetch 4.0.1 vor HQ installieren | rot; `behavior_regression`                             |
+| CP03       | `corp.gain_credit`              | rot; `behavior_regression`                             |
 
 Die CP02-Aktion überspringt einen legalen kostenlosen Chester-Mix-Rez und
 bezahlt dadurch den ersten vermeidbaren HQ-ICE-Installationscredit. CP03 wird

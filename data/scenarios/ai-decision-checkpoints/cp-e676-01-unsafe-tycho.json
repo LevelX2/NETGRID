@@ -770,12 +770,8 @@
             "id": "hq",
             "kind": "hq",
             "label": "HQ",
-            "ice": [
-              "corp_onr_v1_247_haunting-inquisition_2"
-            ],
-            "root": [
-              "corp_onr_v1_352_chester-mix_1"
-            ]
+            "ice": ["corp_onr_v1_247_haunting-inquisition_2"],
+            "root": ["corp_onr_v1_352_chester-mix_1"]
           },
           {
             "id": "rd",
@@ -6943,9 +6939,7 @@
           "milestone": "find_remote_protection",
           "progress": 0.6,
           "selectedStepKind": "find_remote_protection",
-          "actionCandidateIds": [
-            "corp.draw_card"
-          ],
+          "actionCandidateIds": ["corp.draw_card"],
           "cadence": {
             "turnKey": "corp:turn:12",
             "maxActionsPerTurn": 1,
@@ -7070,9 +7064,7 @@
       "phase": "fund",
       "transitionStatus": "continued",
       "decisionsCommitted": 77,
-      "blockerIds": [
-        "corp.tag_trace_punish:reserve_shortfall"
-      ],
+      "blockerIds": ["corp.tag_trace_punish:reserve_shortfall"],
       "ttlDecisionsRemaining": 4,
       "updatedAtStateVersion": 161,
       "state": {
@@ -7139,9 +7131,7 @@
               "support": 85,
               "final": 94
             },
-            "supportGaps": [
-              "low_ambush_support"
-            ],
+            "supportGaps": ["low_ambush_support"],
             "evidence": [
               "strategy:corp.damage_kill",
               "confidence:high",
@@ -7230,9 +7220,7 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "corp.tag_trace_punish",
-          "evidence": [
-            "continued:corp.tag_trace_punish"
-          ]
+          "evidence": ["continued:corp.tag_trace_punish"]
         },
         "commitment": {
           "strategyId": "corp.tag_trace_punish",
@@ -7408,10 +7396,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -7498,9 +7483,7 @@
               "family": "corp_ice_tax",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 100,
@@ -7558,9 +7541,7 @@
               "family": "corp_asset_economy",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 100,
@@ -7591,10 +7572,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -7613,9 +7591,7 @@
               "family": "corp_central_defense",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "medium",
               "score": {
                 "anchor": 28,
@@ -7647,10 +7623,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -7840,10 +7813,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -7885,10 +7855,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -7930,10 +7897,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",

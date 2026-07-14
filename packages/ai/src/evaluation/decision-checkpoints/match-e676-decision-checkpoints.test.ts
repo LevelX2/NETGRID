@@ -142,8 +142,5 @@ function mutateFixture(
 
 function expectCheckpointToPass(fixture: AiDecisionCheckpointV1): void {
   const result = runAiDecisionCheckpoint(fixture);
-  expect(
-    result.ok,
-    `${result.code ?? "ok"}: ${result.message}`,
-  ).toBe(true);
+  expect(result.ok, `${result.code ?? "ok"}: ${result.message}`).toBe(true);
 }
