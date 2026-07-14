@@ -1,6 +1,6 @@
 # KI-Remediation für Match E676 (2026-07-14)
 
-Status: In Bearbeitung; P0 bis P2 abgeschlossen, P3 aktiv
+Status: In Bearbeitung; P0 bis P5 abgeschlossen, P6 aktiv
 
 ## Quelle und Gesamtziel
 
@@ -113,12 +113,13 @@ seine Checks und einen eigenen Commit.
 
 ### P3 – Generische Runtime-Korrekturen
 
-- Ziel: Matchpoint-Scoringrisiko, kostenlosen persistenten Rez-Vorteil und
-  Reserveaktions-Arbitration jeweils an der verursachenden Schicht beheben.
+- Ziel: Die weiterhin roten Verträge für kostenlosen persistenten Rez-Vorteil
+  und Reserveaktions-Arbitration jeweils an der verursachenden Schicht
+  beheben. Der bereits grüne Tycho-Vertrag bleibt ohne Produktionsänderung.
 - Checks: unveränderte Checkpoints und neue fokussierte Unit-Regressionen.
 - Done-Gate: alle Zieltests und Gegenproben grün; keine Match-ID- oder
   Kartennamen-Sonderregeln im produktiven Code.
-- Commit: `fix(ai): refine corp scoreline and economy sequencing`
+- Commit: `fix(ai): refine corp reserve action sequencing`
 
 ### P4 – Breite Verifikation
 
