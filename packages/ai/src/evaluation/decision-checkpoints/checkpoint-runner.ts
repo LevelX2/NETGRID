@@ -218,15 +218,18 @@ function discardChoiceExpectationMatches(
         ),
     )
     .filter((definitionId): definitionId is string => Boolean(definitionId));
+  const discardedInstanceIds = new Set(
+    choice.options
+      .filter((option) => selectedIds.has(option.id))
+      .map(
+        (option) =>
+          option.card?.instanceId ??
+          (typeof option.value === "string" ? option.value : undefined),
+      )
+      .filter((instanceId): instanceId is string => Boolean(instanceId)),
+  );
   const retainedDefinitionIds = input.playerView.own.gripOrHq
-    .filter(
-      (card) =>
-        !choice.options.some(
-          (option) =>
-            selectedIds.has(option.id) &&
-            option.card?.instanceId === card.instanceId,
-        ),
-    )
+    .filter((card) => !discardedInstanceIds.has(card.instanceId))
     .map((card) => card.definitionId)
     .filter((definitionId): definitionId is string => Boolean(definitionId));
   return (
