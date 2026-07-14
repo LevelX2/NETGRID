@@ -38,6 +38,23 @@ describe("runnerCreditBankAssessment", () => {
       ).shouldBuild,
     ).toBe(true);
   });
+
+  it("stops building when liquid plus stored access exceeds the combined target", () => {
+    const assessment = runnerCreditBankAssessment(
+      context({ credits: 12, storedCredits: 9, cashOutLegal: true }),
+      [BUILD_ACTION, CASH_OUT_ACTION],
+      false,
+    );
+
+    expect(assessment.shouldBuild).toBe(false);
+    expect(assessment.evidence).toEqual(
+      expect.arrayContaining([
+        "runner_bank_combined_credit_access:21",
+        "runner_bank_combined_access_target:18",
+        "runner_bank_build_ready:false",
+      ]),
+    );
+  });
 });
 
 const BUILD_ACTION = {
@@ -49,9 +66,19 @@ const BUILD_ACTION = {
   payload: {},
 } as LegalAction;
 
+const CASH_OUT_ACTION = {
+  actionId: "cash-out-bank",
+  side: "runner",
+  type: "trigger_ability",
+  source: "bank",
+  label: "Cash out bank",
+  payload: {},
+} as LegalAction;
+
 function context(params: {
   credits: number;
   storedCredits: number;
+  cashOutLegal?: boolean;
 }): TacticalPlanBuildContext {
   return {
     input: {
@@ -59,7 +86,9 @@ function context(params: {
       playerView: {
         own: { credits: params.credits },
       },
-      legalActions: [BUILD_ACTION],
+      legalActions: params.cashOutLegal
+        ? [BUILD_ACTION, CASH_OUT_ACTION]
+        : [BUILD_ACTION],
     } as AiDecisionInput,
     deckCapabilities: {
       runner: {
@@ -71,9 +100,11 @@ function context(params: {
             status: "installed",
             currentBankAmount: params.storedCredits,
             buildActionLegal: true,
-            cashOutActionLegal: false,
+            cashOutActionLegal: params.cashOutLegal ?? false,
             buildActionIds: [BUILD_ACTION.actionId],
-            cashOutActionIds: [],
+            cashOutActionIds: params.cashOutLegal
+              ? [CASH_OUT_ACTION.actionId]
+              : [],
             confidence: "high",
             evidence: [],
           },

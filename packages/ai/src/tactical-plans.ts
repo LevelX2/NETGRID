@@ -153,7 +153,11 @@ export function evaluateTacticalPlans(
     ...(previousPlan ? { previousPlan } : {}),
     ...(previousPlanPortfolio ? { previousPlanPortfolio } : {}),
   });
-  const progression = progressTacticalPlans(rawPlans, previousPlan);
+  const progression = progressTacticalPlans(
+    rawPlans,
+    previousPlan,
+    context.input,
+  );
   const planAlternatives = rankTacticalPlans(progression.plans);
   const blockedPlans = planAlternatives.filter(
     (plan) => plan.status === "blocked",

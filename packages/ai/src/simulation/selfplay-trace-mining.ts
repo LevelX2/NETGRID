@@ -1012,6 +1012,14 @@ function collectSelfplayFindingsForSummary(
       ),
     );
   }
+  if (
+    enabled.has("repeatable_action_no_progress_loop") &&
+    summary.winner === "action_limit_reached"
+  ) {
+    findings.push(
+      ...repeatableActionNoProgressLoopFindings(summary, summaryIndex),
+    );
+  }
   if (summary.actions >= longGameActionThreshold) {
     if (
       enabled.has("corp_never_scores_long_game") &&
@@ -1064,6 +1072,73 @@ function collectSelfplayFindingsForSummary(
         actionIndex,
         entry,
         enabled,
+      ),
+    );
+  }
+  return findings;
+}
+
+const SELFPLAY_BOARD_PROGRESS_ACTION_TYPES = new Set<
+  AiSimulationSummary["actionSequence"][number]["actionType"]
+>([
+  "install_card",
+  "play_event",
+  "play_operation",
+  "start_run",
+  "access_card",
+  "steal_agenda",
+  "trash_accessed_card",
+  "advance_card",
+  "score_agenda",
+]);
+
+function repeatableActionNoProgressLoopFindings(
+  summary: AiSimulationSummary,
+  summaryIndex: number,
+): AiSelfplaySuspiciousDecision[] {
+  const repeatedBySideAndAction = new Map<string, number[]>();
+  for (const [actionIndex, entry] of summary.actionSequence.entries()) {
+    if (
+      entry.actionType !== "activated_card_ability" &&
+      entry.actionType !== "trigger_ability"
+    ) {
+      continue;
+    }
+    const key = `${entry.side}:${entry.selectedActionId}`;
+    const indices = repeatedBySideAndAction.get(key) ?? [];
+    indices.push(actionIndex);
+    repeatedBySideAndAction.set(key, indices);
+  }
+  const findings: AiSelfplaySuspiciousDecision[] = [];
+  for (const indices of repeatedBySideAndAction.values()) {
+    if (indices.length < 6) continue;
+    const first = indices[0];
+    const last = indices.at(-1);
+    if (first === undefined || last === undefined) continue;
+    const repeatedEntry = summary.actionSequence[last];
+    if (!repeatedEntry) continue;
+    const madeBoardProgress = summary.actionSequence
+      .slice(first, last + 1)
+      .some(
+        (entry) =>
+          entry.side === repeatedEntry.side &&
+          SELFPLAY_BOARD_PROGRESS_ACTION_TYPES.has(entry.actionType),
+      );
+    if (madeBoardProgress) continue;
+    findings.push(
+      selfplayEntryFinding(
+        summary,
+        summaryIndex,
+        last,
+        "repeatable_action_no_progress_loop",
+        "high",
+        `${repeatedEntry.side} repeated the same ability without board progress until the action limit.`,
+        [
+          `repeatable_action_count:${indices.length}`,
+          `repeatable_action_first_index:${first}`,
+          `repeatable_action_last_index:${last}`,
+          "repeatable_action_board_progress:false",
+        ],
       ),
     );
   }

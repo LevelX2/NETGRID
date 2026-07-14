@@ -1,3 +1,4 @@
+import type { AiDecisionInput } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import { createPlanStep, createTacticalPlan } from "./tactical-plan-builders";
 import {
@@ -132,6 +133,69 @@ describe("tactical plan progression", () => {
     expect(ranked[0]?.planId).toBe("runner.contest_remote:remote_1");
     expect(progressed.planProgressionReason).toBe(
       "previous_central_probe_satisfied",
+    );
+  });
+
+  it("withholds punish continuity when the previous step produced no visible conversion", () => {
+    const plan = createTacticalPlan({
+      planId: "corp.apply_punish_pressure",
+      side: "corp",
+      type: "corp.apply_punish_pressure",
+      status: "active",
+      priority: 800,
+      horizonTurns: 1,
+      currentStep: createPlanStep({
+        stepId: "apply_punish_pressure",
+        kind: "apply_punish_pressure",
+        desiredActionSemantics: ["trace.source"],
+      }),
+      stateVersion: 12,
+    });
+    const previousPlan: TacticalPlanMemorySnapshot = {
+      schemaVersion: "tactical-plan-v1",
+      memoryId: "previous-punish",
+      side: "corp",
+      planId: plan.planId,
+      type: plan.type,
+      status: "active",
+      selectedStepKind: "apply_punish_pressure",
+      selectedActionId: "netwatch",
+      blockedBy: [],
+      ttlDecisionsRemaining: 2,
+      planProgressionReason: "selected_new_plan",
+      progressBaseline: {
+        ownCredits: 6,
+        opponentCredits: 109,
+        ownAgendaPoints: 5,
+        opponentAgendaPoints: 0,
+        opponentTags: 0,
+        opponentCoreDamage: 0,
+      },
+      updatedAtStateVersion: 11,
+    };
+    const input = {
+      side: "corp",
+      playerView: {
+        stateVersion: 12,
+        own: { credits: 6, clicks: 3, agendaPoints: 5 },
+        opponent: {
+          credits: 109,
+          agendaPoints: 0,
+          tags: 0,
+          coreDamage: 0,
+        },
+      },
+    } as AiDecisionInput;
+
+    const result = progressTacticalPlans([plan], previousPlan, input);
+
+    expect(result.planProgressionReason).toBe("no_observable_progress");
+    expect(result.plans[0]).toMatchObject({
+      status: "active",
+      priority: 800,
+    });
+    expect(result.plans[0]?.evidence).toContain(
+      "plan_progression:no_observable_progress",
     );
   });
 });

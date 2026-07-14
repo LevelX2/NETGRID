@@ -353,6 +353,49 @@ describe("createRunnerBankInvestmentContext", () => {
     );
   });
 
+  it("holds a legal fourth load when combined credit access is already over target", () => {
+    const context = createContext({
+      hintEffectsForDefinition: (definitionId) =>
+        definitionId === "custom-runner-credit-bank"
+          ? [{ kind: "economy", target: "economy.temporary_resource_bank" }]
+          : [],
+    });
+    const bank = visibleRunnerCard("custom-runner-credit-bank", {
+      counters: { power: 9 },
+    });
+    const buildAction = runnerAction("activated_card_ability", {
+      actionId: "structured-build",
+      source: bank.instanceId,
+      cardImplementationAddsHostedCredits: true,
+    });
+    const cashOutAction = runnerAction("trigger_ability", {
+      actionId: "structured-cashout",
+      source: bank.instanceId,
+      cardImplementationTakesHostedCredits: true,
+    });
+    const input = runnerInput({
+      credits: 12,
+      rig: [bank],
+      legalActions: [buildAction, cashOutAction],
+    });
+
+    expect(
+      context.runnerBankInvestmentCommitmentEvidence(input, buildAction),
+    ).toEqual(
+      expect.arrayContaining([
+        "bankCombinedCreditAccess:21",
+        "bankOverDesiredTarget:true",
+        "bankCommitmentStatus:over_target_hold",
+      ]),
+    );
+    expect(
+      context.runnerBankInvestmentCommitmentScoreComponents(
+        input,
+        buildAction,
+      )[0]?.value,
+    ).toBe(-1800);
+  });
+
   it("ignores build-action substring noise in credit-bank action text", () => {
     const context = createContext({
       hintEffectsForDefinition: (definitionId) =>

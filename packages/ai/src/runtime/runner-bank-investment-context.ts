@@ -11,6 +11,7 @@ import { rolesMatch } from "./role-match";
 const RUNNER_BANK_FIRST_LOAD_TARGET = 3;
 const RUNNER_BANK_URGENT_CASHOUT_TARGET = 6;
 const RUNNER_BANK_VALUE_CASHOUT_TARGET = 12;
+const RUNNER_BANK_COMBINED_ACCESS_TARGET = 18;
 
 type RunnerBankInvestmentCommitmentStatus =
   | "inactive"
@@ -247,9 +248,11 @@ export function createRunnerBankInvestmentContext(
       concreteFundingNeed,
       criticalReserve,
     });
-    const overDesiredTarget =
-      storedCredits > 0 && storedCredits >= desiredBankTarget;
     const combinedCreditAccess = input.playerView.own.credits + storedCredits;
+    const overDesiredTarget =
+      storedCredits > 0 &&
+      (storedCredits >= desiredBankTarget ||
+        combinedCreditAccess >= RUNNER_BANK_COMBINED_ACCESS_TARGET);
     const cashOutThresholdMet =
       storedCredits >= desiredBankTarget && !comfortableCreditPool;
     const runOverride =

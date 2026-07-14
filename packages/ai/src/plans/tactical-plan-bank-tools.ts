@@ -3,6 +3,7 @@ import type { TacticalPlanBuildContext } from "./tactical-plan-types";
 
 const RUNNER_BANK_MIN_CRITICAL_CASHOUT = 3;
 const RUNNER_BANK_VALUE_BUILD_TARGET = 12;
+const RUNNER_BANK_COMBINED_ACCESS_TARGET = 18;
 const RUNNER_BANK_COMFORTABLE_CREDITS = 10;
 
 export type RunnerCreditBankAssessment = {
@@ -109,6 +110,7 @@ export function runnerCreditBankAssessment(
     Math.floor(context.input.playerView.own.credits),
   );
   const buildTarget = RUNNER_BANK_VALUE_BUILD_TARGET;
+  const combinedCreditAccess = ownCredits + currentStoredCredits;
   const cashOutMinimum = concreteFundingNeed
     ? 1
     : ownCredits <= 3
@@ -117,9 +119,10 @@ export function runnerCreditBankAssessment(
   const shouldBuild =
     buildActions.length > 0 &&
     !concreteFundingNeed &&
+    combinedCreditAccess < RUNNER_BANK_COMBINED_ACCESS_TARGET &&
     (payoutActions.length > 0 ||
       (ownCredits < RUNNER_BANK_COMFORTABLE_CREDITS &&
-        ownCredits + currentStoredCredits < RUNNER_BANK_VALUE_BUILD_TARGET)) &&
+        combinedCreditAccess < RUNNER_BANK_VALUE_BUILD_TARGET)) &&
     currentStoredCredits < buildTarget;
   const cashOutReason =
     payoutActions.length === 0 || estimatedPayout <= 0
@@ -149,6 +152,8 @@ export function runnerCreditBankAssessment(
       `runner_bank_current_stored:${currentStoredCredits}`,
       `runner_bank_estimated_payout:${estimatedPayout}`,
       `runner_bank_build_target:${buildTarget}`,
+      `runner_bank_combined_credit_access:${combinedCreditAccess}`,
+      `runner_bank_combined_access_target:${RUNNER_BANK_COMBINED_ACCESS_TARGET}`,
       `runner_bank_cashout_minimum:${cashOutMinimum}`,
       `runner_bank_concrete_funding_need:${concreteFundingNeed}`,
       `runner_bank_build_ready:${shouldBuild}`,

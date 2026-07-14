@@ -1,3 +1,4 @@
+import type { AiDecisionInput } from "@netgrid/shared";
 import type {
   PlanLifecycle,
   TacticalPlan,
@@ -19,12 +20,16 @@ export function planCanMapToCurrentAction(plan: TacticalPlan): boolean {
 export function progressTacticalPlans(
   plans: readonly TacticalPlan[],
   previousPlan: TacticalPlanMemorySnapshot | undefined,
+  input?: AiDecisionInput,
 ): {
   plans: TacticalPlan[];
   planProgressionReason?: string;
   whyPlanAbandoned?: string;
 } {
   if (!previousPlan) return { plans: [...plans] };
+  const previousPunishMadeNoProgress =
+    input !== undefined &&
+    punishPlanMadeNoObservableProgress(previousPlan, input);
   const creditBaseShouldYieldToRdOpportunity =
     previousPlan.type === "runner.build_credit_base" &&
     plans.some(isCheapUnknownRdOpportunityPlan) &&
@@ -35,6 +40,27 @@ export function progressTacticalPlans(
     previousPlan.ttlDecisionsRemaining <= 0;
   const continued = plans.map((plan) => {
     if (!samePlanLine(plan, previousPlan)) return plan;
+    if (previousPunishMadeNoProgress) {
+      const abandoned = previousPlan.ttlDecisionsRemaining <= 1;
+      return {
+        ...plan,
+        status: abandoned ? "abandoned" : plan.status,
+        evidence: [
+          ...plan.evidence,
+          `previous_plan:${previousPlan.planId}`,
+          "plan_progression:no_observable_progress",
+        ],
+        scoreBreakdown: [
+          ...plan.scoreBreakdown,
+          {
+            key: "previous_plan_no_observable_progress",
+            label: "Plan ohne sichtbaren Fortschritt",
+            value: 0,
+            reason: previousPlan.planId,
+          },
+        ],
+      } satisfies TacticalPlan;
+    }
     if (
       creditBaseShouldYieldToRdOpportunity &&
       plan.type === "runner.build_credit_base"
@@ -117,6 +143,15 @@ export function progressTacticalPlans(
       planProgressionReason: "previous_central_probe_satisfied",
     };
   }
+  if (previousPunishMadeNoProgress) {
+    return {
+      plans: continued,
+      planProgressionReason: "no_observable_progress",
+      ...(previousPlan.ttlDecisionsRemaining <= 1
+        ? { whyPlanAbandoned: "repeated_punish_without_visible_conversion" }
+        : {}),
+    };
+  }
   if (creditBaseShouldYieldToRdOpportunity) {
     return {
       plans: continued,
@@ -128,6 +163,37 @@ export function progressTacticalPlans(
     plans: continued,
     planProgressionReason: "previous_plan_considered",
   };
+}
+
+function punishPlanMadeNoObservableProgress(
+  previousPlan: TacticalPlanMemorySnapshot,
+  input: AiDecisionInput,
+): boolean {
+  const baseline = previousPlan.progressBaseline;
+  if (
+    previousPlan.type !== "corp.apply_punish_pressure" ||
+    !baseline ||
+    input.side !== "corp" ||
+    input.playerView.stateVersion <= previousPlan.updatedAtStateVersion
+  ) {
+    return false;
+  }
+  const tagLanded = input.playerView.opponent.tags > baseline.opponentTags;
+  const damageLanded =
+    (input.playerView.opponent.coreDamage ?? 0) > baseline.opponentCoreDamage;
+  const payoffConverted =
+    input.playerView.own.agendaPoints > baseline.ownAgendaPoints ||
+    input.playerView.opponent.agendaPoints < baseline.opponentAgendaPoints;
+  const meaningfulCreditConvergence =
+    input.playerView.opponent.credits < baseline.opponentCredits &&
+    input.playerView.own.credits + input.playerView.own.clicks * 2 >=
+      input.playerView.opponent.credits;
+  return !(
+    tagLanded ||
+    damageLanded ||
+    payoffConverted ||
+    meaningfulCreditConvergence
+  );
 }
 
 export function normalizedPlanContinuityValue(rawValue: number): number {

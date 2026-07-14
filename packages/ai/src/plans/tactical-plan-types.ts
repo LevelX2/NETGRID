@@ -314,6 +314,14 @@ export type TacticalPlanMemorySnapshot = {
   blockedBy: string[];
   ttlDecisionsRemaining: number;
   planProgressionReason: string;
+  progressBaseline?: {
+    ownCredits: number;
+    opponentCredits: number;
+    ownAgendaPoints: number;
+    opponentAgendaPoints: number;
+    opponentTags: number;
+    opponentCoreDamage: number;
+  };
   whyPlanAbandoned?: string;
   updatedAtStateVersion: number;
 };

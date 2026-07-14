@@ -22,6 +22,10 @@ import {
   corpIcePlacementCandidateForAction,
   type CorpIcePlacementCandidate,
 } from "../runtime/corp-ice-placement/corp-ice-placement";
+import {
+  candidateRequiresSuccessfulTrace,
+  traceTagExpectedSuccessEstimate,
+} from "../runtime/trace-tag-success-estimate";
 
 const CORP_PUNISH_EXACT_SIGNALS = new Set([
   "tag.source",
@@ -43,6 +47,12 @@ export function corpPunishCandidates(
     if (
       candidate.primaryProjectionStatus === "blocked" ||
       candidate.primaryProjectionStatus === "hidden_info_blocked"
+    ) {
+      return false;
+    }
+    if (
+      candidateRequiresSuccessfulTrace(candidate) &&
+      traceTagExpectedSuccessEstimate(context.input) === 0
     ) {
       return false;
     }

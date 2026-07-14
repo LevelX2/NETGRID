@@ -29,6 +29,10 @@ import { semanticRuntimeCorpCentralPressureAssessment } from "./semantic-runtime
 import type { CorpScoringWindowAssessment } from "./semantic-runtime-corp-scoring-window";
 import type { CorpScorelineWindowAssessment } from "./corp-scoreline/semantic-runtime-corp-scoreline-assessment";
 import { corpKnownAgendaInventory } from "./corp-known-agenda-inventory";
+import {
+  candidateRequiresSuccessfulTrace,
+  traceTagExpectedSuccessEstimate,
+} from "./trace-tag-success-estimate";
 
 type SemanticRuntimeCorpSafetyGate = {
   allowed: boolean;
@@ -160,6 +164,22 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
     actionSemanticCandidate,
   );
   if (tacticalGoalFit) components.push(tacticalGoalFit);
+  if (
+    candidateRequiresSuccessfulTrace(actionSemanticCandidate) &&
+    traceTagExpectedSuccessEstimate(input) === 0
+  ) {
+    components.push({
+      key: "corp_trace_without_conversion_window",
+      label: "Trace ohne Conversion-Fenster",
+      value: -2400,
+      reason: [
+        `corp_credits:${input.playerView.own.credits}`,
+        `corp_clicks:${input.playerView.own.clicks}`,
+        `runner_credits:${input.playerView.opponent.credits}`,
+        "trace_expected_success:0",
+      ].join("|"),
+    });
+  }
   const boardTriage = semanticRuntimeCorpBoardTriageActionComponent(
     input,
     action,

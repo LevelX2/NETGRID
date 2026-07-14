@@ -150,13 +150,20 @@ export function createTacticalPlanMemorySnapshot(params: {
   planProgressionReason?: string;
   whyPlanAbandoned?: string;
 }): TacticalPlanMemorySnapshot {
-  const status = planMemoryStatus(params.plan, params.step);
-  const ttlDecisionsRemaining =
-    params.plan.type === "runner.opportunistic_central_run"
-      ? status === "satisfied"
+  const mappedStatus = planMemoryStatus(params.plan, params.step);
+  const noObservableProgress =
+    params.planProgressionReason === "no_observable_progress";
+  const ttlDecisionsRemaining = noObservableProgress
+    ? Math.max(0, (params.previousPlan?.ttlDecisionsRemaining ?? 2) - 1)
+    : params.plan.type === "runner.opportunistic_central_run"
+      ? mappedStatus === "satisfied"
         ? 0
         : Math.max(1, (params.previousPlan?.ttlDecisionsRemaining ?? 2) - 1)
       : 2;
+  const status =
+    noObservableProgress && ttlDecisionsRemaining === 0
+      ? "abandoned"
+      : mappedStatus;
   return {
     schemaVersion: TACTICAL_PLAN_SCHEMA_VERSION,
     memoryId: tacticalPlanMemoryKey(params.input),
@@ -175,6 +182,14 @@ export function createTacticalPlanMemorySnapshot(params: {
       (params.previousPlan && samePlanLine(params.plan, params.previousPlan)
         ? "continued_previous_plan"
         : "selected_new_plan"),
+    progressBaseline: {
+      ownCredits: params.input.playerView.own.credits,
+      opponentCredits: params.input.playerView.opponent.credits,
+      ownAgendaPoints: params.input.playerView.own.agendaPoints,
+      opponentAgendaPoints: params.input.playerView.opponent.agendaPoints,
+      opponentTags: params.input.playerView.opponent.tags,
+      opponentCoreDamage: params.input.playerView.opponent.coreDamage ?? 0,
+    },
     ...(params.whyPlanAbandoned
       ? { whyPlanAbandoned: params.whyPlanAbandoned }
       : {}),
