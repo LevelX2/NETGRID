@@ -1,7 +1,7 @@
 # Final Review: Trapdoor-/Dumpster-Deflector (2026-07-14)
 
-Status: Implementierung und breite Branch-Verifikation grün; lokale
-Main-Integration folgt im Abschluss
+Status: Implementierung und breite Verifikation grün; lokal in `main`
+integriert
 
 ## Ergebnis
 
@@ -88,6 +88,11 @@ Nicht ausgeführt wurden eine vollständige Engine-Suite, Selfplay-Langläufe
 oder die AI-Behavior-Baseline. Für die eng reproduzierten Entscheidungs-,
 Schema- und Chronikänderungen liefern die vollständigen AI-/Web-Suiten plus
 fokussierte Engine-Tests den angemessenen Regressionsschutz.
+
+Nach Einzug des neuesten lokalen `main` mit dem unabhängigen
+Deflector-Kostenfix wurden 255 kombinierte Zieltests sowie AI- und
+Engine-Typecheck erneut grün ausgeführt. Der Arbeitsbranch wurde anschließend
+per Fast-Forward lokal nach `main` integriert; es erfolgte kein Push.
 
 ## Führende Artefakte
 
