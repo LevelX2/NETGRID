@@ -5,6 +5,7 @@ import richCreditLoopJson from "../../../../../data/scenarios/ai-decision-checkp
 import newsgroupRichLoopJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-baseline-seed05-01-newsgroup-rich-loop.json";
 import newsgroupLowCreditControlJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-baseline-seed05-02-newsgroup-low-credit-control.json";
 import netwatchNoConversionJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-baseline-seed05-03-netwatch-no-conversion.json";
+import postRemediationNewsgroupLoopJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-baseline-seed05-04-post-remediation-newsgroup-loop.json";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
@@ -25,6 +26,10 @@ describe("baseline seed 03 and seed 05 exact loop checkpoints", () => {
     [
       "does not force a no-conversion Netwatch trace into a 109-credit runner",
       netwatchNoConversionJson,
+    ],
+    [
+      "does not continue late Newsgroup economy over legal pressure development",
+      postRemediationNewsgroupLoopJson,
     ],
   ])("%s", (_label, json) => {
     expectCheckpointToPass(fixture(json));
