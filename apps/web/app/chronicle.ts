@@ -6446,6 +6446,9 @@ export function chronicleRunGroupLabelFromEvent(
   event: PublicGameEvent,
 ): string | null {
   const actionType = stringValue(event.publicPayload.actionType) ?? event.type;
+  const redirectsRun =
+    event.publicPayload.classicDeflector === true &&
+    event.publicPayload.deflectedRun === true;
   const startsRun =
     actionType === "start_run" ||
     (actionType === "play_event" &&
@@ -6453,9 +6456,8 @@ export function chronicleRunGroupLabelFromEvent(
     (actionType === "resolve_choice" &&
       (event.publicPayload.socialEngineeringRun === true ||
         payloadBooleanValue(event.publicPayload, "autoPassChosenIce") ===
-          true ||
-        (event.publicPayload.classicDeflector === true &&
-          event.publicPayload.deflectedRun === true)));
+          true)) ||
+    redirectsRun;
   if (!startsRun) return null;
   const serverLabel =
     stringValue(event.publicPayload.selectedServerLabel) ??

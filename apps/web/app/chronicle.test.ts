@@ -479,6 +479,98 @@ describe("formatChronicleEvent", () => {
     );
   });
 
+  it("narrates the direct Trapdoor to Dumpster redirect chain with both destinations", () => {
+    const trapdoor = makeEvent("continue_run", {
+      actor: "runner",
+      actionType: "continue_run",
+      classicDeflector: true,
+      sourceDefinitionId: "onr_classic_014_trapdoor",
+      deflectedRun: true,
+      selectedServerId: "remote_1",
+      selectedServerLabel: "Remote 1",
+      redirectedToRezzedIce: true,
+      paidCredits: 0,
+      resolvedEffects: [
+        {
+          effectId: "subroutine_1",
+          kind: "resolve_subroutine",
+          visibility: "public",
+          side: "runner",
+          reason: "ice_subroutine",
+          sourceDefinitionId: "onr_classic_014_trapdoor",
+          sourceTitle: "Trapdoor",
+          subroutineIndex: 0,
+          subroutineType: "deflect_run",
+          paidCredits: 0,
+        },
+      ],
+    });
+    const dumpster = makeEvent("continue_run", {
+      actor: "runner",
+      actionType: "continue_run",
+      classicDeflector: true,
+      sourceDefinitionId: "onr_classic_009_dumpster",
+      deflectedRun: true,
+      selectedServerId: "archives",
+      selectedServerLabel: "Archives",
+      redirectedToRezzedIce: false,
+      paidCredits: 0,
+      resolvedEffects: [
+        {
+          effectId: "subroutine_1",
+          kind: "resolve_subroutine",
+          visibility: "public",
+          side: "runner",
+          reason: "ice_subroutine",
+          sourceDefinitionId: "onr_classic_009_dumpster",
+          sourceTitle: "Dumpster",
+          subroutineIndex: 0,
+          subroutineType: "deflect_run",
+          paidCredits: 0,
+        },
+      ],
+    });
+
+    const trapdoorItem = formatChronicleEffectItems(trapdoor, "runner")[0]!;
+    const dumpsterItem = formatChronicleEffectItems(dumpster, "runner")[0]!;
+
+    expect(trapdoorItem).toMatchObject({
+      title: "Trapdoor: Subroutine 1 leitet den Run auf Remote 1 um.",
+      description: "Der Runner begegnet dort dem äußersten gerezzten ICE.",
+      groupLabel: "Run auf Remote 1",
+      category: "run",
+      importance: "important",
+    });
+    expect(trapdoorItem.chips).toEqual(
+      expect.arrayContaining([
+        "Trapdoor",
+        "Subroutine 1",
+        "Run umgeleitet",
+        "Remote 1",
+        "Äußerstes gerezztes ICE",
+      ]),
+    );
+    expect(dumpsterItem).toMatchObject({
+      title: "Dumpster: Subroutine 1 leitet den Run auf Archive um.",
+      description:
+        "Der Runner gilt dort als am letzten ICE des Data Forts vorbeigekommen.",
+      groupLabel: "Run auf Archive",
+      category: "run",
+      importance: "important",
+    });
+    expect(dumpsterItem.chips).toEqual(
+      expect.arrayContaining([
+        "Dumpster",
+        "Subroutine 1",
+        "Run umgeleitet",
+        "Archive",
+        "Letztes ICE passiert",
+      ]),
+    );
+    expect(chronicleRunGroupLabelFromEvent(trapdoor)).toBe("Run auf Remote 1");
+    expect(chronicleRunGroupLabelFromEvent(dumpster)).toBe("Run auf Archive");
+  });
+
   it("distinguishes Entrapment redirects without rezzed ICE and declined payment", () => {
     const resolvedEffect = {
       effectId: "subroutine_1",
