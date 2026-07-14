@@ -657,6 +657,13 @@ describe("encounter printed non-trace effects boundary", () => {
       visibility: "public",
       minSelections: 1,
       maxSelections: 1,
+      options: [
+        { id: "decline", label: "Nicht zahlen" },
+        { id: "server_rd", label: "RD (2 Credits)" },
+        { id: "server_hq", label: "HQ (2 Credits)" },
+        { id: "server_archives", label: "ARCHIVES (2 Credits)" },
+        { id: "server_remote_1", label: "REMOTE_1 (2 Credits)" },
+      ],
     });
 
     resolveClassicDeflectorChoice(
