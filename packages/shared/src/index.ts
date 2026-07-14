@@ -1357,6 +1357,7 @@ export type RunnerDrawSequence = {
   drawnCardIds: CardInstanceId[];
   currentDrawTaxSourceIds: CardInstanceId[];
   currentDrawTaxSourceIndex: number;
+  preDrawRezWindowPassed: boolean;
   drawTaxSourceCount: number;
   drawTaxCreditsPaid: number;
   drawTaxTagsAdded: number;

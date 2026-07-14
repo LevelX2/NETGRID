@@ -2945,6 +2945,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       }),
     );
     const cityId = putCorpRootInRemote(state, "onr_v1_313_city-surveillance");
+    state.corp.credits = 0;
     state.runner.credits = 1;
     state.runner.tags = 0;
     state.runner.clicks = 4;

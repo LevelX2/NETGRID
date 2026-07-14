@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
+  applyAction,
   createGameAfterSetup,
+  getLegalActions,
   getPlayerView,
   hashState,
   replayEvents,
@@ -256,6 +258,130 @@ describe("City Surveillance per-draw decisions", () => {
     expect(state.corp.credits).toBe(0);
     expect(state.runner.stack).toHaveLength(stackBefore - 1);
     expect(state.pendingChoice?.side).toBe("runner");
+  });
+
+  it("offers the rez window again before every card after the Corp passes", () => {
+    let state = cityGame("city-surveillance-rez-pass-each-card");
+    const cityId = putCorpRootInRemote(state, CITY_SURVEILLANCE_ID);
+    state.corp.credits = 1;
+    const jackId = moveRunnerCardToGrip(state, JACK_N_JOE_ID);
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const stackBefore = state.runner.stack.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "play_event" && action.payload?.cardId === jackId,
+    );
+    for (let index = 0; index < 3; index += 1) {
+      expect(state.pendingChoice).toMatchObject({
+        side: "corp",
+        source: expect.stringContaining("runner_draw.city_surveillance_rez"),
+      });
+      state = applyChoice(state, "corp", "pass");
+      expect(state.runner.stack).toHaveLength(stackBefore - index - 1);
+    }
+
+    expect(state.cardInstances[cityId]?.rezzed).toBe(false);
+    expect(state.runner.tags).toBe(0);
+    expect(state.pendingChoice).toBeUndefined();
+    expect(
+      JSON.stringify(
+        state.eventLog.slice(replayStart).map((event) => event.publicPayload),
+      ),
+    ).not.toContain(cityId);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("draws without a rez window when the Corp cannot afford City Surveillance", () => {
+    let state = cityGame("city-surveillance-rez-unaffordable");
+    const cityId = putCorpRootInRemote(state, CITY_SURVEILLANCE_ID);
+    state.corp.credits = 0;
+    const jackId = moveRunnerCardToGrip(state, JACK_N_JOE_ID);
+    const stackBefore = state.runner.stack.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "play_event" && action.payload?.cardId === jackId,
+    );
+
+    expect(state.runner.stack).toHaveLength(stackBefore - 3);
+    expect(state.cardInstances[cityId]?.rezzed).toBe(false);
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.runnerDrawSequence).toBeUndefined();
+  });
+
+  it("allows multiple City Surveillance copies to rez before the same card", () => {
+    let state = cityGame("city-surveillance-rez-multiple-copies");
+    const firstCityId = putCorpRootInRemote(state, CITY_SURVEILLANCE_ID);
+    const secondCityId = addSecondRezzedCityForTest(state, firstCityId);
+    state.corp.credits = 2;
+    const jackId = moveRunnerCardToGrip(state, JACK_N_JOE_ID);
+    const stackBefore = state.runner.stack.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "play_event" && action.payload?.cardId === jackId,
+    );
+    expect(state.pendingChoice?.options.map((option) => option.id)).toEqual([
+      `rez_${firstCityId}`,
+      `rez_${secondCityId}`,
+      "pass",
+    ]);
+    state = applyChoice(state, "corp", `rez_${firstCityId}`);
+    expect(state.runner.stack).toHaveLength(stackBefore);
+    expect(state.pendingChoice?.options.map((option) => option.id)).toEqual([
+      `rez_${secondCityId}`,
+      "pass",
+    ]);
+    state = applyChoice(state, "corp", `rez_${secondCityId}`);
+
+    expect(state.runner.stack).toHaveLength(stackBefore - 1);
+    expect(state.corp.credits).toBe(0);
+    expect(state.pendingChoice?.side).toBe("runner");
+    expect(state.pendingChoice?.source).toContain(firstCityId);
+    state = applyChoice(state, "runner", "take_tag");
+    expect(state.pendingChoice?.source).toContain(secondCityId);
+  });
+
+  it("rejects a stale City Surveillance rez decision", () => {
+    let state = cityGame("city-surveillance-rez-stale");
+    const cityId = putCorpRootInRemote(state, CITY_SURVEILLANCE_ID);
+    state.corp.credits = 1;
+    const jackId = moveRunnerCardToGrip(state, JACK_N_JOE_ID);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "play_event" && action.payload?.cardId === jackId,
+    );
+    const choiceAction = getLegalActions(state, "corp").find(
+      (action) => action.type === "resolve_choice",
+    );
+    if (!choiceAction || !state.pendingChoice)
+      throw new Error("Missing City Surveillance rez choice");
+
+    const result = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: choiceAction.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      selectedChoices: {
+        choiceId: state.pendingChoice.choiceId,
+        selectedOptionIds: [`rez_${cityId}`],
+      },
+    });
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error.code).toBe("ERR_STALE_STATE");
   });
 });
 

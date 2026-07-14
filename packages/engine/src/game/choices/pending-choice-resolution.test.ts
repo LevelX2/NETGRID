@@ -122,6 +122,25 @@ describe("pending choice resolution", () => {
     expect(resolveRunnerDrawSequenceChoice).toHaveBeenCalledOnce();
     expect(resolveRunnerDrawSequenceChoice.mock.calls[0]?.[0]).toBe(state);
   });
+
+  it("dispatches City Surveillance pre-draw rez decisions through the sequence resolver", () => {
+    const state = stateWithChoice(
+      "city_rez_choice",
+      "runner_draw.city_surveillance_rez:1",
+    );
+    const resolveRunnerDrawSequenceChoice = vi.fn();
+
+    resolvePendingChoice(
+      pendingChoiceHost(state, {
+        hiddenZone: { resolveRunnerDrawSequenceChoice },
+      }),
+      choiceAction("city_rez_choice"),
+      playerChoice("city_rez_choice", ["pass"]),
+    );
+
+    expect(resolveRunnerDrawSequenceChoice).toHaveBeenCalledOnce();
+    expect(resolveRunnerDrawSequenceChoice.mock.calls[0]?.[0]).toBe(state);
+  });
 });
 
 function stateWithChoice(choiceId: string, source: string): GameState {

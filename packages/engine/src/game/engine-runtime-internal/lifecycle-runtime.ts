@@ -41,12 +41,14 @@ export function createLifecycleRuntime(deps: RuntimeDeps) {
     executeCardImplementationLifecycleEffects,
     hasCardImplementationMemoryUnitModifier,
     hostedCardsOn,
+    isDrawTaxSourceDefinition,
     leavePlayCleanupImplementationsForCard,
     mergeRunnerDrawSummary,
     installedProgramTrashBackupHardwareIds,
     mustArrayValue,
     nextRandom,
     publicCardTitle,
+    rezCostForCard,
     remainingReplacementLongtailKindForCard,
     removeFromAllZones,
     runnerInstalledCardIds,
@@ -557,6 +559,51 @@ export function createLifecycleRuntime(deps: RuntimeDeps) {
     };
   }
 
+  function affordableUnrezzedDrawTaxSourceIds(
+    state: GameState,
+  ): CardInstanceId[] {
+    return state.corp.servers
+      .flatMap((server) => server.root)
+      .filter((cardId) => {
+        const instance = mustInstance(state.cardInstances, cardId);
+        return (
+          instance.rezzed !== true &&
+          isDrawTaxSourceDefinition(state, cardId) &&
+          state.corp.credits >= rezCostForCard(state, cardId)
+        );
+      });
+  }
+
+  function openRunnerDrawTaxRezChoice(
+    state: GameState,
+    sourceCardIds: readonly CardInstanceId[],
+  ): void {
+    const sequence = state.runnerDrawSequence;
+    if (!sequence) throw new Error("Es ist keine Runner-Ziehsequenz aktiv.");
+    if (state.pendingChoice)
+      throw new Error("Es ist bereits eine Choice offen.");
+    state.pendingChoice = {
+      choiceId: `runner_draw_city_surveillance_rez_${sequence.sequenceId}_${state.stateVersion + 1}`,
+      side: "corp",
+      source: `runner_draw.city_surveillance_rez:${sequence.sequenceId}`,
+      prompt: "City Surveillance unmittelbar vor dem Ziehen rezzen?",
+      kind: "select_option",
+      options: [
+        ...sourceCardIds.map((cardId) => ({
+          id: `rez_${cardId}`,
+          label: `City Surveillance für ${rezCostForCard(state, cardId)} Credit rezzen`,
+          publicLabel: "Installierte Karte rezzen",
+          value: cardId,
+        })),
+        { id: "pass", label: "Passen", value: "pass" },
+      ],
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: state.stateVersion + 1,
+      visibility: "hidden_info_barrier",
+    };
+  }
+
   function continueRunnerDrawSequence(state: GameState): RunnerDrawSummary {
     const summary = emptyRunnerDrawSummary();
     const sequence = state.runnerDrawSequence;
@@ -583,6 +630,15 @@ export function createLifecycleRuntime(deps: RuntimeDeps) {
         return summary;
       }
 
+      if (!sequence.preDrawRezWindowPassed) {
+        const rezSourceIds = affordableUnrezzedDrawTaxSourceIds(state);
+        if (rezSourceIds.length > 0) {
+          openRunnerDrawTaxRezChoice(state, rezSourceIds);
+          return summary;
+        }
+        sequence.preDrawRezWindowPassed = true;
+      }
+
       const cardId = drawRunnerCardIntoGrip(state);
       if (!cardId) {
         sequence.remainingDrawCount = 0;
@@ -594,6 +650,7 @@ export function createLifecycleRuntime(deps: RuntimeDeps) {
       (summary.drawnCardIds ??= []).push(cardId);
       sequence.currentDrawTaxSourceIds = drawTaxSourceIds(state);
       sequence.currentDrawTaxSourceIndex = 0;
+      sequence.preDrawRezWindowPassed = false;
       sequence.drawTaxSourceCount = Math.max(
         sequence.drawTaxSourceCount,
         sequence.currentDrawTaxSourceIds.length,
@@ -669,13 +726,18 @@ export function createLifecycleRuntime(deps: RuntimeDeps) {
     const crashSourceId =
       amount > 0 ? activeCrashEverettSourceId(state) : undefined;
     const drawAmount = amount + (crashSourceId ? 1 : 0);
-    if (drawAmount > 0 && drawTaxSourceIds(state).length > 0) {
+    if (
+      drawAmount > 0 &&
+      (drawTaxSourceIds(state).length > 0 ||
+        affordableUnrezzedDrawTaxSourceIds(state).length > 0)
+    ) {
       state.runnerDrawSequence = {
         sequenceId: `${state.stateVersion + 1}`,
         remainingDrawCount: drawAmount,
         drawnCardIds: [],
         currentDrawTaxSourceIds: [],
         currentDrawTaxSourceIndex: 0,
+        preDrawRezWindowPassed: false,
         drawTaxSourceCount: 0,
         drawTaxCreditsPaid: 0,
         drawTaxTagsAdded: 0,
@@ -707,11 +769,13 @@ export function createLifecycleRuntime(deps: RuntimeDeps) {
   ): void {
     const choice = state.pendingChoice;
     const sequence = state.runnerDrawSequence;
-    if (
-      !choice ||
-      !choice.source.startsWith("runner_draw.city_surveillance:") ||
-      !sequence
-    )
+    if (!choice || !sequence)
+      throw new Error("Es ist keine City-Surveillance-Choice offen.");
+    if (choice.source.startsWith("runner_draw.city_surveillance_rez:")) {
+      resolveRunnerDrawTaxRezChoice(state, legalAction, playerAction, choice);
+      return;
+    }
+    if (!choice.source.startsWith("runner_draw.city_surveillance:"))
       throw new Error("Es ist keine City-Surveillance-Choice offen.");
     if (choice.side !== "runner" || legalAction.side !== "runner")
       throw new Error("Nur der Runner darf City Surveillance aufloesen.");
@@ -771,6 +835,74 @@ export function createLifecycleRuntime(deps: RuntimeDeps) {
           }
         : {}),
     };
+  }
+
+  function resolveRunnerDrawTaxRezChoice(
+    state: GameState,
+    legalAction: LegalAction,
+    playerAction: PlayerAction,
+    choice: ChoiceRequest,
+  ): void {
+    const sequence = state.runnerDrawSequence;
+    if (!sequence) throw new Error("Es ist keine Runner-Ziehsequenz aktiv.");
+    if (choice.side !== "corp" || legalAction.side !== "corp")
+      throw new Error("Nur die Korp darf City Surveillance rezzen.");
+    const [, choiceSequenceId = ""] = choice.source.split(":");
+    if (choiceSequenceId !== sequence.sequenceId)
+      throw new Error("Die Runner-Ziehsequenz ist veraltet.");
+    const selected = selectedChoiceIds(playerAction.selectedChoices)[0];
+    if (!choice.options.some((option) => option.id === selected))
+      throw new Error("Die City-Surveillance-Rez-Auswahl ist ungueltig.");
+    delete state.pendingChoice;
+    if (selected === "pass") {
+      sequence.preDrawRezWindowPassed = true;
+      const continuationSummary = continueRunnerDrawSequence(state);
+      if (continuationSummary.drawnCount > 0) {
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          drawnCount: continuationSummary.drawnCount,
+        };
+      }
+      return;
+    }
+
+    const sourceCardId = selected?.startsWith("rez_")
+      ? (selected.slice("rez_".length) as CardInstanceId)
+      : undefined;
+    if (!sourceCardId)
+      throw new Error("Die City-Surveillance-Rez-Auswahl ist ungueltig.");
+    if (!affordableUnrezzedDrawTaxSourceIds(state).includes(sourceCardId))
+      throw new Error("City Surveillance kann nicht mehr gerezzt werden.");
+    const instance = mustInstance(state.cardInstances, sourceCardId);
+    const definition = definitionFor(state, sourceCardId);
+    const rezCost = rezCostForCard(state, sourceCardId);
+    spendCredits(state, "corp", rezCost);
+    state.cardInstances[sourceCardId] = {
+      ...instance,
+      faceup: true,
+      rezzed: true,
+    };
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      sourceDefinitionId: definition.id,
+      rezCostPaid: rezCost,
+      corpCreditsAfter: state.corp.credits,
+    };
+    executeCardImplementationLifecycleEffects(
+      cardImplementationRuntimeDeps,
+      state,
+      legalAction,
+      definition,
+      sourceCardId,
+      "on_rez",
+    );
+    const continuationSummary = continueRunnerDrawSequence(state);
+    if (continuationSummary.drawnCount > 0) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        drawnCount: continuationSummary.drawnCount,
+      };
+    }
   }
 
   function resolveCrashEverettDrawChoice(

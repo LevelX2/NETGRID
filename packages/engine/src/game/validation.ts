@@ -355,9 +355,18 @@ export function validateGameState(state: GameState): ValidationResult {
       if (!Number.isInteger(value) || value < 0)
         errors.push(`Runner draw sequence has invalid ${field}.`);
     }
+    if (typeof sequence.preDrawRezWindowPassed !== "boolean")
+      errors.push("Runner draw sequence has invalid pre-draw rez state.");
+    const resolvingDrawTax = state.pendingChoice?.source.startsWith(
+      "runner_draw.city_surveillance:",
+    );
+    const resolvingDrawTaxRez = state.pendingChoice?.source.startsWith(
+      "runner_draw.city_surveillance_rez:",
+    );
     if (
+      resolvingDrawTax &&
       sequence.currentDrawTaxSourceIndex >=
-      sequence.currentDrawTaxSourceIds.length
+        sequence.currentDrawTaxSourceIds.length
     )
       errors.push("Runner draw sequence requires an unresolved tax source.");
     if (
@@ -365,12 +374,11 @@ export function validateGameState(state: GameState): ValidationResult {
       sequence.currentDrawTaxSourceIds.length
     )
       errors.push("Runner draw sequence tax sources must be unique.");
-    if (
-      !state.pendingChoice?.source.startsWith("runner_draw.city_surveillance:")
-    )
+    if (!resolvingDrawTax && !resolvingDrawTaxRez)
       errors.push("Runner draw sequence requires its pending choice.");
   } else if (
-    state.pendingChoice?.source.startsWith("runner_draw.city_surveillance:")
+    state.pendingChoice?.source.startsWith("runner_draw.city_surveillance:") ||
+    state.pendingChoice?.source.startsWith("runner_draw.city_surveillance_rez:")
   ) {
     errors.push("City Surveillance choice requires a runner draw sequence.");
   }

@@ -403,7 +403,10 @@ export function resolvePendingChoice(
     resolveCrashEverettDrawChoice(state, legalAction, playerAction);
     return;
   }
-  if (state.pendingChoice.source.startsWith("runner_draw.city_surveillance:")) {
+  if (
+    state.pendingChoice.source.startsWith("runner_draw.city_surveillance:") ||
+    state.pendingChoice.source.startsWith("runner_draw.city_surveillance_rez:")
+  ) {
     resolveRunnerDrawSequenceChoice(state, legalAction, playerAction);
     return;
   }
