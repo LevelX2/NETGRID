@@ -75,6 +75,11 @@ Es wurden keine Benchmarks, Selfplays oder Serverprozesse gestartet. Die
 Rules Engine, LegalActions, PlayerViews, Replay-, StateHash-, Randomness-,
 Kartenpool- und Hidden-Info-Verträge wurden nicht verändert.
 
+Der verifizierte Arbeitsstand wurde nach Einzug des aktuellen lokalen
+`main` per Fast-Forward wieder nach `main` integriert. Der separate Worktree
+und der Arbeitsbranch wurden anschließend verifiziert entfernt; ein Push
+erfolgte nicht.
+
 ## Führende Artefakte
 
 - Prozess:
