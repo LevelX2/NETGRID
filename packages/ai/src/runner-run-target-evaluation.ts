@@ -464,15 +464,24 @@ function evaluateRunnerRunTarget(
   const spendLimitBlocksPath =
     projection.spendLimit !== undefined &&
     (path.visibleBreakCost ?? 0) > projection.spendLimit;
+  const probabilisticUniversalPathReachable = Boolean(
+    blinkRiskAssessment?.pathDependsOnBlink &&
+      !blinkRiskAssessment.blockedByHandBuffer &&
+      !blinkRiskAssessment.breakWouldBeExcludedInEncounter,
+  );
   const pathPassability = blinkRiskAssessment?.blockedByHandBuffer
     ? "blocked_by_blink_hand_buffer"
+    : probabilisticUniversalPathReachable
+      ? "reachable"
     : spendLimitBlocksPath
       ? "blocked_unpayable"
       : basePathPassability;
   const creditsAfterRun = path.creditsAfterPath;
   const multiaccessAvailable = combinedRunPayoff.multiaccessAvailable;
   const stealOrTrashAffordable = stealOrTrashAffordableFor(accessPayoff);
-  const unproductiveVisibleRunPath = runnerRunTargetPathIsUnproductive(path);
+  const unproductiveVisibleRunPath =
+    runnerRunTargetPathIsUnproductive(path) &&
+    !probabilisticUniversalPathReachable;
   const visibleTraceEndRunLockUnavoidable =
     path.knownPathBlockedByUnavoidableTraceRunLock === true;
   const visibleIceHazardPenalty = path.visibleIceHazardPenalty ?? 0;
@@ -594,6 +603,7 @@ function evaluateRunnerRunTarget(
       `run_action_projection_no_noisy_breakers:${projection.noNoisyBreakers}`,
       `run_action_projection_bypass_first_ice:${projection.bypassFirstIce}`,
       `risky_universal_coverage:${riskyUniversalCoverage}`,
+      `probabilistic_universal_path_reachable:${probabilisticUniversalPathReachable}`,
       ...(blinkRiskAssessment?.evidence ?? []),
       `unproductive_visible_run_path:${unproductiveVisibleRunPath}`,
       `visible_trace_end_run_lock_unavoidable:${visibleTraceEndRunLockUnavoidable}`,

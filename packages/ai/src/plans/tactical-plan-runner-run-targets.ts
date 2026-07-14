@@ -392,6 +392,17 @@ export function runnerRunTargetCurrentStep(
     context.runnerEconomyPosture?.fundingNeed === true &&
     context.input.playerView.own.credits <
       context.runnerEconomyPosture.desiredCreditReserve;
+  if (evaluation?.recommendation === "draw_for_damage_buffer") {
+    return createPlanStep({
+      stepId: `draw_hand_buffer_before_run:${evaluation.targetServerId}`,
+      kind: "draw_hand_buffer",
+      desiredActionSemantics: ["draw.card"],
+      rationale: [
+        "probabilistic universal coverage needs a survivable hand buffer",
+        ...(evaluation.blinkRiskAssessment?.evidence ?? []),
+      ],
+    });
+  }
   if (
     evaluation?.recommendation === "gain_credits_first" &&
     !preserveLastClickForScoreThreat &&

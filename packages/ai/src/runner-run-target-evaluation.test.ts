@@ -654,6 +654,57 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     );
   });
 
+  it("lets installed Blink convert probabilistic coverage with a sufficient hand buffer", () => {
+    const input = aiInput({
+      credits: 8,
+      servers: [
+        server("remote_1", {
+          ice: [barrierIce("remote-wall")],
+          root: [
+            visibleCard("remote-root", {
+              known: false,
+              advancementCounters: 2,
+            }),
+          ],
+        }),
+      ],
+      legalActions: [runAction("run-remote-1", "remote_1")],
+      rig: [
+        visibleCard("runner-blink", {
+          definitionId: "onr_v1_007_blink",
+          title: "Blink",
+          type: "program",
+          subtypes: ["icebreaker"],
+        }),
+      ],
+      grip: Array.from({ length: 4 }, (_, index) =>
+        visibleCard(`grip-card-${index + 1}`, {
+          definitionId: "simple_run_event",
+        }),
+      ),
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "remote_1",
+      accessPayoff: "score_threat",
+      pathPassability: "reachable",
+      recommendation: "run_now",
+    });
+    expect(evaluation?.blinkRiskAssessment).toMatchObject({
+      pathDependsOnBlink: true,
+      blockedByHandBuffer: false,
+      payoffOverride: "remote_score_threat",
+    });
+    expect(evaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "probabilistic_universal_path_reachable:true",
+        "why_blink_run_allowed_despite_risk:remote_score_threat",
+      ]),
+    );
+  });
+
   it("keeps remote contest reachable when stable wall coverage is installed", () => {
     const input = aiInput({
       credits: 10,

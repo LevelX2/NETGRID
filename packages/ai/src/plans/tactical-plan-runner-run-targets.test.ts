@@ -178,6 +178,38 @@ describe("runnerPressureProbeAllowance", () => {
     ).toMatchObject({ kind: "probe_central" });
   });
 
+  it("converts a low-hand probabilistic breaker path into a hand-buffer step", () => {
+    const remoteRun = runAction("run-remote-1", "remote_1");
+    const evaluation = runTargetEvaluation({
+      actionId: remoteRun.actionId,
+      targetServerId: "remote_1",
+      targetKind: "remote",
+      recommendation: "draw_for_damage_buffer",
+      accessPayoff: "score_threat",
+      scoreThreat: true,
+      score: -900,
+      pathPassability: "blocked_by_blink_hand_buffer",
+    });
+
+    expect(
+      runnerRunTargetCurrentStep(
+        planContext({
+          primaryStrategyId: "runner.remote_contest",
+          runTargetEvaluations: [evaluation],
+        }),
+        remoteRun,
+        {
+          stepId: "run_target:remote_1",
+          kind: "run_target",
+          desiredActionSemantics: ["run.start"],
+        },
+      ),
+    ).toMatchObject({
+      kind: "draw_hand_buffer",
+      desiredActionSemantics: ["draw.card"],
+    });
+  });
+
   it("keeps a fundable matchpoint R&D run above long-term economy plans", () => {
     const rdRun = runAction("run-rd", "rd");
     const evaluation = runTargetEvaluation({

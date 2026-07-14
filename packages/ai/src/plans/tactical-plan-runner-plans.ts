@@ -46,6 +46,7 @@ import {
   runnerEconomyGoalPriority,
   runnerPressureProbeAllowance,
   runnerRunTargetCurrentStep,
+  runnerRunTargetEvaluationForAction,
   runnerRunTargetPlanEvidence,
   runnerRunTargetPlanScoreBreakdown,
   runnerRunTargetStepRationale,
@@ -200,7 +201,7 @@ export function buildRunnerTacticalPlans(
     (action) =>
       !noPayoffRemoteRunActions.includes(action) &&
       !emptyRemoteRunActions.includes(action) &&
-      runNeedsBreakerCoverage(input.playerView, actionServerId(action)),
+      runNeedsStableBreakerCoverage(context, action),
   );
   const centralRunActions = input.legalActions.filter(
     (action) =>
@@ -222,7 +223,7 @@ export function buildRunnerTacticalPlans(
   const blockedCentralRuns = centralRunActions.filter(
     (action) =>
       !noPayoffCentralRunActions.includes(action) &&
-      runNeedsBreakerCoverage(input.playerView, actionServerId(action)),
+      runNeedsStableBreakerCoverage(context, action),
   );
   for (const action of blockedRemoteRuns) {
     const serverId = actionServerId(action);
@@ -777,6 +778,23 @@ export function buildRunnerTacticalPlans(
     );
   }
   return applyRunnerDrawOverflowAdjustments(context, plans);
+}
+
+function runNeedsStableBreakerCoverage(
+  context: TacticalPlanBuildContext,
+  action: LegalAction,
+): boolean {
+  const evaluation = runnerRunTargetEvaluationForAction(context, action);
+  if (
+    evaluation?.pathPassability === "reachable" ||
+    evaluation?.pathPassability === "blocked_by_blink_hand_buffer"
+  ) {
+    return false;
+  }
+  return runNeedsBreakerCoverage(
+    context.input.playerView,
+    actionServerId(action),
+  );
 }
 
 function runnerSuccessWindowActions(
