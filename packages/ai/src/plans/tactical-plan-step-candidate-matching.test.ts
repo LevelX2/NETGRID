@@ -215,6 +215,57 @@ describe("candidateMatchesStep", () => {
     expect(clearAllPriority).toBeGreaterThan(basicPriority);
   });
 
+  it("matches damage survival answers but not generic tag survival setup", () => {
+    const step = planStep("find_survival_answer", [
+      "draw.card",
+      "survival.damage_prevention",
+    ]);
+    const plan = tacticalPlan(step, "runner");
+    const input = runnerInput();
+    const dependencies = testDependencies();
+    const tagAvoid = legalAction(
+      "install-tag-avoid",
+      "install_card",
+      {},
+      "runner",
+    );
+    const damagePrevention = legalAction(
+      "install-damage-prevention",
+      "install_card",
+      {},
+      "runner",
+    );
+
+    expect(
+      candidateMatchesStep(
+        plan,
+        step,
+        candidateFor(tagAvoid, {
+          actorSide: "runner",
+          semanticActionType: "install.card",
+          cardContextSignals: ["survival", "tag.avoid"],
+        }),
+        tagAvoid,
+        input,
+        dependencies,
+      ),
+    ).toBe(false);
+    expect(
+      candidateMatchesStep(
+        plan,
+        step,
+        candidateFor(damagePrevention, {
+          actorSide: "runner",
+          semanticActionType: "install.card",
+          cardContextSignals: ["survival.damage_prevention"],
+        }),
+        damagePrevention,
+        input,
+        dependencies,
+      ),
+    ).toBe(true);
+  });
+
   it("prioritizes concrete success-window payoffs over generic followups", () => {
     const step = planStep("convert_success_window", ["run.success_followup"]);
     const plan = tacticalPlan(step, "runner");

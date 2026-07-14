@@ -198,7 +198,7 @@ function survivalAnswerStepPriority(
   dependencies: TacticalPlanCreditValueDependencies,
 ): number {
   if (action.type === "draw_card") return 260;
-  if (candidateShowsSurvivalSemantics(candidate)) return 360;
+  if (candidateShowsDamageSurvivalSemantics(candidate)) return 360;
   if (legalActionCreditNetGain(input, action, dependencies) > 0) return 110;
   return 0;
 }
@@ -215,7 +215,7 @@ function survivalAnswerStepMatchesAction(
       action.type === "play_event" ||
       action.type === "trigger_ability" ||
       action.type === "activated_card_ability") &&
-    candidateShowsSurvivalSemantics(candidate)
+    candidateShowsDamageSurvivalSemantics(candidate)
   ) {
     return true;
   }
@@ -225,7 +225,7 @@ function survivalAnswerStepMatchesAction(
   );
 }
 
-function candidateShowsSurvivalSemantics(
+function candidateShowsDamageSurvivalSemantics(
   candidate: ActionSemanticCandidate,
 ): boolean {
   return candidateSurvivalTokens(candidate).some((token) =>
@@ -234,7 +234,7 @@ function candidateShowsSurvivalSemantics(
       "damage_prevention",
       "flatline_prevention",
       "net_damage_prevention",
-      "survival",
+      "survival.damage_prevention",
       "survival.flatline_prevention",
     ].includes(token),
   );
