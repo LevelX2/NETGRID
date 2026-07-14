@@ -293,6 +293,18 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
       reason: `credits:${credits};cost:${rezCost}`,
     });
     const sourceCard = visibleSourceCardForAction(input, action);
+    const persistentInstallDiscountSequence =
+      corpPersistentInstallDiscountSequenceComponent(
+        input,
+        action,
+        sourceCard,
+        actionSemanticCandidate,
+        dependencies,
+        boardTriageState,
+      );
+    if (persistentInstallDiscountSequence) {
+      components.push(persistentInstallDiscountSequence);
+    }
     const rootRezTiming = corpRootRezTimingComponent(input, action, sourceCard);
     if (rootRezTiming) components.push(rootRezTiming);
     const effectiveDefense =
@@ -2715,6 +2727,99 @@ function corpRootRezTimingComponent(
       `server:${location.id}`,
       `run_phase:${run.phase}`,
       `timing:${input.playerView.timingPoint}`,
+    ].join("|"),
+  };
+}
+
+function corpPersistentInstallDiscountSequenceComponent<
+  TConsumer extends string,
+>(
+  input: AiDecisionInput,
+  action: LegalAction,
+  sourceCard: VisibleCard | undefined,
+  actionSemanticCandidate: ActionSemanticCandidate | undefined,
+  dependencies: Pick<
+    SemanticRuntimeCorpScoreDependencies<TConsumer>,
+    "actionCreditCost"
+  >,
+  boardTriage: CorpBoardTriage,
+): AiDecisionScoreComponent | undefined {
+  if (
+    input.playerView.timingPoint !== "corp_action.main" ||
+    !sourceCard ||
+    sourceCard.type === "ice" ||
+    !sourceCard.definitionId ||
+    semanticRuntimeCorpActionCreditCost(
+      dependencies,
+      action,
+      actionSemanticCandidate,
+    ) !== 0 ||
+    semanticRuntimeCorpActionClickCost(action, actionSemanticCandidate) !== 0
+  ) {
+    return undefined;
+  }
+  const location = input.playerView.servers.find((server) =>
+    server.root.some((card) => card.instanceId === sourceCard.instanceId),
+  );
+  if (!location) return undefined;
+  if (
+    (boardTriage.severity === "high" || boardTriage.severity === "critical") &&
+    boardTriage.targetServerId !== undefined &&
+    boardTriage.targetServerId !== location.id
+  ) {
+    return undefined;
+  }
+  const hint = AI_HINTS_BY_CARD.get(sourceCard.definitionId);
+  const persistentFortDiscounts = (hint?.effects ?? []).filter(
+    (effect) =>
+      effect.kind === "install_discount" &&
+      effect.timing === "persistent" &&
+      effect.scope === "fort" &&
+      effect.resource === "credits" &&
+      typeof effect.amount === "number" &&
+      effect.amount > 0,
+  );
+  if (
+    persistentFortDiscounts.length === 0 ||
+    hint?.conditions?.some(
+      (condition) => condition.kind === "requires_rezzed_card",
+    ) !== true
+  ) {
+    return undefined;
+  }
+  const sameFortPaidIceInstalls = input.legalActions
+    .filter(
+      (candidate) =>
+        candidate.type === "install_card" &&
+        candidate.payload?.placement === "ice" &&
+        candidate.payload?.serverId === location.id,
+    )
+    .map((candidate) => ({
+      action: candidate,
+      creditCost: dependencies.actionCreditCost(candidate),
+    }))
+    .filter((candidate) => candidate.creditCost > 0);
+  if (sameFortPaidIceInstalls.length === 0) return undefined;
+  const discountAmount = Math.max(
+    ...persistentFortDiscounts.map((effect) => effect.amount ?? 0),
+  );
+  const minimumInstallCost = Math.min(
+    ...sameFortPaidIceInstalls.map((candidate) => candidate.creditCost),
+  );
+  const immediateSaving = Math.min(discountAmount, minimumInstallCost);
+  const value = 2800 + Math.min(800, immediateSaving * 400);
+  return {
+    key: "corp_persistent_install_discount_sequence",
+    label: "Persistenten Installationsrabatt zuerst aktivieren",
+    value,
+    reason: [
+      "persistent_install_discount_sequence:free_rez_before_same_fort_ice",
+      `card:${sourceCard.instanceId}`,
+      `server:${location.id}`,
+      `discount:${discountAmount}`,
+      `same_fort_paid_ice_installs:${sameFortPaidIceInstalls.length}`,
+      `minimum_install_cost:${minimumInstallCost}`,
+      `immediate_saving:${immediateSaving}`,
     ].join("|"),
   };
 }

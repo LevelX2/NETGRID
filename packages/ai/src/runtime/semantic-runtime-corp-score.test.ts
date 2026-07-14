@@ -6583,6 +6583,129 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("rezzes a free persistent fort install discount before paid same-fort ICE", () => {
+    const discountUpgrade = corpCard("discount-upgrade", "upgrade", {
+      definitionId: "onr_v1_352_chester-mix",
+      title: "Chester Mix",
+      rezzed: false,
+    });
+    const iceInHq = corpIce("ice-in-hq");
+    const rezDiscount = corpAction(
+      "rez-discount",
+      "rez_ice",
+      {},
+      discountUpgrade.instanceId,
+    );
+    const installIce = corpAction(
+      "install-hq-ice",
+      "install_card",
+      { cardId: iceInHq.instanceId, serverId: "hq", placement: "ice" },
+      iceInHq.instanceId,
+    );
+    const base = corpInputWithGoals([], [rezDiscount, installIce]);
+    const input = {
+      ...base,
+      playerView: {
+        ...base.playerView,
+        timingPoint: "corp_action.main",
+        own: {
+          ...base.playerView.own,
+          gripOrHq: [iceInHq],
+        },
+        servers: [
+          {
+            id: "hq",
+            label: "HQ",
+            ice: [corpIce("existing-hq-ice")],
+            root: [discountUpgrade],
+          },
+        ],
+      },
+    } as unknown as AiDecisionInput;
+
+    const components = semanticRuntimeCorpScoreComponents(
+      input,
+      rezDiscount,
+      "simple_rez",
+      {
+        ...testDependencies(),
+        actionCreditCost: (action) =>
+          action.actionId === installIce.actionId ? 1 : 0,
+      },
+    );
+
+    expect(components).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_persistent_install_discount_sequence",
+          value: 3200,
+          reason: expect.stringContaining("server:hq"),
+        }),
+      ]),
+    );
+  });
+
+  it("does not rez a fort install discount without paid same-fort ICE", () => {
+    const discountUpgrade = corpCard("discount-upgrade", "upgrade", {
+      definitionId: "onr_v1_352_chester-mix",
+      title: "Chester Mix",
+      rezzed: false,
+    });
+    const iceInHq = corpIce("ice-in-hq");
+    const rezDiscount = corpAction(
+      "rez-discount",
+      "rez_ice",
+      {},
+      discountUpgrade.instanceId,
+    );
+    const installArchivesIce = corpAction(
+      "install-archives-ice",
+      "install_card",
+      {
+        cardId: iceInHq.instanceId,
+        serverId: "archives",
+        placement: "ice",
+      },
+      iceInHq.instanceId,
+    );
+    const base = corpInputWithGoals([], [rezDiscount, installArchivesIce]);
+    const input = {
+      ...base,
+      playerView: {
+        ...base.playerView,
+        timingPoint: "corp_action.main",
+        own: {
+          ...base.playerView.own,
+          gripOrHq: [iceInHq],
+        },
+        servers: [
+          {
+            id: "hq",
+            label: "HQ",
+            ice: [corpIce("existing-hq-ice")],
+            root: [discountUpgrade],
+          },
+          { id: "archives", label: "Archives", ice: [], root: [] },
+        ],
+      },
+    } as unknown as AiDecisionInput;
+
+    const components = semanticRuntimeCorpScoreComponents(
+      input,
+      rezDiscount,
+      "simple_rez",
+      {
+        ...testDependencies(),
+        actionCreditCost: (action) =>
+          action.actionId === installArchivesIce.actionId ? 1 : 0,
+      },
+    );
+
+    expect(components.map((component) => component.key)).not.toContain(
+      "corp_persistent_install_discount_sequence",
+    );
+  });
+
   it("rezzes a run-relevant root only at the last relevant window", () => {
     const redHerrings = corpCard("red-herrings", "upgrade", {
       definitionId: "onr_v1_366_red-herrings",

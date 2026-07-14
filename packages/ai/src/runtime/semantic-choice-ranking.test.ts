@@ -195,6 +195,59 @@ describe("tacticalPlanMappedChoice", () => {
     );
   });
 
+  it("lets a better burst-economy operation build the progressing rez reserve", () => {
+    const gain = legalAction("gain", "gain_credit");
+    const burstEconomy = legalAction("burst-economy", "play_operation");
+    const alternative = choice(
+      burstEconomy,
+      -423,
+      scoreComponentEvidence("corp_operation_burst_economy"),
+      {
+        key: "corp_operation_burst_economy",
+        value: 1890,
+        reason: "operation_gain:2|operation_draw:1",
+      },
+    );
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [alternative, choice(gain, -1681)],
+      scorelineSupportMapping([gain], { stepKind: "build_rez_reserve" }),
+      alternative,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("burst-economy");
+  });
+
+  it("keeps the basic rez-reserve action when burst economy cannot draw", () => {
+    const gain = legalAction("gain", "gain_credit");
+    const burstEconomy = legalAction("burst-economy", "play_operation");
+    const input = aiInput();
+    input.playerView.own.stackOrRdCount = 0;
+    const alternative = choice(
+      burstEconomy,
+      -423,
+      scoreComponentEvidence("corp_operation_burst_economy"),
+      {
+        key: "corp_operation_burst_economy",
+        value: 1890,
+        reason: "operation_gain:2|operation_draw:1",
+      },
+    );
+    const result = tacticalPlanMappedChoice(
+      input,
+      [alternative, choice(gain, -1681)],
+      scorelineSupportMapping([gain], { stepKind: "build_rez_reserve" }),
+      alternative,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_blocked");
+    expect(result.choice?.action.actionId).toBe("gain");
+    expect(result.overrideBlockedReason).toBe(
+      "corp_scoreline_support_plan_controller",
+    );
+  });
+
   it("lets board triage reject an overbuilt remote protection target", () => {
     const remoteIce = legalAction("install-remote-ice", "install_card", {
       serverId: "remote_1",

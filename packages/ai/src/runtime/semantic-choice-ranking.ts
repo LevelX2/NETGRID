@@ -230,6 +230,7 @@ export function tacticalPlanMappedChoice(
     }
     if (
       tacticalPlanCorpScorelineSupportBlocksOffPlanOverride(
+        input,
         mapping,
         mappedChoice,
         overrideChoice,
@@ -621,6 +622,7 @@ function tacticalPlanCorpEconomyActivationBlocksOffPlanOverride(
 }
 
 function tacticalPlanCorpScorelineSupportBlocksOffPlanOverride(
+  input: AiDecisionInput,
   mapping: PlanStepMappingResult,
   mappedChoice: SemanticRuntimeChoice,
   overrideChoice: SemanticRuntimeChoice,
@@ -635,6 +637,16 @@ function tacticalPlanCorpScorelineSupportBlocksOffPlanOverride(
   ) {
     return false;
   }
+  if (
+    tacticalPlanBuildRezReserveBurstEconomyShouldYield(
+      input,
+      mapping,
+      mappedChoice,
+      overrideChoice,
+    )
+  ) {
+    return false;
+  }
   return (
     mapping.plan.side === "corp" &&
     mapping.plan.type === "corp.create_score_window" &&
@@ -642,6 +654,30 @@ function tacticalPlanCorpScorelineSupportBlocksOffPlanOverride(
     (mapping.step.kind === "protect_remote" ||
       mapping.step.kind === "build_rez_reserve") &&
     !mappedActionIds.has(overrideChoice.action.actionId)
+  );
+}
+
+function tacticalPlanBuildRezReserveBurstEconomyShouldYield(
+  input: AiDecisionInput,
+  mapping: PlanStepMappingResult,
+  mappedChoice: SemanticRuntimeChoice,
+  overrideChoice: SemanticRuntimeChoice,
+): boolean {
+  if (
+    mapping.plan.side !== "corp" ||
+    mapping.plan.type !== "corp.create_score_window" ||
+    mapping.plan.status !== "progressing" ||
+    mapping.step.kind !== "build_rez_reserve" ||
+    mappedChoice.action.type !== "gain_credit" ||
+    overrideChoice.action.type !== "play_operation" ||
+    overrideChoice.score <= mappedChoice.score ||
+    input.playerView.own.stackOrRdCount <= 0
+  ) {
+    return false;
+  }
+  return overrideChoice.scoreBreakdown.some(
+    (component) =>
+      component.key === "corp_operation_burst_economy" && component.value > 0,
   );
 }
 
