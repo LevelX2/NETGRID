@@ -4,6 +4,75 @@ import { describe, expect, it } from "vitest";
 import { selectedChoicesForDecision } from "./selected-choices-for-decision";
 
 describe("selectedChoicesForDecision", () => {
+  it("pays the current City Surveillance draw tax when the option is legal", () => {
+    const decision = selectedChoicesForDecision(
+      inputWithChoice(
+        {
+          kind: "select_option",
+          source: "runner_draw.draw_tax:12:city_1:0",
+          minSelections: 1,
+          maxSelections: 1,
+          options: [
+            { id: "pay_credit", label: "1 Credit zahlen" },
+            { id: "take_tag", label: "1 Tag nehmen" },
+          ],
+        },
+        { side: "runner" },
+      ),
+      resolveChoiceAction("runner"),
+      unusedDependencies(),
+    );
+
+    expect(decision).toEqual({
+      choiceId: "choice_multi",
+      selectedOptionIds: ["pay_credit"],
+    });
+  });
+
+  it("takes the City Surveillance tag when no payment option is legal", () => {
+    const decision = selectedChoicesForDecision(
+      inputWithChoice(
+        {
+          kind: "select_option",
+          source: "runner_draw.draw_tax:12:city_1:0",
+          minSelections: 1,
+          maxSelections: 1,
+          options: [{ id: "take_tag", label: "1 Tag nehmen" }],
+        },
+        { side: "runner", credits: 0 },
+      ),
+      resolveChoiceAction("runner"),
+      unusedDependencies(),
+    );
+
+    expect(decision).toEqual({
+      choiceId: "choice_multi",
+      selectedOptionIds: ["take_tag"],
+    });
+  });
+
+  it("rezes an affordable City Surveillance before passing the draw window", () => {
+    const decision = selectedChoicesForDecision(
+      inputWithChoice({
+        kind: "select_option",
+        source: "runner_draw.draw_tax_rez:12",
+        minSelections: 1,
+        maxSelections: 1,
+        options: [
+          { id: "rez_city_1", label: "City Surveillance rezzen" },
+          { id: "pass", label: "Passen" },
+        ],
+      }),
+      resolveChoiceAction(),
+      unusedDependencies(),
+    );
+
+    expect(decision).toEqual({
+      choiceId: "choice_multi",
+      selectedOptionIds: ["rez_city_1"],
+    });
+  });
+
   it("selects enough generic options for mandatory multi-select choices", () => {
     const decision = selectedChoicesForDecision(
       inputWithChoice({
@@ -332,10 +401,12 @@ function inputWithChoice(
     gripOrHq?: AiDecisionInput["playerView"]["own"]["gripOrHq"];
     credits?: number;
     servers?: AiDecisionInput["playerView"]["servers"];
+    side?: "corp" | "runner";
   } = {},
 ): AiDecisionInput {
+  const side = options.side ?? "corp";
   return {
-    side: "corp",
+    side,
     seed: "selected-choice-test",
     decisionId: "selected-choice-test:7",
     profileId: "selected-choice-test",
@@ -347,7 +418,7 @@ function inputWithChoice(
       servers: options.servers ?? [],
       pendingChoice: {
         choiceId: "choice_multi",
-        side: "corp",
+        side,
         source:
           choice.source ??
           "card_implementation.agenda_purge_install_targets:test",
@@ -403,10 +474,10 @@ function visibleCard(
   } as AiDecisionInput["playerView"]["own"]["gripOrHq"][number];
 }
 
-function resolveChoiceAction(): LegalAction {
+function resolveChoiceAction(side: "corp" | "runner" = "corp"): LegalAction {
   return {
-    actionId: "corp.resolve_choice",
-    side: "corp",
+    actionId: `${side}.resolve_choice`,
+    side,
     type: "resolve_choice",
     label: "Resolve choice",
     costs: [],

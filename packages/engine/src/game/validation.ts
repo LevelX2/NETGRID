@@ -182,7 +182,9 @@ export function validateGameState(state: GameState): ValidationResult {
     state.run?.activeIceProgramTrashPendingPassedIceId &&
     !state.cardInstances[state.run.activeIceProgramTrashPendingPassedIceId]
   )
-    errors.push("Run Active ICE Program Trash pending passed ice references missing ice.");
+    errors.push(
+      "Run Active ICE Program Trash pending passed ice references missing ice.",
+    );
   if (state.run && !Array.isArray(state.run.resolvedSubroutineIndexes))
     errors.push("Run resolved subroutine index list is missing.");
   if (state.run?.remainderStrengthBonusByBreaker) {
@@ -196,8 +198,8 @@ export function validateGameState(state: GameState): ValidationResult {
       }
     }
   }
-  for (const modifier of
-    state.temporaryBreakerStrengthModifiersUntilEndOfTurn ?? []) {
+  for (const modifier of state.temporaryBreakerStrengthModifiersUntilEndOfTurn ??
+    []) {
     const source = state.cardInstances[modifier.sourceCardInstanceId];
     const target = state.cardInstances[modifier.targetBreakerId];
     if (!source)
@@ -339,6 +341,47 @@ export function validateGameState(state: GameState): ValidationResult {
     if (optionIds.size !== state.pendingChoice.options.length)
       errors.push("PendingChoice option ids must be unique.");
   }
+  if (state.runnerDrawSequence) {
+    const sequence = state.runnerDrawSequence;
+    if (!sequence.sequenceId)
+      errors.push("Runner draw sequence requires an id.");
+    for (const [field, value] of [
+      ["remainingDrawCount", sequence.remainingDrawCount],
+      ["currentDrawTaxSourceIndex", sequence.currentDrawTaxSourceIndex],
+      ["drawTaxSourceCount", sequence.drawTaxSourceCount],
+      ["drawTaxCreditsPaid", sequence.drawTaxCreditsPaid],
+      ["drawTaxTagsAdded", sequence.drawTaxTagsAdded],
+    ] as const) {
+      if (!Number.isInteger(value) || value < 0)
+        errors.push(`Runner draw sequence has invalid ${field}.`);
+    }
+    if (typeof sequence.preDrawRezWindowPassed !== "boolean")
+      errors.push("Runner draw sequence has invalid pre-draw rez state.");
+    const resolvingDrawTax = state.pendingChoice?.source.startsWith(
+      "runner_draw.draw_tax:",
+    );
+    const resolvingDrawTaxRez = state.pendingChoice?.source.startsWith(
+      "runner_draw.draw_tax_rez:",
+    );
+    if (
+      resolvingDrawTax &&
+      sequence.currentDrawTaxSourceIndex >=
+        sequence.currentDrawTaxSourceIds.length
+    )
+      errors.push("Runner draw sequence requires an unresolved tax source.");
+    if (
+      new Set(sequence.currentDrawTaxSourceIds).size !==
+      sequence.currentDrawTaxSourceIds.length
+    )
+      errors.push("Runner draw sequence tax sources must be unique.");
+    if (!resolvingDrawTax && !resolvingDrawTaxRez)
+      errors.push("Runner draw sequence requires its pending choice.");
+  } else if (
+    state.pendingChoice?.source.startsWith("runner_draw.draw_tax:") ||
+    state.pendingChoice?.source.startsWith("runner_draw.draw_tax_rez:")
+  ) {
+    errors.push("City Surveillance choice requires a runner draw sequence.");
+  }
   if (state.runnerTurnFlags?.incubatorPendingTransforms !== undefined) {
     const pending = state.runnerTurnFlags.incubatorPendingTransforms;
     if (!Number.isInteger(pending) || pending < 0)
@@ -387,9 +430,7 @@ export function validateGameState(state: GameState): ValidationResult {
   if (state.activeObligationDebtCount !== undefined) {
     const obligations = state.activeObligationDebtCount;
     if (!Number.isInteger(obligations) || obligations < 0)
-      errors.push(
-        "activeObligationDebtCount must be a non-negative integer.",
-      );
+      errors.push("activeObligationDebtCount must be a non-negative integer.");
   }
   if (state.corpBonusAgendaPoints !== undefined) {
     const points = state.corpBonusAgendaPoints;
@@ -515,10 +556,11 @@ function hasHostingCycle(state: GameState, cardId: CardInstanceId): boolean {
   return false;
 }
 
-type RunnerTraceCounterEffectRuntime =
-  NonNullable<(typeof CARD_IMPLEMENTATIONS)[number]["runnerCounterEffects"]>[number] & {
-    sourceDefinitionId: CardDefinitionId;
-  };
+type RunnerTraceCounterEffectRuntime = NonNullable<
+  (typeof CARD_IMPLEMENTATIONS)[number]["runnerCounterEffects"]
+>[number] & {
+  sourceDefinitionId: CardDefinitionId;
+};
 
 function runnerTraceCounterEffectDefinitions(): RunnerTraceCounterEffectRuntime[] {
   return CARD_IMPLEMENTATIONS.flatMap((implementation) =>
@@ -593,11 +635,10 @@ function validateRestrictedActionGrants(
       errors.push(`${grantPath}.sourceDefinitionId must be a string.`);
     if (typeof grant.actionType !== "string")
       errors.push(`${grantPath}.actionType must be a string.`);
-    if (
-      !Number.isInteger(grant.remainingActions) ||
-      grant.remainingActions < 0
-    )
-      errors.push(`${grantPath}.remainingActions must be a non-negative integer.`);
+    if (!Number.isInteger(grant.remainingActions) || grant.remainingActions < 0)
+      errors.push(
+        `${grantPath}.remainingActions must be a non-negative integer.`,
+      );
     if (
       grant.temporaryCredits &&
       (!Number.isInteger(grant.temporaryCredits.amount) ||
@@ -608,8 +649,11 @@ function validateRestrictedActionGrants(
       );
     if (
       grant.spendingCap &&
-      (!Number.isInteger(grant.spendingCap.limit) || grant.spendingCap.limit < 0)
+      (!Number.isInteger(grant.spendingCap.limit) ||
+        grant.spendingCap.limit < 0)
     )
-      errors.push(`${grantPath}.spendingCap.limit must be a non-negative integer.`);
+      errors.push(
+        `${grantPath}.spendingCap.limit must be a non-negative integer.`,
+      );
   }
 }

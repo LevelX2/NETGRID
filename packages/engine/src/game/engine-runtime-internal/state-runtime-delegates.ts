@@ -256,7 +256,9 @@ export function runBreakSubroutineAdditionalCost(...args: any[]): any {
   )(...args);
 }
 
-export function runnerHardwareBreakSubroutineAdditionalCost(...args: any[]): any {
+export function runnerHardwareBreakSubroutineAdditionalCost(
+  ...args: any[]
+): any {
   return runtimeDelegate(
     "stateRuntimeServices",
     "runnerHardwareBreakSubroutineAdditionalCost",
@@ -478,7 +480,9 @@ export function trashRunnerInstalledProgram(...args: any[]): any {
   )(...args);
 }
 
-export function backupProgramsOnTrashBackupHardwareBeforeTrash(...args: any[]): any {
+export function backupProgramsOnTrashBackupHardwareBeforeTrash(
+  ...args: any[]
+): any {
   return runtimeDelegate(
     "lifecycleRuntime",
     "backupProgramsOnTrashBackupHardwareBeforeTrash",
@@ -557,6 +561,13 @@ export function resolveCrashEverettDrawChoice(...args: any[]): any {
   return runtimeDelegate(
     "lifecycleRuntime",
     "resolveCrashEverettDrawChoice",
+  )(...args);
+}
+
+export function resolveRunnerDrawSequenceChoice(...args: any[]): any {
+  return runtimeDelegate(
+    "lifecycleRuntime",
+    "resolveRunnerDrawSequenceChoice",
   )(...args);
 }
 
@@ -703,7 +714,9 @@ export function totalCounters(...args: any[]): any {
   return runtimeDelegate("stateRuntimeResolvers", "totalCounters")(...args);
 }
 
-export function installedVirusCounterPurgePreserveSourceIds(...args: any[]): any {
+export function installedVirusCounterPurgePreserveSourceIds(
+  ...args: any[]
+): any {
   return runtimeDelegate(
     "stateRuntimeResolvers",
     "installedVirusCounterPurgePreserveSourceIds",

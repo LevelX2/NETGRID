@@ -31,7 +31,7 @@ describe("runner draw main actions", () => {
     expect(actions[0]).not.toHaveProperty("payload");
   });
 
-  it("builds City Surveillance pay and tag draw actions with stable payloads", () => {
+  it("defers City Surveillance decisions until each card is drawn", () => {
     const state = createGame({
       seed: "arch-5-runner-draw-city-surveillance",
       setupMode: "completed",
@@ -43,36 +43,17 @@ describe("runner draw main actions", () => {
       projectedDrawCount: 2,
     });
 
-    expect(actions).toHaveLength(2);
+    expect(actions).toHaveLength(1);
     expect(actions[0]).toMatchObject({
-      actionId: "runner.draw_card.pay",
+      actionId: "runner.draw_card",
       type: "draw_card",
-      label: "Karte ziehen (City Surveillance: 2 Credits zahlen)",
-      costs: [{ clicks: 1, credits: 2 }],
-      payload: {
-        drawTaxSourceCount: 1,
-        drawTaxProjectedDrawCount: 2,
-        drawTaxDecision: "pay",
-        drawTaxProjectedCreditsPaid: 2,
-        drawTaxProjectedTagsAdded: 0,
-      },
-    });
-    expect(actions[1]).toMatchObject({
-      actionId: "runner.draw_card.tag",
-      type: "draw_card",
-      label: "Karte ziehen (City Surveillance: 1 Tag nehmen)",
+      label: "Karte ziehen",
       costs: [{ clicks: 1 }],
-      payload: {
-        drawTaxSourceCount: 1,
-        drawTaxProjectedDrawCount: 2,
-        drawTaxDecision: "tag",
-        drawTaxProjectedCreditsPaid: 0,
-        drawTaxProjectedTagsAdded: 2,
-      },
     });
+    expect(actions[0]).not.toHaveProperty("payload");
   });
 
-  it("omits the City Surveillance pay action when credits are insufficient", () => {
+  it("still offers the draw action when City Surveillance cannot be paid", () => {
     const state = createGame({
       seed: "arch-5-runner-draw-city-surveillance-no-credit",
       setupMode: "completed",
@@ -86,17 +67,11 @@ describe("runner draw main actions", () => {
 
     expect(actions).toHaveLength(1);
     expect(actions[0]).toMatchObject({
-      actionId: "runner.draw_card.tag",
-      label: "Karte ziehen (City Surveillance: 2 Tags nehmen)",
+      actionId: "runner.draw_card",
+      label: "Karte ziehen",
       costs: [{ clicks: 1 }],
-      payload: {
-        drawTaxSourceCount: 2,
-        drawTaxProjectedDrawCount: 1,
-        drawTaxDecision: "tag",
-        drawTaxProjectedCreditsPaid: 0,
-        drawTaxProjectedTagsAdded: 2,
-      },
     });
+    expect(actions[0]).not.toHaveProperty("payload");
   });
 
   it("keeps stack-empty draw eligibility in runnerMainActions", () => {

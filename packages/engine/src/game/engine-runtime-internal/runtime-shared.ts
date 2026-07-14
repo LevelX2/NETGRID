@@ -25,10 +25,10 @@ import type { CardRunnerEventLongtailImplementation } from "../../ability-engine
 // Runtime dependencies are the concrete composition-root surface. Do not
 // reintroduce string-index bags, proxy dispatch or generic member lookup here.
 export type RuntimeDeps = ReturnType<
-  typeof import("./state-runtime-bootstrap")["initializeStateRuntimeBootstrap"]
+  (typeof import("./state-runtime-bootstrap"))["initializeStateRuntimeBootstrap"]
 > & {
   turnCorpRuntime?: ReturnType<
-    typeof import("./turn-corp-runtime")["createTurnCorpRuntime"]
+    (typeof import("./turn-corp-runtime"))["createTurnCorpRuntime"]
   >;
 };
 export type {
@@ -41,7 +41,14 @@ export type {
 };
 export type CardDefinitionId = string;
 export type CardInstanceId = string;
-export type { CorpServer, CounterType, DamageSummary, ResolvedGameEffect, RestrictedActionFamily, ServerId };
+export type {
+  CorpServer,
+  CounterType,
+  DamageSummary,
+  ResolvedGameEffect,
+  RestrictedActionFamily,
+  ServerId,
+};
 export type {
   PendingChoiceResolutionHost,
   HiddenZoneSearchActivationHandlerHost,
@@ -53,7 +60,7 @@ export type {
 };
 
 export type ActiveRun = NonNullable<GameState["run"]>;
-export type DrawTaxDecision = "auto" | "pay" | "tag";
+export type DrawTaxDecision = "auto" | "pay" | "tag" | "none";
 export type RunnerDrawSummary = {
   drawnCount: number;
   drawnCardIds?: CardInstanceId[];

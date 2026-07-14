@@ -210,9 +210,9 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       );
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus).toBe(
-      "playable_mvp",
-    );
+    expect(
+      CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus,
+    ).toBe("playable_mvp");
   });
 
   it("scores V1.9.19 overadvanced agendas with server-bound difficulty modifiers and replay-stable payloads", () => {
@@ -433,7 +433,9 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     expect(accessState.eventLog.at(-1)?.visibilityClass).toBe(
       "hidden_info_barrier",
     );
-    expect(accessState.run?.accessedCardId).toBe(programTrashByAdvancementAssetId);
+    expect(accessState.run?.accessedCardId).toBe(
+      programTrashByAdvancementAssetId,
+    );
   });
 
   it("uses V1.9.19 operation advance, counter and forfeit-cost paths through play-operation actions", () => {
@@ -791,7 +793,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     });
   });
 
-  it("uses V1.9.19 Runner agenda-cost paths for Fait Accompli and Arasaka Owns You", () => {
+  it("uses V1.9.19 Runner agenda-cost paths and keeps Arasaka's refresh distinct from drawing", () => {
     let faitState = toRunnerTurn(
       MECHANIC_SMOKE_GAMES.agendaScoring("v1919-fait-accompli"),
     );
@@ -817,7 +819,19 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     });
 
     let arasakaState = toRunnerTurn(
-      MECHANIC_SMOKE_GAMES.agendaScoring("v1919-arasaka-owns-you"),
+      createGameAfterSetup({
+        seed: "v1919-arasaka-owns-you",
+        runnerDeck: MECHANIC_SMOKE_DECKS.agendaScoring.runner,
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.agendaScoring.corp,
+          id: `${MECHANIC_SMOKE_DECKS.agendaScoring.corp.id}_with_city_surveillance`,
+          cards: [
+            ...MECHANIC_SMOKE_DECKS.agendaScoring.corp.cards,
+            { id: "onr_v1_313_city-surveillance", quantity: 1 },
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
     );
     arasakaState.runner.credits = 20;
     arasakaState.corp.credits = 20;
@@ -827,6 +841,15 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       arasakaState,
       "onr_v1_078_arasaka-owns-you",
     );
+    const cityId = putCorpRootInRemote(
+      arasakaState,
+      "onr_v1_313_city-surveillance",
+    );
+    arasakaState.cardInstances[cityId] = {
+      ...arasakaState.cardInstances[cityId]!,
+      faceup: true,
+      rezzed: true,
+    };
     for (const cardId of arasakaState.runner.grip.slice()) {
       if (cardId === arasakaId) continue;
       removeEverywhere(arasakaState, cardId);
@@ -860,6 +883,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     )?.id;
     arasakaState = applyChoice(arasakaState, "runner", String(arasakaOption));
     expect(arasakaState.winner).toBeNull();
+    expect(arasakaState.pendingChoice).toBeUndefined();
     expect(arasakaState.runner.tags).toBe(0);
     expect(arasakaState.runner.coreDamage).toBe(0);
     expect(arasakaState.runner.credits).toBe(30);
@@ -1288,9 +1312,9 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
         /persistent_special_state|action_economy|modify_hand_limit|modify_memory_limit|global_static_modifier|meat_damage|tag_condition/,
       );
     }
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus).toBe(
-      "playable_mvp",
-    );
+    expect(
+      CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus,
+    ).toBe("playable_mvp");
   });
 
   it("scores Encryption Breakthrough with code-gate reveal credits and a scored code-gate strength modifier", () => {
@@ -2871,7 +2895,9 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     );
     expect(
       getPlayerView(ownServerAfterRez, "runner").run?.encounteredIce?.strength,
-    ).toBe((CARD_DEFINITIONS_BY_ID["onr_v1_232_crystal-wall"]?.strength ?? 0) + 1);
+    ).toBe(
+      (CARD_DEFINITIONS_BY_ID["onr_v1_232_crystal-wall"]?.strength ?? 0) + 1,
+    );
     const otherServerAfterRez = apply(
       otherServerState,
       "corp",
@@ -2941,6 +2967,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       }),
     );
     const cityId = putCorpRootInRemote(state, "onr_v1_313_city-surveillance");
+    state.corp.credits = 0;
     state.runner.credits = 1;
     state.runner.tags = 0;
     state.runner.clicks = 4;
@@ -2961,44 +2988,31 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     const drawActions = getLegalActions(state, "runner").filter(
       (action) => action.type === "draw_card",
     );
-    expect(drawActions).toHaveLength(2);
-    expect(
-      drawActions.find(
-        (action) => action.payload?.drawTaxDecision === "pay",
-      ),
-    ).toMatchObject({
-      costs: [{ clicks: 1, credits: 1 }],
-      payload: {
-        drawTaxSourceCount: 1,
-        drawTaxProjectedCreditsPaid: 1,
-        drawTaxProjectedTagsAdded: 0,
-      },
-    });
-    expect(
-      drawActions.find(
-        (action) => action.payload?.drawTaxDecision === "tag",
-      ),
-    ).toMatchObject({
+    expect(drawActions).toHaveLength(1);
+    expect(drawActions[0]).toMatchObject({
+      actionId: "runner.draw_card",
       costs: [{ clicks: 1 }],
-      payload: {
-        drawTaxSourceCount: 1,
-        drawTaxProjectedCreditsPaid: 0,
-        drawTaxProjectedTagsAdded: 1,
-      },
     });
+    expect(drawActions[0]).not.toHaveProperty("payload");
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
-    state = apply(
-      state,
-      "runner",
-      (action) =>
-        action.type === "draw_card" &&
-        action.payload?.drawTaxDecision === "pay",
-    );
+    state = apply(state, "runner", (action) => action.type === "draw_card");
+    expect(state.runner.credits).toBe(1);
+    expect(state.runner.tags).toBe(0);
+    expect(state.pendingChoice?.options.map((option) => option.id)).toEqual([
+      "pay_credit",
+      "take_tag",
+    ]);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      drawnCount: 1,
+      drawTaxSourceCount: 1,
+      drawTaxCreditsPaid: 0,
+      drawTaxTagsAdded: 0,
+    });
+    state = applyChoice(state, "runner", "pay_credit");
     expect(state.runner.credits).toBe(0);
     expect(state.runner.tags).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      drawnCount: 1,
       drawTaxSourceCount: 1,
       drawTaxDecision: "pay",
       drawTaxCreditsPaid: 1,
@@ -3009,17 +3023,12 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       (action) => action.type === "draw_card",
     );
     expect(tagOnlyDrawActions).toHaveLength(1);
-    expect(tagOnlyDrawActions[0]?.payload).toMatchObject({
-      drawTaxDecision: "tag",
-      drawTaxProjectedTagsAdded: 1,
-    });
-    state = apply(
-      state,
-      "runner",
-      (action) =>
-        action.type === "draw_card" &&
-        action.payload?.drawTaxDecision === "tag",
-    );
+    expect(tagOnlyDrawActions[0]).not.toHaveProperty("payload");
+    state = apply(state, "runner", (action) => action.type === "draw_card");
+    expect(state.pendingChoice?.options.map((option) => option.id)).toEqual([
+      "take_tag",
+    ]);
+    state = applyChoice(state, "runner", "take_tag");
     expect(state.runner.tags).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       drawTaxSourceCount: 1,
@@ -3047,9 +3056,9 @@ describe("V1.9.21 Deterministic Random WIP", () => {
         "deterministic_random",
       );
     }
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus).toBe(
-      "playable_mvp",
-    );
+    expect(
+      CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus,
+    ).toBe("playable_mvp");
   });
 
   it("resolves Schlaghund as a tag-threshold die roll with meat damage and self-trash", () => {
@@ -3591,7 +3600,9 @@ describe("V1.9.21 Deterministic Random WIP", () => {
       expect(firstResolvePayload.randomDiceLoopRemainingDice).toBe(
         2 - firstFollowupRolls.length,
       );
-      expect(state.pendingChoice?.source).toContain("card_implementation.random_dice_split");
+      expect(state.pendingChoice?.source).toContain(
+        "card_implementation.random_dice_split",
+      );
     } else {
       expect(firstResolvePayload?.randomDiceLoopRemainingDice).toBe(0);
     }

@@ -1,6 +1,6 @@
 # Aktueller Projektstatus
 
-Stand: 2026-07-13
+Stand: 2026-07-14
 
 ## Führender Produktstand
 
@@ -28,6 +28,14 @@ Stand: 2026-07-13
   Promotion getrennt.
 - Kartenimplementierungen, PlayerViews, PublicEvents, Replay und StateHash
   werden durch paketnahe Engine- und Visibilitytests abgesichert.
+- City Surveillance löst Runner-Mehrfachziehen als fortsetzbare Sequenz auf:
+  Vor jeder tatsächlich gezogenen Karte kann die Korp eine installierte,
+  bezahlbare Draw-Tax-Quelle rezzen; danach wählt der Runner pro gerezzter
+  Quelle einzeln 1 Credit oder 1 Tag. `Jack 'n' Joe`, Fünf-Karten-Draws,
+  mehrere Quellen und Crash Everetts Zusatzdraw sind abgedeckt. Effekte ohne
+  das Wort „draw“, insbesondere `Arasaka Owns You` mit „refresh your hand“,
+  verwenden keinen Draw-Tax-Pfad. Führend ist
+  `docs/reviews/engine/city-surveillance-draw-sequence-final-review-2026-07-14.md`.
 
 ## KI
 
