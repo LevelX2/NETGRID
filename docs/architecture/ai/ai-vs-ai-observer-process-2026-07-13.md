@@ -54,8 +54,9 @@ Konservative Annahmen:
   steuern nur die lokale Verzögerung; auch `Schnell` sendet ausschließlich
   einzelne AI-Advance-Anforderungen.
 - `Regelmatch` und `Matchserie` sind auswählbar. In der Matchserie werden KI A
-  und KI B im zweiten vollständig beobachtbaren Spiel regelkonform den Seiten
-  gewechselt; Deckpaar und Schwierigkeit bleiben der jeweiligen KI zugeordnet.
+  und KI B nach jedem vollständig beobachtbaren Spiel regelkonform den Seiten
+  gewechselt; zwei bis sechs Spiele sind auswählbar, Deckpaar und Schwierigkeit
+  bleiben der jeweiligen KI zugeordnet.
 - Sichtbare Zugriffsfenster bleiben im Einzelschrittmodus bis zur Bestätigung
   offen. Im getakteten und schnellen Beobachtungsmodus schließen sie nach der
   sichtbaren Präsentationszeit automatisch, damit die Simulation weiterläuft.
@@ -98,7 +99,8 @@ verwendet.
 - Kein menschlicher Eingriff in KI-`LegalActions`.
 - Keine neue Engine-Aktion, kein geändertes Siegkriterium und kein künstlicher
   Draw nach einer festen Aktionszahl.
-- Keine von der vorhandenen Zwei-Spiele-Matchserie abweichende Serienwertung.
+- Keine von der vorhandenen Matchpunktwertung für zwei bis sechs Spiele
+  abweichende Serienwertung.
 
 ## Controller-Invarianten
 

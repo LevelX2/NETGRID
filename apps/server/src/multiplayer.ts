@@ -124,6 +124,7 @@ const AI_DECISION_DETAIL_SECTION_PRIORITY_IDS = [
 export type MatchSettings = {
   agendaPointsToWin: number;
   matchFormat: MatchFormat;
+  seriesGamesPlanned?: number;
   cardPool?: MatchCardPool;
   playerClock?: ApiPlayerClockConfig;
 };
@@ -173,6 +174,7 @@ export type MatchStartLobbyState = {
   countdownEndsAt?: string;
   agendaPointsToWin: number;
   matchFormat: MatchFormat;
+  seriesGamesPlanned?: number;
   cardPool: MatchCardPool;
   sideAssignmentMode?: "fixed" | "random_pending";
   sideAssignment: {
@@ -790,6 +792,10 @@ export class MultiplayerService {
     const hostReconnectToken = generateToken();
     const joinToken = mode === "human_vs_human" ? generateToken() : undefined;
     const matchFormat = normalizeMatchFormat(input.settings?.matchFormat);
+    const seriesGamesPlanned =
+      matchFormat === "two_game_side_swap"
+        ? normalizeSeriesGamesPlanned(input.series?.gamesPlanned ?? input.settings?.seriesGamesPlanned)
+        : undefined;
     const cardPool = normalizeMatchCardPool(input.settings?.cardPool);
     const playerClockConfig = mode === "ai_vs_ai" ? { mode: "none" as const } : normalizePlayerClockConfig(input.settings?.playerClock);
     const countdownSeconds = normalizeCountdownSeconds(input.countdownSeconds);
@@ -820,6 +826,7 @@ export class MultiplayerService {
           settings: {
             agendaPointsToWin: pendingAgendaPointsToWin,
             matchFormat,
+            ...(seriesGamesPlanned ? { seriesGamesPlanned } : {}),
             cardPool,
             ...(playerClockConfig.mode === "player_clock" ? { playerClock: playerClockConfig } : {})
           },
@@ -840,7 +847,7 @@ export class MultiplayerService {
                   mode: "two_game_side_swap",
                   status: "active",
                   gameNumber: input.series?.gameNumber ?? 1,
-                  gamesPlanned: input.series?.gamesPlanned ?? 2,
+                  gamesPlanned: seriesGamesPlanned ?? 2,
                   runnerPlayer,
                   corpPlayer,
                   results: clone(input.series?.previousResults ?? []),
@@ -873,6 +880,7 @@ export class MultiplayerService {
           countdownSeconds,
           agendaPointsToWin: pendingAgendaPointsToWin,
           matchFormat,
+          ...(seriesGamesPlanned ? { seriesGamesPlanned } : {}),
           cardPool,
           sideAssignmentMode,
           sideAssignment: { runnerPlayer, corpPlayer },
@@ -918,6 +926,7 @@ export class MultiplayerService {
     const settings: MatchSettings = {
       agendaPointsToWin: agendaPointsToWinFor(matchFormat, input.settings?.agendaPointsToWin),
       matchFormat,
+      ...(seriesGamesPlanned ? { seriesGamesPlanned } : {}),
       cardPool,
       ...(playerClockConfig.mode === "player_clock" ? { playerClock: playerClockConfig } : {})
     };
@@ -981,7 +990,7 @@ export class MultiplayerService {
                     mode: "two_game_side_swap",
                     status: "active",
                     gameNumber: input.series.gameNumber,
-                    gamesPlanned: input.series.gamesPlanned,
+                    gamesPlanned: seriesGamesPlanned ?? 2,
                     runnerPlayer,
                     corpPlayer,
                     results: clone(input.series.previousResults),
@@ -992,7 +1001,7 @@ export class MultiplayerService {
                     mode: "two_game_side_swap",
                     status: "active",
                     gameNumber: 1,
-                    gamesPlanned: 2,
+                    gamesPlanned: seriesGamesPlanned ?? 2,
                     runnerPlayer,
                     corpPlayer,
                     results: []
@@ -2368,6 +2377,7 @@ export class MultiplayerService {
       countdownSeconds: record.startLobby?.countdownSeconds ?? 3,
       agendaPointsToWin,
       matchFormat,
+      ...(record.match.series ? { seriesGamesPlanned: record.match.series.gamesPlanned } : {}),
       cardPool,
       sideAssignmentMode: record.startLobby?.sideAssignmentMode ?? "fixed",
       sideAssignment: { runnerPlayer, corpPlayer },
@@ -2564,6 +2574,7 @@ export class MultiplayerService {
       ...(lobby.countdownEndsAt ? { countdownEndsAt: lobby.countdownEndsAt } : {}),
       agendaPointsToWin: lobby.agendaPointsToWin,
       matchFormat: lobby.matchFormat,
+      ...(lobby.seriesGamesPlanned ? { seriesGamesPlanned: lobby.seriesGamesPlanned } : {}),
       cardPool: lobby.cardPool,
       ...(lobby.sideAssignmentMode ? { sideAssignmentMode: lobby.sideAssignmentMode } : {}),
       sideAssignment: { ...lobby.sideAssignment },
@@ -2991,6 +3002,10 @@ function isHostSession(record: StoredMatch, session: SessionRecord): boolean {
 function normalizeMatchFormat(matchFormat: MatchFormat | undefined): MatchFormat {
   if (matchFormat === "two_game_side_swap") return "two_game_side_swap";
   return "rules_match";
+}
+
+function normalizeSeriesGamesPlanned(value: number | undefined): number {
+  return boundedWholeNumber(value, 2, 2, 6);
 }
 
 function normalizeMatchCardPool(cardPool: MatchCardPool | undefined): MatchCardPool {

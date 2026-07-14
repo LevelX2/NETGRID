@@ -37,7 +37,7 @@ export async function createHumanVsHumanLobby(page: Page, seed: string, side: "r
   await page.getByTestId("match-format-rules-match").click();
   await selectE2eDecks(page, "Teilnehmer A · Runner-Deck", "Teilnehmer A · Korp-Deck");
   await page.getByTestId("advanced-match-options").locator("summary").click();
-  await page.getByLabel("Seitenzuteilung").selectOption(side);
+  await page.getByLabel("Deine Startseite").selectOption(side);
   await page.getByLabel("Countdown").selectOption("3");
   await page.getByLabel("Seed").fill(seed);
   await page.getByLabel("Name").fill(side === "corp" ? "Host Corp V107" : "Host Runner V107");

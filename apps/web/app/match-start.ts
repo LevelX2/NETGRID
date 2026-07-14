@@ -7,8 +7,11 @@ export type HumanAiSideSelection = "runner" | "corp" | "random";
 export type TechnicalMatchMode = "human_vs_human" | "human_runner_vs_corp_ai" | "human_corp_vs_runner_ai" | "ai_vs_ai";
 export type MatchFormatSelection = "rules_match" | "two_game_side_swap";
 export const MATCH_FORMAT_OPTIONS: MatchFormatSelection[] = ["rules_match", "two_game_side_swap"];
+export const MATCH_SERIES_GAMES_OPTIONS = [2, 3, 4, 5, 6] as const;
+export type MatchStartSeriesGames = (typeof MATCH_SERIES_GAMES_OPTIONS)[number];
 export const MATCH_CARD_POOL_OPTIONS = ["originalset", "originalset_classic", "originalset_proteus", "originalset_classic_proteus"] as const;
 export type MatchCardPoolSelection = (typeof MATCH_CARD_POOL_OPTIONS)[number];
+export type MatchCardPoolAddon = "classic" | "proteus";
 export type AiDeckPolicySelection = "selected" | "fixed" | "seeded_random" | "same_as_participant_a";
 
 export function aiDeckReadinessLabel(
@@ -93,8 +96,20 @@ export function playModeCardLabel(mode: PlayMode): { title: string; description:
 }
 
 export function matchFormatCardLabel(format: MatchFormatSelection): { title: string; description: string } {
-  if (format === "two_game_side_swap") return { title: "Matchserie", description: "Zwei Spiele mit Seitenwechsel" };
+  if (format === "two_game_side_swap") return { title: "Matchserie", description: "2–6 Spiele mit wechselnden Seiten" };
   return { title: "Regelmatch", description: "7 Agendapunkte, ein Spiel" };
+}
+
+export function matchCardPoolIncludes(cardPool: MatchCardPoolSelection, addon: MatchCardPoolAddon): boolean {
+  if (addon === "classic") return cardPool === "originalset_classic" || cardPool === "originalset_classic_proteus";
+  return cardPool === "originalset_proteus" || cardPool === "originalset_classic_proteus";
+}
+
+export function matchCardPoolFromAddons(input: { classic: boolean; proteus: boolean }): MatchCardPoolSelection {
+  if (input.classic && input.proteus) return "originalset_classic_proteus";
+  if (input.classic) return "originalset_classic";
+  if (input.proteus) return "originalset_proteus";
+  return "originalset";
 }
 
 export function matchCardPoolCardLabel(cardPool: MatchCardPoolSelection): { title: string; description: string } {
@@ -128,6 +143,7 @@ export function parseJoinLinkInput(input: string): { matchId: string; joinToken:
 export function matchStartSummary(input: {
   playMode: PlayMode;
   matchFormat: MatchFormatSelection;
+  seriesGamesPlanned?: MatchStartSeriesGames;
   matchCardPool?: MatchCardPoolSelection;
   humanSideSelection: HumanSideSelection;
   humanAiSideSelection: HumanAiSideSelection;
@@ -135,7 +151,10 @@ export function matchStartSummary(input: {
   testSetupMode?: boolean;
 }): string[] {
   const playMode = playModeCardLabel(input.playMode).title;
-  const format = input.matchFormat === "two_game_side_swap" ? "Matchserie mit Seitenwechsel" : "Regelmatch bis 7 Agendapunkte";
+  const format =
+    input.matchFormat === "two_game_side_swap"
+      ? `Matchserie · ${input.seriesGamesPlanned ?? 2} Spiele mit Seitenwechsel`
+      : "Regelmatch bis 7 Agendapunkte";
   const cardPool = matchCardPoolSummaryLabel(input.matchCardPool);
   const side =
     input.playMode === "human_vs_human"

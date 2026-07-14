@@ -4645,6 +4645,66 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(JSON.stringify(first)).not.toContain("cardInstances");
   });
 
+  it("creates match series with a validated length between two and six games", async () => {
+    const storage = new InMemoryMatchStorage();
+    const service = new MultiplayerService(storage, { tokenSalt: "series-length-selection" });
+    const created = await service.createMatch({
+      hostSide: "runner",
+      mode: "human_runner_vs_corp_ai",
+      seed: "series-length-five",
+      settings: { agendaPointsToWin: 7, matchFormat: "two_game_side_swap", seriesGamesPlanned: 5 },
+      participantADecks: {
+        runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
+        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+      },
+      aiDeckPolicy: "fixed"
+    });
+    const stored = await storage.load(created.matchId);
+
+    expect(stored?.match.settings.seriesGamesPlanned).toBe(5);
+    expect(stored?.match.series).toMatchObject({ gameNumber: 1, gamesPlanned: 5, status: "active" });
+
+    const bounded = await service.createMatch({
+      hostSide: "runner",
+      mode: "human_runner_vs_corp_ai",
+      seed: "series-length-bounded",
+      settings: { agendaPointsToWin: 7, matchFormat: "two_game_side_swap", seriesGamesPlanned: 99 },
+      participantADecks: {
+        runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
+        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+      },
+      aiDeckPolicy: "fixed"
+    });
+    expect((await storage.load(bounded.matchId))?.match.series?.gamesPlanned).toBe(6);
+
+    const httpStorage = new InMemoryMatchStorage();
+    const httpService = new MultiplayerService(httpStorage, { tokenSalt: "series-length-http" });
+    const handle = createNetgridHttpServer(httpService);
+    const baseUrl = await listen(handle);
+    try {
+      const response = await fetch(`${baseUrl}/api/matches`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          hostSide: "runner",
+          mode: "human_runner_vs_corp_ai",
+          seed: "series-length-http-four",
+          settings: { matchFormat: "two_game_side_swap", seriesGamesPlanned: 4 },
+          participantADecks: {
+            runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
+            corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+          },
+          aiDeckPolicy: "fixed"
+        })
+      });
+      expect(response.status).toBe(201);
+      const body = (await response.json()) as { matchId: string };
+      expect((await httpStorage.load(body.matchId))?.match.series?.gamesPlanned).toBe(4);
+    } finally {
+      await handle.close();
+    }
+  });
+
   it("creates the next private series game with a side swap and side-safe standings", async () => {
     const match = await joinedMatch("series-side-swap", { agendaPointsToWin: 2, matchFormat: "two_game_side_swap" });
     await submit(match.service, match.matchId, match.corp, (action) => action.type === "mandatory_draw", "mandatory");

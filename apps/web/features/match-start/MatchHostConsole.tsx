@@ -1,13 +1,13 @@
 "use client";
 
-import { Bot, UserPlus } from "lucide-react";
+import { Bot, Building2, Dices, UserPlus, UserRound, Zap } from "lucide-react";
 
 import {
-  humanAiSideLabel,
   type HumanAiSideSelection,
   type HumanSideSelection,
   type MatchCardPoolSelection,
   type MatchFormatSelection,
+  type MatchStartSeriesGames,
   type PlayMode
 } from "../../app/match-start";
 import type {
@@ -38,6 +38,7 @@ type MatchStartLocalDeck = {
 export function MatchHostConsole({
   playMode,
   matchFormat,
+  seriesGamesPlanned,
   matchCardPool,
   displayName,
   isHumanVsAi,
@@ -79,6 +80,7 @@ export function MatchHostConsole({
   visibleDeckMetadataEntries,
   onPlayMode,
   onMatchFormat,
+  onSeriesGamesPlanned,
   onMatchCardPool,
   onDisplayName,
   onHumanAiSideSelection,
@@ -110,6 +112,7 @@ export function MatchHostConsole({
 }: {
   playMode: PlayMode;
   matchFormat: MatchFormatSelection;
+  seriesGamesPlanned: MatchStartSeriesGames;
   matchCardPool: MatchCardPoolSelection;
   displayName: string;
   isHumanVsAi: boolean;
@@ -151,6 +154,7 @@ export function MatchHostConsole({
   visibleDeckMetadataEntries: Array<{ label: string; metadata: { deckName: string } | undefined }>;
   onPlayMode(mode: PlayMode): void;
   onMatchFormat(format: MatchFormatSelection): void;
+  onSeriesGamesPlanned(games: MatchStartSeriesGames): void;
   onMatchCardPool(cardPool: MatchCardPoolSelection): void;
   onDisplayName(value: string): void;
   onHumanAiSideSelection(selection: HumanAiSideSelection): void;
@@ -183,28 +187,42 @@ export function MatchHostConsole({
   const isAiVsAiSeries = gameMode === "ai_vs_ai" && matchFormat === "two_game_side_swap";
   return (
     <div className="matchStartConsole">
+      <section className="matchStartIdentity" aria-label={gameMode === "ai_vs_ai" ? "Beobachterprofil" : "Spielerprofil"}>
+        <div className="matchStartIdentityIcon" aria-hidden="true">
+          <UserRound size={22} />
+        </div>
+        <label>
+          <span>{gameMode === "ai_vs_ai" ? "Beobachtername" : "Dein Name"}</span>
+          <input
+            value={displayName}
+            onChange={(event) => onDisplayName(event.target.value)}
+            aria-label="Name"
+            autoComplete="nickname"
+            maxLength={80}
+          />
+          <small>{gameMode === "ai_vs_ai" ? "Kennzeichnet deine lokale Beobachtersitzung." : "Erscheint in Lobby, Spiel und Ergebnis."}</small>
+        </label>
+      </section>
       <MatchStartChoiceSections
         playMode={playMode}
         matchFormat={matchFormat}
+        seriesGamesPlanned={seriesGamesPlanned}
         matchCardPool={matchCardPool}
         onPlayMode={onPlayMode}
         onMatchFormat={onMatchFormat}
+        onSeriesGamesPlanned={onSeriesGamesPlanned}
         onMatchCardPool={onMatchCardPool}
       />
       <div className="formGrid primaryStartGrid">
-        <label>
-          Name
-          <input value={displayName} onChange={(event) => onDisplayName(event.target.value)} />
-        </label>
-        {isHumanVsAi ? (
-          <label>
-            Deine Seite
-            <select value={humanAiSideSelection} onChange={(event) => onHumanAiSideSelection(event.target.value as HumanAiSideSelection)}>
-              <option value="random">{humanAiSideLabel("random")}</option>
-              <option value="runner">{humanAiSideLabel("runner")}</option>
-              <option value="corp">{humanAiSideLabel("corp")}</option>
-            </select>
-          </label>
+        {isHumanVsHuman || isHumanVsAi ? (
+          <SideSelectionField
+            label={isHumanVsHuman ? "Deine Startseite" : "Deine Seite"}
+            value={isHumanVsHuman ? humanSideSelection : humanAiSideSelection}
+            onChange={(selection) => {
+              if (isHumanVsHuman) onHumanSideSelection(selection);
+              else onHumanAiSideSelection(selection);
+            }}
+          />
         ) : null}
         {gameMode === "ai_vs_ai" ? (
           <label>
@@ -274,7 +292,6 @@ export function MatchHostConsole({
         isAiVsAiSeries={isAiVsAiSeries}
         hasAiOpponent={hasAiOpponent}
         matchCardPool={matchCardPool}
-        humanSideSelection={humanSideSelection}
         humanAiSideSelection={humanAiSideSelection}
         countdownSeconds={countdownSeconds}
         discoverableInLan={discoverableInLan}
@@ -298,7 +315,6 @@ export function MatchHostConsole({
         selectedParticipantBRunnerLocalDeckId={selectedParticipantBRunnerLocalDeckId}
         selectedParticipantBCorpLocalDeckId={selectedParticipantBCorpLocalDeckId}
         aiSlotDisabled={aiSlotDisabled}
-        onHumanSideSelection={onHumanSideSelection}
         onCountdownSeconds={onCountdownSeconds}
         onDiscoverableInLan={onDiscoverableInLan}
         onPlayerClockMode={onPlayerClockMode}
@@ -319,5 +335,34 @@ export function MatchHostConsole({
       />
       <DeckMetadataLine entries={visibleDeckMetadataEntries} />
     </div>
+  );
+}
+
+function SideSelectionField({
+  label,
+  value,
+  onChange
+}: {
+  label: string;
+  value: HumanSideSelection;
+  onChange(selection: HumanSideSelection): void;
+}) {
+  const Icon = value === "runner" ? Zap : value === "corp" ? Building2 : Dices;
+  const detail = value === "runner" ? "Du beginnst als Runner." : value === "corp" ? "Du beginnst als Korp." : "Die erste Seite wird beim Start ausgelost.";
+  return (
+    <label className={`sideSelectionField side-${value}`}>
+      <span>{label}</span>
+      <span className="sideSelectionControl">
+        <span className="sideSelectionIcon" aria-hidden="true">
+          <Icon size={19} />
+        </span>
+        <select value={value} onChange={(event) => onChange(event.target.value as HumanSideSelection)} aria-label={label}>
+          <option value="random">◆ Zufällig auslosen</option>
+          <option value="runner">↗ Runner</option>
+          <option value="corp">▣ Korp</option>
+        </select>
+      </span>
+      <small>{detail}</small>
+    </label>
   );
 }

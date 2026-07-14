@@ -133,7 +133,7 @@ export function StartLobbyPanel({
       ) : start ? (
         <>
           <div className="lobbyFacts">
-            <span>{matchFormatLabel(start.matchFormat)}</span>
+            <span>{matchFormatLabel(start.matchFormat, start.seriesGamesPlanned)}</span>
             <span title="Agenda-Punkte, die für den Spielsieg erreicht werden müssen.">Zielwert {start.agendaPointsToWin} Agenda-Punkte</span>
             <span title="Spielerzeit-Einstellung für dieses Match.">{matchStartPlayerClockLabel(lobby.playerClock)}</span>
             <span>Countdown {start.countdownSeconds}s</span>

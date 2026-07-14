@@ -4,10 +4,7 @@ import { SlidersHorizontal } from "lucide-react";
 
 import {
   aiDeckReadinessLabel,
-  humanAiSideLabel,
-  sideSelectionLabel,
   type HumanAiSideSelection,
-  type HumanSideSelection,
   type MatchCardPoolSelection
 } from "../../app/match-start";
 import type {
@@ -40,7 +37,6 @@ export function MatchStartAdvancedOptions({
   isAiVsAiSeries,
   hasAiOpponent,
   matchCardPool,
-  humanSideSelection,
   humanAiSideSelection,
   countdownSeconds,
   discoverableInLan,
@@ -64,7 +60,6 @@ export function MatchStartAdvancedOptions({
   selectedParticipantBRunnerLocalDeckId,
   selectedParticipantBCorpLocalDeckId,
   aiSlotDisabled,
-  onHumanSideSelection,
   onCountdownSeconds,
   onDiscoverableInLan,
   onPlayerClockMode,
@@ -89,7 +84,6 @@ export function MatchStartAdvancedOptions({
   isAiVsAiSeries: boolean;
   hasAiOpponent: boolean;
   matchCardPool: MatchCardPoolSelection;
-  humanSideSelection: HumanSideSelection;
   humanAiSideSelection: HumanAiSideSelection;
   countdownSeconds: 3 | 5 | 10;
   discoverableInLan: boolean;
@@ -113,7 +107,6 @@ export function MatchStartAdvancedOptions({
   selectedParticipantBRunnerLocalDeckId: string;
   selectedParticipantBCorpLocalDeckId: string;
   aiSlotDisabled: boolean;
-  onHumanSideSelection(selection: HumanSideSelection): void;
   onCountdownSeconds(seconds: 3 | 5 | 10): void;
   onDiscoverableInLan(discoverable: boolean): void;
   onPlayerClockMode(mode: MatchStartPlayerClockMode): void;
@@ -140,16 +133,6 @@ export function MatchStartAdvancedOptions({
         Erweiterte Optionen
       </summary>
       <div className="formGrid advancedMatchGrid">
-        {isHumanVsHuman ? (
-          <label>
-            Seitenzuteilung
-            <select value={humanSideSelection} onChange={(event) => onHumanSideSelection(event.target.value as HumanSideSelection)}>
-              <option value="random">{sideSelectionLabel("random")}</option>
-              <option value="runner">{sideSelectionLabel("runner")}</option>
-              <option value="corp">{sideSelectionLabel("corp")}</option>
-            </select>
-          </label>
-        ) : null}
         {isHumanVsHuman ? (
           <label>
             Countdown

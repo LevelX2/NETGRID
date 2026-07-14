@@ -1,4 +1,14 @@
-import { MATCH_CARD_POOL_OPTIONS, type AiDeckPolicySelection, type HumanAiSideSelection, type HumanSideSelection, type MatchCardPoolSelection, type MatchFormatSelection, type PlayMode } from "./match-start";
+import {
+  MATCH_CARD_POOL_OPTIONS,
+  MATCH_SERIES_GAMES_OPTIONS,
+  type AiDeckPolicySelection,
+  type HumanAiSideSelection,
+  type HumanSideSelection,
+  type MatchCardPoolSelection,
+  type MatchFormatSelection,
+  type MatchStartSeriesGames,
+  type PlayMode
+} from "./match-start";
 
 export type MatchStartMode = "host" | "join";
 export type MatchStartDeckSource = "snapshot" | "local";
@@ -15,6 +25,7 @@ export type MatchStartStorageSettings = {
   humanSideSelection: HumanSideSelection;
   humanAiSideSelection: HumanAiSideSelection;
   matchFormat: MatchFormatSelection;
+  seriesGamesPlanned: MatchStartSeriesGames;
   matchCardPool: MatchCardPoolSelection;
   runnerDifficulty: MatchStartAiDifficulty;
   corpDifficulty: MatchStartAiDifficulty;
@@ -60,6 +71,7 @@ export function parseMatchStartSettingsFromStorage(raw: string | null): Partial<
     if (isHumanSideSelection(parsed.humanSideSelection)) next.humanSideSelection = parsed.humanSideSelection;
     if (isHumanAiSideSelection(parsed.humanAiSideSelection)) next.humanAiSideSelection = parsed.humanAiSideSelection;
     if (isMatchFormatSelection(parsed.matchFormat)) next.matchFormat = parsed.matchFormat;
+    if (isMatchStartSeriesGames(parsed.seriesGamesPlanned)) next.seriesGamesPlanned = parsed.seriesGamesPlanned;
     if (isMatchCardPoolSelection(parsed.matchCardPool)) next.matchCardPool = parsed.matchCardPool;
     if (isMatchStartAiDifficulty(parsed.runnerDifficulty)) next.runnerDifficulty = parsed.runnerDifficulty;
     if (isMatchStartAiDifficulty(parsed.corpDifficulty)) next.corpDifficulty = parsed.corpDifficulty;
@@ -106,6 +118,10 @@ function isHumanAiSideSelection(value: unknown): value is HumanAiSideSelection {
 
 function isMatchFormatSelection(value: unknown): value is MatchFormatSelection {
   return value === "rules_match" || value === "two_game_side_swap";
+}
+
+function isMatchStartSeriesGames(value: unknown): value is MatchStartSeriesGames {
+  return typeof value === "number" && (MATCH_SERIES_GAMES_OPTIONS as readonly number[]).includes(value);
 }
 
 function isMatchCardPoolSelection(value: unknown): value is MatchCardPoolSelection {

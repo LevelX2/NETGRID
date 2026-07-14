@@ -20,9 +20,10 @@ type MatchStartLobby = ApiMatchStartLobbyPayload;
 type LobbyClientPayload = ApiLobbyPayload;
 type LobbyParticipant = ApiLobbyParticipantPayload;
 
-export function matchFormatLabel(format: MatchFormat): string {
+export function matchFormatLabel(format: MatchFormat, seriesGamesPlanned?: number): string {
   if (format === "single_game") return "Einzelspiel";
   if (format === "quick_match") return "Quick Match";
+  if (format === "two_game_side_swap") return seriesGamesPlanned ? `Matchserie · ${seriesGamesPlanned} Spiele` : "Matchserie";
   return "Regelmatch";
 }
 

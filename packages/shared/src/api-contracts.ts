@@ -245,6 +245,7 @@ export type ApiMatchStartLobbyPayload = {
   countdownEndsAt?: string;
   agendaPointsToWin: number;
   matchFormat: ApiMatchFormat;
+  seriesGamesPlanned?: number;
   cardPool: ApiMatchCardPool;
   sideAssignmentMode?: "fixed" | "random_pending";
   sideAssignment: {

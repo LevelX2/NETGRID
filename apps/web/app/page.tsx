@@ -136,6 +136,7 @@ import {
   type HumanAiSideSelection,
   type HumanSideSelection,
   type MatchFormatSelection,
+  type MatchStartSeriesGames,
   type PlayMode,
 } from "./match-start";
 import {
@@ -509,6 +510,8 @@ export default function Page() {
   const [humanAiSideSelection, setHumanAiSideSelection] =
     useState<HumanAiSideSelection>("random");
   const [matchFormat, setMatchFormat] = useState<MatchFormat>("rules_match");
+  const [seriesGamesPlanned, setSeriesGamesPlanned] =
+    useState<MatchStartSeriesGames>(2);
   const [matchCardPool, setMatchCardPool] =
     useState<MatchCardPool>("originalset");
   const [playerClockMode, setPlayerClockMode] =
@@ -890,6 +893,8 @@ export default function Page() {
         setHumanAiSideSelection(storedMatchStartSettings.humanAiSideSelection);
       if (storedMatchStartSettings.matchFormat)
         setMatchFormat(storedMatchStartSettings.matchFormat);
+      if (storedMatchStartSettings.seriesGamesPlanned)
+        setSeriesGamesPlanned(storedMatchStartSettings.seriesGamesPlanned);
       if (storedMatchStartSettings.matchCardPool)
         setMatchCardPool(storedMatchStartSettings.matchCardPool);
       if (storedMatchStartSettings.playerClockMode)
@@ -1510,6 +1515,7 @@ export default function Page() {
           matchFormat === "two_game_side_swap"
             ? "two_game_side_swap"
             : "rules_match",
+        seriesGamesPlanned,
         matchCardPool,
         playerClockMode,
         playerClockMinutes,
@@ -1541,6 +1547,7 @@ export default function Page() {
     humanSideSelection,
     humanAiSideSelection,
     matchFormat,
+    seriesGamesPlanned,
     matchCardPool,
     playerClockMode,
     playerClockMinutes,
@@ -1847,6 +1854,7 @@ export default function Page() {
       effectiveStartMatchFormat === "two_game_side_swap"
         ? "two_game_side_swap"
         : "rules_match",
+    seriesGamesPlanned,
     matchCardPool,
     humanSideSelection,
     humanAiSideSelection,
@@ -3217,6 +3225,9 @@ export default function Page() {
         ...(isHumanVsHuman ? { discoverableInLan } : {}),
         settings: {
           matchFormat: effectiveStartMatchFormat,
+          ...(effectiveStartMatchFormat === "two_game_side_swap"
+            ? { seriesGamesPlanned }
+            : {}),
           cardPool: matchCardPool,
           agendaPointsToWin: effectiveAgendaTarget,
           playerClock:
@@ -5000,6 +5011,7 @@ export default function Page() {
                         <MatchHostConsole
                           playMode={playMode}
                           matchFormat={effectiveStartMatchFormat}
+                          seriesGamesPlanned={seriesGamesPlanned}
                           matchCardPool={matchCardPool}
                           displayName={displayName}
                           isHumanVsAi={isHumanVsAi}
@@ -5059,6 +5071,7 @@ export default function Page() {
                           }
                           onPlayMode={updatePlayMode}
                           onMatchFormat={setMatchFormat}
+                          onSeriesGamesPlanned={setSeriesGamesPlanned}
                           onMatchCardPool={setMatchCardPool}
                           onDisplayName={updateDisplayName}
                           onHumanAiSideSelection={setHumanAiSideSelection}

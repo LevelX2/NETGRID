@@ -1,5 +1,18 @@
 import { describe, expect, it } from "vitest";
-import { MATCH_FORMAT_OPTIONS, aiDeckReadinessLabel, deriveMatchStart, matchCardPoolCardLabel, matchFormatCardLabel, matchStartLobbyBlocksSetup, matchStartPlayerClockLabel, matchStartSummary, parseJoinLinkInput, playModeCardLabel } from "./match-start";
+import {
+  MATCH_FORMAT_OPTIONS,
+  aiDeckReadinessLabel,
+  deriveMatchStart,
+  matchCardPoolCardLabel,
+  matchCardPoolFromAddons,
+  matchCardPoolIncludes,
+  matchFormatCardLabel,
+  matchStartLobbyBlocksSetup,
+  matchStartPlayerClockLabel,
+  matchStartSummary,
+  parseJoinLinkInput,
+  playModeCardLabel
+} from "./match-start";
 
 describe("V1.0.4 match start derivation", () => {
   it("keeps Human-vs-Human side assignment server-readable", () => {
@@ -49,11 +62,21 @@ describe("V1.0.4 match start derivation", () => {
     expect(playModeCardLabel("human_vs_ai")).toEqual({ title: "Gegen KI", description: "Schnelles Spiel gegen eine KI-Seite" });
     expect(playModeCardLabel("ai_vs_ai")).toEqual({ title: "Simulation", description: "KI gegen KI zum Beobachten und Testen" });
     expect(matchFormatCardLabel("rules_match")).toEqual({ title: "Regelmatch", description: "7 Agendapunkte, ein Spiel" });
-    expect(matchFormatCardLabel("two_game_side_swap")).toEqual({ title: "Matchserie", description: "Zwei Spiele mit Seitenwechsel" });
+    expect(matchFormatCardLabel("two_game_side_swap")).toEqual({ title: "Matchserie", description: "2–6 Spiele mit wechselnden Seiten" });
     expect(matchCardPoolCardLabel("originalset")).toEqual({ title: "Nur Originalset", description: "Zusatzsets werden nicht zugelassen" });
     expect(matchCardPoolCardLabel("originalset_classic")).toEqual({ title: "Originalset & Classic", description: "Classic wird als Zusatzset zugelassen" });
     expect(matchCardPoolCardLabel("originalset_proteus")).toEqual({ title: "Originalset & Protheus", description: "Protheus wird als Zusatzset zugelassen" });
     expect(matchCardPoolCardLabel("originalset_classic_proteus")).toEqual({ title: "Originalset & Classic & Protheus", description: "Beide Zusatzsets werden zugelassen" });
+  });
+
+  it("maps compact card-pool addon toggles to the existing technical pool ids", () => {
+    expect(matchCardPoolFromAddons({ classic: false, proteus: false })).toBe("originalset");
+    expect(matchCardPoolFromAddons({ classic: true, proteus: false })).toBe("originalset_classic");
+    expect(matchCardPoolFromAddons({ classic: false, proteus: true })).toBe("originalset_proteus");
+    expect(matchCardPoolFromAddons({ classic: true, proteus: true })).toBe("originalset_classic_proteus");
+    expect(matchCardPoolIncludes("originalset_classic_proteus", "classic")).toBe(true);
+    expect(matchCardPoolIncludes("originalset_proteus", "classic")).toBe(false);
+    expect(matchCardPoolIncludes("originalset_proteus", "proteus")).toBe(true);
   });
 
   it("parses Join-Links and ignores unknown query parameters", () => {
@@ -97,6 +120,19 @@ describe("V1.0.4 match start derivation", () => {
 
     expect(summary).toContain("KI-Decks: wie du");
     expect(summary.join(" ")).not.toMatch(/token|hash|deck_/i);
+  });
+
+  it("includes the selected series length in the safe start summary", () => {
+    const summary = matchStartSummary({
+      playMode: "human_vs_ai",
+      matchFormat: "two_game_side_swap",
+      seriesGamesPlanned: 5,
+      matchCardPool: "originalset_classic",
+      humanSideSelection: "random",
+      humanAiSideSelection: "random"
+    });
+
+    expect(summary).toContain("Matchserie · 5 Spiele mit Seitenwechsel");
   });
 
   it("distinguishes Proteus selected-deck and default-pool readiness", () => {

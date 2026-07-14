@@ -949,6 +949,7 @@ async function routeHttp(
         const nextSettings: Parameters<MultiplayerService["createMatch"]>[0]["settings"] = {};
         nextSettings.agendaPointsToWin = 7;
         if (settings.matchFormat === "rules_match" || settings.matchFormat === "two_game_side_swap") nextSettings.matchFormat = settings.matchFormat;
+        if (typeof settings.seriesGamesPlanned === "number") nextSettings.seriesGamesPlanned = settings.seriesGamesPlanned;
         if (isMatchCardPool(settings.cardPool)) nextSettings.cardPool = settings.cardPool;
         if (settings.playerClock && typeof settings.playerClock === "object") {
           const playerClock = settings.playerClock as Record<string, unknown>;

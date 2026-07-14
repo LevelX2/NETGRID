@@ -1,7 +1,7 @@
 # S01 Match Series Spec
 
 Status: implemented_for_S01
-Stand: 2026-05-03
+Stand: 2026-07-14
 
 ## Entscheidung
 
@@ -9,9 +9,11 @@ Die private S01-Matchserie ist eine Hülle über einzelnen Spielen. Ein Spiel bl
 
 ## Format
 
-Unterstützt wird zunächst:
+Unterstützt wird:
 
-- `two_game_side_swap`: zwei private Spiele mit Seitenwechsel nach Spiel 1.
+- `two_game_side_swap`: zwei bis sechs private Spiele mit Seitenwechsel nach jedem Spiel. Der technische Bezeichner bleibt aus dem bestehenden Vertrag erhalten; `gamesPlanned` ist die fachlich maßgebliche Serienlänge.
+
+Die erste Seitenzuordnung folgt der Matchstart-Auswahl. Bei `random` wird sie deterministisch aus dem Match-Seed ermittelt; jedes Folgespiel tauscht die Seiten der stabilen Spieler-Slots `player_a` und `player_b`.
 
 Das Format ist keine öffentliche Turnierlogik, kein Matchmaking und keine Ranking-Funktion.
 
@@ -32,9 +34,9 @@ Nach Spielende erzeugt der Server eine side-sichere `series`-Zusammenfassung inn
 
 ## Serienwertung
 
-Die private Zwei-Spiel-Serie nutzt die Original-Netrunner-nahe Matchpunktwertung: Jeder Einzelspielsieg gibt dem Gewinner 10 Matchpunkte. Der Verlierer erhält für dieses Einzelspiel so viele Matchpunkte, wie er eigene Agenda-Punkte erzielt hat. Bei einem Einzelspiel-Draw erhalten beide Spieler ihre erzielten Agenda-Punkte als Matchpunkte. Nach den geplanten Serienspielen entscheidet die Summe dieser Matchpunkte über die Serie; gleiche Matchpunkte ergeben ein Serienunentschieden.
+Die private Matchserie nutzt die Original-Netrunner-nahe Matchpunktwertung: Jeder Einzelspielsieg gibt dem Gewinner 10 Matchpunkte. Der Verlierer erhält für dieses Einzelspiel so viele Matchpunkte, wie er eigene Agenda-Punkte erzielt hat. Bei einem Einzelspiel-Draw erhalten beide Spieler ihre erzielten Agenda-Punkte als Matchpunkte. Nach den geplanten Serienspielen entscheidet die Summe dieser Matchpunkte über die Serie; gleiche Matchpunkte ergeben ein Serienunentschieden.
 
-Diese Serienwertung ist eine private Produktregel für NETGRID und ist bewusst so geschnitten, dass sie später auch für Serien mit mehr als zwei geplanten Spielen erweitert werden kann. Sie bleibt getrennt von offizieller öffentlicher Turnierlogik und verändert nicht den Engine-Vertrag für einzelne Spiele.
+Diese Serienwertung ist eine private Produktregel für NETGRID. Sie gilt unverändert für zwei bis sechs geplante Spiele, bleibt getrennt von offizieller öffentlicher Turnierlogik und verändert nicht den Engine-Vertrag für einzelne Spiele.
 
 ## Einzelspiel-Aufgabe innerhalb einer Serie
 
@@ -94,7 +96,8 @@ Die Umsetzung ist über Server-Tests und Visibility-Vertrag abgedeckt:
 
 - Spiel 1 einer Serie endet mit side-sicherem Serienstand.
 - Serienergebnisse werden per 10-Punkte-Siegwertung plus Verlierer-Agenda-Punkten entschieden.
-- `series-next` erstellt Spiel 2 mit Seitenwechsel.
+- `series-next` erstellt bis zum gewählten Serienende jeweils das nächste Spiel mit Seitenwechsel.
+- Serienlängen von zwei bis sechs werden serverseitig begrenzt und in Folgespiele übernommen.
 - Aufgabe in Spiel 1 einer Serie erzeugt ein Einzelspiel-Forfeit-Resultat und hält `series-next` verfügbar.
 - Aufgabe im letzten Serienspiel schließt die Serie über die normale Matchpunktwertung ab.
 - doppeltes Erstellen des Folgespiels wird abgelehnt.
