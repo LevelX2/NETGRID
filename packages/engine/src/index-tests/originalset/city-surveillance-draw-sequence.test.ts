@@ -35,6 +35,8 @@ describe("City Surveillance per-draw decisions", () => {
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
     const stackBefore = state.runner.stack.length;
+    const firstDrawnCardId = state.runner.stack[0];
+    if (!firstDrawnCardId) throw new Error("Missing Runner stack card");
 
     state = apply(
       state,
@@ -51,6 +53,19 @@ describe("City Surveillance per-draw decisions", () => {
       "pay_credit",
       "take_tag",
     ]);
+    const runnerView = getPlayerView(state, "runner");
+    const corpView = getPlayerView(state, "corp");
+    expect(runnerView.pendingChoice?.choiceId).toBe(
+      state.pendingChoice?.choiceId,
+    );
+    expect(
+      runnerView.legalActions.find((action) => action.type === "resolve_choice")
+        ?.choiceRequirements?.[0]?.optionIds,
+    ).toEqual(["pay_credit", "take_tag"]);
+    expect(corpView.pendingChoice).toBeUndefined();
+    expect(JSON.stringify(corpView)).not.toContain(firstDrawnCardId);
+    expect(JSON.stringify(runnerView)).not.toContain("runnerDrawSequence");
+    expect(JSON.stringify(corpView)).not.toContain("runnerDrawSequence");
 
     state = applyChoice(state, "runner", "pay_credit");
     expect(state.runner.stack).toHaveLength(stackBefore - 2);
@@ -227,6 +242,41 @@ describe("City Surveillance per-draw decisions", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
+  it("preserves the Crash Everett continuation after passing every pre-draw rez window", () => {
+    let state = cityGameWithCrash("city-surveillance-crash-rez-pass");
+    state.runner.credits = 10;
+    const crashId = moveRunnerCardToGrip(state, CRASH_EVERETT_ID);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" && action.payload?.cardId === crashId,
+    );
+    const cityId = putCorpRootInRemote(state, CITY_SURVEILLANCE_ID);
+    state.corp.credits = 1;
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const stackBefore = state.runner.stack.length;
+
+    state = apply(state, "runner", (action) => action.type === "draw_card");
+    expect(state.pendingChoice?.side).toBe("corp");
+    state = applyChoice(state, "corp", "pass");
+    expect(state.pendingChoice?.side).toBe("corp");
+    state = applyChoice(state, "corp", "pass");
+
+    expect(state.cardInstances[cityId]?.rezzed).toBe(false);
+    expect(state.runner.stack).toHaveLength(stackBefore - 2);
+    expect(state.pendingChoice?.source).toContain("p3_61.crash_draw");
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      crashEverettChoiceOpened: true,
+      drawReplacementExtraDrawn: 1,
+    });
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("offers the Corp the printed rez window before the first Jack 'n' Joe draw", () => {
     let state = cityGame("city-surveillance-pre-draw-rez");
     const cityId = putCorpRootInRemote(state, CITY_SURVEILLANCE_ID);
@@ -252,6 +302,11 @@ describe("City Surveillance per-draw decisions", () => {
       "pass",
     ]);
     expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
+    expect(getPlayerView(state, "corp").pendingChoice).toMatchObject({
+      choiceId: state.pendingChoice?.choiceId,
+      side: "corp",
+      visibility: "hidden_info_barrier",
+    });
 
     state = applyChoice(state, "corp", `rez_${cityId}`);
     expect(state.cardInstances[cityId]?.rezzed).toBe(true);

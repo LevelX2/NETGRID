@@ -213,6 +213,22 @@ export function selectedChoicesForDecision(
       ? { choiceId: choice.choiceId, selectedOptionIds: [selectedOptionId] }
       : { choiceId: choice.choiceId, selectedOptionIds: [] };
   }
+  if (choice.source.startsWith("runner_draw.city_surveillance:")) {
+    const selectedOptionId =
+      selectableOptions.find((option) => option.id === "pay_credit")?.id ??
+      selectableOptions.find((option) => option.id === "take_tag")?.id;
+    return selectedOptionId !== undefined
+      ? { choiceId: choice.choiceId, selectedOptionIds: [selectedOptionId] }
+      : { choiceId: choice.choiceId, selectedOptionIds: [] };
+  }
+  if (choice.source.startsWith("runner_draw.city_surveillance_rez:")) {
+    const selectedOptionId =
+      selectableOptions.find((option) => option.id.startsWith("rez_"))?.id ??
+      selectableOptions.find((option) => option.id === "pass")?.id;
+    return selectedOptionId !== undefined
+      ? { choiceId: choice.choiceId, selectedOptionIds: [selectedOptionId] }
+      : { choiceId: choice.choiceId, selectedOptionIds: [] };
+  }
   if (choice.kind !== "bid_amount") {
     return {
       choiceId: choice.choiceId,

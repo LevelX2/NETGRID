@@ -1001,9 +1001,7 @@ export function actionButtonLabel(action: LegalAction): string {
         ? "Credit nehmen"
         : normalizeVisibleTerms(action.label);
     case "draw_card":
-      return action.payload?.citySurveillanceDrawDecision
-        ? normalizeVisibleTerms(action.label)
-        : "Karte ziehen";
+      return "Karte ziehen";
     case "activated_card_ability":
       return normalizeVisibleTerms(action.label || "Kartenfähigkeit nutzen");
     case "jack_out":

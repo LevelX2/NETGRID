@@ -824,10 +824,16 @@ export function createLifecycleRuntime(deps: RuntimeDeps) {
       drawTaxTags: tagsAdded,
       runnerCreditsAfter: state.runner.credits,
       runnerTagsAfter: state.runner.tags,
-      ...(continuationSummary.drawnCount > 0
-        ? { drawnCount: continuationSummary.drawnCount }
-        : {}),
-      ...(continuationSummary.crashEverettChoiceOpened
+      ...runnerDrawContinuationPayload(continuationSummary),
+    };
+  }
+
+  function runnerDrawContinuationPayload(
+    summary: RunnerDrawSummary,
+  ): Record<string, string | number | boolean> {
+    return {
+      ...(summary.drawnCount > 0 ? { drawnCount: summary.drawnCount } : {}),
+      ...(summary.crashEverettChoiceOpened
         ? {
             drawReplacementSourceTitle: "Crash Everett, Inventive Fixer",
             drawReplacementExtraDrawn: 1,
@@ -857,12 +863,10 @@ export function createLifecycleRuntime(deps: RuntimeDeps) {
     if (selected === "pass") {
       sequence.preDrawRezWindowPassed = true;
       const continuationSummary = continueRunnerDrawSequence(state);
-      if (continuationSummary.drawnCount > 0) {
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          drawnCount: continuationSummary.drawnCount,
-        };
-      }
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        ...runnerDrawContinuationPayload(continuationSummary),
+      };
       return;
     }
 
@@ -897,12 +901,10 @@ export function createLifecycleRuntime(deps: RuntimeDeps) {
       "on_rez",
     );
     const continuationSummary = continueRunnerDrawSequence(state);
-    if (continuationSummary.drawnCount > 0) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        drawnCount: continuationSummary.drawnCount,
-      };
-    }
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      ...runnerDrawContinuationPayload(continuationSummary),
+    };
   }
 
   function resolveCrashEverettDrawChoice(

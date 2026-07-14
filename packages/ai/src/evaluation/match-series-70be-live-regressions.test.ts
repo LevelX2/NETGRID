@@ -86,8 +86,8 @@ describe("match series 70BE real Engine regressions", () => {
     expect(chooseRunnerAction(input).actionId).toBe(build?.actionId);
   });
 
-  it("chooses the affordable City Surveillance draw without taking a tag", () => {
-    const state = runnerTurnState("series-70be-draw-tax-live-input");
+  it("draws first and then pays the affordable City Surveillance choice", () => {
+    let state = runnerTurnState("series-70be-draw-tax-live-input");
     RealEngineFixtureBuilder.forState(state)
       .withRunnerGripSize(1)
       .withRunnerCredits(3)
@@ -95,19 +95,67 @@ describe("match series 70BE real Engine regressions", () => {
         faceup: true,
         rezzed: true,
       });
-    const input = decisionInput(state, "runner", RUNNER_DECK);
-    const pay = input.legalActions.find(
-      (action) => action.payload?.drawTaxProjectedCreditsPaid === 1,
-    );
-    const takeTag = input.legalActions.find(
-      (action) => action.payload?.drawTaxProjectedTagsAdded === 1,
-    );
-    const decision = chooseRunnerAction(input);
+    const drawActions = decisionInput(
+      state,
+      "runner",
+      RUNNER_DECK,
+    ).legalActions.filter((action) => action.type === "draw_card");
 
-    expect(pay).toBeDefined();
-    expect(takeTag).toBeDefined();
-    expect(decision.actionId).toBe(pay?.actionId);
-    expect(decision.actionId).not.toBe(takeTag?.actionId);
+    expect(drawActions).toHaveLength(1);
+    state = applyByPredicate(
+      state,
+      "runner",
+      (action) => action.type === "draw_card",
+    );
+    const choiceInput = decisionInput(state, "runner", RUNNER_DECK);
+    const decision = chooseRunnerAction(choiceInput);
+
+    expect(choiceInput.playerView.pendingChoice?.source).toContain(
+      "runner_draw.city_surveillance",
+    );
+    expect(decision.actionId).toBe(choiceInput.legalActions[0]?.actionId);
+    expect(decision.selectedChoices).toEqual({
+      choiceId: choiceInput.playerView.pendingChoice?.choiceId,
+      selectedOptionIds: ["pay_credit"],
+    });
+    state = applyDecision(state, "runner", decision);
+    expect(state.runner.credits).toBe(2);
+    expect(state.runner.tags).toBe(0);
+    expect(state.pendingChoice).toBeUndefined();
+  });
+
+  it("rezes City Surveillance through the Corp pre-draw choice", () => {
+    let state = runnerTurnState("series-70be-pre-draw-rez-live-input");
+    RealEngineFixtureBuilder.forState(state)
+      .withRunnerGripSize(1)
+      .withRunnerCredits(3)
+      .withCorpCredits(1)
+      .withCorpRemoteRoot("remote_1", CITY_SURVEILLANCE, 0, {
+        faceup: false,
+        rezzed: false,
+      });
+    state = applyByPredicate(
+      state,
+      "runner",
+      (action) => action.type === "draw_card",
+    );
+    const choiceInput = decisionInput(state, "corp", CORP_DECK);
+    const decision = chooseCorpAction(choiceInput);
+
+    expect(choiceInput.playerView.pendingChoice?.source).toContain(
+      "runner_draw.city_surveillance_rez",
+    );
+    expect(decision.actionId).toBe(choiceInput.legalActions[0]?.actionId);
+    expect(decision.selectedChoices?.selectedOptionIds).toEqual([
+      expect.stringMatching(/^rez_/),
+    ]);
+    state = applyDecision(state, "corp", decision);
+
+    expect(state.corp.credits).toBe(0);
+    expect(state.pendingChoice?.side).toBe("runner");
+    expect(state.pendingChoice?.source).toContain(
+      "runner_draw.city_surveillance",
+    );
   });
 
   it("quotes Rush Hour after its Engine-produced event cost", () => {
@@ -209,7 +257,11 @@ function corpMainState(seed: string): GameState {
 
 function runnerTurnState(seed: string): GameState {
   let state = corpMainState(seed);
-  state = applyByPredicate(state, "corp", (action) => action.type === "end_turn");
+  state = applyByPredicate(
+    state,
+    "corp",
+    (action) => action.type === "end_turn",
+  );
   while (state.pendingChoice?.side === "corp") {
     state = applyByPredicate(
       state,

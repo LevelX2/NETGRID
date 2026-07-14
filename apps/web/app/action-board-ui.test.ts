@@ -3981,9 +3981,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
 
     expect(actionButtonLabel(pump)).toBe("Stärke +5 (Matador)");
     expect(contextualCardActionLabel(pump)).toBe("Stärke +5");
-    expect(runWindowActionButtonLabel(running, pump)).toBe(
-      "Matador +5 Stärke",
-    );
+    expect(runWindowActionButtonLabel(running, pump)).toBe("Matador +5 Stärke");
     expect(runBreakerActionHint(running, [pump])).toBe(
       "Eisbrecher: Matador +5 Stärke",
     );
@@ -4379,45 +4377,46 @@ describe("V1.0.6 resource and card-display helpers", () => {
     );
   });
 
-  it("keeps City Surveillance draw choices visible in draw action labels", () => {
-    const pay = legalAction(
-      "runner",
-      "draw_card",
-      "basic_action",
-      "Karte ziehen (City Surveillance: 1 Credit zahlen)",
-      {
-        citySurveillanceSourceCount: 1,
-        citySurveillanceDrawDecision: "pay",
-        citySurveillanceProjectedCreditsPaid: 1,
-        citySurveillanceProjectedTagsAdded: 0,
-      },
-    );
-    const tag = legalAction(
-      "runner",
-      "draw_card",
-      "basic_action",
-      "Karte ziehen (City Surveillance: 1 Tag nehmen)",
-      {
-        citySurveillanceSourceCount: 1,
-        citySurveillanceDrawDecision: "tag",
-        citySurveillanceProjectedCreditsPaid: 0,
-        citySurveillanceProjectedTagsAdded: 1,
-      },
-    );
-    const plain = legalAction(
+  it("keeps the draw action neutral and routes City Surveillance through generic choices", () => {
+    const draw = legalAction(
       "runner",
       "draw_card",
       "basic_action",
       "Karte ziehen",
     );
+    const runnerChoice: NonNullable<PlayerView["pendingChoice"]> = {
+      choiceId: "runner_draw_city_surveillance_12_0_13",
+      side: "runner",
+      source: "runner_draw.city_surveillance:12:city_1:0",
+      prompt: "City Surveillance: 1 Credit zahlen oder 1 Tag nehmen?",
+      kind: "select_option",
+      options: [
+        { id: "pay_credit", label: "1 Credit zahlen" },
+        { id: "take_tag", label: "1 Tag nehmen" },
+      ],
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: 13,
+      visibility: "public",
+    };
+    const corpRezChoice: NonNullable<PlayerView["pendingChoice"]> = {
+      ...runnerChoice,
+      choiceId: "runner_draw_city_surveillance_rez_12_13",
+      side: "corp",
+      source: "runner_draw.city_surveillance_rez:12",
+      prompt: "City Surveillance unmittelbar vor dem Ziehen rezzen?",
+      options: [
+        { id: "rez_city_1", label: "City Surveillance für 1 Credit rezzen" },
+        { id: "pass", label: "Passen" },
+      ],
+      visibility: "hidden_info_barrier",
+    };
 
-    expect(actionButtonLabel(pay)).toBe(
-      "Karte ziehen (City Surveillance: 1 Credit zahlen)",
-    );
-    expect(actionButtonLabel(tag)).toBe(
-      "Karte ziehen (City Surveillance: 1 Tag nehmen)",
-    );
-    expect(actionButtonLabel(plain)).toBe("Karte ziehen");
+    expect(actionButtonLabel(draw)).toBe("Karte ziehen");
+    expect(shouldUseCardChoicePanel(runnerChoice)).toBe(false);
+    expect(shouldUseFieldCardChoice(runnerChoice, view("runner"))).toBe(false);
+    expect(shouldUseCardChoicePanel(corpRezChoice)).toBe(false);
+    expect(shouldUseFieldCardChoice(corpRezChoice, view("corp"))).toBe(false);
   });
 
   it("describes accessed Archive assets without redundant trash hints", () => {
