@@ -107,6 +107,7 @@ export function createPendingChoiceRuntimeHosts(
     resolveCardImplementationMoveAdvancementChoice,
     resolveVirusCounterPurgePreserveChoice,
     resolveCrashEverettDrawChoice,
+    resolveRunnerDrawSequenceChoice,
     resolveEventModificationChoice,
     resolveFortHqReplacementChoice,
     resolveHammerStealthLossChoice,
@@ -283,7 +284,9 @@ export function createPendingChoiceRuntimeHosts(
         const iceIndex = server.ice.length - 1;
         const approachedIceId = server.ice[iceIndex];
         if (!approachedIceId)
-          throw new Error("Das angegriffene Fort hat keine ICE an dieser Position.");
+          throw new Error(
+            "Das angegriffene Fort hat keine ICE an dieser Position.",
+          );
         run.phase = "approach_ice";
         run.position = { kind: "ice", serverId: server.id, iceIndex };
         run.approachedIceId = approachedIceId;
@@ -598,7 +601,9 @@ export function createPendingChoiceRuntimeHosts(
       if (
         selectedIds.length !== server.ice.length ||
         new Set(selectedIds).size !== selectedIds.length ||
-        selectedIds.some((cardId: CardInstanceId) => !server.ice.includes(cardId))
+        selectedIds.some(
+          (cardId: CardInstanceId) => !server.ice.includes(cardId),
+        )
       )
         throw new Error("Die Reorder-Auswahl ist nicht legal.");
       server.ice = selectedIds;
@@ -675,6 +680,7 @@ export function createPendingChoiceRuntimeHosts(
         resolveExposePreventionChoice,
         resolveCorpInstalledEconomyCreditChoice,
         resolveCrashEverettDrawChoice,
+        resolveRunnerDrawSequenceChoice,
         resolveHardwareTrashByCounterChoice,
         resolveAdvancementPlacementChoice,
         resolveDerezRezzedBlackIceChoice,

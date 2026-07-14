@@ -49,9 +49,7 @@ describe("pending choice resolution", () => {
     );
 
     expect(resolveDelayedInstallStartTurnChoice).toHaveBeenCalledOnce();
-    expect(resolveDelayedInstallStartTurnChoice.mock.calls[0]?.[0]).toBe(
-      state,
-    );
+    expect(resolveDelayedInstallStartTurnChoice.mock.calls[0]?.[0]).toBe(state);
   });
 
   it("lets hidden-zone search handlers clear the pending choice", () => {
@@ -101,7 +99,28 @@ describe("pending choice resolution", () => {
     );
 
     expect(resolveExposeInstalledCorpCardsChoice).toHaveBeenCalledOnce();
-    expect(resolveExposeInstalledCorpCardsChoice.mock.calls[0]?.[0]).toBe(state);
+    expect(resolveExposeInstalledCorpCardsChoice.mock.calls[0]?.[0]).toBe(
+      state,
+    );
+  });
+
+  it("dispatches City Surveillance draw decisions through the sequence resolver", () => {
+    const state = stateWithChoice(
+      "city_choice",
+      "runner_draw.city_surveillance:1:city_1:0",
+    );
+    const resolveRunnerDrawSequenceChoice = vi.fn();
+
+    resolvePendingChoice(
+      pendingChoiceHost(state, {
+        hiddenZone: { resolveRunnerDrawSequenceChoice },
+      }),
+      choiceAction("city_choice"),
+      playerChoice("city_choice", ["take_tag"]),
+    );
+
+    expect(resolveRunnerDrawSequenceChoice).toHaveBeenCalledOnce();
+    expect(resolveRunnerDrawSequenceChoice.mock.calls[0]?.[0]).toBe(state);
   });
 });
 
@@ -176,8 +195,12 @@ function pendingChoiceHost(
     },
     replacement: {
       resolveReplacementChoice: unexpected("resolveReplacementChoice"),
-      resolveEventModificationChoice: unexpected("resolveEventModificationChoice"),
-      resolvePdcaDamageReplacementChoice: unexpected("resolvePdcaDamageReplacementChoice"),
+      resolveEventModificationChoice: unexpected(
+        "resolveEventModificationChoice",
+      ),
+      resolvePdcaDamageReplacementChoice: unexpected(
+        "resolvePdcaDamageReplacementChoice",
+      ),
     },
     trace: {
       resolveTraceChoice: unexpected("resolveTraceChoice"),
@@ -195,15 +218,24 @@ function pendingChoiceHost(
       ),
       handleHiddenZoneSearchChoice: unhandled,
       hiddenZoneSearchChoiceHandlerHost: () => ({}),
-      resolveMultiExposeInstalledCorpCardsChoice: unexpected("resolveMultiExposeInstalledCorpCardsChoice"),
+      resolveMultiExposeInstalledCorpCardsChoice: unexpected(
+        "resolveMultiExposeInstalledCorpCardsChoice",
+      ),
       resolveExposeInstalledCorpCardsChoice: unexpected(
         "resolveExposeInstalledCorpCardsChoice",
       ),
       resolveCorpInstalledEconomyCreditChoice: unexpected(
         "resolveCorpInstalledEconomyCreditChoice",
       ),
-      resolveCrashEverettDrawChoice: unexpected("resolveCrashEverettDrawChoice"),
-      resolveHardwareTrashByCounterChoice: unexpected("resolveHardwareTrashByCounterChoice"),
+      resolveCrashEverettDrawChoice: unexpected(
+        "resolveCrashEverettDrawChoice",
+      ),
+      resolveRunnerDrawSequenceChoice: unexpected(
+        "resolveRunnerDrawSequenceChoice",
+      ),
+      resolveHardwareTrashByCounterChoice: unexpected(
+        "resolveHardwareTrashByCounterChoice",
+      ),
       resolveAdvancementPlacementChoice: unexpected(
         "resolveAdvancementPlacementChoice",
       ),
@@ -236,16 +268,24 @@ function pendingChoiceHost(
         "resolvePaidSourceReturnToGripChoice",
       ),
       resolveRunnerHostingChoice: unexpected("resolveRunnerHostingChoice"),
-      resolveIncubatorTransformChoice: unexpected("resolveIncubatorTransformChoice"),
+      resolveIncubatorTransformChoice: unexpected(
+        "resolveIncubatorTransformChoice",
+      ),
       resolveVirusCounterPurgePreserveChoice: unexpected(
         "resolveVirusCounterPurgePreserveChoice",
       ),
-      resolveChimeraDaemonTrashChoice: unexpected("resolveChimeraDaemonTrashChoice"),
+      resolveChimeraDaemonTrashChoice: unexpected(
+        "resolveChimeraDaemonTrashChoice",
+      ),
       resolveRunnerProgramReturnChoice: unexpected(
         "resolveRunnerProgramReturnChoice",
       ),
-      resolveRunnerPrivateLookChoice: unexpected("resolveRunnerPrivateLookChoice"),
-      resolveExposePreventionChoice: unexpected("resolveExposePreventionChoice"),
+      resolveRunnerPrivateLookChoice: unexpected(
+        "resolveRunnerPrivateLookChoice",
+      ),
+      resolveExposePreventionChoice: unexpected(
+        "resolveExposePreventionChoice",
+      ),
       resolveSenatorialFieldTripChoice: unexpected(
         "resolveSenatorialFieldTripChoice",
       ),
@@ -267,15 +307,15 @@ function pendingChoiceHost(
       ...overrides.runner,
     },
     run: {
-      resolveHqIceSwapChoice: unexpected(
-        "resolveHqIceSwapChoice",
-      ),
+      resolveHqIceSwapChoice: unexpected("resolveHqIceSwapChoice"),
       fortPassWindowHostForState: () => ({}),
       resolveSecretSpendCompareChoiceInRunModule: unexpected(
         "resolveSecretSpendCompareChoiceInRunModule",
       ),
       encounterSpecialWindowHostForState: () => ({}),
-      resolveHammerStealthLossChoice: unexpected("resolveHammerStealthLossChoice"),
+      resolveHammerStealthLossChoice: unexpected(
+        "resolveHammerStealthLossChoice",
+      ),
       fortRunSideFamiliesHostForState: () => ({}),
       resolveActiveIceProgramTrashChoiceInRunModule: unexpected(
         "resolveActiveIceProgramTrashChoiceInRunModule",
@@ -288,7 +328,9 @@ function pendingChoiceHost(
         "resolveRezInterruptJackOutChoice",
       ),
       runRezWindowHostForState: () => ({}),
-      resolveBrokenIceVirusCounterChoice: unexpected("resolveBrokenIceVirusCounterChoice"),
+      resolveBrokenIceVirusCounterChoice: unexpected(
+        "resolveBrokenIceVirusCounterChoice",
+      ),
       runEndCleanupHost: () => ({}),
       resolveAardvarkInterceptionChoice: unexpected(
         "resolveAardvarkInterceptionChoice",
@@ -308,7 +350,9 @@ function pendingChoiceHost(
       ),
     },
     access: {
-      resolveSuccessfulRunCreditLossSpendChoice: unexpected("resolveSuccessfulRunCreditLossSpendChoice"),
+      resolveSuccessfulRunCreditLossSpendChoice: unexpected(
+        "resolveSuccessfulRunCreditLossSpendChoice",
+      ),
       runAccessTransitionHost: () => ({}),
       resolvePreAccessTopRdReorderChoice: unexpected(
         "resolvePreAccessTopRdReorderChoice",

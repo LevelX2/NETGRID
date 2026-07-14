@@ -1351,6 +1351,18 @@ export type GameEvent = PublicGameEvent & {
   privatePayload?: Partial<Record<Side, Record<string, unknown>>>;
 };
 
+export type RunnerDrawSequence = {
+  sequenceId: string;
+  remainingDrawCount: number;
+  drawnCardIds: CardInstanceId[];
+  currentDrawTaxSourceIds: CardInstanceId[];
+  currentDrawTaxSourceIndex: number;
+  drawTaxSourceCount: number;
+  drawTaxCreditsPaid: number;
+  drawTaxTagsAdded: number;
+  crashEverettSourceCardId?: CardInstanceId;
+};
+
 export type GameState = {
   matchId: string;
   baseline: RulesBaseline;
@@ -1372,6 +1384,7 @@ export type GameState = {
   agendaPointsToWin: number;
   setup?: SetupState;
   pendingChoice?: PendingChoice;
+  runnerDrawSequence?: RunnerDrawSequence;
   imminentEvent?: ImminentEvent;
   temporaryProgramInstallReturns?: TemporaryProgramInstallReturn[];
   eventModificationWindow?: EventModificationWindow;

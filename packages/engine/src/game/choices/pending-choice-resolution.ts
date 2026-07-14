@@ -34,6 +34,7 @@ export type PendingChoiceResolutionHost = {
     resolveExposeInstalledCorpCardsChoice: HostFn<void>;
     resolveCorpInstalledEconomyCreditChoice: HostFn<void>;
     resolveCrashEverettDrawChoice: HostFn<void>;
+    resolveRunnerDrawSequenceChoice: HostFn<void>;
     resolveHardwareTrashByCounterChoice: HostFn<void>;
     resolveAdvancementPlacementChoice: HostFn<void>;
     resolveDerezRezzedBlackIceChoice: HostFn<void>;
@@ -143,6 +144,8 @@ export function resolvePendingChoice(
     host.hiddenZone.resolveCorpInstalledEconomyCreditChoice;
   const resolveCrashEverettDrawChoice =
     host.hiddenZone.resolveCrashEverettDrawChoice;
+  const resolveRunnerDrawSequenceChoice =
+    host.hiddenZone.resolveRunnerDrawSequenceChoice;
   const resolveHardwareTrashByCounterChoice =
     host.hiddenZone.resolveHardwareTrashByCounterChoice;
   const resolveAdvancementPlacementChoice =
@@ -398,6 +401,10 @@ export function resolvePendingChoice(
   }
   if (state.pendingChoice.source.startsWith("p3_61.crash_draw")) {
     resolveCrashEverettDrawChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("runner_draw.city_surveillance:")) {
+    resolveRunnerDrawSequenceChoice(state, legalAction, playerAction);
     return;
   }
   if (
