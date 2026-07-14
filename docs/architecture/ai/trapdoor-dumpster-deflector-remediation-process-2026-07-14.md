@@ -1,6 +1,6 @@
 # Trapdoor-/Dumpster-Deflector-Remediation (2026-07-14)
 
-Status: P3 abgeschlossen; P4 aktiv
+Status: P4 abgeschlossen; P5 aktiv
 
 ## Quelle und Gesamtziel
 
