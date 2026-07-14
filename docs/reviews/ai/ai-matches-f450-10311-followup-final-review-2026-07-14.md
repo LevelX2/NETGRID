@@ -1,7 +1,6 @@
 # Final Review: Follow-up zu den KI-Spielen f450 und 10311
 
-Status: Fachlich und technisch abgeschlossen; lokale Integration steht als
-letzter Prozessschritt aus
+Status: Fachlich und technisch abgeschlossen; lokal in `main` integriert
 
 ## Ergebnis
 
@@ -123,3 +122,5 @@ Entscheidungs- und Payload-Scope die führenden Gates.
 - `e77a6eb1a` – Puzzle-Metadaten
 - `6260c7c08` – erreichbare Corp-Punish-Paare
 - `7c6bf822f` – schrittweise Mehrfach-Discard-Bewertung
+- `b779aac75` – Abschlussreview und Wissenslog
+- `74a1e50dd` – lokale Integration nach `main`

@@ -1,6 +1,6 @@
 # Follow-up-Prozess zu den KI-Spielen f450 und 10311
 
-Status: Fachlich abgeschlossen; lokale Integration ausstehend
+Status: Abgeschlossen und lokal in `main` integriert
 
 ## Quelle und Gesamtziel
 
@@ -102,12 +102,19 @@ generisch, side-safe und ohne kartennamenspezifische KI-Sonderfälle zu beheben.
 - Evidence, Review und dauerhaftes Wissensartefakt aktualisieren.
 - Commit: `docs(ai): close f450 10311 followup remediation`
 
-### P6: Lokale Integration und Cleanup
+### P6: Lokale Integration und Cleanup (abgeschlossen)
 
 - Aktuelles lokales `main` defensiv in den Arbeitsbranch integrieren.
 - Relevante Gates nach der Integration wiederholen.
 - Arbeitsbranch lokal nach `main` mergen und Worktree entfernen.
 - Kein Push und kein Pull Request ohne ausdrücklichen Nutzerauftrag.
+
+Der aktuelle lokale `main` war weiterhin der dokumentierte Ausgangsstand. Der
+Arbeitsbranch wurde nach 77 grünen Integrationsprüfungen und beiden grünen
+Typechecks konfliktfrei mit Mergecommit `74a1e50dd` in `main` integriert. Die
+bereits offenen Nutzeränderungen an der Classic-Deflector-Auflösung blieben
+unverändert und ungestaged. Worktree und Arbeitsbranch wurden anschließend
+entfernt.
 
 ## Automatische Fehlerbehandlung
 
