@@ -1007,6 +1007,7 @@ export function initializeStateRuntimeBootstrap({
     addCurrentRunAccessCount,
     addCorpTraceCounterPoolCounters,
     addRunnerFutureActionDebt,
+    addRunnerTagsWithPrevention,
     addVirusCounterWithCounterPrevention,
     addVisibleCardCounter,
     advanceableInstalledCardTargets,

@@ -30,6 +30,11 @@ export type EncounterPrintedEffectHost = {
       amount: number,
     ) => void;
     addCorpTraceCounterPoolCounters: () => number;
+    addRunnerTagsWithPrevention: (
+      legalAction: LegalAction,
+      amount: number,
+      source: string,
+    ) => boolean;
     calculateRunnerLink: () => number;
     cardCounter: (cardId: CardInstanceId, counterType: CounterType) => number;
     createDamageImminentEvent: (request: {
@@ -237,7 +242,9 @@ export function resolvePrintedDamageSubroutine(
     summary,
   );
   if (legalAction)
-    host.callbacks.setDamagePayload(aggregateDamageSummaries(options.damageSummaries));
+    host.callbacks.setDamagePayload(
+      aggregateDamageSummaries(options.damageSummaries),
+    );
   return {
     handled: true,
     damageSummary: summary,
@@ -340,7 +347,9 @@ export function resolvePrintedRandomDamageSubroutine(
     { dieRoll, randomDamageApplied: true },
   );
   if (legalAction)
-    host.callbacks.setDamagePayload(aggregateDamageSummaries(options.damageSummaries));
+    host.callbacks.setDamagePayload(
+      aggregateDamageSummaries(options.damageSummaries),
+    );
   return {
     handled: true,
     damageSummary: summary,
@@ -375,7 +384,10 @@ export function startTraceFromPrintedSubroutine(
       ? Math.max(0, Math.floor(subroutine.traceBidLimit))
       : undefined;
   const successEffect = subroutine.traceSuccessEffect;
-  if (!successEffect || !host.callbacks.supportsTraceSuccessEffect(successEffect))
+  if (
+    !successEffect ||
+    !host.callbacks.supportsTraceSuccessEffect(successEffect)
+  )
     throw new Error("Dieser Trace-Effekt ist nicht freigegeben.");
 
   const run = mustRun(state);
@@ -387,7 +399,10 @@ export function startTraceFromPrintedSubroutine(
   const fortTraceBitPoolSource = host.callbacks.fortTraceBitPoolSource();
   const encounterTemporaryTraceCredits =
     run.encounterTemporaryTraceCredits?.sourceIceId === sourceCardInstanceId
-      ? Math.max(0, Math.floor(run.encounterTemporaryTraceCredits.remaining ?? 0))
+      ? Math.max(
+          0,
+          Math.floor(run.encounterTemporaryTraceCredits.remaining ?? 0),
+        )
       : 0;
   const fortTraceBits = fortTraceBitPoolSource
     ? host.callbacks.cardCounter(fortTraceBitPoolSource.cardId, "bit")
@@ -481,6 +496,7 @@ export function applyPrintedTraceSuccessFollowups(
     legalAction: LegalAction;
     runnerLinkFallback?: number;
     extraPayload?: Record<string, unknown> | undefined;
+    additionalTagAmount?: number | undefined;
     deletePendingChoice?: boolean | undefined;
   },
 ): TraceSuccessFollowupResult {
@@ -495,7 +511,9 @@ export function applyPrintedTraceSuccessFollowups(
   const runnerBid = result.runnerBid;
   const runnerStrength = result.runnerTraceStrength;
   const successful = result.successful;
-  const tagsAdded = traceSuccessTagAmount(trace.successEffect, successful, result);
+  const tagAmount =
+    traceSuccessTagAmount(trace.successEffect, successful, result) +
+    (successful ? Math.max(0, options.additionalTagAmount ?? 0) : 0);
   const hackerTrackerCountersAdded =
     host.callbacks.addCorpTraceCounterPoolCounters();
   const traceAvoidReward = successful
@@ -506,11 +524,13 @@ export function applyPrintedTraceSuccessFollowups(
   let traceDamagePayload: Record<string, unknown> = {};
   let traceHardwareWreckerPayload: Record<string, unknown> = {};
   let traceResourceTrashPayload: Record<string, unknown> = {};
-  if (successful) state.runner.tags += tagsAdded;
   const traceCounterPayload = successful
     ? applyTraceCounterSuccess(host, trace.successEffect)
     : {};
-  if (successful && trace.successEffect.type === "trash_runner_resource_and_add_tag") {
+  if (
+    successful &&
+    trace.successEffect.type === "trash_runner_resource_and_add_tag"
+  ) {
     traceResourceTrashPayload =
       host.callbacks.resolveTraceTrashRunnerResourceSuccess(
         trace.sourceDefinitionId,
@@ -555,7 +575,7 @@ export function applyPrintedTraceSuccessFollowups(
         handled: true,
         suspended: true,
         traceSuccessful: true,
-        tagsAdded,
+        tagsAdded: 0,
         hackerTrackerCountersAdded,
         runnerRunEnded,
         runnerRunLockCreditCost,
@@ -630,7 +650,7 @@ export function applyPrintedTraceSuccessFollowups(
       ? { postBidTraceLinkBonus: trace.postBidLinkBonus ?? 0 }
       : {}),
     traceSuccessful: successful,
-    tagsAdded,
+    tagsAdded: 0,
     ...traceCounterPayload,
     ...(hackerTrackerCountersAdded > 0
       ? {
@@ -662,14 +682,25 @@ export function applyPrintedTraceSuccessFollowups(
     ...(legalAction.payload ?? {}),
     ...payload,
   };
+  const tagPreventionWindowOpened =
+    tagAmount > 0
+      ? host.callbacks.addRunnerTagsWithPrevention(
+          legalAction,
+          tagAmount,
+          `trace:${trace.sourceDefinitionId}:${trace.traceId}`,
+        )
+      : false;
+  const tagsAdded = Number(legalAction.payload?.tagsAdded ?? 0);
+  const finalPayload = legalAction.payload ?? payload;
   return {
     handled: true,
+    ...(tagPreventionWindowOpened ? { suspended: true } : {}),
     traceSuccessful: successful,
     tagsAdded,
     hackerTrackerCountersAdded,
     runnerRunEnded,
     runnerRunLockCreditCost,
-    payload,
+    payload: finalPayload,
     stateChanged: true,
   };
 }

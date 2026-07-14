@@ -1,19 +1,34 @@
 ---
 activityId: act-2026-07-14-trace-tag-prevention-avoidance-hardening
-status: inbox
+status: done
 kind: fix
 area: engine
 priority: hotfix
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-07-14
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-07-14
+completedAt: 2026-07-14
+branch: codex/act-2026-07-14-trace-tag-prevention
 releaseTarget: Current private playtest
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/engine/src/game/damage/damage-core.ts
+  - packages/engine/src/game/trace/trace-orchestration.ts
+  - packages/engine/src/game/run/encounter-printed-effects.ts
+  - packages/engine/src/game/run/encounter-printed-nontrace-effects.ts
+  - packages/engine/src/index-tests/originalset/trace-prevention-assets.test.ts
+  - apps/web/app/run-layering.test.ts
+  - docs/reviews/engine/trace-tag-prevention-avoidance-hardening-2026-07-14.md
+  - docs/activities/inbox/act-2026-07-14-nontrace-tag-prevention-continuations.md
+checks:
+  - corepack pnpm --filter @netgrid/engine test (184 Dateien, 1656 Tests)
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - corepack pnpm --filter @netgrid/web exec vitest run app/run-layering.test.ts (11 Tests)
+  - corepack pnpm --filter @netgrid/web typecheck
+  - corepack pnpm check:package-boundaries
+  - corepack pnpm format:changed
+  - git diff --check
 ---
 
 # Trace-Tags und Avoid-Tag-Quellen systemisch härten
@@ -99,32 +114,32 @@ sequenziell und replay-stabil auflösbar sein.
 
 ## Akzeptanzkriterien
 
-- [ ] Erfolgreicher `Fetch 4.0.1`-Trace mit 0 Runner-Credits und installiertem
+- [x] Erfolgreicher `Fetch 4.0.1`-Trace mit 0 Runner-Credits und installiertem
       `Fall Guy` öffnet vor dem Tag ein runner-privates Fenster mit Pass und
       Fall-Guy-Option.
-- [ ] Fall Guy wählen trasht genau diese Source, gibt keinen Tag und setzt den
+- [x] Fall Guy wählen trasht genau diese Source, gibt keinen Tag und setzt den
       Run am korrekten Encounter-Schritt fort; Pass gibt den Tag und lässt Fall
       Guy installiert.
-- [ ] Trace-Tags funktionieren mit und ohne aktiven Run sowie für alle aktiven
+- [x] Trace-Tags funktionieren mit und ohne aktiven Run sowie für alle aktiven
       Trace-Erfolg-Tagvarianten über denselben Prevention-Vertrag.
-- [ ] Zwei oder mehr Tags können mit mehreren legalen Quellen schrittweise
+- [x] Zwei oder mehr Tags können mit mehreren legalen Quellen schrittweise
       vermieden werden; Kosten, entfernte/getappte Sources und Restmenge werden
       vor jeder Choice erneut validiert.
-- [ ] Nasuko Cycle, Fall Guy, Leland, Nomad Allies, Wilson, Expendable Family
+- [x] Nasuko Cycle, Fall Guy, Leland, Nomad Allies, Wilson, Expendable Family
       Member und Vintage Camaro besitzen je einen belastbaren positiven
       Kosten-/Auflösungstest oder eine äquivalente parametrisierte Abdeckung.
-- [ ] Falsche Seite, stale Choice, nicht mehr installierte Source,
+- [x] Falsche Seite, stale Choice, nicht mehr installierte Source,
       unzureichende Credits und bereits getappte Source bleiben illegal.
-- [ ] Runner-PlayerView sieht die konkrete Avoid-Option; Korp-PlayerView erhält
+- [x] Runner-PlayerView sieht die konkrete Avoid-Option; Korp-PlayerView erhält
       keine private Choice oder verdeckte Source-Identität.
-- [ ] Run-Fenster zeigt das Engine-Choice mit verständlichem Tag-Prompt; die UI
+- [x] Run-Fenster zeigt das Engine-Choice mit verständlichem Tag-Prompt; die UI
       erzeugt keine eigene Kartenaktion.
-- [ ] Replay und StateHash stimmen nach Vermeiden und Pass sowohl im Run- als
+- [x] Replay und StateHash stimmen nach Vermeiden und Pass sowohl im Run- als
       auch im Nicht-Run-Trace-Pfad.
-- [ ] Der Audit aller direkten Tag-Zuweisungen ist im Review nachvollziehbar;
+- [x] Der Audit aller direkten Tag-Zuweisungen ist im Review nachvollziehbar;
       verbleibende Ausnahmen sind fachlich begründet oder als kleine
       Folge-Activities angelegt.
-- [ ] Fokussierte Engine- und Web-Tests, Engine-Typecheck und `git diff --check`
+- [x] Fokussierte Engine- und Web-Tests, Engine-Typecheck und `git diff --check`
       sind grün.
 
 ## Umsetzungshinweise
@@ -144,4 +159,19 @@ sequenziell und replay-stabil auflösbar sein.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen. Erfolgreiche Trace-Tags im Run und außerhalb eines Runs sowie
+gedruckte Nicht-Trace-Tag-ICE-Subroutinen nutzen jetzt den gemeinsamen
+Add-Tag-ImminentEvent-Pfad. Der gemeldete Fetch/Fall-Guy-Fall öffnet bei 0:0
+das runner-private Choice `Tag vermeiden`; Vermeiden und Pass setzen den Run
+korrekt fort und bleiben replay-/statehash-stabil.
+
+Mehrere Tags werden nach jeder Source mit aktueller Restmenge und erneuter
+Kosten-/Source-Prüfung fortgesetzt. Alle sieben aktiven Avoid-Tag-Karten sind
+parametrisiert gegen Registry, Kosten und Priorität abgesichert; zusätzliche
+Verhaltensregressionen decken Trash-Quellen, Hidden Resource, automatische
+Avoid-next-tag-Credits und Vintage Camaros Future-Action-Debt ab.
+
+Der direkte Tag-Schreibstellen-Audit ist im Ergebnisreview dokumentiert.
+Weitere automatische Nicht-Trace-Pfade benötigen einen eigenen
+suspendierbaren Continuation-Vertrag und liegen als
+`act-2026-07-14-nontrace-tag-prevention-continuations` im Inbox-Board.

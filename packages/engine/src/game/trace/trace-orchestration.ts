@@ -126,6 +126,7 @@ export type TraceOrchestrationHost = {
       legalAction: LegalAction;
       runnerLinkFallback?: number;
       extraPayload?: Record<string, unknown> | undefined;
+      additionalTagAmount?: number | undefined;
       deletePendingChoice?: boolean | undefined;
     }) => TraceSuccessFollowupResult;
   };
@@ -141,6 +142,11 @@ export type TraceOrchestrationHost = {
   callbacks: {
     sanitizeId: (value: string) => string;
     addCorpTraceCounterPoolCounters: () => number;
+    addRunnerTagsWithPrevention: (
+      legalAction: LegalAction,
+      amount: number,
+      source: string,
+    ) => boolean;
     resolveTraceTrashRunnerResourceSuccess: (
       sourceDefinitionId: CardDefinitionId,
       sourceCardInstanceId: CardInstanceId,
@@ -373,7 +379,7 @@ function resolveTraceCorpBid(
         ? `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink}; ${state.runner.credits} Credits + ${runnerTraceLinkCreditCapacity} Link-Bits verfügbar)`
         : runnerSupportCreditCapacity > 0
           ? `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink}; ${state.runner.credits} Credits + ${runnerSupportCreditCapacity} Support verfügbar)`
-      : `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink})`,
+          : `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink})`,
     runnerBidCapacity,
     runnerTraceLinkCreditCapacity > 0 || runnerSupportCreditCapacity > 0
       ? "Gesamtbid"
@@ -462,7 +468,7 @@ function openTraceRunnerBidChoice(
         ? `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink}; ${state.runner.credits} Credits + ${runnerTraceLinkCreditCapacity} Link-Bits verfügbar)`
         : runnerSupportCreditCapacity > 0
           ? `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink}; ${state.runner.credits} Credits + ${runnerSupportCreditCapacity} Support verfügbar)`
-      : `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink})`,
+          : `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink})`,
     runnerBidCapacity,
     runnerTraceLinkCreditCapacity > 0 || runnerSupportCreditCapacity > 0
       ? "Gesamtbid"
@@ -635,14 +641,12 @@ function finishTraceRunnerBid(
   const crashSpaceSource = traceAutoSuccessSource(host);
   if (crashSpaceSource) {
     const forcedTrace = forceTraceSuccessful(postBidTrace);
-    const extraPayload = applyTraceAutoSuccessAdditionalTag(
-      host,
-      crashSpaceSource,
-    );
+    const extraPayload = traceAutoSuccessAdditionalTagPayload(crashSpaceSource);
     if (!state.run) {
       completeTraceWithoutRun(host, forcedTrace, "runner_bid", legalAction, {
         runnerLinkFallback: runnerLink,
         extraPayload: { ...tracePaymentPayload, ...extraPayload },
+        additionalTagAmount: 1,
         deletePendingChoice: true,
       });
       return;
@@ -653,6 +657,7 @@ function finishTraceRunnerBid(
       legalAction,
       runnerLinkFallback: runnerLink,
       extraPayload: { ...tracePaymentPayload, ...extraPayload },
+      additionalTagAmount: 1,
       deletePendingChoice: true,
     });
     return;
@@ -1021,14 +1026,12 @@ function completeTraceAfterPostBidLink(
   const crashSpaceSource = traceAutoSuccessSource(host);
   if (crashSpaceSource) {
     const forcedTrace = forceTraceSuccessful(trace);
-    const extraPayload = applyTraceAutoSuccessAdditionalTag(
-      host,
-      crashSpaceSource,
-    );
+    const extraPayload = traceAutoSuccessAdditionalTagPayload(crashSpaceSource);
     if (!host.state.run) {
       completeTraceWithoutRun(host, forcedTrace, "post_bid_link", legalAction, {
         runnerLinkFallback: calculateRunnerLink(host),
         extraPayload,
+        additionalTagAmount: 1,
         deletePendingChoice: true,
       });
       return;
@@ -1039,6 +1042,7 @@ function completeTraceAfterPostBidLink(
       legalAction,
       runnerLinkFallback: calculateRunnerLink(host),
       extraPayload,
+      additionalTagAmount: 1,
       deletePendingChoice: true,
     });
     return;
@@ -1095,21 +1099,14 @@ function forceTraceSuccessful(trace: CurrentTrace): CurrentTrace {
   };
 }
 
-function applyTraceAutoSuccessAdditionalTag(
-  host: TraceOrchestrationHost,
-  source: { cardId: CardInstanceId; definitionId: CardDefinitionId },
-): Record<string, string | number | boolean> {
-  host.state.runner.tags += 1;
-  host.state.runnerTurnFlags ??= {
-    stoleAgendaThisTurn: false,
-    stoleAgendaLastTurn: false,
-  };
-  host.state.runnerTurnFlags.runnerReceivedTagThisTurn = true;
+function traceAutoSuccessAdditionalTagPayload(source: {
+  cardId: CardInstanceId;
+  definitionId: CardDefinitionId;
+}): Record<string, string | number | boolean> {
   return {
     traceAutoSuccessSourceCardId: source.cardId,
     traceAutoSuccessSourceDefinitionId: source.definitionId,
-    traceAutoSuccessAdditionalTagsAdded: 1,
-    runnerTagsAfterTraceAutoSuccess: host.state.runner.tags,
+    traceAutoSuccessAdditionalTagAmount: 1,
   };
 }
 
@@ -1121,6 +1118,7 @@ function completeTraceWithoutRun(
   options: {
     runnerLinkFallback?: number;
     extraPayload?: Record<string, unknown>;
+    additionalTagAmount?: number;
     deletePendingChoice?: boolean;
   } = {},
 ): void {
@@ -1129,12 +1127,9 @@ function completeTraceWithoutRun(
     runnerLinkFallback: options.runnerLinkFallback ?? calculateRunnerLink(host),
   });
   const successful = result.successful;
-  const tagsAdded = traceSuccessTagAmountForOperation(
-    trace.successEffect,
-    successful,
-    result,
-  );
-  if (successful) state.runner.tags += tagsAdded;
+  const tagAmount =
+    traceSuccessTagAmountForOperation(trace.successEffect, successful, result) +
+    (successful ? Math.max(0, options.additionalTagAmount ?? 0) : 0);
   const hackerTrackerCountersAdded =
     host.callbacks.addCorpTraceCounterPoolCounters();
   const traceAvoidReward = successful
@@ -1173,7 +1168,7 @@ function completeTraceWithoutRun(
       ? { postBidTraceLinkBonus: trace.postBidLinkBonus ?? 0 }
       : {}),
     traceSuccessful: successful,
-    tagsAdded,
+    tagsAdded: 0,
     ...(hackerTrackerCountersAdded > 0
       ? {
           hackerTrackerCountersAdded,
@@ -1191,6 +1186,12 @@ function completeTraceWithoutRun(
       : {}),
     ...traceResourceTrashPayload,
   };
+  if (tagAmount > 0)
+    host.callbacks.addRunnerTagsWithPrevention(
+      legalAction,
+      tagAmount,
+      `trace:${trace.sourceDefinitionId}:${trace.traceId}`,
+    );
 }
 
 function traceSuccessTagAmountForOperation(

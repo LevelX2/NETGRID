@@ -47,7 +47,9 @@ export type EncounterPrintedNonTraceHost = {
     definitionFor: (cardId: CardInstanceId) => CardDefinition;
   };
   servers: {
-    mustServer: (serverId: Exclude<ServerId, "new_remote"> | string) => CorpServer;
+    mustServer: (
+      serverId: Exclude<ServerId, "new_remote"> | string,
+    ) => CorpServer;
     publicServerLabel: (
       serverId: Exclude<ServerId, "new_remote"> | string,
     ) => string | undefined;
@@ -58,6 +60,13 @@ export type EncounterPrintedNonTraceHost = {
   payment: {
     spendCorpCredits: (amount: number) => void;
   };
+  tags: {
+    addRunnerTagsWithPrevention: (
+      legalAction: LegalAction,
+      amount: number,
+      source: string,
+    ) => boolean;
+  };
   trash: {
     openRunnerInstalledTrashPreventionWindow: (
       targetCardIds: CardInstanceId[],
@@ -67,7 +76,9 @@ export type EncounterPrintedNonTraceHost = {
     trashRunnerInstalledProgram: (cardId: CardInstanceId) => void;
   };
   choices: {
-    selectedChoiceIds: (selectedChoices: PlayerAction["selectedChoices"]) => string[];
+    selectedChoiceIds: (
+      selectedChoices: PlayerAction["selectedChoices"],
+    ) => string[];
     revealCorpRdTop: (legalAction: LegalAction) => void;
     startCorpRdArrangeChoice: (input: {
       sourceIceId: CardInstanceId;
@@ -167,8 +178,24 @@ export function resolveEncounterPrintedNonTraceEffect(
     return { handled: true, ...source, stateChanged: true };
   }
   if (subroutine.type === "give_runner_tag") {
-    host.state.runner.tags += subroutine.amount ?? 1;
-    return { handled: true, ...source, stateChanged: true };
+    const amount = subroutine.amount ?? 1;
+    if (!legalAction) {
+      host.state.runner.tags += amount;
+      return { handled: true, ...source, stateChanged: true };
+    }
+    const suspended = host.tags.addRunnerTagsWithPrevention(
+      legalAction,
+      amount,
+      `subroutine:${definition.id}:${subroutine.id}`,
+    );
+    if (suspended && !run.resolvedSubroutineIndexes.includes(subroutineIndex))
+      run.resolvedSubroutineIndexes.push(subroutineIndex);
+    return {
+      handled: true,
+      ...source,
+      ...(suspended ? { suspended: true } : {}),
+      stateChanged: true,
+    };
   }
   if (subroutine.type === "trash_installed_program") {
     return resolveDirectTrashProgramSubroutine(host, {
@@ -186,7 +213,10 @@ export function resolveEncounterPrintedNonTraceEffect(
         subroutineIndex,
         subroutine,
         undefined,
-        { paidCredits: Math.max(0, Math.floor(subroutine.amount ?? 0)), cardsTrashed: 0 },
+        {
+          paidCredits: Math.max(0, Math.floor(subroutine.amount ?? 0)),
+          cardsTrashed: 0,
+        },
       );
       return { handled: true, ...source, stateChanged: true };
     }
@@ -291,8 +321,7 @@ function resolveClassicDeflectorSubroutine(
   },
 ): EncounterPrintedNonTraceEffectResult {
   const targetProfile = options.subroutine.deflectorTarget;
-  if (!targetProfile)
-    throw new Error("Deflector-Subroutine ohne Zielprofil.");
+  if (!targetProfile) throw new Error("Deflector-Subroutine ohne Zielprofil.");
   const run = mustRun(host.state);
   const sourceIceId = run.encounteredIceId;
   if (!sourceIceId)
@@ -351,7 +380,12 @@ function resolveClassicDeflectorSubroutine(
       includeDecline: true,
     });
     markSubroutineResolved(run, options.subroutineIndex);
-    return { handled: true, ...options.source, suspended: true, stateChanged: true };
+    return {
+      handled: true,
+      ...options.source,
+      suspended: true,
+      stateChanged: true,
+    };
   }
   if (targets.length > 1) {
     startClassicDeflectorChoice(host, {
@@ -367,7 +401,12 @@ function resolveClassicDeflectorSubroutine(
       includeDecline: false,
     });
     markSubroutineResolved(run, options.subroutineIndex);
-    return { handled: true, ...options.source, suspended: true, stateChanged: true };
+    return {
+      handled: true,
+      ...options.source,
+      suspended: true,
+      stateChanged: true,
+    };
   }
   const target = targets[0]!;
   markSubroutineResolved(run, options.subroutineIndex);
@@ -407,7 +446,8 @@ export function resolveClassicDeflectorChoice(
     throw new Error("Die Deflector-Choice passt nicht mehr zum Run.");
   if (run.encounteredIceId !== context.sourceIceId)
     throw new Error("Die Deflector-Quelle passt nicht mehr zum Encounter.");
-  const selected = host.choices.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+  const selected =
+    host.choices.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
   const subroutine: SubroutineDefinition = {
     id: context.subroutineId,
     type: "deflect_run",
@@ -504,7 +544,8 @@ function startClassicDeflectorChoice(
       subroutineId: input.subroutine.id,
       target: input.targetProfile,
       cost: input.cost,
-      autoBreakIfNoTarget: input.subroutine.deflectorAutoBreakIfNoTarget === true,
+      autoBreakIfNoTarget:
+        input.subroutine.deflectorAutoBreakIfNoTarget === true,
     }),
     prompt:
       input.cost > 0
@@ -573,7 +614,11 @@ export function applyClassicDeflectorRedirect(
   delete run.postPassCancellableFutureIceStrength;
   if (rezzedIceIndex !== undefined) {
     const encounteredIceId = server.ice[rezzedIceIndex]!;
-    run.position = { kind: "ice", serverId: server.id, iceIndex: rezzedIceIndex };
+    run.position = {
+      kind: "ice",
+      serverId: server.id,
+      iceIndex: rezzedIceIndex,
+    };
     run.approachedIceId = encounteredIceId;
     if (host.callbacks?.beginEncounter) {
       host.callbacks.beginEncounter(encounteredIceId, input.legalAction);
@@ -712,7 +757,9 @@ function parseClassicDeflectorChoiceSource(
   };
 }
 
-function isDeflectorTarget(value: string | undefined): value is DeflectorTarget {
+function isDeflectorTarget(
+  value: string | undefined,
+): value is DeflectorTarget {
   return (
     value === "archives" ||
     value === "any_data_fort" ||
@@ -732,11 +779,17 @@ export function resolveDirectTrashProgramSubroutine(
   const targetProgramId = pickRunnerProgramForTrash(host);
   const base: EncounterPrintedNonTraceEffectResult = {
     handled: true,
-    ...(options.definition ? { sourceDefinitionId: options.definition.id } : {}),
+    ...(options.definition
+      ? { sourceDefinitionId: options.definition.id }
+      : {}),
     ...(options.subroutine ? { subroutineId: options.subroutine.id } : {}),
   };
   if (!targetProgramId) {
-    if (options.definition && options.subroutine && options.subroutineIndex !== undefined)
+    if (
+      options.definition &&
+      options.subroutine &&
+      options.subroutineIndex !== undefined
+    )
       appendResolvedSubroutineEffect(
         options.legalAction,
         options.definition,
@@ -756,7 +809,11 @@ export function resolveDirectTrashProgramSubroutine(
       options.legalAction,
     )
   ) {
-    if (options.definition && options.subroutine && options.subroutineIndex !== undefined)
+    if (
+      options.definition &&
+      options.subroutine &&
+      options.subroutineIndex !== undefined
+    )
       appendResolvedSubroutineEffect(
         options.legalAction,
         options.definition,
@@ -781,7 +838,11 @@ export function resolveDirectTrashProgramSubroutine(
       trashedCount: 1,
     };
   }
-  if (options.definition && options.subroutine && options.subroutineIndex !== undefined)
+  if (
+    options.definition &&
+    options.subroutine &&
+    options.subroutineIndex !== undefined
+  )
     appendResolvedSubroutineEffect(
       options.legalAction,
       options.definition,
@@ -884,7 +945,12 @@ function resolveDirectCorpRdReorderSubroutine(
   });
   if (!run.resolvedSubroutineIndexes.includes(options.subroutineIndex))
     run.resolvedSubroutineIndexes.push(options.subroutineIndex);
-  return { handled: true, ...options.source, suspended: true, stateChanged: true };
+  return {
+    handled: true,
+    ...options.source,
+    suspended: true,
+    stateChanged: true,
+  };
 }
 
 function resolveDirectEndRunSubroutine(
@@ -912,7 +978,9 @@ function resolveDirectEndRunSubroutine(
       stateChanged: false,
     };
   }
-  if (options.subroutine.type === "end_the_run_and_trash_source_at_end_of_turn") {
+  if (
+    options.subroutine.type === "end_the_run_and_trash_source_at_end_of_turn"
+  ) {
     const sourceCardId = host.state.run?.encounteredIceId;
     if (!sourceCardId)
       throw new Error("End-of-turn-Trash-Subroutine benötigt Encounter-ICE.");

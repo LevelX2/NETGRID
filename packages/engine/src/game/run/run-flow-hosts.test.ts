@@ -8,10 +8,7 @@ import type {
 } from "@netgrid/shared";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import {
-  createRunFlowAdapters,
-  type RunFlowHost,
-} from "./run-flow-hosts";
+import { createRunFlowAdapters, type RunFlowHost } from "./run-flow-hosts";
 
 const ICE_ID = "ice_outer" as CardInstanceId;
 
@@ -139,7 +136,8 @@ function hostFor(calls: string[]): RunFlowHost {
         calls.push("expertScheduleAnalyzer"),
     },
     run: {
-      currentRun: (targetState) => targetState.run as NonNullable<GameState["run"]>,
+      currentRun: (targetState) =>
+        targetState.run as NonNullable<GameState["run"]>,
       currentEncounterSubroutines: () => [],
       runRemainderStrengthBonusForBreaker: () => 0,
       runnerDuringRunCardImplementationLegalActions: () => [],
@@ -148,7 +146,8 @@ function hostFor(calls: string[]): RunFlowHost {
         calls.push("runStartEffects"),
       applyRunnerTraceCounterRunStartEffects: () =>
         calls.push("traceCounterRunStart"),
-      applyRunStartRandomStrengthBonus: () => calls.push("runStartRandomStrengthBonus"),
+      applyRunStartRandomStrengthBonus: () =>
+        calls.push("runStartRandomStrengthBonus"),
       openStartOfRunFortUtilityWindow: () => false,
     },
     trace: {
@@ -163,6 +162,7 @@ function hostFor(calls: string[]): RunFlowHost {
       supportsTraceSuccessEffect: () => true,
     },
     damage: {
+      addRunnerTagsWithPrevention: (() => false) as never,
       createDamageImminentEvent: (() => ({})) as never,
       doDamage: (() => ({
         damageType: "net",
@@ -305,7 +305,9 @@ describe("run-flow-hosts", () => {
 
     adapters.runCoreExecutionHost(targetState).servers.mustServer("hq");
     adapters.runCoreExecutionHost(targetState).turn.ensureRunnerTurnFlags();
-    adapters.runContinuationExecutionHost(targetState).callbacks.finishRun(false);
+    adapters
+      .runContinuationExecutionHost(targetState)
+      .callbacks.finishRun(false);
     adapters.runMovementHostForState(targetState).cleanup.finishRun(true);
 
     expect(calls).toEqual([

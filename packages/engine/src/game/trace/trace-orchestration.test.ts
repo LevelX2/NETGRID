@@ -137,6 +137,9 @@ describe("trace orchestration", () => {
 
     expect(state.runner.credits).toBe(3);
     expect(calls.followups).toEqual([]);
+    expect(calls.tagRequests).toEqual([
+      { amount: 1, source: "trace:trace_source:trace_1" },
+    ]);
     expect(state.runner.tags).toBe(1);
     expect(action.payload).toMatchObject({
       traceId: "trace_1",
@@ -146,6 +149,59 @@ describe("trace orchestration", () => {
     });
     expect(state.trace).toBeUndefined();
     expect(state.pendingChoice).toBeUndefined();
+  });
+
+  it("routes Crash Space's forced-success extra tag through the shared tag request", () => {
+    const sourceId = "source_1" as CardInstanceId;
+    const crashSpaceId = "crash_space_1" as CardInstanceId;
+    const sourceDefinition = definition("trace_source", "operation");
+    const crashSpaceDefinition = definition(
+      "onr_classic_044_crash-space",
+      "resource",
+    );
+    const state = minimalState({
+      cardInstances: {
+        [sourceId]: instance(sourceId, sourceDefinition.id, "corp"),
+        [crashSpaceId]: instance(
+          crashSpaceId,
+          crashSpaceDefinition.id,
+          "runner",
+        ),
+      },
+      runnerResources: [crashSpaceId],
+    });
+    state.trace = activeTrace(sourceId, sourceDefinition.id, "runner_bid", {
+      corpBid: 0,
+      traceStrength: 2,
+      runnerLink: 1,
+    });
+    state.pendingChoice = bidChoice(state, "runner", state.trace.traceId, 5);
+    const calls = testCalls();
+    const action = actionFor("runner", "resolve_choice");
+
+    resolveTraceChoice(
+      testHost(
+        state,
+        {
+          [sourceDefinition.id]: sourceDefinition,
+          [crashSpaceDefinition.id]: crashSpaceDefinition,
+        },
+        calls,
+      ),
+      action,
+      playerChoice("bid_5"),
+    );
+
+    expect(calls.tagRequests).toEqual([
+      { amount: 2, source: "trace:trace_source:trace_1" },
+    ]);
+    expect(state.runner.tags).toBe(2);
+    expect(action.payload).toMatchObject({
+      traceSuccessful: true,
+      traceAutoSuccessSourceDefinitionId: "onr_classic_044_crash-space",
+      traceAutoSuccessAdditionalTagAmount: 1,
+      tagsAdded: 2,
+    });
   });
 
   it("opens runner cost support when a trace bid exceeds normal credits", () => {
@@ -753,6 +809,7 @@ type TestCalls = {
   submarineMarkers: CardInstanceId[];
   followups: string[];
   runActionCapSpends: number[];
+  tagRequests: Array<{ amount: number; source: string }>;
 };
 
 function testCalls(): TestCalls {
@@ -760,6 +817,7 @@ function testCalls(): TestCalls {
     submarineMarkers: [],
     followups: [],
     runActionCapSpends: [],
+    tagRequests: [],
   };
 }
 
@@ -954,6 +1012,16 @@ function testHost(
     callbacks: {
       sanitizeId: (value) => value.replace(/[^a-z0-9_]+/gi, "_"),
       addCorpTraceCounterPoolCounters: () => 0,
+      addRunnerTagsWithPrevention: (legalAction, amount, source) => {
+        calls.tagRequests.push({ amount, source });
+        state.runner.tags += amount;
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          tagsAdded: amount,
+          runnerTagsAfter: state.runner.tags,
+        };
+        return false;
+      },
       resolveTraceTrashRunnerResourceSuccess: () => ({}),
     },
   };

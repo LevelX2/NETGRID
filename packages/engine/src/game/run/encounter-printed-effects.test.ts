@@ -121,11 +121,14 @@ function definitionFor(cardId: CardInstanceId): CardDefinition {
       baseLink: 0,
     } as CardDefinition,
   };
-  return definitions[cardId] ?? ({
-    id: String(cardId),
-    title: String(cardId),
-    type: "program",
-  } as CardDefinition);
+  return (
+    definitions[cardId] ??
+    ({
+      id: String(cardId),
+      title: String(cardId),
+      type: "program",
+    } as CardDefinition)
+  );
 }
 
 function makeHost(
@@ -142,6 +145,15 @@ function makeHost(
       };
     },
     addCorpTraceCounterPoolCounters: () => 0,
+    addRunnerTagsWithPrevention: (action, amount) => {
+      state.runner.tags += amount;
+      action.payload = {
+        ...(action.payload ?? {}),
+        tagsAdded: amount,
+        runnerTagsAfter: state.runner.tags,
+      };
+      return false;
+    },
     calculateRunnerLink: () => 0,
     cardCounter: (cardId, counterType) =>
       state.cardInstances[cardId]?.counters?.[counterType] ?? 0,
@@ -253,18 +265,21 @@ describe("encounter printed effects boundary", () => {
     const legalAction = { payload: {} } as LegalAction;
     const summaries: DamageSummary[] = [];
 
-    const result = resolvePrintedDamageSubroutine(makeHost(state, legalAction), {
-      definition: definitionFor("ice_1" as CardInstanceId),
-      subroutine: {
-        id: "net_damage",
-        type: "do_damage",
-        damageType: "net",
-        amount: 2,
-      } as SubroutineDefinition,
-      subroutineIndex: 0,
-      damageSummaries: summaries,
-      legalAction,
-    });
+    const result = resolvePrintedDamageSubroutine(
+      makeHost(state, legalAction),
+      {
+        definition: definitionFor("ice_1" as CardInstanceId),
+        subroutine: {
+          id: "net_damage",
+          type: "do_damage",
+          damageType: "net",
+          amount: 2,
+        } as SubroutineDefinition,
+        subroutineIndex: 0,
+        damageSummaries: summaries,
+        legalAction,
+      },
+    );
 
     expect(result).toMatchObject({
       handled: true,
@@ -570,7 +585,9 @@ describe("encounter printed effects boundary", () => {
     expect(state.trace).toBeUndefined();
     expect(state.pendingChoice).toBeUndefined();
     expect(state.runner.tags).toBe(1);
-    expect(state.cardInstances.runner_identity?.counters?.trace_tag_counter).toBe(1);
+    expect(
+      state.cardInstances.runner_identity?.counters?.trace_tag_counter,
+    ).toBe(1);
     expect(state.run?.traceSuccessBySubroutineIndex).toEqual({ 0: true });
     expect(legalAction.payload).toMatchObject({
       traceId: "run_1.ice_1.0.trace",

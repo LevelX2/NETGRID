@@ -700,6 +700,7 @@ export function createActivatedCardRuntimeHosts(
     encounterSpecialWindowHostForState,
     fortRunSideFamiliesHostForState,
     addCorpTraceCounterPoolCounters,
+    addRunnerTagsWithPrevention,
     corpTraceCounterPoolTotal,
     identityModifierAmount,
     recurringTraceCreditPoolTotal,
@@ -799,6 +800,8 @@ export function createActivatedCardRuntimeHosts(
         sanitizeId,
         addCorpTraceCounterPoolCounters: () =>
           addCorpTraceCounterPoolCounters(state),
+        addRunnerTagsWithPrevention: (legalAction, amount, source) =>
+          addRunnerTagsWithPrevention(state, legalAction, amount, source),
         resolveTraceTrashRunnerResourceSuccess: (
           sourceDefinitionId,
           sourceCardInstanceId,

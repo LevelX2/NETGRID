@@ -10,6 +10,7 @@ import type {
   PlayerAction,
 } from "@netgrid/shared";
 import {
+  addRunnerTagsWithPrevention,
   configureDamageCoreHost,
   doDamage,
   resetDamageCoreHostForTests,
@@ -133,6 +134,176 @@ describe("damage core", () => {
       finalAmount: 0,
       damageResolved: true,
       damageAmount: 0,
+    });
+  });
+
+  it("chains public tag-avoidance sources until every incoming tag is handled", () => {
+    const fallGuyId = "fall_guy_1" as CardInstanceId;
+    const nomadId = "nomad_allies_1" as CardInstanceId;
+    const state = minimalState({
+      cardInstances: {
+        [fallGuyId]: {
+          ...instance(fallGuyId, "onr_v1_161_fall-guy", "runner", "grip"),
+          faceup: true,
+          rezzed: true,
+          zone: { side: "runner", zone: "rig" },
+        } as CardInstance,
+        [nomadId]: {
+          ...instance(nomadId, "onr_v1_170_nomad-allies", "runner", "grip"),
+          faceup: true,
+          rezzed: true,
+          zone: { side: "runner", zone: "rig" },
+        } as CardInstance,
+      },
+      runnerGrip: [],
+    });
+    state.runner.rig.resources = [fallGuyId, nomadId];
+    configureDamageCoreHost(testHost());
+    const initiatingAction = actionFor("corp", "play_operation");
+
+    expect(
+      addRunnerTagsWithPrevention(state, initiatingAction, 2, "trace:test"),
+    ).toBe(true);
+    expect(state.pendingChoice).toMatchObject({
+      side: "runner",
+      source: "v120.event_modification.avoid",
+      prompt: "Tag vermeiden",
+    });
+
+    const firstChoice = actionFor("runner", "resolve_choice");
+    resolveEventModificationChoice(
+      state,
+      firstChoice,
+      playerChoice(
+        String(
+          state.pendingChoice?.options.find((option) =>
+            option.id.includes(String(fallGuyId)),
+          )?.id,
+        ),
+      ),
+    );
+    expect(state.runner.tags).toBe(0);
+    expect(state.runner.heap).toContain(fallGuyId);
+    expect(state.pendingChoice).toMatchObject({
+      side: "runner",
+      prompt: "Tag vermeiden",
+    });
+    expect(
+      state.pendingChoice?.options.some((option) =>
+        option.id.includes(String(nomadId)),
+      ),
+    ).toBe(true);
+
+    const secondChoice = actionFor("runner", "resolve_choice");
+    resolveEventModificationChoice(
+      state,
+      secondChoice,
+      playerChoice(
+        String(
+          state.pendingChoice?.options.find((option) =>
+            option.id.includes(String(nomadId)),
+          )?.id,
+        ),
+      ),
+    );
+    expect(state.runner.tags).toBe(0);
+    expect(state.runner.heap).toEqual(
+      expect.arrayContaining([fallGuyId, nomadId]),
+    );
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.eventModificationWindow).toBeUndefined();
+    expect(state.imminentEvent).toBeUndefined();
+  });
+
+  it("continues prevention after an automatic avoid-next-tag credit", () => {
+    const fallGuyId = "fall_guy_after_automatic_avoid" as CardInstanceId;
+    const state = minimalState({
+      cardInstances: {
+        [fallGuyId]: {
+          ...instance(fallGuyId, "onr_v1_161_fall-guy", "runner", "grip"),
+          faceup: true,
+          rezzed: true,
+          zone: { side: "runner", zone: "rig" },
+        } as CardInstance,
+      },
+      runnerGrip: [],
+    });
+    state.runner.rig.resources = [fallGuyId];
+    state.runnerTagAvoidanceCredits = 1;
+    configureDamageCoreHost(testHost());
+    const initiatingAction = actionFor("corp", "play_operation");
+
+    expect(
+      addRunnerTagsWithPrevention(state, initiatingAction, 2, "trace:test"),
+    ).toBe(true);
+    expect(state.runnerTagAvoidanceCredits).toBe(0);
+    expect(state.runner.tags).toBe(0);
+    expect(initiatingAction.payload).toMatchObject({
+      tagsAdded: 0,
+      preventedTags: 1,
+      tagAvoidanceCreditsAfter: 0,
+      eventModificationWindowOpened: true,
+    });
+    const avoidOption = state.pendingChoice?.options.find((option) =>
+      option.id.includes(String(fallGuyId)),
+    )?.id;
+    resolveEventModificationChoice(
+      state,
+      actionFor("runner", "resolve_choice"),
+      playerChoice(String(avoidOption)),
+    );
+
+    expect(state.runner.tags).toBe(0);
+    expect(state.runner.heap).toContain(fallGuyId);
+    expect(state.pendingChoice).toBeUndefined();
+  });
+
+  it("charges Vintage Camaro credits and future-action debt when avoiding a tag", () => {
+    const camaroId = "vintage_camaro_1" as CardInstanceId;
+    const state = minimalState({
+      cardInstances: {
+        [camaroId]: {
+          ...instance(
+            camaroId,
+            "onr_classic_051_vintage-camaro",
+            "runner",
+            "grip",
+          ),
+          faceup: true,
+          rezzed: true,
+          zone: { side: "runner", zone: "rig" },
+        } as CardInstance,
+      },
+      runnerGrip: [],
+    });
+    state.runner.credits = 1;
+    state.runner.rig.hardware = [camaroId];
+    configureDamageCoreHost(testHost());
+    const initiatingAction = actionFor("corp", "play_operation");
+
+    expect(
+      addRunnerTagsWithPrevention(state, initiatingAction, 1, "trace:test"),
+    ).toBe(true);
+    const avoidOption = state.pendingChoice?.options.find((option) =>
+      option.id.includes(String(camaroId)),
+    )?.id;
+    const choiceAction = actionFor("runner", "resolve_choice");
+    resolveEventModificationChoice(
+      state,
+      choiceAction,
+      playerChoice(String(avoidOption)),
+    );
+
+    expect(state.runner.tags).toBe(0);
+    expect(state.runner.credits).toBe(0);
+    expect(state.runner.rig.hardware).toContain(camaroId);
+    expect(state.runnerTurnFlags?.forgoNextActionsPending).toBe(1);
+    expect(choiceAction.payload).toMatchObject({
+      eventModificationOutcome: "avoided",
+      sourceDefinitionId: "onr_classic_051_vintage-camaro",
+      paidCredits: 1,
+      runnerForgoNextActions: 1,
+      tagsAdded: 0,
     });
   });
 
@@ -382,7 +553,7 @@ function testHost(): DamageCoreHost {
         return state.runnerTurnFlags;
       },
       addFutureActionDebt: (state, amount) => {
-        const flags = state.runnerTurnFlags ??= {} as any;
+        const flags = (state.runnerTurnFlags ??= {} as any);
         flags.forgoNextActionsPending =
           Math.max(0, Math.floor(flags.forgoNextActionsPending ?? 0)) + amount;
       },

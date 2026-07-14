@@ -99,10 +99,14 @@ function makeState(): GameState {
         side: "runner",
         zone: "rig",
       }),
-      expensive_program: instance("expensive_program", "expensive_program_def", {
-        side: "runner",
-        zone: "rig",
-      }),
+      expensive_program: instance(
+        "expensive_program",
+        "expensive_program_def",
+        {
+          side: "runner",
+          zone: "rig",
+        },
+      ),
       rd_1: instance("rd_1", "rd_card_1", { side: "corp", zone: "rd" }),
       rd_2: instance("rd_2", "rd_card_2", { side: "corp", zone: "rd" }),
     },
@@ -140,10 +144,15 @@ function makeHost(
       "Secret Spend Compare",
       "ice",
     ),
-    cheap_program_def: definition("cheap_program_def", "Cheap Program", "program", {
-      installCost: 1,
-      memoryCost: 2,
-    }),
+    cheap_program_def: definition(
+      "cheap_program_def",
+      "Cheap Program",
+      "program",
+      {
+        installCost: 1,
+        memoryCost: 2,
+      },
+    ),
     expensive_program_def: definition(
       "expensive_program_def",
       "Expensive Program",
@@ -155,7 +164,9 @@ function makeHost(
     ...(options.definitions ?? {}),
   };
   const mustServer = (serverId: string) => {
-    const server = state.corp.servers.find((candidate) => candidate.id === serverId);
+    const server = state.corp.servers.find(
+      (candidate) => candidate.id === serverId,
+    );
     if (!server) throw new Error(`missing server ${serverId}`);
     return server;
   };
@@ -190,6 +201,17 @@ function makeHost(
         state.corp.credits -= amount;
       },
     },
+    tags: {
+      addRunnerTagsWithPrevention: (legalAction, amount) => {
+        state.runner.tags += amount;
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          tagsAdded: amount,
+          runnerTagsAfter: state.runner.tags,
+        };
+        return false;
+      },
+    },
     trash: {
       openRunnerInstalledTrashPreventionWindow: (_targetIds, source) => {
         expect(source).toBe("trash_program_subroutine");
@@ -208,7 +230,7 @@ function makeHost(
     },
     choices: {
       selectedChoiceIds: (selectedChoices) =>
-        ((selectedChoices?.optionIds ?? []) as string[]),
+        (selectedChoices?.optionIds ?? []) as string[],
       revealCorpRdTop:
         options.revealCorpRdTop ??
         ((legalAction) => {
@@ -289,9 +311,9 @@ describe("encounter printed non-trace effects boundary", () => {
       iceId: "ice_1",
       stateChanged: true,
     });
-    expect(state.runnerTurnFlags?.delayedCorpInstalledCardTrashAtTurnEndIds).toEqual([
-      "ice_1",
-    ]);
+    expect(
+      state.runnerTurnFlags?.delayedCorpInstalledCardTrashAtTurnEndIds,
+    ).toEqual(["ice_1"]);
     expect(legalAction.payload).toMatchObject({
       delayedCorpInstalledCardTrashAtTurnEnd: true,
       delayedCorpInstalledCardTrashAtTurnEndId: "ice_1",
@@ -323,17 +345,20 @@ describe("encounter printed non-trace effects boundary", () => {
       legalAction,
       paidPayOrEndRunIndexes: paid,
     });
-    const unpaidResult = resolveEncounterPrintedNonTraceEffect(makeHost(state), {
-      definition: definition("test_ice", "Test ICE", "ice"),
-      subroutine: {
-        id: "unpaid",
-        type: "end_the_run_unless_runner_pays",
-        amount: 3,
-      } as SubroutineDefinition,
-      subroutineIndex: 1,
-      legalAction,
-      paidPayOrEndRunIndexes: paid,
-    });
+    const unpaidResult = resolveEncounterPrintedNonTraceEffect(
+      makeHost(state),
+      {
+        definition: definition("test_ice", "Test ICE", "ice"),
+        subroutine: {
+          id: "unpaid",
+          type: "end_the_run_unless_runner_pays",
+          amount: 3,
+        } as SubroutineDefinition,
+        subroutineIndex: 1,
+        legalAction,
+        paidPayOrEndRunIndexes: paid,
+      },
+    );
 
     expect(paidResult).toMatchObject({ handled: true, runShouldEnd: false });
     expect(unpaidResult).toMatchObject({ handled: true, runShouldEnd: true });

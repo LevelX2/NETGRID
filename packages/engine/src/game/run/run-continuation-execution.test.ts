@@ -36,8 +36,7 @@ function instance(
     definitionId,
     owner: options.owner ?? "corp",
     controller: options.controller ?? "corp",
-    zone:
-      options.zone ?? { side: "corp", zone: "serverIce", serverId: "hq" },
+    zone: options.zone ?? { side: "corp", zone: "serverIce", serverId: "hq" },
     faceup: options.faceup ?? true,
     rezzed: options.rezzed ?? true,
     strengthModifier: options.strengthModifier ?? 0,
@@ -128,8 +127,7 @@ function makeState(
               iceIndex: options.positionIceIndex ?? iceIds.length - 1,
             },
       approachedIceId: ICE_ID,
-      encounteredIceId:
-        options.phase === "access" ? undefined : ICE_ID,
+      encounteredIceId: options.phase === "access" ? undefined : ICE_ID,
       brokenSubroutineIndexes: options.brokenSubroutineIndexes ?? [],
       resolvedSubroutineIndexes: [],
       bartmossUsedBreakerIdsThisEncounter:
@@ -170,7 +168,9 @@ function hostFor(
     return card;
   };
   const mustServer = (serverId: Exclude<ServerId, "new_remote"> | string) => {
-    const server = state.corp.servers.find((candidate) => candidate.id === serverId);
+    const server = state.corp.servers.find(
+      (candidate) => candidate.id === serverId,
+    );
     if (!server) throw new Error(`Server fehlt: ${serverId}`);
     return server;
   };
@@ -194,6 +194,17 @@ function hostFor(
         state.corp.credits -= amount;
       },
     },
+    tags: {
+      addRunnerTagsWithPrevention: (legalAction, amount) => {
+        state.runner.tags += amount;
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          tagsAdded: amount,
+          runnerTagsAfter: state.runner.tags,
+        };
+        return false;
+      },
+    },
     trash: {
       openRunnerInstalledTrashPreventionWindow: () => false,
       trashRunnerInstalledProgram: (cardId) =>
@@ -201,7 +212,7 @@ function hostFor(
     },
     choices: {
       selectedChoiceIds: (selectedChoices) =>
-        ((selectedChoices?.optionIds ?? []) as string[]),
+        (selectedChoices?.optionIds ?? []) as string[],
       revealCorpRdTop: () => calls.push("revealCorpRdTop"),
       startCorpRdArrangeChoice: () => calls.push("startCorpRdArrangeChoice"),
     },
@@ -249,7 +260,7 @@ function hostFor(
       encounter: {
         currentSubroutines: () => subroutines,
         resolutionHost,
-        printedEffectHost: () => ({ state } as EncounterPrintedEffectHost),
+        printedEffectHost: () => ({ state }) as EncounterPrintedEffectHost,
         printedNonTraceHost,
         specialWindowHost,
         successfulRunInterventionHost: () =>
@@ -346,8 +357,8 @@ describe("run-continuation-execution", () => {
   });
 
   it("fails clearly when required host groups are absent", () => {
-    expect(() =>
-      continueRun({} as RunContinuationExecutionHost),
-    ).toThrow("RunContinuationExecutionHost missing group: state");
+    expect(() => continueRun({} as RunContinuationExecutionHost)).toThrow(
+      "RunContinuationExecutionHost missing group: state",
+    );
   });
 });

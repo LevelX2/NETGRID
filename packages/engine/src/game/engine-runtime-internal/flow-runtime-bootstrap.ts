@@ -1306,6 +1306,7 @@ export function configureFlowRuntimeBootstrap({
         traceSuccessEffectForCardImplementation,
       },
       damage: {
+        addRunnerTagsWithPrevention,
         createDamageImminentEvent,
         doDamage,
         openDamageResolutionWindow,

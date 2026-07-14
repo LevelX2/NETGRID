@@ -135,11 +135,22 @@ function host(): TraceRuntimeDepsHost {
         callbacks: {
           sanitizeId: (value) => value.replace(/[^a-zA-Z0-9_.-]/g, "_"),
           addCorpTraceCounterPoolCounters: () => 0,
+          addRunnerTagsWithPrevention: (legalAction, amount) => {
+            gameState.runner.tags += amount;
+            legalAction.payload = {
+              ...(legalAction.payload ?? {}),
+              tagsAdded: amount,
+              runnerTagsAfter: gameState.runner.tags,
+            };
+            return false;
+          },
           resolveTraceTrashRunnerResourceSuccess: () => ({}),
         },
       }),
-      resolveRunnerLastTurnInstalledResourceTargetId: (_gameState, targetRef) =>
-        targetRef === targetResourceId ? targetResourceId : undefined,
+      resolveRunnerLastTurnInstalledResourceTargetId: (
+        _gameState,
+        targetRef,
+      ) => (targetRef === targetResourceId ? targetResourceId : undefined),
     },
   };
 }
@@ -162,7 +173,14 @@ describe("trace card implementation runtime deps", () => {
       sourceCardId,
       sourceDefinitionId,
       4,
-      [{ kind: "add_tags", recipient: "runner", amount: 1, visibility: "public" }],
+      [
+        {
+          kind: "add_tags",
+          recipient: "runner",
+          amount: 1,
+          visibility: "public",
+        },
+      ],
     );
 
     expect(result).toMatchObject({
@@ -248,7 +266,9 @@ describe("trace card implementation runtime deps", () => {
           },
         ],
       ),
-    ).toThrow("Die gewaehlte Runner-Resource ist fuer diesen Trace nicht legal.");
+    ).toThrow(
+      "Die gewaehlte Runner-Resource ist fuer diesen Trace nicht legal.",
+    );
     expect(gameState.trace).toBeUndefined();
   });
 

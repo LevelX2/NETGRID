@@ -6,7 +6,9 @@ function readCssWithImports(url: URL, seen = new Set<string>()): string {
   if (seen.has(key)) return "";
   seen.add(key);
   const source = readFileSync(url, "utf8");
-  return source.replace(/^@import\s+"(.+)";/gm, (_match, specifier: string) => readCssWithImports(new URL(specifier, url), seen));
+  return source.replace(/^@import\s+"(.+)";/gm, (_match, specifier: string) =>
+    readCssWithImports(new URL(specifier, url), seen),
+  );
 }
 
 const css = readCssWithImports(new URL("./globals.css", import.meta.url));
@@ -39,6 +41,10 @@ const windowEventIconKindSource = readFileSync(
   new URL("../features/actions/window-event-icon-kind.ts", import.meta.url),
   "utf8",
 );
+const runTimelineOverlaySource = readFileSync(
+  new URL("../features/game-board/RunTimelineOverlay.tsx", import.meta.url),
+  "utf8",
+);
 
 function zLayer(name: string): number {
   const match = css.match(new RegExp(`--${name}:\\s*(\\d+);`));
@@ -48,17 +54,42 @@ function zLayer(name: string): number {
 
 function selectorBlock(selector: string): string {
   const escapedSelector = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const match = css.match(new RegExp(`${escapedSelector}\\s*\\{([\\s\\S]*?)\\n\\}`));
+  const match = css.match(
+    new RegExp(`${escapedSelector}\\s*\\{([\\s\\S]*?)\\n\\}`),
+  );
   expect(match, `missing ${selector}`).not.toBeNull();
   return match![1]!;
 }
 
 describe("run window layering", () => {
+  it("renders engine-owned single-choice actions directly in the run window", () => {
+    expect(runTimelineOverlaySource).toContain(
+      'action.type === "resolve_choice"',
+    );
+    expect(runTimelineOverlaySource).toContain(
+      'data-testid="run-choice-action-bar"',
+    );
+    expect(runTimelineOverlaySource).toContain(
+      'data-testid="run-choice-button"',
+    );
+    expect(runTimelineOverlaySource).toContain(
+      "onChoiceOption(choiceAction, runChoice.choiceId, option.id)",
+    );
+  });
+
   it("keeps the run overlay above normal board surfaces and below card detail overlays", () => {
-    expect(selectorBlock(".runTimelineOverlay")).toContain("z-index: var(--z-run-overlay)");
-    expect(selectorBlock(".cardChoiceOverlay")).toContain("z-index: var(--z-card-choice-overlay)");
-    expect(selectorBlock(".accessRevealOverlay")).toContain("z-index: var(--z-access-reveal-overlay)");
-    expect(selectorBlock(".cardTooltip")).toContain("z-index: var(--z-card-tooltip-overlay)");
+    expect(selectorBlock(".runTimelineOverlay")).toContain(
+      "z-index: var(--z-run-overlay)",
+    );
+    expect(selectorBlock(".cardChoiceOverlay")).toContain(
+      "z-index: var(--z-card-choice-overlay)",
+    );
+    expect(selectorBlock(".accessRevealOverlay")).toContain(
+      "z-index: var(--z-access-reveal-overlay)",
+    );
+    expect(selectorBlock(".cardTooltip")).toContain(
+      "z-index: var(--z-card-tooltip-overlay)",
+    );
 
     const runOverlay = zLayer("z-run-overlay");
     expect(runOverlay).toBeGreaterThan(180);
@@ -69,23 +100,53 @@ describe("run window layering", () => {
   });
 
   it("keeps stack-search card choices readable instead of overlapped", () => {
-    expect(selectorBlock(".cardChoiceDialog.readableCards .cardChoiceOverlapRow")).toContain("display: grid");
-    expect(selectorBlock(".cardChoiceDialog.readableCards .cardChoiceOverlapRow")).toContain("minmax(184px, 1fr)");
-    expect(selectorBlock(".cardChoiceDialog.readableCards .cardChoiceOverlapRow")).toContain("grid-auto-rows: auto");
-    expect(selectorBlock(".cardChoiceDialog.readableCards .cardChoiceOverlapRow")).toContain("align-items: flex-start");
-    expect(selectorBlock(".cardChoiceDialog.readableCards .cardChoiceOptionSlot")).toContain("flex: 1 1 auto");
-    expect(selectorBlock(".cardChoiceDialog.readableCards .cardChoiceOptionSlot")).toContain("min-width: 0");
-    expect(selectorBlock(".cardChoiceDialog.readableCards .cardChoiceOptionSlot + .cardChoiceOptionSlot")).toContain("margin-left: 0");
-    expect(selectorBlock(".cardChoiceOrderBadge")).toContain("position: absolute");
-    expect(selectorBlock(".cardChoiceOrderBadge")).toContain("pointer-events: none");
+    expect(
+      selectorBlock(".cardChoiceDialog.readableCards .cardChoiceOverlapRow"),
+    ).toContain("display: grid");
+    expect(
+      selectorBlock(".cardChoiceDialog.readableCards .cardChoiceOverlapRow"),
+    ).toContain("minmax(184px, 1fr)");
+    expect(
+      selectorBlock(".cardChoiceDialog.readableCards .cardChoiceOverlapRow"),
+    ).toContain("grid-auto-rows: auto");
+    expect(
+      selectorBlock(".cardChoiceDialog.readableCards .cardChoiceOverlapRow"),
+    ).toContain("align-items: flex-start");
+    expect(
+      selectorBlock(".cardChoiceDialog.readableCards .cardChoiceOptionSlot"),
+    ).toContain("flex: 1 1 auto");
+    expect(
+      selectorBlock(".cardChoiceDialog.readableCards .cardChoiceOptionSlot"),
+    ).toContain("min-width: 0");
+    expect(
+      selectorBlock(
+        ".cardChoiceDialog.readableCards .cardChoiceOptionSlot + .cardChoiceOptionSlot",
+      ),
+    ).toContain("margin-left: 0");
+    expect(selectorBlock(".cardChoiceOrderBadge")).toContain(
+      "position: absolute",
+    );
+    expect(selectorBlock(".cardChoiceOrderBadge")).toContain(
+      "pointer-events: none",
+    );
   });
 
   it("keeps access reveal cards primary with compact round actions", () => {
-    expect(selectorBlock(".accessRevealBody")).toContain("grid-template-columns: minmax(220px, 292px) minmax(150px, 180px)");
-    expect(selectorBlock(".accessRevealCard")).toContain("width: min(292px, 100%)");
-    expect(selectorBlock(".accessRevealActions .button")).toContain("border-radius: 999px");
-    expect(selectorBlock(".accessRevealActionButton")).toContain("height: auto");
-    expect(selectorBlock(".accessRevealActionButton")).toContain("grid-template-columns: auto minmax(0, 1fr) auto");
+    expect(selectorBlock(".accessRevealBody")).toContain(
+      "grid-template-columns: minmax(220px, 292px) minmax(150px, 180px)",
+    );
+    expect(selectorBlock(".accessRevealCard")).toContain(
+      "width: min(292px, 100%)",
+    );
+    expect(selectorBlock(".accessRevealActions .button")).toContain(
+      "border-radius: 999px",
+    );
+    expect(selectorBlock(".accessRevealActionButton")).toContain(
+      "height: auto",
+    );
+    expect(selectorBlock(".accessRevealActionButton")).toContain(
+      "grid-template-columns: auto minmax(0, 1fr) auto",
+    );
   });
 
   it("keeps the access cue mounted in manual and automatic AI advance paths", () => {
@@ -149,7 +210,9 @@ describe("run window layering", () => {
 
   it("keeps damage ambience from overriding the fixed damage overlay placement", () => {
     expect(selectorBlock(".damageImpactOverlay")).toContain("position: fixed");
-    expect(selectorBlock(".damageImpactOverlay.ambience-damage")).toContain("position: fixed");
+    expect(selectorBlock(".damageImpactOverlay.ambience-damage")).toContain(
+      "position: fixed",
+    );
     expect(css).toContain("rgb(8 12 16 / 0.18)");
     expect(css).toContain("border-radius: inherit");
   });
@@ -194,8 +257,12 @@ describe("run window layering", () => {
     );
     expect(css).toContain(".windowEventIcon-side-runner");
     expect(css).toContain(".windowEventIcon-side-corp");
-    expect(windowEventIconSource).toContain("data-window-event-side={side ?? undefined}");
-    expect(windowEventIconSource).toContain("data-window-event-side-glyph={side}");
+    expect(windowEventIconSource).toContain(
+      "data-window-event-side={side ?? undefined}",
+    );
+    expect(windowEventIconSource).toContain(
+      "data-window-event-side-glyph={side}",
+    );
     for (const icon of [
       "agenda",
       "ice-pass",
@@ -241,7 +308,9 @@ describe("run window layering", () => {
       expect(css).toContain(`.windowEventIcon-run-${target}`);
     }
     expect(accessReviewModalSource).toContain("Runner erleidet ${cue.amount}");
-    expect(accessReviewModalSource).toContain('/[.!?]$/.test(sourceLabel.trim())');
+    expect(accessReviewModalSource).toContain(
+      "/[.!?]$/.test(sourceLabel.trim())",
+    );
     expect(accessReviewModalSource).toContain("hasSingleRevealedCard");
     expect(accessReviewModalSource).toContain("accessRevealSingleRevealedCard");
   });
@@ -252,9 +321,7 @@ describe("run window layering", () => {
     );
     expect(pageSource).toContain("interactionPresentationBlocked");
     expect(pageSource).toContain("damageImpact={accessDamageImpact}");
-    expect(pageSource).toContain(
-      "interactionPresentationBlocksAi({",
-    );
+    expect(pageSource).toContain("interactionPresentationBlocksAi({");
     expect(pageSource).toContain("coalesceAccessActionCues(");
     expect(accessReviewModalSource).toContain(
       'data-testid="access-damage-stage"',

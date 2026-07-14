@@ -25,9 +25,7 @@ import {
 } from "../view/card-view";
 import { maxHandSize } from "../../ability-engine/effective-values";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
-import {
-  FLATLINE_REPLACEMENT_EVENT_SOURCE,
-} from "../../mechanics/agenda-operation-effects";
+import { FLATLINE_REPLACEMENT_EVENT_SOURCE } from "../../mechanics/agenda-operation-effects";
 import {
   SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE,
   RUNTIME_DAMAGE_PREVENTION_PROFILES,
@@ -57,15 +55,16 @@ type CorpAgendaPointCostSpendResult = {
   spentAgendaDefinitionIds: CardDefinitionId[];
 };
 
-const DAMAGE_PREVENTION_BYPASS_CHOICE_PREFIX =
-  "damage_prevention_bypass_pay_";
+const DAMAGE_PREVENTION_BYPASS_CHOICE_PREFIX = "damage_prevention_bypass_pay_";
 
 export type DamageCoreHost = {
   cards: {
     definitionFor: (state: GameState, cardId: CardInstanceId) => CardDefinition;
     runnerInstalledCardIds: (state: GameState) => CardInstanceId[];
     scoredCorpAgendaIds: (state: GameState) => CardInstanceId[];
-    scoredAgendaKindForDefinition: (definition: CardDefinition) => string | undefined;
+    scoredAgendaKindForDefinition: (
+      definition: CardDefinition,
+    ) => string | undefined;
   };
   zones: {
     removeFromAllZones: (state: GameState, cardId: string) => void;
@@ -92,8 +91,14 @@ export type DamageCoreHost = {
       state: GameState,
       requiredPoints: number,
     ) => CardInstanceId[];
-    agendaPointsForScoredCard: (state: GameState, cardId: CardInstanceId) => number;
-    forfeitAgendaForPointCost: (state: GameState, cardId: CardInstanceId) => void;
+    agendaPointsForScoredCard: (
+      state: GameState,
+      cardId: CardInstanceId,
+    ) => number;
+    forfeitAgendaForPointCost: (
+      state: GameState,
+      cardId: CardInstanceId,
+    ) => void;
     spendAgendaPointCost: (
       state: GameState,
       requiredPoints: number,
@@ -143,7 +148,10 @@ function requireDamageCoreHost(): DamageCoreHost {
   return configuredDamageCoreHost;
 }
 
-function definitionFor(state: GameState, cardId: CardInstanceId): CardDefinition {
+function definitionFor(
+  state: GameState,
+  cardId: CardInstanceId,
+): CardDefinition {
   return requireDamageCoreHost().cards.definitionFor(state, cardId);
 }
 
@@ -155,8 +163,12 @@ function scoredCorpAgendaIds(state: GameState): CardInstanceId[] {
   return requireDamageCoreHost().cards.scoredCorpAgendaIds(state);
 }
 
-function scoredAgendaKindForDefinition(definition: CardDefinition): string | undefined {
-  return requireDamageCoreHost().cards.scoredAgendaKindForDefinition(definition);
+function scoredAgendaKindForDefinition(
+  definition: CardDefinition,
+): string | undefined {
+  return requireDamageCoreHost().cards.scoredAgendaKindForDefinition(
+    definition,
+  );
 }
 
 function removeFromAllZones(state: GameState, cardId: string): void {
@@ -288,9 +300,11 @@ function sanitizeId(value: string): string {
 }
 
 function cardHasSubtype(definition: CardDefinition, subtype: string): boolean {
-  return definition.subtypes?.some(
-    (candidate) => candidate.toLowerCase() === subtype.toLowerCase(),
-  ) ?? false;
+  return (
+    definition.subtypes?.some(
+      (candidate) => candidate.toLowerCase() === subtype.toLowerCase(),
+    ) ?? false
+  );
 }
 export function doDamage(
   state: GameState,
@@ -414,16 +428,15 @@ function pdcaEventWithReturnContext(
   };
 }
 
-function restorePdcaReturnContext(state: GameState, event: ImminentEvent): void {
+function restorePdcaReturnContext(
+  state: GameState,
+  event: ImminentEvent,
+): void {
   if (state.winner || state.phase === "game_over") return;
   const phase = event.payload.pdcaReturnPhase;
   const timingPoint = event.payload.pdcaReturnTimingPoint;
   const activeSide = event.payload.pdcaReturnActiveSide;
-  if (
-    !isPhase(phase) ||
-    !isTimingPointId(timingPoint) ||
-    !isSide(activeSide)
-  )
+  if (!isPhase(phase) || !isTimingPointId(timingPoint) || !isSide(activeSide))
     return;
   state.phase = phase;
   state.timingPoint = timingPoint;
@@ -536,7 +549,9 @@ export function openDamageResolutionWindow(
   );
 }
 
-export function aggregateDamageSummaries(summaries: DamageSummary[]): DamageSummary {
+export function aggregateDamageSummaries(
+  summaries: DamageSummary[],
+): DamageSummary {
   const first = mustArrayValue(summaries, 0, "Damage-Zusammenfassung fehlt.");
   const lastCoreSummary = summaries
     .slice()
@@ -616,8 +631,7 @@ export function resolveDamageOperation(
   if (typeof event.payload.baseDamageAmount === "number")
     payload.baseDamageAmount = event.payload.baseDamageAmount;
   if (typeof event.payload.damageAmountModifier === "number")
-    payload.damageAmountModifier =
-      event.payload.damageAmountModifier;
+    payload.damageAmountModifier = event.payload.damageAmountModifier;
 }
 
 export function createDamageImminentEvent(
@@ -668,7 +682,9 @@ function cybertechThinkTankBoostCandidates(
   )
     return [];
   const candidates: EventModificationCandidate[] = [];
-  for (const server of state.corp.servers.slice().sort((left, right) => left.id.localeCompare(right.id))) {
+  for (const server of state.corp.servers
+    .slice()
+    .sort((left, right) => left.id.localeCompare(right.id))) {
     for (const cardId of server.root.slice().sort() as CardInstanceId[]) {
       const instance = state.cardInstances[cardId];
       const implementation = instance
@@ -758,25 +774,33 @@ export function addRunnerTagsWithPrevention(
   legalAction: LegalAction,
   amount: number,
   source: string,
-): void {
-  if (amount <= 0) return;
+): boolean {
+  if (amount <= 0) return false;
   const oneShotAvoidance = Math.max(
     0,
     Math.floor(state.runnerTagAvoidanceCredits ?? 0),
   );
   if (oneShotAvoidance > 0) {
     state.runnerTagAvoidanceCredits = oneShotAvoidance - 1;
-    const tagsAdded = Math.max(0, amount - 1);
-    state.runner.tags += tagsAdded;
-    recordRunnerReceivedTags(state, tagsAdded);
+    const remainingTags = Math.max(0, amount - 1);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      tagsAdded,
+      tagsAdded: 0,
       preventedTags: 1,
       runnerTagsAfter: state.runner.tags,
       tagAvoidanceCreditsAfter: state.runnerTagAvoidanceCredits,
     };
-    return;
+    if (remainingTags <= 0) return false;
+    const remainingEvent = createAddTagImminentEvent(
+      state,
+      remainingTags,
+      source,
+      addTagPublicContextFromPayload(legalAction.payload),
+    );
+    if (openEventModificationWindow(state, remainingEvent, legalAction))
+      return true;
+    resolveAddTagImminentEvent(state, remainingEvent, legalAction);
+    return false;
   }
   const event = createAddTagImminentEvent(
     state,
@@ -784,8 +808,9 @@ export function addRunnerTagsWithPrevention(
     source,
     addTagPublicContextFromPayload(legalAction.payload),
   );
-  if (openEventModificationWindow(state, event, legalAction)) return;
+  if (openEventModificationWindow(state, event, legalAction)) return true;
   resolveAddTagImminentEvent(state, event, legalAction);
+  return false;
 }
 
 function resolveAddTagImminentEvent(
@@ -891,7 +916,10 @@ function collectRuntimeDamagePreventionCandidates(
   const candidates: EventModificationCandidate[] = [];
   const runPool = state.run?.damagePreventionPool;
   if (runPool && runPool.remaining > 0) {
-    const preventAmount = Math.min(amount, Math.max(0, Math.floor(runPool.remaining)));
+    const preventAmount = Math.min(
+      amount,
+      Math.max(0, Math.floor(runPool.remaining)),
+    );
     if (preventAmount > 0) {
       candidates.push({
         candidateId: `run_damage_prevent_${sanitizeId(runPool.sourceDefinitionId)}_${preventAmount}`,
@@ -975,7 +1003,8 @@ export function damagePreventionSourcesForDefinition(
   definition: CardDefinition,
 ): readonly CardDamagePreventionSourceImplementation[] {
   return (
-    cardImplementationForDefinitionId(definition.id)?.damagePreventionSources ?? []
+    cardImplementationForDefinitionId(definition.id)?.damagePreventionSources ??
+    []
   );
 }
 
@@ -991,7 +1020,8 @@ function trashPreventionSourcesForDefinition(
   definition: CardDefinition,
 ): readonly CardTrashPreventionSourceImplementation[] {
   return (
-    cardImplementationForDefinitionId(definition.id)?.trashPreventionSources ?? []
+    cardImplementationForDefinitionId(definition.id)?.trashPreventionSources ??
+    []
   );
 }
 
@@ -999,12 +1029,14 @@ function flatlineReplacementSourcesForDefinition(
   definition: CardDefinition,
 ): readonly CardFlatlineReplacementSourceImplementation[] {
   return (
-    cardImplementationForDefinitionId(definition.id)?.flatlineReplacementSources ??
-    []
+    cardImplementationForDefinitionId(definition.id)
+      ?.flatlineReplacementSources ?? []
   );
 }
 
-export function isRunnerHardwareDeckDefinition(definition: CardDefinition): boolean {
+export function isRunnerHardwareDeckDefinition(
+  definition: CardDefinition,
+): boolean {
   return (
     definition.type === "hardware" &&
     (cardHasSubtype(definition, "deck") ||
@@ -1093,7 +1125,9 @@ function cardImplementationDamagePreventionSourceCanPay(
     );
   if (source.cost.kind === "credit")
     return state.runner.credits >= source.cost.amount;
-  return cardCounter(state, cardId, source.cost.counterType) >= source.cost.amount;
+  return (
+    cardCounter(state, cardId, source.cost.counterType) >= source.cost.amount
+  );
 }
 
 function collectRuntimeTagPreventionCandidates(
@@ -1235,7 +1269,10 @@ function cardImplementationTrashPreventionProtectsTarget(
   if (!runnerInstalledCardIds(state).includes(targetCardId)) return false;
   const targetDefinition = definitionFor(state, targetCardId);
   return source.protectsCardTypes.includes(
-    targetDefinition.type as Extract<CardType, "program" | "hardware" | "resource">,
+    targetDefinition.type as Extract<
+      CardType,
+      "program" | "hardware" | "resource"
+    >,
   );
 }
 
@@ -1359,17 +1396,15 @@ function collectReplacementCandidates(
     event.affectedSide === "runner" &&
     damageAmount > state.runner.grip.length
   ) {
-    const gripFlatlineReplacementId = state.runner.grip.find(
-      (cardId) => {
-        const definition = definitionFor(state, cardId);
-        return flatlineReplacementSourcesForDefinition(definition).some(
-          (source) =>
-            source.kind === "flatline_replacement_from_grip" &&
-            source.replacement === "flatline_tag_replacement" &&
-            source.visibility === "public",
-        );
-      },
-    );
+    const gripFlatlineReplacementId = state.runner.grip.find((cardId) => {
+      const definition = definitionFor(state, cardId);
+      return flatlineReplacementSourcesForDefinition(definition).some(
+        (source) =>
+          source.kind === "flatline_replacement_from_grip" &&
+          source.replacement === "flatline_tag_replacement" &&
+          source.visibility === "public",
+      );
+    });
     if (gripFlatlineReplacementId) {
       const definition = definitionFor(state, gripFlatlineReplacementId);
       candidates.push({
@@ -1477,8 +1512,7 @@ function replacementChoice(
       {
         id: candidate.candidateId,
         label:
-          candidate.sourceRef.definitionId ===
-          FLATLINE_REPLACEMENT_EVENT_SOURCE
+          candidate.sourceRef.definitionId === FLATLINE_REPLACEMENT_EVENT_SOURCE
             ? "Arasaka Owns You spielen"
             : candidate.sourceRef.definitionId ===
                 SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE
@@ -1532,7 +1566,11 @@ function eventModificationChoice(
       costPerDamage > 0 ? Math.floor(state.corp.credits / costPerDamage) : 0,
     );
     const options: ChoiceRequest["options"] = [];
-    for (let damageAllowed = 0; damageAllowed <= maxBypass; damageAllowed += 1) {
+    for (
+      let damageAllowed = 0;
+      damageAllowed <= maxBypass;
+      damageAllowed += 1
+    ) {
       const creditCost = damageAllowed * costPerDamage;
       options.push({
         id: `${DAMAGE_PREVENTION_BYPASS_CHOICE_PREFIX}${damageAllowed}`,
@@ -1574,18 +1612,17 @@ function eventModificationChoice(
     },
     ...stageCandidates.map((stageCandidate) => ({
       id: stageCandidate.candidateId,
-      label:
-        corpDamagePreventionCancel
-          ? "Prevention wirken lassen"
-          : event.eventType === "add_tag"
-            ? `${stageCandidate.sourceRef.label}: ${stageCandidate.preventedTags ?? 1} Tag vermeiden`
-            : event.eventType === "runner_installed_trash"
-              ? `${stageCandidate.sourceRef.label}: ${stageCandidate.preventedTrashTargetIds?.length ?? 1} Trash verhindern`
-              : window.kind === "increase"
-                ? `${stageCandidate.sourceRef.label}: Schaden um ${stageCandidate.increaseAmount ?? 1} erhöhen`
-                : stageCandidate.sourceRef.kind === "card"
-                  ? `${stageCandidate.sourceRef.label}: ${stageCandidate.preventAmount ?? amount} Schaden verhindern`
-                  : `${stageCandidate.preventAmount ?? amount} Schaden verhindern`,
+      label: corpDamagePreventionCancel
+        ? "Prevention wirken lassen"
+        : event.eventType === "add_tag"
+          ? `${stageCandidate.sourceRef.label}: ${stageCandidate.preventedTags ?? 1} Tag vermeiden`
+          : event.eventType === "runner_installed_trash"
+            ? `${stageCandidate.sourceRef.label}: ${stageCandidate.preventedTrashTargetIds?.length ?? 1} Trash verhindern`
+            : window.kind === "increase"
+              ? `${stageCandidate.sourceRef.label}: Schaden um ${stageCandidate.increaseAmount ?? 1} erhöhen`
+              : stageCandidate.sourceRef.kind === "card"
+                ? `${stageCandidate.sourceRef.label}: ${stageCandidate.preventAmount ?? amount} Schaden verhindern`
+                : `${stageCandidate.preventAmount ?? amount} Schaden verhindern`,
       publicLabel: "Event Modification",
     })),
   ];
@@ -1593,7 +1630,12 @@ function eventModificationChoice(
     choiceId: `v120_choice_${window.windowId}`,
     side: window.side,
     source: `v120.event_modification.${window.kind}`,
-    prompt: "Damage Prevention",
+    prompt:
+      event.eventType === "add_tag"
+        ? "Tag vermeiden"
+        : event.eventType === "runner_installed_trash"
+          ? "Trash verhindern"
+          : "Damage Prevention",
     kind: "select_option",
     options,
     minSelections: 1,
@@ -1626,28 +1668,7 @@ export function resolveEventModificationChoice(
     redactedKind: "event_modification",
   };
   if (selected === "pass") {
-    const remainingCandidates = remainingEventModificationCandidatesAfterStage(
-      state,
-      window,
-      event,
-    );
     if (event.eventType === "add_tag") {
-      if (
-        continueEventModificationWindow(
-          state,
-          event,
-          window,
-          remainingCandidates,
-          legalAction,
-          {
-            ...basePayload,
-            eventModificationDecision: "pass",
-            eventModificationOutcome: "next_window_opened",
-            originalAmount: numberPayload(event, "amount"),
-          },
-        )
-      )
-        return;
       resolveAddTagImminentEvent(state, event, legalAction);
       legalAction.payload = {
         ...basePayload,
@@ -1659,6 +1680,11 @@ export function resolveEventModificationChoice(
       clearEventModificationState(state);
       return;
     }
+    const remainingCandidates = remainingEventModificationCandidatesAfterStage(
+      state,
+      window,
+      event,
+    );
     if (event.eventType === "runner_installed_trash") {
       if (
         continueEventModificationWindow(
@@ -1703,17 +1729,14 @@ export function resolveEventModificationChoice(
     let spentAgendaDefinitionIds = "";
     if (corpDamagePreventionCancel) {
       agendaPointCost =
-        damagePreventionSourceForEventCandidate(
-          state,
-          cancelCandidate,
-        )?.corpMayCancelUntilEndOfTurn?.agendaPointCost ?? 1;
+        damagePreventionSourceForEventCandidate(state, cancelCandidate)
+          ?.corpMayCancelUntilEndOfTurn?.agendaPointCost ?? 1;
       const costResult = spendCorpAgendaPointCost(state, agendaPointCost);
       agendaPointCostPaid = costResult.paidPoints;
       if (agendaPointCostPaid < agendaPointCost)
         throw new Error("Damage Prevention kann nicht gecancelt werden.");
       corpBonusAgendaPointsSpent = costResult.bonusPointsSpent;
-      spentAgendaDefinitionIds =
-        costResult.spentAgendaDefinitionIds.join(",");
+      spentAgendaDefinitionIds = costResult.spentAgendaDefinitionIds.join(",");
       const sourceInstanceId = cancelCandidate.sourceRef.instanceId;
       if (sourceInstanceId) {
         state.cancelledDamagePreventionSourceIdsUntilEndOfTurn = [
@@ -1768,9 +1791,7 @@ export function resolveEventModificationChoice(
             ...(corpBonusAgendaPointsSpent > 0
               ? { corpBonusAgendaPointsSpent }
               : {}),
-            ...(spentAgendaDefinitionIds
-              ? { spentAgendaDefinitionIds }
-              : {}),
+            ...(spentAgendaDefinitionIds ? { spentAgendaDefinitionIds } : {}),
           }
         : {}),
     };
@@ -1846,7 +1867,11 @@ export function resolveEventModificationChoice(
         state,
         finalEvent,
         window,
-        remainingEventModificationCandidatesAfterStage(state, window, finalEvent),
+        remainingEventModificationCandidatesAfterStage(
+          state,
+          window,
+          finalEvent,
+        ),
         legalAction,
         legalAction.payload,
       )
@@ -1892,22 +1917,51 @@ export function resolveEventModificationChoice(
       candidate,
       preventedTags,
     );
-    resolveAddTagImminentEvent(state, event, legalAction, preventedTags);
-    legalAction.payload = {
+    const remainingTags = Math.max(0, originalAmount - preventedTags);
+    const decisionPayload = {
       ...basePayload,
       ...(legalAction.payload ?? {}),
       eventModificationDecision: "apply",
       eventModificationOutcome:
-        originalAmount === preventedTags ? "avoided" : "partially_avoided",
+        remainingTags === 0 ? "avoided" : "partially_avoided",
       candidateId: candidate.candidateId,
       originalAmount,
       preventedTags,
-      finalAmount: Math.max(0, originalAmount - preventedTags),
+      finalAmount: remainingTags,
       sourceKind: candidate.sourceRef.kind,
       ...(candidate.sourceRef.definitionId
         ? { sourceDefinitionId: candidate.sourceRef.definitionId }
         : {}),
       ...preventionCostPayload,
+    };
+    if (remainingTags > 0) {
+      const remainingEvent = {
+        ...event,
+        payload: { ...event.payload, amount: remainingTags },
+      };
+      const remainingCandidates = collectEventModificationCandidates(
+        state,
+        remainingEvent,
+      );
+      if (
+        continueEventModificationWindow(
+          state,
+          remainingEvent,
+          window,
+          remainingCandidates,
+          legalAction,
+          {
+            ...decisionPayload,
+            eventModificationOutcome: "next_window_opened",
+          },
+        )
+      )
+        return;
+    }
+    resolveAddTagImminentEvent(state, event, legalAction, preventedTags);
+    legalAction.payload = {
+      ...decisionPayload,
+      ...(legalAction.payload ?? {}),
     };
     clearEventModificationState(state);
     return;
@@ -1970,7 +2024,10 @@ export function resolveEventModificationChoice(
       Math.floor(source.advancementCounters ?? 0) - 1,
     );
     const originalAmount = numberPayload(event, "amount");
-    const increaseAmount = Math.max(1, Math.floor(candidate.increaseAmount ?? 1));
+    const increaseAmount = Math.max(
+      1,
+      Math.floor(candidate.increaseAmount ?? 1),
+    );
     const finalAmount = originalAmount + increaseAmount;
     const finalEvent = {
       ...event,
@@ -2010,7 +2067,10 @@ export function resolveEventModificationChoice(
   );
   const finalAmount = Math.max(0, originalAmount - preventedAmount);
   registerDamagePreventionUsage(state, candidate, preventedAmount);
-  if (candidate.candidateId.startsWith("run_damage_prevent_") && state.run?.damagePreventionPool) {
+  if (
+    candidate.candidateId.startsWith("run_damage_prevent_") &&
+    state.run?.damagePreventionPool
+  ) {
     state.run.damagePreventionPool.remaining = Math.max(
       0,
       Math.floor(state.run.damagePreventionPool.remaining) - preventedAmount,
@@ -2103,7 +2163,9 @@ function remainingEventModificationCandidatesAfterStage(
     ),
   );
   return clampEventModificationCandidatesToEventAmount(
-    window.candidates.filter((candidate) => !stageIds.has(candidate.candidateId)),
+    window.candidates.filter(
+      (candidate) => !stageIds.has(candidate.candidateId),
+    ),
     numberPayload(event, "amount"),
   );
 }
@@ -2140,8 +2202,7 @@ function continueEventModificationWindow(
     throw new Error("Event-Modification-Konflikt blockiert.");
   const candidate = sorted[0];
   if (!candidate) return false;
-  const windowId =
-    `${previousWindow.windowId}_next_${candidate.priority}_${candidate.controller}`;
+  const windowId = `${previousWindow.windowId}_next_${candidate.priority}_${candidate.controller}`;
   const window: EventModificationWindow = {
     windowId,
     eventId: event.eventId,
@@ -2182,10 +2243,7 @@ function isCorpDamagePreventionBypassCandidate(
   state: GameState,
   candidate: EventModificationCandidate,
 ): boolean {
-  const source = damagePreventionSourceForEventCandidate(
-    state,
-    candidate,
-  );
+  const source = damagePreventionSourceForEventCandidate(state, candidate);
   return (
     source?.corpMayPayToBypass !== undefined &&
     candidate.bypassPaymentSide === "corp" &&
@@ -2246,15 +2304,15 @@ export function resolveReplacementChoice(
     throw new Error(
       "Dieser Replacement-Kandidat wurde in diesem Fenster bereits genutzt.",
     );
-  if (
-    candidate.sourceRef.definitionId ===
-    FLATLINE_REPLACEMENT_EVENT_SOURCE
-  ) {
+  if (candidate.sourceRef.definitionId === FLATLINE_REPLACEMENT_EVENT_SOURCE) {
     resolveGripFlatlineTagReplacement(state, legalAction, event, candidate);
     clearReplacementState(state);
     return;
   }
-  if (candidate.sourceRef.definitionId === SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE) {
+  if (
+    candidate.sourceRef.definitionId ===
+    SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE
+  ) {
     resolveInstalledFlatlinePreventionReplacement(
       state,
       legalAction,
@@ -2300,7 +2358,9 @@ function isIdentityDonorReplacementCandidate(
 ): boolean {
   const cardId = candidate.sourceRef.instanceId;
   if (!cardId || !state.runner.grip.includes(cardId)) return false;
-  return flatlineReplacementSourcesForDefinition(definitionFor(state, cardId)).some(
+  return flatlineReplacementSourcesForDefinition(
+    definitionFor(state, cardId),
+  ).some(
     (source) =>
       source.kind === "damage_replacement_from_grip" &&
       source.replacement === "prevent_meat_damage_add_bad_publicity" &&
@@ -2400,7 +2460,10 @@ function resolveGripFlatlineTagReplacement(
   state.runner.coreDamage = 0;
   const targetHandSize = maxHandSize(state, "runner");
   let drawnCards = 0;
-  while (state.runner.grip.length < targetHandSize && state.runner.stack.length > 0) {
+  while (
+    state.runner.grip.length < targetHandSize &&
+    state.runner.stack.length > 0
+  ) {
     drawRunnerCard(state);
     if (state.winner) break;
     drawnCards += 1;
@@ -2443,8 +2506,13 @@ function resolveInstalledFlatlinePreventionReplacement(
 ): void {
   const cardId = candidate.sourceRef.instanceId;
   if (!cardId || !state.runner.rig.programs.includes(cardId))
-    throw new Error("Die installierte Flatline-Prevention ist nicht installiert.");
-  if (definitionFor(state, cardId).id !== SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE)
+    throw new Error(
+      "Die installierte Flatline-Prevention ist nicht installiert.",
+    );
+  if (
+    definitionFor(state, cardId).id !==
+    SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE
+  )
     throw new Error("Die installierte Flatline-Prevention-Quelle passt nicht.");
   windowConsumeReplacementCandidate(state, candidate.candidateId);
   const originalAmount = numberPayload(event, "amount");
@@ -2781,10 +2849,8 @@ function applyRuntimeDamagePreventionCost(
   }
   const sourceCardId = candidate.sourceRef.instanceId;
   const definition = definitionFor(state, sourceCardId);
-  const implementationSource = cardImplementationDamagePreventionSourceForCandidate(
-    definition,
-    candidate,
-  );
+  const implementationSource =
+    cardImplementationDamagePreventionSourceForCandidate(definition, candidate);
   if (implementationSource) {
     if (implementationSource.cost.kind === "none") return {};
     if (implementationSource.cost.kind === "trash_source") {
@@ -3068,10 +3134,11 @@ function revalidateDamagePreventionCandidateSource(
   ) {
     throw new Error("Die Prevention-Quelle passt nicht mehr zur Karte.");
   }
-  const implementationSource = cardImplementationDamagePreventionSourceForCandidate(
-    definitionFor(state, sourceCardId),
-    candidate,
-  );
+  const implementationSource =
+    cardImplementationDamagePreventionSourceForCandidate(
+      definitionFor(state, sourceCardId),
+      candidate,
+    );
   if (
     implementationSource &&
     !cardImplementationDamagePreventionSourceCanPay(
@@ -3158,7 +3225,6 @@ function revalidateTrashPreventionCandidateSource(
   )
     throw new Error("Die Trash-Prevention-Ziele sind nicht mehr gueltig.");
 }
-
 
 function recordRunnerDamageDuringCurrentAction(state: GameState): void {
   const flags = ensureRunnerTurnFlags(state);

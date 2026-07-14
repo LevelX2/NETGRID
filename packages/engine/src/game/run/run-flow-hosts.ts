@@ -16,6 +16,7 @@ import type {
 } from "@netgrid/shared";
 import { selectedChoiceIds } from "../choices/choice-validation";
 import {
+  addRunnerTagsWithPrevention,
   createDamageImminentEvent,
   doDamage,
   openDamageResolutionWindow,
@@ -222,7 +223,10 @@ export type RunFlowHost = {
       state: GameState,
       legalAction?: LegalAction,
     ) => void;
-    applyRunStartRandomStrengthBonus: (state: GameState, legalAction?: LegalAction) => void;
+    applyRunStartRandomStrengthBonus: (
+      state: GameState,
+      legalAction?: LegalAction,
+    ) => void;
     openStartOfRunFortUtilityWindow: (
       state: GameState,
       legalAction?: LegalAction,
@@ -257,6 +261,7 @@ export type RunFlowHost = {
     ) => ChoiceRequest;
   };
   damage: {
+    addRunnerTagsWithPrevention: typeof addRunnerTagsWithPrevention;
     createDamageImminentEvent: typeof createDamageImminentEvent;
     doDamage: typeof doDamage;
     openEventModificationWindow: typeof openEventModificationWindow;
@@ -368,13 +373,17 @@ export type RunFlowHost = {
     breakAbilityForLegalAction: (
       state: GameState,
       legalAction: LegalAction,
-    ) => ReturnType<FortRunSideFamiliesHost["breaker"]["breakAbilityForLegalAction"]>;
+    ) => ReturnType<
+      FortRunSideFamiliesHost["breaker"]["breakAbilityForLegalAction"]
+    >;
     breakSubroutineCostBreakdown: (
       state: GameState,
       baseCost: number,
       subroutineCount?: number,
       breakerId?: CardInstanceId,
-    ) => ReturnType<RunnerEncounterActionHost["costs"]["breakSubroutineCostBreakdown"]>;
+    ) => ReturnType<
+      RunnerEncounterActionHost["costs"]["breakSubroutineCostBreakdown"]
+    >;
     abilityMetadata: RunnerEncounterActionHost["actions"]["abilityMetadata"];
     revealCorpRdTop: (state: GameState, legalAction: LegalAction) => void;
   };
@@ -412,7 +421,9 @@ export type RunFlowHost = {
     addActiveObligation: (state: GameState, amount: number) => void;
     applyRunnerForgoNextAction: (state: GameState) => void;
     hasInstalledRunnerApDamageReducerHardware: (state: GameState) => boolean;
-    traceCounterEffectDefinitionFor: Parameters<typeof isSupportedEncounterTraceSuccessEffect>[1];
+    traceCounterEffectDefinitionFor: Parameters<
+      typeof isSupportedEncounterTraceSuccessEffect
+    >[1];
     installedRunnerVirusSourceIds: (
       state: GameState,
       predicate?: (implementation: CardVirusCounterImplementation) => boolean,
@@ -521,7 +532,8 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
           host.run.executeCardImplementationRunnerRunStartEffects,
         applyRunnerTraceCounterRunStartEffects:
           host.run.applyRunnerTraceCounterRunStartEffects,
-        applyRunStartRandomStrengthBonus: host.run.applyRunStartRandomStrengthBonus,
+        applyRunStartRandomStrengthBonus:
+          host.run.applyRunStartRandomStrengthBonus,
         openStartOfRunFortUtilityWindow:
           host.run.openStartOfRunFortUtilityWindow,
       },
@@ -552,7 +564,8 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         printedNonTraceHost: (legalAction) =>
           encounterPrintedNonTraceHostForState(state, legalAction),
         specialWindowHost: () => encounterSpecialWindowHostForState(state),
-        successfulRunInterventionHost: () => successfulRunInterventionHost(state),
+        successfulRunInterventionHost: () =>
+          successfulRunInterventionHost(state),
       },
       movement: {
         host: () => runMovementHostForState(state),
@@ -636,7 +649,16 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       },
       actions: {
         buildLegalAction: (type, label, source, costs, payload, metadata) =>
-          action(state, "runner", type, label, source, costs, payload, metadata),
+          action(
+            state,
+            "runner",
+            type,
+            label,
+            source,
+            costs,
+            payload,
+            metadata,
+          ),
         abilityMetadata: host.effects.abilityMetadata,
       },
       costs: {
@@ -688,7 +710,8 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       },
       encounter: {
         encounterResolutionHost: () => encounterResolutionHostForState(state),
-        encounterSpecialWindowHost: () => encounterSpecialWindowHostForState(state),
+        encounterSpecialWindowHost: () =>
+          encounterSpecialWindowHostForState(state),
         beginEncounter: (iceId, legalAction) =>
           beginEncounter(encounterEntryHostForState(state), iceId, legalAction),
       },
@@ -721,7 +744,8 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       },
       fortPass: fortPassWindowHostForState(state),
       choices: {
-        selectedChoiceIds: (selectedChoices) => selectedChoiceIds(selectedChoices),
+        selectedChoiceIds: (selectedChoices) =>
+          selectedChoiceIds(selectedChoices),
       },
       callbacks: {
         continueAfterRootRez: (legalAction) => {
@@ -875,10 +899,19 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       },
       actions: {
         createRunnerTriggerAction: (label, sourceCardId, costs, payload) =>
-          action(state, "runner", "trigger_ability", label, sourceCardId, costs, payload),
+          action(
+            state,
+            "runner",
+            "trigger_ability",
+            label,
+            sourceCardId,
+            costs,
+            payload,
+          ),
       },
       choices: {
-        selectedChoiceIds: (selectedChoices) => selectedChoiceIds(selectedChoices),
+        selectedChoiceIds: (selectedChoices) =>
+          selectedChoiceIds(selectedChoices),
       },
       costs: {
         creditCostForAction: (legalAction) =>
@@ -912,7 +945,11 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
           if (gripIds.length === 0) return 0;
           state.runner.grip = [];
           const stackIds = [...state.runner.stack, ...gripIds];
-          state.runner.stack = host.rng.shuffleStateIds(state, stackIds, purpose);
+          state.runner.stack = host.rng.shuffleStateIds(
+            state,
+            stackIds,
+            purpose,
+          );
           for (const cardId of gripIds) {
             state.cardInstances[cardId] = {
               ...host.cards.cardInstanceFor(state, cardId),
@@ -929,7 +966,8 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         ensureTurnFlags: () => host.turn.ensureRunnerTurnFlags(state),
       },
       zones: {
-        removeFromAllZones: (cardId) => host.zones.removeFromAllZones(state, cardId),
+        removeFromAllZones: (cardId) =>
+          host.zones.removeFromAllZones(state, cardId),
         trashCorpInstalledCardToArchives: (cardId, legalAction) =>
           host.zones.trashCorpInstalledCardToArchives(
             state,
@@ -937,11 +975,7 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
             legalAction,
           ),
         trashRunnerInstalledCardToHeap: (cardId, legalAction) =>
-          host.zones.trashRunnerInstalledCardToHeap(
-            state,
-            cardId,
-            legalAction,
-          ),
+          host.zones.trashRunnerInstalledCardToHeap(state, cardId, legalAction),
       },
       encounter: {
         beginEncounter: (iceId, legalAction) =>
@@ -955,7 +989,10 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       },
       access: {
         startAccessFromSuccessfulRun: (legalAction) =>
-          enterAccessFromSuccessfulRun(runAccessTransitionHost(state), legalAction),
+          enterAccessFromSuccessfulRun(
+            runAccessTransitionHost(state),
+            legalAction,
+          ),
         finishSuccessfulRun: (legalAction) =>
           host.callbacks.finishRun(state, true, legalAction),
       },
@@ -966,7 +1003,8 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
     state: GameState,
   ): EncounterResolutionHost {
     return createEncounterResolutionHost(state, {
-      applyRunnerForgoNextAction: () => host.callbacks.applyRunnerForgoNextAction(state),
+      applyRunnerForgoNextAction: () =>
+        host.callbacks.applyRunnerForgoNextAction(state),
       trashRunnerInstalledProgram: (cardId) =>
         host.zones.trashRunnerInstalledProgram(state, cardId),
     });
@@ -1000,11 +1038,7 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       trashCorpInstalledCard: (cardId) =>
         host.zones.trashCorpInstalledCardToArchives(state, cardId),
       trashRunnerInstalledCardToHeap: (cardId, legalAction) =>
-        host.zones.trashRunnerInstalledCardToHeap(
-          state,
-          cardId,
-          legalAction,
-        ),
+        host.zones.trashRunnerInstalledCardToHeap(state, cardId, legalAction),
     });
   }
 
@@ -1017,6 +1051,8 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         host.counters.addCardCounter(state, cardId, counterType, amount),
       addCorpTraceCounterPoolCounters: () =>
         host.trace.addCorpTraceCounterPoolCounters(state),
+      addRunnerTagsWithPrevention: (action, amount, source) =>
+        host.damage.addRunnerTagsWithPrevention(state, action, amount, source),
       calculateRunnerLink: () => host.trace.calculateRunnerLink(state),
       cardCounter: (cardId, counterType) =>
         host.counters.cardCounter(state, cardId, counterType),
@@ -1027,8 +1063,10 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       finishRun: (successful) => host.callbacks.finishRun(state, successful),
       hasInstalledRunnerApDamageReducerHardware: () =>
         host.callbacks.hasInstalledRunnerApDamageReducerHardware(state),
-      corpTraceCounterPoolTotal: () => host.trace.corpTraceCounterPoolTotal(state),
-      recurringTraceCreditPoolTotal: () => host.trace.recurringTraceCreditPoolTotal(state),
+      corpTraceCounterPoolTotal: () =>
+        host.trace.corpTraceCounterPoolTotal(state),
+      recurringTraceCreditPoolTotal: () =>
+        host.trace.recurringTraceCreditPoolTotal(state),
       openEventModificationWindow: (event, action) =>
         host.damage.openEventModificationWindow(state, event, action),
       openReplacementWindow: (event, action) =>
@@ -1067,14 +1105,19 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
           traceId,
           targetCardId,
         ),
-      resolveTrashInstalledProgramSubroutine: (actionToResolve = legalAction) => {
+      resolveTrashInstalledProgramSubroutine: (
+        actionToResolve = legalAction,
+      ) => {
         const trashResult = resolveDirectTrashProgramSubroutine(
           encounterPrintedNonTraceHostForState(state, actionToResolve),
           { legalAction: actionToResolve },
         );
         const trashedCardId = trashResult.trashedCardIds[0];
         if (!trashedCardId) return undefined;
-        const trashedDefinition = host.cards.definitionFor(state, trashedCardId);
+        const trashedDefinition = host.cards.definitionFor(
+          state,
+          trashedCardId,
+        );
         return {
           definitionId: trashedDefinition.id,
           title: trashedDefinition.title,
@@ -1114,6 +1157,15 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         spendCorpCredits: (amount) =>
           host.payment.spendCredits(state, "corp", amount),
       },
+      tags: {
+        addRunnerTagsWithPrevention: (action, amount, source) =>
+          host.damage.addRunnerTagsWithPrevention(
+            state,
+            action,
+            amount,
+            source,
+          ),
+      },
       trash: {
         openRunnerInstalledTrashPreventionWindow: (
           targetCardIds,
@@ -1138,10 +1190,7 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
           if (!legalAction)
             throw new Error("Continue-Run LegalAction fehlt fuer R&D-Reorder.");
           startCorpRdArrangeChoice(
-            host.choices.hiddenZoneArrangeChoiceHandlerHost(
-              state,
-              legalAction,
-            ),
+            host.choices.hiddenZoneArrangeChoiceHandlerHost(state, legalAction),
             input,
           );
         },
@@ -1176,7 +1225,11 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         consumeFutureActionDebt: () => {
           host.turn.consumeRunnerFutureActionDebt(state);
         },
-        awardEventAgendaPoint: (sourceCardId, sourceDefinitionId, legalAction) => {
+        awardEventAgendaPoint: (
+          sourceCardId,
+          sourceDefinitionId,
+          legalAction,
+        ) => {
           if (!legalAction)
             throw new Error("Runner-Agenda-Punkt braucht eine LegalAction.");
           legalAction.payload = {
@@ -1199,7 +1252,8 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         },
       },
       choices: {
-        selectedChoiceIds: (selectedChoices) => selectedChoiceIds(selectedChoices),
+        selectedChoiceIds: (selectedChoices) =>
+          selectedChoiceIds(selectedChoices),
       },
       credits: {
         gainRunner: (amount) => {
@@ -1292,7 +1346,11 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       },
       runner: {
         ensureTurnFlags: () => host.turn.ensureRunnerTurnFlags(state),
-        awardEventAgendaPoint: (sourceCardId, sourceDefinitionId, legalAction) => {
+        awardEventAgendaPoint: (
+          sourceCardId,
+          sourceDefinitionId,
+          legalAction,
+        ) => {
           if (!legalAction)
             throw new Error("Runner-Agenda-Punkt braucht eine LegalAction.");
           legalAction.payload = {
@@ -1325,11 +1383,7 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       },
       access: {
         hasHiddenResourceAccessStartActions: (run, serverId) =>
-          host.access.hasHiddenResourceAccessStartActions(
-            state,
-            run,
-            serverId,
-          ),
+          host.access.hasHiddenResourceAccessStartActions(state, run, serverId),
         advanceArchivesBreachPastNonDecisionCards: (legalAction) =>
           host.access.advanceArchivesBreachPastNonDecisionCards(
             host.access.accessFlowHost(state),
@@ -1337,22 +1391,28 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
           ),
         findPreAccessTopRdReorderSource: (run) => {
           if (run.preAccessTopRdReorderResolved) return undefined;
-          const accessServerId = run.accessServerOverride ?? run.attackedServerId;
+          const accessServerId =
+            run.accessServerOverride ?? run.attackedServerId;
           if (accessServerId !== "rd") return undefined;
-          return host.cards.runnerInstalledCardIds(state)
+          return host.cards
+            .runnerInstalledCardIds(state)
             .slice()
             .sort()
             .find((cardId) =>
-              host.cards.cardImplementationAccessHookKindsForDefinition(
-                host.cards.definitionFor(state, cardId).id,
-              ).includes("pre_access_rd_cut"),
+              host.cards
+                .cardImplementationAccessHookKindsForDefinition(
+                  host.cards.definitionFor(state, cardId).id,
+                )
+                .includes("pre_access_rd_cut"),
             );
         },
         isPreAccessTopRdReorderSource: (cardId) =>
           host.cards.runnerInstalledCardIds(state).includes(cardId) &&
-          host.cards.cardImplementationAccessHookKindsForDefinition(
-            host.cards.definitionFor(state, cardId).id,
-          ).includes("pre_access_rd_cut"),
+          host.cards
+            .cardImplementationAccessHookKindsForDefinition(
+              host.cards.definitionFor(state, cardId).id,
+            )
+            .includes("pre_access_rd_cut"),
         startRunnerPrivateLookChoice: (
           sourceCardId,
           sourceDefinitionId,
@@ -1394,7 +1454,8 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
           ),
       },
       choices: {
-        selectedChoiceIds: (selectedChoices) => selectedChoiceIds(selectedChoices),
+        selectedChoiceIds: (selectedChoices) =>
+          selectedChoiceIds(selectedChoices),
       },
     };
   }
@@ -1439,7 +1500,6 @@ function assertRequiredHostGroups(host: RunFlowHost): void {
     "rng",
     "callbacks",
   ] as const) {
-    if (!host[group])
-      throw new Error(`RunFlowHost missing group: ${group}`);
+    if (!host[group]) throw new Error(`RunFlowHost missing group: ${group}`);
   }
 }

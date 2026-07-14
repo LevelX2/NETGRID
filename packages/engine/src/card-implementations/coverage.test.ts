@@ -541,6 +541,45 @@ function formatClassicCoverageReport(report: ClassicCoverageReport): string {
 }
 
 describe("CardImplementation coverage and registry invariants", () => {
+  it("keeps every avoid-tag card in the shared prevention registry with its printed cost", () => {
+    const cases = [
+      ["onr_v1_135_nasuko-cycle", { kind: "credit", amount: 3 }, 125],
+      ["onr_v1_161_fall-guy", { kind: "trash_source" }, 120],
+      ["onr_v1_167_leland-corporate-bodyguard", { kind: "trash_source" }, 122],
+      ["onr_v1_170_nomad-allies", { kind: "trash_source" }, 121],
+      [
+        "onr_v1_187_wilson-weeflerunner-apprentice",
+        { kind: "trash_source" },
+        130,
+      ],
+      [
+        "onr_proteus_140_expendable-family-member",
+        { kind: "credit_and_trash_source", amount: 1 },
+        118,
+      ],
+      [
+        "onr_classic_051_vintage-camaro",
+        { kind: "credit_and_forgo_next_action", amount: 1 },
+        130,
+      ],
+    ] as const;
+
+    for (const [definitionId, cost, priority] of cases) {
+      expect(
+        cardImplementationForDefinitionId(definitionId)?.tagPreventionSources,
+        definitionId,
+      ).toEqual([
+        expect.objectContaining({
+          kind: "avoid_tag",
+          amount: 1,
+          cost,
+          priority,
+          visibility: "public",
+        }),
+      ]);
+    }
+  });
+
   const p344SimpleIcebreakers = [
     "onr_v1_039_krash",
     "onr_v1_014_codecracker",
@@ -2121,11 +2160,14 @@ describe("CardImplementation coverage and registry invariants", () => {
       );
     }
 
-    const currentReleaseDefinitionIds = Object.keys(CARD_DEFINITIONS_BY_ID).filter(
-      (definitionId) =>
-        isCurrentCardImplementationReleaseScopeDefinitionId(definitionId),
+    const currentReleaseDefinitionIds = Object.keys(
+      CARD_DEFINITIONS_BY_ID,
+    ).filter((definitionId) =>
+      isCurrentCardImplementationReleaseScopeDefinitionId(definitionId),
     );
-    const outsideScopeDefinitionIds = Object.keys(CARD_DEFINITIONS_BY_ID).filter(
+    const outsideScopeDefinitionIds = Object.keys(
+      CARD_DEFINITIONS_BY_ID,
+    ).filter(
       (definitionId) =>
         !isCurrentCardImplementationReleaseScopeDefinitionId(definitionId),
     );
