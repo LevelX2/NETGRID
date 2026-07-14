@@ -18,6 +18,20 @@
   und höchstens zwei fortsetzbare Hintergrundprojekte. Broker-/Bank-Zyklen und
   strategieabhängige Corp-Scoring-Remotes besitzen begrenzte Zugkadenz,
   redigierte Mehrplan-Beiträge und deterministische Zielbindung.
+- Wiederholbare Economy- und Bankaktionen werden nach sichtbarer Reserve,
+  konkretem Fundingbedarf, kombiniertem Credit-Zugriff und legalen
+  Entwicklungsalternativen marginal bewertet. Ein Bankaufbau ohne konkreten
+  Fundingbedarf bleibt eine überstimmbare Hintergrundoption; es gibt keine
+  absolute kartenspezifische Nutzungsgrenze.
+- TacticalPlans schreiben Fortschritt nur bei einer nachfolgend sichtbaren
+  Zielannäherung fort. Erreichte Creditreserven beenden stale Creditbase-Pläne;
+  Punish-Pläne ohne Tag, Payoff oder messbare Ressourcenannäherung verlieren
+  ihre TTL. Ein letzter Klick darf eine Trace-Quelle ohne unmittelbaren
+  Punish-Payoff nicht als Fortschrittsplan erzwingen.
+- Universelle probabilistische Breaker-Coverage ist von stabiler typgebundener
+  Coverage getrennt. Ihr Nutzen wird über Erfolgswahrscheinlichkeit und
+  Handpuffer bewertet; die KI wartet nicht auf im eigenen Deck nicht
+  vorhandene Standardbreaker und ignoriert kein letales Ausfallrisiko.
 - `RemoteDoctrineProfile` leitet aus eigenem Deckstrategieprofil,
   DeckCapabilities und StrategicIntent ab, ob ein Deck keinen,
   opportunistischen, unterstützenden oder primären Remote-Bedarf besitzt.
@@ -77,6 +91,11 @@
 - `semantic-decision-chain-observability-contract-2026-07-14.md`: aktueller
   verhaltensneutraler Debug-, Arbitration- und Decision-Checkpoint-Vertrag für
   den produktiven Semantic-Runtime-Auswahlweg.
+- `ai-seed03-seed05-loop-remediation-process-2026-07-14.md` und
+  `docs/reviews/ai/ai-behavior-baseline-v1-seed03-seed05-remediation-final-2026-07-14.md`:
+  spielgleiche Verträge und vollständige Seed-03/05-Evidence für marginale
+  Economy, erfolgsbasierte Planfortschreibung, Trace-Konversion und
+  probabilistische Coverage.
 - `proteus-ai-release-reconciliation-plan-2026-07-09.md`,
   `proteus-ai-release-automation-process-2026-07-09.md` und
   `docs/reviews/ai/proteus-ai-release-reconciliation-final-review-2026-07-09.md`:

@@ -1,6 +1,6 @@
 # KI-Remediation für Baseline-Seed 03 und Seed 05 (2026-07-14)
 
-Status: Aktiv; P0 bis P4 erfüllt, P5 in Vorbereitung
+Status: P0 bis P6 erfüllt; P7 Main-Integration und Cleanup ausstehend
 
 ## Quelle und Zielprüfung
 
@@ -199,6 +199,21 @@ entfernen.
   Vertrag nachgewiesen und innerhalb des freigegebenen Scopes geschlossen.
 - Commit: nur bei geänderten Test- oder Evidence-Artefakten.
 
+Erfüllt mit Commit `a415cc575`:
+
+- acht spielgleiche Correctness-Checkpoints sind grün;
+- 235 fokussierte Tests und alle drei AI-Shards mit insgesamt 2.191 Tests sind
+  grün;
+- AI-Typecheck, `check:ai`, Kartenfunktions-Abstraktion, Paketgrenzen, Format
+  und Diff-Hygiene sind grün;
+- Seed 03 endet nach 307, Seed 05 nach 248 Aktionen; beide Replays sind gültig
+  und kein Spiel erreicht das 480-Aktionen-Limit;
+- Seed 05 endet durch Flatline. Der Ergebnisreport kennt für Seed 03 den
+  Sieger Korp, liefert aber weiterhin nur `gameEndReason: unknown`;
+- eine im ersten akzeptierten Lauf sichtbare absolute Broker-Planbindung wurde
+  vor dem finalen Lauf zusätzlich spielgleich rot gesichert und als gewichtete
+  Hintergrundoption korrigiert.
+
 ### P6 – Abschlussreview und Wissenspflege
 
 - Ziel: Ursachen, Änderungen, Gegenverträge, Baseline-Ergebnis und Grenzen
@@ -209,6 +224,12 @@ entfernen.
 - Done-Gate: versionierte Dokumentation trennt technische Gates,
   Play-Strength-Evidence und offene Follow-ups.
 - Commit: `docs(ai): close seed03 seed05 loop remediation`
+
+Erfüllt durch den finalen Baseline-Review, den Current-State-Nachtrag in
+`docs/architecture/ai/README.md` und den Monatslog. Der Review trennt die vier
+verbleibenden Detector-Rohsignale ausdrücklich von bewiesenen
+Correctness-Fehlern; die drei späteren Broker-Einzahlungen ohne konkreten
+Fundingbedarf sind im finalen Lauf verschwunden.
 
 ### P7 – Main-Integration und Cleanup
 
