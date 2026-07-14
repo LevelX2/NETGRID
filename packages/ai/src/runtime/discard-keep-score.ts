@@ -271,10 +271,18 @@ function corpConditionalPayoffKeepAdjustment(
   }
   if (signals.has("risk.requires_tagged_runner") && runnerTags <= 0) {
     if (reachableTagSource) {
-      return {
-        value: 240,
-        evidence: ["discard_score:corp_conditional_payoff_reachable"],
-      };
+      const hardDamagePayoff =
+        signals.has("damage.corp_tagged_meat_payoff") ||
+        signals.has("damage.payoff");
+      return hardDamagePayoff
+        ? {
+            value: 240,
+            evidence: ["discard_score:corp_conditional_payoff_reachable"],
+          }
+        : {
+            value: -80,
+            evidence: ["discard_score:corp_soft_tag_payoff_not_live"],
+          };
     }
     return {
       value: -180,

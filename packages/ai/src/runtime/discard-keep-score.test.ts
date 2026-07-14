@@ -258,6 +258,32 @@ describe("discard keep score", () => {
     );
   });
 
+  it("protects a reachable hard damage payoff over an inactive soft tag payoff", () => {
+    const hardDamage = score(
+      corpCard("onr_v1_302_scorched-earth", "operation"),
+      [],
+      "corp",
+      [],
+      {},
+      { corpTagSourceState: "stack" },
+    );
+    const softCreditPunish = score(
+      corpCard("onr_v1_285_closed-accounts", "operation"),
+      [],
+      "corp",
+      [],
+      {},
+      { corpTagSourceState: "stack" },
+    );
+
+    expect(hardDamage.baseValue).toBeGreaterThan(
+      softCreditPunish.baseValue + 300,
+    );
+    expect(softCreditPunish.evidence).toContain(
+      "discard_score:corp_soft_tag_payoff_not_live",
+    );
+  });
+
   it("devalues non-additive Runner utility duplicates already represented in the rig", () => {
     const freshUtility = score(
       runnerCard("runner-stack-filter", "resource"),
