@@ -23,6 +23,18 @@
   Entwicklungsalternativen marginal bewertet. Ein Bankaufbau ohne konkreten
   Fundingbedarf bleibt eine überstimmbare Hintergrundoption; es gibt keine
   absolute kartenspezifische Nutzungsgrenze.
+- Ein Bankplan ohne konkreten Fundingbedarf bleibt auch gegenüber seinem
+  eigenen Rohscore überstimmbar, wenn ein sichtbarer Schadensdruck den
+  Handpuffer priorisiert. Gerade finanzierte neue Entwicklung bleibt dagegen
+  planbindend; negative Backup-Installationen dürfen weichen.
+- Run-Events werden über ihre konkrete RunTargetEvaluation bewertet.
+  Zentraldruck und Zielplan-Fit gelten für projizierte HQ-/R&D-Runs nur, wenn
+  ihr eigener sichtbarer Pfad `run_now` trägt; Archives-, Remote- und
+  Bezahlbarkeitsausschlüsse bleiben wirksam.
+- Strukturierte Tag-Vermeidungs-Choices im Engine-Fenster
+  `v120.event_modification.avoid` bevorzugen eine vorhandene legale
+  Präventionsquelle gegenüber `pass`. Ohne konkrete Quelle entsteht keine
+  künstliche Choice.
 - TacticalPlans schreiben Fortschritt nur bei einer nachfolgend sichtbaren
   Zielannäherung fort. Erreichte Creditreserven beenden stale Creditbase-Pläne;
   Punish-Pläne ohne Tag, Payoff oder messbare Ressourcenannäherung verlieren
@@ -107,6 +119,11 @@
   textgenaue Hint-Verträge für acht Karten aus vier gespeicherten Spielen,
   Familienhomogenität für Handlimit- und eingeschränkte wiederkehrende
   Breaker-Credits sowie eine spielgleiche Inside-Job-Bypass-Pfadquote.
+- `ai-match-424a-runner-endgame-remediation-process-2026-07-15.md` und
+  `docs/reviews/ai/ai-match-424a-runner-endgame-remediation-final-2026-07-15.md`:
+  spielgleiche Verträge für Tag-Vermeidung, Run-Event-Zielkontext,
+  Matchpoint-Remote-Vorbereitung, Bank-/Plan-Arbitration und die Trennung von
+  Breaker-Coverage und Gesamtbezahlbarkeit.
 - `proteus-ai-release-reconciliation-plan-2026-07-09.md`,
   `proteus-ai-release-automation-process-2026-07-09.md` und
   `docs/reviews/ai/proteus-ai-release-reconciliation-final-review-2026-07-09.md`:

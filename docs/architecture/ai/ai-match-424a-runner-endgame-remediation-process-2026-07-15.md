@@ -1,6 +1,6 @@
 # KI-Runner-Endgame-Remediation für Match 424A (2026-07-15)
 
-Status: P0 bis P4b abgeschlossen; P5 aktiv, P6 ausstehend
+Status: P0 bis P5 abgeschlossen; P6 zur lokalen Integration freigegeben
 
 ## Quelle und Zielprüfung
 
@@ -126,7 +126,7 @@ verifiziert entfernen.
 
 ### P1 – Side-sichere Match-Evidence und Fehlergruppen
 
-- Ziel: Match-Metadaten, die vollständige Entscheidungstimeline, die neun
+- Ziel: Match-Metadaten, die vollständige Entscheidungstimeline, die zehn
   Findings und die damaligen sichtbaren besseren Alternativen dauerhaft
   dokumentieren.
 - Kernartefakt:
@@ -149,7 +149,7 @@ verifiziert entfernen.
   - Decision 146 / StateVersion 273: Remote-Informations- und Bankkontext;
   - Decision 151 / StateVersion 283: Matchpoint-Remote ohne Pfadöffnungs- und
     Fundingsequenz;
-- Decision 154 / StateVersion 286: Krash-Pfad als fehlende Coverage statt
+  - Decision 154 / StateVersion 286: Krash-Pfad als fehlende Coverage statt
     unbezahlbarer Gesamtpfad.
   - Decision 69 / StateVersion 122: Fall Guy ist legal, aber die KI lässt den
     unmittelbar drohenden Hunter-Tag mit `pass` zu.
@@ -211,6 +211,11 @@ verifiziert entfernen.
 - Done-Gate: Checks, Grenzen und Nicht-Fixes sind dokumentiert; Worktree ist
   sauber.
 - Commit: `docs(ai): close match 424a runner remediation`
+
+Abschlussnachweis: 333/333 Testdateien und 2253/2253 Tests der vollständigen
+`@netgrid/ai`-Suite, AI-Typecheck, `check:ai` und Diff-Hygiene sind grün. Das
+Final Review liegt unter
+`docs/reviews/ai/ai-match-424a-runner-endgame-remediation-final-2026-07-15.md`.
 
 ### P6 – Main-Integration und Cleanup
 

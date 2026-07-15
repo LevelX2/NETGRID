@@ -1,6 +1,6 @@
 # CODEX_STATUS
 
-Stand: 2026-07-14
+Stand: 2026-07-15
 
 ## Einstieg
 
@@ -35,6 +35,13 @@ beobachtbar; diese Observability verändert weder Scoring noch Planpriorität.
 Der vorhandene SQLite-KI-Trace persistiert die Kette im normalen
 `summary`-Modus kompakt und im erweiterten `detailed`-Modus vollständig unter
 demselben `trace_json`-Pfad.
+
+Das jüngste Runner-Endgame-Review aus Match 424A ist spielgleich geschlossen:
+Tag-Vermeidung, projizierte Run-Events, terminale Remote-Vorbereitung,
+Bank-/Plan-Arbitration und Mehr-ICE-Bezahlbarkeit besitzen unveränderte
+Decision-Checkpoint-Verträge. Der vollständige Abschlusslauf umfasst 333
+AI-Testdateien und 2253 grüne Tests. Führend ist
+`docs/reviews/ai/ai-match-424a-runner-endgame-remediation-final-2026-07-15.md`.
 
 ## Current-State-Cleanup
 

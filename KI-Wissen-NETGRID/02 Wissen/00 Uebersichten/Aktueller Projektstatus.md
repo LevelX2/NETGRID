@@ -1,6 +1,6 @@
 # Aktueller Projektstatus
 
-Stand: 2026-07-14
+Stand: 2026-07-15
 
 ## Führender Produktstand
 
@@ -61,6 +61,13 @@ Stand: 2026-07-14
   Countertransfer und Basic Advances. Vapor Ops und andere Werkzeuge werden
   funktionsbasiert erkannt; ungeschützte Agenda-Installationen bleiben ohne
   garantierten Abschluss gesperrt.
+- Die spielgleiche Runner-Endgame-Remediation aus Match 424A trennt vorhandene
+  Breaker-Coverage von fehlender Gesamtbezahlbarkeit, bewertet Run-Events über
+  ihren wirklichen Zielpfad, schützt finanzierte neue Entwicklung und lässt
+  negative Backup- oder Hintergrund-Bankpläne bei akut besserer sichtbarer
+  Konvertierung weichen. Fall Guy wird im konkreten legalen
+  Tag-Vermeidungsfenster statt `pass` genutzt. Führend ist
+  `docs/reviews/ai/ai-match-424a-runner-endgame-remediation-final-2026-07-15.md`.
 - Die Planebene besitzt zusätzlich ein begrenztes Planportfolio: kurzfristige
   Score- und Gefahrenpläne bleiben Vordergrund beziehungsweise Interrupt,
   während Broker-/Bank-Zyklen und langfristige Corp-Scoring-Remotes mit
@@ -85,8 +92,8 @@ Stand: 2026-07-14
   leicht, gestiegene Bank-/Plan-Mismatch-Findings und eine Seed-Verschiebung
   bleiben offenes Review-Risiko. Führend:
   `docs/reviews/ai/ai-planportfolio-remote-doctrine-final-review-2026-07-12.md`.
-- Aktive AI-Gates: 616 Hints, 600 durch den Action-Signal-Katalog abgedeckt,
-  34 zurückgestellt, 90 Target-Profile-Gaps. Full Derived Facts: 527
+- Aktive AI-Gates: 618 Hints, 602 durch den Action-Signal-Katalog abgedeckt,
+  34 zurückgestellt, 89 Target-Profile-Gaps. Full Derived Facts: 527
   CardImplementations, 390 generierte Facts und 137 aktuell noch nur über
   kompilierte Hints abgedeckte Karten; 0 harte Fehler.
 - Führende Artefakte:
