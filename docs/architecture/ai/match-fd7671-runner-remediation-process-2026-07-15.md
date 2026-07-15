@@ -2,7 +2,8 @@
 
 ## Status
 
-Freigegeben und in Umsetzung.
+P0 bis P5 abgeschlossen; P6 verifiziert die Integration und räumt den
+Arbeitsstrang auf.
 
 ## Quelle und Zielprüfung
 
@@ -137,6 +138,11 @@ werden nicht verworfen.
 - Nach allen Fixes das dann zuletzt beendete Spiel mit dem aktualisierten Skill
   vollständig und zugweise prüfen.
 - Neue Funde nur dokumentieren; keine stillschweigende Scope-Erweiterung.
+- Abgeschlossen für `match_ecfe3ce373a56823`: 208/208 Decisions
+  klassifiziert. Neue Funde sind ein fehlender aktueller Coverage-Abgleich in
+  D59 sowie ein Engine-/LegalActions-Bypass der Fang-Run-Sperre durch
+  Run-Events und Bonus-Runs. Führend ist
+  `docs/reviews/ai/match-ecfe3ce-full-decision-audit-2026-07-15.md`.
 - Commit: `docs(ai): review latest match after fd7671 fixes`
 
 ### P6 – Abschluss
