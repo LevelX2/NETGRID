@@ -16,6 +16,7 @@ import {
   type RunAccessTransitionHost,
 } from "./run-access-transition";
 import { approachOrEncounterIce, type RunMovementHost } from "./run-movement";
+import { assertRunnerCanStartRun } from "./run-start-lock";
 
 export type StartRunOptions = Pick<
   RunState,
@@ -101,6 +102,7 @@ export function startRun(
 ): void {
   assertRequiredHostGroups(host);
   const { state } = host;
+  assertRunnerCanStartRun(state);
   const server = host.servers.mustServer(serverId);
   const flags = host.turn.ensureRunnerTurnFlags();
   flags.runAttemptsThisTurn = (flags.runAttemptsThisTurn ?? 0) + 1;
@@ -142,9 +144,7 @@ export function startRun(
     ...(options?.freeTrashAccessZones?.length
       ? { freeTrashAccessZones: options.freeTrashAccessZones.slice() }
       : {}),
-    ...(options?.grantBonusRunOnFinish
-      ? { grantBonusRunOnFinish: true }
-      : {}),
+    ...(options?.grantBonusRunOnFinish ? { grantBonusRunOnFinish: true } : {}),
     ...(options?.accessServerOverride
       ? { accessServerOverride: options.accessServerOverride }
       : {}),
@@ -191,13 +191,19 @@ export function startRun(
       : {}),
     ...(options?.successfulRunArchivesMoveCount &&
     options.successfulRunArchivesMoveCount > 0
-      ? { successfulRunArchivesMoveCount: options.successfulRunArchivesMoveCount }
+      ? {
+          successfulRunArchivesMoveCount:
+            options.successfulRunArchivesMoveCount,
+        }
       : {}),
     ...(options?.successfulRunSourceCardId
       ? { successfulRunSourceCardId: options.successfulRunSourceCardId }
       : {}),
     ...(options?.successfulRunSourceDefinitionId
-      ? { successfulRunSourceDefinitionId: options.successfulRunSourceDefinitionId }
+      ? {
+          successfulRunSourceDefinitionId:
+            options.successfulRunSourceDefinitionId,
+        }
       : {}),
     ...(options?.successfulRunSourceTitle
       ? { successfulRunSourceTitle: options.successfulRunSourceTitle }
@@ -239,7 +245,10 @@ export function startRun(
         }
       : {}),
     ...(options?.secretSpendGuessRunAutoPassIceId
-      ? { secretSpendGuessRunAutoPassIceId: options.secretSpendGuessRunAutoPassIceId }
+      ? {
+          secretSpendGuessRunAutoPassIceId:
+            options.secretSpendGuessRunAutoPassIceId,
+        }
       : {}),
     ...(options?.prohibitNoisyIcebreakers
       ? { prohibitNoisyIcebreakers: true }

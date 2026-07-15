@@ -71,6 +71,63 @@ describe("runner main action generation", () => {
     });
   });
 
+  it.each([
+    ["actions", { runLockActionsPending: 2 }],
+    ["credits", { runnerRunLockCreditCost: 3 }],
+  ])(
+    "omits basic, bonus, and event runs while the %s lock is open",
+    (_kind, lock) => {
+      const state = minimalRunnerMainState(`runner-run-lock-${_kind}`);
+      const eventCardId = "locked_run_event" as CardInstanceId;
+      state.runner.grip = [eventCardId];
+      state.runnerTurnFlags = {
+        ...(state.runnerTurnFlags ?? {}),
+        bonusRunPending: true,
+        ...lock,
+      } as NonNullable<GameState["runnerTurnFlags"]>;
+      state.cardInstances[eventCardId] = {
+        id: eventCardId,
+        instanceId: eventCardId,
+        definitionId: "locked_run_event",
+        owner: "runner",
+        controller: "runner",
+        zone: { side: "runner", zone: "grip" },
+        faceup: false,
+        rezzed: false,
+        advancementCounters: 0,
+        strengthModifier: 0,
+      } as never;
+      const host = testRunnerMainHost(state);
+      host.cards.definitionFor = () =>
+        ({
+          id: "locked_run_event",
+          title: "Locked Run Event",
+          side: "runner",
+          type: "event",
+          cost: 0,
+        }) as never;
+      host.cards.isUniqueCard = () => false;
+      host.cards.hasInstalledUniqueCardDefinition = () => false;
+      host.constants.RUNNER_EVENT_RESOLVERS = {
+        locked_run_event: {
+          name: "locked_run_event",
+          startsRun: true,
+          requiresServer: true,
+          resolve: () => undefined,
+        },
+      };
+
+      const actions = buildRunnerMainActions(host);
+
+      expect(actions.some((candidate) => candidate.type === "start_run")).toBe(
+        false,
+      );
+      expect(actions.some((candidate) => candidate.type === "play_event")).toBe(
+        false,
+      );
+    },
+  );
+
   it("omits draw when the stack is empty", () => {
     const state = minimalRunnerMainState("arch-54-runner-empty-stack");
     state.runner.stack = [];

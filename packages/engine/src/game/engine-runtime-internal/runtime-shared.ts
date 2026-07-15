@@ -72,6 +72,7 @@ export type RunnerDrawSummary = {
 };
 export type RunnerEventResolver = {
   name: string;
+  startsRun?: boolean;
   requiresServer?: boolean;
   canPlay?: (state: GameState) => boolean;
   canPlayForServer?: (state: GameState, serverId: ServerId) => boolean;

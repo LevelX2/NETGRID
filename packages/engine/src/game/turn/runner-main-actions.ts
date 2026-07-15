@@ -12,6 +12,7 @@ import {
 } from "../../ability-engine/card-implementation-runtime-shared";
 import { expandRunnerProgramInstallPaymentActions } from "../install/runner-program-install-payment";
 import { restrictedHostedCredits } from "../run/run-duration-payment";
+import { runnerCanStartRun } from "../run/run-start-lock";
 
 type HostFn<T = unknown> = (...args: any[]) => T;
 
@@ -310,6 +311,7 @@ export function buildRunnerMainActions(
     );
   };
   const flags = ensureRunnerTurnFlags(state);
+  const canStartRun = runnerCanStartRun(state);
   const hasClicks = state.runner.clicks > 0;
   const unusedRunOnlyActionSourceIds = activeRunActionSpendingCapSourceIds(
     runDurationPaymentHost(state),
@@ -708,6 +710,11 @@ export function buildRunnerMainActions(
         cardImplementationRunnerEventResolver(definition) ??
         RUNNER_EVENT_RESOLVERS[definition.id];
       if (!resolver && !canPlayCardImplementation) continue;
+      const makeRunEffect = canPlayCardImplementation
+        ? printedCostCardImplementationMakeRunEffect(definition)
+        : undefined;
+      if (!canStartRun && (resolver?.startsRun === true || makeRunEffect))
+        continue;
       if (
         !canPlayCardImplementation &&
         resolver?.canPlay &&
@@ -747,8 +754,6 @@ export function buildRunnerMainActions(
           );
         }
       } else {
-        const makeRunEffect =
-          printedCostCardImplementationMakeRunEffect(definition);
         if (makeRunEffect?.target.kind === "central_server") {
           const server = mustServer(state, makeRunEffect.target.server);
           actions.push(
@@ -1158,14 +1163,6 @@ export function buildRunnerMainActions(
       ...upgradeRunStartTax.sourceDefinitionIds,
       ...rootAssetRunTax.sourceDefinitionIds,
     ];
-    const runLockActionsPending = Math.max(
-      0,
-      Math.floor(state.runnerTurnFlags?.runLockActionsPending ?? 0),
-    );
-    const runnerRunLockCreditCost = Math.max(
-      0,
-      Math.floor(state.runnerTurnFlags?.runnerRunLockCreditCost ?? 0),
-    );
     const runCosts = [
       {
         clicks: 1,
@@ -1182,12 +1179,7 @@ export function buildRunnerMainActions(
           }
         : {}),
     };
-    if (
-      hasClicks &&
-      runLockActionsPending <= 0 &&
-      runnerRunLockCreditCost <= 0 &&
-      !rovingRunBlocked
-    ) {
+    if (hasClicks && canStartRun && !rovingRunBlocked) {
       if (
         runStartTaxCredits === 0 ||
         availableRunnerRunStartCredits(runDurationPaymentHost(state)) >=
@@ -1209,6 +1201,7 @@ export function buildRunnerMainActions(
     for (const sourceCardId of unusedRunOnlyActionSourceIds) {
       const sourceDefinition = definitionFor(state, sourceCardId);
       if (
+        canStartRun &&
         !rovingRunBlocked &&
         (runStartTaxCredits === 0 ||
           availableRunnerRunStartCredits(runDurationPaymentHost(state)) >=
@@ -1240,6 +1233,7 @@ export function buildRunnerMainActions(
       }
     }
     if (
+      canStartRun &&
       bonusRunPending &&
       (!nextSequenceServerId || nextSequenceServerId === server.id) &&
       !rovingRunBlocked &&
@@ -1363,6 +1357,7 @@ function buildMultiServerSuccessSequenceForcedRunActions(
   },
 ): LegalAction[] {
   const state = host.state;
+  if (!runnerCanStartRun(state)) return [];
   const server = state.corp.servers.find(
     (candidate) => candidate.id === input.nextSequenceServerId,
   );

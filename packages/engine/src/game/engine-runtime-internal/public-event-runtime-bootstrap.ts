@@ -738,6 +738,7 @@ import {
 
 type RunnerEventResolver = {
   name: string;
+  startsRun?: boolean;
   requiresServer?: boolean;
   canPlay?: (state: GameState, definition: CardDefinition) => boolean;
   canPlayForServer?: (
@@ -763,6 +764,7 @@ export const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
   },
   simple_run_event: {
     name: "runner_event_run_success_2",
+    startsRun: true,
     requiresServer: true,
     resolve: (state, legalAction) => {
       startRun(
@@ -790,6 +792,7 @@ export const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
   },
   v08_overclock_run_event: {
     name: "runner_event_run_success_3",
+    startsRun: true,
     requiresServer: true,
     resolve: (state, legalAction) => {
       startRun(
@@ -804,6 +807,7 @@ export const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
   },
   v097_deep_dive_event: {
     name: "runner_event_run_multiaccess_2",
+    startsRun: true,
     requiresServer: true,
     resolve: (state, legalAction) => {
       startRun(
@@ -1109,6 +1113,7 @@ export const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
   },
   [ALL_NIGHTER_ID]: {
     name: "runner_event_bonus_run",
+    startsRun: true,
     requiresServer: true,
     resolve: (state, legalAction) => {
       const serverId = String(legalAction.payload?.serverId) as Exclude<
@@ -1127,6 +1132,7 @@ export const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
   },
   [RUN_REPLACEMENT_OVERLAP_EVENT_SOURCE]: {
     name: "runner_event_run_with_replacement_overlap",
+    startsRun: true,
     requiresServer: true,
     resolve: (state, legalAction) => {
       const serverId = String(legalAction.payload?.serverId) as Exclude<
@@ -1143,6 +1149,7 @@ export const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
   },
   [RUN_ACCESS_PRESSURE_EVENT_SOURCE]: {
     name: "runner_event_secret_spend_guess_targeted_bypass_run",
+    startsRun: true,
     canPlay: (state, definition) =>
       state.runner.credits - (definition.cost ?? 0) >= 2,
     resolve: (state, legalAction) => {
@@ -1161,6 +1168,7 @@ export const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
   },
   [TRACE_AWARE_RUN_EVENT_SOURCE]: {
     name: "runner_event_trace_aware_run_access",
+    startsRun: true,
     requiresServer: true,
     resolve: (state, legalAction) => {
       const serverId = String(legalAction.payload?.serverId) as Exclude<

@@ -157,6 +157,25 @@ describe("start-run-action-execution", () => {
     ]);
   });
 
+  it.each([
+    ["actions", { runLockActionsPending: 2 }],
+    ["credits", { runnerRunLockCreditCost: 3 }],
+  ])(
+    "revalidates the %s run lock before paying any action costs",
+    (_kind, lock) => {
+      const gameState = state();
+      const calls: string[] = [];
+      Object.assign(gameState.runnerTurnFlags!, lock);
+
+      expect(() =>
+        handleStartRunActionExecution(hostFor(gameState, calls), action()),
+      ).toThrow("Run-Sperre");
+      expect(gameState.runner.clicks).toBe(3);
+      expect(gameState.run).toBeUndefined();
+      expect(calls).toEqual([]);
+    },
+  );
+
   it("clears Bodyweight bonus-run flags, marks the ability used, and spends no click", () => {
     const gameState = state();
     const calls: string[] = [];

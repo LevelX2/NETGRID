@@ -30,8 +30,7 @@ function instance(
     definitionId,
     owner: options.owner ?? "corp",
     controller: options.controller ?? "corp",
-    zone:
-      options.zone ?? { side: "corp", zone: "serverIce", serverId: "hq" },
+    zone: options.zone ?? { side: "corp", zone: "serverIce", serverId: "hq" },
     faceup: options.faceup ?? true,
     rezzed: options.rezzed ?? true,
     strengthModifier: options.strengthModifier ?? 0,
@@ -160,7 +159,8 @@ function hostFor(state: GameState): {
         breachStateHost: () => ({
           state,
           cards: {
-            definitionFor: (cardId) => definition(cardInstanceFor(cardId).definitionId),
+            definitionFor: (cardId) =>
+              definition(cardInstanceFor(cardId).definitionId),
             cardInstanceFor,
           },
           servers: {
@@ -179,7 +179,8 @@ function hostFor(state: GameState): {
         movementHost: () => ({
           state,
           cards: {
-            definitionFor: (cardId) => definition(cardInstanceFor(cardId).definitionId),
+            definitionFor: (cardId) =>
+              definition(cardInstanceFor(cardId).definitionId),
             cardInstanceFor,
           },
           servers: {
@@ -218,7 +219,8 @@ function hostFor(state: GameState): {
           calls.push("cardImplementationRunStart"),
         applyRunnerTraceCounterRunStartEffects: () =>
           calls.push("traceCounterRunStart"),
-        applyRunStartRandomStrengthBonus: () => calls.push("runStartRandomStrengthBonus"),
+        applyRunStartRandomStrengthBonus: () =>
+          calls.push("runStartRandomStrengthBonus"),
         openStartOfRunFortUtilityWindow: () => false,
       },
     },
@@ -315,9 +317,28 @@ describe("run-core-execution", () => {
     expect(state.run?.runnerRunTemporaryCredits).not.toBe(temporaryCredits);
   });
 
-  it("fails clearly when required host groups are absent", () => {
+  it.each([
+    ["offene Pflichtaktionen", { runLockActionsPending: 2 }],
+    ["offene Sperrkosten", { runnerRunLockCreditCost: 3 }],
+  ])("rejects every direct run start while %s remain", (_label, lock) => {
+    const state = makeState();
+    state.runnerTurnFlags = {
+      ...(state.runnerTurnFlags ?? {}),
+      ...lock,
+    } as NonNullable<GameState["runnerTurnFlags"]>;
+    const { host, calls } = hostFor(state);
+
     expect(() =>
-      startRun({} as RunCoreExecutionHost, "hq"),
-    ).toThrow("RunCoreExecutionHost missing group: state");
+      startRun(host, "hq", undefined, 1, undefined, action(state)),
+    ).toThrow("Run-Sperre");
+    expect(state.run).toBeUndefined();
+    expect(state.runnerTurnFlags?.runAttemptsThisTurn ?? 0).toBe(0);
+    expect(calls).toEqual([]);
+  });
+
+  it("fails clearly when required host groups are absent", () => {
+    expect(() => startRun({} as RunCoreExecutionHost, "hq")).toThrow(
+      "RunCoreExecutionHost missing group: state",
+    );
   });
 });

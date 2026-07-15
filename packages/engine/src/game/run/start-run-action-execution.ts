@@ -8,6 +8,7 @@ import type {
 import type { StartRunOptions } from "./run-core-execution";
 import type { RunTaxPaymentResult } from "./run-duration-payment";
 import { BODYWEIGHT_DATA_CRECHE_ID } from "../../compatibility/runtime-compatibility";
+import { assertRunnerCanStartRun } from "./run-start-lock";
 
 export type StartRunActionExecutionHost = {
   state: GameState;
@@ -48,6 +49,7 @@ export function executeStartRunAction(
   host: StartRunActionExecutionHost,
   legalAction: LegalAction,
 ): void {
+  assertRunnerCanStartRun(host.state);
   const serverId = String(legalAction.payload?.serverId) as Exclude<
     ServerId,
     "new_remote"
