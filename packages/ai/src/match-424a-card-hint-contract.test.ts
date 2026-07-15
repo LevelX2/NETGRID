@@ -153,6 +153,29 @@ describe.each(hintSources)("match 424A card semantics in %s", (source) => {
       ]),
     );
   });
+
+  it("keeps WuTech as memory support and Junkyard as recovery utility", () => {
+    const wuTech = card(hints, "onr_v1_145_wutech-mem-chip");
+    const junkyard = card(hints, "onr_v1_165_junkyard-bbs");
+
+    expect(wuTech.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "global_modifier",
+          resource: "memory",
+          amount: 1,
+        }),
+      ]),
+    );
+    expect(junkyard.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "search",
+          target: "setup.recovery",
+        }),
+      ]),
+    );
+  });
 });
 
 function readHints(relativePath: string): HintCard[] {

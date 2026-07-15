@@ -123,6 +123,28 @@ describe("selectedChoicesForDecision", () => {
     });
   });
 
+  it("keeps pass in a damage window without a legal prevention source", () => {
+    const decision = selectedChoicesForDecision(
+      inputWithChoice(
+        {
+          kind: "select_option",
+          source: "v120.event_modification.prevent",
+          minSelections: 1,
+          maxSelections: 1,
+          options: [{ id: "pass", label: "Nicht verhindern" }],
+        },
+        { side: "runner" },
+      ),
+      resolveChoiceAction("runner"),
+      unusedDependencies(),
+    );
+
+    expect(decision).toEqual({
+      choiceId: "choice_multi",
+      selectedOptionIds: ["pass"],
+    });
+  });
+
   it("selects enough generic options for mandatory multi-select choices", () => {
     const decision = selectedChoicesForDecision(
       inputWithChoice({

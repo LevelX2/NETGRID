@@ -301,6 +301,33 @@ describe("discard keep score", () => {
     expect(installedDuplicate).toBeLessThan(freshUtility - 100);
   });
 
+  it("preserves unique Runner memory support over redundant neutral copies", () => {
+    const memorySupport = runnerCard("unique-memory-support", "hardware");
+    const neutral = runnerCard("neutral-duplicate", "resource");
+    const secondNeutral = {
+      ...runnerCard("neutral-duplicate", "resource"),
+      instanceId: "neutral-duplicate-second-instance",
+    };
+    const memoryScore = score(
+      memorySupport,
+      ["memory", "setup", "build_rig"],
+      "runner",
+      [],
+      {},
+      { extraGrip: [neutral, secondNeutral] },
+    );
+    const neutralScore = score(
+      neutral,
+      [],
+      "runner",
+      [],
+      {},
+      { extraGrip: [secondNeutral, memorySupport] },
+    );
+
+    expect(memoryScore.baseValue).toBeGreaterThan(neutralScore.baseValue);
+  });
+
   it("discards excess copies of an installed breaker before a unique support program", () => {
     const krash = runnerCard("krash", "program");
     const secondKrash = {

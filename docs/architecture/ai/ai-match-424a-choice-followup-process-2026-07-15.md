@@ -1,6 +1,6 @@
 # KI-Choice-Follow-up für Match 424A (2026-07-15)
 
-Status: P0 aktiv; P1 bis P5 offen
+Status: P0 und P1 abgeschlossen; P2 aktiv; P3 bis P5 offen
 
 ## Quelle und `/Goal`
 
@@ -142,4 +142,3 @@ Arbeite ausschließlich im Worktree
 stelle die historischen Verhaltensverträge vor dem jeweiligen Fix fachlich
 rot, ändere ihre Erwartungen danach nicht und committe jedes abgeschlossene
 Paket separat. Nutze den Hauptworkspace erst für den finalen lokalen Merge.
-

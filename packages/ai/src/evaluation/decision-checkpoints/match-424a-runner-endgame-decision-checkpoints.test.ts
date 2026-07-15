@@ -8,6 +8,9 @@ import remoteInformationJson from "../../../../../data/scenarios/ai-decision-che
 import blockedMatchpointJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-424a-05-blocked-matchpoint-sequence.json";
 import krashPathJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-424a-06-krash-path-unpayable.json";
 import fallGuyTagAvoidanceJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-424a-07-fall-guy-tag-avoidance.json";
+import firstDamagePreventionJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-424a-08-force-shield-damage-prevention.json";
+import discardPathToolsJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-424a-09-discard-path-tools.json";
+import secondDamagePreventionJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-424a-10-force-shield-damage-prevention.json";
 import { evaluateRunnerRunTargets } from "../../runner-run-target-evaluation";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
@@ -34,6 +37,17 @@ describe("match 424A runner endgame decision checkpoints", () => {
 
   it("trashes Fall Guy to avoid the historical Hunter tag", () => {
     expectCheckpointToPass(fixture(fallGuyTagAvoidanceJson));
+  });
+
+  it.each([
+    ["D51 prevents the visible Vacant Soulkiller damage", firstDamagePreventionJson],
+    ["D118 prevents the visible Neural Blade damage", secondDamagePreventionJson],
+  ])("uses Force Shield at %s", (_label, json) => {
+    expectCheckpointToPass(fixture(json));
+  });
+
+  it("retains the unique path tools at the historical D93 discard", () => {
+    expectCheckpointToPass(fixture(discardPathToolsJson));
   });
 
   it("classifies the installed-Krash HQ path as unpayable rather than missing wall coverage", () => {
