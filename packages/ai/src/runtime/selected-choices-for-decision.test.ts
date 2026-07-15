@@ -145,6 +145,36 @@ describe("selectedChoicesForDecision", () => {
     });
   });
 
+  it("uses the first legal Runner damage-prevention source instead of passing", () => {
+    const decision = selectedChoicesForDecision(
+      inputWithChoice(
+        {
+          kind: "select_option",
+          source: "v120.event_modification.prevent",
+          minSelections: 1,
+          maxSelections: 1,
+          options: [
+            { id: "pass", label: "Nicht verhindern" },
+            {
+              id: "card_implementation_damage_prevent_force_shield_0_2",
+              label: "Force Shield: 2 Schaden verhindern",
+            },
+          ],
+        },
+        { side: "runner" },
+      ),
+      resolveChoiceAction("runner"),
+      unusedDependencies(),
+    );
+
+    expect(decision).toEqual({
+      choiceId: "choice_multi",
+      selectedOptionIds: [
+        "card_implementation_damage_prevent_force_shield_0_2",
+      ],
+    });
+  });
+
   it("selects enough generic options for mandatory multi-select choices", () => {
     const decision = selectedChoicesForDecision(
       inputWithChoice({

@@ -9,6 +9,7 @@ import { selectedBidChoiceOptionId } from "./bid-choice-option";
 import { selectableChoiceOptions } from "./choice-option";
 import { selectedCorpAdvancementCounterChoiceOptionId } from "./corp-advancement-counter-choice";
 import { selectedDiscardChoiceOptionIds } from "./discard-choice-selection";
+import { selectedRunnerDamagePreventionChoiceOptionId } from "./damage-prevention-choice-option";
 import { selectedPlayfulAiChoiceOptionId } from "./playful-ai-choice-option";
 import { selectedPostBidLinkChoiceOptionId } from "./post-bid-link-choice-option";
 import {
@@ -231,6 +232,14 @@ export function selectedChoicesForDecision(
       : { choiceId: choice.choiceId, selectedOptionIds: [] };
   }
   if (input.side === "runner") {
+    const selectedDamagePreventionOptionId =
+      selectedRunnerDamagePreventionChoiceOptionId(choice, selectableOptions);
+    if (selectedDamagePreventionOptionId !== undefined) {
+      return {
+        choiceId: choice.choiceId,
+        selectedOptionIds: [selectedDamagePreventionOptionId],
+      };
+    }
     const selectedOptionId = selectedRunnerTagAvoidanceChoiceOptionId(
       choice,
       selectableOptions,
