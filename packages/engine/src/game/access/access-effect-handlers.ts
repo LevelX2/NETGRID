@@ -449,8 +449,35 @@ function accessEffectApplies(
   return (
     effect.sourceZones.includes(accessZone) &&
     !(effect.ignoreIfAccessedFrom ?? []).includes(accessZone) &&
+    installedAccessActivationMet(host, cardId, effect, accessZone) &&
     accessConditionMet(host, cardId, effect.condition)
   );
+}
+
+function installedAccessActivationMet(
+  host: AccessEffectHandlerHost,
+  cardId: CardInstanceId,
+  effect: CardAccessEffectImplementation,
+  accessZone: CardAccessZone,
+): boolean {
+  if (accessZone !== "installed") return true;
+  const rezzed = host.cards.mustInstance(cardId).rezzed === true;
+  switch (effect.installedSourceActivation ?? "requires_rezzed") {
+    case "requires_rezzed":
+      return rezzed;
+    case "unrezzed_only":
+      return !rezzed;
+    case "any_rez_state":
+      return true;
+    default: {
+      const unknown = effect as { installedSourceActivation?: string };
+      throw new Error(
+        `Unsupported CardImplementation installed access activation: ${
+          unknown.installedSourceActivation ?? "unknown"
+        }`,
+      );
+    }
+  }
 }
 
 function accessEffectHiddenZoneAction(
@@ -507,6 +534,11 @@ function accessEffectHiddenZoneAction(
     )
   )
     return "v1919_access_ambush_damage";
+  if (
+    effect.installedSourceActivation === "unrezzed_only" &&
+    effect.effects.some((step) => step.kind === "damage")
+  )
+    return "v1919_access_ambush_damage";
   if (definition.type === "upgrade") return "v1918_upgrade_access_ambush";
   if (effect.sourceZones.some((zone) => zone === "hq" || zone === "rd"))
     return "v1917_access_ambush";
@@ -554,8 +586,8 @@ function resolveCardImplementationAccessEffects(
   }
   const accessZone = cardImplementationAccessZone(host, cardId);
   for (const [effectIndex, effect] of accessEffects.entries()) {
-    setAccessEffectBasePayload(legalAction, definition, accessZone, effect);
     if ((effect.ignoreIfAccessedFrom ?? []).includes(accessZone)) {
+      setAccessEffectBasePayload(legalAction, definition, accessZone, effect);
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
         ambushSkippedReason: accessZone,
@@ -563,6 +595,8 @@ function resolveCardImplementationAccessEffects(
       continue;
     }
     if (!effect.sourceZones.includes(accessZone)) continue;
+    if (!installedAccessActivationMet(host, cardId, effect, accessZone)) continue;
+    setAccessEffectBasePayload(legalAction, definition, accessZone, effect);
     if (!accessConditionMet(host, cardId, effect.condition)) {
       legalAction.payload = {
         ...(legalAction.payload ?? {}),

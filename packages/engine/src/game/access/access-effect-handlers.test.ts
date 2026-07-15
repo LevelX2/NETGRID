@@ -337,6 +337,22 @@ describe("access effect handlers", () => {
     });
   });
 
+  it("does not dispatch an installed access effect from an unrezzed source", () => {
+    const action = accessAction("setup", "remote_1");
+    const { host, calls, state } = makeHost(action);
+    state.run = { ...state.run!, accessedCardId: "setup", attackedServerId: "remote_1" };
+    state.cardInstances.setup = {
+      ...state.cardInstances.setup!,
+      rezzed: false,
+    };
+
+    const result = handleAccessEffectsForCard(host, "setup" as CardInstanceId);
+
+    expect(result.handled).toBe(false);
+    expect(calls.damages).toEqual([]);
+    expect(action.payload).toEqual({ serverId: "remote_1" });
+  });
+
   it("keeps TRAP! access payment choice and pay path stable", () => {
     const action = accessAction("trap");
     const { host, calls, state } = makeHost(action);
@@ -362,6 +378,30 @@ describe("access effect handlers", () => {
       damageResolved: true,
       damageAmount: 3,
     });
+  });
+
+  it("revalidates the installed source rez state before resolving payment", () => {
+    const action = accessAction("trap", "remote_1");
+    const { host, state } = makeHost(action);
+    state.run = { ...state.run!, accessedCardId: "trap", attackedServerId: "remote_1" };
+    state.cardInstances.trap = {
+      ...state.cardInstances.trap!,
+      rezzed: true,
+      zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+    };
+    state.corp.rd = [];
+
+    handleAccessEffectsForCard(host, "trap" as CardInstanceId);
+    expect(state.pendingChoice?.source).toContain("p3_35.access_payment");
+
+    state.cardInstances.trap = {
+      ...state.cardInstances.trap!,
+      rezzed: false,
+    };
+
+    expect(() => resolveAccessPaymentChoice(host, "pay")).toThrow(
+      "Der Access-Payment-Kontext ist nicht mehr gueltig.",
+    );
   });
 
   it("runs Dedicated Response Team and Dieter through access damage callbacks", () => {

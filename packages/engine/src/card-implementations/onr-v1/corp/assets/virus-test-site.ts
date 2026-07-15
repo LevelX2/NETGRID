@@ -8,7 +8,39 @@ export const advancementNetDamageAssetImplementation: CardImplementationDefiniti
   accessEffects: [
     {
       kind: "on_access",
-      sourceZones: ["installed", "hq", "rd", "archives"],
+      sourceZones: ["installed"],
+      installedSourceActivation: "unrezzed_only",
+      visibility: "hidden_info_barrier",
+      effects: [
+        {
+          kind: "damage",
+          recipient: "runner",
+          damageType: "net",
+          amount: 1,
+          preventable: true,
+          visibility: "hidden_info_barrier",
+        },
+      ],
+    },
+    {
+      kind: "on_access",
+      sourceZones: ["installed"],
+      visibility: "hidden_info_barrier",
+      effects: [
+        {
+          kind: "damage_from_source_advancement_counters",
+          recipient: "runner",
+          damageType: "net",
+          amountPerCounter: 2,
+          minimumAmount: 1,
+          preventable: true,
+          visibility: "hidden_info_barrier",
+        },
+      ],
+    },
+    {
+      kind: "on_access",
+      sourceZones: ["hq", "rd", "archives"],
       ignoreIfAccessedFrom: ["archives"],
       revealIfAccessedFrom: ["rd"],
       visibility: "hidden_info_barrier",

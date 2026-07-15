@@ -201,7 +201,7 @@ import {
 } from "../../test-fixtures/index-test-helpers";
 
 describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => {
-  it("scales Virus Test Site access damage, reveals R&D access and skips Archives", () => {
+  it("keeps unrezzed Virus Test Site at one damage, scales when rezzed, reveals R&D and skips Archives", () => {
     let remoteState = toRunnerTurn(
       MECHANIC_SMOKE_GAMES.agendaScoring("spotcheck-virus-test-site-remote"),
     );
@@ -232,16 +232,64 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
       (action) => action.type === "access_card",
     );
 
-    expect(remoteState.runner.grip.length).toBe(gripBefore - 6);
+    expect(remoteState.runner.grip.length).toBe(gripBefore - 1);
     expect(remoteState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneAction: "v1919_access_ambush_damage",
+      ambushDefinitionId: "onr_v1_348_virus-test-site",
+      damageAmount: 1,
+    });
+    const replay = replayEvents(initial, remoteState.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(remoteState));
+
+    let rezzedRemoteState = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.agendaScoring(
+        "spotcheck-virus-test-site-rezzed-remote",
+      ),
+    );
+    rezzedRemoteState.runner.credits = 10;
+    drawRunnerCardsForTest(rezzedRemoteState, 4);
+    const rezzedVirusTestSiteId = putCorpRootInRemote(
+      rezzedRemoteState,
+      "onr_v1_348_virus-test-site",
+    );
+    rezzedRemoteState.cardInstances[rezzedVirusTestSiteId] = {
+      ...rezzedRemoteState.cardInstances[rezzedVirusTestSiteId]!,
+      advancementCounters: 3,
+    };
+    const rezzedGripBefore = rezzedRemoteState.runner.grip.length;
+    rezzedRemoteState = apply(
+      rezzedRemoteState,
+      "runner",
+      (action) =>
+        action.type === "start_run" &&
+        action.payload?.serverId === "remote_1",
+    );
+    rezzedRemoteState = apply(
+      rezzedRemoteState,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(rezzedRemoteState, action) ===
+          "onr_v1_348_virus-test-site",
+    );
+    rezzedRemoteState = apply(
+      rezzedRemoteState,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
+    rezzedRemoteState = apply(
+      rezzedRemoteState,
+      "runner",
+      (action) => action.type === "access_card",
+    );
+    expect(rezzedRemoteState.runner.grip.length).toBe(rezzedGripBefore - 6);
+    expect(rezzedRemoteState.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneAction: "v1919_access_ambush_damage",
       ambushDefinitionId: "onr_v1_348_virus-test-site",
       advancementCounterCount: 3,
       damageAmount: 6,
     });
-    const replay = replayEvents(initial, remoteState.eventLog.slice(replayStart));
-    expect(replay.ok).toBe(true);
-    expect(hashState(replay.state)).toBe(hashState(remoteState));
 
     let rdState = toRunnerTurn(
       MECHANIC_SMOKE_GAMES.agendaScoring("spotcheck-virus-test-site-rd"),
@@ -2857,7 +2905,14 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
         (action) =>
           action.type === "start_run" && action.payload?.serverId === "remote_1",
       );
-      state = passRootRezWindowBeforeAccessIfOpen(state);
+      state = apply(
+        state,
+        "corp",
+        (action) =>
+          action.type === "rez_ice" &&
+          sourceDefinition(state, action) === "onr_v1_346_vacant-soulkiller",
+      );
+      state = apply(state, "runner", (action) => action.type === "continue_run");
       state = apply(state, "runner", (action) => action.type === "access_card");
       expect(state.runner.coreDamage).toBe(advancementCounters);
       const expectedPayload: Record<string, unknown> = {
@@ -2877,6 +2932,37 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       expect(replay.ok).toBe(true);
       expect(hashState(replay.state)).toBe(hashState(state));
     }
+  });
+
+  it("keeps unrezzed Vacant Soulkiller inactive on access", () => {
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.agendaScoring(
+        "spotcheck-vacant-soulkiller-unrezzed",
+      ),
+    );
+    const vacantId = putCorpRootInRemote(
+      state,
+      "onr_v1_346_vacant-soulkiller",
+    );
+    state.cardInstances[vacantId] = {
+      ...state.cardInstances[vacantId]!,
+      advancementCounters: 3,
+    };
+    const coreDamageBefore = state.runner.coreDamage;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = passRootRezWindowBeforeAccessIfOpen(state);
+    state = apply(state, "runner", (action) => action.type === "access_card");
+
+    expect(state.runner.coreDamage).toBe(coreDamageBefore);
+    expect(state.eventLog.at(-1)?.publicPayload).not.toHaveProperty(
+      "ambushDefinitionId",
+    );
   });
 
   it("charges Microtech Trode Set for breaks and reduces unbroken AP net damage to one", () => {
