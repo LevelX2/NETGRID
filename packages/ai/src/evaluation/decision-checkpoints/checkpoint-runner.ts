@@ -2,6 +2,10 @@ import type { AiDecision, AiDecisionInput, LegalAction } from "@netgrid/shared";
 
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { resetTacticalPlanMemory } from "../../plans/plan-memory";
+import {
+  evaluateRunnerRunTargets,
+  type RunnerRunTargetEvaluation,
+} from "../../runner-run-target-evaluation";
 import { buildAiDecisionInput } from "../../runtime/ai-decision-input";
 import {
   getStrategicIntentMemorySnapshot,
@@ -11,6 +15,7 @@ import {
   type AiDecisionCheckpointActionMatcher,
   type AiDecisionCheckpointExpectationV1,
   type AiDecisionCheckpointErrorCode,
+  type AiDecisionCheckpointRunTargetExpectation,
   type AiDecisionCheckpointV1,
 } from "./checkpoint-types";
 import { validateAiDecisionCheckpoint } from "./checkpoint-validation";
@@ -109,6 +114,10 @@ export function runAiDecisionCheckpoint(
     decision,
     fixture.expectation.decisionChain,
   );
+  const runTargetsAccepted = runTargetExpectationsMatch(
+    input,
+    fixture.expectation.runTargets,
+  );
   if (
     forbidden ||
     !accepted ||
@@ -116,6 +125,7 @@ export function runAiDecisionCheckpoint(
     !discardChoiceAccepted ||
     !strategicIntentAccepted ||
     !selectedScoreBreakdownAccepted ||
+    !runTargetsAccepted ||
     !decisionChainAccepted
   ) {
     return {
@@ -136,6 +146,46 @@ export function runAiDecisionCheckpoint(
     selectedAction,
     ...(strategicIntent ? { strategicIntent } : {}),
   };
+}
+
+function runTargetExpectationsMatch(
+  input: AiDecisionInput,
+  expectations: AiDecisionCheckpointRunTargetExpectation[] | undefined,
+): boolean {
+  if (!expectations?.length) return true;
+  if (input.side !== "runner") return false;
+  const evaluations = evaluateRunnerRunTargets({ input });
+  return expectations.every((expectation) =>
+    evaluations.some((evaluation) =>
+      runTargetExpectationMatches(evaluation, expectation),
+    ),
+  );
+}
+
+function runTargetExpectationMatches(
+  evaluation: RunnerRunTargetEvaluation,
+  expectation: AiDecisionCheckpointRunTargetExpectation,
+): boolean {
+  return (
+    (expectation.actionId === undefined ||
+      evaluation.actionId === expectation.actionId) &&
+    (expectation.targetServerId === undefined ||
+      evaluation.targetServerId === expectation.targetServerId) &&
+    (expectation.pathPassability === undefined ||
+      evaluation.pathPassability === expectation.pathPassability) &&
+    (expectation.pathCost === undefined ||
+      evaluation.pathCost === expectation.pathCost) &&
+    (expectation.creditsAfterRun === undefined ||
+      evaluation.creditsAfterRun === expectation.creditsAfterRun) &&
+    (expectation.recommendation === undefined ||
+      evaluation.recommendation === expectation.recommendation) &&
+    (expectation.requiredEvidence ?? []).every((item) =>
+      evaluation.evidence.includes(item),
+    ) &&
+    !(expectation.forbiddenEvidence ?? []).some((item) =>
+      evaluation.evidence.includes(item),
+    )
+  );
 }
 
 function selectedScoreBreakdownExpectationMatches(

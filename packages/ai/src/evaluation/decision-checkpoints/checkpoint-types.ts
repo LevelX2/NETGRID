@@ -13,6 +13,10 @@ import type {
   StrategicTargetVector,
 } from "../../strategic-intent-state";
 import type { AiRuntimeCheckpointV1 } from "./runtime-checkpoint";
+import type {
+  RunnerPathPassability,
+  RunnerRunTargetRecommendation,
+} from "../../runner-run-target-evaluation";
 
 export const AI_DECISION_CHECKPOINT_SCHEMA_VERSION =
   "ai-decision-checkpoint-v1" as const;
@@ -22,6 +26,17 @@ export type AiDecisionCheckpointActionMatcher = {
   type?: string;
   sourceDefinitionId?: string;
   targetServerId?: string;
+};
+
+export type AiDecisionCheckpointRunTargetExpectation = {
+  actionId?: string;
+  targetServerId?: string;
+  pathPassability?: RunnerPathPassability;
+  pathCost?: number;
+  creditsAfterRun?: number;
+  recommendation?: RunnerRunTargetRecommendation;
+  requiredEvidence?: string[];
+  forbiddenEvidence?: string[];
 };
 
 export type AiDecisionCheckpointExpectationV1 = {
@@ -48,6 +63,7 @@ export type AiDecisionCheckpointExpectationV1 = {
     requiredComponentKeys?: string[];
     forbiddenComponentKeys?: string[];
   };
+  runTargets?: AiDecisionCheckpointRunTargetExpectation[];
   decisionChain?: {
     selectionRoute?: AiDecisionSelectionRoute;
     rawScoreWinner?: AiDecisionCheckpointActionMatcher;
