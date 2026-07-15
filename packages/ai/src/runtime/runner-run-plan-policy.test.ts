@@ -504,6 +504,113 @@ describe("runner run plan policy", () => {
     );
   });
 
+  it("honors a current known-complete unpayable remaining path over continue score", () => {
+    const continueRun = action("continue_run", {
+      actionId: "continue-run-to-keeper",
+      source: "game_rule",
+      costs: [],
+      timingPoint: "run.jack_out_window",
+      expiresAtStateVersion: 143,
+      payload: {},
+    });
+    const jackOut = action("jack_out", {
+      actionId: "jack-out-before-keeper",
+      source: "game_rule",
+      costs: [],
+      timingPoint: "run.jack_out_window",
+      expiresAtStateVersion: 143,
+      payload: {},
+    });
+    const input = runnerEncounterInput({
+      iceDefinitionId: "onr_v1_252_keeper",
+      iceTitle: "Keeper",
+      iceStrength: 4,
+      breaker: {
+        instanceId: "cyfermaster-1",
+        definitionId: "onr_v1_016_cyfermaster",
+        title: "Cyfermaster",
+        type: "program",
+        subtypes: ["icebreaker", "decoder"],
+        strength: 5,
+        known: true,
+      },
+      credits: 0,
+      passedOuterIce: [
+        {
+          instanceId: "passed-unknown-outer",
+          type: "ice",
+          known: false,
+          rezzed: false,
+        },
+      ],
+      legalActions: [jackOut, continueRun],
+    });
+    input.playerView.timingPoint = "run.jack_out_window";
+    const approachedKeeper = input.playerView.servers[0]?.ice[0];
+    if (!approachedKeeper) throw new Error("Expected approached Keeper");
+    input.playerView.run = {
+      attackedServerId: "rd",
+      phase: "movement",
+      position: { kind: "ice", serverId: "rd", iceIndex: 0 },
+      approachedIce: approachedKeeper,
+      successful: false,
+    };
+    const basePlan = runPlan();
+    const revalidated = revalidateRunnerRunPlan(input, {
+      ...basePlan,
+      budget: { ...basePlan.budget, availableCredits: 0 },
+      pathQuote: {
+        ...basePlan.pathQuote,
+        quoteStatus: "partially_known",
+        totalKnownCost: 2,
+        expectedRemainingCredits: 1,
+      },
+      revalidation: {
+        ...basePlan.revalidation,
+        reasons: ["fingerprint:previous"],
+      },
+    });
+
+    const currentAbortPlan: RunnerRunPlan = {
+      ...revalidated,
+      lifecycle: "abort_recommended",
+      pathQuote: {
+        ...revalidated.pathQuote,
+        quoteStatus: "known_complete",
+        totalKnownCost: 2,
+        expectedRemainingCredits: -2,
+        reserveViolation: true,
+        canReachAccess: false,
+        cannotReachReason: "insufficient_credits_after_reserve",
+      },
+      revalidation: {
+        status: "abort_recommended",
+        reasons: [
+          "path_quote_changed",
+          "cannot_reach:insufficient_credits_after_reserve",
+        ],
+        checkedAtStateVersion: input.playerView.stateVersion,
+      },
+    };
+    const selected = runnerRunPlanSemanticChoice({
+      input,
+      plan: currentAbortPlan,
+      choices: [
+        choice(jackOut, "simple_run_choice", -351),
+        choice(continueRun, "simple_run_choice", 103),
+      ],
+    });
+
+    expect(revalidated.pathQuote.quoteStatus).toBe("known_complete");
+    expect(selected?.action.actionId).toBe(jackOut.actionId);
+    expect(selected?.evidence).toContain(
+      "runner_run_plan_concrete_current_abort:true",
+    );
+    expect(selected?.evidence).not.toContain(
+      "runner_run_plan_abort_yielded_to_continue:true",
+    );
+  });
+
   it("does not treat approached movement ICE as the active encounter", () => {
     const continueRun = action("continue_run", {
       actionId: "continue-run-to-banpei",

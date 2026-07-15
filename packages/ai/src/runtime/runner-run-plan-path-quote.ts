@@ -122,7 +122,7 @@ export function quoteRunnerRunPath(
   const expectedRemainingCredits =
     input.playerView.own.credits - totalKnownCost;
   const reserveViolation = expectedRemainingCredits < reserveTarget;
-  const unknownVisibleIce = (server?.ice ?? []).some(
+  const unknownVisibleIce = serverIce.some(
     (ice) => !ice.known || ice.rezzed === false,
   );
   const blockedQuote = iceQuotes.find(

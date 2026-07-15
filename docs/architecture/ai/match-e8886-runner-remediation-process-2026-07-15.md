@@ -1,6 +1,6 @@
 # Runner-Remediation aus Match E8886 (2026-07-15)
 
-Status: P3 abgeschlossen; P4 als nächstes
+Status: P4 abgeschlossen; P5 als nächstes
 
 ## Quelle und Gesamtziel
 
@@ -150,6 +150,15 @@ freies HQ.
 - Gate: D23 und beide Continue-/Abort-Gegenrichtungen grün; angrenzende
   RunnerRunPlan-Tests grün.
 - Commit: `fix(ai): honor concrete unpayable run aborts`
+
+Umgesetzt: Die aktive Restpfad-Quote bestimmt ihren Known-Status nur noch aus
+dem tatsächlich noch vor dem Runner liegenden ICE; bereits passiertes
+unbekanntes ICE hält die Quote nicht künstlich auf `partially_known`. Eine im
+aktuellen State revalidierte, `known_complete` und nicht zugriffsfähige Quote
+darf deshalb nicht mehr allein wegen eines höheren generischen Continue-Scores
+überstimmt werden. Vorsichtige oder veraltete Abort-Schätzungen mit unbekannter
+Quote dürfen weiterhin an eine sichtbar bessere Continue-Entscheidung
+abgeben.
 
 ### P5 - Breite Verifikation, Review und Wissenspflege
 

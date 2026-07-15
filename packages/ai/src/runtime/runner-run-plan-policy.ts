@@ -64,6 +64,9 @@ function runnerRunPlanAbortYieldContinueChoice(params: {
     )
     .sort((left, right) => right.score - left.score)[0];
   if (!jackOutChoice || !continueChoice) return undefined;
+  if (runnerRunPlanHasConcreteCurrentAbort(params.input, params.plan)) {
+    return undefined;
+  }
   if (continueChoice.score <= jackOutChoice.score) return undefined;
   if (currentEncounterHasUnbrokenSafetyThreat(params.input)) return undefined;
   return annotateRunnerRunPlanChoice({
@@ -250,6 +253,7 @@ function runnerRunPlanAccessChoice(params: {
 }
 
 function runnerRunPlanAbortChoice(params: {
+  input: AiDecisionInput;
   plan: RunnerRunPlan;
   choices: readonly SemanticRuntimeChoice[];
 }): SemanticRuntimeChoice | undefined {
@@ -319,11 +323,29 @@ function runnerRunPlanAbortChoice(params: {
     extraEvidence: [
       "runner_run_plan_abort_recommended:true",
       `runner_run_plan_abort_status:${params.plan.revalidation.status}`,
+      ...(runnerRunPlanHasConcreteCurrentAbort(params.input, params.plan)
+        ? ["runner_run_plan_concrete_current_abort:true"]
+        : []),
       ...params.plan.revalidation.reasons.map(
         (reason) => `runner_run_plan_abort_reason:${reason}`,
       ),
     ],
   });
+}
+
+function runnerRunPlanHasConcreteCurrentAbort(
+  input: AiDecisionInput,
+  plan: RunnerRunPlan,
+): boolean {
+  return (
+    plan.revalidation.status === "abort_recommended" &&
+    plan.revalidation.checkedAtStateVersion === input.playerView.stateVersion &&
+    plan.pathQuote.quoteStatus === "known_complete" &&
+    !plan.pathQuote.canReachAccess &&
+    (plan.pathQuote.cannotReachReason === "known_ice_unbreakable" ||
+      plan.pathQuote.cannotReachReason ===
+        "insufficient_credits_after_reserve")
+  );
 }
 
 function runnerRunPlanEncounterChoice(params: {
