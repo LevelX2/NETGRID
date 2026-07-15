@@ -1448,7 +1448,7 @@
       "side": "runner",
       "cardType": "program",
       "roles": ["program", "damage_prevention", "rig_defense"],
-      "planRoles": ["build_rig", "recover_economy"],
+      "planRoles": ["build_rig"],
       "requiredMechanics": [
         "install_program",
         "memory",
@@ -4191,7 +4191,7 @@
       ],
       "conditions": [
         {
-          "kind": "requires_successful_run"
+          "kind": "requires_successful_hq_run"
         },
         {
           "kind": "requires_rezzed_ice"
@@ -8042,18 +8042,24 @@
       "side": "runner",
       "cardType": "resource",
       "roles": ["connection", "economy", "resource"],
-      "planRoles": ["build_rig", "recover_key_card", "resource_value_engine"],
+      "planRoles": [
+        "build_rig",
+        "recover_economy",
+        "click_for_credits_when_safe",
+        "resource_value_engine"
+      ],
       "requiredMechanics": [
         "install_resource",
         "resource_tag_interaction",
-        "public_trash_to_hand",
+        "gain_credit",
+        "bit_depot",
         "take_click_ability"
       ],
       "valueHints": {
         "utility": 2,
-        "cardFlow": 2
+        "economy": 3
       },
-      "riskTags": ["resource_trash_if_tagged", "trash_top_card_dependency"],
+      "riskTags": ["resource_trash_if_tagged", "click_cost"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1914-smokes.json#runner_v1914_tag_resource_tools"

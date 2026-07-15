@@ -13,6 +13,10 @@ export type RunnerFollowupScoreDependencies = {
     input: AiDecisionInput,
     action: LegalAction,
   ) => AiDecisionScoreComponent[];
+  projectedRunContextComponents: (
+    input: AiDecisionInput,
+    action: LegalAction,
+  ) => AiDecisionScoreComponent[];
   badPublicityRelevanceScoreComponent: (
     input: AiDecisionInput,
     action: LegalAction,
@@ -30,6 +34,7 @@ export function runnerFollowupScoreComponents(
     action,
   );
   if (runTargetGuidance) components.push(runTargetGuidance);
+  components.push(...dependencies.projectedRunContextComponents(input, action));
   if (
     action.type === "trash_accessed_card" ||
     action.type === "decline_trash"

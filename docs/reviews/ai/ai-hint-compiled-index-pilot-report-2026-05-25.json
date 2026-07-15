@@ -10274,7 +10274,7 @@
         "side": "runner",
         "cardType": "program",
         "roles": ["damage_prevention", "program", "rig_defense"],
-        "planRoles": ["build_rig", "recover_economy"],
+        "planRoles": ["build_rig"],
         "aiSupportStatus": "ai_supported",
         "effects": [
           {
@@ -14687,7 +14687,12 @@
         "side": "runner",
         "cardType": "resource",
         "roles": ["connection", "economy", "resource"],
-        "planRoles": ["build_rig", "recover_key_card", "resource_value_engine"],
+        "planRoles": [
+          "build_rig",
+          "click_for_credits_when_safe",
+          "recover_economy",
+          "resource_value_engine"
+        ],
         "aiSupportStatus": "ai_supported",
         "effects": [
           {

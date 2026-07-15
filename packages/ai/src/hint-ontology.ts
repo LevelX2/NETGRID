@@ -147,6 +147,7 @@ export const KNOWN_HINT_EFFECT_RESOURCES = [
 export const KNOWN_HINT_CONDITION_KINDS = [
   "requires_runner_tagged",
   "requires_successful_run",
+  "requires_successful_hq_run",
   "requires_known_ice",
   "requires_agenda_in_remote",
   "requires_trace_success",

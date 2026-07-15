@@ -1,6 +1,6 @@
 # KI-Runner-Endgame-Remediation für Match 424A (2026-07-15)
 
-Status: P0 bis P2 abgeschlossen; P3 aktiv, P4 bis P6 ausstehend
+Status: P0 bis P3 abgeschlossen; P4 aktiv, P5 und P6 ausstehend
 
 ## Quelle und Zielprüfung
 

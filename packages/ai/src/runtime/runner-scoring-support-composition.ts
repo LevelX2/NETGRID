@@ -239,6 +239,21 @@ export function createRunnerScoringSupportComposition(
     followup: {
       runTargetGuidanceComponent:
         semanticRuntimeRunnerRunTargetGuidanceComponent,
+      projectedRunContextComponents: (input, action) => {
+        if (action.type === "start_run") return [];
+        const evaluation = dependencies.evaluationForAction(input, action);
+        if (!evaluation) return [];
+        const server = input.playerView.servers.find(
+          (candidate) => candidate.id === evaluation.accessServerId,
+        );
+        if (evaluation.accessServerId === "archives") {
+          return semanticRuntimeRunnerArchivesComponents(input, action, server);
+        }
+        if (dependencies.isRemoteServerTarget(evaluation.accessServerId)) {
+          return semanticRuntimeRunnerRemoteComponents(input, action, server);
+        }
+        return [];
+      },
       accessTrashComponents: semanticRuntimeRunnerAccessTrashComponents,
       badPublicityRelevanceScoreComponent:
         runnerBadPublicityRelevanceScoreComponent,

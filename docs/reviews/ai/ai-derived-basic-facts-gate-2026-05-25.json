@@ -6864,8 +6864,7 @@
           "rig_defense"
         ],
         "planRoles": [
-          "build_rig",
-          "recover_economy"
+          "build_rig"
         ],
         "effects": [
           {
@@ -12170,7 +12169,8 @@
         ],
         "planRoles": [
           "build_rig",
-          "recover_key_card",
+          "click_for_credits_when_safe",
+          "recover_economy",
           "resource_value_engine"
         ],
         "effects": [
