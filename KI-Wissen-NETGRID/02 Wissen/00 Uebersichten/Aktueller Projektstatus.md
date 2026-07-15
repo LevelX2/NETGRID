@@ -1,6 +1,6 @@
 # Aktueller Projektstatus
 
-Stand: 2026-07-15
+Stand: 2026-07-16
 
 ## Führender Produktstand
 
@@ -75,6 +75,15 @@ Stand: 2026-07-15
   Konvertierung weichen. Fall Guy wird im konkreten legalen
   Tag-Vermeidungsfenster statt `pass` genutzt. Führend ist
   `docs/reviews/ai/ai-match-424a-runner-endgame-remediation-final-2026-07-15.md`.
+- Die ECFE3CE-Remediation führt sichtbare Trace-Vermeidung und spätere
+  ICE-Kosten durch einen gemeinsamen Credit-Pool und revalidiert Run-Sperren
+  quellenunabhängig im tiefsten `startRun`-Pfad. Fang, All-Nighter, Private LDL
+  Access, Bodyweight Synthetic Blood und TKO 2.0 sind von der Hintquelle bis
+  zu ihren produktiven Consumern korrigiert. Die getrennte Broker-Analyse
+  bestätigt Optimierungsbedarf bei letztem Lade-Klick, Mehrkopien-
+  Amortisation, Quellenwahl und einem frühen Cashout; Broker-Code wurde dafür
+  noch nicht geändert. Führend ist
+  `docs/reviews/ai/match-ecfe3ce-engine-hints-remediation-final-2026-07-16.md`.
 - Die Planebene besitzt zusätzlich ein begrenztes Planportfolio: kurzfristige
   Score- und Gefahrenpläne bleiben Vordergrund beziehungsweise Interrupt,
   während Broker-/Bank-Zyklen und langfristige Corp-Scoring-Remotes mit

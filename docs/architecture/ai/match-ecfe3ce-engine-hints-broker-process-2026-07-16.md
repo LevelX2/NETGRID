@@ -2,10 +2,10 @@
 
 ## Status
 
-P0 aktiv. Die Punkte F1, F2 und H1 bis H5 aus
-`match_ecfe3ce373a56823` sind vom Nutzer zur Umsetzung freigegeben. Das
-Broker-Verhalten wird vollständig analysiert; ein zusätzlicher Broker-Fix
-bleibt bis zu einem eigenen belastbaren Befund und Freigabe-Gate getrennt.
+Abgeschlossen. Die Punkte F1, F2 und H1 bis H5 aus
+`match_ecfe3ce373a56823` sind umgesetzt und verifiziert. Das Broker-Verhalten
+ist vollständig analysiert; zusätzliche Broker-Heuristiken bleiben mit vier
+konkreten Folgefunden in einem getrennten Freigabe-Gate.
 
 ## Gesamtziel
 
@@ -94,3 +94,19 @@ Ladefenster und Cashouts wirtschaftlich bewertet.
   Fehlentscheidungen oder einer begründeten Entlastung.
 - Keine Hidden-Info-, Replay-, LegalAction- oder Ausführungsregression.
 - `main` ist sauber integriert; Worktree und Branch sind entfernt.
+
+## Abschlussstand vor Integration
+
+- F1 verwendet einen gemeinsamen Credit-Pool für garantierte sichtbare
+  Trace-Vermeidung und alle späteren ICE-Kosten. Der historische Remote-Pfad
+  kostet damit 8 statt 4 Credits; die Gegenprobe mit 10 Credits bleibt
+  erreichbar und hält 2 Credits Reserve.
+- F2 filtert Basic-, Event-, Run-only-, Bonus- und erzwungene Folgeruns unter
+  aktiver Run-Sperre. `startRun` revalidiert die Sperre zusätzlich als tiefste
+  Ausführungsgrenze vor jeder Zustandsänderung.
+- H1 bis H5 sind in aktiven und kompilierten Hints, Inspector,
+  Action-Projektion sowie den produktiven generischen Consumern gesichert.
+- Der Broker-Census belegt vier eigenständige Optimierungspunkte, verändert
+  die Broker-Heuristik in diesem Paket aber nicht.
+- Final Review:
+  `docs/reviews/ai/match-ecfe3ce-engine-hints-remediation-final-2026-07-16.md`.
