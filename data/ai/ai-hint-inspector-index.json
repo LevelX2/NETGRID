@@ -20,13 +20,12 @@
     "cardsWithFunctionSignals": 602,
     "cardsWithStrategyAnchors": 257,
     "cardsWithStrategySupportPairs": 198,
-    "cardsWithWarnings": 118,
+    "cardsWithWarnings": 116,
     "warningCategoryCounts": {
       "deferred_requires_human_review": 34,
       "descriptor_gap": 45,
       "function_signal_descriptor_gap": 27,
-      "legacy_fallback_only": 34,
-      "unknown_unmapped": 2
+      "legacy_fallback_only": 34
     }
   },
   "cards": [
@@ -36506,7 +36505,7 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "setup.hand_size"
@@ -36521,11 +36520,11 @@
       "lineSupportClassification": [],
       "rolesClassification": [
         {
-          "value": "hand_size",
-          "category": "unknown_unmapped",
-          "triageCategory": "unknown_unmapped",
+          "value": "handlimit",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
           "mapsTo": [],
-          "rationale": "No AI003 mapping rule matched this value; later migration should review it explicitly."
+          "rationale": "Hand-size/limit function context only."
         },
         {
           "value": "hardware",
@@ -36536,9 +36535,7 @@
         }
       ],
       "planRolesClassification": [],
-      "warningCategories": [
-        "unknown_unmapped"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
@@ -36573,7 +36570,7 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "setup.hand_size"
@@ -36588,11 +36585,11 @@
       "lineSupportClassification": [],
       "rolesClassification": [
         {
-          "value": "hand_size",
-          "category": "unknown_unmapped",
-          "triageCategory": "unknown_unmapped",
+          "value": "handlimit",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
           "mapsTo": [],
-          "rationale": "No AI003 mapping rule matched this value; later migration should review it explicitly."
+          "rationale": "Hand-size/limit function context only."
         },
         {
           "value": "hardware",
@@ -36603,9 +36600,7 @@
         }
       ],
       "planRolesClassification": [],
-      "warningCategories": [
-        "unknown_unmapped"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,

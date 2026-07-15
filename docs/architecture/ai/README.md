@@ -102,6 +102,11 @@
   Survival-Planabbildung und vollständig viable Encounter-Breakpfade; der
   Checkpoint-Vertrag kann zusätzlich ausgewählte Score-Komponenten nach
   stabilen Schlüsseln verlangen oder verbieten, ohne Zahlenwerte festzuschreiben.
+- `ai-four-match-card-hint-remediation-process-2026-07-15.md` und
+  `docs/reviews/ai/ai-four-match-card-hint-remediation-final-2026-07-15.md`:
+  textgenaue Hint-Verträge für acht Karten aus vier gespeicherten Spielen,
+  Familienhomogenität für Handlimit- und eingeschränkte wiederkehrende
+  Breaker-Credits sowie eine spielgleiche Inside-Job-Bypass-Pfadquote.
 - `proteus-ai-release-reconciliation-plan-2026-07-09.md`,
   `proteus-ai-release-automation-process-2026-07-09.md` und
   `docs/reviews/ai/proteus-ai-release-reconciliation-final-review-2026-07-09.md`:
@@ -125,7 +130,7 @@ Das Realitätsgate aus
 Engine-erzeugte Inputs mit dem produktiven Chooser. Unit-, synthetische Live-,
 Live-Engine- und Full-Simulation-Evidence bleiben getrennt.
 
-Die aktuelle vollständige Derived-Facts-Prüfung umfasst 616 aktive Hints, 527
+Die aktuelle vollständige Derived-Facts-Prüfung umfasst 618 aktive Hints, 527
 CardImplementations, 390 generierte Facts und 137 noch über kompilierte Hints
 abgedeckte Karten. Warnungen sind Qualitätsschuld, keine versteckten
 Runtime-Fallbacks.

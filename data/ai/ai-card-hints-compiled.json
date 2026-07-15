@@ -9363,7 +9363,7 @@
       "cardType": "hardware",
       "roles": [
         "hardware",
-        "hand_size"
+        "handlimit"
       ],
       "planRoles": [],
       "requiredMechanics": [
@@ -9417,7 +9417,7 @@
       "cardType": "hardware",
       "roles": [
         "hardware",
-        "hand_size"
+        "handlimit"
       ],
       "planRoles": [],
       "requiredMechanics": [

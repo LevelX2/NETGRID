@@ -14422,7 +14422,7 @@
         "cardId": "onr_v1_133_militech-mram-chip",
         "side": "runner",
         "cardType": "hardware",
-        "roles": ["hand_size", "hardware"],
+        "roles": ["handlimit", "hardware"],
         "aiSupportStatus": "ai_supported",
         "effects": [
           {
@@ -14505,7 +14505,7 @@
         "cardId": "onr_v1_134_mram-chip",
         "side": "runner",
         "cardType": "hardware",
-        "roles": ["hand_size", "hardware"],
+        "roles": ["handlimit", "hardware"],
         "aiSupportStatus": "ai_supported",
         "effects": [
           {

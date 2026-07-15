@@ -1,7 +1,7 @@
 {
   "schemaVersion": "ai-hint-quality-gate-report-v1",
   "generatedAt": "2026-05-25",
-  "hintCount": 616,
+  "hintCount": 618,
   "roleContractCount": 255,
   "planRoleContractCount": 114,
   "errors": [],
@@ -282,7 +282,7 @@
       "data/ai/ai-local-realistic-benchmark-deck-snapshots-2026-05-23.json",
       "data/ai/ai-real-scene-benchmark-deck-snapshots-2026-05-24.json"
     ],
-    "totalUniqueCards": 360,
+    "totalUniqueCards": 410,
     "skippedDecks": [],
     "missingHintCards": [],
     "riskCards": []

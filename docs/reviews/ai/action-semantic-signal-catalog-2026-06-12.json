@@ -9252,7 +9252,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": ["unknown_unmapped"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_v1_134_mram-chip",
@@ -9272,7 +9272,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": ["unknown_unmapped"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_v1_135_nasuko-cycle",

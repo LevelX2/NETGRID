@@ -11863,7 +11863,7 @@
         "side": "runner",
         "cardType": "hardware",
         "roles": [
-          "hand_size",
+          "handlimit",
           "hardware"
         ],
         "planRoles": [],
@@ -11956,7 +11956,7 @@
         "side": "runner",
         "cardType": "hardware",
         "roles": [
-          "hand_size",
+          "handlimit",
           "hardware"
         ],
         "planRoles": [],

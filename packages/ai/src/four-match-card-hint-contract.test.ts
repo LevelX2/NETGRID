@@ -80,7 +80,7 @@ describe.each(hintSources)("four-match card semantics in %s", (source) => {
   ])("keeps %s as hand-size support rather than memory", (_name, cardId, amount) => {
     const hint = card(hints, cardId);
 
-    expect(hint.roles).toEqual(expect.arrayContaining(["hardware", "hand_size"]));
+    expect(hint.roles).toEqual(expect.arrayContaining(["hardware", "handlimit"]));
     expect(hint.roles).not.toContain("memory");
     expect(hint.planRoles).not.toContain("remote_upgrade_modifier");
     expect(hint.tacticSignals).toContain("setup.hand_size");

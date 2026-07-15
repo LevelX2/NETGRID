@@ -6983,7 +6983,7 @@
       "cardId": "onr_v1_133_militech-mram-chip",
       "side": "runner",
       "cardType": "hardware",
-      "roles": ["hardware", "hand_size"],
+      "roles": ["hardware", "handlimit"],
       "planRoles": [],
       "requiredMechanics": [
         "persistent_special_state_resolver",
@@ -7024,7 +7024,7 @@
       "cardId": "onr_v1_134_mram-chip",
       "side": "runner",
       "cardType": "hardware",
-      "roles": ["hardware", "hand_size"],
+      "roles": ["hardware", "handlimit"],
       "planRoles": [],
       "requiredMechanics": [
         "persistent_special_state_resolver",
