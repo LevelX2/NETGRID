@@ -62,9 +62,7 @@ function isRoutineDamagePreventionOption(
   const roles = rolesForCardId(source?.definitionId);
   return (
     !roles.includes("hidden_zone_tool") &&
-    roles.some(
-      (role) => role === "damage_prevention" || role === "rig_defense",
-    )
+    roles.some((role) => role === "damage_prevention" || role === "rig_defense")
   );
 }
 

@@ -5,13 +5,10 @@ export function isRunnerEconomyRole(role: string): boolean {
 }
 
 export function isRunnerPressureRole(role: string): boolean {
-  return rolesMatch([role], [
-    "run_pressure",
-    "access",
-    "pressure",
-    "interface",
-    "multiaccess",
-  ]);
+  return rolesMatch(
+    [role],
+    ["run_pressure", "access", "pressure", "interface", "multiaccess"],
+  );
 }
 
 export function isRunnerNonAdditiveUtilityRole(role: string): boolean {

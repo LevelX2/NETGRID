@@ -23,10 +23,10 @@ StateHash-, Runtime- und Redaction-Prüfung; ihre einzige Zielabweichung lautet
 
 ## F11 – Force Shield wird im Schadensfenster nicht genutzt
 
-| Decision | StateVersion | Sichtbarer Kontext | Legale Optionen | Aktuelle Wahl | Erwartung |
-| --- | ---: | --- | --- | --- | --- |
-| 51 | 91 | Runner mit 2 Handkarten und 0 Core Damage; Vacant Soulkiller verursacht 2 vermeidbaren Schaden | `pass`; Force Shield verhindert 2 | `pass` | Force Shield wählen |
-| 118 | 216 | Runner mit 4 Handkarten und 2 Core Damage; Neural Blade verursacht 1 vermeidbaren Schaden | `pass`; zwei installierte Force Shields verhindern je 1 | `pass` | eine legale Force-Shield-Option wählen |
+| Decision | StateVersion | Sichtbarer Kontext                                                                             | Legale Optionen                                         | Aktuelle Wahl | Erwartung                              |
+| -------- | -----------: | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------- | ------------- | -------------------------------------- |
+| 51       |           91 | Runner mit 2 Handkarten und 0 Core Damage; Vacant Soulkiller verursacht 2 vermeidbaren Schaden | `pass`; Force Shield verhindert 2                       | `pass`        | Force Shield wählen                    |
+| 118      |          216 | Runner mit 4 Handkarten und 2 Core Damage; Neural Blade verursacht 1 vermeidbaren Schaden      | `pass`; zwei installierte Force Shields verhindern je 1 | `pass`        | eine legale Force-Shield-Option wählen |
 
 Die Checkpoints liegen unter:
 
@@ -120,4 +120,3 @@ F11 und F12 erfüllen den Red-vor-Fix-Vertrag. P2 darf deshalb einen
 generischen Schadensverhinderungs-Selector ergänzen. P3 darf die vorhandene
 Rollen-/Effektontologie im Discard-Consumer nutzen. Beide Fixes müssen die
 hier festgeschriebenen Expectations unverändert grün machen.
-

@@ -342,22 +342,14 @@ describe("discard keep score", () => {
       "contest_remote",
     ];
     const fresh = score(seeYa, roles, "runner");
-    const installedDuplicate = score(
-      seeYa,
-      roles,
-      "runner",
-      [installedSeeYa],
-    );
+    const installedDuplicate = score(seeYa, roles, "runner", [installedSeeYa]);
 
     expect(installedDuplicate.baseValue).toBeLessThan(fresh.baseValue - 100);
   });
 
   it("protects unique structured path tools only while a visible path has ICE", () => {
     const insideJob = runnerCard("onr_v1_094_inside-job", "event");
-    const forged = runnerCard(
-      "onr_v1_086_forged-activation-orders",
-      "event",
-    );
+    const forged = runnerCard("onr_v1_086_forged-activation-orders", "event");
     const icedServer = {
       id: "rd",
       label: "R&D",
@@ -387,11 +379,7 @@ describe("discard keep score", () => {
       {},
       { servers: [icedServer] },
     );
-    const insideWithoutPath = score(
-      insideJob,
-      insideRoles,
-      "runner",
-    );
+    const insideWithoutPath = score(insideJob, insideRoles, "runner");
     const forgedWithPath = score(
       forged,
       forgedRoles,

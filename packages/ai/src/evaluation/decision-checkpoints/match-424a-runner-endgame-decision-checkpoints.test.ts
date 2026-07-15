@@ -40,8 +40,14 @@ describe("match 424A runner endgame decision checkpoints", () => {
   });
 
   it.each([
-    ["D51 prevents the visible Vacant Soulkiller damage", firstDamagePreventionJson],
-    ["D118 prevents the visible Neural Blade damage", secondDamagePreventionJson],
+    [
+      "D51 prevents the visible Vacant Soulkiller damage",
+      firstDamagePreventionJson,
+    ],
+    [
+      "D118 prevents the visible Neural Blade damage",
+      secondDamagePreventionJson,
+    ],
   ])("uses Force Shield at %s", (_label, json) => {
     expectCheckpointToPass(fixture(json));
   });
