@@ -3,6 +3,7 @@ import {
   type AbilityDefinition,
   type CardDefinitionId,
 } from "@netgrid/shared";
+import functionSignalDerivationData from "../../../../data/ai/function-signal-derivation-v1.json";
 import tacticSignalCatalogData from "../../../../data/ai/tactic-signals-v1.json";
 import { createAiHintsByCard, type AiCardHint } from "../ai-hints";
 import type {
@@ -39,11 +40,28 @@ type TacticSignalCatalogEntry = {
   allowedStrategyAnchors?: string[];
 };
 
+type EffectFunctionSignalDerivationRule = {
+  signalId: string;
+  source: string;
+  match?: Readonly<Record<string, unknown>>;
+  gates?: {
+    side?: string | readonly string[];
+    cardType?: string | readonly string[];
+    effectScope?: string | readonly string[];
+  };
+};
+
 const TACTIC_SIGNAL_CATALOG_BY_ID = new Map(
   (
     tacticSignalCatalogData as { signals: TacticSignalCatalogEntry[] }
   ).signals.map((signal) => [signal.signalId, signal]),
 );
+
+const EFFECT_FUNCTION_SIGNAL_DERIVATION_RULES = (
+  functionSignalDerivationData as {
+    derivationRules: EffectFunctionSignalDerivationRule[];
+  }
+).derivationRules.filter((rule) => rule.source === "effects");
 
 const BROAD_SUPPORT_ONLY_ACTION_ANCHOR_SIGNALS = new Set([
   "access.payoff",
@@ -82,7 +100,9 @@ function actionCardSemanticProfileFromHint(
   hint: AiCardHint,
 ): ActionCardSemanticProfile | undefined {
   const extendedHint = hint as ExtendedAiCardHint;
-  const effectSignals = (hint.effects ?? []).flatMap(effectTacticSignals);
+  const effectSignals = (hint.effects ?? []).flatMap((effect) =>
+    effectTacticSignals(effect, hint),
+  );
   const abilitySemantics = (CARD_DEFINITIONS_BY_ID[cardId]?.abilities ?? []).map(
     abilitySemanticProfile,
   );
@@ -113,7 +133,7 @@ function actionCardSemanticProfileFromHint(
 
 function strategySupportFromHint(hint: AiCardHint): StrategySupportPair[] {
   const pairs = (hint.effects ?? []).flatMap((effect) =>
-    effectTacticSignals(effect).flatMap((signal) =>
+    effectTacticSignals(effect, hint).flatMap((signal) =>
       strategySupportFromTacticSignal(signal, hint),
     ),
   );
@@ -228,7 +248,10 @@ function targetProfileMatch(
   };
 }
 
-function effectTacticSignals(effect: AiHintStructuredEffect): string[] {
+function effectTacticSignals(
+  effect: AiHintStructuredEffect,
+  hint: AiCardHint,
+): string[] {
   const scopeSuffix = effect.scope ? `.${effect.scope}` : "";
   const base = [
     `effect:${effect.kind}`,
@@ -255,7 +278,16 @@ function effectTacticSignals(effect: AiHintStructuredEffect): string[] {
     case "tag_source":
       return [...base, "tag.source"];
     case "trace":
-      return [...base, "trace.source"];
+      return [
+        ...base,
+        ...(effectFunctionSignalAllowedByDerivation(
+          "trace.source",
+          effect,
+          hint,
+        )
+          ? ["trace.source"]
+          : []),
+      ];
     case "trace_credit":
       return [...base, "trace.credit_support"];
     case "tag_punish_payoff":
@@ -304,6 +336,49 @@ function effectTacticSignals(effect: AiHintStructuredEffect): string[] {
     default:
       return base;
   }
+}
+
+function effectFunctionSignalAllowedByDerivation(
+  signalId: string,
+  effect: AiHintStructuredEffect,
+  hint: AiCardHint,
+): boolean {
+  const rules = EFFECT_FUNCTION_SIGNAL_DERIVATION_RULES.filter(
+    (rule) => rule.signalId === signalId,
+  );
+  if (rules.length === 0) return false;
+  return rules.some(
+    (rule) =>
+      recordMatchesDerivation(rule.match, effect) &&
+      valueAllowedByGate(rule.gates?.side, hint.side) &&
+      valueAllowedByGate(rule.gates?.cardType, hint.cardType) &&
+      valueAllowedByGate(rule.gates?.effectScope, effect.scope),
+  );
+}
+
+function recordMatchesDerivation(
+  match: Readonly<Record<string, unknown>> | undefined,
+  value: AiHintStructuredEffect,
+): boolean {
+  if (match === undefined) return true;
+  const record = value as unknown as Readonly<Record<string, unknown>>;
+  return Object.entries(match).every(([key, expected]) => {
+    const actual = record[key];
+    return Array.isArray(expected)
+      ? expected.includes(actual)
+      : actual === expected;
+  });
+}
+
+function valueAllowedByGate(
+  allowed: string | readonly string[] | undefined,
+  value: string | undefined,
+): boolean {
+  if (allowed === undefined) return true;
+  if (value === undefined) return false;
+  return typeof allowed === "string"
+    ? allowed === value
+    : allowed.includes(value);
 }
 
 function uniqueStrings(values: readonly string[]): string[] {

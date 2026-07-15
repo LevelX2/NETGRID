@@ -36,8 +36,9 @@ Gegenbeispiele abgesichert.
 
 - Keine Änderung der Engine-Regeln oder LegalActions.
 - Keine Karten-ID-Sonderlogik für SeeYa, Mantis, Rockerboy oder Rex.
-- Keine erneute Korrektur bereits geklärter Entscheidungen wie frühem
-  Check-Run, Inside-Job-Bypass, unmöglichem Trace-Bid oder Fall-Guy ohne Tags.
+- Keine pauschale Bevorzugung früher Check-Runs und keine erneute Korrektur
+  geklärter Entscheidungen wie Inside-Job-Bypass, unmöglichem Trace-Bid oder
+  Fall-Guy ohne Tags.
 - Kein Push und keine Remote-Integration.
 
 ## Controller-Invarianten
@@ -84,7 +85,9 @@ werden nicht verworfen.
   exakter Exposition ordnen.
 - Wiederholte Aktivierungen ohne verbleibendes wertvolles Ziel abwerten.
 - Kontrollen: kein erzwungenes Lösen ohne Folgerun; konservativer Umgang mit
-  alten Events; kein erneutes Wählen derselben exakten Position.
+  alten Events; kein erneutes Wählen derselben exakten Position; bekannte
+  unpassierbare ICE-Pfade lösen keinen Hard-Interrupt aus; Install-/Move-
+  Ereignisse invalidieren positionsbezogene Expose-Erinnerung.
 - Commit: `fix(ai): convert run lock and expose opportunities`
 
 ### P2 – Planarbitration und Run-Reserve
@@ -95,6 +98,14 @@ werden nicht verworfen.
   zentralen Ökonomie-Trash schützen; mit echtem Überschuss bleibt Trash legal
   und attraktiv.
 - Kontrollen: Tutor bei realer Coverage-Lücke; Trash bei ausreichender Reserve.
+- Ein sicherer, informationsbringender erster Run darf eine direkte
+  Coverage-Installation bei material höherem Score überstimmen. Das gilt nur
+  für sichtbar erreichbare, unbekannte Payoffs ohne unvermeidbare ICE-Gefahr;
+  Gain/Draw oder bekannte unpassierbare Pfade werden dadurch nicht bevorzugt.
+- Die Matchpoint-Runreserve greift nur bei verbleibendem Run-Click, sichtbarem
+  Access-Payoff und mit vorhandener Pfad-/Coverage-Bewertung erreichbarem
+  Folgerun. Akute Ziele und hoher verbleibender Finite-Pool-Wert dürfen den
+  Trash weiter rechtfertigen.
 - Commit: `fix(ai): protect runner matchpoint conversion`
 
 ### P3 – Rex-Hint und Consumer-Kette
@@ -102,6 +113,10 @@ werden nicht verworfen.
 - Aktiven Rex-Hint von Tag-Druck auf Trace, End-the-run und Run-Lock umstellen.
 - Aktive Quelle, generiertes Artefakt, Runtime-Consumer, Planbeiträge und
   Arbitration auf dieselbe Semantik prüfen.
+- Action-Signalprojektion an die vorhandenen Function-Signal-Scope-Gates
+  binden; Trace allein ist weder Tag-Quelle noch ausführbare Trace-Aktion.
+- Encounter-Trace-Bids berücksichtigen native, hintbelegte Trace-Payoffs mit
+  begrenztem Budget; reale Choice-Source und PlayerView-Quellkarte prüfen.
 - Done-Gate: Vertrags- und Generierungstests grün.
 - Commit: `fix(ai): align rex run lock hints`
 
@@ -110,6 +125,11 @@ werden nicht verworfen.
 - Den Skill um die hier bestätigten Prüfschritte ergänzen: Entscheidung für
   Entscheidung, Hint-Quelle bis Arbitration, Choice-Consumer, wiederholte
   Ziele, Freischaltaktionen und Reservekosten.
+- Umgesetzt im lokalen Skillpfad mit einer verpflichtenden Referenzcheckliste
+  für Decision-Denominator, Parent-Child-Sequenzen, Hint-Übergaben,
+  Plan-Lebenszyklus, kausale Checkpoints und faire Check-/Facecheck-Vergleiche.
+- `quick_validate.py`: `Skill is valid!`; `agents/openai.yaml` bleibt zum
+  unveränderten Trigger- und Nutzungskontext passend.
 - Commit: `docs(skill): deepen netgrid ai match audit`
 
 ### P5 – Neues letztes Spiel analysieren

@@ -184,7 +184,9 @@ function tagPunishProfileFromHint(
       .filter(isTagPunishRelevantConditionKind),
   );
   const tagSource = effects.some(isTagSourceEffect);
-  const traceTagSource = effects.some(isTraceTagSourceEffect);
+  const traceTagSource =
+    effects.some((effect) => effect.kind === "trace") &&
+    effects.some(isTraceTagSourceEffect);
   const payoff = effects.some(isTagPunishPayoffEffect);
   if (!tagSource && !payoff && effectKinds.length === 0) return undefined;
   const requiresRunnerTagged = conditions.some(
@@ -228,18 +230,11 @@ function canActionCarryTagPunish(action: LegalAction): boolean {
 }
 
 function isTagSourceEffect(effect: AiHintStructuredEffect): boolean {
-  return (
-    effect.kind === "tag_source" ||
-    effect.kind === "tag" ||
-    effect.kind === "trace"
-  );
+  return effect.kind === "tag_source" || effect.kind === "tag";
 }
 
 function isTraceTagSourceEffect(effect: AiHintStructuredEffect): boolean {
-  return (
-    effect.kind === "trace" ||
-    (effect.kind === "tag_source" && effect.timing === "trace_success")
-  );
+  return effect.kind === "tag_source" && effect.timing === "trace_success";
 }
 
 function isTagPunishPayoffEffect(effect: AiHintStructuredEffect): boolean {

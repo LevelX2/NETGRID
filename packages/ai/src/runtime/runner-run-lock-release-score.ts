@@ -3,6 +3,10 @@ import type {
   AiDecisionScoreComponent,
   LegalAction,
 } from "@netgrid/shared";
+import {
+  assessKnownRezzedIcePath,
+  runnerRunPathCreditBudgetWithVisiblePools,
+} from "../visible-run-analysis";
 
 type FollowUp = {
   serverId: string;
@@ -67,13 +71,36 @@ function plausibleFollowUpRun(
 ): FollowUp | undefined {
   const candidates = input.playerView.servers
     .filter((server) => serverHasContestPayoff(input, server.id))
-    .map((server) => ({
-      serverId: server.id,
-      estimatedProbeCredits: server.ice.reduce(
-        (sum, ice) => sum + estimatedProbeCreditForIce(ice),
-        0,
-      ),
-    }))
+    .flatMap((server) => {
+      const path = assessKnownRezzedIcePath(
+        server.ice,
+        input.playerView.own.rig ?? [],
+        runnerRunPathCreditBudgetWithVisiblePools(
+          creditsAfterRelease,
+          input.playerView.own.rig ?? [],
+        ),
+        server.root,
+        input.playerView.opponent.credits,
+        {
+          visibleRemoteServerCount: input.playerView.servers.filter((entry) =>
+            entry.id.startsWith("remote_"),
+          ).length,
+          visibleCorpCredits: input.playerView.opponent.credits,
+        },
+      );
+      if (!path.canReachAccess) return [];
+      const unknownIceProbeReserve = server.ice.filter(
+        (ice) =>
+          ice.rezzed !== true || !ice.known || !ice.definitionId,
+      ).length;
+      return [
+        {
+          serverId: server.id,
+          estimatedProbeCredits:
+            (path.visibleBreakCost ?? 0) + unknownIceProbeReserve,
+        },
+      ];
+    })
     .filter(
       (candidate) => candidate.estimatedProbeCredits <= creditsAfterRelease,
     )
@@ -101,17 +128,6 @@ function serverHasContestPayoff(
       (card) => !card.known || !card.definitionId || card.type === "agenda",
     ) === true
   );
-}
-
-function estimatedProbeCreditForIce(
-  ice: AiDecisionInput["playerView"]["servers"][number]["ice"][number],
-): number {
-  if (ice.rezzed !== true || !ice.known || !ice.definitionId) return 1;
-  const endTheRunSubroutines =
-    ice.effectiveRunQuote?.subroutines.filter((subroutine) =>
-      ["end_the_run", "initiate_trace"].includes(subroutine.type),
-    ).length ?? 0;
-  return Math.max(1, endTheRunSubroutines);
 }
 
 function serverPriority(serverId: string): number {

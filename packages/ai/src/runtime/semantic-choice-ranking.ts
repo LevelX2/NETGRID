@@ -133,6 +133,13 @@ export function tacticalPlanMappedChoice(
       mappedChoice,
       overrideChoice,
     );
+    const coverageProbeRunShouldYield =
+      tacticalPlanCoverageProbeRunShouldYield(
+        mapping,
+        mappedChoice,
+        overrideChoice,
+        scoreGap,
+      );
     if (
       tacticalPlanFundedDevelopmentContinuationBlocksOverride(
         mapping,
@@ -172,7 +179,7 @@ export function tacticalPlanMappedChoice(
         mappedActionIds,
         scoreGap,
         threshold.scoreGap,
-      )
+      ) && !coverageProbeRunShouldYield
     ) {
       return tacticalPlanBlockedOverrideResult({
         mappedChoice,
@@ -371,6 +378,7 @@ export function tacticalPlanMappedChoice(
           deferredDevelopmentInstallShouldYield,
           backgroundBankBuildShouldYield,
           noNeedSearchShouldYield,
+          coverageProbeRunShouldYield,
         },
       )
     ) {
@@ -392,6 +400,7 @@ export function tacticalPlanMappedChoice(
       backgroundBankBuildShouldYield ||
       hardInterruptShouldYield ||
       noNeedSearchShouldYield ||
+      coverageProbeRunShouldYield ||
       scoreGap > threshold.scoreGap
     ) {
       const result = {
@@ -400,6 +409,8 @@ export function tacticalPlanMappedChoice(
         overriddenMappedChoice: mappedChoice,
         overrideReason: noNeedSearchShouldYield
           ? "no_need_search_mapping_yield"
+          : coverageProbeRunShouldYield
+            ? "coverage_probe_run_mapping_yield"
           : mappedNonPositiveAgainstPositive
             ? "mapped_nonpositive_against_positive"
             : repeatedRunShouldYield
@@ -569,6 +580,7 @@ function tacticalPlanRunnerMappingBlocksOffPlanOverride(
     deferredDevelopmentInstallShouldYield: boolean;
     backgroundBankBuildShouldYield: boolean;
     noNeedSearchShouldYield: boolean;
+    coverageProbeRunShouldYield: boolean;
   },
 ): boolean {
   if (mapping.plan.side !== "runner") return false;
@@ -583,6 +595,7 @@ function tacticalPlanRunnerMappingBlocksOffPlanOverride(
   if (exceptions.deferredDevelopmentInstallShouldYield) return false;
   if (exceptions.backgroundBankBuildShouldYield) return false;
   if (exceptions.noNeedSearchShouldYield) return false;
+  if (exceptions.coverageProbeRunShouldYield) return false;
   return !runnerPlanOverrideIsHardInterrupt(
     mapping.plan,
     mappedChoice,
@@ -1265,6 +1278,42 @@ function tacticalPlanCoverageMappingBlocksRunOverride(
     overrideChoice.action.type === "start_run" &&
     !mappedActionIds.has(overrideChoice.action.actionId) &&
     scoreGap <= threshold
+  );
+}
+
+function tacticalPlanCoverageProbeRunShouldYield(
+  mapping: PlanStepMappingResult,
+  mappedChoice: SemanticRuntimeChoice,
+  overrideChoice: SemanticRuntimeChoice,
+  scoreGap: number,
+): boolean {
+  if (
+    mapping.plan.type !== "runner.obtain_breaker_coverage" ||
+    overrideChoice.action.type !== "start_run" ||
+    ![
+      "install_card",
+      "play_event",
+      "activated_card_ability",
+      "trigger_ability",
+    ].includes(mappedChoice.action.type) ||
+    overrideChoice.score <= 0 ||
+    scoreGap < 200 ||
+    !semanticRuntimeChoiceHasScoreComponent(
+      overrideChoice,
+      "runner_free_server_path",
+    )
+  ) {
+    return false;
+  }
+  return overrideChoice.scoreBreakdown.some(
+    (component) =>
+      component.key === "runner_run_target_semantic_guidance" &&
+      (component.reason ?? "").includes("recommendation:run_if_free") &&
+      (component.reason ?? "").includes("payoff:unknown") &&
+      (component.reason ?? "").includes("path:reachable") &&
+      (component.reason ?? "").includes(
+        "unavoidable_visible_ice_hazard_count:0",
+      ),
   );
 }
 

@@ -2,6 +2,7 @@ import { traceBaseLinkCardImplementationQuotesForDefinition } from "@netgrid/eng
 import type { AiDecisionInput, CardDefinitionId } from "@netgrid/shared";
 
 export type LatestTraceContext = {
+  sourceDefinitionId?: string;
   traceStrength?: number;
   runnerLink?: number;
   corpBid?: number;
@@ -21,6 +22,7 @@ export function latestTraceContext(input: AiDecisionInput): LatestTraceContext {
     const runnerBid = event.publicPayload.runnerBid;
     const runnerStrength = event.publicPayload.runnerStrength;
     const postBidTraceLinkBonus = event.publicPayload.postBidTraceLinkBonus;
+    const sourceDefinitionId = event.publicPayload.sourceDefinitionId;
     if (
       typeof traceStrength === "number" ||
       typeof runnerLink === "number" ||
@@ -30,6 +32,10 @@ export function latestTraceContext(input: AiDecisionInput): LatestTraceContext {
       typeof postBidTraceLinkBonus === "number"
     ) {
       return {
+        ...(typeof sourceDefinitionId === "string" &&
+        sourceDefinitionId.length > 0
+          ? { sourceDefinitionId }
+          : {}),
         ...(typeof traceStrength === "number" ? { traceStrength } : {}),
         ...(typeof runnerLink === "number"
           ? { runnerLink }

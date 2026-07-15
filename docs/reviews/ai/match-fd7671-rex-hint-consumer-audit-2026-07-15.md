@@ -24,10 +24,11 @@ mechanischen Fakten bereits korrekt `trace`, bedingtes End-the-run und
 - Kartenbezogener Strategiebeitrag bleibt ausschließlich
   `corp.ice_tax_glacier` / `tax_tool` / `run_lock_ice`.
 
-`trace.source` darf weiterhin den generischen Trace-Anteil eines
-Tag-/Trace-Deckprofils stützen. Entfernt wurde nur die falsche Behauptung,
-Rex erzeuge selbst Tags oder müsse einen direkten `tag_pressure`-Plan
-ankern.
+`trace.source` darf im Hint weiterhin den generischen Trace-Anteil
+beschreiben. Produktive Action- und Strategieprojektionen müssen jedoch die
+Scope-Gates aus `function-signal-derivation-v1.json` erfüllen. Rex' kompiliertes
+`trace`-Effect hat `scope: corp`; deshalb darf es weder Installation noch Rez
+als ausführbare Trace-Aktion oder direkten Tag-/Trace-Punish-Anker markieren.
 
 ## Consumer-Kette
 
@@ -42,26 +43,44 @@ ankern.
    Der geprüfte Kartenanker `corp.ice_tax_glacier` bleibt erhalten.
 4. `createAiHintsByCard` liefert das kompilierte Artefakt an die produktive
    Runtime.
-5. `buildCorpIceCardPlacementProfile` verbindet Hintsignale, generierte
+5. `action-card-semantic-profiles` projiziert Effect-Signale nur innerhalb der
+   vorhandenen Function-Signal-Gates. Rex-Install und Rex-Rez enthalten damit
+   kein produktives `trace.source`, keinen `corp.tag_trace_punish`-Support und
+   gelten für `corpPunishCandidates` nicht als erfolgreiche Trace-Aktion.
+6. `tag-punish-ontology-consumer` verlangt für eine Tag-Quelle einen echten
+   `tag`- oder `tag_source`-Effect. Eine Trace-Tag-Quelle benötigt zusätzlich
+   einen Trace und `tag_source` mit Timing `trace_success`. Rex-Rez ist damit
+   keine Tag-Quelle; Fetch-Rez bleibt der positive Gegenanker.
+7. `buildCorpIceCardPlacementProfile` verbindet Hintsignale, generierte
    Effekte, sichtbaren Kartentext und strukturierte Subroutinen. Der
    fokussierte Consumer-Test ergibt für Rex `immediateStop: true`,
    `tagTrace: true` ausschließlich wegen des Trace-Fensters, `runLock: true`
    und `damage: false`.
-6. Die effektive Verteidigungsbewertung erkennt Rex weiter als bedingten
+8. Die effektive Verteidigungsbewertung erkennt Rex weiter als bedingten
    Stop-/Tax-Effekt. Deckdoctrine und Strategic Intent erhalten den
    Run-Lock-/ICE-Tax-Beitrag; ein direkter Tag-Planbeitrag aus Rollen oder
    Planrollen entfällt.
-7. Installation, Rez und Zielwahl bleiben LegalAction-basiert. Es gibt keine
-   Rex-Karten-ID-Sonderregel in Score, Exclusion oder Arbitration.
+9. Der Corp-Trace-Bid erkennt den sichtbaren Encounter-ICE-Quellbezug aus der
+   PlayerView beziehungsweise aus dem jüngsten öffentlichen Trace-Event. Ein
+   durch strukturierte Hints belegter eigener Trace-Erfolgseffekt wie Rex'
+   End-the-run plus Run-Lock erlaubt den kleinsten garantierenden Bid, aber nur
+   bis zu einem begrenzten Payoff-Budget und unter Erhalt einer Creditreserve.
+   Ein teurer All-in-Bid bleibt ausgeschlossen.
+10. Installation, Rez, Trace-Bid und Zielwahl bleiben LegalAction- und
+    PlayerView-basiert. Es gibt keine Rex-Karten-ID-Sonderregel in Score,
+    Exclusion oder Arbitration.
 
 Da die Corp im Quellmatch menschlich war, wäre ein historischer Corp-KI-
-Checkpoint erfunden. Der rote Beleg ist deshalb der vor dem Fix gesicherte
-aktive und kompilierte Hint-Vertrag; der grüne Beleg umfasst zusätzlich den
-produktiven Placement-Consumer und den Inspector-/Strategieanker.
+Checkpoint erfunden. Der rote Beleg besteht deshalb aus dem vor dem Fix
+gesicherten aktiven und kompilierten Hint-Vertrag sowie drei produktiven
+Consumer-Verträgen: Rex-Install/Rez als falsche Punish-Aktion, Rex-Rez als
+falsche Tag-Quelle und Rex-Trace mit stets null Bid. Die Gegenproben sichern
+Fetch als echte Trace-Tag-Quelle und einen nicht vertretbaren Rex-All-in-Bid.
 
 ## Verifikation
 
-- Match-spezifischer Hint- und Consumer-Vertrag: 3 Tests grün.
+- Match-spezifischer Hint-, Action-, Ontologie- und Bid-Consumer-Vertrag:
+  vollständig grün.
 - Angrenzende Corp-ICE-Placement-Regressionen: 24 Tests grün.
 - `corepack pnpm check:ai`: OK; vorhandene Warnungen, keine Fehler.
 - `corepack pnpm check:ai-deck-doctrine-strategy`: bestanden.

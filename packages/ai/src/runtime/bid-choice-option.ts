@@ -62,9 +62,13 @@ function corpDesiredBidAmount(
     return Math.min(2, maxBid);
   }
   if (input.difficulty === "easy") return 0;
+  const sourceDefinitionId =
+    traceContext.sourceDefinitionId ??
+    input.playerView.run?.encounteredIce?.definitionId;
   return assessCorpTraceBid({
     input,
     traceContext,
     maxBid,
+    ...(sourceDefinitionId ? { sourceDefinitionId } : {}),
   }).recommendedBid;
 }

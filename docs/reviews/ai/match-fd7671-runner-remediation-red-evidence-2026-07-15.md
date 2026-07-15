@@ -58,6 +58,33 @@ auf der roten Baseline grün sein.
 Nach erfolgreicher Reproduktion werden Fixtures, Tests und dieses Dokument in
 einem eigenständigen Red-Evidence-Commit eingefroren.
 
+## Nachträglicher Consumer- und Gegenbeweis-Audit
+
+Der unabhängige Gegencheck nach den ersten vier Fixes zeigte, dass grüne
+historische Ziele allein die Überbreite der neuen Regeln nicht ausschlossen.
+Vor den Nachkorrekturen wurden deshalb weitere rote Verträge separat
+eingefroren:
+
+- Rex-Install und Rex-Rez wurden fälschlich als produktive
+  `trace.source`-/Punish-Aktionen projiziert.
+- Rex-Rez wurde von der Tag-Punish-Ontologie fälschlich als Tag-Quelle
+  klassifiziert.
+- Der Rex-Encounter-Trace bot ohne sichtbaren Tag-Follow-up immer null; der
+  reale Choice-Source enthält dabei nur die Trace-ID. Ein zusätzlicher
+  Gegenfall verbietet einen teuren All-in-Bid.
+- Ein direkter Coverage-Plan sperrte einen material besseren, sichtbaren,
+  gefahrlosen Informationsrun.
+- Die Matchpoint-Trashreserve griff auch ohne Run-Click, ohne erreichbaren
+  Access-Payoff und gegen hohen verbleibenden Finite-Pool-Wert.
+- Die Run-Lock-Freigabe akzeptierte einen bekannten rezzten ETR-Pfad ohne
+  Breaker-Abdeckung.
+- Expose-Erinnerung blieb nach Installation einer Ersatzkarte an derselben
+  Position fälschlich aktiv.
+
+Alle diese roten Tests scheiterten fachlich im vorgesehenen Consumer; es lag
+kein Engine-, Legalitäts-, Fixture- oder Infrastrukturdrift vor. Die
+historischen Zielcheckpoints blieben währenddessen grün.
+
 Ausgeführt:
 
 ```text

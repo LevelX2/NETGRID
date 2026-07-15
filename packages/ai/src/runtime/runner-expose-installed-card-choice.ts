@@ -143,21 +143,67 @@ type ExposeHistory = {
 function exposeHistory(input: AiDecisionInput): ExposeHistory {
   const exactPositions = new Set<string>();
   const legacyServers = new Set<string>();
-  for (const event of [
-    ...(input.playerView.publicEvents ?? []),
-    ...(input.eventTail ?? []),
-  ]) {
+  const eventsById = new Map(
+    [...(input.playerView.publicEvents ?? []), ...(input.eventTail ?? [])].map(
+      (event) => [event.eventId, event] as const,
+    ),
+  );
+  const events = [...eventsById.values()].sort(
+    (left, right) =>
+      left.stateVersionAfter - right.stateVersionAfter ||
+      left.eventId.localeCompare(right.eventId),
+  );
+  for (const event of events) {
     const serverId = stringValue(event.publicPayload.exposedServerId);
-    if (!serverId) continue;
-    const area = stringValue(event.publicPayload.exposedArea);
-    const index = numberValue(event.publicPayload.exposedIndex);
-    if ((area === "ice" || area === "root") && index !== undefined) {
-      exactPositions.add(positionKey(serverId, area, index));
-    } else {
-      legacyServers.add(serverId);
+    if (serverId) {
+      const area = stringValue(event.publicPayload.exposedArea);
+      const index = numberValue(event.publicPayload.exposedIndex);
+      if ((area === "ice" || area === "root") && index !== undefined) {
+        exactPositions.add(positionKey(serverId, area, index));
+      } else {
+        legacyServers.add(serverId);
+      }
+      continue;
     }
+    invalidateExposedPositionsForBoardMutation(exactPositions, event);
   }
   return { exactPositions, legacyServers };
+}
+
+function invalidateExposedPositionsForBoardMutation(
+  exactPositions: Set<string>,
+  event: AiDecisionInput["eventTail"][number],
+): void {
+  const actionType =
+    stringValue(event.publicPayload.actionType) ?? stringValue(event.type);
+  if (
+    ![
+      "install_card",
+      "trash_accessed_card",
+      "trash_card",
+      "move_card",
+      "swap_card",
+    ].includes(actionType ?? "")
+  ) {
+    return;
+  }
+  const serverId =
+    stringValue(event.publicPayload.serverId) ??
+    stringValue(event.publicPayload.installedServerId);
+  if (!serverId) return;
+  const placement =
+    stringValue(event.publicPayload.placement) ??
+    stringValue(event.publicPayload.installedArea);
+  const areas: InstalledArea[] =
+    placement === "ice" || placement === "root"
+      ? [placement]
+      : ["ice", "root"];
+  for (const area of areas) {
+    const prefix = `${serverId}:${area}:`;
+    for (const key of exactPositions) {
+      if (key.startsWith(prefix)) exactPositions.delete(key);
+    }
+  }
 }
 
 function positionKey(
