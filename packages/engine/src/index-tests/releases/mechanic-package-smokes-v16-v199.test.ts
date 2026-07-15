@@ -8215,7 +8215,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
     let state = toRunnerTurn(v199CardReleaseGame("v199-chimera"));
     state.runner.credits = 20;
     const afreetId = installRunnerProgramForTest(state, "onr_v1_001_afreet");
-    putCorpRootInRemote(state, "onr_v1_353_chimera");
+    const chimeraId = putCorpRootInRemote(state, "onr_v1_353_chimera");
 
     state = apply(
       state,
@@ -8223,7 +8223,12 @@ describe("V1.9.9 Mechanikpaket R", () => {
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
-    state = passRootRezWindowBeforeAccessIfOpen(state);
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "rez_ice" && action.source === chimeraId,
+    );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
     state = apply(state, "runner", (action) => action.type === "access_card");
     expect(state.pendingChoice).toBeUndefined();
     expect(state.runner.heap).toContain(afreetId);

@@ -121,7 +121,97 @@ function accessFixture(definitionId: string, zone: "rd" | "archives"): GameState
   return state;
 }
 
+function installedAccessFixture(
+  definitionId: string,
+  rezzed: boolean,
+): GameState {
+  const state = createGame({
+    seed: `proteus-8b-${definitionId}-installed-${rezzed}`,
+    setupMode: "completed",
+  });
+  const serverId = "remote_1";
+  const cardId = `${definitionId}_installed_test` as CardInstanceId;
+  state.corp.servers.push({
+    id: serverId,
+    kind: "remote",
+    label: "Remote 1",
+    ice: [],
+    root: [cardId],
+  });
+  state.cardInstances[cardId] = corpCard(
+    cardId,
+    definitionId,
+    { side: "corp", zone: "serverRoot", serverId },
+    rezzed,
+  );
+  state.activeSide = "runner";
+  state.phase = "run";
+  state.timingPoint = "access.resolve_card";
+  state.run = {
+    runId: "run_1",
+    attackedServerId: serverId,
+    phase: "access",
+    position: { kind: "server", serverId },
+    brokenSubroutineIndexes: [],
+    resolvedSubroutineIndexes: [],
+    successful: true,
+    accessCount: 1,
+    breach: {
+      breachId: "breach_1",
+      serverId,
+      accessMode: "single",
+      queue: [
+        {
+          entryId: "entry_1",
+          cardInstanceId: cardId,
+          serverId,
+          zone: "remote_root",
+          status: "pending",
+          hiddenInfo: !rezzed,
+        },
+      ],
+      currentIndex: 0,
+      completed: false,
+      accessedSummaries: [],
+    },
+  };
+  return state;
+}
+
 describe("Proteus Phase 8b Corp Antibody access", () => {
+  it.each([
+    ["onr_proteus_057_doppelganger-antibody", 2],
+    ["onr_proteus_068_pattel-antibody", 3],
+  ] as const)(
+    "opens the installed %s payment only while the source is rezzed",
+    (definitionId, cost) => {
+      let unrezzed = installedAccessFixture(definitionId, false);
+      unrezzed.corp.credits = cost;
+      unrezzed = apply(
+        unrezzed,
+        "runner",
+        (action) => action.type === "access_card",
+      );
+      expect(unrezzed.pendingChoice).toBeUndefined();
+      expect(unrezzed.eventLog.at(-1)?.publicPayload).not.toHaveProperty(
+        "ambushPaymentChoiceOpened",
+      );
+
+      let rezzed = installedAccessFixture(definitionId, true);
+      rezzed.corp.credits = cost;
+      rezzed = apply(
+        rezzed,
+        "runner",
+        (action) => action.type === "access_card",
+      );
+      expect(rezzed.pendingChoice?.source).toContain("p3_35.access_payment");
+      expect(rezzed.eventLog.at(-1)?.publicPayload).toMatchObject({
+        ambushPaymentChoiceOpened: true,
+        ambushPaymentAmount: cost,
+      });
+    },
+  );
+
   it("lets Doppelganger Antibody create removable public Runner status counters", () => {
     let state = accessFixture(
       "onr_proteus_057_doppelganger-antibody",
