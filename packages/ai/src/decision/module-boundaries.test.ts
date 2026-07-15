@@ -779,6 +779,7 @@ describe("AI module boundaries", () => {
   it("keeps runner run-target evaluation owned by the run-target evaluator", () => {
     const allowedFiles = new Set([
       "ai-runtime-public-entrypoints.ts",
+      "evaluation/decision-checkpoints/checkpoint-runner.ts",
       "evaluation/real-engine-decision-corpus-fixtures.ts",
       "index.ts",
       "runner-run-target-evaluation.ts",

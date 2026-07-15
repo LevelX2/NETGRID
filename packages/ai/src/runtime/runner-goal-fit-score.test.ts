@@ -114,6 +114,83 @@ describe("runnerSemanticGoalFitScoreComponent", () => {
     );
   });
 
+  it("scores projected run events against the same active target goal", () => {
+    const action = {
+      actionId: "inside-job-rd",
+      side: "runner",
+      type: "play_event",
+    } as unknown as LegalAction;
+    const input = runnerInputWithGoals([
+      {
+        schemaVersion: "runner-tactical-goal-v1",
+        goalId: "runner.pressure_good_central_target",
+        family: "pressure",
+        priority: 980,
+        urgency: "high",
+        targetServerId: "rd",
+        source: "run_target_evaluation",
+        evidence: ["test_goal"],
+      },
+    ]);
+    const evaluation = {
+      targetServerId: "rd",
+      accessServerId: "rd",
+      recommendation: "run_now",
+      pathPassability: "reachable",
+      accessPayoff: "fresh",
+    } as unknown as RunnerRunTargetEvaluation;
+
+    const component = runnerSemanticGoalFitScoreComponent(
+      input,
+      action,
+      "basic_install",
+      undefined,
+      testDependencies({ evaluation }),
+    );
+
+    expect(component).toMatchObject({
+      key: "runner_goal_fit_tactical_goal_run_target",
+      value: 980,
+    });
+  });
+
+  it("does not give projected run events target-goal credit for an unpayable path", () => {
+    const action = {
+      actionId: "run-event-rd",
+      side: "runner",
+      type: "play_event",
+    } as unknown as LegalAction;
+    const input = runnerInputWithGoals([
+      {
+        schemaVersion: "runner-tactical-goal-v1",
+        goalId: "runner.pressure_good_central_target",
+        family: "pressure",
+        priority: 900,
+        urgency: "high",
+        targetServerId: "rd",
+        source: "run_target_evaluation",
+        evidence: ["test_goal"],
+      },
+    ]);
+    const evaluation = {
+      targetServerId: "rd",
+      accessServerId: "rd",
+      recommendation: "gain_credits_first",
+      pathPassability: "blocked_unpayable",
+      accessPayoff: "unknown",
+    } as unknown as RunnerRunTargetEvaluation;
+
+    const component = runnerSemanticGoalFitScoreComponent(
+      input,
+      action,
+      "basic_install",
+      undefined,
+      testDependencies({ evaluation }),
+    );
+
+    expect(component).toBeUndefined();
+  });
+
   it("scores bypass run actions for high-value access tactical goals", () => {
     const action = {
       actionId: "inside-run",

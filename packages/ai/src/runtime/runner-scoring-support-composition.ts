@@ -246,6 +246,42 @@ export function createRunnerScoringSupportComposition(
         const server = input.playerView.servers.find(
           (candidate) => candidate.id === evaluation.accessServerId,
         );
+        if (
+          evaluation.accessServerId === "hq" &&
+          evaluation.recommendation === "run_now"
+        ) {
+          return [
+            ...(input.playerView.opponent.handCount <= 0
+              ? [
+                  {
+                    key: "runner_hq_empty_no_access_payoff",
+                    label: "HQ leer",
+                    value: -3200,
+                    reason: "opponent_hand_count:0",
+                  },
+                ]
+              : []),
+            {
+              key: "runner_hq_pressure",
+              label: "HQ-Druck",
+              value: 480,
+              reason: "central:hq",
+            },
+          ];
+        }
+        if (
+          evaluation.accessServerId === "rd" &&
+          evaluation.recommendation === "run_now"
+        ) {
+          return [
+            {
+              key: "runner_rnd_pressure",
+              label: "R&D-Druck",
+              value: 640,
+              reason: "central:rd",
+            },
+          ];
+        }
         if (evaluation.accessServerId === "archives") {
           return semanticRuntimeRunnerArchivesComponents(input, action, server);
         }

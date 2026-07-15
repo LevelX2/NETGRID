@@ -141,8 +141,17 @@ export function runnerSemanticGoalFitScoreComponent(
     runnerTacticalGoalsForInput(input),
   );
   if (tacticalGoalNonRunFit) return tacticalGoalNonRunFit;
-  if (action.type !== "start_run") return undefined;
-  if (action.payload?.runOnlyAction === true) {
+  const evaluation = dependencies.runTargetEvaluationForAction(input, action);
+  if (action.type !== "start_run") {
+    if (!evaluation) return undefined;
+    if (
+      evaluation.recommendation !== "run_now" &&
+      !runnerRunTargetHasHighValueAccess(evaluation)
+    ) {
+      return undefined;
+    }
+  }
+  if (action.type === "start_run" && action.payload?.runOnlyAction === true) {
     const capAssessment = dependencies.runActionSpendingCapAssessment(
       input,
       action,
@@ -158,7 +167,6 @@ export function runnerSemanticGoalFitScoreComponent(
       ].join("|"),
     };
   }
-  const evaluation = dependencies.runTargetEvaluationForAction(input, action);
   const tacticalGoalBypassFit = runnerTacticalGoalBypassRunFitScoreComponent(
     action,
     actionSemanticCandidate,

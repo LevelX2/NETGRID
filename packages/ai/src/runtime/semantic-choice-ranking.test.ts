@@ -439,7 +439,8 @@ describe("tacticalPlanMappedChoice", () => {
         choice(install, -156, [], {
           key: "runner_persistent_install_fit",
           value: -180,
-          reason: "visible installed copy already covers the role",
+          reason:
+            "delta:backup_only|duplicate:redundant_duplicate|fit:-180|stackability:unknown",
         }),
       ],
       fundedDevelopmentMapping([install]),
@@ -452,6 +453,31 @@ describe("tacticalPlanMappedChoice", () => {
       "install-funded-card",
     );
     expect(result.overrideReason).toBe("mapped_nonpositive_against_positive");
+  });
+
+  it("keeps a funded nonduplicate development install despite a negative immediate fit", () => {
+    const install = legalAction("install-funded-card", "install_card");
+    const run = legalAction("run-rd", "start_run", { serverId: "rd" });
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [
+        choice(run, 1903),
+        choice(install, -156, [], {
+          key: "runner_persistent_install_fit",
+          value: -480,
+          reason:
+            "delta:cumulative_capacity|duplicate:none|fit:-480|stackability:cumulative_capacity",
+        }),
+      ],
+      fundedDevelopmentMapping([install]),
+      choice(run, 1903),
+    );
+
+    expect(result.outcome).toBe("semantic_choice_blocked");
+    expect(result.choice?.action.actionId).toBe("install-funded-card");
+    expect(result.overrideBlockedReason).toBe(
+      "funded_development_plan_controller",
+    );
   });
 
   it("lets an immediate agenda score interrupt funded hand development", () => {
@@ -629,6 +655,32 @@ describe("tacticalPlanMappedChoice", () => {
     expect(result.outcome).toBe("semantic_choice_blocked");
     expect(result.choice?.action.actionId).toBe("broker-load");
     expect(result.overrideBlockedReason).toBe("runner_plan_controller");
+  });
+
+  it("lets a damage-pressure hand-buffer draw interrupt a slightly higher background bank score", () => {
+    const broker = legalAction("broker-load", "activated_card_ability");
+    const draw = legalAction("draw", "draw_card");
+    const brokerChoice = choice(
+      broker,
+      1682,
+      scoreComponentEvidence("runner_bank_investment_commitment"),
+    );
+    const drawChoice = choice(draw, 1478, [], {
+      key: "runner_hand_buffer_need",
+      value: 350,
+      reason: "hand:3|damage_pressure:true|damage_threat:confirmed",
+    });
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [brokerChoice, drawChoice],
+      bankBuildMapping([broker]),
+      brokerChoice,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("draw");
+    expect(result.overriddenMappedChoice?.action.actionId).toBe("broker-load");
+    expect(result.overrideReason).toBe("background_bank_build_mapping_yield");
   });
 
   it("lets no-run economy setup hold interrupt generic central pressure", () => {

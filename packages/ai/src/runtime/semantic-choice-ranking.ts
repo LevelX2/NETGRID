@@ -24,6 +24,7 @@ const STRATEGIC_KIND_OVERRIDE_SCORE_GAP = 480;
 const STRATEGIC_EXACT_MAPPING_PROTECTION_SCORE_GAP = 900;
 const STRATEGIC_KIND_MAPPING_PROTECTION_SCORE_GAP = 720;
 const BACKGROUND_BANK_BUILD_MAX_SCORE_GAP = 300;
+const BACKGROUND_BANK_HAND_BUFFER_MAX_SCORE_DEFICIT = 300;
 
 export function bestSemanticRuntimeChoice(
   choices: readonly SemanticRuntimeChoice[],
@@ -102,6 +103,21 @@ export function tacticalPlanMappedChoice(
     ) {
       overrideChoice = acuteHandBufferOverride;
     }
+  }
+  if (
+    overrideChoice?.action.actionId === mappedChoice.action.actionId &&
+    mapping.plan.type === "runner.build_credit_bank" &&
+    mapping.plan.evidence.includes("runner_bank_concrete_funding_need:false")
+  ) {
+    const damagePressureDraw = bestSemanticRuntimeChoice(
+      choices.filter(
+        (choice) =>
+          !choice.exclusion &&
+          choice.action.actionId !== mappedChoice.action.actionId &&
+          semanticRuntimeChoiceIsDamagePressureHandBufferDraw(choice),
+      ),
+    );
+    if (damagePressureDraw) overrideChoice = damagePressureDraw;
   }
   if (
     overrideChoice &&
@@ -322,6 +338,7 @@ export function tacticalPlanMappedChoice(
     const backgroundBankBuildShouldYield =
       tacticalPlanBackgroundBankBuildShouldYield(
         mapping,
+        mappedChoice,
         overrideChoice,
         scoreGap,
       );
@@ -417,9 +434,10 @@ function tacticalPlanFundedDevelopmentContinuationBlocksOverride(
 ): boolean {
   return (
     mapping.plan.type === "runner.develop_hand_card" &&
-    mapping.plan.evidence.includes(
+    (mapping.plan.evidence.includes(
       "funded_hand_development_continuation:true",
-    ) &&
+    ) ||
+      mapping.plan.evidence.includes(`previous_plan:${mapping.plan.planId}`)) &&
     (mappedChoice.action.type === "install_card" ||
       mappedChoice.action.type === "play_event") &&
     !tacticalPlanDeferredDevelopmentInstallShouldYield(
@@ -552,6 +570,7 @@ function tacticalPlanRunnerMappingBlocksOffPlanOverride(
 
 function tacticalPlanBackgroundBankBuildShouldYield(
   mapping: PlanStepMappingResult,
+  mappedChoice: SemanticRuntimeChoice,
   overrideChoice: SemanticRuntimeChoice,
   scoreGap: number,
 ): boolean {
@@ -560,7 +579,13 @@ function tacticalPlanBackgroundBankBuildShouldYield(
     mapping.step.kind === "build_bank_counter" &&
     mapping.plan.evidence.includes("runner_bank_concrete_funding_need:false") &&
     overrideChoice.score > 0 &&
-    scoreGap > BACKGROUND_BANK_BUILD_MAX_SCORE_GAP
+    (scoreGap > BACKGROUND_BANK_BUILD_MAX_SCORE_GAP ||
+      (semanticRuntimeChoiceIsDamagePressureHandBufferDraw(overrideChoice) &&
+        scoreGap > -BACKGROUND_BANK_HAND_BUFFER_MAX_SCORE_DEFICIT &&
+        semanticRuntimeChoiceHasScoreComponent(
+          mappedChoice,
+          "runner_bank_investment_commitment",
+        )))
   );
 }
 
@@ -742,7 +767,12 @@ function tacticalPlanDeferredDevelopmentInstallShouldYield(
       component.value < 0 &&
       (component.key === "runner_bank_install_commitment" ||
         component.key === "runner_no_run_economy_install_commitment" ||
-        component.key === "runner_persistent_install_fit"),
+        (component.key === "runner_persistent_install_fit" &&
+          ((component.reason ?? "").includes(
+            "duplicate:redundant_duplicate",
+          ) ||
+            (component.reason ?? "").includes("duplicate:useful_backup") ||
+            (component.reason ?? "").includes("delta:backup_only")))),
   );
 }
 
@@ -901,6 +931,18 @@ function semanticRuntimeChoiceIsAcuteHandBufferDraw(
   if (!component) return false;
   const handMatch = /(?:^|\|)hand:(\d+)(?:\||$)/.exec(component.reason ?? "");
   return handMatch !== null && Number(handMatch[1] ?? Number.NaN) <= 2;
+}
+
+function semanticRuntimeChoiceIsDamagePressureHandBufferDraw(
+  choice: SemanticRuntimeChoice,
+): boolean {
+  if (choice.action.type !== "draw_card") return false;
+  return choice.scoreBreakdown.some(
+    (component) =>
+      component.key === "runner_hand_buffer_need" &&
+      component.value > 0 &&
+      (component.reason ?? "").includes("damage_pressure:true"),
+  );
 }
 
 function semanticRuntimeChoiceHasPositiveDevelopmentCommitment(

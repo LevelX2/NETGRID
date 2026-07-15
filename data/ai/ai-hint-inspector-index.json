@@ -25713,15 +25713,6 @@
             "runner.rig_first"
           ],
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        },
-        {
-          "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
       "warningCategories": [],
@@ -38482,11 +38473,18 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         },
         {
-          "value": "recover_key_card",
+          "value": "click_for_credits_when_safe",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Tactical economy action hint; not a StrategyGoal source."
+        },
+        {
+          "value": "recover_economy",
           "category": "alias_to_strategy_goal",
           "triageCategory": "strategy_alias",
           "mapsTo": [
-            "runner.search.breaker"
+            "corp.economy_rez_reserve"
           ],
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         },
