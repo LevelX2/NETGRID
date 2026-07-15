@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  classifyTagPunishLegalActionFromOntology,
   tagPunishOntologyConflictWithLegacy,
   type StructuredTagPunishProfile,
 } from "./tag-punish-ontology-consumer";
+import type { LegalAction } from "@netgrid/shared";
 
 describe("tag punish ontology conflict detection", () => {
   it("matches legacy tag and payoff roles by bounded role terms", () => {
@@ -34,7 +36,40 @@ describe("tag punish ontology conflict detection", () => {
       ]),
     ).toBe(false);
   });
+
+  it("does not classify Rex rez as a tag source", () => {
+    const assessment = classifyTagPunishLegalActionFromOntology(
+      rezAction(),
+      "onr_v1_264_rex",
+      { runnerTagged: false },
+    );
+
+    expect(assessment?.isTagSource).toBe(false);
+    expect(assessment?.isTraceTagSource).toBe(false);
+  });
+
+  it("keeps Fetch rez classified as a real trace tag source", () => {
+    const assessment = classifyTagPunishLegalActionFromOntology(
+      rezAction(),
+      "onr_v1_243_fetch-4-0-1",
+      { runnerTagged: false },
+    );
+
+    expect(assessment?.isTagSource).toBe(true);
+    expect(assessment?.isTraceTagSource).toBe(true);
+  });
 });
+
+function rezAction(): LegalAction {
+  return {
+    actionId: "corp.rez_ice",
+    side: "corp",
+    type: "rez_ice",
+    source: "ice-instance",
+    costs: [],
+    payload: {},
+  } as unknown as LegalAction;
+}
 
 function tagSourceProfile(): StructuredTagPunishProfile {
   return profile({ tagSource: true });
