@@ -7,6 +7,7 @@ import mramJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-4
 import remoteInformationJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-424a-04-matchpoint-remote-information.json";
 import blockedMatchpointJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-424a-05-blocked-matchpoint-sequence.json";
 import krashPathJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-424a-06-krash-path-unpayable.json";
+import fallGuyTagAvoidanceJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-424a-07-fall-guy-tag-avoidance.json";
 import { evaluateRunnerRunTargets } from "../../runner-run-target-evaluation";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
@@ -29,6 +30,10 @@ describe("match 424A runner endgame decision checkpoints", () => {
 
   it("keeps corrected MRAM hand-size semantics at the historical decision", () => {
     expectCheckpointToPass(fixture(mramJson));
+  });
+
+  it("trashes Fall Guy to avoid the historical Hunter tag", () => {
+    expectCheckpointToPass(fixture(fallGuyTagAvoidanceJson));
   });
 
   it("classifies the installed-Krash HQ path as unpayable rather than missing wall coverage", () => {

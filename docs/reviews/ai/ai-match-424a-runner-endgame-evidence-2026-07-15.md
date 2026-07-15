@@ -54,7 +54,7 @@ historischen Reihenfolge enthalten.
 | 6 | D42–D46 | Zwei Credits, Score!, erstes Militech MRAM Chip, Ende; erstes Handgrößen-Setup ist noch plausibel. |
 | 7 | D47–D55 | Credit, Remote-2-Run, Vacant Soulkiller mit Damage Prevention trashen, zwei Draws; guter Contest. |
 | 8 | D56–D60 | Draw, Broker, Draw, Fall Guy, Ende; Broker ist sinnvoll, Fall Guy wird als schwacher Handkarten-Override gewählt. |
-| 9 | D61–D76 | Draw, Jack 'n' Joe, Inside Job auf R&D und vollständige Run-/Trace-/Access-Folge, Draw, Ende; legal, aber nur schwach zielbewertet. |
+| 9 | D61–D76 | Draw, Jack 'n' Joe, Inside Job auf R&D und vollständige Run-/Trace-/Access-Folge, Draw, Ende; bei D69 lässt die KI den Hunter-Tag trotz legalem Fall Guy zu. |
 | 10 | D77–D82 | Draw, Tag entfernen, Credit, Bodyweight, Ende und Discard; solide Stabilisierung. |
 | 11 | D83–D87 | Zweimal Livewire's Contacts, Jack 'n' Joe, SeeYa, Ende; gutes Economy- und Informationssetup. |
 | 12 | D88–D93 | Bodyweight, drei Credits, Ende und Discard; unauffällig. |
@@ -195,6 +195,25 @@ historischen Reihenfolge enthalten.
 - Gegenprobe: unterschiedliche echte Bankkarten dürfen weiterhin generisch
   über ihre Effekte erkannt werden.
 
+### 424A-F10 – Fall Guy wird im Tag-Vermeidungsfenster nicht genutzt
+
+- Historische Evidence: D69 / StateVersion 122, Hunter hat einen erfolgreichen
+  Trace ausgelöst. Die einzige LegalAction ist `runner.resolve_choice` für
+  „Tag vermeiden“ mit den Optionen `pass` und dem sichtbar installierten Fall
+  Guy. Die KI wählt `pass`; der Tag wird erzeugt und später mit einem Klick und
+  2 Credits entfernt.
+- Ursachehypothese: Die generische Choice-Rangfolge behandelt Optionen im
+  Event-Modification-Fenster nur ordinal und bewertet weder den vermiedenen
+  Tag noch die sichtbaren Kosten der Präventionsquelle.
+- Roter Vertrag: Fall Guy auswählen und `pass` nicht auswählen.
+- Gegenprobe: Ohne Tag-Gefahr, ohne legale Präventionsquelle oder bei einer
+  strategisch teureren sichtbaren Alternative bleibt `pass` zulässig.
+- Capture-Hinweis: Auf dem aktuellen Branch gab es acht frühere
+  Warmup-Abweichungen, überwiegend durch die bereits abgeschlossenen
+  Plan-/Hint-Fixes. `warmup-policy=rebase` liefert vor D69 einen kompatiblen
+  Suffix von neun Entscheidungen; Engine-State, LegalAction, Event-Präfix und
+  Choice-Optionen bleiben die historischen Daten aus Match 424A.
+
 ## Nicht als Produktionsfix verfolgt
 
 - D6 Cyfermaster statt sofortigem Score! bleibt fachlich vertretbar und wird
@@ -209,9 +228,11 @@ historischen Reihenfolge enthalten.
 
 ## Red-/Green-Vertrag
 
-Vor Produktionsänderungen werden alle Zielzustände mit
-`warmup-policy=strict` capturiert. Nur `behavior_regression` bestätigt ein
-historisches Verhaltensfinding. Bereits grüne Ziele werden als Nicht-Fix
-dokumentiert. Nach dem Red-Commit bleiben Fixtures und Erwartungen
-unverändert; ausschließlich generische Hints, Consumer, Planer oder
-RunTarget-Auswertung dürfen sie grün machen.
+Vor Produktionsänderungen werden Zielzustände grundsätzlich mit
+`warmup-policy=strict` capturiert. Bei belegtem früherem Warmup-Drift darf ein
+kompatibler Runtime-Suffix mit `rebase` verwendet werden; das wird am Finding
+explizit dokumentiert. Nur `behavior_regression` bestätigt ein historisches
+Verhaltensfinding. Bereits grüne Ziele werden als Nicht-Fix dokumentiert. Nach
+dem Red-Commit bleiben Fixtures und Erwartungen unverändert; ausschließlich
+generische Hints, Consumer, Planer, Choice-Ranker oder RunTarget-Auswertung
+dürfen sie grün machen.

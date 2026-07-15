@@ -1,6 +1,6 @@
 # KI-Runner-Endgame-Remediation für Match 424A (2026-07-15)
 
-Status: P0 bis P4 abgeschlossen; P5 aktiv, P6 ausstehend
+Status: P0 bis P4 abgeschlossen; ergänzender P2b-Red-Nachweis für F10 aktiv, P5 pausiert, P6 ausstehend
 
 ## Quelle und Zielprüfung
 
@@ -15,8 +15,10 @@ SQLite-Runtime:
 - Trace-Modus: `detailed`;
 - 155 persistierte Runner-Entscheidungen.
 
-Der Nutzer hat nach vollständiger zugweiser Analyse neun Findings und ihre
-Umsetzung freigegeben. Die Vorgabe ist für einen sequenziellen Worktree-Prozess
+Der Nutzer hat nach vollständiger zugweiser Analyse zunächst neun Findings und
+ihre Umsetzung freigegeben. Während P5 hat er die zuvor übersehene
+Nichtnutzung von Fall Guy in einem Tag-Vermeidungsfenster als zehntes Finding
+ergänzt. Die Vorgabe ist für einen sequenziellen Worktree-Prozess
 präzise. Jeder historische Verhaltensfund muss auf dem unveränderten
 Ausgangscode als spielgleicher `behavior_regression`-Checkpoint rot sein,
 bevor Produktionscode für ihn geändert wird. Textlich falsche Hints werden
@@ -24,7 +26,7 @@ zusätzlich über explizite, kartentextnahe Hint-Verträge abgesichert.
 
 ## Gesamtziel und `/Goal`
 
-`/Goal`: Die neun freigegebenen Findings aus
+`/Goal`: Die zehn freigegebenen Findings aus
 `match_424abdd1c7ac054d` sequenziell im eigenen Worktree zuerst als
 spielgleiche rote Decision-Checkpoints oder textgenaue rote Hint-Verträge
 sichern, nur weiterhin rote Verhaltensfehler generisch in Hints, Ontologie-
@@ -58,6 +60,8 @@ verifiziert entfernen.
    diagnostizieren.
 9. Core Command und Broker textgenau als HQ-gebundenen ICE-Trash
    beziehungsweise Hosted-Credit-Bank beschreiben.
+10. Eine sichtbare, legal bezahlbare Tag-Vermeidung wie Fall Guy in einem
+    unmittelbar drohenden Tag-Fenster gegen `pass` bewerten.
 
 ## Annahmen und Nicht-Ziele
 
@@ -145,8 +149,10 @@ verifiziert entfernen.
   - Decision 146 / StateVersion 273: Remote-Informations- und Bankkontext;
   - Decision 151 / StateVersion 283: Matchpoint-Remote ohne Pfadöffnungs- und
     Fundingsequenz;
-  - Decision 154 / StateVersion 286: Krash-Pfad als fehlende Coverage statt
+- Decision 154 / StateVersion 286: Krash-Pfad als fehlende Coverage statt
     unbezahlbarer Gesamtpfad.
+  - Decision 69 / StateVersion 122: Fall Guy ist legal, aber die KI lässt den
+    unmittelbar drohenden Hunter-Tag mit `pass` zu.
 - Hint-Verträge: Force Shield, Militech MRAM, Core Command, Broker, Inside Job,
   SeeYa und Forged Activation Orders.
 - Gegenproben: erstes nützliches Force Shield, echter MU-Chip, wertvoller
@@ -177,6 +183,20 @@ verifiziert entfernen.
 - Done-Gate: Historische Endgame- und Planverträge sind unverändert grün;
   normale Setup-, Bank-, Coverage- und Run-Kontrollen bleiben grün.
 - Commit: `fix(ai): convert blocked runner matchpoint contests`
+
+### P4b – Tag-Vermeidungs-Choice nachziehen
+
+- Ziel: Das während P5 ergänzte Finding F10 nach demselben Red-vor-Fix-Vertrag
+  abarbeiten.
+- Red-Gate: Der spielgleiche D69-Checkpoint scheitert ausschließlich als
+  `behavior_regression`; die bisherigen acht Tests des Matchpakets bleiben
+  grün.
+- Arbeit: generische Choice-Bewertung für sichtbare
+  Event-Modification-Optionen; keine Karten-ID- oder Match-Sonderregel.
+- Gegenproben: `pass` ohne konkrete Gefahr/Quelle und andere Choice-Arten
+  bleiben unverändert.
+- Red-Commit: `test(ai): capture match 424a Fall Guy regression`
+- Fix-Commit: `fix(ai): use visible tag avoidance choices`
 
 ### P5 – Verifikation, Final Review und Wissenspflege
 
