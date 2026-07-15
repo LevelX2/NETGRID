@@ -61,7 +61,20 @@ describe("match FD7671 runner decision checkpoints", () => {
       checkpoint.source.kind = "synthetic_companion";
       checkpoint.source.findingId = "FD7671-C02-EARLY-CHECK-BEFORE-COVERAGE";
       checkpoint.expectation = {
-        acceptableActions: [{ actionId: "runner.start_run.hq" }],
+        acceptableActions: [
+          { actionId: "runner.start_run.hq" },
+          { type: "gain_credit" },
+        ],
+        forbiddenActions: [
+          { sourceDefinitionId: "onr_v1_099_mantis-fixer-at-large" },
+        ],
+        runTargets: [
+          {
+            actionId: "runner.start_run.hq",
+            pathPassability: "reachable",
+            recommendation: "run_if_free",
+          },
+        ],
       };
     });
 

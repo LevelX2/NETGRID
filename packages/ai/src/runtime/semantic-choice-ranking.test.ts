@@ -661,6 +661,32 @@ describe("tacticalPlanMappedChoice", () => {
     expect(result.overrideChoice).toBeUndefined();
   });
 
+  it("lets a materially better safe information run precede direct breaker coverage", () => {
+    const installBreaker = legalAction("install-decoder", "install_card");
+    const run = legalAction("run-hq", "start_run", { serverId: "hq" });
+    const checkRun = choice(
+      run,
+      1064,
+      scoreComponentEvidence("runner_free_server_path"),
+      {
+        key: "runner_run_target_semantic_guidance",
+        value: -34,
+        reason:
+          "target:hq|recommendation:run_if_free|payoff:unknown|path:reachable|unavoidable_visible_ice_hazard_count:0",
+      },
+    );
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [checkRun, choice(installBreaker, 780)],
+      coverageMapping([installBreaker]),
+      checkRun,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("run-hq");
+    expect(result.overrideReason).toBe("coverage_probe_run_mapping_yield");
+  });
+
   it("lets explicit runner economy commitments interrupt generic central pressure", () => {
     const broker = legalAction("broker-load", "trigger_ability");
     const run = legalAction("run-rd", "start_run", { serverId: "rd" });
