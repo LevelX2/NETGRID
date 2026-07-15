@@ -328,6 +328,97 @@ describe("discard keep score", () => {
     expect(memoryScore.baseValue).toBeGreaterThan(neutralScore.baseValue);
   });
 
+  it("devalues installed duplicate Runner expose utility", () => {
+    const seeYa = runnerCard("onr_v1_058_seeya", "program");
+    const installedSeeYa = {
+      ...runnerCard("onr_v1_058_seeya", "program"),
+      instanceId: "installed-seeya-instance",
+    };
+    const roles = [
+      "program",
+      "hidden_zone_tool",
+      "expose_helper",
+      "build_rig",
+      "contest_remote",
+    ];
+    const fresh = score(seeYa, roles, "runner");
+    const installedDuplicate = score(
+      seeYa,
+      roles,
+      "runner",
+      [installedSeeYa],
+    );
+
+    expect(installedDuplicate.baseValue).toBeLessThan(fresh.baseValue - 100);
+  });
+
+  it("protects unique structured path tools only while a visible path has ICE", () => {
+    const insideJob = runnerCard("onr_v1_094_inside-job", "event");
+    const forged = runnerCard(
+      "onr_v1_086_forged-activation-orders",
+      "event",
+    );
+    const icedServer = {
+      id: "rd",
+      label: "R&D",
+      ice: [corpCard("visible-path-ice", "ice")],
+      root: [],
+    } as AiDecisionInput["playerView"]["servers"][number];
+    const insideRoles = [
+      "event",
+      "run_bypass",
+      "run_event",
+      "contest_remote",
+      "pressure_hq",
+      "pressure_rnd",
+    ];
+    const forgedRoles = [
+      "event",
+      "per_card_longtail",
+      "runner",
+      "runner_play_event",
+      "runner_event_choice",
+    ];
+    const insideWithPath = score(
+      insideJob,
+      insideRoles,
+      "runner",
+      [],
+      {},
+      { servers: [icedServer] },
+    );
+    const insideWithoutPath = score(
+      insideJob,
+      insideRoles,
+      "runner",
+    );
+    const forgedWithPath = score(
+      forged,
+      forgedRoles,
+      "runner",
+      [],
+      {},
+      { servers: [icedServer] },
+    );
+    const forgedWithoutPath = score(forged, forgedRoles, "runner");
+
+    expect(insideWithPath.baseValue).toBeGreaterThan(
+      insideWithoutPath.baseValue + 200,
+    );
+    expect(forgedWithPath.baseValue).toBeGreaterThan(
+      forgedWithoutPath.baseValue + 200,
+    );
+    expect(insideWithPath.evidence).toContain(
+      "discard_score:runner_visible_path_tool",
+    );
+    expect(forgedWithPath.evidence).toContain(
+      "discard_score:runner_visible_path_tool",
+    );
+    expect(insideWithoutPath.evidence).not.toContain(
+      "discard_score:runner_visible_path_tool",
+    );
+  });
+
   it("discards excess copies of an installed breaker before a unique support program", () => {
     const krash = runnerCard("krash", "program");
     const secondKrash = {
@@ -438,6 +529,7 @@ function score(
     breakerCoverage?: "stack_only" | "installed";
     agendaPoints?: number;
     corpTagSourceState?: "stack" | "archives";
+    servers?: AiDecisionInput["playerView"]["servers"];
   } = {},
 ) {
   return discardKeepScore(input(card, side, rig, options), card, {
@@ -466,6 +558,7 @@ function input(
     breakerCoverage?: "stack_only" | "installed";
     agendaPoints?: number;
     corpTagSourceState?: "stack" | "archives";
+    servers?: AiDecisionInput["playerView"]["servers"];
   } = {},
 ): AiDecisionInput {
   const decisionInput = {
@@ -510,7 +603,7 @@ function input(
         discardCount: 0,
         scoreArea: [],
       },
-      servers: [],
+      servers: options.servers ?? [],
       publicEvents: [],
       legalActions: options.legalActionForCard
         ? [

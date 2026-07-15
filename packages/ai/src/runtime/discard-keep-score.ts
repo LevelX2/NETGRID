@@ -72,6 +72,9 @@ export function discardKeepScore(
     input.side === "runner" &&
     cost > input.playerView.own.credits &&
     runnerEconomyOrPayout;
+  const runnerVisiblePathTool =
+    input.side === "runner" &&
+    runnerCardProvidesVisiblePathUtility(input, card.definitionId);
   const runnerMissingBreakerSearchAccess =
     input.side === "runner" &&
     rolesMatch(roles, ["program_search", "breaker_search"]) &&
@@ -134,6 +137,8 @@ export function discardKeepScore(
     if (rolesMatch(roles, ["draw"])) baseValue += 55;
     if (rolesMatch(roles, ["run_pressure"]))
       baseValue += input.playerView.own.credits < 4 ? 20 : 90;
+    if (runnerVisiblePathTool)
+      baseValue += input.playerView.own.credits < 2 ? 70 : 150;
     if (runnerPlanRelevantBreaker) baseValue += 360;
     if (runnerMissingBreakerSearchAccess) baseValue += 420;
     if (runnerBadPublicityTraceTech) baseValue += 240;
@@ -145,6 +150,7 @@ export function discardKeepScore(
         runnerEconomyOrPayout ||
         rolesMatch(roles, ["memory", "setup", "build_rig", "draw"]) ||
         rolesMatch(roles, ["run_pressure"]) ||
+        runnerVisiblePathTool ||
         runnerPlanRelevantBreaker ||
         runnerMissingBreakerSearchAccess ||
         runnerBadPublicityTraceTech)
@@ -196,11 +202,42 @@ export function discardKeepScore(
       ...(runnerMissingBreakerSearchAccess
         ? ["discard_score:runner_missing_breaker_search_access"]
         : []),
+      ...(runnerVisiblePathTool
+        ? ["discard_score:runner_visible_path_tool"]
+        : []),
       ...corpConditionalPayoff.evidence,
       ...(planFit > 0 ? ["discard_score:planfit"] : []),
       ...(strategicFit > 0 ? ["discard_score:strategicfit"] : []),
     ]),
   };
+}
+
+function runnerCardProvidesVisiblePathUtility(
+  input: AiDecisionInput,
+  definitionId: string,
+): boolean {
+  if (!runnerHasVisibleIcedPath(input)) return false;
+  const effects = AI_HINTS_BY_CARD.get(definitionId)?.effects ?? [];
+  return effects.some(
+    (effect) =>
+      effect.kind === "ice_trash" ||
+      (effect.kind === "future_encounter_effect" &&
+        "target" in effect &&
+        effect.target === "bypass_first_ice"),
+  );
+}
+
+function runnerHasVisibleIcedPath(input: AiDecisionInput): boolean {
+  const semanticInput = input as AiDecisionInputWithDeckCapabilities;
+  const targetVector = semanticInput.ownStrategicIntentState?.targetVector;
+  const targetId =
+    targetVector && "targetId" in targetVector
+      ? targetVector.targetId
+      : undefined;
+  const relevantServers = targetId
+    ? input.playerView.servers.filter((server) => server.id === targetId)
+    : input.playerView.servers;
+  return relevantServers.some((server) => server.ice.length > 0);
 }
 
 function runnerHasDeckBreakerCoverageUnavailableOutsideStack(

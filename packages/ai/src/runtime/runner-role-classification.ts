@@ -18,6 +18,8 @@ export function isRunnerNonAdditiveUtilityRole(role: string): boolean {
   return (
     role === "program_search" ||
     role === "stack_search" ||
+    role === "hidden_zone_tool" ||
+    role === "expose_helper" ||
     role === "trash_recovery" ||
     role === "search_trash" ||
     roleHasStructuredPath(role, "setup.recovery") ||
