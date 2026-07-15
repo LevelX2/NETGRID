@@ -40,6 +40,34 @@ describe("match FD7671 runner decision checkpoints", () => {
     expectCheckpointToPass(noFollowUpClick);
   });
 
+  it("keeps the first HQ check run available before installing missing decoder coverage", () => {
+    const missingDecoder = mutateFixture(noNeedTutorJson, (checkpoint) => {
+      const state = checkpoint.engine.testOnlyGameState;
+      const decoderId = state.runner.rig.programs.find(
+        (instanceId) =>
+          state.cardInstances[instanceId]?.definitionId ===
+          "onr_v1_016_cyfermaster",
+      );
+      if (!decoderId) throw new Error("Expected installed Cyfermaster");
+      state.runner.rig.programs = state.runner.rig.programs.filter(
+        (instanceId) => instanceId !== decoderId,
+      );
+      state.runner.stack.push(decoderId);
+      state.runner.memoryUsed -= 1;
+      state.cardInstances[decoderId] = {
+        ...state.cardInstances[decoderId]!,
+        zone: { side: "runner", zone: "stack" },
+      };
+      checkpoint.source.kind = "synthetic_companion";
+      checkpoint.source.findingId = "FD7671-C02-EARLY-CHECK-BEFORE-COVERAGE";
+      checkpoint.expectation = {
+        acceptableActions: [{ actionId: "runner.start_run.hq" }],
+      };
+    });
+
+    expectCheckpointToPass(missingDecoder);
+  });
+
   it("still trashes central economy when credits cover the reserve", () => {
     const surplusCredits = mutateFixture(centralTrashJson, (checkpoint) => {
       checkpoint.engine.testOnlyGameState.runner.credits = 12;
@@ -51,6 +79,19 @@ describe("match FD7671 runner decision checkpoints", () => {
     });
 
     expectCheckpointToPass(surplusCredits);
+  });
+
+  it("trashes central economy when no click remains for a follow-up run", () => {
+    const noFollowUpClick = mutateFixture(centralTrashJson, (checkpoint) => {
+      checkpoint.engine.testOnlyGameState.runner.clicks = 0;
+      checkpoint.source.kind = "synthetic_companion";
+      checkpoint.source.findingId = "FD7671-C05-TRASH-WITHOUT-RUN-CLICK";
+      checkpoint.expectation = {
+        acceptableActions: [{ type: "trash_accessed_card" }],
+      };
+    });
+
+    expectCheckpointToPass(noFollowUpClick);
   });
 
   it("keeps the sole legal expose target selectable", () => {

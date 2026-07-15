@@ -109,7 +109,71 @@ describe("runnerAccessTrashScoreComponents", () => {
       "runner_matchpoint_central_economy_trash_reserve",
     );
   });
+
+  it("does not protect a run reserve without a remaining run click", () => {
+    const trash = accessAction("trash-economy", "trash_accessed_card");
+    const current = runnerInput([trash]);
+    current.playerView.own.credits = 5;
+    current.playerView.own.clicks = 0;
+    current.playerView.opponent.agendaPoints = 6;
+
+    expect(
+      runnerAccessTrashScoreComponents(current, trash, {
+        trashAccessContext: () => economyContext(),
+      }).map((component) => component.key),
+    ).not.toContain("runner_matchpoint_central_economy_trash_reserve");
+  });
+
+  it("does not protect a run reserve when no server has visible access payoff", () => {
+    const trash = accessAction("trash-economy", "trash_accessed_card");
+    const current = runnerInput([trash]);
+    current.playerView.own.credits = 5;
+    current.playerView.opponent.agendaPoints = 6;
+    current.playerView.opponent.handCount = 0;
+    current.playerView.opponent.deckCount = 0;
+    current.playerView.servers = [];
+
+    expect(
+      runnerAccessTrashScoreComponents(current, trash, {
+        trashAccessContext: () => economyContext(),
+      }).map((component) => component.key),
+    ).not.toContain("runner_matchpoint_central_economy_trash_reserve");
+  });
+
+  it("does not preserve the reserve over high remaining finite-pool economy", () => {
+    const trash = accessAction("trash-economy", "trash_accessed_card");
+    const current = runnerInput([trash]);
+    current.playerView.own.credits = 5;
+    current.playerView.opponent.agendaPoints = 6;
+
+    expect(
+      runnerAccessTrashScoreComponents(current, trash, {
+        trashAccessContext: () => ({
+          ...economyContext(),
+          finitePoolEconomy: true,
+          corpValueRemaining: 9,
+        }),
+      }).map((component) => component.key),
+    ).not.toContain("runner_matchpoint_central_economy_trash_reserve");
+  });
 });
+
+function economyContext() {
+  return {
+    trashable: true,
+    affordableRelevant: true,
+    highImpact: true,
+    trashCost: 3,
+    generalCreditCost: 3,
+    creditsAfterGeneralTrash: 2,
+    reserveTarget: 4,
+    deferredByBudget: false,
+    centralAccess: true,
+    accessServerId: "rd",
+    targetType: "asset",
+    role: "economy",
+  } as const;
+}
 
 function runnerInput(legalActions: LegalAction[]): AiDecisionInput {
   const playerView: PlayerView = {

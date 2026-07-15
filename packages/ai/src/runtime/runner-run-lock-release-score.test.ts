@@ -35,6 +35,25 @@ describe("runnerRunLockReleaseScoreComponent", () => {
     ).toBeUndefined();
   });
 
+  it("does not release into a known rezzed ETR path without breaker coverage", () => {
+    const current = input();
+    current.playerView.servers[0]!.ice = [
+      {
+        instanceId: "known-data-wall",
+        definitionId: "onr_v1_237_data-wall",
+        title: "Data Wall",
+        type: "ice",
+        known: true,
+        rezzed: true,
+      },
+    ];
+    current.playerView.own.rig = [];
+
+    expect(
+      runnerRunLockReleaseScoreComponent(current, releaseAction()),
+    ).toBeUndefined();
+  });
+
   it("does not create terminal urgency below Corp matchpoint", () => {
     const current = input();
     current.playerView.opponent.agendaPoints = 4;

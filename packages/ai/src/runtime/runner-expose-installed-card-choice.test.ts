@@ -46,6 +46,34 @@ describe("runner installed-card expose choice", () => {
       [],
     );
   });
+
+  it("treats a replacement card at an exposed remote-root position as unseen", () => {
+    const current = input();
+    current.eventTail.push(
+      exposeEvent("remote_1", "root", 0),
+      installEvent("remote_1", "root"),
+    );
+    current.playerView.servers[1]!.root = [
+      {
+        instanceId: "replacement_remote_root",
+        known: false,
+        advancementCounters: 1,
+      },
+    ];
+    const choice = current.playerView.pendingChoice!;
+    choice.options = [
+      { id: "card_hidden_remote_ice", label: "Remote 1 ICE 1" },
+      { id: "card_replacement_remote_root", label: "Remote 1 Root 1" },
+    ];
+
+    expect(
+      selectedRunnerExposeInstalledCardChoiceOptionIds(
+        current,
+        choice,
+        choice.options,
+      ),
+    ).toEqual(["card_replacement_remote_root"]);
+  });
 });
 
 function input(): AiDecisionInput {
@@ -126,6 +154,25 @@ function legacyExposeEvent(
       actor: "runner",
       actionType: "resolve_choice",
       exposedServerId: serverId,
+    },
+  } as AiDecisionInput["eventTail"][number];
+}
+
+function installEvent(
+  serverId: string,
+  placement: "ice" | "root",
+): AiDecisionInput["eventTail"][number] {
+  return {
+    eventId: `install-${serverId}-${placement}`,
+    type: "install_card",
+    stateVersionBefore: 2,
+    stateVersionAfter: 3,
+    stateHashAfter: `hash-install-${serverId}-${placement}`,
+    publicPayload: {
+      actor: "corp",
+      actionType: "install_card",
+      serverId,
+      placement,
     },
   } as AiDecisionInput["eventTail"][number];
 }
