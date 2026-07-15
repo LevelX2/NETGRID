@@ -579,6 +579,7 @@ function evaluateRunnerRunTarget(
         ? [`missing_coverage:${path.missingCoverage.join("|")}`]
         : []),
       `path_cost:${path.visibleBreakCost ?? 0}`,
+      `visible_break_cost:${path.visibleBreakCost ?? 0}`,
       `run_action_credit_cost:${actionCreditCost}`,
       `credits_after_run_action:${creditsAfterAction}`,
       `credits_after_run:${creditsAfterRun}`,

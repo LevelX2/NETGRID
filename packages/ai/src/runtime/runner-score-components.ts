@@ -49,6 +49,7 @@ import {
   runnerTagCleanupScoreComponent,
 } from "./runner-tag-cleanup-score";
 import { runnerDrawTaxLiabilityScoreComponent } from "./runner-draw-tax-liability-score";
+import { runnerTerminalRemoteToolScoreComponent } from "./runner-terminal-remote-tool-score";
 
 export type RunnerScoreComponentsDependencies = {
   loanLiabilityAssessment: (
@@ -104,6 +105,12 @@ export function runnerScoreComponents(
 ): AiDecisionScoreComponent[] {
   const components: AiDecisionScoreComponent[] = [];
   components.push(...runnerActivatedAgendaScoreComponents(input, action));
+  const terminalRemoteTool = runnerTerminalRemoteToolScoreComponent(
+    input,
+    action,
+    actionSemanticCandidate,
+  );
+  if (terminalRemoteTool) components.push(terminalRemoteTool);
   const loanLiabilityAssessment = dependencies.loanLiabilityAssessment(
     input,
     action,

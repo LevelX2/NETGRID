@@ -77,7 +77,10 @@ export function tacticalPlanMappedChoice(
     if (
       strategicOverrideChoice &&
       strategicOverrideChoice.score > 0 &&
-      strategicOverrideChoice.score > mappedChoice.score
+      strategicOverrideChoice.score > mappedChoice.score &&
+      (mapping.plan.side !== "runner" ||
+        strategicOverrideChoice.score >
+          (overrideChoice?.score ?? Number.NEGATIVE_INFINITY))
     ) {
       overrideChoice = strategicOverrideChoice;
     }
@@ -253,6 +256,12 @@ export function tacticalPlanMappedChoice(
         mapping,
         mappedChoice,
         overrideChoice,
+      ) ||
+      tacticalPlanMarginalDevelopmentInstallShouldYield(
+        mapping,
+        mappedChoice,
+        overrideChoice,
+        scoreGap,
       );
     if (
       mappedNonPositiveAgainstPositive &&
@@ -413,6 +422,11 @@ function tacticalPlanFundedDevelopmentContinuationBlocksOverride(
     ) &&
     (mappedChoice.action.type === "install_card" ||
       mappedChoice.action.type === "play_event") &&
+    !tacticalPlanDeferredDevelopmentInstallShouldYield(
+      mapping,
+      mappedChoice,
+      overrideChoice,
+    ) &&
     !semanticRuntimeChoiceHasScoreComponent(
       overrideChoice,
       "runner_activated_agenda_score",
@@ -732,6 +746,34 @@ function tacticalPlanDeferredDevelopmentInstallShouldYield(
   );
 }
 
+function tacticalPlanMarginalDevelopmentInstallShouldYield(
+  mapping: PlanStepMappingResult,
+  mappedChoice: SemanticRuntimeChoice,
+  overrideChoice: SemanticRuntimeChoice,
+  scoreGap: number,
+): boolean {
+  if (
+    (mapping.plan.type !== "runner.develop_hand_card" &&
+      mapping.plan.type !== "runner.play_best_hand_card") ||
+    mapping.step.kind !== "install_development_card" ||
+    mappedChoice.action.type !== "install_card" ||
+    mappedChoice.score > 100 ||
+    overrideChoice.score <= 0 ||
+    scoreGap <= PLAN_MAPPED_CHOICE_MAX_SCORE_GAP ||
+    !semanticRuntimeChoiceHasScoreComponent(
+      overrideChoice,
+      "runner_bank_investment_commitment",
+    )
+  ) {
+    return false;
+  }
+  return mappedChoice.scoreBreakdown.some(
+    (component) =>
+      component.key === "runner_persistent_install_fit" &&
+      component.value <= 100,
+  );
+}
+
 function runnerPlanTypeRequiresPlanDominance(
   type: TacticalPlan["type"],
 ): boolean {
@@ -759,6 +801,14 @@ function runnerPlanOverrideIsHardInterrupt(
     semanticRuntimeChoiceHasScoreComponent(
       overrideChoice,
       "runner_activated_agenda_score",
+    )
+  ) {
+    return true;
+  }
+  if (
+    semanticRuntimeChoiceHasScoreComponent(
+      overrideChoice,
+      "runner_terminal_remote_tool",
     )
   ) {
     return true;

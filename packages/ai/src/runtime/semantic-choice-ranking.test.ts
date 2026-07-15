@@ -429,21 +429,29 @@ describe("tacticalPlanMappedChoice", () => {
     expect(result.overrideBlockedReason).toBe("runner_plan_controller");
   });
 
-  it("keeps a just-funded development install over ordinary run pressure", () => {
+  it("yields a negative just-funded development install to a clearly better action", () => {
     const install = legalAction("install-funded-card", "install_card");
     const run = legalAction("run-rd", "start_run", { serverId: "rd" });
     const result = tacticalPlanMappedChoice(
       aiInput(),
-      [choice(run, 1903), choice(install, -156)],
+      [
+        choice(run, 1903),
+        choice(install, -156, [], {
+          key: "runner_persistent_install_fit",
+          value: -180,
+          reason: "visible installed copy already covers the role",
+        }),
+      ],
       fundedDevelopmentMapping([install]),
       choice(run, 1903),
     );
 
-    expect(result.outcome).toBe("semantic_choice_blocked");
-    expect(result.choice?.action.actionId).toBe("install-funded-card");
-    expect(result.overrideBlockedReason).toBe(
-      "funded_development_plan_controller",
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("run-rd");
+    expect(result.overriddenMappedChoice?.action.actionId).toBe(
+      "install-funded-card",
     );
+    expect(result.overrideReason).toBe("mapped_nonpositive_against_positive");
   });
 
   it("lets an immediate agenda score interrupt funded hand development", () => {

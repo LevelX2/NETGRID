@@ -178,6 +178,36 @@ describe("visible run analysis text-derived breaker costs", () => {
   });
 });
 
+describe("visible run analysis access-preserving effect choices", () => {
+  it("takes damage to preserve credits for a later no-break lock and Wall", () => {
+    const blocked = assessKnownRezzedIcePath(
+      [dataWallTwoPointZeroIce("inner-wall"), neuralBladeIce("outer-blade")],
+      [krashBreaker("runner-krash")],
+      12,
+    );
+
+    expect(blocked).toMatchObject({
+      blocked: true,
+      canReachAccess: false,
+      visibleBreakCost: 14,
+      creditsAfterPath: -2,
+      unpayableReason: "later_ice_unaffordable_after_prior_ice_cost",
+    });
+
+    const funded = assessKnownRezzedIcePath(
+      [dataWallTwoPointZeroIce("inner-wall"), neuralBladeIce("outer-blade")],
+      [krashBreaker("runner-krash")],
+      14,
+    );
+    expect(funded).toMatchObject({
+      blocked: false,
+      canReachAccess: true,
+      visibleBreakCost: 14,
+      creditsAfterPath: 0,
+    });
+  });
+});
+
 describe("visible run analysis Deflector paths", () => {
   it("prices a live Deflector as a required access-preserving break", () => {
     const assessment = assessKnownRezzedIcePath(
@@ -668,6 +698,32 @@ function classicCodeGateIce(instanceId: string): VisibleCard {
     known: true,
     rezzed: true,
     strength: 2,
+  };
+}
+
+function dataWallTwoPointZeroIce(instanceId: string): VisibleCard {
+  return {
+    instanceId,
+    definitionId: "onr_v1_238_data-wall-2-0",
+    title: "Data Wall 2.0",
+    type: "ice",
+    subtypes: ["wall"],
+    known: true,
+    rezzed: true,
+    strength: 1,
+  };
+}
+
+function neuralBladeIce(instanceId: string): VisibleCard {
+  return {
+    instanceId,
+    definitionId: "onr_v1_258_neural-blade",
+    title: "Neural Blade",
+    type: "ice",
+    subtypes: ["sentry", "ap", "sword"],
+    known: true,
+    rezzed: true,
+    strength: 4,
   };
 }
 

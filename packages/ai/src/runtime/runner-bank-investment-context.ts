@@ -175,6 +175,7 @@ export function createRunnerBankInvestmentContext(
       `bankBuildLegal:${assessment.buildActionLegal}`,
       `bankCashOutLegal:${assessment.cashOutActionLegal}`,
       `bankConcreteFundingNeed:${assessment.concreteFundingNeed}`,
+      `bankTerminalContestFundingNeed:${runnerBankHasTerminalContestFundingNeed(input)}`,
       `bankCriticalReserve:${assessment.criticalReserve}`,
       `bankCashOutThreshold:${assessment.cashOutThresholdMet}`,
       ...(assessment.installProjection
@@ -744,6 +745,7 @@ export function createRunnerBankInvestmentContext(
 
   function runnerBankHasConcreteFundingNeed(input: AiDecisionInput): boolean {
     if (dependencies.runnerHandFundingTarget(input)) return true;
+    if (runnerBankHasTerminalContestFundingNeed(input)) return true;
     const credits = input.playerView.own.credits;
     return input.legalActions.some((action) => {
       if (action.side !== "runner") return false;
@@ -759,6 +761,42 @@ export function createRunnerBankInvestmentContext(
         "pressure",
         "setup",
       ]);
+    });
+  }
+
+  function runnerBankHasTerminalContestFundingNeed(
+    input: AiDecisionInput,
+  ): boolean {
+    if (
+      input.playerView.opponent.agendaPoints <
+        input.playerView.agendaPointsToWin - 1 ||
+      input.playerView.own.clicks < 2
+    ) {
+      return false;
+    }
+    const cashOutAction = input.legalActions.find((action) =>
+      isRunnerBankCashOutAction(input, action),
+    );
+    if (
+      !cashOutAction ||
+      runnerBankStoredCredits(input, cashOutAction) <
+        RUNNER_BANK_FIRST_LOAD_TARGET
+    ) {
+      return false;
+    }
+    return input.legalActions.some((action) => {
+      if (action.type !== "start_run") return false;
+      const serverId = dependencies.serverId(action);
+      if (!serverId?.startsWith("remote_")) return false;
+      const evaluation = dependencies.runnerRunTargetEvaluation(
+        input,
+        action,
+        serverId,
+      );
+      return (
+        evaluation?.scoreThreat === true &&
+        evaluation.pathPassability === "blocked_unpayable"
+      );
     });
   }
 

@@ -4,6 +4,7 @@ import type {
   LegalAction,
   VisibleCard,
 } from "@netgrid/shared";
+import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
 import { createRunnerBankInvestmentContext } from "./runner-bank-investment-context";
 
 describe("createRunnerBankInvestmentContext", () => {
@@ -280,6 +281,52 @@ describe("createRunnerBankInvestmentContext", () => {
         "bankStoredCredits:1",
         "bankCommitmentStatus:cashout_deferred",
         "why_cashout_now:no_funding_need",
+      ]),
+    );
+  });
+
+  it("cashes out a funded bank to convert a blocked matchpoint remote", () => {
+    const context = createContext({
+      hintEffectsForDefinition: (definitionId) =>
+        definitionId === "custom-runner-credit-bank"
+          ? [{ kind: "economy", target: "economy.temporary_resource_bank" }]
+          : [],
+      runnerRunTargetEvaluation: () =>
+        ({
+          scoreThreat: true,
+          pathPassability: "blocked_unpayable",
+        }) as RunnerRunTargetEvaluation,
+    });
+    const bank = visibleRunnerCard("custom-runner-credit-bank", {
+      counters: { power: 3 },
+    });
+    const cashOutAction = runnerAction("trigger_ability", {
+      actionId: "structured-cashout",
+      source: bank.instanceId,
+      cardImplementationTakesHostedCredits: true,
+    });
+    const remoteRun = runnerAction("start_run", {
+      actionId: "remote-matchpoint-run",
+      serverId: "remote_1",
+    });
+    const input = runnerInput({
+      credits: 12,
+      clicks: 4,
+      rig: [bank],
+      legalActions: [cashOutAction, remoteRun],
+    });
+    input.playerView.opponent.agendaPoints = 6;
+
+    expect(context.runnerBankHasConcreteFundingNeed(input)).toBe(true);
+    expect(context.runnerBankCashOutIsUsefulNow(input, cashOutAction)).toBe(
+      true,
+    );
+    expect(
+      context.runnerBankInvestmentCommitmentEvidence(input, cashOutAction),
+    ).toEqual(
+      expect.arrayContaining([
+        "bankTerminalContestFundingNeed:true",
+        "why_cashout_now:concrete_funding_need",
       ]),
     );
   });

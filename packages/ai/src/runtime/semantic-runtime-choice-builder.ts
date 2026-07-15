@@ -197,4 +197,5 @@ const SEMANTIC_RUNTIME_CHOICE_SCORE_COMPONENT_EVIDENCE_KEYS = new Set([
   "runner_bank_investment_commitment",
   "runner_no_run_economy_setup_hold",
   "runner_activated_agenda_score",
+  "runner_terminal_remote_tool",
 ]);

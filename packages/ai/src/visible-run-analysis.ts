@@ -431,17 +431,15 @@ function bestAccessPreservingPayment(
       breakAssessment,
     });
   }
-  const bestPayment = paymentOptions.sort(
-    (left, right) => {
-      const affordabilityDelta =
-        Number(right.affordable) - Number(left.affordable);
-      if (affordabilityDelta !== 0) return affordabilityDelta;
-      if (!left.affordable && !right.affordable) {
-        return left.cost - right.cost || left.cashSpent - right.cashSpent;
-      }
-      return left.cashSpent - right.cashSpent || left.cost - right.cost;
-    },
-  )[0];
+  const bestPayment = paymentOptions.sort((left, right) => {
+    const affordabilityDelta =
+      Number(right.affordable) - Number(left.affordable);
+    if (affordabilityDelta !== 0) return affordabilityDelta;
+    if (!left.affordable && !right.affordable) {
+      return left.cost - right.cost || left.cashSpent - right.cashSpent;
+    }
+    return left.cashSpent - right.cashSpent || left.cost - right.cost;
+  })[0];
   return bestPayment ?? projectGeneralCreditPayment(budget, payCost);
 }
 
@@ -679,7 +677,10 @@ function assessKnownRezzedIcePathInternal(
       ({ effect }) =>
         !runPathEffectAlreadyVisibleOnFutureIce(effect, futureIce),
     );
-    for (const { effect, sourceSubroutine } of runPathEffects) {
+    for (const [
+      effectIndex,
+      { effect, sourceSubroutine },
+    ] of runPathEffects.entries()) {
       const unavoidableTraceRunLock = unbrokenEffectIsUnavoidableTraceRunLock(
         effect,
         sourceSubroutine,
@@ -692,7 +693,14 @@ function assessKnownRezzedIcePathInternal(
           ? {}
           : { unavoidableTraceRunLock },
       );
-      if (hardEffectKinds.length > 0) {
+      const laterEffectPreventsFutureBreaking = runPathEffects
+        .slice(effectIndex + 1)
+        .some((entry) => entry.effect.preventsFutureBreaking === true);
+      const prioritizeLaterAccessPreservation =
+        laterEffectPreventsFutureBreaking &&
+        hardEffectKinds.length === 1 &&
+        hardEffectKinds[0] === "damage_or_program_trash";
+      if (hardEffectKinds.length > 0 && !prioritizeLaterAccessPreservation) {
         const breakAssessment =
           options.allowBreakingRunPathEffects &&
           !runPathEffectsPreventFutureBreaking(activeRunPathEffects)
@@ -709,10 +717,7 @@ function assessKnownRezzedIcePathInternal(
           : undefined;
         if (breakAssessment && payment?.affordable) {
           visibleBreakCost += breakAssessment.cost;
-          spendBreakerCreditsAndApplySideEffects(
-            creditBudget,
-            breakAssessment,
-          );
+          spendBreakerCreditsAndApplySideEffects(creditBudget, breakAssessment);
           creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
           firstKnownIceBreakable = true;
           if (breakAssessment.carriesStrengthAcrossIce) {
@@ -895,7 +900,12 @@ function runPathEffectBreakAssessment(params: {
     breakerStrengthsAfterBreak,
     params.deflectorContext,
   );
-  if (!futureAfterBreak.canReachAccess) return undefined;
+  if (
+    !futureAfterBreak.canReachAccess &&
+    !runnerKnownPathAssessmentIsCostNoAccess(futureAfterBreak)
+  ) {
+    return undefined;
+  }
   const effectCreatesNoAccess =
     futureWithoutEffect.canReachAccess &&
     !futureWithEffect.canReachAccess &&
@@ -1637,22 +1647,24 @@ function projectIceForRunPathEffects(
     iceDefinitionId: ice.definitionId,
     effectiveStrength: ice.strength ?? cardDefinitionStrength(ice.definitionId),
     subroutines:
-      CARD_DEFINITIONS_BY_ID[ice.definitionId]?.subroutines?.map((subroutine) => ({
-        id: subroutine.id,
-        type: subroutine.type,
-        ...(subroutine.amount !== undefined
-          ? { amount: subroutine.amount }
-          : {}),
-        ...(subroutine.baseTraceStrength !== undefined
-          ? { baseTraceStrength: subroutine.baseTraceStrength }
-          : {}),
-        ...(subroutine.traceSuccessEffect
-          ? { traceSuccessEffect: subroutine.traceSuccessEffect }
-          : {}),
-        ...(subroutine.breakTags
-          ? { breakTags: subroutine.breakTags.slice() }
-          : {}),
-      })) ?? [],
+      CARD_DEFINITIONS_BY_ID[ice.definitionId]?.subroutines?.map(
+        (subroutine) => ({
+          id: subroutine.id,
+          type: subroutine.type,
+          ...(subroutine.amount !== undefined
+            ? { amount: subroutine.amount }
+            : {}),
+          ...(subroutine.baseTraceStrength !== undefined
+            ? { baseTraceStrength: subroutine.baseTraceStrength }
+            : {}),
+          ...(subroutine.traceSuccessEffect
+            ? { traceSuccessEffect: subroutine.traceSuccessEffect }
+            : {}),
+          ...(subroutine.breakTags
+            ? { breakTags: subroutine.breakTags.slice() }
+            : {}),
+        }),
+      ) ?? [],
   };
   let effectiveStrength = baseQuote.effectiveStrength;
   let breakSubroutineAdditionalCostPerSubroutine =
@@ -2078,8 +2090,7 @@ function creditsToBreakVisibleSubroutinesWithBreaker(
       breakerCarriesStrengthAcrossIce(breakerDefinition),
     ...(breakAbility.postBreakStealthLoss
       ? {
-          postBreakStealthLoss:
-            breakUses * breakAbility.postBreakStealthLoss,
+          postBreakStealthLoss: breakUses * breakAbility.postBreakStealthLoss,
         }
       : {}),
   };
@@ -2205,8 +2216,7 @@ export function creditsToBreakEndTheRunSubroutinesWithBreaker(
       breakerCarriesStrengthAcrossIce(breakerDefinition),
     ...(breakAbility.postBreakStealthLoss
       ? {
-          postBreakStealthLoss:
-            breakUses * breakAbility.postBreakStealthLoss,
+          postBreakStealthLoss: breakUses * breakAbility.postBreakStealthLoss,
         }
       : {}),
   };
