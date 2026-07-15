@@ -139,6 +139,8 @@ gehören nicht zu diesem Arbeitsstrang; erzeugte Fremdänderungen wurden nicht
 
 ## Integrationsstatus
 
-Der Arbeitsbranch hat den abschließenden Verify-Lauf bestanden und ist für die
-lokale Fast-forward-Integration nach `main` sowie den verifizierten Abbau von
-Worktree und Arbeitsbranch vorbereitet.
+Der Arbeitsbranch hat den abschließenden Verify-Lauf bestanden und wurde lokal
+per Fast-forward nach `main` integriert. Auf dem integrierten Stand sind die
+11 fokussierten Testdateien mit 120/120 Tests und der AI-Typecheck erneut grün;
+der temporäre Worktree und Arbeitsbranch werden anschließend verifiziert
+entfernt.

@@ -2,8 +2,8 @@
 
 ## Status
 
-P0 bis P5 abgeschlossen; P6 verifiziert die Integration und räumt den
-Arbeitsstrang auf.
+P0 bis P6 abgeschlossen. Der Arbeitsbranch wurde lokal per Fast-forward nach
+`main` integriert und der integrierte Stand erneut verifiziert.
 
 ## Quelle und Zielprüfung
 
@@ -151,6 +151,11 @@ werden nicht verworfen.
   und Wissenslog ausführen.
 - Aktuelles `main` integrieren, erneut prüfen, lokal per Fast-forward mergen.
 - Worktree und gemergten Branch entfernen und doppelt verifizieren.
+- Abschlussnachweis vor Integration: 11/11 fokussierte Testdateien mit
+  120/120 Tests, vollständige KI-Suite mit 338/338 Dateien und 2316/2316
+  Tests, AI-Typecheck und alle relevanten Hint-/Daten-Gates grün.
+- Integrationsnachweis auf `main`: 11/11 fokussierte Testdateien mit 120/120
+  Tests sowie AI-Typecheck grün.
 
 ## Verifikationsregeln
 
