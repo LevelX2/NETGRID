@@ -1,6 +1,6 @@
 # Runner-Remediation aus Match E8886 (2026-07-15)
 
-Status: P2 abgeschlossen; P3 als nächstes
+Status: P3 abgeschlossen; P4 als nächstes
 
 ## Quelle und Gesamtziel
 
@@ -130,6 +130,17 @@ der ausdrücklichen Nutzerfreigabe präzise genug für direkte Umsetzung.
 - Gate: D13 und D22 grün; D2/D3-artiger Check-Run, D39 und erreichbarer
   Inside Job bleiben grün.
 - Commit: `fix(ai): respect run risk and action reachability`
+
+Umgesetzt: Die bereits side-safe rekonstruierte Unrezzed-ICE-Risikokurve
+liefert für tatsächlich unbekanntes, nicht gerezztes ICE eine kleine
+Finanzierungsreserve. Score-Threats, finanzierte Probes und ein Corp ohne
+Rez-Credits bleiben davon ausgenommen. Aktionsprojektionen werden nun auch
+von der harten Exclusion-Schicht vollständig konsumiert: Ein nach Eventkosten
+unbezahlbarer Pfad wird ausgeschlossen. Zusätzlich wird ein bezahltes
+Run-Event gegenüber dem legalen Basic Run ausgeschlossen, wenn seine
+projizierte Sonderwirkung am gewählten Ziel gar nicht eintritt. Das verhindert
+insbesondere den nachgelagert sichtbar gewordenen nutzlosen Inside Job auf ein
+freies HQ.
 
 ### P4 - Konkreter Run-Abbruch
 

@@ -1,5 +1,6 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
+import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
 import {
   assessKnownRezzedIcePath,
   runnerRunPathCreditBudgetWithVisiblePools,
@@ -50,7 +51,7 @@ export type SemanticRuntimeActionExclusionDependencies = {
   runnerRunTargetEvaluationForAction: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => { targetServerId?: string; accessServerId?: string } | undefined;
+  ) => RunnerRunTargetEvaluation | undefined;
   runnerBlinkRunExclusion: (
     input: AiDecisionInput,
     action: LegalAction,
@@ -135,6 +136,61 @@ export function semanticRuntimeActionExclusion(
     runTargetEvaluation?.targetServerId ?? semanticRuntimeServerId(action);
   const accessServerId = runTargetEvaluation?.accessServerId ?? serverId;
   if (input.side !== "runner" || !serverId || !accessServerId) return undefined;
+  if (
+    runTargetEvaluation &&
+    [
+      "blocked_missing_coverage",
+      "blocked_unpayable",
+      "blocked_unbreakable",
+    ].includes(runTargetEvaluation.pathPassability)
+  ) {
+    return {
+      key: "projected_run_path_no_access",
+      label:
+        runTargetEvaluation.pathPassability === "blocked_unpayable"
+          ? "Projizierter Run nicht bezahlbar"
+          : "Projizierter Run nicht erreichbar",
+      reason: [
+        `action:${action.actionId}`,
+        `target:${runTargetEvaluation.targetServerId}`,
+        `access:${runTargetEvaluation.accessServerId}`,
+        `path:${runTargetEvaluation.pathPassability}`,
+        `credits_after:${runTargetEvaluation.creditsAfterRun}`,
+        ...runTargetEvaluation.evidence.filter(
+          (entry) =>
+            entry.startsWith("missing_coverage:") ||
+            entry.startsWith("run_action_credit_cost:") ||
+            entry.startsWith("run_action_projection_") ||
+            entry.startsWith("visible_break_cost:"),
+        ),
+      ].join("|"),
+    };
+  }
+  if (
+    runTargetEvaluation &&
+    runTargetEvaluation.runActionProjection.structure === "event_run" &&
+    action.costs.some((cost) => (cost.credits ?? 0) > 0) &&
+    !runTargetEvaluation.bypassedFirstIce &&
+    runTargetEvaluation.runActionPayoff.scoreBonus <= 0 &&
+    input.legalActions.some(
+      (candidate) =>
+        candidate.type === "start_run" &&
+        semanticRuntimeServerId(candidate) ===
+          runTargetEvaluation.targetServerId,
+    )
+  ) {
+    return {
+      key: "run_event_dominated_by_basic_run",
+      label: "Run-Event ohne genutzten Vorteil",
+      reason: [
+        `action:${action.actionId}`,
+        `target:${runTargetEvaluation.targetServerId}`,
+        "basic_run_available:true",
+        "bypassed_first_ice:false",
+        `run_action_payoff_score:${runTargetEvaluation.runActionPayoff.scoreBonus}`,
+      ].join("|"),
+    };
+  }
   const blinkRunExclusion = dependencies.runnerBlinkRunExclusion(input, action);
   if (blinkRunExclusion) return blinkRunExclusion;
   const knownCentralPayoffExclusion = dependencies.knownCentralPayoffExclusion(

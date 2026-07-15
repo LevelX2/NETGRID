@@ -3,7 +3,11 @@ import {
   type AiDecisionInput,
   type LegalAction,
 } from "@netgrid/shared";
-import type { BeliefState } from "./belief-state";
+import {
+  reconstructBeliefState,
+  type BeliefState,
+  type RunnerOpponentModel,
+} from "./belief-state";
 import {
   evaluateKnownCentralAccessPayoff,
   type KnownCentralAccessPayoff,
@@ -288,6 +292,10 @@ export type RunnerRunTargetEvaluation = {
   pathPassability: RunnerPathPassability;
   pathCost: number;
   creditsAfterRun: number;
+  unknownUnrezzedIceCount?: number;
+  unrezzedIceRisk?: number;
+  unrezzedIceRiskCreditBuffer?: number;
+  unrezzedIceRiskUnderfunded?: boolean;
   visibleIceRunHazards?: VisibleIceRunHazard[];
   visibleIceHazardPenalty?: number;
   visibleIceHazardAvoidanceCost?: number;
@@ -299,6 +307,7 @@ export type RunnerRunTargetEvaluation = {
   installedRunPayoff: RunnerInstalledRunPayoff;
   runActionPayoff: RunnerInstalledRunPayoff;
   runActionProjection: RunActionProjection;
+  bypassedFirstIce?: boolean;
   riskyUniversalCoverage: boolean;
   blinkRiskAssessment?: BlinkRiskAssessment;
   scoreThreat: boolean;
@@ -358,6 +367,9 @@ export function evaluateRunnerRunTargets(
   params: EvaluateRunnerRunTargetsParams,
 ): RunnerRunTargetEvaluation[] {
   const economyPosture = buildRunnerEconomyPosture(params);
+  const unrezzedIceRiskModel =
+    (params.beliefState ?? reconstructBeliefState(params.input))
+      .runnerOpponentModel?.unrezzedIceRiskModel ?? [];
   return projectInternalRunnerRunActions(params)
     .filter(
       (projection) =>
@@ -365,7 +377,12 @@ export function evaluateRunnerRunTargets(
         projection.targetServerId !== undefined,
     )
     .map((projection) =>
-      evaluateRunnerRunTarget(params, projection, economyPosture),
+      evaluateRunnerRunTarget(
+        params,
+        projection,
+        economyPosture,
+        unrezzedIceRiskModel,
+      ),
     )
     .filter(
       (evaluation): evaluation is RunnerRunTargetEvaluation =>
@@ -387,6 +404,7 @@ function evaluateRunnerRunTarget(
   params: EvaluateRunnerRunTargetsParams,
   projection: InternalRunActionProjection,
   economyPosture: RunnerEconomyPosture,
+  unrezzedIceRiskModel: RunnerOpponentModel["unrezzedIceRiskModel"],
 ): RunnerRunTargetEvaluation | undefined {
   const targetServerId = projection.targetServerId;
   if (!targetServerId) return undefined;
@@ -439,6 +457,7 @@ function evaluateRunnerRunTarget(
   const runActionPayoff = runActionPayoffForTarget(
     projection,
     accessTargetKind,
+    bypassedFirstIce,
   );
   const combinedRunPayoff = combineRunPayoffs(
     installedRunPayoff,
@@ -483,6 +502,20 @@ function evaluateRunnerRunTarget(
         ? "blocked_unpayable"
         : basePathPassability;
   const creditsAfterRun = path.creditsAfterPath;
+  const unknownUnrezzedIceCount = projectedServerIce.filter(
+    (card) => card.rezzed !== true && card.known === false,
+  ).length;
+  const unrezzedIceRisk =
+    unrezzedIceRiskModel.find((entry) => entry.serverId === targetServerId)
+      ?.risk ?? 0;
+  const unrezzedIceRiskCreditBuffer =
+    unknownUnrezzedIceCount > 0 &&
+    params.input.playerView.opponent.credits > 0
+      ? Math.max(1, Math.ceil(unrezzedIceRisk * 4))
+      : 0;
+  const unrezzedIceRiskUnderfunded =
+    unknownUnrezzedIceCount > 0 &&
+    creditsAfterRun < unrezzedIceRiskCreditBuffer;
   const multiaccessAvailable = combinedRunPayoff.multiaccessAvailable;
   const stealOrTrashAffordable = stealOrTrashAffordableFor(accessPayoff);
   const unproductiveVisibleRunPath =
@@ -515,6 +548,7 @@ function evaluateRunnerRunTarget(
     expectedTagsFromVisibleIce,
     unavoidableVisibleIceHazardCount,
     visibleTraceTagHazardUnavoidable,
+    unrezzedIceRiskUnderfunded,
     ...(accessOutcomeMemory ? { accessOutcomeMemory } : {}),
     ...(rankedAccessTarget ? { rankedAccessTarget } : {}),
     ...(blinkRiskAssessment ? { blinkRiskAssessment } : {}),
@@ -549,6 +583,10 @@ function evaluateRunnerRunTarget(
     pathPassability,
     pathCost: path.visibleBreakCost ?? 0,
     creditsAfterRun,
+    unknownUnrezzedIceCount,
+    unrezzedIceRisk,
+    unrezzedIceRiskCreditBuffer,
+    unrezzedIceRiskUnderfunded,
     ...(path.visibleIceRunHazards?.length
       ? { visibleIceRunHazards: path.visibleIceRunHazards }
       : {}),
@@ -562,6 +600,7 @@ function evaluateRunnerRunTarget(
     installedRunPayoff,
     runActionPayoff,
     runActionProjection: publicProjection,
+    bypassedFirstIce,
     riskyUniversalCoverage,
     ...(blinkRiskAssessment ? { blinkRiskAssessment } : {}),
     scoreThreat,
@@ -583,6 +622,10 @@ function evaluateRunnerRunTarget(
       `run_action_credit_cost:${actionCreditCost}`,
       `credits_after_run_action:${creditsAfterAction}`,
       `credits_after_run:${creditsAfterRun}`,
+      `unknown_unrezzed_ice_count:${unknownUnrezzedIceCount}`,
+      `unrezzed_ice_risk:${unrezzedIceRisk}`,
+      `unrezzed_ice_risk_credit_buffer:${unrezzedIceRiskCreditBuffer}`,
+      `unrezzed_ice_risk_underfunded:${unrezzedIceRiskUnderfunded}`,
       `visible_ice_hazard_penalty:${visibleIceHazardPenalty}`,
       `visible_ice_hazard_avoidance_cost:${visibleIceHazardAvoidanceCost}`,
       `credits_after_avoiding_visible_ice_hazards:${creditsAfterAvoidingVisibleIceHazards}`,
@@ -637,6 +680,7 @@ function evaluateRunnerRunTarget(
 function runActionPayoffForTarget(
   projection: RunActionProjection,
   targetKind: RunnerRunTargetKind,
+  bypassedFirstIce: boolean,
 ): RunnerInstalledRunPayoff {
   const values = emptyRunPayoffValues();
   const evidence = new Set<string>();
@@ -656,7 +700,7 @@ function runActionPayoffForTarget(
     values.immediateAccessValue += 70;
     evidence.add(`run_action_payoff:${targetKind}:access_trash`);
   }
-  if (projection.bypassFirstIce) {
+  if (bypassedFirstIce) {
     values.futureSetupValue += 35;
     evidence.add(`run_action_payoff:${targetKind}:bypass_first_ice`);
   }
@@ -1061,6 +1105,7 @@ function recommendationForRunTarget(params: {
   expectedTagsFromVisibleIce: number;
   unavoidableVisibleIceHazardCount: number;
   visibleTraceTagHazardUnavoidable: boolean;
+  unrezzedIceRiskUnderfunded: boolean;
   accessOutcomeMemory?: AccessOutcomeMemoryStatus;
   rankedAccessTarget?: RankedKnownRemoteAccessCandidate;
   blinkRiskAssessment?: BlinkRiskAssessment;
@@ -1151,6 +1196,13 @@ function recommendationForRunTarget(params: {
     params.accessPayoff === "score_threat" &&
     params.creditsAfterRun <
       params.economyPosture.creditReservePolicy.contestReserve
+  ) {
+    return "gain_credits_first";
+  }
+  if (
+    params.unrezzedIceRiskUnderfunded &&
+    !highValuePayoff(params.accessPayoff) &&
+    !params.scoreThreat
   ) {
     return "gain_credits_first";
   }

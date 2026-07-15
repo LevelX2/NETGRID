@@ -265,6 +265,103 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     );
   });
 
+  it("funds an unknown R&D ICE risk before probing with zero credits", () => {
+    const input = aiInput({
+      credits: 0,
+      opponentCredits: 4,
+      servers: [
+        server("rd", {
+          ice: [
+            visibleCard("unknown-rd-ice", {
+              type: "ice",
+              known: false,
+              rezzed: false,
+            }),
+          ],
+        }),
+      ],
+      legalActions: [
+        runAction("run-rd", "rd"),
+        gainCreditAction("gain-credit"),
+      ],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "rd",
+      pathPassability: "reachable",
+      recommendation: "gain_credits_first",
+      unknownUnrezzedIceCount: 1,
+      unrezzedIceRisk: 0.51,
+      unrezzedIceRiskCreditBuffer: 3,
+      unrezzedIceRiskUnderfunded: true,
+    });
+    expect(evaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "unknown_unrezzed_ice_count:1",
+        "unrezzed_ice_risk_credit_buffer:3",
+        "unrezzed_ice_risk_underfunded:true",
+      ]),
+    );
+  });
+
+  it("keeps an affordable unknown R&D probe available", () => {
+    const input = aiInput({
+      credits: 3,
+      opponentCredits: 4,
+      servers: [
+        server("rd", {
+          ice: [
+            visibleCard("unknown-rd-ice", {
+              type: "ice",
+              known: false,
+              rezzed: false,
+            }),
+          ],
+        }),
+      ],
+      legalActions: [runAction("run-rd", "rd")],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "rd",
+      recommendation: "run_now",
+      unrezzedIceRiskCreditBuffer: 3,
+      unrezzedIceRiskUnderfunded: false,
+    });
+  });
+
+  it("allows a zero-credit information probe when the Corp cannot rez", () => {
+    const input = aiInput({
+      credits: 0,
+      opponentCredits: 0,
+      servers: [
+        server("rd", {
+          ice: [
+            visibleCard("unknown-rd-ice", {
+              type: "ice",
+              known: false,
+              rezzed: false,
+            }),
+          ],
+        }),
+      ],
+      legalActions: [runAction("run-rd", "rd")],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "rd",
+      recommendation: "run_now",
+      unrezzedIceRiskCreditBuffer: 0,
+      unrezzedIceRiskUnderfunded: false,
+    });
+  });
+
   it("keeps a visible remote agenda runnable through Hunter tag risk", () => {
     const input = aiInput({
       credits: 2,
