@@ -1,6 +1,6 @@
 # Runner-Remediation aus Match E8886 (2026-07-15)
 
-Status: P4 abgeschlossen; P5 als nächstes
+Status: P5 abgeschlossen; P6 als nächstes
 
 ## Quelle und Gesamtziel
 
