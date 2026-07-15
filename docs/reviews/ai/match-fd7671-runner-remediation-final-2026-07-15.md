@@ -142,5 +142,5 @@ gehören nicht zu diesem Arbeitsstrang; erzeugte Fremdänderungen wurden nicht
 Der Arbeitsbranch hat den abschließenden Verify-Lauf bestanden und wurde lokal
 per Fast-forward nach `main` integriert. Auf dem integrierten Stand sind die
 11 fokussierten Testdateien mit 120/120 Tests und der AI-Typecheck erneut grün;
-der temporäre Worktree und Arbeitsbranch werden anschließend verifiziert
+der temporäre Worktree und Arbeitsbranch wurden anschließend verifiziert
 entfernt.
