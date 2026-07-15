@@ -1,4 +1,9 @@
-import type { AiDecisionInput, LegalAction, PlayerView, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  PlayerView,
+  VisibleCard,
+} from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import { runnerAccessTrashScoreComponents } from "./runner-access-trash-score";
 
@@ -32,6 +37,76 @@ describe("runnerAccessTrashScoreComponents", () => {
         value: -1800,
         reason: "ambush",
       }),
+    );
+  });
+
+  it("protects the central economy-trash reserve at Corp matchpoint", () => {
+    const trash = accessAction("trash-economy", "trash_accessed_card");
+    const decline = accessAction("decline-economy", "decline_trash");
+    const current = runnerInput([trash, decline]);
+    current.playerView.own.credits = 5;
+    current.playerView.opponent.agendaPoints = 6;
+    const context = {
+      trashable: true,
+      affordableRelevant: true,
+      highImpact: true,
+      trashCost: 3,
+      generalCreditCost: 3,
+      creditsAfterGeneralTrash: 2,
+      reserveTarget: 4,
+      deferredByBudget: false,
+      centralAccess: true,
+      accessServerId: "rd",
+      targetType: "asset",
+      role: "economy",
+    } as const;
+
+    expect(
+      runnerAccessTrashScoreComponents(current, trash, {
+        trashAccessContext: () => context,
+      }),
+    ).toContainEqual(
+      expect.objectContaining({
+        key: "runner_matchpoint_central_economy_trash_reserve",
+        value: -3200,
+      }),
+    );
+    expect(
+      runnerAccessTrashScoreComponents(current, decline, {
+        trashAccessContext: () => context,
+      }),
+    ).toContainEqual(
+      expect.objectContaining({
+        key: "runner_decline_matchpoint_central_economy_trash",
+        value: 2400,
+      }),
+    );
+  });
+
+  it("does not protect the reserve when central trash leaves a real surplus", () => {
+    const trash = accessAction("trash-economy", "trash_accessed_card");
+    const current = runnerInput([trash]);
+    current.playerView.own.credits = 12;
+    current.playerView.opponent.agendaPoints = 6;
+    const components = runnerAccessTrashScoreComponents(current, trash, {
+      trashAccessContext: () => ({
+        trashable: true,
+        affordableRelevant: true,
+        highImpact: true,
+        trashCost: 3,
+        generalCreditCost: 3,
+        creditsAfterGeneralTrash: 9,
+        reserveTarget: 4,
+        deferredByBudget: false,
+        centralAccess: true,
+        accessServerId: "rd",
+        targetType: "asset",
+        role: "economy",
+      }),
+    });
+
+    expect(components.map((component) => component.key)).not.toContain(
+      "runner_matchpoint_central_economy_trash_reserve",
     );
   });
 });

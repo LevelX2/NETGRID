@@ -527,6 +527,41 @@ describe("tacticalPlanMappedChoice", () => {
     expect(result.overrideReason).toBe("runner_hard_interrupt");
   });
 
+  it("yields a no-need tutor plan to a positive free check run", () => {
+    const tutor = legalAction("play-tutor", "play_event");
+    const run = legalAction("run-hq", "start_run", { serverId: "hq" });
+    const tutorChoice = choice(tutor, -1268, [], {
+      key: "runner_goal_fit_coverage_search_no_need",
+      value: -1400,
+      reason: "required_coverage:none",
+    });
+    const runChoice = choice(run, 1064);
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [runChoice, tutorChoice],
+      planMapping("runner.play_best_hand_card", [tutor]),
+      runChoice,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("run-hq");
+    expect(result.overrideReason).toBe("no_need_search_mapping_yield");
+  });
+
+  it("keeps a tutor plan when a concrete coverage need exists", () => {
+    const tutor = legalAction("play-tutor", "play_event");
+    const run = legalAction("run-hq", "start_run", { serverId: "hq" });
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [choice(run, 1064), choice(tutor, 780)],
+      planMapping("runner.play_best_hand_card", [tutor]),
+      choice(run, 1064),
+    );
+
+    expect(result.outcome).toBe("semantic_choice_blocked");
+    expect(result.choice?.action.actionId).toBe("play-tutor");
+  });
+
   it("yields a deferred bank install plan to a positive semantic action", () => {
     const install = legalAction("install-broker-copy", "install_card");
     const draw = legalAction("draw", "draw_card");

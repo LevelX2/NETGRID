@@ -35,6 +35,16 @@ export function runnerAccessTrashScoreComponents(
   const context = dependencies.trashAccessContext(input, action);
   if (!context.trashable) return components;
   const takingTrash = action.type === "trash_accessed_card";
+  // Keep the ordinary central-run working reserve bounded. The broader
+  // reserveTarget may include an unrelated expensive remote and must not turn
+  // every affordable central trash into a permanent decline.
+  const matchpointCentralEconomyReserveTarget = 4;
+  const breaksMatchpointCentralEconomyReserve =
+    context.centralAccess &&
+    context.role === "economy" &&
+    input.playerView.opponent.agendaPoints >=
+      input.playerView.agendaPointsToWin - 1 &&
+    context.creditsAfterGeneralTrash < matchpointCentralEconomyReserveTarget;
   if (takingTrash) {
     components.push({
       key: "runner_trash_affordability",
@@ -55,6 +65,14 @@ export function runnerAccessTrashScoreComponents(
         reason: context.accessServerId ?? "central",
       });
     }
+    if (breaksMatchpointCentralEconomyReserve) {
+      components.push({
+        key: "runner_matchpoint_central_economy_trash_reserve",
+        label: "Matchpoint-Runreserve vor Zentral-Trash",
+        value: -3_200,
+        reason: `credits_after:${context.creditsAfterGeneralTrash};reserve:${matchpointCentralEconomyReserveTarget};role:${context.role}`,
+      });
+    }
     if (context.deferredByBudget) {
       components.push({
         key: "runner_access_trash_deferred_by_budget",
@@ -72,6 +90,14 @@ export function runnerAccessTrashScoreComponents(
       });
     }
   } else {
+    if (breaksMatchpointCentralEconomyReserve) {
+      components.push({
+        key: "runner_decline_matchpoint_central_economy_trash",
+        label: "Matchpoint-Runreserve erhalten",
+        value: 2_400,
+        reason: `credits_after_trash:${context.creditsAfterGeneralTrash};reserve:${matchpointCentralEconomyReserveTarget};role:${context.role}`,
+      });
+    }
     if (context.deferredByBudget) {
       components.push({
         key: "runner_decline_trash_preserve_budget",

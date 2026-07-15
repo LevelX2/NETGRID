@@ -279,9 +279,15 @@ export function tacticalPlanMappedChoice(
         overrideChoice,
         scoreGap,
       );
+    const noNeedSearchShouldYield = tacticalPlanNoNeedSearchShouldYield(
+      mapping,
+      mappedChoice,
+      overrideChoice,
+    );
     if (
       mappedNonPositiveAgainstPositive &&
       !deferredDevelopmentInstallShouldYield &&
+      !noNeedSearchShouldYield &&
       tacticalPlanNonPositiveMappingStillProtected(
         mapping,
         mappedChoice,
@@ -364,6 +370,7 @@ export function tacticalPlanMappedChoice(
           corpBoardTriageMismatchShouldYield,
           deferredDevelopmentInstallShouldYield,
           backgroundBankBuildShouldYield,
+          noNeedSearchShouldYield,
         },
       )
     ) {
@@ -384,29 +391,32 @@ export function tacticalPlanMappedChoice(
       corpBoardTriageMismatchShouldYield ||
       backgroundBankBuildShouldYield ||
       hardInterruptShouldYield ||
+      noNeedSearchShouldYield ||
       scoreGap > threshold.scoreGap
     ) {
       const result = {
         outcome: "semantic_choice_selected" as const,
         overrideChoice,
         overriddenMappedChoice: mappedChoice,
-        overrideReason: mappedNonPositiveAgainstPositive
-          ? "mapped_nonpositive_against_positive"
-          : repeatedRunShouldYield
-            ? "repeated_run_mapping_yield"
-            : acuteHandBufferShouldYield
-              ? "acute_hand_buffer_mapping_yield"
-              : lowValueRecoveryShouldYield
-                ? "low_value_recovery_mapping_yield"
-                : inferiorRunTargetShouldYield
-                  ? "inferior_run_target_mapping_yield"
-                  : corpBoardTriageMismatchShouldYield
-                    ? "corp_board_triage_mismatch_yield"
-                    : backgroundBankBuildShouldYield
-                      ? "background_bank_build_mapping_yield"
-                      : hardInterruptShouldYield
-                        ? "runner_hard_interrupt"
-                        : threshold.reason,
+        overrideReason: noNeedSearchShouldYield
+          ? "no_need_search_mapping_yield"
+          : mappedNonPositiveAgainstPositive
+            ? "mapped_nonpositive_against_positive"
+            : repeatedRunShouldYield
+              ? "repeated_run_mapping_yield"
+              : acuteHandBufferShouldYield
+                ? "acute_hand_buffer_mapping_yield"
+                : lowValueRecoveryShouldYield
+                  ? "low_value_recovery_mapping_yield"
+                  : inferiorRunTargetShouldYield
+                    ? "inferior_run_target_mapping_yield"
+                    : corpBoardTriageMismatchShouldYield
+                      ? "corp_board_triage_mismatch_yield"
+                      : backgroundBankBuildShouldYield
+                        ? "background_bank_build_mapping_yield"
+                        : hardInterruptShouldYield
+                          ? "runner_hard_interrupt"
+                          : threshold.reason,
         overrideThreshold: threshold.scoreGap,
         scoreGap,
       };
@@ -558,6 +568,7 @@ function tacticalPlanRunnerMappingBlocksOffPlanOverride(
     corpBoardTriageMismatchShouldYield: boolean;
     deferredDevelopmentInstallShouldYield: boolean;
     backgroundBankBuildShouldYield: boolean;
+    noNeedSearchShouldYield: boolean;
   },
 ): boolean {
   if (mapping.plan.side !== "runner") return false;
@@ -571,6 +582,7 @@ function tacticalPlanRunnerMappingBlocksOffPlanOverride(
   if (exceptions.corpBoardTriageMismatchShouldYield) return false;
   if (exceptions.deferredDevelopmentInstallShouldYield) return false;
   if (exceptions.backgroundBankBuildShouldYield) return false;
+  if (exceptions.noNeedSearchShouldYield) return false;
   return !runnerPlanOverrideIsHardInterrupt(
     mapping.plan,
     mappedChoice,
@@ -781,6 +793,26 @@ function tacticalPlanDeferredDevelopmentInstallShouldYield(
           ((component.reason ?? "").includes("duplicate:redundant_duplicate") ||
             (component.reason ?? "").includes("duplicate:useful_backup") ||
             (component.reason ?? "").includes("delta:backup_only")))),
+  );
+}
+
+function tacticalPlanNoNeedSearchShouldYield(
+  mapping: PlanStepMappingResult,
+  mappedChoice: SemanticRuntimeChoice,
+  overrideChoice: SemanticRuntimeChoice,
+): boolean {
+  return (
+    (mapping.plan.type === "runner.develop_hand_card" ||
+      mapping.plan.type === "runner.play_best_hand_card") &&
+    (mappedChoice.action.type === "play_event" ||
+      mappedChoice.action.type === "activated_card_ability") &&
+    mappedChoice.score <= 0 &&
+    overrideChoice.score > 0 &&
+    mappedChoice.scoreBreakdown.some(
+      (component) =>
+        component.key === "runner_goal_fit_coverage_search_no_need" &&
+        component.value < 0,
+    )
   );
 }
 

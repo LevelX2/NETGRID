@@ -38,8 +38,9 @@ Vier synthetische Begleitfälle grenzen die Korrekturen ein:
 
 1. Mit nur einem Click wird der Run-Lock nicht gelöst, weil kein Click für den
    Folgerun bleibt.
-2. Fehlt die installierte Decoder-Abdeckung und liegt ein Decoder im Stack,
-   bleibt Mantis ein zulässiger Tutorzug.
+2. Eine fokussierte Arbitration-Gegenprobe ohne den negativen
+   `coverage_search_no_need`-Befund hält einen Tutorplan gegenüber einem
+   Off-plan-Run verbindlich.
 3. Mit zwölf Credits bleibt Rockerboy-Trash möglich, weil die Reserve danach
    nicht gefährdet ist.
 4. Ist nur ein einziges Installed-Card-Expose-Ziel legal, bleibt genau dieses
@@ -69,4 +70,5 @@ corepack pnpm --filter @netgrid/ai exec vitest run \
 Ergebnis: zwei erwartungsgemäß rote Testdateien, sechs rote Tests und vier
 grüne Tests. Die vier historischen Fehler tragen jeweils ausschließlich
 `behavior_regression`; die zwei weiteren Fehler sind die aktive und die
-kompilierte Rex-Hint-Verletzung. Alle vier Begleitfälle sind grün.
+kompilierte Rex-Hint-Verletzung. Die vier Begleitfälle verteilen sich auf die
+historische Checkpoint-Datei und die fokussierten Consumer-Tests und sind grün.
