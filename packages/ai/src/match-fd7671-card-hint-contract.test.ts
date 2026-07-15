@@ -1,10 +1,16 @@
-import type { VisibleCard } from "@netgrid/shared";
+import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
 import activeHints from "../../../data/ai/ai-card-hints-active.json";
 import compiledHints from "../../../data/ai/ai-card-hints-compiled.json";
 import inspectorIndex from "../../../data/ai/ai-hint-inspector-index.json";
+import { buildActionSemanticCandidates } from "./action-semantic-candidate";
+import { buildActionCardSemanticProfilesByDefinitionId } from "./actions/action-card-semantic-profiles";
 import { createAiHintsByCard } from "./ai-hints";
+import type { TacticalGoalLike } from "./decision/semantic-decision-frame";
+import { corpPunishCandidates } from "./plans/tactical-plan-corp-helpers";
+import type { TacticalPlanBuildContext } from "./plans/tactical-plan-types";
+import { candidateRequiresSuccessfulTrace } from "./runtime/trace-tag-success-estimate";
 import { buildCorpIceCardPlacementProfile } from "./runtime/corp-ice-placement/corp-ice-placement";
 
 type Hint = {
@@ -83,4 +89,88 @@ describe("match FD7671 card-hint contract", () => {
       expect.objectContaining({ value: "defend_server" }),
     ]);
   });
+
+  it("does not project Rex install or rez actions as productive trace-punish actions", () => {
+    const actions = [
+      rexAction("install-rex", "install_card"),
+      rexAction("rez-rex", "rez_ice"),
+    ];
+    const candidates = buildActionSemanticCandidates({
+      legalActions: actions,
+      observerSide: "corp",
+      visibleSourceDefinitionsByInstanceId: {
+        "rex-instance": "onr_v1_264_rex",
+      },
+      cardSemanticProfilesByDefinitionId:
+        buildActionCardSemanticProfilesByDefinitionId(),
+    });
+
+    for (const candidate of candidates) {
+      expect(candidate.actionTacticSignals).not.toContain("trace.source");
+      expect(candidate.strategySupport).not.toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ strategyId: "corp.tag_trace_punish" }),
+        ]),
+      );
+      expect(candidateRequiresSuccessfulTrace(candidate)).toBe(false);
+    }
+    expect(
+      corpPunishCandidates(
+        {
+          input: rexCorpInput(actions),
+          candidates,
+        } as TacticalPlanBuildContext,
+        { goalId: "corp.apply_punish_pressure" } as TacticalGoalLike,
+      ),
+    ).toEqual([]);
+  });
 });
+
+function rexAction(
+  actionId: string,
+  type: "install_card" | "rez_ice",
+): LegalAction {
+  return {
+    actionId,
+    side: "corp",
+    type,
+    label: actionId,
+    source: "rex-instance",
+    timingPoint: "corp_action.main",
+    costs: [],
+    payload: {},
+    targetRequirements: [],
+    visibility: "public",
+  } as unknown as LegalAction;
+}
+
+function rexCorpInput(legalActions: LegalAction[]): AiDecisionInput {
+  return {
+    side: "corp",
+    actorSide: "corp",
+    legalActions,
+    playerView: {
+      side: "corp",
+      legalActions,
+      own: {
+        credits: 8,
+        clicks: 3,
+        agendaPoints: 0,
+        gripOrHq: [],
+        heapOrArchives: [],
+        rig: [],
+        scoreArea: [],
+      },
+      opponent: {
+        credits: 4,
+        clicks: 4,
+        agendaPoints: 0,
+        rig: [],
+        scoreArea: [],
+      },
+      servers: [],
+      publicEvents: [],
+      agendaPointsToWin: 7,
+    },
+  } as unknown as AiDecisionInput;
+}
