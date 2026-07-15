@@ -50,6 +50,23 @@ describe("selectedBidChoiceOptionId", () => {
     ).toBe("bid_0");
   });
 
+  it("uses the minimum winning bid for a source-visible native Rex trace payoff", () => {
+    expect(
+      selectedBidChoiceOptionId(
+        input("corp", "hard", {
+          ownCredits: 8,
+          ownClicks: 0,
+          runnerCredits: 5,
+        }),
+        bidChoice(
+          "trace:onr_v1_264_rex:run_1.ice_1.2.trace",
+          range(0, 5),
+        ),
+        { traceStrength: 5, runnerLink: 0 },
+      ),
+    ).toBe("bid_1");
+  });
+
   it("bids zero when guarantee plus payoff is unaffordable", () => {
     expect(
       selectedBidChoiceOptionId(
