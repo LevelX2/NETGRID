@@ -73,6 +73,40 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     });
   });
 
+  it("quotes a run that bypasses the outermost ICE without pricing that ICE", () => {
+    const insideJob = {
+      ...runAction("inside-job-rd", "rd"),
+      source: "card",
+      costs: [{ clicks: 1, credits: 2 }],
+      payload: {
+        serverId: "rd",
+        sourceDefinitionId: "onr_v1_094_inside-job",
+        bypassFirstIce: true,
+      },
+    } satisfies LegalAction;
+    const input = aiInput({
+      credits: 2,
+      servers: [server("rd", { ice: [expensiveBarrierIce("rd-outer")] })],
+      legalActions: [insideJob],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "rd",
+      pathPassability: "reachable",
+      pathCost: 0,
+      creditsAfterRun: 0,
+    });
+    expect(evaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "run_action_projection_bypass_first_ice:true",
+        "run_action_projection_bypassed_first_ice:true",
+        "path_passability:reachable",
+      ]),
+    );
+  });
+
   it("does not start a visible R&D trace run that cannot reach access and adds a run lock", () => {
     const input = aiInput({
       credits: 4,

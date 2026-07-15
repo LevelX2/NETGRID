@@ -4,6 +4,7 @@ import disgruntledArchivesJson from "../../../../../data/scenarios/ai-decision-c
 import insideJobRdJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-four-match-02-inside-job-rd.json";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
+import { evaluateRunnerRunTargets } from "../../runner-run-target-evaluation";
 
 describe("four-match card-hint decision checkpoints", () => {
   it("does not spend Disgruntled Ice Technician on the historical empty Archives run", () => {
@@ -16,11 +17,29 @@ describe("four-match card-hint decision checkpoints", () => {
     const result = runAiDecisionCheckpoint(fixture(insideJobRdJson));
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
-    const guidance = result.decision?.decisionDebug?.scoreBreakdown?.find(
-      (component) => component.key === "runner_run_target_semantic_guidance",
+    const selectedAction = result.selectedAction;
+    if (!selectedAction) throw new Error("Expected selected Inside Job action");
+    const scopedInput = {
+      ...result.input,
+      legalActions: [selectedAction],
+      playerView: {
+        ...result.input.playerView,
+        legalActions: [selectedAction],
+      },
+    };
+    const [evaluation] = evaluateRunnerRunTargets({ input: scopedInput });
+    expect(evaluation).toMatchObject({
+      pathPassability: "reachable",
+      pathCost: 0,
+      creditsAfterRun: 4,
+    });
+    expect(evaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "run_action_projection_bypass_first_ice:true",
+        "run_action_projection_bypassed_first_ice:true",
+        "path_passability:reachable",
+      ]),
     );
-    expect(guidance?.reason).toContain("path:reachable");
-    expect(guidance?.reason).not.toContain("path:blocked_unpayable");
   });
 });
 

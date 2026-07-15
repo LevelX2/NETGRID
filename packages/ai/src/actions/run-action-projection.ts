@@ -797,14 +797,14 @@ function bypassFirstIceForRunAction(
   signals: readonly string[],
 ): boolean {
   if (booleanPayloadValue(action, "bypassFirstIce")) return true;
-  return runActionHasStructuredSignal(signals, [
-    "bypass_first_ice",
-    "bypass first ice",
-    "inside_job",
-  ]);
+  const normalizedSignals = signals.map((signal) =>
+    signal.toLocaleLowerCase("en-US"),
+  );
+  return (
+    signalTokensInclude(normalizedSignals, "bypass_first_ice") ||
+    runActionHasStructuredSignal(signals, ["bypass first ice", "inside_job"])
+  );
 }
-
-
 function payloadRecord(action: LegalAction): Record<string, unknown> {
   return action.payload ?? {};
 }

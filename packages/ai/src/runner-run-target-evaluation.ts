@@ -409,8 +409,14 @@ function evaluateRunnerRunTarget(
     0,
     params.input.playerView.own.credits - actionCreditCost,
   );
+  const visibleServerIce = server?.ice ?? [];
+  const projectedServerIce = projection.bypassFirstIce
+    ? visibleServerIce.slice(0, -1)
+    : visibleServerIce;
+  const bypassedFirstIce =
+    projection.bypassFirstIce && visibleServerIce.length > 0;
   const path = assessKnownRezzedIcePath(
-    server?.ice ?? [],
+    projectedServerIce,
     params.input.playerView.own.rig ?? [],
     runnerRunPathCreditBudgetWithVisiblePools(
       creditsAfterAction,
@@ -602,6 +608,7 @@ function evaluateRunnerRunTarget(
       `run_action_projection_spend_limit_blocks_path:${spendLimitBlocksPath}`,
       `run_action_projection_no_noisy_breakers:${projection.noNoisyBreakers}`,
       `run_action_projection_bypass_first_ice:${projection.bypassFirstIce}`,
+      `run_action_projection_bypassed_first_ice:${bypassedFirstIce}`,
       `risky_universal_coverage:${riskyUniversalCoverage}`,
       `probabilistic_universal_path_reachable:${probabilisticUniversalPathReachable}`,
       ...(blinkRiskAssessment?.evidence ?? []),

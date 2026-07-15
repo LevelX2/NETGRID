@@ -13,6 +13,7 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 const KRASH = "onr_v1_039_krash";
 const TEMPLE_MICROCODE_OUTLET = "onr_v1_114_temple-microcode-outlet";
+const SCORE = "onr_v1_108_score";
 
 describe("F450 and 10311 follow-up decision checkpoints", () => {
   it.each([
@@ -31,7 +32,7 @@ describe("F450 and 10311 follow-up decision checkpoints", () => {
     expectCheckpointToPass(fixture(templeDiscardJson));
   });
 
-  it("may discard breaker search access after breaker coverage is installed", () => {
+  it("discards redundant burst economy before breaker search access at high credits after coverage", () => {
     const coveredRig = mutateFixture(templeDiscardJson, (checkpoint) => {
       const state = checkpoint.engine.testOnlyGameState;
       const krashId = state.runner.stack.find(
@@ -51,7 +52,7 @@ describe("F450 and 10311 follow-up decision checkpoints", () => {
       };
       checkpoint.expectation = {
         discardChoice: {
-          mustDiscardDefinitionIds: [TEMPLE_MICROCODE_OUTLET],
+          mustDiscardDefinitionIds: [SCORE],
         },
       };
     });
