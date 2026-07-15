@@ -1,6 +1,6 @@
 # KI-Kartenhint-Remediation aus vier gespeicherten Spielen (2026-07-15)
 
-Status: In Umsetzung; P0 und P1 abgeschlossen, P2 aktiv
+Status: In Umsetzung; P0 bis P2 abgeschlossen, P3 aktiv
 
 ## Quelle und Zielprüfung
 

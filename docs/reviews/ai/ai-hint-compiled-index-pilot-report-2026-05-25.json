@@ -4259,7 +4259,7 @@
       "title": "Mantis, Fixer-at-Large",
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
-      "missingManualOverlay": ["condition:requires_stack_search", "effect:draw"]
+      "missingManualOverlay": ["condition:requires_stack_search"]
     },
     {
       "cardId": "onr_v1_103_organ-donor",
@@ -7798,7 +7798,7 @@
       "title": "Mantis, Fixer-at-Large",
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
-      "missingManualOverlay": ["condition:requires_stack_search", "effect:draw"]
+      "missingManualOverlay": ["condition:requires_stack_search"]
     },
     {
       "cardId": "onr_v1_103_organ-donor",
@@ -13853,10 +13853,7 @@
       "manualOverlayFound": false,
       "expectedManualOverlayNeeded": false,
       "needsManualReview": true,
-      "missingManualOverlay": [
-        "condition:requires_stack_search",
-        "effect:draw"
-      ],
+      "missingManualOverlay": ["condition:requires_stack_search"],
       "compiledPreview": {
         "cardId": "onr_v1_099_mantis-fixer-at-large",
         "side": "runner",
@@ -14046,8 +14043,8 @@
         "cardId": "onr_v1_108_score",
         "side": "runner",
         "cardType": "event",
-        "roles": ["economy", "run_pressure"],
-        "planRoles": ["pressure_rnd", "recover_economy"],
+        "roles": ["economy"],
+        "planRoles": ["recover_economy"],
         "aiSupportStatus": "ai_supported",
         "effects": [
           {
@@ -14425,8 +14422,7 @@
         "cardId": "onr_v1_133_militech-mram-chip",
         "side": "runner",
         "cardType": "hardware",
-        "roles": ["hardware", "memory", "runner"],
-        "planRoles": ["remote_upgrade_modifier"],
+        "roles": ["hand_size", "hardware"],
         "aiSupportStatus": "ai_supported",
         "effects": [
           {
@@ -14460,6 +14456,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["conditions"],
@@ -14508,8 +14505,7 @@
         "cardId": "onr_v1_134_mram-chip",
         "side": "runner",
         "cardType": "hardware",
-        "roles": ["hardware", "memory", "runner"],
-        "planRoles": ["remote_upgrade_modifier"],
+        "roles": ["hand_size", "hardware"],
         "aiSupportStatus": "ai_supported",
         "effects": [
           {
@@ -14543,6 +14539,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["conditions"],
@@ -16001,7 +15998,7 @@
         "side": "corp",
         "cardType": "agenda",
         "roles": ["agenda", "hidden_zone_tool", "scored_agenda_ability"],
-        "planRoles": ["protect_rnd", "score_agenda"],
+        "planRoles": ["score_agenda"],
         "aiSupportStatus": "ai_supported",
         "effects": [
           {

@@ -114,15 +114,20 @@ describe.each(hintSources)("four-match card semantics in %s", (source) => {
 
     expect(hint.roles).toEqual(["economy"]);
     expect(hint.planRoles).toEqual(["recover_economy"]);
-    expect(hint.effects).toEqual([
-      expect.objectContaining({
-        kind: "economy",
-        scope: "runner",
-        resource: "credits",
-        amount: 9,
-        target: "burst_credit",
-      }),
-    ]);
+    expect(hint.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "economy",
+          scope: "runner",
+          resource: "credits",
+          amount: 9,
+          target: "burst_credit",
+        }),
+      ]),
+    );
+    expect(hint.effects?.every((effect) => effect.kind === "economy")).toBe(
+      true,
+    );
   });
 
   it("keeps Corporate Downsizing on HQ agenda cleanup mechanics", () => {

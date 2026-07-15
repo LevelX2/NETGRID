@@ -14,13 +14,13 @@ Keine Runtime-Anbindung, keine Action-Auswahl, kein Scoring und keine Hidden-Inf
 | covered                                                        |   602 |
 | deferred                                                       |    34 |
 | no_signal_reason != none                                       |    16 |
-| target_profile_gap                                             |    90 |
+| target_profile_gap                                             |    89 |
 | structural signal violations                                   |     0 |
 | unknown signals                                                |     0 |
 | covered delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE            |   +63 |
 | deferred delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE           |   -11 |
 | no_signal delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE          |    -9 |
-| target_profile_gap delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE |    +6 |
+| target_profile_gap delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE |    +5 |
 
 ## No Signal Reasons
 
@@ -48,7 +48,6 @@ Keine Runtime-Anbindung, keine Action-Auswahl, kein Scoring und keine Hidden-Inf
 | `onr_proteus_093_redecorator`                  | runner | program  | `breaker.multi_subroutine_break`                                          |
 | `onr_proteus_104_decoy-signal`                 | runner | event    | `info.expose`, `info.ice_approach_expose`                                 |
 | `onr_proteus_105_demolition-run`               | runner | event    | `fort.all_rezzed_ice_trash`, `fort.all_rezzed_ice_trash_tag_risk`         |
-| `onr_proteus_106_disgruntled-ice-technician`   | runner | event    | `ice.trash_rezzed`                                                        |
 | `onr_proteus_107_drone-for-a-day`              | runner | event    | `fort.all_rezzed_ice_trash_tag_risk`                                      |
 | `onr_proteus_110_hijack`                       | runner | event    | `setup.hardware_install`, `setup.install_credit`, `setup.program_install` |
 | `onr_proteus_118_prearranged-drop`             | runner | event    | `access.next_agenda_credit`                                               |
@@ -64,6 +63,7 @@ Keine Runtime-Anbindung, keine Action-Auswahl, kein Scoring und keine Hidden-Inf
 | `onr_proteus_141_get-ready-to-rumble`          | runner | resource | `access.hq_random_discard_retaliation`, `hidden.reveals_on_trash`         |
 | `onr_proteus_142_hq-mole`                      | runner | resource | `access.hq_hidden_multiaccess`, `hidden.reveals_on_trash`                 |
 | `onr_proteus_143_liberated-savings-account`    | runner | resource | `hidden.reveals_on_trash`                                                 |
+| `onr_proteus_146_precision-bribery`            | runner | resource | `fort.creation_lock`                                                      |
 
 ## No Signal Review Start
 

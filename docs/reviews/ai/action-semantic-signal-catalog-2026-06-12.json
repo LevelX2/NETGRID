@@ -47,7 +47,7 @@
     "coveredCards": 602,
     "deferredCards": 34,
     "noSignalCards": 16,
-    "targetProfileGapCards": 90,
+    "targetProfileGapCards": 89,
     "structuralSignalViolationCards": 0,
     "unknownSignalCards": 0,
     "byNoSignalReason": {
@@ -86,7 +86,6 @@
       "onr_proteus_093_redecorator",
       "onr_proteus_104_decoy-signal",
       "onr_proteus_105_demolition-run",
-      "onr_proteus_106_disgruntled-ice-technician",
       "onr_proteus_107_drone-for-a-day",
       "onr_proteus_110_hijack",
       "onr_proteus_118_prearranged-drop",
@@ -170,7 +169,7 @@
       "coveredCards": 63,
       "deferredCards": -11,
       "noSignalCards": -9,
-      "targetProfileGapCards": 6
+      "targetProfileGapCards": 5
     }
   },
   "qualityGate": {
@@ -4714,14 +4713,29 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
-      "signalCount": 1,
-      "targetProfileCount": 0,
-      "derivedFunctionSignals": ["ice.trash_rezzed"],
-      "activeTacticSignals": [],
+      "target_profile_gap": false,
+      "signalCount": 5,
+      "targetProfileCount": 2,
+      "derivedFunctionSignals": [
+        "ice.derez",
+        "run.any_server",
+        "run.ends_run_after_effect",
+        "run.event_tempo",
+        "run.make_run"
+      ],
+      "activeTacticSignals": [
+        "ice.derez",
+        "run.any_server",
+        "run.ends_run_after_effect",
+        "run.event_tempo",
+        "run.make_run"
+      ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["ice.trash_rezzed"],
+      "targetProfileExpectedBySignals": [
+        "ice.derez",
+        "run.ends_run_after_effect"
+      ],
       "warningCategories": []
     },
     {
@@ -6293,13 +6307,14 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 2,
+      "signalCount": 3,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
         "economy.recurring",
-        "economy.recurring_breaker_credit"
+        "economy.recurring_breaker_credit",
+        "economy.recurring_non_noisy_breaker_credit"
       ],
-      "activeTacticSignals": [],
+      "activeTacticSignals": ["economy.recurring_non_noisy_breaker_credit"],
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
@@ -7749,13 +7764,14 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 2,
+      "signalCount": 3,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
         "economy.recurring",
-        "economy.recurring_breaker_credit"
+        "economy.recurring_breaker_credit",
+        "economy.recurring_non_noisy_breaker_credit"
       ],
-      "activeTacticSignals": [],
+      "activeTacticSignals": ["economy.recurring_non_noisy_breaker_credit"],
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
@@ -8409,13 +8425,9 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 3,
+      "signalCount": 2,
       "targetProfileCount": 2,
-      "derivedFunctionSignals": [
-        "setup.card_search",
-        "setup.draw",
-        "setup.search"
-      ],
+      "derivedFunctionSignals": ["setup.card_search", "setup.search"],
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
@@ -9236,11 +9248,11 @@
       "signalCount": 1,
       "targetProfileCount": 0,
       "derivedFunctionSignals": ["setup.hand_size"],
-      "activeTacticSignals": [],
+      "activeTacticSignals": ["setup.hand_size"],
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": []
+      "warningCategories": ["unknown_unmapped"]
     },
     {
       "cardId": "onr_v1_134_mram-chip",
@@ -9256,11 +9268,11 @@
       "signalCount": 1,
       "targetProfileCount": 0,
       "derivedFunctionSignals": ["setup.hand_size"],
-      "activeTacticSignals": [],
+      "activeTacticSignals": ["setup.hand_size"],
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": []
+      "warningCategories": ["unknown_unmapped"]
     },
     {
       "cardId": "onr_v1_135_nasuko-cycle",

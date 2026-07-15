@@ -640,9 +640,10 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-01",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-15",
+        "reviewedBy": "codex-four-match-card-hint-review"
       },
+      "tacticSignals": ["economy.recurring_non_noisy_breaker_credit"],
       "effects": [
         {
           "kind": "recurring_economy",
@@ -651,7 +652,7 @@
           "resource": "credits",
           "amount": 3,
           "repeatable": true,
-          "target": "icebreaker"
+          "target": "non_noisy_icebreaker"
         }
       ],
       "costProfile": {
@@ -3693,9 +3694,10 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-01",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-15",
+        "reviewedBy": "codex-four-match-card-hint-review"
       },
+      "tacticSignals": ["economy.recurring_non_noisy_breaker_credit"],
       "effects": [
         {
           "kind": "recurring_economy",
@@ -3704,7 +3706,7 @@
           "resource": "credits",
           "amount": 2,
           "repeatable": true,
-          "target": "icebreaker"
+          "target": "non_noisy_icebreaker"
         }
       ],
       "costProfile": {
@@ -5187,8 +5189,8 @@
         "strategyCovered": false,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-15",
+        "reviewedBy": "codex-four-match-card-hint-review"
       },
       "effects": [
         {
@@ -5196,15 +5198,6 @@
           "timing": "action",
           "scope": "runner",
           "target": "card_search"
-        },
-        {
-          "kind": "draw",
-          "timing": "action",
-          "scope": "runner",
-          "target": "draw",
-          "resource": "cards",
-          "amount": 1,
-          "finite": true
         }
       ],
       "costProfile": {
@@ -5634,8 +5627,8 @@
       "cardId": "onr_v1_108_score",
       "side": "runner",
       "cardType": "event",
-      "roles": ["economy", "run_pressure"],
-      "planRoles": ["pressure_rnd", "recover_economy"],
+      "roles": ["economy"],
+      "planRoles": ["recover_economy"],
       "requiredMechanics": ["play_event"],
       "valueHints": {
         "economy": 5,
@@ -5644,8 +5637,7 @@
       "riskTags": ["public_play", "credit_reserve"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
-        "data/scenarios/ai-kotr-runner-approval-smokes.json#recover_economy",
-        "data/scenarios/ai-kotr-runner-approval-smokes.json#pressure_rnd"
+        "data/scenarios/ai-kotr-runner-approval-smokes.json#recover_economy"
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -5653,8 +5645,8 @@
         "strategyCovered": false,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-15",
+        "reviewedBy": "codex-four-match-card-hint-review"
       },
       "effects": [
         {
@@ -6991,8 +6983,8 @@
       "cardId": "onr_v1_133_militech-mram-chip",
       "side": "runner",
       "cardType": "hardware",
-      "roles": ["runner", "hardware", "memory"],
-      "planRoles": ["remote_upgrade_modifier"],
+      "roles": ["hardware", "hand_size"],
+      "planRoles": [],
       "requiredMechanics": [
         "persistent_special_state_resolver",
         "action_economy_handsize_modifier_resolver"
@@ -7011,9 +7003,10 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-15",
+        "reviewedBy": "codex-four-match-card-hint-review"
       },
+      "tacticSignals": ["setup.hand_size"],
       "effects": [
         {
           "kind": "hand_size_modifier",
@@ -7031,8 +7024,8 @@
       "cardId": "onr_v1_134_mram-chip",
       "side": "runner",
       "cardType": "hardware",
-      "roles": ["runner", "hardware", "memory"],
-      "planRoles": ["remote_upgrade_modifier"],
+      "roles": ["hardware", "hand_size"],
+      "planRoles": [],
       "requiredMechanics": [
         "persistent_special_state_resolver",
         "action_economy_handsize_modifier_resolver"
@@ -7051,9 +7044,10 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-15",
+        "reviewedBy": "codex-four-match-card-hint-review"
       },
+      "tacticSignals": ["setup.hand_size"],
       "effects": [
         {
           "kind": "hand_size_modifier",
@@ -10345,13 +10339,14 @@
       "side": "corp",
       "cardType": "agenda",
       "roles": ["agenda", "scored_agenda_ability", "hidden_zone_tool"],
-      "planRoles": ["score_agenda", "protect_rnd"],
+      "planRoles": ["score_agenda"],
       "requiredMechanics": [
         "install_remote",
         "advance",
         "score",
         "scored_agenda_action",
-        "reveal_rd_top",
+        "hq_agenda_reveal",
+        "hq_agenda_shuffle_into_rd",
         "legal_action_only"
       ],
       "valueHints": {
@@ -10369,8 +10364,8 @@
         "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-07-01",
-        "reviewedBy": "codex-agenda-semantic-review-v1"
+        "reviewedDate": "2026-07-15",
+        "reviewedBy": "codex-four-match-card-hint-review"
       },
       "tacticSignals": [
         "economy.corp_agenda_reveal_burst",
@@ -28413,9 +28408,16 @@
       "cardId": "onr_proteus_106_disgruntled-ice-technician",
       "side": "runner",
       "cardType": "event",
-      "roles": ["event", "run_pressure"],
-      "planRoles": ["pressure_rnd"],
-      "requiredMechanics": [],
+      "roles": ["event", "run_event", "derez", "fully_broken_ice"],
+      "planRoles": ["safe_probe_run"],
+      "requiredMechanics": [
+        "play_event",
+        "run",
+        "encounter_ice",
+        "fully_break_ice_window",
+        "derez_ice",
+        "end_run"
+      ],
       "valueHints": {
         "runPressure": 2
       },
@@ -28430,21 +28432,67 @@
         "strategyCovered": false,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-15",
+        "reviewedBy": "codex-four-match-card-hint-review"
       },
+      "tacticSignals": [
+        "run.make_run",
+        "run.any_server",
+        "run.event_tempo",
+        "ice.derez",
+        "run.ends_run_after_effect"
+      ],
       "effects": [
         {
-          "kind": "ice_trash",
+          "kind": "future_run_effect",
           "timing": "action",
+          "scope": "server",
+          "target": "make_run"
+        },
+        {
+          "kind": "rez",
+          "timing": "encounter_resolution",
           "scope": "ice",
-          "target": "trash_rezzed"
+          "target": "derez"
+        },
+        {
+          "kind": "future_run_effect",
+          "timing": "encounter_resolution",
+          "scope": "run_path",
+          "target": "ends_run_after_effect"
         }
       ],
       "conditions": [
         {
+          "kind": "requires_encounter"
+        },
+        {
           "kind": "requires_rezzed_ice"
         }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "encounter_resolution",
+          "targetType": "installed_ice",
+          "purpose": "derez_fully_broken_ice",
+          "preferences": [
+            "current_encounter_ice",
+            "known_or_rezzed_ice",
+            "high_rez_cost_relief",
+            "blocks_relevant_run_path"
+          ],
+          "avoid": [
+            "unknown_low_information_target",
+            "irrelevant_server_ice",
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "visible_or_known_only"
+        }
+      ],
+      "manualNotes": [
+        "Four-match review: make a run on any server; after fully breaking the encountered ICE, optionally derez it and end the run. This is ICE control, not ICE trash or fixed R&D pressure."
       ]
     },
     {

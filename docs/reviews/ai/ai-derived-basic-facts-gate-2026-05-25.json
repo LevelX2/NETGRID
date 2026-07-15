@@ -128,7 +128,7 @@
   "hardErrorCount": 0,
   "hardErrors": [],
   "hardConflicts": [],
-  "warningCount": 999,
+  "warningCount": 997,
   "warnings": [
     {
       "kind": "text_pattern_derivation",
@@ -1082,22 +1082,12 @@
     },
     {
       "kind": "descriptor_or_overlay_gap",
-      "message": "Manual ontology contains fields not currently derivable.",
-      "cardId": "onr_v1_099_mantis-fixer-at-large"
-    },
-    {
-      "kind": "descriptor_or_overlay_gap",
       "message": "Search/topdeck target granularity is not fully expressible in the current ontology comparison.",
       "cardId": "onr_v1_099_mantis-fixer-at-large"
     },
     {
       "kind": "generated_fact_without_manual_match",
       "message": "Generated condition:requires_stack_search has no manual ontology match.",
-      "cardId": "onr_v1_099_mantis-fixer-at-large"
-    },
-    {
-      "kind": "manual_ontology_without_generated_match",
-      "message": "Manual effect:draw has no generated basic fact match.",
       "cardId": "onr_v1_099_mantis-fixer-at-large"
     },
     {
@@ -11183,13 +11173,6 @@
         ],
         "effects": [
           {
-            "kind": "draw",
-            "timing": "action",
-            "scope": "runner",
-            "resource": "cards",
-            "amount": 1
-          },
-          {
             "kind": "search",
             "timing": "action",
             "scope": "runner"
@@ -11217,17 +11200,13 @@
         "generatedOnly": [
           "condition:requires_stack_search"
         ],
-        "manualOnly": [
-          "effect:draw"
-        ]
+        "manualOnly": []
       },
       "missingManualOverlay": [
-        "condition:requires_stack_search",
-        "effect:draw"
+        "condition:requires_stack_search"
       ],
       "descriptorGaps": [
         "Generated facts contain fields not currently mirrored manually.",
-        "Manual ontology contains fields not currently derivable.",
         "Search/topdeck target granularity is not fully expressible in the current ontology comparison."
       ],
       "confidence": "high",
@@ -11242,19 +11221,11 @@
         },
         {
           "kind": "descriptor_or_overlay_gap",
-          "message": "Manual ontology contains fields not currently derivable."
-        },
-        {
-          "kind": "descriptor_or_overlay_gap",
           "message": "Search/topdeck target granularity is not fully expressible in the current ontology comparison."
         },
         {
           "kind": "generated_fact_without_manual_match",
           "message": "Generated condition:requires_stack_search has no manual ontology match."
-        },
-        {
-          "kind": "manual_ontology_without_generated_match",
-          "message": "Manual effect:draw has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -11412,11 +11383,9 @@
         "side": "runner",
         "cardType": "event",
         "roles": [
-          "economy",
-          "run_pressure"
+          "economy"
         ],
         "planRoles": [
-          "pressure_rnd",
           "recover_economy"
         ],
         "effects": [
@@ -11894,13 +11863,10 @@
         "side": "runner",
         "cardType": "hardware",
         "roles": [
-          "hardware",
-          "memory",
-          "runner"
+          "hand_size",
+          "hardware"
         ],
-        "planRoles": [
-          "remote_upgrade_modifier"
-        ],
+        "planRoles": [],
         "effects": [
           {
             "kind": "hand_size_modifier",
@@ -11990,13 +11956,10 @@
         "side": "runner",
         "cardType": "hardware",
         "roles": [
-          "hardware",
-          "memory",
-          "runner"
+          "hand_size",
+          "hardware"
         ],
-        "planRoles": [
-          "remote_upgrade_modifier"
-        ],
+        "planRoles": [],
         "effects": [
           {
             "kind": "hand_size_modifier",
@@ -13954,7 +13917,6 @@
           "scored_agenda_ability"
         ],
         "planRoles": [
-          "protect_rnd",
           "score_agenda"
         ],
         "effects": [],
