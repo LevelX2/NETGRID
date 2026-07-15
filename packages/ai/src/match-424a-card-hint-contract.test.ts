@@ -175,6 +175,11 @@ describe.each(hintSources)("match 424A card semantics in %s", (source) => {
         }),
       ]),
     );
+    expect(junkyard.roles).toEqual(
+      expect.arrayContaining(["trash_recovery", "utility_resource"]),
+    );
+    expect(junkyard.planRoles).not.toContain("economy");
+    expect(junkyard.valueHints?.economy).toBeUndefined();
   });
 });
 

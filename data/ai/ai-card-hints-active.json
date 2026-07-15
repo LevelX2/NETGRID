@@ -8596,11 +8596,8 @@
       "side": "runner",
       "cardType": "resource",
       "roles": ["resource", "trash_recovery", "utility_resource"],
-      "planRoles": ["build_rig", "economy"],
+      "planRoles": ["build_rig"],
       "requiredMechanics": ["install_resource", "resource_tag_interaction"],
-      "valueHints": {
-        "economy": 1
-      },
       "riskTags": ["resource_trash_if_tagged"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [

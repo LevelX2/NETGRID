@@ -11668,16 +11668,12 @@
         "utility_resource"
       ],
       "planRoles": [
-        "build_rig",
-        "economy"
+        "build_rig"
       ],
       "requiredMechanics": [
         "install_resource",
         "resource_tag_interaction"
       ],
-      "valueHints": {
-        "economy": 1
-      },
       "riskTags": [
         "resource_trash_if_tagged"
       ],

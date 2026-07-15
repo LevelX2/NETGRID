@@ -1249,7 +1249,34 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     );
   });
 
-  it("allows recovery utility replacement when no copy remains installed", () => {
+  it("defers recovery-only setup while the visible heap is empty", () => {
+    const junkyard = visibleCard("junkyard-empty-heap", {
+      definitionId: "onr_v1_165_junkyard-bbs",
+      title: "Junkyard BBS",
+      type: "resource",
+      installCost: 0,
+      rulesText: "A, [1]: Bring the top card from your trash into your hand.",
+    });
+    const input = runnerInput({
+      credits: 5,
+      hand: [junkyard],
+      rig: [],
+      legalActions: [installAction("install-empty-junkyard", junkyard, 0)],
+    });
+
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({ input }),
+      "junkyard-empty-heap",
+    );
+
+    expect(evaluation).toMatchObject({
+      developmentRole: "draw_or_search_engine",
+      currentNeed: "later",
+      deferReason: "none",
+    });
+  });
+
+  it("allows recovery utility setup when the visible heap has a target", () => {
     const replacementJunkyard = visibleCard("junkyard-replacement", {
       definitionId: "onr_v1_165_junkyard-bbs",
       title: "Junkyard BBS",
@@ -1260,6 +1287,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     const input = runnerInput({
       credits: 5,
       hand: [replacementJunkyard],
+      heap: [visibleCard("visible-recovery-target", { type: "event" })],
       rig: [],
       legalActions: [
         installAction("install-replacement-junkyard", replacementJunkyard, 0),
@@ -1431,6 +1459,7 @@ function runnerInput(params: {
   credits: number;
   clicks?: number;
   hand: VisibleCard[];
+  heap?: VisibleCard[];
   legalActions: LegalAction[];
   rig?: VisibleCard[];
   memoryUsed?: number;
@@ -1450,7 +1479,7 @@ function runnerInput(params: {
       agendaPoints: 0,
       gripOrHq: params.hand,
       stackOrRdCount: 20,
-      heapOrArchives: [],
+      heapOrArchives: params.heap ?? [],
       scoreArea: [],
       rig: params.rig ?? [],
       ...(params.memoryUsed !== undefined

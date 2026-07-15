@@ -39576,13 +39576,6 @@
             "runner.rig_first"
           ],
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        },
-        {
-          "value": "economy",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         }
       ],
       "warningCategories": [],

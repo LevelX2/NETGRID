@@ -291,10 +291,14 @@ function evaluateHandCard(
           developmentRole,
           baseNeed,
         );
-  const currentNeed = currentNeedAdjustedByPersistentInstall(
-    baseNeed,
-    persistentInstallEvaluation,
-  );
+  const currentNeed =
+    developmentRole === "draw_or_search_engine" &&
+    recoveryOnlySearchHasNoVisibleTarget(params.input, context)
+      ? baseNeed
+      : currentNeedAdjustedByPersistentInstall(
+          baseNeed,
+          persistentInstallEvaluation,
+        );
   const strategicFit = strategicFitForCard(
     params.strategicIntent,
     availability,
@@ -531,6 +535,12 @@ function currentNeedForCard(
   const intent = params.strategicIntent;
   const setupEngine = new Set(intent?.setupEngine ?? []);
   const credits = params.input.playerView.own.credits;
+  if (
+    role === "draw_or_search_engine" &&
+    recoveryOnlySearchHasNoVisibleTarget(params.input, context)
+  ) {
+    return "later";
+  }
   switch (role) {
     case "memory_support":
       return params.deckCapabilities?.runner?.memoryProfile
@@ -572,6 +582,25 @@ function currentNeedForCard(
     case "unknown":
       return context.legalAction ? "later" : "none";
   }
+}
+
+function recoveryOnlySearchHasNoVisibleTarget(
+  input: AiDecisionInput,
+  context: CardContext,
+): boolean {
+  const text = context.signals.text;
+  const explicitRecoveryRole = context.signals.roles.includes("trash_recovery");
+  const explicitIndependentSearchRole = context.signals.roles.some(
+    (role) =>
+      role !== "trash_recovery" &&
+      (role.includes("search") || role === "draw" || role === "card_draw"),
+  );
+  const recoveryOnly = explicitRecoveryRole
+    ? !explicitIndependentSearchRole
+    : runnerHandTextHasRecoveryUtilitySignal(text) &&
+      !runnerHandTextHasProgramSearchUtilitySignal(text) &&
+      !runnerHandTextHasStackSearchUtilitySignal(text);
+  return recoveryOnly && input.playerView.own.heapOrArchives.length === 0;
 }
 
 function currentNeedAdjustedByPersistentInstall(
