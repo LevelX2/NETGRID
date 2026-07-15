@@ -1,6 +1,6 @@
 # CODEX_STATUS
 
-Stand: 2026-07-14
+Stand: 2026-07-15
 
 ## Einstieg
 
@@ -88,6 +88,22 @@ Regel- beziehungsweise Match-Evidence als Nichtfehler bestätigt.
 
 Führend ist
 `docs/reviews/current-game-findings-remediation-final-review-2026-07-11.md`.
+
+## Node-Zugriffseffekt-Rez-Vertrag vom 15. Juli 2026
+
+Alle 56 aktiven Corp-Assets aus Originalset V1, Classic und Proteus wurden auf
+Zugriffseffekte geprüft. Zehn besitzen einen semantischen Access-Effekt.
+Installierte Access-Quellen benötigen jetzt generisch Rez; sieben Nodes folgen
+diesem Default. `Virus Test Site` bleibt die einzige belegte installierte
+Unrezzed-Ausnahme und verursacht dann genau 1 Net Damage statt
+advancementskalierendem Schaden. Bel-Digmo und Stereogram bleiben reine
+R&D-/Archives-Kontrollfälle.
+
+Der vollständige Engine-Lauf ist mit 186 Testdateien und 1.687 Tests grün.
+Führend sind
+`docs/architecture/card-rules/node-access-rez-contract-process-2026-07-15.md`
+und
+`docs/reviews/engine/node-access-rez-contract-final-review-2026-07-15.md`.
 
 ## Offene technische Schwerpunkte
 

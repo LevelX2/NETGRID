@@ -1,7 +1,7 @@
 # Node-Zugriffseffekte – Rez-Vertragsaudit
 
 Stand: 2026-07-15  
-Status: P1-Vollinventar abgeschlossen; Umsetzung in P2/P3 erforderlich
+Status: abgeschlossen und umgesetzt; siehe Final Review
 
 ## Kurzfazit
 
@@ -9,14 +9,19 @@ Der aktive Kartenpool enthält 56 Corp-Assets/Nodes: 41 im Originalset V1,
 vier in Classic und elf in Proteus. Zehn davon besitzen einen Zugriffseffekt;
 alle zehn haben eine semantische `accessEffects`-Implementierung.
 
-Die Runtime prüft derzeit nur Source-Zone, Ignore-Zone und Kartenbedingung.
-Der Rez-Zustand einer installierten Quelle ist kein Teil von
-`accessEffectApplies`. Dadurch lösen sieben installierbare Node-Effekte
-regelwidrig auch unrezzed aus. `Virus Test Site` ist zwar die belegte
-unrezzed-Ausnahme, skaliert aktuell aber auch unrezzed mit Advancement-
-Countern statt genau 1 Net Damage zu verursachen. Zwei weitere Antibodies
-wirken ausschließlich aus R&D beziehungsweise Archives und sind von der
+Vor der Umsetzung prüfte die Runtime nur Source-Zone, Ignore-Zone und
+Kartenbedingung. Der Rez-Zustand einer installierten Quelle war kein Teil von
+`accessEffectApplies`. Dadurch lösten sieben installierbare Node-Effekte
+regelwidrig auch unrezzed aus. `Virus Test Site` war zwar die belegte
+unrezzed-Ausnahme, skalierte aber auch unrezzed mit Advancement-Countern statt
+genau 1 Net Damage zu verursachen. Zwei weitere Antibodies wirken
+ausschließlich aus R&D beziehungsweise Archives und sind von der
 Installiert-Rez-Frage nicht betroffen.
+
+Der Befund ist umgesetzt: Installierte Access-Quellen benötigen jetzt
+standardmäßig Rez; `Virus Test Site` besitzt getrennte unrezzed-, rezzed- und
+Hidden-Zone-Auflösungen. Der Abschlussnachweis steht in
+`docs/reviews/engine/node-access-rez-contract-final-review-2026-07-15.md`.
 
 Classic enthält vier aktive Corp-Assets, aber keinen Node-/Asset-
 Zugriffseffekt. Für Classic entsteht daher kein Kartenmigrationsfall.
@@ -168,4 +173,3 @@ Hidden-Info-, Replay- und StateHash-Evidence.
 - Sieben Default-Rez-Fälle, eine echte Unrezzed-Ausnahme und zwei
   nicht-installierte Kontrollfälle bestimmt.
 - Keine ungeklärte Regel- oder Implementierungslücke vor P2.
-

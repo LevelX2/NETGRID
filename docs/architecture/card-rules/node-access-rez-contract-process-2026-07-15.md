@@ -2,8 +2,8 @@
 
 ## Status
 
-Aktive sequenzielle Umsetzung seit 2026-07-15. Arbeitsbranch:
-`codex/node-access-rez-audit`.
+Pakete P0 bis P4 am 2026-07-15 abgeschlossen und für den finalen lokalen
+Main-Abgleich freigegeben. Arbeitsbranch: `codex/node-access-rez-audit`.
 
 ## Quelle und Vorgabe
 
@@ -225,3 +225,22 @@ side-sicherer, erneut geprüfter Vertrag.
 - Arbeitsbranch ist lokal nach `main` integriert; Worktree und Branch sind
   verifiziert entfernt.
 
+## Umsetzungs- und Verifikationsnachweis
+
+- P0 `43b84b330`: Prozess-Freeze und verbindliches `/Goal` erstellt.
+- P1 `d1b0fa7f8`: 56 aktive Corp-Assets inventarisiert; zehn
+  Zugriffseffekt-Assets vollständig klassifiziert.
+- P2 `455b6ddce`: generischen Installed-Rez-Default, Choice-Revalidation und
+  den getrennten `Virus Test Site`-Sondervertrag umgesetzt.
+- P3 `e21f9652f`: vollständigen Node-Inventar-Contracttest,
+  Doppelganger-/Pattel-End-to-End-Matrix und korrigierte Smokes ergänzt.
+- P4: Audit, Final Review, Current State, CODEX-Status, Kartenregel-Index und
+  Juli-Log aktualisiert.
+- Fokussierte P2-Suite: 4 Testdateien und 118 Tests grün.
+- P3-Matrix: 4 Testdateien und 176 Tests grün.
+- Vollständige Engine-Suite: 186 Testdateien und 1.687 Tests grün.
+- Engine-Typecheck und `git diff --check` grün.
+
+Der abschließende Main-Abgleich, die Wiederholung der finalen Checks sowie der
+verifizierte Worktree-/Branch-Cleanup folgen nach dem P4-Commit gemäß diesem
+Prozess.
