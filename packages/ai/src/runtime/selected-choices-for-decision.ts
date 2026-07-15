@@ -233,7 +233,12 @@ export function selectedChoicesForDecision(
   }
   if (input.side === "runner") {
     const selectedDamagePreventionOptionId =
-      selectedRunnerDamagePreventionChoiceOptionId(choice, selectableOptions);
+      selectedRunnerDamagePreventionChoiceOptionId(
+        input,
+        choice,
+        selectableOptions,
+        dependencies.rolesForCardId,
+      );
     if (selectedDamagePreventionOptionId !== undefined) {
       return {
         choiceId: choice.choiceId,

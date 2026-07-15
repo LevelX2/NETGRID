@@ -146,6 +146,12 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it("uses the first legal Runner damage-prevention source instead of passing", () => {
+    const forceShield = {
+      instanceId: "runner_force_shield_1",
+      definitionId: "runner_force_shield",
+      known: true,
+      type: "program",
+    } as AiDecisionInput["playerView"]["own"]["gripOrHq"][number];
     const decision = selectedChoicesForDecision(
       inputWithChoice(
         {
@@ -156,22 +162,79 @@ describe("selectedChoicesForDecision", () => {
           options: [
             { id: "pass", label: "Nicht verhindern" },
             {
-              id: "card_implementation_damage_prevent_force_shield_0_2",
-              label: "Force Shield: 2 Schaden verhindern",
+              id: "card_implementation_damage_prevent_runner_force_shield_1_0_1",
+              label: "Force Shield: 1 Schaden verhindern",
             },
           ],
         },
-        { side: "runner" },
+        {
+          side: "runner",
+          gripOrHq: [
+            { ...forceShield, instanceId: "grip-buffer-1" },
+            { ...forceShield, instanceId: "grip-buffer-2" },
+            { ...forceShield, instanceId: "grip-buffer-3" },
+          ],
+          rig: [forceShield],
+        },
       ),
       resolveChoiceAction("runner"),
-      unusedDependencies(),
+      {
+        ...unusedDependencies(),
+        rolesForCardId: () => ["damage_prevention", "rig_defense"],
+      },
     );
 
     expect(decision).toEqual({
       choiceId: "choice_multi",
       selectedOptionIds: [
-        "card_implementation_damage_prevent_force_shield_0_2",
+        "card_implementation_damage_prevent_runner_force_shield_1_0_1",
       ],
+    });
+  });
+
+  it("preserves a non-routine prevention source outside acute damage pressure", () => {
+    const oneShot = {
+      instanceId: "runner_one_shot_1",
+      definitionId: "runner_one_shot",
+      known: true,
+      type: "program",
+    } as AiDecisionInput["playerView"]["own"]["gripOrHq"][number];
+    const decision = selectedChoicesForDecision(
+      inputWithChoice(
+        {
+          kind: "select_option",
+          source: "v120.event_modification.prevent",
+          minSelections: 1,
+          maxSelections: 1,
+          options: [
+            { id: "pass", label: "Nicht verhindern" },
+            {
+              id: "card_implementation_damage_prevent_runner_one_shot_1_0_1",
+              label: "Einmalige Quelle: 1 Schaden verhindern",
+            },
+          ],
+        },
+        {
+          side: "runner",
+          gripOrHq: [
+            { ...oneShot, instanceId: "grip-buffer-1" },
+            { ...oneShot, instanceId: "grip-buffer-2" },
+            { ...oneShot, instanceId: "grip-buffer-3" },
+            { ...oneShot, instanceId: "grip-buffer-4" },
+          ],
+          rig: [oneShot],
+        },
+      ),
+      resolveChoiceAction("runner"),
+      {
+        ...unusedDependencies(),
+        rolesForCardId: () => ["program"],
+      },
+    );
+
+    expect(decision).toEqual({
+      choiceId: "choice_multi",
+      selectedOptionIds: ["pass"],
     });
   });
 
@@ -503,6 +566,7 @@ function inputWithChoice(
     gripOrHq?: AiDecisionInput["playerView"]["own"]["gripOrHq"];
     credits?: number;
     servers?: AiDecisionInput["playerView"]["servers"];
+    rig?: AiDecisionInput["playerView"]["own"]["rig"];
     side?: "corp" | "runner";
   } = {},
 ): AiDecisionInput {
@@ -516,6 +580,7 @@ function inputWithChoice(
       own: {
         credits: options.credits ?? 5,
         gripOrHq: options.gripOrHq ?? [],
+        rig: options.rig ?? [],
       },
       servers: options.servers ?? [],
       pendingChoice: {
