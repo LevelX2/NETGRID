@@ -1,6 +1,6 @@
 # KI-Runner-Endgame-Remediation für Match 424A (2026-07-15)
 
-Status: P0 bis P5 abgeschlossen; P6 zur lokalen Integration freigegeben
+Status: P0 bis P6 abgeschlossen; lokal integriert und bereinigt
 
 ## Quelle und Zielprüfung
 
@@ -223,6 +223,12 @@ Final Review liegt unter
   Fast-Forward mergen und Worktree sowie Branch entfernen.
 - Done-Gate: lokales `main` enthält alle Paketcommits; Status und Diff-Hygiene
   sind geprüft; Worktree-Pfad und Arbeitsbranch existieren nicht mehr.
+
+Abschluss: `main` wurde auf den verifizierten Integrationscommit `e6317a7b2`
+fast-forwarded. `C:\Projekte\NETGRID_AI_MATCH_424A_RUNNER_ENDGAME`, die
+zugehörige Worktree-Registrierung und der Branch
+`codex/ai-match-424a-runner-endgame` wurden anschließend entfernt und ihr
+Fehlen separat geprüft. Es erfolgte kein Push und kein Pull Request.
 
 ## Controller-Prompt-Kern
 
