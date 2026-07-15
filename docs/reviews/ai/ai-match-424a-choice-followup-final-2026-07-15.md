@@ -1,6 +1,6 @@
 # Match 424A – Choice- und Discard-Follow-up final (2026-07-15)
 
-Status: fachlich und technisch verifiziert; lokale Main-Integration ausstehend
+Status: fachlich und technisch verifiziert; lokal integriert und bereinigt
 
 ## Ergebnis
 
@@ -125,6 +125,14 @@ sind unverändert nicht blockierend; es kam kein neuer Gate-Fehler hinzu.
 - Die KI kann nur Kosten unterscheiden, die im Choice-/Rollenvertrag sichtbar
   sind. Nicht als Routineabwehr klassifizierte Quellen werden bei sicherem
   Handpuffer deshalb konservativ aufbewahrt.
+
+## Lokale Integration
+
+Der Arbeitsbranch wurde bis Commit `020d0bb9a` per Fast-Forward nach `main`
+integriert. Anschließend liefen die 88 fokussierten Tests und der AI-Typecheck
+auf `main` erneut grün. Worktree, Git-Worktree-Registrierung und Arbeitsbranch
+sind entfernt und ihr Fehlen ist verifiziert. Es erfolgte kein Push und kein
+Pull Request.
 
 ## Führende Artefakte
 

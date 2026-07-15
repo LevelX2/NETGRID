@@ -1,6 +1,6 @@
 # KI-Choice-Follow-up für Match 424A (2026-07-15)
 
-Status: P0 bis P4 abgeschlossen; P5 aktiv
+Status: P0 bis P5 abgeschlossen; lokal integriert und bereinigt
 
 ## Quelle und `/Goal`
 
@@ -133,6 +133,14 @@ State Machine:
 - Done-Gate: `main` enthält alle Paketcommits; relevante Checks sind nach der
   Integration grün; Worktree-Pfad, Git-Registrierung und Arbeitsbranch
   existieren nicht mehr.
+
+Abschluss: `main` wurde bis zum verifizierten Integrationscommit `020d0bb9a`
+fast-forwarded. Danach waren 88/88 fokussierte Tests und der AI-Typecheck auf
+`main` erneut grün. Der Worktree
+`C:\Projekte\NETGRID_AI_MATCH_424A_CHOICE_FOLLOWUP`, seine Git-Registrierung
+und der Branch `codex/ai-match-424a-choice-followup` wurden entfernt; ihr
+Fehlen wurde jeweils separat geprüft. Es erfolgte kein Push und kein Pull
+Request.
 
 ## Controller-Prompt-Kern
 
