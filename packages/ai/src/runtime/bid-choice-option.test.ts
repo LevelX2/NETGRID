@@ -57,14 +57,27 @@ describe("selectedBidChoiceOptionId", () => {
           ownCredits: 8,
           ownClicks: 0,
           runnerCredits: 5,
+          encounteredIceDefinitionId: "onr_v1_264_rex",
         }),
-        bidChoice(
-          "trace:onr_v1_264_rex:run_1.ice_1.2.trace",
-          range(0, 5),
-        ),
+        bidChoice("trace:run_1.rex.0.trace", range(0, 5)),
         { traceStrength: 5, runnerLink: 0 },
       ),
     ).toBe("bid_1");
+  });
+
+  it("does not go all-in for Rex when guaranteeing the native payoff is too expensive", () => {
+    expect(
+      selectedBidChoiceOptionId(
+        input("corp", "hard", {
+          ownCredits: 8,
+          ownClicks: 0,
+          runnerCredits: 11,
+          encounteredIceDefinitionId: "onr_v1_264_rex",
+        }),
+        bidChoice("trace:run_1.rex.0.trace", range(0, 8)),
+        { traceStrength: 5, runnerLink: 0 },
+      ),
+    ).toBe("bid_0");
   });
 
   it("bids zero when guarantee plus payoff is unaffordable", () => {
@@ -135,6 +148,7 @@ function input(
     ownClicks?: number;
     runnerCredits?: number;
     hq?: Array<Record<string, unknown>>;
+    encounteredIceDefinitionId?: string;
   } = {},
 ): AiDecisionInput {
   return {
@@ -168,6 +182,20 @@ function input(
         scoreArea: [],
       },
       servers: [],
+      ...(overrides.encounteredIceDefinitionId
+        ? {
+            run: {
+              encounteredIce: {
+                instanceId: "encountered-ice",
+                definitionId: overrides.encounteredIceDefinitionId,
+                title: "Encountered ICE",
+                type: "ice",
+                known: true,
+                rezzed: true,
+              },
+            },
+          }
+        : {}),
     },
     legalActions: [],
     eventTail: [],
