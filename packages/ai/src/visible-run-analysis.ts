@@ -116,6 +116,12 @@ export type VisibleIceRunHazard = {
   penalty: number;
   evidence: string[];
 };
+type VisibleIceRunHazardProjection = {
+  hazard: VisibleIceRunHazard;
+  avoidancePayment?:
+    | { kind: "general"; cost: number }
+    | { kind: "breaker"; assessment: BreakAssessment };
+};
 export type KnownRezzedIcePathAssessment = {
   blocked: boolean;
   visibleBreakCost?: number;
@@ -656,7 +662,7 @@ function assessKnownRezzedIcePathInternal(
         );
       }
     }
-    const visibleHazards = visibleIceRunHazardsForQuote({
+    const visibleHazardProjections = visibleIceRunHazardsForQuote({
       quote,
       ice: effectiveIce,
       iceIndex,
@@ -666,15 +672,34 @@ function assessKnownRezzedIcePathInternal(
       breakerStrengths,
       additionalBreakCostPerSubroutine,
     });
-    for (const hazard of visibleHazards) {
+    const avoidedVisibleHazardSubroutineIds = new Set<string>();
+    for (const { hazard, avoidancePayment } of visibleHazardProjections) {
       visibleIceRunHazards.push(hazard);
-      if (!hazard.unavoidable && hazard.minimumAvoidanceCost !== undefined) {
-        creditsAfterAvoidingVisibleIceHazards -= hazard.minimumAvoidanceCost;
+      if (avoidancePayment) {
+        avoidedVisibleHazardSubroutineIds.add(hazard.subroutineId);
       }
+      if (avoidancePayment?.kind === "breaker") {
+        visibleBreakCost += avoidancePayment.assessment.cost;
+        spendBreakerCreditsAndApplySideEffects(
+          creditBudget,
+          avoidancePayment.assessment,
+        );
+        if (avoidancePayment.assessment.carriesStrengthAcrossIce) {
+          breakerStrengths.set(
+            avoidancePayment.assessment.breakerInstanceId,
+            avoidancePayment.assessment.endingStrength,
+          );
+        }
+      } else if (avoidancePayment?.kind === "general") {
+        visibleBreakCost += avoidancePayment.cost;
+        spendGeneralCredits(creditBudget, avoidancePayment.cost);
+      }
+      creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
     }
     const futureIce = iceCards.slice(0, Math.max(0, iceIndex));
     const runPathEffects = pathProjectionEffectsForQuote(quote).filter(
-      ({ effect }) =>
+      ({ effect, sourceSubroutine }) =>
+        !avoidedVisibleHazardSubroutineIds.has(sourceSubroutine.id) &&
         !runPathEffectAlreadyVisibleOnFutureIce(effect, futureIce),
     );
     for (const [
@@ -980,9 +1005,9 @@ function visibleIceRunHazardsForQuote(params: {
   visibleCorpBidCapacity: number;
   breakerStrengths: Map<string, number>;
   additionalBreakCostPerSubroutine: number;
-}): VisibleIceRunHazard[] {
+}): VisibleIceRunHazardProjection[] {
   if (!params.quote) return [];
-  const hazards: VisibleIceRunHazard[] = [];
+  const hazards: VisibleIceRunHazardProjection[] = [];
   let remainingHazardCredits = Math.max(0, Math.floor(params.availableCredits));
   params.quote.subroutines.forEach((subroutine, subroutineIndex) => {
     if (subroutine.type !== "initiate_trace") return;
@@ -1079,7 +1104,7 @@ function visibleIceRunHazardsForQuote(params: {
       unavoidable,
       minimumAvoidanceCost,
     );
-    hazards.push({
+    const hazard: VisibleIceRunHazard = {
       ...baseHazard,
       iceIndex: params.iceIndex,
       ...(sourceDefinitionId ? { sourceDefinitionId } : {}),
@@ -1174,18 +1199,27 @@ function visibleIceRunHazardsForQuote(params: {
           : []),
         `visible_ice_hazard_unavoidable:${unavoidable}`,
       ],
+    };
+    hazards.push({
+      hazard,
+      ...(!unavoidable && minimumAvoidanceCost !== undefined
+        ? usesBreakAvoidance && breakAssessment
+          ? {
+              avoidancePayment: {
+                kind: "breaker" as const,
+                assessment: breakAssessment,
+              },
+            }
+          : {
+              avoidancePayment: {
+                kind: "general" as const,
+                cost: minimumAvoidanceCost,
+              },
+            }
+        : {}),
     });
     if (!unavoidable && minimumAvoidanceCost !== undefined) {
       remainingHazardCredits -= minimumAvoidanceCost;
-      if (
-        usesBreakAvoidance &&
-        breakAssessment?.carriesStrengthAcrossIce === true
-      ) {
-        params.breakerStrengths.set(
-          breakAssessment.breakerInstanceId,
-          breakAssessment.endingStrength,
-        );
-      }
     }
   });
   return hazards;
