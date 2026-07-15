@@ -170,4 +170,56 @@ describe("publicContextForAction", () => {
     expect(context).not.toHaveProperty("lastPassedIceId");
     expect(eventVisibilityForAction(action)).toBe("public");
   });
+
+  it("forwards an exposed installed card's public position without its instance id", () => {
+    const state = {
+      corp: { servers: [] },
+      cardInstances: {},
+    } as unknown as GameState;
+    const action = {
+      side: "runner",
+      type: "resolve_choice",
+      payload: {
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "expose_installed_card_review",
+        publicRevealKind: "expose",
+        publicRevealDefinitionId: "simple_upgrade",
+        sourceDefinitionId: "onr_v1_058_seeya",
+        exposedServerId: "remote_2",
+        exposedServerLabel: "Remote 2",
+        exposedArea: "root",
+        exposedIndex: 1,
+        exposedPositionKey: "root:1",
+        exposedCardInstanceId: "secret_upgrade_instance",
+      },
+    } as unknown as LegalAction;
+
+    const context = publicContextForAction(state, action, {
+      agendaPointsForScoredCard: () => 0,
+      cardCounter: () => 0,
+      cardStrengthModifier: () => 0,
+      creditCostForAction: () => 0,
+      definitionFor: () => {
+        throw new Error("not needed");
+      },
+      pumpAmountForLegalAction: () => 0,
+      runnerHqAccessBonus: () => 0,
+      v1915InstalledAccessBonus: () => 0,
+    });
+
+    expect(context).toMatchObject({
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "expose_installed_card_review",
+      publicRevealKind: "expose",
+      publicRevealDefinitionId: "simple_upgrade",
+      sourceDefinitionId: "onr_v1_058_seeya",
+      exposedServerId: "remote_2",
+      exposedServerLabel: "Remote 2",
+      exposedArea: "root",
+      exposedIndex: 1,
+    });
+    expect(context).not.toHaveProperty("exposedPositionKey");
+    expect(context).not.toHaveProperty("exposedCardInstanceId");
+    expect(JSON.stringify(context)).not.toContain("secret_upgrade_instance");
+  });
 });

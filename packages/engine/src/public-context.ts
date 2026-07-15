@@ -1203,6 +1203,19 @@ export function publicContextForAction(
       context.exposedServerIds = legalAction.payload.exposedServerIds;
     if (typeof legalAction.payload.exposedServerLabels === "string")
       context.exposedServerLabels = legalAction.payload.exposedServerLabels;
+    if (typeof legalAction.payload.exposedServerLabel === "string")
+      context.exposedServerLabel = legalAction.payload.exposedServerLabel;
+    if (
+      legalAction.payload.exposedArea === "root" ||
+      legalAction.payload.exposedArea === "ice"
+    )
+      context.exposedArea = legalAction.payload.exposedArea;
+    if (
+      typeof legalAction.payload.exposedIndex === "number" &&
+      Number.isInteger(legalAction.payload.exposedIndex) &&
+      legalAction.payload.exposedIndex >= 0
+    )
+      context.exposedIndex = legalAction.payload.exposedIndex;
     if (typeof legalAction.payload.targetCardDefinitionIds === "string")
       context.targetCardDefinitionIds =
         legalAction.payload.targetCardDefinitionIds;

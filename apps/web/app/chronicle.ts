@@ -1561,6 +1561,34 @@ export function formatChronicleEvent(
         chips.push(source, "Expose", "Ansehen beendet");
         break;
       }
+      if (hiddenZoneAction === "expose_installed_card_review") {
+        const exposedTitle =
+          publicRevealTitleFromPayload(payload) ??
+          titleForDefinitionId(cardDefinitionId) ??
+          cardTitle ??
+          "eine installierte Korp-Karte";
+        const source =
+          titleForDefinitionId(sourceDefinitionId) ??
+          sourceTitle ??
+          "eine Kartenfähigkeit";
+        const location = exposedInstalledCardLocation(payload);
+        category = "card";
+        importance = "important";
+        visibility = "public";
+        cardDefinitionId =
+          stringValue(payload.publicRevealDefinitionId) ?? cardDefinitionId;
+        cardTitle = exposedTitle;
+        title = phrase(
+          subject,
+          `mit ${source} ${exposedTitle}${location?.sentenceSuffix ?? ""} aufgedeckt`,
+        );
+        chips.push(
+          source,
+          "Expose",
+          ...(location ? [location.chip] : []),
+        );
+        break;
+      }
       if (hiddenZoneAction === "p3_33_private_look") {
         const source =
           titleForDefinitionId(sourceDefinitionId) ??
@@ -6339,6 +6367,42 @@ function displayServerLabel(label: string | undefined): string | undefined {
   const remote = /^remote_(\d+)$/.exec(label);
   if (remote?.[1]) return `Remote ${remote[1]}`;
   return label;
+}
+
+function exposedInstalledCardLocation(
+  payload: Record<string, unknown>,
+): { sentenceSuffix: string; chip: string } | undefined {
+  const serverLabel = displayServerLabel(
+    stringValue(payload.exposedServerLabel) ??
+      stringValue(payload.exposedServerId),
+  );
+  if (!serverLabel) return undefined;
+  const area = stringValue(payload.exposedArea);
+  const exposedIndex = numberValue(payload.exposedIndex);
+  const position =
+    exposedIndex !== undefined &&
+    Number.isInteger(exposedIndex) &&
+    exposedIndex >= 0
+      ? exposedIndex + 1
+      : undefined;
+  if (area === "ice") {
+    const positionLabel = position ? `ICE ${position}` : "ICE";
+    return {
+      sentenceSuffix: ` als ${positionLabel} vor ${serverLabel}`,
+      chip: `${serverLabel} · ${positionLabel}`,
+    };
+  }
+  if (area === "root") {
+    const positionLabel = position ? `Root ${position}` : "Root";
+    return {
+      sentenceSuffix: ` in ${serverLabel} · ${positionLabel}`,
+      chip: `${serverLabel} · ${positionLabel}`,
+    };
+  }
+  return {
+    sentenceSuffix: ` in ${serverLabel}`,
+    chip: serverLabel,
+  };
 }
 
 function accessServerLocationSuffix(

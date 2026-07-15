@@ -1285,6 +1285,63 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toContain("SeeYa");
   });
 
+  it("shows SeeYa's exposed card and exact public position to the Corp", () => {
+    const remoteOne = makeEvent("resolve_choice", {
+      actor: "runner",
+      aiExplanation: "Expose a legal installed Corp card.",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "expose_installed_card_review",
+      publicRevealKind: "expose",
+      publicRevealDefinitionId: "simple_upgrade",
+      cardDefinitionId: "simple_upgrade",
+      title: "Simple Upgrade",
+      sourceDefinitionId: "onr_v1_058_seeya",
+      sourceTitle: "SeeYa",
+      exposedServerId: "remote_1",
+      exposedServerLabel: "Remote 1",
+      exposedArea: "root",
+      exposedIndex: 0,
+    });
+    const sameCardInRemoteTwo = makeEvent("resolve_choice", {
+      ...remoteOne.publicPayload,
+      eventId: "evt_expose_remote_2",
+      exposedServerId: "remote_2",
+      exposedServerLabel: "Remote 2",
+      exposedIndex: 1,
+    });
+    const iceInRemoteOne = makeEvent("resolve_choice", {
+      ...remoteOne.publicPayload,
+      eventId: "evt_expose_remote_1_ice_2",
+      title: "Simple Barrier ICE",
+      publicRevealDefinitionId: "simple_barrier_ice",
+      cardDefinitionId: "simple_barrier_ice",
+      exposedArea: "ice",
+      exposedIndex: 1,
+    });
+
+    const firstItem = formatChronicleEvent(remoteOne, "corp");
+    const secondItem = formatChronicleEvent(sameCardInRemoteTwo, "corp");
+    const iceItem = formatChronicleEvent(iceInRemoteOne, "corp");
+
+    expect(firstItem.title).toBe(
+      "Die Runner-KI hat mit SeeYa Simple Upgrade in Remote 1 · Root 1 aufgedeckt.",
+    );
+    expect(secondItem.title).toBe(
+      "Die Runner-KI hat mit SeeYa Simple Upgrade in Remote 2 · Root 2 aufgedeckt.",
+    );
+    expect(iceItem.title).toBe(
+      "Die Runner-KI hat mit SeeYa Simple Barrier ICE als ICE 2 vor Remote 1 aufgedeckt.",
+    );
+    expect(firstItem.chips).toEqual(
+      expect.arrayContaining(["SeeYa", "Expose", "Remote 1 · Root 1"]),
+    );
+    expect(secondItem.chips).toContain("Remote 2 · Root 2");
+    expect(iceItem.chips).toContain("Remote 1 · ICE 2");
+    expect(shouldSuppressChronicleEventItem(remoteOne)).toBe(false);
+    expect(shouldSuppressChronicleEventItem(sameCardInRemoteTwo)).toBe(false);
+    expect(shouldSuppressChronicleEventItem(iceInRemoteOne)).toBe(false);
+  });
+
   it("shows Schematics Search Engine HQ access exposes in the chronicle", () => {
     const item = formatChronicleEvent(
       makeEvent("access_card", {

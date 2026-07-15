@@ -711,9 +711,16 @@ describe("Originalset Spotcheck 2026-05-16 Breaker/Ice Subtype Mix hardening", (
     expect(seeya.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneAction: "expose_installed_card_review",
       cardDefinitionId: "simple_upgrade",
+      exposedServerId: "remote_1",
+      exposedServerLabel: "Remote 1",
+      exposedArea: "root",
+      exposedIndex: 0,
     });
     expect(JSON.stringify(seeya.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"privatePayload"|"cardInstances"|"hq"|"rd"|"exposedCardInstanceId"/,
+    );
+    expect(JSON.stringify(seeya.eventLog.at(-1)?.publicPayload)).not.toContain(
+      upgradeId,
     );
     expect(getPlayerView(seeya, "corp").pendingChoice).toBeUndefined();
     expect(
