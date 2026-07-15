@@ -6,7 +6,9 @@ import {
 
 describe("ActionCardSemanticProfiles", () => {
   it("keeps legacy hint role fields as compatibility signals", () => {
-    const profiles = Object.values(buildActionCardSemanticProfilesByDefinitionId());
+    const profiles = Object.values(
+      buildActionCardSemanticProfilesByDefinitionId(),
+    );
     const tacticCompatibilityLeaks = profiles.flatMap((profile) =>
       profile.tacticSignals.filter(legacyCompatibilitySignal),
     );
@@ -20,8 +22,7 @@ describe("ActionCardSemanticProfiles", () => {
 
   it("retains reviewed hint tactic signals as compatibility evidence", () => {
     const profiles = buildActionCardSemanticProfilesByDefinitionId();
-    const researchBunker =
-      profiles["onr_proteus_072_research-bunker"];
+    const researchBunker = profiles["onr_proteus_072_research-bunker"];
 
     expect(researchBunker?.compatibilitySignals).toEqual(
       expect.arrayContaining([
@@ -45,9 +46,7 @@ describe("ActionCardSemanticProfiles", () => {
     ]) {
       expect(profiles[cardId]?.strategySupport ?? []).toEqual([]);
     }
-    expect(
-      profiles["onr_v1_043_mystery-box"]?.compatibilitySignals,
-    ).toEqual(
+    expect(profiles["onr_v1_043_mystery-box"]?.compatibilitySignals).toEqual(
       expect.arrayContaining([
         "line_support:runner.search.breaker",
         "strategic_role:engine_anchor",
@@ -95,9 +94,10 @@ describe("ActionCardSemanticProfiles", () => {
         }),
       ]),
     );
-    expect(
-      [...(hqInterface?.strategySupport ?? []), ...(rndInterface?.strategySupport ?? [])],
-    ).not.toEqual(
+    expect([
+      ...(hqInterface?.strategySupport ?? []),
+      ...(rndInterface?.strategySupport ?? []),
+    ]).not.toEqual(
       expect.arrayContaining([
         expect.objectContaining({ evidence: "ai_hint_semantic_profile" }),
       ]),
@@ -117,13 +117,21 @@ describe("ActionCardSemanticProfiles", () => {
     expect(netwatch?.tacticSignals).not.toContain("corp.score_closeout");
   });
 
+  it("preserves TKO's structured Runner action-loss signal", () => {
+    const profiles = buildActionCardSemanticProfilesByDefinitionId();
+
+    expect(profiles["onr_v1_271_tko-2-0"]?.tacticSignals).toContain(
+      "corp_ice.runner_action_loss",
+    );
+  });
+
   it("matches StrategySupportPair payoff roles by bounded signal segments", () => {
     expect(strategySupportRoleForSignal("access.hq_multiaccess")).toBe(
       "payoff_anchor",
     );
-    expect(
-      strategySupportRoleForSignal("access.hq_multiaccessory_noise"),
-    ).toBe("anchor_evidence");
+    expect(strategySupportRoleForSignal("access.hq_multiaccessory_noise")).toBe(
+      "anchor_evidence",
+    );
   });
 });
 

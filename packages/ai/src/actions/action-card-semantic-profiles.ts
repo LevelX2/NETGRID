@@ -103,9 +103,9 @@ function actionCardSemanticProfileFromHint(
   const effectSignals = (hint.effects ?? []).flatMap((effect) =>
     effectTacticSignals(effect, hint),
   );
-  const abilitySemantics = (CARD_DEFINITIONS_BY_ID[cardId]?.abilities ?? []).map(
-    abilitySemanticProfile,
-  );
+  const abilitySemantics = (
+    CARD_DEFINITIONS_BY_ID[cardId]?.abilities ?? []
+  ).map(abilitySemanticProfile);
   const compatibilitySignals = uniqueStrings([
     ...(extendedHint.tacticSignals ?? []),
     ...hint.roles.map((role) => `role:${role}`),
@@ -178,9 +178,9 @@ export function strategySupportRoleForSignal(signal: string): string {
 }
 
 function tacticSignalHasSegment(signal: string, expected: string): boolean {
-  const segmentSet = new Set(signal
-    .toLocaleLowerCase("en-US")
-    .split(/[._:-]+/));
+  const segmentSet = new Set(
+    signal.toLocaleLowerCase("en-US").split(/[._:-]+/),
+  );
   return segmentSet.has(expected);
 }
 
@@ -211,7 +211,9 @@ function abilitySemanticProfile(
       ...(ability.publicActionType
         ? [`ability.action_type:${ability.publicActionType}`]
         : []),
-      ...(ability.iceSubtype ? [`ability.ice_subtype:${ability.iceSubtype}`] : []),
+      ...(ability.iceSubtype
+        ? [`ability.ice_subtype:${ability.iceSubtype}`]
+        : []),
     ]),
   };
 }
@@ -322,6 +324,17 @@ function effectTacticSignals(
     case "etr":
     case "run_tax":
       return [...base, "corp.ice_protection"];
+    case "action_penalty":
+      return [
+        ...base,
+        ...(effectFunctionSignalAllowedByDerivation(
+          "corp_ice.runner_action_loss",
+          effect,
+          hint,
+        )
+          ? ["corp_ice.runner_action_loss"]
+          : []),
+      ];
     case "multiaccess":
       return [...base, "access.payoff", ...multiaccessSignals(effect)];
     case "topdeck_info":

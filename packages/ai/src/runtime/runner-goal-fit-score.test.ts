@@ -71,6 +71,32 @@ describe("runnerSemanticGoalFitScoreComponent", () => {
     expect(component?.reason).toContain("goal:runner.draw_or_search_for_setup");
   });
 
+  it("values Bodyweight Synthetic Blood by its structured five-card draw", () => {
+    const action = {
+      actionId: "bodyweight-synthetic-blood",
+      side: "runner",
+      type: "play_event",
+      source: "bodyweight-synthetic-blood-instance",
+      payload: {
+        sourceDefinitionId: "onr_v1_079_bodyweight-synthetic-blood",
+      },
+    } as unknown as LegalAction;
+
+    const component = runnerSemanticGoalFitScoreComponent(
+      runnerInputWithGoals([]),
+      action,
+      "basic_economy_draw",
+      undefined,
+      testDependencies({ sourceRole: "draw" }),
+    );
+
+    expect(component).toMatchObject({
+      key: "runner_goal_fit_card_draw",
+      value: 1300,
+      reason: "source_role:draw|hint_draw_amount:5",
+    });
+  });
+
   it("scores start-run actions that match active runner tactical goals", () => {
     const action = {
       actionId: "run-rd",

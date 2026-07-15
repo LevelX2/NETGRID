@@ -5361,8 +5361,7 @@
       "requiredMechanics": [
         "bonus_run_window",
         "play_event",
-        "run",
-        "successful_run"
+        "run"
       ],
       "valueHints": {
         "runPressure": 3
@@ -5393,7 +5392,7 @@
         },
         {
           "kind": "future_run_effect",
-          "timing": "successful_run",
+          "timing": "action",
           "scope": "runner",
           "target": "followup_run"
         },
@@ -5609,6 +5608,7 @@
       },
       "effects": [
         {
+          "amount": 5,
           "kind": "draw",
           "scope": "runner",
           "target": "draw",
@@ -7377,8 +7377,7 @@
       ],
       "requiredMechanics": [
         "hq_run",
-        "access_replacement",
-        "successful_rd_run"
+        "access_replacement"
       ],
       "valueHints": {
         "runPressure": 3
@@ -18427,18 +18426,15 @@
       "roles": [
         "ice",
         "trace",
-        "tag",
         "end_run"
       ],
       "planRoles": [
-        "defend_server",
-        "tag_pressure"
+        "defend_server"
       ],
       "requiredMechanics": [
         "install_ice",
         "rez_ice",
         "trace",
-        "add_tag",
         "end_the_run"
       ],
       "valueHints": {
@@ -21303,6 +21299,14 @@
         "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ],
       "effects": [
+        {
+          "amount": 1,
+          "kind": "action_penalty",
+          "resource": "actions",
+          "scope": "runner",
+          "target": "corp_ice.runner_action_loss",
+          "timing": "encounter"
+        },
         {
           "kind": "etr",
           "scope": "run_path",

@@ -118,11 +118,7 @@ describe("projectRunnerRunActions", () => {
       actionId: "pressure-noise",
       type: "play_event",
       payload: {
-        runActionSignals: [
-          "run_pressure",
-          "multiaccessory_noise",
-          "scope:hq",
-        ],
+        runActionSignals: ["run_pressure", "multiaccessory_noise", "scope:hq"],
       } as unknown as LegalAction["payload"],
     });
 
@@ -327,8 +323,9 @@ describe("projectRunnerRunActions", () => {
       ]),
     );
     expect(
-      projections.find((projection) => projection.actionId === "label-like-server")
-        ?.targetServerId,
+      projections.find(
+        (projection) => projection.actionId === "label-like-server",
+      )?.targetServerId,
     ).toBeUndefined();
   });
 
@@ -367,6 +364,35 @@ describe("projectRunnerRunActions", () => {
         structure: "bonus_run",
         targetServerId: "rd",
         projectionStatus: "concrete_target",
+      }),
+    ]);
+  });
+
+  it("projects Private LDL as an HQ run that accesses R&D", () => {
+    const privateLdl = action({
+      actionId: "private-ldl-hq",
+      type: "play_event",
+      source: "private-ldl-instance",
+      payload: {
+        cardId: "private-ldl-instance",
+        sourceDefinitionId: "onr_v1_106_private-ldl-access",
+        serverId: "hq",
+      },
+    });
+
+    const projections = projectRunnerRunActions({
+      input: input([privateLdl]),
+    });
+
+    expect(projections).toEqual([
+      expect.objectContaining({
+        actionId: "private-ldl-hq",
+        targetServerId: "hq",
+        accessServerId: "rd",
+        accessPayoffSignals: expect.arrayContaining([
+          "access.replacement",
+          "access.hq_to_rnd_conversion",
+        ]),
       }),
     ]);
   });

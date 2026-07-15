@@ -4,12 +4,15 @@ import type {
   LegalAction,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
+import { createAiHintsByCard } from "../ai-hints";
 import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
 import type { RunnerTacticalGoal } from "../runner-tactical-goals";
 import {
   runnerCoverageSearchSaturation,
   runnerVisibleSearchCoverageNeed,
 } from "./runner-search-coverage-need";
+
+const AI_HINTS_BY_CARD = createAiHintsByCard();
 
 export type RunnerSourceCardAnswerRole = "search" | "draw";
 
@@ -125,11 +128,15 @@ export function runnerSemanticGoalFitScoreComponent(
     sourceRole === "draw" &&
     action.type !== "draw_card"
   ) {
+    const drawAmount = hintedDrawAmountForAction(input, action);
     return {
       key: "runner_goal_fit_card_draw",
       label: "Kartenzieh-Antwort",
-      value: 900,
-      reason: "source_role:draw",
+      value: 900 + Math.min(4, Math.max(0, (drawAmount ?? 1) - 1)) * 100,
+      reason: [
+        "source_role:draw",
+        ...(drawAmount !== undefined ? [`hint_draw_amount:${drawAmount}`] : []),
+      ].join("|"),
     };
   }
   const tacticalGoalNonRunFit = runnerTacticalGoalNonRunFitScoreComponent(
@@ -203,6 +210,48 @@ export function runnerSemanticGoalFitScoreComponent(
     };
   }
   return undefined;
+}
+
+function hintedDrawAmountForAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+): number | undefined {
+  const directDefinitionIds = [
+    action.payload?.sourceDefinitionId,
+    action.payload?.sourceCardDefinitionId,
+    action.payload?.cardDefinitionId,
+    action.payload?.definitionId,
+    action.source,
+  ].filter((value): value is string => typeof value === "string");
+  let definitionId = directDefinitionIds.find((id) => AI_HINTS_BY_CARD.has(id));
+  if (!definitionId) {
+    const instanceIds = [
+      action.payload?.sourceCardInstanceId,
+      action.payload?.sourceInstanceId,
+      action.payload?.cardInstanceId,
+      action.payload?.cardId,
+      action.source,
+    ].filter((value): value is string => typeof value === "string");
+    const own = input.playerView.own;
+    const visibleCards = [
+      own.identity,
+      ...(own.rig ?? []),
+      ...(own.gripOrHq ?? []),
+      ...(own.heapOrArchives ?? []),
+      ...(own.scoreArea ?? []),
+    ].filter(Boolean);
+    definitionId = visibleCards.find((card) =>
+      instanceIds.includes(card.instanceId),
+    )?.definitionId;
+  }
+  const drawAmounts = (AI_HINTS_BY_CARD.get(definitionId ?? "")?.effects ?? [])
+    .filter((effect) => effect.kind === "draw")
+    .map((effect) => effect.amount)
+    .filter(
+      (amount): amount is number =>
+        typeof amount === "number" && Number.isFinite(amount) && amount > 0,
+    );
+  return drawAmounts.length > 0 ? Math.max(...drawAmounts) : undefined;
 }
 
 function runnerTacticalGoalsForInput(

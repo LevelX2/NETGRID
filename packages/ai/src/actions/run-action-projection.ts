@@ -76,7 +76,11 @@ export function projectInternalRunnerRunActions(
         hint,
         signals,
       ),
-      constraintSignals: constraintSignalsForRunAction(action, candidate, signals),
+      constraintSignals: constraintSignalsForRunAction(
+        action,
+        candidate,
+        signals,
+      ),
       riskSignals: riskSignalsForRunAction(candidate, hint),
       ...(spendLimit !== undefined ? { spendLimit } : {}),
       noNoisyBreakers: noNoisyBreakersForRunAction(action, signals),
@@ -210,7 +214,10 @@ function runActionProjectionEvidence(
   ];
 }
 
-function runActionRelevant(action: LegalAction, signals: readonly string[]): boolean {
+function runActionRelevant(
+  action: LegalAction,
+  signals: readonly string[],
+): boolean {
   if (action.type === "start_run") return true;
   const text = runActionSearchText(action, signals);
   if (runActionHasStructuredSignal(signals, ["path blocked", "path_blocked"]))
@@ -233,6 +240,7 @@ function runActionRelevant(action: LegalAction, signals: readonly string[]): boo
     "server_specific_archives",
     "server_specific_remote",
     "future_run_effect",
+    "hq_run",
   ]);
   if (concretePayloadServerId(action) && explicitRunSignals) return true;
   if (explicitRunSignals) return true;
@@ -285,18 +293,17 @@ function runActionSignalHasTerm(signal: string, term: string): boolean {
     .toLocaleLowerCase("en-US")
     .split(/[^a-z0-9]+/)
     .filter(Boolean);
-  const termTokens = normalizedTerm
-    .split(/[^a-z0-9]+/)
-    .filter(Boolean);
+  const termTokens = normalizedTerm.split(/[^a-z0-9]+/).filter(Boolean);
   if (termTokens.length <= 1) {
     const tokenSet = new Set(tokens);
     return tokenSet.has(normalizedTerm);
   }
-  return tokens.some((token, index) =>
-    token === termTokens[0] &&
-    termTokens.every(
-      (termToken, offset) => tokens[index + offset] === termToken,
-    ),
+  return tokens.some(
+    (token, index) =>
+      token === termTokens[0] &&
+      termTokens.every(
+        (termToken, offset) => tokens[index + offset] === termToken,
+      ),
   );
 }
 
@@ -475,6 +482,16 @@ function accessServerIdForRunAction(
   ) {
     return "hq";
   }
+  if (
+    targetServerId === "hq" &&
+    runActionHasStructuredSignal(signals, [
+      "target:hq_to_rnd_conversion",
+      "access.hq_to_rnd_conversion",
+      "hq_to_rnd_conversion",
+    ])
+  ) {
+    return "rd";
+  }
   return undefined;
 }
 
@@ -482,7 +499,9 @@ function concretePayloadServerId(action: LegalAction): string | undefined {
   return normalizeServerId(actionServerId(action));
 }
 
-function targetKindForServerId(serverId: string): RunnerRunTargetKind | undefined {
+function targetKindForServerId(
+  serverId: string,
+): RunnerRunTargetKind | undefined {
   if (serverId === "hq") return "hq";
   if (serverId === "rd") return "rd";
   if (serverId === "archives") return "archives";
@@ -550,7 +569,10 @@ function targetServerIdsFromSignals(
   return uniqueStrings(targetIds);
 }
 
-function signalTokensInclude(tokens: readonly string[], value: string): boolean {
+function signalTokensInclude(
+  tokens: readonly string[],
+  value: string,
+): boolean {
   return tokens.some(
     (token) =>
       token === value ||
@@ -561,7 +583,10 @@ function signalTokensInclude(tokens: readonly string[], value: string): boolean 
 
 function normalizeServerId(value: unknown): string | undefined {
   if (typeof value !== "string") return undefined;
-  const trimmed = value.trim().toLowerCase().replace(/^server[:.]/, "");
+  const trimmed = value
+    .trim()
+    .toLowerCase()
+    .replace(/^server[:.]/, "");
   if (trimmed === "hq") return "hq";
   if (trimmed === "rd") return "rd";
   if (trimmed === "archives") return "archives";
@@ -665,7 +690,9 @@ function accessPayoffSignalsForRunAction(
     ...(candidate?.cardContextSignals ?? []),
     ...(candidate?.actionTacticSignals ?? []),
   ].filter(signalShowsRunAccessPayoff);
-  const effectSignals = (hint?.effects ?? []).flatMap(accessSignalsForHintEffect);
+  const effectSignals = (hint?.effects ?? []).flatMap(
+    accessSignalsForHintEffect,
+  );
   return uniqueStrings([
     ...directSignals,
     ...semanticSignals,
@@ -688,6 +715,9 @@ function accessSignalsForHintEffect(
   if (effect.kind === "access_replacement") {
     if (target === "hq_via_archives") {
       return ["access.replacement", "access.hq_via_archives"];
+    }
+    if (target === "hq_to_rnd_conversion") {
+      return ["access.replacement", "access.hq_to_rnd_conversion"];
     }
     return ["access.replacement"];
   }
@@ -713,8 +743,12 @@ function constraintSignalsForRunAction(
 ): string[] {
   return uniqueStrings([
     ...(runSpendLimitForAction(action) !== undefined ? ["spend_limit"] : []),
-    ...(noNoisyBreakersForRunAction(action, signals) ? ["no_noisy_breakers"] : []),
-    ...(bypassFirstIceForRunAction(action, signals) ? ["bypass_first_ice"] : []),
+    ...(noNoisyBreakersForRunAction(action, signals)
+      ? ["no_noisy_breakers"]
+      : []),
+    ...(bypassFirstIceForRunAction(action, signals)
+      ? ["bypass_first_ice"]
+      : []),
     ...(candidate?.constraints ?? []).map(
       (constraint) => `${constraint.kind}:${constraint.status}`,
     ),
@@ -756,7 +790,9 @@ function tokensIncludePhrase(
   phrase: readonly string[],
 ): boolean {
   return tokens.some((token, index) =>
-    phrase.every((phraseToken, offset) => tokens[index + offset] === phraseToken),
+    phrase.every(
+      (phraseToken, offset) => tokens[index + offset] === phraseToken,
+    ),
   );
 }
 
@@ -764,7 +800,8 @@ function riskSignalsForRunAction(
   candidate: ActionSemanticCandidate | undefined,
   hint: AiCardHint | undefined,
 ): string[] {
-  const riskTags = (hint as { riskTags?: string[] } | undefined)?.riskTags ?? [];
+  const riskTags =
+    (hint as { riskTags?: string[] } | undefined)?.riskTags ?? [];
   return uniqueStrings([
     ...riskTags,
     ...(candidate?.risks ?? []).map((risk) => `${risk.kind}:${risk.severity}`),
@@ -818,7 +855,9 @@ function payloadStringValues(
     const value = payload[key];
     if (typeof value === "string") return [value];
     if (Array.isArray(value)) {
-      return value.filter((entry): entry is string => typeof entry === "string");
+      return value.filter(
+        (entry): entry is string => typeof entry === "string",
+      );
     }
     return [];
   });
@@ -843,7 +882,9 @@ function payloadSearchText(action: LegalAction): string {
       }
       if (Array.isArray(value)) {
         return value
-          .filter((entry) => typeof entry === "string" || typeof entry === "number")
+          .filter(
+            (entry) => typeof entry === "string" || typeof entry === "number",
+          )
           .map(String);
       }
       return [];

@@ -12905,9 +12905,13 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 2,
+      "signalCount": 3,
       "targetProfileCount": 0,
-      "derivedFunctionSignals": ["corp_ice.end_run", "ice.etr"],
+      "derivedFunctionSignals": [
+        "corp_ice.end_run",
+        "corp_ice.runner_action_loss",
+        "ice.etr"
+      ],
       "activeTacticSignals": [
         "corp_ice.end_run",
         "corp_ice.runner_action_loss"

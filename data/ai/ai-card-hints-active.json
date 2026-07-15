@@ -3948,8 +3948,7 @@
       "requiredMechanics": [
         "bonus_run_window",
         "play_event",
-        "run",
-        "successful_run"
+        "run"
       ],
       "valueHints": {
         "runPressure": 3
@@ -3977,7 +3976,7 @@
         },
         {
           "kind": "future_run_effect",
-          "timing": "successful_run",
+          "timing": "action",
           "scope": "runner",
           "target": "followup_run"
         },
@@ -4153,6 +4152,7 @@
           "kind": "draw",
           "timing": "action",
           "scope": "runner",
+          "amount": 5,
           "target": "draw"
         }
       ]
@@ -5520,8 +5520,7 @@
       "planRoles": ["pressure_hq", "pressure_rnd"],
       "requiredMechanics": [
         "hq_run",
-        "access_replacement",
-        "successful_rd_run"
+        "access_replacement"
       ],
       "valueHints": {
         "runPressure": 3
@@ -13345,13 +13344,12 @@
       "cardId": "onr_v1_240_fang",
       "side": "corp",
       "cardType": "ice",
-      "roles": ["ice", "trace", "tag", "end_run"],
-      "planRoles": ["defend_server", "tag_pressure"],
+      "roles": ["ice", "trace", "end_run"],
+      "planRoles": ["defend_server"],
       "requiredMechanics": [
         "install_ice",
         "rez_ice",
         "trace",
-        "add_tag",
         "end_the_run"
       ],
       "valueHints": {
@@ -15216,6 +15214,16 @@
         "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
         "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
         "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
+      ],
+      "effects": [
+        {
+          "kind": "action_penalty",
+          "timing": "encounter",
+          "scope": "runner",
+          "resource": "actions",
+          "amount": 1,
+          "target": "corp_ice.runner_action_loss"
+        }
       ]
     },
     {

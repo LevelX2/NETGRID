@@ -48626,13 +48626,6 @@
           "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         },
         {
-          "value": "tag",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        },
-        {
           "value": "trace",
           "category": "function_signal_only",
           "triageCategory": "function_signal_only",
@@ -48647,15 +48640,6 @@
           "triageCategory": "strategy_alias",
           "mapsTo": [
             "corp.central_stabilize"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        },
-        {
-          "value": "tag_pressure",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.tag_trace_punish"
           ],
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
@@ -52211,6 +52195,7 @@
       },
       "derivedFunctionSignals": [
         "corp_ice.end_run",
+        "corp_ice.runner_action_loss",
         "ice.etr"
       ],
       "derivedStrategyAnchors": [
@@ -52319,7 +52304,9 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions"

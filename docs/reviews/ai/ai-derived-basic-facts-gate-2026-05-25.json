@@ -10157,7 +10157,8 @@
           {
             "kind": "draw",
             "timing": "action",
-            "scope": "runner"
+            "scope": "runner",
+            "amount": 5
           }
         ],
         "conditions": [],
@@ -18901,12 +18902,10 @@
         "roles": [
           "end_run",
           "ice",
-          "tag",
           "trace"
         ],
         "planRoles": [
-          "defend_server",
-          "tag_pressure"
+          "defend_server"
         ],
         "effects": [],
         "conditions": [],
