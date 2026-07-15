@@ -17,6 +17,7 @@ import {
   type SearchChoiceFeatureSnapshot,
 } from "./search-choice-option";
 import { runnerVisibleSearchCoverageNeed } from "./runner-search-coverage-need";
+import { selectedRunnerExposeInstalledCardChoiceOptionIds } from "./runner-expose-installed-card-choice";
 import {
   selectedDefaultCardChoiceOptionIds,
   selectedFallbackChoiceOptionIds,
@@ -179,6 +180,14 @@ export function selectedChoicesForDecision(
     };
   }
   if (choice.kind === "select_cards") {
+    const exposeSelected = selectedRunnerExposeInstalledCardChoiceOptionIds(
+      input,
+      choice,
+      selectableOptions,
+    );
+    if (exposeSelected) {
+      return { choiceId: choice.choiceId, selectedOptionIds: exposeSelected };
+    }
     const requiredCoverage =
       runnerVisibleSearchCoverageNeed(input)?.requiredCoverage;
     const searchSelected = selectedSearchChoiceOptionIds(

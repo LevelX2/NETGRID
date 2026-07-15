@@ -5,6 +5,7 @@ import type {
 } from "@netgrid/shared";
 
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
+import { runnerExposeInstalledOpportunity } from "./runner-expose-installed-card-choice";
 
 export function runnerTerminalRemoteToolScoreComponent(
   input: AiDecisionInput,
@@ -28,27 +29,25 @@ export function runnerTerminalRemoteToolScoreComponent(
     ...candidate.cardContextSignals,
     ...candidate.evidence,
   ]);
+  const exposeOpportunity = runnerExposeInstalledOpportunity(input);
   const remoteContexts = input.playerView.servers
     .filter((server) => server.id.startsWith("remote_"))
     .map((server) => ({
       server,
-      hiddenRootCount: server.root.filter(
-        (card) => !card.known || !card.definitionId,
+      hiddenRootCount: exposeOpportunity.unseenPositions.filter(
+        (position) =>
+          position.serverId === server.id && position.area === "root",
       ).length,
-      advancedHiddenRootCount: server.root.filter(
-        (card) =>
-          (!card.known || !card.definitionId) &&
-          (card.advancementCounters ?? 0) > 0,
+      advancedHiddenRootCount: exposeOpportunity.unseenPositions.filter(
+        (position) =>
+          position.serverId === server.id &&
+          position.area === "root" &&
+          position.advanced,
       ).length,
       visibleRezzedIceCount: server.ice.filter(
         (card) => card.known && card.definitionId && card.rezzed === true,
       ).length,
     }));
-  const possibleMatchpointRemotes = remoteContexts.filter(
-    (context) => context.hiddenRootCount > 0,
-  );
-  if (possibleMatchpointRemotes.length === 0) return undefined;
-
   const exposeInfo = [...signals].some(
     (signal) =>
       signal === "effect:expose_info" ||
@@ -56,6 +55,21 @@ export function runnerTerminalRemoteToolScoreComponent(
       signal.includes("expose_info"),
   );
   if (exposeInfo) {
+    if (
+      exposeOpportunity.positions.length > 0 &&
+      exposeOpportunity.unseenPositions.length === 0
+    ) {
+      return {
+        key: "runner_expose_no_unseen_target",
+        label: "Keine neue Expose-Information",
+        value: -3_200,
+        reason: `exactly_exposed_positions:${exposeOpportunity.positions.length}`,
+      };
+    }
+    const possibleMatchpointRemotes = remoteContexts.filter(
+      (context) => context.hiddenRootCount > 0,
+    );
+    if (possibleMatchpointRemotes.length === 0) return undefined;
     const advancedHiddenRootCount = possibleMatchpointRemotes.reduce(
       (sum, context) => sum + context.advancedHiddenRootCount,
       0,
@@ -73,6 +87,11 @@ export function runnerTerminalRemoteToolScoreComponent(
       ].join("|"),
     };
   }
+
+  const possibleMatchpointRemotes = remoteContexts.filter(
+    (context) => context.hiddenRootCount > 0,
+  );
+  if (possibleMatchpointRemotes.length === 0) return undefined;
 
   const iceDisruption = [...signals].some(
     (signal) =>

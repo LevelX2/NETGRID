@@ -507,6 +507,26 @@ describe("tacticalPlanMappedChoice", () => {
     );
   });
 
+  it("lets matchpoint run-lock release interrupt an ordinary hand-development plan", () => {
+    const gain = legalAction("gain", "gain_credit");
+    const release = legalAction("release-run-lock", "trigger_ability");
+    const releaseChoice = choice(release, 4117, [], {
+      key: "runner_matchpoint_run_lock_release",
+      value: 4100,
+      reason: "follow_up_server:hq",
+    });
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [releaseChoice, choice(gain, 2604)],
+      planMapping("runner.develop_hand_card", [gain]),
+      releaseChoice,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("release-run-lock");
+    expect(result.overrideReason).toBe("runner_hard_interrupt");
+  });
+
   it("yields a deferred bank install plan to a positive semantic action", () => {
     const install = legalAction("install-broker-copy", "install_card");
     const draw = legalAction("draw", "draw_card");

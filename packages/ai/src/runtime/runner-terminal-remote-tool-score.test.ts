@@ -19,6 +19,37 @@ describe("runnerTerminalRemoteToolScoreComponent", () => {
     expect(component?.reason).toContain("terminal_remote_tool:expose_info");
   });
 
+  it("penalizes repeating expose after every hidden position was exposed exactly", () => {
+    const current = input({ advancementCounters: 0 });
+    current.eventTail = [
+      {
+        eventId: "exposed-remote-root",
+        type: "resolve_choice",
+        stateVersionBefore: 1,
+        stateVersionAfter: 2,
+        stateHashAfter: "hash-exposed-remote-root",
+        publicPayload: {
+          actor: "runner",
+          actionType: "resolve_choice",
+          exposedServerId: "remote_1",
+          exposedArea: "root",
+          exposedIndex: 0,
+        },
+      },
+    ];
+
+    expect(
+      runnerTerminalRemoteToolScoreComponent(
+        current,
+        action("see-ya", "activated_card_ability"),
+        candidate("effect:expose_info"),
+      ),
+    ).toMatchObject({
+      key: "runner_expose_no_unseen_target",
+      value: -3200,
+    });
+  });
+
   it("prioritizes visible ICE disruption for an advanced matchpoint remote", () => {
     const component = runnerTerminalRemoteToolScoreComponent(
       input({ advancementCounters: 2 }),

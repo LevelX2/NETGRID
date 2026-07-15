@@ -342,6 +342,13 @@ export function tacticalPlanMappedChoice(
         overrideChoice,
         scoreGap,
       );
+    const hardInterruptShouldYield =
+      mapping.plan.side === "runner" &&
+      runnerPlanOverrideIsHardInterrupt(
+        mapping.plan,
+        mappedChoice,
+        overrideChoice,
+      );
     if (
       tacticalPlanRunnerMappingBlocksOffPlanOverride(
         mapping,
@@ -376,6 +383,7 @@ export function tacticalPlanMappedChoice(
       inferiorRunTargetShouldYield ||
       corpBoardTriageMismatchShouldYield ||
       backgroundBankBuildShouldYield ||
+      hardInterruptShouldYield ||
       scoreGap > threshold.scoreGap
     ) {
       const result = {
@@ -396,7 +404,9 @@ export function tacticalPlanMappedChoice(
                     ? "corp_board_triage_mismatch_yield"
                     : backgroundBankBuildShouldYield
                       ? "background_bank_build_mapping_yield"
-                      : threshold.reason,
+                      : hardInterruptShouldYield
+                        ? "runner_hard_interrupt"
+                        : threshold.reason,
         overrideThreshold: threshold.scoreGap,
         scoreGap,
       };
@@ -768,9 +778,7 @@ function tacticalPlanDeferredDevelopmentInstallShouldYield(
       (component.key === "runner_bank_install_commitment" ||
         component.key === "runner_no_run_economy_install_commitment" ||
         (component.key === "runner_persistent_install_fit" &&
-          ((component.reason ?? "").includes(
-            "duplicate:redundant_duplicate",
-          ) ||
+          ((component.reason ?? "").includes("duplicate:redundant_duplicate") ||
             (component.reason ?? "").includes("duplicate:useful_backup") ||
             (component.reason ?? "").includes("delta:backup_only")))),
   );
@@ -839,6 +847,14 @@ function runnerPlanOverrideIsHardInterrupt(
     semanticRuntimeChoiceHasScoreComponent(
       overrideChoice,
       "runner_terminal_remote_tool",
+    )
+  ) {
+    return true;
+  }
+  if (
+    semanticRuntimeChoiceHasScoreComponent(
+      overrideChoice,
+      "runner_matchpoint_run_lock_release",
     )
   ) {
     return true;
@@ -1443,7 +1459,10 @@ function semanticRuntimeChoiceHasScoreComponent(
   choice: SemanticRuntimeChoice,
   key: string,
 ): boolean {
-  return choice.evidence.includes(`semantic_score_component:${key}`);
+  return (
+    choice.evidence.includes(`semantic_score_component:${key}`) ||
+    choice.scoreBreakdown.some((component) => component.key === key)
+  );
 }
 
 function semanticRuntimeChoiceHasAnyScoreComponent(
