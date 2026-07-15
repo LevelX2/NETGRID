@@ -1,6 +1,7 @@
 # KI-Kartenhint-Remediation aus vier gespeicherten Spielen (2026-07-15)
 
-Status: In Umsetzung; P0 bis P4 abgeschlossen, P5 aktiv
+Status: Abgeschlossen; P0 bis P5 abgeschlossen, lokal nach `main` integriert
+und Worktree sowie Arbeitsbranch verifiziert entfernt
 
 ## Quelle und Zielprüfung
 
