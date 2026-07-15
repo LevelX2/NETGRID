@@ -14779,9 +14779,14 @@
       "cardId": "onr_v1_264_rex",
       "side": "corp",
       "cardType": "ice",
-      "roles": ["ice", "trace", "tag"],
-      "planRoles": ["defend_server", "tag_pressure"],
-      "requiredMechanics": ["install_ice", "rez_ice", "trace", "add_tag"],
+      "roles": ["ice", "trace"],
+      "planRoles": ["defend_server"],
+      "requiredMechanics": [
+        "install_ice",
+        "rez_ice",
+        "trace",
+        "end_the_run"
+      ],
       "valueHints": {
         "defense": 1
       },

@@ -20665,18 +20665,16 @@
       "cardType": "ice",
       "roles": [
         "ice",
-        "trace",
-        "tag"
+        "trace"
       ],
       "planRoles": [
-        "defend_server",
-        "tag_pressure"
+        "defend_server"
       ],
       "requiredMechanics": [
         "install_ice",
         "rez_ice",
         "trace",
-        "add_tag"
+        "end_the_run"
       ],
       "valueHints": {
         "defense": 1

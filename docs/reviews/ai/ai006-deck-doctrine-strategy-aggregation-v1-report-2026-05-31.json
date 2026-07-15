@@ -1277,7 +1277,6 @@
       "legacySignalCounts": {
         "planRole:build_rig": 11,
         "planRole:draw_for_answers": 4,
-        "planRole:pressure_rnd": 2,
         "planRole:recover_economy": 4,
         "planRole:safe_probe_run": 10,
         "role:breaker_decoder": 5,
@@ -1295,7 +1294,6 @@
         "role:low_install_breaker": 1,
         "role:memory": 1,
         "role:program": 4,
-        "role:run_pressure": 2,
         "role:sentry_breaker": 2,
         "role:setup": 5,
         "role:tempo": 2
@@ -3609,7 +3607,6 @@
         "planRole:contest_remote": 1,
         "planRole:draw_for_answers": 4,
         "planRole:pressure_hq": 3,
-        "planRole:pressure_rnd": 2,
         "planRole:recover_economy": 4,
         "planRole:safe_probe_run": 8,
         "role:access_replacement": 1,
@@ -3633,7 +3630,6 @@
         "role:multiaccess": 2,
         "role:program": 8,
         "role:recycle_zones": 1,
-        "role:run_pressure": 2,
         "role:setup": 5,
         "role:tag_self": 1,
         "role:tempo": 2
@@ -7001,6 +6997,6 @@
       "inspector:function_signal_descriptor_gap": 1,
       "inspector:legacy_fallback_only": 2
     },
-    "contentSha256": "e601407fe95f9a8d673eafa604c53bb8de31f732ac81b77be7d6cf07549964f4"
+    "contentSha256": "c8d072e09559f0474a4fa86e3dd2fb39d08903fca79c2109b2f832d942310a03"
   }
 }
