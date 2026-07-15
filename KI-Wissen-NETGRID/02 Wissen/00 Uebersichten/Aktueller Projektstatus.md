@@ -28,6 +28,13 @@ Stand: 2026-07-15
   Promotion getrennt.
 - Kartenimplementierungen, PlayerViews, PublicEvents, Replay und StateHash
   werden durch paketnahe Engine- und Visibilitytests abgesichert.
+- Installierte Corp-Assets mit semantischem Zugriffseffekt wirken
+  standardmäßig nur gerezzt. Der aktive Pool umfasst zehn Access-Nodes unter
+  56 Corp-Assets: sieben folgen dem Rez-Default, `Virus Test Site` ist die
+  einzige belegte installierte Unrezzed-Ausnahme und macht dann genau 1 Net
+  Damage; Bel-Digmo und Stereogram wirken nur aus R&D beziehungsweise
+  Archives. Führend ist
+  `docs/reviews/engine/node-access-rez-contract-final-review-2026-07-15.md`.
 - City Surveillance löst Runner-Mehrfachziehen als fortsetzbare Sequenz auf:
   Vor jeder tatsächlich gezogenen Karte kann die Korp eine installierte,
   bezahlbare Draw-Tax-Quelle rezzen; danach wählt der Runner pro gerezzter

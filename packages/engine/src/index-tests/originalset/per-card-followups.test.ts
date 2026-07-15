@@ -923,7 +923,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     });
   });
 
-  it("offers Experimental AI as a root rez before access and still resolves the ambush when declined", () => {
+  it("offers Experimental AI as a root rez before access and keeps it inactive when declined", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "spotcheck-experimental-ai-root-rez-window",
@@ -997,16 +997,13 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     expect(state.timingPoint).toBe("access.resolve_card");
     state = apply(state, "runner", (action) => action.type === "access_card");
 
-    expect(state.runner.heap).toContain(blinkId);
+    expect(state.runner.heap).not.toContain(blinkId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "access_card",
-      hiddenZoneAction: "v1919_access_ambush_trash_installed",
-      ambushDefinitionId: "onr_v1_323_experimental-ai",
-      advancementCounterCount: 1,
-      trashedCount: 1,
-      trashedCardDefinitionId: "onr_v1_007_blink",
-      trashedCardDefinitionIds: "onr_v1_007_blink",
     });
+    expect(state.eventLog.at(-1)?.publicPayload).not.toHaveProperty(
+      "ambushDefinitionId",
+    );
   });
 
   it("keeps Experimental AI ambush and later Runner trash separate after root rez", () => {
@@ -1104,8 +1101,8 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       state,
       "corp",
       (action) =>
-        action.type === "decline_rez" &&
-        action.payload?.runRootRezPass === true,
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "onr_v1_323_experimental-ai",
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
     state = apply(state, "runner", (action) => action.type === "access_card");
@@ -3286,7 +3283,19 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
-    access = passRootRezWindowBeforeAccessIfOpen(access);
+    access = apply(
+      access,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(access, action) ===
+          "onr_v1_315_corprunners-shattered-remains",
+    );
+    access = apply(
+      access,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
     access = apply(access, "runner", (action) => action.type === "access_card");
     expect(access.runner.heap).toEqual(
       expect.arrayContaining([firstHardware, secondHardware]),

@@ -36,7 +36,6 @@ import {
   cardChoiceUsesOrderedSelection,
   cardChoiceUsesReadableCards,
   choiceInteractionAmbience,
-  shouldShowTurnActionsForChoice,
   counterDisplayUsesCreditBadge,
   counterDisplayUsesRefreshingCreditBadge,
   counterDisplayBadgeView,
@@ -553,8 +552,6 @@ describe("V1.0.5 action board UI helpers", () => {
       "trash",
     );
     expect(choiceInteractionAmbience(traceChoice)).toBe("trace");
-    expect(shouldShowTurnActionsForChoice(traceChoice)).toBe(true);
-    expect(shouldShowTurnActionsForChoice(choice("runner"))).toBe(false);
     expect(
       actionInteractionAmbience(
         legalAction(
@@ -2007,6 +2004,11 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(bonus.capacity).toBe(5);
     expect(bonus.slots.filter((slot) => slot.bonus)).toHaveLength(1);
     expect(bonus.slots.every((slot) => slot.state === "available")).toBe(true);
+
+    const extendedBonus = actionSlotDisplay("runner", 6, 4, true);
+    expect(extendedBonus.capacity).toBe(6);
+    expect(extendedBonus.slots).toHaveLength(6);
+    expect(extendedBonus.slots.filter((slot) => slot.bonus)).toHaveLength(2);
   });
 
   it("derives bonus-action slot capacity from current turn action history", () => {

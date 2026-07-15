@@ -24,7 +24,6 @@ import {
   isSingleInstalledCorpExposeChoice,
   interactionAmbienceClassName,
   runAwareActionButtonLabel,
-  shouldShowTurnActionsForChoice,
   shouldUseCardChoicePanel,
   shouldUseFieldCardChoice,
   type ActionContext,
@@ -241,51 +240,25 @@ export function LegalActionsPanel({
         />
       );
     }
-    const currentTurnSide = turnSideForView(view) ?? view.activeSide;
-    const currentTurnClicks =
-      currentTurnSide === view.side ? view.own.clicks : view.opponent.clicks;
-    const currentTurnCapacity = actionCapacities[currentTurnSide];
-    const currentTurnDisplay = actionSlotDisplay(
-      currentTurnSide,
-      currentTurnClicks,
-      currentTurnCapacity,
-      true,
-    );
     return (
       <section
         className={`section setupPanel ${genericChoiceAmbienceClass} ${highlighted ? "cueHighlight" : ""}`}
         data-testid="generic-choice-panel"
       >
+        {genericChoiceAmbience === "trace" ? (
+          <TurnActionHeader
+            view={view}
+            actionCapacities={actionCapacities}
+            priorityWindowHoldEnabled={priorityWindowHoldEnabled}
+            activeAiSide={activeAiSide}
+            onPriorityWindowHoldEnabled={onPriorityWindowHoldEnabled}
+            onFloatPanel={onFloatPanel}
+          />
+        ) : null}
         <h2>
           <Check size={16} />
           {sideLabel(genericChoice.side)}-Entscheidung
         </h2>
-        {shouldShowTurnActionsForChoice(
-          genericChoice,
-          genericChoiceAction,
-        ) ? (
-          <div
-            className={`choiceTurnActionStatus side-${currentTurnSide}`}
-            data-testid="trace-choice-turn-actions"
-            aria-label={`${sideLabel(currentTurnSide)}-Aktionen, ${currentTurnDisplay.label}`}
-          >
-            <strong>{sideLabel(currentTurnSide)}-Aktionen</strong>
-            <div
-              className={`actionAvailability side-${currentTurnSide}`}
-              data-testid="trace-choice-action-availability"
-            >
-              <span className="actionAvailabilityCount">{`noch ${currentTurnDisplay.available}`}</span>
-              <ActionSlotMeter
-                side={currentTurnSide}
-                currentClicks={currentTurnClicks}
-                displayCapacity={currentTurnCapacity}
-                active
-                compact
-                slotsOnly
-              />
-            </div>
-          </div>
-        ) : null}
         <p className="meta">{genericChoice.prompt}</p>
         <div className="actions setupActions">
           {genericChoice.options.map((option) => (
@@ -321,16 +294,6 @@ export function LegalActionsPanel({
       </section>
     );
   }
-  const currentTurnSide = turnSideForView(view) ?? view.activeSide;
-  const currentTurnClicks =
-    currentTurnSide === view.side ? view.own.clicks : view.opponent.clicks;
-  const currentTurnCapacity = actionCapacities[currentTurnSide];
-  const currentTurnDisplay = actionSlotDisplay(
-    currentTurnSide,
-    currentTurnClicks,
-    currentTurnCapacity,
-    true,
-  );
   const actionPanelAmbienceClass = interactionAmbienceClassName(
     actionsInteractionAmbience([...primaryActions, ...contextualActions]),
   );
@@ -339,32 +302,14 @@ export function LegalActionsPanel({
       className={`section ${actionPanelAmbienceClass} ${highlighted ? "cueHighlight" : ""}`}
       data-testid="legal-actions"
     >
-      <div className={`turnActionHeader side-${currentTurnSide}`}>
-        <div className="turnActionHeaderTop">
-          <h2>{turnActionHeaderLabel(view, currentTurnSide, activeAiSide)}</h2>
-          <PriorityWindowHoldToggle
-            enabled={priorityWindowHoldEnabled}
-            onToggle={onPriorityWindowHoldEnabled}
-          />
-          {onFloatPanel ? (
-            <ActionPanelFloatButton onFloat={onFloatPanel} />
-          ) : null}
-        </div>
-        <div
-          className={`actionAvailability side-${currentTurnSide}`}
-          data-testid="action-availability"
-        >
-          <span className="actionAvailabilityCount">{`noch ${currentTurnDisplay.available}`}</span>
-          <ActionSlotMeter
-            side={currentTurnSide}
-            currentClicks={currentTurnClicks}
-            displayCapacity={currentTurnCapacity}
-            active
-            compact
-            slotsOnly
-          />
-        </div>
-      </div>
+      <TurnActionHeader
+        view={view}
+        actionCapacities={actionCapacities}
+        priorityWindowHoldEnabled={priorityWindowHoldEnabled}
+        activeAiSide={activeAiSide}
+        onPriorityWindowHoldEnabled={onPriorityWindowHoldEnabled}
+        onFloatPanel={onFloatPanel}
+      />
       <div className="actions">
         {primaryActions.map((action) => {
           const label = runAwareActionButtonLabel(view, action);
@@ -431,6 +376,62 @@ export function LegalActionsPanel({
         ) : null}
       </div>
     </section>
+  );
+}
+
+function TurnActionHeader({
+  view,
+  actionCapacities,
+  priorityWindowHoldEnabled,
+  activeAiSide,
+  onPriorityWindowHoldEnabled,
+  onFloatPanel,
+}: {
+  view: PlayerView;
+  actionCapacities: Record<Side, number>;
+  priorityWindowHoldEnabled: boolean;
+  activeAiSide: Side | undefined;
+  onPriorityWindowHoldEnabled(enabled: boolean): void;
+  onFloatPanel: (() => void) | undefined;
+}) {
+  const currentTurnSide = turnSideForView(view) ?? view.activeSide;
+  const currentTurnClicks =
+    currentTurnSide === view.side ? view.own.clicks : view.opponent.clicks;
+  const currentTurnCapacity = actionCapacities[currentTurnSide];
+  const currentTurnDisplay = actionSlotDisplay(
+    currentTurnSide,
+    currentTurnClicks,
+    currentTurnCapacity,
+    true,
+  );
+
+  return (
+    <div className={`turnActionHeader side-${currentTurnSide}`}>
+      <div className="turnActionHeaderTop">
+        <h2>{turnActionHeaderLabel(view, currentTurnSide, activeAiSide)}</h2>
+        <PriorityWindowHoldToggle
+          enabled={priorityWindowHoldEnabled}
+          onToggle={onPriorityWindowHoldEnabled}
+        />
+        {onFloatPanel ? (
+          <ActionPanelFloatButton onFloat={onFloatPanel} />
+        ) : null}
+      </div>
+      <div
+        className={`actionAvailability side-${currentTurnSide}`}
+        data-testid="action-availability"
+      >
+        <span className="actionAvailabilityCount">{`noch ${currentTurnDisplay.available}`}</span>
+        <ActionSlotMeter
+          side={currentTurnSide}
+          currentClicks={currentTurnClicks}
+          displayCapacity={currentTurnCapacity}
+          active
+          compact
+          slotsOnly
+        />
+      </div>
+    </div>
   );
 }
 

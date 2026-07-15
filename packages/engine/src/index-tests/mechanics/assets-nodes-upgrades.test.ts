@@ -1354,7 +1354,14 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
           action.type === "start_run" &&
           action.payload?.serverId === "remote_1",
       );
-      state = passRootRezWindowBeforeAccessIfOpen(state);
+      state = apply(
+        state,
+        "corp",
+        (action) =>
+          action.type === "rez_ice" &&
+          sourceDefinition(state, action) === definitionId,
+      );
+      state = apply(state, "runner", (action) => action.type === "continue_run");
       state = apply(state, "runner", (action) => action.type === "access_card");
       if (definitionId === "onr_v1_345_trap") {
         expect(state.pendingChoice?.source).toContain("p3_35.access_payment");

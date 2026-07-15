@@ -412,6 +412,10 @@ export type CardAccessZone = "installed" | "hq" | "rd" | "archives";
 export type CardAccessEffectImplementation = {
   kind: "on_access";
   sourceZones: readonly CardAccessZone[];
+  installedSourceActivation?:
+    | "requires_rezzed"
+    | "unrezzed_only"
+    | "any_rez_state";
   ignoreIfAccessedFrom?: readonly CardAccessZone[];
   revealIfAccessedFrom?: readonly Extract<CardAccessZone, "rd">[];
   condition?: CardConditionImplementation;

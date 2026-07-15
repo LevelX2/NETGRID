@@ -53,6 +53,8 @@
   `docs/reviews/ai/proteus-ai-release-reconciliation-final-review-2026-07-09.md`.
 - Originalset-/Releasehistorie liegt unter `docs/releases/v1/`; sie ist keine
   zweite aktuelle Runtimequelle.
+- Node-Zugriffseffekte und Rez-Default:
+  `docs/reviews/engine/node-access-rez-contract-final-review-2026-07-15.md`.
 
 ## KI
 
