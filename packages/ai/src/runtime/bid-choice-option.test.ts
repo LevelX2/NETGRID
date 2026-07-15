@@ -80,6 +80,21 @@ describe("selectedBidChoiceOptionId", () => {
     ).toBe("bid_0");
   });
 
+  it("does not treat an operation trace as a native ICE trace payoff", () => {
+    expect(
+      selectedBidChoiceOptionId(
+        input("corp", "hard", {
+          ownCredits: 8,
+          ownClicks: 0,
+          runnerCredits: 5,
+          encounteredIceDefinitionId: "onr_v1_284_chance-observation",
+        }),
+        bidChoice("trace:chance-observation", range(0, 5)),
+        { traceStrength: 5, runnerLink: 0 },
+      ),
+    ).toBe("bid_0");
+  });
+
   it("bids zero when guarantee plus payoff is unaffordable", () => {
     expect(
       selectedBidChoiceOptionId(

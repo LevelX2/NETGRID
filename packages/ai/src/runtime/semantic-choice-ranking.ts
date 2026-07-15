@@ -357,10 +357,9 @@ export function tacticalPlanMappedChoice(
       );
     const hardInterruptShouldYield =
       mapping.plan.side === "runner" &&
-      runnerPlanOverrideIsHardInterrupt(
-        mapping.plan,
-        mappedChoice,
+      semanticRuntimeChoiceHasScoreBreakdownComponent(
         overrideChoice,
+        "runner_matchpoint_run_lock_release",
       );
     if (
       tacticalPlanRunnerMappingBlocksOffPlanOverride(
@@ -897,7 +896,7 @@ function runnerPlanOverrideIsHardInterrupt(
     return true;
   }
   if (
-    semanticRuntimeChoiceHasScoreComponent(
+    semanticRuntimeChoiceHasScoreBreakdownComponent(
       overrideChoice,
       "runner_matchpoint_run_lock_release",
     )
@@ -1290,12 +1289,7 @@ function tacticalPlanCoverageProbeRunShouldYield(
   if (
     mapping.plan.type !== "runner.obtain_breaker_coverage" ||
     overrideChoice.action.type !== "start_run" ||
-    ![
-      "install_card",
-      "play_event",
-      "activated_card_ability",
-      "trigger_ability",
-    ].includes(mappedChoice.action.type) ||
+    mappedChoice.action.type !== "install_card" ||
     overrideChoice.score <= 0 ||
     scoreGap < 200 ||
     !semanticRuntimeChoiceHasScoreComponent(
@@ -1540,10 +1534,14 @@ function semanticRuntimeChoiceHasScoreComponent(
   choice: SemanticRuntimeChoice,
   key: string,
 ): boolean {
-  return (
-    choice.evidence.includes(`semantic_score_component:${key}`) ||
-    choice.scoreBreakdown.some((component) => component.key === key)
-  );
+  return choice.evidence.includes(`semantic_score_component:${key}`);
+}
+
+function semanticRuntimeChoiceHasScoreBreakdownComponent(
+  choice: SemanticRuntimeChoice,
+  key: string,
+): boolean {
+  return choice.scoreBreakdown.some((component) => component.key === key);
 }
 
 function semanticRuntimeChoiceHasAnyScoreComponent(

@@ -119,7 +119,7 @@ export function assessCorpTraceBid(params: {
 
 function sourceHasNativeTraceSuccessPayoff(sourceDefinitionId: string): boolean {
   const hint = AI_HINTS_BY_CARD.get(sourceDefinitionId);
-  if (!hint) return false;
+  if (!hint || hint.cardType !== "ice") return false;
   const hasTrace = (hint.effects ?? []).some(
     (effect) => effect.kind === "trace",
   );
