@@ -73,6 +73,56 @@ describe("selectedChoicesForDecision", () => {
     });
   });
 
+  it("uses a legal Runner tag-avoidance source instead of passing", () => {
+    const decision = selectedChoicesForDecision(
+      inputWithChoice(
+        {
+          kind: "select_option",
+          source: "v120.event_modification.avoid",
+          minSelections: 1,
+          maxSelections: 1,
+          options: [
+            { id: "pass", label: "Tag nicht vermeiden" },
+            {
+              id: "card_implementation_avoid_tag_runner_resource_1_0",
+              label: "Installierte Ressource: 1 Tag vermeiden",
+            },
+          ],
+        },
+        { side: "runner" },
+      ),
+      resolveChoiceAction("runner"),
+      unusedDependencies(),
+    );
+
+    expect(decision).toEqual({
+      choiceId: "choice_multi",
+      selectedOptionIds: ["card_implementation_avoid_tag_runner_resource_1_0"],
+    });
+  });
+
+  it("keeps pass when no legal Runner tag-avoidance source is selectable", () => {
+    const decision = selectedChoicesForDecision(
+      inputWithChoice(
+        {
+          kind: "select_option",
+          source: "v120.event_modification.avoid",
+          minSelections: 1,
+          maxSelections: 1,
+          options: [{ id: "pass", label: "Tag nicht vermeiden" }],
+        },
+        { side: "runner" },
+      ),
+      resolveChoiceAction("runner"),
+      unusedDependencies(),
+    );
+
+    expect(decision).toEqual({
+      choiceId: "choice_multi",
+      selectedOptionIds: ["pass"],
+    });
+  });
+
   it("selects enough generic options for mandatory multi-select choices", () => {
     const decision = selectedChoicesForDecision(
       inputWithChoice({

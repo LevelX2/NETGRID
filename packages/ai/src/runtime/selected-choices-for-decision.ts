@@ -22,6 +22,7 @@ import {
 } from "./select-card-choice-option";
 import { selectedSetupMulliganChoiceOptionId } from "./setup-mulligan-choice-option";
 import { selectedShellTradersStartTurnChoiceOptionId } from "./shell-traders-choice-option";
+import { selectedRunnerTagAvoidanceChoiceOptionId } from "./tag-avoidance-choice-option";
 import { latestTraceContext } from "./trace-context";
 import { getTacticalPlanMemorySnapshot } from "../plans/plan-memory";
 
@@ -228,6 +229,18 @@ export function selectedChoicesForDecision(
     return selectedOptionId !== undefined
       ? { choiceId: choice.choiceId, selectedOptionIds: [selectedOptionId] }
       : { choiceId: choice.choiceId, selectedOptionIds: [] };
+  }
+  if (input.side === "runner") {
+    const selectedOptionId = selectedRunnerTagAvoidanceChoiceOptionId(
+      choice,
+      selectableOptions,
+    );
+    if (selectedOptionId !== undefined) {
+      return {
+        choiceId: choice.choiceId,
+        selectedOptionIds: [selectedOptionId],
+      };
+    }
   }
   if (choice.kind !== "bid_amount") {
     return {
