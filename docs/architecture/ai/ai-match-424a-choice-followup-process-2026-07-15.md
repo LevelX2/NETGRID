@@ -1,6 +1,6 @@
 # KI-Choice-Follow-up für Match 424A (2026-07-15)
 
-Status: P0 bis P3 abgeschlossen; P4 aktiv; P5 offen
+Status: P0 bis P4 abgeschlossen; P5 aktiv
 
 ## Quelle und `/Goal`
 
