@@ -1,6 +1,6 @@
 # KI-Match-F5D27033-Flatline-Risikoprozess
 
-Status: aktiv
+Status: fachlich abgeschlossen; lokale Integration ausstehend
 
 ## Quelle und Ziel
 
@@ -40,6 +40,8 @@ aktuellen Code reproduzierbare Runner-Fehler generisch zu beheben:
 
 ### Paket 1: Preflight und Prozessartefakt
 
+Status: abgeschlossen
+
 - Worktree und Branch anlegen.
 - Projekt-, Agenten-, Skill- und Checkpoint-Verträge lesen.
 - Prozess, Invarianten, Paketfolge und Abschlussgates festhalten.
@@ -47,6 +49,8 @@ aktuellen Code reproduzierbare Runner-Fehler generisch zu beheben:
 Done-Gate: sauberer Worktree, `git diff --check`, Paketcommit.
 
 ### Paket 2: Match-Evidence und rote Checkpoints
+
+Status: abgeschlossen
 
 - Decisions 13/StateVersion 25, 24/StateVersion 41 und
   33/StateVersion 56 side-safe capturen.
@@ -59,6 +63,8 @@ Red-Evidence-Commit.
 
 ### Paket 3: Generische Runtime-Korrektur
 
+Status: abgeschlossen
+
 - Bekannten verbleibenden Access-Schaden in Run-Revalidation und Jack-out-
   Auswahl konsumieren.
 - Effektive Handgröße, Handpuffer-Headroom und Core Damage in Survival-
@@ -70,6 +76,8 @@ Done-Gate: unveränderte Zielcheckpoints grün, Gegenproben weiterhin grün,
 fokussierte Unit-Tests grün, Paketcommit.
 
 ### Paket 4: Breite Verifikation und Abschluss
+
+Status: Verifikation und Dokumentation abgeschlossen; Merge/Cleanup ausstehend
 
 - Angrenzende Decision-Checkpoint- und Runtime-Tests ausführen.
 - AI-Typecheck, relevante AI-Shards beziehungsweise vollständige AI-Suite und

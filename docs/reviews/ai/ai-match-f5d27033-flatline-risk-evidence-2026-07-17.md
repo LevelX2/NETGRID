@@ -1,6 +1,6 @@
 # KI-Match-F5D27033-Flatline-Risiko-Evidence
 
-Status: Red Evidence vor Runtime-Korrektur
+Status: umgesetzt und verifiziert
 
 ## Quelle und Reproduktion
 
@@ -13,7 +13,7 @@ Status: Red Evidence vor Runtime-Korrektur
 - Hidden-Info-Grenze: PlayerView und öffentlicher Eventpräfix des jeweiligen
   Entscheidungszeitpunkts
 
-## Rote Zielentscheidungen
+## Vorher: rote Zielentscheidungen
 
 ### F01: bekannter Damage-Ambush wird trotzdem betreten
 
@@ -88,3 +88,78 @@ Der fokussierte Checkpoint-Test muss vor der Runtime-Korrektur genau drei
 `behavior_regression`-Fehler liefern: F01, F02 und F03. Die drei Gegenproben und
 der Hidden-Info-Test müssen grün bleiben. Warmup-, Fixture-, Engine-Legality-
 oder Runtime-State-Drift zählt nicht als Verhaltensnachweis.
+
+Der unveränderte Ausgangscode lieferte genau diesen Stand: F01, F02 und F03
+scheiterten ausschließlich als `behavior_regression`; alle drei Gegenproben und
+der Hidden-Info-Test waren grün.
+
+## Umsetzung
+
+### Bekannter Access-Damage-Ambush
+
+Die Runner-Bewertung konsumiert am Jack-out-Fenster nun den bereits sichtbaren
+Hint eines gerezzten, bekannten Access-Damage-Ambushes, wenn er die einzige
+Root-Karte des erreichten Remote-Servers ist. Ein erforderlicher
+Advancement-Counter wird aus der sichtbaren Karte geprüft. Die Regel ist weder
+an Vacant Soulkiller noch an eine verdeckte Definition gebunden.
+
+F01 wählt danach `runner.jack_out`. Der Continue-Score erhält im geprüften Fall
+den generischen Faktor `runner_known_access_damage_ambush`; dadurch gewinnt
+Jack-out trotz des bestehenden Druckverlust-Malus mit -351.
+
+### Effektive Handgröße und Reaktionsreserve
+
+`RunnerDamageThreatAssessment` führt nun die effektive maximale Handgröße und
+den verbleibenden Hand-Headroom. Bei bestätigtem oder kritischem Damage-Druck,
+einem durch Core Damage auf den empfohlenen Floor gesenkten Handlimit, vollem
+Handpuffer und nur einem verbleibenden Klick gilt:
+
+- ein Basiscredit unter zehn liquiden Credits gewinnt abgestuft
+  Reaktionsreserve;
+- ein letzter Draw unter acht Credits wird abgewertet, weil er den dauerhaften
+  Handpuffer nicht erhöht;
+- eine nicht unmittelbar defensive Installation wird für den verlorenen
+  Puffer bestraft;
+- Breaker, Damage-Prevention, Tag-Prevention, Handgrößenhilfe und
+  Core-Damage-Reparatur bleiben als unmittelbare Verteidigung erlaubt.
+
+F03 wählt danach `runner.gain_credit` mit Rohscore 1509. Der sichtbare Faktor
+`runner_damage_locked_hand_reaction_reserve` trägt +650 bei; der
+opportunistische HQ-Plan mit Rohscore 844 gibt über
+`damage_reaction_reserve_mapping_yield` frei.
+
+### Marginale Kapazitätsinstallation
+
+Ein `runner.play_best_hand_card`- oder Development-Plan darf eine positive,
+aber sehr schwache kumulative Kapazitätsinstallation nicht mehr absolut gegen
+einen um mehr als 600 Punkte stärkeren Basis-Draw oder Basiscredit schützen.
+Die bestehende Broker-Investment-Ausnahme bleibt erhalten; neue Coverage,
+wertvolle Breaker und andere Installationsklassen werden nicht pauschal
+freigegeben.
+
+F02 wählt danach den unveränderten Rohgewinner `runner.draw_card` mit 1248
+statt der Mem-Chip-Installation mit 2. Die Arbitration meldet Score-Gap 1246
+bei Schwelle 600.
+
+## Nachher-Gates
+
+- sechs spielgleiche Checkpoints: drei Zielentscheidungen grün, drei
+  Gegenproben grün, Hidden-Info-Test grün
+- fokussierter Runtime-Verbund: 108/108 Tests grün
+- `@netgrid/ai`-Typecheck: grün
+- `check:ai:full`: grün; 618 aktive Hints, 528 Implementierungen, 391
+  generierte Facts, 137 Fallbacks, null harte Fehler
+- vollständige AI-Suite: 346/354 Dateien und 2445/2460 Tests grün
+- die 15 roten Tests in acht Dateien sind auf demselben `main` identisch
+  reproduzierbare Broker-/Plan- und Hint-Quality-Altfehler; der Slice fügt
+  keinen neuen Vollsuite-Fehler hinzu
+- `git diff --check`: grün
+
+## Ergebnis
+
+Die drei freigegebenen Fehler sind mit unveränderten historischen Erwartungen
+geschlossen. Die KI nutzt nur PlayerView, öffentliche Eventpräfixe,
+LegalActions und bereits geprüfte Hints. Sie kennt Chance Observation und
+Urban Renewal an F03 weiterhin nicht. Ambige frühe Check-Runs bleiben über die
+vorhandene replay-stabile Probevariation variabel; nur die klar sichtbaren
+Damage-/Pufferlagen erhalten den neuen deterministischen Schutz.

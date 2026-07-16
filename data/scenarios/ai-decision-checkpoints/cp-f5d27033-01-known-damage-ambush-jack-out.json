@@ -752,9 +752,7 @@
           "corp_onr_v1_244_filter_1",
           "corp_onr_v1_295_night-shift_2"
         ],
-        "archives": [
-          "corp_onr_v1_309_bbs-whispering-campaign_2"
-        ],
+        "archives": ["corp_onr_v1_309_bbs-whispering-campaign_2"],
         "scoreArea": [],
         "servers": [
           {
@@ -783,9 +781,7 @@
             "kind": "remote",
             "label": "Remote 1",
             "ice": [],
-            "root": [
-              "corp_onr_v1_346_vacant-soulkiller_1"
-            ]
+            "root": ["corp_onr_v1_346_vacant-soulkiller_1"]
           }
         ]
       },
@@ -3403,9 +3399,7 @@
               "support": 90,
               "final": 74
             },
-            "supportGaps": [
-              "weak_tag_damage_defense"
-            ],
+            "supportGaps": ["weak_tag_damage_defense"],
             "evidence": [
               "strategy:runner.run_event_tempo",
               "confidence:high",
@@ -3470,19 +3464,14 @@
           "kind": "none",
           "required": 0,
           "satisfied": true,
-          "evidence": [
-            "reserve_source:runtime_context",
-            "reserve:none"
-          ]
+          "evidence": ["reserve_source:runtime_context", "reserve:none"]
         },
         "blockers": [],
         "transition": {
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "runner.search.breaker",
-          "evidence": [
-            "continued:runner.search.breaker"
-          ]
+          "evidence": ["continued:runner.search.breaker"]
         },
         "commitment": {
           "strategyId": "runner.search.breaker",
@@ -3564,10 +3553,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3649,10 +3635,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3732,10 +3715,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3757,9 +3737,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -3819,10 +3797,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4330,10 +4305,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4446,9 +4418,7 @@
         "minimumCreditsAfterRun": 0,
         "minimumGripAfterRun": 0,
         "preserveStealOrTrashCredits": 0,
-        "evidence": [
-          "runner_run_plan_reserve_steal_cost:unknown_or_zero"
-        ]
+        "evidence": ["runner_run_plan_reserve_steal_cost:unknown_or_zero"]
       },
       "pathQuote": {
         "server": "remote_1",
@@ -4463,9 +4433,7 @@
       },
       "revalidation": {
         "status": "valid",
-        "reasons": [
-          "run_plan_created_from_selected_run_action"
-        ],
+        "reasons": ["run_plan_created_from_selected_run_action"],
         "checkedAtStateVersion": 23
       },
       "abortPolicy": {
