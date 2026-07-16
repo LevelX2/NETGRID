@@ -320,18 +320,23 @@ export function evaluateRunnerOpeningHand(
   const handSize = input.playerView.own.gripOrHq.length;
   const semanticContext = openingSemanticContext(input);
   const strategySet = new Set(semanticContext.strategies);
+  const breakerAccessCount =
+    breakerCount + Math.min(1, semanticContext.runnerOpeningBreakerSearchTools);
   let score = 0;
   const reasons: string[] = [];
   const evidence = [
     `opening_breakers:${breakerCount}`,
+    `opening_breaker_search_tools:${semanticContext.runnerOpeningBreakerSearchTools}`,
+    `opening_breaker_access:${breakerAccessCount}`,
     `opening_economy:${economyCount}`,
     `opening_setup:${setupCount}`,
     `opening_pressure:${pressureCount}`,
     ...semanticOpeningEvidence(semanticContext),
   ];
 
-  score += breakerCount >= 2 ? 24 : breakerCount === 1 ? 18 : 0;
-  if (breakerCount === 0) reasons.push("no_opening_breaker");
+  score +=
+    breakerAccessCount >= 2 ? 24 : breakerAccessCount === 1 ? 18 : 0;
+  if (breakerAccessCount === 0) reasons.push("no_opening_breaker_access");
   score +=
     economyCount >= 2
       ? 22
@@ -343,7 +348,7 @@ export function evaluateRunnerOpeningHand(
   if (economyCount === 0) reasons.push("no_opening_economy");
   score += setupCount >= 3 ? 16 : setupCount >= 1 ? 10 : 0;
   score +=
-    pressureCount > 0 && (breakerCount > 0 || economyCount > 0)
+    pressureCount > 0 && (breakerAccessCount > 0 || economyCount > 0)
       ? 12
       : pressureCount > 0
         ? 4
@@ -354,7 +359,8 @@ export function evaluateRunnerOpeningHand(
     strategySet.has("runner.rig_first") ||
     strategySet.has("runner.search.breaker")
   ) {
-    score += breakerCount > 0 && setupCount > 0 ? 12 : setupCount > 0 ? 6 : 0;
+    score +=
+      breakerAccessCount > 0 && setupCount > 0 ? 12 : setupCount > 0 ? 6 : 0;
   } else if (
     semanticContext.runnerEconomyTools > 0 &&
     strategySet.has("runner.economy_first")
@@ -366,16 +372,19 @@ export function evaluateRunnerOpeningHand(
     strategySet.has("runner.remote_contest")
   ) {
     score +=
-      pressureCount > 0 && (breakerCount > 0 || economyCount > 0) ? 12 : 4;
+      pressureCount > 0 && (breakerAccessCount > 0 || economyCount > 0)
+        ? 12
+        : 4;
   } else {
     score += 6;
   }
 
-  if (breakerCount === 0 && economyCount === 0) score = Math.min(score, 30);
-  if (pressureCount >= 3 && breakerCount === 0) {
+  if (breakerAccessCount === 0 && economyCount === 0)
+    score = Math.min(score, 30);
+  if (pressureCount >= 3 && breakerAccessCount === 0) {
     score = Math.min(score, economyCount > 0 ? 44 : 32);
   }
-  if (breakerCount >= 1 && economyCount >= 1) {
+  if (breakerAccessCount >= 1 && economyCount >= 1) {
     reasons.push("opening_runner_plan_supported");
   }
   const threshold =
@@ -392,8 +401,26 @@ type OpeningSemanticContext = {
   strategies: string[];
   strategyProfileStatus: "present" | "neutral" | "missing";
   runnerEconomyTools: number;
+  runnerOpeningBreakerSearchTools: number;
   corpRemoteProtectionTools: number;
   capabilityConfidence?: string;
+};
+
+type RunnerOpeningCapabilities = {
+  economyBankTools?: readonly unknown[];
+  breakerInventory?: ReadonlyArray<{
+    coverage?: readonly string[];
+    locations?: readonly string[];
+    confidence?: string;
+  }>;
+  searchAccess?: {
+    tools?: ReadonlyArray<{
+      cardId: string;
+      status?: string;
+      canSearchBreakers?: boolean;
+      confidence?: string;
+    }>;
+  };
 };
 
 function openingSemanticContext(input: AiDecisionInput): OpeningSemanticContext {
@@ -405,9 +432,7 @@ function openingSemanticContext(input: AiDecisionInput): OpeningSemanticContext 
     };
     ownDeckCapabilities?: {
       confidence?: string;
-      runner?: {
-        economyBankTools?: readonly unknown[];
-      };
+      runner?: RunnerOpeningCapabilities;
       corp?: {
         remotePlanProfile?: {
           remoteProtectionToolsKnown?: number;
@@ -433,6 +458,8 @@ function openingSemanticContext(input: AiDecisionInput): OpeningSemanticContext 
       : "missing",
     runnerEconomyTools:
       semanticInput.ownDeckCapabilities?.runner?.economyBankTools?.length ?? 0,
+    runnerOpeningBreakerSearchTools:
+      openingExecutableBreakerSearchToolCount(input, semanticInput),
     corpRemoteProtectionTools:
       semanticInput.ownDeckCapabilities?.corp?.remotePlanProfile
         ?.remoteProtectionToolsKnown ?? 0,
@@ -442,11 +469,56 @@ function openingSemanticContext(input: AiDecisionInput): OpeningSemanticContext 
   };
 }
 
+function openingExecutableBreakerSearchToolCount(
+  input: AiDecisionInput,
+  semanticInput: AiDecisionInput & {
+    ownDeckCapabilities?: { runner?: RunnerOpeningCapabilities };
+  },
+): number {
+  const runnerCapabilities = semanticInput.ownDeckCapabilities?.runner;
+  const hasKnownStandardCoverage =
+    runnerCapabilities?.breakerInventory?.some(
+      (breaker) =>
+        breaker.locations?.includes("in_deck") === true &&
+        breaker.confidence !== "low" &&
+        breaker.coverage?.some((coverage) =>
+          ["wall", "code_gate", "sentry", "universal"].includes(coverage),
+        ) === true,
+    ) === true;
+  if (!hasKnownStandardCoverage) return 0;
+
+  const handByDefinitionId = new Map(
+    input.playerView.own.gripOrHq
+      .filter((card) => card.definitionId)
+      .map((card) => [card.definitionId!, card]),
+  );
+  return (
+    runnerCapabilities?.searchAccess?.tools?.filter((tool) => {
+      if (
+        tool.status !== "in_hand" ||
+        tool.canSearchBreakers !== true ||
+        tool.confidence === "low"
+      ) {
+        return false;
+      }
+      const card = handByDefinitionId.get(tool.cardId);
+      if (!card) return false;
+      const immediateCreditCost =
+        card.type === "event" ? card.cost : (card.installCost ?? card.cost);
+      return (
+        immediateCreditCost !== undefined &&
+        immediateCreditCost <= input.playerView.own.credits
+      );
+    }).length ?? 0
+  );
+}
+
 function semanticOpeningEvidence(context: OpeningSemanticContext): string[] {
   return [
     `strategy_profile:${context.strategyProfileStatus}`,
     `strategy_lines:${context.strategies.slice(0, 3).join(",") || "none"}`,
     `runner_economy_tools:${context.runnerEconomyTools}`,
+    `runner_opening_breaker_search_tools:${context.runnerOpeningBreakerSearchTools}`,
     `corp_remote_protection_tools:${context.corpRemoteProtectionTools}`,
     ...(context.capabilityConfidence
       ? [`deck_capability_confidence:${context.capabilityConfidence}`]
