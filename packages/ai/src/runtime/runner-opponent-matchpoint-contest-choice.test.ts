@@ -75,6 +75,44 @@ describe("runner opponent matchpoint contest choice", () => {
       ),
     ).toBeUndefined();
   });
+
+  it("contests the specifically advanced remote at a public two-point terminal window", () => {
+    const remoteRun = action("run-remote", "start_run", {
+      serverId: "remote_1",
+    });
+    const view = input({ opponentAgendaPoints: 5, actions: [remoteRun] });
+    view.playerView.servers[0]!.root[0]!.advancementCounters = 2;
+
+    const selected = runnerOpponentMatchpointContestSemanticChoice(
+      view,
+      [choice(remoteRun, 200)],
+      [
+        runTarget(remoteRun.actionId, {
+          scoreThreat: true,
+          recommendation: "run_now",
+        }),
+      ],
+    );
+
+    expect(selected?.action.actionId).toBe(remoteRun.actionId);
+    expect(selected?.evidence).toContain(
+      "terminal_contest_kind:visible_two_point_remote",
+    );
+  });
+
+  it("does not force a two-point contest without public advancement", () => {
+    const remoteRun = action("run-remote", "start_run", {
+      serverId: "remote_1",
+    });
+
+    expect(
+      runnerOpponentMatchpointContestSemanticChoice(
+        input({ opponentAgendaPoints: 5, actions: [remoteRun] }),
+        [choice(remoteRun, 200)],
+        [runTarget(remoteRun.actionId)],
+      ),
+    ).toBeUndefined();
+  });
 });
 
 function input(params: {

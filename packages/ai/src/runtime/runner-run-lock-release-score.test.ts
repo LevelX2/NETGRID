@@ -62,6 +62,62 @@ describe("runnerRunLockReleaseScoreComponent", () => {
       runnerRunLockReleaseScoreComponent(current, releaseAction()),
     ).toBeUndefined();
   });
+
+  it("releases for a reachable public two-point terminal remote", () => {
+    const current = input();
+    current.playerView.opponent.agendaPoints = 5;
+    current.playerView.servers = [
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: [],
+        root: [
+          {
+            instanceId: "unknown-advanced-root",
+            known: false,
+            advancementCounters: 2,
+          },
+        ],
+      },
+    ];
+
+    const component = runnerRunLockReleaseScoreComponent(
+      current,
+      releaseAction(),
+    );
+
+    expect(component).toMatchObject({
+      key: "runner_matchpoint_run_lock_release",
+      value: 4100,
+    });
+    expect(component?.reason).toContain(
+      "terminal_contest_kind:visible_two_point_remote",
+    );
+    expect(component?.reason).toContain("follow_up_server:remote_1");
+  });
+
+  it("does not release at five points for an unadvanced unknown remote", () => {
+    const current = input();
+    current.playerView.opponent.agendaPoints = 5;
+    current.playerView.servers = [
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: [],
+        root: [
+          {
+            instanceId: "unknown-unadvanced-root",
+            known: false,
+            advancementCounters: 0,
+          },
+        ],
+      },
+    ];
+
+    expect(
+      runnerRunLockReleaseScoreComponent(current, releaseAction()),
+    ).toBeUndefined();
+  });
 });
 
 function input(): AiDecisionInput {
