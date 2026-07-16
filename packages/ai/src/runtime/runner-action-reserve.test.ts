@@ -44,6 +44,40 @@ describe("runner action reserve", () => {
       undefined,
     );
   });
+
+  it("raises the install floor after a visible trace-tag deck signal", () => {
+    const action = installAction(2);
+    const input = runnerInput(4, action);
+    input.playerView.own.gripOrHq = Array.from({ length: 4 }, (_, index) => ({
+      instanceId: `buffer-${index}`,
+      definitionId: `buffer-${index}`,
+      title: `Buffer ${index}`,
+      type: "event",
+      known: true,
+    }));
+    input.playerView.publicEvents = [
+      {
+        eventId: "seen-chance-observation",
+        type: "access_card",
+        stateVersionBefore: 1,
+        stateVersionAfter: 2,
+        stateHashAfter: "fnv1a:seen-chance-observation",
+        publicPayload: {
+          actionType: "access_card",
+          cardDefinitionId: "onr_v1_284_chance-observation",
+        },
+      },
+    ];
+
+    expect(assessRunnerActionReserve(input, action)).toMatchObject({
+      creditsAfterAction: 2,
+      minimumCreditFloor: 3,
+      spendingWouldDropBelowReserve: true,
+    });
+    expect(runnerActionReserveExclusion(input, action)).toMatchObject({
+      key: "runner_install_breaks_credit_floor",
+    });
+  });
 });
 
 function installAction(cost: number): LegalAction {

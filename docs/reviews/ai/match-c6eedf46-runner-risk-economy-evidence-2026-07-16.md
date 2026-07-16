@@ -273,3 +273,38 @@ Im historischen D9 werden dadurch sowohl Rigged Investments als auch R&D
 Interface aus der zulässigen Auswahl entfernt. Mit 10 Credits bleibt Rigged
 Investments erlaubt. Der fokussierte P3-Lauf ist mit 123 Tests sowie dem
 AI-Typecheck grün.
+
+## Sichtbare Damage-/Punish-Vermutung und sichere Varianz
+
+Die bestehende Damage-Threat-Bewertung berücksichtigt nun nicht nur bereits
+eingetretenen Schaden. Sie sammelt ausschließlich sichtbare Korp-Karten aus
+Board, Archives, Score Area und side-safe Event-Memory und klassifiziert ihre
+strukturierten Hints als Damage-Quelle, Trace-/Tag-Delivery oder Punish-
+Payoff. Eigene Runner-Karten und unbekannte Handkarten zählen nicht als
+Gegnersignal.
+
+Die Intensität ist abgestuft:
+
+- eine bekannte Chance Observation erzeugt `suspected`, aber kein Run-Verbot;
+- Chance Observation plus Urban Renewal bildet eine sichtbare Delivery-/
+  Payoff-Kombination und erzeugt `confirmed`;
+- vorhandene Tags, niedrige Hand oder bereits eingetretener Schaden können
+  die Lage bis `critical` verschärfen;
+- Handfloor, gewünschte Liquidität und der aktionsbezogene Install-Floor
+  steigen mit der Stufe.
+
+Die bereits vorhandene Near-Tie-Varianz wurde vom leicht ausrechenbaren
+StateVersion-Modulo auf einen FNV-Hash aus Match-Seed, Decision-ID,
+ActionNumber, öffentlicher StateVersion und zulässigen Zielservern umgestellt.
+Sie gilt nur für kostenlose, unbekannte und erreichbare Zentral-Probes ohne
+Score-Threat, ohne nützliche Handentwicklung und ohne Remote-Contestbedarf.
+Der stabile Vierer-Bucket führt ohne Signal in drei Fällen zum Probe und in
+einem zum Credit-Hold, bei `suspected` zwei zu zwei, bei `confirmed` eins zu
+drei und bei `critical` immer zum Hold. Derselbe Kontext bleibt identisch;
+ein Warnsignal kann für denselben Bucket die Risikobereitschaft nur senken,
+nie erhöhen.
+
+Fokussierte P4-Gegenproben belegen sichtbare versus unbekannte Karten,
+abgestufte Reserve, Probe und Hold, identische Wiederholung, unterschiedliche
+Kontexte sowie den Ausschluss klarer und nicht naher Entscheidungen. Der
+Checkpoint und 35 fokussierte Tests sowie der AI-Typecheck sind grün.

@@ -1,5 +1,6 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
+import { runnerDamageThreatAssessment } from "../runner-damage-threat-assessment";
 import { actionCreditCost } from "./action-cost";
 import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
 
@@ -26,7 +27,15 @@ export function assessRunnerActionReserve(
   );
   const creditsAfterAction =
     input.playerView.own.credits - actionCost + immediateCreditGain;
-  const minimumCreditFloor = 2;
+  const damageThreatLevel = runnerDamageThreatAssessment(input).level;
+  const minimumCreditFloor =
+    damageThreatLevel === "critical"
+      ? 6
+      : damageThreatLevel === "confirmed"
+        ? 4
+        : damageThreatLevel === "suspected"
+          ? 3
+          : 2;
   const spendingWouldDropBelowReserve =
     actionCost > 0 && creditsAfterAction < minimumCreditFloor;
   const survivalOverride = runnerActionHasSurvivalOverride(candidate);
@@ -42,6 +51,7 @@ export function assessRunnerActionReserve(
       `runner_action_reserve_immediate_credit_gain:${immediateCreditGain}`,
       `runner_action_reserve_credits_after:${creditsAfterAction}`,
       `runner_action_reserve_floor:${minimumCreditFloor}`,
+      `runner_action_reserve_damage_threat:${damageThreatLevel}`,
       `runner_action_reserve_spending_would_drop:${spendingWouldDropBelowReserve}`,
       `runner_action_reserve_survival_override:${survivalOverride}`,
     ],

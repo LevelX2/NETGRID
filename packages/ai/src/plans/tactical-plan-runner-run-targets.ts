@@ -2,10 +2,13 @@ import type { LegalAction } from "@netgrid/shared";
 import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
 import {
   runnerPressurePreferredProbeTarget,
+  runnerPressureProbeDisposition,
+  runnerPressureVariationBucket,
   runnerPressureProbeBasePriority,
   runnerPressureProbeTargetAllowed,
   runnerRunTargetTacticalPriorityDelta,
 } from "../runner-run-target-guidance";
+import { runnerDamageThreatAssessment } from "../runner-damage-threat-assessment";
 import { createPlanStep } from "./tactical-plan-builders";
 import { actionServerId } from "./tactical-plan-server-targets";
 import { usefulLegalRunnerHandDevelopment } from "./tactical-plan-runner-hand-development";
@@ -255,6 +258,15 @@ export function assessRunnerPressureBudget(
   const allowedProbeTargets = allowedProbeEvaluations
     .map((evaluation) => evaluation.targetServerId)
     .sort();
+  const variationEligibleProbeTargets = allowedProbeEvaluations
+    .filter(
+      (evaluation) =>
+        evaluation.accessPayoff === "unknown" &&
+        evaluation.knownAccessState === "unknown" &&
+        evaluation.scoreThreat !== true,
+    )
+    .map((evaluation) => evaluation.targetServerId)
+    .sort();
   const probeBaselines = allowedProbeEvaluations
     .map((evaluation) => ({
       targetServerId: evaluation.targetServerId,
@@ -274,6 +286,30 @@ export function assessRunnerPressureBudget(
         RUNNER_PRESSURE_PROBE_NEAR_TIE_WINDOW,
     )
     .map((baseline) => baseline.targetServerId);
+  const damageThreatLevel = runnerDamageThreatAssessment(context.input).level;
+  const replayStableVariationContext = [
+    context.input.seed,
+    context.input.decisionId,
+    context.input.actionNumber,
+    context.input.playerView.stateVersion,
+    allowedProbeTargets.join("|"),
+  ].join(":");
+  const probeEligible =
+    context.input.side === "runner" &&
+    reservePressureActive &&
+    !usefulHandDevelopmentAvailable &&
+    !remoteFundingNeed &&
+    variationEligibleProbeTargets.length > 0;
+  const probeDisposition = probeEligible
+    ? runnerPressureProbeDisposition(
+        replayStableVariationContext,
+        damageThreatLevel,
+      )
+    : "hold";
+  const variationBucket = runnerPressureVariationBucket(
+    `${replayStableVariationContext}|disposition`,
+    4,
+  );
   const blockedReasons = [
     ...(!reservePressureActive ? ["reserve_pressure_inactive"] : []),
     ...(usefulHandDevelopmentAvailable
@@ -281,23 +317,23 @@ export function assessRunnerPressureBudget(
       : []),
     ...(remoteFundingNeed ? ["remote_contest_funding_need"] : []),
     ...(allowedProbeTargets.length === 0 ? ["no_safe_probe_target"] : []),
+    ...(probeEligible && probeDisposition === "hold"
+      ? ["replay_stable_safe_probe_hold"]
+      : []),
   ];
   const canSpendActionOnPressure =
-    context.input.side === "runner" &&
-    reservePressureActive &&
-    !usefulHandDevelopmentAvailable &&
-    !remoteFundingNeed &&
-    allowedProbeTargets.length > 0;
+    probeEligible && probeDisposition === "probe";
   const boundedVariationApplied =
-    canSpendActionOnPressure && nearTieProbeTargets.length > 1;
-  const preferredProbeTarget = boundedVariationApplied
+    probeEligible;
+  const preferredProbeTarget =
+    canSpendActionOnPressure && nearTieProbeTargets.length > 1
     ? runnerPressurePreferredProbeTarget(
         nearTieProbeTargets,
-        context.input.playerView.stateVersion,
+        replayStableVariationContext,
       )
     : undefined;
   const variationReason = boundedVariationApplied
-    ? "near_tie_state_version"
+    ? "safe_probe_seeded_decision_context"
     : "deterministic_priority_only";
   return {
     canSpendActionOnPressure,
@@ -305,20 +341,28 @@ export function assessRunnerPressureBudget(
     maxCreditLossForProbe: 0,
     allowedProbeTargets,
     nearTieProbeTargets,
+    variationEligibleProbeTargets,
     ...(preferredProbeTarget ? { preferredProbeTarget } : {}),
     blockedReasons,
     boundedVariationApplied,
     variationReason,
+    probeDisposition,
+    variationBucket,
+    damageThreatLevel,
     evidence: [
       `pressure_budget:${canSpendActionOnPressure ? "available" : "blocked"}`,
       `pressure_action_budget:${canSpendActionOnPressure ? 1 : 0}`,
       "max_credit_loss_for_probe:0",
       `allowed_probe_targets:${allowedProbeTargets.join("|") || "none"}`,
       `near_tie_probe_targets:${nearTieProbeTargets.join("|") || "none"}`,
+      `variation_eligible_probe_targets:${variationEligibleProbeTargets.join("|") || "none"}`,
       `preferred_probe_target:${preferredProbeTarget ?? "none"}`,
       `blocked_pressure_reasons:${blockedReasons.join("|") || "none"}`,
       `bounded_variation_applied:${boundedVariationApplied}`,
       `variation_reason:${variationReason}`,
+      `probe_disposition:${probeDisposition}`,
+      `probe_variation_bucket:${variationBucket}`,
+      `probe_damage_threat_level:${damageThreatLevel}`,
     ],
   };
 }

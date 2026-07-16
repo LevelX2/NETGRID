@@ -8,6 +8,76 @@ import type {
 import { runnerDamageThreatAssessment } from "./runner-damage-threat-assessment";
 
 describe("runnerDamageThreatAssessment", () => {
+  it("raises a warning from a previously revealed trace-tag operation", () => {
+    const assessment = runnerDamageThreatAssessment(
+      input({
+        handCount: 4,
+        stateVersion: 12,
+        events: [
+          event("seen-chance-observation", 10, {
+            actionType: "access_card",
+            cardDefinitionId: "onr_v1_284_chance-observation",
+          }),
+        ],
+      }),
+    );
+
+    expect(assessment).toMatchObject({
+      level: "suspected",
+      knownTraceTagSignalCount: 1,
+      visiblePunishSignalScore: 1,
+      recommendedHandFloor: 2,
+    });
+    expect(assessment.visiblePunishSignalKinds).toContain("trace_tag_source");
+  });
+
+  it("confirms a damage deck read from matching visible delivery and payoff", () => {
+    const assessment = runnerDamageThreatAssessment(
+      input({
+        handCount: 4,
+        stateVersion: 14,
+        events: [
+          event("seen-chance-observation", 10, {
+            actionType: "access_card",
+            cardDefinitionId: "onr_v1_284_chance-observation",
+          }),
+          event("seen-urban-renewal", 12, {
+            actionType: "access_card",
+            cardDefinitionId: "onr_v1_307_urban-renewal",
+          }),
+        ],
+      }),
+    );
+
+    expect(assessment).toMatchObject({
+      level: "confirmed",
+      knownDamageSourceCount: 1,
+      knownPunishSignalCount: 2,
+      knownTraceTagSignalCount: 1,
+      recommendedHandFloor: 3,
+    });
+    expect(assessment.visiblePunishSignalKinds).toEqual(
+      expect.arrayContaining([
+        "damage_delivery_combo",
+        "damage_source",
+        "punish_payoff",
+        "trace_tag_source",
+      ]),
+    );
+  });
+
+  it("does not infer punish cards from unknown opponent hand slots", () => {
+    expect(
+      runnerDamageThreatAssessment(
+        input({ handCount: 4, stateVersion: 14, opponentHandCount: 5 }),
+      ),
+    ).toMatchObject({
+      level: "none",
+      knownPunishSignalCount: 0,
+      visiblePunishSignalScore: 0,
+    });
+  });
+
   it("treats recent visible damage at empty hand as critical survival pressure", () => {
     const assessment = runnerDamageThreatAssessment(
       input({
@@ -78,6 +148,7 @@ function input(params: {
   handCount: number;
   stateVersion: number;
   events?: readonly PublicGameEvent[];
+  opponentHandCount?: number;
   servers?: Array<{
     id: string;
     ice: VisibleCard[];
@@ -99,6 +170,7 @@ function input(params: {
       },
       opponent: {
         identity: card({ definitionId: "corp-identity", type: "identity" }),
+        handCount: params.opponentHandCount ?? 5,
       },
       servers: (params.servers ?? []).map((server) => ({
         id: server.id,

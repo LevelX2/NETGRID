@@ -38,8 +38,8 @@ describe("match C6EEDF46 runner risk and economy checkpoints", () => {
     const checkpoint = fixture(delayedEconomyReserveJson);
     const serializedPublicPrefix = JSON.stringify(checkpoint.engine.eventPrefix);
 
-    expect(serializedPublicPrefix).not.toContain("onr_v1_192_chance-observation");
-    expect(serializedPublicPrefix).not.toContain("onr_v1_231_urban-renewal");
+    expect(serializedPublicPrefix).not.toContain("onr_v1_284_chance-observation");
+    expect(serializedPublicPrefix).not.toContain("onr_v1_307_urban-renewal");
     expect(serializedPublicPrefix).not.toContain("Chance Observation");
     expect(serializedPublicPrefix).not.toContain("Urban Renewal");
   });

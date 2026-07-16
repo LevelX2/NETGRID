@@ -2,6 +2,7 @@ import type {
   RunnerRunTargetEvaluation,
   RunnerRunTargetRecommendation,
 } from "./runner-run-target-evaluation";
+import { fnv1a } from "./runtime/stable-hash";
 
 type RunTargetSemanticGuidanceInput = Pick<
   RunnerRunTargetEvaluation,
@@ -168,11 +169,42 @@ export function runnerPressureProbeTargetAllowed(
 
 export function runnerPressurePreferredProbeTarget(
   targets: readonly string[],
-  stateVersion: number,
+  replayStableContext: string,
 ): string | undefined {
   if (targets.length === 0) return undefined;
-  const index = Math.abs(stateVersion) % targets.length;
+  const index = runnerPressureVariationBucket(
+    `${replayStableContext}|target|${targets.join("|")}`,
+    targets.length,
+  );
   return targets[index];
+}
+
+export function runnerPressureProbeDisposition(
+  replayStableContext: string,
+  damageThreatLevel: "none" | "suspected" | "confirmed" | "critical",
+): "probe" | "hold" {
+  const probeBuckets =
+    damageThreatLevel === "none"
+      ? 3
+      : damageThreatLevel === "suspected"
+        ? 2
+        : damageThreatLevel === "confirmed"
+          ? 1
+          : 0;
+  return runnerPressureVariationBucket(
+    `${replayStableContext}|disposition`,
+    4,
+  ) < probeBuckets
+    ? "probe"
+    : "hold";
+}
+
+export function runnerPressureVariationBucket(
+  replayStableContext: string,
+  bucketCount: number,
+): number {
+  if (bucketCount <= 1) return 0;
+  return Number.parseInt(fnv1a(replayStableContext), 16) % bucketCount;
 }
 
 export function runnerRunTargetRecommendationGuidanceKeys(): RunnerRunTargetRecommendation[] {

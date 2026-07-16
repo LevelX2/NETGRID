@@ -2,6 +2,7 @@ import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 import type { DeckCapabilityProfile } from "./deck-capabilities";
 import type { RunnerHandDevelopmentEvaluation } from "./runner-hand-development";
 import type { RunnerStrategicIntentProfile } from "./runner-strategic-intent";
+import { runnerDamageThreatAssessment } from "./runner-damage-threat-assessment";
 import { assessKnownRezzedIcePath } from "./visible-run-analysis";
 import type {
   EvaluateRunnerRunTargetsParams,
@@ -35,11 +36,29 @@ export function buildRunnerEconomyPosture(
     (params.deckCapabilities?.runner?.economyBankTools.length ?? 0) > 0;
   const remoteScoreThreat = runnerRemoteScoreThreat(params.input);
   const phase = runnerCreditReservePhase(params.input, remoteScoreThreat);
-  const minimumCreditFloor =
-    riskAdjustedRunReserve || phase === "late_contest" ? 3 : 2;
+  const damageThreat = runnerDamageThreatAssessment(params.input);
+  const damageThreatFloor =
+    damageThreat.level === "critical"
+      ? 6
+      : damageThreat.level === "confirmed"
+        ? 4
+        : damageThreat.level === "suspected"
+          ? 3
+          : 2;
+  const minimumCreditFloor = Math.max(
+    riskAdjustedRunReserve || phase === "late_contest" ? 3 : 2,
+    damageThreatFloor,
+  );
   const baseDesiredCreditReserve = Math.max(
     phase === "opening" ? 4 : phase === "midgame" ? 5 : 6,
     riskAdjustedRunReserve || bankToolsRelevant ? 6 : 4,
+    damageThreat.level === "critical"
+      ? 8
+      : damageThreat.level === "confirmed"
+        ? 7
+        : damageThreat.level === "suspected"
+          ? 6
+          : 4,
   );
   const creditReservePolicy = buildRunnerCreditReservePolicy({
     input: params.input,
@@ -107,6 +126,8 @@ export function buildRunnerEconomyPosture(
     evidence: [
       `runner_credits:${credits}`,
       `minimum_credit_floor:${minimumCreditFloor}`,
+      `damage_threat_level:${damageThreat.level}`,
+      `damage_threat_credit_floor:${damageThreatFloor}`,
       `desired_credit_reserve:${desiredCreditReserve}`,
       `credit_reserve_phase:${creditReservePolicy.phase}`,
       `credit_reserve_remote_score_threat:${creditReservePolicy.remoteScoreThreat}`,

@@ -575,6 +575,10 @@ export function buildRunnerTacticalPlans(
       pressureBudget,
       serverId,
     );
+    const replayStableProbeHold =
+      pressureBudget.boundedVariationApplied &&
+      pressureBudget.probeDisposition === "hold" &&
+      (pressureBudget.variationEligibleProbeTargets ?? []).includes(serverId);
     const basePriority = serverId === "rd" ? 760 : 740;
     const pressureGoal = runnerPressureGoalForServer(context, serverId);
     const strategicBoost = tacticalGoalPriorityBoost(pressureGoal);
@@ -583,7 +587,9 @@ export function buildRunnerTacticalPlans(
       action,
       basePriority + pressureAllowance.priorityBonus + strategicBoost,
     );
-    const opportunityFloor = runnerCentralRunOpportunityFloor(context, action);
+    const opportunityFloor = replayStableProbeHold
+      ? undefined
+      : runnerCentralRunOpportunityFloor(context, action);
     const opportunityFloorBoost = opportunityFloor
       ? Math.max(0, opportunityFloor.priority - rawPriority)
       : 0;
@@ -592,12 +598,25 @@ export function buildRunnerTacticalPlans(
         planId: `runner.opportunistic_central_run:${serverId}`,
         side: "runner",
         type: "runner.opportunistic_central_run",
-        status: "active",
-        priority: opportunityFloor
-          ? Math.max(rawPriority, opportunityFloor.priority)
-          : rawPriority,
+        status: replayStableProbeHold ? "abandoned" : "active",
+        priority: replayStableProbeHold
+          ? -900
+          : opportunityFloor
+            ? Math.max(rawPriority, opportunityFloor.priority)
+            : rawPriority,
         horizonTurns: 1,
         target: { kind: "server", id: serverId },
+        blockers: replayStableProbeHold
+          ? [
+              {
+                blockerId: `replay_stable_safe_probe_hold:${serverId}`,
+                kind: "timing_window_unavailable",
+                severity: "soft",
+                target: { kind: "server", id: serverId },
+                evidence: pressureAllowance.evidence,
+              },
+            ]
+          : [],
         currentStep: runnerRunTargetCurrentStep(context, action, {
           stepId: `probe_central:${serverId}`,
           kind: "probe_central",
@@ -638,6 +657,16 @@ export function buildRunnerTacticalPlans(
                 },
               ]
             : []),
+          ...(replayStableProbeHold
+            ? [
+                {
+                  key: "runner_safe_probe_disposition_hold",
+                  label: "Replay-stabile Risk-Hold-Entscheidung",
+                  value: -900,
+                  reason: pressureAllowance.evidence.join("|"),
+                },
+              ]
+            : []),
         ],
         stateVersion,
       }),
@@ -665,6 +694,11 @@ export function buildRunnerTacticalPlans(
       stateVersion,
       runnerGoalEvidence,
       dependencies,
+      {
+        forceSafeProbeHold:
+          pressureBudget.boundedVariationApplied &&
+          pressureBudget.probeDisposition === "hold",
+      },
     ),
   );
   const runnerBankToolEvidence = bankToolEvidence(context, "runner");
