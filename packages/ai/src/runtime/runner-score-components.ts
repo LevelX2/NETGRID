@@ -153,6 +153,7 @@ export function runnerScoreComponents(
   components.push(
     ...runnerCreditNeedScoreComponents(input, action, {
       handFundingTarget: dependencies.handFundingTarget,
+      creditYield: dependencies.creditYield,
     }),
   );
   components.push(
