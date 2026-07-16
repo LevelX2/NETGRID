@@ -1,6 +1,6 @@
 # Globale Asset-/Upgrade-Rezfenster während Runs – Paketprozess
 
-Status: in Arbeit
+Status: Abschlussprüfung
 Stand: 2026-07-16
 Arbeitsbranch: `codex/global-run-rez-windows`
 Arbeits-Worktree: `C:\Projekte\NETGRID_GLOBAL_RUN_REZ_WINDOWS`
@@ -120,7 +120,7 @@ entsprechenden Safety-Regressionen sind grün.
 
 ## State Machine
 
-`GRR-0 done -> GRR-1 done -> GRR-2 done -> GRR-3 active -> final_verify -> merge_main -> cleanup -> complete`
+`GRR-0 done -> GRR-1 done -> GRR-2 done -> GRR-3 done -> final_verify active -> merge_main -> cleanup -> complete`
 
 Fehlerzustände:
 
@@ -136,7 +136,7 @@ Fehlerzustände:
 | GRR-0 | Prozessvertrag und Worktree-Controller | done | Preflight |
 | GRR-1 | Globaler Rez-Aktionsvertrag und Unit-Regressionen | done | GRR-0 |
 | GRR-2 | Hacker-Tracker-End-to-End- und Safety-Regression | done | GRR-1 |
-| GRR-3 | Abschlussreview und Wissensrückführung | active | GRR-2 |
+| GRR-3 | Abschlussreview und Wissensrückführung | done | GRR-2 |
 
 ## Paketdetails
 
@@ -314,6 +314,12 @@ Main-Merge und den vollständig verifizierten Worktree-/Branch-Cleanup aus.
   `validateGameState` sind geprüft. Vier fokussierte/angrenzende Testdateien
   sind mit 163 Tests grün; die vollständige Engine-Suite ist mit 187 Dateien
   und 1.701 Tests grün, ebenso Typecheck und Diff-Hygiene.
+- GRR-3: Final Review, aktueller Projektstatus und Juli-Log führen den
+  korrigierten Regelvertrag, die Engine-Ursache und die Safety-Evidence zurück.
+  Der abschließende Paketlauf bestätigt erneut 187 von 187 Testdateien und
+  1.701 von 1.701 Tests sowie einen grünen Engine-Typecheck; Diff-Hygiene ist
+  grün. Damit sind alle Pakete abgeschlossen und der Controller befindet sich
+  in der finalen Integrations- und Cleanup-Prüfung.
 
 ## Abschlusskriterien
 
