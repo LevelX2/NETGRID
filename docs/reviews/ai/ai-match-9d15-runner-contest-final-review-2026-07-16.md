@@ -97,5 +97,9 @@ der Inspector bestätigt weiterhin 84/84 verknüpfte Entscheidungen.
 - Kein neues Selfplay wurde erzeugt; die Aufgabe schließt zwei gespeicherte
   Zustände mit historischen Checkpoints und einer vollständigen AI-Suite.
 - Push und Pull Request sind nicht Teil des Auftrags.
-- Lokale Main-Integration und Worktree-Cleanup folgen als P5; ihr Ergebnis
-  wird nach dem Merge im Prozessartefakt und hier nachgetragen.
+- Der Arbeitsbranch wurde per Fast-Forward bis `1bc3c38d4` nach lokalem
+  `main` integriert. Im Hauptworkspace sind danach 96 fokussierte Tests und
+  der AI-Typecheck grün.
+- Der Arbeitsbranch `codex/ai-match-9d15-runner-contest` und der Worktree
+  `C:\Projekte\NETGRID_AI_MATCH_9D15_RUNNER_CONTEST` sind verifiziert
+  entfernt. Der parallele Broker-Worktree besteht unverändert fort.

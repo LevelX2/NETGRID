@@ -1,6 +1,6 @@
 # KI-Runner-Contest-Remediation für Match 9D15 (2026-07-16)
 
-Status: P0 bis P4 abgeschlossen; P5 lokale Integration ausstehend
+Status: P0 bis P5 abgeschlossen
 
 ## Quelle und Zielprüfung
 
@@ -171,18 +171,26 @@ Broker-Logik.
 - `main` enthält alle Paketcommits; Worktree und Branch sind verifiziert
   entfernt.
 
-## Paketstand vor P5
+## Abgeschlossener Paketstand
 
 - P0 Prozessbasis: `634d97666`
 - P1 Red-Evidence und Checkpoints: `5e63c23ed`
 - P2 Bypass-Contest: `e20dbbd48`
 - P3 Mehrpunkt-Terminalcontest: `412f4b2a4`
 - P4 Full-Gate-Fund zur Low-Value-Run-Event-Arbitration: `e1d6cd82b`
-- Evidence, Final Review, Wissenspflege und Skill-Härtung: im abschließenden
-  P4-Dokumentencommit
+- Evidence, Final Review und Wissenspflege: `1bc3c38d4`
+- P5: Fast-Forward nach lokalem `main`, 96 fokussierte Tests und AI-Typecheck
+  im Hauptworkspace grün; Arbeitsbranch gelöscht; Worktree verifiziert
+  entfernt
 
 Die ursprünglichen beiden Zielverträge waren vor Produktionsänderungen als
 `behavior_regression` rot und sind unverändert grün. Der erste breite
 AI-Shard-Lauf deckte zusätzlich eine 424A-Regression auf; erst nach ihrer
 generischen Eingrenzung wurden alle drei Shards auf demselben finalen
 Code-Commit erneut grün ausgeführt.
+
+Der normale `git worktree remove` löschte die Git-Registrierung, stieß beim
+Verzeichnis-Cleanup aber auf das Windows-Pfadlängenlimit. Der zuvor exakt
+aufgelöste Worktree-Pfad wurde deshalb im selben PowerShell-Prozess mit dem
+Long-Path-fähigen .NET-Dateisystempfad bereinigt. Registrierung, Ordner und
+Branch sind anschließend getrennt als nicht mehr vorhanden verifiziert.
