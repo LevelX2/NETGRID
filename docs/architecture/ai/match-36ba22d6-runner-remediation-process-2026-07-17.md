@@ -1,6 +1,6 @@
 # Match 36BA22D6: Runner-Plan-, Bank- und Access-Risk-Remediation
 
-Status: P0 bis P5 abgeschlossen, P6 aktiv
+Status: P0 bis P6 abgeschlossen
 
 ## Quelle und Zielprüfung
 
@@ -240,9 +240,15 @@ Ergebnis:
 - Done-Gate: `main` enthält alle Paketcommits und ist sauber; Worktree-Pfad
   und Arbeitsbranch existieren weder in Git noch im Dateisystem.
 
-Zwischenstand: Der aktuelle lokale `main` ist bereits im Arbeitsbranch
-enthalten. Ausstehend sind nur noch der lokale Merge nach `main`, die
-Main-Nachprüfung und das verifizierte Entfernen von Worktree und Branch.
+Ergebnis:
+
+- der Arbeitsbranch wurde lokal per Fast-Forward bis `de109e990` nach `main`
+  integriert;
+- direkt auf `main` sind 38/38 betroffene und angrenzende Tests, AI-Typecheck
+  und `git diff --check` grün;
+- der Git-Worktree-Eintrag, der absolute Worktree-Pfad und der Arbeitsbranch
+  sind verifiziert entfernt;
+- `main` ist sauber; Push und Pull Request wurden nicht ausgeführt.
 
 ## Verifikationsregeln
 

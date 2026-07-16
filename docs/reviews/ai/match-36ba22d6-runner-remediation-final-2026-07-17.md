@@ -102,5 +102,12 @@ grünen Tests.
 - Die fünf späteren Findings bleiben als historisch plausible, aber aktuell
   nicht spielgleich reproduzierbare Diagnose dokumentiert.
 
-Der Arbeitsbranch ist nach Dokumentationscommit für den lokalen Merge nach
-`main` bereit. Push und Pull Request sind nicht Teil dieses Prozesses.
+## Lokale Integration und Cleanup
+
+Der Arbeitsbranch wurde lokal per Fast-Forward bis `de109e990` nach `main`
+integriert. Direkt auf `main` sind anschließend 38/38 betroffene und
+angrenzende Tests, AI-Typecheck und `git diff --check` grün geblieben. Der
+Git-Worktree-Eintrag, der absolute Pfad
+`C:\Projekte\NETGRID_AI_MATCH_36BA22D6_REMEDIATION` und der Branch
+`codex/ai-match-36ba22d6-remediation` sind verifiziert entfernt. `main` ist
+sauber. Push und Pull Request wurden nicht ausgeführt.
