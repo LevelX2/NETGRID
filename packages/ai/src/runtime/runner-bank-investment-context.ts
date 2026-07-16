@@ -415,7 +415,7 @@ export function createRunnerBankInvestmentContext(
         criticalReserve,
         cashOutThresholdMet,
         ...(runOverride ? { runOverride } : {}),
-        buildBankPriority: firstLoad ? 2050 : 1950,
+        buildBankPriority: firstLoad ? 1200 : 1100,
         cashOutPriority: -1600,
       };
     }
