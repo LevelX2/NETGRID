@@ -632,7 +632,6 @@ export type EffectCommand =
       amount: number;
       source?: string;
     }
-  | { type: "add_tag"; amount: number }
   | { type: "remove_tag"; amount: number }
   | {
       type: "change_breaker_strength";
@@ -1364,6 +1363,72 @@ export type RunnerDrawSequence = {
   crashEverettSourceCardId?: CardInstanceId;
 };
 
+export type PendingAddTagContinuation =
+  | {
+      kind: "terminal";
+      sourceDefinitionId: CardDefinitionId;
+    }
+  | {
+      kind: "access_effect";
+      sourceCardId: CardInstanceId;
+      effectIndex: number;
+      tagStepIndex: number;
+      nextStepIndex: number;
+      accessZone: "installed" | "hq" | "rd" | "archives";
+      runnerTagsBefore: number;
+    }
+  | {
+      kind: "card_effect_on_play";
+      sourceCardId: CardInstanceId;
+      sourceDefinitionId: CardDefinitionId;
+      tagEffectIndex: number;
+      nextEffectIndex: number;
+      runnerTagsBefore: number;
+    }
+  | {
+      kind: "runner_draw_tax";
+      sequenceId: string;
+      sourceCardId: CardInstanceId;
+      sourceIndex: number;
+      runnerTagsBefore: number;
+    }
+  | {
+      kind: "corp_start_turn";
+      sourceCardId: CardInstanceId;
+      sourceDefinitionId: CardDefinitionId;
+      nextRootCardIndex: number;
+      runAttemptsLastTurn: number;
+      dieRolls: number[];
+      tagAmount: number;
+      runnerTagsBefore: number;
+    }
+  | {
+      kind: "runner_start_turn";
+      sourceDefinitionId: CardDefinitionId;
+      counterType: CounterType;
+      nextCounterEffectIndex: number;
+      tagAmount: number;
+      runnerTagsBefore: number;
+    }
+  | {
+      kind: "successful_run_access_replacement";
+      runId: string;
+      runnerTagsBefore: number;
+    }
+  | {
+      kind: "run_end_cleanup";
+      runId: string;
+      successful: boolean;
+      runnerTagsBefore: number;
+    }
+  | {
+      kind: "end_turn_tag";
+      side: Side;
+      sourceCardIds: CardInstanceId[];
+      nextSourceIndex: number;
+      runnerTagsBefore: number;
+    };
+
 export type GameState = {
   matchId: string;
   baseline: RulesBaseline;
@@ -1385,6 +1450,7 @@ export type GameState = {
   agendaPointsToWin: number;
   setup?: SetupState;
   pendingChoice?: PendingChoice;
+  pendingAddTagContinuation?: PendingAddTagContinuation;
   runnerDrawSequence?: RunnerDrawSequence;
   imminentEvent?: ImminentEvent;
   temporaryProgramInstallReturns?: TemporaryProgramInstallReturn[];

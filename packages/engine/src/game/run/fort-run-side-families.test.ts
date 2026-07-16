@@ -269,6 +269,34 @@ function hostFor(state: GameState): FortRunSideFamiliesHost {
         state.runner.heap.push(cardId);
       },
     },
+    tags: {
+      addRunnerTagsWithPrevention: (legalAction, amount) => {
+        state.runner.tags += amount;
+        state.runnerTurnFlags ??= {
+          stoleAgendaThisTurn: false,
+          stoleAgendaLastTurn: false,
+          stolenAgendaAdvancementCountersThisTurn: 0,
+          stolenAgendaAdvancementCountersLastTurn: 0,
+          runnerReceivedTagThisTurn: false,
+          stoleResearchAgendaThisTurn: false,
+          stoleGrayOpsAgendaThisTurn: false,
+          stoleBlackOpsAgendaThisTurn: false,
+          runAttemptsThisTurn: 0,
+          runAttemptsLastTurn: 0,
+          successfulHqRunThisTurn: false,
+          successfulRunThisTurn: false,
+          damagePreventionUsage: {},
+          runnerActionsTakenThisTurn: 0,
+        } as NonNullable<GameState["runnerTurnFlags"]>;
+        state.runnerTurnFlags.runnerReceivedTagThisTurn = true;
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          tagsAdded: amount,
+          runnerTagsAfter: state.runner.tags,
+        };
+        return false;
+      },
+    },
   };
 }
 

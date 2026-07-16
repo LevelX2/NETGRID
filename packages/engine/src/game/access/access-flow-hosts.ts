@@ -94,7 +94,7 @@ export type AccessFlowCompositionHost = {
       legalAction: LegalAction,
       amount: number,
       sourceDefinitionId: CardDefinitionId,
-    ) => void;
+    ) => boolean;
   };
   trace: {
     startTraceFromOperation: (
@@ -395,7 +395,7 @@ export function createAccessFlowAdapters(
       tags: {
         addRunnerTagsWithPrevention: (amount, sourceDefinitionId) => {
           if (!legalAction) throw new Error("Tag-Aktion fehlt.");
-          host.tags.addRunnerTagsWithPrevention(
+          return host.tags.addRunnerTagsWithPrevention(
             state,
             legalAction,
             amount,

@@ -1,20 +1,28 @@
 ---
 activityId: act-2026-07-14-nontrace-tag-prevention-continuations
-status: inbox
+status: done
 kind: fix
 area: engine
 priority: high
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-07-14
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-07-16
+completedAt: 2026-07-16
+branch: codex/activities-worktree-20260716-counter-cleanup
 releaseTarget: Current private playtest
 blockedBy:
   - act-2026-07-14-trace-tag-prevention-avoidance-hardening
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - docs/reviews/engine/nontrace-tag-prevention-continuations-2026-07-16.md
+  - packages/engine/src/game/damage/direct-tag-write-boundary.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/engine test
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - corepack pnpm --filter @netgrid/shared typecheck
+  - corepack pnpm --filter @netgrid/web typecheck
+  - corepack pnpm --filter @netgrid/web exec vitest run app/action-board-ui.test.ts app/card-choice-panel.test.ts app/run-layering.test.ts features/actions/WindowEventIcon.test.ts
+  - git diff --check
 ---
 
 # Verbleibende Nicht-Trace-Tags mit suspendierbaren Prevention-Continuations härten
@@ -67,22 +75,22 @@ falscher Reihenfolge aufzulösen.
 
 ## Akzeptanzkriterien
 
-- [ ] Jede produktive direkte Erhöhung von `runner.tags` ist klassifiziert und
+- [x] Jede produktive direkte Erhöhung von `runner.tags` ist klassifiziert und
       entweder gemeinsam geroutet oder ausdrücklich als unvermeidbare finale
       Anwendung begründet.
-- [ ] Access-Ambush-, CardEffect-, Lifecycle-, Start-of-turn-, Run-Success-
+- [x] Access-Ambush-, CardEffect-, Lifecycle-, Start-of-turn-, Run-Success-
       und Run-End-Tagpfade können bei legaler Source pausieren und nach Avoid
       oder Pass genau einmal weiterlaufen.
-- [ ] Kombinierte Effekte halten ihre gedruckte Reihenfolge und wenden keine
+- [x] Kombinierte Effekte halten ihre gedruckte Reihenfolge und wenden keine
       Folgekomponente vorzeitig oder doppelt an.
-- [ ] Alle sieben Avoid-Tag-Sources funktionieren auch in den jeweils
+- [x] Alle sieben Avoid-Tag-Sources funktionieren auch in den jeweils
       passenden Nicht-Trace-Pfadfamilien mit Kosten- und Source-Revalidation.
-- [ ] PlayerViews und PublicEvents leaken keine verdeckte Source oder Choice.
-- [ ] Replay und StateHash stimmen in mindestens einem positiven und einem
+- [x] PlayerViews und PublicEvents leaken keine verdeckte Source oder Choice.
+- [x] Replay und StateHash stimmen in mindestens einem positiven und einem
       Pass-Fall je Continuation-Familie.
-- [ ] Ein Boundary-Gate verhindert neue unklassifizierte direkte
+- [x] Ein Boundary-Gate verhindert neue unklassifizierte direkte
       `runner.tags +=`-Schreibstellen.
-- [ ] Fokussierte Engine-/Web-Tests, relevante Typechecks und
+- [x] Fokussierte Engine-/Web-Tests, relevante Typechecks und
       `git diff --check` sind grün.
 
 ## Umsetzungshinweise
@@ -97,4 +105,16 @@ falscher Reihenfolge aufzulösen.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Der neutrale `pendingAddTagContinuation`-Vertrag pausiert Access-,
+CardEffect-, Draw-/Lifecycle-, Start-of-turn-, Successful-Run-, Run-End-,
+End-turn- und terminale Tagpfade am gemeinsamen Add-Tag-ImminentEvent. Avoid
+und Pass setzen den jeweiligen Ablauf am exakten Folgeschritt fort; kombinierte
+Credit-, Draw-, Damage-, Trash-, Bad-Publicity- und Turn-Abschluss-Effekte
+werden nicht vorzeitig oder doppelt angewendet.
+
+Alle sieben öffentlichen Avoid-Tag-Quellen sind auf einem Nicht-Trace-
+Accesspfad einschließlich Kosten und Source-Drift geprüft. Direkte produktive
+Tag-Erhöhungen bleiben nur in den zwei finalen `damage-core.ts`-Resolvern; der
+LegalAction-lose `EffectCommand` `add_tag` wurde entfernt. Die vollständige
+Engine-Suite ist mit 187 Testdateien und 1700 Tests grün; Shared-, Engine- und
+Web-Typechecks, 144 fokussierte Web-Tests sowie `git diff --check` sind grün.

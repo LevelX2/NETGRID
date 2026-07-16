@@ -137,6 +137,25 @@ function addRunnerGripCard(
   return cardId;
 }
 
+function installRunnerPreventionCard(
+  state: GameState,
+  definitionId: string,
+  id: string,
+  type: "hardware" | "resource",
+  faceup = true,
+): CardInstanceId {
+  const cardId = addRunnerGripCard(state, definitionId, id);
+  state.runner.grip = state.runner.grip.filter((candidate) => candidate !== cardId);
+  state.runner.rig[type === "hardware" ? "hardware" : "resources"].push(cardId);
+  state.cardInstances[cardId] = {
+    ...state.cardInstances[cardId]!,
+    zone: { side: "runner", zone: "rig" },
+    faceup,
+    rezzed: faceup,
+  };
+  return cardId;
+}
+
 function scoreCorpAgenda(
   state: GameState,
   definitionId: string,
@@ -388,6 +407,21 @@ describe("Proteus PRO013 agenda suite behavior", () => {
     expect(fallGuyOption).toBeDefined();
     if (!fallGuyOption) throw new Error("Missing Fall Guy tag-avoid option");
 
+    const passState = applyChoice(structuredClone(state), "runner", "pass");
+    expect(passState.runner.tags).toBe(1);
+    expect(passState.runner.rig.resources).toContain(fallGuyId);
+    expect(passState.pendingAddTagContinuation).toBeUndefined();
+    expect(passState.cardInstances["pro013_fetal_stays_hidden_rd"]?.faceup).toBe(
+      false,
+    );
+    expect(passState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      eventModificationDecision: "pass",
+      tagsAdded: 1,
+      ambushDefinitionId: MARKED_ACCOUNTS,
+      accessEffectSourceDefinitionId: MARKED_ACCOUNTS,
+    });
+    expectReplayStable(before, passState);
+
     state = applyChoice(state, "runner", fallGuyOption);
 
     expect(state.runner.tags).toBe(0);
@@ -416,6 +450,127 @@ describe("Proteus PRO013 agenda suite behavior", () => {
     expect(resolvePayload).not.toHaveProperty("publicRevealDefinitionId");
     expect(JSON.stringify(resolvePayload)).not.toContain("pro013_fetal_stays_hidden_rd");
     expectReplayStable(before, state);
+  });
+
+  it("revalidates all seven public tag-avoid sources on a non-trace access continuation", () => {
+    const sources = [
+      {
+        definitionId: "onr_v1_135_nasuko-cycle",
+        type: "hardware",
+        creditCost: 3,
+        trashes: false,
+      },
+      {
+        definitionId: FALL_GUY,
+        type: "resource",
+        creditCost: 0,
+        trashes: true,
+      },
+      {
+        definitionId: "onr_v1_167_leland-corporate-bodyguard",
+        type: "resource",
+        creditCost: 0,
+        trashes: true,
+      },
+      {
+        definitionId: "onr_v1_170_nomad-allies",
+        type: "resource",
+        creditCost: 0,
+        trashes: true,
+      },
+      {
+        definitionId: "onr_v1_187_wilson-weeflerunner-apprentice",
+        type: "resource",
+        creditCost: 0,
+        trashes: true,
+      },
+      {
+        definitionId: "onr_proteus_140_expendable-family-member",
+        type: "resource",
+        creditCost: 1,
+        trashes: true,
+        faceup: false,
+      },
+      {
+        definitionId: "onr_classic_051_vintage-camaro",
+        type: "hardware",
+        creditCost: 1,
+        trashes: false,
+        forgoesAction: true,
+      },
+    ] as const;
+
+    for (const [index, source] of sources.entries()) {
+      let state = baseState(`pro013-seven-avoid-sources-${index}`);
+      state.runner.credits = 10;
+      const sourceId = installRunnerPreventionCard(
+        state,
+        source.definitionId,
+        `pro013_avoid_source_${index}`,
+        source.type,
+        "faceup" in source ? source.faceup : true,
+      );
+      addCorpCard(
+        state,
+        MARKED_ACCOUNTS,
+        `pro013_marked_source_${index}`,
+        "rd",
+      );
+      openAccess(state, "rd");
+      const initial = structuredClone(state);
+      state = apply(state, "runner", (action) => action.type === "access_card");
+      const avoidOption = state.pendingChoice?.options.find((option) =>
+        option.id.includes(String(sourceId)),
+      )?.id;
+      expect(avoidOption, source.definitionId).toBeDefined();
+      expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+
+      const drift = structuredClone(state);
+      drift.runner.rig.hardware = drift.runner.rig.hardware.filter(
+        (cardId) => cardId !== sourceId,
+      );
+      drift.runner.rig.resources = drift.runner.rig.resources.filter(
+        (cardId) => cardId !== sourceId,
+      );
+      drift.runner.heap.push(sourceId);
+      drift.cardInstances[sourceId] = {
+        ...drift.cardInstances[sourceId]!,
+        zone: { side: "runner", zone: "heap" },
+        faceup: true,
+      };
+      const driftAction = getLegalActions(drift, "runner").find(
+        (action) => action.type === "resolve_choice",
+      );
+      if (!driftAction || !drift.pendingChoice)
+        throw new Error("Missing drift resolution action");
+      const driftResult = applyAction(drift, {
+        matchId: drift.matchId,
+        side: "runner",
+        actionId: driftAction.actionId,
+        clientKnownStateVersion: drift.stateVersion,
+        selectedChoices: {
+          choiceId: drift.pendingChoice.choiceId,
+          selectedOptionIds: [String(avoidOption)],
+        },
+      });
+      expect(driftResult.ok, source.definitionId).toBe(false);
+
+      const creditsBefore = state.runner.credits;
+      state = applyChoice(state, "runner", String(avoidOption));
+      expect(state.runner.tags, source.definitionId).toBe(0);
+      expect(state.runner.credits, source.definitionId).toBe(
+        creditsBefore - source.creditCost,
+      );
+      if (source.trashes) expect(state.runner.heap).toContain(sourceId);
+      else
+        expect([
+          ...state.runner.rig.hardware,
+          ...state.runner.rig.resources,
+        ]).toContain(sourceId);
+      if ("forgoesAction" in source && source.forgoesAction)
+        expect(state.runnerTurnFlags?.forgoNextActionsPending).toBe(1);
+      expectReplayStable(initial, state);
+    }
   });
 
   it("Project Zurich stores source-bound overadvance credits and World Domination awards fixed points through score authority", () => {
