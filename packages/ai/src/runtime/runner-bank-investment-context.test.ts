@@ -331,7 +331,7 @@ describe("createRunnerBankInvestmentContext", () => {
     );
   });
 
-  it("holds bank building once liquid credits are already comfortable", () => {
+  it("holds bank building once fifteen liquid credits are available", () => {
     const context = createContext({
       hintEffectsForDefinition: (definitionId) =>
         definitionId === "custom-runner-credit-bank"
@@ -347,7 +347,7 @@ describe("createRunnerBankInvestmentContext", () => {
       cardImplementationAddsHostedCredits: true,
     });
     const input = runnerInput({
-      credits: 23,
+      credits: 15,
       rig: [bank],
       legalActions: [buildAction],
     });
@@ -356,7 +356,7 @@ describe("createRunnerBankInvestmentContext", () => {
       context.runnerBankInvestmentCommitmentEvidence(input, buildAction),
     ).toEqual(
       expect.arrayContaining([
-        "bankComfortableCreditPool:true",
+        "bankComfortableCreditPool:false",
         "bankCommitmentStatus:hold",
       ]),
     );
@@ -462,7 +462,7 @@ describe("createRunnerBankInvestmentContext", () => {
     expect(
       context.runnerBankCashOutIsUsefulNow(
         runnerInput({
-          credits: 11,
+          credits: 15,
           rig: [bank],
           legalActions: [cashOutAction],
         }),
@@ -614,7 +614,7 @@ describe("createRunnerBankInvestmentContext", () => {
     expect(Math.abs(emptyPriority - loadedPriority)).toBeLessThanOrEqual(300);
   });
 
-  it("defers installing another bank once liquid credits are comfortable", () => {
+  it("defers installing another bank outside the build phase", () => {
     const context = createContext({
       previousPlan: () => undefined,
       hintEffectsForDefinition: (definitionId) =>
@@ -629,7 +629,7 @@ describe("createRunnerBankInvestmentContext", () => {
       source: bank.instanceId,
     });
     const input = runnerInput({
-      credits: 20,
+      credits: 15,
       clicks: 4,
       hand: [bank],
       rig: [],

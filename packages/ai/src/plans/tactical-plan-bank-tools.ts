@@ -3,7 +3,8 @@ import type { TacticalPlanBuildContext } from "./tactical-plan-types";
 
 const RUNNER_BANK_MIN_CRITICAL_CASHOUT = 3;
 const RUNNER_BANK_VALUE_BUILD_TARGET = 12;
-const RUNNER_BANK_COMFORTABLE_CREDITS = 20;
+const RUNNER_BANK_COMFORTABLE_BUILD_CREDITS = 15;
+const RUNNER_BANK_COMFORTABLE_LIQUID_CREDITS = 20;
 
 export type RunnerCreditBankAssessment = {
   buildActions: LegalAction[];
@@ -152,7 +153,7 @@ export function runnerCreditBankAssessment(
   const shouldBuild =
     buildActions.length > 0 &&
     !concreteFundingNeed &&
-    ownCredits < RUNNER_BANK_COMFORTABLE_CREDITS &&
+    ownCredits < RUNNER_BANK_COMFORTABLE_BUILD_CREDITS &&
     currentStoredCredits < buildTarget;
   const cashOutReason =
     payoutActions.length === 0 || estimatedPayout <= 0
@@ -161,7 +162,7 @@ export function runnerCreditBankAssessment(
         ? "concrete_funding_need"
         : ownCredits < 5 && estimatedPayout >= RUNNER_BANK_MIN_CRITICAL_CASHOUT
           ? "urgent_credit_floor"
-          : ownCredits < RUNNER_BANK_COMFORTABLE_CREDITS &&
+          : ownCredits < RUNNER_BANK_COMFORTABLE_LIQUID_CREDITS &&
               estimatedPayout >= RUNNER_BANK_VALUE_BUILD_TARGET
             ? "value_target"
             : undefined;

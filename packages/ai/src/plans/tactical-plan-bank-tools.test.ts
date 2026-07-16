@@ -8,7 +8,7 @@ import type { TacticalPlanBuildContext } from "./tactical-plan-types";
 describe("runnerCreditBankAssessment", () => {
   it("does not open a bank-build plan with a comfortable liquid pool", () => {
     const assessment = runnerCreditBankAssessment(
-      context({ credits: 20, storedCredits: 0 }),
+      context({ credits: 15, storedCredits: 0 }),
       [BUILD_ACTION],
       false,
     );
@@ -17,7 +17,7 @@ describe("runnerCreditBankAssessment", () => {
     expect(assessment.evidence).toContain("runner_bank_build_ready:false");
   });
 
-  it("keeps building while the liquid pool remains below twenty", () => {
+  it("keeps building while the liquid pool remains below fifteen", () => {
     expect(
       runnerCreditBankAssessment(
         context({ credits: 9, storedCredits: 3 }),

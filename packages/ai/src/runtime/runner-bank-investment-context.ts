@@ -12,6 +12,7 @@ import { rolesMatch } from "./role-match";
 const RUNNER_BANK_FIRST_LOAD_TARGET = 3;
 const RUNNER_BANK_URGENT_CASHOUT_TARGET = 6;
 const RUNNER_BANK_VALUE_CASHOUT_TARGET = 12;
+const RUNNER_BANK_COMFORTABLE_BUILD_CREDITS = 15;
 const RUNNER_BANK_COMFORTABLE_LIQUID_CREDITS = 20;
 
 type RunnerBankInvestmentCommitmentStatus =
@@ -266,7 +267,7 @@ export function createRunnerBankInvestmentContext(
     const stableBuildWindow =
       input.playerView.own.clicks >= 1 &&
       !concreteFundingNeed &&
-      !comfortableCreditPool;
+      input.playerView.own.credits < RUNNER_BANK_COMFORTABLE_BUILD_CREDITS;
     const active =
       buildActionLegal ||
       cashOutActionLegal ||
@@ -840,7 +841,7 @@ export function createRunnerBankInvestmentContext(
     const preservesConcreteFunding =
       !runnerBankHasConcreteFundingNeed(input) || creditsAfterInstall >= 4;
     const liquidPoolAlreadyComfortable =
-      input.playerView.own.credits >= RUNNER_BANK_COMFORTABLE_LIQUID_CREDITS;
+      input.playerView.own.credits >= RUNNER_BANK_COMFORTABLE_BUILD_CREDITS;
     return {
       plausible:
         creditsAfterInstall >= 0 &&
