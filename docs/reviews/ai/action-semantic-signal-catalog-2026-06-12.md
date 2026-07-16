@@ -12,13 +12,13 @@ Keine Runtime-Anbindung, keine Action-Auswahl, kein Scoring und keine Hidden-Inf
 | -------------------------------------------------------------- | ----: |
 | Active cards                                                   |   618 |
 | covered                                                        |   602 |
-| deferred                                                       |    34 |
+| deferred                                                       |    32 |
 | no_signal_reason != none                                       |    16 |
 | target_profile_gap                                             |    89 |
 | structural signal violations                                   |     0 |
 | unknown signals                                                |     0 |
 | covered delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE            |   +63 |
-| deferred delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE           |   -11 |
+| deferred delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE           |   -13 |
 | no_signal delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE          |    -9 |
 | target_profile_gap delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE |    +5 |
 
@@ -90,7 +90,7 @@ Keine Runtime-Anbindung, keine Action-Auswahl, kein Scoring und keine Hidden-Inf
 
 | Scope                                       | Cards |
 | ------------------------------------------- | ----: |
-| `inspector_warning_and_active_hint_quality` |    32 |
+| `inspector_warning_and_active_hint_quality` |    30 |
 | `inspector_warning`                         |     2 |
 
 ## Row Contract

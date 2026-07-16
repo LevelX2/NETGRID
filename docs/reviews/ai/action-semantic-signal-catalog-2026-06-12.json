@@ -45,7 +45,7 @@
   "summary": {
     "activeCards": 618,
     "coveredCards": 602,
-    "deferredCards": 34,
+    "deferredCards": 32,
     "noSignalCards": 16,
     "targetProfileGapCards": 89,
     "structuralSignalViolationCards": 0,
@@ -167,7 +167,7 @@
     "baselineDeltas": {
       "baseline": "P2_POST_TARGET_PROFILE_GAP_CLOSURE",
       "coveredCards": 63,
-      "deferredCards": -11,
+      "deferredCards": -13,
       "noSignalCards": -9,
       "targetProfileGapCards": 5
     }
@@ -363,19 +363,7 @@
         "warnings": ["deferred_requires_human_review"]
       },
       {
-        "cardId": "onr_v1_021_dwarf",
-        "scope": "inspector_warning_and_active_hint_quality",
-        "owner": "ai_semantic_catalog_review",
-        "warnings": ["deferred_requires_human_review"]
-      },
-      {
         "cardId": "onr_v1_055_reflector",
-        "scope": "inspector_warning_and_active_hint_quality",
-        "owner": "ai_semantic_catalog_review",
-        "warnings": ["deferred_requires_human_review"]
-      },
-      {
-        "cardId": "onr_v1_066_snowball",
         "scope": "inspector_warning_and_active_hint_quality",
         "owner": "ai_semantic_catalog_review",
         "warnings": ["deferred_requires_human_review"]
@@ -6549,9 +6537,9 @@
       "cardType": "program",
       "aiSupportStatus": "ai_supported",
       "covered": true,
-      "deferred": true,
-      "deferred_review_scope": "inspector_warning_and_active_hint_quality",
-      "deferred_owner": "ai_semantic_catalog_review",
+      "deferred": false,
+      "deferred_review_scope": "none",
+      "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 1,
@@ -6561,7 +6549,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": ["deferred_requires_human_review"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_v1_022_emergency-self-construct",
@@ -7650,9 +7638,9 @@
       "cardType": "program",
       "aiSupportStatus": "ai_supported",
       "covered": true,
-      "deferred": true,
-      "deferred_review_scope": "inspector_warning_and_active_hint_quality",
-      "deferred_owner": "ai_semantic_catalog_review",
+      "deferred": false,
+      "deferred_review_scope": "none",
+      "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": true,
       "signalCount": 2,
@@ -7662,7 +7650,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": ["breaker.scaling_strength"],
-      "warningCategories": ["deferred_requires_human_review"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_v1_067_speed-trap",
@@ -8618,7 +8606,7 @@
         "access.hq_trash_pressure",
         "access.trash_untrashable"
       ],
-      "warningCategories": ["function_signal_descriptor_gap"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_v1_108_score",

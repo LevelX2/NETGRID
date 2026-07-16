@@ -15,16 +15,16 @@
   "summary": {
     "cardCount": 618,
     "cardsWithMechanicalFacts": 584,
-    "cardsWithGeneratedFacts": 337,
+    "cardsWithGeneratedFacts": 330,
     "cardsWithOverlays": 6,
     "cardsWithFunctionSignals": 602,
     "cardsWithStrategyAnchors": 257,
     "cardsWithStrategySupportPairs": 198,
-    "cardsWithWarnings": 116,
+    "cardsWithWarnings": 113,
     "warningCategoryCounts": {
-      "deferred_requires_human_review": 34,
+      "deferred_requires_human_review": 32,
       "descriptor_gap": 45,
-      "function_signal_descriptor_gap": 27,
+      "function_signal_descriptor_gap": 26,
       "legacy_fallback_only": 34
     }
   },
@@ -12011,12 +12011,10 @@
       "planRolesClassification": [
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [],
@@ -12080,12 +12078,10 @@
       "planRolesClassification": [
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [],
@@ -13222,12 +13218,10 @@
       "planRolesClassification": [
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [],
@@ -13326,12 +13320,10 @@
       "planRolesClassification": [
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [],
@@ -13537,12 +13529,10 @@
       "planRolesClassification": [
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [],
@@ -15172,12 +15162,10 @@
       "planRolesClassification": [
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [],
@@ -15372,12 +15360,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -15464,12 +15450,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [
@@ -15560,12 +15544,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -15654,12 +15636,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [
@@ -15755,12 +15735,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [
@@ -15847,12 +15825,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [
@@ -15958,12 +15934,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -16047,12 +16021,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -16127,12 +16099,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -16221,12 +16191,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [
@@ -16324,12 +16292,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -16436,12 +16402,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -16549,12 +16513,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -16645,12 +16607,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -16746,12 +16706,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -16842,12 +16800,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [
@@ -16928,12 +16884,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -17018,12 +16972,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [
@@ -17100,12 +17052,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -17186,12 +17136,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -17293,12 +17241,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -17379,12 +17325,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -17471,12 +17415,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [
@@ -17587,12 +17529,10 @@
         },
         {
           "value": "run_pressure",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Broad tactical run pressure; central and run-event strategy require structured target/effect anchors."
         }
       ],
       "planRolesClassification": [
@@ -17708,12 +17648,10 @@
         },
         {
           "value": "run_pressure",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Broad tactical run pressure; central and run-event strategy require structured target/effect anchors."
         }
       ],
       "planRolesClassification": [
@@ -17810,12 +17748,10 @@
       "planRolesClassification": [
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [],
@@ -17886,12 +17822,10 @@
         },
         {
           "value": "run_pressure",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Broad tactical run pressure; central and run-event strategy require structured target/effect anchors."
         }
       ],
       "planRolesClassification": [
@@ -17971,12 +17905,10 @@
         },
         {
           "value": "run_pressure",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Broad tactical run pressure; central and run-event strategy require structured target/effect anchors."
         }
       ],
       "planRolesClassification": [
@@ -18083,12 +18015,10 @@
       "planRolesClassification": [
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -18165,12 +18095,10 @@
       "planRolesClassification": [
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [],
@@ -18304,12 +18232,10 @@
         },
         {
           "value": "run_pressure",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Broad tactical run pressure; central and run-event strategy require structured target/effect anchors."
         }
       ],
       "planRolesClassification": [
@@ -18395,12 +18321,10 @@
       "planRolesClassification": [
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [],
@@ -18601,12 +18525,10 @@
         },
         {
           "value": "run_pressure",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Broad tactical run pressure; central and run-event strategy require structured target/effect anchors."
         }
       ],
       "planRolesClassification": [
@@ -18688,12 +18610,10 @@
       "planRolesClassification": [
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [],
@@ -18835,12 +18755,10 @@
         },
         {
           "value": "run_pressure",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Broad tactical run pressure; central and run-event strategy require structured target/effect anchors."
         }
       ],
       "planRolesClassification": [
@@ -18985,12 +18903,10 @@
       "planRolesClassification": [
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [],
@@ -19162,23 +19078,19 @@
         },
         {
           "value": "run_pressure",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Broad tactical run pressure; central and run-event strategy require structured target/effect anchors."
         }
       ],
       "planRolesClassification": [
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [],
@@ -19240,12 +19152,10 @@
         },
         {
           "value": "run_pressure",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Broad tactical run pressure; central and run-event strategy require structured target/effect anchors."
         }
       ],
       "planRolesClassification": [
@@ -19365,12 +19275,10 @@
         },
         {
           "value": "run_pressure",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Broad tactical run pressure; central and run-event strategy require structured target/effect anchors."
         }
       ],
       "planRolesClassification": [
@@ -19538,12 +19446,10 @@
       "planRolesClassification": [
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [],
@@ -19603,12 +19509,10 @@
         },
         {
           "value": "run_pressure",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Broad tactical run pressure; central and run-event strategy require structured target/effect anchors."
         }
       ],
       "planRolesClassification": [
@@ -19718,12 +19622,10 @@
         },
         {
           "value": "run_pressure",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Broad tactical run pressure; central and run-event strategy require structured target/effect anchors."
         }
       ],
       "planRolesClassification": [
@@ -19811,12 +19713,10 @@
         },
         {
           "value": "run_pressure",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Broad tactical run pressure; central and run-event strategy require structured target/effect anchors."
         }
       ],
       "planRolesClassification": [
@@ -19959,12 +19859,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [
@@ -20088,12 +19986,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [
@@ -20179,12 +20075,10 @@
       "planRolesClassification": [
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [],
@@ -20280,12 +20174,10 @@
       "planRolesClassification": [
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [],
@@ -20382,12 +20274,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [
@@ -20485,12 +20375,10 @@
       "planRolesClassification": [
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [
@@ -20599,12 +20487,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -20679,12 +20565,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -20821,12 +20705,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [
@@ -20986,12 +20868,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [
@@ -21087,12 +20967,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -21176,12 +21054,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -21283,12 +21159,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [
@@ -21402,12 +21276,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [
@@ -21549,12 +21421,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [
@@ -21652,12 +21522,10 @@
       "planRolesClassification": [
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [
@@ -21732,12 +21600,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -21838,12 +21704,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [
@@ -21955,12 +21819,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -22104,12 +21966,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [
@@ -22201,12 +22061,10 @@
       "planRolesClassification": [
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [],
@@ -22323,12 +22181,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [
@@ -22414,12 +22270,10 @@
       "planRolesClassification": [
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [],
@@ -22505,12 +22359,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -22606,12 +22458,10 @@
       "planRolesClassification": [
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [
@@ -22710,12 +22560,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [
@@ -22819,12 +22667,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [
@@ -22924,12 +22770,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -23297,12 +23141,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -23388,12 +23230,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -23489,12 +23329,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [
@@ -23930,12 +23768,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -24033,12 +23869,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -24242,12 +24076,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -24341,12 +24173,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [
@@ -24447,12 +24277,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -24671,12 +24499,10 @@
         },
         {
           "value": "run_pressure",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Broad tactical run pressure; central and run-event strategy require structured target/effect anchors."
         }
       ],
       "planRolesClassification": [
@@ -24700,12 +24526,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [
@@ -24891,12 +24715,10 @@
         },
         {
           "value": "run_pressure",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Broad tactical run pressure; central and run-event strategy require structured target/effect anchors."
         }
       ],
       "warningCategories": [],
@@ -24930,10 +24752,10 @@
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
         "mechanicalFactsFound": true,
-        "generatedFactsFound": true,
+        "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "breaker.wall"
@@ -24988,31 +24810,27 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "breakerProfile"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "breakerProfile"
         ],
-        "generatedFactFields": [
-          "effects",
-          "breakerProfile"
-        ],
+        "generatedFactFields": [],
         "overlayFields": []
       },
       "strategicRoleStatus": {
@@ -25240,12 +25058,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -25353,12 +25169,10 @@
         },
         {
           "value": "run_pressure",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Broad tactical run pressure; central and run-event strategy require structured target/effect anchors."
         }
       ],
       "warningCategories": [],
@@ -25891,12 +25705,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -26270,12 +26082,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -26464,12 +26274,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -26764,12 +26572,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -26849,12 +26655,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -26979,12 +26783,10 @@
         },
         {
           "value": "run_pressure",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Broad tactical run pressure; central and run-event strategy require structured target/effect anchors."
         }
       ],
       "warningCategories": [],
@@ -27561,12 +27363,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -27888,12 +27688,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -28239,12 +28037,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -28442,12 +28238,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -29114,12 +28908,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -29318,12 +29110,10 @@
         },
         {
           "value": "run_pressure",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Broad tactical run pressure; central and run-event strategy require structured target/effect anchors."
         }
       ],
       "warningCategories": [],
@@ -29675,10 +29465,10 @@
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
         "mechanicalFactsFound": true,
-        "generatedFactsFound": true,
+        "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "breaker.scaling_strength",
@@ -29735,31 +29525,27 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "breakerProfile"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "breakerProfile"
         ],
-        "generatedFactFields": [
-          "effects",
-          "breakerProfile"
-        ],
+        "generatedFactFields": [],
         "overlayFields": []
       },
       "strategicRoleStatus": {
@@ -30096,12 +29882,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [
@@ -30298,12 +30082,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -30383,12 +30165,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -30489,12 +30269,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -31127,7 +30905,7 @@
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
         "mechanicalFactsFound": true,
-        "generatedFactsFound": true,
+        "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
         "warningCount": 0
@@ -31240,9 +31018,7 @@
           "effects",
           "conditions"
         ],
-        "generatedFactFields": [
-          "effects"
-        ],
+        "generatedFactFields": [],
         "overlayFields": []
       },
       "strategicRoleStatus": {
@@ -31628,7 +31404,7 @@
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
         "mechanicalFactsFound": true,
-        "generatedFactsFound": true,
+        "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
         "warningCount": 0
@@ -31725,15 +31501,6 @@
             "runner.hq_pressure"
           ],
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        },
-        {
-          "value": "pressure_rnd",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.rnd_pressure"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
       "warningCategories": [],
@@ -31750,9 +31517,7 @@
           "effects",
           "conditions"
         ],
-        "generatedFactFields": [
-          "effects"
-        ],
+        "generatedFactFields": [],
         "overlayFields": []
       },
       "strategicRoleStatus": {
@@ -32053,12 +31818,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [
@@ -32355,12 +32118,10 @@
       "planRolesClassification": [
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [
@@ -32449,12 +32210,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [
@@ -32709,7 +32468,7 @@
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
         "mechanicalFactsFound": true,
-        "generatedFactsFound": true,
+        "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
         "warningCount": 0
@@ -32762,9 +32521,7 @@
         "compiledMechanicalFactFields": [
           "effects"
         ],
-        "generatedFactFields": [
-          "effects"
-        ],
+        "generatedFactFields": [],
         "overlayFields": []
       },
       "strategicRoleStatus": {
@@ -32925,7 +32682,7 @@
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
         "mechanicalFactsFound": true,
-        "generatedFactsFound": true,
+        "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
         "warningCount": 0
@@ -32962,12 +32719,10 @@
       "planRolesClassification": [
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [],
@@ -32982,9 +32737,7 @@
         "compiledMechanicalFactFields": [
           "effects"
         ],
-        "generatedFactFields": [
-          "effects"
-        ],
+        "generatedFactFields": [],
         "overlayFields": []
       },
       "strategicRoleStatus": {
@@ -33051,12 +32804,10 @@
       "planRolesClassification": [
         {
           "value": "run_pressure",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Broad tactical run pressure; central and run-event strategy require structured target/effect anchors."
         }
       ],
       "warningCategories": [],
@@ -33711,12 +33462,10 @@
       "planRolesClassification": [
         {
           "value": "run_pressure",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Broad tactical run pressure; central and run-event strategy require structured target/effect anchors."
         }
       ],
       "warningCategories": [],
@@ -33879,7 +33628,7 @@
         "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "access.free_trash",
@@ -33953,15 +33702,6 @@
       ],
       "planRolesClassification": [
         {
-          "value": "contest_remote",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.remote_contest"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        },
-        {
           "value": "pressure_hq",
           "category": "alias_to_strategy_goal",
           "triageCategory": "strategy_alias",
@@ -33971,22 +33711,8 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "function_signal_descriptor_gap"
-      ],
-      "descriptorGaps": [
-        {
-          "gapId": "remote_contest_pressure_not_first_class",
-          "description": "Current structured hints can describe some remoteRole and access costs, but direct Runner remote-contest intent remains mostly planner context.",
-          "affectedSignalsOrValues": [
-            "remote_contest",
-            "contest_remote",
-            "server_development"
-          ],
-          "batchMigrationDecision": "do_not_bulk_migrate_in_AI004",
-          "needsSchemaOrDescriptorExtension": true
-        }
-      ],
+      "warningCategories": [],
+      "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
@@ -34020,7 +33746,7 @@
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
         "mechanicalFactsFound": true,
-        "generatedFactsFound": true,
+        "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
         "warningCount": 0
@@ -34050,12 +33776,10 @@
       "planRolesClassification": [
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [],
@@ -34072,9 +33796,7 @@
           "effects",
           "costProfile"
         ],
-        "generatedFactFields": [
-          "effects"
-        ],
+        "generatedFactFields": [],
         "overlayFields": []
       },
       "strategicRoleStatus": {
@@ -34361,12 +34083,10 @@
       "planRolesClassification": [
         {
           "value": "run_pressure",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Broad tactical run pressure; central and run-event strategy require structured target/effect anchors."
         }
       ],
       "warningCategories": [],
@@ -34453,12 +34173,10 @@
       "planRolesClassification": [
         {
           "value": "run_pressure",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Broad tactical run pressure; central and run-event strategy require structured target/effect anchors."
         },
         {
           "value": "trace_bid_support",
@@ -35073,12 +34791,10 @@
         },
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [],
@@ -35185,12 +34901,10 @@
       "planRolesClassification": [
         {
           "value": "run_pressure",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Broad tactical run pressure; central and run-event strategy require structured target/effect anchors."
         },
         {
           "value": "runner_install_hardware",
@@ -37045,7 +36759,16 @@
           "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
         },
         {
-          "value": "rd_multiaccess",
+          "value": "multiaccess",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "runner.interface_closeout"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "rnd_pressure",
           "category": "alias_to_strategy_goal",
           "triageCategory": "strategy_alias",
           "mapsTo": [
@@ -37065,11 +36788,11 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         },
         {
-          "value": "run_pressure",
+          "value": "pressure_rnd",
           "category": "alias_to_strategy_goal",
           "triageCategory": "strategy_alias",
           "mapsTo": [
-            "runner.run_event_tempo"
+            "runner.rnd_pressure"
           ],
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
@@ -37339,12 +37062,10 @@
         },
         {
           "value": "run_pressure",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Broad tactical run pressure; central and run-event strategy require structured target/effect anchors."
         }
       ],
       "warningCategories": [],
@@ -38481,12 +38202,10 @@
         },
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         },
         {
           "value": "resource_value_engine",
@@ -38908,12 +38627,10 @@
         },
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [],
@@ -38997,12 +38714,10 @@
       "planRolesClassification": [
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [],
@@ -39395,12 +39110,10 @@
       "planRolesClassification": [
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [],
@@ -40382,12 +40095,10 @@
         },
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [
@@ -40579,12 +40290,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [],
@@ -40913,12 +40622,10 @@
         },
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [],
@@ -41012,12 +40719,10 @@
         },
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [],
@@ -41119,12 +40824,10 @@
         },
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [],
@@ -41510,12 +41213,10 @@
         },
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [
@@ -41849,12 +41550,10 @@
         },
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         },
         {
           "value": "survive_meat_damage",
@@ -41989,12 +41688,10 @@
       "planRolesClassification": [
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         },
         {
           "value": "score_next_turn",
@@ -44705,12 +44402,10 @@
       "planRolesClassification": [
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         },
         {
           "value": "score_next_turn",
@@ -53481,12 +53176,10 @@
       "planRolesClassification": [
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [],
@@ -53557,12 +53250,10 @@
       "planRolesClassification": [
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [],
@@ -53968,12 +53659,10 @@
         },
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [],
@@ -54334,12 +54023,10 @@
       "planRolesClassification": [
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [],
@@ -54502,12 +54189,10 @@
       "planRolesClassification": [
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [],
@@ -54890,12 +54575,10 @@
         },
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [],
@@ -54993,12 +54676,10 @@
         },
         {
           "value": "run_pressure",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Broad tactical run pressure; central and run-event strategy require structured target/effect anchors."
         }
       ],
       "planRolesClassification": [
@@ -55100,12 +54781,10 @@
       "planRolesClassification": [
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [],
@@ -56708,12 +56387,10 @@
         },
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [],
@@ -65679,12 +65356,10 @@
       "planRolesClassification": [
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [],
@@ -65764,12 +65439,10 @@
         },
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [],
@@ -65832,12 +65505,10 @@
       "planRolesClassification": [
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [
@@ -65900,12 +65571,10 @@
       "planRolesClassification": [
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [],
@@ -66159,12 +65828,10 @@
         },
         {
           "value": "run_pressure",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Broad tactical run pressure; central and run-event strategy require structured target/effect anchors."
         }
       ],
       "planRolesClassification": [
@@ -66312,12 +65979,10 @@
       "planRolesClassification": [
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [
@@ -66495,12 +66160,10 @@
       "planRolesClassification": [
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [],
@@ -66644,12 +66307,10 @@
       "planRolesClassification": [
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [
@@ -66781,12 +66442,10 @@
       "planRolesClassification": [
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [],
@@ -66849,12 +66508,10 @@
       "planRolesClassification": [
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [
@@ -66933,12 +66590,10 @@
         },
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [],
@@ -67009,12 +66664,10 @@
       "planRolesClassification": [
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [],
@@ -67225,12 +66878,10 @@
       "planRolesClassification": [
         {
           "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself."
         }
       ],
       "warningCategories": [
@@ -67283,12 +66934,10 @@
         },
         {
           "value": "run_pressure",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Broad tactical run pressure; central and run-event strategy require structured target/effect anchors."
         }
       ],
       "planRolesClassification": [
@@ -67303,12 +66952,10 @@
         },
         {
           "value": "recover_economy",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [

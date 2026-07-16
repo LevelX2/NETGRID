@@ -7,19 +7,19 @@
   "generatedFactsCardCount": 390,
   "legacyFallbackOnlyCount": 137,
   "manualOverlayCardCount": 6,
-  "descriptorOrSchemaGapCount": 288,
+  "descriptorOrSchemaGapCount": 286,
   "manualOverlayRequiredCount": 0,
-  "blockedMissingImplementationCount": 89,
+  "blockedMissingImplementationCount": 91,
   "coverageClassCounts": {
-    "blocked_missing_implementation": 89,
-    "descriptor_or_schema_gap": 288,
-    "generated_mechanical_clean": 96,
+    "blocked_missing_implementation": 91,
+    "descriptor_or_schema_gap": 286,
+    "generated_mechanical_clean": 98,
     "generated_plus_overlay": 6,
     "legacy_fallback_only": 137
   },
   "coverageBySideCardType": {
     "corp:agenda": 50,
-    "corp:asset": 57,
+    "corp:asset": 58,
     "corp:ice": 114,
     "corp:identity": 1,
     "corp:operation": 43,
@@ -28,7 +28,7 @@
     "runner:hardware": 42,
     "runner:identity": 1,
     "runner:program": 112,
-    "runner:resource": 65
+    "runner:resource": 66
   },
   "warningCount": 2316,
   "hardErrorCount": 0,

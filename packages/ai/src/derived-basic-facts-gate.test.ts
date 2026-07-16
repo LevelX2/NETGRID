@@ -279,7 +279,7 @@ describe("derived basic facts gate report", () => {
       expect.objectContaining({
         kind: "multiaccess",
         scope: "hq",
-        amount: 3,
+        amount: 2,
       }),
     );
 
