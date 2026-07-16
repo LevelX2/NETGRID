@@ -24,7 +24,6 @@ export type CardEffectFamilyRuntime = {
     amount: number,
   ) => boolean;
   loseGame: (state: GameState, side: Side) => Winner;
-  addRunnerTags: (state: GameState, amount: number) => void;
   publicEffectId: (
     context: CardEffectExecutionContext,
     index: number,

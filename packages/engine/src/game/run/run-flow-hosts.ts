@@ -852,6 +852,15 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         trashRunnerInstalledProgram: (cardId) =>
           host.zones.trashRunnerInstalledProgram(state, cardId),
       },
+      tags: {
+        addRunnerTagsWithPrevention: (legalAction, amount, source) =>
+          host.damage.addRunnerTagsWithPrevention(
+            state,
+            legalAction,
+            amount,
+            source,
+          ),
+      },
     };
   }
 
@@ -1272,6 +1281,15 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
             source: `run_end:${sourceDefinitionId}`,
           }),
       },
+      tags: {
+        addRunnerTagsWithPrevention: (legalAction, amount, source) =>
+          host.damage.addRunnerTagsWithPrevention(
+            state,
+            legalAction,
+            amount,
+            source,
+          ),
+      },
       counters: {
         cardCounter: (cardId, counterType) =>
           host.counters.cardCounter(state, cardId, counterType),
@@ -1368,6 +1386,15 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       },
       draw: {
         drawCorpCards: (count) => host.callbacks.drawCorpCards(state, count),
+      },
+      tags: {
+        addRunnerTagsWithPrevention: (legalAction, amount, source) =>
+          host.damage.addRunnerTagsWithPrevention(
+            state,
+            legalAction,
+            amount,
+            source,
+          ),
       },
       trash: {
         trashCorpInstalledCardToArchives: (cardId, legalAction) =>

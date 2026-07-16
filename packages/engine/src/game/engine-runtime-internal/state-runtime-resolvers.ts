@@ -1326,10 +1326,6 @@ function executeEffectCommands(
           source: command.source ?? "effect_command",
         });
         break;
-      case "add_tag":
-        assertNonNegativeAmount(command.amount);
-        state.runner.tags += command.amount;
-        break;
       case "remove_tag":
         assertNonNegativeAmount(command.amount);
         state.runner.tags = Math.max(0, state.runner.tags - command.amount);

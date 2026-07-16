@@ -179,10 +179,8 @@ export function resolveEncounterPrintedNonTraceEffect(
   }
   if (subroutine.type === "give_runner_tag") {
     const amount = subroutine.amount ?? 1;
-    if (!legalAction) {
-      host.state.runner.tags += amount;
-      return { handled: true, ...source, stateChanged: true };
-    }
+    if (!legalAction)
+      throw new Error("Give-Runner-Tag braucht eine LegalAction.");
     const suspended = host.tags.addRunnerTagsWithPrevention(
       legalAction,
       amount,

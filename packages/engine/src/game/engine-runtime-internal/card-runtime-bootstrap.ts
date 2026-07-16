@@ -1217,6 +1217,7 @@ export function configureCardRuntimeBootstrap() {
         rezCostForCard,
         startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice,
         startPaidSourceReturnToGripChoice,
+        addRunnerTagsWithPrevention,
       },
     };
   }

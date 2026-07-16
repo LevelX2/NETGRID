@@ -856,6 +856,10 @@ describe("V1.6.2 Mechanikpaket B", () => {
         sourceDefinitionId: "onr_v1_287_datapool-by-zetatech",
         sourceTitle: "Datapool® by Zetatech",
         controller: "corp",
+        addRunnerTagsWithPrevention: (amount) => {
+          state.runner.tags += amount;
+          return false;
+        },
       },
       [
         {
@@ -3252,10 +3256,26 @@ describe("V1.7.1 Mechanikpaket E", () => {
     });
 
     let manifestsState = toRunnerTurn(
-      v171CardReleaseGame("v171-edited-shipping"),
+      createGameAfterSetup({
+        seed: "v171-edited-shipping",
+        runnerDeck: {
+          ...ONR_V1_7_1_RUNNER_DECK,
+          id: "v171_edited_shipping_fall_guy_runner",
+          cards: [
+            { id: "onr_v1_161_fall-guy", quantity: 1 },
+            ...ONR_V1_7_1_RUNNER_DECK.cards,
+          ],
+        },
+        corpDeck: ONR_V1_7_1_CORP_DECK,
+        agendaPointsToWin: 7,
+      }),
     );
     manifestsState.runner.credits = 20;
     manifestsState.corp.credits = 8;
+    const manifestsFallGuyId = installRunnerResourceForTest(
+      manifestsState,
+      "onr_v1_161_fall-guy",
+    );
     moveRunnerCardToGrip(
       manifestsState,
       "onr_v1_084_edited-shipping-manifests",
@@ -3263,6 +3283,8 @@ describe("V1.7.1 Mechanikpaket E", () => {
     const runnerCreditsBefore = manifestsState.runner.credits;
     const corpHqBefore = manifestsState.corp.hq.length;
     const corpRdBefore = manifestsState.corp.rd.length;
+    const manifestsInitial = structuredClone(manifestsState);
+    const manifestsReplayStart = manifestsState.eventLog.length;
     manifestsState = apply(
       manifestsState,
       "runner",
@@ -3272,18 +3294,56 @@ describe("V1.7.1 Mechanikpaket E", () => {
           "onr_v1_084_edited-shipping-manifests" &&
         action.payload?.serverId === "hq",
     );
-    expect(manifestsState.run).toBeUndefined();
+    expect(manifestsState.run).toBeDefined();
     expect(manifestsState.corp.credits).toBe(7);
-    expect(manifestsState.runner.tags).toBe(1);
+    expect(manifestsState.runner.tags).toBe(0);
+    expect(manifestsState.runner.credits).toBe(runnerCreditsBefore - 1);
+    expect(manifestsState.pendingAddTagContinuation).toMatchObject({
+      kind: "successful_run_access_replacement",
+    });
+    expect(manifestsState.pendingChoice?.source).toContain("event_modification");
+
+    const manifestsPassState = applyChoice(
+      structuredClone(manifestsState),
+      "runner",
+      "pass",
+    );
+    expect(manifestsPassState.run).toBeUndefined();
+    expect(manifestsPassState.runner.tags).toBe(1);
+    expect(manifestsPassState.runner.credits).toBe(
+      runnerCreditsBefore - 1 + 10,
+    );
+    expect(manifestsPassState.runner.rig.resources).toContain(
+      manifestsFallGuyId,
+    );
+
+    const manifestsFallGuyOption = manifestsState.pendingChoice?.options.find(
+      (option) => option.id.includes(String(manifestsFallGuyId)),
+    )?.id;
+    manifestsState = applyChoice(
+      manifestsState,
+      "runner",
+      String(manifestsFallGuyOption),
+    );
+    expect(manifestsState.run).toBeUndefined();
+    expect(manifestsState.runner.tags).toBe(0);
     expect(manifestsState.runner.credits).toBe(runnerCreditsBefore - 1 + 10);
+    expect(manifestsState.runner.heap).toContain(manifestsFallGuyId);
     expect(manifestsState.corp.hq.length).toBe(corpHqBefore);
     expect(manifestsState.corp.rd.length).toBe(corpRdBefore);
     expect(manifestsState.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "play_event",
       creditLoss: 1,
-      tagsAdded: 1,
+      tagsAdded: 0,
       gainedCredits: 10,
     });
+    for (const branch of [manifestsPassState, manifestsState]) {
+      const replay = replayEvents(
+        manifestsInitial,
+        branch.eventLog.slice(manifestsReplayStart),
+      );
+      expect(replay.ok).toBe(true);
+      expect(hashState(replay.state)).toBe(hashState(branch));
+    }
 
     let noCreditsState = toRunnerTurn(
       v171CardReleaseGame("v171-edited-shipping-no-corp-credits"),
@@ -7691,6 +7751,100 @@ describe("V1.9.6 Mechanikpaket O", () => {
     state = apply(state, "corp", (action) => action.type === "end_turn");
     expect(state.runner.tags).toBe(2);
     expect(cardCounterAmount(state, state.runner.identity, "trace_tag_counter")).toBe(1);
+  });
+
+  it("suspends the Data Raven Runner-start tag and resumes once after avoid or pass", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v196-data-raven-start-tag-continuation",
+        runnerDeck: {
+          ...ONR_V1_9_6_RUNNER_DECK,
+          id: "v196_data_raven_fall_guy_runner",
+          cards: [
+            { id: "onr_v1_161_fall-guy", quantity: 1 },
+            ...ONR_V1_9_6_RUNNER_DECK.cards,
+          ],
+        },
+        corpDeck: ONR_V1_9_6_CORP_DECK,
+        agendaPointsToWin: 7,
+      }),
+    );
+    const fallGuyId = installRunnerResourceForTest(
+      state,
+      "onr_v1_161_fall-guy",
+    );
+    setCardCounterForTest(state, state.runner.identity, "trace_tag_counter", 1);
+    state.activeSide = "corp";
+    state.phase = "corp_action_phase";
+    state.timingPoint = "corp_action.main";
+    state.corp.clicks = 1;
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+    expect(state.activeSide).toBe("runner");
+    expect(state.runner.tags).toBe(0);
+    expect(state.pendingAddTagContinuation).toMatchObject({
+      kind: "runner_start_turn",
+      sourceDefinitionId: "onr_v1_236_data-raven",
+    });
+    expect(state.pendingChoice).toMatchObject({
+      side: "runner",
+      source: expect.stringContaining("event_modification"),
+    });
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
+      "pendingAddTagContinuation",
+    );
+
+    const resolve = getLegalActions(state, "runner").find(
+      (action) => action.type === "resolve_choice",
+    );
+    if (!resolve || !state.pendingChoice)
+      throw new Error("Missing Data Raven tag-avoid choice");
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: resolve.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      selectedChoices: {
+        choiceId: state.pendingChoice.choiceId,
+        selectedOptionIds: ["pass"],
+      },
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: resolve.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      selectedChoices: {
+        choiceId: state.pendingChoice.choiceId,
+        selectedOptionIds: ["pass"],
+      },
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    const passState = applyChoice(structuredClone(state), "runner", "pass");
+    expect(passState.runner.tags).toBe(1);
+    expect(passState.runner.rig.resources).toContain(fallGuyId);
+    expect(passState.pendingAddTagContinuation).toBeUndefined();
+
+    const fallGuyOption = state.pendingChoice.options.find((option) =>
+      option.id.includes(String(fallGuyId)),
+    )?.id;
+    const avoidState = applyChoice(state, "runner", String(fallGuyOption));
+    expect(avoidState.runner.tags).toBe(0);
+    expect(avoidState.runner.heap).toContain(fallGuyId);
+    expect(avoidState.pendingAddTagContinuation).toBeUndefined();
+
+    for (const branch of [passState, avoidState]) {
+      const replay = replayEvents(initial, branch.eventLog.slice(replayStart));
+      expect(replay.ok).toBe(true);
+      expect(hashState(replay.state)).toBe(hashState(branch));
+    }
   });
 });
 

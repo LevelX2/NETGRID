@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import type { DeckDefinition, GameState } from "@netgrid/shared";
-import { createGameAfterSetup, validateGameState } from "../../index";
+import {
+  createGameAfterSetup,
+  getPlayerView,
+  hashState,
+  replayEvents,
+  validateGameState,
+} from "../../index";
 import { cardImplementationCoverageForDefinitionId } from "../../card-implementations/coverage";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import {
@@ -12,9 +18,11 @@ import {
 } from "../../test-fixtures/index-test-helpers";
 import {
   apply,
+  applyChoice,
   emptyRunnerGripForTest,
   installRunnerHardwareForTest,
   installRunnerProgramForTest,
+  installRunnerResourceForTest,
   moveRunnerCardCopyToGrip,
   mustAction,
   putCorpCardOnTopOfRd,
@@ -29,6 +37,7 @@ const SHOCK_TREATMENT = "onr_classic_023_shock-treatment";
 const STERDROID = "onr_classic_024_sterdroid";
 const STRATEGIC_PLANNING_GROUP = "onr_classic_025_strategic-planning-group";
 const STREET_ENFORCER = "onr_classic_026_street-enforcer";
+const FALL_GUY = "onr_v1_161_fall-guy";
 
 const CLASSIC_08_IDS = [
   IRT,
@@ -85,6 +94,33 @@ function classic08Game(seed: string): GameState {
 function corpMainClassic08Game(seed: string): GameState {
   const state = apply(
     classic08Game(seed),
+    "corp",
+    (action) => action.type === "mandatory_draw",
+  );
+  state.corp.credits = 80;
+  state.corp.clicks = 30;
+  state.corp.maxHandSize = 100;
+  state.runner.credits = 40;
+  state.runner.clicks = 4;
+  state.runner.memoryLimit = 8;
+  return state;
+}
+
+function corpMainClassic08FallGuyGame(seed: string): GameState {
+  const state = apply(
+    createGameAfterSetup({
+      seed,
+      corpDeck: CLASSIC_08_CORP_DECK,
+      runnerDeck: {
+        ...CLASSIC_08_RUNNER_DECK,
+        id: `${CLASSIC_08_RUNNER_DECK.id}_fall_guy`,
+        cards: [
+          ...CLASSIC_08_RUNNER_DECK.cards,
+          { id: FALL_GUY, quantity: 1 },
+        ],
+      },
+      agendaPointsToWin: 99,
+    }),
     "corp",
     (action) => action.type === "mandatory_draw",
   );
@@ -322,6 +358,82 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     expect(payload?.tagsAdded).toBe(dieRolls.filter((roll) => roll === 1).length);
     expect(state.runner.tags).toBe(Number(payload?.tagsAdded ?? 0));
     expectValid(state);
+  });
+
+  it("suspends Satellite Monitors tags and preserves its single roll set after avoid or pass", () => {
+    let opened:
+      | {
+          initial: GameState;
+          replayStart: number;
+          state: GameState;
+          fallGuyId: string;
+        }
+      | undefined;
+    for (let seedIndex = 0; seedIndex < 40 && !opened; seedIndex += 1) {
+      let candidate = corpMainClassic08FallGuyGame(
+        `classic-08-satellite-continuation-${seedIndex}`,
+      );
+      addRezzedCorpRootForTest(
+        candidate,
+        SATELLITE_MONITORS,
+        "remote_1",
+        "satellite",
+      );
+      candidate = toRunnerTurnFromCorpMain(candidate);
+      const fallGuyId = installRunnerResourceForTest(candidate, FALL_GUY);
+      candidate.runnerTurnFlags = {
+        ...candidate.runnerTurnFlags!,
+        runAttemptsThisTurn: 6,
+      };
+      const initial = structuredClone(candidate);
+      const replayStart = candidate.eventLog.length;
+      candidate = apply(
+        candidate,
+        "runner",
+        (action) => action.type === "end_turn",
+      );
+      if (candidate.pendingAddTagContinuation?.kind === "corp_start_turn") {
+        opened = { initial, replayStart, state: candidate, fallGuyId };
+      }
+    }
+    if (!opened) throw new Error("Satellite Monitors produced no tag window");
+
+    const { initial, replayStart, fallGuyId } = opened;
+    const state = opened.state;
+    const randomDrawCount = state.randomDrawRecords.length;
+    expect(state.runner.tags).toBe(0);
+    expect(state.pendingChoice).toMatchObject({
+      side: "runner",
+      source: expect.stringContaining("event_modification"),
+    });
+    expect(state.pendingAddTagContinuation).toMatchObject({
+      kind: "corp_start_turn",
+      sourceDefinitionId: SATELLITE_MONITORS,
+    });
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+
+    const passState = applyChoice(structuredClone(state), "runner", "pass");
+    expect(passState.runner.tags).toBeGreaterThan(0);
+    expect(passState.runner.rig.resources).toContain(fallGuyId);
+    expect(passState.randomDrawRecords).toHaveLength(randomDrawCount);
+    expect(passState.pendingAddTagContinuation).toBeUndefined();
+
+    const fallGuyOption = state.pendingChoice?.options.find((option) =>
+      option.id.includes(fallGuyId),
+    )?.id;
+    const avoidState = applyChoice(state, "runner", String(fallGuyOption));
+    expect(avoidState.runner.tags).toBe(
+      Math.max(0, passState.runner.tags - 1),
+    );
+    expect(avoidState.runner.heap).toContain(fallGuyId);
+    expect(avoidState.randomDrawRecords).toHaveLength(randomDrawCount);
+    expect(avoidState.pendingAddTagContinuation).toBeUndefined();
+
+    for (const branch of [passState, avoidState]) {
+      const replay = replayEvents(initial, branch.eventLog.slice(replayStart));
+      expect(replay.ok).toBe(true);
+      expect(hashState(replay.state)).toBe(hashState(branch));
+    }
   });
 
   it("uses Self-Destruct on access to trash other installed root cards and deal net damage", () => {

@@ -468,6 +468,16 @@ describe("Proteus PRO015 Bad-Publicity Run/Replacement Suite", () => {
 
   it("resolves Live News Feed tags and Bad Publicity from encounter, rez, and steal production hooks", () => {
     let state = baseState("pro015-live-news-feed");
+    const fallGuyId = addRunnerGripCard(
+      state,
+      "onr_v1_161_fall-guy",
+      "live_news_fall_guy",
+    );
+    state = takeRunnerAction(
+      state,
+      (action) =>
+        action.type === "install_card" && action.payload?.cardId === fallGuyId,
+    );
     const sourceId = addRunnerGripCard(state, LIVE_NEWS_FEED, "live_news");
     const blackIceId = addCorpIce(state, BLACK_ICE, "live_news_black_ice", "hq", true);
     clearCorpZone(state, "hq");
@@ -504,17 +514,47 @@ describe("Proteus PRO015 Bad-Publicity Run/Replacement Suite", () => {
 
     state.activeSide = "runner";
     state.timingPoint = "access.resolve_card";
+    const continuationInitial = structuredClone(state);
+    const continuationReplayStart = state.eventLog.length;
     state = accessAndStealAgenda(state);
-    expect(state.run).toBeUndefined();
-    expect(state.runner.tags).toBe(2);
-    expect(state.corp.badPublicity).toBe(3);
+    expect(state.run).toBeDefined();
+    expect(state.runner.tags).toBe(0);
+    expect(state.corp.badPublicity).toBe(0);
+    expect(state.pendingAddTagContinuation).toMatchObject({
+      kind: "run_end_cleanup",
+    });
+    expect(state.pendingChoice?.source).toContain("event_modification");
 
-    expect(state.runner.tags).toBe(2);
-    expect(state.corp.badPublicity).toBe(3);
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+    const passState = applyChoice(structuredClone(state), "runner", "pass");
+    expect(passState.run).toBeUndefined();
+    expect(passState.runner.tags).toBe(2);
+    expect(passState.corp.badPublicity).toBe(3);
+    expect(passState.runner.rig.resources).toContain(fallGuyId);
+    expect(passState.eventLog.at(-1)?.publicPayload).toMatchObject({
       tagsAdded: 2,
       badPublicityAdded: 3,
     });
+
+    const fallGuyOption = state.pendingChoice?.options.find((option) =>
+      option.id.includes(String(fallGuyId)),
+    )?.id;
+    const avoidState = applyChoice(state, "runner", String(fallGuyOption));
+    expect(avoidState.run).toBeUndefined();
+    expect(avoidState.runner.tags).toBe(1);
+    expect(avoidState.corp.badPublicity).toBe(3);
+    expect(avoidState.runner.heap).toContain(fallGuyId);
+    expect(avoidState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      tagsAdded: 1,
+      badPublicityAdded: 3,
+    });
+    for (const branch of [passState, avoidState]) {
+      const replay = replayEvents(
+        continuationInitial,
+        branch.eventLog.slice(continuationReplayStart),
+      );
+      expect(replay.ok).toBe(true);
+      expect(hashState(replay.state)).toBe(hashState(branch));
+    }
     expect(before.run).toBeUndefined();
   });
 

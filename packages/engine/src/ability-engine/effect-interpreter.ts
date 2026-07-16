@@ -24,7 +24,6 @@ import type {
   CardEffectExecutionResult,
 } from "./effect-execution-types";
 import {
-  addRunnerTags,
   assertHiddenInfoBarrierVisibility,
   assertPositiveIntegerAmount,
   assertPublicVisibility,
@@ -81,7 +80,6 @@ export function executeCardImplementationEffects(
     loseCredits,
     spendCreditsIfAvailable,
     loseGame,
-    addRunnerTags,
     publicEffectId,
     effectReason,
     assertPositiveIntegerAmount,
@@ -91,7 +89,8 @@ export function executeCardImplementationEffects(
     dataFortServerIds,
   };
 
-  effects.forEach((effect, index) => {
+  for (const [localIndex, effect] of effects.entries()) {
+    const index = localIndex + (context.effectIndexOffset ?? 0);
     const familyInput = {
       state,
       context,
@@ -104,7 +103,7 @@ export function executeCardImplementationEffects(
 
     // The dispatcher preserves effect order. New reusable effect behavior should
     // live in a focused family module instead of extending this switch forever.
-    if (
+    const handled =
       executeCreditEffect(familyInput) ||
       executeBadPublicityEffect(familyInput) ||
       executeCounterEffect(familyInput) ||
@@ -112,14 +111,19 @@ export function executeCardImplementationEffects(
       executeAdvancementEffect(familyInput) ||
       executeDrawEffect(familyInput) ||
       executeTagEffect(familyInput) ||
-      executeDamageEffect(familyInput)
-    )
-      return;
+      executeDamageEffect(familyInput);
+    if (handled) {
+      if (context.isEffectSuspended?.())
+        return { publicPayload, resolvedEffects, suspendedAtEffectIndex: index };
+      continue;
+    }
 
-    if (executeAgendaScoringEffect(familyInput)) return;
+    if (executeAgendaScoringEffect(familyInput)) continue;
 
     executeContextualEffect(familyInput);
-  });
+    if (context.isEffectSuspended?.())
+      return { publicPayload, resolvedEffects, suspendedAtEffectIndex: index };
+  }
 
   return { publicPayload, resolvedEffects };
 }

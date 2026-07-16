@@ -113,6 +113,12 @@ export type CardImplementationRuntimeExtendedDependencies = {
     amount?: number,
   ) => CardEffectRemoveTagsResult;
   avoidNextTag: (state: GameState, amount: 1) => CardEffectAvoidTagResult;
+  addRunnerTagsWithPrevention: (
+    state: GameState,
+    legalAction: LegalAction,
+    amount: number,
+    sourceDefinitionId: CardDefinition["id"],
+  ) => boolean;
   returnSourceToGripIfPaid: (
     state: GameState,
     legalAction: LegalAction,

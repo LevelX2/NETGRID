@@ -245,6 +245,7 @@ function makeHost(legalAction: LegalAction) {
     tags: {
       addRunnerTagsWithPrevention: (amount) => {
         state.runner.tags += amount;
+        return false;
       },
     },
     trace: {
