@@ -23,6 +23,13 @@
   Entwicklungsalternativen marginal bewertet. Ein Bankaufbau ohne konkreten
   Fundingbedarf bleibt eine überstimmbare Hintergrundoption; es gibt keine
   absolute kartenspezifische Nutzungsgrenze.
+- Die Runner-Opening-Hand-Bewertung trennt direkt gehaltene Breaker von
+  ausführbarem Breaker-Zugriff. Ein in der Hand liegender, sofort bezahlbarer
+  und semantisch bestätigter Programmsucher zählt als Zugriff, wenn im eigenen
+  Deck mindestens eine belastbare Standard-Coverage für Wall, Code Gate,
+  Sentry oder Universal-ICE liegt. Sucher nur im Deck, unbezahlbare Sucher und
+  ausschließlich spezielle oder niedrigkonfidente Coverage umgehen die
+  Mulligan-Grenzen nicht.
 - Ein Bankplan ohne konkreten Fundingbedarf bleibt auch gegenüber seinem
   eigenen Rohscore überstimmbar, wenn ein sichtbarer Schadensdruck den
   Handpuffer priorisiert. Gerade finanzierte neue Entwicklung bleibt dagegen
@@ -158,6 +165,11 @@
   spielgleiche Verträge für ökonomische Runner-Trace-Bids, sichtbare
   R&D-Top-Frische bei Wiederholungsruns und die registrierungsgetreue
   Networking-Auflösung im Full-Derived-Facts-Consumerpfad.
+- `match-36ba22d6-runner-remediation-process-2026-07-17.md` und
+  `docs/reviews/ai/match-36ba22d6-runner-remediation-final-2026-07-17.md`:
+  vollständiger 98/98-Matchaudit, Strict-Warmup-Grenze für spätere Findings
+  und spielgleicher Opening-Hand-Vertrag für bezahlbaren Breaker-Zugriff über
+  einen eigenen Programmsucher.
 - `match-c6eedf46-runner-risk-economy-remediation-process-2026-07-16.md` und
   `docs/reviews/ai/match-c6eedf46-runner-risk-economy-remediation-final-2026-07-16.md`:
   aktionsbezogener Reservevertrag für verzögerte Ökonomie, side-safe

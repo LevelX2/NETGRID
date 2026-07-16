@@ -1,6 +1,6 @@
 # Match 36BA22D6: Runner-Plan-, Bank- und Access-Risk-Remediation
 
-Status: P0 bis P4 abgeschlossen, P5 aktiv
+Status: P0 bis P5 abgeschlossen, P6 aktiv
 
 ## Quelle und Zielprüfung
 
@@ -218,6 +218,20 @@ Ergebnis:
   sauber und merge-bereit.
 - Commit: `docs(ai): close match 36ba22d6 remediation`
 
+Ergebnis:
+
+- der zwischenzeitlich weitergelaufene lokale `main` einschließlich Match
+  03575 wurde konfliktfrei über Merge-Commit `a37835808` eingebunden;
+- die drei AI-Shards enthalten 353 Dateien und 2.447 Tests: 345 Dateien und
+  2.432 Tests sind grün, die 15 roten Tests in acht Dateien entsprechen exakt
+  der dokumentierten `main`-Baseline von Match 03575; der vorliegende Slice
+  fügt eine grüne Datei und sechs grüne Tests hinzu;
+- `check:ai:full`, AI-Typecheck, 38 fokussierte beziehungsweise angrenzende
+  Tests und `git diff --check` sind grün;
+- der Deckhint-/Consumer-Audit bleibt bei 20/20 eindeutigen Karten,
+  45/45 Kopien, null blockierenden Findings und null Warnungen;
+- Final Review, AI-Architekturindex und Monatslog sind aktualisiert.
+
 ### P6 – Main-Integration und Cleanup
 
 - Ziel: aktuelles `main` defensiv einbinden, relevante Checks wiederholen,
@@ -225,6 +239,10 @@ Ergebnis:
   verifiziert entfernen.
 - Done-Gate: `main` enthält alle Paketcommits und ist sauber; Worktree-Pfad
   und Arbeitsbranch existieren weder in Git noch im Dateisystem.
+
+Zwischenstand: Der aktuelle lokale `main` ist bereits im Arbeitsbranch
+enthalten. Ausstehend sind nur noch der lokale Merge nach `main`, die
+Main-Nachprüfung und das verifizierte Entfernen von Worktree und Branch.
 
 ## Verifikationsregeln
 
