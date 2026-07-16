@@ -28,6 +28,13 @@ Stand: 2026-07-16
   Promotion getrennt.
 - Kartenimplementierungen, PlayerViews, PublicEvents, Replay und StateHash
   werden durch paketnahe Engine- und Visibilitytests abgesichert.
+- Allgemeine Asset-/Upgrade-Rezfenster während Runs gelten über alle
+  Corp-Server. ICE-Rez und fortgebundene Sonderfenster bleiben am Runziel;
+  Encounter und laufende Trace-Versuche öffnen kein zusätzliches normales
+  Rezfenster. Der konkrete Hacker-Tracker-Fall rezzt die Karte in Remote 2
+  während eines Runs auf Remote 1 und führt sie anschließend regelkonform in
+  den Trace. Führend ist
+  `docs/reviews/engine/global-run-rez-windows-final-review-2026-07-16.md`.
 - Installierte Corp-Assets mit semantischem Zugriffseffekt wirken
   standardmäßig nur gerezzt. Der aktive Pool umfasst zehn Access-Nodes unter
   56 Corp-Assets: sieben folgen dem Rez-Default, `Virus Test Site` ist die

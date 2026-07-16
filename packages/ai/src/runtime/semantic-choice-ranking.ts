@@ -146,13 +146,22 @@ export function tacticalPlanMappedChoice(
         overrideChoice,
         scoreGap,
       );
+    const urgentRunNowDevelopmentShouldYield =
+      tacticalPlanUrgentRunNowDevelopmentShouldYield(
+        input,
+        mapping,
+        mappedChoice,
+        overrideChoice,
+        scoreGap,
+      );
     if (
       tacticalPlanFundedDevelopmentContinuationBlocksOverride(
         mapping,
         mappedChoice,
         overrideChoice,
       ) &&
-      !lowValueRunEventShouldYield
+      !lowValueRunEventShouldYield &&
+      !urgentRunNowDevelopmentShouldYield
     ) {
       return tacticalPlanBlockedOverrideResult({
         mappedChoice,
@@ -302,6 +311,7 @@ export function tacticalPlanMappedChoice(
     if (
       mappedNonPositiveAgainstPositive &&
       !deferredDevelopmentInstallShouldYield &&
+      !urgentRunNowDevelopmentShouldYield &&
       !noNeedSearchShouldYield &&
       tacticalPlanNonPositiveMappingStillProtected(
         mapping,
@@ -391,6 +401,7 @@ export function tacticalPlanMappedChoice(
           noNeedSearchShouldYield,
           coverageProbeRunShouldYield,
           lowValueRunEventShouldYield,
+          urgentRunNowDevelopmentShouldYield,
         },
       )
     ) {
@@ -414,35 +425,38 @@ export function tacticalPlanMappedChoice(
       noNeedSearchShouldYield ||
       coverageProbeRunShouldYield ||
       lowValueRunEventShouldYield ||
+      urgentRunNowDevelopmentShouldYield ||
       scoreGap > threshold.scoreGap
     ) {
       const result = {
         outcome: "semantic_choice_selected" as const,
         overrideChoice,
         overriddenMappedChoice: mappedChoice,
-        overrideReason: noNeedSearchShouldYield
-          ? "no_need_search_mapping_yield"
-          : coverageProbeRunShouldYield
-            ? "coverage_probe_run_mapping_yield"
-            : lowValueRunEventShouldYield
-              ? "low_value_run_event_mapping_yield"
-              : mappedNonPositiveAgainstPositive
-                ? "mapped_nonpositive_against_positive"
-                : repeatedRunShouldYield
-                  ? "repeated_run_mapping_yield"
-                  : acuteHandBufferShouldYield
-                    ? "acute_hand_buffer_mapping_yield"
-                    : lowValueRecoveryShouldYield
-                      ? "low_value_recovery_mapping_yield"
-                      : inferiorRunTargetShouldYield
-                        ? "inferior_run_target_mapping_yield"
-                        : corpBoardTriageMismatchShouldYield
-                          ? "corp_board_triage_mismatch_yield"
-                          : backgroundBankBuildShouldYield
-                            ? "background_bank_build_mapping_yield"
-                            : hardInterruptShouldYield
-                              ? "runner_hard_interrupt"
-                              : threshold.reason,
+        overrideReason: urgentRunNowDevelopmentShouldYield
+          ? "urgent_run_now_development_yield"
+          : noNeedSearchShouldYield
+            ? "no_need_search_mapping_yield"
+            : coverageProbeRunShouldYield
+              ? "coverage_probe_run_mapping_yield"
+              : lowValueRunEventShouldYield
+                ? "low_value_run_event_mapping_yield"
+                : mappedNonPositiveAgainstPositive
+                  ? "mapped_nonpositive_against_positive"
+                  : repeatedRunShouldYield
+                    ? "repeated_run_mapping_yield"
+                    : acuteHandBufferShouldYield
+                      ? "acute_hand_buffer_mapping_yield"
+                      : lowValueRecoveryShouldYield
+                        ? "low_value_recovery_mapping_yield"
+                        : inferiorRunTargetShouldYield
+                          ? "inferior_run_target_mapping_yield"
+                          : corpBoardTriageMismatchShouldYield
+                            ? "corp_board_triage_mismatch_yield"
+                            : backgroundBankBuildShouldYield
+                              ? "background_bank_build_mapping_yield"
+                              : hardInterruptShouldYield
+                                ? "runner_hard_interrupt"
+                                : threshold.reason,
         overrideThreshold: threshold.scoreGap,
         scoreGap,
       };
@@ -597,6 +611,7 @@ function tacticalPlanRunnerMappingBlocksOffPlanOverride(
     noNeedSearchShouldYield: boolean;
     coverageProbeRunShouldYield: boolean;
     lowValueRunEventShouldYield: boolean;
+    urgentRunNowDevelopmentShouldYield: boolean;
   },
 ): boolean {
   if (mapping.plan.side !== "runner") return false;
@@ -613,6 +628,7 @@ function tacticalPlanRunnerMappingBlocksOffPlanOverride(
   if (exceptions.noNeedSearchShouldYield) return false;
   if (exceptions.coverageProbeRunShouldYield) return false;
   if (exceptions.lowValueRunEventShouldYield) return false;
+  if (exceptions.urgentRunNowDevelopmentShouldYield) return false;
   return !runnerPlanOverrideIsHardInterrupt(
     mapping.plan,
     mappedChoice,
@@ -843,6 +859,44 @@ function tacticalPlanDeferredDevelopmentInstallShouldYield(
           ((component.reason ?? "").includes("duplicate:redundant_duplicate") ||
             (component.reason ?? "").includes("duplicate:useful_backup") ||
             (component.reason ?? "").includes("delta:backup_only")))),
+  );
+}
+
+function tacticalPlanUrgentRunNowDevelopmentShouldYield(
+  input: AiDecisionInput,
+  mapping: PlanStepMappingResult,
+  mappedChoice: SemanticRuntimeChoice,
+  overrideChoice: SemanticRuntimeChoice,
+  scoreGap: number,
+): boolean {
+  if (
+    (mapping.plan.type !== "runner.develop_hand_card" &&
+      mapping.plan.type !== "runner.play_best_hand_card") ||
+    (mappedChoice.action.type !== "gain_credit" &&
+      mappedChoice.action.type !== "install_card" &&
+      mappedChoice.action.type !== "play_event") ||
+    (mappedChoice.action.type === "gain_credit" &&
+      !mapping.plan.evidence.includes("hand_development_fit:blocked")) ||
+    (mappedChoice.action.type === "gain_credit" &&
+      input.playerView.own.clicks <= 1) ||
+    mappedChoice.score > 0 ||
+    mappedChoice.scoreBreakdown.some(
+      (component) =>
+        component.key === "semantic_strategic_action_fit" &&
+        component.value > 0,
+    ) ||
+    overrideChoice.action.type !== "start_run" ||
+    overrideChoice.score <= 0 ||
+    scoreGap <= PLAN_MAPPED_CHOICE_MAX_SCORE_GAP
+  ) {
+    return false;
+  }
+  return overrideChoice.scoreBreakdown.some(
+    (component) =>
+      component.key === "runner_goal_fit_tactical_goal_run_target" &&
+      component.value > 0 &&
+      (component.reason ?? "").includes("urgency:high") &&
+      (component.reason ?? "").includes("recommendation:run_now"),
   );
 }
 

@@ -192,6 +192,7 @@ import {
   continueRunThroughMovement,
   continueRunThroughMovementWindow,
   enterEncounterFromMovementWindow,
+  passRootRezWindowBeforeAccessIfOpen,
   traceChoiceOptionIdForDefinition,
   addCorpCardToHqForTest,
   addRezzedCorpRootForTest,
@@ -1974,6 +1975,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Prevention Tools harde
       "runner",
       (action) => action.type === "start_run" && action.payload?.serverId === "rd",
     );
+    toolState = passRootRezWindowBeforeAccessIfOpen(toolState);
     toolState = apply(toolState, "runner", (action) => action.type === "access_card");
     expect(toolState.eventLog.at(-1)?.publicPayload).toMatchObject({
       visibility: { class: "hidden_info_barrier" },

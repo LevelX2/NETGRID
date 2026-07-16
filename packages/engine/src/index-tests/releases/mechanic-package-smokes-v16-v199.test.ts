@@ -1760,7 +1760,9 @@ describe("V1.6.2 Mechanikpaket B", () => {
         (action) =>
           action.type === "start_run" && action.payload?.serverId === "rd",
       );
-      return apply(state, "corp", (action) => action.type === "rez_ice");
+      return passCorpApproachRezWindowIfOpen(
+        apply(state, "corp", (action) => action.type === "rez_ice"),
+      );
     };
     const decoderBreakIndexes = (state: GameState): number[] =>
       getLegalActions(state, "runner")

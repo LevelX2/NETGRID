@@ -140,64 +140,70 @@ export function buildCorpRunRootRezActions(
 ): LegalAction[] {
   const run = host.state.run;
   if (!run) return [];
-  const server = host.servers.mustServer(run.attackedServerId);
+  const attackedServer = host.servers.mustServer(run.attackedServerId);
   const actions: LegalAction[] = [];
-  for (const cardId of server.root.slice().sort()) {
-    const instance = host.state.cardInstances[cardId];
-    if (!instance || instance.rezzed) continue;
-    const definition = host.cards.definitionFor(cardId);
-    if (definition.type !== "asset" && definition.type !== "upgrade") continue;
-    const rezCost = rezCostForCard(host.state, cardId);
-    if (host.state.corp.credits < rezCost) continue;
-    const agendaPointCost = rootRezAgendaPointCostForDefinition(definition);
-    if (
-      agendaPointCost > 0 &&
-      corpAgendaPointTotalForRootRez(host) < agendaPointCost
-    )
-      continue;
-    if (!rootRezLifecycleIsSolvable(host, cardId, definition, server)) continue;
-    const rezCostReductionSourceDefinitionIds =
-      rezCostReductionSourceDefinitionIdsFor(host.state, cardId, definition);
-    const agendaPointCostPayload =
-      agendaPointCost > 0
-        ? {
-            agendaPointCost,
-            ...(isObligationDebtDefinition(definition.id)
-              ? { obligationDebtAbility: "rez_with_agenda_point_cost" }
-              : {}),
-          }
-        : {};
-    actions.push(
-      buildLegalAction(
-        host.state,
-        "corp",
-        "rez_ice",
-        `${definition.title} in ${server.label} rezzen`,
-        cardId,
-        [{ credits: rezCost }],
-        {
+  for (const server of host.state.corp.servers
+    .slice()
+    .sort((left, right) => left.id.localeCompare(right.id))) {
+    for (const cardId of server.root.slice().sort()) {
+      const instance = host.state.cardInstances[cardId];
+      if (!instance || instance.rezzed) continue;
+      const definition = host.cards.definitionFor(cardId);
+      if (definition.type !== "asset" && definition.type !== "upgrade")
+        continue;
+      const rezCost = rezCostForCard(host.state, cardId);
+      if (host.state.corp.credits < rezCost) continue;
+      const agendaPointCost = rootRezAgendaPointCostForDefinition(definition);
+      if (
+        agendaPointCost > 0 &&
+        corpAgendaPointTotalForRootRez(host) < agendaPointCost
+      )
+        continue;
+      if (!rootRezLifecycleIsSolvable(host, cardId, definition, server))
+        continue;
+      const rezCostReductionSourceDefinitionIds =
+        rezCostReductionSourceDefinitionIdsFor(host.state, cardId, definition);
+      const agendaPointCostPayload =
+        agendaPointCost > 0
+          ? {
+              agendaPointCost,
+              ...(isObligationDebtDefinition(definition.id)
+                ? { obligationDebtAbility: "rez_with_agenda_point_cost" }
+                : {}),
+            }
+          : {};
+      actions.push(
+        buildLegalAction(
+          host.state,
+          "corp",
+          "rez_ice",
+          `${definition.title} in ${server.label} rezzen`,
           cardId,
-          rootRez: true,
-          ...agendaPointCostPayload,
-          rezInterruptJackOutEligible: true,
-          serverId: server.id,
-          ...(rezCostReductionSourceDefinitionIds.length > 0
-            ? {
-                rezCostReductionSourceDefinitionIds:
-                  rezCostReductionSourceDefinitionIds.join(","),
-                rezCostReductionAmount: (definition.rezCost ?? 0) - rezCost,
-                rezCostPaid: rezCost,
-              }
-            : {}),
-        },
-      ),
-    );
+          [{ credits: rezCost }],
+          {
+            cardId,
+            rootRez: true,
+            ...agendaPointCostPayload,
+            rezInterruptJackOutEligible: true,
+            serverId: server.id,
+            ...(rezCostReductionSourceDefinitionIds.length > 0
+              ? {
+                  rezCostReductionSourceDefinitionIds:
+                    rezCostReductionSourceDefinitionIds.join(","),
+                  rezCostReductionAmount: (definition.rezCost ?? 0) - rezCost,
+                  rezCostPaid: rezCost,
+                }
+              : {}),
+          },
+        ),
+      );
+    }
   }
   actions.push(
     ...buildRegisteredRunWindowActions(
       host.fortPass,
       run,
-      server,
+      attackedServer,
       "corp_root_rez_window",
     ),
   );
