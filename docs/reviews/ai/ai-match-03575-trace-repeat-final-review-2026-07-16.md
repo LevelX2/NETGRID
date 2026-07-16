@@ -122,8 +122,8 @@ Eingrenzung sind beide Gates grün. Der gezielte Wiederholungslauf aller zuvor
 roten Dateien enthält noch 15 Fehler; repräsentative identische Läufe auf dem
 aktuellen lokalen `main` reproduzieren dieselben Broker-/Plan- und
 Hint-Quality-Fehler ohne diesen Branch. Der abschließende vollständige AI-Lauf
-bestätigt exakt 15 rote und 2.404 grüne Tests in acht roten und 342 grünen
-Dateien bei insgesamt 350 Dateien und 2.419 Tests. Die Match-03575-Datei bleibt
+bestätigt exakt 15 rote und 2.426 grüne Tests in acht roten und 344 grünen
+Dateien bei insgesamt 352 Dateien und 2.441 Tests. Die Match-03575-Datei bleibt
 dabei 4/4 grün. Diese bestehende Main-Schuld wurde nicht in den freigegebenen
 Scope gezogen.
 

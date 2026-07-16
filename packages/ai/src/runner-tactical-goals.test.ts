@@ -430,6 +430,7 @@ describe("Runner TacticalGoalIntegration", () => {
         gainCreditAction("gain-credit"),
       ],
     });
+    input.seed = "probe-a";
     const runTargetEvaluations = evaluateRunnerRunTargets({ input });
     const economyPosture = buildRunnerEconomyPosture({ input });
     const runnerTacticalGoals = buildRunnerTacticalGoals({
@@ -459,7 +460,7 @@ describe("Runner TacticalGoalIntegration", () => {
       "pressure_probe_allowed:true",
     );
     expect(JSON.stringify(result.planAlternatives)).toContain(
-      "variation_reason:deterministic_priority_only",
+      "variation_reason:safe_probe_seeded_decision_context",
     );
     expect(result.runnerEconomyPostureUsed).toEqual(
       expect.arrayContaining([
@@ -471,6 +472,46 @@ describe("Runner TacticalGoalIntegration", () => {
     );
     expect(JSON.stringify(result.planAlternatives)).toContain(
       "why_spend_allowed_despite_reserve:pressure_budget_probe",
+    );
+  });
+
+  it("can replay-stably hold the same safe unknown probe for economy", () => {
+    const input = aiInput({
+      credits: 3,
+      servers: [server("rd")],
+      legalActions: [
+        runAction("run-rd", "rd"),
+        gainCreditAction("gain-credit"),
+      ],
+    });
+    const runTargetEvaluations = evaluateRunnerRunTargets({ input });
+    const economyPosture = buildRunnerEconomyPosture({ input });
+    const runnerTacticalGoals = buildRunnerTacticalGoals({
+      input,
+      runTargetEvaluations,
+      economyPosture,
+    });
+
+    const result = evaluateTacticalPlans({
+      input,
+      runnerRunTargetEvaluations: runTargetEvaluations,
+      runnerEconomyPosture: economyPosture,
+      runnerTacticalGoals,
+      candidates: buildActionSemanticCandidates({
+        legalActions: input.legalActions,
+        observerSide: "runner",
+        stateVersion: input.playerView.stateVersion,
+      }),
+    });
+
+    expect(
+      result.selectedMapping?.legalActions.map((action) => action.actionId),
+    ).toEqual(["gain-credit"]);
+    expect(JSON.stringify(result.planAlternatives)).toContain(
+      "probe_disposition:hold",
+    );
+    expect(JSON.stringify(result.planAlternatives)).toContain(
+      "replay_stable_safe_probe_hold:rd",
     );
   });
 
@@ -491,6 +532,7 @@ describe("Runner TacticalGoalIntegration", () => {
         gainCreditAction("gain-credit"),
       ],
     });
+    input.seed = "probe-a";
     input.playerView.stateVersion = 2;
     const runTargetEvaluations = evaluateRunnerRunTargets({ input });
     const economyPosture = buildRunnerEconomyPosture({ input });
@@ -552,6 +594,7 @@ describe("Runner TacticalGoalIntegration", () => {
         gainCreditAction("gain-credit"),
       ],
     });
+    input.seed = "probe-a";
     input.playerView.stateVersion = 2;
     const runTargetEvaluations = evaluateRunnerRunTargets({ input });
     const economyPosture = buildRunnerEconomyPosture({ input });
@@ -580,7 +623,10 @@ describe("Runner TacticalGoalIntegration", () => {
       "near_tie_probe_targets:rd",
     );
     expect(JSON.stringify(result.planAlternatives)).toContain(
-      "bounded_variation_applied:false",
+      "bounded_variation_applied:true",
+    );
+    expect(JSON.stringify(result.planAlternatives)).toContain(
+      "preferred_probe_target:none",
     );
   });
 

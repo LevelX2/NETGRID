@@ -110,10 +110,15 @@ export function applyCardSemanticJoin(
           ]),
         }
       : candidate.costProfile;
+  const effectTargets = uniqueStrings([
+    ...(candidate.effectTargets ?? []),
+    ...(profile.effectTargets ?? []),
+  ]);
 
   return {
     ...candidate,
     costProfile,
+    ...(effectTargets.length > 0 ? { effectTargets } : {}),
     cardContextSignals,
     actionTacticSignals,
     ...(compatibilitySignals.length > 0 ? { compatibilitySignals } : {}),

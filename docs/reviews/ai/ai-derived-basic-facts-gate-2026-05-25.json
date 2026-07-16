@@ -9,7 +9,7 @@
   "pilotCardCount": 193,
   "implementationFoundCount": 193,
   "cardsWithDerivedFacts": 193,
-  "cardsWithManualOntologyOverlap": 156,
+  "cardsWithManualOntologyOverlap": 155,
   "cardsNeedingManualOverlay": 133,
   "effectKindCounts": {
     "access_punish": 5,
@@ -18,7 +18,7 @@
     "action_penalty": 1,
     "advance_burst": 3,
     "advanceable_economy": 6,
-    "agenda_reveal_economy": 1,
+    "agenda_reveal_economy": 2,
     "ambush": 5,
     "base_link": 1,
     "brain_damage_prevention": 2,
@@ -85,7 +85,7 @@
     "requires_accessed_card": 8,
     "requires_advancement_counter": 5,
     "requires_agenda_in_hq": 1,
-    "requires_agenda_reveal": 1,
+    "requires_agenda_reveal": 2,
     "requires_archives_card": 1,
     "requires_brain_damage": 2,
     "requires_corp_credits_threshold": 1,
@@ -128,7 +128,7 @@
   "hardErrorCount": 0,
   "hardErrors": [],
   "hardConflicts": [],
-  "warningCount": 997,
+  "warningCount": 994,
   "warnings": [
     {
       "kind": "text_pattern_derivation",
@@ -3682,7 +3682,7 @@
     },
     {
       "kind": "generated_fact_without_manual_match",
-      "message": "Generated remoteRole:asset_economy has no manual ontology match.",
+      "message": "Generated remoteRole:score_acceleration has no manual ontology match.",
       "cardId": "onr_v1_300_project-consultants"
     },
     {
@@ -3737,7 +3737,7 @@
     },
     {
       "kind": "generated_fact_without_manual_match",
-      "message": "Generated remoteRole:asset_economy has no manual ontology match.",
+      "message": "Generated remoteRole:score_acceleration has no manual ontology match.",
       "cardId": "onr_v1_304_systematic-layoffs"
     },
     {
@@ -3782,7 +3782,7 @@
     },
     {
       "kind": "generated_fact_without_manual_match",
-      "message": "Generated remoteRole:asset_economy has no manual ontology match.",
+      "message": "Generated remoteRole:score_acceleration has no manual ontology match.",
       "cardId": "onr_v1_305_team-restructuring"
     },
     {
@@ -4026,23 +4026,8 @@
       "cardId": "onr_v1_314_corporate-negotiating-center"
     },
     {
-      "kind": "descriptor_or_overlay_gap",
-      "message": "Manual ontology contains fields not currently derivable.",
-      "cardId": "onr_v1_314_corporate-negotiating-center"
-    },
-    {
       "kind": "generated_fact_without_manual_match",
       "message": "Generated condition:requires_start_of_turn has no manual ontology match.",
-      "cardId": "onr_v1_314_corporate-negotiating-center"
-    },
-    {
-      "kind": "manual_ontology_without_generated_match",
-      "message": "Manual condition:requires_agenda_reveal has no generated basic fact match.",
-      "cardId": "onr_v1_314_corporate-negotiating-center"
-    },
-    {
-      "kind": "manual_ontology_without_generated_match",
-      "message": "Manual effect:agenda_reveal_economy has no generated basic fact match.",
       "cardId": "onr_v1_314_corporate-negotiating-center"
     },
     {
@@ -22512,7 +22497,7 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "remoteRole": {
-          "kind": "asset_economy",
+          "kind": "score_acceleration",
           "threatLevel": "medium",
           "serverScope": "remote",
           "confidence": "high",
@@ -22562,7 +22547,7 @@
         "generatedOnly": [
           "condition:requires_score_window",
           "effect:score_acceleration",
-          "remoteRole:asset_economy"
+          "remoteRole:score_acceleration"
         ],
         "manualOnly": [
           "condition:requires_installed_advanceable_card"
@@ -22572,7 +22557,7 @@
         "condition:requires_installed_advanceable_card",
         "condition:requires_score_window",
         "effect:score_acceleration",
-        "remoteRole:asset_economy"
+        "remoteRole:score_acceleration"
       ],
       "descriptorGaps": [
         "Generated facts contain fields not currently mirrored manually.",
@@ -22598,7 +22583,7 @@
         },
         {
           "kind": "generated_fact_without_manual_match",
-          "message": "Generated remoteRole:asset_economy has no manual ontology match."
+          "message": "Generated remoteRole:score_acceleration has no manual ontology match."
         },
         {
           "kind": "manual_ontology_without_generated_match",
@@ -22968,7 +22953,7 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "remoteRole": {
-          "kind": "asset_economy",
+          "kind": "score_acceleration",
           "threatLevel": "medium",
           "serverScope": "remote",
           "confidence": "high",
@@ -23020,7 +23005,7 @@
         "generatedOnly": [
           "condition:requires_score_window",
           "effect:score_acceleration",
-          "remoteRole:asset_economy"
+          "remoteRole:score_acceleration"
         ],
         "manualOnly": [
           "condition:requires_installed_advanceable_card"
@@ -23030,7 +23015,7 @@
         "condition:requires_installed_advanceable_card",
         "condition:requires_score_window",
         "effect:score_acceleration",
-        "remoteRole:asset_economy"
+        "remoteRole:score_acceleration"
       ],
       "descriptorGaps": [
         "Generated facts contain fields not currently mirrored manually.",
@@ -23056,7 +23041,7 @@
         },
         {
           "kind": "generated_fact_without_manual_match",
-          "message": "Generated remoteRole:asset_economy has no manual ontology match."
+          "message": "Generated remoteRole:score_acceleration has no manual ontology match."
         },
         {
           "kind": "manual_ontology_without_generated_match",
@@ -23114,7 +23099,7 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "remoteRole": {
-          "kind": "asset_economy",
+          "kind": "score_acceleration",
           "threatLevel": "medium",
           "serverScope": "remote",
           "confidence": "high",
@@ -23163,7 +23148,7 @@
           "condition:requires_score_window",
           "effect:advance_burst",
           "effect:score_acceleration",
-          "remoteRole:asset_economy"
+          "remoteRole:score_acceleration"
         ],
         "manualOnly": [
           "condition:requires_installed_advanceable_card",
@@ -23176,7 +23161,7 @@
         "effect:advance",
         "effect:advance_burst",
         "effect:score_acceleration",
-        "remoteRole:asset_economy"
+        "remoteRole:score_acceleration"
       ],
       "descriptorGaps": [
         "Generated facts contain fields not currently mirrored manually.",
@@ -23206,7 +23191,7 @@
         },
         {
           "kind": "generated_fact_without_manual_match",
-          "message": "Generated remoteRole:asset_economy has no manual ontology match."
+          "message": "Generated remoteRole:score_acceleration has no manual ontology match."
         },
         {
           "kind": "manual_ontology_without_generated_match",
@@ -24014,7 +23999,7 @@
       "implementationFound": true,
       "expectedDerivableKinds": [
         "effect:score_acceleration",
-        "remoteRole:asset_economy"
+        "remoteRole:score_acceleration"
       ],
       "expectedManualOverlayNeeded": false,
       "rationale": "Activated advancement-counter placement is a mechanical score-acceleration fact; strategic closeout valuation remains manual/consumer context.",
@@ -24039,7 +24024,7 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "remoteRole": {
-          "kind": "asset_economy",
+          "kind": "score_acceleration",
           "threatLevel": "medium",
           "serverScope": "remote",
           "confidence": "high",
@@ -24074,7 +24059,7 @@
           "opportunityCost": "medium"
         },
         "remoteRole": {
-          "kind": "asset_economy",
+          "kind": "score_acceleration",
           "threatLevel": "medium",
           "serverScope": "remote"
         },
@@ -24092,7 +24077,7 @@
       },
       "overlap": {
         "matches": [
-          "remoteRole:asset_economy"
+          "remoteRole:score_acceleration"
         ],
         "generatedOnly": [
           "effect:score_acceleration"
@@ -24299,8 +24284,23 @@
       "expectedManualOverlayNeeded": false,
       "rationale": "Start-turn remote economy/support context is mechanically represented when visible in implementation.",
       "derivedFacts": {
-        "effects": [],
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "agenda_reveal_economy",
+            "timing": "start_of_turn",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 1,
+            "source": "implementation.lifecycle.start_of_corp_turn.show_hq_agendas_for_credits"
+          }
+        ],
         "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_agenda_reveal",
+            "source": "implementation.lifecycle.start_of_corp_turn.show_hq_agendas_for_credits"
+          },
           {
             "confidence": "high",
             "kind": "requires_start_of_turn",
@@ -24364,24 +24364,20 @@
       },
       "overlap": {
         "matches": [
+          "condition:requires_agenda_reveal",
+          "effect:agenda_reveal_economy",
           "remoteRole:asset_economy"
         ],
         "generatedOnly": [
           "condition:requires_start_of_turn"
         ],
-        "manualOnly": [
-          "condition:requires_agenda_reveal",
-          "effect:agenda_reveal_economy"
-        ]
+        "manualOnly": []
       },
       "missingManualOverlay": [
-        "condition:requires_agenda_reveal",
-        "condition:requires_start_of_turn",
-        "effect:agenda_reveal_economy"
+        "condition:requires_start_of_turn"
       ],
       "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually.",
-        "Manual ontology contains fields not currently derivable."
+        "Generated facts contain fields not currently mirrored manually."
       ],
       "confidence": "high",
       "warnings": [
@@ -24390,20 +24386,8 @@
           "message": "Generated facts contain fields not currently mirrored manually."
         },
         {
-          "kind": "descriptor_or_overlay_gap",
-          "message": "Manual ontology contains fields not currently derivable."
-        },
-        {
           "kind": "generated_fact_without_manual_match",
           "message": "Generated condition:requires_start_of_turn has no manual ontology match."
-        },
-        {
-          "kind": "manual_ontology_without_generated_match",
-          "message": "Manual condition:requires_agenda_reveal has no generated basic fact match."
-        },
-        {
-          "kind": "manual_ontology_without_generated_match",
-          "message": "Manual effect:agenda_reveal_economy has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -24829,8 +24813,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/esa-contract.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [
-        "effect:draw",
-        "remoteRole:asset_economy"
+        "effect:draw"
       ],
       "expectedManualOverlayNeeded": false,
       "rationale": "Action draw node is mechanically represented without strategy about when to use it.",
@@ -24849,14 +24832,7 @@
         "conditions": [],
         "costProfile": {},
         "derivationNotes": [],
-        "needsManualOverlayReasons": [],
-        "remoteRole": {
-          "kind": "asset_economy",
-          "threatLevel": "medium",
-          "serverScope": "remote",
-          "confidence": "high",
-          "source": "pilot.expectedDerivableKinds.asset_economy"
-        }
+        "needsManualOverlayReasons": []
       },
       "manualOntologySummary": {
         "hintPresent": true,
@@ -24879,11 +24855,6 @@
           }
         ],
         "conditions": [],
-        "remoteRole": {
-          "kind": "asset_economy",
-          "threatLevel": "medium",
-          "serverScope": "remote"
-        },
         "lineSupport": [],
         "quality": {
           "hintReviewed": true,
@@ -24895,8 +24866,7 @@
       },
       "overlap": {
         "matches": [
-          "effect:draw",
-          "remoteRole:asset_economy"
+          "effect:draw"
         ],
         "generatedOnly": [],
         "manualOnly": []
@@ -24919,8 +24889,7 @@
       "expectedDerivableKinds": [
         "effect:draw",
         "effect:remote_protection",
-        "condition:requires_rezzed_card",
-        "remoteRole:asset_economy"
+        "condition:requires_rezzed_card"
       ],
       "expectedManualOverlayNeeded": false,
       "rationale": "Draw plus hand-size support are represented as board-context asset utility, not remote safety.",
@@ -24956,14 +24925,7 @@
         "derivationNotes": [
           "Active board-state still belongs to engine/runtime; derived facts only describe the mechanical class."
         ],
-        "needsManualOverlayReasons": [],
-        "remoteRole": {
-          "kind": "asset_economy",
-          "threatLevel": "medium",
-          "serverScope": "remote",
-          "confidence": "high",
-          "source": "pilot.expectedDerivableKinds.asset_economy"
-        }
+        "needsManualOverlayReasons": []
       },
       "manualOntologySummary": {
         "hintPresent": true,
@@ -24991,11 +24953,6 @@
           }
         ],
         "conditions": [],
-        "remoteRole": {
-          "kind": "asset_economy",
-          "threatLevel": "medium",
-          "serverScope": "remote"
-        },
         "lineSupport": [],
         "quality": {
           "hintReviewed": true,
@@ -25007,8 +24964,7 @@
       },
       "overlap": {
         "matches": [
-          "effect:draw",
-          "remoteRole:asset_economy"
+          "effect:draw"
         ],
         "generatedOnly": [
           "condition:requires_rezzed_card",
@@ -25223,8 +25179,7 @@
       "implementationFound": true,
       "expectedDerivableKinds": [
         "effect:install_discount",
-        "condition:requires_rezzed_card",
-        "remoteRole:asset_economy"
+        "condition:requires_rezzed_card"
       ],
       "expectedManualOverlayNeeded": false,
       "rationale": "ICE install discount is mechanical support; install legality and board state remain runtime-owned.",
@@ -25251,14 +25206,7 @@
         "derivationNotes": [
           "Active board-state still belongs to engine/runtime; derived facts only describe the mechanical class."
         ],
-        "needsManualOverlayReasons": [],
-        "remoteRole": {
-          "kind": "asset_economy",
-          "threatLevel": "medium",
-          "serverScope": "remote",
-          "confidence": "high",
-          "source": "pilot.expectedDerivableKinds.asset_economy"
-        }
+        "needsManualOverlayReasons": []
       },
       "manualOntologySummary": {
         "hintPresent": true,
@@ -25280,11 +25228,6 @@
           }
         ],
         "conditions": [],
-        "remoteRole": {
-          "kind": "asset_economy",
-          "threatLevel": "medium",
-          "serverScope": "remote"
-        },
         "lineSupport": [
           "corp.ice_tax_glacier"
         ],
@@ -25298,8 +25241,7 @@
       },
       "overlap": {
         "matches": [
-          "effect:install_discount",
-          "remoteRole:asset_economy"
+          "effect:install_discount"
         ],
         "generatedOnly": [
           "condition:requires_rezzed_card"
@@ -26252,7 +26194,7 @@
         "effect:extra_action",
         "effect:advanceable_economy",
         "condition:requires_advancement_counter",
-        "remoteRole:asset_economy"
+        "remoteRole:score_acceleration"
       ],
       "expectedManualOverlayNeeded": false,
       "rationale": "Advancement-counter action gain is represented; action use remains LegalAction context.",
@@ -26287,11 +26229,11 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "remoteRole": {
-          "kind": "asset_economy",
+          "kind": "score_acceleration",
           "threatLevel": "medium",
           "serverScope": "remote",
           "confidence": "high",
-          "source": "pilot.expectedDerivableKinds.asset_economy"
+          "source": "pilot.expectedDerivableKinds.score_acceleration"
         }
       },
       "manualOntologySummary": {
@@ -26315,7 +26257,9 @@
         ],
         "conditions": [],
         "remoteRole": {
-          "kind": "asset_economy"
+          "kind": "score_acceleration",
+          "threatLevel": "medium",
+          "serverScope": "remote"
         },
         "lineSupport": [
           "corp.fast_advance"
@@ -26331,7 +26275,7 @@
       "overlap": {
         "matches": [
           "effect:extra_action",
-          "remoteRole:asset_economy"
+          "remoteRole:score_acceleration"
         ],
         "generatedOnly": [
           "condition:requires_advancement_counter",
@@ -26745,8 +26689,7 @@
       "implementationFound": true,
       "expectedDerivableKinds": [
         "effect:remote_protection",
-        "condition:requires_rezzed_card",
-        "remoteRole:asset_economy"
+        "condition:requires_rezzed_card"
       ],
       "expectedManualOverlayNeeded": false,
       "rationale": "Corp hand-size support is represented as board-context asset utility, not remote safety.",
@@ -26773,14 +26716,7 @@
         "derivationNotes": [
           "Active board-state still belongs to engine/runtime; derived facts only describe the mechanical class."
         ],
-        "needsManualOverlayReasons": [],
-        "remoteRole": {
-          "kind": "asset_economy",
-          "threatLevel": "medium",
-          "serverScope": "remote",
-          "confidence": "high",
-          "source": "pilot.expectedDerivableKinds.asset_economy"
-        }
+        "needsManualOverlayReasons": []
       },
       "manualOntologySummary": {
         "hintPresent": true,
@@ -26803,11 +26739,6 @@
           }
         ],
         "conditions": [],
-        "remoteRole": {
-          "kind": "asset_economy",
-          "threatLevel": "medium",
-          "serverScope": "remote"
-        },
         "lineSupport": [],
         "quality": {
           "hintReviewed": true,
@@ -26818,9 +26749,7 @@
         }
       },
       "overlap": {
-        "matches": [
-          "remoteRole:asset_economy"
-        ],
+        "matches": [],
         "generatedOnly": [
           "condition:requires_rezzed_card",
           "effect:remote_protection"

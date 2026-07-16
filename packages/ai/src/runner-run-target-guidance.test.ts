@@ -7,6 +7,7 @@ import type {
 import {
   RUNNER_RUN_TARGET_TACTICAL_PRIORITY_DELTA_BY_RECOMMENDATION,
   runnerPressurePreferredProbeTarget,
+  runnerPressureProbeDisposition,
   runnerPressureProbeBasePriority,
   runnerPressureProbeTargetAllowed,
   runnerRunTargetHighPayoff,
@@ -177,9 +178,47 @@ describe("runner run target guidance", () => {
         creditsAfterRun: -1,
       }),
     ).toBe(false);
-    expect(runnerPressurePreferredProbeTarget([], 4)).toBeUndefined();
-    expect(runnerPressurePreferredProbeTarget(["hq", "rd"], 0)).toBe("hq");
-    expect(runnerPressurePreferredProbeTarget(["hq", "rd"], 1)).toBe("rd");
-    expect(runnerPressurePreferredProbeTarget(["hq", "rd"], -1)).toBe("rd");
+    expect(runnerPressurePreferredProbeTarget([], "context")).toBeUndefined();
+    const repeated = runnerPressurePreferredProbeTarget(
+      ["hq", "rd"],
+      "same-seed-and-decision",
+    );
+    expect(
+      runnerPressurePreferredProbeTarget(
+        ["hq", "rd"],
+        "same-seed-and-decision",
+      ),
+    ).toBe(repeated);
+    expect(
+      new Set(
+        ["seed-a", "seed-b", "seed-c", "seed-d", "seed-e"].map((key) =>
+          runnerPressurePreferredProbeTarget(["hq", "rd"], key),
+        ),
+      ).size,
+    ).toBe(2);
+  });
+
+  it("varies only the disposition of safe probes and becomes more cautious on visible signals", () => {
+    const contexts = Array.from({ length: 24 }, (_, index) => `context-${index}`);
+    const withoutSignal = contexts.map((context) =>
+      runnerPressureProbeDisposition(context, "none"),
+    );
+    const withSuspectedDamage = contexts.map((context) =>
+      runnerPressureProbeDisposition(context, "suspected"),
+    );
+
+    expect(new Set(withoutSignal)).toEqual(new Set(["probe", "hold"]));
+    expect(new Set(withSuspectedDamage)).toEqual(new Set(["probe", "hold"]));
+    expect(withoutSignal.filter((value) => value === "probe").length).toBeGreaterThan(
+      withSuspectedDamage.filter((value) => value === "probe").length,
+    );
+    expect(
+      runnerPressureProbeDisposition("same-context", "confirmed"),
+    ).toBe(runnerPressureProbeDisposition("same-context", "confirmed"));
+    expect(
+      contexts.every(
+        (context) => runnerPressureProbeDisposition(context, "critical") === "hold",
+      ),
+    ).toBe(true);
   });
 });

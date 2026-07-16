@@ -188,10 +188,14 @@ export type RunnerPressureBudget = {
   maxCreditLossForProbe: number;
   allowedProbeTargets: string[];
   nearTieProbeTargets: string[];
+  variationEligibleProbeTargets?: string[];
   preferredProbeTarget?: string;
   blockedReasons: string[];
   boundedVariationApplied: boolean;
   variationReason: string;
+  probeDisposition?: "probe" | "hold";
+  variationBucket?: number;
+  damageThreatLevel?: "none" | "suspected" | "confirmed" | "critical";
   evidence: string[];
 };
 

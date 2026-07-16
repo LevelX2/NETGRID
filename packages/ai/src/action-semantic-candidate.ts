@@ -408,6 +408,12 @@ export type ActionSemanticCandidate = {
   effectKind?: string;
   abilityBindingMethod: ActionAbilityBindingMethod;
   semanticActionType: string;
+  /**
+   * Structured effect destinations retained from side-safe card hints. These
+   * keep timing-relevant distinctions such as immediate, installment and
+   * turn-start credits out of lossy free-text inference.
+   */
+  effectTargets?: string[];
   cardContextSignals: string[];
   actionTacticSignals: string[];
   compatibilitySignals?: string[];
@@ -491,6 +497,7 @@ export type ActionCardAbilitySemanticProfile = {
 export type ActionCardSemanticProfile = {
   cardId: CardDefinitionId;
   tacticSignals: readonly string[];
+  effectTargets?: readonly string[];
   compatibilitySignals?: readonly string[];
   strategySupport?: readonly StrategySupportPair[];
   conditions?: readonly SemanticCondition[];

@@ -18121,7 +18121,7 @@
         "opportunityCost": "medium"
       },
       "remoteRole": {
-        "kind": "asset_economy",
+        "kind": "score_acceleration",
         "threatLevel": "medium",
         "serverScope": "remote"
       },
@@ -18710,13 +18710,6 @@
           "amount": 2
         }
       ],
-      "remoteRole": {
-        "kind": "asset_economy",
-        "serverScope": "remote",
-        "threatLevel": "medium",
-        "strategyDerivation": "not_for_strategy_derivation",
-        "strategyDerivationNotes": "Guide V3: draw support only, not Corp asset-economy strategy derivation."
-      },
       "tacticSignals": ["draw.corp_draw"],
       "quality": {
         "benchmarkCovered": false,
@@ -18771,13 +18764,6 @@
           "target": "setup.corp_hand_size"
         }
       ],
-      "remoteRole": {
-        "kind": "asset_economy",
-        "serverScope": "remote",
-        "threatLevel": "medium",
-        "strategyDerivation": "not_for_strategy_derivation",
-        "strategyDerivationNotes": "Guide V3: draw and hand-size support only, not Corp asset-economy strategy derivation."
-      },
       "tacticSignals": ["draw.corp_draw", "setup.corp_hand_size"],
       "quality": {
         "benchmarkCovered": false,
@@ -18905,11 +18891,6 @@
           "scope": "ice"
         }
       ],
-      "remoteRole": {
-        "kind": "asset_economy",
-        "serverScope": "remote",
-        "threatLevel": "medium"
-      },
       "tacticSignals": ["ice.corp_install_discount", "tax.ice"],
       "lineSupport": ["corp.ice_tax_glacier"],
       "strategicRole": ["tax_tool"],
@@ -19527,9 +19508,9 @@
         "reviewedBy": "codex"
       },
       "remoteRole": {
-        "kind": "asset_economy",
-        "strategyDerivation": "not_for_strategy_derivation",
-        "strategyDerivationNotes": "Guide V3: score-conversion support remains card-level fast advance; generated asset_economy remoteRole must not derive asset-economy strategy."
+        "kind": "score_acceleration",
+        "serverScope": "remote",
+        "threatLevel": "medium"
       },
       "strategySupportPairs": [
         {
@@ -19747,13 +19728,6 @@
           "amount": 2
         }
       ],
-      "remoteRole": {
-        "kind": "asset_economy",
-        "serverScope": "remote",
-        "threatLevel": "medium",
-        "strategyDerivation": "not_for_strategy_derivation",
-        "strategyDerivationNotes": "Guide V3: hand-size support only, not Corp asset-economy strategy derivation."
-      },
       "tacticSignals": ["setup.corp_hand_size"],
       "quality": {
         "benchmarkCovered": false,

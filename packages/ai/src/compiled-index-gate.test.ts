@@ -164,11 +164,11 @@ describe("compiled hint index pilot report", () => {
 
   it("classifies compiled-index warnings into non-blocking comparison groups", () => {
     const report = readReport();
-    expect(report.warningCount).toBe(740);
+    expect(report.warningCount).toBe(734);
     expect(report.warningClassificationCounts).toEqual({
-      generated_fact_absent_from_monolith: 320,
+      generated_fact_absent_from_monolith: 317,
       manual_review_candidate: 128,
-      monolith_mechanical_duplication_candidate: 284,
+      monolith_mechanical_duplication_candidate: 281,
       overlay_strategy_field_not_in_monolith: 8,
     });
     expect(

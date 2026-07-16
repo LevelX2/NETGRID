@@ -75,6 +75,7 @@ export function buildEventWithHost(
   playerAction: PlayerAction,
 ): GameEvent {
   const actor = legalAction.side;
+  const publicEventType = publicEventTypeForAction(state, legalAction);
   const reveal = revealForPublicEvent(state, legalAction);
   const visibilityClass = eventVisibilityForAction(legalAction);
   const actionUseContext = publicActionUseContext(previousState, legalAction);
@@ -88,7 +89,7 @@ export function buildEventWithHost(
   );
   const publicPayload: Record<string, unknown> = {
     actor,
-    actionType: legalAction.type,
+    actionType: publicEventType,
     label: publicLabel(legalAction),
     ...actionUseContext,
     ...actionContext,
@@ -116,7 +117,7 @@ export function buildEventWithHost(
   }
   return {
     eventId: `evt_${after}`,
-    type: legalAction.type,
+    type: publicEventType,
     stateVersionBefore: before,
     stateVersionAfter: after,
     stateHashAfter,
@@ -129,6 +130,19 @@ export function buildEventWithHost(
       },
     },
   };
+}
+
+function publicEventTypeForAction(
+  state: GameState,
+  legalAction: LegalAction,
+): string {
+  if (legalAction.type !== "rez_ice") return legalAction.type;
+  const cardId = legalAction.payload?.cardId;
+  if (typeof cardId !== "string" || !state.cardInstances[cardId])
+    return legalAction.type;
+  return definitionForEvent(state, cardId).type === "ice"
+    ? "rez_ice"
+    : "rez_card";
 }
 
 export function eventVisibilityForAction(

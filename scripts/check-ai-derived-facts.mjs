@@ -234,6 +234,7 @@ const KNOWN_BREAKER_SIDE_EFFECTS = new Set([
 
 const KNOWN_REMOTE_ROLES = new Set([
   "scoring_protection",
+  "score_acceleration",
   "bait",
   "asset_economy",
   "run_tax",
@@ -947,6 +948,23 @@ function deriveFromImplementation(card, implementationText, hint) {
     facts.derivationNotes.push(
       "Corporate Downsizing is represented as HQ-agenda reveal/economy context only; generated facts do not contain hidden HQ agenda identities.",
     );
+  }
+
+  if (/kind:\s*"show_hq_agendas_for_credits"/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "agenda_reveal_economy",
+      timing: "start_of_turn",
+      scope: "corp",
+      resource: "credits",
+      amount: propertyNumber(implementationText, "creditPerAgenda"),
+      source:
+        "implementation.lifecycle.start_of_corp_turn.show_hq_agendas_for_credits",
+    });
+    addCondition(facts, {
+      kind: "requires_agenda_reveal",
+      source:
+        "implementation.lifecycle.start_of_corp_turn.show_hq_agendas_for_credits",
+    });
   }
 
   if (
@@ -3106,7 +3124,7 @@ function deriveFromImplementation(card, implementationText, hint) {
       source: "implementation.abilities.costs",
     };
     facts.remoteRole = {
-      kind: "asset_economy",
+      kind: "score_acceleration",
       threatLevel: "medium",
       serverScope: "remote",
       confidence: "high",
@@ -3797,6 +3815,15 @@ function deriveFromImplementation(card, implementationText, hint) {
       serverScope: "remote",
       confidence: "high",
       source: "pilot.expectedDerivableKinds.asset_economy",
+    };
+  }
+  if (!facts.remoteRole && expectsKind("remoteRole:score_acceleration")) {
+    facts.remoteRole = {
+      kind: "score_acceleration",
+      threatLevel: "medium",
+      serverScope: "remote",
+      confidence: "high",
+      source: "pilot.expectedDerivableKinds.score_acceleration",
     };
   }
   if (!facts.remoteRole && expectsKind("remoteRole:remote_capacity")) {

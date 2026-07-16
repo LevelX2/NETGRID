@@ -117,6 +117,11 @@ function actionCardSemanticProfileFromHint(
   ]);
   return {
     cardId,
+    effectTargets: uniqueStrings(
+      (hint.effects ?? [])
+        .map(hintEffectTarget)
+        .filter((target): target is string => target !== undefined),
+    ),
     tacticSignals: uniqueStrings([
       ...effectSignals,
       ...(hint.remoteRole ? [`remote_role:${hint.remoteRole.kind}`] : []),
@@ -129,6 +134,12 @@ function actionCardSemanticProfileFromHint(
     targetProfileMatches: (hint.targetProfiles ?? []).map(targetProfileMatch),
     ...(abilitySemantics.length > 0 ? { abilitySemantics } : {}),
   };
+}
+
+function hintEffectTarget(effect: AiHintStructuredEffect): string | undefined {
+  const target = (effect as AiHintStructuredEffect & { target?: unknown })
+    .target;
+  return typeof target === "string" && target.length > 0 ? target : undefined;
 }
 
 function strategySupportFromHint(hint: AiCardHint): StrategySupportPair[] {

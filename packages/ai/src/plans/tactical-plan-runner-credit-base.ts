@@ -24,6 +24,7 @@ export function runnerCreditBasePlans(
   stateVersion: number,
   runnerGoalEvidence: readonly string[],
   dependencies: TacticalPlanCreditValueDependencies,
+  options: { forceSafeProbeHold?: boolean } = {},
 ): TacticalPlan[] {
   const creditBase = context.runnerEconomyPosture?.creditBasePlan;
   if (
@@ -44,7 +45,8 @@ export function runnerCreditBasePlans(
     missingCredits <= 2;
   if (
     runnerMeaningfulRunOpportunityAvailable(context) &&
-    !nearTermFundingTarget
+    !nearTermFundingTarget &&
+    options.forceSafeProbeHold !== true
   ) {
     return [];
   }
@@ -62,7 +64,13 @@ export function runnerCreditBasePlans(
   const overflowBoost = drawOverflowCreditPressure
     ? runnerDrawOverflowCreditPriorityBoost(drawOverflow)
     : 0;
-  const priority = Math.min(940, basePriority + overflowBoost);
+  const priority = Math.min(
+    940,
+    Math.max(
+      options.forceSafeProbeHold === true ? 900 : 0,
+      basePriority + overflowBoost,
+    ),
+  );
   const basicDrawActionAvailable = context.input.legalActions.some(
     (action) => action.type === "draw_card",
   );
@@ -128,6 +136,7 @@ export function runnerCreditBasePlans(
               `credit_base_top_missing_credits:${missingCredits ?? 0}`,
               `credit_base_long_basic_credit_horizon:${longBasicCreditFundingHorizon}`,
               `economy_route:${context.runnerEconomyPosture?.preferredEconomyRoute ?? "unknown"}`,
+              `safe_probe_hold_credit_plan:${options.forceSafeProbeHold === true}`,
             ]
           : ["credit_base_recommendation:avoid_overdraw"]),
         ...(drawOverflowCreditPressure

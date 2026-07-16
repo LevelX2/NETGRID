@@ -69,6 +69,11 @@ export type RunnerHandDevelopmentDeferReason =
   | "preserve_credit_floor"
   | "stronger_override";
 
+export type RunnerHandDevelopmentLiquidityTiming =
+  | "immediate"
+  | "delayed"
+  | "none";
+
 export type RunnerHandDevelopmentFundingNeed = {
   installOrPlayCost: number;
   missingCredits: number;
@@ -139,6 +144,7 @@ export type RunnerHandDevelopmentEvaluation = {
   developmentRole: RunnerHandDevelopmentRole;
   strategicFit: RunnerHandDevelopmentStrategicFit;
   currentNeed: RunnerHandDevelopmentCurrentNeed;
+  liquidityTiming?: RunnerHandDevelopmentLiquidityTiming;
   priority: number;
   fundingNeed?: RunnerHandDevelopmentFundingNeed;
   deferReason: RunnerHandDevelopmentDeferReason;
@@ -154,11 +160,22 @@ export type EvaluateRunnerHandDevelopmentParams = {
   actionCandidates?: readonly ActionSemanticCandidate[];
 };
 
+export function runnerHandDevelopmentBreaksProtectedReserve(
+  evaluation: RunnerHandDevelopmentEvaluation,
+): boolean {
+  return (
+    evaluation.persistentInstallEvaluation !== undefined &&
+    evaluation.persistentInstallEvaluation.reservePenalty <= -900 &&
+    evaluation.liquidityTiming !== "immediate"
+  );
+}
+
 type CardSignals = {
   text: string;
   roles: string[];
   planRoles: string[];
   candidateSignals: string[];
+  effectTargets: string[];
   requiresSameTurnAccess: boolean;
 };
 
@@ -231,6 +248,7 @@ export function redactedRunnerHandDevelopmentFacts(
         `runner_hand_development:${evaluation.developmentRole}`,
         `availability:${evaluation.availability}`,
         `need:${evaluation.currentNeed}`,
+        `liquidity:${evaluation.liquidityTiming}`,
         `fit:${evaluation.strategicFit}`,
         `priority:${evaluation.priority}`,
         ...(evaluation.fundingNeed
@@ -307,10 +325,12 @@ function evaluateHandCard(
     persistentInstallEvaluation,
   );
   const fundingNeed = fundingNeedForCard(params.input, context, availability);
+  const liquidityTiming = liquidityTimingForCard(context, developmentRole);
   const deferReason = deferReasonForCard(
     availability,
     developmentRole,
     currentNeed,
+    liquidityTiming,
     persistentInstallEvaluation,
   );
   const priority = priorityForCard({
@@ -331,6 +351,7 @@ function evaluateHandCard(
     developmentRole,
     strategicFit,
     currentNeed,
+    liquidityTiming,
     priority,
     ...(fundingNeed ? { fundingNeed } : {}),
     deferReason,
@@ -344,6 +365,7 @@ function evaluateHandCard(
       availability,
       strategicFit,
       currentNeed,
+      liquidityTiming,
       ...(fundingNeed ? { fundingNeed } : {}),
       ...(persistentInstallEvaluation ? { persistentInstallEvaluation } : {}),
     }),
@@ -445,6 +467,12 @@ function signalsForCard(
       ...candidate.strategySupport.map((support) => support.strategyId),
     ]),
   );
+  const effectTargets = sortedUnique([
+    ...candidates.flatMap((candidate) => candidate.effectTargets ?? []),
+    ...((hint?.effects ?? []) as readonly Record<string, unknown>[])
+      .map((effect) => effect.target)
+      .filter((target): target is string => typeof target === "string"),
+  ]);
   const text = [
     card.title,
     card.definitionId,
@@ -474,8 +502,47 @@ function signalsForCard(
     roles,
     planRoles,
     candidateSignals,
+    effectTargets,
     requiresSameTurnAccess,
   };
+}
+
+function liquidityTimingForCard(
+  context: CardContext,
+  role: RunnerHandDevelopmentRole,
+): RunnerHandDevelopmentLiquidityTiming {
+  if (role !== "economy_engine" && role !== "bank_tool") return "none";
+  const immediateCreditGain = Math.max(
+    0,
+    finiteRunnerHandNumber(
+      context.legalAction?.payload?.gainCreditsAmount,
+    ),
+    finiteRunnerHandNumber(context.legalAction?.payload?.gainedCredits),
+  );
+  if (
+    immediateCreditGain > 0 ||
+    context.signals.candidateSignals.includes("economy.gain_credit") ||
+    context.signals.effectTargets.some((target) =>
+      target.includes("immediate_credit"),
+    )
+  ) {
+    return "immediate";
+  }
+  if (
+    context.signals.effectTargets.some(
+      (target) =>
+        target.includes("installment_credit") ||
+        target.includes("turn_start_credit") ||
+        target.includes("deferred_credit"),
+    )
+  ) {
+    return "delayed";
+  }
+  return "none";
+}
+
+function finiteRunnerHandNumber(value: unknown): number {
+  return typeof value === "number" && Number.isFinite(value) ? value : 0;
 }
 
 function roleForCard(context: CardContext): RunnerHandDevelopmentRole {
@@ -859,6 +926,7 @@ function deferReasonForCard(
   availability: RunnerHandDevelopmentAvailability,
   role: RunnerHandDevelopmentRole,
   currentNeed: RunnerHandDevelopmentCurrentNeed,
+  liquidityTiming: RunnerHandDevelopmentLiquidityTiming,
   persistentInstallEvaluation?: RunnerPersistentInstallEvaluation,
 ): RunnerHandDevelopmentDeferReason {
   if (persistentInstallEvaluation?.duplicateRole === "redundant_duplicate") {
@@ -867,7 +935,7 @@ function deferReasonForCard(
   if (
     persistentInstallEvaluation &&
     persistentInstallEvaluation.reservePenalty <= -900 &&
-    persistentInstallEvaluation.finalInstallFit <= 0
+    liquidityTiming !== "immediate"
   ) {
     return "preserve_credit_floor";
   }
@@ -924,6 +992,7 @@ function redactedEvidenceForCard(params: {
   availability: RunnerHandDevelopmentAvailability;
   strategicFit: RunnerHandDevelopmentStrategicFit;
   currentNeed: RunnerHandDevelopmentCurrentNeed;
+  liquidityTiming: RunnerHandDevelopmentLiquidityTiming;
   fundingNeed?: RunnerHandDevelopmentFundingNeed;
   persistentInstallEvaluation?: RunnerPersistentInstallEvaluation;
 }): string[] {
@@ -935,6 +1004,7 @@ function redactedEvidenceForCard(params: {
     `availability:${params.availability}`,
     `strategic_fit:${params.strategicFit}`,
     `current_need:${params.currentNeed}`,
+    `liquidity_timing:${params.liquidityTiming}`,
     `legal_action_present:${params.context.legalAction !== undefined}`,
     `matching_action_candidates:${params.context.matchingCandidates.length}`,
     `duplicate_installed:${params.context.duplicateInstalled}`,

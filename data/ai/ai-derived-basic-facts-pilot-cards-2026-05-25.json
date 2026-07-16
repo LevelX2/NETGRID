@@ -1721,7 +1721,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/chicago-branch.ts",
       "expectedDerivableKinds": [
         "effect:score_acceleration",
-        "remoteRole:asset_economy"
+        "remoteRole:score_acceleration"
       ],
       "expectedManualOverlayNeeded": false,
       "rationale": "Activated advancement-counter placement is a mechanical score-acceleration fact; strategic closeout valuation remains manual/consumer context."
@@ -1791,7 +1791,7 @@
       "cardId": "onr_v1_321_esa-contract",
       "title": "ESA Contract",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/esa-contract.ts",
-      "expectedDerivableKinds": ["effect:draw", "remoteRole:asset_economy"],
+      "expectedDerivableKinds": ["effect:draw"],
       "expectedManualOverlayNeeded": false,
       "rationale": "Action draw node is mechanically represented without strategy about when to use it."
     },
@@ -1802,8 +1802,7 @@
       "expectedDerivableKinds": [
         "effect:draw",
         "effect:remote_protection",
-        "condition:requires_rezzed_card",
-        "remoteRole:asset_economy"
+        "condition:requires_rezzed_card"
       ],
       "expectedManualOverlayNeeded": false,
       "rationale": "Draw plus hand-size support are represented as board-context asset utility, not remote safety."
@@ -1830,8 +1829,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/fortress-architects.ts",
       "expectedDerivableKinds": [
         "effect:install_discount",
-        "condition:requires_rezzed_card",
-        "remoteRole:asset_economy"
+        "condition:requires_rezzed_card"
       ],
       "expectedManualOverlayNeeded": false,
       "rationale": "ICE install discount is mechanical support; install legality and board state remain runtime-owned."
@@ -1933,7 +1931,7 @@
         "effect:extra_action",
         "effect:advanceable_economy",
         "condition:requires_advancement_counter",
-        "remoteRole:asset_economy"
+        "remoteRole:score_acceleration"
       ],
       "expectedManualOverlayNeeded": false,
       "rationale": "Advancement-counter action gain is represented; action use remains LegalAction context."
@@ -1977,8 +1975,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/assets/rustbelt-hq-branch.ts",
       "expectedDerivableKinds": [
         "effect:remote_protection",
-        "condition:requires_rezzed_card",
-        "remoteRole:asset_economy"
+        "condition:requires_rezzed_card"
       ],
       "expectedManualOverlayNeeded": false,
       "rationale": "Corp hand-size support is represented as board-context asset utility, not remote safety."

@@ -5,6 +5,7 @@ import {
   assessKnownRezzedIcePath,
   runnerRunPathCreditBudgetWithVisiblePools,
 } from "../visible-run-analysis";
+import { runnerActionReserveExclusion } from "./runner-action-reserve";
 import { semanticRuntimeServerId } from "./semantic-runtime-scope";
 import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
 
@@ -12,6 +13,17 @@ type PlayerViewServer = AiDecisionInput["playerView"]["servers"][number];
 type KnownIcePathAssessment = ReturnType<typeof assessKnownRezzedIcePath>;
 
 export type SemanticRuntimeActionExclusionDependencies = {
+  previousPlan?: (input: AiDecisionInput) =>
+    | {
+        type?: string;
+        status?: string;
+        target?: { kind?: string; id?: string };
+        selectedStepKind?: string;
+        ttlDecisionsRemaining?: number;
+        blockedBy?: readonly string[];
+        updatedAtStateVersion?: number;
+      }
+    | undefined;
   corpUpgradePlacementExclusion?: (
     input: AiDecisionInput,
     action: LegalAction,
@@ -115,6 +127,19 @@ export function semanticRuntimeActionExclusion(
       actionSemanticCandidate,
     );
   if (selfDamageSurvivalExclusion) return selfDamageSurvivalExclusion;
+  const reserveExclusion = runnerActionReserveExclusion(
+    input,
+    action,
+    actionSemanticCandidate,
+    {
+      fundedPlanContinuation: runnerInstallCompletesFundedPlan(
+        input,
+        action,
+        dependencies,
+      ),
+    },
+  );
+  if (reserveExclusion) return reserveExclusion;
   const encounterExclusion = dependencies.runnerEncounterActionExclusion(
     input,
     action,
@@ -240,4 +265,24 @@ export function semanticRuntimeActionExclusion(
       : "Run-Ziel nicht bezahlbar",
     reason: dependencies.knownIcePathReason(assessment, server.id),
   };
+}
+
+function runnerInstallCompletesFundedPlan(
+  input: AiDecisionInput,
+  action: LegalAction,
+  dependencies: SemanticRuntimeActionExclusionDependencies,
+): boolean {
+  if (input.side !== "runner" || action.type !== "install_card") return false;
+  const previousPlan = dependencies.previousPlan?.(input);
+  return (
+    previousPlan?.type === "runner.develop_hand_card" &&
+    previousPlan.status === "progressing" &&
+    previousPlan.target?.kind === "card" &&
+    previousPlan.target.id === action.source &&
+    previousPlan.selectedStepKind === "gain_credits" &&
+    (previousPlan.ttlDecisionsRemaining ?? 0) > 0 &&
+    previousPlan.blockedBy?.includes("missing_credits") === true &&
+    input.playerView.stateVersion ===
+      (previousPlan.updatedAtStateVersion ?? -2) + 1
+  );
 }

@@ -130,7 +130,8 @@ export function buildRunnerRemoteTrashAccessContext(
   const expensive = trashCost >= 4 || generalCreditCost >= 4;
   const highImpact =
     relevant &&
-    (role === "scoring_protection" ||
+    (role === "score_acceleration" ||
+      role === "scoring_protection" ||
       role === "run_tax" ||
       role === "remote_capacity" ||
       role === "economy" ||

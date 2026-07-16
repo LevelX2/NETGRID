@@ -112,6 +112,21 @@ describe("Corp score-conversion hint audit", () => {
     );
     expect(hint.requiredMechanics).toContain("advancement_counter_transfer");
   });
+
+  it("classifies Chicago Branch as score acceleration, never asset economy", () => {
+    const hint = requiredHint("onr_v1_312_chicago-branch");
+    expect(hint.remoteRole?.kind).toBe("score_acceleration");
+    expect(hint.remoteRole?.kind).not.toBe("asset_economy");
+    expect(hint.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "advance",
+          timing: "action",
+          scope: "installed_card",
+        }),
+      ]),
+    );
+  });
 });
 
 function requiredHint(cardId: string): ActiveHint {

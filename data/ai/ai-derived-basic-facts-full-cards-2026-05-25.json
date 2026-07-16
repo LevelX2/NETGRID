@@ -4690,7 +4690,7 @@
       "fullCoverageScope": true,
       "expectedDerivableKinds": [
         "effect:score_acceleration",
-        "remoteRole:asset_economy"
+        "remoteRole:score_acceleration"
       ],
       "expectedManualOverlayNeeded": false,
       "coverageClass": "legacy_fallback_only",
@@ -4832,8 +4832,7 @@
       "implementationFound": true,
       "fullCoverageScope": true,
       "expectedDerivableKinds": [
-        "effect:draw",
-        "remoteRole:asset_economy"
+        "effect:draw"
       ],
       "expectedManualOverlayNeeded": false,
       "coverageClass": "legacy_fallback_only",
@@ -4850,8 +4849,7 @@
       "expectedDerivableKinds": [
         "effect:draw",
         "effect:remote_protection",
-        "condition:requires_rezzed_card",
-        "remoteRole:asset_economy"
+        "condition:requires_rezzed_card"
       ],
       "expectedManualOverlayNeeded": false,
       "coverageClass": "legacy_fallback_only",
@@ -4888,8 +4886,7 @@
       "fullCoverageScope": true,
       "expectedDerivableKinds": [
         "effect:install_discount",
-        "condition:requires_rezzed_card",
-        "remoteRole:asset_economy"
+        "condition:requires_rezzed_card"
       ],
       "expectedManualOverlayNeeded": false,
       "coverageClass": "legacy_fallback_only",
@@ -5057,7 +5054,7 @@
         "effect:extra_action",
         "effect:advanceable_economy",
         "condition:requires_advancement_counter",
-        "remoteRole:asset_economy"
+        "remoteRole:score_acceleration"
       ],
       "expectedManualOverlayNeeded": false,
       "coverageClass": "legacy_fallback_only",
@@ -5124,8 +5121,7 @@
       "fullCoverageScope": true,
       "expectedDerivableKinds": [
         "effect:remote_protection",
-        "condition:requires_rezzed_card",
-        "remoteRole:asset_economy"
+        "condition:requires_rezzed_card"
       ],
       "expectedManualOverlayNeeded": false,
       "coverageClass": "legacy_fallback_only",

@@ -108,6 +108,56 @@ describe("game event builder", () => {
     expect(event.publicPayload).not.toHaveProperty("sourceTitle");
   });
 
+  it("publishes root assets as rez_card while preserving the private replay action", () => {
+    const previous = createGame({
+      seed: "arch-60-generic-card-rez-event",
+      setupMode: "completed",
+    });
+    const assetId = previous.corp.hq[0]!;
+    previous.cardInstances[assetId] = {
+      ...previous.cardInstances[assetId]!,
+      definitionId: "onr_v1_309_bbs-whispering-campaign",
+    };
+    const next = structuredClone(previous);
+    next.cardInstances[assetId] = {
+      ...next.cardInstances[assetId]!,
+      rezzed: true,
+      faceup: true,
+    };
+    next.stateVersion += 1;
+    const legalAction = {
+      ...mandatoryDrawLegalAction(previous),
+      actionId: `corp.rez.${assetId}`,
+      type: "rez_ice",
+      label: "Karte rezzen",
+      source: assetId,
+      payload: { cardId: assetId, rootRez: true },
+      visibility: "public",
+    } satisfies LegalAction;
+
+    const event = buildEventWithHost(
+      testBuildEventHost(),
+      previous.stateVersion,
+      next.stateVersion,
+      hashState(next),
+      previous,
+      next,
+      legalAction,
+      playerActionFor(previous, legalAction),
+    );
+
+    expect(event.type).toBe("rez_card");
+    expect(event.publicPayload).toMatchObject({
+      actionType: "rez_card",
+      cardDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+    });
+    expect(event.visibilityClass).toBe("hidden_info_barrier");
+    expect(event.privatePayload?.corp?.legalAction).toMatchObject({
+      type: "rez_ice",
+      payload: { cardId: assetId, rootRez: true },
+    });
+  });
+
   it("keeps hidden-info visibility classification with PublicEvent projection", () => {
     const state = createGame({
       seed: "arch-60-hidden-info-event",

@@ -27,6 +27,14 @@
   eigenen Rohscore überstimmbar, wenn ein sichtbarer Schadensdruck den
   Handpuffer priorisiert. Gerade finanzierte neue Entwicklung bleibt dagegen
   planbindend; negative Backup-Installationen dürfen weichen.
+- Sichtbare gegnerische Damage-, Tag-/Trace-Punish- und Damage-Payoff-Signale
+  erhöhen Handpuffer und Liquiditätsreserve abgestuft. Allgemeine Trace-Karten,
+  Access-Ambushes oder ein Tag allein begründen noch kein Damage-Deck;
+  unbekannte Hand- und Deckkarten bleiben vollständig ausgeschlossen.
+- Bezahlte Runner-Installationen werden vor Plan-Arbitration gegen ihren
+  konkreten Post-Action-Creditfloor geprüft. Exakt finanzierte fortgesetzte
+  Handentwicklung darf den Floor eng übersteuern, verzögerte Raten- oder
+  Turn-Start-Ökonomie dagegen nicht.
 - Run-Events werden über ihre konkrete RunTargetEvaluation bewertet.
   Zentraldruck und Zielplan-Fit gelten für projizierte HQ-/R&D-Runs nur, wenn
   ihr eigener sichtbarer Pfad `run_now` trägt; Archives-, Remote- und
@@ -150,6 +158,11 @@
   spielgleiche Verträge für ökonomische Runner-Trace-Bids, sichtbare
   R&D-Top-Frische bei Wiederholungsruns und die registrierungsgetreue
   Networking-Auflösung im Full-Derived-Facts-Consumerpfad.
+- `match-c6eedf46-runner-risk-economy-remediation-process-2026-07-16.md` und
+  `docs/reviews/ai/match-c6eedf46-runner-risk-economy-remediation-final-2026-07-16.md`:
+  aktionsbezogener Reservevertrag für verzögerte Ökonomie, side-safe
+  Damage-/Punish-Vermutung, replay-stabile sichere Probe-Varianz,
+  Scorebeschleunigungs-Hints und typkorrekte öffentliche Nicht-ICE-Rez-Events.
 - `proteus-ai-release-reconciliation-plan-2026-07-09.md`,
   `proteus-ai-release-automation-process-2026-07-09.md` und
   `docs/reviews/ai/proteus-ai-release-reconciliation-final-review-2026-07-09.md`:

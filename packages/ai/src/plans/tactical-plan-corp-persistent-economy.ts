@@ -162,8 +162,7 @@ function persistentEconomyProfile(
   if (
     hint?.side !== "corp" ||
     hint.aiSupportStatus !== "ai_supported" ||
-    hint.quality?.hintReviewed !== true ||
-    hint.remoteRole?.kind !== "asset_economy"
+    hint.quality?.hintReviewed !== true
   ) {
     return undefined;
   }
@@ -175,13 +174,20 @@ function persistentEconomyProfile(
         effect.kind === "draw") &&
       (effect.timing === "action" || effect.timing === "start_of_turn"),
   );
-  if (persistentEffects.length === 0) return undefined;
-  return {
-    supportsCredits: persistentEffects.some(
+  const supportsCredits =
+    hint.remoteRole?.kind === "asset_economy" &&
+    persistentEffects.some(
       (effect) =>
-        effect.kind === "economy" || effect.kind === "agenda_reveal_economy",
-    ),
-    supportsDraw: persistentEffects.some((effect) => effect.kind === "draw"),
+        effect.kind === "economy" ||
+        effect.kind === "agenda_reveal_economy",
+    );
+  const supportsDraw = persistentEffects.some(
+    (effect) => effect.kind === "draw",
+  );
+  if (!supportsCredits && !supportsDraw) return undefined;
+  return {
+    supportsCredits,
+    supportsDraw,
   };
 }
 

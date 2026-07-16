@@ -76,6 +76,48 @@ describe("AI hint ontology validation", () => {
     expect(result.valid).toBe(true);
   });
 
+  it("rejects asset_economy without independent credit or economy evidence", () => {
+    const invalid = validateAiHintOntologyFields({
+      effects: [
+        {
+          kind: "advance",
+          timing: "action",
+          scope: "installed_card",
+          amount: 2,
+        },
+      ],
+      remoteRole: {
+        kind: "asset_economy",
+        threatLevel: "medium",
+        serverScope: "remote",
+      },
+    });
+    const valid = validateAiHintOntologyFields({
+      effects: [
+        {
+          kind: "economy",
+          timing: "action",
+          scope: "corp",
+          resource: "credits",
+          amount: 2,
+        },
+      ],
+      remoteRole: {
+        kind: "asset_economy",
+        threatLevel: "medium",
+        serverScope: "remote",
+      },
+    });
+
+    expect(invalid.errors).toContainEqual(
+      expect.objectContaining({
+        kind: "asset_economy_without_economy_evidence",
+        path: "$.remoteRole.kind",
+      }),
+    );
+    expect(valid.errors).toEqual([]);
+  });
+
   it("accepts reviewed strategy support pairs", () => {
     const result = validateAiHintOntologyFields({
       lineSupport: ["corp.remote_scoring"],

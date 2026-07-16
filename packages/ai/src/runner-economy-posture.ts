@@ -2,6 +2,7 @@ import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 import type { DeckCapabilityProfile } from "./deck-capabilities";
 import type { RunnerHandDevelopmentEvaluation } from "./runner-hand-development";
 import type { RunnerStrategicIntentProfile } from "./runner-strategic-intent";
+import { runnerDamageThreatAssessment } from "./runner-damage-threat-assessment";
 import { assessKnownRezzedIcePath } from "./visible-run-analysis";
 import type {
   EvaluateRunnerRunTargetsParams,
@@ -35,11 +36,25 @@ export function buildRunnerEconomyPosture(
     (params.deckCapabilities?.runner?.economyBankTools.length ?? 0) > 0;
   const remoteScoreThreat = runnerRemoteScoreThreat(params.input);
   const phase = runnerCreditReservePhase(params.input, remoteScoreThreat);
-  const minimumCreditFloor =
-    riskAdjustedRunReserve || phase === "late_contest" ? 3 : 2;
+  const damageThreat = runnerDamageThreatAssessment(params.input);
+  const damageThreatFloor =
+    damageThreat.level === "critical"
+      ? 4
+      : damageThreat.level === "confirmed"
+        ? 3
+        : 2;
+  const minimumCreditFloor = Math.max(
+    riskAdjustedRunReserve || phase === "late_contest" ? 3 : 2,
+    damageThreatFloor,
+  );
   const baseDesiredCreditReserve = Math.max(
     phase === "opening" ? 4 : phase === "midgame" ? 5 : 6,
     riskAdjustedRunReserve || bankToolsRelevant ? 6 : 4,
+    damageThreat.level === "critical"
+      ? 6
+      : damageThreat.level === "confirmed"
+        ? 5
+        : 4,
   );
   const creditReservePolicy = buildRunnerCreditReservePolicy({
     input: params.input,
@@ -107,6 +122,8 @@ export function buildRunnerEconomyPosture(
     evidence: [
       `runner_credits:${credits}`,
       `minimum_credit_floor:${minimumCreditFloor}`,
+      `damage_threat_level:${damageThreat.level}`,
+      `damage_threat_credit_floor:${damageThreatFloor}`,
       `desired_credit_reserve:${desiredCreditReserve}`,
       `credit_reserve_phase:${creditReservePolicy.phase}`,
       `credit_reserve_remote_score_threat:${creditReservePolicy.remoteScoreThreat}`,
@@ -369,6 +386,15 @@ function buildRunnerCreditReservePolicy(params: {
     ...(emergencyReserve > 0 ? ["emergency_reserve"] : []),
   ];
   const belowReserveNow = params.currentCredits < desiredCreditReserve;
+  const spendingWouldDropBelowReserve = params.input.legalActions.some(
+    (action) => {
+      const cost = action.costs.reduce(
+        (sum, entry) => sum + Math.max(0, entry.credits ?? 0),
+        0,
+      );
+      return cost > 0 && params.currentCredits - cost < desiredCreditReserve;
+    },
+  );
 
   return {
     schemaVersion: 1,
@@ -383,7 +409,7 @@ function buildRunnerCreditReservePolicy(params: {
     remoteScoreThreat: params.remoteScoreThreat,
     canContestIfFunded,
     belowReserveNow,
-    spendingWouldDropBelowReserve: false,
+    spendingWouldDropBelowReserve,
     reserveDrivers,
     reserveOverrides: [],
     evidence: [
@@ -398,6 +424,7 @@ function buildRunnerCreditReservePolicy(params: {
       `remote_score_threat:${params.remoteScoreThreat}`,
       `can_contest_if_funded:${canContestIfFunded}`,
       `below_reserve_now:${belowReserveNow}`,
+      `spending_would_drop_below_reserve:${spendingWouldDropBelowReserve}`,
       ...reserveDrivers.map((driver) => `reserve_driver:${driver}`),
     ],
   };

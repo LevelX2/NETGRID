@@ -165,6 +165,13 @@ export function runnerHandBufferPlans(
   }
   if (!assessment.active) return [];
   if (
+    assessment.damageThreatLevel === "confirmed" &&
+    assessment.handCount >= 2 &&
+    runnerLargeLiquidityActionCanRestoreReactionFloor(context, dependencies)
+  ) {
+    return [];
+  }
+  if (
     !assessment.damagePressure &&
     runnerMeaningfulRunOpportunityAvailable(context)
   ) {
@@ -260,6 +267,17 @@ export function runnerHandBufferPlans(
       stateVersion,
     }),
   ];
+}
+
+function runnerLargeLiquidityActionCanRestoreReactionFloor(
+  context: TacticalPlanBuildContext,
+  dependencies: TacticalPlanCreditValueDependencies,
+): boolean {
+  if (context.input.playerView.own.credits >= 4) return false;
+  return context.input.legalActions.some(
+    (action) =>
+      legalActionCreditGainForPlan(context.input, action, dependencies) >= 3,
+  );
 }
 
 export function runnerHighPayoffRunAvailable(
