@@ -41,6 +41,16 @@
   `v120.event_modification.avoid` bevorzugen eine vorhandene legale
   Präventionsquelle gegenüber `pass`. Ohne konkrete Quelle entsteht keine
   künstliche Choice.
+- Runner-Trace-Bids vergleichen einen sichtbaren Tag-Erfolg mit den Kosten und
+  Click-Opportunitäten einer legal möglichen Bereinigung. Ein gewonnener Trace
+  darf weiterhin bezahlt werden, wenn Restpfad, Reserve, sichtbarer Tag-Punish
+  oder fehlende Bereinigungs-Clicks das verlangen; ohne diese Gründe wird kein
+  strikt teurerer Gewinn-Bid erzwungen.
+- Wiederholte R&D-Runs unterscheiden eine unveränderte bekannte Topkarte von
+  einem durch sichtbaren Draw, Shuffle, Reorder oder Access-Abgang veränderten
+  Top. Ein veränderter Top erhält vor Matchpoint nur eine begrenzte
+  Wiederholungsstrafe und wird innerhalb von zwei Agenda-Punkten zum Sieg nicht
+  durch die pauschale Zentralserver-Strafe unterdrückt.
 - TacticalPlans schreiben Fortschritt nur bei einer nachfolgend sichtbaren
   Zielannäherung fort. Erreichte Creditreserven beenden stale Creditbase-Pläne;
   Punish-Pläne ohne Tag, Payoff oder messbare Ressourcenannäherung verlieren
@@ -135,6 +145,11 @@
   spielgleiche Verträge für aktionsspezifisch führende Bypass-Pfade,
   dringende Remote-Plan-Arbitration und side-safe sichtbare
   Zwei-Punkte-Terminalcontests bei aktiver Run-Sperre.
+- `ai-match-03575-trace-repeat-remediation-process-2026-07-16.md` und
+  `docs/reviews/ai/ai-match-03575-trace-repeat-final-review-2026-07-16.md`:
+  spielgleiche Verträge für ökonomische Runner-Trace-Bids, sichtbare
+  R&D-Top-Frische bei Wiederholungsruns und die registrierungsgetreue
+  Networking-Auflösung im Full-Derived-Facts-Consumerpfad.
 - `proteus-ai-release-reconciliation-plan-2026-07-09.md`,
   `proteus-ai-release-automation-process-2026-07-09.md` und
   `docs/reviews/ai/proteus-ai-release-reconciliation-final-review-2026-07-09.md`:
@@ -158,8 +173,8 @@ Das Realitätsgate aus
 Engine-erzeugte Inputs mit dem produktiven Chooser. Unit-, synthetische Live-,
 Live-Engine- und Full-Simulation-Evidence bleiben getrennt.
 
-Die aktuelle vollständige Derived-Facts-Prüfung umfasst 618 aktive Hints, 527
-CardImplementations, 390 generierte Facts und 137 noch über kompilierte Hints
+Die aktuelle vollständige Derived-Facts-Prüfung umfasst 618 aktive Hints, 528
+CardImplementations, 391 generierte Facts und 137 noch über kompilierte Hints
 abgedeckte Karten. Warnungen sind Qualitätsschuld, keine versteckten
 Runtime-Fallbacks.
 
