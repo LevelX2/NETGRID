@@ -18,6 +18,7 @@ describe("runnerKnownIcePathScoreComponents", () => {
         root: [],
       },
       {
+        evaluationForAction: () => undefined,
         assessment: () =>
           ({
             assessedKnownIceCount: 1,
@@ -43,6 +44,38 @@ describe("runnerKnownIcePathScoreComponents", () => {
       value: -3200,
       reason: "server:remote_1;reason:missing_breaker_coverage",
     });
+  });
+
+  it("uses a reachable action projection instead of re-blocking a bypass run", () => {
+    const action = runAction("inside-job-remote-1", "remote_1");
+    const components = runnerKnownIcePathScoreComponents(
+      {
+        playerView: { own: { credits: 4 } },
+      } as AiDecisionInput,
+      action,
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: [],
+        root: [],
+      },
+      {
+        evaluationForAction: () =>
+          ({
+            pathPassability: "reachable",
+            pathCost: 0,
+            creditsAfterRun: 2,
+          }) as never,
+        assessment: () => {
+          throw new Error(
+            "Reachable action projection must remain authoritative",
+          );
+        },
+        reason: () => "not_relevant",
+      },
+    );
+
+    expect(components).toEqual([]);
   });
 });
 

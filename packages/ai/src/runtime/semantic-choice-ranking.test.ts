@@ -527,6 +527,69 @@ describe("tacticalPlanMappedChoice", () => {
     expect(result.overrideReason).toBe("runner_hard_interrupt");
   });
 
+  it("lets a viable run event interrupt coverage search for its urgent remote", () => {
+    const draw = legalAction("draw-for-answer", "play_event");
+    const bypass = legalAction("bypass-remote", "play_event", {
+      serverId: "remote_1",
+      runnerEventRun: true,
+    });
+    const bypassChoice = choice(bypass, 2167, []);
+    bypassChoice.scoreBreakdown.push({
+      key: "runner_goal_fit_tactical_goal_run_target",
+      label: "Urgent remote goal fit",
+      value: 900,
+      reason:
+        "goal:runner.contest_remote_if_score_threat|urgency:high|target:remote_1|recommendation:run_now",
+    });
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [bypassChoice, choice(draw, 1437)],
+      remoteContestMapping([draw], {
+        evidence: ["runner_run_target_payoff:score_threat"],
+        priority: 960,
+      }),
+      bypassChoice,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("bypass-remote");
+    expect(result.overrideReason).toBe("runner_hard_interrupt");
+  });
+
+  it("keeps coverage search when the run event still leaves the remote blocked", () => {
+    const draw = legalAction("draw-for-answer", "play_event");
+    const bypass = legalAction("blocked-bypass-remote", "play_event", {
+      serverId: "remote_1",
+      runnerEventRun: true,
+    });
+    const bypassChoice = choice(bypass, 2167, [], {
+      key: "runner_run_target_semantic_guidance",
+      value: -52,
+      reason:
+        "target:remote_1|recommendation:find_breaker_first|payoff:score_threat|path:blocked_missing_coverage",
+    });
+    bypassChoice.scoreBreakdown.push({
+      key: "runner_goal_fit_tactical_goal_run_target",
+      label: "Urgent remote goal fit",
+      value: 900,
+      reason:
+        "goal:runner.contest_remote_if_score_threat|urgency:high|target:remote_1|recommendation:find_breaker_first",
+    });
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [bypassChoice, choice(draw, 1437)],
+      remoteContestMapping([draw], {
+        evidence: ["runner_run_target_payoff:score_threat"],
+        priority: 960,
+      }),
+      bypassChoice,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_blocked");
+    expect(result.choice?.action.actionId).toBe("draw-for-answer");
+    expect(result.overrideBlockedReason).toBe("runner_plan_controller");
+  });
+
   it("yields a no-need tutor plan to a positive free check run", () => {
     const tutor = legalAction("play-tutor", "play_event");
     const run = legalAction("run-hq", "start_run", { serverId: "hq" });

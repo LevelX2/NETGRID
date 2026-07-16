@@ -133,13 +133,12 @@ export function tacticalPlanMappedChoice(
       mappedChoice,
       overrideChoice,
     );
-    const coverageProbeRunShouldYield =
-      tacticalPlanCoverageProbeRunShouldYield(
-        mapping,
-        mappedChoice,
-        overrideChoice,
-        scoreGap,
-      );
+    const coverageProbeRunShouldYield = tacticalPlanCoverageProbeRunShouldYield(
+      mapping,
+      mappedChoice,
+      overrideChoice,
+      scoreGap,
+    );
     if (
       tacticalPlanFundedDevelopmentContinuationBlocksOverride(
         mapping,
@@ -179,7 +178,8 @@ export function tacticalPlanMappedChoice(
         mappedActionIds,
         scoreGap,
         threshold.scoreGap,
-      ) && !coverageProbeRunShouldYield
+      ) &&
+      !coverageProbeRunShouldYield
     ) {
       return tacticalPlanBlockedOverrideResult({
         mappedChoice,
@@ -357,10 +357,14 @@ export function tacticalPlanMappedChoice(
       );
     const hardInterruptShouldYield =
       mapping.plan.side === "runner" &&
-      semanticRuntimeChoiceHasScoreBreakdownComponent(
+      (semanticRuntimeChoiceHasScoreBreakdownComponent(
         overrideChoice,
         "runner_matchpoint_run_lock_release",
-      );
+      ) ||
+        runnerUrgentRemoteContestRunCanInterruptPlan(
+          mapping.plan,
+          overrideChoice,
+        ));
     if (
       tacticalPlanRunnerMappingBlocksOffPlanOverride(
         mapping,
@@ -410,23 +414,23 @@ export function tacticalPlanMappedChoice(
           ? "no_need_search_mapping_yield"
           : coverageProbeRunShouldYield
             ? "coverage_probe_run_mapping_yield"
-          : mappedNonPositiveAgainstPositive
-            ? "mapped_nonpositive_against_positive"
-            : repeatedRunShouldYield
-              ? "repeated_run_mapping_yield"
-              : acuteHandBufferShouldYield
-                ? "acute_hand_buffer_mapping_yield"
-                : lowValueRecoveryShouldYield
-                  ? "low_value_recovery_mapping_yield"
-                  : inferiorRunTargetShouldYield
-                    ? "inferior_run_target_mapping_yield"
-                    : corpBoardTriageMismatchShouldYield
-                      ? "corp_board_triage_mismatch_yield"
-                      : backgroundBankBuildShouldYield
-                        ? "background_bank_build_mapping_yield"
-                        : hardInterruptShouldYield
-                          ? "runner_hard_interrupt"
-                          : threshold.reason,
+            : mappedNonPositiveAgainstPositive
+              ? "mapped_nonpositive_against_positive"
+              : repeatedRunShouldYield
+                ? "repeated_run_mapping_yield"
+                : acuteHandBufferShouldYield
+                  ? "acute_hand_buffer_mapping_yield"
+                  : lowValueRecoveryShouldYield
+                    ? "low_value_recovery_mapping_yield"
+                    : inferiorRunTargetShouldYield
+                      ? "inferior_run_target_mapping_yield"
+                      : corpBoardTriageMismatchShouldYield
+                        ? "corp_board_triage_mismatch_yield"
+                        : backgroundBankBuildShouldYield
+                          ? "background_bank_build_mapping_yield"
+                          : hardInterruptShouldYield
+                            ? "runner_hard_interrupt"
+                            : threshold.reason,
         overrideThreshold: threshold.scoreGap,
         scoreGap,
       };
@@ -904,6 +908,11 @@ function runnerPlanOverrideIsHardInterrupt(
     return true;
   }
   if (
+    runnerUrgentRemoteContestRunCanInterruptPlan(mappedPlan, overrideChoice)
+  ) {
+    return true;
+  }
+  if (
     runnerEconomyCommitmentCanInterruptPlan(mappedPlan.type) &&
     semanticRuntimeChoiceHasAnyScoreComponent(overrideChoice, [
       "runner_bank_cashout_gate",
@@ -936,6 +945,32 @@ function runnerPlanOverrideIsHardInterrupt(
     "runner_rnd_fresh_memory",
     "runner_goal_fit_tactical_goal_run_target",
   ]);
+}
+
+function runnerUrgentRemoteContestRunCanInterruptPlan(
+  plan: TacticalPlan,
+  choice: SemanticRuntimeChoice,
+): boolean {
+  if (plan.type !== "runner.contest_remote") {
+    return false;
+  }
+  const planTarget =
+    plan.target?.kind === "server" ? plan.target.id : undefined;
+  if (
+    !planTarget?.startsWith("remote_") ||
+    semanticRuntimeServerId(choice.action) !== planTarget
+  ) {
+    return false;
+  }
+  const targetMarker = `target:${planTarget}`;
+  const urgentGoalFit = choice.scoreBreakdown.some(
+    (component) =>
+      component.key === "runner_goal_fit_tactical_goal_run_target" &&
+      (component.reason ?? "").includes(targetMarker) &&
+      (component.reason ?? "").includes("urgency:high") &&
+      (component.reason ?? "").includes("recommendation:run_now"),
+  );
+  return urgentGoalFit;
 }
 
 function tacticalPlanAcuteHandBufferShouldYield(

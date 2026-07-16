@@ -214,6 +214,7 @@ export function semanticRuntimeActionExclusion(
       dependencies.runnerEmptyRemoteExclusion(server);
     if (emptyRemoteExclusion) return emptyRemoteExclusion;
   }
+  if (runTargetEvaluation?.pathPassability === "reachable") return undefined;
   const assessment = assessKnownRezzedIcePath(
     server.ice,
     input.playerView.own.rig ?? [],
