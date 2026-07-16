@@ -228,6 +228,77 @@ describe("discard keep score", () => {
     expect(economy).toBeGreaterThan(neutral + 300);
   });
 
+  it("preserves immediate Runner liquidity over an unaffordable payout", () => {
+    const livewire = score(
+      runnerCard("onr_v1_097_livewires-contacts", "event"),
+      ["economy", "tempo"],
+      "runner",
+      [],
+      {},
+      { credits: 1, cardCost: 0 },
+    );
+    const scoreEvent = score(
+      runnerCard("onr_v1_108_score", "event"),
+      ["economy"],
+      "runner",
+      [],
+      {},
+      { credits: 1, cardCost: 5 },
+    );
+
+    expect(livewire.total).toBeGreaterThan(scoreEvent.total);
+    expect(livewire.evidence).toContain(
+      "discard_score:runner_immediate_liquidity",
+    );
+    expect(scoreEvent.evidence).not.toContain(
+      "discard_score:runner_immediate_liquidity",
+    );
+  });
+
+  it("adds unique strategy-aligned multiaccess value only at matchpoint", () => {
+    const hqInterface = runnerCard("onr_v1_129_hq-interface", "hardware");
+    const matchpoint = score(
+      hqInterface,
+      ["hardware", "hq_pressure", "multiaccess"],
+      "runner",
+      [],
+      {},
+      { agendaPoints: 5, strategyId: "runner.hq_pressure", cardCost: 4 },
+    );
+    const earlyGame = score(
+      hqInterface,
+      ["hardware", "hq_pressure", "multiaccess"],
+      "runner",
+      [],
+      {},
+      { agendaPoints: 2, strategyId: "runner.hq_pressure", cardCost: 4 },
+    );
+    const installedDuplicate = score(
+      hqInterface,
+      ["hardware", "hq_pressure", "multiaccess"],
+      "runner",
+      [
+        {
+          ...hqInterface,
+          instanceId: "installed-hq-interface",
+        },
+      ],
+      {},
+      { agendaPoints: 5, strategyId: "runner.hq_pressure", cardCost: 4 },
+    );
+
+    expect(matchpoint.total).toBeGreaterThan(earlyGame.total + 600);
+    expect(matchpoint.evidence).toContain(
+      "discard_score:runner_matchpoint_closeout",
+    );
+    expect(earlyGame.evidence).not.toContain(
+      "discard_score:runner_matchpoint_closeout",
+    );
+    expect(installedDuplicate.evidence).not.toContain(
+      "discard_score:runner_matchpoint_closeout",
+    );
+  });
+
   it("preserves program search while known breaker coverage is only in the stack", () => {
     const search = runnerCard("runner-program-search", "event");
     const unavailableBreaker = score(
@@ -518,6 +589,7 @@ function score(
     agendaPoints?: number;
     corpTagSourceState?: "stack" | "archives";
     servers?: AiDecisionInput["playerView"]["servers"];
+    cardCost?: number;
   } = {},
 ) {
   return discardKeepScore(input(card, side, rig, options), card, {
@@ -526,7 +598,7 @@ function score(
         ? roles
         : (rolesByCardId[cardId ?? ""] ?? []),
     definitionTypeForCardId: () => card.type,
-    visibleCardPlayOrInstallCost: () => 0,
+    visibleCardPlayOrInstallCost: () => options.cardCost ?? 0,
     runnerCardAddressesVisibleBreakerNeed: () => false,
     runnerBadPublicityOrTraceTechCard: () => false,
     isRunnerEconomyRole: (role) => role.includes("economy"),
@@ -547,6 +619,7 @@ function input(
     agendaPoints?: number;
     corpTagSourceState?: "stack" | "archives";
     servers?: AiDecisionInput["playerView"]["servers"];
+    cardCost?: number;
   } = {},
 ): AiDecisionInput {
   const decisionInput = {

@@ -60,6 +60,82 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     );
   });
 
+  it("treats HQ and R&D multiaccess as distinct persistent coverage", () => {
+    const hqInterface = visibleCard("hq-interface-hand", {
+      definitionId: "onr_v1_129_hq-interface",
+      title: "HQ Interface",
+      type: "hardware",
+      installCost: 4,
+      rulesText:
+        "Whenever you make a successful run on HQ, access 1 additional card.",
+    });
+    const rdInterface = visibleCard("rd-interface-installed", {
+      definitionId: "onr_v1_139_r-and-d-interface",
+      title: "R&D Interface",
+      type: "hardware",
+      installCost: 4,
+      rulesText:
+        "Whenever you make a successful run on R&D, access 1 additional card.",
+    });
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({
+        input: runnerInput({
+          credits: 10,
+          hand: [hqInterface],
+          rig: [rdInterface],
+          legalActions: [installAction("install-hq-interface", hqInterface, 4)],
+        }),
+        strategicIntent: strategicIntent({
+          pressureVectors: ["runner.central_probe_pressure"],
+        }),
+      }),
+      hqInterface.instanceId,
+    );
+
+    expect(evaluation.persistentInstallEvaluation).toMatchObject({
+      installedSameDefinitionCount: 0,
+      installedSameFunctionalGroupCount: 0,
+      capabilityDelta: "new_coverage",
+      duplicateRole: "none",
+    });
+  });
+
+  it("still treats an installed same-server interface as a duplicate", () => {
+    const hqInterface = visibleCard("hq-interface-hand", {
+      definitionId: "onr_v1_129_hq-interface",
+      title: "HQ Interface",
+      type: "hardware",
+      installCost: 4,
+      rulesText:
+        "Whenever you make a successful run on HQ, access 1 additional card.",
+    });
+    const installedHqInterface = {
+      ...hqInterface,
+      instanceId: "hq-interface-installed",
+    };
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({
+        input: runnerInput({
+          credits: 10,
+          hand: [hqInterface],
+          rig: [installedHqInterface],
+          legalActions: [installAction("install-hq-interface", hqInterface, 4)],
+        }),
+        strategicIntent: strategicIntent({
+          pressureVectors: ["runner.central_probe_pressure"],
+        }),
+      }),
+      hqInterface.instanceId,
+    );
+
+    expect(evaluation.persistentInstallEvaluation).toMatchObject({
+      installedSameDefinitionCount: 1,
+      installedSameFunctionalGroupCount: 1,
+      capabilityDelta: "backup_only",
+      duplicateRole: "redundant_duplicate",
+    });
+  });
+
   it("requires a same-turn access action after turn-limited preparation", () => {
     const preparation = visibleCard("prearranged-drop-1", {
       definitionId: "onr_proteus_118_prearranged-drop",

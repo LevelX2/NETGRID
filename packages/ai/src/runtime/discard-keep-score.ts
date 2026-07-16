@@ -107,6 +107,17 @@ export function discardKeepScore(
     input.side === "runner" &&
     (duplicateCount > 1 || installedSameDefinition) &&
     roles.some((role) => isRunnerNonAdditiveUtilityRole(role));
+  const runnerImmediateLiquidityBonus = runnerImmediateLiquidityKeepBonus(
+    input,
+    card.definitionId,
+    cost,
+  );
+  const runnerMatchpointCloseoutBonus = runnerMatchpointCloseoutKeepBonus({
+    input,
+    definitionId: card.definitionId,
+    duplicateCount,
+    installedSameDefinition,
+  });
   let baseValue = 100;
   const corpAdvancementBurstSupportsVisibleAgenda =
     input.side === "corp" &&
@@ -143,6 +154,8 @@ export function discardKeepScore(
     if (runnerMissingBreakerSearchAccess) baseValue += 420;
     if (runnerBadPublicityTraceTech) baseValue += 240;
     if (runnerFundingEconomyCard) baseValue += 260;
+    baseValue += runnerImmediateLiquidityBonus;
+    baseValue += runnerMatchpointCloseoutBonus;
     if (
       duplicateCount <= 1 &&
       !installedSameDefinition &&
@@ -205,11 +218,85 @@ export function discardKeepScore(
       ...(runnerVisiblePathTool
         ? ["discard_score:runner_visible_path_tool"]
         : []),
+      ...(runnerImmediateLiquidityBonus > 0
+        ? ["discard_score:runner_immediate_liquidity"]
+        : []),
+      ...(runnerMatchpointCloseoutBonus > 0
+        ? ["discard_score:runner_matchpoint_closeout"]
+        : []),
       ...corpConditionalPayoff.evidence,
       ...(planFit > 0 ? ["discard_score:planfit"] : []),
       ...(strategicFit > 0 ? ["discard_score:strategicfit"] : []),
     ]),
   };
+}
+
+function runnerImmediateLiquidityKeepBonus(
+  input: AiDecisionInput,
+  definitionId: string,
+  cost: number,
+): number {
+  if (input.side !== "runner" || cost > input.playerView.own.credits) return 0;
+  const payout = runnerCreditPayoutAmount(definitionId);
+  const netGain = payout - cost;
+  if (netGain <= 0) return 0;
+  const liquidityBase = input.playerView.own.credits < 4 ? 520 : 220;
+  return liquidityBase + Math.min(160, netGain * 40);
+}
+
+function runnerMatchpointCloseoutKeepBonus(params: {
+  input: AiDecisionInput;
+  definitionId: string;
+  duplicateCount: number;
+  installedSameDefinition: boolean;
+}): number {
+  if (
+    params.input.side !== "runner" ||
+    params.input.playerView.own.agendaPoints <
+      Math.max(1, params.input.playerView.agendaPointsToWin - 2) ||
+    params.duplicateCount > 1 ||
+    params.installedSameDefinition
+  ) {
+    return 0;
+  }
+  const hint = AI_HINTS_BY_CARD.get(params.definitionId);
+  const multiaccess = (hint?.effects ?? []).some(
+    (effect) => effect.kind === "multiaccess" && (effect.amount ?? 0) > 0,
+  );
+  if (!multiaccess) return 0;
+  const strategyIds = runnerDiscardStrategyIds(params.input);
+  return (hint?.lineSupport ?? []).some((strategyId) =>
+    strategyIds.has(strategyId),
+  )
+    ? 720
+    : 0;
+}
+
+function runnerCreditPayoutAmount(definitionId: string): number {
+  return Math.max(
+    0,
+    ...(AI_HINTS_BY_CARD.get(definitionId)?.effects ?? [])
+      .filter(
+        (effect) =>
+          effect.kind === "economy" &&
+          effect.resource === "credits" &&
+          effect.scope === "runner",
+      )
+      .map((effect) => effect.amount ?? 0),
+  );
+}
+
+function runnerDiscardStrategyIds(input: AiDecisionInput): ReadonlySet<string> {
+  const semanticInput = input as AiDecisionInputWithDeckCapabilities;
+  const profile = semanticInput.ownDeckStrategyProfile;
+  const intent = semanticInput.ownStrategicIntentState;
+  return new Set([
+    ...(intent && intent.primaryStrategy.family !== "neutral"
+      ? [intent.primaryStrategy.strategyId]
+      : []),
+    ...(profile?.primaryStrategies ?? []),
+    ...(profile?.secondaryStrategies ?? []),
+  ]);
 }
 
 function runnerCardProvidesVisiblePathUtility(
