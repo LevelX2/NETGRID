@@ -1,4 +1,8 @@
-import { type AiDecisionInput } from "@netgrid/shared";
+import { traceSuccessEffectCardImplementationQuotesForDefinition } from "@netgrid/engine";
+import {
+  type AiDecisionInput,
+  type CardDefinitionId,
+} from "@netgrid/shared";
 
 import { selectEfficientTraceBidOption } from "../trace-bid-efficiency";
 import { classifyTagPunishPayoffFromOntology } from "../tag-punish-ontology-consumer";
@@ -82,11 +86,11 @@ function runnerRunBudgetPreservingBidOption(
   ) {
     return undefined;
   }
-  const tagAmount = currentTraceTagAmount(input);
+  const tagAmount = currentTraceTagAmount(input, traceContext);
   if (
     tagAmount <= 0 ||
     input.playerView.own.tags > 0 ||
-    input.playerView.own.clicks < 1 ||
+    input.playerView.own.clicks < tagAmount ||
     runnerFacesVisibleTagPunish(input)
   ) {
     return undefined;
@@ -97,7 +101,6 @@ function runnerRunBudgetPreservingBidOption(
   if (remainingCost === undefined) return undefined;
   const reserve = runnerRunPlanReserveTarget(plan);
   const credits = input.playerView.own.credits;
-  if (credits - selected.amount >= remainingCost + reserve) return undefined;
   const minimumLosingBid = bidOptions.find(
     (option) => !runnerAvoidsTrace(runnerLink, option.amount, traceStrength),
   );
@@ -109,10 +112,25 @@ function runnerRunBudgetPreservingBidOption(
   ) {
     return undefined;
   }
+  const cleanupClickOpportunityCost = tagAmount;
+  const winningBidPremium = selected.amount - minimumLosingBid.amount;
+  const cleanupEconomicCost =
+    basicTagCleanupCost + cleanupClickOpportunityCost;
+  const selectedPreservesRunBudget =
+    credits - selected.amount >= remainingCost + reserve;
+  if (
+    selectedPreservesRunBudget &&
+    winningBidPremium <= cleanupEconomicCost
+  ) {
+    return undefined;
+  }
   return minimumLosingBid;
 }
 
-function currentTraceTagAmount(input: AiDecisionInput): number {
+function currentTraceTagAmount(
+  input: AiDecisionInput,
+  traceContext: LatestTraceContext,
+): number {
   const tagAmounts =
     currentEncounteredIceCard(input)?.effectiveRunQuote?.subroutines.flatMap(
       (subroutine) =>
@@ -120,7 +138,24 @@ function currentTraceTagAmount(input: AiDecisionInput): number {
           ? [Math.max(0, subroutine.traceSuccessEffect.amount)]
           : [],
     ) ?? [];
-  return tagAmounts.length === 1 ? (tagAmounts[0] ?? 0) : 0;
+  if (tagAmounts.length === 1) return tagAmounts[0] ?? 0;
+  const sourceDefinitionId = traceContext.sourceDefinitionId;
+  if (!sourceDefinitionId) return 0;
+  const implementationQuotes =
+    traceSuccessEffectCardImplementationQuotesForDefinition(
+      sourceDefinitionId as CardDefinitionId,
+    ).filter(
+      (quote) =>
+        traceContext.baseTraceStrength === undefined ||
+        quote.baseTraceStrength === traceContext.baseTraceStrength,
+    );
+  const implementationTagAmounts = implementationQuotes.flatMap((quote) =>
+    quote.traceSuccessEffect.type === "add_tag"
+      ? [Math.max(0, quote.traceSuccessEffect.amount)]
+      : [],
+  );
+  const uniqueTagAmounts = new Set(implementationTagAmounts);
+  return uniqueTagAmounts.size === 1 ? (implementationTagAmounts[0] ?? 0) : 0;
 }
 
 function runnerFacesVisibleTagPunish(input: AiDecisionInput): boolean {
@@ -163,10 +198,8 @@ function knownRemainingRunCashCost(
   plan: RunnerRunPlan,
 ): number | undefined {
   const remainingIce = currentRunRemainingIce(input);
-  if (
-    remainingIce.length === 0 ||
-    remainingIce.some((ice) => !ice.known || ice.rezzed === false)
-  ) {
+  if (remainingIce.length === 0) return 0;
+  if (remainingIce.some((ice) => !ice.known || ice.rezzed === false)) {
     return undefined;
   }
   const quotesByIceId = new Map(

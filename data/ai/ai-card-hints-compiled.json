@@ -45833,13 +45833,20 @@
       },
       "effects": [
         {
-          "kind": "economy",
-          "timing": "action",
-          "scope": "runner",
-          "resource": "credits",
           "amount": 9,
+          "finite": true,
+          "kind": "economy",
+          "resource": "credits",
+          "scope": "runner",
           "target": "burst_credit",
-          "finite": true
+          "timing": "action"
+        },
+        {
+          "amount": 9,
+          "kind": "economy",
+          "resource": "credits",
+          "scope": "runner",
+          "timing": "action"
         }
       ],
       "conditions": [
