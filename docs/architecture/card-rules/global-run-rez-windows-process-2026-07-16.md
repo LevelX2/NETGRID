@@ -120,7 +120,7 @@ entsprechenden Safety-Regressionen sind grün.
 
 ## State Machine
 
-`GRR-0 done -> GRR-1 active -> GRR-2 -> GRR-3 -> final_verify -> merge_main -> cleanup -> complete`
+`GRR-0 done -> GRR-1 done -> GRR-2 active -> GRR-3 -> final_verify -> merge_main -> cleanup -> complete`
 
 Fehlerzustände:
 
@@ -134,8 +134,8 @@ Fehlerzustände:
 | Paket | Titel | Status | Abhängigkeit |
 |---|---|---|---|
 | GRR-0 | Prozessvertrag und Worktree-Controller | done | Preflight |
-| GRR-1 | Globaler Rez-Aktionsvertrag und Unit-Regressionen | active | GRR-0 |
-| GRR-2 | Hacker-Tracker-End-to-End- und Safety-Regression | pending | GRR-1 |
+| GRR-1 | Globaler Rez-Aktionsvertrag und Unit-Regressionen | done | GRR-0 |
+| GRR-2 | Hacker-Tracker-End-to-End- und Safety-Regression | active | GRR-1 |
 | GRR-3 | Abschlussreview und Wissensrückführung | pending | GRR-2 |
 
 ## Paketdetails
@@ -295,6 +295,17 @@ Paketchecks aus, dokumentiere Warnungen und nicht ausgeführte Checks, führe
 nächste Paket. Bei Safety- oder fachlichem Vertragsblocker stoppe mit
 Blocker-Report und Removal Condition. Nach GRR-3 führe Final Verify, lokalen
 Main-Merge und den vollständig verifizierten Worktree-/Branch-Cleanup aus.
+
+## Paketfortschritt
+
+- GRR-0: Prozessvertrag in Commit `4161a0e9b` angelegt; Diff-Hygiene grün.
+- GRR-1: Der normale Run-Rez-Builder durchsucht nun alle Corp-Server in
+  stabiler ID-Reihenfolge und hält Registry-/Fort-Pass-Aktionen am
+  angegriffenen Server. Der fokussierte `run-rez-window`-Test ist mit 6 Tests
+  grün, ebenso Engine-Typecheck und `git diff --check`. Ein versehentlich
+  breiter erster Testlauf hat zwei bestehende Sequenz-Fixtures identifiziert,
+  die das neue globale Rezfenster noch nicht passieren; diese eng angrenzenden
+  Anpassungen gehören zu GRR-2.
 
 ## Abschlusskriterien
 
