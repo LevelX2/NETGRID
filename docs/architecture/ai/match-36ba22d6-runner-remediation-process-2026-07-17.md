@@ -1,6 +1,6 @@
 # Match 36BA22D6: Runner-Plan-, Bank- und Access-Risk-Remediation
 
-Status: P0 aktiv
+Status: P0 abgeschlossen, P1 aktiv
 
 ## Quelle und Zielprüfung
 
