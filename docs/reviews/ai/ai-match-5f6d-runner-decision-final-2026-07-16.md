@@ -102,6 +102,25 @@ zusätzlich einen FD7671-Run-Lock-Rückfall; nach der Cashout-Härtung ist diese
 Vertrag wieder grün und der finale Branch-Fehlersatz entspricht exakt der
 `main`-Kontrollmessung.
 
+### Aktualisierter Main-Abgleich
+
+Während P6 rückte `main` durch den parallelen Hint-Consumer-Strang bis
+`87d43fa47` vor. Nach dem konfliktfreien Merge sind 62 fokussierte Tests,
+AI-Typecheck und `check:ai` grün. Die drei vollständigen Shards zeigen auf
+diesem Stand 15 rote Tests; die exakte Kontrollmessung auf `main` zeigt
+dieselben 15 Tests in denselben acht Dateien:
+
+| Check                                     | Ergebnis auf Merge-Stand und `main`                    |
+| ----------------------------------------- | ------------------------------------------------------ |
+| AI-Shard 1                                | 113 Dateien und 742 Tests grün; 5 identische Altfehler |
+| AI-Shard 2                                | 113 Dateien und 855 Tests grün; 5 identische Altfehler |
+| AI-Shard 3                                | 113 Dateien und 787 Tests grün; 5 identische Altfehler |
+| exakte `main`-Kontrolle der roten Dateien | 112 Tests grün; 15 Tests identisch rot                 |
+
+Zusätzlich zum zuvor belegten Zehner-Satz stammen drei ECFE3CE-Broker-
+Verträge und zwei AI-Hint-Quality-Tests aus dem neu integrierten `main`-Stand.
+Es gibt weiterhin keine branch-exklusive Regression.
+
 ## Grenzen
 
 - Keine Engine-, LegalAction-, PlayerView-, Replay-, StateHash-, Randomness-
@@ -116,6 +135,7 @@ Vertrag wieder grün und der finale Branch-Fehlersatz entspricht exakt der
 ## Integrationsstatus
 
 P5 ist abgeschlossen. Der lokale Main-Abgleich, die Verifikation auf dem
-integrierten Stand und das verifizierte Entfernen von Worktree und Branch
-erfolgen als P6 dieses Prozesses. Dieser Abschnitt wird nach dem tatsächlichen
-Cleanup auf `main` aktualisiert.
+integrierten Stand und die `main`-Kontrollmessung sind abgeschlossen. Der
+Fast-Forward und das verifizierte Entfernen von Worktree und Branch bilden den
+letzten P6-Schritt. Dieser Abschnitt wird nach dem tatsächlichen Cleanup auf
+`main` aktualisiert.
