@@ -41,6 +41,16 @@ const OVERLAY_FIELDS = [
   "descriptorGaps",
   "opponentSignals",
 ];
+const REVIEWED_EFFECT_NORMALIZATION_CARD_IDS = new Set([
+  "onr_v1_079_bodyweight-synthetic-blood",
+  "onr_v1_081_custodial-position",
+  "onr_v1_085_executive-wiretaps",
+  "onr_v1_095_jack-n-joe",
+  "onr_v1_097_livewires-contacts",
+  "onr_v1_108_score",
+  "onr_proteus_101_all-hands",
+  "onr_proteus_122_rush-hour",
+]);
 const HIDDEN_INFO_FIELDS = new Set([
   "opponentDeckList",
   "corpHiddenRndOrder",
@@ -375,7 +385,12 @@ export function buildCompiledHintsArtifact() {
     const derivedCard = derivedByCard.get(activeHint.cardId);
     const generatedFacts = generatedFactsFrom(derivedCard?.derivedFacts);
     for (const [field, value] of Object.entries(generatedFacts)) {
-      compiled[field] = mergeMechanicalField(field, compiled[field], value);
+      compiled[field] = mergeMechanicalField(
+        field,
+        compiled[field],
+        value,
+        activeHint.cardId,
+      );
     }
     const overlay = overlayFieldsFrom(overlaysByCard.get(activeHint.cardId));
     for (const [field, value] of Object.entries(overlay)) {
@@ -397,9 +412,15 @@ export function buildCompiledHintsArtifact() {
   };
 }
 
-function mergeMechanicalField(field, activeValue, generatedValue) {
+function mergeMechanicalField(field, activeValue, generatedValue, cardId) {
   if (!isMeaningful(activeValue)) return stableValue(generatedValue);
   if (!isMeaningful(generatedValue)) return stableValue(activeValue);
+  if (
+    field === "effects" &&
+    REVIEWED_EFFECT_NORMALIZATION_CARD_IDS.has(cardId)
+  ) {
+    return mergeMechanicalEffects(activeValue, generatedValue);
+  }
   if (["effects", "conditions", "targetProfiles"].includes(field)) {
     return uniqueBySerialized([
       ...(Array.isArray(activeValue) ? activeValue : []),
@@ -418,6 +439,55 @@ function mergeMechanicalField(field, activeValue, generatedValue) {
     return stableValue({ ...activeValue, ...generatedValue });
   }
   return stableValue(generatedValue);
+}
+
+function mergeMechanicalEffects(activeValue, generatedValue) {
+  const merged = (Array.isArray(activeValue) ? activeValue : []).map((effect) =>
+    stableValue(effect),
+  );
+  for (const generatedEffect of Array.isArray(generatedValue)
+    ? generatedValue
+    : []) {
+    const normalizedGenerated = stableValue(generatedEffect);
+    const compatibleIndices = merged.flatMap((activeEffect, index) =>
+      mechanicalEffectsAreCompatible(activeEffect, normalizedGenerated)
+        ? [index]
+        : [],
+    );
+    if (compatibleIndices.length !== 1) {
+      merged.push(normalizedGenerated);
+      continue;
+    }
+    const compatibleIndex = compatibleIndices[0];
+    merged[compatibleIndex] = stableValue({
+      ...normalizedGenerated,
+      ...merged[compatibleIndex],
+    });
+  }
+  return uniqueBySerialized(merged).map(stableValue);
+}
+
+function mechanicalEffectsAreCompatible(left, right) {
+  if (!left || !right || typeof left !== "object" || typeof right !== "object")
+    return false;
+  for (const field of ["kind", "timing", "scope"]) {
+    if (left[field] !== right[field]) return false;
+  }
+  for (const field of ["resource", "amount", "target", "repeatable", "finite"]) {
+    if (
+      isMeaningful(left[field]) &&
+      isMeaningful(right[field]) &&
+      left[field] !== right[field]
+    ) {
+      return false;
+    }
+  }
+  return ["resource", "amount", "target"].some(
+    (field) =>
+      isMeaningful(left[field]) &&
+      isMeaningful(right[field]) &&
+      left[field] === right[field],
+  );
 }
 
 function uniqueBySerialized(values) {

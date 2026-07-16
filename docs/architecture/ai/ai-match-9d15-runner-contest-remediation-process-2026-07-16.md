@@ -194,3 +194,30 @@ Verzeichnis-Cleanup aber auf das Windows-Pfadlängenlimit. Der zuvor exakt
 aufgelöste Worktree-Pfad wurde deshalb im selben PowerShell-Prozess mit dem
 Long-Path-fähigen .NET-Dateisystempfad bereinigt. Registrierung, Ordner und
 Branch sind anschließend getrennt als nicht mehr vorhanden verifiziert.
+
+## Dauerhafter Follow-up-Vertrag für Deckhints und Consumer
+
+Ein gespeichertes Match mit `deckSnapshot` erhält zusätzlich zum zugweisen
+Decision-Audit einen deckweiten Kartenvertrag. Der reproduzierbare Einstieg
+ist `scripts/audit-ai-deck-hint-consumers.ts`; Ausschlüsse werden als exakte,
+wiederholbare `--exclude-card-id`-Parameter übergeben und im Ergebnis als
+Nicht-Ziele ausgewiesen.
+
+Der Audit prüft für jede eindeutige Karte aktive und kompilierte Hints,
+Derived Facts, Inspector-Taxonomie und Reviewstatus. Anschließend führt er die
+tatsächlichen Capability- und Strategy-Consumer aus. Er blockiert bei
+fehlenden Artefakten, ungeprüften Hints, Active-/Compiled-Drift, überlappenden
+kompilierten Effekten, falschen Side-Ankern, Search-Tools ohne Suchsemantik
+oder einer abweichenden Remote-Contest-Zählung.
+
+Die dauerhaften Semantikgrenzen lauten:
+
+- Ein Icebreaker ist ohne explizite Suchsemantik kein Search-Tool.
+- `contest_remote` zählt bei Run-Karten nur zusammen mit einem strukturierten
+  serverweiten `make_run`-Effekt.
+- Implementierungs-`accessCount` ist die Gesamtzahl, Hint-
+  `multiaccess.amount` die Zahl zusätzlicher Zugriffe.
+- Breite seitenneutrale Funktionsrollen erzeugen ohne strukturierte Anker
+  keine Side-Strategie.
+- Homogenisierung bleibt auf fachlich belegte Karten oder Effektfamilien
+  begrenzt und benötigt enge Vertragstests.

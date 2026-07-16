@@ -30,7 +30,7 @@ const IMPLEMENTATION_ROOTS = [
 ];
 const OVERLAY_ROOT = "data/ai/hints/overlays";
 const GENERATED_AT = "2026-05-25";
-const EXPECTED_ACTIVE_HINT_COUNT = 616;
+const EXPECTED_ACTIVE_HINT_COUNT = 618;
 
 function repoPath(relativePath) {
   return path.join(REPO_ROOT, relativePath);

@@ -6,7 +6,10 @@ import {
   estimateBreakerCostProfileFromOntology,
   getStructuredBreakerProfileForCard,
 } from "./breaker-ontology-consumer";
-import type { KnownHintBreakerCoverage } from "./hint-ontology";
+import type {
+  AiHintStructuredEffect,
+  KnownHintBreakerCoverage,
+} from "./hint-ontology";
 
 export const DECK_CAPABILITY_PROFILE_SCHEMA_VERSION =
   "deck-capability-profile-v1" as const;
@@ -189,6 +192,7 @@ type CardCapabilityRecord = {
   text: string;
   roles: string[];
   planRoles: string[];
+  effects: AiHintStructuredEffect[];
   quantityKnownInDeck: number;
   locations: CapabilityCardStatus[];
   visibleCards: VisibleCard[];
@@ -399,6 +403,7 @@ function recordFromDefinition(
     text: definition.text,
     roles: [...(CARD_ROLES_BY_CARD.get(cardId)?.roles ?? []), ...(hint?.roles ?? [])],
     planRoles: [...(hint?.planRoles ?? [])],
+    effects: [...(hint?.effects ?? [])],
     quantityKnownInDeck: Math.max(0, quantityKnownInDeck),
     locations: quantityKnownInDeck > 0 ? ["in_deck"] : [],
     visibleCards: [],
@@ -425,6 +430,7 @@ function recordFromVisibleCard(
     text: definition?.text ?? card.rulesText ?? "",
     roles: [...(CARD_ROLES_BY_CARD.get(cardId)?.roles ?? []), ...(hint?.roles ?? [])],
     planRoles: [...(hint?.planRoles ?? [])],
+    effects: [...(hint?.effects ?? [])],
     quantityKnownInDeck: 0,
     locations: [],
     visibleCards: [card],
@@ -839,10 +845,17 @@ function buildRunnerAttackPlanProfile(
     ]),
   ).length;
   const remoteContestToolsKnown = records.filter((record) =>
-    rolesMatch(record.roles, [
-    "remote_contest",
-    "trash_support",
-    ]),
+    rolesMatch(record.roles, ["remote_contest", "trash_support"]) ||
+    (rolesMatch(record.planRoles, ["contest_remote"]) &&
+      record.effects.some((effect) => {
+        const target = (effect as AiHintStructuredEffect & { target?: string })
+          .target;
+        return (
+          effect.kind === "future_run_effect" &&
+          effect.scope === "server" &&
+          target === "make_run"
+        );
+      })),
   ).length;
   const setupToolsKnown = records.filter((record) =>
     rolesMatch(record.roles, ["setup"]) ||
@@ -1016,8 +1029,7 @@ function deckCapabilityTextHasBreakerSearchSignal(text: string): boolean {
   const tokens = deckCapabilityTextTokens(text);
   return (
     deckCapabilityTokensIncludePhrase(tokens, ["breaker", "search"]) ||
-    deckCapabilityTokensIncludeInOrder(tokens, "search", "breaker") ||
-    deckCapabilityTokensIncludeAny(tokens, ["icebreaker"])
+    deckCapabilityTokensIncludeInOrder(tokens, "search", "breaker")
   );
 }
 

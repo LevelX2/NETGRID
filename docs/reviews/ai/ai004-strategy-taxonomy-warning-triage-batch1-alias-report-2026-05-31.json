@@ -10,48 +10,48 @@
   },
   "summary": {
     "totals": {
-      "roles": 255,
+      "roles": 256,
       "planRoles": 114,
       "lineSupport": 21,
-      "allValues": 390
+      "allValues": 391
     },
     "categoryCounts": {
-      "alias_to_strategy_goal": 75,
+      "alias_to_strategy_goal": 72,
       "deferred_requires_human_review": 1,
       "descriptor_gap": 8,
       "exact_strategy_goal": 21,
-      "function_signal_only": 234,
+      "function_signal_only": 238,
       "legacy_role_only": 50,
       "remove_or_deprecate": 1
     },
     "mappedCounts": {
       "exactStrategyGoal": 21,
-      "aliasToStrategyGoal": 75,
-      "functionSignalOnly": 234,
+      "aliasToStrategyGoal": 72,
+      "functionSignalOnly": 238,
       "legacyRoleOnly": 50,
       "unknownUnmapped": 0,
       "shouldBeRemovedFromLineSupport": 0
     }
   },
   "totals": {
-    "roles": 255,
+    "roles": 256,
     "planRoles": 114,
     "lineSupport": 21,
-    "allValues": 390
+    "allValues": 391
   },
   "categoryCounts": {
-    "alias_to_strategy_goal": 75,
+    "alias_to_strategy_goal": 72,
     "deferred_requires_human_review": 1,
     "descriptor_gap": 8,
     "exact_strategy_goal": 21,
-    "function_signal_only": 234,
+    "function_signal_only": 238,
     "legacy_role_only": 50,
     "remove_or_deprecate": 1
   },
   "mappedCounts": {
     "exactStrategyGoal": 21,
-    "aliasToStrategyGoal": 75,
-    "functionSignalOnly": 234,
+    "aliasToStrategyGoal": 72,
+    "functionSignalOnly": 238,
     "legacyRoleOnly": 50,
     "unknownUnmapped": 0,
     "shouldBeRemovedFromLineSupport": 0
@@ -504,13 +504,11 @@
     {
       "value": "run_pressure",
       "count": 17,
-      "mappingCategory": "alias_to_strategy_goal",
-      "triageCategory": "strategy_alias",
-      "triageSource": "classifier",
-      "mapsTo": [
-        "runner.run_event_tempo"
-      ],
-      "rationale": "Legacy role or planRole aliases to a normalized strategy.",
+      "mappingCategory": "function_signal_only",
+      "triageCategory": "function_signal_only",
+      "triageSource": "ai004_explicit",
+      "mapsTo": [],
+      "rationale": "Broad tactical run pressure; central and run-event strategy require structured target/effect anchors.",
       "examples": [
         "onr_v1_018_dogcatcher",
         "onr_v1_294_new-blood",
@@ -970,25 +968,6 @@
       ]
     },
     {
-      "value": "tag",
-      "count": 8,
-      "mappingCategory": "function_signal_only",
-      "triageCategory": "function_signal_only",
-      "triageSource": "classifier",
-      "mapsTo": [],
-      "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor.",
-      "examples": [
-        "onr_v1_078_arasaka-owns-you",
-        "onr_v1_221_asp",
-        "onr_v1_240_fang",
-        "onr_v1_241_fang-2-0",
-        "onr_v1_260_pocket-virtual-reality",
-        "onr_v1_264_rex",
-        "onr_v1_345_trap",
-        "onr_v1_364_omni-kismet-ph-d"
-      ]
-    },
-    {
       "value": "tag_punishment",
       "count": 8,
       "mappingCategory": "alias_to_strategy_goal",
@@ -1101,6 +1080,26 @@
         "onr_v1_320_encoder-inc",
         "onr_v1_341_skalderviken-sa-beta-test-site",
         "onr_v1_350_antiquated-interface-routines"
+      ]
+    },
+    {
+      "value": "multiaccess",
+      "count": 7,
+      "mappingCategory": "alias_to_strategy_goal",
+      "triageCategory": "strategy_alias",
+      "triageSource": "classifier",
+      "mapsTo": [
+        "runner.interface_closeout"
+      ],
+      "rationale": "Legacy role or planRole aliases to a normalized strategy.",
+      "examples": [
+        "onr_v1_081_custodial-position",
+        "onr_v1_085_executive-wiretaps",
+        "onr_v1_105_priority-wreck",
+        "onr_v1_129_hq-interface",
+        "onr_v1_139_r-and-d-interface",
+        "onr_proteus_142_hq-mole",
+        "onr_classic_039_library-search"
       ]
     },
     {
@@ -1299,25 +1298,6 @@
       ]
     },
     {
-      "value": "multiaccess",
-      "count": 6,
-      "mappingCategory": "alias_to_strategy_goal",
-      "triageCategory": "strategy_alias",
-      "triageSource": "classifier",
-      "mapsTo": [
-        "runner.interface_closeout"
-      ],
-      "rationale": "Legacy role or planRole aliases to a normalized strategy.",
-      "examples": [
-        "onr_v1_081_custodial-position",
-        "onr_v1_085_executive-wiretaps",
-        "onr_v1_105_priority-wreck",
-        "onr_v1_129_hq-interface",
-        "onr_proteus_142_hq-mole",
-        "onr_classic_039_library-search"
-      ]
-    },
-    {
       "value": "region",
       "count": 6,
       "mappingCategory": "legacy_role_only",
@@ -1332,6 +1312,23 @@
         "onr_v1_369_singapore-city-grid",
         "onr_v1_371_tokyo-chiba-infighting",
         "onr_v1_374_washington-d-c-city-grid"
+      ]
+    },
+    {
+      "value": "tag",
+      "count": 6,
+      "mappingCategory": "function_signal_only",
+      "triageCategory": "function_signal_only",
+      "triageSource": "classifier",
+      "mapsTo": [],
+      "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor.",
+      "examples": [
+        "onr_v1_078_arasaka-owns-you",
+        "onr_v1_221_asp",
+        "onr_v1_241_fang-2-0",
+        "onr_v1_260_pocket-virtual-reality",
+        "onr_v1_345_trap",
+        "onr_v1_364_omni-kismet-ph-d"
       ]
     },
     {
@@ -2256,21 +2253,6 @@
       "examples": [
         "onr_v1_013_cockroach",
         "onr_proteus_141_get-ready-to-rumble"
-      ]
-    },
-    {
-      "value": "rd_multiaccess",
-      "count": 2,
-      "mappingCategory": "alias_to_strategy_goal",
-      "triageCategory": "strategy_alias",
-      "triageSource": "classifier",
-      "mapsTo": [
-        "runner.rnd_pressure"
-      ],
-      "rationale": "Legacy role or planRole aliases to a normalized strategy.",
-      "examples": [
-        "onr_v1_139_r-and-d-interface",
-        "onr_proteus_147_r-and-d-mole"
       ]
     },
     {
@@ -3305,6 +3287,20 @@
       ]
     },
     {
+      "value": "rd_multiaccess",
+      "count": 1,
+      "mappingCategory": "alias_to_strategy_goal",
+      "triageCategory": "strategy_alias",
+      "triageSource": "classifier",
+      "mapsTo": [
+        "runner.rnd_pressure"
+      ],
+      "rationale": "Legacy role or planRole aliases to a normalized strategy.",
+      "examples": [
+        "onr_proteus_147_r-and-d-mole"
+      ]
+    },
+    {
       "value": "rd_reorder",
       "count": 1,
       "mappingCategory": "descriptor_gap",
@@ -3436,6 +3432,20 @@
       "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor.",
       "examples": [
         "onr_classic_043_running-interference"
+      ]
+    },
+    {
+      "value": "rnd_pressure",
+      "count": 1,
+      "mappingCategory": "alias_to_strategy_goal",
+      "triageCategory": "strategy_alias",
+      "triageSource": "classifier",
+      "mapsTo": [
+        "runner.rnd_pressure"
+      ],
+      "rationale": "Legacy role or planRole aliases to a normalized strategy.",
+      "examples": [
+        "onr_v1_139_r-and-d-interface"
       ]
     },
     {
@@ -3846,13 +3856,11 @@
     {
       "value": "safe_probe_run",
       "count": 78,
-      "mappingCategory": "alias_to_strategy_goal",
-      "triageCategory": "strategy_alias",
-      "triageSource": "classifier",
-      "mapsTo": [
-        "runner.run_event_tempo"
-      ],
-      "rationale": "Legacy role or planRole aliases to a normalized strategy.",
+      "mappingCategory": "function_signal_only",
+      "triageCategory": "function_signal_only",
+      "triageSource": "ai004_explicit",
+      "mapsTo": [],
+      "rationale": "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself.",
       "examples": [
         "onr_v1_001_afreet",
         "onr_v1_005_bartmoss-memorial-icebreaker",
@@ -3888,18 +3896,16 @@
     {
       "value": "recover_economy",
       "count": 53,
-      "mappingCategory": "alias_to_strategy_goal",
-      "triageCategory": "strategy_alias",
-      "triageSource": "classifier",
-      "mapsTo": [
-        "corp.economy_rez_reserve"
-      ],
-      "rationale": "Legacy role or planRole aliases to a normalized strategy.",
+      "mappingCategory": "function_signal_only",
+      "triageCategory": "function_signal_only",
+      "triageSource": "ai004_explicit",
+      "mapsTo": [],
+      "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals.",
       "examples": [
-        "onr_v1_028_force-shield",
         "onr_v1_097_livewires-contacts",
         "onr_v1_108_score",
         "onr_v1_118_weather-to-finance-pipe",
+        "onr_v1_154_broker",
         "onr_v1_158_danshis-second-id",
         "onr_v1_159_databroker",
         "onr_v1_163_floating-runner-bbs",
@@ -3962,9 +3968,9 @@
         "onr_v1_076_all-nighter",
         "onr_v1_081_custodial-position",
         "onr_v1_083_desperate-competitor",
-        "onr_v1_085_executive-wiretaps",
         "onr_v1_090_hot-tip-for-wns",
-        "onr_v1_094_inside-job"
+        "onr_v1_094_inside-job",
+        "onr_v1_096_kilroy-was-here"
       ]
     },
     {
@@ -4032,7 +4038,7 @@
     },
     {
       "value": "contest_remote",
-      "count": 15,
+      "count": 14,
       "mappingCategory": "alias_to_strategy_goal",
       "triageCategory": "strategy_alias",
       "triageSource": "classifier",
@@ -4193,27 +4199,6 @@
       ]
     },
     {
-      "value": "run_pressure",
-      "count": 11,
-      "mappingCategory": "alias_to_strategy_goal",
-      "triageCategory": "strategy_alias",
-      "triageSource": "classifier",
-      "mapsTo": [
-        "runner.run_event_tempo"
-      ],
-      "rationale": "Legacy role or planRole aliases to a normalized strategy.",
-      "examples": [
-        "onr_v1_020_dupre",
-        "onr_v1_024_expert-schedule-analyzer",
-        "onr_v1_041_microtech-ai-interface",
-        "onr_v1_062_shredder-uplink-protocol",
-        "onr_v1_098_lucidrine-booster-drug",
-        "onr_v1_105_priority-wreck",
-        "onr_v1_111_social-engineering",
-        "onr_v1_112_stumble-through-wilderspace"
-      ]
-    },
-    {
       "value": "runner_play_event",
       "count": 11,
       "mappingCategory": "alias_to_strategy_goal",
@@ -4232,6 +4217,25 @@
         "onr_v1_102_open-ended-mileage-program",
         "onr_v1_103_organ-donor",
         "onr_v1_104_playful-ai"
+      ]
+    },
+    {
+      "value": "run_pressure",
+      "count": 10,
+      "mappingCategory": "function_signal_only",
+      "triageCategory": "function_signal_only",
+      "triageSource": "ai004_explicit",
+      "mapsTo": [],
+      "rationale": "Broad tactical run pressure; central and run-event strategy require structured target/effect anchors.",
+      "examples": [
+        "onr_v1_020_dupre",
+        "onr_v1_024_expert-schedule-analyzer",
+        "onr_v1_041_microtech-ai-interface",
+        "onr_v1_062_shredder-uplink-protocol",
+        "onr_v1_098_lucidrine-booster-drug",
+        "onr_v1_105_priority-wreck",
+        "onr_v1_111_social-engineering",
+        "onr_v1_112_stumble-through-wilderspace"
       ]
     },
     {
@@ -4501,25 +4505,6 @@
       ]
     },
     {
-      "value": "tag_pressure",
-      "count": 6,
-      "mappingCategory": "alias_to_strategy_goal",
-      "triageCategory": "strategy_alias",
-      "triageSource": "classifier",
-      "mapsTo": [
-        "corp.tag_trace_punish"
-      ],
-      "rationale": "Legacy role or planRole aliases to a normalized strategy.",
-      "examples": [
-        "onr_v1_221_asp",
-        "onr_v1_240_fang",
-        "onr_v1_241_fang-2-0",
-        "onr_v1_255_mastiff",
-        "onr_v1_260_pocket-virtual-reality",
-        "onr_v1_264_rex"
-      ]
-    },
-    {
       "value": "avoid_tags",
       "count": 5,
       "mappingCategory": "alias_to_strategy_goal",
@@ -4685,6 +4670,23 @@
       ]
     },
     {
+      "value": "tag_pressure",
+      "count": 4,
+      "mappingCategory": "alias_to_strategy_goal",
+      "triageCategory": "strategy_alias",
+      "triageSource": "classifier",
+      "mapsTo": [
+        "corp.tag_trace_punish"
+      ],
+      "rationale": "Legacy role or planRole aliases to a normalized strategy.",
+      "examples": [
+        "onr_v1_221_asp",
+        "onr_v1_241_fang-2-0",
+        "onr_v1_255_mastiff",
+        "onr_v1_260_pocket-virtual-reality"
+      ]
+    },
+    {
       "value": "corp_operation_choice",
       "count": 3,
       "mappingCategory": "function_signal_only",
@@ -4713,20 +4715,6 @@
       ]
     },
     {
-      "value": "economy",
-      "count": 3,
-      "mappingCategory": "function_signal_only",
-      "triageCategory": "function_signal_only",
-      "triageSource": "classifier",
-      "mapsTo": [],
-      "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor.",
-      "examples": [
-        "onr_v1_165_junkyard-bbs",
-        "onr_v1_166_karl-de-veres-corporate-stooge",
-        "onr_v1_294_new-blood"
-      ]
-    },
-    {
       "value": "break_walls",
       "count": 2,
       "mappingCategory": "function_signal_only",
@@ -4752,6 +4740,32 @@
       "examples": [
         "onr_v1_116_total-genetic-retrofit",
         "onr_v1_126_drifter-mobile-environment"
+      ]
+    },
+    {
+      "value": "click_for_credits_when_safe",
+      "count": 2,
+      "mappingCategory": "function_signal_only",
+      "triageCategory": "function_signal_only",
+      "triageSource": "ai004_explicit",
+      "mapsTo": [],
+      "rationale": "Tactical economy action hint; not a StrategyGoal source.",
+      "examples": [
+        "onr_v1_154_broker",
+        "onr_v1_178_short-term-contract"
+      ]
+    },
+    {
+      "value": "economy",
+      "count": 2,
+      "mappingCategory": "function_signal_only",
+      "triageCategory": "function_signal_only",
+      "triageSource": "classifier",
+      "mapsTo": [],
+      "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor.",
+      "examples": [
+        "onr_v1_166_karl-de-veres-corporate-stooge",
+        "onr_v1_294_new-blood"
       ]
     },
     {
@@ -4832,21 +4846,6 @@
       "examples": [
         "onr_v1_038_joan-of-arc",
         "onr_v1_186_umbrella-policy"
-      ]
-    },
-    {
-      "value": "recover_key_card",
-      "count": 2,
-      "mappingCategory": "alias_to_strategy_goal",
-      "triageCategory": "strategy_alias",
-      "triageSource": "classifier",
-      "mapsTo": [
-        "runner.search.breaker"
-      ],
-      "rationale": "Legacy role or planRole aliases to a normalized strategy.",
-      "examples": [
-        "onr_v1_154_broker",
-        "onr_classic_034_boostergang-connections"
       ]
     },
     {
@@ -4945,18 +4944,6 @@
       "rationale": "Legacy role or planRole aliases to a normalized strategy.",
       "examples": [
         "onr_v1_174_rigged-investments"
-      ]
-    },
-    {
-      "value": "click_for_credits_when_safe",
-      "count": 1,
-      "mappingCategory": "function_signal_only",
-      "triageCategory": "function_signal_only",
-      "triageSource": "ai004_explicit",
-      "mapsTo": [],
-      "rationale": "Tactical economy action hint; not a StrategyGoal source.",
-      "examples": [
-        "onr_v1_178_short-term-contract"
       ]
     },
     {
@@ -5153,6 +5140,20 @@
       "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor.",
       "examples": [
         "onr_classic_040_meat-upgrade"
+      ]
+    },
+    {
+      "value": "recover_key_card",
+      "count": 1,
+      "mappingCategory": "alias_to_strategy_goal",
+      "triageCategory": "strategy_alias",
+      "triageSource": "classifier",
+      "mapsTo": [
+        "runner.search.breaker"
+      ],
+      "rationale": "Legacy role or planRole aliases to a normalized strategy.",
+      "examples": [
+        "onr_classic_034_boostergang-connections"
       ]
     },
     {

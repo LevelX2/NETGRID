@@ -187,6 +187,7 @@ const LINE_SUPPORT_MAPPINGS = {
 
 const ROLE_ALIASES = {
   pressure_rnd: ["runner.rnd_pressure"],
+  rnd_pressure: ["runner.rnd_pressure"],
   rd_pressure: ["runner.rnd_pressure"],
   rd_run: ["runner.rnd_pressure"],
   rd_multiaccess: ["runner.rnd_pressure"],
@@ -206,8 +207,6 @@ const ROLE_ALIASES = {
   program_search: ["runner.search.breaker"],
   recover_key_card: ["runner.search.breaker"],
   recover_cards: ["runner.search.breaker"],
-  safe_probe_run: ["runner.run_event_tempo"],
-  run_pressure: ["runner.run_event_tempo"],
   runner_play_event: ["runner.run_event_tempo"],
   runner_event_choice: ["runner.run_event_tempo"],
   avoid_tags: ["runner.survival_defense"],
@@ -257,7 +256,6 @@ const ROLE_ALIASES = {
   damage: ["corp.damage_kill"],
   damage_operation: ["corp.damage_kill"],
   run_start_damage: ["corp.damage_kill"],
-  recover_economy: ["corp.economy_rez_reserve"],
   build_economy: ["corp.economy_rez_reserve"],
   economy_operation: ["corp.economy_rez_reserve"],
   managed_risk_economy: ["corp.economy_rez_reserve"],
@@ -465,6 +463,11 @@ const ROLE_PLAN_ROLE_TRIAGE = {
     category: "function_signal_only",
     rationale: "Card recovery/recursion function context only.",
   },
+  recover_economy: {
+    category: "function_signal_only",
+    rationale:
+      "Side-neutral tactical economy recovery; strategy support must come from structured economy signals.",
+  },
   recycle_zones: {
     category: "function_signal_only",
     rationale: "Zone recycle/shuffle function context only.",
@@ -476,6 +479,16 @@ const ROLE_PLAN_ROLE_TRIAGE = {
   rig_defense: {
     category: "function_signal_only",
     rationale: "Rig protection function context only.",
+  },
+  run_pressure: {
+    category: "function_signal_only",
+    rationale:
+      "Broad tactical run pressure; central and run-event strategy require structured target/effect anchors.",
+  },
+  safe_probe_run: {
+    category: "function_signal_only",
+    rationale:
+      "Breaker-enabled safe-run support; not a run-event-tempo strategy anchor by itself.",
   },
   sentry: {
     category: "function_signal_only",

@@ -759,7 +759,7 @@ describe("AI003 strategy goal taxonomy", () => {
       ...report.ai004Triage.planRoles,
     ].filter((entry) => entry.triageSource === "ai004_explicit");
 
-    expect(explicitTriage).toHaveLength(45);
+    expect(explicitTriage).toHaveLength(49);
     expect(
       report.warnings.some(
         (warning) => warning.kind === "unknown_role_or_planRole_values_warn_only",
@@ -770,6 +770,25 @@ describe("AI003 strategy goal taxonomy", () => {
         (entry) => entry.mappingCategory === "function_signal_only",
       ).length,
     ).toBeGreaterThan(0);
+    expect(report.ai004Triage.planRoles).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          value: "recover_economy",
+          mappingCategory: "function_signal_only",
+          triageSource: "ai004_explicit",
+        }),
+        expect.objectContaining({
+          value: "run_pressure",
+          mappingCategory: "function_signal_only",
+          triageSource: "ai004_explicit",
+        }),
+        expect.objectContaining({
+          value: "safe_probe_run",
+          mappingCategory: "function_signal_only",
+          triageSource: "ai004_explicit",
+        }),
+      ]),
+    );
     expect(
       explicitTriage.filter((entry) => entry.mappingCategory === "descriptor_gap")
         .length,

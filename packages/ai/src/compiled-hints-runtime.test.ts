@@ -111,7 +111,7 @@ describe("compiled AI hints runtime full coverage", () => {
     expect(fullCoverageReport.legacyFallbackOnlyCount).toBeGreaterThanOrEqual(
       0,
     );
-    expect(fullCoverageReport.blockedMissingImplementationCount).toBe(89);
+    expect(fullCoverageReport.blockedMissingImplementationCount).toBe(91);
     const classifiedTotal = Object.values(
       fullCoverageReport.coverageClassCounts,
     ).reduce((sum, count) => sum + count, 0);

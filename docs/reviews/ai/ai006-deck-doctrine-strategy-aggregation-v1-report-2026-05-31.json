@@ -2494,7 +2494,7 @@
         "planRole:build_rig": 12,
         "planRole:draw_for_answers": 4,
         "planRole:pressure_hq": 3,
-        "planRole:pressure_rnd": 4,
+        "planRole:pressure_rnd": 2,
         "planRole:safe_probe_run": 10,
         "role:breaker_decoder": 3,
         "role:breaker_fracter": 6,
@@ -3635,7 +3635,6 @@
         "role:tempo": 2
       },
       "warnings": [
-        "inspector:deferred_requires_human_review",
         "inspector:function_signal_descriptor_gap"
       ],
       "runnerProfile": {
@@ -6993,10 +6992,10 @@
       "runner.rig_first": 1
     },
     "warningCounts": {
-      "inspector:deferred_requires_human_review": 3,
+      "inspector:deferred_requires_human_review": 2,
       "inspector:function_signal_descriptor_gap": 1,
       "inspector:legacy_fallback_only": 2
     },
-    "contentSha256": "c8d072e09559f0474a4fa86e3dd2fb39d08903fca79c2109b2f832d942310a03"
+    "contentSha256": "998cd704a1734af5ad509a37c2f27c99e876b4199ed9c4c0d86ee8a2c630627b"
   }
 }

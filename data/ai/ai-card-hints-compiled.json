@@ -1508,13 +1508,6 @@
         "data/scenarios/ai-runner-rig-low-risk-batch-a-smokes.json#rig_setup_breaker_roles",
         "data/scenarios/ai-runner-rig-low-risk-batch-a-smokes.json#negative_visible_stopper"
       ],
-      "quality": {
-        "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      },
       "effects": [
         {
           "kind": "breaker",
@@ -1528,6 +1521,15 @@
           "wall"
         ],
         "pumpCost": 1
+      },
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-16",
+        "reviewedBy": "codex-match-9d15-hint-audit"
       }
     },
     {
@@ -4735,13 +4737,6 @@
       "scenarioRefs": [
         "data/scenarios/ai-runner-rig-low-risk-batch-a-smokes.json#rig_setup_breaker_roles"
       ],
-      "quality": {
-        "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      },
       "effects": [
         {
           "kind": "breaker",
@@ -4759,6 +4754,15 @@
         "sideEffects": [
           "temporary_strength"
         ]
+      },
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-16",
+        "reviewedBy": "codex-match-9d15-hint-audit"
       }
     },
     {
@@ -5610,15 +5614,9 @@
         {
           "amount": 5,
           "kind": "draw",
-          "scope": "runner",
-          "target": "draw",
-          "timing": "action"
-        },
-        {
-          "amount": 5,
-          "kind": "draw",
           "resource": "cards",
           "scope": "runner",
+          "target": "draw",
           "timing": "action"
         }
       ]
@@ -5740,13 +5738,6 @@
           "scope": "rnd",
           "target": "server_specific_rnd",
           "timing": "action"
-        },
-        {
-          "amount": 3,
-          "kind": "multiaccess",
-          "resource": "cards",
-          "scope": "rnd",
-          "timing": "successful_run"
         }
       ],
       "conditions": [
@@ -5997,8 +5988,7 @@
         "run_event"
       ],
       "planRoles": [
-        "pressure_hq",
-        "pressure_rnd"
+        "pressure_hq"
       ],
       "requiredMechanics": [
         "access",
@@ -6036,13 +6026,6 @@
           "scope": "hq",
           "target": "server_specific_hq",
           "timing": "action"
-        },
-        {
-          "amount": 3,
-          "kind": "multiaccess",
-          "resource": "cards",
-          "scope": "hq",
-          "timing": "successful_run"
         }
       ],
       "conditions": [
@@ -6719,16 +6702,11 @@
       },
       "effects": [
         {
-          "kind": "draw",
-          "scope": "runner",
-          "target": "draw",
-          "timing": "action"
-        },
-        {
           "amount": 3,
           "kind": "draw",
           "resource": "cards",
           "scope": "runner",
+          "target": "draw",
           "timing": "action"
         }
       ]
@@ -6848,17 +6826,12 @@
       },
       "effects": [
         {
-          "finite": true,
-          "kind": "economy",
-          "scope": "runner",
-          "target": "burst_credit",
-          "timing": "action"
-        },
-        {
           "amount": 3,
+          "finite": true,
           "kind": "economy",
           "resource": "credits",
           "scope": "runner",
+          "target": "burst_credit",
           "timing": "action"
         }
       ]
@@ -7432,8 +7405,7 @@
         "run_event"
       ],
       "planRoles": [
-        "pressure_hq",
-        "contest_remote"
+        "pressure_hq"
       ],
       "requiredMechanics": [
         "access_card",
@@ -7514,8 +7486,7 @@
         "play_event"
       ],
       "valueHints": {
-        "economy": 5,
-        "runPressure": 2
+        "economy": 5
       },
       "riskTags": [
         "public_play",
@@ -7542,13 +7513,6 @@
           "resource": "credits",
           "scope": "runner",
           "target": "burst_credit",
-          "timing": "action"
-        },
-        {
-          "amount": 9,
-          "kind": "economy",
-          "resource": "credits",
-          "scope": "runner",
           "timing": "action"
         }
       ],
@@ -9743,18 +9707,19 @@
       "cardType": "hardware",
       "roles": [
         "hardware",
-        "rd_multiaccess"
+        "multiaccess",
+        "rnd_pressure"
       ],
       "planRoles": [
         "build_rig",
-        "run_pressure"
+        "pressure_rnd"
       ],
       "requiredMechanics": [
         "install_hardware",
         "rd_additional_access"
       ],
       "valueHints": {
-        "run": 2
+        "runPressure": 3
       },
       "riskTags": [
         "hidden_zone_access_queue",
@@ -28683,6 +28648,13 @@
           "timing": "on_access"
         },
         {
+          "amount": 1,
+          "kind": "damage",
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "action"
+        },
+        {
           "kind": "damage",
           "resource": "damage",
           "scope": "runner",
@@ -39125,6 +39097,7 @@
       ],
       "effects": [
         {
+          "amount": 3,
           "finite": true,
           "kind": "multiaccess",
           "resource": "cards",
@@ -39143,13 +39116,6 @@
           "scope": "runner",
           "target": "noisy_breaker_restriction",
           "timing": "during_run"
-        },
-        {
-          "amount": 4,
-          "kind": "multiaccess",
-          "resource": "cards",
-          "scope": "hq",
-          "timing": "successful_run"
         }
       ],
       "conditions": [
@@ -40316,6 +40282,7 @@
       ],
       "effects": [
         {
+          "amount": 3,
           "finite": true,
           "kind": "multiaccess",
           "resource": "cards",
@@ -40334,13 +40301,6 @@
           "scope": "runner",
           "target": "noisy_breaker_restriction",
           "timing": "during_run"
-        },
-        {
-          "amount": 4,
-          "kind": "multiaccess",
-          "resource": "cards",
-          "scope": "rnd",
-          "timing": "successful_run"
         }
       ],
       "conditions": [
