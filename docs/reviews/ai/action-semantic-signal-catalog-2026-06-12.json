@@ -14001,9 +14001,9 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": true,
-      "signalCount": 2,
+      "signalCount": 1,
       "targetProfileCount": 0,
-      "derivedFunctionSignals": ["remote.asset_economy", "score.advance_burst"],
+      "derivedFunctionSignals": ["score.advance_burst"],
       "activeTacticSignals": [
         "advance.corp_counter_placement",
         "advance.score_window_support"
@@ -14310,12 +14310,9 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": true,
-      "signalCount": 2,
+      "signalCount": 1,
       "targetProfileCount": 0,
-      "derivedFunctionSignals": [
-        "remote.asset_economy",
-        "setup.install_discount"
-      ],
+      "derivedFunctionSignals": ["setup.install_discount"],
       "activeTacticSignals": ["ice.corp_install_discount", "tax.ice"],
       "unknownSignals": [],
       "structuralOnlySignals": [],

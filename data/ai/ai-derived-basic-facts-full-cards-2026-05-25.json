@@ -8306,12 +8306,12 @@
       "title": "Onr Classic 041 Networking",
       "side": "runner",
       "cardType": "event",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/__missing__/onr_classic_041_networking.ts",
-      "implementationFound": false,
+      "implementationPath": "packages/engine/src/card-implementations/classic/runner/events/networking.ts",
+      "implementationFound": true,
       "fullCoverageScope": true,
       "expectedDerivableKinds": [],
       "expectedManualOverlayNeeded": false,
-      "coverageClass": "blocked_missing_implementation",
+      "coverageClass": "legacy_fallback_only",
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate."
     },
     {

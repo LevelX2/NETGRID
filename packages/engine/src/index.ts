@@ -38,6 +38,11 @@ export {
   type TraceBaseLinkCardImplementationQuote,
 } from "./game/trace/base-link";
 
+export {
+  traceSuccessEffectCardImplementationQuotesForDefinition,
+  type TraceSuccessEffectCardImplementationQuote,
+} from "./game/trace/success-effect-quote";
+
 export type {
   ActionType,
   ChoiceRequest,

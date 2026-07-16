@@ -116,8 +116,8 @@ Stand: 2026-07-16
   bleiben offenes Review-Risiko. Führend:
   `docs/reviews/ai/ai-planportfolio-remote-doctrine-final-review-2026-07-12.md`.
 - Aktive AI-Gates: 618 Hints, 602 durch den Action-Signal-Katalog abgedeckt,
-  34 zurückgestellt, 89 Target-Profile-Gaps. Full Derived Facts: 527
-  CardImplementations, 390 generierte Facts und 137 aktuell noch nur über
+  32 zurückgestellt, 89 Target-Profile-Gaps. Full Derived Facts: 528
+  CardImplementations, 391 generierte Facts und 137 aktuell noch nur über
   kompilierte Hints abgedeckte Karten; 0 harte Fehler.
 - Führende Artefakte:
   - `docs/architecture/ai/README.md`

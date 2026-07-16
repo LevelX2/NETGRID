@@ -10,16 +10,16 @@
   },
   "activeHintCount": 618,
   "compiledTargetHintCount": 618,
-  "implementationFoundCount": 527,
-  "generatedFactsCardCount": 390,
+  "implementationFoundCount": 528,
+  "generatedFactsCardCount": 391,
   "manualOverlayCardCount": 6,
   "legacyFallbackOnlyCount": 137,
-  "descriptorOrSchemaGapCount": 286,
+  "descriptorOrSchemaGapCount": 287,
   "manualOverlayRequiredCount": 0,
-  "blockedMissingImplementationCount": 91,
+  "blockedMissingImplementationCount": 90,
   "coverageClassCounts": {
-    "blocked_missing_implementation": 91,
-    "descriptor_or_schema_gap": 286,
+    "blocked_missing_implementation": 90,
+    "descriptor_or_schema_gap": 287,
     "generated_mechanical_clean": 98,
     "generated_plus_overlay": 6,
     "legacy_fallback_only": 137
@@ -55,7 +55,7 @@
     "damage_prevention": 19,
     "delayed_penalty": 2,
     "draw": 17,
-    "economy": 41,
+    "economy": 42,
     "etr": 53,
     "expose_info": 5,
     "extra_action": 7,
@@ -157,7 +157,7 @@
   },
   "hardErrorCount": 0,
   "hardErrors": [],
-  "warningCount": 2314,
+  "warningCount": 2315,
   "warnings": [
     {
       "kind": "monolith_mechanical_duplication_candidate",
@@ -975,14 +975,19 @@
       "message": "Active monolith has effect:tag_prevention that the current deriver does not reproduce."
     },
     {
+      "kind": "descriptor_or_schema_gap",
+      "cardId": "onr_classic_041_networking",
+      "message": "Implementation produced facts, but descriptor/schema comparison still has gaps."
+    },
+    {
       "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_classic_041_networking",
       "message": "Active monolith has condition:requires_runner_action that the current deriver does not reproduce."
     },
     {
-      "kind": "monolith_mechanical_duplication_candidate",
+      "kind": "text_pattern_derivation",
       "cardId": "onr_classic_041_networking",
-      "message": "Active monolith has effect:economy that the current deriver does not reproduce."
+      "message": "Derived facts use read-only text/descriptor pattern scans rather than imported TS descriptors."
     },
     {
       "kind": "monolith_mechanical_duplication_candidate",
@@ -16722,19 +16727,27 @@
     {
       "cardId": "onr_classic_041_networking",
       "title": "Onr Classic 041 Networking",
-      "implementationPath": "packages/engine/src/card-implementations/onr-v1/__missing__/onr_classic_041_networking.ts",
-      "implementationFound": false,
+      "implementationPath": "packages/engine/src/card-implementations/classic/runner/events/networking.ts",
+      "implementationFound": true,
       "expectedDerivableKinds": [],
       "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
-        "effects": [],
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "economy",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "credits",
+            "amount": 9,
+            "source": "implementation.effect.gain_credits"
+          }
+        ],
         "conditions": [],
         "costProfile": {},
         "derivationNotes": [],
-        "needsManualOverlayReasons": [
-          "Implementation file not found."
-        ]
+        "needsManualOverlayReasons": []
       },
       "manualOntologySummary": {
         "hintPresent": true,
@@ -16776,28 +16789,22 @@
         }
       },
       "overlap": {
-        "matches": [],
+        "matches": [
+          "effect:economy"
+        ],
         "generatedOnly": [],
         "manualOnly": [
-          "condition:requires_runner_action",
-          "effect:economy"
+          "condition:requires_runner_action"
         ]
       },
       "missingManualOverlay": [
-        "Implementation file not found.",
-        "condition:requires_runner_action",
-        "effect:economy"
+        "condition:requires_runner_action"
       ],
       "descriptorGaps": [
-        "Implementation file not found.",
         "Manual ontology contains fields not currently derivable."
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "descriptor_or_overlay_gap",
-          "message": "Implementation file not found."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Manual ontology contains fields not currently derivable."
@@ -16807,12 +16814,12 @@
           "message": "Manual condition:requires_runner_action has no generated basic fact match."
         },
         {
-          "kind": "manual_ontology_without_generated_match",
-          "message": "Manual effect:economy has no generated basic fact match."
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
         }
       ],
       "fullCoverageScope": true,
-      "coverageClass": "blocked_missing_implementation"
+      "coverageClass": "descriptor_or_schema_gap"
     },
     {
       "cardId": "onr_classic_042_panzer-run",

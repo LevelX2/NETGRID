@@ -3,6 +3,7 @@ import type { AiDecisionInput, CardDefinitionId } from "@netgrid/shared";
 
 export type LatestTraceContext = {
   sourceDefinitionId?: string;
+  baseTraceStrength?: number;
   traceStrength?: number;
   runnerLink?: number;
   corpBid?: number;
@@ -14,9 +15,10 @@ export type LatestTraceContext = {
 export function latestTraceContext(input: AiDecisionInput): LatestTraceContext {
   const visibleRunnerLink = visibleRunnerLinkAtCorpBid(input);
   for (const event of input.eventTail.slice().reverse()) {
+    const baseTraceStrength = event.publicPayload.baseTraceStrength;
     const traceStrength =
       event.publicPayload.traceStrength ??
-      event.publicPayload.baseTraceStrength;
+      baseTraceStrength;
     const runnerLink = event.publicPayload.runnerLink;
     const corpBid = event.publicPayload.corpBid;
     const runnerBid = event.publicPayload.runnerBid;
@@ -35,6 +37,9 @@ export function latestTraceContext(input: AiDecisionInput): LatestTraceContext {
         ...(typeof sourceDefinitionId === "string" &&
         sourceDefinitionId.length > 0
           ? { sourceDefinitionId }
+          : {}),
+        ...(typeof baseTraceStrength === "number"
+          ? { baseTraceStrength }
           : {}),
         ...(typeof traceStrength === "number" ? { traceStrength } : {}),
         ...(typeof runnerLink === "number"

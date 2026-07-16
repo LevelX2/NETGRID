@@ -1,4 +1,5 @@
 import type { AiDecisionInput, AiDecisionScoreComponent } from "@netgrid/shared";
+import { reconstructBeliefState } from "../belief-state";
 
 export type RunnerRepeatedRunTargetScoreDependencies = {
   recentStartRunsOnServer: (
@@ -20,7 +21,7 @@ export function runnerRepeatedRunTargetScoreComponents(
     serverId === "hq"
       ? Math.min(4200, recentRuns * 2600)
       : serverId === "rd"
-        ? Math.min(4200, recentRuns * 2600)
+        ? runnerRndRepeatRunPenalty(input, recentRuns)
         : dependencies.isRemoteServerTarget(serverId)
           ? Math.min(2400, recentRuns * 1400)
           : 0;
@@ -33,4 +34,25 @@ export function runnerRepeatedRunTargetScoreComponents(
       reason: `${serverId}:${recentRuns}`,
     },
   ];
+}
+
+function runnerRndRepeatRunPenalty(
+  input: AiDecisionInput,
+  recentRuns: number,
+): number {
+  const defaultPenalty = Math.min(4200, recentRuns * 2600);
+  const freshness =
+    reconstructBeliefState(input).runnerOpponentModel?.rndTopFreshness;
+  const topChangedSinceKnownAccess =
+    freshness?.freshness === "fresh_after_top_removed" ||
+    (freshness?.freshness === "invalidated" &&
+      freshness.invalidationReasons.length > 0);
+  if (!topChangedSinceKnownAccess) return defaultPenalty;
+  const agendaPointsToWin = Math.max(
+    1,
+    input.playerView.agendaPointsToWin ?? 7,
+  );
+  const runnerAgendaPoints = Math.max(0, input.playerView.own.agendaPoints);
+  if (runnerAgendaPoints >= Math.max(0, agendaPointsToWin - 2)) return 0;
+  return Math.min(1600, recentRuns * 700);
 }
