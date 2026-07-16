@@ -1,6 +1,6 @@
 # Match 36BA22D6: Runner-Plan-, Bank- und Access-Risk-Remediation
 
-Status: P0 abgeschlossen, P1 aktiv
+Status: P0 bis P2 abgeschlossen, P3 aktiv
 
 ## Quelle und Zielprüfung
 
@@ -151,6 +151,28 @@ integrieren.
   `behavior_regression`; grüne beziehungsweise driftende Fälle sind separat
   klassifiziert; Red-Evidence ist vor Produktionscode committed.
 - Commit: `test(ai): capture match 36ba22d6 regressions`
+
+Ergebnis:
+
+- D01 wurde mit `warmup-policy strict`, ohne Warmup-Drift und mit dem
+  historischen State 0 als spielgleicher Checkpoint capturt. Der unveränderte
+  aktuelle Code scheitert ausschließlich als `behavior_regression` und wählt
+  `mulligan` statt `keep`.
+- Die enge Gegenprobe ersetzt nur den in der Hand liegenden Programmsucher
+  durch eine dritte Druck-/Ökonomiekarte. Sie bleibt auf demselben aktuellen
+  Code grün und wählt weiterhin `mulligan`.
+- Der Strict-Capture aller späteren Zielentscheidungen stoppt bereits im
+  Warmup an D02: historisch wurde `runner.gain_credit`, aktuell
+  `runner.start_run.rd` gewählt. Ein `rebase` würde den historischen
+  Runtime-Zustand kaschieren und wurde deshalb nicht verwendet.
+- F2 bis F5 sind damit aktuell nicht spielgleich reproduzierbar und
+  autorisieren keinen Verhaltensfix. F5 ist zusätzlich in der direkten
+  zustandslosen Gegenprüfung bereits fachlich grün (`bid_0`).
+- F6 besitzt auf dem aktuellen Engine-Stand am historischen Snapshot keine
+  LegalActions mehr und bleibt zusätzlich als `engine_legality_drift`
+  klassifiziert.
+- Dauerhafte Red-Evidence:
+  `docs/reviews/ai/match-36ba22d6-runner-checkpoint-red-evidence-2026-07-17.md`.
 
 ### P3 – Bestätigte generische Verhaltenskorrekturen
 
