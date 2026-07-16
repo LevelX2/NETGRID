@@ -18,7 +18,11 @@ import {
   runnerCreditYieldScoreComponent,
   type RunnerCreditYieldScoreDependencies,
 } from "./runner-credit-yield-score";
-import { runnerDamageThreatRunScoreComponent } from "../runner-damage-threat-assessment";
+import {
+  runnerDamageLockedHandScoreComponents,
+  runnerDamageThreatRunScoreComponent,
+  runnerKnownAccessDamageScoreComponent,
+} from "../runner-damage-threat-assessment";
 import { runnerEncounterBreakScoreComponents } from "./runner-encounter-break-score";
 import {
   runnerFollowupScoreComponents,
@@ -187,6 +191,12 @@ export function runnerScoreComponents(
     action,
   );
   if (damageThreatRunRisk) components.push(damageThreatRunRisk);
+  components.push(...runnerDamageLockedHandScoreComponents(input, action));
+  const knownAccessDamage = runnerKnownAccessDamageScoreComponent(
+    input,
+    action,
+  );
+  if (knownAccessDamage) components.push(knownAccessDamage);
   components.push(
     ...runnerStartRunScoreComponents(input, action, dependencies.startRun),
   );

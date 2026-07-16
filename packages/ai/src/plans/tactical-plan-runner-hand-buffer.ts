@@ -72,6 +72,8 @@ export function runnerHandBufferAssessment(input: AiDecisionInput): {
   damagePressure: boolean;
   damageThreatLevel: ReturnType<typeof runnerDamageThreatAssessment>["level"];
   recommendedHandFloor: number;
+  effectiveMaxHandSize: number;
+  handBufferHeadroom: number;
   planPriority: number;
   reason: string;
   evidence: string[];
@@ -114,6 +116,8 @@ export function runnerHandBufferAssessment(input: AiDecisionInput): {
     damagePressure,
     damageThreatLevel: damageThreat.level,
     recommendedHandFloor: damageThreat.recommendedHandFloor,
+    effectiveMaxHandSize: damageThreat.effectiveMaxHandSize,
+    handBufferHeadroom: damageThreat.handBufferHeadroom,
     planPriority,
     reason,
     evidence: [
@@ -121,6 +125,8 @@ export function runnerHandBufferAssessment(input: AiDecisionInput): {
       `runner_hand_buffer_damage_pressure:${damagePressure}`,
       `runner_hand_buffer_damage_threat:${damageThreat.level}`,
       `runner_hand_buffer_floor:${damageThreat.recommendedHandFloor}`,
+      `runner_hand_buffer_effective_max:${damageThreat.effectiveMaxHandSize}`,
+      `runner_hand_buffer_headroom:${damageThreat.handBufferHeadroom}`,
       `runner_hand_buffer_reason:${reason}`,
       ...damageThreat.evidence,
     ],

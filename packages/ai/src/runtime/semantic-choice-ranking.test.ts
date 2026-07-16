@@ -752,6 +752,80 @@ describe("tacticalPlanMappedChoice", () => {
     expect(result.overrideReason).toBe("mapped_nonpositive_against_positive");
   });
 
+  it("yields a marginal positive memory install to a much stronger draw", () => {
+    const install = legalAction("install-memory", "install_card");
+    const draw = legalAction("draw", "draw_card");
+    const marginalInstall = choice(install, 2, [], {
+      key: "runner_persistent_install_fit",
+      value: 43,
+      reason: "delta:cumulative_capacity|duplicate:none|fit:170",
+    });
+    const drawChoice = choice(draw, 1248);
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [drawChoice, marginalInstall],
+      bestHandCardMapping([install]),
+      drawChoice,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("draw");
+  });
+
+  it("lets confirmed-damage reaction reserve interrupt an opportunistic run", () => {
+    const run = legalAction("run-hq", "start_run", { serverId: "hq" });
+    const gain = legalAction("gain", "gain_credit");
+    const gainChoice = choice(
+      gain,
+      1509,
+      scoreComponentEvidence("runner_damage_locked_hand_reaction_reserve"),
+      {
+        key: "runner_damage_locked_hand_reaction_reserve",
+        value: 650,
+        reason: "level:confirmed|hand:3|effective_max:3|credits:6|clicks:1",
+      },
+    );
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [gainChoice, choice(run, 844)],
+      centralRunMapping([run]),
+      gainChoice,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("gain");
+    expect(result.overrideReason).toBe("damage_reaction_reserve_mapping_yield");
+  });
+
+  it("keeps an immediate visible agenda run over reaction reserve", () => {
+    const run = legalAction("run-hq", "start_run", { serverId: "hq" });
+    const gain = legalAction("gain", "gain_credit");
+    const runChoice = choice(
+      run,
+      844,
+      scoreComponentEvidence("runner_hq_known_agenda"),
+    );
+    const gainChoice = choice(
+      gain,
+      1509,
+      scoreComponentEvidence("runner_damage_locked_hand_reaction_reserve"),
+      {
+        key: "runner_damage_locked_hand_reaction_reserve",
+        value: 650,
+        reason: "level:confirmed|hand:3|effective_max:3|credits:6|clicks:1",
+      },
+    );
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [gainChoice, runChoice],
+      centralRunMapping([run]),
+      gainChoice,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_blocked");
+    expect(result.choice?.action.actionId).toBe("run-hq");
+  });
+
   it("keeps a positive stackable bank install inside its development plan", () => {
     const install = legalAction("install-stackable-bank", "install_card");
     const draw = legalAction("draw", "draw_card");

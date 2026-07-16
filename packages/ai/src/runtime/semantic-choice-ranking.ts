@@ -346,6 +346,13 @@ export function tacticalPlanMappedChoice(
       overrideChoice,
       scoreGap,
     );
+    const damageReactionReserveShouldYield =
+      tacticalPlanDamageReactionReserveShouldYield(
+        mapping,
+        mappedChoice,
+        overrideChoice,
+        scoreGap,
+      );
     const lowValueRecoveryShouldYield =
       tacticalPlanLowValueRecoveryMappingShouldYield(
         mappedChoice,
@@ -393,6 +400,7 @@ export function tacticalPlanMappedChoice(
           repeatedRunShouldYield,
           nonPositiveProjectedRunShouldYield,
           acuteHandBufferShouldYield,
+          damageReactionReserveShouldYield,
           lowValueRecoveryShouldYield,
           inferiorRunTargetShouldYield,
           corpBoardTriageMismatchShouldYield,
@@ -417,6 +425,7 @@ export function tacticalPlanMappedChoice(
       mappedNonPositiveAgainstPositive ||
       repeatedRunShouldYield ||
       acuteHandBufferShouldYield ||
+      damageReactionReserveShouldYield ||
       lowValueRecoveryShouldYield ||
       inferiorRunTargetShouldYield ||
       corpBoardTriageMismatchShouldYield ||
@@ -446,17 +455,19 @@ export function tacticalPlanMappedChoice(
                     ? "repeated_run_mapping_yield"
                     : acuteHandBufferShouldYield
                       ? "acute_hand_buffer_mapping_yield"
-                      : lowValueRecoveryShouldYield
-                        ? "low_value_recovery_mapping_yield"
-                        : inferiorRunTargetShouldYield
-                          ? "inferior_run_target_mapping_yield"
-                          : corpBoardTriageMismatchShouldYield
-                            ? "corp_board_triage_mismatch_yield"
-                            : backgroundBankBuildShouldYield
-                              ? "background_bank_build_mapping_yield"
-                              : hardInterruptShouldYield
-                                ? "runner_hard_interrupt"
-                                : threshold.reason,
+                      : damageReactionReserveShouldYield
+                        ? "damage_reaction_reserve_mapping_yield"
+                        : lowValueRecoveryShouldYield
+                          ? "low_value_recovery_mapping_yield"
+                          : inferiorRunTargetShouldYield
+                            ? "inferior_run_target_mapping_yield"
+                            : corpBoardTriageMismatchShouldYield
+                              ? "corp_board_triage_mismatch_yield"
+                              : backgroundBankBuildShouldYield
+                                ? "background_bank_build_mapping_yield"
+                                : hardInterruptShouldYield
+                                  ? "runner_hard_interrupt"
+                                  : threshold.reason,
         overrideThreshold: threshold.scoreGap,
         scoreGap,
       };
@@ -603,6 +614,7 @@ function tacticalPlanRunnerMappingBlocksOffPlanOverride(
     repeatedRunShouldYield: boolean;
     nonPositiveProjectedRunShouldYield: boolean;
     acuteHandBufferShouldYield: boolean;
+    damageReactionReserveShouldYield: boolean;
     lowValueRecoveryShouldYield: boolean;
     inferiorRunTargetShouldYield: boolean;
     corpBoardTriageMismatchShouldYield: boolean;
@@ -620,6 +632,7 @@ function tacticalPlanRunnerMappingBlocksOffPlanOverride(
   if (exceptions.repeatedRunShouldYield) return false;
   if (exceptions.nonPositiveProjectedRunShouldYield) return false;
   if (exceptions.acuteHandBufferShouldYield) return false;
+  if (exceptions.damageReactionReserveShouldYield) return false;
   if (exceptions.lowValueRecoveryShouldYield) return false;
   if (exceptions.inferiorRunTargetShouldYield) return false;
   if (exceptions.corpBoardTriageMismatchShouldYield) return false;
@@ -926,25 +939,51 @@ function tacticalPlanMarginalDevelopmentInstallShouldYield(
   overrideChoice: SemanticRuntimeChoice,
   scoreGap: number,
 ): boolean {
+  const bankInvestmentOverride = semanticRuntimeChoiceHasScoreComponent(
+    overrideChoice,
+    "runner_bank_investment_commitment",
+  );
+  const basicCapacityOverride =
+    overrideChoice.action.type === "draw_card" ||
+    overrideChoice.action.type === "gain_credit";
   if (
     (mapping.plan.type !== "runner.develop_hand_card" &&
       mapping.plan.type !== "runner.play_best_hand_card") ||
     mapping.step.kind !== "install_development_card" ||
     mappedChoice.action.type !== "install_card" ||
     mappedChoice.score > 100 ||
+    (!bankInvestmentOverride && !basicCapacityOverride) ||
     overrideChoice.score <= 0 ||
-    scoreGap <= PLAN_MAPPED_CHOICE_MAX_SCORE_GAP ||
-    !semanticRuntimeChoiceHasScoreComponent(
-      overrideChoice,
-      "runner_bank_investment_commitment",
-    )
+    scoreGap <= PLAN_MAPPED_CHOICE_MAX_SCORE_GAP
   ) {
     return false;
   }
   return mappedChoice.scoreBreakdown.some(
     (component) =>
       component.key === "runner_persistent_install_fit" &&
-      component.value <= 100,
+      component.value <= 100 &&
+      (bankInvestmentOverride ||
+        (component.reason ?? "").includes("delta:cumulative_capacity")),
+  );
+}
+
+function tacticalPlanDamageReactionReserveShouldYield(
+  mapping: PlanStepMappingResult,
+  mappedChoice: SemanticRuntimeChoice,
+  overrideChoice: SemanticRuntimeChoice,
+  scoreGap: number,
+): boolean {
+  return (
+    mapping.plan.type === "runner.opportunistic_central_run" &&
+    semanticRuntimeChoiceIsProjectedRun(mappedChoice) &&
+    !mappedPlanHasImmediateVisibleRunPayoff(mapping.plan, mappedChoice) &&
+    overrideChoice.action.type === "gain_credit" &&
+    overrideChoice.score > 0 &&
+    scoreGap > 0 &&
+    semanticRuntimeChoiceHasScoreComponent(
+      overrideChoice,
+      "runner_damage_locked_hand_reaction_reserve",
+    )
   );
 }
 

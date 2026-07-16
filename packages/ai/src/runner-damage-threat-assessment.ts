@@ -16,6 +16,8 @@ export type RunnerDamageThreatLevel =
 export type RunnerDamageThreatAssessment = {
   level: RunnerDamageThreatLevel;
   handCount: number;
+  effectiveMaxHandSize: number;
+  handBufferHeadroom: number;
   recentDamageEvents: number;
   historicalDamageEvents: number;
   recentDamageAmount: number;
@@ -48,6 +50,11 @@ export function runnerDamageThreatAssessment(
   input: AiDecisionInput,
 ): RunnerDamageThreatAssessment {
   const handCount = input.playerView.own.gripOrHq.length;
+  const effectiveMaxHandSize = Math.max(
+    0,
+    input.playerView.own.maxHandSize ?? 5,
+  );
+  const handBufferHeadroom = Math.max(0, effectiveMaxHandSize - handCount);
   const history = mergedHistory(input);
   const damageEvents = history.filter(publicEventShowsDamage);
   const latestDamage = damageEvents[damageEvents.length - 1];
@@ -83,7 +90,8 @@ export function runnerDamageThreatAssessment(
   const staleDamage =
     recentDamageStateDistance !== undefined &&
     recentDamageStateDistance > STALE_DAMAGE_STATE_DISTANCE &&
-    knownDamageSourceCount === 0 && visiblePunishSignalScore === 0;
+    knownDamageSourceCount === 0 &&
+    visiblePunishSignalScore === 0;
   const hasDamageEvidence =
     historicalDamageEvents > 0 ||
     knownDamageSourceCount > 0 ||
@@ -107,6 +115,8 @@ export function runnerDamageThreatAssessment(
   return {
     level,
     handCount,
+    effectiveMaxHandSize,
+    handBufferHeadroom,
     recentDamageEvents,
     historicalDamageEvents,
     recentDamageAmount,
@@ -124,6 +134,8 @@ export function runnerDamageThreatAssessment(
     evidence: [
       `runner_damage_threat_level:${level}`,
       `runner_damage_threat_hand:${handCount}`,
+      `runner_damage_effective_max_hand:${effectiveMaxHandSize}`,
+      `runner_damage_hand_buffer_headroom:${handBufferHeadroom}`,
       `runner_damage_threat_floor:${recommendedHandFloor}`,
       `runner_damage_recent_events:${recentDamageEvents}`,
       `runner_damage_historical_events:${historicalDamageEvents}`,
@@ -142,6 +154,149 @@ export function runnerDamageThreatAssessment(
         : []),
     ],
   };
+}
+
+export function runnerKnownAccessDamageScoreComponent(
+  input: AiDecisionInput,
+  action: LegalAction,
+): AiDecisionScoreComponent | undefined {
+  if (
+    input.side !== "runner" ||
+    action.side !== "runner" ||
+    action.type !== "continue_run" ||
+    input.playerView.timingPoint !== "run.jack_out_window"
+  ) {
+    return undefined;
+  }
+  const run = input.playerView.run;
+  if (!run?.position || run.position.kind !== "server") return undefined;
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === run.attackedServerId,
+  );
+  if (
+    !server?.id.startsWith("remote_") ||
+    server.root.length !== 1 ||
+    server.root[0]?.known === false ||
+    server.root[0]?.rezzed !== true
+  ) {
+    return undefined;
+  }
+  const root = server.root[0];
+  const hint = root.definitionId ? AI_HINTS.get(root.definitionId) : undefined;
+  const accessDamage = hint?.effects?.some(
+    (effect) => effect.kind === "damage" && effect.timing === "on_access",
+  );
+  const accessAmbush =
+    hint?.remoteRole?.kind === "ambush" ||
+    hint?.effects?.some(
+      (effect) => effect.kind === "ambush" && effect.timing === "on_access",
+    );
+  if (!accessDamage || !accessAmbush) return undefined;
+  const requiresAdvancementCounter = hint?.conditions?.some(
+    (condition) => condition.kind === "requires_advancement_counter",
+  );
+  const advancementCounters = Math.max(0, root.advancementCounters ?? 0);
+  if (requiresAdvancementCounter && advancementCounters <= 0) return undefined;
+  const damageRisk = requiresAdvancementCounter
+    ? advancementCounters
+    : Math.max(1, hint?.valueHints?.damage ?? 1);
+  return {
+    key: "runner_known_access_damage_ambush",
+    label: "Bekannter Access-Damage-Ambush",
+    value: -2200 - damageRisk * 200,
+    reason: [
+      `server:${server.id}`,
+      `source:${root.definitionId ?? root.instanceId}`,
+      `advancement_counters:${advancementCounters}`,
+      `damage_risk:${damageRisk}`,
+      "sole_known_root:true",
+    ].join("|"),
+  };
+}
+
+export function runnerDamageLockedHandScoreComponents(
+  input: AiDecisionInput,
+  action: LegalAction,
+): AiDecisionScoreComponent[] {
+  if (input.side !== "runner" || action.side !== "runner") return [];
+  const assessment = runnerDamageThreatAssessment(input);
+  const lockedAtThreatFloor =
+    (assessment.level === "confirmed" || assessment.level === "critical") &&
+    assessment.effectiveMaxHandSize <= assessment.recommendedHandFloor &&
+    assessment.handCount >= assessment.effectiveMaxHandSize &&
+    assessment.handBufferHeadroom === 0 &&
+    input.playerView.own.clicks <= 1;
+  if (!lockedAtThreatFloor) return [];
+  const reason = [
+    `level:${assessment.level}`,
+    `hand:${assessment.handCount}`,
+    `effective_max:${assessment.effectiveMaxHandSize}`,
+    `floor:${assessment.recommendedHandFloor}`,
+    `headroom:${assessment.handBufferHeadroom}`,
+    `credits:${input.playerView.own.credits}`,
+    `clicks:${input.playerView.own.clicks}`,
+  ].join("|");
+
+  if (
+    action.type === "gain_credit" &&
+    action.source === "basic_action" &&
+    input.playerView.own.credits < 10
+  ) {
+    return [
+      {
+        key: "runner_damage_locked_hand_reaction_reserve",
+        label: "Reaktionsreserve bei gesperrtem Damage-Handpuffer",
+        value: input.playerView.own.credits < 8 ? 650 : 350,
+        reason,
+      },
+    ];
+  }
+  if (action.type === "draw_card" && input.playerView.own.credits < 8) {
+    return [
+      {
+        key: "runner_damage_locked_hand_last_click_draw",
+        label: "Letzter Draw ohne dauerhaften Handpuffer",
+        value: -450,
+        reason,
+      },
+    ];
+  }
+  if (action.type !== "install_card") return [];
+  const sourceId = action.source ?? String(action.payload?.cardId ?? "");
+  const source = input.playerView.own.gripOrHq.find(
+    (card) => card.instanceId === sourceId,
+  );
+  if (!source || runnerLockedHandInstallIsImmediateDefense(source)) return [];
+  return [
+    {
+      key: "runner_damage_locked_hand_install_spend",
+      label: "Installation verbraucht gesperrten Damage-Handpuffer",
+      value: -1000,
+      reason: `${reason}|source:${source.definitionId ?? source.instanceId}`,
+    },
+  ];
+}
+
+function runnerLockedHandInstallIsImmediateDefense(card: VisibleCard): boolean {
+  const hint = card.definitionId ? AI_HINTS.get(card.definitionId) : undefined;
+  if (!hint) return false;
+  if (hint.breakerProfile) return true;
+  if (
+    hint.roles.some((role) =>
+      ["damage_prevention", "icebreaker", "tag_avoid"].includes(role),
+    )
+  ) {
+    return true;
+  }
+  return (hint.effects ?? []).some((effect) => {
+    const kind = String(effect.kind);
+    return (
+      kind === "remove_brain_damage" ||
+      kind === "tag_prevention" ||
+      kind === "hand_size_modifier" ||
+      kind.includes("damage_prevention")
+    );
+  });
 }
 
 export function runnerDamageThreatRunScoreComponent(
@@ -196,7 +351,8 @@ function runnerDamageThreatLevel(params: {
   if (
     params.handCount <= 0 ||
     (params.handCount <= 1 &&
-      (params.hasRecentDamageEvidence || params.visiblePunishSignalScore >= 3)) ||
+      (params.hasRecentDamageEvidence ||
+        params.visiblePunishSignalScore >= 3)) ||
     (params.runnerTagged && params.knownDamageSourceCount > 0)
   ) {
     return "critical";
@@ -301,7 +457,9 @@ function visibleOpponentPunishSignals(
   for (const definitionId of definitionIds) {
     const hint = AI_HINTS.get(definitionId);
     if (hint?.side !== "corp") continue;
-    const effectKinds = new Set((hint.effects ?? []).map((effect) => effect.kind));
+    const effectKinds = new Set(
+      (hint.effects ?? []).map((effect) => effect.kind),
+    );
     const directDamage = effectKinds.has("damage");
     const traceTag =
       (effectKinds.has("trace") ||
@@ -329,7 +487,9 @@ function visibleOpponentPunishSignals(
 
   const unprofiledVisibleDamageSources = visibleCards.filter((card) => {
     if (!visibleCardShowsDamageSource(card)) return false;
-    const hint = card.definitionId ? AI_HINTS.get(card.definitionId) : undefined;
+    const hint = card.definitionId
+      ? AI_HINTS.get(card.definitionId)
+      : undefined;
     return !hint?.effects?.some((effect) => effect.kind === "damage");
   }).length;
   if (unprofiledVisibleDamageSources > 0) {

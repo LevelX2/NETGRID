@@ -1,11 +1,16 @@
 import { describe, expect, it } from "vitest";
 import type {
   AiDecisionInput,
+  LegalAction,
   PublicGameEvent,
   VisibleCard,
 } from "@netgrid/shared";
 
-import { runnerDamageThreatAssessment } from "./runner-damage-threat-assessment";
+import {
+  runnerDamageLockedHandScoreComponents,
+  runnerDamageThreatAssessment,
+  runnerKnownAccessDamageScoreComponent,
+} from "./runner-damage-threat-assessment";
 
 describe("runnerDamageThreatAssessment", () => {
   it("raises a warning from a previously revealed trace-tag operation", () => {
@@ -189,6 +194,137 @@ describe("runnerDamageThreatAssessment", () => {
       ]),
     );
   });
+
+  it("penalizes continuing into the sole known advanced access-damage ambush", () => {
+    const continueRun: LegalAction = {
+      actionId: "continue-run",
+      side: "runner",
+      type: "continue_run",
+      label: "Continue",
+      source: "game_rule",
+      timingPoint: "run.jack_out_window",
+      costs: [],
+      targetRequirements: [],
+      visibility: "private_to_actor",
+      expiresAtStateVersion: 25,
+    };
+    const current = input({
+      handCount: 4,
+      stateVersion: 25,
+      servers: [
+        {
+          id: "remote_1",
+          ice: [],
+          root: [
+            card({
+              definitionId: "onr_v1_346_vacant-soulkiller",
+              type: "asset",
+              rezzed: true,
+              advancementCounters: 2,
+            }),
+          ],
+        },
+      ],
+    });
+    current.playerView.timingPoint = "run.jack_out_window";
+    current.playerView.run = {
+      attackedServerId: "remote_1",
+      phase: "movement",
+      position: { kind: "server", serverId: "remote_1" },
+      successful: false,
+    };
+
+    expect(runnerKnownAccessDamageScoreComponent(current, continueRun)).toEqual(
+      expect.objectContaining({
+        key: "runner_known_access_damage_ambush",
+        value: -2600,
+      }),
+    );
+  });
+
+  it("prefers liquid reaction reserve when core damage locks the last-click hand buffer", () => {
+    const current = input({
+      handCount: 3,
+      maxHandSize: 3,
+      credits: 6,
+      clicks: 1,
+      stateVersion: 39,
+      events: [
+        event("recent-core-damage", 37, {
+          actionType: "core_damage",
+          damageType: "core",
+          damageAmount: 2,
+        }),
+      ],
+    });
+    const gain = action("gain", "gain_credit", "basic_action");
+    const draw = action("draw", "draw_card", "basic_action");
+    const install = action(
+      "install",
+      "install_card",
+      current.playerView.own.gripOrHq[0]!.instanceId,
+    );
+
+    expect(runnerDamageThreatAssessment(current)).toMatchObject({
+      level: "confirmed",
+      effectiveMaxHandSize: 3,
+      handBufferHeadroom: 0,
+    });
+    expect(runnerDamageLockedHandScoreComponents(current, gain)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "runner_damage_locked_hand_reaction_reserve",
+          value: 650,
+        }),
+      ]),
+    );
+    expect(runnerDamageLockedHandScoreComponents(current, draw)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "runner_damage_locked_hand_last_click_draw",
+          value: -450,
+        }),
+      ]),
+    );
+    expect(runnerDamageLockedHandScoreComponents(current, install)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "runner_damage_locked_hand_install_spend",
+          value: -1000,
+        }),
+      ]),
+    );
+  });
+
+  it("does not suppress an immediate breaker installation at the same locked hand floor", () => {
+    const current = input({
+      handCount: 3,
+      maxHandSize: 3,
+      credits: 6,
+      clicks: 1,
+      stateVersion: 39,
+      events: [
+        event("recent-core-damage", 37, {
+          actionType: "core_damage",
+          damageType: "core",
+          damageAmount: 2,
+        }),
+      ],
+    });
+    current.playerView.own.gripOrHq[0] = card({
+      definitionId: "onr_v1_039_krash",
+      type: "program",
+    });
+    const installKrash = action(
+      "install-krash",
+      "install_card",
+      current.playerView.own.gripOrHq[0].instanceId,
+    );
+
+    expect(
+      runnerDamageLockedHandScoreComponents(current, installKrash),
+    ).toEqual([]);
+  });
 });
 
 function input(params: {
@@ -196,6 +332,9 @@ function input(params: {
   stateVersion: number;
   events?: readonly PublicGameEvent[];
   opponentHandCount?: number;
+  maxHandSize?: number;
+  credits?: number;
+  clicks?: number;
   servers?: Array<{
     id: string;
     ice: VisibleCard[];
@@ -213,7 +352,9 @@ function input(params: {
         heapOrArchives: [],
         rig: [],
         scoreArea: [],
-        credits: 0,
+        credits: params.credits ?? 0,
+        clicks: params.clicks ?? 4,
+        maxHandSize: params.maxHandSize ?? 5,
       },
       opponent: {
         identity: card({ definitionId: "corp-identity", type: "identity" }),
@@ -236,6 +377,7 @@ function card(params: {
   definitionId: string;
   type: NonNullable<VisibleCard["type"]>;
   rezzed?: boolean;
+  advancementCounters?: number;
 }): VisibleCard {
   return {
     instanceId: `${params.definitionId}-instance`,
@@ -246,7 +388,29 @@ function card(params: {
     type: params.type,
     known: true,
     ...(params.rezzed !== undefined ? { rezzed: params.rezzed } : {}),
+    ...(params.advancementCounters !== undefined
+      ? { advancementCounters: params.advancementCounters }
+      : {}),
   } as VisibleCard;
+}
+
+function action(
+  actionId: string,
+  type: LegalAction["type"],
+  source: string,
+): LegalAction {
+  return {
+    actionId,
+    side: "runner",
+    type,
+    label: actionId,
+    source,
+    timingPoint: "runner_action.main",
+    costs: [],
+    targetRequirements: [],
+    visibility: "public",
+    expiresAtStateVersion: 39,
+  };
 }
 
 function event(

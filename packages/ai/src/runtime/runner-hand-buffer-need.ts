@@ -48,6 +48,8 @@ export function runnerHandBufferNeedScoreComponent(
       `damage_pressure:${damagePressure}`,
       `damage_threat:${damageThreat.level}`,
       `damage_floor:${damageThreat.recommendedHandFloor}`,
+      `effective_max_hand:${damageThreat.effectiveMaxHandSize}`,
+      `hand_buffer_headroom:${damageThreat.handBufferHeadroom}`,
       `base:${baseValue}`,
       `damage_boost:${damageBoost}`,
     ].join("|"),
