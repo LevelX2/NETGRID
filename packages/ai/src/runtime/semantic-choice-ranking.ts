@@ -139,12 +139,20 @@ export function tacticalPlanMappedChoice(
       overrideChoice,
       scoreGap,
     );
+    const lowValueRunEventShouldYield =
+      tacticalPlanLowValueRunEventMappingShouldYield(
+        mapping,
+        mappedChoice,
+        overrideChoice,
+        scoreGap,
+      );
     if (
       tacticalPlanFundedDevelopmentContinuationBlocksOverride(
         mapping,
         mappedChoice,
         overrideChoice,
-      )
+      ) &&
+      !lowValueRunEventShouldYield
     ) {
       return tacticalPlanBlockedOverrideResult({
         mappedChoice,
@@ -382,6 +390,7 @@ export function tacticalPlanMappedChoice(
           backgroundBankBuildShouldYield,
           noNeedSearchShouldYield,
           coverageProbeRunShouldYield,
+          lowValueRunEventShouldYield,
         },
       )
     ) {
@@ -404,6 +413,7 @@ export function tacticalPlanMappedChoice(
       hardInterruptShouldYield ||
       noNeedSearchShouldYield ||
       coverageProbeRunShouldYield ||
+      lowValueRunEventShouldYield ||
       scoreGap > threshold.scoreGap
     ) {
       const result = {
@@ -414,23 +424,25 @@ export function tacticalPlanMappedChoice(
           ? "no_need_search_mapping_yield"
           : coverageProbeRunShouldYield
             ? "coverage_probe_run_mapping_yield"
-            : mappedNonPositiveAgainstPositive
-              ? "mapped_nonpositive_against_positive"
-              : repeatedRunShouldYield
-                ? "repeated_run_mapping_yield"
-                : acuteHandBufferShouldYield
-                  ? "acute_hand_buffer_mapping_yield"
-                  : lowValueRecoveryShouldYield
-                    ? "low_value_recovery_mapping_yield"
-                    : inferiorRunTargetShouldYield
-                      ? "inferior_run_target_mapping_yield"
-                      : corpBoardTriageMismatchShouldYield
-                        ? "corp_board_triage_mismatch_yield"
-                        : backgroundBankBuildShouldYield
-                          ? "background_bank_build_mapping_yield"
-                          : hardInterruptShouldYield
-                            ? "runner_hard_interrupt"
-                            : threshold.reason,
+            : lowValueRunEventShouldYield
+              ? "low_value_run_event_mapping_yield"
+              : mappedNonPositiveAgainstPositive
+                ? "mapped_nonpositive_against_positive"
+                : repeatedRunShouldYield
+                  ? "repeated_run_mapping_yield"
+                  : acuteHandBufferShouldYield
+                    ? "acute_hand_buffer_mapping_yield"
+                    : lowValueRecoveryShouldYield
+                      ? "low_value_recovery_mapping_yield"
+                      : inferiorRunTargetShouldYield
+                        ? "inferior_run_target_mapping_yield"
+                        : corpBoardTriageMismatchShouldYield
+                          ? "corp_board_triage_mismatch_yield"
+                          : backgroundBankBuildShouldYield
+                            ? "background_bank_build_mapping_yield"
+                            : hardInterruptShouldYield
+                              ? "runner_hard_interrupt"
+                              : threshold.reason,
         overrideThreshold: threshold.scoreGap,
         scoreGap,
       };
@@ -584,6 +596,7 @@ function tacticalPlanRunnerMappingBlocksOffPlanOverride(
     backgroundBankBuildShouldYield: boolean;
     noNeedSearchShouldYield: boolean;
     coverageProbeRunShouldYield: boolean;
+    lowValueRunEventShouldYield: boolean;
   },
 ): boolean {
   if (mapping.plan.side !== "runner") return false;
@@ -599,10 +612,31 @@ function tacticalPlanRunnerMappingBlocksOffPlanOverride(
   if (exceptions.backgroundBankBuildShouldYield) return false;
   if (exceptions.noNeedSearchShouldYield) return false;
   if (exceptions.coverageProbeRunShouldYield) return false;
+  if (exceptions.lowValueRunEventShouldYield) return false;
   return !runnerPlanOverrideIsHardInterrupt(
     mapping.plan,
     mappedChoice,
     overrideChoice,
+  );
+}
+
+function tacticalPlanLowValueRunEventMappingShouldYield(
+  mapping: PlanStepMappingResult,
+  mappedChoice: SemanticRuntimeChoice,
+  overrideChoice: SemanticRuntimeChoice,
+  scoreGap: number,
+): boolean {
+  return (
+    (mapping.plan.type === "runner.develop_hand_card" ||
+      mapping.plan.type === "runner.play_best_hand_card") &&
+    mappedChoice.action.type === "play_event" &&
+    overrideChoice.score > 0 &&
+    scoreGap > 0 &&
+    mappedChoice.scoreBreakdown.some(
+      (component) =>
+        component.key === "runner_run_target_semantic_guidance" &&
+        component.value < 0,
+    )
   );
 }
 

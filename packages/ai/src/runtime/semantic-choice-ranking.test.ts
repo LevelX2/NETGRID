@@ -1275,6 +1275,33 @@ describe("tacticalPlanMappedChoice", () => {
     expect(result.choice?.action.actionId).toBe("gain");
   });
 
+  it("does not let a best-hand plan force a positive but low-value run event", () => {
+    const insideJob = legalAction("inside-job-hq", "play_event", {
+      serverId: "hq",
+      runnerEventRun: true,
+    });
+    const draw = legalAction("draw", "draw_card");
+    const mapped = choice(insideJob, 150, [], {
+      key: "runner_run_target_semantic_guidance",
+      value: -42,
+      reason:
+        "target:hq|recommendation:gain_credits_first|payoff:unknown|path:reachable",
+    });
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [choice(draw, 898), mapped],
+      planMapping("runner.play_best_hand_card", [insideJob], {
+        stepKind: "install_development_card",
+        evidence: ["previous_plan:runner.play_best_hand_card:inside-job"],
+      }),
+      choice(draw, 898),
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("draw");
+    expect(result.overrideReason).toBe("low_value_run_event_mapping_yield");
+  });
+
   it("keeps score-threat remote contest funding over off-plan Archives runs", () => {
     const gain = legalAction("gain", "gain_credit");
     const archives = legalAction("run-archives", "start_run", {
