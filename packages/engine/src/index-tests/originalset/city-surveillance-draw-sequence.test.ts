@@ -10,6 +10,7 @@ import {
 import {
   apply,
   applyChoice,
+  installRunnerResourceForTest,
   moveRunnerCardToGrip,
   ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
   ONR_V1_RUNNER_DECK,
@@ -23,6 +24,7 @@ const CITY_SURVEILLANCE_ID = "onr_v1_313_city-surveillance";
 const JACK_N_JOE_ID = "onr_v1_095_jack-n-joe";
 const BODYWEIGHT_ID = "onr_v1_079_bodyweight-synthetic-blood";
 const CRASH_EVERETT_ID = "onr_v1_157_crash-everett-inventive-fixer";
+const FALL_GUY_ID = "onr_v1_161_fall-guy";
 
 describe("City Surveillance per-draw decisions", () => {
   it("lets Jack 'n' Joe resolve three independent pay-or-tag decisions", () => {
@@ -115,6 +117,56 @@ describe("City Surveillance per-draw decisions", () => {
     expect(state.runner.credits).toBe(1);
     expect(state.runner.tags).toBe(1);
     expect(state.pendingChoice).toBeUndefined();
+  });
+
+  it("suspends the draw sequence for tag avoidance and resumes once after avoid or pass", () => {
+    let state = cityGameWithFallGuy("city-surveillance-tag-continuation");
+    const fallGuyId = installRunnerResourceForTest(state, FALL_GUY_ID);
+    const cityId = putCorpRootInRemote(state, CITY_SURVEILLANCE_ID);
+    rezForTest(state, cityId);
+    state.runner.credits = 0;
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const stackBefore = state.runner.stack.length;
+
+    state = apply(state, "runner", (action) => action.type === "draw_card");
+    expect(state.runner.stack).toHaveLength(stackBefore - 1);
+    state = applyChoice(state, "runner", "take_tag");
+
+    expect(state.runner.tags).toBe(0);
+    expect(state.pendingChoice).toMatchObject({
+      side: "runner",
+      source: expect.stringContaining("event_modification"),
+    });
+    expect(state.pendingAddTagContinuation).toMatchObject({
+      kind: "runner_draw_tax",
+      sourceCardId: cityId,
+    });
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
+      "pendingAddTagContinuation",
+    );
+
+    const passState = applyChoice(structuredClone(state), "runner", "pass");
+    expect(passState.runner.tags).toBe(1);
+    expect(passState.runner.rig.resources).toContain(fallGuyId);
+    expect(passState.runnerDrawSequence).toBeUndefined();
+    expect(passState.pendingAddTagContinuation).toBeUndefined();
+
+    const fallGuyOption = state.pendingChoice?.options.find((option) =>
+      option.id.includes(String(fallGuyId)),
+    )?.id;
+    const avoidState = applyChoice(state, "runner", String(fallGuyOption));
+    expect(avoidState.runner.tags).toBe(0);
+    expect(avoidState.runner.heap).toContain(fallGuyId);
+    expect(avoidState.runnerDrawSequence).toBeUndefined();
+    expect(avoidState.pendingAddTagContinuation).toBeUndefined();
+
+    for (const branch of [passState, avoidState]) {
+      const replay = replayEvents(initial, branch.eventLog.slice(replayStart));
+      expect(replay.ok).toBe(true);
+      expect(hashState(replay.state)).toBe(hashState(branch));
+    }
   });
 
   it("pauses a five-card Bodyweight draw once per card", () => {
@@ -458,6 +510,25 @@ function cityGameWithCrash(seed: string): GameState {
         cards: [
           ...ONR_V1_RUNNER_DECK.cards,
           { id: CRASH_EVERETT_ID, quantity: 1 },
+        ],
+      },
+      corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+      agendaPointsToWin: 7,
+    }),
+  );
+}
+
+function cityGameWithFallGuy(seed: string): GameState {
+  return toRunnerTurn(
+    createGameAfterSetup({
+      seed,
+      runnerDeck: {
+        ...ONR_V1_RUNNER_DECK,
+        id: `${ONR_V1_RUNNER_DECK.id}_fall_guy`,
+        name: `${ONR_V1_RUNNER_DECK.name} + Fall Guy`,
+        cards: [
+          ...ONR_V1_RUNNER_DECK.cards,
+          { id: FALL_GUY_ID, quantity: 1 },
         ],
       },
       corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,

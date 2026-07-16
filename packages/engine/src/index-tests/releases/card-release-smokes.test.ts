@@ -734,6 +734,11 @@ describe("V1.0.5K Card Release", () => {
         action.payload?.cardId === assetId &&
         action.payload?.serverId === "new_remote",
     );
+    state.cardInstances[assetId] = {
+      ...state.cardInstances[assetId]!,
+      advancementCounters: 2,
+      counters: { power: 1 },
+    };
     const installAgenda = mustAction(
       state,
       "corp",
@@ -769,6 +774,8 @@ describe("V1.0.5K Card Release", () => {
       side: "corp",
       zone: "archives",
     });
+    expect(state.cardInstances[assetId]?.advancementCounters).toBe(0);
+    expect(state.cardInstances[assetId]?.counters).toBeUndefined();
     expect(state.cardInstances[agendaId]?.zone).toEqual({
       side: "corp",
       zone: "serverRoot",
@@ -1442,7 +1449,14 @@ describe("V1.1.2K Card Release", () => {
   it("plays V1.1.2K Corp operations and resolves new ICE through visibility-safe replayable paths", () => {
     let operationState = createGameAfterSetup({
       seed: "v112k-corp-operations",
-      runnerDeck: ONR_V1_1_2K_RUNNER_DECK,
+      runnerDeck: {
+        ...ONR_V1_1_2K_RUNNER_DECK,
+        id: "v112k_corp_operations_fall_guy_runner",
+        cards: [
+          { id: "onr_v1_161_fall-guy", quantity: 1 },
+          ...ONR_V1_1_2K_RUNNER_DECK.cards,
+        ],
+      },
       corpDeck: ONR_V1_1_2K_CORP_DECK,
       agendaPointsToWin: 7,
     });
@@ -1456,9 +1470,15 @@ describe("V1.1.2K Card Release", () => {
     operationState.runner.tags = 1;
     moveCorpCardToHq(operationState, "onr_v1_293_netwatch-credit-voucher");
     moveCorpCardToHq(operationState, "onr_v1_295_night-shift");
+    const fallGuyId = installRunnerResourceForTest(
+      operationState,
+      "onr_v1_161_fall-guy",
+    );
 
     const beforeVoucherTags = operationState.runner.tags;
     const beforeVoucherCredits = operationState.corp.credits;
+    const beforeVoucher = structuredClone(operationState);
+    const voucherReplayStart = operationState.eventLog.length;
     operationState = apply(
       operationState,
       "corp",
@@ -1467,8 +1487,55 @@ describe("V1.1.2K Card Release", () => {
         sourceDefinition(operationState, action) ===
           "onr_v1_293_netwatch-credit-voucher",
     );
-    expect(operationState.runner.tags).toBe(beforeVoucherTags + 1);
+    expect(operationState.runner.tags).toBe(beforeVoucherTags);
+    expect(operationState.corp.credits).toBe(beforeVoucherCredits);
+    expect(operationState.pendingChoice?.source).toContain("event_modification");
+
+    const voucherPassState = applyChoice(
+      structuredClone(operationState),
+      "runner",
+      "pass",
+    );
+    expect(voucherPassState.runner.tags).toBe(beforeVoucherTags + 1);
+    expect(voucherPassState.corp.credits).toBe(beforeVoucherCredits + 1);
+    expect(voucherPassState.runner.rig.resources).toContain(fallGuyId);
+    expect(voucherPassState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      tagsAdded: 1,
+      gainedCredits: 1,
+      resolvedEffects: [
+        expect.objectContaining({ kind: "add_tags", amount: 1 }),
+        expect.objectContaining({ kind: "gain_credits", amount: 1 }),
+      ],
+    });
+
+    const fallGuyOption = operationState.pendingChoice?.options.find((option) =>
+      option.id.includes(String(fallGuyId)),
+    )?.id;
+    expect(fallGuyOption).toBeDefined();
+    operationState = applyChoice(
+      operationState,
+      "runner",
+      String(fallGuyOption),
+    );
+    expect(operationState.runner.tags).toBe(beforeVoucherTags);
     expect(operationState.corp.credits).toBe(beforeVoucherCredits + 1);
+    expect(operationState.runner.heap).toContain(fallGuyId);
+    expect(operationState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      tagsAdded: 0,
+      gainedCredits: 1,
+      resolvedEffects: [
+        expect.objectContaining({ kind: "add_tags", amount: 0 }),
+        expect.objectContaining({ kind: "gain_credits", amount: 1 }),
+      ],
+    });
+    for (const branch of [voucherPassState, operationState]) {
+      const replay = replayEvents(
+        beforeVoucher,
+        branch.eventLog.slice(voucherReplayStart),
+      );
+      expect(replay.ok).toBe(true);
+      expect(hashState(replay.state)).toBe(hashState(branch));
+    }
 
     const beforeNightShiftCards = operationState.corp.hq.length;
     const beforeNightShiftCredits = operationState.corp.credits;
@@ -3331,7 +3398,14 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     let omni = apply(
       createGameAfterSetup({
         seed: "p351-omniscience-extra-tag",
-        runnerDeck: MECHANIC_SMOKE_DECKS.assetNodeEffects.runner,
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.assetNodeEffects.runner,
+          id: "p351_omni_fall_guy_runner",
+          cards: [
+            { id: "onr_v1_161_fall-guy", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.assetNodeEffects.runner.cards,
+          ],
+        },
         corpDeck: {
           ...MECHANIC_SMOKE_DECKS.assetNodeEffects.corp,
           id: "p351_omni_corp",
@@ -3385,11 +3459,46 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         sourceDefinition(omni, action) === "onr_v1_306_trojan-horse",
     );
     expect(omni.runner.tags).toBe(1);
+    const omniFallGuyId = installRunnerResourceForTest(
+      omni,
+      "onr_v1_161_fall-guy",
+    );
+    const omniInitial = structuredClone(omni);
+    const omniReplayStart = omni.eventLog.length;
     omni = apply(omni, "corp", (action) => action.type === "end_turn");
-    expect(omni.runner.tags).toBe(2);
-    expect(omni.eventLog.at(-1)?.publicPayload).toMatchObject({
+    expect(omni.runner.tags).toBe(1);
+    expect(omni.pendingAddTagContinuation).toMatchObject({
+      kind: "end_turn_tag",
+      side: "corp",
+    });
+
+    const omniPassState = applyChoice(structuredClone(omni), "runner", "pass");
+    expect(omniPassState.runner.tags).toBe(2);
+    expect(omniPassState.runner.rig.resources).toContain(omniFallGuyId);
+    expect(omniPassState.eventLog.at(-1)?.publicPayload).toMatchObject({
       runnerTagsAfter: 2,
     });
+
+    const omniFallGuyOption = omni.pendingChoice?.options.find((option) =>
+      option.id.includes(String(omniFallGuyId)),
+    )?.id;
+    const omniAvoidState = applyChoice(
+      omni,
+      "runner",
+      String(omniFallGuyOption),
+    );
+    expect(omniAvoidState.runner.tags).toBe(1);
+    expect(omniAvoidState.runner.heap).toContain(omniFallGuyId);
+    expect(omniAvoidState.pendingAddTagContinuation).toBeUndefined();
+
+    for (const branch of [omniPassState, omniAvoidState]) {
+      const replay = replayEvents(
+        omniInitial,
+        branch.eventLog.slice(omniReplayStart),
+      );
+      expect(replay.ok).toBe(true);
+      expect(hashState(replay.state)).toBe(hashState(branch));
+    }
 
     let disinfectant = toRunnerTurn(
       createGameAfterSetup({
@@ -3956,6 +4065,8 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     const trojanId = moveCorpCardToHq(fallGuyState, "onr_v1_306_trojan-horse");
     keepOnlyCorpHqCard(fallGuyState, trojanId);
     fallGuyState.corp.credits = 8;
+    const fallGuyBefore = structuredClone(fallGuyState);
+    const fallGuyReplayStart = fallGuyState.eventLog.length;
     fallGuyState = apply(
       fallGuyState,
       "corp",
@@ -3970,12 +4081,32 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     )?.id;
     expect(fallGuyOption).toBeDefined();
     if (!fallGuyOption) throw new Error("Missing Fall Guy tag-avoid option");
+    const fallGuyPassState = applyChoice(
+      structuredClone(fallGuyState),
+      "runner",
+      "pass",
+    );
+    expect(fallGuyPassState.runner.tags).toBe(1);
+    expect(fallGuyPassState.runner.rig.resources).toContain(fallGuyId);
+    const passReplay = replayEvents(
+      fallGuyBefore,
+      fallGuyPassState.eventLog.slice(fallGuyReplayStart),
+    );
+    expect(passReplay.ok).toBe(true);
+    expect(hashState(passReplay.state)).toBe(hashState(fallGuyPassState));
+
     fallGuyState = applyChoice(fallGuyState, "runner", fallGuyOption);
     expect(fallGuyState.runner.tags).toBe(0);
     expect(fallGuyState.runner.heap).toContain(fallGuyId);
     expect(fallGuyState.eventLog.at(-1)?.publicPayload).toMatchObject({
       sourceDefinitionId: "onr_v1_161_fall-guy",
     });
+    const avoidReplay = replayEvents(
+      fallGuyBefore,
+      fallGuyState.eventLog.slice(fallGuyReplayStart),
+    );
+    expect(avoidReplay.ok).toBe(true);
+    expect(hashState(avoidReplay.state)).toBe(hashState(fallGuyState));
 
     let retrofitState = toRunnerTurn(
       createGameAfterSetup({

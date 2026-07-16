@@ -170,6 +170,13 @@ function makeHost(options: {
     draw: {
       drawCorpCards: () => undefined,
     },
+    tags: {
+      addRunnerTagsWithPrevention: (_legalAction, amount) => {
+        state.runner.tags += amount;
+        host.runner.ensureTurnFlags().runnerReceivedTagThisTurn = true;
+        return false;
+      },
+    },
     rng: {
       shuffleStateIds: (ids) => ids.slice(),
     },

@@ -11,6 +11,7 @@ export type PendingChoiceResolutionHost = {
   replacement: {
     resolveReplacementChoice: HostFn<void>;
     resolveEventModificationChoice: HostFn<void>;
+    resumeAddTagContinuation: HostFn<void>;
     resolvePdcaDamageReplacementChoice: HostFn<void>;
   };
   trace: {
@@ -115,6 +116,7 @@ export function resolvePendingChoice(
   const resolveReplacementChoice = host.replacement.resolveReplacementChoice;
   const resolveEventModificationChoice =
     host.replacement.resolveEventModificationChoice;
+  const resumeAddTagContinuation = host.replacement.resumeAddTagContinuation;
   const resolvePdcaDamageReplacementChoice =
     host.replacement.resolvePdcaDamageReplacementChoice;
   const resolveTraceChoice = host.trace.resolveTraceChoice;
@@ -264,6 +266,12 @@ export function resolvePendingChoice(
   }
   if (state.pendingChoice.source.startsWith("v120.event_modification")) {
     resolveEventModificationChoice(state, legalAction, playerAction);
+    if (
+      !state.pendingChoice &&
+      !state.eventModificationWindow &&
+      state.pendingAddTagContinuation
+    )
+      resumeAddTagContinuation(state, legalAction);
     return;
   }
   if (

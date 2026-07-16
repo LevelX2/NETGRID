@@ -1048,7 +1048,6 @@ export function createCardLifecycleRuntimeHosts(
         trashedDefinitionIds.push(definitionFor(state, iceId).id);
         trashCorpInstalledCardToArchives(state, iceId, legalAction);
       }
-      state.runner.tags += tagAmount;
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
         remoteServerTrashTagSequenceResolved: true,
@@ -1058,7 +1057,25 @@ export function createCardLifecycleRuntimeHosts(
         ...(trashedDefinitionIds.length > 0
           ? { trashedCardDefinitionIds: trashedDefinitionIds.sort().join(",") }
           : {}),
-        tagsAdded: tagAmount,
+      };
+      state.pendingAddTagContinuation = {
+        kind: "terminal",
+        sourceDefinitionId: definition.id,
+      };
+      const runnerTagsBefore = state.runner.tags;
+      if (
+        addRunnerTagsWithPrevention(
+          state,
+          legalAction,
+          tagAmount,
+          definition.id,
+        )
+      )
+        return;
+      delete state.pendingAddTagContinuation;
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        tagsAdded: Math.max(0, state.runner.tags - runnerTagsBefore),
         runnerTagsAfter: state.runner.tags,
       };
     }

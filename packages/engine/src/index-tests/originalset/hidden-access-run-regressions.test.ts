@@ -2934,6 +2934,79 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     }
   });
 
+  it("clears Vacant Soulkiller advancement counters after prevented access damage and trash", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-vacant-soulkiller-prevent-trash-cleanup",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: MECHANIC_SMOKE_DECKS.damagePrevention.runner,
+        corpDeck: MECHANIC_SMOKE_DECKS.agendaScoring.corp,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 20;
+    installRunnerHardwareForTest(state, "onr_v1_130_lifesaver-nanosurgeons");
+    const vacantId = putCorpRootInRemote(
+      state,
+      "onr_v1_346_vacant-soulkiller",
+    );
+    state.cardInstances[vacantId] = {
+      ...state.cardInstances[vacantId]!,
+      advancementCounters: 2,
+      counters: { power: 1 },
+    };
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "onr_v1_346_vacant-soulkiller",
+    );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+
+    const preventionOptionId = getPlayerView(
+      state,
+      "runner",
+    ).pendingChoice?.options.find((option) =>
+      option.label.includes("Lifesaver Nanosurgeons"),
+    )?.id;
+    expect(preventionOptionId).toBeDefined();
+    state = applyChoice(state, "runner", String(preventionOptionId));
+    expect(state.runner.coreDamage).toBe(1);
+    expect(state.cardInstances[vacantId]?.advancementCounters).toBe(2);
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "trash_accessed_card",
+    );
+    expect(state.corp.archives).toContain(vacantId);
+    expect(state.cardInstances[vacantId]).toMatchObject({
+      zone: { side: "corp", zone: "archives" },
+      advancementCounters: 0,
+    });
+    expect(state.cardInstances[vacantId]?.counters).toBeUndefined();
+    const runnerView = getPlayerView(state, "runner");
+    const archivedVacant = runnerView.servers
+      .find((server) => server.id === "archives")
+      ?.root.find((card) => card.instanceId === vacantId);
+    expect(archivedVacant?.advancementCounters).toBe(0);
+
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("keeps unrezzed Vacant Soulkiller inactive on access", () => {
     let state = toRunnerTurn(
       MECHANIC_SMOKE_GAMES.agendaScoring(

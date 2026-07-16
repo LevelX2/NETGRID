@@ -18,6 +18,10 @@ import { TOKYO_CHIBA_INFIGHTING_FALLBACK_SOURCE } from "../../compatibility/runt
 import type { SuccessfulRunFollowupExecutionResult } from "./successful-run-interventions";
 
 type ActiveRun = NonNullable<GameState["run"]>;
+type RunEndTagContinuation = Extract<
+  NonNullable<GameState["pendingAddTagContinuation"]>,
+  { kind: "run_end_cleanup" }
+>;
 type RunnerTurnFlags = NonNullable<GameState["runnerTurnFlags"]>;
 
 const CORP_PURGEABLE_SUCCESSFUL_RUN_COUNTERS = new Set<
@@ -111,6 +115,13 @@ export type RunEndCleanupHost = {
       sourceDefinitionId: CardDefinitionId,
       amount: number,
     ) => RunEndDamageSummary;
+  };
+  tags: {
+    addRunnerTagsWithPrevention: (
+      legalAction: LegalAction,
+      amount: number,
+      source: string,
+    ) => boolean;
   };
   counters: {
     cardCounter: (cardId: CardInstanceId, counterType: CounterType) => number;
@@ -366,18 +377,22 @@ export function handleRunEndCleanup(
   host: RunEndCleanupHost,
   successful: boolean,
   legalAction?: LegalAction,
+  tagContinuation?: RunEndTagContinuation,
 ): RunEndCleanupResult {
+  const resumeAfterTag = tagContinuation !== undefined;
   const run = host.state.run;
-  if (run) clearEncounterTemporaryTraceCredits(run, legalAction);
-  const dupre = run ? applyDupreRunEndCounters(host, run) : { handled: false };
-  const temporaryDiscountedDerez = run
+  if (!resumeAfterTag && run) clearEncounterTemporaryTraceCredits(run, legalAction);
+  const dupre = !resumeAfterTag && run
+    ? applyDupreRunEndCounters(host, run)
+    : { handled: false };
+  const temporaryDiscountedDerez = !resumeAfterTag && run
     ? derezTemporaryDiscountedRunIce(host, run, legalAction)
     : { handled: false };
-  if (run && successful)
+  if (!resumeAfterTag && run && successful)
     applyV181SuccessfulRunCounterTriggers(host, run, legalAction);
-  if (run && successful)
+  if (!resumeAfterTag && run && successful)
     host.followups.applySuccessfulRunExtraRunFollowup(legalAction);
-  if (run && successful) {
+  if (!resumeAfterTag && run && successful) {
     const flags = host.runner.ensureTurnFlags();
     flags.successfulRunThisTurn = true;
     flags.lastSuccessfulRunServerId = run.attackedServerId;
@@ -391,7 +406,24 @@ export function handleRunEndCleanup(
       flags.blackOpsLiberatedOrTrashedDuringSuccessfulHqOrRdRunThisTurn = true;
     }
   }
-  if (run) applyBadPublicityRunAftermath(host, run, successful, legalAction);
+  if (
+    run &&
+    applyBadPublicityRunAftermath(
+      host,
+      run,
+      successful,
+      legalAction,
+      tagContinuation,
+    )
+  ) {
+    return {
+      handled: true,
+      runWasSuccessful: successful,
+      serverId: run.attackedServerId,
+      ...(legalAction?.payload ? { resolvedPayload: legalAction.payload } : {}),
+      stateChanged: true,
+    };
+  }
   const sequenceRun = run
     ? applyMultiServerSuccessSequenceRunResult(host, run, successful, legalAction)
     : { handled: false };
@@ -579,14 +611,58 @@ function applyBadPublicityRunAftermath(
   run: ActiveRun,
   successful: boolean,
   legalAction?: LegalAction,
-): void {
+  tagContinuation?: RunEndTagContinuation,
+): boolean {
+  const resumeAfterTag = tagContinuation !== undefined;
   const aftermath = run.badPublicityRunAftermath;
-  if (!aftermath) return;
+  if (!aftermath) return false;
   let badPublicityAdded = 0;
   if (aftermath.kind === "successful_run_draw_event") {
-    if (!successful) return;
-    const tagAmount = 2;
-    host.state.runner.tags += tagAmount;
+    if (!successful) return false;
+    let tagsAdded = tagContinuation
+      ? Math.max(
+          0,
+          host.state.runner.tags - tagContinuation.runnerTagsBefore,
+        )
+      : 2;
+    if (!resumeAfterTag) {
+      if (!legalAction)
+        throw new Error("Run-end Add-Tag braucht eine LegalAction.");
+      host.state.pendingAddTagContinuation = {
+        kind: "run_end_cleanup",
+        runId: run.runId,
+        successful,
+        runnerTagsBefore: host.state.runner.tags,
+      };
+      if (
+        host.tags.addRunnerTagsWithPrevention(
+          legalAction,
+          tagsAdded,
+          aftermath.sourceDefinitionId,
+        )
+      ) {
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          liveNewsFeedEncounteredBlackIceCount: Math.max(
+            0,
+            Math.floor(run.encounteredBlackIceCount ?? 0),
+          ),
+          liveNewsFeedRezzedBlackOpsCount: Math.max(
+            0,
+            Math.floor(run.rezzedBlackOpsCount ?? 0),
+          ),
+          liveNewsFeedLiberatedBlackOpsAgendaCount: Math.max(
+            0,
+            Math.floor(run.liberatedBlackOpsAgendaCount ?? 0),
+          ),
+        };
+        return true;
+      }
+      const runnerTagsBefore =
+        host.state.pendingAddTagContinuation.runnerTagsBefore;
+      delete host.state.pendingAddTagContinuation;
+      tagsAdded = Math.max(0, host.state.runner.tags - runnerTagsBefore);
+    }
     badPublicityAdded =
       Math.max(0, Math.floor(run.encounteredBlackIceCount ?? 0)) +
       Math.max(0, Math.floor(run.rezzedBlackOpsCount ?? 0)) +
@@ -594,7 +670,7 @@ function applyBadPublicityRunAftermath(
     if (legalAction) {
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
-        tagsAdded: tagAmount,
+        tagsAdded,
         runnerTagsAfter: host.state.runner.tags,
         liveNewsFeedEncounteredBlackIceCount: Math.max(
           0,
@@ -622,7 +698,7 @@ function applyBadPublicityRunAftermath(
       };
     }
   }
-  if (badPublicityAdded <= 0) return;
+  if (badPublicityAdded <= 0) return false;
   const before = host.state.corp.badPublicity;
   host.state.corp.badPublicity += badPublicityAdded;
   if (legalAction) {
@@ -652,6 +728,31 @@ function applyBadPublicityRunAftermath(
       },
     ];
   }
+  return false;
+}
+
+export function resumeRunEndCleanupAfterTagPrevention(
+  host: RunEndCleanupHost,
+  legalAction: LegalAction,
+): RunEndCleanupResult {
+  const continuation = host.state.pendingAddTagContinuation;
+  const run = host.state.run;
+  if (
+    !continuation ||
+    continuation.kind !== "run_end_cleanup" ||
+    !run ||
+    run.runId !== continuation.runId
+  )
+    throw new Error("Die Run-end-Tag-Fortsetzung ist veraltet.");
+  if (host.state.pendingChoice || host.state.eventModificationWindow)
+    throw new Error("Das Add-Tag-Fenster ist noch nicht abgeschlossen.");
+  delete host.state.pendingAddTagContinuation;
+  return handleRunEndCleanup(
+    host,
+    continuation.successful,
+    legalAction,
+    continuation,
+  );
 }
 
 function applyMultiServerSuccessSequenceRunResult(

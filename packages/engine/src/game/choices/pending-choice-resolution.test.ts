@@ -217,6 +217,7 @@ function pendingChoiceHost(
       resolveEventModificationChoice: unexpected(
         "resolveEventModificationChoice",
       ),
+      resumeAddTagContinuation: unexpected("resumeAddTagContinuation"),
       resolvePdcaDamageReplacementChoice: unexpected(
         "resolvePdcaDamageReplacementChoice",
       ),

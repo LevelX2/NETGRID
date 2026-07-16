@@ -19,6 +19,9 @@ export type CardEffectExecutionContext = {
   targetRezCost?: number;
   controller: Side;
   reason?: string;
+  effectIndexOffset?: number;
+  addRunnerTagsWithPrevention?: (amount: number) => boolean;
+  isEffectSuspended?: () => boolean;
   drawCards?: (side: Side, amount: number) => CardEffectDrawCardsResult;
   damageRunner?: (
     damageType: Extract<DamageType, "meat" | "net" | "core">,
@@ -199,6 +202,7 @@ export type CardEffectExecutionContext = {
 export type CardEffectExecutionResult = {
   publicPayload: Record<string, string | number | boolean>;
   resolvedEffects: ResolvedGameEffect[];
+  suspendedAtEffectIndex?: number;
 };
 
 export type CardEffectDrawCardsResult = {

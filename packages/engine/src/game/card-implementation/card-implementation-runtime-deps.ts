@@ -168,6 +168,7 @@ export function createGameCardImplementationRuntimeDeps(
     startDistributeAdvancementCounters:
       host.callbacks.startDistributeAdvancementCounters,
     startMoveAdvancementCounters: host.callbacks.startMoveAdvancementCounters,
+    addRunnerTagsWithPrevention: host.callbacks.addRunnerTagsWithPrevention,
     revealHiddenRunnerResource: (state, sourceCardId) =>
       host.callbacks.revealHiddenRunnerResource?.(state, sourceCardId) ?? {},
     addCurrentRunAccessCount: (state, server, amount) => {

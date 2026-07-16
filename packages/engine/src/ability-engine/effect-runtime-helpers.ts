@@ -95,11 +95,6 @@ export function loseGame(
   return winner;
 }
 
-export function addRunnerTags(state: GameState, amount: number): void {
-  if (amount <= 0) return;
-  state.runner.tags += amount;
-}
-
 export function publicEffectId(
   context: CardEffectExecutionContext,
   index: number,

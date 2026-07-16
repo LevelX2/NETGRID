@@ -17,16 +17,22 @@ export function executeTagEffect(input: CardEffectFamilyInput): boolean {
       runtime.assertPublicVisibility("add_tags", effect.visibility);
       if ((effect as { recipient?: string }).recipient !== "runner")
         throw new Error("add_tags effect recipient must be runner.");
-      runtime.addRunnerTags(state, effect.amount);
+      if (!context.addRunnerTagsWithPrevention)
+        throw new Error(
+          "add_tags effect requires an addRunnerTagsWithPrevention execution context.",
+        );
+      const runnerTagsBefore = state.runner.tags;
+      if (context.addRunnerTagsWithPrevention(effect.amount)) return true;
+      const tagsAdded = Math.max(0, state.runner.tags - runnerTagsBefore);
       publicPayload.tagsAdded =
-        Number(publicPayload.tagsAdded ?? 0) + effect.amount;
+        Number(publicPayload.tagsAdded ?? 0) + tagsAdded;
       publicPayload.runnerTagsAfter = state.runner.tags;
       resolvedEffects.push({
         effectId: runtime.publicEffectId(context, index, "add_tags"),
         kind: "add_tags",
         visibility: effect.visibility,
         side: "runner",
-        amount: effect.amount,
+        amount: tagsAdded,
         reason: runtime.effectReason(context),
         runnerTagsAfter: state.runner.tags,
         ...(context.sourceDefinitionId

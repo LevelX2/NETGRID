@@ -15,6 +15,10 @@ import {
 } from "../access/breach-state";
 
 type ActiveRun = NonNullable<GameState["run"]>;
+type SuccessfulRunTagContinuation = Extract<
+  NonNullable<GameState["pendingAddTagContinuation"]>,
+  { kind: "successful_run_access_replacement" }
+>;
 const GYPSY_RD_REVEAL_CHOICE_SOURCE = "successful_run.gypsy_rd_reveal";
 const GYPSY_RD_REVEAL_NEXT_OPTION_ID = "reveal_next";
 const GYPSY_RD_REVEAL_FINISH_OPTION_ID = "finish";
@@ -40,6 +44,13 @@ export type RunAccessTransitionHost = {
   };
   draw: {
     drawCorpCards: (count: number) => void;
+  };
+  tags: {
+    addRunnerTagsWithPrevention: (
+      legalAction: LegalAction,
+      amount: number,
+      source: string,
+    ) => boolean;
   };
   trash?: {
     trashCorpInstalledCardToArchives: (
@@ -123,7 +134,8 @@ export function enterAccessFromSuccessfulRun(
     run.successfulRunAccessReplacement === "corp_lose_credits" &&
     (!run.successfulRunRequiresCorpCredits || host.state.corp.credits > 0)
   ) {
-    applySuccessfulRunAccessReplacement(host, run, legalAction);
+    if (applySuccessfulRunAccessReplacement(host, run, legalAction))
+      return suspendedSuccessfulRunReplacementResult(run, legalAction);
     host.run.finishRun(true, legalAction);
     return {
       handled: true,
@@ -163,7 +175,8 @@ export function enterAccessFromSuccessfulRun(
     run.successfulRunAccessReplacement ===
     "trash_rezzed_ice_on_fort_and_tag_runner"
   ) {
-    applySuccessfulRunAccessReplacement(host, run, legalAction);
+    if (applySuccessfulRunAccessReplacement(host, run, legalAction))
+      return suspendedSuccessfulRunReplacementResult(run, legalAction);
     host.run.finishRun(true, legalAction);
     return {
       handled: true,
@@ -175,7 +188,8 @@ export function enterAccessFromSuccessfulRun(
     };
   }
   if (run.successfulRunAccessReplacement === "runner_gain_agenda_point") {
-    applySuccessfulRunAccessReplacement(host, run, legalAction);
+    if (applySuccessfulRunAccessReplacement(host, run, legalAction))
+      return suspendedSuccessfulRunReplacementResult(run, legalAction);
     host.run.finishRun(true, legalAction);
     return {
       handled: true,
@@ -527,15 +541,55 @@ function applySuccessfulRunAccessReplacement(
   host: RunAccessTransitionHost,
   run: ActiveRun,
   legalAction?: LegalAction,
-): void {
+  tagContinuation?: SuccessfulRunTagContinuation,
+): boolean {
+  const resumeAfterTag = tagContinuation !== undefined;
   const creditLoss = Math.max(0, Math.floor(run.successfulRunCreditLoss ?? 0));
-  if (creditLoss > 0)
+  if (!resumeAfterTag && creditLoss > 0)
     host.state.corp.credits = Math.max(0, host.state.corp.credits - creditLoss);
   const runnerTagGain = Math.max(
     0,
     Math.floor(run.successfulRunRunnerTagGain ?? 0),
   );
-  if (runnerTagGain > 0) host.state.runner.tags += runnerTagGain;
+  let resolvedRunnerTagGain = tagContinuation
+    ? Math.max(
+        0,
+        host.state.runner.tags - tagContinuation.runnerTagsBefore,
+      )
+    : runnerTagGain;
+  if (!resumeAfterTag && runnerTagGain > 0) {
+    if (!legalAction)
+      throw new Error("Successful-run Add-Tag braucht eine LegalAction.");
+    host.state.pendingAddTagContinuation = {
+      kind: "successful_run_access_replacement",
+      runId: run.runId,
+      runnerTagsBefore: host.state.runner.tags,
+    };
+    if (
+      host.tags.addRunnerTagsWithPrevention(
+        legalAction,
+        runnerTagGain,
+        run.successfulRunSourceDefinitionId ?? "successful_run_replacement",
+      )
+    ) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        accessReplacement:
+          run.successfulRunAccessReplacement ?? "corp_lose_credits",
+        creditLoss,
+        corpCreditsAfter: host.state.corp.credits,
+        ...sourcePayloadForSuccessfulRunReplacement(run),
+      };
+      return true;
+    }
+    const runnerTagsBefore =
+      host.state.pendingAddTagContinuation.runnerTagsBefore;
+    delete host.state.pendingAddTagContinuation;
+    resolvedRunnerTagGain = Math.max(
+      0,
+      host.state.runner.tags - runnerTagsBefore,
+    );
+  }
   const corpDraw = Math.max(0, Math.floor(run.successfulRunCorpDraw ?? 0));
   if (corpDraw > 0) host.draw.drawCorpCards(corpDraw);
   const runnerCreditGain = Math.max(
@@ -579,7 +633,7 @@ function applySuccessfulRunAccessReplacement(
         run.successfulRunAccessReplacement ?? "corp_lose_credits",
       creditLoss,
       corpCreditsAfter: host.state.corp.credits,
-      tagsAdded: runnerTagGain,
+      tagsAdded: resolvedRunnerTagGain,
       runnerTagsAfter: host.state.runner.tags,
       corpDrawnCount: corpDraw,
       gainedCredits: runnerCreditGain,
@@ -597,6 +651,41 @@ function applySuccessfulRunAccessReplacement(
       ...sourcePayloadForSuccessfulRunReplacement(run),
     };
   }
+  return false;
+}
+
+function suspendedSuccessfulRunReplacementResult(
+  run: ActiveRun,
+  legalAction?: LegalAction,
+): RunAccessTransitionResult {
+  return {
+    handled: true,
+    accessSkipped: true,
+    replacementApplied:
+      run.successfulRunAccessReplacement ?? "corp_lose_credits",
+    stateChanged: true,
+    ...resolvedPayloadFor(legalAction),
+  };
+}
+
+export function resumeSuccessfulRunAccessReplacementAfterTagPrevention(
+  host: RunAccessTransitionHost,
+  legalAction: LegalAction,
+): void {
+  const continuation = host.state.pendingAddTagContinuation;
+  const run = host.state.run;
+  if (
+    !continuation ||
+    continuation.kind !== "successful_run_access_replacement" ||
+    !run ||
+    run.runId !== continuation.runId
+  )
+    throw new Error("Die Successful-run-Tag-Fortsetzung ist veraltet.");
+  if (host.state.pendingChoice || host.state.eventModificationWindow)
+    throw new Error("Das Add-Tag-Fenster ist noch nicht abgeschlossen.");
+  delete host.state.pendingAddTagContinuation;
+  applySuccessfulRunAccessReplacement(host, run, legalAction, continuation);
+  host.run.finishRun(true, legalAction);
 }
 
 function startRevealRdUntilAgendaStoreInHqChoice(

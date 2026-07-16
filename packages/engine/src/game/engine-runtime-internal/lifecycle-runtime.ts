@@ -57,6 +57,7 @@ export function createLifecycleRuntime(deps: RuntimeDeps) {
     setHostedOn,
     spendCredits,
     uniqueDirectLongtailKindForDefinition,
+    addRunnerTagsWithPrevention,
     mustInstance,
     credits,
     withoutVariableIceState,
@@ -503,22 +504,10 @@ export function createLifecycleRuntime(deps: RuntimeDeps) {
     (summary.drawnCardIds ??= []).push(cardId);
     if (drawTaxDecision === "none") return summary;
     const drawTaxSourceCardIds = drawTaxSourceIds(state);
-    summary.drawTaxSourceCount = drawTaxSourceCardIds.length;
-    for (const _sourceId of drawTaxSourceCardIds) {
-      void _sourceId;
-      if (
-        drawTaxDecision === "pay" ||
-        (drawTaxDecision === "auto" && state.runner.credits > 0)
-      ) {
-        if (state.runner.credits <= 0)
-          throw new Error("City Surveillance kann nicht bezahlt werden.");
-        spendCredits(state, "runner", 1);
-        summary.drawTaxCreditsPaid += 1;
-      } else {
-        state.runner.tags += 1;
-        summary.drawTaxTagsAdded += 1;
-      }
-    }
+    if (drawTaxSourceCardIds.length > 0)
+      throw new Error(
+        "City Surveillance muss ueber die suspendierbare Ziehsequenz aufgeloest werden.",
+      );
     return summary;
   }
 
@@ -804,9 +793,8 @@ export function createLifecycleRuntime(deps: RuntimeDeps) {
       sequence.drawTaxCreditsPaid += 1;
       creditsPaid = 1;
     } else if (selected === "take_tag") {
-      state.runner.tags += 1;
-      sequence.drawTaxTagsAdded += 1;
-      tagsAdded = 1;
+      // The draw sequence owns the continuation because the Add-Tag window can
+      // span several runner choices before the draw may continue.
     } else {
       throw new Error("City Surveillance braucht Credit oder Tag.");
     }
@@ -814,6 +802,42 @@ export function createLifecycleRuntime(deps: RuntimeDeps) {
     const sourceCount = sequence.currentDrawTaxSourceIds.length;
     sequence.currentDrawTaxSourceIndex += 1;
     delete state.pendingChoice;
+    if (selected === "take_tag") {
+      const runnerTagsBefore = state.runner.tags;
+      state.pendingAddTagContinuation = {
+        kind: "runner_draw_tax",
+        sequenceId: sequence.sequenceId,
+        sourceCardId: sourceCardId as CardInstanceId,
+        sourceIndex: Number(sourceIndex),
+        runnerTagsBefore,
+      };
+      const suspended = addRunnerTagsWithPrevention(
+        state,
+        legalAction,
+        1,
+        definitionFor(state, sourceCardId as CardInstanceId).id,
+      );
+      if (suspended) {
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          sourceDefinitionId: definitionFor(
+            state,
+            sourceCardId as CardInstanceId,
+          ).id,
+          drawTaxDecision: "tag",
+          drawTaxSourceCount: sourceCount,
+          drawTaxCreditsPaid: 0,
+          drawTaxTagsAdded: 0,
+          drawTaxTags: 0,
+          runnerCreditsAfter: state.runner.credits,
+          runnerTagsAfter: state.runner.tags,
+        };
+        return;
+      }
+      delete state.pendingAddTagContinuation;
+      tagsAdded = Math.max(0, state.runner.tags - runnerTagsBefore);
+      sequence.drawTaxTagsAdded += tagsAdded;
+    }
     const continuationSummary = continueRunnerDrawSequence(state);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
@@ -821,6 +845,42 @@ export function createLifecycleRuntime(deps: RuntimeDeps) {
       drawTaxDecision: selected === "pay_credit" ? "pay" : "tag",
       drawTaxSourceCount: sourceCount,
       drawTaxCreditsPaid: creditsPaid,
+      drawTaxTagsAdded: tagsAdded,
+      drawTaxTags: tagsAdded,
+      runnerCreditsAfter: state.runner.credits,
+      runnerTagsAfter: state.runner.tags,
+      ...runnerDrawContinuationPayload(continuationSummary),
+    };
+  }
+
+  function resumeRunnerDrawSequenceAfterTagPrevention(
+    state: GameState,
+    legalAction: LegalAction,
+  ): void {
+    const continuation = state.pendingAddTagContinuation;
+    const sequence = state.runnerDrawSequence;
+    if (!continuation || continuation.kind !== "runner_draw_tax" || !sequence)
+      throw new Error("Es ist keine Runner-Zieh-Tag-Fortsetzung offen.");
+    if (
+      sequence.sequenceId !== continuation.sequenceId ||
+      sequence.currentDrawTaxSourceIndex !== continuation.sourceIndex + 1 ||
+      sequence.currentDrawTaxSourceIds[continuation.sourceIndex] !==
+        continuation.sourceCardId
+    )
+      throw new Error("Die Runner-Zieh-Tag-Fortsetzung ist veraltet.");
+    delete state.pendingAddTagContinuation;
+    const tagsAdded = Math.max(
+      0,
+      state.runner.tags - continuation.runnerTagsBefore,
+    );
+    sequence.drawTaxTagsAdded += tagsAdded;
+    const continuationSummary = continueRunnerDrawSequence(state);
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      sourceDefinitionId: definitionFor(state, continuation.sourceCardId).id,
+      drawTaxDecision: "tag",
+      drawTaxSourceCount: sequence.currentDrawTaxSourceIds.length,
+      drawTaxCreditsPaid: 0,
       drawTaxTagsAdded: tagsAdded,
       drawTaxTags: tagsAdded,
       runnerCreditsAfter: state.runner.credits,
@@ -992,5 +1052,6 @@ export function createLifecycleRuntime(deps: RuntimeDeps) {
     drawRunnerCards,
     resolveCrashEverettDrawChoice,
     resolveRunnerDrawSequenceChoice,
+    resumeRunnerDrawSequenceAfterTagPrevention,
   };
 }

@@ -66,6 +66,13 @@ export type FortRunSideFamiliesHost = {
     executeEffectCommands: (commands: EffectCommand[]) => void;
     trashRunnerInstalledProgram: (cardId: CardInstanceId) => void;
   };
+  tags: {
+    addRunnerTagsWithPrevention: (
+      legalAction: LegalAction,
+      amount: number,
+      source: string,
+    ) => boolean;
+  };
 };
 
 export type FortRunSideFamilyResult = {
@@ -620,28 +627,30 @@ export function applyOncePerRunBreakTagAndAllStealthLoss(
     spent += available;
   }
 
-  host.state.runner.tags += 1;
-  const flags = (host.state.runnerTurnFlags ??= {
-    stoleAgendaThisTurn: false,
-    stoleAgendaLastTurn: false,
-  });
-  flags.runnerReceivedTagThisTurn = true;
-
   const breakerDefinition = host.cards.definitionFor(breakerId);
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     v1922RunnerProgramAbility: "once_per_run_break_tag_and_all_stealth_loss",
     sourceDefinitionId: breakerDefinition.id,
     postBreakStealthLoss: spent,
-    tagsAdded: 1,
-    runnerTagsAfter: host.state.runner.tags,
   };
+  host.state.pendingAddTagContinuation = {
+    kind: "terminal",
+    sourceDefinitionId: breakerDefinition.id,
+  };
+  const suspended = host.tags.addRunnerTagsWithPrevention(
+    legalAction,
+    1,
+    breakerDefinition.id,
+  );
+  if (!suspended) delete host.state.pendingAddTagContinuation;
 
   return {
     handled: true,
     targetProgramId: breakerId,
     sourceDefinitionId: breakerDefinition.id,
     stealthCreditsLost: spent,
+    ...(suspended ? { choiceStarted: true } : {}),
     stateChanged: true,
   };
 }

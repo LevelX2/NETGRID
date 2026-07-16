@@ -571,6 +571,13 @@ export function resolveRunnerDrawSequenceChoice(...args: any[]): any {
   )(...args);
 }
 
+export function resumeRunnerDrawSequenceAfterTagPrevention(...args: any[]): any {
+  return runtimeDelegate(
+    "lifecycleRuntime",
+    "resumeRunnerDrawSequenceAfterTagPrevention",
+  )(...args);
+}
+
 export function swapCorpHqAndRdTop(...args: any[]): any {
   return runtimeDelegate(
     "stateCorpRuntimeResolvers",

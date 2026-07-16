@@ -39,7 +39,7 @@ export function cardInstanceWithoutCounters(
 ): CardInstance {
   const { counters: _counters, ...withoutCounters } = instance;
   void _counters;
-  return withoutCounters;
+  return { ...withoutCounters, advancementCounters: 0 };
 }
 
 export function clearCardCounters(
