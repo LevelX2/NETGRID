@@ -13,6 +13,8 @@ import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 const NEWSGROUP_INSTANCE_ID = "runner_onr_v1_045_newsgroup-filter_1";
+const SHATTERED_REMAINS_INSTANCE_ID =
+  "corp_onr_v1_315_corprunners-shattered-remains_1";
 
 describe("match 5F6D runner decision checkpoints", () => {
   it.each([
@@ -35,6 +37,33 @@ describe("match 5F6D runner decision checkpoints", () => {
 
   it("keeps the minimal bid when a trace cannot be won", () => {
     expectCheckpointToPass(fixture(unwinnableTraceControlJson));
+  });
+
+  it("does not take the tag when a visible active punish payoff remains", () => {
+    const activeTagPunish = mutateFixture(traceRunBudgetJson, (checkpoint) => {
+      const state = checkpoint.engine.testOnlyGameState;
+      state.corp.archives = state.corp.archives.filter(
+        (instanceId) => instanceId !== SHATTERED_REMAINS_INSTANCE_ID,
+      );
+      const remote = state.corp.servers.find(
+        (server) => server.id === "remote_1",
+      );
+      if (!remote) throw new Error("Expected Remote 1");
+      remote.root.push(SHATTERED_REMAINS_INSTANCE_ID);
+      state.cardInstances[SHATTERED_REMAINS_INSTANCE_ID] = {
+        ...state.cardInstances[SHATTERED_REMAINS_INSTANCE_ID]!,
+        zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+        faceup: true,
+        rezzed: true,
+      };
+      checkpoint.source.kind = "synthetic_companion";
+      checkpoint.source.findingId = "5F6D-C04-VISIBLE-TAG-PUNISH";
+      checkpoint.expectation = {
+        choice: { mustSelectOptionIds: ["bid_5"] },
+      };
+    });
+
+    expectCheckpointToPass(activeTagPunish);
   });
 
   it("does not invent a Newsgroup action when the card is no longer installed", () => {

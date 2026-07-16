@@ -1,6 +1,6 @@
 # KI-Runner-Decision-Remediation für Match 5F6D (2026-07-16)
 
-Status: P0 und P1 abgeschlossen, P2 aktiv
+Status: P0 bis P2 abgeschlossen, P3 aktiv
 
 ## Quelle und Zielprüfung
 
