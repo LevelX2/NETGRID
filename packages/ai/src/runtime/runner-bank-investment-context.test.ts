@@ -368,7 +368,7 @@ describe("createRunnerBankInvestmentContext", () => {
     ).toBe(-300);
   });
 
-  it("treats liquid plus stored credits as a comfortable combined pool", () => {
+  it("keeps loading toward twelve when only combined access is comfortable", () => {
     const context = createContext({
       hintEffectsForDefinition: (definitionId) =>
         definitionId === "custom-runner-credit-bank"
@@ -394,13 +394,13 @@ describe("createRunnerBankInvestmentContext", () => {
     ).toEqual(
       expect.arrayContaining([
         "bankCombinedCreditAccess:12",
-        "bankComfortableCreditPool:true",
-        "bankCommitmentStatus:hold",
+        "bankComfortableCreditPool:false",
+        "bankCommitmentStatus:build_second_load",
       ]),
     );
   });
 
-  it("holds a legal fourth load when combined credit access is already over target", () => {
+  it("finishes a bank from nine to twelve despite high combined access", () => {
     const context = createContext({
       hintEffectsForDefinition: (definitionId) =>
         definitionId === "custom-runner-credit-bank"
@@ -431,8 +431,8 @@ describe("createRunnerBankInvestmentContext", () => {
     ).toEqual(
       expect.arrayContaining([
         "bankCombinedCreditAccess:21",
-        "bankOverDesiredTarget:true",
-        "bankCommitmentStatus:over_target_hold",
+        "bankOverDesiredTarget:false",
+        "bankCommitmentStatus:build_second_load",
       ]),
     );
     expect(
@@ -440,7 +440,205 @@ describe("createRunnerBankInvestmentContext", () => {
         input,
         buildAction,
       )[0]?.value,
-    ).toBe(-1800);
+    ).toBeGreaterThan(0);
+  });
+
+  it("uses a mature bank below twenty liquid credits but preserves it at twenty", () => {
+    const context = createContext({
+      hintEffectsForDefinition: (definitionId) =>
+        definitionId === "custom-runner-credit-bank"
+          ? [{ kind: "economy", target: "economy.temporary_resource_bank" }]
+          : [],
+    });
+    const bank = visibleRunnerCard("custom-runner-credit-bank", {
+      counters: { power: 15 },
+    });
+    const cashOutAction = runnerAction("trigger_ability", {
+      actionId: "structured-cashout",
+      source: bank.instanceId,
+      cardImplementationTakesHostedCredits: true,
+    });
+
+    expect(
+      context.runnerBankCashOutIsUsefulNow(
+        runnerInput({
+          credits: 11,
+          rig: [bank],
+          legalActions: [cashOutAction],
+        }),
+        cashOutAction,
+      ),
+    ).toBe(true);
+    expect(
+      context.runnerBankCashOutIsUsefulNow(
+        runnerInput({
+          credits: 20,
+          rig: [bank],
+          legalActions: [cashOutAction],
+        }),
+        cashOutAction,
+      ),
+    ).toBe(false);
+  });
+
+  it("treats fewer than five liquid credits as a valid reaction-floor emergency", () => {
+    const context = createContext({
+      hintEffectsForDefinition: (definitionId) =>
+        definitionId === "custom-runner-credit-bank"
+          ? [{ kind: "economy", target: "economy.temporary_resource_bank" }]
+          : [],
+    });
+    const bank = visibleRunnerCard("custom-runner-credit-bank", {
+      counters: { power: 3 },
+    });
+    const cashOutAction = runnerAction("trigger_ability", {
+      actionId: "structured-cashout",
+      source: bank.instanceId,
+      cardImplementationTakesHostedCredits: true,
+    });
+    const input = runnerInput({
+      credits: 4,
+      rig: [bank],
+      legalActions: [cashOutAction],
+    });
+
+    expect(context.runnerBankCashOutIsUsefulNow(input, cashOutAction)).toBe(
+      true,
+    );
+  });
+
+  it("only cashes out for a hand target when the payout bridges it this turn", () => {
+    const context = createContext({
+      runnerHandFundingTarget: () => ({
+        value: 900,
+        reason: "breaker_in_hand",
+        cardCost: 9,
+        missingCredits: 4,
+      }),
+      hintEffectsForDefinition: (definitionId) =>
+        definitionId === "custom-runner-credit-bank"
+          ? [{ kind: "economy", target: "economy.temporary_resource_bank" }]
+          : [],
+    });
+    const bankWithThree = visibleRunnerCard("custom-runner-credit-bank", {
+      counters: { power: 3 },
+    });
+    const threeCreditCashOut = runnerAction("trigger_ability", {
+      actionId: "cashout-three",
+      source: bankWithThree.instanceId,
+      cardImplementationTakesHostedCredits: true,
+    });
+    expect(
+      context.runnerBankHasConcreteFundingNeed(
+        runnerInput({
+          credits: 5,
+          clicks: 2,
+          rig: [bankWithThree],
+          legalActions: [threeCreditCashOut],
+        }),
+      ),
+    ).toBe(false);
+
+    const bankWithSix = visibleRunnerCard("custom-runner-credit-bank", {
+      counters: { power: 6 },
+    });
+    const sixCreditCashOut = runnerAction("trigger_ability", {
+      actionId: "cashout-six",
+      source: bankWithSix.instanceId,
+      cardImplementationTakesHostedCredits: true,
+    });
+    expect(
+      context.runnerBankHasConcreteFundingNeed(
+        runnerInput({
+          credits: 5,
+          clicks: 2,
+          rig: [bankWithSix],
+          legalActions: [sixCreditCashOut],
+        }),
+      ),
+    ).toBe(true);
+    expect(
+      context.runnerBankHasConcreteFundingNeed(
+        runnerInput({
+          credits: 5,
+          clicks: 1,
+          rig: [bankWithSix],
+          legalActions: [sixCreditCashOut],
+        }),
+      ),
+    ).toBe(false);
+  });
+
+  it("keeps first and continuation loads at comparable portfolio priority", () => {
+    const context = createContext({
+      hintEffectsForDefinition: (definitionId) =>
+        definitionId === "custom-runner-credit-bank"
+          ? [{ kind: "economy", target: "economy.temporary_resource_bank" }]
+          : [],
+    });
+    const emptyBank = visibleRunnerCard("custom-runner-credit-bank", {
+      counters: { power: 0 },
+    });
+    const emptyBuild = runnerAction("activated_card_ability", {
+      actionId: "build-empty",
+      source: emptyBank.instanceId,
+      cardImplementationAddsHostedCredits: true,
+    });
+    const loadedBank = visibleRunnerCard("custom-runner-credit-bank", {
+      instanceId: "loaded-bank-instance",
+      counters: { power: 6 },
+    });
+    const loadedBuild = runnerAction("activated_card_ability", {
+      actionId: "build-loaded",
+      source: loadedBank.instanceId,
+      cardImplementationAddsHostedCredits: true,
+    });
+    const input = runnerInput({
+      credits: 8,
+      rig: [emptyBank, loadedBank],
+      legalActions: [emptyBuild, loadedBuild],
+    });
+    const emptyPriority =
+      context.runnerBankInvestmentCommitmentScoreComponents(
+        input,
+        emptyBuild,
+      )[0]?.value ?? 0;
+    const loadedPriority =
+      context.runnerBankInvestmentCommitmentScoreComponents(
+        input,
+        loadedBuild,
+      )[0]?.value ?? 0;
+
+    expect(emptyPriority).toBeGreaterThan(0);
+    expect(loadedPriority).toBeGreaterThan(0);
+    expect(Math.abs(emptyPriority - loadedPriority)).toBeLessThanOrEqual(300);
+  });
+
+  it("defers installing another bank once liquid credits are comfortable", () => {
+    const context = createContext({
+      previousPlan: () => undefined,
+      hintEffectsForDefinition: (definitionId) =>
+        definitionId === "custom-runner-credit-bank"
+          ? [{ kind: "economy", target: "economy.temporary_resource_bank" }]
+          : [],
+      actionCreditCost: (action) => (action.type === "install_card" ? 3 : 0),
+    });
+    const bank = visibleRunnerCard("custom-runner-credit-bank");
+    const install = runnerAction("install_card", {
+      actionId: "install-bank",
+      source: bank.instanceId,
+    });
+    const input = runnerInput({
+      credits: 20,
+      clicks: 4,
+      hand: [bank],
+      rig: [],
+      legalActions: [install],
+    });
+
+    expect(
+      context.runnerBankInvestmentCommitmentEvidence(input, install),
+    ).toContain("bankCommitmentStatus:install_deferred");
   });
 
   it("ignores build-action substring noise in credit-bank action text", () => {

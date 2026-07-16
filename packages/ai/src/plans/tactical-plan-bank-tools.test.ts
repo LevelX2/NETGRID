@@ -8,7 +8,7 @@ import type { TacticalPlanBuildContext } from "./tactical-plan-types";
 describe("runnerCreditBankAssessment", () => {
   it("does not open a bank-build plan with a comfortable liquid pool", () => {
     const assessment = runnerCreditBankAssessment(
-      context({ credits: 10, storedCredits: 0 }),
+      context({ credits: 20, storedCredits: 0 }),
       [BUILD_ACTION],
       false,
     );
@@ -17,14 +17,14 @@ describe("runnerCreditBankAssessment", () => {
     expect(assessment.evidence).toContain("runner_bank_build_ready:false");
   });
 
-  it("does not keep building after liquid and stored credits reach value", () => {
+  it("keeps building while the liquid pool remains below twenty", () => {
     expect(
       runnerCreditBankAssessment(
         context({ credits: 9, storedCredits: 3 }),
         [BUILD_ACTION],
         false,
       ).shouldBuild,
-    ).toBe(false);
+    ).toBe(true);
   });
 
   it("keeps the low-credit first-load route available", () => {
@@ -37,21 +37,36 @@ describe("runnerCreditBankAssessment", () => {
     ).toBe(true);
   });
 
-  it("stops building when liquid plus stored access exceeds the combined target", () => {
+  it("finishes a bank toward twelve despite high combined access", () => {
     const assessment = runnerCreditBankAssessment(
       context({ credits: 12, storedCredits: 9, cashOutLegal: true }),
       [BUILD_ACTION, CASH_OUT_ACTION],
       false,
     );
 
-    expect(assessment.shouldBuild).toBe(false);
+    expect(assessment.shouldBuild).toBe(true);
     expect(assessment.evidence).toEqual(
       expect.arrayContaining([
         "runner_bank_combined_credit_access:21",
         "runner_bank_combined_access_target:18",
-        "runner_bank_build_ready:false",
+        "runner_bank_build_ready:true",
       ]),
     );
+  });
+
+  it("uses the least-loaded source when planning a multi-bank portfolio", () => {
+    const assessment = runnerCreditBankAssessment(
+      context({
+        credits: 8,
+        storedCredits: 12,
+        storedCreditAmounts: [12, 0],
+      }),
+      [BUILD_ACTION],
+      false,
+    );
+
+    expect(assessment.currentStoredCredits).toBe(0);
+    expect(assessment.shouldBuild).toBe(true);
   });
 });
 
@@ -76,6 +91,7 @@ const CASH_OUT_ACTION = {
 function context(params: {
   credits: number;
   storedCredits: number;
+  storedCreditAmounts?: number[];
   cashOutLegal?: boolean;
 }): TacticalPlanBuildContext {
   return {
@@ -97,6 +113,9 @@ function context(params: {
             ownerSide: "runner",
             status: "installed",
             currentBankAmount: params.storedCredits,
+            ...(params.storedCreditAmounts
+              ? { currentBankAmounts: params.storedCreditAmounts }
+              : {}),
             buildActionLegal: true,
             cashOutActionLegal: params.cashOutLegal ?? false,
             buildActionIds: [BUILD_ACTION.actionId],
