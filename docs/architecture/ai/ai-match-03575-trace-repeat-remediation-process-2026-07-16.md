@@ -1,6 +1,6 @@
 # AI Match 03575 Trace/Repeat Remediation Process
 
-Status: P0 bis P4 abgeschlossen; P5 verifiziert, lokale Integration ausstehend
+Status: P0 bis P5 abgeschlossen und lokal nach `main` integriert
 
 ## Quelle und Gesamtziel
 
