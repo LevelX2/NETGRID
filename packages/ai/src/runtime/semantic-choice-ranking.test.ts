@@ -494,6 +494,7 @@ describe("tacticalPlanMappedChoice", () => {
       [urgentRun, choice(gain, -1796)],
       planMapping("runner.develop_hand_card", [gain], {
         stepKind: "gain_credits",
+        evidence: ["hand_development_fit:blocked"],
       }),
       urgentRun,
     );
@@ -546,8 +547,35 @@ describe("tacticalPlanMappedChoice", () => {
       [nonurgentRun, choice(gain, -1796)],
       planMapping("runner.develop_hand_card", [gain], {
         stepKind: "gain_credits",
+        evidence: ["hand_development_fit:blocked"],
       }),
       nonurgentRun,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_blocked");
+    expect(result.choice?.action.actionId).toBe("gain");
+    expect(result.overrideBlockedReason).toBe("runner_plan_controller");
+  });
+
+  it("keeps one-credit development funding on the final click", () => {
+    const gain = legalAction("gain", "gain_credit");
+    const run = legalAction("run-rd", "start_run", { serverId: "rd" });
+    const urgentRun = choice(run, 1903, [], {
+      key: "runner_goal_fit_tactical_goal_run_target",
+      value: 1000,
+      reason:
+        "goal:runner.pressure_good_central_target|urgency:high|target:rd|recommendation:run_now",
+    });
+    const input = aiInput();
+    input.playerView.own.clicks = 1;
+    const result = tacticalPlanMappedChoice(
+      input,
+      [urgentRun, choice(gain, -156)],
+      planMapping("runner.develop_hand_card", [gain], {
+        stepKind: "gain_credits",
+        evidence: ["hand_development_fit:blocked"],
+      }),
+      urgentRun,
     );
 
     expect(result.outcome).toBe("semantic_choice_blocked");

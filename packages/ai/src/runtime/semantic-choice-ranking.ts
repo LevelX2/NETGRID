@@ -148,6 +148,7 @@ export function tacticalPlanMappedChoice(
       );
     const urgentRunNowDevelopmentShouldYield =
       tacticalPlanUrgentRunNowDevelopmentShouldYield(
+        input,
         mapping,
         mappedChoice,
         overrideChoice,
@@ -862,6 +863,7 @@ function tacticalPlanDeferredDevelopmentInstallShouldYield(
 }
 
 function tacticalPlanUrgentRunNowDevelopmentShouldYield(
+  input: AiDecisionInput,
   mapping: PlanStepMappingResult,
   mappedChoice: SemanticRuntimeChoice,
   overrideChoice: SemanticRuntimeChoice,
@@ -873,7 +875,16 @@ function tacticalPlanUrgentRunNowDevelopmentShouldYield(
     (mappedChoice.action.type !== "gain_credit" &&
       mappedChoice.action.type !== "install_card" &&
       mappedChoice.action.type !== "play_event") ||
+    (mappedChoice.action.type === "gain_credit" &&
+      !mapping.plan.evidence.includes("hand_development_fit:blocked")) ||
+    (mappedChoice.action.type === "gain_credit" &&
+      input.playerView.own.clicks <= 1) ||
     mappedChoice.score > 0 ||
+    mappedChoice.scoreBreakdown.some(
+      (component) =>
+        component.key === "semantic_strategic_action_fit" &&
+        component.value > 0,
+    ) ||
     overrideChoice.action.type !== "start_run" ||
     overrideChoice.score <= 0 ||
     scoreGap <= PLAN_MAPPED_CHOICE_MAX_SCORE_GAP

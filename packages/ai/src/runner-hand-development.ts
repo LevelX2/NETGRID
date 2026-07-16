@@ -1045,9 +1045,6 @@ function persistentFunctionalProfileForCard(
   const absoluteNonStackable =
     runnerHandTextHasAbsoluteLinkSignal(text) &&
     !runnerHandTextHasTemporaryCounterSignal(text);
-  const accessSupportCoverage = accessSupport
-    ? persistentAccessSupportCoverageForCard(card)
-    : [];
   const functionalCoverage = sortedUnique([
     ...breakerCoverage.map((coverage) => `breaker:${coverage}`),
     ...nonAdditiveUtilityFamilies,
@@ -1060,7 +1057,7 @@ function persistentFunctionalProfileForCard(
     ...(bankTool ? ["bank_tool"] : []),
     ...(economyTool ? ["economy_engine"] : []),
     ...(actionEconomy ? ["action_economy"] : []),
-    ...accessSupportCoverage,
+    ...(accessSupport ? ["access_support"] : []),
     ...(searchSupport ? ["search_support"] : []),
     ...(absoluteNonStackable ? ["absolute_link"] : []),
   ]);
@@ -1095,25 +1092,6 @@ function persistentFunctionalProfileForCard(
     actionGatedUtility,
     absoluteNonStackable,
   };
-}
-
-function persistentAccessSupportCoverageForCard(card: VisibleCard): string[] {
-  const hint = card.definitionId ? AI_HINTS.get(card.definitionId) : undefined;
-  const targetIds = sortedUnique(
-    (hint?.effects ?? [])
-      .filter((effect) => effect.kind === "multiaccess")
-      .flatMap((effect) => [
-        effect.scope,
-        "target" in effect ? effect.target : undefined,
-      ])
-      .filter((value): value is string => typeof value === "string")
-      .map((value) => value.toLocaleLowerCase("en-US"))
-      .map((value) => (value === "r&d" || value === "rnd" ? "rd" : value))
-      .filter((value) => ["hq", "rd", "archives", "remote"].includes(value)),
-  );
-  return targetIds.length > 0
-    ? targetIds.map((targetId) => `access_support:${targetId}`)
-    : ["access_support"];
 }
 
 function runnerHandTextHasRiskyBreakerSignal(text: string): boolean {

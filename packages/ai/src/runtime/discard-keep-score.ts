@@ -236,12 +236,17 @@ function runnerImmediateLiquidityKeepBonus(
   definitionId: string,
   cost: number,
 ): number {
-  if (input.side !== "runner" || cost > input.playerView.own.credits) return 0;
+  if (
+    input.side !== "runner" ||
+    input.playerView.own.credits >= 4 ||
+    cost > input.playerView.own.credits
+  ) {
+    return 0;
+  }
   const payout = runnerCreditPayoutAmount(definitionId);
   const netGain = payout - cost;
   if (netGain <= 0) return 0;
-  const liquidityBase = input.playerView.own.credits < 4 ? 520 : 220;
-  return liquidityBase + Math.min(160, netGain * 40);
+  return 520 + Math.min(160, netGain * 40);
 }
 
 function runnerMatchpointCloseoutKeepBonus(params: {
