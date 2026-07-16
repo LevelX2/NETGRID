@@ -1,7 +1,6 @@
 # Evidence: Match C6EEDF46 Runner-Risiko und Ökonomie 2026-07-16
 
-Status: Analyse vollständig, Umsetzung freigegeben, Produktionscode noch
-unverändert
+Status: Analyse und Umsetzung vollständig, Abschlussverifikation erfolgt
 
 ## Match und Datenbasis
 
@@ -339,3 +338,38 @@ StateHash.
 
 P5 ist mit 99 fokussierten Tests, AI-/Engine-Typecheck sowie grünen Derived-,
 Compiled- und Inspector-Gates abgeschlossen.
+
+## Abschlussverifikation
+
+Die nachgelagerte Gegenprüfung hat die Damage-Vermutung bewusst enger als
+den ersten P4-Stand gefasst. Ein Tag allein ist kein Beleg für ein
+Damage-Deck. Allgemeine Trace-Karten zählen nur bei strukturiertem
+`corp.tag_trace_punish`-Support; allgemeine Access-Ambushes ohne
+Damage-/Tag-Punish-Effekt zählen nicht. Damit lösen etwa Rex und Corprunner's
+Shattered Remains zusammen keine falsche Damage-Deck-Vermutung aus.
+
+Der erhöhte Vorsichtsvertrag blockiert außerdem keine exakt finanzierte,
+bereits vorbereitete Handentwicklung. Nur verzögerte Ökonomie bleibt trotz
+Funding-Plan an die konkrete Restreserve gebunden. Ein großer sofortiger
+Broker-Cashout kann bei bestätigtem Damage-Risiko und niedrigem Creditpool
+den Reaktionsfloor herstellen; rein vorsorgliches Bankladen verdrängt den
+Handpuffer dagegen nicht.
+
+Abschlussstand:
+
+- 11 fokussierte AI-Testdateien mit 107/107 Tests grün;
+- sieben Hint-/Engine-Testdateien mit 99/99 Tests grün;
+- Derived-, Full-Derived-, Compiled-, Inspector- und Pilot-Index-Gates grün;
+- AI-, Engine- und Shared-Typecheck grün;
+- vollständige AI-Suite: 346 Testdateien, 2381 Tests, davon 2371 grün und
+  exakt zehn bereits auf dem unveränderten Ausgangsstand reproduzierte rote
+  Alt-Checkpoints;
+- keine neue rote AI-Erwartung gegenüber dem Baseline-Commit
+  `70b3f985c2f85321af633824c65c6abfb1bb4db4`;
+- `git diff --check` grün.
+
+Die zehn Altfehler betreffen drei Broker-Erwartungen, vier ältere
+424A-Endgame-Erwartungen sowie je einen historischen DFE6-, MRGSG- und
+Streetware-Controlfall. Sie wurden nicht durch diesen Prozess erzeugt und
+ihre Erwartungen wurden nicht verändert. Der Branch ist damit für die
+lokale Integration bereit.
