@@ -339,7 +339,7 @@ export function createRunnerBankInvestmentContext(
         cashOutThresholdMet,
         installProjection,
         ...(runOverride ? { runOverride } : {}),
-        buildBankPriority: plausibleFollowup ? 1300 : -1600,
+        buildBankPriority: plausibleFollowup ? 900 : -1600,
         cashOutPriority: 0,
       };
     }
