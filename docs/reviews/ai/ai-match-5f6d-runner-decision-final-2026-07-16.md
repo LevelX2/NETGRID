@@ -134,8 +134,18 @@ Es gibt weiterhin keine branch-exklusive Regression.
 
 ## Integrationsstatus
 
-P5 ist abgeschlossen. Der lokale Main-Abgleich, die Verifikation auf dem
-integrierten Stand und die `main`-Kontrollmessung sind abgeschlossen. Der
-Fast-Forward und das verifizierte Entfernen von Worktree und Branch bilden den
-letzten P6-Schritt. Dieser Abschnitt wird nach dem tatsächlichen Cleanup auf
-`main` aktualisiert.
+P6 ist abgeschlossen:
+
+- Der während der Arbeit bis `87d43fa47` vorgerückte lokale `main` wurde
+  konfliktfrei in den Arbeitsbranch eingebunden. 62 fokussierte Tests,
+  AI-Typecheck, `check:ai` und Diff-Hygiene waren auf diesem Merge-Stand grün;
+  die drei Shards entsprachen mit 15 roten Tests exakt der aktuellen
+  `main`-Kontrollmessung.
+- Der Arbeitsbranch wurde bis `f82050d2d` per Fast-Forward nach lokalem `main`
+  integriert. Danach waren direkt im Hauptworkspace 20/20 Match-5F6D- und
+  FD7671-Checkpoints, AI-Typecheck und Diff-Hygiene grün.
+- `codex/ai-match-5f6d027a-fixes` wurde gelöscht. Der Git-Worktree-Eintrag und
+  `C:\Projekte\NETGRID_AI_MATCH_5F6D027A` wurden verifiziert entfernt; ein
+  zunächst verbliebenes Windows-`node_modules`-Restverzeichnis wurde erst nach
+  exakter Pfadprüfung über den Long-Path entfernt.
+- Es erfolgte kein Push und kein Pull Request.
