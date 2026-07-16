@@ -500,30 +500,87 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       state,
       "onr_v1_325_hacker-tracker-central",
     );
+    const hackerTrackerServer = state.corp.servers.find(
+      (server) => server.id === "remote_1",
+    );
+    if (!hackerTrackerServer) throw new Error("Missing Hacker Tracker server.");
+    hackerTrackerServer.id = "remote_2";
+    hackerTrackerServer.label = "Remote 2";
     state.cardInstances[hackerTrackerId] = {
       ...state.cardInstances[hackerTrackerId]!,
-      faceup: true,
-      rezzed: true,
+      zone: { side: "corp", zone: "serverRoot", serverId: "remote_2" },
       counters: { bit: 2 },
     };
-    putCorpIceOnServer(state, "rd", "onr_v1_241_fang-2-0");
+    state.corp.servers.push({
+      id: "remote_1",
+      kind: "remote",
+      label: "Remote 1",
+      ice: [],
+      root: [],
+    });
+    const fangId = putCorpIceOnServer(
+      state,
+      "remote_1",
+      "onr_v1_241_fang-2-0",
+    );
     state.corp.credits = 10;
     state.runner.credits = 10;
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
 
     state = apply(
       state,
       "runner",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "rd",
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
+      "onr_v1_325_hacker-tracker-central",
+    );
+    const hackerTrackerRezAction = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        action.payload?.cardId === hackerTrackerId &&
+        action.payload?.rootRez === true,
+    );
+    expect(hackerTrackerRezAction).toMatchObject({
+      costs: [{ credits: 0 }],
+      payload: {
+        cardId: hackerTrackerId,
+        rootRez: true,
+        serverId: "remote_2",
+      },
+    });
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === hackerTrackerRezAction.actionId,
+    );
+    expect(state.cardInstances[hackerTrackerId]).toMatchObject({
+      faceup: true,
+      rezzed: true,
+      zone: { side: "corp", zone: "serverRoot", serverId: "remote_2" },
+    });
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "rez_ice",
+      cardDefinitionId: "onr_v1_325_hacker-tracker-central",
+    });
+    expect(JSON.stringify(getPlayerView(state, "runner"))).toContain(
+      "onr_v1_325_hacker-tracker-central",
     );
     state = apply(
       state,
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(state, action) === "onr_v1_241_fang-2-0",
+        action.payload?.cardId === fangId,
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(
+      getLegalActions(state, "corp").some((action) => action.type === "rez_ice"),
+    ).toBe(false);
     state = applyChoice(state, "corp", "bid_6");
     expect(state.corp.credits).toBe(0);
     expect(cardCounterAmount(state, hackerTrackerId, "bit")).toBe(0);
@@ -553,6 +610,10 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
         (action) => action.type === "start_run",
       ),
     ).toBe(false);
+    expect(validateGameState(state).ok).toBe(true);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
 
     const creditsBeforeClearingRunLock = state.runner.credits;
     state = apply(
