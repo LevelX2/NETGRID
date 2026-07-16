@@ -5,6 +5,7 @@ import {
   assessKnownRezzedIcePath,
   runnerRunPathCreditBudgetWithVisiblePools,
 } from "../visible-run-analysis";
+import { runnerActionReserveExclusion } from "./runner-action-reserve";
 import { semanticRuntimeServerId } from "./semantic-runtime-scope";
 import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
 
@@ -115,6 +116,12 @@ export function semanticRuntimeActionExclusion(
       actionSemanticCandidate,
     );
   if (selfDamageSurvivalExclusion) return selfDamageSurvivalExclusion;
+  const reserveExclusion = runnerActionReserveExclusion(
+    input,
+    action,
+    actionSemanticCandidate,
+  );
+  if (reserveExclusion) return reserveExclusion;
   const encounterExclusion = dependencies.runnerEncounterActionExclusion(
     input,
     action,

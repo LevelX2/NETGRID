@@ -125,6 +125,19 @@ describe("ActionCardSemanticProfiles", () => {
     );
   });
 
+  it("retains delayed credit destinations as structured effect targets", () => {
+    const profiles = buildActionCardSemanticProfilesByDefinitionId();
+
+    expect(
+      profiles["onr_v1_174_rigged-investments"]?.effectTargets,
+    ).toEqual(
+      expect.arrayContaining([
+        "economy.installment_credit",
+        "economy.turn_start_credit",
+      ]),
+    );
+  });
+
   it("matches StrategySupportPair payoff roles by bounded signal segments", () => {
     expect(strategySupportRoleForSignal("access.hq_multiaccess")).toBe(
       "payoff_anchor",

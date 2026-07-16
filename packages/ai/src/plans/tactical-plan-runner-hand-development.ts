@@ -1,4 +1,7 @@
-import type { RunnerHandDevelopmentEvaluation } from "../runner-hand-development";
+import {
+  runnerHandDevelopmentBreaksProtectedReserve,
+  type RunnerHandDevelopmentEvaluation,
+} from "../runner-hand-development";
 import { assessRunnerBreakerDevelopment } from "../runner-breaker-development";
 import { cardProvidesBreakerCoverage } from "./tactical-plan-breaker-cards";
 import { missingBreakerCoverageKind } from "./tactical-plan-breaker-coverage";
@@ -38,6 +41,7 @@ export function usefulLegalRunnerHandDevelopment(
 ): boolean {
   if (evaluation.availability !== "legal_now") return false;
   if (!evaluation.legalActionId) return false;
+  if (runnerHandDevelopmentBreaksProtectedReserve(evaluation)) return false;
   if (
     evaluation.persistentInstallEvaluation &&
     (evaluation.persistentInstallEvaluation.finalInstallFit <= 0 ||
@@ -371,6 +375,7 @@ export function runnerFundedHandDevelopmentContinuation(
     evaluation.currentNeed === "none" ||
     evaluation.currentNeed === "later" ||
     evaluation.deferReason === "missing_mu" ||
+    runnerHandDevelopmentBreaksProtectedReserve(evaluation) ||
     evaluation.persistentInstallEvaluation?.duplicateRole ===
       "redundant_duplicate" ||
     !context.input.legalActions.some(

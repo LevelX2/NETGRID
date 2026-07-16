@@ -369,6 +369,15 @@ function buildRunnerCreditReservePolicy(params: {
     ...(emergencyReserve > 0 ? ["emergency_reserve"] : []),
   ];
   const belowReserveNow = params.currentCredits < desiredCreditReserve;
+  const spendingWouldDropBelowReserve = params.input.legalActions.some(
+    (action) => {
+      const cost = action.costs.reduce(
+        (sum, entry) => sum + Math.max(0, entry.credits ?? 0),
+        0,
+      );
+      return cost > 0 && params.currentCredits - cost < desiredCreditReserve;
+    },
+  );
 
   return {
     schemaVersion: 1,
@@ -383,7 +392,7 @@ function buildRunnerCreditReservePolicy(params: {
     remoteScoreThreat: params.remoteScoreThreat,
     canContestIfFunded,
     belowReserveNow,
-    spendingWouldDropBelowReserve: false,
+    spendingWouldDropBelowReserve,
     reserveDrivers,
     reserveOverrides: [],
     evidence: [
@@ -398,6 +407,7 @@ function buildRunnerCreditReservePolicy(params: {
       `remote_score_threat:${params.remoteScoreThreat}`,
       `can_contest_if_funded:${canContestIfFunded}`,
       `below_reserve_now:${belowReserveNow}`,
+      `spending_would_drop_below_reserve:${spendingWouldDropBelowReserve}`,
       ...reserveDrivers.map((driver) => `reserve_driver:${driver}`),
     ],
   };

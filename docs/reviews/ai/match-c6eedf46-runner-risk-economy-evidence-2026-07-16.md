@@ -251,3 +251,25 @@ Ergebnis des Laufs: ein erwarteter roter Zieltest und drei grüne
 Gegenproben. Damit ist die Regression verhaltensbezogen und nicht durch
 Engine-Legalität, Runtime-State-Drift, Fixture-Migration oder Hidden-Info-
 Leakage verursacht.
+
+## Umgesetzter Reserve- und Liquiditätsvertrag
+
+Die Action-Semantik erhält die strukturierten Effektziele aus den Hints nun
+bis zum produktiven Action-Kandidaten. Rigged Investments bleibt damit als
+`economy.installment_credit` und `economy.turn_start_credit` erkennbar,
+anstatt zu einer generischen Economy-Karte ohne Auszahlungszeitpunkt zu
+verflachen.
+
+Handkartenentwicklung und funded continuation unterscheiden jetzt
+Sofortliquidität von verzögerter Liquidität. Zusätzlich bewertet die finale
+Runtime jede bezahlte Runner-Installation mit konkreten Aktionskosten,
+unmittelbarem Credit-Ertrag, Credits nach der Aktion und geschütztem
+Mindestfloor. Eine Installation, die ohne Sofortertrag unter zwei Credits
+führt, wird vor Plan-Arbitration ausgeschlossen; bezahlte Runs werden davon
+nicht pauschal erfasst und echte Survival-Installationen besitzen einen
+engen strukturierten Override.
+
+Im historischen D9 werden dadurch sowohl Rigged Investments als auch R&D
+Interface aus der zulässigen Auswahl entfernt. Mit 10 Credits bleibt Rigged
+Investments erlaubt. Der fokussierte P3-Lauf ist mit 123 Tests sowie dem
+AI-Typecheck grün.

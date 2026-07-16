@@ -30,7 +30,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
         "Whenever you make a successful run on R&D, access 1 additional card.",
     });
     const input = runnerInput({
-      credits: 5,
+      credits: 6,
       hand: [accessCard],
       legalActions: [installAction("install-rd-interface", accessCard, 4)],
     });
