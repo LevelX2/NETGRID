@@ -52,6 +52,10 @@
               "type": "array",
               "items": { "type": "string" }
             },
+            "selectedOptionIdsPrefix": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
             "mustSelectValues": {
               "type": "array",
               "items": { "type": ["string", "number", "boolean"] }

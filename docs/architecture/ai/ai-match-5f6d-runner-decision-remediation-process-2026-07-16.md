@@ -1,6 +1,6 @@
 # KI-Runner-Decision-Remediation für Match 5F6D (2026-07-16)
 
-Status: P0 abgeschlossen, P1 aktiv
+Status: P0 und P1 abgeschlossen, P2 aktiv
 
 ## Quelle und Zielprüfung
 
@@ -92,7 +92,8 @@ entfernen.
 
 ### P1 – Spielgleiche rote Decision-Checkpoints
 
-- Ziel: Decisions 58, 62 und 72 vor Produktionsänderungen strikt capturen.
+- Ziel: Decisions 58, 62, 72, 74, 75, 83 und 84 vor
+  Produktionsänderungen strikt capturen.
 - Zielverträge:
   - D58 wählt einen Bid, der bei akzeptabler Tag-Folge den bekannten
     verbleibenden Zugriffspfad nicht selbst unfinanzierbar macht.
