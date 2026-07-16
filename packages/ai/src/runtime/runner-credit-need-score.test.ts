@@ -72,6 +72,21 @@ describe("runnerCreditNeedScoreComponents", () => {
       ),
     ).toEqual([]);
   });
+
+  it("does not duplicate the dedicated value of a hosted-credit cashout", () => {
+    expect(
+      score(
+        action({
+          type: "activated_card_ability",
+          payload: {
+            cardImplementationTakesHostedCredits: true,
+            gainCreditsAmount: 3,
+          },
+          costs: [{ clicks: 1 }],
+        }),
+      ),
+    ).toEqual([]);
+  });
 });
 
 function score(actionToScore: LegalAction) {

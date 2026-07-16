@@ -143,6 +143,11 @@ entfernen.
   Runtime-/Trace-/Economy-/Choice-Tests, AI-Typecheck und `git diff --check`.
 - Breite Checks: vollständige AI-Suite beziehungsweise alle AI-Testshards und
   relevante AI-Gates, sofern realistisch.
+- Broad-Regression-Härtung: Eine ausdrücklich modellierte Auszahlung
+  gehosteter Credits erhält keinen zweiten allgemeinen Credit-Bedarfsbonus;
+  ihr Wert bleibt beim dedizierten Bankvertrag. Dadurch behält eine dringende
+  Run-Lock-Freigabe ihren Vorrang. Zwischencommit:
+  `fix(ai): avoid double-counting credit bank cashouts`.
 - Artefakte: Red-Evidence, Final-Report, AI-README beziehungsweise aktueller
   Monatslog, falls ein dauerhafter Vertrag entstanden ist.
 - Done-Gate: Checks, Grenzen und bewusst nicht gelaufene Gates dokumentiert;
