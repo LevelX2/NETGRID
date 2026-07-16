@@ -734,6 +734,11 @@ describe("V1.0.5K Card Release", () => {
         action.payload?.cardId === assetId &&
         action.payload?.serverId === "new_remote",
     );
+    state.cardInstances[assetId] = {
+      ...state.cardInstances[assetId]!,
+      advancementCounters: 2,
+      counters: { power: 1 },
+    };
     const installAgenda = mustAction(
       state,
       "corp",
@@ -769,6 +774,8 @@ describe("V1.0.5K Card Release", () => {
       side: "corp",
       zone: "archives",
     });
+    expect(state.cardInstances[assetId]?.advancementCounters).toBe(0);
+    expect(state.cardInstances[assetId]?.counters).toBeUndefined();
     expect(state.cardInstances[agendaId]?.zone).toEqual({
       side: "corp",
       zone: "serverRoot",

@@ -69,9 +69,11 @@ describe("turn-flags-counters", () => {
       "Nicht genug Counter vorhanden.",
     );
 
+    current.cardInstances[CARD_ID]!.advancementCounters = 2;
     setCardCounter(current, CARD_ID, "power", 3);
     clearCardCounters(current, CARD_ID);
     expect(current.cardInstances[CARD_ID]?.counters).toBeUndefined();
+    expect(current.cardInstances[CARD_ID]?.advancementCounters).toBe(0);
   });
 
   it("ensures turn flags and records runner action spending", () => {

@@ -1,19 +1,28 @@
 ---
 activityId: act-2026-07-16-archives-advancement-counter-cleanup
-status: inbox
+status: done
 kind: fix
 area: engine
 priority: hotfix
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-07-16
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-07-16
+completedAt: 2026-07-16
+branch: codex/activities-worktree-20260716-counter-cleanup
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/engine/src/game/state/turn-flags-counters.ts
+  - packages/engine/src/game/state/turn-flags-counters.test.ts
+  - packages/engine/src/index-tests/originalset/hidden-access-run-regressions.test.ts
+  - packages/engine/src/index-tests/releases/card-release-smokes.test.ts
+checks:
+  - corepack pnpm exec vitest run packages/engine/src/game/state/turn-flags-counters.test.ts --reporter=dot
+  - corepack pnpm exec vitest run packages/engine/src/index-tests/originalset/hidden-access-run-regressions.test.ts --reporter=dot
+  - corepack pnpm exec vitest run packages/engine/src/index-tests/releases/card-release-smokes.test.ts -t "lets the Corp install an agenda over an installed asset" --reporter=dot
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - git diff --check
 ---
 
 # Advancement Counter beim Wechsel nach Archives entfernen
@@ -52,15 +61,15 @@ Wenn eine Korp-Karte nach Archives gelangt, liegen auf ihr keine Advancement Cou
 
 ## Akzeptanzkriterien
 
-- [ ] Eine installierte Korp-Karte mit Advancement Countern hat nach `trashCorpInstalledCardToArchives` den Wert `advancementCounters: 0`.
-- [ ] Beim Zugriff auf eine entwickelte `Vacant Soulkiller` wird die Schadensmenge weiterhin aus der Counter-Anzahl vor dem Trash berechnet; nach Schadensabwicklung oder -verhinderung und anschließendem Trash liegt die Karte ohne Advancement Counter in Archives.
-- [ ] Der Access-Trash-Ablauf verwendet weiterhin eine aus `LegalActions` abgeleitete Aktion, und `applyAction` revalidiert den aktuellen Zugriff, die Karte, die Kosten und die StateVersion.
-- [ ] Der zentrale Cleanup entfernt weiterhin allgemeine kartengebundene Counter, ohne andere Spielzustandsfelder unbeabsichtigt zu löschen.
-- [ ] Mindestens ein weiterer zentraler Archives-Trash-Pfad ist durch Test oder vorhandene passende Regression gegen liegenbleibende Advancement Counter abgesichert.
-- [ ] PlayerViews und UI zeigen in Archives keine Advancement Counter, weil der zugrunde liegende Engine-Zustand bereinigt ist.
-- [ ] Öffentliche Events verraten keine zusätzliche verdeckte Karteninformation.
-- [ ] Replay des korrigierten Ablaufs ist erfolgreich und sein StateHash stimmt mit dem direkt ausgeführten Zustand überein.
-- [ ] Fokussierte Engine-Tests, Engine-Typecheck und `git diff --check` sind erfolgreich.
+- [x] Eine installierte Korp-Karte mit Advancement Countern hat nach `trashCorpInstalledCardToArchives` den Wert `advancementCounters: 0`.
+- [x] Beim Zugriff auf eine entwickelte `Vacant Soulkiller` wird die Schadensmenge weiterhin aus der Counter-Anzahl vor dem Trash berechnet; nach Schadensabwicklung oder -verhinderung und anschließendem Trash liegt die Karte ohne Advancement Counter in Archives.
+- [x] Der Access-Trash-Ablauf verwendet weiterhin eine aus `LegalActions` abgeleitete Aktion, und `applyAction` revalidiert den aktuellen Zugriff, die Karte, die Kosten und die StateVersion.
+- [x] Der zentrale Cleanup entfernt weiterhin allgemeine kartengebundene Counter, ohne andere Spielzustandsfelder unbeabsichtigt zu löschen.
+- [x] Mindestens ein weiterer zentraler Archives-Trash-Pfad ist durch Test oder vorhandene passende Regression gegen liegenbleibende Advancement Counter abgesichert.
+- [x] PlayerViews und UI zeigen in Archives keine Advancement Counter, weil der zugrunde liegende Engine-Zustand bereinigt ist.
+- [x] Öffentliche Events verraten keine zusätzliche verdeckte Karteninformation.
+- [x] Replay des korrigierten Ablaufs ist erfolgreich und sein StateHash stimmt mit dem direkt ausgeführten Zustand überein.
+- [x] Fokussierte Engine-Tests, Engine-Typecheck und `git diff --check` sind erfolgreich.
 
 ## Umsetzungshinweise
 
@@ -71,4 +80,6 @@ Wenn eine Korp-Karte nach Archives gelangt, liegen auf ihr keine Advancement Cou
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen am 2026-07-16. `cardInstanceWithoutCounters` entfernt weiterhin die allgemeine `counters`-Map und setzt jetzt zusätzlich das separate Feld `advancementCounters` deterministisch auf `0`. Damit bereinigt der zentrale Archives-Trash-Helfer alle kartengebundenen Counter, ohne den vorangehenden Access-Effekt zu verändern.
+
+Die neue Vacant-Soulkiller-Regression bildet den Playtest-Ablauf mit zwei Advancement Countern, partiellem Core-Damage-Schutz durch Lifesaver Nanosurgeons und anschließendem legalen `trash_accessed_card` ab. Vor dem Trash bleiben die Counter für die Schadensberechnung erhalten; danach sind Engine-State und Runner-Archives-Ansicht counterfrei. Replay und StateHash stimmen überein. Der bestehende Agenda-over-Asset-Replacement-Test sichert denselben Cleanup zusätzlich für einen zweiten zentralen Archives-Pfad. Alle paketbezogenen Tests, der Engine-Typecheck und `git diff --check` sind grün; es bleiben keine paketbezogenen Folgepunkte offen.
