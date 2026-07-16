@@ -6,7 +6,9 @@ import { rolesMatch } from "./role-match";
 import { visibleCardCoversRequiredCoverage } from "./runner-search-coverage-need";
 import type { RequiredCapabilityKind } from "../plans/tactical-plan-types";
 
-type PendingChoice = NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>;
+type PendingChoice = NonNullable<
+  AiDecisionInput["playerView"]["pendingChoice"]
+>;
 type PendingChoiceOption = PendingChoice["options"][number];
 
 export type SearchChoiceFeatureSnapshot = {
@@ -21,6 +23,7 @@ export type SearchChoiceScoringContext = {
   readonly features: SearchChoiceFeatureSnapshot;
   readonly rolesForCardId: (cardId: string | undefined) => readonly string[];
   readonly requiredCoverage?: RequiredCapabilityKind;
+  readonly preferredServerId?: string;
 };
 
 export function selectedSearchChoiceOptionIds(
@@ -37,37 +40,42 @@ export function selectedSearchChoiceOptionIds(
   if (count <= 0) return [];
   const hasDirectCoverageAnswer = Boolean(
     context.requiredCoverage &&
-      selectableOptions.some(
-        (option) =>
-          option.card &&
-          visibleCardCoversRequiredCoverage(
-            option.card,
-            context.requiredCoverage,
-            context.rolesForCardId,
-          ),
-      ),
+    selectableOptions.some(
+      (option) =>
+        option.card &&
+        visibleCardCoversRequiredCoverage(
+          option.card,
+          context.requiredCoverage,
+          context.rolesForCardId,
+        ),
+    ),
   );
-  return selectableOptions
-    .slice()
-    .sort((left, right) => {
-      const scoreDelta =
-        scoreSearchChoiceOption(choice, right, context, hasDirectCoverageAnswer) -
-        scoreSearchChoiceOption(choice, left, context, hasDirectCoverageAnswer);
-      return (
-        scoreDelta ||
-        left.label.localeCompare(right.label, "de") ||
-        left.id.localeCompare(right.id)
-      );
-    })
-    .slice(0, count)
-    .map((option) => option.id);
+  const ranked = rankSearchChoiceOptions(
+    choice,
+    selectableOptions,
+    context,
+    hasDirectCoverageAnswer,
+  );
+  if (!isTakeOneArrangeRestChoice(choice)) {
+    return ranked.slice(0, count).map((option) => option.id);
+  }
+  const firstPick = ranked[0];
+  if (!firstPick) return [];
+  const remainingContext = projectFirstPickIntoGrip(context, firstPick);
+  const remaining = rankSearchChoiceOptions(
+    choice,
+    selectableOptions.filter((option) => option.id !== firstPick.id),
+    remainingContext,
+    hasDirectCoverageAnswer,
+  );
+  return [firstPick, ...remaining].slice(0, count).map((option) => option.id);
 }
 
 export function isSearchChoice(choice: PendingChoice): boolean {
   return Boolean(
     choice.cardSearchPresentation ||
-      choice.stackSearchResolution ||
-      choiceSourceHasSearchToken(choice.source),
+    choice.stackSearchResolution ||
+    choiceSourceHasSearchToken(choice.source),
   );
 }
 
@@ -81,6 +89,52 @@ function choiceSourceHasSearchToken(source: string | undefined): boolean {
   return tokenSet.has("search") || tokenSet.has("stack");
 }
 
+function isTakeOneArrangeRestChoice(choice: PendingChoice): boolean {
+  return (
+    choice.source.startsWith(
+      "v1922.runner_stack_top5_choose_one_arrange_rest",
+    ) ||
+    choice.source.startsWith("p3_37.runner_stack_top5_choose_one_arrange_rest")
+  );
+}
+
+function rankSearchChoiceOptions(
+  choice: PendingChoice,
+  options: readonly PendingChoiceOption[],
+  context: SearchChoiceScoringContext,
+  hasDirectCoverageAnswer: boolean,
+): PendingChoiceOption[] {
+  return options.slice().sort((left, right) => {
+    const scoreDelta =
+      scoreSearchChoiceOption(choice, right, context, hasDirectCoverageAnswer) -
+      scoreSearchChoiceOption(choice, left, context, hasDirectCoverageAnswer);
+    return (
+      scoreDelta ||
+      left.label.localeCompare(right.label, "de") ||
+      left.id.localeCompare(right.id)
+    );
+  });
+}
+
+function projectFirstPickIntoGrip(
+  context: SearchChoiceScoringContext,
+  firstPick: PendingChoiceOption,
+): SearchChoiceScoringContext {
+  const definitionId = firstPick.card?.definitionId;
+  if (!definitionId) return context;
+  const gripDefinitionCounts = new Map(
+    context.features.gripDefinitionCounts ?? [],
+  );
+  gripDefinitionCounts.set(
+    definitionId,
+    (gripDefinitionCounts.get(definitionId) ?? 0) + 1,
+  );
+  return {
+    ...context,
+    features: { ...context.features, gripDefinitionCounts },
+  };
+}
+
 function scoreSearchChoiceOption(
   choice: PendingChoice,
   option: PendingChoiceOption,
@@ -91,7 +145,8 @@ function scoreSearchChoiceOption(
   if (!card) return 0;
   const destination =
     choice.cardSearchPresentation?.destination ??
-    choice.stackSearchResolution?.destination;
+    choice.stackSearchResolution?.destination ??
+    (isTakeOneArrangeRestChoice(choice) ? "grip" : undefined);
   const roles = context.rolesForCardId(card.definitionId);
   const subtypes = (card.subtypes ?? []).map((subtype) =>
     subtype.toLowerCase(),
@@ -140,6 +195,25 @@ function scoreSearchChoiceOption(
         ? 100
         : -120 - (installCost - features.credits) * 30;
   }
+  if (destination === "grip" && card.type !== "program") {
+    const playOrInstallCost = card.installCost ?? card.cost ?? 0;
+    score +=
+      playOrInstallCost <= features.credits
+        ? 80
+        : -100 - (playOrInstallCost - features.credits) * 25;
+  }
+
+  if (
+    context.preferredServerId === "hq" &&
+    rolesMatch(roles, ["pressure_hq"])
+  ) {
+    score += 350;
+  } else if (
+    context.preferredServerId === "rd" &&
+    rolesMatch(roles, ["pressure_rnd"])
+  ) {
+    score += 350;
+  }
 
   const breakerRoleNeedles = matchingBreakerRoleNeedles(roles);
   if (
@@ -159,8 +233,7 @@ function scoreSearchChoiceOption(
 
   if (rolesMatch(roles, ["memory"]) || (card.memoryLimitBonus ?? 0) > 0)
     score += features.memoryRemaining <= 1 ? 170 : 60;
-  if (rolesMatch(roles, ["economy"]))
-    score += features.credits < 4 ? 90 : 25;
+  if (rolesMatch(roles, ["economy"])) score += features.credits < 4 ? 90 : 25;
   if (card.definitionId) {
     const gripCopies =
       features.gripDefinitionCounts?.get(card.definitionId) ?? 0;
