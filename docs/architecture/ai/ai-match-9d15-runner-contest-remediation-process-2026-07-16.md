@@ -1,6 +1,6 @@
 # KI-Runner-Contest-Remediation für Match 9D15 (2026-07-16)
 
-Status: P0 aktiv
+Status: P0 bis P4 abgeschlossen; P5 lokale Integration ausstehend
 
 ## Quelle und Zielprüfung
 
@@ -170,3 +170,19 @@ Broker-Logik.
   Verifikationspfade ohne erneute breite Suche.
 - `main` enthält alle Paketcommits; Worktree und Branch sind verifiziert
   entfernt.
+
+## Paketstand vor P5
+
+- P0 Prozessbasis: `634d97666`
+- P1 Red-Evidence und Checkpoints: `5e63c23ed`
+- P2 Bypass-Contest: `e20dbbd48`
+- P3 Mehrpunkt-Terminalcontest: `412f4b2a4`
+- P4 Full-Gate-Fund zur Low-Value-Run-Event-Arbitration: `e1d6cd82b`
+- Evidence, Final Review, Wissenspflege und Skill-Härtung: im abschließenden
+  P4-Dokumentencommit
+
+Die ursprünglichen beiden Zielverträge waren vor Produktionsänderungen als
+`behavior_regression` rot und sind unverändert grün. Der erste breite
+AI-Shard-Lauf deckte zusätzlich eine 424A-Regression auf; erst nach ihrer
+generischen Eingrenzung wurden alle drei Shards auf demselben finalen
+Code-Commit erneut grün ausgeführt.
