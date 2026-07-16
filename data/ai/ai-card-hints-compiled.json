@@ -23206,7 +23206,7 @@
       ],
       "costProfile": {},
       "remoteRole": {
-        "kind": "asset_economy",
+        "kind": "score_acceleration",
         "serverScope": "remote",
         "threatLevel": "medium"
       }
@@ -23953,7 +23953,7 @@
       ],
       "costProfile": {},
       "remoteRole": {
-        "kind": "asset_economy",
+        "kind": "score_acceleration",
         "serverScope": "remote",
         "threatLevel": "medium"
       }
@@ -24389,7 +24389,7 @@
       ],
       "costProfile": {},
       "remoteRole": {
-        "kind": "asset_economy",
+        "kind": "score_acceleration",
         "serverScope": "remote",
         "threatLevel": "medium"
       }
@@ -24495,7 +24495,7 @@
       ],
       "costProfile": {},
       "remoteRole": {
-        "kind": "asset_economy",
+        "kind": "score_acceleration",
         "serverScope": "remote",
         "threatLevel": "medium"
       }
@@ -25191,7 +25191,7 @@
         "reserveRisk": "medium"
       },
       "remoteRole": {
-        "kind": "asset_economy",
+        "kind": "score_acceleration",
         "serverScope": "remote",
         "threatLevel": "medium"
       },
@@ -26019,13 +26019,6 @@
           "timing": "action"
         }
       ],
-      "remoteRole": {
-        "kind": "asset_economy",
-        "serverScope": "remote",
-        "strategyDerivation": "not_for_strategy_derivation",
-        "strategyDerivationNotes": "Guide V3: draw support only, not Corp asset-economy strategy derivation.",
-        "threatLevel": "medium"
-      },
       "tacticSignals": [
         "draw.corp_draw"
       ],
@@ -26105,13 +26098,6 @@
           "timing": "persistent"
         }
       ],
-      "remoteRole": {
-        "kind": "asset_economy",
-        "serverScope": "remote",
-        "strategyDerivation": "not_for_strategy_derivation",
-        "strategyDerivationNotes": "Guide V3: draw and hand-size support only, not Corp asset-economy strategy derivation.",
-        "threatLevel": "medium"
-      },
       "tacticSignals": [
         "draw.corp_draw",
         "setup.corp_hand_size"
@@ -26298,11 +26284,6 @@
           "timing": "persistent"
         }
       ],
-      "remoteRole": {
-        "kind": "asset_economy",
-        "serverScope": "remote",
-        "threatLevel": "medium"
-      },
       "tacticSignals": [
         "ice.corp_install_discount",
         "tax.ice"
@@ -27260,10 +27241,8 @@
         "reviewedBy": "codex"
       },
       "remoteRole": {
-        "kind": "asset_economy",
+        "kind": "score_acceleration",
         "serverScope": "remote",
-        "strategyDerivation": "not_for_strategy_derivation",
-        "strategyDerivationNotes": "Guide V3: score-conversion support remains card-level fast advance; generated asset_economy remoteRole must not derive asset-economy strategy.",
         "threatLevel": "medium"
       },
       "strategySupportPairs": [
@@ -27602,13 +27581,6 @@
           "timing": "persistent"
         }
       ],
-      "remoteRole": {
-        "kind": "asset_economy",
-        "serverScope": "remote",
-        "strategyDerivation": "not_for_strategy_derivation",
-        "strategyDerivationNotes": "Guide V3: hand-size support only, not Corp asset-economy strategy derivation.",
-        "threatLevel": "medium"
-      },
       "tacticSignals": [
         "setup.corp_hand_size"
       ],
@@ -28681,6 +28653,13 @@
           "scope": "runner",
           "target": "access.corp_net_damage_ambush",
           "timing": "on_access"
+        },
+        {
+          "amount": 1,
+          "kind": "damage",
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "action"
         },
         {
           "kind": "damage",

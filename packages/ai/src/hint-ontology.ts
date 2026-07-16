@@ -230,6 +230,7 @@ export const KNOWN_HINT_BREAKER_SIDE_EFFECTS = [
 
 export const KNOWN_HINT_REMOTE_ROLE_KINDS = [
   "scoring_protection",
+  "score_acceleration",
   "bait",
   "asset_economy",
   "run_tax",
@@ -641,6 +642,7 @@ export type AiHintOntologyIssueKind =
   | "unknown_breaker_coverage"
   | "unknown_breaker_side_effect"
   | "unknown_remote_role"
+  | "asset_economy_without_economy_evidence"
   | "unknown_target_zone"
   | "unknown_target_card_type"
   | "unknown_target_install_cost"
@@ -705,6 +707,12 @@ function validateExtensionFields(
     issues,
   );
   validateRemoteRole(input.remoteRole, `${path}.remoteRole`, issues);
+  validateAssetEconomyEvidence(
+    input.remoteRole,
+    input.effects,
+    `${path}.remoteRole`,
+    issues,
+  );
   validateTargetProfiles(
     input.targetProfiles,
     `${path}.targetProfiles`,
@@ -954,6 +962,42 @@ function validateRemoteRole(
     "invalid_shape",
     issues,
   );
+}
+
+function validateAssetEconomyEvidence(
+  remoteRole: unknown,
+  effects: unknown,
+  path: string,
+  issues: AiHintOntologyIssue[],
+): void {
+  if (
+    !isRecord(remoteRole) ||
+    remoteRole.kind !== "asset_economy" ||
+    (Array.isArray(effects) && effects.some(isIndependentEconomyEffect))
+  )
+    return;
+  addIssue(
+    issues,
+    "error",
+    "asset_economy_without_economy_evidence",
+    `${path}.kind`,
+    "asset_economy requires an independent credit or economy effect.",
+  );
+}
+
+function isIndependentEconomyEffect(effect: unknown): boolean {
+  if (!isRecord(effect)) return false;
+  if (effect.resource === "credits") return true;
+  return [
+    "economy",
+    "counter_economy",
+    "action_economy",
+    "start_of_turn_economy",
+    "recurring_economy",
+    "advanceable_economy",
+    "agenda_reveal_economy",
+    "finite_economy_pool",
+  ].includes(String(effect.kind));
 }
 
 function validateTargetProfiles(

@@ -234,6 +234,7 @@ const KNOWN_BREAKER_SIDE_EFFECTS = new Set([
 
 const KNOWN_REMOTE_ROLES = new Set([
   "scoring_protection",
+  "score_acceleration",
   "bait",
   "asset_economy",
   "run_tax",
@@ -3102,7 +3103,7 @@ function deriveFromImplementation(card, implementationText, hint) {
       source: "implementation.abilities.costs",
     };
     facts.remoteRole = {
-      kind: "asset_economy",
+      kind: "score_acceleration",
       threatLevel: "medium",
       serverScope: "remote",
       confidence: "high",
@@ -3793,6 +3794,15 @@ function deriveFromImplementation(card, implementationText, hint) {
       serverScope: "remote",
       confidence: "high",
       source: "pilot.expectedDerivableKinds.asset_economy",
+    };
+  }
+  if (!facts.remoteRole && expectsKind("remoteRole:score_acceleration")) {
+    facts.remoteRole = {
+      kind: "score_acceleration",
+      threatLevel: "medium",
+      serverScope: "remote",
+      confidence: "high",
+      source: "pilot.expectedDerivableKinds.score_acceleration",
     };
   }
   if (!facts.remoteRole && expectsKind("remoteRole:remote_capacity")) {

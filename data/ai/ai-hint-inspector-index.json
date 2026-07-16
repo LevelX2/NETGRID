@@ -18,7 +18,7 @@
     "cardsWithGeneratedFacts": 337,
     "cardsWithOverlays": 6,
     "cardsWithFunctionSignals": 602,
-    "cardsWithStrategyAnchors": 257,
+    "cardsWithStrategyAnchors": 256,
     "cardsWithStrategySupportPairs": 198,
     "cardsWithWarnings": 116,
     "warningCategoryCounts": {
@@ -57152,11 +57152,9 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "remote.asset_economy",
         "score.advance_burst"
       ],
       "derivedStrategyAnchors": [
-        "corp.asset_economy",
         "corp.fast_advance"
       ],
       "cardLevelStrategyAnchors": [
@@ -57164,7 +57162,6 @@
         "corp.remote_scoring"
       ],
       "derivedPossibleStrategyAnchors": [
-        "corp.asset_economy",
         "corp.fast_advance"
       ],
       "reviewedStrategySupportPairs": [
@@ -58301,12 +58298,10 @@
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
-          "effects",
-          "remoteRole"
+          "effects"
         ],
         "compiledMechanicalFactFields": [
-          "effects",
-          "remoteRole"
+          "effects"
         ],
         "generatedFactFields": [
           "effects"
@@ -58384,13 +58379,11 @@
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
-          "effects",
-          "remoteRole"
+          "effects"
         ],
         "compiledMechanicalFactFields": [
           "effects",
-          "conditions",
-          "remoteRole"
+          "conditions"
         ],
         "generatedFactFields": [
           "effects",
@@ -58550,18 +58543,13 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "remote.asset_economy",
         "setup.install_discount"
       ],
-      "derivedStrategyAnchors": [
-        "corp.asset_economy"
-      ],
+      "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [
         "corp.ice_tax_glacier"
       ],
-      "derivedPossibleStrategyAnchors": [
-        "corp.asset_economy"
-      ],
+      "derivedPossibleStrategyAnchors": [],
       "reviewedStrategySupportPairs": [
         {
           "strategyId": "corp.ice_tax_glacier",
@@ -58631,13 +58619,11 @@
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
-          "effects",
-          "remoteRole"
+          "effects"
         ],
         "compiledMechanicalFactFields": [
           "effects",
-          "conditions",
-          "remoteRole"
+          "conditions"
         ],
         "generatedFactFields": [
           "effects",
@@ -59850,8 +59836,7 @@
         ],
         "generatedFactFields": [
           "effects",
-          "conditions",
-          "remoteRole"
+          "conditions"
         ],
         "overlayFields": []
       },
@@ -60246,13 +60231,11 @@
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
-          "effects",
-          "remoteRole"
+          "effects"
         ],
         "compiledMechanicalFactFields": [
           "effects",
-          "conditions",
-          "remoteRole"
+          "conditions"
         ],
         "generatedFactFields": [
           "effects",

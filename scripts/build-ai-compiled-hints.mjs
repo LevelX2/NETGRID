@@ -216,6 +216,7 @@ const KNOWN_BREAKER_COVERAGES = new Set([
 ]);
 const KNOWN_REMOTE_ROLES = new Set([
   "scoring_protection",
+  "score_acceleration",
   "bait",
   "asset_economy",
   "run_tax",
@@ -644,6 +645,18 @@ function validateKnownOntology(hint, errors) {
       message: `Unknown remote role ${String(hint.remoteRole.kind)}.`,
     });
   }
+  if (
+    hint.remoteRole?.kind === "asset_economy" &&
+    !(hint.effects ?? []).some(isIndependentEconomyEffect)
+  ) {
+    errors.push({
+      kind: "asset_economy_without_economy_evidence",
+      cardId: hint.cardId,
+      field: "remoteRole.kind",
+      message:
+        "asset_economy requires an independent credit or economy effect.",
+    });
+  }
   if (hint.opponentSignals !== undefined) {
     for (const [index, signal] of hint.opponentSignals.entries()) {
       if (signal?.visibleEvidenceOnly !== true) {
@@ -656,6 +669,21 @@ function validateKnownOntology(hint, errors) {
       }
     }
   }
+}
+
+function isIndependentEconomyEffect(effect) {
+  if (!effect || typeof effect !== "object") return false;
+  if (effect.resource === "credits") return true;
+  return new Set([
+    "economy",
+    "counter_economy",
+    "action_economy",
+    "start_of_turn_economy",
+    "recurring_economy",
+    "advanceable_economy",
+    "agenda_reveal_economy",
+    "finite_economy_pool",
+  ]).has(effect.kind);
 }
 
 function validatePilotSpecificGuards(compiledByCard, errors) {

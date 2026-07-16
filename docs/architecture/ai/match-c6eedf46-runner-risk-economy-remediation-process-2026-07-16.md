@@ -1,6 +1,6 @@
 # Match C6EEDF46: Runner-Risiko- und Ökonomie-Remediation 2026-07-16
 
-Status: P0 bis P4 abgeschlossen, P5 aktiv
+Status: P0 bis P5 abgeschlossen, P6 aktiv
 
 ## Quelle und Zielprüfung
 

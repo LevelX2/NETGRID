@@ -1314,7 +1314,10 @@ function publicKnownCardDefinitionId(
   ) {
     return stringValue(event.publicPayload.sourceDefinitionId);
   }
-  if (classification.actionType === "rez_ice") {
+  if (
+    classification.actionType === "rez_ice" ||
+    classification.actionType === "rez_card"
+  ) {
     return (
       stringValue(event.publicPayload.rezzedCardDefinitionId) ??
       stringValue(event.publicPayload.sourceDefinitionId)
@@ -1785,7 +1788,7 @@ function eventFamily(actionType: string, event: PublicGameEvent): BeliefEventFam
   const hiddenZoneFamily = hiddenZoneActionEventFamily(hiddenZoneAction);
   if (hiddenZoneFamily) return hiddenZoneFamily;
   if (actionType === "install_card") return "install";
-  if (actionType === "rez_ice") return "rez";
+  if (actionType === "rez_ice" || actionType === "rez_card") return "rez";
   if (actionType === "advance_card") return "advance";
   if (actionType === "score_agenda") return "score";
   if (actionType === "steal_agenda") return "steal";

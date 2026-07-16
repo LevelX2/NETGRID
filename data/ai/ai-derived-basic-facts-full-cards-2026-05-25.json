@@ -4690,7 +4690,7 @@
       "fullCoverageScope": true,
       "expectedDerivableKinds": [
         "effect:score_acceleration",
-        "remoteRole:asset_economy"
+        "remoteRole:score_acceleration"
       ],
       "expectedManualOverlayNeeded": false,
       "coverageClass": "legacy_fallback_only",
@@ -4832,8 +4832,7 @@
       "implementationFound": true,
       "fullCoverageScope": true,
       "expectedDerivableKinds": [
-        "effect:draw",
-        "remoteRole:asset_economy"
+        "effect:draw"
       ],
       "expectedManualOverlayNeeded": false,
       "coverageClass": "legacy_fallback_only",
@@ -4850,8 +4849,7 @@
       "expectedDerivableKinds": [
         "effect:draw",
         "effect:remote_protection",
-        "condition:requires_rezzed_card",
-        "remoteRole:asset_economy"
+        "condition:requires_rezzed_card"
       ],
       "expectedManualOverlayNeeded": false,
       "coverageClass": "legacy_fallback_only",
@@ -4888,8 +4886,7 @@
       "fullCoverageScope": true,
       "expectedDerivableKinds": [
         "effect:install_discount",
-        "condition:requires_rezzed_card",
-        "remoteRole:asset_economy"
+        "condition:requires_rezzed_card"
       ],
       "expectedManualOverlayNeeded": false,
       "coverageClass": "legacy_fallback_only",
@@ -5057,7 +5054,7 @@
         "effect:extra_action",
         "effect:advanceable_economy",
         "condition:requires_advancement_counter",
-        "remoteRole:asset_economy"
+        "remoteRole:score_acceleration"
       ],
       "expectedManualOverlayNeeded": false,
       "coverageClass": "legacy_fallback_only",
@@ -5124,8 +5121,7 @@
       "fullCoverageScope": true,
       "expectedDerivableKinds": [
         "effect:remote_protection",
-        "condition:requires_rezzed_card",
-        "remoteRole:asset_economy"
+        "condition:requires_rezzed_card"
       ],
       "expectedManualOverlayNeeded": false,
       "coverageClass": "legacy_fallback_only",
@@ -8818,6 +8814,32 @@
       "side": "runner",
       "cardType": "hardware",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/__missing__/onr_classic_052_zetatech-portastation.ts",
+      "implementationFound": false,
+      "fullCoverageScope": true,
+      "expectedDerivableKinds": [],
+      "expectedManualOverlayNeeded": false,
+      "coverageClass": "blocked_missing_implementation",
+      "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate."
+    },
+    {
+      "cardId": "onr_classic_053_protected-resources",
+      "title": "Onr Classic 053 Protected Resources",
+      "side": "corp",
+      "cardType": "asset",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/__missing__/onr_classic_053_protected-resources.ts",
+      "implementationFound": false,
+      "fullCoverageScope": true,
+      "expectedDerivableKinds": [],
+      "expectedManualOverlayNeeded": false,
+      "coverageClass": "blocked_missing_implementation",
+      "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate."
+    },
+    {
+      "cardId": "onr_classic_054_phone-freak",
+      "title": "Onr Classic 054 Phone Freak",
+      "side": "runner",
+      "cardType": "resource",
+      "implementationPath": "packages/engine/src/card-implementations/onr-v1/__missing__/onr_classic_054_phone-freak.ts",
       "implementationFound": false,
       "fullCoverageScope": true,
       "expectedDerivableKinds": [],

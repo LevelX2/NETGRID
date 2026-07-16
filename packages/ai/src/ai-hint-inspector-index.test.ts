@@ -257,6 +257,47 @@ describe("AI005 hint inspector index", () => {
     expect(canisMinor.derivedStrategyAnchors).toContain("corp.ice_tax_glacier");
   });
 
+  it("keeps asset economy evidence-backed and exposes Chicago as score acceleration", () => {
+    const index = readIndex();
+    const activeHints = JSON.parse(
+      fs.readFileSync(activeHintsPath, "utf8"),
+    ) as {
+      cards: Array<{
+        cardId: string;
+        remoteRole?: { kind?: string };
+        effects?: Array<{ kind?: string; resource?: string }>;
+      }>;
+    };
+    const chicago = activeHints.cards.find(
+      (hint) => hint.cardId === "onr_v1_312_chicago-branch",
+    );
+    expect(chicago?.remoteRole?.kind).toBe("score_acceleration");
+    for (const hint of activeHints.cards.filter(
+      (candidate) => candidate.remoteRole?.kind === "asset_economy",
+    )) {
+      expect(
+        hint.effects?.some(
+          (effect) =>
+            effect.resource === "credits" ||
+            [
+              "economy",
+              "counter_economy",
+              "action_economy",
+              "start_of_turn_economy",
+              "recurring_economy",
+              "advanceable_economy",
+              "agenda_reveal_economy",
+              "finite_economy_pool",
+            ].includes(effect.kind ?? ""),
+        ),
+        hint.cardId,
+      ).toBe(true);
+      expect(card(index, hint.cardId).warningCategories).not.toContain(
+        "asset_economy_without_economy_evidence",
+      );
+    }
+  });
+
   it("exposes AI018 icebreaker sweep signals without planner-facing anchors", () => {
     const index = readIndex();
     const blackWidow = card(index, "onr_proteus_080_black-widow");

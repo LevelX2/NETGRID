@@ -15,6 +15,7 @@ import {
 describe("known remote access commitment", () => {
   it("matches high-impact remote root roles by bounded role terms", () => {
     expect(knownRemoteRootHasHighImpactRole(["asset_economy"])).toBe(true);
+    expect(knownRemoteRootHasHighImpactRole(["score_acceleration"])).toBe(true);
     expect(knownRemoteRootHasHighImpactRole(["holovid_campaign"])).toBe(true);
     expect(knownRemoteRootHasHighImpactRole(["access_tax"])).toBe(true);
     expect(knownRemoteRootHasHighImpactRole(["access_taxish_noise"])).toBe(

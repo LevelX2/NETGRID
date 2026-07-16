@@ -85,6 +85,7 @@ function aiEventMayRefreshRemoteRun(
     actionType === "install_card" ||
     actionType === "play_event" ||
     actionType === "trigger_ability" ||
+    actionType === "rez_card" ||
     actionType === "rez_ice"
   );
 }

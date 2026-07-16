@@ -11,6 +11,7 @@ import { rolesMatch } from "../runtime/role-match";
 
 export type RemoteTrashRole =
   | "economy"
+  | "score_acceleration"
   | "scoring_protection"
   | "run_tax"
   | "remote_capacity"
@@ -30,6 +31,7 @@ export function remoteTrashRoleForVisibleCard(
   const structuredRole = getStructuredRemoteRoleForCard(card.definitionId);
   if (structuredRole) {
     if (structuredRole.kind === "remote_capacity") return "remote_capacity";
+    if (structuredRole.kind === "score_acceleration") return "score_acceleration";
     if (structuredRole.kind === "asset_economy") return "economy";
     if (structuredRole.kind === "bait" || structuredRole.kind === "ambush")
       return "ambush";

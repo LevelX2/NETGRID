@@ -52,6 +52,7 @@ export function remoteRoleIsNonScoringProtectionKind(
 ): boolean {
   return (
     kind === "remote_capacity" ||
+    kind === "score_acceleration" ||
     kind === "asset_economy" ||
     kind === "bait" ||
     kind === "ambush"
@@ -119,6 +120,11 @@ export function structuredRemoteRoleSafetyAssessmentForCard(
         : []),
       ...(role.kind === "asset_economy"
         ? ["corp_remote_role_prevented_asset_as_scoring_protection:true"]
+        : []),
+      ...(role.kind === "score_acceleration"
+        ? [
+            "corp_remote_role_prevented_score_acceleration_as_scoring_protection:true",
+          ]
         : []),
     ],
   };

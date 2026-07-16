@@ -556,6 +556,12 @@ function warningCategoriesForCard({
   }
   if (wrongSideAnchorMatches.length > 0) warnings.push("wrong_side_anchor");
   if (
+    hint.remoteRole?.kind === "asset_economy" &&
+    !assetEconomyHasIndependentEvidence(hint)
+  ) {
+    warnings.push("asset_economy_without_economy_evidence");
+  }
+  if (
     mechanicalFactFields.length === 0 &&
     generatedFactFields.length === 0 &&
     overlayFields.length === 0
@@ -563,6 +569,23 @@ function warningCategoriesForCard({
     warnings.push("legacy_fallback_only");
   }
   return sortedUnique(warnings);
+}
+
+export function assetEconomyHasIndependentEvidence(hint) {
+  return (hint.effects ?? []).some((effect) => {
+    if (!effect || typeof effect !== "object") return false;
+    if (effect.resource === "credits") return true;
+    return new Set([
+      "economy",
+      "counter_economy",
+      "action_economy",
+      "start_of_turn_economy",
+      "recurring_economy",
+      "advanceable_economy",
+      "agenda_reveal_economy",
+      "finite_economy_pool",
+    ]).has(effect.kind);
+  });
 }
 
 function readManualOverlays(repoRoot, rootPath) {

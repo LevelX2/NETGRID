@@ -816,6 +816,53 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
+  it("publishes BBS Whispering Campaign as generic card rez and replays it exactly", () => {
+    let state = MECHANIC_SMOKE_GAMES.assetNodeEffects(
+      "v1917-bbs-generic-card-rez-event",
+    );
+    state.corp.credits = 10;
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    const bbsId = moveCorpCardToHq(
+      state,
+      "onr_v1_309_bbs-whispering-campaign",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.cardId === bbsId &&
+        action.payload?.serverId === "new_remote",
+    );
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" && action.payload?.cardId === bbsId,
+    );
+
+    expect(state.eventLog.at(-1)).toMatchObject({
+      type: "rez_card",
+      visibilityClass: "hidden_info_barrier",
+      publicPayload: {
+        actionType: "rez_card",
+        cardDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+      },
+    });
+    expect(cardCounterAmount(state, bbsId, "bit")).toBe(16);
+    expect(validateGameState(state).ok).toBe(true);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("cascades hosted V1.9.17 Corp cards to Archives when the host is trashed on access", () => {
     let state = toRunnerTurn(
       MECHANIC_SMOKE_GAMES.assetNodeEffects("v1917-hosted-corp-asset-trash"),

@@ -308,3 +308,34 @@ Fokussierte P4-Gegenproben belegen sichtbare versus unbekannte Karten,
 abgestufte Reserve, Probe und Hold, identische Wiederholung, unterschiedliche
 Kontexte sowie den Ausschluss klarer und nicht naher Entscheidungen. Der
 Checkpoint und 35 fokussierte Tests sowie der AI-Typecheck sind grün.
+
+## Korrigierte Hint- und Rez-Semantik
+
+Chicago Branch und Pacifica Regional AI verwenden nun die eigenständige
+Remote-Rolle `score_acceleration`. Der Remote-Trash-Consumer behandelt diese
+Rolle als relevanten, hochwirksamen Boardwert, aber weder als
+`asset_economy` noch als Scoring-Protection. Die isolierte Chicago-
+Accessentscheidung bleibt damit kontextabhängig; der Fix erzwingt keinen
+unbegründeten All-in-Trash bei gebrochener Reserve.
+
+Die neue Ontologie- und Compiler-Invariante weist `asset_economy` ohne einen
+unabhängigen Credit-/Economy-Effekt als Fehler zurück. Beim Regenerieren
+wurden dadurch zusätzlich fünf bereits vorhandene Fehlklassifikationen bei
+reinen Draw-, Handgrößen- und Installationsrabatt-Assets entfernt. Echte
+Credit-Assets behalten die Rolle. Aktive Hints, Derived-Facts-Gate,
+Full-Inventar, kompilierte Hints und Inspector-Index sind synchronisiert.
+Der Full-Gate-Zähler wurde dabei an die bereits vor diesem Paket vorhandenen
+618 aktiven Hints angeglichen; die bislang fest codierte Erwartung 616 war
+gegen das aktuelle Input-Artefakt veraltet.
+
+Die interne historische LegalAction heißt für Root-Rez weiterhin
+`rez_ice`, damit Legalität und privater Replay-Payload unverändert bleiben.
+Der öffentliche Event-Typ und `publicPayload.actionType` werden dagegen aus
+dem tatsächlich gerezzten Kartentyp abgeleitet: ICE bleibt `rez_ice`, BBS
+Whispering Campaign und andere Nicht-ICE-Karten erscheinen als `rez_card`.
+Die Sichtbarkeitsbarriere bleibt `hidden_info_barrier`; der BBS-Integrationstest
+belegt außerdem 16 geladene Bits, gültigen State und identischen Replay-
+StateHash.
+
+P5 ist mit 99 fokussierten Tests, AI-/Engine-Typecheck sowie grünen Derived-,
+Compiled- und Inspector-Gates abgeschlossen.

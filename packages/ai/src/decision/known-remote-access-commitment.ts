@@ -365,6 +365,7 @@ function knownRemoteTrashTargetProfile(
 } {
   const hint = AI_HINTS_BY_CARD.get(definitionId);
   const roles = [...(hint?.roles ?? []), ...(hint?.planRoles ?? [])];
+  if (hint?.remoteRole?.kind) roles.push(hint.remoteRole.kind);
   const values = Object.values(hint?.valueHints ?? {}).filter(
     (value): value is number => typeof value === "number",
   );
@@ -414,6 +415,7 @@ export function knownRemoteRootHasHighImpactRole(
   return rolesMatch(roles, [
     "economy",
     "campaign",
+    "score_acceleration",
     "scoring_protection",
     "agenda_protection",
     "remote_upgrade_tax",

@@ -14,6 +14,15 @@ vi.mock("../runtime/card-role-lookup", () => ({
 }));
 
 describe("remoteTrashRoleForVisibleCard", () => {
+  it("consumes Chicago Branch score acceleration as a relevant trash role", () => {
+    expect(
+      remoteTrashRoleForVisibleCard({
+        ...card(),
+        definitionId: "onr_v1_312_chicago-branch",
+      }),
+    ).toBe("score_acceleration");
+  });
+
   it("matches remote trash roles by bounded role terms", () => {
     expect(roleForRoles(["remote_agenda_protection"])).toBe(
       "scoring_protection",
