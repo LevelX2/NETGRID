@@ -86,13 +86,15 @@ Suche:
 - die führenden Codepfade von Run-Action-Projektion über Exclusions und
   Score-Consumer bis Plan-Arbitration und Run-Lock-Contest.
 
-`quick_validate.py` meldet den Skill bei 495 Zeilen Hauptdatei als gültig;
+`quick_validate.py` meldete den Skill in dieser ersten Phase bei 495 Zeilen
+Hauptdatei als gültig;
 der Inspector bestätigt weiterhin 84/84 verknüpfte Entscheidungen.
 
 ## Grenzen und Status
 
-- Keine Engine-, LegalAction-, Replay-, PlayerView- oder Hint-Daten wurden
-  geändert.
+- Engine-, LegalAction-, Replay- und PlayerView-Verträge wurden nicht
+  geändert. Hintdaten ändern sich ausschließlich im nachfolgenden
+  Nicht-Broker-Follow-up.
 - Keine Karten-ID-, Match-ID-, Seed- oder Instanz-Sonderregel wurde ergänzt.
 - Kein neues Selfplay wurde erzeugt; die Aufgabe schließt zwei gespeicherte
   Zustände mit historischen Checkpoints und einer vollständigen AI-Suite.
@@ -103,3 +105,51 @@ der Inspector bestätigt weiterhin 84/84 verknüpfte Entscheidungen.
 - Der Arbeitsbranch `codex/ai-match-9d15-runner-contest` und der Worktree
   `C:\Projekte\NETGRID_AI_MATCH_9D15_RUNNER_CONTEST` sind verifiziert
   entfernt. Der parallele Broker-Worktree besteht unverändert fort.
+
+## Follow-up: deckweiter Hint- und Consumer-Audit
+
+Auf Nutzerwunsch wurde anschließend das vollständige Runner-Deck aus dem
+Checkpoint `cp-9d15-01-urgent-remote-inside-job` geprüft. Broker blieb über
+die exakte `cardId` `onr_v1_154_broker` ausgeschlossen. Damit umfasst der
+Audit 21 eindeutige Karten mit 43 Kopien.
+
+Der neue reproduzierbare Lauf
+`scripts/audit-ai-deck-hint-consumers.ts` vergleicht aktiven und kompilierten
+Hint, Full-Derived-Facts, Inspector-Taxonomie sowie die tatsächlichen
+`DeckCapabilityProfile`- und `DeckStrategyProfile`-Consumer. Der finale Lauf
+meldet `status: ok`, null blockierende Findings und null Warnungen.
+
+Korrigiert wurden:
+
+- Dwarf und Snowball besitzen jetzt vollständige, geprüfte Breaker-Effekte
+  und Breaker-Profile;
+- Executive Wiretaps und Romp through HQ tragen keine falschen R&D- oder
+  Remote-Planrollen mehr;
+- Score! ist reine Economy ohne künstlichen Run-Druck;
+- R&D Interface ist analog zu HQ Interface auf Multiaccess und R&D-Druck
+  normalisiert;
+- Jack 'n' Joe und Livewire's Contacts tragen ihre tatsächlichen Mengen in
+  den strukturierten Effekten;
+- `accessCount` wird als Gesamtzugriff interpretiert, während
+  `multiaccess.amount` zusätzliche Zugriffe beschreibt;
+- aktive und generierte Teil-Effekte der nachweislich betroffenen Karten
+  werden zu genau einem kompilierten Effekt zusammengeführt;
+- die seitenneutralen Werte `recover_economy`, `run_pressure` und
+  `safe_probe_run` bleiben Function-Signale statt falscher Side-Strategy-
+  Aliasse.
+
+Die produktiven Consumer weisen nach der Korrektur nur Temple Microcode
+Outlet als Search-Tool sowie All-Nighter und Inside Job als zwei Remote-
+Contest-Werkzeuge aus. Die primären Linien bleiben
+`runner.interface_closeout`, `runner.rnd_pressure` und
+`runner.run_event_tempo` mit jeweils 96 Punkten; HQ-Druck bleibt mit 94
+Punkten sekundär. Broker-Hints, Broker-Consumer und Broker-Spielweise wurden
+nicht verändert.
+
+Verifiziert wurden 15 fokussierte Testdateien mit 178 Tests, AI-Typecheck,
+DeckDoctrine-Strategie-Gate, Taxonomie-Gate, `check:ai:full`,
+`git diff --check` und der neue Deck-Audit. Die abgeleiteten AI-Artefakte
+stehen konsistent auf dem aktuellen Denominator von 618 aktiven Kartenhints.
+Der Analyse-Skill enthält dafür nun eine feste Referenz mit den Search-,
+Remote-Contest-, Multiaccess-, Taxonomie- und Homogenisierungsverträgen; seine
+Hauptdatei bleibt mit 497 Zeilen gültig.

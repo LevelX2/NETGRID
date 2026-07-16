@@ -134,5 +134,6 @@ export type GameCardImplementationRuntimeDepsHost = {
       state: RuntimeState,
       sourceCardId: CardInstanceId,
     ) => void;
+    addRunnerTagsWithPrevention: CardImplementationRuntimeDependencies["addRunnerTagsWithPrevention"];
   };
 };

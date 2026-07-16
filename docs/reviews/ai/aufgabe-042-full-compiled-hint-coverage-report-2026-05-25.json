@@ -14,13 +14,13 @@
   "generatedFactsCardCount": 390,
   "manualOverlayCardCount": 6,
   "legacyFallbackOnlyCount": 137,
-  "descriptorOrSchemaGapCount": 288,
+  "descriptorOrSchemaGapCount": 286,
   "manualOverlayRequiredCount": 0,
   "blockedMissingImplementationCount": 91,
   "coverageClassCounts": {
     "blocked_missing_implementation": 91,
-    "descriptor_or_schema_gap": 288,
-    "generated_mechanical_clean": 96,
+    "descriptor_or_schema_gap": 286,
+    "generated_mechanical_clean": 98,
     "generated_plus_overlay": 6,
     "legacy_fallback_only": 137
   },
@@ -157,7 +157,7 @@
   },
   "hardErrorCount": 0,
   "hardErrors": [],
-  "warningCount": 2321,
+  "warningCount": 2314,
   "warnings": [
     {
       "kind": "monolith_mechanical_duplication_candidate",
@@ -4550,21 +4550,6 @@
       "message": "Derived facts use read-only text/descriptor pattern scans rather than imported TS descriptors."
     },
     {
-      "kind": "descriptor_or_schema_gap",
-      "cardId": "onr_v1_021_dwarf",
-      "message": "Implementation produced facts, but descriptor/schema comparison still has gaps."
-    },
-    {
-      "kind": "generated_fact_absent_from_active_monolith",
-      "cardId": "onr_v1_021_dwarf",
-      "message": "Generated breakerCoverage:wall is absent from the active monolith."
-    },
-    {
-      "kind": "generated_fact_absent_from_active_monolith",
-      "cardId": "onr_v1_021_dwarf",
-      "message": "Generated effect:breaker is absent from the active monolith."
-    },
-    {
       "kind": "text_pattern_derivation",
       "cardId": "onr_v1_021_dwarf",
       "message": "Derived facts use read-only text/descriptor pattern scans rather than imported TS descriptors."
@@ -5278,26 +5263,6 @@
       "kind": "text_pattern_derivation",
       "cardId": "onr_v1_065_smarteye",
       "message": "Derived facts use read-only text/descriptor pattern scans rather than imported TS descriptors."
-    },
-    {
-      "kind": "descriptor_or_schema_gap",
-      "cardId": "onr_v1_066_snowball",
-      "message": "Implementation produced facts, but descriptor/schema comparison still has gaps."
-    },
-    {
-      "kind": "generated_fact_absent_from_active_monolith",
-      "cardId": "onr_v1_066_snowball",
-      "message": "Generated breakerCoverage:sentry is absent from the active monolith."
-    },
-    {
-      "kind": "generated_fact_absent_from_active_monolith",
-      "cardId": "onr_v1_066_snowball",
-      "message": "Generated breakerSideEffect:temporary_strength is absent from the active monolith."
-    },
-    {
-      "kind": "generated_fact_absent_from_active_monolith",
-      "cardId": "onr_v1_066_snowball",
-      "message": "Generated effect:breaker is absent from the active monolith."
     },
     {
       "kind": "text_pattern_derivation",
@@ -28247,7 +28212,7 @@
             "timing": "successful_run",
             "scope": "hq",
             "resource": "cards",
-            "amount": 4,
+            "amount": 3,
             "source": "implementation.effect.make_run.accessCount"
           }
         ],
@@ -30356,7 +30321,7 @@
             "timing": "successful_run",
             "scope": "rnd",
             "resource": "cards",
-            "amount": 4,
+            "amount": 3,
             "source": "implementation.effect.make_run.accessCount"
           }
         ],
@@ -37153,7 +37118,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/dwarf.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -37193,57 +37158,51 @@
           "build_rig",
           "safe_probe_run"
         ],
-        "effects": [],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
         "conditions": [],
+        "breakerProfile": {
+          "coverage": [
+            "wall"
+          ],
+          "pumpCost": 1,
+          "breakCost": 1,
+          "sideEffects": [],
+          "restrictions": []
+        },
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
-        "matches": [],
-        "generatedOnly": [
+        "matches": [
           "breakerCoverage:wall",
           "effect:breaker"
         ],
+        "generatedOnly": [],
         "manualOnly": []
       },
-      "missingManualOverlay": [
-        "breakerCoverage:wall",
-        "effect:breaker"
-      ],
-      "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
-      ],
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
-        },
-        {
-          "kind": "descriptor_or_overlay_gap",
-          "message": "Generated facts contain fields not currently mirrored manually."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated breakerCoverage:wall has no manual ontology match."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:breaker has no manual ontology match."
-        },
         {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
         }
       ],
       "fullCoverageScope": true,
-      "coverageClass": "descriptor_or_schema_gap"
+      "coverageClass": "generated_mechanical_clean"
     },
     {
       "cardId": "onr_v1_022_emergency-self-construct",
@@ -42268,7 +42227,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/snowball.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -42312,63 +42271,54 @@
           "build_rig",
           "safe_probe_run"
         ],
-        "effects": [],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
         "conditions": [],
+        "breakerProfile": {
+          "coverage": [
+            "sentry"
+          ],
+          "pumpCost": 1,
+          "breakCost": 1,
+          "sideEffects": [
+            "temporary_strength"
+          ],
+          "restrictions": []
+        },
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
-        "matches": [],
-        "generatedOnly": [
+        "matches": [
           "breakerCoverage:sentry",
           "breakerSideEffect:temporary_strength",
           "effect:breaker"
         ],
+        "generatedOnly": [],
         "manualOnly": []
       },
-      "missingManualOverlay": [
-        "breakerCoverage:sentry",
-        "breakerSideEffect:temporary_strength",
-        "effect:breaker"
-      ],
-      "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
-      ],
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
-        },
-        {
-          "kind": "descriptor_or_overlay_gap",
-          "message": "Generated facts contain fields not currently mirrored manually."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated breakerCoverage:sentry has no manual ontology match."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated breakerSideEffect:temporary_strength has no manual ontology match."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:breaker has no manual ontology match."
-        },
         {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
         }
       ],
       "fullCoverageScope": true,
-      "coverageClass": "descriptor_or_schema_gap"
+      "coverageClass": "generated_mechanical_clean"
     },
     {
       "cardId": "onr_v1_067_speed-trap",
@@ -43791,7 +43741,7 @@
             "timing": "successful_run",
             "scope": "rnd",
             "resource": "cards",
-            "amount": 3,
+            "amount": 2,
             "source": "implementation.effect.make_run.accessCount"
           }
         ],
@@ -44262,7 +44212,7 @@
             "timing": "successful_run",
             "scope": "hq",
             "resource": "cards",
-            "amount": 3,
+            "amount": 2,
             "source": "implementation.effect.make_run.accessCount"
           }
         ],
@@ -44287,8 +44237,7 @@
           "run_event"
         ],
         "planRoles": [
-          "pressure_hq",
-          "pressure_rnd"
+          "pressure_hq"
         ],
         "effects": [
           {
@@ -45287,7 +45236,9 @@
           {
             "kind": "draw",
             "timing": "action",
-            "scope": "runner"
+            "scope": "runner",
+            "resource": "cards",
+            "amount": 3
           }
         ],
         "conditions": [],
@@ -45485,7 +45436,9 @@
           {
             "kind": "economy",
             "timing": "action",
-            "scope": "runner"
+            "scope": "runner",
+            "resource": "credits",
+            "amount": 3
           }
         ],
         "conditions": [],
@@ -46478,7 +46431,6 @@
           "run_event"
         ],
         "planRoles": [
-          "contest_remote",
           "pressure_hq"
         ],
         "effects": [
@@ -50182,11 +50134,12 @@
         "cardType": "hardware",
         "roles": [
           "hardware",
-          "rd_multiaccess"
+          "multiaccess",
+          "rnd_pressure"
         ],
         "planRoles": [
           "build_rig",
-          "run_pressure"
+          "pressure_rnd"
         ],
         "effects": [
           {

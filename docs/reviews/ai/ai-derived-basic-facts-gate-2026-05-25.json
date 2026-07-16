@@ -10196,7 +10196,7 @@
             "timing": "successful_run",
             "scope": "rnd",
             "resource": "cards",
-            "amount": 3,
+            "amount": 2,
             "source": "implementation.effect.make_run.accessCount"
           }
         ],
@@ -10468,7 +10468,7 @@
             "timing": "successful_run",
             "scope": "hq",
             "resource": "cards",
-            "amount": 3,
+            "amount": 2,
             "source": "implementation.effect.make_run.accessCount"
           }
         ],
@@ -10493,8 +10493,7 @@
           "run_event"
         ],
         "planRoles": [
-          "pressure_hq",
-          "pressure_rnd"
+          "pressure_hq"
         ],
         "effects": [
           {
@@ -10997,7 +10996,9 @@
           {
             "kind": "draw",
             "timing": "action",
-            "scope": "runner"
+            "scope": "runner",
+            "resource": "cards",
+            "amount": 3
           }
         ],
         "conditions": [],
@@ -11073,7 +11074,9 @@
           {
             "kind": "economy",
             "timing": "action",
-            "scope": "runner"
+            "scope": "runner",
+            "resource": "credits",
+            "amount": 3
           }
         ],
         "conditions": [],

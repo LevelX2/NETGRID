@@ -30,11 +30,7 @@ export function runnerCreditYieldScoreComponent(
   if (input.side !== "runner" || action.side !== "runner") return undefined;
   if (isBasicCreditAction(action)) return undefined;
   const grossGain = runnerKnownCreditGain(input, action, dependencies);
-  if (grossGain <= 0) return undefined;
-  const netGain = Math.max(
-    0,
-    grossGain - dependencies.actionCreditCost(action),
-  );
+  const netGain = runnerKnownNetCreditGain(input, action, dependencies);
   if (netGain <= 0) return undefined;
   const sourceDefinitionId = dependencies.sourceDefinitionIdForAction(
     input,
@@ -70,6 +66,18 @@ export function runnerCreditYieldScoreComponent(
         : []),
     ].join("|"),
   };
+}
+
+export function runnerKnownNetCreditGain(
+  input: AiDecisionInput,
+  action: LegalAction,
+  dependencies: RunnerCreditYieldScoreDependencies,
+): number {
+  return Math.max(
+    0,
+    runnerKnownCreditGain(input, action, dependencies) -
+      dependencies.actionCreditCost(action),
+  );
 }
 
 function runnerKnownCreditGain(

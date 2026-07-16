@@ -21,6 +21,7 @@ type HintCard = {
   cardId: string;
   roles: string[];
   planRoles: string[];
+  valueHints?: Record<string, number>;
   requiredMechanics?: string[];
   tacticSignals?: string[];
   effects?: HintEffect[];
@@ -114,6 +115,7 @@ describe.each(hintSources)("four-match card semantics in %s", (source) => {
 
     expect(hint.roles).toEqual(["economy"]);
     expect(hint.planRoles).toEqual(["recover_economy"]);
+    expect(hint.valueHints).toEqual({ economy: 5 });
     expect(hint.effects).toEqual(
       expect.arrayContaining([
         expect.objectContaining({

@@ -13101,7 +13101,7 @@
         "aiSupportStatus": "ai_supported",
         "effects": [
           {
-            "amount": 3,
+            "amount": 2,
             "confidence": "high",
             "kind": "multiaccess",
             "resource": "cards",
@@ -13324,11 +13324,11 @@
         "side": "runner",
         "cardType": "event",
         "roles": ["event", "multiaccess", "run_event"],
-        "planRoles": ["pressure_hq", "pressure_rnd"],
+        "planRoles": ["pressure_hq"],
         "aiSupportStatus": "ai_supported",
         "effects": [
           {
-            "amount": 3,
+            "amount": 2,
             "confidence": "high",
             "kind": "multiaccess",
             "resource": "cards",

@@ -222,6 +222,13 @@ function makeHost(options: {
         };
       },
     },
+    tags: {
+      addRunnerTagsWithPrevention: (_legalAction, amount) => {
+        state.runner.tags += amount;
+        host.runner.ensureTurnFlags().runnerReceivedTagThisTurn = true;
+        return false;
+      },
+    },
     counters: {
       cardCounter: (cardId, counterType) =>
         Math.max(0, Math.floor(instances[cardId]?.counters?.[counterType] ?? 0)),

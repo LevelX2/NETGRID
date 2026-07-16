@@ -69,6 +69,11 @@ import {
 } from "../choices/pending-choice-resolution";
 import { selectedChoiceIds } from "../choices/choice-validation";
 import {
+  resolveEndTurnTagSequence,
+  resumeEndTurnTagSequence,
+  type EndTurnTagContinuationHost,
+} from "../turn/end-turn-tag-continuation";
+import {
   corpInstalledCardIds,
   corpRootAssetIdsInServer,
   corpRootMainCardIdsInServer,
@@ -1180,25 +1185,11 @@ export function createTurnRuntimeResolvers(deps: RuntimeDeps) {
 function resolveEndTurnTagIfRunnerReceivedTag(
   state: GameState,
   legalAction: LegalAction,
-): void {
-  if (state.runnerTurnFlags?.runnerReceivedTagThisTurn !== true) return;
-  const sourceIds = rezzedCorpRootCardIds(state)
-    .filter((cardId: CardInstanceId) =>
-      hasCorpUtilityKind(state, cardId, "end_turn_tag_if_runner_received_tag"),
-    )
-    .sort();
-  if (sourceIds.length === 0) return;
-  const tagsBefore = state.runner.tags;
-  for (const _sourceId of sourceIds) {
-    addRunnerTagsWithPrevention(state, legalAction, 1, "end_turn_tag_if_runner_received_tag");
-  }
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    v1951CorpUtilityAbility: "end_turn_tag_if_runner_received_tag",
-    endTurnTagIfRunnerReceivedTagAdded: Math.max(0, state.runner.tags - tagsBefore),
-    sourceCount: sourceIds.length,
-    runnerTagsAfter: state.runner.tags,
-  };
+): boolean {
+  return resolveEndTurnTagSequence(
+    endTurnTagContinuationHost(state),
+    legalAction,
+  );
 }
 
 function resolveFieldReporterEndOfRunnerTurn(
@@ -1330,8 +1321,21 @@ function endTurn(
     resolveFieldReporterEndOfRunnerTurn(state, legalAction);
     resolveDelayedEndTurnDamageEffects(state, legalAction);
     resolveDelayedCorpInstalledTrashAtEndOfRunnerTurn(state, legalAction);
-    resolveEndTurnTagIfRunnerReceivedTag(state, legalAction);
+    if (resolveEndTurnTagIfRunnerReceivedTag(state, legalAction)) return;
     resolveTemporaryProgramInstallReturns(state, legalAction);
+    finishEndTurnAfterTagPrevention(state, side, legalAction);
+    return;
+  }
+  if (resolveEndTurnTagIfRunnerReceivedTag(state, legalAction)) return;
+  finishEndTurnAfterTagPrevention(state, side, legalAction);
+}
+
+function finishEndTurnAfterTagPrevention(
+  state: GameState,
+  side: Side,
+  legalAction: LegalAction,
+): void {
+  if (side === "runner") {
     const flags = ensureRunnerTurnFlags(state);
     flags.stoleAgendaLastTurn = flags.stoleAgendaThisTurn;
     flags.stolenAgendaAdvancementCountersLastTurn =
@@ -1360,7 +1364,6 @@ function endTurn(
     flags.runnerActionsTakenThisTurn = 0;
     delete flags.lastDamageRunnerActionOrdinal;
   } else {
-    resolveEndTurnTagIfRunnerReceivedTag(state, legalAction);
     const corpFlags = ensureCorpTurnFlags(state);
     corpFlags.scoredBlackOpsAgendaLastTurn =
       corpFlags.scoredBlackOpsAgendaThisTurn;
@@ -1374,6 +1377,48 @@ function endTurn(
   clearTemporaryRunnerMemoryLimitModifiersUntilEndOfTurn(state, legalAction);
   delete state.cancelledDamagePreventionSourceIdsUntilEndOfTurn;
   startDiscardPhase(state, side, legalAction);
+}
+
+function resumeEndTurnAfterTagPrevention(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  resumeEndTurnTagSequence(endTurnTagContinuationHost(state), legalAction);
+}
+
+function endTurnTagContinuationHost(
+  state: GameState,
+): EndTurnTagContinuationHost {
+  return {
+    state,
+    sources: {
+      activeSourceIds: () =>
+        rezzedCorpRootCardIds(state)
+          .filter((cardId: CardInstanceId) =>
+            hasCorpUtilityKind(
+              state,
+              cardId,
+              "end_turn_tag_if_runner_received_tag",
+            ),
+          )
+          .sort(),
+      definitionId: (cardId) => definitionFor(state, cardId).id,
+    },
+    tags: {
+      addRunnerTagsWithPrevention: (legalAction, amount, sourceDefinitionId) =>
+        addRunnerTagsWithPrevention(
+          state,
+          legalAction,
+          amount,
+          sourceDefinitionId,
+        ),
+    },
+    finishEndTurn: (side, legalAction) => {
+      if (side === "runner")
+        resolveTemporaryProgramInstallReturns(state, legalAction);
+      finishEndTurnAfterTagPrevention(state, side, legalAction);
+    },
+  };
 }
 
 function clearTemporaryIceStrengthModifiersUntilEndOfTurn(
@@ -1609,11 +1654,11 @@ function completeDiscardPhase(
 ): void {
   const effects: AutomaticEffectCollector = [];
   if (side === "runner") {
-    startCorpTurn(state, effects);
+    startCorpTurn(state, effects, legalAction);
     appendResolvedEffectsToPayload(legalAction, effects);
     return;
   }
-  startRunnerTurn(state, effects);
+  startRunnerTurn(state, effects, legalAction);
   appendResolvedEffectsToPayload(legalAction, effects);
 }
 
@@ -1868,6 +1913,7 @@ function resolvePdcaCounterAction(state: GameState, legalAction: LegalAction): v
 function startCorpTurn(
   state: GameState,
   effects?: AutomaticEffectCollector,
+  legalAction?: LegalAction,
 ): void {
   expireTurnBoundExtraActionGrants(state);
   state.turnSerial = currentTurnSerial(state) + 1;
@@ -1890,13 +1936,14 @@ function startCorpTurn(
   applyScoredAgendaCreditEconomyAtCorpStart(state, effects);
   applyScoredAgendaActionEconomyAtCorpStart(state, effects);
   applyInstalledIceCounterLifecycle(state);
-  applyCorpStartOfTurnEffects(state, effects);
+  if (applyCorpStartOfTurnEffects(state, effects, legalAction)) return;
   openCorpStartTurnRestrictedActionOffers(state, effects);
 }
 
 function startRunnerTurn(
   state: GameState,
   effects?: AutomaticEffectCollector,
+  legalAction?: LegalAction,
 ): void {
   expireTurnBoundExtraActionGrants(state);
   state.turnSerial = currentTurnSerial(state) + 1;
@@ -1958,7 +2005,7 @@ function startRunnerTurn(
   refreshRecurringCredits(state, "runner", effects);
   untapRunnerCardsAtTurnStart(state);
   applyRunnerStartTurnActionEconomyEffects(state, effects);
-  applyRunnerStartOfTurnEffects(state, effects);
+  applyRunnerStartOfTurnEffects(state, effects, "begin", legalAction);
 }
 
 function returnCorpTemporaryInstallRezCredits(
@@ -2066,46 +2113,57 @@ function resolveDelayedAccessEffects(state: GameState, effects?: AutomaticEffect
 function applyCorpStartOfTurnEffects(
   state: GameState,
   effects?: AutomaticEffectCollector,
-): void {
-  applyPurgeableRunnerVirusCorpStartEffects(state, effects);
-  const skivvissDraws = virusCounterDrawsAtCorpStart(state);
-  if (skivvissDraws > 0) {
-    drawCorpCards(state, skivvissDraws);
-    effects?.push(
-      automaticDrawCardsEffect(
-        "corp.start.skivviss",
-        "corp",
-        skivvissDraws,
-        SKIVVISS_ID,
-      ),
+  legalAction?: LegalAction,
+  rootCardStartIndex = 0,
+  skipPreamble = false,
+): boolean {
+  if (!skipPreamble) {
+    applyPurgeableRunnerVirusCorpStartEffects(state, effects);
+    const skivvissDraws = virusCounterDrawsAtCorpStart(state);
+    if (skivvissDraws > 0) {
+      drawCorpCards(state, skivvissDraws);
+      effects?.push(
+        automaticDrawCardsEffect(
+          "corp.start.skivviss",
+          "corp",
+          skivvissDraws,
+          SKIVVISS_ID,
+        ),
+      );
+    }
+    const cascadeTrash = virusCounterCascadeTrashAtCorpStart(state);
+    if (cascadeTrash.amount > 0) {
+      if (!cascadeTrash.sourceDefinitionId)
+        throw new Error("Cascade-Virus-Quelle fehlt.");
+      const trashed = trashFaceupRdCardsForCascade(state, cascadeTrash.amount);
+      if (trashed.length > 0) {
+        effects?.push({
+          effectId: "corp.start.cascade.trash_faceup_rd",
+          kind: "trash_card",
+          visibility: "hidden_info_barrier",
+          side: "corp",
+          amount: trashed.length,
+          reason: "start_of_turn",
+          sourceDefinitionId: cascadeTrash.sourceDefinitionId,
+          sourceTitle: publicCardTitle(cascadeTrash.sourceDefinitionId),
+          cardDefinitionId: definitionFor(state, trashed[0]!).id,
+          cardTitle: publicCardTitle(definitionFor(state, trashed[0]!).id),
+        });
+      }
+    }
+    executeCardImplementationStartOfCorpTurnEffects(
+      cardImplementationRuntimeDeps,
+      state,
+      effects,
     );
   }
-  const cascadeTrash = virusCounterCascadeTrashAtCorpStart(state);
-  if (cascadeTrash.amount > 0) {
-    if (!cascadeTrash.sourceDefinitionId)
-      throw new Error("Cascade-Virus-Quelle fehlt.");
-    const trashed = trashFaceupRdCardsForCascade(state, cascadeTrash.amount);
-    if (trashed.length > 0) {
-      effects?.push({
-        effectId: "corp.start.cascade.trash_faceup_rd",
-        kind: "trash_card",
-        visibility: "hidden_info_barrier",
-        side: "corp",
-        amount: trashed.length,
-        reason: "start_of_turn",
-        sourceDefinitionId: cascadeTrash.sourceDefinitionId,
-        sourceTitle: publicCardTitle(cascadeTrash.sourceDefinitionId),
-        cardDefinitionId: definitionFor(state, trashed[0]!).id,
-        cardTitle: publicCardTitle(definitionFor(state, trashed[0]!).id),
-      });
-    }
-  }
-  executeCardImplementationStartOfCorpTurnEffects(
-    cardImplementationRuntimeDeps,
-    state,
-    effects,
-  );
-  for (const cardId of rezzedCorpRootCardIds(state)) {
+  const rootCardIds = rezzedCorpRootCardIds(state);
+  for (
+    let rootCardIndex = rootCardStartIndex;
+    rootCardIndex < rootCardIds.length;
+    rootCardIndex += 1
+  ) {
+    const cardId = rootCardIds[rootCardIndex]!;
     const definitionId = definitionFor(state, cardId).id;
     const recurringTracePool = corpUtilityImplementationForCard(state, cardId);
     if (
@@ -2149,10 +2207,33 @@ function applyCorpStartOfTurnEffects(
         const randomPurpose = `classic.satellite_monitors.corp_start.${state.stateVersion}.${cardId}.${index}`;
         const dieRoll = rollDeterministicDie(state, randomPurpose);
         dieRolls.push(dieRoll);
-        if (dieRoll === recurringTracePool.tagOn) {
-          state.runner.tags += 1;
-          tagsAdded += 1;
-        }
+        if (dieRoll === recurringTracePool.tagOn) tagsAdded += 1;
+      }
+      if (tagsAdded > 0) {
+        if (!legalAction)
+          throw new Error("Corp-Start-Add-Tag braucht eine LegalAction.");
+        const runnerTagsBefore = state.runner.tags;
+        state.pendingAddTagContinuation = {
+          kind: "corp_start_turn",
+          sourceCardId: cardId,
+          sourceDefinitionId: definitionId,
+          nextRootCardIndex: rootCardIndex + 1,
+          runAttemptsLastTurn: runCount,
+          dieRolls,
+          tagAmount: tagsAdded,
+          runnerTagsBefore,
+        };
+        if (
+          addRunnerTagsWithPrevention(
+            state,
+            legalAction,
+            tagsAdded,
+            definitionId,
+          )
+        )
+          return true;
+        delete state.pendingAddTagContinuation;
+        tagsAdded = Math.max(0, state.runner.tags - runnerTagsBefore);
       }
       if (runCount > 0) {
         effects?.push({
@@ -2204,7 +2285,7 @@ function applyCorpStartOfTurnEffects(
     }
   }
   applyScoredAgendaMandatoryDrawAtCorpStart(state, effects);
-  if (state.winner) return;
+  if (state.winner) return false;
   if (!state.pendingChoice)
     startCorpHqAgendaRevealChoice(
       corpZoneChoiceHandlerHost(
@@ -2214,6 +2295,7 @@ function applyCorpStartOfTurnEffects(
     );
   if (!state.pendingChoice)
     startScoredAgendaStartDrawChoice(scoredAgendaFlowHost(state));
+  return false;
 }
 
 function applyPurgeableRunnerVirusCorpStartEffects(
@@ -2390,13 +2472,21 @@ function applyRunnerStartOfTurnEffects(
   state: GameState,
   effects?: AutomaticEffectCollector,
   resumePoint: "begin" | "after_delayed_install_choice" = "begin",
+  legalAction?: LegalAction,
+  counterEffectStartIndex = 0,
 ): void {
   if (resumePoint === "after_delayed_install_choice") {
     continueRunnerStartOfTurnFromDelayedInstall(state, effects);
     return;
   }
   const flags = ensureRunnerTurnFlags(state);
-  for (const counterEffect of runnerTraceCounterEffectDefinitions()) {
+  const counterEffects = runnerTraceCounterEffectDefinitions();
+  for (
+    let counterEffectIndex = counterEffectStartIndex;
+    counterEffectIndex < counterEffects.length;
+    counterEffectIndex += 1
+  ) {
+    const counterEffect = counterEffects[counterEffectIndex]!;
     if (!counterEffect.startOfRunnerTurn) continue;
     const counterCount = cardCounter(
       state,
@@ -2406,14 +2496,36 @@ function applyRunnerStartOfTurnEffects(
     if (counterCount <= 0) continue;
     const amount = counterCount * counterEffect.startOfRunnerTurn.amountPerCounter;
     if (counterEffect.startOfRunnerTurn.kind === "add_tags") {
-      state.runner.tags += amount;
-      effects?.push(
-        automaticTagEffect(
-          `runner.start.${counterEffect.counterType}`,
+      if (!legalAction)
+        throw new Error("Runner-Start-Add-Tag braucht eine LegalAction.");
+      const runnerTagsBefore = state.runner.tags;
+      state.pendingAddTagContinuation = {
+        kind: "runner_start_turn",
+        sourceDefinitionId: counterEffect.sourceDefinitionId,
+        counterType: counterEffect.counterType,
+        nextCounterEffectIndex: counterEffectIndex + 1,
+        tagAmount: amount,
+        runnerTagsBefore,
+      };
+      if (
+        addRunnerTagsWithPrevention(
+          state,
+          legalAction,
           amount,
           counterEffect.sourceDefinitionId,
-        ),
-      );
+        )
+      )
+        return;
+      delete state.pendingAddTagContinuation;
+      const tagsAdded = Math.max(0, state.runner.tags - runnerTagsBefore);
+      if (tagsAdded > 0)
+        effects?.push(
+          automaticTagEffect(
+            `runner.start.${counterEffect.counterType}`,
+            tagsAdded,
+            counterEffect.sourceDefinitionId,
+          ),
+        );
     }
     if (counterEffect.startOfRunnerTurn.kind === "lose_credits") {
       const lost = Math.min(state.runner.credits, amount);
@@ -2933,8 +3045,101 @@ function startIncubatorTransformChoice(state: GameState): boolean {
   return true;
 }
 
+function resumeStartOfTurnAfterTagPrevention(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  const continuation = state.pendingAddTagContinuation;
+  if (!continuation)
+    throw new Error("Es ist keine Start-of-turn-Tag-Fortsetzung offen.");
+  if (state.pendingChoice || state.eventModificationWindow)
+    throw new Error("Das Add-Tag-Fenster ist noch nicht abgeschlossen.");
+  const effects: AutomaticEffectCollector = [];
+
+  if (continuation.kind === "corp_start_turn") {
+    const tagsAdded = Math.max(
+      0,
+      state.runner.tags - continuation.runnerTagsBefore,
+    );
+    const rootCardIds = rezzedCorpRootCardIds(state);
+    if (
+      continuation.nextRootCardIndex <= 0 ||
+      rootCardIds[continuation.nextRootCardIndex - 1] !==
+        continuation.sourceCardId ||
+      definitionFor(state, continuation.sourceCardId).id !==
+        continuation.sourceDefinitionId
+    )
+      throw new Error("Die Corp-Start-Tag-Fortsetzung ist veraltet.");
+    effects.push({
+      effectId: `corp.start.classic.satellite_monitors.${continuation.sourceCardId}`,
+      kind: tagsAdded > 0 ? "add_tags" : "counter_change",
+      visibility: "public",
+      side: "runner",
+      amount: tagsAdded,
+      reason: "start_of_turn",
+      sourceDefinitionId: continuation.sourceDefinitionId,
+      sourceTitle: publicCardTitle(continuation.sourceDefinitionId),
+      runAttemptsLastTurn: continuation.runAttemptsLastTurn,
+      dieSize: 6,
+      dieRolls: continuation.dieRolls.join(","),
+      tagsAdded,
+      runnerTagsAfter: state.runner.tags,
+      randomCounterAfter: state.randomCounter,
+    } as ResolvedGameEffect);
+    delete state.pendingAddTagContinuation;
+    const suspended = applyCorpStartOfTurnEffects(
+      state,
+      effects,
+      legalAction,
+      continuation.nextRootCardIndex,
+      true,
+    );
+    if (!suspended) openCorpStartTurnRestrictedActionOffers(state, effects);
+    appendResolvedEffectsToPayload(legalAction, effects);
+    return;
+  }
+
+  if (continuation.kind === "runner_start_turn") {
+    const tagsAdded = Math.max(
+      0,
+      state.runner.tags - continuation.runnerTagsBefore,
+    );
+    const counterEffect = runnerTraceCounterEffectDefinitions()[
+      continuation.nextCounterEffectIndex - 1
+    ];
+    if (
+      !counterEffect ||
+      counterEffect.sourceDefinitionId !== continuation.sourceDefinitionId ||
+      counterEffect.counterType !== continuation.counterType ||
+      counterEffect.startOfRunnerTurn?.kind !== "add_tags"
+    )
+      throw new Error("Die Runner-Start-Tag-Fortsetzung ist veraltet.");
+    if (tagsAdded > 0)
+      effects.push(
+        automaticTagEffect(
+          `runner.start.${continuation.counterType}`,
+          tagsAdded,
+          continuation.sourceDefinitionId,
+        ),
+      );
+    delete state.pendingAddTagContinuation;
+    applyRunnerStartOfTurnEffects(
+      state,
+      effects,
+      "begin",
+      legalAction,
+      continuation.nextCounterEffectIndex,
+    );
+    appendResolvedEffectsToPayload(legalAction, effects);
+    return;
+  }
+
+  throw new Error("Die Add-Tag-Fortsetzung gehoert nicht zum Turn-Start.");
+}
+
   return {
     resolveEndTurnTagIfRunnerReceivedTag,
+    resumeEndTurnAfterTagPrevention,
     resolveFieldReporterEndOfRunnerTurn,
     resolveDelayedEndTurnDamageEffects,
     endTurn,
@@ -2989,6 +3194,7 @@ function startIncubatorTransformChoice(state: GameState): boolean {
     randomCorpHqCardsWithoutReplacement,
     startRunnerPrivateLookAtSpecificCorpCards,
     queueIncubatorStartOfTurnTransforms,
-    startIncubatorTransformChoice
+    startIncubatorTransformChoice,
+    resumeStartOfTurnAfterTagPrevention,
   };
 }

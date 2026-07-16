@@ -348,6 +348,57 @@ describe("run rez window", () => {
     expect(state.run?.rootRezWindowPassedKeys).toEqual(["run_1:ice:rd:0"]);
   });
 
+  it("opens a run rez window for an affordable root card in another server", () => {
+    const state = makeState({ rootRezzed: true });
+    const remoteRootId = "remote_root" as CardInstanceId;
+    const rezzedRemoteRootId = "remote_root_rezzed" as CardInstanceId;
+    state.cardInstances[remoteRootId] = instance(
+      remoteRootId,
+      "simple_economy_asset",
+      {
+        zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+      },
+    );
+    state.cardInstances[rezzedRemoteRootId] = instance(
+      rezzedRemoteRootId,
+      "simple_economy_asset",
+      {
+        zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+        rezzed: true,
+      },
+    );
+    state.corp.servers.push({
+      id: "remote_1",
+      kind: "remote",
+      label: "Remote 1",
+      ice: [],
+      root: [rezzedRemoteRootId, remoteRootId],
+    });
+    const { host } = hostFor(state);
+
+    const actions = buildCorpRunRootRezWindowActions(host);
+
+    expect(actions.map((action) => action.type)).toEqual([
+      "rez_ice",
+      "decline_rez",
+    ]);
+    expect(actions[0]).toMatchObject({
+      label: "Simple Economy Asset in Remote 1 rezzen",
+      costs: [{ credits: 1 }],
+      payload: {
+        cardId: remoteRootId,
+        rootRez: true,
+        rezInterruptJackOutEligible: true,
+        serverId: "remote_1",
+      },
+    });
+    expect(actions[1]?.payload).toMatchObject({
+      runRootRezPass: true,
+      serverId: "rd",
+      serverLabel: "R&D",
+    });
+  });
+
   it("resolves simple root rez effects without generic rez or payment execution", () => {
     const state = makeState({
       rootDefinitionId: "simple_economy_asset",

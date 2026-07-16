@@ -27,6 +27,7 @@ import { selectedShellTradersStartTurnChoiceOptionId } from "./shell-traders-cho
 import { selectedRunnerTagAvoidanceChoiceOptionId } from "./tag-avoidance-choice-option";
 import { latestTraceContext } from "./trace-context";
 import { getTacticalPlanMemorySnapshot } from "../plans/plan-memory";
+import { getStrategicIntentMemorySnapshot } from "../strategic-intent-memory";
 
 type PendingChoice = NonNullable<
   AiDecisionInput["playerView"]["pendingChoice"]
@@ -190,6 +191,7 @@ export function selectedChoicesForDecision(
     }
     const requiredCoverage =
       runnerVisibleSearchCoverageNeed(input)?.requiredCoverage;
+    const preferredServerId = runnerSearchPreferredServerId(input);
     const searchSelected = selectedSearchChoiceOptionIds(
       choice,
       selectableOptions,
@@ -197,6 +199,7 @@ export function selectedChoicesForDecision(
         features: dependencies.extractAiFeatures(input),
         rolesForCardId: dependencies.rolesForCardId,
         ...(requiredCoverage ? { requiredCoverage } : {}),
+        ...(preferredServerId ? { preferredServerId } : {}),
       },
     );
     if (searchSelected)
@@ -283,6 +286,16 @@ export function selectedChoicesForDecision(
   return selectedOptionId !== undefined
     ? { choiceId: choice.choiceId, selectedOptionIds: [selectedOptionId] }
     : { choiceId: choice.choiceId, selectedOptionIds: [] };
+}
+
+function runnerSearchPreferredServerId(
+  input: AiDecisionInput,
+): string | undefined {
+  if (input.side !== "runner") return undefined;
+  const target = getStrategicIntentMemorySnapshot(input)?.state.targetVector;
+  return target?.kind === "central" || target?.kind === "remote"
+    ? target.targetId
+    : undefined;
 }
 
 function isHqToNewRemoteOptionalRezChoice(choice: PendingChoice): boolean {

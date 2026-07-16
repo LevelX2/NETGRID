@@ -1,7 +1,18 @@
 import { type AiDecisionInput } from "@netgrid/shared";
 
 import { selectEfficientTraceBidOption } from "../trace-bid-efficiency";
+import { classifyTagPunishPayoffFromOntology } from "../tag-punish-ontology-consumer";
 import { assessCorpTraceBid } from "./corp-trace-bid-assessment";
+import {
+  currentEncounteredIceCard,
+  currentRunRemainingIce,
+} from "./current-encounter";
+import { getRunnerRunPlanMemorySnapshot } from "./runner-run-plan-memory";
+import { quoteRunnerRunPath } from "./runner-run-plan-path-quote";
+import type {
+  RunnerRunIceEncounterQuote,
+  RunnerRunPlan,
+} from "./runner-run-plan-types";
 import { type LatestTraceContext } from "./trace-context";
 
 type PendingChoice = NonNullable<
@@ -41,8 +52,173 @@ export function selectedBidChoiceOptionId(
         desiredAmount: desired,
         ...traceContext,
       }).option ?? selected;
+    selected =
+      runnerRunBudgetPreservingBidOption(
+        input,
+        bidOptions,
+        selected,
+        traceContext,
+      ) ?? selected;
   }
   return selected?.id;
+}
+
+function runnerRunBudgetPreservingBidOption(
+  input: AiDecisionInput,
+  bidOptions: readonly { id: string; amount: number }[],
+  selected: { id: string; amount: number },
+  traceContext: LatestTraceContext,
+): { id: string; amount: number } | undefined {
+  const traceStrength = traceContext.traceStrength;
+  const runnerLink = traceContext.runnerLink;
+  if (
+    input.side !== "runner" ||
+    !input.playerView.run ||
+    !Number.isInteger(traceStrength) ||
+    !Number.isInteger(runnerLink) ||
+    typeof traceStrength !== "number" ||
+    typeof runnerLink !== "number" ||
+    !runnerAvoidsTrace(runnerLink, selected.amount, traceStrength)
+  ) {
+    return undefined;
+  }
+  const tagAmount = currentTraceTagAmount(input);
+  if (
+    tagAmount <= 0 ||
+    input.playerView.own.tags > 0 ||
+    input.playerView.own.clicks < 1 ||
+    runnerFacesVisibleTagPunish(input)
+  ) {
+    return undefined;
+  }
+  const plan = getRunnerRunPlanMemorySnapshot(input);
+  if (!plan || !runObjectiveJustifiesTakingTag(plan)) return undefined;
+  const remainingCost = knownRemainingRunCashCost(input, plan);
+  if (remainingCost === undefined) return undefined;
+  const reserve = runnerRunPlanReserveTarget(plan);
+  const credits = input.playerView.own.credits;
+  if (credits - selected.amount >= remainingCost + reserve) return undefined;
+  const minimumLosingBid = bidOptions.find(
+    (option) => !runnerAvoidsTrace(runnerLink, option.amount, traceStrength),
+  );
+  if (!minimumLosingBid) return undefined;
+  const basicTagCleanupCost = tagAmount * 2;
+  if (
+    credits - minimumLosingBid.amount <
+    remainingCost + reserve + basicTagCleanupCost
+  ) {
+    return undefined;
+  }
+  return minimumLosingBid;
+}
+
+function currentTraceTagAmount(input: AiDecisionInput): number {
+  const tagAmounts =
+    currentEncounteredIceCard(input)?.effectiveRunQuote?.subroutines.flatMap(
+      (subroutine) =>
+        subroutine.traceSuccessEffect?.type === "add_tag"
+          ? [Math.max(0, subroutine.traceSuccessEffect.amount)]
+          : [],
+    ) ?? [];
+  return tagAmounts.length === 1 ? (tagAmounts[0] ?? 0) : 0;
+}
+
+function runnerFacesVisibleTagPunish(input: AiDecisionInput): boolean {
+  const visibleCorpCards = [
+    ...input.playerView.opponent.scoreArea,
+    ...input.playerView.servers.flatMap((server) =>
+      server.id === "archives" ? [] : [...server.ice, ...server.root],
+    ),
+  ];
+  return visibleCorpCards.some(
+    (card) =>
+      card.known !== false &&
+      classifyTagPunishPayoffFromOntology(card.definitionId)?.payoff === true,
+  );
+}
+
+function runObjectiveJustifiesTakingTag(plan: RunnerRunPlan): boolean {
+  switch (plan.objective.kind) {
+    case "access_hq_card":
+    case "access_rnd_top":
+    case "access_rnd_multi":
+    case "access_hq_multi":
+    case "trash_asset_or_upgrade":
+      return plan.objective.expectedValue > 0;
+    case "contest_remote_agenda":
+      return plan.objective.urgency > 0;
+    case "access_archives":
+      return (plan.accessIntent?.expectedAccessCount ?? 0) > 0;
+    case "run_card_effect":
+    case "survival_or_win_pressure":
+      return true;
+    case "probe_unknown_ice":
+    case "force_rez":
+      return false;
+  }
+}
+
+function knownRemainingRunCashCost(
+  input: AiDecisionInput,
+  plan: RunnerRunPlan,
+): number | undefined {
+  const remainingIce = currentRunRemainingIce(input);
+  if (
+    remainingIce.length === 0 ||
+    remainingIce.some((ice) => !ice.known || ice.rezzed === false)
+  ) {
+    return undefined;
+  }
+  const quotesByIceId = new Map(
+    quoteRunnerRunPath(input, plan).iceQuotes.map((quote) => [
+      quote.iceRef.instanceId,
+      quote,
+    ]),
+  );
+  let totalCashCost = 0;
+  for (const ice of remainingIce) {
+    const quote = quotesByIceId.get(ice.instanceId);
+    const cashCost = accessPreservingCashCost(quote);
+    if (cashCost === undefined) return undefined;
+    totalCashCost += cashCost;
+  }
+  return totalCashCost;
+}
+
+function accessPreservingCashCost(
+  quote: RunnerRunIceEncounterQuote | undefined,
+): number | undefined {
+  if (!quote) return undefined;
+  const sequence = quote.cheapestAccessPreservingSequence;
+  if (sequence) return Math.max(0, sequence.cashCost);
+  const requiresBreak = quote.subroutineQuotes.some((subroutine) =>
+    [
+      "must_break_for_access",
+      "must_break_for_survival",
+      "must_break_for_plan_budget",
+      "too_expensive_abort_recommended",
+    ].includes(subroutine.threatClass),
+  );
+  return requiresBreak ? undefined : 0;
+}
+
+function runnerRunPlanReserveTarget(plan: RunnerRunPlan): number {
+  return Math.max(
+    0,
+    plan.reserve.minimumCreditsAfterRun,
+    plan.reserve.preserveStealOrTrashCredits,
+    plan.budget.reservedCreditsAfterRun,
+    plan.budget.reservedCreditsForSteal,
+    plan.budget.reservedCreditsForTrash,
+  );
+}
+
+function runnerAvoidsTrace(
+  runnerLink: number,
+  runnerBid: number,
+  traceStrength: number,
+): boolean {
+  return Math.max(0, runnerLink) + runnerBid >= Math.max(0, traceStrength);
 }
 
 function corpDesiredBidAmount(

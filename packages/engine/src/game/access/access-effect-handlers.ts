@@ -76,7 +76,7 @@ export type AccessEffectHandlerHost = {
     addRunnerTagsWithPrevention: (
       amount: number,
       sourceDefinitionId: CardDefinitionId,
-    ) => void;
+    ) => boolean;
   };
   trace: {
     startTraceFromOperation: (
@@ -154,11 +154,20 @@ export function handleAccessEffectsForCard(
   cardId: CardInstanceId,
 ): AccessEffectHandlerResult {
   const beforePayload = host.legalAction?.payload;
-  resolveCardImplementationAccessEffects(host, cardId);
+  const suspended = resolveCardImplementationAccessEffects(host, cardId);
+  if (suspended) return accessEffectHandlerResult(host, cardId, beforePayload);
   resolveAccessAmbushAssetEffect(host, cardId);
   resolveUpgradeAccessEffect(host, cardId);
   resolveAssetAccessEffect(host, cardId);
   resolveV199AccessEffect(host, cardId);
+  return accessEffectHandlerResult(host, cardId, beforePayload);
+}
+
+function accessEffectHandlerResult(
+  host: AccessEffectHandlerHost,
+  cardId: CardInstanceId,
+  beforePayload: LegalAction["payload"] | undefined,
+): AccessEffectHandlerResult {
   const definition = host.cards.definitionFor(cardId);
   const payload = host.legalAction?.payload;
   const accessedCardId = host.state.run?.accessedCardId as
@@ -254,7 +263,13 @@ export function resolveAccessPaymentChoice(
     corpCreditsAfter: host.state.corp.credits,
   };
   delete host.state.pendingChoice;
-  executeCardImplementationAccessEffectSteps(host, sourceId, definition, effect);
+  executeCardImplementationAccessEffectSteps(
+    host,
+    sourceId,
+    definition,
+    effect,
+    effectIndex,
+  );
   return {
     handled: true,
     sourceCardId: sourceId,
@@ -267,6 +282,79 @@ export function resolveAccessPaymentChoice(
       ? { resolvedEffects: host.legalAction.resolvedEffects }
       : {}),
   };
+}
+
+export function resumeAccessEffectAfterTagPrevention(
+  host: AccessEffectHandlerHost,
+): void {
+  const legalAction = requireLegalAction(host);
+  const continuation = host.state.pendingAddTagContinuation;
+  if (!continuation || continuation.kind !== "access_effect")
+    throw new Error("Es ist keine Access-Tag-Fortsetzung offen.");
+  if (
+    host.state.pendingChoice ||
+    host.state.eventModificationWindow ||
+    host.state.run?.accessedCardId !== continuation.sourceCardId
+  )
+    throw new Error("Der Access-Tag-Kontext ist nicht mehr gueltig.");
+  const definition = host.cards.definitionFor(continuation.sourceCardId);
+  const effect = host.cards.accessEffectsForDefinition(definition.id)[
+    continuation.effectIndex
+  ];
+  const accessZone = cardImplementationAccessZone(
+    host,
+    continuation.sourceCardId,
+  );
+  if (
+    !effect ||
+    accessZone !== continuation.accessZone ||
+    !effect.sourceZones.includes(accessZone) ||
+    (effect.ignoreIfAccessedFrom ?? []).includes(accessZone)
+  )
+    throw new Error("Die Access-Tag-Fortsetzung ist veraltet.");
+  const tagStep = effect.effects[continuation.tagStepIndex];
+  if (!tagStep || tagStep.kind !== "add_tags")
+    throw new Error("Die Access-Tag-Fortsetzung passt nicht zur Karte.");
+
+  delete host.state.pendingAddTagContinuation;
+  setAccessEffectBasePayload(
+    legalAction,
+    definition,
+    accessZone,
+    effect,
+    false,
+  );
+  const tagsAdded = Math.max(
+    0,
+    host.state.runner.tags - continuation.runnerTagsBefore,
+  );
+  legalAction.resolvedEffects = [
+    ...(legalAction.resolvedEffects ?? []),
+    {
+      effectId: accessEffectId(
+        definition,
+        continuation.sourceCardId,
+        continuation.tagStepIndex,
+        "add_tags",
+      ),
+      kind: "add_tags",
+      visibility: tagStep.visibility,
+      side: "runner",
+      amount: tagsAdded,
+      reason: "access_effect",
+      runnerTagsAfter: host.state.runner.tags,
+      sourceDefinitionId: definition.id,
+      sourceTitle: definition.title,
+    },
+  ];
+  executeCardImplementationAccessEffectSteps(
+    host,
+    continuation.sourceCardId,
+    definition,
+    effect,
+    continuation.effectIndex,
+    continuation.nextStepIndex,
+  );
 }
 
 export function resolveChimeraDaemonTrashChoice(
@@ -550,6 +638,7 @@ function setAccessEffectBasePayload(
   definition: CardDefinition,
   accessZone: CardAccessZone,
   effect: CardAccessEffectImplementation,
+  includePublicReveal = true,
 ): void {
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
@@ -558,7 +647,8 @@ function setAccessEffectBasePayload(
     ambushDefinitionId: definition.id,
     accessEffectSourceDefinitionId: definition.id,
     accessedFromZone: accessZone,
-    ...(effect.revealIfAccessedFrom?.includes(accessZone as "rd")
+    ...(includePublicReveal &&
+    effect.revealIfAccessedFrom?.includes(accessZone as "rd")
       ? {
           publicRevealKind: "reveal",
           publicRevealDefinitionId: definition.id,
@@ -570,11 +660,11 @@ function setAccessEffectBasePayload(
 function resolveCardImplementationAccessEffects(
   host: AccessEffectHandlerHost,
   cardId: CardInstanceId,
-): void {
+): boolean {
   const legalAction = requireLegalAction(host);
   const definition = host.cards.definitionFor(cardId);
   const accessEffects = host.cards.accessEffectsForDefinition(definition.id);
-  if (accessEffects.length === 0) return;
+  if (accessEffects.length === 0) return false;
   if (
     legalAction.side !== "runner" ||
     legalAction.type !== "access_card" ||
@@ -620,8 +710,18 @@ function resolveCardImplementationAccessEffects(
       startCardImplementationAccessPaymentChoice(host, cardId, effectIndex, accessZone, effect);
       continue;
     }
-    executeCardImplementationAccessEffectSteps(host, cardId, definition, effect);
+    if (
+      executeCardImplementationAccessEffectSteps(
+        host,
+        cardId,
+        definition,
+        effect,
+        effectIndex,
+      )
+    )
+      return true;
   }
+  return false;
 }
 
 function startCardImplementationAccessPaymentChoice(
@@ -682,10 +782,13 @@ function executeCardImplementationAccessEffectSteps(
   cardId: CardInstanceId,
   definition: CardDefinition,
   effect: CardAccessEffectImplementation,
-): void {
+  effectIndex: number,
+  startStepIndex = 0,
+): boolean {
   const legalAction = requireLegalAction(host);
   const resolvedEffects: ResolvedGameEffect[] = [];
   for (const [index, step] of effect.effects.entries()) {
+    if (index < startStepIndex) continue;
     executeCardImplementationAccessEffectStep(
       host,
       cardId,
@@ -693,8 +796,18 @@ function executeCardImplementationAccessEffectSteps(
       effect,
       step,
       index,
+      effectIndex,
       resolvedEffects,
     );
+    if (host.state.pendingAddTagContinuation) {
+      if (resolvedEffects.length > 0) {
+        legalAction.resolvedEffects = [
+          ...(legalAction.resolvedEffects ?? []),
+          ...resolvedEffects,
+        ];
+      }
+      return true;
+    }
   }
   if (resolvedEffects.length > 0) {
     legalAction.resolvedEffects = [
@@ -702,6 +815,7 @@ function executeCardImplementationAccessEffectSteps(
       ...resolvedEffects,
     ];
   }
+  return false;
 }
 
 function accessEffectId(
@@ -720,6 +834,7 @@ function executeCardImplementationAccessEffectStep(
   effect: CardAccessEffectImplementation,
   step: CardAccessEffectStepImplementation,
   index: number,
+  effectIndex: number,
   resolvedEffects: ResolvedGameEffect[],
 ): void {
   const legalAction = requireLegalAction(host);
@@ -827,14 +942,33 @@ function executeCardImplementationAccessEffectStep(
       return;
     }
     case "add_tags": {
-      host.tags.addRunnerTagsWithPrevention(step.amount, definition.id);
-      if (legalAction.payload?.eventModificationWindowOpened === true) return;
+      const runnerTagsBefore = host.state.runner.tags;
+      const suspended = host.tags.addRunnerTagsWithPrevention(
+        step.amount,
+        definition.id,
+      );
+      if (suspended) {
+        host.state.pendingAddTagContinuation = {
+          kind: "access_effect",
+          sourceCardId: cardId,
+          effectIndex,
+          tagStepIndex: index,
+          nextStepIndex: index + 1,
+          accessZone: cardImplementationAccessZone(host, cardId),
+          runnerTagsBefore,
+        };
+        return;
+      }
+      const tagsAdded = Math.max(
+        0,
+        host.state.runner.tags - runnerTagsBefore,
+      );
       resolvedEffects.push({
         effectId: accessEffectId(definition, cardId, index, "add_tags"),
         kind: "add_tags",
         visibility: step.visibility,
         side: "runner",
-        amount: step.amount,
+        amount: tagsAdded,
         reason: "access_effect",
         runnerTagsAfter: host.state.runner.tags,
         sourceDefinitionId: definition.id,
@@ -1388,7 +1522,8 @@ function resolveAccessAmbushAssetEffect(
     };
     return;
   }
-  if (definition.id === ids.trap) host.state.runner.tags += 1;
+  if (definition.id === ids.trap)
+    throw new Error("TRAP!-Access braucht die CardImplementation-Sequenz.");
   const damageAmount = definition.id === ids.setup ? 2 : 3;
   const summary = host.damage.doDamage(
     `v1917.ambush.${host.state.run!.runId}.${cardId}.${host.state.stateVersion + 1}`,
@@ -1408,9 +1543,6 @@ function resolveAccessAmbushAssetEffect(
           publicRevealKind: "reveal",
           publicRevealDefinitionId: definition.id,
         }
-      : {}),
-    ...(definition.id === ids.trap
-      ? { tagsAdded: 1, runnerTagsAfter: host.state.runner.tags }
       : {}),
   };
 }

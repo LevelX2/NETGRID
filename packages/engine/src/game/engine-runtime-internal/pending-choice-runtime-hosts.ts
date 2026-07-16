@@ -21,6 +21,15 @@ import type {
 } from "./runtime-shared";
 import type { ChoiceHiddenZoneRuntimeLinks } from "./choice-hidden-zone-runtime-links";
 import { resolveClassicDeflectorChoice as resolveClassicDeflectorChoiceInRunModule } from "../run/encounter-printed-nontrace-effects";
+import { resumeAccessEffectAfterTagPrevention } from "../access/access-effect-handlers";
+import { resumeOnPlayCardImplementationAfterTagPrevention } from "../../ability-engine/card-implementation-runtime";
+import { resumeSuccessfulRunAccessReplacementAfterTagPrevention } from "../run/run-access-transition";
+import { resumeRunEndCleanupAfterTagPrevention } from "../run/run-end-cleanup";
+import { resumeRunnerDrawSequenceAfterTagPrevention } from "./state-runtime-delegates";
+import {
+  resumeEndTurnAfterTagPrevention,
+  resumeStartOfTurnAfterTagPrevention,
+} from "./action-runtime-delegates";
 
 export function createPendingChoiceRuntimeHosts(
   deps: RuntimeDeps,
@@ -642,6 +651,54 @@ export function createPendingChoiceRuntimeHosts(
     );
   }
 
+  function resumeAddTagContinuation(
+    state: GameState,
+    legalAction: LegalAction,
+  ): void {
+    const continuation = state.pendingAddTagContinuation;
+    if (!continuation)
+      throw new Error("Es ist keine Add-Tag-Fortsetzung offen.");
+    switch (continuation.kind) {
+      case "terminal":
+        delete state.pendingAddTagContinuation;
+        return;
+      case "access_effect":
+        resumeAccessEffectAfterTagPrevention(
+          accessEffectHandlerHost(state, legalAction),
+        );
+        return;
+      case "card_effect_on_play":
+        resumeOnPlayCardImplementationAfterTagPrevention(
+          cardImplementationRuntimeDeps,
+          state,
+          legalAction,
+        );
+        return;
+      case "runner_draw_tax":
+        resumeRunnerDrawSequenceAfterTagPrevention(state, legalAction);
+        return;
+      case "successful_run_access_replacement":
+        resumeSuccessfulRunAccessReplacementAfterTagPrevention(
+          runAccessTransitionHost(state),
+          legalAction,
+        );
+        return;
+      case "run_end_cleanup":
+        resumeRunEndCleanupAfterTagPrevention(
+          runEndCleanupHost(state),
+          legalAction,
+        );
+        return;
+      case "end_turn_tag":
+        resumeEndTurnAfterTagPrevention(state, legalAction);
+        return;
+      case "corp_start_turn":
+      case "runner_start_turn":
+        resumeStartOfTurnAfterTagPrevention(state, legalAction);
+        return;
+    }
+  }
+
   function pendingChoiceResolutionHost(
     state: GameState,
   ): PendingChoiceResolutionHost {
@@ -654,6 +711,7 @@ export function createPendingChoiceRuntimeHosts(
       replacement: {
         resolveReplacementChoice,
         resolveEventModificationChoice,
+        resumeAddTagContinuation,
         resolvePdcaDamageReplacementChoice,
       },
       trace: {

@@ -5,12 +5,16 @@ import {
   selectedSearchChoiceOptionIds,
 } from "./search-choice-option";
 
-type PendingChoice = NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>;
+type PendingChoice = NonNullable<
+  AiDecisionInput["playerView"]["pendingChoice"]
+>;
 
 describe("selectedSearchChoiceOptionIds", () => {
   it("matches search choices by bounded source tokens", () => {
     expect(isSearchChoice(sourceOnlyChoice("stack search"))).toBe(true);
-    expect(isSearchChoice(sourceOnlyChoice("searchlight stackish"))).toBe(false);
+    expect(isSearchChoice(sourceOnlyChoice("searchlight stackish"))).toBe(
+      false,
+    );
   });
 
   it("matches search option roles by bounded role terms", () => {
@@ -150,6 +154,88 @@ describe("selectedSearchChoiceOptionIds", () => {
 
     expect(selected).toEqual(["clown"]);
   });
+
+  it("takes an affordable plan-aligned event before ordering an unusable program", () => {
+    const choice = takeOneArrangeRestChoice([
+      option("cloak-a", "Cloak", "program", {
+        definitionId: "cloak",
+        memoryCost: 1,
+        installCost: 7,
+      }),
+      option("wiretaps", "Executive Wiretaps", "event", {
+        definitionId: "wiretaps",
+        cost: 2,
+      }),
+      option("mouse", "Mouse", "program", {
+        definitionId: "mouse",
+        memoryCost: 1,
+        installCost: 2,
+      }),
+    ]);
+    const selected = selectedSearchChoiceOptionIds(choice, choice.options, {
+      features: {
+        credits: 3,
+        memoryRemaining: 0,
+        rigRoles: new Set(),
+        rigDefinitionIds: new Set(),
+      },
+      rolesForCardId: (cardId) => {
+        if (cardId === "cloak") return ["economy", "icebreaker_support"];
+        if (cardId === "wiretaps") return ["multiaccess", "pressure_hq"];
+        return ["hidden_zone_tool"];
+      },
+      preferredServerId: "hq",
+    });
+
+    expect(selected).toBeDefined();
+    if (!selected) throw new Error("expected a stack-search selection");
+    expect(selected[0]).toBe("wiretaps");
+  });
+
+  it("keeps a funded Cloak first and devalues its duplicate in the rest order", () => {
+    const choice = takeOneArrangeRestChoice([
+      option("cloak-a", "Cloak A", "program", {
+        definitionId: "cloak",
+        memoryCost: 1,
+        installCost: 7,
+      }),
+      option("cloak-b", "Cloak B", "program", {
+        definitionId: "cloak",
+        memoryCost: 1,
+        installCost: 7,
+      }),
+      option("wiretaps", "Executive Wiretaps", "event", {
+        definitionId: "wiretaps",
+        cost: 2,
+      }),
+      option("mouse", "Mouse", "program", {
+        definitionId: "mouse",
+        memoryCost: 1,
+        installCost: 2,
+      }),
+    ]);
+    const selected = selectedSearchChoiceOptionIds(choice, choice.options, {
+      features: {
+        credits: 8,
+        memoryRemaining: 1,
+        rigRoles: new Set(),
+        rigDefinitionIds: new Set(),
+      },
+      rolesForCardId: (cardId) => {
+        if (cardId === "cloak") return ["economy", "icebreaker_support"];
+        if (cardId === "wiretaps") return ["multiaccess", "pressure_hq"];
+        return ["hidden_zone_tool"];
+      },
+      preferredServerId: "hq",
+    });
+
+    expect(selected).toBeDefined();
+    if (!selected) throw new Error("expected a stack-search selection");
+    expect(selected[0]).toBe("cloak-a");
+    expect(selected.indexOf("cloak-b")).toBeGreaterThan(
+      selected.indexOf("mouse"),
+    );
+  });
 });
 
 function searchChoice(
@@ -176,6 +262,19 @@ function sourceOnlyChoice(source: string): PendingChoice {
   return {
     ...choice,
     source,
+  } as PendingChoice;
+}
+
+function takeOneArrangeRestChoice(
+  options: PendingChoice["options"],
+): PendingChoice {
+  const { cardSearchPresentation, stackSearchResolution, ...choice } =
+    searchChoice(options, options.length);
+  void cardSearchPresentation;
+  void stackSearchResolution;
+  return {
+    ...choice,
+    source: "p3_37.runner_stack_top5_choose_one_arrange_rest:test:1",
   } as PendingChoice;
 }
 

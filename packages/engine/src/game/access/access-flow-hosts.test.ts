@@ -130,7 +130,10 @@ function hostFor(calls: string[]): AccessFlowCompositionHost {
       setDamagePayload: () => calls.push("setDamagePayload"),
     },
     tags: {
-      addRunnerTagsWithPrevention: () => calls.push("addRunnerTags"),
+      addRunnerTagsWithPrevention: () => {
+        calls.push("addRunnerTags");
+        return false;
+      },
     },
     trace: {
       startTraceFromOperation: () => calls.push("startTrace"),

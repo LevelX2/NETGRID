@@ -2515,12 +2515,16 @@ function deriveFromImplementation(card, implementationText, hint) {
   }
 
   if (/accessCount:\s*[2-9]/.test(implementationText)) {
+    const totalAccessCount = propertyNumber(implementationText, "accessCount");
     addEffect(facts, {
       kind: "multiaccess",
       timing: "successful_run",
       scope: centralServerTarget(implementationText),
       resource: "cards",
-      amount: propertyNumber(implementationText, "accessCount"),
+      amount:
+        typeof totalAccessCount === "number"
+          ? Math.max(1, totalAccessCount - 1)
+          : totalAccessCount,
       source: "implementation.effect.make_run.accessCount",
     });
     addCondition(facts, {

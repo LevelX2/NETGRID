@@ -46,6 +46,7 @@ export type AiDecisionCheckpointExpectationV1 = {
   choice?: {
     mustSelectOptionIds?: string[];
     mustNotSelectOptionIds?: string[];
+    selectedOptionIdsPrefix?: string[];
     mustSelectValues?: Array<string | number | boolean>;
     mustNotSelectValues?: Array<string | number | boolean>;
   };

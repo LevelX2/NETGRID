@@ -35,6 +35,13 @@ export function resolveEndTurnTagIfRunnerReceivedTag(...args: any[]): any {
   )(...args);
 }
 
+export function resumeEndTurnAfterTagPrevention(...args: any[]): any {
+  return runtimeDelegate(
+    "turnRuntimeResolvers",
+    "resumeEndTurnAfterTagPrevention",
+  )(...args);
+}
+
 export function resolveFieldReporterEndOfRunnerTurn(...args: any[]): any {
   return runtimeDelegate(
     "turnRuntimeResolvers",
@@ -210,6 +217,13 @@ export function startCorpTurn(...args: any[]): any {
 
 export function startRunnerTurn(...args: any[]): any {
   return runtimeDelegate("turnRuntimeResolvers", "startRunnerTurn")(...args);
+}
+
+export function resumeStartOfTurnAfterTagPrevention(...args: any[]): any {
+  return runtimeDelegate(
+    "turnRuntimeResolvers",
+    "resumeStartOfTurnAfterTagPrevention",
+  )(...args);
 }
 
 export function untapRunnerCardsAtTurnStart(...args: any[]): any {

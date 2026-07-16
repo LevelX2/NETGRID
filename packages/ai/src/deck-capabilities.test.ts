@@ -6,6 +6,7 @@ import {
 } from "./deck-capabilities";
 import { CARD_ROLES_BY_CARD } from "./ai-hints";
 import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
+import match9d15Checkpoint from "../../../data/scenarios/ai-decision-checkpoints/cp-9d15-01-urgent-remote-inside-job.json";
 import type {
   LegalAction,
   PlayerView,
@@ -704,6 +705,31 @@ describe("DeckCapabilityProfile", () => {
       CARD_ROLES_BY_CARD.delete("local_runner_attack_c");
       CARD_ROLES_BY_CARD.delete("local_runner_attack_noise");
     }
+  });
+
+  it("keeps the non-Broker 9D15 deck search and remote-contest capabilities truthful", () => {
+    const capturedSnapshot =
+      match9d15Checkpoint.deckSnapshot as AiDeckStrategyDeckSnapshot;
+    const deckSnapshot = {
+      ...capturedSnapshot,
+      cards: capturedSnapshot.cards.filter(
+        (card) => card.cardId !== "onr_v1_154_broker",
+      ),
+    };
+
+    const profile = buildDeckCapabilityProfile({
+      side: "runner",
+      deckSnapshot,
+      legalActions: [],
+    });
+
+    expect(profile.runner?.searchAccess.tools.map((tool) => tool.cardId)).toEqual([
+      "onr_v1_114_temple-microcode-outlet",
+    ]);
+    expect(profile.runner?.attackPlanProfile).toMatchObject({
+      remoteContestToolsKnown: 2,
+      evidence: expect.arrayContaining(["remote_contest_tools:2"]),
+    });
   });
 
   it("marks missing runner coverage without guessing unavailable deck answers", () => {

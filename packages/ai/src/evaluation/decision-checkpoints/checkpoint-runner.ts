@@ -269,12 +269,15 @@ function choiceExpectationMatches(
   const choice = input.playerView.pendingChoice;
   if (!choice) return false;
   const rawSelectedIds = decision.selectedChoices?.selectedOptionIds;
-  const selectedIds = new Set(
-    Array.isArray(rawSelectedIds)
-      ? rawSelectedIds.filter(
-          (value): value is string => typeof value === "string",
-        )
-      : [],
+  const selectedOptionIds = Array.isArray(rawSelectedIds)
+    ? rawSelectedIds.filter(
+        (value): value is string => typeof value === "string",
+      )
+    : [];
+  const selectedIds = new Set(selectedOptionIds);
+  const selectedOptionIdsPrefix = expectation.selectedOptionIdsPrefix ?? [];
+  const prefixMatches = selectedOptionIdsPrefix.every(
+    (optionId, index) => selectedOptionIds[index] === optionId,
   );
   const selectedValues = choice.options
     .filter((option) => selectedIds.has(option.id))
@@ -286,6 +289,7 @@ function choiceExpectationMatches(
     !(expectation.mustNotSelectOptionIds ?? []).some((optionId) =>
       selectedIds.has(optionId),
     ) &&
+    prefixMatches &&
     (expectation.mustSelectValues ?? []).every((value) =>
       selectedValues.includes(value),
     ) &&

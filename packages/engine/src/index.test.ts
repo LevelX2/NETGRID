@@ -805,6 +805,18 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
 
   it("gates Remote Detonator on successful data-fort run and revalidates followup actions", () => {
     let state = runnerMain("proteus-pro008-remote-detonator");
+    const fallGuyId = addRunnerCardToGripForTest(
+      state,
+      "onr_v1_161_fall-guy",
+      "remote_detonator_fall_guy",
+    );
+    state = apply(
+      state,
+      "runner",
+      (candidate) =>
+        candidate.type === "install_card" &&
+        candidate.payload?.cardId === fallGuyId,
+    );
     addRunnerCardToGripForTest(
       state,
       "onr_proteus_121_remote-detonator",
@@ -848,13 +860,17 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
     });
     expect(stale.ok).toBe(false);
     if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
     state = apply(
       state,
       "runner",
       (candidate) => candidate.actionId === action.actionId,
     );
     expect(state.corp.archives).toContain(iceId);
-    expect(state.runner.tags).toBe(3);
+    expect(state.runner.tags).toBe(0);
+    expect(state.pendingAddTagContinuation).toMatchObject({ kind: "terminal" });
+    expect(state.pendingChoice?.source).toContain("event_modification");
     const remoteServerTrashTagSequenceEffect =
       cardImplementationForDefinitionId("onr_proteus_121_remote-detonator")
         ?.abilities?.flatMap((ability) =>
@@ -866,9 +882,24 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
             "trash_rezzed_ice_on_last_successful_run_fort_and_add_tags",
         );
     expect(remoteServerTrashTagSequenceEffect).toMatchObject({ tagAmount: 3 });
-    expect(
-      state.eventLog.some((event) => event.publicPayload?.tagsAdded === 3),
-    ).toBe(true);
+    const passState = applyChoice(structuredClone(state), "runner", "pass");
+    expect(passState.runner.tags).toBe(3);
+    expect(passState.runner.rig.resources).toContain(fallGuyId);
+    expect(passState.pendingAddTagContinuation).toBeUndefined();
+
+    const fallGuyOption = state.pendingChoice?.options.find((option) =>
+      option.id.includes(String(fallGuyId)),
+    )?.id;
+    const avoidState = applyChoice(state, "runner", String(fallGuyOption));
+    expect(avoidState.runner.tags).toBe(2);
+    expect(avoidState.runner.heap).toContain(fallGuyId);
+    expect(avoidState.pendingAddTagContinuation).toBeUndefined();
+
+    for (const branch of [passState, avoidState]) {
+      const replay = replayEvents(initial, branch.eventLog.slice(replayStart));
+      expect(replay.ok).toBe(true);
+      expect(hashState(replay.state)).toBe(hashState(branch));
+    }
   });
 
   it("offers Disgruntled Ice Technician post-pass derez from the run event source", () => {
@@ -3516,11 +3547,11 @@ describe("MVP 0.93 M1 effect, ability and choice foundation", () => {
 
   it("runs basic effect commands without mutating the original state", () => {
     const state = createGameAfterSetup({ seed: "v093-effects" });
+    state.runner.tags = 2;
     const beforeHash = hashState(state);
     const next = applyEffectCommands(state, [
       { type: "gain_credits", side: "runner", amount: 3 },
       { type: "spend_credits", side: "runner", amount: 1 },
-      { type: "add_tag", amount: 2 },
       { type: "remove_tag", amount: 1 },
     ]);
 

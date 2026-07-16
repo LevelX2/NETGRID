@@ -1161,12 +1161,26 @@
         "data/scenarios/ai-runner-rig-low-risk-batch-a-smokes.json#rig_setup_breaker_roles",
         "data/scenarios/ai-runner-rig-low-risk-batch-a-smokes.json#negative_visible_stopper"
       ],
+      "effects": [
+        {
+          "kind": "breaker",
+          "timing": "persistent",
+          "scope": "runner"
+        }
+      ],
+      "breakerProfile": {
+        "coverage": ["wall"],
+        "breakCost": 1,
+        "pumpCost": 1
+      },
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-16",
+        "reviewedBy": "codex-match-9d15-hint-audit"
       }
     },
     {
@@ -3458,12 +3472,28 @@
       "scenarioRefs": [
         "data/scenarios/ai-runner-rig-low-risk-batch-a-smokes.json#rig_setup_breaker_roles"
       ],
+      "effects": [
+        {
+          "kind": "breaker",
+          "timing": "persistent",
+          "scope": "runner"
+        }
+      ],
+      "breakerProfile": {
+        "coverage": ["sentry"],
+        "breakCost": 1,
+        "pumpCost": 1,
+        "scalingStrength": true,
+        "sideEffects": ["temporary_strength"]
+      },
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-16",
+        "reviewedBy": "codex-match-9d15-hint-audit"
       }
     },
     {
@@ -4441,7 +4471,7 @@
       "side": "runner",
       "cardType": "event",
       "roles": ["event", "multiaccess", "run_event"],
-      "planRoles": ["pressure_hq", "pressure_rnd"],
+      "planRoles": ["pressure_hq"],
       "requiredMechanics": ["access", "play_event", "run"],
       "valueHints": {
         "runPressure": 3
@@ -5013,6 +5043,8 @@
           "kind": "draw",
           "timing": "action",
           "scope": "runner",
+          "resource": "cards",
+          "amount": 3,
           "target": "draw"
         }
       ]
@@ -5111,6 +5143,8 @@
           "kind": "economy",
           "timing": "action",
           "scope": "runner",
+          "resource": "credits",
+          "amount": 3,
           "target": "burst_credit",
           "finite": true
         }
@@ -5563,7 +5597,7 @@
       "side": "runner",
       "cardType": "event",
       "roles": ["access_trash", "event", "hq_pressure", "run_event"],
-      "planRoles": ["pressure_hq", "contest_remote"],
+      "planRoles": ["pressure_hq"],
       "requiredMechanics": [
         "access_card",
         "play_event",
@@ -5630,8 +5664,7 @@
       "planRoles": ["recover_economy"],
       "requiredMechanics": ["play_event"],
       "valueHints": {
-        "economy": 5,
-        "runPressure": 2
+        "economy": 5
       },
       "riskTags": ["public_play", "credit_reserve"],
       "aiSupportStatus": "ai_supported",
@@ -7282,11 +7315,11 @@
       "cardId": "onr_v1_139_r-and-d-interface",
       "side": "runner",
       "cardType": "hardware",
-      "roles": ["hardware", "rd_multiaccess"],
-      "planRoles": ["build_rig", "run_pressure"],
+      "roles": ["hardware", "multiaccess", "rnd_pressure"],
+      "planRoles": ["build_rig", "pressure_rnd"],
       "requiredMechanics": ["install_hardware", "rd_additional_access"],
       "valueHints": {
-        "run": 2
+        "runPressure": 3
       },
       "riskTags": [
         "hidden_zone_access_queue",

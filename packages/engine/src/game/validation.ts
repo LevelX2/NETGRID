@@ -341,6 +341,14 @@ export function validateGameState(state: GameState): ValidationResult {
     if (optionIds.size !== state.pendingChoice.options.length)
       errors.push("PendingChoice option ids must be unique.");
   }
+  if (state.pendingAddTagContinuation) {
+    if (state.imminentEvent?.eventType !== "add_tag")
+      errors.push("Add-tag continuation requires an Add-Tag imminent event.");
+    if (!state.eventModificationWindow)
+      errors.push("Add-tag continuation requires an event modification window.");
+    if (!state.pendingChoice?.source.startsWith("v120.event_modification"))
+      errors.push("Add-tag continuation requires its pending choice.");
+  }
   if (state.runnerDrawSequence) {
     const sequence = state.runnerDrawSequence;
     if (!sequence.sequenceId)
@@ -363,6 +371,8 @@ export function validateGameState(state: GameState): ValidationResult {
     const resolvingDrawTaxRez = state.pendingChoice?.source.startsWith(
       "runner_draw.draw_tax_rez:",
     );
+    const resolvingDrawTaxTag =
+      state.pendingAddTagContinuation?.kind === "runner_draw_tax";
     if (
       resolvingDrawTax &&
       sequence.currentDrawTaxSourceIndex >=
@@ -374,7 +384,7 @@ export function validateGameState(state: GameState): ValidationResult {
       sequence.currentDrawTaxSourceIds.length
     )
       errors.push("Runner draw sequence tax sources must be unique.");
-    if (!resolvingDrawTax && !resolvingDrawTaxRez)
+    if (!resolvingDrawTax && !resolvingDrawTaxRez && !resolvingDrawTaxTag)
       errors.push("Runner draw sequence requires its pending choice.");
   } else if (
     state.pendingChoice?.source.startsWith("runner_draw.draw_tax:") ||

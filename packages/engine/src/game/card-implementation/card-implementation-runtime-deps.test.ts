@@ -280,6 +280,7 @@ function host(calls: string[] = []): GameCardImplementationRuntimeDepsHost {
       startPaidSourceReturnToGripChoice: () => {
         calls.push("return_choice");
       },
+      addRunnerTagsWithPrevention: () => false,
       startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice: () => {
         calls.push("senatorial_field_trip_choice");
         return { publicPayload: { choiceOpened: true } };
@@ -313,6 +314,7 @@ describe("game card implementation runtime deps root", () => {
         "spendCredits",
         "createAction",
         "appendResolvedEffectsToPayload",
+        "addRunnerTagsWithPrevention",
         "drawCards",
         "damageRunner",
         "unpreventableDamageRunner",
