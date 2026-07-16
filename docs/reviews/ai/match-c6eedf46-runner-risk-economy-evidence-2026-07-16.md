@@ -226,3 +226,28 @@ Observability-Fix im selben Prozess enthalten.
 - Damage-/Punish-Tests unterscheiden sichtbare von unbekannten Karten.
 - Varianztests belegen Replay-Stabilität und Ausschluss klar dominierter oder
   unsicherer Kandidaten.
+
+## Spielgleicher roter Checkpoint
+
+Der strikte Capture auf dem mit `main` synchronisierten Stand erzeugte
+`cp-c6eedf46-01-delayed-economy-reserve` ohne Warmup-Drift. Der Checkpoint
+enthält den öffentlichen Eventpräfix bis D9/SV15 sowie TacticalPlan,
+PlanPortfolio und StrategicIntent; der produktive Chooser wählt weiterhin
+`runner.install_card...rigged-investments`.
+
+Der fokussierte Lauf vor jeder Produktionsänderung belegt genau den
+erwarteten roten Zustand:
+
+- historischer Zieltest: ausschließlich `behavior_regression`, weil Rigged
+  Investments sowohl verboten als auch außerhalb der positiven
+  Aktionsmenge liegt;
+- Gegenprobe mit 10 statt 4 Credits: grün, Rigged Investments bleibt bei
+  erhaltener Reserve zulässig;
+- bestehender Livewire-Sofortökonomie-Checkpoint: grün;
+- Eventpräfix-Gegenprobe: grün, weder Chance Observation noch Urban Renewal
+  sind der damaligen KI sichtbar.
+
+Ergebnis des Laufs: ein erwarteter roter Zieltest und drei grüne
+Gegenproben. Damit ist die Regression verhaltensbezogen und nicht durch
+Engine-Legalität, Runtime-State-Drift, Fixture-Migration oder Hidden-Info-
+Leakage verursacht.
