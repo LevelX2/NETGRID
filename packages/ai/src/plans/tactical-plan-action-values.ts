@@ -40,6 +40,7 @@ export function legalActionCreditGainForPlan(
     legalActionNumberPayload(action, "gainCreditsAmount"),
     legalActionNumberPayload(action, "gainedCredits"),
     legalActionNumberPayload(action, "amount"),
+    legalActionVisibleStoredCreditCashout(input, action, dependencies),
     legalActionCreditHintGain(input, action, dependencies),
   );
   if (action.type === "gain_credit")
@@ -52,6 +53,19 @@ export function legalActionCreditGainForPlan(
     return 0;
   }
   return capCreditGainByVisibleStoredCredits(input, action, dependencies, knownGain);
+}
+
+function legalActionVisibleStoredCreditCashout(
+  input: AiDecisionInput,
+  action: LegalAction,
+  dependencies: TacticalPlanCreditValueDependencies,
+): number {
+  if (action.payload?.cardImplementationTakesHostedCredits !== true) return 0;
+  const sourceCard = dependencies.visibleCardForAction(
+    input.playerView,
+    action,
+  );
+  return sourceCard ? visibleStoredCredits(sourceCard) : 0;
 }
 
 function legalActionCreditHintGain(

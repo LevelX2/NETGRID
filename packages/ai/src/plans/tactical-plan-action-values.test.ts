@@ -84,6 +84,35 @@ describe("legalActionCreditGainForPlan", () => {
       ),
     ).toBe(0);
   });
+
+  it("projects a Broker-style all-hosted-credit cashout from the visible pool", () => {
+    const input = { side: "runner", playerView: {} } as AiDecisionInput;
+
+    expect(
+      legalActionCreditGainForPlan(
+        input,
+        legalAction({
+          type: "activated_card_ability",
+          payload: {
+            cardImplementationTakesHostedCredits: true,
+            hostedCreditTakeMode: "all",
+          },
+        }),
+        {
+          aiHintsByCard: new Map(),
+          visibleCardForAction: () =>
+            ({
+              counterDisplays: [
+                {
+                  displayKind: "stored_credits",
+                  amount: 9,
+                },
+              ],
+            }) as VisibleCard,
+        },
+      ),
+    ).toBe(9);
+  });
 });
 
 function legalAction(

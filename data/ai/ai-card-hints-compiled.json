@@ -25394,9 +25394,16 @@
       "effects": [
         {
           "kind": "agenda_reveal_economy",
-          "timing": "start_of_turn",
           "scope": "corp",
-          "target": "economy.corp_hq_agenda_reveal_credit"
+          "target": "economy.corp_hq_agenda_reveal_credit",
+          "timing": "start_of_turn"
+        },
+        {
+          "amount": 1,
+          "kind": "agenda_reveal_economy",
+          "resource": "credits",
+          "scope": "corp",
+          "timing": "start_of_turn"
         }
       ],
       "costProfile": {

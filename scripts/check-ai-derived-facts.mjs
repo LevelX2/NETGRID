@@ -950,6 +950,23 @@ function deriveFromImplementation(card, implementationText, hint) {
     );
   }
 
+  if (/kind:\s*"show_hq_agendas_for_credits"/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "agenda_reveal_economy",
+      timing: "start_of_turn",
+      scope: "corp",
+      resource: "credits",
+      amount: propertyNumber(implementationText, "creditPerAgenda"),
+      source:
+        "implementation.lifecycle.start_of_corp_turn.show_hq_agendas_for_credits",
+    });
+    addCondition(facts, {
+      kind: "requires_agenda_reveal",
+      source:
+        "implementation.lifecycle.start_of_corp_turn.show_hq_agendas_for_credits",
+    });
+  }
+
   if (
     /kind:\s*"priority_requisition_rez_ice_at_no_cost"/.test(
       implementationText,

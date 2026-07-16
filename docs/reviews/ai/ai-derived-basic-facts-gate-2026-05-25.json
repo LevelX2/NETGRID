@@ -18,7 +18,7 @@
     "action_penalty": 1,
     "advance_burst": 3,
     "advanceable_economy": 6,
-    "agenda_reveal_economy": 1,
+    "agenda_reveal_economy": 2,
     "ambush": 5,
     "base_link": 1,
     "brain_damage_prevention": 2,
@@ -85,7 +85,7 @@
     "requires_accessed_card": 8,
     "requires_advancement_counter": 5,
     "requires_agenda_in_hq": 1,
-    "requires_agenda_reveal": 1,
+    "requires_agenda_reveal": 2,
     "requires_archives_card": 1,
     "requires_brain_damage": 2,
     "requires_corp_credits_threshold": 1,
@@ -128,7 +128,7 @@
   "hardErrorCount": 0,
   "hardErrors": [],
   "hardConflicts": [],
-  "warningCount": 997,
+  "warningCount": 994,
   "warnings": [
     {
       "kind": "text_pattern_derivation",
@@ -4026,23 +4026,8 @@
       "cardId": "onr_v1_314_corporate-negotiating-center"
     },
     {
-      "kind": "descriptor_or_overlay_gap",
-      "message": "Manual ontology contains fields not currently derivable.",
-      "cardId": "onr_v1_314_corporate-negotiating-center"
-    },
-    {
       "kind": "generated_fact_without_manual_match",
       "message": "Generated condition:requires_start_of_turn has no manual ontology match.",
-      "cardId": "onr_v1_314_corporate-negotiating-center"
-    },
-    {
-      "kind": "manual_ontology_without_generated_match",
-      "message": "Manual condition:requires_agenda_reveal has no generated basic fact match.",
-      "cardId": "onr_v1_314_corporate-negotiating-center"
-    },
-    {
-      "kind": "manual_ontology_without_generated_match",
-      "message": "Manual effect:agenda_reveal_economy has no generated basic fact match.",
       "cardId": "onr_v1_314_corporate-negotiating-center"
     },
     {
@@ -24296,8 +24281,23 @@
       "expectedManualOverlayNeeded": false,
       "rationale": "Start-turn remote economy/support context is mechanically represented when visible in implementation.",
       "derivedFacts": {
-        "effects": [],
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "agenda_reveal_economy",
+            "timing": "start_of_turn",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 1,
+            "source": "implementation.lifecycle.start_of_corp_turn.show_hq_agendas_for_credits"
+          }
+        ],
         "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_agenda_reveal",
+            "source": "implementation.lifecycle.start_of_corp_turn.show_hq_agendas_for_credits"
+          },
           {
             "confidence": "high",
             "kind": "requires_start_of_turn",
@@ -24361,24 +24361,20 @@
       },
       "overlap": {
         "matches": [
+          "condition:requires_agenda_reveal",
+          "effect:agenda_reveal_economy",
           "remoteRole:asset_economy"
         ],
         "generatedOnly": [
           "condition:requires_start_of_turn"
         ],
-        "manualOnly": [
-          "condition:requires_agenda_reveal",
-          "effect:agenda_reveal_economy"
-        ]
+        "manualOnly": []
       },
       "missingManualOverlay": [
-        "condition:requires_agenda_reveal",
-        "condition:requires_start_of_turn",
-        "effect:agenda_reveal_economy"
+        "condition:requires_start_of_turn"
       ],
       "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually.",
-        "Manual ontology contains fields not currently derivable."
+        "Generated facts contain fields not currently mirrored manually."
       ],
       "confidence": "high",
       "warnings": [
@@ -24387,20 +24383,8 @@
           "message": "Generated facts contain fields not currently mirrored manually."
         },
         {
-          "kind": "descriptor_or_overlay_gap",
-          "message": "Manual ontology contains fields not currently derivable."
-        },
-        {
           "kind": "generated_fact_without_manual_match",
           "message": "Generated condition:requires_start_of_turn has no manual ontology match."
-        },
-        {
-          "kind": "manual_ontology_without_generated_match",
-          "message": "Manual condition:requires_agenda_reveal has no generated basic fact match."
-        },
-        {
-          "kind": "manual_ontology_without_generated_match",
-          "message": "Manual effect:agenda_reveal_economy has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",

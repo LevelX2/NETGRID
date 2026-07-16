@@ -375,7 +375,6 @@ export function runnerFundedHandDevelopmentContinuation(
     evaluation.currentNeed === "none" ||
     evaluation.currentNeed === "later" ||
     evaluation.deferReason === "missing_mu" ||
-    runnerHandDevelopmentBreaksProtectedReserve(evaluation) ||
     evaluation.persistentInstallEvaluation?.duplicateRole ===
       "redundant_duplicate" ||
     !context.input.legalActions.some(

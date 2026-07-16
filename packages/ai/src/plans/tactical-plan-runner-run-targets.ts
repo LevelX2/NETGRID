@@ -261,6 +261,7 @@ export function assessRunnerPressureBudget(
   const variationEligibleProbeTargets = allowedProbeEvaluations
     .filter(
       (evaluation) =>
+        runnerEvaluationUsesBasicStartRun(context, evaluation.actionId) &&
         evaluation.accessPayoff === "unknown" &&
         evaluation.knownAccessState === "unknown" &&
         evaluation.scoreThreat !== true,
@@ -299,6 +300,10 @@ export function assessRunnerPressureBudget(
     reservePressureActive &&
     !usefulHandDevelopmentAvailable &&
     !remoteFundingNeed &&
+    !allowedProbeEvaluations.some(
+      (evaluation) =>
+        !runnerEvaluationUsesBasicStartRun(context, evaluation.actionId),
+    ) &&
     variationEligibleProbeTargets.length > 0;
   const probeDisposition = probeEligible
     ? runnerPressureProbeDisposition(
@@ -365,6 +370,16 @@ export function assessRunnerPressureBudget(
       `probe_damage_threat_level:${damageThreatLevel}`,
     ],
   };
+}
+
+function runnerEvaluationUsesBasicStartRun(
+  context: TacticalPlanBuildContext,
+  actionId: string,
+): boolean {
+  const action = context.input.legalActions.find(
+    (candidate) => candidate.actionId === actionId,
+  );
+  return action?.type === "start_run" && action.source === "basic_action";
 }
 
 export function runnerPressureProbeAllowance(

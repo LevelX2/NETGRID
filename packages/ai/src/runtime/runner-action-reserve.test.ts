@@ -1,6 +1,7 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
+import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import {
   assessRunnerActionReserve,
   runnerActionReserveExclusion,
@@ -19,17 +20,34 @@ describe("runner action reserve", () => {
       spendingWouldDropBelowReserve: true,
       survivalOverride: false,
     });
-    expect(runnerActionReserveExclusion(input, action)).toMatchObject({
-      key: "runner_install_breaks_credit_floor",
-    });
+    expect(
+      runnerActionReserveExclusion(input, action, delayedEconomyCandidate()),
+    ).toMatchObject({ key: "runner_install_breaks_credit_floor" });
   });
 
   it("allows the same installation when the protected reserve remains", () => {
     const action = installAction(4);
 
-    expect(runnerActionReserveExclusion(runnerInput(10, action), action)).toBe(
-      undefined,
-    );
+    expect(
+      runnerActionReserveExclusion(
+        runnerInput(10, action),
+        action,
+        delayedEconomyCandidate(),
+      ),
+    ).toBe(undefined);
+  });
+
+  it("allows a funded strategic plan continuation to spend its reserved pool", () => {
+    const action = installAction(11);
+
+    expect(
+      runnerActionReserveExclusion(
+        runnerInput(11, action),
+        action,
+        strategicInstallCandidate(),
+        { fundedPlanContinuation: true },
+      ),
+    ).toBeUndefined();
   });
 
   it("does not turn the install floor into a blanket ban on paid runs", () => {
@@ -74,11 +92,28 @@ describe("runner action reserve", () => {
       minimumCreditFloor: 3,
       spendingWouldDropBelowReserve: true,
     });
-    expect(runnerActionReserveExclusion(input, action)).toMatchObject({
-      key: "runner_install_breaks_credit_floor",
-    });
+    expect(
+      runnerActionReserveExclusion(input, action, delayedEconomyCandidate()),
+    ).toMatchObject({ key: "runner_install_breaks_credit_floor" });
   });
 });
+
+function delayedEconomyCandidate(): ActionSemanticCandidate {
+  return {
+    effectTargets: [
+      "economy.installment_credit",
+      "economy.turn_start_credit",
+    ],
+    actionTacticSignals: [],
+  } as unknown as ActionSemanticCandidate;
+}
+
+function strategicInstallCandidate(): ActionSemanticCandidate {
+  return {
+    effectTargets: ["icebreaker"],
+    actionTacticSignals: [],
+  } as unknown as ActionSemanticCandidate;
+}
 
 function installAction(cost: number): LegalAction {
   return {

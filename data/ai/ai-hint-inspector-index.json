@@ -57516,6 +57516,7 @@
           "remoteRole"
         ],
         "generatedFactFields": [
+          "effects",
           "conditions"
         ],
         "overlayFields": []

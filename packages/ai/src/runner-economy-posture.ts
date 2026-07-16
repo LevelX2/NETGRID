@@ -39,12 +39,10 @@ export function buildRunnerEconomyPosture(
   const damageThreat = runnerDamageThreatAssessment(params.input);
   const damageThreatFloor =
     damageThreat.level === "critical"
-      ? 6
+      ? 4
       : damageThreat.level === "confirmed"
-        ? 4
-        : damageThreat.level === "suspected"
-          ? 3
-          : 2;
+        ? 3
+        : 2;
   const minimumCreditFloor = Math.max(
     riskAdjustedRunReserve || phase === "late_contest" ? 3 : 2,
     damageThreatFloor,
@@ -53,12 +51,10 @@ export function buildRunnerEconomyPosture(
     phase === "opening" ? 4 : phase === "midgame" ? 5 : 6,
     riskAdjustedRunReserve || bankToolsRelevant ? 6 : 4,
     damageThreat.level === "critical"
-      ? 8
+      ? 6
       : damageThreat.level === "confirmed"
-        ? 7
-        : damageThreat.level === "suspected"
-          ? 6
-          : 4,
+        ? 5
+        : 4,
   );
   const creditReservePolicy = buildRunnerCreditReservePolicy({
     input: params.input,

@@ -87,8 +87,7 @@ export function runnerDamageThreatAssessment(
   const hasDamageEvidence =
     historicalDamageEvents > 0 ||
     knownDamageSourceCount > 0 ||
-    visiblePunishSignalScore > 0 ||
-    input.playerView.own.tags > 0;
+    visiblePunishSignalScore > 0;
   const hasRecentDamageEvidence = recentDamageEvents > 0 && !staleDamage;
   const level = runnerDamageThreatLevel({
     handCount,
@@ -214,8 +213,7 @@ function runnerDamageThreatLevel(params: {
     params.knownDamageSourceCount > 0 ||
     params.knownPunishSignalCount > 0 ||
     params.knownTraceTagSignalCount > 0 ||
-    params.historicalDamageEvents > 0 ||
-    params.runnerTagged
+    params.historicalDamageEvents > 0
   ) {
     return "suspected";
   }
@@ -225,6 +223,7 @@ function runnerDamageThreatLevel(params: {
 function runnerDamageThreatHandFloor(level: RunnerDamageThreatLevel): number {
   switch (level) {
     case "critical":
+      return 3;
     case "confirmed":
       return 3;
     case "suspected":
@@ -305,13 +304,11 @@ function visibleOpponentPunishSignals(
     const effectKinds = new Set((hint.effects ?? []).map((effect) => effect.kind));
     const directDamage = effectKinds.has("damage");
     const traceTag =
-      effectKinds.has("trace") ||
-      effectKinds.has("tag") ||
-      effectKinds.has("tag_source");
-    const punishPayoff =
-      effectKinds.has("tag_punish_payoff") ||
-      effectKinds.has("access_punish") ||
-      effectKinds.has("ambush");
+      (effectKinds.has("trace") ||
+        effectKinds.has("tag") ||
+        effectKinds.has("tag_source")) &&
+      (hint.lineSupport ?? []).includes("corp.tag_trace_punish");
+    const punishPayoff = effectKinds.has("tag_punish_payoff");
     if (!directDamage && !traceTag && !punishPayoff) continue;
     signalSourceCount += 1;
     if (directDamage) {

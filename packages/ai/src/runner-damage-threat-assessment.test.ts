@@ -78,6 +78,53 @@ describe("runnerDamageThreatAssessment", () => {
     });
   });
 
+  it("does not turn a tag by itself into damage evidence", () => {
+    const tagged = input({ handCount: 1, stateVersion: 14 });
+    tagged.playerView.own.tags = 1;
+
+    expect(runnerDamageThreatAssessment(tagged)).toMatchObject({
+      level: "none",
+      visiblePunishSignalScore: 0,
+      recommendedHandFloor: 1,
+    });
+  });
+
+  it("does not mistake generic trace ice plus a non-damage access ambush for a damage deck", () => {
+    expect(
+      runnerDamageThreatAssessment(
+        input({
+          handCount: 1,
+          stateVersion: 14,
+          servers: [
+            {
+              id: "remote_1",
+              ice: [
+                card({
+                  definitionId: "onr_v1_264_rex",
+                  type: "ice",
+                  rezzed: true,
+                }),
+              ],
+              root: [
+                card({
+                  definitionId: "onr_v1_315_corprunners-shattered-remains",
+                  type: "asset",
+                  rezzed: true,
+                }),
+              ],
+            },
+          ],
+        }),
+      ),
+    ).toMatchObject({
+      level: "none",
+      knownDamageSourceCount: 0,
+      knownPunishSignalCount: 0,
+      knownTraceTagSignalCount: 0,
+      visiblePunishSignalScore: 0,
+    });
+  });
+
   it("treats recent visible damage at empty hand as critical survival pressure", () => {
     const assessment = runnerDamageThreatAssessment(
       input({

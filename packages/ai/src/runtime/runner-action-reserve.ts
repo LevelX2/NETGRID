@@ -30,9 +30,9 @@ export function assessRunnerActionReserve(
   const damageThreatLevel = runnerDamageThreatAssessment(input).level;
   const minimumCreditFloor =
     damageThreatLevel === "critical"
-      ? 6
+      ? 4
       : damageThreatLevel === "confirmed"
-        ? 4
+        ? 3
         : damageThreatLevel === "suspected"
           ? 3
           : 2;
@@ -62,8 +62,15 @@ export function runnerActionReserveExclusion(
   input: AiDecisionInput,
   action: LegalAction,
   candidate?: ActionSemanticCandidate,
+  options: { fundedPlanContinuation?: boolean } = {},
 ): SemanticRuntimeExclusion | undefined {
   if (action.type !== "install_card") return undefined;
+  if (
+    options.fundedPlanContinuation === true &&
+    !runnerActionIsDelayedEconomy(candidate)
+  ) {
+    return undefined;
+  }
   const assessment = assessRunnerActionReserve(input, action, candidate);
   if (
     !assessment?.spendingWouldDropBelowReserve ||
@@ -76,6 +83,17 @@ export function runnerActionReserveExclusion(
     label: "Installation unterschreitet Credit-Reserve",
     reason: assessment.evidence.join("|"),
   };
+}
+
+function runnerActionIsDelayedEconomy(
+  candidate: ActionSemanticCandidate | undefined,
+): boolean {
+  return (candidate?.effectTargets ?? []).some(
+    (target) =>
+      target.includes("installment_credit") ||
+      target.includes("turn_start_credit") ||
+      target.includes("deferred_credit"),
+  );
 }
 
 function runnerImmediateActionCreditGain(
