@@ -2,8 +2,11 @@
 
 ## Status
 
-P0 aktiv. Der Nutzer hat die Umsetzung nach einer Korrektur des ersten
-Mature-first-Vorschlags freigegeben.
+P4 zur Integration freigegeben. Die Umsetzung und die spielgleichen
+Broker-Checkpoints sind grün. Die kausale Verhaltensbaseline zeigt gegenüber
+dem exakten Vorher-Stand ein zusätzliches Spiel am Aktionslimit (3 statt 2).
+Der Nutzer hat diese Abweichung am 16. Juli 2026 ausdrücklich akzeptiert und
+die Integration für weitere Prüfung in echten Spielen freigegeben.
 
 ## Quelle und Gesamtziel
 
@@ -112,6 +115,9 @@ Basic Credit korrekt bewerten.
   zurückgestellt.
 - Cashouts decken Notfall, Reaktionsreserve und reifen Liquiditätstransfer ab,
   ohne unreife Banken grundlos zu leeren.
-- Historische rote Ziele, positive Gegenproben, AI-Typecheck und vollständige
-  AI-Suite sind grün.
+- Historische rote Ziele, positive Gegenproben, fokussierte Tests und
+  AI-Typecheck sind grün.
+- Die Verhaltensbaseline bleibt mit 3 statt 2 Spielen am Aktionslimit als
+  bekannte Abweichung dokumentiert; die Freigabe erfolgt bewusst für den
+  Praxistest.
 - `main` ist sauber integriert; Worktree und Branch sind entfernt.

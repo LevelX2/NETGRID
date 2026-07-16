@@ -85,25 +85,24 @@ Ursachen jetzt sauber:
 ## Broker-Folgegate
 
 Der vollständige Entscheidungs-Census steht in
-`docs/architecture/ai/match-ecfe3ce-broker-audit-2026-07-16.md`. Bestätigt sind
-vier getrennte Optimierungspunkte:
+`docs/architecture/ai/match-ecfe3ce-broker-audit-2026-07-16.md`. Die spätere
+spielgleiche Reproduktion korrigiert die erste Einordnung:
 
-1. Decision 156 ließ einen legalen letzten Lade-Klick zugunsten eines Basic
-   Credits aus.
-2. Decision 179 installierte eine zweite Kopie ohne ausreichende
-   Amortisationsprüfung.
-3. Decisions 180 und 191 zeigen eine falsche Quellenwahl: Der pauschale
-   Erstladebonus bevorzugt eine leere oder neue Kopie gegenüber einer bereits
-   reifen Bank.
-4. Decision 56 war ein wahrscheinlich verfrühter Cashout im Umfeld der
-   fehlerhaften Run-Pfadquote und muss nach deren Korrektur gezielt neu
-   reproduziert werden.
+1. Decision 56 war ein eigenständiger Frühcashout. Eine teure Entwicklungskarte
+   in der Hand machte einen erst einmal geladenen 3-Credit-Speicher noch nicht
+   zu einem konkreten, dringenden Funding-Ziel.
+2. Decision 156 ließ den legalen letzten Load zugunsten eines Basic Credits
+   aus.
+3. Decisions 179 und 180 sind zulässiger Parallelaufbau zweier Quellen, kein
+   pauschaler Mehrkopien-Fehler.
+4. Decision 191 wird auf aktuellem Code korrekt durch einen Survival-Draw
+   überstimmt und ist keine Broker-Quellenwahl.
 
 Ein einzelner Broker kann wegen seines gemeinsamen
 `once_per_turn_per_source`-Limits nicht im selben Zug erst laden und danach
-auszahlen. Der Nutzerverdacht eines ausgelassenen zweiten Einsatzes derselben
-Kopie ist daher regeltechnisch entlastet; die ausgelassenen Ladefenster und
-die zu frühe Mehrkopien- beziehungsweise Cashout-Wahl sind dagegen real.
+auszahlen. Zwei installierte Kopien sind eigenständige Quellen und werden nun
+als Portfolio bewertet. Die Broker-Remediation liegt in einem separaten,
+spielgleichen Paket vor.
 
 ## Verifikation
 
@@ -117,7 +116,6 @@ die zu frühe Mehrkopien- beziehungsweise Cashout-Wahl sind dagegen real.
 
 ## Restpunkt
 
-Die Broker-Heuristik ist absichtlich nicht Teil dieser Remediation. Ihre vier
-bestätigten Folgefunde benötigen eigene spielgleiche Checkpoints und ein
-separates Freigabe-Gate, damit Notfall-Cashouts, normale Reifeziele,
-Mehrkopien-Amortisation und Quellenwahl nicht vermischt werden.
+Die Broker-Heuristik war absichtlich nicht Teil dieser Engine-/Hint-Remediation.
+Ihr separates Folgepaket trennt Notfall-Cashout, Aufbau, Reifetransfer und
+Mehrkopien-Portfolio durch eigene spielgleiche Checkpoints.
