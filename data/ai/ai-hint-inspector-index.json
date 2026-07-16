@@ -15,7 +15,7 @@
   "summary": {
     "cardCount": 618,
     "cardsWithMechanicalFacts": 584,
-    "cardsWithGeneratedFacts": 330,
+    "cardsWithGeneratedFacts": 331,
     "cardsWithOverlays": 6,
     "cardsWithFunctionSignals": 602,
     "cardsWithStrategyAnchors": 257,
@@ -5141,7 +5141,7 @@
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
         "mechanicalFactsFound": true,
-        "generatedFactsFound": false,
+        "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
         "warningCount": 0
@@ -5200,7 +5200,9 @@
           "conditions",
           "costProfile"
         ],
-        "generatedFactFields": [],
+        "generatedFactFields": [
+          "effects"
+        ],
         "overlayFields": []
       },
       "strategicRoleStatus": {

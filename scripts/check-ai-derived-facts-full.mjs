@@ -27,12 +27,13 @@ const IMPLEMENTATION_ROOTS = [
     cardIdPrefix: "onr_proteus_",
     path: "packages/engine/src/card-implementations/proteus",
   },
-  {
-    setId: "classic",
-    cardIdPrefix: "onr_classic_",
-    path: "packages/engine/src/card-implementations/classic",
-  },
 ];
+const IMPLEMENTATION_PATH_OVERRIDES = new Map([
+  [
+    "onr_classic_041_networking",
+    "packages/engine/src/card-implementations/classic/runner/events/networking.ts",
+  ],
+]);
 const OVERLAY_ROOT = "data/ai/hints/overlays";
 const GENERATED_AT = "2026-05-25";
 const EXPECTED_ACTIVE_HINT_COUNT = 618;
@@ -83,6 +84,13 @@ function implementationPathByCardId() {
       if (!match) continue;
       byCardId.set(match[1], toRepoRelative(absolutePath));
     }
+  }
+  for (const [cardId, relativePath] of IMPLEMENTATION_PATH_OVERRIDES) {
+    const absolutePath = repoPath(relativePath);
+    if (!fs.existsSync(absolutePath)) continue;
+    const text = fs.readFileSync(absolutePath, "utf8");
+    const match = text.match(/cardDefinitionId:\s*"([^"]+)"/);
+    if (match?.[1] === cardId) byCardId.set(cardId, relativePath);
   }
   return byCardId;
 }

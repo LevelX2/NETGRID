@@ -44784,26 +44784,20 @@
       ],
       "effects": [
         {
-          "finite": true,
           "kind": "card_recovery",
-          "resource": "cards",
+          "timing": "action",
           "scope": "archives",
+          "resource": "cards",
           "target": "archives.corp_recovery",
-          "timing": "action"
+          "finite": true
         },
         {
-          "finite": true,
           "kind": "search",
-          "resource": "cards",
+          "timing": "action",
           "scope": "archives",
+          "resource": "cards",
           "target": "ice_recovery",
-          "timing": "action"
-        },
-        {
-          "kind": "card_recovery",
-          "resource": "cards",
-          "scope": "archives",
-          "timing": "action"
+          "finite": true
         }
       ],
       "conditions": [
@@ -45004,26 +44998,19 @@
       ],
       "effects": [
         {
-          "amount": 1,
           "kind": "run_tax",
-          "repeatable": true,
-          "resource": "credits",
+          "timing": "during_run",
           "scope": "runner",
+          "resource": "credits",
+          "amount": 1,
           "target": "run.break_cost_penalty",
-          "timing": "during_run"
+          "repeatable": true
         },
         {
           "kind": "remote_protection",
+          "timing": "persistent",
           "scope": "remote",
-          "target": "remote.scoring_protection",
-          "timing": "persistent"
-        },
-        {
-          "amount": 1,
-          "kind": "run_tax",
-          "resource": "credits",
-          "scope": "fort",
-          "timing": "persistent"
+          "target": "remote.scoring_protection"
         }
       ],
       "conditions": [
@@ -45041,12 +45028,7 @@
         "UPGRADE-V2: ändern; priority=medium; set=classic.",
         "UPGRADE-V2: Target/Constraints: Region/Fort constraint; applies only to using subroutines of noisy icebreakers during runs on this fort.",
         "UPGRADE-V2: Rationale: Noisy-Icebreaker-Hate ist subtype-/matchup-spezifisch wie Worm- oder Stealth-Hate. Das ist ein taktisches Tax-/Constraint-Signal, aber kein stabiler `corp.ice_tax_glacier`- oder `corp.remote_scoring`-Anker."
-      ],
-      "remoteRole": {
-        "kind": "run_tax",
-        "serverScope": "fort",
-        "threatLevel": "medium"
-      }
+      ]
     },
     {
       "cardId": "onr_classic_021_satellite-monitors",
@@ -45797,35 +45779,22 @@
       },
       "effects": [
         {
-          "amount": 2,
-          "finite": true,
           "kind": "tag_prevention",
-          "resource": "tags",
+          "timing": "action",
           "scope": "runner",
+          "resource": "tags",
+          "amount": 2,
           "target": "remove_tags",
-          "timing": "action"
+          "finite": true
         },
         {
-          "amount": 3,
-          "finite": true,
           "kind": "draw",
-          "resource": "cards",
+          "timing": "action",
           "scope": "runner",
+          "resource": "cards",
+          "amount": 3,
           "target": "draw",
-          "timing": "action"
-        },
-        {
-          "amount": 3,
-          "kind": "draw",
-          "resource": "cards",
-          "scope": "runner",
-          "timing": "action"
-        },
-        {
-          "kind": "survival_payoff",
-          "resource": "tags",
-          "scope": "runner",
-          "timing": "action"
+          "finite": true
         }
       ],
       "conditions": [
@@ -45956,36 +45925,22 @@
       },
       "effects": [
         {
-          "amount": 4,
-          "finite": true,
           "kind": "economy",
-          "resource": "credits",
+          "timing": "action",
           "scope": "runner",
+          "resource": "credits",
+          "amount": 4,
           "target": "burst_credit",
-          "timing": "action"
+          "finite": true
         },
         {
-          "amount": 2,
-          "finite": true,
           "kind": "draw",
-          "resource": "cards",
+          "timing": "action",
           "scope": "runner",
+          "resource": "cards",
+          "amount": 2,
           "target": "draw",
-          "timing": "action"
-        },
-        {
-          "amount": 2,
-          "kind": "draw",
-          "resource": "cards",
-          "scope": "runner",
-          "timing": "action"
-        },
-        {
-          "amount": 4,
-          "kind": "economy",
-          "resource": "credits",
-          "scope": "runner",
-          "timing": "action"
+          "finite": true
         }
       ],
       "conditions": [
@@ -46040,8 +45995,8 @@
       "effects": [
         {
           "kind": "breaker",
-          "scope": "runner",
-          "timing": "persistent"
+          "timing": "persistent",
+          "scope": "runner"
         }
       ],
       "costProfile": {
@@ -46052,14 +46007,14 @@
         "opportunityCost": "low"
       },
       "breakerProfile": {
-        "baseStrength": 1,
-        "breakCost": 1,
         "coverage": [
           "wall"
         ],
-        "maxSubroutinesPerBreak": 1,
+        "baseStrength": 1,
         "pumpCost": 2,
-        "pumpStrengthAmount": 3
+        "pumpStrengthAmount": 3,
+        "breakCost": 1,
+        "maxSubroutinesPerBreak": 1
       },
       "manualNotes": [
         "CLASSIC-AI-01: Wall-only breaker. Coverage support for rig construction, not a direct pressure anchor."
@@ -46103,8 +46058,8 @@
       "effects": [
         {
           "kind": "breaker",
-          "scope": "runner",
-          "timing": "persistent"
+          "timing": "persistent",
+          "scope": "runner"
         }
       ],
       "costProfile": {
@@ -46115,14 +46070,14 @@
         "opportunityCost": "low"
       },
       "breakerProfile": {
-        "baseStrength": 1,
-        "breakCost": 1,
         "coverage": [
           "sentry"
         ],
-        "maxSubroutinesPerBreak": 1,
+        "baseStrength": 1,
         "pumpCost": 3,
-        "pumpStrengthAmount": 5
+        "pumpStrengthAmount": 5,
+        "breakCost": 1,
+        "maxSubroutinesPerBreak": 1
       },
       "manualNotes": [
         "CLASSIC-AI-01: Sentry breaker with large pump increments. Coverage support only; no standalone strategy anchor."
@@ -46173,23 +46128,23 @@
       "effects": [
         {
           "kind": "breaker",
-          "scope": "runner",
-          "timing": "persistent"
+          "timing": "persistent",
+          "scope": "runner"
         },
         {
-          "amount": 1,
           "kind": "tag",
-          "resource": "tags",
+          "timing": "during_run",
           "scope": "runner",
-          "target": "self_tag_after_first_sentry_break",
-          "timing": "during_run"
+          "resource": "tags",
+          "amount": 1,
+          "target": "self_tag_after_first_sentry_break"
         },
         {
           "kind": "finite_economy_pool",
-          "resource": "credits",
+          "timing": "during_run",
           "scope": "runner",
-          "target": "stealth_credit_loss",
-          "timing": "during_run"
+          "resource": "credits",
+          "target": "stealth_credit_loss"
         }
       ],
       "conditions": [
@@ -46208,19 +46163,19 @@
         "opportunityCost": "medium"
       },
       "breakerProfile": {
-        "baseStrength": 1,
-        "breakCost": 1,
         "coverage": [
           "sentry"
         ],
-        "maxSubroutinesPerBreak": 1,
+        "baseStrength": 1,
         "pumpCost": 1,
         "pumpStrengthAmount": 1,
-        "restrictions": [
-          "first_sentry_break_each_run_gives_runner_tag"
-        ],
+        "breakCost": 1,
+        "maxSubroutinesPerBreak": 1,
         "sideEffects": [
           "stealth_loss"
+        ],
+        "restrictions": [
+          "first_sentry_break_each_run_gives_runner_tag"
         ]
       },
       "manualNotes": [
@@ -46268,8 +46223,8 @@
       "effects": [
         {
           "kind": "breaker",
-          "scope": "runner",
-          "timing": "persistent"
+          "timing": "persistent",
+          "scope": "runner"
         }
       ],
       "conditions": [
@@ -46285,14 +46240,14 @@
         "opportunityCost": "low"
       },
       "breakerProfile": {
-        "baseStrength": 1,
-        "breakCost": 1,
         "coverage": [
           "code_gate"
         ],
-        "maxSubroutinesPerBreak": 1,
+        "baseStrength": 1,
         "pumpCost": 2,
         "pumpStrengthAmount": 1,
+        "breakCost": 1,
+        "maxSubroutinesPerBreak": 1,
         "sideEffects": [
           "temporary_strength"
         ]
@@ -46343,14 +46298,14 @@
       "effects": [
         {
           "kind": "breaker",
-          "scope": "runner",
-          "timing": "persistent"
+          "timing": "persistent",
+          "scope": "runner"
         },
         {
           "kind": "delayed_penalty",
+          "timing": "on_leave_play",
           "scope": "installed_program",
-          "target": "run_end_self_trash",
-          "timing": "on_leave_play"
+          "target": "run_end_self_trash"
         }
       ],
       "conditions": [
@@ -46369,20 +46324,20 @@
         "opportunityCost": "high"
       },
       "breakerProfile": {
-        "baseStrength": 1,
-        "breakCost": 1,
         "coverage": [
           "universal"
         ],
-        "emergencyCoverage": true,
-        "maxSubroutinesPerBreak": 1,
+        "baseStrength": 1,
         "pumpCost": 1,
         "pumpStrengthAmount": 1,
-        "restrictions": [
-          "trashes_self_at_end_of_run_after_break_use"
-        ],
+        "breakCost": 1,
+        "maxSubroutinesPerBreak": 1,
+        "emergencyCoverage": true,
         "sideEffects": [
           "program_trash_risk"
+        ],
+        "restrictions": [
+          "trashes_self_at_end_of_run_after_break_use"
         ]
       },
       "manualNotes": [
@@ -46630,73 +46585,46 @@
       ],
       "effects": [
         {
-          "amount": 2,
-          "finite": true,
           "kind": "damage",
+          "timing": "encounter",
+          "scope": "runner",
           "resource": "damage",
-          "scope": "runner",
+          "amount": 2,
           "target": "corp_ice.net_damage",
-          "timing": "encounter"
+          "finite": true
         },
         {
-          "amount": 5,
-          "finite": true,
           "kind": "trace",
+          "timing": "encounter",
           "scope": "runner",
+          "amount": 5,
           "target": "trace.source",
-          "timing": "encounter"
+          "finite": true
         },
         {
-          "amount": 1,
           "kind": "persistent_counter_effect",
-          "repeatable": true,
-          "resource": "counters",
+          "timing": "trace_success",
           "scope": "runner",
+          "resource": "counters",
+          "amount": 1,
           "target": "baskerville_counter_run_start_net_damage",
-          "timing": "trace_success"
+          "repeatable": true
         },
         {
-          "finite": true,
           "kind": "etr",
+          "timing": "encounter",
           "scope": "run_path",
           "target": "corp_ice.end_run",
-          "timing": "encounter"
+          "finite": true
         },
         {
-          "amount": 5,
-          "finite": true,
           "kind": "rez_discount",
+          "timing": "during_run",
+          "scope": "corp",
           "resource": "credits",
-          "scope": "corp",
+          "amount": 5,
           "target": "noisy_icebreaker_self_rez_discount",
-          "timing": "during_run"
-        },
-        {
-          "kind": "damage",
-          "resource": "damage",
-          "scope": "runner",
-          "timing": "encounter"
-        },
-        {
-          "kind": "etr",
-          "scope": "run_path",
-          "timing": "encounter"
-        },
-        {
-          "kind": "persistent_counter_effect",
-          "resource": "counters",
-          "scope": "runner",
-          "timing": "persistent"
-        },
-        {
-          "kind": "remote_protection",
-          "scope": "run_path",
-          "timing": "encounter"
-        },
-        {
-          "kind": "trace",
-          "scope": "corp",
-          "timing": "encounter"
+          "finite": true
         }
       ],
       "conditions": [
@@ -46814,41 +46742,29 @@
       ],
       "effects": [
         {
-          "amount": 4,
-          "finite": true,
           "kind": "damage",
-          "resource": "damage",
+          "timing": "encounter",
           "scope": "runner",
+          "resource": "damage",
+          "amount": 4,
           "target": "corp_ice.net_damage",
-          "timing": "encounter"
+          "finite": true
         },
         {
-          "finite": true,
           "kind": "future_encounter_effect",
+          "timing": "encounter",
           "scope": "run_path",
           "target": "corp_ice.next_ice_break_lock",
-          "timing": "encounter"
+          "finite": true
         },
         {
-          "amount": 5,
-          "finite": true,
           "kind": "rez_discount",
-          "resource": "credits",
+          "timing": "during_run",
           "scope": "corp",
+          "resource": "credits",
+          "amount": 5,
           "target": "noisy_icebreaker_self_rez_discount",
-          "timing": "during_run"
-        },
-        {
-          "amount": 4,
-          "kind": "damage",
-          "resource": "damage",
-          "scope": "runner",
-          "timing": "encounter"
-        },
-        {
-          "kind": "future_encounter_effect",
-          "scope": "run_path",
-          "timing": "encounter"
+          "finite": true
         }
       ],
       "conditions": [
@@ -46860,9 +46776,6 @@
         },
         {
           "kind": "requires_unbroken_subroutine"
-        },
-        {
-          "kind": "requires_later_encounter"
         }
       ],
       "lineSupport": [
@@ -47051,42 +46964,27 @@
       ],
       "effects": [
         {
-          "finite": true,
           "kind": "program_trash",
+          "timing": "encounter",
           "scope": "installed_program",
           "target": "corp_ice.program_trash",
-          "timing": "encounter"
+          "finite": true
         },
         {
-          "finite": true,
           "kind": "etr",
+          "timing": "encounter",
           "scope": "run_path",
           "target": "corp_ice.end_run",
-          "timing": "encounter"
+          "finite": true
         },
         {
-          "amount": 5,
-          "finite": true,
           "kind": "rez_discount",
-          "resource": "credits",
+          "timing": "during_run",
           "scope": "corp",
+          "resource": "credits",
+          "amount": 5,
           "target": "noisy_icebreaker_self_rez_discount",
-          "timing": "during_run"
-        },
-        {
-          "kind": "etr",
-          "scope": "run_path",
-          "timing": "encounter"
-        },
-        {
-          "kind": "program_trash",
-          "scope": "runner",
-          "timing": "encounter"
-        },
-        {
-          "kind": "remote_protection",
-          "scope": "run_path",
-          "timing": "encounter"
+          "finite": true
         }
       ],
       "conditions": [
@@ -47177,42 +47075,27 @@
       ],
       "effects": [
         {
-          "finite": true,
           "kind": "program_trash",
+          "timing": "encounter",
           "scope": "installed_program",
           "target": "corp_ice.program_trash",
-          "timing": "encounter"
+          "finite": true
         },
         {
-          "finite": true,
           "kind": "etr",
+          "timing": "encounter",
           "scope": "run_path",
           "target": "corp_ice.end_run",
-          "timing": "encounter"
+          "finite": true
         },
         {
-          "amount": 5,
-          "finite": true,
           "kind": "rez_discount",
-          "resource": "credits",
+          "timing": "during_run",
           "scope": "corp",
+          "resource": "credits",
+          "amount": 5,
           "target": "noisy_icebreaker_self_rez_discount",
-          "timing": "during_run"
-        },
-        {
-          "kind": "etr",
-          "scope": "run_path",
-          "timing": "encounter"
-        },
-        {
-          "kind": "program_trash",
-          "scope": "runner",
-          "timing": "encounter"
-        },
-        {
-          "kind": "remote_protection",
-          "scope": "run_path",
-          "timing": "encounter"
+          "finite": true
         }
       ],
       "conditions": [
@@ -47400,9 +47283,6 @@
         },
         {
           "kind": "requires_rezzed_ice"
-        },
-        {
-          "kind": "requires_unbroken_subroutine"
         }
       ],
       "targetProfiles": [
@@ -47511,9 +47391,6 @@
         },
         {
           "kind": "requires_corp_credits_threshold"
-        },
-        {
-          "kind": "requires_unbroken_subroutine"
         }
       ],
       "costProfile": {
@@ -47773,9 +47650,6 @@
         },
         {
           "kind": "requires_remote_server"
-        },
-        {
-          "kind": "requires_unbroken_subroutine"
         }
       ],
       "targetProfiles": [
@@ -47896,9 +47770,6 @@
         },
         {
           "kind": "requires_corp_credits_threshold"
-        },
-        {
-          "kind": "requires_unbroken_subroutine"
         }
       ],
       "costProfile": {
@@ -48011,32 +47882,27 @@
       ],
       "effects": [
         {
-          "finite": true,
           "kind": "scored_agenda_action",
+          "timing": "when_scored",
           "scope": "score_area",
           "target": "score.action_counter_bank",
-          "timing": "when_scored"
+          "finite": true
         },
         {
-          "amount": 1,
-          "finite": true,
           "kind": "persistent_counter_effect",
-          "resource": "counters",
+          "timing": "when_scored",
           "scope": "score_area",
+          "resource": "counters",
+          "amount": 1,
           "target": "score.action_counter_bank",
-          "timing": "when_scored"
+          "finite": true
         },
         {
-          "finite": true,
           "kind": "etr",
+          "timing": "during_run",
           "scope": "run_path",
           "target": "remap_counter_end_run",
-          "timing": "during_run"
-        },
-        {
-          "kind": "scored_agenda_action",
-          "scope": "score_area",
-          "timing": "scored_activated"
+          "finite": true
         }
       ],
       "conditions": [
@@ -48303,41 +48169,33 @@
       ],
       "effects": [
         {
-          "finite": true,
           "kind": "access_replacement",
-          "resource": "cards",
+          "timing": "on_access",
           "scope": "accessed_card",
+          "resource": "cards",
           "target": "access.runner_program_bounce",
-          "timing": "on_access"
+          "finite": true
         },
         {
-          "amount": 2,
-          "finite": true,
           "kind": "install",
-          "resource": "memory",
+          "timing": "on_access",
           "scope": "runner",
+          "resource": "memory",
+          "amount": 2,
           "target": "runner_installs_agenda_as_program",
-          "timing": "on_access"
+          "finite": true
         },
         {
-          "finite": true,
           "kind": "scored_agenda_action",
+          "timing": "action",
           "scope": "score_area",
           "target": "score.closeout_agenda",
-          "timing": "action"
-        },
-        {
-          "kind": "scored_agenda_action",
-          "scope": "score_area",
-          "timing": "scored_activated"
+          "finite": true
         }
       ],
       "conditions": [
         {
           "kind": "requires_accessed_card"
-        },
-        {
-          "kind": "requires_scored_agenda"
         }
       ],
       "costProfile": {
@@ -48834,31 +48692,26 @@
       },
       "effects": [
         {
-          "finite": true,
           "kind": "future_run_effect",
+          "timing": "action",
           "scope": "rnd",
           "target": "make_rnd_run",
-          "timing": "action"
+          "finite": true
         },
         {
-          "finite": true,
           "kind": "access_replacement",
+          "timing": "successful_run",
           "scope": "rnd",
           "target": "reveal_until_agenda_store_in_hq",
-          "timing": "successful_run"
+          "finite": true
         },
         {
-          "finite": true,
           "kind": "topdeck_info",
+          "timing": "successful_run",
+          "scope": "rnd",
           "resource": "cards",
-          "scope": "rnd",
           "target": "reveal_until_agenda",
-          "timing": "successful_run"
-        },
-        {
-          "kind": "access_replacement",
-          "scope": "rnd",
-          "timing": "successful_run"
+          "finite": true
         }
       ],
       "conditions": [
@@ -49163,58 +49016,38 @@
       ],
       "effects": [
         {
-          "amount": 1,
           "kind": "economy",
-          "repeatable": true,
-          "resource": "credits",
+          "timing": "start_of_turn",
           "scope": "runner",
+          "resource": "credits",
+          "amount": 1,
           "target": "economy.turn_start_credit",
-          "timing": "start_of_turn"
+          "repeatable": true
         },
         {
           "kind": "trace",
-          "repeatable": true,
+          "timing": "trace_window",
           "scope": "trace",
           "target": "runner_trace_attempts_auto_success",
-          "timing": "trace_window"
+          "repeatable": true
         },
         {
-          "amount": 1,
           "kind": "tag",
-          "repeatable": true,
+          "timing": "trace_success",
+          "scope": "runner",
           "resource": "tags",
-          "scope": "runner",
-          "target": "self_tag_after_trace",
-          "timing": "trace_success"
-        },
-        {
-          "amount": 2,
-          "finite": true,
-          "kind": "delayed_penalty",
-          "resource": "credits",
-          "scope": "runner",
-          "target": "risk.leaves_play_loss",
-          "timing": "on_leave_play"
-        },
-        {
           "amount": 1,
-          "kind": "economy",
-          "resource": "credits",
-          "scope": "runner",
-          "timing": "action"
+          "target": "self_tag_after_trace",
+          "repeatable": true
         },
         {
-          "amount": 2,
           "kind": "delayed_penalty",
-          "resource": "credits",
+          "timing": "on_leave_play",
           "scope": "runner",
-          "timing": "start_of_turn"
-        },
-        {
-          "kind": "counter_economy",
           "resource": "credits",
-          "scope": "runner",
-          "timing": "action"
+          "amount": 2,
+          "target": "risk.leaves_play_loss",
+          "finite": true
         }
       ],
       "conditions": [
@@ -49442,100 +49275,51 @@
       "effects": [
         {
           "kind": "hardware_trait",
+          "timing": "persistent",
           "scope": "hardware",
-          "target": "deck_exclusive",
-          "timing": "persistent"
+          "target": "deck_exclusive"
         },
         {
-          "amount": 1,
           "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
           "resource": "memory",
-          "scope": "runner",
-          "timing": "persistent"
+          "amount": 1
         },
         {
-          "amount": 1,
           "kind": "hand_size_modifier",
+          "timing": "persistent",
+          "scope": "runner",
           "resource": "hand_size",
-          "scope": "runner",
-          "timing": "persistent"
+          "amount": 1
         },
         {
-          "amount": 1,
           "kind": "recurring_economy",
-          "repeatable": true,
+          "timing": "persistent",
+          "scope": "runner",
           "resource": "credits",
-          "scope": "runner",
+          "amount": 1,
           "target": "link",
-          "timing": "persistent"
+          "repeatable": true
         },
         {
-          "amount": 1,
           "kind": "net_damage_prevention",
+          "timing": "prevention_window",
+          "scope": "runner",
           "resource": "net_damage",
-          "scope": "runner",
-          "timing": "prevention_window"
+          "amount": 1
         },
         {
-          "amount": 1,
           "kind": "brain_damage_prevention",
+          "timing": "prevention_window",
+          "scope": "runner",
           "resource": "brain_damage",
-          "scope": "runner",
-          "timing": "prevention_window"
-        },
-        {
-          "amount": 1,
-          "damageTypes": [
-            "brain",
-            "net"
-          ],
-          "kind": "damage_prevention",
-          "perTurnLimit": 1,
-          "resource": "damage",
-          "scope": "runner",
-          "timing": "prevention_window"
-        },
-        {
-          "amount": 1,
-          "kind": "brain_damage_prevention",
-          "perTurnLimit": 1,
-          "resource": "brain_damage",
-          "scope": "runner",
-          "timing": "prevention_window"
-        },
-        {
-          "amount": 1,
-          "kind": "net_damage_prevention",
-          "perTurnLimit": 1,
-          "resource": "net_damage",
-          "scope": "runner",
-          "timing": "prevention_window"
-        },
-        {
-          "kind": "trash_credit",
-          "resource": "trash_credits",
-          "scope": "runner",
-          "timing": "persistent"
+          "amount": 1
         }
       ],
       "conditions": [
         {
           "kind": "requires_damage"
-        },
-        {
-          "kind": "requires_brain_damage"
-        },
-        {
-          "kind": "requires_installed_card"
-        },
-        {
-          "kind": "requires_net_damage"
-        },
-        {
-          "kind": "requires_prevention_window"
-        },
-        {
-          "kind": "requires_turn_limit_available"
         }
       ],
       "costProfile": {
@@ -49608,59 +49392,52 @@
       "effects": [
         {
           "kind": "hardware_trait",
+          "timing": "persistent",
           "scope": "hardware",
-          "target": "deck_exclusive",
-          "timing": "persistent"
+          "target": "deck_exclusive"
         },
         {
-          "amount": 1,
           "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
           "resource": "memory",
-          "scope": "runner",
-          "timing": "persistent"
+          "amount": 1
         },
         {
-          "amount": 2,
           "kind": "recurring_economy",
-          "repeatable": true,
-          "resource": "credits",
+          "timing": "persistent",
           "scope": "runner",
+          "resource": "credits",
+          "amount": 2,
           "target": "icebreaker",
-          "timing": "persistent"
+          "repeatable": true
         },
         {
-          "amount": 2,
           "kind": "recurring_economy",
-          "repeatable": true,
+          "timing": "persistent",
+          "scope": "runner",
           "resource": "credits",
-          "scope": "runner",
+          "amount": 2,
           "target": "link",
-          "timing": "persistent"
+          "repeatable": true
         },
         {
-          "amount": 2,
           "kind": "damage",
-          "repeatable": true,
+          "timing": "start_of_turn",
+          "scope": "runner",
           "resource": "brain_damage",
-          "scope": "runner",
+          "amount": 2,
           "target": "self_inflicted_brain_damage",
-          "timing": "start_of_turn"
+          "repeatable": true
         },
         {
-          "amount": 2,
-          "finite": true,
           "kind": "damage",
+          "timing": "on_leave_play",
+          "scope": "runner",
           "resource": "brain_damage",
-          "scope": "runner",
-          "target": "self_inflicted_brain_damage",
-          "timing": "on_leave_play"
-        },
-        {
           "amount": 2,
-          "kind": "damage",
-          "resource": "damage",
-          "scope": "runner",
-          "timing": "action"
+          "target": "self_inflicted_brain_damage",
+          "finite": true
         }
       ],
       "conditions": [
@@ -49879,27 +49656,20 @@
       ],
       "effects": [
         {
-          "amount": 1,
           "kind": "tag_prevention",
-          "resource": "tags",
+          "timing": "prevention_window",
           "scope": "runner",
-          "target": "avoid_tag",
-          "timing": "prevention_window"
+          "resource": "tags",
+          "amount": 1,
+          "target": "avoid_tag"
         },
         {
-          "amount": 1,
           "kind": "action_penalty",
+          "timing": "prevention_window",
+          "scope": "runner",
           "resource": "actions",
-          "scope": "runner",
-          "target": "action_loss",
-          "timing": "prevention_window"
-        },
-        {
           "amount": 1,
-          "kind": "tag_prevention",
-          "resource": "tags",
-          "scope": "runner",
-          "timing": "prevention_window"
+          "target": "action_loss"
         }
       ],
       "conditions": [
@@ -49961,19 +49731,13 @@
       },
       "effects": [
         {
-          "amount": 1,
           "kind": "recurring_economy",
-          "repeatable": true,
+          "timing": "persistent",
+          "scope": "runner",
           "resource": "credits",
-          "scope": "runner",
+          "amount": 1,
           "target": "play_events",
-          "timing": "persistent"
-        },
-        {
-          "kind": "trash_credit",
-          "resource": "trash_credits",
-          "scope": "runner",
-          "timing": "persistent"
+          "repeatable": true
         }
       ],
       "costProfile": {
@@ -50095,19 +49859,13 @@
       ],
       "effects": [
         {
-          "amount": 3,
           "kind": "recurring_economy",
-          "repeatable": true,
+          "timing": "persistent",
+          "scope": "runner",
           "resource": "credits",
-          "scope": "runner",
+          "amount": 3,
           "target": "link",
-          "timing": "persistent"
-        },
-        {
-          "kind": "trash_credit",
-          "resource": "trash_credits",
-          "scope": "runner",
-          "timing": "persistent"
+          "repeatable": true
         }
       ],
       "quality": {
