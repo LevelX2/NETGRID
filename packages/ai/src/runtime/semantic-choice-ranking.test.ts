@@ -480,6 +480,81 @@ describe("tacticalPlanMappedChoice", () => {
     );
   });
 
+  it("lets an urgent run-now target interrupt negative development funding", () => {
+    const gain = legalAction("gain", "gain_credit");
+    const run = legalAction("run-rd", "start_run", { serverId: "rd" });
+    const urgentRun = choice(run, 1693, [], {
+      key: "runner_goal_fit_tactical_goal_run_target",
+      value: 1000,
+      reason:
+        "goal:runner.pressure_good_central_target|urgency:high|target:rd|recommendation:run_now",
+    });
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [urgentRun, choice(gain, -1796)],
+      planMapping("runner.develop_hand_card", [gain], {
+        stepKind: "gain_credits",
+      }),
+      urgentRun,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("run-rd");
+    expect(result.overrideReason).toBe("urgent_run_now_development_yield");
+  });
+
+  it("lets an urgent run-now target interrupt a negative funded install", () => {
+    const install = legalAction("install-funded-card", "install_card");
+    const run = legalAction("run-rd", "start_run", { serverId: "rd" });
+    const urgentRun = choice(run, 1693, [], {
+      key: "runner_goal_fit_tactical_goal_run_target",
+      value: 1000,
+      reason:
+        "goal:runner.pressure_good_central_target|urgency:high|target:rd|recommendation:run_now",
+    });
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [
+        urgentRun,
+        choice(install, -461, [], {
+          key: "runner_persistent_install_fit",
+          value: -820,
+          reason:
+            "delta:cumulative_capacity|duplicate:none|fit:-820|stackability:cumulative_capacity",
+        }),
+      ],
+      fundedDevelopmentMapping([install]),
+      urgentRun,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("run-rd");
+    expect(result.overrideReason).toBe("urgent_run_now_development_yield");
+  });
+
+  it("keeps negative development funding against a nonurgent run", () => {
+    const gain = legalAction("gain", "gain_credit");
+    const run = legalAction("run-rd", "start_run", { serverId: "rd" });
+    const nonurgentRun = choice(run, 1693, [], {
+      key: "runner_goal_fit_tactical_goal_run_target",
+      value: 1000,
+      reason:
+        "goal:runner.pressure_good_central_target|urgency:medium|target:rd|recommendation:run_if_free",
+    });
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [nonurgentRun, choice(gain, -1796)],
+      planMapping("runner.develop_hand_card", [gain], {
+        stepKind: "gain_credits",
+      }),
+      nonurgentRun,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_blocked");
+    expect(result.choice?.action.actionId).toBe("gain");
+    expect(result.overrideBlockedReason).toBe("runner_plan_controller");
+  });
+
   it("lets an immediate agenda score interrupt funded hand development", () => {
     const install = legalAction("install-funded-card", "install_card");
     const score = legalAction("score-visible-agenda", "activated_card_ability");
