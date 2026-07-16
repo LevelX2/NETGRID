@@ -65,7 +65,32 @@ type DerivedFactsReport = {
   }>;
 };
 
+type FullCoverageInventory = {
+  cards: Array<{
+    cardId: string;
+    implementationPath: string;
+    implementationFound: boolean;
+    coverageClass: string;
+  }>;
+};
+
 describe("derived basic facts gate report", () => {
+  it("resolves the registered classic Networking implementation", () => {
+    const inventory = buildFullCoverageInventory();
+    expect(
+      inventory.cards.find(
+        (card) => card.cardId === "onr_classic_041_networking",
+      ),
+    ).toEqual(
+      expect.objectContaining({
+        implementationPath:
+          "packages/engine/src/card-implementations/classic/runner/events/networking.ts",
+        implementationFound: true,
+        coverageClass: "legacy_fallback_only",
+      }),
+    );
+  });
+
   it("is deterministic against the committed report", () => {
     const first = runGateJson();
     const second = runGateJson();
@@ -597,6 +622,26 @@ function runGateJson(): DerivedFactsReport {
       },
     ),
   ) as DerivedFactsReport;
+}
+
+function buildFullCoverageInventory(): FullCoverageInventory {
+  const scriptUrl = pathToFileURL(
+    path.join(repoRoot, "scripts/check-ai-derived-facts-full.mjs"),
+  ).href;
+  const code = `
+    import { buildFullCoverageInventory } from ${JSON.stringify(scriptUrl)};
+    process.stdout.write(JSON.stringify(buildFullCoverageInventory()));
+  `;
+  return JSON.parse(
+    execFileSync(
+      "node",
+      ["--input-type=module", "-e", code, "inventory-probe"],
+      {
+        cwd: repoRoot,
+        encoding: "utf8",
+      },
+    ),
+  ) as FullCoverageInventory;
 }
 
 function readReport(): DerivedFactsReport {

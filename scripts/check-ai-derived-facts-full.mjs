@@ -27,6 +27,11 @@ const IMPLEMENTATION_ROOTS = [
     cardIdPrefix: "onr_proteus_",
     path: "packages/engine/src/card-implementations/proteus",
   },
+  {
+    setId: "classic",
+    cardIdPrefix: "onr_classic_",
+    path: "packages/engine/src/card-implementations/classic",
+  },
 ];
 const OVERLAY_ROOT = "data/ai/hints/overlays";
 const GENERATED_AT = "2026-05-25";
