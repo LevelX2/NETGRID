@@ -872,7 +872,7 @@ select {
 }
 
 .sideSelectionField.side-corp {
-  --side-selection-accent: var(--corp);
+  --side-selection-accent: var(--corp-zone-accent);
 }
 
 .sideSelectionField.side-random {
