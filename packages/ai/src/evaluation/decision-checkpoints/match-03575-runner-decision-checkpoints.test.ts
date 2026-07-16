@@ -63,5 +63,8 @@ function mutateFixture(
 
 function expectCheckpointToPass(checkpoint: AiDecisionCheckpointV1): void {
   const result = runAiDecisionCheckpoint(checkpoint);
-  expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
+  expect(
+    result.ok,
+    `${result.code}: ${result.message}; choices=${JSON.stringify(result.decision?.selectedChoices)}`,
+  ).toBe(true);
 }

@@ -18,6 +18,7 @@ describe("latestTraceContext", () => {
     ];
 
     expect(latestTraceContext(input)).toMatchObject({
+      baseTraceStrength: 5,
       traceStrength: 5,
       runnerLink: 0,
     });
