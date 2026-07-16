@@ -1,6 +1,6 @@
 # KI-Match-F5D27033-Flatline-Risikoprozess
 
-Status: fachlich abgeschlossen; lokale Integration ausstehend
+Status: abgeschlossen
 
 ## Quelle und Ziel
 
@@ -77,7 +77,7 @@ fokussierte Unit-Tests grün, Paketcommit.
 
 ### Paket 4: Breite Verifikation und Abschluss
 
-Status: Verifikation und Dokumentation abgeschlossen; Merge/Cleanup ausstehend
+Status: abgeschlossen
 
 - Angrenzende Decision-Checkpoint- und Runtime-Tests ausführen.
 - AI-Typecheck, relevante AI-Shards beziehungsweise vollständige AI-Suite und
