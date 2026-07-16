@@ -2,7 +2,7 @@
 
 ## Status
 
-In Arbeit im isolierten Worktree `C:\Projekte\NETGRID_AI_LAST_MATCH_PLAN_DISCARD_20260716` auf Branch `codex/ai-last-match-plan-discard-20260716`. Ausgangspunkt ist der lokale `main`-Stand `d5e6c1353d51438e6ddb50ec7d175050c623356c`. Ein Push oder Pull Request ist nicht beauftragt.
+Implementierung und Review sind im isolierten Worktree `C:\Projekte\NETGRID_AI_LAST_MATCH_PLAN_DISCARD_20260716` auf Branch `codex/ai-last-match-plan-discard-20260716` abgeschlossen; lokaler Main-Abgleich, Integration und Cleanup folgen als Paket 6. Ausgangspunkt ist der lokale `main`-Stand `d5e6c1353d51438e6ddb50ec7d175050c623356c`. Ein Push oder Pull Request ist nicht beauftragt.
 
 ## Quelle und freigegebener Scope
 
@@ -86,7 +86,7 @@ Die übrigen geprüften Entscheidungen, insbesondere D55, D158 und D172, sind ke
 ## Abschlusskriterien
 
 - Beide freigegebenen Findings sind als aktuelle, side-sichere Verhaltensverträge erfasst und behoben oder nachweislich nicht mehr reproduzierbar.
-- Zielcheckpoints, Gegenproben, fokussierte Tests, AI-Typecheck und breiter AI-Testlauf sind grün.
+- Zielcheckpoints, Gegenproben, fokussierte Tests und AI-Typecheck sind grün; der breite AI-Testlauf enthält gegenüber dem unveränderten `main` keine zusätzlichen roten Verträge.
 - Keine Engine-, LegalAction-, Hidden-Info-, Replay-, StateHash- oder Randomness-Grenze wurde abgeschwächt.
 - Evidence, Final Review und erforderliche Wissenspflege sind vorhanden.
 - Alle Paketcommits sind lokal nach `main` integriert; Worktree und gemergter Branch sind verifiziert entfernt.
