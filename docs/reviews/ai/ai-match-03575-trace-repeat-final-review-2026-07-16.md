@@ -1,6 +1,6 @@
 # AI-Match 03575: Trace/Repeat Final Review (2026-07-16)
 
-Status: Fachlich abgeschlossen und für lokale Integration vorbereitet
+Status: Fachlich abgeschlossen und lokal nach `main` integriert
 
 ## Ergebnis
 
@@ -140,7 +140,11 @@ Scope gezogen.
 
 ## Integration und Cleanup
 
-Der Arbeitsbranch `codex/ai-match-03575-trace-repeat` ist mit aktuellem lokalem
-`main` konfliktfrei abgeglichen. Lokaler Merge nach `main`, Main-Verifikation
-und verifizierter Worktree-/Branch-Cleanup folgen als letzte Prozessschritte;
-der Abschlussstatus wird danach in diesem Report nachgezogen.
+Der Arbeitsbranch `codex/ai-match-03575-trace-repeat` wurde nach einem zweiten
+Abgleich mit dem inzwischen weitergelaufenen lokalen `main` konfliktfrei über
+Merge-Commit `a05cf7cdd` integriert. Auf `main` blieben anschließend 46/46
+betroffene AI-Tests, 2/2 Engine-Tests, AI- und Engine-Typecheck sowie
+`corepack pnpm check:ai:full` grün. Der isolierte Worktree und sein Branch sind
+damit ohne offene Änderungen entfernbar; ihre tatsächliche Entfernung wird als
+abschließende unversionierte Repository-Metadatenprüfung direkt nach diesem
+Dokumentationscommit verifiziert.
