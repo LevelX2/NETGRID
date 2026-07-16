@@ -3,12 +3,17 @@ import type {
   AiDecisionScoreComponent,
   LegalAction,
 } from "@netgrid/shared";
+import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
 import type { KnownRezzedIcePathAssessment } from "../visible-run-analysis";
 
 type RunnerKnownIcePathServer =
   AiDecisionInput["playerView"]["servers"][number];
 
 export type RunnerKnownIcePathScoreDependencies = {
+  evaluationForAction: (
+    input: AiDecisionInput,
+    action: LegalAction,
+  ) => RunnerRunTargetEvaluation | undefined;
   assessment: (
     input: AiDecisionInput,
     server: RunnerKnownIcePathServer,
@@ -26,6 +31,27 @@ export function runnerKnownIcePathScoreComponents(
   dependencies: RunnerKnownIcePathScoreDependencies,
 ): AiDecisionScoreComponent[] {
   if (action.type !== "start_run" || !server) return [];
+  const projectedEvaluation = dependencies.evaluationForAction(input, action);
+  if (projectedEvaluation?.pathPassability === "reachable") {
+    if (projectedEvaluation.pathCost <= 0) return [];
+    return [
+      {
+        key: "runner_visible_ice_path_cost",
+        label: "Sichtbare ICE-Kosten",
+        value: -Math.min(
+          1800,
+          projectedEvaluation.pathCost * 220 +
+            Math.max(0, 2 - projectedEvaluation.creditsAfterRun) * 350,
+        ),
+        reason: [
+          `server:${server.id}`,
+          "projection:run_action",
+          `break_cost:${projectedEvaluation.pathCost}`,
+          `credits_after:${projectedEvaluation.creditsAfterRun}`,
+        ].join(";"),
+      },
+    ];
+  }
   const assessment = dependencies.assessment(input, server);
   if (assessment.assessedKnownIceCount <= 0) return [];
   if (!assessment.canReachAccess) {

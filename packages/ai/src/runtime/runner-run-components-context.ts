@@ -3,6 +3,7 @@ import type {
   AiDecisionScoreComponent,
   LegalAction,
 } from "@netgrid/shared";
+import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
 import type { KnownRezzedIcePathAssessment } from "../visible-run-analysis";
 import { runnerAccessTrashScoreComponents } from "./runner-access-trash-score";
 import { runnerArchivesScoreComponents } from "./runner-archives-score";
@@ -43,23 +44,18 @@ export type RunnerRunComponentsContextDependencies = {
   evaluationForAction: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => { accessServerId: string } | undefined;
+  ) => RunnerRunTargetEvaluation | undefined;
   definitionType: (definitionId: string) => string | undefined;
   knownIcePathAssessment: (
     input: AiDecisionInput,
     server: RunnerRunServer,
   ) => KnownRezzedIcePathAssessment;
-  rootTrashCost: (
-    card: RunnerRunServer["root"][number],
-  ) => number | undefined;
+  rootTrashCost: (card: RunnerRunServer["root"][number]) => number | undefined;
   candidateMemory: (
     input: AiDecisionInput,
     server: RunnerRunServer | undefined,
   ) => RunnerRemoteCandidateMemory | undefined;
-  recentStartRunsOnServer: (
-    input: AiDecisionInput,
-    serverId: string,
-  ) => number;
+  recentStartRunsOnServer: (input: AiDecisionInput, serverId: string) => number;
   isRemoteServerTarget: (serverId: string | undefined) => boolean;
 };
 
@@ -104,6 +100,7 @@ export function createRunnerRunComponentsContext(
       }),
     semanticRuntimeRunnerKnownIcePathComponents: (input, action, server) =>
       runnerKnownIcePathScoreComponents(input, action, server, {
+        evaluationForAction: dependencies.evaluationForAction,
         assessment: dependencies.knownIcePathAssessment,
         reason: runnerKnownIcePathReason,
       }),

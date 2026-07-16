@@ -2,6 +2,7 @@ import type { AiDecisionInput } from "@netgrid/shared";
 
 import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
 import { semanticRuntimeChoiceWithEvidence } from "./semantic-runtime-score-components";
+import { runnerTerminalContestThreat } from "./runner-terminal-contest-threat";
 import type { SemanticRuntimeChoice } from "./semantic-runtime-types";
 
 const OPPONENT_MATCHPOINT_CONTEST_SCORE_FLOOR = 10_000;
@@ -11,17 +12,22 @@ export function runnerOpponentMatchpointContestSemanticChoice(
   choices: readonly SemanticRuntimeChoice[],
   runTargets: readonly RunnerRunTargetEvaluation[],
 ): SemanticRuntimeChoice | undefined {
+  const terminalThreat = runnerTerminalContestThreat(input);
   if (
     input.side !== "runner" ||
     input.playerView.winner !== null ||
-    input.playerView.opponent.agendaPoints <
-      input.playerView.agendaPointsToWin - 1
+    !terminalThreat
   ) {
     return undefined;
   }
 
   const candidates = runTargets
-    .filter((target) => urgentReachableRemoteContest(input, target))
+    .filter(
+      (target) =>
+        urgentReachableRemoteContest(input, target) &&
+        (terminalThreat.kind !== "visible_two_point_remote" ||
+          terminalThreat.remoteServerIds.includes(target.targetServerId)),
+    )
     .flatMap((target) => {
       const choice = choices.find(
         (candidate) =>
@@ -55,6 +61,7 @@ export function runnerOpponentMatchpointContestSemanticChoice(
       `matchpoint_contest_payoff:${selected.target.accessPayoff}`,
       `matchpoint_contest_path:${selected.target.pathPassability}`,
       `matchpoint_contest_credits_after:${selected.target.creditsAfterRun}`,
+      ...terminalThreat.evidence,
     ],
   });
 }

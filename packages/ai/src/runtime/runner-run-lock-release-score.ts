@@ -7,6 +7,10 @@ import {
   assessKnownRezzedIcePath,
   runnerRunPathCreditBudgetWithVisiblePools,
 } from "../visible-run-analysis";
+import {
+  runnerTerminalContestThreat,
+  type RunnerTerminalContestThreat,
+} from "./runner-terminal-contest-threat";
 
 type FollowUp = {
   serverId: string;
@@ -17,12 +21,12 @@ export function runnerRunLockReleaseScoreComponent(
   input: AiDecisionInput,
   action: LegalAction,
 ): AiDecisionScoreComponent | undefined {
+  const terminalThreat = runnerTerminalContestThreat(input);
   if (
     input.side !== "runner" ||
     action.side !== "runner" ||
     !isRunLockReleaseAction(action) ||
-    input.playerView.opponent.agendaPoints <
-      input.playerView.agendaPointsToWin - 1
+    !terminalThreat
   ) {
     return undefined;
   }
@@ -39,12 +43,16 @@ export function runnerRunLockReleaseScoreComponent(
   const creditsAfterRelease = input.playerView.own.credits - creditCost;
   if (clicksAfterRelease < 1 || creditsAfterRelease < 0) return undefined;
 
-  const followUp = plausibleFollowUpRun(input, creditsAfterRelease);
+  const followUp = plausibleFollowUpRun(
+    input,
+    creditsAfterRelease,
+    terminalThreat,
+  );
   if (!followUp) return undefined;
 
   return {
     key: "runner_matchpoint_run_lock_release",
-    label: "Run-Sperre für Matchpoint-Zug lösen",
+    label: "Run-Sperre für terminalen Contest lösen",
     value: 4_100,
     reason: [
       `corp_agenda_points:${input.playerView.opponent.agendaPoints}`,
@@ -53,6 +61,7 @@ export function runnerRunLockReleaseScoreComponent(
       `credits_after_release:${creditsAfterRelease}`,
       `follow_up_server:${followUp.serverId}`,
       `estimated_probe_credits:${followUp.estimatedProbeCredits}`,
+      ...terminalThreat.evidence,
     ].join("|"),
   };
 }
@@ -68,9 +77,14 @@ function isRunLockReleaseAction(action: LegalAction): boolean {
 function plausibleFollowUpRun(
   input: AiDecisionInput,
   creditsAfterRelease: number,
+  terminalThreat: RunnerTerminalContestThreat,
 ): FollowUp | undefined {
   const candidates = input.playerView.servers
-    .filter((server) => serverHasContestPayoff(input, server.id))
+    .filter((server) =>
+      terminalThreat.kind === "visible_two_point_remote"
+        ? terminalThreat.remoteServerIds.includes(server.id)
+        : serverHasContestPayoff(input, server.id),
+    )
     .flatMap((server) => {
       const path = assessKnownRezzedIcePath(
         server.ice,
@@ -90,8 +104,7 @@ function plausibleFollowUpRun(
       );
       if (!path.canReachAccess) return [];
       const unknownIceProbeReserve = server.ice.filter(
-        (ice) =>
-          ice.rezzed !== true || !ice.known || !ice.definitionId,
+        (ice) => ice.rezzed !== true || !ice.known || !ice.definitionId,
       ).length;
       return [
         {

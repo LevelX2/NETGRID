@@ -31,6 +31,12 @@
   Zentraldruck und Zielplan-Fit gelten für projizierte HQ-/R&D-Runs nur, wenn
   ihr eigener sichtbarer Pfad `run_now` trägt; Archives-, Remote- und
   Bezahlbarkeitsausschlüsse bleiben wirksam.
+- Eine aktionsspezifisch erreichbare RunTargetEvaluation bleibt für Bypass,
+  Restpfad und ICE-Kosten führend; generische Serverprüfungen dürfen sie nicht
+  ohne Action-Kontext erneut blockieren. Ein akuter gleichzieliger
+  Remote-Contest darf abstrakte Coverage-Suche unterbrechen. Öffentlich
+  sichtbare mögliche Zwei-Punkte-Terminal-Remotes können außerdem eine
+  bezahlbare Run-Lock-Freigabe mit erreichbarem Folgepfad auslösen.
 - Strukturierte Tag-Vermeidungs-Choices im Engine-Fenster
   `v120.event_modification.avoid` bevorzugen eine vorhandene legale
   Präventionsquelle gegenüber `pass`. Ohne konkrete Quelle entsteht keine
@@ -124,6 +130,11 @@
   spielgleiche Verträge für Tag-Vermeidung, Run-Event-Zielkontext,
   Matchpoint-Remote-Vorbereitung, Bank-/Plan-Arbitration und die Trennung von
   Breaker-Coverage und Gesamtbezahlbarkeit.
+- `ai-match-9d15-runner-contest-remediation-process-2026-07-16.md` und
+  `docs/reviews/ai/ai-match-9d15-runner-contest-final-review-2026-07-16.md`:
+  spielgleiche Verträge für aktionsspezifisch führende Bypass-Pfade,
+  dringende Remote-Plan-Arbitration und side-safe sichtbare
+  Zwei-Punkte-Terminalcontests bei aktiver Run-Sperre.
 - `proteus-ai-release-reconciliation-plan-2026-07-09.md`,
   `proteus-ai-release-automation-process-2026-07-09.md` und
   `docs/reviews/ai/proteus-ai-release-reconciliation-final-review-2026-07-09.md`:
