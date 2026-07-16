@@ -1,6 +1,6 @@
 # Match 36BA22D6: Runner-Plan-, Bank- und Access-Risk-Remediation
 
-Status: P0 bis P2 abgeschlossen, P3 aktiv
+Status: P0 bis P4 abgeschlossen, P5 aktiv
 
 ## Quelle und Zielprüfung
 
@@ -197,6 +197,18 @@ Ergebnis:
 - Checks: direkte Vitest-Dateien, AI-Typecheck und `git diff --check`.
 - Done-Gate: keine neue rote fokussierte Erwartung.
 - Commit: `test(ai): verify match 36ba22d6 remediation`
+
+Ergebnis:
+
+- der unveränderte D01-Checkpoint und seine synthetische Gegenprobe sind
+  gemeinsam grün;
+- der generische Unit-Vertrag erkennt nur einen in der Hand liegenden,
+  bezahlbaren und hoch- beziehungsweise mittelkonfidenten Sucher;
+- ein Sucher nur im Deck, ein nicht bezahlbarer Sucher und ein Deck ohne
+  belastbare Wall-/Code-Gate-/Sentry-/Universal-Coverage bleiben Mulligans;
+- die angrenzenden Opening-Hand- und Real-Engine-Decision-Contracts sind mit
+  insgesamt 16 Tests grün;
+- `@netgrid/ai`-Typecheck und `git diff --check` sind grün.
 
 ### P5 – Breite Gates, Review und Wissenspflege
 

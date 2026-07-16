@@ -205,7 +205,131 @@ describe("deck opening hand role classification", () => {
       CARD_ROLES_BY_CARD.delete("local_remote_support_noise");
     }
   });
+
+  it("counts an affordable in-hand search tool as opening breaker access when standard coverage is in the deck", () => {
+    registerRunnerSearchOpeningRoles();
+    try {
+      const searchOpening = runnerSearchOpeningInput();
+
+      const evaluation = evaluateRunnerOpeningHand(searchOpening);
+
+      expect(evaluation.decision).toBe("keep");
+      expect(evaluation.evidence).toEqual(
+        expect.arrayContaining([
+          "opening_breakers:0",
+          "opening_breaker_search_tools:1",
+          "opening_breaker_access:1",
+        ]),
+      );
+    } finally {
+      unregisterRunnerSearchOpeningRoles();
+    }
+  });
+
+  it.each([
+    ["the tool is only in the deck", { searchStatus: "in_deck" }],
+    ["the in-hand tool is unaffordable", { searchCost: 6 }],
+    ["the deck has no standard breaker coverage", { coverage: ["special"] }],
+  ])("does not invent opening breaker access when %s", (_label, options) => {
+    registerRunnerSearchOpeningRoles();
+    try {
+      const evaluation = evaluateRunnerOpeningHand(
+        runnerSearchOpeningInput(options),
+      );
+
+      expect(evaluation.decision).toBe("mulligan");
+      expect(evaluation.evidence).toEqual(
+        expect.arrayContaining([
+          "opening_breakers:0",
+          "opening_breaker_search_tools:0",
+          "opening_breaker_access:0",
+        ]),
+      );
+    } finally {
+      unregisterRunnerSearchOpeningRoles();
+    }
+  });
 });
+
+function registerRunnerSearchOpeningRoles(): void {
+  CARD_ROLES_BY_CARD.set("local_opening_search", {
+    cardId: "local_opening_search",
+    side: "runner",
+    roles: ["program_search", "run_pressure"],
+  });
+  CARD_ROLES_BY_CARD.set("local_opening_economy", {
+    cardId: "local_opening_economy",
+    side: "runner",
+    roles: ["economy_event", "run_pressure"],
+  });
+  CARD_ROLES_BY_CARD.set("local_opening_setup", {
+    cardId: "local_opening_setup",
+    side: "runner",
+    roles: ["runner_program"],
+  });
+}
+
+function unregisterRunnerSearchOpeningRoles(): void {
+  CARD_ROLES_BY_CARD.delete("local_opening_search");
+  CARD_ROLES_BY_CARD.delete("local_opening_economy");
+  CARD_ROLES_BY_CARD.delete("local_opening_setup");
+}
+
+function runnerSearchOpeningInput(
+  options: {
+    searchStatus?: string;
+    searchCost?: number;
+    coverage?: string[];
+  } = {},
+): AiDecisionInput {
+  const result = input(
+    "runner",
+    [
+      "local_opening_search",
+      "local_opening_economy",
+      "local_opening_economy",
+      "local_opening_economy",
+      "local_opening_setup",
+    ],
+    {
+      difficulty: "hard",
+      ownDeckStrategyProfile: {
+        primaryStrategies: ["runner.search.breaker"],
+        secondaryStrategies: [],
+        warnings: [],
+      },
+      ownDeckCapabilities: {
+        confidence: "high",
+        runner: {
+          economyBankTools: [{}],
+          searchAccess: {
+            tools: [
+              {
+                cardId: "local_opening_search",
+                status: options.searchStatus ?? "in_hand",
+                canSearchBreakers: true,
+                confidence: "high",
+              },
+            ],
+          },
+          breakerInventory: [
+            {
+              coverage: options.coverage ?? ["wall", "code_gate", "sentry"],
+              locations: ["in_deck"],
+              confidence: "high",
+            },
+          ],
+        },
+      },
+    },
+  );
+  result.playerView.own.credits = 5;
+  const searchCard = result.playerView.own.gripOrHq[0];
+  if (!searchCard) throw new Error("Expected local opening search card");
+  searchCard.type = "event";
+  searchCard.cost = options.searchCost ?? 1;
+  return result;
+}
 
 function input(
   side: Side,
