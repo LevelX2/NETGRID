@@ -48,7 +48,6 @@ describe("runnerCreditBankAssessment", () => {
     expect(assessment.evidence).toEqual(
       expect.arrayContaining([
         "runner_bank_combined_credit_access:21",
-        "runner_bank_combined_access_target:18",
         "runner_bank_build_ready:true",
       ]),
     );

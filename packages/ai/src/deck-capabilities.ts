@@ -87,6 +87,8 @@ export type EconomyBankTool = {
   ownerSide: Side;
   status: CapabilityCardStatus;
   currentBankAmount?: number;
+  currentBankAmounts?: number[];
+  portfolioStoredAmount?: number;
   maxKnownCapacity?: number;
   buildActionLegal: boolean;
   cashOutActionLegal: boolean;
@@ -751,7 +753,13 @@ function economyBankToolForRecord(
     .sort();
   const buildActionLegal = buildActionIds.length > 0;
   const cashOutActionLegal = cashOutActionIds.length > 0;
-  const currentBankAmount = currentVisibleBankAmount(record.visibleCards);
+  const currentBankAmounts = currentVisibleBankAmounts(record.visibleCards);
+  const currentBankAmount = currentBankAmounts.length > 0
+    ? Math.max(...currentBankAmounts)
+    : undefined;
+  const portfolioStoredAmount = currentBankAmounts.length > 0
+    ? currentBankAmounts.reduce((sum, amount) => sum + amount, 0)
+    : undefined;
   const structuredBank =
     deckCapabilityTextHasStructuredBankRoleSignal(signals) ||
     currentBankAmount !== undefined;
@@ -761,6 +769,8 @@ function economyBankToolForRecord(
     ownerSide: record.side,
     status: primaryStatus(record.locations),
     ...(currentBankAmount !== undefined ? { currentBankAmount } : {}),
+    ...(currentBankAmounts.length > 0 ? { currentBankAmounts } : {}),
+    ...(portfolioStoredAmount !== undefined ? { portfolioStoredAmount } : {}),
     ...maxKnownBankCapacity(record.text),
     buildActionLegal,
     cashOutActionLegal,
@@ -1159,22 +1169,26 @@ function actionMatchesBankCashOut(
   return action.payload?.cardImplementationTakesHostedCredits === true;
 }
 
-function currentVisibleBankAmount(cards: readonly VisibleCard[]): number | undefined {
-  const values = cards.flatMap((card) => [
-    ...(card.counterDisplays ?? [])
-      .filter((counter) =>
-        counter.creditPool?.kind === "stored_credit" ||
-        counter.creditPool?.kind === "recurring_credit" ||
-        counter.displayKind === "stored_credits" ||
-        counter.displayKind === "recurring_credit",
-      )
-      .map((counter) => counter.amount),
-    ...(card.counters?.recurring_credit !== undefined
-      ? [card.counters.recurring_credit]
-      : []),
-  ]);
-  if (values.length === 0) return undefined;
-  return values.reduce((sum, value) => sum + value, 0);
+function currentVisibleBankAmounts(cards: readonly VisibleCard[]): number[] {
+  return cards
+    .map((card) => {
+      const values = [
+        ...(card.counterDisplays ?? [])
+          .filter((counter) =>
+            counter.creditPool?.kind === "stored_credit" ||
+            counter.creditPool?.kind === "recurring_credit" ||
+            counter.displayKind === "stored_credits" ||
+            counter.displayKind === "recurring_credit",
+          )
+          .map((counter) => counter.amount),
+        ...(card.counters?.recurring_credit !== undefined
+          ? [card.counters.recurring_credit]
+          : []),
+      ];
+      return values.length > 0 ? Math.max(...values) : undefined;
+    })
+    .filter((value): value is number => value !== undefined)
+    .sort((left, right) => right - left);
 }
 
 function maxKnownBankCapacity(text: string): Pick<EconomyBankTool, "maxKnownCapacity"> {

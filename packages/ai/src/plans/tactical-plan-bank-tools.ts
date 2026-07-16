@@ -3,13 +3,13 @@ import type { TacticalPlanBuildContext } from "./tactical-plan-types";
 
 const RUNNER_BANK_MIN_CRITICAL_CASHOUT = 3;
 const RUNNER_BANK_VALUE_BUILD_TARGET = 12;
-const RUNNER_BANK_COMBINED_ACCESS_TARGET = 18;
-const RUNNER_BANK_COMFORTABLE_CREDITS = 10;
+const RUNNER_BANK_COMFORTABLE_CREDITS = 20;
 
 export type RunnerCreditBankAssessment = {
   buildActions: LegalAction[];
   payoutActions: LegalAction[];
   currentStoredCredits: number;
+  portfolioStoredCredits: number;
   estimatedPayout: number;
   buildTarget: number;
   cashOutMinimum: number;
@@ -58,12 +58,41 @@ export function largestBankStoredAmount(
   context: TacticalPlanBuildContext,
   side: Side,
 ): number | undefined {
-  const tools = bankTools(context, side);
-  const amounts = tools
-    .map((tool) => tool.currentBankAmount)
-    .filter((value): value is number => typeof value === "number");
+  const amounts = bankStoredAmounts(context, side);
   if (amounts.length === 0) return undefined;
   return Math.max(...amounts);
+}
+
+function leastLoadedBankStoredAmount(
+  context: TacticalPlanBuildContext,
+  side: Side,
+): number | undefined {
+  const amounts = bankStoredAmounts(context, side);
+  if (amounts.length === 0) return undefined;
+  return Math.min(...amounts);
+}
+
+function portfolioBankStoredAmount(
+  context: TacticalPlanBuildContext,
+  side: Side,
+): number {
+  return bankStoredAmounts(context, side).reduce(
+    (sum, amount) => sum + amount,
+    0,
+  );
+}
+
+function bankStoredAmounts(
+  context: TacticalPlanBuildContext,
+  side: Side,
+): number[] {
+  return bankTools(context, side).flatMap((tool) =>
+    tool.currentBankAmounts?.length
+      ? tool.currentBankAmounts
+      : typeof tool.currentBankAmount === "number"
+        ? [tool.currentBankAmount]
+        : [],
+  );
 }
 
 export function largestBankPayout(
@@ -99,7 +128,11 @@ export function runnerCreditBankAssessment(
   const payoutActions = bankPayoutActions(context, "runner", legalActions);
   const currentStoredCredits = Math.max(
     0,
-    Math.floor(largestBankStoredAmount(context, "runner") ?? 0),
+    Math.floor(leastLoadedBankStoredAmount(context, "runner") ?? 0),
+  );
+  const portfolioStoredCredits = Math.max(
+    0,
+    Math.floor(portfolioBankStoredAmount(context, "runner")),
   );
   const estimatedPayout = Math.max(
     0,
@@ -110,26 +143,23 @@ export function runnerCreditBankAssessment(
     Math.floor(context.input.playerView.own.credits),
   );
   const buildTarget = RUNNER_BANK_VALUE_BUILD_TARGET;
-  const combinedCreditAccess = ownCredits + currentStoredCredits;
+  const combinedCreditAccess = ownCredits + portfolioStoredCredits;
   const cashOutMinimum = concreteFundingNeed
     ? 1
-    : ownCredits <= 3
+    : ownCredits < 5
       ? RUNNER_BANK_MIN_CRITICAL_CASHOUT
       : RUNNER_BANK_VALUE_BUILD_TARGET;
   const shouldBuild =
     buildActions.length > 0 &&
     !concreteFundingNeed &&
-    combinedCreditAccess < RUNNER_BANK_COMBINED_ACCESS_TARGET &&
-    (payoutActions.length > 0 ||
-      (ownCredits < RUNNER_BANK_COMFORTABLE_CREDITS &&
-        combinedCreditAccess < RUNNER_BANK_VALUE_BUILD_TARGET)) &&
+    ownCredits < RUNNER_BANK_COMFORTABLE_CREDITS &&
     currentStoredCredits < buildTarget;
   const cashOutReason =
     payoutActions.length === 0 || estimatedPayout <= 0
       ? undefined
       : concreteFundingNeed
         ? "concrete_funding_need"
-        : ownCredits <= 3 && estimatedPayout >= RUNNER_BANK_MIN_CRITICAL_CASHOUT
+        : ownCredits < 5 && estimatedPayout >= RUNNER_BANK_MIN_CRITICAL_CASHOUT
           ? "urgent_credit_floor"
           : ownCredits < RUNNER_BANK_COMFORTABLE_CREDITS &&
               estimatedPayout >= RUNNER_BANK_VALUE_BUILD_TARGET
@@ -140,6 +170,7 @@ export function runnerCreditBankAssessment(
     buildActions,
     payoutActions,
     currentStoredCredits,
+    portfolioStoredCredits,
     estimatedPayout,
     buildTarget,
     cashOutMinimum,
@@ -149,10 +180,10 @@ export function runnerCreditBankAssessment(
     ...(cashOutReason ? { cashOutReason } : {}),
     evidence: [
       `runner_bank_current_stored:${currentStoredCredits}`,
+      `runner_bank_portfolio_stored:${portfolioStoredCredits}`,
       `runner_bank_estimated_payout:${estimatedPayout}`,
       `runner_bank_build_target:${buildTarget}`,
       `runner_bank_combined_credit_access:${combinedCreditAccess}`,
-      `runner_bank_combined_access_target:${RUNNER_BANK_COMBINED_ACCESS_TARGET}`,
       `runner_bank_cashout_minimum:${cashOutMinimum}`,
       `runner_bank_concrete_funding_need:${concreteFundingNeed}`,
       `runner_bank_build_ready:${shouldBuild}`,

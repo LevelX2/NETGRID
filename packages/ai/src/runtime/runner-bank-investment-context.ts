@@ -6,12 +6,13 @@ import type {
 } from "@netgrid/shared";
 import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
 import { runnerBankInvestmentCommitmentScoreComponents as buildRunnerBankInvestmentCommitmentScoreComponents } from "./runner-economy-commitment-score";
+import type { RunnerHandFundingTarget } from "./runner-hand-funding-target";
 import { rolesMatch } from "./role-match";
 
 const RUNNER_BANK_FIRST_LOAD_TARGET = 3;
 const RUNNER_BANK_URGENT_CASHOUT_TARGET = 6;
 const RUNNER_BANK_VALUE_CASHOUT_TARGET = 12;
-const RUNNER_BANK_COMBINED_ACCESS_TARGET = 18;
+const RUNNER_BANK_COMFORTABLE_LIQUID_CREDITS = 20;
 
 type RunnerBankInvestmentCommitmentStatus =
   | "inactive"
@@ -76,7 +77,9 @@ export type RunnerBankInvestmentContextDependencies = {
         turnKey?: string;
       }
     | undefined;
-  runnerHandFundingTarget: (input: AiDecisionInput) => unknown;
+  runnerHandFundingTarget: (
+    input: AiDecisionInput,
+  ) => RunnerHandFundingTarget | undefined;
   findVisibleCard: (
     input: AiDecisionInput,
     instanceId: string,
@@ -238,7 +241,7 @@ export function createRunnerBankInvestmentContext(
       isRunnerBankCashOutAction(input, candidate),
     );
     const concreteFundingNeed = runnerBankHasConcreteFundingNeed(input);
-    const criticalReserve = input.playerView.own.credits <= 3;
+    const criticalReserve = input.playerView.own.credits < 5;
     const comfortableCreditPool = runnerBankHasComfortableCreditPool(
       input,
       storedCredits,
@@ -251,9 +254,7 @@ export function createRunnerBankInvestmentContext(
     });
     const combinedCreditAccess = input.playerView.own.credits + storedCredits;
     const overDesiredTarget =
-      storedCredits > 0 &&
-      (storedCredits >= desiredBankTarget ||
-        combinedCreditAccess >= RUNNER_BANK_COMBINED_ACCESS_TARGET);
+      storedCredits > 0 && storedCredits >= desiredBankTarget;
     const cashOutThresholdMet =
       storedCredits >= desiredBankTarget && !comfortableCreditPool;
     const runOverride =
@@ -265,7 +266,7 @@ export function createRunnerBankInvestmentContext(
     const stableBuildWindow =
       input.playerView.own.clicks >= 1 &&
       !concreteFundingNeed &&
-      (!comfortableCreditPool || cashOutActionLegal);
+      !comfortableCreditPool;
     const active =
       buildActionLegal ||
       cashOutActionLegal ||
@@ -337,7 +338,7 @@ export function createRunnerBankInvestmentContext(
         cashOutThresholdMet,
         installProjection,
         ...(runOverride ? { runOverride } : {}),
-        buildBankPriority: plausibleFollowup ? 900 : -1600,
+        buildBankPriority: plausibleFollowup ? 1300 : -1600,
         cashOutPriority: 0,
       };
     }
@@ -414,7 +415,7 @@ export function createRunnerBankInvestmentContext(
         criticalReserve,
         cashOutThresholdMet,
         ...(runOverride ? { runOverride } : {}),
-        buildBankPriority: firstLoad ? 2050 : 720,
+        buildBankPriority: firstLoad ? 2050 : 1950,
         cashOutPriority: -1600,
       };
     }
@@ -454,14 +455,11 @@ export function createRunnerBankInvestmentContext(
 
   function runnerBankHasComfortableCreditPool(
     input: AiDecisionInput,
-    storedCredits: number,
-    cashOutActionLegal: boolean,
+    _storedCredits: number,
+    _cashOutActionLegal: boolean,
   ): boolean {
     return (
-      input.playerView.own.credits >= 10 ||
-      (!cashOutActionLegal &&
-        input.playerView.own.credits + storedCredits >=
-          RUNNER_BANK_VALUE_CASHOUT_TARGET)
+      input.playerView.own.credits >= RUNNER_BANK_COMFORTABLE_LIQUID_CREDITS
     );
   }
 
@@ -744,15 +742,27 @@ export function createRunnerBankInvestmentContext(
   }
 
   function runnerBankHasConcreteFundingNeed(input: AiDecisionInput): boolean {
-    if (dependencies.runnerHandFundingTarget(input)) return true;
     if (runnerBankHasTerminalContestFundingNeed(input)) return true;
+    if (input.playerView.own.clicks < 2) return false;
+    const largestCashOut = runnerBankLargestLegalCashOut(input);
+    if (largestCashOut < RUNNER_BANK_URGENT_CASHOUT_TARGET) return false;
+    const handFundingTarget = dependencies.runnerHandFundingTarget(input);
+    if (
+      handFundingTarget &&
+      handFundingTarget.missingCredits > 0 &&
+      handFundingTarget.missingCredits <= largestCashOut
+    ) {
+      return true;
+    }
     const credits = input.playerView.own.credits;
     return input.legalActions.some((action) => {
       if (action.side !== "runner") return false;
       if (isRunnerBankCashOutAction(input, action)) return false;
       if (action.type !== "install_card" && action.type !== "play_event")
         return false;
-      if (dependencies.actionCreditCost(action) <= credits) return false;
+      const actionCost = dependencies.actionCreditCost(action);
+      if (actionCost <= credits || actionCost > credits + largestCashOut)
+        return false;
       const roles = dependencies.rolesForAction(input, action);
       return rolesMatch(roles, [
         "breaker_",
@@ -762,6 +772,13 @@ export function createRunnerBankInvestmentContext(
         "setup",
       ]);
     });
+  }
+
+  function runnerBankLargestLegalCashOut(input: AiDecisionInput): number {
+    const payouts = input.legalActions
+      .filter((action) => isRunnerBankCashOutAction(input, action))
+      .map((action) => runnerBankStoredCredits(input, action));
+    return payouts.length > 0 ? Math.max(...payouts) : 0;
   }
 
   function runnerBankHasTerminalContestFundingNeed(
@@ -822,11 +839,14 @@ export function createRunnerBankInvestmentContext(
       clicksAfterInstall - reservedRunClicks >= 1;
     const preservesConcreteFunding =
       !runnerBankHasConcreteFundingNeed(input) || creditsAfterInstall >= 4;
+    const liquidPoolAlreadyComfortable =
+      input.playerView.own.credits >= RUNNER_BANK_COMFORTABLE_LIQUID_CREDITS;
     return {
       plausible:
         creditsAfterInstall >= 0 &&
         canLoadAfterInstallThisTurn &&
-        preservesConcreteFunding,
+        preservesConcreteFunding &&
+        !liquidPoolAlreadyComfortable,
       creditsAfterInstall,
       clicksAfterInstall,
       reservedRunClicks,

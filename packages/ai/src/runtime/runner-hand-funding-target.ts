@@ -3,6 +3,8 @@ import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 export type RunnerHandFundingTarget = {
   value: number;
   reason: string;
+  cardCost: number;
+  missingCredits: number;
 };
 
 export type RunnerHandFundingTargetDependencies = {
@@ -75,6 +77,8 @@ export function runnerHandFundingTarget(
           `missing_credits:${missingCredits}`,
           `card_cost:${cost}`,
         ]).join(","),
+        cardCost: cost,
+        missingCredits,
       };
     })
     .filter((candidate): candidate is RunnerHandFundingTarget =>
@@ -88,7 +92,5 @@ export function runnerHandFundingTarget(
 }
 
 function sortedUnique(values: string[]): string[] {
-  return [...new Set(values)].sort((left, right) =>
-    left.localeCompare(right),
-  );
+  return [...new Set(values)].sort((left, right) => left.localeCompare(right));
 }
