@@ -1,6 +1,6 @@
 # Letzte zwei Corp-KI-Spiele: Remediation-Prozess vom 17.07.2026
 
-Status: aktiv; P2 rot gesichert
+Status: aktiv; P3 abgeschlossen, P4 aktiv
 
 ## Quelle und Zielprüfung
 
@@ -217,3 +217,17 @@ Hauptworkspace nur für Runtime-Evidence und den finalen Merge.
   Gegenverträge erhalten Night Shifts getrennte Economy-/Draw-Semantik und
   Scorched Earths Damage-/Tag-Punish-Semantik. Produktionscode ist gegenüber
   dem Ausgangsstand weiterhin unverändert.
+- P3 abgeschlossen: Eine geschützte Scoreline darf einen spekulativen
+  Punish-Plan bei kreditarmem Runner und mindestens drei HQ-Agenden
+  unterbrechen; die reiche Runner-Gegenprobe bleibt passiv. Eine geschützte
+  Matchpoint-Race-Linie verlangt mindestens drei bezahlbare, relevante ICE
+  und wird nicht durch allgemeine Exposure- oder Plan-Controller-Penalties
+  absolut blockiert. Contestable Agenda-Installationen tragen ihren
+  tatsächlichen Punktwert als Risiko, während die verstärkte sichere
+  Remote-Gegenprobe keinen solchen Component-Key besitzt. Der
+  Scoreline-Support-Controller gibt eine wertmindernde Nicht-Agenda-
+  Root-Belegung an die bessere zentrale Alternative frei. Alle vier
+  historischen Checkpoints und vier Gegenproben, 121 angrenzende
+  Runtime-/Scoreline-/Plan-Tests sowie der direkte AI-Typecheck sind grün.
+- P4 aktiv: Der generische Rez-Aktionstyp und die zehn deckweiten
+  Hint-Normalisierungen werden umgesetzt.

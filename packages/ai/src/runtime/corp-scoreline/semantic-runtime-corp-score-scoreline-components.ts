@@ -41,10 +41,12 @@ import { corpInstallServerId } from "./semantic-runtime-corp-score-ice-component
 import {
   corpActiveRemoteScorelineState,
   corpServerIceCount,
+  corpVisibleAgendaPoints,
 } from "./semantic-runtime-corp-score-state";
 import {
   corpHqAgendaReliefScorelineContext,
   corpIsLastViableDeckoutMatchpointScoreline,
+  corpProtectedScorelineCommitmentContext,
   corpScoreRuntimeIsPunishPrimary,
   corpScorelineActionServerId,
 } from "./semantic-runtime-corp-score-hq-pressure";
@@ -210,6 +212,17 @@ export function corpGameEndingScorelineExposurePenaltyComponent<
   if (!assessment || assessment.scoreHorizon === "immediate") {
     return undefined;
   }
+  if (
+    corpProtectedScorelineCommitmentContext(
+      input,
+      action,
+      dependencies,
+      roles,
+      assessment,
+    )
+  ) {
+    return undefined;
+  }
   const runnerCanAccessBeforeScore =
     assessment.runnerCanContestBeforeScore ||
     assessment.runnerCanReachAccessBeforeScore ||
@@ -288,6 +301,17 @@ export function corpUnsafeDelayedScorelineExposureComponent<
     return undefined;
   }
   if (
+    corpProtectedScorelineCommitmentContext(
+      input,
+      action,
+      dependencies,
+      roles,
+      assessment,
+    )
+  ) {
+    return undefined;
+  }
+  if (
     !assessment.runnerCanReachAccessBeforeScore ||
     !assessment.agendaStealRelevantBeforeScore
   ) {
@@ -306,6 +330,50 @@ export function corpUnsafeDelayedScorelineExposureComponent<
       `runner_can_reach_access_before_score:${assessment.runnerCanReachAccessBeforeScore}`,
       `agenda_steal_relevant_before_score:${assessment.agendaStealRelevantBeforeScore}`,
       ...assessment.evidence,
+    ].join("|"),
+  };
+}
+
+export function corpContestedAgendaPointRiskComponent<
+  TConsumer extends string,
+>(
+  input: AiDecisionInput,
+  action: LegalAction,
+  dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
+): AiDecisionScoreComponent | undefined {
+  if (action.type !== "install_card" || action.payload?.placement !== "root") {
+    return undefined;
+  }
+  const roles = dependencies.rolesForAction(input, action);
+  if (!dependencies.corpActionIsScoreLine(input, action, roles)) {
+    return undefined;
+  }
+  const source = visibleSourceCardForAction(input, action);
+  if (!source || !corpVisibleCardIsAgenda(source)) return undefined;
+  const assessment = dependencies.corpScoringWindowAssessment?.(
+    input,
+    action,
+    roles,
+  );
+  if (
+    !assessment ||
+    assessment.windowKind !== "unsafe" ||
+    !assessment.runnerCanReachAccessBeforeScore ||
+    !assessment.agendaStealRelevantBeforeScore
+  ) {
+    return undefined;
+  }
+  const agendaPoints = corpVisibleAgendaPoints(source);
+  if (agendaPoints <= 0) return undefined;
+  return {
+    key: "corp_contested_agenda_point_risk",
+    label: "Gefährdete Agenda-Punkte",
+    value: -600 * agendaPoints,
+    reason: [
+      "contested_agenda_point_risk:true",
+      `server:${assessment.serverId}`,
+      `agenda_points_at_risk:${agendaPoints}`,
+      `runner_can_reach_access_before_score:${assessment.runnerCanReachAccessBeforeScore}`,
     ].join("|"),
   };
 }

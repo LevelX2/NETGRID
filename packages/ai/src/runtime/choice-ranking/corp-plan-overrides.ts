@@ -66,6 +66,25 @@ export function tacticalPlanCorpScorelineSupportBlocksOffPlanOverride(
   mappedActionIds: ReadonlySet<string>,
 ): boolean {
   if (
+    mappedChoice.scoreBreakdown.some(
+      (component) =>
+        component.key === "corp_non_agenda_root_blocks_score_remote" &&
+        component.value < 0,
+    ) &&
+    overrideChoice.score > mappedChoice.score
+  ) {
+    return false;
+  }
+  if (
+    overrideChoice.scoreBreakdown.some(
+      (component) =>
+        component.key === "corp_protected_matchpoint_scoreline" &&
+        component.value > 0,
+    )
+  ) {
+    return false;
+  }
+  if (
     tacticalPlanCorpBoardTriageMismatchShouldYield(
       mappedChoice,
       overrideChoice,

@@ -66,7 +66,7 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
     expectCheckpointToPass(checkpoint);
   });
 
-  it("allows the valuable agenda when the remote is no longer contestable", () => {
+  it("still develops the remote when it is no longer contestable", () => {
     const checkpoint = mutateFixture(minimizeAgendaRiskJson, (fixture) => {
       const state = fixture.engine.testOnlyGameState;
       state.runner.credits = 0;
@@ -75,6 +75,12 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
         (server) => server.id === "remote_1",
       );
       if (!remote) throw new Error("Missing agenda-risk control remote");
+      for (const server of state.corp.servers) {
+        if (server.id === remote.id) continue;
+        const movedIce = [...server.ice];
+        server.ice = [];
+        remote.ice.push(...movedIce);
+      }
       for (const iceId of remote.ice) {
         state.cardInstances[iceId] = {
           ...state.cardInstances[iceId]!,
@@ -89,7 +95,18 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
             actionId:
               "corp.install_card.corp_onr_v1_195_corporate-retreat_1.remote_1.corp_onr_v1_195_corporate-retreat_1",
           },
+          {
+            actionId:
+              "corp.install_card.corp_onr_v1_214_project-babylon_1.remote_1.corp_onr_v1_214_project-babylon_1",
+          },
+          {
+            actionId:
+              "corp.install_card.corp_onr_v1_216_security-purge_1.remote_1.corp_onr_v1_216_security-purge_1",
+          },
         ],
+        selectedScoreBreakdown: {
+          forbiddenComponentKeys: ["corp_contested_agenda_point_risk"],
+        },
       };
     });
 

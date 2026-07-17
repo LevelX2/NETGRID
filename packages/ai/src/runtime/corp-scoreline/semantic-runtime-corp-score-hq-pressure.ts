@@ -13,7 +13,10 @@ import { semanticRuntimeCorpCentralPressureAssessment } from "../semantic-runtim
 import type { CorpScoringWindowAssessment } from "../semantic-runtime-corp-scoring-window";
 import { corpKnownAgendaInventory } from "../corp-known-agenda-inventory";
 import { type SemanticRuntimeCorpScoreDependencies } from "./semantic-runtime-corp-score-contracts";
-import { corpPreparedScoreRemotePipeline } from "./semantic-runtime-corp-score-facts";
+import {
+  corpHqAgendaCount,
+  corpPreparedScoreRemotePipeline,
+} from "./semantic-runtime-corp-score-facts";
 import {
   corpBurstEconomyOperationForAction,
   corpVisibleCardIsAgenda,
@@ -156,6 +159,17 @@ export function corpPunishPrimarySpeculativeScorelineDampenComponent<
   );
   if (assessment?.scoreHorizon === "immediate") return undefined;
   if (
+    corpProtectedScorelineCommitmentContext(
+      input,
+      action,
+      dependencies,
+      roles,
+      assessment,
+    )
+  ) {
+    return undefined;
+  }
+  if (
     corpPunishPrimaryPreparedScoreRemoteCommitment(
       input,
       action,
@@ -194,6 +208,117 @@ export function corpPunishPrimarySpeculativeScorelineDampenComponent<
         ? `score_horizon:${assessment.scoreHorizon}`
         : "score_horizon:unknown",
     ].join("|"),
+  };
+}
+
+export type CorpProtectedScorelineCommitmentContext = {
+  kind: "hq_flood" | "matchpoint_race";
+  value: number;
+  evidence: string[];
+};
+
+export function corpProtectedScorelineCommitmentContext<
+  TConsumer extends string,
+>(
+  input: AiDecisionInput,
+  action: LegalAction,
+  dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
+  roles: string[],
+  providedAssessment?: CorpScoringWindowAssessment,
+): CorpProtectedScorelineCommitmentContext | undefined {
+  if (
+    action.type !== "install_card" ||
+    action.payload?.placement !== "root" ||
+    !dependencies.corpActionIsScoreLine(input, action, roles)
+  ) {
+    return undefined;
+  }
+  const source = visibleSourceCardForAction(input, action);
+  if (!source || !corpVisibleCardIsAgenda(source)) return undefined;
+  const serverId = corpInstallServerId(action);
+  if (!serverId?.startsWith("remote_")) return undefined;
+  const assessment =
+    providedAssessment ??
+    dependencies.corpScoringWindowAssessment?.(input, action, roles);
+  if (
+    !assessment ||
+    assessment.serverId !== serverId ||
+    assessment.corpCanRezRelevantIce === false ||
+    assessment.corpCanRezFullPathWithDynamicReserve !== true ||
+    (assessment.dynamicProtectionWeaknessCount ?? 0) > 0
+  ) {
+    return undefined;
+  }
+
+  const agendaPoints = corpVisibleAgendaPoints(source);
+  const ownAgendaPoints =
+    positiveOrZeroNumber(input.playerView.own.agendaPoints) ?? 0;
+  const opponentAgendaPoints =
+    positiveOrZeroNumber(input.playerView.opponent.agendaPoints) ?? 0;
+  const pointsToWin = input.playerView.agendaPointsToWin ?? 7;
+  const affordableRelevantIce =
+    assessment.affordableDurableRelevantIceCount ?? 0;
+  const matchpointRace =
+    agendaPoints > 0 &&
+    ownAgendaPoints + agendaPoints >= pointsToWin &&
+    opponentAgendaPoints >= Math.max(0, pointsToWin - 2) &&
+    affordableRelevantIce >= 3;
+  const hqAgendaCount = corpHqAgendaCount(input);
+  const runnerPointsAfterSteal =
+    positiveOrZeroNumber(assessment.runnerAgendaPointsAfterSteal) ??
+    opponentAgendaPoints + agendaPoints;
+  const hqFlood =
+    !matchpointRace &&
+    hqAgendaCount >= 3 &&
+    input.playerView.opponent.credits <= 3 &&
+    runnerPointsAfterSteal < pointsToWin;
+  if (!matchpointRace && !hqFlood) return undefined;
+
+  const kind = matchpointRace ? "matchpoint_race" : "hq_flood";
+  return {
+    kind,
+    value: matchpointRace ? 7600 : 5600,
+    evidence: [
+      `protected_scoreline_commitment:${kind}`,
+      `server:${serverId}`,
+      `agenda_points:${agendaPoints}`,
+      `corp_agenda_points:${ownAgendaPoints}`,
+      `runner_agenda_points:${opponentAgendaPoints}`,
+      `runner_points_after_steal:${runnerPointsAfterSteal}`,
+      `hq_agenda_count:${hqAgendaCount}`,
+      `runner_credits:${input.playerView.opponent.credits}`,
+      `affordable_durable_relevant_ice:${affordableRelevantIce}`,
+      "corp_can_rez_full_path_with_dynamic_reserve:true",
+    ],
+  };
+}
+
+export function corpProtectedScorelineCommitmentComponent<
+  TConsumer extends string,
+>(
+  input: AiDecisionInput,
+  action: LegalAction,
+  dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
+  roles: string[],
+): AiDecisionScoreComponent | undefined {
+  const context = corpProtectedScorelineCommitmentContext(
+    input,
+    action,
+    dependencies,
+    roles,
+  );
+  if (!context) return undefined;
+  return {
+    key:
+      context.kind === "matchpoint_race"
+        ? "corp_protected_matchpoint_scoreline"
+        : "corp_protected_hq_flood_scoreline",
+    label:
+      context.kind === "matchpoint_race"
+        ? "Geschützte Matchpoint-Scoreline"
+        : "Geschützte HQ-Flood-Scoreline",
+    value: context.value,
+    reason: context.evidence.join("|"),
   };
 }
 

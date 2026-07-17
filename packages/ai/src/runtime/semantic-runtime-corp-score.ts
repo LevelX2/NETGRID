@@ -58,6 +58,7 @@ import {
   corpLegalCreditActionExists,
   corpLegalEconomyActionExists,
   corpNonAgendaRootBlocksScoreRemoteComponent,
+  corpProtectedScorelineCommitmentComponent,
   corpPunishPrimarySpeculativeScorelineDampenComponent,
 } from "./corp-scoreline/semantic-runtime-corp-score-hq-pressure";
 import {
@@ -78,6 +79,7 @@ import {
   corpActiveScorelineOffPathPenaltyComponent,
   corpActiveScoreRemoteReserveFundingComponent,
   corpCentralOvericeRemoteUnderbuildComponent,
+  corpContestedAgendaPointRiskComponent,
   corpExistingScoreRemotePipelineComponent,
   corpGameEndingScorelineExposurePenaltyComponent,
   corpLowValueInstallDeferComponent,
@@ -191,6 +193,19 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
     actionSemanticCandidate,
   );
   if (activeScorelineOffPath) components.push(activeScorelineOffPath);
+  const protectedScoreline = corpProtectedScorelineCommitmentComponent(
+    input,
+    action,
+    dependencies,
+    dependencies.rolesForAction(input, action),
+  );
+  if (protectedScoreline) components.push(protectedScoreline);
+  const contestedAgendaPointRisk = corpContestedAgendaPointRiskComponent(
+    input,
+    action,
+    dependencies,
+  );
+  if (contestedAgendaPointRisk) components.push(contestedAgendaPointRisk);
   const gameEndingExposure = corpGameEndingScorelineExposurePenaltyComponent(
     input,
     action,
@@ -532,7 +547,10 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
       action,
       roles,
     );
-    if (corpScoringWindowSuppressesContestableRemotePenalty(scoringWindow)) {
+    if (
+      protectedScoreline ||
+      corpScoringWindowSuppressesContestableRemotePenalty(scoringWindow)
+    ) {
       components.push({
         key: "corp_contestable_remote_score_penalty_suppressed",
         label: "Scoring-Window hebt Contestability auf",
@@ -540,7 +558,9 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
         reason: [
           ...contestableScoreLine.evidence,
           ...(scoringWindow?.evidence ?? []),
-          "contestable_penalty_suppressed_by_scoring_window:true",
+          protectedScoreline
+            ? "contestable_penalty_suppressed_by_protected_commitment:true"
+            : "contestable_penalty_suppressed_by_scoring_window:true",
         ].join("|"),
       });
     } else {
