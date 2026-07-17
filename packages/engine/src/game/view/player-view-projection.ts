@@ -9,7 +9,10 @@ import {
   type ServerId,
   type Side,
 } from "@netgrid/shared";
-import { maxHandSize, runnerMemoryLimit } from "../../ability-engine/effective-values";
+import {
+  maxHandSize,
+  runnerMemoryLimit,
+} from "../../ability-engine/effective-values";
 import {
   activeCardImplementationModifiersForRunnerInstalled,
   isPublicRunnerInstalledModifier,
@@ -60,7 +63,8 @@ export function buildPlayerViewProjection(
           : server.root.map((id) => visibleCorpCard(state, id, side, "root")),
       ...counterDisplaysField([
         ...(poxCounterDisplaysForServer(state, server.id) ?? []),
-        ...(purgeableRunnerVirusCounterDisplaysForServer(state, server.id) ?? []),
+        ...(purgeableRunnerVirusCounterDisplaysForServer(state, server.id) ??
+          []),
         ...(spyCounterDisplaysForServer(state, server.id) ?? []),
         ...(corpIceInstallCostModifierCounterDisplaysForServer(
           state,
@@ -129,6 +133,7 @@ export function buildPlayerViewProjection(
   return {
     side,
     stateVersion: state.stateVersion,
+    turnSerial: Math.max(0, Math.floor(state.turnSerial ?? 0)),
     timingPoint: state.timingPoint,
     activeSide: state.activeSide,
     phase: state.phase,
@@ -233,7 +238,9 @@ export function buildPlayerViewProjection(
           },
         }
       : {}),
-    publicEvents: state.eventLog.map((event) => toPublicEventForSide(event, side)),
+    publicEvents: state.eventLog.map((event) =>
+      toPublicEventForSide(event, side),
+    ),
     legalActions,
     winner: state.winner,
     agendaPointsToWin: state.agendaPointsToWin,

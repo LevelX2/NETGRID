@@ -120,6 +120,7 @@ export function buildEventWithHost(
     type: publicEventType,
     stateVersionBefore: before,
     stateVersionAfter: after,
+    turnSerial: Math.max(0, Math.floor(state.turnSerial ?? 0)),
     stateHashAfter,
     visibilityClass,
     publicPayload,

@@ -1,6 +1,6 @@
 # Runner-Damage-Threat-Model-v2-Prozess
 
-Status: P3 Modelltrennung aktiv
+Status: P4 Consumer-Migration aktiv
 
 ## Quelle und Zielprüfung
 
@@ -137,7 +137,7 @@ Commit: `test(ai): capture damage threat model v2 regressions`
 
 ### P3: Deck-Belief und akutes Flatline-Risiko
 
-Status: aktiv
+Status: abgeschlossen
 
 Ziel: Das bisherige skalare Threat-Modell fachlich trennen.
 
@@ -154,13 +154,15 @@ Konkrete Arbeit:
 Checks: neue Modelltests, PlayerView-/Event-Projektion, AI- und
 Engine-Typecheck, `git diff --check`.
 
-Done-Gate: P2-Modelltests grün; keine Hidden-Info- oder Replay-Abweichung.
+Done-Gate: fünf Modelltests grün; ausschließlich der ausdrücklich P4
+zugeordnete Handbuffer-Consumer bleibt rot. Keine Hidden-Info- oder
+Replay-Abweichung.
 
 Commit: `feat(ai): split damage deck belief from flatline risk`
 
 ### P4: Consumer auf konkrete Gefahr umstellen
 
-Status: ausstehend
+Status: aktiv
 
 Ziel: Hand-, Economy-, Run- und Arbitration-Consumer nutzen die richtige Achse.
 

@@ -36,7 +36,7 @@ describe("runnerDamageThreatAssessment", () => {
     expect(assessment.visiblePunishSignalKinds).toContain("trace_tag_source");
   });
 
-  it("confirms a damage deck read from matching visible delivery and payoff", () => {
+  it("confirms deck belief without keeping an inactive window acute", () => {
     const assessment = runnerDamageThreatAssessment(
       input({
         handCount: 4,
@@ -55,11 +55,16 @@ describe("runnerDamageThreatAssessment", () => {
     );
 
     expect(assessment).toMatchObject({
-      level: "confirmed",
-      knownDamageSourceCount: 1,
-      knownPunishSignalCount: 2,
-      knownTraceTagSignalCount: 1,
-      recommendedHandFloor: 3,
+      deckBelief: {
+        level: "confirmed",
+        visibleDamageSourceCount: 1,
+        visibleDeliverySourceCount: 1,
+        visibleDamagePayoffCount: 1,
+      },
+      flatlineRisk: {
+        level: "suspected",
+        recommendedHandFloor: 2,
+      },
     });
     expect(assessment.visiblePunishSignalKinds).toEqual(
       expect.arrayContaining([
@@ -162,8 +167,8 @@ describe("runnerDamageThreatAssessment", () => {
     expect(assessment.riskyRunServerIds).toEqual(["rd"]);
     expect(assessment.evidence).toEqual(
       expect.arrayContaining([
-        "runner_damage_threat_level:critical",
-        "runner_damage_risky_servers:rd",
+        "runner_flatline_risk_level:critical",
+        "runner_flatline_risk_risky_servers:rd",
       ]),
     );
   });
@@ -189,8 +194,9 @@ describe("runnerDamageThreatAssessment", () => {
     expect(assessment.criticalRunSuppression).toBe(false);
     expect(assessment.evidence).toEqual(
       expect.arrayContaining([
-        "runner_damage_threat_level:suspected",
-        "runner_damage_stale:true",
+        "runner_damage_deck_belief_level:confirmed",
+        "runner_flatline_risk_level:suspected",
+        "runner_flatline_risk_legacy_state_distance:38",
       ]),
     );
   });
@@ -425,6 +431,6 @@ function event(
     stateVersionAfter,
     stateHashAfter: `fnv1a:${eventId}`,
     visibilityClass: "public",
-    publicPayload,
+    publicPayload: { actor: publicPayload.actor ?? "corp", ...publicPayload },
   } as PublicGameEvent;
 }
