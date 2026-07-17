@@ -2992,6 +2992,46 @@ describe("formatChronicleEvent", () => {
     );
   });
 
+  it("shows a run-locking subroutine with its exact action duration", () => {
+    const items = formatChronicleEffectItems(
+      makeEvent("continue_run", {
+        actor: "runner",
+        encounterContinue: true,
+        result: "ended",
+        resolvedEffects: [
+          {
+            effectId: "subroutine_1",
+            kind: "resolve_subroutine",
+            visibility: "public",
+            side: "runner",
+            sourceDefinitionId: "onr_v1_247_haunting-inquisition",
+            sourceTitle: "Haunting Inquisition",
+            subroutineIndex: 0,
+            subroutineType: "set_runner_run_lock_actions",
+            amount: 4,
+          },
+        ],
+      }),
+      "runner",
+    );
+
+    expect(items).toHaveLength(1);
+    expect(items[0]?.title).toBe(
+      "Haunting Inquisition: Subroutine 1 verhindert Runs für die nächsten 4 Aktionen.",
+    );
+    expect(items[0]?.description).toBe(
+      "Der Runner kann während der nächsten 4 Aktionen keinen Run starten.",
+    );
+    expect(items[0]?.chips).toEqual(
+      expect.arrayContaining([
+        "Haunting Inquisition",
+        "Subroutine 1",
+        "Run-Sperre",
+        "4 Aktionen",
+      ]),
+    );
+  });
+
   it("suppresses redundant Encounter summaries when concrete subroutine lines exist", () => {
     const event = makeEvent("continue_run", {
       actor: "runner",

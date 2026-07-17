@@ -273,6 +273,7 @@ export function resolveEncounterPrintedNonTraceEffect(
     return resolveDirectRunLockSubroutine(host, {
       definition,
       subroutine,
+      subroutineIndex,
       legalAction,
     });
 
@@ -865,6 +866,7 @@ function resolveDirectRunLockSubroutine(
   options: {
     definition: CardDefinition;
     subroutine: SubroutineDefinition;
+    subroutineIndex: number;
     legalAction?: LegalAction | undefined;
   },
 ): DirectRunLockSubroutineResult {
@@ -878,6 +880,14 @@ function resolveDirectRunLockSubroutine(
     runLockActionsPending: flags.runLockActionsPending,
     sourceDefinitionId: options.definition.id,
   });
+  appendResolvedSubroutineEffect(
+    options.legalAction,
+    options.definition,
+    options.subroutineIndex,
+    options.subroutine,
+    undefined,
+    { amount },
+  );
   return {
     handled: true,
     sourceDefinitionId: options.definition.id,

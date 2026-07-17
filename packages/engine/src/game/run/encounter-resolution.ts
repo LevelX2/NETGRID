@@ -797,6 +797,7 @@ export function appendResolvedSubroutineEffect(
   subroutine: EncounterSubroutine,
   damageSummary?: DamageSummary,
   options: {
+    amount?: number;
     paidCredits?: number;
     endedRun?: boolean;
     cardDefinitionId?: string;
@@ -840,6 +841,7 @@ export function appendResolvedSubroutineEffect(
             cardsTrashed: damageSummary.cardsTrashed,
           }
         : {}),
+      ...(options.amount !== undefined ? { amount: options.amount } : {}),
       ...(options.paidCredits !== undefined
         ? { paidCredits: options.paidCredits }
         : {}),

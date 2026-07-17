@@ -483,6 +483,15 @@ describe("encounter printed non-trace effects boundary", () => {
       runLockActionsPending: 6,
       sourceDefinitionId: "haunting",
     });
+    expect(legalAction.resolvedEffects).toEqual([
+      expect.objectContaining({
+        kind: "resolve_subroutine",
+        sourceDefinitionId: "haunting",
+        subroutineIndex: 1,
+        subroutineType: "set_runner_run_lock_actions",
+        amount: 6,
+      }),
+    ]);
   });
 
   it("keeps next-ICE cannot-break and cannot-jack-out markers in encounter-resolution", () => {
