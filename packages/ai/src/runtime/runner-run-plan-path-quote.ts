@@ -4,6 +4,7 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 
+import { createAiHintsByCard } from "../ai-hints";
 import {
   canBreakerDefinitionBreakIce,
   cardDefinitionStrength,
@@ -20,6 +21,7 @@ import {
 import {
   isEndRunSubroutine,
   isImmediateSafetyThreatSubroutine,
+  isProgramTrashThreatSubroutine,
 } from "./encounter-subroutine";
 import {
   breakerIdForEncounterAction,
@@ -46,6 +48,8 @@ import {
   runnerEncounterPaymentForActions,
   spendRunnerEncounterBreakerCost,
 } from "./runner-encounter-credit-budget";
+
+const AI_HINTS_BY_CARD = createAiHintsByCard();
 
 export function quoteRunnerRunPath(
   input: AiDecisionInput,
@@ -203,14 +207,18 @@ export function runnerRunPlanCurrentEncounterSafeSequence(params: {
 
 export function runnerRunPlanCurrentEncounterRequiresBreak(params: {
   input: AiDecisionInput;
+  plan: RunnerRunPlan;
 }): boolean {
   if (params.input.playerView.run?.phase !== "encounter_ice") {
     return false;
   }
   const currentEncounter = currentEncounteredIceCard(params.input);
   return currentEncounter
-    ? currentRequiredBreakSubroutineIndexes(params.input, currentEncounter)
-        .size > 0
+    ? currentRequiredBreakSubroutineIndexes(
+        params.input,
+        params.plan,
+        currentEncounter,
+      ).size > 0
     : false;
 }
 
@@ -221,7 +229,12 @@ function quoteIceEncounter(params: {
   currentEncounter: boolean;
 }): RunnerRunIceEncounterQuote {
   const { input, plan, ice, currentEncounter } = params;
-  const subroutineQuotes = subroutineQuotesForIce(input, ice, currentEncounter);
+  const subroutineQuotes = subroutineQuotesForIce(
+    input,
+    plan,
+    ice,
+    currentEncounter,
+  );
   const breakerCoverage = breakerCoverageQuotesForIce(input, ice);
   const quotedSequence = currentEncounter
     ? cheapestCurrentEncounterSequence({ input, plan, ice })
@@ -267,6 +280,7 @@ function cheapestCurrentEncounterSequence(params: {
   const futurePathAssessment = encounterRunRemainderEffectAssessment(input);
   const requiredSubroutineIndexes = currentRequiredBreakSubroutineIndexes(
     input,
+    plan,
     ice,
     futurePathAssessment,
   );
@@ -324,6 +338,7 @@ function cheapestCurrentSafetySequence(params: {
   if (!ice.known || !ice.definitionId) return undefined;
   const requiredSubroutineIndexes = currentSafetyBreakSubroutineIndexes(
     input,
+    plan,
     ice,
   );
   if (requiredSubroutineIndexes.size <= 0) return undefined;
@@ -721,6 +736,7 @@ function breakerCoverageQuotesForIce(
 
 function subroutineQuotesForIce(
   input: AiDecisionInput,
+  plan: RunnerRunPlan,
   ice: VisibleCard,
   currentEncounter: boolean,
 ): RunnerRunSubroutineQuote[] {
@@ -733,11 +749,16 @@ function subroutineQuotesForIce(
     : undefined;
   if (quoteSubroutines.length > 0) {
     return quoteSubroutines.map((subroutine, index) => {
-      const baseThreatClass = threatClassForSubroutine(input, subroutine);
+      const baseThreatClass = threatClassForSubroutine(
+        input,
+        subroutine,
+        currentEncounter ? plan : undefined,
+      );
       const threatClass = allBroken
         ? "irrelevant_to_current_plan"
         : currentThreatClassForSubroutine(
             input,
+            plan,
             subroutine,
             futurePathAssessment,
           );
@@ -750,6 +771,10 @@ function subroutineQuotesForIce(
           ...(baseThreatClass === "future_path_modifier" &&
           threatClass === "must_break_for_access"
             ? ["subroutine_future_path_modifier_required:true"]
+            : []),
+          ...(threatClass === "irrelevant_to_current_plan" &&
+          isProgramTrashThreatSubroutine(subroutine)
+            ? ["program_run_end_self_trash_expendable:true"]
             : []),
         ],
       };
@@ -771,12 +796,13 @@ function subroutineQuotesForIce(
 
 function currentThreatClassForSubroutine(
   input: AiDecisionInput,
+  plan: RunnerRunPlan,
   subroutine: NonNullable<
     VisibleCard["effectiveRunQuote"]
   >["subroutines"][number],
   futurePathAssessment: EncounterRunRemainderEffectAssessment | undefined,
 ): RunnerRunSubroutineThreatClass {
-  const threatClass = threatClassForSubroutine(input, subroutine);
+  const threatClass = threatClassForSubroutine(input, subroutine, plan);
   if (
     threatClass === "future_path_modifier" &&
     futurePathAssessment?.mustBreak === true
@@ -791,6 +817,7 @@ function threatClassForSubroutine(
   subroutine: NonNullable<
     VisibleCard["effectiveRunQuote"]
   >["subroutines"][number],
+  plan?: RunnerRunPlan,
 ): RunnerRunSubroutineThreatClass {
   if (isEndRunSubroutine(subroutine)) return "must_break_for_access";
   if (
@@ -800,6 +827,13 @@ function threatClassForSubroutine(
     )
   )
     return "must_break_for_access";
+  if (
+    plan &&
+    isProgramTrashThreatSubroutine(subroutine) &&
+    onlyInstalledProgramIsExpendableAtRunEnd(input, plan)
+  ) {
+    return "irrelevant_to_current_plan";
+  }
   if (isImmediateSafetyThreatSubroutine(subroutine)) {
     return "must_break_for_survival";
   }
@@ -813,6 +847,48 @@ function threatClassForSubroutine(
     return "future_path_modifier";
   }
   return "may_allow";
+}
+
+function onlyInstalledProgramIsExpendableAtRunEnd(
+  input: AiDecisionInput,
+  plan: RunnerRunPlan,
+): boolean {
+  const installedPrograms = (input.playerView.own.rig ?? []).filter(
+    (card) => card.type === "program",
+  );
+  if (installedPrograms.length !== 1) return false;
+  const program = installedPrograms[0];
+  if (!program?.definitionId) return false;
+  const hint = AI_HINTS_BY_CARD.get(program.definitionId);
+  const runEndSelfTrash =
+    hint?.roles.includes("self_trash") === true &&
+    hint.effects?.some(
+      (effect) =>
+        effect.kind === "delayed_penalty" &&
+        effect.timing === "on_leave_play" &&
+        effect.scope === "installed_program",
+    ) === true;
+  if (!runEndSelfTrash) {
+    return false;
+  }
+
+  const futureIce = currentRunRemainingIce(input);
+  if (futureIce.some((ice) => !ice.known || ice.rezzed === false)) {
+    return false;
+  }
+  return !futureIce.some((ice) =>
+    knownIceAccessSequenceUsesProgram(input, plan, ice, program.instanceId),
+  );
+}
+
+function knownIceAccessSequenceUsesProgram(
+  input: AiDecisionInput,
+  plan: RunnerRunPlan,
+  ice: VisibleCard,
+  programInstanceId: string,
+): boolean {
+  const sequence = cheapestKnownIceSequence({ input, plan, ice });
+  return sequence?.evidence?.includes(`breaker:${programInstanceId}`) === true;
 }
 
 function subroutineRequiresBreak(
@@ -961,6 +1037,7 @@ function currentEndTheRunThreatCount(
 
 function currentRequiredBreakSubroutineIndexes(
   input: AiDecisionInput,
+  plan: RunnerRunPlan,
   ice: VisibleCard,
   futurePathAssessment:
     | EncounterRunRemainderEffectAssessment
@@ -986,7 +1063,7 @@ function currentRequiredBreakSubroutineIndexes(
           )
         )
           return [index];
-        const threatClass = threatClassForSubroutine(input, subroutine);
+        const threatClass = threatClassForSubroutine(input, subroutine, plan);
         if (threatClass === "must_break_for_access") {
           return continueWillEndRun ? [index] : [];
         }
@@ -1009,6 +1086,7 @@ function currentRequiredBreakSubroutineIndexes(
 
 function currentSafetyBreakSubroutineIndexes(
   input: AiDecisionInput,
+  plan: RunnerRunPlan,
   ice: VisibleCard,
 ): Set<number> {
   const continueAction = encounterContinueAction(input);
@@ -1022,7 +1100,7 @@ function currentSafetyBreakSubroutineIndexes(
   if (quoteSubroutines.length > 0) {
     return new Set(
       quoteSubroutines.flatMap((subroutine, index) =>
-        threatClassForSubroutine(input, subroutine) ===
+        threatClassForSubroutine(input, subroutine, plan) ===
         "must_break_for_survival"
           ? [index]
           : [],

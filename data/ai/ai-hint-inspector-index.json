@@ -20132,9 +20132,7 @@
         "risk.random_hand_reveal",
         "run.event_tempo",
         "run.extra_action",
-        "run.make_run",
-        "setup.draw",
-        "setup.search"
+        "run.make_run"
       ],
       "derivedStrategyAnchors": [
         "runner.run_event_tempo"
@@ -20153,8 +20151,7 @@
         "risk.mandatory_action",
         "risk.random_action",
         "risk.random_hand_reveal",
-        "run.make_run",
-        "setup.draw"
+        "run.make_run"
       ],
       "lineSupportClassification": [],
       "rolesClassification": [

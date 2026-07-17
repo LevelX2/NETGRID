@@ -99,6 +99,63 @@ export function tacticalPlanNoNeedSearchShouldYield(
   );
 }
 
+export function tacticalPlanUnconvertibleFundingShouldYieldToBank(
+  mapping: PlanStepMappingResult,
+  mappedChoice: SemanticRuntimeChoice,
+  overrideChoice: SemanticRuntimeChoice,
+  scoreGap: number,
+): boolean {
+  return (
+    mapping.plan.type === "runner.develop_hand_card" &&
+    mapping.step.kind === "gain_credits" &&
+    mapping.plan.evidence.includes("funding_same_turn_convertible:false") &&
+    mappedChoice.action.type === "gain_credit" &&
+    scoreGap > 0 &&
+    semanticRuntimeChoiceHasScoreBreakdownComponent(
+      overrideChoice,
+      "runner_bank_investment_commitment",
+    )
+  );
+}
+
+export function tacticalPlanUrgentCoverageSearchInstallShouldYield(
+  mapping: PlanStepMappingResult,
+  overrideChoice: SemanticRuntimeChoice,
+  scoreGap: number,
+): boolean {
+  return (
+    (mapping.plan.type === "runner.develop_hand_card" ||
+      mapping.plan.type === "runner.build_credit_base") &&
+    overrideChoice.action.type === "install_card" &&
+    scoreGap > 0 &&
+    semanticRuntimeChoiceHasScoreBreakdownComponent(
+      overrideChoice,
+      "runner_install_coverage_search",
+    )
+  );
+}
+
+export function tacticalPlanHardInterruptShouldYield(
+  mapping: PlanStepMappingResult,
+  overrideChoice: SemanticRuntimeChoice,
+): boolean {
+  return (
+    mapping.plan.side === "runner" &&
+    (semanticRuntimeChoiceHasScoreBreakdownComponent(
+      overrideChoice,
+      "runner_matchpoint_run_lock_release",
+    ) ||
+      semanticRuntimeChoiceHasScoreBreakdownComponent(
+        overrideChoice,
+        "runner_viable_followup_run_lock_release",
+      ) ||
+      runnerUrgentRemoteContestRunCanInterruptPlan(
+        mapping.plan,
+        overrideChoice,
+      ))
+  );
+}
+
 export function tacticalPlanMarginalDevelopmentInstallShouldYield(
   mapping: PlanStepMappingResult,
   mappedChoice: SemanticRuntimeChoice,
@@ -132,11 +189,14 @@ export function tacticalPlanMarginalDevelopmentInstallShouldYield(
   }
   return mappedChoice.scoreBreakdown.some(
     (component) =>
-      component.key === "runner_persistent_install_fit" &&
-      component.value <= (bankEconomyOverride ? 150 : 100) &&
-      (bankEconomyOverride ||
-        immediateHandPlayOverride ||
-        (component.reason ?? "").includes("delta:cumulative_capacity")),
+      (bankEconomyOverride &&
+        component.key === "runner_install_mandatory_random_action_risk" &&
+        component.value < 0) ||
+      (component.key === "runner_persistent_install_fit" &&
+        component.value <= (bankEconomyOverride ? 150 : 100) &&
+        (bankEconomyOverride ||
+          immediateHandPlayOverride ||
+          (component.reason ?? "").includes("delta:cumulative_capacity"))),
   );
 }
 

@@ -9,6 +9,7 @@ import {
   runnerVisibleSearchCoverageNeed,
   visibleCardCoversRequiredCoverage,
 } from "./runner-search-coverage-need";
+import { rolesMatch } from "./role-match";
 
 type RunnerProgramSacrificeInstallAssessment = {
   memoryRequired: boolean;
@@ -62,7 +63,10 @@ export type RunnerInstallScoreDependencies = {
 export function runnerInstallScoreComponents(
   input: AiDecisionInput,
   action: LegalAction,
-  context: { loanInstallAction: boolean },
+  context: {
+    loanInstallAction: boolean;
+    semanticRiskKinds?: readonly string[];
+  },
   dependencies: RunnerInstallScoreDependencies,
 ): AiDecisionScoreComponent[] {
   if (action.type !== "install_card") return [];
@@ -111,6 +115,22 @@ export function runnerInstallScoreComponents(
     });
   }
   if (
+    sourceCard &&
+    visibleCoverageNeed &&
+    rolesMatch(roles, ["program_search", "breaker_search"])
+  ) {
+    components.push({
+      key: "runner_install_coverage_search",
+      label: "Konkrete Breaker-Suche aufbauen",
+      value: 1400,
+      reason: [
+        `required:${visibleCoverageNeed.requiredCoverage}`,
+        `server:${visibleCoverageNeed.serverId}`,
+        `source:${sourceCard.definitionId ?? sourceCard.instanceId}`,
+      ].join("|"),
+    });
+  }
+  if (
     roles.some((role) => dependencies.isRunnerEconomyRole(role)) &&
     !context.loanInstallAction
   ) {
@@ -138,6 +158,17 @@ export function runnerInstallScoreComponents(
       label: "Bad-Publicity-/Trace-Tech",
       value: 520,
       reason: "bad_publicity_or_trace",
+    });
+  }
+  if (
+    context.semanticRiskKinds?.includes("mandatory_action") &&
+    context.semanticRiskKinds.includes("random_outcome")
+  ) {
+    components.push({
+      key: "runner_install_mandatory_random_action_risk",
+      label: "Zufällige Pflichtaktion",
+      value: -500,
+      reason: "mandatory_action|random_outcome",
     });
   }
   const sacrificeAssessment =
@@ -196,9 +227,7 @@ function runnerServerIceInstallTaxComponents(
   const urgentAdvancedRemote = input.playerView.servers.some(
     (candidate) =>
       candidate.id.startsWith("remote_") &&
-      candidate.root.some(
-        (card) => (card.advancementCounters ?? 0) > 0,
-      ),
+      candidate.root.some((card) => (card.advancementCounters ?? 0) > 0),
   );
   const immediateRemoteContestAvailable = input.legalActions.some(
     (candidate) =>

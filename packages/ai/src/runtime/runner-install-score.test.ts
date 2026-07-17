@@ -47,6 +47,69 @@ describe("runnerInstallScoreComponents", () => {
     );
   });
 
+  it("boosts a program-search install only for a concrete visible coverage gap", () => {
+    const action = {
+      actionId: "install-search",
+      side: "runner",
+      type: "install_card",
+      source: "search-tool",
+    } as LegalAction;
+    const sourceCard = visibleCard("search-tool", "runner", "resource");
+    const input = runnerInputWithKnownWallNeed(sourceCard);
+
+    const withNeed = runnerInstallScoreComponents(
+      input,
+      action,
+      { loanInstallAction: false },
+      dependencies(["program_search"], sourceCard),
+    );
+    expect(withNeed).toContainEqual(
+      expect.objectContaining({
+        key: "runner_install_coverage_search",
+        value: 1400,
+        reason: expect.stringContaining("required:breaker_wall"),
+      }),
+    );
+
+    input.playerView.servers.forEach((server) => {
+      server.ice = [];
+    });
+    const withoutNeed = runnerInstallScoreComponents(
+      input,
+      action,
+      { loanInstallAction: false },
+      dependencies(["program_search"], sourceCard),
+    );
+    expect(withoutNeed).not.toContainEqual(
+      expect.objectContaining({ key: "runner_install_coverage_search" }),
+    );
+  });
+
+  it("prices a structured mandatory random-action risk on installation", () => {
+    const components = runnerInstallScoreComponents(
+      runnerInputWithKnownWallNeed(
+        visibleCard("random-resource", "runner", "resource"),
+      ),
+      {
+        actionId: "install-random-resource",
+        side: "runner",
+        type: "install_card",
+      } as LegalAction,
+      {
+        loanInstallAction: false,
+        semanticRiskKinds: ["mandatory_action", "random_outcome"],
+      },
+      dependencies(["resource"]),
+    );
+
+    expect(components).toContainEqual({
+      key: "runner_install_mandatory_random_action_risk",
+      label: "Zufällige Pflichtaktion",
+      value: -500,
+      reason: "mandatory_action|random_outcome",
+    });
+  });
+
   it("prefers a central ICE-tax target over Archives", () => {
     const input = runnerInputWithKnownWallNeed(
       visibleCard("rnz", "runner", "resource"),
@@ -62,12 +125,13 @@ describe("runnerInstallScoreComponents", () => {
       visibleCard("rnz", "runner", "resource"),
     );
     input.playerView.own.clicks = 2;
-    input.playerView.servers.find((server) => server.id === "remote_1")!.root = [
-      visibleCard("advanced-remote-card", "corp", "agenda", {
-        known: false,
-        advancementCounters: 1,
-      }),
-    ];
+    input.playerView.servers.find((server) => server.id === "remote_1")!.root =
+      [
+        visibleCard("advanced-remote-card", "corp", "agenda", {
+          known: false,
+          advancementCounters: 1,
+        }),
+      ];
     input.legalActions = [
       {
         actionId: "runner.start_run.remote_1",

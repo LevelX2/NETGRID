@@ -14,13 +14,13 @@ Keine Runtime-Anbindung, keine Action-Auswahl, kein Scoring und keine Hidden-Inf
 | covered                                                        |   601 |
 | deferred                                                       |    32 |
 | no_signal_reason != none                                       |    17 |
-| target_profile_gap                                             |    89 |
+| target_profile_gap                                             |    88 |
 | structural signal violations                                   |     0 |
 | unknown signals                                                |     0 |
 | covered delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE            |   +62 |
 | deferred delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE           |   -13 |
 | no_signal delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE          |    -8 |
-| target_profile_gap delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE |    +5 |
+| target_profile_gap delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE |    +4 |
 
 ## No Signal Reasons
 
@@ -55,7 +55,6 @@ Keine Runtime-Anbindung, keine Action-Auswahl, kein Scoring und keine Hidden-Inf
 | `onr_proteus_120_reconnaissance`               | runner | event    | `info.expose`, `info.run_recon`                                           |
 | `onr_proteus_121_remote-detonator`             | runner | event    | `fort.all_rezzed_ice_trash`, `fort.all_rezzed_ice_trash_tag_risk`         |
 | `onr_proteus_129_back-door-to-netwatch`        | runner | resource | `hidden.reveals_on_trash`                                                 |
-| `onr_proteus_131_bargain-with-viacox`          | runner | resource | `setup.search`                                                            |
 | `onr_proteus_132_bolt-hole`                    | runner | resource | `hidden.reveals_on_trash`                                                 |
 | `onr_proteus_133_chiba-bank-account`           | runner | resource | `hidden.reveals_on_trash`                                                 |
 | `onr_proteus_136_credit-subversion`            | runner | resource | `access.hq_sabotage_credit_loss`, `hidden.reveals_on_trash`               |
@@ -64,6 +63,7 @@ Keine Runtime-Anbindung, keine Action-Auswahl, kein Scoring und keine Hidden-Inf
 | `onr_proteus_142_hq-mole`                      | runner | resource | `access.hq_hidden_multiaccess`, `hidden.reveals_on_trash`                 |
 | `onr_proteus_143_liberated-savings-account`    | runner | resource | `hidden.reveals_on_trash`                                                 |
 | `onr_proteus_146_precision-bribery`            | runner | resource | `fort.creation_lock`                                                      |
+| `onr_proteus_147_r-and-d-mole`                 | runner | resource | `access.rnd_hidden_multiaccess`, `hidden.reveals_on_trash`                |
 
 ## No Signal Review Start
 

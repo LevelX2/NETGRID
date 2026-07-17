@@ -512,6 +512,111 @@ describe("runnerPressureProbeAllowance", () => {
     );
   });
 
+  it("converts a reachable low-cost central when a two-point agenda can close", () => {
+    const hqRun = runAction("run-hq", "hq");
+    const evaluation = runTargetEvaluation({
+      actionId: hqRun.actionId,
+      targetServerId: "hq",
+      targetKind: "hq",
+      recommendation: "gain_credits_first",
+      accessPayoff: "unknown",
+      scoreThreat: false,
+      score: -40,
+      pathPassability: "reachable",
+      creditsAfterRun: 1,
+      pathCost: 0,
+    });
+    const context = planContext({
+      primaryStrategyId: "runner.rig_first",
+      runnerClicks: 3,
+      runnerAgendaPoints: 5,
+      agendaPointsToWin: 7,
+      runTargetEvaluations: [evaluation],
+    });
+
+    expect(runnerAdjustedPlanPriority(context, hqRun, 740)).toBe(1280);
+    expect(runnerRunTargetPlanScoreBreakdown(context, hqRun, 740)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "runner_matchpoint_run_conversion",
+          value: 720,
+        }),
+      ]),
+    );
+  });
+
+  it("does not convert the same central with three points still needed", () => {
+    const hqRun = runAction("run-hq", "hq");
+    const evaluation = runTargetEvaluation({
+      actionId: hqRun.actionId,
+      targetServerId: "hq",
+      targetKind: "hq",
+      recommendation: "gain_credits_first",
+      accessPayoff: "unknown",
+      scoreThreat: false,
+      score: -40,
+      pathPassability: "reachable",
+      creditsAfterRun: 1,
+      pathCost: 0,
+    });
+    const context = planContext({
+      primaryStrategyId: "runner.rig_first",
+      runnerClicks: 3,
+      runnerAgendaPoints: 4,
+      agendaPointsToWin: 7,
+      runTargetEvaluations: [evaluation],
+    });
+
+    expect(runnerRunTargetPlanScoreBreakdown(context, hqRun, 740)).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ key: "runner_matchpoint_run_conversion" }),
+      ]),
+    );
+  });
+
+  it("keeps a possible fresh remote contest above a two-point central conversion", () => {
+    const hqRun = runAction("run-hq", "hq");
+    const remoteRun = runAction("run-remote-1", "remote_1");
+    const hqEvaluation = runTargetEvaluation({
+      actionId: hqRun.actionId,
+      targetServerId: "hq",
+      targetKind: "hq",
+      recommendation: "run_if_free",
+      accessPayoff: "unknown",
+      scoreThreat: false,
+      score: 160,
+      pathPassability: "reachable",
+      creditsAfterRun: 5,
+      pathCost: 0,
+    });
+    const remoteEvaluation = {
+      ...runTargetEvaluation({
+        actionId: remoteRun.actionId,
+        targetServerId: "remote_1",
+        targetKind: "remote",
+        recommendation: "do_not_run_now",
+        accessPayoff: "unknown",
+        scoreThreat: false,
+        score: -340,
+        pathPassability: "blocked_unbreakable",
+      }),
+      evidence: ["remote_score_threat:possible"],
+    };
+    const context = planContext({
+      primaryStrategyId: "runner.rig_first",
+      runnerClicks: 4,
+      runnerAgendaPoints: 5,
+      agendaPointsToWin: 7,
+      runTargetEvaluations: [hqEvaluation, remoteEvaluation],
+    });
+
+    expect(runnerRunTargetPlanScoreBreakdown(context, hqRun, 740)).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ key: "runner_matchpoint_run_conversion" }),
+      ]),
+    );
+  });
+
   it("does not boost a reachable central with known low payoff at matchpoint", () => {
     const hqRun = runAction("run-hq", "hq");
     const evaluation = runTargetEvaluation({

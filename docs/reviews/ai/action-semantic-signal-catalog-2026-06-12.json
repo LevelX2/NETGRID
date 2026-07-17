@@ -47,7 +47,7 @@
     "coveredCards": 601,
     "deferredCards": 32,
     "noSignalCards": 17,
-    "targetProfileGapCards": 89,
+    "targetProfileGapCards": 88,
     "structuralSignalViolationCards": 0,
     "unknownSignalCards": 0,
     "byNoSignalReason": {
@@ -93,7 +93,6 @@
       "onr_proteus_120_reconnaissance",
       "onr_proteus_121_remote-detonator",
       "onr_proteus_129_back-door-to-netwatch",
-      "onr_proteus_131_bargain-with-viacox",
       "onr_proteus_132_bolt-hole",
       "onr_proteus_133_chiba-bank-account",
       "onr_proteus_136_credit-subversion",
@@ -169,7 +168,7 @@
       "coveredCards": 62,
       "deferredCards": -13,
       "noSignalCards": -8,
-      "targetProfileGapCards": 5
+      "targetProfileGapCards": 4
     }
   },
   "qualityGate": {
@@ -5352,8 +5351,8 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
-      "signalCount": 13,
+      "target_profile_gap": false,
+      "signalCount": 11,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
         "action.mandatory_extra_action",
@@ -5366,14 +5365,12 @@
         "risk.random_hand_reveal",
         "run.event_tempo",
         "run.extra_action",
-        "run.make_run",
-        "setup.draw",
-        "setup.search"
+        "run.make_run"
       ],
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["setup.search"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {

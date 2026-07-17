@@ -134,9 +134,7 @@ import {
   configureLegalActionHostComposition,
   type LegalActionHostCompositionHost,
 } from "../legal-action-hosts";
-import {
-  configureEventContextHostComposition,
-} from "../events/event-context-hosts";
+import { configureEventContextHostComposition } from "../events/event-context-hosts";
 import { BAD_PUBLICITY_LOSS_THRESHOLD } from "../win-conditions";
 import {
   calculateRunnerLink as calculateRunnerLinkInTrace,
@@ -215,10 +213,7 @@ import {
   installCard as executeInstallCard,
   type InstallCardHost,
 } from "../install/install-card";
-import {
-  rezCard as executeRezCard,
-  type RezCardHost,
-} from "../rez/rez-card";
+import { rezCard as executeRezCard, type RezCardHost } from "../rez/rez-card";
 import {
   addRunnerTagsWithPrevention,
   aggregateDamageSummaries,
@@ -249,12 +244,8 @@ import {
   buildRunnerAgendaPointInstallAction,
   buildRunnerSelectedServerInstallAction,
 } from "../turn/runner-install-context-actions";
-import {
-  buildRunnerHostedProgramInstallAction,
-} from "../turn/runner-hosted-install-actions";
-import {
-  buildRunnerProgramTrashBeforeInstallAction,
-} from "../turn/runner-program-trash-install-actions";
+import { buildRunnerHostedProgramInstallAction } from "../turn/runner-hosted-install-actions";
+import { buildRunnerProgramTrashBeforeInstallAction } from "../turn/runner-program-trash-install-actions";
 import { buildRunnerStackSearchProgramToGripAction } from "../turn/runner-hidden-zone-search-actions";
 import {
   buildRunnerDelayedInstallRemoveCounterAction,
@@ -410,9 +401,7 @@ import {
   isSupportedEncounterTraceSuccessEffect,
   type EncounterPrintedEffectHost,
 } from "../run/encounter-printed-effects";
-import {
-  type EncounterPrintedNonTraceHost,
-} from "../run/encounter-printed-nontrace-effects";
+import { type EncounterPrintedNonTraceHost } from "../run/encounter-printed-nontrace-effects";
 import {
   breakAbilityMatchesIce,
   breakAbilityMatchesSubroutine,
@@ -428,18 +417,10 @@ import {
   createGameCardImplementationRuntimeDeps,
   type GameCardImplementationRuntimeDepsHost,
 } from "../card-implementation/card-implementation-runtime-deps";
-import {
-  type HiddenZoneRuntimeDepsHost,
-} from "../card-implementation/hidden-zone-runtime-deps";
-import {
-  type InstallRezRuntimeDepsHost,
-} from "../card-implementation/install-rez-runtime-deps";
-import {
-  type CounterLifecycleRuntimeDepsHost,
-} from "../card-implementation/counter-lifecycle-runtime-deps";
-import {
-  type TraceRuntimeDepsHost,
-} from "../card-implementation/trace-runtime-deps";
+import { type HiddenZoneRuntimeDepsHost } from "../card-implementation/hidden-zone-runtime-deps";
+import { type InstallRezRuntimeDepsHost } from "../card-implementation/install-rez-runtime-deps";
+import { type CounterLifecycleRuntimeDepsHost } from "../card-implementation/counter-lifecycle-runtime-deps";
+import { type TraceRuntimeDepsHost } from "../card-implementation/trace-runtime-deps";
 import {
   beginEncounter,
   isApproachIceExposeViewingWindowOpen,
@@ -628,9 +609,7 @@ import {
   corpInstalledEconomyActionProfileForPayload,
   type EconomyActionProfile,
 } from "../../mechanics/payment-costs";
-import {
-  isP358HiddenReplacementCompatibilityChoiceSource,
-} from "../../compatibility/payload-compatibility";
+import { isP358HiddenReplacementCompatibilityChoiceSource } from "../../compatibility/payload-compatibility";
 import {
   ALL_NIGHTER_ID,
   ARMADILLO_ARMORED_ROAD_HOME_ID,
@@ -683,9 +662,7 @@ import {
   ACCESS_NET_DAMAGE_UPGRADE_SOURCE,
   ACCESS_TRACE_DAMAGE_UPGRADE_SOURCE,
 } from "../../mechanics/server-upgrades";
-import {
-  RUN_TAX_UPGRADE_SOURCES,
-} from "../../mechanics/trace-tags";
+import { RUN_TAX_UPGRADE_SOURCES } from "../../mechanics/trace-tags";
 import { snapshotPersistentStealCostModifiersForSource } from "../../ability-engine/steal-cost-modifiers";
 import { createCardImplementationEffectAdapters } from "../../ability-engine/card-implementation-effect-adapters";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
@@ -1179,1961 +1156,2066 @@ export function createTurnRuntimeResolvers(deps: RuntimeDeps) {
     virusCounterImplementationForCard,
     virusCounterImplementationForDefinition,
     visibleVirusCounterTargetIds,
-    withoutVariableIceState
+    withoutVariableIceState,
   } = deps;
 
-function resolveEndTurnTagIfRunnerReceivedTag(
-  state: GameState,
-  legalAction: LegalAction,
-): boolean {
-  return resolveEndTurnTagSequence(
-    endTurnTagContinuationHost(state),
-    legalAction,
-  );
-}
-
-function resolveFieldReporterEndOfRunnerTurn(
-  state: GameState,
-  legalAction: LegalAction,
-): void {
-  const sourceIds = state.runner.rig.resources
-    .slice()
-    .sort()
-    .filter(
-      (cardId) =>
-        runnerUtilityLongtailKindForCard(state, cardId) ===
-        "field_reporter_end_turn_rezzed_ice_payout",
-    );
-  if (sourceIds.length === 0) return;
-  const rezzedIceCount = Math.max(
-    0,
-    Math.floor(ensureRunnerTurnFlags(state).corpRezzedIceThisTurn ?? 0),
-  );
-  if (rezzedIceCount <= 0) return;
-  let gained = 0;
-  for (const sourceId of sourceIds) {
-    const implementation = runnerUtilityLongtailImplementationForCard(
-      state,
-      sourceId,
-    );
-    if (
-      implementation?.kind !==
-      "field_reporter_end_turn_rezzed_ice_payout"
-    )
-      continue;
-    gained += rezzedIceCount * implementation.amountPerRezzedIce;
-  }
-  if (gained <= 0) return;
-  credits(state, "runner", gained);
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    runnerUtilityAbility: "field_reporter_end_turn_rezzed_ice_payout",
-    corpRezzedIceThisTurnCount: rezzedIceCount,
-    gainedCredits: gained,
-    runnerCreditsAfter: state.runner.credits,
-    sourceDefinitionId: definitionFor(state, sourceIds[0]!).id,
-    sourceCount: sourceIds.length,
-  };
-}
-
-function resolveDelayedEndTurnDamageEffects(state: GameState, legalAction: LegalAction): void {
-  const flags = ensureRunnerTurnFlags(state);
-  const dueEffects = (flags.delayedEndTurnEffects ?? []).filter(
-    (effect) => effect.kind === "damage",
-  );
-  if (dueEffects.length === 0) return;
-  const totalDamage = dueEffects.reduce((sum, effect) => sum + effect.amount, 0);
-  const damageType = dueEffects[0]!.damageType;
-  if (!dueEffects.every((effect) => effect.damageType === damageType))
-    throw new Error("Gemischte verzögerte Schadensarten sind nicht implementiert.");
-  if (!dueEffects.every((effect) => effect.preventable === false))
-    throw new Error("Verhinderbarer verzögerter Schaden ist nicht implementiert.");
-  const damageSummary = doDamage(state, {
-    damageId: `runner.end.delayed_damage.${state.stateVersion}`,
-    damageType,
-    amount: totalDamage,
-    source: "runner_end:delayed_damage",
-  });
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    runnerUtilityAbility: "delayed_end_turn_damage",
-    damageCannotBePrevented: true,
-    damageResolved: true,
-    damageType: damageSummary.damageType,
-    damageAmount: damageSummary.amount,
-    cardsTrashed: damageSummary.cardsTrashed,
-    flatline: damageSummary.flatline,
-    sourceDefinitionId: dueEffects[0]!.sourceDefinitionId,
-    sourceCount: dueEffects.length,
-    sourceCardInstanceIds: dueEffects
-      .map((effect) => effect.sourceCardInstanceId)
-      .sort()
-      .join(","),
-    ...(damageSummary.coreDamageAfter !== undefined
-      ? { coreDamageAfter: damageSummary.coreDamageAfter }
-      : {}),
-  };
-  flags.delayedEndTurnEffects = (flags.delayedEndTurnEffects ?? []).filter(
-    (effect) => effect.kind !== "damage",
-  );
-}
-
-function resolveDelayedCorpInstalledTrashAtEndOfRunnerTurn(
-  state: GameState,
-  legalAction: LegalAction,
-): void {
-  const flags = ensureRunnerTurnFlags(state);
-  const pendingIds = [
-    ...new Set(flags.delayedCorpInstalledCardTrashAtTurnEndIds ?? []),
-  ].sort();
-  if (pendingIds.length === 0) return;
-  delete flags.delayedCorpInstalledCardTrashAtTurnEndIds;
-  const trashedDefinitionIds: CardDefinitionId[] = [];
-  for (const cardId of pendingIds) {
-    const instance = state.cardInstances[cardId];
-    if (!instance || instance.zone.side !== "corp") continue;
-    if (instance.zone.zone !== "serverIce" && instance.zone.zone !== "serverRoot")
-      continue;
-    trashedDefinitionIds.push(definitionFor(state, cardId).id);
-    trashCorpInstalledCardToArchives(state, cardId, legalAction);
-  }
-  if (trashedDefinitionIds.length === 0) return;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    corpInstalledCardsTrashedAtTurnEnd: trashedDefinitionIds.length,
-    corpInstalledCardTrashAtTurnEndDefinitionIds:
-      trashedDefinitionIds.sort().join(","),
-  };
-}
-
-function endTurn(
-  state: GameState,
-  side: Side,
-  legalAction: LegalAction,
-): void {
-  if (side === "runner") {
-    resolveCardImplementationEndOfRunnerTurnAction(
-      cardImplementationRuntimeDeps,
-      state,
+  function resolveEndTurnTagIfRunnerReceivedTag(
+    state: GameState,
+    legalAction: LegalAction,
+  ): boolean {
+    return resolveEndTurnTagSequence(
+      endTurnTagContinuationHost(state),
       legalAction,
     );
-    if (state.winner) return;
-    resolveFieldReporterEndOfRunnerTurn(state, legalAction);
-    resolveDelayedEndTurnDamageEffects(state, legalAction);
-    resolveDelayedCorpInstalledTrashAtEndOfRunnerTurn(state, legalAction);
-    if (resolveEndTurnTagIfRunnerReceivedTag(state, legalAction)) return;
-    resolveTemporaryProgramInstallReturns(state, legalAction);
-    finishEndTurnAfterTagPrevention(state, side, legalAction);
-    return;
   }
-  if (resolveEndTurnTagIfRunnerReceivedTag(state, legalAction)) return;
-  finishEndTurnAfterTagPrevention(state, side, legalAction);
-}
 
-function finishEndTurnAfterTagPrevention(
-  state: GameState,
-  side: Side,
-  legalAction: LegalAction,
-): void {
-  if (side === "runner") {
+  function resolveFieldReporterEndOfRunnerTurn(
+    state: GameState,
+    legalAction: LegalAction,
+  ): void {
+    const sourceIds = state.runner.rig.resources
+      .slice()
+      .sort()
+      .filter(
+        (cardId) =>
+          runnerUtilityLongtailKindForCard(state, cardId) ===
+          "field_reporter_end_turn_rezzed_ice_payout",
+      );
+    if (sourceIds.length === 0) return;
+    const rezzedIceCount = Math.max(
+      0,
+      Math.floor(ensureRunnerTurnFlags(state).corpRezzedIceThisTurn ?? 0),
+    );
+    if (rezzedIceCount <= 0) return;
+    let gained = 0;
+    for (const sourceId of sourceIds) {
+      const implementation = runnerUtilityLongtailImplementationForCard(
+        state,
+        sourceId,
+      );
+      if (implementation?.kind !== "field_reporter_end_turn_rezzed_ice_payout")
+        continue;
+      gained += rezzedIceCount * implementation.amountPerRezzedIce;
+    }
+    if (gained <= 0) return;
+    credits(state, "runner", gained);
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      runnerUtilityAbility: "field_reporter_end_turn_rezzed_ice_payout",
+      corpRezzedIceThisTurnCount: rezzedIceCount,
+      gainedCredits: gained,
+      runnerCreditsAfter: state.runner.credits,
+      sourceDefinitionId: definitionFor(state, sourceIds[0]!).id,
+      sourceCount: sourceIds.length,
+    };
+  }
+
+  function resolveDelayedEndTurnDamageEffects(
+    state: GameState,
+    legalAction: LegalAction,
+  ): void {
     const flags = ensureRunnerTurnFlags(state);
-    flags.stoleAgendaLastTurn = flags.stoleAgendaThisTurn;
-    flags.stolenAgendaAdvancementCountersLastTurn =
-      flags.stolenAgendaAdvancementCountersThisTurn ?? 0;
-    flags.stoleAgendaThisTurn = false;
-    flags.stolenAgendaIdsThisTurn = [];
-    flags.stolenAgendaAdvancementCountersThisTurn = 0;
-    flags.runnerReceivedTagThisTurn = false;
-    flags.stoleResearchAgendaThisTurn = false;
-    flags.stoleGrayOpsAgendaThisTurn = false;
-    flags.stoleBlackOpsAgendaThisTurn = false;
-    flags.runAttemptsLastTurn = flags.runAttemptsThisTurn ?? 0;
-    flags.runAttemptsThisTurn = 0;
-    flags.trashedNodeLastTurn = flags.trashedNodeThisTurn === true;
-    flags.trashedNodeThisTurn = false;
-    flags.trashedAdvertisementThisTurn = false;
-    flags.trashedTransactionsThisTurn = false;
-    flags.nextAgendaAccessCreditGainPending = false;
-    flags.installedResourceIdsLastTurn = (
-      flags.installedResourceIdsThisTurn ?? []
-    ).slice();
-    flags.installedResourceIdsThisTurn = [];
-    flags.successfulHqRunThisTurn = false;
-    flags.successfulRunThisTurn = false;
-    delete flags.lastSuccessfulRunServerId;
-    flags.runnerActionsTakenThisTurn = 0;
-    delete flags.lastDamageRunnerActionOrdinal;
-  } else {
-    const corpFlags = ensureCorpTurnFlags(state);
-    corpFlags.scoredBlackOpsAgendaLastTurn =
-      corpFlags.scoredBlackOpsAgendaThisTurn;
-    corpFlags.scoredBlackOpsAgendaThisTurn = false;
-    resolveCorpObligationEndOfTurn(state, legalAction);
-    if (state.winner) return;
-    ensureRunnerTurnFlags(state).runnerReceivedTagThisTurn = false;
+    const dueEffects = (flags.delayedEndTurnEffects ?? []).filter(
+      (effect) => effect.kind === "damage",
+    );
+    if (dueEffects.length === 0) return;
+    const totalDamage = dueEffects.reduce(
+      (sum, effect) => sum + effect.amount,
+      0,
+    );
+    const damageType = dueEffects[0]!.damageType;
+    if (!dueEffects.every((effect) => effect.damageType === damageType))
+      throw new Error(
+        "Gemischte verzögerte Schadensarten sind nicht implementiert.",
+      );
+    if (!dueEffects.every((effect) => effect.preventable === false))
+      throw new Error(
+        "Verhinderbarer verzögerter Schaden ist nicht implementiert.",
+      );
+    const damageSummary = doDamage(state, {
+      damageId: `runner.end.delayed_damage.${state.stateVersion}`,
+      damageType,
+      amount: totalDamage,
+      source: "runner_end:delayed_damage",
+    });
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      runnerUtilityAbility: "delayed_end_turn_damage",
+      damageCannotBePrevented: true,
+      damageResolved: true,
+      damageType: damageSummary.damageType,
+      damageAmount: damageSummary.amount,
+      cardsTrashed: damageSummary.cardsTrashed,
+      flatline: damageSummary.flatline,
+      sourceDefinitionId: dueEffects[0]!.sourceDefinitionId,
+      sourceCount: dueEffects.length,
+      sourceCardInstanceIds: dueEffects
+        .map((effect) => effect.sourceCardInstanceId)
+        .sort()
+        .join(","),
+      ...(damageSummary.coreDamageAfter !== undefined
+        ? { coreDamageAfter: damageSummary.coreDamageAfter }
+        : {}),
+    };
+    flags.delayedEndTurnEffects = (flags.delayedEndTurnEffects ?? []).filter(
+      (effect) => effect.kind !== "damage",
+    );
   }
-  clearTemporaryIceStrengthModifiersUntilEndOfTurn(state, legalAction);
-  clearTemporaryBreakerStrengthModifiersUntilEndOfTurn(state, legalAction);
-  clearTemporaryRunnerMemoryLimitModifiersUntilEndOfTurn(state, legalAction);
-  delete state.cancelledDamagePreventionSourceIdsUntilEndOfTurn;
-  startDiscardPhase(state, side, legalAction);
-}
 
-function resumeEndTurnAfterTagPrevention(
-  state: GameState,
-  legalAction: LegalAction,
-): void {
-  resumeEndTurnTagSequence(endTurnTagContinuationHost(state), legalAction);
-}
+  function resolveDelayedCorpInstalledTrashAtEndOfRunnerTurn(
+    state: GameState,
+    legalAction: LegalAction,
+  ): void {
+    const flags = ensureRunnerTurnFlags(state);
+    const pendingIds = [
+      ...new Set(flags.delayedCorpInstalledCardTrashAtTurnEndIds ?? []),
+    ].sort();
+    if (pendingIds.length === 0) return;
+    delete flags.delayedCorpInstalledCardTrashAtTurnEndIds;
+    const trashedDefinitionIds: CardDefinitionId[] = [];
+    for (const cardId of pendingIds) {
+      const instance = state.cardInstances[cardId];
+      if (!instance || instance.zone.side !== "corp") continue;
+      if (
+        instance.zone.zone !== "serverIce" &&
+        instance.zone.zone !== "serverRoot"
+      )
+        continue;
+      trashedDefinitionIds.push(definitionFor(state, cardId).id);
+      trashCorpInstalledCardToArchives(state, cardId, legalAction);
+    }
+    if (trashedDefinitionIds.length === 0) return;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      corpInstalledCardsTrashedAtTurnEnd: trashedDefinitionIds.length,
+      corpInstalledCardTrashAtTurnEndDefinitionIds: trashedDefinitionIds
+        .sort()
+        .join(","),
+    };
+  }
 
-function endTurnTagContinuationHost(
-  state: GameState,
-): EndTurnTagContinuationHost {
-  return {
-    state,
-    sources: {
-      activeSourceIds: () =>
-        rezzedCorpRootCardIds(state)
-          .filter((cardId: CardInstanceId) =>
-            hasCorpUtilityKind(
-              state,
-              cardId,
-              "end_turn_tag_if_runner_received_tag",
-            ),
-          )
-          .sort(),
-      definitionId: (cardId) => definitionFor(state, cardId).id,
-    },
-    tags: {
-      addRunnerTagsWithPrevention: (legalAction, amount, sourceDefinitionId) =>
-        addRunnerTagsWithPrevention(
-          state,
+  function endTurn(
+    state: GameState,
+    side: Side,
+    legalAction: LegalAction,
+  ): void {
+    if (side === "runner") {
+      resolveCardImplementationEndOfRunnerTurnAction(
+        cardImplementationRuntimeDeps,
+        state,
+        legalAction,
+      );
+      if (state.winner) return;
+      resolveFieldReporterEndOfRunnerTurn(state, legalAction);
+      resolveDelayedEndTurnDamageEffects(state, legalAction);
+      resolveDelayedCorpInstalledTrashAtEndOfRunnerTurn(state, legalAction);
+      if (resolveEndTurnTagIfRunnerReceivedTag(state, legalAction)) return;
+      resolveTemporaryProgramInstallReturns(state, legalAction);
+      finishEndTurnAfterTagPrevention(state, side, legalAction);
+      return;
+    }
+    if (resolveEndTurnTagIfRunnerReceivedTag(state, legalAction)) return;
+    finishEndTurnAfterTagPrevention(state, side, legalAction);
+  }
+
+  function finishEndTurnAfterTagPrevention(
+    state: GameState,
+    side: Side,
+    legalAction: LegalAction,
+  ): void {
+    if (side === "runner") {
+      const flags = ensureRunnerTurnFlags(state);
+      flags.stoleAgendaLastTurn = flags.stoleAgendaThisTurn;
+      flags.stolenAgendaAdvancementCountersLastTurn =
+        flags.stolenAgendaAdvancementCountersThisTurn ?? 0;
+      flags.stoleAgendaThisTurn = false;
+      flags.stolenAgendaIdsThisTurn = [];
+      flags.stolenAgendaAdvancementCountersThisTurn = 0;
+      flags.runnerReceivedTagThisTurn = false;
+      flags.stoleResearchAgendaThisTurn = false;
+      flags.stoleGrayOpsAgendaThisTurn = false;
+      flags.stoleBlackOpsAgendaThisTurn = false;
+      flags.runAttemptsLastTurn = flags.runAttemptsThisTurn ?? 0;
+      flags.runAttemptsThisTurn = 0;
+      flags.trashedNodeLastTurn = flags.trashedNodeThisTurn === true;
+      flags.trashedNodeThisTurn = false;
+      flags.trashedAdvertisementThisTurn = false;
+      flags.trashedTransactionsThisTurn = false;
+      flags.nextAgendaAccessCreditGainPending = false;
+      flags.installedResourceIdsLastTurn = (
+        flags.installedResourceIdsThisTurn ?? []
+      ).slice();
+      flags.installedResourceIdsThisTurn = [];
+      flags.successfulHqRunThisTurn = false;
+      flags.successfulRunThisTurn = false;
+      delete flags.lastSuccessfulRunServerId;
+      flags.runnerActionsTakenThisTurn = 0;
+      delete flags.lastDamageRunnerActionOrdinal;
+    } else {
+      const corpFlags = ensureCorpTurnFlags(state);
+      corpFlags.scoredBlackOpsAgendaLastTurn =
+        corpFlags.scoredBlackOpsAgendaThisTurn;
+      corpFlags.scoredBlackOpsAgendaThisTurn = false;
+      resolveCorpObligationEndOfTurn(state, legalAction);
+      if (state.winner) return;
+      ensureRunnerTurnFlags(state).runnerReceivedTagThisTurn = false;
+    }
+    clearTemporaryIceStrengthModifiersUntilEndOfTurn(state, legalAction);
+    clearTemporaryBreakerStrengthModifiersUntilEndOfTurn(state, legalAction);
+    clearTemporaryRunnerMemoryLimitModifiersUntilEndOfTurn(state, legalAction);
+    delete state.cancelledDamagePreventionSourceIdsUntilEndOfTurn;
+    startDiscardPhase(state, side, legalAction);
+  }
+
+  function resumeEndTurnAfterTagPrevention(
+    state: GameState,
+    legalAction: LegalAction,
+  ): void {
+    resumeEndTurnTagSequence(endTurnTagContinuationHost(state), legalAction);
+  }
+
+  function endTurnTagContinuationHost(
+    state: GameState,
+  ): EndTurnTagContinuationHost {
+    return {
+      state,
+      sources: {
+        activeSourceIds: () =>
+          rezzedCorpRootCardIds(state)
+            .filter((cardId: CardInstanceId) =>
+              hasCorpUtilityKind(
+                state,
+                cardId,
+                "end_turn_tag_if_runner_received_tag",
+              ),
+            )
+            .sort(),
+        definitionId: (cardId) => definitionFor(state, cardId).id,
+      },
+      tags: {
+        addRunnerTagsWithPrevention: (
           legalAction,
           amount,
           sourceDefinitionId,
-        ),
-    },
-    finishEndTurn: (side, legalAction) => {
-      if (side === "runner")
-        resolveTemporaryProgramInstallReturns(state, legalAction);
-      finishEndTurnAfterTagPrevention(state, side, legalAction);
-    },
-  };
-}
-
-function clearTemporaryIceStrengthModifiersUntilEndOfTurn(
-  state: GameState,
-  legalAction: LegalAction,
-): void {
-  const modifiers = state.temporaryIceStrengthModifiersUntilEndOfTurn ?? [];
-  if (modifiers.length === 0) return;
-  const currentSerial = currentTurnSerial(state);
-  const remaining = [];
-  let removedAmount = 0;
-  const affectedDefinitionIds: CardDefinitionId[] = [];
-  for (const modifier of modifiers) {
-    if (modifier.turnSerial > currentSerial) {
-      remaining.push(modifier);
-      continue;
-    }
-    const instance = state.cardInstances[modifier.targetIceId];
-    if (instance) {
-      state.cardInstances[modifier.targetIceId] = {
-        ...instance,
-        strengthModifier: Math.max(
-          0,
-          Math.floor(instance.strengthModifier ?? 0) - modifier.amount,
-        ),
-      };
-      affectedDefinitionIds.push(definitionFor(state, modifier.targetIceId).id);
-    }
-    removedAmount += modifier.amount;
-  }
-  if (remaining.length > 0)
-    state.temporaryIceStrengthModifiersUntilEndOfTurn = remaining;
-  else delete state.temporaryIceStrengthModifiersUntilEndOfTurn;
-  if (removedAmount <= 0) return;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    temporaryIceStrengthRemoved: removedAmount,
-    temporaryIceStrengthTargetDefinitionIds:
-      affectedDefinitionIds.sort().join(","),
-  };
-}
-
-function clearTemporaryBreakerStrengthModifiersUntilEndOfTurn(
-  state: GameState,
-  legalAction: LegalAction,
-): void {
-  const modifiers =
-    state.temporaryBreakerStrengthModifiersUntilEndOfTurn ?? [];
-  if (modifiers.length === 0) return;
-  const currentSerial = currentTurnSerial(state);
-  const remaining = modifiers.filter(
-    (modifier) => modifier.turnSerial > currentSerial,
-  );
-  const expired = modifiers.filter(
-    (modifier) => modifier.turnSerial <= currentSerial,
-  );
-  if (remaining.length > 0)
-    state.temporaryBreakerStrengthModifiersUntilEndOfTurn = remaining;
-  else delete state.temporaryBreakerStrengthModifiersUntilEndOfTurn;
-  if (expired.length === 0) return;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    turnBreakerStrengthModifiersExpired: expired.length,
-    turnBreakerStrengthBonusExpiredAmount: expired.reduce(
-      (sum, modifier) => sum + modifier.amount,
-      0,
-    ),
-  };
-}
-
-function clearTemporaryRunnerMemoryLimitModifiersUntilEndOfTurn(
-  state: GameState,
-  legalAction: LegalAction,
-): void {
-  const modifiers =
-    state.temporaryRunnerMemoryLimitModifiersUntilEndOfTurn ?? [];
-  if (modifiers.length === 0) return;
-  const currentSerial = currentTurnSerial(state);
-  const remaining = modifiers.filter(
-    (modifier) => modifier.turnSerial > currentSerial,
-  );
-  const removedAmount = modifiers
-    .filter((modifier) => modifier.turnSerial <= currentSerial)
-    .reduce((sum, modifier) => sum + Math.max(0, Math.floor(modifier.amount)), 0);
-  if (remaining.length > 0)
-    state.temporaryRunnerMemoryLimitModifiersUntilEndOfTurn = remaining;
-  else delete state.temporaryRunnerMemoryLimitModifiersUntilEndOfTurn;
-  if (removedAmount <= 0) return;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    temporaryRunnerMemoryLimitReductionRemoved: removedAmount,
-  };
-}
-
-function resolveTemporaryProgramInstallReturns(
-  state: GameState,
-  legalAction: LegalAction,
-): void {
-  const pending = state.temporaryProgramInstallReturns ?? [];
-  if (pending.length === 0) return;
-  const returnedDefinitionIds: string[] = [];
-  for (const entry of pending) {
-    const cardId = entry.cardId;
-    const instance = state.cardInstances[cardId];
-    if (
-      instance &&
-      state.runner.rig.programs.includes(cardId) &&
-      instance.zone.side === "runner" &&
-      instance.zone.zone === "rig"
-    ) {
-      const definition = definitionFor(state, cardId);
-      removeFromAllZones(state, cardId);
-      state.runner.grip.push(cardId);
-      if (runnerProgramUsesMemory(state, cardId)) {
-        state.runner.memoryUsed = Math.max(
-          0,
-          state.runner.memoryUsed - (definition.memoryCost ?? 0),
-        );
-      }
-      state.cardInstances[cardId] = {
-        ...cardInstanceWithoutCounters(instance),
-        faceup: true,
-        rezzed: true,
-        zone: { side: "runner", zone: "grip" },
-      };
-      returnedDefinitionIds.push(definition.id);
-    }
-  }
-  state.temporaryProgramInstallReturns = [];
-  if (returnedDefinitionIds.length > 0) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      hiddenZoneBarrier: true,
-      hiddenZoneAction: "temporary_program_install_end_turn_return",
-      returnedCount: returnedDefinitionIds.length,
-      returnedCardDefinitionIds: returnedDefinitionIds.join(","),
+        ) =>
+          addRunnerTagsWithPrevention(
+            state,
+            legalAction,
+            amount,
+            sourceDefinitionId,
+          ),
+      },
+      finishEndTurn: (side, legalAction) => {
+        if (side === "runner")
+          resolveTemporaryProgramInstallReturns(state, legalAction);
+        finishEndTurnAfterTagPrevention(state, side, legalAction);
+      },
     };
   }
-}
 
-function resolveCorpObligationEndOfTurn(
-  state: GameState,
-  legalAction: LegalAction,
-): void {
-  const obligations = activeObligationCount(state);
-  if (obligations <= 0) return;
-  const creditsBefore = state.corp.credits;
-  if (creditsBefore < obligations) {
-    state.winner = "runner";
-    state.gameEndReason = "obligation_debt_unpaid";
-    state.phase = "game_over";
-    state.timingPoint = "game.checkpoint";
-    delete state.pendingChoice;
-    delete state.run;
+  function clearTemporaryIceStrengthModifiersUntilEndOfTurn(
+    state: GameState,
+    legalAction: LegalAction,
+  ): void {
+    const modifiers = state.temporaryIceStrengthModifiersUntilEndOfTurn ?? [];
+    if (modifiers.length === 0) return;
+    const currentSerial = currentTurnSerial(state);
+    const remaining = [];
+    let removedAmount = 0;
+    const affectedDefinitionIds: CardDefinitionId[] = [];
+    for (const modifier of modifiers) {
+      if (modifier.turnSerial > currentSerial) {
+        remaining.push(modifier);
+        continue;
+      }
+      const instance = state.cardInstances[modifier.targetIceId];
+      if (instance) {
+        state.cardInstances[modifier.targetIceId] = {
+          ...instance,
+          strengthModifier: Math.max(
+            0,
+            Math.floor(instance.strengthModifier ?? 0) - modifier.amount,
+          ),
+        };
+        affectedDefinitionIds.push(
+          definitionFor(state, modifier.targetIceId).id,
+        );
+      }
+      removedAmount += modifier.amount;
+    }
+    if (remaining.length > 0)
+      state.temporaryIceStrengthModifiersUntilEndOfTurn = remaining;
+    else delete state.temporaryIceStrengthModifiersUntilEndOfTurn;
+    if (removedAmount <= 0) return;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      temporaryIceStrengthRemoved: removedAmount,
+      temporaryIceStrengthTargetDefinitionIds: affectedDefinitionIds
+        .sort()
+        .join(","),
+    };
+  }
+
+  function clearTemporaryBreakerStrengthModifiersUntilEndOfTurn(
+    state: GameState,
+    legalAction: LegalAction,
+  ): void {
+    const modifiers =
+      state.temporaryBreakerStrengthModifiersUntilEndOfTurn ?? [];
+    if (modifiers.length === 0) return;
+    const currentSerial = currentTurnSerial(state);
+    const remaining = modifiers.filter(
+      (modifier) => modifier.turnSerial > currentSerial,
+    );
+    const expired = modifiers.filter(
+      (modifier) => modifier.turnSerial <= currentSerial,
+    );
+    if (remaining.length > 0)
+      state.temporaryBreakerStrengthModifiersUntilEndOfTurn = remaining;
+    else delete state.temporaryBreakerStrengthModifiersUntilEndOfTurn;
+    if (expired.length === 0) return;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      turnBreakerStrengthModifiersExpired: expired.length,
+      turnBreakerStrengthBonusExpiredAmount: expired.reduce(
+        (sum, modifier) => sum + modifier.amount,
+        0,
+      ),
+    };
+  }
+
+  function clearTemporaryRunnerMemoryLimitModifiersUntilEndOfTurn(
+    state: GameState,
+    legalAction: LegalAction,
+  ): void {
+    const modifiers =
+      state.temporaryRunnerMemoryLimitModifiersUntilEndOfTurn ?? [];
+    if (modifiers.length === 0) return;
+    const currentSerial = currentTurnSerial(state);
+    const remaining = modifiers.filter(
+      (modifier) => modifier.turnSerial > currentSerial,
+    );
+    const removedAmount = modifiers
+      .filter((modifier) => modifier.turnSerial <= currentSerial)
+      .reduce(
+        (sum, modifier) => sum + Math.max(0, Math.floor(modifier.amount)),
+        0,
+      );
+    if (remaining.length > 0)
+      state.temporaryRunnerMemoryLimitModifiersUntilEndOfTurn = remaining;
+    else delete state.temporaryRunnerMemoryLimitModifiersUntilEndOfTurn;
+    if (removedAmount <= 0) return;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      temporaryRunnerMemoryLimitReductionRemoved: removedAmount,
+    };
+  }
+
+  function resolveTemporaryProgramInstallReturns(
+    state: GameState,
+    legalAction: LegalAction,
+  ): void {
+    const pending = state.temporaryProgramInstallReturns ?? [];
+    if (pending.length === 0) return;
+    const returnedDefinitionIds: string[] = [];
+    for (const entry of pending) {
+      const cardId = entry.cardId;
+      const instance = state.cardInstances[cardId];
+      if (
+        instance &&
+        state.runner.rig.programs.includes(cardId) &&
+        instance.zone.side === "runner" &&
+        instance.zone.zone === "rig"
+      ) {
+        const definition = definitionFor(state, cardId);
+        removeFromAllZones(state, cardId);
+        state.runner.grip.push(cardId);
+        if (runnerProgramUsesMemory(state, cardId)) {
+          state.runner.memoryUsed = Math.max(
+            0,
+            state.runner.memoryUsed - (definition.memoryCost ?? 0),
+          );
+        }
+        state.cardInstances[cardId] = {
+          ...cardInstanceWithoutCounters(instance),
+          faceup: true,
+          rezzed: true,
+          zone: { side: "runner", zone: "grip" },
+        };
+        returnedDefinitionIds.push(definition.id);
+      }
+    }
+    state.temporaryProgramInstallReturns = [];
+    if (returnedDefinitionIds.length > 0) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "temporary_program_install_end_turn_return",
+        returnedCount: returnedDefinitionIds.length,
+        returnedCardDefinitionIds: returnedDefinitionIds.join(","),
+      };
+    }
+  }
+
+  function resolveCorpObligationEndOfTurn(
+    state: GameState,
+    legalAction: LegalAction,
+  ): void {
+    const obligations = activeObligationCount(state);
+    if (obligations <= 0) return;
+    const creditsBefore = state.corp.credits;
+    if (creditsBefore < obligations) {
+      state.winner = "runner";
+      state.gameEndReason = "obligation_debt_unpaid";
+      state.phase = "game_over";
+      state.timingPoint = "game.checkpoint";
+      delete state.pendingChoice;
+      delete state.run;
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        obligationDebtAbility: "end_of_turn_payment",
+        activeObligationDebtCount: obligations,
+        obligationDebtPaymentDue: obligations,
+        obligationDebtPaymentPaid: 0,
+        obligationDebtPaymentFailed: true,
+        corpCreditsBefore: creditsBefore,
+        corpCreditsAfter: state.corp.credits,
+      };
+      return;
+    }
+    state.corp.credits -= obligations;
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       obligationDebtAbility: "end_of_turn_payment",
       activeObligationDebtCount: obligations,
       obligationDebtPaymentDue: obligations,
-      obligationDebtPaymentPaid: 0,
-      obligationDebtPaymentFailed: true,
+      obligationDebtPaymentPaid: obligations,
       corpCreditsBefore: creditsBefore,
       corpCreditsAfter: state.corp.credits,
     };
-    return;
   }
-  state.corp.credits -= obligations;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    obligationDebtAbility: "end_of_turn_payment",
-    activeObligationDebtCount: obligations,
-    obligationDebtPaymentDue: obligations,
-    obligationDebtPaymentPaid: obligations,
-    corpCreditsBefore: creditsBefore,
-    corpCreditsAfter: state.corp.credits,
-  };
-}
 
-function startDiscardPhase(
-  state: GameState,
-  side: Side,
-  legalAction?: LegalAction,
-): void {
-  state.activeSide = side;
-  if (side === "runner") {
-    state.phase = "runner_discard_phase";
-    state.timingPoint = "runner_discard.flatline_check";
-    if (maxHandSize(state, "runner") < 0) {
-      state.winner = "corp";
-      state.gameEndReason = "flatline";
-      state.phase = "game_over";
-      state.timingPoint = "game.checkpoint";
-      delete state.pendingChoice;
-      delete state.run;
+  function startDiscardPhase(
+    state: GameState,
+    side: Side,
+    legalAction?: LegalAction,
+  ): void {
+    state.activeSide = side;
+    if (side === "runner") {
+      state.phase = "runner_discard_phase";
+      state.timingPoint = "runner_discard.flatline_check";
+      if (maxHandSize(state, "runner") < 0) {
+        state.winner = "corp";
+        state.gameEndReason = "flatline";
+        state.phase = "game_over";
+        state.timingPoint = "game.checkpoint";
+        delete state.pendingChoice;
+        delete state.run;
+        return;
+      }
+      processDiscardStep(state, "runner", legalAction);
       return;
     }
-    processDiscardStep(state, "runner", legalAction);
-    return;
+
+    state.phase = "corp_discard_phase";
+    state.timingPoint = "corp_discard.select_cards";
+    processDiscardStep(state, "corp", legalAction);
   }
 
-  state.phase = "corp_discard_phase";
-  state.timingPoint = "corp_discard.select_cards";
-  processDiscardStep(state, "corp", legalAction);
-}
-
-function processDiscardStep(
-  state: GameState,
-  side: Side,
-  legalAction?: LegalAction,
-): void {
-  const hand = handForSide(state, side);
-  const requiredDiscardCount = hand.length - maxHandSize(state, side);
-  if (requiredDiscardCount <= 0) {
-    completeDiscardPhase(state, side, legalAction);
-    return;
+  function processDiscardStep(
+    state: GameState,
+    side: Side,
+    legalAction?: LegalAction,
+  ): void {
+    const hand = handForSide(state, side);
+    const requiredDiscardCount = hand.length - maxHandSize(state, side);
+    if (requiredDiscardCount <= 0) {
+      completeDiscardPhase(state, side, legalAction);
+      return;
+    }
+    state.timingPoint =
+      side === "corp"
+        ? "corp_discard.select_cards"
+        : "runner_discard.select_cards";
+    state.pendingChoice = discardChoice(
+      state,
+      side,
+      requiredDiscardCount,
+      state.stateVersion + 1,
+    );
   }
-  state.timingPoint =
-    side === "corp"
-      ? "corp_discard.select_cards"
-      : "runner_discard.select_cards";
-  state.pendingChoice = discardChoice(
-    state,
-    side,
-    requiredDiscardCount,
-    state.stateVersion + 1,
-  );
-}
 
-function completeDiscardPhase(
-  state: GameState,
-  side: Side,
-  legalAction?: LegalAction,
-): void {
-  const effects: AutomaticEffectCollector = [];
-  if (side === "runner") {
-    startCorpTurn(state, effects, legalAction);
+  function completeDiscardPhase(
+    state: GameState,
+    side: Side,
+    legalAction?: LegalAction,
+  ): void {
+    const effects: AutomaticEffectCollector = [];
+    if (side === "runner") {
+      startCorpTurn(state, effects, legalAction);
+      appendResolvedEffectsToPayload(legalAction, effects);
+      return;
+    }
+    startRunnerTurn(state, effects, legalAction);
     appendResolvedEffectsToPayload(legalAction, effects);
-    return;
   }
-  startRunnerTurn(state, effects, legalAction);
-  appendResolvedEffectsToPayload(legalAction, effects);
-}
 
-function appendResolvedEffectsToPayload(
-  legalAction: LegalAction | undefined,
-  effects: AutomaticEffectCollector,
-): void {
-  if (!legalAction || effects.length === 0) return;
-  legalAction.resolvedEffects = [
-    ...(legalAction.resolvedEffects ?? []),
-    ...effects,
-  ];
-}
+  function appendResolvedEffectsToPayload(
+    legalAction: LegalAction | undefined,
+    effects: AutomaticEffectCollector,
+  ): void {
+    if (!legalAction || effects.length === 0) return;
+    legalAction.resolvedEffects = [
+      ...(legalAction.resolvedEffects ?? []),
+      ...effects,
+    ];
+  }
 
-function automaticGainCreditsEffect(
-  effectId: string,
-  side: Side,
-  amount: number,
-  sourceDefinitionId: CardDefinitionId,
-): ResolvedGameEffect {
-  return {
-    effectId,
-    kind: "gain_credits",
-    visibility: "public",
-    side,
-    amount,
-    reason: "start_of_turn",
-    sourceDefinitionId,
-    sourceTitle: publicCardTitle(sourceDefinitionId),
-  };
-}
-
-function automaticLoseCreditsEffect(
-  effectId: string,
-  side: Side,
-  amount: number,
-  sourceDefinitionId: CardDefinitionId,
-): ResolvedGameEffect {
-  return {
-    effectId,
-    kind: "lose_credits",
-    visibility: "public",
-    side,
-    amount,
-    reason: "start_of_turn",
-    sourceDefinitionId,
-    sourceTitle: publicCardTitle(sourceDefinitionId),
-  };
-}
-
-function automaticDrawCardsEffect(
-  effectId: string,
-  side: Side,
-  amount: number,
-  sourceDefinitionId: CardDefinitionId,
-): ResolvedGameEffect {
-  return {
-    effectId,
-    kind: "draw_cards",
-    visibility: "public",
-    side,
-    amount,
-    reason: "start_of_turn",
-    sourceDefinitionId,
-    sourceTitle: publicCardTitle(sourceDefinitionId),
-  };
-}
-
-function automaticTagEffect(
-  effectId: string,
-  amount: number,
-  sourceDefinitionId: CardDefinitionId,
-): ResolvedGameEffect {
-  return {
-    effectId,
-    kind: "add_tags",
-    visibility: "public",
-    side: "runner",
-    amount,
-    reason: "start_of_turn",
-    sourceDefinitionId,
-    sourceTitle: publicCardTitle(sourceDefinitionId),
-  };
-}
-function automaticTrashCardEffect(
-  effectId: string,
-  side: Side,
-  cardDefinitionId: CardDefinitionId,
-  sourceDefinitionId: CardDefinitionId,
-): ResolvedGameEffect {
-  return {
-    effectId,
-    kind: "trash_card",
-    visibility: "public",
-    side,
-    reason: "start_of_turn",
-    cardDefinitionId,
-    cardTitle: publicCardTitle(cardDefinitionId),
-    sourceDefinitionId,
-    sourceTitle: publicCardTitle(sourceDefinitionId),
-  };
-}
-function automaticCounterChangeEffect(
-  effectId: string,
-  side: Side,
-  sourceDefinitionId: CardDefinitionId,
-  counterType: CounterType,
-  remainingCounters: number,
-  addedCounterAmount: number,
-): ResolvedGameEffect {
-  return {
-    effectId,
-    kind: "counter_change",
-    visibility: "public",
-    side,
-    amount: remainingCounters,
-    reason: "start_of_turn",
-    counterType,
-    remainingCounters,
-    addedCounterAmount,
-    sourceDefinitionId,
-    sourceTitle: publicCardTitle(sourceDefinitionId),
-  };
-}
-function automaticStealAgendaEffect(
-  effectId: string,
-  cardDefinitionId: CardDefinitionId,
-  sourceDefinitionId: CardDefinitionId,
-  amount: number,
-): ResolvedGameEffect {
-  return {
-    effectId,
-    kind: "steal_agenda",
-    visibility: "public",
-    side: "runner",
-    amount,
-    reason: "start_of_turn",
-    cardDefinitionId,
-    cardTitle: publicCardTitle(cardDefinitionId),
-    sourceDefinitionId,
-    sourceTitle: publicCardTitle(sourceDefinitionId),
-  };
-}
-function publicCardTitle(definitionId: CardDefinitionId): string {
-  return CARD_DEFINITIONS_BY_ID[definitionId]?.title ?? definitionId;
-}
-function applyScoredAgendaActionEconomyAtCorpStart(
-  state: GameState,
-  effects?: AutomaticEffectCollector,
-): void {
-  for (const cardId of state.corp.scoreArea.slice().sort()) {
-    const definition = definitionFor(state, cardId);
-    const implementation = scoredAgendaImplementationForDefinition(definition);
-    if (implementation?.kind !== "overadvance_start_of_corp_turn_actions")
-      continue;
-    const amount = cardCounter(state, cardId, "mark");
-    if (amount <= 0) continue;
-    state.corp.clicks += amount;
-    effects?.push({
-      effectId: `corp.start.scored_agenda.action.${cardId}`,
-      kind: "gain_actions",
+  function automaticGainCreditsEffect(
+    effectId: string,
+    side: Side,
+    amount: number,
+    sourceDefinitionId: CardDefinitionId,
+  ): ResolvedGameEffect {
+    return {
+      effectId,
+      kind: "gain_credits",
       visibility: "public",
-      side: "corp",
+      side,
       amount,
       reason: "start_of_turn",
-      sourceDefinitionId: definition.id,
-      sourceTitle: publicCardTitle(definition.id),
-    });
+      sourceDefinitionId,
+      sourceTitle: publicCardTitle(sourceDefinitionId),
+    };
   }
-}
 
-function applyScoredAgendaCreditEconomyAtCorpStart(
-  state: GameState,
-  effects?: AutomaticEffectCollector,
-): void {
-  for (const cardId of state.corp.scoreArea.slice().sort()) {
-    const definition = definitionFor(state, cardId);
-    const implementation = scoredAgendaImplementationForDefinition(definition);
-    if (implementation?.kind !== "overadvance_start_of_corp_turn_credits")
-      continue;
-    const amount = cardCounter(state, cardId, "mark");
-    if (amount <= 0) continue;
-    state.corp.credits += amount;
-    effects?.push(
-      automaticGainCreditsEffect(
-        `corp.start.scored_agenda.credit.${cardId}`,
-        "corp",
+  function automaticLoseCreditsEffect(
+    effectId: string,
+    side: Side,
+    amount: number,
+    sourceDefinitionId: CardDefinitionId,
+  ): ResolvedGameEffect {
+    return {
+      effectId,
+      kind: "lose_credits",
+      visibility: "public",
+      side,
+      amount,
+      reason: "start_of_turn",
+      sourceDefinitionId,
+      sourceTitle: publicCardTitle(sourceDefinitionId),
+    };
+  }
+
+  function automaticDrawCardsEffect(
+    effectId: string,
+    side: Side,
+    amount: number,
+    sourceDefinitionId: CardDefinitionId,
+  ): ResolvedGameEffect {
+    return {
+      effectId,
+      kind: "draw_cards",
+      visibility: "public",
+      side,
+      amount,
+      reason: "start_of_turn",
+      sourceDefinitionId,
+      sourceTitle: publicCardTitle(sourceDefinitionId),
+    };
+  }
+
+  function automaticTagEffect(
+    effectId: string,
+    amount: number,
+    sourceDefinitionId: CardDefinitionId,
+  ): ResolvedGameEffect {
+    return {
+      effectId,
+      kind: "add_tags",
+      visibility: "public",
+      side: "runner",
+      amount,
+      reason: "start_of_turn",
+      sourceDefinitionId,
+      sourceTitle: publicCardTitle(sourceDefinitionId),
+    };
+  }
+  function automaticTrashCardEffect(
+    effectId: string,
+    side: Side,
+    cardDefinitionId: CardDefinitionId,
+    sourceDefinitionId: CardDefinitionId,
+  ): ResolvedGameEffect {
+    return {
+      effectId,
+      kind: "trash_card",
+      visibility: "public",
+      side,
+      reason: "start_of_turn",
+      cardDefinitionId,
+      cardTitle: publicCardTitle(cardDefinitionId),
+      sourceDefinitionId,
+      sourceTitle: publicCardTitle(sourceDefinitionId),
+    };
+  }
+  function automaticCounterChangeEffect(
+    effectId: string,
+    side: Side,
+    sourceDefinitionId: CardDefinitionId,
+    counterType: CounterType,
+    remainingCounters: number,
+    addedCounterAmount: number,
+  ): ResolvedGameEffect {
+    return {
+      effectId,
+      kind: "counter_change",
+      visibility: "public",
+      side,
+      amount: remainingCounters,
+      reason: "start_of_turn",
+      counterType,
+      remainingCounters,
+      addedCounterAmount,
+      sourceDefinitionId,
+      sourceTitle: publicCardTitle(sourceDefinitionId),
+    };
+  }
+  function automaticStealAgendaEffect(
+    effectId: string,
+    cardDefinitionId: CardDefinitionId,
+    sourceDefinitionId: CardDefinitionId,
+    amount: number,
+  ): ResolvedGameEffect {
+    return {
+      effectId,
+      kind: "steal_agenda",
+      visibility: "public",
+      side: "runner",
+      amount,
+      reason: "start_of_turn",
+      cardDefinitionId,
+      cardTitle: publicCardTitle(cardDefinitionId),
+      sourceDefinitionId,
+      sourceTitle: publicCardTitle(sourceDefinitionId),
+    };
+  }
+  function publicCardTitle(definitionId: CardDefinitionId): string {
+    return CARD_DEFINITIONS_BY_ID[definitionId]?.title ?? definitionId;
+  }
+  function applyScoredAgendaActionEconomyAtCorpStart(
+    state: GameState,
+    effects?: AutomaticEffectCollector,
+  ): void {
+    for (const cardId of state.corp.scoreArea.slice().sort()) {
+      const definition = definitionFor(state, cardId);
+      const implementation =
+        scoredAgendaImplementationForDefinition(definition);
+      if (implementation?.kind !== "overadvance_start_of_corp_turn_actions")
+        continue;
+      const amount = cardCounter(state, cardId, "mark");
+      if (amount <= 0) continue;
+      state.corp.clicks += amount;
+      effects?.push({
+        effectId: `corp.start.scored_agenda.action.${cardId}`,
+        kind: "gain_actions",
+        visibility: "public",
+        side: "corp",
         amount,
-        definition.id,
-      ),
-    );
+        reason: "start_of_turn",
+        sourceDefinitionId: definition.id,
+        sourceTitle: publicCardTitle(definition.id),
+      });
+    }
   }
-}
 
-function applyScoredAgendaMandatoryDrawAtCorpStart(
-  state: GameState,
-  effects?: AutomaticEffectCollector,
-): void {
-  for (const cardId of state.corp.scoreArea.slice().sort()) {
-    const definition = definitionFor(state, cardId);
-    const implementation = scoredAgendaImplementationForDefinition(definition);
-    if (implementation?.kind !== "corp_start_turn_mandatory_draw") continue;
-    const rdBefore = state.corp.rd.length;
-    drawCorpCards(state, implementation.drawCount);
-    const drawnCount = rdBefore - state.corp.rd.length;
-    effects?.push(
-      automaticDrawCardsEffect(
-        `corp.start.scored_agenda.mandatory_draw.${cardId}`,
-        "corp",
-        drawnCount,
-        definition.id,
-      ),
-    );
-    if (state.winner) return;
+  function applyScoredAgendaCreditEconomyAtCorpStart(
+    state: GameState,
+    effects?: AutomaticEffectCollector,
+  ): void {
+    for (const cardId of state.corp.scoreArea.slice().sort()) {
+      const definition = definitionFor(state, cardId);
+      const implementation =
+        scoredAgendaImplementationForDefinition(definition);
+      if (implementation?.kind !== "overadvance_start_of_corp_turn_credits")
+        continue;
+      const amount = cardCounter(state, cardId, "mark");
+      if (amount <= 0) continue;
+      state.corp.credits += amount;
+      effects?.push(
+        automaticGainCreditsEffect(
+          `corp.start.scored_agenda.credit.${cardId}`,
+          "corp",
+          amount,
+          definition.id,
+        ),
+      );
+    }
   }
-}
 
-function resolvePdcaCounterAction(state: GameState, legalAction: LegalAction): void {
-  if (legalAction.side !== "corp")
-    throw new Error("Nur die Korp darf PDCA-Counter nutzen.");
-  if (state.phase !== "corp_action_phase" || state.activeSide !== "corp")
-    throw new Error("PDCA-Counter sind nur im Korp-Zug nutzbar.");
-  const sourceId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
-  if (!state.corp.scoreArea.includes(sourceId))
-    throw new Error("PDCA-Counter-Quelle ist nicht gescort.");
-  const definition = definitionFor(state, sourceId);
-  if (
-    scoredAgendaImplementationForDefinition(definition)?.kind !==
-    "corp_damage_replacement_pdca_action_counter"
-  )
-    throw new Error("Die PDCA-Fähigkeit passt nicht zur Quelle.");
-  const flags = ensureCorpTurnFlags(state);
-  if (abilityUsageSourceUsed(flags.pdcaUsedSourceIdsThisTurn, sourceId))
-    throw new Error("Diese PDCA-Fähigkeit wurde diesen Zug bereits genutzt.");
-  if (cardCounter(state, sourceId, "pdca") <= 0)
-    throw new Error("Es ist kein PDCA-Counter vorhanden.");
-  spendCardCounter(state, sourceId, "pdca", 1);
-  flags.pdcaUsedSourceIdsThisTurn = markAbilityUsageSourceUsed(
-    flags.pdcaUsedSourceIdsThisTurn,
-    sourceId,
-  );
-  state.corp.clicks += 1;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    gainedActions: 1,
-    removedCounterAmount: 1,
-    remainingCounters: cardCounter(state, sourceId, "pdca"),
-    corpClicksAfter: state.corp.clicks,
-  };
-}
+  function applyScoredAgendaMandatoryDrawAtCorpStart(
+    state: GameState,
+    effects?: AutomaticEffectCollector,
+  ): void {
+    for (const cardId of state.corp.scoreArea.slice().sort()) {
+      const definition = definitionFor(state, cardId);
+      const implementation =
+        scoredAgendaImplementationForDefinition(definition);
+      if (implementation?.kind !== "corp_start_turn_mandatory_draw") continue;
+      const rdBefore = state.corp.rd.length;
+      drawCorpCards(state, implementation.drawCount);
+      const drawnCount = rdBefore - state.corp.rd.length;
+      effects?.push(
+        automaticDrawCardsEffect(
+          `corp.start.scored_agenda.mandatory_draw.${cardId}`,
+          "corp",
+          drawnCount,
+          definition.id,
+        ),
+      );
+      if (state.winner) return;
+    }
+  }
 
-function startCorpTurn(
-  state: GameState,
-  effects?: AutomaticEffectCollector,
-  legalAction?: LegalAction,
-): void {
-  expireTurnBoundExtraActionGrants(state);
-  state.turnSerial = currentTurnSerial(state) + 1;
-  state.activeSide = "corp";
-  state.phase = "corp_draw_phase";
-  state.timingPoint = "corp_draw.mandatory_draw";
-  state.corp.clicks = 3;
-  state.runner.clicks = 0;
-  clearValuPakProgramInstallFlags(state);
-  clearActivityGatedFortRunMarkers(fortRunSideFamiliesHostForState(state));
-  ensureRunnerTurnFlags(state).damagePreventionUsage = {};
-  ensureRunnerTurnFlags(state).runnerReceivedTagThisTurn = false;
-  ensureRunnerTurnFlags(state).corpRezzedIceThisTurn = 0;
-  ensureCorpTurnFlags(state).counterPreventionUsedSourceIdsThisTurn =
-    clearAbilityUsageSourceIds();
-  ensureCorpTurnFlags(state).scoredAgendaStartDrawChoiceResolvedSourceIds = [];
-  ensureCorpTurnFlags(state).pdcaUsedSourceIdsThisTurn =
-    clearAbilityUsageSourceIds();
-  applyFutureExtraActionGrantsAtTurnStart(state, "corp", effects);
-  applyScoredAgendaCreditEconomyAtCorpStart(state, effects);
-  applyScoredAgendaActionEconomyAtCorpStart(state, effects);
-  applyInstalledIceCounterLifecycle(state);
-  if (applyCorpStartOfTurnEffects(state, effects, legalAction)) return;
-  openCorpStartTurnRestrictedActionOffers(state, effects);
-}
+  function resolvePdcaCounterAction(
+    state: GameState,
+    legalAction: LegalAction,
+  ): void {
+    if (legalAction.side !== "corp")
+      throw new Error("Nur die Korp darf PDCA-Counter nutzen.");
+    if (state.phase !== "corp_action_phase" || state.activeSide !== "corp")
+      throw new Error("PDCA-Counter sind nur im Korp-Zug nutzbar.");
+    const sourceId = String(
+      legalAction.payload?.cardId ?? "",
+    ) as CardInstanceId;
+    if (!state.corp.scoreArea.includes(sourceId))
+      throw new Error("PDCA-Counter-Quelle ist nicht gescort.");
+    const definition = definitionFor(state, sourceId);
+    if (
+      scoredAgendaImplementationForDefinition(definition)?.kind !==
+      "corp_damage_replacement_pdca_action_counter"
+    )
+      throw new Error("Die PDCA-Fähigkeit passt nicht zur Quelle.");
+    const flags = ensureCorpTurnFlags(state);
+    if (abilityUsageSourceUsed(flags.pdcaUsedSourceIdsThisTurn, sourceId))
+      throw new Error("Diese PDCA-Fähigkeit wurde diesen Zug bereits genutzt.");
+    if (cardCounter(state, sourceId, "pdca") <= 0)
+      throw new Error("Es ist kein PDCA-Counter vorhanden.");
+    spendCardCounter(state, sourceId, "pdca", 1);
+    flags.pdcaUsedSourceIdsThisTurn = markAbilityUsageSourceUsed(
+      flags.pdcaUsedSourceIdsThisTurn,
+      sourceId,
+    );
+    state.corp.clicks += 1;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      gainedActions: 1,
+      removedCounterAmount: 1,
+      remainingCounters: cardCounter(state, sourceId, "pdca"),
+      corpClicksAfter: state.corp.clicks,
+    };
+  }
 
-function startRunnerTurn(
-  state: GameState,
-  effects?: AutomaticEffectCollector,
-  legalAction?: LegalAction,
-): void {
-  expireTurnBoundExtraActionGrants(state);
-  state.turnSerial = currentTurnSerial(state) + 1;
-  returnCorpTemporaryInstallRezCredits(state, effects);
-  state.activeSide = "runner";
-  state.phase = "runner_action_phase";
-  state.timingPoint = "runner_action.main";
-  state.runner.clicks = runnerActionsPerTurn(state);
-  state.runner.clicks += (state.runnerTurnFlags?.persistentModifiers ?? []).reduce(
-    (total, modifier) =>
-      modifier.kind === "runner_extra_actions_per_turn"
-        ? total + modifier.amount
-        : total,
-    0,
-  );
-  applyFutureExtraActionGrantsAtTurnStart(state, "runner", effects);
-  state.corp.clicks = 0;
-  clearEdgerunnerTempsInstallFlags(state);
-  const flags = ensureRunnerTurnFlags(state);
-  flags.stoleAgendaThisTurn = false;
-  flags.stoleAgendaLastTurn = false;
-  flags.stolenAgendaIdsThisTurn = [];
-  flags.stolenAgendaAdvancementCountersThisTurn = 0;
-  flags.stolenAgendaAdvancementCountersLastTurn = 0;
-  flags.runnerReceivedTagThisTurn = false;
-  flags.stoleResearchAgendaThisTurn = false;
-  flags.stoleGrayOpsAgendaThisTurn = false;
-  flags.stoleBlackOpsAgendaThisTurn = false;
-  flags.runAttemptsThisTurn = 0;
-  flags.runAttemptsLastTurn = 0;
-  flags.successfulHqRunThisTurn = false;
-  flags.successfulRdRunThisTurn = false;
-  flags.successfulRunThisTurn = false;
-  delete flags.lastSuccessfulRunServerId;
-  flags.blackOpsLiberatedOrTrashedDuringSuccessfulHqOrRdRunThisTurn = false;
-  flags.trashedAdvertisementThisTurn = false;
-  flags.trashedTransactionsThisTurn = false;
-  flags.nextAgendaAccessCreditGainPending = false;
-  flags.nextAgendaAccessAgendaPointPending = false;
-  delete flags.nextAgendaAccessAgendaPointSourceDefinitionId;
-  delete flags.nextAgendaAccessAgendaPointSourceTitle;
-  flags.damagePreventionUsage = {};
-  flags.abilityUsedSourceIdsByLimitKey = {};
-  flags.startOfTurnFloatingCreditsApplied = false;
-  flags.bonusRunPending = false;
-  flags.valuPakProgramInstallActionsRemaining = 0;
-  flags.valuPakTemporaryProgramInstallCredits = 0;
-  flags.delayedInstallStartTurnResolvedSourceIds = [];
-  flags.successfulRunExtraRunPending = false;
-  flags.successfulRunExtraRunUsedThisTurn = false;
-  flags.delayedEndTurnEffects = [];
-  flags.corpRezzedIceThisTurn = 0;
-  delete flags.lastRezzedBlackIceThisTurn;
-  ensureCorpTurnFlags(state).counterPreventionUsedSourceIdsThisTurn =
-    clearAbilityUsageSourceIds();
-  delete flags.incubatorPendingTransforms;
-  consumeRunnerFutureActionDebt(state);
-  resolveDelayedAccessEffects(state, effects);
-  refreshRecurringCredits(state, "runner", effects);
-  untapRunnerCardsAtTurnStart(state);
-  applyRunnerStartTurnActionEconomyEffects(state, effects);
-  applyRunnerStartOfTurnEffects(state, effects, "begin", legalAction);
-}
+  function startCorpTurn(
+    state: GameState,
+    effects?: AutomaticEffectCollector,
+    legalAction?: LegalAction,
+  ): void {
+    expireTurnBoundExtraActionGrants(state);
+    state.turnSerial = currentTurnSerial(state) + 1;
+    state.activeSide = "corp";
+    state.phase = "corp_draw_phase";
+    state.timingPoint = "corp_draw.mandatory_draw";
+    state.corp.clicks = 3;
+    state.runner.clicks = 0;
+    clearValuPakProgramInstallFlags(state);
+    clearActivityGatedFortRunMarkers(fortRunSideFamiliesHostForState(state));
+    ensureRunnerTurnFlags(state).damagePreventionUsage = {};
+    ensureRunnerTurnFlags(state).runnerReceivedTagThisTurn = false;
+    ensureRunnerTurnFlags(state).corpRezzedIceThisTurn = 0;
+    ensureCorpTurnFlags(state).counterPreventionUsedSourceIdsThisTurn =
+      clearAbilityUsageSourceIds();
+    ensureCorpTurnFlags(state).scoredAgendaStartDrawChoiceResolvedSourceIds =
+      [];
+    ensureCorpTurnFlags(state).pdcaUsedSourceIdsThisTurn =
+      clearAbilityUsageSourceIds();
+    applyFutureExtraActionGrantsAtTurnStart(state, "corp", effects);
+    applyScoredAgendaCreditEconomyAtCorpStart(state, effects);
+    applyScoredAgendaActionEconomyAtCorpStart(state, effects);
+    applyInstalledIceCounterLifecycle(state);
+    if (applyCorpStartOfTurnEffects(state, effects, legalAction)) return;
+    openCorpStartTurnRestrictedActionOffers(state, effects);
+  }
 
-function returnCorpTemporaryInstallRezCredits(
-  state: GameState,
-  effects?: AutomaticEffectCollector,
-): void {
-  const temporaryCredits = state.corpTemporaryInstallRezCredits;
-  if (!temporaryCredits) return;
-  const returned = Math.max(0, Math.floor(temporaryCredits.remaining ?? 0));
-  if (returned > 0)
-    state.corp.credits = Math.max(0, state.corp.credits - returned);
-  effects?.push({
-    effectId: `corp.end.${temporaryCredits.sourceCardInstanceId}.temporary_install_rez_credits`,
-    kind: "lose_credits",
-    visibility: "public",
-    side: "corp",
-    amount: returned,
-    reason: "end_of_turn",
-    sourceDefinitionId: temporaryCredits.sourceDefinitionId,
-    sourceTitle: publicCardTitle(temporaryCredits.sourceDefinitionId),
-  });
-  delete state.corpTemporaryInstallRezCredits;
-}
+  function startRunnerTurn(
+    state: GameState,
+    effects?: AutomaticEffectCollector,
+    legalAction?: LegalAction,
+  ): void {
+    expireTurnBoundExtraActionGrants(state);
+    state.turnSerial = currentTurnSerial(state) + 1;
+    returnCorpTemporaryInstallRezCredits(state, effects);
+    state.activeSide = "runner";
+    state.phase = "runner_action_phase";
+    state.timingPoint = "runner_action.main";
+    state.runner.clicks = runnerActionsPerTurn(state);
+    state.runner.clicks += (
+      state.runnerTurnFlags?.persistentModifiers ?? []
+    ).reduce(
+      (total, modifier) =>
+        modifier.kind === "runner_extra_actions_per_turn"
+          ? total + modifier.amount
+          : total,
+      0,
+    );
+    applyFutureExtraActionGrantsAtTurnStart(state, "runner", effects);
+    state.corp.clicks = 0;
+    clearEdgerunnerTempsInstallFlags(state);
+    const flags = ensureRunnerTurnFlags(state);
+    flags.stoleAgendaThisTurn = false;
+    flags.stoleAgendaLastTurn = false;
+    flags.stolenAgendaIdsThisTurn = [];
+    flags.stolenAgendaAdvancementCountersThisTurn = 0;
+    flags.stolenAgendaAdvancementCountersLastTurn = 0;
+    flags.runnerReceivedTagThisTurn = false;
+    flags.stoleResearchAgendaThisTurn = false;
+    flags.stoleGrayOpsAgendaThisTurn = false;
+    flags.stoleBlackOpsAgendaThisTurn = false;
+    flags.runAttemptsThisTurn = 0;
+    flags.runAttemptsLastTurn = 0;
+    flags.successfulHqRunThisTurn = false;
+    flags.successfulRdRunThisTurn = false;
+    flags.successfulRunThisTurn = false;
+    delete flags.lastSuccessfulRunServerId;
+    flags.blackOpsLiberatedOrTrashedDuringSuccessfulHqOrRdRunThisTurn = false;
+    flags.trashedAdvertisementThisTurn = false;
+    flags.trashedTransactionsThisTurn = false;
+    flags.nextAgendaAccessCreditGainPending = false;
+    flags.nextAgendaAccessAgendaPointPending = false;
+    delete flags.nextAgendaAccessAgendaPointSourceDefinitionId;
+    delete flags.nextAgendaAccessAgendaPointSourceTitle;
+    flags.damagePreventionUsage = {};
+    flags.abilityUsedSourceIdsByLimitKey = {};
+    flags.startOfTurnFloatingCreditsApplied = false;
+    flags.bonusRunPending = false;
+    flags.valuPakProgramInstallActionsRemaining = 0;
+    flags.valuPakTemporaryProgramInstallCredits = 0;
+    flags.delayedInstallStartTurnResolvedSourceIds = [];
+    flags.successfulRunExtraRunPending = false;
+    flags.successfulRunExtraRunUsedThisTurn = false;
+    flags.delayedEndTurnEffects = [];
+    flags.corpRezzedIceThisTurn = 0;
+    delete flags.lastRezzedBlackIceThisTurn;
+    ensureCorpTurnFlags(state).counterPreventionUsedSourceIdsThisTurn =
+      clearAbilityUsageSourceIds();
+    delete flags.incubatorPendingTransforms;
+    consumeRunnerFutureActionDebt(state);
+    resolveDelayedAccessEffects(state, effects);
+    refreshRecurringCredits(state, "runner", effects);
+    untapRunnerCardsAtTurnStart(state);
+    applyRunnerStartTurnActionEconomyEffects(state, effects);
+    applyRunnerStartOfTurnEffects(state, effects, "begin", legalAction);
+  }
 
-function applyInstalledIceCounterLifecycle(state: GameState): void {
-  for (const server of state.corp.servers) {
-    for (const iceId of server.ice.slice().sort()) {
-      const instance = state.cardInstances[iceId];
-      if (!instance || instance.controller !== "corp") continue;
-      const kludge = cardCounter(state, iceId, "kludge");
-      if (kludge > 0) {
-        const remaining = kludge - 1;
-        setCardCounter(state, iceId, "kludge", remaining);
-        if (remaining <= 0) trashCorpInstalledCardToArchives(state, iceId);
-      }
-      const term = cardCounter(state, iceId, "term");
-      if (term > 0) {
-        if (state.corp.credits >= 2) {
-          state.corp.credits -= 2;
-          setCardCounter(state, iceId, "term", term - 1);
-        } else {
-          addCardCounter(state, iceId, "term", 1);
+  function returnCorpTemporaryInstallRezCredits(
+    state: GameState,
+    effects?: AutomaticEffectCollector,
+  ): void {
+    const temporaryCredits = state.corpTemporaryInstallRezCredits;
+    if (!temporaryCredits) return;
+    const returned = Math.max(0, Math.floor(temporaryCredits.remaining ?? 0));
+    if (returned > 0)
+      state.corp.credits = Math.max(0, state.corp.credits - returned);
+    effects?.push({
+      effectId: `corp.end.${temporaryCredits.sourceCardInstanceId}.temporary_install_rez_credits`,
+      kind: "lose_credits",
+      visibility: "public",
+      side: "corp",
+      amount: returned,
+      reason: "end_of_turn",
+      sourceDefinitionId: temporaryCredits.sourceDefinitionId,
+      sourceTitle: publicCardTitle(temporaryCredits.sourceDefinitionId),
+    });
+    delete state.corpTemporaryInstallRezCredits;
+  }
+
+  function applyInstalledIceCounterLifecycle(state: GameState): void {
+    for (const server of state.corp.servers) {
+      for (const iceId of server.ice.slice().sort()) {
+        const instance = state.cardInstances[iceId];
+        if (!instance || instance.controller !== "corp") continue;
+        const kludge = cardCounter(state, iceId, "kludge");
+        if (kludge > 0) {
+          const remaining = kludge - 1;
+          setCardCounter(state, iceId, "kludge", remaining);
+          if (remaining <= 0) trashCorpInstalledCardToArchives(state, iceId);
+        }
+        const term = cardCounter(state, iceId, "term");
+        if (term > 0) {
+          if (state.corp.credits >= 2) {
+            state.corp.credits -= 2;
+            setCardCounter(state, iceId, "term", term - 1);
+          } else {
+            addCardCounter(state, iceId, "term", 1);
+          }
         }
       }
     }
   }
-}
 
-function untapRunnerCardsAtTurnStart(state: GameState): void {
-  for (const cardId of runnerInstalledCardIds(state)) {
-    const instance = state.cardInstances[cardId];
-    if (!instance?.tapped) continue;
-    state.cardInstances[cardId] = { ...instance, tapped: false };
+  function untapRunnerCardsAtTurnStart(state: GameState): void {
+    for (const cardId of runnerInstalledCardIds(state)) {
+      const instance = state.cardInstances[cardId];
+      if (!instance?.tapped) continue;
+      state.cardInstances[cardId] = { ...instance, tapped: false };
+    }
   }
-}
 
-function resolveDelayedAccessEffects(state: GameState, effects?: AutomaticEffectCollector): void {
-  const delayed = state.delayedAccessEffects ?? [];
-  if (delayed.length === 0) return;
-  const remaining: NonNullable<GameState["delayedAccessEffects"]> = [];
-  for (const entry of delayed) {
-    if (entry.kind !== "delayed_agenda_access_replacement" || entry.resolveAt !== "runner_start_turn") {
-      remaining.push(entry);
-      continue;
-    }
-    const instance = state.cardInstances[entry.agendaId];
-    const server = state.corp.servers.find(
-      (candidate) => candidate.id === entry.serverId,
-    );
-    if (
-      !instance ||
-      instance.zone.side !== "corp" ||
-      instance.zone.zone !== "serverRoot" ||
-      instance.zone.serverId !== entry.serverId ||
-      !server?.root.includes(entry.agendaId)
-    ) {
-      continue;
-    }
-    const definition = CARD_DEFINITIONS_BY_ID[instance.definitionId];
-    if (!definition || definition.type !== "agenda") {
-      remaining.push(entry);
-      continue;
-    }
-    removeFromAllZones(state, entry.agendaId);
-    state.runner.scoreArea.push(entry.agendaId);
-    state.cardInstances[entry.agendaId] = {
-      ...instance,
-      faceup: true,
-      rezzed: true,
-      zone: { side: "runner", zone: "scoreArea" },
-    };
-    effects?.push(
-      automaticStealAgendaEffect(
-        `runner.start.delayed_agenda_access.${entry.agendaId}`,
-        definition.id,
-        entry.sourceDefinitionId,
-        agendaPointsForScoredCard(state, entry.agendaId),
-      ),
-    );
-  }
-  if (remaining.length > 0) state.delayedAccessEffects = remaining;
-  else delete state.delayedAccessEffects;
-}
-
-function applyCorpStartOfTurnEffects(
-  state: GameState,
-  effects?: AutomaticEffectCollector,
-  legalAction?: LegalAction,
-  rootCardStartIndex = 0,
-  skipPreamble = false,
-): boolean {
-  if (!skipPreamble) {
-    applyPurgeableRunnerVirusCorpStartEffects(state, effects);
-    const skivvissDraws = virusCounterDrawsAtCorpStart(state);
-    if (skivvissDraws > 0) {
-      drawCorpCards(state, skivvissDraws);
-      effects?.push(
-        automaticDrawCardsEffect(
-          "corp.start.skivviss",
-          "corp",
-          skivvissDraws,
-          SKIVVISS_ID,
-        ),
-      );
-    }
-    const cascadeTrash = virusCounterCascadeTrashAtCorpStart(state);
-    if (cascadeTrash.amount > 0) {
-      if (!cascadeTrash.sourceDefinitionId)
-        throw new Error("Cascade-Virus-Quelle fehlt.");
-      const trashed = trashFaceupRdCardsForCascade(state, cascadeTrash.amount);
-      if (trashed.length > 0) {
-        effects?.push({
-          effectId: "corp.start.cascade.trash_faceup_rd",
-          kind: "trash_card",
-          visibility: "hidden_info_barrier",
-          side: "corp",
-          amount: trashed.length,
-          reason: "start_of_turn",
-          sourceDefinitionId: cascadeTrash.sourceDefinitionId,
-          sourceTitle: publicCardTitle(cascadeTrash.sourceDefinitionId),
-          cardDefinitionId: definitionFor(state, trashed[0]!).id,
-          cardTitle: publicCardTitle(definitionFor(state, trashed[0]!).id),
-        });
+  function resolveDelayedAccessEffects(
+    state: GameState,
+    effects?: AutomaticEffectCollector,
+  ): void {
+    const delayed = state.delayedAccessEffects ?? [];
+    if (delayed.length === 0) return;
+    const remaining: NonNullable<GameState["delayedAccessEffects"]> = [];
+    for (const entry of delayed) {
+      if (
+        entry.kind !== "delayed_agenda_access_replacement" ||
+        entry.resolveAt !== "runner_start_turn"
+      ) {
+        remaining.push(entry);
+        continue;
       }
-    }
-    executeCardImplementationStartOfCorpTurnEffects(
-      cardImplementationRuntimeDeps,
-      state,
-      effects,
-    );
-  }
-  const rootCardIds = rezzedCorpRootCardIds(state);
-  for (
-    let rootCardIndex = rootCardStartIndex;
-    rootCardIndex < rootCardIds.length;
-    rootCardIndex += 1
-  ) {
-    const cardId = rootCardIds[rootCardIndex]!;
-    const definitionId = definitionFor(state, cardId).id;
-    const recurringTracePool = corpUtilityImplementationForCard(state, cardId);
-    if (
-      recurringTracePool?.kind === "recurring_trace_credit_pool" &&
-      recurringTracePool.counterType === "bit" &&
-      recurringTracePool.spendWindow === "trace" &&
-      recurringTracePool.refresh === "start_of_corp_turn_after_use" &&
-      cardCounter(state, cardId, recurringTracePool.counterType) < recurringTracePool.amount
-    ) {
-      setCardCounter(state, cardId, recurringTracePool.counterType, recurringTracePool.amount);
+      const instance = state.cardInstances[entry.agendaId];
+      const server = state.corp.servers.find(
+        (candidate) => candidate.id === entry.serverId,
+      );
+      if (
+        !instance ||
+        instance.zone.side !== "corp" ||
+        instance.zone.zone !== "serverRoot" ||
+        instance.zone.serverId !== entry.serverId ||
+        !server?.root.includes(entry.agendaId)
+      ) {
+        continue;
+      }
+      const definition = CARD_DEFINITIONS_BY_ID[instance.definitionId];
+      if (!definition || definition.type !== "agenda") {
+        remaining.push(entry);
+        continue;
+      }
+      removeFromAllZones(state, entry.agendaId);
+      state.runner.scoreArea.push(entry.agendaId);
+      state.cardInstances[entry.agendaId] = {
+        ...instance,
+        faceup: true,
+        rezzed: true,
+        zone: { side: "runner", zone: "scoreArea" },
+      };
       effects?.push(
-        automaticCounterChangeEffect(
-          `corp.start.recurring_trace_credit_pool.${cardId}`,
-          "corp",
-          definitionId,
-          recurringTracePool.counterType,
-          recurringTracePool.amount,
-          recurringTracePool.amount,
+        automaticStealAgendaEffect(
+          `runner.start.delayed_agenda_access.${entry.agendaId}`,
+          definition.id,
+          entry.sourceDefinitionId,
+          agendaPointsForScoredCard(state, entry.agendaId),
         ),
       );
     }
-    if (isFortTraceBitPoolSource(fortRunSideFamiliesHostForState(state), cardId)) {
-      const capacity = fortTraceBitPoolCapacityForCard(
-        fortRunSideFamiliesHostForState(state),
+    if (remaining.length > 0) state.delayedAccessEffects = remaining;
+    else delete state.delayedAccessEffects;
+  }
+
+  function applyCorpStartOfTurnEffects(
+    state: GameState,
+    effects?: AutomaticEffectCollector,
+    legalAction?: LegalAction,
+    rootCardStartIndex = 0,
+    skipPreamble = false,
+  ): boolean {
+    if (!skipPreamble) {
+      applyPurgeableRunnerVirusCorpStartEffects(state, effects);
+      const skivvissDraws = virusCounterDrawsAtCorpStart(state);
+      if (skivvissDraws > 0) {
+        drawCorpCards(state, skivvissDraws);
+        effects?.push(
+          automaticDrawCardsEffect(
+            "corp.start.skivviss",
+            "corp",
+            skivvissDraws,
+            SKIVVISS_ID,
+          ),
+        );
+      }
+      const cascadeTrash = virusCounterCascadeTrashAtCorpStart(state);
+      if (cascadeTrash.amount > 0) {
+        if (!cascadeTrash.sourceDefinitionId)
+          throw new Error("Cascade-Virus-Quelle fehlt.");
+        const trashed = trashFaceupRdCardsForCascade(
+          state,
+          cascadeTrash.amount,
+        );
+        if (trashed.length > 0) {
+          effects?.push({
+            effectId: "corp.start.cascade.trash_faceup_rd",
+            kind: "trash_card",
+            visibility: "hidden_info_barrier",
+            side: "corp",
+            amount: trashed.length,
+            reason: "start_of_turn",
+            sourceDefinitionId: cascadeTrash.sourceDefinitionId,
+            sourceTitle: publicCardTitle(cascadeTrash.sourceDefinitionId),
+            cardDefinitionId: definitionFor(state, trashed[0]!).id,
+            cardTitle: publicCardTitle(definitionFor(state, trashed[0]!).id),
+          });
+        }
+      }
+      executeCardImplementationStartOfCorpTurnEffects(
+        cardImplementationRuntimeDeps,
+        state,
+        effects,
+      );
+    }
+    const rootCardIds = rezzedCorpRootCardIds(state);
+    for (
+      let rootCardIndex = rootCardStartIndex;
+      rootCardIndex < rootCardIds.length;
+      rootCardIndex += 1
+    ) {
+      const cardId = rootCardIds[rootCardIndex]!;
+      const definitionId = definitionFor(state, cardId).id;
+      const recurringTracePool = corpUtilityImplementationForCard(
+        state,
         cardId,
       );
-      if (cardCounter(state, cardId, "bit") < capacity)
-        setCardCounter(state, cardId, "bit", capacity);
-    }
-    if (
-      recurringTracePool?.kind ===
-      "corp_start_turn_tag_roll_per_runner_run_last_turn"
-    ) {
-      const runCount = Math.max(
-        0,
-        Math.floor(state.runnerTurnFlags?.runAttemptsLastTurn ?? 0),
-      );
-      let tagsAdded = 0;
-      const dieRolls: number[] = [];
-      for (let index = 0; index < runCount; index += 1) {
-        const randomPurpose = `classic.satellite_monitors.corp_start.${state.stateVersion}.${cardId}.${index}`;
-        const dieRoll = rollDeterministicDie(state, randomPurpose);
-        dieRolls.push(dieRoll);
-        if (dieRoll === recurringTracePool.tagOn) tagsAdded += 1;
+      if (
+        recurringTracePool?.kind === "recurring_trace_credit_pool" &&
+        recurringTracePool.counterType === "bit" &&
+        recurringTracePool.spendWindow === "trace" &&
+        recurringTracePool.refresh === "start_of_corp_turn_after_use" &&
+        cardCounter(state, cardId, recurringTracePool.counterType) <
+          recurringTracePool.amount
+      ) {
+        setCardCounter(
+          state,
+          cardId,
+          recurringTracePool.counterType,
+          recurringTracePool.amount,
+        );
+        effects?.push(
+          automaticCounterChangeEffect(
+            `corp.start.recurring_trace_credit_pool.${cardId}`,
+            "corp",
+            definitionId,
+            recurringTracePool.counterType,
+            recurringTracePool.amount,
+            recurringTracePool.amount,
+          ),
+        );
       }
-      if (tagsAdded > 0) {
+      if (
+        isFortTraceBitPoolSource(fortRunSideFamiliesHostForState(state), cardId)
+      ) {
+        const capacity = fortTraceBitPoolCapacityForCard(
+          fortRunSideFamiliesHostForState(state),
+          cardId,
+        );
+        if (cardCounter(state, cardId, "bit") < capacity)
+          setCardCounter(state, cardId, "bit", capacity);
+      }
+      if (
+        recurringTracePool?.kind ===
+        "corp_start_turn_tag_roll_per_runner_run_last_turn"
+      ) {
+        const runCount = Math.max(
+          0,
+          Math.floor(state.runnerTurnFlags?.runAttemptsLastTurn ?? 0),
+        );
+        let tagsAdded = 0;
+        const dieRolls: number[] = [];
+        for (let index = 0; index < runCount; index += 1) {
+          const randomPurpose = `classic.satellite_monitors.corp_start.${state.stateVersion}.${cardId}.${index}`;
+          const dieRoll = rollDeterministicDie(state, randomPurpose);
+          dieRolls.push(dieRoll);
+          if (dieRoll === recurringTracePool.tagOn) tagsAdded += 1;
+        }
+        if (tagsAdded > 0) {
+          if (!legalAction)
+            throw new Error("Corp-Start-Add-Tag braucht eine LegalAction.");
+          const runnerTagsBefore = state.runner.tags;
+          state.pendingAddTagContinuation = {
+            kind: "corp_start_turn",
+            sourceCardId: cardId,
+            sourceDefinitionId: definitionId,
+            nextRootCardIndex: rootCardIndex + 1,
+            runAttemptsLastTurn: runCount,
+            dieRolls,
+            tagAmount: tagsAdded,
+            runnerTagsBefore,
+          };
+          if (
+            addRunnerTagsWithPrevention(
+              state,
+              legalAction,
+              tagsAdded,
+              definitionId,
+            )
+          )
+            return true;
+          delete state.pendingAddTagContinuation;
+          tagsAdded = Math.max(0, state.runner.tags - runnerTagsBefore);
+        }
+        if (runCount > 0) {
+          effects?.push({
+            effectId: `corp.start.classic.satellite_monitors.${cardId}`,
+            kind: tagsAdded > 0 ? "add_tags" : "counter_change",
+            visibility: recurringTracePool.visibility,
+            side: "runner",
+            amount: tagsAdded,
+            reason: "start_of_turn",
+            sourceDefinitionId: definitionId,
+            sourceTitle: publicCardTitle(definitionId),
+            runAttemptsLastTurn: runCount,
+            dieSize: recurringTracePool.dieFaces,
+            dieRolls: dieRolls.join(","),
+            tagsAdded,
+            runnerTagsAfter: state.runner.tags,
+            randomCounterAfter: state.randomCounter,
+          } as ResolvedGameEffect);
+        }
+      }
+      if (isCorpInstalledEconomyCreditSource(state, cardId)) {
+        if (cardCounter(state, cardId, "recurring_credit") > 0) {
+          spendCardCounter(state, cardId, "recurring_credit", 1);
+          credits(state, "corp", 1);
+          const remainingCounters = cardCounter(
+            state,
+            cardId,
+            "recurring_credit",
+          );
+          effects?.push(
+            automaticGainCreditsEffect(
+              `corp.start.installed_economy_credit.${cardId}`,
+              "corp",
+              1,
+              definitionId,
+            ),
+          );
+          effects?.push({
+            effectId: `corp.start.installed_economy_credit.counter.${cardId}`,
+            kind: "counter_change",
+            visibility: "public",
+            side: "corp",
+            amount: remainingCounters,
+            reason: "start_of_turn",
+            counterType: "recurring_credit",
+            removedCounterAmount: 1,
+            remainingCounters,
+            sourceDefinitionId: definitionId,
+            sourceTitle: publicCardTitle(definitionId),
+          });
+        }
+        continue;
+      }
+    }
+    applyScoredAgendaMandatoryDrawAtCorpStart(state, effects);
+    if (state.winner) return false;
+    if (!state.pendingChoice)
+      startCorpHqAgendaRevealChoice(
+        corpZoneChoiceHandlerHost(state, {
+          side: "corp",
+          payload: {},
+        } as LegalAction),
+      );
+    if (!state.pendingChoice)
+      startScoredAgendaStartDrawChoice(scoredAgendaFlowHost(state));
+    return false;
+  }
+
+  function applyPurgeableRunnerVirusCorpStartEffects(
+    state: GameState,
+    effects?: AutomaticEffectCollector,
+  ): void {
+    const corpCounters = state.purgeableRunnerVirusCounters?.corp;
+    const scaldanCounters = purgeableRunnerVirusCounterAmount(
+      corpCounters,
+      "scaldan",
+    );
+    for (let index = 0; index < scaldanCounters; index += 1) {
+      const randomPurpose = `proteus.scaldan.corp_start.${state.stateVersion}.${index}`;
+      const dieRoll = rollDeterministicDie(state, randomPurpose);
+      const badPublicityAdded = dieRoll >= 5 ? 1 : 0;
+      if (badPublicityAdded > 0) state.corp.badPublicity += badPublicityAdded;
+      effects?.push({
+        effectId: `corp.start.proteus.scaldan.${index}`,
+        kind: badPublicityAdded > 0 ? "add_bad_publicity" : "counter_change",
+        visibility: "public",
+        side: "corp",
+        amount: badPublicityAdded,
+        reason: "start_of_turn",
+        counterType: "scaldan",
+        remainingCounters: scaldanCounters,
+        sourceDefinitionId: PROTEUS_SCALDAN_ID,
+        sourceTitle: publicCardTitle(PROTEUS_SCALDAN_ID),
+        randomPurpose,
+        dieSize: 6,
+        dieRoll,
+        randomCounterAfter: state.randomCounter,
+        ...(badPublicityAdded > 0
+          ? {
+              badPublicityAdded,
+              corpBadPublicityAfter: state.corp.badPublicity,
+            }
+          : {}),
+      } as ResolvedGameEffect);
+    }
+    const taxCounters = purgeableRunnerVirusCounterAmount(corpCounters, "tax");
+    const taxLoss = Math.min(state.corp.credits, Math.floor(taxCounters / 2));
+    if (taxLoss > 0) {
+      state.corp.credits -= taxLoss;
+      effects?.push(
+        automaticLoseCreditsEffect(
+          "corp.start.proteus.taxman",
+          "corp",
+          taxLoss,
+          PROTEUS_TAXMAN_ID,
+        ),
+      );
+    }
+
+    const pipeCounters = purgeableRunnerVirusCounterAmount(
+      corpCounters,
+      "pipe",
+    );
+    if (pipeCounters <= 0) return;
+    addCorpActionDebt(state, {
+      amount: pipeCounters,
+      reason: "pipe_counter",
+      source: "start_of_turn_effect",
+    });
+    effects?.push({
+      effectId: "corp.start.pipe_counter",
+      kind: "counter_change",
+      visibility: "public",
+      side: "corp",
+      amount: pipeCounters,
+      reason: "start_of_turn",
+      counterType: "pipe",
+      remainingCounters: pipeCounters,
+    });
+  }
+  function openCorpStartTurnRestrictedActionOffers(
+    state: GameState,
+    effects?: AutomaticEffectCollector,
+  ): void {
+    if (state.actionEconomy?.pendingOffer) return;
+    for (const sourceId of state.corp.scoreArea.slice().sort()) {
+      const definition = definitionFor(state, sourceId);
+      if (
+        scoredAgendaImplementationForDefinition(definition)?.kind !==
+        "corp_start_turn_random_restricted_optional_action"
+      )
+        continue;
+      const randomPurpose = `action_economy.${definition.id}.corp_start.${state.stateVersion}.${sourceId}`;
+      const dieRoll = rollDeterministicDie(state, randomPurpose);
+      const restriction = restrictedActionFamilyForRandomActionRoll(dieRoll);
+      ensureActionEconomy(state).pendingOffer = {
+        side: "corp",
+        sourceCardInstanceId: sourceId,
+        sourceDefinitionId: definition.id,
+        restriction,
+        optional: true,
+        dieRoll,
+        randomPurpose,
+        createdAtStateVersion: state.stateVersion,
+      };
+      effects?.push({
+        effectId: `corp.start.action_economy.offer.${sourceId}`,
+        kind: "counter_change",
+        visibility: "public",
+        side: "corp",
+        amount: 0,
+        reason: "start_of_turn",
+        sourceDefinitionId: definition.id,
+        sourceTitle: definition.title,
+        dieRoll,
+        randomPurpose,
+        restrictedActionFamily: restriction,
+        randomCounterAfter: state.randomCounter,
+      } as ResolvedGameEffect);
+      return;
+    }
+  }
+  function virusCounterDrawsAtCorpStart(state: GameState): number {
+    return Object.keys(state.cardInstances).reduce((sum, cardId) => {
+      const implementation = virusCounterImplementationForCard(state, cardId);
+      const start = implementation?.startOfCorpTurn;
+      if (start?.kind !== "draw_extra_cards_per_counter") return sum;
+      return sum + cardCounter(state, cardId, "virus") * start.amountPerCounter;
+    }, 0);
+  }
+  function skivvissCounterTotal(state: GameState): number {
+    return Object.keys(state.cardInstances).reduce((sum, cardId) => {
+      if (definitionFor(state, cardId).id !== SKIVVISS_ID) return sum;
+      return sum + cardCounter(state, cardId, "virus");
+    }, 0);
+  }
+  function virusCounterCascadeTrashAtCorpStart(state: GameState): {
+    amount: number;
+    sourceDefinitionId?: CardDefinitionId;
+  } {
+    const corpCascadeCounters = purgeableRunnerVirusCounterAmount(
+      state.purgeableRunnerVirusCounters?.corp,
+      "cascade",
+    );
+    const corpCascadeTrash = Math.floor(corpCascadeCounters / 2);
+    return Object.keys(state.cardInstances).reduce(
+      (result, cardId) => {
+        const implementation = virusCounterImplementationForCard(state, cardId);
+        const start = implementation?.startOfCorpTurn;
+        if (start?.kind !== "trash_faceup_rd_cards_per_two_counters")
+          return result;
+        const amount =
+          Math.floor(cardCounter(state, cardId, "virus") / start.perCounters) *
+          start.countPerGroup;
+        return {
+          amount: result.amount + amount,
+          sourceDefinitionId:
+            result.sourceDefinitionId ?? definitionFor(state, cardId).id,
+        };
+      },
+      {
+        amount: corpCascadeTrash,
+        sourceDefinitionId: corpCascadeCounters > 0 ? CASCADE_ID : undefined,
+      } as { amount: number; sourceDefinitionId?: CardDefinitionId },
+    );
+  }
+  function trashFaceupRdCardsForCascade(
+    state: GameState,
+    maxCount: number,
+  ): CardInstanceId[] {
+    const selected = state.corp.rd
+      .filter((cardId) => state.cardInstances[cardId]?.faceup === true)
+      .slice(0, Math.max(0, Math.floor(maxCount)));
+    for (const cardId of selected) {
+      removeFromAllZones(state, cardId);
+      state.corp.archives.push(cardId);
+      state.cardInstances[cardId] = {
+        ...mustInstance(state.cardInstances, cardId),
+        faceup: true,
+        rezzed: true,
+        zone: { side: "corp", zone: "archives" },
+      };
+    }
+    return selected;
+  }
+  function applyRunnerStartOfTurnEffects(
+    state: GameState,
+    effects?: AutomaticEffectCollector,
+    resumePoint: "begin" | "after_delayed_install_choice" = "begin",
+    legalAction?: LegalAction,
+    counterEffectStartIndex = 0,
+  ): void {
+    if (resumePoint === "after_delayed_install_choice") {
+      continueRunnerStartOfTurnFromDelayedInstall(state, effects);
+      return;
+    }
+    const flags = ensureRunnerTurnFlags(state);
+    const counterEffects = runnerTraceCounterEffectDefinitions();
+    for (
+      let counterEffectIndex = counterEffectStartIndex;
+      counterEffectIndex < counterEffects.length;
+      counterEffectIndex += 1
+    ) {
+      const counterEffect = counterEffects[counterEffectIndex]!;
+      if (!counterEffect.startOfRunnerTurn) continue;
+      const counterCount = cardCounter(
+        state,
+        state.runner.identity,
+        counterEffect.counterType,
+      );
+      if (counterCount <= 0) continue;
+      const amount =
+        counterCount * counterEffect.startOfRunnerTurn.amountPerCounter;
+      if (counterEffect.startOfRunnerTurn.kind === "add_tags") {
         if (!legalAction)
-          throw new Error("Corp-Start-Add-Tag braucht eine LegalAction.");
+          throw new Error("Runner-Start-Add-Tag braucht eine LegalAction.");
         const runnerTagsBefore = state.runner.tags;
         state.pendingAddTagContinuation = {
-          kind: "corp_start_turn",
-          sourceCardId: cardId,
-          sourceDefinitionId: definitionId,
-          nextRootCardIndex: rootCardIndex + 1,
-          runAttemptsLastTurn: runCount,
-          dieRolls,
-          tagAmount: tagsAdded,
+          kind: "runner_start_turn",
+          sourceDefinitionId: counterEffect.sourceDefinitionId,
+          counterType: counterEffect.counterType,
+          nextCounterEffectIndex: counterEffectIndex + 1,
+          tagAmount: amount,
           runnerTagsBefore,
         };
         if (
           addRunnerTagsWithPrevention(
             state,
             legalAction,
-            tagsAdded,
-            definitionId,
+            amount,
+            counterEffect.sourceDefinitionId,
           )
         )
-          return true;
+          return;
         delete state.pendingAddTagContinuation;
-        tagsAdded = Math.max(0, state.runner.tags - runnerTagsBefore);
+        const tagsAdded = Math.max(0, state.runner.tags - runnerTagsBefore);
+        if (tagsAdded > 0)
+          effects?.push(
+            automaticTagEffect(
+              `runner.start.${counterEffect.counterType}`,
+              tagsAdded,
+              counterEffect.sourceDefinitionId,
+            ),
+          );
       }
-      if (runCount > 0) {
-        effects?.push({
-          effectId: `corp.start.classic.satellite_monitors.${cardId}`,
-          kind: tagsAdded > 0 ? "add_tags" : "counter_change",
-          visibility: recurringTracePool.visibility,
-          side: "runner",
-          amount: tagsAdded,
-          reason: "start_of_turn",
-          sourceDefinitionId: definitionId,
-          sourceTitle: publicCardTitle(definitionId),
-          runAttemptsLastTurn: runCount,
-          dieSize: recurringTracePool.dieFaces,
-          dieRolls: dieRolls.join(","),
-          tagsAdded,
-          runnerTagsAfter: state.runner.tags,
-          randomCounterAfter: state.randomCounter,
-        } as ResolvedGameEffect);
-      }
-    }
-    if (isCorpInstalledEconomyCreditSource(state, cardId)) {
-      if (cardCounter(state, cardId, "recurring_credit") > 0) {
-        spendCardCounter(state, cardId, "recurring_credit", 1);
-        credits(state, "corp", 1);
-        const remainingCounters = cardCounter(state, cardId, "recurring_credit");
+      if (counterEffect.startOfRunnerTurn.kind === "lose_credits") {
+        const lost = Math.min(state.runner.credits, amount);
+        state.runner.credits -= lost;
         effects?.push(
-          automaticGainCreditsEffect(
-            `corp.start.installed_economy_credit.${cardId}`,
-            "corp",
-            1,
-            definitionId,
-          ),
-        );
-        effects?.push({
-          effectId: `corp.start.installed_economy_credit.counter.${cardId}`,
-          kind: "counter_change",
-          visibility: "public",
-          side: "corp",
-          amount: remainingCounters,
-          reason: "start_of_turn",
-          counterType: "recurring_credit",
-          removedCounterAmount: 1,
-          remainingCounters,
-          sourceDefinitionId: definitionId,
-          sourceTitle: publicCardTitle(definitionId),
-        });
-      }
-      continue;
-    }
-  }
-  applyScoredAgendaMandatoryDrawAtCorpStart(state, effects);
-  if (state.winner) return false;
-  if (!state.pendingChoice)
-    startCorpHqAgendaRevealChoice(
-      corpZoneChoiceHandlerHost(
-        state,
-        { side: "corp", payload: {} } as LegalAction,
-      ),
-    );
-  if (!state.pendingChoice)
-    startScoredAgendaStartDrawChoice(scoredAgendaFlowHost(state));
-  return false;
-}
-
-function applyPurgeableRunnerVirusCorpStartEffects(
-  state: GameState,
-  effects?: AutomaticEffectCollector,
-): void {
-  const corpCounters = state.purgeableRunnerVirusCounters?.corp;
-  const scaldanCounters = purgeableRunnerVirusCounterAmount(
-    corpCounters,
-    "scaldan",
-  );
-  for (let index = 0; index < scaldanCounters; index += 1) {
-    const randomPurpose = `proteus.scaldan.corp_start.${state.stateVersion}.${index}`;
-    const dieRoll = rollDeterministicDie(state, randomPurpose);
-    const badPublicityAdded = dieRoll >= 5 ? 1 : 0;
-    if (badPublicityAdded > 0) state.corp.badPublicity += badPublicityAdded;
-    effects?.push({
-      effectId: `corp.start.proteus.scaldan.${index}`,
-      kind: badPublicityAdded > 0 ? "add_bad_publicity" : "counter_change",
-      visibility: "public",
-      side: "corp",
-      amount: badPublicityAdded,
-      reason: "start_of_turn",
-      counterType: "scaldan",
-      remainingCounters: scaldanCounters,
-      sourceDefinitionId: PROTEUS_SCALDAN_ID,
-      sourceTitle: publicCardTitle(PROTEUS_SCALDAN_ID),
-      randomPurpose,
-      dieSize: 6,
-      dieRoll,
-      randomCounterAfter: state.randomCounter,
-      ...(badPublicityAdded > 0
-        ? {
-            badPublicityAdded,
-            corpBadPublicityAfter: state.corp.badPublicity,
-          }
-        : {}),
-    } as ResolvedGameEffect);
-  }
-  const taxCounters = purgeableRunnerVirusCounterAmount(corpCounters, "tax");
-  const taxLoss = Math.min(state.corp.credits, Math.floor(taxCounters / 2));
-  if (taxLoss > 0) {
-    state.corp.credits -= taxLoss;
-    effects?.push(
-      automaticLoseCreditsEffect(
-        "corp.start.proteus.taxman",
-        "corp",
-        taxLoss,
-        PROTEUS_TAXMAN_ID,
-      ),
-    );
-  }
-
-  const pipeCounters = purgeableRunnerVirusCounterAmount(corpCounters, "pipe");
-  if (pipeCounters <= 0) return;
-  addCorpActionDebt(state, {
-    amount: pipeCounters,
-    reason: "pipe_counter",
-    source: "start_of_turn_effect",
-  });
-  effects?.push({
-    effectId: "corp.start.pipe_counter",
-    kind: "counter_change",
-    visibility: "public",
-    side: "corp",
-    amount: pipeCounters,
-    reason: "start_of_turn",
-    counterType: "pipe",
-    remainingCounters: pipeCounters,
-  });
-}
-function openCorpStartTurnRestrictedActionOffers(
-  state: GameState,
-  effects?: AutomaticEffectCollector,
-): void {
-  if (state.actionEconomy?.pendingOffer) return;
-  for (const sourceId of state.corp.scoreArea.slice().sort()) {
-    const definition = definitionFor(state, sourceId);
-    if (
-      scoredAgendaImplementationForDefinition(definition)?.kind !==
-      "corp_start_turn_random_restricted_optional_action"
-    )
-      continue;
-    const randomPurpose = `action_economy.${definition.id}.corp_start.${state.stateVersion}.${sourceId}`;
-    const dieRoll = rollDeterministicDie(state, randomPurpose);
-    const restriction = restrictedActionFamilyForRandomActionRoll(dieRoll);
-    ensureActionEconomy(state).pendingOffer = {
-      side: "corp",
-      sourceCardInstanceId: sourceId,
-      sourceDefinitionId: definition.id,
-      restriction,
-      optional: true,
-      dieRoll,
-      randomPurpose,
-      createdAtStateVersion: state.stateVersion,
-    };
-    effects?.push({
-      effectId: `corp.start.action_economy.offer.${sourceId}`,
-      kind: "counter_change",
-      visibility: "public",
-      side: "corp",
-      amount: 0,
-      reason: "start_of_turn",
-      sourceDefinitionId: definition.id,
-      sourceTitle: definition.title,
-      dieRoll,
-      randomPurpose,
-      restrictedActionFamily: restriction,
-      randomCounterAfter: state.randomCounter,
-    } as ResolvedGameEffect);
-    return;
-  }
-}
-function virusCounterDrawsAtCorpStart(state: GameState): number {
-  return Object.keys(state.cardInstances).reduce((sum, cardId) => {
-    const implementation = virusCounterImplementationForCard(state, cardId);
-    const start = implementation?.startOfCorpTurn;
-    if (start?.kind !== "draw_extra_cards_per_counter") return sum;
-    return sum + cardCounter(state, cardId, "virus") * start.amountPerCounter;
-  }, 0);
-}
-function skivvissCounterTotal(state: GameState): number {
-  return Object.keys(state.cardInstances).reduce((sum, cardId) => {
-    if (definitionFor(state, cardId).id !== SKIVVISS_ID) return sum;
-    return sum + cardCounter(state, cardId, "virus");
-  }, 0);
-}
-function virusCounterCascadeTrashAtCorpStart(state: GameState): {
-  amount: number;
-  sourceDefinitionId?: CardDefinitionId;
-} {
-  const corpCascadeCounters = purgeableRunnerVirusCounterAmount(
-    state.purgeableRunnerVirusCounters?.corp,
-    "cascade",
-  );
-  const corpCascadeTrash = Math.floor(corpCascadeCounters / 2);
-  return Object.keys(state.cardInstances).reduce((result, cardId) => {
-    const implementation = virusCounterImplementationForCard(state, cardId);
-    const start = implementation?.startOfCorpTurn;
-    if (start?.kind !== "trash_faceup_rd_cards_per_two_counters") return result;
-    const amount =
-      Math.floor(cardCounter(state, cardId, "virus") / start.perCounters) *
-      start.countPerGroup;
-    return {
-      amount: result.amount + amount,
-      sourceDefinitionId:
-        result.sourceDefinitionId ?? definitionFor(state, cardId).id,
-    };
-  }, {
-    amount: corpCascadeTrash,
-    sourceDefinitionId: corpCascadeCounters > 0 ? CASCADE_ID : undefined,
-  } as { amount: number; sourceDefinitionId?: CardDefinitionId });
-}
-function trashFaceupRdCardsForCascade(
-  state: GameState,
-  maxCount: number,
-): CardInstanceId[] {
-  const selected = state.corp.rd
-    .filter((cardId) => state.cardInstances[cardId]?.faceup === true)
-    .slice(0, Math.max(0, Math.floor(maxCount)));
-  for (const cardId of selected) {
-    removeFromAllZones(state, cardId);
-    state.corp.archives.push(cardId);
-    state.cardInstances[cardId] = {
-      ...mustInstance(state.cardInstances, cardId),
-      faceup: true,
-      rezzed: true,
-      zone: { side: "corp", zone: "archives" },
-    };
-  }
-  return selected;
-}
-function applyRunnerStartOfTurnEffects(
-  state: GameState,
-  effects?: AutomaticEffectCollector,
-  resumePoint: "begin" | "after_delayed_install_choice" = "begin",
-  legalAction?: LegalAction,
-  counterEffectStartIndex = 0,
-): void {
-  if (resumePoint === "after_delayed_install_choice") {
-    continueRunnerStartOfTurnFromDelayedInstall(state, effects);
-    return;
-  }
-  const flags = ensureRunnerTurnFlags(state);
-  const counterEffects = runnerTraceCounterEffectDefinitions();
-  for (
-    let counterEffectIndex = counterEffectStartIndex;
-    counterEffectIndex < counterEffects.length;
-    counterEffectIndex += 1
-  ) {
-    const counterEffect = counterEffects[counterEffectIndex]!;
-    if (!counterEffect.startOfRunnerTurn) continue;
-    const counterCount = cardCounter(
-      state,
-      state.runner.identity,
-      counterEffect.counterType,
-    );
-    if (counterCount <= 0) continue;
-    const amount = counterCount * counterEffect.startOfRunnerTurn.amountPerCounter;
-    if (counterEffect.startOfRunnerTurn.kind === "add_tags") {
-      if (!legalAction)
-        throw new Error("Runner-Start-Add-Tag braucht eine LegalAction.");
-      const runnerTagsBefore = state.runner.tags;
-      state.pendingAddTagContinuation = {
-        kind: "runner_start_turn",
-        sourceDefinitionId: counterEffect.sourceDefinitionId,
-        counterType: counterEffect.counterType,
-        nextCounterEffectIndex: counterEffectIndex + 1,
-        tagAmount: amount,
-        runnerTagsBefore,
-      };
-      if (
-        addRunnerTagsWithPrevention(
-          state,
-          legalAction,
-          amount,
-          counterEffect.sourceDefinitionId,
-        )
-      )
-        return;
-      delete state.pendingAddTagContinuation;
-      const tagsAdded = Math.max(0, state.runner.tags - runnerTagsBefore);
-      if (tagsAdded > 0)
-        effects?.push(
-          automaticTagEffect(
+          automaticLoseCreditsEffect(
             `runner.start.${counterEffect.counterType}`,
-            tagsAdded,
+            "runner",
+            lost,
             counterEffect.sourceDefinitionId,
           ),
         );
-    }
-    if (counterEffect.startOfRunnerTurn.kind === "lose_credits") {
-      const lost = Math.min(state.runner.credits, amount);
-      state.runner.credits -= lost;
-      effects?.push(
-        automaticLoseCreditsEffect(
-          `runner.start.${counterEffect.counterType}`,
-          "runner",
-          lost,
-          counterEffect.sourceDefinitionId,
-        ),
-      );
-    }
-  }
-  executeCardImplementationStartOfRunnerTurnEffects(
-    cardImplementationRuntimeDeps,
-    state,
-    effects,
-  );
-  applyStartTurnRandomEffectTables(state, effects);
-  if (!flags.startOfTurnFloatingCreditsApplied) {
-    const virusCredits = virusCounterCreditsAtRunnerStart(state);
-    if (virusCredits.amount > 0) {
-      if (!virusCredits.sourceDefinitionId)
-        throw new Error("Virus-Credit-Quelle fehlt.");
-      credits(state, "runner", virusCredits.amount);
-      effects?.push(
-        automaticGainCreditsEffect(
-          "runner.start.virus_counter_credits",
-          "runner",
-          virusCredits.amount,
-          virusCredits.sourceDefinitionId,
-        ),
-      );
-    }
-    flags.startOfTurnFloatingCreditsApplied = true;
-  }
-  continueRunnerStartOfTurnFromDelayedInstall(state, effects);
-}
-
-function continueRunnerStartOfTurnFromDelayedInstall(
-  state: GameState,
-  effects?: AutomaticEffectCollector,
-): void {
-  applyDelayedInstallStartOfTurn(
-    runnerSpecialTriggerExecutionHost(state),
-    effects,
-  );
-  if (state.pendingChoice) return;
-  if (queueIncubatorStartOfTurnTransforms(state)) return;
-  if (startVirusCounterRunnerPrivateLookAtStart(state)) return;
-  for (const cardId of state.runner.rig.resources.slice().sort()) {
-    if (state.pendingChoice) break;
-    if (
-      uniqueDirectLongtailKindForCard(state, cardId) ===
-      "start_turn_trash_for_credits"
-    )
-      startInstalledCardTrashForCreditsChoice(
-        hiddenZoneNonSearchChoiceHandlerHost(state, {
-          side: "runner",
-          payload: {},
-        } as LegalAction),
-        cardId,
-      );
-  }
-}
-
-function applyStartTurnRandomEffectTables(
-  state: GameState,
-  effects?: AutomaticEffectCollector,
-): void {
-  for (const sourceId of [
-    ...state.runner.rig.resources,
-    ...state.runner.rig.hardware,
-  ]
-    .slice()
-    .sort()) {
-    const sourceDefinitionId = definitionFor(state, sourceId).id;
-    const implementation = runnerUtilityLongtailImplementationForCard(
-      state,
-      sourceId,
-    );
-    if (implementation?.kind !== "start_turn_random_effect_table") continue;
-    const randomPurpose = `start_turn_random_effect_table.${sourceDefinitionId}.runner_start.${state.stateVersion}.${sourceId}`;
-    const dieRoll = rollDeterministicDie(state, randomPurpose);
-    const outcome =
-      implementation.outcomes.find(
-        (
-          candidate: Extract<
-            CardRunnerUtilityLongtailImplementation,
-            { kind: "start_turn_random_effect_table" }
-          >["outcomes"][number],
-        ) => candidate.roll === dieRoll,
-      ) ??
-      implementation.defaultOutcome;
-    const grantsAction =
-      outcome.kind === "trash_source_and_grant_persistent_extra_action";
-    const dealsDamage = outcome.kind === "unpreventable_damage";
-    let damageSummary: DamageSummary | undefined;
-    if (grantsAction) {
-      const flags = ensureRunnerTurnFlags(state);
-      const modifiers = (flags.persistentModifiers ??= []);
-      if (!modifiers.some((modifier) => modifier.sourceCardInstanceId === sourceId)) {
-        modifiers.push({
-          sourceCardInstanceId: sourceId,
-          sourceDefinitionId,
-          kind: "runner_extra_actions_per_turn",
-          amount: outcome.extraActions,
-        });
-        state.runner.clicks += outcome.extraActions;
       }
-      trashRunnerInstalledCardToHeap(state, sourceId);
-    } else if (dealsDamage) {
-      damageSummary = doDamage(state, {
-        damageId: `runner.start.${sourceDefinitionId}.${outcome.damageType}.${state.stateVersion}`,
-        damageType: outcome.damageType,
-        amount: outcome.amount,
-        source: `runner_start:${sourceDefinitionId}`,
-      });
     }
-    effects?.push({
-      effectId: `runner.start.random_effect_table.${sourceId}`,
-      kind: grantsAction ? "gain_actions" : dealsDamage ? "damage" : "counter_change",
-      visibility: "public",
-      side: "runner",
-      amount: grantsAction ? outcome.extraActions : damageSummary?.amount ?? 0,
-      reason: "start_of_turn",
-      sourceDefinitionId,
-      sourceTitle: publicCardTitle(sourceDefinitionId),
-      v1921DieRoll: dieRoll,
-      randomEffectOutcome:
-        grantsAction ? "permanent_action" : dealsDamage ? `${outcome.damageType}_damage` : "no_effect",
-      randomPurpose,
-      randomCounterAfter: state.randomCounter,
-      ...(grantsAction
-        ? {
-            permanentActionGain: true,
-            sourceTrashed: true,
-            runnerClicksAfter: state.runner.clicks,
-          }
-        : {}),
-      ...(damageSummary
-        ? {
-            damageCannotBePrevented: true,
-            damageType: damageSummary.damageType,
-            cardsTrashed: damageSummary.cardsTrashed,
-            flatline: damageSummary.flatline,
-            ...(damageSummary.coreDamageAfter !== undefined
-              ? { coreDamageAfter: damageSummary.coreDamageAfter }
-              : {}),
-          }
-        : {}),
-    } as ResolvedGameEffect);
+    executeCardImplementationStartOfRunnerTurnEffects(
+      cardImplementationRuntimeDeps,
+      state,
+      effects,
+    );
+    applyStartTurnRandomEffectTables(state, effects);
+    if (!flags.startOfTurnFloatingCreditsApplied) {
+      const virusCredits = virusCounterCreditsAtRunnerStart(state);
+      if (virusCredits.amount > 0) {
+        if (!virusCredits.sourceDefinitionId)
+          throw new Error("Virus-Credit-Quelle fehlt.");
+        credits(state, "runner", virusCredits.amount);
+        effects?.push(
+          automaticGainCreditsEffect(
+            "runner.start.virus_counter_credits",
+            "runner",
+            virusCredits.amount,
+            virusCredits.sourceDefinitionId,
+          ),
+        );
+      }
+      flags.startOfTurnFloatingCreditsApplied = true;
+    }
+    continueRunnerStartOfTurnFromDelayedInstall(state, effects);
   }
-}
 
-function applyRunnerStartTurnActionEconomyEffects(
-  state: GameState,
-  effects?: AutomaticEffectCollector,
-): void {
-  for (const sourceId of state.runner.rig.hardware.slice().sort()) {
-    const definition = definitionFor(state, sourceId);
-    const longtail =
-      cardImplementationForDefinitionId(definition.id)?.uniqueDirectLongtail;
-    if (
-      longtail?.kind !==
-      "runner_start_turn_drip_counter_action_or_core_damage"
-    )
-      continue;
-    const current = cardCounter(state, sourceId, "drip");
-    if (current >= longtail.threshold) {
-      setCardCounter(state, sourceId, "drip", 0);
-      const damageSummary = doDamage(state, {
-        damageId: `runner.start.${definition.id}.drip_core.${state.stateVersion}`,
-        damageType: "core",
-        amount: 1,
-        source: `runner_start:${definition.id}`,
-      });
+  function continueRunnerStartOfTurnFromDelayedInstall(
+    state: GameState,
+    effects?: AutomaticEffectCollector,
+  ): void {
+    applyDelayedInstallStartOfTurn(
+      runnerSpecialTriggerExecutionHost(state),
+      effects,
+    );
+    if (state.pendingChoice) return;
+    if (queueIncubatorStartOfTurnTransforms(state)) return;
+    if (startVirusCounterRunnerPrivateLookAtStart(state)) return;
+    for (const cardId of state.runner.rig.resources.slice().sort()) {
+      if (state.pendingChoice) break;
+      if (
+        uniqueDirectLongtailKindForCard(state, cardId) ===
+        "start_turn_trash_for_credits"
+      )
+        startInstalledCardTrashForCreditsChoice(
+          hiddenZoneNonSearchChoiceHandlerHost(state, {
+            side: "runner",
+            payload: {},
+          } as LegalAction),
+          cardId,
+        );
+    }
+  }
+
+  function applyStartTurnRandomEffectTables(
+    state: GameState,
+    effects?: AutomaticEffectCollector,
+  ): void {
+    for (const sourceId of [
+      ...state.runner.rig.resources,
+      ...state.runner.rig.hardware,
+    ]
+      .slice()
+      .sort()) {
+      const sourceDefinitionId = definitionFor(state, sourceId).id;
+      const implementation = runnerUtilityLongtailImplementationForCard(
+        state,
+        sourceId,
+      );
+      if (implementation?.kind !== "start_turn_random_effect_table") continue;
+      const randomPurpose = `start_turn_random_effect_table.${sourceDefinitionId}.runner_start.${state.stateVersion}.${sourceId}`;
+      const dieRoll = rollDeterministicDie(state, randomPurpose);
+      const outcome =
+        implementation.outcomes.find(
+          (
+            candidate: Extract<
+              CardRunnerUtilityLongtailImplementation,
+              { kind: "start_turn_random_effect_table" }
+            >["outcomes"][number],
+          ) => candidate.roll === dieRoll,
+        ) ?? implementation.defaultOutcome;
+      const grantsAction =
+        outcome.kind === "trash_source_and_grant_persistent_extra_action";
+      const dealsDamage = outcome.kind === "unpreventable_damage";
+      let damageSummary: DamageSummary | undefined;
+      if (grantsAction) {
+        const flags = ensureRunnerTurnFlags(state);
+        const modifiers = (flags.persistentModifiers ??= []);
+        if (
+          !modifiers.some(
+            (modifier) => modifier.sourceCardInstanceId === sourceId,
+          )
+        ) {
+          modifiers.push({
+            sourceCardInstanceId: sourceId,
+            sourceDefinitionId,
+            kind: "runner_extra_actions_per_turn",
+            amount: outcome.extraActions,
+          });
+          state.runner.clicks += outcome.extraActions;
+        }
+        trashRunnerInstalledCardToHeap(state, sourceId);
+      } else if (dealsDamage) {
+        damageSummary = doDamage(state, {
+          damageId: `runner.start.${sourceDefinitionId}.${outcome.damageType}.${state.stateVersion}`,
+          damageType: outcome.damageType,
+          amount: outcome.amount,
+          source: `runner_start:${sourceDefinitionId}`,
+        });
+      }
       effects?.push({
-        effectId: `runner.start.drip.${sourceId}`,
-        kind: "damage",
+        effectId: `runner.start.random_effect_table.${sourceId}`,
+        kind: grantsAction
+          ? "gain_actions"
+          : dealsDamage
+            ? "damage"
+            : "counter_change",
         visibility: "public",
         side: "runner",
-        amount: 1,
+        amount: grantsAction
+          ? outcome.extraActions
+          : (damageSummary?.amount ?? 0),
         reason: "start_of_turn",
-        counterType: "drip",
-        remainingCounters: 0,
-        sourceDefinitionId: definition.id,
-        sourceTitle: definition.title,
-        damageCannotBePrevented: true,
-        damageType: "core",
-        cardsTrashed: damageSummary.cardsTrashed,
-        ...(damageSummary.coreDamageAfter !== undefined
-          ? { coreDamageAfter: damageSummary.coreDamageAfter }
+        sourceDefinitionId,
+        sourceTitle: publicCardTitle(sourceDefinitionId),
+        v1921DieRoll: dieRoll,
+        randomEffectOutcome: grantsAction
+          ? "permanent_action"
+          : dealsDamage
+            ? `${outcome.damageType}_damage`
+            : "no_effect",
+        randomPurpose,
+        randomCounterAfter: state.randomCounter,
+        ...(grantsAction
+          ? {
+              permanentActionGain: true,
+              sourceTrashed: true,
+              runnerClicksAfter: state.runner.clicks,
+            }
+          : {}),
+        ...(damageSummary
+          ? {
+              damageCannotBePrevented: true,
+              damageType: damageSummary.damageType,
+              cardsTrashed: damageSummary.cardsTrashed,
+              flatline: damageSummary.flatline,
+              ...(damageSummary.coreDamageAfter !== undefined
+                ? { coreDamageAfter: damageSummary.coreDamageAfter }
+                : {}),
+            }
           : {}),
       } as ResolvedGameEffect);
-    } else {
-      setCardCounter(state, sourceId, "drip", current + 1);
-      state.runner.clicks += 1;
+    }
+  }
+
+  function applyRunnerStartTurnActionEconomyEffects(
+    state: GameState,
+    effects?: AutomaticEffectCollector,
+  ): void {
+    for (const sourceId of state.runner.rig.hardware.slice().sort()) {
+      const definition = definitionFor(state, sourceId);
+      const longtail = cardImplementationForDefinitionId(
+        definition.id,
+      )?.uniqueDirectLongtail;
+      if (
+        longtail?.kind !==
+        "runner_start_turn_drip_counter_action_or_core_damage"
+      )
+        continue;
+      const current = cardCounter(state, sourceId, "drip");
+      if (current >= longtail.threshold) {
+        setCardCounter(state, sourceId, "drip", 0);
+        const damageSummary = doDamage(state, {
+          damageId: `runner.start.${definition.id}.drip_core.${state.stateVersion}`,
+          damageType: "core",
+          amount: 1,
+          source: `runner_start:${definition.id}`,
+        });
+        effects?.push({
+          effectId: `runner.start.drip.${sourceId}`,
+          kind: "damage",
+          visibility: "public",
+          side: "runner",
+          amount: 1,
+          reason: "start_of_turn",
+          counterType: "drip",
+          remainingCounters: 0,
+          sourceDefinitionId: definition.id,
+          sourceTitle: definition.title,
+          damageCannotBePrevented: true,
+          damageType: "core",
+          cardsTrashed: damageSummary.cardsTrashed,
+          ...(damageSummary.coreDamageAfter !== undefined
+            ? { coreDamageAfter: damageSummary.coreDamageAfter }
+            : {}),
+        } as ResolvedGameEffect);
+      } else {
+        setCardCounter(state, sourceId, "drip", current + 1);
+        state.runner.clicks += 1;
+        effects?.push({
+          effectId: `runner.start.drip.${sourceId}`,
+          kind: "gain_actions",
+          visibility: "public",
+          side: "runner",
+          amount: 1,
+          reason: "start_of_turn",
+          counterType: "drip",
+          remainingCounters: current + 1,
+          addedCounterAmount: 1,
+          sourceDefinitionId: definition.id,
+          sourceTitle: definition.title,
+        });
+      }
+    }
+
+    for (const sourceId of state.runner.rig.resources.slice().sort()) {
+      const definition = definitionFor(state, sourceId);
+      const longtail = cardImplementationForDefinitionId(
+        definition.id,
+      )?.uniqueDirectLongtail;
+      if (longtail?.kind !== "runner_start_turn_forced_random_action") continue;
+      const randomPurpose = `action_economy.${definition.id}.runner_start.${state.stateVersion}.${sourceId}`;
+      const dieRoll = rollDeterministicDie(state, randomPurpose);
+      const grant = runnerForcedActionGrantForRoll(
+        state,
+        sourceId,
+        definition.id,
+        dieRoll,
+      );
+      if (!grant) continue;
+      addTurnBoundExtraActionGrant(state, {
+        side: "runner",
+        sourceCardInstanceId: sourceId,
+        sourceDefinitionId: definition.id,
+        restriction: grant.restriction,
+        forced: true,
+        dieRoll,
+        randomPurpose,
+        ...(grant.targetServerId
+          ? { targetServerId: grant.targetServerId }
+          : {}),
+        ...(grant.targetCardInstanceId
+          ? { targetCardInstanceId: grant.targetCardInstanceId }
+          : {}),
+        ...(grant.revealToCorpOnly ? { revealToCorpOnly: true } : {}),
+      });
       effects?.push({
-        effectId: `runner.start.drip.${sourceId}`,
+        effectId: `runner.start.forced_action.${sourceId}`,
         kind: "gain_actions",
         visibility: "public",
         side: "runner",
         amount: 1,
         reason: "start_of_turn",
-        counterType: "drip",
-        remainingCounters: current + 1,
-        addedCounterAmount: 1,
         sourceDefinitionId: definition.id,
         sourceTitle: definition.title,
-      });
+        dieRoll,
+        randomPurpose,
+        randomCounterAfter: state.randomCounter,
+        restrictedActionFamily: grant.restriction,
+        ...(grant.targetServerId ? { serverId: grant.targetServerId } : {}),
+      } as ResolvedGameEffect);
     }
   }
 
-  for (const sourceId of state.runner.rig.resources.slice().sort()) {
-    const definition = definitionFor(state, sourceId);
-    const longtail =
-      cardImplementationForDefinitionId(definition.id)?.uniqueDirectLongtail;
-    if (longtail?.kind !== "runner_start_turn_forced_random_action") continue;
-    const randomPurpose = `action_economy.${definition.id}.runner_start.${state.stateVersion}.${sourceId}`;
-    const dieRoll = rollDeterministicDie(state, randomPurpose);
-    const grant = runnerForcedActionGrantForRoll(
-      state,
-      sourceId,
-      definition.id,
-      dieRoll,
-    );
-    if (!grant) continue;
-    addTurnBoundExtraActionGrant(state, {
-      side: "runner",
-      sourceCardInstanceId: sourceId,
-      sourceDefinitionId: definition.id,
-      restriction: grant.restriction,
-      forced: true,
-      dieRoll,
-      randomPurpose,
-      ...(grant.targetServerId ? { targetServerId: grant.targetServerId } : {}),
-      ...(grant.targetCardInstanceId
-        ? { targetCardInstanceId: grant.targetCardInstanceId }
-        : {}),
-      ...(grant.revealToCorpOnly ? { revealToCorpOnly: true } : {}),
-    });
-    effects?.push({
-      effectId: `runner.start.forced_action.${sourceId}`,
-      kind: "gain_actions",
-      visibility: "public",
-      side: "runner",
-      amount: 1,
-      reason: "start_of_turn",
-      sourceDefinitionId: definition.id,
-      sourceTitle: definition.title,
-      dieRoll,
-      randomPurpose,
-      randomCounterAfter: state.randomCounter,
-      restrictedActionFamily: grant.restriction,
-      ...(grant.targetServerId ? { serverId: grant.targetServerId } : {}),
-    } as ResolvedGameEffect);
-  }
-}
-
-function runnerForcedActionGrantForRoll(
-  state: GameState,
-  sourceId: CardInstanceId,
-  sourceDefinitionId: CardDefinitionId,
-  dieRoll: number,
-):
-  | {
-      restriction: RestrictedActionFamily;
-      targetServerId?: Exclude<ServerId, "new_remote">;
-      targetCardInstanceId?: CardInstanceId;
-      revealToCorpOnly?: boolean;
+  function runnerForcedActionGrantForRoll(
+    state: GameState,
+    sourceId: CardInstanceId,
+    sourceDefinitionId: CardDefinitionId,
+    dieRoll: number,
+  ):
+    | {
+        restriction: RestrictedActionFamily;
+        targetServerId?: Exclude<ServerId, "new_remote">;
+        targetCardInstanceId?: CardInstanceId;
+        revealToCorpOnly?: boolean;
+      }
+    | undefined {
+    void sourceId;
+    void sourceDefinitionId;
+    if (dieRoll === 1) return { restriction: "draw_card" };
+    if (dieRoll === 2) return { restriction: "gain_credit" };
+    if (dieRoll === 3)
+      return { restriction: "start_run", targetServerId: "rd" };
+    if (dieRoll === 4)
+      return { restriction: "start_run", targetServerId: "hq" };
+    if (dieRoll === 5) {
+      const hasRemote = state.corp.servers.some(
+        (server) => server.kind === "remote",
+      );
+      if (!hasRemote) return undefined;
+      return { restriction: "start_run_remote" };
     }
-  | undefined {
-  void sourceId;
-  void sourceDefinitionId;
-  if (dieRoll === 1) return { restriction: "draw_card" };
-  if (dieRoll === 2) return { restriction: "gain_credit" };
-  if (dieRoll === 3) return { restriction: "start_run", targetServerId: "rd" };
-  if (dieRoll === 4) return { restriction: "start_run", targetServerId: "hq" };
-  if (dieRoll === 5) {
-    const remote = state.corp.servers
-      .filter((server) => server.kind === "remote")
-      .sort((a, b) => a.id.localeCompare(b.id))[0];
-    if (!remote) return undefined;
-    return { restriction: "start_run", targetServerId: remote.id };
-  }
-  const target = randomRunnerGripCardId(state, "runner_forced_action.random_grip");
-  if (!target) return undefined;
-  return {
-    restriction: "play_or_install_card",
-    targetCardInstanceId: target,
-    revealToCorpOnly: true,
-  };
-}
-
-function randomRunnerGripCardId(
-  state: GameState,
-  purpose: string,
-): CardInstanceId | undefined {
-  if (state.runner.grip.length === 0) return undefined;
-  const value = nextRandom(state, `${purpose}.${state.stateVersion}`);
-  return state.runner.grip[Math.floor(value * state.runner.grip.length)];
-}
-
-function virusCounterCreditsAtRunnerStart(state: GameState): {
-  amount: number;
-  sourceDefinitionId?: CardDefinitionId;
-} {
-  return Object.keys(state.cardInstances).reduce((result, cardId) => {
-    const implementation = virusCounterImplementationForCard(state, cardId);
-    const start = implementation?.startOfRunnerTurn;
-    if (start?.kind !== "gain_credits_per_two_counters") return result;
-    const amount =
-      Math.floor(cardCounter(state, cardId, "virus") / start.perCounters) *
-      start.amountPerGroup;
-    return {
-      amount: result.amount + amount,
-      sourceDefinitionId:
-        result.sourceDefinitionId ?? definitionFor(state, cardId).id,
-    };
-  }, { amount: 0 } as { amount: number; sourceDefinitionId?: CardDefinitionId });
-}
-
-function startVirusCounterRunnerPrivateLookAtStart(state: GameState): boolean {
-  const boardwalk = Object.keys(state.cardInstances).reduce((result, cardId) => {
-    const implementation = virusCounterImplementationForCard(state, cardId);
-    const start = implementation?.startOfRunnerTurn;
-    if (start?.kind !== "random_reveal_hq_cards_per_two_counters") return result;
-    const amount =
-      Math.floor(cardCounter(state, cardId, "virus") / start.perCounters) *
-      start.countPerGroup;
-    return {
-      amount: result.amount + amount,
-      sourceDefinitionId:
-        result.sourceDefinitionId ?? definitionFor(state, cardId).id,
-    };
-  }, { amount: 0 } as { amount: number; sourceDefinitionId?: CardDefinitionId });
-  if (boardwalk.amount > 0 && state.corp.hq.length > 0) {
-    const selected = randomCorpHqCardsWithoutReplacement(
+    const target = randomRunnerGripCardId(
       state,
-      Math.min(boardwalk.amount, state.corp.hq.length),
-      `p3_49.random.boardwalk.hq_reveal.${state.stateVersion}`,
+      "runner_forced_action.random_grip",
     );
-    return startRunnerPrivateLookAtSpecificCorpCards(
-      state,
-      boardwalk.sourceDefinitionId ?? definitionFor(state, state.runner.identity).id,
-      "hq",
-      selected,
-      "Boardwalk: zufällige HQ-Karten ansehen.",
+    if (!target) return undefined;
+    return {
+      restriction: "play_or_install_card",
+      targetCardInstanceId: target,
+      revealToCorpOnly: true,
+    };
+  }
+
+  function randomRunnerGripCardId(
+    state: GameState,
+    purpose: string,
+  ): CardInstanceId | undefined {
+    if (state.runner.grip.length === 0) return undefined;
+    const value = nextRandom(state, `${purpose}.${state.stateVersion}`);
+    return state.runner.grip[Math.floor(value * state.runner.grip.length)];
+  }
+
+  function virusCounterCreditsAtRunnerStart(state: GameState): {
+    amount: number;
+    sourceDefinitionId?: CardDefinitionId;
+  } {
+    return Object.keys(state.cardInstances).reduce(
+      (result, cardId) => {
+        const implementation = virusCounterImplementationForCard(state, cardId);
+        const start = implementation?.startOfRunnerTurn;
+        if (start?.kind !== "gain_credits_per_two_counters") return result;
+        const amount =
+          Math.floor(cardCounter(state, cardId, "virus") / start.perCounters) *
+          start.amountPerGroup;
+        return {
+          amount: result.amount + amount,
+          sourceDefinitionId:
+            result.sourceDefinitionId ?? definitionFor(state, cardId).id,
+        };
+      },
+      { amount: 0 } as {
+        amount: number;
+        sourceDefinitionId?: CardDefinitionId;
+      },
     );
   }
 
-  const privateRdLookSourceCardId = Object.keys(state.cardInstances).find((cardId) => {
-    const implementation = virusCounterImplementationForCard(state, cardId);
-    const start = implementation?.startOfRunnerTurn;
-    return (
-      start?.kind === "private_look_top_rd_at_threshold" &&
-      cardCounter(state, cardId, "virus") >= start.threshold
+  function startVirusCounterRunnerPrivateLookAtStart(
+    state: GameState,
+  ): boolean {
+    const boardwalk = Object.keys(state.cardInstances).reduce(
+      (result, cardId) => {
+        const implementation = virusCounterImplementationForCard(state, cardId);
+        const start = implementation?.startOfRunnerTurn;
+        if (start?.kind !== "random_reveal_hq_cards_per_two_counters")
+          return result;
+        const amount =
+          Math.floor(cardCounter(state, cardId, "virus") / start.perCounters) *
+          start.countPerGroup;
+        return {
+          amount: result.amount + amount,
+          sourceDefinitionId:
+            result.sourceDefinitionId ?? definitionFor(state, cardId).id,
+        };
+      },
+      { amount: 0 } as {
+        amount: number;
+        sourceDefinitionId?: CardDefinitionId;
+      },
     );
-  });
-  if (!privateRdLookSourceCardId || state.corp.rd.length === 0) return false;
-  return startRunnerPrivateLookChoice(
-    state,
-    privateRdLookSourceCardId,
-    definitionFor(state, privateRdLookSourceCardId).id,
-    "rd",
-    1,
-    "ability",
-  );
-}
-
-function randomCorpHqCardsWithoutReplacement(
-  state: GameState,
-  count: number,
-  purpose: string,
-): CardInstanceId[] {
-  const pool = state.corp.hq.slice();
-  const selected: CardInstanceId[] = [];
-  const limit = Math.min(Math.max(0, Math.floor(count)), pool.length);
-  for (let index = 0; index < limit; index += 1) {
-    const value = nextRandom(state, `${purpose}.${index}`);
-    const selectedIndex = Math.floor(value * pool.length);
-    const [cardId] = pool.splice(selectedIndex, 1);
-    if (cardId) selected.push(cardId);
-  }
-  return selected;
-}
-
-function startRunnerPrivateLookAtSpecificCorpCards(
-  state: GameState,
-  sourceDefinitionId: CardDefinitionId,
-  zone: Extract<ServerId, "rd" | "hq">,
-  cardIds: CardInstanceId[],
-  prompt: string,
-): boolean {
-  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  const visibleIds = cardIds.filter((cardId) => {
-    const instance = state.cardInstances[cardId];
-    return instance?.owner === "corp";
-  });
-  if (visibleIds.length === 0) return false;
-  state.pendingChoice = {
-    choiceId: `p3_49_virus_private_look_${zone}_${state.stateVersion + 1}`,
-    side: "runner",
-    source: `p3_33.private_look:ability:${sourceDefinitionId}:${zone}:${state.stateVersion + 1}`,
-    prompt,
-    kind: "select_cards",
-    options: [
-      ...visibleIds.map((cardId) => ({
-        id: `card_${cardId}`,
-        label: definitionFor(state, cardId).title,
-        publicLabel: "Verdeckte Korp-Karte",
-        value: cardId,
-        selectable: false,
-      })),
-      { id: "done", label: "Fertig", publicLabel: "Fertig", value: "done" },
-    ],
-    minSelections: 1,
-    maxSelections: 1,
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-  };
-  return true;
-}
-
-function queueIncubatorStartOfTurnTransforms(state: GameState): boolean {
-  const flags = ensureRunnerTurnFlags(state);
-  if (flags.incubatorPendingTransforms === undefined) {
-    const counterTotal = incubatorCounterTotal(state);
-    let pending = 0;
-    for (let index = 0; index < counterTotal; index += 1) {
-      const die = rollDeterministicDie(
+    if (boardwalk.amount > 0 && state.corp.hq.length > 0) {
+      const selected = randomCorpHqCardsWithoutReplacement(
         state,
-        `v191.die.${INCUBATOR_ID}.start_of_turn.roll.${state.stateVersion}.${index}`,
+        Math.min(boardwalk.amount, state.corp.hq.length),
+        `p3_49.random.boardwalk.hq_reveal.${state.stateVersion}`,
       );
-      if (die === 6) pending += 1;
+      return startRunnerPrivateLookAtSpecificCorpCards(
+        state,
+        boardwalk.sourceDefinitionId ??
+          definitionFor(state, state.runner.identity).id,
+        "hq",
+        selected,
+        "Boardwalk: zufällige HQ-Karten ansehen.",
+      );
     }
-    flags.incubatorPendingTransforms = pending;
+
+    const privateRdLookSourceCardId = Object.keys(state.cardInstances).find(
+      (cardId) => {
+        const implementation = virusCounterImplementationForCard(state, cardId);
+        const start = implementation?.startOfRunnerTurn;
+        return (
+          start?.kind === "private_look_top_rd_at_threshold" &&
+          cardCounter(state, cardId, "virus") >= start.threshold
+        );
+      },
+    );
+    if (!privateRdLookSourceCardId || state.corp.rd.length === 0) return false;
+    return startRunnerPrivateLookChoice(
+      state,
+      privateRdLookSourceCardId,
+      definitionFor(state, privateRdLookSourceCardId).id,
+      "rd",
+      1,
+      "ability",
+    );
   }
-  if ((flags.incubatorPendingTransforms ?? 0) <= 0) return false;
-  return startIncubatorTransformChoice(state);
-}
 
-function startIncubatorTransformChoice(state: GameState): boolean {
-  const flags = ensureRunnerTurnFlags(state);
-  const pending = Math.max(
-    0,
-    Math.floor(flags.incubatorPendingTransforms ?? 0),
-  );
-  if (pending <= 0) return false;
+  function randomCorpHqCardsWithoutReplacement(
+    state: GameState,
+    count: number,
+    purpose: string,
+  ): CardInstanceId[] {
+    const pool = state.corp.hq.slice();
+    const selected: CardInstanceId[] = [];
+    const limit = Math.min(Math.max(0, Math.floor(count)), pool.length);
+    for (let index = 0; index < limit; index += 1) {
+      const value = nextRandom(state, `${purpose}.${index}`);
+      const selectedIndex = Math.floor(value * pool.length);
+      const [cardId] = pool.splice(selectedIndex, 1);
+      if (cardId) selected.push(cardId);
+    }
+    return selected;
+  }
 
-  const cardTargets = Object.keys(state.cardInstances)
-    .sort()
-    .filter((cardId) => cardCounter(state, cardId, "virus") > 0)
-    .filter((cardId) => isVisibleVirusCounterCardForRunner(state, cardId))
-    .map((cardId) => {
-      const title = definitionFor(state, cardId).title;
-      const amount = cardCounter(state, cardId, "virus");
-      return {
-        id: `card_${cardId}`,
-        label: `${title} (${amount})`,
-        publicLabel: "Virus-Counter",
-        value: `card:${cardId}`,
-      };
+  function startRunnerPrivateLookAtSpecificCorpCards(
+    state: GameState,
+    sourceDefinitionId: CardDefinitionId,
+    zone: Extract<ServerId, "rd" | "hq">,
+    cardIds: CardInstanceId[],
+    prompt: string,
+  ): boolean {
+    if (state.pendingChoice)
+      throw new Error("Es ist bereits eine Choice offen.");
+    const visibleIds = cardIds.filter((cardId) => {
+      const instance = state.cardInstances[cardId];
+      return instance?.owner === "corp";
     });
-
-  const poxTargets = state.corp.servers
-    .map((server) => ({
-      serverId: server.id,
-      amount: poxCountersForServer(state, server.id),
-    }))
-    .filter((entry) => entry.amount > 0)
-    .map((entry) => ({
-      id: `pox_${entry.serverId}`,
-      label: `Pox auf ${publicServerLabel(state, entry.serverId) ?? entry.serverId} (${entry.amount})`,
-      publicLabel: "Virus-Counter",
-      value: `pox:${entry.serverId}`,
-    }));
-
-  const faitTargets = state.corp.servers
-    .map((server) => ({
-      serverId: server.id,
-      amount: Math.max(
-        0,
-        Math.floor(state.serverAgendaCostCountersByServer?.[server.id] ?? 0),
-      ),
-    }))
-    .filter((entry) => entry.amount > 0)
-    .map((entry) => ({
-      id: `fait_${entry.serverId}`,
-      label: `Fait auf ${publicServerLabel(state, entry.serverId) ?? entry.serverId} (${entry.amount})`,
-      publicLabel: "Virus-Counter",
-      value: `fait:${entry.serverId}`,
-    }));
-
-  const options = [...cardTargets, ...poxTargets, ...faitTargets];
-  if (options.length === 0) {
-    flags.incubatorPendingTransforms = 0;
-    return false;
-  }
-
-  state.pendingChoice = {
-    choiceId: `v191_incubator_transform_${state.stateVersion + 1}_${pending}`,
-    side: "runner",
-    source: `v191.incubator_transform:${state.stateVersion + 1}`,
-    prompt: "Incubator: Wähle einen Virus-Counter für die Verdopplung.",
-    kind: "select_option",
-    options,
-    minSelections: 1,
-    maxSelections: 1,
-    stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier",
-  };
-  return true;
-}
-
-function resumeStartOfTurnAfterTagPrevention(
-  state: GameState,
-  legalAction: LegalAction,
-): void {
-  const continuation = state.pendingAddTagContinuation;
-  if (!continuation)
-    throw new Error("Es ist keine Start-of-turn-Tag-Fortsetzung offen.");
-  if (state.pendingChoice || state.eventModificationWindow)
-    throw new Error("Das Add-Tag-Fenster ist noch nicht abgeschlossen.");
-  const effects: AutomaticEffectCollector = [];
-
-  if (continuation.kind === "corp_start_turn") {
-    const tagsAdded = Math.max(
-      0,
-      state.runner.tags - continuation.runnerTagsBefore,
-    );
-    const rootCardIds = rezzedCorpRootCardIds(state);
-    if (
-      continuation.nextRootCardIndex <= 0 ||
-      rootCardIds[continuation.nextRootCardIndex - 1] !==
-        continuation.sourceCardId ||
-      definitionFor(state, continuation.sourceCardId).id !==
-        continuation.sourceDefinitionId
-    )
-      throw new Error("Die Corp-Start-Tag-Fortsetzung ist veraltet.");
-    effects.push({
-      effectId: `corp.start.classic.satellite_monitors.${continuation.sourceCardId}`,
-      kind: tagsAdded > 0 ? "add_tags" : "counter_change",
-      visibility: "public",
+    if (visibleIds.length === 0) return false;
+    state.pendingChoice = {
+      choiceId: `p3_49_virus_private_look_${zone}_${state.stateVersion + 1}`,
       side: "runner",
-      amount: tagsAdded,
-      reason: "start_of_turn",
-      sourceDefinitionId: continuation.sourceDefinitionId,
-      sourceTitle: publicCardTitle(continuation.sourceDefinitionId),
-      runAttemptsLastTurn: continuation.runAttemptsLastTurn,
-      dieSize: 6,
-      dieRolls: continuation.dieRolls.join(","),
-      tagsAdded,
-      runnerTagsAfter: state.runner.tags,
-      randomCounterAfter: state.randomCounter,
-    } as ResolvedGameEffect);
-    delete state.pendingAddTagContinuation;
-    const suspended = applyCorpStartOfTurnEffects(
-      state,
-      effects,
-      legalAction,
-      continuation.nextRootCardIndex,
-      true,
-    );
-    if (!suspended) openCorpStartTurnRestrictedActionOffers(state, effects);
-    appendResolvedEffectsToPayload(legalAction, effects);
-    return;
+      source: `p3_33.private_look:ability:${sourceDefinitionId}:${zone}:${state.stateVersion + 1}`,
+      prompt,
+      kind: "select_cards",
+      options: [
+        ...visibleIds.map((cardId) => ({
+          id: `card_${cardId}`,
+          label: definitionFor(state, cardId).title,
+          publicLabel: "Verdeckte Korp-Karte",
+          value: cardId,
+          selectable: false,
+        })),
+        { id: "done", label: "Fertig", publicLabel: "Fertig", value: "done" },
+      ],
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: state.stateVersion + 1,
+      visibility: "hidden_info_barrier",
+    };
+    return true;
   }
 
-  if (continuation.kind === "runner_start_turn") {
-    const tagsAdded = Math.max(
+  function queueIncubatorStartOfTurnTransforms(state: GameState): boolean {
+    const flags = ensureRunnerTurnFlags(state);
+    if (flags.incubatorPendingTransforms === undefined) {
+      const counterTotal = incubatorCounterTotal(state);
+      let pending = 0;
+      for (let index = 0; index < counterTotal; index += 1) {
+        const die = rollDeterministicDie(
+          state,
+          `v191.die.${INCUBATOR_ID}.start_of_turn.roll.${state.stateVersion}.${index}`,
+        );
+        if (die === 6) pending += 1;
+      }
+      flags.incubatorPendingTransforms = pending;
+    }
+    if ((flags.incubatorPendingTransforms ?? 0) <= 0) return false;
+    return startIncubatorTransformChoice(state);
+  }
+
+  function startIncubatorTransformChoice(state: GameState): boolean {
+    const flags = ensureRunnerTurnFlags(state);
+    const pending = Math.max(
       0,
-      state.runner.tags - continuation.runnerTagsBefore,
+      Math.floor(flags.incubatorPendingTransforms ?? 0),
     );
-    const counterEffect = runnerTraceCounterEffectDefinitions()[
-      continuation.nextCounterEffectIndex - 1
-    ];
-    if (
-      !counterEffect ||
-      counterEffect.sourceDefinitionId !== continuation.sourceDefinitionId ||
-      counterEffect.counterType !== continuation.counterType ||
-      counterEffect.startOfRunnerTurn?.kind !== "add_tags"
-    )
-      throw new Error("Die Runner-Start-Tag-Fortsetzung ist veraltet.");
-    if (tagsAdded > 0)
-      effects.push(
-        automaticTagEffect(
-          `runner.start.${continuation.counterType}`,
-          tagsAdded,
-          continuation.sourceDefinitionId,
+    if (pending <= 0) return false;
+
+    const cardTargets = Object.keys(state.cardInstances)
+      .sort()
+      .filter((cardId) => cardCounter(state, cardId, "virus") > 0)
+      .filter((cardId) => isVisibleVirusCounterCardForRunner(state, cardId))
+      .map((cardId) => {
+        const title = definitionFor(state, cardId).title;
+        const amount = cardCounter(state, cardId, "virus");
+        return {
+          id: `card_${cardId}`,
+          label: `${title} (${amount})`,
+          publicLabel: "Virus-Counter",
+          value: `card:${cardId}`,
+        };
+      });
+
+    const poxTargets = state.corp.servers
+      .map((server) => ({
+        serverId: server.id,
+        amount: poxCountersForServer(state, server.id),
+      }))
+      .filter((entry) => entry.amount > 0)
+      .map((entry) => ({
+        id: `pox_${entry.serverId}`,
+        label: `Pox auf ${publicServerLabel(state, entry.serverId) ?? entry.serverId} (${entry.amount})`,
+        publicLabel: "Virus-Counter",
+        value: `pox:${entry.serverId}`,
+      }));
+
+    const faitTargets = state.corp.servers
+      .map((server) => ({
+        serverId: server.id,
+        amount: Math.max(
+          0,
+          Math.floor(state.serverAgendaCostCountersByServer?.[server.id] ?? 0),
         ),
-      );
-    delete state.pendingAddTagContinuation;
-    applyRunnerStartOfTurnEffects(
-      state,
-      effects,
-      "begin",
-      legalAction,
-      continuation.nextCounterEffectIndex,
-    );
-    appendResolvedEffectsToPayload(legalAction, effects);
-    return;
+      }))
+      .filter((entry) => entry.amount > 0)
+      .map((entry) => ({
+        id: `fait_${entry.serverId}`,
+        label: `Fait auf ${publicServerLabel(state, entry.serverId) ?? entry.serverId} (${entry.amount})`,
+        publicLabel: "Virus-Counter",
+        value: `fait:${entry.serverId}`,
+      }));
+
+    const options = [...cardTargets, ...poxTargets, ...faitTargets];
+    if (options.length === 0) {
+      flags.incubatorPendingTransforms = 0;
+      return false;
+    }
+
+    state.pendingChoice = {
+      choiceId: `v191_incubator_transform_${state.stateVersion + 1}_${pending}`,
+      side: "runner",
+      source: `v191.incubator_transform:${state.stateVersion + 1}`,
+      prompt: "Incubator: Wähle einen Virus-Counter für die Verdopplung.",
+      kind: "select_option",
+      options,
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: state.stateVersion + 1,
+      visibility: "hidden_info_barrier",
+    };
+    return true;
   }
 
-  throw new Error("Die Add-Tag-Fortsetzung gehoert nicht zum Turn-Start.");
-}
+  function resumeStartOfTurnAfterTagPrevention(
+    state: GameState,
+    legalAction: LegalAction,
+  ): void {
+    const continuation = state.pendingAddTagContinuation;
+    if (!continuation)
+      throw new Error("Es ist keine Start-of-turn-Tag-Fortsetzung offen.");
+    if (state.pendingChoice || state.eventModificationWindow)
+      throw new Error("Das Add-Tag-Fenster ist noch nicht abgeschlossen.");
+    const effects: AutomaticEffectCollector = [];
+
+    if (continuation.kind === "corp_start_turn") {
+      const tagsAdded = Math.max(
+        0,
+        state.runner.tags - continuation.runnerTagsBefore,
+      );
+      const rootCardIds = rezzedCorpRootCardIds(state);
+      if (
+        continuation.nextRootCardIndex <= 0 ||
+        rootCardIds[continuation.nextRootCardIndex - 1] !==
+          continuation.sourceCardId ||
+        definitionFor(state, continuation.sourceCardId).id !==
+          continuation.sourceDefinitionId
+      )
+        throw new Error("Die Corp-Start-Tag-Fortsetzung ist veraltet.");
+      effects.push({
+        effectId: `corp.start.classic.satellite_monitors.${continuation.sourceCardId}`,
+        kind: tagsAdded > 0 ? "add_tags" : "counter_change",
+        visibility: "public",
+        side: "runner",
+        amount: tagsAdded,
+        reason: "start_of_turn",
+        sourceDefinitionId: continuation.sourceDefinitionId,
+        sourceTitle: publicCardTitle(continuation.sourceDefinitionId),
+        runAttemptsLastTurn: continuation.runAttemptsLastTurn,
+        dieSize: 6,
+        dieRolls: continuation.dieRolls.join(","),
+        tagsAdded,
+        runnerTagsAfter: state.runner.tags,
+        randomCounterAfter: state.randomCounter,
+      } as ResolvedGameEffect);
+      delete state.pendingAddTagContinuation;
+      const suspended = applyCorpStartOfTurnEffects(
+        state,
+        effects,
+        legalAction,
+        continuation.nextRootCardIndex,
+        true,
+      );
+      if (!suspended) openCorpStartTurnRestrictedActionOffers(state, effects);
+      appendResolvedEffectsToPayload(legalAction, effects);
+      return;
+    }
+
+    if (continuation.kind === "runner_start_turn") {
+      const tagsAdded = Math.max(
+        0,
+        state.runner.tags - continuation.runnerTagsBefore,
+      );
+      const counterEffect =
+        runnerTraceCounterEffectDefinitions()[
+          continuation.nextCounterEffectIndex - 1
+        ];
+      if (
+        !counterEffect ||
+        counterEffect.sourceDefinitionId !== continuation.sourceDefinitionId ||
+        counterEffect.counterType !== continuation.counterType ||
+        counterEffect.startOfRunnerTurn?.kind !== "add_tags"
+      )
+        throw new Error("Die Runner-Start-Tag-Fortsetzung ist veraltet.");
+      if (tagsAdded > 0)
+        effects.push(
+          automaticTagEffect(
+            `runner.start.${continuation.counterType}`,
+            tagsAdded,
+            continuation.sourceDefinitionId,
+          ),
+        );
+      delete state.pendingAddTagContinuation;
+      applyRunnerStartOfTurnEffects(
+        state,
+        effects,
+        "begin",
+        legalAction,
+        continuation.nextCounterEffectIndex,
+      );
+      appendResolvedEffectsToPayload(legalAction, effects);
+      return;
+    }
+
+    throw new Error("Die Add-Tag-Fortsetzung gehoert nicht zum Turn-Start.");
+  }
 
   return {
     resolveEndTurnTagIfRunnerReceivedTag,

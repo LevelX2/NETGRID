@@ -4664,7 +4664,9 @@ function formatChronicleEffect(
       category = "turn";
       {
         const forcedAction = forcedRandomActionChronicleText(effect);
-        const dieRoll = numberValue((effect as Record<string, unknown>).dieRoll);
+        const dieRoll = numberValue(
+          (effect as Record<string, unknown>).dieRoll,
+        );
         if (
           effect.reason === "start_of_turn" &&
           sourceTitle &&
@@ -6649,7 +6651,7 @@ function forcedRandomActionChronicleText(
     return { title: "eine Karte ziehen", chip: "Karte ziehen" };
   if (restriction === "gain_credit")
     return { title: "1 Credit nehmen", chip: "1 Credit" };
-  if (restriction === "start_run") {
+  if (restriction === "start_run" || restriction === "start_run_remote") {
     const server = displayServerLabel(effect.serverLabel ?? effect.serverId);
     return {
       title: `einen Run auf ${server ?? "eine Tochter-Datenfestung"} starten`,
@@ -6658,7 +6660,8 @@ function forcedRandomActionChronicleText(
   }
   if (restriction === "play_or_install_card")
     return {
-      title: "eine zufällige Karte aus der Hand offenlegen und spielen oder installieren",
+      title:
+        "eine zufällige Karte aus der Hand offenlegen und spielen oder installieren",
       chip: "Zufällige Handkarte",
     };
   return undefined;

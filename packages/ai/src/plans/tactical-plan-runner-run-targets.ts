@@ -234,7 +234,17 @@ function runnerCentralMatchpointAccessOpportunity(
   const pointsNeeded =
     context.input.playerView.agendaPointsToWin -
     context.input.playerView.own.agendaPoints;
-  if (pointsNeeded > 1) return false;
+  if (pointsNeeded > 2) return false;
+  if (
+    pointsNeeded === 2 &&
+    context.runnerRunTargetEvaluations?.some(
+      (candidate) =>
+        candidate.targetKind === "remote" &&
+        candidate.evidence.includes("remote_score_threat:possible"),
+    )
+  ) {
+    return false;
+  }
   return (
     evaluation.accessPayoff === "unknown" ||
     evaluation.accessPayoff === "fresh" ||

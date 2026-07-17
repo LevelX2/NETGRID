@@ -209,6 +209,48 @@ describe("runnerSemanticGoalFitScoreComponent", () => {
     });
   });
 
+  it("adds bounded multiaccess payoff to a projected target-goal run", () => {
+    const action = {
+      actionId: "multiaccess-rd",
+      side: "runner",
+      type: "play_event",
+    } as unknown as LegalAction;
+    const input = runnerInputWithGoals([
+      {
+        schemaVersion: "runner-tactical-goal-v1",
+        goalId: "runner.pressure_good_central_target",
+        family: "pressure",
+        priority: 980,
+        urgency: "high",
+        targetServerId: "rd",
+        source: "run_target_evaluation",
+        evidence: ["test_goal"],
+      },
+    ]);
+    const evaluation = {
+      targetServerId: "rd",
+      accessServerId: "rd",
+      recommendation: "run_now",
+      pathPassability: "reachable",
+      accessPayoff: "access_bonus",
+      multiaccessAvailable: true,
+    } as unknown as RunnerRunTargetEvaluation;
+
+    const component = runnerSemanticGoalFitScoreComponent(
+      input,
+      action,
+      "basic_install",
+      undefined,
+      testDependencies({ evaluation }),
+    );
+
+    expect(component).toMatchObject({
+      key: "runner_goal_fit_tactical_goal_run_target",
+      value: 1400,
+    });
+    expect(component?.reason).toContain("access_bonus:multiaccess");
+  });
+
   it("does not give projected run events target-goal credit for an unpayable path", () => {
     const action = {
       actionId: "run-event-rd",
