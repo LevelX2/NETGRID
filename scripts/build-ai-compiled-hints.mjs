@@ -48,6 +48,7 @@ const REVIEWED_EFFECT_NORMALIZATION_CARD_IDS = new Set([
   "onr_v1_095_jack-n-joe",
   "onr_v1_097_livewires-contacts",
   "onr_v1_108_score",
+  "onr_proteus_096_skullcap",
   "onr_proteus_101_all-hands",
   "onr_proteus_122_rush-hour",
 ]);

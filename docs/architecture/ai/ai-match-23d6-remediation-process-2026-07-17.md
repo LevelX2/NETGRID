@@ -1,6 +1,6 @@
 # Match 23D6: Runner-Run-, Breaker-, Broker- und Hint-Remediation
 
-Status: P6 aktiv
+Status: P7 aktiv
 
 ## Quelle und Zielprüfung
 
@@ -261,4 +261,11 @@ den finalen Merge.
   Handkartenplan überstimmen. D148 ist grün, D58 bleibt als sichere
   Installationsgegenprobe grün; 76 angrenzende AI-Verträge und 21
   Engine-Verträge bestehen.
-- P6 aktiv: Skullcap-Normalisierung und erneuter deckweiter Consumer-Audit.
+- P6 abgeschlossen: Skullcap ist in der bestehenden, geprüften
+  Effect-Normalisierung registriert. Der kompilierte generische
+  Damage-Prevention-Effekt liegt genau einmal vor und trägt die Typen Brain
+  und Net. Der feste Deck-Audit erfasst erneut 27/27 eindeutige und 45/45
+  Karten; Capability-/Search- und Doctrine-/Strategy-Consumer liefern Status
+  `ok` mit null Blockern und null Warnungen. Viacox erscheint dabei nur noch
+  mit Pflicht-/Zufallsaktions- und Run-Signalen, nicht mehr als Search-Tool.
+- P7 aktiv: breite Gates, Review, Wissenspflege, Main-Integration und Cleanup.

@@ -378,3 +378,25 @@ Verifizierte Consumer-Kette:
   Yield zu einem materiell stärkeren Bankzug;
 - Decision-Checkpoints: D37, D130, D164, D176, D148 und D58 sowie beide
   synthetischen Gegenproben grün.
+
+## P6-Verifikation: Skullcap und vollständiger Deck-Audit
+
+Skullcap verwendet jetzt denselben eng freigegebenen Compiler-
+Normalisierungspfad wie die bereits geprüften Karten mit kompatiblen aktiven
+und generierten Effekten. Der generische Effekt für Timing
+`prevention_window`, Scope `runner` und Resource `damage` wird genau einmal
+kompiliert und enthält `damageTypes: [brain, net]`; die getrennten typisierten
+Funktionssignale bleiben erhalten.
+
+Der feste Audit auf dem unveränderten Match-Decksnapshot bestätigt danach:
+
+- 27/27 eindeutige Karten und 45/45 Karten geprüft, keine Ausschlüsse;
+- Search-Tools weiterhin ausschließlich Aujourd'Oui;
+- Viacox ohne `setup.search`, mit Pflicht-/Zufallsaktionssignalen;
+- primäre Strategien weiterhin R&D Pressure 100, Run Event Tempo 100 und
+  Rig First 65; Interface Closeout 60 bleibt sekundär;
+- Auditstatus `ok`, null Blocker, null Warnungen.
+
+Damit sind aktiver Hint, Compiler, Inspector, Action-Projektion,
+Installationsscore, Plan-Arbitration, DeckCapability und DeckStrategy für die
+betroffenen Karten gemeinsam verifiziert.

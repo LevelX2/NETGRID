@@ -38748,6 +38748,10 @@
       },
       "effects": [
         {
+          "damageTypes": [
+            "brain",
+            "net"
+          ],
           "kind": "damage_prevention",
           "resource": "damage",
           "scope": "runner",
@@ -38762,16 +38766,6 @@
         {
           "kind": "brain_damage_prevention",
           "resource": "brain_damage",
-          "scope": "runner",
-          "timing": "prevention_window"
-        },
-        {
-          "damageTypes": [
-            "brain",
-            "net"
-          ],
-          "kind": "damage_prevention",
-          "resource": "damage",
           "scope": "runner",
           "timing": "prevention_window"
         }
