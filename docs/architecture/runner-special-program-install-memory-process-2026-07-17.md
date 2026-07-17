@@ -1,6 +1,7 @@
 # Runner-Spezialinstallationen: MU-korrekter Paketprozess
 
-Status: in Arbeit
+Status: abgeschlossen; Final Review:
+`docs/reviews/engine/runner-special-program-install-memory-final-review-2026-07-17.md`
 
 Quelle/Vorgabe: Nutzerfund vom 2026-07-17 zu `Sneak Preview` sowie Auftrag,
 vergleichbare Programme installierende Karteneffekte zu prüfen und denselben
@@ -94,14 +95,14 @@ Fortsetzung ist erst nach dokumentierter Removal Condition zulässig.
 
 | Karte/Pfad | Installationsquelle | Aktueller Befund | Sollbehandlung |
 |---|---|---|---|
-| Sneak Preview | Stack oder Heap, kostenlos, temporär | fehlerhaft: Quelle und Programme werden nach aktuell freier MU vorgefiltert | Ziel wählen, bei Bedarf Programme trashen, kostenlos installieren, Stack ggf. shufflen, temporäre Rückgabe tracken |
-| Self-Modifying Code | Stack, normale Kosten, Source-Trash | fehlerhaft im aktuellen CardImplementation-Pfad; alter Legacy-Pfad kennt bereits MU-Freimachung | Source-Trash berücksichtigen, Ziel wählen, bei Bedarf weitere Programme trashen, Kosten zahlen und installieren |
-| Airport Locker | Stack, normale Kosten | fehlerhaft: Stackziele werden nach aktuell freier MU vorgefiltert | Ziel wählen, bei Bedarf Programme trashen, Kosten zahlen und installieren |
-| Mystery Box | oberste fünf Stackkarten, kostenlos, Source-Trash | fehlerhaft: Quelltrash wird bei der Auswahl nicht als freigewordene MU berücksichtigt; weiterer Trash fehlt | öffentliche Top-5-Präsentation erhalten, Mystery Box vor Installation trashen, bei Bedarf weitere Programme trashen |
-| Test Spin | Stack, kostenlos, temporär für Run | fehlerhaft: Event und Ziel werden nach aktuell freier MU vorgefiltert | Ziel wählen, bei Bedarf Programme trashen, installieren, shufflen, Run-/Return-/Penalty-Vertrag erhalten |
-| Hijack | Grip, drei temporäre Installationscredits | fehlerhaft: Programmziele werden nach aktuell freier MU vorgefiltert | Hardware unverändert; Programm wählen, bei Bedarf Programme trashen, temporäre Credits korrekt abrechnen |
-| Theorem Proof | öffentliches Access-Replacement als 2-MU-Programm | fehlerhaft: Installationsoption fehlt bei aktuell voller MU | Installationsoption anbieten, wenn 2 MU durch Trash erreichbar sind; Access erst nach Choice fortsetzen |
-| Valu-Pak Software Bundle | eingeschränkte normale Grip-Programminstallationen | fehlerhaft: Bundle und Folgeaktionen verwenden einen freien-MU-Vorfilter | Erreichbarkeit nach Trash für Bundle-Start und Folgeaktionen verwenden; vorhandenen normalen Install-Choice-Vertrag beibehalten |
+| Sneak Preview | Stack oder Heap, kostenlos, temporär | behoben und mit 4/4-MU-, Sichtbarkeits- und Replay-Fall belegt | Ziel wählen, bei Bedarf Programme trashen, kostenlos installieren, Stack ggf. shufflen, temporäre Rückgabe tracken |
+| Self-Modifying Code | Stack, normale Kosten, Source-Trash | behoben über den gemeinsamen Search-Install-Vertrag; der 2-MU-Quelltrash reicht für alle aktuell maximal 2 MU großen Zielprogramme bereits aus | Source-Trash berücksichtigen, Ziel wählen, bei Bedarf weitere Programme trashen, Kosten zahlen und installieren |
+| Airport Locker | Stack, normale Kosten | behoben über denselben getesteten bezahlten Search-Install-Vertrag | Ziel wählen, bei Bedarf Programme trashen, Kosten zahlen und installieren |
+| Mystery Box | oberste fünf Stackkarten, kostenlos, Source-Trash | behoben; automatischer Quelltrash wird vor der Installation und in der Erreichbarkeit berücksichtigt | öffentliche Top-5-Präsentation erhalten, Mystery Box vor Installation trashen, bei Bedarf weitere Programme trashen |
+| Test Spin | Stack, kostenlos, temporär für Run | behoben und mit 4/4-MU-, Run-Cleanup-, Sichtbarkeits- und Replay-Fall belegt | Ziel wählen, bei Bedarf Programme trashen, installieren, shufflen, Run-/Return-/Penalty-Vertrag erhalten |
+| Hijack | Grip, drei temporäre Installationscredits | behoben und mit 4/4-MU-, stale-, Sichtbarkeits- und Replay-Fall belegt | Hardware unverändert; Programm wählen, bei Bedarf Programme trashen, temporäre Credits korrekt abrechnen |
+| Theorem Proof | öffentliches Access-Replacement als 2-MU-Programm | behoben und mit 4/4-MU-, Zwei-Programm-Trash- und Replay-Fall belegt | Installationsoption anbieten, wenn 2 MU durch Trash erreichbar sind; Access erst nach Choice fortsetzen |
+| Valu-Pak Software Bundle | eingeschränkte normale Grip-Programminstallationen | behoben; Bundle-Markierung und Aktionsverbrauch bleiben über die normale MU-Choice erhalten | Erreichbarkeit nach Trash für Bundle-Start und Folgeaktionen verwenden; vorhandenen normalen Install-Choice-Vertrag beibehalten |
 | The Shell Traders | vorbereitete Karte aus Set-aside, kostenlos | bereits korrekt: eigener privater MU-Freimach-Dialog mit Revalidation | als positive Regression absichern, keine unnötige Produktionsänderung |
 | Normale Grip-Installation / Edgerunner Temps | Grip über `install_card` | bereits korrekt: Trash-vor-Install-Pfad vorhanden | unverändert lassen und als gemeinsame Verhaltensreferenz nutzen |
 
