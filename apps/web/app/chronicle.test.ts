@@ -2311,6 +2311,76 @@ describe("formatChronicleEvent", () => {
     expect(JSON.stringify(item)).not.toContain('"rd"');
   });
 
+  it("describes Weather-to-Finance Pipe identically for immediate and delayed successful runs", () => {
+    const payload = {
+      actor: "runner",
+      sourceDefinitionId: "onr_v1_118_weather-to-finance-pipe",
+      sourceTitle: "Weather-to-Finance Pipe",
+      serverId: "hq",
+      accessReplacement: "corp_lose_credits",
+      creditLoss: 4,
+      corpCreditsAfter: 6,
+      runSuccessful: true,
+      accessSkipped: true,
+      hiddenZoneBarrier: true,
+    };
+    const immediate = formatChronicleEvent(
+      makeEvent("play_event", payload),
+      "runner",
+    );
+    const delayed = formatChronicleEvent(
+      makeEvent("continue_run", payload),
+      "runner",
+    );
+
+    for (const item of [immediate, delayed]) {
+      expect(item.title).toBe(
+        "Du hast mit Weather-to-Finance Pipe einen erfolgreichen HQ-Run abgeschlossen: Korp verliert 4 Credits, kein Karten-Access auf HQ.",
+      );
+      expect(item.description).toBe(
+        "Der erfolgreiche Run ersetzt den normalen Zugriff auf HQ; es werden keine verdeckten Karten aufgedeckt.",
+      );
+      expect(item.category).toBe("economy");
+      expect(item.importance).toBe("important");
+      expect(item.chips).toEqual(
+        expect.arrayContaining([
+          "Weather-to-Finance Pipe",
+          "Erfolgreicher HQ-Run",
+          "Korp -4",
+          "Kein HQ-Access",
+        ]),
+      );
+      expect(JSON.stringify(item)).not.toContain("cardInstances");
+    }
+  });
+
+  it("does not announce Weather-to-Finance Pipe before success or after a failed run", () => {
+    const unresolved = formatChronicleEvent(
+      makeEvent("play_event", {
+        actor: "runner",
+        sourceDefinitionId: "onr_v1_118_weather-to-finance-pipe",
+        sourceTitle: "Weather-to-Finance Pipe",
+        serverId: "hq",
+      }),
+      "runner",
+    );
+    const failed = formatChronicleEvent(
+      makeEvent("continue_run", {
+        actor: "runner",
+        sourceDefinitionId: "onr_v1_118_weather-to-finance-pipe",
+        sourceTitle: "Weather-to-Finance Pipe",
+        serverId: "hq",
+        runSuccessful: false,
+      }),
+      "runner",
+    );
+
+    expect(unresolved.title).not.toContain("erfolgreichen HQ-Run");
+    expect(failed.title).not.toContain("erfolgreichen HQ-Run");
+    expect(unresolved.chips).not.toContain("Kein HQ-Access");
+    expect(failed.chips).not.toContain("Kein HQ-Access");
+  });
+
   it("describes Record Reconstructor Archives replacement on immediate and protected runs", () => {
     const immediate = formatChronicleEvent(
       makeEvent("activated_card_ability", {

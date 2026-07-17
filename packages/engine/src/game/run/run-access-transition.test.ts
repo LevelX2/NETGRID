@@ -301,7 +301,7 @@ describe("run access transition", () => {
         position: { kind: "server", serverId: "hq" },
         successful: true,
         successfulRunAccessReplacement: "corp_lose_credits",
-        successfulRunCreditLoss: 1,
+        successfulRunCreditLoss: 5,
         successfulRunRunnerCreditGain: 10,
         successfulRunRunnerTagGain: 1,
       } as unknown as NonNullable<GameState["run"]>,
@@ -316,15 +316,18 @@ describe("run access transition", () => {
       replacementApplied: "corp_lose_credits",
       runFinished: true,
     });
-    expect(fixture.state.corp.credits).toBe(3);
+    expect(fixture.state.corp.credits).toBe(0);
     expect(fixture.state.runner.credits).toBe(16);
     expect(fixture.state.runner.tags).toBe(1);
     expect(fixture.finishedRuns).toEqual([true]);
     expect(legalAction.payload).toMatchObject({
       accessReplacement: "corp_lose_credits",
-      creditLoss: 1,
+      creditLoss: 4,
       gainedCredits: 10,
       tagsAdded: 1,
+      runSuccessful: true,
+      accessSkipped: true,
+      serverId: "hq",
       hiddenZoneBarrier: true,
     });
   });

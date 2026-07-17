@@ -135,6 +135,13 @@ describe("access presentation outcome ownership", () => {
       interactionPresentationBlocksAi({
         damageOpen: false,
         accessOutcomeOpen: false,
+        successfulRunOutcomeOpen: true,
+      }),
+    ).toBe(true);
+    expect(
+      interactionPresentationBlocksAi({
+        damageOpen: false,
+        accessOutcomeOpen: false,
       }),
     ).toBe(false);
   });

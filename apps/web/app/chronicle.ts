@@ -176,6 +176,35 @@ export function formatChronicleEvent(
   let description: string | undefined;
   const chips = [...baseChipList];
 
+  const successfulRunCreditLoss = successfulRunCreditLossChronicleSummary(
+    payload,
+    cardTitle,
+  );
+  if (successfulRunCreditLoss) {
+    return {
+      id: event.eventId,
+      category: "economy",
+      importance: "important",
+      visibility: "public",
+      ...(actor ? { actor } : {}),
+      ...(actionUse ? { actionUse } : {}),
+      title: ensurePeriod(phrase(subject, successfulRunCreditLoss.title)),
+      description: ensurePeriod(successfulRunCreditLoss.description),
+      chips: uniqueChips([...chips, ...successfulRunCreditLoss.chips]),
+      cardDefinitionId: successfulRunCreditLoss.cardDefinitionId,
+      cardTitle: successfulRunCreditLoss.sourceTitle,
+      cardDetailLines,
+      groupLabel: groupLabelFor(
+        "run",
+        actor,
+        label,
+        successfulRunCreditLoss.serverLabel,
+        turnNumber,
+        turnSide,
+      ),
+    };
+  }
+
   switch (actionType) {
     case "time_expired":
       category = "danger";
@@ -6182,6 +6211,67 @@ function accessReplacementEffectParts(
   if (corpDrawnCount > 0)
     parts.push(`Korp zieht ${cardCountText(corpDrawnCount)}`);
   return parts.length > 0 ? parts : ["der Zugriff wird ersetzt"];
+}
+
+function successfulRunCreditLossChronicleSummary(
+  payload: Record<string, unknown>,
+  fallbackCardTitle: string | undefined,
+): {
+  title: string;
+  description: string;
+  chips: string[];
+  cardDefinitionId: string;
+  sourceTitle: string;
+  serverLabel: string;
+} | null {
+  if (
+    stringValue(payload.accessReplacement) !== "corp_lose_credits" ||
+    payload.runSuccessful !== true ||
+    payload.accessSkipped !== true
+  )
+    return null;
+  const sourceDefinitionId = stringValue(payload.sourceDefinitionId);
+  if (!sourceDefinitionId) return null;
+  const sourceTitle =
+    titleForDefinitionId(sourceDefinitionId) ??
+    stringValue(payload.sourceTitle) ??
+    fallbackCardTitle ??
+    "Run-Effekt";
+  const serverLabel =
+    displayServerLabel(stringValue(payload.serverLabel)) ??
+    displayServerLabel(stringValue(payload.serverId)) ??
+    "HQ";
+  const creditLoss = Math.max(0, numberValue(payload.creditLoss) ?? 0);
+  const tagsAdded = Math.max(0, numberValue(payload.tagsAdded) ?? 0);
+  const corpDrawnCount = Math.max(0, numberValue(payload.corpDrawnCount) ?? 0);
+  const gainedCredits = Math.max(0, numberValue(payload.gainedCredits) ?? 0);
+  const otherEffects = [
+    ...(tagsAdded > 0
+      ? [`Runner erhält ${tagsAdded} Tag${tagsAdded === 1 ? "" : "s"}`]
+      : []),
+    ...(gainedCredits > 0
+      ? [`Runner erhält ${creditText(gainedCredits)}`]
+      : []),
+    ...(corpDrawnCount > 0
+      ? [`Korp zieht ${cardCountText(corpDrawnCount)}`]
+      : []),
+  ];
+  return {
+    title: `mit ${sourceTitle} einen erfolgreichen ${serverLabel}-Run abgeschlossen: Korp verliert ${creditText(creditLoss)}, kein Karten-Access auf ${serverLabel}${otherEffects.length > 0 ? `, ${otherEffects.join(", ")}` : ""}`,
+    description: `Der erfolgreiche Run ersetzt den normalen Zugriff auf ${serverLabel}; es werden keine verdeckten Karten aufgedeckt.`,
+    chips: [
+      sourceTitle,
+      `Erfolgreicher ${serverLabel}-Run`,
+      `Korp -${creditLoss}`,
+      `Kein ${serverLabel}-Access`,
+      ...(tagsAdded > 0 ? [`+${tagsAdded} Tag${tagsAdded === 1 ? "" : "s"}`] : []),
+      ...(gainedCredits > 0 ? [`Runner +${gainedCredits}`] : []),
+      ...(corpDrawnCount > 0 ? [`Korp zieht ${corpDrawnCount}`] : []),
+    ],
+    cardDefinitionId: sourceDefinitionId,
+    sourceTitle,
+    serverLabel,
+  };
 }
 
 function gypsyScheduleAnalyzerChronicleSummary(

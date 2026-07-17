@@ -90,6 +90,9 @@ import {
   dismissPendingAccessPresentationEvent,
 } from "./access-presentation-queue";
 import {
+  latestSuccessfulRunOutcomePresentation,
+} from "./successful-run-outcome-presentation";
+import {
   ACTION_CUE_POSITION_STORAGE_KEY,
   DEFAULT_CUE_POSITION,
   LEGACY_ACTION_CUE_POSITION_STORAGE_KEY,
@@ -374,6 +377,9 @@ import {
   ExposeReviewModal,
 } from "../features/actions/AccessReviewModals";
 import {
+  SuccessfulRunOutcomeModal,
+} from "../features/actions/SuccessfulRunOutcomeModal";
+import {
   accessRevealFromCurrentRun,
   accessRevealFromLatestEvent,
   archivesRevealFromLatestEvent,
@@ -644,6 +650,10 @@ export default function Page() {
     useState<PublicGameEvent[]>([]);
   const [dismissedExposeReviewEventId, setDismissedExposeReviewEventId] =
     useState<string | null>(null);
+  const [
+    dismissedSuccessfulRunOutcomeEventId,
+    setDismissedSuccessfulRunOutcomeEventId,
+  ] = useState<string | null>(null);
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
   const [matchDetailsOpen, setMatchDetailsOpen] = useState(false);
   const [colorScheme, setColorScheme] = useState<ColorScheme>("black");
@@ -2121,6 +2131,18 @@ export default function Page() {
       onSelect: () => toggleFieldCardChoiceCardOptions(optionIds),
     };
   };
+  const successfulRunOutcome = payload
+    ? latestSuccessfulRunOutcomePresentation(
+        payload.eventTail,
+        dismissedSuccessfulRunOutcomeEventId,
+      )
+    : null;
+  const showSuccessfulRunOutcome = Boolean(
+    successfulRunOutcome && !matchEnded,
+  );
+  const successfulRunOutcomeCard = successfulRunOutcome
+    ? (catalogDetailsById[successfulRunOutcome.sourceDefinitionId] ?? null)
+    : null;
   const latestAccessRevealEvent = payload
     ? latestRetainableAccessRevealEvent(payload.eventTail)
     : null;
@@ -2240,6 +2262,7 @@ export default function Page() {
   const interactionPresentationBlocked = interactionPresentationBlocksAi({
     damageOpen: Boolean(currentDamageImpact),
     accessOutcomeOpen: accessOutcomeAwaitingConfirmation,
+    successfulRunOutcomeOpen: showSuccessfulRunOutcome,
   });
   const exposeReviewEvent = payload
     ? retainedExposeReviewEvent(payload.eventTail, dismissedExposeReviewEventId)
@@ -2262,6 +2285,7 @@ export default function Page() {
     !matchEnded &&
     dismissedExposeReviewEventId !== exposeReview.eventId &&
     !showAccessReveal &&
+    !showSuccessfulRunOutcome &&
     !viewedApproachIceId &&
     !viewedInstalledExposeCardId,
   );
@@ -2839,6 +2863,7 @@ export default function Page() {
       payload?.eventTail.at(-1)?.eventId ?? null;
     setDismissedAccessEventIds([]);
     setPendingAccessPresentationEvents([]);
+    setDismissedSuccessfulRunOutcomeEventId(null);
   }, [payload?.matchId]);
 
   useEffect(() => {
@@ -3007,6 +3032,35 @@ export default function Page() {
     payload?.side,
     catalogDetailsById,
     preferGermanCardImages,
+  ]);
+
+  useEffect(() => {
+    if (!successfulRunOutcome?.sourceDefinitionId) return;
+    void ensureCatalogDetails([successfulRunOutcome.sourceDefinitionId]);
+  }, [ensureCatalogDetails, successfulRunOutcome?.sourceDefinitionId]);
+
+  useEffect(() => {
+    const outcomeEventId = successfulRunOutcome?.eventId;
+    const sourceDefinitionId = successfulRunOutcome?.sourceDefinitionId;
+    if (!showSuccessfulRunOutcome || !outcomeEventId || !sourceDefinitionId)
+      return;
+    setCurrentActionCue((current) =>
+      current?.eventId === outcomeEventId ||
+      current?.cardDefinitionId === sourceDefinitionId
+        ? null
+        : current,
+    );
+    setActionCueQueue((current) =>
+      current.filter(
+        (cue) =>
+          cue.eventId !== outcomeEventId &&
+          cue.cardDefinitionId !== sourceDefinitionId,
+      ),
+    );
+  }, [
+    showSuccessfulRunOutcome,
+    successfulRunOutcome?.eventId,
+    successfulRunOutcome?.sourceDefinitionId,
   ]);
 
   useEffect(() => {
@@ -3874,7 +3928,7 @@ export default function Page() {
       payload.legalActions,
       session.side,
       {
-        accessRevealVisible: showAccessReveal,
+        accessRevealVisible: showAccessReveal || showSuccessfulRunOutcome,
         exposeReviewVisible: showExposeReview,
         damageImpactVisible: Boolean(currentDamageImpact),
         confirmationVisible: Boolean(confirmationDialog),
@@ -3895,6 +3949,7 @@ export default function Page() {
     connection,
     submitAction,
     showAccessReveal,
+    showSuccessfulRunOutcome,
     showExposeReview,
     currentDamageImpact,
     confirmationDialog,
@@ -5418,7 +5473,8 @@ export default function Page() {
             {activeMatchIsGame &&
             !matchEnded &&
             !currentDamageImpact &&
-            !showAccessReveal ? (
+            !showAccessReveal &&
+            !showSuccessfulRunOutcome ? (
               <OpponentActionOverlay
                 cue={currentActionCue}
                 queued={actionCueQueue.length}
@@ -6033,6 +6089,27 @@ export default function Page() {
               />
             ) : null}
             {activeMatchIsGame &&
+            showSuccessfulRunOutcome &&
+            successfulRunOutcome ? (
+              <SuccessfulRunOutcomeModal
+                outcome={successfulRunOutcome}
+                displayMode={cardDisplayMode}
+                onDismiss={() =>
+                  setDismissedSuccessfulRunOutcomeEventId(
+                    successfulRunOutcome.eventId,
+                  )
+                }
+                {...(successfulRunOutcomeCard
+                  ? {
+                      card: visibleCardFromCatalogDetail(
+                        successfulRunOutcomeCard,
+                      ),
+                    }
+                  : {})}
+              />
+            ) : null}
+            {activeMatchIsGame &&
+            !showSuccessfulRunOutcome &&
             showAccessReveal &&
             accessReveal &&
             !standaloneDamageImpact ? (

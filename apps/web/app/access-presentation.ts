@@ -32,8 +32,13 @@ export function accessPresentationOwnsActionCue(actionType: string): boolean {
 export function interactionPresentationBlocksAi(input: {
   damageOpen: boolean;
   accessOutcomeOpen: boolean;
+  successfulRunOutcomeOpen?: boolean;
 }): boolean {
-  return input.damageOpen || input.accessOutcomeOpen;
+  return (
+    input.damageOpen ||
+    input.accessOutcomeOpen ||
+    input.successfulRunOutcomeOpen === true
+  );
 }
 
 export function observerAccessAutoDismissMs(input: {

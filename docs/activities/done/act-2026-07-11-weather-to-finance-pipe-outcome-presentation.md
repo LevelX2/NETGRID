@@ -1,19 +1,37 @@
 ---
 activityId: act-2026-07-11-weather-to-finance-pipe-outcome-presentation
-status: inbox
+status: done
 kind: fix
 area: web
 priority: high
 primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-07-11
-startedAt:
-completedAt:
+startedAt: 2026-07-17
+completedAt: 2026-07-17
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/engine/src/game/run/run-access-transition.ts
+  - packages/engine/src/game/run/run-access-transition.test.ts
+  - packages/engine/src/public-context.ts
+  - packages/engine/src/index-tests/releases/mechanic-package-smokes-v16-v199.test.ts
+  - apps/web/app/chronicle.ts
+  - apps/web/app/chronicle.test.ts
+  - apps/web/app/successful-run-outcome-presentation.ts
+  - apps/web/app/successful-run-outcome-presentation.test.ts
+  - apps/web/features/actions/SuccessfulRunOutcomeModal.tsx
+  - apps/web/features/actions/SuccessfulRunOutcomeModal.test.ts
+  - apps/web/app/access-presentation.ts
+  - apps/web/app/access-presentation.test.ts
+  - apps/web/app/page.tsx
+checks:
+  - "corepack pnpm --filter @netgrid/engine test (188 Dateien, 1709 Tests bestanden)"
+  - "corepack pnpm --filter @netgrid/web test (45 Dateien, 598 Tests bestanden)"
+  - "corepack pnpm --filter @netgrid/engine typecheck (bestanden)"
+  - "corepack pnpm --filter @netgrid/web typecheck (bestanden)"
+  - "git diff --check (bestanden)"
 ---
 
 # Weather-to-Finance Pipe mit Chronicle und Ergebnisfenster abschließen
@@ -61,16 +79,16 @@ Ein erfolgreicher, durch `Weather-to-Finance Pipe` gestarteter HQ-Run soll sein 
 
 ## Akzeptanzkriterien
 
-- [ ] Ein erfolgreicher Weather-to-Finance-Pipe-Run mit mindestens einem ICE vor HQ zieht der Korp tatsächlich bis zu 4 Credits ab, erzeugt keinen HQ-Kartenzugriff und liefert auf der finalen Auflösungsaktion den vollständigen öffentlichen Replacement-Payload.
-- [ ] Derselbe fachliche Ergebnisvertrag ist auch beim unmittelbaren No-ICE-Pfad vorhanden.
-- [ ] Die Chronicle nennt nach erfolgreicher Auflösung `Weather-to-Finance Pipe`, den erfolgreichen HQ-Run, den tatsächlichen Creditverlust der Korp und ausdrücklich den entfallenen HQ-Karten-Access.
-- [ ] Die Chronicle meldet den Effekt nicht bereits beim Ausspielen als erfolgreich, wenn der Run noch scheitern kann.
-- [ ] Nach der erfolgreichen Auflösung erscheint ein Fenster mit der Quellkarte und dem Ergebnis `Korp verliert 4 Credits; kein HQ-Karten-Access`.
-- [ ] Erst die ausdrückliche lokale Bestätigung schließt dieses Ergebnisfenster und gibt den normalen Präsentationsablauf wieder frei.
-- [ ] Scheitert der Run, gibt es weder Creditverlust noch ein falsches Erfolgsfenster; die Chronicle beschreibt keinen ausgeführten Replacement-Effekt.
-- [ ] Hat die Korp weniger als 4 Credits, zeigen State, Chronicle und Fenster konsistent den tatsächlich verlorenen Betrag; die Korp fällt nicht unter 0 Credits.
-- [ ] Runner- und Korp-Ansicht enthalten keine Identität, Position oder Anzahl verdeckter HQ-Karten und keine ableitbare Access-Queue.
-- [ ] Fokussierte Engine- und Webtests decken No-ICE-, ICE-/`continue_run`-, Failed-Run- und Corp-mit-weniger-als-4-Credits-Fälle ab; Web-Typecheck und `git diff --check` sind grün.
+- [x] Ein erfolgreicher Weather-to-Finance-Pipe-Run mit mindestens einem ICE vor HQ zieht der Korp tatsächlich bis zu 4 Credits ab, erzeugt keinen HQ-Kartenzugriff und liefert auf der finalen Auflösungsaktion den vollständigen öffentlichen Replacement-Payload.
+- [x] Derselbe fachliche Ergebnisvertrag ist auch beim unmittelbaren No-ICE-Pfad vorhanden.
+- [x] Die Chronicle nennt nach erfolgreicher Auflösung `Weather-to-Finance Pipe`, den erfolgreichen HQ-Run, den tatsächlichen Creditverlust der Korp und ausdrücklich den entfallenen HQ-Karten-Access.
+- [x] Die Chronicle meldet den Effekt nicht bereits beim Ausspielen als erfolgreich, wenn der Run noch scheitern kann.
+- [x] Nach der erfolgreichen Auflösung erscheint ein Fenster mit der Quellkarte und dem Ergebnis `Korp verliert 4 Credits; kein HQ-Karten-Access`.
+- [x] Erst die ausdrückliche lokale Bestätigung schließt dieses Ergebnisfenster und gibt den normalen Präsentationsablauf wieder frei.
+- [x] Scheitert der Run, gibt es weder Creditverlust noch ein falsches Erfolgsfenster; die Chronicle beschreibt keinen ausgeführten Replacement-Effekt.
+- [x] Hat die Korp weniger als 4 Credits, zeigen State, Chronicle und Fenster konsistent den tatsächlich verlorenen Betrag; die Korp fällt nicht unter 0 Credits.
+- [x] Runner- und Korp-Ansicht enthalten keine Identität, Position oder Anzahl verdeckter HQ-Karten und keine ableitbare Access-Queue.
+- [x] Fokussierte Engine- und Webtests decken No-ICE-, ICE-/`continue_run`-, Failed-Run- und Corp-mit-weniger-als-4-Credits-Fälle ab; Web-Typecheck und `git diff --check` sind grün.
 
 ## Umsetzungshinweise
 
@@ -87,4 +105,4 @@ Ein erfolgreicher, durch `Weather-to-Finance Pipe` gestarteter HQ-Run soll sein 
 
 ## Ergebnisnotiz
 
-Noch offen.
+Der erfolgreiche Run-Abschluss liefert nun unabhängig von `play_event` oder `continue_run` denselben öffentlichen Replacement-Vertrag mit tatsächlichem Creditverlust und explizitem No-Access-Signal. Chronicle und ein lokal bestätigungspflichtiges Ergebnisfenster zeigen Quellkarte, erfolgreichen HQ-Run, Creditverlust und entfallenen Zugriff; bis zur Bestätigung bleiben KI-Pacing, Action-Cues und automatische Zugbeendigung blockiert. Engine-Tests sichern No-ICE, ICE, Fehlschlag, niedrige Korp-Credits und Hidden-Info-Schutz für beide Seiten ab.

@@ -545,9 +545,17 @@ function applySuccessfulRunAccessReplacement(
   tagContinuation?: SuccessfulRunTagContinuation,
 ): boolean {
   const resumeAfterTag = tagContinuation !== undefined;
-  const creditLoss = Math.max(0, Math.floor(run.successfulRunCreditLoss ?? 0));
-  if (!resumeAfterTag && creditLoss > 0)
-    host.state.corp.credits = Math.max(0, host.state.corp.credits - creditLoss);
+  const quotedCreditLoss = Math.max(
+    0,
+    Math.floor(run.successfulRunCreditLoss ?? 0),
+  );
+  const creditLoss = resumeAfterTag
+    ? quotedCreditLoss
+    : Math.min(host.state.corp.credits, quotedCreditLoss);
+  if (!resumeAfterTag) {
+    host.state.corp.credits -= creditLoss;
+    run.successfulRunCreditLoss = creditLoss;
+  }
   const runnerTagGain = Math.max(
     0,
     Math.floor(run.successfulRunRunnerTagGain ?? 0),
@@ -579,6 +587,9 @@ function applySuccessfulRunAccessReplacement(
           run.successfulRunAccessReplacement ?? "corp_lose_credits",
         creditLoss,
         corpCreditsAfter: host.state.corp.credits,
+        runSuccessful: true,
+        accessSkipped: true,
+        serverId: run.attackedServerId,
         ...sourcePayloadForSuccessfulRunReplacement(run),
       };
       return true;
@@ -634,6 +645,9 @@ function applySuccessfulRunAccessReplacement(
         run.successfulRunAccessReplacement ?? "corp_lose_credits",
       creditLoss,
       corpCreditsAfter: host.state.corp.credits,
+      runSuccessful: true,
+      accessSkipped: true,
+      serverId: run.attackedServerId,
       tagsAdded: resolvedRunnerTagGain,
       runnerTagsAfter: host.state.runner.tags,
       corpDrawnCount: corpDraw,

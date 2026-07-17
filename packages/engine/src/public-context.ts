@@ -1046,6 +1046,8 @@ export function publicContextForAction(
       context.runnerCreditsAfter = legalAction.payload.runnerCreditsAfter;
     if (typeof legalAction.payload.accessReplacement === "string")
       context.accessReplacement = legalAction.payload.accessReplacement;
+    if (typeof legalAction.payload.accessSkipped === "boolean")
+      context.accessSkipped = legalAction.payload.accessSkipped;
     if (typeof legalAction.payload.creditLoss === "number")
       context.creditLoss = legalAction.payload.creditLoss;
     if (typeof legalAction.payload.runnerPaidAmount === "number")

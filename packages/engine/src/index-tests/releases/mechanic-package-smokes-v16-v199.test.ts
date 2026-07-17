@@ -3242,6 +3242,7 @@ describe("V1.7.1 Mechanikpaket E", () => {
     weatherState.runner.credits = 20;
     weatherState.corp.credits = 10;
     moveRunnerCardToGrip(weatherState, "onr_v1_118_weather-to-finance-pipe");
+    const weatherHqIds = weatherState.corp.hq.slice();
     weatherState = apply(
       weatherState,
       "runner",
@@ -3255,7 +3256,162 @@ describe("V1.7.1 Mechanikpaket E", () => {
     expect(weatherState.corp.credits).toBe(6);
     expect(weatherState.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_event",
+      accessReplacement: "corp_lose_credits",
+      creditLoss: 4,
+      corpCreditsAfter: 6,
+      runSuccessful: true,
+      accessSkipped: true,
+      serverId: "hq",
+      sourceDefinitionId: "onr_v1_118_weather-to-finance-pipe",
+      sourceTitle: "Weather-to-Finance Pipe",
     });
+    for (const hiddenHqId of weatherHqIds)
+      expect(
+        JSON.stringify(weatherState.eventLog.at(-1)?.publicPayload),
+      ).not.toContain(hiddenHqId);
+    for (const side of ["runner", "corp"] as const) {
+      const publicResult = getPlayerView(weatherState, side).publicEvents.at(-1);
+      expect(publicResult?.publicPayload).toMatchObject({
+        accessReplacement: "corp_lose_credits",
+        runSuccessful: true,
+        accessSkipped: true,
+        serverId: "hq",
+        creditLoss: 4,
+      });
+      for (const hiddenHqId of weatherHqIds)
+        expect(JSON.stringify(publicResult)).not.toContain(hiddenHqId);
+    }
+
+    let weatherIceState = toRunnerTurn(
+      v171CardReleaseGame("v171-weather-pipe-with-ice"),
+    );
+    weatherIceState.runner.credits = 20;
+    weatherIceState.corp.credits = 10;
+    moveRunnerCardToGrip(weatherIceState, "onr_v1_118_weather-to-finance-pipe");
+    const weatherIceHqIds = weatherIceState.corp.hq.slice();
+    putCorpIceOnServer(weatherIceState, "hq", "onr_v1_232_crystal-wall");
+    weatherIceState = apply(
+      weatherIceState,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinition(weatherIceState, action) ===
+          "onr_v1_118_weather-to-finance-pipe",
+    );
+    expect(weatherIceState.timingPoint).toBe("run.approach_ice");
+    weatherIceState = apply(
+      weatherIceState,
+      "corp",
+      (action) => action.type === "decline_rez",
+    );
+    weatherIceState = apply(
+      weatherIceState,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
+    expect(weatherIceState.run).toBeUndefined();
+    expect(weatherIceState.corp.credits).toBe(6);
+    expect(weatherIceState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "continue_run",
+      accessReplacement: "corp_lose_credits",
+      creditLoss: 4,
+      corpCreditsAfter: 6,
+      runSuccessful: true,
+      accessSkipped: true,
+      serverId: "hq",
+      sourceDefinitionId: "onr_v1_118_weather-to-finance-pipe",
+      sourceTitle: "Weather-to-Finance Pipe",
+    });
+    expect(
+      getLegalActions(weatherIceState, "runner").some(
+        (action) => action.type === "access_card",
+      ),
+    ).toBe(false);
+    for (const side of ["runner", "corp"] as const) {
+      const publicResult = getPlayerView(
+        weatherIceState,
+        side,
+      ).publicEvents.at(-1);
+      expect(publicResult?.publicPayload.actionType).toBe("continue_run");
+      for (const hiddenHqId of weatherIceHqIds)
+        expect(JSON.stringify(publicResult)).not.toContain(hiddenHqId);
+    }
+
+    let weatherLowCreditsState = toRunnerTurn(
+      v171CardReleaseGame("v171-weather-pipe-low-corp-credits"),
+    );
+    weatherLowCreditsState.runner.credits = 20;
+    weatherLowCreditsState.corp.credits = 2;
+    moveRunnerCardToGrip(
+      weatherLowCreditsState,
+      "onr_v1_118_weather-to-finance-pipe",
+    );
+    weatherLowCreditsState = apply(
+      weatherLowCreditsState,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinition(weatherLowCreditsState, action) ===
+          "onr_v1_118_weather-to-finance-pipe",
+    );
+    expect(weatherLowCreditsState.corp.credits).toBe(0);
+    expect(weatherLowCreditsState.eventLog.at(-1)?.publicPayload).toMatchObject(
+      {
+        accessReplacement: "corp_lose_credits",
+        creditLoss: 2,
+        corpCreditsAfter: 0,
+        runSuccessful: true,
+        accessSkipped: true,
+      },
+    );
+
+    let failedWeatherState = toRunnerTurn(
+      v171CardReleaseGame("v171-weather-pipe-failed-run"),
+    );
+    failedWeatherState.runner.credits = 20;
+    failedWeatherState.corp.credits = 10;
+    moveRunnerCardToGrip(
+      failedWeatherState,
+      "onr_v1_118_weather-to-finance-pipe",
+    );
+    const failedWeatherIceId = putCorpIceOnServer(
+      failedWeatherState,
+      "hq",
+      "onr_v1_232_crystal-wall",
+    );
+    const failedWeatherEventStart = failedWeatherState.eventLog.length;
+    failedWeatherState = apply(
+      failedWeatherState,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinition(failedWeatherState, action) ===
+          "onr_v1_118_weather-to-finance-pipe",
+    );
+    failedWeatherState = apply(
+      failedWeatherState,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        action.payload?.cardId === failedWeatherIceId,
+    );
+    failedWeatherState = apply(
+      failedWeatherState,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
+    expect(failedWeatherState.run).toBeUndefined();
+    expect(failedWeatherState.corp.credits).toBe(
+      10 - (CARD_DEFINITIONS_BY_ID["onr_v1_232_crystal-wall"]?.rezCost ?? 0),
+    );
+    expect(
+      failedWeatherState.eventLog
+        .slice(failedWeatherEventStart)
+        .some(
+          (event) =>
+            event.publicPayload.accessReplacement === "corp_lose_credits",
+        ),
+    ).toBe(false);
 
     let manifestsState = toRunnerTurn(
       createGameAfterSetup({
