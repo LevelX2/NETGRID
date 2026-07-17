@@ -1934,7 +1934,7 @@ describe("Semantic AI runtime cutover", () => {
         expect.objectContaining({
           key: "runner_hand_buffer_need",
           value: 2800,
-          reason: expect.stringContaining("damage_threat:critical"),
+          reason: expect.stringContaining("flatline_risk:critical"),
         }),
       ]),
     );

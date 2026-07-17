@@ -70,7 +70,9 @@ export function runnerHandBufferAssessment(input: AiDecisionInput): {
   active: boolean;
   handCount: number;
   damagePressure: boolean;
-  damageThreatLevel: ReturnType<typeof runnerDamageThreatAssessment>["level"];
+  flatlineRiskLevel: ReturnType<
+    typeof runnerDamageThreatAssessment
+  >["flatlineRisk"]["level"];
   recommendedHandFloor: number;
   effectiveMaxHandSize: number;
   handBufferHeadroom: number;
@@ -79,22 +81,23 @@ export function runnerHandBufferAssessment(input: AiDecisionInput): {
   evidence: string[];
 } {
   const handCount = input.playerView.own.gripOrHq.length;
-  const damageThreat = runnerDamageThreatAssessment(input);
-  const damagePressure = damageThreat.level !== "none";
+  const flatlineRisk = runnerDamageThreatAssessment(input).flatlineRisk;
+  const damagePressure = flatlineRisk.level !== "none";
   const active =
-    handCount <= 1 ||
-    (damagePressure && handCount < damageThreat.recommendedHandFloor);
+    flatlineRisk.handBufferHeadroom > 0 &&
+    (handCount <= 1 ||
+      (damagePressure && handCount < flatlineRisk.recommendedHandFloor));
   const planPriority =
-    damageThreat.level === "critical"
+    flatlineRisk.level === "critical"
       ? handCount <= 0
         ? 1720
         : 1560
-      : damageThreat.level === "confirmed"
+      : flatlineRisk.level === "confirmed"
         ? handCount <= 1
           ? 1460
           : 1240
-        : damageThreat.level === "suspected"
-          ? handCount < damageThreat.recommendedHandFloor
+        : flatlineRisk.level === "suspected"
+          ? handCount < flatlineRisk.recommendedHandFloor
             ? 1080
             : 0
           : handCount <= 0
@@ -103,9 +106,9 @@ export function runnerHandBufferAssessment(input: AiDecisionInput): {
               ? 1060
               : 0;
   const reason =
-    damageThreat.level === "critical"
+    flatlineRisk.level === "critical"
       ? "critical_damage_survival"
-      : damagePressure && handCount < damageThreat.recommendedHandFloor
+      : damagePressure && handCount < flatlineRisk.recommendedHandFloor
         ? "low_hand_damage_threat"
         : handCount <= 0
           ? "empty_hand"
@@ -114,21 +117,21 @@ export function runnerHandBufferAssessment(input: AiDecisionInput): {
     active,
     handCount,
     damagePressure,
-    damageThreatLevel: damageThreat.level,
-    recommendedHandFloor: damageThreat.recommendedHandFloor,
-    effectiveMaxHandSize: damageThreat.effectiveMaxHandSize,
-    handBufferHeadroom: damageThreat.handBufferHeadroom,
+    flatlineRiskLevel: flatlineRisk.level,
+    recommendedHandFloor: flatlineRisk.recommendedHandFloor,
+    effectiveMaxHandSize: flatlineRisk.effectiveMaxHandSize,
+    handBufferHeadroom: flatlineRisk.handBufferHeadroom,
     planPriority,
     reason,
     evidence: [
       `runner_hand_buffer_count:${handCount}`,
       `runner_hand_buffer_damage_pressure:${damagePressure}`,
-      `runner_hand_buffer_damage_threat:${damageThreat.level}`,
-      `runner_hand_buffer_floor:${damageThreat.recommendedHandFloor}`,
-      `runner_hand_buffer_effective_max:${damageThreat.effectiveMaxHandSize}`,
-      `runner_hand_buffer_headroom:${damageThreat.handBufferHeadroom}`,
+      `runner_hand_buffer_flatline_risk:${flatlineRisk.level}`,
+      `runner_hand_buffer_floor:${flatlineRisk.recommendedHandFloor}`,
+      `runner_hand_buffer_effective_max:${flatlineRisk.effectiveMaxHandSize}`,
+      `runner_hand_buffer_headroom:${flatlineRisk.handBufferHeadroom}`,
       `runner_hand_buffer_reason:${reason}`,
-      ...damageThreat.evidence,
+      ...flatlineRisk.evidence,
     ],
   };
 }
@@ -171,7 +174,7 @@ export function runnerHandBufferPlans(
   }
   if (!assessment.active) return [];
   if (
-    assessment.damageThreatLevel === "confirmed" &&
+    assessment.flatlineRiskLevel === "confirmed" &&
     assessment.handCount >= 2 &&
     runnerLargeLiquidityActionCanRestoreReactionFloor(context, dependencies)
   ) {
@@ -190,7 +193,7 @@ export function runnerHandBufferPlans(
     return [];
   }
   if (
-    assessment.damageThreatLevel !== "critical" &&
+    assessment.flatlineRiskLevel !== "critical" &&
     runnerHighPayoffRunAvailable(context)
   ) {
     return [];

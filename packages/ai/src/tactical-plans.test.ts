@@ -2623,8 +2623,8 @@ describe("tactical plan model", () => {
     });
     expect(result.selectedPlan?.evidence).toEqual(
       expect.arrayContaining([
-        "runner_damage_threat_level:critical",
-        "runner_damage_risky_servers:rd",
+        "runner_flatline_risk_level:critical",
+        "runner_flatline_risk_risky_servers:rd",
       ]),
     );
     expect(result.selectedMapping?.legalActions[0]?.actionId).toBe(

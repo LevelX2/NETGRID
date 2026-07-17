@@ -181,14 +181,14 @@ export function runnerPressurePreferredProbeTarget(
 
 export function runnerPressureProbeDisposition(
   replayStableContext: string,
-  damageThreatLevel: "none" | "suspected" | "confirmed" | "critical",
+  flatlineRiskLevel: "none" | "suspected" | "confirmed" | "critical",
 ): "probe" | "hold" {
   const probeBuckets =
-    damageThreatLevel === "none"
+    flatlineRiskLevel === "none"
       ? 3
-      : damageThreatLevel === "suspected"
+      : flatlineRiskLevel === "suspected"
         ? 2
-        : damageThreatLevel === "confirmed"
+        : flatlineRiskLevel === "confirmed"
           ? 1
           : 0;
   return runnerPressureVariationBucket(

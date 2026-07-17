@@ -1,6 +1,6 @@
 # Runner-Damage-Threat-Model-v2-Prozess
 
-Status: P4 Consumer-Migration aktiv
+Status: P5 Altstruktur-Cleanup aktiv
 
 ## Quelle und Zielprüfung
 
@@ -162,7 +162,7 @@ Commit: `feat(ai): split damage deck belief from flatline risk`
 
 ### P4: Consumer auf konkrete Gefahr umstellen
 
-Status: aktiv
+Status: abgeschlossen
 
 Ziel: Hand-, Economy-, Run- und Arbitration-Consumer nutzen die richtige Achse.
 
@@ -183,11 +183,21 @@ Checks: Consumer-Unit-Tests, F5D-Checkpoints, angrenzende Run-/Plan-Tests,
 Done-Gate: alle Ziel- und Gegenproben grün, keine neue Plan-Arbitration-
 Regression.
 
+Ergebnis: Handpuffer, Action-Reserve, Economy-Posture, Run-Abwertung,
+Probevariation und Survival-Plan nutzen ausschließlich `flatlineRisk`. Ein
+voller effektiver Grip wird nur noch vor einem konkret legalen riskanten Run
+temporär überzogen; auf dem letzten Klick wird stattdessen im F5D-Checkpoint
+die sichere Credit-Aktion gewählt. 111 fokussierte Consumer-/Plan-/Checkpoint-
+Tests sowie zwei Runtime-Survival-Tests und der AI-Typecheck sind grün. Der
+unveränderte Broker-Test „stops loading Broker when stored credits and runner
+pool are comfortable“ ist sowohl auf diesem Branch als auch auf dem
+gleichzeitigen `main` rot und damit kein Delta dieses Pakets.
+
 Commit: `fix(ai): consume acute flatline risk across runner policy`
 
 ### P5: Altstrukturen und Verträge konsolidieren
 
-Status: ausstehend
+Status: aktiv
 
 Ziel: Es bleibt genau eine führende Damage-Belief-/Flatline-Risk-API.
 

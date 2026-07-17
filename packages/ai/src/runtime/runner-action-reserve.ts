@@ -27,13 +27,14 @@ export function assessRunnerActionReserve(
   );
   const creditsAfterAction =
     input.playerView.own.credits - actionCost + immediateCreditGain;
-  const damageThreatLevel = runnerDamageThreatAssessment(input).level;
+  const flatlineRiskLevel =
+    runnerDamageThreatAssessment(input).flatlineRisk.level;
   const minimumCreditFloor =
-    damageThreatLevel === "critical"
+    flatlineRiskLevel === "critical"
       ? 4
-      : damageThreatLevel === "confirmed"
+      : flatlineRiskLevel === "confirmed"
         ? 3
-        : damageThreatLevel === "suspected"
+        : flatlineRiskLevel === "suspected"
           ? 3
           : 2;
   const spendingWouldDropBelowReserve =
@@ -51,7 +52,7 @@ export function assessRunnerActionReserve(
       `runner_action_reserve_immediate_credit_gain:${immediateCreditGain}`,
       `runner_action_reserve_credits_after:${creditsAfterAction}`,
       `runner_action_reserve_floor:${minimumCreditFloor}`,
-      `runner_action_reserve_damage_threat:${damageThreatLevel}`,
+      `runner_action_reserve_flatline_risk:${flatlineRiskLevel}`,
       `runner_action_reserve_spending_would_drop:${spendingWouldDropBelowReserve}`,
       `runner_action_reserve_survival_override:${survivalOverride}`,
     ],

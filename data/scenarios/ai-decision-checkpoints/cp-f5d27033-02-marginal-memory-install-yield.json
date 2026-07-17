@@ -4748,7 +4748,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "draw_card"
+        "type": "gain_credit"
       }
     ],
     "forbiddenActions": [

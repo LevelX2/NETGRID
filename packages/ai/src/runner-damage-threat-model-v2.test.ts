@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type {
   AiDecisionInput,
+  LegalAction,
   PublicGameEvent,
   VisibleCard,
 } from "@netgrid/shared";
@@ -187,7 +188,68 @@ describe("runner damage threat model v2 red evidence", () => {
       }),
     ).toBeUndefined();
   });
+
+  it("allows a temporary overdraw only before a concrete risky run", () => {
+    const current = input({
+      handCount: 2,
+      maxHandSize: 2,
+      credits: 6,
+      clicks: 2,
+      turnSerial: 8,
+      events: [
+        event("resolved-net-damage", 31, 8, {
+          actor: "corp",
+          actionType: "net_damage",
+          damageType: "net",
+          damageAmount: 1,
+          damageResolved: true,
+          sourceDefinitionId: "onr_v1_258_neural-blade",
+        }),
+      ],
+    });
+    current.playerView.servers[1]!.ice = [
+      {
+        instanceId: "unknown-rd-ice",
+        owner: "corp",
+        controller: "corp",
+        known: false,
+        rezzed: false,
+      } as VisibleCard,
+    ];
+    const drawAction = basicAction(current, "draw", "draw_card");
+    const runAction = {
+      ...basicAction(current, "run-rd", "start_run"),
+      payload: { serverId: "rd" },
+    } as LegalAction;
+    current.legalActions = [drawAction, runAction];
+
+    expect(
+      runnerHandBufferNeedScoreComponent(current, drawAction),
+    ).toMatchObject({
+      key: "runner_hand_buffer_need",
+      reason: expect.stringContaining("buffer_mode:temporary_before_risky_run"),
+    });
+  });
 });
+
+function basicAction(
+  current: AiDecisionInput,
+  actionId: string,
+  type: LegalAction["type"],
+): LegalAction {
+  return {
+    actionId,
+    side: "runner",
+    type,
+    label: actionId,
+    source: "basic_action",
+    timingPoint: "runner_action.main",
+    costs: [{ clicks: 1 }],
+    targetRequirements: [],
+    visibility: "public",
+    expiresAtStateVersion: current.playerView.stateVersion,
+  } as LegalAction;
+}
 
 function input(params: {
   handCount: number;

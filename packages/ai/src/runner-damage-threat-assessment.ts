@@ -270,7 +270,7 @@ export function runnerDamageLockedHandScoreComponents(
   action: LegalAction,
 ): AiDecisionScoreComponent[] {
   if (input.side !== "runner" || action.side !== "runner") return [];
-  const assessment = runnerDamageThreatAssessment(input);
+  const assessment = runnerDamageThreatAssessment(input).flatlineRisk;
   const lockedAtThreatFloor =
     (assessment.level === "confirmed" || assessment.level === "critical") &&
     assessment.effectiveMaxHandSize <= assessment.recommendedHandFloor &&
@@ -356,7 +356,7 @@ export function runnerDamageThreatRunScoreComponent(
 ): AiDecisionScoreComponent | undefined {
   if (input.side !== "runner" || action.side !== "runner") return undefined;
   if (action.type !== "start_run") return undefined;
-  const assessment = runnerDamageThreatAssessment(input);
+  const assessment = runnerDamageThreatAssessment(input).flatlineRisk;
   if (assessment.level === "none") return undefined;
   const serverId = actionServerId(action);
   const riskyServer =
@@ -458,6 +458,7 @@ function runnerFlatlineRiskLevel(params: {
   if (
     (params.handCount <= 0 &&
       (recentResolvedDamage ||
+        params.attemptedCorpDamageEvents > 0 ||
         activeDamageSources > 0 ||
         params.deckBelief.level === "confirmed")) ||
     (params.handCount <= 1 &&
@@ -469,6 +470,7 @@ function runnerFlatlineRiskLevel(params: {
   if (
     recentResolvedDamage ||
     activeSignalScore >= 4 ||
+    (activeDamageSources > 0 && params.effectiveMaxHandSize <= 3) ||
     (params.runnerTagged &&
       (activePunishSources > 0 || params.deckBelief.level === "confirmed")) ||
     (params.deckBelief.level === "confirmed" && params.handCount <= 2) ||
