@@ -62,10 +62,15 @@ const warmup = db
   .prepare(
     `select state_version, decision_index, side, selected_action_id, trace_json
      from ai_decision_traces
-     where match_id = ? and side = ? and decision_index < ?
+     where match_id = ? and side = ? and decision_index >= ? and decision_index < ?
      order by decision_index`,
   )
-  .all(args.matchId, actor, args.decisionIndex) as TraceRow[];
+  .all(
+    args.matchId,
+    actor,
+    args.warmupStartDecisionIndex,
+    args.decisionIndex,
+  ) as TraceRow[];
 const warmupResult = replayAiDecisionCheckpointWarmup({
   rows: warmup.map((row) => ({
     stateVersion: row.state_version,
@@ -134,6 +139,7 @@ process.stdout.write(
     out: resolve(args.out),
     checkpointId: fixture.checkpointId,
     warmupDecisions: warmupResult.warmupDecisions,
+    warmupStartDecisionIndex: args.warmupStartDecisionIndex,
     warmupPolicy: args.warmupPolicy,
     warmupDriftCount: warmupResult.warmupDrifts.length,
     compatibleWarmupSuffixDecisions:
@@ -244,6 +250,7 @@ function parseArgs(values: string[]): {
   expectationBase64: string;
   out: string;
   warmupPolicy: "strict" | "rebase";
+  warmupStartDecisionIndex: number;
 } {
   const value = (name: string): string => {
     const index = values.indexOf(name);
@@ -259,6 +266,16 @@ function parseArgs(values: string[]): {
   if (warmupPolicyValue !== "strict" && warmupPolicyValue !== "rebase") {
     throw new Error("invalid_argument:--warmup-policy");
   }
+  const warmupStartDecisionIndex = Number(
+    optionalValue(values, "--warmup-start-decision-index") ?? "1",
+  );
+  if (
+    !Number.isInteger(warmupStartDecisionIndex) ||
+    warmupStartDecisionIndex <= 0 ||
+    warmupStartDecisionIndex > decisionIndex
+  ) {
+    throw new Error("invalid_argument:--warmup-start-decision-index");
+  }
   return {
     db: value("--db"),
     matchId: value("--match-id"),
@@ -268,6 +285,7 @@ function parseArgs(values: string[]): {
     expectationBase64: value("--expectation-base64"),
     out: value("--out"),
     warmupPolicy: warmupPolicyValue,
+    warmupStartDecisionIndex,
   };
 }
 

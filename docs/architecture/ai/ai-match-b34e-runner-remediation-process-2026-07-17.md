@@ -25,6 +25,9 @@ Worktree und Branch werden anschließend sauber entfernt.
 
 - Die historische SQLite-Datei im Hauptworkspace ist die unveränderte
   Capture-Quelle; sie wird ausschließlich lesend verwendet.
+- Für Decisions ab D43 beginnt der Strict-Warmup an D43, weil der lokale
+  Watch-Server unmittelbar davor nachweislich neu gestartet wurde. Es gibt
+  keinen Warmup über diese Prozessgrenze und kein `rebase`.
 - Die aktuelle Rules Engine rekonstruiert die side-sichere Runner-Sicht.
 - Die drei Befundgruppen sind Search-Consumer-Drift, Endgame-/Plan-Arbitration
   und Viral-15-Encounter-Sequenzkosten.

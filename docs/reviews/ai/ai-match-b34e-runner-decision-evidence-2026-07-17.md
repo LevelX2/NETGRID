@@ -22,6 +22,20 @@ sichtbaren PublicEvents und die historischen LegalActions. Rohes
 `game_state_json` und zukünftige Events wurden nicht als
 Entscheidungsgrundlage verwendet.
 
+### Historische Runtime-Neustartgrenze
+
+Der erste Strict-Capture-Versuch über D1 bis D68 meldete an D43 eine
+Warmup-Abweichung. Die Zeitachse erklärt sie ohne Rebase: Um 21:08:17 Uhr
+wurde `24bee63ce` im Hauptworkspace committed; der laufende `tsx watch`-
+Server lud daraufhin neu. D43 wurde um 21:08:45 Uhr erzeugt und war damit die
+erste Runner-Decision nach dem Prozessneustart. Der produktive In-Memory-
+Planstand war zu diesem Zeitpunkt leer.
+
+Alle Checkpoints ab D43 verwenden deshalb D43 als explizite
+Warmup-Startgrenze. Strict-Warmup ab dieser tatsächlichen Prozessgrenze hat
+null Drifts. Frühere Decisions werden nicht künstlich über den Neustart
+hinweg in den Runtime-Speicher eingespielt; `rebase` wird nicht verwendet.
+
 ## Vollständige Entscheidungsklassifikation
 
 Als fachlich plausibel wurden die Decisions in folgenden lückenlosen
