@@ -412,6 +412,53 @@ describe("DeckCapabilityProfile", () => {
     });
   });
 
+  it("uses a reviewed general stack search for breaker access without matching a card title", () => {
+    const inputView = playerView("runner");
+    inputView.own.gripOrHq = [
+      visibleCard(
+        "boostergang-1",
+        "onr_classic_034_boostergang-connections",
+        "runner",
+        "event",
+        {
+          title: "Boostergang Connections",
+          rulesText:
+            "Trash your hand. Search your stack for as many cards as were successfully trashed in this way and bring them into your hand.",
+        },
+      ),
+    ];
+
+    const profile = buildDeckCapabilityProfile({
+      side: "runner",
+      playerView: inputView,
+      legalActions: [
+        legalAction(
+          "boostergang-search",
+          "runner",
+          "play_event",
+          "boostergang-1",
+          "Play Boostergang Connections",
+        ),
+      ],
+      deckSnapshot: runnerSnapshot([
+        ["onr_classic_027_early-worm", 2],
+        ["onr_classic_032_schematics-search-engine", 2],
+        ["onr_classic_034_boostergang-connections", 2],
+      ]),
+    });
+
+    expect(profile.runner?.searchAccess.tools).toEqual([
+      expect.objectContaining({
+        cardId: "onr_classic_034_boostergang-connections",
+        canSearchPrograms: true,
+        canSearchBreakers: true,
+        legalNow: true,
+        confidence: "high",
+      }),
+    ]);
+    expect(profile.runner?.breakerCoverageMatrix.wall.searchableNow).toBe(true);
+  });
+
   it("matches breaker capability roles by bounded role prefixes", () => {
     CARD_ROLES_BY_CARD.set("local_structured_breaker", {
       cardId: "local_structured_breaker",

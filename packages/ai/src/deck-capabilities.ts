@@ -697,12 +697,13 @@ function searchAccessToolForRecord(
     rolesMatch(roleSignals, ["breaker_search"]);
   if (!canSearchPrograms && !canSearchBreakers) return undefined;
   const status = primaryStatus(record.locations);
-  const structuredSearch = rolesMatch(roleSignals, [
-    "program_search",
-    "breaker_search",
-    "stack_search",
-    "search",
-  ]);
+  const structuredSearch =
+    rolesMatch(roleSignals, [
+      "program_search",
+      "breaker_search",
+      "stack_search",
+      "search",
+    ]);
   return {
     cardId: record.cardId,
     title: record.title,
@@ -745,14 +746,6 @@ function normalizedRecordRulesTextWithoutRoles(
   return [record.type, ...record.subtypes, record.text]
     .join(" ")
     .toLowerCase();
-}
-
-function deckCapabilityTextHasStackSearchSignal(text: string): boolean {
-  const tokens = deckCapabilityTextTokens(text);
-  return (
-    deckCapabilityTokensIncludePhrase(tokens, ["search", "your", "stack"]) ||
-    deckCapabilityTokensIncludePhrase(tokens, ["search", "the", "stack"])
-  );
 }
 
 function buildEconomyBankTools(
@@ -1047,6 +1040,14 @@ function deckCapabilityTextHasProgramSearchSignal(text: string): boolean {
       "a",
       "program",
     ])
+  );
+}
+
+function deckCapabilityTextHasStackSearchSignal(text: string): boolean {
+  const tokens = deckCapabilityTextTokens(text);
+  return (
+    deckCapabilityTokensIncludePhrase(tokens, ["search", "your", "stack"]) ||
+    deckCapabilityTokensIncludePhrase(tokens, ["search", "the", "stack"])
   );
 }
 
