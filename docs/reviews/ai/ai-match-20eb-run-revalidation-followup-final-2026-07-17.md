@@ -104,6 +104,11 @@ Node-Skripte. Es wurden keine Abhängigkeiten verändert.
 3. `33d99f707` – `fix(ai): preserve public remote root type deductions`
 4. `786cbc3ac` – `fix(ai): revalidate run payoff before continuation`
 5. `f6965dc8b` – `fix(ai): route matchpoint contestability through run targets`
+6. `edac8b5ba` – `docs(ai): close match 20eb run revalidation follow-up`
 
-Der lokale Main-Abgleich und das Entfernen von Worktree sowie Arbeitsbranch
-folgen in P5.
+Der Arbeitsstand wurde per Fast-Forward bis `edac8b5ba` in den lokalen `main`
+integriert. Der Worktree
+`C:\Projekte\NETGRID_AI_MATCH_20EB_RUN_REVALIDATION`, seine sechs temporären
+Dependency-Junctions und der Branch `codex/ai-match-20eb-run-revalidation`
+wurden anschließend verifiziert entfernt; alle Junction-Ziele im
+Hauptworkspace blieben erhalten.

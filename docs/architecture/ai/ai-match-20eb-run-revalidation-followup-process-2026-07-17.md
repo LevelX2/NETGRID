@@ -1,6 +1,6 @@
 # KI-Run-Revalidierung für Match 20EB (Follow-up, 2026-07-17)
 
-Status: P4 abgeschlossen, P5 aktiv
+Status: Abgeschlossen – P5 lokal gemergt und bereinigt
 
 ## Quelle und Zielprüfung
 
