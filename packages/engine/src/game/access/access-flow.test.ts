@@ -179,6 +179,8 @@ function makeHost(
       definitionFor: accessActions.cards.definitionFor,
       cardInstanceFor: accessActions.cards.cardInstanceFor,
       cardHasSubtype: () => false,
+      runnerProgramUsesMemory: (cardId) =>
+        state.runner.rig.programs.includes(cardId),
     },
     servers: {
       mustServer: accessActions.servers.mustServer,

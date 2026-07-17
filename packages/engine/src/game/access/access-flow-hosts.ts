@@ -32,6 +32,10 @@ export type AccessFlowCompositionHost = {
     definitionFor: (state: GameState, cardId: CardInstanceId) => CardDefinition;
     cardInstanceFor: (state: GameState, cardId: CardInstanceId) => CardInstance;
     cardHasSubtype: (definition: CardDefinition, subtype: string) => boolean;
+    runnerProgramUsesMemory?: (
+      state: GameState,
+      cardId: CardInstanceId,
+    ) => boolean;
     accessEffectsForDefinition: (
       definitionId: CardDefinitionId,
     ) => readonly CardAccessEffectImplementation[];
@@ -241,6 +245,12 @@ export function createAccessFlowAdapters(
         definitionFor: (cardId) => host.cards.definitionFor(state, cardId),
         cardInstanceFor: (cardId) => host.cards.cardInstanceFor(state, cardId),
         cardHasSubtype: host.cards.cardHasSubtype,
+        ...(host.cards.runnerProgramUsesMemory
+          ? {
+              runnerProgramUsesMemory: (cardId: CardInstanceId) =>
+                host.cards.runnerProgramUsesMemory!(state, cardId),
+            }
+          : {}),
       },
       servers: {
         mustServer: (serverId) => host.servers.mustServer(state, serverId),
@@ -279,6 +289,10 @@ export function createAccessFlowAdapters(
         definitionFor: (cardId) => host.cards.definitionFor(state, cardId),
         cardInstanceFor: (cardId) => host.cards.cardInstanceFor(state, cardId),
         cardHasSubtype: host.cards.cardHasSubtype,
+        runnerProgramUsesMemory: (cardId) =>
+          host.cards.runnerProgramUsesMemory
+            ? host.cards.runnerProgramUsesMemory(state, cardId)
+            : !host.cards.cardInstanceFor(state, cardId).hostedOn,
       },
       servers: {
         mustServer: (serverId) => host.servers.mustServer(state, serverId),

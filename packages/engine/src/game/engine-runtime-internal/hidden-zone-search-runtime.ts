@@ -20,6 +20,7 @@ import type {
 } from "./runtime-shared";
 import type { ChoiceHiddenZoneRuntimeLinks } from "./choice-hidden-zone-runtime-links";
 import { completeRunnerProgramRigInstall } from "../install/runner-rig-install-finalization";
+import { runnerProgramInstallMemoryReachable } from "../install/runner-program-install-memory";
 
 export function createHiddenZoneSearchRuntime(
   deps: RuntimeDeps,
@@ -463,10 +464,16 @@ export function createHiddenZoneSearchRuntime(
         (definition.installCost ?? 0)
     )
       return false;
-    return (
-      state.runner.memoryUsed + (definition.memoryCost ?? 0) <=
-      runnerMemoryLimit(state)
-    );
+    return runnerProgramInstallMemoryReachable({
+      memoryUsed: state.runner.memoryUsed,
+      targetMemoryCost: definition.memoryCost ?? 0,
+      memoryLimit: runnerMemoryLimit(state),
+      trashableMemoryCosts: state.runner.rig.programs.map((installedCardId) =>
+        runnerProgramUsesMemory(state, installedCardId)
+          ? (definitionFor(state, installedCardId).memoryCost ?? 0)
+          : 0,
+      ),
+    });
   }
 
   function installRunnerProgramFromZoneWithoutClick(

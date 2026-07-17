@@ -1186,6 +1186,7 @@ export function configureFlowRuntimeBootstrap({
       definitionFor,
       cardInstanceFor: (state, cardId) => mustInstance(state.cardInstances, cardId),
       cardHasSubtype,
+      runnerProgramUsesMemory,
       runnerInstalledCardIds,
       publicInstalledCorpCardIdentityKnown,
       effectiveSubtypesForCard,

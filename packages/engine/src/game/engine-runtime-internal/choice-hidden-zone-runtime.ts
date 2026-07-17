@@ -83,6 +83,7 @@ function createChoiceHiddenZoneRuntimeLinks(
     resolveCorpChoiceRezOrTrashIceDecisionChoice: link("resolveCorpChoiceRezOrTrashIceDecisionChoice"),
     resolveCorpChoiceRezOrTrashIceTargetChoice: link("resolveCorpChoiceRezOrTrashIceTargetChoice"),
     resolveGripInstallTemporaryCreditChoice: link("resolveGripInstallTemporaryCreditChoice"),
+    resolveNonSearchProgramInstallMemoryChoice: link("resolveNonSearchProgramInstallMemoryChoice"),
     resolveIncubatorTransformChoice: link("resolveIncubatorTransformChoice"),
     resolvePaidSourceReturnToGripChoice: link("resolvePaidSourceReturnToGripChoice"),
     resolveRunnerProgramReturnChoice: link("resolveRunnerProgramReturnChoice"),

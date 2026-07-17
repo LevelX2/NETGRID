@@ -15,6 +15,7 @@ import { quoteAccessTrashCost } from "../../ability-engine/trash-cost-modifiers"
 import type { RestrictedHostedCreditUse } from "../../ability-engine/definition-types";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { runnerCostPenaltySupportCreditCapacity } from "../payment/runner-payment-support";
+import { runnerProgramInstallMemoryReachable } from "../install/runner-program-install-memory";
 
 type ActiveRun = NonNullable<GameState["run"]>;
 type ActiveBreach = NonNullable<ActiveRun["breach"]>;
@@ -27,6 +28,7 @@ export type RunnerAccessActionHost = {
     definitionFor: (cardId: CardInstanceId) => CardDefinition;
     cardInstanceFor: (cardId: CardInstanceId) => CardInstance;
     cardHasSubtype: (definition: CardDefinition, subtype: string) => boolean;
+    runnerProgramUsesMemory?: (cardId: CardInstanceId) => boolean;
   };
   servers: {
     mustServer: (serverId: Exclude<ServerId, "new_remote">) => CorpServer;
@@ -120,10 +122,7 @@ export function buildRunnerAccessActions(
     const accessReplacement = agendaAccessReplacementForDefinition(definition);
     if (accessReplacement?.kind === "install_as_runner_program") {
       const legalActions: LegalAction[] = [];
-      if (
-        host.state.runner.memoryUsed + accessReplacement.memoryCost <=
-        host.state.runner.memoryLimit
-      ) {
+      if (runnerAgendaProgramInstallMemoryReachable(host, accessReplacement.memoryCost)) {
         legalActions.push(
           host.actions.buildLegalAction(
             "runner",
@@ -358,6 +357,24 @@ export function buildRunnerAccessActions(
       ),
     ],
   };
+}
+
+function runnerAgendaProgramInstallMemoryReachable(
+  host: RunnerAccessActionHost,
+  targetMemoryCost: number,
+): boolean {
+  return runnerProgramInstallMemoryReachable({
+    memoryUsed: host.state.runner.memoryUsed,
+    targetMemoryCost,
+    memoryLimit: host.state.runner.memoryLimit,
+    trashableMemoryCosts: host.state.runner.rig.programs
+      .filter((cardId) =>
+        host.cards.runnerProgramUsesMemory
+          ? host.cards.runnerProgramUsesMemory(cardId)
+          : !host.cards.cardInstanceFor(cardId).hostedOn,
+      )
+      .map((cardId) => host.cards.definitionFor(cardId).memoryCost ?? 0),
+  });
 }
 
 function agendaAccessReplacementForDefinition(definition: CardDefinition):

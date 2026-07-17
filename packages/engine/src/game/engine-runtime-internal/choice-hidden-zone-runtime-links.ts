@@ -43,6 +43,7 @@ export interface ChoiceHiddenZoneRuntimeLinks {
   resolveCorpChoiceRezOrTrashIceDecisionChoice: RuntimeDeps["resolveCorpChoiceRezOrTrashIceDecisionChoice"];
   resolveCorpChoiceRezOrTrashIceTargetChoice: RuntimeDeps["resolveCorpChoiceRezOrTrashIceTargetChoice"];
   resolveGripInstallTemporaryCreditChoice: ChoiceResolver;
+  resolveNonSearchProgramInstallMemoryChoice: ChoiceResolver;
   resolveIncubatorTransformChoice: RuntimeDeps["resolveIncubatorTransformChoice"];
   resolvePaidSourceReturnToGripChoice: RuntimeDeps["resolvePaidSourceReturnToGripChoice"];
   resolveRunnerProgramReturnChoice: RuntimeDeps["resolveRunnerProgramReturnChoice"];

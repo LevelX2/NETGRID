@@ -539,8 +539,7 @@ export function temporaryProgramInstallableProgramIds(
     return (
       definition.type === "program" &&
       !uniqueBlocked &&
-      host.state.runner.memoryUsed + (definition.memoryCost ?? 0) <=
-        host.runnerMemoryLimit()
+      host.install.canInstallRunnerProgramFromZone(cardId, zone, "free")
     );
   });
 }

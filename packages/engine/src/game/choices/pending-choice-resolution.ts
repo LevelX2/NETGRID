@@ -46,6 +46,7 @@ export type PendingChoiceResolutionHost = {
     resolveRandomDiceSplitChoice: HostFn<void>;
     resolveRunnerInstalledConnectionTrashBadPublicityChoice: HostFn<void>;
     resolveGripInstallTemporaryCreditChoice: HostFn<void>;
+    resolveNonSearchProgramInstallMemoryChoice: HostFn<void>;
     resolveStackInstallRunCleanupChoice: HostFn<void>;
     resolvePaidSourceReturnToGripChoice: HostFn<void>;
     resolveRunnerHostingChoice: HostFn<void>;
@@ -91,6 +92,7 @@ export type PendingChoiceResolutionHost = {
     resolveClassicDeflectorChoice: HostFn<void>;
   };
   access: {
+    resolveAccessProgramInstallMemoryChoice: HostFn<void>;
     resolveSuccessfulRunCreditLossSpendChoice: HostFn<void>;
     runAccessTransitionHost: HostFn<unknown>;
     resolvePreAccessTopRdReorderChoice: HostFn<void>;
@@ -169,6 +171,8 @@ export function resolvePendingChoice(
     host.hiddenZone.resolveRunnerInstalledConnectionTrashBadPublicityChoice;
   const resolveGripInstallTemporaryCreditChoice =
     host.hiddenZone.resolveGripInstallTemporaryCreditChoice;
+  const resolveNonSearchProgramInstallMemoryChoice =
+    host.hiddenZone.resolveNonSearchProgramInstallMemoryChoice;
   const resolveStackInstallRunCleanupChoice =
     host.hiddenZone.resolveStackInstallRunCleanupChoice;
   const resolvePaidSourceReturnToGripChoice =
@@ -236,6 +240,8 @@ export function resolvePendingChoice(
   const resolveClassicDeflectorChoice = host.run.resolveClassicDeflectorChoice;
   const resolveSuccessfulRunCreditLossSpendChoice =
     host.access.resolveSuccessfulRunCreditLossSpendChoice;
+  const resolveAccessProgramInstallMemoryChoice =
+    host.access.resolveAccessProgramInstallMemoryChoice;
   const runAccessTransitionHost = host.access.runAccessTransitionHost;
   const resolvePreAccessTopRdReorderChoice =
     host.access.resolvePreAccessTopRdReorderChoice;
@@ -516,6 +522,30 @@ export function resolvePendingChoice(
     )
   ) {
     resolveRunnerInstalledConnectionTrashBadPublicityChoice(
+      state,
+      legalAction,
+      playerAction,
+    );
+    return;
+  }
+  if (
+    state.pendingChoice.source.startsWith(
+      "runner.program_install_memory:access:",
+    )
+  ) {
+    resolveAccessProgramInstallMemoryChoice(
+      state,
+      legalAction,
+      playerAction,
+    );
+    return;
+  }
+  if (
+    state.pendingChoice.source.startsWith(
+      "runner.program_install_memory:nonsearch:",
+    )
+  ) {
+    resolveNonSearchProgramInstallMemoryChoice(
       state,
       legalAction,
       playerAction,

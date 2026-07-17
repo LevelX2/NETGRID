@@ -5,6 +5,7 @@ import type {
   CorpServer,
   GameState,
   LegalAction,
+  PlayerAction,
   ServerId,
   SpecialZoneState,
 } from "@netgrid/shared";
@@ -26,6 +27,13 @@ import {
   closeRunnerCostPenaltySupportWindowForPayment,
   openRunnerCostPenaltySupportWindow,
 } from "../payment/runner-payment-support";
+import { selectedChoiceIds } from "../choices/choice-validation";
+import {
+  buildRunnerProgramInstallMemoryChoice,
+  resolveRunnerProgramInstallMemoryTrashSelection,
+  runnerProgramInstallMemoryDeficit,
+  RUNNER_PROGRAM_INSTALL_MEMORY_CHOICE_PREFIX,
+} from "../install/runner-program-install-memory";
 
 type ActiveRun = NonNullable<GameState["run"]>;
 type ActiveBreach = NonNullable<ActiveRun["breach"]>;
@@ -39,6 +47,7 @@ export type AccessFlowHost = {
     definitionFor: (cardId: CardInstanceId) => CardDefinition;
     cardInstanceFor: (cardId: CardInstanceId) => CardInstance;
     cardHasSubtype: (definition: CardDefinition, subtype: string) => boolean;
+    runnerProgramUsesMemory: (cardId: CardInstanceId) => boolean;
   };
   servers: {
     mustServer: (serverId: Exclude<ServerId, "new_remote">) => CorpServer;
@@ -780,8 +789,34 @@ function installAccessedAgendaAsRunnerProgram(
     Number(legalAction.payload?.installedRunnerProgramMemoryCost) !== memoryCost
   )
     throw new Error("Die Installationskosten passen nicht mehr zur Agenda.");
-  if (host.state.runner.memoryUsed + memoryCost > host.state.runner.memoryLimit)
-    throw new Error("Der Runner hat nicht genug MU fuer dieses Programm.");
+  const memoryDeficit = runnerProgramInstallMemoryDeficit({
+    memoryUsed: host.state.runner.memoryUsed,
+    targetMemoryCost: memoryCost,
+    memoryLimit: host.state.runner.memoryLimit,
+  });
+  if (memoryDeficit > 0) {
+    const trashableIds = host.state.runner.rig.programs.filter((cardId) =>
+      host.cards.runnerProgramUsesMemory(cardId),
+    );
+    host.state.pendingChoice = buildRunnerProgramInstallMemoryChoice({
+      stateVersion: host.state.stateVersion,
+      kind: "access",
+      targetCardId: sourceCardId,
+      originalChoiceId: legalAction.actionId,
+      originalChoiceSource: `access.agenda_install_as_runner_program:${sourceCardId}:${memoryCost}`,
+      options: trashableIds.map((cardId) => ({
+        id: `card_${cardId}`,
+        label: host.cards.definitionFor(cardId).title,
+        value: cardId,
+      })),
+    });
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      installDeferredForMemory: true,
+      memoryToFree: memoryDeficit,
+    };
+    return { handled: true, stateChanged: true };
+  }
   const instance = host.cards.cardInstanceFor(sourceCardId);
   host.zones.removeFromAllZones(sourceCardId);
   host.state.runner.rig.programs.push(sourceCardId);
@@ -823,6 +858,57 @@ function installAccessedAgendaAsRunnerProgram(
     ...resolvedPayloadFor(legalAction),
     stateChanged: true,
   };
+}
+
+export function resolveAccessProgramInstallMemoryChoice(
+  host: AccessFlowHost,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): AccessExecutionResult {
+  const choice = host.state.pendingChoice;
+  if (
+    !choice ||
+    !choice.source.startsWith(
+      `${RUNNER_PROGRAM_INSTALL_MEMORY_CHOICE_PREFIX}:access:`,
+    )
+  )
+    throw new Error("Es ist keine Access-MU-Installationschoice offen.");
+  const continuationTarget = choice.source.split(":")[2] as CardInstanceId;
+  const targetDefinition = host.cards.definitionFor(continuationTarget);
+  const replacement = cardImplementationForDefinitionId(
+    targetDefinition.id,
+  )?.agendaAccessReplacement;
+  if (replacement?.kind !== "install_as_runner_program")
+    throw new Error("Die Access-MU-Installationsquelle ist nicht mehr legal.");
+  const selectedOptionIds = selectedChoiceIds(playerAction.selectedChoices);
+  const selection = resolveRunnerProgramInstallMemoryTrashSelection({
+    choice,
+    selectedOptionIds,
+    installedProgramIds: host.state.runner.rig.programs,
+    memoryUsed: host.state.runner.memoryUsed,
+    targetMemoryCost: replacement.memoryCost,
+    memoryLimit: host.state.runner.memoryLimit,
+    memoryCostFor: (cardId) => host.cards.definitionFor(cardId).memoryCost ?? 0,
+    usesMemory: (cardId) => host.cards.runnerProgramUsesMemory(cardId),
+  });
+  const trashedDefinitionIds = selection.trashCardIds.map(
+    (cardId) => host.cards.definitionFor(cardId).id,
+  );
+  for (const cardId of selection.trashCardIds)
+    host.zones.trashRunnerInstalledCardToHeap(cardId);
+  delete host.state.pendingChoice;
+  const result = installAccessedAgendaAsRunnerProgram(
+    host,
+    selection.continuation.targetCardId,
+    legalAction,
+  );
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    installDeferredForMemory: true,
+    memoryFreed: selection.freedMemory,
+    trashedCardDefinitionIds: trashedDefinitionIds.join(","),
+  };
+  return result;
 }
 
 function applyPendingAgendaPointBonusToStolenAgenda(

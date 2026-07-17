@@ -278,6 +278,7 @@ describe("hidden-zone search choice activations", () => {
     const host = makeHost({
       stack: [stackProgram],
       heap: [heapProgram],
+      canInstallIds: [heapProgram, stackProgram],
       definitions: {
         [heapProgram]: card("heap_program_def", "program", "Heap Program"),
         [stackProgram]: card("stack_program_def", "program", "Stack Program"),

@@ -39,11 +39,16 @@ import {
 } from "./free-program-install-execution";
 import {
   applySourceOncePerRunPostInstallPlan,
-  applySourceTrashPostInstallPlan,
   applyTemporaryProgramInstallReturnPlan,
-  createSourceTrashPostInstallSideEffectPlan,
   createTemporaryProgramInstallPostInstallSideEffectPlan,
 } from "./post-install-side-effects";
+import {
+  buildRunnerProgramInstallMemoryChoice,
+  resolveRunnerProgramInstallMemoryTrashSelection,
+  runnerProgramInstallMemoryDeficit,
+  runnerProgramInstallMemoryReachable,
+  RUNNER_PROGRAM_INSTALL_MEMORY_CHOICE_PREFIX,
+} from "../install/runner-program-install-memory";
 
 type HiddenZonePayload = Record<string, string | number | boolean>;
 type SearchInstallCost = "normal" | "free";
@@ -140,6 +145,12 @@ export function handleHiddenZoneSearchChoice(
   host: HiddenZoneSearchChoiceHandlerHost,
 ): HiddenZoneChoiceHandlerResult {
   const source = host.choice.source;
+  if (
+    source.startsWith(
+      `${RUNNER_PROGRAM_INSTALL_MEMORY_CHOICE_PREFIX}:hidden_search:`,
+    )
+  )
+    return handleHiddenSearchProgramInstallMemoryChoice(host);
   if (isPaidStackProgramInstallChoiceSource(source))
     return handlePaidStackProgramInstallChoice(host);
   if (isTemporaryProgramInstallChoiceSource(source))
@@ -206,11 +217,24 @@ export function handleRevealedStackProgramInstallChoice(
     topCardIds: currentTopCards,
     selectedCardDefinition: selectedDefinition,
   });
+  if (!selectedId)
+    throw new Error("Es muss genau ein offengelegtes Programm gewählt werden.");
   const sourceCardId = plan.sourceCardId;
   if (!sourceCardId || !state.runner.rig.programs.includes(sourceCardId))
     throw new Error("Die offengelegte Stack-Quelle ist nicht mehr installiert.");
   if (host.cards.definitionFor(sourceCardId).id !== host.constants.randomStackProgramInstallSourceId)
     throw new Error("Die Revealed-Stack-Program-Install-Choice passt nicht zur Quelle.");
+  const sourceMemory = host.cards.runnerProgramUsesMemory(sourceCardId)
+    ? (host.cards.definitionFor(sourceCardId).memoryCost ?? 0)
+    : 0;
+  const deferred = deferHiddenSearchProgramInstallForMemory(
+    host,
+    selectedId,
+    sourceMemory,
+    [sourceCardId],
+  );
+  if (deferred) return deferred;
+  host.zones.trashRunnerInstalledCardToHeap(sourceCardId);
   const execution = executeFreeProgramInstallPlan({
     plan: createRevealedStackFreeProgramInstallInput(plan),
     callbacks: {
@@ -221,10 +245,6 @@ export function handleRevealedStackProgramInstallChoice(
           memoryError: "Nicht genug Memory fuer das Programm aus offengelegtem Stack.",
         }),
     },
-  });
-  const postInstall = createSourceTrashPostInstallSideEffectPlan(execution);
-  applySourceTrashPostInstallPlan(postInstall, {
-    trashSource: host.zones.trashRunnerInstalledCardToHeap,
   });
   if (execution.shuffleNeeded)
     host.shuffleRunnerStack(
@@ -243,7 +263,7 @@ export function handleRevealedStackProgramInstallChoice(
     resolvedPayload: host.legalAction.payload as HiddenZonePayload,
     shufflePerformed: execution.shuffleNeeded,
     installedCardId: execution.installedProgramId,
-    sourceTrashCardIds: postInstall.sourceCardId ? [postInstall.sourceCardId] : [],
+    sourceTrashCardIds: [sourceCardId],
   };
 }
 
@@ -265,6 +285,8 @@ export function handleSearchStackInstallChoice(
     throw new Error("Die CardImplementation-Install-Choice ist ungueltig.");
   const cardId = selection.selectedCardId;
   const definition = host.cards.definitionFor(cardId);
+  const deferred = deferHiddenSearchProgramInstallForMemory(host, cardId);
+  if (deferred) return deferred;
   const installed = host.install.installRunnerProgramFromZoneWithoutClick(
     cardId,
     "stack",
@@ -455,13 +477,24 @@ export function handleLookTopStackShowInstallChoice(
   )
     throw new Error("Das gewaehlte Programm ist nicht legal installierbar.");
   const selectedDefinition = host.cards.definitionFor(selectedId);
+  const sourceInstanceId = sourceCardId as CardInstanceId;
+  const sourceMemory = host.cards.runnerProgramUsesMemory(sourceInstanceId)
+    ? (host.cards.definitionFor(sourceInstanceId).memoryCost ?? 0)
+    : 0;
+  const deferred = deferHiddenSearchProgramInstallForMemory(
+    host,
+    selectedId,
+    sourceMemory,
+    [sourceInstanceId],
+  );
+  if (deferred) return deferred;
+  host.zones.trashRunnerInstalledCardToHeap(sourceInstanceId);
   const installed = host.install.installRunnerProgramFromZoneWithoutClick(
     selectedId,
     "stack",
     "free",
   );
   if (!installed) throw new Error("Das Programm kann nicht installiert werden.");
-  host.zones.trashRunnerInstalledCardToHeap(sourceCardId as CardInstanceId);
   run.successfulRunAbilityUsedSourceIds = [
     ...used,
     sourceCardId as CardInstanceId,
@@ -562,6 +595,11 @@ function handleTemporaryProgramInstallChoice(
     selectedCardDefinition: selectedDefinition,
     defaultSourceDefinitionId: host.constants.temporaryProgramInstallSourceId,
   });
+  const deferred = deferHiddenSearchProgramInstallForMemory(
+    host,
+    plan.selectedCardId,
+  );
+  if (deferred) return deferred;
   const execution = executeFreeProgramInstallPlan({
     plan: createTemporaryProgramFreeInstallInput(plan),
     callbacks: {
@@ -975,6 +1013,137 @@ function handlePaidStackProgramInstallFreeMemoryChoice(
     installedCardId: selectedProgramId,
     sourceTrashCardIds: uniqueTrashIds,
   };
+}
+
+function deferHiddenSearchProgramInstallForMemory(
+  host: HiddenZoneSearchChoiceHandlerHost,
+  targetCardId: CardInstanceId,
+  automaticFreedMemory = 0,
+  excludedTrashCardIds: readonly CardInstanceId[] = [],
+): HiddenZoneChoiceHandlerResult | undefined {
+  const targetDefinition = host.cards.definitionFor(targetCardId);
+  const deficit = runnerProgramInstallMemoryDeficit({
+    memoryUsed: host.state.runner.memoryUsed,
+    targetMemoryCost: targetDefinition.memoryCost ?? 0,
+    memoryLimit: host.runnerMemoryLimit(),
+    automaticFreedMemory,
+  });
+  if (deficit <= 0) return undefined;
+  const excluded = new Set(excludedTrashCardIds);
+  const trashableProgramIds = host.state.runner.rig.programs.filter(
+    (cardId) => !excluded.has(cardId),
+  );
+  if (
+    !runnerProgramInstallMemoryReachable({
+      memoryUsed: host.state.runner.memoryUsed,
+      targetMemoryCost: targetDefinition.memoryCost ?? 0,
+      memoryLimit: host.runnerMemoryLimit(),
+      automaticFreedMemory,
+      trashableMemoryCosts: trashableProgramIds.map((cardId) =>
+        host.cards.runnerProgramUsesMemory(cardId)
+          ? (host.cards.definitionFor(cardId).memoryCost ?? 0)
+          : 0,
+      ),
+    })
+  )
+    throw new Error("Durch Programmtrash kann nicht genug MU freigemacht werden.");
+  host.state.pendingChoice = buildRunnerProgramInstallMemoryChoice({
+    stateVersion: host.state.stateVersion,
+    kind: "hidden_search",
+    targetCardId,
+    originalChoiceId: host.choice.choiceId,
+    originalChoiceSource: host.choice.source,
+    automaticFreedMemory,
+    options: trashableProgramIds.map((cardId) => ({
+      id: `card_${cardId}`,
+      label: host.cards.definitionFor(cardId).title,
+      value: cardId,
+    })),
+  });
+  host.legalAction.payload = {
+    ...(host.legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    installDeferredForMemory: true,
+    runnerProgramTrashBeforeInstall: true,
+  };
+  return {
+    handled: true,
+    stateChanged: true,
+    resolvedPayload: host.legalAction.payload as HiddenZonePayload,
+  };
+}
+
+function handleHiddenSearchProgramInstallMemoryChoice(
+  host: HiddenZoneSearchChoiceHandlerHost,
+): HiddenZoneChoiceHandlerResult {
+  const targetCardId = parseRunnerProgramInstallMemoryTarget(host.choice);
+  const targetDefinition = host.cards.definitionFor(targetCardId);
+  const selection = resolveRunnerProgramInstallMemoryTrashSelection({
+    choice: host.choice,
+    selectedOptionIds: selectedChoiceIds(host.playerAction.selectedChoices),
+    installedProgramIds: host.state.runner.rig.programs,
+    memoryUsed: host.state.runner.memoryUsed,
+    targetMemoryCost: targetDefinition.memoryCost ?? 0,
+    memoryLimit: host.runnerMemoryLimit(),
+    memoryCostFor: (cardId) => host.cards.definitionFor(cardId).memoryCost ?? 0,
+    usesMemory: host.cards.runnerProgramUsesMemory,
+  });
+  if (selection.continuation.kind !== "hidden_search")
+    throw new Error("Die MU-Choice gehört nicht zu einer Hidden-Search-Installation.");
+  const trashedDefinitionIds = selection.trashCardIds.map(
+    (cardId) => host.cards.definitionFor(cardId).id,
+  );
+  for (const cardId of selection.trashCardIds)
+    host.zones.trashRunnerInstalledCardToHeap(cardId);
+  const originalChoice: ChoiceRequest = {
+    ...host.choice,
+    choiceId: selection.continuation.originalChoiceId,
+    source: selection.continuation.originalChoiceSource,
+    options: [
+      {
+        id: `card_${targetCardId}`,
+        label: targetDefinition.title,
+        value: targetCardId,
+      },
+    ],
+  };
+  const continued = handleHiddenZoneSearchChoice({
+    ...host,
+    choice: originalChoice,
+    playerAction: {
+      ...host.playerAction,
+      selectedChoices: {
+        choiceId: originalChoice.choiceId,
+        selectedOptionIds: [`card_${targetCardId}`],
+      },
+    },
+  });
+  if (continued.resolvedPayload?.installDeferredForMemory === true)
+    throw new Error("Die MU-Installation konnte nach dem Trash nicht fortgesetzt werden.");
+  host.legalAction.payload = {
+    ...(host.legalAction.payload ?? {}),
+    runnerProgramTrashBeforeInstall: true,
+    runnerProgramTrashBeforeInstallResolved: true,
+    trashedCount: selection.trashCardIds.length,
+    trashedCardDefinitionIds: trashedDefinitionIds.join(","),
+  };
+  return {
+    ...continued,
+    resolvedPayload: host.legalAction.payload as HiddenZonePayload,
+    sourceTrashCardIds: [
+      ...(continued.sourceTrashCardIds ?? []),
+      ...selection.trashCardIds,
+    ],
+  };
+}
+
+function parseRunnerProgramInstallMemoryTarget(
+  choice: ChoiceRequest,
+): CardInstanceId {
+  const continuation = choice.source.split(":")[2];
+  if (!continuation)
+    throw new Error("Der MU-Installationschoice fehlt das Zielprogramm.");
+  return continuation as CardInstanceId;
 }
 
 function selectedChoiceIds(

@@ -840,8 +840,7 @@ export function createEconomyRuntimeServices(deps: RuntimeDeps) {
         !uniqueBlocked &&
         availableRunnerProgramInstallCredits(state) >=
           (definition.installCost ?? 0) &&
-        state.runner.memoryUsed + (definition.memoryCost ?? 0) <=
-          runnerMemoryLimit(state)
+        runnerProgramInstallMemoryReachableAfterTrash(state, definition)
       );
     });
   }

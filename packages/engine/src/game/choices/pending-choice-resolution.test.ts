@@ -300,6 +300,9 @@ function pendingChoiceHost(
       resolveGripInstallTemporaryCreditChoice: unexpected(
         "resolveGripInstallTemporaryCreditChoice",
       ),
+      resolveNonSearchProgramInstallMemoryChoice: unexpected(
+        "resolveNonSearchProgramInstallMemoryChoice",
+      ),
       resolveStackInstallRunCleanupChoice: unexpected(
         "resolveStackInstallRunCleanupChoice",
       ),
@@ -392,6 +395,9 @@ function pendingChoiceHost(
       ),
     },
     access: {
+      resolveAccessProgramInstallMemoryChoice: unexpected(
+        "resolveAccessProgramInstallMemoryChoice",
+      ),
       resolveSuccessfulRunCreditLossSpendChoice: unexpected(
         "resolveSuccessfulRunCreditLossSpendChoice",
       ),

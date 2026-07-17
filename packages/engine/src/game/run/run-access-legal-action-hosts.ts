@@ -25,7 +25,9 @@ export type RunAccessLegalActionHostCompositionHost = {
   cards: Omit<
     RunFlowHost["cards"],
     "cardImplementationAccessHookKindsForDefinition"
-  >;
+  > & {
+    runnerProgramUsesMemory?: AccessFlowCompositionHost["cards"]["runnerProgramUsesMemory"];
+  };
   servers: RunFlowHost["servers"];
   run: Omit<
     RunFlowHost["run"],
@@ -167,6 +169,9 @@ export function createRunAccessLegalActionHostComposition(
       definitionFor: cards.definitionFor,
       cardInstanceFor: cards.cardInstanceFor,
       cardHasSubtype: cards.cardHasSubtype,
+      ...(cards.runnerProgramUsesMemory
+        ? { runnerProgramUsesMemory: cards.runnerProgramUsesMemory }
+        : {}),
       accessEffectsForDefinition:
         cardImplementation.accessEffectsForDefinition,
       hiddenReplacementLongtailKindForDefinition:

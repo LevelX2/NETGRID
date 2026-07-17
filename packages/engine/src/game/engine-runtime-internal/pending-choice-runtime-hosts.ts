@@ -30,6 +30,7 @@ import {
   resumeEndTurnAfterTagPrevention,
   resumeStartOfTurnAfterTagPrevention,
 } from "./action-runtime-delegates";
+import { resolveAccessProgramInstallMemoryChoice } from "../access/access-flow";
 
 export function createPendingChoiceRuntimeHosts(
   deps: RuntimeDeps,
@@ -57,6 +58,7 @@ export function createPendingChoiceRuntimeHosts(
     STACK_TOP_REORDER_RESOURCE_SOURCE,
     TOO_MANY_DOORS_ID,
     accessEffectHandlerHost,
+    accessFlow,
     addCardCounter,
     affordableRezzedInstalledIceIdsForRunner,
     agendaPointsForScoredCard,
@@ -239,6 +241,7 @@ export function createPendingChoiceRuntimeHosts(
     resolveCorpChoiceRezOrTrashIceDecisionChoice,
     resolveCorpChoiceRezOrTrashIceTargetChoice,
     resolveGripInstallTemporaryCreditChoice,
+    resolveNonSearchProgramInstallMemoryChoice,
     resolveMultiExposeInstalledCorpCardsChoice,
     resolveIncubatorTransformChoice,
     resolvePaidSourceReturnToGripChoice,
@@ -750,6 +753,7 @@ export function createPendingChoiceRuntimeHosts(
         resolveRandomDiceSplitChoice,
         resolveRunnerInstalledConnectionTrashBadPublicityChoice,
         resolveGripInstallTemporaryCreditChoice,
+        resolveNonSearchProgramInstallMemoryChoice,
         resolveStackInstallRunCleanupChoice,
         resolvePaidSourceReturnToGripChoice,
         resolveRunnerHostingChoice,
@@ -834,6 +838,17 @@ export function createPendingChoiceRuntimeHosts(
         resolveClassicDeflectorChoice,
       },
       access: {
+        resolveAccessProgramInstallMemoryChoice: (
+          _state,
+          legalAction,
+          playerAction,
+        ) => {
+          resolveAccessProgramInstallMemoryChoice(
+            accessFlow.accessFlowHost(state),
+            legalAction,
+            playerAction,
+          );
+        },
         resolveSuccessfulRunCreditLossSpendChoice,
         runAccessTransitionHost,
         resolvePreAccessTopRdReorderChoice,
