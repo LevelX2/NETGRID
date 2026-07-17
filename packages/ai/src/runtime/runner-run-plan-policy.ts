@@ -337,6 +337,15 @@ function runnerRunPlanHasConcreteCurrentAbort(
   input: AiDecisionInput,
   plan: RunnerRunPlan,
 ): boolean {
+  if (
+    plan.revalidation.checkedAtStateVersion ===
+      input.playerView.stateVersion &&
+    plan.revalidation.reasons.includes(
+      "known_remote_access_payoff_unfunded",
+    )
+  ) {
+    return true;
+  }
   return (
     plan.revalidation.status === "abort_recommended" &&
     plan.revalidation.checkedAtStateVersion === input.playerView.stateVersion &&

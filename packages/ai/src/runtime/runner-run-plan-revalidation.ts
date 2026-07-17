@@ -1,5 +1,6 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 
+import { projectKnownRemoteTrashCommitment } from "../decision/known-remote-access-commitment";
 import { quoteRunnerRunPath } from "./runner-run-plan-path-quote";
 import type {
   RunnerRunEncounterStateRef,
@@ -24,6 +25,11 @@ export function revalidateRunnerRunPlan(
       ? redirectedRunnerRunPlan(plan, currentTarget)
       : plan;
   const pathQuote = quoteRunnerRunPath(input, currentPlan);
+  const currentAccessPayoff = revalidateCurrentRemoteAccessPayoff(
+    input,
+    currentPlan,
+    pathQuote.expectedRemainingCredits,
+  );
   const nextEncounter = currentEncounterRef(input, currentPlan.targetServer.id);
   const previousFingerprint = plan.revalidation.reasons.find((reason) =>
     reason.startsWith("fingerprint:"),
@@ -60,6 +66,15 @@ export function revalidateRunnerRunPlan(
         ? []
         : ["run_state_fingerprint_initialized"]),
     ...(pathQuote.reserveViolation ? ["reserve_violation"] : []),
+    ...(currentAccessPayoff?.knownNoCurrentPayoff
+      ? [
+          "access_payoff_revalidated",
+          "known_remote_access_payoff_unfunded",
+          ...currentAccessPayoff.reasons.map(
+            (reason) => `access_payoff_reason:${reason}`,
+          ),
+        ]
+      : []),
     ...(!pathQuote.canReachAccess && pathQuote.cannotReachReason
       ? [`cannot_reach:${pathQuote.cannotReachReason}`]
       : []),
@@ -71,6 +86,8 @@ export function revalidateRunnerRunPlan(
     encounterChanged,
     fingerprintChanged,
     canReachAccess: pathQuote.canReachAccess,
+    knownNoCurrentPayoff:
+      currentAccessPayoff?.knownNoCurrentPayoff === true,
   });
   return {
     ...currentPlan,
@@ -92,8 +109,10 @@ function revalidationStatusFor(params: {
   encounterChanged: boolean;
   fingerprintChanged: boolean;
   canReachAccess: boolean;
+  knownNoCurrentPayoff: boolean;
 }): RunnerRunPlanRevalidationStatus {
   if (!params.canReachAccess) return "abort_recommended";
+  if (params.knownNoCurrentPayoff) return "abort_recommended";
   if (
     params.targetChanged ||
     params.pathQuoteChanged ||
@@ -103,6 +122,63 @@ function revalidationStatusFor(params: {
     return "adjusted";
   }
   return "valid";
+}
+
+function revalidateCurrentRemoteAccessPayoff(
+  input: AiDecisionInput,
+  plan: RunnerRunPlan,
+  creditsAfterRemainingPath: number,
+): { knownNoCurrentPayoff: true; reasons: string[] } | undefined {
+  const serverId = plan.targetServer.id;
+  const run = input.playerView.run;
+  if (
+    !serverId.startsWith("remote_") ||
+    input.playerView.timingPoint !== "run.jack_out_window" ||
+    run?.phase !== "movement" ||
+    run.position?.kind !== "server" ||
+    run.position.serverId !== serverId ||
+    !input.legalActions.some((action) => action.type === "jack_out") ||
+    plan.objective.kind === "run_card_effect" ||
+    plan.objective.kind === "survival_or_win_pressure"
+  ) {
+    return undefined;
+  }
+
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
+  if (!server || server.root.length === 0) return undefined;
+  if (
+    server.root.some(
+      (card) =>
+        !card.known ||
+        !card.definitionId ||
+        (card.type !== "asset" && card.type !== "upgrade") ||
+        typeof card.trashCost !== "number",
+    )
+  ) {
+    return undefined;
+  }
+
+  const projections = server.root.map((card) =>
+    projectKnownRemoteTrashCommitment(input, {
+      serverId,
+      definitionId: card.definitionId!,
+      rootType: card.type!,
+      trashCost: card.trashCost!,
+      creditsAfterPath: creditsAfterRemainingPath,
+      visibleCard: card,
+    }),
+  );
+  if (projections.some((projection) => !projection.knownNoCurrentPayoff)) {
+    return undefined;
+  }
+  return {
+    knownNoCurrentPayoff: true,
+    reasons: [
+      ...new Set(projections.flatMap((projection) => projection.reasons)),
+    ],
+  };
 }
 
 function redirectedRunnerRunPlan(

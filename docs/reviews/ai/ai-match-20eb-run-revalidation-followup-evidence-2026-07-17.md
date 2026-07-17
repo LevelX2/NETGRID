@@ -101,6 +101,31 @@ Dreff für drei Credits und beendete die Sequenz bei null liquiden Credits.
 Dieses Finding bleibt als defensive Folgegrenze relevant, auch wenn der
 primäre D92-Fix die historische Sequenz künftig verhindert.
 
+## P3 – Revalidierung des aktuellen Access-Payoffs
+
+Die bestehende Run-Plan-Revalidierung quotierte den noch vor dem Runner
+liegenden ICE-Pfad korrekt neu, behandelte einen erreichbaren Zugriff aber
+automatisch weiter als sinnvollen Zugriff. Sie konsumierte die vorhandene
+Access-Reserve- und Trash-Projektion nicht erneut, nachdem der Root öffentlich
+gerezzt worden war.
+
+P3 projiziert deshalb im legalen Jack-out-Fenster am Server den aktuellen,
+vollständig sichtbaren Remote-Payoff mit den Credits nach dem tatsächlich noch
+verbleibenden Pfad. Ein Run-Card-Effekt oder ein eigener Survival-/Win-Zweck
+wird davon nicht verdrängt. Nur wenn alle sichtbaren Root-Ziele aktuell keinen
+finanzierbaren Payoff bieten, wird der Plan `abort_recommended`; dieser aktuelle
+konkrete Abort darf dann nicht mehr von der pauschalen Continue-/Jack-out-
+Score-Differenz zurückgenommen werden.
+
+Verifikation nach P3:
+
+- historischer D113-Checkpoint mit 3 Credits: grün, `jack_out`;
+- Gegenprobe mit 12 Credits: grün, `continue_run`;
+- der Restpfad bleibt in beiden Fällen erreichbar; ausschlaggebend ist allein
+  die aktuelle Access-Finanzierung und nicht eine doppelte Berechnung bereits
+  passierter ICE;
+- fokussierte Run-Plan-Revalidierungs- und Policy-Suite: 27/27 grün.
+
 ## Bestehender Portfolio- und Eurocorpse-Stand
 
 Die bereits integrierte Match-20EB-Remediation setzt den Nutzervertrag zur
