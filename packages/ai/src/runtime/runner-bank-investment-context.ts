@@ -416,7 +416,13 @@ export function createRunnerBankInvestmentContext(
         criticalReserve,
         cashOutThresholdMet,
         ...(runOverride ? { runOverride } : {}),
-        buildBankPriority: firstLoad ? 1200 : 1100,
+        buildBankPriority: firstLoad
+          ? input.playerView.own.clicks <= 1
+            ? 2300
+            : 1250
+          : input.playerView.own.clicks <= 1
+            ? 600
+            : 1550,
         cashOutPriority: -1600,
       };
     }

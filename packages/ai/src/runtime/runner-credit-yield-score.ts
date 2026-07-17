@@ -29,6 +29,9 @@ export function runnerCreditYieldScoreComponent(
 ): AiDecisionScoreComponent | undefined {
   if (input.side !== "runner" || action.side !== "runner") return undefined;
   if (isBasicCreditAction(action)) return undefined;
+  if (action.payload?.cardImplementationAddsHostedCredits === true) {
+    return undefined;
+  }
   const grossGain = runnerKnownCreditGain(input, action, dependencies);
   const netGain = runnerKnownNetCreditGain(input, action, dependencies);
   if (netGain <= 0) return undefined;

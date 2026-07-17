@@ -656,7 +656,7 @@ describe("createRunnerBankInvestmentContext", () => {
         loadedBuild,
       )[0]?.value ?? 0;
 
-    expect(firstLoad).toBe(1200);
+    expect(firstLoad).toBeGreaterThan(2000);
     expect(secondLoad).toBeGreaterThan(0);
     expect(secondLoad).toBeLessThan(820);
   });

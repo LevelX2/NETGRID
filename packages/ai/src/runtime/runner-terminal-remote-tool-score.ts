@@ -5,6 +5,7 @@ import type {
 } from "@netgrid/shared";
 
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
+import { actionCreditCost } from "./action-cost";
 import { runnerExposeInstalledOpportunity } from "./runner-expose-installed-card-choice";
 
 export function runnerTerminalRemoteToolScoreComponent(
@@ -55,6 +56,14 @@ export function runnerTerminalRemoteToolScoreComponent(
       signal.includes("expose_info"),
   );
   if (exposeInfo) {
+    const installPreparation = action.type === "install_card";
+    if (
+      installPreparation &&
+      (input.playerView.own.clicks < 3 ||
+        input.playerView.own.credits < actionCreditCost(action) + 1)
+    ) {
+      return undefined;
+    }
     if (
       exposeOpportunity.positions.length > 0 &&
       exposeOpportunity.unseenPositions.length === 0
@@ -80,6 +89,9 @@ export function runnerTerminalRemoteToolScoreComponent(
       value: advancedHiddenRootCount > 0 ? 2_150 : 1_800,
       reason: [
         "terminal_remote_tool:expose_info",
+        `terminal_tool_step:${
+          installPreparation ? "install_then_activate" : "execute"
+        }`,
         `corp_agenda_points:${input.playerView.opponent.agendaPoints}`,
         `agenda_points_to_win:${input.playerView.agendaPointsToWin}`,
         `possible_matchpoint_remotes:${possibleMatchpointRemotes.length}`,
