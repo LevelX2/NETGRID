@@ -9,6 +9,7 @@ export const esaContractImplementation: CardImplementationDefinition = {
       kind: "activated",
       timing: "corp_main",
       costs: [{ kind: "action", amount: 1 }],
+      label: "ESA Contract: 2 Karten ziehen",
       effects: [
         {
           kind: "draw_cards",

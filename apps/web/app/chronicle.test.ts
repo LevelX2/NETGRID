@@ -23,6 +23,7 @@ const ACTION_TYPES = [
   "score_agenda",
   "start_run",
   "rez_ice",
+  "rez_card",
   "decline_rez",
   "pump_breaker",
   "break_subroutine",
@@ -5029,6 +5030,40 @@ describe("formatChronicleEvent", () => {
       );
       expect(effects).toEqual([]);
     }
+  });
+
+  it("names Remote Facility's non-ICE rez and immediate action", () => {
+    const event = makeEvent("rez_card", {
+      actor: "corp",
+      title: "Remote Facility",
+      cardDefinitionId: "onr_v1_335_remote-facility",
+      rezCostPaid: 5,
+      resolvedEffects: [
+        {
+          effectId: "onr_v1_335_remote-facility.on_rez.gain_actions",
+          kind: "gain_actions",
+          visibility: "public",
+          side: "corp",
+          amount: 1,
+          sourceDefinitionId: "onr_v1_335_remote-facility",
+          sourceTitle: "Remote Facility",
+          reason: "card_resolver",
+        },
+      ],
+    });
+
+    const item = formatChronicleEvent(event, "runner", {
+      cardTitle: "Remote Facility",
+    });
+
+    expect(item.title).toBe(
+      "Die Korp hat Remote Facility gerezzt und 1 zusätzliche Aktion erhalten.",
+    );
+    expect(item.description).toBe("Rez-Kosten: 5 Credits.");
+    expect(item.chips).toEqual(
+      expect.arrayContaining(["Rez", "+1 Aktion", "5 Credits"]),
+    );
+    expect(formatChronicleEffectItems(event, "runner")).toEqual([]);
   });
 
   it("formats Corporate War score credit swings from score payload fields", () => {
