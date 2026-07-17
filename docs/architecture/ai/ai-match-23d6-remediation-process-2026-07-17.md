@@ -1,6 +1,6 @@
 # Match 23D6: Runner-Run-, Breaker-, Broker- und Hint-Remediation
 
-Status: P3 aktiv
+Status: P4 aktiv
 
 ## Quelle und Zielprüfung
 
@@ -237,4 +237,9 @@ den finalen Merge.
   und keine Risiko-Tags, Skullcap besitzt zwei überlappende generische
   Damage-Prevention-Effekte. Der 27/27-Deck-Audit bestätigt genau den einen
   Skullcap-Blocker bei null Warnungen.
-- P3 aktiv: Encounter-Zieldaten und D37-Break-Auswahl.
+- P3 abgeschlossen: Die positive LegalAction-Allowlist erhält ausschließlich
+  die actor-sicheren Encounter-Felder `breakerId`, `iceId`,
+  `subroutineIndex` und `subroutineIndexes`. DTO- und Side-Safety-Vertrag,
+  Break-Score, RunPlan-Zitat und D37-Checkpoint sind grün; D37 bricht nun die
+  programmtrashende Subroutine 2 und behält Krash.
+- P4 aktiv: Broker-Funding und konkrete Coverage-Suche.

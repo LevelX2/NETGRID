@@ -140,6 +140,8 @@ describe("AI input DTO score-conversion contract", () => {
     action.type = "break_subroutine";
     action.payload = {
       ...action.payload,
+      breakerId: "runner-breaker",
+      iceId: "corp-ice",
       subroutineIndex: 1,
       subroutineIndexes: "1",
       privateEncounterProbe: "must-not-cross-dto",
@@ -157,10 +159,14 @@ describe("AI input DTO score-conversion contract", () => {
     });
 
     expect(input.legalActions[0]?.payload).toMatchObject({
+      breakerId: "runner-breaker",
+      iceId: "corp-ice",
       subroutineIndex: 1,
       subroutineIndexes: "1",
     });
     expect(input.playerView.legalActions[0]?.payload).toMatchObject({
+      breakerId: "runner-breaker",
+      iceId: "corp-ice",
       subroutineIndex: 1,
       subroutineIndexes: "1",
     });
