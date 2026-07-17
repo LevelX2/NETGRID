@@ -166,6 +166,7 @@ const TARGET_KEYS = [
   "publicRevealKind",
   "publicRevealDefinitionIds",
   "publicRevealTitles",
+  "exposedCardInstanceIds",
   "revealedAgendaDefinitionIds",
   "spentAgendaCardId",
   "spentAgendaDefinitionIds",

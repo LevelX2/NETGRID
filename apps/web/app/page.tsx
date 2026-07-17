@@ -31,7 +31,15 @@ import {
   X,
   ZoomIn,
 } from "lucide-react";
-import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { createPortal } from "react-dom";
 import type {
   CSSProperties,
@@ -91,9 +99,7 @@ import {
   dismissPendingAccessPresentationEvent,
 } from "./access-presentation-queue";
 import { matchOverlayPresentation } from "./match-overlay-presentation";
-import {
-  latestSuccessfulRunOutcomePresentation,
-} from "./successful-run-outcome-presentation";
+import { latestSuccessfulRunOutcomePresentation } from "./successful-run-outcome-presentation";
 import {
   ACTION_CUE_POSITION_STORAGE_KEY,
   DEFAULT_CUE_POSITION,
@@ -111,6 +117,7 @@ import {
   automaticCorpRunPassAction,
   automaticEndTurnAction,
   baseActionSlotCapacity,
+  exposedCardInstanceIdsForEvent,
   installedCorpExposeReviewCardId,
   fieldCardChoiceOptionsForCard,
   groupRunnerRigCards,
@@ -380,9 +387,7 @@ import {
   AccessRevealModal,
   ExposeReviewModal,
 } from "../features/actions/AccessReviewModals";
-import {
-  SuccessfulRunOutcomeModal,
-} from "../features/actions/SuccessfulRunOutcomeModal";
+import { SuccessfulRunOutcomeModal } from "../features/actions/SuccessfulRunOutcomeModal";
 import {
   accessRevealFromCurrentRun,
   accessRevealFromLatestEvent,
@@ -721,6 +726,13 @@ export default function Page() {
     useState<ActionPanelMode>("docked");
   const [aiDecisionDebugOverlayEnabled, setAiDecisionDebugOverlayEnabled] =
     useState(false);
+  const [exposedCardHighlightEnabled, setExposedCardHighlightEnabled] =
+    useState(true);
+  const [exposedCardHighlightIds, setExposedCardHighlightIds] = useState<
+    string[]
+  >([]);
+  const [exposedCardHighlightTurnSerial, setExposedCardHighlightTurnSerial] =
+    useState<number | null>(null);
   const [actionPanelOverlayPosition, setActionPanelOverlayPosition] =
     useState<RunOverlayPositionPreference>(() =>
       typeof window === "undefined"
@@ -805,6 +817,10 @@ export default function Page() {
   const lastAudioResultKeyRef = useRef<string | null>(null);
   const lastSeenCueEventIdRef = useRef<string | null>(null);
   const lastSeenAccessPresentationEventIdRef = useRef<string | null>(null);
+  const lastSeenExposeHighlightEventIdRef = useRef<string | null>(null);
+  const exposedCardHighlightTimerRef = useRef<ReturnType<
+    typeof setTimeout
+  > | null>(null);
   const lastTurnStartAudioStateRef = useRef<TurnStartAudioState | null>(null);
   const lastTurnStartAudioCueKeyRef = useRef<string | null>(null);
   const locallyPlayedActionSoundKeysRef = useRef<Set<string>>(new Set());
@@ -1391,6 +1407,7 @@ export default function Page() {
           resourceStripMode?: unknown;
           actionPanelMode?: unknown;
           aiDecisionDebugOverlayEnabled?: unknown;
+          exposedCardHighlightEnabled?: unknown;
         };
         if (typeof parsed.autoCorpMandatoryDrawEnabled === "boolean")
           setAutoCorpMandatoryDrawEnabled(parsed.autoCorpMandatoryDrawEnabled);
@@ -1408,6 +1425,8 @@ export default function Page() {
           setAiDecisionDebugOverlayEnabled(
             parsed.aiDecisionDebugOverlayEnabled,
           );
+        if (typeof parsed.exposedCardHighlightEnabled === "boolean")
+          setExposedCardHighlightEnabled(parsed.exposedCardHighlightEnabled);
         setResourceStripMode(
           normalizeResourceStripMode(parsed.resourceStripMode),
         );
@@ -1436,6 +1455,7 @@ export default function Page() {
         resourceStripMode,
         actionPanelMode,
         aiDecisionDebugOverlayEnabled,
+        exposedCardHighlightEnabled,
       }),
     );
   }, [
@@ -1449,6 +1469,7 @@ export default function Page() {
     resourceStripMode,
     actionPanelMode,
     aiDecisionDebugOverlayEnabled,
+    exposedCardHighlightEnabled,
   ]);
 
   useEffect(() => {
@@ -1832,16 +1853,16 @@ export default function Page() {
   });
   const gameMode: GameMode =
     matchStart.technicalMode ??
-    (playMode === "human_vs_ai"
-      ? "human_runner_vs_corp_ai"
-      : "human_vs_human");
+    (playMode === "human_vs_ai" ? "human_runner_vs_corp_ai" : "human_vs_human");
   const hasAiOpponent = matchStart.hasAiOpponent;
   const isHumanVsHuman = playMode === "human_vs_human";
   const isHumanVsAi = playMode === "human_vs_ai";
   const isAiVsAiMatch = session?.mode === "ai_vs_ai";
   const humanOpponentIsAi = isHumanVsAiMatchMode(session?.mode);
   const effectiveStartMatchFormat = matchFormat;
-  const isAiVsAiStartSeries = gameMode === "ai_vs_ai" && effectiveStartMatchFormat === "two_game_side_swap";
+  const isAiVsAiStartSeries =
+    gameMode === "ai_vs_ai" &&
+    effectiveStartMatchFormat === "two_game_side_swap";
   const aiTurnPresentation = effectiveAiTurnPresentation(payload);
   const hasPendingAiCue =
     currentActionCue?.source === "ai" ||
@@ -1909,14 +1930,23 @@ export default function Page() {
     gameMode === "ai_vs_ai"
       ? aiDeckPolicyUsesPrimaryDeckSlots
         ? [
-            { label: isAiVsAiStartSeries ? "KI A · Runner" : "Runner-KI", metadata: participantARunnerMetadata },
-            { label: isAiVsAiStartSeries ? "KI A · Korp" : "Korp-KI", metadata: participantACorpMetadata },
+            {
+              label: isAiVsAiStartSeries ? "KI A · Runner" : "Runner-KI",
+              metadata: participantARunnerMetadata,
+            },
+            {
+              label: isAiVsAiStartSeries ? "KI A · Korp" : "Korp-KI",
+              metadata: participantACorpMetadata,
+            },
             ...(isAiVsAiStartSeries && aiDeckPolicy === "selected"
               ? [
-                  { label: "KI B · Runner", metadata: participantBRunnerMetadata },
-                  { label: "KI B · Korp", metadata: participantBCorpMetadata }
+                  {
+                    label: "KI B · Runner",
+                    metadata: participantBRunnerMetadata,
+                  },
+                  { label: "KI B · Korp", metadata: participantBCorpMetadata },
                 ]
-              : [])
+              : []),
           ]
         : []
       : [
@@ -2145,9 +2175,7 @@ export default function Page() {
         dismissedSuccessfulRunOutcomeEventId,
       )
     : null;
-  const showSuccessfulRunOutcome = Boolean(
-    successfulRunOutcome && !matchEnded,
-  );
+  const showSuccessfulRunOutcome = Boolean(successfulRunOutcome && !matchEnded);
   const successfulRunOutcomeCard = successfulRunOutcome
     ? (catalogDetailsById[successfulRunOutcome.sourceDefinitionId] ?? null)
     : null;
@@ -2252,18 +2280,22 @@ export default function Page() {
     accessOutcomeKind: accessReveal?.outcomeKind ?? null,
     matchEnded,
     resultAvailable: Boolean(resultSummary && resultKey),
-    resultDismissed: Boolean(
-      resultKey && dismissedResultKey === resultKey,
-    ),
+    resultDismissed: Boolean(resultKey && dismissedResultKey === resultKey),
     runnerWonByAgendaPoints:
       resultSummary?.winner === "runner" &&
       resultSummary.reason === "agenda_points",
   });
   const showAccessReveal = overlayPresentation.showAccessReveal;
   const dismissAccessPresentation = useCallback((eventId: string) => {
-    setPendingAccessPresentationEvents((events) => dismissPendingAccessPresentationEvent(events, eventId));
-    setDismissedAccessEventIds((eventIds) => eventIds.includes(eventId) ? eventIds : [...eventIds, eventId].slice(-30));
-    setCurrentDamageImpact((current) => current?.eventId === eventId ? null : current);
+    setPendingAccessPresentationEvents((events) =>
+      dismissPendingAccessPresentationEvent(events, eventId),
+    );
+    setDismissedAccessEventIds((eventIds) =>
+      eventIds.includes(eventId) ? eventIds : [...eventIds, eventId].slice(-30),
+    );
+    setCurrentDamageImpact((current) =>
+      current?.eventId === eventId ? null : current,
+    );
   }, []);
   const accessDamageImpact =
     currentDamageImpact &&
@@ -2276,8 +2308,8 @@ export default function Page() {
     : currentDamageImpact;
   const accessOutcomeAwaitingConfirmation = Boolean(
     showAccessReveal &&
-      accessReveal?.kind === "access" &&
-      accessReveal.outcomeStatus,
+    accessReveal?.kind === "access" &&
+    accessReveal.outcomeStatus,
   );
   const interactionPresentationBlocked = interactionPresentationBlocksAi({
     damageOpen: Boolean(currentDamageImpact),
@@ -2325,9 +2357,9 @@ export default function Page() {
     null;
   const canForfeit = Boolean(
     payload &&
-      payload.matchStatus === "active" &&
-      !payload.winner &&
-      !isAiVsAiMatch,
+    payload.matchStatus === "active" &&
+    !payload.winner &&
+    !isAiVsAiMatch,
   );
   const canCancelSimulation = Boolean(
     isAiVsAiMatch && payload?.matchStatus === "active" && !payload.winner,
@@ -2884,6 +2916,82 @@ export default function Page() {
     setDismissedSuccessfulRunOutcomeEventId(null);
   }, [payload?.matchId]);
 
+  const clearExposedCardHighlights = useCallback(() => {
+    if (exposedCardHighlightTimerRef.current !== null) {
+      clearTimeout(exposedCardHighlightTimerRef.current);
+      exposedCardHighlightTimerRef.current = null;
+    }
+    setExposedCardHighlightIds([]);
+    setExposedCardHighlightTurnSerial(null);
+  }, []);
+
+  useEffect(() => {
+    lastSeenExposeHighlightEventIdRef.current =
+      payload?.eventTail.at(-1)?.eventId ?? null;
+    clearExposedCardHighlights();
+  }, [clearExposedCardHighlights, payload?.matchId]);
+
+  useEffect(() => {
+    if (exposedCardHighlightEnabled) return;
+    clearExposedCardHighlights();
+  }, [clearExposedCardHighlights, exposedCardHighlightEnabled]);
+
+  useEffect(
+    () => () => {
+      if (exposedCardHighlightTimerRef.current !== null)
+        clearTimeout(exposedCardHighlightTimerRef.current);
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (!payload) return;
+    const latestId = payload.eventTail.at(-1)?.eventId ?? null;
+    const lastSeen = lastSeenExposeHighlightEventIdRef.current;
+    if (lastSeen === null) {
+      lastSeenExposeHighlightEventIdRef.current = latestId;
+      return;
+    }
+    if (latestId === lastSeen) return;
+    const exposedCardIds = publicEventsAfter(
+      payload.eventTail,
+      lastSeen,
+    ).flatMap(exposedCardInstanceIdsForEvent);
+    lastSeenExposeHighlightEventIdRef.current = latestId;
+    if (!exposedCardHighlightEnabled || exposedCardIds.length === 0) return;
+    if (exposedCardHighlightTimerRef.current !== null)
+      clearTimeout(exposedCardHighlightTimerRef.current);
+    setExposedCardHighlightIds((current) => [
+      ...new Set([...current, ...exposedCardIds]),
+    ]);
+    setExposedCardHighlightTurnSerial(payload.playerView.turnSerial ?? null);
+    exposedCardHighlightTimerRef.current = setTimeout(() => {
+      exposedCardHighlightTimerRef.current = null;
+      setExposedCardHighlightIds([]);
+      setExposedCardHighlightTurnSerial(null);
+    }, 10_000);
+  }, [
+    exposedCardHighlightEnabled,
+    payload?.eventTail,
+    payload?.matchId,
+    payload?.playerView.turnSerial,
+  ]);
+
+  useEffect(() => {
+    const currentTurnSerial = payload?.playerView.turnSerial;
+    if (
+      exposedCardHighlightTurnSerial === null ||
+      currentTurnSerial === undefined ||
+      currentTurnSerial === exposedCardHighlightTurnSerial
+    )
+      return;
+    clearExposedCardHighlights();
+  }, [
+    clearExposedCardHighlights,
+    exposedCardHighlightTurnSerial,
+    payload?.playerView.turnSerial,
+  ]);
+
   useEffect(() => {
     if (!payload) return;
     const latestId = payload.eventTail.at(-1)?.eventId ?? null;
@@ -3104,9 +3212,7 @@ export default function Page() {
         : current,
     );
     setActionCueQueue((current) =>
-      current.filter(
-        (cue) => !accessPresentationOwnsActionCue(cue.actionType),
-      ),
+      current.filter((cue) => !accessPresentationOwnsActionCue(cue.actionType)),
     );
   }, [accessReveal?.eventId, showAccessReveal]);
 
@@ -3121,11 +3227,14 @@ export default function Page() {
     const autoDismissMs = observerAccessAutoDismissMs({
       observerMode: isAiVsAiMatch,
       pacingMode: localAiPacingMode,
-      configuredAutoDismissMs: actionCueAutoDismissMs
+      configuredAutoDismissMs: actionCueAutoDismissMs,
     });
     if (autoDismissMs === null) return;
     const eventId = accessReveal.eventId;
-    const timeout = window.setTimeout(() => dismissAccessPresentation(eventId), autoDismissMs);
+    const timeout = window.setTimeout(
+      () => dismissAccessPresentation(eventId),
+      autoDismissMs,
+    );
     return () => window.clearTimeout(timeout);
   }, [
     accessReveal?.eventId,
@@ -3225,8 +3334,7 @@ export default function Page() {
           pendingAiAdvanceKeyRef.current = null;
         return;
       }
-      if (currentActionCue)
-        setCurrentActionCue(actionCueAfterAiAdvanceRequest);
+      if (currentActionCue) setCurrentActionCue(actionCueAfterAiAdvanceRequest);
       const sent = advanceAi(
         aiAdvanceRequestMode(localAiPacingModeRef.current, isAiVsAiMatch),
       );
@@ -5378,6 +5486,7 @@ export default function Page() {
                       aiDecisionDebugOverlayEnabled={
                         aiDecisionDebugOverlayEnabled
                       }
+                      exposedCardHighlightEnabled={exposedCardHighlightEnabled}
                       audioEnabled={audioEnabled}
                       audioVolume={audioVolume}
                       cardTooltipHoverDelayMs={cardTooltipHoverDelayMs}
@@ -5406,11 +5515,16 @@ export default function Page() {
                       onAutoDiscardEnabled={setAutoDiscardEnabled}
                       onAutoEndTurnEnabled={setAutoEndTurnEnabled}
                       onTopbarStickyEnabled={setTopbarStickyEnabled}
-                      onCyberspaceBackgroundEnabled={setCyberspaceBackgroundEnabled}
+                      onCyberspaceBackgroundEnabled={
+                        setCyberspaceBackgroundEnabled
+                      }
                       onResourceStripMode={setResourceStripMode}
                       onActionPanelMode={setActionPanelMode}
                       onAiDecisionDebugOverlayEnabled={
                         setAiDecisionDebugOverlayEnabled
+                      }
+                      onExposedCardHighlightEnabled={
+                        setExposedCardHighlightEnabled
                       }
                       onAudioEnabled={updateAudioEnabled}
                       onAudioVolume={setAudioVolume}
@@ -5966,6 +6080,7 @@ export default function Page() {
                     activeRunIceId={activeRunIceId}
                     viewedApproachIceId={viewedApproachIceId}
                     viewedInstalledExposeCardId={viewedInstalledExposeCardId}
+                    exposedCardHighlightIds={new Set(exposedCardHighlightIds)}
                     selectedActionContext={selectedActionContext}
                     selectedDiscardOptionIdSet={selectedDiscardOptionIdSet}
                     boardLaneStyle={boardLaneStyle}
@@ -6105,6 +6220,7 @@ export default function Page() {
                   resourceStripMode,
                   actionPanelMode,
                   aiDecisionDebugOverlayEnabled,
+                  exposedCardHighlightEnabled,
                   audioEnabled,
                   audioVolume,
                   cardTooltipHoverDelayMs,
@@ -6131,12 +6247,12 @@ export default function Page() {
                   onAutoDiscardEnabled: setAutoDiscardEnabled,
                   onAutoEndTurnEnabled: setAutoEndTurnEnabled,
                   onTopbarStickyEnabled: setTopbarStickyEnabled,
-                  onCyberspaceBackgroundEnabled:
-                    setCyberspaceBackgroundEnabled,
+                  onCyberspaceBackgroundEnabled: setCyberspaceBackgroundEnabled,
                   onResourceStripMode: setResourceStripMode,
                   onActionPanelMode: setActionPanelMode,
                   onAiDecisionDebugOverlayEnabled:
                     setAiDecisionDebugOverlayEnabled,
+                  onExposedCardHighlightEnabled: setExposedCardHighlightEnabled,
                   onAudioEnabled: updateAudioEnabled,
                   onAudioVolume: setAudioVolume,
                   onCardTooltipHoverDelayMs: setCardTooltipHoverDelayMs,
@@ -6215,7 +6331,9 @@ export default function Page() {
                 onAction={submitAction}
                 onChoiceOption={submitChoiceOption}
                 onDamageDismiss={() => setCurrentDamageImpact(null)}
-                onDismiss={() => dismissAccessPresentation(accessReveal.eventId)}
+                onDismiss={() =>
+                  dismissAccessPresentation(accessReveal.eventId)
+                }
               />
             ) : null}
             {activeMatchIsGame && showExposeReview && exposeReview ? (
@@ -6241,6 +6359,7 @@ export default function Page() {
                   resourceStripMode={resourceStripMode}
                   actionPanelMode={actionPanelMode}
                   aiDecisionDebugOverlayEnabled={aiDecisionDebugOverlayEnabled}
+                  exposedCardHighlightEnabled={exposedCardHighlightEnabled}
                   audioEnabled={audioEnabled}
                   audioVolume={audioVolume}
                   cardTooltipHoverDelayMs={cardTooltipHoverDelayMs}
@@ -6275,6 +6394,7 @@ export default function Page() {
                   onAiDecisionDebugOverlayEnabled={
                     setAiDecisionDebugOverlayEnabled
                   }
+                  onExposedCardHighlightEnabled={setExposedCardHighlightEnabled}
                   onAudioEnabled={updateAudioEnabled}
                   onAudioVolume={setAudioVolume}
                   onCardTooltipHoverDelayMs={setCardTooltipHoverDelayMs}

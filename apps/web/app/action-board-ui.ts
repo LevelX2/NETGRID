@@ -931,9 +931,7 @@ export function automaticCorpMandatoryDrawAction(
     : undefined;
 }
 
-export function isAutomaticCorpRunPassAction(
-  action: LegalAction,
-): boolean {
+export function isAutomaticCorpRunPassAction(action: LegalAction): boolean {
   return (
     action.side === "corp" &&
     action.type === "decline_rez" &&
@@ -950,12 +948,7 @@ export function automaticCorpRunPassAction(
   actions: LegalAction[],
   side: Side,
 ): LegalAction | undefined {
-  if (
-    side !== "corp" ||
-    !view.run ||
-    view.winner ||
-    view.pendingChoice
-  )
+  if (side !== "corp" || !view.run || view.winner || view.pendingChoice)
     return undefined;
   const passActions = actions.filter(isAutomaticCorpRunPassAction);
   return passActions.length === 1 ? passActions[0] : undefined;
@@ -1727,6 +1720,29 @@ export function serverDisplayLabel(serverIdOrLabel: string): string {
   return normalizeVisibleTerms(serverIdOrLabel);
 }
 
+export function serverTargetIdForAction(action: LegalAction): string | null {
+  const payload = action.payload;
+  const targetServerId = payload?.targetServerId;
+  if (typeof targetServerId === "string") return targetServerId;
+  const selectedServerId = payload?.selectedServerId;
+  if (typeof selectedServerId === "string") return selectedServerId;
+  const serverId = payload?.serverId;
+  return typeof serverId === "string" ? serverId : null;
+}
+
+export function serverTargetIdForChoiceOption(
+  option: VisibleChoiceOption,
+  serverIds: readonly string[],
+): string | null {
+  const isKnownServer = (value: string): boolean =>
+    value === "new_remote" || serverIds.includes(value);
+  if (typeof option.value === "string" && isKnownServer(option.value))
+    return option.value;
+  if (isKnownServer(option.id)) return option.id;
+  const fortId = /^fort_(.+)$/.exec(option.id)?.[1];
+  return fortId && isKnownServer(fortId) ? fortId : null;
+}
+
 export function accessRevealStatusLabel(
   card: Pick<VisibleCard, "type" | "trashCost">,
   actions: LegalAction[],
@@ -1893,6 +1909,26 @@ export function retainedExposeReviewEvent(
     return event;
   }
   return null;
+}
+
+export function exposedCardInstanceIdsForEvent(
+  event: PublicGameEvent,
+): string[] {
+  if (
+    event.publicPayload.hiddenZoneAction !==
+      "expose_installed_cards_single_fort" ||
+    event.publicPayload.publicRevealKind !== "expose" ||
+    typeof event.publicPayload.exposedCardInstanceIds !== "string"
+  )
+    return [];
+  return [
+    ...new Set(
+      event.publicPayload.exposedCardInstanceIds
+        .split(",")
+        .map((cardId) => cardId.trim())
+        .filter((cardId) => cardId.length > 0),
+    ),
+  ];
 }
 
 export function approachIceExposeViewingIceId(
@@ -2219,9 +2255,7 @@ export function shouldUseFieldCardChoice(
 export function fieldCardChoiceAuxiliaryOptions(
   choice: NonNullable<PlayerView["pendingChoice"]>,
 ): NonNullable<PlayerView["pendingChoice"]>["options"] {
-  if (
-    !choice.source.startsWith("card_implementation.scored_agenda_free_rez:")
-  )
+  if (!choice.source.startsWith("card_implementation.scored_agenda_free_rez:"))
     return [];
   return choice.options.filter(
     (option) =>

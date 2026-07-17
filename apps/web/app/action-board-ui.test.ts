@@ -85,12 +85,15 @@ import {
   runWindowActionButtonLabel,
   runWindowActions,
   runWindowStatusLabel,
+  exposedCardInstanceIdsForEvent,
   runnerHostedCardsForHost,
   runnerRigMemorySummary,
   serverBoardRows,
   serverCounterChipsForDisplays,
   variableIceSubtypeBadgeForCard,
   serverDisplayLabel,
+  serverTargetIdForAction,
+  serverTargetIdForChoiceOption,
   selectedSubtypeDetailLabel,
   selectedTargetDetailLabel,
   splitLegalActions,
@@ -590,6 +593,37 @@ describe("V1.0.5 action board UI helpers", () => {
         ),
       ),
     ).toBe("Subroutinen auslösen (Run endet)");
+  });
+
+  it("derives the selected server for action and choice icons", () => {
+    expect(
+      serverTargetIdForAction(
+        legalAction("corp", "score_agenda", "agenda_1", "Agenda scoren", {
+          serverId: "hq",
+          selectedServerId: "rd",
+        }),
+      ),
+    ).toBe("rd");
+    expect(
+      serverTargetIdForAction(
+        legalAction("runner", "start_run", "basic_action", "Run auf HQ", {
+          targetServerId: "remote_1",
+          serverId: "hq",
+        }),
+      ),
+    ).toBe("remote_1");
+    expect(
+      serverTargetIdForChoiceOption(
+        { id: "fort_rd", label: "R&D", value: "rd" },
+        ["hq", "rd", "archives", "remote_1"],
+      ),
+    ).toBe("rd");
+    expect(
+      serverTargetIdForChoiceOption(
+        { id: "fort_none", label: "Keine Karten exposen", value: "none" },
+        ["hq", "rd", "archives", "remote_1"],
+      ),
+    ).toBeNull();
   });
 
   it("classifies interaction ambience from safe UI actions, choices, and run phase", () => {
@@ -4929,6 +4963,28 @@ describe("V1.0.6 resource and card-display helpers", () => {
       retainedExposeReviewEvent([expose, smarteyeFinish], null),
     ).toBeNull();
     expect(retainedExposeReviewEvent([smarteye, jackOut], null)).toBeNull();
+  });
+
+  it("uses only public instance ids from Ice and Data Special Report expose events", () => {
+    const exposed = publicEvent("evt_ice_data", "resolve_choice", {
+      actionType: "resolve_choice",
+      actor: "runner",
+      hiddenZoneAction: "expose_installed_cards_single_fort",
+      publicRevealKind: "expose",
+      exposedCardInstanceIds: "ice_1, root_1,ice_1",
+    });
+    const unrelated = publicEvent("evt_other", "resolve_choice", {
+      actionType: "resolve_choice",
+      actor: "runner",
+      publicRevealKind: "expose",
+      exposedCardInstanceIds: "hidden_card",
+    });
+
+    expect(exposedCardInstanceIdsForEvent(exposed)).toEqual([
+      "ice_1",
+      "root_1",
+    ]);
+    expect(exposedCardInstanceIdsForEvent(unrelated)).toEqual([]);
   });
 
   it("detects the active approach-ice viewing target from legal actions", () => {

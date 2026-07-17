@@ -1064,6 +1064,7 @@ export function createCorpZoneRuntimeHosts(
         sourceTitle: sourceDefinition.title,
         serverId,
         revealedCount: selectedIds.length,
+        exposedCardInstanceIds: selectedIds.join(","),
         publicRevealDefinitionIds: definitions
           .map((definition: CardDefinition) => definition.id)
           .join(","),

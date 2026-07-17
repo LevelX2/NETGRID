@@ -1198,6 +1198,9 @@ export function publicContextForAction(
     if (typeof legalAction.payload.publicRevealDefinitionIds === "string")
       context.publicRevealDefinitionIds =
         legalAction.payload.publicRevealDefinitionIds;
+    if (typeof legalAction.payload.exposedCardInstanceIds === "string")
+      context.exposedCardInstanceIds =
+        legalAction.payload.exposedCardInstanceIds;
     if (typeof legalAction.payload.shownCardDefinitionIds === "string")
       context.shownCardDefinitionIds =
         legalAction.payload.shownCardDefinitionIds;

@@ -23,6 +23,7 @@ import {
   runWindowActionButtonLabel,
   runWindowStatusLabel,
   serverDisplayLabel,
+  serverTargetIdForChoiceOption,
   splitRunWindowActionsByServer,
 } from "../../app/action-board-ui";
 import { enrichVisibleCard } from "../cards/card-view-model";
@@ -250,6 +251,10 @@ export function RunTimelineOverlay({
                   data-testid="run-choice-button"
                   data-action-type={choiceAction.type}
                   iconSize={14}
+                  serverTargetId={serverTargetIdForChoiceOption(
+                    option,
+                    view.servers.map((server) => server.id),
+                  )}
                 />
               );
             })}

@@ -221,6 +221,61 @@ export function formatChronicleEvent(
       chips.push("Spielstart");
       break;
     case "resolve_choice":
+      if (
+        hiddenZoneAction === "expose_installed_cards_single_fort" &&
+        stringValue(payload.publicRevealKind) === "expose"
+      ) {
+        const source =
+          titleForDefinitionId(sourceDefinitionId) ??
+          sourceTitle ??
+          "Ice and Data Special Report";
+        const exposedTitles = titlesForDefinitionIds(
+          stringValue(payload.publicRevealDefinitionIds),
+        );
+        const exposedLocations = (
+          stringValue(payload.exposedServerLabels) ?? ""
+        )
+          .split(",")
+          .map((label) => label.trim())
+          .filter((label) => label.length > 0);
+        const exposedCount =
+          numberValue(payload.revealedCount) ??
+          Math.max(exposedTitles.length, exposedLocations.length);
+        const exposedCountText =
+          exposedCount === 0
+            ? "keine installierten Korp-Karten"
+            : exposedCount === 1
+              ? "eine installierte Korp-Karte"
+              : `${exposedCount} installierte Korp-Karten`;
+        const exposedCards = Array.from(
+          { length: Math.max(exposedTitles.length, exposedLocations.length) },
+          (_, index) => {
+            const card = exposedTitles[index] ?? "eine installierte Korp-Karte";
+            const location = exposedLocations[index];
+            return location ? `${card} (${location})` : card;
+          },
+        );
+        category = "card";
+        importance = "important";
+        visibility = "public";
+        cardDefinitionId = sourceDefinitionId ?? cardDefinitionId;
+        cardTitle = source;
+        title = phrase(
+          subject,
+          `${source} genutzt und ${exposedCountText} exposed`,
+        );
+        description =
+          exposedCards.length > 0
+            ? `Exposed: ${exposedCards.join(", ")}.`
+            : "Keine installierten Korp-Karten wurden exposed.";
+        chips.push(
+          source,
+          "Expose",
+          exposedCount === 1 ? "1 Karte" : `${exposedCount} Karten`,
+          ...exposedLocations,
+        );
+        break;
+      }
       if (isSecurityPurgePayload(payload)) {
         const summary = securityPurgeChronicleSummary(payload, cardTitle);
         category = "agenda";
@@ -1611,11 +1666,7 @@ export function formatChronicleEvent(
           subject,
           `mit ${source} ${exposedTitle}${location?.sentenceSuffix ?? ""} aufgedeckt`,
         );
-        chips.push(
-          source,
-          "Expose",
-          ...(location ? [location.chip] : []),
-        );
+        chips.push(source, "Expose", ...(location ? [location.chip] : []));
         break;
       }
       if (hiddenZoneAction === "p3_33_private_look") {
@@ -4670,6 +4721,12 @@ function formatChronicleEffect(
           ? `Subroutine ${subroutineNumber}`
           : "Subroutine";
       const subroutineType = stringValue(effect.subroutineType);
+      const runLockActions =
+        subroutineType === "set_runner_run_lock_actions"
+          ? (numberValue(effect.amount) ??
+            numberValue(event.publicPayload.runLockActionsAdded) ??
+            0)
+          : 0;
       const dieRoll = numberValue(effect.dieRoll);
       const randomDamageApplied = effect.randomDamageApplied === true;
       const damageType = stringValue(effect.damageType);
@@ -4763,11 +4820,13 @@ function formatChronicleEffect(
               ? `${source}: ${subroutineChip} macht ${preventionSummary.originalAmount} ${damageLabel}; ${preventionSummary.preventedAmount} durch ${preventionSummary.sourceTitle} verhindert, Ergebnis ${preventionSummary.finalAmount} ${damageLabel}`
               : subroutineType === "do_damage"
                 ? `${source}: ${subroutineChip} macht ${amount} ${damageLabel}`
-                : trashedProgramTitle
-                  ? `${source}: ${subroutineChip} trasht ${trashedProgramTitle}`
-                  : effect.endedRun === true
-                    ? `${source}: ${subroutineChip} beendet den Run`
-                    : `${source}: ${subroutineChip} aufgelöst`;
+                : subroutineType === "set_runner_run_lock_actions"
+                  ? `${source}: ${subroutineChip} verhindert Runs für die nächsten ${runLockActions} ${runLockActions === 1 ? "Aktion" : "Aktionen"}`
+                  : trashedProgramTitle
+                    ? `${source}: ${subroutineChip} trasht ${trashedProgramTitle}`
+                    : effect.endedRun === true
+                      ? `${source}: ${subroutineChip} beendet den Run`
+                      : `${source}: ${subroutineChip} aufgelöst`;
       }
       if (
         (subroutineType === "do_damage" ||
@@ -4783,6 +4842,11 @@ function formatChronicleEffect(
         description = `Kein ${damageLabel} bleibt übrig.`;
       if (trashedProgramTitle)
         description = `${trashedProgramTitle} wurde in den Heap bewegt.`;
+      if (subroutineType === "set_runner_run_lock_actions")
+        description =
+          runLockActions === 1
+            ? "Der Runner kann während der nächsten Aktion keinen Run starten."
+            : `Der Runner kann während der nächsten ${runLockActions} Aktionen keinen Run starten.`;
       chips.push(
         subroutineChip,
         ...(subroutineType === "random_damage" && dieRoll !== undefined
@@ -4808,6 +4872,12 @@ function formatChronicleEffect(
           : []),
         ...(trashedProgramTitle
           ? [trashedProgramTitle, "Programm getrasht"]
+          : []),
+        ...(subroutineType === "set_runner_run_lock_actions"
+          ? [
+              "Run-Sperre",
+              `${runLockActions} ${runLockActions === 1 ? "Aktion" : "Aktionen"}`,
+            ]
           : []),
         ...(effect.endedRun === true ? ["Run endet"] : []),
         source,
@@ -6264,7 +6334,9 @@ function successfulRunCreditLossChronicleSummary(
       `Erfolgreicher ${serverLabel}-Run`,
       `Korp -${creditLoss}`,
       `Kein ${serverLabel}-Access`,
-      ...(tagsAdded > 0 ? [`+${tagsAdded} Tag${tagsAdded === 1 ? "" : "s"}`] : []),
+      ...(tagsAdded > 0
+        ? [`+${tagsAdded} Tag${tagsAdded === 1 ? "" : "s"}`]
+        : []),
       ...(gainedCredits > 0 ? [`Runner +${gainedCredits}`] : []),
       ...(corpDrawnCount > 0 ? [`Korp zieht ${corpDrawnCount}`] : []),
     ],

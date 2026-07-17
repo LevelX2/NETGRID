@@ -1,7 +1,23 @@
-import { Activity, Clipboard, Image, Keyboard, Moon, Shield, SlidersHorizontal, Sun, Trash2, Volume2, VolumeX, ZoomIn } from "lucide-react";
+import {
+  Activity,
+  Clipboard,
+  Image,
+  Keyboard,
+  Moon,
+  Shield,
+  SlidersHorizontal,
+  Sun,
+  Trash2,
+  Volume2,
+  VolumeX,
+  ZoomIn,
+} from "lucide-react";
 
 import type { SessionInfo } from "../../app/session-recovery";
-import type { CuePositionPreference, CuePositionPreset } from "../../app/action-board-ui";
+import type {
+  CuePositionPreference,
+  CuePositionPreset,
+} from "../../app/action-board-ui";
 import { NETGRID_BUILD_INFO } from "../../lib/app-build-info";
 import { reconnectUrlForSession } from "../../lib/session-url";
 import {
@@ -21,7 +37,7 @@ import {
   type ChronicleDetailMode,
   type ColorScheme,
   type CueAutoDismissMs,
-  type ResourceStripMode
+  type ResourceStripMode,
 } from "./settings-model";
 
 function sideLabel(side: "runner" | "corp"): string {
@@ -40,6 +56,7 @@ export function OptionsPanel({
   resourceStripMode,
   actionPanelMode,
   aiDecisionDebugOverlayEnabled,
+  exposedCardHighlightEnabled,
   audioEnabled,
   audioVolume,
   cardTooltipHoverDelayMs,
@@ -70,6 +87,7 @@ export function OptionsPanel({
   onResourceStripMode,
   onActionPanelMode,
   onAiDecisionDebugOverlayEnabled,
+  onExposedCardHighlightEnabled,
   onAudioEnabled,
   onAudioVolume,
   onCardTooltipHoverDelayMs,
@@ -88,7 +106,7 @@ export function OptionsPanel({
   onCuePosition,
   onAiPacingMode,
   onCopyReconnectLink,
-  onDiscardLocalSession
+  onDiscardLocalSession,
 }: {
   actionCueAutoDismissMs: CueAutoDismissMs;
   actionCuesEnabled: boolean;
@@ -101,6 +119,7 @@ export function OptionsPanel({
   resourceStripMode: ResourceStripMode;
   actionPanelMode: ActionPanelMode;
   aiDecisionDebugOverlayEnabled: boolean;
+  exposedCardHighlightEnabled: boolean;
   audioEnabled: boolean;
   audioVolume: number;
   cardTooltipHoverDelayMs: CardTooltipHoverDelayMs;
@@ -131,6 +150,7 @@ export function OptionsPanel({
   onResourceStripMode(value: ResourceStripMode): void;
   onActionPanelMode(value: ActionPanelMode): void;
   onAiDecisionDebugOverlayEnabled(value: boolean): void;
+  onExposedCardHighlightEnabled(value: boolean): void;
   onAudioEnabled(value: boolean): void;
   onAudioVolume(value: number): void;
   onCardTooltipHoverDelayMs(value: CardTooltipHoverDelayMs): void;
@@ -163,12 +183,34 @@ export function OptionsPanel({
         </div>
       ) : null}
       <div className="optionsContent">
-        {session ? <SessionAccessSettings session={session} onCopyReconnectLink={onCopyReconnectLink} onDiscardLocalSession={onDiscardLocalSession} /> : null}
+        {session ? (
+          <SessionAccessSettings
+            session={session}
+            onCopyReconnectLink={onCopyReconnectLink}
+            onDiscardLocalSession={onDiscardLocalSession}
+          />
+        ) : null}
         <ColorSchemeSettings scheme={colorScheme} onChange={onColorScheme} />
-        <CardDisplaySettings mode={cardDisplayMode} onChange={onCardDisplayMode} />
-        <CardImageSkinSettings preferGermanCardImages={preferGermanCardImages} showSetBadges={showSetBadges} onPreferGermanCardImages={onPreferGermanCardImages} onShowSetBadges={onShowSetBadges} />
-        <ChronicleDetailSettings mode={chronicleDetailMode} onChange={onChronicleDetailMode} />
-        <CardTooltipSettings mode={cardTooltipMode} hoverOpenDelayMs={cardTooltipHoverDelayMs} onMode={onCardTooltipMode} onHoverOpenDelayMs={onCardTooltipHoverDelayMs} />
+        <CardDisplaySettings
+          mode={cardDisplayMode}
+          onChange={onCardDisplayMode}
+        />
+        <CardImageSkinSettings
+          preferGermanCardImages={preferGermanCardImages}
+          showSetBadges={showSetBadges}
+          onPreferGermanCardImages={onPreferGermanCardImages}
+          onShowSetBadges={onShowSetBadges}
+        />
+        <ChronicleDetailSettings
+          mode={chronicleDetailMode}
+          onChange={onChronicleDetailMode}
+        />
+        <CardTooltipSettings
+          mode={cardTooltipMode}
+          hoverOpenDelayMs={cardTooltipHoverDelayMs}
+          onMode={onCardTooltipMode}
+          onHoverOpenDelayMs={onCardTooltipHoverDelayMs}
+        />
         <CardSizeSettings
           tooltipPercent={cardTooltipScalePercent}
           handPercent={cardHandScalePercent}
@@ -192,6 +234,7 @@ export function OptionsPanel({
           resourceStripMode={resourceStripMode}
           actionPanelMode={actionPanelMode}
           aiDecisionDebugOverlayEnabled={aiDecisionDebugOverlayEnabled}
+          exposedCardHighlightEnabled={exposedCardHighlightEnabled}
           onAutoCorpMandatoryDrawEnabled={onAutoCorpMandatoryDrawEnabled}
           onAutoDiscardEnabled={onAutoDiscardEnabled}
           onAutoEndTurnEnabled={onAutoEndTurnEnabled}
@@ -200,6 +243,7 @@ export function OptionsPanel({
           onResourceStripMode={onResourceStripMode}
           onActionPanelMode={onActionPanelMode}
           onAiDecisionDebugOverlayEnabled={onAiDecisionDebugOverlayEnabled}
+          onExposedCardHighlightEnabled={onExposedCardHighlightEnabled}
         />
         <AiPacingSettings mode={aiPacingMode} onMode={onAiPacingMode} />
         <ActionCueSettings
@@ -212,7 +256,12 @@ export function OptionsPanel({
           onPosition={onCuePosition}
           onAutoDismissMs={onActionCueAutoDismissMs}
         />
-        <AudioSettings enabled={audioEnabled} volume={audioVolume} onEnabled={onAudioEnabled} onVolume={onAudioVolume} />
+        <AudioSettings
+          enabled={audioEnabled}
+          volume={audioVolume}
+          onEnabled={onAudioEnabled}
+          onVolume={onAudioVolume}
+        />
         <BuildInfoSettings />
         <SystemStatus />
       </div>
@@ -252,7 +301,7 @@ function BuildInfoSettings() {
 function SessionAccessSettings({
   session,
   onCopyReconnectLink,
-  onDiscardLocalSession
+  onDiscardLocalSession,
 }: {
   session: SessionInfo;
   onCopyReconnectLink?: (() => void) | undefined;
@@ -268,22 +317,39 @@ function SessionAccessSettings({
       <div className="sessionAccessLink">
         <label>
           Wiederverbindungslink
-          <input value={reconnectUrl} readOnly aria-label="Wiederverbindungslink" />
+          <input
+            value={reconnectUrl}
+            readOnly
+            aria-label="Wiederverbindungslink"
+          />
         </label>
-        <button className="button" onClick={onCopyReconnectLink} type="button" disabled={!onCopyReconnectLink || !session.reconnectToken}>
+        <button
+          className="button"
+          onClick={onCopyReconnectLink}
+          type="button"
+          disabled={!onCopyReconnectLink || !session.reconnectToken}
+        >
           <Clipboard size={15} />
           Kopieren
         </button>
       </div>
       <p className="settingsHelp">
-        Der Link enthält Deinen Reconnect-Token für {sideLabel(session.side)}. Wer ihn hat, kann diese Seite des Matches weiterführen.
+        Der Link enthält Deinen Reconnect-Token für {sideLabel(session.side)}.
+        Wer ihn hat, kann diese Seite des Matches weiterführen.
       </p>
       <div className="sessionDangerRow">
-        <button className="button dangerButton" onClick={onDiscardLocalSession} type="button" disabled={!onDiscardLocalSession}>
+        <button
+          className="button dangerButton"
+          onClick={onDiscardLocalSession}
+          type="button"
+          disabled={!onDiscardLocalSession}
+        >
           <Trash2 size={15} />
           Lokale Sitzung löschen
         </button>
-        <span className="settingsHelp">Löscht nur diesen Browserzugang. Das Spiel wird nicht aufgegeben.</span>
+        <span className="settingsHelp">
+          Löscht nur diesen Browserzugang. Das Spiel wird nicht aufgegeben.
+        </span>
       </div>
     </div>
   );
@@ -304,19 +370,41 @@ function SystemStatus() {
   );
 }
 
-function ColorSchemeSettings({ scheme, onChange }: { scheme: ColorScheme; onChange(value: ColorScheme): void }) {
+function ColorSchemeSettings({
+  scheme,
+  onChange,
+}: {
+  scheme: ColorScheme;
+  onChange(value: ColorScheme): void;
+}) {
   return (
     <div className="colorSchemeSettings">
       <div>
         <span className="settingsTitle">Farbschema</span>
         <span className="meta">Lokale Anzeigeoption, kein Match-State</span>
       </div>
-      <div className="segmented themeToggle" role="group" aria-label="Farbschema">
-        <button className={scheme === "black" ? "active" : ""} onClick={() => onChange("black")} type="button" title="Schwarzes Farbschema" aria-label="Schwarzes Farbschema">
+      <div
+        className="segmented themeToggle"
+        role="group"
+        aria-label="Farbschema"
+      >
+        <button
+          className={scheme === "black" ? "active" : ""}
+          onClick={() => onChange("black")}
+          type="button"
+          title="Schwarzes Farbschema"
+          aria-label="Schwarzes Farbschema"
+        >
           <Moon size={15} />
           Schwarz
         </button>
-        <button className={scheme === "white" ? "active" : ""} onClick={() => onChange("white")} type="button" title="Weißes Farbschema" aria-label="Weißes Farbschema">
+        <button
+          className={scheme === "white" ? "active" : ""}
+          onClick={() => onChange("white")}
+          type="button"
+          title="Weißes Farbschema"
+          aria-label="Weißes Farbschema"
+        >
           <Sun size={15} />
           Weiß
         </button>
@@ -325,30 +413,77 @@ function ColorSchemeSettings({ scheme, onChange }: { scheme: ColorScheme; onChan
   );
 }
 
-function CardDisplaySettings({ mode, onChange, compact = false }: { mode: CardDisplayMode; onChange(value: CardDisplayMode): void; compact?: boolean }) {
+function CardDisplaySettings({
+  mode,
+  onChange,
+  compact = false,
+}: {
+  mode: CardDisplayMode;
+  onChange(value: CardDisplayMode): void;
+  compact?: boolean;
+}) {
   return (
     <div className={`cardDisplaySettings ${compact ? "compact" : ""}`}>
       <div>
         <span className="settingsTitle">Kartenanzeige</span>
-        {!compact ? <span className="meta">Lokale Anzeigeoption, kein Match-State</span> : null}
+        {!compact ? (
+          <span className="meta">Lokale Anzeigeoption, kein Match-State</span>
+        ) : null}
       </div>
-      <CardDisplayModeSelector mode={mode} onChange={onChange} iconOnly={compact} />
+      <CardDisplayModeSelector
+        mode={mode}
+        onChange={onChange}
+        iconOnly={compact}
+      />
     </div>
   );
 }
 
-export function CardDisplayModeSelector({ mode, onChange, iconOnly = false }: { mode: CardDisplayMode; onChange(value: CardDisplayMode): void; iconOnly?: boolean }) {
+export function CardDisplayModeSelector({
+  mode,
+  onChange,
+  iconOnly = false,
+}: {
+  mode: CardDisplayMode;
+  onChange(value: CardDisplayMode): void;
+  iconOnly?: boolean;
+}) {
   return (
-    <div className={`segmented cardDisplaySelector ${iconOnly ? "iconOnlySelector" : ""}`} role="group" aria-label="Kartenanzeige">
-      <button className={mode === "placeholder" ? "active" : ""} onClick={() => onChange("placeholder")} type="button" title="Bildmodus: Regeltext für bekannte Karten per Hover oder Fokus" aria-label="Bildmodus" data-testid="card-display-image">
+    <div
+      className={`segmented cardDisplaySelector ${iconOnly ? "iconOnlySelector" : ""}`}
+      role="group"
+      aria-label="Kartenanzeige"
+    >
+      <button
+        className={mode === "placeholder" ? "active" : ""}
+        onClick={() => onChange("placeholder")}
+        type="button"
+        title="Bildmodus: Regeltext für bekannte Karten per Hover oder Fokus"
+        aria-label="Bildmodus"
+        data-testid="card-display-image"
+      >
         <Image size={15} />
         {!iconOnly ? "Bild" : <span className="srOnly">Bild</span>}
       </button>
-      <button className={mode === "text-card" ? "active" : ""} onClick={() => onChange("text-card")} type="button" title="Textmodus ohne große leere Bildfläche" aria-label="Textmodus" data-testid="card-display-text">
+      <button
+        className={mode === "text-card" ? "active" : ""}
+        onClick={() => onChange("text-card")}
+        type="button"
+        title="Textmodus ohne große leere Bildfläche"
+        aria-label="Textmodus"
+        data-testid="card-display-text"
+      >
         <Keyboard size={15} />
         {!iconOnly ? "Text" : <span className="srOnly">Text</span>}
       </button>
-      <button className={mode === "compact" ? "active" : ""} onClick={() => onChange("compact")} type="button" title="Kompaktmodus mit Regeltext per Tooltip oder Fokus" aria-label="Kompaktmodus" data-testid="card-display-compact">
+      <button
+        className={mode === "compact" ? "active" : ""}
+        onClick={() => onChange("compact")}
+        type="button"
+        title="Kompaktmodus mit Regeltext per Tooltip oder Fokus"
+        aria-label="Kompaktmodus"
+        data-testid="card-display-compact"
+      >
         <ZoomIn size={15} />
         {!iconOnly ? "Kompakt" : <span className="srOnly">Kompakt</span>}
       </button>
@@ -360,7 +495,7 @@ function CardImageSkinSettings({
   preferGermanCardImages,
   showSetBadges,
   onPreferGermanCardImages,
-  onShowSetBadges
+  onShowSetBadges,
 }: {
   preferGermanCardImages: boolean;
   showSetBadges: boolean;
@@ -373,33 +508,68 @@ function CardImageSkinSettings({
         <span className="settingsTitle">Kartenbilder</span>
         <span className="meta">Lokale Anzeigeoption, kein Match-State</span>
       </div>
-      <label className={`deckBuilderToggle ${preferGermanCardImages ? "checked" : ""}`}>
-        <input checked={preferGermanCardImages} onChange={(event) => onPreferGermanCardImages(event.target.checked)} type="checkbox" />
+      <label
+        className={`deckBuilderToggle ${preferGermanCardImages ? "checked" : ""}`}
+      >
+        <input
+          checked={preferGermanCardImages}
+          onChange={(event) => onPreferGermanCardImages(event.target.checked)}
+          type="checkbox"
+        />
         Deutsche Kartenbilder bevorzugen
       </label>
       <label className={`deckBuilderToggle ${showSetBadges ? "checked" : ""}`}>
-        <input checked={showSetBadges} onChange={(event) => onShowSetBadges(event.target.checked)} type="checkbox" />
+        <input
+          checked={showSetBadges}
+          onChange={(event) => onShowSetBadges(event.target.checked)}
+          type="checkbox"
+        />
         Set-Badges anzeigen
       </label>
     </div>
   );
 }
 
-function ChronicleDetailSettings({ mode, onChange }: { mode: ChronicleDetailMode; onChange(value: ChronicleDetailMode): void }) {
+function ChronicleDetailSettings({
+  mode,
+  onChange,
+}: {
+  mode: ChronicleDetailMode;
+  onChange(value: ChronicleDetailMode): void;
+}) {
   return (
     <div className="chronicleDetailSettings">
       <div>
         <span className="settingsTitle">Chronik</span>
         <span className="meta">Lokale Detailtiefe, kein Match-State</span>
       </div>
-      <div className="segmented chronicleDetailSelector" role="group" aria-label="Detailgrad der Chronik">
-        <button className={mode === "simple" ? "active" : ""} onClick={() => onChange("simple")} type="button" title="Nur Basistext">
+      <div
+        className="segmented chronicleDetailSelector"
+        role="group"
+        aria-label="Detailgrad der Chronik"
+      >
+        <button
+          className={mode === "simple" ? "active" : ""}
+          onClick={() => onChange("simple")}
+          type="button"
+          title="Nur Basistext"
+        >
           Einfach
         </button>
-        <button className={mode === "medium" ? "active" : ""} onClick={() => onChange("medium")} type="button" title="Basistext mit Chips ohne Regeltext">
+        <button
+          className={mode === "medium" ? "active" : ""}
+          onClick={() => onChange("medium")}
+          type="button"
+          title="Basistext mit Chips ohne Regeltext"
+        >
           Mittel
         </button>
-        <button className={mode === "full" ? "active" : ""} onClick={() => onChange("full")} type="button" title="Basistext, Chips und Regeltext">
+        <button
+          className={mode === "full" ? "active" : ""}
+          onClick={() => onChange("full")}
+          type="button"
+          title="Basistext, Chips und Regeltext"
+        >
           Alles
         </button>
       </div>
@@ -411,7 +581,7 @@ function CardTooltipSettings({
   mode,
   hoverOpenDelayMs,
   onMode,
-  onHoverOpenDelayMs
+  onHoverOpenDelayMs,
 }: {
   mode: CardTooltipMode;
   hoverOpenDelayMs: CardTooltipHoverDelayMs;
@@ -426,7 +596,12 @@ function CardTooltipSettings({
       </div>
       <label>
         Modus
-        <select value={mode} onChange={(event) => onMode(normalizeCardTooltipMode(event.target.value))}>
+        <select
+          value={mode}
+          onChange={(event) =>
+            onMode(normalizeCardTooltipMode(event.target.value))
+          }
+        >
           <option value="simple">Einfach</option>
           <option value="enhanced">Verbessert</option>
           <option value="image">Kartenbild</option>
@@ -434,7 +609,14 @@ function CardTooltipSettings({
       </label>
       <label>
         Hover-Verzögerung
-        <select value={hoverOpenDelayMs} onChange={(event) => onHoverOpenDelayMs(normalizeCardTooltipHoverDelayMs(Number(event.target.value)))}>
+        <select
+          value={hoverOpenDelayMs}
+          onChange={(event) =>
+            onHoverOpenDelayMs(
+              normalizeCardTooltipHoverDelayMs(Number(event.target.value)),
+            )
+          }
+        >
           <option value={300}>0,3 Sekunden</option>
           <option value={500}>0,5 Sekunden</option>
           <option value={750}>0,75 Sekunden</option>
@@ -459,7 +641,7 @@ function CardSizeSettings({
   onArchivePercent,
   onZonePercent,
   onBoardPercent,
-  onRigPercent
+  onRigPercent,
 }: {
   tooltipPercent: number;
   handPercent: number;
@@ -480,12 +662,48 @@ function CardSizeSettings({
         <span className="settingsTitle">Kartengrößen</span>
         <span className="meta">Lokale Anzeigeoption, kein Match-State</span>
       </div>
-      <CardSizeSliderRow label="Tooltip-Karte" value={tooltipPercent} min={CARD_SCALE_PERCENT_MIN} max={CARD_SCALE_PERCENT_MAX} onChange={onTooltipPercent} />
-      <CardSizeSliderRow label="Handkarten" value={handPercent} min={CARD_SCALE_PERCENT_MIN} max={CARD_SCALE_PERCENT_MAX} onChange={onHandPercent} />
-      <CardSizeSliderRow label="Archive" value={archivePercent} min={CARD_SCALE_PERCENT_MIN} max={CARD_SCALE_PERCENT_MAX} onChange={onArchivePercent} />
-      <CardSizeSliderRow label="Stack/Heap" value={zonePercent} min={CARD_SCALE_PERCENT_MIN} max={CARD_SCALE_PERCENT_MAX} onChange={onZonePercent} />
-      <CardSizeSliderRow label="Spielfeld/Remotes" value={boardPercent} min={CARD_SCALE_PERCENT_MIN} max={CARD_SCALE_PERCENT_MAX} onChange={onBoardPercent} />
-      <CardSizeSliderRow label="Rig" value={rigPercent} min={CARD_SCALE_PERCENT_MIN} max={CARD_SCALE_PERCENT_MAX} onChange={onRigPercent} />
+      <CardSizeSliderRow
+        label="Tooltip-Karte"
+        value={tooltipPercent}
+        min={CARD_SCALE_PERCENT_MIN}
+        max={CARD_SCALE_PERCENT_MAX}
+        onChange={onTooltipPercent}
+      />
+      <CardSizeSliderRow
+        label="Handkarten"
+        value={handPercent}
+        min={CARD_SCALE_PERCENT_MIN}
+        max={CARD_SCALE_PERCENT_MAX}
+        onChange={onHandPercent}
+      />
+      <CardSizeSliderRow
+        label="Archive"
+        value={archivePercent}
+        min={CARD_SCALE_PERCENT_MIN}
+        max={CARD_SCALE_PERCENT_MAX}
+        onChange={onArchivePercent}
+      />
+      <CardSizeSliderRow
+        label="Stack/Heap"
+        value={zonePercent}
+        min={CARD_SCALE_PERCENT_MIN}
+        max={CARD_SCALE_PERCENT_MAX}
+        onChange={onZonePercent}
+      />
+      <CardSizeSliderRow
+        label="Spielfeld/Remotes"
+        value={boardPercent}
+        min={CARD_SCALE_PERCENT_MIN}
+        max={CARD_SCALE_PERCENT_MAX}
+        onChange={onBoardPercent}
+      />
+      <CardSizeSliderRow
+        label="Rig"
+        value={rigPercent}
+        min={CARD_SCALE_PERCENT_MIN}
+        max={CARD_SCALE_PERCENT_MAX}
+        onChange={onRigPercent}
+      />
     </div>
   );
 }
@@ -495,7 +713,7 @@ function CardSizeSliderRow({
   value,
   min,
   max,
-  onChange
+  onChange,
 }: {
   label: string;
   value: number;
@@ -512,7 +730,9 @@ function CardSizeSliderRow({
         max={max}
         step={CARD_SCALE_PERCENT_STEP}
         value={value}
-        onChange={(event) => onChange(normalizeCardScalePercent(event.target.value, min, max))}
+        onChange={(event) =>
+          onChange(normalizeCardScalePercent(event.target.value, min, max))
+        }
       />
       <strong>{value}%</strong>
     </label>
@@ -528,6 +748,7 @@ function GameplaySettings({
   resourceStripMode,
   actionPanelMode,
   aiDecisionDebugOverlayEnabled,
+  exposedCardHighlightEnabled,
   onAutoCorpMandatoryDrawEnabled,
   onAutoDiscardEnabled,
   onAutoEndTurnEnabled,
@@ -535,7 +756,8 @@ function GameplaySettings({
   onCyberspaceBackgroundEnabled,
   onResourceStripMode,
   onActionPanelMode,
-  onAiDecisionDebugOverlayEnabled
+  onAiDecisionDebugOverlayEnabled,
+  onExposedCardHighlightEnabled,
 }: {
   autoCorpMandatoryDrawEnabled: boolean;
   autoDiscardEnabled: boolean;
@@ -545,6 +767,7 @@ function GameplaySettings({
   resourceStripMode: ResourceStripMode;
   actionPanelMode: ActionPanelMode;
   aiDecisionDebugOverlayEnabled: boolean;
+  exposedCardHighlightEnabled: boolean;
   onAutoCorpMandatoryDrawEnabled(value: boolean): void;
   onAutoDiscardEnabled(value: boolean): void;
   onAutoEndTurnEnabled(value: boolean): void;
@@ -553,6 +776,7 @@ function GameplaySettings({
   onResourceStripMode(value: ResourceStripMode): void;
   onActionPanelMode(value: ActionPanelMode): void;
   onAiDecisionDebugOverlayEnabled(value: boolean): void;
+  onExposedCardHighlightEnabled(value: boolean): void;
 }) {
   return (
     <div className="gameplaySettings">
@@ -562,62 +786,172 @@ function GameplaySettings({
           <span className="meta">Lokale Komfortoption, kein Match-State</span>
         </div>
         <div className="settingsToggleGroup">
-          <label className={`settingsToggle ${autoCorpMandatoryDrawEnabled ? "checked" : ""}`}>
-            <input type="checkbox" checked={autoCorpMandatoryDrawEnabled} onChange={(event) => onAutoCorpMandatoryDrawEnabled(event.target.checked)} />
+          <label
+            className={`settingsToggle ${autoCorpMandatoryDrawEnabled ? "checked" : ""}`}
+          >
+            <input
+              type="checkbox"
+              checked={autoCorpMandatoryDrawEnabled}
+              onChange={(event) =>
+                onAutoCorpMandatoryDrawEnabled(event.target.checked)
+              }
+            />
             Korp-Startziehen
           </label>
-          <label className={`settingsToggle ${autoEndTurnEnabled ? "checked" : ""}`}>
-            <input type="checkbox" checked={autoEndTurnEnabled} onChange={(event) => onAutoEndTurnEnabled(event.target.checked)} />
+          <label
+            className={`settingsToggle ${autoEndTurnEnabled ? "checked" : ""}`}
+          >
+            <input
+              type="checkbox"
+              checked={autoEndTurnEnabled}
+              onChange={(event) => onAutoEndTurnEnabled(event.target.checked)}
+            />
             Auto-Zugende
           </label>
-          <label className={`settingsToggle ${autoDiscardEnabled ? "checked" : ""}`}>
-            <input type="checkbox" checked={autoDiscardEnabled} onChange={(event) => onAutoDiscardEnabled(event.target.checked)} />
+          <label
+            className={`settingsToggle ${autoDiscardEnabled ? "checked" : ""}`}
+          >
+            <input
+              type="checkbox"
+              checked={autoDiscardEnabled}
+              onChange={(event) => onAutoDiscardEnabled(event.target.checked)}
+            />
             Auto-Abwerfen
           </label>
-          <label className={`settingsToggle ${topbarStickyEnabled ? "checked" : ""}`}>
-            <input data-testid="sticky-topbar-toggle" type="checkbox" checked={topbarStickyEnabled} onChange={(event) => onTopbarStickyEnabled(event.target.checked)} />
+          <label
+            className={`settingsToggle ${topbarStickyEnabled ? "checked" : ""}`}
+          >
+            <input
+              data-testid="sticky-topbar-toggle"
+              type="checkbox"
+              checked={topbarStickyEnabled}
+              onChange={(event) => onTopbarStickyEnabled(event.target.checked)}
+            />
             Kopfzeile fixieren
           </label>
-          <label className={`settingsToggle ${cyberspaceBackgroundEnabled ? "checked" : ""}`}>
-            <input data-testid="cyberspace-background-toggle" type="checkbox" checked={cyberspaceBackgroundEnabled} onChange={(event) => onCyberspaceBackgroundEnabled(event.target.checked)} />
+          <label
+            className={`settingsToggle ${cyberspaceBackgroundEnabled ? "checked" : ""}`}
+          >
+            <input
+              data-testid="cyberspace-background-toggle"
+              type="checkbox"
+              checked={cyberspaceBackgroundEnabled}
+              onChange={(event) =>
+                onCyberspaceBackgroundEnabled(event.target.checked)
+              }
+            />
             Cyberspace-Hintergrund
           </label>
-          <label className={`settingsToggle ${actionPanelMode === "floating" ? "checked" : ""}`}>
-            <input data-testid="floating-action-panel-toggle" type="checkbox" checked={actionPanelMode === "floating"} onChange={(event) => onActionPanelMode(event.target.checked ? "floating" : "docked")} />
+          <label
+            className={`settingsToggle ${actionPanelMode === "floating" ? "checked" : ""}`}
+          >
+            <input
+              data-testid="floating-action-panel-toggle"
+              type="checkbox"
+              checked={actionPanelMode === "floating"}
+              onChange={(event) =>
+                onActionPanelMode(event.target.checked ? "floating" : "docked")
+              }
+            />
             Aktionsfenster schwebend
           </label>
-          <label className={`settingsToggle ${aiDecisionDebugOverlayEnabled ? "checked" : ""}`}>
-            <input data-testid="ai-decision-debug-overlay-toggle" type="checkbox" checked={aiDecisionDebugOverlayEnabled} onChange={(event) => onAiDecisionDebugOverlayEnabled(event.target.checked)} />
+          <label
+            className={`settingsToggle ${aiDecisionDebugOverlayEnabled ? "checked" : ""}`}
+          >
+            <input
+              data-testid="ai-decision-debug-overlay-toggle"
+              type="checkbox"
+              checked={aiDecisionDebugOverlayEnabled}
+              onChange={(event) =>
+                onAiDecisionDebugOverlayEnabled(event.target.checked)
+              }
+            />
             KI-Bewertungsfenster anzeigen
+          </label>
+          <label
+            className={`settingsToggle ${exposedCardHighlightEnabled ? "checked" : ""}`}
+          >
+            <input
+              data-testid="exposed-card-highlight-toggle"
+              type="checkbox"
+              checked={exposedCardHighlightEnabled}
+              onChange={(event) =>
+                onExposedCardHighlightEnabled(event.target.checked)
+              }
+            />
+            Exposed-Karten hervorheben
           </label>
         </div>
       </div>
       <div className="resourceStripSettings">
         <span className="settingsTitle">Spielstandsstreifen</span>
-        <div className="segmented resourceStripModeSelector" role="group" aria-label="Spielstandsstreifen">
+        <div
+          className="segmented resourceStripModeSelector"
+          role="group"
+          aria-label="Spielstandsstreifen"
+        >
           {(["auto", "on", "off"] as const).map((mode) => (
-            <button className={resourceStripMode === mode ? "active" : ""} key={mode} onClick={() => onResourceStripMode(mode)} type="button">
+            <button
+              className={resourceStripMode === mode ? "active" : ""}
+              key={mode}
+              onClick={() => onResourceStripMode(mode)}
+              type="button"
+            >
               {mode === "auto" ? "Auto" : mode === "on" ? "Ein" : "Aus"}
             </button>
           ))}
         </div>
       </div>
-      <p className="settingsHelp">Korp-Startziehen bestätigt die Pflichtkarte am Zuganfang automatisch, wenn sonst keine Korp-Aktion offen ist. Auto-Zugende beendet Deinen Zug, wenn nur noch Zug beenden offen ist. Auto-Abwerfen bestätigt eine Discard-Auswahl sofort, sobald genau die nötige Anzahl Handkarten gewählt ist. Kopfzeile fixieren hält die aktive Spielkopfzeile beim Scrollen sichtbar. Der Cyberspace-Hintergrund legt eine ruhige Netzwerklandschaft hinter das Spielfeld. Das schwebende Aktionsfenster zeigt mögliche Nicht-Run-Aktionen lokal verschiebbar an. Das KI-Bewertungsfenster zeigt lokale, redigierte KI-Trace-Daten für laufende KI-Matches. Der Spielstandsstreifen zeigt Credits, Agenda-Punkte und aktuelle Aktionen platzsparend über dem Spielfeld.</p>
+      <p className="settingsHelp">
+        Korp-Startziehen bestätigt die Pflichtkarte am Zuganfang automatisch,
+        wenn sonst keine Korp-Aktion offen ist. Auto-Zugende beendet Deinen Zug,
+        wenn nur noch Zug beenden offen ist. Auto-Abwerfen bestätigt eine
+        Discard-Auswahl sofort, sobald genau die nötige Anzahl Handkarten
+        gewählt ist. Kopfzeile fixieren hält die aktive Spielkopfzeile beim
+        Scrollen sichtbar. Der Cyberspace-Hintergrund legt eine ruhige
+        Netzwerklandschaft hinter das Spielfeld. Das schwebende Aktionsfenster
+        zeigt mögliche Nicht-Run-Aktionen lokal verschiebbar an. Das
+        KI-Bewertungsfenster zeigt lokale, redigierte KI-Trace-Daten für
+        laufende KI-Matches. Exposed-Karten hervorheben markiert öffentlich
+        exposed Karten zehn Sekunden lang oder bis zum Zugende. Der
+        Spielstandsstreifen zeigt Credits, Agenda-Punkte und aktuelle Aktionen
+        platzsparend über dem Spielfeld.
+      </p>
     </div>
   );
 }
 
-function AiPacingSettings({ mode, onMode }: { mode: AiPacingMode; onMode(value: AiPacingMode): void }) {
+function AiPacingSettings({
+  mode,
+  onMode,
+}: {
+  mode: AiPacingMode;
+  onMode(value: AiPacingMode): void;
+}) {
   return (
     <div className="aiPacingSettings">
       <div>
         <span className="settingsTitle">KI-Steuerung</span>
         <span className="meta">Lokale Ablaufoption, kein Match-State</span>
       </div>
-      <div className="segmented aiPacingSelector" role="group" aria-label="KI-Steuerung">
+      <div
+        className="segmented aiPacingSelector"
+        role="group"
+        aria-label="KI-Steuerung"
+      >
         {(["manual", "paced", "fast"] as const).map((value) => (
-          <button className={mode === value ? "active" : ""} key={value} onClick={() => onMode(value)} type="button" title={aiPacingModeHelp(value)}>
-            {value === "manual" ? "Einzelschritt" : value === "paced" ? "Getaktet" : "Schnell"}
+          <button
+            className={mode === value ? "active" : ""}
+            key={value}
+            onClick={() => onMode(value)}
+            type="button"
+            title={aiPacingModeHelp(value)}
+          >
+            {value === "manual"
+              ? "Einzelschritt"
+              : value === "paced"
+                ? "Getaktet"
+                : "Schnell"}
           </button>
         ))}
       </div>
@@ -634,7 +968,7 @@ function ActionCueSettings({
   onEnabled,
   onAutomaticEffectsEnabled,
   onPosition,
-  onAutoDismissMs
+  onAutoDismissMs,
 }: {
   enabled: boolean;
   automaticEffectsEnabled: boolean;
@@ -645,7 +979,8 @@ function ActionCueSettings({
   onPosition(value: CuePositionPreference): void;
   onAutoDismissMs(value: CueAutoDismissMs): void;
 }) {
-  const setPreset = (preset: CuePositionPreset) => onPosition({ kind: "preset", preset });
+  const setPreset = (preset: CuePositionPreset) =>
+    onPosition({ kind: "preset", preset });
   return (
     <div className="actionCueSettings">
       <div className="settingsHeaderLine">
@@ -654,11 +989,24 @@ function ActionCueSettings({
           <span className="meta">Lokale Hinweise zu KI- und Gegenzügen</span>
         </div>
         <label className={`settingsToggle ${enabled ? "checked" : ""}`}>
-          <input type="checkbox" checked={enabled} onChange={(event) => onEnabled(event.target.checked)} />
+          <input
+            type="checkbox"
+            checked={enabled}
+            onChange={(event) => onEnabled(event.target.checked)}
+          />
           Anzeigen
         </label>
-        <label className={`settingsToggle ${automaticEffectsEnabled ? "checked" : ""}`}>
-          <input type="checkbox" checked={automaticEffectsEnabled} onChange={(event) => onAutomaticEffectsEnabled(event.target.checked)} disabled={!enabled} />
+        <label
+          className={`settingsToggle ${automaticEffectsEnabled ? "checked" : ""}`}
+        >
+          <input
+            type="checkbox"
+            checked={automaticEffectsEnabled}
+            onChange={(event) =>
+              onAutomaticEffectsEnabled(event.target.checked)
+            }
+            disabled={!enabled}
+          />
           Automatische Effekte anzeigen
         </label>
       </div>
@@ -678,12 +1026,22 @@ function ActionCueSettings({
             <option value="bottom-right">Unten rechts</option>
             <option value="bottom-left">Unten links</option>
             <option value="center">Mitte</option>
-            {position.kind === "custom" ? <option value="custom">Eigene Position</option> : null}
+            {position.kind === "custom" ? (
+              <option value="custom">Eigene Position</option>
+            ) : null}
           </select>
         </label>
         <label>
           Automatisch ausblenden
-          <select value={autoDismissMs} onChange={(event) => onAutoDismissMs(normalizeCueAutoDismissMs(Number(event.target.value)))} disabled={!enabled}>
+          <select
+            value={autoDismissMs}
+            onChange={(event) =>
+              onAutoDismissMs(
+                normalizeCueAutoDismissMs(Number(event.target.value)),
+              )
+            }
+            disabled={!enabled}
+          >
             <option value={1500}>Nach 1,5 Sekunden</option>
             <option value={2500}>Nach 2,5 Sekunden</option>
             <option value={4000}>Nach 4 Sekunden</option>
@@ -691,7 +1049,12 @@ function ActionCueSettings({
             <option value={0}>Nicht automatisch</option>
           </select>
         </label>
-        <button className="button" onClick={() => setPreset("top-right")} type="button" disabled={!enabled}>
+        <button
+          className="button"
+          onClick={() => setPreset("top-right")}
+          type="button"
+          disabled={!enabled}
+        >
           Zurücksetzen
         </button>
       </div>
@@ -703,7 +1066,7 @@ function AudioSettings({
   enabled,
   volume,
   onEnabled,
-  onVolume
+  onVolume,
 }: {
   enabled: boolean;
   volume: number;
@@ -712,13 +1075,29 @@ function AudioSettings({
 }) {
   return (
     <div className="audioSettings">
-      <button className={`button ${enabled ? "primary" : ""}`} type="button" onClick={() => onEnabled(!enabled)} title={enabled ? "Audioeffekte ausschalten" : "Audioeffekte einschalten · Testton"}>
+      <button
+        className={`button ${enabled ? "primary" : ""}`}
+        type="button"
+        onClick={() => onEnabled(!enabled)}
+        title={
+          enabled
+            ? "Audioeffekte ausschalten"
+            : "Audioeffekte einschalten · Testton"
+        }
+      >
         {enabled ? <Volume2 size={15} /> : <VolumeX size={15} />}
         Audio
       </button>
       <label>
         Lautstärke
-        <input type="range" min={0} max={1} step={0.05} value={volume} onChange={(event) => onVolume(Number(event.target.value))} />
+        <input
+          type="range"
+          min={0}
+          max={1}
+          step={0.05}
+          value={volume}
+          onChange={(event) => onVolume(Number(event.target.value))}
+        />
       </label>
     </div>
   );

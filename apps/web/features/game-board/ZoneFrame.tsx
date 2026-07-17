@@ -22,7 +22,7 @@ export function zoneSideClass(side: Side): "runnerZoneSideLabel" | "corpZoneSide
 
 export type ZoneIdentityIconKind = "hq" | "rd" | "archives" | "remote" | "rig" | "grip" | "heap" | "stack";
 
-export function serverZoneIdentityIconKind(serverId: PlayerView["servers"][number]["id"]): ZoneIdentityIconKind {
+export function serverZoneIdentityIconKind(serverId: string): ZoneIdentityIconKind {
   if (serverId === "hq") return "hq";
   if (serverId === "rd") return "rd";
   if (serverId === "archives") return "archives";

@@ -1186,6 +1186,18 @@ describe("PRO019 rule-contract baseline utilities", () => {
     expect(state.pendingChoice?.source).toContain("single_data_fort:remote_1");
     expect(state.pendingChoice?.minSelections).toBe(0);
     expect(state.pendingChoice?.maxSelections).toBe(1);
+    const exposedCardOptionId = state.pendingChoice?.options.find(
+      (option) => option.value === "wall_3",
+    )?.id;
+    expect(exposedCardOptionId).toBeDefined();
+    state = applyChoice(state, "runner", exposedCardOptionId!);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneAction: "expose_installed_cards_single_fort",
+      publicRevealKind: "expose",
+      publicRevealDefinitionIds: WALL,
+      exposedCardInstanceIds: "wall_3",
+      exposedServerLabels: "Remote 1 ICE 1",
+    });
     expect(hashState(state)).toMatch(/^fnv1a:/);
 
     const replay = replayEvents(
