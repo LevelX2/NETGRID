@@ -135,7 +135,9 @@ und Handqualitätsgründe für Draw erhalten.
 Streetware Distributor ist eine legale Action-Bank: Eine Aktion speichert
 drei Bits; zu Beginn jedes Runner-Zugs zahlt sie, solange vorhanden, ein Bit
 aus. Der PlanPortfolio-Vertrag klassifiziert `recurring_cycle` als
-`background` mit `maxActionsPerTurn: 1`.
+`background` mit `maxActionsPerTurn: 1`. Nach Nutzerklärung ist dies eine
+weiche Normalfrequenz und kein hartes Verbot: Fehlt eine wirklich sinnvolle
+Alternative, darf Runner im selben Zug weitere Bits auflegen.
 
 Im Match wird dieselbe Streetware dennoch mehrfach pro Zug beladen:
 
@@ -150,7 +152,9 @@ Die Bankwerte zeigen `bankPortfolioRole: background`,
 `bankPortfolioActionsThisTurn: 0`, keinen konkreten Finanzierungsbedarf,
 keinen terminalen Finanzierungsbedarf und keine kritische Reserve. Der
 vorhandene PlanMemory-/Portfolio-Vertrag wird somit nicht zuverlässig bis in
-den Folgezustand fortgeschrieben.
+den Folgezustand fortgeschrieben. Das Finding ist nicht die bloße zweite
+Aktivierung, sondern die unerkannte Wiederholung und ihre volle Priorisierung
+gegen wertvolle Alternativen wie den bestätigten Handpuffer-Draw an D39.
 
 ## Finding F5 – Späte Bankinvestition ignoriert Amortisationshorizont
 

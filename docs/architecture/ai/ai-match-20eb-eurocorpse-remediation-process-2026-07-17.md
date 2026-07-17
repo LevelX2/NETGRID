@@ -18,8 +18,8 @@ trennbare Verhaltensverträge:
 3. Basic Draw wird bei vollem oder überfülltem effektiven Grip wiederholt
    gewählt und erzeugt vermeidbare End-of-turn-Discards.
 4. Die als `background` definierte Streetware-Bankaktion wird in demselben
-   Zug mehrfach gewählt, obwohl ihr Planvertrag höchstens eine Aktion pro Zug
-   vorsieht.
+   Zug mehrfach voll priorisiert, während der Portfoliozähler bei 0 bleibt
+   und eine wirklich sinnvolle Alternative vorhanden ist.
 5. Streetware wird am gegnerischen Matchpoint ohne konkreten
    Finanzierungsbedarf und ohne realistische Amortisationszeit weiter
    beladen.
@@ -57,9 +57,11 @@ verifiziert entfernen.
 - Draw-Überlauf darf bei akutem Defense-, Search- oder Handqualitätsbedarf
   weiterhin sinnvoll sein; bestraft wird nur vermeidbarer erwarteter
   End-of-turn-Überlauf relativ zu produktiven Alternativen.
-- Eine Hintergrundbank darf weiterhin einmal pro Zug geladen werden. Späte
-  Investitionen bleiben erlaubt, wenn ein konkreter oder terminaler
-  Finanzierungsbedarf die kurze Amortisationszeit rechtfertigt.
+- `maxActionsPerTurn: 1` beschreibt für Hintergrundbanken eine weiche
+  Normalfrequenz, kein unumstößliches Verbot. Mehrere Ladungen im selben Zug
+  bleiben erlaubt, wenn keine wirklich sinnvolle Alternative existiert.
+  Späte Investitionen bleiben außerdem erlaubt, wenn ein konkreter oder
+  terminaler Finanzierungsbedarf die kurze Amortisationszeit rechtfertigt.
 - Engine-Kartentexte, LegalAction-Erzeugung, Replay, StateHash und
   Hidden-Info-Grenzen werden nicht verändert, sofern kein reproduzierbarer
   Engine-Blocker entsteht.
@@ -120,7 +122,9 @@ verifiziert entfernen.
     abstrakten Economy-Plan erzwungen.
   - D59: bei vollem effektiven Grip wird der konkrete Hosting-Schritt oder
     eine andere produktive Aktion dem Basic Draw vorgezogen.
-  - D39: eine `background`-Bank wird im selben Zug nicht erneut beladen.
+  - D39: eine `background`-Bank wird im selben Zug nicht erneut voll
+    priorisiert, wenn ein wertvoller Draw oder eine andere wirklich sinnvolle
+    Aktion verfügbar ist.
   - D129: am gegnerischen Matchpoint wird ohne konkreten
     Finanzierungsbedarf keine verzögerte Bankinvestition begonnen oder
     fortgesetzt.
@@ -131,6 +135,8 @@ verifiziert entfernen.
   - Draw bleibt unterhalb des erwarteten Handlimits beziehungsweise bei
     akutem Such-/Defensebedarf zulässig;
   - erste frühe Hintergrundbank-Aktion eines Zugs bleibt zulässig;
+  - auch eine weitere Hintergrundbank-Aktion bleibt zulässig, wenn keine
+    wirklich sinnvolle Alternative verfügbar ist;
   - Bankladung bleibt bei konkretem kurzfristigem Finanzierungsbedarf
     zulässig.
 - Done-Gate: historische Zieltests sind ausschließlich als
@@ -148,9 +154,10 @@ verifiziert entfernen.
 
 ### P3 – Bankkadenz und Amortisationshorizont härten
 
-- Ziel: den vorhandenen `background`-Maximalvertrag zuverlässig über
-  PlanMemory fortschreiben und späte Investitionen gegen sichtbare
-  Matchpoint-/Amortisationssignale abwägen.
+- Ziel: die vorhandene weiche `background`-Kadenz zuverlässig erkennen,
+  Wiederholungen relativ zu wirklich sinnvollen Alternativen abwerten und
+  späte Investitionen gegen sichtbare Matchpoint-/Amortisationssignale
+  abwägen. Die Kadenz wird nicht als hartes Aktionsverbot umgesetzt.
 - Done-Gate: D39/D129 und Gegenproben sind unverändert grün; bestehende
   Bank-, Portfolio- und Economy-Verträge bleiben grün.
 - Commit: `fix(ai): enforce runner bank investment cadence`
