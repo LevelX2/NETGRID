@@ -96,16 +96,27 @@ for (const missing of [...expectedTypeCycleSignatures].filter(
 const productionLineCaps = new Map([
   ["runtime/semantic-runtime-corp-score.ts", 808],
   ["runtime/semantic-runtime-corp-board-triage.ts", 793],
-  ["runner-hand-development.ts", 2756],
+  ["runner-hand-development.ts", 916],
+  ["runner/hand-development/runner-hand-text-signals.ts", 431],
+  ["runner/hand-development/runner-persistent-install-evaluation.ts", 1408],
   ["visible-run-analysis.ts", 629],
   ["run-analysis/visible-run-breaker-path.ts", 838],
   ["run-analysis/visible-run-hazards.ts", 753],
   ["runtime/semantic-choice-ranking.ts", 536],
   ["runtime/semantic-runtime-corp-scoring-window.ts", 249],
-  ["runtime/corp-scoreline/semantic-runtime-corp-board-triage-policies.ts", 2276],
+  [
+    "runtime/corp-scoreline/semantic-runtime-corp-board-triage-policies.ts",
+    2276,
+  ],
   ["runtime/corp-scoreline/semantic-runtime-corp-score-action-economy.ts", 885],
-  ["runtime/corp-scoreline/semantic-runtime-corp-score-scoreline-components.ts", 925],
-  ["runtime/corp-scoreline/semantic-runtime-corp-scoring-window-projection.ts", 1445],
+  [
+    "runtime/corp-scoreline/semantic-runtime-corp-score-scoreline-components.ts",
+    925,
+  ],
+  [
+    "runtime/corp-scoreline/semantic-runtime-corp-scoring-window-projection.ts",
+    1445,
+  ],
 ]);
 for (const file of productionFiles) {
   const relative = relativeSourcePath(file);
@@ -119,14 +130,25 @@ for (const file of productionFiles) {
 }
 
 const testLineCaps = new Map([
+  ["runner-hand-development.test.ts", 590],
+  ["runner/hand-development/runner-persistent-install-evaluation.test.ts", 912],
   ["runtime/semantic-runtime-corp-score.test.ts", 3797],
   ["tactical-plans.test.ts", 4308],
   ["semantic-ai-runtime-cutover.test.ts", 4261],
   ["runtime/semantic-runtime-corp-board-triage.test.ts", 1764],
   ["runtime/semantic-runtime-corp-scoring-window.test.ts", 812],
-  ["runtime/corp-scoreline/semantic-runtime-corp-score-scoreline-and-install.test.ts", 3314],
-  ["runtime/corp-scoreline/semantic-runtime-corp-board-triage-scoreline.test.ts", 1373],
-  ["runtime/corp-scoreline/semantic-runtime-corp-scoring-window-protection.test.ts", 877],
+  [
+    "runtime/corp-scoreline/semantic-runtime-corp-score-scoreline-and-install.test.ts",
+    3314,
+  ],
+  [
+    "runtime/corp-scoreline/semantic-runtime-corp-board-triage-scoreline.test.ts",
+    1373,
+  ],
+  [
+    "runtime/corp-scoreline/semantic-runtime-corp-scoring-window-protection.test.ts",
+    877,
+  ],
   ["runner-run-target-evaluation.test.ts", 3150],
   ["runtime/semantic-choice-ranking.test.ts", 1174],
   ["runtime/choice-ranking/semantic-choice-ranking-corp.test.ts", 299],

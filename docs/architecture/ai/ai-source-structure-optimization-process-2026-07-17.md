@@ -1,6 +1,6 @@
 # AI Source Structure Optimization Process 2026-07
 
-Status: `package_done:AISSO-5`
+Status: `package_done:AISSO-6`
 
 ## Quelle und Vorgabe
 
@@ -348,6 +348,26 @@ Ergebnis:
 - Done-Gate: kleine öffentliche/interne Fassade; keine Bewertungs- oder
   Evidence-Änderung.
 - Commit: `refactor(ai): split runner hand development domains`
+
+Ergebnis:
+
+- `runner-hand-development.ts` ist von 2.650 auf 915 Zeilen reduziert und
+  bleibt als bestehender Orchestrator sowie als Consumer-Fassade erhalten.
+- Öffentliche Verträge, interne Bewertungsverträge, Kartentextsignale und die
+  Persistent-Install-Bewertung liegen unter `runner/hand-development/` in
+  fachlich benannten Modulen; das größte neue Produktionsmodul umfasst 1.407
+  Zeilen.
+- Strukturierte Hints bleiben unverändert führend. Die vorhandenen
+  Textfallbacks wurden ohne neue Heuristiken in ein eigenes Signalmodul
+  verschoben und werden von der Persistent-Install-Bewertung wiederverwendet.
+- Der bisher 1.741 Zeilen große Testmonolith ist in eine 589 Zeilen große
+  Basissuite und eine 911 Zeilen große Persistent-Install-Suite mit gemeinsamem
+  Test-Support geteilt. Alle verschobenen Fälle bleiben erhalten.
+- Die Source-Structure-Ratchets begrenzen die neue Fassade, beide extrahierten
+  Produktionsmodule und beide Testsuiten auf ihre erreichten Größen.
+- Checks: elf HandDevelopment-, RunTarget-, TacticalPlan-, Discard- und
+  Search-Suiten mit 208/208 Tests grün; AI-Typecheck, Structure-Gate und
+  Selbsttest, Package-Boundaries sowie `git diff --check` grün.
 
 ### AISSO-7 – Simulationsverträge neutralisieren und V143-Fixtures isolieren
 
