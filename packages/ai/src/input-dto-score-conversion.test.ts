@@ -135,6 +135,40 @@ describe("AI input DTO score-conversion contract", () => {
     );
   });
 
+  it("preserves actor-visible encounter subroutine targets", () => {
+    const action = runnerSemanticAction();
+    action.type = "break_subroutine";
+    action.payload = {
+      ...action.payload,
+      subroutineIndex: 1,
+      subroutineIndexes: "1",
+      privateEncounterProbe: "must-not-cross-dto",
+    };
+    const input = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: playerView(action, "runner"),
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "runner-encounter-target-dto",
+      decisionId: "runner-encounter-target-dto:runner:1",
+      actionNumber: 1,
+      profileId: "runner-encounter-target-dto-test",
+    });
+
+    expect(input.legalActions[0]?.payload).toMatchObject({
+      subroutineIndex: 1,
+      subroutineIndexes: "1",
+    });
+    expect(input.playerView.legalActions[0]?.payload).toMatchObject({
+      subroutineIndex: 1,
+      subroutineIndexes: "1",
+    });
+    expect(input.legalActions[0]?.payload).not.toHaveProperty(
+      "privateEncounterProbe",
+    );
+  });
+
   it("preserves public remote-root structure without exposing card identities", () => {
     const action = runnerSemanticAction();
     const events: PublicGameEvent[] = [

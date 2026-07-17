@@ -298,3 +298,48 @@ Der 27-Karten-Audit meldet für `onr_proteus_096_skullcap` einen generischen Dam
 - Jede Korrektur besitzt eine Gegenprobe, in der die neue Priorität bewusst nicht greift.
 - Checkpoint-Erwartungen werden nach dem Red-Evidence-Commit nicht abgeschwächt.
 - Keine zukünftige Root-, HQ-, Hand- oder Stack-Information gelangt in Fixture, Test oder produktiven Consumer.
+
+## Red-Evidence und Fixture-Kompatibilität
+
+Der Strict-Capture für D37 replayt alle 36 vorherigen KI-Entscheidungen ohne
+Drift. Der sichere Viacox-Kontrollfall D58 besitzt ebenfalls 57 kompatible
+Warmup-Entscheidungen und null Drifts. Der aktuelle Code verletzt bei D37 die
+unveränderte Erwartung als `behavior_regression`: Er bricht weiterhin Viral
+15 Subroutine 1 statt der programmtrashenden Subroutine 2.
+
+Der erste Strict-Versuch für D130 stoppt regelkonform bei D73: historisch
+„Run auf HQ“, aktuell „Karte ziehen“. Deshalb wurden D130, D148, D164 und D176
+nicht als strict spielgleich ausgegeben, sondern über die ausdrücklich
+dokumentierte Fixture-Migration `rebase` capturt. Alle vier Migrationen weisen
+dieselben frühen Drifts D73, D76, D81 und D82 auf. Danach bleiben die
+historischen Suffixe kompatibel:
+
+- D130: 47 kompatible Entscheidungen;
+- D148: 65 kompatible Entscheidungen;
+- D164: 81 kompatible Entscheidungen;
+- D176: 93 kompatible Entscheidungen.
+
+Die Runtime enthält in allen Fällen TacticalPlan, PlanPortfolio und
+StrategicIntent. D37 enthält zusätzlich den relevanten RunnerRunPlan; die
+späteren Action-Phase-Fälle benötigen keinen aktiven RunPlan. Auf aktuellem
+Code sind D130, D164, D176 und D148 jeweils `behavior_regression`; D58 bleibt
+als sichere Viacox-Gegenprobe grün.
+
+Vor Produktionsänderung sind außerdem folgende Schichtverträge rot:
+
+- DTO: `subroutineIndex` und `subroutineIndexes` fehlen nach positiver
+  LegalAction-Sanitization, während ein unbekannter privater Probe-Key korrekt
+  entfernt wird;
+- Engine: Viacox-Wurf 5 erzeugt bei Remote 1 und Remote 2 ausschließlich die
+  Start-Run-LegalAction für Remote 1;
+- Hint: Viacox besitzt keine `mandatory_action`-/`random_outcome`-RiskTags und
+  erzeugt weiterhin das falsche Signal `setup.search`;
+- Compiler: Skullcap kompiliert zwei generische Damage-Prevention-Effekte für
+  dasselbe Timing, denselben Scope und dieselbe Resource;
+- Deck-Audit: 27/27 eindeutige Karten und 45/45 Karten erfasst, Status
+  `failed`, genau ein Skullcap-Blocker und null Warnungen.
+
+Damit sind die fünf KI-Verhaltensänderungen ausschließlich durch
+`behavior_regression` autorisiert; Engine-, DTO- und Hint-Änderungen besitzen
+je einen eigenen roten Vertrag. Die Erwartungen werden ab diesem Commit nicht
+abgeschwächt.

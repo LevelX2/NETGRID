@@ -1,6 +1,6 @@
 # Match 23D6: Runner-Run-, Breaker-, Broker- und Hint-Remediation
 
-Status: P1 aktiv
+Status: P3 aktiv
 
 ## Quelle und Zielprüfung
 
@@ -222,3 +222,19 @@ den finalen Merge.
 - Pflichtchecks und verbleibende Grenzen sind dokumentiert.
 - `main` enthält alle Paketcommits; Worktree und Branch sind verifiziert
   entfernt.
+
+## Ausführungsstand
+
+- P0 abgeschlossen: Prozessbasis in Commit `7c0079d11`.
+- P1 abgeschlossen: 199/199-Entscheidungsevidenz in Commit `106f5b1bf`.
+- P2 abgeschlossen: D37 strict und driftfrei capturt; D58 besitzt ebenfalls
+  null Warmup-Drifts. Die späteren D130-/D148-/D164-/D176-Fixtures sind als
+  explizite Migration mit vier dokumentierten frühen Drifts und langem
+  kompatiblem Suffix capturt. Fünf KI-Erwartungen sind als
+  `behavior_regression` rot, der sichere Viacox-Kontrollfall ist grün.
+- P2-Schichtverträge sind rot: Encounter-Ziele fehlen im DTO, Viacox-Wurf 5
+  bietet bei zwei Remotes nur Remote 1, Viacox enthält falsche Search-Semantik
+  und keine Risiko-Tags, Skullcap besitzt zwei überlappende generische
+  Damage-Prevention-Effekte. Der 27/27-Deck-Audit bestätigt genau den einen
+  Skullcap-Blocker bei null Warnungen.
+- P3 aktiv: Encounter-Zieldaten und D37-Break-Auswahl.

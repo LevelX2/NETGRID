@@ -677,6 +677,25 @@ describe("Proteus PRO017 action economy and debt suite", () => {
     }
   });
 
+  it("Bargain with Viacox roll 5 lets the Runner choose among all subsidiary data forts", () => {
+    const state = viacoxStateForRoll(5);
+    addRemote(state, "remote_2");
+
+    const actions = getLegalActions(state, "runner").filter(
+      (action) => action.type === "start_run",
+    );
+    expect(
+      actions.map((action) => action.payload?.serverId).sort(),
+    ).toEqual(["remote_1", "remote_2"]);
+
+    for (const action of actions) {
+      const before = structuredClone(state) as GameState;
+      const after = applyLegal(before, "runner", action);
+      expect(after.run?.attackedServerId).toBe(action.payload?.serverId);
+      expectReplayStable(before, after);
+    }
+  });
+
   it("Bargain with Viacox grants the forced fifth action on the first Runner turn after a real installation", () => {
     let state = baseState("pro017-viacox-real-install");
     clearRunnerGrip(state);
