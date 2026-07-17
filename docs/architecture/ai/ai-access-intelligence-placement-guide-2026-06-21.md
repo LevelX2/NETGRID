@@ -16,7 +16,10 @@ Access-Intelligence ist AI-intern, LegalActions-only und side-safe. Die Engine b
 - Remote-Root-Wert, Trash-Spendability, Reserve-Zitat, Ranking, Fingerprint und Outcome-Memory liegen unter `packages/ai/src/access/`.
 - TacticalPlans und RunTargetEvaluation dürfen strukturierte Access-Daten konsumieren, aber keine Evidence-Strings als primäre Entscheidungsquelle parsen.
 - RunTarget-Guidance-Gewichte liegen in `packages/ai/src/runner-run-target-guidance.ts`, damit TacticalPlans und Semantic Runtime nicht getrennte Recommendation-Switches pflegen.
-- Der alte `packages/ai/src/memory/remote-access-outcome.ts`-Pfad ist Legacy-Kompatibilitätsadapter; neue Outcome-Memory-Arbeit gehört nach `packages/ai/src/access/access-outcome-memory.ts`.
+- Outcome-Memory und aus öffentlichen Access-Ereignissen abgeleitete
+  No-Progress-Memory liegen ausschließlich unter
+  `packages/ai/src/access/access-outcome-memory.ts`; ein paralleler
+  Compatibility-Pfad unter `memory/` ist nicht zulässig.
 - Evaluation, Feedback, Real-Engine-Corpus und Loop-Detection bleiben unter `packages/ai/src/evaluation/` und report-only.
 - Runtime-Switches in `packages/ai/src/index.ts` dürfen nur schmale Access-Helper verwenden; neue Fachlogik gehört in `access/`, `decision/`, `tactical-plans.ts`, `runner-run-target-evaluation.ts` oder `evaluation/`.
 

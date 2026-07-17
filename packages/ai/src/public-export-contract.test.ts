@@ -55,6 +55,7 @@ describe("AI public export contract", () => {
       "formatDoctrineQualityBenchmarkReport",
       "evaluateDoctrineQualityGate",
       "buildSemanticRuntimeWhyCoverageReportFromSimulationSummaries",
+      "evaluatePracticalTacticBenchmark",
       "simulateAiGame",
     ];
 
@@ -109,8 +110,6 @@ describe("AI public export contract", () => {
     );
     const forbiddenPublicModules = [
       "./diagnostics/semantic-runtime-debug",
-      "./legacy/legacy-public-contract",
-      "./legacy/legacy-entrypoints",
       "./diagnostics/coverage-selection-debug",
       "./diagnostics/semantic-runtime-action-alternatives",
       "./diagnostics/semantic-runtime-ranked-alternatives",
@@ -299,6 +298,8 @@ describe("AI public export contract", () => {
         ),
       );
     }
+    expect(source).not.toMatch(/from\s+["']\.\/evaluation\//);
+    expect(source).not.toMatch(/from\s+["']\.\/simulation(?:\/|["'])/);
     expect(source).not.toMatch(
       /export\s+(?:type\s+)?(?:\{|\*)[\s\S]*?\.test["']/,
     );

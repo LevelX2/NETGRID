@@ -1116,64 +1116,6 @@ describe("AI module boundaries", () => {
 
     expect(violations).toEqual([]);
   });
-
-  it("routes runtime, simulation and diagnostics legacy imports through the legacy entrypoint", () => {
-    const checkedAreas = ["runtime", "simulation", "diagnostics", "evaluation"];
-    const violations = checkedAreas.flatMap((area) =>
-      productionFiles(area as Parameters<typeof productionFiles>[0]).flatMap(
-        (file) =>
-          importsFrom(file)
-            .filter(
-              (reference) =>
-                resolvesToSrcArea(file, reference.importSource, "legacy") &&
-                resolvedImportBasename(file, reference.importSource) !==
-                  "legacy-entrypoints",
-            )
-            .map((reference) =>
-              violation(
-                file,
-                reference,
-                "runtime/simulation/diagnostics/evaluation must use legacy-entrypoints",
-              ),
-            ),
-      ),
-    );
-
-    expect(violations).toEqual([]);
-  });
-
-  it("keeps productive semantic runtime off legacy imports except explicit compatibility facades", () => {
-    const allowedRuntimeLegacyEntrypointImporters = new Set([
-      "runtime/ai-action-entrypoints.ts",
-      "runtime/ai-action-entrypoints-composition.ts",
-      "runtime/runner-baseline-support-composition.ts",
-      "runtime/semantic-runtime-action-exclusion-composition.ts",
-    ]);
-    const violations = productionFiles("runtime").flatMap((file) =>
-      importsFrom(file).flatMap((reference) => {
-        if (!resolvesToSrcArea(file, reference.importSource, "legacy")) {
-          return [];
-        }
-        const relative = relativeFile(file);
-        if (
-          allowedRuntimeLegacyEntrypointImporters.has(relative) &&
-          resolvedImportBasename(file, reference.importSource) ===
-            "legacy-entrypoints"
-        ) {
-          return [];
-        }
-        return [
-          violation(
-            file,
-            reference,
-            "productive semantic runtime must not import legacy outside explicit compatibility facades",
-          ),
-        ];
-      }),
-    );
-
-    expect(violations).toEqual([]);
-  });
 });
 
 function productionFiles(

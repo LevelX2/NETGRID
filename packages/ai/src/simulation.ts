@@ -13,6 +13,12 @@ export {
 } from "./simulation/benchmark-deck-snapshot-resolver";
 export { benchmarkDeckFromLocalEditableDeck } from "./simulation/benchmark-local-editable-deck-resolver";
 export { buildSemanticRuntimeWhyCoverageReportFromSimulationSummaries } from "./simulation/selfplay-why-coverage";
+export { evaluatePracticalTacticBenchmark } from "./evaluation/practical-tactic-benchmark";
+export type {
+  PracticalTacticBenchmarkCase,
+  PracticalTacticBenchmarkCategory,
+  PracticalTacticBenchmarkResult,
+} from "./evaluation/practical-tactic-benchmark";
 export { buildSelfplayActionTypeDominanceReport } from "./simulation/selfplay-action-type-dominance";
 export type {
   AiSelfplayActionTypeDominanceBucket,

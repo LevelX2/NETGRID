@@ -1,6 +1,6 @@
 # AI Source Structure Optimization Process 2026-07
 
-Status: `package_done:AISSO-0`
+Status: `package_done:AISSO-1`
 
 ## Quelle und Vorgabe
 
@@ -172,6 +172,27 @@ Preflight-Baseline auf Commit `4bdabbc10`:
 - Done-Gate: `@netgrid/ai` ist live-only; kein produktiver Legacy-Adapter oder
   Gate auf ein nicht existentes `legacy/`-Verzeichnis bleibt.
 - Commit: `refactor(ai): align public and current-state boundaries`
+
+Ergebnis:
+
+- `PracticalTacticBenchmark` ist aus `@netgrid/ai` entfernt und über
+  `@netgrid/ai/simulation` erreichbar; das Public-Gate verbietet nun
+  fail-closed Exporte aus `evaluation/` oder `simulation/` in der
+  Default-Fassade.
+- Obsolete Legacy-Entrypoint-Routingtests und die nicht mehr existierende
+  `legacy/`-Platzierung sind entfernt. Historische Evidence darf nur als
+  unveränderliche Regression-Fixture fortbestehen.
+- Die produktive öffentliche No-Progress-Access-Ableitung liegt direkt in
+  `access/access-outcome-memory.ts`. Der deprecated Parallelpfad unter
+  `memory/` samt ausschließlich kompatibilitätsbezogenen Tests ist entfernt.
+- Checks: Public Export, Module Boundaries, Access Outcome Memory und
+  RunTargetEvaluation 114/114 grün; AI-Typecheck und `git diff --check` grün.
+- Zusätzliche Regressionsevidence: TacticalPlans ist grün. Der isolierte Test
+  `stops loading Broker when stored credits and runner pool are comfortable`
+  ist auf Arbeitsbranch und unverändertem `main` identisch rot und damit
+  vorbestehend. Er wird nicht durch Strukturarbeit umgedeutet. Removal
+  Condition für das Final Gate: der separate Broker-Arbeitsstand ist in
+  `main` integriert oder der Fall ist dort anderweitig fachlich grün.
 
 ### AISSO-2 – Ausführbares Source-Structure-Ratchet und Typvertragsgrenzen
 

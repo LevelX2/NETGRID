@@ -211,12 +211,6 @@ export type {
   CorpRemoteProjectAssessment,
   CorpRemoteProtectionBand,
 } from "./plans/corp-remote-project-assessment";
-export { evaluatePracticalTacticBenchmark } from "./evaluation/practical-tactic-benchmark";
-export type {
-  PracticalTacticBenchmarkCase,
-  PracticalTacticBenchmarkCategory,
-  PracticalTacticBenchmarkResult,
-} from "./evaluation/practical-tactic-benchmark";
 export { buildAiDeckOntologySummary } from "./hint-ontology-doctrine";
 export type {
   AiDeckOntologyBreakerCoverageSummary,

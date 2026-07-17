@@ -17,11 +17,13 @@ import {
   type KnownRemoteAccessPayoff,
 } from "./known-remote-access-payoff";
 import type { ActionSemanticCandidate } from "./action-semantic-candidate";
-import type { AccessOutcomeMemoryStatus } from "./access/access-outcome-memory";
+import {
+  deriveObservedRemoteNoProgressAccessMemory,
+  type AccessOutcomeMemoryStatus,
+} from "./access/access-outcome-memory";
 import type { RankedKnownRemoteAccessCandidate } from "./access/access-target-ranking";
 import type { DeckCapabilityProfile } from "./deck-capabilities";
 import { createAiHintsByCard, type AiCardHint } from "./ai-hints";
-import { deriveObservedRemoteNoProgressAccessMemory } from "./memory/remote-access-outcome";
 import type { RunnerHandDevelopmentEvaluation } from "./runner-hand-development";
 import type { RunnerStrategicIntentProfile } from "./runner-strategic-intent";
 import {
@@ -509,8 +511,7 @@ function evaluateRunnerRunTarget(
     unrezzedIceRiskModel.find((entry) => entry.serverId === targetServerId)
       ?.risk ?? 0;
   const unrezzedIceRiskCreditBuffer =
-    unknownUnrezzedIceCount > 0 &&
-    params.input.playerView.opponent.credits > 0
+    unknownUnrezzedIceCount > 0 && params.input.playerView.opponent.credits > 0
       ? Math.max(1, Math.ceil(unrezzedIceRisk * 4))
       : 0;
   const unrezzedIceRiskUnderfunded =
