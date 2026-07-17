@@ -2772,7 +2772,7 @@ function applyRunnerStartTurnActionEconomyEffects(
     effects?.push({
       effectId: `runner.start.forced_action.${sourceId}`,
       kind: "gain_actions",
-      visibility: grant.revealToCorpOnly ? "hidden_info_barrier" : "public",
+      visibility: "public",
       side: "runner",
       amount: 1,
       reason: "start_of_turn",

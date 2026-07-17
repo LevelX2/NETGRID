@@ -751,6 +751,33 @@ describe("Proteus PRO017 action economy and debt suite", () => {
     }
   });
 
+  it("Bargain with Viacox exposes the roll-6 forced action without exposing its random grip target", () => {
+    const state = viacoxStateForRoll(6);
+    const targetCardId = state.actionEconomy?.grants?.[0]?.targetCardInstanceId;
+    expect(targetCardId).toBeDefined();
+
+    for (const side of ["runner", "corp"] as const) {
+      const event = getPlayerView(state, side).publicEvents.at(-1);
+      const effect = Array.isArray(event?.publicPayload.resolvedEffects)
+        ? event.publicPayload.resolvedEffects.find(
+            (candidate) =>
+              candidate &&
+              typeof candidate === "object" &&
+              (candidate as { sourceDefinitionId?: unknown }).sourceDefinitionId ===
+                BARGAIN_WITH_VIACOX,
+          )
+        : undefined;
+      expect(effect).toMatchObject({
+        kind: "gain_actions",
+        visibility: "public",
+        dieRoll: 6,
+        restrictedActionFamily: "play_or_install_card",
+      });
+      expect(JSON.stringify(event)).not.toContain(targetCardId!);
+      expect(JSON.stringify(event)).not.toContain(RUNNER_INSTALLABLE_HARDWARE);
+    }
+  });
+
   it("turn-bound extra-action grants expire if unused and consumed grants still compact", () => {
     let state = aiBoardStateForRoll(1);
     state = apply(

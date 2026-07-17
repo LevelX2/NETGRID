@@ -1,6 +1,6 @@
 # Bargain with Viacox – Aktions-Timing und Würfelwurf-Paketprozess
 
-Status: In Umsetzung (P2)
+Status: Bereit für finale Verifikation und lokale Integration
 
 ## Quelle/Vorgabe
 
@@ -158,5 +158,5 @@ complete markieren. Kein Push und kein PR.
 
 - P0: abgeschlossen – Prozessartefakt und `/Goal` erstellt; `git diff --check` sauber.
 - P1: abgeschlossen – der erste Start-of-turn nach echter Installation überspringt Viacox nicht mehr; fokussierter Engine-Test und Engine-Typecheck grün.
-- P2: aktiv.
-- Final: offen.
+- P2: abgeschlossen – Würfelwurf und Pflichtaktion sind für beide Seiten sichtbar; der Roll-6-Handkarten-Target bleibt verborgen. Fokussierte Engine-/Chronicle-Tests sowie beide Typechecks sind grün.
+- Final: aktiv.
