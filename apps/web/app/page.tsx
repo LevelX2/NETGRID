@@ -139,6 +139,7 @@ import {
   type MatchStartSeriesGames,
   type PlayMode,
 } from "./match-start";
+import { isHumanVsAiMatchMode } from "./match-deck-details";
 import {
   formatMatchTimerDuration,
   matchTimerDecisionKey,
@@ -1820,6 +1821,7 @@ export default function Page() {
   const isHumanVsHuman = playMode === "human_vs_human";
   const isHumanVsAi = playMode === "human_vs_ai";
   const isAiVsAiMatch = session?.mode === "ai_vs_ai";
+  const humanOpponentIsAi = isHumanVsAiMatchMode(session?.mode);
   const effectiveStartMatchFormat = matchFormat;
   const isAiVsAiStartSeries = gameMode === "ai_vs_ai" && effectiveStartMatchFormat === "two_game_side_swap";
   const aiTurnPresentation = effectiveAiTurnPresentation(payload);
@@ -5372,8 +5374,14 @@ export default function Page() {
                 </span>
                 {activeView.deckMetadata ? (
                   <span title={activeView.deckMetadata.own.deckName}>
-                    <strong>Deck</strong> {activeView.deckMetadata.own.deckName}{" "}
-                    · geprüft
+                    <strong>Eigenes Deck</strong>{" "}
+                    {activeView.deckMetadata.own.deckName}
+                  </span>
+                ) : null}
+                {activeView.deckMetadata && humanOpponentIsAi ? (
+                  <span title={activeView.deckMetadata.opponent.deckName}>
+                    <strong>KI-Deck</strong>{" "}
+                    {activeView.deckMetadata.opponent.deckName}
                   </span>
                 ) : null}
                 <span>
