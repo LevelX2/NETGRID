@@ -450,7 +450,7 @@ describe("benchmark report formatting", () => {
 
   it("runs and formats a small selfplay trace-mining smoke", () => {
     const result = runAiSelfplayTraceMining({
-      seeds: ["ai-v143-tuning-001"],
+      seeds: ["ai-benchmark-tuning-001"],
       runnerDeckId: "demo_runner_008",
       corpDeckId: "demo_corp_008",
       maxActions: 40,
@@ -528,7 +528,7 @@ describe("benchmark report formatting", () => {
     const runner = benchmarkDeckFromFrozenLocalSnapshot(pair.runner);
     const corp = benchmarkDeckFromFrozenLocalSnapshot(pair.corp);
     const base = runAiSelfplayTraceMining({
-      seeds: ["ai-v143-tuning-005"],
+      seeds: ["ai-benchmark-tuning-005"],
       runnerDeck: runner.deck,
       corpDeck: corp.deck,
       runnerDeckMetadata: runner.metadata,
@@ -539,7 +539,7 @@ describe("benchmark report formatting", () => {
     expect(JSON.stringify(base.summaries)).not.toContain("actionAlternatives");
 
     const withAlternatives = runAiSelfplayTraceMining({
-      seeds: ["ai-v143-tuning-005"],
+      seeds: ["ai-benchmark-tuning-005"],
       runnerDeck: runner.deck,
       corpDeck: corp.deck,
       runnerDeckMetadata: runner.metadata,
@@ -549,7 +549,7 @@ describe("benchmark report formatting", () => {
       includeActionAlternativesForFindings: true,
       maxAlternativesPerFinding: 3,
       opportunitySnapshotRequests: [
-        { seed: "ai-v143-tuning-005", actionIndices: [9, 11, 20] },
+        { seed: "ai-benchmark-tuning-005", actionIndices: [9, 11, 20] },
       ],
     });
     const entriesWithAlternatives = withAlternatives.summaries.flatMap(
@@ -575,7 +575,7 @@ describe("benchmark report formatting", () => {
   }, 90_000);
 
   it("keeps selfplay trace mining independent across deck pairs with the same seed", () => {
-    const seed = "ai-v143-tuning-001";
+    const seed = "ai-benchmark-tuning-001";
     const pairF = selfplayDeckPair(
       "demo_runner_008_snapshot_v0_8",
       "demo_corp_008_snapshot_v0_8",
@@ -637,7 +637,7 @@ describe("benchmark report formatting", () => {
     const corp = benchmarkDeckFromFrozenLocalSnapshot(pair.corp);
 
     const noActionLimit = runAiSelfplayTraceMining({
-      seeds: ["ai-v143-tuning-001"],
+      seeds: ["ai-benchmark-tuning-001"],
       runnerDeck: runner.deck,
       corpDeck: corp.deck,
       runnerDeckMetadata: runner.metadata,
@@ -1132,12 +1132,12 @@ describe("benchmark report formatting", () => {
 
   it("keeps the pair A late no-goal draw regression separate from coverage draws", () => {
     const pairANoGoalDraw: AiSimulationSummary = {
-      seed: "pair-a-ai-v143-tuning-006-late-no-goal-draw",
+      seed: "pair-a-ai-benchmark-tuning-006-late-no-goal-draw",
       winner: "action_limit_reached",
       actions: 4,
       turns: 2,
       finalAgendaPoints: { runner: 2, corp: 0 },
-      finalStateHash: "fnv1a:pair-a-ai-v143-tuning-006-late-no-goal-draw",
+      finalStateHash: "fnv1a:pair-a-ai-benchmark-tuning-006-late-no-goal-draw",
       eventLogLength: 4,
       replayOk: true,
       replayErrors: [],
@@ -1159,9 +1159,9 @@ describe("benchmark report formatting", () => {
     };
     const pairACoverageDraw: AiSimulationSummary = {
       ...pairANoGoalDraw,
-      seed: "pair-a-ai-v143-tuning-008-coverage-draw",
+      seed: "pair-a-ai-benchmark-tuning-008-coverage-draw",
       finalAgendaPoints: { runner: 5, corp: 2 },
-      finalStateHash: "fnv1a:pair-a-ai-v143-tuning-008-coverage-draw",
+      finalStateHash: "fnv1a:pair-a-ai-benchmark-tuning-008-coverage-draw",
       actionSequence: [
         selfplayAction("runner", 1, "draw_card", {
           selectedActionId: "pair-a-coverage-draw",

@@ -7,9 +7,9 @@ import { createAiSoakRunner } from "./ai-soak-runner";
 import { createDoctrineQualityBenchmarkRunner } from "./doctrine-quality-benchmark-runner";
 import { createMatchProgressionBenchmarkRunner } from "./match-progression-benchmark-runner";
 import { createMatchProgressionBenchmarkSuiteRunner } from "./match-progression-benchmark-suite-runner";
-import { createV143ExploitRegressionFixturesRunner } from "./v143-exploit-regression-fixtures";
-import { createV143ProfileRunner } from "./v143-profile-run";
-import { createV143SimulationLeagueRunner } from "./v143-simulation-league";
+import { createExploitRegressionFixturesRunner } from "./regression/exploit-regression-fixtures";
+import { createSimulationLeagueRunner } from "./simulation-league";
+import { createSimulationProfileRunner } from "./simulation-profile-run";
 
 export type AiSimulationEntrypointDependencies = {
   simulateAiGame: (config?: AiSimulationConfig) => AiSimulationSummary;
@@ -22,24 +22,24 @@ export type AiSimulationEntrypointDependencies = {
 export function createAiSimulationEntrypoints(
   dependencies: AiSimulationEntrypointDependencies,
 ) {
-  const { runV143ExploitRegressionFixtures } =
-    createV143ExploitRegressionFixturesRunner({
+  const { runExploitRegressionFixtures } =
+    createExploitRegressionFixturesRunner({
       simulateAiGame: dependencies.simulateAiGame,
       chooseRunnerAction: dependencies.chooseRunnerAction,
     });
-  const { runV143Profile } = createV143ProfileRunner({
+  const { runSimulationProfile } = createSimulationProfileRunner({
     simulateAiGame: dependencies.simulateAiGame,
-    runExploitRegressionFixtures: runV143ExploitRegressionFixtures,
+    runExploitRegressionFixtures,
   });
-  const { runV143SimulationLeague } = createV143SimulationLeagueRunner({
-    runV143Profile,
+  const { runSimulationLeague } = createSimulationLeagueRunner({
+    runSimulationProfile,
   });
   const { runDoctrineQualityBenchmark } = createDoctrineQualityBenchmarkRunner({
-    runV143Profile,
+    runSimulationProfile,
   });
   const { runMatchProgressionBenchmark } =
     createMatchProgressionBenchmarkRunner({
-      runV143Profile,
+      runSimulationProfile,
       summarizeMatchProgressionMetrics:
         dependencies.summarizeMatchProgressionMetrics,
     });
@@ -57,9 +57,7 @@ export function createAiSimulationEntrypoints(
   });
 
   return {
-    runV143ExploitRegressionFixtures,
-    runV143Profile,
-    runV143SimulationLeague,
+    runSimulationLeague,
     runDoctrineQualityBenchmark,
     runMatchProgressionBenchmark,
     runMatchProgressionBenchmarkSuite,

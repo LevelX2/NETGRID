@@ -1,6 +1,6 @@
 import type { AiDifficulty } from "@netgrid/shared";
 import soakSeedsData from "../../../../data/ai/ai-soak-seeds-0.9.json";
-import soakSeeds143Data from "../../../../data/ai/ai-soak-seeds-1.4.3.json";
+import currentBenchmarkSeedData from "../../../../data/ai/ai-soak-seeds-1.4.3.json";
 
 export const SOAK_SEEDS = soakSeedsData as {
   tuningSeeds: string[];
@@ -14,14 +14,13 @@ export const SOAK_SEEDS = soakSeedsData as {
   };
 };
 
-export const SOAK_SEEDS_143 = soakSeeds143Data as {
-  version: "1.4.3";
-  tuningSeeds: string[];
-  holdoutSeeds: string[];
-  league: {
+export const CURRENT_BENCHMARK_SEEDS = {
+  tuningSeeds: currentBenchmarkSeedData.tuningSeeds,
+  holdoutSeeds: currentBenchmarkSeedData.holdoutSeeds,
+  league: currentBenchmarkSeedData.league as {
     runnerDeckId: "demo_runner_008";
     corpDeckId: "demo_corp_008";
     agendaPointsToWin: number;
     maxActions: number;
-  };
+  },
 };

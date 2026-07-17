@@ -7,7 +7,7 @@ import { MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS } from "./benchmark-deck-slots";
 import { runMatchProgressionBenchmarkSlot } from "./benchmark-deck-slot-runner";
 import type { AiDoctrineQualityBenchmarkConfig } from "./doctrine-quality-benchmark-types";
 import type { SimulationBenchmarkProfileId } from "./simulation-types";
-import { v143BenchmarkSeeds } from "./v143-tuning-gate";
+import { benchmarkSeeds } from "./simulation-quality-gate";
 
 export type MatchProgressionBenchmarkSuiteDependencies = {
   runMatchProgressionBenchmark: (
@@ -35,7 +35,7 @@ export function createMatchProgressionBenchmarkSuiteRunner(
       baselineProfile,
       candidateProfile,
     ]) as SimulationBenchmarkProfileId[];
-    const seeds = v143BenchmarkSeeds(config);
+    const seeds = benchmarkSeeds(config);
     const slotIdFilter = new Set(config.slotIds ?? []);
     const selectedSlotDefinitions =
       slotIdFilter.size > 0

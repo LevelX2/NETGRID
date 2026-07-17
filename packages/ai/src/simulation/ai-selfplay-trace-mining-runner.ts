@@ -21,7 +21,7 @@ import {
   countPassiveActionWithScoreLineAvailable,
   countUnsafeScoreChosen,
 } from "./score-window-counts";
-import { SOAK_SEEDS_143 } from "./soak-seed-data";
+import { CURRENT_BENCHMARK_SEEDS } from "./soak-seed-data";
 
 export type AiSelfplayTraceMiningRunnerDependencies = {
   simulateAiGame: (config?: AiSimulationConfig) => AiSimulationSummary;
@@ -43,7 +43,7 @@ export function createAiSelfplayTraceMiningRunner(
     const seeds =
       config.seeds && config.seeds.length > 0
         ? config.seeds
-        : SOAK_SEEDS_143.tuningSeeds.slice(0, 5);
+        : CURRENT_BENCHMARK_SEEDS.tuningSeeds.slice(0, 5);
     const maxActions = config.maxActions ?? 100;
     const runnerControllerMode =
       config.runnerControllerMode ?? "current_candidate";
@@ -71,12 +71,14 @@ export function createAiSelfplayTraceMiningRunner(
           ? { runnerDeck: config.runnerDeck }
           : {
               runnerDeckId:
-                config.runnerDeckId ?? SOAK_SEEDS_143.league.runnerDeckId,
+                config.runnerDeckId ??
+                CURRENT_BENCHMARK_SEEDS.league.runnerDeckId,
             }),
         ...(config.corpDeck
           ? { corpDeck: config.corpDeck }
           : {
-              corpDeckId: config.corpDeckId ?? SOAK_SEEDS_143.league.corpDeckId,
+              corpDeckId:
+                config.corpDeckId ?? CURRENT_BENCHMARK_SEEDS.league.corpDeckId,
             }),
         ...(config.runnerDeckMetadata
           ? { runnerDeckMetadata: config.runnerDeckMetadata }
@@ -183,11 +185,11 @@ export function createAiSelfplayTraceMiningRunner(
         runnerDeckId:
           config.runnerDeck?.id ??
           config.runnerDeckId ??
-          SOAK_SEEDS_143.league.runnerDeckId,
+          CURRENT_BENCHMARK_SEEDS.league.runnerDeckId,
         corpDeckId:
           config.corpDeck?.id ??
           config.corpDeckId ??
-          SOAK_SEEDS_143.league.corpDeckId,
+          CURRENT_BENCHMARK_SEEDS.league.corpDeckId,
         runnerControllerMode,
         corpControllerMode,
         enabledDetectors,

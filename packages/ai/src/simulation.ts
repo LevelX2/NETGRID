@@ -37,8 +37,7 @@ export {
   runDoctrineQualityBenchmark,
   runMatchProgressionBenchmark,
   runMatchProgressionBenchmarkSuite,
-  runV143ExploitRegressionFixtures,
-  runV143SimulationLeague,
+  runSimulationLeague,
   simulateAiGame,
   simulateAiSoak,
   summarizeMatchProgressionMetrics,
@@ -115,18 +114,11 @@ export type {
   AiSelfplayTraceMiningResult,
 } from "./simulation/selfplay-trace-mining";
 export { assertAiInputIsSideSafe } from "./simulation/side-safe-input";
-export {
-  listV143BenchmarkProfiles,
-  listV143ExploitFixtures,
-} from "./simulation/v143-data";
+export { listCurrentBenchmarkProfiles } from "./simulation/benchmark-profile-data";
+export { evaluateSimulationQualityGate } from "./simulation/simulation-quality-gate";
 export type {
-  V143ExploitFixture,
-  V143ExploitRegressionResult,
-} from "./simulation/v143-fixture-types";
-export { evaluateV143TuningGate } from "./simulation/v143-tuning-gate";
-export type {
-  V143LeagueConfig,
-  V143SimulationRunResult,
-  V143SoakResult,
-  V143TuningGateResult,
-} from "./simulation/v143-tuning-gate";
+  AiSimulationLeagueConfig,
+  AiSimulationLeagueResult,
+  AiSimulationQualityGateResult,
+  AiSimulationRunResult,
+} from "./simulation/simulation-quality-gate";

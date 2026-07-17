@@ -52,6 +52,9 @@ describe("AI public export contract", () => {
       "formatMatchProgressionBenchmarkReport",
       "formatMatchProgressionBenchmarkSuiteReport",
       "runDoctrineQualityBenchmark",
+      "runSimulationLeague",
+      "listCurrentBenchmarkProfiles",
+      "evaluateSimulationQualityGate",
       "formatDoctrineQualityBenchmarkReport",
       "evaluateDoctrineQualityGate",
       "buildSemanticRuntimeWhyCoverageReportFromSimulationSummaries",
@@ -65,6 +68,10 @@ describe("AI public export contract", () => {
         "function",
       );
     }
+
+    expect(publicKeys.some((exportName) => exportName.includes("V143"))).toBe(
+      false,
+    );
   });
 
   it("keeps new play-strength diagnostics and evaluation helpers internal by default", () => {

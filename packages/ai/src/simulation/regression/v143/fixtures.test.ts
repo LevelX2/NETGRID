@@ -1,16 +1,11 @@
 import { describe, expect, it } from "vitest";
-import selfplayExploitLeagueData from "../../../../data/ai/ai-selfplay-exploit-league-2026-05-17.json";
-import { listV143BenchmarkProfiles, listV143ExploitFixtures } from "../simulation";
+import selfplayExploitLeagueData from "../../../../../../data/ai/ai-selfplay-exploit-league-2026-05-17.json";
+import { listExploitFixtures } from "./fixture-data";
 
-describe("V1.4.3 simulation fixture contracts", () => {
-  it("provides versioned benchmark profiles and exploit fixtures", () => {
-    const profiles = listV143BenchmarkProfiles();
-    const fixtures = listV143ExploitFixtures();
+describe("V1.4.3 regression fixture contracts", () => {
+  it("provides the historical exploit fixtures", () => {
+    const fixtures = listExploitFixtures();
 
-    expect(profiles.map((profile) => profile.benchmarkProfileId)).toEqual([
-      "random_legal_bot",
-      "current_candidate",
-    ]);
     expect(fixtures.map((fixture) => fixture.fixtureId)).toEqual([
       "v143-rnd-repeat-access-freshness",
       "v143-visible-etr-blocker-no-repeat-run",

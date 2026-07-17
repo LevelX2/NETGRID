@@ -1,10 +1,10 @@
 import type { AiSimulationConfig } from "./ai-simulation-config";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
 import { roundNumber as round } from "../runtime/number-rounding";
-import { SOAK_SEEDS_143 } from "./soak-seed-data";
+import { CURRENT_BENCHMARK_SEEDS } from "./soak-seed-data";
 import type { SimulationBenchmarkProfileId } from "./simulation-types";
 
-export type V143SimulationRunResult = {
+export type AiSimulationRunResult = {
   simulationId: string;
   benchmarkProfile: SimulationBenchmarkProfileId;
   games: number;
@@ -19,7 +19,7 @@ export type V143SimulationRunResult = {
   summaries: AiSimulationSummary[];
 };
 
-export type V143TuningGateResult = {
+export type AiSimulationQualityGateResult = {
   accepted: boolean;
   holdoutDelta: {
     winRate: number;
@@ -31,31 +31,34 @@ export type V143TuningGateResult = {
   reason: string;
 };
 
-export type V143SoakResult = {
-  version: "1.4.3";
-  profiles: V143SimulationRunResult[];
+export type AiSimulationLeagueResult = {
+  version: "ai-simulation-league-v1";
+  profiles: AiSimulationRunResult[];
   holdoutSeeds: string[];
   tuningSeeds: string[];
 };
 
-export type V143LeagueConfig = Partial<AiSimulationConfig> & {
+export type AiSimulationLeagueConfig = Partial<AiSimulationConfig> & {
   includeHoldout?: boolean;
   seeds?: string[];
 };
 
-export function v143BenchmarkSeeds(config: V143LeagueConfig): string[] {
+export function benchmarkSeeds(config: AiSimulationLeagueConfig): string[] {
   if (config.seeds && config.seeds.length > 0) {
     return [...config.seeds];
   }
   return config.includeHoldout === false
-    ? SOAK_SEEDS_143.tuningSeeds
-    : [...SOAK_SEEDS_143.tuningSeeds, ...SOAK_SEEDS_143.holdoutSeeds];
+    ? CURRENT_BENCHMARK_SEEDS.tuningSeeds
+    : [
+        ...CURRENT_BENCHMARK_SEEDS.tuningSeeds,
+        ...CURRENT_BENCHMARK_SEEDS.holdoutSeeds,
+      ];
 }
 
-export function evaluateV143TuningGate(
-  candidate: V143SimulationRunResult,
-  baseline: V143SimulationRunResult,
-): V143TuningGateResult {
+export function evaluateSimulationQualityGate(
+  candidate: AiSimulationRunResult,
+  baseline: AiSimulationRunResult,
+): AiSimulationQualityGateResult {
   const holdoutDelta = {
     winRate: round(
       (candidate.winRates.runner ?? 0) - (baseline.winRates.runner ?? 0),

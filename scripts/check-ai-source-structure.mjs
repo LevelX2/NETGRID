@@ -50,6 +50,16 @@ for (const file of productionFiles) {
 }
 
 const findings = [];
+for (const file of productionFiles) {
+  const relative = relativeSourcePath(file);
+  if (
+    currentSimulationHasHistoricalMarker(relative, readFileSync(file, "utf8"))
+  ) {
+    findings.push(
+      `${relative} contains a historical V143 marker outside the regression boundary`,
+    );
+  }
+}
 const valueCycles = cyclicComponents(valueGraph);
 if (valueCycles.length > 0) {
   findings.push(
@@ -296,6 +306,24 @@ function sourceLineCount(file) {
   return readFileSync(file, "utf8").split(/\r?\n/).length;
 }
 
+function currentSimulationHasHistoricalMarker(relative, source) {
+  const inCurrentSimulationSurface =
+    relative === "simulation.ts" ||
+    relative === "ai-simulation-public-entrypoints.ts" ||
+    relative.startsWith("simulation/");
+  if (!inCurrentSimulationSurface) return false;
+  if (relative.startsWith("simulation/regression/")) return false;
+  if (
+    [
+      "simulation/benchmark-profile-data.ts",
+      "simulation/soak-seed-data.ts",
+    ].includes(relative)
+  ) {
+    return false;
+  }
+  return /v143|1\.4\.3/i.test(source);
+}
+
 function runSelfTest() {
   const graph = new Map([
     ["a", new Set(["b"])],
@@ -307,6 +335,18 @@ function runSelfTest() {
     throw new Error(
       `source structure self-test failed: ${JSON.stringify(cycles)}`,
     );
+  }
+  if (
+    !currentSimulationHasHistoricalMarker(
+      "simulation/simulation-league.ts",
+      'export const version = "V143";',
+    ) ||
+    currentSimulationHasHistoricalMarker(
+      "simulation/regression/v143/fixture-data.ts",
+      'export const version = "1.4.3";',
+    )
+  ) {
+    throw new Error("source structure self-test failed: V143 boundary");
   }
   console.log("AI_SOURCE_STRUCTURE_SELFTEST OK");
 }

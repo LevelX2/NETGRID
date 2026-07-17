@@ -4,9 +4,9 @@ import type {
 } from "./doctrine-quality-tags";
 import type { SimulationBenchmarkProfileId } from "./simulation-types";
 import type {
-  V143LeagueConfig,
-  V143SimulationRunResult,
-} from "./v143-tuning-gate";
+  AiSimulationLeagueConfig,
+  AiSimulationRunResult,
+} from "./simulation-quality-gate";
 
 export type AiDoctrineQualityBenchmarkResult = {
   version: "ai-deck-doctrine-quality-v1";
@@ -22,11 +22,11 @@ export type AiDoctrineQualityBenchmarkResult = {
     timeoutRateDelta: number;
     fallbackRateDelta: number;
   };
-  baselineRun: V143SimulationRunResult;
-  candidateRun: V143SimulationRunResult;
+  baselineRun: AiSimulationRunResult;
+  candidateRun: AiSimulationRunResult;
 };
 
-export type AiDoctrineQualityBenchmarkConfig = V143LeagueConfig & {
+export type AiDoctrineQualityBenchmarkConfig = AiSimulationLeagueConfig & {
   baselineProfile?: SimulationBenchmarkProfileId;
   candidateProfile?: SimulationBenchmarkProfileId;
   comparisonProfiles?: SimulationBenchmarkProfileId[];

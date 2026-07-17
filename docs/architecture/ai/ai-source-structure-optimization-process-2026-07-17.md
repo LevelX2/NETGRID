@@ -1,6 +1,6 @@
 # AI Source Structure Optimization Process 2026-07
 
-Status: `package_done:AISSO-6`
+Status: `package_done:AISSO-7`
 
 ## Quelle und Vorgabe
 
@@ -386,6 +386,33 @@ Ergebnis:
   historische Controller-/Frameworkversion; echte Fixtures bleiben
   reproduzierbar.
 - Commit: `refactor(ai): neutralize current simulation contracts`
+
+Ergebnis:
+
+- League-, Profil-Run-, Quality-Gate-, Seed- und Benchmarkprofil-Verträge
+  tragen neutrale Current-State-Namen. Die League meldet das neutrale Schema
+  `ai-simulation-league-v1`; auch Simulation-IDs enthalten keine historische
+  Frameworkversion mehr.
+- Die Simulationsfassade exportiert `runSimulationLeague`,
+  `listCurrentBenchmarkProfiles`, `evaluateSimulationQualityGate` und die
+  zugehörigen neutralen Typen. V143-Runner, -Listen und -Typen sind nicht mehr
+  Teil der generischen Public API.
+- Die echten V1.4.3-Exploit-Fixtures, ihre Daten, Typen und Tests liegen
+  geschlossen unter `simulation/regression/v143/`. Ein neutral benannter
+  Regression-Adapter hält den Current-State-Composer von historischen Pfaden
+  und Vertragstypen frei.
+- Das Source-Structure-Gate verbietet V143-/1.4.3-Marker in der aktuellen
+  Simulationsoberfläche. Nur die Regressionsebene und die zwei eng begrenzten
+  Adapter auf die weiterhin versionierten JSON-Quellen sind ausgenommen; der
+  Selbsttest deckt die Grenze ab.
+- Der bereits entfernte Simulation-Type-Zyklus bleibt entfernt. Der gesamte
+  Laufzeitimportgraph bleibt zyklenfrei; nur die separat geratchete
+  Action-Semantik-Type-SCC ist noch vorhanden.
+- Checks: sechs Public-/Contract-/Fixture-/Harness-/Selfplay-Suiten und die
+  vollständige Benchmark-Report-Suite mit 38/38 Tests grün, einschließlich
+  eines deterministischen neutralen League-Smokes; AI-Typecheck,
+  Structure-Gate und Selbsttest, Package-Boundaries sowie `git diff --check`
+  grün.
 
 ### AISSO-8 – Restprüfung, Dokumentation und vollständiges Final Gate
 

@@ -1,4 +1,4 @@
-export type V143ExploitFixture = {
+export type ExploitFixture = {
   fixtureId: string;
   title: string;
   category: string;
@@ -7,7 +7,7 @@ export type V143ExploitFixture = {
   hiddenInfoSafe: boolean;
 };
 
-export type V143ExploitRegressionResult = {
+export type ExploitRegressionResult = {
   fixtureId: string;
   passed: boolean;
   message: string;

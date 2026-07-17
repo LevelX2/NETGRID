@@ -10,17 +10,17 @@ import {
 } from "./simulation-metric-aggregation";
 import type { SimulationBenchmarkProfile } from "./simulation-types";
 import {
-  type V143SimulationRunResult,
-  v143BenchmarkSeeds,
-} from "./v143-tuning-gate";
-import { BENCHMARK_PROFILES_143 } from "./v143-data";
+  type AiSimulationRunResult,
+  benchmarkSeeds,
+} from "./simulation-quality-gate";
+import { CURRENT_BENCHMARK_PROFILES } from "./benchmark-profile-data";
 
 export type DoctrineQualityBenchmarkDependencies = {
-  runV143Profile: (
+  runSimulationProfile: (
     profile: SimulationBenchmarkProfile,
     seeds: string[],
     config: AiDoctrineQualityBenchmarkConfig,
-  ) => V143SimulationRunResult;
+  ) => AiSimulationRunResult;
 };
 
 export function createDoctrineQualityBenchmarkRunner(
@@ -37,19 +37,19 @@ export function createDoctrineQualityBenchmarkRunner(
     const candidateProfileId = config.candidateProfile ?? "current_candidate";
     const baselineProfile = benchmarkProfileById(
       baselineProfileId,
-      BENCHMARK_PROFILES_143.profiles,
+      CURRENT_BENCHMARK_PROFILES.profiles,
     );
     const candidateProfile = benchmarkProfileById(
       candidateProfileId,
-      BENCHMARK_PROFILES_143.profiles,
+      CURRENT_BENCHMARK_PROFILES.profiles,
     );
-    const seeds = v143BenchmarkSeeds(config);
-    const baselineRun = dependencies.runV143Profile(
+    const seeds = benchmarkSeeds(config);
+    const baselineRun = dependencies.runSimulationProfile(
       baselineProfile,
       seeds,
       config,
     );
-    const candidateRun = dependencies.runV143Profile(
+    const candidateRun = dependencies.runSimulationProfile(
       candidateProfile,
       seeds,
       config,

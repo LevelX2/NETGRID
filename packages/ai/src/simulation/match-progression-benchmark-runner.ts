@@ -11,20 +11,20 @@ import type {
   SimulationBenchmarkProfileId,
 } from "./simulation-types";
 import {
-  type V143SimulationRunResult,
-  v143BenchmarkSeeds,
-} from "./v143-tuning-gate";
-import { BENCHMARK_PROFILES_143 } from "./v143-data";
-import { SOAK_SEEDS_143 } from "./soak-seed-data";
+  type AiSimulationRunResult,
+  benchmarkSeeds,
+} from "./simulation-quality-gate";
+import { CURRENT_BENCHMARK_PROFILES } from "./benchmark-profile-data";
+import { CURRENT_BENCHMARK_SEEDS } from "./soak-seed-data";
 
 export type MatchProgressionBenchmarkDependencies = {
-  runV143Profile: (
+  runSimulationProfile: (
     profile: SimulationBenchmarkProfile,
     seeds: string[],
     config: AiDoctrineQualityBenchmarkConfig,
-  ) => V143SimulationRunResult;
+  ) => AiSimulationRunResult;
   summarizeMatchProgressionMetrics: (
-    summaries: V143SimulationRunResult["summaries"],
+    summaries: AiSimulationRunResult["summaries"],
   ) => AiMatchProgressionMetrics;
 };
 
@@ -42,19 +42,19 @@ export function createMatchProgressionBenchmarkRunner(
     const candidateProfileId = config.candidateProfile ?? "current_candidate";
     const baselineProfile = benchmarkProfileById(
       baselineProfileId,
-      BENCHMARK_PROFILES_143.profiles,
+      CURRENT_BENCHMARK_PROFILES.profiles,
     );
     const candidateProfile = benchmarkProfileById(
       candidateProfileId,
-      BENCHMARK_PROFILES_143.profiles,
+      CURRENT_BENCHMARK_PROFILES.profiles,
     );
-    const seeds = v143BenchmarkSeeds(config);
-    const baselineRun = dependencies.runV143Profile(
+    const seeds = benchmarkSeeds(config);
+    const baselineRun = dependencies.runSimulationProfile(
       baselineProfile,
       seeds,
       config,
     );
-    const candidateRun = dependencies.runV143Profile(
+    const candidateRun = dependencies.runSimulationProfile(
       candidateProfile,
       seeds,
       config,
@@ -81,8 +81,11 @@ export function createMatchProgressionBenchmarkRunner(
       return {
         profile: profileId,
         metrics: dependencies.summarizeMatchProgressionMetrics(
-          dependencies.runV143Profile(
-            benchmarkProfileById(profileId, BENCHMARK_PROFILES_143.profiles),
+          dependencies.runSimulationProfile(
+            benchmarkProfileById(
+              profileId,
+              CURRENT_BENCHMARK_PROFILES.profiles,
+            ),
             seeds,
             config,
           ).summaries,
@@ -97,12 +100,13 @@ export function createMatchProgressionBenchmarkRunner(
       runnerDeckId:
         config.runnerDeck?.id ??
         config.runnerDeckId ??
-        SOAK_SEEDS_143.league.runnerDeckId,
+        CURRENT_BENCHMARK_SEEDS.league.runnerDeckId,
       corpDeckId:
         config.corpDeck?.id ??
         config.corpDeckId ??
-        SOAK_SEEDS_143.league.corpDeckId,
-      maxActions: config.maxActions ?? SOAK_SEEDS_143.league.maxActions,
+        CURRENT_BENCHMARK_SEEDS.league.corpDeckId,
+      maxActions:
+        config.maxActions ?? CURRENT_BENCHMARK_SEEDS.league.maxActions,
       diagnosticOnly: true,
       baseline,
       candidate,

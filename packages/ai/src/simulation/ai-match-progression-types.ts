@@ -4,7 +4,7 @@ import type {
   AiBenchmarkDeckSlotType,
 } from "./benchmark-deck-types";
 import type { SimulationBenchmarkProfileId } from "./simulation-types";
-import type { V143SimulationRunResult } from "./v143-tuning-gate";
+import type { AiSimulationRunResult } from "./simulation-quality-gate";
 
 export type AiMatchProgressionMetrics = {
   games: number;
@@ -1501,6 +1501,6 @@ export type AiMatchProgressionBenchmarkResult = {
   candidate: AiMatchProgressionMetrics;
   delta: AiMatchProgressionMetrics;
   profileComparisons: AiMatchProgressionProfileComparison[];
-  baselineRun: V143SimulationRunResult;
-  candidateRun: V143SimulationRunResult;
+  baselineRun: AiSimulationRunResult;
+  candidateRun: AiSimulationRunResult;
 };

@@ -6,48 +6,50 @@ import {
 } from "./simulation-config-helpers";
 import type { SimulationBenchmarkProfile } from "./simulation-types";
 import type {
-  V143LeagueConfig,
-  V143SimulationRunResult,
-} from "./v143-tuning-gate";
-import { SOAK_SEEDS_143 } from "./soak-seed-data";
-import type { V143ExploitRegressionResult } from "./v143-fixture-types";
+  AiSimulationLeagueConfig,
+  AiSimulationRunResult,
+} from "./simulation-quality-gate";
+import { CURRENT_BENCHMARK_SEEDS } from "./soak-seed-data";
+import type { ExploitRegressionResult } from "./regression/exploit-regression-fixtures";
 import { fnv1a } from "../runtime/stable-hash";
 import { roundNumber as round } from "../runtime/number-rounding";
 import { sortedUnique } from "../runtime/collection";
 
-export type V143ProfileRunDependencies = {
+export type SimulationProfileRunDependencies = {
   simulateAiGame: (config?: AiSimulationConfig) => AiSimulationSummary;
   runExploitRegressionFixtures: (
     config?: Partial<AiSimulationConfig>,
-  ) => V143ExploitRegressionResult[];
+  ) => ExploitRegressionResult[];
 };
 
-export function createV143ProfileRunner(
-  dependencies: V143ProfileRunDependencies,
+export function createSimulationProfileRunner(
+  dependencies: SimulationProfileRunDependencies,
 ): {
-  runV143Profile: (
+  runSimulationProfile: (
     profile: SimulationBenchmarkProfile,
     seeds: string[],
-    config: V143LeagueConfig,
-  ) => V143SimulationRunResult;
+    config: AiSimulationLeagueConfig,
+  ) => AiSimulationRunResult;
 } {
-  function runV143Profile(
+  function runSimulationProfile(
     profile: SimulationBenchmarkProfile,
     seeds: string[],
-    config: V143LeagueConfig,
-  ): V143SimulationRunResult {
+    config: AiSimulationLeagueConfig,
+  ): AiSimulationRunResult {
     const runnerProfileId = profileIdForMode("runner", profile.runnerMode);
     const corpProfileId = profileIdForMode("corp", profile.corpMode);
     const summaries = seeds.map((seed) =>
       dependencies.simulateAiGame({
         seed,
         ...simulationDeckConfig(config, {
-          runnerDeckId: SOAK_SEEDS_143.league.runnerDeckId,
-          corpDeckId: SOAK_SEEDS_143.league.corpDeckId,
+          runnerDeckId: CURRENT_BENCHMARK_SEEDS.league.runnerDeckId,
+          corpDeckId: CURRENT_BENCHMARK_SEEDS.league.corpDeckId,
         }),
         agendaPointsToWin:
-          config.agendaPointsToWin ?? SOAK_SEEDS_143.league.agendaPointsToWin,
-        maxActions: config.maxActions ?? SOAK_SEEDS_143.league.maxActions,
+          config.agendaPointsToWin ??
+          CURRENT_BENCHMARK_SEEDS.league.agendaPointsToWin,
+        maxActions:
+          config.maxActions ?? CURRENT_BENCHMARK_SEEDS.league.maxActions,
         runnerControllerMode: profile.runnerMode,
         corpControllerMode: profile.corpMode,
         ...(runnerProfileId ? { runnerProfileId } : {}),
@@ -85,7 +87,7 @@ export function createV143ProfileRunner(
             .map((result) => result.fixtureId)
         : [];
     return {
-      simulationId: `v143:${profile.benchmarkProfileId}:${fnv1a(seeds.join("|"))}`,
+      simulationId: `benchmark:${profile.benchmarkProfileId}:${fnv1a(seeds.join("|"))}`,
       benchmarkProfile: profile.benchmarkProfileId,
       games: summaries.length,
       illegalActions: summaries.reduce(
@@ -119,5 +121,5 @@ export function createV143ProfileRunner(
     };
   }
 
-  return { runV143Profile };
+  return { runSimulationProfile };
 }
