@@ -2,7 +2,7 @@
 
 ## Status
 
-Bereit zur lokalen Main-Integration.
+Lokal nach `main` integriert.
 
 ## Anlass und Scope
 

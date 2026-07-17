@@ -2,7 +2,7 @@
 
 ## Status
 
-Bereit zur lokalen Main-Integration.
+Lokal nach `main` integriert.
 
 ## Quelle und Ziel
 
@@ -90,7 +90,7 @@ Deck-Snapshot, Hints und LegalActions.
 - Die Regression verlangt Boostergang als Search-Tool und schließt Schematics
   explizit aus.
 
-### P3 abgeschlossen, Merge ausstehend
+### P3 abgeschlossen und lokal integriert
 
 - Match-Checkpoint, Deck-Audit, 25 fokussierte Tests, AI-Typecheck und
   `check:ai` sind grün.
