@@ -40,6 +40,7 @@ const INSTALLABLE_CORP_ASSET = "onr_v1_309_bbs-whispering-campaign";
 const RUNNER_EVENT = "onr_v1_077_anonymous-tip";
 const RUNNER_INSTALLABLE_HARDWARE = "onr_v1_144_tycho-mem-chip";
 const CORP_OPERATION = "onr_v1_290_efficiency-experts";
+const WALL_OF_STATIC = "onr_v1_279_wall-of-static";
 
 function baseState(seed: string): GameState {
   const state = toRunnerTurn(
@@ -316,15 +317,30 @@ function aiBoardStateForRoll(roll: number): GameState {
 function viacoxStateForRoll(
   roll: number,
   gripDefinitionId = RUNNER_INSTALLABLE_HARDWARE,
+  remoteIds: readonly Exclude<ServerId, "new_remote">[] = ["remote_1"],
 ): GameState {
   for (let index = 0; index < 500; index += 1) {
     const state = baseState(`pro017-viacox-${roll}-${index}`);
     clearRunnerGrip(state);
     installRunnerCard(state, BARGAIN_WITH_VIACOX, `viacox_${index}`, "resources");
     addRunnerGrip(state, gripDefinitionId, `runner_grip_${index}`);
-    addRemote(state, "remote_1");
+    for (const remoteId of remoteIds) {
+      addRemote(state, remoteId);
+      addRezzedCorpIceForTest(
+        state,
+        WALL_OF_STATIC,
+        remoteId,
+        `viacox_${index}_${remoteId}`,
+      );
+    }
     const next = nextRunnerActionPhase(state);
-    if (next.actionEconomy?.grants?.[0]?.dieRoll === roll) return next;
+    const randomRecord = next.randomDrawRecords.find((record) =>
+      record.purpose.includes("viacox"),
+    );
+    const rolled = randomRecord
+      ? Math.floor(randomRecord.value * 6) + 1
+      : undefined;
+    if (rolled === roll) return next;
   }
   throw new Error(`No Bargain with Viacox seed for roll ${roll}`);
 }
@@ -678,8 +694,10 @@ describe("Proteus PRO017 action economy and debt suite", () => {
   });
 
   it("Bargain with Viacox roll 5 lets the Runner choose among all subsidiary data forts", () => {
-    const state = viacoxStateForRoll(5);
-    addRemote(state, "remote_2");
+    const state = viacoxStateForRoll(5, RUNNER_INSTALLABLE_HARDWARE, [
+      "remote_1",
+      "remote_2",
+    ]);
 
     const actions = getLegalActions(state, "runner").filter(
       (action) => action.type === "start_run",
@@ -694,6 +712,35 @@ describe("Proteus PRO017 action economy and debt suite", () => {
       expect(after.run?.attackedServerId).toBe(action.payload?.serverId);
       expectReplayStable(before, after);
     }
+  });
+
+  it("Bargain with Viacox roll 5 remains impossible without a subsidiary data fort", () => {
+    const state = viacoxStateForRoll(5, RUNNER_INSTALLABLE_HARDWARE, []);
+
+    expect(state.actionEconomy?.grants).toBeUndefined();
+    expect(state.runner.clicks).toBe(4);
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) => action.type === "start_run",
+      ),
+    ).toBe(true);
+  });
+
+  it.each([
+    [3, "rd"],
+    [4, "hq"],
+  ])("Bargain with Viacox roll %i keeps its fixed central target", (roll, serverId) => {
+    const state = viacoxStateForRoll(roll, RUNNER_INSTALLABLE_HARDWARE, [
+      "remote_1",
+      "remote_2",
+    ]);
+
+    const actions = getLegalActions(state, "runner").filter(
+      (action) => action.type === "start_run",
+    );
+    expect(actions.map((action) => action.payload?.serverId)).toEqual([
+      serverId,
+    ]);
   });
 
   it("Bargain with Viacox grants the forced fifth action on the first Runner turn after a real installation", () => {

@@ -6649,7 +6649,7 @@ function forcedRandomActionChronicleText(
     return { title: "eine Karte ziehen", chip: "Karte ziehen" };
   if (restriction === "gain_credit")
     return { title: "1 Credit nehmen", chip: "1 Credit" };
-  if (restriction === "start_run") {
+  if (restriction === "start_run" || restriction === "start_run_remote") {
     const server = displayServerLabel(effect.serverLabel ?? effect.serverId);
     return {
       title: `einen Run auf ${server ?? "eine Tochter-Datenfestung"} starten`,

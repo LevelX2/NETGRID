@@ -63,7 +63,10 @@ export type RunnerInstallScoreDependencies = {
 export function runnerInstallScoreComponents(
   input: AiDecisionInput,
   action: LegalAction,
-  context: { loanInstallAction: boolean },
+  context: {
+    loanInstallAction: boolean;
+    semanticRiskKinds?: readonly string[];
+  },
   dependencies: RunnerInstallScoreDependencies,
 ): AiDecisionScoreComponent[] {
   if (action.type !== "install_card") return [];
@@ -155,6 +158,17 @@ export function runnerInstallScoreComponents(
       label: "Bad-Publicity-/Trace-Tech",
       value: 520,
       reason: "bad_publicity_or_trace",
+    });
+  }
+  if (
+    context.semanticRiskKinds?.includes("mandatory_action") &&
+    context.semanticRiskKinds.includes("random_outcome")
+  ) {
+    components.push({
+      key: "runner_install_mandatory_random_action_risk",
+      label: "Zufällige Pflichtaktion",
+      value: -500,
+      reason: "mandatory_action|random_outcome",
     });
   }
   const sacrificeAssessment =

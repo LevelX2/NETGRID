@@ -343,3 +343,38 @@ Damit sind die fünf KI-Verhaltensänderungen ausschließlich durch
 `behavior_regression` autorisiert; Engine-, DTO- und Hint-Änderungen besitzen
 je einen eigenen roten Vertrag. Die Erwartungen werden ab diesem Commit nicht
 abgeschwächt.
+
+## P5-Verifikation: Viacox bis zum produktiven Consumer
+
+Die Korrektur bestätigt zwei getrennte Ursachen. Erstens behandelte die
+Source-Role-Erkennung das in den Rohmechaniken vorkommende Teilresultat
+`draw_card` als verlässliche Draw-/Breaker-Setup-Antwort, obwohl der aktive
+Hint bereits strukturierte, zufällige Pflichtwirkungen besitzt. Strukturierte
+Hints sind nun für diese Klassifikation autoritativ. Zweitens fehlte den
+`mandatory_action`-/`random_outcome`-RiskTags der Pfad in den
+Installationsscore und die Plan-Arbitration.
+
+Nach der Korrektur fällt D148 von 1577 auf 177 Rohscore und der bereits
+installierte Broker gewinnt mit 1312. D58 bleibt trotz derselben
+Hint-Korrektur als positive Kontrollprobe bei Viacox: Dort existiert noch kein
+Bankzug, der den Handkartenplan produktiv überstimmt. Die Entscheidung wird
+damit nicht kartenspezifisch verboten, sondern kontextabhängig bewertet.
+
+Wurf 5 verwendet nun die eingeschränkte Aktionsfamilie `start_run_remote`.
+Alle vorhandenen Remote-`start_run`-LegalActions bleiben auswählbar und werden
+von `applyAction` erneut validiert. Tests decken zwei, einen und keinen Remote,
+die festen Zentralziele von Wurf 3/4, Replay/StateHash sowie den Chronicle-
+Konsumenten ab.
+
+Verifizierte Consumer-Kette:
+
+- aktiver und kompilierter Hint: Risiko-Tags vorhanden, kein
+  `search/setup.draw`;
+- Inspector: `risk.mandatory_action` und `risk.random_action`, kein
+  `setup.search`;
+- Action-Semantik: beide Risikoobjekte werden auf die Installationsaktion
+  projiziert;
+- Runtime-Score/Arbitration: negative Pflichtzufalls-Komponente und enger
+  Yield zu einem materiell stärkeren Bankzug;
+- Decision-Checkpoints: D37, D130, D164, D176, D148 und D58 sowie beide
+  synthetischen Gegenproben grün.

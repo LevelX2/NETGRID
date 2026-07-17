@@ -83,6 +83,10 @@ export function createSemanticRuntimeActionExclusionComposition(
           ? (dependencies.runtimeDefinition(definitionId) ??
             dependencies.demoDefinition(definitionId))
           : undefined,
+      hintEffectsForCard: (definitionId) =>
+        definitionId
+          ? dependencies.hintForDefinitionId(definitionId)?.effects
+          : undefined,
     });
 
   const {

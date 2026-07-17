@@ -61,6 +61,31 @@ describe("runnerSourceCardAnswerRole", () => {
     expect(runnerSourceCardAnswerRole(input(), textNoise, dependencies()))
       .toBeUndefined();
   });
+
+  it("treats structured hints as authoritative over incidental raw mechanics", () => {
+    const randomBranch = action({
+      payload: { sourceDefinitionId: "random-branch-source" },
+    });
+    const structuredDraw = action({
+      payload: { sourceDefinitionId: "structured-draw-source" },
+    });
+    const base = dependencies();
+    const authoritative = {
+      ...base,
+      sourceDefinition: () => ({ mechanics: ["draw_card"] }),
+      hintEffectsForCard: (definitionId: string | undefined) =>
+        definitionId === "structured-draw-source"
+          ? [{ kind: "draw" }]
+          : [{ kind: "delayed_penalty", target: "risk.random_action" }],
+    };
+
+    expect(
+      runnerSourceCardAnswerRole(input(), randomBranch, authoritative),
+    ).toBeUndefined();
+    expect(
+      runnerSourceCardAnswerRole(input(), structuredDraw, authoritative),
+    ).toBe("draw");
+  });
 });
 
 function dependencies() {

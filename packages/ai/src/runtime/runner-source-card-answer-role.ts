@@ -30,6 +30,9 @@ export type RunnerSourceCardAnswerRoleDependencies = {
   sourceDefinition: (
     definitionId: string | undefined,
   ) => RunnerSourceDefinitionMetadata | undefined;
+  hintEffectsForCard?: (
+    definitionId: string | undefined,
+  ) => readonly unknown[] | undefined;
 };
 
 const SOURCE_SEARCH_TOKENS = [
@@ -53,8 +56,21 @@ export function runnerSourceCardAnswerRole(
   const definitionDisplay = dependencies.sourceDefinition(sourceDefinitionId);
   const mechanics = definitionDisplay?.mechanics ?? [];
   if (rolesMatch(roles, ["search", "tutor"])) return "search";
-  if (rolesMatch(mechanics, ["search", "tutor"])) return "search";
   if (rolesMatch(roles, ["draw"])) return "draw";
+  const hintEffects = dependencies.hintEffectsForCard?.(sourceDefinitionId);
+  if (hintEffects?.some((effect) => hintEffectKind(effect) === "search"))
+    return "search";
+  if (
+    hintEffects?.some((effect) =>
+      ["draw", "shuffle_draw"].includes(hintEffectKind(effect) ?? ""),
+    )
+  )
+    return "draw";
+  // A present structured hint is authoritative. Raw mechanics and rules text
+  // can mention one branch of a random effect without making the card a
+  // reliable search or draw answer (for example Bargain with Viacox).
+  if (hintEffects !== undefined) return undefined;
+  if (rolesMatch(mechanics, ["search", "tutor"])) return "search";
   if (rolesMatch(mechanics, ["draw"])) return "draw";
   const tokens = sourceAnswerTokens([
     sourceCard?.title,
@@ -71,6 +87,12 @@ export function runnerSourceCardAnswerRole(
   }
   if (sourceAnswerTokensIncludeAny(tokens, ["draw", "draw_card"])) return "draw";
   return undefined;
+}
+
+function hintEffectKind(effect: unknown): string | undefined {
+  if (!effect || typeof effect !== "object") return undefined;
+  const kind = (effect as Record<string, unknown>).kind;
+  return typeof kind === "string" ? kind : undefined;
 }
 
 function sourceAnswerTokens(values: readonly (string | undefined)[]): string[] {

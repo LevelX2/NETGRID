@@ -85,6 +85,31 @@ describe("runnerInstallScoreComponents", () => {
     );
   });
 
+  it("prices a structured mandatory random-action risk on installation", () => {
+    const components = runnerInstallScoreComponents(
+      runnerInputWithKnownWallNeed(
+        visibleCard("random-resource", "runner", "resource"),
+      ),
+      {
+        actionId: "install-random-resource",
+        side: "runner",
+        type: "install_card",
+      } as LegalAction,
+      {
+        loanInstallAction: false,
+        semanticRiskKinds: ["mandatory_action", "random_outcome"],
+      },
+      dependencies(["resource"]),
+    );
+
+    expect(components).toContainEqual({
+      key: "runner_install_mandatory_random_action_risk",
+      label: "Zufällige Pflichtaktion",
+      value: -500,
+      reason: "mandatory_action|random_outcome",
+    });
+  });
+
   it("prefers a central ICE-tax target over Archives", () => {
     const input = runnerInputWithKnownWallNeed(
       visibleCard("rnz", "runner", "resource"),

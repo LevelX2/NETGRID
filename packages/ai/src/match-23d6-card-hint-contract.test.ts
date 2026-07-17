@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import activeHints from "../../../data/ai/ai-card-hints-active.json";
 import compiledHints from "../../../data/ai/ai-card-hints-compiled.json";
 import inspectorIndex from "../../../data/ai/ai-hint-inspector-index.json";
+import { buildActionCardSemanticProfilesByDefinitionId } from "./actions/action-card-semantic-profiles";
 
 const VIACOX = "onr_proteus_131_bargain-with-viacox";
 const SKULLCAP = "onr_proteus_096_skullcap";
@@ -44,6 +45,19 @@ describe("match 23D6 card-hint contract", () => {
       expect.arrayContaining(["risk.mandatory_action", "risk.random_action"]),
     );
     expect(viacox?.derivedFunctionSignals).not.toContain("setup.search");
+  });
+
+  it("projects Viacox risk tags into the action-semantic consumer", () => {
+    const profile =
+      buildActionCardSemanticProfilesByDefinitionId()[VIACOX];
+
+    expect(profile?.risks).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "mandatory_action" }),
+        expect.objectContaining({ kind: "random_outcome" }),
+      ]),
+    );
+    expect(profile?.tacticSignals).not.toContain("setup.search");
   });
 
   it("normalizes Skullcap's typed damage prevention to one compiled generic effect", () => {

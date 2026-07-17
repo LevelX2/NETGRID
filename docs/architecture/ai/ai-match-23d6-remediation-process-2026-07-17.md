@@ -1,6 +1,6 @@
 # Match 23D6: Runner-Run-, Breaker-, Broker- und Hint-Remediation
 
-Status: P5 aktiv
+Status: P6 aktiv
 
 ## Quelle und Zielprüfung
 
@@ -250,4 +250,15 @@ den finalen Merge.
   Lücke einen Interrupt. D130, D164 und D176 sowie Liquid-Funding- und
   No-Coverage-Gegenproben sind grün; Bank-, Search-, PlanRanking- und
   Typecheck-Verträge bestehen.
-- P5 aktiv: Viacox Engine, Hints und Installationsrisiko.
+- P5 abgeschlossen: Die Engine führt Wurf 5 als eingeschränkte
+  `start_run_remote`-Aktionsfamilie und bietet damit alle vorhandenen Remotes
+  an; ohne Remote entsteht keine Pflichtaktion, Wurf 3/4 bleibt fest auf
+  R&D/HQ. Chronicle, `applyAction`, Replay und StateHash sind mitgeprüft.
+  Viacox besitzt keine falsche Search-Semantik mehr, publiziert
+  `mandatory_action` und `random_outcome` bis in Inspector und
+  Action-Semantik und erhält eine negative Installationskomponente. Ein
+  deutlich stärkerer Broker-Bankzug darf diesen risikobehafteten
+  Handkartenplan überstimmen. D148 ist grün, D58 bleibt als sichere
+  Installationsgegenprobe grün; 76 angrenzende AI-Verträge und 21
+  Engine-Verträge bestehen.
+- P6 aktiv: Skullcap-Normalisierung und erneuter deckweiter Consumer-Audit.

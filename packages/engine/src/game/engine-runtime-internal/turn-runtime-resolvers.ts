@@ -2807,11 +2807,11 @@ function runnerForcedActionGrantForRoll(
   if (dieRoll === 3) return { restriction: "start_run", targetServerId: "rd" };
   if (dieRoll === 4) return { restriction: "start_run", targetServerId: "hq" };
   if (dieRoll === 5) {
-    const remote = state.corp.servers
-      .filter((server) => server.kind === "remote")
-      .sort((a, b) => a.id.localeCompare(b.id))[0];
-    if (!remote) return undefined;
-    return { restriction: "start_run", targetServerId: remote.id };
+    const hasRemote = state.corp.servers.some(
+      (server) => server.kind === "remote",
+    );
+    if (!hasRemote) return undefined;
+    return { restriction: "start_run_remote" };
   }
   const target = randomRunnerGripCardId(state, "runner_forced_action.random_grip");
   if (!target) return undefined;

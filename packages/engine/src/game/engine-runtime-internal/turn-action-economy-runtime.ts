@@ -200,6 +200,13 @@ function actionMatchesRestrictedGrant(
       !grant.targetServerId || legalAction.payload?.serverId === grant.targetServerId
     );
   }
+  if (grant.restriction === "start_run_remote") {
+    return (
+      legalAction.type === "start_run" &&
+      typeof legalAction.payload?.serverId === "string" &&
+      legalAction.payload.serverId.startsWith("remote_")
+    );
+  }
   if (grant.restriction === "play_or_install_card") {
     const target = grant.targetCardInstanceId;
     if (!target || legalAction.payload?.cardId !== target) return false;

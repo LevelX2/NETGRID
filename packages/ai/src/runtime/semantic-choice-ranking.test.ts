@@ -494,6 +494,43 @@ describe("tacticalPlanMappedChoice Runner overrides", () => {
     );
   });
 
+  it("yields a mandatory random-action install to a materially stronger bank load", () => {
+    const install = legalAction("install-random-resource", "install_card");
+    const bank = legalAction("load-bank", "activated_card_ability");
+    const mappedInstall = choice(install, 177, [], {
+      key: "runner_persistent_install_fit",
+      value: 218,
+      reason: "delta:new_coverage|duplicate:useful_backup|fit:870",
+    });
+    mappedInstall.scoreBreakdown.push({
+      key: "runner_install_mandatory_random_action_risk",
+      label: "Zufällige Pflichtaktion",
+      value: -500,
+      reason: "mandatory_action|random_outcome",
+    });
+    const bankChoice = choice(
+      bank,
+      1312,
+      scoreComponentEvidence("runner_bank_investment_commitment"),
+      {
+        key: "runner_bank_investment_commitment",
+        value: 1250,
+        reason: "bankCommitmentStatus:build_first_load",
+      },
+    );
+
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [bankChoice, mappedInstall],
+      bestHandCardMapping([install]),
+      bankChoice,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("load-bank");
+    expect(result.overrideReason).toBe("deferred_development_mapping_yield");
+  });
+
   it("lets a first bank load interrupt funding that cannot convert this turn", () => {
     const gain = legalAction("gain", "gain_credit");
     const bank = legalAction("load-bank", "activated_card_ability");

@@ -168,11 +168,14 @@ export function tacticalPlanMarginalDevelopmentInstallShouldYield(
   }
   return mappedChoice.scoreBreakdown.some(
     (component) =>
-      component.key === "runner_persistent_install_fit" &&
-      component.value <= (bankEconomyOverride ? 150 : 100) &&
-      (bankEconomyOverride ||
-        immediateHandPlayOverride ||
-        (component.reason ?? "").includes("delta:cumulative_capacity")),
+      (bankEconomyOverride &&
+        component.key === "runner_install_mandatory_random_action_risk" &&
+        component.value < 0) ||
+      (component.key === "runner_persistent_install_fit" &&
+        component.value <= (bankEconomyOverride ? 150 : 100) &&
+        (bankEconomyOverride ||
+          immediateHandPlayOverride ||
+          (component.reason ?? "").includes("delta:cumulative_capacity"))),
   );
 }
 
