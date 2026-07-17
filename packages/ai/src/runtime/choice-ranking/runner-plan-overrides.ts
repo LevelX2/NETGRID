@@ -99,6 +99,42 @@ export function tacticalPlanNoNeedSearchShouldYield(
   );
 }
 
+export function tacticalPlanUnconvertibleFundingShouldYieldToBank(
+  mapping: PlanStepMappingResult,
+  mappedChoice: SemanticRuntimeChoice,
+  overrideChoice: SemanticRuntimeChoice,
+  scoreGap: number,
+): boolean {
+  return (
+    mapping.plan.type === "runner.develop_hand_card" &&
+    mapping.step.kind === "gain_credits" &&
+    mapping.plan.evidence.includes("funding_same_turn_convertible:false") &&
+    mappedChoice.action.type === "gain_credit" &&
+    scoreGap > 0 &&
+    semanticRuntimeChoiceHasScoreBreakdownComponent(
+      overrideChoice,
+      "runner_bank_investment_commitment",
+    )
+  );
+}
+
+export function tacticalPlanUrgentCoverageSearchInstallShouldYield(
+  mapping: PlanStepMappingResult,
+  overrideChoice: SemanticRuntimeChoice,
+  scoreGap: number,
+): boolean {
+  return (
+    (mapping.plan.type === "runner.develop_hand_card" ||
+      mapping.plan.type === "runner.build_credit_base") &&
+    overrideChoice.action.type === "install_card" &&
+    scoreGap > 0 &&
+    semanticRuntimeChoiceHasScoreBreakdownComponent(
+      overrideChoice,
+      "runner_install_coverage_search",
+    )
+  );
+}
+
 export function tacticalPlanMarginalDevelopmentInstallShouldYield(
   mapping: PlanStepMappingResult,
   mappedChoice: SemanticRuntimeChoice,

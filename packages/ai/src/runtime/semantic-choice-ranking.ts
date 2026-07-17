@@ -41,6 +41,8 @@ import {
   tacticalPlanRemoteContestMappingBlocksRunOverride,
   tacticalPlanRepeatedRunMappingShouldYield,
   tacticalPlanUrgentRunNowDevelopmentShouldYield,
+  tacticalPlanUnconvertibleFundingShouldYieldToBank,
+  tacticalPlanUrgentCoverageSearchInstallShouldYield,
 } from "./choice-ranking/runner-plan-overrides";
 import {
   roundScore,
@@ -416,6 +418,19 @@ export function tacticalPlanMappedChoice(
         overrideChoice,
         scoreGap,
       );
+    const unconvertibleFundingShouldYieldToBank =
+      tacticalPlanUnconvertibleFundingShouldYieldToBank(
+        mapping,
+        mappedChoice,
+        overrideChoice,
+        scoreGap,
+      );
+    const urgentCoverageSearchInstallShouldYield =
+      tacticalPlanUrgentCoverageSearchInstallShouldYield(
+        mapping,
+        overrideChoice,
+        scoreGap,
+      );
     const hardInterruptShouldYield =
       mapping.plan.side === "runner" &&
       (semanticRuntimeChoiceHasScoreBreakdownComponent(
@@ -450,6 +465,8 @@ export function tacticalPlanMappedChoice(
           coverageProbeRunShouldYield,
           lowValueRunEventShouldYield,
           urgentRunNowDevelopmentShouldYield,
+          unconvertibleFundingShouldYieldToBank,
+          urgentCoverageSearchInstallShouldYield,
         },
       )
     ) {
@@ -476,6 +493,8 @@ export function tacticalPlanMappedChoice(
       coverageProbeRunShouldYield ||
       lowValueRunEventShouldYield ||
       urgentRunNowDevelopmentShouldYield ||
+      unconvertibleFundingShouldYieldToBank ||
+      urgentCoverageSearchInstallShouldYield ||
       scoreGap > threshold.scoreGap
     ) {
       const result = {
@@ -484,33 +503,37 @@ export function tacticalPlanMappedChoice(
         overriddenMappedChoice: mappedChoice,
         overrideReason: urgentRunNowDevelopmentShouldYield
           ? "urgent_run_now_development_yield"
-          : noNeedSearchShouldYield
-            ? "no_need_search_mapping_yield"
-            : coverageProbeRunShouldYield
-              ? "coverage_probe_run_mapping_yield"
-              : lowValueRunEventShouldYield
-                ? "low_value_run_event_mapping_yield"
-                : mappedNonPositiveAgainstPositive
-                  ? "mapped_nonpositive_against_positive"
-                  : deferredDevelopmentInstallShouldYield
-                    ? "deferred_development_mapping_yield"
-                    : repeatedRunShouldYield
-                      ? "repeated_run_mapping_yield"
-                      : acuteHandBufferShouldYield
-                        ? "acute_hand_buffer_mapping_yield"
-                        : damageReactionReserveShouldYield
-                          ? "damage_reaction_reserve_mapping_yield"
-                          : lowValueRecoveryShouldYield
-                            ? "low_value_recovery_mapping_yield"
-                            : inferiorRunTargetShouldYield
-                              ? "inferior_run_target_mapping_yield"
-                              : corpBoardTriageMismatchShouldYield
-                                ? "corp_board_triage_mismatch_yield"
-                                : backgroundBankBuildShouldYield
-                                  ? "background_bank_build_mapping_yield"
-                                  : hardInterruptShouldYield
-                                    ? "runner_hard_interrupt"
-                                    : threshold.reason,
+          : unconvertibleFundingShouldYieldToBank
+            ? "unconvertible_funding_bank_yield"
+            : urgentCoverageSearchInstallShouldYield
+              ? "urgent_coverage_search_install_yield"
+              : noNeedSearchShouldYield
+                ? "no_need_search_mapping_yield"
+                : coverageProbeRunShouldYield
+                  ? "coverage_probe_run_mapping_yield"
+                  : lowValueRunEventShouldYield
+                    ? "low_value_run_event_mapping_yield"
+                    : mappedNonPositiveAgainstPositive
+                      ? "mapped_nonpositive_against_positive"
+                      : deferredDevelopmentInstallShouldYield
+                        ? "deferred_development_mapping_yield"
+                        : repeatedRunShouldYield
+                          ? "repeated_run_mapping_yield"
+                          : acuteHandBufferShouldYield
+                            ? "acute_hand_buffer_mapping_yield"
+                            : damageReactionReserveShouldYield
+                              ? "damage_reaction_reserve_mapping_yield"
+                              : lowValueRecoveryShouldYield
+                                ? "low_value_recovery_mapping_yield"
+                                : inferiorRunTargetShouldYield
+                                  ? "inferior_run_target_mapping_yield"
+                                  : corpBoardTriageMismatchShouldYield
+                                    ? "corp_board_triage_mismatch_yield"
+                                    : backgroundBankBuildShouldYield
+                                      ? "background_bank_build_mapping_yield"
+                                      : hardInterruptShouldYield
+                                        ? "runner_hard_interrupt"
+                                        : threshold.reason,
         overrideThreshold: threshold.scoreGap,
         scoreGap,
       };

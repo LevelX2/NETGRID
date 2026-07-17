@@ -1,6 +1,6 @@
 # Match 23D6: Runner-Run-, Breaker-, Broker- und Hint-Remediation
 
-Status: P4 aktiv
+Status: P5 aktiv
 
 ## Quelle und Zielprüfung
 
@@ -242,4 +242,12 @@ den finalen Merge.
   `subroutineIndex` und `subroutineIndexes`. DTO- und Side-Safety-Vertrag,
   Break-Score, RunPlan-Zitat und D37-Checkpoint sind grün; D37 bricht nun die
   programmtrashende Subroutine 2 und behält Krash.
-- P4 aktiv: Broker-Funding und konkrete Coverage-Suche.
+- P4 abgeschlossen: Fundingpläne publizieren ihren vollständigen
+  Click-to-fund-plus-convert-Horizont. Nur bei
+  `funding_same_turn_convertible:false` darf ein höher bewerteter erster
+  Bank-Load den Basiscredit unterbrechen. Eine Programmsuch-Installation
+  erhält nur bei side-safe sichtbarer, aktuell unpassierbarer ICE-Coverage-
+  Lücke einen Interrupt. D130, D164 und D176 sowie Liquid-Funding- und
+  No-Coverage-Gegenproben sind grün; Bank-, Search-, PlanRanking- und
+  Typecheck-Verträge bestehen.
+- P5 aktiv: Viacox Engine, Hints und Installationsrisiko.

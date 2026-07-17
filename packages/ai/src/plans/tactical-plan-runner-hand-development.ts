@@ -11,15 +11,11 @@ import {
 } from "./runner-draw-overflow";
 import {
   legalActionCreditGainForPlan,
+  legalActionCreditNetGain,
   type TacticalPlanCreditValueDependencies,
 } from "./tactical-plan-action-values";
-import {
-  createPlanStep,
-  createTacticalPlan,
-} from "./tactical-plan-builders";
-import {
-  runNeedsBreakerCoverage,
-} from "./tactical-plan-run-reachability";
+import { createPlanStep, createTacticalPlan } from "./tactical-plan-builders";
+import { runNeedsBreakerCoverage } from "./tactical-plan-run-reachability";
 import { actionServerId } from "./tactical-plan-server-targets";
 import type {
   PlanBlocker,
@@ -33,7 +29,9 @@ import type {
 export function runnerHandDevelopmentTargetLabel(
   evaluation: RunnerHandDevelopmentEvaluation,
 ): string {
-  return evaluation.title ?? evaluation.definitionId ?? evaluation.developmentRole;
+  return (
+    evaluation.title ?? evaluation.definitionId ?? evaluation.developmentRole
+  );
 }
 
 export function usefulLegalRunnerHandDevelopment(
@@ -145,13 +143,17 @@ export function runnerHandDevelopmentPlanPriority(
     evaluation.persistentInstallEvaluation !== undefined
       ? Math.min(
           0,
-          Math.round(evaluation.persistentInstallEvaluation.finalInstallFit / 4),
+          Math.round(
+            evaluation.persistentInstallEvaluation.finalInstallFit / 4,
+          ),
         )
       : 0;
   const creditBaseScore =
-    creditBase?.recommendation === "allow_setup_spend" ? 40 :
-    creditBase?.recommendation === "preserve_reserve" ? -40 :
-    0;
+    creditBase?.recommendation === "allow_setup_spend"
+      ? 40
+      : creditBase?.recommendation === "preserve_reserve"
+        ? -40
+        : 0;
   const economyRouteScore = runnerEconomyRouteDevelopmentScore(
     context,
     evaluation,
@@ -186,8 +188,7 @@ export function runnerHandDevelopmentPlans(
   const fundedContinuationCardId = fundedContinuation?.cardInstanceId;
   const usefulEvaluations = handEvaluations
     .filter(
-      (evaluation) =>
-        evaluation.cardInstanceId !== fundedContinuationCardId,
+      (evaluation) => evaluation.cardInstanceId !== fundedContinuationCardId,
     )
     .filter(usefulLegalRunnerHandDevelopment)
     .filter((evaluation) =>
@@ -218,8 +219,7 @@ export function runnerHandDevelopmentPlans(
     : [];
   const deferredEvaluations = handEvaluations
     .filter(
-      (evaluation) =>
-        evaluation.cardInstanceId !== fundedContinuationCardId,
+      (evaluation) => evaluation.cardInstanceId !== fundedContinuationCardId,
     )
     .filter(
       (evaluation) =>
@@ -238,7 +238,10 @@ export function runnerHandDevelopmentPlans(
         right.priority - left.priority ||
         left.cardInstanceId.localeCompare(right.cardInstanceId),
     );
-  const bestEvaluation = runnerBestHandCardEvaluation(context, usefulEvaluations);
+  const bestEvaluation = runnerBestHandCardEvaluation(
+    context,
+    usefulEvaluations,
+  );
   const bestPriority = bestEvaluation
     ? runnerPlayBestHandCardPlanPriority(context, bestEvaluation)
     : undefined;
@@ -330,6 +333,7 @@ export function runnerHandDevelopmentPlans(
       runnerHandFundingPlan({
         context,
         evaluation,
+        dependencies,
         runnerGoalEvidence,
         stateVersion,
       }),
@@ -392,7 +396,8 @@ export function runnerSearchDevelopmentHasConcreteConversion(
 ): boolean {
   if (evaluation.developmentRole !== "draw_or_search_engine") return true;
   const coverage = new Set([
-    ...(evaluation.persistentInstallEvaluation?.existingFunctionalCoverage ?? []),
+    ...(evaluation.persistentInstallEvaluation?.existingFunctionalCoverage ??
+      []),
     ...(evaluation.persistentInstallEvaluation?.newFunctionalCoverage ?? []),
   ]);
   const programSearch =
@@ -553,16 +558,18 @@ function runnerDeferredHandDevelopmentPlan(params: {
 function runnerHandFundingPlan(params: {
   context: TacticalPlanBuildContext;
   evaluation: RunnerHandDevelopmentEvaluation;
+  dependencies: TacticalPlanCreditValueDependencies;
   runnerGoalEvidence: readonly string[];
   stateVersion: number;
 }): TacticalPlan {
-  const { context, evaluation } = params;
+  const { context, dependencies, evaluation } = params;
   const fundingNeed = evaluation.fundingNeed;
   const missingCredits = fundingNeed?.missingCredits ?? 0;
   const requiredCredits = fundingNeed?.installOrPlayCost ?? 0;
   const fundingReason = fundingNeed?.reason ?? "unknown";
   const acquireEconomy =
-    context.runnerEconomyPosture?.transition?.commitment === "acquire_economy" &&
+    context.runnerEconomyPosture?.transition?.commitment ===
+      "acquire_economy" &&
     context.runnerEconomyPosture.transition.targetCardInstanceId ===
       evaluation.cardInstanceId &&
     context.input.legalActions.some((action) => action.type === "draw_card");
@@ -572,6 +579,11 @@ function runnerHandFundingPlan(params: {
     label: runnerHandDevelopmentTargetLabel(evaluation),
   };
   const priority = runnerHandFundingPlanPriority(context, evaluation);
+  const conversion = runnerHandFundingConversionHorizon(
+    context,
+    missingCredits,
+    dependencies,
+  );
   return runnerHandDevelopmentPlan({
     context,
     evaluation,
@@ -644,10 +656,52 @@ function runnerHandFundingPlan(params: {
       `funding_required_credits:${requiredCredits}`,
       `funding_reason:${fundingReason}`,
       `funding_route:${acquireEconomy ? "acquire_economy" : "direct_funding"}`,
+      `funding_clicks_remaining:${context.input.playerView.own.clicks}`,
+      `funding_clicks_to_close:${conversion.fundingClicks}`,
+      `funding_clicks_to_convert:${conversion.totalClicks}`,
+      `funding_same_turn_convertible:${conversion.sameTurnConvertible}`,
     ],
     runnerGoalEvidence: params.runnerGoalEvidence,
     stateVersion: params.stateVersion,
   });
+}
+
+function runnerHandFundingConversionHorizon(
+  context: TacticalPlanBuildContext,
+  missingCredits: number,
+  dependencies: TacticalPlanCreditValueDependencies,
+): {
+  fundingClicks: number;
+  totalClicks: number;
+  sameTurnConvertible: boolean;
+} {
+  const fundingClicks = Math.min(
+    ...context.input.legalActions.flatMap((action) => {
+      const netGain = legalActionCreditNetGain(
+        context.input,
+        action,
+        dependencies,
+      );
+      if (netGain <= 0) return [];
+      const clickCost = Math.max(
+        1,
+        action.costs.reduce((sum, cost) => sum + (cost.clicks ?? 0), 0),
+      );
+      if (action.type === "gain_credit") {
+        return [Math.ceil(missingCredits / netGain) * clickCost];
+      }
+      return netGain >= missingCredits ? [clickCost] : [];
+    }),
+  );
+  const finiteFundingClicks = Number.isFinite(fundingClicks)
+    ? fundingClicks
+    : context.input.playerView.own.clicks + 1;
+  const totalClicks = finiteFundingClicks + 1;
+  return {
+    fundingClicks: finiteFundingClicks,
+    totalClicks,
+    sameTurnConvertible: totalClicks <= context.input.playerView.own.clicks,
+  };
 }
 
 function runnerHandFundingActionAvailable(
@@ -698,8 +752,7 @@ function runnerHandDevelopmentDeferredBlocker(
   if (
     evaluation.deferReason === "missing_mu" ||
     (persistent &&
-      (persistent.muPressurePenalty < 0 ||
-        persistent.displacementPenalty < 0))
+      (persistent.muPressurePenalty < 0 || persistent.displacementPenalty < 0))
   ) {
     return {
       blockerId: `deferred_hand_card_mu:${evaluation.cardInstanceId}`,
@@ -736,9 +789,7 @@ function runnerHandDevelopmentDeferredBlocker(
               `funding_required_credits:${evaluation.fundingNeed.installOrPlayCost}`,
             ]
           : []),
-        ...(persistent
-          ? [`reserve_penalty:${persistent.reservePenalty}`]
-          : []),
+        ...(persistent ? [`reserve_penalty:${persistent.reservePenalty}`] : []),
       ],
     };
   }

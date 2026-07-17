@@ -9,6 +9,7 @@ import {
   runnerVisibleSearchCoverageNeed,
   visibleCardCoversRequiredCoverage,
 } from "./runner-search-coverage-need";
+import { rolesMatch } from "./role-match";
 
 type RunnerProgramSacrificeInstallAssessment = {
   memoryRequired: boolean;
@@ -111,6 +112,22 @@ export function runnerInstallScoreComponents(
     });
   }
   if (
+    sourceCard &&
+    visibleCoverageNeed &&
+    rolesMatch(roles, ["program_search", "breaker_search"])
+  ) {
+    components.push({
+      key: "runner_install_coverage_search",
+      label: "Konkrete Breaker-Suche aufbauen",
+      value: 1400,
+      reason: [
+        `required:${visibleCoverageNeed.requiredCoverage}`,
+        `server:${visibleCoverageNeed.serverId}`,
+        `source:${sourceCard.definitionId ?? sourceCard.instanceId}`,
+      ].join("|"),
+    });
+  }
+  if (
     roles.some((role) => dependencies.isRunnerEconomyRole(role)) &&
     !context.loanInstallAction
   ) {
@@ -196,9 +213,7 @@ function runnerServerIceInstallTaxComponents(
   const urgentAdvancedRemote = input.playerView.servers.some(
     (candidate) =>
       candidate.id.startsWith("remote_") &&
-      candidate.root.some(
-        (card) => (card.advancementCounters ?? 0) > 0,
-      ),
+      candidate.root.some((card) => (card.advancementCounters ?? 0) > 0),
   );
   const immediateRemoteContestAvailable = input.legalActions.some(
     (candidate) =>

@@ -494,6 +494,84 @@ describe("tacticalPlanMappedChoice Runner overrides", () => {
     );
   });
 
+  it("lets a first bank load interrupt funding that cannot convert this turn", () => {
+    const gain = legalAction("gain", "gain_credit");
+    const bank = legalAction("load-bank", "activated_card_ability");
+    const bankChoice = choice(bank, 1312, [], {
+      key: "runner_bank_investment_commitment",
+      value: 1250,
+      reason: "bankCommitmentStatus:build_first_load",
+    });
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [bankChoice, choice(gain, 554)],
+      planMapping("runner.develop_hand_card", [gain], {
+        evidence: ["funding_same_turn_convertible:false"],
+      }),
+      bankChoice,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("load-bank");
+    expect(result.overrideReason).toBe("unconvertible_funding_bank_yield");
+  });
+
+  it("keeps immediately convertible liquid funding over a bank load", () => {
+    const gain = legalAction("gain", "gain_credit");
+    const bank = legalAction("load-bank", "activated_card_ability");
+    const bankChoice = choice(bank, 1312, [], {
+      key: "runner_bank_investment_commitment",
+      value: 1250,
+      reason: "bankCommitmentStatus:build_first_load",
+    });
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [bankChoice, choice(gain, 554)],
+      planMapping("runner.develop_hand_card", [gain], {
+        evidence: ["funding_same_turn_convertible:true"],
+      }),
+      bankChoice,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_blocked");
+    expect(result.choice?.action.actionId).toBe("gain");
+  });
+
+  it("lets concrete coverage-search installation interrupt generic funding", () => {
+    const gain = legalAction("gain", "gain_credit");
+    const search = legalAction("install-search", "install_card");
+    const searchChoice = choice(search, 1904, [], {
+      key: "runner_install_coverage_search",
+      value: 1400,
+      reason: "required:breaker_sentry|server:remote_2",
+    });
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [searchChoice, choice(gain, 1169)],
+      planMapping("runner.develop_hand_card", [gain]),
+      searchChoice,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("install-search");
+    expect(result.overrideReason).toBe("urgent_coverage_search_install_yield");
+  });
+
+  it("does not let a generic search install interrupt funding without a concrete need", () => {
+    const gain = legalAction("gain", "gain_credit");
+    const search = legalAction("install-search", "install_card");
+    const searchChoice = choice(search, 1904);
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [searchChoice, choice(gain, 1169)],
+      planMapping("runner.develop_hand_card", [gain]),
+      searchChoice,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_blocked");
+    expect(result.choice?.action.actionId).toBe("gain");
+  });
+
   it("lets confirmed-damage reaction reserve interrupt an opportunistic run", () => {
     const run = legalAction("run-hq", "start_run", { serverId: "hq" });
     const gain = legalAction("gain", "gain_credit");
