@@ -268,6 +268,10 @@ describe("runnerPressureProbeAllowance", () => {
       scoreThreat: false,
       accessPayoff: "unknown",
     });
+    const paidScoreThreatProbe = runTargetEvaluation({
+      ...scoreThreatProbe,
+      pathCost: 6,
+    });
     const context = planContext({
       primaryStrategyId: "runner.remote_contest",
       runnerClicks: 2,
@@ -277,6 +281,11 @@ describe("runnerPressureProbeAllowance", () => {
       primaryStrategyId: "runner.remote_contest",
       runnerClicks: 2,
       runTargetEvaluations: [ordinaryProbe],
+    });
+    const paidScoreThreatProbeContext = planContext({
+      primaryStrategyId: "runner.remote_contest",
+      runnerClicks: 2,
+      runTargetEvaluations: [paidScoreThreatProbe],
     });
 
     expect(
@@ -288,6 +297,16 @@ describe("runnerPressureProbeAllowance", () => {
     expect(
       runnerRunTargetCurrentStep(
         ordinaryProbeContext,
+        remoteRun,
+        defaultStep,
+      ),
+    ).toMatchObject({
+      kind: "run_target",
+      desiredActionSemantics: ["run.start"],
+    });
+    expect(
+      runnerRunTargetCurrentStep(
+        paidScoreThreatProbeContext,
         remoteRun,
         defaultStep,
       ),
