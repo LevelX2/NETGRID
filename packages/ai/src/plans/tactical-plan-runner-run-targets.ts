@@ -29,6 +29,7 @@ export function runnerAdjustedPlanPriority(
   return (
     basePriority +
     (evaluation ? runnerRunTargetPlanPriorityDelta(evaluation) : 0) +
+    runnerCentralRunRelativeQualityPlanDelta(context, evaluation) +
     runnerMatchpointRunConversionPriorityBoost(context, evaluation) +
     runnerEconomyTransitionRunPriorityDelta(context, evaluation) +
     runnerDeckStrategyPlanPriorityBoost(context, serverId)
@@ -42,6 +43,10 @@ export function runnerRunTargetPlanScoreBreakdown(
 ): PlanScoreBreakdown[] {
   const evaluation = runnerRunTargetEvaluationForAction(context, action);
   const serverId = actionServerId(action);
+  const relativeCentralQuality = runnerCentralRunRelativeQualityPlanDelta(
+    context,
+    evaluation,
+  );
   return [
     {
       key: "runner_run_target_base",
@@ -64,6 +69,20 @@ export function runnerRunTargetPlanScoreBreakdown(
               `score:${evaluation.score}`,
               ...(evaluation.scoreThreat ? ["score_threat:true"] : []),
             ].join(";"),
+          },
+        ]
+      : []),
+    ...(relativeCentralQuality !== 0 && evaluation
+      ? [
+          {
+            key: "runner_central_run_relative_quality",
+            label: "Relative Zentral-Run-Qualität",
+            value: relativeCentralQuality,
+            reason: [
+              `target:${evaluation.targetServerId}`,
+              `score:${evaluation.score}`,
+              `peer_scores:${runnerCentralRunPeerScores(context).join(",")}`,
+            ].join("|"),
           },
         ]
       : []),
@@ -103,6 +122,47 @@ export function runnerRunTargetPlanScoreBreakdown(
 }
 
 const RUNNER_MATCHPOINT_RUN_CONVERSION_PRIORITY_BOOST = 520;
+const RUNNER_CENTRAL_RUN_RELATIVE_QUALITY_LIMIT = 240;
+
+function runnerCentralRunRelativeQualityPlanDelta(
+  context: TacticalPlanBuildContext,
+  evaluation: RunnerRunTargetEvaluation | undefined,
+): number {
+  if (
+    !evaluation ||
+    (evaluation.targetKind !== "rd" && evaluation.targetKind !== "hq")
+  ) {
+    return 0;
+  }
+  const peerScores = runnerCentralRunPeerScores(
+    context,
+    evaluation.recommendation,
+  );
+  if (peerScores.length < 2) return 0;
+  const averageScore =
+    peerScores.reduce((total, score) => total + score, 0) / peerScores.length;
+  return Math.max(
+    -RUNNER_CENTRAL_RUN_RELATIVE_QUALITY_LIMIT,
+    Math.min(
+      RUNNER_CENTRAL_RUN_RELATIVE_QUALITY_LIMIT,
+      Math.round(evaluation.score - averageScore),
+    ),
+  );
+}
+
+function runnerCentralRunPeerScores(
+  context: TacticalPlanBuildContext,
+  recommendation?: RunnerRunTargetEvaluation["recommendation"],
+): number[] {
+  return (context.runnerRunTargetEvaluations ?? [])
+    .filter(
+      (evaluation) =>
+        (evaluation.targetKind === "rd" || evaluation.targetKind === "hq") &&
+        (recommendation === undefined ||
+          evaluation.recommendation === recommendation),
+    )
+    .map((evaluation) => evaluation.score);
+}
 
 function runnerMatchpointRunConversionPriorityBoost(
   context: TacticalPlanBuildContext,

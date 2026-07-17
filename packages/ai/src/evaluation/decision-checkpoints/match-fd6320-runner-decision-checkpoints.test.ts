@@ -16,28 +16,21 @@ describe("match FD6320 runner decision checkpoints", () => {
   });
 
   it("keeps R&D preferred when its path becomes materially better", () => {
-    const openRnd = mutateFixture(centralTargetQualityJson, (checkpoint) => {
-      const state = checkpoint.engine.testOnlyGameState;
-      const rnd = state.corp.servers.find((server) => server.id === "rd");
-      if (!rnd) throw new Error("Missing captured R&D server");
-
-      for (const iceId of rnd.ice.splice(0)) {
-        state.corp.archives.push(iceId);
-        state.cardInstances[iceId] = {
-          ...state.cardInstances[iceId]!,
-          zone: { side: "corp", zone: "archives" },
-          faceup: true,
-          rezzed: false,
-        };
-      }
+    const freshRnd = mutateFixture(centralTargetQualityJson, (checkpoint) => {
+      checkpoint.engine.eventPrefix = checkpoint.engine.eventPrefix.filter(
+        (event) =>
+          event.type !== "start_run" &&
+          event.type !== "access_card" &&
+          event.type !== "decline_trash",
+      );
       checkpoint.source.kind = "synthetic_companion";
-      checkpoint.source.findingId = "FD6320-C01-OPEN-RD-REMAINS-PREFERRED";
+      checkpoint.source.findingId = "FD6320-C01-FRESH-RD-REMAINS-PREFERRED";
       checkpoint.expectation = {
         acceptableActions: [{ type: "start_run", targetServerId: "rd" }],
       };
     });
 
-    expectCheckpointToPass(openRnd);
+    expectCheckpointToPass(freshRnd);
   });
 
   it("does not force the HQ run below matchpoint", () => {

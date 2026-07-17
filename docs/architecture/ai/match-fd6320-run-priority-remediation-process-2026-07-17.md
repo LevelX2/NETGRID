@@ -2,9 +2,10 @@
 
 ## Status
 
-P1 und P2 sind abgeschlossen; P3 ist aktiv. Beide historischen Findings sind
+P1 bis P3 sind abgeschlossen; P4 ist aktiv. Beide historischen Findings wurden
 auf unverändertem aktuellem Code spielgleich als `behavior_regression` rot
-reproduziert, während die zwei engen Gegenproben grün bleiben. Änderungen
+reproduziert. F01 und seine inverse R&D-Gegenprobe sind nach der generischen
+relativen Zielqualitätskorrektur grün; F02 bleibt bis P4 gezielt rot. Änderungen
 erfolgen ausschließlich im separaten Worktree.
 
 ## Quelle und Zielprüfung

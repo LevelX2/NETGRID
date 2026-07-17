@@ -63,9 +63,10 @@ den materiell besseren HQ-Wert überschreiben.
   Plan-Mapping müssen beide HQ referenzieren.
 - Ergebnis vor Fix: `behavior_regression`, tatsächlich
   `runner.start_run.rd`.
-- Gegenprobe `FD6320-C01-OPEN-RD-REMAINS-PREFERRED`: Entfernt ausschließlich
-  das R&D-ICE aus dem Runpfad. R&D bleibt auf unverändertem Code korrekt
-  ausgewählt.
+- Gegenprobe `FD6320-C01-FRESH-RD-REMAINS-PREFERRED`: Entfernt ausschließlich
+  das öffentliche Präfix des früheren R&D-Runs samt Access-Folgeereignissen.
+  Dadurch wird R&D gegenüber HQ wieder das bessere aktuelle Zentralziel und
+  bleibt korrekt ausgewählt.
 
 ## FD6320-F02 – Erreichbarer HQ-Matchpoint
 

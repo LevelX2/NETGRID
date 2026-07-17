@@ -89,6 +89,80 @@ describe("runnerPressureProbeAllowance", () => {
     );
   });
 
+  it("preserves concrete relative quality between equally recommended central runs", () => {
+    const hqRun = runAction("run-hq", "hq");
+    const rdRun = runAction("run-rd", "rd");
+    const context = planContext({
+      primaryStrategyId: "runner.rig_first",
+      runTargetEvaluations: [
+        runTargetEvaluation({
+          actionId: hqRun.actionId,
+          targetServerId: "hq",
+          targetKind: "hq",
+          recommendation: "run_now",
+          accessPayoff: "trash_affordable",
+          scoreThreat: false,
+          score: 300,
+        }),
+        runTargetEvaluation({
+          actionId: rdRun.actionId,
+          targetServerId: "rd",
+          targetKind: "rd",
+          recommendation: "run_now",
+          accessPayoff: "unknown",
+          scoreThreat: false,
+          score: 180,
+        }),
+      ],
+    });
+
+    expect(runnerAdjustedPlanPriority(context, hqRun, 740)).toBe(980);
+    expect(runnerAdjustedPlanPriority(context, rdRun, 760)).toBe(880);
+    expect(runnerAdjustedPlanPriority(context, hqRun, 740)).toBeGreaterThan(
+      runnerAdjustedPlanPriority(context, rdRun, 760),
+    );
+    expect(runnerRunTargetPlanScoreBreakdown(context, hqRun, 740)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "runner_central_run_relative_quality",
+          value: 60,
+        }),
+      ]),
+    );
+  });
+
+  it("retains the normal R&D preference when R&D has the better target score", () => {
+    const hqRun = runAction("run-hq", "hq");
+    const rdRun = runAction("run-rd", "rd");
+    const context = planContext({
+      primaryStrategyId: "runner.rig_first",
+      runTargetEvaluations: [
+        runTargetEvaluation({
+          actionId: hqRun.actionId,
+          targetServerId: "hq",
+          targetKind: "hq",
+          recommendation: "run_now",
+          accessPayoff: "unknown",
+          scoreThreat: false,
+          score: 180,
+        }),
+        runTargetEvaluation({
+          actionId: rdRun.actionId,
+          targetServerId: "rd",
+          targetKind: "rd",
+          recommendation: "run_now",
+          accessPayoff: "fresh",
+          scoreThreat: false,
+          score: 300,
+        }),
+      ],
+    });
+
+    expect(runnerAdjustedPlanPriority(context, rdRun, 760)).toBeGreaterThan(
+      runnerAdjustedPlanPriority(context, hqRun, 740),
+    );
+  });
+
   it("preserves the last click for an urgent reachable remote contest", () => {
     const remoteRun = runAction("run-remote-1", "remote_1");
     const evaluation = runTargetEvaluation({
