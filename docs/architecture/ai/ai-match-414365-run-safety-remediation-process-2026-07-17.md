@@ -1,6 +1,6 @@
 # KI-Match-414365: Run-Sicherheit und Kartenrollen (2026-07-17)
 
-Status: P0 abgeschlossen
+Status: P1 abgeschlossen
 
 ## Ziel und freigegebener Umfang
 
@@ -53,7 +53,7 @@ Done-Gate: `git diff --check`, separater Prozesscommit.
 
 ### P1 – Spielgleiche Evidence und rote Checkpoints
 
-Status: offen
+Status: abgeschlossen
 
 - D32: `Running Interference` darf nicht in eine bloße Kreditaktion
   umklassifiziert werden.
@@ -71,7 +71,7 @@ Gegenprobe grün, Red-Evidence-Commit.
 
 ### P2 – Generische Consumer-Korrekturen
 
-Status: offen
+Status: in Arbeit
 
 - Rollenpriorität für Run-Events vor Economy-Textsignalen.
 - Entfernbare, persistent gefährliche Trace-Zähler in der Aktionswertung.
