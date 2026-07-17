@@ -4,7 +4,7 @@ import type { AccessOutcomeMemoryStatus } from "../access/access-outcome-memory"
 import type { DeckCapabilityProfile } from "../deck-capabilities";
 import type { CorpStrategicIntentProfile } from "../corp-strategic-intent";
 import type { KnownRemoteAccessCommitment } from "../decision/known-remote-access-commitment";
-import type { TacticalGoalLike } from "../decision/semantic-decision-frame";
+import type { TacticalGoalLike } from "../decision/tactical-goal-types";
 import type {
   RunnerEconomyPosture,
   RunnerRunTargetEvaluation,

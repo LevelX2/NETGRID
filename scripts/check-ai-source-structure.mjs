@@ -1,0 +1,285 @@
+import { readFileSync, readdirSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import ts from "typescript";
+
+const repoRoot = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "..",
+);
+const srcRoot = path.join(repoRoot, "packages", "ai", "src");
+
+if (process.argv.includes("--self-test")) {
+  runSelfTest();
+  process.exit(0);
+}
+
+const productionFiles = collectSourceFiles(srcRoot, false);
+const testFiles = collectSourceFiles(srcRoot, true).filter((file) =>
+  isTestFile(file),
+);
+const productionFileSet = new Set(productionFiles);
+const allGraph = new Map(productionFiles.map((file) => [file, new Set()]));
+const valueGraph = new Map(productionFiles.map((file) => [file, new Set()]));
+
+for (const file of productionFiles) {
+  const source = ts.createSourceFile(
+    file,
+    readFileSync(file, "utf8"),
+    ts.ScriptTarget.Latest,
+    true,
+  );
+  for (const statement of source.statements) {
+    if (
+      !ts.isImportDeclaration(statement) &&
+      !ts.isExportDeclaration(statement)
+    ) {
+      continue;
+    }
+    const moduleSpecifier = statement.moduleSpecifier;
+    if (!moduleSpecifier || !ts.isStringLiteral(moduleSpecifier)) continue;
+    const target = resolveRelativeImport(
+      file,
+      moduleSpecifier.text,
+      productionFileSet,
+    );
+    if (!target) continue;
+    allGraph.get(file).add(target);
+    if (statementHasRuntimeEdge(statement)) valueGraph.get(file).add(target);
+  }
+}
+
+const findings = [];
+const valueCycles = cyclicComponents(valueGraph);
+if (valueCycles.length > 0) {
+  findings.push(
+    ...valueCycles.map(
+      (component) =>
+        `runtime import cycle: ${component.map(relativeSourcePath).join(" -> ")}`,
+    ),
+  );
+}
+
+const expectedTypeCycleSignatures = new Set([
+  signature([
+    "action-semantic-candidate.ts",
+    "actions/action-card-semantic-join.ts",
+    "actions/action-cost-timing.ts",
+    "actions/action-source-binding.ts",
+    "actions/action-target-context.ts",
+    "actions/basic-action-semantics.ts",
+    "actions/hidden-resource-virus-model.ts",
+    "actions/random-bad-publicity-model.ts",
+    "actions/run-access-decision-model.ts",
+    "actions/tag-effect-semantics.ts",
+  ]),
+  signature([
+    "actions/risk-action-projection.ts",
+    "actions/run-action-projection.ts",
+    "runner-economy-posture.ts",
+    "runner-hand-development.ts",
+    "runner-run-target-evaluation.ts",
+  ]),
+  signature(["plans/plan-portfolio.ts", "plans/tactical-plan-types.ts"]),
+]);
+const actualTypeCycles = cyclicComponents(allGraph);
+const actualTypeCycleSignatures = new Set(
+  actualTypeCycles.map((component) =>
+    signature(component.map(relativeSourcePath)),
+  ),
+);
+for (const unexpected of [...actualTypeCycleSignatures].filter(
+  (entry) => !expectedTypeCycleSignatures.has(entry),
+)) {
+  findings.push(`unexpected type import cycle: ${unexpected}`);
+}
+for (const missing of [...expectedTypeCycleSignatures].filter(
+  (entry) => !actualTypeCycleSignatures.has(entry),
+)) {
+  findings.push(
+    `type-cycle ratchet is stale because the allowed cycle disappeared: ${missing}`,
+  );
+}
+
+const productionLineCaps = new Map([
+  ["runtime/semantic-runtime-corp-score.ts", 3818],
+  ["runtime/semantic-runtime-corp-board-triage.ts", 3690],
+  ["runner-hand-development.ts", 2756],
+  ["visible-run-analysis.ts", 2465],
+  ["runtime/semantic-choice-ranking.ts", 1760],
+  ["runtime/semantic-runtime-corp-scoring-window.ts", 1720],
+]);
+for (const file of productionFiles) {
+  const relative = relativeSourcePath(file);
+  const lineCount = sourceLineCount(file);
+  const cap = productionLineCaps.get(relative) ?? 2500;
+  if (lineCount > cap) {
+    findings.push(
+      `${relative} has ${lineCount} lines; allowed maximum is ${cap}`,
+    );
+  }
+}
+
+const testLineCaps = new Map([
+  ["runtime/semantic-runtime-corp-score.test.ts", 7540],
+  ["tactical-plans.test.ts", 4308],
+  ["semantic-ai-runtime-cutover.test.ts", 4261],
+  ["runtime/semantic-runtime-corp-board-triage.test.ts", 3334],
+  ["runner-run-target-evaluation.test.ts", 3150],
+]);
+for (const [relative, cap] of testLineCaps) {
+  const file = path.join(srcRoot, ...relative.split("/"));
+  const lineCount = sourceLineCount(file);
+  if (lineCount > cap) {
+    findings.push(
+      `${relative} has ${lineCount} lines; allowed maximum is ${cap}`,
+    );
+  }
+}
+
+const runtimeRootProductionFiles = productionFiles.filter(
+  (file) => path.dirname(file) === path.join(srcRoot, "runtime"),
+);
+const runtimeRootCap = 287;
+if (runtimeRootProductionFiles.length > runtimeRootCap) {
+  findings.push(
+    `runtime root has ${runtimeRootProductionFiles.length} production files; allowed maximum is ${runtimeRootCap}`,
+  );
+}
+
+if (findings.length > 0) {
+  console.error("AI_SOURCE_STRUCTURE FAILED");
+  for (const finding of findings) console.error(`- ${finding}`);
+  process.exit(1);
+}
+
+console.log(
+  `AI_SOURCE_STRUCTURE OK production=${productionFiles.length} runtimeCycles=${valueCycles.length} allowedTypeCycles=${actualTypeCycles.length} runtimeRootProduction=${runtimeRootProductionFiles.length}`,
+);
+
+function collectSourceFiles(root, includeTests) {
+  const files = [];
+  for (const entry of readdirSync(root, { withFileTypes: true })) {
+    const absolute = path.join(root, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...collectSourceFiles(absolute, includeTests));
+      continue;
+    }
+    if (!entry.isFile() || !/\.tsx?$/.test(entry.name)) continue;
+    if (!includeTests && isTestFile(absolute)) continue;
+    files.push(path.normalize(absolute));
+  }
+  return files.sort();
+}
+
+function isTestFile(file) {
+  return /\.test\.tsx?$/.test(file);
+}
+
+function resolveRelativeImport(file, importSource, fileSet) {
+  if (!importSource.startsWith(".")) return undefined;
+  const base = path.resolve(path.dirname(file), importSource);
+  for (const candidate of [
+    `${base}.ts`,
+    `${base}.tsx`,
+    path.join(base, "index.ts"),
+    path.join(base, "index.tsx"),
+  ]) {
+    const normalized = path.normalize(candidate);
+    if (fileSet.has(normalized)) return normalized;
+  }
+  return undefined;
+}
+
+function statementHasRuntimeEdge(statement) {
+  if (ts.isImportDeclaration(statement)) {
+    const clause = statement.importClause;
+    if (!clause) return true;
+    if (clause.isTypeOnly) return false;
+    if (clause.name) return true;
+    const bindings = clause.namedBindings;
+    if (!bindings) return false;
+    if (ts.isNamespaceImport(bindings)) return true;
+    return bindings.elements.some((element) => !element.isTypeOnly);
+  }
+  if (statement.isTypeOnly) return false;
+  if (!statement.exportClause) return true;
+  if (ts.isNamespaceExport(statement.exportClause)) return true;
+  return statement.exportClause.elements.some((element) => !element.isTypeOnly);
+}
+
+function cyclicComponents(graph) {
+  let nextIndex = 0;
+  const stack = [];
+  const onStack = new Set();
+  const indexByNode = new Map();
+  const lowLinkByNode = new Map();
+  const components = [];
+
+  function visit(node) {
+    indexByNode.set(node, nextIndex);
+    lowLinkByNode.set(node, nextIndex);
+    nextIndex += 1;
+    stack.push(node);
+    onStack.add(node);
+
+    for (const target of graph.get(node) ?? []) {
+      if (!indexByNode.has(target)) {
+        visit(target);
+        lowLinkByNode.set(
+          node,
+          Math.min(lowLinkByNode.get(node), lowLinkByNode.get(target)),
+        );
+      } else if (onStack.has(target)) {
+        lowLinkByNode.set(
+          node,
+          Math.min(lowLinkByNode.get(node), indexByNode.get(target)),
+        );
+      }
+    }
+
+    if (lowLinkByNode.get(node) !== indexByNode.get(node)) return;
+    const component = [];
+    let current;
+    do {
+      current = stack.pop();
+      onStack.delete(current);
+      component.push(current);
+    } while (current !== node);
+    if (component.length > 1) components.push(component.sort());
+  }
+
+  for (const node of graph.keys()) {
+    if (!indexByNode.has(node)) visit(node);
+  }
+  return components.sort((left, right) =>
+    signature(left).localeCompare(signature(right)),
+  );
+}
+
+function relativeSourcePath(file) {
+  return path.relative(srcRoot, file).replaceAll("\\", "/");
+}
+
+function signature(entries) {
+  return entries.slice().sort().join("|");
+}
+
+function sourceLineCount(file) {
+  return readFileSync(file, "utf8").split(/\r?\n/).length;
+}
+
+function runSelfTest() {
+  const graph = new Map([
+    ["a", new Set(["b"])],
+    ["b", new Set(["a", "c"])],
+    ["c", new Set()],
+  ]);
+  const cycles = cyclicComponents(graph);
+  if (cycles.length !== 1 || signature(cycles[0]) !== "a|b") {
+    throw new Error(
+      `source structure self-test failed: ${JSON.stringify(cycles)}`,
+    );
+  }
+  console.log("AI_SOURCE_STRUCTURE_SELFTEST OK");
+}

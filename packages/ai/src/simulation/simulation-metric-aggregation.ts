@@ -2,7 +2,7 @@ import type {
   AiDoctrineQualityDelta,
   AiDoctrineQualityMetricName,
   AiDoctrineQualityMetrics,
-} from "./doctrine-quality-tags";
+} from "./doctrine-quality-types";
 
 export const DOCTRINE_QUALITY_METRIC_NAMES: AiDoctrineQualityMetricName[] = [
   "nakedAgendaInstalls",

@@ -14,9 +14,19 @@ import {
   DOCTRINE_QUALITY_METRIC_NAMES,
   sumDoctrineMetrics,
 } from "./simulation-metric-aggregation";
+import type {
+  AiDoctrineQualityDelta,
+  AiDoctrineQualityMetricName,
+  AiDoctrineQualityMetrics,
+} from "./doctrine-quality-types";
+export type {
+  AiDoctrineQualityDelta,
+  AiDoctrineQualityMetricName,
+  AiDoctrineQualityMetrics,
+} from "./doctrine-quality-types";
 
-const DOCTRINE_CASE_HIDDEN_INFO_MARKERS = FORBIDDEN_AI_INPUT_FIELDS.map((field) =>
-  field.toLocaleLowerCase("en-US"),
+const DOCTRINE_CASE_HIDDEN_INFO_MARKERS = FORBIDDEN_AI_INPUT_FIELDS.map(
+  (field) => field.toLocaleLowerCase("en-US"),
 );
 
 type CentralRunActionSequenceEntry = {
@@ -39,20 +49,6 @@ type DoctrineQualityTagDependencies = {
   ) => VisibleCard | undefined;
   rolesForAction: (input: AiDecisionInput, action: LegalAction) => string[];
 };
-
-export type AiDoctrineQualityMetrics = {
-  nakedAgendaInstalls: number;
-  agendaFloodExposure: number;
-  scoreWindowMissed: number;
-  remoteOverbuild: number;
-  economyStall: number;
-  repeatedLowValueCentralRun: number;
-  rigStall: number;
-  assetTrashNeglect: number;
-};
-
-export type AiDoctrineQualityMetricName = keyof AiDoctrineQualityMetrics;
-export type AiDoctrineQualityDelta = AiDoctrineQualityMetrics;
 
 export type AiDoctrineQualityCaseExample = {
   metric: AiDoctrineQualityMetricName;
@@ -435,7 +431,9 @@ export function analyzeDoctrineQualityCases(
 
 function doctrineCaseContainsHiddenInfoMarker(value: string): boolean {
   const tokenSet = new Set(doctrineCaseHiddenInfoTokens(value));
-  return DOCTRINE_CASE_HIDDEN_INFO_MARKERS.some((marker) => tokenSet.has(marker));
+  return DOCTRINE_CASE_HIDDEN_INFO_MARKERS.some((marker) =>
+    tokenSet.has(marker),
+  );
 }
 
 function doctrineCaseHiddenInfoTokens(value: string): string[] {

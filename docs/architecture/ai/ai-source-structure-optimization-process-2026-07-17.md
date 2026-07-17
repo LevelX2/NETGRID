@@ -1,6 +1,6 @@
 # AI Source Structure Optimization Process 2026-07
 
-Status: `package_done:AISSO-1`
+Status: `package_done:AISSO-2`
 
 ## Quelle und Vorgabe
 
@@ -208,6 +208,28 @@ Ergebnis:
   Removal Condition ratcheted; keine neuen Großdateien oder Runtime-Root-
   Dateien können still hinzukommen.
 - Commit: `test(ai): add source structure ratchet`
+
+Ergebnis:
+
+- `check:ai-source-structure` ist Teil des aktiven `check:ai`-Gates und prüft
+  produktive Value-/Type-Importgraphen, ratcheted Hotspot- und Testgrößen sowie
+  die Zahl produktiver Dateien direkt im Runtime-Root.
+- Neue Laufzeitzyklen schlagen immer fehl. Das Gate akzeptiert nur die exakt
+  benannten verbleibenden Type-SCCs und wird rot, sobald eine neue SCC entsteht
+  oder eine bereits entfernte SCC als stale Ausnahme im Ratchet verbleibt.
+- Der Simulation-Summary-/QualityMetrics-Vierzyklus ist über reine
+  `doctrine-quality-types` und `quality-metric-types` vollständig entfernt.
+- `TacticalGoalLike` besitzt einen eigenen Decision-Contract. Der frühere
+  Dreizyklus ist auf den engeren `plan-portfolio`-/`tactical-plan-types`-
+  Zweizyklus reduziert.
+- Verbleibende exakt ratcheted Type-SCCs: Action-Semantik, RunTarget/Hand/Risk
+  und PlanPortfolio/TacticalPlan. Removal Conditions: RunTarget im AISSO-5-
+  Familienschnitt; PlanPortfolio beim AISSO-3-Plan-Mapping-Schnitt; Action-
+  Semantik nur über eine eigene Contractextraktion, falls sie ohne breiten
+  Consumer-Umbau in diesem Prozess sicher möglich ist.
+- Checks: Structure-Gate und Selbsttest grün; sechs fokussierte Testdateien mit
+  64/64 Tests grün; AI-Typecheck, Package-Boundaries und
+  `git diff --check` grün.
 
 ### AISSO-3 – Semantic Choice Ranking nach Override-Familien zerlegen
 

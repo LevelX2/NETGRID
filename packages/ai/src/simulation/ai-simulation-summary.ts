@@ -1,6 +1,6 @@
 import type { CURRENT_RULES_BASELINE, GameState } from "@netgrid/shared";
 import type { AiSimulationActionSequenceEntry } from "./ai-simulation-action-sequence-entry";
-import type { AiQualityMetrics } from "./quality-metrics";
+import type { AiQualityMetrics } from "./quality-metric-types";
 
 export type AiSimulationSummary = {
   seed: string;

@@ -7,23 +7,14 @@ import type {
   RunnerEconomyPosture,
   RunnerRunTargetEvaluation,
 } from "../runner-run-target-evaluation";
-import type { RunnerTacticalGoal } from "../runner-tactical-goals";
 import type { StrategicIntentState } from "../strategic-intent-state";
 import type { TacticalPlanRuntimeResult } from "../plans/tactical-plan-types";
 import { assertSemanticObjectSideSafe } from "../diagnostics/semantic-redaction";
+import type { TacticalGoalLike } from "./tactical-goal-types";
+export type { TacticalGoalLike } from "./tactical-goal-types";
 
 export const SEMANTIC_DECISION_FRAME_SCHEMA_VERSION =
   "semantic-decision-frame-v1" as const;
-
-export type TacticalGoalLike = RunnerTacticalGoal | {
-  goalId: string;
-  family: string;
-  priority: number;
-  urgency?: string;
-  targetServerId?: string;
-  source?: string;
-  evidence?: readonly string[];
-};
 
 export type SemanticDecisionEconomyContext = {
   availableCredits?: number;
@@ -77,7 +68,9 @@ export type BuildSemanticDecisionFrameParams = {
 export function buildSemanticDecisionFrame(
   params: BuildSemanticDecisionFrameParams,
 ): SemanticDecisionFrame {
-  const legalActionIds = params.input.legalActions.map((action) => action.actionId);
+  const legalActionIds = params.input.legalActions.map(
+    (action) => action.actionId,
+  );
   const legalActionIdSet = new Set(legalActionIds);
   const invalidCandidateIds = (params.actionCandidates ?? [])
     .filter((candidate) => !legalActionIdSet.has(candidate.actionId))
@@ -97,7 +90,9 @@ export function buildSemanticDecisionFrame(
   );
   const actionCandidates = legalActionIds
     .map((actionId) => candidatesByActionId.get(actionId))
-    .filter((candidate): candidate is ActionSemanticCandidate => Boolean(candidate));
+    .filter((candidate): candidate is ActionSemanticCandidate =>
+      Boolean(candidate),
+    );
   const economyContext = buildEconomyContext(params);
 
   const frame: SemanticDecisionFrame = {

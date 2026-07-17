@@ -1,18 +1,8 @@
 import type { AiSimulationSummary } from "./ai-simulation-summary";
 import { sortedUnique } from "../runtime/collection";
-import type { AiDoctrineQualityMetrics } from "./doctrine-quality-tags";
-
-export type AiQualityMetrics = {
-  illegalActions: number;
-  fallbackRate: number;
-  timeoutRate: number;
-  reasonCodeCoverage: string[];
-  actionTypeCoverage: string[];
-  roleCoverage: string[];
-  progressScore: number;
-  holdout: boolean;
-  doctrine: AiDoctrineQualityMetrics;
-};
+import type { AiDoctrineQualityMetrics } from "./doctrine-quality-types";
+import type { AiQualityMetrics } from "./quality-metric-types";
+export type { AiQualityMetrics } from "./quality-metric-types";
 
 export type AiSoakResult = {
   summaries: AiSimulationSummary[];
