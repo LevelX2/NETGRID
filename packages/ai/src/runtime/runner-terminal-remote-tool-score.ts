@@ -105,8 +105,9 @@ export function runnerTerminalRemoteToolScoreComponent(
 
     const damageThreat = runnerDamageThreatAssessment(input);
     if (
-      !["confirmed", "critical"].includes(damageThreat.level) ||
-      damageThreat.handCount < damageThreat.recommendedHandFloor
+      damageThreat.deckBelief.level !== "confirmed" ||
+      damageThreat.flatlineRisk.handCount <
+        damageThreat.flatlineRisk.recommendedHandFloor
     ) {
       return undefined;
     }
@@ -124,7 +125,7 @@ export function runnerTerminalRemoteToolScoreComponent(
     const advancedDamageRoots = unseenDamageRemoteRoots.filter(
       (position) => position.advanced,
     );
-    const damageThreatBase = damageThreat.level === "critical" ? 1_250 : 1_000;
+    const damageThreatBase = 1_000;
     const targetRelevance =
       advancedDamageRoots.length > 0
         ? 300
@@ -140,10 +141,11 @@ export function runnerTerminalRemoteToolScoreComponent(
         `terminal_tool_step:${
           installPreparation ? "install_then_activate" : "execute"
         }`,
-        `damage_threat_level:${damageThreat.level}`,
-        `damage_visible_score:${damageThreat.visiblePunishSignalScore}`,
-        `damage_hand:${damageThreat.handCount}`,
-        `damage_hand_floor:${damageThreat.recommendedHandFloor}`,
+        `damage_deck_belief_level:${damageThreat.deckBelief.level}`,
+        `damage_deck_signal_score:${damageThreat.deckBelief.signalScore}`,
+        `flatline_risk_level:${damageThreat.flatlineRisk.level}`,
+        `damage_hand:${damageThreat.flatlineRisk.handCount}`,
+        `damage_hand_floor:${damageThreat.flatlineRisk.recommendedHandFloor}`,
         `unseen_remote_roots:${unseenDamageRemoteRoots.length}`,
         `unseen_remote_ice:${unseenDamageRemoteIce.length}`,
         `advanced_hidden_roots:${advancedDamageRoots.length}`,

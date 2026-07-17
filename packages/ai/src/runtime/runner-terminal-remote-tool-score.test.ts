@@ -136,8 +136,27 @@ describe("runnerTerminalRemoteToolScoreComponent", () => {
       key: "runner_damage_intelligence_tool",
       value: 1300,
     });
-    expect(component?.reason).toContain("damage_threat_level:confirmed");
+    expect(component?.reason).toContain("damage_deck_belief_level:confirmed");
     expect(component?.reason).toContain("advanced_hidden_roots:1");
+  });
+
+  it("keeps confirmed damage-deck knowledge useful after acute risk decays", () => {
+    const current = confirmedDamageStrategyInput({ advancementCounters: 2 });
+    current.playerView.opponent.agendaPoints = 4;
+    current.playerView.stateVersion = 80;
+
+    const component = runnerTerminalRemoteToolScoreComponent(
+      current,
+      action("see-ya", "activated_card_ability"),
+      candidate("effect:expose_info"),
+    );
+
+    expect(component).toMatchObject({
+      key: "runner_damage_intelligence_tool",
+      value: 1300,
+    });
+    expect(component?.reason).toContain("damage_deck_belief_level:confirmed");
+    expect(component?.reason).toContain("flatline_risk_level:suspected");
   });
 
   it("does not infer proactive SeeYa value from a merely suspected damage plan", () => {
