@@ -1,6 +1,6 @@
 # AI-Match-9FEF-Decision-Audit
 
-Status: Umsetzung freigegeben
+Status: Red-Evidence auf aktuellem Code gesichert
 
 ## Match und technische Evidence
 
@@ -111,3 +111,27 @@ wiederholbare Hintergrundaktion darf mehrfach gewählt werden, wenn sie legal
 und gegenüber den Alternativen sinnvoll ist; daraus folgt keine Aufweichung
 der Broker-Kartenregel.
 
+## Reproduktion auf aktuellem Code
+
+Vierzehn spielgleiche Fixtures wurden mit dem produktiven Chooser und
+side-sicherem Eventpräfix capturiert. Die Captures bis einschließlich D95
+liefen mit `warmupPolicy: strict` ohne Drift. Ab D109 wurde der Rebase bewusst
+und ausschließlich wegen einer bereits korrigierten früheren Entscheidung
+verwendet:
+
+- Historisch wählte D95 `runner.start_run.rd`.
+- Der aktuelle Chooser wählt im unveränderten D95-Checkpoint
+  `runner.start_run.hq`.
+- Bis D159 gibt es genau diese eine Warmup-Abweichung; der kompatible Suffix
+  nach D95 wird für den jeweiligen Zielzustand wiederhergestellt.
+
+Der direkte Checkpoint-Lauf ergibt:
+
+- 12 Zielerwartungen rot, jeweils ausschließlich `behavior_regression`;
+- D95 bereits grün und deshalb kein zusätzlicher Verhaltensfix;
+- D92 als historische positive Checkout-Gegenprobe grün;
+- der bestehende frühe Unknown-ICE-Prüfrun aus Match E8886 grün.
+
+Damit bleibt die fachliche Grenze explizit: Ein Informationsrun darf beginnen.
+Die KI soll vor einem unbezahlbaren Break auschecken und darf nicht mehrere
+Funding-Klicks als vermeintliche Vollrun-Vorbereitung verschwenden.
