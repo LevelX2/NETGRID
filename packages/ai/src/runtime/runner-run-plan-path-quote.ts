@@ -602,9 +602,23 @@ function sequenceForActions(params: {
         )
       : 0;
   const projectedProbeCreditLoss = probeCreditLossBeforeSequence + cashCost;
+  const probeEncounterHasImmediateSafetyThreat =
+    currentEncounteredIceCard(
+      params.input,
+    )?.effectiveRunQuote?.subroutines.some(
+      isImmediateSafetyThreatSubroutine,
+    ) === true;
+  const probeCanConvertToFundedFullPath =
+    params.plan.objective.kind === "probe_unknown_ice" &&
+    !currentRunRemainingIce(params.input).some(
+      (ice) => !ice.known || ice.rezzed !== true,
+    ) &&
+    (creditsAfterSequence >= Math.max(2, reserveTarget) ||
+      probeEncounterHasImmediateSafetyThreat);
   const violatesProbeRiskBudget =
     params.plan.objective.kind === "probe_unknown_ice" &&
-    projectedProbeCreditLoss > params.plan.objective.riskBudget.maxCreditLoss;
+    projectedProbeCreditLoss > params.plan.objective.riskBudget.maxCreditLoss &&
+    !probeCanConvertToFundedFullPath;
   const violatesReserve =
     creditsAfterSequence < reserveTarget || violatesProbeRiskBudget;
   return {
@@ -640,6 +654,8 @@ function sequenceForActions(params: {
             `sequence_probe_credit_loss_before:${probeCreditLossBeforeSequence}`,
             `sequence_probe_credit_loss_projected:${projectedProbeCreditLoss}`,
             `sequence_probe_credit_loss_limit:${params.plan.objective.riskBudget.maxCreditLoss}`,
+            `sequence_probe_immediate_safety_threat:${probeEncounterHasImmediateSafetyThreat}`,
+            `sequence_probe_full_path_conversion:${probeCanConvertToFundedFullPath}`,
             `sequence_probe_credit_loss_budget_exceeded:${violatesProbeRiskBudget}`,
           ]
         : []),

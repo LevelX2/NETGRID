@@ -320,7 +320,11 @@ export function mappedPlanHasImmediateVisibleRunPayoff(
     plan.evidence.includes("runner_run_target_payoff:score_threat") ||
     semanticRuntimeChoiceHasAnyScoreComponent(mappedChoice, [
       "runner_hq_known_agenda",
-    ])
+    ]) ||
+    semanticRuntimeChoiceHasScoreBreakdownComponent(
+      mappedChoice,
+      "runner_hq_success_window_setup",
+    )
   );
 }
 

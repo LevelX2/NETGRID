@@ -588,6 +588,16 @@ export function runnerRunTargetCurrentStep(
     runnerCentralMatchpointAccessOpportunity(context, evaluation);
   const probeOnly =
     evaluation?.evidence.includes("run_commitment:probe_only") === true;
+  const usefulNonFundingActionAvailable =
+    (context.input.legalActions ?? []).some(
+      (candidate) => candidate.type === "draw_card",
+    ) ||
+    (context.runnerHandDevelopmentEvaluations ?? []).some(
+      usefulLegalRunnerHandDevelopment,
+    );
+  const longHorizonFundingFallback =
+    evaluation?.pathPassability === "blocked_unpayable" &&
+    !usefulNonFundingActionAvailable;
   if (evaluation?.recommendation === "draw_for_damage_buffer") {
     return createPlanStep({
       stepId: `draw_hand_buffer_before_run:${evaluation.targetServerId}`,
@@ -602,10 +612,12 @@ export function runnerRunTargetCurrentStep(
   if (
     evaluation?.recommendation === "gain_credits_first" &&
     !probeOnly &&
-    fundingHasImmediateRunValue &&
     !preserveLastClickForScoreThreat &&
     !preserveReachableMatchpointRun &&
-    (boundedPathFunding || urgentContestFunding || concreteEconomyFunding)
+    (concreteEconomyFunding ||
+      longHorizonFundingFallback ||
+      (fundingHasImmediateRunValue &&
+        (boundedPathFunding || urgentContestFunding)))
   ) {
     return createPlanStep({
       stepId: `gain_credits_before_run:${evaluation.targetServerId}`,

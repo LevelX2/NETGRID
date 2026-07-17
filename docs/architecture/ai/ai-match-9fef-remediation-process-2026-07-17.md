@@ -1,6 +1,6 @@
 # AI-Match-9FEF-Remediation-Prozess
 
-Status: in Umsetzung
+Status: fachlich abgeschlossen und verifiziert
 
 Quelle: vollständige Decision-Analyse von `match_9fef30abd4b16341`
 vom 17. Juli 2026 und anschließende Nutzerfreigabe.
@@ -116,6 +116,10 @@ Genau ein Paket ist aktiv. Ein Paket wird erst nach Checks,
 - Done-Gate: keine neue fachliche oder technische Regression.
 - Commit: `Verify AI match 9fef remediation`.
 
+Abgeschlossen. Die 15 Match-/Gegenproben, alle drei KI-Testshards,
+Typecheck, AI-Full-Gates und der Deck-Consumer-Audit sind grün. Eurocorpse
+war weder im Matchdeck noch Gegenstand einer Codeänderung.
+
 ### Paket 6 – Integration und Cleanup
 
 - Ziel: aktuelles `main` in den Arbeitsbranch integrieren, final prüfen,
@@ -141,4 +145,3 @@ codex/ai-match-9fef-analysis. Nutze den Hauptworkspace nur für Read-only-
 Evidence und den finalen Merge. Arbeite immer nur am aktuellen Paket,
 committe jedes bestandene Done-Gate und entferne Worktree und Branch erst
 nach erfolgreicher Integration.`
-

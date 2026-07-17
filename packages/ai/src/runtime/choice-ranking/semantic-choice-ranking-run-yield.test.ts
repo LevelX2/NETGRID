@@ -5,6 +5,7 @@ import {
   centralRunMapping,
   choice,
   legalAction,
+  scoreComponentEvidence,
 } from "./semantic-choice-ranking.test-support";
 
 describe("tactical plan run yield contracts", () => {
@@ -28,5 +29,34 @@ describe("tactical plan run yield contracts", () => {
     expect(result.outcome).toBe("semantic_choice_selected");
     expect(result.choice?.action.actionId).toBe("draw");
     expect(result.overrideReason).toBe("inferior_run_target_mapping_yield");
+  });
+
+  it("keeps an affordable HQ success-window run over the acute hand buffer", () => {
+    const draw = legalAction("draw", "draw_card");
+    const run = legalAction("run-hq", "start_run", { serverId: "hq" });
+    const drawChoice = choice(draw, 1543, [], {
+      key: "runner_hand_buffer_need",
+      value: 600,
+      reason: "hand:1|damage_pressure:false",
+    });
+    const runChoice = choice(
+      run,
+      2764,
+      scoreComponentEvidence("runner_hq_success_window_setup"),
+      {
+        key: "runner_hq_success_window_setup",
+        value: 1700,
+        reason: "affordable_success_window:true",
+      },
+    );
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [drawChoice, runChoice],
+      centralRunMapping([run]),
+      drawChoice,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_blocked");
+    expect(result.choice?.action.actionId).toBe("run-hq");
   });
 });

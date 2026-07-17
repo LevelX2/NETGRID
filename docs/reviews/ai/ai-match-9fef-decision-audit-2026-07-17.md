@@ -1,6 +1,6 @@
 # AI-Match-9FEF-Decision-Audit
 
-Status: Red-Evidence auf aktuellem Code gesichert
+Status: vollständig analysiert, umgesetzt und grün verifiziert
 
 ## Match und technische Evidence
 
@@ -135,3 +135,69 @@ Der direkte Checkpoint-Lauf ergibt:
 Damit bleibt die fachliche Grenze explizit: Ein Informationsrun darf beginnen.
 Die KI soll vor einem unbezahlbaren Break auschecken und darf nicht mehrere
 Funding-Klicks als vermeintliche Vollrun-Vorbereitung verschwenden.
+
+## Umgesetzter Green-Stand
+
+Die acht freigegebenen Fehlergruppen sind generisch behoben:
+
+- Parent- und Child-Choices werden getrennt bewertet. Priority Wreck plant
+  einen tatsächlich sinnvollen Zahlbetrag ein, statt den Event-Score trotz
+  vorhersehbarem `pay_0` stehen zu lassen.
+- Das HQ-Erfolgsfenster für Jettison bleibt nur dann ein unmittelbarer
+  Run-Payoff, wenn der bekannte HQ-Pfad erreichbar ist, keine unvermeidbare
+  sichtbare Trace-Tag-Gefahr enthält und nach dem Pfad noch der sichtbare
+  ICE-Trash bezahlbar ist. Ein kostenloser HQ-Check bleibt dadurch erhalten;
+  ein gefährlicher Weg verdrängt eine sinnvolle Entwicklungskarte nicht.
+- Restrictive Net Zoning bewertet HQ und R&D früh als natürliche Ziele,
+  einen im Aufbau befindlichen Remote nach konkreter Zukunftsevidence und
+  Archives nicht mehr durch bloße Action-Reihenfolge. Der falsche
+  Corp-Installationsrabatt wurde entfernt.
+- Runziele tragen explizit `probe_only` oder `full_path`. Ein Prüfrun darf
+  sofort beginnen, unbekanntes ICE aufdecken und vor dem Bezahlen aussteigen.
+  Er erzeugt keine vorgetäuschte Vollrun-Finanzierung. Nach dem Rez darf er
+  nur bei einem nun tragfähigen Vollpfad oder einer unmittelbar zu lösenden
+  Sicherheitsgefahr in einen bezahlten Vollrun übergehen.
+- Bekannte teure Zentralpfade, jüngste Run-Kosten, Access-/Trash-Budget und
+  strategische Reserve werden in der Arbitration wirksam. Ein ICE wird nicht
+  erst teuer gebrochen, um anschließend ohne finanzierbaren Restpayoff
+  freiwillig auszuchecken.
+- Funding verlangt einen konkreten Folgeschritt. Gibt es Draw oder eine
+  sinnvolle Handentwicklung, verdrängt ein negativer Run-Funding-Plan diese
+  Aktion nicht. Fehlt dagegen wirklich jede sinnvolle Alternative, darf eine
+  legale langfristige Hintergrundaktion auch wiederholt gewählt werden; es
+  gibt keine starre Einmal-pro-Zug-Regel.
+- Mehrschrittpläne werden nach Zustandsänderungen revalidiert. Die
+  Fortsetzungsentscheidung verwendet öffentliche ICE-Anzahl,
+  Stärkemodifikatoren, aktuelle Credits und den verbleibenden Pfad.
+
+## Deck-Consumer- und Eurocorpse-Audit
+
+Der Matchsnapshot enthält 45 Karten und 19 eindeutige Karten, darunter die
+hier relevanten Priority Wreck, Core Command: Jettison Ice und Restrictive
+Net Zoning. Eurocorpse™ Spin Chip ist nicht enthalten. Die versionierten
+Deckdateien unter `data/decks/` enthalten keine dieser vier Karten-IDs; die
+betroffenen Karten erscheinen in Karten-Smokes, Support-Inventaren und
+Decision-Fixtures. Da weder Decklisten noch Kartendaten geändert wurden, war
+keine Deckmigration oder Snapshot-Aktualisierung erforderlich.
+
+Die bestehenden Eurocorpse-Fixtures und die frühere Eurocorpse-Remediation
+bleiben unverändert. Die vorliegende Änderung berührt ausschließlich
+generische Choice-, Runbudget-, Planfortsetzungs- und sichtbare
+Erfolgsfensterlogik.
+
+## Abschlussverifikation
+
+- 15 Match-9FEF-Ziel- und Gegenproben: grün
+- fokussierte Regressionsgruppe für 9FEF, FD7671 und DFE6: grün
+- KI-Shard 1: 123 Dateien, 787 Tests, grün
+- KI-Shard 2: 123 Dateien, 972 Tests, grün
+- KI-Shard 3: 122 Dateien, 785 Tests, grün
+- `@netgrid/ai` Typecheck: grün
+- `check:ai:full`, einschließlich Source-Structure und Derived Facts: grün
+- `git diff --check`: grün
+
+Damit sind sowohl der gravierende teure Run gegen den öffentlich eindeutig
+als Upgrade erkennbaren Remote-Inhalt als auch die unnötige ICE-
+Installationsverteuerung auf Archives durch reproduzierbare Einzelaufgaben
+abgedeckt. Die positiven Prüfrun-Gegenproben verhindern zugleich eine zu
+pauschale Run-Abwertung.

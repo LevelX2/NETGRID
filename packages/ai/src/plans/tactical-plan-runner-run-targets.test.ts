@@ -274,6 +274,7 @@ describe("runnerPressureProbeAllowance", () => {
         planContext({
           primaryStrategyId: "runner.hq_pressure",
           runnerClicks: 4,
+          legalActions: [basicAction("draw", "draw_card")],
           runTargetEvaluations: [bounded],
         }),
         hqRun,
@@ -285,6 +286,7 @@ describe("runnerPressureProbeAllowance", () => {
         planContext({
           primaryStrategyId: "runner.hq_pressure",
           runnerClicks: 4,
+          legalActions: [basicAction("draw", "draw_card")],
           runTargetEvaluations: [distant],
         }),
         hqRun,
@@ -312,6 +314,7 @@ describe("runnerPressureProbeAllowance", () => {
         planContext({
           primaryStrategyId: "runner.rnd_pressure",
           runnerClicks: 3,
+          legalActions: [basicAction("draw", "draw_card")],
           runTargetEvaluations: [evaluation],
         }),
         rdRun,
@@ -617,6 +620,7 @@ function planContext(input: {
   runnerClicks?: number;
   runnerAgendaPoints?: number;
   agendaPointsToWin?: number;
+  legalActions?: LegalAction[];
   runTargetEvaluations?: RunnerRunTargetEvaluation[];
   economyTransition?: NonNullable<
     TacticalPlanBuildContext["runnerEconomyPosture"]
@@ -625,6 +629,7 @@ function planContext(input: {
   return {
     input: {
       side: "runner",
+      legalActions: input.legalActions ?? [],
       playerView: {
         agendaPointsToWin: input.agendaPointsToWin ?? 7,
         own: {
@@ -650,6 +655,21 @@ function planContext(input: {
         }
       : {}),
   } as TacticalPlanBuildContext;
+}
+
+function basicAction(actionId: string, type: LegalAction["type"]): LegalAction {
+  return {
+    actionId,
+    side: "runner",
+    type,
+    label: actionId,
+    source: "basic_action",
+    timingPoint: "runner_action.main",
+    costs: [],
+    targetRequirements: [],
+    visibility: "private_to_actor",
+    expiresAtStateVersion: 2,
+  };
 }
 
 function runAction(actionId: string, serverId: string): LegalAction {
