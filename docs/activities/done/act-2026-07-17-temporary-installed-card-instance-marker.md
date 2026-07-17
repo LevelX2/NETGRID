@@ -1,19 +1,30 @@
 ---
 activityId: act-2026-07-17-temporary-installed-card-instance-marker
-status: inbox
+status: done
 kind: fix
 area: web
 priority: high
 primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-07-17
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-07-17
+completedAt: 2026-07-17
+branch: codex/act-temporary-card-instance-marker
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/shared/src/index.ts
+  - packages/engine/src/game/view/card-view.ts
+  - apps/web/app/action-board-ui.ts
+  - apps/web/features/cards/CardView.tsx
+  - apps/web/features/game-board/RunTimelineOverlay.tsx
+checks:
+  - corepack pnpm --filter @netgrid/shared typecheck
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - corepack pnpm --filter @netgrid/web typecheck
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/game/view/player-view-projection.test.ts
+  - corepack pnpm --filter @netgrid/web exec vitest run app/action-board-ui.test.ts app/card-view-model.test.ts
+  - git diff --check
 ---
 
 # Temporäre Karten markieren und gleichnamige Run-Aktionen zuordnen
@@ -131,36 +142,36 @@ Spiel kam und welcher spätere Lifecycle-Effekt für sie vorgemerkt ist.
 
 ## Akzeptanzkriterien
 
-- [ ] Zwei gleichnamige Rent-I-Con erzeugen im Run-Fenster keine visuell
+- [x] Zwei gleichnamige Rent-I-Con erzeugen im Run-Fenster keine visuell
   identischen Pump- oder Break-Aktionsbuttons mehr.
-- [ ] Bei zwei, drei oder mehr gleichnamigen Exemplaren trägt jede Karte einen
+- [x] Bei zwei, drei oder mehr gleichnamigen Exemplaren trägt jede Karte einen
   eindeutigen kompakten Instanzmarker und jede ihrer Aktionen exakt denselben
   Marker.
-- [ ] Die Zuordnung bleibt ohne Richtungsbegriffe wie `links` oder `rechts`
+- [x] Die Zuordnung bleibt ohne Richtungsbegriffe wie `links` oder `rechts`
   verständlich und funktioniert auch in einem umgebrochenen oder mobilen
   Layout.
-- [ ] Der Nutzer kann vor dem Auslösen erkennen, ob er das dauerhaft oder das
+- [x] Der Nutzer kann vor dem Auslösen erkennen, ob er das dauerhaft oder das
   per Sneak Preview installierte Rent-I-Con verwendet.
-- [ ] Die per Sneak Preview installierte konkrete Programmkarte trägt im Rig
+- [x] Die per Sneak Preview installierte konkrete Programmkarte trägt im Rig
   einen kleinen sichtbaren Marker, der Quelle und Rückkehr am Runner-Zugende
   verständlich erklärt.
-- [ ] Nur die tatsächlich in `temporaryProgramInstallReturns` gebundene
+- [x] Nur die tatsächlich in `temporaryProgramInstallReturns` gebundene
   Karteninstanz erhält den Marker; gleichnamige andere Exemplare bleiben
   unmarkiert.
-- [ ] Verlässt die temporäre Instanz vorzeitig das Rig oder kehrt sie am
+- [x] Verlässt die temporäre Instanz vorzeitig das Rig oder kehrt sie am
   Zugende in den Grip zurück, verschwindet der Marker mit genau dieser
   Instanz.
-- [ ] Sichtbarer Text, zugänglicher Name und Tooltip/Detailhinweis benennen
+- [x] Sichtbarer Text, zugänglicher Name und Tooltip/Detailhinweis benennen
   dieselbe Quelleninstanz; die Zuordnung funktioniert auch ohne Hover.
-- [ ] Bei nur einem Exemplar bleiben die bisherigen kurzen Run-Labels
+- [x] Bei nur einem Exemplar bleiben die bisherigen kurzen Run-Labels
   unverändert.
-- [ ] Die dargestellte Zuordnung wird aus `breakerId` und PlayerView/Rig
+- [x] Die dargestellte Zuordnung wird aus `breakerId` und PlayerView/Rig
   abgeleitet; rohe Instanz-IDs werden nicht angezeigt.
-- [ ] Die Rules Engine bleibt die einzige Autorität für LegalAction,
+- [x] Die Rules Engine bleibt die einzige Autorität für LegalAction,
   Rent-I-Con-Run-End-Trash und Sneak-Preview-Rückgabe.
-- [ ] PlayerView-, PublicEvent-, Reconnect-, Replay- und WebSocket-Grenzen
+- [x] PlayerView-, PublicEvent-, Reconnect-, Replay- und WebSocket-Grenzen
   leaken keine verdeckten Karteninformationen.
-- [ ] Web-Tests decken gleiche Pump- und Break-Aktionen von drei Exemplaren,
+- [x] Web-Tests decken gleiche Pump- und Break-Aktionen von drei Exemplaren,
   ein einzelnes Exemplar sowie Tastatur-/Tooltip-Texte ab.
 
 ## Umsetzungshinweise
@@ -192,4 +203,16 @@ Spiel kam und welcher spätere Lifecycle-Effekt für sie vorgemerkt ist.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Gleichnamige installierte Karten erhalten nun in sichtbarer Rig-Reihenfolge
+die gemeinsamen Marker `#1`, `#2`, `#3` und so weiter. Die Run-Aktionslabels
+verwenden über die bereits gebundene `breakerId` exakt denselben Marker; ein
+expliziter Detailtooltip und der zugängliche Name erklären die Zuordnung auch
+ohne Textüberlauf. Einzelne Exemplare behalten ihre bisherigen kurzen Labels.
+
+Der vorhandene Engine-Status `temporaryProgramInstallReturns` wird für den
+Runner side-sicher als generischer Lifecycle-Marker an genau die installierte
+Karteninstanz projiziert. `CardView` zeigt dafür `Sneak Preview` mit dem Detail
+`Am Runner-Zugende zurück in den Grip, falls noch installiert`. Verlässt die
+Karte das Rig oder wird der vorgemerkte Effekt aufgelöst, wird kein Marker mehr
+projiziert. Regelwirkung, LegalActions und technische Instanz-IDs wurden nicht
+verändert beziehungsweise nicht sichtbar gemacht.

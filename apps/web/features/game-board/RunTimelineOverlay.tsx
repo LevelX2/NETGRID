@@ -21,6 +21,7 @@ import {
   runBreakerActionHint,
   runWindowInteractionAmbience,
   runWindowActionButtonLabel,
+  runWindowActionInstanceDetail,
   runWindowStatusLabel,
   serverDisplayLabel,
   serverTargetIdForChoiceOption,
@@ -268,10 +269,14 @@ export function RunTimelineOverlay({
           >
             {currentServerActions.map((action) => {
               const compactLabel = runWindowActionButtonLabel(view, action);
-              const fullLabel =
+              const baseFullLabel =
                 compactLabel.startsWith("SMC:") && action.label
                   ? normalizeVisibleTerms(action.label)
                   : runAwareActionButtonLabel(view, action);
+              const instanceDetail = runWindowActionInstanceDetail(view, action);
+              const fullLabel = instanceDetail
+                ? `${baseFullLabel}. ${instanceDetail}`
+                : baseFullLabel;
               return (
                 <OverflowAwareActionButton
                   action={action}
@@ -279,6 +284,7 @@ export function RunTimelineOverlay({
                   key={action.actionId}
                   label={fullLabel}
                   displayLabel={compactLabel}
+                  {...(instanceDetail ? { tooltipLabel: instanceDetail } : {})}
                   tone={actionButtonTone(view, action)}
                   onClick={() => onAction(action)}
                   disabled={actionDisabled}

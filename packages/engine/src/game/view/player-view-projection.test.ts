@@ -24,6 +24,76 @@ import { cardImplementationForDefinitionId } from "../../card-implementations/re
 import { overadvanceViewFields } from "./card-view";
 
 describe("PlayerView projection", () => {
+  it("projects a side-safe temporary return marker only while the program remains installed", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({ seed: "temporary-return-view-marker" }),
+    );
+    const programId = moveRunnerCardToGrip(state, "simple_decoder");
+    removeEverywhere(state, programId);
+    state.runner.rig.programs.push(programId);
+    state.cardInstances[programId]!.zone = {
+      side: "runner",
+      zone: "rig",
+    };
+    state.temporaryProgramInstallReturns = [
+      {
+        cardId: programId,
+        sourceCardDefinitionId: "onr_v1_110_sneak-preview",
+      },
+    ];
+
+    const runnerProgram = getPlayerView(state, "runner").own.rig?.find(
+      (card) => card.instanceId === programId,
+    );
+    const corpProgram = getPlayerView(state, "corp").opponent.rig?.find(
+      (card) => card.instanceId === programId,
+    );
+    expect(runnerProgram?.lifecycleMarkers).toEqual([
+      {
+        kind: "temporary_return_to_grip",
+        label: "Sneak Preview",
+        detail: "Am Runner-Zugende zurück in den Grip, falls noch installiert",
+      },
+    ]);
+    expect(corpProgram).not.toHaveProperty("lifecycleMarkers");
+
+    removeEverywhere(state, programId);
+    state.runner.heap.push(programId);
+    state.cardInstances[programId]!.zone = {
+      side: "runner",
+      zone: "heap",
+    };
+    const trashedProgram = getPlayerView(
+      state,
+      "runner",
+    ).own.heapOrArchives.find((card) => card.instanceId === programId);
+    expect(trashedProgram).not.toHaveProperty("lifecycleMarkers");
+
+    removeEverywhere(state, programId);
+    state.runner.grip.push(programId);
+    state.cardInstances[programId]!.zone = {
+      side: "runner",
+      zone: "grip",
+    };
+    const returnedProgram = getPlayerView(
+      state,
+      "runner",
+    ).own.gripOrHq.find((card) => card.instanceId === programId);
+    expect(returnedProgram).not.toHaveProperty("lifecycleMarkers");
+
+    removeEverywhere(state, programId);
+    state.runner.rig.programs.push(programId);
+    state.cardInstances[programId]!.zone = {
+      side: "runner",
+      zone: "rig",
+    };
+    state.temporaryProgramInstallReturns = [];
+    const clearedProgram = getPlayerView(state, "runner").own.rig?.find(
+      (card) => card.instanceId === programId,
+    );
+    expect(clearedProgram).not.toHaveProperty("lifecycleMarkers");
+  });
+
   it("does not leak hidden Corp card titles into the Runner view or public events", () => {
     let state = toRunnerTurn(createGameAfterSetup({ seed: "visibility" }));
     moveRunnerCardToGrip(state, "simple_run_event");

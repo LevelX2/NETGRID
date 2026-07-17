@@ -182,6 +182,7 @@ type OverflowAwareActionButtonProps = Omit<
   action: LegalAction;
   label: string;
   displayLabel?: string;
+  tooltipLabel?: string;
   displayCostChips?: CostChipView[] | undefined;
   iconSize?: number;
   tone?: ActionButtonTone;
@@ -204,6 +205,7 @@ export function OverflowAwareActionButton({
   action,
   label,
   displayLabel = label,
+  tooltipLabel,
   displayCostChips,
   iconSize,
   tone = "default",
@@ -267,7 +269,7 @@ export function OverflowAwareActionButton({
       className={tonedClassName}
       style={tonedStyle}
       aria-label={label}
-      data-tooltip={tooltipEnabled ? label : undefined}
+      data-tooltip={tooltipLabel ?? (tooltipEnabled ? label : undefined)}
       data-action-tone={tone === "default" ? undefined : tone}
     >
       <ActionLeadIcon

@@ -4,7 +4,7 @@ import type { CSSProperties } from "react";
 import type { LegalAction, PlayerView, Side, VisibleCard } from "@netgrid/shared";
 
 import type { BoardHighlight } from "../../app/action-cues";
-import { runnerHostedCardsForHost, type ActionContext } from "../../app/action-board-ui";
+import { runnerHostedCardsForHost, runnerRigCardInstanceMarker, type ActionContext } from "../../app/action-board-ui";
 import { CardView } from "../cards/CardView";
 import type { DisplayVisibleCard } from "../cards/card-view-model";
 import type { CardDisplayMode } from "../settings/settings-model";
@@ -215,6 +215,7 @@ export function ActiveRunnerZoneBoard({
                                 <CardView
                                   card={displayCard}
                                   displayMode={cardDisplayMode}
+                                  instanceMarker={runnerRigCardInstanceMarker(runnerRig, rigCard.instanceId)}
                                   selected={selectedActionContext?.kind === "card" && selectedActionContext.id === rigCard.instanceId}
                                   actions={cardActionsFor(rigCard)}
                                   actionDisabled={actionDisabled}

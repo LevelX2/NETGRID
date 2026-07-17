@@ -75,6 +75,7 @@ export function CardView({
   actionDisabled = false,
   actionLabelForAction = contextualCardActionLabel,
   slotClassName,
+  instanceMarker,
   positionBadge,
   modifierBadges = [],
   runPositionActive = false,
@@ -106,6 +107,7 @@ export function CardView({
   actionDisabled?: boolean;
   actionLabelForAction?: (action: LegalAction) => string;
   slotClassName?: string;
+  instanceMarker?: string | null;
   positionBadge?: string;
   modifierBadges?: IceModifierBadgeView[];
   runPositionActive?: boolean;
@@ -159,12 +161,15 @@ export function CardView({
   const isCompact = compact || displayMode === "compact";
   const modeClass = displayMode === "text-card" ? " textCard" : displayMode === "compact" ? " compactCard" : " placeholderCard";
   const previewCard = preview ? cardWithoutDevelopmentCounters(card) : card;
+  const lifecycleMarkers = preview || forceCardBack ? [] : (card.lifecycleMarkers ?? []);
   const detailLines = card.known ? cardDetailLines(previewCard) : [];
   const rulesText = card.known ? (card.rulesText ?? "") : "";
   const hasRulesText = rulesText.length > 0;
   const hasRulesLines = rulesTextLines(rulesText).length > 0;
   const hasSubroutineMarkers = rulesTextLines(rulesText).some((line) => isSubroutineRuleLine(card.type ?? "", rulesText, line));
-  const tooltipText = card.known ? [card.title, ...detailLines, rulesText].filter(Boolean).join("\n") : undefined;
+  const tooltipText = card.known
+    ? [card.title, ...detailLines, rulesText, ...lifecycleMarkers.map((marker) => `${marker.label}: ${marker.detail}`)].filter(Boolean).join("\n")
+    : undefined;
   const preferredImageSource = usePreferredCardImageSource(card.definitionId);
   const preferredImageUrl = preferredImageSource.src ?? card.imageUrl;
   const preferredImageFallbackUrl = preferredImageSource.fallbackSrc;
@@ -240,12 +245,16 @@ export function CardView({
   const setBadgeLabel = card.known && showSetBadges ? card.setShortLabel : undefined;
   const setBadgeTitle = card.known && showSetBadges ? card.setDetailLabel : undefined;
   const setBadgeAriaSuffix = setBadgeTitle ? `, Set ${setBadgeTitle}` : "";
+  const instanceMarkerAriaSuffix = instanceMarker ? `, Instanz ${instanceMarker}` : "";
+  const lifecycleMarkerAriaSuffix = lifecycleMarkers.length > 0
+    ? `, ${lifecycleMarkers.map((marker) => `${marker.label}: ${marker.detail}`).join(", ")}`
+    : "";
   const cardAriaLabel = showAdvancementCounters && advancementLabel
     ? card.known
-      ? `Karte ${card.title}, ${advancementLabel}${setBadgeAriaSuffix}${archiveFacedown ? ", verdeckt im Archiv" : ""}${inactiveZoneAriaSuffix}${forceCardBack ? ", Rückseite angezeigt" : ""}${viewMarkerActive ? ", wird gerade angesehen" : ""}${cardStateAria}${modifierBadgeAriaSuffix}`
+      ? `Karte ${card.title}, ${advancementLabel}${instanceMarkerAriaSuffix}${lifecycleMarkerAriaSuffix}${setBadgeAriaSuffix}${archiveFacedown ? ", verdeckt im Archiv" : ""}${inactiveZoneAriaSuffix}${forceCardBack ? ", Rückseite angezeigt" : ""}${viewMarkerActive ? ", wird gerade angesehen" : ""}${cardStateAria}${modifierBadgeAriaSuffix}`
       : `Verdeckte Karte, ${advancementLabel}`
     : card.known
-      ? `Karte ${card.title}${setBadgeAriaSuffix}${archiveFacedown ? ", verdeckt im Archiv" : ""}${inactiveZoneAriaSuffix}${forceCardBack ? ", Rückseite angezeigt" : ""}${viewMarkerActive ? ", wird gerade angesehen" : ""}${cardStateAria}${modifierBadgeAriaSuffix}`
+      ? `Karte ${card.title}${instanceMarkerAriaSuffix}${lifecycleMarkerAriaSuffix}${setBadgeAriaSuffix}${archiveFacedown ? ", verdeckt im Archiv" : ""}${inactiveZoneAriaSuffix}${forceCardBack ? ", Rückseite angezeigt" : ""}${viewMarkerActive ? ", wird gerade angesehen" : ""}${cardStateAria}${modifierBadgeAriaSuffix}`
       : `Verdeckte Karte${inactiveZoneAriaSuffix}${modifierBadgeAriaSuffix}`;
 
   const estimatedTooltipHeight = (): number => {
@@ -540,6 +549,33 @@ export function CardView({
 
   return (
     <div className={`cardSlot${slotClassName ? ` ${slotClassName}` : ""}${showCardActions ? " actionMenuOpen" : ""}${runPositionActive ? " runPositionActiveSlot" : ""}${viewMarkerActive ? " viewMarkerActiveSlot" : ""}`}>
+      {instanceMarker ? (
+        <span
+          className="cardInstanceMarker"
+          tabIndex={0}
+          aria-label={`${card.title ?? "Karte"} ${instanceMarker}: Kennzeichnung dieser installierten Karteninstanz`}
+          data-tooltip={`${card.title ?? "Karte"} ${instanceMarker}: Dieselbe Kennzeichnung steht an den zugehörigen Run-Aktionen.`}
+          title={`${card.title ?? "Karte"} ${instanceMarker}`}
+        >
+          {instanceMarker}
+        </span>
+      ) : null}
+      {lifecycleMarkers.length > 0 ? (
+        <span className="cardLifecycleMarkers">
+          {lifecycleMarkers.map((marker) => (
+            <span
+              className="cardLifecycleMarker"
+              key={`${marker.kind}-${marker.label}`}
+              tabIndex={0}
+              aria-label={`${marker.label}: ${marker.detail}`}
+              data-tooltip={`${marker.label}: ${marker.detail}`}
+              title={`${marker.label}: ${marker.detail}`}
+            >
+              {marker.label}
+            </span>
+          ))}
+        </span>
+      ) : null}
       {positionBadge ? (
         <span className="cardPositionBadge" aria-label={`ICE ${positionBadge}: Installationsreihenfolge von innen nach außen`}>
           {positionBadge}

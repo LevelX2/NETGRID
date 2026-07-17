@@ -2854,11 +2854,43 @@ function compactRunWindowBreakerLabel(
   action: LegalAction,
 ): string {
   const breakerTitle = sourceCardTitleForAction(view, action);
+  const breakerId = breakerIdFromAction(action);
+  const instanceMarker = breakerId
+    ? runnerRigCardInstanceMarker(runnerRigForView(view), breakerId)
+    : null;
+  const breakerLabel = [breakerTitle, instanceMarker].filter(Boolean).join(" ");
   if (action.type === "pump_breaker") {
-    return `${breakerTitle ? `${breakerTitle} ` : ""}+${pumpBreakerStrengthAmount(action)} Stärke`;
+    return `${breakerLabel ? `${breakerLabel} ` : ""}+${pumpBreakerStrengthAmount(action)} Stärke`;
   }
   const subroutineLabel = breakSubroutineTargetLabel(action);
-  return `${breakerTitle ? `${breakerTitle}: ` : ""}${subroutineLabel}`;
+  return `${breakerLabel ? `${breakerLabel}: ` : ""}${subroutineLabel}`;
+}
+
+export function runWindowActionInstanceDetail(
+  view: PlayerView,
+  action: LegalAction,
+): string | null {
+  if (action.type !== "pump_breaker" && action.type !== "break_subroutine")
+    return null;
+  const breakerId = breakerIdFromAction(action);
+  if (!breakerId) return null;
+  const runnerRig = runnerRigForView(view);
+  const breaker = runnerRig.find((card) => card.instanceId === breakerId);
+  if (!breaker?.known) return null;
+  const instanceMarker = runnerRigCardInstanceMarker(runnerRig, breakerId);
+  const lifecycleDetails = (breaker.lifecycleMarkers ?? []).map(
+    (marker) => `${marker.label}: ${marker.detail}.`,
+  );
+  if (!instanceMarker && lifecycleDetails.length === 0) return null;
+  const qualifiedTitle = `${breaker.title ?? "Installierte Karte"}${instanceMarker ? ` ${instanceMarker}` : ""}`;
+  return [
+    ...(instanceMarker
+      ? [
+          `${qualifiedTitle}: Diese Aktion verwendet genau diese installierte Karte.`,
+        ]
+      : []),
+    ...lifecycleDetails,
+  ].join(" ");
 }
 
 export function encounterBreakerActions(
@@ -2896,6 +2928,25 @@ function runnerRigForView(view: PlayerView): VisibleCard[] {
   return view.side === "runner"
     ? (view.own.rig ?? [])
     : (view.opponent.rig ?? []);
+}
+
+export function runnerRigCardInstanceMarker(
+  runnerRig: VisibleCard[],
+  instanceId: string,
+): string | null {
+  const card = runnerRig.find(
+    (candidate) => candidate.instanceId === instanceId,
+  );
+  const title = card?.known ? card.title?.trim() : undefined;
+  if (!title) return null;
+  const equalTitleCards = runnerRig.filter(
+    (candidate) => candidate.known && candidate.title?.trim() === title,
+  );
+  if (equalTitleCards.length < 2) return null;
+  const index = equalTitleCards.findIndex(
+    (candidate) => candidate.instanceId === instanceId,
+  );
+  return index >= 0 ? `#${index + 1}` : null;
 }
 
 function breakerIdFromAction(action: LegalAction): string | null {

@@ -171,6 +171,39 @@ describe("card view model ICE strength badge", () => {
       "strengthModifier !== null ? <StrengthModifierBadge amount={strengthModifier} /> : null",
     );
   });
+
+  it("keeps duplicate-instance and temporary-return markers visible and keyboard-readable", () => {
+    const cardSource = readFileSync(
+      new URL("../features/cards/CardView.tsx", import.meta.url),
+      "utf8",
+    );
+    const runnerBoardSource = readFileSync(
+      new URL("../features/game-board/ActiveRunnerZoneBoard.tsx", import.meta.url),
+      "utf8",
+    );
+    const runOverlaySource = readFileSync(
+      new URL("../features/game-board/RunTimelineOverlay.tsx", import.meta.url),
+      "utf8",
+    );
+    const actionControlsSource = readFileSync(
+      new URL("../features/actions/ActionControls.tsx", import.meta.url),
+      "utf8",
+    );
+
+    expect(cardSource).toContain('className="cardInstanceMarker"');
+    expect(cardSource).toContain('className="cardLifecycleMarker"');
+    expect(cardSource).toContain("tabIndex={0}");
+    expect(cardSource).toContain("data-tooltip={`${marker.label}: ${marker.detail}`}");
+    expect(runnerBoardSource).toContain(
+      "instanceMarker={runnerRigCardInstanceMarker(runnerRig, rigCard.instanceId)}",
+    );
+    expect(runOverlaySource).toContain(
+      "{...(instanceDetail ? { tooltipLabel: instanceDetail } : {})}",
+    );
+    expect(actionControlsSource).toContain(
+      "data-tooltip={tooltipLabel ?? (tooltipEnabled ? label : undefined)}",
+    );
+  });
 });
 
 describe("card view model AI Boon run strength badge", () => {
