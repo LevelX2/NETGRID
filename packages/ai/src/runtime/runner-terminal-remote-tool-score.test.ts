@@ -122,6 +122,106 @@ describe("runnerTerminalRemoteToolScoreComponent", () => {
     ).toBeUndefined();
   });
 
+  it("values proactive expose against a confirmed visible damage strategy", () => {
+    const current = confirmedDamageStrategyInput({ advancementCounters: 2 });
+    current.playerView.opponent.agendaPoints = 4;
+
+    const component = runnerTerminalRemoteToolScoreComponent(
+      current,
+      action("see-ya", "activated_card_ability"),
+      candidate("effect:expose_info"),
+    );
+
+    expect(component).toMatchObject({
+      key: "runner_damage_intelligence_tool",
+      value: 1300,
+    });
+    expect(component?.reason).toContain("damage_threat_level:confirmed");
+    expect(component?.reason).toContain("advanced_hidden_roots:1");
+  });
+
+  it("does not infer proactive SeeYa value from a merely suspected damage plan", () => {
+    const current = input({ advancementCounters: 2 });
+    current.playerView.opponent.agendaPoints = 4;
+    current.playerView.stateVersion = 12;
+    current.eventTail = [
+      publicCardEvent(
+        "seen-chance-observation",
+        10,
+        "onr_v1_284_chance-observation",
+      ),
+    ];
+
+    expect(
+      runnerTerminalRemoteToolScoreComponent(
+        current,
+        action("see-ya", "activated_card_ability"),
+        candidate("effect:expose_info"),
+      ),
+    ).toBeUndefined();
+  });
+
+  it("keeps hand-buffer survival ahead of SeeYa under critical damage pressure", () => {
+    const current = confirmedDamageStrategyInput({ advancementCounters: 2 });
+    current.playerView.opponent.agendaPoints = 4;
+    current.playerView.own.gripOrHq = [];
+
+    expect(
+      runnerTerminalRemoteToolScoreComponent(
+        current,
+        action("see-ya", "activated_card_ability"),
+        candidate("effect:expose_info"),
+      ),
+    ).toBeUndefined();
+  });
+
+  it("requires a complete proactive install and activation sequence against damage", () => {
+    const current = confirmedDamageStrategyInput({ advancementCounters: 2 });
+    current.playerView.opponent.agendaPoints = 4;
+    current.playerView.own.clicks = 3;
+    current.playerView.own.credits = 3;
+
+    expect(
+      runnerTerminalRemoteToolScoreComponent(
+        current,
+        installAction(3),
+        candidate("effect:expose_info"),
+      ),
+    ).toBeUndefined();
+
+    current.playerView.own.credits = 4;
+    expect(
+      runnerTerminalRemoteToolScoreComponent(
+        current,
+        installAction(3),
+        candidate("effect:expose_info"),
+      ),
+    ).toMatchObject({
+      key: "runner_damage_intelligence_tool",
+      value: 1300,
+    });
+  });
+
+  it("does not spend SeeYa proactively for damage when only a central target is unseen", () => {
+    const current = confirmedDamageStrategyInput({ advancementCounters: 0 });
+    current.playerView.opponent.agendaPoints = 4;
+    current.playerView.servers = [
+      {
+        id: "hq",
+        root: [],
+        ice: [{ instanceId: "hidden-hq-ice", known: false, rezzed: false }],
+      },
+    ];
+
+    expect(
+      runnerTerminalRemoteToolScoreComponent(
+        current,
+        action("see-ya", "activated_card_ability"),
+        candidate("effect:expose_info"),
+      ),
+    ).toBeUndefined();
+  });
+
   it("does not start an ICE-disruption sequence without a follow-up click", () => {
     const current = input({ advancementCounters: 2 });
     current.playerView.own.clicks = 1;
@@ -139,10 +239,38 @@ describe("runnerTerminalRemoteToolScoreComponent", () => {
 function input(options: { advancementCounters: number }): AiDecisionInput {
   return {
     side: "runner",
+    eventTail: [],
     playerView: {
       agendaPointsToWin: 7,
-      own: { agendaPoints: 0, clicks: 4 },
-      opponent: { agendaPoints: 6 },
+      stateVersion: 20,
+      publicEvents: [],
+      own: {
+        agendaPoints: 0,
+        clicks: 4,
+        credits: 8,
+        tags: 0,
+        maxHandSize: 5,
+        gripOrHq: [
+          hiddenCard("runner-grip-1"),
+          hiddenCard("runner-grip-2"),
+          hiddenCard("runner-grip-3"),
+          hiddenCard("runner-grip-4"),
+        ],
+        heapOrArchives: [],
+        rig: [],
+        scoreArea: [],
+      },
+      opponent: {
+        agendaPoints: 6,
+        identity: {
+          instanceId: "corp-identity",
+          definitionId: "corp-identity",
+          known: true,
+        },
+        discardCards: [],
+        scoreArea: [],
+        rig: [],
+      },
       servers: [
         {
           id: "remote_1",
@@ -165,6 +293,45 @@ function input(options: { advancementCounters: number }): AiDecisionInput {
       ],
     },
   } as unknown as AiDecisionInput;
+}
+
+function confirmedDamageStrategyInput(options: {
+  advancementCounters: number;
+}): AiDecisionInput {
+  const current = input(options);
+  current.playerView.stateVersion = 14;
+  current.eventTail = [
+    publicCardEvent(
+      "seen-chance-observation",
+      10,
+      "onr_v1_284_chance-observation",
+    ),
+    publicCardEvent("seen-urban-renewal", 12, "onr_v1_307_urban-renewal"),
+  ];
+  return current;
+}
+
+function publicCardEvent(
+  eventId: string,
+  stateVersionAfter: number,
+  cardDefinitionId: string,
+): AiDecisionInput["eventTail"][number] {
+  return {
+    eventId,
+    type: "access_card",
+    stateVersionBefore: stateVersionAfter - 1,
+    stateVersionAfter,
+    stateHashAfter: `hash-${eventId}`,
+    publicPayload: {
+      actor: "runner",
+      actionType: "access_card",
+      cardDefinitionId,
+    },
+  } as AiDecisionInput["eventTail"][number];
+}
+
+function hiddenCard(instanceId: string) {
+  return { instanceId, known: false };
 }
 
 function action(actionId: string, type: LegalAction["type"]): LegalAction {
