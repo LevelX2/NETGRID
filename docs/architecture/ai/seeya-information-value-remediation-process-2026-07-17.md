@@ -2,7 +2,7 @@
 
 ## Status
 
-P1 und P2 abgeschlossen, P3 aktiv. Die fachliche Umsetzung ist vom Nutzer
+P1 bis P3 abgeschlossen, P4 aktiv. Die fachliche Umsetzung ist vom Nutzer
 freigegeben; gearbeitet wird im separaten Worktree und ohne Änderung der
 Engine- oder LegalAction-Regeln.
 

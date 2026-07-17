@@ -19,6 +19,51 @@ describe("runnerTerminalRemoteToolScoreComponent", () => {
     expect(component?.reason).toContain("terminal_remote_tool:expose_info");
   });
 
+  it("does not project immediate expose value onto an install without a response click", () => {
+    const current = input({ advancementCounters: 0 });
+    current.playerView.own.clicks = 2;
+    current.playerView.own.credits = 8;
+
+    expect(
+      runnerTerminalRemoteToolScoreComponent(
+        current,
+        installAction(3),
+        candidate("effect:expose_info"),
+      ),
+    ).toBeUndefined();
+  });
+
+  it("does not project expose install value without the activation credit", () => {
+    const current = input({ advancementCounters: 0 });
+    current.playerView.own.clicks = 3;
+    current.playerView.own.credits = 3;
+
+    expect(
+      runnerTerminalRemoteToolScoreComponent(
+        current,
+        installAction(3),
+        candidate("effect:expose_info"),
+      ),
+    ).toBeUndefined();
+  });
+
+  it("keeps expose installation valuable when the complete short sequence is funded", () => {
+    const current = input({ advancementCounters: 0 });
+    current.playerView.own.clicks = 3;
+    current.playerView.own.credits = 4;
+
+    expect(
+      runnerTerminalRemoteToolScoreComponent(
+        current,
+        installAction(3),
+        candidate("effect:expose_info"),
+      ),
+    ).toMatchObject({
+      key: "runner_terminal_remote_tool",
+      value: 1800,
+    });
+  });
+
   it("penalizes repeating expose after every hidden position was exposed exactly", () => {
     const current = input({ advancementCounters: 0 });
     current.eventTail = [
@@ -124,6 +169,15 @@ function input(options: { advancementCounters: number }): AiDecisionInput {
 
 function action(actionId: string, type: LegalAction["type"]): LegalAction {
   return { actionId, side: "runner", type } as LegalAction;
+}
+
+function installAction(credits: number): LegalAction {
+  return {
+    actionId: "install-expose-tool",
+    side: "runner",
+    type: "install_card",
+    costs: [{ clicks: 1, credits }],
+  } as LegalAction;
 }
 
 function candidate(signal: string): ActionSemanticCandidate {
