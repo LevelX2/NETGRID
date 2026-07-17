@@ -1,6 +1,6 @@
 # Letzte zwei Corp-KI-Spiele: Remediation-Prozess vom 17.07.2026
 
-Status: aktiv; P0 in Bearbeitung
+Status: aktiv; P2 in Vorbereitung
 
 ## Quelle und Zielprüfung
 
@@ -202,5 +202,10 @@ Hauptworkspace nur für Runtime-Evidence und den finalen Merge.
 
 ## Ausführungsstand
 
-- P0 aktiv: Worktree und Arbeitsbranch sind angelegt; das Prozessartefakt
-  wartet auf Diffprüfung und separaten Commit.
+- P0 abgeschlossen: Worktree, Arbeitsbranch, Scope, Invarianten und
+  Paketfolge sind im Commit `51e363791` gesichert.
+- P1 abgeschlossen: 79/79 beziehungsweise 113/113 Decisions, vier
+  Verhaltensanker, der Rez-Vertragsfehler, Nicht-Findings und beide
+  blockierenden Deck-Audits sind dauerhaft dokumentiert.
+- P2 in Vorbereitung: Die vier historischen Checkpoints und die engen
+  Schichtverträge werden auf dem noch unveränderten Produktionscode gesichert.
