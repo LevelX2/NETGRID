@@ -1,6 +1,6 @@
 # Match 23D6: Runner-Run-, Breaker-, Broker- und Hint-Remediation
 
-Status: P0 aktiv
+Status: P1 aktiv
 
 ## Quelle und Zielprüfung
 
