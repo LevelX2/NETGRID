@@ -3,7 +3,7 @@
   "checkpointId": "cp-5201-01-no-repeat-hq-run-d118",
   "source": {
     "kind": "captured_match",
-    "findingId": "5201-F03-HQ-REVALIDATION",
+    "findingId": "5201-C01-INITIAL-HQ-INFORMATION-RUN",
     "capturedAt": "2026-07-17T16:28:26.434Z",
     "matchId": "match_520180ba217781ad",
     "decisionIndex": 118,
@@ -9965,11 +9965,6 @@
   },
   "expectation": {
     "acceptableActions": [
-      {
-        "type": "gain_credit"
-      }
-    ],
-    "forbiddenActions": [
       {
         "actionId": "runner.start_run.hq"
       }

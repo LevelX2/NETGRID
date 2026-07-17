@@ -20,9 +20,28 @@ verbundene, side-safe belegte Entscheidungsfamilien:
 Die Untersuchung zeigte zudem zwei verlorene `Early Worm`-Kopien. Ein
 Deck-Tutor existierte nicht; der aktuelle Scope schützt daher keine
 kartenspezifische Ziehreihenfolge. Er schützt generisch sichtbare,
-erforderliche Breaker gegen vermeidbaren Abwurf und gegen Selbstschaden mit
-unverhältnismäßigem Coverage-Risiko, sofern die historische Checkpoint-Evidence
-einen roten produktiven Runtime-Fall liefert.
+erforderliche Breaker gegen Selbstschaden mit unverhältnismäßigem
+Coverage-Risiko, sofern die historische Checkpoint-Evidence einen roten
+produktiven Runtime-Fall liefert.
+
+### Ergebnis der strikten Capture-Prüfung
+
+Die Captures für D189, D200, D206, D207, D151 und D168 stoppen bereits in
+der Strict-Warmup bei D119 mit `warmup_behavior_drift`: Historisch wurde die
+Run-Fortsetzung gewählt, aktuell wird eine Pump-Aktion gewählt. Die
+historischen Zielzustände sind damit nicht spielgleich erreichbar. Diese
+Funde werden nicht mit `rebase` verdeckt und erhalten in diesem Paket keine
+Runtime-Änderung.
+
+D118 wurde strikt erreicht, ist aber der erste HQ-Informationsrun und damit
+keine valide Negativ-Fixierung. Die Fixture bleibt als grüne Gegenprobe: Ein
+erster sinnvoller HQ-Run muss zulässig bleiben. Die späteren Wiederholungen
+D151/D168 bleiben wegen des D119-Drifts offen.
+
+Der Strict-Capture für D98 ist reproduzierbar rot: Die KI spielt eine
+unvermeidbare Core-Damage-Ökonomieaktion, obwohl sie damit mit 50 Prozent
+Wahrscheinlichkeit die einzige sichtbare Wall-Breaker-Coverage verliert.
+Nur dieser Befund ist für P2 produktive Evidence.
 
 ## Annahmen und Nicht-Ziele
 
@@ -53,14 +72,10 @@ einen roten produktiven Runtime-Fall liefert.
 Capture aus dem Match mit `--warmup-policy strict`, Fixture-Validierung und
 roter `behavior_regression`-Nachweis:
 
-- Handlimit/Funding: D189 sowie D200 oder D207 mit positiver Credit-Alternative
-  und enger Handpuffer-Gegenprobe.
-- Run-Lock: D206 mit akzeptabler Freischaltungs- und Folge-Run-Menge;
-  Gegenproben für unterfinanzierte und letzte-Klick-Situationen.
-- HQ-Repeat: D151 oder D168 mit positiver Funding-Alternative;
-  Gegenprobe für einen ersten, sinnvollen Informationsrun.
-- Breaker-Erhalt: D199 nur übernehmen, falls der produktive aktuelle
-  Choice-Runner eine rote, eindeutig reproduzierbare Wahl zeigt.
+- Handlimit/Funding, Run-Lock und HQ-Repeat: Strict-Captures versucht, aber
+  wegen des unabhängigen D119-Warmup-Drifts nicht übernehmbar.
+- Erster HQ-Informationsrun D118: strikt erfasste grüne Gegenprobe.
+- Breaker-Erhalt D98: strikt erfasste rote Selbstschaden-Entscheidung.
 
 Done-Gate: Jede übernommene Fixture ist schema-valide; Zieltests zeigen
 `behavior_regression`, Gegenproben bleiben grün. Nicht reproduzierbare
@@ -68,15 +83,12 @@ historische Kandidaten werden als solche dokumentiert und nicht gefixt.
 
 ### P2 — Generische Runtime- und Choice-Anpassungen
 
-- Produktive Credit-Alternativen bei Handlimit und konkret finanzierbaren
-  Handkarten korrekt in Überlauf-Score und Plan-Mapping einbeziehen.
-- Run-Lock-Folgepfade mit einem strukturierten allgemeinen und eingeschränkten
-  Creditbudget bewerten.
-- Wiederholte HQ-Runs gegen sichtbare Tag-/Trace- und Selbsttagkosten sowie
-  wiederholt leeren Access revalidieren; ein erster Informationsrun bleibt
-  zulässig.
-- Nur falls P1 rot belegt ist: sichtbare benötigte Breaker im Abwurf- und
-  Selbstschaden-Risiko priorisieren.
+- Sichtbare notwendige Breaker gegen unvermeidbaren Selbstschaden mit
+  mindestens 50 Prozent Verlustwahrscheinlichkeit schützen, solange kein
+  unmittelbarer Sieg vorliegt.
+- Der Schutz bleibt generisch: Er verwendet nur sichtbare Handkarten,
+  sichtbare ICE-Coverage und die semantische Selbstschaden-Kostenstruktur.
+- Die erste HQ-Informationsrun-Gegenprobe bleibt grün.
 
 Done-Gate: Unveränderte rote Zieltests werden grün, alle engen Gegenproben
 bleiben grün, und neue Unit-Tests decken jede generische Grenze ab.
