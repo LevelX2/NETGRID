@@ -57,13 +57,7 @@ export function runnerSourceCardAnswerRole(
   if (rolesMatch(roles, ["draw"])) return "draw";
   if (rolesMatch(mechanics, ["draw"])) return "draw";
   const tokens = sourceAnswerTokens([
-    sourceCard?.title,
-    sourceCard?.type,
-    ...(sourceCard?.subtypes ?? []),
     sourceCard?.rulesText,
-    definitionDisplay?.title,
-    definitionDisplay?.type,
-    ...(definitionDisplay?.subtypes ?? []),
     definitionDisplay?.rulesText,
   ]);
   if (sourceAnswerTokensIncludeAny(tokens, SOURCE_SEARCH_TOKENS)) {
