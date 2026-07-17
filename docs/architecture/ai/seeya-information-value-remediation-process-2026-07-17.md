@@ -2,8 +2,9 @@
 
 ## Status
 
-P1 aktiv. Die fachliche Umsetzung ist vom Nutzer freigegeben; gearbeitet wird
-im separaten Worktree und ohne Änderung der Engine- oder LegalAction-Regeln.
+P1 und P2 abgeschlossen, P3 aktiv. Die fachliche Umsetzung ist vom Nutzer
+freigegeben; gearbeitet wird im separaten Worktree und ohne Änderung der
+Engine- oder LegalAction-Regeln.
 
 ## Quelle und Zielprüfung
 
