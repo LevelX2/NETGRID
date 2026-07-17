@@ -130,9 +130,10 @@ Keine Karten-ID-Sonderregel, keine Hintänderung, keine Engine-/LegalAction-
 - 424A: alle 12 Checkpoint-/Gegenproben grün.
 - FD7671: alle 9 Checkpoint-/Gegenproben grün.
 - AI-Typecheck: grün.
-- Vollständige AI-Suite vor Main-Abgleich: 348/354 Dateien und 2462/2471 Tests
-  grün. Der finale Stand wird nach Integration des Damage-Threat-Model-v2
-  erneut geprüft.
+- Vollständige AI-Suite nach Main-Abgleich: 348/354 Dateien und 2468/2477
+  Tests grün. Gegenüber der synchronisierten Main-Baseline mit 2462/2471 sind
+  alle sechs neuen SeeYa-Tests grün; dieselben neun bekannten Tests bleiben
+  rot.
 
 Die neun roten Vollsuite-Tests wurden einzeln auf unverändertem `main`
 reproduziert und sind keine Regression dieses Slices:
@@ -160,5 +161,7 @@ Effektüberlappungen und außerhalb dieses Scopes.
 ## Lokale Integration
 
 Der ursprüngliche Arbeitsstand wurde per Fast-Forward lokal nach `main`
-integriert. Die ergänzte Damage-Verknüpfung durchläuft vor der abschließenden
-lokalen Integration erneut Fokus-, Typecheck- und Diff-Gates.
+integriert. Danach wurde das inzwischen auf `main` integrierte
+Damage-Threat-Model-v2 konfliktfrei in den Arbeitsbranch übernommen. Der
+kombinierte Stand ist mit Fokus-, Typecheck-, Diff- und Vollsuite-Vergleich
+zur abschließenden lokalen Integration freigegeben.
