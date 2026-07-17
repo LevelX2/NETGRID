@@ -681,19 +681,29 @@ function searchAccessToolForRecord(
   params: BuildDeckCapabilityProfileParams,
   record: CardCapabilityRecord,
 ): SearchAccessTool | undefined {
-  const text = normalizedRecordTextWithoutRoles(record);
+  const text = record.text.toLowerCase();
   const roleSignals = [...record.roles, ...record.planRoles];
+  const genericStackSearch =
+    deckCapabilityTextHasStackSearchSignal(text) ||
+    rolesMatch(roleSignals, ["stack_search"]);
   const canSearchPrograms =
+    genericStackSearch ||
     deckCapabilityTextHasProgramSearchSignal(text) ||
     rolesMatch(roleSignals, ["program_search", "breaker_search"]);
   const canSearchBreakers =
+    genericStackSearch ||
     canSearchPrograms ||
     deckCapabilityTextHasBreakerSearchSignal(text) ||
     rolesMatch(roleSignals, ["breaker_search"]);
   if (!canSearchPrograms && !canSearchBreakers) return undefined;
   const status = primaryStatus(record.locations);
   const structuredSearch =
-    rolesMatch(roleSignals, ["program_search", "breaker_search", "search"]);
+    rolesMatch(roleSignals, [
+      "program_search",
+      "breaker_search",
+      "stack_search",
+      "search",
+    ]);
   return {
     cardId: record.cardId,
     title: record.title,
@@ -1022,6 +1032,14 @@ function deckCapabilityTextHasProgramSearchSignal(text: string): boolean {
       "a",
       "program",
     ])
+  );
+}
+
+function deckCapabilityTextHasStackSearchSignal(text: string): boolean {
+  const tokens = deckCapabilityTextTokens(text);
+  return (
+    deckCapabilityTokensIncludePhrase(tokens, ["search", "your", "stack"]) ||
+    deckCapabilityTokensIncludePhrase(tokens, ["search", "the", "stack"])
   );
 }
 
