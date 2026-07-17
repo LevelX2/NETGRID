@@ -68,6 +68,40 @@ describe("AI input DTO score-conversion contract", () => {
     expect(input.legalActions[0]?.payload).not.toHaveProperty("privateProbe");
   });
 
+  it("preserves actor-visible self-damage costs and prevention status", () => {
+    const action = runnerSemanticAction();
+    action.payload = {
+      ...action.payload,
+      xValue: 2,
+      damageCannotBePrevented: true,
+      damageType: "core",
+      damageAmount: 2,
+    };
+    const input = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: playerView(action, "runner"),
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "runner-self-damage-dto",
+      decisionId: "runner-self-damage-dto:runner:1",
+      actionNumber: 1,
+      profileId: "runner-self-damage-dto-test",
+    });
+
+    expect(input.legalActions[0]?.payload).toMatchObject({
+      xValue: 2,
+      damageCannotBePrevented: true,
+      damageType: "core",
+      damageAmount: 2,
+    });
+    expect(input.playerView.legalActions[0]?.payload).toMatchObject({
+      damageCannotBePrevented: true,
+      damageType: "core",
+      damageAmount: 2,
+    });
+  });
+
   it("preserves the public selected-server binding for server-tax installs", () => {
     const action = runnerSemanticAction();
     action.payload = {

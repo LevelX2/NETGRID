@@ -1614,7 +1614,13 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
                     `${eventDefinition.title}: ${amount} Core Damage`,
                     cardId,
                     [{ clicks: clickCost, credits: creditCost }],
-                    { cardId, xValue: amount },
+                    {
+                      cardId,
+                      xValue: amount,
+                      damageCannotBePrevented: true,
+                      damageType: "core",
+                      damageAmount: amount,
+                    },
                   ),
                 );
               }

@@ -120,6 +120,8 @@ export function createSemanticRuntimeActionExclusionComposition(
       dependencies.hintForDefinitionId(definitionId)?.effects,
     fakedHitCardId: dependencies.fakedHitCardId,
     badPublicityLossThreshold: dependencies.badPublicityLossThreshold,
+    cardAddressesVisibleBreakerNeed:
+      dependencies.cardAddressesVisibleBreakerNeed,
   });
 
   const { semanticRuntimeActionExclusion } =

@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import {
   runnerSelfDamageSurvivalAssessment,
+  runnerSelfDamageSurvivalExclusion,
 } from "./runner-self-damage-choice";
 import { semanticRuntimeActionExclusion } from "./semantic-runtime-action-exclusion";
 
@@ -26,6 +27,7 @@ describe("runnerSelfDamageSurvivalAssessment", () => {
       },
       fakedHitCardId: "faked-hit",
       badPublicityLossThreshold: 7,
+      cardAddressesVisibleBreakerNeed: () => false,
     };
 
     const assessment = runnerSelfDamageSurvivalAssessment(
@@ -50,49 +52,44 @@ describe("runnerSelfDamageSurvivalAssessment", () => {
       ]),
     );
 
-    const exclusion = semanticRuntimeActionExclusion(
-      input,
-      action,
-      candidate,
-      {
-        planMemoryActionExclusion: () => undefined,
-        corpAdvancementCounterPlacementAssessment: () => undefined,
-        runnerSelfDamageSurvivalExclusion: (
+    const exclusion = semanticRuntimeActionExclusion(input, action, candidate, {
+      planMemoryActionExclusion: () => undefined,
+      corpAdvancementCounterPlacementAssessment: () => undefined,
+      runnerSelfDamageSurvivalExclusion: (
+        exclusionInput,
+        exclusionAction,
+        actionSemanticCandidate,
+      ) => {
+        const exclusionAssessment = runnerSelfDamageSurvivalAssessment(
           exclusionInput,
           exclusionAction,
+          dependencies,
           actionSemanticCandidate,
-        ) => {
-          const exclusionAssessment = runnerSelfDamageSurvivalAssessment(
-            exclusionInput,
-            exclusionAction,
-            dependencies,
-            actionSemanticCandidate,
-          );
-          if (
-            !exclusionAssessment ||
-            exclusionAssessment.survivesSelfDamage ||
-            exclusionAssessment.immediateWinByAction
-          ) {
-            return undefined;
-          }
-          return {
-            key: "self_damage_flatline_risk",
-            label: "Self-Damage-Flatline-Risiko",
-            reason: exclusionAssessment.evidence.join("|"),
-          };
-        },
-        runnerEncounterActionExclusion: () => undefined,
-        runnerProgramSacrificeExclusion: () => undefined,
-        runnerMultiRunEventExclusion: () => undefined,
-        runnerRunTargetEvaluationForAction: () => undefined,
-        runnerBlinkRunExclusion: () => undefined,
-        knownCentralPayoffExclusion: () => undefined,
-        runnerArchivesExclusion: () => undefined,
-        runnerEmptyRemoteExclusion: () => undefined,
-        isRemoteServerTarget: () => false,
-        knownIcePathReason: () => "not_relevant",
+        );
+        if (
+          !exclusionAssessment ||
+          exclusionAssessment.survivesSelfDamage ||
+          exclusionAssessment.immediateWinByAction
+        ) {
+          return undefined;
+        }
+        return {
+          key: "self_damage_flatline_risk",
+          label: "Self-Damage-Flatline-Risiko",
+          reason: exclusionAssessment.evidence.join("|"),
+        };
       },
-    );
+      runnerEncounterActionExclusion: () => undefined,
+      runnerProgramSacrificeExclusion: () => undefined,
+      runnerMultiRunEventExclusion: () => undefined,
+      runnerRunTargetEvaluationForAction: () => undefined,
+      runnerBlinkRunExclusion: () => undefined,
+      knownCentralPayoffExclusion: () => undefined,
+      runnerArchivesExclusion: () => undefined,
+      runnerEmptyRemoteExclusion: () => undefined,
+      isRemoteServerTarget: () => false,
+      knownIcePathReason: () => "not_relevant",
+    });
 
     expect(exclusion).toMatchObject({
       key: "self_damage_flatline_risk",
@@ -111,12 +108,14 @@ describe("runnerSelfDamageSurvivalAssessment", () => {
       hintEffectsForCard: () => [selfDamageHintEffect("self")],
       fakedHitCardId: "faked-hit",
       badPublicityLossThreshold: 7,
+      cardAddressesVisibleBreakerNeed: () => false,
     });
     const noiseAssessment = runnerSelfDamageSurvivalAssessment(input, action, {
       sourceDefinitionIdForAction: () => "hint-self-damage-card",
       hintEffectsForCard: () => [selfDamageHintEffect("selfish")],
       fakedHitCardId: "faked-hit",
       badPublicityLossThreshold: 7,
+      cardAddressesVisibleBreakerNeed: () => false,
     });
 
     expect(selfAssessment).toMatchObject({
@@ -124,6 +123,91 @@ describe("runnerSelfDamageSurvivalAssessment", () => {
       selfDamageType: "net",
     });
     expect(noiseAssessment).toBeUndefined();
+  });
+
+  it("excludes unpreventable self-damage that risks the only visible breaker coverage", () => {
+    const action = coverageRiskAction();
+    const input = runnerInput(action, [
+      { known: true, instanceId: action.source },
+      { known: true, instanceId: "required-breaker" },
+      { known: true, instanceId: "other-card" },
+    ]);
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [action],
+      observerSide: "runner",
+      stateVersion: input.playerView.stateVersion,
+      projectionMode: "basic_semantics",
+    });
+    if (!candidate) throw new Error("Expected self-damage candidate");
+
+    const dependencies = {
+      sourceDefinitionIdForAction: () => "coverage-risk-card",
+      hintEffectsForCard: () => undefined,
+      fakedHitCardId: "faked-hit",
+      badPublicityLossThreshold: 7,
+      cardAddressesVisibleBreakerNeed: (
+        _input: AiDecisionInput,
+        card: { instanceId: string },
+      ) => card.instanceId === "required-breaker",
+    };
+    const assessment = runnerSelfDamageSurvivalAssessment(
+      input,
+      action,
+      dependencies,
+      candidate,
+    );
+
+    expect(assessment).toMatchObject({
+      survivesSelfDamage: true,
+      unpreventable: true,
+      visibleCoverageCardsAtRisk: 1,
+      coverageLossRisk: true,
+    });
+    expect(
+      runnerSelfDamageSurvivalExclusion(input, action, {
+        survivalAssessment: () => assessment,
+      }),
+    ).toMatchObject({ key: "self_damage_coverage_loss_risk" });
+  });
+
+  it("allows self-damage when visible breaker coverage is not at risk", () => {
+    const action = coverageRiskAction();
+    const input = runnerInput(action, [
+      { known: true, instanceId: action.source },
+      { known: true, instanceId: "other-card" },
+      { known: true, instanceId: "another-card" },
+    ]);
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [action],
+      observerSide: "runner",
+      stateVersion: input.playerView.stateVersion,
+      projectionMode: "basic_semantics",
+    });
+    if (!candidate) throw new Error("Expected self-damage candidate");
+
+    const assessment = runnerSelfDamageSurvivalAssessment(
+      input,
+      action,
+      {
+        sourceDefinitionIdForAction: () => "coverage-risk-card",
+        hintEffectsForCard: () => undefined,
+        fakedHitCardId: "faked-hit",
+        badPublicityLossThreshold: 7,
+        cardAddressesVisibleBreakerNeed: () => false,
+      },
+      candidate,
+    );
+
+    expect(assessment).toMatchObject({
+      survivesSelfDamage: true,
+      visibleCoverageCardsAtRisk: 0,
+      coverageLossRisk: false,
+    });
+    expect(
+      runnerSelfDamageSurvivalExclusion(input, action, {
+        survivalAssessment: () => assessment,
+      }),
+    ).toBeUndefined();
   });
 });
 
@@ -148,7 +232,28 @@ function selfDamageAction(): LegalAction {
   } as unknown as LegalAction;
 }
 
-function runnerInput(action: LegalAction): AiDecisionInput {
+function coverageRiskAction(): LegalAction {
+  return {
+    ...selfDamageAction(),
+    actionId: "runner-coverage-risk-action",
+    source: "runner-coverage-risk-card",
+    payload: {
+      damageType: "core",
+      damageAmount: 1,
+      damageCannotBePrevented: true,
+    },
+  } as LegalAction;
+}
+
+function runnerInput(
+  action: LegalAction,
+  gripOrHq: Array<{ known: boolean; instanceId: string }> = [
+    {
+      known: true,
+      instanceId: action.source,
+    },
+  ],
+): AiDecisionInput {
   return {
     side: "runner",
     legalActions: [action],
@@ -162,12 +267,7 @@ function runnerInput(action: LegalAction): AiDecisionInput {
       stateVersion: 7,
       own: {
         credits: 0,
-        gripOrHq: [
-          {
-            known: true,
-            instanceId: action.source,
-          },
-        ],
+        gripOrHq,
       },
       opponent: {
         identity: {
