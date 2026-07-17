@@ -1341,6 +1341,7 @@ export type PublicGameEvent = {
   type: string;
   stateVersionBefore: number;
   stateVersionAfter: number;
+  turnSerial?: number;
   stateHashAfter: StateHash;
   visibilityClass?: EventVisibilityClass;
   publicPayload: Record<string, unknown>;
@@ -1879,6 +1880,7 @@ export type VisibleCard = {
 export type PlayerView = {
   side: Side;
   stateVersion: number;
+  turnSerial?: number;
   timingPoint: TimingPointId;
   activeSide: Side;
   phase: Phase;

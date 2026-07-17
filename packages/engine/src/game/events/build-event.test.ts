@@ -1,8 +1,4 @@
-import type {
-  GameState,
-  LegalAction,
-  PlayerAction,
-} from "@netgrid/shared";
+import type { GameState, LegalAction, PlayerAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import { applyAction, getLegalActions } from "../../index";
 import type { PublicContextForActionDependencies } from "../../public-context";
@@ -226,6 +222,7 @@ describe("game event builder", () => {
       );
 
       expect(event.publicPayload.configuredContext).toBe(true);
+      expect(event.turnSerial).toBe(next.turnSerial ?? 0);
     } finally {
       configureBuildEventHost(previousHost);
     }

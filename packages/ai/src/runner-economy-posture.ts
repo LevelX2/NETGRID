@@ -36,11 +36,11 @@ export function buildRunnerEconomyPosture(
     (params.deckCapabilities?.runner?.economyBankTools.length ?? 0) > 0;
   const remoteScoreThreat = runnerRemoteScoreThreat(params.input);
   const phase = runnerCreditReservePhase(params.input, remoteScoreThreat);
-  const damageThreat = runnerDamageThreatAssessment(params.input);
+  const flatlineRisk = runnerDamageThreatAssessment(params.input).flatlineRisk;
   const damageThreatFloor =
-    damageThreat.level === "critical"
+    flatlineRisk.level === "critical"
       ? 4
-      : damageThreat.level === "confirmed"
+      : flatlineRisk.level === "confirmed"
         ? 3
         : 2;
   const minimumCreditFloor = Math.max(
@@ -50,9 +50,9 @@ export function buildRunnerEconomyPosture(
   const baseDesiredCreditReserve = Math.max(
     phase === "opening" ? 4 : phase === "midgame" ? 5 : 6,
     riskAdjustedRunReserve || bankToolsRelevant ? 6 : 4,
-    damageThreat.level === "critical"
+    flatlineRisk.level === "critical"
       ? 6
-      : damageThreat.level === "confirmed"
+      : flatlineRisk.level === "confirmed"
         ? 5
         : 4,
   );
@@ -122,7 +122,7 @@ export function buildRunnerEconomyPosture(
     evidence: [
       `runner_credits:${credits}`,
       `minimum_credit_floor:${minimumCreditFloor}`,
-      `damage_threat_level:${damageThreat.level}`,
+      `flatline_risk_level:${flatlineRisk.level}`,
       `damage_threat_credit_floor:${damageThreatFloor}`,
       `desired_credit_reserve:${desiredCreditReserve}`,
       `credit_reserve_phase:${creditReservePolicy.phase}`,

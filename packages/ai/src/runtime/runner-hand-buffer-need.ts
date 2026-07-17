@@ -12,9 +12,27 @@ export function runnerHandBufferNeedScoreComponent(
   if (input.side !== "runner" || action.side !== "runner") return undefined;
   if (action.type !== "draw_card") return undefined;
   const handCount = input.playerView.own.gripOrHq.length;
-  if (handCount >= 5) return undefined;
-  const damageThreat = runnerDamageThreatAssessment(input);
-  const damagePressure = damageThreat.level !== "none";
+  const flatlineRisk = runnerDamageThreatAssessment(input).flatlineRisk;
+  const damagePressure = flatlineRisk.level !== "none";
+  const temporaryBufferBeforeRiskyRun =
+    flatlineRisk.handBufferHeadroom === 0 &&
+    input.playerView.own.clicks > 1 &&
+    (flatlineRisk.level === "confirmed" || flatlineRisk.level === "critical") &&
+    !input.legalActions.some(
+      (legalAction) =>
+        legalAction.side === "runner" &&
+        legalAction.payload?.cardImplementationScoresSourceAsAgenda === true,
+    ) &&
+    input.legalActions.some(
+      (legalAction) =>
+        legalAction.side === "runner" &&
+        legalAction.type === "start_run" &&
+        typeof legalAction.payload?.serverId === "string" &&
+        flatlineRisk.riskyRunServerIds.includes(legalAction.payload.serverId),
+    );
+  if (flatlineRisk.handBufferHeadroom === 0 && !temporaryBufferBeforeRiskyRun) {
+    return undefined;
+  }
   const baseValue =
     handCount <= 0
       ? 750
@@ -26,19 +44,21 @@ export function runnerHandBufferNeedScoreComponent(
             ? 350
             : 150;
   const belowThreatFloor =
-    damagePressure && handCount < damageThreat.recommendedHandFloor;
+    damagePressure && handCount < flatlineRisk.recommendedHandFloor;
   const damageBoost =
-    damageThreat.level === "critical"
+    flatlineRisk.level === "critical"
       ? handCount <= 0
         ? 2050
         : 1250
-      : belowThreatFloor && damageThreat.level === "confirmed"
+      : belowThreatFloor && flatlineRisk.level === "confirmed"
         ? handCount <= 1
           ? 1100
           : 550
-        : belowThreatFloor && damageThreat.level === "suspected"
+        : belowThreatFloor && flatlineRisk.level === "suspected"
           ? 300
-          : 0;
+          : temporaryBufferBeforeRiskyRun
+            ? 500
+            : 0;
   return {
     key: "runner_hand_buffer_need",
     label: "Handpuffer-Bedarf",
@@ -46,10 +66,11 @@ export function runnerHandBufferNeedScoreComponent(
     reason: [
       `hand:${handCount}`,
       `damage_pressure:${damagePressure}`,
-      `damage_threat:${damageThreat.level}`,
-      `damage_floor:${damageThreat.recommendedHandFloor}`,
-      `effective_max_hand:${damageThreat.effectiveMaxHandSize}`,
-      `hand_buffer_headroom:${damageThreat.handBufferHeadroom}`,
+      `flatline_risk:${flatlineRisk.level}`,
+      `damage_floor:${flatlineRisk.recommendedHandFloor}`,
+      `effective_max_hand:${flatlineRisk.effectiveMaxHandSize}`,
+      `hand_buffer_headroom:${flatlineRisk.handBufferHeadroom}`,
+      `buffer_mode:${temporaryBufferBeforeRiskyRun ? "temporary_before_risky_run" : "durable"}`,
       `base:${baseValue}`,
       `damage_boost:${damageBoost}`,
     ].join("|"),

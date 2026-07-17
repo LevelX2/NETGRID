@@ -287,7 +287,8 @@ export function assessRunnerPressureBudget(
         RUNNER_PRESSURE_PROBE_NEAR_TIE_WINDOW,
     )
     .map((baseline) => baseline.targetServerId);
-  const damageThreatLevel = runnerDamageThreatAssessment(context.input).level;
+  const flatlineRiskLevel = runnerDamageThreatAssessment(context.input)
+    .flatlineRisk.level;
   const replayStableVariationContext = [
     context.input.seed,
     context.input.decisionId,
@@ -308,7 +309,7 @@ export function assessRunnerPressureBudget(
   const probeDisposition = probeEligible
     ? runnerPressureProbeDisposition(
         replayStableVariationContext,
-        damageThreatLevel,
+        flatlineRiskLevel,
       )
     : "hold";
   const variationBucket = runnerPressureVariationBucket(
@@ -328,15 +329,14 @@ export function assessRunnerPressureBudget(
   ];
   const canSpendActionOnPressure =
     probeEligible && probeDisposition === "probe";
-  const boundedVariationApplied =
-    probeEligible;
+  const boundedVariationApplied = probeEligible;
   const preferredProbeTarget =
     canSpendActionOnPressure && nearTieProbeTargets.length > 1
-    ? runnerPressurePreferredProbeTarget(
-        nearTieProbeTargets,
-        replayStableVariationContext,
-      )
-    : undefined;
+      ? runnerPressurePreferredProbeTarget(
+          nearTieProbeTargets,
+          replayStableVariationContext,
+        )
+      : undefined;
   const variationReason = boundedVariationApplied
     ? "safe_probe_seeded_decision_context"
     : "deterministic_priority_only";
@@ -353,7 +353,7 @@ export function assessRunnerPressureBudget(
     variationReason,
     probeDisposition,
     variationBucket,
-    damageThreatLevel,
+    flatlineRiskLevel,
     evidence: [
       `pressure_budget:${canSpendActionOnPressure ? "available" : "blocked"}`,
       `pressure_action_budget:${canSpendActionOnPressure ? 1 : 0}`,
@@ -367,7 +367,7 @@ export function assessRunnerPressureBudget(
       `variation_reason:${variationReason}`,
       `probe_disposition:${probeDisposition}`,
       `probe_variation_bucket:${variationBucket}`,
-      `probe_damage_threat_level:${damageThreatLevel}`,
+      `probe_flatline_risk_level:${flatlineRiskLevel}`,
     ],
   };
 }

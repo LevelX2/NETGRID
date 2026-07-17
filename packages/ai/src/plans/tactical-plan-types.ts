@@ -195,7 +195,7 @@ export type RunnerPressureBudget = {
   variationReason: string;
   probeDisposition?: "probe" | "hold";
   variationBucket?: number;
-  damageThreatLevel?: "none" | "suspected" | "confirmed" | "critical";
+  flatlineRiskLevel?: "none" | "suspected" | "confirmed" | "critical";
   evidence: string[];
 };
 

@@ -5,6 +5,17 @@ import { legalActionsFor } from "./legal-actions";
 import { playerViewFor } from "./player-view";
 
 describe("game player-view facade", () => {
+  it("projects the public turn serial to both sides", () => {
+    const state = createGame({
+      seed: "damage-threat-player-view-turn-serial",
+      setupMode: "completed",
+    });
+    state.turnSerial = 9;
+
+    expect(playerViewFor(state, "corp").turnSerial).toBe(9);
+    expect(playerViewFor(state, "runner").turnSerial).toBe(9);
+  });
+
   it("matches the public Engine API for Corp and Runner perspectives", () => {
     const state = createGame({
       seed: "arch-57-player-view-perspectives",

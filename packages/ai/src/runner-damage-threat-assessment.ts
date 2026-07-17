@@ -7,29 +7,50 @@ import type {
 } from "@netgrid/shared";
 import { createAiHintsByCard } from "./ai-hints";
 
-export type RunnerDamageThreatLevel =
+export type RunnerDamageDeckBeliefLevel = "none" | "suspected" | "confirmed";
+
+export type RunnerFlatlineRiskLevel =
   | "none"
   | "suspected"
   | "confirmed"
   | "critical";
 
-export type RunnerDamageThreatAssessment = {
-  level: RunnerDamageThreatLevel;
+export type RunnerDamageDeckBelief = {
+  level: RunnerDamageDeckBeliefLevel;
+  resolvedCorpDamageEvents: number;
+  attemptedCorpDamageEvents: number;
+  visibleDamageSourceCount: number;
+  visibleDeliverySourceCount: number;
+  visibleDamagePayoffCount: number;
+  visibleFallbackDamageSourceCount: number;
+  independentSignalDefinitionCount: number;
+  signalScore: number;
+  signalKinds: string[];
+  evidence: string[];
+};
+
+export type RunnerFlatlineRiskAssessment = {
+  level: RunnerFlatlineRiskLevel;
   handCount: number;
   effectiveMaxHandSize: number;
   handBufferHeadroom: number;
-  recentDamageEvents: number;
-  historicalDamageEvents: number;
-  recentDamageAmount: number;
-  recentDamageStateDistance?: number;
-  knownDamageSourceCount: number;
-  knownPunishSignalCount: number;
-  knownTraceTagSignalCount: number;
-  visiblePunishSignalScore: number;
-  visiblePunishSignalKinds: string[];
-  riskyRunServerIds: string[];
+  uncappedRecommendedHandFloor: number;
   recommendedHandFloor: number;
+  recentResolvedCorpDamageEvents: number;
+  recentResolvedCorpDamageAmount: number;
+  turnsSinceLatestResolvedCorpDamage?: number;
+  legacyStateDistanceSinceLatestResolvedCorpDamage?: number;
+  activeDamageSourceCount: number;
+  activeDeliverySourceCount: number;
+  activeDamagePayoffCount: number;
+  riskyRunServerIds: string[];
   criticalRunSuppression: boolean;
+  evidence: string[];
+};
+
+export type RunnerDamageThreatAssessment = {
+  deckBelief: RunnerDamageDeckBelief;
+  flatlineRisk: RunnerFlatlineRiskAssessment;
   evidence: string[];
 };
 
@@ -43,7 +64,7 @@ const DAMAGE_TOKENS = new Set([
 ]);
 
 const RECENT_DAMAGE_STATE_DISTANCE = 8;
-const STALE_DAMAGE_STATE_DISTANCE = 24;
+const RECENT_DAMAGE_TURN_DISTANCE = 1;
 const AI_HINTS = createAiHintsByCard();
 
 export function runnerDamageThreatAssessment(
@@ -56,103 +77,94 @@ export function runnerDamageThreatAssessment(
   );
   const handBufferHeadroom = Math.max(0, effectiveMaxHandSize - handCount);
   const history = mergedHistory(input);
-  const damageEvents = history.filter(publicEventShowsDamage);
-  const latestDamage = damageEvents[damageEvents.length - 1];
-  const latestDamageVersion = latestDamage
-    ? eventVersion(latestDamage)
-    : undefined;
-  const stateVersion = input.playerView.stateVersion;
-  const recentDamageStateDistance =
-    latestDamageVersion !== undefined
-      ? Math.max(0, stateVersion - latestDamageVersion)
-      : undefined;
-  const recentDamageEvents = damageEvents.filter((event) => {
-    const distance = stateVersion - eventVersion(event);
-    return distance >= 0 && distance <= RECENT_DAMAGE_STATE_DISTANCE;
-  }).length;
-  const historicalDamageEvents = damageEvents.length;
-  const recentDamageAmount = damageEvents
-    .filter((event) => {
-      if (latestDamageVersion === undefined) return false;
-      return stateVersion - eventVersion(event) <= RECENT_DAMAGE_STATE_DISTANCE;
-    })
-    .reduce((sum, event) => sum + publicEventDamageAmount(event), 0);
-  const punishSignals = visibleOpponentPunishSignals(input, history);
-  const knownDamageSourceCount = punishSignals.damageSourceCount;
-  const knownPunishSignalCount = punishSignals.signalSourceCount;
-  const knownTraceTagSignalCount = punishSignals.traceTagSourceCount;
-  const visiblePunishSignalScore = punishSignals.score;
-  const visiblePunishSignalKinds = punishSignals.kinds;
+  const damageEvents = corpDamageEventEvidence(history);
+  const deckSignals = visibleOpponentDamageSignals(input, history);
+  const activeSignals = activeOpponentDamageSignals(input);
+  const deckBelief = runnerDamageDeckBelief(damageEvents, deckSignals);
+  const recentDamage = recentResolvedCorpDamageEvidence(input, damageEvents);
   const riskyRunServerIds = input.playerView.servers
     .filter((server) => serverHasRunnerExposureRisk(server))
     .map((server) => server.id)
     .sort();
-  const staleDamage =
-    recentDamageStateDistance !== undefined &&
-    recentDamageStateDistance > STALE_DAMAGE_STATE_DISTANCE &&
-    knownDamageSourceCount === 0 &&
-    visiblePunishSignalScore === 0;
-  const hasDamageEvidence =
-    historicalDamageEvents > 0 ||
-    knownDamageSourceCount > 0 ||
-    visiblePunishSignalScore > 0;
-  const hasRecentDamageEvidence = recentDamageEvents > 0 && !staleDamage;
-  const level = runnerDamageThreatLevel({
+  const flatlineRiskLevel = runnerFlatlineRiskLevel({
+    deckBelief,
     handCount,
-    hasDamageEvidence,
-    hasRecentDamageEvidence,
-    historicalDamageEvents,
-    knownDamageSourceCount,
-    knownPunishSignalCount,
-    knownTraceTagSignalCount,
-    visiblePunishSignalScore,
+    effectiveMaxHandSize,
+    recentResolvedCorpDamageEvents: recentDamage.events.length,
+    attemptedCorpDamageEvents: damageEvents.attempted.length,
+    activeSignals,
     runnerTagged: input.playerView.own.tags > 0,
-    staleDamage,
   });
-  const recommendedHandFloor = runnerDamageThreatHandFloor(level);
+  const uncappedRecommendedHandFloor =
+    runnerDamageThreatHandFloor(flatlineRiskLevel);
+  const recommendedHandFloor = Math.min(
+    uncappedRecommendedHandFloor,
+    effectiveMaxHandSize,
+  );
   const criticalRunSuppression =
-    level === "critical" || (level === "confirmed" && handCount <= 1);
-  return {
-    level,
+    flatlineRiskLevel === "critical" ||
+    (flatlineRiskLevel === "confirmed" && handCount <= 1);
+  const flatlineRisk: RunnerFlatlineRiskAssessment = {
+    level: flatlineRiskLevel,
     handCount,
     effectiveMaxHandSize,
     handBufferHeadroom,
-    recentDamageEvents,
-    historicalDamageEvents,
-    recentDamageAmount,
-    ...(recentDamageStateDistance !== undefined
-      ? { recentDamageStateDistance }
-      : {}),
-    knownDamageSourceCount,
-    knownPunishSignalCount,
-    knownTraceTagSignalCount,
-    visiblePunishSignalScore,
-    visiblePunishSignalKinds,
-    riskyRunServerIds,
+    uncappedRecommendedHandFloor,
     recommendedHandFloor,
+    recentResolvedCorpDamageEvents: recentDamage.events.length,
+    recentResolvedCorpDamageAmount: recentDamage.events.reduce(
+      (sum, event) => sum + publicEventDamageAmount(event),
+      0,
+    ),
+    ...(recentDamage.turnsSinceLatest !== undefined
+      ? { turnsSinceLatestResolvedCorpDamage: recentDamage.turnsSinceLatest }
+      : {}),
+    ...(recentDamage.legacyStateDistanceSinceLatest !== undefined
+      ? {
+          legacyStateDistanceSinceLatestResolvedCorpDamage:
+            recentDamage.legacyStateDistanceSinceLatest,
+        }
+      : {}),
+    activeDamageSourceCount: activeSignals.damageSourceCount,
+    activeDeliverySourceCount: activeSignals.deliverySourceCount,
+    activeDamagePayoffCount: activeSignals.damagePayoffCount,
+    riskyRunServerIds,
     criticalRunSuppression,
     evidence: [
-      `runner_damage_threat_level:${level}`,
-      `runner_damage_threat_hand:${handCount}`,
-      `runner_damage_effective_max_hand:${effectiveMaxHandSize}`,
-      `runner_damage_hand_buffer_headroom:${handBufferHeadroom}`,
-      `runner_damage_threat_floor:${recommendedHandFloor}`,
-      `runner_damage_recent_events:${recentDamageEvents}`,
-      `runner_damage_historical_events:${historicalDamageEvents}`,
-      `runner_damage_recent_amount:${recentDamageAmount}`,
-      `runner_damage_visible_sources:${knownDamageSourceCount}`,
-      `runner_punish_visible_sources:${knownPunishSignalCount}`,
-      `runner_punish_trace_tag_sources:${knownTraceTagSignalCount}`,
-      `runner_punish_visible_score:${visiblePunishSignalScore}`,
-      `runner_punish_visible_kinds:${visiblePunishSignalKinds.join("|") || "none"}`,
-      `runner_punish_runner_tagged:${input.playerView.own.tags > 0}`,
-      `runner_damage_stale:${staleDamage}`,
-      `runner_damage_risky_servers:${riskyRunServerIds.join("|") || "none"}`,
-      `runner_damage_critical_run_suppression:${criticalRunSuppression}`,
-      ...(recentDamageStateDistance !== undefined
-        ? [`runner_damage_recent_state_distance:${recentDamageStateDistance}`]
+      `runner_flatline_risk_level:${flatlineRiskLevel}`,
+      `runner_flatline_risk_hand:${handCount}`,
+      `runner_flatline_risk_effective_max_hand:${effectiveMaxHandSize}`,
+      `runner_flatline_risk_hand_buffer_headroom:${handBufferHeadroom}`,
+      `runner_flatline_risk_uncapped_floor:${uncappedRecommendedHandFloor}`,
+      `runner_flatline_risk_floor:${recommendedHandFloor}`,
+      `runner_flatline_risk_recent_resolved_events:${recentDamage.events.length}`,
+      `runner_flatline_risk_recent_resolved_amount:${recentDamage.events.reduce(
+        (sum, event) => sum + publicEventDamageAmount(event),
+        0,
+      )}`,
+      `runner_flatline_risk_active_damage_sources:${activeSignals.damageSourceCount}`,
+      `runner_flatline_risk_active_delivery_sources:${activeSignals.deliverySourceCount}`,
+      `runner_flatline_risk_active_payoffs:${activeSignals.damagePayoffCount}`,
+      `runner_flatline_risk_runner_tagged:${input.playerView.own.tags > 0}`,
+      `runner_flatline_risk_risky_servers:${riskyRunServerIds.join("|") || "none"}`,
+      `runner_flatline_risk_critical_run_suppression:${criticalRunSuppression}`,
+      ...(recentDamage.turnsSinceLatest !== undefined
+        ? [
+            `runner_flatline_risk_turns_since_damage:${recentDamage.turnsSinceLatest}`,
+          ]
+        : []),
+      ...(recentDamage.legacyStateDistanceSinceLatest !== undefined
+        ? [
+            `runner_flatline_risk_legacy_state_distance:${recentDamage.legacyStateDistanceSinceLatest}`,
+          ]
         : []),
     ],
+  };
+  const evidence = [...deckBelief.evidence, ...flatlineRisk.evidence];
+  return {
+    deckBelief,
+    flatlineRisk,
+    evidence,
   };
 }
 
@@ -219,7 +231,7 @@ export function runnerDamageLockedHandScoreComponents(
   action: LegalAction,
 ): AiDecisionScoreComponent[] {
   if (input.side !== "runner" || action.side !== "runner") return [];
-  const assessment = runnerDamageThreatAssessment(input);
+  const assessment = runnerDamageThreatAssessment(input).flatlineRisk;
   const lockedAtThreatFloor =
     (assessment.level === "confirmed" || assessment.level === "critical") &&
     assessment.effectiveMaxHandSize <= assessment.recommendedHandFloor &&
@@ -305,7 +317,7 @@ export function runnerDamageThreatRunScoreComponent(
 ): AiDecisionScoreComponent | undefined {
   if (input.side !== "runner" || action.side !== "runner") return undefined;
   if (action.type !== "start_run") return undefined;
-  const assessment = runnerDamageThreatAssessment(input);
+  const assessment = runnerDamageThreatAssessment(input).flatlineRisk;
   if (assessment.level === "none") return undefined;
   const serverId = actionServerId(action);
   const riskyServer =
@@ -335,48 +347,103 @@ export function runnerDamageThreatRunScoreComponent(
   };
 }
 
-function runnerDamageThreatLevel(params: {
+function runnerDamageDeckBelief(
+  damageEvents: CorpDamageEventEvidence,
+  signals: VisibleOpponentDamageSignals,
+): RunnerDamageDeckBelief {
+  const independentSignalDefinitionCount = signals.signalDefinitionIds.size;
+  const independentDeliveryAndPayoff =
+    signals.deliveryDefinitionIds.size > 0 &&
+    signals.payoffDefinitionIds.size > 0 &&
+    new Set([...signals.deliveryDefinitionIds, ...signals.payoffDefinitionIds])
+      .size >= 2;
+  const confirmed =
+    damageEvents.resolved.length > 0 ||
+    independentDeliveryAndPayoff ||
+    signals.damageDefinitionIds.size >= 2 ||
+    (signals.score >= 4 && independentSignalDefinitionCount >= 2);
+  const suspected =
+    damageEvents.attempted.length > 0 ||
+    signals.signalDefinitionIds.size > 0 ||
+    signals.fallbackDamageSourceCount > 0;
+  const level: RunnerDamageDeckBeliefLevel = confirmed
+    ? "confirmed"
+    : suspected
+      ? "suspected"
+      : "none";
+  return {
+    level,
+    resolvedCorpDamageEvents: damageEvents.resolved.length,
+    attemptedCorpDamageEvents: damageEvents.attempted.length,
+    visibleDamageSourceCount: signals.damageSourceCount,
+    visibleDeliverySourceCount: signals.deliverySourceCount,
+    visibleDamagePayoffCount: signals.damagePayoffCount,
+    visibleFallbackDamageSourceCount: signals.fallbackDamageSourceCount,
+    independentSignalDefinitionCount,
+    signalScore: signals.score,
+    signalKinds: signals.kinds,
+    evidence: [
+      `runner_damage_deck_belief_level:${level}`,
+      `runner_damage_deck_resolved_corp_events:${damageEvents.resolved.length}`,
+      `runner_damage_deck_attempted_corp_events:${damageEvents.attempted.length}`,
+      `runner_damage_deck_visible_damage_sources:${signals.damageSourceCount}`,
+      `runner_damage_deck_visible_delivery_sources:${signals.deliverySourceCount}`,
+      `runner_damage_deck_visible_payoffs:${signals.damagePayoffCount}`,
+      `runner_damage_deck_fallback_sources:${signals.fallbackDamageSourceCount}`,
+      `runner_damage_deck_independent_definitions:${independentSignalDefinitionCount}`,
+      `runner_damage_deck_signal_score:${signals.score}`,
+      `runner_damage_deck_signal_kinds:${signals.kinds.join("|") || "none"}`,
+    ],
+  };
+}
+
+function runnerFlatlineRiskLevel(params: {
+  deckBelief: RunnerDamageDeckBelief;
   handCount: number;
-  hasDamageEvidence: boolean;
-  hasRecentDamageEvidence: boolean;
-  historicalDamageEvents: number;
-  knownDamageSourceCount: number;
-  knownPunishSignalCount: number;
-  knownTraceTagSignalCount: number;
-  visiblePunishSignalScore: number;
+  effectiveMaxHandSize: number;
+  recentResolvedCorpDamageEvents: number;
+  attemptedCorpDamageEvents: number;
+  activeSignals: VisibleOpponentDamageSignals;
   runnerTagged: boolean;
-  staleDamage: boolean;
-}): RunnerDamageThreatLevel {
-  if (!params.hasDamageEvidence) return "none";
+}): RunnerFlatlineRiskLevel {
+  const activeSignalScore = params.activeSignals.score;
+  const activeDamageSources = params.activeSignals.damageSourceCount;
+  const activePunishSources = params.activeSignals.signalDefinitionIds.size;
+  const recentResolvedDamage = params.recentResolvedCorpDamageEvents > 0;
+  const hasDamageEvidence =
+    params.deckBelief.level !== "none" ||
+    recentResolvedDamage ||
+    params.attemptedCorpDamageEvents > 0 ||
+    activePunishSources > 0;
+  if (!hasDamageEvidence) return "none";
   if (
-    params.handCount <= 0 ||
+    (params.handCount <= 0 &&
+      (recentResolvedDamage ||
+        params.attemptedCorpDamageEvents > 0 ||
+        activeDamageSources > 0 ||
+        params.deckBelief.level === "confirmed")) ||
     (params.handCount <= 1 &&
-      (params.hasRecentDamageEvidence ||
-        params.visiblePunishSignalScore >= 3)) ||
-    (params.runnerTagged && params.knownDamageSourceCount > 0)
+      (recentResolvedDamage || activeSignalScore >= 3)) ||
+    (params.runnerTagged && activeDamageSources > 0)
   ) {
     return "critical";
   }
   if (
-    params.hasRecentDamageEvidence ||
-    params.visiblePunishSignalScore >= 4 ||
-    (params.runnerTagged && params.knownPunishSignalCount > 0) ||
-    (!params.staleDamage && params.historicalDamageEvents >= 2)
+    recentResolvedDamage ||
+    activeSignalScore >= 4 ||
+    (activeDamageSources > 0 && params.effectiveMaxHandSize <= 3) ||
+    (params.runnerTagged &&
+      (activePunishSources > 0 || params.deckBelief.level === "confirmed")) ||
+    (params.deckBelief.level === "confirmed" && params.handCount <= 2) ||
+    (params.deckBelief.level === "confirmed" &&
+      params.effectiveMaxHandSize <= 3)
   ) {
     return "confirmed";
   }
-  if (
-    params.knownDamageSourceCount > 0 ||
-    params.knownPunishSignalCount > 0 ||
-    params.knownTraceTagSignalCount > 0 ||
-    params.historicalDamageEvents > 0
-  ) {
-    return "suspected";
-  }
-  return "none";
+  return "suspected";
 }
 
-function runnerDamageThreatHandFloor(level: RunnerDamageThreatLevel): number {
+function runnerDamageThreatHandFloor(level: RunnerFlatlineRiskLevel): number {
   switch (level) {
     case "critical":
       return 3;
@@ -402,21 +469,6 @@ function mergedHistory(input: AiDecisionInput): PublicGameEvent[] {
   );
 }
 
-function publicEventShowsDamage(event: PublicGameEvent): boolean {
-  const payload = event.publicPayload ?? {};
-  if (payload.flatline === true) return true;
-  if (publicEventDamageAmount(event) > 0) return true;
-  return damageTokensIncludeAny(
-    damageTokens([
-      event.type,
-      payload.actionType,
-      payload.damageType,
-      payload.sourceTitle,
-      payload.sourceDefinitionId,
-    ]),
-  );
-}
-
 function publicEventDamageAmount(event: PublicGameEvent): number {
   const amount = event.publicPayload?.damageAmount;
   return typeof amount === "number" && Number.isFinite(amount)
@@ -424,18 +476,122 @@ function publicEventDamageAmount(event: PublicGameEvent): number {
     : 0;
 }
 
-type VisibleOpponentPunishSignals = {
-  damageSourceCount: number;
-  signalSourceCount: number;
-  traceTagSourceCount: number;
-  score: number;
-  kinds: string[];
+type CorpDamageEventEvidence = {
+  resolved: PublicGameEvent[];
+  attempted: PublicGameEvent[];
 };
 
-function visibleOpponentPunishSignals(
+function corpDamageEventEvidence(
+  history: readonly PublicGameEvent[],
+): CorpDamageEventEvidence {
+  const resolved: PublicGameEvent[] = [];
+  const attempted: PublicGameEvent[] = [];
+  for (const event of history) {
+    if (!publicEventCanBeCorpDamage(event)) continue;
+    if (
+      publicEventDamageAmount(event) > 0 ||
+      event.publicPayload?.flatline === true
+    ) {
+      resolved.push(event);
+    } else {
+      attempted.push(event);
+    }
+  }
+  return { resolved, attempted };
+}
+
+function publicEventCanBeCorpDamage(event: PublicGameEvent): boolean {
+  const payload = event.publicPayload ?? {};
+  if (payload.actor === "runner") return false;
+  if (payload.actor !== "corp" && payload.actor !== undefined) return false;
+  const sourceDefinitionId =
+    typeof payload.sourceDefinitionId === "string"
+      ? payload.sourceDefinitionId
+      : undefined;
+  if (
+    payload.actor === undefined &&
+    sourceDefinitionId &&
+    AI_HINTS.get(sourceDefinitionId)?.side === "runner"
+  ) {
+    return false;
+  }
+  if (payload.flatline === true || publicEventDamageAmount(event) > 0)
+    return true;
+  if (payload.damageResolved === true) return true;
+  const damageType = payload.damageType;
+  if (
+    damageType === "brain" ||
+    damageType === "core" ||
+    damageType === "meat" ||
+    damageType === "net"
+  ) {
+    return true;
+  }
+  return damageTokensIncludeAny(damageTokens([event.type, payload.actionType]));
+}
+
+function recentResolvedCorpDamageEvidence(
+  input: AiDecisionInput,
+  damageEvents: CorpDamageEventEvidence,
+): {
+  events: PublicGameEvent[];
+  turnsSinceLatest?: number;
+  legacyStateDistanceSinceLatest?: number;
+} {
+  const latest = damageEvents.resolved.at(-1);
+  if (!latest) return { events: [] };
+  const currentTurnSerial = finiteTurnSerial(input.playerView.turnSerial);
+  const latestTurnSerial = finiteTurnSerial(latest.turnSerial);
+  if (currentTurnSerial !== undefined && latestTurnSerial !== undefined) {
+    const turnsSinceLatest = Math.max(0, currentTurnSerial - latestTurnSerial);
+    return {
+      events: damageEvents.resolved.filter((event) => {
+        const eventTurnSerial = finiteTurnSerial(event.turnSerial);
+        return (
+          eventTurnSerial !== undefined &&
+          currentTurnSerial - eventTurnSerial >= 0 &&
+          currentTurnSerial - eventTurnSerial <= RECENT_DAMAGE_TURN_DISTANCE
+        );
+      }),
+      turnsSinceLatest,
+    };
+  }
+  const legacyStateDistanceSinceLatest = Math.max(
+    0,
+    input.playerView.stateVersion - eventVersion(latest),
+  );
+  return {
+    events: damageEvents.resolved.filter((event) => {
+      const distance = input.playerView.stateVersion - eventVersion(event);
+      return distance >= 0 && distance <= RECENT_DAMAGE_STATE_DISTANCE;
+    }),
+    legacyStateDistanceSinceLatest,
+  };
+}
+
+function finiteTurnSerial(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value)
+    ? Math.max(0, Math.floor(value))
+    : undefined;
+}
+
+type VisibleOpponentDamageSignals = {
+  damageSourceCount: number;
+  deliverySourceCount: number;
+  damagePayoffCount: number;
+  fallbackDamageSourceCount: number;
+  score: number;
+  kinds: string[];
+  signalDefinitionIds: Set<string>;
+  damageDefinitionIds: Set<string>;
+  deliveryDefinitionIds: Set<string>;
+  payoffDefinitionIds: Set<string>;
+};
+
+function visibleOpponentDamageSignals(
   input: AiDecisionInput,
   history: readonly PublicGameEvent[],
-): VisibleOpponentPunishSignals {
+): VisibleOpponentDamageSignals {
   const visibleCards = visibleOpponentCards(input);
   const definitionIds = new Set(
     visibleCards
@@ -448,12 +604,35 @@ function visibleOpponentPunishSignals(
       if (hint?.side === "corp") definitionIds.add(definitionId);
     }
   }
+  return damageSignalsForKnownSources(visibleCards, definitionIds);
+}
 
-  let damageSourceCount = 0;
-  let signalSourceCount = 0;
-  let traceTagSourceCount = 0;
+function activeOpponentDamageSignals(
+  input: AiDecisionInput,
+): VisibleOpponentDamageSignals {
+  const visibleCards = activeOpponentCards(input);
+  return damageSignalsForKnownSources(
+    visibleCards,
+    new Set(
+      visibleCards
+        .map((card) => card.definitionId)
+        .filter((definitionId): definitionId is string =>
+          Boolean(definitionId),
+        ),
+    ),
+  );
+}
+
+function damageSignalsForKnownSources(
+  visibleCards: readonly VisibleCard[],
+  definitionIds: ReadonlySet<string>,
+): VisibleOpponentDamageSignals {
   let score = 0;
   const kinds = new Set<string>();
+  const signalDefinitionIds = new Set<string>();
+  const damageDefinitionIds = new Set<string>();
+  const deliveryDefinitionIds = new Set<string>();
+  const payoffDefinitionIds = new Set<string>();
   for (const definitionId of definitionIds) {
     const hint = AI_HINTS.get(definitionId);
     if (hint?.side !== "corp") continue;
@@ -468,54 +647,55 @@ function visibleOpponentPunishSignals(
       (hint.lineSupport ?? []).includes("corp.tag_trace_punish");
     const punishPayoff = effectKinds.has("tag_punish_payoff");
     if (!directDamage && !traceTag && !punishPayoff) continue;
-    signalSourceCount += 1;
+    signalDefinitionIds.add(definitionId);
     if (directDamage) {
-      damageSourceCount += 1;
+      damageDefinitionIds.add(definitionId);
       score += 2;
       kinds.add("damage_source");
     }
     if (traceTag) {
-      traceTagSourceCount += 1;
+      deliveryDefinitionIds.add(definitionId);
       score += 1;
       kinds.add("trace_tag_source");
     }
     if (punishPayoff) {
+      payoffDefinitionIds.add(definitionId);
       score += 2;
       kinds.add("punish_payoff");
     }
   }
 
-  const unprofiledVisibleDamageSources = visibleCards.filter((card) => {
-    if (!visibleCardShowsDamageSource(card)) return false;
+  const fallbackSignalIds = new Set<string>();
+  for (const card of visibleCards) {
+    if (!visibleCardShowsDamageSourceFallback(card)) continue;
     const hint = card.definitionId
       ? AI_HINTS.get(card.definitionId)
       : undefined;
-    return !hint?.effects?.some((effect) => effect.kind === "damage");
-  }).length;
-  if (unprofiledVisibleDamageSources > 0) {
-    damageSourceCount += unprofiledVisibleDamageSources;
-    signalSourceCount += unprofiledVisibleDamageSources;
-    score += unprofiledVisibleDamageSources * 2;
-    kinds.add("damage_source");
+    if (hint?.effects?.some((effect) => effect.kind === "damage")) continue;
+    fallbackSignalIds.add(card.definitionId ?? card.instanceId);
   }
-
-  const eventKinds = publicPunishEventKinds(history);
-  for (const kind of eventKinds) kinds.add(kind);
-  if (eventKinds.has("trace_tag_event") && traceTagSourceCount === 0) {
-    traceTagSourceCount += 1;
-    signalSourceCount += 1;
-    score += 1;
+  if (fallbackSignalIds.size > 0) {
+    score += fallbackSignalIds.size;
+    kinds.add("text_damage_fallback");
+    for (const signalId of fallbackSignalIds) {
+      signalDefinitionIds.add(`fallback:${signalId}`);
+    }
   }
-  if (damageSourceCount > 0 && traceTagSourceCount > 0) {
+  if (damageDefinitionIds.size > 0 && deliveryDefinitionIds.size > 0) {
     score += 1;
     kinds.add("damage_delivery_combo");
   }
   return {
-    damageSourceCount,
-    signalSourceCount,
-    traceTagSourceCount,
+    damageSourceCount: damageDefinitionIds.size,
+    deliverySourceCount: deliveryDefinitionIds.size,
+    damagePayoffCount: payoffDefinitionIds.size,
+    fallbackDamageSourceCount: fallbackSignalIds.size,
     score,
     kinds: [...kinds].sort(),
+    signalDefinitionIds,
+    damageDefinitionIds,
+    deliveryDefinitionIds,
+    payoffDefinitionIds,
   };
 }
 
@@ -534,6 +714,17 @@ function visibleOpponentCards(input: AiDecisionInput): VisibleCard[] {
   ].filter((card) => card.known !== false);
 }
 
+function activeOpponentCards(input: AiDecisionInput): VisibleCard[] {
+  return [
+    input.playerView.opponent.identity,
+    ...(input.playerView.opponent.rig ?? []),
+    ...input.playerView.servers.flatMap((server) => [
+      ...server.ice,
+      ...server.root,
+    ]),
+  ].filter((card) => card.known !== false);
+}
+
 function publicEventDefinitionIds(event: PublicGameEvent): string[] {
   const payload = event.publicPayload ?? {};
   return [
@@ -543,25 +734,12 @@ function publicEventDefinitionIds(event: PublicGameEvent): string[] {
   ].filter((value): value is string => typeof value === "string");
 }
 
-function publicPunishEventKinds(
-  history: readonly PublicGameEvent[],
-): Set<string> {
-  const kinds = new Set<string>();
-  for (const event of history) {
-    const tokens = damageTokens([
-      event.type,
-      event.publicPayload?.actionType,
-      event.publicPayload?.damageType,
-    ]);
-    if (tokens.some((token) => token === "trace" || token === "tag")) {
-      kinds.add("trace_tag_event");
-    }
-  }
-  return kinds;
-}
-
-function visibleCardShowsDamageSource(card: VisibleCard): boolean {
+function visibleCardShowsDamageSourceFallback(card: VisibleCard): boolean {
   if (card.known === false) return false;
+  const text = `${card.title ?? ""} ${card.rulesText ?? ""} ${
+    card.definitionId ?? ""
+  }`.toLowerCase();
+  if (/\b(?:prevent|avoid|reduce)\b.{0,48}\bdamage\b/.test(text)) return false;
   return damageTokensIncludeAny(
     damageTokens([card.title, card.rulesText, card.definitionId]),
   );
