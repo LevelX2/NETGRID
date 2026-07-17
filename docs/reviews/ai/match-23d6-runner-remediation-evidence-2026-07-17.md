@@ -417,6 +417,11 @@ Abschlussstand der Verifikation:
 - AI-Shards auf dem finalen Dateistand: 125 Dateien/797 Tests, 125
   Dateien/987 Tests und 124 Dateien/796 Tests; zusammen 374 Dateien und 2.580
   Tests grün;
+- nach dem defensiven Abgleich mit den zwischenzeitlich nach `main`
+  integrierten B34E-Runner-Korrekturen: 125 Dateien/799 Tests, 125
+  Dateien/1.000 Tests und 125 Dateien/801 Tests; zusammen 375 Dateien und
+  2.600 Tests grün. Die gemeinsame Source-Role-Klassifikation besteht 99
+  fokussierte 23D6-, B34E-, 9FEF- und Unit-Verträge;
 - Engine: 188 Dateien und 1.717 Tests grün, einschließlich Viacox-
   LegalActions, `applyAction`, Replay und StateHash;
 - Web: 48 Dateien und 626 Tests grün, einschließlich Chronicle-Konsument;

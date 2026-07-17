@@ -28,6 +28,18 @@ export function isImmediateSafetyThreatSubroutine(
   );
 }
 
+export function isProgramTrashThreatSubroutine(
+  subroutine: VisibleEncounterSubroutine,
+): boolean {
+  const type = subroutine.type.toLowerCase();
+  return (
+    type === "set_run_pass_rezzed_ice_program_trash" ||
+    type === "trash_installed_program" ||
+    type === "trash_program_unless_runner_pays" ||
+    type === "trash_installed_program_unless_runner_pays"
+  );
+}
+
 export function isEndRunSubroutine(
   subroutine: VisibleEncounterSubroutine,
 ): boolean {

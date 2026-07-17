@@ -44,11 +44,19 @@ const SOURCE_SEARCH_TOKENS = [
   "tutor",
 ];
 
+const RUNNER_ANSWER_ACTION_TYPES = new Set<LegalAction["type"]>([
+  "play_event",
+  "trigger_ability",
+  "activated_card_ability",
+  "install_card",
+]);
+
 export function runnerSourceCardAnswerRole(
   input: AiDecisionInput,
   action: LegalAction,
   dependencies: RunnerSourceCardAnswerRoleDependencies,
 ): "search" | "draw" | undefined {
+  if (!RUNNER_ANSWER_ACTION_TYPES.has(action.type)) return undefined;
   const sourceCard = dependencies.visibleSourceCard(input, action);
   const sourceDefinitionId =
     sourceCard?.definitionId || dependencies.sourceDefinitionId(input, action);
@@ -73,13 +81,7 @@ export function runnerSourceCardAnswerRole(
   if (rolesMatch(mechanics, ["search", "tutor"])) return "search";
   if (rolesMatch(mechanics, ["draw"])) return "draw";
   const tokens = sourceAnswerTokens([
-    sourceCard?.title,
-    sourceCard?.type,
-    ...(sourceCard?.subtypes ?? []),
     sourceCard?.rulesText,
-    definitionDisplay?.title,
-    definitionDisplay?.type,
-    ...(definitionDisplay?.subtypes ?? []),
     definitionDisplay?.rulesText,
   ]);
   if (sourceAnswerTokensIncludeAny(tokens, SOURCE_SEARCH_TOKENS)) {

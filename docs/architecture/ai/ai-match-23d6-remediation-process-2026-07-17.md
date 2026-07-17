@@ -269,7 +269,9 @@ den finalen Merge.
   `ok` mit null Blockern und null Warnungen. Viacox erscheint dabei nur noch
   mit Pflicht-/Zufallsaktions- und Run-Signalen, nicht mehr als Search-Tool.
 - P7 abgeschlossen: Alle drei AI-Testshards sind auf dem abschließend
-  formatierten Stand mit 374 Dateien und 2.580 Tests grün. Die fokussierten
+  formatierten Stand mit 374 Dateien und 2.580 Tests grün. Nach dem defensiven
+  Abgleich mit dem weitergelaufenen `main` bestehen auf dem kombinierten Stand
+  375 Dateien und 2.600 Tests. Die fokussierten
   Runtime-/23D6-, Hint-/9FEF- und Source-Role-Verträge sind darin enthalten.
   Engine ist mit 1.717 Tests, Web mit 626 Tests und der
   Workspace-Typecheck für alle sieben Projekte grün. `check:ai`, Hint-

@@ -171,7 +171,7 @@ describe("publicContextForAction", () => {
     expect(eventVisibilityForAction(action)).toBe("public");
   });
 
-  it("forwards an exposed installed card's public position without its instance id", () => {
+  it("forwards approved public expose ids without a singular private target id", () => {
     const state = {
       corp: { servers: [] },
       cardInstances: {},
@@ -191,6 +191,7 @@ describe("publicContextForAction", () => {
         exposedIndex: 1,
         exposedPositionKey: "root:1",
         exposedCardInstanceId: "secret_upgrade_instance",
+        exposedCardInstanceIds: "public_upgrade_instance,public_ice_instance",
       },
     } as unknown as LegalAction;
 
@@ -217,6 +218,7 @@ describe("publicContextForAction", () => {
       exposedServerLabel: "Remote 2",
       exposedArea: "root",
       exposedIndex: 1,
+      exposedCardInstanceIds: "public_upgrade_instance,public_ice_instance",
     });
     expect(context).not.toHaveProperty("exposedPositionKey");
     expect(context).not.toHaveProperty("exposedCardInstanceId");

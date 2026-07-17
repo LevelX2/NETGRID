@@ -24,7 +24,6 @@ describe("runnerSourceCardAnswerRole", () => {
       label: "Use ability",
       payload: { sourceDefinitionId: "text-search-source" },
     });
-
     expect(
       runnerSourceCardAnswerRole(input(), labelOnly, dependencies()),
     ).toBeUndefined();
@@ -37,6 +36,31 @@ describe("runnerSourceCardAnswerRole", () => {
     expect(
       runnerSourceCardAnswerRole(input(), textBacked, dependencies()),
     ).toBe("search");
+  });
+
+  it("does not infer search from a source title", () => {
+    const titleBacked = action({
+      actionId: "title-backed-search",
+      label: "Use ability",
+      payload: { sourceDefinitionId: "title-search-source" },
+    });
+
+    expect(
+      runnerSourceCardAnswerRole(input(), titleBacked, dependencies()),
+    ).toBeUndefined();
+  });
+
+  it("does not project a Corp encounter source as a Runner answer", () => {
+    const corpEncounter = action({
+      actionId: "corp-encounter-search-noise",
+      type: "continue_run",
+      label: "Continue the run",
+      payload: { sourceDefinitionId: "search-source" },
+    });
+
+    expect(
+      runnerSourceCardAnswerRole(input(), corpEncounter, dependencies()),
+    ).toBeUndefined();
   });
 
   it("ignores substring-only source roles and mechanics", () => {
@@ -111,11 +135,13 @@ function dependencies() {
         ? { mechanics: ["draw_card"] }
         : definitionId === "text-search-source"
           ? { rulesText: "Search your stack for a program." }
-          : definitionId === "mechanic-noise-source"
-            ? { mechanics: ["withdraw_card"] }
-            : definitionId === "text-noise-source"
-              ? { rulesText: "Searchlight drawish tutorish." }
-              : undefined,
+          : definitionId === "title-search-source"
+            ? { title: "Library Search", rulesText: "Make a run on HQ." }
+            : definitionId === "mechanic-noise-source"
+              ? { mechanics: ["withdraw_card"] }
+              : definitionId === "text-noise-source"
+                ? { rulesText: "Searchlight drawish tutorish." }
+                : undefined,
   };
 }
 
