@@ -23,7 +23,7 @@ resultArtifacts:
   - docs/reviews/web/ice-and-data-expose-feedback-final-review-2026-07-17.md
 checks:
   - corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/proteus/rule-contract-baseline-utilities.test.ts (20 Tests)
-  - corepack pnpm --filter @netgrid/web exec vitest run app/chronicle.test.ts app/action-board-ui.test.ts (292 Tests)
+  - corepack pnpm --filter @netgrid/web exec vitest run app/chronicle.test.ts app/action-board-ui.test.ts (293 Tests nach Main-Abgleich)
   - corepack pnpm --filter @netgrid/engine typecheck
   - corepack pnpm --filter @netgrid/web typecheck
   - corepack pnpm typecheck

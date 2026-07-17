@@ -2,8 +2,9 @@
 
 ## Status
 
-Umsetzung vollständig auf `codex/ice-and-data-expose-feedback`; lokale
-Main-Integration und Worktree-Cleanup stehen noch aus.
+Final im Worktree verifiziert auf `codex/ice-and-data-expose-feedback` nach
+defensivem Abgleich mit `main`; die nachfolgende lokale Integration und der
+Worktree-Cleanup sind Teil dieses Prozessabschlusses.
 
 ## Quelle/Vorgabe
 

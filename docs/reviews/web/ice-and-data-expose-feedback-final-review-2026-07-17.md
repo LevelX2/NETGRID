@@ -1,6 +1,6 @@
 # Final Review: Expose-Feedback für Ice and Data Special Report
 
-Status: Implementiert, lokale Main-Integration ausstehend
+Status: Final im Arbeitsbranch verifiziert
 
 ## Ergebnis
 
@@ -34,7 +34,7 @@ keinen Replay-Log und keinen StateHash.
 - `rule-contract-baseline-utilities.test.ts`: 20 Tests grün; der
   Ice-and-Data-Flow prüft die öffentliche Karteninstanz, Kartenidentität und
   Fort-Position nach einer legalen Auswahl.
-- `chronicle.test.ts` und `action-board-ui.test.ts`: 292 Tests grün; sie
+- `chronicle.test.ts` und `action-board-ui.test.ts`: 293 Tests grün; sie
   prüfen den vollständigen Chronicle-Text sowie die strikte Auswahl nur aus
   passenden Public-Expose-Events.
 - `corepack pnpm --filter @netgrid/engine typecheck`: grün.
