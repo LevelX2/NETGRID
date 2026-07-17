@@ -1,6 +1,6 @@
 # Runner-Damage-Threat-Model-v2-Prozess
 
-Status: aktiv
+Status: P3 Modelltrennung aktiv
 
 ## Quelle und Zielprüfung
 
@@ -90,7 +90,7 @@ würde. Ein solcher Blocker erhält einen Report mit Removal Condition.
 
 ### P1: Preflight und Prozessvertrag
 
-Status: aktiv
+Status: abgeschlossen
 
 Ziel: Worktree, Branch, Scope, Invarianten und Gates verbindlich sichern.
 
@@ -108,7 +108,7 @@ Commit: `docs(ai): plan damage threat model v2`
 
 ### P2: Rote Evidence und Consumer-Matrix
 
-Status: ausstehend
+Status: abgeschlossen
 
 Ziel: Die belegten Schwächen vor der Implementierung reproduzierbar machen.
 
@@ -137,7 +137,7 @@ Commit: `test(ai): capture damage threat model v2 regressions`
 
 ### P3: Deck-Belief und akutes Flatline-Risiko
 
-Status: ausstehend
+Status: aktiv
 
 Ziel: Das bisherige skalare Threat-Modell fachlich trennen.
 
