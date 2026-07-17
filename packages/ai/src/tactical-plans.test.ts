@@ -3546,7 +3546,7 @@ describe("tactical plan model", () => {
         scoreThreat: false,
         score: -40,
         evidence: [],
-      } as RunnerRunTargetEvaluation,
+      } as unknown as RunnerRunTargetEvaluation,
     ];
 
     const result = evaluateTacticalPlans({
