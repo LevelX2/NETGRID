@@ -1,6 +1,6 @@
 # Runner-Damage-Threat-Model-v2-Prozess
 
-Status: P5 Altstruktur-Cleanup aktiv
+Status: P6 Gesamtverifikation und Integration aktiv
 
 ## Quelle und Zielprüfung
 
@@ -197,7 +197,7 @@ Commit: `fix(ai): consume acute flatline risk across runner policy`
 
 ### P5: Altstrukturen und Verträge konsolidieren
 
-Status: aktiv
+Status: abgeschlossen
 
 Ziel: Es bleibt genau eine führende Damage-Belief-/Flatline-Risk-API.
 
@@ -214,11 +214,19 @@ Typecheck, `git diff --check`.
 
 Done-Gate: keine parallele Alt-API und keine verwaisten Consumer.
 
+Ergebnis: Der ungenutzte Bool-Detector `runner-visible-damage-pressure` samt
+Test ist gelöscht. Das Aggregat liefert nur noch `deckBelief`, `flatlineRisk`
+und gemeinsame Evidence; sämtliche spiegelnden Legacy-Felder wurden entfernt.
+Dead-Code-Suche, 24 Modell-/F5D-Tests, AI-Typecheck und `check:ai:full` sind
+grün. Die Hint-Gates bestätigen 618 kompilierte Karten ohne Fehler und der
+vollständige Derived-Facts-Gate 618 aktive Karten bei 528 Implementierungen
+ohne Fehler; bestehende Warnungen bleiben unverändert nicht-blockierend.
+
 Commit: `refactor(ai): remove legacy damage pressure paths`
 
 ### P6: Breite Verifikation, Wissenspflege und Integration
 
-Status: ausstehend
+Status: aktiv
 
 Ziel: aktueller Code, Dokumentation, `main` und Cleanup sind nachweislich
 abgeschlossen.

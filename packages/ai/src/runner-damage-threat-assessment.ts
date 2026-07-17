@@ -52,23 +52,6 @@ export type RunnerDamageThreatAssessment = {
   deckBelief: RunnerDamageDeckBelief;
   flatlineRisk: RunnerFlatlineRiskAssessment;
   evidence: string[];
-  /** @deprecated P4 migrates consumers to flatlineRisk.level. */
-  level: RunnerFlatlineRiskLevel;
-  handCount: number;
-  effectiveMaxHandSize: number;
-  handBufferHeadroom: number;
-  recentDamageEvents: number;
-  historicalDamageEvents: number;
-  recentDamageAmount: number;
-  recentDamageStateDistance?: number;
-  knownDamageSourceCount: number;
-  knownPunishSignalCount: number;
-  knownTraceTagSignalCount: number;
-  visiblePunishSignalScore: number;
-  visiblePunishSignalKinds: string[];
-  riskyRunServerIds: string[];
-  recommendedHandFloor: number;
-  criticalRunSuppression: boolean;
 };
 
 const DAMAGE_TOKENS = new Set([
@@ -182,28 +165,6 @@ export function runnerDamageThreatAssessment(
     deckBelief,
     flatlineRisk,
     evidence,
-    level: flatlineRisk.level,
-    handCount,
-    effectiveMaxHandSize,
-    handBufferHeadroom,
-    recentDamageEvents: flatlineRisk.recentResolvedCorpDamageEvents,
-    historicalDamageEvents: deckBelief.resolvedCorpDamageEvents,
-    recentDamageAmount: flatlineRisk.recentResolvedCorpDamageAmount,
-    ...(flatlineRisk.legacyStateDistanceSinceLatestResolvedCorpDamage !==
-    undefined
-      ? {
-          recentDamageStateDistance:
-            flatlineRisk.legacyStateDistanceSinceLatestResolvedCorpDamage,
-        }
-      : {}),
-    knownDamageSourceCount: deckBelief.visibleDamageSourceCount,
-    knownPunishSignalCount: deckSignals.signalDefinitionIds.size,
-    knownTraceTagSignalCount: deckBelief.visibleDeliverySourceCount,
-    visiblePunishSignalScore: deckBelief.signalScore,
-    visiblePunishSignalKinds: deckBelief.signalKinds,
-    riskyRunServerIds,
-    recommendedHandFloor,
-    criticalRunSuppression,
   };
 }
 

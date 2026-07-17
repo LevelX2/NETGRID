@@ -28,12 +28,14 @@ describe("runnerDamageThreatAssessment", () => {
     );
 
     expect(assessment).toMatchObject({
-      level: "suspected",
-      knownTraceTagSignalCount: 1,
-      visiblePunishSignalScore: 1,
-      recommendedHandFloor: 2,
+      deckBelief: {
+        level: "suspected",
+        visibleDeliverySourceCount: 1,
+        signalScore: 1,
+      },
+      flatlineRisk: { level: "suspected", recommendedHandFloor: 2 },
     });
-    expect(assessment.visiblePunishSignalKinds).toContain("trace_tag_source");
+    expect(assessment.deckBelief.signalKinds).toContain("trace_tag_source");
   });
 
   it("confirms deck belief without keeping an inactive window acute", () => {
@@ -66,7 +68,7 @@ describe("runnerDamageThreatAssessment", () => {
         recommendedHandFloor: 2,
       },
     });
-    expect(assessment.visiblePunishSignalKinds).toEqual(
+    expect(assessment.deckBelief.signalKinds).toEqual(
       expect.arrayContaining([
         "damage_delivery_combo",
         "damage_source",
@@ -82,9 +84,8 @@ describe("runnerDamageThreatAssessment", () => {
         input({ handCount: 4, stateVersion: 14, opponentHandCount: 5 }),
       ),
     ).toMatchObject({
-      level: "none",
-      knownPunishSignalCount: 0,
-      visiblePunishSignalScore: 0,
+      deckBelief: { level: "none", signalScore: 0 },
+      flatlineRisk: { level: "none" },
     });
   });
 
@@ -93,9 +94,8 @@ describe("runnerDamageThreatAssessment", () => {
     tagged.playerView.own.tags = 1;
 
     expect(runnerDamageThreatAssessment(tagged)).toMatchObject({
-      level: "none",
-      visiblePunishSignalScore: 0,
-      recommendedHandFloor: 1,
+      deckBelief: { level: "none", signalScore: 0 },
+      flatlineRisk: { level: "none", recommendedHandFloor: 1 },
     });
   });
 
@@ -127,11 +127,14 @@ describe("runnerDamageThreatAssessment", () => {
         }),
       ),
     ).toMatchObject({
-      level: "none",
-      knownDamageSourceCount: 0,
-      knownPunishSignalCount: 0,
-      knownTraceTagSignalCount: 0,
-      visiblePunishSignalScore: 0,
+      deckBelief: {
+        level: "none",
+        visibleDamageSourceCount: 0,
+        visibleDeliverySourceCount: 0,
+        independentSignalDefinitionCount: 0,
+        signalScore: 0,
+      },
+      flatlineRisk: { level: "none" },
     });
   });
 
@@ -159,12 +162,14 @@ describe("runnerDamageThreatAssessment", () => {
     );
 
     expect(assessment).toMatchObject({
-      level: "critical",
-      handCount: 0,
-      recommendedHandFloor: 3,
-      criticalRunSuppression: true,
+      flatlineRisk: {
+        level: "critical",
+        handCount: 0,
+        recommendedHandFloor: 3,
+        criticalRunSuppression: true,
+      },
     });
-    expect(assessment.riskyRunServerIds).toEqual(["rd"]);
+    expect(assessment.flatlineRisk.riskyRunServerIds).toEqual(["rd"]);
     expect(assessment.evidence).toEqual(
       expect.arrayContaining([
         "runner_flatline_risk_level:critical",
@@ -189,9 +194,9 @@ describe("runnerDamageThreatAssessment", () => {
       }),
     );
 
-    expect(assessment.level).toBe("suspected");
-    expect(assessment.recommendedHandFloor).toBe(2);
-    expect(assessment.criticalRunSuppression).toBe(false);
+    expect(assessment.flatlineRisk.level).toBe("suspected");
+    expect(assessment.flatlineRisk.recommendedHandFloor).toBe(2);
+    expect(assessment.flatlineRisk.criticalRunSuppression).toBe(false);
     expect(assessment.evidence).toEqual(
       expect.arrayContaining([
         "runner_damage_deck_belief_level:confirmed",
@@ -272,9 +277,11 @@ describe("runnerDamageThreatAssessment", () => {
     );
 
     expect(runnerDamageThreatAssessment(current)).toMatchObject({
-      level: "confirmed",
-      effectiveMaxHandSize: 3,
-      handBufferHeadroom: 0,
+      flatlineRisk: {
+        level: "confirmed",
+        effectiveMaxHandSize: 3,
+        handBufferHeadroom: 0,
+      },
     });
     expect(runnerDamageLockedHandScoreComponents(current, gain)).toEqual(
       expect.arrayContaining([
