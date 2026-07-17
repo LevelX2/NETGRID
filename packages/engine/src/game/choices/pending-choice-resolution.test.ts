@@ -52,6 +52,25 @@ describe("pending choice resolution", () => {
     expect(resolveDelayedInstallStartTurnChoice.mock.calls[0]?.[0]).toBe(state);
   });
 
+  it("dispatches Shell Traders MU choices through the runner callback", () => {
+    const state = stateWithChoice(
+      "shell_memory_choice",
+      "v1912.delayed_install_memory:shell_1:target_1:paid:1",
+    );
+    const resolveDelayedInstallMemoryChoice = vi.fn();
+
+    resolvePendingChoice(
+      pendingChoiceHost(state, {
+        runner: { resolveDelayedInstallMemoryChoice },
+      }),
+      choiceAction("shell_memory_choice"),
+      playerChoice("shell_memory_choice", ["program_1"]),
+    );
+
+    expect(resolveDelayedInstallMemoryChoice).toHaveBeenCalledOnce();
+    expect(resolveDelayedInstallMemoryChoice.mock.calls[0]?.[0]).toBe(state);
+  });
+
   it("lets hidden-zone search handlers clear the pending choice", () => {
     const state = stateWithChoice("search_choice", "hidden_zone.search");
 
@@ -323,6 +342,9 @@ function pendingChoiceHost(
       ),
       resolveDelayedInstallStartTurnChoice: unexpected(
         "resolveDelayedInstallStartTurnChoice",
+      ),
+      resolveDelayedInstallMemoryChoice: unexpected(
+        "resolveDelayedInstallMemoryChoice",
       ),
       ...overrides.runner,
     },

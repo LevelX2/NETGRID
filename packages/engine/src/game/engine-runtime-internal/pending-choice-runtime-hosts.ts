@@ -132,6 +132,7 @@ export function createPendingChoiceRuntimeHosts(
     resolveReplacementChoice,
     resolveRunnerPrivateLookChoice,
     resolveRunnerProgramTrashBeforeInstallChoice,
+    resolveDelayedInstallMemoryChoice,
     resolveDelayedInstallStartTurnChoice,
     resolveSenatorialFieldTripChoice,
     resolveHqIceSwapChoice,
@@ -768,6 +769,28 @@ export function createPendingChoiceRuntimeHosts(
       },
       runner: {
         resolveRunnerProgramTrashBeforeInstallChoice,
+        resolveDelayedInstallMemoryChoice: (
+          _state,
+          legalAction,
+          playerAction,
+        ) => {
+          const resumesStartOfTurn =
+            state.pendingChoice?.source.split(":")[3] === "start_turn";
+          const effects: ResolvedGameEffect[] = [];
+          resolveDelayedInstallMemoryChoice(
+            runnerSpecialTriggerExecutionHost(state),
+            legalAction,
+            playerAction,
+            effects,
+          );
+          if (resumesStartOfTurn && !state.pendingChoice)
+            applyRunnerStartOfTurnEffects(
+              state,
+              effects,
+              "after_delayed_install_choice",
+            );
+          appendResolvedEffectsToPayload(legalAction, effects);
+        },
         resolveDelayedInstallStartTurnChoice: (
           _state,
           legalAction,

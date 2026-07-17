@@ -76,6 +76,10 @@ export type RunnerSpecialTriggerExecutionHost = {
   };
   runner: {
     runnerMemoryLimit: (state: GameState) => number;
+    runnerProgramUsesMemory: (
+      state: GameState,
+      cardId: CardInstanceId,
+    ) => boolean;
   };
   hiddenZone: {
     startHiddenStackProgramInstallActivation: (
@@ -171,7 +175,7 @@ export function delayedInstallPreparedTargetIds(
       // counters may still be removed while the delayed install target drifts.
       return (
         shellCounters > 1 ||
-        delayedInstallCanInstallPreparedCardForFree(host, cardId, definition)
+        delayedInstallCanResolveFinalCounter(host, cardId, definition)
       );
     })
     .sort();
@@ -218,7 +222,11 @@ export function applyDelayedInstallStartOfTurn(
     }
     const targetCardId = targetCardIds[0]!;
     resolvedSourceIds.push(sourceCardId);
-    const result = removeShellCounterAndMaybeInstall(host, targetCardId);
+    const result = removeShellCounterAndMaybeInstall(host, targetCardId, {
+      sourceCardId,
+      reason: "start_turn",
+    });
+    if (result.memoryChoiceOpened) return;
     effects?.push(
       delayedInstallStartTurnCounterEffect(
         host,
@@ -238,10 +246,7 @@ export function resolveDelayedInstallStartTurnChoice(
 ): void {
   const { state } = host;
   const choice = state.pendingChoice;
-  if (
-    !choice ||
-    !choice.source.startsWith("v1912.shell_traders_start_turn:")
-  )
+  if (!choice || !choice.source.startsWith("v1912.shell_traders_start_turn:"))
     throw new Error("Es ist keine Shell-Traders-Startzugwahl offen.");
   if (legalAction.side !== "runner" || playerAction.side !== "runner")
     throw new Error("Nur der Runner darf das Shell-Traders-Ziel wählen.");
@@ -277,19 +282,24 @@ export function resolveDelayedInstallStartTurnChoice(
   delete state.pendingChoice;
   const flags = state.runnerTurnFlags;
   if (!flags) throw new Error("Runner-Zugstatus fehlt.");
-  const resolvedSourceIds =
-    (flags.delayedInstallStartTurnResolvedSourceIds ??= []);
+  const resolvedSourceIds = (flags.delayedInstallStartTurnResolvedSourceIds ??=
+    []);
   if (!resolvedSourceIds.includes(sourceCardId))
     resolvedSourceIds.push(sourceCardId);
-  const result = removeShellCounterAndMaybeInstall(host, targetCardId);
-  effects?.push(
-    delayedInstallStartTurnCounterEffect(
-      host,
-      sourceCardId,
-      targetCardId,
-      result,
-    ),
-  );
+  const result = removeShellCounterAndMaybeInstall(host, targetCardId, {
+    sourceCardId,
+    reason: "start_turn",
+  });
+  if (!result.memoryChoiceOpened) {
+    effects?.push(
+      delayedInstallStartTurnCounterEffect(
+        host,
+        sourceCardId,
+        targetCardId,
+        result,
+      ),
+    );
+  }
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     delayedInstallAbility: "start_turn_remove_shell_counter",
@@ -299,9 +309,123 @@ export function resolveDelayedInstallStartTurnChoice(
     targetCardId,
     targetCardDefinitionId: targetDefinition.id,
     counterType: "shell",
-    removedCounterAmount: 1,
+    removedCounterAmount: result.memoryChoiceOpened ? 0 : 1,
     remainingCounters: result.remainingCounters,
     delayedInstallInstalledTarget: result.installed,
+    delayedInstallMemoryChoiceOpened: result.memoryChoiceOpened,
+  };
+}
+
+export function resolveDelayedInstallMemoryChoice(
+  host: RunnerSpecialTriggerExecutionHost,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+  effects?: ResolvedGameEffect[],
+): void {
+  const { state } = host;
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("v1912.delayed_install_memory:"))
+    throw new Error("Es ist keine Shell-Traders-MU-Wahl offen.");
+  if (
+    choice.side !== "runner" ||
+    legalAction.side !== "runner" ||
+    playerAction.side !== "runner"
+  )
+    throw new Error("Nur der Runner darf Shell-Traders-MU freimachen.");
+
+  const [, sourceCardId, targetCardId, reason] = choice.source.split(":") as [
+    string,
+    CardInstanceId | undefined,
+    CardInstanceId | undefined,
+    "paid" | "start_turn" | undefined,
+  ];
+  if (
+    !sourceCardId ||
+    !state.runner.rig.resources.includes(sourceCardId) ||
+    host.cards.definitionFor(state, sourceCardId).id !==
+      host.constants.SHELL_TRADERS_ID
+  )
+    throw new Error("The Shell Traders ist nicht mehr installiert.");
+  if (!targetCardId) throw new Error("Die Shell-Traders-Zielkarte fehlt.");
+  if (reason !== "paid" && reason !== "start_turn")
+    throw new Error("Der Shell-Traders-MU-Grund ist ungültig.");
+  const targetDefinition = host.cards.definitionFor(state, targetCardId);
+  if (targetDefinition.type !== "program")
+    throw new Error("Nur Programme benötigen eine Shell-Traders-MU-Wahl.");
+  if (!delayedInstallPreparedTargetIds(host).includes(targetCardId))
+    throw new Error("Die Shell-Traders-Zielkarte ist nicht mehr vorbereitet.");
+  if (host.counters.cardCounter(state, targetCardId, "shell") !== 1)
+    throw new Error("Die Shell-Traders-MU-Wahl verlangt den letzten Counter.");
+
+  const selectedOptionIds = selectedChoiceIds(playerAction.selectedChoices);
+  const selectedCardIds = selectedOptionIds.map((optionId) => {
+    const option = choice.options.find(
+      (candidate) => candidate.id === optionId,
+    );
+    if (typeof option?.value !== "string")
+      throw new Error(
+        "Die Shell-Traders-MU-Wahl enthält eine ungültige Option.",
+      );
+    return option.value as CardInstanceId;
+  });
+  const uniqueCardIds = [...new Set(selectedCardIds)];
+  if (uniqueCardIds.length !== selectedCardIds.length)
+    throw new Error("Die Shell-Traders-MU-Wahl enthält doppelte Programme.");
+  for (const cardId of uniqueCardIds) {
+    if (
+      !state.runner.rig.programs.includes(cardId) ||
+      !host.runner.runnerProgramUsesMemory(state, cardId)
+    )
+      throw new Error(
+        "Die Shell-Traders-MU-Wahl enthält kein gültiges installiertes Programm.",
+      );
+  }
+  const freedMemory = uniqueCardIds.reduce(
+    (sum, cardId) =>
+      sum + (host.cards.definitionFor(state, cardId).memoryCost ?? 0),
+    0,
+  );
+  if (
+    state.runner.memoryUsed + (targetDefinition.memoryCost ?? 0) - freedMemory >
+    host.runner.runnerMemoryLimit(state)
+  )
+    throw new Error("Die Shell-Traders-MU-Wahl macht nicht genug MU frei.");
+
+  const trashedDefinitionIds = uniqueCardIds.map(
+    (cardId) => host.cards.definitionFor(state, cardId).id,
+  );
+  for (const cardId of uniqueCardIds)
+    host.zones.trashRunnerInstalledCardToHeap(state, cardId);
+  delete state.pendingChoice;
+  host.counters.spendCardCounter(state, targetCardId, "shell", 1);
+  installDelayedPreparedCardForFree(host, targetCardId);
+  const result = { remainingCounters: 0, installed: true };
+  if (reason === "start_turn") {
+    effects?.push(
+      delayedInstallStartTurnCounterEffect(
+        host,
+        sourceCardId,
+        targetCardId,
+        result,
+      ),
+    );
+  }
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    delayedInstallAbility: "resolve_delayed_install_memory",
+    abilityFamily: "hosting-counters",
+    abilityId: "resolve_delayed_install_memory",
+    effectKind: "counter_change",
+    sourceDefinitionId: host.constants.SHELL_TRADERS_ID,
+    targetCardId,
+    targetCardDefinitionId: targetDefinition.id,
+    counterType: "shell",
+    removedCounterAmount: 1,
+    remainingCounters: 0,
+    delayedInstallInstalledTarget: true,
+    trashedCount: uniqueCardIds.length,
+    trashedCardDefinitionIds: trashedDefinitionIds.join(","),
+    shellCounterRemovalReason: reason ?? "paid",
   };
 }
 
@@ -535,15 +659,20 @@ function resolveDelayedInstallRemoveCounter(
     throw new Error("Die Shell-Traders-Zielkarte hat sich geaendert.");
 
   host.credits.spend(state, "runner", 1);
-  const result = removeShellCounterAndMaybeInstall(host, targetCardId);
+  const result = removeShellCounterAndMaybeInstall(host, targetCardId, {
+    sourceCardId,
+    reason: "paid",
+  });
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     sourceDefinitionId: host.constants.SHELL_TRADERS_ID,
     targetCardDefinitionId: targetDefinition.id,
     counterType: "shell",
-    removedCounterAmount: 1,
+    removeCounterAmount: result.memoryChoiceOpened ? 0 : 1,
+    removedCounterAmount: result.memoryChoiceOpened ? 0 : 1,
     remainingCounters: result.remainingCounters,
     delayedInstallInstalledTarget: result.installed,
+    delayedInstallMemoryChoiceOpened: result.memoryChoiceOpened,
     runnerCreditsAfter: state.runner.credits,
   };
 }
@@ -551,20 +680,87 @@ function resolveDelayedInstallRemoveCounter(
 function removeShellCounterAndMaybeInstall(
   host: RunnerSpecialTriggerExecutionHost,
   targetCardId: CardInstanceId,
-): { remainingCounters: number; installed: boolean } {
+  context: {
+    sourceCardId: CardInstanceId;
+    reason: "paid" | "start_turn";
+  },
+): {
+  remainingCounters: number;
+  installed: boolean;
+  memoryChoiceOpened: boolean;
+} {
   // Re-check the prepared target at resolution time because both paid and
   // start-of-turn removal can turn the last counter into an immediate install.
   if (!delayedInstallPreparedTargetIds(host).includes(targetCardId))
     throw new Error("Die Shell-Traders-Zielkarte ist nicht vorbereitet.");
+  const countersBefore = host.counters.cardCounter(
+    host.state,
+    targetCardId,
+    "shell",
+  );
+  const definition = host.cards.definitionFor(host.state, targetCardId);
+  if (
+    countersBefore === 1 &&
+    definition.type === "program" &&
+    !delayedInstallCanInstallPreparedCardForFree(host, targetCardId, definition)
+  ) {
+    startDelayedInstallMemoryChoice(host, targetCardId, definition, context);
+    return {
+      remainingCounters: countersBefore,
+      installed: false,
+      memoryChoiceOpened: true,
+    };
+  }
   host.counters.spendCardCounter(host.state, targetCardId, "shell", 1);
   const remainingCounters = host.counters.cardCounter(
     host.state,
     targetCardId,
     "shell",
   );
-  if (remainingCounters > 0) return { remainingCounters, installed: false };
+  if (remainingCounters > 0)
+    return { remainingCounters, installed: false, memoryChoiceOpened: false };
   installDelayedPreparedCardForFree(host, targetCardId);
-  return { remainingCounters, installed: true };
+  return { remainingCounters, installed: true, memoryChoiceOpened: false };
+}
+
+function startDelayedInstallMemoryChoice(
+  host: RunnerSpecialTriggerExecutionHost,
+  targetCardId: CardInstanceId,
+  targetDefinition: CardDefinition,
+  context: {
+    sourceCardId: CardInstanceId;
+    reason: "paid" | "start_turn";
+  },
+): void {
+  if (
+    !delayedInstallCanResolveFinalCounter(host, targetCardId, targetDefinition)
+  )
+    throw new Error(
+      "Durch Programmtrash kann nicht genug MU freigemacht werden.",
+    );
+  const options = host.state.runner.rig.programs
+    .filter((cardId) => host.runner.runnerProgramUsesMemory(host.state, cardId))
+    .sort()
+    .map((cardId) => ({
+      id: `card_${cardId}`,
+      label: host.cards.definitionFor(host.state, cardId).title,
+      value: cardId,
+    }));
+  if (options.length === 0)
+    throw new Error("Es gibt kein installiertes Programm zum MU-Freimachen.");
+  const nextStateVersion = host.state.stateVersion + 1;
+  host.state.pendingChoice = {
+    choiceId: `v1912_delayed_install_memory_${nextStateVersion}_${targetCardId}`,
+    side: "runner",
+    source: `v1912.delayed_install_memory:${context.sourceCardId}:${targetCardId}:${context.reason}:${nextStateVersion}`,
+    prompt: "Programme für The Shell Traders überschreiben",
+    kind: "select_cards",
+    options,
+    minSelections: 1,
+    maxSelections: options.length,
+    stateVersion: nextStateVersion,
+    visibility: "hidden_info_barrier",
+  };
 }
 
 function installDelayedPreparedCardForFree(
@@ -671,6 +867,40 @@ function delayedInstallCanInstallPreparedCardForFree(
   );
 }
 
+function delayedInstallCanResolveFinalCounter(
+  host: RunnerSpecialTriggerExecutionHost,
+  cardId: CardInstanceId,
+  definition = host.cards.definitionFor(host.state, cardId),
+): boolean {
+  if (delayedInstallCanInstallPreparedCardForFree(host, cardId, definition))
+    return true;
+  if (definition.type !== "program") return false;
+  if (
+    host.cards.isUniqueCard(definition) &&
+    host.cards.hasInstalledUniqueCardDefinition(
+      host.state,
+      "runner",
+      definition.id,
+    )
+  )
+    return false;
+  const reclaimableMemory = host.state.runner.rig.programs.reduce(
+    (sum, installedCardId) =>
+      sum +
+      (host.runner.runnerProgramUsesMemory(host.state, installedCardId)
+        ? (host.cards.definitionFor(host.state, installedCardId).memoryCost ??
+          0)
+        : 0),
+    0,
+  );
+  return (
+    host.state.runner.memoryUsed +
+      (definition.memoryCost ?? 0) -
+      reclaimableMemory <=
+    host.runner.runnerMemoryLimit(host.state)
+  );
+}
+
 function resolveHiddenStackProgramInstallAbility(
   host: RunnerSpecialTriggerExecutionHost,
   legalAction: LegalAction,
@@ -727,6 +957,7 @@ function delayedInstallCanPrepareTarget(
   )
     return false;
   if (
+    delayedInstallCounterCost(definition) === 0 &&
     definition.type === "program" &&
     state.runner.memoryUsed + (definition.memoryCost ?? 0) >
       host.runner.runnerMemoryLimit(state)

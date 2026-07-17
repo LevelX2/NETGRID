@@ -67,6 +67,7 @@ export type PendingChoiceResolutionHost = {
   runner: {
     resolveRunnerProgramTrashBeforeInstallChoice: HostFn<void>;
     resolveDelayedInstallStartTurnChoice: HostFn<void>;
+    resolveDelayedInstallMemoryChoice: HostFn<void>;
   };
   run: {
     resolveHqIceSwapChoice: HostFn<void>;
@@ -199,6 +200,8 @@ export function resolvePendingChoice(
     host.runner.resolveRunnerProgramTrashBeforeInstallChoice;
   const resolveDelayedInstallStartTurnChoice =
     host.runner.resolveDelayedInstallStartTurnChoice;
+  const resolveDelayedInstallMemoryChoice =
+    host.runner.resolveDelayedInstallMemoryChoice;
   const resolveHqIceSwapChoice = host.run.resolveHqIceSwapChoice;
   const fortPassWindowHostForState = host.run.fortPassWindowHostForState;
   const resolveSecretSpendCompareChoiceInRunModule =
@@ -349,6 +352,10 @@ export function resolvePendingChoice(
     state.pendingChoice.source.startsWith("v1912.shell_traders_start_turn:")
   ) {
     resolveDelayedInstallStartTurnChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("v1912.delayed_install_memory:")) {
+    resolveDelayedInstallMemoryChoice(state, legalAction, playerAction);
     return;
   }
   if (

@@ -421,9 +421,7 @@ describe("runner special trigger execution", () => {
       maxSelections: 1,
       visibility: "public",
     });
-    expect(choice?.source).toMatch(
-      /^v1912\.shell_traders_start_turn:shell_1:/,
-    );
+    expect(choice?.source).toMatch(/^v1912\.shell_traders_start_turn:shell_1:/);
     expect(choice?.options).toEqual([
       expect.objectContaining({
         id: `card_${firstTargetId}`,
@@ -708,6 +706,8 @@ function testHost(
     },
     runner: {
       runnerMemoryLimit: (stateToRead) => stateToRead.runner.memoryLimit,
+      runnerProgramUsesMemory: (stateToRead, cardId) =>
+        stateToRead.runner.rig.programs.includes(cardId),
     },
     hiddenZone: {
       startHiddenStackProgramInstallActivation:

@@ -709,6 +709,7 @@ export function createTriggerAbilityRuntimeHosts(
     declineExtraActionOffer,
     resolvePdcaCounterAction,
     resolveForcedActionNotPossible,
+    runnerProgramUsesMemory,
     runnerUtilityLongtailImplementationForCard,
     runnerUtilityLongtailKindForCard,
     spyCountersForServer,
@@ -750,6 +751,7 @@ export function createTriggerAbilityRuntimeHosts(
       },
       runner: {
         runnerMemoryLimit,
+        runnerProgramUsesMemory,
       },
       hiddenZone: {
         startHiddenStackProgramInstallActivation: (sourceCardId, legalAction) =>
