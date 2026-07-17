@@ -1,6 +1,6 @@
 # KI-Runner-Remediation für Match 20EB mit Eurocorpse-Fokus (2026-07-17)
 
-Status: P0 aktiv
+Status: P4 abgeschlossen, P5 zur lokalen Integration bereit
 
 ## Quelle und Zielprüfung
 
@@ -98,7 +98,7 @@ verifiziert entfernen.
 
 ## State Machine
 
-`preflight -> process_committed -> red_evidence_committed -> runner_development_fixed -> bank_policy_fixed -> verified -> documented -> merged -> cleaned`
+`preflight -> process_committed -> red_evidence_committed -> runner_development_fixed -> bank_policy_fixed -> verified -> documented -> [merged] -> [cleaned]`
 
 ## Paketfolge
 
@@ -160,7 +160,7 @@ verifiziert entfernen.
   abwägen. Die Kadenz wird nicht als hartes Aktionsverbot umgesetzt.
 - Done-Gate: D39/D129 und Gegenproben sind unverändert grün; bestehende
   Bank-, Portfolio- und Economy-Verträge bleiben grün.
-- Commit: `fix(ai): enforce runner bank investment cadence`
+- Commit: `fix(ai): soften runner bank cadence and horizon`
 
 ### P4 – Verifikation, Final-Report und Wissenspflege
 
@@ -172,6 +172,18 @@ verifiziert entfernen.
 - Done-Gate: Checks, Grenzen und bewusst nicht gelaufene Gates dokumentiert;
   Arbeitsbranch sauber.
 - Commit: `docs(ai): close match 20eb runner remediation`
+
+P4 wurde zusätzlich durch drei während der Vollverifikation abgegrenzte
+Folgecommits stabilisiert:
+
+- `fix(ai): preserve broker portfolio arbitration`
+- `fix(ai): preserve established runner decision boundaries`
+- `test(ai): align R&D pressure role contract`
+
+Der Final-Report liegt unter
+`docs/reviews/ai/ai-match-20eb-eurocorpse-remediation-final-2026-07-17.md`.
+Alle drei AI-Shards, der AI-Typecheck, `check:ai`, das Hint-Qualitätsgate und
+die fokussierten Match-/Gegenproben sind auf dem dokumentierten Endstand grün.
 
 ### P5 – Main-Integration und Cleanup
 
