@@ -1,6 +1,6 @@
 # AI Source Structure Optimization Process 2026-07
 
-Status: `prepared_for_execution`
+Status: `package_done:AISSO-0`
 
 ## Quelle und Vorgabe
 
@@ -126,6 +126,33 @@ Der Prozess stoppt, wenn:
 - Done-Gate: Baseline ist reproduzierbar; Scope und fremde Änderungen sind
   klassifiziert.
 - Commit: `docs(ai): record source structure optimization preflight`
+
+Preflight-Baseline auf Commit `4bdabbc10`:
+
+- Worktree und Branch sind exklusiv angelegt; der Arbeitsbaum ist sauber.
+- Der Hauptworkspace enthält fremde uncommitted Web-, Versions-, Roadmap- und
+  Wissensänderungen. Keine davon liegt unter `packages/ai/` oder an diesem
+  Prozessartefakt; sie bleiben außerhalb des Prozessscope.
+- Weitere aktive Worktrees betreffen eigenständige Activity- und AI-
+  Arbeitszweige. Vor dem finalen Merge wird deshalb aktuelles `main` erneut
+  vollständig in den Arbeitsbranch integriert.
+- `packages/ai/src`: 631 produktive Dateien mit 150.558 Zeilen und 355
+  Testdateien mit 108.961 Zeilen.
+- Direkt unter `packages/ai/src/runtime/`: 287 produktive Dateien und 110
+  Tests; Median 78 Zeilen, 97 produktive Dateien unter 50 Zeilen.
+- Größte produktive Hotspots: Corp Score 3.817, Corp Board Triage 3.689,
+  Runner Hand Development 2.755, Visible Run Analysis 2.464 und Semantic
+  Choice Ranking 1.759 Zeilen.
+- Größte Testhotspots: Corp Score 7.539, Tactical Plans 4.307, Semantic
+  Runtime Cutover 4.260, Corp Board Triage 3.333 und RunTargetEvaluation
+  3.149 Zeilen.
+- Der produktive Importgraph besitzt keine Laufzeitzyklen. Vier reine
+  Typ-SCCs bleiben zwischen Action-Semantik, RunTarget/Hand/Risk,
+  Simulation-Summary/QualityMetrics und TacticalPlan/SemanticDecisionFrame.
+- Die Default-Fassade besitzt 96 Value-Exports; darunter der nicht live-only
+  `evaluatePracticalTacticBenchmark`.
+- Baseline-Checks: Module-Boundary- und Public-Export-Suite 40/40 grün,
+  AI-Typecheck grün, `git diff --check` grün.
 
 ### AISSO-1 – Live-/Simulation-Public-Contract und Current-State-Reste
 
