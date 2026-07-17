@@ -2565,6 +2565,7 @@ export function formatChronicleEvent(
       break;
     }
     case "rez_ice":
+    case "rez_card":
       {
         const rezEffect = mergedCardResolverEffect ?? effect;
         const selectedSubtypes = subtypeLabelListFromPayload(
@@ -5857,6 +5858,7 @@ function shouldMergeCardResolverEffect(
     actionType !== "play_event" &&
     actionType !== "play_operation" &&
     actionType !== "rez_ice" &&
+    actionType !== "rez_card" &&
     actionType !== "install_card" &&
     actionType !== "score_agenda" &&
     !activatedCardAbility
