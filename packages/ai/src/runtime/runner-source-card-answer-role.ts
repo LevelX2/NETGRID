@@ -42,7 +42,6 @@ const SOURCE_SEARCH_TOKENS = [
 ];
 
 const RUNNER_ANSWER_ACTION_TYPES = new Set<LegalAction["type"]>([
-  "search_stack",
   "play_event",
   "trigger_ability",
   "activated_card_ability",

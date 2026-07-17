@@ -74,7 +74,7 @@ describe("match B34E runner decision checkpoints", () => {
       state.runner.memoryUsed += 1;
       state.cardInstances[PSYCHIC_FRIEND_ID] = {
         ...state.cardInstances[PSYCHIC_FRIEND_ID]!,
-        zone: { side: "runner", zone: "rigPrograms" },
+        zone: { side: "runner", zone: "rig" },
       };
       checkpoint.source.kind = "synthetic_companion";
       checkpoint.source.findingId = "B34E-C02-VIRAL15-VALUABLE-PROGRAM";

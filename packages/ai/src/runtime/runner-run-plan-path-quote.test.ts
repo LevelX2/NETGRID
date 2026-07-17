@@ -67,6 +67,81 @@ describe("runner run plan path quote", () => {
     expect(quote.canReachAccess).toBe(true);
   });
 
+  it("allows a program-trash threat when the only program self-trashes at run end", () => {
+    const input = runnerEncounterInput({
+      iceDefinitionId: "onr_v1_276_viral-15",
+      iceTitle: "Viral 15",
+      iceStrength: 3,
+      breaker: rentICon(3),
+      subroutines: [viralProgramTrashSubroutine()],
+      legalActions: [
+        breakAction({
+          breakerId: "rent-i-con-1",
+          costs: [{ credits: 1 }],
+        }),
+        continueAction({
+          encounterWillEndRun: false,
+          unbrokenSubroutineCount: 1,
+        }),
+      ],
+    });
+
+    const quote = quoteRunnerRunPath(input, runPlan());
+    const currentIceQuote = quote.iceQuotes[0];
+
+    expect(
+      currentIceQuote?.cheapestAccessPreservingSequence?.steps.map(
+        (step) => step.actionType,
+      ),
+    ).toEqual(["continue_run"]);
+    expect(currentIceQuote?.subroutineQuotes[0]?.threatClass).toBe(
+      "irrelevant_to_current_plan",
+    );
+    expect(currentIceQuote?.subroutineQuotes[0]?.evidence).toContain(
+      "program_run_end_self_trash_expendable:true",
+    );
+  });
+
+  it("protects a run-end self-trash breaker when later known ICE needs it", () => {
+    const input = runnerEncounterInput({
+      iceDefinitionId: "onr_v1_276_viral-15",
+      iceTitle: "Viral 15",
+      iceStrength: 3,
+      breaker: rentICon(3),
+      futureIce: [
+        visibleIce({
+          instanceId: "future-quandary",
+          iceDefinitionId: "onr_v1_261_quandary",
+          iceTitle: "Future Quandary",
+          iceStrength: 2,
+        }),
+      ],
+      subroutines: [viralProgramTrashSubroutine()],
+      legalActions: [
+        breakAction({
+          breakerId: "rent-i-con-1",
+          costs: [{ credits: 1 }],
+        }),
+        continueAction({
+          encounterWillEndRun: false,
+          unbrokenSubroutineCount: 1,
+        }),
+      ],
+    });
+
+    const quote = quoteRunnerRunPath(input, runPlan());
+    const currentIceQuote = quote.iceQuotes[0];
+
+    expect(
+      currentIceQuote?.cheapestAccessPreservingSequence?.steps.map(
+        (step) => step.actionType,
+      ),
+    ).toEqual(["break_subroutine"]);
+    expect(currentIceQuote?.subroutineQuotes[0]?.threatClass).toBe(
+      "must_break_for_survival",
+    );
+  });
+
   it("prefers same-cost multi-break when it clears damage and ETR together", () => {
     const input = runnerEncounterInput({
       iceDefinitionId: "onr_v1_269_shotgun-wire",
@@ -418,6 +493,7 @@ function runnerEncounterInput(params: {
   iceTitle: string;
   iceStrength: number;
   credits?: number;
+  breaker?: VisibleCard;
   extraRig?: VisibleCard[];
   breakerStrength?: number;
   futureIce?: VisibleCard[];
@@ -446,7 +522,7 @@ function runnerEncounterInput(params: {
         heapOrArchives: [],
         scoreArea: [],
         rig: [
-          {
+          params.breaker ?? {
             instanceId: "codecracker-1",
             known: true,
             title: "Codecracker",
@@ -636,6 +712,28 @@ function quietPrograms(): VisibleCard {
   } as VisibleCard;
 }
 
+function rentICon(strength: number): VisibleCard {
+  return {
+    instanceId: "rent-i-con-1",
+    known: true,
+    title: "Rent-I-Con",
+    definitionId: "onr_classic_031_rent-i-con",
+    type: "program",
+    subtypes: ["icebreaker"],
+    strength,
+  };
+}
+
+function viralProgramTrashSubroutine(): NonNullable<
+  VisibleCard["effectiveRunQuote"]
+>["subroutines"][number] {
+  return {
+    id: "viral-15-program-trash",
+    type: "set_run_pass_rezzed_ice_program_trash",
+    unbrokenRunEffect: { causesDamageOrProgramTrash: true },
+  };
+}
+
 function runPlan(): RunnerRunPlan {
   return {
     id: "runplan-quote-test",
@@ -730,16 +828,18 @@ function pumpAction(params: { costs: LegalAction["costs"] }): LegalAction {
 
 function breakAction(params: {
   actionId?: string;
+  breakerId?: string;
   costs: LegalAction["costs"];
   subroutineIndex?: number;
   subroutineIndexes?: string;
 }): LegalAction {
+  const breakerId = params.breakerId ?? "codecracker-1";
   return action("break_subroutine", {
     actionId: params.actionId ?? "break-codecracker",
-    source: "codecracker-1",
+    source: breakerId,
     costs: params.costs,
     payload: {
-      breakerId: "codecracker-1",
+      breakerId,
       iceId: "ice-1",
       ...(params.subroutineIndexes
         ? { subroutineIndexes: params.subroutineIndexes }

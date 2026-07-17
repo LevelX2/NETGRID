@@ -338,11 +338,8 @@ function runnerRunPlanHasConcreteCurrentAbort(
   plan: RunnerRunPlan,
 ): boolean {
   if (
-    plan.revalidation.checkedAtStateVersion ===
-      input.playerView.stateVersion &&
-    plan.revalidation.reasons.includes(
-      "known_remote_access_payoff_unfunded",
-    )
+    plan.revalidation.checkedAtStateVersion === input.playerView.stateVersion &&
+    plan.revalidation.reasons.includes("known_remote_access_payoff_unfunded")
   ) {
     return true;
   }
@@ -352,8 +349,7 @@ function runnerRunPlanHasConcreteCurrentAbort(
     plan.pathQuote.quoteStatus === "known_complete" &&
     !plan.pathQuote.canReachAccess &&
     (plan.pathQuote.cannotReachReason === "known_ice_unbreakable" ||
-      plan.pathQuote.cannotReachReason ===
-        "insufficient_credits_after_reserve")
+      plan.pathQuote.cannotReachReason === "insufficient_credits_after_reserve")
   );
 }
 
@@ -433,6 +429,7 @@ function runnerRunPlanEncounterChoice(params: {
 
   const requiredBreakMissing = runnerRunPlanCurrentEncounterRequiresBreak({
     input: params.input,
+    plan: params.plan,
   });
   if (!encounterContinueWillEndRun(params.input) && !requiredBreakMissing) {
     return undefined;
