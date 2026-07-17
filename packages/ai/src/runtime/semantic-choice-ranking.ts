@@ -943,9 +943,9 @@ function tacticalPlanMarginalDevelopmentInstallShouldYield(
   overrideChoice: SemanticRuntimeChoice,
   scoreGap: number,
 ): boolean {
-  const bankInvestmentOverride = semanticRuntimeChoiceHasScoreComponent(
+  const bankEconomyOverride = semanticRuntimeChoiceHasAnyScoreComponent(
     overrideChoice,
-    "runner_bank_investment_commitment",
+    ["runner_bank_investment_commitment", "runner_bank_cashout_gate"],
   );
   const basicCapacityOverride =
     overrideChoice.action.type === "draw_card" ||
@@ -956,8 +956,8 @@ function tacticalPlanMarginalDevelopmentInstallShouldYield(
       mapping.plan.type !== "runner.play_best_hand_card") ||
     mapping.step.kind !== "install_development_card" ||
     mappedChoice.action.type !== "install_card" ||
-    mappedChoice.score > 700 ||
-    (!bankInvestmentOverride &&
+    mappedChoice.score > (bankEconomyOverride ? 800 : 700) ||
+    (!bankEconomyOverride &&
       !basicCapacityOverride &&
       !immediateHandPlayOverride) ||
     overrideChoice.score <= 0 ||
@@ -968,8 +968,8 @@ function tacticalPlanMarginalDevelopmentInstallShouldYield(
   return mappedChoice.scoreBreakdown.some(
     (component) =>
       component.key === "runner_persistent_install_fit" &&
-      component.value <= 100 &&
-      (bankInvestmentOverride ||
+      component.value <= (bankEconomyOverride ? 150 : 100) &&
+      (bankEconomyOverride ||
         immediateHandPlayOverride ||
         (component.reason ?? "").includes("delta:cumulative_capacity")),
   );
