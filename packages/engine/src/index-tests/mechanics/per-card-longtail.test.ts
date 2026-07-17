@@ -2010,6 +2010,95 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
+  it("keeps a Valu-Pak bundle install available at full MU and uses the normal replacement flow", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1922-valu-pak-full-mu",
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+          id: "onr_v1_runner_v1922_valu_pak_full_mu",
+          cards: [
+            { id: "onr_v1_117_valu-pak-software-bundle", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
+          ],
+        },
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 20;
+    state.runner.clicks = 4;
+    state.runner.memoryLimit = 4;
+    moveRunnerCardToGrip(state, "onr_v1_117_valu-pak-software-bundle");
+    const targetId = moveRunnerCardToGrip(
+      state,
+      "onr_v1_022_emergency-self-construct",
+    );
+    const fillerIds = Object.values(state.cardInstances)
+      .filter(
+        (instance) =>
+          instance.definitionId === "simple_decoder" ||
+          instance.definitionId === "simple_fracter",
+      )
+      .slice(0, 4)
+      .map((instance) => instance.instanceId);
+    expect(fillerIds).toHaveLength(4);
+    for (const fillerId of fillerIds) {
+      removeEverywhere(state, fillerId);
+      state.runner.rig.programs.push(fillerId);
+      state.runner.memoryUsed += 1;
+      state.cardInstances[fillerId] = {
+        ...state.cardInstances[fillerId]!,
+        zone: { side: "runner", zone: "rig" },
+        faceup: true,
+        rezzed: true,
+      };
+    }
+    const trashId = fillerIds[0]!;
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinition(state, action) ===
+          "onr_v1_117_valu-pak-software-bundle",
+    );
+    const installAction = getLegalActions(state, "runner").find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.cardId === targetId &&
+        action.payload?.runnerProgramTrashBeforeInstall === true,
+    );
+    expect(installAction).toBeDefined();
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === installAction?.actionId,
+    );
+    expect(state.pendingChoice?.source).toContain(
+      "runner_program_trash_before_install",
+    );
+    const trashOption = state.pendingChoice?.options.find(
+      (option) => option.value === trashId,
+    );
+    state = applyChoice(state, "runner", String(trashOption?.id));
+
+    expect(state.runner.heap).toContain(trashId);
+    expect(state.runner.rig.programs).toContain(targetId);
+    expect(state.runner.memoryUsed).toBe(4);
+    expect(state.runnerTurnFlags?.valuPakProgramInstallActionsRemaining).toBe(4);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      v1922RunnerEventAbility: "program_install_action_bundle",
+      valuPakInstallActionSpent: true,
+    });
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("installs Japanese Water Torture, breaks Wall subroutines and carries future action debt without release promotion", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({

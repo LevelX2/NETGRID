@@ -84,6 +84,23 @@ function addRunnerStack(
   return cardId;
 }
 
+function installSyntheticRunnerProgram(
+  state: GameState,
+  id: string,
+): CardInstanceId {
+  const cardId = addRunnerGrip(state, "simple_decoder", id);
+  state.runner.grip = state.runner.grip.filter((candidate) => candidate !== cardId);
+  state.runner.rig.programs.push(cardId);
+  state.runner.memoryUsed += 1;
+  state.cardInstances[cardId] = {
+    ...state.cardInstances[cardId]!,
+    zone: { side: "runner", zone: "rig" },
+    faceup: true,
+    rezzed: true,
+  };
+  return cardId;
+}
+
 function cardInstance(
   cardId: CardInstanceId,
   definitionId: string,
@@ -279,6 +296,61 @@ describe("Proteus PRO018 hidden-zone search/install tutor suite", () => {
     expect(illegal.ok).toBe(false);
   });
 
+  it("Hijack keeps a grip program selectable at full MU and installs it after program trash", () => {
+    let state = baseState("pro018-hijack-full-mu");
+    const hijackId = addRunnerGrip(state, HIJACK, "pro018_hijack_full_mu");
+    const targetId = addRunnerGrip(state, JACKHAMMER, "pro018_hijack_target");
+    const trashId = installSyntheticRunnerProgram(state, "pro018_hijack_filler_1");
+    installSyntheticRunnerProgram(state, "pro018_hijack_filler_2");
+    installSyntheticRunnerProgram(state, "pro018_hijack_filler_3");
+    installSyntheticRunnerProgram(state, "pro018_hijack_filler_4");
+    state.runner.memoryLimit = 4;
+    const before = structuredClone(state);
+
+    state = applyLegal(state, "runner", playEventAction(state, hijackId));
+    const targetOption = state.pendingChoice?.options.find(
+      (option) => option.value === targetId,
+    );
+    expect(targetOption).toBeDefined();
+    expect(targetOption?.selectable).not.toBe(false);
+    state = applyChoice(state, "runner", String(targetOption?.id));
+
+    expect(state.pendingChoice?.source).toContain(
+      "runner.program_install_memory:nonsearch",
+    );
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+    expect(state.runner.rig.programs).not.toContain(targetId);
+    const trashOption = state.pendingChoice?.options.find(
+      (option) => option.value === trashId,
+    );
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: getLegalActions(state, "runner").find(
+        (action) => action.type === "resolve_choice",
+      )!.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      selectedChoices: {
+        choiceId: state.pendingChoice?.choiceId,
+        selectedOptionIds: [String(trashOption?.id)],
+      },
+      idempotencyKey: "pro018-hijack-full-mu-stale",
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+    state = applyChoice(state, "runner", String(trashOption?.id));
+
+    expect(state.runner.heap).toContain(trashId);
+    expect(state.runner.rig.programs).toContain(targetId);
+    expect(state.runner.memoryUsed).toBe(4);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneAction: "pro018_grip_install_temporary_credits",
+      installedCardDefinitionId: JACKHAMMER,
+      installDeferredForMemory: true,
+    });
+    expectReplayStable(before, state);
+  });
+
   it("Test Spin installs a stack program for free, shuffles, starts a run and returns it after the run", () => {
     let state = baseState("pro018-test-spin-return");
     const testSpinId = addRunnerGrip(state, TEST_SPIN, "pro018_test_spin");
@@ -353,6 +425,51 @@ describe("Proteus PRO018 hidden-zone search/install tutor suite", () => {
       returnedToStack: true,
       shufflePerformed: true,
     });
+    expectReplayStable(before, state);
+  });
+
+  it("Test Spin keeps a stack program selectable at full MU and resumes after program trash", () => {
+    let state = baseState("pro018-test-spin-full-mu");
+    const testSpinId = addRunnerGrip(state, TEST_SPIN, "pro018_test_spin_full_mu");
+    const targetId = addRunnerStack(state, JACKHAMMER, "pro018_test_spin_target");
+    const trashId = installSyntheticRunnerProgram(state, "pro018_test_spin_filler_1");
+    installSyntheticRunnerProgram(state, "pro018_test_spin_filler_2");
+    installSyntheticRunnerProgram(state, "pro018_test_spin_filler_3");
+    installSyntheticRunnerProgram(state, "pro018_test_spin_filler_4");
+    state.runner.memoryLimit = 4;
+    const before = structuredClone(state);
+
+    state = applyLegal(
+      state,
+      "runner",
+      playEventAction(state, testSpinId, "rd"),
+    );
+    const targetOption = state.pendingChoice?.options.find(
+      (option) => option.value === targetId,
+    );
+    expect(targetOption).toBeDefined();
+    expect(targetOption?.selectable).not.toBe(false);
+    state = applyChoice(state, "runner", String(targetOption?.id));
+    expect(state.pendingChoice?.source).toContain(
+      "runner.program_install_memory:nonsearch",
+    );
+    const trashOption = state.pendingChoice?.options.find(
+      (option) => option.value === trashId,
+    );
+    state = applyChoice(state, "runner", String(trashOption?.id));
+
+    expect(state.runner.heap).toContain(trashId);
+    expect(state.runner.rig.programs).toContain(targetId);
+    expect(state.runner.memoryUsed).toBe(4);
+    expect(state.run).toBeDefined();
+    expect(lastPublicPayload(state, "pro018_stack_install_run_cleanup"))
+      .toMatchObject({
+        installedProgramDefinitionId: JACKHAMMER,
+        installDeferredForMemory: true,
+      });
+    state = finishCurrentRun(state);
+    expect(state.runner.rig.programs).not.toContain(targetId);
+    expect(state.runner.memoryUsed).toBe(3);
     expectReplayStable(before, state);
   });
 

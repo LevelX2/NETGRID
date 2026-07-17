@@ -8,9 +8,12 @@ import {
 import {
   agendaPoints,
   apply,
+  applyChoices,
   cardCounterAmount,
+  installRunnerProgramForTest,
   putCorpCardOnTopOfRd,
   putCorpRootInRemote,
+  removeEverywhere,
   toRunnerTurnFromCorpMain,
 } from "../../test-fixtures/mechanic-smoke-fixtures";
 import type { CardDefinitionId, DeckDefinition, GameState } from "@netgrid/shared";
@@ -243,5 +246,83 @@ describe("Classic Agenda Implementation Smokes", () => {
       scoredAgendaPointValue: 3,
       runnerMemoryUsedAfter: 0,
     });
+  });
+
+  it("offers Theorem Proof at full MU and installs it after a private two-program trash choice", () => {
+    let state = classicAgendaGame("classic-theorem-proof-full-mu");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state = toRunnerTurnFromCorpMain(state);
+    state.runner.credits = 20;
+    state.runner.clicks = 4;
+    state.runner.memoryLimit = 4;
+    const firstProgram = installRunnerProgramForTest(state, "simple_decoder");
+    const secondProgram = installRunnerProgramForTest(state, "simple_fracter");
+    installRunnerProgramForTest(state, "simple_killer");
+    const fourthProgram = Object.values(state.cardInstances).find(
+      (instance) =>
+        instance.definitionId === "simple_decoder" &&
+        instance.instanceId !== firstProgram,
+    )?.instanceId;
+    if (!fourthProgram) throw new Error("Zweite Simple-Decoder-Instanz fehlt.");
+    removeEverywhere(state, fourthProgram);
+    state.runner.rig.programs.push(fourthProgram);
+    state.runner.memoryUsed += 1;
+    state.cardInstances[fourthProgram] = {
+      ...state.cardInstances[fourthProgram]!,
+      zone: { side: "runner", zone: "rig" },
+      faceup: true,
+      rezzed: true,
+    };
+    const theoremId = putCorpCardOnTopOfRd(state, THEOREM_PROOF);
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "steal_agenda" &&
+          action.payload?.agendaAccessReplacement === "install_as_runner_program",
+      ),
+    ).toBe(true);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "steal_agenda" &&
+        action.payload?.agendaAccessReplacement === "install_as_runner_program",
+    );
+    expect(state.pendingChoice?.source).toContain(
+      "runner.program_install_memory:access",
+    );
+    expect(state.runner.rig.programs).not.toContain(theoremId);
+    const trashOptionIds = [firstProgram, secondProgram].map(
+      (cardId) =>
+        state.pendingChoice?.options.find((option) => option.value === cardId)?.id ??
+        "",
+    );
+    expect(trashOptionIds.every(Boolean)).toBe(true);
+    state = applyChoices(state, "runner", trashOptionIds);
+
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.runner.heap).toEqual(
+      expect.arrayContaining([firstProgram, secondProgram]),
+    );
+    expect(state.runner.rig.programs).toContain(theoremId);
+    expect(state.runner.memoryUsed).toBe(4);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      choiceKind: "select_cards",
+      sourceDefinitionId: THEOREM_PROOF,
+      runnerMemoryUsedAfter: 4,
+    });
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
   });
 });

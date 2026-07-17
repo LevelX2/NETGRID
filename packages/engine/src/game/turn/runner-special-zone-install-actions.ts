@@ -10,6 +10,7 @@ import { buildLegalAction } from "./action-builders";
 export type RunnerValuPakInstallActionInput = {
   cardId: CardInstanceId;
   definition: CardDefinition;
+  runnerProgramTrashBeforeInstall?: boolean;
 };
 
 export type RunnerDelayedInstallSetAsideActionInput = {
@@ -38,12 +39,15 @@ export function buildRunnerValuPakInstallAction(
     state,
     "runner",
     "install_card",
-    `${input.definition.title} installieren`,
+    `${input.definition.title}${input.runnerProgramTrashBeforeInstall ? " mit Programmtrash" : ""} installieren`,
     input.cardId,
     [{ clicks: 1, credits: input.definition.installCost ?? 0 }],
     {
       cardId: input.cardId,
       v1922ValuPakInstallAction: true,
+      ...(input.runnerProgramTrashBeforeInstall
+        ? { runnerProgramTrashBeforeInstall: true }
+        : {}),
     },
   );
 }

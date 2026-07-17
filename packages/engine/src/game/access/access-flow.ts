@@ -897,6 +897,12 @@ export function resolveAccessProgramInstallMemoryChoice(
   for (const cardId of selection.trashCardIds)
     host.zones.trashRunnerInstalledCardToHeap(cardId);
   delete host.state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    cardId: selection.continuation.targetCardId,
+    agendaAccessReplacement: "install_as_runner_program",
+    installedRunnerProgramMemoryCost: replacement.memoryCost,
+  };
   const result = installAccessedAgendaAsRunnerProgram(
     host,
     selection.continuation.targetCardId,

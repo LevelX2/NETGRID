@@ -1300,7 +1300,7 @@ export function createCardLifecycleRuntimeHosts(
     state.pendingChoice = {
       choiceId: `runner_program_trash_before_install_${state.stateVersion + 1}`,
       side: "runner",
-      source: `runner_program_trash_before_install:${sourceCardId}:${state.stateVersion + 1}${runnerInstallPaymentChoiceSourceSuffix(legalAction.payload)}`,
+      source: `runner_program_trash_before_install:${sourceCardId}:${state.stateVersion + 1}${runnerInstallPaymentChoiceSourceSuffix(legalAction.payload)}${legalAction.payload?.v1922ValuPakInstallAction === true ? ":valu_pak" : ""}`,
       prompt: "Programme vor Installation trashen",
       kind: "select_cards",
       options,
@@ -1398,6 +1398,9 @@ export function createCardLifecycleRuntimeHosts(
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       ...runnerInstallPaymentPayloadForChoiceSource(choice.source),
+      ...(choice.source.split(":").includes("valu_pak")
+        ? { v1922ValuPakInstallAction: true }
+        : {}),
       cardId: sourceCardId,
       runnerProgramTrashBeforeInstall: true,
       runnerProgramTrashBeforeInstallResolved: true,

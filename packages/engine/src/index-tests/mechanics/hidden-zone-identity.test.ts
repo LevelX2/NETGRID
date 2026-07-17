@@ -943,6 +943,58 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     expect(state.runner.heap).toContain(targetProgramId);
   });
 
+  it("keeps Sneak Preview and its program target selectable at full MU, then installs after replacement trash", () => {
+    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("v1911-full-mu"));
+    state.runner.credits = 20;
+    state.runner.memoryLimit = 4;
+    const eventId = moveRunnerCardToGrip(state, "onr_v1_110_sneak-preview");
+    const firstTrashId = installRunnerProgramForTest(state, "simple_decoder");
+    installRunnerProgramForTest(state, "simple_decoder");
+    installRunnerProgramForTest(state, "simple_fracter");
+    installRunnerProgramForTest(state, "simple_fracter");
+    const targetProgramId = putRunnerCardOnTopOfStack(state, "onr_v1_042_mouse");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "play_event" && String(action.payload?.cardId) === eventId,
+    );
+    expect(state.pendingChoice?.options.map((option) => option.value)).toContain(
+      "stack",
+    );
+    state = applyChoice(state, "runner", "source_stack");
+    const targetOption = state.pendingChoice?.options.find(
+      (option) => option.value === targetProgramId,
+    );
+    expect(targetOption).toBeDefined();
+    expect(targetOption?.selectable).not.toBe(false);
+    state = applyChoice(state, "runner", String(targetOption?.id));
+
+    expect(state.pendingChoice?.source).toContain(
+      "runner.program_install_memory:hidden_search",
+    );
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+    const trashOption = state.pendingChoice?.options.find(
+      (option) => option.value === firstTrashId,
+    );
+    state = applyChoice(state, "runner", String(trashOption?.id));
+
+    expect(state.runner.heap).toContain(firstTrashId);
+    expect(state.runner.rig.programs).toContain(targetProgramId);
+    expect(state.runner.memoryUsed).toBe(4);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneAction: "p3_38_stack_or_trash_program_install",
+      installedProgramDefinitionId: "onr_v1_042_mouse",
+      trashedCount: 1,
+    });
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("reorders the last successful fort with Fortress Respecification without exposing concealed ICE", () => {
     let state = toRunnerTurn(
       MECHANIC_SMOKE_GAMES.hiddenZone("v1911-fortress-reorder"),

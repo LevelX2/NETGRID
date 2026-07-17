@@ -897,7 +897,11 @@ export function createEconomyRuntimeServices(deps: RuntimeDeps) {
   ): void {
     if (
       legalAction.side !== "runner" ||
-      legalAction.type !== "install_card" ||
+      (legalAction.type !== "install_card" &&
+        !(
+          legalAction.type === "resolve_choice" &&
+          legalAction.payload?.runnerProgramTrashBeforeInstallResolved === true
+        )) ||
       legalAction.payload?.v1922ValuPakInstallAction !== true
     )
       return;

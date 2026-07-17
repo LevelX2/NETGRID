@@ -81,9 +81,13 @@ function host(
     stack?: CardInstanceId[];
     heap?: CardInstanceId[];
     credits?: number;
+    memoryUsed?: number;
+    memoryLimit?: number;
+    rigPrograms?: CardInstanceId[];
     definitions?: Record<string, CardDefinition>;
     canInstall?: (cardId: CardInstanceId) => boolean;
     installFromStack?: (cardId: CardInstanceId) => boolean;
+    installFromZone?: (cardId: CardInstanceId) => boolean;
     installForFree?: (cardId: CardInstanceId) => CardInstanceId;
   } = {},
 ): HiddenZoneSearchChoiceHandlerHost {
@@ -116,9 +120,9 @@ function host(
     heap: overrides.heap ?? [],
     grip: [] as CardInstanceId[],
     credits: overrides.credits ?? 5,
-    memoryUsed: 0,
+    memoryUsed: overrides.memoryUsed ?? 0,
     rig: {
-      programs: [sourceCardId],
+      programs: overrides.rigPrograms ?? [sourceCardId],
       resources: [sourceCardId],
       hardware: [],
     },
@@ -194,7 +198,15 @@ function host(
         );
       },
       addToGrip: (cardId) => runner.grip.push(cardId),
-      trashRunnerInstalledCardToHeap: (cardId) => trashed.push(cardId),
+      trashRunnerInstalledCardToHeap: (cardId) => {
+        trashed.push(cardId);
+        runner.rig.programs = runner.rig.programs.filter((id) => id !== cardId);
+        runner.heap.push(cardId);
+        runner.memoryUsed = Math.max(
+          0,
+          runner.memoryUsed - (definitions[cardId]?.memoryCost ?? 0),
+        );
+      },
     },
     shuffleRunnerStack: (purpose) => shuffles.push(purpose),
     spendRunnerCredits: (amount) => {
@@ -204,11 +216,12 @@ function host(
       overrides.installFromStack ?? (() => true),
     startRunnerProgramFreeMemoryChoice: () => false,
     availableRunnerProgramInstallCredits: () => 5,
-    runnerMemoryLimit: () => 4,
+    runnerMemoryLimit: () => overrides.memoryLimit ?? 4,
     install: {
       canInstallRunnerProgramFromZone: (cardId) =>
         overrides.canInstall?.(cardId) ?? true,
-      installRunnerProgramFromZoneWithoutClick: () => true,
+      installRunnerProgramFromZoneWithoutClick:
+        overrides.installFromZone ?? (() => true),
       installRunnerProgramForFree: (cardId) =>
         overrides.installForFree?.(cardId) ?? cardId,
       searchStackInstallTargets: () => runner.stack,
@@ -441,6 +454,61 @@ describe("hidden-zone search choice handlers", () => {
     });
   });
 
+  it("keeps Sneak Preview selectable at full MU and resumes after trashing a program", () => {
+    const installed: CardInstanceId[] = [];
+    const testHost = host(
+      choice({
+        source: "v1911.temporary_program_install_stack_install:1",
+      }),
+      playerAction(`card_${programId}`),
+      {
+        memoryUsed: 4,
+        rigPrograms: [secondProgramId],
+        definitions: {
+          [secondProgramId]: definition(
+            "second_program_definition" as CardDefinitionId,
+            "program",
+            { memoryCost: 1 },
+          ),
+        },
+        installForFree: (cardId) => {
+          installed.push(cardId);
+          return cardId;
+        },
+      },
+    );
+
+    const deferred = handleHiddenZoneSearchChoice(testHost);
+
+    expect(deferred).toMatchObject({ handled: true, stateChanged: true });
+    expect(testHost.state.pendingChoice?.source).toContain(
+      "runner.program_install_memory:hidden_search",
+    );
+    expect(testHost.state.pendingChoice?.options).toEqual([
+      expect.objectContaining({ value: secondProgramId }),
+    ]);
+    expect(installed).toEqual([]);
+
+    testHost.choice = testHost.state.pendingChoice!;
+    testHost.playerAction = playerAction(`card_${secondProgramId}`);
+    testHost.legalAction.payload = {};
+    const resolved = handleHiddenZoneSearchChoice(testHost);
+
+    expect(resolved).toMatchObject({
+      handled: true,
+      deletePendingChoice: true,
+      installedCardId: programId,
+    });
+    expect(testHost.state.runner.rig.programs).not.toContain(secondProgramId);
+    expect(testHost.state.runner.heap).toContain(secondProgramId);
+    expect(installed).toEqual([programId]);
+    expect(testHost.legalAction.payload).toMatchObject({
+      runnerProgramTrashBeforeInstallResolved: true,
+      trashedCount: 1,
+      installedProgramDefinitionId: "program_definition",
+    });
+  });
+
   it("handles Mystery Box activation no-install path", () => {
     const testHost = host(choice({ source: "unused" }), playerAction(), {
       stack: [hardwareId],
@@ -526,6 +594,43 @@ describe("hidden-zone search choice handlers", () => {
       hiddenZoneAction: "p3_38_search_stack_install",
       searchDestination: "runner_rig",
       installedProgramCount: 1,
+    });
+  });
+
+  it("defers the shared paid stack-install effect at full MU and resumes after trash", () => {
+    const installed: CardInstanceId[] = [];
+    const testHost = host(
+      choice({
+        source: `p3_38.search_stack_install:${sourceCardId}:${sourceDefinitionId}:program:normal:shuffle`,
+      }),
+      playerAction(`card_${programId}`),
+      {
+        memoryUsed: 4,
+        rigPrograms: [secondProgramId],
+        installFromZone: (cardId) => {
+          installed.push(cardId);
+          return true;
+        },
+      },
+    );
+
+    handleHiddenZoneSearchChoice(testHost);
+    expect(testHost.state.pendingChoice?.source).toContain(
+      "runner.program_install_memory:hidden_search",
+    );
+    expect(installed).toEqual([]);
+
+    testHost.choice = testHost.state.pendingChoice!;
+    testHost.playerAction = playerAction(`card_${secondProgramId}`);
+    testHost.legalAction.payload = {};
+    handleHiddenZoneSearchChoice(testHost);
+
+    expect(testHost.state.runner.heap).toContain(secondProgramId);
+    expect(installed).toEqual([programId]);
+    expect(testHost.legalAction.payload).toMatchObject({
+      hiddenZoneAction: "p3_38_search_stack_install",
+      runnerProgramTrashBeforeInstallResolved: true,
+      trashedCount: 1,
     });
   });
 

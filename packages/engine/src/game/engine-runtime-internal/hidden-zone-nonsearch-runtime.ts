@@ -24,13 +24,7 @@ import {
   completeRunnerProgramRigInstall,
   type RunnerProgramInstallInstancePatch,
 } from "../install/runner-rig-install-finalization";
-import {
-  buildRunnerProgramInstallMemoryChoice,
-  resolveRunnerProgramInstallMemoryTrashSelection,
-  runnerProgramInstallMemoryDeficit,
-  runnerProgramInstallMemoryReachable,
-  RUNNER_PROGRAM_INSTALL_MEMORY_CHOICE_PREFIX,
-} from "../install/runner-program-install-memory";
+import * as nonSearchMemory from "../install/nonsearch-program-install-memory";
 
 export function createHiddenZoneNonSearchRuntime(
   deps: RuntimeDeps,
@@ -1260,7 +1254,8 @@ export function createHiddenZoneNonSearchRuntime(
     const selectedId = selectedIds[0];
     if (!selectedId) throw new Error("Genau eine Karte muss gewaehlt werden.");
     if (
-      deferNonSearchProgramInstallForMemory(
+      nonSearchMemory.deferNonSearchProgramInstallForMemory(
+        nonSearchProgramInstallMemoryHost,
         state,
         choice,
         selectedId,
@@ -1317,7 +1312,8 @@ export function createHiddenZoneNonSearchRuntime(
       throw new Error("Genau ein Programm muss gewaehlt werden.");
     const definition = definitionFor(state, selectedId);
     if (
-      deferNonSearchProgramInstallForMemory(
+      nonSearchMemory.deferNonSearchProgramInstallForMemory(
+        nonSearchProgramInstallMemoryHost,
         state,
         choice,
         selectedId,
@@ -1371,142 +1367,11 @@ export function createHiddenZoneNonSearchRuntime(
     };
   }
 
-  function deferNonSearchProgramInstallForMemory(
-    state: GameState,
-    choice: ChoiceRequest,
-    targetCardId: CardInstanceId,
-    legalAction: LegalAction,
-  ): boolean {
-    const definition = definitionFor(state, targetCardId);
-    if (definition.type !== "program") return false;
-    const deficit = runnerProgramInstallMemoryDeficit({
-      memoryUsed: state.runner.memoryUsed,
-      targetMemoryCost: definition.memoryCost ?? 0,
-      memoryLimit: runnerMemoryLimit(state),
-    });
-    if (deficit === 0) return false;
-    const trashableIds = state.runner.rig.programs.filter((cardId) =>
-      runnerProgramUsesMemory(state, cardId),
-    );
-    if (
-      !runnerProgramInstallMemoryReachable({
-        memoryUsed: state.runner.memoryUsed,
-        targetMemoryCost: definition.memoryCost ?? 0,
-        memoryLimit: runnerMemoryLimit(state),
-        trashableMemoryCosts: trashableIds.map(
-          (cardId) => definitionFor(state, cardId).memoryCost ?? 0,
-        ),
-      })
-    )
-      throw new Error("Durch Programmtrash kann nicht genug MU freigemacht werden.");
-    state.pendingChoice = buildRunnerProgramInstallMemoryChoice({
-      stateVersion: state.stateVersion,
-      kind: "nonsearch",
-      targetCardId,
-      originalChoiceId: choice.choiceId,
-      originalChoiceSource: choice.source,
-      options: trashableIds.map((cardId) => ({
-        id: `card_${cardId}`,
-        label: definitionFor(state, cardId).title,
-        value: cardId,
-      })),
-    });
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      hiddenZoneBarrier: true,
-      installDeferredForMemory: true,
-      memoryToFree: deficit,
-    };
-    return true;
-  }
-
-  function resolveNonSearchProgramInstallMemoryChoice(
-    state: GameState,
-    legalAction: LegalAction,
-    playerAction: PlayerAction,
-  ): void {
-    const choice = state.pendingChoice;
-    if (
-      !choice ||
-      !choice.source.startsWith(
-        `${RUNNER_PROGRAM_INSTALL_MEMORY_CHOICE_PREFIX}:nonsearch:`,
-      )
-    )
-      throw new Error("Es ist keine MU-Installationschoice offen.");
-    const targetDefinition = definitionFor(
-      state,
-      choice.source.split(":")[2] as CardInstanceId,
-    );
-    const selection = resolveRunnerProgramInstallMemoryTrashSelection({
-      choice,
-      selectedOptionIds: selectedChoiceIds(playerAction.selectedChoices),
-      installedProgramIds: state.runner.rig.programs,
-      memoryUsed: state.runner.memoryUsed,
-      targetMemoryCost: targetDefinition.memoryCost ?? 0,
-      memoryLimit: runnerMemoryLimit(state),
-      memoryCostFor: (cardId) => definitionFor(state, cardId).memoryCost ?? 0,
-      usesMemory: (cardId) => runnerProgramUsesMemory(state, cardId),
-    });
-    const trashedDefinitionIds = selection.trashCardIds.map(
-      (cardId) => definitionFor(state, cardId).id,
-    );
-    for (const cardId of selection.trashCardIds)
-      trashRunnerInstalledCardToHeap(state, cardId, legalAction);
-    state.pendingChoice = {
-      choiceId: selection.continuation.originalChoiceId,
-      source: selection.continuation.originalChoiceSource,
-      side: "runner",
-      prompt: "Programminstallation fortsetzen",
-      kind: "select_cards",
-      options: [
-        {
-          id: `card_${selection.continuation.targetCardId}`,
-          label: targetDefinition.title,
-          value: selection.continuation.targetCardId,
-        },
-      ],
-      minSelections: 1,
-      maxSelections: 1,
-      stateVersion: choice.stateVersion,
-      visibility: "hidden_info_barrier",
-    };
-    const continuationAction = {
-      ...playerAction,
-      selectedChoices: {
-        choiceId: selection.continuation.originalChoiceId,
-        selectedOptionIds: [
-          `card_${selection.continuation.targetCardId}`,
-        ],
-      },
-    } as PlayerAction;
-    if (
-      selection.continuation.originalChoiceSource.startsWith(
-        "card_implementation.pro018_grip_install_temporary_credits:",
-      )
-    )
-      resolveGripInstallTemporaryCreditChoice(
-        state,
-        legalAction,
-        continuationAction,
-      );
-    else if (
-      selection.continuation.originalChoiceSource.startsWith(
-        "card_implementation.pro018_stack_install_run_cleanup:",
-      )
-    )
-      resolveStackInstallRunCleanupChoice(
-        state,
-        legalAction,
-        continuationAction,
-      );
-    else throw new Error("Die MU-Installationsfortsetzung ist unbekannt.");
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      installDeferredForMemory: true,
-      memoryFreed: selection.freedMemory,
-      trashedCardDefinitionIds: trashedDefinitionIds.join(","),
-    };
-  }
+  const nonSearchProgramInstallMemoryHost: nonSearchMemory.NonSearchProgramInstallMemoryHost = {
+    definitionFor, runnerMemoryLimit, runnerProgramUsesMemory,
+    trashRunnerInstalledCardToHeap,
+    continueGripInstall: resolveGripInstallTemporaryCreditChoice,
+    continueStackInstall: resolveStackInstallRunCleanupChoice };
 
   function resolveRunnerInstalledConnectionTrashBadPublicityChoice(
     state: GameState,
@@ -1611,7 +1476,9 @@ export function createHiddenZoneNonSearchRuntime(
     resolveCorpChoiceRezOrTrashIceDecisionChoice,
     resolveCorpChoiceRezOrTrashIceTargetChoice,
     resolveGripInstallTemporaryCreditChoice,
-    resolveNonSearchProgramInstallMemoryChoice,
+    resolveNonSearchProgramInstallMemoryChoice: (state: GameState, action: LegalAction, playerAction: PlayerAction) =>
+      nonSearchMemory.resolveNonSearchProgramInstallMemoryChoice(
+        nonSearchProgramInstallMemoryHost, state, action, playerAction),
     resolveIncubatorTransformChoice,
     resolvePaidSourceReturnToGripChoice,
     resolveRunnerProgramReturnChoice,

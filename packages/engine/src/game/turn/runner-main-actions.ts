@@ -373,6 +373,9 @@ export function buildRunnerMainActions(
         buildRunnerValuPakInstallAction(state, {
           cardId: id,
           definition,
+          runnerProgramTrashBeforeInstall:
+            state.runner.memoryUsed + (definition.memoryCost ?? 0) >
+            runnerMemoryLimit(state),
         }),
         definition,
       );
