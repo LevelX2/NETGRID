@@ -4715,7 +4715,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       ).toBeUndefined();
   });
 
-  it("scores Data Fort Reclamation as a private HQ install sequence", () => {
+  it("scores Data Fort Reclamation as a private ordered HQ install and rez sequence", () => {
     const corpDeck: DeckDefinition = {
       ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
       id: "onr_v1_corp_v1922_hq_to_new_remote_install_rez",
@@ -4814,8 +4814,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     const remote = state.corp.servers.find(
       (server) =>
         server.kind === "remote" &&
-        server.ice.includes(iceId) &&
-        server.root.includes(assetId),
+        server.ice.includes(iceId),
     );
     expect(remote).toBeDefined();
     expect(state.cardInstances[iceId]?.zone).toMatchObject({
@@ -4825,19 +4824,18 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     });
     expect(state.cardInstances[assetId]?.zone).toMatchObject({
       side: "corp",
-      zone: "serverRoot",
-      serverId: remote?.id,
+      zone: "hq",
     });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       hiddenZoneAction: "hq_to_new_remote_install_sequence",
       selectedCount: 2,
-      installedCount: 2,
+      installedCount: 1,
       temporaryCreditsProvided: 10,
       temporaryCreditsSpent: 0,
       temporaryCreditsRemaining: 10,
       hqToNewRemoteInstallRezRezChoiceOpened: true,
-      hqToNewRemoteInstallRezRezCandidateCount: 2,
+      hqToNewRemoteInstallRezRezCandidateCount: 1,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"hq"|"rd"|"cardInstances"|"privatePayload"|ACME/,
@@ -4846,7 +4844,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       side: "corp",
       visibility: "hidden_info_barrier",
       minSelections: 0,
-      maxSelections: 2,
+      maxSelections: 1,
     });
     const rezChoice = mustAction(
       state,
@@ -4871,10 +4869,15 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state = applyChoices(state, "corp", [`card_${iceId}`]);
     expect(state.cardInstances[iceId]?.rezzed).toBe(true);
     expect(state.cardInstances[assetId]?.rezzed).toBe(false);
+    expect(state.cardInstances[assetId]?.zone).toMatchObject({
+      side: "corp",
+      zone: "serverRoot",
+      serverId: remote?.id,
+    });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       hiddenZoneAction: "hq_to_new_remote_rez_sequence",
-      selectedCount: 1,
+      selectedCount: 2,
       rezzedCount: 1,
       rezzedIceCount: 1,
       rezzedRootCount: 0,
@@ -4886,6 +4889,19 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"hq"|"rd"|"cardInstances"|"privatePayload"|ACME/,
     );
+    state = applyChoices(state, "corp", []);
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.dataFortReclamationSequence).toBeUndefined();
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      hiddenZoneAction: "hq_to_new_remote_rez_sequence",
+      selectedCount: 2,
+      installedCount: 2,
+      temporaryCreditsProvided: 10,
+      temporaryCreditsSpent: 3,
+      temporaryCreditsRemaining: 7,
+      temporaryCreditsReturned: 7,
+    });
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));

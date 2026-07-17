@@ -341,6 +341,53 @@ export function validateGameState(state: GameState): ValidationResult {
     if (optionIds.size !== state.pendingChoice.options.length)
       errors.push("PendingChoice option ids must be unique.");
   }
+  if (state.dataFortReclamationSequence) {
+    const sequence = state.dataFortReclamationSequence;
+    if (!state.corp.scoreArea.includes(sequence.sourceAgendaId))
+      errors.push("Data Fort Reclamation sequence requires a scored source agenda.");
+    if (
+      sequence.selectedCardIds.length === 0 ||
+      sequence.selectedCardIds.length > 4 ||
+      new Set(sequence.selectedCardIds).size !== sequence.selectedCardIds.length
+    )
+      errors.push("Data Fort Reclamation sequence has invalid selected cards.");
+    if (
+      !Number.isInteger(sequence.nextCardIndex) ||
+      sequence.nextCardIndex < 1 ||
+      sequence.nextCardIndex > sequence.selectedCardIds.length
+    )
+      errors.push("Data Fort Reclamation sequence has an invalid card index.");
+    if (
+      !Number.isInteger(sequence.temporaryCreditsProvided) ||
+      sequence.temporaryCreditsProvided < 0 ||
+      !Number.isInteger(sequence.temporaryCreditsRemaining) ||
+      sequence.temporaryCreditsRemaining < 0 ||
+      sequence.temporaryCreditsRemaining > sequence.temporaryCreditsProvided
+    )
+      errors.push("Data Fort Reclamation sequence has invalid temporary credits.");
+    const server = state.corp.servers.find(
+      (candidate) => candidate.id === sequence.serverId,
+    );
+    if (!server || server.kind !== "remote")
+      errors.push("Data Fort Reclamation sequence requires its remote server.");
+    const currentCardId =
+      sequence.selectedCardIds[sequence.nextCardIndex - 1];
+    const sourceParts = state.pendingChoice?.source.split(":") ?? [];
+    if (
+      sourceParts[0] !==
+        "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez.rez" ||
+      sourceParts[1] !== sequence.sourceAgendaId ||
+      sourceParts[2] !== sequence.serverId ||
+      sourceParts[3] !== currentCardId
+    )
+      errors.push("Data Fort Reclamation sequence requires its current rez choice.");
+  } else if (
+    state.pendingChoice?.source.startsWith(
+      "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez.rez:",
+    )
+  ) {
+    errors.push("Data Fort Reclamation rez choice requires its sequence state.");
+  }
   if (state.pendingAddTagContinuation) {
     if (state.imminentEvent?.eventType !== "add_tag")
       errors.push("Add-tag continuation requires an Add-Tag imminent event.");

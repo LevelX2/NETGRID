@@ -1431,6 +1431,16 @@ export type PendingAddTagContinuation =
       runnerTagsBefore: number;
     };
 
+export type DataFortReclamationSequenceState = {
+  sourceAgendaId: CardInstanceId;
+  sourceDefinitionId: CardDefinitionId;
+  serverId: Exclude<ServerId, "new_remote">;
+  selectedCardIds: CardInstanceId[];
+  nextCardIndex: number;
+  temporaryCreditsProvided: number;
+  temporaryCreditsRemaining: number;
+};
+
 export type GameState = {
   matchId: string;
   baseline: RulesBaseline;
@@ -1452,6 +1462,7 @@ export type GameState = {
   agendaPointsToWin: number;
   setup?: SetupState;
   pendingChoice?: PendingChoice;
+  dataFortReclamationSequence?: DataFortReclamationSequenceState;
   pendingAddTagContinuation?: PendingAddTagContinuation;
   runnerDrawSequence?: RunnerDrawSequence;
   imminentEvent?: ImminentEvent;

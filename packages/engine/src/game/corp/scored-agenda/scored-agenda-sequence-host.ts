@@ -22,7 +22,11 @@ export type SequencePayload = Record<string, string | number | boolean>;
 export type CorpInstallRezSequenceHandlerHost = {
   state: Pick<
     GameState,
-    "corp" | "cardInstances" | "pendingChoice" | "stateVersion"
+    | "corp"
+    | "cardInstances"
+    | "pendingChoice"
+    | "dataFortReclamationSequence"
+    | "stateVersion"
   >;
   legalAction: LegalAction;
   playerAction?: PlayerAction;

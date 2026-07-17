@@ -366,7 +366,7 @@ describe("corp install rez sequence handlers", () => {
     });
   });
 
-  it("installs selected Data Fort Reclamation HQ cards in selected order", () => {
+  it("installs and offers to rez each selected Data Fort Reclamation card in selected order", () => {
     const host = makeHost({
       hq: ["asset_1", "ice_1", "upgrade_1"] as CardInstanceId[],
       scoreArea: ["data_fort_agenda"] as CardInstanceId[],
@@ -381,17 +381,29 @@ describe("corp install rez sequence handlers", () => {
       playerAction: playerAction(["card_ice_1", "card_asset_1"]),
     });
 
-    const result = handleCorpInstallRezSequenceChoice(host);
+    const firstResult = handleCorpInstallRezSequenceChoice(host);
 
-    expect(result.handled).toBe(true);
-    expect(result.selectedCardIds).toEqual(["ice_1", "asset_1"]);
-    expect(result.installedCardIds).toEqual(["ice_1", "asset_1"]);
-    expect(host.state.corp.hq).toEqual(["upgrade_1"]);
+    expect(firstResult.handled).toBe(true);
+    expect(firstResult.selectedCardIds).toEqual(["ice_1", "asset_1"]);
+    expect(firstResult.installedCardIds).toEqual(["ice_1"]);
+    expect(host.state.corp.hq).toEqual(["asset_1", "upgrade_1"]);
     expect(host.state.corp.servers[0]?.ice).toEqual(["ice_1"]);
-    expect(host.state.corp.servers[0]?.root).toEqual(["asset_1"]);
+    expect(host.state.corp.servers[0]?.root).toEqual([]);
     expect(host.state.pendingChoice?.source).toBe(
-      "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez.rez:data_fort_agenda:remote_1:10:8",
+      "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez.rez:data_fort_agenda:remote_1:ice_1:1:8",
     );
+    expect(host.state.pendingChoice?.prompt).toBe(
+      "Data Fort Reclamation: Karte 1 von 2 rezzen.",
+    );
+    expect(
+      host.state.pendingChoice?.options.map((option) => option.value),
+    ).toEqual(["ice_1"]);
+    expect(host.state.dataFortReclamationSequence).toMatchObject({
+      selectedCardIds: ["ice_1", "asset_1"],
+      nextCardIndex: 1,
+      temporaryCreditsProvided: 10,
+      temporaryCreditsRemaining: 10,
+    });
     expect(host.legalAction.payload).toMatchObject({
       cardImplementationPrimitiveKind:
         "score_install_hq_cards_into_new_remote_then_rez",
@@ -400,7 +412,7 @@ describe("corp install rez sequence handlers", () => {
       hiddenZoneAction: "hq_to_new_remote_install_sequence",
       selectedCount: 2,
       installedIceCount: 1,
-      installedRootCount: 1,
+      installedRootCount: 0,
       createdServerId: "remote_1",
       cardImplementationSequenceCreatedServerId: "remote_1",
       cardImplementationTemporaryCreditBudget: 10,
@@ -408,6 +420,17 @@ describe("corp install rez sequence handlers", () => {
       temporaryCreditsRemaining: 10,
     });
     expect(JSON.stringify(host.legalAction.payload)).not.toContain("upgrade_1");
+
+    host.playerAction = playerAction(["card_ice_1"]);
+    const secondResult = handleCorpInstallRezSequenceChoice(host);
+
+    expect(secondResult.rezzedCardIds).toEqual(["ice_1"]);
+    expect(secondResult.installedCardIds).toEqual(["asset_1"]);
+    expect(host.state.corp.hq).toEqual(["upgrade_1"]);
+    expect(host.state.corp.servers[0]?.root).toEqual(["asset_1"]);
+    expect(host.state.pendingChoice?.source).toBe(
+      "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez.rez:data_fort_agenda:remote_1:asset_1:2:8",
+    );
   });
 
   it("resolves empty Data Fort Reclamation selection without creating a remote", () => {
@@ -607,7 +630,7 @@ describe("corp install rez sequence handlers", () => {
     });
   });
 
-  it("keeps Data Fort Reclamation optional rez as one follow-up after the install batch", () => {
+  it("continues through Data Fort Reclamation one card at a time after each rez decision", () => {
     const host = makeHost({
       hq: ["asset_1", "ice_1", "upgrade_1"] as CardInstanceId[],
       scoreArea: ["data_fort_agenda"] as CardInstanceId[],
@@ -626,73 +649,93 @@ describe("corp install rez sequence handlers", () => {
       ]),
     });
 
-    const result = handleCorpInstallRezSequenceChoice(host);
+    const firstResult = handleCorpInstallRezSequenceChoice(host);
 
-    expect(result.handled).toBe(true);
-    expect(result.rezzedCardIds).toEqual([]);
-    expect(host.state.corp.hq).toEqual([]);
-    expect(host.state.corp.servers[0]?.root).toEqual(["asset_1", "upgrade_1"]);
-    expect(host.state.corp.servers[0]?.ice).toEqual(["ice_1"]);
+    expect(firstResult.handled).toBe(true);
+    expect(firstResult.rezzedCardIds).toEqual([]);
+    expect(host.state.corp.hq).toEqual(["ice_1", "upgrade_1"]);
+    expect(host.state.corp.servers[0]?.root).toEqual(["asset_1"]);
+    expect(host.state.corp.servers[0]?.ice).toEqual([]);
     expect(host.state.cardInstances.asset_1).toMatchObject({
       rezzed: false,
       zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
     });
+    expect(host.state.pendingChoice).toMatchObject({
+      source:
+        "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez.rez:data_fort_agenda:remote_1:asset_1:1:8",
+      visibility: "hidden_info_barrier",
+      minSelections: 0,
+      maxSelections: 1,
+    });
+    expect(
+      host.state.pendingChoice?.options.map((option) => option.value),
+    ).toEqual(["asset_1"]);
+    expect(host.legalAction.payload).toMatchObject({
+      hiddenZoneAction: "hq_to_new_remote_install_sequence",
+      immediateRezzedCount: 0,
+      hqToNewRemoteInstallRezRezChoiceOpened: true,
+      hqToNewRemoteInstallRezRezCandidateCount: 1,
+      temporaryCreditsSpent: 0,
+      temporaryCreditsRemaining: 10,
+    });
+
+    host.playerAction = playerAction([]);
+    const secondResult = handleCorpInstallRezSequenceChoice(host);
+    expect(secondResult.rezzedCardIds).toEqual([]);
+    expect(secondResult.installedCardIds).toEqual(["ice_1"]);
+    expect(host.state.pendingChoice?.prompt).toBe(
+      "Data Fort Reclamation: Karte 2 von 3 rezzen.",
+    );
+    expect(host.state.corp.hq).toEqual(["upgrade_1"]);
+
+    host.playerAction = playerAction(["card_ice_1"]);
+    const thirdResult = handleCorpInstallRezSequenceChoice(host);
+    expect(thirdResult.rezzedCardIds).toEqual(["ice_1"]);
+    expect(thirdResult.installedCardIds).toEqual(["upgrade_1"]);
+    expect(host.state.pendingChoice?.prompt).toBe(
+      "Data Fort Reclamation: Karte 3 von 3 rezzen.",
+    );
+    expect(host.state.corp.hq).toEqual([]);
+
+    host.playerAction = playerAction([]);
+    const finalResult = handleCorpInstallRezSequenceChoice(host);
+    expect(finalResult.temporaryCreditsReturned).toBe(7);
+    expect(host.state.pendingChoice).toBeUndefined();
+    expect(host.state.dataFortReclamationSequence).toBeUndefined();
     expect(host.state.cardInstances.ice_1).toMatchObject({
-      rezzed: false,
+      rezzed: true,
       zone: { side: "corp", zone: "serverIce", serverId: "remote_1" },
     });
     expect(host.state.cardInstances.upgrade_1).toMatchObject({
       rezzed: false,
       zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
     });
-    expect(host.state.pendingChoice).toMatchObject({
-      source:
-        "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez.rez:data_fort_agenda:remote_1:10:8",
-      visibility: "hidden_info_barrier",
-      minSelections: 0,
-      maxSelections: 3,
-    });
-    expect(
-      host.state.pendingChoice?.options.map((option) => option.value),
-    ).toEqual(["asset_1", "ice_1", "upgrade_1"]);
-    expect(host.legalAction.payload).toMatchObject({
-      hiddenZoneAction: "hq_to_new_remote_install_sequence",
-      immediateRezzedCount: 0,
-      hqToNewRemoteInstallRezRezChoiceOpened: true,
-      hqToNewRemoteInstallRezRezCandidateCount: 3,
-      temporaryCreditsSpent: 0,
-      temporaryCreditsRemaining: 10,
-    });
   });
 
-  it("resolves Data Fort Reclamation rez with temporary credits before corp credits", () => {
+  it("pays each Data Fort Reclamation rez from temporary credits before corp credits", () => {
     const rezRootCalls: CardInstanceId[] = [];
-    const server = {
-      id: "remote_1" as Exclude<ServerId, "new_remote">,
-      label: "Remote 1",
-      kind: "remote",
-      ice: ["ice_1" as CardInstanceId],
-      root: ["asset_1" as CardInstanceId],
-    } as CorpServer;
     const host = makeHost({
-      hq: [],
+      hq: ["ice_1", "asset_1"] as CardInstanceId[],
       scoreArea: ["data_fort_agenda"] as CardInstanceId[],
-      servers: [server],
       scoredKinds: {
         data_fort_agenda: "score_install_hq_cards_into_new_remote_then_rez",
       },
       pendingChoice: selectCardsChoice(
-        "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez.rez:data_fort_agenda:remote_1:10:8",
+        "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez:data_fort_agenda:8",
         ["ice_1", "asset_1"] as CardInstanceId[],
       ),
       playerAction: playerAction(["card_ice_1", "card_asset_1"]),
       rezRootCalls,
     });
 
-    const result = handleCorpInstallRezSequenceChoice(host);
+    handleCorpInstallRezSequenceChoice(host);
+    host.playerAction = playerAction(["card_ice_1"]);
+    const secondResult = handleCorpInstallRezSequenceChoice(host);
+    host.playerAction = playerAction(["card_asset_1"]);
+    const finalResult = handleCorpInstallRezSequenceChoice(host);
 
-    expect(result.handled).toBe(true);
-    expect(result.rezzedCardIds).toEqual(["ice_1", "asset_1"]);
+    expect(secondResult.rezzedCardIds).toEqual(["ice_1"]);
+    expect(finalResult.rezzedCardIds).toEqual(["asset_1"]);
     expect(host.state.corp.credits).toBe(5);
     expect(rezRootCalls).toEqual(["asset_1"]);
     expect(host.legalAction.payload).toMatchObject({
@@ -704,8 +747,8 @@ describe("corp install rez sequence handlers", () => {
       cardImplementationSequenceCreatedServerId: "remote_1",
       cardImplementationTemporaryCreditBudget: 10,
       selectedCount: 2,
-      rezzedCount: 2,
-      rezzedIceCount: 1,
+      rezzedCount: 1,
+      rezzedIceCount: 0,
       rezzedRootCount: 1,
       temporaryCreditsProvided: 10,
       temporaryCreditsSpent: 9,
