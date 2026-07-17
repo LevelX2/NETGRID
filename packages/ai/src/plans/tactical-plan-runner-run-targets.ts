@@ -598,6 +598,8 @@ export function runnerRunTargetCurrentStep(
     runnerCentralMatchpointAccessOpportunity(context, evaluation);
   const probeOnly =
     evaluation?.evidence.includes("run_commitment:probe_only") === true;
+  const scoreThreatProbeWithoutVisibleCost =
+    probeOnly && evaluation?.scoreThreat === true && evaluation.pathCost === 0;
   const usefulNonFundingActionAvailable =
     (context.input.legalActions ?? []).some(
       (candidate) => candidate.type === "draw_card",
@@ -621,7 +623,7 @@ export function runnerRunTargetCurrentStep(
   }
   if (
     evaluation?.recommendation === "gain_credits_first" &&
-    !probeOnly &&
+    (!probeOnly || scoreThreatProbeWithoutVisibleCost) &&
     !preserveLastClickForScoreThreat &&
     !preserveReachableMatchpointRun &&
     (concreteEconomyFunding ||
@@ -638,6 +640,9 @@ export function runnerRunTargetCurrentStep(
         `run funding gap ${fundingGap}`,
         `run preparatory clicks ${preparatoryClicks}`,
         `concrete economy funding ${concreteEconomyFunding}`,
+        ...(scoreThreatProbeWithoutVisibleCost
+          ? ["zero-cost score-threat probe honors funding recommendation"]
+          : []),
         ...runnerRunTargetStepRationale(context, action),
       ],
     });

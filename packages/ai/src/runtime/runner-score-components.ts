@@ -179,6 +179,8 @@ export function runnerScoreComponents(
       action,
       {
         loanInstallAction: loanLiabilityAssessment?.loanInstallAction === true,
+        semanticRiskKinds:
+          actionSemanticCandidate?.risks.map((risk) => risk.kind) ?? [],
       },
       dependencies.install,
     ),

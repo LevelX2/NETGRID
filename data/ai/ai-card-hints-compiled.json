@@ -38748,6 +38748,10 @@
       },
       "effects": [
         {
+          "damageTypes": [
+            "brain",
+            "net"
+          ],
           "kind": "damage_prevention",
           "resource": "damage",
           "scope": "runner",
@@ -38762,16 +38766,6 @@
         {
           "kind": "brain_damage_prevention",
           "resource": "brain_damage",
-          "scope": "runner",
-          "timing": "prevention_window"
-        },
-        {
-          "damageTypes": [
-            "brain",
-            "net"
-          ],
-          "kind": "damage_prevention",
-          "resource": "damage",
           "scope": "runner",
           "timing": "prevention_window"
         }
@@ -40948,7 +40942,10 @@
       "valueHints": {
         "economy": 1
       },
-      "riskTags": [],
+      "riskTags": [
+        "mandatory_action",
+        "random_outcome"
+      ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
@@ -40998,12 +40995,6 @@
           "timing": "persistent",
           "scope": "runner",
           "target": "risk.random_hand_reveal"
-        },
-        {
-          "kind": "search",
-          "timing": "persistent",
-          "scope": "runner",
-          "target": "setup.draw"
         },
         {
           "kind": "economy",

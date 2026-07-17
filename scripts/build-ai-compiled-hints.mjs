@@ -48,6 +48,7 @@ const REVIEWED_EFFECT_NORMALIZATION_CARD_IDS = new Set([
   "onr_v1_095_jack-n-joe",
   "onr_v1_097_livewires-contacts",
   "onr_v1_108_score",
+  "onr_proteus_096_skullcap",
   "onr_proteus_101_all-hands",
   "onr_proteus_122_rush-hour",
 ]);
@@ -474,7 +475,13 @@ function mechanicalEffectsAreCompatible(left, right) {
   for (const field of ["kind", "timing", "scope"]) {
     if (left[field] !== right[field]) return false;
   }
-  for (const field of ["resource", "amount", "target", "repeatable", "finite"]) {
+  for (const field of [
+    "resource",
+    "amount",
+    "target",
+    "repeatable",
+    "finite",
+  ]) {
     if (
       isMeaningful(left[field]) &&
       isMeaningful(right[field]) &&

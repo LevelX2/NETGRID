@@ -315,6 +315,7 @@ export type RestrictedActionFamily =
   | "gain_credit"
   | "draw_card"
   | "start_run"
+  | "start_run_remote"
   | "play_or_install_card";
 
 export type TurnBoundExtraActionOffer = {

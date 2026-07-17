@@ -7302,6 +7302,41 @@ describe("formatChronicleEvent", () => {
     }
   });
 
+  it("shows Bargain with Viacox's remote choice without inventing a fixed target", () => {
+    const [item] = formatChronicleEffectItems(
+      makeEvent("end_turn", {
+        actor: "corp",
+        resolvedEffects: [
+          {
+            effectId: "runner.start.forced_action.viacox_1",
+            kind: "gain_actions",
+            visibility: "public",
+            side: "runner",
+            amount: 1,
+            reason: "start_of_turn",
+            sourceDefinitionId: "onr_proteus_131_bargain-with-viacox",
+            sourceTitle: "Bargain with Viacox",
+            dieRoll: 5,
+            restrictedActionFamily: "start_run_remote",
+          },
+        ],
+      }),
+      "runner",
+    );
+
+    expect(item?.title).toBe(
+      "Bargain with Viacox würfelt eine 5: Runner muss einen Run auf eine Tochter-Datenfestung starten.",
+    );
+    expect(item?.chips).toEqual(
+      expect.arrayContaining([
+        "+1 Aktion",
+        "Wurf 5",
+        "Erzwungene Aktion",
+        "Run auf Tochter-Datenfestung",
+      ]),
+    );
+  });
+
   it("shows recurring-credit refreshes from automatic start-of-turn effects", () => {
     const items = formatChronicleEffectItems(
       makeEvent("end_turn", {

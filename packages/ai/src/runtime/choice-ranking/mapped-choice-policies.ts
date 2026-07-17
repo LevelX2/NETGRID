@@ -139,6 +139,8 @@ export function tacticalPlanRunnerMappingBlocksOffPlanOverride(
     coverageProbeRunShouldYield: boolean;
     lowValueRunEventShouldYield: boolean;
     urgentRunNowDevelopmentShouldYield: boolean;
+    unconvertibleFundingShouldYieldToBank: boolean;
+    urgentCoverageSearchInstallShouldYield: boolean;
   },
 ): boolean {
   if (mapping.plan.side !== "runner") return false;
@@ -157,6 +159,8 @@ export function tacticalPlanRunnerMappingBlocksOffPlanOverride(
   if (exceptions.coverageProbeRunShouldYield) return false;
   if (exceptions.lowValueRunEventShouldYield) return false;
   if (exceptions.urgentRunNowDevelopmentShouldYield) return false;
+  if (exceptions.unconvertibleFundingShouldYieldToBank) return false;
+  if (exceptions.urgentCoverageSearchInstallShouldYield) return false;
   return !runnerPlanOverrideIsHardInterrupt(
     mapping.plan,
     mappedChoice,

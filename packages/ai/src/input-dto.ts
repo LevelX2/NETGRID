@@ -55,6 +55,10 @@ export const AI_DECISION_INPUT_TOP_LEVEL_FIELDS = [
 // shapes must be added here deliberately instead of being deep-copied.
 const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "serverId",
+  "breakerId",
+  "iceId",
+  "subroutineIndex",
+  "subroutineIndexes",
   "placement",
   "regionReplacementWarning",
   "rootReplacement",

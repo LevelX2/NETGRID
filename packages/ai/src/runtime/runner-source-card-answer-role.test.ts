@@ -90,6 +90,58 @@ describe("runnerSourceCardAnswerRole", () => {
       runnerSourceCardAnswerRole(input(), textNoise, dependencies()),
     ).toBeUndefined();
   });
+
+  it("does not promote a random hinted branch while retaining ordinary mechanic fallbacks", () => {
+    const randomBranch = action({
+      payload: { sourceDefinitionId: "random-branch-source" },
+    });
+    const ordinaryDraw = action({
+      payload: { sourceDefinitionId: "ordinary-draw-source" },
+    });
+    const base = dependencies();
+    const authoritative = {
+      ...base,
+      sourceDefinition: () => ({ mechanics: ["draw_card"] }),
+      hintEffectsForCard: (definitionId: string | undefined) =>
+        definitionId === "random-branch-source"
+          ? [{ kind: "delayed_penalty", target: "risk.random_action" }]
+          : [{ kind: "economy" }],
+    };
+
+    expect(
+      runnerSourceCardAnswerRole(input(), randomBranch, authoritative),
+    ).toBeUndefined();
+    expect(
+      runnerSourceCardAnswerRole(input(), ordinaryDraw, authoritative),
+    ).toBe("draw");
+  });
+
+  it("does not infer deck search from a generic card title", () => {
+    const schematics = action({
+      actionId: "schematics-title-only",
+      payload: { sourceDefinitionId: "schematics-search-engine" },
+    });
+    const library = action({
+      actionId: "library-title-only",
+      payload: { sourceDefinitionId: "library-search" },
+    });
+    const titleOnlyDependencies = {
+      ...dependencies(),
+      sourceDefinition: (definitionId: string | undefined) =>
+        definitionId === "schematics-search-engine"
+          ? { title: "Schematics Search Engine" }
+          : definitionId === "library-search"
+            ? { title: "Library Search" }
+            : undefined,
+    };
+
+    expect(
+      runnerSourceCardAnswerRole(input(), schematics, titleOnlyDependencies),
+    ).toBeUndefined();
+    expect(
+      runnerSourceCardAnswerRole(input(), library, titleOnlyDependencies),
+    ).toBeUndefined();
+  });
 });
 
 function dependencies() {
