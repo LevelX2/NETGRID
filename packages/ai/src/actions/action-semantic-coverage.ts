@@ -367,6 +367,7 @@ function groupsForCandidate(
   if (candidate.actionType === "advance_card") groups.add("advance_action");
   if (
     candidate.actionType === "rez_ice" ||
+    candidate.actionType === "rez_card" ||
     candidate.actionType === "decline_rez"
   )
     groups.add("rez_action");

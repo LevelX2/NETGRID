@@ -37,7 +37,9 @@ function installedPersistentEconomyPlan(
       visibleCardForAction(input.playerView, action)?.instanceId ===
         card.instanceId,
   );
-  const rezActions = actions.filter((action) => action.type === "rez_ice");
+  const rezActions = actions.filter(
+    (action) => action.type === "rez_ice" || action.type === "rez_card",
+  );
   const useActions = actions.filter((action) =>
     persistentEconomyUseAction(input, action, profile),
   );

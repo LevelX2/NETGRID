@@ -81,7 +81,7 @@ describe("match e676 exact decision checkpoints", () => {
       }
       fixture.expectation = {
         forbiddenActions: [
-          { type: "rez_ice", sourceDefinitionId: CHESTER_MIX },
+          { type: "rez_card", sourceDefinitionId: CHESTER_MIX },
         ],
       };
     });

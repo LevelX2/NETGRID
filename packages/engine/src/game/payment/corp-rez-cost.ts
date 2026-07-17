@@ -700,7 +700,7 @@ export function assertCorpRootRezCostQuoteValid(
   if (!instance) throw new Error("Root-Rez-Ziel existiert nicht mehr.");
   if (instance.rezzed) throw new Error("Root-Rez-Ziel ist bereits gerezzt.");
   if (
-    legalAction.type !== "rez_ice" ||
+    legalAction.type !== "rez_card" ||
     legalAction.side !== "corp" ||
     legalAction.source !== cardId ||
     legalAction.payload?.cardId !== cardId ||

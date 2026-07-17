@@ -541,7 +541,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         action.payload?.cardId === hackerTrackerId &&
         action.payload?.rootRez === true,
     );

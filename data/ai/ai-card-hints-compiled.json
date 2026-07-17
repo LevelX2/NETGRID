@@ -14026,13 +14026,6 @@
           "resource": "credits",
           "scope": "corp",
           "timing": "scored_activated"
-        },
-        {
-          "amount": 3,
-          "kind": "counter_economy",
-          "resource": "credits",
-          "scope": "corp",
-          "timing": "scored_activated"
         }
       ],
       "conditions": [
@@ -14894,13 +14887,6 @@
           "resource": "credits",
           "scope": "corp",
           "timing": "when_scored"
-        },
-        {
-          "amount": 5,
-          "kind": "economy",
-          "resource": "credits",
-          "scope": "corp",
-          "timing": "when_scored"
         }
       ],
       "tacticSignals": [
@@ -15096,13 +15082,6 @@
           "amount": 3,
           "kind": "economy",
           "repeatable": true,
-          "resource": "credits",
-          "scope": "corp",
-          "timing": "scored_activated"
-        },
-        {
-          "amount": 3,
-          "kind": "economy",
           "resource": "credits",
           "scope": "corp",
           "timing": "scored_activated"
@@ -22136,13 +22115,6 @@
           "resource": "credits",
           "scope": "corp",
           "timing": "action"
-        },
-        {
-          "amount": 9,
-          "kind": "economy",
-          "resource": "credits",
-          "scope": "corp",
-          "timing": "action"
         }
       ],
       "costProfile": {
@@ -22501,12 +22473,6 @@
         },
         {
           "kind": "counter_economy",
-          "resource": "credits",
-          "scope": "runner",
-          "timing": "action"
-        },
-        {
-          "kind": "tag_punish_payoff",
           "resource": "credits",
           "scope": "runner",
           "timing": "action"
@@ -22949,13 +22915,6 @@
         {
           "amount": 3,
           "finite": true,
-          "kind": "economy",
-          "resource": "credits",
-          "scope": "corp",
-          "timing": "action"
-        },
-        {
-          "amount": 3,
           "kind": "economy",
           "resource": "credits",
           "scope": "corp",
@@ -23428,20 +23387,6 @@
           "resource": "cards",
           "scope": "corp",
           "timing": "action"
-        },
-        {
-          "amount": 1,
-          "kind": "draw",
-          "resource": "cards",
-          "scope": "corp",
-          "timing": "action"
-        },
-        {
-          "amount": 2,
-          "kind": "economy",
-          "resource": "credits",
-          "scope": "corp",
-          "timing": "action"
         }
       ],
       "costProfile": {
@@ -23578,14 +23523,8 @@
       ],
       "effects": [
         {
-          "finite": true,
-          "kind": "extra_action",
-          "resource": "actions",
-          "scope": "corp",
-          "timing": "action"
-        },
-        {
           "amount": 2,
+          "finite": true,
           "kind": "extra_action",
           "resource": "actions",
           "scope": "corp",
@@ -24089,19 +24028,6 @@
         {
           "amount": 4,
           "finite": true,
-          "kind": "tag_punish_payoff",
-          "resource": "damage",
-          "scope": "runner",
-          "timing": "action"
-        },
-        {
-          "amount": 4,
-          "kind": "damage",
-          "resource": "damage",
-          "scope": "runner",
-          "timing": "action"
-        },
-        {
           "kind": "tag_punish_payoff",
           "resource": "damage",
           "scope": "runner",
@@ -30631,13 +30557,6 @@
           "kind": "remote_protection",
           "scope": "fort",
           "timing": "persistent"
-        },
-        {
-          "amount": 5,
-          "kind": "run_tax",
-          "resource": "credits",
-          "scope": "accessed_card",
-          "timing": "on_access"
         }
       ],
       "conditions": [

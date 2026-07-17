@@ -15,7 +15,7 @@
   "summary": {
     "cardCount": 618,
     "cardsWithMechanicalFacts": 584,
-    "cardsWithGeneratedFacts": 330,
+    "cardsWithGeneratedFacts": 324,
     "cardsWithOverlays": 6,
     "cardsWithFunctionSignals": 601,
     "cardsWithStrategyAnchors": 255,
@@ -42245,7 +42245,7 @@
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
         "mechanicalFactsFound": true,
-        "generatedFactsFound": true,
+        "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
         "warningCount": 0
@@ -42344,9 +42344,7 @@
           "conditions",
           "costProfile"
         ],
-        "generatedFactFields": [
-          "effects"
-        ],
+        "generatedFactFields": [],
         "overlayFields": []
       },
       "strategicRoleStatus": {
@@ -43492,7 +43490,6 @@
           "conditions"
         ],
         "generatedFactFields": [
-          "effects",
           "conditions"
         ],
         "overlayFields": []
@@ -43715,7 +43712,7 @@
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
         "mechanicalFactsFound": true,
-        "generatedFactsFound": true,
+        "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
         "warningCount": 0
@@ -43792,9 +43789,7 @@
           "conditions",
           "costProfile"
         ],
-        "generatedFactFields": [
-          "effects"
-        ],
+        "generatedFactFields": [],
         "overlayFields": []
       },
       "strategicRoleStatus": {
@@ -53140,7 +53135,7 @@
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
         "mechanicalFactsFound": true,
-        "generatedFactsFound": true,
+        "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
         "warningCount": 0
@@ -53199,9 +53194,7 @@
           "effects",
           "costProfile"
         ],
-        "generatedFactFields": [
-          "effects"
-        ],
+        "generatedFactFields": [],
         "overlayFields": []
       },
       "strategicRoleStatus": {
@@ -54153,7 +54146,7 @@
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
         "mechanicalFactsFound": true,
-        "generatedFactsFound": true,
+        "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
         "warningCount": 0
@@ -54212,9 +54205,7 @@
           "effects",
           "costProfile"
         ],
-        "generatedFactFields": [
-          "effects"
-        ],
+        "generatedFactFields": [],
         "overlayFields": []
       },
       "strategicRoleStatus": {
@@ -54736,7 +54727,7 @@
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
         "mechanicalFactsFound": true,
-        "generatedFactsFound": true,
+        "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
         "warningCount": 0
@@ -54804,9 +54795,7 @@
           "effects",
           "costProfile"
         ],
-        "generatedFactFields": [
-          "effects"
-        ],
+        "generatedFactFields": [],
         "overlayFields": []
       },
       "strategicRoleStatus": {
@@ -55524,7 +55513,7 @@
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
         "mechanicalFactsFound": true,
-        "generatedFactsFound": true,
+        "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
         "warningCount": 0
@@ -55655,9 +55644,7 @@
           "conditions",
           "costProfile"
         ],
-        "generatedFactFields": [
-          "effects"
-        ],
+        "generatedFactFields": [],
         "overlayFields": []
       },
       "strategicRoleStatus": {
@@ -63854,7 +63841,6 @@
           "remoteRole"
         ],
         "generatedFactFields": [
-          "effects",
           "remoteRole"
         ],
         "overlayFields": [

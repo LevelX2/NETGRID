@@ -735,7 +735,7 @@ describe("PRO019 rule-contract baseline utilities", () => {
     expect(
       getLegalActions(wrongTiming, "corp").some(
         (action) =>
-          action.type === "rez_ice" &&
+          action.type === "rez_card" &&
           action.payload?.cardId === wrongTimingPavitId,
       ),
     ).toBe(false);
@@ -764,7 +764,7 @@ describe("PRO019 rule-contract baseline utilities", () => {
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" && action.payload?.cardId === pavitId,
+        action.type === "rez_card" && action.payload?.cardId === pavitId,
     );
     state = applySelected(state, "corp", rezAction.actionId);
     expect(state.pendingChoice).toMatchObject({
@@ -859,7 +859,7 @@ describe("PRO019 rule-contract baseline utilities", () => {
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" && action.payload?.cardId === pavitId,
+        action.type === "rez_card" && action.payload?.cardId === pavitId,
     );
     state.run = {
       ...state.run!,
@@ -924,7 +924,7 @@ describe("PRO019 rule-contract baseline utilities", () => {
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" && action.payload?.cardId === pavitId,
+        action.type === "rez_card" && action.payload?.cardId === pavitId,
     );
     state.timingPoint = "run.approach_ice";
     const beforeStaleHash = hashState(state);
@@ -977,7 +977,7 @@ describe("PRO019 rule-contract baseline utilities", () => {
     expect(
       getLegalActions(state, "corp").some(
         (action) =>
-          action.type === "rez_ice" && action.payload?.cardId === pavitId,
+          action.type === "rez_card" && action.payload?.cardId === pavitId,
       ),
     ).toBe(false);
   });
@@ -1013,7 +1013,7 @@ describe("PRO019 rule-contract baseline utilities", () => {
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" && action.payload?.cardId === pavitId,
+        action.type === "rez_card" && action.payload?.cardId === pavitId,
     );
 
     const server = remoteServer(state, "remote_1");
@@ -1047,7 +1047,7 @@ describe("PRO019 rule-contract baseline utilities", () => {
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" && action.payload?.cardId === pavitId,
+        action.type === "rez_card" && action.payload?.cardId === pavitId,
     );
     const beforeInvalidHash = hashState(state);
     const beforeInvalidEventCount = state.eventLog.length;

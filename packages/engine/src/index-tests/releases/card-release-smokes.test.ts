@@ -3440,7 +3440,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       omni,
       "corp",
       (action) =>
-        action.type === "rez_ice" && action.payload?.cardId === omniId,
+        action.type === "rez_card" && action.payload?.cardId === omniId,
     );
     moveCorpCardToHq(omni, "onr_v1_306_trojan-horse");
     omni.runnerTurnFlags = {

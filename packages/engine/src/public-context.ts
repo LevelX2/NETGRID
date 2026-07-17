@@ -283,13 +283,13 @@ export function publicContextForAction(
       if (value !== undefined) context[key] = value;
     }
   }
-  if (legalAction.type === "rez_ice")
+  if (legalAction.type === "rez_ice" || legalAction.type === "rez_card")
     context.zoneLabel =
       legalAction.payload?.rootRez === true ||
       legalAction.payload?.assetRez === true
         ? "Remote"
         : "ICE";
-  if (legalAction.type === "rez_ice") {
+  if (legalAction.type === "rez_ice" || legalAction.type === "rez_card") {
     for (const key of [
       "rezCostPaid",
       "rezCostReductionAmount",

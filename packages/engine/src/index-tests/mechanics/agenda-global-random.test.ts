@@ -421,7 +421,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       accessState,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(accessState, action) === "onr_v1_323_experimental-ai",
     );
     accessState = apply(
@@ -736,7 +736,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       hardwareState,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(hardwareState, action) ===
           "onr_v1_315_corprunners-shattered-remains",
     );
@@ -779,7 +779,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       coreDamageState,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(coreDamageState, action) ===
           "onr_v1_346_vacant-soulkiller",
     );
@@ -2014,7 +2014,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(state, action) === "onr_v1_324_fortress-architects",
     );
     const iceId = moveCorpCardToHq(state, "onr_v1_232_crystal-wall");
@@ -2128,7 +2128,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       nonIce,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(nonIce, action) === "onr_v1_324_fortress-architects",
     );
     const regionId = moveCorpCardToHq(nonIce, "onr_v1_360_jerusalem-city-grid");
@@ -2162,7 +2162,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(state, action) === "onr_v1_324_fortress-architects",
     );
     state = toRunnerTurnFromCorpMain(state);

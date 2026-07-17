@@ -118,7 +118,11 @@ export function createCorpTagSourcePayoffContext(
     input: AiDecisionInput,
     action: LegalAction,
   ): boolean => {
-    if (action.type !== "install_card" && action.type !== "rez_ice")
+    if (
+      action.type !== "install_card" &&
+      action.type !== "rez_ice" &&
+      action.type !== "rez_card"
+    )
       return false;
     const sourceDefinitionId = dependencies.sourceDefinitionIdForAction(
       input,

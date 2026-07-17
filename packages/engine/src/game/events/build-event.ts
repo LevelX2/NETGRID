@@ -185,6 +185,7 @@ export function eventVisibilityForAction(
     [
       "access_card",
       "rez_ice",
+      "rez_card",
       "score_agenda",
       "steal_agenda",
       "trash_accessed_card",
@@ -216,6 +217,7 @@ export function isHiddenInfoBarrierEvent(event: GameEvent): boolean {
   return [
     "access_card",
     "rez_ice",
+    "rez_card",
     "score_agenda",
     "steal_agenda",
     "trash_accessed_card",
@@ -341,6 +343,7 @@ function revealForPublicEvent(
     [
       "access_card",
       "rez_ice",
+      "rez_card",
       "score_agenda",
       "steal_agenda",
       "trash_accessed_card",

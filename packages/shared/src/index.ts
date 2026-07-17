@@ -89,6 +89,7 @@ export type ActionType =
   | "start_run"
   | "jack_out"
   | "rez_ice"
+  | "rez_card"
   | "decline_rez"
   | "pump_breaker"
   | "break_subroutine"

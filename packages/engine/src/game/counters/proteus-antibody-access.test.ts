@@ -339,7 +339,7 @@ describe("Proteus Phase 8b Corp Antibody access", () => {
     state = apply(
       state,
       "corp",
-      (action) => action.type === "rez_ice" && action.source === belId,
+      (action) => action.type === "rez_card" && action.source === belId,
     );
     expect(state.corp.rd).toContain(belId);
     expect(state.cardInstances[belId]?.zone).toEqual({ side: "corp", zone: "rd" });

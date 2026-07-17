@@ -1318,7 +1318,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
       dataMasons,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(dataMasons, action) === "onr_v1_317_data-masons",
     );
     dataMasons = apply(
@@ -1570,7 +1570,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
       encoder,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(encoder, action) === "onr_v1_320_encoder-inc",
     );
     encoder = apply(encoder, "corp", (action) => action.type === "end_turn");
@@ -1618,7 +1618,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
       skalderviken,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(skalderviken, action) ===
           "onr_v1_341_skalderviken-sa-beta-test-site",
     );
@@ -2474,7 +2474,7 @@ describe("V1.6.3 Mechanikpaket C", () => {
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         action.payload?.cardId === upgradeId &&
         action.payload?.rootRez === true,
     );
@@ -2531,7 +2531,7 @@ describe("V1.6.3 Mechanikpaket C", () => {
       strengthState,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(strengthState, action) ===
           "onr_v1_350_antiquated-interface-routines",
     );
@@ -7378,7 +7378,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(state, action) === "onr_v1_308_acme-savings-and-loan",
     );
     expect(state.corp.credits).toBe(22);
@@ -7456,7 +7456,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(state, action) === "onr_v1_308_acme-savings-and-loan",
     );
 
@@ -7645,7 +7645,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
     expect(
       getLegalActions(state, "corp").some(
         (action) =>
-          action.type === "rez_ice" &&
+          action.type === "rez_card" &&
           sourceDefinition(state, action) ===
             "onr_v1_308_acme-savings-and-loan",
       ),
@@ -7689,7 +7689,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
     expect(
       corpActions.some(
         (action) =>
-          action.type === "rez_ice" && action.payload?.cardId === acmeId,
+          action.type === "rez_card" && action.payload?.cardId === acmeId,
       ),
     ).toBe(false);
     expect(corpActions.some((action) => action.type === "decline_rez")).toBe(
@@ -7717,7 +7717,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(state, action) === "onr_v1_308_acme-savings-and-loan",
     );
 
@@ -7757,7 +7757,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(state, action) === "onr_v1_308_acme-savings-and-loan",
     );
     const initial = structuredClone(state);
@@ -7808,7 +7808,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(state, action) === "onr_v1_308_acme-savings-and-loan",
     );
     const removeAction = mustAction(
@@ -8546,7 +8546,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
     state = apply(
       state,
       "corp",
-      (action) => action.type === "rez_ice" && action.source === chimeraId,
+      (action) => action.type === "rez_card" && action.source === chimeraId,
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
     state = apply(state, "runner", (action) => action.type === "access_card");

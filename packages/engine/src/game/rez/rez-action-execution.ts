@@ -25,6 +25,7 @@ export function handleRezActionExecution(
 ): RezActionExecutionResult {
   switch (legalAction.type) {
     case "rez_ice":
+    case "rez_card":
       executeRezIceAction(host, legalAction);
       return { handled: true };
     case "decline_rez":

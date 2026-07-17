@@ -2221,7 +2221,7 @@ export function actionDelaysForcedScoreline<TConsumer extends string>(
       !actionPushesConcreteAgendaScoreline(input, action, dependencies)
     );
   }
-  if (action.type === "rez_ice") {
+  if (action.type === "rez_ice" || action.type === "rez_card") {
     return actionServerId !== triage.targetServerId;
   }
   if (
@@ -2253,7 +2253,7 @@ export function actionDelaysProtectedScoreRemote<TConsumer extends string>(
     if (actionServerId !== triage.targetServerId) return true;
     return action.payload?.placement !== "ice";
   }
-  if (action.type === "rez_ice") {
+  if (action.type === "rez_ice" || action.type === "rez_card") {
     return actionServerId !== triage.targetServerId;
   }
   if (

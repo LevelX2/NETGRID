@@ -94,7 +94,7 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
       current.expectation = {
         acceptableActions: [
           {
-            type: "rez_ice",
+            type: "rez_card",
             sourceDefinitionId: "onr_v1_313_city-surveillance",
           },
         ],

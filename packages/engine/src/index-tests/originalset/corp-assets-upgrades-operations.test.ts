@@ -227,7 +227,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(state, action) ===
           "onr_v1_337_rockerboy-promotion",
     );
@@ -721,7 +721,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
       trace,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(trace, action) === "onr_v1_310_blood-cat",
     );
     const traceInitial = structuredClone(trace);
@@ -781,7 +781,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
       cowboy,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(cowboy, action) === "onr_v1_316_cowboy-sysop",
     );
     const cowboyAction = mustAction(
@@ -845,7 +845,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
         state,
         "corp",
         (action) =>
-          action.type === "rez_ice" &&
+          action.type === "rez_card" &&
           sourceDefinition(state, action) === definitionId,
       );
       const initial = structuredClone(state);
@@ -913,7 +913,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
       encoder,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(encoder, action) === "onr_v1_320_encoder-inc",
     );
     const codeGateId = putCorpIceOnServer(

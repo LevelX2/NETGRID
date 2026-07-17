@@ -713,7 +713,7 @@ export function createLegalActionRuntimeHosts(
           action(
             state,
             "corp",
-            "rez_ice",
+            "rez_card",
             `${definition.title} in ${server.label} rezzen`,
             id,
             rezQuote.costs.map((cost) => ({ ...cost })),

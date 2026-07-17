@@ -142,7 +142,7 @@ export function rezCard(
     };
   }
   const shouldUseCorpRootRezCostQuote =
-    legalAction?.type === "rez_ice" &&
+    legalAction?.type === "rez_card" &&
     rootRez &&
     (definition.type === "asset" || definition.type === "upgrade");
   if (shouldUseCorpRootRezCostQuote && legalAction) {

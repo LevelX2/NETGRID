@@ -1712,7 +1712,7 @@ describe("MVP 0.1 engine foundation", () => {
     );
     const rezAction = corpActions.find(
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         action.payload?.cardId === upgradeId &&
         action.payload?.runnerActionPaidWindowRez === true,
     );
@@ -2694,7 +2694,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
     expect(
       getLegalActions(state, "corp").some(
         (action) =>
-          action.type === "rez_ice" &&
+          action.type === "rez_card" &&
           action.payload?.cardId === drDreffId &&
           action.payload?.rootRez === true,
       ),
@@ -2711,7 +2711,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         action.payload?.cardId === drDreffId &&
         action.payload?.rootRez === true,
     );
@@ -2783,7 +2783,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
     expect(
       getLegalActions(state, "corp").some(
         (action) =>
-          action.type === "rez_ice" &&
+          action.type === "rez_card" &&
           action.payload?.cardId === antiquatedId &&
           action.payload?.rootRez === true,
       ),
@@ -2813,7 +2813,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
     expect(
       getLegalActions(state, "corp").some(
         (action) =>
-          action.type === "rez_ice" &&
+          action.type === "rez_card" &&
           action.payload?.cardId === antiquatedId &&
           action.payload?.rootRez === true,
       ),
@@ -2823,7 +2823,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         action.payload?.cardId === antiquatedId &&
         action.payload?.rootRez === true,
     );
@@ -2902,7 +2902,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         action.payload?.cardId === tesseractId &&
         action.payload?.rootRez === true,
     );
@@ -3738,7 +3738,7 @@ describe("MVP 0.4 controlled card pool and tags", () => {
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(state, action) === "simple_upgrade",
     );
     runnerView = getPlayerView(state, "runner");
@@ -4004,7 +4004,7 @@ describe("MVP 0.8 playable starter slice", () => {
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(state, action) === "v08_cashout_asset",
     );
     expect(state.corp.credits).toBe(beforeRezCredits + 2);

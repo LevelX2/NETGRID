@@ -96,7 +96,7 @@ describe("rez card execution", () => {
     });
     state.activeObligationDebtCount = 2;
     state.corpBonusAgendaPoints = 1;
-    const action = rezAction(assetId, { agendaPointCost: 1 });
+    const action = rezAction(assetId, { agendaPointCost: 1 }, "rez_card");
     const calls = testCalls();
 
     rezCard(
@@ -159,7 +159,7 @@ describe("rez card execution", () => {
         [upgradeId]: instance(upgradeId, upgradeDefinition.id, "serverRoot"),
       },
     });
-    const action = rezAction(upgradeId);
+    const action = rezAction(upgradeId, {}, "rez_card");
 
     rezCard(
       testHost(state, { [upgradeDefinition.id]: upgradeDefinition }, testCalls(), {
@@ -269,10 +269,11 @@ function minimalState(input: {
 function rezAction(
   cardId: CardInstanceId,
   payload: NonNullable<LegalAction["payload"]> = {},
+  type: "rez_ice" | "rez_card" = "rez_ice",
 ): LegalAction {
   return {
-    actionId: `corp.rez_ice.${cardId}`,
-    type: "rez_ice",
+    actionId: `corp.${type}.${cardId}`,
+    type,
     side: "corp",
     label: "Rez",
     source: cardId,

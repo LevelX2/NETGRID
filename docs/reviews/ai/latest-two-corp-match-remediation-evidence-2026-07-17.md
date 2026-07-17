@@ -178,6 +178,20 @@ exakten Überlappungen als rote Compiler-/Inspector-Verträge; P4 normalisiert
 nur tatsächlich deckungsgleiche Effektkerne und führt beide vollständigen
 Audits erneut aus.
 
+### Ergebnis nach P4
+
+- Beide vollständigen Deck-Audits melden nach der Normalisierung
+  `status = ok`, null Blocker und null Warnungen.
+- Die Primärstrategien beider Decks bleiben unverändert; die Korrektur
+  dedupliziert ausschließlich deckungsgleiche kompilierte Effektkerne.
+- Alle zwölf zuvor reproduzierten Overlap-Verträge und ihre legitimen
+  Mehrfachsemantik-Gegenproben sind grün.
+- Nicht-ICE-Karten erzeugen nun in LegalAction, AI-Input, PrivateEvent und
+  PublicEvent konsistent `rez_card`; echtes ICE behält `rez_ice`.
+- Historische Checkpoints, die City Surveillance oder Chester Mix rezzen,
+  wurden nur auf den neuen Aktionstyp migriert. Ihre Verhaltensaussage und
+  Auswahlpriorität bleiben unverändert.
+
 ## Checkpoint- und Fix-Scope
 
 | Finding | Historischer Anker | Bessere zulässige Richtung | Fix nur bei |

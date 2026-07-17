@@ -773,7 +773,11 @@ export function corpActiveScorelineOffPathPenaltyComponent<
   boardTriageState: ReturnType<typeof semanticRuntimeCorpBoardTriage>,
   actionSemanticCandidate: ActionSemanticCandidate | undefined,
 ): AiDecisionScoreComponent | undefined {
-  if (action.type !== "install_card" && action.type !== "rez_ice") {
+  if (
+    action.type !== "install_card" &&
+    action.type !== "rez_ice" &&
+    action.type !== "rez_card"
+  ) {
     return undefined;
   }
   const state = corpActiveRemoteScorelineState(input);

@@ -978,7 +978,11 @@ function actionMatchesFamily(
       return action.type === "rez_ice" || hasInstallIcePayload(action);
     case "corp_asset_economy":
     case "corp_economy_reserve":
-      return actionProvidesCredits(action) || action.type === "rez_ice";
+      return (
+        actionProvidesCredits(action) ||
+        action.type === "rez_ice" ||
+        action.type === "rez_card"
+      );
     case "corp_tag_trace_punish":
     case "corp_damage_kill":
     case "corp_ambush":

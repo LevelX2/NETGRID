@@ -269,7 +269,7 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
       rezzedRemoteState,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(rezzedRemoteState, action) ===
           "onr_v1_348_virus-test-site",
     );
@@ -1868,7 +1868,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(state, action) === "onr_v1_326_holovid-campaign",
     );
     expect(cardCounterAmount(state, holovidId, "bit")).toBe(12);
@@ -1921,7 +1921,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(state, action) === "onr_v1_311_braindance-campaign",
     );
 
@@ -2200,7 +2200,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" && action.payload?.cardId === remoteId,
+        action.type === "rez_card" && action.payload?.cardId === remoteId,
     );
 
     expect(state.cardInstances[remoteId]?.rezzed).toBe(true);
@@ -2966,7 +2966,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
         state,
         "corp",
         (action) =>
-          action.type === "rez_ice" &&
+          action.type === "rez_card" &&
           sourceDefinition(state, action) === "onr_v1_346_vacant-soulkiller",
       );
       state = apply(state, "runner", (action) => action.type === "continue_run");
@@ -3025,7 +3025,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(state, action) === "onr_v1_346_vacant-soulkiller",
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
@@ -4094,7 +4094,7 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         String(action.payload?.cardId) === chicagoId,
     );
     expect(
@@ -4140,7 +4140,7 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         String(action.payload?.cardId) === chicagoId,
     );
     state = apply(
@@ -4170,7 +4170,7 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" && String(action.payload?.cardId) === vaporId,
+        action.type === "rez_card" && String(action.payload?.cardId) === vaporId,
     );
     state = apply(
       state,
@@ -4237,7 +4237,7 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" && String(action.payload?.cardId) === vaporId,
+        action.type === "rez_card" && String(action.payload?.cardId) === vaporId,
     );
 
     const moveAction = mustAction(

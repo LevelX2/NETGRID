@@ -290,7 +290,7 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
     );
     if (scoreableAdvancePenalty) components.push(scoreableAdvancePenalty);
   }
-  if (action.type === "rez_ice") {
+  if (action.type === "rez_ice" || action.type === "rez_card") {
     const rezCost = semanticRuntimeCorpActionCreditCost(
       dependencies,
       action,

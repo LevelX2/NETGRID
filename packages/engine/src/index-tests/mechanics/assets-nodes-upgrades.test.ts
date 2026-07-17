@@ -256,7 +256,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(state, action) === "onr_v1_321_esa-contract",
     );
 
@@ -392,7 +392,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(state, action) === "onr_v1_326_holovid-campaign",
     );
     const creditsBeforeNextCorpTurn = state.corp.credits;
@@ -432,7 +432,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
         state,
         "corp",
         (action) =>
-          action.type === "rez_ice" &&
+          action.type === "rez_card" &&
           sourceDefinition(state, action) === definitionId,
       );
       expect(
@@ -479,7 +479,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(state, action) === "onr_v1_329_investment-firm",
     );
     expect(
@@ -727,7 +727,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(state, action) ===
           "onr_v1_344_spinn-public-relations",
     );
@@ -963,7 +963,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
         state,
         "corp",
         (action) =>
-          action.type === "rez_ice" &&
+          action.type === "rez_card" &&
           sourceDefinition(state, action) === definitionId,
       );
       state = apply(
@@ -1009,7 +1009,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(state, action) === "onr_v1_330_krumz",
     );
     expect(cardCounterAmount(state, krumzId, "bit")).toBe(1);
@@ -1026,7 +1026,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(state, action) === "onr_v1_310_blood-cat",
     );
     state.corp.credits = 0;
@@ -1161,7 +1161,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       reorderState,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(reorderState, action) === "onr_v1_336_rescheduler",
     );
     const hqAgendaId = moveCorpCardToHq(reorderState, "simple_agenda");
@@ -1216,7 +1216,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(state, action) === "onr_v1_342_solo-squad",
     );
     expect(
@@ -1300,7 +1300,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       cowboyState,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(cowboyState, action) === "onr_v1_316_cowboy-sysop",
     );
     const cowboyInitial = structuredClone(cowboyState);
@@ -1368,7 +1368,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       disinfectantState,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(disinfectantState, action) ===
           "onr_v1_319_disinfectant-inc",
     );
@@ -1420,7 +1420,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
         state,
         "corp",
         (action) =>
-          action.type === "rez_ice" &&
+          action.type === "rez_card" &&
           sourceDefinition(state, action) === definitionId,
       );
       state = apply(state, "runner", (action) => action.type === "continue_run");
@@ -1493,7 +1493,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(state, action) === "onr_v1_354_crybaby",
     );
 

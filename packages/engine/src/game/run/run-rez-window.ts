@@ -157,7 +157,7 @@ export function buildCorpRunRootRezActions(
         buildLegalAction(
           host.state,
           "corp",
-          "rez_ice",
+          "rez_card",
           `${definition.title} in ${server.label} rezzen`,
           cardId,
           costQuoteToLegalActionCosts(rezQuote),

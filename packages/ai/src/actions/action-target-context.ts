@@ -132,6 +132,7 @@ function targetContextCompletesPartialProjection(action: LegalAction): boolean {
     "trash_accessed_card",
     "trash_resource",
     "rez_ice",
+    "rez_card",
     "advance_card",
     "score_agenda",
   ]);
@@ -356,6 +357,14 @@ function cardPayloadTargetForAction(
       targetKind: "ice",
       targetSide: "corp",
       evidence: [`AI039 legal action payload ice target: ${cardId}`],
+    };
+  }
+  if (action.type === "rez_card") {
+    return {
+      targetId: cardId,
+      targetKind: "card",
+      targetSide: "corp",
+      evidence: [`AI039 legal action payload card target: ${cardId}`],
     };
   }
   return undefined;

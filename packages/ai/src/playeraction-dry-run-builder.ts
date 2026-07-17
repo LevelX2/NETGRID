@@ -241,5 +241,6 @@ const installedOwnCardActions = new Set([
   "advance_card",
   "rez_ice",
   "rez_card",
+  "rez_card",
   "score_agenda",
 ]);

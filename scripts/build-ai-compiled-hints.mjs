@@ -42,6 +42,16 @@ const OVERLAY_FIELDS = [
   "opponentSignals",
 ];
 const REVIEWED_EFFECT_NORMALIZATION_CARD_IDS = new Set([
+  "onr_v1_193_corporate-coup",
+  "onr_v1_203_hostile-takeover",
+  "onr_v1_206_marine-arcology",
+  "onr_v1_281_accounts-receivable",
+  "onr_v1_285_closed-accounts",
+  "onr_v1_290_efficiency-experts",
+  "onr_v1_295_night-shift",
+  "onr_v1_297_overtime-incentives",
+  "onr_v1_302_scorched-earth",
+  "onr_v1_366_red-herrings",
   "onr_v1_079_bodyweight-synthetic-blood",
   "onr_v1_081_custodial-position",
   "onr_v1_085_executive-wiretaps",

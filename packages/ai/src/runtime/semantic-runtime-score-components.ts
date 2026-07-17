@@ -132,6 +132,7 @@ export function semanticRuntimeTypePriority(type: LegalAction["type"]): number {
     case "jack_out":
       return 7400;
     case "rez_ice":
+    case "rez_card":
       return 7200;
     case "advance_card":
       return 7000;

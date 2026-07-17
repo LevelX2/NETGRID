@@ -307,7 +307,7 @@ describe("run rez window", () => {
     expect(actions.map((action) => action.type)).toEqual([
       "rez_ice",
       "decline_rez",
-      "rez_ice",
+      "rez_card",
     ]);
     expect(actions[0]?.payload).toMatchObject({
       cardId: "ice_1",
@@ -328,7 +328,7 @@ describe("run rez window", () => {
 
     const actions = buildCorpRunRootRezWindowActions(host);
     expect(actions.map((action) => action.type)).toEqual([
-      "rez_ice",
+      "rez_card",
       "decline_rez",
     ]);
     expect(actions[1]?.payload).toMatchObject({
@@ -379,7 +379,7 @@ describe("run rez window", () => {
     const actions = buildCorpRunRootRezWindowActions(host);
 
     expect(actions.map((action) => action.type)).toEqual([
-      "rez_ice",
+      "rez_card",
       "decline_rez",
     ]);
     expect(actions[0]).toMatchObject({
@@ -406,7 +406,7 @@ describe("run rez window", () => {
     });
     state.corp.credits = 4;
     const { host, calls } = hostFor(state);
-    const action = legalAction(state, "corp", "rez_ice", {
+    const action = legalAction(state, "corp", "rez_card", {
       cardId: "root_1",
       rootRez: true,
     });
@@ -431,7 +431,7 @@ describe("run rez window", () => {
   it("continues after root rez when no root effect or Speed Trap window handles it", () => {
     const state = makeState({ rootRezzed: true });
     const { host, calls } = hostFor(state);
-    const action = legalAction(state, "corp", "rez_ice", {
+    const action = legalAction(state, "corp", "rez_card", {
       cardId: "root_1",
       rootRez: true,
     });
@@ -457,7 +457,7 @@ describe("run rez window", () => {
       positionKind: "server",
     });
     const { host, calls } = hostFor(state);
-    const action = legalAction(state, "corp", "rez_ice", {
+    const action = legalAction(state, "corp", "rez_card", {
       cardId: "root_1",
       rootRez: true,
     });

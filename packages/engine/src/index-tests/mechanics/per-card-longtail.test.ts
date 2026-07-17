@@ -4038,7 +4038,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         action.payload?.rootRez === true &&
         action.payload?.cardId === upgradeId,
     );
@@ -4112,7 +4112,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         action.payload?.rootRez === true &&
         action.payload?.cardId === upgradeId,
     );

@@ -104,7 +104,7 @@ describe("game event builder", () => {
     expect(event.publicPayload).not.toHaveProperty("sourceTitle");
   });
 
-  it("publishes root assets as rez_card while preserving the private replay action", () => {
+  it("publishes root assets as rez_card in public and private replay actions", () => {
     const previous = createGame({
       seed: "arch-60-generic-card-rez-event",
       setupMode: "completed",
@@ -124,7 +124,7 @@ describe("game event builder", () => {
     const legalAction = {
       ...mandatoryDrawLegalAction(previous),
       actionId: `corp.rez.${assetId}`,
-      type: "rez_ice",
+      type: "rez_card",
       label: "Karte rezzen",
       source: assetId,
       payload: { cardId: assetId, rootRez: true },
@@ -149,7 +149,7 @@ describe("game event builder", () => {
     });
     expect(event.visibilityClass).toBe("hidden_info_barrier");
     expect(event.privatePayload?.corp?.legalAction).toMatchObject({
-      type: "rez_ice",
+      type: "rez_card",
       payload: { cardId: assetId, rootRez: true },
     });
   });

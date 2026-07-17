@@ -968,7 +968,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     expect(corpActions).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          type: "rez_ice",
+          type: "rez_card",
           costs: [{ credits: 2 }],
           payload: expect.objectContaining({
             cardId: programTrashByAdvancementAssetId,
@@ -1044,7 +1044,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(state, action) === "onr_v1_323_experimental-ai",
     );
 
@@ -1101,7 +1101,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(state, action) === "onr_v1_323_experimental-ai",
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
@@ -1976,7 +1976,7 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
       solo,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(solo, action) === "onr_v1_342_solo-squad",
     );
     const soloAction = mustAction(
@@ -2513,7 +2513,7 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(state, action) ===
           "onr_v1_350_antiquated-interface-routines",
     );
@@ -2646,7 +2646,7 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" && action.payload?.cardId === upgradeId,
+        action.type === "rez_card" && action.payload?.cardId === upgradeId,
     );
     expect(state.corp.credits).toBe(4);
     expect(
@@ -3287,7 +3287,7 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       access,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(access, action) ===
           "onr_v1_315_corprunners-shattered-remains",
     );

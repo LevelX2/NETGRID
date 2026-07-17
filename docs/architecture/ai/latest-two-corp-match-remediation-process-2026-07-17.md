@@ -1,6 +1,6 @@
 # Letzte zwei Corp-KI-Spiele: Remediation-Prozess vom 17.07.2026
 
-Status: aktiv; P3 abgeschlossen, P4 aktiv
+Status: aktiv; P4 abgeschlossen, P5 aktiv
 
 ## Quelle und Zielprüfung
 
@@ -229,5 +229,18 @@ Hauptworkspace nur für Runtime-Evidence und den finalen Merge.
   Root-Belegung an die bessere zentrale Alternative frei. Alle vier
   historischen Checkpoints und vier Gegenproben, 121 angrenzende
   Runtime-/Scoreline-/Plan-Tests sowie der direkte AI-Typecheck sind grün.
-- P4 aktiv: Der generische Rez-Aktionstyp und die zehn deckweiten
-  Hint-Normalisierungen werden umgesetzt.
+- P4 abgeschlossen: Nicht-ICE-Rezzes verwenden durchgängig `rez_card`,
+  während ICE-Rezzes `rez_ice` behalten. Engine, Replay, öffentliche
+  Projektion und AI-Semantik einschließlich Root-Timing, Tag-Payoff,
+  Triage und Economy-Plänen sind auf den getrennten Vertrag migriert. Die
+  zehn betroffenen Karten sind als geprüfte Effekt-Normalisierungen im
+  Compiler verankert; beide vollständigen Match-Deck-Audits melden
+  `status=ok`, null Blocker und null Warnungen bei unveränderten
+  Primärstrategien. 95 fokussierte Engine-Tests, die 13 zuvor betroffenen
+  Engine-Dateien mit 483 Tests, alle 2.624 AI-Tests sowie die direkten
+  Shared-, Engine- und AI-Typechecks sind grün. Die vollständige Engine-Suite
+  ist mit 1.731/1.732 Tests fachlich grün; ausschließlich der bereits auf
+  unverändertem `main` reproduzierte Modulgrößen-Baselinefehler
+  (`turn-runtime-resolvers.ts`: 3.280 > 3.200 Zeilen) bleibt rot.
+- P5 aktiv: Abschlussreview, Wissenspflege, defensiver Main-Abgleich,
+  kombinierte Schlussgates, lokaler Merge und Cleanup stehen aus.

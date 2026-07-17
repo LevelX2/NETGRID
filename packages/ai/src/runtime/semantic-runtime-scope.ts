@@ -36,7 +36,11 @@ export function semanticRuntimeScopeForAction(
   if (action.type === "score_agenda") return "simple_score_advance";
   if (action.type === "advance_card") return "simple_score_advance";
   if (action.type === "remove_tag") return "tag_removal";
-  if (action.type === "rez_ice" || action.type === "decline_rez") {
+  if (
+    action.type === "rez_ice" ||
+    action.type === "rez_card" ||
+    action.type === "decline_rez"
+  ) {
     return "simple_rez";
   }
   if (action.type === "start_run") {

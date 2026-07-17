@@ -316,7 +316,9 @@ export function timingProfileForAction(
       : {}),
     ...(timingPoint.startsWith("access.") ? { accessPhase: true } : {}),
     ...(scoreWindowForAction(action) ? { scoreWindow: true } : {}),
-    ...(action.type === "rez_ice" || action.type === "decline_rez"
+    ...(action.type === "rez_ice" ||
+    action.type === "rez_card" ||
+    action.type === "decline_rez"
       ? { rezWindow: true }
       : {}),
     ...(action.type === "trigger_ability" ||

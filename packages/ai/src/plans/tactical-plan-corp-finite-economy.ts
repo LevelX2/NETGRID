@@ -154,7 +154,9 @@ function installedFiniteEconomyPlan(
   const abilityActions = legalActions.filter(
     (action) => action.type === "activated_card_ability",
   );
-  const rezActions = legalActions.filter((action) => action.type === "rez_ice");
+  const rezActions = legalActions.filter(
+    (action) => action.type === "rez_ice" || action.type === "rez_card",
+  );
   const currentStep = card.rezzed
     ? drainStep(card.instanceId, abilityActions)
     : rezStep(card.instanceId, rezActions);

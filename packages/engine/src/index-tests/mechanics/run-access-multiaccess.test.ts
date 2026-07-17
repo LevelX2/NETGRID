@@ -708,7 +708,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     expect(getPlayerView(state, "runner").legalActions).toEqual([]);
     expect(
       getLegalActions(state, "corp").filter(
-        (action) => action.type === "rez_ice",
+        (action) => action.type === "rez_card",
       ),
     ).toHaveLength(2);
     expect(
@@ -730,7 +730,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         action.payload?.cardId === aardvarkId &&
         action.payload?.rootRez === true,
     );
@@ -741,7 +741,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     expect(
       getLegalActions(state, "corp").some(
         (action) =>
-          action.type === "rez_ice" &&
+          action.type === "rez_card" &&
           action.payload?.cardId === bizarreEncryptionId,
       ),
     ).toBe(true);

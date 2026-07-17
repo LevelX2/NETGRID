@@ -585,7 +585,7 @@ export function buildCorpMainActions(
           action(
             state,
             "corp",
-            "rez_ice",
+            "rez_card",
             `Karte in ${server.label} rezzen`,
             id,
             rezQuote.costs.map((cost: Record<string, unknown>) => ({ ...cost })),

@@ -99,6 +99,17 @@ const BASIC_ACTION_SEMANTICS: Record<
     confidence: "medium",
     projectionIssues: ["target_context_unavailable"],
   },
+  rez_card: {
+    semanticActionType: "corp_window.rez",
+    tacticSignals: [
+      "corp.card_activation",
+      "corp.protection",
+      "rez.reserve_spend",
+    ],
+    primaryProjectionStatus: "partial_projected",
+    confidence: "medium",
+    projectionIssues: ["target_context_unavailable"],
+  },
   decline_rez: {
     semanticActionType: "corp_window.decline_rez",
     primaryProjectionStatus: "projected",
@@ -335,6 +346,7 @@ function dynamicBasicActionSignals(action: LegalAction): string[] {
   }
   if (
     (action.type === "rez_ice" ||
+      action.type === "rez_card" ||
       action.type === "advance_card" ||
       action.type === "score_agenda") &&
     serverId !== undefined

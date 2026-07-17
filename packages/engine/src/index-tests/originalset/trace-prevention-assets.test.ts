@@ -1129,7 +1129,7 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
       assetState,
       "corp",
       (action) =>
-        action.type === "rez_ice" && String(action.payload?.cardId) === bbsId,
+        action.type === "rez_card" && String(action.payload?.cardId) === bbsId,
     );
     expect(assetState.cardInstances[bbsId]?.counters?.bit).toBe(16);
     const bbsAction = mustAction(
@@ -1396,7 +1396,7 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
         state,
         "corp",
         (action) =>
-          action.type === "rez_ice" &&
+          action.type === "rez_card" &&
           sourceDefinition(state, action) === definitionId,
       );
       expect(cardCounterAmount(state, campaignId, "bit")).toBe(12);
@@ -1551,7 +1551,7 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
       spinn,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
+        action.type === "rez_card" &&
         sourceDefinition(spinn, action) === "onr_v1_344_spinn-public-relations",
     );
     const zeroCreditsBefore = spinn.corp.credits;

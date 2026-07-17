@@ -134,7 +134,7 @@ export function createCorpTaggedPayoffWindowContext(
         input.playerView.opponent.tags >= 7 || availableDamagePayoff
           ? "corp_tag_punish_endgame_slow_setup_penalty"
           : key;
-    } else if (action.type === "rez_ice") {
+    } else if (action.type === "rez_ice" || action.type === "rez_card") {
       passiveKind = "rez_setup";
       value = tagSourceAvailable ? -1800 : -650;
       key = tagSourceAvailable

@@ -311,6 +311,7 @@ export function performAction(
       host.run.handleRunMovementAction(legalAction);
       return;
     case "rez_ice":
+    case "rez_card":
     case "decline_rez":
       host.rez.handleRezActionExecution(legalAction);
       return;
