@@ -177,6 +177,7 @@ type CardSignals = {
   candidateSignals: string[];
   effectTargets: string[];
   requiresSameTurnAccess: boolean;
+  requiresHostedIcebreaker: boolean;
 };
 
 type CardContext = {
@@ -190,6 +191,7 @@ type CardContext = {
   memoryAvailable?: number;
   duplicateInstalled: boolean;
   sameTurnAccessFollowupAvailable?: boolean;
+  hostableIcebreakerAvailable?: boolean;
 };
 
 type PersistentFunctionalProfile = {
@@ -424,6 +426,9 @@ function buildCardContext(
     ? legalAction !== undefined &&
       sameTurnAccessFollowupAvailableAfter(params.input, legalAction)
     : undefined;
+  const hostableIcebreakerAvailable = signals.requiresHostedIcebreaker
+    ? hostableIcebreakerAvailableAfterInstall(params.input, card, legalAction)
+    : undefined;
 
   return {
     card,
@@ -437,6 +442,9 @@ function buildCardContext(
     duplicateInstalled,
     ...(sameTurnAccessFollowupAvailable !== undefined
       ? { sameTurnAccessFollowupAvailable }
+      : {}),
+    ...(hostableIcebreakerAvailable !== undefined
+      ? { hostableIcebreakerAvailable }
       : {}),
   };
 }
@@ -497,6 +505,18 @@ function signalsForCard(
       (rulesText) =>
         typeof rulesText === "string" && /\bthis turn\b/i.test(rulesText),
     );
+  const requiresHostedIcebreaker =
+    (hint?.effects ?? []).some((effect) => {
+      const record = effect as unknown as Record<string, unknown>;
+      return record.kind === "program_host" && record.target === "icebreaker";
+    }) ||
+    (hint?.targetProfiles ?? []).some((profile) => {
+      const record = profile as unknown as Record<string, unknown>;
+      return (
+        record.kind === "hosted_install_target" &&
+        record.targetType === "icebreaker"
+      );
+    });
   return {
     text,
     roles,
@@ -504,6 +524,7 @@ function signalsForCard(
     candidateSignals,
     effectTargets,
     requiresSameTurnAccess,
+    requiresHostedIcebreaker,
   };
 }
 
@@ -514,9 +535,7 @@ function liquidityTimingForCard(
   if (role !== "economy_engine" && role !== "bank_tool") return "none";
   const immediateCreditGain = Math.max(
     0,
-    finiteRunnerHandNumber(
-      context.legalAction?.payload?.gainCreditsAmount,
-    ),
+    finiteRunnerHandNumber(context.legalAction?.payload?.gainCreditsAmount),
     finiteRunnerHandNumber(context.legalAction?.payload?.gainedCredits),
   );
   if (
@@ -605,6 +624,13 @@ function currentNeedForCard(
   if (
     role === "draw_or_search_engine" &&
     recoveryOnlySearchHasNoVisibleTarget(params.input, context)
+  ) {
+    return "later";
+  }
+  if (
+    role === "economy_engine" &&
+    context.signals.requiresHostedIcebreaker &&
+    context.hostableIcebreakerAvailable !== true
   ) {
     return "later";
   }
@@ -1014,6 +1040,12 @@ function redactedEvidenceForCard(params: {
           `same_turn_access_followup_available:${params.context.sameTurnAccessFollowupAvailable === true}`,
         ]
       : []),
+    ...(params.context.signals.requiresHostedIcebreaker
+      ? [
+          "hosted_icebreaker_required:true",
+          `hostable_icebreaker_available:${params.context.hostableIcebreakerAvailable === true}`,
+        ]
+      : []),
     ...(params.context.memoryAvailable !== undefined
       ? [`memory_available:${params.context.memoryAvailable}`]
       : []),
@@ -1045,6 +1077,35 @@ function redactedEvidenceForCard(params: {
         ]
       : []),
   ];
+}
+
+function hostableIcebreakerAvailableAfterInstall(
+  input: AiDecisionInput,
+  hostCard: VisibleCard,
+  hostInstallAction: LegalAction | undefined,
+): boolean {
+  if (!hostInstallAction) return false;
+  const remainingClicks =
+    input.playerView.own.clicks - actionClickCost(hostInstallAction);
+  if (remainingClicks < 1) return false;
+  const remainingCredits =
+    input.playerView.own.credits - (actionCreditCost(hostInstallAction) ?? 0);
+  if (remainingCredits < 0) return false;
+  return input.playerView.own.gripOrHq.some((candidate) => {
+    if (
+      candidate.instanceId === hostCard.instanceId ||
+      candidate.known === false
+    ) {
+      return false;
+    }
+    const candidateText = signalsForCard(candidate, []).text;
+    if (!looksLikeBreaker(candidate, candidateText)) return false;
+    const installCost =
+      visibleOrRuntimeNumber(candidate, "installCost") ??
+      visibleOrRuntimeNumber(candidate, "cost") ??
+      0;
+    return installCost <= remainingCredits;
+  });
 }
 
 function sameTurnAccessFollowupAvailableAfter(

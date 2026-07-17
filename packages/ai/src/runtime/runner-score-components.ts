@@ -55,6 +55,8 @@ import {
 import { runnerDrawTaxLiabilityScoreComponent } from "./runner-draw-tax-liability-score";
 import { runnerTerminalRemoteToolScoreComponent } from "./runner-terminal-remote-tool-score";
 import { runnerRunLockReleaseScoreComponent } from "./runner-run-lock-release-score";
+import { runnerDrawOverflowScoreComponent } from "./runner-draw-overflow-score";
+import { runnerHostedInstallScoreComponent } from "./runner-hosted-install-score";
 
 export type RunnerScoreComponentsDependencies = {
   loanLiabilityAssessment: (
@@ -148,6 +150,8 @@ export function runnerScoreComponents(
   if (tagCleanupFallback) components.push(tagCleanupFallback);
   const drawTaxLiability = runnerDrawTaxLiabilityScoreComponent(input, action);
   if (drawTaxLiability) components.push(drawTaxLiability);
+  const drawOverflow = runnerDrawOverflowScoreComponent(input, action);
+  if (drawOverflow) components.push(drawOverflow);
   const creditYield = runnerCreditYieldScoreComponent(
     input,
     action,
@@ -167,6 +171,8 @@ export function runnerScoreComponents(
       dependencies.recoveryCommitment,
     ),
   );
+  const hostedInstall = runnerHostedInstallScoreComponent(input, action);
+  if (hostedInstall) components.push(hostedInstall);
   components.push(
     ...runnerInstallScoreComponents(
       input,

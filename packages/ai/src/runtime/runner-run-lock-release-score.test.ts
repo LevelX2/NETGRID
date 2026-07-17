@@ -54,13 +54,31 @@ describe("runnerRunLockReleaseScoreComponent", () => {
     ).toBeUndefined();
   });
 
-  it("does not create terminal urgency below Corp matchpoint", () => {
+  it("does not release for a thin speculative path below Corp matchpoint", () => {
     const current = input();
     current.playerView.opponent.agendaPoints = 4;
 
     expect(
       runnerRunLockReleaseScoreComponent(current, releaseAction()),
     ).toBeUndefined();
+  });
+
+  it("releases below matchpoint for a well-funded credible follow-up", () => {
+    const current = input();
+    current.playerView.opponent.agendaPoints = 4;
+    current.playerView.own.credits = 12;
+
+    const component = runnerRunLockReleaseScoreComponent(
+      current,
+      releaseAction(),
+    );
+
+    expect(component).toMatchObject({
+      key: "runner_viable_followup_run_lock_release",
+      value: 1800,
+    });
+    expect(component?.reason).toContain("release_context:viable_followup");
+    expect(component?.reason).toContain("reserve_after_probe:9");
   });
 
   it("releases for a reachable public two-point terminal remote", () => {
@@ -125,7 +143,18 @@ function input(): AiDecisionInput {
     side: "runner",
     playerView: {
       agendaPointsToWin: 7,
-      own: { credits: 4, clicks: 4 },
+      own: {
+        credits: 4,
+        clicks: 4,
+        gripOrHq: [],
+        rig: [
+          {
+            instanceId: "test-breaker",
+            known: true,
+            subtypes: ["icebreaker"],
+          },
+        ],
+      },
       opponent: { agendaPoints: 6, handCount: 5, deckCount: 20 },
       servers: [
         {

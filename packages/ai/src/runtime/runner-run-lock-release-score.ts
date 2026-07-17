@@ -11,6 +11,7 @@ import {
   runnerTerminalContestThreat,
   type RunnerTerminalContestThreat,
 } from "./runner-terminal-contest-threat";
+import { CARD_ROLES_BY_CARD } from "../ai-hints";
 
 type FollowUp = {
   serverId: string;
@@ -25,8 +26,7 @@ export function runnerRunLockReleaseScoreComponent(
   if (
     input.side !== "runner" ||
     action.side !== "runner" ||
-    !isRunLockReleaseAction(action) ||
-    !terminalThreat
+    !isRunLockReleaseAction(action)
   ) {
     return undefined;
   }
@@ -42,6 +42,12 @@ export function runnerRunLockReleaseScoreComponent(
   const clicksAfterRelease = input.playerView.own.clicks - clickCost;
   const creditsAfterRelease = input.playerView.own.credits - creditCost;
   if (clicksAfterRelease < 1 || creditsAfterRelease < 0) return undefined;
+  if (
+    !terminalThreat &&
+    (clicksAfterRelease < 2 || !installedBreakerAvailable(input))
+  ) {
+    return undefined;
+  }
 
   const followUp = plausibleFollowUpRun(
     input,
@@ -49,11 +55,26 @@ export function runnerRunLockReleaseScoreComponent(
     terminalThreat,
   );
   if (!followUp) return undefined;
+  const reserveAfterProbe =
+    creditsAfterRelease - followUp.estimatedProbeCredits;
+  if (!terminalThreat && reserveAfterProbe < 4) return undefined;
+  if (
+    !terminalThreat &&
+    input.playerView.own.gripOrHq.length <
+      (input.playerView.own.maxHandSize ?? 5) &&
+    legalHostedInstallAvailable(input)
+  ) {
+    return undefined;
+  }
 
   return {
-    key: "runner_matchpoint_run_lock_release",
-    label: "Run-Sperre für terminalen Contest lösen",
-    value: 4_100,
+    key: terminalThreat
+      ? "runner_matchpoint_run_lock_release"
+      : "runner_viable_followup_run_lock_release",
+    label: terminalThreat
+      ? "Run-Sperre für terminalen Contest lösen"
+      : "Run-Sperre für glaubwürdigen Folgepfad lösen",
+    value: terminalThreat ? 4_100 : 1_800,
     reason: [
       `corp_agenda_points:${input.playerView.opponent.agendaPoints}`,
       `agenda_points_to_win:${input.playerView.agendaPointsToWin}`,
@@ -61,9 +82,38 @@ export function runnerRunLockReleaseScoreComponent(
       `credits_after_release:${creditsAfterRelease}`,
       `follow_up_server:${followUp.serverId}`,
       `estimated_probe_credits:${followUp.estimatedProbeCredits}`,
-      ...terminalThreat.evidence,
+      `reserve_after_probe:${reserveAfterProbe}`,
+      `release_context:${terminalThreat ? "terminal_contest" : "viable_followup"}`,
+      ...(terminalThreat?.evidence ?? []),
     ].join("|"),
   };
+}
+
+function installedBreakerAvailable(input: AiDecisionInput): boolean {
+  return (input.playerView.own.rig ?? []).some((card) => {
+    const roles = card.definitionId
+      ? (CARD_ROLES_BY_CARD.get(card.definitionId)?.roles ?? [])
+      : [];
+    return (
+      (card.subtypes ?? []).some((subtype) =>
+        subtype.toLowerCase().includes("icebreaker"),
+      ) ||
+      roles.some((role) => role === "icebreaker" || role.includes("breaker"))
+    );
+  });
+}
+
+function legalHostedInstallAvailable(input: AiDecisionInput): boolean {
+  const installedIds = new Set(
+    (input.playerView.own.rig ?? []).map((card) => card.instanceId),
+  );
+  if (installedIds.size === 0) return false;
+  return (input.legalActions ?? []).some(
+    (action) =>
+      action.side === "runner" &&
+      action.type === "install_card" &&
+      action.actionId.split(".").some((segment) => installedIds.has(segment)),
+  );
 }
 
 function isRunLockReleaseAction(action: LegalAction): boolean {
@@ -77,11 +127,11 @@ function isRunLockReleaseAction(action: LegalAction): boolean {
 function plausibleFollowUpRun(
   input: AiDecisionInput,
   creditsAfterRelease: number,
-  terminalThreat: RunnerTerminalContestThreat,
+  terminalThreat: RunnerTerminalContestThreat | undefined,
 ): FollowUp | undefined {
   const candidates = input.playerView.servers
     .filter((server) =>
-      terminalThreat.kind === "visible_two_point_remote"
+      terminalThreat?.kind === "visible_two_point_remote"
         ? terminalThreat.remoteServerIds.includes(server.id)
         : serverHasContestPayoff(input, server.id),
     )

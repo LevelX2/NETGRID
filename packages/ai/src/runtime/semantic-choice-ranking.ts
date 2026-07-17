@@ -386,6 +386,10 @@ export function tacticalPlanMappedChoice(
         overrideChoice,
         "runner_matchpoint_run_lock_release",
       ) ||
+        semanticRuntimeChoiceHasScoreBreakdownComponent(
+          overrideChoice,
+          "runner_viable_followup_run_lock_release",
+        ) ||
         runnerUrgentRemoteContestRunCanInterruptPlan(
           mapping.plan,
           overrideChoice,
@@ -946,13 +950,16 @@ function tacticalPlanMarginalDevelopmentInstallShouldYield(
   const basicCapacityOverride =
     overrideChoice.action.type === "draw_card" ||
     overrideChoice.action.type === "gain_credit";
+  const immediateHandPlayOverride = overrideChoice.action.type === "play_event";
   if (
     (mapping.plan.type !== "runner.develop_hand_card" &&
       mapping.plan.type !== "runner.play_best_hand_card") ||
     mapping.step.kind !== "install_development_card" ||
     mappedChoice.action.type !== "install_card" ||
-    mappedChoice.score > 100 ||
-    (!bankInvestmentOverride && !basicCapacityOverride) ||
+    mappedChoice.score > 700 ||
+    (!bankInvestmentOverride &&
+      !basicCapacityOverride &&
+      !immediateHandPlayOverride) ||
     overrideChoice.score <= 0 ||
     scoreGap <= PLAN_MAPPED_CHOICE_MAX_SCORE_GAP
   ) {
@@ -963,6 +970,7 @@ function tacticalPlanMarginalDevelopmentInstallShouldYield(
       component.key === "runner_persistent_install_fit" &&
       component.value <= 100 &&
       (bankInvestmentOverride ||
+        immediateHandPlayOverride ||
         (component.reason ?? "").includes("delta:cumulative_capacity")),
   );
 }
@@ -1030,6 +1038,14 @@ function runnerPlanOverrideIsHardInterrupt(
     semanticRuntimeChoiceHasScoreBreakdownComponent(
       overrideChoice,
       "runner_matchpoint_run_lock_release",
+    )
+  ) {
+    return true;
+  }
+  if (
+    semanticRuntimeChoiceHasScoreBreakdownComponent(
+      overrideChoice,
+      "runner_viable_followup_run_lock_release",
     )
   ) {
     return true;
