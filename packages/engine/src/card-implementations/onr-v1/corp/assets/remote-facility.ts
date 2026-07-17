@@ -5,6 +5,14 @@ import type { CardImplementationDefinition } from "../../../types";
 export const remoteFacilityImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_335_remote-facility",
   lifecycle: {
+    on_rez: [
+      {
+        kind: "gain_actions",
+        recipient: "controller",
+        amount: 1,
+        visibility: "public",
+      },
+    ],
     start_of_corp_turn: [
       {
         effects: [
