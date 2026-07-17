@@ -191,10 +191,13 @@ Erfolgsfensterlogik.
 - fokussierte Regressionsgruppe für 9FEF, FD7671 und DFE6: grün
 - KI-Shard 1: 123 Dateien, 787 Tests, grün
 - KI-Shard 2: 123 Dateien, 972 Tests, grün
-- KI-Shard 3: 122 Dateien, 785 Tests, grün
+- KI-Shard 3: 122 Dateien, 786 Tests, grün
 - `@netgrid/ai` Typecheck: grün
 - `check:ai:full`, einschließlich Source-Structure und Derived Facts: grün
 - `git diff --check`: grün
+
+Die drei Shards, Typecheck und AI-Full-Gates wurden nach der konfliktfreien
+Integration des aktuellen `main` in diesen Arbeitsbranch erneut ausgeführt.
 
 Damit sind sowohl der gravierende teure Run gegen den öffentlich eindeutig
 als Upgrade erkennbaren Remote-Inhalt als auch die unnötige ICE-
