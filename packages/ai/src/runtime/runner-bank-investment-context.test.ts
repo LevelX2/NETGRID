@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type {
   AiDecisionInput,
   LegalAction,
+  PublicGameEvent,
   VisibleCard,
 } from "@netgrid/shared";
 import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
@@ -661,6 +662,138 @@ describe("createRunnerBankInvestmentContext", () => {
     expect(secondLoad).toBeLessThan(820);
   });
 
+  it("makes a repeated background load yield to a meaningful draw without forbidding it", () => {
+    const context = createContext({
+      previousPlan: () => ({
+        type: "runner.build_credit_bank",
+        portfolioRole: "background",
+        portfolioLifecycle: "active",
+        actionsUsedThisTurn: 0,
+        turnKey: "runner:turn:1",
+      }),
+      sourceDefinitionIdForAction: (input, action) =>
+        input.playerView.own.rig?.find(
+          (card) => card.instanceId === action.source,
+        )?.definitionId,
+      hintEffectsForDefinition: (definitionId) =>
+        definitionId === "custom-runner-credit-bank"
+          ? [{ kind: "economy", target: "economy.temporary_resource_bank" }]
+          : [],
+    });
+    const bank = visibleRunnerCard("custom-runner-credit-bank", {
+      counters: { power: 4 },
+    });
+    const buildAction = runnerAction("activated_card_ability", {
+      actionId: "repeat-bank-build",
+      source: bank.instanceId,
+      cardImplementationAddsHostedCredits: true,
+    });
+    const drawAction = runnerAction("draw_card");
+    const events = [
+      publicEvent("corp-end", 1, "corp", "end_turn"),
+      publicEvent("first-bank-load", 2, "runner", "activated_card_ability", {
+        sourceDefinitionId: bank.definitionId,
+        addedCounterAmount: 3,
+      }),
+    ];
+    const inputWithUsefulDraw = runnerInput({
+      credits: 9,
+      clicks: 3,
+      rig: [bank],
+      hand: [
+        visibleRunnerCard("hand-a"),
+        visibleRunnerCard("hand-b"),
+        visibleRunnerCard("hand-c"),
+      ],
+      publicEvents: events,
+      legalActions: [buildAction, drawAction],
+    });
+
+    expect(
+      context.runnerBankInvestmentCommitmentEvidence(
+        inputWithUsefulDraw,
+        buildAction,
+      ),
+    ).toEqual(
+      expect.arrayContaining([
+        "bankPortfolioActionsThisTurn:1",
+        "bankBackgroundCadenceReached:true",
+        "bankMeaningfulAlternativeAvailable:true",
+      ]),
+    );
+    expect(
+      context.runnerBankInvestmentCommitmentScoreComponents(
+        inputWithUsefulDraw,
+        buildAction,
+      )[0]?.value,
+    ).toBe(850);
+
+    const fullHand = Array.from({ length: 5 }, (_, index) =>
+      visibleRunnerCard(`full-hand-${index}`),
+    );
+    const inputWithoutUsefulAlternative = runnerInput({
+      credits: 9,
+      clicks: 3,
+      rig: [bank],
+      hand: fullHand,
+      publicEvents: events,
+      legalActions: [buildAction, drawAction],
+    });
+
+    expect(
+      context.runnerBankInvestmentCommitmentEvidence(
+        inputWithoutUsefulAlternative,
+        buildAction,
+      ),
+    ).toContain("bankMeaningfulAlternativeAvailable:false");
+    expect(
+      context.runnerBankInvestmentCommitmentScoreComponents(
+        inputWithoutUsefulAlternative,
+        buildAction,
+      )[0]?.value,
+    ).toBe(1550);
+  });
+
+  it("holds delayed bank investment at opposing matchpoint without a funding need", () => {
+    const context = createContext({
+      hintEffectsForDefinition: (definitionId) =>
+        definitionId === "custom-runner-credit-bank"
+          ? [{ kind: "economy", target: "economy.temporary_resource_bank" }]
+          : [],
+    });
+    const bank = visibleRunnerCard("custom-runner-credit-bank", {
+      counters: { power: 1 },
+    });
+    const buildAction = runnerAction("activated_card_ability", {
+      actionId: "late-bank-build",
+      source: bank.instanceId,
+      cardImplementationAddsHostedCredits: true,
+    });
+    const input = runnerInput({
+      credits: 6,
+      clicks: 3,
+      opponentAgendaPoints: 6,
+      rig: [bank],
+      legalActions: [buildAction, runnerAction("gain_credit")],
+    });
+
+    expect(
+      context.runnerBankInvestmentCommitmentEvidence(input, buildAction),
+    ).toEqual(
+      expect.arrayContaining([
+        "bankShortHorizon:true",
+        "bankConcreteFundingNeed:false",
+        "bankCommitmentStatus:short_horizon_hold",
+      ]),
+    );
+    expect(
+      context.runnerBankInvestmentCommitmentScoreComponents(
+        input,
+        buildAction,
+      )[0]?.value,
+    ).toBe(-2200);
+  });
+
   it("defers installing another bank outside the build phase", () => {
     const context = createContext({
       previousPlan: () => undefined,
@@ -827,6 +960,9 @@ function runnerInput(input: {
   clicks?: number;
   hand?: VisibleCard[];
   hqRoot?: VisibleCard[];
+  publicEvents?: PublicGameEvent[];
+  maxHandSize?: number;
+  opponentAgendaPoints?: number;
 }): AiDecisionInput {
   return {
     side: "runner",
@@ -846,14 +982,14 @@ function runnerInput(input: {
         heapOrArchives: [],
         scoreArea: [],
         rig: input.rig,
-        maxHandSize: 5,
+        maxHandSize: input.maxHandSize ?? 5,
         tags: 0,
       },
       opponent: {
         identity: visibleRunnerCard("corp-identity"),
         credits: 5,
         clicks: 3,
-        agendaPoints: 0,
+        agendaPoints: input.opponentAgendaPoints ?? 0,
         tags: 0,
         handCount: 5,
         maxHandSize: 5,
@@ -869,7 +1005,7 @@ function runnerInput(input: {
           root: input.hqRoot ?? [],
         },
       ],
-      publicEvents: [],
+      publicEvents: input.publicEvents ?? [],
       legalActions: input.legalActions,
       winner: null,
       agendaPointsToWin: 7,
@@ -882,6 +1018,24 @@ function runnerInput(input: {
     actionNumber: 1,
     profileId: "runner-bank-investment-context-test",
   } as AiDecisionInput;
+}
+
+function publicEvent(
+  eventId: string,
+  stateVersionAfter: number,
+  actor: "corp" | "runner",
+  actionType: string,
+  payload: Record<string, unknown> = {},
+): PublicGameEvent {
+  return {
+    eventId,
+    type: actionType,
+    stateVersionBefore: stateVersionAfter - 1,
+    stateVersionAfter,
+    stateHashAfter: `fnv1a:${eventId}`,
+    visibilityClass: "public",
+    publicPayload: { actor, actionType, ...payload },
+  } as PublicGameEvent;
 }
 
 function visibleRunnerCard(
