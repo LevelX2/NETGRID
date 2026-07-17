@@ -77,6 +77,7 @@ export function buildPlayerViewProjection(
 
   const run = state.run
     ? {
+        runId: state.run.runId,
         attackedServerId: state.run.attackedServerId,
         phase: state.run.phase,
         position: { ...state.run.position },

@@ -77,6 +77,24 @@ describe("run window layering", () => {
     );
   });
 
+  it("offers a visible Corp-only per-Run auto-pass control", () => {
+    expect(runTimelineOverlaySource).toContain(
+      'data-testid="corp-run-auto-pass-control"',
+    );
+    expect(runTimelineOverlaySource).toContain(
+      "Restlichen Run automatisch passen",
+    );
+    expect(runTimelineOverlaySource).toContain(
+      "Auto-Pass für diesen Run aktiv",
+    );
+    expect(runTimelineOverlaySource).toContain('view.side === "corp"');
+    expect(pageSource).toContain("automaticCorpRunPassAction(");
+    expect(pageSource).toContain("corpRunAutoPassSubmittedKeyRef");
+    expect(selectorBlock(".runAutoPassControl.active")).toContain(
+      "grid-template-columns: minmax(0, 1fr) auto",
+    );
+  });
+
   it("keeps the run overlay above normal board surfaces and below card detail overlays", () => {
     expect(selectorBlock(".runTimelineOverlay")).toContain(
       "z-index: var(--z-run-overlay)",

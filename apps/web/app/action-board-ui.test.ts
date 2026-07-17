@@ -27,6 +27,7 @@ import {
   armoredFridgeAblativeCounterBadge,
   actionsInteractionAmbience,
   automaticCorpMandatoryDrawAction,
+  automaticCorpRunPassAction,
   automaticEndTurnAction,
   breachHighlighterAccessHint,
   breachProgressLabel,
@@ -50,6 +51,7 @@ import {
   fieldCardChoiceOptionForCard,
   fieldCardChoiceOptionsForCard,
   installedCorpExposeReviewCardId,
+  isAutomaticCorpRunPassAction,
   isInstalledCorpExposeReviewChoice,
   isSingleInstalledCorpExposeChoice,
   showInstalledCorpState,
@@ -406,6 +408,94 @@ describe("V1.0.5 action board UI helpers", () => {
       automaticCorpMandatoryDrawAction(
         { ...board, pendingChoice: choice("corp") },
         [mandatoryDraw],
+        "corp",
+      ),
+    ).toBeUndefined();
+  });
+
+  it("auto-passes only the single explicit cost-free Corp decline action in the current Run", () => {
+    const running = view("corp", {
+      phase: "run",
+      timingPoint: "run.approach_ice",
+      run: {
+        runId: "run_7",
+        attackedServerId: "rd",
+        phase: "approach_ice",
+        position: { kind: "ice", serverId: "rd", iceIndex: 0 },
+        successful: false,
+      },
+    });
+    const decline = legalAction(
+      "corp",
+      "decline_rez",
+      "game_rule",
+      "Nicht rezzen",
+      undefined,
+      "run.approach_ice",
+    );
+    const rez = legalAction(
+      "corp",
+      "rez_ice",
+      "ice_1",
+      "ICE rezzen",
+      { cardId: "ice_1" },
+      "run.approach_ice",
+    );
+
+    expect(isAutomaticCorpRunPassAction(decline)).toBe(true);
+    expect(automaticCorpRunPassAction(running, [rez, decline], "corp")).toBe(
+      decline,
+    );
+    expect(
+      automaticCorpRunPassAction(
+        { ...running, pendingChoice: choice("corp") },
+        [decline],
+        "corp",
+      ),
+    ).toBeUndefined();
+    expect(
+      automaticCorpRunPassAction(running, [decline], "runner"),
+    ).toBeUndefined();
+    expect(
+      automaticCorpRunPassAction(view("corp"), [decline], "corp"),
+    ).toBeUndefined();
+  });
+
+  it("does not treat choices, paid actions or ambiguous pass actions as automatic Run passes", () => {
+    const running = view("corp", {
+      phase: "run",
+      run: {
+        runId: "run_8",
+        attackedServerId: "hq",
+        phase: "movement",
+        position: { kind: "server", serverId: "hq" },
+        successful: false,
+      },
+    });
+    const decline = legalAction(
+      "corp",
+      "decline_rez",
+      "game_rule",
+      "Nichts rezzen / Weiter",
+      undefined,
+      "run.jack_out_window",
+    );
+    const paidDecline = { ...decline, costs: [{ credits: 1 }] };
+    const choicePass = legalAction(
+      "corp",
+      "resolve_choice",
+      "game_rule",
+      "Nicht nutzen",
+      undefined,
+      "run.encounter_ice",
+    );
+
+    expect(isAutomaticCorpRunPassAction(paidDecline)).toBe(false);
+    expect(isAutomaticCorpRunPassAction(choicePass)).toBe(false);
+    expect(
+      automaticCorpRunPassAction(
+        running,
+        [decline, { ...decline, actionId: "second" }],
         "corp",
       ),
     ).toBeUndefined();

@@ -107,6 +107,7 @@ import {
   activeRunIceInstanceId,
   approachIceExposeViewingIceId,
   automaticCorpMandatoryDrawAction,
+  automaticCorpRunPassAction,
   automaticEndTurnAction,
   baseActionSlotCapacity,
   installedCorpExposeReviewCardId,
@@ -704,6 +705,9 @@ export default function Page() {
   const [autoCorpMandatoryDrawEnabled, setAutoCorpMandatoryDrawEnabled] =
     useState(false);
   const [autoDiscardEnabled, setAutoDiscardEnabled] = useState(false);
+  const [corpRunAutoPassKey, setCorpRunAutoPassKey] = useState<string | null>(
+    null,
+  );
   const [priorityWindowHoldEnabled, setPriorityWindowHoldEnabled] =
     useState(false);
   const [topbarStickyEnabled, setTopbarStickyEnabled] = useState(true);
@@ -805,6 +809,7 @@ export default function Page() {
   const autoEndTurnSubmittedKeyRef = useRef<string | null>(null);
   const autoCorpMandatoryDrawSubmittedKeyRef = useRef<string | null>(null);
   const autoDiscardSubmittedKeyRef = useRef<string | null>(null);
+  const corpRunAutoPassSubmittedKeyRef = useRef<string | null>(null);
   const pendingAiAdvanceKeyRef = useRef<string | null>(null);
   const aiDecisionDebugEnabledMatchRef = useRef<string | null>(null);
   const aiDecisionDebugTraceIdRef = useRef<string | null>(null);
@@ -3904,6 +3909,50 @@ export default function Page() {
     return true;
   };
 
+  const currentCorpRunAutoPassKey =
+    session && payload?.playerView.run?.runId
+      ? `${session.matchId}:${payload.playerView.run.runId}`
+      : null;
+
+  useEffect(() => {
+    if (
+      corpRunAutoPassKey &&
+      corpRunAutoPassKey !== currentCorpRunAutoPassKey
+    ) {
+      setCorpRunAutoPassKey(null);
+      corpRunAutoPassSubmittedKeyRef.current = null;
+    }
+  }, [corpRunAutoPassKey, currentCorpRunAutoPassKey]);
+
+  useEffect(() => {
+    if (
+      !session ||
+      !payload ||
+      session.side !== "corp" ||
+      connection !== "online" ||
+      !currentCorpRunAutoPassKey ||
+      corpRunAutoPassKey !== currentCorpRunAutoPassKey
+    )
+      return;
+    const action = automaticCorpRunPassAction(
+      payload.playerView,
+      payload.legalActions,
+      session.side,
+    );
+    if (!action) return;
+    const key = `${currentCorpRunAutoPassKey}:${payload.playerView.stateVersion}:${action.actionId}`;
+    if (corpRunAutoPassSubmittedKeyRef.current === key) return;
+    if (submitAction(action, { immediateAudio: false }))
+      corpRunAutoPassSubmittedKeyRef.current = key;
+  }, [
+    session,
+    payload,
+    connection,
+    currentCorpRunAutoPassKey,
+    corpRunAutoPassKey,
+    submitAction,
+  ]);
+
   useEffect(() => {
     if (
       !autoCorpMandatoryDrawEnabled ||
@@ -5540,8 +5589,18 @@ export default function Page() {
                   Boolean(payload.winner) || connection !== "online"
                 }
                 highlighted={activeCueHighlight?.kind === "run"}
+                corpRunAutoPassActive={
+                  Boolean(currentCorpRunAutoPassKey) &&
+                  corpRunAutoPassKey === currentCorpRunAutoPassKey
+                }
                 onAction={submitAction}
                 onChoiceOption={submitChoiceOption}
+                onCorpRunAutoPassEnabled={(enabled) => {
+                  setCorpRunAutoPassKey(
+                    enabled ? currentCorpRunAutoPassKey : null,
+                  );
+                  corpRunAutoPassSubmittedKeyRef.current = null;
+                }}
               />
             ) : null}
             {showFloatingActionPanel && activeView ? (
