@@ -137,6 +137,32 @@ describe("formatChronicleEvent", () => {
     expect(item.icon).toBe("discard");
   });
 
+  it("names Ice and Data Special Report exposed cards and their data fort in the chronicle", () => {
+    const item = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "expose_installed_cards_single_fort",
+        publicRevealKind: "expose",
+        sourceDefinitionId: "onr_proteus_111_ice-and-data-special-report",
+        revealedCount: 2,
+        publicRevealDefinitionIds: "simple_barrier_ice,simple_economy_asset",
+        exposedServerLabels: "Remote 1 ICE 1,Remote 1 Root 1",
+      }),
+      "runner",
+    );
+
+    expect(item.title).toBe(
+      "Du hast Ice and Data Special Report genutzt und 2 installierte Korp-Karten exposed.",
+    );
+    expect(item.description).toBe(
+      "Exposed: Simple Barrier ICE (Remote 1 ICE 1), Simple Economy Asset (Remote 1 Root 1).",
+    );
+    expect(item.chips).toEqual(
+      expect.arrayContaining(["Expose", "Remote 1 ICE 1", "Remote 1 Root 1"]),
+    );
+  });
+
   it("redacts hidden Corp installs from the Runner perspective", () => {
     const item = formatChronicleEvent(
       makeEvent("install_card", {

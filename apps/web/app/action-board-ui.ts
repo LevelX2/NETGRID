@@ -931,9 +931,7 @@ export function automaticCorpMandatoryDrawAction(
     : undefined;
 }
 
-export function isAutomaticCorpRunPassAction(
-  action: LegalAction,
-): boolean {
+export function isAutomaticCorpRunPassAction(action: LegalAction): boolean {
   return (
     action.side === "corp" &&
     action.type === "decline_rez" &&
@@ -950,12 +948,7 @@ export function automaticCorpRunPassAction(
   actions: LegalAction[],
   side: Side,
 ): LegalAction | undefined {
-  if (
-    side !== "corp" ||
-    !view.run ||
-    view.winner ||
-    view.pendingChoice
-  )
+  if (side !== "corp" || !view.run || view.winner || view.pendingChoice)
     return undefined;
   const passActions = actions.filter(isAutomaticCorpRunPassAction);
   return passActions.length === 1 ? passActions[0] : undefined;
@@ -1918,6 +1911,26 @@ export function retainedExposeReviewEvent(
   return null;
 }
 
+export function exposedCardInstanceIdsForEvent(
+  event: PublicGameEvent,
+): string[] {
+  if (
+    event.publicPayload.hiddenZoneAction !==
+      "expose_installed_cards_single_fort" ||
+    event.publicPayload.publicRevealKind !== "expose" ||
+    typeof event.publicPayload.exposedCardInstanceIds !== "string"
+  )
+    return [];
+  return [
+    ...new Set(
+      event.publicPayload.exposedCardInstanceIds
+        .split(",")
+        .map((cardId) => cardId.trim())
+        .filter((cardId) => cardId.length > 0),
+    ),
+  ];
+}
+
 export function approachIceExposeViewingIceId(
   actions: LegalAction[],
 ): string | null {
@@ -2242,9 +2255,7 @@ export function shouldUseFieldCardChoice(
 export function fieldCardChoiceAuxiliaryOptions(
   choice: NonNullable<PlayerView["pendingChoice"]>,
 ): NonNullable<PlayerView["pendingChoice"]>["options"] {
-  if (
-    !choice.source.startsWith("card_implementation.scored_agenda_free_rez:")
-  )
+  if (!choice.source.startsWith("card_implementation.scored_agenda_free_rez:"))
     return [];
   return choice.options.filter(
     (option) =>

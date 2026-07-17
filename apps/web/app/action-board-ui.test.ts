@@ -85,6 +85,7 @@ import {
   runWindowActionButtonLabel,
   runWindowActions,
   runWindowStatusLabel,
+  exposedCardInstanceIdsForEvent,
   runnerHostedCardsForHost,
   runnerRigMemorySummary,
   serverBoardRows,
@@ -4962,6 +4963,28 @@ describe("V1.0.6 resource and card-display helpers", () => {
       retainedExposeReviewEvent([expose, smarteyeFinish], null),
     ).toBeNull();
     expect(retainedExposeReviewEvent([smarteye, jackOut], null)).toBeNull();
+  });
+
+  it("uses only public instance ids from Ice and Data Special Report expose events", () => {
+    const exposed = publicEvent("evt_ice_data", "resolve_choice", {
+      actionType: "resolve_choice",
+      actor: "runner",
+      hiddenZoneAction: "expose_installed_cards_single_fort",
+      publicRevealKind: "expose",
+      exposedCardInstanceIds: "ice_1, root_1,ice_1",
+    });
+    const unrelated = publicEvent("evt_other", "resolve_choice", {
+      actionType: "resolve_choice",
+      actor: "runner",
+      publicRevealKind: "expose",
+      exposedCardInstanceIds: "hidden_card",
+    });
+
+    expect(exposedCardInstanceIdsForEvent(exposed)).toEqual([
+      "ice_1",
+      "root_1",
+    ]);
+    expect(exposedCardInstanceIdsForEvent(unrelated)).toEqual([]);
   });
 
   it("detects the active approach-ice viewing target from legal actions", () => {

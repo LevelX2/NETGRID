@@ -28,7 +28,8 @@
 }
 
 .app.activeMatch.cyberspaceBackgroundEnabled .main {
-  background: url("/backgrounds/cyberspace-board-background.png") center top / cover no-repeat;
+  background: url("/backgrounds/cyberspace-board-background.png") center top /
+    cover no-repeat;
 }
 
 .activeMatchWorkspace {
@@ -536,7 +537,11 @@ select {
   border-radius: 7px;
   color: var(--text);
   background:
-    linear-gradient(180deg, color-mix(in srgb, var(--panel), var(--runner) 10%), var(--tooltip-bg)),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--panel), var(--runner) 10%),
+      var(--tooltip-bg)
+    ),
     var(--tooltip-bg);
   box-shadow: var(--tooltip-shadow);
   font-size: 12px;
@@ -641,7 +646,11 @@ select {
   border: 1px solid color-mix(in srgb, var(--runner), var(--line) 54%);
   border-radius: 10px;
   background:
-    linear-gradient(120deg, color-mix(in srgb, var(--runner), transparent 89%), transparent 62%),
+    linear-gradient(
+      120deg,
+      color-mix(in srgb, var(--runner), transparent 89%),
+      transparent 62%
+    ),
     var(--field-bg);
   padding: 13px 14px;
   box-shadow: inset 3px 0 0 color-mix(in srgb, var(--runner), white 8%);
@@ -770,7 +779,9 @@ select {
   position: relative;
   grid-template-columns: 20px minmax(0, 1fr);
   cursor: pointer;
-  transition: border-color 120ms ease, background-color 120ms ease;
+  transition:
+    border-color 120ms ease,
+    background-color 120ms ease;
 }
 
 .matchCardPoolAddon:hover,
@@ -887,8 +898,16 @@ select {
 .sideSelectionControl select {
   width: 100%;
   min-height: 44px;
-  border-color: color-mix(in srgb, var(--side-selection-accent), var(--line) 52%);
-  background: color-mix(in srgb, var(--side-selection-accent), var(--field-bg) 91%);
+  border-color: color-mix(
+    in srgb,
+    var(--side-selection-accent),
+    var(--line) 52%
+  );
+  background: color-mix(
+    in srgb,
+    var(--side-selection-accent),
+    var(--field-bg) 91%
+  );
   padding-left: 44px;
   font-weight: 800;
 }
@@ -1246,10 +1265,15 @@ select {
   border-radius: 8px;
   color: var(--text);
   background:
-    linear-gradient(135deg, color-mix(in srgb, var(--deck-slot-accent), transparent 88%), transparent 62%),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--deck-slot-accent), transparent 88%),
+      transparent 62%
+    ),
     var(--field-bg);
   font-size: 13px;
-  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--deck-slot-accent), transparent 18%);
+  box-shadow: inset 3px 0 0
+    color-mix(in srgb, var(--deck-slot-accent), transparent 18%);
   transition:
     border-color 120ms ease,
     background 120ms ease,
@@ -1390,7 +1414,9 @@ select {
 
 .catalogControls {
   display: grid;
-  grid-template-columns: minmax(220px, 1fr) minmax(150px, 220px) minmax(120px, 150px) minmax(150px, 210px) minmax(130px, 170px) minmax(130px, max-content);
+  grid-template-columns:
+    minmax(220px, 1fr) minmax(150px, 220px) minmax(120px, 150px)
+    minmax(150px, 210px) minmax(130px, 170px) minmax(130px, max-content);
   align-items: end;
   gap: 10px;
   padding: 12px 14px;
@@ -2104,7 +2130,10 @@ select {
 
 .deckBuilderGrid {
   display: grid;
-  grid-template-columns: minmax(230px, 300px) minmax(360px, 0.9fr) minmax(420px, 1fr);
+  grid-template-columns: minmax(230px, 300px) minmax(360px, 0.9fr) minmax(
+      420px,
+      1fr
+    );
   gap: 12px;
   align-items: start;
 }
@@ -3116,7 +3145,13 @@ select {
 
 .deckTableGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(calc(var(--deck-table-card-width, 94px) + 12px), calc(var(--deck-table-card-width, 94px) + 16px)));
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(
+      calc(var(--deck-table-card-width, 94px) + 12px),
+      calc(var(--deck-table-card-width, 94px) + 16px)
+    )
+  );
   justify-content: start;
   gap: 6px;
 }
@@ -3275,7 +3310,9 @@ select {
 .deckTableCard.selected .deckCardThumb.table {
   outline: 2px solid var(--runner);
   outline-offset: 2px;
-  box-shadow: 0 0 0 4px rgb(93 225 196 / 0.2), 0 14px 22px rgb(0 0 0 / 0.38);
+  box-shadow:
+    0 0 0 4px rgb(93 225 196 / 0.2),
+    0 14px 22px rgb(0 0 0 / 0.38);
 }
 
 .deckTableCardInner {
@@ -3417,7 +3454,10 @@ select {
 
 .deckTableLibraryPanel .deckLibraryList {
   display: grid;
-  grid-template-columns: repeat(var(--deck-table-library-columns, 2), minmax(0, 1fr));
+  grid-template-columns: repeat(
+    var(--deck-table-library-columns, 2),
+    minmax(0, 1fr)
+  );
   align-content: start;
   gap: 6px;
   max-height: calc(100vh - 310px);
@@ -3858,7 +3898,10 @@ select {
   background: var(--panel);
   color: var(--text);
   padding: 8px;
-  font: 12px Consolas, "Courier New", monospace;
+  font:
+    12px Consolas,
+    "Courier New",
+    monospace;
 }
 
 .deckImportBox h3 {
@@ -3950,7 +3993,8 @@ select {
   display: grid;
   gap: 10px;
   padding: 10px;
-  border: 1px solid color-mix(in srgb, var(--opponent-cue-side), var(--line) 26%);
+  border: 1px solid
+    color-mix(in srgb, var(--opponent-cue-side), var(--line) 26%);
   border-radius: 8px;
   background: color-mix(in srgb, var(--panel), var(--opponent-cue-side) 14%);
   box-shadow: 0 18px 44px rgb(0 0 0 / 0.38);
@@ -4033,16 +4077,22 @@ select {
   height: 38px;
   display: grid;
   place-items: center;
-  border: 1px solid color-mix(in srgb, var(--opponent-cue-side), var(--line) 38%);
+  border: 1px solid
+    color-mix(in srgb, var(--opponent-cue-side), var(--line) 38%);
   border-radius: 8px;
   color: color-mix(in srgb, var(--opponent-cue-side), var(--text) 18%);
-  background: color-mix(in srgb, var(--opponent-cue-side), var(--accent-mix-bg) 84%);
+  background: color-mix(
+    in srgb,
+    var(--opponent-cue-side),
+    var(--accent-mix-bg) 84%
+  );
 }
 
 .opponentCueActionUse {
   max-width: 100%;
   padding: 2px 7px;
-  border: 1px solid color-mix(in srgb, var(--opponent-cue-side), transparent 54%);
+  border: 1px solid
+    color-mix(in srgb, var(--opponent-cue-side), transparent 54%);
   border-radius: 999px;
   color: color-mix(in srgb, var(--opponent-cue-side), var(--text) 18%);
   background: color-mix(in srgb, var(--opponent-cue-side), transparent 88%);
@@ -4163,7 +4213,8 @@ select {
   padding: 8px 6px;
   isolation: isolate;
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--opponent-cue-side), var(--line) 36%);
+  border: 1px solid
+    color-mix(in srgb, var(--opponent-cue-side), var(--line) 36%);
   border-radius: 8px;
   background-color: #151d26;
   background-position: center;
@@ -4241,8 +4292,11 @@ select {
   transform: translate(-50%, -50%);
   border: 1px solid color-mix(in srgb, var(--damage-impact), var(--line) 26%);
   border-radius: 8px;
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--panel), var(--damage-impact) 18%), color-mix(in srgb, var(--panel), #111 16%));
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--panel), var(--damage-impact) 18%),
+    color-mix(in srgb, var(--panel), #111 16%)
+  );
   box-shadow:
     0 26px 72px rgb(0 0 0 / 0.52),
     0 0 0 9999px rgb(0 0 0 / 0.28);
@@ -4339,14 +4393,12 @@ select {
 
 .damageImpactSegment.overkill {
   border: 1px solid color-mix(in srgb, var(--danger), transparent 36%);
-  background:
-    repeating-linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--danger), transparent 30%) 0 6px,
-      color-mix(in srgb, var(--danger), black 18%) 6px 12px
-    );
-  box-shadow:
-    0 0 16px color-mix(in srgb, var(--damage-impact), transparent 40%);
+  background: repeating-linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--danger), transparent 30%) 0 6px,
+    color-mix(in srgb, var(--danger), black 18%) 6px 12px
+  );
+  box-shadow: 0 0 16px color-mix(in srgb, var(--damage-impact), transparent 40%);
 }
 
 .damageImpactSegment.unknown {
@@ -4410,7 +4462,10 @@ select {
 
 .main {
   display: grid;
-  grid-template-columns: minmax(230px, 280px) minmax(0, 1fr) minmax(270px, 340px);
+  grid-template-columns: minmax(230px, 280px) minmax(0, 1fr) minmax(
+      270px,
+      340px
+    );
   gap: 14px;
   padding: 14px;
 }
@@ -4527,12 +4582,14 @@ select {
   height: 38px;
   display: grid;
   place-items: center;
-  border: 1px solid color-mix(in srgb, var(--window-event-side-accent) 78%, transparent);
+  border: 1px solid
+    color-mix(in srgb, var(--window-event-side-accent) 78%, transparent);
   color: var(--window-event-side-accent);
   background: rgb(3 13 22 / 0.9);
   box-shadow:
     0 0 0 3px rgb(3 13 22 / 0.72),
-    0 0 18px color-mix(in srgb, var(--window-event-side-accent) 55%, transparent);
+    0 0 18px
+      color-mix(in srgb, var(--window-event-side-accent) 55%, transparent);
 }
 
 .windowEventIcon-side-runner .windowEventIconSide {
@@ -4613,7 +4670,15 @@ select {
   overflow: hidden;
   border: 1px solid rgb(255 102 118 / 0.52);
   background:
-    radial-gradient(circle at center, rgb(255 74 96 / 0.26) 0 9%, transparent 10% 26%, rgb(76 211 255 / 0.16) 27% 28%, transparent 29% 46%, rgb(76 211 255 / 0.12) 47% 48%, transparent 49%),
+    radial-gradient(
+      circle at center,
+      rgb(255 74 96 / 0.26) 0 9%,
+      transparent 10% 26%,
+      rgb(76 211 255 / 0.16) 27% 28%,
+      transparent 29% 46%,
+      rgb(76 211 255 / 0.12) 47% 48%,
+      transparent 49%
+    ),
     linear-gradient(145deg, rgb(5 21 34 / 0.98), rgb(17 7 20 / 0.98));
   box-shadow:
     inset 0 0 34px rgb(255 60 86 / 0.16),
@@ -4629,7 +4694,11 @@ select {
   z-index: 1;
   border: 1px solid rgb(82 218 255 / 0.32);
   border-radius: 50%;
-  background: repeating-conic-gradient(from 0deg, rgb(93 221 255 / 0.45) 0 1deg, transparent 1deg 30deg);
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgb(93 221 255 / 0.45) 0 1deg,
+    transparent 1deg 30deg
+  );
   opacity: 0.62;
 }
 
@@ -4848,68 +4917,68 @@ select {
 }
 
 :where(
-  .accessRevealPanel,
-  .damageImpactOverlay,
-  .runTimeline.overlay,
-  .cardChoiceDialog,
-  .scoredAgendaPanel,
-  .setupPanel,
-  .section
-).ambience-movement::before,
+    .accessRevealPanel,
+    .damageImpactOverlay,
+    .runTimeline.overlay,
+    .cardChoiceDialog,
+    .scoredAgendaPanel,
+    .setupPanel,
+    .section
+  ).ambience-movement::before,
 :where(
-  .accessRevealPanel,
-  .damageImpactOverlay,
-  .runTimeline.overlay,
-  .cardChoiceDialog,
-  .scoredAgendaPanel,
-  .setupPanel,
-  .section
-).ambience-access::before,
+    .accessRevealPanel,
+    .damageImpactOverlay,
+    .runTimeline.overlay,
+    .cardChoiceDialog,
+    .scoredAgendaPanel,
+    .setupPanel,
+    .section
+  ).ambience-access::before,
 :where(
-  .accessRevealPanel,
-  .damageImpactOverlay,
-  .runTimeline.overlay,
-  .cardChoiceDialog,
-  .scoredAgendaPanel,
-  .setupPanel,
-  .section
-).ambience-damage::before,
+    .accessRevealPanel,
+    .damageImpactOverlay,
+    .runTimeline.overlay,
+    .cardChoiceDialog,
+    .scoredAgendaPanel,
+    .setupPanel,
+    .section
+  ).ambience-damage::before,
 :where(
-  .accessRevealPanel,
-  .damageImpactOverlay,
-  .runTimeline.overlay,
-  .cardChoiceDialog,
-  .scoredAgendaPanel,
-  .setupPanel,
-  .section
-).ambience-trace::before,
+    .accessRevealPanel,
+    .damageImpactOverlay,
+    .runTimeline.overlay,
+    .cardChoiceDialog,
+    .scoredAgendaPanel,
+    .setupPanel,
+    .section
+  ).ambience-trace::before,
 :where(
-  .accessRevealPanel,
-  .damageImpactOverlay,
-  .runTimeline.overlay,
-  .cardChoiceDialog,
-  .scoredAgendaPanel,
-  .setupPanel,
-  .section
-).ambience-pump::before,
+    .accessRevealPanel,
+    .damageImpactOverlay,
+    .runTimeline.overlay,
+    .cardChoiceDialog,
+    .scoredAgendaPanel,
+    .setupPanel,
+    .section
+  ).ambience-pump::before,
 :where(
-  .accessRevealPanel,
-  .damageImpactOverlay,
-  .runTimeline.overlay,
-  .cardChoiceDialog,
-  .scoredAgendaPanel,
-  .setupPanel,
-  .section
-).ambience-trash::before,
+    .accessRevealPanel,
+    .damageImpactOverlay,
+    .runTimeline.overlay,
+    .cardChoiceDialog,
+    .scoredAgendaPanel,
+    .setupPanel,
+    .section
+  ).ambience-trash::before,
 :where(
-  .accessRevealPanel,
-  .damageImpactOverlay,
-  .runTimeline.overlay,
-  .cardChoiceDialog,
-  .scoredAgendaPanel,
-  .setupPanel,
-  .section
-).ambience-agenda::before {
+    .accessRevealPanel,
+    .damageImpactOverlay,
+    .runTimeline.overlay,
+    .cardChoiceDialog,
+    .scoredAgendaPanel,
+    .setupPanel,
+    .section
+  ).ambience-agenda::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -4925,68 +4994,75 @@ select {
 }
 
 :where(
-  .accessRevealPanel,
-  .damageImpactOverlay,
-  .runTimeline.overlay,
-  .cardChoiceDialog,
-  .scoredAgendaPanel,
-  .setupPanel,
-  .section
-).ambience-movement > *,
+    .accessRevealPanel,
+    .damageImpactOverlay,
+    .runTimeline.overlay,
+    .cardChoiceDialog,
+    .scoredAgendaPanel,
+    .setupPanel,
+    .section
+  ).ambience-movement
+  > *,
 :where(
-  .accessRevealPanel,
-  .damageImpactOverlay,
-  .runTimeline.overlay,
-  .cardChoiceDialog,
-  .scoredAgendaPanel,
-  .setupPanel,
-  .section
-).ambience-access > *,
+    .accessRevealPanel,
+    .damageImpactOverlay,
+    .runTimeline.overlay,
+    .cardChoiceDialog,
+    .scoredAgendaPanel,
+    .setupPanel,
+    .section
+  ).ambience-access
+  > *,
 :where(
-  .accessRevealPanel,
-  .damageImpactOverlay,
-  .runTimeline.overlay,
-  .cardChoiceDialog,
-  .scoredAgendaPanel,
-  .setupPanel,
-  .section
-).ambience-damage > *,
+    .accessRevealPanel,
+    .damageImpactOverlay,
+    .runTimeline.overlay,
+    .cardChoiceDialog,
+    .scoredAgendaPanel,
+    .setupPanel,
+    .section
+  ).ambience-damage
+  > *,
 :where(
-  .accessRevealPanel,
-  .damageImpactOverlay,
-  .runTimeline.overlay,
-  .cardChoiceDialog,
-  .scoredAgendaPanel,
-  .setupPanel,
-  .section
-).ambience-trace > *,
+    .accessRevealPanel,
+    .damageImpactOverlay,
+    .runTimeline.overlay,
+    .cardChoiceDialog,
+    .scoredAgendaPanel,
+    .setupPanel,
+    .section
+  ).ambience-trace
+  > *,
 :where(
-  .accessRevealPanel,
-  .damageImpactOverlay,
-  .runTimeline.overlay,
-  .cardChoiceDialog,
-  .scoredAgendaPanel,
-  .setupPanel,
-  .section
-).ambience-pump > *,
+    .accessRevealPanel,
+    .damageImpactOverlay,
+    .runTimeline.overlay,
+    .cardChoiceDialog,
+    .scoredAgendaPanel,
+    .setupPanel,
+    .section
+  ).ambience-pump
+  > *,
 :where(
-  .accessRevealPanel,
-  .damageImpactOverlay,
-  .runTimeline.overlay,
-  .cardChoiceDialog,
-  .scoredAgendaPanel,
-  .setupPanel,
-  .section
-).ambience-trash > *,
+    .accessRevealPanel,
+    .damageImpactOverlay,
+    .runTimeline.overlay,
+    .cardChoiceDialog,
+    .scoredAgendaPanel,
+    .setupPanel,
+    .section
+  ).ambience-trash
+  > *,
 :where(
-  .accessRevealPanel,
-  .damageImpactOverlay,
-  .runTimeline.overlay,
-  .cardChoiceDialog,
-  .scoredAgendaPanel,
-  .setupPanel,
-  .section
-).ambience-agenda > * {
+    .accessRevealPanel,
+    .damageImpactOverlay,
+    .runTimeline.overlay,
+    .cardChoiceDialog,
+    .scoredAgendaPanel,
+    .setupPanel,
+    .section
+  ).ambience-agenda
+  > * {
   position: relative;
   z-index: 1;
 }
@@ -5018,10 +5094,27 @@ select {
   display: grid;
   gap: 7px;
   background:
-    linear-gradient(135deg, color-mix(in srgb, var(--side-status-accent), transparent var(--side-status-gradient-fade)), transparent 72%),
-    color-mix(in srgb, var(--side-status-accent), var(--panel) var(--side-status-bg-panel-mix));
-  border-bottom-color: color-mix(in srgb, var(--side-status-accent), var(--line) 58%);
-  box-shadow: inset 4px 0 0 color-mix(in srgb, var(--side-status-accent), white 4%);
+    linear-gradient(
+      135deg,
+      color-mix(
+        in srgb,
+        var(--side-status-accent),
+        transparent var(--side-status-gradient-fade)
+      ),
+      transparent 72%
+    ),
+    color-mix(
+      in srgb,
+      var(--side-status-accent),
+      var(--panel) var(--side-status-bg-panel-mix)
+    );
+  border-bottom-color: color-mix(
+    in srgb,
+    var(--side-status-accent),
+    var(--line) 58%
+  );
+  box-shadow: inset 4px 0 0
+    color-mix(in srgb, var(--side-status-accent), white 4%);
 }
 
 .sideStatusPanel.side-corp {
@@ -5047,7 +5140,8 @@ select {
   outline-offset: -3px;
   box-shadow:
     inset 4px 0 0 color-mix(in srgb, var(--side-status-accent), white 8%),
-    inset 0 0 0 1px color-mix(in srgb, var(--side-status-accent), transparent 35%),
+    inset 0 0 0 1px
+      color-mix(in srgb, var(--side-status-accent), transparent 35%),
     0 0 0 1px color-mix(in srgb, var(--side-status-accent), transparent 52%);
 }
 
@@ -5055,7 +5149,11 @@ select {
   justify-items: center;
   min-height: 40px;
   border-color: color-mix(in srgb, var(--side-status-accent), var(--line) 54%);
-  background: color-mix(in srgb, var(--side-status-accent), var(--section-bg) 88%);
+  background: color-mix(
+    in srgb,
+    var(--side-status-accent),
+    var(--section-bg) 88%
+  );
   text-align: center;
 }
 
@@ -5077,10 +5175,15 @@ select {
   align-items: center;
   gap: 6px;
   padding: 3px 7px;
-  border: 1px solid color-mix(in srgb, var(--side-status-accent), var(--line) 38%);
+  border: 1px solid
+    color-mix(in srgb, var(--side-status-accent), var(--line) 38%);
   border-radius: 999px;
   color: color-mix(in srgb, var(--side-status-accent), var(--text) 18%);
-  background: color-mix(in srgb, var(--side-status-accent), var(--section-bg) 84%);
+  background: color-mix(
+    in srgb,
+    var(--side-status-accent),
+    var(--section-bg) 84%
+  );
   font-size: 11px;
   font-weight: 800;
   line-height: 1;
@@ -5524,7 +5627,8 @@ select {
   z-index: 70;
   width: min(260px, calc(100vw - 28px));
   padding: 8px 10px;
-  border: 1px solid color-mix(in srgb, var(--runner-zone-accent), var(--line) 48%);
+  border: 1px solid
+    color-mix(in srgb, var(--runner-zone-accent), var(--line) 48%);
   border-radius: 7px;
   background: var(--tooltip-bg);
   color: var(--text);
@@ -5666,9 +5770,18 @@ select {
   justify-content: space-between;
   gap: 10px;
   padding: 7px 8px;
-  border: 1px solid color-mix(in srgb, var(--side-status-accent, var(--runner)), var(--line) 48%);
+  border: 1px solid
+    color-mix(
+      in srgb,
+      var(--side-status-accent, var(--runner)),
+      var(--line) 48%
+    );
   border-radius: 6px;
-  background: color-mix(in srgb, var(--side-status-accent, var(--runner)), var(--section-bg) 91%);
+  background: color-mix(
+    in srgb,
+    var(--side-status-accent, var(--runner)),
+    var(--section-bg) 91%
+  );
 }
 
 .actionResource .resourceStatTop {
@@ -5708,9 +5821,18 @@ select {
   display: inline-block;
   position: relative;
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--side-status-accent, var(--runner)), var(--line) 35%);
+  border: 1px solid
+    color-mix(
+      in srgb,
+      var(--side-status-accent, var(--runner)),
+      var(--line) 35%
+    );
   border-radius: 3px;
-  background: color-mix(in srgb, var(--side-status-accent, var(--runner)), transparent 88%);
+  background: color-mix(
+    in srgb,
+    var(--side-status-accent, var(--runner)),
+    transparent 88%
+  );
 }
 
 .actionSlot::before {
@@ -5722,7 +5844,12 @@ select {
   height: 0;
   border-top: 3px solid transparent;
   border-bottom: 3px solid transparent;
-  border-left: 5px solid color-mix(in srgb, var(--side-status-accent, var(--runner)), var(--text) 28%);
+  border-left: 5px solid
+    color-mix(
+      in srgb,
+      var(--side-status-accent, var(--runner)),
+      var(--text) 28%
+    );
   transform: translate(-36%, -50%);
   opacity: 0.92;
 }
@@ -5760,7 +5887,11 @@ select {
   border: 2px solid color-mix(in srgb, var(--credit), white 18%);
   border-radius: 50%;
   background:
-    radial-gradient(circle at 35% 28%, rgb(255 255 255 / 0.55), transparent 22%),
+    radial-gradient(
+      circle at 35% 28%,
+      rgb(255 255 255 / 0.55),
+      transparent 22%
+    ),
     radial-gradient(circle at 62% 68%, rgb(111 70 10 / 0.46), transparent 34%),
     linear-gradient(135deg, #ffe28a 0%, var(--credit) 46%, #b8781b 100%);
   box-shadow:
@@ -5870,10 +6001,14 @@ select {
   gap: 5px;
   padding: 8px 10px 9px;
   margin: 0 0 8px;
-  border: 1px solid color-mix(in srgb, var(--turn-action-header-accent), var(--line) 42%);
+  border: 1px solid
+    color-mix(in srgb, var(--turn-action-header-accent), var(--line) 42%);
   border-radius: 8px;
   background:
-    linear-gradient(color-mix(in srgb, var(--turn-action-header-accent), transparent 84%), color-mix(in srgb, var(--turn-action-header-accent), transparent 84%)),
+    linear-gradient(
+      color-mix(in srgb, var(--turn-action-header-accent), transparent 84%),
+      color-mix(in srgb, var(--turn-action-header-accent), transparent 84%)
+    ),
     var(--section-bg);
 }
 
@@ -5908,10 +6043,15 @@ select {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid color-mix(in srgb, var(--turn-action-header-accent), var(--line) 36%);
+  border: 1px solid
+    color-mix(in srgb, var(--turn-action-header-accent), var(--line) 36%);
   border-radius: 6px;
   color: color-mix(in srgb, var(--turn-action-header-accent), var(--text) 22%);
-  background: color-mix(in srgb, var(--turn-action-header-accent), transparent 90%);
+  background: color-mix(
+    in srgb,
+    var(--turn-action-header-accent),
+    transparent 90%
+  );
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.05);
   cursor: pointer;
 }
@@ -5919,17 +6059,26 @@ select {
 .priorityHoldToggle:hover,
 .priorityHoldToggle:focus-visible {
   border-color: color-mix(in srgb, var(--turn-action-header-accent), white 18%);
-  background: color-mix(in srgb, var(--turn-action-header-accent), transparent 82%);
+  background: color-mix(
+    in srgb,
+    var(--turn-action-header-accent),
+    transparent 82%
+  );
   outline: none;
 }
 
 .priorityHoldToggle.active {
   border-color: color-mix(in srgb, var(--turn-action-header-accent), white 28%);
   color: var(--text);
-  background: color-mix(in srgb, var(--turn-action-header-accent), var(--panel) 42%);
+  background: color-mix(
+    in srgb,
+    var(--turn-action-header-accent),
+    var(--panel) 42%
+  );
   box-shadow:
     inset 0 0 0 1px rgb(255 255 255 / 0.12),
-    0 0 0 2px color-mix(in srgb, var(--turn-action-header-accent), transparent 72%);
+    0 0 0 2px
+      color-mix(in srgb, var(--turn-action-header-accent), transparent 72%);
 }
 
 .actionPanelFloatToggle {
@@ -6222,7 +6371,11 @@ select {
   border: 1px solid color-mix(in srgb, var(--runner), white 16%);
   border-radius: 8px;
   background:
-    linear-gradient(180deg, color-mix(in srgb, var(--panel), var(--runner) 13%), var(--tooltip-bg)),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--panel), var(--runner) 13%),
+      var(--tooltip-bg)
+    ),
     var(--tooltip-bg);
   color: color-mix(in srgb, var(--text), white 8%);
   box-shadow:
@@ -6276,8 +6429,12 @@ select {
 .sidePanel .actions > .actionButton[data-tooltip]:focus-visible::after,
 .sidePanel .selectedActionGroup > .actionButton[data-tooltip]:hover::before,
 .sidePanel .selectedActionGroup > .actionButton[data-tooltip]:hover::after,
-.sidePanel .selectedActionGroup > .actionButton[data-tooltip]:focus-visible::before,
-.sidePanel .selectedActionGroup > .actionButton[data-tooltip]:focus-visible::after {
+.sidePanel
+  .selectedActionGroup
+  > .actionButton[data-tooltip]:focus-visible::before,
+.sidePanel
+  .selectedActionGroup
+  > .actionButton[data-tooltip]:focus-visible::after {
   transform: translateY(0);
 }
 
@@ -6326,10 +6483,14 @@ select {
   min-height: 0;
   box-sizing: border-box;
   padding: 6px;
-  border: 1px solid color-mix(in srgb, var(--corp-status-accent), var(--line) 66%);
+  border: 1px solid
+    color-mix(in srgb, var(--corp-status-accent), var(--line) 66%);
   border-radius: 8px;
   background:
-    linear-gradient(color-mix(in srgb, var(--corp-status-accent), transparent 90%), color-mix(in srgb, var(--corp-status-accent), transparent 90%)),
+    linear-gradient(
+      color-mix(in srgb, var(--corp-status-accent), transparent 90%),
+      color-mix(in srgb, var(--corp-status-accent), transparent 90%)
+    ),
     var(--board-corp-zone-bg);
 }
 
@@ -6401,13 +6562,21 @@ select {
 .zoneIdentityIcon.runnerZoneSideLabel {
   border-color: color-mix(in srgb, var(--runner-zone-accent), var(--line) 46%);
   color: var(--runner-zone-accent);
-  background: color-mix(in srgb, var(--runner-zone-accent), var(--section-bg) 88%);
+  background: color-mix(
+    in srgb,
+    var(--runner-zone-accent),
+    var(--section-bg) 88%
+  );
 }
 
 .zoneIdentityIcon.corpZoneSideLabel {
   border-color: color-mix(in srgb, var(--corp-zone-accent), var(--line) 46%);
   color: var(--corp-zone-accent);
-  background: color-mix(in srgb, var(--corp-zone-accent), var(--section-bg) 88%);
+  background: color-mix(
+    in srgb,
+    var(--corp-zone-accent),
+    var(--section-bg) 88%
+  );
 }
 
 .serverRunButtonCorner {
@@ -6470,7 +6639,11 @@ select {
   border: 1px solid color-mix(in srgb, var(--corp-zone-accent), var(--line) 36%);
   border-radius: 999px;
   color: color-mix(in srgb, var(--corp-zone-accent), var(--text) 18%);
-  background: color-mix(in srgb, var(--corp-status-accent), var(--section-bg) 82%);
+  background: color-mix(
+    in srgb,
+    var(--corp-status-accent),
+    var(--section-bg) 82%
+  );
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08);
   font-size: 11px;
   font-weight: 850;
@@ -6520,7 +6693,8 @@ select {
   min-width: 0;
   max-width: 100%;
   padding: 6px;
-  border: 1px solid color-mix(in srgb, var(--corp-status-accent), var(--line) 72%);
+  border: 1px solid
+    color-mix(in srgb, var(--corp-status-accent), var(--line) 72%);
   border-radius: 6px;
   background: var(--board-corp-lane-bg);
 }
@@ -6573,12 +6747,20 @@ select {
 
 .runnerZoneSideLabel {
   color: var(--runner-zone-accent);
-  border-right-color: color-mix(in srgb, var(--runner-zone-accent), var(--line) 48%);
+  border-right-color: color-mix(
+    in srgb,
+    var(--runner-zone-accent),
+    var(--line) 48%
+  );
 }
 
 .corpZoneSideLabel {
   color: var(--corp-zone-accent);
-  border-right-color: color-mix(in srgb, var(--corp-zone-accent), var(--line) 48%);
+  border-right-color: color-mix(
+    in srgb,
+    var(--corp-zone-accent),
+    var(--line) 48%
+  );
 }
 
 .serverTitle {
@@ -6886,8 +7068,11 @@ select {
   width: 100%;
 }
 
-.server[data-server-id="archives"]:has(.archivesDualStack) .pairedServerLane:first-child,
-.server[data-server-id="archives"]:has(.archivesDualStack) .pairedServerLane:first-child .lane {
+.server[data-server-id="archives"]:has(.archivesDualStack)
+  .pairedServerLane:first-child,
+.server[data-server-id="archives"]:has(.archivesDualStack)
+  .pairedServerLane:first-child
+  .lane {
   min-width: 0;
   width: 100%;
 }
@@ -6943,10 +7128,16 @@ select {
   --archive-card-height: calc(151px * var(--archive-card-scale, 1));
   --archive-card-step: calc(50px * var(--archive-card-scale, 1));
   --archive-visible-steps: 5;
-  --archive-stack-width: calc(var(--archive-card-width) + (var(--archive-card-step) * var(--archive-visible-steps)));
+  --archive-stack-width: calc(
+    var(--archive-card-width) +
+      (var(--archive-card-step) * var(--archive-visible-steps))
+  );
   box-sizing: border-box;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(var(--archive-card-step), var(--archive-card-step)));
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(var(--archive-card-step), var(--archive-card-step))
+  );
   grid-auto-rows: var(--archive-card-height);
   gap: calc(8px * var(--archive-card-scale, 1)) 0;
   align-items: flex-start;
@@ -7123,7 +7314,10 @@ select {
 }
 
 .scoredAgendaList {
-  width: min(var(--score-area-list-width, var(--cards-min-width, 108px)), calc(100vw - 42px));
+  width: min(
+    var(--score-area-list-width, var(--cards-min-width, 108px)),
+    calc(100vw - 42px)
+  );
   max-width: 100%;
   display: grid;
   grid-template-columns: repeat(var(--score-area-columns, 1), minmax(0, 1fr));
@@ -7221,7 +7415,11 @@ select {
   place-items: center;
   border-color: color-mix(in srgb, var(--agenda), var(--line) 32%);
   background:
-    linear-gradient(180deg, color-mix(in srgb, var(--agenda), transparent 86%), transparent 70%),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--agenda), transparent 86%),
+      transparent 70%
+    ),
     color-mix(in srgb, var(--agenda), var(--section-bg) 82%);
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0.09),
@@ -7358,7 +7556,11 @@ select {
   border: 1px solid color-mix(in srgb, var(--runner), white 22%);
   border-radius: 999px;
   background:
-    radial-gradient(circle at 34% 22%, rgb(255 255 255 / 0.42), transparent 33%),
+    radial-gradient(
+      circle at 34% 22%,
+      rgb(255 255 255 / 0.42),
+      transparent 33%
+    ),
     color-mix(in srgb, var(--runner), var(--panel) 46%);
   color: var(--text);
   box-shadow:
@@ -7433,7 +7635,13 @@ select {
   border-radius: inherit;
   pointer-events: none;
   background:
-    repeating-linear-gradient(136deg, rgb(8 13 18 / 0) 0, rgb(8 13 18 / 0) 8px, rgb(8 13 18 / 0.16) 8px, rgb(8 13 18 / 0.16) 16px),
+    repeating-linear-gradient(
+      136deg,
+      rgb(8 13 18 / 0) 0,
+      rgb(8 13 18 / 0) 8px,
+      rgb(8 13 18 / 0.16) 8px,
+      rgb(8 13 18 / 0.16) 16px
+    ),
     linear-gradient(180deg, rgb(7 12 17 / 0.08) 0%, rgb(7 12 17 / 0.24) 100%);
 }
 
@@ -7445,6 +7653,29 @@ select {
 
 .viewMarkerActiveSlot {
   z-index: 72;
+}
+
+.exposedCardHighlightSlot {
+  z-index: 74;
+}
+
+.exposedCardHighlightSlot .card {
+  border-color: color-mix(in srgb, var(--ok), white 24%);
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--ok), transparent 26%),
+    0 0 24px color-mix(in srgb, var(--ok), transparent 48%),
+    var(--card-shadow);
+  animation: exposedCardHighlightPulse 1.1s ease-in-out infinite alternate;
+}
+
+@keyframes exposedCardHighlightPulse {
+  from {
+    filter: brightness(1);
+  }
+
+  to {
+    filter: brightness(1.15);
+  }
 }
 
 .card.runPositionActive {
@@ -7631,7 +7862,15 @@ select {
   border-radius: inherit;
   pointer-events: none;
   background:
-    repeating-linear-gradient(44deg, rgb(108 238 255 / 0) 0, rgb(108 238 255 / 0) 7px, rgb(108 238 255 / 0.17) 7px, rgb(108 238 255 / 0.17) 10px, rgb(108 238 255 / 0) 10px, rgb(108 238 255 / 0) 16px),
+    repeating-linear-gradient(
+      44deg,
+      rgb(108 238 255 / 0) 0,
+      rgb(108 238 255 / 0) 7px,
+      rgb(108 238 255 / 0.17) 7px,
+      rgb(108 238 255 / 0.17) 10px,
+      rgb(108 238 255 / 0) 10px,
+      rgb(108 238 255 / 0) 16px
+    ),
     linear-gradient(180deg, rgb(27 45 56 / 0.08) 0%, rgb(27 45 56 / 0.18) 100%);
 }
 
@@ -7649,8 +7888,11 @@ select {
   isolation: isolate;
   border-style: solid;
   border-color: color-mix(in srgb, var(--muted), var(--line) 42%);
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--card-bg), #071016 8%) 0%, color-mix(in srgb, var(--card-bg), #030608 18%) 100%);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--card-bg), #071016 8%) 0%,
+    color-mix(in srgb, var(--card-bg), #030608 18%) 100%
+  );
 }
 
 .card.inactiveZoneCard::after {
@@ -7660,7 +7902,11 @@ select {
   z-index: 5;
   border-radius: inherit;
   background:
-    radial-gradient(circle at 50% 45%, rgb(255 255 255 / 0.08) 0, transparent 34%),
+    radial-gradient(
+      circle at 50% 45%,
+      rgb(255 255 255 / 0.08) 0,
+      transparent 34%
+    ),
     linear-gradient(180deg, rgb(3 6 9 / 0.22) 0%, rgb(3 6 9 / 0.48) 100%);
   pointer-events: none;
 }
@@ -7798,8 +8044,16 @@ select {
   border: 1px solid color-mix(in srgb, var(--runner), white 32%);
   border-radius: 999px;
   background:
-    radial-gradient(circle at 28% 18%, rgb(255 255 255 / 0.28), transparent 34%),
-    linear-gradient(135deg, color-mix(in srgb, var(--runner), black 10%), color-mix(in srgb, var(--section-bg), black 10%));
+    radial-gradient(
+      circle at 28% 18%,
+      rgb(255 255 255 / 0.28),
+      transparent 34%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--runner), black 10%),
+      color-mix(in srgb, var(--section-bg), black 10%)
+    );
   color: white;
   box-shadow:
     0 2px 7px rgb(0 0 0 / 0.32),
@@ -7828,7 +8082,8 @@ select {
   top: calc(5px * var(--lane-card-scale, 1));
   right: calc(5px * var(--lane-card-scale, 1));
   min-height: calc(17px * var(--lane-card-scale, 1));
-  padding: calc(2px * var(--lane-card-scale, 1)) calc(6px * var(--lane-card-scale, 1));
+  padding: calc(2px * var(--lane-card-scale, 1))
+    calc(6px * var(--lane-card-scale, 1));
   font-size: calc(8px * var(--lane-card-scale, 1));
 }
 
@@ -7862,7 +8117,13 @@ select {
   border-radius: inherit;
   pointer-events: none;
   background:
-    repeating-linear-gradient(136deg, rgb(8 13 18 / 0) 0, rgb(8 13 18 / 0) 9px, rgb(8 13 18 / 0.18) 9px, rgb(8 13 18 / 0.18) 18px),
+    repeating-linear-gradient(
+      136deg,
+      rgb(8 13 18 / 0) 0,
+      rgb(8 13 18 / 0) 9px,
+      rgb(8 13 18 / 0.18) 9px,
+      rgb(8 13 18 / 0.18) 18px
+    ),
     linear-gradient(180deg, rgb(7 12 17 / 0.18) 0%, rgb(7 12 17 / 0.38) 100%);
 }
 
@@ -7921,7 +8182,8 @@ select {
 
 .lane .iceModifierBadge {
   min-height: calc(17px * var(--lane-card-scale, 1));
-  padding: calc(2px * var(--lane-card-scale, 1)) calc(5px * var(--lane-card-scale, 1));
+  padding: calc(2px * var(--lane-card-scale, 1))
+    calc(5px * var(--lane-card-scale, 1));
   font-size: calc(8px * var(--lane-card-scale, 1));
 }
 
@@ -7934,7 +8196,8 @@ select {
   right: calc(5px * var(--lane-card-scale, 1));
   top: calc(5px * var(--lane-card-scale, 1));
   min-height: calc(18px * var(--lane-card-scale, 1));
-  padding: calc(2px * var(--lane-card-scale, 1)) calc(6px * var(--lane-card-scale, 1));
+  padding: calc(2px * var(--lane-card-scale, 1))
+    calc(6px * var(--lane-card-scale, 1));
   font-size: calc(8px * var(--lane-card-scale, 1));
 }
 
@@ -7954,7 +8217,8 @@ select {
   min-width: calc(30px * var(--lane-card-scale, 1));
   min-height: calc(20px * var(--lane-card-scale, 1));
   gap: calc(4px * var(--lane-card-scale, 1));
-  padding: calc(2px * var(--lane-card-scale, 1)) calc(5px * var(--lane-card-scale, 1));
+  padding: calc(2px * var(--lane-card-scale, 1))
+    calc(5px * var(--lane-card-scale, 1));
 }
 
 .lane .advancementGemCountIcon {
@@ -7970,7 +8234,8 @@ select {
   right: calc(-7px * var(--lane-card-scale, 1));
   top: calc(50% - calc(23px * var(--lane-card-scale, 1)));
   min-height: calc(12px * var(--lane-card-scale, 1));
-  padding: calc(1px * var(--lane-card-scale, 1)) calc(4px * var(--lane-card-scale, 1));
+  padding: calc(1px * var(--lane-card-scale, 1))
+    calc(4px * var(--lane-card-scale, 1));
   font-size: calc(7px * var(--lane-card-scale, 1));
 }
 
@@ -7978,7 +8243,8 @@ select {
   left: calc(5px * var(--lane-card-scale, 1));
   bottom: calc(5px * var(--lane-card-scale, 1));
   min-height: calc(14px * var(--lane-card-scale, 1));
-  padding: calc(1px * var(--lane-card-scale, 1)) calc(5px * var(--lane-card-scale, 1));
+  padding: calc(1px * var(--lane-card-scale, 1))
+    calc(5px * var(--lane-card-scale, 1));
   font-size: calc(7px * var(--lane-card-scale, 1));
 }
 
@@ -7986,7 +8252,8 @@ select {
   right: calc(5px * var(--lane-card-scale, 1));
   bottom: calc(5px * var(--lane-card-scale, 1));
   min-height: calc(14px * var(--lane-card-scale, 1));
-  padding: calc(1px * var(--lane-card-scale, 1)) calc(5px * var(--lane-card-scale, 1));
+  padding: calc(1px * var(--lane-card-scale, 1))
+    calc(5px * var(--lane-card-scale, 1));
   font-size: calc(7px * var(--lane-card-scale, 1));
 }
 
@@ -8004,7 +8271,8 @@ select {
   top: calc(5px * var(--lane-card-scale, 1));
   right: calc(5px * var(--lane-card-scale, 1));
   min-height: calc(19px * var(--lane-card-scale, 1));
-  padding: calc(2px * var(--lane-card-scale, 1)) calc(6px * var(--lane-card-scale, 1));
+  padding: calc(2px * var(--lane-card-scale, 1))
+    calc(6px * var(--lane-card-scale, 1));
   font-size: calc(10px * var(--lane-card-scale, 1));
 }
 
@@ -8012,7 +8280,9 @@ select {
   top: calc(29px * var(--lane-card-scale, 1));
   min-height: calc(20px * var(--lane-card-scale, 1));
   gap: calc(3px * var(--lane-card-scale, 1));
-  padding: calc(2px * var(--lane-card-scale, 1)) calc(5px * var(--lane-card-scale, 1)) calc(2px * var(--lane-card-scale, 1)) calc(4px * var(--lane-card-scale, 1));
+  padding: calc(2px * var(--lane-card-scale, 1))
+    calc(5px * var(--lane-card-scale, 1)) calc(2px * var(--lane-card-scale, 1))
+    calc(4px * var(--lane-card-scale, 1));
   border-radius: calc(6px * var(--lane-card-scale, 1));
 }
 
@@ -8023,7 +8293,9 @@ select {
 }
 
 .lane .cardCreditCounterBadge.counted {
-  padding: calc(2px * var(--lane-card-scale, 1)) calc(5px * var(--lane-card-scale, 1)) calc(2px * var(--lane-card-scale, 1)) calc(6px * var(--lane-card-scale, 1));
+  padding: calc(2px * var(--lane-card-scale, 1))
+    calc(5px * var(--lane-card-scale, 1)) calc(2px * var(--lane-card-scale, 1))
+    calc(6px * var(--lane-card-scale, 1));
 }
 
 .lane .recurringCreditBadge.counted {
@@ -8031,7 +8303,10 @@ select {
 }
 
 .lane .cardCreditCounterIcons {
-  grid-template-columns: repeat(var(--card-credit-columns, 3), calc(8px * var(--lane-card-scale, 1)));
+  grid-template-columns: repeat(
+    var(--card-credit-columns, 3),
+    calc(8px * var(--lane-card-scale, 1))
+  );
   gap: calc(2px * var(--lane-card-scale, 1));
 }
 
@@ -8077,8 +8352,16 @@ select {
   border: 1px solid color-mix(in srgb, var(--ice), white 26%);
   border-radius: 999px;
   background:
-    radial-gradient(circle at 30% 20%, rgb(255 255 255 / 0.34), transparent 34%),
-    linear-gradient(135deg, color-mix(in srgb, var(--ice), #32e0c4 18%), color-mix(in srgb, var(--panel), var(--ice) 54%));
+    radial-gradient(
+      circle at 30% 20%,
+      rgb(255 255 255 / 0.34),
+      transparent 34%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--ice), #32e0c4 18%),
+      color-mix(in srgb, var(--panel), var(--ice) 54%)
+    );
   color: var(--text);
   box-shadow:
     0 2px 7px rgb(0 0 0 / 0.34),
@@ -8100,8 +8383,11 @@ select {
 
 .iceModifierBadge.subtype {
   border-color: color-mix(in srgb, var(--accent), white 18%);
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--accent), #0b1117 24%), color-mix(in srgb, var(--panel), var(--accent) 38%));
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--accent), #0b1117 24%),
+    color-mix(in srgb, var(--panel), var(--accent) 38%)
+  );
   color: var(--text-strong);
   letter-spacing: 0;
 }
@@ -8120,8 +8406,16 @@ select {
   border: 1px solid color-mix(in srgb, var(--ice), white 25%);
   border-radius: 999px;
   background:
-    radial-gradient(circle at 26% 18%, color-mix(in srgb, var(--ice), white 36%), transparent 34%),
-    linear-gradient(135deg, color-mix(in srgb, var(--ice), black 32%), rgb(18 23 30 / 0.96));
+    radial-gradient(
+      circle at 26% 18%,
+      color-mix(in srgb, var(--ice), white 36%),
+      transparent 34%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--ice), black 32%),
+      rgb(18 23 30 / 0.96)
+    );
   box-shadow: 0 6px 14px rgb(0 0 0 / 0.34);
   color: var(--text);
   font-size: 9px;
@@ -8433,8 +8727,17 @@ select {
   border: 1px solid rgb(255 164 156 / 0.9);
   border-radius: 45% 55% 48% 52%;
   background:
-    radial-gradient(circle at 32% 27%, rgb(255 240 232 / 0.95) 0 13%, transparent 14%),
-    radial-gradient(circle at 42% 38%, rgb(255 120 105 / 0.88) 0 36%, rgb(143 20 34 / 0.95) 68%, rgb(78 8 20 / 0.98) 100%);
+    radial-gradient(
+      circle at 32% 27%,
+      rgb(255 240 232 / 0.95) 0 13%,
+      transparent 14%
+    ),
+    radial-gradient(
+      circle at 42% 38%,
+      rgb(255 120 105 / 0.88) 0 36%,
+      rgb(143 20 34 / 0.95) 68%,
+      rgb(78 8 20 / 0.98) 100%
+    );
   box-shadow:
     0 2px 5px rgb(0 0 0 / 0.34),
     inset -2px -2px 4px rgb(77 0 10 / 0.45),
@@ -8456,7 +8759,11 @@ select {
   border-radius: 999px;
   color: var(--text);
   background:
-    radial-gradient(circle at 26% 20%, rgb(255 220 214 / 0.28), transparent 32%),
+    radial-gradient(
+      circle at 26% 20%,
+      rgb(255 220 214 / 0.28),
+      transparent 32%
+    ),
     linear-gradient(135deg, rgb(92 15 28 / 0.96), rgb(30 11 18 / 0.96));
   box-shadow:
     0 4px 9px rgb(0 0 0 / 0.34),
@@ -8494,7 +8801,11 @@ select {
   border-radius: 999px;
   background:
     radial-gradient(circle at 30% 20%, rgb(255 255 255 / 0.5), transparent 32%),
-    linear-gradient(135deg, color-mix(in srgb, var(--runner), white 18%), color-mix(in srgb, var(--runner), black 18%));
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--runner), white 18%),
+      color-mix(in srgb, var(--runner), black 18%)
+    );
   color: white;
   font-size: 8px;
   font-weight: 800;
@@ -8522,8 +8833,16 @@ select {
   border: 1px solid color-mix(in srgb, var(--corp), white 32%);
   border-radius: 999px;
   background:
-    radial-gradient(circle at 30% 20%, rgb(255 255 255 / 0.45), transparent 32%),
-    linear-gradient(135deg, color-mix(in srgb, var(--corp), white 15%), color-mix(in srgb, var(--corp), black 20%));
+    radial-gradient(
+      circle at 30% 20%,
+      rgb(255 255 255 / 0.45),
+      transparent 32%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--corp), white 15%),
+      color-mix(in srgb, var(--corp), black 20%)
+    );
   color: white;
   font-size: 9px;
   font-weight: 800;
@@ -8551,7 +8870,11 @@ select {
   border-radius: 999px;
   background:
     radial-gradient(circle at 30% 20%, rgb(255 255 255 / 0.5), transparent 32%),
-    linear-gradient(135deg, color-mix(in srgb, var(--runner), white 18%), color-mix(in srgb, var(--runner), black 18%));
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--runner), white 18%),
+      color-mix(in srgb, var(--runner), black 18%)
+    );
   color: white;
   font-size: 9px;
   font-weight: 800;
@@ -8599,7 +8922,11 @@ select {
   border: 1px solid rgb(118 255 214 / 0.74);
   border-radius: 7px;
   background:
-    radial-gradient(circle at 28% 18%, rgb(255 248 198 / 0.22), transparent 34%),
+    radial-gradient(
+      circle at 28% 18%,
+      rgb(255 248 198 / 0.22),
+      transparent 34%
+    ),
     linear-gradient(135deg, rgb(8 61 48 / 0.95), rgb(8 21 31 / 0.96));
   box-shadow:
     0 4px 10px rgb(0 0 0 / 0.38),
@@ -8623,7 +8950,11 @@ select {
 .recurringCreditBadge.counted {
   border-color: rgb(118 255 214 / 0.78);
   background:
-    radial-gradient(circle at 26% 20%, rgb(255 250 215 / 0.34), transparent 32%),
+    radial-gradient(
+      circle at 26% 20%,
+      rgb(255 250 215 / 0.34),
+      transparent 32%
+    ),
     linear-gradient(135deg, rgb(10 67 51 / 0.96), rgb(22 19 14 / 0.96));
 }
 
@@ -8637,7 +8968,11 @@ select {
   border: 1px solid rgb(232 191 79 / 0.82);
   border-radius: 999px;
   background:
-    radial-gradient(circle at 26% 20%, rgb(255 250 215 / 0.34), transparent 32%),
+    radial-gradient(
+      circle at 26% 20%,
+      rgb(255 250 215 / 0.34),
+      transparent 32%
+    ),
     linear-gradient(135deg, rgb(78 55 17 / 0.95), rgb(22 19 14 / 0.96));
   color: #ffe8a5;
   box-shadow:
@@ -8661,7 +8996,11 @@ select {
   border: 1px solid rgb(255 230 154 / 0.9);
   border-radius: 50%;
   background:
-    radial-gradient(circle at 34% 28%, rgb(255 255 255 / 0.74), transparent 28%),
+    radial-gradient(
+      circle at 34% 28%,
+      rgb(255 255 255 / 0.74),
+      transparent 28%
+    ),
     radial-gradient(circle at 64% 68%, rgb(116 72 12 / 0.44), transparent 36%),
     linear-gradient(135deg, #ffe892 0%, var(--credit) 48%, #b8781b 100%);
   box-shadow:
@@ -8691,7 +9030,11 @@ select {
   border: 1px solid rgb(132 207 214 / 0.82);
   border-radius: 999px;
   background:
-    radial-gradient(circle at 30% 22%, rgb(255 255 255 / 0.32), transparent 32%),
+    radial-gradient(
+      circle at 30% 22%,
+      rgb(255 255 255 / 0.32),
+      transparent 32%
+    ),
     linear-gradient(135deg, rgb(22 93 105 / 0.95), rgb(18 45 58 / 0.96));
   color: #c5fbff;
   box-shadow:
@@ -8719,8 +9062,16 @@ select {
   border: 1px solid color-mix(in srgb, var(--corp), white 18%);
   border-radius: 999px;
   background:
-    radial-gradient(circle at 30% 22%, rgb(255 255 255 / 0.32), transparent 32%),
-    linear-gradient(135deg, color-mix(in srgb, var(--corp), #2a1119 34%), rgb(26 18 27 / 0.96));
+    radial-gradient(
+      circle at 30% 22%,
+      rgb(255 255 255 / 0.32),
+      transparent 32%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--corp), #2a1119 34%),
+      rgb(26 18 27 / 0.96)
+    );
   color: color-mix(in srgb, var(--corp), white 72%);
   box-shadow:
     0 4px 9px rgb(0 0 0 / 0.34),
@@ -8747,7 +9098,11 @@ select {
   border: 1px solid rgb(155 221 190 / 0.82);
   border-radius: 999px;
   background:
-    radial-gradient(circle at 30% 22%, rgb(255 255 255 / 0.32), transparent 32%),
+    radial-gradient(
+      circle at 30% 22%,
+      rgb(255 255 255 / 0.32),
+      transparent 32%
+    ),
     linear-gradient(135deg, rgb(29 91 67 / 0.95), rgb(17 42 39 / 0.96));
   color: #c9ffe6;
   box-shadow:
@@ -8778,8 +9133,16 @@ select {
   border: 1px solid color-mix(in srgb, var(--accent), white 20%);
   border-radius: 999px;
   background:
-    radial-gradient(circle at 30% 22%, rgb(255 255 255 / 0.28), transparent 32%),
-    linear-gradient(135deg, color-mix(in srgb, var(--accent), #122728 28%), rgb(13 35 36 / 0.96));
+    radial-gradient(
+      circle at 30% 22%,
+      rgb(255 255 255 / 0.28),
+      transparent 32%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--accent), #122728 28%),
+      rgb(13 35 36 / 0.96)
+    );
   color: color-mix(in srgb, var(--accent), white 78%);
   box-shadow:
     0 4px 9px rgb(0 0 0 / 0.34),
@@ -8798,7 +9161,11 @@ select {
   border-color: color-mix(in srgb, var(--ice), white 26%);
   background:
     radial-gradient(circle at 30% 22%, rgb(255 255 255 / 0.3), transparent 32%),
-    linear-gradient(135deg, color-mix(in srgb, var(--ice), #10363c 28%), rgb(12 31 38 / 0.96));
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--ice), #10363c 28%),
+      rgb(12 31 38 / 0.96)
+    );
   color: color-mix(in srgb, var(--ice), white 82%);
 }
 
@@ -8847,7 +9214,11 @@ select {
 .scoreCardStateBadge.credit {
   border-color: rgb(232 191 79 / 0.78);
   background:
-    radial-gradient(circle at 28% 24%, rgb(255 255 255 / 0.28), transparent 30%),
+    radial-gradient(
+      circle at 28% 24%,
+      rgb(255 255 255 / 0.28),
+      transparent 30%
+    ),
     linear-gradient(135deg, rgb(116 82 21 / 0.92), rgb(50 35 12 / 0.94));
   color: #ffe7a4;
 }
@@ -8855,8 +9226,16 @@ select {
 .scoreCardStateBadge.agenda {
   border-color: color-mix(in srgb, var(--agenda), white 25%);
   background:
-    radial-gradient(circle at 28% 24%, rgb(255 255 255 / 0.24), transparent 30%),
-    linear-gradient(135deg, color-mix(in srgb, var(--agenda), white 14%), color-mix(in srgb, var(--agenda), black 32%));
+    radial-gradient(
+      circle at 28% 24%,
+      rgb(255 255 255 / 0.24),
+      transparent 30%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--agenda), white 14%),
+      color-mix(in srgb, var(--agenda), black 32%)
+    );
   color: #e7f2ff;
 }
 
@@ -9021,7 +9400,8 @@ select {
 .chronicleGroupBlock.group-run {
   margin-left: 12px;
   padding-left: 14px;
-  border-left: 1px solid color-mix(in srgb, var(--chronicle-run), transparent 54%);
+  border-left: 1px solid
+    color-mix(in srgb, var(--chronicle-run), transparent 54%);
 }
 
 .chronicleGroupBlock.entriesCollapsed {
@@ -9039,9 +9419,14 @@ select {
   align-items: center;
   gap: 5px;
   padding: 3px 8px;
-  border: 1px solid color-mix(in srgb, var(--chronicle-group-accent), var(--line) 45%);
+  border: 1px solid
+    color-mix(in srgb, var(--chronicle-group-accent), var(--line) 45%);
   border-radius: 999px;
-  background: color-mix(in srgb, var(--chronicle-group-accent), var(--panel) 86%);
+  background: color-mix(
+    in srgb,
+    var(--chronicle-group-accent),
+    var(--panel) 86%
+  );
   color: color-mix(in srgb, var(--chronicle-group-accent), white 32%);
   font-family: inherit;
   font-size: 11px;
@@ -9054,11 +9439,16 @@ select {
 .chronicleGroup:hover,
 .chronicleGroup:focus-visible {
   border-color: color-mix(in srgb, var(--chronicle-group-accent), white 24%);
-  background: color-mix(in srgb, var(--chronicle-group-accent), var(--panel) 78%);
+  background: color-mix(
+    in srgb,
+    var(--chronicle-group-accent),
+    var(--panel) 78%
+  );
 }
 
 .chronicleGroup:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--chronicle-group-accent), white 30%);
+  outline: 2px solid
+    color-mix(in srgb, var(--chronicle-group-accent), white 30%);
   outline-offset: 2px;
 }
 
@@ -9143,7 +9533,10 @@ select {
 .chronicleEntry.group-corp {
   border-color: color-mix(in srgb, var(--corp-status-accent), var(--line) 58%);
   background:
-    linear-gradient(color-mix(in srgb, var(--corp-status-accent), transparent 84%), color-mix(in srgb, var(--corp-status-accent), transparent 84%)),
+    linear-gradient(
+      color-mix(in srgb, var(--corp-status-accent), transparent 84%),
+      color-mix(in srgb, var(--corp-status-accent), transparent 84%)
+    ),
     color-mix(in srgb, var(--panel), var(--chronicle-accent) 5%);
 }
 
@@ -9151,7 +9544,10 @@ select {
 .chronicleEntry.group-run {
   border-color: color-mix(in srgb, var(--runner-zone-accent), var(--line) 58%);
   background:
-    linear-gradient(color-mix(in srgb, var(--runner-zone-accent), transparent 84%), color-mix(in srgb, var(--runner-zone-accent), transparent 84%)),
+    linear-gradient(
+      color-mix(in srgb, var(--runner-zone-accent), transparent 84%),
+      color-mix(in srgb, var(--runner-zone-accent), transparent 84%)
+    ),
     color-mix(in srgb, var(--panel), var(--chronicle-accent) 5%);
 }
 
@@ -9170,8 +9566,16 @@ select {
   height: 30px;
   border: 1px solid color-mix(in srgb, var(--chronicle-accent), var(--line) 42%);
   border-radius: 8px;
-  background: color-mix(in srgb, var(--chronicle-accent), var(--accent-mix-bg) 86%);
-  color: color-mix(in srgb, var(--chronicle-accent), var(--accent-mix-text) 34%);
+  background: color-mix(
+    in srgb,
+    var(--chronicle-accent),
+    var(--accent-mix-bg) 86%
+  );
+  color: color-mix(
+    in srgb,
+    var(--chronicle-accent),
+    var(--accent-mix-text) 34%
+  );
 }
 
 .chronicleActionOrdinal {
@@ -9277,10 +9681,19 @@ select {
   display: inline-block;
   max-width: 100%;
   padding: 1px 5px;
-  border: 1px solid color-mix(in srgb, var(--chronicle-card-type-accent), var(--line) 35%);
+  border: 1px solid
+    color-mix(in srgb, var(--chronicle-card-type-accent), var(--line) 35%);
   border-radius: 6px;
-  background: color-mix(in srgb, var(--chronicle-card-type-accent), var(--accent-mix-bg) 88%);
-  color: color-mix(in srgb, var(--chronicle-card-type-accent), var(--accent-mix-text) 46%);
+  background: color-mix(
+    in srgb,
+    var(--chronicle-card-type-accent),
+    var(--accent-mix-bg) 88%
+  );
+  color: color-mix(
+    in srgb,
+    var(--chronicle-card-type-accent),
+    var(--accent-mix-text) 46%
+  );
   font: inherit;
   font-weight: inherit;
   line-height: 1.25;
@@ -9349,8 +9762,16 @@ select {
   padding: 2px 7px;
   border: 1px solid color-mix(in srgb, var(--chronicle-accent), var(--line));
   border-radius: 999px;
-  background: color-mix(in srgb, var(--chronicle-accent), var(--accent-mix-bg) 88%);
-  color: color-mix(in srgb, var(--chronicle-accent), var(--accent-mix-text) 48%);
+  background: color-mix(
+    in srgb,
+    var(--chronicle-accent),
+    var(--accent-mix-bg) 88%
+  );
+  color: color-mix(
+    in srgb,
+    var(--chronicle-accent),
+    var(--accent-mix-text) 48%
+  );
   font-size: 11px;
   font-weight: 700;
   line-height: 1.35;
@@ -9380,8 +9801,16 @@ select {
   padding: 2px 7px;
   border: 1px solid color-mix(in srgb, var(--chronicle-accent), var(--line) 45%);
   border-radius: 999px;
-  background: color-mix(in srgb, var(--chronicle-accent), var(--accent-mix-bg) 91%);
-  color: color-mix(in srgb, var(--chronicle-accent), var(--accent-mix-text) 55%);
+  background: color-mix(
+    in srgb,
+    var(--chronicle-accent),
+    var(--accent-mix-bg) 91%
+  );
+  color: color-mix(
+    in srgb,
+    var(--chronicle-accent),
+    var(--accent-mix-text) 55%
+  );
   font-size: 12px;
   line-height: 1.35;
   overflow-wrap: anywhere;
@@ -9393,11 +9822,20 @@ select {
   width: fit-content;
   max-width: 100%;
   padding: 5px 7px;
-  border: 1px solid color-mix(in srgb, var(--chronicle-card-type-accent), var(--line) 55%);
+  border: 1px solid
+    color-mix(in srgb, var(--chronicle-card-type-accent), var(--line) 55%);
   border-radius: 6px;
-  background: color-mix(in srgb, var(--chronicle-card-type-accent), var(--accent-mix-bg) 93%);
+  background: color-mix(
+    in srgb,
+    var(--chronicle-card-type-accent),
+    var(--accent-mix-bg) 93%
+  );
   cursor: help;
-  color: color-mix(in srgb, var(--chronicle-card-type-accent), var(--accent-mix-text) 46%);
+  color: color-mix(
+    in srgb,
+    var(--chronicle-card-type-accent),
+    var(--accent-mix-text) 46%
+  );
   font: inherit;
   font-size: 12px;
   line-height: 1.35;
@@ -9742,21 +10180,39 @@ select {
   background:
     linear-gradient(135deg, rgb(66 200 163 / 0.18), transparent 38%),
     linear-gradient(315deg, rgb(240 106 91 / 0.18), transparent 42%),
-    repeating-linear-gradient(90deg, rgb(255 255 255 / 0.04) 0, rgb(255 255 255 / 0.04) 1px, transparent 1px, transparent 22px),
+    repeating-linear-gradient(
+      90deg,
+      rgb(255 255 255 / 0.04) 0,
+      rgb(255 255 255 / 0.04) 1px,
+      transparent 1px,
+      transparent 22px
+    ),
     radial-gradient(circle at 50% 18%, rgb(216 189 95 / 0.18), transparent 35%);
 }
 
 .gameOverOverlay.won .gameOverBackdrop {
   background:
     linear-gradient(140deg, rgb(66 200 163 / 0.32), transparent 42%),
-    repeating-linear-gradient(90deg, rgb(255 255 255 / 0.05) 0, rgb(255 255 255 / 0.05) 1px, transparent 1px, transparent 20px),
+    repeating-linear-gradient(
+      90deg,
+      rgb(255 255 255 / 0.05) 0,
+      rgb(255 255 255 / 0.05) 1px,
+      transparent 1px,
+      transparent 20px
+    ),
     radial-gradient(circle at 48% 24%, rgb(216 189 95 / 0.22), transparent 34%);
 }
 
 .gameOverOverlay.lost .gameOverBackdrop {
   background:
     linear-gradient(140deg, rgb(240 106 91 / 0.28), transparent 43%),
-    repeating-linear-gradient(90deg, rgb(255 255 255 / 0.04) 0, rgb(255 255 255 / 0.04) 1px, transparent 1px, transparent 20px),
+    repeating-linear-gradient(
+      90deg,
+      rgb(255 255 255 / 0.04) 0,
+      rgb(255 255 255 / 0.04) 1px,
+      transparent 1px,
+      transparent 20px
+    ),
     radial-gradient(circle at 48% 24%, rgb(116 169 255 / 0.15), transparent 34%);
 }
 
@@ -9842,7 +10298,9 @@ select {
   padding: 0;
   border-color: rgb(255 255 255 / 0.22);
   background: rgb(7 12 16 / 0.7);
-  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.28), 0 14px 38px rgb(0 0 0 / 0.26);
+  box-shadow:
+    inset 0 0 0 1px rgb(0 0 0 / 0.28),
+    0 14px 38px rgb(0 0 0 / 0.26);
 }
 
 .gameOverHero.withVisualMotif .resultWinnerMotif > span {
@@ -9964,7 +10422,9 @@ select {
   width: 46px;
   height: 2px;
   background: currentColor;
-  box-shadow: 18px 14px 0 currentColor, -22px 22px 0 currentColor;
+  box-shadow:
+    18px 14px 0 currentColor,
+    -22px 22px 0 currentColor;
 }
 
 .resultWinnerMotif.corp {
@@ -10068,14 +10528,21 @@ select {
 
 .seriesStrip {
   display: grid;
-  grid-template-columns: minmax(150px, 0.8fr) minmax(190px, 0.7fr) minmax(260px, 1.25fr);
+  grid-template-columns: minmax(150px, 0.8fr) minmax(190px, 0.7fr) minmax(
+      260px,
+      1.25fr
+    );
   align-items: center;
   gap: 18px;
   padding: 14px 16px;
   border: 1px solid color-mix(in srgb, var(--runner), var(--line) 52%);
   border-radius: 10px;
   background:
-    linear-gradient(100deg, color-mix(in srgb, var(--runner), transparent 93%), transparent 42%),
+    linear-gradient(
+      100deg,
+      color-mix(in srgb, var(--runner), transparent 93%),
+      transparent 42%
+    ),
     rgb(255 255 255 / 0.06);
 }
 
@@ -10304,24 +10771,34 @@ select {
   flex: 0 0 auto;
   max-width: 100%;
   padding: 6px;
-  border: 1px solid color-mix(in srgb, var(--runner-zone-accent), var(--line) 68%);
+  border: 1px solid
+    color-mix(in srgb, var(--runner-zone-accent), var(--line) 68%);
   border-radius: 8px;
   background:
-    linear-gradient(color-mix(in srgb, var(--chronicle-run), transparent 91%), color-mix(in srgb, var(--chronicle-run), transparent 91%)),
+    linear-gradient(
+      color-mix(in srgb, var(--chronicle-run), transparent 91%),
+      color-mix(in srgb, var(--chronicle-run), transparent 91%)
+    ),
     var(--board-runner-zone-bg);
 }
 
 .zoneBoardSection > .sideZoneFrame.corp {
   border-color: color-mix(in srgb, var(--corp-zone-accent), var(--line) 68%);
   background:
-    linear-gradient(color-mix(in srgb, var(--corp-status-accent), transparent 90%), color-mix(in srgb, var(--corp-status-accent), transparent 90%)),
+    linear-gradient(
+      color-mix(in srgb, var(--corp-status-accent), transparent 90%),
+      color-mix(in srgb, var(--corp-status-accent), transparent 90%)
+    ),
     var(--board-corp-zone-bg);
 }
 
 .runnerGripHeapLayout .sideZoneFrame.corp {
   border-color: color-mix(in srgb, var(--corp-zone-accent), var(--line) 68%);
   background:
-    linear-gradient(color-mix(in srgb, var(--corp-status-accent), transparent 90%), color-mix(in srgb, var(--corp-status-accent), transparent 90%)),
+    linear-gradient(
+      color-mix(in srgb, var(--corp-status-accent), transparent 90%),
+      color-mix(in srgb, var(--corp-status-accent), transparent 90%)
+    ),
     var(--board-corp-zone-bg);
 }
 
@@ -10392,7 +10869,10 @@ select {
 }
 
 .fixedZoneCards .cardSlot + .cardSlot {
-  margin-left: var(--cards-overlap-offset, calc(var(--cards-min-width, 108px) * -0.42));
+  margin-left: var(
+    --cards-overlap-offset,
+    calc(var(--cards-min-width, 108px) * -0.42)
+  );
 }
 
 .fixedZoneCards .cardSlot:hover,
@@ -10426,17 +10906,25 @@ select {
   --zone-stack-card-height: calc(151px * var(--zone-card-scale, 1));
   --zone-stack-card-step: calc(38px * var(--zone-card-scale, 1));
   --zone-stack-visible-steps: 5;
-  --zone-stack-width: calc(var(--zone-stack-card-width) + (var(--zone-stack-card-step) * var(--zone-stack-visible-steps)));
+  --zone-stack-width: calc(
+    var(--zone-stack-card-width) +
+      (var(--zone-stack-card-step) * var(--zone-stack-visible-steps))
+  );
   box-sizing: border-box;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(var(--zone-stack-card-step), var(--zone-stack-card-step)));
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(var(--zone-stack-card-step), var(--zone-stack-card-step))
+  );
   grid-auto-rows: var(--zone-stack-card-height);
   gap: calc(8px * var(--zone-card-scale, 1)) 0;
   align-items: flex-start;
   width: var(--zone-stack-width);
   max-width: 100%;
   min-height: var(--zone-stack-card-height);
-  padding-right: calc(var(--zone-stack-card-width) - var(--zone-stack-card-step));
+  padding-right: calc(
+    var(--zone-stack-card-width) - var(--zone-stack-card-step)
+  );
   overflow-x: visible;
   overflow-y: visible;
 }
@@ -10475,7 +10963,8 @@ select {
   aspect-ratio: 5 / 7;
   position: relative;
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--runner-zone-accent), var(--line) 44%);
+  border: 1px solid
+    color-mix(in srgb, var(--runner-zone-accent), var(--line) 44%);
   border-radius: 6px;
   background-color: #151d26;
   background-image:
@@ -10493,7 +10982,11 @@ select {
   inset: 0;
   background:
     linear-gradient(135deg, rgb(255 255 255 / 0.1), transparent 36%),
-    radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--runner-zone-accent), transparent 70%), transparent 54%);
+    radial-gradient(
+      circle at 50% 42%,
+      color-mix(in srgb, var(--runner-zone-accent), transparent 70%),
+      transparent 54%
+    );
   pointer-events: none;
 }
 
@@ -10686,7 +11179,13 @@ select {
   --card-shadow: 0 8px 18px rgba(9, 37, 78, 0.16);
   --card-art-bg: linear-gradient(135deg, #dcecff, #fff7ea);
   --card-art-text-bg: #d9e4ee;
-  --card-hidden-art-bg: repeating-linear-gradient(135deg, #d8dee6 0, #d8dee6 8px, #eef2f6 8px, #eef2f6 16px);
+  --card-hidden-art-bg: repeating-linear-gradient(
+    135deg,
+    #d8dee6 0,
+    #d8dee6 8px,
+    #eef2f6 8px,
+    #eef2f6 16px
+  );
   --tooltip-bg: #ffffff;
   --tooltip-shadow: 0 12px 28px rgb(34 47 62 / 0.22);
   --accent-mix-bg: #ffffff;
@@ -10723,7 +11222,9 @@ textarea:focus-visible {
 
 .topbar {
   background: color-mix(in srgb, var(--bg), transparent 58%);
-  box-shadow: 0 1px 0 color-mix(in srgb, var(--line), transparent 42%), 0 10px 26px rgb(14 31 52 / 0.14);
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--line), transparent 42%),
+    0 10px 26px rgb(14 31 52 / 0.14);
 }
 
 .mark {
@@ -10779,7 +11280,8 @@ select,
   left: 0;
   pointer-events: none;
   z-index: 0;
-  background: url("/backgrounds/netgrid-startscreen-cyberworld.png") center center / cover no-repeat;
+  background: url("/backgrounds/netgrid-startscreen-cyberworld.png") center
+    center / cover no-repeat;
 }
 
 .setup.v07Entry::after {
@@ -10901,7 +11403,10 @@ select,
 
 .cardTooltipSettings {
   display: grid;
-  grid-template-columns: minmax(170px, 0.9fr) minmax(190px, 1fr) minmax(190px, 1fr);
+  grid-template-columns: minmax(170px, 0.9fr) minmax(190px, 1fr) minmax(
+      190px,
+      1fr
+    );
   gap: 10px;
   align-items: end;
 }
@@ -11379,9 +11884,14 @@ select,
 .resourceStripSide {
   gap: 7px;
   padding: 4px 7px;
-  border: 1px solid color-mix(in srgb, var(--side-status-accent, var(--line)), var(--line) 52%);
+  border: 1px solid
+    color-mix(in srgb, var(--side-status-accent, var(--line)), var(--line) 52%);
   border-radius: 6px;
-  background: color-mix(in srgb, var(--side-status-accent, var(--section-bg)), var(--section-bg) 86%);
+  background: color-mix(
+    in srgb,
+    var(--side-status-accent, var(--section-bg)),
+    var(--section-bg) 86%
+  );
 }
 
 .resourceStripSide.side-corp,
@@ -11435,9 +11945,14 @@ select,
   justify-content: center;
   gap: 6px;
   padding: 4px 8px;
-  border: 1px solid color-mix(in srgb, var(--side-status-accent, var(--line)), var(--line) 42%);
+  border: 1px solid
+    color-mix(in srgb, var(--side-status-accent, var(--line)), var(--line) 42%);
   border-radius: 6px;
-  background: color-mix(in srgb, var(--side-status-accent, var(--section-bg)), var(--section-bg) 80%);
+  background: color-mix(
+    in srgb,
+    var(--side-status-accent, var(--section-bg)),
+    var(--section-bg) 80%
+  );
   font-size: 12px;
   white-space: nowrap;
 }
@@ -11470,7 +11985,10 @@ select,
 }
 
 .main {
-  grid-template-columns: minmax(250px, 300px) minmax(0, 1fr) minmax(290px, 360px);
+  grid-template-columns: minmax(250px, 300px) minmax(0, 1fr) minmax(
+      290px,
+      360px
+    );
   align-items: start;
 }
 
@@ -11732,7 +12250,10 @@ select,
   padding: 8px 9px 8px 10px;
   border-bottom: 1px solid color-mix(in srgb, var(--agenda), var(--line) 54%);
   background:
-    linear-gradient(color-mix(in srgb, var(--agenda), transparent 88%), color-mix(in srgb, var(--agenda), transparent 88%)),
+    linear-gradient(
+      color-mix(in srgb, var(--agenda), transparent 88%),
+      color-mix(in srgb, var(--agenda), transparent 88%)
+    ),
     var(--panel);
 }
 
@@ -11788,18 +12309,25 @@ select,
 }
 
 .actionPanelFloatingBody .actions > .actionButton .actionButtonLabel,
-.actionPanelFloatingBody .selectedActionGroup > .actionButton .actionButtonLabel {
+.actionPanelFloatingBody
+  .selectedActionGroup
+  > .actionButton
+  .actionButtonLabel {
   -webkit-line-clamp: 3;
 }
 
 .actionPanelFloatingBody .actions > .actionButton[data-tooltip]::before,
-.actionPanelFloatingBody .selectedActionGroup > .actionButton[data-tooltip]::before {
+.actionPanelFloatingBody
+  .selectedActionGroup
+  > .actionButton[data-tooltip]::before {
   left: 28px;
   transform: translateY(-3px);
 }
 
 .actionPanelFloatingBody .actions > .actionButton[data-tooltip]::after,
-.actionPanelFloatingBody .selectedActionGroup > .actionButton[data-tooltip]::after {
+.actionPanelFloatingBody
+  .selectedActionGroup
+  > .actionButton[data-tooltip]::after {
   left: 0;
   max-width: min(430px, calc(100vw - 42px));
   transform: translateY(-3px);
@@ -11807,12 +12335,24 @@ select,
 
 .actionPanelFloatingBody .actions > .actionButton[data-tooltip]:hover::before,
 .actionPanelFloatingBody .actions > .actionButton[data-tooltip]:hover::after,
-.actionPanelFloatingBody .actions > .actionButton[data-tooltip]:focus-visible::before,
-.actionPanelFloatingBody .actions > .actionButton[data-tooltip]:focus-visible::after,
-.actionPanelFloatingBody .selectedActionGroup > .actionButton[data-tooltip]:hover::before,
-.actionPanelFloatingBody .selectedActionGroup > .actionButton[data-tooltip]:hover::after,
-.actionPanelFloatingBody .selectedActionGroup > .actionButton[data-tooltip]:focus-visible::before,
-.actionPanelFloatingBody .selectedActionGroup > .actionButton[data-tooltip]:focus-visible::after {
+.actionPanelFloatingBody
+  .actions
+  > .actionButton[data-tooltip]:focus-visible::before,
+.actionPanelFloatingBody
+  .actions
+  > .actionButton[data-tooltip]:focus-visible::after,
+.actionPanelFloatingBody
+  .selectedActionGroup
+  > .actionButton[data-tooltip]:hover::before,
+.actionPanelFloatingBody
+  .selectedActionGroup
+  > .actionButton[data-tooltip]:hover::after,
+.actionPanelFloatingBody
+  .selectedActionGroup
+  > .actionButton[data-tooltip]:focus-visible::before,
+.actionPanelFloatingBody
+  .selectedActionGroup
+  > .actionButton[data-tooltip]:focus-visible::after {
   transform: translateY(0);
 }
 
@@ -11862,7 +12402,10 @@ select,
   padding: 8px 9px 8px 10px;
   border-bottom: 1px solid color-mix(in srgb, var(--runner), var(--line) 54%);
   background:
-    linear-gradient(color-mix(in srgb, var(--runner), transparent 88%), color-mix(in srgb, var(--runner), transparent 88%)),
+    linear-gradient(
+      color-mix(in srgb, var(--runner), transparent 88%),
+      color-mix(in srgb, var(--runner), transparent 88%)
+    ),
     var(--panel);
 }
 
@@ -11990,7 +12533,9 @@ select,
   border-left: 2px solid color-mix(in srgb, var(--runner), var(--line) 40%);
 }
 
-.aiDecisionDebugCollapsible .aiDecisionDebugCollapsible .aiDecisionDebugCollapsible {
+.aiDecisionDebugCollapsible
+  .aiDecisionDebugCollapsible
+  .aiDecisionDebugCollapsible {
   margin-left: 8px;
   border-left-color: color-mix(in srgb, var(--cue), var(--line) 45%);
 }
@@ -12042,7 +12587,10 @@ select,
   border-left-color: var(--cue);
 }
 
-.aiDecisionDebugCollapsible .aiDecisionDebugCollapsible .aiDecisionDebugCollapsible > summary::before {
+.aiDecisionDebugCollapsible
+  .aiDecisionDebugCollapsible
+  .aiDecisionDebugCollapsible
+  > summary::before {
   border-left-color: var(--corp);
 }
 
@@ -12071,14 +12619,20 @@ select,
 }
 
 .aiDecisionDebugContent > .aiDecisionDebugCollapsible > summary strong,
-.aiDecisionDebugContent > .aiDecisionDebugCollapsible > summary .aiDecisionDebugSectionSummary {
+.aiDecisionDebugContent
+  > .aiDecisionDebugCollapsible
+  > summary
+  .aiDecisionDebugSectionSummary {
   overflow: visible;
   text-overflow: clip;
   white-space: normal;
   overflow-wrap: anywhere;
 }
 
-.aiDecisionDebugContent > .aiDecisionDebugCollapsible > summary .aiDecisionDebugSectionSummary {
+.aiDecisionDebugContent
+  > .aiDecisionDebugCollapsible
+  > summary
+  .aiDecisionDebugSectionSummary {
   flex: 1 1 170px;
 }
 
@@ -12087,7 +12641,11 @@ select,
   color: color-mix(in srgb, var(--text), var(--runner) 22%);
 }
 
-.aiDecisionDebugCollapsible .aiDecisionDebugCollapsible .aiDecisionDebugCollapsible > summary strong,
+.aiDecisionDebugCollapsible
+  .aiDecisionDebugCollapsible
+  .aiDecisionDebugCollapsible
+  > summary
+  strong,
 .aiDecisionDebugActionDetails > summary strong {
   color: color-mix(in srgb, var(--text), var(--cue) 28%);
 }
@@ -12497,8 +13055,16 @@ select,
 }
 
 .runBreakerHint {
-  border-color: color-mix(in srgb, var(--runner-zone-accent), var(--runner) 28%);
-  background: color-mix(in srgb, var(--runner-zone-accent), var(--section-bg) 87%);
+  border-color: color-mix(
+    in srgb,
+    var(--runner-zone-accent),
+    var(--runner) 28%
+  );
+  background: color-mix(
+    in srgb,
+    var(--runner-zone-accent),
+    var(--section-bg) 87%
+  );
 }
 
 .actionGroup {
@@ -12558,7 +13124,10 @@ select,
   min-height: 0;
   border-color: color-mix(in srgb, var(--corp-zone-accent), var(--line) 52%);
   background:
-    linear-gradient(color-mix(in srgb, var(--corp-status-accent), transparent 84%), color-mix(in srgb, var(--corp-status-accent), transparent 84%)),
+    linear-gradient(
+      color-mix(in srgb, var(--corp-status-accent), transparent 84%),
+      color-mix(in srgb, var(--corp-status-accent), transparent 84%)
+    ),
     color-mix(in srgb, var(--corp-status-accent), var(--section-bg) 78%);
 }
 
@@ -12568,12 +13137,20 @@ select,
 }
 
 .server .lane {
-  border-color: color-mix(in srgb, var(--corp-zone-accent), var(--lane-border) 55%);
+  border-color: color-mix(
+    in srgb,
+    var(--corp-zone-accent),
+    var(--lane-border) 55%
+  );
   background: color-mix(in srgb, var(--corp-status-accent), var(--lane-bg) 82%);
 }
 
 .server .serverLead {
-  border-right-color: color-mix(in srgb, var(--corp-zone-accent), transparent 56%);
+  border-right-color: color-mix(
+    in srgb,
+    var(--corp-zone-accent),
+    transparent 56%
+  );
 }
 
 .corpHqHandPanel {
@@ -12582,7 +13159,10 @@ select,
 }
 
 .cards {
-  grid-template-columns: repeat(auto-fill, minmax(var(--cards-min-width, 118px), 1fr));
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(var(--cards-min-width, 118px), 1fr)
+  );
 }
 
 .card {
@@ -12647,7 +13227,12 @@ select,
   --overlay-frame-bottom-padding: 10px;
   --overlay-rules-bottom-padding: 3px;
   color: #f3f7f8;
-  background: linear-gradient(180deg, rgb(10 16 24 / 0.04) 0%, rgb(9 15 22 / 0.12) 48%, rgb(7 12 18 / 0.3) 100%);
+  background: linear-gradient(
+    180deg,
+    rgb(10 16 24 / 0.04) 0%,
+    rgb(9 15 22 / 0.12) 48%,
+    rgb(7 12 18 / 0.3) 100%
+  );
 }
 
 .hardwareImageOverlay.overlayTextDensityMedium {
@@ -12675,7 +13260,11 @@ select,
   padding: 3px 7px;
   border: 1px solid rgb(211 178 113 / 0.84);
   border-radius: 4px;
-  background: linear-gradient(180deg, rgb(172 138 81 / 0.9) 0%, rgb(97 73 34 / 0.95) 100%);
+  background: linear-gradient(
+    180deg,
+    rgb(172 138 81 / 0.9) 0%,
+    rgb(97 73 34 / 0.95) 100%
+  );
   box-shadow:
     inset 0 1px 0 rgb(255 241 198 / 0.36),
     0 1px 4px rgb(0 0 0 / 0.3);
@@ -12707,7 +13296,12 @@ select,
   padding: 0 7px;
   border: 1px solid rgb(238 222 180 / 0.88);
   border-radius: 999px;
-  background: radial-gradient(circle at 32% 25%, rgb(248 233 197 / 0.95) 0%, rgb(195 161 98 / 0.98) 45%, rgb(121 88 43 / 1) 100%);
+  background: radial-gradient(
+    circle at 32% 25%,
+    rgb(248 233 197 / 0.95) 0%,
+    rgb(195 161 98 / 0.98) 45%,
+    rgb(121 88 43 / 1) 100%
+  );
   color: #160f05;
   font-size: 14px;
   font-weight: 900;
@@ -12754,10 +13348,15 @@ select,
   display: grid;
   grid-template-rows: auto 1fr;
   gap: var(--overlay-frame-gap);
-  padding: var(--overlay-frame-top-padding) var(--overlay-frame-horizontal-padding) var(--overlay-frame-bottom-padding);
+  padding: var(--overlay-frame-top-padding)
+    var(--overlay-frame-horizontal-padding) var(--overlay-frame-bottom-padding);
   border: 1px solid rgb(216 184 123 / 0.68);
   border-radius: 4px;
-  background: linear-gradient(180deg, rgb(29 34 41 / 0.82) 0%, rgb(13 18 24 / 0.95) 100%);
+  background: linear-gradient(
+    180deg,
+    rgb(29 34 41 / 0.82) 0%,
+    rgb(13 18 24 / 0.95) 100%
+  );
   box-shadow:
     inset 0 1px 0 rgb(247 227 182 / 0.18),
     0 2px 6px rgb(0 0 0 / 0.3);
@@ -12797,12 +13396,21 @@ select,
 
 .operationImageOverlay {
   color: #fdf3ed;
-  background: linear-gradient(180deg, rgb(19 9 11 / 0.05) 0%, rgb(24 11 13 / 0.16) 50%, rgb(18 8 11 / 0.34) 100%);
+  background: linear-gradient(
+    180deg,
+    rgb(19 9 11 / 0.05) 0%,
+    rgb(24 11 13 / 0.16) 50%,
+    rgb(18 8 11 / 0.34) 100%
+  );
 }
 
 .operationImageOverlay .hardwareImageOverlayTop {
   border-color: rgb(232 148 124 / 0.88);
-  background: linear-gradient(180deg, rgb(171 69 52 / 0.92) 0%, rgb(106 33 24 / 0.96) 100%);
+  background: linear-gradient(
+    180deg,
+    rgb(171 69 52 / 0.92) 0%,
+    rgb(106 33 24 / 0.96) 100%
+  );
   box-shadow:
     inset 0 1px 0 rgb(255 210 197 / 0.32),
     0 1px 4px rgb(0 0 0 / 0.34);
@@ -12814,13 +13422,22 @@ select,
 
 .operationImageOverlay .hardwareImageOverlayCost {
   border-color: rgb(255 210 192 / 0.92);
-  background: radial-gradient(circle at 32% 25%, rgb(255 228 216 / 0.97) 0%, rgb(231 153 126 / 0.98) 46%, rgb(157 70 49 / 1) 100%);
+  background: radial-gradient(
+    circle at 32% 25%,
+    rgb(255 228 216 / 0.97) 0%,
+    rgb(231 153 126 / 0.98) 46%,
+    rgb(157 70 49 / 1) 100%
+  );
   color: #2b0f08;
 }
 
 .operationImageOverlay .hardwareImageOverlayFrame {
   border-color: rgb(238 159 136 / 0.72);
-  background: linear-gradient(180deg, rgb(41 18 20 / 0.84) 0%, rgb(22 10 12 / 0.95) 100%);
+  background: linear-gradient(
+    180deg,
+    rgb(41 18 20 / 0.84) 0%,
+    rgb(22 10 12 / 0.95) 100%
+  );
   box-shadow:
     inset 0 1px 0 rgb(255 208 194 / 0.2),
     0 2px 6px rgb(0 0 0 / 0.32);
@@ -13007,10 +13624,14 @@ select,
   display: grid;
   gap: 6px;
   padding: 12px;
-  border: 1px solid color-mix(in srgb, var(--runner-zone-accent), var(--line) 68%);
+  border: 1px solid
+    color-mix(in srgb, var(--runner-zone-accent), var(--line) 68%);
   border-radius: 8px;
   background:
-    linear-gradient(color-mix(in srgb, var(--chronicle-run), transparent 91%), color-mix(in srgb, var(--chronicle-run), transparent 91%)),
+    linear-gradient(
+      color-mix(in srgb, var(--chronicle-run), transparent 91%),
+      color-mix(in srgb, var(--chronicle-run), transparent 91%)
+    ),
     var(--board-runner-zone-bg);
 }
 
@@ -13061,10 +13682,14 @@ select,
   width: fit-content;
   max-width: 100%;
   padding: 6px;
-  border: 1px solid color-mix(in srgb, var(--runner-zone-accent), var(--line) 68%);
+  border: 1px solid
+    color-mix(in srgb, var(--runner-zone-accent), var(--line) 68%);
   border-radius: 8px;
   background:
-    linear-gradient(color-mix(in srgb, var(--chronicle-run), transparent 91%), color-mix(in srgb, var(--chronicle-run), transparent 91%)),
+    linear-gradient(
+      color-mix(in srgb, var(--chronicle-run), transparent 91%),
+      color-mix(in srgb, var(--chronicle-run), transparent 91%)
+    ),
     var(--board-runner-zone-bg);
 }
 
@@ -13088,17 +13713,25 @@ select,
   --runner-grip-card-height: calc(151px * var(--zone-card-scale, 1));
   --runner-grip-card-step: calc(24px * var(--zone-card-scale, 1));
   --runner-grip-visible-steps: 5;
-  --runner-grip-stack-width: calc(var(--runner-grip-card-width) + (var(--runner-grip-card-step) * var(--runner-grip-visible-steps)));
+  --runner-grip-stack-width: calc(
+    var(--runner-grip-card-width) +
+      (var(--runner-grip-card-step) * var(--runner-grip-visible-steps))
+  );
   box-sizing: border-box;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(var(--runner-grip-card-step), var(--runner-grip-card-step)));
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(var(--runner-grip-card-step), var(--runner-grip-card-step))
+  );
   grid-auto-rows: var(--runner-grip-card-height);
   align-items: flex-start;
   width: var(--runner-grip-stack-width);
   min-width: var(--runner-grip-card-width);
   max-width: 100%;
   min-height: var(--runner-grip-card-height);
-  padding-right: calc(var(--runner-grip-card-width) - var(--runner-grip-card-step));
+  padding-right: calc(
+    var(--runner-grip-card-width) - var(--runner-grip-card-step)
+  );
   overflow: visible;
 }
 
@@ -13133,10 +13766,16 @@ select,
   --corp-hq-card-height: calc(151px * var(--zone-card-scale, 1));
   --corp-hq-card-step: calc(24px * var(--zone-card-scale, 1));
   --corp-hq-visible-steps: 5;
-  --corp-hq-stack-width: calc(var(--corp-hq-card-width) + (var(--corp-hq-card-step) * var(--corp-hq-visible-steps)));
+  --corp-hq-stack-width: calc(
+    var(--corp-hq-card-width) +
+      (var(--corp-hq-card-step) * var(--corp-hq-visible-steps))
+  );
   box-sizing: border-box;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(var(--corp-hq-card-step), var(--corp-hq-card-step)));
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(var(--corp-hq-card-step), var(--corp-hq-card-step))
+  );
   grid-auto-rows: var(--corp-hq-card-height);
   align-items: flex-start;
   width: var(--corp-hq-stack-width);
@@ -13180,8 +13819,10 @@ select,
   max-width: 100%;
 }
 
-.opponentRunnerBoardStrip .sideZoneFrame.runnerOpponentHeapCompact.sideZoneFrameCountOnly,
-.runnerOpponentZonesStrip .sideZoneFrame.runnerOpponentHeapCompact.sideZoneFrameCountOnly {
+.opponentRunnerBoardStrip
+  .sideZoneFrame.runnerOpponentHeapCompact.sideZoneFrameCountOnly,
+.runnerOpponentZonesStrip
+  .sideZoneFrame.runnerOpponentHeapCompact.sideZoneFrameCountOnly {
   justify-self: start;
   width: fit-content;
 }
@@ -13193,7 +13834,10 @@ select,
 
 .runnerHeapCompactPreview .cardSlot {
   width: var(--zone-stack-card-width, calc(108px * var(--zone-card-scale, 1)));
-  max-width: var(--zone-stack-card-width, calc(108px * var(--zone-card-scale, 1)));
+  max-width: var(
+    --zone-stack-card-width,
+    calc(108px * var(--zone-card-scale, 1))
+  );
 }
 
 .runnerHeapCompactPreview .cardSlot + .cardSlot {
@@ -13317,7 +13961,10 @@ select,
 
 .specialZoneOverlapRow .archivesOverflowBadge {
   margin-left: 0;
-  margin-top: max(0px, calc(var(--special-zone-card-width, 140px) * 0.7 - 12px));
+  margin-top: max(
+    0px,
+    calc(var(--special-zone-card-width, 140px) * 0.7 - 12px)
+  );
 }
 
 .rigGroups {
@@ -13329,10 +13976,14 @@ select,
   width: fit-content;
   max-width: 100%;
   padding: 6px;
-  border: 1px solid color-mix(in srgb, var(--runner-zone-accent), var(--line) 68%);
+  border: 1px solid
+    color-mix(in srgb, var(--runner-zone-accent), var(--line) 68%);
   border-radius: 8px;
   background:
-    linear-gradient(color-mix(in srgb, var(--chronicle-run), transparent 91%), color-mix(in srgb, var(--chronicle-run), transparent 91%)),
+    linear-gradient(
+      color-mix(in srgb, var(--chronicle-run), transparent 91%),
+      color-mix(in srgb, var(--chronicle-run), transparent 91%)
+    ),
     var(--board-runner-zone-bg);
 }
 
@@ -13407,7 +14058,11 @@ select,
 }
 
 .rigSectionTitle.rigGroupSideLabel {
-  font-size: clamp(13px, calc(var(--cards-min-width, var(--mini-cards-min-width, 96px)) * 0.135), 18px);
+  font-size: clamp(
+    13px,
+    calc(var(--cards-min-width, var(--mini-cards-min-width, 96px)) * 0.135),
+    18px
+  );
   color: color-mix(in srgb, var(--runner), white 12%);
   border-left: 0;
   border-right: 0;
@@ -13422,10 +14077,15 @@ select,
   height: 22px;
   margin-left: -1px;
   place-items: center;
-  border: 1px solid color-mix(in srgb, var(--runner-zone-accent), var(--line) 46%);
+  border: 1px solid
+    color-mix(in srgb, var(--runner-zone-accent), var(--line) 46%);
   border-radius: 6px;
   color: var(--runner-zone-accent);
-  background: color-mix(in srgb, var(--runner-zone-accent), var(--section-bg) 88%);
+  background: color-mix(
+    in srgb,
+    var(--runner-zone-accent),
+    var(--section-bg) 88%
+  );
 }
 
 .rigSectionLead .zoneLimitBadge {
@@ -13446,12 +14106,26 @@ select,
   box-sizing: border-box;
   display: grid;
   place-items: center;
-  width: var(--cards-min-width, var(--mini-cards-min-width, calc(108px * var(--zone-card-scale, 1))));
-  min-height: calc(var(--cards-min-width, var(--mini-cards-min-width, calc(108px * var(--zone-card-scale, 1)))) * 1.4);
+  width: var(
+    --cards-min-width,
+    var(--mini-cards-min-width, calc(108px * var(--zone-card-scale, 1)))
+  );
+  min-height: calc(
+    var(
+        --cards-min-width,
+        var(--mini-cards-min-width, calc(108px * var(--zone-card-scale, 1)))
+      ) *
+      1.4
+  );
   padding: 6px;
-  border: 1px dashed color-mix(in srgb, var(--runner-zone-accent), var(--line) 50%);
+  border: 1px dashed
+    color-mix(in srgb, var(--runner-zone-accent), var(--line) 50%);
   border-radius: 6px;
-  background: color-mix(in srgb, var(--runner-zone-accent), var(--section-bg) 88%);
+  background: color-mix(
+    in srgb,
+    var(--runner-zone-accent),
+    var(--section-bg) 88%
+  );
   color: var(--muted);
   font-size: 12px;
   font-weight: 700;
@@ -13488,9 +14162,14 @@ select,
   min-width: 0;
   max-width: 100%;
   padding: 6px 8px;
-  border: 1px solid color-mix(in srgb, var(--runner-zone-accent), var(--line) 60%);
+  border: 1px solid
+    color-mix(in srgb, var(--runner-zone-accent), var(--line) 60%);
   border-radius: 6px;
-  background: color-mix(in srgb, var(--runner-zone-accent), var(--section-bg) 84%);
+  background: color-mix(
+    in srgb,
+    var(--runner-zone-accent),
+    var(--section-bg) 84%
+  );
 }
 
 .rigGroupHorizontal .rigGroupSideLabel {
@@ -13523,12 +14202,20 @@ select,
   transform: rotate(180deg);
   white-space: nowrap;
   letter-spacing: 0.03em;
-  font-size: clamp(10px, calc(var(--cards-min-width, var(--mini-cards-min-width, 96px)) * 0.1), 13px);
+  font-size: clamp(
+    10px,
+    calc(var(--cards-min-width, var(--mini-cards-min-width, 96px)) * 0.1),
+    13px
+  );
   max-block-size: 100%;
 }
 
 .sideZoneTitle.rigGroupSideLabel {
-  font-size: clamp(13px, calc(var(--cards-min-width, var(--mini-cards-min-width, 96px)) * 0.135), 18px);
+  font-size: clamp(
+    13px,
+    calc(var(--cards-min-width, var(--mini-cards-min-width, 96px)) * 0.135),
+    18px
+  );
   letter-spacing: 0.05em;
   transform: rotate(180deg) translateY(-5px);
 }
@@ -13573,14 +14260,22 @@ select,
 .sideZoneTitle.runnerZoneSideLabel,
 .serverContextButton.runnerZoneSideLabel {
   color: var(--runner-zone-accent);
-  border-right-color: color-mix(in srgb, var(--runner-zone-accent), var(--line) 48%);
+  border-right-color: color-mix(
+    in srgb,
+    var(--runner-zone-accent),
+    var(--line) 48%
+  );
 }
 
 .rigGroupSideLabel.corpZoneSideLabel,
 .sideZoneTitle.corpZoneSideLabel,
 .serverContextButton.corpZoneSideLabel {
   color: var(--corp-zone-accent);
-  border-right-color: color-mix(in srgb, var(--corp-zone-accent), var(--line) 48%);
+  border-right-color: color-mix(
+    in srgb,
+    var(--corp-zone-accent),
+    var(--line) 48%
+  );
 }
 
 .rigGroupCards {
@@ -13596,9 +14291,14 @@ select,
   align-items: flex-start;
   gap: 6px;
   padding: 5px;
-  border: 1px solid color-mix(in srgb, var(--runner-zone-accent), var(--line) 58%);
+  border: 1px solid
+    color-mix(in srgb, var(--runner-zone-accent), var(--line) 58%);
   border-radius: 8px;
-  background: color-mix(in srgb, var(--runner-zone-accent), var(--section-bg) 94%);
+  background: color-mix(
+    in srgb,
+    var(--runner-zone-accent),
+    var(--section-bg) 94%
+  );
 }
 
 .runnerHostedCardConnector {
@@ -13619,9 +14319,14 @@ select,
 .runnerHostedCardBadge {
   width: max-content;
   padding: 2px 6px;
-  border: 1px solid color-mix(in srgb, var(--runner-zone-accent), var(--line) 42%);
+  border: 1px solid
+    color-mix(in srgb, var(--runner-zone-accent), var(--line) 42%);
   border-radius: 999px;
-  background: color-mix(in srgb, var(--runner-zone-accent), var(--section-bg) 84%);
+  background: color-mix(
+    in srgb,
+    var(--runner-zone-accent),
+    var(--section-bg) 84%
+  );
   color: var(--runner-zone-accent);
   font-size: 9px;
   font-weight: 800;
@@ -13666,9 +14371,14 @@ select,
   flex: 0 0 clamp(24px, calc(var(--rig-group-card-width, 118px) * 0.22), 38px);
   width: clamp(24px, calc(var(--rig-group-card-width, 118px) * 0.22), 38px);
   min-height: calc(var(--rig-group-card-width, 118px) * 1.28);
-  border: 1px dashed color-mix(in srgb, var(--runner-zone-accent), var(--line) 50%);
+  border: 1px dashed
+    color-mix(in srgb, var(--runner-zone-accent), var(--line) 50%);
   border-radius: 6px;
-  background: color-mix(in srgb, var(--runner-zone-accent), var(--section-bg) 88%);
+  background: color-mix(
+    in srgb,
+    var(--runner-zone-accent),
+    var(--section-bg) 88%
+  );
   opacity: 0.78;
 }
 
@@ -13678,7 +14388,10 @@ select,
 }
 
 .miniCards {
-  grid-template-columns: repeat(auto-fill, minmax(var(--mini-cards-min-width, 88px), 1fr));
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(var(--mini-cards-min-width, 88px), 1fr)
+  );
 }
 
 .cardPreviewPanel .card.preview .cardRulesPreview {
@@ -13898,7 +14611,10 @@ select,
 @media (max-width: 1180px) and (min-width: 821px) {
   .sidePanel {
     display: grid;
-    grid-template-columns: minmax(172px, 0.82fr) minmax(260px, 1.32fr) minmax(176px, 0.86fr);
+    grid-template-columns: minmax(172px, 0.82fr) minmax(260px, 1.32fr) minmax(
+        176px,
+        0.86fr
+      );
     align-items: stretch;
     gap: 6px;
   }
@@ -14033,8 +14749,14 @@ select,
   }
 
   .runnerHeapOverlapRow .cardSlot {
-    width: var(--zone-stack-card-width, calc(108px * var(--zone-card-scale, 1)));
-    max-width: var(--zone-stack-card-width, calc(108px * var(--zone-card-scale, 1)));
+    width: var(
+      --zone-stack-card-width,
+      calc(108px * var(--zone-card-scale, 1))
+    );
+    max-width: var(
+      --zone-stack-card-width,
+      calc(108px * var(--zone-card-scale, 1))
+    );
   }
 
   .runnerHeapOverlapRow .cardSlot + .cardSlot {
@@ -14042,8 +14764,14 @@ select,
   }
 
   .runnerHeapCompactPreview .cardSlot {
-    width: var(--zone-stack-card-width, calc(108px * var(--zone-card-scale, 1)));
-    max-width: var(--zone-stack-card-width, calc(108px * var(--zone-card-scale, 1)));
+    width: var(
+      --zone-stack-card-width,
+      calc(108px * var(--zone-card-scale, 1))
+    );
+    max-width: var(
+      --zone-stack-card-width,
+      calc(108px * var(--zone-card-scale, 1))
+    );
   }
 
   .runnerHeapCompactPreview .cardSlot + .cardSlot {
