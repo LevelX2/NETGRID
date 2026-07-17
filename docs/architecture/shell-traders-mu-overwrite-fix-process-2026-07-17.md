@@ -2,7 +2,7 @@
 
 ## Status
 
-`implementing`
+`packages_complete_ready_for_main_integration`
 
 ## Quelle und Vorgabe
 
@@ -39,8 +39,9 @@ kostenlos installieren.
 ## Annahmen
 
 - Die bestehende generische Runner-Programmtrash-vor-Installations-Choice wird
-  wiederverwendet oder eng erweitert; es entsteht keine zweite konkurrierende
-  MU-Choice-Familie.
+  wiederverwendet oder eng erweitert. Die Umsetzung darf einen eng typisierten
+  Delayed-Install-Resolver nutzen, wenn normale Installationskosten und Klicks
+  fachlich nicht auf die kostenlose Shell-Traders-Installation passen.
 - Hardware benötigt keine MU und bleibt vom Programmtrash-Pfad unberührt.
 - Unique- und sonstige zusätzliche Installationsbeschränkungen bleiben
   bestehen und werden erst am jeweils fachlich richtigen Zeitpunkt geprüft.
@@ -91,12 +92,12 @@ Bei einem roten Done-Gate bleibt der Prozess im aktuellen Zustand.
 
 ## Paketfolge
 
-| Paket | Titel | Ergebnis |
-| --- | --- | --- |
-| P0 | Prozess und Worktree | Verbindliches Artefakt, Goal, eigener Branch und Worktree |
-| P1 | Regelvertrag und Regression | Rote Tests reproduzieren Vorbereitung trotz MU-Druck und verpflichtenden Programmtrash beim letzten Counter |
-| P2 | Engine-Korrektur | Minimaler Resolver-/Choice-Schnitt erfüllt die neuen Tests |
-| P3 | Abschluss und Dokumentation | Reviews/Status aktualisiert, fokussierte und finale Checks grün |
+| Paket | Titel                       | Ergebnis                                                                                                    |
+| ----- | --------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| P0    | Prozess und Worktree        | Verbindliches Artefakt, Goal, eigener Branch und Worktree                                                   |
+| P1    | Regelvertrag und Regression | Rote Tests reproduzieren Vorbereitung trotz MU-Druck und verpflichtenden Programmtrash beim letzten Counter |
+| P2    | Engine-Korrektur            | Minimaler Resolver-/Choice-Schnitt erfüllt die neuen Tests                                                  |
+| P3    | Abschluss und Dokumentation | Reviews/Status aktualisiert, fokussierte und finale Checks grün                                             |
 
 ## Paketdetails
 
@@ -143,7 +144,7 @@ Bei einem roten Done-Gate bleibt der Prozess im aktuellen Zustand.
   Choice-/Installationshelfer.
 - Checks: fokussierte Engine-Tests, Engine-Typecheck, `git diff --check`.
 - Done-Gate: P1-Tests und bestehende Shell-Traders-Tests grün.
-- Commit: `fix(engine): resolve Shell Traders installs under MU pressure`.
+- Commit: `fix(engine): resolve delayed installs under MU pressure`.
 
 ### P3 – Abschluss und Dokumentation
 
@@ -170,6 +171,37 @@ Bei einem roten Done-Gate bleibt der Prozess im aktuellen Zustand.
   `corepack pnpm --filter @netgrid/engine typecheck`.
 - Nach Main-Abgleich werden die final relevanten Checks wiederholt.
 - Vor jedem Commit: `git diff --check` und paketgenaues Staging.
+
+## Umsetzungsergebnis
+
+- Der Vorbereitungsresolver prüft MU nicht mehr vorzeitig für Programme mit
+  Shell-Countern. Der konkrete Nutzerfall mit `Rent-I-Con` (2 MU) bleibt daher
+  auch bei vollständig belegtem Runner-Memory als LegalAction auswählbar.
+- Beim letzten Shell-Counter öffnet die Engine nur bei tatsächlichem MU-Mangel
+  die generische Pending Choice `delayed_install_memory`. Counter und
+  Set-Aside-Ziel bleiben bis zur erfolgreichen Choice unverändert.
+- Die Auflösung revalidiert Runner-Seite, installierte Quelle, vorbereitetes
+  Ziel, letzten Counter, ausgewählte installierte Programme und ausreichend
+  freigemachte MU. Danach werden die gewählten Programme getrasht, der letzte
+  Counter entfernt und das Ziel kostenlos installiert.
+- Bezahlter Pfad und Startzugpfad verwenden denselben Resolver. Der
+  Startzugpfad setzt nach der MU-Choice die verbliebenen Startzugeffekte fort.
+- Choice-Quelle und Ability-ID sind bewusst kartennamensneutral auf die
+  bestehende Abstraktion `delayed_install_memory` ausgerichtet.
+
+## Verifikationsergebnis
+
+- Fokussierte Shell-Traders-/Choice-Regressionen: 3 Testdateien, 49 Tests
+  grün.
+- Engine-Typecheck: grün.
+- Vollständige Engine-Suite: 188 Testdateien, 1.717 Tests grün.
+- `format:changed`, `check:package-boundaries` und `git diff --check`: grün.
+- Der zusätzliche Card-Function-Abstraction-Check bleibt auf diesem Branch
+  identisch zum synchronen `main` rot, weil dessen generierte
+  Fingerprint-Baseline bereits vor dieser Korrektur driftet. Die neue
+  Choice-Familie selbst verwendet keinen Kartennamen und erweitert diese
+  technische Schuld nicht; die Baseline wurde deshalb nicht stillschweigend
+  neu geschrieben.
 
 ## Worktree-, Git- und Integrationsregeln
 

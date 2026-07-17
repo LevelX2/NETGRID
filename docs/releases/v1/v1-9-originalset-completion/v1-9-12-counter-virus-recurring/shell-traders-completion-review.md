@@ -1,12 +1,40 @@
 # V1.9.12 Shell Traders Completion Review
 
-Stand: 2026-05-14
-Status: implemented_completion
+Stand: 2026-07-17 (MU-Korrektur)
+Status: implemented_completion_corrected
 Primaerer Agent: release-implementation-agent
 
 ## Zweck
 
 Diese Completion-Nacharbeit ergaenzt den formalen V1.9.12-Abschluss, ohne `docs/releases/v1/v1-9-originalset-completion/v1-9-12-counter-virus-recurring/final-review.md` umzuschreiben. Repariert wurde genau `The Shell Traders` (`onr_v1_176_the-shell-traders`) als enge V1.9.12-Spur. Es wurde keine weitere Karte promotet.
+
+## Korrekturstand 2026-07-17
+
+- Ein Livebefund aus `match_8107a9dffe8cd234`, State-Version 208, zeigte den
+  verbliebenen Vertragsfehler: Bei 4/4 MU bot die Engine `Rent-I-Con` (2 MU)
+  trotz zweier installierter `The Shell Traders` nicht als Vorbereitungsziel
+  an.
+- Die MU-Prüfung erfolgt nicht mehr beim Beiseitelegen eines Programms mit
+  Shell-Countern. Entscheidend ist die verpflichtende Installation, wenn der
+  letzte Shell-Counter entfernt wird.
+- Reicht die MU dann nicht aus, bleibt der letzte Counter zunächst liegen und
+  die Engine öffnet die kartennamensneutrale, verpflichtende Runner-Choice
+  `delayed_install_memory`. Erst nach ausreichend ausgewähltem Programmtrash
+  entfernt sie den Counter und installiert das vorbereitete Programm
+  kostenlos.
+- Quelle, Ziel, Counterstand, Programmauswahl und freigemachte MU werden bei
+  der Choice-Auflösung erneut validiert. Der Vertrag gilt gleichermaßen für
+  die bezahlte 1-Credit-Fähigkeit und das automatische Entfernen zu
+  Runner-Zugbeginn.
+- Regressionen schützen den konkreten `Rent-I-Con`-Zielpfad, ungültige und
+  stale Choices, Corp-Sichtbarkeit, Startzugfortsetzung, Replay und StateHash.
+
+### Verifikation der Korrektur
+
+- Fokussiert: 3 Testdateien mit 49 Tests grün.
+- Engine-Typecheck: grün.
+- Vollständige Engine-Suite: 188 Testdateien mit 1.717 Tests grün.
+- Changed-File-Format, Package Boundaries und Diff-Check: grün.
 
 ## Umgesetzter Kartenvertrag
 
