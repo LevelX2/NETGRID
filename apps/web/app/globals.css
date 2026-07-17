@@ -12355,6 +12355,33 @@ select,
   gap: 6px;
 }
 
+.runActionDivider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.runActionDivider::before,
+.runActionDivider::after {
+  content: "";
+  min-width: 12px;
+  height: 1px;
+  flex: 1 1 auto;
+  background: color-mix(in srgb, var(--run-active-border), transparent 38%);
+}
+
+.runActionDivider span {
+  flex: 0 1 auto;
+  text-align: center;
+}
+
 .runActionButton {
   min-height: 34px;
   width: 100%;

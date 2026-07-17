@@ -2676,6 +2676,31 @@ export function runWindowActions(
   });
 }
 
+export function splitRunWindowActionsByServer(
+  view: PlayerView,
+  actions: LegalAction[],
+): {
+  currentServerActions: LegalAction[];
+  otherServerRezActions: LegalAction[];
+} {
+  const currentServerActions: LegalAction[] = [];
+  const otherServerRezActions: LegalAction[] = [];
+  for (const action of actions) {
+    if (
+      view.run &&
+      action.type === "rez_ice" &&
+      action.payload?.rootRez === true &&
+      typeof action.payload.serverId === "string" &&
+      action.payload.serverId !== view.run.attackedServerId
+    ) {
+      otherServerRezActions.push(action);
+    } else {
+      currentServerActions.push(action);
+    }
+  }
+  return { currentServerActions, otherServerRezActions };
+}
+
 function isAccessWindowAction(action: LegalAction): boolean {
   return (
     action.type === "access_card" ||

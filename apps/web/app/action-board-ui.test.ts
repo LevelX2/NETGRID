@@ -94,6 +94,7 @@ import {
   selectedSubtypeDetailLabel,
   selectedTargetDetailLabel,
   splitLegalActions,
+  splitRunWindowActionsByServer,
   storedCreditAmount,
   storedCreditSourceLabel,
 } from "./action-board-ui";
@@ -4025,6 +4026,65 @@ describe("V1.0.6 resource and card-display helpers", () => {
     );
 
     expect(runWindowActions(running, [choiceAction])).toEqual([choiceAction]);
+  });
+
+  it("places cross-server Asset and Upgrade rez actions at the end of the Run window", () => {
+    const running = view("corp", {
+      run: {
+        attackedServerId: "rd",
+        phase: "approach_ice",
+        position: { kind: "ice", serverId: "rd", iceIndex: 0 },
+        successful: false,
+      },
+    });
+    const otherServerRez = legalAction(
+      "corp",
+      "rez_ice",
+      "remote_asset",
+      "Hacker Tracker Central in Remote 2 rezzen",
+      {
+        cardId: "remote_asset",
+        rootRez: true,
+        serverId: "remote_2",
+      },
+      "run.approach_ice",
+    );
+    const attackedServerRez = legalAction(
+      "corp",
+      "rez_ice",
+      "rd_upgrade",
+      "Red Herrings in R&D rezzen",
+      { cardId: "rd_upgrade", rootRez: true, serverId: "rd" },
+      "run.approach_ice",
+    );
+    const approachedIceRez = legalAction(
+      "corp",
+      "rez_ice",
+      "rd_ice",
+      "Data Wall rezzen",
+      { cardId: "rd_ice", iceId: "rd_ice", serverId: "rd" },
+      "run.approach_ice",
+    );
+    const pass = legalAction(
+      "corp",
+      "decline_rez",
+      "game_rule",
+      "Nicht rezzen",
+      { serverId: "rd" },
+      "run.approach_ice",
+    );
+
+    expect(
+      splitRunWindowActionsByServer(running, [
+        otherServerRez,
+        attackedServerRez,
+        approachedIceRez,
+        pass,
+      ]),
+    ).toEqual({
+      currentServerActions: [attackedServerRez, approachedIceRez, pass],
+      otherServerRezActions: [otherServerRez],
+    });
   });
 
   it("keeps long run-window breaker examples compact while leaving costs to chips", () => {

@@ -23,6 +23,7 @@ import {
   runWindowActionButtonLabel,
   runWindowStatusLabel,
   serverDisplayLabel,
+  splitRunWindowActionsByServer,
 } from "../../app/action-board-ui";
 import { enrichVisibleCard } from "../cards/card-view-model";
 import { OverflowAwareActionButton } from "../actions/ActionControls";
@@ -158,6 +159,8 @@ export function RunTimelineOverlay({
   const regularRunActions = choiceAction
     ? runActions.filter((action) => action.actionId !== choiceAction.actionId)
     : runActions;
+  const { currentServerActions, otherServerRezActions } =
+    splitRunWindowActionsByServer(view, regularRunActions);
   const canEnableCorpRunAutoPass =
     view.side === "corp" &&
     regularRunActions.some(isAutomaticCorpRunPassAction);
@@ -258,7 +261,7 @@ export function RunTimelineOverlay({
             aria-label="Run-Aktionen"
             data-testid="run-action-bar"
           >
-            {regularRunActions.map((action) => {
+            {currentServerActions.map((action) => {
               const compactLabel = runWindowActionButtonLabel(view, action);
               const fullLabel =
                 compactLabel.startsWith("SMC:") && action.label
@@ -270,6 +273,34 @@ export function RunTimelineOverlay({
                   className="button primary actionButton runActionButton"
                   key={action.actionId}
                   label={fullLabel}
+                  displayLabel={compactLabel}
+                  tone={actionButtonTone(view, action)}
+                  onClick={() => onAction(action)}
+                  disabled={actionDisabled}
+                  type="button"
+                  data-testid="run-action-button"
+                  data-action-type={action.type}
+                  iconSize={14}
+                />
+              );
+            })}
+            {otherServerRezActions.length > 0 ? (
+              <div
+                className="runActionDivider"
+                role="separator"
+                aria-label="Auf anderen Servern rezzen"
+              >
+                <span>Auf anderen Servern rezzen</span>
+              </div>
+            ) : null}
+            {otherServerRezActions.map((action) => {
+              const compactLabel = runWindowActionButtonLabel(view, action);
+              return (
+                <OverflowAwareActionButton
+                  action={action}
+                  className="button primary actionButton runActionButton"
+                  key={action.actionId}
+                  label={runAwareActionButtonLabel(view, action)}
                   displayLabel={compactLabel}
                   tone={actionButtonTone(view, action)}
                   onClick={() => onAction(action)}
