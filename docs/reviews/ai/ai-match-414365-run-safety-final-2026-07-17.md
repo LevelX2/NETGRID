@@ -1,6 +1,6 @@
 # Finalreview: Match 414365 Run-Sicherheit (2026-07-17)
 
-Status: fachlich verifiziert, lokale Integration ausstehend
+Status: abgeschlossen und lokal nach `main` integriert
 
 ## Entscheidung
 
@@ -55,3 +55,6 @@ sondern nur ein gegen sinnlose Wiederholung gewichteter Kontextwert.
   Kartentext selbst; der Match-03575-R&D-Gegenvertrag bleibt grün.
 
 Führende Vorstufe: `docs/reviews/ai/ai-match-414365-run-safety-red-evidence-2026-07-17.md`.
+
+Die geprüften Paketcommits wurden ausschließlich lokal nach `main`
+integriert. Es gab keinen Push und keinen Pull Request.

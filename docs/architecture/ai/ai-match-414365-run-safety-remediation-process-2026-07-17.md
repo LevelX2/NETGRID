@@ -1,6 +1,6 @@
 # KI-Match-414365: Run-Sicherheit und Kartenrollen (2026-07-17)
 
-Status: fachlich verifiziert, lokale Integration ausstehend
+Status: abgeschlossen und lokal nach `main` integriert
 
 ## Ziel und freigegebener Umfang
 
@@ -43,7 +43,7 @@ Abschlussregression.
 
 ### P0 – Prozess und Preflight
 
-Status: fachlich abgeschlossen, lokale Integration ausstehend
+Status: abgeschlossen
 
 - Rollen-, Wissens-, Skill- und Checkpoint-Verträge geprüft.
 - Worktree offline und lockfile-fest eingerichtet.
@@ -91,8 +91,8 @@ Status: abgeschlossen
 - Evidence, Final-Report und Monatslog nachziehen.
 - 210 fokussierte und angrenzende Tests, AI-Typecheck und `check:ai` sind
   grün; die drei AI-Shards sind mit 371 Dateien und 2.557 Tests grün.
-- Aktuelles `main` defensiv integrieren, lokal mergen und Worktree/Branch
-  nach verifiziertem Erfolg entfernen.
+- Aktuelles `main` wurde defensiv integriert und anschließend lokal nach
+  `main` gemergt; Worktree und temporärer Branch werden im Abschluss entfernt.
 
 ## Stoppregeln
 
