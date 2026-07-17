@@ -2,8 +2,8 @@
 
 ## Status
 
-In Umsetzung auf `codex/ice-and-data-expose-feedback` im Worktree
-`C:\Projekte\NETGRID-worktrees\ice-and-data-expose-feedback`.
+Umsetzung vollständig auf `codex/ice-and-data-expose-feedback`; lokale
+Main-Integration und Worktree-Cleanup stehen noch aus.
 
 ## Quelle/Vorgabe
 
@@ -152,3 +152,16 @@ committe jedes Done-Gate, bevor das nächste Paket beginnt.
   verändern.
 - Alle Paketcommits sind lokal nach `main` integriert; Worktree und
   Arbeitsbranch sind nachweislich entfernt.
+
+## Umsetzungsergebnis
+
+- Der Expose-Resolver für ein einzelnes Data Fort projiziert nur die bereits
+  public exposed `exposedCardInstanceIds` zusätzlich zu Titel und Position.
+- Die Chronik nennt zu jeder exposed Karte die Fort-Position.
+- Das Board hebt diese konkreten, im PlayerView sichtbaren Karten lokal grün
+  hervor. Die Hervorhebung endet nach zehn Sekunden oder dem nächsten
+  `turnSerial`.
+- `Exposed-Karten hervorheben` ist standardmäßig aktiv, lokal persistiert und
+  beeinflusst weder Chronik noch Match-State.
+- Details und Checks stehen im
+  `docs/reviews/web/ice-and-data-expose-feedback-final-review-2026-07-17.md`.
