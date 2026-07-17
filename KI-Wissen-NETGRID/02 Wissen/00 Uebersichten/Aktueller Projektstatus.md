@@ -91,6 +91,14 @@ Stand: 2026-07-16
   Amortisation, Quellenwahl und einem frühen Cashout; Broker-Code wurde dafür
   noch nicht geändert. Führend ist
   `docs/reviews/ai/match-ecfe3ce-engine-hints-remediation-final-2026-07-16.md`.
+- Die zwei zuletzt abgeschlossenen Corp-KI-Spiele vom 17.07.2026 sind mit
+  192/192 Decisions analysiert und behoben. Geschützte Scorelines können
+  spekulative Punish-Pläne konvertieren, Score-Remote-Roots bleiben für
+  Agenden frei, contestable Agenda-Risiken berücksichtigen den Punktwert und
+  ausreichend geschützte Matchpoint-Linien werden nicht pauschal blockiert.
+  Nicht-ICE-Rezzes verwenden durchgängig `rez_card`; beide Match-Deck-Audits
+  melden null Hint-Blocker und null Warnungen. Führend ist
+  `docs/reviews/ai/latest-two-corp-match-remediation-final-review-2026-07-17.md`.
 - Die Planebene besitzt zusätzlich ein begrenztes Planportfolio: kurzfristige
   Score- und Gefahrenpläne bleiben Vordergrund beziehungsweise Interrupt,
   während Broker-/Bank-Zyklen und langfristige Corp-Scoring-Remotes mit

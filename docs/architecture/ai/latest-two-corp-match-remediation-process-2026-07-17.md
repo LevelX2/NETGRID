@@ -1,6 +1,6 @@
 # Letzte zwei Corp-KI-Spiele: Remediation-Prozess vom 17.07.2026
 
-Status: aktiv; P4 abgeschlossen, P5 aktiv
+Status: abgeschlossen und lokal integrationsbereit
 
 ## Quelle und Zielprüfung
 
@@ -242,5 +242,8 @@ Hauptworkspace nur für Runtime-Evidence und den finalen Merge.
   ist mit 1.731/1.732 Tests fachlich grün; ausschließlich der bereits auf
   unverändertem `main` reproduzierte Modulgrößen-Baselinefehler
   (`turn-runtime-resolvers.ts`: 3.280 > 3.200 Zeilen) bleibt rot.
-- P5 aktiv: Abschlussreview, Wissenspflege, defensiver Main-Abgleich,
-  kombinierte Schlussgates, lokaler Merge und Cleanup stehen aus.
+- P5 abgeschlossen: Abschlussreview und Wissensbasis sind gepflegt. Die
+  vollständigen AI- und Engine-Gates sowie alle drei direkten Typechecks sind
+  gelaufen; der einzige rote Engine-Test ist als identischer `main`-Baseline-
+  fehler verifiziert. Der Arbeitsbranch ist damit für defensiven Main-Abgleich,
+  lokalen Merge und verifiziertes Cleanup freigegeben.
