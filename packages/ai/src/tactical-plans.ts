@@ -168,7 +168,31 @@ export function evaluateTacticalPlans(
     ...(previousPlanPortfolio ? { previous: previousPlanPortfolio } : {}),
     turnKey: planPortfolioTurnKey(context.input),
   });
-  const planPortfolioUsed = redactedPlanPortfolioFacts(planPortfolio);
+  const candidates = context.candidates ?? [];
+  const interruptPlan = planPortfolio.interrupt
+    ? planAlternatives.find(
+        (plan) => plan.planId === planPortfolio.interrupt?.sourcePlanId,
+      )
+    : undefined;
+  const interruptMapping = interruptPlan
+    ? mapPlanStepToLegalActions(
+        interruptPlan,
+        interruptPlan.currentStep,
+        candidates,
+        context.input,
+      )
+    : undefined;
+  const interruptCanAct =
+    interruptMapping?.status === "matched" &&
+    interruptMapping.legalActions.length > 0;
+  const planPortfolioUsed = [
+    ...redactedPlanPortfolioFacts(planPortfolio),
+    ...(planPortfolio.interrupt && !interruptCanAct
+      ? [
+          `plan_portfolio_unmappable_interrupt_released:${planPortfolio.interrupt.planType}`,
+        ]
+      : []),
+  ];
   const planActionContributionScores = aggregatePlanActionContributions({
     portfolio: planPortfolio,
     contributions: buildPlanPortfolioActionContributions(planPortfolio),
@@ -176,10 +200,23 @@ export function evaluateTacticalPlans(
   const planActionContributionsUsed = redactedPlanActionContributionFacts(
     planActionContributionScores,
   );
-  const candidates = context.candidates ?? [];
   for (const plan of planAlternatives) {
     const portfolioEntry = planPortfolioEntryForPlan(planPortfolio, plan);
-    if (portfolioEntry && !planPortfolioEntryCanAct(portfolioEntry)) continue;
+    const terminalMatchpointPlan = plan.scoreBreakdown.some(
+      (component) => component.key === "runner_matchpoint_run_conversion",
+    );
+    const releasedSuspendedEntry =
+      portfolioEntry?.lifecycle === "suspended" &&
+      !interruptCanAct &&
+      terminalMatchpointPlan &&
+      planPortfolioEntryCanAct({ ...portfolioEntry, lifecycle: "active" });
+    if (
+      portfolioEntry &&
+      !planPortfolioEntryCanAct(portfolioEntry) &&
+      !releasedSuspendedEntry
+    ) {
+      continue;
+    }
     if (!planCanMapToCurrentAction(plan)) continue;
     const mapping = mapPlanStepToLegalActions(
       plan,

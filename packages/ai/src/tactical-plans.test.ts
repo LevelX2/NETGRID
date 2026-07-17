@@ -3515,6 +3515,61 @@ describe("tactical plan model", () => {
     );
   });
 
+  it("releases a terminal foreground run when tag cleanup cannot map", () => {
+    const hqRun = legalAction("run-hq", "runner", "start_run", {
+      serverId: "hq",
+    });
+    const gain = legalAction("gain-credit", "runner", "gain_credit");
+    const input = aiInput("runner", [hqRun, gain]);
+    input.playerView.own.tags = 1;
+    input.playerView.own.credits = 1;
+    input.playerView.own.clicks = 3;
+    input.playerView.own.agendaPoints = 6;
+    input.playerView.agendaPointsToWin = 7;
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
+    const candidates = buildActionSemanticCandidates({
+      legalActions: input.legalActions,
+      observerSide: "runner",
+      stateVersion: input.playerView.stateVersion,
+    });
+    const runnerRunTargetEvaluations = [
+      {
+        actionId: hqRun.actionId,
+        targetServerId: "hq",
+        targetKind: "hq",
+        recommendation: "gain_credits_first",
+        accessPayoff: "unknown",
+        pathPassability: "reachable",
+        knownAccessState: "unknown",
+        creditsAfterRun: 1,
+        pathCost: 0,
+        scoreThreat: false,
+        score: -40,
+        evidence: [],
+      } as RunnerRunTargetEvaluation,
+    ];
+
+    const result = evaluateTacticalPlans({
+      input,
+      candidates,
+      runnerRunTargetEvaluations,
+    });
+
+    expect(result.planPortfolio?.interrupt?.planType).toBe(
+      "runner.clear_tags_or_survive",
+    );
+    expect(result.selectedPlan).toMatchObject({
+      planId: "runner.opportunistic_central_run:hq",
+      currentStep: expect.objectContaining({ kind: "probe_central" }),
+    });
+    expect(
+      result.selectedMapping?.legalActions.map((action) => action.actionId),
+    ).toEqual([hqRun.actionId]);
+    expect(result.planPortfolioUsed).toContain(
+      "plan_portfolio_unmappable_interrupt_released:runner.clear_tags_or_survive",
+    );
+  });
+
   it("selects a successful-run follow-up before ordinary economy", () => {
     const successFollowup = {
       ...legalAction(

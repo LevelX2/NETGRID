@@ -81,7 +81,10 @@ export function runnerRunTargetPlanScoreBreakdown(
             reason: [
               `target:${evaluation.targetServerId}`,
               `score:${evaluation.score}`,
-              `peer_scores:${runnerCentralRunPeerScores(context).join(",")}`,
+              `peer_scores:${runnerCentralRunPeerScores(
+                context,
+                evaluation.recommendation,
+              ).join(",")}`,
             ].join("|"),
           },
         ]
@@ -109,6 +112,9 @@ export function runnerRunTargetPlanScoreBreakdown(
             reason: evaluation
               ? [
                   `target:${evaluation.targetServerId}`,
+                  `path:${evaluation.pathPassability}`,
+                  `path_cost:${evaluation.pathCost}`,
+                  `credits_after:${evaluation.creditsAfterRun}`,
                   `funding_gap:${Math.max(0, -evaluation.creditsAfterRun)}`,
                   `clicks:${context.input.playerView.own.clicks}`,
                   `payoff:${evaluation.accessPayoff}`,
@@ -121,7 +127,8 @@ export function runnerRunTargetPlanScoreBreakdown(
   ];
 }
 
-const RUNNER_MATCHPOINT_RUN_CONVERSION_PRIORITY_BOOST = 520;
+const RUNNER_FUNDED_MATCHPOINT_RUN_CONVERSION_PRIORITY_BOOST = 520;
+const RUNNER_REACHABLE_MATCHPOINT_RUN_CONVERSION_PRIORITY_BOOST = 720;
 const RUNNER_CENTRAL_RUN_RELATIVE_QUALITY_LIMIT = 240;
 
 function runnerCentralRunRelativeQualityPlanDelta(
@@ -168,20 +175,9 @@ function runnerMatchpointRunConversionPriorityBoost(
   context: TacticalPlanBuildContext,
   evaluation: RunnerRunTargetEvaluation | undefined,
 ): number {
-  if (!evaluation) return 0;
-  if (evaluation.targetKind !== "rd" && evaluation.targetKind !== "hq")
-    return 0;
-  const pointsNeeded =
-    context.input.playerView.agendaPointsToWin -
-    context.input.playerView.own.agendaPoints;
-  if (pointsNeeded > 1) return 0;
-  if (
-    evaluation.accessPayoff !== "unknown" &&
-    evaluation.accessPayoff !== "fresh" &&
-    evaluation.accessPayoff !== "access_bonus" &&
-    evaluation.accessPayoff !== "agenda"
-  ) {
-    return 0;
+  if (!runnerCentralMatchpointAccessOpportunity(context, evaluation)) return 0;
+  if (runnerReachableCentralMatchpointRun(context, evaluation)) {
+    return RUNNER_REACHABLE_MATCHPOINT_RUN_CONVERSION_PRIORITY_BOOST;
   }
   if (
     evaluation.recommendation !== "gain_credits_first" ||
@@ -195,7 +191,49 @@ function runnerMatchpointRunConversionPriorityBoost(
     context.input.playerView.own.clicks - 1,
   );
   if (fundingGap === 0 || fundingGap > preparatoryClicks) return 0;
-  return RUNNER_MATCHPOINT_RUN_CONVERSION_PRIORITY_BOOST;
+  return RUNNER_FUNDED_MATCHPOINT_RUN_CONVERSION_PRIORITY_BOOST;
+}
+
+function runnerCentralMatchpointAccessOpportunity(
+  context: TacticalPlanBuildContext,
+  evaluation: RunnerRunTargetEvaluation | undefined,
+): evaluation is RunnerRunTargetEvaluation {
+  if (!evaluation) return false;
+  if (evaluation.targetKind !== "rd" && evaluation.targetKind !== "hq") {
+    return false;
+  }
+  const pointsNeeded =
+    context.input.playerView.agendaPointsToWin -
+    context.input.playerView.own.agendaPoints;
+  if (pointsNeeded > 1) return false;
+  return (
+    evaluation.accessPayoff === "unknown" ||
+    evaluation.accessPayoff === "fresh" ||
+    evaluation.accessPayoff === "access_bonus" ||
+    evaluation.accessPayoff === "agenda"
+  );
+}
+
+function runnerReachableCentralMatchpointRun(
+  context: TacticalPlanBuildContext,
+  evaluation: RunnerRunTargetEvaluation | undefined,
+): boolean {
+  if (!runnerCentralMatchpointAccessOpportunity(context, evaluation)) {
+    return false;
+  }
+  if (
+    evaluation.recommendation !== "run_now" &&
+    evaluation.recommendation !== "run_if_free" &&
+    evaluation.recommendation !== "gain_credits_first"
+  ) {
+    return false;
+  }
+  return (
+    context.input.playerView.own.clicks > 0 &&
+    evaluation.pathPassability === "reachable" &&
+    evaluation.pathCost <= 1 &&
+    evaluation.creditsAfterRun >= 0
+  );
 }
 
 function runnerEconomyTransitionRunPriorityDelta(
@@ -511,6 +549,10 @@ export function runnerRunTargetCurrentStep(
     context.runnerEconomyPosture?.fundingNeed === true &&
     context.input.playerView.own.credits <
       context.runnerEconomyPosture.desiredCreditReserve;
+  const preserveReachableMatchpointRun = runnerReachableCentralMatchpointRun(
+    context,
+    evaluation,
+  );
   if (evaluation?.recommendation === "draw_for_damage_buffer") {
     return createPlanStep({
       stepId: `draw_hand_buffer_before_run:${evaluation.targetServerId}`,
@@ -525,6 +567,7 @@ export function runnerRunTargetCurrentStep(
   if (
     evaluation?.recommendation === "gain_credits_first" &&
     !preserveLastClickForScoreThreat &&
+    !preserveReachableMatchpointRun &&
     (boundedPathFunding || urgentContestFunding || concreteEconomyFunding)
   ) {
     return createPlanStep({
@@ -546,6 +589,9 @@ export function runnerRunTargetCurrentStep(
       ...(defaultStep.rationale ?? []),
       ...(preserveLastClickForScoreThreat
         ? ["preserve last click for reachable remote score threat"]
+        : []),
+      ...(preserveReachableMatchpointRun
+        ? ["convert reachable low-cost central run at matchpoint"]
         : []),
     ],
   });

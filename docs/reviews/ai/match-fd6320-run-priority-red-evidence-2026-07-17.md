@@ -98,6 +98,15 @@ Matchpoint-Planbonus greift nur für `gain_credits_first` zusammen mit
 `blocked_unpayable`; der bereits erreichbare HQ-Run erhält daher keinen
 terminalen Konvertierungswert.
 
+Der spielgleiche Checkpoint zeigte zusätzlich die nachgelagerte Portfolio-
+Grenze: Sobald der HQ-Plan den terminalen Bonus erhält und Planrang 1 erreicht,
+suspendiert ein aktiver Tag-Cleanup-Interrupt weiterhin das Foreground. Bei nur
+1 Credit existiert jedoch keine legale Tag-Entfernung; der Interrupt kann auf
+keine LegalAction gemappt werden. Ohne Revalidation fällt die Auswahl deshalb
+auf Handkarten-Funding zurück. Die generische Korrektur muss daher sowohl den
+erreichbaren Matchpoint-Run bewerten als auch ausschließlich dieses terminale
+Foreground freigeben, wenn der reaktive Interrupt aktuell nicht ausführbar ist.
+
 ### Checkpoint und Gegenprobe
 
 - Fixture:

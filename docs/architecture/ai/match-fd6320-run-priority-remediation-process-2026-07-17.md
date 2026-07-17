@@ -2,11 +2,12 @@
 
 ## Status
 
-P1 bis P3 sind abgeschlossen; P4 ist aktiv. Beide historischen Findings wurden
-auf unverändertem aktuellem Code spielgleich als `behavior_regression` rot
-reproduziert. F01 und seine inverse R&D-Gegenprobe sind nach der generischen
-relativen Zielqualitätskorrektur grün; F02 bleibt bis P4 gezielt rot. Änderungen
-erfolgen ausschließlich im separaten Worktree.
+P1 bis P4 sind abgeschlossen; P5 ist aktiv. Beide historischen Findings und
+ihre Gegenproben sind grün. F01 erhält die konkrete relative Zentralziel-
+Qualität innerhalb derselben Empfehlungsklasse. F02 erhält einen eng begrenzten
+terminalen Bonus; ein aktuell nicht abbildbarer Tag-Cleanup-Interrupt darf nur
+dieses Matchpoint-Foreground nicht mehr suspendieren. Änderungen erfolgen
+ausschließlich im separaten Worktree.
 
 ## Quelle und Zielprüfung
 

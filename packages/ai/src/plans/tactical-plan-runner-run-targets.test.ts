@@ -327,6 +327,104 @@ describe("runnerPressureProbeAllowance", () => {
     );
   });
 
+  it("converts an already reachable low-cost central run at matchpoint", () => {
+    const hqRun = runAction("run-hq", "hq");
+    const evaluation = runTargetEvaluation({
+      actionId: hqRun.actionId,
+      targetServerId: "hq",
+      targetKind: "hq",
+      recommendation: "gain_credits_first",
+      accessPayoff: "unknown",
+      scoreThreat: false,
+      score: -40,
+      pathPassability: "reachable",
+      creditsAfterRun: 1,
+      pathCost: 0,
+    });
+    const context = planContext({
+      primaryStrategyId: "runner.rig_first",
+      runnerClicks: 3,
+      runnerAgendaPoints: 6,
+      agendaPointsToWin: 7,
+      runTargetEvaluations: [evaluation],
+    });
+
+    expect(runnerAdjustedPlanPriority(context, hqRun, 740)).toBe(1280);
+    expect(
+      runnerRunTargetCurrentStep(context, hqRun, {
+        stepId: "probe_central:hq",
+        kind: "probe_central",
+        desiredActionSemantics: ["run.start"],
+      }),
+    ).toMatchObject({ kind: "probe_central" });
+    expect(runnerRunTargetPlanScoreBreakdown(context, hqRun, 740)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "runner_matchpoint_run_conversion",
+          value: 720,
+        }),
+      ]),
+    );
+  });
+
+  it("does not boost a reachable central with known low payoff at matchpoint", () => {
+    const hqRun = runAction("run-hq", "hq");
+    const evaluation = runTargetEvaluation({
+      actionId: hqRun.actionId,
+      targetServerId: "hq",
+      targetKind: "hq",
+      recommendation: "known_no_current_payoff",
+      accessPayoff: "known_low_value",
+      scoreThreat: false,
+      score: -620,
+      pathPassability: "reachable",
+      creditsAfterRun: 1,
+      pathCost: 0,
+    });
+    const context = planContext({
+      primaryStrategyId: "runner.rig_first",
+      runnerAgendaPoints: 6,
+      agendaPointsToWin: 7,
+      runTargetEvaluations: [evaluation],
+    });
+
+    expect(runnerAdjustedPlanPriority(context, hqRun, 740)).toBe(120);
+    expect(runnerRunTargetPlanScoreBreakdown(context, hqRun, 740)).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ key: "runner_matchpoint_run_conversion" }),
+      ]),
+    );
+  });
+
+  it("does not force a materially paid reachable central at matchpoint", () => {
+    const hqRun = runAction("run-hq", "hq");
+    const evaluation = runTargetEvaluation({
+      actionId: hqRun.actionId,
+      targetServerId: "hq",
+      targetKind: "hq",
+      recommendation: "gain_credits_first",
+      accessPayoff: "unknown",
+      scoreThreat: false,
+      score: -120,
+      pathPassability: "reachable",
+      creditsAfterRun: 0,
+      pathCost: 2,
+    });
+    const context = planContext({
+      primaryStrategyId: "runner.rig_first",
+      runnerAgendaPoints: 6,
+      agendaPointsToWin: 7,
+      runTargetEvaluations: [evaluation],
+    });
+
+    expect(runnerAdjustedPlanPriority(context, hqRun, 740)).toBe(560);
+    expect(runnerRunTargetPlanScoreBreakdown(context, hqRun, 740)).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ key: "runner_matchpoint_run_conversion" }),
+      ]),
+    );
+  });
+
   it("does not boost a matchpoint run that cannot still be funded this turn", () => {
     const rdRun = runAction("run-rd", "rd");
     const evaluation = runTargetEvaluation({
