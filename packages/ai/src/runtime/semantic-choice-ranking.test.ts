@@ -772,6 +772,27 @@ describe("tacticalPlanMappedChoice", () => {
     expect(result.choice?.action.actionId).toBe("draw");
   });
 
+  it("yields a weak cumulative install when a basic draw is clearly better", () => {
+    const install = legalAction("install-memory-support", "install_card");
+    const draw = legalAction("draw", "draw_card");
+    const mappedInstall = choice(install, 88, [], {
+      key: "runner_persistent_install_fit",
+      value: 94,
+      reason: "delta:cumulative_capacity|duplicate:useful_backup|fit:376",
+    });
+    const drawChoice = choice(draw, 348);
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [drawChoice, mappedInstall],
+      bestHandCardMapping([install]),
+      drawChoice,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("draw");
+    expect(result.overrideReason).toBe("deferred_development_mapping_yield");
+  });
+
   it("yields a low-delta development install to a materially stronger bank commitment", () => {
     const install = legalAction("install-pressure-hardware", "install_card");
     const bank = legalAction("load-bank", "activated_card_ability");

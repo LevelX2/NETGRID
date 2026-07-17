@@ -70,7 +70,7 @@ describe("runnerRunLockReleaseScoreComponent", () => {
 
     const component = runnerRunLockReleaseScoreComponent(
       current,
-      releaseAction(),
+      releaseAction(1),
     );
 
     expect(component).toMatchObject({
@@ -78,7 +78,17 @@ describe("runnerRunLockReleaseScoreComponent", () => {
       value: 1800,
     });
     expect(component?.reason).toContain("release_context:viable_followup");
-    expect(component?.reason).toContain("reserve_after_probe:9");
+    expect(component?.reason).toContain("reserve_after_probe:10");
+  });
+
+  it("does not pay an expensive speculative lock below own matchpoint", () => {
+    const current = input();
+    current.playerView.opponent.agendaPoints = 4;
+    current.playerView.own.credits = 12;
+
+    expect(
+      runnerRunLockReleaseScoreComponent(current, releaseAction(2)),
+    ).toBeUndefined();
   });
 
   it("releases for a reachable public two-point terminal remote", () => {
@@ -167,12 +177,12 @@ function input(): AiDecisionInput {
   } as unknown as AiDecisionInput;
 }
 
-function releaseAction(): LegalAction {
+function releaseAction(credits = 2): LegalAction {
   return {
     actionId: "runner.trigger_ability",
     side: "runner",
     type: "trigger_ability",
-    costs: [{ clicks: 1, credits: 2 }],
+    costs: [{ clicks: 1, credits }],
     payload: {
       abilityId: "pay_to_remove_run_lock",
       v1920RunnerRunLockAbility: "pay_to_remove_run_lock",

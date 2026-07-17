@@ -434,6 +434,7 @@ export function tacticalPlanMappedChoice(
       inferiorRunTargetShouldYield ||
       corpBoardTriageMismatchShouldYield ||
       backgroundBankBuildShouldYield ||
+      deferredDevelopmentInstallShouldYield ||
       hardInterruptShouldYield ||
       noNeedSearchShouldYield ||
       coverageProbeRunShouldYield ||
@@ -455,23 +456,25 @@ export function tacticalPlanMappedChoice(
                 ? "low_value_run_event_mapping_yield"
                 : mappedNonPositiveAgainstPositive
                   ? "mapped_nonpositive_against_positive"
-                  : repeatedRunShouldYield
-                    ? "repeated_run_mapping_yield"
-                    : acuteHandBufferShouldYield
-                      ? "acute_hand_buffer_mapping_yield"
-                      : damageReactionReserveShouldYield
-                        ? "damage_reaction_reserve_mapping_yield"
-                        : lowValueRecoveryShouldYield
-                          ? "low_value_recovery_mapping_yield"
-                          : inferiorRunTargetShouldYield
-                            ? "inferior_run_target_mapping_yield"
-                            : corpBoardTriageMismatchShouldYield
-                              ? "corp_board_triage_mismatch_yield"
-                              : backgroundBankBuildShouldYield
-                                ? "background_bank_build_mapping_yield"
-                                : hardInterruptShouldYield
-                                  ? "runner_hard_interrupt"
-                                  : threshold.reason,
+                  : deferredDevelopmentInstallShouldYield
+                    ? "deferred_development_mapping_yield"
+                    : repeatedRunShouldYield
+                      ? "repeated_run_mapping_yield"
+                      : acuteHandBufferShouldYield
+                        ? "acute_hand_buffer_mapping_yield"
+                        : damageReactionReserveShouldYield
+                          ? "damage_reaction_reserve_mapping_yield"
+                          : lowValueRecoveryShouldYield
+                            ? "low_value_recovery_mapping_yield"
+                            : inferiorRunTargetShouldYield
+                              ? "inferior_run_target_mapping_yield"
+                              : corpBoardTriageMismatchShouldYield
+                                ? "corp_board_triage_mismatch_yield"
+                                : backgroundBankBuildShouldYield
+                                  ? "background_bank_build_mapping_yield"
+                                  : hardInterruptShouldYield
+                                    ? "runner_hard_interrupt"
+                                    : threshold.reason,
         overrideThreshold: threshold.scoreGap,
         scoreGap,
       };
@@ -951,6 +954,9 @@ function tacticalPlanMarginalDevelopmentInstallShouldYield(
     overrideChoice.action.type === "draw_card" ||
     overrideChoice.action.type === "gain_credit";
   const immediateHandPlayOverride = overrideChoice.action.type === "play_event";
+  const minimumScoreGap = basicCapacityOverride
+    ? 200
+    : PLAN_MAPPED_CHOICE_MAX_SCORE_GAP;
   if (
     (mapping.plan.type !== "runner.develop_hand_card" &&
       mapping.plan.type !== "runner.play_best_hand_card") ||
@@ -961,7 +967,7 @@ function tacticalPlanMarginalDevelopmentInstallShouldYield(
       !basicCapacityOverride &&
       !immediateHandPlayOverride) ||
     overrideChoice.score <= 0 ||
-    scoreGap <= PLAN_MAPPED_CHOICE_MAX_SCORE_GAP
+    scoreGap <= minimumScoreGap
   ) {
     return false;
   }

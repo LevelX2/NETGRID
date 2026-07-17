@@ -36770,7 +36770,7 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         },
         {
-          "value": "rnd_pressure",
+          "value": "rd_pressure",
           "category": "alias_to_strategy_goal",
           "triageCategory": "strategy_alias",
           "mapsTo": [

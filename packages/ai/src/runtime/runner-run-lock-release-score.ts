@@ -42,9 +42,14 @@ export function runnerRunLockReleaseScoreComponent(
   const clicksAfterRelease = input.playerView.own.clicks - clickCost;
   const creditsAfterRelease = input.playerView.own.credits - creditCost;
   if (clicksAfterRelease < 1 || creditsAfterRelease < 0) return undefined;
+  const ownAtMatchpoint =
+    (input.playerView.own.agendaPoints ?? 0) >=
+    input.playerView.agendaPointsToWin - 1;
   if (
     !terminalThreat &&
-    (clicksAfterRelease < 2 || !installedBreakerAvailable(input))
+    (clicksAfterRelease < 2 ||
+      !installedBreakerAvailable(input) ||
+      (creditCost > 1 && !ownAtMatchpoint))
   ) {
     return undefined;
   }
@@ -83,6 +88,7 @@ export function runnerRunLockReleaseScoreComponent(
       `follow_up_server:${followUp.serverId}`,
       `estimated_probe_credits:${followUp.estimatedProbeCredits}`,
       `reserve_after_probe:${reserveAfterProbe}`,
+      `own_at_matchpoint:${ownAtMatchpoint}`,
       `release_context:${terminalThreat ? "terminal_contest" : "viable_followup"}`,
       ...(terminalThreat?.evidence ?? []),
     ].join("|"),

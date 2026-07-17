@@ -311,6 +311,45 @@ describe("candidateMatchesStep", () => {
 
     expect(trashPriority).toBeGreaterThan(genericPriority);
   });
+
+  it("prefers a basic run over spending a run event on an open server", () => {
+    const step = planStep("probe_central", ["run.start"]);
+    const plan = tacticalPlan(step, "runner");
+    const input = runnerInput();
+    input.playerView.servers = [{ id: "rd", label: "R&D", ice: [], root: [] }];
+    const dependencies = testDependencies();
+    const basicRun = legalAction(
+      "run-rd",
+      "start_run",
+      { serverId: "rd" },
+      "runner",
+    );
+    const runEvent = legalAction(
+      "event-run-rd",
+      "play_event",
+      { serverId: "rd", runnerEventRun: true },
+      "runner",
+    );
+
+    const basicPriority = planStepCandidatePriority(
+      plan,
+      step,
+      candidateFor(basicRun, { actorSide: "runner" }),
+      basicRun,
+      input,
+      dependencies,
+    );
+    const eventPriority = planStepCandidatePriority(
+      plan,
+      step,
+      candidateFor(runEvent, { actorSide: "runner" }),
+      runEvent,
+      input,
+      dependencies,
+    );
+
+    expect(basicPriority).toBeGreaterThan(eventPriority);
+  });
 });
 
 function rezReserveStep(): PlanStep {

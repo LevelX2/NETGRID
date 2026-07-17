@@ -119,6 +119,7 @@ export function runnerTerminalRemoteToolScoreComponent(
     const unseenDamageRemoteRoots = unseenDamageRemotePositions.filter(
       (position) => position.area === "root",
     );
+    if (unseenDamageRemoteRoots.length === 0) return undefined;
     const unseenDamageRemoteIce = unseenDamageRemotePositions.filter(
       (position) => position.area === "ice",
     );
