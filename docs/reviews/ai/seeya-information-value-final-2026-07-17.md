@@ -127,3 +127,9 @@ Effektüberlappungen und außerhalb dieses Scopes.
 - Der Slice löst nicht die bekannten übergeordneten Bank-Portfolio-
   Planarbitrationen oder die offene Background-Kadenz aus Match 36BA22D6.
 - Kein Push und keine Remote-Integration.
+
+## Lokale Integration
+
+Der Arbeitsbranch wurde per Fast-Forward lokal nach `main` integriert. Auf
+dem integrierten Stand sind die sieben fokussierten Dateien mit 69/69 Tests
+sowie der AI-Typecheck erneut grün; `git diff --check` meldet keinen Fehler.
