@@ -1,6 +1,6 @@
 # AI Source Structure Optimization Process 2026-07
 
-Status: `package_done:AISSO-4`
+Status: `package_done:AISSO-5`
 
 ## Quelle und Vorgabe
 
@@ -315,6 +315,25 @@ Ergebnis:
 - Done-Gate: keine Typzyklen in dieser Familie; Runquotes, Hazards und Kosten
   sind unverändert regressionsgeschützt.
 - Commit: `refactor(ai): split visible run analysis domains`
+
+Ergebnis:
+
+- `visible-run-analysis.ts` ist von 2.464 auf 628 Zeilen reduziert und bleibt
+  als bestehende Consumer-Fassade erhalten.
+- Contracts, Creditbudget, Breaker-/Path-Projektion und sichtbare
+  Trace-/Hazardbewertung liegen unter `run-analysis/`; das größte neue
+  Produktionsmodul umfasst 837 Zeilen.
+- RunTarget- und HandDevelopment-Verträge wurden in reine Typmodule
+  extrahiert. Dadurch ist die fünfteilige RunTarget-/Hand-/Risk-Type-SCC
+  vollständig entfernt; nur die bereits eng geratchete Action-Semantik-SCC
+  bleibt übrig.
+- Die bestehende Visible-Run-Testsuite ist bereits nach Known-Path,
+  Server-ID, Breakkosten, Access-Erhalt, Deflector, Creditpools und Hazards in
+  getrennte Describe-Familien gegliedert; ihr bestehender Importpfad bleibt
+  unverändert.
+- Checks: sechs fokussierte Visible-Run-/RunTarget-/Risk-/Breaker-/Real-
+  Engine-Suiten mit 125/125 Tests grün; AI-Typecheck, Structure-Gate und
+  Laufzeitzyklusprüfung grün.
 
 ### AISSO-6 – Runner Hand Development und Tests strukturieren
 

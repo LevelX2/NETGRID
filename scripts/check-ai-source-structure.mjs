@@ -73,13 +73,6 @@ const expectedTypeCycleSignatures = new Set([
     "actions/run-access-decision-model.ts",
     "actions/tag-effect-semantics.ts",
   ]),
-  signature([
-    "actions/risk-action-projection.ts",
-    "actions/run-action-projection.ts",
-    "runner-economy-posture.ts",
-    "runner-hand-development.ts",
-    "runner-run-target-evaluation.ts",
-  ]),
 ]);
 const actualTypeCycles = cyclicComponents(allGraph);
 const actualTypeCycleSignatures = new Set(
@@ -104,7 +97,9 @@ const productionLineCaps = new Map([
   ["runtime/semantic-runtime-corp-score.ts", 808],
   ["runtime/semantic-runtime-corp-board-triage.ts", 793],
   ["runner-hand-development.ts", 2756],
-  ["visible-run-analysis.ts", 2465],
+  ["visible-run-analysis.ts", 629],
+  ["run-analysis/visible-run-breaker-path.ts", 838],
+  ["run-analysis/visible-run-hazards.ts", 753],
   ["runtime/semantic-choice-ranking.ts", 536],
   ["runtime/semantic-runtime-corp-scoring-window.ts", 249],
   ["runtime/corp-scoreline/semantic-runtime-corp-board-triage-policies.ts", 2276],

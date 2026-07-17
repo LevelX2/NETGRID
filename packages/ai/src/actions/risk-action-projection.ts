@@ -13,7 +13,7 @@ import type {
   BlinkRiskSeverity,
   RunnerAccessPayoff,
   RunnerBlinkRecoveryAssessment,
-} from "../runner-run-target-evaluation";
+} from "../run-analysis/runner-run-target-types";
 
 export const BLINK_CARD_ID = "onr_v1_007_blink";
 

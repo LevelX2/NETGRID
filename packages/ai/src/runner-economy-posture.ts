@@ -1,6 +1,6 @@
 import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 import type { DeckCapabilityProfile } from "./deck-capabilities";
-import type { RunnerHandDevelopmentEvaluation } from "./runner-hand-development";
+import type { RunnerHandDevelopmentEvaluation } from "./runner/hand-development/runner-hand-development-types";
 import type { RunnerStrategicIntentProfile } from "./runner-strategic-intent";
 import { runnerDamageThreatAssessment } from "./runner-damage-threat-assessment";
 import { assessKnownRezzedIcePath } from "./visible-run-analysis";
@@ -14,7 +14,7 @@ import type {
   RunnerEconomyPosture,
   RunnerEconomyTransitionAssessment,
   RunnerRemoteScoreThreat,
-} from "./runner-run-target-evaluation";
+} from "./run-analysis/runner-run-target-types";
 
 const RUNNER_ECONOMY_POSTURE_SCHEMA_VERSION =
   "runner-economy-posture-v1" as const;

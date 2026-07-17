@@ -11,7 +11,7 @@ import type {
   RunnerRunActionSourceKind,
   RunnerRunActionStructure,
   RunnerRunTargetKind,
-} from "../runner-run-target-evaluation";
+} from "../run-analysis/runner-run-target-types";
 
 const AI_HINTS_BY_CARD = createAiHintsByCard();
 
