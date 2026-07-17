@@ -224,6 +224,7 @@ import { copyTextToClipboard } from "../lib/clipboard";
 import { downloadTextFile } from "../lib/download";
 import { runtimeRandomId } from "../lib/runtime-id";
 import { reconnectUrlForSession } from "../lib/session-url";
+import { NETGRID_APP_STATUS_LABEL } from "../lib/app-build-info";
 import {
   bootstrap,
   enableAiDecisionDebugTracing,
@@ -446,7 +447,7 @@ import {
 } from "../features/game-board/board-view-helpers";
 
 const APP_NAME = "NETGRID";
-const APP_STATUS_LABEL = "V1.9.22";
+const APP_STATUS_LABEL = NETGRID_APP_STATUS_LABEL;
 const APP_BRAND_ASSET_VERSION = "2026-05-10-brand-fix-2";
 const APP_ICON_SRC = `/brand/netgrid-icon-cyber-v1.png?v=${APP_BRAND_ASSET_VERSION}`;
 const APP_WORDMARK_SRC = `/brand/netgrid-wordmark-cyber-v1.png?v=${APP_BRAND_ASSET_VERSION}`;

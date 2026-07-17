@@ -148,6 +148,11 @@ Stand: 2026-07-16
   ist seit dem Current-State-Projekt-Cleanup kein Start-/CLI-/Health-Vertrag
   mehr.
 - Der normale lokale Startpfad ist `scripts/start-netgrid.ps1`.
+- Der Webclient zeigt die bewusst gesetzte Produktversion `V0.9` getrennt von
+  einer fortlaufenden Git-Buildkennung. Die Optionen nennen zusätzlich Commit,
+  Quellstand und lokalen Entwicklungsstatus; ein nicht sauberer Arbeitsbaum
+  wird als `-dev` gekennzeichnet. Führend ist
+  `docs/decisions/product-version-and-build-identification-2026-07-17.md`.
 - Storage-, Cleanup-, Recovery- und KI-Trace-Maintenance bilden nach ARC-001
   eine eigenständige Control Plane. Private LAN-Adressen sind kein
   Adminnachweis mehr. Passwort, kurzlebige serverseitige Sitzung, CSRF und
