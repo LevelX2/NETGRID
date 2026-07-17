@@ -393,7 +393,7 @@ describe("corp install rez sequence handlers", () => {
       "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez.rez:data_fort_agenda:remote_1:ice_1:1:8",
     );
     expect(host.state.pendingChoice?.prompt).toBe(
-      "Data Fort Reclamation: Karte 1 von 2 rezzen.",
+      "Data Fort Reclamation: Karte 1 von 2 rezzen (10 temporäre Credits verfügbar).",
     );
     expect(
       host.state.pendingChoice?.options.map((option) => option.value),
@@ -684,7 +684,7 @@ describe("corp install rez sequence handlers", () => {
     expect(secondResult.rezzedCardIds).toEqual([]);
     expect(secondResult.installedCardIds).toEqual(["ice_1"]);
     expect(host.state.pendingChoice?.prompt).toBe(
-      "Data Fort Reclamation: Karte 2 von 3 rezzen.",
+      "Data Fort Reclamation: Karte 2 von 3 rezzen (10 temporäre Credits verfügbar).",
     );
     expect(host.state.corp.hq).toEqual(["upgrade_1"]);
 
@@ -693,7 +693,7 @@ describe("corp install rez sequence handlers", () => {
     expect(thirdResult.rezzedCardIds).toEqual(["ice_1"]);
     expect(thirdResult.installedCardIds).toEqual(["upgrade_1"]);
     expect(host.state.pendingChoice?.prompt).toBe(
-      "Data Fort Reclamation: Karte 3 von 3 rezzen.",
+      "Data Fort Reclamation: Karte 3 von 3 rezzen (7 temporäre Credits verfügbar).",
     );
     expect(host.state.corp.hq).toEqual([]);
 

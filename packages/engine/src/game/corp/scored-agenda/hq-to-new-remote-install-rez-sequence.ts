@@ -415,7 +415,7 @@ function dataFortReclamationRezChoice(
     choiceId: `choice_card_implementation_hq_to_new_remote_install_rez_rez_${host.state.stateVersion + 1}`,
     side: "corp",
     source: `${HQ_TO_NEW_REMOTE_INSTALL_REZ_REZ_SOURCE}:${sequenceState.sourceAgendaId}:${sequenceState.serverId}:${cardId}:${sequencePosition}:${host.state.stateVersion + 1}`,
-    prompt: `Data Fort Reclamation: Karte ${sequencePosition} von ${sequenceLength} rezzen.`,
+    prompt: `Data Fort Reclamation: Karte ${sequencePosition} von ${sequenceLength} rezzen (${sequenceState.temporaryCreditsRemaining} temporäre Credits verfügbar).`,
     kind: "select_cards",
     options: [hiddenCardChoiceOption({ cardId, label: definition.title })],
     minSelections: 0,

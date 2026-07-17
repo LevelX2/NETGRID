@@ -2115,6 +2115,28 @@ export function shouldUseCardChoicePanel(
   return minSelections !== 1 || maxSelections !== 1;
 }
 
+export function isDataFortReclamationHqChoice(
+  choice: NonNullable<PlayerView["pendingChoice"]>,
+): boolean {
+  return (
+    choice.kind === "select_cards" &&
+    choice.source.startsWith(
+      "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez:",
+    )
+  );
+}
+
+export function isDataFortReclamationRezChoice(
+  choice: NonNullable<PlayerView["pendingChoice"]>,
+): boolean {
+  return (
+    choice.kind === "select_cards" &&
+    choice.source.startsWith(
+      "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez.rez:",
+    )
+  );
+}
+
 export function cardChoiceUsesReadableCards(
   choice: NonNullable<PlayerView["pendingChoice"]>,
 ): boolean {
@@ -2176,9 +2198,12 @@ export function cardChoiceUsesOrderedSelection(
   );
   return (
     choice.kind === "select_cards" &&
-    minSelections === maxSelections &&
-    maxSelections > 1 &&
-    isHiddenZoneOrderedCardChoiceSource(choice.source)
+    ((isDataFortReclamationHqChoice(choice) &&
+      minSelections === 0 &&
+      maxSelections > 0) ||
+      (minSelections === maxSelections &&
+        maxSelections > 1 &&
+        isHiddenZoneOrderedCardChoiceSource(choice.source)))
   );
 }
 
@@ -2246,6 +2271,7 @@ export function shouldUseFieldCardChoice(
   view: PlayerView,
 ): boolean {
   if (choice.kind !== "select_cards") return false;
+  if (isDataFortReclamationRezChoice(choice)) return false;
   if (choice.source === "discard_phase") return false;
   if (choice.source.startsWith("v1922.corp_archives_to_hq")) return false;
   if (choice.source.startsWith("corp.start_of_run_redirect.herman_reorder"))

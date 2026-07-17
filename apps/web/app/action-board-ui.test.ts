@@ -51,6 +51,8 @@ import {
   fieldCardChoiceOptionForCard,
   fieldCardChoiceOptionsForCard,
   installedCorpExposeReviewCardId,
+  isDataFortReclamationHqChoice,
+  isDataFortReclamationRezChoice,
   isAutomaticCorpRunPassAction,
   isInstalledCorpExposeReviewChoice,
   isSingleInstalledCorpExposeChoice,
@@ -1777,6 +1779,57 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(newBloodReorderTargetSequenceHint(newBloodChoice)).toBe(
       "Wähle die ICE in Zielslot-Reihenfolge: HQ ICE 1 -> R&D ICE 1 -> Remote 1 ICE 1.",
     );
+  });
+
+  it("routes Data Fort Reclamation through an ordered selection and per-card rez dialog", () => {
+    const hqChoice: NonNullable<PlayerView["pendingChoice"]> = {
+      choiceId: "data_fort_reclamation_hq_8",
+      side: "corp",
+      source:
+        "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez:data_fort_agenda:8",
+      prompt: "Bis zu 4 HQ-Karten für den neuen Datenfort wählen.",
+      kind: "select_cards",
+      options: [
+        {
+          id: "card_corp_ice_1",
+          label: "ICE",
+          value: "corp_ice_1",
+          card: card("corp_ice_1", "ICE", "ice"),
+        },
+      ],
+      minSelections: 0,
+      maxSelections: 4,
+      stateVersion: 8,
+      visibility: "hidden_info_barrier",
+    };
+    const rezChoice: NonNullable<PlayerView["pendingChoice"]> = {
+      ...hqChoice,
+      choiceId: "data_fort_reclamation_rez_9",
+      source:
+        "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez.rez:data_fort_agenda:remote_1:corp_ice_1:1:9",
+      prompt:
+        "Data Fort Reclamation: Karte 1 von 1 rezzen (10 temporäre Credits verfügbar).",
+      maxSelections: 1,
+    };
+    const board = view("corp", {
+      servers: [
+        {
+          id: "remote_1",
+          label: "Remote 1",
+          ice: [card("corp_ice_1", "ICE", "ice")],
+          root: [],
+        },
+      ],
+    });
+
+    expect(isDataFortReclamationHqChoice(hqChoice)).toBe(true);
+    expect(isDataFortReclamationRezChoice(hqChoice)).toBe(false);
+    expect(shouldUseCardChoicePanel(hqChoice)).toBe(true);
+    expect(cardChoiceUsesOrderedSelection(hqChoice)).toBe(true);
+    expect(isDataFortReclamationHqChoice(rezChoice)).toBe(false);
+    expect(isDataFortReclamationRezChoice(rezChoice)).toBe(true);
+    expect(shouldUseCardChoicePanel(rezChoice)).toBe(true);
+    expect(shouldUseFieldCardChoice(rezChoice, board)).toBe(false);
   });
 
   it("detects field-card choices for installed board cards only", () => {

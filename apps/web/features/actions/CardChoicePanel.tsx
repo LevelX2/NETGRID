@@ -12,6 +12,8 @@ import {
   cardChoiceUsesReadableCards,
   choiceInteractionAmbience,
   interactionAmbienceClassName,
+  isDataFortReclamationHqChoice,
+  isDataFortReclamationRezChoice,
   newBloodReorderTargetSequenceHint,
   runnerProgramInstallTrashChoiceInfo,
 } from "../../app/action-board-ui";
@@ -142,7 +144,7 @@ export function CardChoicePanel({
                 </button>
               </div>
             ) : null}
-            {readonlyPrivateLook ? null : <span className="cardChoiceCounter">{choiceSelectionRangeLabel(minSelections, maxSelections)}</span>}
+            {readonlyPrivateLook ? null : <span className="cardChoiceCounter">{cardChoiceCounterLabel(choice, minSelections, maxSelections)}</span>}
           </div>
         </header>
         <div className="cardChoiceRows">
@@ -230,6 +232,10 @@ export function CardChoicePanel({
 }
 
 export function cardChoiceTitle(choice: VisibleChoice): string {
+  if (isDataFortReclamationHqChoice(choice))
+    return "Data Fort Reclamation: Bau-Reihenfolge";
+  if (isDataFortReclamationRezChoice(choice))
+    return "Data Fort Reclamation: Karte rezzen";
   if (choice.cardSearchPresentation?.sourceZone === "heap") return "Heap durchsuchen";
   if (choice.cardSearchPresentation?.sourceZone === "stack") return "Stack durchsuchen";
   if (isRunnerStackTopChooseOneArrangeRestChoice(choice)) return "Stack-Spitze wählen und anordnen";
@@ -306,6 +312,12 @@ function cardChoiceReadonlyQuestion(choice: VisibleChoice): string {
 }
 
 function cardChoiceQuestion(choice: VisibleChoice, selectedOptions: VisibleChoiceOption[]): string {
+  if (isDataFortReclamationRezChoice(choice)) {
+    if (selectedOptions.length === 0)
+      return "Diese Karte nicht rezzen und mit der nächsten Karte fortfahren?";
+    const title = selectedOptions[0]?.card?.title ?? selectedOptions[0]?.label;
+    return `${title} jetzt rezzen?`;
+  }
   if (selectedOptions.length === 0) return choice.source.includes("sneak_preview_source") ? "Noch keine Quelle gewählt." : "Noch keine Karte gewählt.";
   if (choice.source.includes("sneak_preview_source")) return "Diese Quelle für Sneak Preview verwenden?";
   if (isRunnerStackTopChooseOneArrangeRestChoice(choice)) {
@@ -323,6 +335,10 @@ function cardChoiceQuestion(choice: VisibleChoice, selectedOptions: VisibleChoic
 }
 
 function cardChoiceSubmitLabel(choice: VisibleChoice, selectedCount: number): string {
+  if (isDataFortReclamationRezChoice(choice))
+    return selectedCount === 1 ? "Rezzen" : "Nicht rezzen";
+  if (isDataFortReclamationHqChoice(choice))
+    return "Fort in dieser Reihenfolge bauen";
   if (isRunnerStackTopChooseOneArrangeRestChoice(choice)) return "Karte nehmen und anordnen";
   if (cardChoiceUsesOrderedSelection(choice)) return "Reihenfolge übernehmen";
   if (selectedCount <= 1) return "Auswahl übernehmen";
@@ -330,6 +346,10 @@ function cardChoiceSubmitLabel(choice: VisibleChoice, selectedCount: number): st
 }
 
 function cardChoiceEffectHint(choice: VisibleChoice): string | null {
+  if (isDataFortReclamationHqChoice(choice))
+    return "Die Nummern bestimmen die Installationsreihenfolge. Jede Karte wird einzeln installiert; unmittelbar danach kannst du sie rezzen.";
+  if (isDataFortReclamationRezChoice(choice))
+    return "Die temporären Credits aus Data Fort Reclamation werden zuerst verwendet. Danach setzt die Sequenz mit der nächsten gewählten Karte fort.";
   const newBloodHint = newBloodReorderTargetSequenceHint(choice);
   if (newBloodHint) return newBloodHint;
   const presentation = choice.cardSearchPresentation;
@@ -359,4 +379,13 @@ function cardChoiceEffectHint(choice: VisibleChoice): string | null {
   if (choice.source.includes("arrange_stack")) return "Die gewählte Reihenfolge wird für den Stack übernommen.";
   if (choice.source.includes("search_trash")) return "Die gewählte Karte wird aus dem Heap in den Grip genommen.";
   return null;
+}
+
+function cardChoiceCounterLabel(
+  choice: VisibleChoice,
+  minSelections: number,
+  maxSelections: number,
+): string {
+  if (isDataFortReclamationRezChoice(choice)) return "Rez-Fenster";
+  return choiceSelectionRangeLabel(minSelections, maxSelections);
 }
