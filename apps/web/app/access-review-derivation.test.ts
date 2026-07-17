@@ -48,6 +48,58 @@ describe("Access outcome presentation", () => {
     });
   });
 
+  it.each([
+    ["R&D", "rd"],
+    ["HQ", "hq"],
+    ["Archive", "archives"],
+    ["Remote 1", "remote_root"],
+  ])(
+    "presents a stolen agenda from %s as a read-only confirmation",
+    (serverLabel, accessOrigin) => {
+      const access = event(`evt_access_${accessOrigin}`, {
+        actionType: "access_card",
+        actor: "runner",
+        cardDefinitionId: "public_agenda",
+        title: "Public Agenda",
+        serverLabel,
+        accessOrigin,
+      });
+      const steal = event(`evt_steal_${accessOrigin}`, {
+        actionType: "steal_agenda",
+        actor: "runner",
+        cardDefinitionId: "public_agenda",
+      });
+
+      expect(
+        accessRevealFromLatestEvent(
+          access,
+          {
+            public_agenda: catalogCard(
+              "public_agenda",
+              "Public Agenda",
+              "agenda",
+            ),
+          },
+          [],
+          "corp",
+          [access, steal],
+        ),
+      ).toMatchObject({
+        eventId: `evt_access_${accessOrigin}`,
+        outcomeKind: "stolen",
+        outcomeStatus:
+          "Der Runner hat die Agenda Public Agenda erbeutet.",
+        dismissLabel: "Agenda bestätigen",
+        actions: [],
+        card: {
+          definitionId: "public_agenda",
+          title: "Public Agenda",
+          type: "agenda",
+        },
+      });
+    },
+  );
+
   it("separates central root upgrades from HQ, R&D and Archives cards", () => {
     const details = {
       root_upgrade: catalogCard("root_upgrade", "Root Upgrade", "upgrade"),

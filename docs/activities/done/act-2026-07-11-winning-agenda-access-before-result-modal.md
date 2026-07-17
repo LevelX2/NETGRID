@@ -1,19 +1,32 @@
 ---
 activityId: act-2026-07-11-winning-agenda-access-before-result-modal
-status: inbox
+status: done
 kind: fix
 area: web
 priority: high
 primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-07-11
-startedAt:
-completedAt:
+startedAt: 2026-07-17
+completedAt: 2026-07-17
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/app/match-overlay-presentation.ts
+  - apps/web/app/match-overlay-presentation.test.ts
+  - apps/web/app/winning-agenda-result-sequence.test.ts
+  - apps/web/app/access-presentation.ts
+  - apps/web/app/access-presentation.test.ts
+  - apps/web/features/actions/access-review-derivation.ts
+  - apps/web/app/access-review-derivation.test.ts
+  - apps/web/app/page.tsx
+  - apps/web/app/version-status.test.ts
+checks:
+  - "corepack pnpm --filter @netgrid/web exec vitest run app/match-overlay-presentation.test.ts app/access-presentation.test.ts app/access-review-derivation.test.ts (3 Dateien, 31 Tests bestanden)"
+  - "corepack pnpm --filter @netgrid/web test (47 Dateien, 607 Tests bestanden)"
+  - "corepack pnpm --filter @netgrid/web typecheck (bestanden)"
+  - "git diff --check (bestanden)"
 ---
 
 # Gewinnende Agenda vor dem Ergebnisfenster bestätigen
@@ -54,15 +67,15 @@ Wenn der Runner beim Zugriff eine Agenda stiehlt und dadurch das Spiel gewinnt, 
 
 ## Akzeptanzkriterien
 
-- [ ] Beim verpflichtenden R&D-Startfall bleibt nach dem gewinnenden Agenda-Steal zuerst das Access-Fenster sichtbar und zeigt die erbeutete Agenda mit eindeutigem Ergebnisstatus.
-- [ ] Das Gewinner-/Spielende-Fenster ist nicht gleichzeitig davor, darüber oder anderweitig interaktiv sichtbar.
-- [ ] Erst die ausdrückliche Bestätigung beziehungsweise das Schließen des Access-Ergebnisses gibt das Ergebnisfenster frei.
-- [ ] Nach dieser Bestätigung erscheint das Ergebnisfenster genau einmal mit unverändertem Gewinner, Endgrund, Endstand und gegebenenfalls Serieninformationen.
-- [ ] Der bereits beendete Matchzustand verlangt keine weitere Engine-Aktion; Access-Aktionsbuttons sind nicht fälschlich aktiv, die lokale Ergebnisbestätigung bleibt aber bedienbar.
-- [ ] Gewinnende Agenda-Steals aus HQ, Archives und Remotes folgen derselben Sequenz oder sind durch eine nachweislich gemeinsame generische Ableitung abgedeckt.
-- [ ] Normales Spielende ohne offenes Access-Ergebnis zeigt das Ergebnisfenster weiterhin sofort; ein nicht gewinnender Agenda-Steal behält den normalen Access-Ablauf.
-- [ ] Beide Seiten sehen nur die für sie zulässigen öffentlichen Informationen; es entstehen keine Hidden-Info-Leaks in UI, PlayerView, PublicEvents, WebSocket-Payloads oder Logs.
-- [ ] Fokussierte Webtests decken Overlay-Priorität, Bestätigung und Ergebnisfreigabe ab; Web-Typecheck und `git diff --check` sind grün.
+- [x] Beim verpflichtenden R&D-Startfall bleibt nach dem gewinnenden Agenda-Steal zuerst das Access-Fenster sichtbar und zeigt die erbeutete Agenda mit eindeutigem Ergebnisstatus.
+- [x] Das Gewinner-/Spielende-Fenster ist nicht gleichzeitig davor, darüber oder anderweitig interaktiv sichtbar.
+- [x] Erst die ausdrückliche Bestätigung beziehungsweise das Schließen des Access-Ergebnisses gibt das Ergebnisfenster frei.
+- [x] Nach dieser Bestätigung erscheint das Ergebnisfenster genau einmal mit unverändertem Gewinner, Endgrund, Endstand und gegebenenfalls Serieninformationen.
+- [x] Der bereits beendete Matchzustand verlangt keine weitere Engine-Aktion; Access-Aktionsbuttons sind nicht fälschlich aktiv, die lokale Ergebnisbestätigung bleibt aber bedienbar.
+- [x] Gewinnende Agenda-Steals aus HQ, Archives und Remotes folgen derselben Sequenz oder sind durch eine nachweislich gemeinsame generische Ableitung abgedeckt.
+- [x] Normales Spielende ohne offenes Access-Ergebnis zeigt das Ergebnisfenster weiterhin sofort; ein nicht gewinnender Agenda-Steal behält den normalen Access-Ablauf.
+- [x] Beide Seiten sehen nur die für sie zulässigen öffentlichen Informationen; es entstehen keine Hidden-Info-Leaks in UI, PlayerView, PublicEvents, WebSocket-Payloads oder Logs.
+- [x] Fokussierte Webtests decken Overlay-Priorität, Bestätigung und Ergebnisfreigabe ab; Web-Typecheck und `git diff --check` sind grün.
 
 ## Umsetzungshinweise
 
@@ -73,4 +86,4 @@ Wenn der Runner beim Zugriff eine Agenda stiehlt und dadurch das Spiel gewinnt, 
 
 ## Ergebnisnotiz
 
-Noch offen.
+Die Match-Overlay-Priorität wird nun über einen kleinen reinen Helper abgeleitet. Bei einem Runner-Sieg durch Agendapunkte hält ein öffentliches, noch unbestätigtes `stolen`-Access-Ergebnis das Ergebnisfenster zurück. Das Access-Fenster zeigt die konkrete Agenda mit `Agenda … erbeutet` und `Agenda bestätigen`, bleibt am beendeten Match read-only und gibt nach lokaler Bestätigung unmittelbar das unveränderte Ergebnisfenster frei. R&D ist als Integrationsfall abgedeckt; HQ, Archive und Remote nutzen dieselbe öffentliche Ableitung.

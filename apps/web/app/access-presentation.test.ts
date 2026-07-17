@@ -61,7 +61,7 @@ describe("access presentation outcome ownership", () => {
     expect(
       accessPresentationOutcomeAfter([access, steal], access, "runner")
         ?.status,
-    ).toBe("Du hast Public Agenda gestohlen.");
+    ).toBe("Du hast die Agenda Public Agenda erbeutet.");
     expect(
       accessPresentationOutcomeAfter([access, decline], access, "corp")
         ?.status,

@@ -14,8 +14,14 @@ describe("web client release status", () => {
     const normalizedPageSource = pageSource.replace(/\s+/g, " ");
 
     expect(pageSource).toContain("const matchEnded = Boolean(");
+    expect(pageSource).toContain(
+      "const overlayPresentation = matchOverlayPresentation({",
+    );
     expect(normalizedPageSource).toContain(
-      "const showAccessReveal = Boolean( accessReveal && !matchEnded",
+      "const showAccessReveal = overlayPresentation.showAccessReveal;",
+    );
+    expect(normalizedPageSource).toContain(
+      "const showResultModal = overlayPresentation.showResultModal;",
     );
     expect(normalizedPageSource).toContain(
       "const showFloatingActionPanel = Boolean( activeMatchIsGame && !matchEnded",

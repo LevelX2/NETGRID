@@ -195,7 +195,7 @@ function accessOutcome(
     return {
       eventId: outcomeEvent.eventId,
       kind: "stolen",
-      status: `${subject} ${title} gestohlen.`,
+      status: `${subject} die Agenda ${title} erbeutet.`,
     };
   }
   return {

@@ -111,6 +111,9 @@ export function accessRevealFromLatestEvent(
     ...(outcome
       ? { outcomeKind: outcome.kind, outcomeStatus: outcome.status }
       : {}),
+    ...(outcome?.kind === "stolen"
+      ? { dismissLabel: "Agenda bestätigen" }
+      : {}),
   };
 }
 
@@ -194,6 +197,9 @@ export function accessRevealFromCurrentRun(
     ...(accessFollowupStatus ? { followupStatus: accessFollowupStatus } : {}),
     ...(outcome
       ? { outcomeKind: outcome.kind, outcomeStatus: outcome.status }
+      : {}),
+    ...(outcome?.kind === "stolen"
+      ? { dismissLabel: "Agenda bestätigen" }
       : {}),
   };
 }

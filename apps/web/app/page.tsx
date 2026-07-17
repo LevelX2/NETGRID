@@ -89,6 +89,7 @@ import {
   appendPendingAccessPresentationEvents,
   dismissPendingAccessPresentationEvent,
 } from "./access-presentation-queue";
+import { matchOverlayPresentation } from "./match-overlay-presentation";
 import {
   latestSuccessfulRunOutcomePresentation,
 } from "./successful-run-outcome-presentation";
@@ -2223,7 +2224,7 @@ export default function Page() {
     ? accessRevealFromLatestEvent(
         accessRevealEvent ?? undefined,
         catalogDetailsById,
-        accessRevealUsesCurrentState ? payload.legalActions : [],
+        accessRevealUsesCurrentState && !matchEnded ? payload.legalActions : [],
         payload.side,
         payload.eventTail,
       )
@@ -2235,11 +2236,23 @@ export default function Page() {
     securityPurgeReveal ??
     currentAccessReveal ??
     retainedEventAccessReveal;
-  const showAccessReveal = Boolean(
-    accessReveal &&
-    !matchEnded &&
-    !dismissedAccessEventIds.includes(accessReveal.eventId),
-  );
+  const overlayPresentation = matchOverlayPresentation({
+    accessRevealAvailable: Boolean(accessReveal),
+    accessRevealDismissed: Boolean(
+      accessReveal && dismissedAccessEventIds.includes(accessReveal.eventId),
+    ),
+    accessRevealKind: accessReveal?.kind ?? null,
+    accessOutcomeKind: accessReveal?.outcomeKind ?? null,
+    matchEnded,
+    resultAvailable: Boolean(resultSummary && resultKey),
+    resultDismissed: Boolean(
+      resultKey && dismissedResultKey === resultKey,
+    ),
+    runnerWonByAgendaPoints:
+      resultSummary?.winner === "runner" &&
+      resultSummary.reason === "agenda_points",
+  });
+  const showAccessReveal = overlayPresentation.showAccessReveal;
   const dismissAccessPresentation = useCallback((eventId: string) => {
     setPendingAccessPresentationEvents((events) => dismissPendingAccessPresentationEvent(events, eventId));
     setDismissedAccessEventIds((eventIds) => eventIds.includes(eventId) ? eventIds : [...eventIds, eventId].slice(-30));
@@ -2289,9 +2302,7 @@ export default function Page() {
     !viewedApproachIceId &&
     !viewedInstalledExposeCardId,
   );
-  const showResultModal = Boolean(
-    resultSummary && resultKey && dismissedResultKey !== resultKey,
-  );
+  const showResultModal = overlayPresentation.showResultModal;
   const canReturnToStart = Boolean(
     payload &&
     (resultSummary ||
@@ -3078,7 +3089,13 @@ export default function Page() {
   }, [accessReveal?.eventId, showAccessReveal]);
 
   useEffect(() => {
-    if (!isAiVsAiMatch || !showAccessReveal || !accessReveal) return;
+    if (
+      !isAiVsAiMatch ||
+      !showAccessReveal ||
+      !accessReveal ||
+      overlayPresentation.concludingAgendaAccessAwaitingConfirmation
+    )
+      return;
     const autoDismissMs = observerAccessAutoDismissMs({
       observerMode: isAiVsAiMatch,
       pacingMode: localAiPacingMode,
@@ -3095,7 +3112,8 @@ export default function Page() {
     dismissAccessPresentation,
     isAiVsAiMatch,
     localAiPacingMode,
-    showAccessReveal
+    overlayPresentation.concludingAgendaAccessAwaitingConfirmation,
+    showAccessReveal,
   ]);
 
   useEffect(() => {
@@ -6116,7 +6134,7 @@ export default function Page() {
               <AccessRevealModal
                 reveal={accessReveal}
                 displayMode={cardDisplayMode}
-                disabled={Boolean(payload.winner) || connection !== "online"}
+                disabled={matchEnded || connection !== "online"}
                 damageImpact={accessDamageImpact}
                 onAction={submitAction}
                 onChoiceOption={submitChoiceOption}
