@@ -662,6 +662,7 @@ export type ChoiceOption = {
   value?: string | number | boolean;
   selectable?: boolean;
   metadata?: {
+    creditCost?: number;
     postBidTraceLinkDelta?: number;
     shellTradersRemainingCounters?: number;
   };
@@ -1840,6 +1841,7 @@ export type VisibleCard = {
   definitionId?: CardDefinitionId;
   type?: CardType;
   subtypes?: string[];
+  alternateIceSubtypeActive?: boolean;
   rulesText?: string;
   cost?: number;
   installCost?: number;

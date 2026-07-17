@@ -501,9 +501,10 @@ export function startSuccessfulRunInterventionChoice(
       },
       ...hqIceOptions.map(({ cardId, cost }) => ({
         id: `ice_${sanitizeId(cardId)}`,
-        label: `ICE aus HQ wählen (${cost} Credits)`,
+        label: host.cards.definitionFor(cardId).title,
         publicLabel: `${definition.title}: ICE aus HQ wählen`,
         value: cardId,
+        metadata: { creditCost: cost },
       })),
     ],
     minSelections: 1,

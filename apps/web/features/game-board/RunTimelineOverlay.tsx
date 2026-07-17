@@ -11,6 +11,7 @@ import {
   actionButtonTone,
   breachHighlighterAccessHint,
   breachProgressLabel,
+  choiceOptionCostChips,
   currentRunTimelineStep,
   hasLegalAction,
   interactionAmbienceClassName,
@@ -211,23 +212,33 @@ export function RunTimelineOverlay({
             {runChoiceStatus ? (
               <p className="runHint runChoiceHint">{runChoiceStatus}</p>
             ) : null}
-            {runChoice.options.map((option) => (
-              <OverflowAwareActionButton
-                action={choiceAction}
-                className="button primary actionButton runActionButton"
-                key={option.id}
-                label={option.label}
-                displayLabel={option.label}
-                onClick={() =>
-                  onChoiceOption(choiceAction, runChoice.choiceId, option.id)
-                }
-                disabled={actionDisabled || option.selectable === false}
-                type="button"
-                data-testid="run-choice-button"
-                data-action-type={choiceAction.type}
-                iconSize={14}
-              />
-            ))}
+            {runChoice.options.map((option) => {
+              const displayCostChips = choiceOptionCostChips(option);
+              const costLabel = displayCostChips[0]?.label;
+              const accessibleLabel = costLabel
+                ? `${option.label}, Kosten: ${costLabel}`
+                : option.label;
+              return (
+                <OverflowAwareActionButton
+                  action={choiceAction}
+                  className="button primary actionButton runActionButton"
+                  key={option.id}
+                  label={accessibleLabel}
+                  displayLabel={option.label}
+                  displayCostChips={
+                    displayCostChips.length > 0 ? displayCostChips : undefined
+                  }
+                  onClick={() =>
+                    onChoiceOption(choiceAction, runChoice.choiceId, option.id)
+                  }
+                  disabled={actionDisabled || option.selectable === false}
+                  type="button"
+                  data-testid="run-choice-button"
+                  data-action-type={choiceAction.type}
+                  iconSize={14}
+                />
+              );
+            })}
           </div>
         ) : null}
         {regularRunActions.length > 0 ? (

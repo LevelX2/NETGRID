@@ -5,6 +5,7 @@ import {
   type PublicGameEvent,
   type Side,
   type VisibleCard,
+  type VisibleChoiceOption,
 } from "@netgrid/shared";
 import { actionHasAbility } from "./action-payload";
 export {
@@ -473,13 +474,20 @@ function serverHasRezzedTesseractFortConstruction(
 export function variableIceSubtypeBadgeForCard(
   card: Pick<
     VisibleCard,
-    "instanceId" | "known" | "title" | "type" | "subtypes" | "rezzed"
+    | "instanceId"
+    | "known"
+    | "title"
+    | "type"
+    | "subtypes"
+    | "rezzed"
+    | "alternateIceSubtypeActive"
   > & { printedSubtypes?: readonly string[] },
 ): IceModifierBadgeView | null {
   if (
     !card.known ||
     card.type !== "ice" ||
     card.rezzed !== true ||
+    card.alternateIceSubtypeActive !== true ||
     !card.printedSubtypes ||
     !card.subtypes
   ) {
@@ -1578,6 +1586,25 @@ export function actionCostChips(
     });
   }
   return chips;
+}
+
+export function choiceOptionCostChips(
+  option: Pick<VisibleChoiceOption, "metadata">,
+): CostChipView[] {
+  const creditCost = option.metadata?.creditCost;
+  if (
+    typeof creditCost !== "number" ||
+    !Number.isInteger(creditCost) ||
+    creditCost < 0
+  )
+    return [];
+  return [
+    {
+      kind: "credit",
+      amount: creditCost,
+      label: `${creditCost} ${creditCost === 1 ? "Credit" : "Credits"}`,
+    },
+  ];
 }
 
 export function actionConsumesClick(

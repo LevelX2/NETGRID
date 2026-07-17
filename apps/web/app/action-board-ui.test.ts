@@ -36,6 +36,7 @@ import {
   cardChoiceUsesOrderedSelection,
   cardChoiceUsesReadableCards,
   choiceInteractionAmbience,
+  choiceOptionCostChips,
   counterDisplayUsesCreditBadge,
   counterDisplayUsesRefreshingCreditBadge,
   counterDisplayBadgeView,
@@ -651,12 +652,13 @@ describe("V1.0.5 action board UI helpers", () => {
     ).toEqual([]);
   });
 
-  it("marks rezzed variable ICE when the effective subtype differs from the printed subtype", () => {
+  it("marks only an explicitly active alternate ICE subtype", () => {
     expect(
       variableIceSubtypeBadgeForCard({
         ...card("caryatid_1", "Caryatid", "ice", true),
         subtypes: ["code_gate"],
         printedSubtypes: ["wall"],
+        alternateIceSubtypeActive: true,
       }),
     ).toEqual({
       key: "variable-subtype-caryatid_1-code_gate",
@@ -673,6 +675,14 @@ describe("V1.0.5 action board UI helpers", () => {
         ...card("caryatid_2", "Caryatid", "ice", true),
         subtypes: ["wall"],
         printedSubtypes: ["wall"],
+        alternateIceSubtypeActive: true,
+      }),
+    ).toBeNull();
+    expect(
+      variableIceSubtypeBadgeForCard({
+        ...card("asp_1", "Asp", "ice", true),
+        subtypes: ["sentry"],
+        printedSubtypes: ["flatline", "sentry"],
       }),
     ).toBeNull();
   });
@@ -2063,6 +2073,16 @@ describe("V1.0.6 resource and card-display helpers", () => {
     );
     expect(actionConsumesClick({ costs: [{ credits: 2 }] })).toBe(false);
     expect(actionConsumesClick({ costs: [] })).toBe(false);
+  });
+
+  it("formats choice-specific credit costs as the existing credit chip", () => {
+    expect(choiceOptionCostChips({ metadata: { creditCost: 2 } })).toEqual([
+      { kind: "credit", amount: 2, label: "2 Credits" },
+    ]);
+    expect(choiceOptionCostChips({ metadata: { creditCost: 0 } })).toEqual([
+      { kind: "credit", amount: 0, label: "0 Credits" },
+    ]);
+    expect(choiceOptionCostChips({})).toEqual([]);
   });
 
   it("keeps paid ability costs in chips instead of duplicating them in labels", () => {

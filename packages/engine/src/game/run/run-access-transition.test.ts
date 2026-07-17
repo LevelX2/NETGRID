@@ -13,12 +13,17 @@ import { describe, expect, it } from "vitest";
 import {
   resolveSuccessfulRunCreditLossSpendChoice,
   enterAccessFromSuccessfulRun,
+  startSuccessfulRunInterventionChoice,
   type RunAccessTransitionHost,
 } from "./run-access-transition";
 import type { BreachStateHost } from "../access/breach-state";
 
-function definition(id: string, type: CardDefinition["type"]): CardDefinition {
-  return { id: id as CardDefinitionId, title: id, type } as CardDefinition;
+function definition(
+  id: string,
+  type: CardDefinition["type"],
+  title = id,
+): CardDefinition {
+  return { id: id as CardDefinitionId, title, type } as CardDefinition;
 }
 
 function instance(
@@ -54,7 +59,7 @@ function makeHost(options: {
   const definitions = {
     agenda: definition("agenda_def", "agenda"),
     operation: definition("operation_def", "operation"),
-    ice: definition("ice_def", "ice"),
+    ice: definition("ice_def", "ice", "Quandary"),
   };
   const servers = [
     { id: "rd", ice: [], root: [] },
@@ -224,6 +229,42 @@ function makeHost(options: {
 }
 
 describe("run access transition", () => {
+  it("names successful-run HQ ICE choices and exposes their credit cost", () => {
+    const fixture = makeHost({ corpCredits: 5 });
+    fixture.state.run = {
+      runId: "run_dreff",
+      attackedServerId: "remote_1",
+      phase: "movement",
+      position: { kind: "server", serverId: "remote_1" },
+      successful: true,
+      accessCount: 1,
+    } as unknown as NonNullable<GameState["run"]>;
+    fixture.state.cardInstances.remote_agenda = {
+      ...fixture.state.cardInstances.remote_agenda!,
+      rezzed: true,
+    };
+    fixture.state.cardInstances.hq_ice = instance("hq_ice", "ice_def", {
+      side: "corp",
+      zone: "hq",
+    });
+    fixture.state.corp.hq = ["hq_ice" as CardInstanceId];
+    fixture.host.run.successfulRunInterventionKindForSource = () =>
+      "temporary_hq_ice_encounter_after_successful_run";
+    fixture.host.run.successfulRunInterventionCost = () => 2;
+
+    expect(
+      startSuccessfulRunInterventionChoice(fixture.host, fixture.state.run),
+    ).toBe(true);
+    expect(
+      fixture.state.pendingChoice?.options.find(
+        (option) => option.value === "hq_ice",
+      ),
+    ).toMatchObject({
+      label: "Quandary",
+      metadata: { creditCost: 2 },
+    });
+  });
+
   it("starts normal successful R&D access with a breach state", () => {
     const fixture = makeHost();
     const legalAction = { payload: {} } as LegalAction;

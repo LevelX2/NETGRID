@@ -17,6 +17,7 @@ import {
   actionConsumesClick,
   actionCostChips,
   type ActionButtonTone,
+  type CostChipView,
 } from "../../app/action-board-ui";
 
 export function ActionPanelDockPlaceholder({
@@ -128,8 +129,14 @@ export function PriorityWindowHoldToggle({
   );
 }
 
-export function CostChips({ action }: { action: LegalAction }) {
-  const chips = actionCostChips(action);
+export function CostChips({
+  action,
+  displayCostChips,
+}: {
+  action: LegalAction;
+  displayCostChips?: CostChipView[] | undefined;
+}) {
+  const chips = displayCostChips ?? actionCostChips(action);
   if (chips.length === 0) return null;
   return (
     <span
@@ -169,6 +176,7 @@ type OverflowAwareActionButtonProps = Omit<
   action: LegalAction;
   label: string;
   displayLabel?: string;
+  displayCostChips?: CostChipView[] | undefined;
   iconSize?: number;
   tone?: ActionButtonTone;
 };
@@ -189,6 +197,7 @@ export function OverflowAwareActionButton({
   action,
   label,
   displayLabel = label,
+  displayCostChips,
   iconSize,
   tone = "default",
   className,
@@ -255,7 +264,7 @@ export function OverflowAwareActionButton({
       <span className="actionButtonLabel" ref={labelRef}>
         {displayLabel}
       </span>
-      <CostChips action={action} />
+      <CostChips action={action} displayCostChips={displayCostChips} />
     </button>
   );
 }
