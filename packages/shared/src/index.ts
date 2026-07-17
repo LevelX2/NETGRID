@@ -662,6 +662,7 @@ export type ChoiceOption = {
   value?: string | number | boolean;
   selectable?: boolean;
   metadata?: {
+    creditCost?: number;
     postBidTraceLinkDelta?: number;
     shellTradersRemainingCounters?: number;
   };

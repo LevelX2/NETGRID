@@ -36,6 +36,7 @@ import {
   cardChoiceUsesOrderedSelection,
   cardChoiceUsesReadableCards,
   choiceInteractionAmbience,
+  choiceOptionCostChips,
   counterDisplayUsesCreditBadge,
   counterDisplayUsesRefreshingCreditBadge,
   counterDisplayBadgeView,
@@ -2072,6 +2073,16 @@ describe("V1.0.6 resource and card-display helpers", () => {
     );
     expect(actionConsumesClick({ costs: [{ credits: 2 }] })).toBe(false);
     expect(actionConsumesClick({ costs: [] })).toBe(false);
+  });
+
+  it("formats choice-specific credit costs as the existing credit chip", () => {
+    expect(choiceOptionCostChips({ metadata: { creditCost: 2 } })).toEqual([
+      { kind: "credit", amount: 2, label: "2 Credits" },
+    ]);
+    expect(choiceOptionCostChips({ metadata: { creditCost: 0 } })).toEqual([
+      { kind: "credit", amount: 0, label: "0 Credits" },
+    ]);
+    expect(choiceOptionCostChips({})).toEqual([]);
   });
 
   it("keeps paid ability costs in chips instead of duplicating them in labels", () => {
