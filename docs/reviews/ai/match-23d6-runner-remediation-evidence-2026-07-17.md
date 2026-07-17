@@ -44,207 +44,207 @@ Für Broker, alle vier Breaker und Aujourd'Oui stimmen Rollen und strukturierte 
 
 ## Vollständige Decision-Coverage
 
-| Decision | SV | Turn | Auswahl | beste sichtbare Alternative | Status | Klassifikation |
-| ---: | ---: | ---: | --- | --- | --- | --- |
-| D001 | 0 | 1 | Runner-Starthand | - | plausibel | Choice-Inhalt, zulässige Optionen und Folgefenster geprüft; kein weiterer belegter Fehler. |
-| D002 | 7 | 2 | Run auf R&D | Krash installieren | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D003 | 9 | 2 | Run fortsetzen | Jack-out | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D004 | 10 | 2 | Karte accessen | - | plausibel | Access-/Trash-/Steal-Fenster und sichtbare Alternativen geprüft. |
-| D005 | 11 | 2 | Krash installieren | Runner Sensei installieren | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D006 | 12 | 2 | Run auf HQ | Runner Sensei installieren | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D007 | 13 | 2 | Karte accessen | - | plausibel | Access-/Trash-/Steal-Fenster und sichtbare Alternativen geprüft. |
-| D008 | 14 | 2 | Runner Sensei installieren | Karte ziehen | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D009 | 15 | 2 | Zug beenden | - | plausibel | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster. |
-| D010 | 21 | 4 | Run auf R&D | 1 Credit nehmen | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D011 | 23 | 4 | Run fortsetzen | Jack-out | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D012 | 25 | 4 | Subroutinen auslösen (Run endet) | - | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D013 | 26 | 4 | 1 Credit nehmen | Karte ziehen | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D014 | 27 | 4 | 1 Credit nehmen | Karte ziehen | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D015 | 28 | 4 | 1 Credit nehmen | Karte ziehen | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D016 | 29 | 4 | Zug beenden | - | plausibel | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster. |
-| D017 | 36 | 6 | 1 Credit nehmen | Karte ziehen | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D018 | 37 | 6 | 1 Credit nehmen | Karte ziehen | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D019 | 38 | 6 | Karte ziehen | Get Ready to Rumble installieren | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D020 | 39 | 6 | Ice and Data Special Report spielen | Karte ziehen | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D021 | 40 | 6 | Ein Data Fort zum Exposen wählen | - | plausibel | Choice-Inhalt, zulässige Optionen und Folgefenster geprüft; kein weiterer belegter Fehler. |
-| D022 | 41 | 6 | Zug beenden | - | plausibel | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster. |
-| D023 | 47 | 8 | Run auf HQ | Karte ziehen | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D024 | 48 | 8 | Karte accessen | - | plausibel | Access-/Trash-/Steal-Fenster und sichtbare Alternativen geprüft. |
-| D025 | 49 | 8 | Nicht trashen | Corporate Negotiating Center trashen | plausibel | Access-/Trash-/Steal-Fenster und sichtbare Alternativen geprüft. |
-| D026 | 50 | 8 | 1 Credit nehmen | Karte ziehen | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D027 | 51 | 8 | Get Ready to Rumble installieren | 1 Credit nehmen | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D028 | 52 | 8 | Karte ziehen | Run auf HQ | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D029 | 53 | 8 | Zug beenden | - | plausibel | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster. |
-| D030 | 59 | 10 | 1 Credit nehmen | Karte ziehen | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D031 | 60 | 10 | Karte ziehen | Run auf Remote 1 | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D032 | 61 | 10 | Score! spielen | Run auf Remote 1 | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D033 | 62 | 10 | Run auf Remote 1 | Karte ziehen | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D034 | 64 | 10 | Krash: Stärke +1 | Subroutinen auslösen | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D035 | 65 | 10 | Krash: Stärke +1 | Subroutinen auslösen | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D036 | 66 | 10 | Krash: Stärke +1 | Subroutinen auslösen | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D037 | 67 | 10 | Krash: Subroutine 1 brechen | Subroutinen auslösen | Finding F1 | Viral 15: falsches Break-Ziel; Krash geht verloren. |
-| D038 | 68 | 10 | Subroutinen auslösen | - | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D039 | 69 | 10 | Run fortsetzen | Jack-out | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D040 | 70 | 10 | Viral 15: installiertes Programm trashen. | - | plausibel | Choice-Inhalt, zulässige Optionen und Folgefenster geprüft; kein weiterer belegter Fehler. |
-| D041 | 71 | 10 | Run fortsetzen | Jack-out | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D042 | 72 | 10 | Karte accessen | - | plausibel | Access-/Trash-/Steal-Fenster und sichtbare Alternativen geprüft. |
-| D043 | 73 | 10 | Corporate War stehlen | - | plausibel | Access-/Trash-/Steal-Fenster und sichtbare Alternativen geprüft. |
-| D044 | 74 | 10 | Zug beenden | - | plausibel | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster. |
-| D045 | 80 | 12 | Karte ziehen | 1 Credit nehmen | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D046 | 81 | 12 | Karte ziehen | 1 Credit nehmen | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D047 | 82 | 12 | Karte ziehen | 1 Credit nehmen | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D048 | 83 | 12 | 1 Credit nehmen | Run auf HQ | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D049 | 84 | 12 | Zug beenden | - | plausibel | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster. |
-| D050 | 85 | 12 | Runner-Discard wählen | - | plausibel | Choice-Inhalt, zulässige Optionen und Folgefenster geprüft; kein weiterer belegter Fehler. |
-| D051 | 93 | 14 | 1 Credit nehmen | Run auf HQ | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D052 | 94 | 14 | 1 Credit nehmen | Run auf HQ | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D053 | 95 | 14 | 1 Credit nehmen | Run auf HQ | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D054 | 96 | 14 | Score! spielen | Run auf HQ | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D055 | 97 | 14 | Zug beenden | - | plausibel | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster. |
-| D056 | 102 | 16 | Karte ziehen | Run auf HQ | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D057 | 103 | 16 | Karte ziehen | Bargain with Viacox installieren | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D058 | 104 | 16 | Bargain with Viacox installieren | Run auf HQ | Schwachpunkt F4 | Viacox-Install erhält Setup-/Economybonus ohne Pflichtaktionsrisiko. |
-| D059 | 105 | 16 | Karte ziehen | Run auf HQ | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D060 | 106 | 16 | Zug beenden | - | plausibel | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster. |
-| D061 | 107 | 16 | Runner-Discard wählen | - | plausibel | Choice-Inhalt, zulässige Optionen und Folgefenster geprüft; kein weiterer belegter Fehler. |
-| D062 | 113 | 18 | Karte ziehen | Run auf HQ | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D063 | 114 | 18 | Ice and Data Special Report spielen | Run auf HQ | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D064 | 115 | 18 | Ein Data Fort zum Exposen wählen | - | plausibel | Choice-Inhalt, zulässige Optionen und Folgefenster geprüft; kein weiterer belegter Fehler. |
-| D065 | 116 | 18 | Karte ziehen | 1 Credit nehmen | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D066 | 117 | 18 | Run auf HQ | 1 Credit nehmen | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D067 | 118 | 18 | Karte accessen | - | plausibel | Access-/Trash-/Steal-Fenster und sichtbare Alternativen geprüft. |
-| D068 | 119 | 18 | Zug beenden | - | plausibel | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster. |
-| D069 | 120 | 18 | Runner-Discard wählen | - | plausibel | Choice-Inhalt, zulässige Optionen und Folgefenster geprüft; kein weiterer belegter Fehler. |
-| D070 | 129 | 20 | start_run | - | Finding F5 | Viacox-Wurf 5 bietet nur Remote 1 statt einer Remote-Auswahl. |
-| D071 | 130 | 20 | Subroutinen auslösen | - | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D072 | 131 | 20 | Run fortsetzen | Jack-out (1 Credit) | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D073 | 132 | 20 | Run auf HQ | 1 Credit nehmen | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D074 | 133 | 20 | Karte accessen | - | plausibel | Access-/Trash-/Steal-Fenster und sichtbare Alternativen geprüft. |
-| D075 | 134 | 20 | Nicht trashen | Rescheduler trashen | plausibel | Access-/Trash-/Steal-Fenster und sichtbare Alternativen geprüft. |
-| D076 | 135 | 20 | Karte ziehen | 1 Credit nehmen | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D077 | 136 | 20 | 1 Credit nehmen | Run auf Remote 2 | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D078 | 137 | 20 | Mercenary Subcontract installieren | Run auf Remote 2 | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D079 | 138 | 20 | Zug beenden | - | plausibel | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster. |
-| D080 | 143 | 22 | Skullcap installieren | - | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D081 | 144 | 22 | Karte ziehen | Run auf HQ | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D082 | 145 | 22 | Karte ziehen | Drone for a Day spielen | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D083 | 146 | 22 | Run auf HQ | Drone for a Day spielen | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D084 | 147 | 22 | Karte accessen | - | plausibel | Access-/Trash-/Steal-Fenster und sichtbare Alternativen geprüft. |
-| D085 | 148 | 22 | Nicht trashen | Rescheduler trashen | plausibel | Access-/Trash-/Steal-Fenster und sichtbare Alternativen geprüft. |
-| D086 | 149 | 22 | Drone for a Day spielen | Prearranged Drop spielen | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D087 | 150 | 22 | Zug beenden | - | plausibel | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster. |
-| D088 | 156 | 24 | Tag entfernen | Run auf Remote 2 | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D089 | 157 | 24 | Tag entfernen | Run auf Remote 2 | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D090 | 158 | 24 | Tag entfernen | Run auf Remote 2 | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D091 | 159 | 24 | 1 Credit nehmen | Prearranged Drop spielen | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D092 | 160 | 24 | Zug beenden | - | plausibel | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster. |
-| D093 | 166 | 26 | Prearranged Drop spielen | Run auf Remote 3 | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D094 | 167 | 26 | Run auf Remote 3 | Karte ziehen | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D095 | 169 | 26 | Run fortsetzen | Jack-out | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D096 | 170 | 26 | Karte accessen | - | plausibel | Access-/Trash-/Steal-Fenster und sichtbare Alternativen geprüft. |
-| D097 | 171 | 26 | Mercenary Subcontract: aktuelle Karte kostenlos trashen | Nicht trashen | plausibel | Access-/Trash-/Steal-Fenster und sichtbare Alternativen geprüft. |
-| D098 | 172 | 26 | Karte ziehen | 1 Credit nehmen | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D099 | 173 | 26 | Karte ziehen | 1 Credit nehmen | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D100 | 174 | 26 | Zug beenden | - | plausibel | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster. |
-| D101 | 175 | 26 | Runner-Discard wählen | - | plausibel | Choice-Inhalt, zulässige Optionen und Folgefenster geprüft; kein weiterer belegter Fehler. |
-| D102 | 180 | 28 | Karte ziehen | 1 Credit nehmen | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D103 | 181 | 28 | Karte ziehen | 1 Credit nehmen | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D104 | 182 | 28 | Karte ziehen | 1 Credit nehmen | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D105 | 183 | 28 | Karte ziehen | 1 Credit nehmen | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D106 | 184 | 28 | Zug beenden | - | plausibel | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster. |
-| D107 | 185 | 28 | Runner-Discard wählen | - | plausibel | Choice-Inhalt, zulässige Optionen und Folgefenster geprüft; kein weiterer belegter Fehler. |
-| D108 | 192 | 30 | Karte ziehen | 1 Credit nehmen | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D109 | 193 | 30 | 1 Credit nehmen | Run auf HQ | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D110 | 194 | 30 | 1 Credit nehmen | Run auf HQ | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D111 | 195 | 30 | 1 Credit nehmen | Run auf HQ | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D112 | 196 | 30 | Zug beenden | - | plausibel | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster. |
-| D113 | 197 | 30 | Runner-Discard wählen | - | plausibel | Choice-Inhalt, zulässige Optionen und Folgefenster geprüft; kein weiterer belegter Fehler. |
-| D114 | 205 | 32 | 1 Credit nehmen | Run auf HQ | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D115 | 206 | 32 | Drone for a Day spielen | Run auf HQ | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D116 | 207 | 32 | Tag entfernen | Run auf Remote 2 | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D117 | 208 | 32 | Run auf Remote 2 | Karte ziehen | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D118 | 209 | 32 | Subroutinen auslösen | - | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D119 | 210 | 32 | Run fortsetzen | Jack-out | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D120 | 211 | 32 | Karte accessen | - | plausibel | Access-/Trash-/Steal-Fenster und sichtbare Alternativen geprüft. |
-| D121 | 212 | 32 | Remote Facility trashen | Nicht trashen | plausibel | Access-/Trash-/Steal-Fenster und sichtbare Alternativen geprüft. |
-| D122 | 213 | 32 | Zug beenden | - | plausibel | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster. |
-| D123 | 218 | 34 | Karte ziehen | Broker installieren | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D124 | 219 | 34 | Karte ziehen | Broker installieren | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D125 | 220 | 34 | 1 Credit nehmen | Run auf HQ | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D126 | 221 | 34 | 1 Credit nehmen | Run auf HQ | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D127 | 222 | 34 | Zug beenden | - | plausibel | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster. |
-| D128 | 223 | 34 | Runner-Discard wählen | - | plausibel | Choice-Inhalt, zulässige Optionen und Folgefenster geprüft; kein weiterer belegter Fehler. |
-| D129 | 228 | 36 | Broker installieren | Run auf HQ | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D130 | 229 | 36 | 1 Credit nehmen | Broker: 3 Credits auf Broker legen | Finding F2 | Lucidrine-Funding blockiert den klar besseren Broker-Load. |
-| D131 | 230 | 36 | 1 Credit nehmen | Broker: 3 Credits auf Broker legen | Finding F2 | Fundingplan blockiert Broker erneut ohne Same-turn-Konversion. |
-| D132 | 231 | 36 | 1 Credit nehmen | Broker: 3 Credits auf Broker legen | Finding F2 | Letzter Basiscredit erreicht 8 Credits erst ohne Installationsclick. |
-| D133 | 232 | 36 | Zug beenden | - | plausibel | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster. |
-| D134 | 240 | 38 | Karte ziehen | Broker: 3 Credits auf Broker legen | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D135 | 241 | 38 | Karte ziehen | Bargain with Viacox installieren | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D136 | 242 | 38 | Codecracker installieren | Bargain with Viacox installieren | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D137 | 243 | 38 | 1 Credit nehmen | Broker: 3 Credits auf Broker legen | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D138 | 244 | 38 | Zug beenden | - | plausibel | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster. |
-| D139 | 251 | 40 | 1 Credit nehmen | Run auf Remote 2 | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D140 | 252 | 40 | Run auf Remote 2 | Bargain with Viacox installieren | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D141 | 254 | 40 | Subroutinen auslösen | - | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D142 | 255 | 40 | Jack-out (1 Credit) | Run fortsetzen | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D143 | 256 | 40 | 1 Credit nehmen | Bargain with Viacox installieren | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D144 | 257 | 40 | Karte ziehen | Broker: 3 Credits auf Broker legen | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D145 | 258 | 40 | Zug beenden | - | plausibel | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster. |
-| D146 | 259 | 40 | Runner-Discard wählen | - | plausibel | Choice-Inhalt, zulässige Optionen und Folgefenster geprüft; kein weiterer belegter Fehler. |
-| D147 | 266 | 42 | Karte ziehen | Bargain with Viacox installieren | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D148 | 267 | 42 | Bargain with Viacox installieren | Broker: 3 Credits auf Broker legen | Schwachpunkt F4 | Zweites Viacox ignoriert den sichtbar gefährlichen Pflicht-Run-Kontext. |
-| D149 | 268 | 42 | 1 Credit nehmen | Broker: 3 Credits auf Broker legen | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D150 | 269 | 42 | 1 Credit nehmen | Broker: 3 Credits auf Broker legen | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D151 | 270 | 42 | Zug beenden | - | plausibel | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster. |
-| D152 | 277 | 44 | start_run | - | regelbedingt | Viacox-Wurf 3: R&D-Run war die einzige LegalAction. |
-| D153 | 280 | 44 | Subroutinen auslösen | - | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D154 | 282 | 44 | Run fortsetzen | Jack-out | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D155 | 284 | 44 | Codecracker: Stärke +1 | Subroutinen auslösen (Run endet) | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D156 | 285 | 44 | Codecracker: Stärke +1 | Subroutinen auslösen (Run endet) | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D157 | 286 | 44 | Codecracker: Stärke +1 | Subroutinen auslösen (Run endet) | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D158 | 287 | 44 | Codecracker: Stärke +1 | Subroutinen auslösen (Run endet) | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D159 | 288 | 44 | Codecracker: Stärke +1 | Subroutinen auslösen (Run endet) | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D160 | 289 | 44 | Codecracker: Stärke +1 | Subroutinen auslösen (Run endet) | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D161 | 290 | 44 | Codecracker: Subroutine 1 brechen | Codecracker: Subroutine 2 brechen | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D162 | 291 | 44 | Subroutinen auslösen (Run endet) | - | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D163 | 292 | 44 | Karte ziehen | Broker: 3 Credits auf Broker legen | Finding F2/F3 | Lucidrine-Plan blockiert Broker und zieht bei bereits vollem Setup-Fokus. |
-| D164 | 293 | 44 | 1 Credit nehmen | Broker: 3 Credits auf Broker legen | Finding F2/F3 | Basiscredit verdrängt das kostenlose Aujourd'Oui bei akuter Coverage-Lücke. |
-| D165 | 294 | 44 | 1 Credit nehmen | Broker: 3 Credits auf Broker legen | Finding F2/F3 | Fundingfortsetzung verdrängt erneut Broker und Aujourd'Oui. |
-| D166 | 295 | 44 | 1 Credit nehmen | Broker: 3 Credits auf Broker legen | Finding F2/F3 | Dritter Basiscredit verdrängt erneut Broker und Aujourd'Oui. |
-| D167 | 296 | 44 | Zug beenden | - | plausibel | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster. |
-| D168 | 297 | 44 | Runner-Discard wählen | - | plausibel | Choice-Inhalt, zulässige Optionen und Folgefenster geprüft; kein weiterer belegter Fehler. |
-| D169 | 303 | 46 | start_run | - | regelbedingt | Viacox-Wurf 3: R&D-Run war die einzige LegalAction. |
-| D170 | 305 | 46 | Subroutinen auslösen | - | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D171 | 307 | 46 | Run fortsetzen | Jack-out | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D172 | 309 | 46 | Subroutinen auslösen (Run endet) | - | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D173 | 310 | 46 | 1 Credit nehmen | Broker: 3 Credits auf Broker legen | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D174 | 311 | 46 | 1 Credit nehmen | Broker: 3 Credits auf Broker legen | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D175 | 312 | 46 | Broker: 3 Credits auf Broker legen | Aujourd'Oui installieren | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D176 | 313 | 46 | 1 Credit nehmen | Aujourd'Oui installieren | Schwachpunkt F3 | Credit-Base-Plan hält Aujourd'Oui trotz konkreter Coverage-Lücke zurück. |
-| D177 | 314 | 46 | Zug beenden | - | plausibel | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster. |
-| D178 | 321 | 48 | 1 Credit nehmen | - | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D179 | 322 | 48 | Broker: 3 Credits auf Broker legen | Aujourd'Oui installieren | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D180 | 323 | 48 | Run auf Remote 3 | Run auf Remote 4 | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D181 | 325 | 48 | Run fortsetzen | Jack-out | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D182 | 326 | 48 | Karte accessen | - | plausibel | Access-/Trash-/Steal-Fenster und sichtbare Alternativen geprüft. |
-| D183 | 327 | 48 | Corporate Negotiating Center trashen | Nicht trashen | plausibel | Access-/Trash-/Steal-Fenster und sichtbare Alternativen geprüft. |
-| D184 | 328 | 48 | Run auf Remote 4 | Run auf Remote 5 | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D185 | 330 | 48 | Run fortsetzen | Jack-out | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D186 | 331 | 48 | Karte accessen | - | plausibel | Access-/Trash-/Steal-Fenster und sichtbare Alternativen geprüft. |
-| D187 | 332 | 48 | Rescheduler trashen | Nicht trashen | plausibel | Access-/Trash-/Steal-Fenster und sichtbare Alternativen geprüft. |
-| D188 | 333 | 48 | 1 Credit nehmen | Run auf Remote 5 | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D189 | 334 | 48 | Zug beenden | - | plausibel | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster. |
-| D190 | 342 | 50 | start_run | - | regelbedingt | Viacox-Wurf 3: R&D-Run war die einzige LegalAction. |
-| D191 | 344 | 50 | Subroutinen auslösen | - | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D192 | 346 | 50 | Run fortsetzen | Jack-out | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D193 | 348 | 50 | Subroutinen auslösen (Run endet) | - | plausibel | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler. |
-| D194 | 349 | 50 | Broker: Credits von Broker nehmen | 1 Credit nehmen | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D195 | 350 | 50 | Aujourd'Oui installieren | Mercenary Subcontract installieren | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D196 | 351 | 50 | Aujourd'Oui: Top 5 nach Programmen prüfen | Karte ziehen | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D197 | 352 | 50 | Stack-Spitze ansehen und Karten nehmen | - | plausibel | Choice-Inhalt, zulässige Optionen und Folgefenster geprüft; kein weiterer belegter Fehler. |
-| D198 | 353 | 50 | Mercenary Subcontract installieren | 1 Credit nehmen | plausibel | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
-| D199 | 354 | 50 | Zug beenden | - | plausibel | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster. |
+| Decision |  SV | Turn | Auswahl                                                 | beste sichtbare Alternative          | Status          | Klassifikation                                                                                                   |
+| -------: | --: | ---: | ------------------------------------------------------- | ------------------------------------ | --------------- | ---------------------------------------------------------------------------------------------------------------- |
+|     D001 |   0 |    1 | Runner-Starthand                                        | -                                    | plausibel       | Choice-Inhalt, zulässige Optionen und Folgefenster geprüft; kein weiterer belegter Fehler.                       |
+|     D002 |   7 |    2 | Run auf R&D                                             | Krash installieren                   | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D003 |   9 |    2 | Run fortsetzen                                          | Jack-out                             | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D004 |  10 |    2 | Karte accessen                                          | -                                    | plausibel       | Access-/Trash-/Steal-Fenster und sichtbare Alternativen geprüft.                                                 |
+|     D005 |  11 |    2 | Krash installieren                                      | Runner Sensei installieren           | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D006 |  12 |    2 | Run auf HQ                                              | Runner Sensei installieren           | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D007 |  13 |    2 | Karte accessen                                          | -                                    | plausibel       | Access-/Trash-/Steal-Fenster und sichtbare Alternativen geprüft.                                                 |
+|     D008 |  14 |    2 | Runner Sensei installieren                              | Karte ziehen                         | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D009 |  15 |    2 | Zug beenden                                             | -                                    | plausibel       | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster.                                            |
+|     D010 |  21 |    4 | Run auf R&D                                             | 1 Credit nehmen                      | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D011 |  23 |    4 | Run fortsetzen                                          | Jack-out                             | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D012 |  25 |    4 | Subroutinen auslösen (Run endet)                        | -                                    | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D013 |  26 |    4 | 1 Credit nehmen                                         | Karte ziehen                         | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D014 |  27 |    4 | 1 Credit nehmen                                         | Karte ziehen                         | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D015 |  28 |    4 | 1 Credit nehmen                                         | Karte ziehen                         | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D016 |  29 |    4 | Zug beenden                                             | -                                    | plausibel       | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster.                                            |
+|     D017 |  36 |    6 | 1 Credit nehmen                                         | Karte ziehen                         | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D018 |  37 |    6 | 1 Credit nehmen                                         | Karte ziehen                         | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D019 |  38 |    6 | Karte ziehen                                            | Get Ready to Rumble installieren     | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D020 |  39 |    6 | Ice and Data Special Report spielen                     | Karte ziehen                         | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D021 |  40 |    6 | Ein Data Fort zum Exposen wählen                        | -                                    | plausibel       | Choice-Inhalt, zulässige Optionen und Folgefenster geprüft; kein weiterer belegter Fehler.                       |
+|     D022 |  41 |    6 | Zug beenden                                             | -                                    | plausibel       | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster.                                            |
+|     D023 |  47 |    8 | Run auf HQ                                              | Karte ziehen                         | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D024 |  48 |    8 | Karte accessen                                          | -                                    | plausibel       | Access-/Trash-/Steal-Fenster und sichtbare Alternativen geprüft.                                                 |
+|     D025 |  49 |    8 | Nicht trashen                                           | Corporate Negotiating Center trashen | plausibel       | Access-/Trash-/Steal-Fenster und sichtbare Alternativen geprüft.                                                 |
+|     D026 |  50 |    8 | 1 Credit nehmen                                         | Karte ziehen                         | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D027 |  51 |    8 | Get Ready to Rumble installieren                        | 1 Credit nehmen                      | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D028 |  52 |    8 | Karte ziehen                                            | Run auf HQ                           | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D029 |  53 |    8 | Zug beenden                                             | -                                    | plausibel       | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster.                                            |
+|     D030 |  59 |   10 | 1 Credit nehmen                                         | Karte ziehen                         | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D031 |  60 |   10 | Karte ziehen                                            | Run auf Remote 1                     | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D032 |  61 |   10 | Score! spielen                                          | Run auf Remote 1                     | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D033 |  62 |   10 | Run auf Remote 1                                        | Karte ziehen                         | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D034 |  64 |   10 | Krash: Stärke +1                                        | Subroutinen auslösen                 | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D035 |  65 |   10 | Krash: Stärke +1                                        | Subroutinen auslösen                 | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D036 |  66 |   10 | Krash: Stärke +1                                        | Subroutinen auslösen                 | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D037 |  67 |   10 | Krash: Subroutine 1 brechen                             | Subroutinen auslösen                 | Finding F1      | Viral 15: falsches Break-Ziel; Krash geht verloren.                                                              |
+|     D038 |  68 |   10 | Subroutinen auslösen                                    | -                                    | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D039 |  69 |   10 | Run fortsetzen                                          | Jack-out                             | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D040 |  70 |   10 | Viral 15: installiertes Programm trashen.               | -                                    | plausibel       | Choice-Inhalt, zulässige Optionen und Folgefenster geprüft; kein weiterer belegter Fehler.                       |
+|     D041 |  71 |   10 | Run fortsetzen                                          | Jack-out                             | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D042 |  72 |   10 | Karte accessen                                          | -                                    | plausibel       | Access-/Trash-/Steal-Fenster und sichtbare Alternativen geprüft.                                                 |
+|     D043 |  73 |   10 | Corporate War stehlen                                   | -                                    | plausibel       | Access-/Trash-/Steal-Fenster und sichtbare Alternativen geprüft.                                                 |
+|     D044 |  74 |   10 | Zug beenden                                             | -                                    | plausibel       | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster.                                            |
+|     D045 |  80 |   12 | Karte ziehen                                            | 1 Credit nehmen                      | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D046 |  81 |   12 | Karte ziehen                                            | 1 Credit nehmen                      | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D047 |  82 |   12 | Karte ziehen                                            | 1 Credit nehmen                      | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D048 |  83 |   12 | 1 Credit nehmen                                         | Run auf HQ                           | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D049 |  84 |   12 | Zug beenden                                             | -                                    | plausibel       | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster.                                            |
+|     D050 |  85 |   12 | Runner-Discard wählen                                   | -                                    | plausibel       | Choice-Inhalt, zulässige Optionen und Folgefenster geprüft; kein weiterer belegter Fehler.                       |
+|     D051 |  93 |   14 | 1 Credit nehmen                                         | Run auf HQ                           | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D052 |  94 |   14 | 1 Credit nehmen                                         | Run auf HQ                           | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D053 |  95 |   14 | 1 Credit nehmen                                         | Run auf HQ                           | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D054 |  96 |   14 | Score! spielen                                          | Run auf HQ                           | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D055 |  97 |   14 | Zug beenden                                             | -                                    | plausibel       | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster.                                            |
+|     D056 | 102 |   16 | Karte ziehen                                            | Run auf HQ                           | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D057 | 103 |   16 | Karte ziehen                                            | Bargain with Viacox installieren     | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D058 | 104 |   16 | Bargain with Viacox installieren                        | Run auf HQ                           | Schwachpunkt F4 | Viacox-Install erhält Setup-/Economybonus ohne Pflichtaktionsrisiko.                                             |
+|     D059 | 105 |   16 | Karte ziehen                                            | Run auf HQ                           | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D060 | 106 |   16 | Zug beenden                                             | -                                    | plausibel       | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster.                                            |
+|     D061 | 107 |   16 | Runner-Discard wählen                                   | -                                    | plausibel       | Choice-Inhalt, zulässige Optionen und Folgefenster geprüft; kein weiterer belegter Fehler.                       |
+|     D062 | 113 |   18 | Karte ziehen                                            | Run auf HQ                           | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D063 | 114 |   18 | Ice and Data Special Report spielen                     | Run auf HQ                           | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D064 | 115 |   18 | Ein Data Fort zum Exposen wählen                        | -                                    | plausibel       | Choice-Inhalt, zulässige Optionen und Folgefenster geprüft; kein weiterer belegter Fehler.                       |
+|     D065 | 116 |   18 | Karte ziehen                                            | 1 Credit nehmen                      | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D066 | 117 |   18 | Run auf HQ                                              | 1 Credit nehmen                      | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D067 | 118 |   18 | Karte accessen                                          | -                                    | plausibel       | Access-/Trash-/Steal-Fenster und sichtbare Alternativen geprüft.                                                 |
+|     D068 | 119 |   18 | Zug beenden                                             | -                                    | plausibel       | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster.                                            |
+|     D069 | 120 |   18 | Runner-Discard wählen                                   | -                                    | plausibel       | Choice-Inhalt, zulässige Optionen und Folgefenster geprüft; kein weiterer belegter Fehler.                       |
+|     D070 | 129 |   20 | start_run                                               | -                                    | Finding F5      | Viacox-Wurf 5 bietet nur Remote 1 statt einer Remote-Auswahl.                                                    |
+|     D071 | 130 |   20 | Subroutinen auslösen                                    | -                                    | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D072 | 131 |   20 | Run fortsetzen                                          | Jack-out (1 Credit)                  | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D073 | 132 |   20 | Run auf HQ                                              | 1 Credit nehmen                      | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D074 | 133 |   20 | Karte accessen                                          | -                                    | plausibel       | Access-/Trash-/Steal-Fenster und sichtbare Alternativen geprüft.                                                 |
+|     D075 | 134 |   20 | Nicht trashen                                           | Rescheduler trashen                  | plausibel       | Access-/Trash-/Steal-Fenster und sichtbare Alternativen geprüft.                                                 |
+|     D076 | 135 |   20 | Karte ziehen                                            | 1 Credit nehmen                      | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D077 | 136 |   20 | 1 Credit nehmen                                         | Run auf Remote 2                     | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D078 | 137 |   20 | Mercenary Subcontract installieren                      | Run auf Remote 2                     | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D079 | 138 |   20 | Zug beenden                                             | -                                    | plausibel       | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster.                                            |
+|     D080 | 143 |   22 | Skullcap installieren                                   | -                                    | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D081 | 144 |   22 | Karte ziehen                                            | Run auf HQ                           | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D082 | 145 |   22 | Karte ziehen                                            | Drone for a Day spielen              | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D083 | 146 |   22 | Run auf HQ                                              | Drone for a Day spielen              | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D084 | 147 |   22 | Karte accessen                                          | -                                    | plausibel       | Access-/Trash-/Steal-Fenster und sichtbare Alternativen geprüft.                                                 |
+|     D085 | 148 |   22 | Nicht trashen                                           | Rescheduler trashen                  | plausibel       | Access-/Trash-/Steal-Fenster und sichtbare Alternativen geprüft.                                                 |
+|     D086 | 149 |   22 | Drone for a Day spielen                                 | Prearranged Drop spielen             | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D087 | 150 |   22 | Zug beenden                                             | -                                    | plausibel       | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster.                                            |
+|     D088 | 156 |   24 | Tag entfernen                                           | Run auf Remote 2                     | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D089 | 157 |   24 | Tag entfernen                                           | Run auf Remote 2                     | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D090 | 158 |   24 | Tag entfernen                                           | Run auf Remote 2                     | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D091 | 159 |   24 | 1 Credit nehmen                                         | Prearranged Drop spielen             | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D092 | 160 |   24 | Zug beenden                                             | -                                    | plausibel       | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster.                                            |
+|     D093 | 166 |   26 | Prearranged Drop spielen                                | Run auf Remote 3                     | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D094 | 167 |   26 | Run auf Remote 3                                        | Karte ziehen                         | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D095 | 169 |   26 | Run fortsetzen                                          | Jack-out                             | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D096 | 170 |   26 | Karte accessen                                          | -                                    | plausibel       | Access-/Trash-/Steal-Fenster und sichtbare Alternativen geprüft.                                                 |
+|     D097 | 171 |   26 | Mercenary Subcontract: aktuelle Karte kostenlos trashen | Nicht trashen                        | plausibel       | Access-/Trash-/Steal-Fenster und sichtbare Alternativen geprüft.                                                 |
+|     D098 | 172 |   26 | Karte ziehen                                            | 1 Credit nehmen                      | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D099 | 173 |   26 | Karte ziehen                                            | 1 Credit nehmen                      | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D100 | 174 |   26 | Zug beenden                                             | -                                    | plausibel       | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster.                                            |
+|     D101 | 175 |   26 | Runner-Discard wählen                                   | -                                    | plausibel       | Choice-Inhalt, zulässige Optionen und Folgefenster geprüft; kein weiterer belegter Fehler.                       |
+|     D102 | 180 |   28 | Karte ziehen                                            | 1 Credit nehmen                      | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D103 | 181 |   28 | Karte ziehen                                            | 1 Credit nehmen                      | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D104 | 182 |   28 | Karte ziehen                                            | 1 Credit nehmen                      | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D105 | 183 |   28 | Karte ziehen                                            | 1 Credit nehmen                      | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D106 | 184 |   28 | Zug beenden                                             | -                                    | plausibel       | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster.                                            |
+|     D107 | 185 |   28 | Runner-Discard wählen                                   | -                                    | plausibel       | Choice-Inhalt, zulässige Optionen und Folgefenster geprüft; kein weiterer belegter Fehler.                       |
+|     D108 | 192 |   30 | Karte ziehen                                            | 1 Credit nehmen                      | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D109 | 193 |   30 | 1 Credit nehmen                                         | Run auf HQ                           | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D110 | 194 |   30 | 1 Credit nehmen                                         | Run auf HQ                           | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D111 | 195 |   30 | 1 Credit nehmen                                         | Run auf HQ                           | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D112 | 196 |   30 | Zug beenden                                             | -                                    | plausibel       | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster.                                            |
+|     D113 | 197 |   30 | Runner-Discard wählen                                   | -                                    | plausibel       | Choice-Inhalt, zulässige Optionen und Folgefenster geprüft; kein weiterer belegter Fehler.                       |
+|     D114 | 205 |   32 | 1 Credit nehmen                                         | Run auf HQ                           | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D115 | 206 |   32 | Drone for a Day spielen                                 | Run auf HQ                           | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D116 | 207 |   32 | Tag entfernen                                           | Run auf Remote 2                     | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D117 | 208 |   32 | Run auf Remote 2                                        | Karte ziehen                         | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D118 | 209 |   32 | Subroutinen auslösen                                    | -                                    | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D119 | 210 |   32 | Run fortsetzen                                          | Jack-out                             | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D120 | 211 |   32 | Karte accessen                                          | -                                    | plausibel       | Access-/Trash-/Steal-Fenster und sichtbare Alternativen geprüft.                                                 |
+|     D121 | 212 |   32 | Remote Facility trashen                                 | Nicht trashen                        | plausibel       | Access-/Trash-/Steal-Fenster und sichtbare Alternativen geprüft.                                                 |
+|     D122 | 213 |   32 | Zug beenden                                             | -                                    | plausibel       | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster.                                            |
+|     D123 | 218 |   34 | Karte ziehen                                            | Broker installieren                  | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D124 | 219 |   34 | Karte ziehen                                            | Broker installieren                  | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D125 | 220 |   34 | 1 Credit nehmen                                         | Run auf HQ                           | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D126 | 221 |   34 | 1 Credit nehmen                                         | Run auf HQ                           | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D127 | 222 |   34 | Zug beenden                                             | -                                    | plausibel       | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster.                                            |
+|     D128 | 223 |   34 | Runner-Discard wählen                                   | -                                    | plausibel       | Choice-Inhalt, zulässige Optionen und Folgefenster geprüft; kein weiterer belegter Fehler.                       |
+|     D129 | 228 |   36 | Broker installieren                                     | Run auf HQ                           | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D130 | 229 |   36 | 1 Credit nehmen                                         | Broker: 3 Credits auf Broker legen   | Finding F2      | Lucidrine-Funding blockiert den klar besseren Broker-Load.                                                       |
+|     D131 | 230 |   36 | 1 Credit nehmen                                         | Broker: 3 Credits auf Broker legen   | Finding F2      | Fundingplan blockiert Broker erneut ohne Same-turn-Konversion.                                                   |
+|     D132 | 231 |   36 | 1 Credit nehmen                                         | Broker: 3 Credits auf Broker legen   | Finding F2      | Letzter Basiscredit erreicht 8 Credits erst ohne Installationsclick.                                             |
+|     D133 | 232 |   36 | Zug beenden                                             | -                                    | plausibel       | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster.                                            |
+|     D134 | 240 |   38 | Karte ziehen                                            | Broker: 3 Credits auf Broker legen   | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D135 | 241 |   38 | Karte ziehen                                            | Bargain with Viacox installieren     | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D136 | 242 |   38 | Codecracker installieren                                | Bargain with Viacox installieren     | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D137 | 243 |   38 | 1 Credit nehmen                                         | Broker: 3 Credits auf Broker legen   | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D138 | 244 |   38 | Zug beenden                                             | -                                    | plausibel       | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster.                                            |
+|     D139 | 251 |   40 | 1 Credit nehmen                                         | Run auf Remote 2                     | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D140 | 252 |   40 | Run auf Remote 2                                        | Bargain with Viacox installieren     | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D141 | 254 |   40 | Subroutinen auslösen                                    | -                                    | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D142 | 255 |   40 | Jack-out (1 Credit)                                     | Run fortsetzen                       | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D143 | 256 |   40 | 1 Credit nehmen                                         | Bargain with Viacox installieren     | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D144 | 257 |   40 | Karte ziehen                                            | Broker: 3 Credits auf Broker legen   | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D145 | 258 |   40 | Zug beenden                                             | -                                    | plausibel       | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster.                                            |
+|     D146 | 259 |   40 | Runner-Discard wählen                                   | -                                    | plausibel       | Choice-Inhalt, zulässige Optionen und Folgefenster geprüft; kein weiterer belegter Fehler.                       |
+|     D147 | 266 |   42 | Karte ziehen                                            | Bargain with Viacox installieren     | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D148 | 267 |   42 | Bargain with Viacox installieren                        | Broker: 3 Credits auf Broker legen   | Schwachpunkt F4 | Zweites Viacox ignoriert den sichtbar gefährlichen Pflicht-Run-Kontext.                                          |
+|     D149 | 268 |   42 | 1 Credit nehmen                                         | Broker: 3 Credits auf Broker legen   | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D150 | 269 |   42 | 1 Credit nehmen                                         | Broker: 3 Credits auf Broker legen   | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D151 | 270 |   42 | Zug beenden                                             | -                                    | plausibel       | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster.                                            |
+|     D152 | 277 |   44 | start_run                                               | -                                    | regelbedingt    | Viacox-Wurf 3: R&D-Run war die einzige LegalAction.                                                              |
+|     D153 | 280 |   44 | Subroutinen auslösen                                    | -                                    | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D154 | 282 |   44 | Run fortsetzen                                          | Jack-out                             | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D155 | 284 |   44 | Codecracker: Stärke +1                                  | Subroutinen auslösen (Run endet)     | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D156 | 285 |   44 | Codecracker: Stärke +1                                  | Subroutinen auslösen (Run endet)     | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D157 | 286 |   44 | Codecracker: Stärke +1                                  | Subroutinen auslösen (Run endet)     | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D158 | 287 |   44 | Codecracker: Stärke +1                                  | Subroutinen auslösen (Run endet)     | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D159 | 288 |   44 | Codecracker: Stärke +1                                  | Subroutinen auslösen (Run endet)     | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D160 | 289 |   44 | Codecracker: Stärke +1                                  | Subroutinen auslösen (Run endet)     | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D161 | 290 |   44 | Codecracker: Subroutine 1 brechen                       | Codecracker: Subroutine 2 brechen    | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D162 | 291 |   44 | Subroutinen auslösen (Run endet)                        | -                                    | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D163 | 292 |   44 | Karte ziehen                                            | Broker: 3 Credits auf Broker legen   | Finding F2/F3   | Lucidrine-Plan blockiert Broker und zieht bei bereits vollem Setup-Fokus.                                        |
+|     D164 | 293 |   44 | 1 Credit nehmen                                         | Broker: 3 Credits auf Broker legen   | Finding F2/F3   | Basiscredit verdrängt das kostenlose Aujourd'Oui bei akuter Coverage-Lücke.                                      |
+|     D165 | 294 |   44 | 1 Credit nehmen                                         | Broker: 3 Credits auf Broker legen   | Finding F2/F3   | Fundingfortsetzung verdrängt erneut Broker und Aujourd'Oui.                                                      |
+|     D166 | 295 |   44 | 1 Credit nehmen                                         | Broker: 3 Credits auf Broker legen   | Finding F2/F3   | Dritter Basiscredit verdrängt erneut Broker und Aujourd'Oui.                                                     |
+|     D167 | 296 |   44 | Zug beenden                                             | -                                    | plausibel       | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster.                                            |
+|     D168 | 297 |   44 | Runner-Discard wählen                                   | -                                    | plausibel       | Choice-Inhalt, zulässige Optionen und Folgefenster geprüft; kein weiterer belegter Fehler.                       |
+|     D169 | 303 |   46 | start_run                                               | -                                    | regelbedingt    | Viacox-Wurf 3: R&D-Run war die einzige LegalAction.                                                              |
+|     D170 | 305 |   46 | Subroutinen auslösen                                    | -                                    | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D171 | 307 |   46 | Run fortsetzen                                          | Jack-out                             | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D172 | 309 |   46 | Subroutinen auslösen (Run endet)                        | -                                    | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D173 | 310 |   46 | 1 Credit nehmen                                         | Broker: 3 Credits auf Broker legen   | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D174 | 311 |   46 | 1 Credit nehmen                                         | Broker: 3 Credits auf Broker legen   | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D175 | 312 |   46 | Broker: 3 Credits auf Broker legen                      | Aujourd'Oui installieren             | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D176 | 313 |   46 | 1 Credit nehmen                                         | Aujourd'Oui installieren             | Schwachpunkt F3 | Credit-Base-Plan hält Aujourd'Oui trotz konkreter Coverage-Lücke zurück.                                         |
+|     D177 | 314 |   46 | Zug beenden                                             | -                                    | plausibel       | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster.                                            |
+|     D178 | 321 |   48 | 1 Credit nehmen                                         | -                                    | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D179 | 322 |   48 | Broker: 3 Credits auf Broker legen                      | Aujourd'Oui installieren             | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D180 | 323 |   48 | Run auf Remote 3                                        | Run auf Remote 4                     | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D181 | 325 |   48 | Run fortsetzen                                          | Jack-out                             | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D182 | 326 |   48 | Karte accessen                                          | -                                    | plausibel       | Access-/Trash-/Steal-Fenster und sichtbare Alternativen geprüft.                                                 |
+|     D183 | 327 |   48 | Corporate Negotiating Center trashen                    | Nicht trashen                        | plausibel       | Access-/Trash-/Steal-Fenster und sichtbare Alternativen geprüft.                                                 |
+|     D184 | 328 |   48 | Run auf Remote 4                                        | Run auf Remote 5                     | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D185 | 330 |   48 | Run fortsetzen                                          | Jack-out                             | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D186 | 331 |   48 | Karte accessen                                          | -                                    | plausibel       | Access-/Trash-/Steal-Fenster und sichtbare Alternativen geprüft.                                                 |
+|     D187 | 332 |   48 | Rescheduler trashen                                     | Nicht trashen                        | plausibel       | Access-/Trash-/Steal-Fenster und sichtbare Alternativen geprüft.                                                 |
+|     D188 | 333 |   48 | 1 Credit nehmen                                         | Run auf Remote 5                     | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D189 | 334 |   48 | Zug beenden                                             | -                                    | plausibel       | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster.                                            |
+|     D190 | 342 |   50 | start_run                                               | -                                    | regelbedingt    | Viacox-Wurf 3: R&D-Run war die einzige LegalAction.                                                              |
+|     D191 | 344 |   50 | Subroutinen auslösen                                    | -                                    | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D192 | 346 |   50 | Run fortsetzen                                          | Jack-out                             | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D193 | 348 |   50 | Subroutinen auslösen (Run endet)                        | -                                    | plausibel       | Run-Elternaktion, sichtbarer Pfad und Encounter-Folge geprüft; kein weiterer belegter Fehler.                    |
+|     D194 | 349 |   50 | Broker: Credits von Broker nehmen                       | 1 Credit nehmen                      | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D195 | 350 |   50 | Aujourd'Oui installieren                                | Mercenary Subcontract installieren   | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D196 | 351 |   50 | Aujourd'Oui: Top 5 nach Programmen prüfen               | Karte ziehen                         | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D197 | 352 |   50 | Stack-Spitze ansehen und Karten nehmen                  | -                                    | plausibel       | Choice-Inhalt, zulässige Optionen und Folgefenster geprüft; kein weiterer belegter Fehler.                       |
+|     D198 | 353 |   50 | Mercenary Subcontract installieren                      | 1 Credit nehmen                      | plausibel       | Plan, Rohscore-Alternativen, sichtbare Ressourcen und unmittelbare Folge geprüft; kein weiterer belegter Fehler. |
+|     D199 | 354 |   50 | Zug beenden                                             | -                                    | plausibel       | Keine offene klar bessere konvertierbare Aktion im damaligen Fenster.                                            |
 
 ## F1 – Encounter-Zieldaten gehen im AI-Input verloren
 
@@ -400,3 +400,36 @@ Der feste Audit auf dem unveränderten Match-Decksnapshot bestätigt danach:
 Damit sind aktiver Hint, Compiler, Inspector, Action-Projektion,
 Installationsscore, Plan-Arbitration, DeckCapability und DeckStrategy für die
 betroffenen Karten gemeinsam verifiziert.
+
+## P7-Abschlussverifikation und breite Regression
+
+Der erste vollständige AI-Shardlauf deckte neben den 23D6-Fällen auch eine
+9FEF-Kontrollregression auf: Eine zunächst zu breite Source-Hint-Autorität
+unterdrückte bei Junkyard BBS die gewöhnliche Draw-Rohmechanik. Die Autorität
+ist deshalb auf explizit strukturierte `delayed_penalty`-Effekte mit Ziel
+`risk.random_action` begrenzt. Viacox bleibt korrekt als zufällige
+Pflichtaktion klassifiziert, während gewöhnliche Draw-Karten ihre bisherige
+Rolle behalten. Der 9FEF-Kontrollcheckpoint, der Source-Role-Vertrag und alle
+23D6-Checkpoints sind danach grün.
+
+Abschlussstand der Verifikation:
+
+- AI-Shards auf dem finalen Dateistand: 125 Dateien/797 Tests, 125
+  Dateien/987 Tests und 124 Dateien/796 Tests; zusammen 374 Dateien und 2.580
+  Tests grün;
+- Engine: 188 Dateien und 1.717 Tests grün, einschließlich Viacox-
+  LegalActions, `applyAction`, Replay und StateHash;
+- Web: 48 Dateien und 626 Tests grün, einschließlich Chronicle-Konsument;
+- Workspace-Typecheck: Shared, Catalog, Engine, Decks, AI, Server und Web
+  grün;
+- AI-Gates: Compiler, Derived Facts, Compiled Index, Manual Overlays,
+  Action-Signal-Katalog, Source-Struktur und Hint-Inspector-Index grün;
+- Deck-Audit: 27/27 eindeutige und 45/45 Karten, null Blocker, null Warnungen;
+- Formatprüfung und `git diff --check` grün.
+
+Der generierte Action-Signal-Katalog sinkt fachlich korrekt von 89 auf 88
+Target-Profile-Gaps: Viacox verliert die falschen `setup.draw`-/
+`setup.search`-Signale, während 601 aktive Karten weiterhin durch
+Action-Signale gedeckt sind. Die von den AI-Gates ausgegebenen allgemeinen
+Compiler-/Derived-Facts-Warnungen entsprechen der bestehenden Inventar-
+Baseline; kein Gate meldet einen neuen Fehler.

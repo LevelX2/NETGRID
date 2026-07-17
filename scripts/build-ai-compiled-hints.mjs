@@ -475,7 +475,13 @@ function mechanicalEffectsAreCompatible(left, right) {
   for (const field of ["kind", "timing", "scope"]) {
     if (left[field] !== right[field]) return false;
   }
-  for (const field of ["resource", "amount", "target", "repeatable", "finite"]) {
+  for (const field of [
+    "resource",
+    "amount",
+    "target",
+    "repeatable",
+    "finite",
+  ]) {
     if (
       isMeaningful(left[field]) &&
       isMeaningful(right[field]) &&

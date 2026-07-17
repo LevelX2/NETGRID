@@ -954,9 +954,7 @@
           "corp_onr_v1_216_security-purge_1",
           "corp_onr_v1_280_zombie_2"
         ],
-        "archives": [
-          "corp_onr_v1_274_tutor_3"
-        ],
+        "archives": ["corp_onr_v1_274_tutor_3"],
         "scoreArea": [],
         "servers": [
           {
@@ -987,12 +985,8 @@
             "id": "remote_1",
             "kind": "remote",
             "label": "Remote 1",
-            "ice": [
-              "corp_onr_v1_276_viral-15_3"
-            ],
-            "root": [
-              "corp_onr_v1_196_corporate-war_1"
-            ]
+            "ice": ["corp_onr_v1_276_viral-15_3"],
+            "root": ["corp_onr_v1_196_corporate-war_1"]
           }
         ]
       },
@@ -1055,9 +1049,7 @@
         ],
         "scoreArea": [],
         "rig": {
-          "programs": [
-            "runner_onr_v1_039_krash_1"
-          ],
+          "programs": ["runner_onr_v1_039_krash_1"],
           "hardware": [],
           "resources": [
             "runner_onr_proteus_148_runner-sensei_2",
@@ -4378,9 +4370,7 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "runner.rnd_pressure",
-          "evidence": [
-            "continued:runner.rnd_pressure"
-          ]
+          "evidence": ["continued:runner.rnd_pressure"]
         },
         "commitment": {
           "strategyId": "runner.rnd_pressure",
@@ -4553,10 +4543,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4636,10 +4623,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4750,9 +4734,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -4812,10 +4794,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4834,9 +4813,7 @@
               "family": "runner_survival",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.survival_defense"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.survival_defense"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -4867,10 +4844,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -5134,10 +5108,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -5284,9 +5255,7 @@
           "maxCreditLoss": 0,
           "maxDamage": 0,
           "allowEndTheRun": true,
-          "evidence": [
-            "run_objective:probe_unknown_ice"
-          ]
+          "evidence": ["run_objective:probe_unknown_ice"]
         }
       },
       "targetServer": {
@@ -5360,18 +5329,14 @@
             "known": true,
             "rezzed": true,
             "visibleName": "Viral 15",
-            "visibleSubtypes": [
-              "sentry"
-            ],
+            "visibleSubtypes": ["sentry"],
             "effectiveStrength": 3,
             "subroutineQuotes": [
               {
                 "index": 0,
                 "threatClass": "may_allow",
                 "broken": false,
-                "evidence": [
-                  "subroutine_type:set_run_jack_out_additional_cost"
-                ]
+                "evidence": ["subroutine_type:set_run_jack_out_additional_cost"]
               },
               {
                 "index": 1,
@@ -5437,9 +5402,7 @@
               "usesPrevention": false,
               "preservesAccessObjective": true,
               "violatesReserve": false,
-              "riskTags": [
-                "break_action_expected_after_pump"
-              ],
+              "riskTags": ["break_action_expected_after_pump"],
               "evidence": [
                 "current_encounter_future_path_modifier_required:true",
                 "run_remainder_subroutine_effect:true",
@@ -5489,9 +5452,7 @@
               "usesPrevention": false,
               "preservesAccessObjective": false,
               "violatesReserve": false,
-              "riskTags": [
-                "break_action_expected_after_pump"
-              ],
+              "riskTags": ["break_action_expected_after_pump"],
               "evidence": [
                 "current_encounter_safety_break_sequence:true",
                 "current_encounter_pump_break_sequence:true",
@@ -5551,9 +5512,7 @@
             "usesPrevention": false,
             "preservesAccessObjective": true,
             "violatesReserve": false,
-            "riskTags": [
-              "break_action_expected_after_pump"
-            ],
+            "riskTags": ["break_action_expected_after_pump"],
             "evidence": [
               "current_encounter_future_path_modifier_required:true",
               "run_remainder_subroutine_effect:true",

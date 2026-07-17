@@ -24,7 +24,6 @@ import {
 } from "./choice-ranking/mapped-choice-policies";
 import {
   mappedPlanHasImmediateVisibleRunPayoff,
-  runnerUrgentRemoteContestRunCanInterruptPlan,
   semanticRuntimeChoiceHasPositiveDevelopmentCommitment,
   semanticRuntimeChoiceIsAcuteHandBufferDraw,
   semanticRuntimeChoiceIsDamagePressureHandBufferDraw,
@@ -32,6 +31,7 @@ import {
   tacticalPlanAcuteHandBufferShouldYield,
   tacticalPlanDamageReactionReserveShouldYield,
   tacticalPlanDeferredDevelopmentInstallShouldYield,
+  tacticalPlanHardInterruptShouldYield,
   tacticalPlanHandBufferMappingBlocksProbeRunOverride,
   tacticalPlanLowValueRecoveryMappingShouldYield,
   tacticalPlanMarginalDevelopmentInstallShouldYield,
@@ -46,7 +46,6 @@ import {
 } from "./choice-ranking/runner-plan-overrides";
 import {
   roundScore,
-  semanticRuntimeChoiceHasScoreBreakdownComponent,
   semanticRuntimeChoiceStrategicFitLevel,
   semanticRuntimeChoiceWithAddedEvidence,
   tacticalPlanBlockedOverrideResult,
@@ -56,6 +55,7 @@ import {
   tacticalPlanCoverageMappingBlocksRunOverride,
   tacticalPlanCoverageProbeRunShouldYield,
   tacticalPlanMappingOverrideEvidence,
+  tacticalPlanOverrideReason,
   tacticalPlanOverrideScoreGapThreshold,
 } from "./choice-ranking/semantic-choice-ranking-support";
 
@@ -431,20 +431,10 @@ export function tacticalPlanMappedChoice(
         overrideChoice,
         scoreGap,
       );
-    const hardInterruptShouldYield =
-      mapping.plan.side === "runner" &&
-      (semanticRuntimeChoiceHasScoreBreakdownComponent(
-        overrideChoice,
-        "runner_matchpoint_run_lock_release",
-      ) ||
-        semanticRuntimeChoiceHasScoreBreakdownComponent(
-          overrideChoice,
-          "runner_viable_followup_run_lock_release",
-        ) ||
-        runnerUrgentRemoteContestRunCanInterruptPlan(
-          mapping.plan,
-          overrideChoice,
-        ));
+    const hardInterruptShouldYield = tacticalPlanHardInterruptShouldYield(
+      mapping,
+      overrideChoice,
+    );
     if (
       tacticalPlanRunnerMappingBlocksOffPlanOverride(
         mapping,
@@ -501,39 +491,25 @@ export function tacticalPlanMappedChoice(
         outcome: "semantic_choice_selected" as const,
         overrideChoice,
         overriddenMappedChoice: mappedChoice,
-        overrideReason: urgentRunNowDevelopmentShouldYield
-          ? "urgent_run_now_development_yield"
-          : unconvertibleFundingShouldYieldToBank
-            ? "unconvertible_funding_bank_yield"
-            : urgentCoverageSearchInstallShouldYield
-              ? "urgent_coverage_search_install_yield"
-              : noNeedSearchShouldYield
-                ? "no_need_search_mapping_yield"
-                : coverageProbeRunShouldYield
-                  ? "coverage_probe_run_mapping_yield"
-                  : lowValueRunEventShouldYield
-                    ? "low_value_run_event_mapping_yield"
-                    : mappedNonPositiveAgainstPositive
-                      ? "mapped_nonpositive_against_positive"
-                      : deferredDevelopmentInstallShouldYield
-                        ? "deferred_development_mapping_yield"
-                        : repeatedRunShouldYield
-                          ? "repeated_run_mapping_yield"
-                          : acuteHandBufferShouldYield
-                            ? "acute_hand_buffer_mapping_yield"
-                            : damageReactionReserveShouldYield
-                              ? "damage_reaction_reserve_mapping_yield"
-                              : lowValueRecoveryShouldYield
-                                ? "low_value_recovery_mapping_yield"
-                                : inferiorRunTargetShouldYield
-                                  ? "inferior_run_target_mapping_yield"
-                                  : corpBoardTriageMismatchShouldYield
-                                    ? "corp_board_triage_mismatch_yield"
-                                    : backgroundBankBuildShouldYield
-                                      ? "background_bank_build_mapping_yield"
-                                      : hardInterruptShouldYield
-                                        ? "runner_hard_interrupt"
-                                        : threshold.reason,
+        overrideReason: tacticalPlanOverrideReason({
+          urgentRunNowDevelopmentShouldYield,
+          unconvertibleFundingShouldYieldToBank,
+          urgentCoverageSearchInstallShouldYield,
+          noNeedSearchShouldYield,
+          coverageProbeRunShouldYield,
+          lowValueRunEventShouldYield,
+          mappedNonPositiveAgainstPositive,
+          deferredDevelopmentInstallShouldYield,
+          repeatedRunShouldYield,
+          acuteHandBufferShouldYield,
+          damageReactionReserveShouldYield,
+          lowValueRecoveryShouldYield,
+          inferiorRunTargetShouldYield,
+          corpBoardTriageMismatchShouldYield,
+          backgroundBankBuildShouldYield,
+          hardInterruptShouldYield,
+          thresholdReason: threshold.reason,
+        }),
         overrideThreshold: threshold.scoreGap,
         scoreGap,
       };

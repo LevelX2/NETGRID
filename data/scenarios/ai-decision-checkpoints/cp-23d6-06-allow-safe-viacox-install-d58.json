@@ -955,9 +955,7 @@
           "corp_onr_v1_274_tutor_3",
           "corp_onr_v1_289_edgerunner-inc-temps_1"
         ],
-        "scoreArea": [
-          "corp_onr_v1_206_marine-arcology_1"
-        ],
+        "scoreArea": ["corp_onr_v1_206_marine-arcology_1"],
         "servers": [
           {
             "id": "hq",
@@ -987,12 +985,8 @@
             "id": "remote_1",
             "kind": "remote",
             "label": "Remote 1",
-            "ice": [
-              "corp_onr_v1_276_viral-15_3"
-            ],
-            "root": [
-              "corp_onr_v1_197_data-fort-reclamation_1"
-            ]
+            "ice": ["corp_onr_v1_276_viral-15_3"],
+            "root": ["corp_onr_v1_197_data-fort-reclamation_1"]
           }
         ]
       },
@@ -1054,9 +1048,7 @@
           "runner_onr_proteus_090_highlighter_1",
           "runner_onr_v1_108_score_2"
         ],
-        "scoreArea": [
-          "corp_onr_v1_196_corporate-war_1"
-        ],
+        "scoreArea": ["corp_onr_v1_196_corporate-war_1"],
         "rig": {
           "programs": [],
           "hardware": [],
@@ -5084,10 +5076,7 @@
       },
       "selectedStepKind": "draw_for_answer",
       "selectedActionId": "runner.draw_card",
-      "blockedBy": [
-        "missing_breaker_coverage",
-        "search_target_not_available"
-      ],
+      "blockedBy": ["missing_breaker_coverage", "search_target_not_available"],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_plan_considered",
       "progressBaseline": {
@@ -5314,9 +5303,7 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "runner.rnd_pressure",
-          "evidence": [
-            "continued:runner.rnd_pressure"
-          ]
+          "evidence": ["continued:runner.rnd_pressure"]
         },
         "commitment": {
           "strategyId": "runner.rnd_pressure",
@@ -5489,10 +5476,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -5661,10 +5645,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -5686,9 +5667,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -5748,10 +5727,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -5770,9 +5746,7 @@
               "family": "runner_survival",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.survival_defense"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.survival_defense"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -5803,10 +5777,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6070,10 +6041,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",

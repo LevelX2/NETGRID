@@ -15,7 +15,10 @@ import {
   toRunnerTurn,
   toRunnerTurnFromCorpMain,
 } from "../../test-fixtures/mechanic-smoke-fixtures";
-import { addRezzedCorpIceForTest, enterEncounterFromMovementWindow } from "../../test-fixtures/index-test-helpers";
+import {
+  addRezzedCorpIceForTest,
+  enterEncounterFromMovementWindow,
+} from "../../test-fixtures/index-test-helpers";
 import {
   CURRENT_RULES_BASELINE,
   type CardDefinitionId,
@@ -67,7 +70,11 @@ function baseState(seed: string): GameState {
   return state;
 }
 
-function applyLegal(state: GameState, side: Side, action: LegalAction): GameState {
+function applyLegal(
+  state: GameState,
+  side: Side,
+  action: LegalAction,
+): GameState {
   const result = applyAction(state, {
     matchId: state.matchId,
     side,
@@ -120,12 +127,25 @@ function nextRunnerActionPhase(state: GameState): GameState {
   return next;
 }
 
-function addRemote(state: GameState, id: Exclude<ServerId, "new_remote">): void {
+function addRemote(
+  state: GameState,
+  id: Exclude<ServerId, "new_remote">,
+): void {
   if (state.corp.servers.some((server) => server.id === id)) return;
-  state.corp.servers.push({ id, kind: "remote", label: "Remote 1", ice: [], root: [] });
+  state.corp.servers.push({
+    id,
+    kind: "remote",
+    label: "Remote 1",
+    ice: [],
+    root: [],
+  });
 }
 
-function addCorpHq(state: GameState, definitionId: string, id: string): CardInstanceId {
+function addCorpHq(
+  state: GameState,
+  definitionId: string,
+  id: string,
+): CardInstanceId {
   const cardId = id as CardInstanceId;
   removeEverywhere(state, cardId);
   state.corp.hq.unshift(cardId);
@@ -199,7 +219,9 @@ function installCorpAgendaInRemote(
   const cardId = id as CardInstanceId;
   removeEverywhere(state, cardId);
   addRemote(state, "remote_1");
-  const server = state.corp.servers.find((candidate) => candidate.id === "remote_1")!;
+  const server = state.corp.servers.find(
+    (candidate) => candidate.id === "remote_1",
+  )!;
   server.root.push(cardId);
   state.cardInstances[cardId] = {
     ...cardInstance(cardId, definitionId, "corp", {
@@ -221,7 +243,9 @@ function installRezzedCorpRoot(
   const cardId = id as CardInstanceId;
   removeEverywhere(state, cardId);
   addRemote(state, serverId);
-  const server = state.corp.servers.find((candidate) => candidate.id === serverId)!;
+  const server = state.corp.servers.find(
+    (candidate) => candidate.id === serverId,
+  )!;
   server.root.push(cardId);
   state.cardInstances[cardId] = {
     ...cardInstance(cardId, definitionId, "corp", {
@@ -262,8 +286,12 @@ function removeEverywhere(state: GameState, cardId: CardInstanceId): void {
   state.runner.grip = state.runner.grip.filter((id) => id !== cardId);
   state.runner.stack = state.runner.stack.filter((id) => id !== cardId);
   state.runner.heap = state.runner.heap.filter((id) => id !== cardId);
-  state.runner.rig.resources = state.runner.rig.resources.filter((id) => id !== cardId);
-  state.runner.rig.hardware = state.runner.rig.hardware.filter((id) => id !== cardId);
+  state.runner.rig.resources = state.runner.rig.resources.filter(
+    (id) => id !== cardId,
+  );
+  state.runner.rig.hardware = state.runner.rig.hardware.filter(
+    (id) => id !== cardId,
+  );
   for (const server of state.corp.servers) {
     server.root = server.root.filter((id) => id !== cardId);
     server.ice = server.ice.filter((id) => id !== cardId);
@@ -277,7 +305,10 @@ function clearRunnerGrip(state: GameState): void {
 }
 
 function expectReplayStable(before: GameState, after: GameState): void {
-  const replay = replayEvents(before, after.eventLog.slice(before.eventLog.length));
+  const replay = replayEvents(
+    before,
+    after.eventLog.slice(before.eventLog.length),
+  );
   expect(replay.ok).toBe(true);
   expect(hashState(replay.state)).toBe(hashState(after));
 }
@@ -298,7 +329,8 @@ function startEncounterWithRezzedIce(
   state = apply(
     state,
     "runner",
-    (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    (action) =>
+      action.type === "start_run" && action.payload?.serverId === "rd",
   );
   return enterEncounterFromMovementWindow(state);
 }
@@ -322,7 +354,12 @@ function viacoxStateForRoll(
   for (let index = 0; index < 500; index += 1) {
     const state = baseState(`pro017-viacox-${roll}-${index}`);
     clearRunnerGrip(state);
-    installRunnerCard(state, BARGAIN_WITH_VIACOX, `viacox_${index}`, "resources");
+    installRunnerCard(
+      state,
+      BARGAIN_WITH_VIACOX,
+      `viacox_${index}`,
+      "resources",
+    );
     addRunnerGrip(state, gripDefinitionId, `runner_grip_${index}`);
     for (const remoteId of remoteIds) {
       addRemote(state, remoteId);
@@ -358,8 +395,11 @@ describe("Proteus PRO017 action economy and debt suite", () => {
     for (const testCase of cases) {
       let state = aiBoardStateForRoll(testCase.roll);
       const offerActions = getLegalActions(state, "corp");
-      expect(offerActions.map((action) => action.payload?.actionEconomyAbility).sort())
-        .toEqual(["accept_extra_action_offer", "decline_extra_action_offer"]);
+      expect(
+        offerActions
+          .map((action) => action.payload?.actionEconomyAbility)
+          .sort(),
+      ).toEqual(["accept_extra_action_offer", "decline_extra_action_offer"]);
 
       const declined = apply(
         state,
@@ -373,14 +413,16 @@ describe("Proteus PRO017 action economy and debt suite", () => {
       state = apply(
         state,
         "corp",
-        (action) => action.payload?.actionEconomyAbility === "accept_extra_action_offer",
+        (action) =>
+          action.payload?.actionEconomyAbility === "accept_extra_action_offer",
       );
       state.corp.clicks = 1;
       const filteredTypes = new Set(
         getLegalActions(state, "corp").map((action) => action.type),
       );
-      expect([...filteredTypes].filter((type) => type !== "end_turn").sort())
-        .toEqual(testCase.expected);
+      expect(
+        [...filteredTypes].filter((type) => type !== "end_turn").sort(),
+      ).toEqual(testCase.expected);
     }
   });
 
@@ -395,11 +437,14 @@ describe("Proteus PRO017 action economy and debt suite", () => {
     state = apply(
       state,
       "corp",
-      (action) => action.payload?.agendaAbility === "proteus_corporate_headhunters",
+      (action) =>
+        action.payload?.agendaAbility === "proteus_corporate_headhunters",
     );
     expect(state.pendingChoice).toMatchObject({
       side: "corp",
-      source: expect.stringContaining(`proteus.pdca_damage_replacement:${pdcaId}`),
+      source: expect.stringContaining(
+        `proteus.pdca_damage_replacement:${pdcaId}`,
+      ),
     });
     expect(state.cardInstances[pdcaId]?.counters?.pdca).toBeUndefined();
     expect(state.runner.grip).toHaveLength(1);
@@ -415,7 +460,8 @@ describe("Proteus PRO017 action economy and debt suite", () => {
     state = apply(
       state,
       "corp",
-      (action) => action.payload?.agendaAbility === "proteus_corporate_headhunters",
+      (action) =>
+        action.payload?.agendaAbility === "proteus_corporate_headhunters",
     );
     state = applyChoice(state, "corp", "pass");
     expect(state.runner.grip).toHaveLength(0);
@@ -434,7 +480,8 @@ describe("Proteus PRO017 action economy and debt suite", () => {
     state = apply(
       state,
       "corp",
-      (action) => action.payload?.agendaAbility === "proteus_corporate_headhunters",
+      (action) =>
+        action.payload?.agendaAbility === "proteus_corporate_headhunters",
     );
     const replaceOption = state.pendingChoice?.options.find((option) =>
       String(option.id).startsWith("replace_"),
@@ -448,13 +495,15 @@ describe("Proteus PRO017 action economy and debt suite", () => {
     state = apply(
       state,
       "corp",
-      (action) => action.payload?.actionEconomyAbility === "pdca_counter_gain_action",
+      (action) =>
+        action.payload?.actionEconomyAbility === "pdca_counter_gain_action",
     );
     expect(state.corp.clicks).toBe(beforeClicks + 1);
     expect(state.cardInstances[pdcaId]?.counters?.pdca ?? 0).toBe(0);
     expect(
       getLegalActions(state, "corp").some(
-        (action) => action.payload?.actionEconomyAbility === "pdca_counter_gain_action",
+        (action) =>
+          action.payload?.actionEconomyAbility === "pdca_counter_gain_action",
       ),
     ).toBe(false);
   });
@@ -470,7 +519,8 @@ describe("Proteus PRO017 action economy and debt suite", () => {
     state = apply(
       state,
       "corp",
-      (action) => action.payload?.agendaAbility === "proteus_corporate_headhunters",
+      (action) =>
+        action.payload?.agendaAbility === "proteus_corporate_headhunters",
     );
     const choiceAction = getLegalActions(state, "corp").find(
       (action) => action.type === "resolve_choice",
@@ -497,21 +547,39 @@ describe("Proteus PRO017 action economy and debt suite", () => {
 
   it("Please Don't Choke Anyone restores Runner encounter context after replace and pass", () => {
     let replaceState = baseState("pro017-2-pdca-encounter-replace");
-    const replacePdcaId = scoreCorpAgenda(replaceState, PDCA, "pdca_encounter_replace");
+    const replacePdcaId = scoreCorpAgenda(
+      replaceState,
+      PDCA,
+      "pdca_encounter_replace",
+    );
     clearRunnerGrip(replaceState);
-    addRunnerGrip(replaceState, RUNNER_EVENT, "runner_event_encounter_replace_a");
-    addRunnerGrip(replaceState, RUNNER_INSTALLABLE_HARDWARE, "runner_event_encounter_replace_b");
+    addRunnerGrip(
+      replaceState,
+      RUNNER_EVENT,
+      "runner_event_encounter_replace_a",
+    );
+    addRunnerGrip(
+      replaceState,
+      RUNNER_INSTALLABLE_HARDWARE,
+      "runner_event_encounter_replace_b",
+    );
     replaceState = startEncounterWithRezzedIce(
       replaceState,
       CHIHUAHUA,
       "pdca_trace_replace",
     );
-    replaceState = apply(replaceState, "runner", (action) => action.type === "continue_run");
+    replaceState = apply(
+      replaceState,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
     replaceState = applyChoice(replaceState, "corp", "bid_0");
     replaceState = applyChoice(replaceState, "runner", "bid_0");
     expect(replaceState.pendingChoice).toMatchObject({
       side: "corp",
-      source: expect.stringContaining(`proteus.pdca_damage_replacement:${replacePdcaId}`),
+      source: expect.stringContaining(
+        `proteus.pdca_damage_replacement:${replacePdcaId}`,
+      ),
     });
     expect(replaceState.phase).toBe("run");
     expect(replaceState.timingPoint).toBe("run.encounter_ice");
@@ -533,9 +601,21 @@ describe("Proteus PRO017 action economy and debt suite", () => {
     scoreCorpAgenda(passState, PDCA, "pdca_encounter_pass");
     clearRunnerGrip(passState);
     addRunnerGrip(passState, RUNNER_EVENT, "runner_event_encounter_pass_a");
-    addRunnerGrip(passState, RUNNER_INSTALLABLE_HARDWARE, "runner_event_encounter_pass_b");
-    passState = startEncounterWithRezzedIce(passState, CHIHUAHUA, "pdca_trace_pass");
-    passState = apply(passState, "runner", (action) => action.type === "continue_run");
+    addRunnerGrip(
+      passState,
+      RUNNER_INSTALLABLE_HARDWARE,
+      "runner_event_encounter_pass_b",
+    );
+    passState = startEncounterWithRezzedIce(
+      passState,
+      CHIHUAHUA,
+      "pdca_trace_pass",
+    );
+    passState = apply(
+      passState,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
     passState = applyChoice(passState, "corp", "bid_0");
     passState = applyChoice(passState, "runner", "bid_0");
     passState = applyChoice(passState, "corp", "pass");
@@ -549,7 +629,11 @@ describe("Proteus PRO017 action economy and debt suite", () => {
     let state = baseState("pro017-2-pdca-encounter-flatline");
     scoreCorpAgenda(state, PDCA, "pdca_encounter_flatline");
     clearRunnerGrip(state);
-    state = startEncounterWithRezzedIce(state, CHIHUAHUA, "pdca_trace_flatline");
+    state = startEncounterWithRezzedIce(
+      state,
+      CHIHUAHUA,
+      "pdca_trace_flatline",
+    );
     state = apply(state, "runner", (action) => action.type === "continue_run");
     state = applyChoice(state, "corp", "bid_0");
     state = applyChoice(state, "runner", "bid_0");
@@ -562,7 +646,9 @@ describe("Proteus PRO017 action economy and debt suite", () => {
   });
 
   it("Please Don't Choke Anyone opens after existing event modification windows", () => {
-    let state = nextCorpActionPhase(baseState("pro017-2-pdca-after-modification"));
+    let state = nextCorpActionPhase(
+      baseState("pro017-2-pdca-after-modification"),
+    );
     const pdcaId = scoreCorpAgenda(state, PDCA, "pdca_after_modification");
     const cybertechId = installRezzedCorpRoot(
       state,
@@ -571,28 +657,49 @@ describe("Proteus PRO017 action economy and debt suite", () => {
       "remote_1",
     );
     state.cardInstances[cybertechId]!.advancementCounters = 1;
-    scoreCorpAgenda(state, CORPORATE_HEADHUNTERS, "headhunter_after_modification");
+    scoreCorpAgenda(
+      state,
+      CORPORATE_HEADHUNTERS,
+      "headhunter_after_modification",
+    );
     clearRunnerGrip(state);
     addRunnerGrip(state, RUNNER_EVENT, "runner_event_modified_a");
-    addRunnerGrip(state, RUNNER_INSTALLABLE_HARDWARE, "runner_event_modified_b");
+    addRunnerGrip(
+      state,
+      RUNNER_INSTALLABLE_HARDWARE,
+      "runner_event_modified_b",
+    );
     addRunnerGrip(state, RUNNER_EVENT, "runner_event_modified_c");
     state.runner.tags = 1;
 
     state = apply(
       state,
       "corp",
-      (action) => action.payload?.agendaAbility === "proteus_corporate_headhunters",
+      (action) =>
+        action.payload?.agendaAbility === "proteus_corporate_headhunters",
     );
-    expect(state.pendingChoice?.source).toContain("v120.event_modification.increase");
-    state = applyChoice(state, "corp", `cybertech_meat_damage_boost_${cybertechId}`);
+    expect(state.pendingChoice?.source).toContain(
+      "v120.event_modification.increase",
+    );
+    state = applyChoice(
+      state,
+      "corp",
+      `cybertech_meat_damage_boost_${cybertechId}`,
+    );
     expect(state.pendingChoice).toMatchObject({
       side: "corp",
-      source: expect.stringContaining(`proteus.pdca_damage_replacement:${pdcaId}`),
+      source: expect.stringContaining(
+        `proteus.pdca_damage_replacement:${pdcaId}`,
+      ),
     });
     state = applyChoice(
       state,
       "corp",
-      String(state.pendingChoice?.options.find((option) => String(option.id).startsWith("replace_"))?.id),
+      String(
+        state.pendingChoice?.options.find((option) =>
+          String(option.id).startsWith("replace_"),
+        )?.id,
+      ),
     );
     expect(state.cardInstances[pdcaId]?.counters?.pdca).toBe(2);
     expect(state.cardInstances[cybertechId]?.advancementCounters).toBe(0);
@@ -604,7 +711,12 @@ describe("Proteus PRO017 action economy and debt suite", () => {
   it("Please Don't Choke Anyone ignores unpreventable core damage", () => {
     let state = baseState("pro017-2-pdca-core-excluded");
     scoreCorpAgenda(state, PDCA, "pdca_core_excluded");
-    const dripId = installRunnerCard(state, LUCIDRINE_DRIP_FEED, "drip_core_excluded", "hardware");
+    const dripId = installRunnerCard(
+      state,
+      LUCIDRINE_DRIP_FEED,
+      "drip_core_excluded",
+      "hardware",
+    );
     clearRunnerGrip(state);
     addRunnerGrip(state, RUNNER_EVENT, "drip_core_excluded_card");
 
@@ -618,12 +730,18 @@ describe("Proteus PRO017 action economy and debt suite", () => {
 
   it("Project Venice records overadvance at score and grants immediate plus recurring Corp actions", () => {
     let state = nextCorpActionPhase(baseState("pro017-venice"));
-    const veniceId = installCorpAgendaInRemote(state, PROJECT_VENICE, "venice", 7);
+    const veniceId = installCorpAgendaInRemote(
+      state,
+      PROJECT_VENICE,
+      "venice",
+      7,
+    );
     const clicksBeforeScore = state.corp.clicks;
     state = apply(
       state,
       "corp",
-      (action) => action.type === "score_agenda" && action.payload?.cardId === veniceId,
+      (action) =>
+        action.type === "score_agenda" && action.payload?.cardId === veniceId,
     );
     expect(state.cardInstances[veniceId]?.counters?.mark).toBe(1);
     expect(state.corp.clicks).toBe(clicksBeforeScore + 1);
@@ -651,16 +769,24 @@ describe("Proteus PRO017 action economy and debt suite", () => {
     state = apply(
       state,
       "corp",
-      (action) => action.type === "play_operation" && action.payload?.cardId === tempsId && action.payload?.xValue === 2,
+      (action) =>
+        action.type === "play_operation" &&
+        action.payload?.cardId === tempsId &&
+        action.payload?.xValue === 2,
     );
     expect(state.corp.credits).toBe(16);
     expect(state.actionEconomy?.corpCreditForfeitDebt?.remaining).toBe(2);
 
-    const creditId = addCorpHq(state, CREDIT_CONSOLIDATION, "credit_consolidation");
+    const creditId = addCorpHq(
+      state,
+      CREDIT_CONSOLIDATION,
+      "credit_consolidation",
+    );
     state = apply(
       state,
       "corp",
-      (action) => action.type === "play_operation" && action.payload?.cardId === creditId,
+      (action) =>
+        action.type === "play_operation" && action.payload?.cardId === creditId,
     );
     expect(state.corp.credits).toBe(19);
     expect(state.actionEconomy?.corpCreditForfeitDebt).toBeUndefined();
@@ -684,8 +810,11 @@ describe("Proteus PRO017 action economy and debt suite", () => {
       expect(new Set(actions.map((action) => action.type))).toEqual(
         new Set(expectedByRoll[roll]),
       );
-      expect(state.randomDrawRecords.some((record) => record.purpose.includes("viacox")))
-        .toBe(true);
+      expect(
+        state.randomDrawRecords.some((record) =>
+          record.purpose.includes("viacox"),
+        ),
+      ).toBe(true);
 
       const before = structuredClone(state) as GameState;
       const after = applyLegal(state, "runner", actions[0]!);
@@ -702,9 +831,10 @@ describe("Proteus PRO017 action economy and debt suite", () => {
     const actions = getLegalActions(state, "runner").filter(
       (action) => action.type === "start_run",
     );
-    expect(
-      actions.map((action) => action.payload?.serverId).sort(),
-    ).toEqual(["remote_1", "remote_2"]);
+    expect(actions.map((action) => action.payload?.serverId).sort()).toEqual([
+      "remote_1",
+      "remote_2",
+    ]);
 
     for (const action of actions) {
       const before = structuredClone(state) as GameState;
@@ -729,19 +859,22 @@ describe("Proteus PRO017 action economy and debt suite", () => {
   it.each([
     [3, "rd"],
     [4, "hq"],
-  ])("Bargain with Viacox roll %i keeps its fixed central target", (roll, serverId) => {
-    const state = viacoxStateForRoll(roll, RUNNER_INSTALLABLE_HARDWARE, [
-      "remote_1",
-      "remote_2",
-    ]);
+  ])(
+    "Bargain with Viacox roll %i keeps its fixed central target",
+    (roll, serverId) => {
+      const state = viacoxStateForRoll(roll, RUNNER_INSTALLABLE_HARDWARE, [
+        "remote_1",
+        "remote_2",
+      ]);
 
-    const actions = getLegalActions(state, "runner").filter(
-      (action) => action.type === "start_run",
-    );
-    expect(actions.map((action) => action.payload?.serverId)).toEqual([
-      serverId,
-    ]);
-  });
+      const actions = getLegalActions(state, "runner").filter(
+        (action) => action.type === "start_run",
+      );
+      expect(actions.map((action) => action.payload?.serverId)).toEqual([
+        serverId,
+      ]);
+    },
+  );
 
   it("Bargain with Viacox grants the forced fifth action on the first Runner turn after a real installation", () => {
     let state = baseState("pro017-viacox-real-install");
@@ -774,11 +907,11 @@ describe("Proteus PRO017 action economy and debt suite", () => {
     expect(grant?.dieRoll).toBeGreaterThanOrEqual(1);
     expect(grant?.dieRoll).toBeLessThanOrEqual(6);
     expect(
-      state.randomDrawRecords.some((record) => record.purpose.includes("viacox")),
+      state.randomDrawRecords.some((record) =>
+        record.purpose.includes("viacox"),
+      ),
     ).toBe(true);
-    expect(
-      state.eventLog.at(-1)?.publicPayload.resolvedEffects,
-    ).toEqual(
+    expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           kind: "gain_actions",
@@ -829,8 +962,8 @@ describe("Proteus PRO017 action economy and debt suite", () => {
             (candidate) =>
               candidate &&
               typeof candidate === "object" &&
-              (candidate as { sourceDefinitionId?: unknown }).sourceDefinitionId ===
-                BARGAIN_WITH_VIACOX,
+              (candidate as { sourceDefinitionId?: unknown })
+                .sourceDefinitionId === BARGAIN_WITH_VIACOX,
           )
         : undefined;
       expect(effect).toMatchObject({
@@ -849,7 +982,8 @@ describe("Proteus PRO017 action economy and debt suite", () => {
     state = apply(
       state,
       "corp",
-      (action) => action.payload?.actionEconomyAbility === "accept_extra_action_offer",
+      (action) =>
+        action.payload?.actionEconomyAbility === "accept_extra_action_offer",
     );
     expect(state.actionEconomy?.grants).toHaveLength(1);
     state = apply(state, "corp", (action) => action.type === "end_turn");
@@ -864,7 +998,8 @@ describe("Proteus PRO017 action economy and debt suite", () => {
     state = apply(
       state,
       "corp",
-      (action) => action.payload?.actionEconomyAbility === "accept_extra_action_offer",
+      (action) =>
+        action.payload?.actionEconomyAbility === "accept_extra_action_offer",
     );
     state.corp.clicks = 1;
     state = apply(state, "corp", (action) => action.type === "gain_credit");
@@ -873,7 +1008,12 @@ describe("Proteus PRO017 action economy and debt suite", () => {
 
   it("Lucidrine Drip Feed builds Drip counters, grants actions, then resets for unpreventable core damage", () => {
     let state = baseState("pro017-drip");
-    const dripId = installRunnerCard(state, LUCIDRINE_DRIP_FEED, "drip", "hardware");
+    const dripId = installRunnerCard(
+      state,
+      LUCIDRINE_DRIP_FEED,
+      "drip",
+      "hardware",
+    );
     clearRunnerGrip(state);
     addRunnerGrip(state, RUNNER_EVENT, "drip_damage_card");
 

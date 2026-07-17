@@ -193,11 +193,13 @@ function actionMatchesRestrictedGrant(
     return legalAction.type === "install_card";
   if (grant.restriction === "gain_credit")
     return legalAction.type === "gain_credit";
-  if (grant.restriction === "draw_card") return legalAction.type === "draw_card";
+  if (grant.restriction === "draw_card")
+    return legalAction.type === "draw_card";
   if (grant.restriction === "start_run") {
     if (legalAction.type !== "start_run") return false;
     return (
-      !grant.targetServerId || legalAction.payload?.serverId === grant.targetServerId
+      !grant.targetServerId ||
+      legalAction.payload?.serverId === grant.targetServerId
     );
   }
   if (grant.restriction === "start_run_remote") {
@@ -248,10 +250,13 @@ export function filterActionsForRestrictedExtraActions(
   if (grants.length === 0) return actions;
   const clicks = side === "corp" ? state.corp.clicks : state.runner.clicks;
   const forced = forcedRestrictedGrantsForSide(state, side);
-  const relevant = forced.length > 0 ? forced : clicks <= grants.length ? grants : [];
+  const relevant =
+    forced.length > 0 ? forced : clicks <= grants.length ? grants : [];
   if (relevant.length === 0) return actions;
   const matching = actions.filter((candidate) =>
-    relevant.some((grant) => actionMatchesRestrictedGrant(state, candidate, grant)),
+    relevant.some((grant) =>
+      actionMatchesRestrictedGrant(state, candidate, grant),
+    ),
   );
   if (forced.length > 0) {
     if (matching.length > 0) return matching;
@@ -271,7 +276,9 @@ export function filterActionsForRestrictedExtraActions(
           ...(grant.revealToCorpOnly !== true && grant.targetCardInstanceId
             ? { targetCardInstanceId: grant.targetCardInstanceId }
             : {}),
-          ...(grant.targetServerId ? { targetServerId: grant.targetServerId } : {}),
+          ...(grant.targetServerId
+            ? { targetServerId: grant.targetServerId }
+            : {}),
           ...(grant.dieRoll !== undefined ? { dieRoll: grant.dieRoll } : {}),
           createdAtStateVersion: grant.createdAtStateVersion,
           ...(grant.createdDuringTurnSerial !== undefined

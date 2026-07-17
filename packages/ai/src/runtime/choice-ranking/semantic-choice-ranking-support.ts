@@ -18,6 +18,70 @@ const STRATEGIC_KIND_OVERRIDE_SCORE_GAP = 480;
 const STRATEGIC_EXACT_MAPPING_PROTECTION_SCORE_GAP = 900;
 const STRATEGIC_KIND_MAPPING_PROTECTION_SCORE_GAP = 720;
 
+export function tacticalPlanOverrideReason(input: {
+  urgentRunNowDevelopmentShouldYield: boolean;
+  unconvertibleFundingShouldYieldToBank: boolean;
+  urgentCoverageSearchInstallShouldYield: boolean;
+  noNeedSearchShouldYield: boolean;
+  coverageProbeRunShouldYield: boolean;
+  lowValueRunEventShouldYield: boolean;
+  mappedNonPositiveAgainstPositive: boolean;
+  deferredDevelopmentInstallShouldYield: boolean;
+  repeatedRunShouldYield: boolean;
+  acuteHandBufferShouldYield: boolean;
+  damageReactionReserveShouldYield: boolean;
+  lowValueRecoveryShouldYield: boolean;
+  inferiorRunTargetShouldYield: boolean;
+  corpBoardTriageMismatchShouldYield: boolean;
+  backgroundBankBuildShouldYield: boolean;
+  hardInterruptShouldYield: boolean;
+  thresholdReason: string;
+}): string {
+  const candidates = [
+    [
+      input.urgentRunNowDevelopmentShouldYield,
+      "urgent_run_now_development_yield",
+    ],
+    [
+      input.unconvertibleFundingShouldYieldToBank,
+      "unconvertible_funding_bank_yield",
+    ],
+    [
+      input.urgentCoverageSearchInstallShouldYield,
+      "urgent_coverage_search_install_yield",
+    ],
+    [input.noNeedSearchShouldYield, "no_need_search_mapping_yield"],
+    [input.coverageProbeRunShouldYield, "coverage_probe_run_mapping_yield"],
+    [input.lowValueRunEventShouldYield, "low_value_run_event_mapping_yield"],
+    [
+      input.mappedNonPositiveAgainstPositive,
+      "mapped_nonpositive_against_positive",
+    ],
+    [
+      input.deferredDevelopmentInstallShouldYield,
+      "deferred_development_mapping_yield",
+    ],
+    [input.repeatedRunShouldYield, "repeated_run_mapping_yield"],
+    [input.acuteHandBufferShouldYield, "acute_hand_buffer_mapping_yield"],
+    [
+      input.damageReactionReserveShouldYield,
+      "damage_reaction_reserve_mapping_yield",
+    ],
+    [input.lowValueRecoveryShouldYield, "low_value_recovery_mapping_yield"],
+    [input.inferiorRunTargetShouldYield, "inferior_run_target_mapping_yield"],
+    [
+      input.corpBoardTriageMismatchShouldYield,
+      "corp_board_triage_mismatch_yield",
+    ],
+    [
+      input.backgroundBankBuildShouldYield,
+      "background_bank_build_mapping_yield",
+    ],
+    [input.hardInterruptShouldYield, "runner_hard_interrupt"],
+  ] as const;
+  return candidates.find(([matches]) => matches)?.[1] ?? input.thresholdReason;
+}
+
 export function tacticalPlanMappingOverrideEvidence(
   result: TacticalPlanMappedChoiceResult,
 ): string[] {

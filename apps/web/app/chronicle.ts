@@ -4664,7 +4664,9 @@ function formatChronicleEffect(
       category = "turn";
       {
         const forcedAction = forcedRandomActionChronicleText(effect);
-        const dieRoll = numberValue((effect as Record<string, unknown>).dieRoll);
+        const dieRoll = numberValue(
+          (effect as Record<string, unknown>).dieRoll,
+        );
         if (
           effect.reason === "start_of_turn" &&
           sourceTitle &&
@@ -6658,7 +6660,8 @@ function forcedRandomActionChronicleText(
   }
   if (restriction === "play_or_install_card")
     return {
-      title: "eine zufällige Karte aus der Hand offenlegen und spielen oder installieren",
+      title:
+        "eine zufällige Karte aus der Hand offenlegen und spielen oder installieren",
       chip: "Zufällige Handkarte",
     };
   return undefined;

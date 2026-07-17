@@ -25,21 +25,26 @@ describe("match 23D6 card-hint contract", () => {
   it.each([
     ["active", activeHints.cards],
     ["compiled", compiledHints.cards],
-  ])("models Viacox as mandatory random action risk, not stack search, in %s hints", (_source, cards) => {
-    const viacox = hint(cards as Hint[], VIACOX);
+  ])(
+    "models Viacox as mandatory random action risk, not stack search, in %s hints",
+    (_source, cards) => {
+      const viacox = hint(cards as Hint[], VIACOX);
 
-    expect(viacox.riskTags).toEqual(
-      expect.arrayContaining(["mandatory_action", "random_outcome"]),
-    );
-    expect(viacox.effects).not.toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ kind: "search", target: "setup.draw" }),
-      ]),
-    );
-  });
+      expect(viacox.riskTags).toEqual(
+        expect.arrayContaining(["mandatory_action", "random_outcome"]),
+      );
+      expect(viacox.effects).not.toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ kind: "search", target: "setup.draw" }),
+        ]),
+      );
+    },
+  );
 
   it("publishes Viacox risk signals without a false search signal", () => {
-    const viacox = inspectorIndex.cards.find((entry) => entry.cardId === VIACOX);
+    const viacox = inspectorIndex.cards.find(
+      (entry) => entry.cardId === VIACOX,
+    );
 
     expect(viacox?.derivedFunctionSignals).toEqual(
       expect.arrayContaining(["risk.mandatory_action", "risk.random_action"]),
@@ -48,8 +53,7 @@ describe("match 23D6 card-hint contract", () => {
   });
 
   it("projects Viacox risk tags into the action-semantic consumer", () => {
-    const profile =
-      buildActionCardSemanticProfilesByDefinitionId()[VIACOX];
+    const profile = buildActionCardSemanticProfilesByDefinitionId()[VIACOX];
 
     expect(profile?.risks).toEqual(
       expect.arrayContaining([

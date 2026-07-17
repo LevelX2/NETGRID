@@ -135,6 +135,27 @@ export function tacticalPlanUrgentCoverageSearchInstallShouldYield(
   );
 }
 
+export function tacticalPlanHardInterruptShouldYield(
+  mapping: PlanStepMappingResult,
+  overrideChoice: SemanticRuntimeChoice,
+): boolean {
+  return (
+    mapping.plan.side === "runner" &&
+    (semanticRuntimeChoiceHasScoreBreakdownComponent(
+      overrideChoice,
+      "runner_matchpoint_run_lock_release",
+    ) ||
+      semanticRuntimeChoiceHasScoreBreakdownComponent(
+        overrideChoice,
+        "runner_viable_followup_run_lock_release",
+      ) ||
+      runnerUrgentRemoteContestRunCanInterruptPlan(
+        mapping.plan,
+        overrideChoice,
+      ))
+  );
+}
+
 export function tacticalPlanMarginalDevelopmentInstallShouldYield(
   mapping: PlanStepMappingResult,
   mappedChoice: SemanticRuntimeChoice,

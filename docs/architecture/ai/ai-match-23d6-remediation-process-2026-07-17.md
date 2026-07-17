@@ -1,6 +1,6 @@
 # Match 23D6: Runner-Run-, Breaker-, Broker- und Hint-Remediation
 
-Status: P7 aktiv
+Status: abgeschlossen; lokale Main-Integration ausstehend
 
 ## Quelle und Zielprüfung
 
@@ -268,4 +268,14 @@ den finalen Merge.
   Karten; Capability-/Search- und Doctrine-/Strategy-Consumer liefern Status
   `ok` mit null Blockern und null Warnungen. Viacox erscheint dabei nur noch
   mit Pflicht-/Zufallsaktions- und Run-Signalen, nicht mehr als Search-Tool.
-- P7 aktiv: breite Gates, Review, Wissenspflege, Main-Integration und Cleanup.
+- P7 abgeschlossen: Alle drei AI-Testshards sind auf dem abschließend
+  formatierten Stand mit 374 Dateien und 2.580 Tests grün. Die fokussierten
+  Runtime-/23D6-, Hint-/9FEF- und Source-Role-Verträge sind darin enthalten.
+  Engine ist mit 1.717 Tests, Web mit 626 Tests und der
+  Workspace-Typecheck für alle sieben Projekte grün. `check:ai`, Hint-
+  Inspector-Index, Source-Struktur, Formatprüfung, `git diff --check` und der
+  27/27-Deck-Audit bestehen. Ein im breiten Lauf erkannter 9FEF-Kontrollfehler
+  wurde durch die enge Autorität strukturierter `delayed_penalty`-Risiken
+  behoben, ohne gewöhnliche Draw-Rohmechaniken zu unterdrücken. Ausstehend ist
+  nur die im Anschluss an diesen Paketcommit ausgeführte lokale
+  Main-Integration samt Worktree-/Branch-Cleanup.

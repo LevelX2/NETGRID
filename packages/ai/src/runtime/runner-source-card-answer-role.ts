@@ -58,18 +58,18 @@ export function runnerSourceCardAnswerRole(
   if (rolesMatch(roles, ["search", "tutor"])) return "search";
   if (rolesMatch(roles, ["draw"])) return "draw";
   const hintEffects = dependencies.hintEffectsForCard?.(sourceDefinitionId);
-  if (hintEffects?.some((effect) => hintEffectKind(effect) === "search"))
-    return "search";
+  // Raw mechanics can mention one branch of a random effect without making
+  // the card a reliable search or draw answer (for example Bargain with
+  // Viacox). Keep the fallback for ordinary cards whose structured hints do
+  // not yet repeat every useful raw mechanic.
   if (
-    hintEffects?.some((effect) =>
-      ["draw", "shuffle_draw"].includes(hintEffectKind(effect) ?? ""),
+    hintEffects?.some(
+      (effect) =>
+        hintEffectKind(effect) === "delayed_penalty" &&
+        hintEffectTarget(effect) === "risk.random_action",
     )
   )
-    return "draw";
-  // A present structured hint is authoritative. Raw mechanics and rules text
-  // can mention one branch of a random effect without making the card a
-  // reliable search or draw answer (for example Bargain with Viacox).
-  if (hintEffects !== undefined) return undefined;
+    return undefined;
   if (rolesMatch(mechanics, ["search", "tutor"])) return "search";
   if (rolesMatch(mechanics, ["draw"])) return "draw";
   const tokens = sourceAnswerTokens([
@@ -85,7 +85,8 @@ export function runnerSourceCardAnswerRole(
   if (sourceAnswerTokensIncludeAny(tokens, SOURCE_SEARCH_TOKENS)) {
     return "search";
   }
-  if (sourceAnswerTokensIncludeAny(tokens, ["draw", "draw_card"])) return "draw";
+  if (sourceAnswerTokensIncludeAny(tokens, ["draw", "draw_card"]))
+    return "draw";
   return undefined;
 }
 
@@ -93,6 +94,12 @@ function hintEffectKind(effect: unknown): string | undefined {
   if (!effect || typeof effect !== "object") return undefined;
   const kind = (effect as Record<string, unknown>).kind;
   return typeof kind === "string" ? kind : undefined;
+}
+
+function hintEffectTarget(effect: unknown): string | undefined {
+  if (!effect || typeof effect !== "object") return undefined;
+  const target = (effect as Record<string, unknown>).target;
+  return typeof target === "string" ? target : undefined;
 }
 
 function sourceAnswerTokens(values: readonly (string | undefined)[]): string[] {
