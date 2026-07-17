@@ -1,6 +1,5 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 
-import { evaluateKnownRemoteAccessPayoff } from "../known-remote-access-payoff";
 import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
 import { semanticRuntimeChoiceWithEvidence } from "./semantic-runtime-score-components";
 import { runnerTerminalContestThreat } from "./runner-terminal-contest-threat";
@@ -87,11 +86,9 @@ function urgentReachableRemoteContest(
   const hasVisibleAgenda = server.root.some(
     (card) => card.known !== false && card.type === "agenda",
   );
-  const publicRootPayoff = evaluateKnownRemoteAccessPayoff(
-    input,
-    target.targetServerId,
-  );
-  if (!publicRootPayoff.contestable && !hasVisibleAgenda) return false;
+  if (target.accessPayoffContestable === false && !hasVisibleAgenda) {
+    return false;
+  }
   return (
     target.scoreThreat ||
     target.accessPayoff === "score_threat" ||
