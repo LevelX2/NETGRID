@@ -878,6 +878,9 @@ describe("AI module boundaries", () => {
         ]),
       ],
     ]);
+    const allowedOwnerDirectoryBySymbol = new Map<string, string>([
+      ["semanticRuntimeCorpBoardTriage", "runtime/corp-scoreline/"],
+    ]);
     const violations = collectSourceFiles(srcDir)
       .filter((file) => !file.endsWith(".test.ts"))
       .flatMap((file) => {
@@ -885,7 +888,14 @@ describe("AI module boundaries", () => {
         const relative = relativeFile(file);
         return [...allowedFilesBySymbol.entries()].flatMap(
           ([symbol, allowedFiles]) => {
-            if (!content.includes(symbol) || allowedFiles.has(relative)) {
+            const allowedOwnerDirectory =
+              allowedOwnerDirectoryBySymbol.get(symbol);
+            if (
+              !content.includes(symbol) ||
+              allowedFiles.has(relative) ||
+              (allowedOwnerDirectory !== undefined &&
+                relative.startsWith(allowedOwnerDirectory))
+            ) {
               return [];
             }
             return [

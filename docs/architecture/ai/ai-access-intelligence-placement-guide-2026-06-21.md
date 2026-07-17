@@ -16,6 +16,10 @@ Access-Intelligence ist AI-intern, LegalActions-only und side-safe. Die Engine b
 - Remote-Root-Wert, Trash-Spendability, Reserve-Zitat, Ranking, Fingerprint und Outcome-Memory liegen unter `packages/ai/src/access/`.
 - TacticalPlans und RunTargetEvaluation dürfen strukturierte Access-Daten konsumieren, aber keine Evidence-Strings als primäre Entscheidungsquelle parsen.
 - RunTarget-Guidance-Gewichte liegen in `packages/ai/src/runner-run-target-guidance.ts`, damit TacticalPlans und Semantic Runtime nicht getrennte Recommendation-Switches pflegen.
+- Sichtbare Run-Pfadkosten, Breakerpfade und Hazards liegen unter
+  `packages/ai/src/run-analysis/`; `visible-run-analysis.ts` ist nur die
+  gemeinsame Consumer-Fassade. Access-Projektion und Access-Memory bleiben
+  davon getrennt unter `access/`.
 - Outcome-Memory und aus öffentlichen Access-Ereignissen abgeleitete
   No-Progress-Memory liegen ausschließlich unter
   `packages/ai/src/access/access-outcome-memory.ts`; ein paralleler
@@ -30,6 +34,8 @@ Access-Intelligence ist AI-intern, LegalActions-only und side-safe. Die Engine b
 - Keine Public-Exports für Access-Intelligence-Internals ohne expliziten API-Beschluss.
 - Keine Speicherung von Hidden-Zone-Karten, vollständigem Engine-State, privaten Payloads oder nicht side-sicheren Definitionen in Access-Memory.
 - Keine Dry-Run-Erzeugung von `selectedChoices`, `selectedTargets` oder PlayerActions.
+- Keine zweite Run-Kosten- oder Hazardimplementierung unter `access/`; neue
+  gemeinsame sichtbare Pfadfacts gehören in `run-analysis/`.
 
 ## Review-Fragen
 

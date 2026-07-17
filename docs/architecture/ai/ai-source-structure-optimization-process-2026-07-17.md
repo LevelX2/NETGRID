@@ -1,6 +1,6 @@
 # AI Source Structure Optimization Process 2026-07
 
-Status: `package_done:AISSO-7`
+Status: `final_green_ready`
 
 ## Quelle und Vorgabe
 
@@ -427,6 +427,37 @@ Ergebnis:
 - Done-Gate: alle Pakete dokumentiert und grün; Arbeitsbranch sauber und mit
   aktuellem `main` abgeglichen.
 - Commit: `docs(ai): finalize source structure optimization`
+
+Ergebnis:
+
+- Die letzte Action-Semantik-Type-SCC wurde über
+  `action-semantic-candidate-types.ts` entfernt. Der Orchestrator ist von 726
+  auf 284 Zeilen reduziert; der produktive Graph besitzt jetzt weder Laufzeit-
+  noch Typzyklen. Der enge vorbereitende Reparaturcommit ist `8ed54b783`.
+- Die aktiven Architektur- und Placement-Guides bilden Choice-Ranking,
+  Corp-Scoreline, Run-Analyse, Runner-Handentwicklung, Action-Contracts sowie
+  die Current-/Regression-Simulationsgrenze explizit ab. Der Final Review
+  dokumentiert Größen, Ratchets und verbleibende Follow-up-Kandidaten.
+- Aktuelles lokales `main` wurde in `ed2436929` integriert. Neuere
+  Hosted-Breaker-, RunTarget-, Bank-/Run-Lock- und Choice-Arbitration-Fixes
+  wurden in die neuen Fachmodule übertragen; zehn betroffene Suiten waren mit
+  192/192 Tests grün.
+- Das Ratchet wurde nur für die integrierten Main-Zuwächse exakt nachgezogen:
+  `belief-state.ts`, die zwei schmalen Orchestratoren, ihre gewachsenen Tests
+  und zwei neue Runtime-Root-Module. Zyklen bleiben bei null.
+- Der auf unverändertem `main` identisch veraltete Full-Derived-Facts-Report
+  wurde entsprechend der Gate-Removal-Condition um genau eine generierte
+  Rollenwert aktualisiert. Die Corp-Scoreline-Ownership-Regel akzeptiert nun
+  die fachliche Owner-Gruppe `runtime/corp-scoreline/`.
+- Final grün: Package-Boundaries, `check:ai`, `check:ai:full`, Source-
+  Structure-Gate und Selbsttest, AI- und Server-Typecheck sowie alle drei
+  AI-Shards mit 366 Testdateien und 2.519/2.519 Tests. Die in AISSO-1
+  dokumentierte Broker-Removal-Condition ist durch den integrierten Main-Fix
+  erfüllt.
+
+Abschlussartefakt:
+
+- `docs/reviews/ai/ai-source-structure-optimization-final-review-2026-07-17.md`
 
 ## Verifikationsregeln
 

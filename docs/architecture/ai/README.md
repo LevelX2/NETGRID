@@ -92,6 +92,23 @@
   ohne zweiten Speicherpfad.
 - Ausführbare Benchmarkprofile sind `random_legal_bot` und
   `current_candidate`.
+- Der produktive AI-Importgraph ist frei von Laufzeit- und Typzyklen. Das
+  ausführbare Source-Structure-Gate schützt diese Nullbaseline sowie die
+  erreichten Größen der priorisierten Produktions- und Testmodule.
+- Volatile Entscheidungsfamilien besitzen fachliche Modulgruppen:
+  Choice-Overrides unter `runtime/choice-ranking/`, Corp-Scoreline unter
+  `runtime/corp-scoreline/`, sichtbare Run-Projektion unter `run-analysis/`
+  und Runner-Handentwicklung unter `runner/hand-development/`. Die bisherigen
+  Rootpfade bleiben nur dort als schmale Consumer-Fassaden bestehen, wo sie
+  den Current-State-Importvertrag stabil halten.
+- Gemeinsame Action-Semantik-Verträge liegen in
+  `action-semantic-candidate-types.ts`; `action-semantic-candidate.ts`
+  orchestriert ausschließlich die Projektionen aus `actions/` und re-exportiert
+  den bestehenden Typvertrag.
+- Aktuelle League-, Profil-Run- und Quality-Gate-Verträge unter
+  `@netgrid/ai/simulation` sind versionsneutral benannt. Historische
+  V1.4.3-Exploit-Evidence liegt ausschließlich unter
+  `simulation/regression/v143/` und ist kein generischer Public-API-Vertrag.
 - Technisches `ai_supported`, semantische Coverage, Szenario-Evidence,
   Play Strength und Default-/Random-Pool-Promotion sind getrennte Gates.
 
@@ -134,6 +151,10 @@
 - `semantic-decision-chain-observability-contract-2026-07-14.md`: aktueller
   verhaltensneutraler Debug-, Arbitration- und Decision-Checkpoint-Vertrag für
   den produktiven Semantic-Runtime-Auswahlweg.
+- `ai-source-structure-optimization-process-2026-07-17.md` und
+  `docs/reviews/ai/ai-source-structure-optimization-final-review-2026-07-17.md`:
+  aktueller Source-Placement-, Zyklen-, Größenratchet- und
+  Public-/Simulation-Grenzstand.
 - `ai-seed03-seed05-loop-remediation-process-2026-07-14.md` und
   `docs/reviews/ai/ai-behavior-baseline-v1-seed03-seed05-remediation-final-2026-07-14.md`:
   spielgleiche Verträge und vollständige Seed-03/05-Evidence für marginale
@@ -186,6 +207,7 @@
 ```text
 corepack pnpm check:ai
 corepack pnpm check:ai:full
+corepack pnpm check:ai-source-structure
 corepack pnpm check:proteus-ai-readiness
 corepack pnpm check:ai-deck-doctrine-strategy
 corepack pnpm --filter @netgrid/ai typecheck

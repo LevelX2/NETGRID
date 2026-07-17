@@ -25,6 +25,12 @@ Neue KI-Arbeit wird nach Funktion platziert, nicht nach dem gerade betroffenen T
 | Historische Regressionsevidence                                       | unveränderliche Fixture unter `evaluation/` oder `simulation/regression/`; keine ausführbare Legacy-Implementierung                     |
 | Simulation-Harness, Soak oder reine Simulationsaggregation            | `packages/ai/src/simulation/*`                                                                                                          |
 | Runtime-nahe Score-Komponenten ohne Auswahl und ohne Fallback         | `packages/ai/src/runtime/*`                                                                                                             |
+| Choice-Ranking-Override einer bestehenden Plan-/Action-Familie        | `packages/ai/src/runtime/choice-ranking/*`; `semantic-choice-ranking.ts` bleibt Orchestrator                                            |
+| Corp-Scoreline-, Board-Triage- oder Scoring-Window-Komponente         | `packages/ai/src/runtime/corp-scoreline/*`; die drei bisherigen Rootmodule bleiben Fassaden                                             |
+| Sichtbare Run-Kosten-, Pfad- oder Hazard-Projektion                   | `packages/ai/src/run-analysis/*`; `visible-run-analysis.ts` bleibt Consumer-Fassade                                                     |
+| Runner-Handsignal oder Persistent-Install-Bewertung                   | `packages/ai/src/runner/hand-development/*`; `runner-hand-development.ts` bleibt Orchestrator                                           |
+| Gemeinsamer Action-Semantik-Vertrag ohne Projektion                   | `packages/ai/src/action-semantic-candidate-types.ts`; Projektionslogik bleibt unter `actions/*`                                         |
+| Aktuelle League-, Profil-Run- oder Simulations-Gate-Logik             | neutral benannt unter `packages/ai/src/simulation/*`; historische Fixtures ausschließlich unter `simulation/regression/<version>/`      |
 
 ## Negative Regeln
 
@@ -34,6 +40,10 @@ Neue KI-Arbeit wird nach Funktion platziert, nicht nach dem gerade betroffenen T
 - Keine mutierende Auswahl in `diagnostics/`.
 - Keine produktiven Target- oder Choice-Entscheidungen aus `target-choice-shadow`.
 - Keine Proteus-KI-Freigabe durch Readiness-Dokumente oder Semantiktests.
+- Keine historische Frameworkversion in aktuellen Simulationsverträgen,
+  Benchmarktypen oder Public-Exports.
+- Keine neuen Rückimporte fachlicher Module in ihre Orchestrator-Fassade;
+  gemeinsame Typen gehören in ein reines Contractmodul.
 
 ## Entscheidungsfolge für neue Fixes
 
@@ -46,7 +56,12 @@ Neue KI-Arbeit wird nach Funktion platziert, nicht nach dem gerade betroffenen T
    nicht ausführbare Fixture unter `evaluation/` oder
    `simulation/regression/`; alte Planner oder Baselines werden nicht neu
    angelegt.
-7. Betrifft sie öffentliche API-Fläche? Dann erst Public-Export-Contract und Modulgrenzen prüfen, danach minimal in `index.ts` re-exportieren.
+7. Betrifft sie einen bestehenden Choice-, Corp-Scoreline-, Run-Analyse- oder
+   HandDevelopment-Orchestrator? Dann in dessen fachliche Untergruppe legen
+   und die Fassade nur verdrahten.
+8. Betrifft sie öffentliche API-Fläche? Dann erst Public-Export-Contract und
+   Modulgrenzen prüfen, danach minimal in `index.ts` beziehungsweise
+   `simulation.ts` re-exportieren.
 
 ## Sicherheitsgrenzen
 

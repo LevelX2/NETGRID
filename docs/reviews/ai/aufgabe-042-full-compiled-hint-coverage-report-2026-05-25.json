@@ -50142,7 +50142,7 @@
         "roles": [
           "hardware",
           "multiaccess",
-          "rnd_pressure"
+          "rd_pressure"
         ],
         "planRoles": [
           "build_rig",
