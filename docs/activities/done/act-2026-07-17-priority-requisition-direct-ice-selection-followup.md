@@ -1,19 +1,26 @@
 ---
 activityId: act-2026-07-17-priority-requisition-direct-ice-selection-followup
-status: inbox
+status: done
 kind: fix
 area: web
 priority: high
 primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-07-17
-startedAt:
-completedAt:
+startedAt: 2026-07-17
+completedAt: 2026-07-17
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/app/action-board-ui.ts
+  - apps/web/features/actions/ChoicePanels.tsx
+  - apps/web/app/priority-requisition-field-choice.test.ts
+checks:
+  - Fokussierte Webtests: 1 Datei, 4 Tests grün
+  - Vollständige Webtests: 48 Dateien, 611 Tests grün
+  - Web-Typecheck grün
+  - git diff --check grün
 ---
 
 # Priority Requisition: ICE direkt im Fort auswählen
@@ -54,15 +61,15 @@ Beim Scoren von `Priority Requisition` soll die Korp das kostenlos zu rezzende I
 
 ## Akzeptanzkriterien
 
-- [ ] Beim Scoren von `Priority Requisition` mit mindestens einem legalen ICE-Ziel erscheint kein großes Kartenwahlfenster über dem Board.
-- [ ] Jedes laut `pendingChoice.options` legale ICE ist genau an seiner tatsächlichen Fort- und Reihenposition direkt auswählbar; nicht legale ICE erhalten keinen Auswahlknopf.
-- [ ] Das Actionboard zeigt vor der Wahl `0/1`, nach der Wahl `1/1` und eine eindeutige Bestätigung; vor dieser Bestätigung wird kein ICE gerezzt.
-- [ ] Bei maximal einer Auswahl wechselt ein Klick auf ein anderes legales ICE die lokale Markierung nachvollziehbar; Abwahl beziehungsweise Korrektur vor Bestätigung ist möglich.
-- [ ] `Überspringen` bleibt als getrennte Actionboard-Aktion erreichbar, zählt nicht als ausgewähltes ICE und löst ausschließlich die bestehende `skip`-Option auf.
-- [ ] Bestätigen sendet genau die Engine-Option des ausgewählten ICE; normale Revalidierung von Choice-ID, StateVersion, Ziel und Rezzed-Zustand bleibt wirksam.
-- [ ] Unbekannte gemischte `select_cards`-Choices sowie Hand-, Stack-, R&D-, HQ-, Archives-, Heap- und Reorder-Choices behalten ihren sicheren bisherigen Darstellungsweg.
-- [ ] Die Runner-Ansicht erhält durch Auswahlmarker, Labels, Payloads, Reconnect, Chronik oder Logs keine zusätzlichen Informationen über verdeckte ICE.
-- [ ] Fokussierte Webtests decken `Priority Requisition` mit mindestens zwei ICE in unterschiedlichen Forts, die `skip`-Nebenoption, Zähler/Bestätigung und den sicheren Fallback ab; Web-Typecheck und `git diff --check` sind grün.
+- [x] Beim Scoren von `Priority Requisition` mit mindestens einem legalen ICE-Ziel erscheint kein großes Kartenwahlfenster über dem Board.
+- [x] Jedes laut `pendingChoice.options` legale ICE ist genau an seiner tatsächlichen Fort- und Reihenposition direkt auswählbar; nicht legale ICE erhalten keinen Auswahlknopf.
+- [x] Das Actionboard zeigt vor der Wahl `0/1`, nach der Wahl `1/1` und eine eindeutige Bestätigung; vor dieser Bestätigung wird kein ICE gerezzt.
+- [x] Bei maximal einer Auswahl wechselt ein Klick auf ein anderes legales ICE die lokale Markierung nachvollziehbar; Abwahl beziehungsweise Korrektur vor Bestätigung ist möglich.
+- [x] `Überspringen` bleibt als getrennte Actionboard-Aktion erreichbar, zählt nicht als ausgewähltes ICE und löst ausschließlich die bestehende `skip`-Option auf.
+- [x] Bestätigen sendet genau die Engine-Option des ausgewählten ICE; normale Revalidierung von Choice-ID, StateVersion, Ziel und Rezzed-Zustand bleibt wirksam.
+- [x] Unbekannte gemischte `select_cards`-Choices sowie Hand-, Stack-, R&D-, HQ-, Archives-, Heap- und Reorder-Choices behalten ihren sicheren bisherigen Darstellungsweg.
+- [x] Die Runner-Ansicht erhält durch Auswahlmarker, Labels, Payloads, Reconnect, Chronik oder Logs keine zusätzlichen Informationen über verdeckte ICE.
+- [x] Fokussierte Webtests decken `Priority Requisition` mit mindestens zwei ICE in unterschiedlichen Forts, die `skip`-Nebenoption, Zähler/Bestätigung und den sicheren Fallback ab; Web-Typecheck und `git diff --check` sind grün.
 
 ## Umsetzungshinweise
 
@@ -73,4 +80,4 @@ Beim Scoren von `Priority Requisition` soll die Korp das kostenlos zu rezzende I
 
 ## Ergebnisnotiz
 
-Noch offen.
+`Priority Requisition` nutzt nun trotz der zusätzlichen Engine-Option `skip` den vorhandenen Feldkartenmodus: legale ICE bleiben an ihrer Fortposition auswählbar, der Zähler berücksichtigt nur ICE, und `Überspringen` löst als getrennte Actionboard-Aktion ausschließlich die bestehende `skip`-Option auf. Die Ausnahme ist eng auf diese Choice-Quelle und das kanonische Skip-Label begrenzt; unbekannte Misch-Choices behalten den bisherigen sicheren Fallback. Eine Suche nach weiteren `select_cards`-Choices mit `skip` ergab keine vergleichbare aktuelle Choice.

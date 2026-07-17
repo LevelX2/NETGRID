@@ -2173,9 +2173,31 @@ export function shouldUseFieldCardChoice(
     (option) => option.selectable !== false,
   );
   if (selectableOptions.length === 0) return false;
+  const auxiliaryOptionIds = new Set(
+    fieldCardChoiceAuxiliaryOptions(choice).map((option) => option.id),
+  );
+  const cardOptions = selectableOptions.filter(
+    (option) => !auxiliaryOptionIds.has(option.id),
+  );
+  if (cardOptions.length === 0) return false;
   const fieldCards = visibleFieldCards(view);
-  return selectableOptions.every((option) =>
+  return cardOptions.every((option) =>
     fieldCards.some((card) => fieldCardChoiceOptionTargetsCard(option, card)),
+  );
+}
+
+export function fieldCardChoiceAuxiliaryOptions(
+  choice: NonNullable<PlayerView["pendingChoice"]>,
+): NonNullable<PlayerView["pendingChoice"]>["options"] {
+  if (
+    !choice.source.startsWith("card_implementation.scored_agenda_free_rez:")
+  )
+    return [];
+  return choice.options.filter(
+    (option) =>
+      option.selectable !== false &&
+      option.id === "skip" &&
+      option.label === "Überspringen",
   );
 }
 
@@ -2218,10 +2240,15 @@ export function fieldCardChoiceInfo(
     minSelections,
     Math.floor(choice.maxSelections),
   );
-  const selectedCount = selectedOptionIds.filter((optionId) =>
-    choice.options.some(
-      (option) => option.id === optionId && option.selectable !== false,
-    ),
+  const auxiliaryOptionIds = new Set(
+    fieldCardChoiceAuxiliaryOptions(choice).map((option) => option.id),
+  );
+  const selectedCount = selectedOptionIds.filter(
+    (optionId) =>
+      !auxiliaryOptionIds.has(optionId) &&
+      choice.options.some(
+        (option) => option.id === optionId && option.selectable !== false,
+      ),
   ).length;
   const exactSelection = minSelections === maxSelections;
   const canSubmit =

@@ -5,6 +5,7 @@ import type { LegalAction, PlayerView } from "@netgrid/shared";
 
 import {
   choiceInteractionAmbience,
+  fieldCardChoiceAuxiliaryOptions,
   fieldCardChoiceInfo,
   interactionAmbienceClassName,
 } from "../../app/action-board-ui";
@@ -27,6 +28,7 @@ export function FieldCardChoicePanel({
   onChoiceOptions(action: LegalAction, choiceId: string, selectedOptionIds: string[]): void;
 }) {
   const info = fieldCardChoiceInfo(choice, selected);
+  const auxiliaryOptions = fieldCardChoiceAuxiliaryOptions(choice);
   const ambienceClass = interactionAmbienceClassName(
     choiceInteractionAmbience(choice, action),
   );
@@ -58,6 +60,21 @@ export function FieldCardChoicePanel({
           <X size={15} />
           {info.clearLabel}
         </button>
+        {auxiliaryOptions.map((option) => (
+          <button
+            className="button wide"
+            onClick={() =>
+              onChoiceOptions(action, choice.choiceId, [option.id])
+            }
+            disabled={disabled}
+            type="button"
+            data-testid="field-card-choice-auxiliary-option"
+            key={option.id}
+          >
+            <X size={15} />
+            {option.label}
+          </button>
+        ))}
       </div>
     </section>
   );
