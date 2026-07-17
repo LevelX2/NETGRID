@@ -246,6 +246,57 @@ describe("runnerPressureProbeAllowance", () => {
     });
   });
 
+  it("funds a score-threat probe without suppressing an ordinary probe", () => {
+    const remoteRun = runAction("run-remote-1", "remote_1");
+    const defaultStep = {
+      stepId: "run_target:remote_1",
+      kind: "run_target" as const,
+      desiredActionSemantics: ["run.start"],
+    };
+    const scoreThreatProbe = runTargetEvaluation({
+      actionId: remoteRun.actionId,
+      targetServerId: "remote_1",
+      targetKind: "remote",
+      recommendation: "gain_credits_first",
+      accessPayoff: "score_threat",
+      scoreThreat: true,
+      score: 1250,
+      evidence: ["run_commitment:probe_only"],
+    });
+    const ordinaryProbe = runTargetEvaluation({
+      ...scoreThreatProbe,
+      scoreThreat: false,
+      accessPayoff: "unknown",
+    });
+    const context = planContext({
+      primaryStrategyId: "runner.remote_contest",
+      runnerClicks: 2,
+      runTargetEvaluations: [scoreThreatProbe],
+    });
+    const ordinaryProbeContext = planContext({
+      primaryStrategyId: "runner.remote_contest",
+      runnerClicks: 2,
+      runTargetEvaluations: [ordinaryProbe],
+    });
+
+    expect(
+      runnerRunTargetCurrentStep(context, remoteRun, defaultStep),
+    ).toMatchObject({
+      kind: "gain_credits",
+      desiredActionSemantics: ["economy.gain_credit"],
+    });
+    expect(
+      runnerRunTargetCurrentStep(
+        ordinaryProbeContext,
+        remoteRun,
+        defaultStep,
+      ),
+    ).toMatchObject({
+      kind: "run_target",
+      desiredActionSemantics: ["run.start"],
+    });
+  });
+
   it("funds only a path gap that can still convert into a run this turn", () => {
     const hqRun = runAction("run-hq", "hq");
     const defaultStep = {
@@ -702,7 +753,7 @@ function runTargetEvaluation(
     Partial<
       Pick<
         RunnerRunTargetEvaluation,
-        "creditsAfterRun" | "pathPassability" | "pathCost"
+        "creditsAfterRun" | "evidence" | "pathPassability" | "pathCost"
       >
     >,
 ): RunnerRunTargetEvaluation {
@@ -718,6 +769,6 @@ function runTargetEvaluation(
     pathCost: input.pathCost ?? 0,
     scoreThreat: input.scoreThreat,
     score: input.score,
-    evidence: [],
+    evidence: input.evidence ?? [],
   } as unknown as RunnerRunTargetEvaluation;
 }
