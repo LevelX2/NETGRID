@@ -3,6 +3,62 @@ import type {
   AiDecisionScoreComponent,
   LegalAction,
 } from "@netgrid/shared";
+import { createAiHintsByCard } from "../ai-hints";
+
+const AI_HINTS_BY_CARD = createAiHintsByCard();
+
+export type RunnerHqSuccessWindowSetup = {
+  sourceDefinitionId: string;
+  minimumIceTrashCost: number;
+  evidence: string[];
+};
+
+export function runnerHqSuccessWindowSetupAssessment(
+  input: AiDecisionInput,
+  action: LegalAction,
+  serverId: string | undefined,
+): RunnerHqSuccessWindowSetup | undefined {
+  if (
+    action.type !== "start_run" ||
+    serverId !== "hq" ||
+    input.playerView.run ||
+    input.playerView.own.clicks < 2
+  ) {
+    return undefined;
+  }
+  const source = input.playerView.own.gripOrHq.find((card) => {
+    if (!card.definitionId) return false;
+    const hint = AI_HINTS_BY_CARD.get(card.definitionId);
+    return (
+      (hint?.conditions ?? []).some(
+        (condition) => condition.kind === "requires_successful_hq_run",
+      ) &&
+      (hint?.effects ?? []).some(
+        (effect) =>
+          effect.kind === "ice_trash" &&
+          "target" in effect &&
+          effect.target === "rezzed_ice",
+      )
+    );
+  });
+  if (!source?.definitionId) return undefined;
+  const minimumIceTrashCost = input.playerView.servers
+    .flatMap((server) => server.ice)
+    .filter((ice) => ice.rezzed === true && Number.isFinite(ice.rezCost))
+    .map((ice) => Math.max(0, ice.rezCost ?? 0))
+    .filter((rezCost) => rezCost <= input.playerView.own.credits)
+    .sort((left, right) => left - right)[0];
+  if (minimumIceTrashCost === undefined) return undefined;
+  return {
+    sourceDefinitionId: source.definitionId,
+    minimumIceTrashCost,
+    evidence: [
+      `success_window_source:${source.definitionId}`,
+      `visible_affordable_rezzed_ice_cost:${minimumIceTrashCost}`,
+      `runner_clicks:${input.playerView.own.clicks}`,
+    ],
+  };
+}
 
 type RunnerStartRunServer = AiDecisionInput["playerView"]["servers"][number];
 
@@ -65,6 +121,19 @@ export function runnerStartRunScoreComponents(
       reason: "central:hq",
     });
     components.push(...dependencies.hqMemoryComponents(input, action));
+    const successWindowSetup = runnerHqSuccessWindowSetupAssessment(
+      input,
+      action,
+      serverId,
+    );
+    if (successWindowSetup) {
+      components.push({
+        key: "runner_hq_success_window_setup",
+        label: "HQ-Erfolgsfenster vorbereiten",
+        value: 1700,
+        reason: successWindowSetup.evidence.join("|"),
+      });
+    }
   } else if (serverId === "rd") {
     components.push({
       key: "runner_rnd_pressure",

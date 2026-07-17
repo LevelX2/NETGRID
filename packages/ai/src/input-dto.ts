@@ -90,6 +90,8 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "targetCardDefinitionId",
   "targetCardId",
   "serverLabel",
+  "selectedServerId",
+  "selectedServerLabel",
   "targetServerId",
   "targetServerLabel",
   "cardId",

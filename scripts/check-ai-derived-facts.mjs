@@ -3672,16 +3672,38 @@ function deriveFromImplementation(card, implementationText, hint) {
   }
 
   if (/kind:\s*"install_cost"/.test(implementationText)) {
-    addEffect(facts, {
-      kind: "install_discount",
-      timing: "persistent",
-      scope: /sameServerAsSource:\s*true/.test(implementationText)
-        ? "fort"
-        : "corp",
-      resource: "credits",
-      amount: amountNear(implementationText, "install_cost"),
-      source: "implementation.modifiers.install_cost",
-    });
+    const installCostIncreases =
+      /kind:\s*"install_cost"[\s\S]{0,240}?operation:\s*"increase"/.test(
+        implementationText,
+      );
+    addEffect(
+      facts,
+      installCostIncreases
+        ? {
+            kind: "remote_tax",
+            timing: "persistent",
+            scope:
+              /(?:sameServerAsSource|selectedServerAsSource):\s*true/.test(
+                implementationText,
+              )
+                ? "fort"
+                : "corp",
+            resource: "credits",
+            amount: amountNear(implementationText, "install_cost"),
+            target: "ice_install_tax",
+            source: "implementation.modifiers.install_cost",
+          }
+        : {
+            kind: "install_discount",
+            timing: "persistent",
+            scope: /sameServerAsSource:\s*true/.test(implementationText)
+              ? "fort"
+              : "corp",
+            resource: "credits",
+            amount: amountNear(implementationText, "install_cost"),
+            source: "implementation.modifiers.install_cost",
+          },
+    );
     if (expectsKind("condition:requires_rezzed_card")) {
       addCondition(facts, {
         kind: "requires_rezzed_card",

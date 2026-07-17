@@ -10,6 +10,7 @@ import { runnerBankInvestmentCommitmentScoreComponents as buildRunnerBankInvestm
 import type { RunnerHandFundingTarget } from "./runner-hand-funding-target";
 import { mergedPublicHistory } from "./public-event-history";
 import { rolesMatch } from "./role-match";
+import { runnerHqSuccessWindowSetupAssessment } from "./runner-start-run-score";
 
 const RUNNER_BANK_FIRST_LOAD_TARGET = 3;
 const RUNNER_BANK_URGENT_CASHOUT_TARGET = 6;
@@ -1058,6 +1059,9 @@ export function createRunnerBankInvestmentContext(
     if (action.type !== "start_run") return undefined;
     const serverId = dependencies.serverId(action);
     if (!serverId) return undefined;
+    if (runnerHqSuccessWindowSetupAssessment(input, action, serverId)) {
+      return "hq_success_window_ice_trash";
+    }
     const server = input.playerView.servers.find(
       (entry) => entry.id === serverId,
     );

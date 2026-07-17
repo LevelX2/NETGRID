@@ -11,24 +11,24 @@ Keine Runtime-Anbindung, keine Action-Auswahl, kein Scoring und keine Hidden-Inf
 | Metric                                                         | Count |
 | -------------------------------------------------------------- | ----: |
 | Active cards                                                   |   618 |
-| covered                                                        |   602 |
+| covered                                                        |   601 |
 | deferred                                                       |    32 |
-| no_signal_reason != none                                       |    16 |
+| no_signal_reason != none                                       |    17 |
 | target_profile_gap                                             |    89 |
 | structural signal violations                                   |     0 |
 | unknown signals                                                |     0 |
-| covered delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE            |   +63 |
+| covered delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE            |   +62 |
 | deferred delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE           |   -13 |
-| no_signal delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE          |    -9 |
+| no_signal delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE          |    -8 |
 | target_profile_gap delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE |    +5 |
 
 ## No Signal Reasons
 
 | no_signal_reason       | Cards |
 | ---------------------- | ----: |
-| `none`                 |   602 |
+| `none`                 |   601 |
 | `legacy_fallback_only` |    15 |
-| `no_function_signal`   |     1 |
+| `no_function_signal`   |     2 |
 
 ## Target Profile Gaps
 
@@ -67,24 +67,25 @@ Keine Runtime-Anbindung, keine Action-Auswahl, kein Scoring und keine Hidden-Inf
 
 ## No Signal Review Start
 
-| Card                      | Side   | Type     | Reason                 |
-| ------------------------- | ------ | -------- | ---------------------- |
-| `corp_identity_001`       | corp   | identity | `legacy_fallback_only` |
-| `onr_proteus_034_riddler` | corp   | ice      | `legacy_fallback_only` |
-| `onr_proteus_074_siren`   | corp   | asset    | `no_function_signal`   |
-| `runner_identity_001`     | runner | identity | `legacy_fallback_only` |
-| `simple_agenda`           | corp   | agenda   | `legacy_fallback_only` |
-| `simple_draw_event`       | runner | event    | `legacy_fallback_only` |
-| `simple_economy_event`    | runner | event    | `legacy_fallback_only` |
-| `simple_priority_agenda`  | corp   | agenda   | `legacy_fallback_only` |
-| `simple_run_event`        | runner | event    | `legacy_fallback_only` |
-| `simple_setup_hardware`   | runner | hardware | `legacy_fallback_only` |
-| `simple_upgrade`          | corp   | upgrade  | `legacy_fallback_only` |
-| `v08_burst_credit_event`  | runner | event    | `legacy_fallback_only` |
-| `v08_deep_draw_event`     | runner | event    | `legacy_fallback_only` |
-| `v08_memory_chip`         | runner | hardware | `legacy_fallback_only` |
-| `v08_overclock_run_event` | runner | event    | `legacy_fallback_only` |
-| `v08_project_agenda`      | corp   | agenda   | `legacy_fallback_only` |
+| Card                                | Side   | Type     | Reason                 |
+| ----------------------------------- | ------ | -------- | ---------------------- |
+| `corp_identity_001`                 | corp   | identity | `legacy_fallback_only` |
+| `onr_proteus_034_riddler`           | corp   | ice      | `legacy_fallback_only` |
+| `onr_proteus_074_siren`             | corp   | asset    | `no_function_signal`   |
+| `onr_v1_173_restrictive-net-zoning` | runner | resource | `no_function_signal`   |
+| `runner_identity_001`               | runner | identity | `legacy_fallback_only` |
+| `simple_agenda`                     | corp   | agenda   | `legacy_fallback_only` |
+| `simple_draw_event`                 | runner | event    | `legacy_fallback_only` |
+| `simple_economy_event`              | runner | event    | `legacy_fallback_only` |
+| `simple_priority_agenda`            | corp   | agenda   | `legacy_fallback_only` |
+| `simple_run_event`                  | runner | event    | `legacy_fallback_only` |
+| `simple_setup_hardware`             | runner | hardware | `legacy_fallback_only` |
+| `simple_upgrade`                    | corp   | upgrade  | `legacy_fallback_only` |
+| `v08_burst_credit_event`            | runner | event    | `legacy_fallback_only` |
+| `v08_deep_draw_event`               | runner | event    | `legacy_fallback_only` |
+| `v08_memory_chip`                   | runner | hardware | `legacy_fallback_only` |
+| `v08_overclock_run_event`           | runner | event    | `legacy_fallback_only` |
+| `v08_project_agenda`                | corp   | agenda   | `legacy_fallback_only` |
 
 ## Deferred Review Scope
 

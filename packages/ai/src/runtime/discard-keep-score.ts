@@ -87,6 +87,14 @@ export function discardKeepScore(
     (input.playerView.own.rig ?? []).some(
       (candidate) => candidate.definitionId === card.definitionId,
     );
+  const runnerConditionalSuccessWindowPathTool =
+    input.side === "runner" &&
+    duplicateCount <= 1 &&
+    !installedSameDefinition &&
+    runnerCardProvidesConditionalHqSuccessIceTrash(
+      input,
+      card.definitionId,
+    );
   const breakerRoleNeedles = matchingBreakerRoleNeedles(roles);
   const installedRigRoles =
     input.side === "runner"
@@ -150,6 +158,7 @@ export function discardKeepScore(
       baseValue += input.playerView.own.credits < 4 ? 20 : 90;
     if (runnerVisiblePathTool)
       baseValue += input.playerView.own.credits < 2 ? 70 : 150;
+    if (runnerConditionalSuccessWindowPathTool) baseValue += 420;
     if (runnerPlanRelevantBreaker) baseValue += 360;
     if (runnerMissingBreakerSearchAccess) baseValue += 420;
     if (runnerBadPublicityTraceTech) baseValue += 240;
@@ -217,6 +226,9 @@ export function discardKeepScore(
         : []),
       ...(runnerVisiblePathTool
         ? ["discard_score:runner_visible_path_tool"]
+        : []),
+      ...(runnerConditionalSuccessWindowPathTool
+        ? ["discard_score:runner_conditional_success_window_path_tool"]
         : []),
       ...(runnerImmediateLiquidityBonus > 0
         ? ["discard_score:runner_immediate_liquidity"]
@@ -316,6 +328,29 @@ function runnerCardProvidesVisiblePathUtility(
       (effect.kind === "future_encounter_effect" &&
         "target" in effect &&
         effect.target === "bypass_first_ice"),
+  );
+}
+
+function runnerCardProvidesConditionalHqSuccessIceTrash(
+  input: AiDecisionInput,
+  definitionId: string,
+): boolean {
+  const hint = AI_HINTS_BY_CARD.get(definitionId);
+  const requiresSuccessfulHqRun = (hint?.conditions ?? []).some(
+    (condition) => condition.kind === "requires_successful_hq_run",
+  );
+  const trashesRezzedIce = (hint?.effects ?? []).some(
+    (effect) =>
+      effect.kind === "ice_trash" &&
+      "target" in effect &&
+      effect.target === "rezzed_ice",
+  );
+  return (
+    requiresSuccessfulHqRun &&
+    trashesRezzedIce &&
+    input.playerView.servers.some((server) =>
+      server.ice.some((card) => card.rezzed === true),
+    )
   );
 }
 

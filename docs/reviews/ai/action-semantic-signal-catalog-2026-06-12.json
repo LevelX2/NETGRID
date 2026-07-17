@@ -44,16 +44,16 @@
   },
   "summary": {
     "activeCards": 618,
-    "coveredCards": 602,
+    "coveredCards": 601,
     "deferredCards": 32,
-    "noSignalCards": 16,
+    "noSignalCards": 17,
     "targetProfileGapCards": 89,
     "structuralSignalViolationCards": 0,
     "unknownSignalCards": 0,
     "byNoSignalReason": {
-      "none": 602,
+      "none": 601,
       "legacy_fallback_only": 15,
-      "no_function_signal": 1
+      "no_function_signal": 2
     },
     "bySide": {
       "corp": 311,
@@ -166,9 +166,9 @@
     "unknownSignalRows": [],
     "baselineDeltas": {
       "baseline": "P2_POST_TARGET_PROFILE_GAP_CLOSURE",
-      "coveredCards": 63,
+      "coveredCards": 62,
       "deferredCards": -13,
-      "noSignalCards": -9,
+      "noSignalCards": -8,
       "targetProfileGapCards": 5
     }
   },
@@ -203,6 +203,12 @@
         "reason": "no_function_signal",
         "side": "corp",
         "cardType": "asset"
+      },
+      {
+        "cardId": "onr_v1_173_restrictive-net-zoning",
+        "reason": "no_function_signal",
+        "side": "runner",
+        "cardType": "resource"
       },
       {
         "cardId": "runner_identity_001",
@@ -10223,27 +10229,19 @@
       "side": "runner",
       "cardType": "resource",
       "aiSupportStatus": "ai_supported",
-      "covered": true,
+      "covered": false,
       "deferred": false,
       "deferred_review_scope": "none",
       "deferred_owner": "none",
-      "no_signal_reason": "none",
+      "no_signal_reason": "no_function_signal",
       "target_profile_gap": false,
-      "signalCount": 3,
+      "signalCount": 0,
       "targetProfileCount": 2,
-      "derivedFunctionSignals": [
-        "fort.install_ice_tax",
-        "remote.install_ice_tax",
-        "setup.install_discount"
-      ],
+      "derivedFunctionSignals": [],
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "fort.install_ice_tax",
-        "remote.install_ice_tax",
-        "setup.install_discount"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": ["function_signal_descriptor_gap"]
     },
     {

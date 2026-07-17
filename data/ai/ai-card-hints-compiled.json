@@ -7271,19 +7271,22 @@
       "side": "runner",
       "cardType": "event",
       "roles": [
+        "economy_denial",
         "event",
-        "multiaccess"
+        "hq_pressure",
+        "run_event"
       ],
       "planRoles": [
+        "pressure_hq",
         "run_pressure"
       ],
       "requiredMechanics": [
+        "access_replacement",
         "play_event",
-        "start_run",
-        "multiaccess"
+        "start_run"
       ],
       "valueHints": {
-        "access": 2
+        "runPressure": 3
       },
       "riskTags": [
         "run_commitment"
@@ -12286,8 +12289,7 @@
         "server_ice_install"
       ],
       "planRoles": [
-        "contest_remote",
-        "recover_economy"
+        "contest_remote"
       ],
       "requiredMechanics": [
         "choose_data_fort_on_install",
@@ -12306,22 +12308,11 @@
       ],
       "effects": [
         {
-          "kind": "remote_tax",
-          "scope": "runner",
-          "target": "remote.install_ice_tax",
-          "timing": "persistent"
-        },
-        {
-          "kind": "remote_tax",
-          "scope": "runner",
-          "target": "fort.install_ice_tax",
-          "timing": "persistent"
-        },
-        {
           "amount": 2,
-          "kind": "install_discount",
+          "kind": "remote_tax",
           "resource": "credits",
-          "scope": "corp",
+          "scope": "fort",
+          "target": "ice_install_tax",
           "timing": "persistent"
         }
       ],

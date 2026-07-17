@@ -15,10 +15,10 @@
   "summary": {
     "cardCount": 618,
     "cardsWithMechanicalFacts": 584,
-    "cardsWithGeneratedFacts": 331,
+    "cardsWithGeneratedFacts": 330,
     "cardsWithOverlays": 6,
-    "cardsWithFunctionSignals": 602,
-    "cardsWithStrategyAnchors": 256,
+    "cardsWithFunctionSignals": 601,
+    "cardsWithStrategyAnchors": 255,
     "cardsWithStrategySupportPairs": 198,
     "cardsWithWarnings": 113,
     "warningCategoryCounts": {
@@ -33445,6 +33445,13 @@
       ],
       "rolesClassification": [
         {
+          "value": "economy_denial",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
           "value": "event",
           "category": "legacy_role_only",
           "triageCategory": "legacy_role_only",
@@ -33452,16 +33459,32 @@
           "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
         },
         {
-          "value": "multiaccess",
+          "value": "hq_pressure",
           "category": "alias_to_strategy_goal",
           "triageCategory": "strategy_alias",
           "mapsTo": [
-            "runner.interface_closeout"
+            "runner.hq_pressure"
           ],
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "run_event",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         }
       ],
       "planRolesClassification": [
+        {
+          "value": "pressure_hq",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "runner.hq_pressure"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
         {
           "value": "run_pressure",
           "category": "function_signal_only",
@@ -40027,25 +40050,17 @@
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
         "mechanicalFactsFound": true,
-        "generatedFactsFound": true,
+        "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
         "warningCount": 1
       },
-      "derivedFunctionSignals": [
-        "fort.install_ice_tax",
-        "remote.install_ice_tax",
-        "setup.install_discount"
-      ],
-      "derivedStrategyAnchors": [
-        "runner.remote_contest"
-      ],
+      "derivedFunctionSignals": [],
+      "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [
         "runner.remote_contest"
       ],
-      "derivedPossibleStrategyAnchors": [
-        "runner.remote_contest"
-      ],
+      "derivedPossibleStrategyAnchors": [],
       "reviewedStrategySupportPairs": [
         {
           "strategyId": "runner.remote_contest",
@@ -40055,9 +40070,7 @@
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
       ],
-      "supportingEvidenceOnly": [
-        "setup.install_discount"
-      ],
+      "supportingEvidenceOnly": [],
       "lineSupportClassification": [
         {
           "value": "runner.remote_contest",
@@ -40094,13 +40107,6 @@
             "runner.remote_contest"
           ],
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        },
-        {
-          "value": "recover_economy",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Side-neutral tactical economy recovery; strategy support must come from structured economy signals."
         }
       ],
       "warningCategories": [
@@ -40131,9 +40137,7 @@
           "effects",
           "targetProfiles"
         ],
-        "generatedFactFields": [
-          "effects"
-        ],
+        "generatedFactFields": [],
         "overlayFields": []
       },
       "strategicRoleStatus": {

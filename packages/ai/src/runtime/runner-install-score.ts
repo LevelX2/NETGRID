@@ -129,6 +129,9 @@ export function runnerInstallScoreComponents(
       reason: "pressure_role",
     });
   }
+  if (roles.includes("server_ice_install")) {
+    components.push(...runnerServerIceInstallTaxComponents(input, action));
+  }
   if (dependencies.badPublicityOrTraceTechCard(sourceCard, roles)) {
     components.push({
       key: "runner_install_bad_publicity_trace_tech",
@@ -150,6 +153,69 @@ export function runnerInstallScoreComponents(
         `category:${sacrificeAssessment.selectedCandidates[0]?.category ?? sacrificeAssessment.candidates[0]?.category ?? "none"}`,
         `can_free:${sacrificeAssessment.canFreeRequiredMemory}`,
       ].join("|"),
+    });
+  }
+  return components;
+}
+
+function runnerServerIceInstallTaxComponents(
+  input: AiDecisionInput,
+  action: LegalAction,
+): AiDecisionScoreComponent[] {
+  const selectedServerId =
+    typeof action.payload?.selectedServerId === "string"
+      ? action.payload.selectedServerId
+      : undefined;
+  if (!selectedServerId) return [];
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === selectedServerId,
+  );
+  if (!server) return [];
+
+  const targetValue =
+    selectedServerId === "archives"
+      ? -1400
+      : selectedServerId === "rd"
+        ? 780 + server.ice.length * 100
+        : selectedServerId === "hq"
+          ? 720 + server.ice.length * 100
+          : 320 + server.ice.length * 100 + server.root.length * 120;
+  const components: AiDecisionScoreComponent[] = [
+    {
+      key: "runner_install_server_ice_tax_target",
+      label: "ICE-Installationssteuer-Ziel",
+      value: targetValue,
+      reason: [
+        `server:${selectedServerId}`,
+        `ice:${server.ice.length}`,
+        `root:${server.root.length}`,
+      ].join("|"),
+    },
+  ];
+
+  const urgentAdvancedRemote = input.playerView.servers.some(
+    (candidate) =>
+      candidate.id.startsWith("remote_") &&
+      candidate.root.some(
+        (card) => (card.advancementCounters ?? 0) > 0,
+      ),
+  );
+  const immediateRemoteContestAvailable = input.legalActions.some(
+    (candidate) =>
+      candidate.type === "start_run" &&
+      typeof candidate.payload?.serverId === "string" &&
+      candidate.payload.serverId.startsWith("remote_"),
+  );
+  if (
+    urgentAdvancedRemote &&
+    immediateRemoteContestAvailable &&
+    input.playerView.own.clicks <= 2
+  ) {
+    components.push({
+      key: "runner_install_server_ice_tax_too_late",
+      label: "ICE-Steuer kommt für den akuten Contest zu spät",
+      value: -1600,
+      reason: "advanced_remote_requires_immediate_contest",
     });
   }
   return components;

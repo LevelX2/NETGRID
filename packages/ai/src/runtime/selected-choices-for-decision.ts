@@ -243,6 +243,18 @@ export function selectedChoicesForDecision(
       ? { choiceId: choice.choiceId, selectedOptionIds: [selectedOptionId] }
       : { choiceId: choice.choiceId, selectedOptionIds: [] };
   }
+  if (
+    input.side === "runner" &&
+    choice.source.startsWith("successful_run.credit_loss_spend:")
+  ) {
+    const selectedOptionId = selectedCreditLossSpendOptionId(
+      input,
+      selectableOptions,
+    );
+    return selectedOptionId !== undefined
+      ? { choiceId: choice.choiceId, selectedOptionIds: [selectedOptionId] }
+      : { choiceId: choice.choiceId, selectedOptionIds: [] };
+  }
   if (input.side === "runner") {
     const selectedDamagePreventionOptionId =
       selectedRunnerDamagePreventionChoiceOptionId(
@@ -286,6 +298,41 @@ export function selectedChoicesForDecision(
   return selectedOptionId !== undefined
     ? { choiceId: choice.choiceId, selectedOptionIds: [selectedOptionId] }
     : { choiceId: choice.choiceId, selectedOptionIds: [] };
+}
+
+function selectedCreditLossSpendOptionId(
+  input: AiDecisionInput,
+  selectableOptions: PendingChoiceOptions,
+): string | undefined {
+  const ownCredits = Math.max(0, input.playerView.own.credits);
+  const opponentCredits = Math.max(0, input.playerView.opponent.credits);
+  const strategicReserve = Math.min(3, Math.floor(ownCredits / 2));
+  const maximumUsefulSpend = Math.min(
+    opponentCredits,
+    Math.max(0, ownCredits - strategicReserve),
+  );
+  return selectableOptions
+    .map((option) => ({ option, amount: choiceNumericValue(option) }))
+    .filter(
+      (entry): entry is { option: PendingChoiceOptions[number]; amount: number } =>
+        entry.amount !== undefined && entry.amount <= maximumUsefulSpend,
+    )
+    .sort(
+      (left, right) =>
+        right.amount - left.amount || left.option.id.localeCompare(right.option.id),
+    )[0]?.option.id;
+}
+
+function choiceNumericValue(
+  option: PendingChoiceOptions[number],
+): number | undefined {
+  const value =
+    typeof option.value === "number"
+      ? option.value
+      : typeof option.value === "string"
+        ? Number.parseInt(option.value, 10)
+        : Number.parseInt(option.id.replace(/^pay_/, ""), 10);
+  return Number.isInteger(value) && value >= 0 ? value : undefined;
 }
 
 function runnerSearchPreferredServerId(

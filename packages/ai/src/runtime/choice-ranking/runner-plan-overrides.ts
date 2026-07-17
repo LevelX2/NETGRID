@@ -410,6 +410,14 @@ export function tacticalPlanRepeatedRunMappingShouldYield(
   if (semanticRuntimeRecentRunnerStartRunsOnServer(input, serverId) <= 0) {
     return false;
   }
+  if (
+    semanticRuntimeChoiceHasScoreBreakdownComponent(
+      mappedChoice,
+      "runner_hq_success_window_setup",
+    )
+  ) {
+    return false;
+  }
   if (overrideChoice.action.type !== "start_run") return true;
   if (
     mapping.plan.type !== "runner.opportunistic_central_run" ||

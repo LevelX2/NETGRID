@@ -14,13 +14,13 @@
   "generatedFactsCardCount": 391,
   "manualOverlayCardCount": 6,
   "legacyFallbackOnlyCount": 137,
-  "descriptorOrSchemaGapCount": 287,
+  "descriptorOrSchemaGapCount": 286,
   "manualOverlayRequiredCount": 0,
   "blockedMissingImplementationCount": 90,
   "coverageClassCounts": {
     "blocked_missing_implementation": 90,
-    "descriptor_or_schema_gap": 287,
-    "generated_mechanical_clean": 98,
+    "descriptor_or_schema_gap": 286,
+    "generated_mechanical_clean": 99,
     "generated_plus_overlay": 6,
     "legacy_fallback_only": 137
   },
@@ -69,7 +69,7 @@
     "hq_info": 2,
     "ice_trash": 1,
     "install": 2,
-    "install_discount": 5,
+    "install_discount": 4,
     "installed_card_trash": 1,
     "link": 13,
     "link_penalty": 1,
@@ -86,7 +86,7 @@
     "recurring_economy": 18,
     "remote_build": 1,
     "remote_protection": 72,
-    "remote_tax": 4,
+    "remote_tax": 5,
     "remove_brain_damage": 1,
     "resource_trash": 1,
     "rez": 2,
@@ -157,7 +157,7 @@
   },
   "hardErrorCount": 0,
   "hardErrors": [],
-  "warningCount": 2315,
+  "warningCount": 2312,
   "warnings": [
     {
       "kind": "monolith_mechanical_duplication_candidate",
@@ -7448,21 +7448,6 @@
       "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_v1_172_quest-for-cattekin",
       "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
-    },
-    {
-      "kind": "descriptor_or_schema_gap",
-      "cardId": "onr_v1_173_restrictive-net-zoning",
-      "message": "Implementation produced facts, but descriptor/schema comparison still has gaps."
-    },
-    {
-      "kind": "generated_fact_absent_from_active_monolith",
-      "cardId": "onr_v1_173_restrictive-net-zoning",
-      "message": "Generated effect:install_discount is absent from the active monolith."
-    },
-    {
-      "kind": "monolith_mechanical_duplication_candidate",
-      "cardId": "onr_v1_173_restrictive-net-zoning",
-      "message": "Active monolith has effect:remote_tax that the current deriver does not reproduce."
     },
     {
       "kind": "text_pattern_derivation",
@@ -46229,10 +46214,13 @@
         "side": "runner",
         "cardType": "event",
         "roles": [
+          "economy_denial",
           "event",
-          "multiaccess"
+          "hq_pressure",
+          "run_event"
         ],
         "planRoles": [
+          "pressure_hq",
           "run_pressure"
         ],
         "effects": [
@@ -54432,11 +54420,12 @@
         "effects": [
           {
             "confidence": "high",
-            "kind": "install_discount",
+            "kind": "remote_tax",
             "timing": "persistent",
-            "scope": "corp",
+            "scope": "fort",
             "resource": "credits",
             "amount": 2,
+            "target": "ice_install_tax",
             "source": "implementation.modifiers.install_cost"
           }
         ],
@@ -54454,19 +54443,15 @@
           "server_ice_install"
         ],
         "planRoles": [
-          "contest_remote",
-          "recover_economy"
+          "contest_remote"
         ],
         "effects": [
           {
             "kind": "remote_tax",
             "timing": "persistent",
-            "scope": "runner"
-          },
-          {
-            "kind": "remote_tax",
-            "timing": "persistent",
-            "scope": "runner"
+            "scope": "fort",
+            "resource": "credits",
+            "amount": 2
           }
         ],
         "conditions": [],
@@ -54482,22 +54467,14 @@
         }
       },
       "overlap": {
-        "matches": [],
-        "generatedOnly": [
-          "effect:install_discount"
-        ],
-        "manualOnly": [
+        "matches": [
           "effect:remote_tax"
-        ]
+        ],
+        "generatedOnly": [],
+        "manualOnly": []
       },
-      "missingManualOverlay": [
-        "effect:install_discount",
-        "effect:remote_tax"
-      ],
-      "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually.",
-        "Manual ontology contains fields not currently derivable."
-      ],
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
       "confidence": "high",
       "warnings": [
         {
@@ -54505,28 +54482,12 @@
           "message": "Generated confidence high differs from manual confidence medium."
         },
         {
-          "kind": "descriptor_or_overlay_gap",
-          "message": "Generated facts contain fields not currently mirrored manually."
-        },
-        {
-          "kind": "descriptor_or_overlay_gap",
-          "message": "Manual ontology contains fields not currently derivable."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:install_discount has no manual ontology match."
-        },
-        {
-          "kind": "manual_ontology_without_generated_match",
-          "message": "Manual effect:remote_tax has no generated basic fact match."
-        },
-        {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
         }
       ],
       "fullCoverageScope": true,
-      "coverageClass": "descriptor_or_schema_gap"
+      "coverageClass": "generated_mechanical_clean"
     },
     {
       "cardId": "onr_v1_174_rigged-investments",

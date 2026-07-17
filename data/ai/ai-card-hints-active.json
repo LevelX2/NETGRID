@@ -5501,11 +5501,15 @@
       "cardId": "onr_v1_105_priority-wreck",
       "side": "runner",
       "cardType": "event",
-      "roles": ["event", "multiaccess"],
-      "planRoles": ["run_pressure"],
-      "requiredMechanics": ["play_event", "start_run", "multiaccess"],
+      "roles": ["economy_denial", "event", "hq_pressure", "run_event"],
+      "planRoles": ["pressure_hq", "run_pressure"],
+      "requiredMechanics": [
+        "access_replacement",
+        "play_event",
+        "start_run"
+      ],
       "valueHints": {
-        "access": 2
+        "runPressure": 3
       },
       "riskTags": ["run_commitment"],
       "aiSupportStatus": "ai_supported",
@@ -9112,7 +9116,7 @@
       "side": "runner",
       "cardType": "resource",
       "roles": ["resource", "server_ice_install"],
-      "planRoles": ["contest_remote", "recover_economy"],
+      "planRoles": ["contest_remote"],
       "requiredMechanics": [
         "choose_data_fort_on_install",
         "ice_install_extra_cost_2"
@@ -9130,14 +9134,10 @@
         {
           "kind": "remote_tax",
           "timing": "persistent",
-          "scope": "runner",
-          "target": "remote.install_ice_tax"
-        },
-        {
-          "kind": "remote_tax",
-          "timing": "persistent",
-          "scope": "runner",
-          "target": "fort.install_ice_tax"
+          "scope": "fort",
+          "resource": "credits",
+          "amount": 2,
+          "target": "ice_install_tax"
         }
       ],
       "lineSupport": ["runner.remote_contest"],

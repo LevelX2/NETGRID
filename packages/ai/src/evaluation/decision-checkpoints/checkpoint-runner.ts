@@ -389,7 +389,9 @@ function actionMatches(
   if (matcher.type && action.type !== matcher.type) return false;
   if (
     matcher.targetServerId &&
-    action.payload?.serverId !== matcher.targetServerId
+    (action.payload?.serverId ??
+      action.payload?.selectedServerId ??
+      action.payload?.targetServerId) !== matcher.targetServerId
   ) {
     return false;
   }

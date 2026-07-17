@@ -57,6 +57,7 @@ import type {
   TacticalPlan,
   TacticalPlanBuildContext,
 } from "./tactical-plan-types";
+import { runnerHqSuccessWindowSetupAssessment } from "../runtime/runner-start-run-score";
 
 export function buildRunnerTacticalPlans(
   context: TacticalPlanBuildContext,
@@ -170,6 +171,68 @@ export function buildRunnerTacticalPlans(
             label: "Runner success window",
             value: 980,
             reason: currentRunTarget ?? "current_run_window",
+          },
+        ],
+        stateVersion,
+      }),
+    );
+  }
+  const hqSuccessWindowSetup = runnerHqSuccessWindowSetup(context);
+  if (hqSuccessWindowSetup) {
+    plans.push(
+      createTacticalPlan({
+        planId: "runner.opportunistic_central_run:hq:prepare_success_window",
+        side: "runner",
+        type: "runner.opportunistic_central_run",
+        status: "active",
+        priority: 1030,
+        horizonTurns: 1,
+        target: { kind: "server", id: "hq" },
+        requiredCapabilities: [
+          {
+            capabilityId: "runner.success_window_ice_trash_credits",
+            kind: "credits",
+            side: "runner",
+            target: { kind: "server", id: "hq" },
+            minimumCredits: hqSuccessWindowSetup.minimumIceTrashCost,
+            evidence: hqSuccessWindowSetup.evidence,
+          },
+        ],
+        currentStep: createPlanStep({
+          stepId: "run_hq_for_success_window",
+          kind: "run_target",
+          desiredActionSemantics: ["run.start", "run.success_window_setup"],
+          actionCandidateIds: [hqSuccessWindowSetup.hqRunAction.actionId],
+          rationale: [
+            "a visible hand tool converts a successful HQ run into immediate ICE control",
+            ...hqSuccessWindowSetup.evidence,
+          ],
+        }),
+        nextSteps: [
+          createPlanStep({
+            stepId: "convert_hq_success_window",
+            kind: "convert_success_window",
+            desiredActionSemantics: [
+              "run.success_followup",
+              "successful_run_before_access_effect",
+              "ice.trash",
+            ],
+            rationale: [
+              "use the conditional ICE-control action after the HQ run succeeds",
+            ],
+          }),
+        ],
+        evidence: [
+          "runner_hq_success_window_setup:true",
+          `hq_run_action:${hqSuccessWindowSetup.hqRunAction.actionId}`,
+          ...hqSuccessWindowSetup.evidence,
+        ],
+        scoreBreakdown: [
+          {
+            key: "runner_prepare_hq_success_window",
+            label: "HQ success-window setup",
+            value: 1030,
+            reason: hqSuccessWindowSetup.sourceDefinitionId,
           },
         ],
         stateVersion,
@@ -809,6 +872,30 @@ export function buildRunnerTacticalPlans(
     );
   }
   return applyRunnerDrawOverflowAdjustments(context, plans);
+}
+
+function runnerHqSuccessWindowSetup(
+  context: TacticalPlanBuildContext,
+):
+  | {
+      hqRunAction: LegalAction;
+      sourceDefinitionId: string;
+      minimumIceTrashCost: number;
+      evidence: string[];
+    }
+  | undefined {
+  const input = context.input;
+  const hqRunAction = input.legalActions.find(
+    (action) =>
+      action.type === "start_run" && actionServerId(action) === "hq",
+  );
+  if (!hqRunAction) return undefined;
+  const setup = runnerHqSuccessWindowSetupAssessment(input, hqRunAction, "hq");
+  if (!setup) return undefined;
+  return {
+    hqRunAction,
+    ...setup,
+  };
 }
 
 function runNeedsStableBreakerCoverage(

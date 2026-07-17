@@ -37,6 +37,48 @@ describe("runnerStartRunScoreComponents", () => {
       "runner_hq_empty_no_access_payoff",
     );
   });
+
+  it("values an HQ run that opens an affordable conditional ICE-trash window", () => {
+    const input = aiInput({ opponentHandCount: 4 });
+    input.playerView.own.gripOrHq = [
+      {
+        instanceId: "jettison",
+        definitionId: "onr_v1_080_core-command-jettison-ice",
+        title: "Jettison Ice",
+        owner: "runner",
+        controller: "runner",
+        type: "event",
+        known: true,
+      },
+    ];
+    input.playerView.servers.push({
+      id: "rd",
+      label: "R&D",
+      ice: [
+        {
+          instanceId: "rezzed-ice",
+          definitionId: "rezzed-ice",
+          title: "Rezzed ICE",
+          owner: "corp",
+          controller: "corp",
+          type: "ice",
+          known: true,
+          rezzed: true,
+          rezCost: 2,
+        },
+      ],
+      root: [],
+    });
+
+    expect(
+      runnerStartRunScoreComponents(input, startRun("hq"), dependencies()),
+    ).toContainEqual(
+      expect.objectContaining({
+        key: "runner_hq_success_window_setup",
+        value: 1700,
+      }),
+    );
+  });
 });
 
 function dependencies(): Parameters<typeof runnerStartRunScoreComponents>[2] {

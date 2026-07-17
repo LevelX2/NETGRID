@@ -4,6 +4,55 @@ import { describe, expect, it } from "vitest";
 import { selectedChoicesForDecision } from "./selected-choices-for-decision";
 
 describe("selectedChoicesForDecision", () => {
+  it("spends a useful Priority Wreck amount while keeping a small reserve", () => {
+    const decision = selectedChoicesForDecision(
+      inputWithChoice(
+        {
+          kind: "select_option",
+          source: "successful_run.credit_loss_spend:run_85:85",
+          minSelections: 1,
+          maxSelections: 1,
+          options: Array.from({ length: 8 }, (_, amount) => ({
+            id: `pay_${amount}`,
+            label: `${amount} Credits zahlen`,
+            value: amount,
+          })),
+        },
+        { side: "runner", credits: 7, opponentCredits: 7 },
+      ),
+      resolveChoiceAction("runner"),
+      unusedDependencies(),
+    );
+
+    expect(decision).toEqual({
+      choiceId: "choice_multi",
+      selectedOptionIds: ["pay_4"],
+    });
+  });
+
+  it("does not spend more on Priority Wreck than the Corp can lose", () => {
+    const decision = selectedChoicesForDecision(
+      inputWithChoice(
+        {
+          kind: "select_option",
+          source: "successful_run.credit_loss_spend:run_129:129",
+          minSelections: 1,
+          maxSelections: 1,
+          options: Array.from({ length: 18 }, (_, amount) => ({
+            id: `pay_${amount}`,
+            label: `${amount} Credits zahlen`,
+            value: amount,
+          })),
+        },
+        { side: "runner", credits: 17, opponentCredits: 12 },
+      ),
+      resolveChoiceAction("runner"),
+      unusedDependencies(),
+    );
+
+    expect(decision?.selectedOptionIds).toEqual(["pay_12"]);
+  });
+
   it("pays the current City Surveillance draw tax when the option is legal", () => {
     const decision = selectedChoicesForDecision(
       inputWithChoice(
@@ -560,11 +609,12 @@ function inputWithChoice(
     source?: string;
     minSelections: number;
     maxSelections: number;
-    options?: Array<{ id: string; label: string; value?: string }>;
+    options?: Array<{ id: string; label: string; value?: string | number }>;
   },
   options: {
     gripOrHq?: AiDecisionInput["playerView"]["own"]["gripOrHq"];
     credits?: number;
+    opponentCredits?: number;
     servers?: AiDecisionInput["playerView"]["servers"];
     rig?: AiDecisionInput["playerView"]["own"]["rig"];
     side?: "corp" | "runner";
@@ -583,6 +633,9 @@ function inputWithChoice(
         rig: options.rig ?? [],
       },
       servers: options.servers ?? [],
+      opponent: {
+        credits: options.opponentCredits ?? 5,
+      },
       pendingChoice: {
         choiceId: "choice_multi",
         side,

@@ -478,6 +478,43 @@ describe("discard keep score", () => {
     );
   });
 
+  it("protects a unique HQ-success ICE-trash follow-up while rezzed ICE is visible", () => {
+    const jettison = runnerCard(
+      "onr_v1_080_core-command-jettison-ice",
+      "event",
+    );
+    const neutral = runnerCard("runner-neutral-event", "event");
+    const icedServer = {
+      id: "rd",
+      label: "R&D",
+      ice: [{ ...corpCard("visible-rezzed-ice", "ice"), rezzed: true }],
+      root: [],
+    } as AiDecisionInput["playerView"]["servers"][number];
+    const jettisonScore = score(
+      jettison,
+      ["event", "per_card_longtail", "runner"],
+      "runner",
+      [],
+      {},
+      { servers: [icedServer] },
+    );
+    const neutralScore = score(
+      neutral,
+      ["event"],
+      "runner",
+      [],
+      {},
+      { servers: [icedServer] },
+    );
+
+    expect(jettisonScore.baseValue).toBeGreaterThan(
+      neutralScore.baseValue + 400,
+    );
+    expect(jettisonScore.evidence).toContain(
+      "discard_score:runner_conditional_success_window_path_tool",
+    );
+  });
+
   it("discards excess copies of an installed breaker before a unique support program", () => {
     const krash = runnerCard("krash", "program");
     const secondKrash = {

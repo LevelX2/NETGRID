@@ -68,6 +68,39 @@ describe("AI input DTO score-conversion contract", () => {
     expect(input.legalActions[0]?.payload).not.toHaveProperty("privateProbe");
   });
 
+  it("preserves the public selected-server binding for server-tax installs", () => {
+    const action = runnerSemanticAction();
+    action.payload = {
+      ...action.payload,
+      selectedServerId: "rd",
+      selectedServerLabel: "R&D",
+      privateSelectedCardId: "must-not-cross-dto",
+    };
+    const input = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: playerView(action, "runner"),
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "runner-selected-server-dto",
+      decisionId: "runner-selected-server-dto:runner:1",
+      actionNumber: 1,
+      profileId: "runner-selected-server-dto-test",
+    });
+
+    expect(input.legalActions[0]?.payload).toMatchObject({
+      selectedServerId: "rd",
+      selectedServerLabel: "R&D",
+    });
+    expect(input.playerView.legalActions[0]?.payload).toMatchObject({
+      selectedServerId: "rd",
+      selectedServerLabel: "R&D",
+    });
+    expect(input.legalActions[0]?.payload).not.toHaveProperty(
+      "privateSelectedCardId",
+    );
+  });
+
   it("preserves public remote-root structure without exposing card identities", () => {
     const action = runnerSemanticAction();
     const events: PublicGameEvent[] = [

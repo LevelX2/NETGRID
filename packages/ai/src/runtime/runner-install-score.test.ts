@@ -46,7 +46,67 @@ describe("runnerInstallScoreComponents", () => {
       }),
     );
   });
+
+  it("prefers a central ICE-tax target over Archives", () => {
+    const input = runnerInputWithKnownWallNeed(
+      visibleCard("rnz", "runner", "resource"),
+    );
+    const rd = serverTaxScore(input, "rd");
+    const archives = serverTaxScore(input, "archives");
+
+    expect(rd).toBeGreaterThan(archives + 1500);
+  });
+
+  it("defers a server ICE tax when an advanced remote needs the final clicks", () => {
+    const input = runnerInputWithKnownWallNeed(
+      visibleCard("rnz", "runner", "resource"),
+    );
+    input.playerView.own.clicks = 2;
+    input.playerView.servers.find((server) => server.id === "remote_1")!.root = [
+      visibleCard("advanced-remote-card", "corp", "agenda", {
+        known: false,
+        advancementCounters: 1,
+      }),
+    ];
+    input.legalActions = [
+      {
+        actionId: "runner.start_run.remote_1",
+        side: "runner",
+        type: "start_run",
+        payload: { serverId: "remote_1" },
+      } as unknown as LegalAction,
+    ];
+
+    expect(serverTaxComponents(input, "rd")).toContainEqual(
+      expect.objectContaining({
+        key: "runner_install_server_ice_tax_too_late",
+        value: -1600,
+      }),
+    );
+  });
 });
+
+function serverTaxScore(input: AiDecisionInput, serverId: string): number {
+  return serverTaxComponents(input, serverId).reduce(
+    (total, component) => total + component.value,
+    0,
+  );
+}
+
+function serverTaxComponents(input: AiDecisionInput, serverId: string) {
+  return runnerInstallScoreComponents(
+    input,
+    {
+      actionId: `install-rnz:${serverId}`,
+      side: "runner",
+      type: "install_card",
+      source: "rnz",
+      payload: { selectedServerId: serverId },
+    } as unknown as LegalAction,
+    { loanInstallAction: false },
+    dependencies(["resource", "server_ice_install"]),
+  );
+}
 
 function hasBreakerInstallComponent(roles: string[]): boolean {
   return runnerInstallScoreComponents(
