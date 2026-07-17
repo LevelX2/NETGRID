@@ -7202,6 +7202,43 @@ describe("formatChronicleEvent", () => {
     );
   });
 
+  it("shows Bargain with Viacox's die roll and forced action without revealing its hand target", () => {
+    const event = makeEvent("end_turn", {
+      actor: "corp",
+      resolvedEffects: [
+        {
+          effectId: "runner.start.forced_action.viacox_1",
+          kind: "gain_actions",
+          visibility: "public",
+          side: "runner",
+          amount: 1,
+          reason: "start_of_turn",
+          sourceDefinitionId: "onr_proteus_131_bargain-with-viacox",
+          sourceTitle: "Bargain with Viacox",
+          dieRoll: 6,
+          restrictedActionFamily: "play_or_install_card",
+          targetCardInstanceId: "runner_grip_secret",
+        },
+      ],
+    });
+
+    for (const side of ["runner", "corp"] as const) {
+      const [item] = formatChronicleEffectItems(event, side);
+      expect(item?.title).toBe(
+        "Bargain with Viacox würfelt eine 6: Runner muss eine zufällige Karte aus der Hand offenlegen und spielen oder installieren.",
+      );
+      expect(item?.chips).toEqual(
+        expect.arrayContaining([
+          "+1 Aktion",
+          "Wurf 6",
+          "Erzwungene Aktion",
+          "Zufällige Handkarte",
+        ]),
+      );
+      expect(JSON.stringify(item)).not.toContain("runner_grip_secret");
+    }
+  });
+
   it("shows recurring-credit refreshes from automatic start-of-turn effects", () => {
     const items = formatChronicleEffectItems(
       makeEvent("end_turn", {

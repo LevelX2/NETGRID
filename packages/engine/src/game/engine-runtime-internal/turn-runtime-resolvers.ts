@@ -2746,8 +2746,6 @@ function applyRunnerStartTurnActionEconomyEffects(
     const longtail =
       cardImplementationForDefinitionId(definition.id)?.uniqueDirectLongtail;
     if (longtail?.kind !== "runner_start_turn_forced_random_action") continue;
-    const flags = ensureRunnerTurnFlags(state);
-    if ((flags.installedResourceIdsLastTurn ?? []).includes(sourceId)) continue;
     const randomPurpose = `action_economy.${definition.id}.runner_start.${state.stateVersion}.${sourceId}`;
     const dieRoll = rollDeterministicDie(state, randomPurpose);
     const grant = runnerForcedActionGrantForRoll(
@@ -2774,7 +2772,7 @@ function applyRunnerStartTurnActionEconomyEffects(
     effects?.push({
       effectId: `runner.start.forced_action.${sourceId}`,
       kind: "gain_actions",
-      visibility: grant.revealToCorpOnly ? "hidden_info_barrier" : "public",
+      visibility: "public",
       side: "runner",
       amount: 1,
       reason: "start_of_turn",

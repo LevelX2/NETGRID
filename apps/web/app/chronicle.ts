@@ -4661,14 +4661,34 @@ function formatChronicleEffect(
     }
     case "gain_actions":
       category = "turn";
-      title =
-        effect.reason === "start_of_turn" && sourceTitle
-          ? `${sourceTitle} gibt ${sideLabel(actor)} ${amount} Aktion${amount === 1 ? "" : "en"}`
-          : phrase(
-              subject,
-              `${amount} zusätzliche Aktion${amount === 1 ? "" : "en"}${through} erhalten`,
-            );
-      chips.push(`+${amount} Aktion${amount === 1 ? "" : "en"}`);
+      {
+        const forcedAction = forcedRandomActionChronicleText(effect);
+        const dieRoll = numberValue((effect as Record<string, unknown>).dieRoll);
+        if (
+          effect.reason === "start_of_turn" &&
+          sourceTitle &&
+          dieRoll !== undefined &&
+          forcedAction
+        ) {
+          importance = "important";
+          title = `${sourceTitle} würfelt eine ${dieRoll}: ${sideLabel(actor)} muss ${forcedAction.title}`;
+          chips.push(
+            `+${amount} Aktion${amount === 1 ? "" : "en"}`,
+            `Wurf ${dieRoll}`,
+            "Erzwungene Aktion",
+            forcedAction.chip,
+          );
+        } else {
+          title =
+            effect.reason === "start_of_turn" && sourceTitle
+              ? `${sourceTitle} gibt ${sideLabel(actor)} ${amount} Aktion${amount === 1 ? "" : "en"}`
+              : phrase(
+                  subject,
+                  `${amount} zusätzliche Aktion${amount === 1 ? "" : "en"}${through} erhalten`,
+                );
+          chips.push(`+${amount} Aktion${amount === 1 ? "" : "en"}`);
+        }
+      }
       break;
     case "add_tags":
       category = "danger";
@@ -6529,6 +6549,31 @@ function displayServerLabel(label: string | undefined): string | undefined {
   const remote = /^remote_(\d+)$/.exec(label);
   if (remote?.[1]) return `Remote ${remote[1]}`;
   return label;
+}
+
+function forcedRandomActionChronicleText(
+  effect: ResolvedGameEffect,
+): { title: string; chip: string } | undefined {
+  const restriction = stringValue(
+    (effect as Record<string, unknown>).restrictedActionFamily,
+  );
+  if (restriction === "draw_card")
+    return { title: "eine Karte ziehen", chip: "Karte ziehen" };
+  if (restriction === "gain_credit")
+    return { title: "1 Credit nehmen", chip: "1 Credit" };
+  if (restriction === "start_run") {
+    const server = displayServerLabel(effect.serverLabel ?? effect.serverId);
+    return {
+      title: `einen Run auf ${server ?? "eine Tochter-Datenfestung"} starten`,
+      chip: server ? `Run auf ${server}` : "Run auf Tochter-Datenfestung",
+    };
+  }
+  if (restriction === "play_or_install_card")
+    return {
+      title: "eine zufällige Karte aus der Hand offenlegen und spielen oder installieren",
+      chip: "Zufällige Handkarte",
+    };
+  return undefined;
 }
 
 function exposedInstalledCardLocation(

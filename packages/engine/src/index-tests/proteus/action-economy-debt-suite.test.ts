@@ -677,6 +677,54 @@ describe("Proteus PRO017 action economy and debt suite", () => {
     }
   });
 
+  it("Bargain with Viacox grants the forced fifth action on the first Runner turn after a real installation", () => {
+    let state = baseState("pro017-viacox-real-install");
+    clearRunnerGrip(state);
+    const viacoxId = addRunnerGrip(
+      state,
+      BARGAIN_WITH_VIACOX,
+      "viacox_real_install",
+    );
+    addRunnerGrip(state, RUNNER_INSTALLABLE_HARDWARE, "viacox_real_grip");
+    addRemote(state, "remote_1");
+    const before = structuredClone(state) as GameState;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" && action.payload?.cardId === viacoxId,
+    );
+    state = nextRunnerActionPhase(state);
+
+    const grant = state.actionEconomy?.grants?.[0];
+    expect(state.runner.clicks).toBe(5);
+    expect(grant).toMatchObject({
+      side: "runner",
+      sourceCardInstanceId: viacoxId,
+      sourceDefinitionId: BARGAIN_WITH_VIACOX,
+      forced: true,
+    });
+    expect(grant?.dieRoll).toBeGreaterThanOrEqual(1);
+    expect(grant?.dieRoll).toBeLessThanOrEqual(6);
+    expect(
+      state.randomDrawRecords.some((record) => record.purpose.includes("viacox")),
+    ).toBe(true);
+    expect(
+      state.eventLog.at(-1)?.publicPayload.resolvedEffects,
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "gain_actions",
+          sourceDefinitionId: BARGAIN_WITH_VIACOX,
+          dieRoll: grant?.dieRoll,
+          restrictedActionFamily: grant?.restriction,
+        }),
+      ]),
+    );
+    expectReplayStable(before, state);
+  });
+
   it("Bargain with Viacox resolves an impossible roll-6 target without leaking hidden grip identity", () => {
     let state = viacoxStateForRoll(6, CORP_OPERATION);
     const grant = state.actionEconomy?.grants?.[0];
@@ -700,6 +748,33 @@ describe("Proteus PRO017 action economy and debt suite", () => {
     for (const view of publicViews) {
       expect(view).not.toContain(targetCardId);
       expect(view).not.toContain(CORP_OPERATION);
+    }
+  });
+
+  it("Bargain with Viacox exposes the roll-6 forced action without exposing its random grip target", () => {
+    const state = viacoxStateForRoll(6);
+    const targetCardId = state.actionEconomy?.grants?.[0]?.targetCardInstanceId;
+    expect(targetCardId).toBeDefined();
+
+    for (const side of ["runner", "corp"] as const) {
+      const event = getPlayerView(state, side).publicEvents.at(-1);
+      const effect = Array.isArray(event?.publicPayload.resolvedEffects)
+        ? event.publicPayload.resolvedEffects.find(
+            (candidate) =>
+              candidate &&
+              typeof candidate === "object" &&
+              (candidate as { sourceDefinitionId?: unknown }).sourceDefinitionId ===
+                BARGAIN_WITH_VIACOX,
+          )
+        : undefined;
+      expect(effect).toMatchObject({
+        kind: "gain_actions",
+        visibility: "public",
+        dieRoll: 6,
+        restrictedActionFamily: "play_or_install_card",
+      });
+      expect(JSON.stringify(event)).not.toContain(targetCardId!);
+      expect(JSON.stringify(event)).not.toContain(RUNNER_INSTALLABLE_HARDWARE);
     }
   });
 
