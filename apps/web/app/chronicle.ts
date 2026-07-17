@@ -4845,9 +4845,12 @@ function formatChronicleEffect(
                   ? `${source}: ${subroutineChip} verhindert Runs für die nächsten ${runLockActions} ${runLockActions === 1 ? "Aktion" : "Aktionen"}`
                   : trashedProgramTitle
                     ? `${source}: ${subroutineChip} trasht ${trashedProgramTitle}`
-                    : effect.endedRun === true
-                      ? `${source}: ${subroutineChip} beendet den Run`
-                      : `${source}: ${subroutineChip} aufgelöst`;
+                    : `${source}: ${subroutineChip} ${resolvedSubroutineOutcomeText(
+                        subroutineType,
+                        amount,
+                        effect,
+                        event.publicPayload ?? {},
+                      )}`;
       }
       if (
         (subroutineType === "do_damage" ||
@@ -4929,6 +4932,89 @@ function formatChronicleEffect(
       undefined,
     ),
   };
+}
+
+function resolvedSubroutineOutcomeText(
+  subroutineType: string | undefined,
+  amount: number,
+  effect: ResolvedGameEffect,
+  payload: Record<string, unknown>,
+): string {
+  const normalizedAmount = Math.max(0, Math.floor(amount));
+  const paidCredits = Math.max(
+    0,
+    Math.floor(numberValue(effect.paidCredits) ?? 0),
+  );
+  switch (subroutineType) {
+    case "end_the_run":
+      return "beendet den Run";
+    case "end_the_run_unless_runner_pays":
+      return paidCredits > 0
+        ? `verlangt ${creditText(normalizedAmount)}; der Runner hat bezahlt und der Run läuft weiter`
+        : `verlangt ${creditText(normalizedAmount)}; der Runner hat nicht bezahlt und der Run endet`;
+    case "corp_gain_credit":
+      return `gibt der Korp ${creditText(normalizedAmount || 1)}`;
+    case "runner_lose_credits":
+      return `lässt den Runner bis zu ${creditText(normalizedAmount || 1)} verlieren`;
+    case "give_runner_tag":
+      return `gibt dem Runner ${normalizedAmount || 1} ${normalizedAmount === 1 ? "Tag" : "Tags"}`;
+    case "initiate_trace": {
+      const baseTraceStrength = Math.max(
+        0,
+        Math.floor(numberValue(payload.baseTraceStrength) ?? normalizedAmount),
+      );
+      return `startet einen Trace mit Basisstärke ${baseTraceStrength}`;
+    }
+    case "end_the_run_and_trash_source_at_end_of_turn":
+      return "beendet den Run und sorgt dafür, dass das ICE am Ende des Zuges getrasht wird";
+    case "trash_installed_program":
+      return "versucht, ein installiertes Programm zu trashen";
+    case "trash_installed_program_unless_runner_pays":
+      return paidCredits > 0
+        ? `verlangt ${creditText(normalizedAmount)} oder ein installiertes Programm; der Runner hat bezahlt`
+        : "trasht ein installiertes Programm";
+    case "set_run_encounter_tax":
+      return `erhöht für den restlichen Run die Kosten jeder späteren ICE-Begegnung um ${creditText(normalizedAmount)}`;
+    case "set_run_break_subroutine_cost_modifier":
+      return `erhöht für den restlichen Run die Kosten zum Brechen jeder Subroutine um ${creditText(normalizedAmount)}`;
+    case "set_run_future_end_the_run_subroutine":
+      return "gibt für den restlichen Run jedem später begegneten ICE eine zusätzliche „Run beenden“-Subroutine";
+    case "set_run_active_ice_program_trash":
+      return "sorgt für den restlichen Run dafür, dass der Runner nach jedem passierten gerezzten ICE ein installiertes Programm trasht";
+    case "set_run_future_strength_bonus":
+      return `erhöht für den restlichen Run die Stärke jedes später begegneten ICE um ${normalizedAmount}`;
+    case "set_next_encounter_unless_fully_break_damage":
+      return `droht bei der nächsten ICE-Begegnung mit ${normalizedAmount} Net Damage, falls nicht alle Subroutinen gebrochen werden`;
+    case "set_next_encounter_lock":
+      return "verhindert bei der nächsten ICE-Begegnung das Brechen von Subroutinen und das Ausstöpseln bis nach der Begegnung";
+    case "set_next_encounter_no_break_subroutines":
+      return "verhindert bei der nächsten ICE-Begegnung das Brechen von Subroutinen";
+    case "set_run_jack_out_lock":
+      return "verhindert für den restlichen Run das Ausstöpseln";
+    case "set_runner_forgo_next_action":
+      return "lässt den Runner seine nächste Aktion verlieren";
+    case "set_run_jack_out_additional_cost":
+      return `erhöht für den restlichen Run die Kosten zum Ausstöpseln um ${creditText(normalizedAmount)}`;
+    case "set_run_pass_rezzed_ice_program_trash":
+      return "sorgt für den restlichen Run dafür, dass der Runner nach jedem passierten gerezzten ICE ein installiertes Programm trasht";
+    case "secret_spend_compare_end_run_unless_corp_spent_at_least_runner":
+      return "startet das geheime Gebot von Korp und Runner; gibt die Korp weniger aus, endet der Run";
+    case "reveal_corp_rd_top":
+      return "deckt die oberste Karte von R&D auf";
+    case "reorder_corp_rd_top2":
+      return "lässt die Korp die obersten zwei Karten von R&D neu anordnen";
+    case "rewind_run_to_rezzed_ice_by_die": {
+      const dieRoll = numberValue(effect.dieRoll);
+      const rewindApplied = payload.rezzedIceRewindApplied === true;
+      return dieRoll === undefined
+        ? "würfelt für ein Zurücksetzen des Runs"
+        : rewindApplied
+          ? `würfelt eine ${dieRoll} und setzt den Run um ${dieRoll} gerezzte ICE zurück`
+          : `würfelt eine ${dieRoll}; der Run wird nicht zurückgesetzt`;
+    }
+    default:
+      return "wurde ausgelöst";
+  }
 }
 
 function accessEffectDamageChronicleItem(

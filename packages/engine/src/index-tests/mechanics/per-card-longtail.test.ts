@@ -6115,6 +6115,15 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       actionType: "continue_run",
       v1922CorpIceAbility: "tutor_future_end_the_run_subroutine",
       sourceDefinitionId: "onr_v1_274_tutor",
+      resolvedEffects: [
+        expect.objectContaining({
+          kind: "resolve_subroutine",
+          sourceDefinitionId: "onr_v1_274_tutor",
+          sourceTitle: "Tutor",
+          subroutineIndex: 0,
+          subroutineType: "set_run_future_end_the_run_subroutine",
+        }),
+      ],
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"cardInstances"|"privatePayload"/,

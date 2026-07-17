@@ -2559,6 +2559,12 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
           damageType: "net",
           amount: 3,
         }),
+        expect.objectContaining({
+          kind: "resolve_subroutine",
+          sourceDefinitionId: "onr_v1_234_data-darts",
+          subroutineIndex: 1,
+          subroutineType: "set_next_encounter_no_break_subroutines",
+        }),
       ],
     });
     expect(state.run?.nextEncounterNoBreakSubroutines).toBe(true);

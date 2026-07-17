@@ -3788,6 +3788,34 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toContain("Subroutinen");
   });
 
+  it("shows Tutor's triggered subroutine with its concrete run-wide effect", () => {
+    const event = makeEvent("continue_run", {
+      actor: "runner",
+      result: "continued",
+      encounterContinue: true,
+      unbrokenSubroutineCount: 1,
+      resolvedEffects: [
+        {
+          effectId: "subroutine_1",
+          kind: "resolve_subroutine",
+          visibility: "public",
+          side: "runner",
+          sourceDefinitionId: "onr_v1_274_tutor",
+          sourceTitle: "Tutor",
+          subroutineIndex: 0,
+          subroutineType: "set_run_future_end_the_run_subroutine",
+        },
+      ],
+    });
+
+    expect(shouldSuppressChronicleEventItem(event)).toBe(true);
+    expect(
+      formatChronicleEffectItems(event, "runner").map((item) => item.title),
+    ).toEqual([
+      "Tutor: Subroutine 1 gibt für den restlichen Run jedem später begegneten ICE eine zusätzliche „Run beenden“-Subroutine.",
+    ]);
+  });
+
   it("includes trashed program titles in Encounter continuation summaries", () => {
     const item = formatChronicleEvent(
       makeEvent("continue_run", {

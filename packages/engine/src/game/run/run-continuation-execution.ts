@@ -8,6 +8,7 @@ import type {
 import { BARTMOSS_ID } from "../../compatibility/runtime-compatibility";
 import type { DamageSummary as CoreDamageSummary } from "../damage/damage-core";
 import {
+  appendResolvedSubroutineEffect,
   appendUnpaidPayOrEndRunEffects,
   cleanupEncounterDurationMarkers,
   preparePayOrEndRunSubroutinePayment,
@@ -133,6 +134,14 @@ export function continueRun(
         continue;
       }
     }
+    appendResolvedSubroutineEffect(
+      legalAction,
+      definition,
+      index,
+      subroutine,
+      undefined,
+      subroutine.amount !== undefined ? { amount: subroutine.amount } : {},
+    );
     if (subroutine.type === "initiate_trace") {
       startTraceFromPrintedSubroutine(
         host.encounter.printedEffectHost(legalAction),
@@ -191,6 +200,20 @@ export function continueRun(
       host.encounter.specialWindowHost(),
       { definition, subroutine, subroutineIndex: index, legalAction },
     );
+    const specialWindowDieRoll =
+      "dieRoll" in specialWindow && typeof specialWindow.dieRoll === "number"
+        ? specialWindow.dieRoll
+        : undefined;
+    if (specialWindow.handled && specialWindowDieRoll !== undefined) {
+      appendResolvedSubroutineEffect(
+        legalAction,
+        definition,
+        index,
+        subroutine,
+        undefined,
+        { dieRoll: specialWindowDieRoll },
+      );
+    }
     if (specialWindow.suspended) return;
   }
   ended = appendUnpaidPayOrEndRunEffects({

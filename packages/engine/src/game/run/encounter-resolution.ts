@@ -7,6 +7,7 @@ import {
   type GameState,
   type LegalAction,
   type PlayerAction,
+  type ResolvedGameEffect,
   type SubroutineDefinition,
 } from "@netgrid/shared";
 import { dynamicSubroutineAttributionFor } from "../../ability-engine/additional-subroutine-modifiers";
@@ -809,54 +810,65 @@ export function appendResolvedSubroutineEffect(
 ): void {
   if (!legalAction) return;
   const dynamicAttribution = dynamicSubroutineAttributionFor(subroutine);
-  legalAction.resolvedEffects = [
-    ...(legalAction.resolvedEffects ?? []),
-    {
-      effectId: `subroutine_${subroutineIndex + 1}`,
-      kind: "resolve_subroutine",
-      visibility: "public",
-      side: "runner",
-      reason: "ice_subroutine",
-      sourceDefinitionId: definition.id,
-      sourceTitle: definition.title,
-      subroutineIndex,
-      subroutineType: subroutine.type,
-      ...(options.dieRoll !== undefined ? { dieRoll: options.dieRoll } : {}),
-      ...(options.randomDamageApplied !== undefined
-        ? { randomDamageApplied: options.randomDamageApplied }
-        : {}),
-      ...(subroutine.type === "random_damage" && subroutine.damageType
-        ? { damageType: subroutine.damageType }
-        : {}),
-      ...(dynamicAttribution
-        ? {
-            cardDefinitionId: dynamicAttribution.sourceDefinitionId,
-            cardTitle: dynamicAttribution.sourceTitle,
-          }
-        : {}),
-      ...(damageSummary
-        ? {
-            damageType: damageSummary.damageType,
-            amount: damageSummary.amount,
-            cardsTrashed: damageSummary.cardsTrashed,
-          }
-        : {}),
-      ...(options.amount !== undefined ? { amount: options.amount } : {}),
-      ...(options.paidCredits !== undefined
-        ? { paidCredits: options.paidCredits }
-        : {}),
-      ...(options.cardDefinitionId
-        ? { cardDefinitionId: options.cardDefinitionId }
-        : {}),
-      ...(options.cardTitle ? { cardTitle: options.cardTitle } : {}),
-      ...(options.cardsTrashed !== undefined
-        ? { cardsTrashed: options.cardsTrashed }
-        : {}),
-      ...(subroutine.type === "end_the_run" || options.endedRun
-        ? { endedRun: true }
-        : {}),
-    },
-  ];
+  const existingEffects = legalAction.resolvedEffects ?? [];
+  const existingIndex = existingEffects.findIndex(
+    (effect) =>
+      effect.kind === "resolve_subroutine" &&
+      effect.sourceDefinitionId === definition.id &&
+      effect.subroutineIndex === subroutineIndex,
+  );
+  const resolvedEffect = {
+    ...(existingIndex >= 0 ? existingEffects[existingIndex] : {}),
+    effectId: `subroutine_${subroutineIndex + 1}`,
+    kind: "resolve_subroutine",
+    visibility: "public",
+    side: "runner",
+    reason: "ice_subroutine",
+    sourceDefinitionId: definition.id,
+    sourceTitle: definition.title,
+    subroutineIndex,
+    subroutineType: subroutine.type,
+    ...(options.dieRoll !== undefined ? { dieRoll: options.dieRoll } : {}),
+    ...(options.randomDamageApplied !== undefined
+      ? { randomDamageApplied: options.randomDamageApplied }
+      : {}),
+    ...(subroutine.type === "random_damage" && subroutine.damageType
+      ? { damageType: subroutine.damageType }
+      : {}),
+    ...(dynamicAttribution
+      ? {
+          cardDefinitionId: dynamicAttribution.sourceDefinitionId,
+          cardTitle: dynamicAttribution.sourceTitle,
+        }
+      : {}),
+    ...(damageSummary
+      ? {
+          damageType: damageSummary.damageType,
+          amount: damageSummary.amount,
+          cardsTrashed: damageSummary.cardsTrashed,
+        }
+      : {}),
+    ...(options.amount !== undefined ? { amount: options.amount } : {}),
+    ...(options.paidCredits !== undefined
+      ? { paidCredits: options.paidCredits }
+      : {}),
+    ...(options.cardDefinitionId
+      ? { cardDefinitionId: options.cardDefinitionId }
+      : {}),
+    ...(options.cardTitle ? { cardTitle: options.cardTitle } : {}),
+    ...(options.cardsTrashed !== undefined
+      ? { cardsTrashed: options.cardsTrashed }
+      : {}),
+    ...(subroutine.type === "end_the_run" || options.endedRun
+      ? { endedRun: true }
+      : {}),
+  } satisfies ResolvedGameEffect;
+  legalAction.resolvedEffects =
+    existingIndex >= 0
+      ? existingEffects.map((effect, index) =>
+          index === existingIndex ? resolvedEffect : effect,
+        )
+      : [...existingEffects, resolvedEffect];
 }
 
 export function encounterWasFullyBrokenByRunner(

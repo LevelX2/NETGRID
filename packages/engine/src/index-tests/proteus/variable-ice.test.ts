@@ -919,6 +919,13 @@ describe("Proteus Phase 3c Relative Board-Count ICE", () => {
       expect.objectContaining({
         kind: "resolve_subroutine",
         sourceDefinitionId: DOG_PILE,
+        subroutineIndex: 0,
+        subroutineType: "do_damage",
+        amount: 0,
+      }),
+      expect.objectContaining({
+        kind: "resolve_subroutine",
+        sourceDefinitionId: DOG_PILE,
         subroutineIndex: 1,
         subroutineType: "end_the_run",
         endedRun: true,

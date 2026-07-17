@@ -329,6 +329,39 @@ describe("run-continuation-execution", () => {
     expect(legalAction.resolvedEffects).toBeDefined();
   });
 
+  it("records every unbroken subroutine once in encounter order", () => {
+    const subroutines: SubroutineDefinition[] = [
+      { id: "credit", type: "corp_gain_credit", amount: 2 },
+      { id: "tutor", type: "set_run_future_end_the_run_subroutine" },
+      { id: "etr", type: "end_the_run" },
+    ] as SubroutineDefinition[];
+    const state = makeState(subroutines);
+    const legalAction = action();
+    const { host } = hostFor(state, subroutines);
+
+    continueRun(host, legalAction);
+
+    expect(legalAction.resolvedEffects).toEqual([
+      expect.objectContaining({
+        kind: "resolve_subroutine",
+        subroutineIndex: 0,
+        subroutineType: "corp_gain_credit",
+        amount: 2,
+      }),
+      expect.objectContaining({
+        kind: "resolve_subroutine",
+        subroutineIndex: 1,
+        subroutineType: "set_run_future_end_the_run_subroutine",
+      }),
+      expect.objectContaining({
+        kind: "resolve_subroutine",
+        subroutineIndex: 2,
+        subroutineType: "end_the_run",
+        endedRun: true,
+      }),
+    ]);
+  });
+
   it("moves past fully handled ICE and keeps Bartmoss post-encounter behavior", () => {
     const subroutines: SubroutineDefinition[] = [
       { id: "etr", type: "end_the_run" } as SubroutineDefinition,
@@ -354,6 +387,7 @@ describe("run-continuation-execution", () => {
       bartmossPostEncounterChecked: true,
       bartmossPostEncounterOutcomes: `${BARTMOSS_BREAKER_ID}:1:trashed`,
     });
+    expect(legalAction.resolvedEffects).toBeUndefined();
   });
 
   it("fails clearly when required host groups are absent", () => {
