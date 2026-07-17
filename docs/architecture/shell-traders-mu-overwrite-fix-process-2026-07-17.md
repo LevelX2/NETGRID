@@ -202,6 +202,13 @@ Bei einem roten Done-Gate bleibt der Prozess im aktuellen Zustand.
   Choice-Familie selbst verwendet keinen Kartennamen und erweitert diese
   technische Schuld nicht; die Baseline wurde deshalb nicht stillschweigend
   neu geschrieben.
+- Nach Integration des aktuellen `main` bleiben die 49 fokussierten Tests und
+  der Engine-Typecheck grün. Die breite Engine-Suite erreicht 1.720 von 1.721
+  grünen Tests; ausschließlich der Modulgrößen-Gate für den auf `main`
+  weitergelaufenen `turn-runtime-resolvers.ts` ist mit 3.280 statt höchstens
+  3.200 Zeilen rot. Derselbe Einzeltest ist auf unverändertem `main` identisch
+  rot und gehört nicht zum Shell-Traders-Scope. Format-, Boundary- und
+  Diff-Check bleiben nach dem Abgleich grün.
 
 ## Worktree-, Git- und Integrationsregeln
 
