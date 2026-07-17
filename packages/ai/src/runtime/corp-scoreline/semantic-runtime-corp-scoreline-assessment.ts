@@ -1,4 +1,8 @@
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 import { actionProvidesCredits } from "../../actions/action-effect-classification";
 import type { CorpRemoteContestabilityAssessment } from "../corp-scoring-assessment-types";
 import {
@@ -154,7 +158,9 @@ export function assessCorpScorelineWindow<
       ? "blocked"
       : "none";
   const protectedRemoteIds = input.playerView.servers
-    .filter((server): server is TServer => dependencies.isRemoteServerTarget(server.id))
+    .filter((server): server is TServer =>
+      dependencies.isRemoteServerTarget(server.id),
+    )
     .filter((server) =>
       dependencies.remoteIsProtected
         ? dependencies.remoteIsProtected(server)
@@ -298,7 +304,9 @@ function scorelinePathForAction<TServer extends VisibleCorpServer>(
     blockers,
     creditsBeforeAction,
     creditsAfterAction,
-    ...(scoringWindow?.scoreHorizon ? { scoreHorizon: scoringWindow.scoreHorizon } : {}),
+    ...(scoringWindow?.scoreHorizon
+      ? { scoreHorizon: scoringWindow.scoreHorizon }
+      : {}),
     ...(scoringWindow ? { scoringWindow } : {}),
     evidence: [
       `corp_scoreline_action:${scorelineActionSafeSignature(action, actionRoles, serverId)}`,
@@ -591,7 +599,8 @@ function projectedCreditsAfterEconomyAction<TServer extends VisibleCorpServer>(
     numberPayload(action, "amount"),
     numberPayload(action, "credits"),
   );
-  if (action.type === "gain_credit") return creditsAfterCosts + Math.max(1, payloadGain);
+  if (action.type === "gain_credit")
+    return creditsAfterCosts + Math.max(1, payloadGain);
   return creditsAfterCosts + payloadGain;
 }
 

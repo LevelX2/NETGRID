@@ -1,6 +1,6 @@
 # AI Source Structure Optimization Process 2026-07
 
-Status: `package_done:AISSO-3`
+Status: `package_done:AISSO-4`
 
 ## Quelle und Vorgabe
 
@@ -280,6 +280,25 @@ Ergebnis:
 - Done-Gate: keine der drei Orchestrator-Dateien bleibt ein mehrere tausend
   Zeilen großer Mischblock; Scorewerte und Evidence bleiben unverändert.
 - Commit: `refactor(ai): organize corp scoreline runtime`
+
+Ergebnis:
+
+- Die drei bisherigen Corp-Hotspots sind von 3.817/3.689/1.719 auf
+  807/792/248 Zeilen reduziert. Sie bleiben als schmale Orchestratoren und
+  öffentliche Fassaden erhalten.
+- Scoreline-Komponenten, Install-/ICE-Ökonomie, HQ-Druck, Zustandsfacts,
+  Board-Triage-Policies und -Action-Facts sowie Scoring-Window-Projektion
+  liegen unter `runtime/corp-scoreline/` in fachlich benannten Modulen. Die
+  größte neue Einheit umfasst 2.275 Zeilen und bleibt unter dem generischen
+  2.500-Zeilen-Gate.
+- Reine Contracts für Corp-Score, Board-Triage und Scoring-Window verhindern
+  Rückimporte in die Fassaden; der Laufzeitimportgraph bleibt zyklenfrei.
+- Die drei großen Testsuiten sind in Score-/Scoreline, Triage-/Clock und
+  Window-/Protection-Familien plus Test-Support geteilt. Die Ratchets wurden
+  auf 3.796/3.313, 1.763/1.372 und 811/876 Zeilen abgesenkt.
+- Checks: zehn vollständige Corp-Score-/Triage-/Window-/Score-Conversion-
+  Suiten mit 221/221 Tests grün; AI-Typecheck, Structure-Gate und
+  `git diff --check` grün.
 
 ### AISSO-5 – Visible Run Analysis als fachliche Modulgruppe schneiden
 

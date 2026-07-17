@@ -1,4 +1,8 @@
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import {
   assessCorpScorelineWindow,
@@ -9,12 +13,22 @@ import { semanticRuntimeCorpScoreNowSafetyGate } from "../semantic-runtime-corp-
 
 describe("assessCorpScorelineWindow", () => {
   it("allows safe score-now and penalizes passive draw, economy and end turn", () => {
-    const score = action("score", "score_agenda", "agenda-installed", "remote_1");
+    const score = action(
+      "score",
+      "score_agenda",
+      "agenda-installed",
+      "remote_1",
+    );
     const gain = action("gain", "gain_credit", "basic_action");
     const draw = action("draw", "draw_card", "basic_action");
     const endTurn = action("end", "end_turn", "game_rule");
     const input = inputWithActions([score, gain, draw, endTurn], {
-      servers: [remote("remote_1", { ice: [ice("ice-1")], root: [agenda("agenda-installed")] })],
+      servers: [
+        remote("remote_1", {
+          ice: [ice("ice-1")],
+          root: [agenda("agenda-installed")],
+        }),
+      ],
     });
     const assessment = scoreline(input);
 
@@ -25,7 +39,11 @@ describe("assessCorpScorelineWindow", () => {
       blocked: false,
     });
     expect(
-      semanticRuntimeCorpScoreNowSafetyGate(input, score, consumerDeps(assessment)),
+      semanticRuntimeCorpScoreNowSafetyGate(
+        input,
+        score,
+        consumerDeps(assessment),
+      ),
     ).toMatchObject({ allowed: true });
     for (const passive of [gain, draw, endTurn]) {
       expect(
@@ -34,24 +52,39 @@ describe("assessCorpScorelineWindow", () => {
           passive,
           passiveDeps(assessment),
         ),
-      ).toEqual(expect.objectContaining({ key: "corp_passive_scoreline_available" }));
+      ).toEqual(
+        expect.objectContaining({ key: "corp_passive_scoreline_available" }),
+      );
     }
   });
 
   it("does not mark score or advance safe when the remote is unsafe", () => {
-    const advance = action("advance", "advance_card", "agenda-installed", "remote_1");
+    const advance = action(
+      "advance",
+      "advance_card",
+      "agenda-installed",
+      "remote_1",
+    );
     const gain = action("gain", "gain_credit", "basic_action");
     const input = inputWithActions([advance, gain], {
-      servers: [remote("remote_1", { root: [agenda("agenda-installed", 2, 1)] })],
+      servers: [
+        remote("remote_1", { root: [agenda("agenda-installed", 2, 1)] }),
+      ],
       runnerCredits: 4,
     });
-    const assessment = scoreline(input, { advanceCompletesActionIds: ["advance"] });
+    const assessment = scoreline(input, {
+      advanceCompletesActionIds: ["advance"],
+    });
     const path = pathFor(assessment, "advance");
 
     expect(path.safe).toBe(false);
     expect(path.blockers).toContain("cheap_contest");
     expect(
-      semanticRuntimeCorpPassiveScoreLinePenalty(input, gain, passiveDeps(assessment)),
+      semanticRuntimeCorpPassiveScoreLinePenalty(
+        input,
+        gain,
+        passiveDeps(assessment),
+      ),
     ).toBeUndefined();
   });
 
@@ -63,7 +96,12 @@ describe("assessCorpScorelineWindow", () => {
     const gain = action("gain", "gain_credit", "basic_action");
     const input = inputWithActions([score, gain], {
       credits: 0,
-      servers: [remote("remote_1", { ice: [ice("ice-1")], root: [agenda("agenda-installed")] })],
+      servers: [
+        remote("remote_1", {
+          ice: [ice("ice-1")],
+          root: [agenda("agenda-installed")],
+        }),
+      ],
     });
     const assessment = scoreline(input, { creditsAfterAction: { gain: 5 } });
 
@@ -74,7 +112,11 @@ describe("assessCorpScorelineWindow", () => {
       blocked: false,
     });
     expect(
-      semanticRuntimeCorpPassiveScoreLinePenalty(input, gain, passiveDeps(assessment)),
+      semanticRuntimeCorpPassiveScoreLinePenalty(
+        input,
+        gain,
+        passiveDeps(assessment),
+      ),
     ).toBeUndefined();
   });
 
@@ -84,14 +126,25 @@ describe("assessCorpScorelineWindow", () => {
       costs: [{ credits: 5 }],
     };
     const gain = action("gain", "gain_credit", "basic_action");
-    const reveal = action("reveal-rd-top", "gain_credit", "agenda-scored", undefined, {
-      abilityFamily: "hidden-zone",
-      effectKind: "hidden_zone",
-      agendaAbility: "v1919_scored_agenda_reveal_rd_top",
-    });
+    const reveal = action(
+      "reveal-rd-top",
+      "gain_credit",
+      "agenda-scored",
+      undefined,
+      {
+        abilityFamily: "hidden-zone",
+        effectKind: "hidden_zone",
+        agendaAbility: "v1919_scored_agenda_reveal_rd_top",
+      },
+    );
     const input = inputWithActions([score, gain, reveal], {
       credits: 0,
-      servers: [remote("remote_1", { ice: [ice("ice-1")], root: [agenda("agenda-installed")] })],
+      servers: [
+        remote("remote_1", {
+          ice: [ice("ice-1")],
+          root: [agenda("agenda-installed")],
+        }),
+      ],
     });
     const assessment = scoreline(input, {
       creditsAfterAction: { gain: 1, "reveal-rd-top": 1 },
@@ -107,14 +160,27 @@ describe("assessCorpScorelineWindow", () => {
   });
 
   it("lets central pressure support score-now while blocking agenda install and recommending central protection", () => {
-    const score = action("score", "score_agenda", "agenda-installed", "remote_1");
-    const installAgenda = action("install-agenda", "install_card", "agenda-hand", "remote_1");
+    const score = action(
+      "score",
+      "score_agenda",
+      "agenda-installed",
+      "remote_1",
+    );
+    const installAgenda = action(
+      "install-agenda",
+      "install_card",
+      "agenda-hand",
+      "remote_1",
+    );
     const protectHq = action("protect-hq", "install_card", "ice-hand", "hq", {
       placement: "ice",
     });
     const input = inputWithActions([score, installAgenda, protectHq], {
       servers: [
-        remote("remote_1", { ice: [ice("ice-1")], root: [agenda("agenda-installed")] }),
+        remote("remote_1", {
+          ice: [ice("ice-1")],
+          root: [agenda("agenda-installed")],
+        }),
         central("hq"),
       ],
       hand: [agenda("agenda-hand"), ice("ice-hand")],
@@ -135,11 +201,23 @@ describe("assessCorpScorelineWindow", () => {
   });
 
   it("classifies advance actions that complete the agenda as advance-to-score", () => {
-    const advance = action("advance", "advance_card", "agenda-installed", "remote_1");
+    const advance = action(
+      "advance",
+      "advance_card",
+      "agenda-installed",
+      "remote_1",
+    );
     const input = inputWithActions([advance], {
-      servers: [remote("remote_1", { ice: [ice("ice-1")], root: [agenda("agenda-installed", 2, 1)] })],
+      servers: [
+        remote("remote_1", {
+          ice: [ice("ice-1")],
+          root: [agenda("agenda-installed", 2, 1)],
+        }),
+      ],
     });
-    const assessment = scoreline(input, { advanceCompletesActionIds: ["advance"] });
+    const assessment = scoreline(input, {
+      advanceCompletesActionIds: ["advance"],
+    });
 
     expect(assessment.advanceToScoreActionIds).toEqual(["advance"]);
     expect(pathFor(assessment, "advance")).toMatchObject({
@@ -171,9 +249,9 @@ describe("assessCorpScorelineWindow", () => {
     const assessment = scoreline(input);
 
     expect(assessment.agendaInstallActionIds).toEqual(["install-protected"]);
-    expect(assessment.paths.some((path) => path.actionId === "install-naked")).toBe(
-      false,
-    );
+    expect(
+      assessment.paths.some((path) => path.actionId === "install-naked"),
+    ).toBe(false);
   });
 
   it("keeps central protection out of scoreline paths when central threat is not high", () => {
@@ -189,10 +267,7 @@ describe("assessCorpScorelineWindow", () => {
     const input = inputWithActions([installAgenda, protectHq], {
       credits: 10,
       hand: [agenda("agenda-hand"), ice("ice-hand")],
-      servers: [
-        remote("remote_1", { ice: [ice("ice-1")] }),
-        central("hq"),
-      ],
+      servers: [remote("remote_1", { ice: [ice("ice-1")] }), central("hq")],
     });
 
     const assessment = scoreline(input, { centralThreatHigh: false });
@@ -218,17 +293,27 @@ describe("assessCorpScorelineWindow", () => {
     expect(assessment.recommendedNextStep).toBe("defer");
     expect(assessment.terminalWindow).toBe(false);
     expect(
-      semanticRuntimeCorpPassiveScoreLinePenalty(input, draw, passiveDeps(assessment)),
+      semanticRuntimeCorpPassiveScoreLinePenalty(
+        input,
+        draw,
+        passiveDeps(assessment),
+      ),
     ).toBeUndefined();
   });
 
   it("does not emit fixed true evidence when no scoreline window exists", () => {
-    const input = inputWithActions([action("draw", "draw_card", "basic_action")]);
+    const input = inputWithActions([
+      action("draw", "draw_card", "basic_action"),
+    ]);
     const assessment = scoreline(input);
     const terminal = scorelineAssessmentToTerminalWindowLike(assessment);
 
-    expect(assessment.evidence).toContain("corp_scoreline_terminal_window:false");
-    expect(assessment.evidence).not.toContain("corp_score_terminal_window:true");
+    expect(assessment.evidence).toContain(
+      "corp_scoreline_terminal_window:false",
+    );
+    expect(assessment.evidence).not.toContain(
+      "corp_score_terminal_window:true",
+    );
     expect(terminal.evidence).not.toContain("corp_score_terminal_window:true");
   });
 });
@@ -261,7 +346,8 @@ function scoreline(
           (card.known && card.type === "agenda") ||
           (card.advancementCounters ?? 0) > 0,
       ) === true,
-    isRemoteServerTarget: (serverId) => serverId?.startsWith("remote_") === true,
+    isRemoteServerTarget: (serverId) =>
+      serverId?.startsWith("remote_") === true,
     visibleIceRezCost: (card) => card.rezCost ?? 0,
     actionSourceCard: sourceCard,
     rolesForAction: (_input, action) =>
@@ -295,7 +381,8 @@ function scoreline(
 
 function consumerDeps(assessment: ReturnType<typeof scoreline>) {
   return {
-    scoreTerminalWindow: () => scorelineAssessmentToTerminalWindowLike(assessment),
+    scoreTerminalWindow: () =>
+      scorelineAssessmentToTerminalWindowLike(assessment),
     scorelineWindowAssessment: () => assessment,
   };
 }
@@ -311,7 +398,9 @@ function passiveDeps(assessment: ReturnType<typeof scoreline>) {
 }
 
 function pathFor(assessment: ReturnType<typeof scoreline>, actionId: string) {
-  const path = assessment.paths.find((candidate) => candidate.actionId === actionId);
+  const path = assessment.paths.find(
+    (candidate) => candidate.actionId === actionId,
+  );
   expect(path, actionId).toBeDefined();
   return path!;
 }
@@ -401,7 +490,9 @@ function remote(
   } as AiDecisionInput["playerView"]["servers"][number];
 }
 
-function central(id: "hq" | "rd"): AiDecisionInput["playerView"]["servers"][number] {
+function central(
+  id: "hq" | "rd",
+): AiDecisionInput["playerView"]["servers"][number] {
   return remote(id);
 }
 
