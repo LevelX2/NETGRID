@@ -4721,6 +4721,12 @@ function formatChronicleEffect(
           ? `Subroutine ${subroutineNumber}`
           : "Subroutine";
       const subroutineType = stringValue(effect.subroutineType);
+      const runLockActions =
+        subroutineType === "set_runner_run_lock_actions"
+          ? (numberValue(effect.amount) ??
+            numberValue(event.publicPayload.runLockActionsAdded) ??
+            0)
+          : 0;
       const dieRoll = numberValue(effect.dieRoll);
       const randomDamageApplied = effect.randomDamageApplied === true;
       const damageType = stringValue(effect.damageType);
@@ -4814,11 +4820,13 @@ function formatChronicleEffect(
               ? `${source}: ${subroutineChip} macht ${preventionSummary.originalAmount} ${damageLabel}; ${preventionSummary.preventedAmount} durch ${preventionSummary.sourceTitle} verhindert, Ergebnis ${preventionSummary.finalAmount} ${damageLabel}`
               : subroutineType === "do_damage"
                 ? `${source}: ${subroutineChip} macht ${amount} ${damageLabel}`
-                : trashedProgramTitle
-                  ? `${source}: ${subroutineChip} trasht ${trashedProgramTitle}`
-                  : effect.endedRun === true
-                    ? `${source}: ${subroutineChip} beendet den Run`
-                    : `${source}: ${subroutineChip} aufgelöst`;
+                : subroutineType === "set_runner_run_lock_actions"
+                  ? `${source}: ${subroutineChip} verhindert Runs für die nächsten ${runLockActions} ${runLockActions === 1 ? "Aktion" : "Aktionen"}`
+                  : trashedProgramTitle
+                    ? `${source}: ${subroutineChip} trasht ${trashedProgramTitle}`
+                    : effect.endedRun === true
+                      ? `${source}: ${subroutineChip} beendet den Run`
+                      : `${source}: ${subroutineChip} aufgelöst`;
       }
       if (
         (subroutineType === "do_damage" ||
@@ -4834,6 +4842,11 @@ function formatChronicleEffect(
         description = `Kein ${damageLabel} bleibt übrig.`;
       if (trashedProgramTitle)
         description = `${trashedProgramTitle} wurde in den Heap bewegt.`;
+      if (subroutineType === "set_runner_run_lock_actions")
+        description =
+          runLockActions === 1
+            ? "Der Runner kann während der nächsten Aktion keinen Run starten."
+            : `Der Runner kann während der nächsten ${runLockActions} Aktionen keinen Run starten.`;
       chips.push(
         subroutineChip,
         ...(subroutineType === "random_damage" && dieRoll !== undefined
@@ -4859,6 +4872,12 @@ function formatChronicleEffect(
           : []),
         ...(trashedProgramTitle
           ? [trashedProgramTitle, "Programm getrasht"]
+          : []),
+        ...(subroutineType === "set_runner_run_lock_actions"
+          ? [
+              "Run-Sperre",
+              `${runLockActions} ${runLockActions === 1 ? "Aktion" : "Aktionen"}`,
+            ]
           : []),
         ...(effect.endedRun === true ? ["Run endet"] : []),
         source,

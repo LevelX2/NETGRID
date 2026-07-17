@@ -6417,6 +6417,17 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       runLockActionsPending: 6,
       sourceDefinitionId: "onr_v1_247_haunting-inquisition",
     });
+    expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "resolve_subroutine",
+          sourceDefinitionId: "onr_v1_247_haunting-inquisition",
+          subroutineIndex: 0,
+          subroutineType: "set_runner_run_lock_actions",
+          amount: 6,
+        }),
+      ]),
+    );
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"cardInstances"|"privatePayload"/,
     );
