@@ -526,6 +526,7 @@ function visibleCardsByDefinition(view: PlayerView): Map<string, VisibleCard> {
     ...view.own.heapOrArchives,
     ...view.own.scoreArea,
     ...(view.own.rig ?? []),
+    ...(view.opponent.discardCards ?? []),
     ...view.opponent.scoreArea,
     ...(view.opponent.rig ?? []),
     ...view.servers.flatMap((server) => [...server.ice, ...server.root]),

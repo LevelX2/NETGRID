@@ -418,6 +418,43 @@ describe("deriveOpponentActionCues", () => {
     expect(cueHasHiddenLeak(cues[0]!)).toBe(false);
   });
 
+  it("shows an opponent's played event from the public discard pile", () => {
+    const panzerRun = {
+      instanceId: "runner_panzer_run_1",
+      known: true,
+      title: "Panzer Run",
+      definitionId: "onr_classic_042_panzer-run",
+      type: "event" as const,
+    };
+    const playerView = view("corp", {
+      opponent: {
+        ...view("corp").opponent,
+        discardCount: 1,
+        discardCards: [panzerRun],
+      },
+    });
+
+    const cues = deriveOpponentActionCues({
+      viewerSide: "corp",
+      playerView,
+      events: [
+        event("evt_panzer_run", "play_event", {
+          actor: "runner",
+          cardDefinitionId: "onr_classic_042_panzer-run",
+          title: "Panzer Run",
+          gainedCredits: 4,
+          drawnCount: 2,
+          aiReasonCode: "runner.event.economy",
+        }),
+      ],
+    });
+
+    expect(cues).toHaveLength(1);
+    expect(cues[0]?.relatedCard).toEqual(panzerRun);
+    expect(cues[0]?.visibility).toBe("public");
+    expect(cueHasHiddenLeak(cues[0]!)).toBe(false);
+  });
+
   it("does not create a duplicate cue for visible access reveals", () => {
     const cues = deriveOpponentActionCues({
       viewerSide: "corp",
