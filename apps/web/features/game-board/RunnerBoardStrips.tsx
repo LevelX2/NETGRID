@@ -11,6 +11,7 @@ import {
   opponentRunnerRigCardActions,
   runAwareActionButtonLabel,
   runnerHostedCardsForHost,
+  runnerRigCardInstanceMarker,
   runnerRigMemorySummary,
   type ActionContext,
 } from "../../app/action-board-ui";
@@ -276,6 +277,7 @@ export function RunnerRigStrip({
                               card={displayCard}
                               compact
                               displayMode={displayMode}
+                              instanceMarker={runnerRigCardInstanceMarker(runnerRig, rigCard.instanceId)}
                               {...(rigCard.known ? {} : { hiddenSide: "runner" as const })}
                               selected={selectedContext?.kind === "card" && selectedContext.id === rigCard.instanceId}
                               actions={cardActionsForRig(rigCard)}

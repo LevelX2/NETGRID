@@ -86,10 +86,12 @@ import {
   runPositionStatusLabel,
   runTargetServerIds,
   runWindowActionButtonLabel,
+  runWindowActionInstanceDetail,
   runWindowActions,
   runWindowStatusLabel,
   exposedCardInstanceIdsForEvent,
   runnerHostedCardsForHost,
+  runnerRigCardInstanceMarker,
   runnerRigMemorySummary,
   serverBoardRows,
   serverCounterChipsForDisplays,
@@ -4064,6 +4066,90 @@ describe("V1.0.6 resource and card-display helpers", () => {
       }),
     ).toBe(true);
     expect(actionCostChips(searchInstall)).toEqual([]);
+  });
+
+  it("uses stable rig instance markers for three equal breakers and their Run actions", () => {
+    const first = card("rent_1", "Rent-I-Con", "program");
+    const temporary = {
+      ...card("rent_2", "Rent-I-Con", "program"),
+      lifecycleMarkers: [
+        {
+          kind: "temporary_return_to_grip" as const,
+          label: "Sneak Preview",
+          detail:
+            "Am Runner-Zugende zurück in den Grip, falls noch installiert",
+        },
+      ],
+    };
+    const third = card("rent_3", "Rent-I-Con", "program");
+    const single = card("decoder_1", "Simple Decoder", "program");
+    const runnerRig = [first, temporary, single, third];
+    const running = view("runner", {
+      own: { ...view("runner").own, rig: runnerRig },
+      run: {
+        attackedServerId: "rd",
+        phase: "encounter_ice",
+        position: { kind: "ice", serverId: "rd", iceIndex: 0 },
+        encounteredIce: card("ice_1", "Data Wall", "ice"),
+        successful: false,
+      },
+    });
+    const firstPump = legalAction(
+      "runner",
+      "pump_breaker",
+      first.instanceId,
+      "Rent-I-Con: Stärke +1",
+      { breakerId: first.instanceId, iceId: "ice_1" },
+      "run.encounter_ice",
+    );
+    const temporaryBreak = legalAction(
+      "runner",
+      "break_subroutine",
+      temporary.instanceId,
+      "Rent-I-Con: Subroutine 1 brechen",
+      {
+        breakerId: temporary.instanceId,
+        iceId: "ice_1",
+        subroutineIndex: 0,
+      },
+      "run.encounter_ice",
+    );
+    const thirdPump = legalAction(
+      "runner",
+      "pump_breaker",
+      third.instanceId,
+      "Rent-I-Con: Stärke +1",
+      { breakerId: third.instanceId, iceId: "ice_1" },
+      "run.encounter_ice",
+    );
+    const singlePump = legalAction(
+      "runner",
+      "pump_breaker",
+      single.instanceId,
+      "Simple Decoder: Stärke +1",
+      { breakerId: single.instanceId, iceId: "ice_1" },
+      "run.encounter_ice",
+    );
+
+    expect(
+      runnerRig.map((rigCard) =>
+        runnerRigCardInstanceMarker(runnerRig, rigCard.instanceId),
+      ),
+    ).toEqual(["#1", "#2", null, "#3"]);
+    expect(
+      [firstPump, temporaryBreak, thirdPump, singlePump].map((action) =>
+        runWindowActionButtonLabel(running, action),
+      ),
+    ).toEqual([
+      "Rent-I-Con #1 +1 Stärke",
+      "Rent-I-Con #2: Subroutine 1 brechen",
+      "Rent-I-Con #3 +1 Stärke",
+      "Simple Decoder +1 Stärke",
+    ]);
+    expect(runWindowActionInstanceDetail(running, temporaryBreak)).toBe(
+      "Rent-I-Con #2: Diese Aktion verwendet genau diese installierte Karte. Sneak Preview: Am Runner-Zugende zurück in den Grip, falls noch installiert.",
+    );
+    expect(runWindowActionInstanceDetail(running, singlePump)).toBeNull();
   });
 
   it("mirrors pending run choices into the Run window", () => {

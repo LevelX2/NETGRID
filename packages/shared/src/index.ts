@@ -1846,6 +1846,12 @@ export type VisibleEffectiveIceRunQuote = {
   breakSubroutineCostSourceTitles?: string[];
 };
 
+export type VisibleCardLifecycleMarker = {
+  kind: "temporary_return_to_grip";
+  label: string;
+  detail: string;
+};
+
 export type VisibleCard = {
   instanceId: CardInstanceId;
   known: boolean;
@@ -1888,6 +1894,7 @@ export type VisibleCard = {
   selectedTargetLabel?: string;
   owner?: Side;
   controller?: Side;
+  lifecycleMarkers?: VisibleCardLifecycleMarker[];
   effectiveRunQuote?: VisibleEffectiveIceRunQuote;
 };
 

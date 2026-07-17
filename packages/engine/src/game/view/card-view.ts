@@ -95,6 +95,11 @@ function visibleKnownCardWithReferenceViewer(
   const overadvance = overadvanceViewFields(
     cardImplementationForDefinitionId(definition.id),
   );
+  const lifecycleMarkers = visibleCardLifecycleMarkers(
+    state,
+    id,
+    referenceViewer,
+  );
   return {
     instanceId: id,
     known: true,
@@ -194,7 +199,38 @@ function visibleKnownCardWithReferenceViewer(
       : {}),
     owner: instance.owner,
     controller: instance.controller,
+    ...(lifecycleMarkers.length > 0 ? { lifecycleMarkers } : {}),
   };
+}
+
+function visibleCardLifecycleMarkers(
+  state: GameState,
+  id: CardInstanceId,
+  referenceViewer: Side | "own",
+): NonNullable<VisibleCard["lifecycleMarkers"]> {
+  const instance = state.cardInstances[id];
+  if (
+    referenceViewer === "corp" ||
+    instance?.zone.side !== "runner" ||
+    instance.zone.zone !== "rig"
+  )
+    return [];
+  const sourceDefinitionIds = new Set(
+    (state.temporaryProgramInstallReturns ?? [])
+      .filter((entry) => entry.cardId === id)
+      .map((entry) => entry.sourceCardDefinitionId),
+  );
+  return [...sourceDefinitionIds].flatMap((sourceDefinitionId) => {
+    const sourceDefinition = CARD_DEFINITIONS_BY_ID[sourceDefinitionId];
+    if (!sourceDefinition) return [];
+    return [
+      {
+        kind: "temporary_return_to_grip" as const,
+        label: sourceDefinition.title,
+        detail: "Am Runner-Zugende zurück in den Grip, falls noch installiert",
+      },
+    ];
+  });
 }
 
 export function overadvanceViewFields(
