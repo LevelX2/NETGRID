@@ -208,6 +208,7 @@ describe("runnerTerminalRemoteToolScoreComponent", () => {
     current.playerView.servers = [
       {
         id: "hq",
+        label: "HQ",
         root: [],
         ice: [{ instanceId: "hidden-hq-ice", known: false, rezzed: false }],
       },
