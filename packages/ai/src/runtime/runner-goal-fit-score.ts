@@ -413,13 +413,21 @@ function runnerTacticalGoalRunFitScoreComponent(
     )
     .sort((left, right) => right.priority - left.priority)[0];
   if (!matchingGoal) return undefined;
+  const accessBonus =
+    evaluation.accessPayoff === "access_bonus" &&
+    evaluation.multiaccessAvailable
+      ? 420
+      : 0;
   return {
     key: "runner_goal_fit_tactical_goal_run_target",
     label: "Runner-TacticalGoal-Ziel",
-    value: scoreValueForTacticalGoal(matchingGoal),
+    value: scoreValueForTacticalGoal(matchingGoal) + accessBonus,
     reason: runnerTacticalGoalReason(matchingGoal, [
       `target:${evaluation.targetServerId}`,
       `recommendation:${evaluation.recommendation}`,
+      ...(accessBonus > 0
+        ? ["access_bonus:multiaccess", `access_bonus_value:${accessBonus}`]
+        : []),
     ]),
   };
 }
