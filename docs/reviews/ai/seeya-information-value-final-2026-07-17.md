@@ -163,5 +163,8 @@ Effektüberlappungen und außerhalb dieses Scopes.
 Der ursprüngliche Arbeitsstand wurde per Fast-Forward lokal nach `main`
 integriert. Danach wurde das inzwischen auf `main` integrierte
 Damage-Threat-Model-v2 konfliktfrei in den Arbeitsbranch übernommen. Der
-kombinierte Stand ist mit Fokus-, Typecheck-, Diff- und Vollsuite-Vergleich
-zur abschließenden lokalen Integration freigegeben.
+kombinierte Stand wurde nach Fokus-, Typecheck-, Diff- und
+Vollsuite-Vergleich per Fast-Forward nach `main` integriert. Der
+Post-Merge-Nachlauf ist mit 75/75 Tests und AI-Typecheck grün. Der Worktree
+wurde entfernt; `codex/ai-seeya-criteria` bleibt gemäß defensivem
+Main-Abgleich als gemergte lokale Referenz bestehen. Es gab keinen Push.

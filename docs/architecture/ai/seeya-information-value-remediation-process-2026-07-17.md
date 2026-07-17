@@ -2,9 +2,10 @@
 
 ## Status
 
-P1 bis P6 abgeschlossen, P7 aktiv. Die fachliche Umsetzung ist vom Nutzer
-freigegeben; gearbeitet wird im separaten Worktree und ohne Änderung der
-Engine- oder LegalAction-Regeln.
+P1 bis P7 abgeschlossen. Der kombinierte Stand ist lokal nach `main`
+integriert, der separate Worktree ist entfernt und der gemergte Arbeitsbranch
+bleibt gemäß defensivem Main-Abgleich als lokale Referenz bestehen. Engine-
+und LegalAction-Regeln blieben unverändert.
 
 ## Quelle und Zielprüfung
 
@@ -191,8 +192,9 @@ betroffene Positionshistorie.
 
 - Aktuelles `main` defensiv integrieren, Pflichtchecks wiederholen und lokal
   nach `main` mergen.
-- Sauberen Worktree entfernen, Entfernung doppelt verifizieren und den
-  gemergten Arbeitsbranch löschen.
+- Sauberen Worktree entfernen und die Entfernung doppelt verifizieren. Den
+  gemergten Arbeitsbranch gemäß defensivem Main-Abgleich nicht automatisch
+  löschen.
 
 ## Worktree-, Git- und Verifikationsregeln
 
@@ -211,7 +213,7 @@ betroffene Positionshistorie.
 `P7 im festgelegten Worktree ab. Sichere unveränderte rote Evidence vor dem`
 `Fix, verwende nur side-sichere generische Kriterien, committe jedes Paket und`
 `merge erst nach vollständiger Verifikation lokal nach main. Entferne danach`
-`den sauberen Worktree und den gemergten Branch.`
+`den sauberen Worktree; behalte den gemergten Branch als lokale Referenz.`
 
 ## Abschlusskriterien
 
@@ -223,4 +225,5 @@ betroffene Positionshistorie.
 - 424A-F04 und alle fachlich angrenzenden Kontrollen sind grün.
 - Broker bleibt ohne akutes Informationsfenster eine zulässige
   Hintergrundaktion.
-- `main` enthält die verifizierte Änderung; Worktree und Branch sind entfernt.
+- `main` enthält die verifizierte Änderung; der Worktree ist entfernt und der
+  gemergte Branch bleibt als lokale Referenz erhalten.
