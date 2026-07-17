@@ -1,6 +1,6 @@
 # KI-Run-Revalidierung für Match 20EB (Follow-up, 2026-07-17)
 
-Status: P1 abgeschlossen, P2 aktiv
+Status: P2 abgeschlossen, P3 aktiv
 
 ## Quelle und Zielprüfung
 
@@ -49,9 +49,9 @@ und anschließend Worktree sowie Branch verifiziert entfernen.
 
 ## Annahmen und Nicht-Ziele
 
-- Die Typableitung verwendet ausschließlich Runner-PlayerView, stabile
-  side-safe verdeckte Karten-IDs, öffentliche Events und öffentliche
-  Installations-/Score-Metadaten.
+- Die Typableitung verwendet ausschließlich Runner-PlayerView, aktuelle
+  Root-Anzahl, öffentliche Events und öffentliche Installations-/Score-
+  Metadaten. Sie benötigt weder Karteninstanz noch Kartentitel.
 - Ein verdeckter Titel bleibt verdeckt. Gespeichert wird nur eine öffentlich
   beweisbare Typ-Kandidatenmenge wie `upgrade`, nicht die spätere Kartenidentität.
 - Ein normaler unbekannter Remote, eine nach dem Score neu installierte Karte
@@ -126,9 +126,9 @@ und anschließend Worktree sowie Branch verifiziert entfernen.
 
 ### P2 – Öffentliche Root-Typableitung und Matchpoint-Contest
 
-- Ziel: stabile verdeckte Root-Identitäten und öffentliche
-  Austausch-/Score-Ereignisse in eine konservative Typ-Kandidatenmenge
-  überführen und im RunTarget-/Matchpoint-Consumer verwenden.
+- Ziel: aktuelle Root-Anzahl und öffentliche Austausch-/Score-Ereignisse in
+  eine konservative Typ-Kandidatenmenge überführen und im
+  RunTarget-/Matchpoint-Consumer verwenden.
 - Done-Gate: D92 und alle Gegenproben unverändert grün; keine Hidden-Info-
   oder allgemeine Contest-Regression.
 - Commit: `fix(ai): preserve public remote root type deductions`

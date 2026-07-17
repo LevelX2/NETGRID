@@ -55,6 +55,30 @@ Damit ist D92 der früheste kausale Fehler der Sequenz. Der Matchpoint-Override
 prüft aktuell nur, ob eine Rootkarte `known === false` ist, nicht ob ihre
 öffentlich mögliche Typmenge noch eine Agenda enthält.
 
+## P2 – behobene Informationslücke und Entscheidungsgrenze
+
+Die Engine veröffentlichte die nötigen Fakten bereits korrekt. Die positive
+Allowlist des KI-Eingabe-DTO entfernte jedoch `rootReplacement`,
+`replacedRootCardType` und den `scoredFromServerId` innerhalb der öffentlichen
+Score-Ziele. Deshalb konnte der Belief-State die für einen menschlichen Spieler
+sichtbare Kausalkette nicht rekonstruieren.
+
+P2 lässt genau diese öffentlichen Strukturfelder durch die DTO-Grenze und
+leitet daraus konservativ `candidateTypes: ["upgrade"]` ab. Die Ableitung wird
+nach jeder späteren Root-Mutation verworfen, benötigt keine Karteninstanz und
+enthüllt keinen Titel. Der Matchpoint-Override akzeptiert einen Remote nur noch
+als terminales Agenda-Ziel, wenn die öffentlich mögliche Typmenge weiterhin
+eine Agenda enthält.
+
+Verifikation nach P2:
+
+- historischer D92-Checkpoint: grün, R&D statt Remote 1;
+- Gegenprobe mit neuer Root-Installation nach dem Score: grün, Remote 1 bleibt
+  contestbar;
+- DTO-Grenztest: öffentliche Strukturwerte bleiben erhalten,
+  Karteninstanz-IDs werden weiterhin entfernt;
+- D113 bleibt erwartungsgemäß als separater `behavior_regression` rot.
+
 ## D113 – fehlende Revalidierung nach Upgrade-Rez
 
 Der Runner bezahlte beziehungsweise band im Run nominal 30 Credits für Pump,

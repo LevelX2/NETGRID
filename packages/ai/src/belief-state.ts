@@ -9,7 +9,12 @@ import {
 import { RUNTIME_CARDS } from "./ai-hints";
 import { rolesMatch } from "./runtime/role-match";
 
-export type BeliefKnowledgeKind = "public_fact" | "own_private_fact" | "revealed_opponent_fact" | "hypothesis" | "unknown";
+export type BeliefKnowledgeKind =
+  | "public_fact"
+  | "own_private_fact"
+  | "revealed_opponent_fact"
+  | "hypothesis"
+  | "unknown";
 
 export type BeliefEventFamily =
   | "install"
@@ -138,6 +143,15 @@ export type HiddenRemoteCandidateMemory = {
   basis: string[];
 };
 
+export type RemoteRootTypeDeduction = {
+  serverId: string;
+  unknownRootCount: number;
+  candidateTypes: Array<"agenda" | "asset" | "upgrade">;
+  confidence: 1;
+  sourceEventIds: string[];
+  basis: string[];
+};
+
 export type RunnerOpponentModel = {
   corpPlanEstimate: {
     scoring: number;
@@ -162,6 +176,7 @@ export type RunnerOpponentModel = {
   knownPositionMemory: KnownPositionMemory[];
   hqHandMemory: KnownHqHandMemory;
   hiddenRemoteCandidateMemory: HiddenRemoteCandidateMemory[];
+  remoteRootTypeDeductions?: RemoteRootTypeDeduction[];
 };
 
 export type CorpOpponentModel = {
@@ -198,7 +213,7 @@ export type BeliefState = {
   knownPositionMemory?: KnownPositionMemory[];
 };
 
-const BELIEF_VERSION_PREFIX = "belief-v1.4.3";
+const BELIEF_VERSION_PREFIX = "belief-v1.4.4";
 const RD_SWAP_OPERATION_DEFINITION_ID = "v098_hq_rd_swap_operation";
 const HQ_ALL_KNOWN_CONTRADICTION_WARNING =
   "belief_warning:hq_all_known_contradiction";
@@ -220,36 +235,67 @@ export function reconstructBeliefState(input: AiDecisionInput): BeliefState {
   const history = beliefHistory(input);
   const classifications = history.map(classifyBeliefEvent);
   const invalidationLog = deriveInvalidationLog(classifications);
+  const remoteRootTypeDeductions =
+    input.side === "runner"
+      ? deriveRemoteRootTypeDeductions(input, history)
+      : [];
   const entries = dedupeEntries(
     [
       ...ownPrivateEntries(input),
       ...publicBoardEntries(input),
       ...revealedOpponentEntries(input, classifications),
       ...unknownEntries(input),
-      ...hypothesisEntries(input, classifications)
+      ...hypothesisEntries(input, classifications, remoteRootTypeDeductions),
+      ...remoteRootTypeDeductionEntries(input.side, remoteRootTypeDeductions),
     ].map((entry) => ({
       ...entry,
-      confidence: clamp01(entry.confidence)
-    }))
+      confidence: clamp01(entry.confidence),
+    })),
   );
 
   const assumptions = buildAssumptions(input.side, entries, classifications);
-  const rndTopFreshness = input.side === "runner" ? deriveRndTopFreshness(history, classifications) : undefined;
-  const knownPositionMemory = input.side === "runner" ? deriveKnownPositionMemory(input.playerView, history, classifications) : [];
-  const hqHandMemory = input.side === "runner" ? deriveKnownHqHandMemory(input, history, classifications) : undefined;
+  const rndTopFreshness =
+    input.side === "runner"
+      ? deriveRndTopFreshness(history, classifications)
+      : undefined;
+  const knownPositionMemory =
+    input.side === "runner"
+      ? deriveKnownPositionMemory(input.playerView, history, classifications)
+      : [];
+  const hqHandMemory =
+    input.side === "runner"
+      ? deriveKnownHqHandMemory(input, history, classifications)
+      : undefined;
   const uncertainty = buildBeliefUncertaintyWithMemoryWarnings(
     buildUncertainty(entries, input.side),
     hqHandMemory,
   );
-  const hiddenRemoteCandidateMemory = input.side === "runner" ? deriveHiddenRemoteCandidateMemory(input, history, classifications) : [];
+  const hiddenRemoteCandidateMemory =
+    input.side === "runner"
+      ? deriveHiddenRemoteCandidateMemory(input, history, classifications)
+      : [];
   const runnerOpponentModel =
-    input.side === "runner" ? deriveRunnerOpponentModel(input, entries, classifications, rndTopFreshness, knownPositionMemory, hqHandMemory, hiddenRemoteCandidateMemory) : undefined;
-  const corpOpponentModel = input.side === "corp" ? deriveCorpOpponentModel(input, classifications) : undefined;
+    input.side === "runner"
+      ? deriveRunnerOpponentModel(
+          input,
+          entries,
+          classifications,
+          rndTopFreshness,
+          knownPositionMemory,
+          hqHandMemory,
+          hiddenRemoteCandidateMemory,
+          remoteRootTypeDeductions,
+        )
+      : undefined;
+  const corpOpponentModel =
+    input.side === "corp"
+      ? deriveCorpOpponentModel(input, classifications)
+      : undefined;
   const versionSeed = [
     input.side,
     String(input.playerView.stateVersion),
     history.map((event) => event.eventId).join("|"),
-    history.map((event) => String(event.type)).join("|")
+    history.map((event) => String(event.type)).join("|"),
   ].join("::");
 
   return {
@@ -263,23 +309,37 @@ export function reconstructBeliefState(input: AiDecisionInput): BeliefState {
     ...(runnerOpponentModel ? { runnerOpponentModel } : {}),
     ...(corpOpponentModel ? { corpOpponentModel } : {}),
     ...(rndTopFreshness ? { rndTopFreshness } : {}),
-    ...(knownPositionMemory.length > 0 ? { knownPositionMemory } : {})
+    ...(knownPositionMemory.length > 0 ? { knownPositionMemory } : {}),
   };
 }
 
-export function beliefStateInvariantSignature(beliefState: BeliefState): string {
+export function beliefStateInvariantSignature(
+  beliefState: BeliefState,
+): string {
   const entrySignature = beliefState.entries
     .slice()
     .sort((left, right) => left.key.localeCompare(right.key))
-    .map((entry) => `${entry.key}:${entry.kind}:${entry.subject}:${round(entry.confidence)}`)
+    .map(
+      (entry) =>
+        `${entry.key}:${entry.kind}:${entry.subject}:${round(entry.confidence)}`,
+    )
     .join("|");
   const uncertaintySignature = beliefState.uncertainty.slice().sort().join("|");
-  return fnv1a([beliefState.side, entrySignature, uncertaintySignature].join("::"));
+  return fnv1a(
+    [beliefState.side, entrySignature, uncertaintySignature].join("::"),
+  );
 }
 
-export function beliefDebugSummary(beliefState: BeliefState): Record<string, unknown> {
+export function beliefDebugSummary(
+  beliefState: BeliefState,
+): Record<string, unknown> {
   const facts = beliefState.entries
-    .filter((entry) => entry.kind === "public_fact" || entry.kind === "revealed_opponent_fact" || entry.kind === "own_private_fact")
+    .filter(
+      (entry) =>
+        entry.kind === "public_fact" ||
+        entry.kind === "revealed_opponent_fact" ||
+        entry.kind === "own_private_fact",
+    )
     .slice(0, 6)
     .map((entry) => `${entry.kind}:${entry.subject}`);
   const hypotheses = beliefState.entries
@@ -293,10 +353,18 @@ export function beliefDebugSummary(beliefState: BeliefState): Record<string, unk
     uncertainty: beliefState.uncertainty.slice(0, 6),
     uncertaintyConsumer: beliefUncertaintyConsumerFacts(beliefState),
     invalidations: beliefState.invalidationLog.slice(0, 6),
-    ...(beliefState.rndTopFreshness ? { rndTopFreshness: beliefState.rndTopFreshness } : {}),
-    ...(beliefState.knownPositionMemory ? { knownPositionMemory: beliefState.knownPositionMemory } : {}),
-    ...(beliefState.runnerOpponentModel ? { runnerOpponentModel: beliefState.runnerOpponentModel } : {}),
-    ...(beliefState.corpOpponentModel ? { corpOpponentModel: beliefState.corpOpponentModel } : {})
+    ...(beliefState.rndTopFreshness
+      ? { rndTopFreshness: beliefState.rndTopFreshness }
+      : {}),
+    ...(beliefState.knownPositionMemory
+      ? { knownPositionMemory: beliefState.knownPositionMemory }
+      : {}),
+    ...(beliefState.runnerOpponentModel
+      ? { runnerOpponentModel: beliefState.runnerOpponentModel }
+      : {}),
+    ...(beliefState.corpOpponentModel
+      ? { corpOpponentModel: beliefState.corpOpponentModel }
+      : {}),
   };
 }
 
@@ -320,26 +388,36 @@ export function normalizedBeliefUncertaintyValue(rawValue: number): number {
 }
 
 function activeBeliefUncertaintyCount(uncertainty: readonly string[]): number {
-  return uncertainty.filter((entry) => entry !== "known_projection_only").length;
+  return uncertainty.filter((entry) => entry !== "known_projection_only")
+    .length;
 }
 
 function beliefHistory(input: AiDecisionInput): PublicGameEvent[] {
   const eventById = new Map<string, PublicGameEvent>();
   for (const event of [...input.playerView.publicEvents, ...input.eventTail]) {
     const previous = eventById.get(event.eventId);
-    if (!previous || previous.stateVersionAfter <= event.stateVersionAfter) eventById.set(event.eventId, event);
+    if (!previous || previous.stateVersionAfter <= event.stateVersionAfter)
+      eventById.set(event.eventId, event);
   }
-  return [...eventById.values()].sort((left, right) => left.stateVersionBefore - right.stateVersionBefore || left.eventId.localeCompare(right.eventId));
+  return [...eventById.values()].sort(
+    (left, right) =>
+      left.stateVersionBefore - right.stateVersionBefore ||
+      left.eventId.localeCompare(right.eventId),
+  );
 }
 
-function classifyBeliefEvent(event: PublicGameEvent): BeliefEventClassification {
+function classifyBeliefEvent(
+  event: PublicGameEvent,
+): BeliefEventClassification {
   const actionType = stringValue(event.publicPayload.actionType) ?? event.type;
   const serverId = publicServerId(event, actionType);
   const runTargetServerId = publicRunTargetServerId(event, actionType);
   const actor = parseActor(event.publicPayload.actor);
   const family = eventFamily(actionType, event);
   const installPlacement = installPlacementFromEvent(event);
-  const accessedCardPositionKey = stringValue(event.publicPayload.accessedCardPositionKey);
+  const accessedCardPositionKey = stringValue(
+    event.publicPayload.accessedCardPositionKey,
+  );
   const accessedArea = stringValue(event.publicPayload.accessedArea);
   return {
     eventId: event.eventId,
@@ -353,7 +431,17 @@ function classifyBeliefEvent(event: PublicGameEvent): BeliefEventClassification 
     ...(accessedArea ? { accessedArea } : {}),
     ...(installPlacement ? { installPlacement } : {}),
     sourceEventIds: [event.eventId],
-    ...(invalidationReasonForEvent(family, actionType, actor, serverId, event) ? { invalidationReason: invalidationReasonForEvent(family, actionType, actor, serverId, event)! } : {})
+    ...(invalidationReasonForEvent(family, actionType, actor, serverId, event)
+      ? {
+          invalidationReason: invalidationReasonForEvent(
+            family,
+            actionType,
+            actor,
+            serverId,
+            event,
+          )!,
+        }
+      : {}),
   };
 }
 
@@ -365,7 +453,7 @@ function ownPrivateEntries(input: AiDecisionInput): BeliefEntry[] {
     subject: `own_private_card:${card.definitionId ?? "unknown"}`,
     confidence: 1,
     sourceEventIds: [],
-    invalidatedBy: []
+    invalidatedBy: [],
   }));
 }
 
@@ -379,7 +467,7 @@ function publicBoardEntries(input: AiDecisionInput): BeliefEntry[] {
       subject: `server_shape:${server.id}:ice:${server.ice.length}:root:${server.root.length}`,
       confidence: 1,
       sourceEventIds: [],
-      invalidatedBy: []
+      invalidatedBy: [],
     });
     for (const card of [...server.ice, ...server.root]) {
       if (!card.known) continue;
@@ -390,14 +478,17 @@ function publicBoardEntries(input: AiDecisionInput): BeliefEntry[] {
         subject: `public_card:${server.id}:${card.definitionId ?? "unknown"}`,
         confidence: 1,
         sourceEventIds: [],
-        invalidatedBy: []
+        invalidatedBy: [],
       });
     }
   }
   return entries;
 }
 
-function revealedOpponentEntries(input: AiDecisionInput, classifications: BeliefEventClassification[]): BeliefEntry[] {
+function revealedOpponentEntries(
+  input: AiDecisionInput,
+  classifications: BeliefEventClassification[],
+): BeliefEntry[] {
   const entries: BeliefEntry[] = [];
   const knownOpponentCards = opponentKnownCardsFromView(input);
   for (const card of knownOpponentCards) {
@@ -408,17 +499,31 @@ function revealedOpponentEntries(input: AiDecisionInput, classifications: Belief
       subject: `revealed_opponent_card:${card.definitionId ?? "unknown"}`,
       confidence: 1,
       sourceEventIds: [],
-      invalidatedBy: []
+      invalidatedBy: [],
     });
   }
 
   for (const classification of classifications) {
-    const event = input.playerView.publicEvents.find((candidate) => candidate.eventId === classification.eventId) ?? input.eventTail.find((candidate) => candidate.eventId === classification.eventId);
+    const event =
+      input.playerView.publicEvents.find(
+        (candidate) => candidate.eventId === classification.eventId,
+      ) ??
+      input.eventTail.find(
+        (candidate) => candidate.eventId === classification.eventId,
+      );
     const definitionId = event
       ? publicKnownCardDefinitionId(event, classification)
       : undefined;
     if (!definitionId) continue;
-    const revealedOpponentFamilySet = new Set(["access", "reveal", "expose", "rez", "score", "steal", "trash"]);
+    const revealedOpponentFamilySet = new Set([
+      "access",
+      "reveal",
+      "expose",
+      "rez",
+      "score",
+      "steal",
+      "trash",
+    ]);
     if (!revealedOpponentFamilySet.has(classification.family)) continue;
     if (beliefDefinitionSide(definitionId) === input.side) continue;
     entries.push({
@@ -428,7 +533,7 @@ function revealedOpponentEntries(input: AiDecisionInput, classifications: Belief
       subject: `revealed_opponent_card:${definitionId}`,
       confidence: 1,
       sourceEventIds: classification.sourceEventIds,
-      invalidatedBy: []
+      invalidatedBy: [],
     });
   }
   return entries;
@@ -444,12 +549,15 @@ function unknownEntries(input: AiDecisionInput): BeliefEntry[] {
       subject: `opponent_hidden_hand_cards:${input.playerView.opponent.handCount}`,
       confidence: 0,
       sourceEventIds: [],
-      invalidatedBy: []
+      invalidatedBy: [],
     });
   }
   const unknownRemoteRoots = input.playerView.servers
     .filter((server) => server.id.startsWith("remote_"))
-    .reduce((sum, server) => sum + server.root.filter((card) => !card.known).length, 0);
+    .reduce(
+      (sum, server) => sum + server.root.filter((card) => !card.known).length,
+      0,
+    );
   if (unknownRemoteRoots > 0) {
     entries.push({
       key: `unknown:remote_roots:${unknownRemoteRoots}`,
@@ -458,19 +566,32 @@ function unknownEntries(input: AiDecisionInput): BeliefEntry[] {
       subject: `unknown_remote_root_cards:${unknownRemoteRoots}`,
       confidence: 0,
       sourceEventIds: [],
-      invalidatedBy: []
+      invalidatedBy: [],
     });
   }
   return entries;
 }
 
-function hypothesisEntries(input: AiDecisionInput, classifications: BeliefEventClassification[]): BeliefEntry[] {
+function hypothesisEntries(
+  input: AiDecisionInput,
+  classifications: BeliefEventClassification[],
+  remoteRootTypeDeductions: RemoteRootTypeDeduction[] = [],
+): BeliefEntry[] {
   const invalidationLog = deriveInvalidationLog(classifications);
   const entries: BeliefEntry[] = [];
 
-  for (const server of input.playerView.servers.filter((candidate) => candidate.id.startsWith("remote_"))) {
+  for (const server of input.playerView.servers.filter((candidate) =>
+    candidate.id.startsWith("remote_"),
+  )) {
     const unknownRoots = server.root.filter((card) => !card.known);
-    for (let index = 0; index < unknownRoots.length; index += 1) {
+    const typeDeduction = remoteRootTypeDeductions.find(
+      (deduction) => deduction.serverId === server.id,
+    );
+    const unconstrainedUnknownRootCount = Math.max(
+      0,
+      unknownRoots.length - (typeDeduction?.unknownRootCount ?? 0),
+    );
+    for (let index = 0; index < unconstrainedUnknownRootCount; index += 1) {
       entries.push({
         key: `hypothesis:remote_root:${server.id}:${index + 1}`,
         side: input.side,
@@ -479,11 +600,15 @@ function hypothesisEntries(input: AiDecisionInput, classifications: BeliefEventC
         confidence: 0.42,
         sourceEventIds: [],
         invalidatedBy: invalidationLog
-          .filter((entry) => invalidationEntryReferencesServer(entry, server.id))
-          .slice(0, 3)
+          .filter((entry) =>
+            invalidationEntryReferencesServer(entry, server.id),
+          )
+          .slice(0, 3),
       });
     }
-    const unknownUnrezzedIce = server.ice.filter((card) => card.rezzed !== true && !card.known).length;
+    const unknownUnrezzedIce = server.ice.filter(
+      (card) => card.rezzed !== true && !card.known,
+    ).length;
     if (unknownUnrezzedIce > 0) {
       entries.push({
         key: `hypothesis:unrezzed_ice:${server.id}`,
@@ -493,8 +618,10 @@ function hypothesisEntries(input: AiDecisionInput, classifications: BeliefEventC
         confidence: clamp01(0.35 + unknownUnrezzedIce * 0.17),
         sourceEventIds: [],
         invalidatedBy: invalidationLog
-          .filter((entry) => invalidationEntryReferencesServer(entry, server.id))
-          .slice(0, 3)
+          .filter((entry) =>
+            invalidationEntryReferencesServer(entry, server.id),
+          )
+          .slice(0, 3),
       });
     }
   }
@@ -502,7 +629,145 @@ function hypothesisEntries(input: AiDecisionInput, classifications: BeliefEventC
   return entries;
 }
 
-function deriveKnownPositionMemory(playerView: PlayerView, history: PublicGameEvent[], classifications: BeliefEventClassification[]): KnownPositionMemory[] {
+function remoteRootTypeDeductionEntries(
+  side: Side,
+  deductions: RemoteRootTypeDeduction[],
+): BeliefEntry[] {
+  return deductions.map((deduction) => ({
+    key: `remote-root-type:${deduction.serverId}:upgrade-only`,
+    side,
+    kind: "public_fact",
+    subject: `remote_root_type_deduction:${deduction.serverId}:upgrade_only:${deduction.unknownRootCount}`,
+    confidence: deduction.confidence,
+    sourceEventIds: deduction.sourceEventIds,
+    invalidatedBy: [],
+  }));
+}
+
+function deriveRemoteRootTypeDeductions(
+  input: AiDecisionInput,
+  history: PublicGameEvent[],
+): RemoteRootTypeDeduction[] {
+  const deductions: RemoteRootTypeDeduction[] = [];
+  for (const server of input.playerView.servers.filter((candidate) =>
+    candidate.id.startsWith("remote_"),
+  )) {
+    const unknownRootCount = server.root.filter((card) => !card.known).length;
+    if (
+      unknownRootCount === 0 ||
+      server.root.some(
+        (card) =>
+          card.known && card.type !== undefined && card.type !== "upgrade",
+      )
+    ) {
+      continue;
+    }
+
+    const serverEvents = history
+      .map((event, index) => ({
+        event,
+        index,
+        actionType: stringValue(event.publicPayload.actionType) ?? event.type,
+      }))
+      .filter(
+        (entry) =>
+          remoteRootEventServerId(entry.event, entry.actionType) === server.id,
+      );
+    const scoredAgenda = serverEvents
+      .filter((entry) => entry.actionType === "score_agenda")
+      .at(-1);
+    if (!scoredAgenda) continue;
+
+    const replacementInstall = serverEvents
+      .filter(
+        (entry) =>
+          entry.index < scoredAgenda.index &&
+          entry.actionType === "install_card" &&
+          installPlacementFromEvent(entry.event) === "root" &&
+          stringValue(entry.event.publicPayload.rootReplacement) ===
+            "asset_to_agenda" &&
+          stringValue(entry.event.publicPayload.replacedRootCardType) ===
+            "asset",
+      )
+      .at(-1);
+    if (!replacementInstall) continue;
+
+    const interveningMutation = serverEvents.some(
+      (entry) =>
+        entry.index > replacementInstall.index &&
+        entry.index < scoredAgenda.index &&
+        remoteRootMutationInvalidatesDeduction(entry.event, entry.actionType),
+    );
+    const laterMutation = serverEvents.some(
+      (entry) =>
+        entry.index > scoredAgenda.index &&
+        remoteRootMutationInvalidatesDeduction(entry.event, entry.actionType),
+    );
+    if (interveningMutation || laterMutation) continue;
+
+    deductions.push({
+      serverId: server.id,
+      unknownRootCount,
+      candidateTypes: ["upgrade"],
+      confidence: 1,
+      sourceEventIds: [
+        replacementInstall.event.eventId,
+        scoredAgenda.event.eventId,
+      ],
+      basis: [
+        "public_root_replacement:asset_to_agenda",
+        `public_scored_agenda:${scoredAgenda.event.eventId}`,
+        "no_later_remote_root_mutation:true",
+        `current_unknown_root_count:${unknownRootCount}`,
+      ],
+    });
+  }
+  return deductions;
+}
+
+function remoteRootMutationInvalidatesDeduction(
+  event: PublicGameEvent,
+  actionType: string,
+): boolean {
+  if (actionType === "install_card") {
+    return installPlacementFromEvent(event) === "root";
+  }
+  const family = eventFamily(actionType, event);
+  return (
+    family === "score" ||
+    family === "steal" ||
+    family === "trash" ||
+    family === "move"
+  );
+}
+
+function remoteRootEventServerId(
+  event: PublicGameEvent,
+  actionType: string,
+): string | undefined {
+  const targets = objectValue(event.publicPayload.targets);
+  const structured =
+    stringValue(event.publicPayload.serverId) ??
+    stringValue(event.publicPayload.scoredFromServerId) ??
+    stringValue(targets?.serverId) ??
+    stringValue(targets?.scoredFromServerId);
+  if (structured) return canonicalStructuredServerId(structured);
+  if (
+    actionType === "install_card" ||
+    actionType === "score_agenda" ||
+    actionType === "steal_agenda" ||
+    actionType === "trash_accessed_card"
+  ) {
+    return publicServerLabelId(event);
+  }
+  return publicServerId(event, actionType);
+}
+
+function deriveKnownPositionMemory(
+  playerView: PlayerView,
+  history: PublicGameEvent[],
+  classifications: BeliefEventClassification[],
+): KnownPositionMemory[] {
   const eventsById = new Map(history.map((event) => [event.eventId, event]));
   const memory = new Map<string, KnownPositionMemory>();
 
@@ -523,7 +788,12 @@ function deriveKnownPositionMemory(playerView: PlayerView, history: PublicGameEv
       ? knownDefinitionsFromEvent(event, classification, definitionId)
       : [];
     if (knownDefinitions.length === 0) continue;
-    const knownPositionFamilySet = new Set(["access", "reveal", "expose", "rez"]);
+    const knownPositionFamilySet = new Set([
+      "access",
+      "reveal",
+      "expose",
+      "rez",
+    ]);
     if (!knownPositionFamilySet.has(classification.family)) continue;
 
     const zone =
@@ -542,14 +812,18 @@ function deriveKnownPositionMemory(playerView: PlayerView, history: PublicGameEv
         certainty: "observed",
         sourceEventId: classification.eventId,
         sourceKind: knownPositionSourceKind(classification.family),
-        invalidatedBy: []
+        invalidatedBy: [],
       });
     }
   }
 
   return normalizeKnownPositionMemory([...memory.values()])
     .filter((entry) => !positionCurrentlyKnownInView(playerView, entry))
-    .sort((left, right) => `${left.zone}:${left.positionKey}`.localeCompare(`${right.zone}:${right.positionKey}`));
+    .sort((left, right) =>
+      `${left.zone}:${left.positionKey}`.localeCompare(
+        `${right.zone}:${right.positionKey}`,
+      ),
+    );
 }
 
 function positionCurrentlyKnownInView(
@@ -572,13 +846,14 @@ function positionCurrentlyKnownInView(
   return card?.known === true && card.definitionId === entry.definitionId;
 }
 
-function normalizeKnownPositionMemory(entries: KnownPositionMemory[]): KnownPositionMemory[] {
+function normalizeKnownPositionMemory(
+  entries: KnownPositionMemory[],
+): KnownPositionMemory[] {
   const preciseRemoteDefinitions = new Set(
     entries
       .filter(
         (entry) =>
-          entry.zone.startsWith("remote_") &&
-          entry.positionKey !== "installed",
+          entry.zone.startsWith("remote_") && entry.positionKey !== "installed",
       )
       .map((entry) => `${entry.zone}:${entry.definitionId}`),
   );
@@ -632,7 +907,11 @@ function advanceRndKnownPositionMemory(
   for (const [key, entry] of shifted) memory.set(key, entry);
 }
 
-function deriveKnownHqHandMemory(input: AiDecisionInput, history: PublicGameEvent[], classifications: BeliefEventClassification[]): KnownHqHandMemory {
+function deriveKnownHqHandMemory(
+  input: AiDecisionInput,
+  history: PublicGameEvent[],
+  classifications: BeliefEventClassification[],
+): KnownHqHandMemory {
   const eventsById = new Map(history.map((event) => [event.eventId, event]));
   const knownCards: KnownHqHandEntry[] = [];
   const candidateGroups: HqHandCandidateGroupMemory[] = [];
@@ -644,7 +923,9 @@ function deriveKnownHqHandMemory(input: AiDecisionInput, history: PublicGameEven
     const definitionId = event
       ? publicKnownCardDefinitionId(event, classification)
       : undefined;
-    const fullHqRevealDefinitions = event ? hqPrivateLookDefinitions(event) : [];
+    const fullHqRevealDefinitions = event
+      ? hqPrivateLookDefinitions(event)
+      : [];
     const rndTopDefinition = event
       ? rndTopDefinitionFromEvent(event, classification, definitionId)
       : undefined;
@@ -656,7 +937,7 @@ function deriveKnownHqHandMemory(input: AiDecisionInput, history: PublicGameEven
         knownCards.push({
           key: `${classification.eventId}:private_look:${index}`,
           definitionId: knownDefinitionId,
-          eventId: classification.eventId
+          eventId: classification.eventId,
         });
       });
       continue;
@@ -664,7 +945,7 @@ function deriveKnownHqHandMemory(input: AiDecisionInput, history: PublicGameEven
     if (rndTopDefinition) {
       knownRndTop = {
         definitionId: rndTopDefinition,
-        eventId: classification.eventId
+        eventId: classification.eventId,
       };
     }
     if (isRunnerHqAccess(classification) && definitionId) {
@@ -694,20 +975,25 @@ function deriveKnownHqHandMemory(input: AiDecisionInput, history: PublicGameEven
       knownCards.push({
         key: `${classification.eventId}:rnd_top_draw:${knownCards.length}`,
         definitionId: knownRndTop.definitionId,
-        eventId: classification.eventId
+        eventId: classification.eventId,
       });
       invalidationReasons.push(
-        `known_rnd_top_moved_to_hq:${knownRndTop.eventId}->${classification.eventId}`
+        `known_rnd_top_moved_to_hq:${knownRndTop.eventId}->${classification.eventId}`,
       );
       knownRndTop = undefined;
       continue;
     }
     if (adjustment.kind === "remove_known" && definitionId) {
-      const removeIndex = knownCards.findIndex((card) => card.definitionId === definitionId);
+      const removeIndex = knownCards.findIndex(
+        (card) => card.definitionId === definitionId,
+      );
       if (removeIndex >= 0) knownCards.splice(removeIndex, 1);
       continue;
     }
-    if (adjustment.kind === "unknown_departure" && classification.actionType === "install_card") {
+    if (
+      adjustment.kind === "unknown_departure" &&
+      classification.actionType === "install_card"
+    ) {
       const departure = hqHiddenInstallDepartureMemory(
         classification,
         knownCards,
@@ -715,10 +1001,14 @@ function deriveKnownHqHandMemory(input: AiDecisionInput, history: PublicGameEven
       );
       knownCards.length = 0;
       knownCards.push(...departure.safeEntries);
-      if (departure.candidateGroup) candidateGroups.push(departure.candidateGroup);
+      if (departure.candidateGroup)
+        candidateGroups.push(departure.candidateGroup);
       continue;
     }
-    if (adjustment.kind === "unknown_departure" || adjustment.kind === "hidden_zone_reordered") {
+    if (
+      adjustment.kind === "unknown_departure" ||
+      adjustment.kind === "hidden_zone_reordered"
+    ) {
       knownCards.length = 0;
       candidateGroups.length = 0;
     }
@@ -751,7 +1041,7 @@ function deriveKnownHqHandMemory(input: AiDecisionInput, history: PublicGameEven
       ledger.candidateGroups.length === 0,
     sourceEventIds: ledger.sourceEventIds,
     invalidationReasons,
-    ledger
+    ledger,
   };
 }
 
@@ -759,7 +1049,7 @@ function deriveHqHandLedger(
   knownEntries: KnownHqHandEntry[],
   handCount: number,
   invalidationReasons: string[],
-  candidateGroups: HqHandCandidateGroupMemory[] = []
+  candidateGroups: HqHandCandidateGroupMemory[] = [],
 ): HqHandLedgerMemory {
   const sourceEventIdsByDefinition = new Map<string, string[]>();
   for (const entry of knownEntries) {
@@ -768,22 +1058,30 @@ function deriveHqHandLedger(
       entry.eventId,
     ]);
   }
-  const safeDefinitions = countKnownDefinitionEntries(knownEntries.map((entry) => entry.definitionId)).map((definition) => ({
+  const safeDefinitions = countKnownDefinitionEntries(
+    knownEntries.map((entry) => entry.definitionId),
+  ).map((definition) => ({
     ...definition,
-    sourceEventIds: sortedUnique(sourceEventIdsByDefinition.get(definition.definitionId) ?? []),
+    sourceEventIds: sortedUnique(
+      sourceEventIdsByDefinition.get(definition.definitionId) ?? [],
+    ),
   }));
   const activeCandidateGroups = hqCandidateGroupsWithinAvailableSlots(
     candidateGroups,
     Math.max(0, handCount - knownEntries.length),
   );
   const candidateRemainderCount = activeCandidateGroups.reduce(
-    (sum, group) => sum + Math.max(0, group.candidateCount - group.departureCount),
+    (sum, group) =>
+      sum + Math.max(0, group.candidateCount - group.departureCount),
     0,
   );
 
   return {
     safeDefinitions,
-    unknownRestCount: Math.max(0, handCount - knownEntries.length - candidateRemainderCount),
+    unknownRestCount: Math.max(
+      0,
+      handCount - knownEntries.length - candidateRemainderCount,
+    ),
     candidateGroups: activeCandidateGroups,
     sourceEventIds: sortedUnique([
       ...knownEntries.map((entry) => entry.eventId),
@@ -810,7 +1108,10 @@ function hqCandidateGroupsWithinAvailableSlots(
   let remainingSlots = availableSlots;
   const selected: HqHandCandidateGroupMemory[] = [];
   for (const group of candidateGroups.slice(-6).reverse()) {
-    const groupRemainder = Math.max(0, group.candidateCount - group.departureCount);
+    const groupRemainder = Math.max(
+      0,
+      group.candidateCount - group.departureCount,
+    );
     const ambiguousUnknownInstallCandidate =
       group.candidateCount > 0 && group.unknownCandidateCount > 0;
     if (groupRemainder <= 0 && !ambiguousUnknownInstallCandidate) continue;
@@ -906,7 +1207,9 @@ function hqHiddenInstallDepartureMemory(
         ...(event.serverId ? [`server:${event.serverId}`] : []),
         `known_candidates:${candidateCount}`,
         `unknown_candidates:${unknownCandidateCount}`,
-        ...(useAllKnownAsFallback ? ["candidate_filter_fallback:all_known"] : []),
+        ...(useAllKnownAsFallback
+          ? ["candidate_filter_fallback:all_known"]
+          : []),
       ],
     },
   };
@@ -954,7 +1257,9 @@ function reconcileHqCandidateGroups(
   );
 }
 
-function hqCandidateReconciliationEvent(event: BeliefEventClassification): boolean {
+function hqCandidateReconciliationEvent(
+  event: BeliefEventClassification,
+): boolean {
   if (
     event.family === "rez" ||
     event.family === "reveal" ||
@@ -1003,7 +1308,7 @@ function rememberCandidateDefinitionsAsSafeHqEntries(
 function deriveHiddenRemoteCandidateMemory(
   input: AiDecisionInput,
   history: PublicGameEvent[],
-  classifications: BeliefEventClassification[]
+  classifications: BeliefEventClassification[],
 ): HiddenRemoteCandidateMemory[] {
   const eventsById = new Map(history.map((event) => [event.eventId, event]));
   const knownCards: KnownHqHandEntry[] = [];
@@ -1015,7 +1320,9 @@ function deriveHiddenRemoteCandidateMemory(
     const definitionId = event
       ? publicKnownCardDefinitionId(event, classification)
       : undefined;
-    const fullHqRevealDefinitions = event ? hqPrivateLookDefinitions(event) : [];
+    const fullHqRevealDefinitions = event
+      ? hqPrivateLookDefinitions(event)
+      : [];
     const rndTopDefinition = event
       ? rndTopDefinitionFromEvent(event, classification, definitionId)
       : undefined;
@@ -1026,7 +1333,7 @@ function deriveHiddenRemoteCandidateMemory(
         knownCards.push({
           key: `${classification.eventId}:private_look:${index}`,
           definitionId: knownDefinitionId,
-          eventId: classification.eventId
+          eventId: classification.eventId,
         });
       });
       continue;
@@ -1034,7 +1341,7 @@ function deriveHiddenRemoteCandidateMemory(
     if (rndTopDefinition) {
       knownRndTop = {
         definitionId: rndTopDefinition,
-        eventId: classification.eventId
+        eventId: classification.eventId,
       };
     }
     if (isRunnerHqAccess(classification) && definitionId) {
@@ -1047,7 +1354,11 @@ function deriveHiddenRemoteCandidateMemory(
       );
       continue;
     }
-    reconcileHiddenRemoteCandidateMemories(classification, definitionId, memories);
+    reconcileHiddenRemoteCandidateMemories(
+      classification,
+      definitionId,
+      memories,
+    );
 
     const adjustment = hqHandMemoryAdjustment(classification, definitionId);
     if (!adjustment) continue;
@@ -1056,13 +1367,15 @@ function deriveHiddenRemoteCandidateMemory(
       knownCards.push({
         key: `${classification.eventId}:rnd_top_draw:${knownCards.length}`,
         definitionId: knownRndTop.definitionId,
-        eventId: classification.eventId
+        eventId: classification.eventId,
       });
       knownRndTop = undefined;
       continue;
     }
     if (adjustment.kind === "remove_known" && definitionId) {
-      const removeIndex = knownCards.findIndex((card) => card.definitionId === definitionId);
+      const removeIndex = knownCards.findIndex(
+        (card) => card.definitionId === definitionId,
+      );
       if (removeIndex >= 0) knownCards.splice(removeIndex, 1);
       continue;
     }
@@ -1083,18 +1396,31 @@ function deriveHiddenRemoteCandidateMemory(
       ) {
         const { candidateGroup } = departure;
         const candidateDefinitions = candidateGroup.candidateDefinitions;
-        const knownCandidateCount = candidateDefinitions.reduce((sum, candidate) => sum + candidate.count, 0);
-        const totalCandidateCount = knownCandidateCount + candidateGroup.unknownCandidateCount;
-        const agendaCandidateCount = candidateDefinitions.reduce((sum, candidate) => (
-          beliefDefinitionType(candidate.definitionId) === "agenda" ? sum + candidate.count : sum
-        ), 0);
-        const relevantTrashCandidateCount = candidateDefinitions.reduce((sum, candidate) => {
-          const type = beliefDefinitionType(candidate.definitionId);
-          const trashCost = beliefDefinitionTrashCost(candidate.definitionId);
-          return (type === "asset" || type === "upgrade") && trashCost !== undefined && input.playerView.own.credits >= trashCost + 1
-            ? sum + candidate.count
-            : sum;
-        }, 0);
+        const knownCandidateCount = candidateDefinitions.reduce(
+          (sum, candidate) => sum + candidate.count,
+          0,
+        );
+        const totalCandidateCount =
+          knownCandidateCount + candidateGroup.unknownCandidateCount;
+        const agendaCandidateCount = candidateDefinitions.reduce(
+          (sum, candidate) =>
+            beliefDefinitionType(candidate.definitionId) === "agenda"
+              ? sum + candidate.count
+              : sum,
+          0,
+        );
+        const relevantTrashCandidateCount = candidateDefinitions.reduce(
+          (sum, candidate) => {
+            const type = beliefDefinitionType(candidate.definitionId);
+            const trashCost = beliefDefinitionTrashCost(candidate.definitionId);
+            return (type === "asset" || type === "upgrade") &&
+              trashCost !== undefined &&
+              input.playerView.own.credits >= trashCost + 1
+              ? sum + candidate.count
+              : sum;
+          },
+          0,
+        );
         memories.push({
           serverId: classification.serverId,
           candidateCount: totalCandidateCount,
@@ -1102,7 +1428,9 @@ function deriveHiddenRemoteCandidateMemory(
           agendaCandidateCount,
           relevantTrashCandidateCount,
           candidateDefinitions,
-          exhaustive: candidateGroup.unknownCandidateCount === 0 && knownCandidateCount > 0,
+          exhaustive:
+            candidateGroup.unknownCandidateCount === 0 &&
+            knownCandidateCount > 0,
           sourceEventId: classification.eventId,
           ...(candidateGroup.installPlacement
             ? { installPlacement: candidateGroup.installPlacement }
@@ -1112,7 +1440,7 @@ function deriveHiddenRemoteCandidateMemory(
             `unique_candidates:${candidateDefinitions.length}`,
             `unknown_candidates:${candidateGroup.unknownCandidateCount}`,
             ...candidateGroup.basis,
-          ]
+          ],
         });
       }
       knownCards.length = 0;
@@ -1146,12 +1474,27 @@ function reconcileHiddenRemoteCandidateMemories(
   if (memoryIndex >= 0) memories.splice(memoryIndex, 1);
 }
 
-function positionInvalidatesKey(key: string, event: BeliefEventClassification): boolean {
-  if (event.family === "draw" && event.actor === "corp") return key.startsWith("rd:");
-  if (event.family === "shuffle" || event.family === "arrange" || event.family === "swap") return true;
-  if (event.family === "install" && event.serverId) return key.startsWith(`${event.serverId}:`);
+function positionInvalidatesKey(
+  key: string,
+  event: BeliefEventClassification,
+): boolean {
+  if (event.family === "draw" && event.actor === "corp")
+    return key.startsWith("rd:");
+  if (
+    event.family === "shuffle" ||
+    event.family === "arrange" ||
+    event.family === "swap"
+  )
+    return true;
+  if (event.family === "install" && event.serverId)
+    return key.startsWith(`${event.serverId}:`);
   if (rdTopRemovedByRunnerAccess(event) && key.startsWith("rd:")) return false;
-  if (event.family === "move" || event.family === "trash" || event.family === "steal" || event.family === "discard") {
+  if (
+    event.family === "move" ||
+    event.family === "trash" ||
+    event.family === "steal" ||
+    event.family === "discard"
+  ) {
     return event.serverId ? key.startsWith(`${event.serverId}:`) : true;
   }
   return false;
@@ -1212,7 +1555,9 @@ function rememberObservedHqAccessDefinitionWithConsistencyCheck(
   ) {
     knownCards.length = 0;
     candidateGroups.length = 0;
-    invalidationReasons?.push(`${HQ_ALL_KNOWN_CONTRADICTION_WARNING}:${eventId}`);
+    invalidationReasons?.push(
+      `${HQ_ALL_KNOWN_CONTRADICTION_WARNING}:${eventId}`,
+    );
   }
   rememberObservedHqAccessDefinition(knownCards, eventId, definitionId);
 }
@@ -1231,7 +1576,9 @@ function hqAccessContradictsCompleteHandMemory(
   );
 }
 
-function countKnownDefinitionEntries(definitionIds: string[]): KnownDefinitionCountMemory[] {
+function countKnownDefinitionEntries(
+  definitionIds: string[],
+): KnownDefinitionCountMemory[] {
   const counts = new Map<string, number>();
   for (const definitionId of definitionIds) {
     counts.set(definitionId, (counts.get(definitionId) ?? 0) + 1);
@@ -1257,7 +1604,9 @@ function hqPrivateLookDefinitions(event: PublicGameEvent): string[] {
       .filter((value) => value.length > 0);
   }
   if (Array.isArray(raw)) {
-    return raw.filter((value): value is string => typeof value === "string" && value.length > 0);
+    return raw.filter(
+      (value): value is string => typeof value === "string" && value.length > 0,
+    );
   }
   return [];
 }
@@ -1292,12 +1641,21 @@ function rndPrivateLookDefinitions(event: PublicGameEvent): string[] {
 function rndTopDefinitionFromEvent(
   event: PublicGameEvent,
   classification: BeliefEventClassification,
-  definitionId: string | undefined
+  definitionId: string | undefined,
 ): string | undefined {
   const privateLookTop = rndPrivateLookDefinitions(event)[0];
   if (privateLookTop) return privateLookTop;
-  if (classification.actor === "runner" && classification.actionType === "access_card" && classification.serverId === "rd") return definitionId;
-  if (classification.serverId === "rd" && (classification.family === "reveal" || classification.family === "expose")) return definitionId;
+  if (
+    classification.actor === "runner" &&
+    classification.actionType === "access_card" &&
+    classification.serverId === "rd"
+  )
+    return definitionId;
+  if (
+    classification.serverId === "rd" &&
+    (classification.family === "reveal" || classification.family === "expose")
+  )
+    return definitionId;
   return undefined;
 }
 
@@ -1335,7 +1693,9 @@ function publicCardOrSourceDefinitionId(
   );
 }
 
-function installPlacementFromEvent(event: PublicGameEvent): HqInstallPlacementMemory | undefined {
+function installPlacementFromEvent(
+  event: PublicGameEvent,
+): HqInstallPlacementMemory | undefined {
   const placement =
     stringValue(event.publicPayload.installPlacement) ??
     stringValue(event.publicPayload.placement);
@@ -1349,7 +1709,7 @@ function installPlacementFromEvent(event: PublicGameEvent): HqInstallPlacementMe
 function knownDefinitionsFromEvent(
   event: PublicGameEvent,
   classification: BeliefEventClassification,
-  definitionId: string | undefined
+  definitionId: string | undefined,
 ): Array<{ definitionId: string; positionKey: string }> {
   const rndPrivateLook = rndPrivateLookDefinitions(event);
   if (rndPrivateLook.length > 0) {
@@ -1358,8 +1718,13 @@ function knownDefinitionsFromEvent(
       positionKey: index === 0 ? "top" : `top:${index}`,
     }));
   }
-  const rndTopDefinition = rndTopDefinitionFromEvent(event, classification, definitionId);
-  if (rndTopDefinition) return [{ definitionId: rndTopDefinition, positionKey: "top" }];
+  const rndTopDefinition = rndTopDefinitionFromEvent(
+    event,
+    classification,
+    definitionId,
+  );
+  if (rndTopDefinition)
+    return [{ definitionId: rndTopDefinition, positionKey: "top" }];
   const exposedDefinition =
     stringValue(event.publicPayload.exposedCardDefinitionId) ??
     stringValue(event.publicPayload.publicRevealDefinitionId) ??
@@ -1370,25 +1735,28 @@ function knownDefinitionsFromEvent(
     const positionKey =
       exposedArea && exposedIndex !== undefined
         ? `${exposedArea}:${exposedIndex}`
-        : stringValue(event.publicPayload.exposedPositionKey) ?? "installed";
+        : (stringValue(event.publicPayload.exposedPositionKey) ?? "installed");
     return [{ definitionId: exposedDefinition, positionKey }];
   }
   if (!definitionId) return [];
-  const accessedCardPositionKey = stringValue(event.publicPayload.accessedCardPositionKey);
+  const accessedCardPositionKey = stringValue(
+    event.publicPayload.accessedCardPositionKey,
+  );
   if (classification.family === "access" && accessedCardPositionKey) {
     return [
       {
         definitionId,
-        positionKey: accessedCardPositionKey
-      }
+        positionKey: accessedCardPositionKey,
+      },
     ];
   }
   if (classification.family === "access") {
     return [
       {
         definitionId,
-        positionKey: accessEventZone(classification) === "rd" ? "top" : "accessed"
-      }
+        positionKey:
+          accessEventZone(classification) === "rd" ? "top" : "accessed",
+      },
     ];
   }
   return [{ definitionId, positionKey: "installed" }];
@@ -1409,28 +1777,69 @@ function hqDefinitionMatchesInstallPlacement(
 
 function hqHandMemoryAdjustment(
   event: BeliefEventClassification,
-  definitionId: string | undefined
-): { kind: "remove_known" | "unknown_arrival" | "unknown_departure" | "hidden_zone_reordered"; reason: string } | undefined {
-  if (event.actor === "corp" && (event.actionType === "mandatory_draw" || event.actionType === "draw_card")) {
-    return { kind: "unknown_arrival", reason: "corp_draw_added_unknown_hq_card" };
+  definitionId: string | undefined,
+):
+  | {
+      kind:
+        | "remove_known"
+        | "unknown_arrival"
+        | "unknown_departure"
+        | "hidden_zone_reordered";
+      reason: string;
+    }
+  | undefined {
+  if (
+    event.actor === "corp" &&
+    (event.actionType === "mandatory_draw" || event.actionType === "draw_card")
+  ) {
+    return {
+      kind: "unknown_arrival",
+      reason: "corp_draw_added_unknown_hq_card",
+    };
   }
-  if (event.family === "shuffle" || event.family === "arrange" || event.family === "swap") {
-    return { kind: "hidden_zone_reordered", reason: `${event.family}_changed_hq_hand` };
+  if (
+    event.family === "shuffle" ||
+    event.family === "arrange" ||
+    event.family === "swap"
+  ) {
+    return {
+      kind: "hidden_zone_reordered",
+      reason: `${event.family}_changed_hq_hand`,
+    };
   }
   if (event.actor === "corp" && event.actionType === "play_operation") {
-    return { kind: "remove_known", reason: definitionId ? "known_hq_card_played" : "corp_played_unknown_hq_card" };
+    return {
+      kind: "remove_known",
+      reason: definitionId
+        ? "known_hq_card_played"
+        : "corp_played_unknown_hq_card",
+    };
   }
   if (event.actor === "corp" && event.actionType === "install_card") {
-    return definitionId ? { kind: "remove_known", reason: "known_hq_card_installed" } : { kind: "unknown_departure", reason: "corp_installed_hidden_hq_card" };
+    return definitionId
+      ? { kind: "remove_known", reason: "known_hq_card_installed" }
+      : { kind: "unknown_departure", reason: "corp_installed_hidden_hq_card" };
   }
   if (event.family === "discard" && event.actor === "corp") {
     return { kind: "unknown_departure", reason: "corp_discarded_hq_card" };
   }
-  if ((event.family === "steal" || event.family === "trash" || event.family === "score") && event.serverId === "hq") {
-    return definitionId ? { kind: "remove_known", reason: `known_hq_card_${event.family}` } : { kind: "unknown_departure", reason: `unknown_hq_card_${event.family}` };
+  if (
+    (event.family === "steal" ||
+      event.family === "trash" ||
+      event.family === "score") &&
+    event.serverId === "hq"
+  ) {
+    return definitionId
+      ? { kind: "remove_known", reason: `known_hq_card_${event.family}` }
+      : {
+          kind: "unknown_departure",
+          reason: `unknown_hq_card_${event.family}`,
+        };
   }
   if (event.family === "move") {
-    return definitionId ? { kind: "remove_known", reason: "known_hq_card_moved" } : { kind: "unknown_departure", reason: "hidden_zone_move_changed_hq" };
+    return definitionId
+      ? { kind: "remove_known", reason: "known_hq_card_moved" }
+      : { kind: "unknown_departure", reason: "hidden_zone_move_changed_hq" };
   }
   return undefined;
 }
@@ -1445,15 +1854,24 @@ function beliefRemoteServerId(serverId: string): boolean {
 }
 
 function beliefDefinitionType(definitionId: string): string | undefined {
-  return CARD_DEFINITIONS_BY_ID[definitionId]?.type ?? RUNTIME_CARDS[definitionId]?.type;
+  return (
+    CARD_DEFINITIONS_BY_ID[definitionId]?.type ??
+    RUNTIME_CARDS[definitionId]?.type
+  );
 }
 
 function beliefDefinitionSide(definitionId: string): Side | undefined {
-  return CARD_DEFINITIONS_BY_ID[definitionId]?.side ?? RUNTIME_CARDS[definitionId]?.side;
+  return (
+    CARD_DEFINITIONS_BY_ID[definitionId]?.side ??
+    RUNTIME_CARDS[definitionId]?.side
+  );
 }
 
 function beliefDefinitionTrashCost(definitionId: string): number | undefined {
-  return RUNTIME_CARDS[definitionId]?.numeric.trashCost ?? CARD_DEFINITIONS_BY_ID[definitionId]?.trashCost;
+  return (
+    RUNTIME_CARDS[definitionId]?.numeric.trashCost ??
+    CARD_DEFINITIONS_BY_ID[definitionId]?.trashCost
+  );
 }
 
 function deriveRunnerOpponentModel(
@@ -1463,48 +1881,98 @@ function deriveRunnerOpponentModel(
   rndTopFreshness: RndTopFreshnessMemory | undefined,
   knownPositionMemory: KnownPositionMemory[],
   hqHandMemory: KnownHqHandMemory | undefined,
-  hiddenRemoteCandidateMemory: HiddenRemoteCandidateMemory[]
+  hiddenRemoteCandidateMemory: HiddenRemoteCandidateMemory[],
+  remoteRootTypeDeductions: RemoteRootTypeDeduction[],
 ): RunnerOpponentModel {
   const corpEvents = classifications.filter((event) => event.actor === "corp");
-  const scoringSignals = corpEvents.filter((event) => event.actionType === "advance_card" || event.actionType === "score_agenda").length;
-  const economySignals = corpEvents.filter((event) => event.actionType === "gain_credit" || event.actionType === "draw_card" || event.actionType === "play_operation" || event.actionType === "mandatory_draw").length;
+  const scoringSignals = corpEvents.filter(
+    (event) =>
+      event.actionType === "advance_card" ||
+      event.actionType === "score_agenda",
+  ).length;
+  const economySignals = corpEvents.filter(
+    (event) =>
+      event.actionType === "gain_credit" ||
+      event.actionType === "draw_card" ||
+      event.actionType === "play_operation" ||
+      event.actionType === "mandatory_draw",
+  ).length;
   const protectionSignals =
-    corpEvents.filter((event) => (event.actionType === "install_card" && event.serverId !== undefined) || event.actionType === "rez_ice").length +
-    input.playerView.servers.reduce((sum, server) => sum + server.ice.length, 0);
+    corpEvents.filter(
+      (event) =>
+        (event.actionType === "install_card" && event.serverId !== undefined) ||
+        event.actionType === "rez_ice",
+    ).length +
+    input.playerView.servers.reduce(
+      (sum, server) => sum + server.ice.length,
+      0,
+    );
 
   const corpPlanEstimate = {
     scoring: clamp01(scoringSignals / 6),
-    economy: clamp01(economySignals / 12 + input.playerView.opponent.credits / 24),
-    protection: clamp01(protectionSignals / 14)
+    economy: clamp01(
+      economySignals / 12 + input.playerView.opponent.credits / 24,
+    ),
+    protection: clamp01(protectionSignals / 14),
   };
 
   const remoteCardBelief = entries
-    .filter((entry) => entry.kind === "hypothesis" && entry.subject.startsWith("remote_card_hypothesis:"))
+    .filter(
+      (entry) =>
+        entry.kind === "hypothesis" &&
+        entry.subject.startsWith("remote_card_hypothesis:"),
+    )
     .map((entry) => {
       const parts = entry.subject.split(":");
       return {
         serverId: parts[1] ?? "remote_unknown",
         hypothesis: "unknown_remote_card",
         confidence: entry.confidence,
-        sourceEventIds: entry.sourceEventIds
+        sourceEventIds: entry.sourceEventIds,
       };
     });
 
   const unrezzedIceRiskModel = input.playerView.servers.map((server) => {
-    const unknownUnrezzedIce = server.ice.filter((card) => card.rezzed !== true && !card.known).length;
-    const rezSignals = corpEvents.filter((event) => event.family === "rez" && event.serverId === server.id).length;
-    const risk = clamp01(0.15 + unknownUnrezzedIce * 0.26 + rezSignals * 0.1 + Math.min(input.playerView.opponent.credits, 12) * 0.025);
+    const unknownUnrezzedIce = server.ice.filter(
+      (card) => card.rezzed !== true && !card.known,
+    ).length;
+    const rezSignals = corpEvents.filter(
+      (event) => event.family === "rez" && event.serverId === server.id,
+    ).length;
+    const risk = clamp01(
+      0.15 +
+        unknownUnrezzedIce * 0.26 +
+        rezSignals * 0.1 +
+        Math.min(input.playerView.opponent.credits, 12) * 0.025,
+    );
     return {
       serverId: server.id,
       risk,
-      basis: [`unknown_unrezzed_ice:${unknownUnrezzedIce}`, `rez_signals:${rezSignals}`, `corp_credits:${input.playerView.opponent.credits}`]
+      basis: [
+        `unknown_unrezzed_ice:${unknownUnrezzedIce}`,
+        `rez_signals:${rezSignals}`,
+        `corp_credits:${input.playerView.opponent.credits}`,
+      ],
     };
   });
 
-  const hqAgendaDensityEstimate = clamp01(0.24 + (input.playerView.opponent.handCount - 5) * 0.04 + corpPlanEstimate.scoring * 0.25 - corpPlanEstimate.economy * 0.1);
-  const staleRndPenalty = rndTopFreshness?.freshness === "stale_known_same_top" ? 0.35 : 0;
-  const rndValueEstimate = clamp01(0.55 + corpPlanEstimate.scoring * 0.18 - staleRndPenalty);
-  const corpCreditReserveInterpretation = input.playerView.opponent.credits <= 4 ? "low" : input.playerView.opponent.credits >= 10 ? "high" : "medium";
+  const hqAgendaDensityEstimate = clamp01(
+    0.24 +
+      (input.playerView.opponent.handCount - 5) * 0.04 +
+      corpPlanEstimate.scoring * 0.25 -
+      corpPlanEstimate.economy * 0.1,
+  );
+  const staleRndPenalty =
+    rndTopFreshness?.freshness === "stale_known_same_top" ? 0.35 : 0;
+  const rndValueEstimate = clamp01(
+    0.55 + corpPlanEstimate.scoring * 0.18 - staleRndPenalty,
+  );
+  const corpCreditReserveInterpretation =
+    input.playerView.opponent.credits <= 4
+      ? "low"
+      : input.playerView.opponent.credits >= 10
+        ? "high"
+        : "medium";
 
   return {
     corpPlanEstimate,
@@ -1519,7 +1987,7 @@ function deriveRunnerOpponentModel(
         lastKnownAccessEventId: "none",
         knownToRunner: false,
         freshness: "invalidated",
-        invalidationReasons: []
+        invalidationReasons: [],
       } satisfies RndTopFreshnessMemory),
     knownPositionMemory,
     hqHandMemory:
@@ -1531,46 +1999,68 @@ function deriveRunnerOpponentModel(
         allCardsKnown: false,
         sourceEventIds: [],
         invalidationReasons: [],
-        ledger: deriveHqHandLedger([], input.playerView.opponent.handCount, [])
+        ledger: deriveHqHandLedger([], input.playerView.opponent.handCount, []),
       } satisfies KnownHqHandMemory),
-    hiddenRemoteCandidateMemory
+    hiddenRemoteCandidateMemory,
+    remoteRootTypeDeductions,
   };
 }
 
-function deriveCorpOpponentModel(input: AiDecisionInput, classifications: BeliefEventClassification[]): CorpOpponentModel {
-  const runnerRuns = classifications.filter((event) => event.actor === "runner" && (event.actionType === "start_run" || event.actionType === "access_card"));
-  const hqRuns = runnerRuns.filter((event) => runPressureServerId(event) === "hq").length;
-  const rndRuns = runnerRuns.filter((event) => runPressureServerId(event) === "rd").length;
-  const remoteRuns = runnerRuns.filter((event) => runPressureServerId(event)?.startsWith("remote_")).length;
+function deriveCorpOpponentModel(
+  input: AiDecisionInput,
+  classifications: BeliefEventClassification[],
+): CorpOpponentModel {
+  const runnerRuns = classifications.filter(
+    (event) =>
+      event.actor === "runner" &&
+      (event.actionType === "start_run" || event.actionType === "access_card"),
+  );
+  const hqRuns = runnerRuns.filter(
+    (event) => runPressureServerId(event) === "hq",
+  ).length;
+  const rndRuns = runnerRuns.filter(
+    (event) => runPressureServerId(event) === "rd",
+  ).length;
+  const remoteRuns = runnerRuns.filter((event) =>
+    runPressureServerId(event)?.startsWith("remote_"),
+  ).length;
   const runEvents = runnerRuns.length;
   const centralRuns = hqRuns + rndRuns;
   const remoteContestProbability = runEvents > 0 ? remoteRuns / runEvents : 0;
-  const installedBreakers = (input.playerView.opponent.rig ?? []).filter((card) => hasBreakerSubtype(card)).length;
-  const hqPressureEstimate = clamp01(hqRuns / 4 + (input.playerView.opponent.credits >= 6 ? 0.08 : 0));
-  const rndPressureEstimate = clamp01(rndRuns / 4 + (input.playerView.opponent.credits >= 6 ? 0.1 : 0));
+  const installedBreakers = (input.playerView.opponent.rig ?? []).filter(
+    (card) => hasBreakerSubtype(card),
+  ).length;
+  const hqPressureEstimate = clamp01(
+    hqRuns / 4 + (input.playerView.opponent.credits >= 6 ? 0.08 : 0),
+  );
+  const rndPressureEstimate = clamp01(
+    rndRuns / 4 + (input.playerView.opponent.credits >= 6 ? 0.1 : 0),
+  );
 
   return {
     runnerThreatModel: {
       hqPressure: hqPressureEstimate,
       rndPressure: rndPressureEstimate,
-      remotePressure: clamp01(remoteRuns / 4 + installedBreakers * 0.07)
+      remotePressure: clamp01(remoteRuns / 4 + installedBreakers * 0.07),
     },
     runnerAggressionMemory: {
       runEvents,
       remoteRuns,
-      centralRuns
+      centralRuns,
     },
     breakerAvailabilityEstimate: {
       installedBreakers,
-      confidence: clamp01(0.35 + installedBreakers * 0.22)
+      confidence: clamp01(0.35 + installedBreakers * 0.22),
     },
     remoteContestProbability: clamp01(remoteContestProbability),
     hqPressureEstimate,
-    rndPressureEstimate
+    rndPressureEstimate,
   };
 }
 
-function runPressureServerId(event: BeliefEventClassification): string | undefined {
+function runPressureServerId(
+  event: BeliefEventClassification,
+): string | undefined {
   return event.runTargetServerId ?? event.serverId;
 }
 
@@ -1618,7 +2108,9 @@ function deriveRndTopFreshness(
       freshenedByRunnerAccess = true;
       invalidationReasons.push(`rd_access_removed_top_card:${event.eventId}`);
       if (knownSequenceDefinitionIds.length > 0)
-        invalidationReasons.push(`rd_known_top_sequence_advanced:${event.eventId}`);
+        invalidationReasons.push(
+          `rd_known_top_sequence_advanced:${event.eventId}`,
+        );
       continue;
     }
     if (!lastKnownAccessEventId) continue;
@@ -1631,25 +2123,30 @@ function deriveRndTopFreshness(
     knownSequenceDefinitionIds = [];
   }
 
-  if (lastKnownAccessEventId && freshness === "fresh") freshness = "stale_known_same_top";
+  if (lastKnownAccessEventId && freshness === "fresh")
+    freshness = "stale_known_same_top";
   const knownTopDefinitionId = knownSequenceDefinitionIds[0];
 
   return {
     lastKnownAccessEventId: lastKnownAccessEventId ?? "none",
-    knownToRunner: knownSequenceDefinitionIds.length > 0 || Boolean(lastKnownAccessEventId),
+    knownToRunner:
+      knownSequenceDefinitionIds.length > 0 || Boolean(lastKnownAccessEventId),
     freshness,
     ...(knownTopDefinitionId ? { knownTopDefinitionId } : {}),
     ...(knownTopDefinitionId
       ? { knownTopIsAgenda: definitionLooksAgenda(knownTopDefinitionId) }
       : {}),
     ...(knownTopDefinitionId
-      ? { knownTopIsLowValue: definitionLooksLowValueRndAccess(knownTopDefinitionId) }
+      ? {
+          knownTopIsLowValue:
+            definitionLooksLowValueRndAccess(knownTopDefinitionId),
+        }
       : {}),
     ...(knownSequenceDefinitionIds.length > 0
       ? { knownSequenceDefinitionIds }
       : {}),
     ...(freshenedByRunnerAccess ? { freshenedByRunnerAccess } : {}),
-    invalidationReasons
+    invalidationReasons,
   };
 }
 
@@ -1661,27 +2158,29 @@ function isRunnerRdAccess(event: BeliefEventClassification): boolean {
   );
 }
 
-function accessEventZone(
-  event: BeliefEventClassification,
-): string | undefined {
+function accessEventZone(event: BeliefEventClassification): string | undefined {
   if (event.serverId) return event.serverId;
   if (event.runTargetServerId) return event.runTargetServerId;
   if (event.accessedArea) {
     const zone = canonicalStructuredServerId(event.accessedArea);
-    if (zone === "hq" || zone === "rd" || zone === "archives")
-      return zone;
+    if (zone === "hq" || zone === "rd" || zone === "archives") return zone;
   }
   const positionPrefix = event.accessedCardPositionKey?.split(":")[0];
   if (positionPrefix) {
     const zone = canonicalStructuredServerId(positionPrefix);
-    if (zone === "hq" || zone === "rd" || zone === "archives")
-      return zone;
+    if (zone === "hq" || zone === "rd" || zone === "archives") return zone;
   }
   return undefined;
 }
 
-function rndInvalidationReason(event: BeliefEventClassification): string | undefined {
-  if (event.actor === "corp" && (event.actionType === "mandatory_draw" || event.actionType === "draw_card")) return "corp_draw_from_rd";
+function rndInvalidationReason(
+  event: BeliefEventClassification,
+): string | undefined {
+  if (
+    event.actor === "corp" &&
+    (event.actionType === "mandatory_draw" || event.actionType === "draw_card")
+  )
+    return "corp_draw_from_rd";
   if (event.family === "shuffle") return "shuffle_changed_rd_top";
   if (event.family === "arrange") return "arrange_changed_rd_top";
   if (event.family === "swap") return "swap_changed_rd_top";
@@ -1692,7 +2191,10 @@ function rndInvalidationReason(event: BeliefEventClassification): string | undef
     "move_to_set_aside",
     "return_from_set_aside",
   ]);
-  if (accessEventZone(event) === "rd" && rdMovedCardActionTypeSet.has(event.actionType)) {
+  if (
+    accessEventZone(event) === "rd" &&
+    rdMovedCardActionTypeSet.has(event.actionType)
+  ) {
     return "rd_access_moved_card";
   }
   return undefined;
@@ -1705,21 +2207,35 @@ function definitionLooksAgenda(definitionId: string): boolean {
 function definitionLooksLowValueRndAccess(definitionId: string): boolean {
   const definition = CARD_DEFINITIONS_BY_ID[definitionId];
   if (!definition) return false;
-  return definition.type !== "agenda" && definition.type !== "asset" && definition.type !== "upgrade";
+  return (
+    definition.type !== "agenda" &&
+    definition.type !== "asset" &&
+    definition.type !== "upgrade"
+  );
 }
 
 function opponentKnownCardsFromView(input: AiDecisionInput): VisibleCard[] {
   if (input.side === "runner") {
-    return input.playerView.servers.flatMap((server) => [...server.ice, ...server.root]).filter((card) => card.known);
+    return input.playerView.servers
+      .flatMap((server) => [...server.ice, ...server.root])
+      .filter((card) => card.known);
   }
   return input.playerView.opponent.rig?.filter((card) => card.known) ?? [];
 }
 
 function buildUncertainty(entries: BeliefEntry[], side: Side): string[] {
   const uncertainty: string[] = [];
-  if (entries.some((entry) => entry.kind === "unknown")) uncertainty.push("unknown_opponent_hand_or_hidden_zones");
-  if (entries.some((entry) => entry.subject.startsWith("remote_card_hypothesis:"))) uncertainty.push("unknown_remote_cards_remain_hypotheses");
-  if (side === "runner" && entries.some((entry) => entry.subject.startsWith("unrezzed_ice_risk:"))) uncertainty.push("unrezzed_ice_titles_remain_unknown");
+  if (entries.some((entry) => entry.kind === "unknown"))
+    uncertainty.push("unknown_opponent_hand_or_hidden_zones");
+  if (
+    entries.some((entry) => entry.subject.startsWith("remote_card_hypothesis:"))
+  )
+    uncertainty.push("unknown_remote_cards_remain_hypotheses");
+  if (
+    side === "runner" &&
+    entries.some((entry) => entry.subject.startsWith("unrezzed_ice_risk:"))
+  )
+    uncertainty.push("unrezzed_ice_titles_remain_unknown");
   if (uncertainty.length === 0) uncertainty.push("known_projection_only");
   return sortedUnique(uncertainty);
 }
@@ -1739,24 +2255,43 @@ function buildBeliefUncertaintyWithMemoryWarnings(
   ]);
 }
 
-function buildAssumptions(side: Side, entries: BeliefEntry[], classifications: BeliefEventClassification[]): string[] {
+function buildAssumptions(
+  side: Side,
+  entries: BeliefEntry[],
+  classifications: BeliefEventClassification[],
+): string[] {
   const assumptions = [
     "hidden_corp_information_not_used",
     "hidden_runner_information_not_used",
-    "belief_state_reconstructed_from_side_safe_history"
+    "belief_state_reconstructed_from_side_safe_history",
   ];
-  if (side === "runner" && entries.some((entry) => entry.subject.startsWith("remote_card_hypothesis:"))) assumptions.push("unknown_remote_cards_modeled_as_hypotheses");
-  if (classifications.some((classification) => classification.invalidationReason)) assumptions.push("hypotheses_invalidated_by_classified_events");
+  if (
+    side === "runner" &&
+    entries.some((entry) => entry.subject.startsWith("remote_card_hypothesis:"))
+  )
+    assumptions.push("unknown_remote_cards_modeled_as_hypotheses");
+  if (
+    classifications.some((classification) => classification.invalidationReason)
+  )
+    assumptions.push("hypotheses_invalidated_by_classified_events");
   return sortedUnique(assumptions);
 }
 
-function deriveInvalidationLog(classifications: BeliefEventClassification[]): string[] {
+function deriveInvalidationLog(
+  classifications: BeliefEventClassification[],
+): string[] {
   return classifications
     .filter((event) => event.invalidationReason)
-    .map((event) => `${event.invalidationReason}:${event.eventId}${event.serverId ? `:${event.serverId}` : ""}`);
+    .map(
+      (event) =>
+        `${event.invalidationReason}:${event.eventId}${event.serverId ? `:${event.serverId}` : ""}`,
+    );
 }
 
-function invalidationEntryReferencesServer(entry: string, serverId: string): boolean {
+function invalidationEntryReferencesServer(
+  entry: string,
+  serverId: string,
+): boolean {
   return entry
     .toLowerCase()
     .split(/[.:-]+/)
@@ -1768,22 +2303,34 @@ function invalidationReasonForEvent(
   actionType: string,
   actor: Side | "system",
   serverId: string | undefined,
-  event: PublicGameEvent
+  event: PublicGameEvent,
 ): string | undefined {
-  if (actor === "corp" && (actionType === "mandatory_draw" || actionType === "draw_card")) return "corp_draw_event";
+  if (
+    actor === "corp" &&
+    (actionType === "mandatory_draw" || actionType === "draw_card")
+  )
+    return "corp_draw_event";
   if (family === "shuffle") return "shuffle_event";
   if (family === "arrange") return "arrange_event";
   if (family === "swap") return "swap_event";
   if (family === "move") return "move_event";
-  if (family === "score" || family === "steal" || family === "trash") return "card_resolution_event";
+  if (family === "score" || family === "steal" || family === "trash")
+    return "card_resolution_event";
   if (family === "reveal" || family === "expose") return "reveal_expose_event";
-  if (serverId?.startsWith("remote_") && (family === "install" || family === "advance")) return "remote_state_changed";
+  if (
+    serverId?.startsWith("remote_") &&
+    (family === "install" || family === "advance")
+  )
+    return "remote_state_changed";
   if (publicCardOrSourceDefinitionId(event) === RD_SWAP_OPERATION_DEFINITION_ID)
     return "rd_swap_operation";
   return undefined;
 }
 
-function eventFamily(actionType: string, event: PublicGameEvent): BeliefEventFamily {
+function eventFamily(
+  actionType: string,
+  event: PublicGameEvent,
+): BeliefEventFamily {
   const hiddenZoneAction = stringValue(event.publicPayload.hiddenZoneAction);
   const hiddenZoneFamily = hiddenZoneActionEventFamily(hiddenZoneAction);
   if (hiddenZoneFamily) return hiddenZoneFamily;
@@ -1793,10 +2340,23 @@ function eventFamily(actionType: string, event: PublicGameEvent): BeliefEventFam
   if (actionType === "score_agenda") return "score";
   if (actionType === "steal_agenda") return "steal";
   if (actionType === "access_card") return "access";
-  if (actionType === "trash_accessed_card" || actionType === "trash_resource") return "trash";
-  if (actionType === "mandatory_draw" || actionType === "draw_card") return "draw";
-  if (actionType === "start_run" || actionType === "jack_out" || actionType === "continue_run") return "run";
-  if (actionType === "move_to_set_aside" || actionType === "move_to_removed_from_game" || actionType === "return_from_set_aside" || actionType === "change_card_control") return "move";
+  if (actionType === "trash_accessed_card" || actionType === "trash_resource")
+    return "trash";
+  if (actionType === "mandatory_draw" || actionType === "draw_card")
+    return "draw";
+  if (
+    actionType === "start_run" ||
+    actionType === "jack_out" ||
+    actionType === "continue_run"
+  )
+    return "run";
+  if (
+    actionType === "move_to_set_aside" ||
+    actionType === "move_to_removed_from_game" ||
+    actionType === "return_from_set_aside" ||
+    actionType === "change_card_control"
+  )
+    return "move";
 
   if (actionType === "resolve_choice") {
     if (event.publicPayload.discardResolved === true) return "discard";
@@ -1863,10 +2423,7 @@ function publicRunTargetServerId(
 ): string | undefined {
   if (actionType !== "start_run" && actionType !== "access_card")
     return undefined;
-  return (
-    publicServerId(event, actionType) ??
-    publicServerLabelId(event)
-  );
+  return publicServerId(event, actionType) ?? publicServerLabelId(event);
 }
 
 function publicServerLabelId(event: PublicGameEvent): string | undefined {
@@ -1914,7 +2471,12 @@ function parseActor(actor: unknown): Side | "system" {
 }
 
 function hasBreakerSubtype(card: VisibleCard): boolean {
-  return card.subtypes?.some((subtype) => subtype === "fracter" || subtype === "decoder" || subtype === "killer") ?? false;
+  return (
+    card.subtypes?.some(
+      (subtype) =>
+        subtype === "fracter" || subtype === "decoder" || subtype === "killer",
+    ) ?? false
+  );
 }
 
 function dedupeEntries(entries: BeliefEntry[]): BeliefEntry[] {
@@ -1925,18 +2487,26 @@ function dedupeEntries(entries: BeliefEntry[]): BeliefEntry[] {
       merged.set(entry.key, {
         ...entry,
         sourceEventIds: sortedUnique(entry.sourceEventIds),
-        invalidatedBy: sortedUnique(entry.invalidatedBy)
+        invalidatedBy: sortedUnique(entry.invalidatedBy),
       });
       continue;
     }
     merged.set(entry.key, {
       ...existing,
       confidence: Math.max(existing.confidence, entry.confidence),
-      sourceEventIds: sortedUnique([...existing.sourceEventIds, ...entry.sourceEventIds]),
-      invalidatedBy: sortedUnique([...existing.invalidatedBy, ...entry.invalidatedBy])
+      sourceEventIds: sortedUnique([
+        ...existing.sourceEventIds,
+        ...entry.sourceEventIds,
+      ]),
+      invalidatedBy: sortedUnique([
+        ...existing.invalidatedBy,
+        ...entry.invalidatedBy,
+      ]),
     });
   }
-  return [...merged.values()].sort((left, right) => left.key.localeCompare(right.key));
+  return [...merged.values()].sort((left, right) =>
+    left.key.localeCompare(right.key),
+  );
 }
 
 function stringValue(value: unknown): string | undefined {
@@ -1950,7 +2520,9 @@ function objectValue(value: unknown): Record<string, unknown> | undefined {
 }
 
 function numberValue(value: unknown): number | undefined {
-  return typeof value === "number" && Number.isInteger(value) ? value : undefined;
+  return typeof value === "number" && Number.isInteger(value)
+    ? value
+    : undefined;
 }
 
 function fnv1a(value: string): string {

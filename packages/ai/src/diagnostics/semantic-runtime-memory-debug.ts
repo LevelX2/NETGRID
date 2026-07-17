@@ -1,7 +1,4 @@
-import {
-  CARD_DEFINITIONS_BY_ID,
-  type AiDecisionInput,
-} from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID, type AiDecisionInput } from "@netgrid/shared";
 import { RUNTIME_CARDS } from "../ai-hints";
 import {
   beliefUncertaintyConsumerFacts,
@@ -239,6 +236,15 @@ function semanticRuntimeRunnerOpponentMemorySummary(
           })),
         exhaustive: entry.exhaustive,
       })),
+    remoteRootTypeDeductions: (model.remoteRootTypeDeductions ?? []).map(
+      (entry) => ({
+        serverId: entry.serverId,
+        unknownRootCount: entry.unknownRootCount,
+        candidateTypes: entry.candidateTypes,
+        confidence: entry.confidence,
+        basis: entry.basis.slice(0, 4),
+      }),
+    ),
     knownPositionMemoryCount: model.knownPositionMemory.length,
     knownPositionMemory: model.knownPositionMemory.slice(0, 8).map((entry) => ({
       zone: entry.zone,
@@ -315,6 +321,7 @@ function semanticRuntimeRunnerMemoryItems(
     `hq_all_known:${model.hqHandMemory.allCardsKnown}`,
     `remote_beliefs:${model.remoteCardBelief.length}`,
     `remote_candidate_sets:${model.hiddenRemoteCandidateMemory.length}`,
+    `remote_root_type_deductions:${model.remoteRootTypeDeductions?.length ?? 0}`,
     `known_positions:${model.knownPositionMemory.length}`,
     `corp_credit_reserve:${model.corpCreditReserveInterpretation}`,
   ];

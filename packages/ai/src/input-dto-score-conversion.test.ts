@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import type { LegalAction, PlayerView, VisibleCard } from "@netgrid/shared";
+import type {
+  LegalAction,
+  PlayerView,
+  PublicGameEvent,
+  VisibleCard,
+} from "@netgrid/shared";
 import { buildAiDecisionInputDto } from "./input-dto";
 
 describe("AI input DTO score-conversion contract", () => {
@@ -62,7 +67,66 @@ describe("AI input DTO score-conversion contract", () => {
     });
     expect(input.legalActions[0]?.payload).not.toHaveProperty("privateProbe");
   });
+
+  it("preserves public remote-root structure without exposing card identities", () => {
+    const action = runnerSemanticAction();
+    const events: PublicGameEvent[] = [
+      publicEvent("install", {
+        actor: "corp",
+        actionType: "install_card",
+        serverLabel: "Remote 1",
+        installPlacement: "root",
+        rootReplacement: "asset_to_agenda",
+        replacedRootCardType: "asset",
+        replacedRootCardId: "must-not-cross-dto",
+      }),
+      publicEvent("score", {
+        actor: "corp",
+        actionType: "score_agenda",
+        targets: {
+          scoredFromServerId: "remote-1",
+          scoredCardId: "must-not-cross-dto",
+        },
+      }),
+    ];
+    const input = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: playerView(action, "runner"),
+      eventTail: events,
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "remote-root-structure-dto",
+      decisionId: "remote-root-structure-dto:runner:1",
+      actionNumber: 1,
+      profileId: "remote-root-structure-dto-test",
+    });
+
+    expect(input.eventTail[0]?.publicPayload).toMatchObject({
+      rootReplacement: "asset_to_agenda",
+      replacedRootCardType: "asset",
+    });
+    expect(input.eventTail[0]?.publicPayload).not.toHaveProperty(
+      "replacedRootCardId",
+    );
+    expect(input.eventTail[1]?.publicPayload.targets).toEqual({
+      scoredFromServerId: "remote-1",
+    });
+  });
 });
+
+function publicEvent(
+  eventId: string,
+  publicPayload: Record<string, unknown>,
+): PublicGameEvent {
+  return {
+    eventId,
+    type: String(publicPayload.actionType ?? "game_event"),
+    stateVersionBefore: 0,
+    stateVersionAfter: 1,
+    stateHashAfter: `hash-${eventId}`,
+    publicPayload,
+  };
+}
 
 function conversionAction(): LegalAction {
   return {

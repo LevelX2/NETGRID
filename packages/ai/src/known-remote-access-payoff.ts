@@ -78,6 +78,32 @@ export function evaluateKnownRemoteAccessPayoff(
   if (knownRoots.length === 0) {
     const unknownRootCount = server.root.filter((card) => !card.known).length;
     if (unknownRootCount > 0) {
+      const typeDeduction =
+        beliefState.runnerOpponentModel?.remoteRootTypeDeductions?.find(
+          (deduction) =>
+            deduction.serverId === serverId &&
+            deduction.unknownRootCount >= unknownRootCount &&
+            !deduction.candidateTypes.includes("agenda"),
+        );
+      if (typeDeduction) {
+        return {
+          payoff: "unknown",
+          accessDecision: "unknown",
+          contestable: false,
+          knownNoCurrentPayoff: false,
+          score: 0,
+          penalty: 0,
+          reasons: ["remote_root_type_excludes_agenda"],
+          evidence: [
+            `remote_target:${serverId}`,
+            "remote_memory_payoff:unknown",
+            `known_remote_root_unknown_count:${unknownRootCount}`,
+            "remote_root_type_candidates:upgrade",
+            "remote_root_agenda_candidate:false",
+            ...typeDeduction.basis,
+          ],
+        };
+      }
       return {
         payoff: "unknown",
         accessDecision: "unknown",
@@ -233,9 +259,7 @@ export function evaluateKnownRemoteAccessPayoff(
       knownNoCurrentPayoff: trashProjection.knownNoCurrentPayoff,
       score: trashProjection.score,
       penalty: trashProjection.penalty,
-      reasons: [
-        ...trashProjection.reasons,
-      ],
+      reasons: [...trashProjection.reasons],
       evidence: [
         ...evidenceBase,
         `known_remote_root_trash_cost:${cheapestTrashCost}`,
@@ -318,7 +342,10 @@ function knownRemoteRoots(
   );
 }
 
-function invalidationEntryReferencesServer(entry: string, serverId: string): boolean {
+function invalidationEntryReferencesServer(
+  entry: string,
+  serverId: string,
+): boolean {
   return entry
     .toLowerCase()
     .split(/[.:-]+/)
@@ -393,7 +420,11 @@ function unknownRemotePayoff(
     score: 0,
     penalty: 0,
     reasons: [],
-    evidence: [`remote_target:${serverId}`, "remote_memory_payoff:unknown", ...extraEvidence],
+    evidence: [
+      `remote_target:${serverId}`,
+      "remote_memory_payoff:unknown",
+      ...extraEvidence,
+    ],
   };
 }
 
@@ -426,6 +457,7 @@ function cardDefinitionTrashCost(definitionId: string): number | undefined {
 
 function cardDefinitionType(definitionId: string): string | undefined {
   return (
-    RUNTIME_CARDS[definitionId]?.type ?? CARD_DEFINITIONS_BY_ID[definitionId]?.type
+    RUNTIME_CARDS[definitionId]?.type ??
+    CARD_DEFINITIONS_BY_ID[definitionId]?.type
   );
 }
