@@ -1,6 +1,6 @@
 # AI-Match-B34E-Runner-Remediation-Prozess
 
-Status: freigegeben, Paket 1 aktiv
+Status: Pakete 1 bis 7 abgeschlossen, zur lokalen Integration freigegeben
 
 Quelle: vollständige Decision-Analyse von `match_b34e724e4cfc0362`
 vom 17. Juli 2026 und anschließende Nutzerfreigabe.
@@ -188,3 +188,22 @@ nach erfolgreicher Integration.`
 - Final Review und Wissenslog nennen Match, Ursache, Maßnahmen und Gates.
 - Die Änderungen sind lokal in `main` integriert.
 - Worktree und Arbeitsbranch existieren nicht mehr.
+
+## Abschlussstand vor Integration
+
+- Die historische Evidence umfasst 119 von 119 Runner-Entscheidungen und
+  ordnet alle 22 Auffälligkeiten vollständig den drei Befundgruppen zu.
+- Zehn unveränderte historische Checkpoints wurden strict ab der
+  nachgewiesenen Runtime-Neustartgrenze D43 erfasst. Die neun Zielregressionen
+  waren vor den Fixes ausschließlich `behavior_regression` und sind auf dem
+  finalen Arbeitsstand grün.
+- Search-Consumer, Zwei-Punkte-Closeout und Viral-15-Sequenzkosten wurden in
+  drei getrennten produktiven Paketen behoben. Die Kontrollen für dringende
+  Remote-Antwortsuche, wertvolle Programme, später benötigte Breaker und echte
+  Jack-out-Sicherheit bleiben grün.
+- Der Deck-Consumer-Audit erfasst 20 eindeutige Runner-Karten beziehungsweise
+  45 Karten ohne Ausschluss und meldet null blockierende Findings. Die
+  bestehende `MS-todon`-Warnung zur Rolle `noisy` bleibt nicht blockierend.
+- AI-Typecheck, 372 Testdateien mit 2.578 Tests und `check:ai:full` sind grün.
+  Die Abschlussdetails stehen in
+  `docs/reviews/ai/ai-match-b34e-runner-remediation-final-2026-07-17.md`.
