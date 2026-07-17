@@ -14,7 +14,10 @@ import {
 } from "../../app/action-board-ui";
 import { CounterHelpTooltipTrigger } from "../game-board/CounterHelpTooltip";
 import { SubroutineIcon } from "./CardTextRendering";
-import type { DisplayVisibleCard } from "./card-view-model";
+import {
+  strengthModifierBadgeLabel,
+  type DisplayVisibleCard,
+} from "./card-view-model";
 
 export function AdvancementGems({ card, display }: { card: DisplayVisibleCard; display: AdvancementCounterDisplay }) {
   if (display.overflowLabel) {
@@ -85,10 +88,11 @@ export function IceModifierBadges({ badges }: { badges: IceModifierBadgeView[] }
   );
 }
 
-export function StrengthBoostBadge({ amount }: { amount: number }) {
+export function StrengthModifierBadge({ amount }: { amount: number }) {
+  const label = strengthModifierBadgeLabel(amount);
   return (
-    <span className="strengthBoostBadge" aria-label={`+${amount} Stärke`} data-testid="strength-boost-badge">
-      +{amount} Stärke
+    <span className="strengthBoostBadge" aria-label={label} data-testid="strength-modifier-badge">
+      {label}
     </span>
   );
 }

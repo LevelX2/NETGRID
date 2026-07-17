@@ -46,10 +46,12 @@ import { cardDetailLines, cardWithoutDevelopmentCounters } from "./card-detail-l
 import {
   aiBoonRunStrengthBadgeValue,
   iceStrengthBadgeValue,
+  strengthModifierBadgeLabel,
+  strengthModifierBadgeValue,
   type DisplayVisibleCard,
 } from "./card-view-model";
 import { CardActionsPopover } from "./CardActionsPopover";
-import { AdvancementGems, CounterDisplayBadge, IceModifierBadges, IceStrengthBadge, RunStrengthBadge, StrengthBoostBadge } from "./CardBadges";
+import { AdvancementGems, CounterDisplayBadge, IceModifierBadges, IceStrengthBadge, RunStrengthBadge, StrengthModifierBadge } from "./CardBadges";
 import { ScoreCardStateBadges, scoreCardStateBadges, type ScoredAgendaStateLine } from "./ScoredAgendaState";
 
 type CardChoiceShortcut = {
@@ -201,7 +203,10 @@ export function CardView({
   const advancementDisplay = showAdvancementCounters && !preview ? advancementCounterDisplay(card) : null;
   const advancementCount = advancementDisplay?.amount ?? 0;
   const advancementLabel = advancementDisplay?.ariaLabel ?? null;
-  const strengthModifier = preview ? 0 : Math.max(0, Math.floor(card.strengthModifier ?? 0));
+  const strengthModifier = strengthModifierBadgeValue(card, {
+    preview,
+    forceCardBack: Boolean(forceCardBack),
+  });
   const iceStrength = iceStrengthBadgeValue(card, { preview, forceCardBack: Boolean(forceCardBack) });
   const aiBoonRunStrength = aiBoonRunStrengthBadgeValue(card, {
     preview,
@@ -223,8 +228,12 @@ export function CardView({
       : iceStrength !== null
         ? `Stärke ${iceStrength}`
         : "";
+  const strengthModifierAriaSuffix =
+    strengthModifier !== null
+      ? strengthModifierBadgeLabel(strengthModifier)
+      : "";
   const concealedRunnerResourceAriaSuffix = knownConcealedRunnerResource ? "verdeckte Runner-Resource, für die Korp nicht aufgedeckt" : "";
-  const cardStateAriaText = [tappedAriaSuffix, concealedRunnerResourceAriaSuffix, visibleStrengthAriaSuffix, counterAriaSuffix, scoreStateAriaSuffix].filter(Boolean).join(", ");
+  const cardStateAriaText = [tappedAriaSuffix, concealedRunnerResourceAriaSuffix, visibleStrengthAriaSuffix, strengthModifierAriaSuffix, counterAriaSuffix, scoreStateAriaSuffix].filter(Boolean).join(", ");
   const cardStateAria = cardStateAriaText ? `, ${cardStateAriaText}` : "";
   const modifierBadgeAria = effectiveModifierBadges.map((badge) => badge.ariaLabel).join(", ");
   const modifierBadgeAriaSuffix = modifierBadgeAria ? `, ${modifierBadgeAria}` : "";
@@ -655,7 +664,7 @@ export function CardView({
         {advancementDisplay ? <AdvancementGems card={card} display={advancementDisplay} /> : null}
         {iceStrength !== null ? <IceStrengthBadge strength={iceStrength} /> : null}
         {aiBoonRunStrength !== null ? <RunStrengthBadge strength={aiBoonRunStrength} /> : null}
-        {strengthModifier > 0 ? <StrengthBoostBadge amount={strengthModifier} /> : null}
+        {strengthModifier !== null ? <StrengthModifierBadge amount={strengthModifier} /> : null}
         {renderedCounterDisplays.map((display) => (
           <CounterDisplayBadge key={`${card.instanceId}-counter-display-${display.id}`} display={display} scoreState={showScoreStateBadges} />
         ))}

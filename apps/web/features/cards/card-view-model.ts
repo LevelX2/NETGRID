@@ -70,7 +70,7 @@ export function enrichVisibleCard(card: VisibleCard, detailsById: Record<string,
   addNumeric(enriched, "trashCost", card.trashCost, detail.numeric.trashCost);
   addNumeric(enriched, "advancementRequirement", card.advancementRequirement, detail.numeric.advancementRequirement);
   addNumeric(enriched, "agendaPoints", card.agendaPoints, detail.numeric.agendaPoints);
-  if (typeof card.strength === "number" && typeof detail.numeric.strength === "number" && card.strength > detail.numeric.strength) {
+  if (typeof card.strength === "number" && typeof detail.numeric.strength === "number" && card.strength !== detail.numeric.strength) {
     enriched.strengthModifier = card.strength - detail.numeric.strength;
   }
   return enriched;
@@ -146,6 +146,29 @@ export function aiBoonRunStrengthBadgeValue(
     return null;
   }
   return Math.max(0, Math.floor(card.strength));
+}
+
+export function strengthModifierBadgeValue(
+  card: DisplayVisibleCard,
+  options: { preview?: boolean; forceCardBack?: boolean } = {},
+): number | null {
+  if (
+    !card.known ||
+    options.preview ||
+    options.forceCardBack ||
+    typeof card.strengthModifier !== "number" ||
+    !Number.isFinite(card.strengthModifier)
+  ) {
+    return null;
+  }
+  const modifier = Math.trunc(card.strengthModifier);
+  return modifier === 0 ? null : modifier;
+}
+
+export function strengthModifierBadgeLabel(amount: number): string {
+  const modifier = Math.trunc(amount);
+  const sign = modifier < 0 ? "−" : "+";
+  return `${sign}${Math.abs(modifier)} Stärke`;
 }
 
 function addCatalogSetDisplay(target: DisplayVisibleCard, detail: Pick<CardViewCatalogDetail, "setId" | "setName" | "collectorNumber">): void {

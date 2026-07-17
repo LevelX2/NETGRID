@@ -1,19 +1,28 @@
 ---
 activityId: act-2026-07-10-signed-ice-strength-modifier-badge
-status: inbox
+status: done
 kind: fix
 area: ui
 priority: normal
 primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-07-10
-startedAt:
-completedAt:
+startedAt: 2026-07-17
+completedAt: 2026-07-17
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/features/cards/card-view-model.ts
+  - apps/web/features/cards/CardBadges.tsx
+  - apps/web/features/cards/CardView.tsx
+  - apps/web/app/card-view-model.test.ts
+checks:
+  - Fokussierte Webtests: 1 Datei, 8 Tests grün
+  - Clown-Engine-Regression: 1 Datei, 2 Tests grün
+  - Vollständige Webtests: 48 Dateien, 614 Tests grün
+  - Web-Typecheck grün
+  - git diff --check grün
 ---
 
 # Vorzeichenbehafteten ICE-Stärke-Modifier als Chip anzeigen
@@ -49,14 +58,14 @@ checks: []
 
 ## Akzeptanzkriterien
 
-- [ ] Ein numerisches ICE mit öffentlicher aktueller Stärke 2 und gedruckter Stärke 3 erhält im Web-View-Model den Modifier `-1`.
-- [ ] Die Kartenansicht rendert diesen Modifier sichtbar und barrierearm als `−1 Stärke`-Chip.
-- [ ] Beim Encounter mit installiertem `Clown` ist der negative Chip auf dem aktuell encounterten ICE sichtbar, solange die Engine die reduzierte Stärke projiziert.
-- [ ] Nicht encounterte ICE erhalten wegen `Clown` keinen pauschalen negativen Chip; verdeckte oder unbekannte ICE leaken keine Stärkeinformation.
-- [ ] Bestehende positive Modifier-Chips bleiben unverändert funktionsfähig; bei einer saldierten Differenz von 0 erscheint kein Modifier-Chip.
-- [ ] Variable ICE mit nicht numerischer Druckstärke behalten ihre bestehende Gesamtstärke-Anzeige und erhalten keinen irreführend berechneten Differenz-Chip.
-- [ ] Fokussierte Webtests decken mindestens negativen, positiven, neutralen und verdeckten beziehungsweise nicht encounterten Zustand ab.
-- [ ] `git diff --check` und die relevanten Webtests sind grün oder ein bereits bestehender, paketfremder Fehler ist klar benannt.
+- [x] Ein numerisches ICE mit öffentlicher aktueller Stärke 2 und gedruckter Stärke 3 erhält im Web-View-Model den Modifier `-1`.
+- [x] Die Kartenansicht rendert diesen Modifier sichtbar und barrierearm als `−1 Stärke`-Chip.
+- [x] Beim Encounter mit installiertem `Clown` ist der negative Chip auf dem aktuell encounterten ICE sichtbar, solange die Engine die reduzierte Stärke projiziert.
+- [x] Nicht encounterte ICE erhalten wegen `Clown` keinen pauschalen negativen Chip; verdeckte oder unbekannte ICE leaken keine Stärkeinformation.
+- [x] Bestehende positive Modifier-Chips bleiben unverändert funktionsfähig; bei einer saldierten Differenz von 0 erscheint kein Modifier-Chip.
+- [x] Variable ICE mit nicht numerischer Druckstärke behalten ihre bestehende Gesamtstärke-Anzeige und erhalten keinen irreführend berechneten Differenz-Chip.
+- [x] Fokussierte Webtests decken mindestens negativen, positiven, neutralen und verdeckten beziehungsweise nicht encounterten Zustand ab.
+- [x] `git diff --check` und die relevanten Webtests sind grün oder ein bereits bestehender, paketfremder Fehler ist klar benannt.
 
 ## Umsetzungshinweise
 
@@ -72,4 +81,4 @@ checks: []
 
 ## Ergebnisnotiz
 
-Noch offen.
+Das Web-View-Model übernimmt jetzt jede von null verschiedene saldierte Differenz zwischen öffentlich projizierter aktueller und gedruckter numerischer Stärke. Die Kartenansicht rendert positive und negative Werte über einen neutral benannten Modifier-Badge, verwendet für negative Werte das typografische Minus und nimmt den Wert in die barrierearme Kartenbeschriftung auf. Nullwerte, variable Druckstärke, Vorschau, Kartenrückseite und unbekannte Karten erzeugen keinen Modifier-Chip; Engine und Clown-Timing blieben unverändert.
