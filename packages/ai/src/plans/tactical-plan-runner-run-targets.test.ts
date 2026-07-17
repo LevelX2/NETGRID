@@ -260,7 +260,7 @@ describe("runnerPressureProbeAllowance", () => {
       recommendation: "gain_credits_first",
       accessPayoff: "unknown",
       scoreThreat: false,
-      score: -200,
+      score: 200,
       pathPassability: "blocked_unpayable",
       creditsAfterRun: -2,
     });
@@ -289,6 +289,37 @@ describe("runnerPressureProbeAllowance", () => {
         }),
         hqRun,
         defaultStep,
+      ),
+    ).toMatchObject({ kind: "probe_central" });
+  });
+
+  it("does not fund a reachable path gap when the run itself has no immediate value", () => {
+    const rdRun = runAction("run-rd", "rd");
+    const evaluation = runTargetEvaluation({
+      actionId: rdRun.actionId,
+      targetServerId: "rd",
+      targetKind: "rd",
+      recommendation: "gain_credits_first",
+      accessPayoff: "unknown",
+      scoreThreat: false,
+      score: -460,
+      pathPassability: "blocked_unpayable",
+      creditsAfterRun: -2,
+    });
+
+    expect(
+      runnerRunTargetCurrentStep(
+        planContext({
+          primaryStrategyId: "runner.rnd_pressure",
+          runnerClicks: 3,
+          runTargetEvaluations: [evaluation],
+        }),
+        rdRun,
+        {
+          stepId: "probe_central:rd",
+          kind: "probe_central",
+          desiredActionSemantics: ["run.start"],
+        },
       ),
     ).toMatchObject({ kind: "probe_central" });
   });

@@ -229,6 +229,8 @@ function evaluateRunnerRunTarget(
   const unknownUnrezzedIceCount = projectedServerIce.filter(
     (card) => card.rezzed !== true && card.known === false,
   ).length;
+  const runCommitment =
+    unknownUnrezzedIceCount > 0 ? "probe_only" : "full_path";
   const unrezzedIceRisk =
     unrezzedIceRiskModel.find((entry) => entry.serverId === targetServerId)
       ?.risk ?? 0;
@@ -352,6 +354,7 @@ function evaluateRunnerRunTarget(
       `credits_after_run_action:${creditsAfterAction}`,
       `credits_after_run:${creditsAfterRun}`,
       `unknown_unrezzed_ice_count:${unknownUnrezzedIceCount}`,
+      `run_commitment:${runCommitment}`,
       `unrezzed_ice_risk:${unrezzedIceRisk}`,
       `unrezzed_ice_risk_credit_buffer:${unrezzedIceRiskCreditBuffer}`,
       `unrezzed_ice_risk_underfunded:${unrezzedIceRiskUnderfunded}`,

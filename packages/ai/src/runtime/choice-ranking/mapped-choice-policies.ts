@@ -215,11 +215,25 @@ export function tacticalPlanInferiorRunTargetMappingShouldYield(
   if (
     mapping.plan.type !== "runner.opportunistic_central_run" ||
     mappedChoice.action.type !== "start_run" ||
-    overrideChoice.action.type !== "start_run" ||
-    scoreGap <= threshold
+    scoreGap <= 0
   ) {
     return false;
   }
+  if (overrideChoice.action.type !== "start_run") {
+    const expensiveLowReservePath = mappedChoice.scoreBreakdown.some(
+      (component) =>
+        component.key === "runner_visible_ice_path_cost" &&
+        component.value <= -1500 &&
+        /(?:^|;)credits_after:(?:0|1)(?:;|$)/.test(component.reason ?? ""),
+    );
+    if (!expensiveLowReservePath || overrideChoice.score <= 0) return false;
+    return !mappedChoice.scoreBreakdown.some(
+      (component) =>
+        component.key === "runner_hq_known_agenda" ||
+        component.key === "runner_rnd_fresh_memory",
+    );
+  }
+  if (scoreGap <= threshold) return false;
   const mappedServerId = semanticRuntimeServerId(mappedChoice.action);
   const overrideServerId = semanticRuntimeServerId(overrideChoice.action);
   if (

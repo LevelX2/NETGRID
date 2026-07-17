@@ -20,19 +20,34 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 describe("match 9FEF runner decision checkpoints", () => {
   it.each([
-    ["F01 chooses a positive Priority Wreck spend at D49", priorityWreckD49Json],
-    ["F01 chooses a positive Priority Wreck spend at D76", priorityWreckD76Json],
+    [
+      "F01 chooses a positive Priority Wreck spend at D49",
+      priorityWreckD49Json,
+    ],
+    [
+      "F01 chooses a positive Priority Wreck spend at D76",
+      priorityWreckD76Json,
+    ],
     ["F02 preserves the Jettison success window at D26", jettisonWindowD26Json],
     ["F02 retains Jettison during the D34 discard", retainJettisonD34Json],
     ["F03 targets useful Corp servers with RNZ at D66", rnzTargetD66Json],
     ["F03 avoids late RNZ setup at D159", noLateRnzD159Json],
-    ["F04 probes now or draws instead of dead funding at D88", probeNotFundingD88Json],
+    [
+      "F04 probes now or draws instead of dead funding at D88",
+      probeNotFundingD88Json,
+    ],
     ["F05 chooses open HQ over costly known R&D at D95", hqOverRdD95Json],
     ["F06 classifies the D109 HQ run as a probe", hqProbeD109Json],
     ["F05 avoids the repeated costly R&D run at D115", noRepeatRdD115Json],
-    ["F07 avoids funding a run that will not happen at D127", noDeadFundingD127Json],
+    [
+      "F07 avoids funding a run that will not happen at D127",
+      noDeadFundingD127Json,
+    ],
     ["F08 classifies the D143 remote run as a probe", remote2ProbeD143Json],
-    ["F08 declines to break without remaining payoff at D144", noBreakWithoutPayoffD144Json],
+    [
+      "F08 declines to break without remaining payoff at D144",
+      noBreakWithoutPayoffD144Json,
+    ],
   ])("satisfies %s", (_label, json) => {
     expectCheckpointToPass(fixture(json));
   });

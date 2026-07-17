@@ -282,6 +282,43 @@ describe("runner run plan path quote", () => {
     expect(quote.cannotReachReason).toBeUndefined();
   });
 
+  it("does not spend past a probe run's credit-loss budget after ICE is revealed", () => {
+    const input = runnerEncounterInput({
+      iceDefinitionId: "onr_v1_261_quandary",
+      iceTitle: "Quandary",
+      iceStrength: 2,
+      credits: 2,
+      legalActions: [
+        pumpAction({ costs: [{ credits: 1 }] }),
+        continueAction({
+          encounterWillEndRun: true,
+          unbrokenSubroutineCount: 1,
+        }),
+      ],
+    });
+    const basePlan = runPlan();
+    const probePlan: RunnerRunPlan = {
+      ...basePlan,
+      objective: {
+        kind: "probe_unknown_ice",
+        riskBudget: {
+          maxCreditLoss: 0,
+          maxDamage: 0,
+          allowEndTheRun: true,
+          evidence: ["run_objective:probe_unknown_ice"],
+        },
+      },
+      budget: { ...basePlan.budget, availableCredits: 2 },
+    };
+
+    const quote = quoteRunnerRunPath(input, probePlan);
+
+    expect(
+      quote.iceQuotes[0]?.cheapestAccessPreservingSequence,
+    ).toBeUndefined();
+    expect(quote.canReachAccess).toBe(false);
+  });
+
   it("requires breaking hard future-path modifiers before visible future ICE", () => {
     const input = runnerEncounterInput({
       iceDefinitionId: "onr_v1_261_quandary",

@@ -582,6 +582,12 @@ export function runnerRunTargetCurrentStep(
     context,
     evaluation,
   );
+  const fundingHasImmediateRunValue =
+    (evaluation?.score ?? 0) > 0 ||
+    evaluation?.scoreThreat === true ||
+    runnerCentralMatchpointAccessOpportunity(context, evaluation);
+  const probeOnly =
+    evaluation?.evidence.includes("run_commitment:probe_only") === true;
   if (evaluation?.recommendation === "draw_for_damage_buffer") {
     return createPlanStep({
       stepId: `draw_hand_buffer_before_run:${evaluation.targetServerId}`,
@@ -595,6 +601,8 @@ export function runnerRunTargetCurrentStep(
   }
   if (
     evaluation?.recommendation === "gain_credits_first" &&
+    !probeOnly &&
+    fundingHasImmediateRunValue &&
     !preserveLastClickForScoreThreat &&
     !preserveReachableMatchpointRun &&
     (boundedPathFunding || urgentContestFunding || concreteEconomyFunding)

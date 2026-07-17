@@ -593,7 +593,20 @@ function sequenceForActions(params: {
     estimatedPayment?.creditsAfterPayment ??
     payment?.creditsAfterPayment ??
     params.input.playerView.own.credits - cashCost;
-  const violatesReserve = creditsAfterSequence < reserveTarget;
+  const probeCreditLossBeforeSequence =
+    params.plan.objective.kind === "probe_unknown_ice"
+      ? Math.max(
+          0,
+          params.plan.budget.availableCredits -
+            params.input.playerView.own.credits,
+        )
+      : 0;
+  const projectedProbeCreditLoss = probeCreditLossBeforeSequence + cashCost;
+  const violatesProbeRiskBudget =
+    params.plan.objective.kind === "probe_unknown_ice" &&
+    projectedProbeCreditLoss > params.plan.objective.riskBudget.maxCreditLoss;
+  const violatesReserve =
+    creditsAfterSequence < reserveTarget || violatesProbeRiskBudget;
   return {
     steps: params.actions.map(legalActionRef),
     totalCost: params.totalCost,
@@ -612,6 +625,7 @@ function sequenceForActions(params: {
     riskTags: [
       ...(params.riskTags ?? []),
       ...(!affordable ? ["sequence_unaffordable"] : []),
+      ...(violatesProbeRiskBudget ? ["probe_credit_loss_budget_exceeded"] : []),
     ],
     evidence: [
       ...params.evidence,
@@ -621,6 +635,14 @@ function sequenceForActions(params: {
       `sequence_credits_after:${creditsAfterSequence}`,
       `sequence_reserve_target:${reserveTarget}`,
       `sequence_affordable:${affordable}`,
+      ...(params.plan.objective.kind === "probe_unknown_ice"
+        ? [
+            `sequence_probe_credit_loss_before:${probeCreditLossBeforeSequence}`,
+            `sequence_probe_credit_loss_projected:${projectedProbeCreditLoss}`,
+            `sequence_probe_credit_loss_limit:${params.plan.objective.riskBudget.maxCreditLoss}`,
+            `sequence_probe_credit_loss_budget_exceeded:${violatesProbeRiskBudget}`,
+          ]
+        : []),
       ...(estimatedRemainingCost > 0
         ? [`sequence_estimated_remaining_cost:${estimatedRemainingCost}`]
         : []),
