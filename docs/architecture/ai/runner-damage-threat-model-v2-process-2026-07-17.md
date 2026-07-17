@@ -1,6 +1,6 @@
 # Runner-Damage-Threat-Model-v2-Prozess
 
-Status: P6 Gesamtverifikation und Integration aktiv
+Status: P6 abgeschlossen; lokaler Merge und Cleanup freigegeben
 
 ## Quelle und Zielprüfung
 
@@ -226,7 +226,7 @@ Commit: `refactor(ai): remove legacy damage pressure paths`
 
 ### P6: Breite Verifikation, Wissenspflege und Integration
 
-Status: aktiv
+Status: abgeschlossen
 
 Ziel: aktueller Code, Dokumentation, `main` und Cleanup sind nachweislich
 abgeschlossen.
@@ -246,6 +246,16 @@ Statusprüfungen; bei Vollsuite-Rot Vergleich auf demselben `main`.
 
 Done-Gate: Main enthält alle Paketcommits, ist sauber, Worktree-Pfad und Branch
 sind entfernt, kein Push wurde ausgeführt.
+
+Verifikation vor Integration: 111/111 Fokus-/Consumer-/Plan-/F5D-Tests,
+22/22 finale Modell-/F450-/F5D-Grenztests, Shared-/Engine-/AI-Typecheck und
+`check:ai:full` sind grün. Die projektübliche dreigeteilte AI-Suite hat
+2462/2471 grüne Tests; die neun roten Tests entsprechen den bereits
+dokumentierten Broker-/Hint-/DFE6-/MRGSG-Baselines. Ein zunächst zusätzlich
+roter F450-Gegencheckpoint wurde als echtes Delta korrigiert und erneut grün
+verifiziert. Aktuelles `main` wurde konfliktfrei in den Arbeitsbranch gemergt.
+Final Review und Monatslog sind aktualisiert. Der Controller führt nach diesem
+Paketcommit den lokalen Main-Merge und die doppelte Cleanup-Prüfung aus.
 
 Commit: `docs(ai): close damage threat model v2 review`
 
