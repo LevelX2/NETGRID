@@ -822,6 +822,27 @@ describe("DeckCapabilityProfile", () => {
       ]),
     });
   });
+
+  it("does not treat Schematics Search Engine title text as a tutor", () => {
+    const profile = buildDeckCapabilityProfile({
+      side: "runner",
+      playerView: playerView("runner"),
+      legalActions: [],
+      deckSnapshot: runnerSnapshot([
+        ["onr_classic_032_schematics-search-engine", 2],
+      ]),
+    });
+
+    expect(profile.runner?.searchAccess.tools).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          cardId: "onr_classic_032_schematics-search-engine",
+        }),
+      ]),
+    );
+    expect(profile.runner?.searchAccess.canSearchProgramsNow).toBe(false);
+    expect(profile.runner?.searchAccess.canSearchBreakersNow).toBe(false);
+  });
 });
 
 function runnerSnapshot(

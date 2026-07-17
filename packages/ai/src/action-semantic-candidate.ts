@@ -8,6 +8,7 @@ import { applyBasicActionSemantics } from "./actions/basic-action-semantics";
 import { applyRunAccessDecisionModel } from "./actions/run-access-decision-model";
 import { applyRandomBadPublicityModel } from "./actions/random-bad-publicity-model";
 import { applyHiddenResourceVirusModel } from "./actions/hidden-resource-virus-model";
+import { applyTraceCounterSemantics } from "./actions/trace-counter-semantics";
 import type {
   ActionSemanticVisibilityScope,
   ActionGateResult,
@@ -128,8 +129,12 @@ function projectActionSemanticCandidate(
     costTimingCandidate,
     action,
   );
-  const cardSemanticCandidate = applyCardSemanticJoin(
+  const traceCounterCandidate = applyTraceCounterSemantics(
     tagEffectCandidate,
+    action,
+  );
+  const cardSemanticCandidate = applyCardSemanticJoin(
+    traceCounterCandidate,
     cardSemanticProfilesByDefinitionId,
   );
   const runAccessCandidate = applyRunAccessDecisionModel(

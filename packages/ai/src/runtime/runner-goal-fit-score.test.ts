@@ -5,6 +5,35 @@ import type { RunnerTacticalGoal } from "../runner-tactical-goals";
 import { runnerSemanticGoalFitScoreComponent } from "./runner-goal-fit-score";
 
 describe("runnerSemanticGoalFitScoreComponent", () => {
+  it("prioritizes a legal persistent trace-counter removal on the last click", () => {
+    const action = {
+      actionId: "remove-trace-counter",
+      side: "runner",
+      type: "trigger_ability",
+      costs: [{ clicks: 1, credits: 1 }],
+      payload: {
+        runnerAbility: "remove_runner_trace_counter",
+        counterType: "trace_tag_counter",
+        removeCounterAmount: 1,
+      },
+    } as unknown as LegalAction;
+    const input = runnerInputWithGoals([]);
+    input.playerView.own.clicks = 1;
+
+    const component = runnerSemanticGoalFitScoreComponent(
+      input,
+      action,
+      "basic_economy_draw",
+      undefined,
+      testDependencies(),
+    );
+
+    expect(component).toMatchObject({
+      key: "runner_goal_fit_persistent_trace_counter",
+      value: 1050,
+    });
+  });
+
   it("scores gain-credit actions that match runner economy tactical goals", () => {
     const action = {
       actionId: "gain-credit",

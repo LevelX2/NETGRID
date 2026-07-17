@@ -7,6 +7,7 @@ import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import { createAiHintsByCard } from "../ai-hints";
 import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
 import type { RunnerTacticalGoal } from "../runner-tactical-goals";
+import { removesPersistentTraceTagCounter } from "../actions/trace-counter-semantics";
 import {
   runnerCoverageSearchSaturation,
   runnerVisibleSearchCoverageNeed,
@@ -46,6 +47,21 @@ export function runnerSemanticGoalFitScoreComponent(
   dependencies: RunnerGoalFitScoreDependencies,
 ): AiDecisionScoreComponent | undefined {
   if (input.side !== "runner" || action.side !== "runner") return undefined;
+  if (
+    removesPersistentTraceTagCounter(action) &&
+    runnerActionUsesLastClick(input, action)
+  ) {
+    return {
+      key: "runner_goal_fit_persistent_trace_counter",
+      label: "Persistenten Trace-Zähler entfernen",
+      value: 1050,
+      reason: [
+        `runner_clicks:${input.playerView.own.clicks}`,
+        `action_click_cost:${actionClickCost(action)}`,
+        "counter_type:trace_tag_counter",
+      ].join("|"),
+    };
+  }
   if (
     scopeId === "tag_removal" &&
     input.playerView.own.tags > 0 &&
@@ -210,6 +226,21 @@ export function runnerSemanticGoalFitScoreComponent(
     };
   }
   return undefined;
+}
+
+function runnerActionUsesLastClick(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  const clickCost = actionClickCost(action);
+  return clickCost > 0 && input.playerView.own.clicks <= clickCost;
+}
+
+function actionClickCost(action: LegalAction): number {
+  return action.costs.reduce(
+    (sum, cost) => sum + Math.max(0, cost.clicks ?? 0),
+    0,
+  );
 }
 
 function hintedDrawAmountForAction(

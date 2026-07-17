@@ -681,7 +681,7 @@ function searchAccessToolForRecord(
   params: BuildDeckCapabilityProfileParams,
   record: CardCapabilityRecord,
 ): SearchAccessTool | undefined {
-  const text = normalizedRecordTextWithoutRoles(record);
+  const text = normalizedRecordRulesTextWithoutRoles(record);
   const roleSignals = [...record.roles, ...record.planRoles];
   const canSearchPrograms =
     deckCapabilityTextHasProgramSearchSignal(text) ||
@@ -728,6 +728,14 @@ function normalizedRecordTextWithoutRoles(record: CardCapabilityRecord): string 
     ...record.subtypes,
     record.text,
   ].join(" ").toLowerCase();
+}
+
+function normalizedRecordRulesTextWithoutRoles(
+  record: CardCapabilityRecord,
+): string {
+  return [record.type, ...record.subtypes, record.text]
+    .join(" ")
+    .toLowerCase();
 }
 
 function buildEconomyBankTools(

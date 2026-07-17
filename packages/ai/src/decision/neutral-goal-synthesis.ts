@@ -84,6 +84,12 @@ function synthesizeRunnerNeutralGoals(
       "candidate_semantic:tag.remove",
     ]));
   }
+  if (semantics.has("counter.remove_trace_tag")) {
+    goals.push(goal("runner.neutral.persistent_trace_counter", "cleanup", 980, [
+      "neutral_goal:persistent_trace_counter",
+      "candidate_semantic:counter.remove_trace_tag",
+    ]));
+  }
   if (goals.length === 0) {
     goals.push(goal("runner.neutral.survival", "risk_control", 500, [
       "neutral_goal:survival",

@@ -8,6 +8,7 @@ import {
 import { runnerActionReserveExclusion } from "./runner-action-reserve";
 import { semanticRuntimeServerId } from "./semantic-runtime-scope";
 import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
+import { removesPersistentTraceTagCounter } from "../actions/trace-counter-semantics";
 
 type PlayerViewServer = AiDecisionInput["playerView"]["servers"][number];
 type KnownIcePathAssessment = ReturnType<typeof assessKnownRezzedIcePath>;
@@ -191,6 +192,15 @@ export function semanticRuntimeActionExclusion(
       ].join("|"),
     };
   }
+  const persistentTraceCounterRunExclusion =
+    runnerAvoidablePersistentTraceCounterRunExclusion(
+      input,
+      action,
+      runTargetEvaluation,
+    );
+  if (persistentTraceCounterRunExclusion) {
+    return persistentTraceCounterRunExclusion;
+  }
   if (
     runTargetEvaluation &&
     runTargetEvaluation.runActionProjection.structure === "event_run" &&
@@ -264,6 +274,44 @@ export function semanticRuntimeActionExclusion(
       ? "Run-Ziel nicht erreichbar"
       : "Run-Ziel nicht bezahlbar",
     reason: dependencies.knownIcePathReason(assessment, server.id),
+  };
+}
+
+function runnerAvoidablePersistentTraceCounterRunExclusion(
+  input: AiDecisionInput,
+  action: LegalAction,
+  evaluation: RunnerRunTargetEvaluation | undefined,
+): SemanticRuntimeExclusion | undefined {
+  if (
+    input.side !== "runner" ||
+    action.type !== "start_run" ||
+    !evaluation?.visibleIceRunHazards?.some(
+      (hazard) =>
+        hazard.kind === "trace_tag_counter" && hazard.unavoidable === true,
+    )
+  ) {
+    return undefined;
+  }
+  const actionClickCost = action.costs.reduce(
+    (sum, cost) => sum + Math.max(0, cost.clicks ?? 0),
+    0,
+  );
+  if (input.playerView.own.clicks > actionClickCost) return undefined;
+  const counterRemoval = input.legalActions.find(
+    removesPersistentTraceTagCounter,
+  );
+  if (!counterRemoval) return undefined;
+  return {
+    key: "avoidable_persistent_trace_counter_last_click",
+    label: "Vermeidbarer persistenter Trace-Zähler",
+    reason: [
+      `action:${action.actionId}`,
+      `target:${evaluation.targetServerId}`,
+      `action_click_cost:${actionClickCost}`,
+      `runner_clicks:${input.playerView.own.clicks}`,
+      `counter_removal:${counterRemoval.actionId}`,
+      "unavoidable_trace_tag_counter:true",
+    ].join("|"),
   };
 }
 
