@@ -301,6 +301,9 @@ function evaluateRunnerRunTarget(
     accessTargetKind,
     actionId: projection.actionId,
     accessPayoff,
+    ...(payoff.accessPayoffContestable !== undefined
+      ? { accessPayoffContestable: payoff.accessPayoffContestable }
+      : {}),
     knownAccessState: payoff.knownAccessState,
     multiaccessAvailable,
     pathPassability,
@@ -335,6 +338,9 @@ function evaluateRunnerRunTarget(
       `access_server:${accessServerId}`,
       `access_target_kind:${accessTargetKind}`,
       `access_payoff:${accessPayoff}`,
+      ...(payoff.accessPayoffContestable !== undefined
+        ? [`access_payoff_contestable:${payoff.accessPayoffContestable}`]
+        : []),
       `known_access_state:${payoff.knownAccessState}`,
       `path_passability:${pathPassability}`,
       ...(path.missingCoverage?.length
@@ -705,6 +711,7 @@ function payoffForTarget(
   targetKind: RunnerRunTargetKind,
 ): {
   accessPayoff: RunnerAccessPayoff;
+  accessPayoffContestable?: boolean;
   knownAccessState: RunnerKnownAccessState;
   scoreAdjustment: number;
   evidence: string[];
@@ -774,12 +781,14 @@ function rankedAccessTargetEvaluationEvidence(
 
 function remotePayoffToRunTarget(payoff: KnownRemoteAccessPayoff): {
   accessPayoff: RunnerAccessPayoff;
+  accessPayoffContestable: boolean;
   knownAccessState: RunnerKnownAccessState;
   scoreAdjustment: number;
   evidence: string[];
 } {
   return {
     accessPayoff: payoff.payoff === "changed" ? "unknown" : payoff.payoff,
+    accessPayoffContestable: payoff.contestable,
     knownAccessState: payoff.knownNoCurrentPayoff
       ? "known_no_current_payoff"
       : payoff.payoff === "changed"

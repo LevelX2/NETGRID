@@ -130,6 +130,18 @@ export function signalsForCard(
       (rulesText) =>
         typeof rulesText === "string" && /\bthis turn\b/i.test(rulesText),
     );
+  const requiresHostedIcebreaker =
+    (hint?.effects ?? []).some((effect) => {
+      const record = effect as unknown as Record<string, unknown>;
+      return record.kind === "program_host" && record.target === "icebreaker";
+    }) ||
+    (hint?.targetProfiles ?? []).some((profile) => {
+      const record = profile as unknown as Record<string, unknown>;
+      return (
+        record.kind === "hosted_install_target" &&
+        record.targetType === "icebreaker"
+      );
+    });
   return {
     text,
     roles,
@@ -137,7 +149,37 @@ export function signalsForCard(
     candidateSignals,
     effectTargets,
     requiresSameTurnAccess,
+    requiresHostedIcebreaker,
   };
+}
+
+export function hostableIcebreakerAvailableAfterInstall(
+  input: AiDecisionInput,
+  hostCard: VisibleCard,
+  hostInstallAction: LegalAction | undefined,
+): boolean {
+  if (!hostInstallAction) return false;
+  const remainingClicks =
+    input.playerView.own.clicks - actionClickCost(hostInstallAction);
+  if (remainingClicks < 1) return false;
+  const remainingCredits =
+    input.playerView.own.credits - (actionCreditCost(hostInstallAction) ?? 0);
+  if (remainingCredits < 0) return false;
+  return input.playerView.own.gripOrHq.some((candidate) => {
+    if (
+      candidate.instanceId === hostCard.instanceId ||
+      candidate.known === false
+    ) {
+      return false;
+    }
+    const candidateText = signalsForCard(candidate, []).text;
+    if (!looksLikeBreaker(candidate, candidateText)) return false;
+    const installCost =
+      visibleOrRuntimeNumber(candidate, "installCost") ??
+      visibleOrRuntimeNumber(candidate, "cost") ??
+      0;
+    return installCost <= remainingCredits;
+  });
 }
 
 export function persistentFunctionalProfileForCard(

@@ -27,6 +27,7 @@ import {
   type TacticalPlanCreditValueDependencies,
 } from "./tactical-plan-action-values";
 import { runnerHasConcreteFundingNeed } from "./tactical-plan-runner-funding-need";
+import { actionServerId } from "./tactical-plan-server-targets";
 import type { PlanStep, TacticalPlan } from "./tactical-plan-types";
 import { visibleCardByInstanceId } from "./tactical-plan-visible-cards";
 
@@ -63,7 +64,23 @@ export function planStepCandidatePriority(
   if (step.kind === "convert_success_window") {
     return successWindowStepPriority(candidate, action);
   }
+  if (isRunPlanStep(step)) {
+    return openRunStepPriority(action, input);
+  }
   return 0;
+}
+
+function openRunStepPriority(
+  action: LegalAction,
+  input: AiDecisionInput,
+): number {
+  const serverId = actionServerId(action);
+  const server = serverId
+    ? input.playerView.servers.find((candidate) => candidate.id === serverId)
+    : undefined;
+  if (!server || server.ice.length > 0) return 0;
+  if (action.type === "start_run") return 400;
+  return Math.max(1, 200 - actionCreditPenalty(action));
 }
 
 export function candidateMatchesStep(

@@ -144,9 +144,14 @@ export function planPortfolioTurnKey(input: AiDecisionInput): string {
 export function advancePlanPortfolioForSelectedAction(
   portfolio: PlanPortfolioSnapshot,
   selectedActionId: string,
+  selectedPortfolioEntryId?: string,
 ): PlanPortfolioSnapshot {
   const advance = (entry: PlanPortfolioEntry): PlanPortfolioEntry => {
-    if (!entry.actionCandidateIds.includes(selectedActionId)) return entry;
+    const mappedByCandidate =
+      entry.actionCandidateIds.includes(selectedActionId);
+    const mappedBySelectedStep =
+      selectedPortfolioEntryId === entry.portfolioEntryId;
+    if (!mappedByCandidate && !mappedBySelectedStep) return entry;
     return {
       ...entry,
       lifecycle: entry.lifecycle === "suspended" ? "suspended" : "active",
@@ -159,6 +164,9 @@ export function advancePlanPortfolioForSelectedAction(
       evidence: [
         ...entry.evidence,
         `plan_portfolio_action_progress:${selectedActionId}`,
+        ...(mappedBySelectedStep && !mappedByCandidate
+          ? ["plan_portfolio_action_progress_source:selected_mapped_step"]
+          : []),
       ],
     };
   };
@@ -195,10 +203,7 @@ export function planPortfolioEntryCanAct(entry: PlanPortfolioEntry): boolean {
   ) {
     return false;
   }
-  return (
-    entry.role !== "background" ||
-    entry.cadence.actionsUsedThisTurn < entry.cadence.maxActionsPerTurn
-  );
+  return true;
 }
 
 export function buildPlanPortfolioActionContributions(
@@ -206,12 +211,17 @@ export function buildPlanPortfolioActionContributions(
 ): PlanActionContribution[] {
   return allPortfolioEntries(portfolio).flatMap((entry) => {
     if (!planPortfolioEntryCanAct(entry)) return [];
+    const backgroundCadenceReached =
+      entry.role === "background" &&
+      entry.cadence.actionsUsedThisTurn >= entry.cadence.maxActionsPerTurn;
     const roleValue =
       entry.role === "reactive_interrupt"
         ? 1_000
         : entry.role === "foreground"
           ? 800
-          : 300;
+          : backgroundCadenceReached
+            ? 80
+            : 300;
     return entry.actionCandidateIds.map((actionId) => ({
       actionId,
       portfolioEntryId: entry.portfolioEntryId,
@@ -221,6 +231,9 @@ export function buildPlanPortfolioActionContributions(
       evidence: [
         `plan_contribution_role:${entry.role}`,
         `plan_contribution_plan:${entry.planType}`,
+        ...(backgroundCadenceReached
+          ? ["plan_contribution_background_cadence:soft_limit_reached"]
+          : []),
       ],
     }));
   });
@@ -310,6 +323,8 @@ export function adaptTacticalPlanToPortfolioEntry(params: {
     actionCandidateIds: [...params.plan.currentStep.actionCandidateIds].sort(),
     cadence: {
       turnKey: params.turnKey,
+      // Ranking threshold only: recurring background work remains legal when
+      // no more meaningful foreground or interrupt action is available.
       maxActionsPerTurn: role === "background" ? 1 : 4,
       actionsUsedThisTurn,
       ...(params.previousEntry?.cadence.lastProgressTurnKey

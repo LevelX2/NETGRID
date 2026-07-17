@@ -86,6 +86,9 @@ function urgentReachableRemoteContest(
   const hasVisibleAgenda = server.root.some(
     (card) => card.known !== false && card.type === "agenda",
   );
+  if (target.accessPayoffContestable === false && !hasVisibleAgenda) {
+    return false;
+  }
   return (
     target.scoreThreat ||
     target.accessPayoff === "score_threat" ||

@@ -29,6 +29,9 @@ describe("tactical plan memory with portfolio continuity", () => {
       tacticalPlans: [bankPlan],
       turnKey: "runner:turn:3",
     });
+    // The portfolio is assembled before the selected step is mapped. Cadence
+    // must still advance from the mapped selected step remembered below.
+    initialPortfolio.backgrounds[0]!.actionCandidateIds = [];
     rememberSelectedPlan(
       initialInput,
       bankPlan,

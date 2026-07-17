@@ -441,6 +441,59 @@ describe("tacticalPlanMappedChoice Runner overrides", () => {
     expect(result.choice?.action.actionId).toBe("draw");
   });
 
+  it("yields a weak cumulative install when a basic draw is clearly better", () => {
+    const install = legalAction("install-memory-support", "install_card");
+    const draw = legalAction("draw", "draw_card");
+    const mappedInstall = choice(install, 88, [], {
+      key: "runner_persistent_install_fit",
+      value: 94,
+      reason: "delta:cumulative_capacity|duplicate:useful_backup|fit:376",
+    });
+    const drawChoice = choice(draw, 348);
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [drawChoice, mappedInstall],
+      bestHandCardMapping([install]),
+      drawChoice,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("draw");
+    expect(result.overrideReason).toBe("deferred_development_mapping_yield");
+  });
+
+  it("yields a low-delta development install to a materially stronger bank commitment", () => {
+    const install = legalAction("install-pressure-hardware", "install_card");
+    const bank = legalAction("load-bank", "activated_card_ability");
+    const mappedInstall = choice(install, 707, [], {
+      key: "runner_persistent_install_fit",
+      value: 133,
+      reason: "delta:new_coverage|duplicate:none|fit:530",
+    });
+    const bankChoice = choice(
+      bank,
+      1612,
+      scoreComponentEvidence("runner_bank_investment_commitment"),
+      {
+        key: "runner_bank_investment_commitment",
+        value: 1550,
+        reason: "bankCommitmentStatus:build_second_load",
+      },
+    );
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [bankChoice, mappedInstall],
+      bestHandCardMapping([install]),
+      bankChoice,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("load-bank");
+    expect(result.overriddenMappedChoice?.action.actionId).toBe(
+      "install-pressure-hardware",
+    );
+  });
+
   it("lets confirmed-damage reaction reserve interrupt an opportunistic run", () => {
     const run = legalAction("run-hq", "start_run", { serverId: "hq" });
     const gain = legalAction("gain", "gain_credit");

@@ -105,7 +105,102 @@ describe("runner run plan revalidation", () => {
     expect(revalidated.pathQuote.server).toBe("hq");
     expect(revalidated.pathQuote.canReachAccess).toBe(true);
   });
+
+  it("recommends abort when the visible remote trash payoff would consume the remaining liquidity", () => {
+    const input = remoteServerMovementInput(3);
+
+    const revalidated = revalidateRunnerRunPlan(input, remoteRunPlan());
+
+    expect(revalidated.pathQuote.canReachAccess).toBe(true);
+    expect(revalidated.pathQuote.expectedRemainingCredits).toBe(3);
+    expect(revalidated.revalidation.status).toBe("abort_recommended");
+    expect(revalidated.revalidation.reasons).toContain(
+      "known_remote_access_payoff_unfunded",
+    );
+  });
+
+  it("keeps a visible remote trash payoff active when current liquidity preserves the access reserve", () => {
+    const input = remoteServerMovementInput(12);
+
+    const revalidated = revalidateRunnerRunPlan(input, remoteRunPlan());
+
+    expect(revalidated.pathQuote.canReachAccess).toBe(true);
+    expect(revalidated.pathQuote.expectedRemainingCredits).toBe(12);
+    expect(revalidated.revalidation.status).not.toBe("abort_recommended");
+    expect(revalidated.revalidation.reasons).not.toContain(
+      "known_remote_access_payoff_unfunded",
+    );
+  });
 });
+
+function remoteServerMovementInput(credits: number): AiDecisionInput {
+  const input = runnerEncounterInput({
+    iceDefinitionId: "onr_v1_261_quandary",
+    iceTitle: "Quandary",
+    iceStrength: 2,
+    legalActions: [
+      action("jack_out", {
+        actionId: "jack-out",
+        source: "game_rule",
+        costs: [],
+        payload: {},
+      }),
+      continueAction({ encounterWillEndRun: false, unbrokenSubroutineCount: 0 }),
+    ],
+  });
+  input.playerView.timingPoint = "run.jack_out_window";
+  input.playerView.own.credits = credits;
+  input.playerView.servers = [
+    {
+      id: "remote_1",
+      label: "Remote 1",
+      ice: [],
+      root: [
+        {
+          instanceId: "dr-dreff-1",
+          definitionId: "onr_v1_358_dr-dreff",
+          title: "Dr. Dreff",
+          type: "upgrade",
+          known: true,
+          rezzed: true,
+          trashCost: 3,
+        },
+      ],
+    },
+  ];
+  input.playerView.run = {
+    attackedServerId: "remote_1",
+    phase: "movement",
+    position: { kind: "server", serverId: "remote_1" },
+    successful: false,
+  };
+  return input;
+}
+
+function remoteRunPlan(): RunnerRunPlan {
+  const plan = runPlan({ reasons: ["fingerprint:previous"] });
+  return {
+    ...plan,
+    objective: {
+      kind: "probe_unknown_ice",
+      riskBudget: {
+        maxCreditLoss: 8,
+        maxDamage: 0,
+        allowEndTheRun: true,
+        evidence: [],
+      },
+    },
+    targetServer: { id: "remote_1" },
+    accessIntent: {
+      ...plan.accessIntent!,
+      server: "remote_1",
+    },
+    pathQuote: {
+      ...plan.pathQuote,
+      server: "remote_1",
+    },
+  };
+}
 
 function runnerEncounterInput(params: {
   attackedServerId?: "hq" | "rd";

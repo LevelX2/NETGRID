@@ -22,31 +22,38 @@ describe("belief-state hidden zone action classification", () => {
 
   it("matches hidden-zone action markers by bounded terms", () => {
     expect(hiddenZoneActionEventFamily("corp_rd_shuffle")).toBe("shuffle");
-    expect(hiddenZoneActionEventFamily("new_blood_conceal_reorder_installed_ice")).toBe(
-      "arrange",
-    );
+    expect(
+      hiddenZoneActionEventFamily("new_blood_conceal_reorder_installed_ice"),
+    ).toBe("arrange");
     expect(hiddenZoneActionEventFamily("p3_33_private_look")).toBe("reveal");
   });
 
   it("ignores hidden-zone action substring noise", () => {
     expect(hiddenZoneActionEventFamily("reshuffleish_noise")).toBeUndefined();
     expect(hiddenZoneActionEventFamily("concealment_noise")).toBeUndefined();
-    expect(hiddenZoneActionEventFamily("private_lookish_noise")).toBeUndefined();
+    expect(
+      hiddenZoneActionEventFamily("private_lookish_noise"),
+    ).toBeUndefined();
   });
 });
 
 describe("belief-state revealed opponent ownership", () => {
   it("does not classify the Runner's own searched card as an opponent card", () => {
-    const ownSearchResult = publicEvent("evt_runner_search", "resolve_choice", 1, {
-      actor: "runner",
-      actionType: "resolve_choice",
-      hiddenZoneAction: "p3_37_search_stack_to_grip",
-      cardDefinitionId: "onr_v1_047_pile-driver",
-      title: "Pile Driver",
-      revealKind: "reveal",
-      publicRevealKind: "reveal",
-      publicRevealDefinitionId: "onr_v1_047_pile-driver",
-    });
+    const ownSearchResult = publicEvent(
+      "evt_runner_search",
+      "resolve_choice",
+      1,
+      {
+        actor: "runner",
+        actionType: "resolve_choice",
+        hiddenZoneAction: "p3_37_search_stack_to_grip",
+        cardDefinitionId: "onr_v1_047_pile-driver",
+        title: "Pile Driver",
+        revealKind: "reveal",
+        publicRevealKind: "reveal",
+        publicRevealDefinitionId: "onr_v1_047_pile-driver",
+      },
+    );
     const opponentAccess = publicEvent("evt_corp_access", "access_card", 2, {
       actor: "runner",
       actionType: "access_card",
@@ -57,8 +64,8 @@ describe("belief-state revealed opponent ownership", () => {
 
     const revealedOpponentSubjects = reconstructBeliefState(
       runnerInput([ownSearchResult, opponentAccess]),
-    ).entries
-      .filter((entry) => entry.kind === "revealed_opponent_fact")
+    )
+      .entries.filter((entry) => entry.kind === "revealed_opponent_fact")
       .map((entry) => entry.subject);
 
     expect(revealedOpponentSubjects).toContain(
@@ -277,10 +284,7 @@ describe("belief-state HQ hand memory retention", () => {
       handCount: 2,
       knownCount: 2,
       allCardsKnown: true,
-      knownDefinitions: [
-        "onr_v1_230_cortical-scanner",
-        "onr_v1_237_data-wall",
-      ],
+      knownDefinitions: ["onr_v1_230_cortical-scanner", "onr_v1_237_data-wall"],
     });
     expect(hqMemory?.ledger).toMatchObject({
       unknownRestCount: 0,
@@ -350,12 +354,17 @@ describe("belief-state HQ hand memory retention", () => {
       actor: "corp",
       actionType: "mandatory_draw",
     });
-    const malformedRemoteInstall = publicEvent("evt_install", "install_card", 3, {
-      actor: "corp",
-      actionType: "install_card",
-      serverId: "remote_1_noise",
-      installPlacement: "ice",
-    });
+    const malformedRemoteInstall = publicEvent(
+      "evt_install",
+      "install_card",
+      3,
+      {
+        actor: "corp",
+        actionType: "install_card",
+        serverId: "remote_1_noise",
+        installPlacement: "ice",
+      },
+    );
 
     const belief = reconstructBeliefState(
       runnerInput([hqLook, unknownDraw, malformedRemoteInstall], 2),
@@ -373,22 +382,32 @@ describe("belief-state HQ hand memory retention", () => {
       "simple_economy_asset",
       "simple_upgrade",
     ]);
-    const hiddenHqRootInstall = publicEvent("evt_install_hq_root", "install_card", 2, {
-      actor: "corp",
-      actionType: "install_card",
-      serverId: "hq",
-      installPlacement: "root",
-    });
-    const accessedHqRootUpgrade = publicEvent("evt_access_hq_root", "access_card", 3, {
-      actor: "runner",
-      actionType: "access_card",
-      serverId: "hq",
-      serverLabel: "HQ",
-      cardDefinitionId: "simple_upgrade",
-      accessedCardPositionKey: "root:0",
-      accessedArea: "root",
-      accessedIndex: 0,
-    });
+    const hiddenHqRootInstall = publicEvent(
+      "evt_install_hq_root",
+      "install_card",
+      2,
+      {
+        actor: "corp",
+        actionType: "install_card",
+        serverId: "hq",
+        installPlacement: "root",
+      },
+    );
+    const accessedHqRootUpgrade = publicEvent(
+      "evt_access_hq_root",
+      "access_card",
+      3,
+      {
+        actor: "runner",
+        actionType: "access_card",
+        serverId: "hq",
+        serverLabel: "HQ",
+        cardDefinitionId: "simple_upgrade",
+        accessedCardPositionKey: "root:0",
+        accessedArea: "root",
+        accessedIndex: 0,
+      },
+    );
 
     const belief = reconstructBeliefState(
       runnerInput([hqLook, hiddenHqRootInstall, accessedHqRootUpgrade], 2),
@@ -435,9 +454,7 @@ describe("belief-state HQ hand memory retention", () => {
       hiddenZoneAction: "hq_shuffle",
     });
 
-    const belief = reconstructBeliefState(
-      runnerInput([hqLook, reorder], 2),
-    );
+    const belief = reconstructBeliefState(runnerInput([hqLook, reorder], 2));
     const hqMemory = belief.runnerOpponentModel?.hqHandMemory;
 
     expect(hqMemory).toMatchObject({
@@ -460,12 +477,17 @@ describe("belief-state HQ hand memory retention", () => {
       "simple_economy_asset",
       "simple_upgrade",
     ]);
-    const hiddenRootInstall = publicEvent("evt_hidden_install", "install_card", 2, {
-      actor: "corp",
-      actionType: "install_card",
-      serverId: "remote_1",
-      installPlacement: "root",
-    });
+    const hiddenRootInstall = publicEvent(
+      "evt_hidden_install",
+      "install_card",
+      2,
+      {
+        actor: "corp",
+        actionType: "install_card",
+        serverId: "remote_1",
+        installPlacement: "root",
+      },
+    );
     const currentHqAccess = publicEvent("evt_hq_access", "access_card", 3, {
       actor: "runner",
       actionType: "access_card",
@@ -503,13 +525,18 @@ describe("belief-state HQ hand memory retention", () => {
       "onr_v1_297_overtime-incentives",
       "onr_v1_340_setup",
     ]);
-    const trashAccessedHqCard = publicEvent("evt_hq_trash", "trash_accessed_card", 2, {
-      actor: "runner",
-      actionType: "trash_accessed_card",
-      serverLabel: "HQ",
-      cardDefinitionId: "onr_proteus_062_lesley-major",
-      title: "Lesley Major",
-    });
+    const trashAccessedHqCard = publicEvent(
+      "evt_hq_trash",
+      "trash_accessed_card",
+      2,
+      {
+        actor: "runner",
+        actionType: "trash_accessed_card",
+        serverLabel: "HQ",
+        cardDefinitionId: "onr_proteus_062_lesley-major",
+        title: "Lesley Major",
+      },
+    );
 
     const belief = reconstructBeliefState(
       runnerInput([hqLook, trashAccessedHqCard], 2),
@@ -542,13 +569,18 @@ describe("belief-state HQ hand memory retention", () => {
       "onr_v1_340_setup",
       "onr_v1_304_systematic-layoffs",
     ]);
-    const contradictingHqAccess = publicEvent("evt_hq_access_data_wall", "access_card", 2, {
-      actor: "runner",
-      actionType: "access_card",
-      serverLabel: "HQ",
-      cardDefinitionId: "onr_v1_238_data-wall-2-0",
-      title: "Data Wall 2.0",
-    });
+    const contradictingHqAccess = publicEvent(
+      "evt_hq_access_data_wall",
+      "access_card",
+      2,
+      {
+        actor: "runner",
+        actionType: "access_card",
+        serverLabel: "HQ",
+        cardDefinitionId: "onr_v1_238_data-wall-2-0",
+        title: "Data Wall 2.0",
+      },
+    );
 
     const belief = reconstructBeliefState(
       runnerInput([hqLook, contradictingHqAccess], 4),
@@ -630,6 +662,71 @@ describe("belief-state known position memory", () => {
   });
 });
 
+describe("belief-state public remote root type deductions", () => {
+  it("deduces upgrade-only roots after a public asset-to-agenda replacement is scored", () => {
+    const events = remoteUpgradeOnlyHistory();
+    const input = runnerInput(events);
+    input.playerView.servers = [
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: [],
+        root: [{ instanceId: "hidden_upgrade", known: false }],
+      },
+    ] as unknown as PlayerView["servers"];
+
+    const belief = reconstructBeliefState(input);
+
+    expect(belief.runnerOpponentModel?.remoteRootTypeDeductions).toEqual([
+      expect.objectContaining({
+        serverId: "remote_1",
+        unknownRootCount: 1,
+        candidateTypes: ["upgrade"],
+        confidence: 1,
+        sourceEventIds: ["evt_replacement", "evt_score"],
+      }),
+    ]);
+    expect(belief.runnerOpponentModel?.remoteCardBelief).toEqual([]);
+    expect(belief.entries).toContainEqual(
+      expect.objectContaining({
+        kind: "public_fact",
+        subject: "remote_root_type_deduction:remote_1:upgrade_only:1",
+      }),
+    );
+  });
+
+  it("keeps the root type unknown after a later public root install", () => {
+    const events = [
+      ...remoteUpgradeOnlyHistory(),
+      publicEvent("evt_new_root", "install_card", 5, {
+        actor: "corp",
+        actionType: "install_card",
+        serverLabel: "Remote 1",
+        installPlacement: "root",
+      }),
+    ];
+    const input = runnerInput(events);
+    input.playerView.servers = [
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: [],
+        root: [{ instanceId: "hidden_new_root", known: false }],
+      },
+    ] as unknown as PlayerView["servers"];
+
+    const belief = reconstructBeliefState(input);
+
+    expect(belief.runnerOpponentModel?.remoteRootTypeDeductions).toEqual([]);
+    expect(belief.runnerOpponentModel?.remoteCardBelief).toEqual([
+      expect.objectContaining({
+        serverId: "remote_1",
+        hypothesis: "unknown_remote_card",
+      }),
+    ]);
+  });
+});
+
 describe("belief-state remote hypothesis invalidations", () => {
   it("exposes side-safe uncertainty consumer facts without changing uncertainty entries", () => {
     const input = runnerInput([]);
@@ -659,11 +756,16 @@ describe("belief-state remote hypothesis invalidations", () => {
   });
 
   it("matches invalidation entries by bounded remote server id", () => {
-    const remote10Advance = publicEvent("evt_remote_10_advance", "advance_card", 1, {
-      actor: "corp",
-      actionType: "advance_card",
-      serverId: "remote_10",
-    });
+    const remote10Advance = publicEvent(
+      "evt_remote_10_advance",
+      "advance_card",
+      1,
+      {
+        actor: "corp",
+        actionType: "advance_card",
+        serverId: "remote_10",
+      },
+    );
     const input = runnerInput([remote10Advance]);
     input.playerView.servers = [
       {
@@ -676,7 +778,8 @@ describe("belief-state remote hypothesis invalidations", () => {
 
     const belief = reconstructBeliefState(input);
     const remoteRootHypothesis = belief.entries.find(
-      (entry) => entry.subject === "remote_card_hypothesis:remote_1:unknown_root",
+      (entry) =>
+        entry.subject === "remote_card_hypothesis:remote_1:unknown_root",
     );
 
     expect(belief.invalidationLog).toContain(
@@ -734,6 +837,37 @@ describe("belief-state reveal kind classification", () => {
     ).toBe("other");
   });
 });
+
+function remoteUpgradeOnlyHistory(): PublicGameEvent[] {
+  return [
+    publicEvent("evt_first_root", "install_card", 1, {
+      actor: "corp",
+      actionType: "install_card",
+      serverLabel: "Remote 1",
+      installPlacement: "root",
+    }),
+    publicEvent("evt_second_root", "install_card", 2, {
+      actor: "corp",
+      actionType: "install_card",
+      serverLabel: "Remote 1",
+      installPlacement: "root",
+    }),
+    publicEvent("evt_replacement", "install_card", 3, {
+      actor: "corp",
+      actionType: "install_card",
+      serverLabel: "Remote 1",
+      installPlacement: "root",
+      rootReplacement: "asset_to_agenda",
+      replacedRootCardType: "asset",
+    }),
+    publicEvent("evt_score", "score_agenda", 4, {
+      actor: "corp",
+      actionType: "score_agenda",
+      targets: { scoredFromServerId: "remote_1" },
+      cardDefinitionId: "onr_v1_193_corporate-coup",
+    }),
+  ];
+}
 
 function runnerInput(
   events: PublicGameEvent[],

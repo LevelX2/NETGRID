@@ -5,8 +5,10 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
+import { planPortfolioTurnKey } from "../plans/plan-portfolio";
 import { runnerBankInvestmentCommitmentScoreComponents as buildRunnerBankInvestmentCommitmentScoreComponents } from "./runner-economy-commitment-score";
 import type { RunnerHandFundingTarget } from "./runner-hand-funding-target";
+import { mergedPublicHistory } from "./public-event-history";
 import { rolesMatch } from "./role-match";
 
 const RUNNER_BANK_FIRST_LOAD_TARGET = 3;
@@ -14,6 +16,8 @@ const RUNNER_BANK_URGENT_CASHOUT_TARGET = 6;
 const RUNNER_BANK_VALUE_CASHOUT_TARGET = 12;
 const RUNNER_BANK_COMFORTABLE_BUILD_CREDITS = 15;
 const RUNNER_BANK_COMFORTABLE_LIQUID_CREDITS = 20;
+const RUNNER_BANK_BACKGROUND_REPEAT_OPPORTUNITY_COST = 700;
+const RUNNER_BANK_SHORT_HORIZON_PRIORITY = -2200;
 
 type RunnerBankInvestmentCommitmentStatus =
   | "inactive"
@@ -21,6 +25,7 @@ type RunnerBankInvestmentCommitmentStatus =
   | "install_deferred"
   | "build_first_load"
   | "build_second_load"
+  | "short_horizon_hold"
   | "over_target_hold"
   | "hold"
   | "cashout_ready"
@@ -41,6 +46,10 @@ type RunnerBankInvestmentCommitmentAssessment = {
   concreteFundingNeed: boolean;
   criticalReserve: boolean;
   cashOutThresholdMet: boolean;
+  backgroundActionsUsedThisTurn: number;
+  backgroundCadenceReached: boolean;
+  meaningfulAlternativeAvailable: boolean;
+  shortHorizon: boolean;
   runOverride?: string;
   buildBankPriority: number;
   cashOutPriority: number;
@@ -182,6 +191,10 @@ export function createRunnerBankInvestmentContext(
       `bankTerminalContestFundingNeed:${runnerBankHasTerminalContestFundingNeed(input)}`,
       `bankCriticalReserve:${assessment.criticalReserve}`,
       `bankCashOutThreshold:${assessment.cashOutThresholdMet}`,
+      `bankBackgroundActionsThisTurn:${assessment.backgroundActionsUsedThisTurn}`,
+      `bankBackgroundCadenceReached:${assessment.backgroundCadenceReached}`,
+      `bankMeaningfulAlternativeAvailable:${assessment.meaningfulAlternativeAvailable}`,
+      `bankShortHorizon:${assessment.shortHorizon}`,
       ...(assessment.installProjection
         ? [
             `bankProjectedCreditsAfterInstall:${assessment.installProjection.creditsAfterInstall}`,
@@ -223,7 +236,7 @@ export function createRunnerBankInvestmentContext(
         ? [
             "bankPortfolioRole:background",
             `bankPortfolioLifecycle:${planContinuity.portfolioLifecycle ?? "unknown"}`,
-            `bankPortfolioActionsThisTurn:${planContinuity.actionsUsedThisTurn ?? 0}`,
+            `bankPortfolioActionsThisTurn:${assessment.backgroundActionsUsedThisTurn}`,
             `bankPortfolioTurnKey:${planContinuity.turnKey ?? "unknown"}`,
           ]
         : []),
@@ -235,6 +248,10 @@ export function createRunnerBankInvestmentContext(
     action: LegalAction,
   ): RunnerBankInvestmentCommitmentAssessment {
     const storedCredits = runnerBankStoredCredits(input, action);
+    const backgroundCadence = runnerBankBackgroundCadenceAssessment(
+      input,
+      action,
+    );
     const buildActionLegal = input.legalActions.some((candidate) =>
       isRunnerBankBuildAction(input, candidate),
     );
@@ -247,6 +264,7 @@ export function createRunnerBankInvestmentContext(
       input,
       storedCredits,
       cashOutActionLegal,
+      backgroundCadence.meaningfulAlternativeAvailable,
     );
     const desiredBankTarget = runnerBankDesiredTarget(storedCredits, {
       comfortableCreditPool,
@@ -255,7 +273,10 @@ export function createRunnerBankInvestmentContext(
     });
     const combinedCreditAccess = input.playerView.own.credits + storedCredits;
     const overDesiredTarget =
-      storedCredits > 0 && storedCredits >= desiredBankTarget;
+      (storedCredits > 0 && storedCredits >= desiredBankTarget) ||
+      (storedCredits >= RUNNER_BANK_FIRST_LOAD_TARGET &&
+        combinedCreditAccess >= RUNNER_BANK_COMFORTABLE_LIQUID_CREDITS &&
+        backgroundCadence.meaningfulAlternativeAvailable);
     const cashOutThresholdMet =
       storedCredits >= desiredBankTarget && !comfortableCreditPool;
     const runOverride =
@@ -264,6 +285,7 @@ export function createRunnerBankInvestmentContext(
         : undefined;
     const previousPlan = dependencies.previousPlan(input);
     const bankSource = runnerBankSourceLabel(input, action);
+    const shortHorizon = runnerBankHasShortInvestmentHorizon(input);
     const stableBuildWindow =
       input.playerView.own.clicks >= 1 &&
       !concreteFundingNeed &&
@@ -289,6 +311,8 @@ export function createRunnerBankInvestmentContext(
         concreteFundingNeed,
         criticalReserve,
         cashOutThresholdMet,
+        ...backgroundCadence,
+        shortHorizon,
         ...(runOverride ? { runOverride } : {}),
         buildBankPriority: 0,
         cashOutPriority: 0,
@@ -314,6 +338,8 @@ export function createRunnerBankInvestmentContext(
         concreteFundingNeed,
         criticalReserve,
         cashOutThresholdMet,
+        ...backgroundCadence,
+        shortHorizon,
         ...(runOverride ? { runOverride } : {}),
         buildBankPriority: -800,
         cashOutPriority: -1200,
@@ -337,6 +363,8 @@ export function createRunnerBankInvestmentContext(
         concreteFundingNeed,
         criticalReserve,
         cashOutThresholdMet,
+        ...backgroundCadence,
+        shortHorizon,
         installProjection,
         ...(runOverride ? { runOverride } : {}),
         buildBankPriority: plausibleFollowup ? 900 : -1600,
@@ -363,6 +391,8 @@ export function createRunnerBankInvestmentContext(
         concreteFundingNeed,
         criticalReserve,
         cashOutThresholdMet,
+        ...backgroundCadence,
+        shortHorizon,
         ...(runOverride ? { runOverride } : {}),
         buildBankPriority: 0,
         cashOutPriority: usefulNow
@@ -392,6 +422,8 @@ export function createRunnerBankInvestmentContext(
           concreteFundingNeed,
           criticalReserve,
           cashOutThresholdMet,
+          ...backgroundCadence,
+          shortHorizon,
           ...(runOverride ? { runOverride } : {}),
           buildBankPriority: -1800,
           cashOutPriority: cashOutActionLegal
@@ -401,9 +433,25 @@ export function createRunnerBankInvestmentContext(
             : 0,
         };
       }
+      const baselineBuildPriority = firstLoad
+        ? input.playerView.own.clicks <= 1
+          ? 2300
+          : 1250
+        : input.playerView.own.clicks <= 1
+          ? 600
+          : 1550;
+      const shortHorizonWithoutFundingNeed =
+        shortHorizon && !concreteFundingNeed;
+      const repeatedBuildHasOpportunityCost =
+        backgroundCadence.backgroundCadenceReached &&
+        backgroundCadence.meaningfulAlternativeAvailable;
       return {
         active: true,
-        status: firstLoad ? "build_first_load" : "build_second_load",
+        status: shortHorizonWithoutFundingNeed
+          ? "short_horizon_hold"
+          : firstLoad
+            ? "build_first_load"
+            : "build_second_load",
         bankSource,
         storedCredits,
         desiredBankTarget,
@@ -415,14 +463,15 @@ export function createRunnerBankInvestmentContext(
         concreteFundingNeed,
         criticalReserve,
         cashOutThresholdMet,
+        ...backgroundCadence,
+        shortHorizon,
         ...(runOverride ? { runOverride } : {}),
-        buildBankPriority: firstLoad
-          ? input.playerView.own.clicks <= 1
-            ? 2300
-            : 1250
-          : input.playerView.own.clicks <= 1
-            ? 600
-            : 1550,
+        buildBankPriority: shortHorizonWithoutFundingNeed
+          ? RUNNER_BANK_SHORT_HORIZON_PRIORITY
+          : repeatedBuildHasOpportunityCost
+            ? baselineBuildPriority -
+              RUNNER_BANK_BACKGROUND_REPEAT_OPPORTUNITY_COST
+            : baselineBuildPriority,
         cashOutPriority: -1600,
       };
     }
@@ -441,6 +490,8 @@ export function createRunnerBankInvestmentContext(
       concreteFundingNeed,
       criticalReserve,
       cashOutThresholdMet,
+      ...backgroundCadence,
+      shortHorizon,
       ...(runOverride ? { runOverride } : {}),
       buildBankPriority: buildActionLegal ? -300 : 0,
       cashOutPriority: cashOutActionLegal ? -900 : 0,
@@ -462,11 +513,16 @@ export function createRunnerBankInvestmentContext(
 
   function runnerBankHasComfortableCreditPool(
     input: AiDecisionInput,
-    _storedCredits: number,
+    storedCredits: number,
     _cashOutActionLegal: boolean,
+    meaningfulAlternativeAvailable: boolean,
   ): boolean {
     return (
-      input.playerView.own.credits >= RUNNER_BANK_COMFORTABLE_LIQUID_CREDITS
+      input.playerView.own.credits >= RUNNER_BANK_COMFORTABLE_LIQUID_CREDITS ||
+      (storedCredits >= RUNNER_BANK_VALUE_CASHOUT_TARGET &&
+        input.playerView.own.credits + storedCredits >=
+          RUNNER_BANK_COMFORTABLE_LIQUID_CREDITS &&
+        meaningfulAlternativeAvailable)
     );
   }
 
@@ -746,6 +802,140 @@ export function createRunnerBankInvestmentContext(
     const sourceCard = dependencies.findVisibleCard(input, action.source);
     if (sourceCard?.definitionId) return sourceCard.definitionId;
     return "credit_bank";
+  }
+
+  function runnerBankBackgroundCadenceAssessment(
+    input: AiDecisionInput,
+    action: LegalAction,
+  ): Pick<
+    RunnerBankInvestmentCommitmentAssessment,
+    | "backgroundActionsUsedThisTurn"
+    | "backgroundCadenceReached"
+    | "meaningfulAlternativeAvailable"
+  > {
+    const previousPlan = dependencies.previousPlan(input);
+    const currentTurnKey = planPortfolioTurnKey(input);
+    const rememberedActions =
+      previousPlan?.portfolioRole === "background" &&
+      previousPlan.turnKey === currentTurnKey
+        ? Math.max(0, previousPlan.actionsUsedThisTurn ?? 0)
+        : 0;
+    const observedActions = runnerBankBuildActionsObservedThisTurn(
+      input,
+      action,
+    );
+    const backgroundActionsUsedThisTurn = Math.max(
+      rememberedActions,
+      observedActions,
+    );
+    return {
+      backgroundActionsUsedThisTurn,
+      backgroundCadenceReached: backgroundActionsUsedThisTurn >= 1,
+      meaningfulAlternativeAvailable:
+        runnerBankMeaningfulAlternativeAvailable(input),
+    };
+  }
+
+  function runnerBankBuildActionsObservedThisTurn(
+    input: AiDecisionInput,
+    action: LegalAction,
+  ): number {
+    const sourceDefinitionId =
+      dependencies.sourceDefinitionIdForAction(input, action) ??
+      dependencies.findVisibleCard(input, action.source)?.definitionId;
+    if (!sourceDefinitionId) return 0;
+    const history = mergedPublicHistory(input);
+    let turnBoundary = -1;
+    for (let index = history.length - 1; index >= 0; index -= 1) {
+      const payload = history[index]!.publicPayload;
+      if (
+        payload.actor === "corp" &&
+        (payload.actionType === "end_turn" ||
+          history[index]!.type === "end_turn")
+      ) {
+        turnBoundary = index;
+        break;
+      }
+    }
+    return history.slice(turnBoundary + 1).filter((event) => {
+      const payload = event.publicPayload;
+      const eventSource =
+        typeof payload.sourceDefinitionId === "string"
+          ? payload.sourceDefinitionId
+          : typeof payload.cardDefinitionId === "string"
+            ? payload.cardDefinitionId
+            : undefined;
+      if (payload.actor !== "runner" || eventSource !== sourceDefinitionId)
+        return false;
+      const actionType =
+        typeof payload.actionType === "string"
+          ? payload.actionType
+          : event.type;
+      if (
+        actionType !== "activated_card_ability" &&
+        actionType !== "trigger_ability"
+      ) {
+        return false;
+      }
+      if (
+        typeof payload.hostedCreditsAdded === "number" &&
+        payload.hostedCreditsAdded > 0
+      ) {
+        return true;
+      }
+      if (
+        typeof payload.addedCounterAmount === "number" &&
+        payload.addedCounterAmount > 0
+      ) {
+        return true;
+      }
+      const effects = Array.isArray(payload.resolvedEffects)
+        ? payload.resolvedEffects
+        : [];
+      return effects.some(
+        (effect) =>
+          typeof effect === "object" &&
+          effect !== null &&
+          "kind" in effect &&
+          effect.kind === "add_hosted_credits",
+      );
+    }).length;
+  }
+
+  function runnerBankMeaningfulAlternativeAvailable(
+    input: AiDecisionInput,
+  ): boolean {
+    const meaningfulDraw = input.legalActions.some(
+      (action) =>
+        action.side === "runner" &&
+        action.type === "draw_card" &&
+        input.playerView.own.stackOrRdCount > 0 &&
+        input.playerView.own.gripOrHq.length < input.playerView.own.maxHandSize,
+    );
+    if (meaningfulDraw) return true;
+    const meaningfulHandDevelopment = input.legalActions.some(
+      (action) =>
+        action.side === "runner" &&
+        (action.type === "install_card" || action.type === "play_event") &&
+        !isRunnerBankInstallAction(input, action) &&
+        dependencies.actionCreditCost(action) <= input.playerView.own.credits,
+    );
+    if (meaningfulHandDevelopment) return true;
+    return input.legalActions.some(
+      (action) =>
+        action.side === "runner" &&
+        action.type === "start_run" &&
+        runnerBankCommitmentRunOverride(input, action) !== undefined,
+    );
+  }
+
+  function runnerBankHasShortInvestmentHorizon(
+    input: AiDecisionInput,
+  ): boolean {
+    return (
+      input.playerView.opponent.agendaPoints >=
+      Math.max(0, input.playerView.agendaPointsToWin - 2)
+    );
   }
 
   function runnerBankHasConcreteFundingNeed(input: AiDecisionInput): boolean {

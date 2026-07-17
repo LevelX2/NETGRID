@@ -7315,7 +7315,7 @@
       "cardId": "onr_v1_139_r-and-d-interface",
       "side": "runner",
       "cardType": "hardware",
-      "roles": ["hardware", "multiaccess", "rnd_pressure"],
+      "roles": ["hardware", "multiaccess", "rd_pressure"],
       "planRoles": ["build_rig", "pressure_rnd"],
       "requiredMechanics": ["install_hardware", "rd_additional_access"],
       "valueHints": {

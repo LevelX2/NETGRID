@@ -9,6 +9,7 @@ export type CardSignals = {
   candidateSignals: string[];
   effectTargets: string[];
   requiresSameTurnAccess: boolean;
+  requiresHostedIcebreaker: boolean;
 };
 
 export type CardContext = {
@@ -22,6 +23,7 @@ export type CardContext = {
   memoryAvailable?: number;
   duplicateInstalled: boolean;
   sameTurnAccessFollowupAvailable?: boolean;
+  hostableIcebreakerAvailable?: boolean;
 };
 
 export type PersistentFunctionalProfile = {

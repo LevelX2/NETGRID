@@ -14,7 +14,10 @@ import {
   rememberPlanPortfolioSnapshot,
   resetPlanPortfolioMemory,
 } from "./plan-portfolio-memory";
-import { advancePlanPortfolioForSelectedAction } from "./plan-portfolio";
+import {
+  advancePlanPortfolioForSelectedAction,
+  planPortfolioEntryForPlan,
+} from "./plan-portfolio";
 import type { RunnerEconomyPosture } from "../runner-run-target-evaluation";
 
 export type PlanContinuityMemorySnapshot = {
@@ -48,11 +51,17 @@ export function rememberTacticalPlanRuntime(
     return undefined;
   }
   if (result.planPortfolio) {
+    const selectedPortfolioEntry =
+      result.selectedPlan &&
+      result.selectedStep?.actionCandidateIds.includes(selectedAction.actionId)
+        ? planPortfolioEntryForPlan(result.planPortfolio, result.selectedPlan)
+        : undefined;
     rememberPlanPortfolioSnapshot(
       input,
       advancePlanPortfolioForSelectedAction(
         result.planPortfolio,
         selectedAction.actionId,
+        selectedPortfolioEntry?.portfolioEntryId,
       ),
     );
   }

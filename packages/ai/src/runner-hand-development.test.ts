@@ -125,6 +125,71 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     );
   });
 
+  it("defers hosted breaker economy until a hostable breaker is in hand", () => {
+    const eurocorpse = visibleCard("eurocorpse-1", {
+      definitionId: "onr_proteus_139_eurocorpse-tm-spin-chip",
+      title: "Eurocorpse (TM) Spin Chip",
+      type: "hardware",
+      installCost: 6,
+    });
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({
+        input: runnerInput({
+          credits: 20,
+          clicks: 2,
+          hand: [eurocorpse],
+          legalActions: [installAction("install-eurocorpse", eurocorpse, 6)],
+        }),
+      }),
+      eurocorpse.instanceId,
+    );
+
+    expect(evaluation).toMatchObject({
+      developmentRole: "economy_engine",
+      availability: "legal_now",
+      currentNeed: "later",
+    });
+    expect(evaluation.evidence).toContain("hosted_icebreaker_required:true");
+    expect(evaluation.evidence).toContain(
+      "hostable_icebreaker_available:false",
+    );
+  });
+
+  it("keeps hosted breaker economy useful when a breaker is immediately hostable", () => {
+    const eurocorpse = visibleCard("eurocorpse-1", {
+      definitionId: "onr_proteus_139_eurocorpse-tm-spin-chip",
+      title: "Eurocorpse (TM) Spin Chip",
+      type: "hardware",
+      installCost: 6,
+    });
+    const breaker = visibleCard("krash-1", {
+      definitionId: "onr_v1_039_krash",
+      title: "Krash",
+      type: "program",
+      subtypes: ["icebreaker"],
+      installCost: 3,
+      memoryCost: 1,
+      rulesText: "Icebreaker: break ice subroutines.",
+    });
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({
+        input: runnerInput({
+          credits: 20,
+          clicks: 2,
+          hand: [eurocorpse, breaker],
+          legalActions: [
+            installAction("install-eurocorpse", eurocorpse, 6),
+            installAction("install-krash", breaker, 3),
+          ],
+        }),
+      }),
+      eurocorpse.instanceId,
+    );
+
+    expect(evaluation.currentNeed).not.toBe("later");
+    expect(evaluation.evidence).toContain("hostable_icebreaker_available:true");
+  });
+
   it("separates MU-blocked breaker setup from missing-credit setup", () => {
     const breaker = visibleCard("breaker-1", {
       definitionId: "test-code-breaker",

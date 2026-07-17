@@ -105,30 +105,37 @@ export function tacticalPlanMarginalDevelopmentInstallShouldYield(
   overrideChoice: SemanticRuntimeChoice,
   scoreGap: number,
 ): boolean {
-  const bankInvestmentOverride = semanticRuntimeChoiceHasScoreComponent(
+  const bankEconomyOverride = semanticRuntimeChoiceHasAnyScoreComponent(
     overrideChoice,
-    "runner_bank_investment_commitment",
+    ["runner_bank_investment_commitment", "runner_bank_cashout_gate"],
   );
   const basicCapacityOverride =
     overrideChoice.action.type === "draw_card" ||
     overrideChoice.action.type === "gain_credit";
+  const immediateHandPlayOverride = overrideChoice.action.type === "play_event";
+  const minimumScoreGap = basicCapacityOverride
+    ? 200
+    : PLAN_MAPPED_CHOICE_MAX_SCORE_GAP;
   if (
     (mapping.plan.type !== "runner.develop_hand_card" &&
       mapping.plan.type !== "runner.play_best_hand_card") ||
     mapping.step.kind !== "install_development_card" ||
     mappedChoice.action.type !== "install_card" ||
-    mappedChoice.score > 100 ||
-    (!bankInvestmentOverride && !basicCapacityOverride) ||
+    mappedChoice.score > (bankEconomyOverride ? 800 : 700) ||
+    (!bankEconomyOverride &&
+      !basicCapacityOverride &&
+      !immediateHandPlayOverride) ||
     overrideChoice.score <= 0 ||
-    scoreGap <= PLAN_MAPPED_CHOICE_MAX_SCORE_GAP
+    scoreGap <= minimumScoreGap
   ) {
     return false;
   }
   return mappedChoice.scoreBreakdown.some(
     (component) =>
       component.key === "runner_persistent_install_fit" &&
-      component.value <= 100 &&
-      (bankInvestmentOverride ||
+      component.value <= (bankEconomyOverride ? 150 : 100) &&
+      (bankEconomyOverride ||
+        immediateHandPlayOverride ||
         (component.reason ?? "").includes("delta:cumulative_capacity")),
   );
 }
@@ -196,6 +203,14 @@ export function runnerPlanOverrideIsHardInterrupt(
     semanticRuntimeChoiceHasScoreBreakdownComponent(
       overrideChoice,
       "runner_matchpoint_run_lock_release",
+    )
+  ) {
+    return true;
+  }
+  if (
+    semanticRuntimeChoiceHasScoreBreakdownComponent(
+      overrideChoice,
+      "runner_viable_followup_run_lock_release",
     )
   ) {
     return true;

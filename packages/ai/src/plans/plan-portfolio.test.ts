@@ -240,7 +240,7 @@ describe("plan portfolio", () => {
     expect(planPortfolioTurnKey(input)).toBe("runner:turn:2");
   });
 
-  it("records background cadence when its mapped action is selected", () => {
+  it("records background cadence as a soft ranking limit", () => {
     const portfolio = buildPlanPortfolio({
       input: decisionInput("runner", 70),
       turnKey: "runner:turn:5",
@@ -266,7 +266,14 @@ describe("plan portfolio", () => {
         plan("runner.build_credit_bank", 800, "bank", "bank-a", 71),
       ],
     });
-    expect(planPortfolioEntryCanAct(sameTurn.backgrounds[0]!)).toBe(false);
+    expect(planPortfolioEntryCanAct(sameTurn.backgrounds[0]!)).toBe(true);
+    const continuedContribution =
+      buildPlanPortfolioActionContributions(sameTurn)[0];
+    expect(continuedContribution?.value).toBeGreaterThan(0);
+    expect(continuedContribution?.value).toBeLessThan(300);
+    expect(continuedContribution?.evidence).toContain(
+      "plan_contribution_background_cadence:soft_limit_reached",
+    );
   });
 
   it("marks one action that advances foreground and background as a multi-plan contribution", () => {

@@ -82,6 +82,7 @@ import {
   duplicateRoleForPersistentInstall,
   fitPriority,
   handBufferPenaltyForPersistentInstall,
+  hostableIcebreakerAvailableAfterInstall,
   intentHasPressure,
   looksLikeAccessPayoff,
   looksLikeBankTool,
@@ -324,6 +325,9 @@ function buildCardContext(
     ? legalAction !== undefined &&
       sameTurnAccessFollowupAvailableAfter(params.input, legalAction)
     : undefined;
+  const hostableIcebreakerAvailable = signals.requiresHostedIcebreaker
+    ? hostableIcebreakerAvailableAfterInstall(params.input, card, legalAction)
+    : undefined;
 
   return {
     card,
@@ -337,6 +341,9 @@ function buildCardContext(
     duplicateInstalled,
     ...(sameTurnAccessFollowupAvailable !== undefined
       ? { sameTurnAccessFollowupAvailable }
+      : {}),
+    ...(hostableIcebreakerAvailable !== undefined
+      ? { hostableIcebreakerAvailable }
       : {}),
   };
 }
@@ -437,6 +444,13 @@ function currentNeedForCard(
   if (
     role === "draw_or_search_engine" &&
     recoveryOnlySearchHasNoVisibleTarget(params.input, context)
+  ) {
+    return "later";
+  }
+  if (
+    role === "economy_engine" &&
+    context.signals.requiresHostedIcebreaker &&
+    context.hostableIcebreakerAvailable !== true
   ) {
     return "later";
   }
@@ -844,6 +858,12 @@ function redactedEvidenceForCard(params: {
       ? [
           "same_turn_access_required:true",
           `same_turn_access_followup_available:${params.context.sameTurnAccessFollowupAvailable === true}`,
+        ]
+      : []),
+    ...(params.context.signals.requiresHostedIcebreaker
+      ? [
+          "hosted_icebreaker_required:true",
+          `hostable_icebreaker_available:${params.context.hostableIcebreakerAvailable === true}`,
         ]
       : []),
     ...(params.context.memoryAvailable !== undefined

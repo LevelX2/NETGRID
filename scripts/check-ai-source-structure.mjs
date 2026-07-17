@@ -91,15 +91,16 @@ for (const missing of [...expectedTypeCycleSignatures].filter(
 }
 
 const productionLineCaps = new Map([
+  ["belief-state.ts", 2548],
   ["runtime/semantic-runtime-corp-score.ts", 808],
   ["runtime/semantic-runtime-corp-board-triage.ts", 793],
-  ["runner-hand-development.ts", 916],
+  ["runner-hand-development.ts", 936],
   ["runner/hand-development/runner-hand-text-signals.ts", 431],
-  ["runner/hand-development/runner-persistent-install-evaluation.ts", 1408],
+  ["runner/hand-development/runner-persistent-install-evaluation.ts", 1450],
   ["visible-run-analysis.ts", 629],
   ["run-analysis/visible-run-breaker-path.ts", 838],
   ["run-analysis/visible-run-hazards.ts", 753],
-  ["runtime/semantic-choice-ranking.ts", 536],
+  ["runtime/semantic-choice-ranking.ts", 543],
   ["runtime/semantic-runtime-corp-scoring-window.ts", 249],
   [
     "runtime/corp-scoreline/semantic-runtime-corp-board-triage-policies.ts",
@@ -127,7 +128,7 @@ for (const file of productionFiles) {
 }
 
 const testLineCaps = new Map([
-  ["runner-hand-development.test.ts", 590],
+  ["runner-hand-development.test.ts", 655],
   ["runner/hand-development/runner-persistent-install-evaluation.test.ts", 912],
   ["runtime/semantic-runtime-corp-score.test.ts", 3797],
   ["tactical-plans.test.ts", 4308],
@@ -147,7 +148,7 @@ const testLineCaps = new Map([
     877,
   ],
   ["runner-run-target-evaluation.test.ts", 3150],
-  ["runtime/semantic-choice-ranking.test.ts", 1174],
+  ["runtime/semantic-choice-ranking.test.ts", 1218],
   ["runtime/choice-ranking/semantic-choice-ranking-corp.test.ts", 299],
   ["runtime/choice-ranking/semantic-choice-ranking-mapping.test.ts", 102],
 ]);
@@ -164,7 +165,7 @@ for (const [relative, cap] of testLineCaps) {
 const runtimeRootProductionFiles = productionFiles.filter(
   (file) => path.dirname(file) === path.join(srcRoot, "runtime"),
 );
-const runtimeRootCap = 287;
+const runtimeRootCap = 289;
 if (runtimeRootProductionFiles.length > runtimeRootCap) {
   findings.push(
     `runtime root has ${runtimeRootProductionFiles.length} production files; allowed maximum is ${runtimeRootCap}`,

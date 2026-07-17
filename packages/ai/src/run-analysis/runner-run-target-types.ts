@@ -254,6 +254,7 @@ export type RunnerRunTargetEvaluation = {
   accessTargetKind: RunnerRunTargetKind;
   actionId: string;
   accessPayoff: RunnerAccessPayoff;
+  accessPayoffContestable?: boolean;
   knownAccessState: RunnerKnownAccessState;
   multiaccessAvailable: boolean;
   pathPassability: RunnerPathPassability;

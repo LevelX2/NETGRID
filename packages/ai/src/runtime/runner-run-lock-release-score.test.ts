@@ -54,12 +54,40 @@ describe("runnerRunLockReleaseScoreComponent", () => {
     ).toBeUndefined();
   });
 
-  it("does not create terminal urgency below Corp matchpoint", () => {
+  it("does not release for a thin speculative path below Corp matchpoint", () => {
     const current = input();
     current.playerView.opponent.agendaPoints = 4;
 
     expect(
       runnerRunLockReleaseScoreComponent(current, releaseAction()),
+    ).toBeUndefined();
+  });
+
+  it("releases below matchpoint for a well-funded credible follow-up", () => {
+    const current = input();
+    current.playerView.opponent.agendaPoints = 4;
+    current.playerView.own.credits = 12;
+
+    const component = runnerRunLockReleaseScoreComponent(
+      current,
+      releaseAction(1),
+    );
+
+    expect(component).toMatchObject({
+      key: "runner_viable_followup_run_lock_release",
+      value: 1800,
+    });
+    expect(component?.reason).toContain("release_context:viable_followup");
+    expect(component?.reason).toContain("reserve_after_probe:10");
+  });
+
+  it("does not pay an expensive speculative lock below own matchpoint", () => {
+    const current = input();
+    current.playerView.opponent.agendaPoints = 4;
+    current.playerView.own.credits = 12;
+
+    expect(
+      runnerRunLockReleaseScoreComponent(current, releaseAction(2)),
     ).toBeUndefined();
   });
 
@@ -125,7 +153,18 @@ function input(): AiDecisionInput {
     side: "runner",
     playerView: {
       agendaPointsToWin: 7,
-      own: { credits: 4, clicks: 4 },
+      own: {
+        credits: 4,
+        clicks: 4,
+        gripOrHq: [],
+        rig: [
+          {
+            instanceId: "test-breaker",
+            known: true,
+            subtypes: ["icebreaker"],
+          },
+        ],
+      },
       opponent: { agendaPoints: 6, handCount: 5, deckCount: 20 },
       servers: [
         {
@@ -138,12 +177,12 @@ function input(): AiDecisionInput {
   } as unknown as AiDecisionInput;
 }
 
-function releaseAction(): LegalAction {
+function releaseAction(credits = 2): LegalAction {
   return {
     actionId: "runner.trigger_ability",
     side: "runner",
     type: "trigger_ability",
-    costs: [{ clicks: 1, credits: 2 }],
+    costs: [{ clicks: 1, credits }],
     payload: {
       abilityId: "pay_to_remove_run_lock",
       v1920RunnerRunLockAbility: "pay_to_remove_run_lock",

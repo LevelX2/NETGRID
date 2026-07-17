@@ -242,6 +242,34 @@ describe("runnerTerminalRemoteToolScoreComponent", () => {
     ).toBeUndefined();
   });
 
+  it("does not spend SeeYa for damage when only remote ICE remains unseen", () => {
+    const current = confirmedDamageStrategyInput({ advancementCounters: 0 });
+    current.playerView.opponent.agendaPoints = 4;
+    current.playerView.servers = [
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        root: [
+          {
+            instanceId: "known-root",
+            definitionId: "known-root",
+            known: true,
+            rezzed: true,
+          },
+        ],
+        ice: [{ instanceId: "hidden-remote-ice", known: false, rezzed: false }],
+      },
+    ];
+
+    expect(
+      runnerTerminalRemoteToolScoreComponent(
+        current,
+        action("see-ya", "activated_card_ability"),
+        candidate("effect:expose_info"),
+      ),
+    ).toBeUndefined();
+  });
+
   it("does not start an ICE-disruption sequence without a follow-up click", () => {
     const current = input({ advancementCounters: 2 });
     current.playerView.own.clicks = 1;
