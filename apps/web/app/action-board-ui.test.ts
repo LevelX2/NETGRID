@@ -71,6 +71,7 @@ import {
   isConcealedRunnerResourceCard,
   newBloodReorderTargetLabel,
   newBloodReorderTargetSequenceHint,
+  opponentRunnerRigCardActions,
   orderedCardContextActions,
   parseCuePositionPreference,
   retainedAccessRevealEvent,
@@ -5086,6 +5087,62 @@ describe("V1.0.6 resource and card-display helpers", () => {
     ).toBe(
       "Remote 1-Zugriff: Red Herrings: 5 Credits zusätzliche Stehlkosten. Du hast nicht genug Credits, um diese Agenda zu stehlen.",
     );
+  });
+});
+
+describe("opponent runner rig card actions", () => {
+  it("binds only the redacted hidden-resource trash action to an unknown rig slot", () => {
+    const hiddenSlot: VisibleCard = {
+      instanceId: "hidden_runner_resource_slot_1",
+      known: false,
+    };
+    const hiddenTrash = legalAction(
+      "corp",
+      "trash_resource",
+      "basic_action",
+      "Verdeckte Runner-Resource trashen",
+      {
+        cardId: hiddenSlot.instanceId,
+        resourceSlotId: hiddenSlot.instanceId,
+        hiddenResourceSlotId: hiddenSlot.instanceId,
+        hiddenRunnerResource: true,
+        redactedKind: "hidden_runner_resource",
+      },
+    );
+    const nonRedactedTrash = legalAction(
+      "corp",
+      "trash_resource",
+      "basic_action",
+      "Resource trashen",
+      { cardId: hiddenSlot.instanceId, resourceId: hiddenSlot.instanceId },
+    );
+    const unrelatedAction = legalAction(
+      "corp",
+      "gain_credit",
+      "basic_action",
+      "Credit nehmen",
+    );
+
+    expect(
+      opponentRunnerRigCardActions(hiddenSlot, [
+        hiddenTrash,
+        nonRedactedTrash,
+        unrelatedAction,
+      ]),
+    ).toEqual([hiddenTrash]);
+  });
+
+  it("keeps matching actions on a known runner-rig card unchanged", () => {
+    const resource = card("runner_resource_1", "Offene Resource", "resource");
+    const trash = legalAction(
+      "corp",
+      "trash_resource",
+      "basic_action",
+      "Offene Resource trashen",
+      { cardId: resource.instanceId, resourceId: resource.instanceId },
+    );
+
+    expect(opponentRunnerRigCardActions(resource, [trash])).toEqual([trash]);
   });
 });
 

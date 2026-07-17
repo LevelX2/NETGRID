@@ -1001,6 +1001,27 @@ export function actionMatchesContext(
   return serverRefsForAction(action).includes(context.id);
 }
 
+export function opponentRunnerRigCardActions(
+  card: VisibleCard,
+  contextualActions: LegalAction[],
+): LegalAction[] {
+  const matchingActions = contextualActions.filter((action) =>
+    actionMatchesContext(action, {
+      kind: "card",
+      id: card.instanceId,
+      label: card.title ?? "Karte",
+    }),
+  );
+  if (card.known) return matchingActions;
+  return matchingActions.filter(
+    (action) =>
+      action.type === "trash_resource" &&
+      action.payload?.hiddenRunnerResource === true &&
+      action.payload?.hiddenResourceSlotId === card.instanceId &&
+      action.payload?.cardId === card.instanceId,
+  );
+}
+
 export function actionContextStillVisible(
   context: ActionContext,
   view: PlayerView,

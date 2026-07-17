@@ -2,9 +2,9 @@
 
 ## Status
 
-`in_progress`  
-Primärer Agent: `release-implementation-agent`  
-Branch: `codex/hidden-resource-trash-ui`  
+`done`
+Primärer Agent: `release-implementation-agent`
+Branch: `codex/hidden-resource-trash-ui`
 Worktree: `C:\Projekte\NETGRID-worktrees\hidden-resource-trash-ui`
 
 ## Quelle und Vorgabe
@@ -66,6 +66,7 @@ DefinitionId oder echter Instanz-ID nachweist.
 - Done-Gate: Artefakt ist vollständig, nur paketbezogen geändert und
   committed.
 - Commit: `docs(activity): document hidden resource trash UI fix`
+- Ergebnis: Erledigt und als `1ed18593c` committed.
 
 ### P2 – Redigierte Slot-Aktion im Runner-Rig anzeigen
 
@@ -78,6 +79,11 @@ DefinitionId oder echter Instanz-ID nachweist.
 - Done-Gate: Test beweist den Button für den redigierten Slot, keine
   Kartenidentität wird verwendet oder angezeigt, alle Checks bestehen.
 - Commit: `fix(web): allow trashing hidden runner resources`
+- Ergebnis: Erledigt. `opponentRunnerRigCardActions` lässt bei unbekannten
+  Slots ausschließlich die bestehende redigierte `trash_resource`-Action
+  durch; die Komponente verwendet diese Auswahl. Der gezielte Web-Test (111
+  Tests), der Web-Typecheck, Prettier für die geänderten Hilfsdateien und
+  `git diff --check` bestehen.
 
 ## Verifikationsregeln
 

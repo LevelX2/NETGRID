@@ -8,6 +8,7 @@ import { type BoardHighlight } from "../../app/action-cues";
 import {
   actionMatchesContext,
   groupRunnerRigCards,
+  opponentRunnerRigCardActions,
   runAwareActionButtonLabel,
   runnerHostedCardsForHost,
   runnerRigMemorySummary,
@@ -226,10 +227,8 @@ export function RunnerRigStrip({
   const runnerRig = view.opponent.rig ?? [];
   const memorySummary = runnerRigMemorySummary(view, "opponent");
   const groups = groupRunnerRigCards(runnerRig, { includeEmptyProgramGroup: Boolean(memorySummary) });
-  const cardActionsForRig = (card: VisibleCard): LegalAction[] => {
-    if (!card.known) return [];
-    return contextualActions.filter((action) => actionMatchesContext(action, { kind: "card", id: card.instanceId, label: card.title ?? "Karte" }));
-  };
+  const cardActionsForRig = (card: VisibleCard): LegalAction[] =>
+    opponentRunnerRigCardActions(card, contextualActions);
   return (
     <SideZoneFrame
       side="runner"
