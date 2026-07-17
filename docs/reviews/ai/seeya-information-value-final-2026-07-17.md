@@ -58,17 +58,19 @@ kein positiver terminaler Vertrag.
 
 Unterhalb des Matchpoints greift ein kleinerer Bonus nur, wenn:
 
-- `runnerDamageThreatAssessment` aus sichtbaren Karten und öffentlichen
-  Ereignissen `confirmed` oder `critical` meldet;
+- `runnerDamageThreatAssessment.deckBelief` aus sichtbaren Karten und
+  öffentlichen Ereignissen `confirmed` meldet;
 - ein noch unbekannter Remote-Root oder unbekanntes Remote-ICE existiert;
-- die Runner-Hand mindestens den empfohlenen Damage-Handpuffer hält;
+- die Runner-Hand mindestens den von `flatlineRisk` empfohlenen
+  Damage-Handpuffer hält;
 - bei Installation weiterhin Installation, Aktivierung und Folgeaktion
   vollständig bezahlbar sind.
 
-`suspected`, ein zu kleiner Handpuffer oder ausschließlich ein unbekanntes
-zentrales ICE erzeugen keinen Bonus. Ein fortgeschrittener Remote-Root erhält
-bei `confirmed` 1300 Punkte; der Matchpoint-Vertrag mit 1800/2150 bleibt klar
-höher und wird nicht mit dem Damage-Wert gestapelt.
+`deckBelief: suspected`, ein zu kleiner Handpuffer oder ausschließlich ein
+unbekanntes zentrales ICE erzeugen keinen Bonus. Bestätigtes Deckwissen bleibt
+auch nach Abklingen der akuten Flatline-Gefahr relevant. Ein fortgeschrittener
+Remote-Root erhält 1300 Punkte; der Matchpoint-Vertrag mit 1800/2150 bleibt
+klar höher und wird nicht mit dem Damage-Wert gestapelt.
 
 ### Zielwahl
 
@@ -102,7 +104,7 @@ wieder unbekannt.
 5. Der 424A-F04-Checkpoint verlangt zusätzlich SeeYa als Raw-Score-Sieger und
    die tatsächliche Komponente `runner_terminal_remote_tool`.
 6. Das vorhandene side-sichere Schadensmodell speist
-   `runner_damage_intelligence_tool`; fünf Gegenproben grenzen bestätigte
+   `runner_damage_intelligence_tool`; sechs Gegenproben grenzen bestätigte
    Gefahr, Handpuffer, Remote-Relevanz und vollständige Kostenfolge ab.
 
 Keine Karten-ID-Sonderregel, keine Hintänderung, keine Engine-/LegalAction-
@@ -124,11 +126,13 @@ Keine Karten-ID-Sonderregel, keine Hintänderung, keine Engine-/LegalAction-
 ## Verifikation
 
 - Red Evidence vor Fix: 7 Dateien, 69 Tests, 60 grün, 9 gezielt rot.
-- Fokus nach Fix: 7/7 Dateien und 74/74 Tests grün.
+- Fokus nach Fix: 7/7 Dateien und 75/75 Tests grün.
 - 424A: alle 12 Checkpoint-/Gegenproben grün.
 - FD7671: alle 9 Checkpoint-/Gegenproben grün.
 - AI-Typecheck: grün.
-- Vollständige AI-Suite: 348/354 Dateien und 2462/2471 Tests grün.
+- Vollständige AI-Suite vor Main-Abgleich: 348/354 Dateien und 2462/2471 Tests
+  grün. Der finale Stand wird nach Integration des Damage-Threat-Model-v2
+  erneut geprüft.
 
 Die neun roten Vollsuite-Tests wurden einzeln auf unverändertem `main`
 reproduziert und sind keine Regression dieses Slices:

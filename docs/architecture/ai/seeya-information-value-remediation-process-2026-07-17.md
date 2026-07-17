@@ -179,10 +179,11 @@ betroffene Positionshistorie.
 
 - Das vorhandene side-sichere Schadensmodell mit SeeYas Informationswert
   verbinden.
-- Nur `confirmed`/`critical`, sicheren Handpuffer, unbekanntes Remote-Ziel und
-  die vollständige kurze Aktionssequenz zulassen.
-- `suspected`, zu kleinen Handpuffer und ausschließlich zentrale Ziele als
-  Gegenproben sichern.
+- Nur `deckBelief: confirmed`, sicheren `flatlineRisk`-Handpuffer,
+  unbekanntes Remote-Ziel und die vollständige kurze Aktionssequenz zulassen.
+- `deckBelief: suspected`, zu kleinen Handpuffer und ausschließlich zentrale
+  Ziele als Gegenproben sichern; bestätigtes Deckwissen bleibt nach Abklingen
+  der akuten Gefahr erhalten.
 - Commits: `test(ai): lock damage-aware SeeYa scouting` und
   `fix(ai): scout damage remotes with SeeYa`
 

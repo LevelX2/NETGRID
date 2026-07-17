@@ -189,7 +189,7 @@ negativ.
 
 Unterhalb des Matchpoints darf SeeYa einen kleineren proaktiven
 Informationsbonus erhalten, wenn das side-sichere Schadensmodell die Gefahr
-als `confirmed` oder `critical` einstuft. Dafür müssen zusätzlich gelten:
+als `deckBelief: confirmed` einstuft. Dafür müssen zusätzlich gelten:
 
 1. Die Einstufung beruht auf sichtbaren Korp-Karten, öffentlichen
    Damage-Ereignissen oder einer sichtbaren Tag-/Trace-/Damage-Kombination;
@@ -198,12 +198,15 @@ als `confirmed` oder `critical` einstuft. Dafür müssen zusätzlich gelten:
    unbekanntes Remote-ICE existiert. Ein unbekanntes zentrales ICE allein
    reicht nicht.
 3. Der Runner besitzt mindestens den vom Schadensmodell empfohlenen
-   Handpuffer. Bei akut zu kleiner Hand haben Draw und Überleben Vorrang.
+   `flatlineRisk`-Handpuffer. Bei akut zu kleiner Hand haben Draw und
+   Überleben Vorrang.
 4. Für eine Installation bleibt der vollständige Vertrag aus Installation,
    Aktivierung und Folgeaktion bestehen.
 
-`suspected` erzeugt keinen Bonus. Der Damage-Informationswert bleibt unter
-dem Matchpoint-Wert; fortgeschrittene Remote-Roots erhalten innerhalb dieses
+`deckBelief: suspected` erzeugt keinen Bonus. Bestätigtes Deckwissen bleibt
+auch nach Abklingen der akuten Flatline-Gefahr relevant; die akute Gefahr
+regelt nur den Überlebensvorrang. Der Damage-Informationswert bleibt unter dem
+Matchpoint-Wert; fortgeschrittene Remote-Roots erhalten innerhalb dieses
 kleineren Fensters die höchste Zielrelevanz.
 
 ### 3. Zielwahl
