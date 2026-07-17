@@ -142,8 +142,7 @@ process.stdout.write(
     warmupStartDecisionIndex: args.warmupStartDecisionIndex,
     warmupPolicy: args.warmupPolicy,
     warmupDriftCount: warmupResult.warmupDrifts.length,
-    compatibleWarmupSuffixDecisions:
-      warmupResult.compatibleSuffixDecisions,
+    compatibleWarmupSuffixDecisions: warmupResult.compatibleSuffixDecisions,
     warmupDrifts: warmupResult.warmupDrifts,
     eventPrefix: fixture.engine.eventPrefix.length,
     runtime: {
@@ -262,7 +261,8 @@ function parseArgs(values: string[]): {
   if (!Number.isInteger(decisionIndex) || decisionIndex <= 0) {
     throw new Error("invalid_argument:--decision-index");
   }
-  const warmupPolicyValue = optionalValue(values, "--warmup-policy") ?? "strict";
+  const warmupPolicyValue =
+    optionalValue(values, "--warmup-policy") ?? "strict";
   if (warmupPolicyValue !== "strict" && warmupPolicyValue !== "rebase") {
     throw new Error("invalid_argument:--warmup-policy");
   }
