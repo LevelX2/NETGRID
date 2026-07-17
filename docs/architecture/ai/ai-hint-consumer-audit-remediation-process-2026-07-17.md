@@ -2,7 +2,7 @@
 
 ## Status
 
-In Arbeit.
+Bereit zur lokalen Main-Integration.
 
 ## Quelle und Ziel
 
@@ -69,6 +69,33 @@ Deck-Snapshot, Hints und LegalActions.
 - `main` defensiv integrieren, final prüfen, Arbeits-Worktree und Branch
   entfernen.
 - Commit: `docs(ai): close hint consumer audit remediation`.
+
+## Paketresultate
+
+### P1 abgeschlossen
+
+- Der globale Spielanalyse-Skill macht den Deck-Audit bei `deckSnapshot`
+  explizit zum Abschlussgate und verlangt dessen Ergebnis im Report.
+- Das Audit-Script bestimmt den Repository-Root aus `import.meta.url` statt
+  aus dem durch `pnpm --filter` wechselnden Arbeitsverzeichnis.
+- Der dokumentierte Aufruf erreichte den erwarteten roten Consumer-Befund
+  ohne Pfadfehler.
+
+### P2 abgeschlossen
+
+- Allgemeine `stack_search`-Semantik ist jetzt ein sichtbarer
+  Programm-/Breaker-Zugang; `legalNow` bleibt an die source-gebundene
+  LegalAction gebunden.
+- Titel- und Typwörter können keine Search-Capability mehr erzeugen.
+- Die Regression verlangt Boostergang als Search-Tool und schließt Schematics
+  explizit aus.
+
+### P3 abgeschlossen, Merge ausstehend
+
+- Match-Checkpoint, Deck-Audit, 25 fokussierte Tests, AI-Typecheck und
+  `check:ai` sind grün.
+- Die vollständige AI-Suite wurde durch das externe 64-Sekunden-Toollimit
+  abgebrochen und wird nicht als grünes Ergebnis behauptet.
 
 ## Abschlusskriterien
 
