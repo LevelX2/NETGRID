@@ -2,9 +2,10 @@
 
 ## Status
 
-P1 ist aktiv. Die fachliche Analyse und die Umsetzung der zwei belegten
-Runner-KI-Findings wurden durch den Nutzer freigegeben. Änderungen erfolgen
-ausschließlich im separaten Worktree.
+P1 und P2 sind abgeschlossen; P3 ist aktiv. Beide historischen Findings sind
+auf unverändertem aktuellem Code spielgleich als `behavior_regression` rot
+reproduziert, während die zwei engen Gegenproben grün bleiben. Änderungen
+erfolgen ausschließlich im separaten Worktree.
 
 ## Quelle und Zielprüfung
 
