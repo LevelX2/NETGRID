@@ -931,6 +931,36 @@ export function automaticCorpMandatoryDrawAction(
     : undefined;
 }
 
+export function isAutomaticCorpRunPassAction(
+  action: LegalAction,
+): boolean {
+  return (
+    action.side === "corp" &&
+    action.type === "decline_rez" &&
+    action.source === "game_rule" &&
+    action.timingPoint.startsWith("run.") &&
+    action.costs.length === 0 &&
+    action.targetRequirements.length === 0 &&
+    (action.choiceRequirements?.length ?? 0) === 0
+  );
+}
+
+export function automaticCorpRunPassAction(
+  view: PlayerView,
+  actions: LegalAction[],
+  side: Side,
+): LegalAction | undefined {
+  if (
+    side !== "corp" ||
+    !view.run ||
+    view.winner ||
+    view.pendingChoice
+  )
+    return undefined;
+  const passActions = actions.filter(isAutomaticCorpRunPassAction);
+  return passActions.length === 1 ? passActions[0] : undefined;
+}
+
 export function isContextualLegalAction(action: LegalAction): boolean {
   if (action.type === "start_run" && action.payload?.bonusRunNoClick === true)
     return false;
@@ -2644,6 +2674,31 @@ export function runWindowActions(
       return action.payload?.iceId === activeRunIceInstanceId(view);
     return true;
   });
+}
+
+export function splitRunWindowActionsByServer(
+  view: PlayerView,
+  actions: LegalAction[],
+): {
+  currentServerActions: LegalAction[];
+  otherServerRezActions: LegalAction[];
+} {
+  const currentServerActions: LegalAction[] = [];
+  const otherServerRezActions: LegalAction[] = [];
+  for (const action of actions) {
+    if (
+      view.run &&
+      action.type === "rez_ice" &&
+      action.payload?.rootRez === true &&
+      typeof action.payload.serverId === "string" &&
+      action.payload.serverId !== view.run.attackedServerId
+    ) {
+      otherServerRezActions.push(action);
+    } else {
+      currentServerActions.push(action);
+    }
+  }
+  return { currentServerActions, otherServerRezActions };
 }
 
 function isAccessWindowAction(action: LegalAction): boolean {

@@ -1,6 +1,6 @@
 "use client";
 
-import { Move, Route } from "lucide-react";
+import { CheckCircle2, FastForward, Move, Route } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
@@ -15,6 +15,7 @@ import {
   currentRunTimelineStep,
   hasLegalAction,
   interactionAmbienceClassName,
+  isAutomaticCorpRunPassAction,
   normalizeVisibleTerms,
   runAwareActionButtonLabel,
   runBreakerActionHint,
@@ -22,6 +23,7 @@ import {
   runWindowActionButtonLabel,
   runWindowStatusLabel,
   serverDisplayLabel,
+  splitRunWindowActionsByServer,
 } from "../../app/action-board-ui";
 import { enrichVisibleCard } from "../cards/card-view-model";
 import { OverflowAwareActionButton } from "../actions/ActionControls";
@@ -46,8 +48,10 @@ export function RunTimelineOverlay({
   cardDetailsById,
   actionDisabled,
   highlighted = false,
+  corpRunAutoPassActive,
   onAction,
   onChoiceOption,
+  onCorpRunAutoPassEnabled,
 }: {
   view: PlayerView;
   legalActions: LegalAction[];
@@ -55,12 +59,14 @@ export function RunTimelineOverlay({
   cardDetailsById: CardDetailsById;
   actionDisabled: boolean;
   highlighted?: boolean;
+  corpRunAutoPassActive: boolean;
   onAction(action: LegalAction): void;
   onChoiceOption(
     action: LegalAction,
     choiceId: string,
     selectedOptionId: string,
   ): void;
+  onCorpRunAutoPassEnabled(enabled: boolean): void;
 }) {
   const overlayRef = useRef<HTMLDivElement | null>(null);
   const dragOffsetRef = useRef<{ x: number; y: number } | null>(null);
@@ -153,6 +159,14 @@ export function RunTimelineOverlay({
   const regularRunActions = choiceAction
     ? runActions.filter((action) => action.actionId !== choiceAction.actionId)
     : runActions;
+  const { currentServerActions, otherServerRezActions } =
+    splitRunWindowActionsByServer(view, regularRunActions);
+  const canEnableCorpRunAutoPass =
+    view.side === "corp" &&
+    regularRunActions.some(isAutomaticCorpRunPassAction);
+  const showCorpRunAutoPassControl =
+    view.side === "corp" &&
+    (corpRunAutoPassActive || canEnableCorpRunAutoPass);
   const runChoice =
     view.pendingChoice &&
     choiceAction &&
@@ -247,7 +261,7 @@ export function RunTimelineOverlay({
             aria-label="Run-Aktionen"
             data-testid="run-action-bar"
           >
-            {regularRunActions.map((action) => {
+            {currentServerActions.map((action) => {
               const compactLabel = runWindowActionButtonLabel(view, action);
               const fullLabel =
                 compactLabel.startsWith("SMC:") && action.label
@@ -270,11 +284,72 @@ export function RunTimelineOverlay({
                 />
               );
             })}
+            {otherServerRezActions.length > 0 ? (
+              <div
+                className="runActionDivider"
+                role="separator"
+                aria-label="Auf anderen Servern rezzen"
+              >
+                <span>Auf anderen Servern rezzen</span>
+              </div>
+            ) : null}
+            {otherServerRezActions.map((action) => {
+              const compactLabel = runWindowActionButtonLabel(view, action);
+              return (
+                <OverflowAwareActionButton
+                  action={action}
+                  className="button primary actionButton runActionButton"
+                  key={action.actionId}
+                  label={runAwareActionButtonLabel(view, action)}
+                  displayLabel={compactLabel}
+                  tone={actionButtonTone(view, action)}
+                  onClick={() => onAction(action)}
+                  disabled={actionDisabled}
+                  type="button"
+                  data-testid="run-action-button"
+                  data-action-type={action.type}
+                  iconSize={14}
+                />
+              );
+            })}
           </div>
         ) : !runChoice && jackOutAvailable ? (
           <p className="runHint">
             Du kannst den Run jetzt abbrechen (Jack-out).
           </p>
+        ) : null}
+        {showCorpRunAutoPassControl ? (
+          <div
+            className={`runAutoPassControl ${corpRunAutoPassActive ? "active" : ""}`}
+            data-testid="corp-run-auto-pass-control"
+          >
+            {corpRunAutoPassActive ? (
+              <>
+                <span className="runAutoPassStatus" role="status">
+                  <CheckCircle2 size={15} aria-hidden="true" />
+                  Auto-Pass für diesen Run aktiv
+                </span>
+                <button
+                  className="button runAutoPassStopButton"
+                  type="button"
+                  onClick={() => onCorpRunAutoPassEnabled(false)}
+                  disabled={actionDisabled}
+                >
+                  Stoppen
+                </button>
+              </>
+            ) : (
+              <button
+                className="button runAutoPassButton"
+                type="button"
+                onClick={() => onCorpRunAutoPassEnabled(true)}
+                disabled={actionDisabled || !canEnableCorpRunAutoPass}
+              >
+                <FastForward size={15} aria-hidden="true" />
+                <span>Restlichen Run automatisch passen</span>
+              </button>
+            )}
+          </div>
         ) : null}
         {breachProgress ? <p className="runHint">{breachProgress}</p> : null}
         {breachHighlighterHint ? (

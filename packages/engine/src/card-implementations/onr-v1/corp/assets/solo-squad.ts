@@ -10,6 +10,7 @@ export const soloSquadImplementation: CardImplementationDefinition = {
       timing: "corp_main",
       costs: [{ kind: "action", amount: 1 }],
       condition: { kind: "runner_is_tagged" },
+      label: "Solo Squad: Dem Runner 1 Meat Damage zufügen",
       effects: [
         {
           kind: "damage",

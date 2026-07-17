@@ -202,6 +202,8 @@ describe("PlayerView projection", () => {
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
+    expect(getPlayerView(state, "runner").run?.runId).toBe(state.run?.runId);
+    expect(getPlayerView(state, "corp").run?.runId).toBe(state.run?.runId);
     state = passRootRezWindowBeforeAccessIfOpen(state);
 
     expect(

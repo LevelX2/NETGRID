@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { PlayerView, PublicGameEvent, Side } from "@netgrid/shared";
-import { actionSoundCountForAction, actionSoundForActionType, cueHasHiddenLeak, deriveDamageImpactCues, deriveOpponentActionCues, eventsAfter, turnStartAudioCue } from "./action-cues";
+import { actionSoundCountForAction, actionSoundForActionType, cueHasHiddenLeak, damageAudioCueFromPublicPayload, deriveDamageImpactCues, deriveOpponentActionCues, eventsAfter, turnStartAudioCue } from "./action-cues";
 
 describe("deriveOpponentActionCues", () => {
   it("maps opponent AI events to stable cues without exposing raw reason codes", () => {
@@ -181,7 +181,10 @@ describe("deriveOpponentActionCues", () => {
     expect(runnerCues.some((cue) => cue.title === "Du hast 1 Net Damage durch Bel-Digmo Antibody erlitten.")).toBe(true);
     expect(corpCues.some((cue) => cue.title === "Der Runner hat 1 Net Damage durch Bel-Digmo Antibody erlitten.")).toBe(true);
     expect(runnerCues.at(-1)?.source).toBe("system");
-    expect(runnerCues.at(-1)?.sound).toBe("tag_or_damage");
+    expect(runnerCues.at(-1)?.sound).toBeUndefined();
+    expect(
+      damageAudioCueFromPublicPayload(accessDamageEvent.publicPayload),
+    ).toEqual({ sound: "damage", soundCount: 1 });
   });
 
   it("queues a separate visible tag-result window with the exact gained amount", () => {
@@ -224,9 +227,14 @@ describe("deriveOpponentActionCues", () => {
       cardDefinitionId: "onr_proteus_050_manhunt",
       cardTitle: "Manhunt",
       iconBadge: "+6",
-      sound: "tag_or_damage",
+      sound: "gain_tag",
       visibility: "public",
     });
+    expect(
+      actionSoundForActionType("resolve_choice", "public", {
+        tagsAdded: 6,
+      }),
+    ).toBe("gain_tag");
     expect(corpTagCue?.title).toBe("Der Runner hat 6 Tags erhalten.");
     expect(cueHasHiddenLeak(runnerTagCue!)).toBe(false);
     expect(cueHasHiddenLeak(corpTagCue!)).toBe(false);
@@ -268,6 +276,15 @@ describe("deriveOpponentActionCues", () => {
     ]);
     expect(JSON.stringify(cues)).not.toContain("hidden_asset_1");
     expect(JSON.stringify(cues)).not.toContain("Hidden Trap");
+    expect(
+      damageAudioCueFromPublicPayload({
+        damageResolved: true,
+        damageAmount: 2,
+      }),
+    ).toEqual({
+      sound: "damage",
+      soundCount: 2,
+    });
   });
 
   it("marks flatline damage impact from side-safe public counts", () => {
@@ -330,6 +347,12 @@ describe("deriveOpponentActionCues", () => {
       amount: 0,
       flatline: false
     });
+    expect(
+      damageAudioCueFromPublicPayload({
+        damageResolved: true,
+        damageAmount: 0,
+      }),
+    ).toBeNull();
   });
 
   it("falls back to public PlayerView max hand size for damage impact grip labels", () => {

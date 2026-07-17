@@ -70,6 +70,7 @@ import {
 import {
   actionSoundCountForAction,
   actionSoundForActionType,
+  damageAudioCueFromPublicPayload,
   deriveDamageImpactCues,
   deriveOpponentActionCues,
   turnStartAudioCue,
@@ -107,6 +108,7 @@ import {
   activeRunIceInstanceId,
   approachIceExposeViewingIceId,
   automaticCorpMandatoryDrawAction,
+  automaticCorpRunPassAction,
   automaticEndTurnAction,
   baseActionSlotCapacity,
   installedCorpExposeReviewCardId,
@@ -222,6 +224,7 @@ import { copyTextToClipboard } from "../lib/clipboard";
 import { downloadTextFile } from "../lib/download";
 import { runtimeRandomId } from "../lib/runtime-id";
 import { reconnectUrlForSession } from "../lib/session-url";
+import { NETGRID_APP_STATUS_LABEL } from "../lib/app-build-info";
 import {
   bootstrap,
   enableAiDecisionDebugTracing,
@@ -444,7 +447,7 @@ import {
 } from "../features/game-board/board-view-helpers";
 
 const APP_NAME = "NETGRID";
-const APP_STATUS_LABEL = "V1.9.22";
+const APP_STATUS_LABEL = NETGRID_APP_STATUS_LABEL;
 const APP_BRAND_ASSET_VERSION = "2026-05-10-brand-fix-2";
 const APP_ICON_SRC = `/brand/netgrid-icon-cyber-v1.png?v=${APP_BRAND_ASSET_VERSION}`;
 const APP_WORDMARK_SRC = `/brand/netgrid-wordmark-cyber-v1.png?v=${APP_BRAND_ASSET_VERSION}`;
@@ -704,6 +707,9 @@ export default function Page() {
   const [autoCorpMandatoryDrawEnabled, setAutoCorpMandatoryDrawEnabled] =
     useState(false);
   const [autoDiscardEnabled, setAutoDiscardEnabled] = useState(false);
+  const [corpRunAutoPassKey, setCorpRunAutoPassKey] = useState<string | null>(
+    null,
+  );
   const [priorityWindowHoldEnabled, setPriorityWindowHoldEnabled] =
     useState(false);
   const [topbarStickyEnabled, setTopbarStickyEnabled] = useState(true);
@@ -805,6 +811,7 @@ export default function Page() {
   const autoEndTurnSubmittedKeyRef = useRef<string | null>(null);
   const autoCorpMandatoryDrawSubmittedKeyRef = useRef<string | null>(null);
   const autoDiscardSubmittedKeyRef = useRef<string | null>(null);
+  const corpRunAutoPassSubmittedKeyRef = useRef<string | null>(null);
   const pendingAiAdvanceKeyRef = useRef<string | null>(null);
   const aiDecisionDebugEnabledMatchRef = useRef<string | null>(null);
   const aiDecisionDebugTraceIdRef = useRef<string | null>(null);
@@ -3007,6 +3014,17 @@ export default function Page() {
     if (!audioEnabled || newEvents.length === 0) return;
     const overlayEventIds = new Set(cues.map((cue) => cue.eventId));
     for (const event of newEvents) {
+      const damageAudioCue = damageAudioCueFromPublicPayload(
+        event.publicPayload,
+      );
+      if (damageAudioCue) {
+        playActionCueSound(
+          damageAudioCue.sound,
+          audioVolume,
+          damageAudioCue.soundCount,
+        );
+        continue;
+      }
       if (overlayEventIds.has(event.eventId)) continue;
       const item = formatChronicleEvent(
         event,
@@ -3022,7 +3040,11 @@ export default function Page() {
         )
       )
         continue;
-      const sound = actionSoundForActionType(actionType, item.visibility);
+      const sound = actionSoundForActionType(
+        actionType,
+        item.visibility,
+        event.publicPayload,
+      );
       if (sound)
         playActionCueSound(
           sound,
@@ -3903,6 +3925,50 @@ export default function Page() {
     });
     return true;
   };
+
+  const currentCorpRunAutoPassKey =
+    session && payload?.playerView.run?.runId
+      ? `${session.matchId}:${payload.playerView.run.runId}`
+      : null;
+
+  useEffect(() => {
+    if (
+      corpRunAutoPassKey &&
+      corpRunAutoPassKey !== currentCorpRunAutoPassKey
+    ) {
+      setCorpRunAutoPassKey(null);
+      corpRunAutoPassSubmittedKeyRef.current = null;
+    }
+  }, [corpRunAutoPassKey, currentCorpRunAutoPassKey]);
+
+  useEffect(() => {
+    if (
+      !session ||
+      !payload ||
+      session.side !== "corp" ||
+      connection !== "online" ||
+      !currentCorpRunAutoPassKey ||
+      corpRunAutoPassKey !== currentCorpRunAutoPassKey
+    )
+      return;
+    const action = automaticCorpRunPassAction(
+      payload.playerView,
+      payload.legalActions,
+      session.side,
+    );
+    if (!action) return;
+    const key = `${currentCorpRunAutoPassKey}:${payload.playerView.stateVersion}:${action.actionId}`;
+    if (corpRunAutoPassSubmittedKeyRef.current === key) return;
+    if (submitAction(action, { immediateAudio: false }))
+      corpRunAutoPassSubmittedKeyRef.current = key;
+  }, [
+    session,
+    payload,
+    connection,
+    currentCorpRunAutoPassKey,
+    corpRunAutoPassKey,
+    submitAction,
+  ]);
 
   useEffect(() => {
     if (
@@ -5540,8 +5606,18 @@ export default function Page() {
                   Boolean(payload.winner) || connection !== "online"
                 }
                 highlighted={activeCueHighlight?.kind === "run"}
+                corpRunAutoPassActive={
+                  Boolean(currentCorpRunAutoPassKey) &&
+                  corpRunAutoPassKey === currentCorpRunAutoPassKey
+                }
                 onAction={submitAction}
                 onChoiceOption={submitChoiceOption}
+                onCorpRunAutoPassEnabled={(enabled) => {
+                  setCorpRunAutoPassKey(
+                    enabled ? currentCorpRunAutoPassKey : null,
+                  );
+                  corpRunAutoPassSubmittedKeyRef.current = null;
+                }}
               />
             ) : null}
             {showFloatingActionPanel && activeView ? (

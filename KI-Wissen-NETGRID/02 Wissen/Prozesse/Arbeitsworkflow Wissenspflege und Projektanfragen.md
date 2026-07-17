@@ -47,7 +47,10 @@ Activity-Prioritäten sind `low`, `normal`, `high`, `critical` und `hotfix`. `ho
 2. Gate-Kriterien der laufenden Phase prüfen.
 3. Fehlende Quellen, Tests, Abweichungen oder Risiken dokumentieren.
 4. Erst nach bestandenem oder ausdrücklich akzeptiertem Gate die nächste Phase beginnen.
-5. Bei Releaseabschlüssen vor dem Phasenwechsel die im Webclient sichtbare Versionsnummer auf den erreichten Release-Stand anheben und im Final Review dokumentieren.
+5. Bei Releaseabschlüssen den fachlichen Zielrelease-Stand im Final Review
+   dokumentieren. Die sichtbare Produktversion des Webclients bleibt davon
+   getrennt und ändert sich nur nach ausdrücklicher Produktreifeentscheidung;
+   die Buildkennung wird automatisch aus Git ermittelt.
 
 ## Fall 5: Abschluss
 

@@ -1223,6 +1223,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
         action.type === "activated_card_ability" &&
         action.payload?.cardId === soloSquadId,
     );
+    expect(legal.label).toBe("Solo Squad: Dem Runner 1 Meat Damage zufügen");
     const tagDrift = structuredClone(state);
     tagDrift.runner.tags = 0;
     const driftResult = applyAction(tagDrift, {

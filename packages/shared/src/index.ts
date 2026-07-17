@@ -1933,6 +1933,7 @@ export type PlayerView = {
     removedFromGameCount: number;
   };
   run?: {
+    runId?: string;
     attackedServerId: Exclude<ServerId, "new_remote">;
     phase: RunState["phase"];
     position?: RunState["position"];

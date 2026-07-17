@@ -10879,7 +10879,8 @@ select,
 .gameplaySettings,
 .aiPacingSettings,
 .actionCueSettings,
-.sessionAccessSettings {
+.sessionAccessSettings,
+.buildInfoSettings {
   grid-column: 1 / -1;
   min-width: 0;
   padding: 10px;
@@ -11121,6 +11122,38 @@ select,
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--settings-bg);
+}
+
+.buildInfoSettings {
+  display: grid;
+  gap: 10px;
+}
+
+.buildInfoDetails {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.buildInfoDetails > div {
+  min-width: 0;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--field-bg);
+}
+
+.buildInfoDetails dt {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.buildInfoDetails dd {
+  margin: 3px 0 0;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .systemStatus span {
@@ -12355,6 +12388,33 @@ select,
   gap: 6px;
 }
 
+.runActionDivider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.runActionDivider::before,
+.runActionDivider::after {
+  content: "";
+  min-width: 12px;
+  height: 1px;
+  flex: 1 1 auto;
+  background: color-mix(in srgb, var(--run-active-border), transparent 38%);
+}
+
+.runActionDivider span {
+  flex: 0 1 auto;
+  text-align: center;
+}
+
 .runActionButton {
   min-height: 34px;
   width: 100%;
@@ -12384,6 +12444,56 @@ select,
   white-space: normal;
   word-break: normal;
   line-height: 1.25;
+}
+
+.runAutoPassControl {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
+  padding-top: 2px;
+}
+
+.runAutoPassControl.active {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  padding: 7px 8px;
+  border: 1px solid color-mix(in srgb, var(--ok), var(--line) 46%);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--ok), var(--section-bg) 92%);
+}
+
+.runAutoPassButton {
+  min-height: 34px;
+  width: 100%;
+  justify-content: center;
+  gap: 7px;
+  border-color: color-mix(in srgb, var(--corp), var(--line) 42%);
+  background: color-mix(in srgb, var(--corp), var(--section-bg) 91%);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.runAutoPassStatus {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.runAutoPassStatus svg {
+  flex: 0 0 auto;
+  color: var(--ok);
+}
+
+.runAutoPassStopButton {
+  min-height: 28px;
+  padding: 4px 8px;
+  font-size: 11px;
 }
 
 .runBreakerHint {
@@ -13994,6 +14104,10 @@ select,
     width: auto;
     min-width: 0;
     padding-inline: 12px;
+  }
+
+  .buildInfoDetails {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .matchStrip {

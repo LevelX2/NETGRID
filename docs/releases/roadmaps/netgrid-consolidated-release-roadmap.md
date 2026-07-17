@@ -50,7 +50,11 @@ Zusätzlich müssen je Release dokumentiert werden:
 - Scope und Nicht-Ziele.
 - Requirements, Spezifikation, Testmatrix und Requirements Review vor Code.
 - Implementation Review und Final Review nach Code.
-- Webclient-Versionsnummer wird am Releaseende auf den Zielstand angehoben und im Final Review als eigener Gatepunkt nachgewiesen.
+- Das Final Review dokumentiert den fachlichen Zielrelease-Stand. Der Webclient
+  zeigt davon getrennt die Produktversion `V0.9` und eine automatisch aus Git
+  ermittelte Buildkennung; die Produktversion ändert sich nur nach einer
+  ausdrücklichen Produktreifeentscheidung. Führend ist
+  `docs/decisions/product-version-and-build-identification-2026-07-17.md`.
 - aktualisierte Mechanik-Coverage, Card-Support-Daten und KI-Support-Daten, sofern betroffen.
 - `CODEX_STATUS.md` und Wissensbasis-Update nur für wiederverwendbare Entscheidungen oder Statusänderungen.
 

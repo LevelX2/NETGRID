@@ -2,6 +2,7 @@ import { Activity, Clipboard, Image, Keyboard, Moon, Shield, SlidersHorizontal, 
 
 import type { SessionInfo } from "../../app/session-recovery";
 import type { CuePositionPreference, CuePositionPreset } from "../../app/action-board-ui";
+import { NETGRID_BUILD_INFO } from "../../lib/app-build-info";
 import { reconnectUrlForSession } from "../../lib/session-url";
 import {
   CARD_SCALE_PERCENT_MAX,
@@ -212,9 +213,39 @@ export function OptionsPanel({
           onAutoDismissMs={onActionCueAutoDismissMs}
         />
         <AudioSettings enabled={audioEnabled} volume={audioVolume} onEnabled={onAudioEnabled} onVolume={onAudioVolume} />
+        <BuildInfoSettings />
         <SystemStatus />
       </div>
     </section>
+  );
+}
+
+function BuildInfoSettings() {
+  return (
+    <div className="buildInfoSettings">
+      <div>
+        <span className="settingsTitle">NETGRID-Version</span>
+        <span className="meta">{NETGRID_BUILD_INFO.developmentStatus}</span>
+      </div>
+      <dl className="buildInfoDetails">
+        <div>
+          <dt>Produktversion</dt>
+          <dd>V{NETGRID_BUILD_INFO.productVersion}</dd>
+        </div>
+        <div>
+          <dt>Build</dt>
+          <dd>{NETGRID_BUILD_INFO.buildNumber}</dd>
+        </div>
+        <div>
+          <dt>Commit</dt>
+          <dd>{NETGRID_BUILD_INFO.commit}</dd>
+        </div>
+        <div>
+          <dt>Quellstand</dt>
+          <dd>{NETGRID_BUILD_INFO.sourceDate}</dd>
+        </div>
+      </dl>
+    </div>
   );
 }
 

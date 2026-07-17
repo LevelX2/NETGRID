@@ -19,7 +19,9 @@ NETGRID nutzt vorerst synthetische Web-Audio-Sounds. Es werden keine externen So
 | Zugriff | `access_card` | `access` | einzelner Scan-Ping | hoch |
 | Agenda | `score_agenda`, `steal_agenda` | `agenda` | heller, klarer Erfolgshinweis | hoch |
 | Trash / Purge | `trash_accessed_card`, `trash_resource`, `purge_virus_counters` | `trash` | kurzer dumpfer Abwurf | mittel |
-| Tag / Damage | `remove_tag`, Damage-/Tag-Folgeevents mit expliziter Action | `tag_or_damage` | warnender, dunkler Akzent | mittel |
+| Tag erhalten | öffentliche Folgeevents mit positivem `tagsAdded` oder gleichwertigem öffentlichem Tag-Zähler | `gain_tag` | unverwechselbarer Target-Lock-Alarm: drei hohe Ortungsimpulse und ein tiefer Lock-on-Abschluss | hoch |
+| Damage | öffentliche, aufgelöste Damage-Impacts mit positivem `damageAmount` | `damage` | dunkler, schussähnlicher synthetischer Einschlag; ein Impuls je tatsächlich erlittenem Schadenspunkt | hoch |
+| Tag entfernen | `remove_tag` | `tag_or_damage` | kurzer dunkler Statusakzent | mittel |
 | Choice | `resolve_choice` | `choice` | dezenter Interface-Klick | niedrig |
 | Spielende | `game_end` und Result-Modal | `game_end` / Result-Sound | klarer Abschluss | hoch |
 
@@ -27,6 +29,7 @@ NETGRID nutzt vorerst synthetische Web-Audio-Sounds. Es werden keine externen So
 
 - Sichtbar redigierte/hidden Aktionen bekommen nur generische Soundfamilien, z. B. `install_hidden`; kein Sound darf verdeckte Kartentypen, Kartennamen oder Zielinhalte verraten.
 - Automatische Systemeffekte bleiben standardmaessig still, solange `includeAutomaticEffectCues` nicht aktiv ist.
+- Ein tatsächlich erhaltener Runner-Tag und tatsächlich erlittener Schaden sind davon ausgenommen: Bei aktiviertem Audio erklingen `gain_tag` und `damage` auch dann, wenn visuelle Action-Cues deaktiviert sind. Mehrere gleichzeitig erhaltene Tags spielen das Tag-Motiv einmal; jeder Schadenspunkt erzeugt dagegen einen eigenen Damage-Impuls. Vollständig verhinderter Schaden bleibt still.
 - Sehr haeufige Kleinstereignisse bleiben leise und kurz, damit KI-gegen-KI oder lange Runs nicht akustisch ueberladen.
 
 ## Naechste Kandidaten

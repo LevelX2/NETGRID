@@ -57,6 +57,10 @@ export function playActionCueSound(kind: ActionSoundKind, volume: number, repeat
     playCardDrawSnap(context, safeVolume, repeatCount);
     return;
   }
+  if (kind === "damage") {
+    playDamageImpactBursts(context, safeVolume, repeatCount);
+    return;
+  }
   const pattern = actionSoundPattern(kind);
   pattern.forEach((note, index) => {
     const oscillator = context.createOscillator();
@@ -72,6 +76,58 @@ export function playActionCueSound(kind: ActionSoundKind, volume: number, repeat
     oscillator.start(start);
     oscillator.stop(start + note.duration + 0.02);
   });
+}
+
+function playDamageImpactBursts(
+  context: AudioContext,
+  volume: number,
+  repeatCount: number,
+): void {
+  const safeCount = Math.min(20, Math.max(1, Math.floor(repeatCount)));
+  for (let index = 0; index < safeCount; index += 1) {
+    const start = context.currentTime + index * 0.19;
+    const noiseBuffer = context.createBuffer(
+      1,
+      Math.max(1, Math.floor(context.sampleRate * 0.09)),
+      context.sampleRate,
+    );
+    const samples = noiseBuffer.getChannelData(0);
+    for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex += 1) {
+      const decay = 1 - sampleIndex / samples.length;
+      samples[sampleIndex] = (Math.random() * 2 - 1) * decay * decay;
+    }
+
+    const noise = context.createBufferSource();
+    const noiseFilter = context.createBiquadFilter();
+    const noiseGain = context.createGain();
+    noise.buffer = noiseBuffer;
+    noiseFilter.type = "lowpass";
+    noiseFilter.frequency.setValueAtTime(950, start);
+    noiseFilter.frequency.exponentialRampToValueAtTime(240, start + 0.085);
+    noiseGain.gain.setValueAtTime(Math.max(0.0001, volume * 0.15), start);
+    noiseGain.gain.exponentialRampToValueAtTime(0.0001, start + 0.09);
+    noise.connect(noiseFilter);
+    noiseFilter.connect(noiseGain);
+    noiseGain.connect(context.destination);
+    noise.start(start);
+    noise.stop(start + 0.1);
+
+    const impact = context.createOscillator();
+    const impactGain = context.createGain();
+    impact.type = "triangle";
+    impact.frequency.setValueAtTime(105, start);
+    impact.frequency.exponentialRampToValueAtTime(48, start + 0.15);
+    impactGain.gain.setValueAtTime(0.0001, start);
+    impactGain.gain.exponentialRampToValueAtTime(
+      Math.max(0.0001, volume * 0.18),
+      start + 0.008,
+    );
+    impactGain.gain.exponentialRampToValueAtTime(0.0001, start + 0.17);
+    impact.connect(impactGain);
+    impactGain.connect(context.destination);
+    impact.start(start);
+    impact.stop(start + 0.18);
+  }
 }
 
 function playCardDrawSnap(context: AudioContext, volume: number, repeatCount: number): void {
@@ -156,6 +212,16 @@ function actionSoundPattern(kind: ActionSoundKind): Array<{ frequency: number; d
         { frequency: 196, duration: 0.055, gain: 0.055, type: "sawtooth" },
         { frequency: 98, duration: 0.12, gain: 0.035, type: "triangle" }
       ];
+    case "gain_tag":
+      return [
+        { frequency: 1319, duration: 0.055, gain: 0.12, type: "square" },
+        { frequency: 988, duration: 0.055, gain: 0.11, type: "square" },
+        { frequency: 1319, duration: 0.07, gain: 0.12, type: "square" },
+        { frequency: 494, duration: 0.17, gain: 0.13, type: "sawtooth" },
+        { frequency: 247, duration: 0.28, gain: 0.12, type: "sawtooth" }
+      ];
+    case "damage":
+      return [{ frequency: 72, duration: 0.17, gain: 0.18, type: "triangle" }];
     case "tag_or_damage":
       return [
         { frequency: 247, duration: 0.08, gain: 0.08, type: "square" },

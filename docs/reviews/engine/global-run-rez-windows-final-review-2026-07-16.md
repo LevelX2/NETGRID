@@ -61,6 +61,15 @@ Zielkarte. Die Registry-/Fort-Pass-Aktionen erhalten weiterhin ausschließlich
 den angegriffenen Server als Kontext. Es entstand keine Hacker-Tracker-Karten-
 ID-Verzweigung und keine zweite Regelautorität in UI, Server oder KI.
 
+## UI-Nachtrag vom 2026-07-17
+
+Das Run-Fenster stellt serverübergreifende Asset-/Upgrade-Rezaktionen gesammelt
+am Ende der Aktionsliste dar. Eine sichtbare Trennlinie mit der Überschrift
+`Auf anderen Servern rezzen` grenzt sie von Aktionen am Runziel und sonstigen
+Run-Aktionen ab. Die UI erkennt diese Gruppe ausschließlich an den vorhandenen
+LegalAction-Feldern `rootRez` und `serverId`; sie erzeugt oder verändert keine
+Regelerlaubnis.
+
 ## End-to-End-Nachweis
 
 Die gehärtete Trace-Regression bildet den Nutzerfall direkt ab:
