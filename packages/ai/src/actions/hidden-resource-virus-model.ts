@@ -4,7 +4,7 @@ import type {
   ActionHiddenResourceVirusModel,
   ActionSemanticCandidate,
   ActionVirusCounterModel,
-} from "../action-semantic-candidate";
+} from "../action-semantic-candidate-types";
 
 const PURGE_ACTION_TYPES = new Set<LegalAction["type"]>([
   "purge_virus_counters",

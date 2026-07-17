@@ -1,8 +1,4 @@
-import type {
-  CardDefinitionId,
-  CardInstanceId,
-  LegalAction,
-} from "@netgrid/shared";
+import type { CardDefinitionId, LegalAction } from "@netgrid/shared";
 import { applyCardSemanticJoin } from "./actions/action-card-semantic-join";
 import { applyCostAndTimingProfiles } from "./actions/action-cost-timing";
 import { applyCardActionSourceBinding } from "./actions/action-source-binding";
@@ -12,500 +8,62 @@ import { applyBasicActionSemantics } from "./actions/basic-action-semantics";
 import { applyRunAccessDecisionModel } from "./actions/run-access-decision-model";
 import { applyRandomBadPublicityModel } from "./actions/random-bad-publicity-model";
 import { applyHiddenResourceVirusModel } from "./actions/hidden-resource-virus-model";
+import type {
+  ActionSemanticVisibilityScope,
+  ActionGateResult,
+  LegalTargetSummary,
+  BoardContextSummary,
+  ActionSemanticCandidate,
+  BuildActionSemanticCandidatesParams,
+  BuildNeutralActionSemanticCandidateOptions,
+  SideSafeActionAbilityBinding,
+  ActionCardSemanticProfile,
+} from "./action-semantic-candidate-types";
+
+export type {
+  ActionSemanticVisibilityScope,
+  ActionSemanticSourceKind,
+  ActionAbilityBindingMethod,
+  ActionSemanticConfidence,
+  ActionPrimaryProjectionStatus,
+  ActionProjectionIssue,
+  ActionGateId,
+  ActionGateResult,
+  StrategySupportPair,
+  SemanticCondition,
+  SemanticRisk,
+  SemanticConstraint,
+  DamageAmount,
+  ActionCostProfile,
+  ActionTimingProfile,
+  LegalTarget,
+  LegalTargetSummary,
+  TargetProfileMatch,
+  ConstraintResult,
+  ActionTargetContext,
+  ActionRunProjectionSummary,
+  RunAccessModifierKind,
+  RunAccessRiskKind,
+  RunAccessPayoffKind,
+  ActionRunAccessDecisionModel,
+  ActionRandomOutcomeModel,
+  ActionBadPublicityDecisionModel,
+  ActionRandomBadPublicityModel,
+  ActionHiddenResourceModel,
+  ActionVirusCounterModel,
+  ActionHiddenResourceVirusModel,
+  ActionTagEffectProfile,
+  BoardContextSummary,
+  ActionSemanticCandidate,
+  BuildActionSemanticCandidatesParams,
+  BuildNeutralActionSemanticCandidateOptions,
+  SideSafeActionAbilityBinding,
+  ActionCardAbilitySemanticProfile,
+  ActionCardSemanticProfile,
+} from "./action-semantic-candidate-types";
 
 export const ACTION_SEMANTIC_CANDIDATE_SCHEMA_VERSION =
   "action-semantic-candidate-v1" as const;
-
-export type ActionSemanticVisibilityScope =
-  | "actor_private"
-  | "public"
-  | "corp_private"
-  | "runner_private"
-  | "developer_only";
-
-export type ActionSemanticSourceKind =
-  | "card"
-  | "basic_action"
-  | "game_rule"
-  | "choice"
-  | "unknown";
-
-export type ActionAbilityBindingMethod =
-  | "explicit_ability_id"
-  | "engine_payload"
-  | "single_legal_ability_inferred"
-  | "unresolved";
-
-export type ActionSemanticConfidence = "none" | "low" | "medium" | "high";
-
-export type ActionPrimaryProjectionStatus =
-  | "projected"
-  | "neutral_projected"
-  | "partial_projected"
-  | "blocked"
-  | "schema_gap"
-  | "hidden_info_blocked";
-
-export type ActionProjectionIssue =
-  | "source_unresolved"
-  | "ability_unresolved"
-  | "target_context_unavailable"
-  | "hidden_info_blocked"
-  | "cost_unknown"
-  | "timing_unknown"
-  | "card_semantics_unavailable";
-
-export type ActionGateId =
-  | "engine_legal_action"
-  | "side_visibility"
-  | "hidden_info"
-  | "source_resolution"
-  | "ability_resolution"
-  | "target_context"
-  | "cost_known"
-  | "timing_known"
-  | "runtime_no_effect";
-
-export type ActionGateResult = {
-  gateId: ActionGateId;
-  status: "pass" | "block" | "unknown" | "not_applicable";
-  severity: "info" | "warning" | "error";
-  reason?: string;
-  evidence?: string[];
-};
-
-export type StrategySupportPair = {
-  strategyId: string;
-  role: string;
-  confidence: "low" | "medium" | "high";
-  evidence: string;
-};
-
-export type SemanticCondition = {
-  conditionId?: string;
-  kind: string;
-  status: "present" | "absent" | "unknown" | "not_evaluated";
-  evidence?: string[];
-};
-
-export type SemanticRisk = {
-  riskId?: string;
-  kind: string;
-  severity: "low" | "medium" | "high" | "unknown";
-  evidence?: string[];
-};
-
-export type SemanticConstraint = {
-  constraintId?: string;
-  kind: string;
-  status: "satisfied" | "unsatisfied" | "unknown" | "not_evaluated";
-  evidence?: string[];
-};
-
-export type DamageAmount = {
-  type: "net" | "meat" | "brain" | "core" | "unknown";
-  amount: number | "unknown";
-};
-
-export type ActionCostProfile = {
-  clickCost?: number;
-  creditCost?: number;
-  trashCost?: number;
-  agendaPointCost?: number;
-  temporaryCredits?: {
-    budget?: number;
-    provided?: number;
-    spent?: number;
-    remaining?: number;
-    returned?: number;
-  };
-  tapCost?: boolean;
-  revealCost?: boolean;
-  forfeitAgenda?: boolean;
-  selfDamage?: DamageAmount[];
-  selfTag?: number;
-  discardCost?: number;
-  xValue?: number | "choice" | "unknown";
-  paidBy?: "runner" | "corp" | "unknown";
-  beneficiary?: "runner" | "corp" | "none" | "unknown";
-  costKnownStatus: "known" | "partial" | "unknown" | "not_applicable";
-  variableCost?: {
-    kind:
-      | "x"
-      | "trace_boost"
-      | "trash_cost"
-      | "rez_cost"
-      | "choice"
-      | "unknown";
-    min?: number;
-    max?: number;
-    chosen?: number;
-    postActionReserve?: number;
-    source?: "legal_action_payload";
-  };
-  additionalCosts: string[];
-};
-
-export type ActionTimingProfile = {
-  phase?: string;
-  turnSide?: "runner" | "corp";
-  window?: string;
-  runPhase?: string;
-  encounterPhase?: string;
-  accessPhase?: boolean;
-  scoreWindow?: boolean;
-  rezWindow?: boolean;
-  responseWindow?: boolean;
-  duration?: {
-    kind:
-      | "current_action"
-      | "current_encounter"
-      | "current_run"
-      | "current_turn"
-      | "next_action"
-      | "action_debt"
-      | "persistent"
-      | "unknown";
-    source: "legal_action_payload" | "action_type" | "timing_point";
-    actions?: number;
-    expiresAt?: string | number;
-  };
-};
-
-export type LegalTarget = {
-  targetId: string;
-  targetKind:
-    | "card"
-    | "server"
-    | "ice"
-    | "program"
-    | "resource"
-    | "hardware"
-    | "agenda"
-    | "choice"
-    | "subroutine"
-    | "unknown";
-  targetSide: "runner" | "corp" | "both" | "unknown";
-  targetZone?: string;
-  targetDefinitionId?: string;
-  targetTitle?: string;
-  targetSubtypes?: string[];
-  targetConstraints?: string[];
-  visibilityScope: ActionSemanticVisibilityScope;
-  evidence: string[];
-};
-
-export type LegalTargetSummary = {
-  targetId: string;
-  targetKind: LegalTarget["targetKind"];
-  targetSide: LegalTarget["targetSide"];
-  targetZone?: string;
-  targetDefinitionId?: string;
-  targetTitle?: string;
-  targetSubtypes?: string[];
-  targetConstraints?: string[];
-  evidence: string[];
-};
-
-export type TargetProfileMatch = {
-  targetProfileId?: string;
-  status: "matched" | "not_matched" | "unknown" | "not_available";
-  issues: ActionProjectionIssue[];
-  evidence: string[];
-};
-
-export type ConstraintResult = {
-  constraintId?: string;
-  status: "pass" | "block" | "unknown" | "not_applicable";
-  reason?: string;
-  evidence: string[];
-};
-
-export type ActionTargetContext = {
-  selectedTargets: LegalTarget[];
-  availableTargets?: LegalTargetSummary[];
-  targetKind:
-    | "card"
-    | "server"
-    | "ice"
-    | "program"
-    | "resource"
-    | "hardware"
-    | "agenda"
-    | "choice"
-    | "subroutine"
-    | "unknown";
-  targetZones: string[];
-  targetSide: "runner" | "corp" | "both" | "unknown";
-  hiddenInfoPolicy: string;
-  availableTargetsStatus:
-    | "engine_provided"
-    | "not_available"
-    | "target_context_unavailable";
-  targetProfileMatches: TargetProfileMatch[];
-  targetConstraintResults: ConstraintResult[];
-};
-
-export type ActionRunProjectionSummary = {
-  serverId?: string;
-  serverKind?: "hq" | "rd" | "archives" | "remote";
-  source: "legal_action_payload" | "target_context" | "run_action_projection";
-  evidence: string[];
-};
-
-export type RunAccessModifierKind =
-  | "bypass_ice"
-  | "additional_subroutines"
-  | "redirect_run"
-  | "access_replacement"
-  | "post_run_followup"
-  | "forced_run_end";
-
-export type RunAccessRiskKind =
-  | "ambush"
-  | "damage"
-  | "tag"
-  | "program_disruption"
-  | "steal_tax"
-  | "access_reduction";
-
-export type RunAccessPayoffKind =
-  | "additional_access"
-  | "free_trash"
-  | "ice_trash"
-  | "information";
-
-export type ActionRunAccessDecisionModel = {
-  schemaVersion: "run-access-decision-model-v1";
-  coverageStatus: "covered" | "partial" | "blocked";
-  serverId?: string;
-  modifiers: RunAccessModifierKind[];
-  accessRisks: RunAccessRiskKind[];
-  payoffs: RunAccessPayoffKind[];
-  unknownRemoteIdentityPreserved: true;
-  hiddenInfoPolicy: "side_safe_visible_only";
-  whyNot: string[];
-  evidence: string[];
-};
-
-export type ActionRandomOutcomeModel = {
-  schemaVersion: "random-outcome-model-v1";
-  outcomeStatus: "not_drawn";
-  purpose?: string;
-  randomCounterAfter?: number;
-  source: "engine_random_draw_records_only";
-  futureOutcomeAccess: "forbidden";
-  deterministicProjection: true;
-  evidence: string[];
-};
-
-export type ActionBadPublicityDecisionModel = {
-  schemaVersion: "bad-publicity-decision-model-v1";
-  delta?: number;
-  current?: number;
-  after?: number;
-  lossThreshold: 7;
-  thresholdStatus: "reached" | "not_reached" | "unknown";
-  actorRelevance: "payoff" | "risk" | "support";
-  source: "legal_action_payload" | "side_safe_semantics";
-  hiddenInfoPolicy: "side_safe_visible_only";
-  evidence: string[];
-};
-
-export type ActionRandomBadPublicityModel = {
-  randomOutcome?: ActionRandomOutcomeModel;
-  badPublicity?: ActionBadPublicityDecisionModel;
-};
-
-export type ActionHiddenResourceModel = {
-  schemaVersion: "hidden-resource-model-v1";
-  perspective:
-    | "own_private_constraint"
-    | "opponent_abstract_risk"
-    | "hidden_info_blocked";
-  available?: number;
-  required?: number;
-  sufficiency: "sufficient" | "insufficient" | "unknown";
-  opponentIdentityPreserved: true;
-  hiddenInfoPolicy: "actor_private_or_abstract_only";
-  evidence: string[];
-};
-
-export type ActionVirusCounterModel = {
-  schemaVersion: "virus-counter-model-v1";
-  counterFamily: "runner_virus" | "corp_antibody";
-  counterType?: string;
-  amountAdded?: number;
-  countersAfter?: number;
-  purgePressure: "purge_action" | "purge_window" | "none";
-  payoutWindow: "available" | "not_signaled";
-  antibodySeparatedFromRunnerVirus: true;
-  source: "legal_action_payload" | "side_safe_semantics" | "action_type";
-  evidence: string[];
-};
-
-export type ActionHiddenResourceVirusModel = {
-  hiddenResource?: ActionHiddenResourceModel;
-  virusCounter?: ActionVirusCounterModel;
-};
-
-export type ActionTagEffectProfile = {
-  kind: "remove_tags" | "avoid_tag" | "avoid_next_tag" | "tag_clear_support";
-  recipient: "runner";
-  mode?: "amount" | "up_to_amount" | "all" | "support_only";
-  amount?: number | "all" | "unknown";
-  currentTagReduction?: number | "all" | "unknown";
-  acuteTagRemoval: boolean;
-  source:
-    | "legal_action_type"
-    | "legal_action_payload"
-    | "card_implementation"
-    | "ai_hint";
-  evidence: string[];
-};
-
-export type BoardContextSummary = {
-  source: "ai_decision_input" | "player_view" | "not_projected";
-  sideSafe: boolean;
-  stateVersion?: number;
-  timingPoint?: string;
-  notes: string[];
-};
-
-/**
- * @aiProjection Read-only descriptor for an Engine-provided LegalAction.
- * @authority Candidates must not influence legality or create actions; they can
- * only explain or rank actions that already exist.
- * @visibility Fields must be built from the observer's side-safe projection and
- * hidden-info barriers must remain explicit.
- */
-export type ActionSemanticCandidate = {
-  actionId: string;
-  actionType: string;
-  actorSide: "runner" | "corp";
-  actorId?: string;
-  observerSide?: "runner" | "corp" | "system";
-  visibilityScope: ActionSemanticVisibilityScope;
-  legalActionRef: {
-    actionId: string;
-    actionType: string;
-    originalPayloadKeys: string[];
-    payloadHash?: string;
-  };
-  stateVersion?: number;
-  sourceKind: ActionSemanticSourceKind;
-  /**
-   * Legacy-compatible alias for the action source card. New semantic joins must
-   * use sourceDefinitionId for card profiles and sourceCardInstanceId for
-   * instance identity.
-   */
-  sourceCardId?: CardInstanceId | CardDefinitionId;
-  sourceCardInstanceId?: CardInstanceId;
-  sourceDefinitionId?: CardDefinitionId;
-  abilityId?: string;
-  abilityKey?: string;
-  primitiveKind?: string;
-  effectKind?: string;
-  abilityBindingMethod: ActionAbilityBindingMethod;
-  semanticActionType: string;
-  /**
-   * Structured effect destinations retained from side-safe card hints. These
-   * keep timing-relevant distinctions such as immediate, installment and
-   * turn-start credits out of lossy free-text inference.
-   */
-  effectTargets?: string[];
-  cardContextSignals: string[];
-  actionTacticSignals: string[];
-  compatibilitySignals?: string[];
-  strategySupport: StrategySupportPair[];
-  conditions: SemanticCondition[];
-  risks: SemanticRisk[];
-  constraints: SemanticConstraint[];
-  costProfile: ActionCostProfile;
-  timingProfile: ActionTimingProfile;
-  targetContext?: ActionTargetContext;
-  runProjectionSummary?: ActionRunProjectionSummary;
-  runAccessDecisionModel?: ActionRunAccessDecisionModel;
-  randomBadPublicityModel?: ActionRandomBadPublicityModel;
-  hiddenResourceVirusModel?: ActionHiddenResourceVirusModel;
-  tagEffectProfile?: ActionTagEffectProfile;
-  boardContext: BoardContextSummary;
-  confidence: ActionSemanticConfidence;
-  primaryProjectionStatus: ActionPrimaryProjectionStatus;
-  projectionIssues: ActionProjectionIssue[];
-  hardGates: ActionGateResult[];
-  evidence: string[];
-};
-
-export type BuildActionSemanticCandidatesParams = {
-  legalActions: readonly LegalAction[];
-  observerSide?: "runner" | "corp" | "system";
-  stateVersion?: number;
-  projectionMode?: "neutral_only" | "basic_semantics";
-  sideSafeAbilityBindings?: readonly SideSafeActionAbilityBinding[];
-  visibleSourceDefinitionsByInstanceId?: Readonly<
-    Record<CardInstanceId, CardDefinitionId>
-  >;
-  selectedTargetsByActionId?: Readonly<
-    Record<string, Readonly<Record<string, string>>>
-  >;
-  availableTargetsByActionId?: Readonly<
-    Record<string, readonly LegalTargetSummary[]>
-  >;
-  cardSemanticProfilesByDefinitionId?: Readonly<
-    Record<CardDefinitionId, ActionCardSemanticProfile>
-  >;
-  /**
-   * Deprecated compatibility alias for older callers. It is interpreted as a
-   * definition-id keyed map and must not be populated from hidden instance ids.
-   */
-  cardSemanticProfilesByCardId?: Readonly<
-    Record<CardDefinitionId, ActionCardSemanticProfile>
-  >;
-};
-
-export type BuildNeutralActionSemanticCandidateOptions = {
-  observerSide?: "runner" | "corp" | "system";
-  stateVersion?: number;
-};
-
-export type SideSafeActionAbilityBinding = {
-  actionId: string;
-  sourceCardInstanceId?: CardInstanceId;
-  /**
-   * Legacy-compatible alias for sourceCardInstanceId.
-   */
-  sourceCardId: CardInstanceId;
-  sourceDefinitionId?: CardDefinitionId;
-  abilityId: string;
-  method: "single_legal_ability_inferred";
-  evidence: string[];
-};
-
-export type ActionCardAbilitySemanticProfile = {
-  abilityId: string;
-  tacticSignals: readonly string[];
-  compatibilitySignals?: readonly string[];
-  strategySupport?: readonly StrategySupportPair[];
-  conditions?: readonly SemanticCondition[];
-  risks?: readonly SemanticRisk[];
-  constraints?: readonly SemanticConstraint[];
-  additionalCosts?: readonly string[];
-  targetProfileMatches?: readonly TargetProfileMatch[];
-};
-
-export type ActionCardSemanticProfile = {
-  cardId: CardDefinitionId;
-  tacticSignals: readonly string[];
-  effectTargets?: readonly string[];
-  compatibilitySignals?: readonly string[];
-  strategySupport?: readonly StrategySupportPair[];
-  conditions?: readonly SemanticCondition[];
-  risks?: readonly SemanticRisk[];
-  constraints?: readonly SemanticConstraint[];
-  targetProfileMatches?: readonly TargetProfileMatch[];
-  abilitySemantics?: readonly ActionCardAbilitySemanticProfile[];
-};
 
 export function buildActionSemanticCandidates(
   params: BuildActionSemanticCandidatesParams,

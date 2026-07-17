@@ -1,4 +1,8 @@
-import { CARD_DEFINITIONS_BY_ID, type CardDefinitionId, type LegalAction } from "@netgrid/shared";
+import {
+  CARD_DEFINITIONS_BY_ID,
+  type CardDefinitionId,
+  type LegalAction,
+} from "@netgrid/shared";
 import type {
   ActionAbilityBindingMethod,
   ActionGateResult,
@@ -6,7 +10,7 @@ import type {
   ActionSemanticCandidate,
   ActionSemanticSourceKind,
   SideSafeActionAbilityBinding,
-} from "../action-semantic-candidate";
+} from "../action-semantic-candidate-types";
 
 /**
  * @aiProjection Copies side-safe Engine source and CardImplementation primitive

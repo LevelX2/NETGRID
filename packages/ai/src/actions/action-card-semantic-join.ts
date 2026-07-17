@@ -4,7 +4,7 @@ import type {
   ActionSemanticCandidate,
   ActionTargetContext,
   TargetProfileMatch,
-} from "../action-semantic-candidate";
+} from "../action-semantic-candidate-types";
 
 export function applyCardSemanticJoin(
   candidate: ActionSemanticCandidate,
@@ -30,7 +30,8 @@ export function applyCardSemanticJoin(
     };
   }
 
-  const profile = cardSemanticProfilesByDefinitionId[candidate.sourceDefinitionId];
+  const profile =
+    cardSemanticProfilesByDefinitionId[candidate.sourceDefinitionId];
   if (profile === undefined) {
     return {
       ...candidate,
@@ -46,7 +47,9 @@ export function applyCardSemanticJoin(
 
   const abilitySemantics = profile.abilitySemantics ?? [];
   const matchingAbility = candidate.abilityId
-    ? abilitySemantics.find((ability) => ability.abilityId === candidate.abilityId)
+    ? abilitySemantics.find(
+        (ability) => ability.abilityId === candidate.abilityId,
+      )
     : undefined;
   const singleAbility =
     abilitySemantics.length === 1 ? abilitySemantics[0] : undefined;
@@ -94,7 +97,8 @@ export function applyCardSemanticJoin(
   const projectionIssues = new Set(candidate.projectionIssues);
   projectionIssues.delete("card_semantics_unavailable");
   if (abilityUnresolved) projectionIssues.add("ability_unresolved");
-  if (actionAbility !== undefined) projectionIssues.delete("ability_unresolved");
+  if (actionAbility !== undefined)
+    projectionIssues.delete("ability_unresolved");
   const joinedTargetContext = targetContextWithSemanticMatches(
     candidate.targetContext,
     actionAbility?.targetProfileMatches ??

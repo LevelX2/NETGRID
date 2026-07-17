@@ -5,7 +5,7 @@ import type {
   ActionProjectionIssue,
   ActionSemanticCandidate,
   ActionTimingProfile,
-} from "../action-semantic-candidate";
+} from "../action-semantic-candidate-types";
 
 export function applyCostAndTimingProfiles(
   candidate: ActionSemanticCandidate,

@@ -2,7 +2,7 @@ import type { CardDefinitionId, LegalAction } from "@netgrid/shared";
 import type {
   ActionTagEffectProfile,
   ActionSemanticCandidate,
-} from "../action-semantic-candidate";
+} from "../action-semantic-candidate-types";
 
 type TagEffectDescriptor = Omit<
   ActionTagEffectProfile,

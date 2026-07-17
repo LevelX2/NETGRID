@@ -5,7 +5,7 @@ import type {
   RunAccessModifierKind,
   RunAccessPayoffKind,
   RunAccessRiskKind,
-} from "../action-semantic-candidate";
+} from "../action-semantic-candidate-types";
 
 const RUN_ACCESS_ACTION_TYPES = new Set<LegalAction["type"]>([
   "start_run",

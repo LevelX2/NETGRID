@@ -6,7 +6,7 @@ import type {
   ActionSemanticCandidate,
   ActionSemanticConfidence,
   ActionSemanticSourceKind,
-} from "../action-semantic-candidate";
+} from "../action-semantic-candidate-types";
 import {
   knownCreditGainAbilitySemantics,
   knownNonCreditGainActionSemantics,

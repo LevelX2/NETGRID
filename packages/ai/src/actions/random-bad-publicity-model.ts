@@ -4,7 +4,7 @@ import type {
   ActionRandomBadPublicityModel,
   ActionRandomOutcomeModel,
   ActionSemanticCandidate,
-} from "../action-semantic-candidate";
+} from "../action-semantic-candidate-types";
 
 const BAD_PUBLICITY_LOSS_THRESHOLD = 7;
 const RANDOM_PURPOSE_KEYS = [

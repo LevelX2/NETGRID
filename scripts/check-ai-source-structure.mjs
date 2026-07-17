@@ -70,20 +70,7 @@ if (valueCycles.length > 0) {
   );
 }
 
-const expectedTypeCycleSignatures = new Set([
-  signature([
-    "action-semantic-candidate.ts",
-    "actions/action-card-semantic-join.ts",
-    "actions/action-cost-timing.ts",
-    "actions/action-source-binding.ts",
-    "actions/action-target-context.ts",
-    "actions/basic-action-semantics.ts",
-    "actions/hidden-resource-virus-model.ts",
-    "actions/random-bad-publicity-model.ts",
-    "actions/run-access-decision-model.ts",
-    "actions/tag-effect-semantics.ts",
-  ]),
-]);
+const expectedTypeCycleSignatures = new Set();
 const actualTypeCycles = cyclicComponents(allGraph);
 const actualTypeCycleSignatures = new Set(
   actualTypeCycles.map((component) =>

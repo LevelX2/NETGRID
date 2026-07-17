@@ -7,7 +7,7 @@ import type {
   ActionTargetContext,
   LegalTarget,
   LegalTargetSummary,
-} from "../action-semantic-candidate";
+} from "../action-semantic-candidate-types";
 
 export function applyTargetContextProjection(
   candidate: ActionSemanticCandidate,
@@ -140,7 +140,10 @@ function targetContextCompletesPartialProjection(action: LegalAction): boolean {
 
 function normalizeServerId(value: unknown): string | undefined {
   if (typeof value !== "string") return undefined;
-  const normalized = value.trim().toLowerCase().replace(/^server[:.]/, "");
+  const normalized = value
+    .trim()
+    .toLowerCase()
+    .replace(/^server[:.]/, "");
   if (normalized === "hq") return "hq";
   if (normalized === "rd") return "rd";
   if (normalized === "archives") return "archives";
@@ -181,11 +184,9 @@ function runProjectionSummaryFromAction(
 ): ActionRunProjectionSummary | undefined {
   const payloadServerId = normalizeServerId(action.payload?.serverId);
   if (payloadServerId) {
-    return buildRunProjectionSummary(
-      payloadServerId,
-      "legal_action_payload",
-      [`run_projection_summary_payload_server:${payloadServerId}`],
-    );
+    return buildRunProjectionSummary(payloadServerId, "legal_action_payload", [
+      `run_projection_summary_payload_server:${payloadServerId}`,
+    ]);
   }
   const targetServerId = [
     ...(targetContext?.selectedTargets ?? []),
@@ -256,32 +257,40 @@ function choiceOptionTargetsForAction(
     }));
 }
 
-function requirementTargetsForAction(action: LegalAction): LegalTargetSummary[] {
-  return action.targetRequirements.flatMap((requirement): LegalTargetSummary[] => {
-    if (requirement.visibility === "engine_only") return [];
-    if (requirement.kind === "server") {
-      return (requirement.allowedServers ?? []).map((serverId) => ({
-        targetId: serverId,
-        targetKind: "server" as const,
-        targetSide: "corp" as const,
-        evidence: [`AI039 legal target server from requirement ${requirement.id}`],
-      }));
-    }
-    if (requirement.sourceIceRef !== undefined) {
-      return [
-        {
-          targetId: requirement.sourceIceRef,
-          targetKind: "ice" as const,
-          targetSide: requirement.side ?? ("corp" as const),
-          ...(requirement.zoneScope?.[0] !== undefined
-            ? { targetZone: requirement.zoneScope[0] }
-            : {}),
-          evidence: [`AI039 legal target ice from requirement ${requirement.id}`],
-        },
-      ];
-    }
-    return [];
-  });
+function requirementTargetsForAction(
+  action: LegalAction,
+): LegalTargetSummary[] {
+  return action.targetRequirements.flatMap(
+    (requirement): LegalTargetSummary[] => {
+      if (requirement.visibility === "engine_only") return [];
+      if (requirement.kind === "server") {
+        return (requirement.allowedServers ?? []).map((serverId) => ({
+          targetId: serverId,
+          targetKind: "server" as const,
+          targetSide: "corp" as const,
+          evidence: [
+            `AI039 legal target server from requirement ${requirement.id}`,
+          ],
+        }));
+      }
+      if (requirement.sourceIceRef !== undefined) {
+        return [
+          {
+            targetId: requirement.sourceIceRef,
+            targetKind: "ice" as const,
+            targetSide: requirement.side ?? ("corp" as const),
+            ...(requirement.zoneScope?.[0] !== undefined
+              ? { targetZone: requirement.zoneScope[0] }
+              : {}),
+            evidence: [
+              `AI039 legal target ice from requirement ${requirement.id}`,
+            ],
+          },
+        ];
+      }
+      return [];
+    },
+  );
 }
 
 function payloadTargetsForAction(action: LegalAction): LegalTargetSummary[] {
@@ -325,10 +334,7 @@ function cardPayloadTargetForAction(
       evidence: [`AI039 legal action payload agenda target: ${cardId}`],
     };
   }
-  if (
-    action.type === "advance_card" ||
-    action.type === "trash_accessed_card"
-  ) {
+  if (action.type === "advance_card" || action.type === "trash_accessed_card") {
     return {
       targetId: cardId,
       targetKind: "card",
@@ -401,7 +407,9 @@ function uniqueLegalTargetSummaries(
     const existing = byKey.get(key);
     byKey.set(
       key,
-      existing === undefined ? cloneLegalTargetSummary(target) : mergeTargets(existing, target),
+      existing === undefined
+        ? cloneLegalTargetSummary(target)
+        : mergeTargets(existing, target),
     );
   }
   return [...byKey.values()];
@@ -436,13 +444,13 @@ function mergeTargets(
   ]);
   return {
     ...existing,
-    ...(existing.targetDefinitionId ?? next.targetDefinitionId
+    ...((existing.targetDefinitionId ?? next.targetDefinitionId)
       ? {
           targetDefinitionId:
             existing.targetDefinitionId ?? next.targetDefinitionId,
         }
       : {}),
-    ...(existing.targetTitle ?? next.targetTitle
+    ...((existing.targetTitle ?? next.targetTitle)
       ? { targetTitle: existing.targetTitle ?? next.targetTitle }
       : {}),
     ...(targetSubtypes !== undefined ? { targetSubtypes } : {}),
@@ -451,7 +459,9 @@ function mergeTargets(
   };
 }
 
-function uniqueOptionalStrings(values: readonly string[]): string[] | undefined {
+function uniqueOptionalStrings(
+  values: readonly string[],
+): string[] | undefined {
   const unique = [...new Set(values.filter((value) => value.length > 0))];
   return unique.length > 0 ? unique : undefined;
 }
@@ -515,7 +525,8 @@ function targetConstraintResultsForAction(
       {
         constraintId: "engine_only_target_blocked",
         status: "block",
-        reason: "Engine-only target requirements are not projected into TargetContext.",
+        reason:
+          "Engine-only target requirements are not projected into TargetContext.",
         evidence: ["target_context_constraint:engine_only_target_blocked"],
       },
     ];
@@ -534,7 +545,8 @@ function targetConstraintResultsForAction(
         status: "block",
         reason: "Cybernetics hardware is excluded from this legal target set.",
         evidence: cyberneticsTargets.map(
-          (target) => `target_constraint:not_cybernetics_block:${target.targetId}`,
+          (target) =>
+            `target_constraint:not_cybernetics_block:${target.targetId}`,
         ),
       },
     ];
@@ -544,8 +556,11 @@ function targetConstraintResultsForAction(
       {
         constraintId: "not_cybernetics",
         status: "unknown",
-        reason: "No side-safe hardware targets were projected for the subtype constraint.",
-        evidence: ["target_constraint:not_cybernetics:available_targets_missing"],
+        reason:
+          "No side-safe hardware targets were projected for the subtype constraint.",
+        evidence: [
+          "target_constraint:not_cybernetics:available_targets_missing",
+        ],
       },
     ];
   }
@@ -553,10 +568,13 @@ function targetConstraintResultsForAction(
     {
       constraintId: "not_cybernetics",
       status: "pass",
-      reason: "Projected hardware targets are side-safe and exclude Cybernetics.",
+      reason:
+        "Projected hardware targets are side-safe and exclude Cybernetics.",
       evidence: [
         "target_constraint:not_cybernetics:side_safe_target_set",
-        ...targets.map((target) => `target_constraint_target:${target.targetId}`),
+        ...targets.map(
+          (target) => `target_constraint_target:${target.targetId}`,
+        ),
       ],
     },
   ];
