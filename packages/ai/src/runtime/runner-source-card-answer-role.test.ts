@@ -61,6 +61,33 @@ describe("runnerSourceCardAnswerRole", () => {
     expect(runnerSourceCardAnswerRole(input(), textNoise, dependencies()))
       .toBeUndefined();
   });
+
+  it("does not infer deck search from a generic card title", () => {
+    const schematics = action({
+      actionId: "schematics-title-only",
+      payload: { sourceDefinitionId: "schematics-search-engine" },
+    });
+    const library = action({
+      actionId: "library-title-only",
+      payload: { sourceDefinitionId: "library-search" },
+    });
+    const titleOnlyDependencies = {
+      ...dependencies(),
+      sourceDefinition: (definitionId: string | undefined) =>
+        definitionId === "schematics-search-engine"
+          ? { title: "Schematics Search Engine" }
+          : definitionId === "library-search"
+            ? { title: "Library Search" }
+            : undefined,
+    };
+
+    expect(
+      runnerSourceCardAnswerRole(input(), schematics, titleOnlyDependencies),
+    ).toBeUndefined();
+    expect(
+      runnerSourceCardAnswerRole(input(), library, titleOnlyDependencies),
+    ).toBeUndefined();
+  });
 });
 
 function dependencies() {
