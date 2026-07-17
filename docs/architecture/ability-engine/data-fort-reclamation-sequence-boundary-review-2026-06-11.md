@@ -2,11 +2,13 @@
 
 ## Status
 
-`review_complete_with_follow_up_boundary`
+`completed_by_ordered_sequence_2026-07-17`
 
 ## Zweck
 
-Dieser Review prüft, ob die aktuelle `Data Fort Reclamation`-Runtime weiterhin als MVP-Grenze tragfähig ist oder ob sofort ein größerer ordered-install/rez-Umbau nötig ist.
+Dieser Review hielt die frühere MVP-Grenze der `Data Fort Reclamation`-Runtime
+fest. Die benannte Folgearbeit ist am 2026-07-17 umgesetzt; dieses Artefakt
+beschreibt den nun führenden Sequenzvertrag.
 
 ## Quellen
 
@@ -29,76 +31,43 @@ Die Errata-Quelle bestätigt zwei Vertragsgrenzen:
 - Die Korp darf zusätzlich Credits aus dem eigenen Creditpool zum Installieren/Rezzing verwenden.
 - Der Effekt erzeugt keine zusätzlichen Aktionen.
 
-## Aktueller Runtime-Schnitt
+## Führender Runtime-Vertrag
 
-Die aktuelle Runtime modelliert den Effekt zweistufig:
+Die Runtime modelliert den Effekt als persistente, Korp-private Sequenz:
 
-1. Korp-private HQ-Choice für bis zu vier installierbare Karten.
-2. Prevalidation ohne State-Mutation.
-3. Neues Remote nur bei nicht leerer Auswahl.
-4. Installation der gewählten Karten in stabiler Choice-Reihenfolge.
-5. Danach zweite Korp-private Rez-Choice für neu installierte rezbare Karten.
-6. Rez-Kosten werden zuerst aus dem 10-Credit-Effektpool und danach aus Korp-Credits bezahlt.
+1. Die Korp wählt bis zu vier installierbare HQ-Karten in Klickreihenfolge.
+2. Eine leere Auswahl erstellt kein Remote und gibt den gesamten temporären
+   Creditpool zurück.
+3. Bei einer nicht leeren Auswahl entsteht genau ein neues Data Fort.
+4. Jede gewählte Karte wird einzeln und in der gewählten Reihenfolge
+   installiert. Root-Kapazität bleibt vorab und unmittelbar vor dem Schritt
+   geprüft.
+5. Region- und sonstige Rez-on-install-Karten durchlaufen ihr Pflichtfenster;
+   alle anderen rezbaren Karten erhalten unmittelbar nach ihrer Installation
+   eine eigene optionale Rez-Choice.
+6. Rez-Kosten verbrauchen zuerst den separaten 10-Credit-Effektpool und
+   danach Korp-Credits. Erst nach der letzten Karte wird der ungenutzte Rest
+   zurückgegeben.
 
-Dieser Schnitt ist für die vorhandene Smoke-Coverage tragfähig:
-
-- ICE plus eine Root-Karte werden in ein neues Remote installiert.
-- Nullauswahl erzeugt kein Remote.
-- Ungültige Root-Auswahl mutiert keinen State.
-- Wrong-side, stale-state, Hidden-Info, PublicPayload und Replay/StateHash sind getestet.
-
-## Bewertete Grenzfälle
-
-### Reihenfolgeeffekte
-
-Der Kartentext verlangt eine installierte Reihenfolge. Die Runtime bewahrt die Auswahlreihenfolge beim Installieren, bietet das Rezzing aber erst nach Abschluss aller Installationen an.
-
-Für die aktuell getesteten ICE/Root-Fälle ändert das Verhalten den Ergebniszustand nicht: Die Korp kann dieselben rezbaren Karten mit demselben temporären Budget rezzen, Hidden-Info bleibt geschützt und der öffentliche Payload bleibt count-basiert.
-
-### Root-Kapazität
-
-Die Prevalidation simuliert das neue Remote und prüft Root-Installierbarkeit vor der Mutation. Dadurch sind offensichtliche Root-Kapazitätsfehler nicht mehr teilmutierend.
-
-### Regionen und Root-Rez-on-install
-
-Hier liegt die relevante MVP-Grenze.
-
-Mehrere Originalset-Region-Upgrades tragen den Vertrag: Region beim Installieren rezzen, nur installieren, wenn die Korp das Rezzen bezahlen kann, und ältere Regionen im Fort trashen. Der normale `installCard`-Pfad enthält dafür `rootInstallRezzesOnInstall(...)`, `appendRootRezOnInstallEffect(...)` und Region-Replacement-Aufräumung.
-
-Die aktuelle Data-Fort-Reclamation-Sequenz nutzt diesen normalen Root-Install-Pfad nicht. Eine Region aus HQ würde zunächst verdeckt installiert und erst in der nachgelagerten Rez-Choice optional gerezzt. Das ist nicht präzise genug für eine vollständige Region-/Install-on-install-Regeltreue.
+Die Auswahl, jedes Rez-Fenster sowie jeder Folgeschritt bleiben an
+`LegalActions`, Choice-ID und `stateVersion` gebunden. Der öffentliche
+Payload enthält nur sichere Sequenzzählwerte; HQ-Identitäten und nicht
+öffentliche Karten bleiben Korp-privat.
 
 ## Entscheidung
 
-Kein stiller Runtime-Umbau in diesem Review-Paket.
+Die frühere Batch-Rez-MVP-Grenze ist aufgehoben. Die damaligen Removal
+Conditions sind erfüllt: geordnete Einzelinstallationen, Pflicht- und
+Optional-Rezfenster, persistenter Effektpool, Korp-Credits als Zusatzquelle,
+Root-/Regionspfad, Hidden-Info-Barriere sowie Replay-/StateHash- und
+stale-/wrong-side-Revalidation sind Bestandteil des aktuellen Vertrags.
 
-Der bestehende MVP-Schnitt bleibt für den aktuell getesteten Data-Fort-Reclamation-Hauptpfad akzeptiert:
+## Teststand
 
-- ICE plus nicht-regionale Root-Karte.
-- Hidden-Info-sichere Auswahl.
-- Temporärer Rez-Creditpool.
-- Deterministisches Replay.
-
-Regionen und künftige install-on-install/rez-on-install Interaktionen bleiben als fachliche Sequenzgrenze dokumentiert. Eine korrekte Lösung braucht einen neuen ordered-install/rez-Sequenzvertrag statt eines kleinen Handler-Patches.
-
-## Removal Conditions für einen Folgeumbau
-
-Ein späterer Codeumbau ist fällig, wenn Data Fort Reclamation Regionen oder andere install-on-install/rez-on-install Karten vollständig regeltreu unterstützen soll.
-
-Dann muss der neue Vertrag mindestens leisten:
-
-- Explizite geordnete Installationssequenz pro gewählter Karte.
-- Nach jeder installierten Karte ein passendes Pflicht- oder Optional-Rez-Fenster.
-- Temporären 10-Credit-Pool über alle Install-/Rez-Schritte tragen.
-- Korp-Credits als Zusatzquelle nutzen.
-- Root-Kapazität, Region-Replacement und `rootInstallRezzesOnInstall(...)` integrieren.
-- Hidden-Info-Barrieren für HQ-Auswahl und nicht öffentliche Kartenidentitäten erhalten.
-- PublicPayload weiter count-/source-sicher halten.
-- Replay/StateHash und stale/wrong-side Revalidation für jeden Sequenzschritt testen.
-
-## Teststand dieses Reviews
-
-Der bestehende Fokuscheck bleibt der passende Regressionstest für den aktuellen MVP-Schnitt:
+Die Sequenz wird mindestens durch die folgenden fokussierten Checks abgesichert:
 
 ```powershell
 corepack pnpm --filter @netgrid/engine exec vitest run src/game/corp/install-rez-sequence-handlers.test.ts
+corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/mechanics/per-card-longtail.test.ts
+corepack pnpm --filter @netgrid/web exec vitest run app/action-board-ui.test.ts
 ```

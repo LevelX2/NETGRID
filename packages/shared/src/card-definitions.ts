@@ -4009,7 +4009,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     advancementRequirement: 4,
     agendaPoints: 2,
     rulesText:
-      "When scored, choose up to 4 HQ cards and install them in a new data fort. Optional rez sequencing remains deferred.",
+      "When scored, gain 10 temporary credits, choose up to 4 HQ cards in installation order, and install them one at a time in a new data fort. You may rez each card as it is installed; return unspent temporary credits afterward.",
     mechanics: [
       "install_remote",
       "advance",

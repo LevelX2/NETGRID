@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-07-17-data-fort-reclamation-ordered-install-rez
-status: in_progress
+status: done
 kind: implementation
 area: cards
 priority: high
@@ -8,6 +8,7 @@ primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-07-17
 startedAt: 2026-07-17
+completedAt: 2026-07-17
 branch: codex/data-fort-reclamation-sequence
 worktree: C:\\Projekte\\NETGRID-worktrees\\data-fort-reclamation-sequence
 releaseTarget: Current State
@@ -18,7 +19,30 @@ blockedBy: []
 
 ## Status
 
-`in_progress`
+`done`
+
+## Ergebnis
+
+- Die Rules Engine speichert die bis zu vier HQ-Karten in Auswahlreihenfolge
+  und führt eine persistente Einzelkartenfolge mit individuellem Rez-Fenster
+  pro normal rezbarer Karte aus. Regionen und weitere Rez-on-install-Karten
+  bleiben im jeweiligen Installationsschritt verpflichtend; ungenutzte
+  temporäre Credits werden erst nach der letzten Karte zurückgegeben.
+- Das vorhandene Kartenwahlfenster zeigt die Reihenfolge mit Badges `1` bis
+  `4`. Ein Rez-Schritt ist als privates Bestätigungsfenster mit Restbudget
+  statt als Feldaktion dargestellt.
+- Kartentext und Boundary-Review beschreiben keinen Deferred-Batch-Rez-Pfad
+  mehr. Die alte Folgeumbau-Removal-Condition ist erfüllt.
+
+## Abgeschlossene Prüfungen
+
+- `corepack pnpm --filter @netgrid/engine exec vitest run src/game/corp/install-rez-sequence-handlers.test.ts` – 12 Tests grün.
+- `corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/mechanics/per-card-longtail.test.ts` – 54 Tests grün.
+- `corepack pnpm --filter @netgrid/web exec vitest run app/action-board-ui.test.ts` – 112 Tests grün.
+- `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/selected-choices-for-decision.test.ts` – 20 Tests grün.
+- `corepack pnpm --filter @netgrid/shared typecheck`, `@netgrid/engine typecheck` und `@netgrid/web typecheck` – grün.
+- `corepack pnpm typecheck` – alle Workspace-Typechecks grün.
+- `git diff --check` – grün.
 
 ## Quelle / Vorgabe
 
