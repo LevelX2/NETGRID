@@ -230,6 +230,49 @@ describe("runner damage threat model v2 red evidence", () => {
       reason: expect.stringContaining("buffer_mode:temporary_before_risky_run"),
     });
   });
+
+  it("does not overdraw when an immediate agenda score is legal", () => {
+    const current = input({
+      handCount: 2,
+      maxHandSize: 2,
+      credits: 6,
+      clicks: 2,
+      turnSerial: 8,
+      events: [
+        event("resolved-net-damage", 31, 8, {
+          actor: "corp",
+          actionType: "net_damage",
+          damageType: "net",
+          damageAmount: 1,
+          damageResolved: true,
+          sourceDefinitionId: "onr_v1_258_neural-blade",
+        }),
+      ],
+    });
+    current.playerView.servers[1]!.ice = [
+      {
+        instanceId: "unknown-rd-ice",
+        owner: "corp",
+        controller: "corp",
+        known: false,
+        rezzed: false,
+      } as VisibleCard,
+    ];
+    const drawAction = basicAction(current, "draw", "draw_card");
+    const runAction = {
+      ...basicAction(current, "run-rd", "start_run"),
+      payload: { serverId: "rd" },
+    } as LegalAction;
+    const scoreAction = {
+      ...basicAction(current, "score-agenda", "activated_card_ability"),
+      payload: { cardImplementationScoresSourceAsAgenda: true },
+    } as LegalAction;
+    current.legalActions = [drawAction, runAction, scoreAction];
+
+    expect(
+      runnerHandBufferNeedScoreComponent(current, drawAction),
+    ).toBeUndefined();
+  });
 });
 
 function basicAction(

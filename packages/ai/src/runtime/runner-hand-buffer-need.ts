@@ -18,6 +18,11 @@ export function runnerHandBufferNeedScoreComponent(
     flatlineRisk.handBufferHeadroom === 0 &&
     input.playerView.own.clicks > 1 &&
     (flatlineRisk.level === "confirmed" || flatlineRisk.level === "critical") &&
+    !input.legalActions.some(
+      (legalAction) =>
+        legalAction.side === "runner" &&
+        legalAction.payload?.cardImplementationScoresSourceAsAgenda === true,
+    ) &&
     input.legalActions.some(
       (legalAction) =>
         legalAction.side === "runner" &&
