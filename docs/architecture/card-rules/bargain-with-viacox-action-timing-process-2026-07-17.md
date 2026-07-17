@@ -1,6 +1,6 @@
 # Bargain with Viacox – Aktions-Timing und Würfelwurf-Paketprozess
 
-Status: In Umsetzung (P1)
+Status: In Umsetzung (P2)
 
 ## Quelle/Vorgabe
 
@@ -157,6 +157,6 @@ complete markieren. Kein Push und kein PR.
 ## Umsetzungs- und Verifikationsnachweis
 
 - P0: abgeschlossen – Prozessartefakt und `/Goal` erstellt; `git diff --check` sauber.
-- P1: aktiv.
-- P2: offen.
+- P1: abgeschlossen – der erste Start-of-turn nach echter Installation überspringt Viacox nicht mehr; fokussierter Engine-Test und Engine-Typecheck grün.
+- P2: aktiv.
 - Final: offen.
