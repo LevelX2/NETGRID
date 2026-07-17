@@ -20,7 +20,7 @@ NETGRID nutzt vorerst synthetische Web-Audio-Sounds. Es werden keine externen So
 | Agenda | `score_agenda`, `steal_agenda` | `agenda` | heller, klarer Erfolgshinweis | hoch |
 | Trash / Purge | `trash_accessed_card`, `trash_resource`, `purge_virus_counters` | `trash` | kurzer dumpfer Abwurf | mittel |
 | Tag erhalten | öffentliche Folgeevents mit positivem `tagsAdded` oder gleichwertigem öffentlichem Tag-Zähler | `gain_tag` | unverwechselbarer Target-Lock-Alarm: drei hohe Ortungsimpulse und ein tiefer Lock-on-Abschluss | hoch |
-| Damage | öffentliche, aufgelöste Damage-Impacts mit positivem `damageAmount` | `damage` | dunkler, schussähnlicher synthetischer Einschlag; ein Impuls je tatsächlich erlittenem Schadenspunkt | hoch |
+| Damage | öffentliche, aufgelöste Damage-Impacts mit positivem `damageAmount` | `damage` | kurzer, abwärts gleitender Synth-Laserschuss; ein Impuls je tatsächlich erlittenem Schadenspunkt | hoch |
 | Tag entfernen | `remove_tag` | `tag_or_damage` | kurzer dunkler Statusakzent | mittel |
 | Choice | `resolve_choice` | `choice` | dezenter Interface-Klick | niedrig |
 | Spielende | `game_end` und Result-Modal | `game_end` / Result-Sound | klarer Abschluss | hoch |

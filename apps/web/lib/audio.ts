@@ -58,7 +58,7 @@ export function playActionCueSound(kind: ActionSoundKind, volume: number, repeat
     return;
   }
   if (kind === "damage") {
-    playDamageImpactBursts(context, safeVolume, repeatCount);
+    playDamageLaserBursts(context, safeVolume, repeatCount);
     return;
   }
   const pattern = actionSoundPattern(kind);
@@ -78,55 +78,45 @@ export function playActionCueSound(kind: ActionSoundKind, volume: number, repeat
   });
 }
 
-function playDamageImpactBursts(
+function playDamageLaserBursts(
   context: AudioContext,
   volume: number,
   repeatCount: number,
 ): void {
   const safeCount = Math.min(20, Math.max(1, Math.floor(repeatCount)));
   for (let index = 0; index < safeCount; index += 1) {
-    const start = context.currentTime + index * 0.19;
-    const noiseBuffer = context.createBuffer(
-      1,
-      Math.max(1, Math.floor(context.sampleRate * 0.09)),
-      context.sampleRate,
+    const start = context.currentTime + index * 0.17;
+    const laser = context.createOscillator();
+    const laserGain = context.createGain();
+    laser.type = "sawtooth";
+    laser.frequency.setValueAtTime(1760, start);
+    laser.frequency.exponentialRampToValueAtTime(310, start + 0.11);
+    laserGain.gain.setValueAtTime(0.0001, start);
+    laserGain.gain.exponentialRampToValueAtTime(
+      Math.max(0.0001, volume * 0.12),
+      start + 0.004,
     );
-    const samples = noiseBuffer.getChannelData(0);
-    for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex += 1) {
-      const decay = 1 - sampleIndex / samples.length;
-      samples[sampleIndex] = (Math.random() * 2 - 1) * decay * decay;
-    }
+    laserGain.gain.exponentialRampToValueAtTime(0.0001, start + 0.12);
+    laser.connect(laserGain);
+    laserGain.connect(context.destination);
+    laser.start(start);
+    laser.stop(start + 0.13);
 
-    const noise = context.createBufferSource();
-    const noiseFilter = context.createBiquadFilter();
-    const noiseGain = context.createGain();
-    noise.buffer = noiseBuffer;
-    noiseFilter.type = "lowpass";
-    noiseFilter.frequency.setValueAtTime(950, start);
-    noiseFilter.frequency.exponentialRampToValueAtTime(240, start + 0.085);
-    noiseGain.gain.setValueAtTime(Math.max(0.0001, volume * 0.15), start);
-    noiseGain.gain.exponentialRampToValueAtTime(0.0001, start + 0.09);
-    noise.connect(noiseFilter);
-    noiseFilter.connect(noiseGain);
-    noiseGain.connect(context.destination);
-    noise.start(start);
-    noise.stop(start + 0.1);
-
-    const impact = context.createOscillator();
-    const impactGain = context.createGain();
-    impact.type = "triangle";
-    impact.frequency.setValueAtTime(105, start);
-    impact.frequency.exponentialRampToValueAtTime(48, start + 0.15);
-    impactGain.gain.setValueAtTime(0.0001, start);
-    impactGain.gain.exponentialRampToValueAtTime(
-      Math.max(0.0001, volume * 0.18),
-      start + 0.008,
+    const spark = context.createOscillator();
+    const sparkGain = context.createGain();
+    spark.type = "square";
+    spark.frequency.setValueAtTime(2380, start);
+    spark.frequency.exponentialRampToValueAtTime(1080, start + 0.04);
+    sparkGain.gain.setValueAtTime(0.0001, start);
+    sparkGain.gain.exponentialRampToValueAtTime(
+      Math.max(0.0001, volume * 0.035),
+      start + 0.002,
     );
-    impactGain.gain.exponentialRampToValueAtTime(0.0001, start + 0.17);
-    impact.connect(impactGain);
-    impactGain.connect(context.destination);
-    impact.start(start);
-    impact.stop(start + 0.18);
+    sparkGain.gain.exponentialRampToValueAtTime(0.0001, start + 0.045);
+    spark.connect(sparkGain);
+    sparkGain.connect(context.destination);
+    spark.start(start);
+    spark.stop(start + 0.05);
   }
 }
 
