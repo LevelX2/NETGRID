@@ -136,7 +136,14 @@ Regression dieses Slices:
 
 ## Lokale Integration
 
-Der Arbeitsbranch `codex/ai-match-fd6320-run-priority` ist nach vollständiger
-Verifikation für die lokale Fast-Forward-Integration nach `main` freigegeben.
-Der Abschlusszustand von Merge, Post-Merge-Prüfung und Worktree-Cleanup wird in
-P6 des Prozessartefakts festgehalten.
+Der inzwischen weitergelaufene committed `main`-Stand wurde konfliktfrei in
+den Arbeitsbranch übernommen. Der kombinierte Stand war mit 188/188
+Fokus-/Nachbartests und AI-Typecheck grün und wurde anschließend per
+Fast-Forward lokal nach `main` integriert.
+
+Der Post-Merge-Lauf auf `main` ist erneut mit 188/188 Tests und AI-Typecheck
+grün. Ein gleichzeitig offener V0.9-Wissenslogeintrag wurde bei der Integration
+vollständig erhalten; die übrigen fremden Web-/Wissensänderungen blieben
+unangetastet. Worktree-Pfad und Git-Registrierung wurden verifiziert entfernt,
+danach wurde der vollständig gemergte Arbeitsbranch gelöscht. Es gab keinen
+Push und keine Remote-Integration.

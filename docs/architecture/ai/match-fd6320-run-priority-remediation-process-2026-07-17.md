@@ -2,14 +2,15 @@
 
 ## Status
 
-P1 bis P5 sind abgeschlossen; P6 ist aktiv. Beide historischen Findings und
-ihre Gegenproben sind grün. F01 erhält die konkrete relative Zentralziel-
-Qualität innerhalb derselben Empfehlungsklasse. F02 erhält einen eng begrenzten
+P1 bis P6 sind abgeschlossen. Beide historischen Findings und ihre
+Gegenproben sind grün. F01 erhält die konkrete relative Zentralziel-Qualität
+innerhalb derselben Empfehlungsklasse. F02 erhält einen eng begrenzten
 terminalen Bonus; ein aktuell nicht abbildbarer Tag-Cleanup-Interrupt darf nur
 dieses Matchpoint-Foreground nicht mehr suspendieren. Die breite Prüfung führt
 genau die neun bereits auf `main` vorhandenen Broker-/Hint-/DFE6-/MRGSG-
-Fehler und keine neue Regression. Der Arbeitsstand ist für die lokale
-Integration freigegeben.
+Fehler und keine neue Regression. Der Arbeitsstand wurde lokal nach `main`
+integriert; Post-Merge-Fokuslauf und AI-Typecheck sind grün. Worktree und
+Arbeitsbranch sind verifiziert entfernt.
 
 ## Quelle und Zielprüfung
 
