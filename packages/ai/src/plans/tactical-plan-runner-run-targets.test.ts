@@ -163,6 +163,47 @@ describe("runnerPressureProbeAllowance", () => {
     );
   });
 
+  it("uses the best action projection per central server for plan quality", () => {
+    const rdBasicRun = runAction("run-rd-basic", "rd");
+    const rdBypassRun = runAction("run-rd-bypass", "rd");
+    const hqRun = runAction("run-hq", "hq");
+    const context = planContext({
+      primaryStrategyId: "runner.rig_first",
+      runTargetEvaluations: [
+        runTargetEvaluation({
+          actionId: rdBasicRun.actionId,
+          targetServerId: "rd",
+          targetKind: "rd",
+          recommendation: "run_now",
+          accessPayoff: "unknown",
+          scoreThreat: false,
+          score: 20,
+        }),
+        runTargetEvaluation({
+          actionId: rdBypassRun.actionId,
+          targetServerId: "rd",
+          targetKind: "rd",
+          recommendation: "run_now",
+          accessPayoff: "unknown",
+          scoreThreat: false,
+          score: 215,
+        }),
+        runTargetEvaluation({
+          actionId: hqRun.actionId,
+          targetServerId: "hq",
+          targetKind: "hq",
+          recommendation: "gain_credits_first",
+          accessPayoff: "unknown",
+          scoreThreat: false,
+          score: -5,
+        }),
+      ],
+    });
+
+    expect(runnerAdjustedPlanPriority(context, rdBasicRun, 760)).toBe(940);
+    expect(runnerAdjustedPlanPriority(context, rdBypassRun, 760)).toBe(940);
+  });
+
   it("preserves the last click for an urgent reachable remote contest", () => {
     const remoteRun = runAction("run-remote-1", "remote_1");
     const evaluation = runTargetEvaluation({

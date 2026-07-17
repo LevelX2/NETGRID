@@ -80,7 +80,7 @@ export function runnerRunTargetPlanScoreBreakdown(
             value: relativeCentralQuality,
             reason: [
               `target:${evaluation.targetServerId}`,
-              `score:${evaluation.score}`,
+              `score:${runnerCentralRunTargetScore(context, evaluation)}`,
               `peer_scores:${runnerCentralRunPeerScores(
                 context,
                 evaluation.recommendation,
@@ -146,13 +146,14 @@ function runnerCentralRunRelativeQualityPlanDelta(
     evaluation.recommendation,
   );
   if (peerScores.length < 2) return 0;
+  const targetScore = runnerCentralRunTargetScore(context, evaluation);
   const averageScore =
     peerScores.reduce((total, score) => total + score, 0) / peerScores.length;
   return Math.max(
     -RUNNER_CENTRAL_RUN_RELATIVE_QUALITY_LIMIT,
     Math.min(
       RUNNER_CENTRAL_RUN_RELATIVE_QUALITY_LIMIT,
-      Math.round(evaluation.score - averageScore),
+      Math.round(targetScore - averageScore),
     ),
   );
 }
@@ -161,14 +162,42 @@ function runnerCentralRunPeerScores(
   context: TacticalPlanBuildContext,
   recommendation?: RunnerRunTargetEvaluation["recommendation"],
 ): number[] {
-  return (context.runnerRunTargetEvaluations ?? [])
-    .filter(
-      (evaluation) =>
-        (evaluation.targetKind === "rd" || evaluation.targetKind === "hq") &&
-        (recommendation === undefined ||
-          evaluation.recommendation === recommendation),
-    )
-    .map((evaluation) => evaluation.score);
+  const scoreByServer = new Map<string, number>();
+  for (const evaluation of context.runnerRunTargetEvaluations ?? []) {
+    if (evaluation.targetKind !== "rd" && evaluation.targetKind !== "hq") {
+      continue;
+    }
+    if (
+      recommendation !== undefined &&
+      evaluation.recommendation !== recommendation
+    ) {
+      continue;
+    }
+    scoreByServer.set(
+      evaluation.targetServerId,
+      Math.max(
+        evaluation.score,
+        scoreByServer.get(evaluation.targetServerId) ?? -Infinity,
+      ),
+    );
+  }
+  return [...scoreByServer.values()];
+}
+
+function runnerCentralRunTargetScore(
+  context: TacticalPlanBuildContext,
+  evaluation: RunnerRunTargetEvaluation,
+): number {
+  return Math.max(
+    evaluation.score,
+    ...(context.runnerRunTargetEvaluations ?? [])
+      .filter(
+        (candidate) =>
+          candidate.targetServerId === evaluation.targetServerId &&
+          candidate.recommendation === evaluation.recommendation,
+      )
+      .map((candidate) => candidate.score),
+  );
 }
 
 function runnerMatchpointRunConversionPriorityBoost(
