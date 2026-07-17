@@ -53,6 +53,8 @@ bleibt zulässig. Er ist kein unerwünschter Wiederholungsrun.
 | Classic-Runner-Rest-Card-Smoke | 10/10 grün |
 | Fokussierter Gesamtlauf | 21/21 grün |
 | `@netgrid/ai` und `@netgrid/engine` Typecheck | grün |
+| `check:ai` | grün; 0 harte Fehler, bestehende Warnungen unverändert |
+| Drei AI-Shards | 369 Dateien, 2.550/2.550 Tests grün |
 | `git diff --check` | grün |
 
 ## Paketcommits

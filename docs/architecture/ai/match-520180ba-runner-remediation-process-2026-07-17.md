@@ -121,6 +121,8 @@ bleiben grün, und neue Unit-Tests decken jede generische Grenze ab.
 
 - Fokussierter Lauf: 21 Tests in vier Dateien grün.
 - `@netgrid/ai`- und `@netgrid/engine`-Typecheck grün.
+- `check:ai` grün; die drei AI-Shards schließen 369 Dateien und 2.550 Tests
+  grün.
 - `git diff --check` grün.
 - Finalreview und Wissenslog verweisen auf die nicht übernommenen
   Strict-Drift-Funde sowie den geschlossenen D98-Vertrag.
