@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { buildDeckCapabilityProfile } from "../packages/ai/src/deck-capabilities";
 import { buildDeckStrategyProfile } from "../packages/ai/src/deck-doctrine-strategy";
@@ -15,7 +16,7 @@ if (!checkpointArgument) {
   );
 }
 
-const repoRoot = process.cwd();
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const excludedCardIds = new Set(optionValues("--exclude-card-id"));
 const checkpointPath = path.resolve(repoRoot, checkpointArgument);
 const checkpoint = readJson(checkpointPath);
