@@ -2442,6 +2442,149 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
     for (const action of prepareActions) expect(action.costs).toEqual([{ clicks: 1 }]);
   });
 
+  it("offers The Shell Traders prepare actions for programs while current MU is full", () => {
+    let state = resourceContactState("shell-prepare-under-memory-pressure");
+    moveRunnerCardToGrip(state, "onr_v1_176_the-shell-traders");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_176_the-shell-traders",
+    );
+    installRunnerProgramForTest(state, "simple_fracter");
+    state.runner.memoryLimit = state.runner.memoryUsed;
+    const targetProgramId = moveRunnerCardCopyToGrip(state, "simple_fracter");
+
+    const prepareActions = getLegalActions(state, "runner").filter(
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.delayedInstallAbility === "set_aside_from_grip" &&
+        action.payload?.targetCardId === targetProgramId,
+    );
+
+    expect(state.runner.memoryUsed).toBe(state.runner.memoryLimit);
+    expect(prepareActions).toHaveLength(1);
+  });
+
+  it("requires program trash before the last Shell counter installs under MU pressure", () => {
+    let state = resourceContactState("shell-final-counter-memory-choice");
+    moveRunnerCardToGrip(state, "onr_v1_176_the-shell-traders");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_176_the-shell-traders",
+    );
+    const installedProgramId = installRunnerProgramForTest(
+      state,
+      "simple_fracter",
+    );
+    state.runner.memoryLimit = state.runner.memoryUsed + 1;
+    const targetProgramId = moveRunnerCardCopyToGrip(state, "simple_fracter");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.delayedInstallAbility === "set_aside_from_grip" &&
+        action.payload?.targetCardId === targetProgramId,
+    );
+    state.runner.memoryLimit = state.runner.memoryUsed;
+    setCardCounterForTest(state, targetProgramId, "shell", 1);
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const creditsBefore = state.runner.credits;
+
+    const removeCounter = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.delayedInstallAbility === "remove_shell_counter" &&
+        action.payload?.targetCardId === targetProgramId,
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === removeCounter.actionId,
+    );
+
+    expect(state.runner.credits).toBe(creditsBefore - 1);
+    expect(cardCounterAmount(state, targetProgramId, "shell")).toBe(1);
+    expect(state.pendingChoice).toMatchObject({
+      side: "runner",
+      kind: "select_cards",
+      minSelections: 1,
+      visibility: "hidden_info_barrier",
+    });
+    expect(state.pendingChoice?.source).toMatch(
+      /^v1912\.shell_traders_memory:/,
+    );
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+    const trashOption = state.pendingChoice?.options.find(
+      (option) => option.value === installedProgramId,
+    );
+    if (!trashOption) throw new Error("Shell-Traders-MU-Trashoption fehlt.");
+    const resolveChoice = mustAction(
+      state,
+      "runner",
+      (action) => action.type === "resolve_choice",
+    );
+    const invalidChoice = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: resolveChoice.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      selectedChoices: {
+        choiceId: state.pendingChoice?.choiceId,
+        selectedOptionIds: ["card_not_installed"],
+      },
+      idempotencyKey: "shell-memory-choice-invalid",
+    });
+    expect(invalidChoice.ok).toBe(false);
+    const staleChoice = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: resolveChoice.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      selectedChoices: {
+        choiceId: state.pendingChoice?.choiceId,
+        selectedOptionIds: [trashOption.id],
+      },
+      idempotencyKey: "shell-memory-choice-stale",
+    });
+    expect(staleChoice.ok).toBe(false);
+
+    state = applyChoice(state, "runner", trashOption.id);
+
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.runner.rig.programs).toContain(targetProgramId);
+    expect(state.runner.rig.programs).not.toContain(installedProgramId);
+    expect(state.runner.heap).toContain(installedProgramId);
+    expect(state.specialZones?.setAside).not.toContain(targetProgramId);
+    expect(cardCounterAmount(state, targetProgramId, "shell")).toBe(0);
+    expect(state.runner.memoryUsed).toBe(state.runner.memoryLimit);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      abilityFamily: "hosting-counters",
+      abilityId: "resolve_shell_traders_memory",
+      sourceDefinitionId: "onr_v1_176_the-shell-traders",
+      targets: expect.objectContaining({
+        targetCardDefinitionId: "simple_fracter",
+      }),
+      amounts: expect.objectContaining({
+        removedCounterAmount: 1,
+        remainingCounters: 0,
+        trashedCount: 1,
+      }),
+    });
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("sets aside Shell Traders targets public, revalidates drift, and keeps hidden grip data out of public payloads", () => {
     let state = resourceContactState("shell-set-aside");
     moveRunnerCardToGrip(state, "onr_v1_176_the-shell-traders");
