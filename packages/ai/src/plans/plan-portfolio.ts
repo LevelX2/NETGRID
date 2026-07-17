@@ -1,112 +1,36 @@
-import type { AiDecisionInput, Side } from "@netgrid/shared";
-import type {
-  PlanStepKind,
-  PlanTarget,
-  TacticalPlan,
-  TacticalPlanType,
-} from "./tactical-plan-types";
+import type { AiDecisionInput } from "@netgrid/shared";
+import type { TacticalPlan, TacticalPlanType } from "./tactical-plan-types";
+import {
+  PLAN_PORTFOLIO_SCHEMA_VERSION,
+  type PlanActionContribution,
+  type PlanActionContributionKind,
+  type PlanActionContributionScore,
+  type PlanExecutionClass,
+  type PlanPortfolioEntry,
+  type PlanPortfolioLifecycle,
+  type PlanPortfolioPlanType,
+  type PlanPortfolioRole,
+  type PlanPortfolioSnapshot,
+} from "./plan-portfolio-types";
 
-export const PLAN_PORTFOLIO_SCHEMA_VERSION = "plan-portfolio-v1" as const;
-
-export type PlanExecutionClass =
-  | "reactive_interrupt"
-  | "bounded_sequence"
-  | "recurring_cycle"
-  | "development_project";
-
-export type PlanPortfolioRole =
-  | "reactive_interrupt"
-  | "foreground"
-  | "background";
-
-export type PlanPortfolioLifecycle =
-  | "active"
-  | "dormant"
-  | "blocked"
-  | "suspended"
-  | "ready"
-  | "completed"
-  | "abandoned";
-
-export type PlanPortfolioPlanType = TacticalPlanType;
-
-export type PlanPortfolioEntry = {
-  portfolioEntryId: string;
-  sourcePlanId: string;
-  planType: PlanPortfolioPlanType;
-  side: Side;
-  executionClass: PlanExecutionClass;
-  role: PlanPortfolioRole;
-  lifecycle: PlanPortfolioLifecycle;
-  priority: number;
-  target?: PlanTarget;
-  parentEntryId?: string;
-  supportsEntryIds: string[];
-  milestone: string;
-  progress: number;
-  selectedStepKind?: PlanStepKind;
-  actionCandidateIds: string[];
-  cadence: {
-    turnKey: string;
-    maxActionsPerTurn: number;
-    actionsUsedThisTurn: number;
-    lastProgressTurnKey?: string;
-  };
-  resourceReservation: {
-    credits: number;
-    clicks: number;
-  };
-  updatedAtStateVersion: number;
-  evidence: string[];
-};
-
-export type PlanPortfolioSnapshot = {
-  schemaVersion: typeof PLAN_PORTFOLIO_SCHEMA_VERSION;
-  side: Side;
-  profileId: string;
-  stateVersion: number;
-  turnKey: string;
-  interrupt?: PlanPortfolioEntry;
-  foreground?: PlanPortfolioEntry;
-  backgrounds: PlanPortfolioEntry[];
-  rejectedEntryIds: string[];
-  evidence: string[];
-};
+export {
+  PLAN_PORTFOLIO_SCHEMA_VERSION,
+  type PlanActionContribution,
+  type PlanActionContributionKind,
+  type PlanActionContributionScore,
+  type PlanExecutionClass,
+  type PlanPortfolioEntry,
+  type PlanPortfolioLifecycle,
+  type PlanPortfolioPlanType,
+  type PlanPortfolioRole,
+  type PlanPortfolioSnapshot,
+} from "./plan-portfolio-types";
 
 export type BuildPlanPortfolioParams = {
   input: AiDecisionInput;
   tacticalPlans: readonly TacticalPlan[];
   previous?: PlanPortfolioSnapshot;
   turnKey?: string;
-};
-
-export type PlanActionContributionKind =
-  | "progress"
-  | "enable"
-  | "fund"
-  | "protect"
-  | "convert"
-  | "complete";
-
-export type PlanActionContribution = {
-  actionId: string;
-  portfolioEntryId: string;
-  contributionKind: PlanActionContributionKind;
-  value: number;
-  milestoneAfter?: string;
-  evidence: string[];
-};
-
-export type PlanActionContributionScore = {
-  actionId: string;
-  totalValue: number;
-  interruptValue: number;
-  foregroundValue: number;
-  backgroundValue: number;
-  multiPlanBonus: number;
-  contributionCount: number;
-  portfolioEntryIds: string[];
-  evidence: string[];
 };
 
 const MAX_BACKGROUND_PROJECTS = 2;

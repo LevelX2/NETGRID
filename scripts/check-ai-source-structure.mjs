@@ -80,7 +80,6 @@ const expectedTypeCycleSignatures = new Set([
     "runner-hand-development.ts",
     "runner-run-target-evaluation.ts",
   ]),
-  signature(["plans/plan-portfolio.ts", "plans/tactical-plan-types.ts"]),
 ]);
 const actualTypeCycles = cyclicComponents(allGraph);
 const actualTypeCycleSignatures = new Set(
@@ -106,7 +105,7 @@ const productionLineCaps = new Map([
   ["runtime/semantic-runtime-corp-board-triage.ts", 3690],
   ["runner-hand-development.ts", 2756],
   ["visible-run-analysis.ts", 2465],
-  ["runtime/semantic-choice-ranking.ts", 1760],
+  ["runtime/semantic-choice-ranking.ts", 536],
   ["runtime/semantic-runtime-corp-scoring-window.ts", 1720],
 ]);
 for (const file of productionFiles) {
@@ -126,6 +125,9 @@ const testLineCaps = new Map([
   ["semantic-ai-runtime-cutover.test.ts", 4261],
   ["runtime/semantic-runtime-corp-board-triage.test.ts", 3334],
   ["runner-run-target-evaluation.test.ts", 3150],
+  ["runtime/semantic-choice-ranking.test.ts", 1174],
+  ["runtime/choice-ranking/semantic-choice-ranking-corp.test.ts", 299],
+  ["runtime/choice-ranking/semantic-choice-ranking-mapping.test.ts", 102],
 ]);
 for (const [relative, cap] of testLineCaps) {
   const file = path.join(srcRoot, ...relative.split("/"));
@@ -173,7 +175,7 @@ function collectSourceFiles(root, includeTests) {
 }
 
 function isTestFile(file) {
-  return /\.test\.tsx?$/.test(file);
+  return /\.(?:test|test-support)\.tsx?$/.test(file);
 }
 
 function resolveRelativeImport(file, importSource, fileSet) {

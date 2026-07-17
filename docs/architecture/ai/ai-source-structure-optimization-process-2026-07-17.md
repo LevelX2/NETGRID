@@ -1,6 +1,6 @@
 # AI Source Structure Optimization Process 2026-07
 
-Status: `package_done:AISSO-2`
+Status: `package_done:AISSO-3`
 
 ## Quelle und Vorgabe
 
@@ -245,6 +245,26 @@ Ergebnis:
 - Done-Gate: Ranking-Orchestrator ist deutlich kleiner; Reihenfolge, Scores,
   Evidence und Entscheidungen bleiben durch bestehende Regressionen identisch.
 - Commit: `refactor(ai): split semantic choice ranking families`
+
+Ergebnis:
+
+- `runtime/semantic-choice-ranking.ts` ist von 1.759 auf 535 Zeilen reduziert
+  und bleibt als sichtbarer, reihenfolgetreuer Orchestrator erhalten.
+- Corp-Overrides, Runner-Overrides, Mapping-Auswahl sowie gemeinsame
+  Mapping-/Evidence-Verträge liegen in vier fachlich benannten Modulen unter
+  `runtime/choice-ranking/`; kein neues Modul überschreitet 523 Zeilen.
+- Der bisher 1.882 Zeilen große Testmonolith ist in Runner-, Corp- und
+  Mapping-Suiten plus gemeinsamem Test-Support geteilt. Alle bisherigen 69
+  Choice-Ranking-Fälle bleiben erhalten.
+- Die PlanPortfolio-/TacticalPlan-Type-SCC ist über reine
+  `plan-contract-types` und `plan-portfolio-types` entfernt. Das Gate erlaubt
+  jetzt nur noch die zwei verbleibenden Type-SCCs Action-Semantik und
+  RunTarget/Hand/Risk.
+- Das Source-Structure-Ratchet wurde auf die neuen Dateigrößen abgesenkt und
+  erkennt `*.test-support.ts` ausdrücklich als Testcode.
+- Checks: fünf fokussierte Choice-/Plan-Suiten mit 148/148 Tests grün;
+  AI-Typecheck, Structure-Gate und Selbsttest, Package-Boundaries sowie
+  `git diff --check` grün.
 
 ### AISSO-4 – Corp-Scoreline, Board-Triage und Scoring-Window strukturieren
 

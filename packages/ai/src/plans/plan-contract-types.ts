@@ -1,0 +1,60 @@
+export type TacticalPlanType =
+  | "runner.obtain_breaker_coverage"
+  | "runner.contest_remote"
+  | "runner.opportunistic_central_run"
+  | "runner.clear_tags_or_survive"
+  | "runner.convert_success_window"
+  | "runner.survival_defense"
+  | "runner.restore_hand_buffer"
+  | "runner.develop_hand_card"
+  | "runner.play_best_hand_card"
+  | "runner.build_credit_base"
+  | "runner.build_credit_bank"
+  | "runner.cash_out_credit_bank"
+  | "corp.create_score_window"
+  | "corp.develop_finite_economy"
+  | "corp.activate_persistent_economy"
+  | "corp.build_credit_bank"
+  | "corp.establish_scoring_remote"
+  | "corp.rez_defense"
+  | "corp.apply_punish_pressure";
+
+export type PlanStepKind =
+  | "install_breaker"
+  | "resolve_missing_mu"
+  | "pivot_to_alternative"
+  | "draw_for_answer"
+  | "draw_hand_buffer"
+  | "find_survival_answer"
+  | "search_for_answer"
+  | "setup_search_engine"
+  | "gain_credits"
+  | "clear_tags"
+  | "convert_success_window"
+  | "install_development_card"
+  | "build_remote"
+  | "protect_remote"
+  | "find_remote_protection"
+  | "build_rez_reserve"
+  | "install_or_prepare_agenda"
+  | "gain_action_capacity"
+  | "convert_advancement"
+  | "build_bank_counter"
+  | "cash_out_bank"
+  | "install_finite_economy"
+  | "rez_finite_economy"
+  | "drain_finite_economy"
+  | "rez_persistent_economy"
+  | "use_persistent_economy"
+  | "run_target"
+  | "probe_central"
+  | "rez_outer_ice"
+  | "advance_score_card"
+  | "score_agenda"
+  | "apply_punish_pressure";
+
+export type PlanTarget = {
+  kind: "server" | "card" | "ice" | "capability" | "bank";
+  id: string;
+  label?: string;
+};
