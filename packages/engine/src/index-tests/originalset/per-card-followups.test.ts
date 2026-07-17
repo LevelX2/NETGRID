@@ -1052,7 +1052,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       true,
     );
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "rez_ice",
+      actionType: "rez_card",
       cardDefinitionId: "onr_v1_323_experimental-ai",
     });
     state = apply(state, "runner", (action) => action.type === "continue_run");

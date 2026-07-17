@@ -3,10 +3,14 @@ import {
   type CardInstance,
   type CardInstanceId,
   type GameState,
+  type LegalAction,
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
+import { hashState } from "../hash";
 import {
+  assertCorpRootRezCostQuoteValid,
   quoteCorpRezCost,
+  quoteCorpRootRezCost,
   rezCostForCard,
   rezCostReductionSourceDefinitionIdsFor,
 } from "./corp-rez-cost";
@@ -15,6 +19,8 @@ const BASKERVILLE_ID = "baskerville_1" as CardInstanceId;
 const BASKERVILLE_DEFINITION_ID = "onr_classic_005_baskerville";
 const GLACIER_ID = "glacier_1" as CardInstanceId;
 const GLACIER_DEFINITION_ID = "onr_classic_011_glacier";
+const ACME_ID = "acme_1" as CardInstanceId;
+const ACME_DEFINITION_ID = "onr_v1_308_acme-savings-and-loan";
 
 function makeState(noisyUsed = false): GameState {
   return {
@@ -165,4 +171,88 @@ describe("corp rez costs", () => {
       },
     });
   });
+
+  it("quotes ACME root rez credits and agenda points without mutating StateHash", () => {
+    const state = makeRootRezState();
+    const beforeHash = hashState(state);
+
+    expect(quoteCorpRootRezCost(state, ACME_ID)).toMatchObject({
+      canPay: false,
+      publicPayload: {
+        cardId: ACME_ID,
+        rootRez: true,
+        serverId: "rd",
+        agendaPointCost: 1,
+        obligationDebtAbility: "rez_with_agenda_point_cost",
+      },
+    });
+    expect(hashState(state)).toBe(beforeHash);
+
+    state.corpBonusAgendaPoints = 1;
+    const quote = quoteCorpRootRezCost(state, ACME_ID);
+    expect(quote.canPay).toBe(true);
+    expect(quote.costs).toEqual([{ credits: quote.finalCredits }]);
+  });
+
+  it("rejects stale or manipulated root-rez quote contracts", () => {
+    const state = makeRootRezState();
+    state.corpBonusAgendaPoints = 1;
+    const quote = quoteCorpRootRezCost(state, ACME_ID);
+    const action = {
+      actionId: "corp.rez_ice.acme_1.rd.acme_1",
+      type: "rez_ice",
+      side: "corp",
+      label: "ACME rezzen",
+      source: ACME_ID,
+      timingPoint: "corp_action.main",
+      costs: quote.costs.map((cost) => ({ ...cost })),
+      targetRequirements: [],
+      visibility: "public",
+      expiresAtStateVersion: state.stateVersion,
+      payload: { ...quote.publicPayload },
+    } as LegalAction;
+
+    expect(assertCorpRootRezCostQuoteValid(state, ACME_ID, action)).toEqual(
+      quote,
+    );
+
+    const manipulatedCost = structuredClone(action);
+    manipulatedCost.costs = [{ credits: quote.finalCredits + 1 }];
+    expect(() =>
+      assertCorpRootRezCostQuoteValid(state, ACME_ID, manipulatedCost),
+    ).toThrow("Root-Rez-Kosten sind nicht mehr gueltig");
+
+    const manipulatedPayload = structuredClone(action);
+    manipulatedPayload.payload = {
+      ...manipulatedPayload.payload,
+      agendaPointCost: 2,
+    };
+    expect(() =>
+      assertCorpRootRezCostQuoteValid(state, ACME_ID, manipulatedPayload),
+    ).toThrow("Root-Rez-Kostenpayload ist nicht mehr gueltig");
+
+    const staleState = structuredClone(state);
+    staleState.corpBonusAgendaPoints = 0;
+    expect(() =>
+      assertCorpRootRezCostQuoteValid(staleState, ACME_ID, action),
+    ).toThrow("Corp kann die Root-Rez-Kosten nicht zahlen");
+  });
 });
+
+function makeRootRezState(): GameState {
+  const state = makeState(false);
+  state.phase = "corp_action_phase";
+  state.timingPoint = "corp_action.main";
+  delete state.run;
+  state.corp.servers[0]!.root = [ACME_ID];
+  state.cardInstances[ACME_ID] = {
+    id: ACME_ID,
+    definitionId: ACME_DEFINITION_ID,
+    owner: "corp",
+    controller: "corp",
+    zone: { side: "corp", zone: "serverRoot", serverId: "rd" },
+    faceup: false,
+    rezzed: false,
+  } as unknown as CardInstance;
+  return state;
+}

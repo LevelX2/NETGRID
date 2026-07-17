@@ -23,10 +23,12 @@ export {
   costQuoteToLegalActionCosts,
 } from "./cost-quote";
 export {
+  assertCorpRootRezCostQuoteValid,
   assertCorpRezCostQuoteValid,
   corpServerIdForInstalledCard,
   discountedRezSourceIdsForRunIce,
   quoteCorpIceInstallCost,
+  quoteCorpRootRezCost,
   quoteCorpRezCost,
   rezCostForCard,
   rezCostReductionSourceDefinitionIdsFor,

@@ -54,8 +54,7 @@ import {
   assertCorpRezCostQuoteValid,
   corpServerIdForInstalledCard,
   quoteCorpIceInstallCost,
-  rezCostForCard,
-  rezCostReductionSourceDefinitionIdsFor,
+  quoteCorpRootRezCost,
   type CorpTracePaymentDependencies,
   type RunnerTracePaymentDependencies,
 } from "../payment";
@@ -694,8 +693,6 @@ export function createLegalActionRuntimeHosts(
 ) {
   const {
     cardImplementationRuntimeDeps,
-    corpAgendaPointTotal,
-    isObligationDebtDefinition,
     runCardImplementationActionHost,
   } = deps;
 
@@ -710,21 +707,8 @@ export function createLegalActionRuntimeHosts(
           instance.rezzed
         )
           continue;
-        const rezCost = rezCostForCard(state, id);
-        if (state.corp.credits < rezCost) continue;
-        if (
-          isObligationDebtDefinition(definition.id) &&
-          corpAgendaPointTotal(state) < 1
-        )
-          continue;
-        const rezCostReductionSourceDefinitionIds =
-          rezCostReductionSourceDefinitionIdsFor(state, id, definition);
-        const acmeRezCost = isObligationDebtDefinition(definition.id)
-          ? {
-              agendaPointCost: 1,
-              obligationDebtAbility: "rez_with_agenda_point_cost",
-            }
-          : {};
+        const rezQuote = quoteCorpRootRezCost(state, id);
+        if (!rezQuote.canPay) continue;
         actions.push(
           action(
             state,
@@ -732,21 +716,10 @@ export function createLegalActionRuntimeHosts(
             "rez_ice",
             `${definition.title} in ${server.label} rezzen`,
             id,
-            [{ credits: rezCost }],
+            rezQuote.costs.map((cost) => ({ ...cost })),
             {
-              cardId: id,
-              rootRez: true,
+              ...rezQuote.publicPayload,
               runnerActionPaidWindowRez: true,
-              serverId: server.id,
-              ...acmeRezCost,
-              ...(rezCostReductionSourceDefinitionIds.length > 0
-                ? {
-                    rezCostReductionSourceDefinitionIds:
-                      rezCostReductionSourceDefinitionIds.join(","),
-                    rezCostReductionAmount: (definition.rezCost ?? 0) - rezCost,
-                    rezCostPaid: rezCost,
-                  }
-                : {}),
             },
           ),
         );

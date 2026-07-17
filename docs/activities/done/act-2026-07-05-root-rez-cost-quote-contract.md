@@ -1,19 +1,42 @@
 ---
 activityId: act-2026-07-05-root-rez-cost-quote-contract
-status: inbox
+status: done
 kind: architecture
 area: engine
 priority: high
 primaryAgent: architecture-review-agent
 requiresImplementation: true
 createdAt: 2026-07-05
-startedAt:
-completedAt:
+startedAt: 2026-07-17
+completedAt: 2026-07-17
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/engine/src/game/payment/corp-rez-cost.ts
+  - packages/engine/src/game/payment/corp-rez-cost.test.ts
+  - packages/engine/src/game/payment/index.ts
+  - packages/engine/src/game/run/run-rez-window.ts
+  - packages/engine/src/game/turn/corp-main-actions.ts
+  - packages/engine/src/game/turn/corp-main-actions.test.ts
+  - packages/engine/src/game/turn/main-action-hosts.ts
+  - packages/engine/src/game/rez/rez-card.ts
+  - packages/engine/src/game/rez/rez-card.test.ts
+  - packages/engine/src/game/engine-runtime-internal/action-runtime-bootstrap.ts
+  - packages/engine/src/game/engine-runtime-internal/card-lifecycle-runtime-hosts.ts
+  - packages/engine/src/game/engine-runtime-internal/legal-action-runtime-hosts.ts
+  - packages/engine/src/index-tests/mechanics/per-card-longtail.test.ts
+  - packages/engine/src/index-tests/mechanics/trace-tags-resources.test.ts
+  - packages/engine/src/index-tests/originalset/per-card-followups.test.ts
+  - packages/engine/src/index-tests/proteus/bad-publicity-run-replacement-suite.test.ts
+  - packages/engine/src/index-tests/releases/mechanic-package-smokes-v16-v199.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/game/payment/corp-rez-cost.test.ts src/game/run/run-rez-window.test.ts src/game/rez/rez-card.test.ts src/game/turn/corp-main-actions.test.ts
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/releases/mechanic-package-smokes-v16-v199.test.ts -t "ACME|Superior Net Barriers"
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index.test.ts -t "lets the Corp rez non-ICE root cards"
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - corepack pnpm --filter @netgrid/engine test
+  - git diff --check
 ---
 
 # Root-Rez-Kosten-Quote für LegalActions und applyAction vereinheitlichen
@@ -59,13 +82,13 @@ Root-Rez-Aktionen sollen ihre Bezahlbarkeit, `LegalAction.costs`, Payload-Metada
 
 ## Akzeptanzkriterien
 
-- [ ] Es gibt genau eine benannte Engine-Quelle für Root-Rez-Bezahlbarkeit und Root-Rez-Kostenpayloads.
-- [ ] Run-Root-Rez und normaler Korp-Root-Rez verwenden diese Quelle.
-- [ ] Eine Root-Rez-Action, deren Kosten anhand des aktuellen States nicht bezahlbar sind, erscheint nicht in `getLegalActions`.
-- [ ] Eine bezahlbare Root-Rez-Action enthält alle für Revalidation und PublicEvent nötigen öffentlichen Kostenmetadaten.
-- [ ] `applyAction` validiert Seite, StateVersion, actionId, Zielkarte, Timing, Credits, Zusatzkosten und Payload erneut gegen denselben Kostenvertrag.
-- [ ] Bestehende ACME-Regressionsfälle bleiben grün; mindestens ein neuer Test deckt den gemeinsamen Quote-Pfad ab.
-- [ ] Keine Hidden-Info-Daten gelangen in PlayerViews, PublicEvents, Replay, WebSocket- oder Fehlerpayloads.
+- [x] Es gibt genau eine benannte Engine-Quelle für Root-Rez-Bezahlbarkeit und Root-Rez-Kostenpayloads.
+- [x] Run-Root-Rez und normaler Korp-Root-Rez verwenden diese Quelle.
+- [x] Eine Root-Rez-Action, deren Kosten anhand des aktuellen States nicht bezahlbar sind, erscheint nicht in `getLegalActions`.
+- [x] Eine bezahlbare Root-Rez-Action enthält alle für Revalidation und PublicEvent nötigen öffentlichen Kostenmetadaten.
+- [x] `applyAction` validiert Seite, StateVersion, actionId, Zielkarte, Timing, Credits, Zusatzkosten und Payload erneut gegen denselben Kostenvertrag.
+- [x] Bestehende ACME-Regressionsfälle bleiben grün; mindestens ein neuer Test deckt den gemeinsamen Quote-Pfad ab.
+- [x] Keine Hidden-Info-Daten gelangen in PlayerViews, PublicEvents, Replay, WebSocket- oder Fehlerpayloads.
 
 ## Umsetzungshinweise
 
@@ -76,4 +99,4 @@ Root-Rez-Aktionen sollen ihre Bezahlbarkeit, `LegalAction.costs`, Payload-Metada
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen. `quoteCorpRootRezCost` ist jetzt die gemeinsame, mutationsfreie Engine-Quelle für Credit-Kosten, aktuelle Rez-Kostenmodifikatoren, Serverzuordnung und zusätzliche öffentliche Agenda-Punkt-Kosten. Normaler Korp-Root-Rez, das Paid-Window zwischen Runner-Aktionen und beide Run-Root-Rez-Fenster erzeugen ihre `LegalAction.costs` und Kostenpayloads daraus. `rezCard` revalidiert unmittelbar vor Zahlung über `assertCorpRootRezCostQuoteValid` Ziel, Seite, Timingfenster, Server, Credits, Agenda-Punkte und sämtliche öffentlichen Quote-Felder; stale oder manipulierte Verträge werden abgelehnt. ACME-Angebot, Zahlung und deterministisches Replay sind regressionsgeschützt, und öffentliche Root-Rez-Events verwenden konsistent den bereits vorgesehenen Typ `rez_card`. Der vollständige Engine-Lauf ist mit 188 Testdateien und 1709 Tests grün.

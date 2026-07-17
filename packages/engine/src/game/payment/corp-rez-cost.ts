@@ -172,11 +172,31 @@ function selfRezAgendaPointCostForIce(definition: CardDefinition): number {
 function corpAgendaPointTotalForRezCost(state: GameState): number {
   const bonusPoints = Math.max(0, Math.floor(state.corpBonusAgendaPoints ?? 0));
   const scoredPoints = state.corp.scoreArea.reduce((sum, cardId) => {
-    const definitionId = state.cardInstances[cardId]?.definitionId;
+    const instance = state.cardInstances[cardId];
+    const definitionId = instance?.definitionId;
     if (!definitionId) return sum;
-    return sum + Math.max(0, Math.floor(CARD_DEFINITIONS_BY_ID[definitionId]?.agendaPoints ?? 0));
+    const printedPoints =
+      CARD_DEFINITIONS_BY_ID[definitionId]?.agendaPoints ?? 0;
+    const counterPoints = Number(instance.counters?.agenda ?? 0);
+    const spentPoints = Math.max(
+      0,
+      Math.floor(instance.agendaPointsSpent ?? 0),
+    );
+    return (
+      sum + Math.max(0, Math.floor(printedPoints + counterPoints - spentPoints))
+    );
   }, 0);
   return bonusPoints + scoredPoints;
+}
+
+function rootRezAgendaPointCostForDefinition(
+  definition: CardDefinition,
+): number {
+  const longtail = cardImplementationForDefinitionId(
+    definition.id,
+  )?.remainingReplacementLongtail;
+  if (longtail?.kind !== "obligation_debt") return 0;
+  return Math.max(0, Math.floor(longtail.agendaPointRezCost));
 }
 
 function corpInstallCostModifierAppliesToCard(
@@ -272,7 +292,9 @@ export function rezCostReductionSourceDefinitionIdsFor(
   return [
     ...activeCorpRezCostModifiersForIce(state, iceId, iceDefinition),
     ...activeCorpSelfRezCostModifiersForIce(state, iceId, iceDefinition),
-  ].map((match) => match.sourceDefinitionId);
+  ].map(
+    (match) => match.sourceDefinitionId,
+  );
 }
 
 /**
@@ -421,9 +443,7 @@ export function quoteCorpRezCost(
   const existingSourceDefinitionIds = [
     ...existingModifierMatches,
     ...selfModifierMatches,
-  ].map(
-    (match) => match.sourceDefinitionId,
-  );
+  ].map((match) => match.sourceDefinitionId);
   const discountedRezSourceCardId = options.discountedRezSourceCardId;
   const discountedRezSourceDefinitionId = discountedRezSourceCardId
     ? definitionFor(state, discountedRezSourceCardId).id
@@ -503,6 +523,52 @@ export function quoteCorpRezCost(
       state.corp.credits >= finalCredits &&
       corpAgendaPointTotalForRezCost(state) >= agendaPointCost,
     publicPayload,
+  };
+}
+
+/**
+ * Builds the complete public payment contract for an installed Corp root card.
+ * The same quote is consumed by every root-rez action window and revalidated
+ * immediately before payment.
+ */
+export function quoteCorpRootRezCost(
+  state: GameState,
+  cardId: CardInstanceId,
+): CostQuote {
+  const instance = state.cardInstances[cardId];
+  if (!instance) throw new Error("Root-Rez-Ziel existiert nicht mehr.");
+  const definition = definitionFor(state, cardId);
+  if (definition.type !== "asset" && definition.type !== "upgrade")
+    throw new Error(
+      "Root-Rez-Kostenquote ist nur fuer Assets und Upgrades gueltig.",
+    );
+  const serverId = corpServerIdForInstalledCard(state, cardId);
+  const server = serverId
+    ? state.corp.servers.find((candidate) => candidate.id === serverId)
+    : undefined;
+  if (!serverId || !server?.root.includes(cardId))
+    throw new Error(
+      "Root-Rez-Ziel ist nicht mehr in einer Server-Root installiert.",
+    );
+
+  const baseQuote = quoteCorpRezCost(state, cardId);
+  const agendaPointCost = rootRezAgendaPointCostForDefinition(definition);
+  return {
+    ...baseQuote,
+    canPay:
+      baseQuote.canPay &&
+      corpAgendaPointTotalForRezCost(state) >= agendaPointCost,
+    publicPayload: {
+      ...baseQuote.publicPayload,
+      rootRez: true,
+      serverId,
+      ...(agendaPointCost > 0
+        ? {
+            agendaPointCost,
+            obligationDebtAbility: "rez_with_agenda_point_cost",
+          }
+        : {}),
+    },
   };
 }
 
@@ -609,5 +675,67 @@ export function assertCorpRezCostQuoteValid(
     actionAgendaPointCost !== quotedAgendaPointCost
   )
     throw new Error("Corp-Rez-Agenda-Punkt-Kosten sind nicht mehr gueltig.");
+  return quote;
+}
+
+const ROOT_REZ_QUOTE_PAYLOAD_FIELDS = [
+  "cardId",
+  "rootRez",
+  "serverId",
+  "agendaPointCost",
+  "obligationDebtAbility",
+  "rezCostReductionSourceDefinitionIds",
+  "rezCostReductionAmount",
+  "rezCostPaid",
+  "corpRezCostSurchargeAmount",
+  "corpRezCostSurchargeSourceDefinitionId",
+] as const;
+
+export function assertCorpRootRezCostQuoteValid(
+  state: GameState,
+  cardId: CardInstanceId,
+  legalAction: LegalAction,
+): CostQuote {
+  const instance = state.cardInstances[cardId];
+  if (!instance) throw new Error("Root-Rez-Ziel existiert nicht mehr.");
+  if (instance.rezzed) throw new Error("Root-Rez-Ziel ist bereits gerezzt.");
+  if (
+    legalAction.type !== "rez_ice" ||
+    legalAction.side !== "corp" ||
+    legalAction.source !== cardId ||
+    legalAction.payload?.cardId !== cardId ||
+    legalAction.payload?.rootRez !== true
+  )
+    throw new Error("Root-Rez-Aktion passt nicht mehr zum Ziel.");
+  if (legalAction.timingPoint !== state.timingPoint)
+    throw new Error("Root-Rez-Aktion stammt aus einem veralteten Timingpunkt.");
+
+  const runWindow = legalAction.payload.rezInterruptJackOutEligible === true;
+  const runnerPaidWindow =
+    legalAction.payload.runnerActionPaidWindowRez === true;
+  const timingIsValid = runnerPaidWindow
+    ? !runWindow && state.timingPoint === "runner_action.main"
+    : runWindow
+      ? Boolean(state.run) &&
+        (state.timingPoint === "run.approach_ice" ||
+          state.timingPoint === "run.jack_out_window")
+      : state.timingPoint === "corp_action.main";
+  if (!timingIsValid)
+    throw new Error(
+      "Root-Rez-Aktion ist in diesem Fenster nicht mehr gueltig.",
+    );
+
+  const quote = quoteCorpRootRezCost(state, cardId);
+  if (!quote.canPay)
+    throw new Error("Corp kann die Root-Rez-Kosten nicht zahlen.");
+  if (JSON.stringify(legalAction.costs) !== JSON.stringify(quote.costs))
+    throw new Error("Root-Rez-Kosten sind nicht mehr gueltig.");
+
+  const actionPayload = legalAction.payload as Record<string, unknown>;
+  const quotePayload = quote.publicPayload as Record<string, unknown>;
+  for (const field of ROOT_REZ_QUOTE_PAYLOAD_FIELDS) {
+    if (actionPayload[field] !== quotePayload[field])
+      throw new Error("Root-Rez-Kostenpayload ist nicht mehr gueltig.");
+  }
   return quote;
 }

@@ -233,6 +233,7 @@ function testCorpMainHost(
     rez: {
       rootInstallRezzesOnInstall: unexpected("rootInstallRezzesOnInstall"),
       rezCostForCard: unexpected("rezCostForCard"),
+      quoteCorpRootRezCost: unexpected("quoteCorpRootRezCost"),
       rezCostReductionSourceDefinitionIdsFor: unexpected(
         "rezCostReductionSourceDefinitionIdsFor",
       ),

@@ -55,6 +55,10 @@ export type RezCardHost = {
       cardId: CardInstanceId,
       legalAction: LegalAction,
     ) => CostQuote;
+    assertCorpRootRezCostQuoteValid: (
+      cardId: CardInstanceId,
+      legalAction: LegalAction,
+    ) => CostQuote;
     creditCostForAction: (legalAction: LegalAction) => number;
     spendCredits: (side: Side, amount: number) => void;
   };
@@ -135,6 +139,21 @@ export function rezCard(
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       ...quotePayload,
+    };
+  }
+  const shouldUseCorpRootRezCostQuote =
+    legalAction?.type === "rez_ice" &&
+    rootRez &&
+    (definition.type === "asset" || definition.type === "upgrade");
+  if (shouldUseCorpRootRezCostQuote && legalAction) {
+    const quote = host.payment.assertCorpRootRezCostQuoteValid(
+      cardId,
+      legalAction,
+    );
+    creditCost = quote.finalCredits;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      ...costQuotePublicPayload(quote),
     };
   }
   if (host.corp.isObligationDebtDefinition(definition.id)) {

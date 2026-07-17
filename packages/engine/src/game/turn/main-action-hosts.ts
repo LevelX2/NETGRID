@@ -151,6 +151,7 @@ export function createMainActionHostComposition(
       rez: {
         rootInstallRezzesOnInstall: rez.rootInstallRezzesOnInstall,
         rezCostForCard: rez.rezCostForCard,
+        quoteCorpRootRezCost: rez.quoteCorpRootRezCost,
         rezCostReductionSourceDefinitionIdsFor:
           rez.rezCostReductionSourceDefinitionIdsFor,
         isObligationDebtDefinition: rez.isObligationDebtDefinition,

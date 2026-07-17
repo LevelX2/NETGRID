@@ -7216,6 +7216,8 @@ describe("V1.9.5 Mechanikpaket N", () => {
         sourceDefinition(state, action) === "onr_v1_308_acme-savings-and-loan",
     );
     state.corp.credits = 10;
+    const beforeAcmeRez = structuredClone(state);
+    const acmeRezReplayStart = state.eventLog.length;
     state = apply(
       state,
       "corp",
@@ -7230,7 +7232,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
     expect(state.corp.archives).toContain(acmeId);
     expect(state.activeObligationDebtCount).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "rez_ice",
+      actionType: "rez_card",
       cardDefinitionId: "onr_v1_308_acme-savings-and-loan",
       agendaPointCost: 1,
       spentAgendaDefinitionIds: "onr_v1_203_hostile-takeover",
@@ -7238,6 +7240,12 @@ describe("V1.9.5 Mechanikpaket N", () => {
       selfTrashed: true,
       obligationDebtCountAfter: 1,
     });
+    const acmeRezReplay = replayEvents(
+      beforeAcmeRez,
+      state.eventLog.slice(acmeRezReplayStart),
+    );
+    expect(acmeRezReplay.ok).toBe(true);
+    expect(acmeRezReplay.actualFinalStateHash).toBe(hashState(state));
 
     state = apply(state, "corp", (action) => action.type === "end_turn");
     expect(state.corp.credits).toBe(21);
@@ -7302,7 +7310,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
     expect(agendaPoints(state, "corp")).toBe(3);
     expect(state.corp.archives).toContain(acmeId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "rez_ice",
+      actionType: "rez_card",
       cardDefinitionId: "onr_v1_308_acme-savings-and-loan",
       agendaPointCost: 1,
       agendaPointCostPaid: 1,

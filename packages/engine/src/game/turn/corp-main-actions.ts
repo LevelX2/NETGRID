@@ -78,6 +78,7 @@ export type CorpMainActionGenerationHost = {
   rez: {
     rootInstallRezzesOnInstall: HostFn<boolean>;
     rezCostForCard: HostFn<number>;
+    quoteCorpRootRezCost: HostFn<any>;
     rezCostReductionSourceDefinitionIdsFor: HostFn<string[]>;
     isObligationDebtDefinition: HostFn<boolean>;
   };
@@ -160,7 +161,6 @@ export function buildCorpMainActions(
     host.corp.corpUtilityImplementationForDefinition;
   const hardwareTrashByCounterLegalActions = host.corp.hardwareTrashByCounterLegalActions;
   const advancementPlacementLegalActions = host.corp.advancementPlacementLegalActions;
-  const corpAgendaPointTotal = host.corp.corpAgendaPointTotal;
   const hasCorpUtilityKind = host.corp.hasCorpUtilityKind;
   const uniqueDirectLongtailKindForDefinition =
     host.corp.uniqueDirectLongtailKindForDefinition;
@@ -183,10 +183,7 @@ export function buildCorpMainActions(
     host.install.isInstalledCorpCardAdvanceable;
   const rootInstallRezzesOnInstall = host.rez.rootInstallRezzesOnInstall;
   const rezCostForCard = host.rez.rezCostForCard;
-  const rezCostReductionSourceDefinitionIdsFor =
-    host.rez.rezCostReductionSourceDefinitionIdsFor;
-  const isObligationDebtDefinition =
-    host.rez.isObligationDebtDefinition;
+  const quoteCorpRootRezCost = host.rez.quoteCorpRootRezCost;
   const corpTraceDamageAbilityHost = host.abilities.corpTraceDamageAbilityHost;
   const corpSpecialDamageAbilityHost =
     host.abilities.corpSpecialDamageAbilityHost;
@@ -578,23 +575,12 @@ export function buildCorpMainActions(
             ),
           );
       }
-      const rezCost = rezCostForCard(state, id);
-      const rezCostReductionSourceDefinitionIds =
-        rezCostReductionSourceDefinitionIdsFor(state, id, definition);
       if (
         (definition.type === "asset" || definition.type === "upgrade") &&
-        !mustInstance(state.cardInstances, id).rezzed &&
-        state.corp.credits >= rezCost &&
-        (!isObligationDebtDefinition(definition.id) ||
-          corpAgendaPointTotal(state) >= 1)
+        !mustInstance(state.cardInstances, id).rezzed
       ) {
-        const acmeRezCost =
-          isObligationDebtDefinition(definition.id)
-            ? {
-                agendaPointCost: 1,
-                obligationDebtAbility: "rez_with_agenda_point_cost",
-              }
-            : {};
+        const rezQuote = quoteCorpRootRezCost(state, id);
+        if (!rezQuote.canPay) continue;
         actions.push(
           action(
             state,
@@ -602,21 +588,8 @@ export function buildCorpMainActions(
             "rez_ice",
             `Karte in ${server.label} rezzen`,
             id,
-            [{ credits: rezCost }],
-            {
-              cardId: id,
-              rootRez: true,
-              ...acmeRezCost,
-              ...(rezCostReductionSourceDefinitionIds.length > 0
-                ? {
-                    rezCostReductionSourceDefinitionIds:
-                      rezCostReductionSourceDefinitionIds.join(","),
-                    rezCostReductionAmount:
-                      (definition.rezCost ?? 0) - rezCost,
-                    rezCostPaid: rezCost,
-                  }
-                : {}),
-            },
+            rezQuote.costs.map((cost: Record<string, unknown>) => ({ ...cost })),
+            { ...rezQuote.publicPayload },
           ),
         );
       }

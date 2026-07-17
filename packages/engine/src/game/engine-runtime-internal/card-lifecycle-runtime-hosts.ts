@@ -51,6 +51,7 @@ import {
   type Winner,
 } from "@netgrid/shared";
 import {
+  assertCorpRootRezCostQuoteValid,
   assertCorpRezCostQuoteValid,
   corpServerIdForInstalledCard,
   quoteCorpIceInstallCost,
@@ -948,6 +949,8 @@ export function createCardLifecycleRuntimeHosts(
         rezCostForCard: (cardId) => rezCostForCard(state, cardId),
         assertCorpRezCostQuoteValid: (cardId, legalAction) =>
           assertCorpRezCostQuoteValid(state, cardId, legalAction),
+        assertCorpRootRezCostQuoteValid: (cardId, legalAction) =>
+          assertCorpRootRezCostQuoteValid(state, cardId, legalAction),
         creditCostForAction,
         spendCredits: (side, amount) =>
           side === "corp"

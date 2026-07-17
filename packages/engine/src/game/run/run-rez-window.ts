@@ -18,10 +18,8 @@ import {
   costQuoteToLegalActionCosts,
   discountedRezSourceIdsForRunIce,
   quoteCorpRezCost,
-  rezCostForCard,
-  rezCostReductionSourceDefinitionIdsFor,
+  quoteCorpRootRezCost,
 } from "../payment";
-import { cardCounter } from "../state/turn-flags-counters";
 import { buildLegalAction } from "../turn/action-builders";
 import { buildRegisteredRunWindowActions } from "./windows/run-window-registry";
 import { stateIsAtServerAfterPassingLastIceWindow } from "./windows/after-passing-last-ice-window";
@@ -151,27 +149,10 @@ export function buildCorpRunRootRezActions(
       const definition = host.cards.definitionFor(cardId);
       if (definition.type !== "asset" && definition.type !== "upgrade")
         continue;
-      const rezCost = rezCostForCard(host.state, cardId);
-      if (host.state.corp.credits < rezCost) continue;
-      const agendaPointCost = rootRezAgendaPointCostForDefinition(definition);
-      if (
-        agendaPointCost > 0 &&
-        corpAgendaPointTotalForRootRez(host) < agendaPointCost
-      )
-        continue;
+      const rezQuote = quoteCorpRootRezCost(host.state, cardId);
+      if (!rezQuote.canPay) continue;
       if (!rootRezLifecycleIsSolvable(host, cardId, definition, server))
         continue;
-      const rezCostReductionSourceDefinitionIds =
-        rezCostReductionSourceDefinitionIdsFor(host.state, cardId, definition);
-      const agendaPointCostPayload =
-        agendaPointCost > 0
-          ? {
-              agendaPointCost,
-              ...(isObligationDebtDefinition(definition.id)
-                ? { obligationDebtAbility: "rez_with_agenda_point_cost" }
-                : {}),
-            }
-          : {};
       actions.push(
         buildLegalAction(
           host.state,
@@ -179,21 +160,10 @@ export function buildCorpRunRootRezActions(
           "rez_ice",
           `${definition.title} in ${server.label} rezzen`,
           cardId,
-          [{ credits: rezCost }],
+          costQuoteToLegalActionCosts(rezQuote),
           {
-            cardId,
-            rootRez: true,
-            ...agendaPointCostPayload,
+            ...costQuotePublicPayload(rezQuote),
             rezInterruptJackOutEligible: true,
-            serverId: server.id,
-            ...(rezCostReductionSourceDefinitionIds.length > 0
-              ? {
-                  rezCostReductionSourceDefinitionIds:
-                    rezCostReductionSourceDefinitionIds.join(","),
-                  rezCostReductionAmount: (definition.rezCost ?? 0) - rezCost,
-                  rezCostPaid: rezCost,
-                }
-              : {}),
           },
         ),
       );
@@ -741,41 +711,6 @@ function cardImplementationCorpRootRezResolver(
     };
   }
   return undefined;
-}
-
-function rootRezAgendaPointCostForDefinition(
-  definition: CardDefinition,
-): number {
-  const longtail = remainingReplacementLongtailImplementationForDefinition(
-    definition.id,
-  );
-  if (longtail?.kind !== "obligation_debt") return 0;
-  return Math.max(0, Math.floor(longtail.agendaPointRezCost));
-}
-
-function corpAgendaPointTotalForRootRez(host: RunRezWindowHost): number {
-  const scoredPoints = host.state.corp.scoreArea.reduce(
-    (sum, cardId) => sum + agendaPointsForScoredCard(host, cardId),
-    0,
-  );
-  return (
-    scoredPoints +
-    Math.max(0, Math.floor(host.state.corpBonusAgendaPoints ?? 0))
-  );
-}
-
-function agendaPointsForScoredCard(
-  host: RunRezWindowHost,
-  cardId: CardInstanceId,
-): number {
-  const definition = host.cards.definitionFor(cardId);
-  const basePoints = definition.agendaPoints ?? 0;
-  const bonusPoints = cardCounter(host.state, cardId, "agenda");
-  const spentPoints = Math.max(
-    0,
-    Math.floor(host.state.cardInstances[cardId]?.agendaPointsSpent ?? 0),
-  );
-  return Math.max(0, basePoints + bonusPoints - spentPoints);
 }
 
 function remainingReplacementLongtailImplementationForDefinition(

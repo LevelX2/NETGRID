@@ -97,9 +97,10 @@ describe("rez card execution", () => {
     state.activeObligationDebtCount = 2;
     state.corpBonusAgendaPoints = 1;
     const action = rezAction(assetId, { agendaPointCost: 1 });
+    const calls = testCalls();
 
     rezCard(
-      testHost(state, { [assetDefinition.id]: assetDefinition }, testCalls(), {
+      testHost(state, { [assetDefinition.id]: assetDefinition }, calls, {
         acmeDefinitions: new Set([assetDefinition.id]),
       }),
       assetId,
@@ -114,6 +115,7 @@ describe("rez card execution", () => {
       obligationDebtCountBefore: 2,
       corpBonusAgendaPointsSpent: 1,
     });
+    expect(calls.rootQuote).toEqual([assetId]);
   });
 
   it("spends Glacier's public agenda-point self-rez cost", () => {
@@ -283,6 +285,7 @@ function rezAction(
 type TestCalls = {
   beginEncounter: CardInstanceId[];
   rootRez: CardInstanceId[];
+  rootQuote: CardInstanceId[];
   lifecycle: CardInstanceId[];
 };
 
@@ -290,6 +293,7 @@ function testCalls(): TestCalls {
   return {
     beginEncounter: [],
     rootRez: [],
+    rootQuote: [],
     lifecycle: [],
   };
 }
@@ -344,6 +348,14 @@ function testHost(
       rezCostForCard: (cardId) => definitionFor(cardId).rezCost ?? 0,
       assertCorpRezCostQuoteValid: (cardId, legalAction) =>
         quote(cardId, Number(definitionFor(cardId).rezCost ?? 0), legalAction),
+      assertCorpRootRezCostQuoteValid: (cardId, legalAction) => {
+        calls.rootQuote.push(cardId);
+        return quote(
+          cardId,
+          Number(definitionFor(cardId).rezCost ?? 0),
+          legalAction,
+        );
+      },
       creditCostForAction: (legalAction) =>
         legalAction.costs.reduce(
           (sum, cost) => sum + Number(cost.credits ?? 0),

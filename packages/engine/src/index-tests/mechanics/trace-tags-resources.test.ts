@@ -564,7 +564,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       zone: { side: "corp", zone: "serverRoot", serverId: "remote_2" },
     });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "rez_ice",
+      actionType: "rez_card",
       cardDefinitionId: "onr_v1_325_hacker-tracker-central",
     });
     expect(JSON.stringify(getPlayerView(state, "runner"))).toContain(

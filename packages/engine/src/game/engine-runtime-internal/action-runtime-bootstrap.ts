@@ -52,6 +52,7 @@ import {
   assertCorpRezCostQuoteValid,
   corpServerIdForInstalledCard,
   quoteCorpIceInstallCost,
+  quoteCorpRootRezCost,
   rezCostForCard,
   rezCostReductionSourceDefinitionIdsFor,
   type CorpTracePaymentDependencies,
@@ -875,6 +876,7 @@ export function configureActionRuntimeBootstrap({
     rez: {
       rootInstallRezzesOnInstall,
       rezCostForCard,
+      quoteCorpRootRezCost,
       rezCostReductionSourceDefinitionIdsFor,
       isObligationDebtDefinition,
     },
