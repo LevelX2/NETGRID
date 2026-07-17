@@ -70,6 +70,7 @@ import {
 import {
   actionSoundCountForAction,
   actionSoundForActionType,
+  damageAudioCueFromPublicPayload,
   deriveDamageImpactCues,
   deriveOpponentActionCues,
   turnStartAudioCue,
@@ -3012,6 +3013,17 @@ export default function Page() {
     if (!audioEnabled || newEvents.length === 0) return;
     const overlayEventIds = new Set(cues.map((cue) => cue.eventId));
     for (const event of newEvents) {
+      const damageAudioCue = damageAudioCueFromPublicPayload(
+        event.publicPayload,
+      );
+      if (damageAudioCue) {
+        playActionCueSound(
+          damageAudioCue.sound,
+          audioVolume,
+          damageAudioCue.soundCount,
+        );
+        continue;
+      }
       if (overlayEventIds.has(event.eventId)) continue;
       const item = formatChronicleEvent(
         event,
@@ -3027,7 +3039,11 @@ export default function Page() {
         )
       )
         continue;
-      const sound = actionSoundForActionType(actionType, item.visibility);
+      const sound = actionSoundForActionType(
+        actionType,
+        item.visibility,
+        event.publicPayload,
+      );
       if (sound)
         playActionCueSound(
           sound,

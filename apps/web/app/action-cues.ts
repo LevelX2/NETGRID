@@ -51,6 +51,11 @@ export type DamageImpactCue = {
   sourceLabel: string;
 };
 
+export type DamageImpactAudioCue = {
+  sound: "damage";
+  soundCount: number;
+};
+
 export type CueActionUse = {
   label: string;
   title: string;
@@ -81,6 +86,8 @@ export type ActionSoundKind =
   | "access"
   | "agenda"
   | "trash"
+  | "gain_tag"
+  | "damage"
   | "tag_or_damage"
   | "choice"
   | "game_end";
@@ -141,7 +148,14 @@ export function deriveOpponentActionCues(input: CueDerivationInput): OpponentAct
     const relatedCardPositionBadge = relatedCard
       ? relatedIcePositionBadge(input.playerView, relatedCard)
       : undefined;
-    const sound = actionSoundForActionType(actionType, visibility);
+    const hasDedicatedImpactEffect = forcedEffectCueItems.some(
+      (effectItem) =>
+        isTagGainEffectCueItem(effectItem) ||
+        isDamageEffectCueItem(effectItem),
+    );
+    const sound = hasDedicatedImpactEffect
+      ? undefined
+      : actionSoundForActionType(actionType, visibility);
     const soundCount = sound ? actionSoundCountForAction(actionType, payload) : 1;
 
     const cue: OpponentActionCue = {
@@ -177,6 +191,11 @@ export function deriveOpponentActionCues(input: CueDerivationInput): OpponentAct
       const relatedCardPositionBadge = relatedCard
         ? relatedIcePositionBadge(input.playerView, relatedCard)
         : undefined;
+      const effectSound = isTagGainEffectCueItem(effectItem)
+        ? "gain_tag"
+        : isDamageEffectCueItem(effectItem)
+          ? undefined
+          : "tag_or_damage";
       return {
         cueId: `${input.viewerSide}:${event.eventId}:effect:${index}`,
         eventId: event.eventId,
@@ -196,7 +215,7 @@ export function deriveOpponentActionCues(input: CueDerivationInput): OpponentAct
         ...(relatedCard ? { relatedCard } : {}),
         ...(relatedCardPositionBadge ? { relatedCardPositionBadge } : {}),
         ...(tagGainAmount > 0 ? { iconBadge: `+${tagGainAmount}` } : {}),
-        sound: "tag_or_damage",
+        ...(effectSound ? { sound: effectSound } : {}),
         requiresLocalAttention: localAttention,
       };
     });
@@ -240,6 +259,29 @@ export function deriveDamageImpactCues(input: Pick<CueDerivationInput, "viewerSi
       };
     })
     .filter((cue): cue is DamageImpactCue => Boolean(cue));
+}
+
+export function damageAudioCueFromPublicPayload(
+  payload: Record<string, unknown>,
+): DamageImpactAudioCue | null {
+  const resolvedAmount =
+    payload.damageResolved === true
+      ? (nonNegativeIntegerValue(payload.damageAmount) ?? 0)
+      : undefined;
+  const effectAmount = Array.isArray(payload.resolvedEffects)
+    ? payload.resolvedEffects.reduce((total, effect) => {
+        if (!effect || typeof effect !== "object") return total;
+        const record = effect as Record<string, unknown>;
+        if (record.kind !== "damage") return total;
+        return total + (nonNegativeIntegerValue(record.amount) ?? 0);
+      }, 0)
+    : 0;
+  const amount = resolvedAmount ?? effectAmount;
+  if (amount <= 0) return null;
+  return {
+    sound: "damage",
+    soundCount: amount,
+  };
 }
 
 export function cueHasHiddenLeak(cue: OpponentActionCue): boolean {
@@ -376,7 +418,13 @@ function serverHighlight(payload: Record<string, unknown>): BoardHighlight {
   };
 }
 
-export function actionSoundForActionType(actionType: string, visibility: ChronicleVisibility): ActionSoundKind | undefined {
+export function actionSoundForActionType(
+  actionType: string,
+  visibility: ChronicleVisibility,
+  payload?: Record<string, unknown>,
+): ActionSoundKind | undefined {
+  if (payload && tagGainAmountFromPublicPayload(payload) > 0)
+    return "gain_tag";
   switch (actionType) {
     case "mandatory_draw":
     case "draw_card":
@@ -449,6 +497,20 @@ function isForcedEffectCueItem(item: { chips: string[]; category: string; visibi
     item.visibility === "public" &&
     item.category === "danger" &&
     (item.chips.includes("Access-Effekt") || item.chips.includes("Tag erhalten"))
+  );
+}
+
+function isTagGainEffectCueItem(item: { chips: string[] }): boolean {
+  return item.chips.includes("Tag erhalten");
+}
+
+function isDamageEffectCueItem(item: { chips: string[] }): boolean {
+  return item.chips.some(
+    (chip) =>
+      chip === "Schaden" ||
+      chip === "Net Damage" ||
+      chip === "Meat Damage" ||
+      chip === "Core Damage",
   );
 }
 
