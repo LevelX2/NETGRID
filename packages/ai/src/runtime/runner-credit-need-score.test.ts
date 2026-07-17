@@ -87,6 +87,21 @@ describe("runnerCreditNeedScoreComponents", () => {
       ),
     ).toEqual([]);
   });
+
+  it("does not treat a hosted-credit load as immediate liquid funding", () => {
+    expect(
+      score(
+        action({
+          type: "activated_card_ability",
+          payload: {
+            cardImplementationAddsHostedCredits: true,
+            gainCreditsAmount: 3,
+          },
+          costs: [{ clicks: 1 }],
+        }),
+      ),
+    ).toEqual([]);
+  });
 });
 
 function score(actionToScore: LegalAction) {

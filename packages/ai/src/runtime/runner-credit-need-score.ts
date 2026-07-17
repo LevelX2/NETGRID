@@ -21,7 +21,10 @@ export function runnerCreditNeedScoreComponents(
   action: LegalAction,
   dependencies: RunnerCreditNeedScoreDependencies,
 ): AiDecisionScoreComponent[] {
-  if (action.payload?.cardImplementationTakesHostedCredits === true) {
+  if (
+    action.payload?.cardImplementationAddsHostedCredits === true ||
+    action.payload?.cardImplementationTakesHostedCredits === true
+  ) {
     return [];
   }
   const netCreditGain = runnerKnownNetCreditGain(

@@ -614,6 +614,53 @@ describe("createRunnerBankInvestmentContext", () => {
     expect(Math.abs(emptyPriority - loadedPriority)).toBeLessThanOrEqual(300);
   });
 
+  it("keeps a first last-click load strong but makes a second load background", () => {
+    const context = createContext({
+      hintEffectsForDefinition: (definitionId) =>
+        definitionId === "custom-runner-credit-bank"
+          ? [{ kind: "economy", target: "economy.temporary_resource_bank" }]
+          : [],
+    });
+    const emptyBank = visibleRunnerCard("custom-runner-credit-bank", {
+      counters: { power: 0 },
+    });
+    const emptyBuild = runnerAction("activated_card_ability", {
+      actionId: "build-empty-last-click",
+      source: emptyBank.instanceId,
+      cardImplementationAddsHostedCredits: true,
+    });
+    const loadedBank = visibleRunnerCard("custom-runner-credit-bank", {
+      instanceId: "loaded-last-click-bank-instance",
+      counters: { power: 3 },
+    });
+    const loadedBuild = runnerAction("activated_card_ability", {
+      actionId: "build-loaded-last-click",
+      source: loadedBank.instanceId,
+      cardImplementationAddsHostedCredits: true,
+    });
+    const input = runnerInput({
+      credits: 12,
+      clicks: 1,
+      rig: [emptyBank, loadedBank],
+      legalActions: [emptyBuild, loadedBuild],
+    });
+
+    const firstLoad =
+      context.runnerBankInvestmentCommitmentScoreComponents(
+        input,
+        emptyBuild,
+      )[0]?.value ?? 0;
+    const secondLoad =
+      context.runnerBankInvestmentCommitmentScoreComponents(
+        input,
+        loadedBuild,
+      )[0]?.value ?? 0;
+
+    expect(firstLoad).toBeGreaterThan(2000);
+    expect(secondLoad).toBeGreaterThan(0);
+    expect(secondLoad).toBeLessThan(820);
+  });
+
   it("defers installing another bank outside the build phase", () => {
     const context = createContext({
       previousPlan: () => undefined,

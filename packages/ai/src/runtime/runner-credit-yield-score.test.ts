@@ -56,6 +56,23 @@ describe("runnerCreditYieldScoreComponent", () => {
     expect(component).toBeUndefined();
   });
 
+  it("leaves hosted-credit bank building to the dedicated bank consumer", () => {
+    const component = runnerCreditYieldScoreComponent(
+      input(),
+      legalAction({
+        actionId: "load-credit-bank",
+        type: "activated_card_ability",
+        payload: {
+          cardImplementationAddsHostedCredits: true,
+          gainCreditsAmount: 3,
+        },
+      }),
+      dependencies("custom-runner-credit-bank"),
+    );
+
+    expect(component).toBeUndefined();
+  });
+
   it("does not treat generic action amounts as credit gain", () => {
     const component = runnerCreditYieldScoreComponent(
       input(),
