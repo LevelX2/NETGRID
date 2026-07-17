@@ -731,8 +731,6 @@ export default function Page() {
   const [exposedCardHighlightIds, setExposedCardHighlightIds] = useState<
     string[]
   >([]);
-  const [exposedCardHighlightTurnSerial, setExposedCardHighlightTurnSerial] =
-    useState<number | null>(null);
   const [actionPanelOverlayPosition, setActionPanelOverlayPosition] =
     useState<RunOverlayPositionPreference>(() =>
       typeof window === "undefined"
@@ -2922,7 +2920,6 @@ export default function Page() {
       exposedCardHighlightTimerRef.current = null;
     }
     setExposedCardHighlightIds([]);
-    setExposedCardHighlightTurnSerial(null);
   }, []);
 
   useEffect(() => {
@@ -2964,33 +2961,11 @@ export default function Page() {
     setExposedCardHighlightIds((current) => [
       ...new Set([...current, ...exposedCardIds]),
     ]);
-    setExposedCardHighlightTurnSerial(payload.playerView.turnSerial ?? null);
     exposedCardHighlightTimerRef.current = setTimeout(() => {
       exposedCardHighlightTimerRef.current = null;
       setExposedCardHighlightIds([]);
-      setExposedCardHighlightTurnSerial(null);
     }, 10_000);
-  }, [
-    exposedCardHighlightEnabled,
-    payload?.eventTail,
-    payload?.matchId,
-    payload?.playerView.turnSerial,
-  ]);
-
-  useEffect(() => {
-    const currentTurnSerial = payload?.playerView.turnSerial;
-    if (
-      exposedCardHighlightTurnSerial === null ||
-      currentTurnSerial === undefined ||
-      currentTurnSerial === exposedCardHighlightTurnSerial
-    )
-      return;
-    clearExposedCardHighlights();
-  }, [
-    clearExposedCardHighlights,
-    exposedCardHighlightTurnSerial,
-    payload?.playerView.turnSerial,
-  ]);
+  }, [exposedCardHighlightEnabled, payload?.eventTail, payload?.matchId]);
 
   useEffect(() => {
     if (!payload) return;

@@ -411,6 +411,11 @@ function applyHqAccessExposeInstalledCorpCards(
     legalAction.payload.exposedServerLabels.length > 0
       ? legalAction.payload.exposedServerLabels.split(",")
       : [];
+  const existingExposedCardIds =
+    typeof legalAction.payload?.exposedCardInstanceIds === "string" &&
+    legalAction.payload.exposedCardInstanceIds.length > 0
+      ? legalAction.payload.exposedCardInstanceIds.split(",")
+      : [];
   const exposedDefinitions = exposedCardIds.map((cardId) =>
     host.cards.definitionFor(cardId),
   );
@@ -463,6 +468,9 @@ function applyHqAccessExposeInstalledCorpCards(
     exposedServerLabels: [
       ...existingLabels,
       ...exposedCardIds.map((cardId) => installedCorpCardLabel(host, cardId)),
+    ].join(","),
+    exposedCardInstanceIds: [
+      ...new Set([...existingExposedCardIds, ...exposedCardIds]),
     ].join(","),
   };
 }

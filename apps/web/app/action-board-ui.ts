@@ -1935,9 +1935,15 @@ export function retainedExposeReviewEvent(
 export function exposedCardInstanceIdsForEvent(
   event: PublicGameEvent,
 ): string[] {
+  const hiddenZoneAction = event.publicPayload.hiddenZoneAction;
   if (
-    event.publicPayload.hiddenZoneAction !==
-      "expose_installed_cards_single_fort" ||
+    hiddenZoneAction !== "expose_installed_cards_single_fort" &&
+    hiddenZoneAction !==
+      "schematics_search_engine_expose_installed_cards_review" &&
+    hiddenZoneAction !== "schematics_search_engine_expose_installed_cards"
+  )
+    return [];
+  if (
     event.publicPayload.publicRevealKind !== "expose" ||
     typeof event.publicPayload.exposedCardInstanceIds !== "string"
   )

@@ -13,7 +13,8 @@ Karten und welches Data Fort exposed wurden:
 
 - in der Chronik mit den tatsächlich exposed Karten und ihrem Fort;
 - auf dem Spielfeld als farbiger Rahmen an den exposed Karten;
-- der Rahmen verschwindet nach zehn Sekunden oder spätestens bei Zugende;
+- der Rahmen bleibt mindestens zehn Sekunden sichtbar, unabhängig von Run- und
+  Zugende;
 - die lokale Komfortanzeige ist in den Optionen ein- und ausschaltbar.
 
 ## Zielprüfung
@@ -32,9 +33,10 @@ vorher verdeckten Karten offenlegen.
 
 ## Annahmen
 
-- Der farbige Rahmen ist standardmäßig aktiv und bleibt zehn Sekunden sichtbar.
-- „Am Ende des Zuges“ bedeutet ein Wechsel der `turnNumber` im PlayerView; er
-  beendet einen noch laufenden Hinweis unabhängig vom Zehn-Sekunden-Timer.
+- Der farbige Rahmen ist standardmäßig aktiv und bleibt mindestens zehn
+  Sekunden sichtbar.
+- Run-Ende und ein Wechsel der `turnNumber` im PlayerView verkürzen die
+  Mindestdauer nicht.
 - Nur Expose-Ereignisse mit im jeweiligen PlayerView sichtbaren Karten dürfen
   einen Chronik- oder Board-Hinweis erzeugen.
 
@@ -70,8 +72,8 @@ ableitbar wären. Nach aktuellem Event-/Chronik-Audit wird dies nicht erwartet.
 
 ## State Machine
 
-`idle` → sicheres Expose-Ereignis → `highlighted` → (10 Sekunden oder
-Turnwechsel oder Option aus) → `idle`.
+`idle` → sicheres Expose-Ereignis → `highlighted` → (mindestens 10 Sekunden;
+weitere Expose-Ereignisse verlängern die Dauer, oder Option aus) → `idle`.
 
 Neue sichere Expose-Ereignisse aktualisieren die Menge markierter Karten und
 setzen deren lokale Ablaufzeit neu.
@@ -121,8 +123,8 @@ setzen deren lokale Ablaufzeit neu.
 
 - Kein Test darf unredigierte fremde private Daten als Fixture voraussetzen.
 - Regressionen prüfen den vollständigen Chronicle-Text inklusive Fort und
-  Karten, die Highlight-Erzeugung, Zehn-Sekunden-Ablauf, Turnwechsel und die
-  aktivierte bzw. deaktivierte Option.
+  Karten, die Highlight-Erzeugung, die Mindestdauer über Run-/Turnwechsel
+  hinweg und die aktivierte bzw. deaktivierte Option.
 - Mindestens Web-Typecheck und die betroffenen Vitest-Dateien müssen grün sein.
 
 ## Worktree-, Git- und Integrationsregeln
@@ -147,8 +149,9 @@ committe jedes Done-Gate, bevor das nächste Paket beginnt.
 
 - Chronik nennt die durch `Ice and Data Special Report` exposed Karten und
   ihren Data Fort, ohne verdeckte Informationen zu leaken.
-- Der Board-Rahmen zeigt genau die berechtigt sichtbaren exposed Karten,
-  endet nach zehn Sekunden oder beim Turnwechsel und ist standardmäßig aktiv.
+- Der Board-Rahmen zeigt genau die berechtigt sichtbaren exposed Karten, bleibt
+  unabhängig von Run- und Turnwechsel mindestens zehn Sekunden aktiv und ist
+  standardmäßig eingeschaltet.
 - Die Option deaktiviert den lokalen Rahmen ohne Chronik oder Spielregeln zu
   verändern.
 - Alle Paketcommits sind lokal nach `main` integriert; Worktree und
@@ -160,8 +163,12 @@ committe jedes Done-Gate, bevor das nächste Paket beginnt.
   public exposed `exposedCardInstanceIds` zusätzlich zu Titel und Position.
 - Die Chronik nennt zu jeder exposed Karte die Fort-Position.
 - Das Board hebt diese konkreten, im PlayerView sichtbaren Karten lokal grün
-  hervor. Die Hervorhebung endet nach zehn Sekunden oder dem nächsten
-  `turnSerial`.
+  hervor. Die Hervorhebung bleibt unabhängig von Run- und Turnwechsel
+  mindestens zehn Sekunden sichtbar.
+- Derselbe Cue-Vertrag gilt auch für die durch `Schematics Search Engine` beim
+  HQ-Access ohne Einzelauswahl exposed installierten Korp-Karten. Der
+  Access-Event führt dafür ausschließlich die bereits öffentlich exposed
+  Karteninstanzen.
 - `Exposed-Karten hervorheben` ist standardmäßig aktiv, lokal persistiert und
   beeinflusst weder Chronik noch Match-State.
 - Details und Checks stehen im

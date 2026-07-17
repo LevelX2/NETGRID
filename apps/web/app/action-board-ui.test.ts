@@ -5019,7 +5019,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(retainedExposeReviewEvent([smarteye, jackOut], null)).toBeNull();
   });
 
-  it("uses only public instance ids from Ice and Data Special Report expose events", () => {
+  it("uses only public instance ids from supported installed-card expose events", () => {
     const exposed = publicEvent("evt_ice_data", "resolve_choice", {
       actionType: "resolve_choice",
       actor: "runner",
@@ -5033,10 +5033,36 @@ describe("V1.0.6 resource and card-display helpers", () => {
       publicRevealKind: "expose",
       exposedCardInstanceIds: "hidden_card",
     });
+    const schematicsReview = publicEvent("evt_schematics", "action", {
+      actionType: "access_card",
+      actor: "runner",
+      hiddenZoneAction:
+        "schematics_search_engine_expose_installed_cards_review",
+      publicRevealKind: "expose",
+      exposedCardInstanceIds: "remote_asset,hq_ice",
+    });
+    const schematicsWithoutReview = publicEvent(
+      "evt_schematics_no_review",
+      "action",
+      {
+        actionType: "access_card",
+        actor: "runner",
+        hiddenZoneAction: "schematics_search_engine_expose_installed_cards",
+        publicRevealKind: "expose",
+        exposedCardInstanceIds: "remote_asset",
+      },
+    );
 
     expect(exposedCardInstanceIdsForEvent(exposed)).toEqual([
       "ice_1",
       "root_1",
+    ]);
+    expect(exposedCardInstanceIdsForEvent(schematicsReview)).toEqual([
+      "remote_asset",
+      "hq_ice",
+    ]);
+    expect(exposedCardInstanceIdsForEvent(schematicsWithoutReview)).toEqual([
+      "remote_asset",
     ]);
     expect(exposedCardInstanceIdsForEvent(unrelated)).toEqual([]);
   });
