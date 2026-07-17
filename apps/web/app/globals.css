@@ -14692,3 +14692,60 @@ select,
     animation: none;
   }
 }
+/* Server-Zielkennzeichnung in Aktionsleisten. */
+.securityPurgeTargetButton .securityPurgeTargetServerIcon {
+  flex: 0 0 auto;
+}
+
+.actions > .actionButton.hasServerTarget,
+.selectedActionGroup > .actionButton.hasServerTarget,
+.runActionButton.hasServerTarget {
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+}
+
+.actions > .actionButton.hasServerTarget .actionTargetServerIcon,
+.selectedActionGroup > .actionButton.hasServerTarget .actionTargetServerIcon,
+.runActionButton.hasServerTarget .actionTargetServerIcon {
+  grid-column: 2;
+  justify-self: start;
+  flex: 0 0 auto;
+}
+
+.actions > .actionButton.hasServerTarget .actionButtonLabel,
+.selectedActionGroup > .actionButton.hasServerTarget .actionButtonLabel,
+.runActionButton.hasServerTarget .actionButtonLabel {
+  grid-column: 3;
+}
+
+.actions > .actionButton.hasServerTarget .costChips,
+.selectedActionGroup > .actionButton.hasServerTarget .costChips,
+.runActionButton.hasServerTarget .costChips {
+  grid-column: 4;
+}
+
+.cardActionButton.hasServerTarget {
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  padding-left: 10px;
+}
+
+.cardActionButton.hasServerTarget > svg {
+  position: static;
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: end;
+  transform: none;
+}
+
+.cardActionButton.hasServerTarget .actionTargetServerIcon {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: start;
+}
+
+.cardActionButton.hasServerTarget .actionButtonLabel {
+  grid-column: 3;
+}
+
+.cardActionButton.hasServerTarget .costChips {
+  grid-column: 4;
+}

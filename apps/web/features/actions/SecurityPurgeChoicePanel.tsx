@@ -1,14 +1,21 @@
 "use client";
 
-import { Check, Search, Server, Shield, Trash2 } from "lucide-react";
+import { Check, Search, Shield, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import type { LegalAction, PlayerView, VisibleCard } from "@netgrid/shared";
 
 import { CardView } from "../cards/CardView";
-import { interactionAmbienceClassName } from "../../app/action-board-ui";
+import {
+  interactionAmbienceClassName,
+  serverDisplayLabel,
+} from "../../app/action-board-ui";
 import { type DisplayVisibleCard } from "../cards/card-view-model";
 import { type CardDisplayMode } from "../settings/settings-model";
+import {
+  ZoneIdentityIcon,
+  serverZoneIdentityIconKind,
+} from "../game-board/ZoneFrame";
 import { WindowEventIcon } from "./WindowEventIcon";
 
 type VisibleChoice = NonNullable<PlayerView["pendingChoice"]>;
@@ -127,6 +134,8 @@ export function SecurityPurgeChoicePanel({
                     <div className="securityPurgeTargetList">
                       {entry.targetOptions.map((option) => {
                         const active = selectedOptionId === option.id;
+                        const targetServerId =
+                          securityPurgeTargetServerId(option);
                         return (
                           <button
                             className={`button securityPurgeTargetButton ${
@@ -144,7 +153,21 @@ export function SecurityPurgeChoicePanel({
                             aria-pressed={active}
                             data-testid="security-purge-target-option"
                           >
-                            {active ? <Check size={14} /> : <Server size={14} />}
+                            {targetServerId ? (
+                              <ZoneIdentityIcon
+                                side="corp"
+                                kind={serverZoneIdentityIconKind(
+                                  targetServerId,
+                                )}
+                                label={
+                                  targetServerId === "new_remote"
+                                    ? "Neues Remote"
+                                    : serverDisplayLabel(targetServerId)
+                                }
+                                className="securityPurgeTargetServerIcon"
+                              />
+                            ) : null}
+                            {active ? <Check size={14} /> : null}
                             <span>
                               {securityPurgeTargetLabel(option, entry)}
                             </span>
@@ -248,4 +271,12 @@ function securityPurgeTargetLabel(
   const title = entry.card?.title ?? entry.label;
   const prefix = `${title}:`;
   return label.startsWith(prefix) ? label.slice(prefix.length).trim() : label;
+}
+
+function securityPurgeTargetServerId(
+  option: VisibleChoiceOption,
+): string | null {
+  if (typeof option.value !== "string") return null;
+  const [, serverId] = option.value.split("|");
+  return serverId?.trim() || null;
 }

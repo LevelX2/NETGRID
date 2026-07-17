@@ -1727,6 +1727,29 @@ export function serverDisplayLabel(serverIdOrLabel: string): string {
   return normalizeVisibleTerms(serverIdOrLabel);
 }
 
+export function serverTargetIdForAction(action: LegalAction): string | null {
+  const payload = action.payload;
+  const targetServerId = payload?.targetServerId;
+  if (typeof targetServerId === "string") return targetServerId;
+  const selectedServerId = payload?.selectedServerId;
+  if (typeof selectedServerId === "string") return selectedServerId;
+  const serverId = payload?.serverId;
+  return typeof serverId === "string" ? serverId : null;
+}
+
+export function serverTargetIdForChoiceOption(
+  option: VisibleChoiceOption,
+  serverIds: readonly string[],
+): string | null {
+  const isKnownServer = (value: string): boolean =>
+    value === "new_remote" || serverIds.includes(value);
+  if (typeof option.value === "string" && isKnownServer(option.value))
+    return option.value;
+  if (isKnownServer(option.id)) return option.id;
+  const fortId = /^fort_(.+)$/.exec(option.id)?.[1];
+  return fortId && isKnownServer(fortId) ? fortId : null;
+}
+
 export function accessRevealStatusLabel(
   card: Pick<VisibleCard, "type" | "trashCost">,
   actions: LegalAction[],

@@ -91,6 +91,8 @@ import {
   serverCounterChipsForDisplays,
   variableIceSubtypeBadgeForCard,
   serverDisplayLabel,
+  serverTargetIdForAction,
+  serverTargetIdForChoiceOption,
   selectedSubtypeDetailLabel,
   selectedTargetDetailLabel,
   splitLegalActions,
@@ -590,6 +592,37 @@ describe("V1.0.5 action board UI helpers", () => {
         ),
       ),
     ).toBe("Subroutinen auslösen (Run endet)");
+  });
+
+  it("derives the selected server for action and choice icons", () => {
+    expect(
+      serverTargetIdForAction(
+        legalAction("corp", "score_agenda", "agenda_1", "Agenda scoren", {
+          serverId: "hq",
+          selectedServerId: "rd",
+        }),
+      ),
+    ).toBe("rd");
+    expect(
+      serverTargetIdForAction(
+        legalAction("runner", "start_run", "basic_action", "Run auf HQ", {
+          targetServerId: "remote_1",
+          serverId: "hq",
+        }),
+      ),
+    ).toBe("remote_1");
+    expect(
+      serverTargetIdForChoiceOption(
+        { id: "fort_rd", label: "R&D", value: "rd" },
+        ["hq", "rd", "archives", "remote_1"],
+      ),
+    ).toBe("rd");
+    expect(
+      serverTargetIdForChoiceOption(
+        { id: "fort_none", label: "Keine Karten exposen", value: "none" },
+        ["hq", "rd", "archives", "remote_1"],
+      ),
+    ).toBeNull();
   });
 
   it("classifies interaction ambience from safe UI actions, choices, and run phase", () => {

@@ -24,11 +24,17 @@ import {
   isSingleInstalledCorpExposeChoice,
   interactionAmbienceClassName,
   runAwareActionButtonLabel,
+  serverDisplayLabel,
+  serverTargetIdForChoiceOption,
   shouldUseCardChoicePanel,
   shouldUseFieldCardChoice,
   type ActionContext,
 } from "../../app/action-board-ui";
 import { ActionSlotMeter } from "../game-board/ResourceStrip";
+import {
+  ZoneIdentityIcon,
+  serverZoneIdentityIconKind,
+} from "../game-board/ZoneFrame";
 import {
   ActionLeadIcon,
   ActionPanelFloatButton,
@@ -261,24 +267,44 @@ export function LegalActionsPanel({
         </h2>
         <p className="meta">{genericChoice.prompt}</p>
         <div className="actions setupActions">
-          {genericChoice.options.map((option) => (
-            <button
-              className="button actionButton primary"
-              key={option.id}
-              onClick={() =>
-                onChoiceOption(
-                  genericChoiceAction,
-                  genericChoice.choiceId,
-                  option.id,
-                )
-              }
-              disabled={disabled}
-              data-testid="generic-choice-button"
-            >
-              <ActionLeadIcon action={genericChoiceAction} />
-              <span className="actionButtonLabel">{option.label}</span>
-            </button>
-          ))}
+          {genericChoice.options.map((option) => {
+            const targetServerId = serverTargetIdForChoiceOption(
+              option,
+              view.servers.map((server) => server.id),
+            );
+            return (
+              <button
+                className={`button actionButton primary ${
+                  targetServerId ? "hasServerTarget" : ""
+                }`}
+                key={option.id}
+                onClick={() =>
+                  onChoiceOption(
+                    genericChoiceAction,
+                    genericChoice.choiceId,
+                    option.id,
+                  )
+                }
+                disabled={disabled}
+                data-testid="generic-choice-button"
+              >
+                <ActionLeadIcon action={genericChoiceAction} />
+                {targetServerId ? (
+                  <ZoneIdentityIcon
+                    side="corp"
+                    kind={serverZoneIdentityIconKind(targetServerId)}
+                    label={
+                      targetServerId === "new_remote"
+                        ? "Neues Remote"
+                        : serverDisplayLabel(targetServerId)
+                    }
+                    className="actionTargetServerIcon"
+                  />
+                ) : null}
+                <span className="actionButtonLabel">{option.label}</span>
+              </button>
+            );
+          })}
         </div>
       </section>
     );

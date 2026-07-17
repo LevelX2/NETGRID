@@ -16,9 +16,15 @@ import type { LegalAction } from "@netgrid/shared";
 import {
   actionConsumesClick,
   actionCostChips,
+  serverDisplayLabel,
+  serverTargetIdForAction,
   type ActionButtonTone,
   type CostChipView,
 } from "../../app/action-board-ui";
+import {
+  ZoneIdentityIcon,
+  serverZoneIdentityIconKind,
+} from "../game-board/ZoneFrame";
 
 export function ActionPanelDockPlaceholder({
   runActive,
@@ -179,6 +185,7 @@ type OverflowAwareActionButtonProps = Omit<
   displayCostChips?: CostChipView[] | undefined;
   iconSize?: number;
   tone?: ActionButtonTone;
+  serverTargetId?: string | null;
 };
 
 const warningActionButtonStyle: CSSProperties = {
@@ -200,6 +207,7 @@ export function OverflowAwareActionButton({
   displayCostChips,
   iconSize,
   tone = "default",
+  serverTargetId,
   className,
   style,
   type = "button",
@@ -207,8 +215,13 @@ export function OverflowAwareActionButton({
 }: OverflowAwareActionButtonProps) {
   const labelRef = useRef<HTMLSpanElement | null>(null);
   const [tooltipEnabled, setTooltipEnabled] = useState(false);
+  const targetServerId = serverTargetId ?? serverTargetIdForAction(action);
   const tonedClassName =
-    [className, tone === "danger" ? "dangerButton" : null]
+    [
+      className,
+      tone === "danger" ? "dangerButton" : null,
+      targetServerId ? "hasServerTarget" : null,
+    ]
       .filter(Boolean)
       .join(" ") || undefined;
   const tonedStyle =
@@ -261,12 +274,26 @@ export function OverflowAwareActionButton({
         action={action}
         {...(iconSize !== undefined ? { size: iconSize } : {})}
       />
+      {targetServerId ? (
+        <ZoneIdentityIcon
+          side="corp"
+          kind={serverZoneIdentityIconKind(targetServerId)}
+          label={serverTargetIconLabel(targetServerId)}
+          className="actionTargetServerIcon"
+        />
+      ) : null}
       <span className="actionButtonLabel" ref={labelRef}>
         {displayLabel}
       </span>
       <CostChips action={action} displayCostChips={displayCostChips} />
     </button>
   );
+}
+
+function serverTargetIconLabel(serverId: string): string {
+  return serverId === "new_remote"
+    ? "Neues Remote"
+    : serverDisplayLabel(serverId);
 }
 
 export function ActionLeadIcon({
