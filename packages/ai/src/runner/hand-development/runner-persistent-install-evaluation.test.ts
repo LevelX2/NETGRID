@@ -901,7 +901,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
     const evaluation = findByInstance(evaluations, "run-event-1");
 
     expect(evaluation).toMatchObject({
-      developmentRole: "access_payoff",
+      developmentRole: "run_event",
       availability: "timing_blocked",
       currentNeed: "useful_now",
       strategicFit: "strong",

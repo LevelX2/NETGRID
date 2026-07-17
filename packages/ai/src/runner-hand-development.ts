@@ -395,7 +395,7 @@ function roleForCard(context: CardContext): RunnerHandDevelopmentRole {
   if (looksLikeMemorySupport(context.card, text)) return "memory_support";
   if (looksLikeBreaker(context.card, text)) return "breaker_or_rig_piece";
   if (looksLikeBankTool(text)) return "bank_tool";
-  if (looksLikeRunEvent(context.card, text)) return "run_event";
+  if (looksLikeRunEvent(context.card, context.card.rulesText ?? text)) return "run_event";
   if (looksLikeEconomyTool(text)) return "economy_engine";
   if (looksLikeDrawOrSearch(text)) return "draw_or_search_engine";
   if (looksLikeDefense(text)) return "defense_support";

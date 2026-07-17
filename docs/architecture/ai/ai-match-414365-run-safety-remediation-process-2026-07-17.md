@@ -1,6 +1,6 @@
 # KI-Match-414365: Run-Sicherheit und Kartenrollen (2026-07-17)
 
-Status: P1 abgeschlossen
+Status: fachlich verifiziert, lokale Integration ausstehend
 
 ## Ziel und freigegebener Umfang
 
@@ -43,7 +43,7 @@ Abschlussregression.
 
 ### P0 – Prozess und Preflight
 
-Status: abgeschlossen
+Status: fachlich abgeschlossen, lokale Integration ausstehend
 
 - Rollen-, Wissens-, Skill- und Checkpoint-Verträge geprüft.
 - Worktree offline und lockfile-fest eingerichtet.
@@ -71,7 +71,7 @@ Gegenprobe grün, Red-Evidence-Commit.
 
 ### P2 – Generische Consumer-Korrekturen
 
-Status: in Arbeit
+Status: abgeschlossen
 
 - Rollenpriorität für Run-Events vor Economy-Textsignalen.
 - Entfernbare, persistent gefährliche Trace-Zähler in der Aktionswertung.
@@ -83,12 +83,14 @@ Done-Gate: unveränderte Checkpoints und eng verbundene Unit-Tests grün.
 
 ### P3 – Breite Verifikation und Abschluss
 
-Status: offen
+Status: abgeschlossen
 
 - Decision-Checkpoints, Eurocorpse-, Portfolio-, Runner-Run- und
   Deckfähigkeitsregressionen ausführen.
 - AI-Typecheck, geeignete AI-Suite und `git diff --check` dokumentieren.
 - Evidence, Final-Report und Monatslog nachziehen.
+- 210 fokussierte und angrenzende Tests, AI-Typecheck und `check:ai` sind
+  grün; die drei AI-Shards sind mit 371 Dateien und 2.557 Tests grün.
 - Aktuelles `main` defensiv integrieren, lokal mergen und Worktree/Branch
   nach verifiziertem Erfolg entfernen.
 
