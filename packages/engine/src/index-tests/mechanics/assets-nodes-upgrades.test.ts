@@ -284,13 +284,22 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
           action.payload?.cardImplementationAbility === "activated",
       ),
     ).toBe(false);
-    state = apply(
-      state,
-      "corp",
+    const esaDrawAction = getLegalActions(state, "corp").find(
       (action) =>
         action.type === "activated_card_ability" &&
         action.payload?.cardImplementationAbility === "activated" &&
         action.payload?.cardId === assetId,
+    );
+    expect(esaDrawAction).toMatchObject({
+      label: "ESA Contract: 2 Karten ziehen",
+      payload: {
+        cardImplementationAbilityLabel: "ESA Contract: 2 Karten ziehen",
+      },
+    });
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === esaDrawAction?.actionId,
     );
     expect(state.corp.hq.length).toBe(hqBeforeAbility + 2);
     expect(state.corp.rd.length).toBe(rdBeforeAbility - 2);
