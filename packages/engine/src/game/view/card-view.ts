@@ -102,6 +102,9 @@ function visibleKnownCardWithReferenceViewer(
     definitionId: definition.id,
     type: definition.type,
     subtypes: effectiveSubtypesForCard(state, id, definition),
+    ...(alternateIceSubtypeIsActive(instance)
+      ? { alternateIceSubtypeActive: true }
+      : {}),
     rulesText: definition.rulesText,
     ...(definition.cost !== undefined ? { cost: definition.cost } : {}),
     ...(definition.installCost !== undefined
@@ -1432,6 +1435,14 @@ function effectiveSubtypesForCard(
   )
     return stableSubtypeList(selectedSubtypes);
   return stableSubtypeList(definition.subtypes ?? []);
+}
+
+function alternateIceSubtypeIsActive(instance: CardInstance): boolean {
+  return (
+    instance.rezzed &&
+    instance.variableIceState?.family === "alternate_subtype" &&
+    instance.variableIceState.value === 1
+  );
 }
 
 function rezzedIceOutsideThisIceCount(

@@ -6583,7 +6583,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
   onrIce({
     id: "onr_v1_221_asp",
     title: "Asp",
-    subtypes: ["sentry"],
+    subtypes: ["sentry", "flatline"],
     rezCost: 4,
     strength: 4,
     rulesText:

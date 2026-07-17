@@ -122,7 +122,7 @@ Nicht erlaubt:
 - private Debugdaten, FullState, `privatePayload`, AIInput oder DecisionDebug,
 - Clientseitiges Erraten aus Labels statt Engine-State.
 
-`VisibleCard.strength` und `PlayerView.run.encounteredIce` müssen nach dem Rezzen den effektiven Wert anzeigen. Bei Food Fight muss die Break-/Resolve-Logik dieselbe deterministische Subroutinenliste verwenden, die auch in PlayerView und PublicEvent sichtbar ist.
+`VisibleCard.strength` und `PlayerView.run.encounteredIce` müssen nach dem Rezzen den effektiven Wert anzeigen. `VisibleCard.alternateIceSubtypeActive` ist nur für einen tatsächlich gewählten alternativen `alternate_subtype`-Rez-Zustand wahr; die UI darf ein entsprechendes Badge nicht aus Abweichungen zwischen Katalog- und Runtime-Subtypen erraten. Bei Food Fight muss die Break-/Resolve-Logik dieselbe deterministische Subroutinenliste verwenden, die auch in PlayerView und PublicEvent sichtbar ist.
 
 ## PublicPayload, Reconnect und Replay
 

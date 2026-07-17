@@ -108,6 +108,12 @@ describe("shared card definition registry", () => {
       ]),
     );
   });
+
+  it("keeps Asp on its complete printed ICE subtype list", () => {
+    const asp = CARD_DEFINITIONS_BY_ID["onr_v1_221_asp"];
+
+    expect(asp?.subtypes).toEqual(["sentry", "flatline"]);
+  });
 });
 
 describe("AI decision debug sanitizing", () => {

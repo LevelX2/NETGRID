@@ -577,9 +577,10 @@ describe("Proteus Phase 3b Variable Cost/Strength/Subtype ICE", () => {
         value: 1,
         selectedSubtypes: [selectedSubtype],
       });
-      expect(
-        getPlayerView(state, "runner").run?.encounteredIce?.subtypes,
-      ).toEqual([selectedSubtype]);
+      const runnerEncounteredIce = getPlayerView(state, "runner").run
+        ?.encounteredIce;
+      expect(runnerEncounteredIce?.subtypes).toEqual([selectedSubtype]);
+      expect(runnerEncounteredIce?.alternateIceSubtypeActive).toBe(true);
       state = pumpUntilBreakerCanBreak(state, breakerId);
       const breakAction = mustAction(
         state,

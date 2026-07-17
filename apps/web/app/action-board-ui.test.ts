@@ -651,12 +651,13 @@ describe("V1.0.5 action board UI helpers", () => {
     ).toEqual([]);
   });
 
-  it("marks rezzed variable ICE when the effective subtype differs from the printed subtype", () => {
+  it("marks only an explicitly active alternate ICE subtype", () => {
     expect(
       variableIceSubtypeBadgeForCard({
         ...card("caryatid_1", "Caryatid", "ice", true),
         subtypes: ["code_gate"],
         printedSubtypes: ["wall"],
+        alternateIceSubtypeActive: true,
       }),
     ).toEqual({
       key: "variable-subtype-caryatid_1-code_gate",
@@ -673,6 +674,14 @@ describe("V1.0.5 action board UI helpers", () => {
         ...card("caryatid_2", "Caryatid", "ice", true),
         subtypes: ["wall"],
         printedSubtypes: ["wall"],
+        alternateIceSubtypeActive: true,
+      }),
+    ).toBeNull();
+    expect(
+      variableIceSubtypeBadgeForCard({
+        ...card("asp_1", "Asp", "ice", true),
+        subtypes: ["sentry"],
+        printedSubtypes: ["flatline", "sentry"],
       }),
     ).toBeNull();
   });

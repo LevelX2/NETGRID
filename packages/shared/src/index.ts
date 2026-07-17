@@ -1840,6 +1840,7 @@ export type VisibleCard = {
   definitionId?: CardDefinitionId;
   type?: CardType;
   subtypes?: string[];
+  alternateIceSubtypeActive?: boolean;
   rulesText?: string;
   cost?: number;
   installCost?: number;
