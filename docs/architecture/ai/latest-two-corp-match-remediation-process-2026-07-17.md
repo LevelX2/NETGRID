@@ -1,6 +1,6 @@
 # Letzte zwei Corp-KI-Spiele: Remediation-Prozess vom 17.07.2026
 
-Status: aktiv; P2 in Vorbereitung
+Status: aktiv; P2 rot gesichert
 
 ## Quelle und Zielprüfung
 
@@ -207,5 +207,13 @@ Hauptworkspace nur für Runtime-Evidence und den finalen Merge.
 - P1 abgeschlossen: 79/79 beziehungsweise 113/113 Decisions, vier
   Verhaltensanker, der Rez-Vertragsfehler, Nicht-Findings und beide
   blockierenden Deck-Audits sind dauerhaft dokumentiert.
-- P2 in Vorbereitung: Die vier historischen Checkpoints und die engen
-  Schichtverträge werden auf dem noch unveränderten Produktionscode gesichert.
+- P2 rot gesichert: D45, D55, D27 und D110 wurden mit Strict-Warmup ab D1,
+  null Warmup-Drifts und vollständigem Runtime-Checkpoint capturt. Alle vier
+  Zielerwartungen scheitern ausschließlich als `behavior_regression`; vier
+  enge Gegenproben sind grün. Der BBS-Engine-Vertrag ist rot, weil die
+  LegalAction noch `rez_ice` statt `rez_card` meldet, während ein gewöhnlicher
+  ICE-Rez durch bestehende Verträge erhalten bleibt. Die zehn betroffenen
+  Deckkarten liefern zwölf exakt reproduzierte Effektkern-Overlaps; die
+  Gegenverträge erhalten Night Shifts getrennte Economy-/Draw-Semantik und
+  Scorched Earths Damage-/Tag-Punish-Semantik. Produktionscode ist gegenüber
+  dem Ausgangsstand weiterhin unverändert.

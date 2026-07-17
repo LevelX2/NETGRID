@@ -1,0 +1,4852 @@
+{
+  "schemaVersion": "ai-decision-checkpoint-v1",
+  "checkpointId": "cp-8107-01-minimize-contested-agenda-risk-d27",
+  "source": {
+    "kind": "captured_match",
+    "findingId": "latest-corp-b-agenda-risk",
+    "capturedAt": "2026-07-17T21:47:52.528Z",
+    "matchId": "match_8107a9dffe8cd234",
+    "decisionIndex": 27,
+    "stateVersion": 46
+  },
+  "compatibility": {
+    "engineSchemaVersion": "0.99.0",
+    "aiRuntimeCheckpointVersion": "ai-runtime-checkpoint-v1"
+  },
+  "actor": "corp",
+  "difficulty": "hard",
+  "profileId": "corp-ai-v0.9-hard",
+  "deckSnapshot": {
+    "deckSnapshotId": "fnv1a:f9ad60d8:corp",
+    "sourceDeckId": "Fast Advance, Baby",
+    "side": "corp",
+    "cardPoolSnapshotId": "card-snapshot-0.8",
+    "formatProfileId": "netgrid_private_local_classic_proteus_playtest_v1",
+    "deckHash": "fnv1a:f9ad60d8",
+    "cards": [
+      {
+        "cardId": "onr_proteus_007_project-venice",
+        "quantity": 1
+      },
+      {
+        "cardId": "onr_proteus_008_project-zurich",
+        "quantity": 2
+      },
+      {
+        "cardId": "onr_proteus_013_caryatid",
+        "quantity": 1
+      },
+      {
+        "cardId": "onr_proteus_021_dog-pile",
+        "quantity": 1
+      },
+      {
+        "cardId": "onr_proteus_062_lesley-major",
+        "quantity": 1
+      },
+      {
+        "cardId": "onr_v1_195_corporate-retreat",
+        "quantity": 1
+      },
+      {
+        "cardId": "onr_v1_206_marine-arcology",
+        "quantity": 2
+      },
+      {
+        "cardId": "onr_v1_214_project-babylon",
+        "quantity": 1
+      },
+      {
+        "cardId": "onr_v1_216_security-purge",
+        "quantity": 1
+      },
+      {
+        "cardId": "onr_v1_231_cortical-scrub",
+        "quantity": 2
+      },
+      {
+        "cardId": "onr_v1_237_data-wall",
+        "quantity": 2
+      },
+      {
+        "cardId": "onr_v1_238_data-wall-2-0",
+        "quantity": 2
+      },
+      {
+        "cardId": "onr_v1_244_filter",
+        "quantity": 2
+      },
+      {
+        "cardId": "onr_v1_245_fire-wall",
+        "quantity": 2
+      },
+      {
+        "cardId": "onr_v1_252_keeper",
+        "quantity": 2
+      },
+      {
+        "cardId": "onr_v1_261_quandary",
+        "quantity": 2
+      },
+      {
+        "cardId": "onr_v1_262_razor-wire",
+        "quantity": 1
+      },
+      {
+        "cardId": "onr_v1_269_shotgun-wire",
+        "quantity": 1
+      },
+      {
+        "cardId": "onr_v1_281_accounts-receivable",
+        "quantity": 3
+      },
+      {
+        "cardId": "onr_v1_290_efficiency-experts",
+        "quantity": 3
+      },
+      {
+        "cardId": "onr_v1_292_management-shake-up",
+        "quantity": 1
+      },
+      {
+        "cardId": "onr_v1_295_night-shift",
+        "quantity": 1
+      },
+      {
+        "cardId": "onr_v1_297_overtime-incentives",
+        "quantity": 1
+      },
+      {
+        "cardId": "onr_v1_304_systematic-layoffs",
+        "quantity": 2
+      },
+      {
+        "cardId": "onr_v1_309_bbs-whispering-campaign",
+        "quantity": 2
+      },
+      {
+        "cardId": "onr_v1_340_setup",
+        "quantity": 2
+      },
+      {
+        "cardId": "onr_v1_347_vapor-ops",
+        "quantity": 2
+      },
+      {
+        "cardId": "onr_v1_366_red-herrings",
+        "quantity": 1
+      }
+    ]
+  },
+  "engine": {
+    "stateVersion": 46,
+    "stateHash": "fnv1a:06e2a7c8",
+    "testOnlyGameState": {
+      "matchId": "match_8107a9dffe8cd234",
+      "baseline": {
+        "rulesVersion": "26.03",
+        "cardTextSource": "manual",
+        "cardTextSnapshotId": "mvp-0.99-demo",
+        "engineSchemaVersion": "0.99.0",
+        "cardImplementationVersion": "0.99.0",
+        "deviationRegistryVersion": "0.99.0",
+        "playerViewSchemaVersion": "0.99.0",
+        "multiplayerSchemaVersion": "0.99.0",
+        "aiControllerSchemaVersion": "0.99.0",
+        "simulationSchemaVersion": "0.99.0"
+      },
+      "stateVersion": 46,
+      "seed": "match-mrpbr76i-1i400ft",
+      "randomCounter": 98,
+      "randomDrawRecords": [
+        {
+          "counter": 0,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.7676958900803416
+        },
+        {
+          "counter": 1,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.6890812330149032
+        },
+        {
+          "counter": 2,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.5551951104231508
+        },
+        {
+          "counter": 3,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.9318909259362689
+        },
+        {
+          "counter": 4,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.2446756240996837
+        },
+        {
+          "counter": 5,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.9587133062053413
+        },
+        {
+          "counter": 6,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.9110324978688001
+        },
+        {
+          "counter": 7,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.27860841440269857
+        },
+        {
+          "counter": 8,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.0698657950272632
+        },
+        {
+          "counter": 9,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.6813151578994361
+        },
+        {
+          "counter": 10,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.24716462432742414
+        },
+        {
+          "counter": 11,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.1149606728762923
+        },
+        {
+          "counter": 12,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.16135651848251087
+        },
+        {
+          "counter": 13,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.2599560187397514
+        },
+        {
+          "counter": 14,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.8671433928322909
+        },
+        {
+          "counter": 15,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.6268317062418147
+        },
+        {
+          "counter": 16,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.14911802753125547
+        },
+        {
+          "counter": 17,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.33359419142990865
+        },
+        {
+          "counter": 18,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.508110677554005
+        },
+        {
+          "counter": 19,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.8747836644327334
+        },
+        {
+          "counter": 20,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.5110272977874577
+        },
+        {
+          "counter": 21,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.20751397818036033
+        },
+        {
+          "counter": 22,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.5237002720280303
+        },
+        {
+          "counter": 23,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.5214334306041625
+        },
+        {
+          "counter": 24,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.020381375595535545
+        },
+        {
+          "counter": 25,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.797571562390057
+        },
+        {
+          "counter": 26,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.14204635326982673
+        },
+        {
+          "counter": 27,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.5298918128341374
+        },
+        {
+          "counter": 28,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.8237393756261968
+        },
+        {
+          "counter": 29,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.5721634049588068
+        },
+        {
+          "counter": 30,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.8831309461463617
+        },
+        {
+          "counter": 31,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.8460389881518996
+        },
+        {
+          "counter": 32,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.19405270098218252
+        },
+        {
+          "counter": 33,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.06394396938727243
+        },
+        {
+          "counter": 34,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.8883938536889546
+        },
+        {
+          "counter": 35,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.27864676110395503
+        },
+        {
+          "counter": 36,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.36363431595725004
+        },
+        {
+          "counter": 37,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.735840507195054
+        },
+        {
+          "counter": 38,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.7655038463738264
+        },
+        {
+          "counter": 39,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.9168101317882296
+        },
+        {
+          "counter": 40,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.9942853833511279
+        },
+        {
+          "counter": 41,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.9515633364599395
+        },
+        {
+          "counter": 42,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.8576007757146069
+        },
+        {
+          "counter": 43,
+          "purpose": "setup.shuffle.runner.start_stack",
+          "value": 0.7872415010573088
+        },
+        {
+          "counter": 44,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.9039530371252376
+        },
+        {
+          "counter": 45,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.4425029844359534
+        },
+        {
+          "counter": 46,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.11607633138923268
+        },
+        {
+          "counter": 47,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.658689975114909
+        },
+        {
+          "counter": 48,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.9820669906058148
+        },
+        {
+          "counter": 49,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.6917563197433045
+        },
+        {
+          "counter": 50,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.9750593213989475
+        },
+        {
+          "counter": 51,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.7694386399836899
+        },
+        {
+          "counter": 52,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.13103173493923626
+        },
+        {
+          "counter": 53,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.1034759369866477
+        },
+        {
+          "counter": 54,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.8488822216657197
+        },
+        {
+          "counter": 55,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.9582976960821187
+        },
+        {
+          "counter": 56,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.42087484380125073
+        },
+        {
+          "counter": 57,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.36400568069185457
+        },
+        {
+          "counter": 58,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.5876524554753291
+        },
+        {
+          "counter": 59,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.7556719836824399
+        },
+        {
+          "counter": 60,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.6732976830211138
+        },
+        {
+          "counter": 61,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.006203283411284732
+        },
+        {
+          "counter": 62,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.9859274213201532
+        },
+        {
+          "counter": 63,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.44502348153357296
+        },
+        {
+          "counter": 64,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.5005185853051438
+        },
+        {
+          "counter": 65,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.07655560374427228
+        },
+        {
+          "counter": 66,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.0622559035539727
+        },
+        {
+          "counter": 67,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.5491513118324269
+        },
+        {
+          "counter": 68,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.9710381486322148
+        },
+        {
+          "counter": 69,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.4188384967162839
+        },
+        {
+          "counter": 70,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.8281634182396693
+        },
+        {
+          "counter": 71,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.7430287934987577
+        },
+        {
+          "counter": 72,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.8833613974051734
+        },
+        {
+          "counter": 73,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.07104223944204657
+        },
+        {
+          "counter": 74,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.3888716900521949
+        },
+        {
+          "counter": 75,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.5135144554819798
+        },
+        {
+          "counter": 76,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.9450256097527319
+        },
+        {
+          "counter": 77,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.2763306584265862
+        },
+        {
+          "counter": 78,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.4404158327191555
+        },
+        {
+          "counter": 79,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.8972822743686868
+        },
+        {
+          "counter": 80,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.8286141404813984
+        },
+        {
+          "counter": 81,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.8960056892543942
+        },
+        {
+          "counter": 82,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.9532855470971882
+        },
+        {
+          "counter": 83,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.47897223258258603
+        },
+        {
+          "counter": 84,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.7257170831514573
+        },
+        {
+          "counter": 85,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.143509549420348
+        },
+        {
+          "counter": 86,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.7479265797848222
+        },
+        {
+          "counter": 87,
+          "purpose": "setup.shuffle.corp.start_rnd",
+          "value": 0.7213818948595764
+        },
+        {
+          "counter": 88,
+          "purpose": "setup.draw.runner.initial_hand",
+          "value": 0.8595571317095921
+        },
+        {
+          "counter": 89,
+          "purpose": "setup.draw.runner.initial_hand",
+          "value": 0.4887720384815212
+        },
+        {
+          "counter": 90,
+          "purpose": "setup.draw.runner.initial_hand",
+          "value": 0.9138287114165978
+        },
+        {
+          "counter": 91,
+          "purpose": "setup.draw.runner.initial_hand",
+          "value": 0.32699356972018856
+        },
+        {
+          "counter": 92,
+          "purpose": "setup.draw.runner.initial_hand",
+          "value": 0.11151380417322498
+        },
+        {
+          "counter": 93,
+          "purpose": "setup.draw.corp.initial_hand",
+          "value": 0.3747953725726665
+        },
+        {
+          "counter": 94,
+          "purpose": "setup.draw.corp.initial_hand",
+          "value": 0.29139167683887357
+        },
+        {
+          "counter": 95,
+          "purpose": "setup.draw.corp.initial_hand",
+          "value": 0.9253480529547404
+        },
+        {
+          "counter": 96,
+          "purpose": "setup.draw.corp.initial_hand",
+          "value": 0.5418008776971791
+        },
+        {
+          "counter": 97,
+          "purpose": "setup.draw.corp.initial_hand",
+          "value": 0.42040840971391413
+        }
+      ],
+      "activeSide": "corp",
+      "phase": "corp_action_phase",
+      "timingPoint": "corp_action.main",
+      "corp": {
+        "identity": "corp_corp_identity_001_0",
+        "credits": 9,
+        "clicks": 2,
+        "maxHandSize": 5,
+        "badPublicity": 0,
+        "hq": [
+          "corp_onr_v1_216_security-purge_1",
+          "corp_onr_v1_195_corporate-retreat_1",
+          "corp_onr_v1_214_project-babylon_1"
+        ],
+        "rd": [
+          "corp_onr_v1_304_systematic-layoffs_1",
+          "corp_onr_v1_297_overtime-incentives_1",
+          "corp_onr_v1_252_keeper_1",
+          "corp_onr_v1_206_marine-arcology_1",
+          "corp_onr_proteus_062_lesley-major_1",
+          "corp_onr_v1_295_night-shift_1",
+          "corp_onr_v1_290_efficiency-experts_1",
+          "corp_onr_v1_292_management-shake-up_1",
+          "corp_onr_v1_238_data-wall-2-0_1",
+          "corp_onr_v1_206_marine-arcology_2",
+          "corp_onr_v1_245_fire-wall_2",
+          "corp_onr_v1_261_quandary_2",
+          "corp_onr_v1_261_quandary_1",
+          "corp_onr_proteus_008_project-zurich_1",
+          "corp_onr_v1_231_cortical-scrub_2",
+          "corp_onr_v1_290_efficiency-experts_2",
+          "corp_onr_v1_269_shotgun-wire_1",
+          "corp_onr_proteus_007_project-venice_1",
+          "corp_onr_v1_347_vapor-ops_2",
+          "corp_onr_v1_252_keeper_2",
+          "corp_onr_v1_244_filter_2",
+          "corp_onr_v1_231_cortical-scrub_1",
+          "corp_onr_v1_237_data-wall_1",
+          "corp_onr_v1_290_efficiency-experts_3",
+          "corp_onr_v1_304_systematic-layoffs_2",
+          "corp_onr_proteus_013_caryatid_1",
+          "corp_onr_v1_347_vapor-ops_1",
+          "corp_onr_v1_281_accounts-receivable_3",
+          "corp_onr_v1_309_bbs-whispering-campaign_1",
+          "corp_onr_v1_340_setup_2",
+          "corp_onr_v1_366_red-herrings_1",
+          "corp_onr_v1_281_accounts-receivable_1",
+          "corp_onr_proteus_021_dog-pile_1",
+          "corp_onr_v1_245_fire-wall_1",
+          "corp_onr_v1_340_setup_1"
+        ],
+        "archives": [
+          "corp_onr_v1_309_bbs-whispering-campaign_2",
+          "corp_onr_v1_281_accounts-receivable_2"
+        ],
+        "scoreArea": [
+          "corp_onr_proteus_008_project-zurich_2"
+        ],
+        "servers": [
+          {
+            "id": "hq",
+            "kind": "hq",
+            "label": "HQ",
+            "ice": [
+              "corp_onr_v1_237_data-wall_2"
+            ],
+            "root": []
+          },
+          {
+            "id": "rd",
+            "kind": "rd",
+            "label": "R&D",
+            "ice": [
+              "corp_onr_v1_238_data-wall-2-0_2"
+            ],
+            "root": []
+          },
+          {
+            "id": "archives",
+            "kind": "archives",
+            "label": "Archives",
+            "ice": [],
+            "root": []
+          },
+          {
+            "id": "remote_1",
+            "kind": "remote",
+            "label": "Remote 1",
+            "ice": [
+              "corp_onr_v1_262_razor-wire_1",
+              "corp_onr_v1_244_filter_1"
+            ],
+            "root": []
+          }
+        ]
+      },
+      "runner": {
+        "identity": "runner_runner_identity_001_0",
+        "credits": 6,
+        "clicks": 0,
+        "maxHandSize": 5,
+        "coreDamage": 0,
+        "tags": 0,
+        "memoryUsed": 3,
+        "memoryLimit": 4,
+        "grip": [
+          "runner_onr_v1_110_sneak-preview_3",
+          "runner_onr_v1_113_synchronized-attack-on-hq_1"
+        ],
+        "stack": [
+          "runner_onr_v1_079_bodyweight-synthetic-blood_3",
+          "runner_onr_v1_087_forgotten-backup-chip_1",
+          "runner_onr_v1_110_sneak-preview_1",
+          "runner_onr_v1_087_forgotten-backup-chip_2",
+          "runner_onr_v1_176_the-shell-traders_2",
+          "runner_onr_v1_079_bodyweight-synthetic-blood_1",
+          "runner_onr_v1_035_invisibility_2",
+          "runner_onr_v1_108_score_2",
+          "runner_onr_v1_114_temple-microcode-outlet_3",
+          "runner_onr_v1_071_vewy-vewy-quiet_1",
+          "runner_onr_classic_031_rent-i-con_1",
+          "runner_onr_classic_048_omnitech-spinal-tap-cybermodem_1",
+          "runner_onr_v1_165_junkyard-bbs_1",
+          "runner_onr_v1_108_score_3",
+          "runner_onr_v1_011_cloak_1",
+          "runner_onr_v1_087_forgotten-backup-chip_3",
+          "runner_onr_v1_035_invisibility_1",
+          "runner_onr_classic_043_running-interference_2",
+          "runner_onr_classic_037_finders-keepers_2",
+          "runner_onr_v1_079_bodyweight-synthetic-blood_2",
+          "runner_onr_v1_108_score_1",
+          "runner_onr_v1_176_the-shell-traders_3",
+          "runner_onr_classic_041_networking_1",
+          "runner_onr_classic_037_finders-keepers_1",
+          "runner_onr_classic_043_running-interference_1",
+          "runner_onr_v1_097_livewires-contacts_1",
+          "runner_onr_classic_031_rent-i-con_3",
+          "runner_onr_v1_161_fall-guy_1",
+          "runner_onr_v1_114_temple-microcode-outlet_2",
+          "runner_onr_v1_144_tycho-mem-chip_1",
+          "runner_onr_classic_045_elena-laskova_1",
+          "runner_onr_v1_144_tycho-mem-chip_2",
+          "runner_onr_v1_089_gideons-pawnshop_1",
+          "runner_onr_v1_110_sneak-preview_2",
+          "runner_onr_v1_114_temple-microcode-outlet_1"
+        ],
+        "heap": [
+          "runner_onr_classic_042_panzer-run_1",
+          "runner_onr_v1_111_social-engineering_1",
+          "runner_onr_classic_042_panzer-run_2",
+          "runner_onr_v1_097_livewires-contacts_2"
+        ],
+        "scoreArea": [],
+        "rig": {
+          "programs": [
+            "runner_onr_v1_071_vewy-vewy-quiet_2",
+            "runner_onr_classic_031_rent-i-con_2"
+          ],
+          "hardware": [
+            "runner_onr_v1_139_r-and-d-interface_1"
+          ],
+          "resources": [
+            "runner_onr_v1_176_the-shell-traders_1"
+          ]
+        }
+      },
+      "specialZones": {
+        "setAside": [],
+        "removedFromGame": []
+      },
+      "cardInstances": {
+        "runner_runner_identity_001_0": {
+          "instanceId": "runner_runner_identity_001_0",
+          "definitionId": "runner_identity_001",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "rig"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_corp_identity_001_0": {
+          "instanceId": "corp_corp_identity_001_0",
+          "definitionId": "corp_identity_001",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "scoreArea"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_classic_031_rent-i-con_1": {
+          "instanceId": "runner_onr_classic_031_rent-i-con_1",
+          "definitionId": "onr_classic_031_rent-i-con",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "stack"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_classic_031_rent-i-con_2": {
+          "instanceId": "runner_onr_classic_031_rent-i-con_2",
+          "definitionId": "onr_classic_031_rent-i-con",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "rig"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_classic_031_rent-i-con_3": {
+          "instanceId": "runner_onr_classic_031_rent-i-con_3",
+          "definitionId": "onr_classic_031_rent-i-con",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "stack"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_classic_037_finders-keepers_1": {
+          "instanceId": "runner_onr_classic_037_finders-keepers_1",
+          "definitionId": "onr_classic_037_finders-keepers",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "stack"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_classic_037_finders-keepers_2": {
+          "instanceId": "runner_onr_classic_037_finders-keepers_2",
+          "definitionId": "onr_classic_037_finders-keepers",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "stack"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_classic_041_networking_1": {
+          "instanceId": "runner_onr_classic_041_networking_1",
+          "definitionId": "onr_classic_041_networking",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "stack"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_classic_042_panzer-run_1": {
+          "instanceId": "runner_onr_classic_042_panzer-run_1",
+          "definitionId": "onr_classic_042_panzer-run",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "heap"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_classic_042_panzer-run_2": {
+          "instanceId": "runner_onr_classic_042_panzer-run_2",
+          "definitionId": "onr_classic_042_panzer-run",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "heap"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_classic_043_running-interference_1": {
+          "instanceId": "runner_onr_classic_043_running-interference_1",
+          "definitionId": "onr_classic_043_running-interference",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "stack"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_classic_043_running-interference_2": {
+          "instanceId": "runner_onr_classic_043_running-interference_2",
+          "definitionId": "onr_classic_043_running-interference",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "stack"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_classic_045_elena-laskova_1": {
+          "instanceId": "runner_onr_classic_045_elena-laskova_1",
+          "definitionId": "onr_classic_045_elena-laskova",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "stack"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_classic_048_omnitech-spinal-tap-cybermodem_1": {
+          "instanceId": "runner_onr_classic_048_omnitech-spinal-tap-cybermodem_1",
+          "definitionId": "onr_classic_048_omnitech-spinal-tap-cybermodem",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "stack"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_v1_011_cloak_1": {
+          "instanceId": "runner_onr_v1_011_cloak_1",
+          "definitionId": "onr_v1_011_cloak",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "stack"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_v1_035_invisibility_1": {
+          "instanceId": "runner_onr_v1_035_invisibility_1",
+          "definitionId": "onr_v1_035_invisibility",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "stack"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_v1_035_invisibility_2": {
+          "instanceId": "runner_onr_v1_035_invisibility_2",
+          "definitionId": "onr_v1_035_invisibility",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "stack"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_v1_071_vewy-vewy-quiet_1": {
+          "instanceId": "runner_onr_v1_071_vewy-vewy-quiet_1",
+          "definitionId": "onr_v1_071_vewy-vewy-quiet",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "stack"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_v1_071_vewy-vewy-quiet_2": {
+          "instanceId": "runner_onr_v1_071_vewy-vewy-quiet_2",
+          "definitionId": "onr_v1_071_vewy-vewy-quiet",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "rig"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0,
+          "counters": {
+            "bit": 2
+          }
+        },
+        "runner_onr_v1_079_bodyweight-synthetic-blood_1": {
+          "instanceId": "runner_onr_v1_079_bodyweight-synthetic-blood_1",
+          "definitionId": "onr_v1_079_bodyweight-synthetic-blood",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "stack"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_v1_079_bodyweight-synthetic-blood_2": {
+          "instanceId": "runner_onr_v1_079_bodyweight-synthetic-blood_2",
+          "definitionId": "onr_v1_079_bodyweight-synthetic-blood",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "stack"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_v1_079_bodyweight-synthetic-blood_3": {
+          "instanceId": "runner_onr_v1_079_bodyweight-synthetic-blood_3",
+          "definitionId": "onr_v1_079_bodyweight-synthetic-blood",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "stack"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_v1_087_forgotten-backup-chip_1": {
+          "instanceId": "runner_onr_v1_087_forgotten-backup-chip_1",
+          "definitionId": "onr_v1_087_forgotten-backup-chip",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "stack"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_v1_087_forgotten-backup-chip_2": {
+          "instanceId": "runner_onr_v1_087_forgotten-backup-chip_2",
+          "definitionId": "onr_v1_087_forgotten-backup-chip",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "stack"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_v1_087_forgotten-backup-chip_3": {
+          "instanceId": "runner_onr_v1_087_forgotten-backup-chip_3",
+          "definitionId": "onr_v1_087_forgotten-backup-chip",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "stack"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_v1_089_gideons-pawnshop_1": {
+          "instanceId": "runner_onr_v1_089_gideons-pawnshop_1",
+          "definitionId": "onr_v1_089_gideons-pawnshop",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "stack"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_v1_097_livewires-contacts_1": {
+          "instanceId": "runner_onr_v1_097_livewires-contacts_1",
+          "definitionId": "onr_v1_097_livewires-contacts",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "stack"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_v1_097_livewires-contacts_2": {
+          "instanceId": "runner_onr_v1_097_livewires-contacts_2",
+          "definitionId": "onr_v1_097_livewires-contacts",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "heap"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_v1_108_score_1": {
+          "instanceId": "runner_onr_v1_108_score_1",
+          "definitionId": "onr_v1_108_score",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "stack"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_v1_108_score_2": {
+          "instanceId": "runner_onr_v1_108_score_2",
+          "definitionId": "onr_v1_108_score",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "stack"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_v1_108_score_3": {
+          "instanceId": "runner_onr_v1_108_score_3",
+          "definitionId": "onr_v1_108_score",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "stack"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_v1_110_sneak-preview_1": {
+          "instanceId": "runner_onr_v1_110_sneak-preview_1",
+          "definitionId": "onr_v1_110_sneak-preview",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "stack"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_v1_110_sneak-preview_2": {
+          "instanceId": "runner_onr_v1_110_sneak-preview_2",
+          "definitionId": "onr_v1_110_sneak-preview",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "stack"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_v1_110_sneak-preview_3": {
+          "instanceId": "runner_onr_v1_110_sneak-preview_3",
+          "definitionId": "onr_v1_110_sneak-preview",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "grip"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_v1_111_social-engineering_1": {
+          "instanceId": "runner_onr_v1_111_social-engineering_1",
+          "definitionId": "onr_v1_111_social-engineering",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "heap"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_v1_113_synchronized-attack-on-hq_1": {
+          "instanceId": "runner_onr_v1_113_synchronized-attack-on-hq_1",
+          "definitionId": "onr_v1_113_synchronized-attack-on-hq",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "grip"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_v1_114_temple-microcode-outlet_1": {
+          "instanceId": "runner_onr_v1_114_temple-microcode-outlet_1",
+          "definitionId": "onr_v1_114_temple-microcode-outlet",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "stack"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_v1_114_temple-microcode-outlet_2": {
+          "instanceId": "runner_onr_v1_114_temple-microcode-outlet_2",
+          "definitionId": "onr_v1_114_temple-microcode-outlet",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "stack"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_v1_114_temple-microcode-outlet_3": {
+          "instanceId": "runner_onr_v1_114_temple-microcode-outlet_3",
+          "definitionId": "onr_v1_114_temple-microcode-outlet",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "stack"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_v1_139_r-and-d-interface_1": {
+          "instanceId": "runner_onr_v1_139_r-and-d-interface_1",
+          "definitionId": "onr_v1_139_r-and-d-interface",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "rig"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_v1_144_tycho-mem-chip_1": {
+          "instanceId": "runner_onr_v1_144_tycho-mem-chip_1",
+          "definitionId": "onr_v1_144_tycho-mem-chip",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "stack"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_v1_144_tycho-mem-chip_2": {
+          "instanceId": "runner_onr_v1_144_tycho-mem-chip_2",
+          "definitionId": "onr_v1_144_tycho-mem-chip",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "stack"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_v1_161_fall-guy_1": {
+          "instanceId": "runner_onr_v1_161_fall-guy_1",
+          "definitionId": "onr_v1_161_fall-guy",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "stack"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_v1_165_junkyard-bbs_1": {
+          "instanceId": "runner_onr_v1_165_junkyard-bbs_1",
+          "definitionId": "onr_v1_165_junkyard-bbs",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "stack"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_v1_176_the-shell-traders_1": {
+          "instanceId": "runner_onr_v1_176_the-shell-traders_1",
+          "definitionId": "onr_v1_176_the-shell-traders",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "rig"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_v1_176_the-shell-traders_2": {
+          "instanceId": "runner_onr_v1_176_the-shell-traders_2",
+          "definitionId": "onr_v1_176_the-shell-traders",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "stack"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "runner_onr_v1_176_the-shell-traders_3": {
+          "instanceId": "runner_onr_v1_176_the-shell-traders_3",
+          "definitionId": "onr_v1_176_the-shell-traders",
+          "owner": "runner",
+          "controller": "runner",
+          "zone": {
+            "side": "runner",
+            "zone": "stack"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_proteus_007_project-venice_1": {
+          "instanceId": "corp_onr_proteus_007_project-venice_1",
+          "definitionId": "onr_proteus_007_project-venice",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "rd"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_proteus_008_project-zurich_1": {
+          "instanceId": "corp_onr_proteus_008_project-zurich_1",
+          "definitionId": "onr_proteus_008_project-zurich",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "rd"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_proteus_008_project-zurich_2": {
+          "instanceId": "corp_onr_proteus_008_project-zurich_2",
+          "definitionId": "onr_proteus_008_project-zurich",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "scoreArea"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 3,
+          "strengthModifier": 0
+        },
+        "corp_onr_proteus_013_caryatid_1": {
+          "instanceId": "corp_onr_proteus_013_caryatid_1",
+          "definitionId": "onr_proteus_013_caryatid",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "rd"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_proteus_021_dog-pile_1": {
+          "instanceId": "corp_onr_proteus_021_dog-pile_1",
+          "definitionId": "onr_proteus_021_dog-pile",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "rd"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_proteus_062_lesley-major_1": {
+          "instanceId": "corp_onr_proteus_062_lesley-major_1",
+          "definitionId": "onr_proteus_062_lesley-major",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "rd"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_v1_195_corporate-retreat_1": {
+          "instanceId": "corp_onr_v1_195_corporate-retreat_1",
+          "definitionId": "onr_v1_195_corporate-retreat",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "hq"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_v1_206_marine-arcology_1": {
+          "instanceId": "corp_onr_v1_206_marine-arcology_1",
+          "definitionId": "onr_v1_206_marine-arcology",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "rd"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_v1_206_marine-arcology_2": {
+          "instanceId": "corp_onr_v1_206_marine-arcology_2",
+          "definitionId": "onr_v1_206_marine-arcology",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "rd"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_v1_214_project-babylon_1": {
+          "instanceId": "corp_onr_v1_214_project-babylon_1",
+          "definitionId": "onr_v1_214_project-babylon",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "hq"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_v1_216_security-purge_1": {
+          "instanceId": "corp_onr_v1_216_security-purge_1",
+          "definitionId": "onr_v1_216_security-purge",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "hq"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_v1_231_cortical-scrub_1": {
+          "instanceId": "corp_onr_v1_231_cortical-scrub_1",
+          "definitionId": "onr_v1_231_cortical-scrub",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "rd"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_v1_231_cortical-scrub_2": {
+          "instanceId": "corp_onr_v1_231_cortical-scrub_2",
+          "definitionId": "onr_v1_231_cortical-scrub",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "rd"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_v1_237_data-wall_1": {
+          "instanceId": "corp_onr_v1_237_data-wall_1",
+          "definitionId": "onr_v1_237_data-wall",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "rd"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_v1_237_data-wall_2": {
+          "instanceId": "corp_onr_v1_237_data-wall_2",
+          "definitionId": "onr_v1_237_data-wall",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "serverIce",
+            "serverId": "hq"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_v1_238_data-wall-2-0_1": {
+          "instanceId": "corp_onr_v1_238_data-wall-2-0_1",
+          "definitionId": "onr_v1_238_data-wall-2-0",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "rd"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_v1_238_data-wall-2-0_2": {
+          "instanceId": "corp_onr_v1_238_data-wall-2-0_2",
+          "definitionId": "onr_v1_238_data-wall-2-0",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "serverIce",
+            "serverId": "rd"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_v1_244_filter_1": {
+          "instanceId": "corp_onr_v1_244_filter_1",
+          "definitionId": "onr_v1_244_filter",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "serverIce",
+            "serverId": "remote_1"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_v1_244_filter_2": {
+          "instanceId": "corp_onr_v1_244_filter_2",
+          "definitionId": "onr_v1_244_filter",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "rd"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_v1_245_fire-wall_1": {
+          "instanceId": "corp_onr_v1_245_fire-wall_1",
+          "definitionId": "onr_v1_245_fire-wall",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "rd"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_v1_245_fire-wall_2": {
+          "instanceId": "corp_onr_v1_245_fire-wall_2",
+          "definitionId": "onr_v1_245_fire-wall",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "rd"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_v1_252_keeper_1": {
+          "instanceId": "corp_onr_v1_252_keeper_1",
+          "definitionId": "onr_v1_252_keeper",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "rd"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_v1_252_keeper_2": {
+          "instanceId": "corp_onr_v1_252_keeper_2",
+          "definitionId": "onr_v1_252_keeper",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "rd"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_v1_261_quandary_1": {
+          "instanceId": "corp_onr_v1_261_quandary_1",
+          "definitionId": "onr_v1_261_quandary",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "rd"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_v1_261_quandary_2": {
+          "instanceId": "corp_onr_v1_261_quandary_2",
+          "definitionId": "onr_v1_261_quandary",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "rd"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_v1_262_razor-wire_1": {
+          "instanceId": "corp_onr_v1_262_razor-wire_1",
+          "definitionId": "onr_v1_262_razor-wire",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "serverIce",
+            "serverId": "remote_1"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_v1_269_shotgun-wire_1": {
+          "instanceId": "corp_onr_v1_269_shotgun-wire_1",
+          "definitionId": "onr_v1_269_shotgun-wire",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "rd"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_v1_281_accounts-receivable_1": {
+          "instanceId": "corp_onr_v1_281_accounts-receivable_1",
+          "definitionId": "onr_v1_281_accounts-receivable",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "rd"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_v1_281_accounts-receivable_2": {
+          "instanceId": "corp_onr_v1_281_accounts-receivable_2",
+          "definitionId": "onr_v1_281_accounts-receivable",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "archives"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_v1_281_accounts-receivable_3": {
+          "instanceId": "corp_onr_v1_281_accounts-receivable_3",
+          "definitionId": "onr_v1_281_accounts-receivable",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "rd"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_v1_290_efficiency-experts_1": {
+          "instanceId": "corp_onr_v1_290_efficiency-experts_1",
+          "definitionId": "onr_v1_290_efficiency-experts",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "rd"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_v1_290_efficiency-experts_2": {
+          "instanceId": "corp_onr_v1_290_efficiency-experts_2",
+          "definitionId": "onr_v1_290_efficiency-experts",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "rd"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_v1_290_efficiency-experts_3": {
+          "instanceId": "corp_onr_v1_290_efficiency-experts_3",
+          "definitionId": "onr_v1_290_efficiency-experts",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "rd"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_v1_292_management-shake-up_1": {
+          "instanceId": "corp_onr_v1_292_management-shake-up_1",
+          "definitionId": "onr_v1_292_management-shake-up",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "rd"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_v1_295_night-shift_1": {
+          "instanceId": "corp_onr_v1_295_night-shift_1",
+          "definitionId": "onr_v1_295_night-shift",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "rd"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_v1_297_overtime-incentives_1": {
+          "instanceId": "corp_onr_v1_297_overtime-incentives_1",
+          "definitionId": "onr_v1_297_overtime-incentives",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "rd"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_v1_304_systematic-layoffs_1": {
+          "instanceId": "corp_onr_v1_304_systematic-layoffs_1",
+          "definitionId": "onr_v1_304_systematic-layoffs",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "rd"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_v1_304_systematic-layoffs_2": {
+          "instanceId": "corp_onr_v1_304_systematic-layoffs_2",
+          "definitionId": "onr_v1_304_systematic-layoffs",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "rd"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_v1_309_bbs-whispering-campaign_1": {
+          "instanceId": "corp_onr_v1_309_bbs-whispering-campaign_1",
+          "definitionId": "onr_v1_309_bbs-whispering-campaign",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "rd"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_v1_309_bbs-whispering-campaign_2": {
+          "instanceId": "corp_onr_v1_309_bbs-whispering-campaign_2",
+          "definitionId": "onr_v1_309_bbs-whispering-campaign",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "archives"
+          },
+          "faceup": true,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_v1_340_setup_1": {
+          "instanceId": "corp_onr_v1_340_setup_1",
+          "definitionId": "onr_v1_340_setup",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "rd"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_v1_340_setup_2": {
+          "instanceId": "corp_onr_v1_340_setup_2",
+          "definitionId": "onr_v1_340_setup",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "rd"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_v1_347_vapor-ops_1": {
+          "instanceId": "corp_onr_v1_347_vapor-ops_1",
+          "definitionId": "onr_v1_347_vapor-ops",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "rd"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_v1_347_vapor-ops_2": {
+          "instanceId": "corp_onr_v1_347_vapor-ops_2",
+          "definitionId": "onr_v1_347_vapor-ops",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "rd"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        },
+        "corp_onr_v1_366_red-herrings_1": {
+          "instanceId": "corp_onr_v1_366_red-herrings_1",
+          "definitionId": "onr_v1_366_red-herrings",
+          "owner": "corp",
+          "controller": "corp",
+          "zone": {
+            "side": "corp",
+            "zone": "rd"
+          },
+          "faceup": false,
+          "rezzed": false,
+          "advancementCounters": 0,
+          "strengthModifier": 0
+        }
+      },
+      "eventLog": [],
+      "winner": null,
+      "agendaPointsToWin": 7,
+      "activeObligationDebtCount": 0,
+      "corpBonusAgendaPoints": 0,
+      "setup": {
+        "status": "complete",
+        "initialHandSize": 5,
+        "resolved": {
+          "runner": "keep",
+          "corp": "keep"
+        },
+        "mulligansTaken": {}
+      },
+      "deckMetadata": {
+        "runner": {
+          "side": "runner",
+          "identityCardId": "runner_identity_001",
+          "deckName": "Rent-I-Con: Das Shellspiel",
+          "cardPoolSnapshotId": "card-snapshot-0.8",
+          "cardPoolVersion": "private-local-onr-v1-plus-classic-proteus-playtest",
+          "formatProfileId": "netgrid_private_local_classic_proteus_playtest_v1",
+          "formatProfileVersion": "1.0.0",
+          "deckHash": "fnv1a:f9e23c98"
+        },
+        "corp": {
+          "side": "corp",
+          "identityCardId": "corp_identity_001",
+          "deckName": "Fast Advance, Baby",
+          "cardPoolSnapshotId": "card-snapshot-0.8",
+          "cardPoolVersion": "private-local-onr-v1-plus-classic-proteus-playtest",
+          "formatProfileId": "netgrid_private_local_classic_proteus_playtest_v1",
+          "formatProfileVersion": "1.0.0",
+          "deckHash": "fnv1a:f9ad60d8"
+        }
+      },
+      "runnerTurnFlags": {
+        "stoleAgendaThisTurn": false,
+        "stoleAgendaLastTurn": false,
+        "stolenAgendaAdvancementCountersThisTurn": 0,
+        "stolenAgendaAdvancementCountersLastTurn": 0,
+        "runnerReceivedTagThisTurn": false,
+        "stoleResearchAgendaThisTurn": false,
+        "stoleGrayOpsAgendaThisTurn": false,
+        "stoleBlackOpsAgendaThisTurn": false,
+        "runAttemptsThisTurn": 0,
+        "runAttemptsLastTurn": 0,
+        "trashedAdvertisementThisTurn": false,
+        "trashedTransactionsThisTurn": false,
+        "nextAgendaAccessCreditGainPending": false,
+        "successfulHqRunThisTurn": false,
+        "successfulRunThisTurn": false,
+        "damagePreventionUsage": {},
+        "runnerActionsTakenThisTurn": 0,
+        "stolenAgendaIdsThisTurn": [],
+        "runAttemptsThisGame": 0,
+        "trashedNodeThisTurn": false,
+        "trashedNodeLastTurn": false,
+        "installedResourceIdsThisTurn": [],
+        "installedResourceIdsLastTurn": [],
+        "abilityUsedSourceIdsByLimitKey": {},
+        "startOfTurnFloatingCreditsApplied": true,
+        "bonusRunPending": false,
+        "forgoNextActionPending": false,
+        "forgoNextActionsPending": 0,
+        "runLockActionsPending": 0,
+        "runnerRunLockCreditCost": 0,
+        "valuPakProgramInstallActionsRemaining": 0,
+        "valuPakTemporaryProgramInstallCredits": 0,
+        "delayedInstallStartTurnResolvedSourceIds": [
+          "runner_onr_v1_176_the-shell-traders_1"
+        ],
+        "successfulRunExtraRunPending": false,
+        "successfulRunExtraRunUsedThisTurn": false,
+        "delayedEndTurnEffects": [],
+        "corpRezzedIceThisTurn": 0,
+        "successfulRdRunThisTurn": false,
+        "blackOpsLiberatedOrTrashedDuringSuccessfulHqOrRdRunThisTurn": false,
+        "nextAgendaAccessAgendaPointPending": false,
+        "incubatorPendingTransforms": 0
+      },
+      "corpTurnFlags": {
+        "scoredBlackOpsAgendaThisTurn": false,
+        "scoredBlackOpsAgendaLastTurn": false,
+        "counterPreventionUsedSourceIdsThisTurn": [],
+        "edgerunnerTempsInstallActionsRemaining": 0,
+        "scoredAgendaStartDrawChoiceResolvedSourceIds": [],
+        "pdcaUsedSourceIdsThisTurn": []
+      },
+      "turnSerial": 8
+    },
+    "eventPrefix": [
+      {
+        "eventId": "evt_0",
+        "type": "game_created",
+        "stateVersionBefore": 0,
+        "stateVersionAfter": 0,
+        "stateHashAfter": "fnv1a:17976c32",
+        "publicPayload": {
+          "baseline": {
+            "rulesVersion": "26.03",
+            "cardTextSource": "manual",
+            "cardTextSnapshotId": "mvp-0.99-demo",
+            "engineSchemaVersion": "0.99.0",
+            "cardImplementationVersion": "0.99.0",
+            "deviationRegistryVersion": "0.99.0",
+            "playerViewSchemaVersion": "0.99.0",
+            "multiplayerSchemaVersion": "0.99.0",
+            "aiControllerSchemaVersion": "0.99.0",
+            "simulationSchemaVersion": "0.99.0"
+          },
+          "runnerDeckId": "local_runner_rent_i_con_shellspiel_2026_07_17_snapshot_v0_6",
+          "corpDeckId": "local_corp_mr96xg94_snapshot_v0_6",
+          "runnerDeck": {
+            "side": "runner",
+            "identityCardId": "runner_identity_001",
+            "deckName": "Rent-I-Con: Das Shellspiel",
+            "cardPoolSnapshotId": "card-snapshot-0.8",
+            "cardPoolVersion": "private-local-onr-v1-plus-classic-proteus-playtest",
+            "formatProfileId": "netgrid_private_local_classic_proteus_playtest_v1",
+            "formatProfileVersion": "1.0.0",
+            "deckHash": "fnv1a:f9e23c98"
+          },
+          "corpDeck": {
+            "side": "corp",
+            "identityCardId": "corp_identity_001",
+            "deckName": "Fast Advance, Baby",
+            "cardPoolSnapshotId": "card-snapshot-0.8",
+            "cardPoolVersion": "private-local-onr-v1-plus-classic-proteus-playtest",
+            "formatProfileId": "netgrid_private_local_classic_proteus_playtest_v1",
+            "formatProfileVersion": "1.0.0",
+            "deckHash": "fnv1a:f9ad60d8"
+          },
+          "agendaPointsToWin": 7,
+          "setupStatus": "mulligan_runner"
+        }
+      },
+      {
+        "eventId": "evt_1",
+        "type": "resolve_choice",
+        "stateVersionBefore": 0,
+        "stateVersionAfter": 1,
+        "stateHashAfter": "fnv1a:74ed154a",
+        "visibilityClass": "hidden_info_barrier",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "resolve_choice",
+          "label": "Setup-Entscheidung wurde beantwortet.",
+          "choiceKind": "select_option",
+          "setupStep": "mulligan",
+          "setupSide": "runner",
+          "setupDecision": "keep",
+          "setupStatus": "mulligan_corp",
+          "redactedKind": "hidden_zone",
+          "hiddenZoneBarrier": true,
+          "hiddenZoneAction": "setup_mulligan",
+          "choiceVisibility": "hidden_info_barrier",
+          "abilityId": "setup_mulligan",
+          "effectKind": "hidden_zone",
+          "targets": {
+            "choiceVisibility": "hidden_info_barrier",
+            "redactedKind": "hidden_zone"
+          },
+          "visibility": {
+            "class": "hidden_info_barrier",
+            "hiddenZoneBarrier": true,
+            "redactedKind": "hidden_zone"
+          }
+        }
+      },
+      {
+        "eventId": "evt_2",
+        "type": "resolve_choice",
+        "stateVersionBefore": 1,
+        "stateVersionAfter": 2,
+        "stateHashAfter": "fnv1a:9e8d549f",
+        "visibilityClass": "hidden_info_barrier",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "resolve_choice",
+          "label": "Setup-Entscheidung wurde beantwortet.",
+          "choiceKind": "select_option",
+          "setupStep": "mulligan",
+          "setupSide": "corp",
+          "setupDecision": "keep",
+          "setupStatus": "complete",
+          "redactedKind": "hidden_zone",
+          "hiddenZoneBarrier": true,
+          "hiddenZoneAction": "setup_mulligan",
+          "choiceVisibility": "hidden_info_barrier",
+          "abilityId": "setup_mulligan",
+          "effectKind": "hidden_zone",
+          "targets": {
+            "choiceVisibility": "hidden_info_barrier",
+            "redactedKind": "hidden_zone"
+          },
+          "visibility": {
+            "class": "hidden_info_barrier",
+            "hiddenZoneBarrier": true,
+            "redactedKind": "hidden_zone"
+          }
+        }
+      },
+      {
+        "eventId": "evt_3",
+        "type": "mandatory_draw",
+        "stateVersionBefore": 2,
+        "stateVersionAfter": 3,
+        "stateHashAfter": "fnv1a:7cf1338c",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "mandatory_draw",
+          "label": "Korp Pflichtkarte ziehen",
+          "visibility": {
+            "class": "private_to_side"
+          }
+        }
+      },
+      {
+        "eventId": "evt_4",
+        "type": "install_card",
+        "stateVersionBefore": 3,
+        "stateVersionAfter": 4,
+        "stateHashAfter": "fnv1a:4a4848c0",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "install_card",
+          "label": "Korp installiert eine Karte.",
+          "actionCostClicks": 1,
+          "turnActionOrdinalStart": 1,
+          "turnActionOrdinalEnd": 1,
+          "serverLabel": "HQ",
+          "installPlacement": "ice",
+          "zoneLabel": "ICE",
+          "iceInstallBaseCost": 0,
+          "iceInstallAdditionalCost": 0,
+          "iceInstallReduction": 0,
+          "iceInstallTotalCost": 0,
+          "redactedKind": "installed_card",
+          "effectKind": "install_card",
+          "targets": {
+            "serverLabel": "HQ",
+            "redactedKind": "installed_card"
+          },
+          "visibility": {
+            "class": "private_to_side",
+            "redactedKind": "installed_card"
+          }
+        }
+      },
+      {
+        "eventId": "evt_5",
+        "type": "install_card",
+        "stateVersionBefore": 4,
+        "stateVersionAfter": 5,
+        "stateHashAfter": "fnv1a:e6839d13",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "install_card",
+          "label": "Korp installiert eine Karte.",
+          "actionCostClicks": 1,
+          "turnActionOrdinalStart": 2,
+          "turnActionOrdinalEnd": 2,
+          "serverLabel": "R&D",
+          "installPlacement": "ice",
+          "zoneLabel": "ICE",
+          "iceInstallBaseCost": 0,
+          "iceInstallAdditionalCost": 0,
+          "iceInstallReduction": 0,
+          "iceInstallTotalCost": 0,
+          "redactedKind": "installed_card",
+          "effectKind": "install_card",
+          "targets": {
+            "serverLabel": "R&D",
+            "redactedKind": "installed_card"
+          },
+          "visibility": {
+            "class": "private_to_side",
+            "redactedKind": "installed_card"
+          }
+        }
+      },
+      {
+        "eventId": "evt_6",
+        "type": "install_card",
+        "stateVersionBefore": 5,
+        "stateVersionAfter": 6,
+        "stateHashAfter": "fnv1a:ec90b592",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "install_card",
+          "label": "Korp installiert eine Karte.",
+          "actionCostClicks": 1,
+          "turnActionOrdinalStart": 3,
+          "turnActionOrdinalEnd": 3,
+          "serverLabel": "Remote 1",
+          "installPlacement": "root",
+          "zoneLabel": "Remote",
+          "redactedKind": "installed_card",
+          "effectKind": "install_card",
+          "targets": {
+            "serverLabel": "Remote 1",
+            "redactedKind": "installed_card"
+          },
+          "visibility": {
+            "class": "private_to_side",
+            "redactedKind": "installed_card"
+          }
+        }
+      },
+      {
+        "eventId": "evt_7",
+        "type": "end_turn",
+        "stateVersionBefore": 6,
+        "stateVersionAfter": 7,
+        "stateHashAfter": "fnv1a:84de03c0",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "end_turn",
+          "label": "Zug beenden",
+          "visibility": {
+            "class": "private_to_side"
+          }
+        }
+      },
+      {
+        "eventId": "evt_8",
+        "type": "install_card",
+        "stateVersionBefore": 7,
+        "stateVersionAfter": 8,
+        "stateHashAfter": "fnv1a:6a520885",
+        "visibilityClass": "public",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "install_card",
+          "label": "The Shell Traders installieren",
+          "actionCostClicks": 1,
+          "turnActionOrdinalStart": 1,
+          "turnActionOrdinalEnd": 1,
+          "zoneLabel": "Resource",
+          "installCostPaid": 0,
+          "runnerInstallNormalCreditsPaid": 0,
+          "runnerInstallHostedCreditsPaid": 0,
+          "runnerInstallRecurringCreditsPaid": 0,
+          "runnerInstallTemporaryCreditsPaid": 0,
+          "runnerCreditsAfter": 5,
+          "effectKind": "install_card",
+          "amounts": {
+            "runnerCreditsAfter": 5
+          },
+          "visibility": {
+            "class": "public"
+          },
+          "cardDefinitionId": "onr_v1_176_the-shell-traders",
+          "title": "The Shell Traders"
+        }
+      },
+      {
+        "eventId": "evt_9",
+        "type": "trigger_ability",
+        "stateVersionBefore": 8,
+        "stateVersionAfter": 9,
+        "stateHashAfter": "fnv1a:2d008560",
+        "visibilityClass": "hidden_info_barrier",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "trigger_ability",
+          "label": "The Shell Traders: Rent-I-Con vorbereiten",
+          "actionCostClicks": 1,
+          "turnActionOrdinalStart": 2,
+          "turnActionOrdinalEnd": 2,
+          "hiddenZoneBarrier": true,
+          "hiddenZoneAction": "delayed_install_set_aside",
+          "targetCardDefinitionId": "onr_classic_031_rent-i-con",
+          "remainingCounters": 3,
+          "redactedKind": "hidden_zone",
+          "counterType": "shell",
+          "addedCounterAmount": 3,
+          "sourceDefinitionId": "onr_v1_176_the-shell-traders",
+          "abilityFamily": "hosting-counters",
+          "abilityId": "set_aside_from_grip",
+          "effectKind": "counter_change",
+          "amounts": {
+            "addedCounterAmount": 3,
+            "remainingCounters": 3
+          },
+          "targets": {
+            "sourceDefinitionId": "onr_v1_176_the-shell-traders",
+            "targetCardDefinitionId": "onr_classic_031_rent-i-con",
+            "redactedKind": "hidden_zone"
+          },
+          "visibility": {
+            "class": "hidden_info_barrier",
+            "hiddenZoneBarrier": true,
+            "redactedKind": "hidden_zone"
+          }
+        }
+      },
+      {
+        "eventId": "evt_10",
+        "type": "install_card",
+        "stateVersionBefore": 9,
+        "stateVersionAfter": 10,
+        "stateHashAfter": "fnv1a:9ade1ec9",
+        "visibilityClass": "public",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "install_card",
+          "label": "Vewy Vewy Quiet installieren",
+          "actionCostClicks": 1,
+          "turnActionOrdinalStart": 3,
+          "turnActionOrdinalEnd": 3,
+          "resolvedEffects": [
+            {
+              "effectId": "onr_v1_071_vewy-vewy-quiet.effect.0.add_hosted_credits",
+              "kind": "add_hosted_credits",
+              "visibility": "public",
+              "side": "runner",
+              "amount": 2,
+              "counterType": "bit",
+              "addedCounterAmount": 2,
+              "remainingCounters": 2,
+              "reason": "card_resolver",
+              "sourceDefinitionId": "onr_v1_071_vewy-vewy-quiet",
+              "sourceTitle": "Vewy Vewy Quiet"
+            }
+          ],
+          "zoneLabel": "Rig",
+          "installCostPaid": 4,
+          "runnerInstallNormalCreditsPaid": 4,
+          "runnerInstallHostedCreditsPaid": 0,
+          "runnerInstallRecurringCreditsPaid": 0,
+          "runnerInstallTemporaryCreditsPaid": 0,
+          "runnerCreditsAfter": 1,
+          "counterType": "bit",
+          "addedCounterAmount": 2,
+          "remainingCounters": 2,
+          "hostedCreditsAdded": 2,
+          "hostedCreditsAfter": 2,
+          "sourceDefinitionId": "onr_v1_071_vewy-vewy-quiet",
+          "effectKind": "install_card",
+          "amounts": {
+            "addedCounterAmount": 2,
+            "remainingCounters": 2,
+            "runnerCreditsAfter": 1,
+            "hostedCreditsAdded": 2,
+            "hostedCreditsAfter": 2
+          },
+          "targets": {
+            "sourceDefinitionId": "onr_v1_071_vewy-vewy-quiet"
+          },
+          "visibility": {
+            "class": "public"
+          },
+          "cardDefinitionId": "onr_v1_071_vewy-vewy-quiet",
+          "title": "Vewy Vewy Quiet"
+        }
+      },
+      {
+        "eventId": "evt_11",
+        "type": "gain_credit",
+        "stateVersionBefore": 10,
+        "stateVersionAfter": 11,
+        "stateHashAfter": "fnv1a:32464507",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "gain_credit",
+          "label": "1 Credit nehmen",
+          "actionCostClicks": 1,
+          "turnActionOrdinalStart": 4,
+          "turnActionOrdinalEnd": 4,
+          "amount": 1,
+          "effectKind": "gain_credits",
+          "amounts": {
+            "amount": 1
+          },
+          "visibility": {
+            "class": "private_to_side"
+          }
+        }
+      },
+      {
+        "eventId": "evt_12",
+        "type": "end_turn",
+        "stateVersionBefore": 11,
+        "stateVersionAfter": 12,
+        "stateHashAfter": "fnv1a:b80e0482",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "end_turn",
+          "label": "Zug beenden",
+          "visibility": {
+            "class": "private_to_side"
+          }
+        }
+      },
+      {
+        "eventId": "evt_13",
+        "type": "mandatory_draw",
+        "stateVersionBefore": 12,
+        "stateVersionAfter": 13,
+        "stateHashAfter": "fnv1a:d55b46db",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "mandatory_draw",
+          "label": "Korp Pflichtkarte ziehen",
+          "visibility": {
+            "class": "private_to_side"
+          }
+        }
+      },
+      {
+        "eventId": "evt_14",
+        "type": "rez_card",
+        "stateVersionBefore": 13,
+        "stateVersionAfter": 14,
+        "stateHashAfter": "fnv1a:125c463d",
+        "visibilityClass": "hidden_info_barrier",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "rez_card",
+          "label": "Karte in Remote 1 rezzen",
+          "resolvedEffects": [
+            {
+              "effectId": "onr_v1_309_bbs-whispering-campaign.effect.0.add_hosted_credits",
+              "kind": "add_hosted_credits",
+              "visibility": "public",
+              "side": "corp",
+              "amount": 16,
+              "counterType": "bit",
+              "addedCounterAmount": 16,
+              "remainingCounters": 16,
+              "reason": "card_resolver",
+              "sourceDefinitionId": "onr_v1_309_bbs-whispering-campaign",
+              "sourceTitle": "BBS Whispering Campaign"
+            }
+          ],
+          "serverLabel": "Remote 1",
+          "zoneLabel": "Remote",
+          "sourceDefinitionId": "onr_v1_309_bbs-whispering-campaign",
+          "counterType": "bit",
+          "addedCounterAmount": 16,
+          "hostedCreditsAdded": 16,
+          "hostedCreditsAfter": 16,
+          "remainingCounters": 16,
+          "amounts": {
+            "addedCounterAmount": 16,
+            "remainingCounters": 16,
+            "hostedCreditsAdded": 16,
+            "hostedCreditsAfter": 16
+          },
+          "targets": {
+            "sourceDefinitionId": "onr_v1_309_bbs-whispering-campaign",
+            "serverLabel": "Remote 1"
+          },
+          "visibility": {
+            "class": "hidden_info_barrier"
+          },
+          "cardDefinitionId": "onr_v1_309_bbs-whispering-campaign",
+          "title": "BBS Whispering Campaign"
+        }
+      },
+      {
+        "eventId": "evt_15",
+        "type": "activated_card_ability",
+        "stateVersionBefore": 14,
+        "stateVersionAfter": 15,
+        "stateHashAfter": "fnv1a:ccdc9d45",
+        "visibilityClass": "public",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "activated_card_ability",
+          "label": "BBS Whispering Campaign: 2 Credits nehmen",
+          "actionCostClicks": 1,
+          "turnActionOrdinalStart": 1,
+          "turnActionOrdinalEnd": 1,
+          "resolvedEffects": [
+            {
+              "effectId": "onr_v1_309_bbs-whispering-campaign.effect.0.take_hosted_credits",
+              "kind": "take_hosted_credits",
+              "visibility": "public",
+              "side": "corp",
+              "amount": 2,
+              "counterType": "bit",
+              "removedCounterAmount": 2,
+              "remainingCounters": 14,
+              "reason": "card_resolver",
+              "sourceDefinitionId": "onr_v1_309_bbs-whispering-campaign",
+              "sourceTitle": "BBS Whispering Campaign"
+            }
+          ],
+          "serverLabel": "Remote 1",
+          "amount": 2,
+          "sourceDefinitionId": "onr_v1_309_bbs-whispering-campaign",
+          "gainedCredits": 2,
+          "corpCreditsAfter": 7,
+          "counterType": "bit",
+          "removedCounterAmount": 2,
+          "remainingCounters": 14,
+          "hostedCreditsTaken": 2,
+          "hostedCreditsAfter": 14,
+          "gainCreditsAmount": 2,
+          "cardImplementationAbility": "activated",
+          "cardImplementationAbilityIndex": 0,
+          "cardImplementationAbilityTiming": "corp_main",
+          "amounts": {
+            "amount": 2,
+            "gainedCredits": 2,
+            "gainCreditsAmount": 2,
+            "removedCounterAmount": 2,
+            "remainingCounters": 14,
+            "corpCreditsAfter": 7,
+            "hostedCreditsTaken": 2,
+            "hostedCreditsAfter": 14
+          },
+          "targets": {
+            "sourceDefinitionId": "onr_v1_309_bbs-whispering-campaign",
+            "serverLabel": "Remote 1"
+          },
+          "visibility": {
+            "class": "public"
+          },
+          "cardDefinitionId": "onr_v1_309_bbs-whispering-campaign",
+          "title": "BBS Whispering Campaign"
+        }
+      },
+      {
+        "eventId": "evt_16",
+        "type": "install_card",
+        "stateVersionBefore": 15,
+        "stateVersionAfter": 16,
+        "stateHashAfter": "fnv1a:b6bee1fe",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "install_card",
+          "label": "Korp installiert eine Karte.",
+          "actionCostClicks": 1,
+          "turnActionOrdinalStart": 2,
+          "turnActionOrdinalEnd": 2,
+          "serverLabel": "Remote 1",
+          "installPlacement": "ice",
+          "zoneLabel": "ICE",
+          "iceInstallBaseCost": 0,
+          "iceInstallAdditionalCost": 0,
+          "iceInstallReduction": 0,
+          "iceInstallTotalCost": 0,
+          "redactedKind": "installed_card",
+          "effectKind": "install_card",
+          "targets": {
+            "serverLabel": "Remote 1",
+            "redactedKind": "installed_card"
+          },
+          "visibility": {
+            "class": "private_to_side",
+            "redactedKind": "installed_card"
+          }
+        }
+      },
+      {
+        "eventId": "evt_17",
+        "type": "install_card",
+        "stateVersionBefore": 16,
+        "stateVersionAfter": 17,
+        "stateHashAfter": "fnv1a:ab03bc17",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "install_card",
+          "label": "Korp installiert eine Karte.",
+          "actionCostClicks": 1,
+          "turnActionOrdinalStart": 3,
+          "turnActionOrdinalEnd": 3,
+          "serverLabel": "Remote 1",
+          "installPlacement": "root",
+          "zoneLabel": "Remote",
+          "rootReplacement": "asset_to_agenda",
+          "replacedRootCardType": "asset",
+          "redactedKind": "installed_card",
+          "effectKind": "install_card",
+          "targets": {
+            "serverLabel": "Remote 1",
+            "redactedKind": "installed_card"
+          },
+          "visibility": {
+            "class": "private_to_side",
+            "redactedKind": "installed_card"
+          }
+        }
+      },
+      {
+        "eventId": "evt_18",
+        "type": "end_turn",
+        "stateVersionBefore": 17,
+        "stateVersionAfter": 18,
+        "stateHashAfter": "fnv1a:12ad9c52",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "end_turn",
+          "label": "Zug beenden",
+          "resolvedEffects": [
+            {
+              "effectId": "runner.start.delayed_install.runner_onr_v1_176_the-shell-traders_1.runner_onr_classic_031_rent-i-con_2",
+              "kind": "counter_change",
+              "visibility": "public",
+              "side": "runner",
+              "amount": 2,
+              "reason": "start_of_turn",
+              "counterType": "shell",
+              "removedCounterAmount": 1,
+              "remainingCounters": 2,
+              "sourceDefinitionId": "onr_v1_176_the-shell-traders",
+              "sourceTitle": "The Shell Traders",
+              "cardDefinitionId": "onr_classic_031_rent-i-con",
+              "cardTitle": "Rent-I-Con"
+            }
+          ],
+          "visibility": {
+            "class": "private_to_side"
+          }
+        }
+      },
+      {
+        "eventId": "evt_19",
+        "type": "draw_card",
+        "stateVersionBefore": 18,
+        "stateVersionAfter": 19,
+        "stateHashAfter": "fnv1a:6477a98b",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "draw_card",
+          "label": "Karte ziehen",
+          "actionCostClicks": 1,
+          "turnActionOrdinalStart": 1,
+          "turnActionOrdinalEnd": 1,
+          "amount": 1,
+          "drawnCount": 1,
+          "amounts": {
+            "amount": 1
+          },
+          "visibility": {
+            "class": "private_to_side"
+          }
+        }
+      },
+      {
+        "eventId": "evt_20",
+        "type": "play_event",
+        "stateVersionBefore": 19,
+        "stateVersionAfter": 20,
+        "stateHashAfter": "fnv1a:4625c0e8",
+        "visibilityClass": "public",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "play_event",
+          "label": "Panzer Run spielen",
+          "actionCostClicks": 2,
+          "turnActionOrdinalStart": 2,
+          "turnActionOrdinalEnd": 3,
+          "resolvedEffects": [
+            {
+              "effectId": "onr_classic_042_panzer-run.effect.0.gain_credits",
+              "kind": "gain_credits",
+              "visibility": "public",
+              "side": "runner",
+              "amount": 4,
+              "reason": "card_resolver",
+              "sourceDefinitionId": "onr_classic_042_panzer-run",
+              "sourceTitle": "Panzer Run"
+            },
+            {
+              "effectId": "onr_classic_042_panzer-run.effect.1.draw_cards",
+              "kind": "draw_cards",
+              "visibility": "public",
+              "side": "runner",
+              "amount": 2,
+              "reason": "card_resolver",
+              "sourceDefinitionId": "onr_classic_042_panzer-run",
+              "sourceTitle": "Panzer Run"
+            }
+          ],
+          "gainedCredits": 4,
+          "runnerCreditsAfter": 5,
+          "normalCreditsSpent": 1,
+          "drawnCount": 2,
+          "runnerGripAfter": 4,
+          "amounts": {
+            "gainedCredits": 4,
+            "runnerCreditsAfter": 5
+          },
+          "visibility": {
+            "class": "public"
+          },
+          "cardDefinitionId": "onr_classic_042_panzer-run",
+          "title": "Panzer Run"
+        }
+      },
+      {
+        "eventId": "evt_21",
+        "type": "play_event",
+        "stateVersionBefore": 20,
+        "stateVersionAfter": 21,
+        "stateHashAfter": "fnv1a:c50ac730",
+        "visibilityClass": "hidden_info_barrier",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "play_event",
+          "label": "Social Engineering spielen",
+          "actionCostClicks": 1,
+          "turnActionOrdinalStart": 4,
+          "turnActionOrdinalEnd": 4,
+          "runnerCreditsAfter": 4,
+          "normalCreditsSpent": 1,
+          "hiddenZoneBarrier": true,
+          "redactedKind": "hidden_zone",
+          "effectKind": "hidden_zone",
+          "amounts": {
+            "runnerCreditsAfter": 4
+          },
+          "targets": {
+            "redactedKind": "hidden_zone"
+          },
+          "visibility": {
+            "class": "hidden_info_barrier",
+            "hiddenZoneBarrier": true,
+            "redactedKind": "hidden_zone"
+          },
+          "cardDefinitionId": "onr_v1_111_social-engineering",
+          "title": "Social Engineering"
+        }
+      },
+      {
+        "eventId": "evt_22",
+        "type": "resolve_choice",
+        "stateVersionBefore": 21,
+        "stateVersionAfter": 22,
+        "stateHashAfter": "fnv1a:160959b6",
+        "visibilityClass": "hidden_info_barrier",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "resolve_choice",
+          "label": "Choice wurde beantwortet.",
+          "choiceKind": "bid_amount",
+          "redactedKind": "hidden_zone",
+          "sourceDefinitionId": "onr_v1_111_social-engineering",
+          "hiddenZoneBarrier": true,
+          "choiceVisibility": "hidden_info_barrier",
+          "effectKind": "hidden_zone",
+          "targets": {
+            "sourceDefinitionId": "onr_v1_111_social-engineering",
+            "choiceVisibility": "hidden_info_barrier",
+            "redactedKind": "hidden_zone"
+          },
+          "visibility": {
+            "class": "hidden_info_barrier",
+            "hiddenZoneBarrier": true,
+            "redactedKind": "hidden_zone"
+          }
+        }
+      },
+      {
+        "eventId": "evt_23",
+        "type": "resolve_choice",
+        "stateVersionBefore": 22,
+        "stateVersionAfter": 23,
+        "stateHashAfter": "fnv1a:cdd179e2",
+        "visibilityClass": "hidden_info_barrier",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "resolve_choice",
+          "label": "Choice wurde beantwortet.",
+          "choiceKind": "bid_amount",
+          "redactedKind": "hidden_zone",
+          "sourceDefinitionId": "onr_v1_111_social-engineering",
+          "runnerCreditsAfter": 0,
+          "hiddenZoneBarrier": true,
+          "choiceVisibility": "hidden_info_barrier",
+          "effectKind": "hidden_zone",
+          "amounts": {
+            "runnerCreditsAfter": 0,
+            "secretHiddenAmountRevealed": 4,
+            "secretGuessAmount": 4
+          },
+          "targets": {
+            "sourceDefinitionId": "onr_v1_111_social-engineering",
+            "choiceVisibility": "hidden_info_barrier",
+            "secretSpendGuessRunGuessCorrect": true,
+            "redactedKind": "hidden_zone"
+          },
+          "visibility": {
+            "class": "hidden_info_barrier",
+            "hiddenZoneBarrier": true,
+            "redactedKind": "hidden_zone"
+          }
+        }
+      },
+      {
+        "eventId": "evt_24",
+        "type": "end_turn",
+        "stateVersionBefore": 23,
+        "stateVersionAfter": 24,
+        "stateHashAfter": "fnv1a:1d0f434c",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "end_turn",
+          "label": "Zug beenden",
+          "visibility": {
+            "class": "private_to_side"
+          }
+        }
+      },
+      {
+        "eventId": "evt_25",
+        "type": "mandatory_draw",
+        "stateVersionBefore": 24,
+        "stateVersionAfter": 25,
+        "stateHashAfter": "fnv1a:ae4ab7e7",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "mandatory_draw",
+          "label": "Korp Pflichtkarte ziehen",
+          "visibility": {
+            "class": "private_to_side"
+          }
+        }
+      },
+      {
+        "eventId": "evt_26",
+        "type": "advance_card",
+        "stateVersionBefore": 25,
+        "stateVersionAfter": 26,
+        "stateHashAfter": "fnv1a:802c1701",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "advance_card",
+          "label": "Korp advanced eine Karte.",
+          "actionCostClicks": 1,
+          "turnActionOrdinalStart": 1,
+          "turnActionOrdinalEnd": 1,
+          "serverLabel": "Remote 1",
+          "redactedKind": "installed_card",
+          "targets": {
+            "serverLabel": "Remote 1",
+            "redactedKind": "installed_card"
+          },
+          "visibility": {
+            "class": "private_to_side",
+            "redactedKind": "installed_card"
+          }
+        }
+      },
+      {
+        "eventId": "evt_27",
+        "type": "advance_card",
+        "stateVersionBefore": 26,
+        "stateVersionAfter": 27,
+        "stateHashAfter": "fnv1a:dcc620af",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "advance_card",
+          "label": "Korp advanced eine Karte.",
+          "actionCostClicks": 1,
+          "turnActionOrdinalStart": 2,
+          "turnActionOrdinalEnd": 2,
+          "serverLabel": "Remote 1",
+          "redactedKind": "installed_card",
+          "targets": {
+            "serverLabel": "Remote 1",
+            "redactedKind": "installed_card"
+          },
+          "visibility": {
+            "class": "private_to_side",
+            "redactedKind": "installed_card"
+          }
+        }
+      },
+      {
+        "eventId": "evt_28",
+        "type": "advance_card",
+        "stateVersionBefore": 27,
+        "stateVersionAfter": 28,
+        "stateHashAfter": "fnv1a:931c244d",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "advance_card",
+          "label": "Korp advanced eine Karte.",
+          "actionCostClicks": 1,
+          "turnActionOrdinalStart": 3,
+          "turnActionOrdinalEnd": 3,
+          "serverLabel": "Remote 1",
+          "redactedKind": "installed_card",
+          "targets": {
+            "serverLabel": "Remote 1",
+            "redactedKind": "installed_card"
+          },
+          "visibility": {
+            "class": "private_to_side",
+            "redactedKind": "installed_card"
+          }
+        }
+      },
+      {
+        "eventId": "evt_29",
+        "type": "score_agenda",
+        "stateVersionBefore": 28,
+        "stateVersionAfter": 29,
+        "stateHashAfter": "fnv1a:861fa9ea",
+        "visibilityClass": "hidden_info_barrier",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "score_agenda",
+          "label": "Agenda in Remote 1 scoren",
+          "overadvanceRecurringCredits": 0,
+          "projectZurichOveradvance": 0,
+          "agendaPoints": 2,
+          "totalAgendaPoints": 2,
+          "amounts": {
+            "overadvanceRecurringCredits": 0,
+            "projectZurichOveradvance": 0
+          },
+          "targets": {
+            "scoredFromServerId": "remote_1"
+          },
+          "visibility": {
+            "class": "hidden_info_barrier"
+          },
+          "cardDefinitionId": "onr_proteus_008_project-zurich",
+          "title": "Project Zurich"
+        }
+      },
+      {
+        "eventId": "evt_30",
+        "type": "end_turn",
+        "stateVersionBefore": 29,
+        "stateVersionAfter": 30,
+        "stateHashAfter": "fnv1a:a747f9fe",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "end_turn",
+          "label": "Zug beenden",
+          "resolvedEffects": [
+            {
+              "effectId": "runner.start.delayed_install.runner_onr_v1_176_the-shell-traders_1.runner_onr_classic_031_rent-i-con_2",
+              "kind": "counter_change",
+              "visibility": "public",
+              "side": "runner",
+              "amount": 1,
+              "reason": "start_of_turn",
+              "counterType": "shell",
+              "removedCounterAmount": 1,
+              "remainingCounters": 1,
+              "sourceDefinitionId": "onr_v1_176_the-shell-traders",
+              "sourceTitle": "The Shell Traders",
+              "cardDefinitionId": "onr_classic_031_rent-i-con",
+              "cardTitle": "Rent-I-Con"
+            }
+          ],
+          "visibility": {
+            "class": "private_to_side"
+          }
+        }
+      },
+      {
+        "eventId": "evt_31",
+        "type": "gain_credit",
+        "stateVersionBefore": 30,
+        "stateVersionAfter": 31,
+        "stateHashAfter": "fnv1a:ca196412",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "gain_credit",
+          "label": "1 Credit nehmen",
+          "actionCostClicks": 1,
+          "turnActionOrdinalStart": 1,
+          "turnActionOrdinalEnd": 1,
+          "amount": 1,
+          "effectKind": "gain_credits",
+          "amounts": {
+            "amount": 1
+          },
+          "visibility": {
+            "class": "private_to_side"
+          }
+        }
+      },
+      {
+        "eventId": "evt_32",
+        "type": "gain_credit",
+        "stateVersionBefore": 31,
+        "stateVersionAfter": 32,
+        "stateHashAfter": "fnv1a:359b4e6e",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "gain_credit",
+          "label": "1 Credit nehmen",
+          "actionCostClicks": 1,
+          "turnActionOrdinalStart": 2,
+          "turnActionOrdinalEnd": 2,
+          "amount": 1,
+          "effectKind": "gain_credits",
+          "amounts": {
+            "amount": 1
+          },
+          "visibility": {
+            "class": "private_to_side"
+          }
+        }
+      },
+      {
+        "eventId": "evt_33",
+        "type": "gain_credit",
+        "stateVersionBefore": 32,
+        "stateVersionAfter": 33,
+        "stateHashAfter": "fnv1a:cf854aaa",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "gain_credit",
+          "label": "1 Credit nehmen",
+          "actionCostClicks": 1,
+          "turnActionOrdinalStart": 3,
+          "turnActionOrdinalEnd": 3,
+          "amount": 1,
+          "effectKind": "gain_credits",
+          "amounts": {
+            "amount": 1
+          },
+          "visibility": {
+            "class": "private_to_side"
+          }
+        }
+      },
+      {
+        "eventId": "evt_34",
+        "type": "gain_credit",
+        "stateVersionBefore": 33,
+        "stateVersionAfter": 34,
+        "stateHashAfter": "fnv1a:be949906",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "gain_credit",
+          "label": "1 Credit nehmen",
+          "actionCostClicks": 1,
+          "turnActionOrdinalStart": 4,
+          "turnActionOrdinalEnd": 4,
+          "amount": 1,
+          "effectKind": "gain_credits",
+          "amounts": {
+            "amount": 1
+          },
+          "visibility": {
+            "class": "private_to_side"
+          }
+        }
+      },
+      {
+        "eventId": "evt_35",
+        "type": "end_turn",
+        "stateVersionBefore": 34,
+        "stateVersionAfter": 35,
+        "stateHashAfter": "fnv1a:32e38898",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "end_turn",
+          "label": "Zug beenden",
+          "visibility": {
+            "class": "private_to_side"
+          }
+        }
+      },
+      {
+        "eventId": "evt_36",
+        "type": "mandatory_draw",
+        "stateVersionBefore": 35,
+        "stateVersionAfter": 36,
+        "stateHashAfter": "fnv1a:d2575371",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "mandatory_draw",
+          "label": "Korp Pflichtkarte ziehen",
+          "visibility": {
+            "class": "private_to_side"
+          }
+        }
+      },
+      {
+        "eventId": "evt_37",
+        "type": "gain_credit",
+        "stateVersionBefore": 36,
+        "stateVersionAfter": 37,
+        "stateHashAfter": "fnv1a:36b75170",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "gain_credit",
+          "label": "1 Credit nehmen",
+          "actionCostClicks": 1,
+          "turnActionOrdinalStart": 1,
+          "turnActionOrdinalEnd": 1,
+          "amount": 1,
+          "effectKind": "gain_credits",
+          "amounts": {
+            "amount": 1
+          },
+          "visibility": {
+            "class": "private_to_side"
+          }
+        }
+      },
+      {
+        "eventId": "evt_38",
+        "type": "gain_credit",
+        "stateVersionBefore": 37,
+        "stateVersionAfter": 38,
+        "stateHashAfter": "fnv1a:6694d08f",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "gain_credit",
+          "label": "1 Credit nehmen",
+          "actionCostClicks": 1,
+          "turnActionOrdinalStart": 2,
+          "turnActionOrdinalEnd": 2,
+          "amount": 1,
+          "effectKind": "gain_credits",
+          "amounts": {
+            "amount": 1
+          },
+          "visibility": {
+            "class": "private_to_side"
+          }
+        }
+      },
+      {
+        "eventId": "evt_39",
+        "type": "install_card",
+        "stateVersionBefore": 38,
+        "stateVersionAfter": 39,
+        "stateHashAfter": "fnv1a:05400d17",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "install_card",
+          "label": "Korp installiert eine Karte.",
+          "actionCostClicks": 1,
+          "turnActionOrdinalStart": 3,
+          "turnActionOrdinalEnd": 3,
+          "serverLabel": "Remote 1",
+          "installPlacement": "ice",
+          "zoneLabel": "ICE",
+          "iceInstallBaseCost": 1,
+          "iceInstallAdditionalCost": 0,
+          "iceInstallReduction": 0,
+          "iceInstallTotalCost": 1,
+          "redactedKind": "installed_card",
+          "effectKind": "install_card",
+          "targets": {
+            "serverLabel": "Remote 1",
+            "redactedKind": "installed_card"
+          },
+          "visibility": {
+            "class": "private_to_side",
+            "redactedKind": "installed_card"
+          }
+        }
+      },
+      {
+        "eventId": "evt_40",
+        "type": "end_turn",
+        "stateVersionBefore": 39,
+        "stateVersionAfter": 40,
+        "stateHashAfter": "fnv1a:868530bc",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "end_turn",
+          "label": "Zug beenden",
+          "resolvedEffects": [
+            {
+              "effectId": "runner.start.delayed_install.runner_onr_v1_176_the-shell-traders_1.runner_onr_classic_031_rent-i-con_2",
+              "kind": "counter_change",
+              "visibility": "public",
+              "side": "runner",
+              "amount": 0,
+              "reason": "start_of_turn",
+              "counterType": "shell",
+              "removedCounterAmount": 1,
+              "remainingCounters": 0,
+              "sourceDefinitionId": "onr_v1_176_the-shell-traders",
+              "sourceTitle": "The Shell Traders",
+              "cardDefinitionId": "onr_classic_031_rent-i-con",
+              "cardTitle": "Rent-I-Con"
+            }
+          ],
+          "visibility": {
+            "class": "private_to_side"
+          }
+        }
+      },
+      {
+        "eventId": "evt_41",
+        "type": "play_event",
+        "stateVersionBefore": 40,
+        "stateVersionAfter": 41,
+        "stateHashAfter": "fnv1a:38cfd90e",
+        "visibilityClass": "public",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "play_event",
+          "label": "Panzer Run spielen",
+          "actionCostClicks": 2,
+          "turnActionOrdinalStart": 1,
+          "turnActionOrdinalEnd": 2,
+          "resolvedEffects": [
+            {
+              "effectId": "onr_classic_042_panzer-run.effect.0.gain_credits",
+              "kind": "gain_credits",
+              "visibility": "public",
+              "side": "runner",
+              "amount": 4,
+              "reason": "card_resolver",
+              "sourceDefinitionId": "onr_classic_042_panzer-run",
+              "sourceTitle": "Panzer Run"
+            },
+            {
+              "effectId": "onr_classic_042_panzer-run.effect.1.draw_cards",
+              "kind": "draw_cards",
+              "visibility": "public",
+              "side": "runner",
+              "amount": 2,
+              "reason": "card_resolver",
+              "sourceDefinitionId": "onr_classic_042_panzer-run",
+              "sourceTitle": "Panzer Run"
+            }
+          ],
+          "gainedCredits": 4,
+          "runnerCreditsAfter": 7,
+          "normalCreditsSpent": 1,
+          "drawnCount": 2,
+          "runnerGripAfter": 4,
+          "amounts": {
+            "gainedCredits": 4,
+            "runnerCreditsAfter": 7
+          },
+          "visibility": {
+            "class": "public"
+          },
+          "cardDefinitionId": "onr_classic_042_panzer-run",
+          "title": "Panzer Run"
+        }
+      },
+      {
+        "eventId": "evt_42",
+        "type": "play_event",
+        "stateVersionBefore": 41,
+        "stateVersionAfter": 42,
+        "stateHashAfter": "fnv1a:3cf6c1f3",
+        "visibilityClass": "public",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "play_event",
+          "label": "Livewire's Contacts spielen",
+          "actionCostClicks": 1,
+          "turnActionOrdinalStart": 3,
+          "turnActionOrdinalEnd": 3,
+          "resolvedEffects": [
+            {
+              "effectId": "onr_v1_097_livewires-contacts.effect.0.gain_credits",
+              "kind": "gain_credits",
+              "visibility": "public",
+              "side": "runner",
+              "amount": 3,
+              "reason": "card_resolver",
+              "sourceDefinitionId": "onr_v1_097_livewires-contacts",
+              "sourceTitle": "Livewire's Contacts"
+            }
+          ],
+          "gainedCredits": 3,
+          "runnerCreditsAfter": 10,
+          "normalCreditsSpent": 0,
+          "amounts": {
+            "gainedCredits": 3,
+            "runnerCreditsAfter": 10
+          },
+          "visibility": {
+            "class": "public"
+          },
+          "cardDefinitionId": "onr_v1_097_livewires-contacts",
+          "title": "Livewire's Contacts"
+        }
+      },
+      {
+        "eventId": "evt_43",
+        "type": "install_card",
+        "stateVersionBefore": 42,
+        "stateVersionAfter": 43,
+        "stateHashAfter": "fnv1a:2ffec657",
+        "visibilityClass": "public",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "install_card",
+          "label": "R&D Interface installieren",
+          "actionCostClicks": 1,
+          "turnActionOrdinalStart": 4,
+          "turnActionOrdinalEnd": 4,
+          "zoneLabel": "Rig",
+          "installCostPaid": 4,
+          "runnerInstallNormalCreditsPaid": 4,
+          "runnerInstallHostedCreditsPaid": 0,
+          "runnerInstallRecurringCreditsPaid": 0,
+          "runnerInstallTemporaryCreditsPaid": 0,
+          "runnerCreditsAfter": 6,
+          "effectKind": "install_card",
+          "amounts": {
+            "runnerCreditsAfter": 6
+          },
+          "visibility": {
+            "class": "public"
+          },
+          "cardDefinitionId": "onr_v1_139_r-and-d-interface",
+          "title": "R&D Interface"
+        }
+      },
+      {
+        "eventId": "evt_44",
+        "type": "end_turn",
+        "stateVersionBefore": 43,
+        "stateVersionAfter": 44,
+        "stateHashAfter": "fnv1a:f99b7847",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "end_turn",
+          "label": "Zug beenden",
+          "visibility": {
+            "class": "private_to_side"
+          }
+        }
+      },
+      {
+        "eventId": "evt_45",
+        "type": "mandatory_draw",
+        "stateVersionBefore": 44,
+        "stateVersionAfter": 45,
+        "stateHashAfter": "fnv1a:f5c4942c",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "mandatory_draw",
+          "label": "Korp Pflichtkarte ziehen",
+          "visibility": {
+            "class": "private_to_side"
+          }
+        }
+      },
+      {
+        "eventId": "evt_46",
+        "type": "play_operation",
+        "stateVersionBefore": 45,
+        "stateVersionAfter": 46,
+        "stateHashAfter": "fnv1a:06e2a7c8",
+        "visibilityClass": "hidden_info_barrier",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "play_operation",
+          "label": "Accounts Receivable spielen",
+          "actionCostClicks": 1,
+          "turnActionOrdinalStart": 1,
+          "turnActionOrdinalEnd": 1,
+          "resolvedEffects": [
+            {
+              "effectId": "onr_v1_281_accounts-receivable.effect.0.gain_credits",
+              "kind": "gain_credits",
+              "visibility": "public",
+              "side": "corp",
+              "amount": 9,
+              "reason": "card_resolver",
+              "sourceDefinitionId": "onr_v1_281_accounts-receivable",
+              "sourceTitle": "Accounts Receivable"
+            }
+          ],
+          "gainedCredits": 9,
+          "corpCreditsAfter": 9,
+          "amounts": {
+            "gainedCredits": 9,
+            "corpCreditsAfter": 9
+          },
+          "visibility": {
+            "class": "hidden_info_barrier"
+          },
+          "cardDefinitionId": "onr_v1_281_accounts-receivable",
+          "title": "Accounts Receivable"
+        }
+      }
+    ]
+  },
+  "runtime": {
+    "schemaVersion": "ai-runtime-checkpoint-v1",
+    "tacticalPlan": {
+      "schemaVersion": "tactical-plan-v1",
+      "memoryId": "match_8107a9dffe8cd234:corp:corp-ai-v0.9-hard",
+      "side": "corp",
+      "planId": "corp.establish_scoring_remote:remote_1",
+      "type": "corp.establish_scoring_remote",
+      "status": "progressing",
+      "target": {
+        "kind": "server",
+        "id": "remote_1"
+      },
+      "selectedStepKind": "protect_remote",
+      "selectedActionId": "corp.install_card.corp_onr_v1_244_filter_1.remote_1.corp_onr_v1_244_filter_1.1",
+      "blockedBy": [
+        "missing_remote_protection"
+      ],
+      "ttlDecisionsRemaining": 2,
+      "planProgressionReason": "previous_plan_considered",
+      "progressBaseline": {
+        "ownCredits": 6,
+        "opponentCredits": 4,
+        "ownAgendaPoints": 2,
+        "opponentAgendaPoints": 0,
+        "opponentTags": 0,
+        "opponentCoreDamage": 0
+      },
+      "updatedAtStateVersion": 38
+    },
+    "planPortfolio": {
+      "schemaVersion": "plan-portfolio-v1",
+      "side": "corp",
+      "profileId": "corp-ai-v0.9-hard",
+      "stateVersion": 45,
+      "turnKey": "corp:turn:5",
+      "foreground": {
+        "portfolioEntryId": "corp.create_score_window:server:remote_1",
+        "sourcePlanId": "corp.create_score_window:corp.install_card.corp_onr_v1_195_corporate-retreat_1.remote_1.corp_onr_v1_195_corporate-retreat_1",
+        "planType": "corp.create_score_window",
+        "side": "corp",
+        "executionClass": "bounded_sequence",
+        "role": "foreground",
+        "lifecycle": "active",
+        "priority": 1049,
+        "target": {
+          "kind": "server",
+          "id": "remote_1"
+        },
+        "supportsEntryIds": [],
+        "milestone": "find_remote_protection",
+        "progress": 0.5,
+        "selectedStepKind": "find_remote_protection",
+        "actionCandidateIds": [
+          "corp.draw_card"
+        ],
+        "cadence": {
+          "turnKey": "corp:turn:5",
+          "maxActionsPerTurn": 4,
+          "actionsUsedThisTurn": 0
+        },
+        "resourceReservation": {
+          "credits": 0,
+          "clicks": 1
+        },
+        "updatedAtStateVersion": 45,
+        "evidence": [
+          "plan_portfolio_source_plan:corp.create_score_window:corp.install_card.corp_onr_v1_195_corporate-retreat_1.remote_1.corp_onr_v1_195_corporate-retreat_1",
+          "plan_portfolio_execution_class:bounded_sequence",
+          "plan_portfolio_role:foreground",
+          "plan_portfolio_lifecycle:active"
+        ]
+      },
+      "backgrounds": [
+        {
+          "portfolioEntryId": "corp.establish_scoring_remote:server:remote_1",
+          "sourcePlanId": "corp.establish_scoring_remote:remote_1",
+          "planType": "corp.establish_scoring_remote",
+          "side": "corp",
+          "executionClass": "development_project",
+          "role": "background",
+          "lifecycle": "active",
+          "priority": 750,
+          "target": {
+            "kind": "server",
+            "id": "remote_1"
+          },
+          "supportsEntryIds": [],
+          "milestone": "find_remote_protection",
+          "progress": 0.5,
+          "selectedStepKind": "find_remote_protection",
+          "actionCandidateIds": [
+            "corp.draw_card"
+          ],
+          "cadence": {
+            "turnKey": "corp:turn:5",
+            "maxActionsPerTurn": 1,
+            "actionsUsedThisTurn": 0,
+            "lastProgressTurnKey": "corp:turn:4"
+          },
+          "resourceReservation": {
+            "credits": 0,
+            "clicks": 0
+          },
+          "updatedAtStateVersion": 45,
+          "evidence": [
+            "plan_portfolio_source_plan:corp.establish_scoring_remote:remote_1",
+            "plan_portfolio_execution_class:development_project",
+            "plan_portfolio_role:background",
+            "plan_portfolio_lifecycle:active",
+            "plan_portfolio_previous_entry:corp.establish_scoring_remote:server:remote_1"
+          ]
+        },
+        {
+          "portfolioEntryId": "corp.establish_scoring_remote:server:new_remote",
+          "sourcePlanId": "corp.establish_scoring_remote:new_remote",
+          "planType": "corp.establish_scoring_remote",
+          "side": "corp",
+          "executionClass": "development_project",
+          "role": "background",
+          "lifecycle": "dormant",
+          "priority": 630,
+          "target": {
+            "kind": "server",
+            "id": "new_remote"
+          },
+          "supportsEntryIds": [],
+          "milestone": "build_remote",
+          "progress": 0.5,
+          "selectedStepKind": "build_remote",
+          "actionCandidateIds": [
+            "corp.install_card.corp_onr_v1_262_razor-wire_1.new_remote.corp_onr_v1_262_razor-wire_1"
+          ],
+          "cadence": {
+            "turnKey": "corp:turn:5",
+            "maxActionsPerTurn": 1,
+            "actionsUsedThisTurn": 0,
+            "lastProgressTurnKey": "corp:turn:1"
+          },
+          "resourceReservation": {
+            "credits": 0,
+            "clicks": 0
+          },
+          "updatedAtStateVersion": 15,
+          "evidence": [
+            "plan_portfolio_source_plan:corp.establish_scoring_remote:new_remote",
+            "plan_portfolio_execution_class:development_project",
+            "plan_portfolio_role:background",
+            "plan_portfolio_lifecycle:active",
+            "plan_portfolio_previous_entry:corp.establish_scoring_remote:server:new_remote",
+            "plan_portfolio_carried_without_current_action:true",
+            "plan_portfolio_carried_without_current_action:true",
+            "plan_portfolio_carried_without_current_action:true",
+            "plan_portfolio_carried_without_current_action:true",
+            "plan_portfolio_carried_without_current_action:true",
+            "plan_portfolio_carried_without_current_action:true",
+            "plan_portfolio_carried_without_current_action:true",
+            "plan_portfolio_carried_without_current_action:true",
+            "plan_portfolio_carried_without_current_action:true",
+            "plan_portfolio_carried_without_current_action:true",
+            "plan_portfolio_carried_without_current_action:true",
+            "plan_portfolio_carried_without_current_action:true"
+          ]
+        }
+      ],
+      "rejectedEntryIds": [],
+      "evidence": [
+        "plan_portfolio_source:tactical_plan_adapter",
+        "plan_portfolio_interrupt:none",
+        "plan_portfolio_foreground:corp.create_score_window",
+        "plan_portfolio_backgrounds:corp.establish_scoring_remote|corp.establish_scoring_remote",
+        "plan_portfolio_rejected:0",
+        "plan_portfolio_selected_action:corp.play_operation.corp_onr_v1_281_accounts-receivable_2.corp_onr_v1_281_accounts-receivable_2"
+      ]
+    },
+    "strategicIntent": {
+      "schemaVersion": "strategic-intent-memory-v1",
+      "memoryId": "match_8107a9dffe8cd234:corp:corp-ai-v0.9-hard:fnv1a:f9ad60d8:corp",
+      "side": "corp",
+      "deckSnapshotId": "fnv1a:f9ad60d8:corp",
+      "profileId": "corp-ai-v0.9-hard",
+      "primaryStrategyId": "corp.fast_advance",
+      "phase": "enable",
+      "transitionStatus": "continued",
+      "decisionsCommitted": 26,
+      "blockerIds": [],
+      "ttlDecisionsRemaining": 4,
+      "updatedAtStateVersion": 45,
+      "state": {
+        "schemaVersion": "strategic-intent-state-v1",
+        "side": "corp",
+        "stateVersion": 45,
+        "source": {
+          "deckStrategyProfile": "ai_internal_strategy_profile",
+          "deckCapabilities": "ai_internal",
+          "plannerEffect": "goal_and_plan_input",
+          "actionGeneration": "none",
+          "hiddenInfoPolicy": "player_view_only"
+        },
+        "primaryStrategy": {
+          "strategyId": "corp.fast_advance",
+          "family": "corp_fast_advance",
+          "confidence": "high",
+          "completeness": "complete",
+          "score": {
+            "anchor": 100,
+            "support": 100,
+            "final": 100
+          },
+          "supportGaps": [],
+          "evidence": [
+            "strategy:corp.fast_advance",
+            "confidence:high",
+            "anchor:100",
+            "support:100",
+            "final:100",
+            "anchor_evidence:10",
+            "support_evidence:24"
+          ]
+        },
+        "secondaryStrategies": [
+          {
+            "strategyId": "corp.ambush_bluff",
+            "family": "corp_ambush",
+            "confidence": "high",
+            "completeness": "complete",
+            "score": {
+              "anchor": 100,
+              "support": 100,
+              "final": 100
+            },
+            "supportGaps": [],
+            "evidence": [
+              "strategy:corp.ambush_bluff",
+              "confidence:high",
+              "anchor:100",
+              "support:100",
+              "final:100",
+              "anchor_evidence:4",
+              "support_evidence:23"
+            ]
+          },
+          {
+            "strategyId": "corp.overadvance_value",
+            "family": "unknown",
+            "confidence": "high",
+            "completeness": "complete",
+            "score": {
+              "anchor": 100,
+              "support": 100,
+              "final": 100
+            },
+            "supportGaps": [],
+            "evidence": [
+              "strategy:corp.overadvance_value",
+              "confidence:high",
+              "anchor:100",
+              "support:100",
+              "final:100",
+              "anchor_evidence:6",
+              "support_evidence:24"
+            ]
+          },
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "family": "corp_ice_tax",
+            "confidence": "high",
+            "completeness": "complete",
+            "score": {
+              "anchor": 100,
+              "support": 95,
+              "final": 97
+            },
+            "supportGaps": [],
+            "evidence": [
+              "strategy:corp.ice_tax_glacier",
+              "confidence:high",
+              "anchor:100",
+              "support:95",
+              "final:97",
+              "anchor_evidence:13",
+              "support_evidence:24"
+            ]
+          },
+          {
+            "strategyId": "corp.remote_scoring",
+            "family": "corp_scoreline",
+            "confidence": "high",
+            "completeness": "complete",
+            "score": {
+              "anchor": 92,
+              "support": 100,
+              "final": 95
+            },
+            "supportGaps": [],
+            "evidence": [
+              "strategy:corp.remote_scoring",
+              "confidence:high",
+              "anchor:92",
+              "support:100",
+              "final:95",
+              "anchor_evidence:3",
+              "support_evidence:24"
+            ]
+          },
+          {
+            "strategyId": "corp.damage_kill",
+            "family": "corp_damage_kill",
+            "confidence": "high",
+            "completeness": "partial",
+            "score": {
+              "anchor": 100,
+              "support": 80,
+              "final": 92
+            },
+            "supportGaps": [
+              "low_tagOrTrace_support"
+            ],
+            "evidence": [
+              "strategy:corp.damage_kill",
+              "confidence:high",
+              "anchor:100",
+              "support:80",
+              "final:92",
+              "anchor_evidence:4",
+              "support_evidence:20"
+            ]
+          },
+          {
+            "strategyId": "corp.asset_economy",
+            "family": "corp_asset_economy",
+            "confidence": "high",
+            "completeness": "partial",
+            "score": {
+              "anchor": 100,
+              "support": 78,
+              "final": 91
+            },
+            "supportGaps": [
+              "low_bait_support"
+            ],
+            "evidence": [
+              "strategy:corp.asset_economy",
+              "confidence:high",
+              "anchor:100",
+              "support:78",
+              "final:91",
+              "anchor_evidence:3",
+              "support_evidence:18"
+            ]
+          },
+          {
+            "strategyId": "corp.economy_rez_reserve",
+            "family": "corp_economy_reserve",
+            "confidence": "high",
+            "completeness": "complete",
+            "score": {
+              "anchor": 32,
+              "support": 100,
+              "final": 69
+            },
+            "supportGaps": [],
+            "evidence": [
+              "strategy:corp.economy_rez_reserve",
+              "confidence:high",
+              "anchor:32",
+              "support:100",
+              "final:69",
+              "anchor_evidence:1",
+              "support_evidence:24"
+            ]
+          }
+        ],
+        "phase": "enable",
+        "roleStatuses": [
+          {
+            "roleId": "corp.score_window",
+            "status": "in_deck_unseen",
+            "source": "player_view",
+            "evidence": [
+              "legal_score:false",
+              "legal_advance:false",
+              "remote_with_agenda:false"
+            ]
+          }
+        ],
+        "targetVector": {
+          "kind": "scoreline",
+          "evidence": [
+            "target_source:runtime_context",
+            "target_strategy:corp.fast_advance",
+            "legal_score:false",
+            "legal_advance:false",
+            "scoreline_feasible:true",
+            "scoreline_max_reachable_points:16"
+          ]
+        },
+        "reserve": {
+          "kind": "credits",
+          "required": 5,
+          "available": 5,
+          "satisfied": true,
+          "evidence": [
+            "reserve_source:runtime_context",
+            "reserve_family:corp_fast_advance",
+            "reserve_required:5",
+            "reserve_available:5",
+            "relevant_action_min_cost:none"
+          ]
+        },
+        "blockers": [],
+        "transition": {
+          "status": "continued",
+          "reason": "switch_margin_not_met",
+          "previousStrategyId": "corp.fast_advance",
+          "evidence": [
+            "continued:corp.fast_advance",
+            "held_candidate:corp.ice_tax_glacier",
+            "hold_reason:switch_margin_not_met"
+          ]
+        },
+        "commitment": {
+          "strategyId": "corp.fast_advance",
+          "decisionsCommitted": 26,
+          "switchMargin": 12,
+          "minCommitmentDecisions": 2,
+          "evidence": [
+            "commitment_status:continued",
+            "decisions_committed:26",
+            "switch_margin:12"
+          ]
+        },
+        "strategyPortfolio": {
+          "activeStrategyId": "corp.fast_advance",
+          "activeSelectionReason": "switch_margin_not_met",
+          "productiveCandidates": [
+            {
+              "strategyId": "corp.ice_tax_glacier",
+              "family": "corp_ice_tax",
+              "candidateRole": "secondary",
+              "runtimeStatus": "productive",
+              "runtimeBlockers": [],
+              "confidence": "high",
+              "score": {
+                "anchor": 100,
+                "support": 95,
+                "final": 97
+              },
+              "selectionScore": 117,
+              "roleStatuses": [
+                {
+                  "roleId": "corp.ice_defense",
+                  "status": "visible",
+                  "source": "capability",
+                  "evidence": [
+                    "legal_install_ice:false",
+                    "visible_ice:4",
+                    "ice_known:11"
+                  ]
+                }
+              ],
+              "targetVector": {
+                "kind": "coverage",
+                "evidence": [
+                  "target_source:runtime_context",
+                  "target_strategy:corp.ice_tax_glacier",
+                  "visible_ice:4"
+                ]
+              },
+              "reserve": {
+                "kind": "credits",
+                "required": 5,
+                "available": 5,
+                "satisfied": true,
+                "evidence": [
+                  "reserve_source:runtime_context",
+                  "reserve_family:corp_ice_tax",
+                  "reserve_required:5",
+                  "reserve_available:5",
+                  "relevant_action_min_cost:none"
+                ]
+              },
+              "evidence": [
+                "portfolio_candidate:runtime_context",
+                "strategy:corp.ice_tax_glacier",
+                "runtime_status:productive",
+                "final:97",
+                "anchor:100",
+                "selection_score:117",
+                "role_bonus:12",
+                "target_bonus:4",
+                "reserve_bonus:4",
+                "portfolio_candidate:intent_alternate"
+              ]
+            },
+            {
+              "strategyId": "corp.asset_economy",
+              "family": "corp_asset_economy",
+              "candidateRole": "secondary",
+              "runtimeStatus": "productive",
+              "runtimeBlockers": [],
+              "confidence": "high",
+              "score": {
+                "anchor": 100,
+                "support": 78,
+                "final": 91
+              },
+              "selectionScore": 113,
+              "roleStatuses": [
+                {
+                  "roleId": "corp.economy",
+                  "status": "active",
+                  "source": "capability",
+                  "evidence": [
+                    "legal_gain_credit:true",
+                    "bank_tools:1",
+                    "rez_economy_tools:6"
+                  ]
+                }
+              ],
+              "targetVector": {
+                "kind": "economy",
+                "evidence": [
+                  "target_source:runtime_context",
+                  "target_strategy:corp.asset_economy"
+                ]
+              },
+              "reserve": {
+                "kind": "none",
+                "required": 0,
+                "satisfied": true,
+                "evidence": [
+                  "reserve_source:runtime_context",
+                  "reserve:none"
+                ]
+              },
+              "evidence": [
+                "portfolio_candidate:runtime_context",
+                "strategy:corp.asset_economy",
+                "runtime_status:productive",
+                "final:91",
+                "anchor:100",
+                "selection_score:113",
+                "role_bonus:18",
+                "target_bonus:4",
+                "reserve_bonus:0",
+                "portfolio_candidate:intent_alternate"
+              ]
+            },
+            {
+              "strategyId": "corp.fast_advance",
+              "family": "corp_fast_advance",
+              "candidateRole": "primary",
+              "runtimeStatus": "productive",
+              "runtimeBlockers": [],
+              "confidence": "high",
+              "score": {
+                "anchor": 100,
+                "support": 100,
+                "final": 100
+              },
+              "selectionScore": 108,
+              "roleStatuses": [
+                {
+                  "roleId": "corp.score_window",
+                  "status": "in_deck_unseen",
+                  "source": "player_view",
+                  "evidence": [
+                    "legal_score:false",
+                    "legal_advance:false",
+                    "remote_with_agenda:false"
+                  ]
+                }
+              ],
+              "targetVector": {
+                "kind": "scoreline",
+                "evidence": [
+                  "target_source:runtime_context",
+                  "target_strategy:corp.fast_advance",
+                  "legal_score:false",
+                  "legal_advance:false",
+                  "scoreline_feasible:true",
+                  "scoreline_max_reachable_points:16"
+                ]
+              },
+              "reserve": {
+                "kind": "credits",
+                "required": 5,
+                "available": 5,
+                "satisfied": true,
+                "evidence": [
+                  "reserve_source:runtime_context",
+                  "reserve_family:corp_fast_advance",
+                  "reserve_required:5",
+                  "reserve_available:5",
+                  "relevant_action_min_cost:none"
+                ]
+              },
+              "evidence": [
+                "portfolio_candidate:runtime_context",
+                "strategy:corp.fast_advance",
+                "runtime_status:productive",
+                "final:100",
+                "anchor:100",
+                "selection_score:108",
+                "role_bonus:2",
+                "target_bonus:0",
+                "reserve_bonus:4",
+                "scoreline_feasible:true",
+                "scoreline_total_agenda_points:16",
+                "scoreline_max_reachable_points:16",
+                "portfolio_candidate:intent_active"
+              ]
+            },
+            {
+              "strategyId": "corp.ambush_bluff",
+              "family": "corp_ambush",
+              "candidateRole": "primary",
+              "runtimeStatus": "productive",
+              "runtimeBlockers": [],
+              "confidence": "high",
+              "score": {
+                "anchor": 100,
+                "support": 100,
+                "final": 100
+              },
+              "selectionScore": 104,
+              "roleStatuses": [
+                {
+                  "roleId": "corp.punish_window",
+                  "status": "in_deck_unseen",
+                  "source": "player_view",
+                  "evidence": [
+                    "runner_tags:0",
+                    "legal_punish_payoff:false",
+                    "legal_tag_source:false",
+                    "blocked_payoff_missing_tag:false"
+                  ]
+                }
+              ],
+              "targetVector": {
+                "kind": "none",
+                "evidence": [
+                  "target_source:runtime_context",
+                  "target_strategy:corp.ambush_bluff",
+                  "target_reason:no_visible_semantic_damage_closeout"
+                ]
+              },
+              "reserve": {
+                "kind": "none",
+                "required": 0,
+                "satisfied": true,
+                "evidence": [
+                  "reserve_source:runtime_context",
+                  "reserve:none"
+                ]
+              },
+              "evidence": [
+                "portfolio_candidate:runtime_context",
+                "strategy:corp.ambush_bluff",
+                "runtime_status:productive",
+                "final:100",
+                "anchor:100",
+                "selection_score:104",
+                "role_bonus:2",
+                "target_bonus:0",
+                "reserve_bonus:0",
+                "portfolio_candidate:intent_alternate"
+              ]
+            },
+            {
+              "strategyId": "corp.overadvance_value",
+              "family": "unknown",
+              "candidateRole": "primary",
+              "runtimeStatus": "productive",
+              "runtimeBlockers": [],
+              "confidence": "high",
+              "score": {
+                "anchor": 100,
+                "support": 100,
+                "final": 100
+              },
+              "selectionScore": 102,
+              "roleStatuses": [],
+              "targetVector": {
+                "kind": "none",
+                "evidence": [
+                  "target_source:runtime_context",
+                  "target_unknown:corp.overadvance_value"
+                ]
+              },
+              "reserve": {
+                "kind": "none",
+                "required": 0,
+                "satisfied": true,
+                "evidence": [
+                  "reserve_source:runtime_context",
+                  "reserve:none"
+                ]
+              },
+              "evidence": [
+                "portfolio_candidate:runtime_context",
+                "strategy:corp.overadvance_value",
+                "runtime_status:productive",
+                "final:100",
+                "anchor:100",
+                "selection_score:102",
+                "role_bonus:0",
+                "target_bonus:0",
+                "reserve_bonus:0",
+                "portfolio_candidate:intent_alternate"
+              ]
+            },
+            {
+              "strategyId": "corp.remote_scoring",
+              "family": "corp_scoreline",
+              "candidateRole": "secondary",
+              "runtimeStatus": "productive",
+              "runtimeBlockers": [],
+              "confidence": "high",
+              "score": {
+                "anchor": 92,
+                "support": 100,
+                "final": 95
+              },
+              "selectionScore": 101,
+              "roleStatuses": [
+                {
+                  "roleId": "corp.score_window",
+                  "status": "in_deck_unseen",
+                  "source": "player_view",
+                  "evidence": [
+                    "legal_score:false",
+                    "legal_advance:false",
+                    "remote_with_agenda:false"
+                  ]
+                }
+              ],
+              "targetVector": {
+                "kind": "scoreline",
+                "evidence": [
+                  "target_source:runtime_context",
+                  "target_strategy:corp.remote_scoring",
+                  "legal_score:false",
+                  "legal_advance:false",
+                  "scoreline_feasible:true",
+                  "scoreline_max_reachable_points:16"
+                ]
+              },
+              "reserve": {
+                "kind": "credits",
+                "required": 5,
+                "available": 5,
+                "satisfied": true,
+                "evidence": [
+                  "reserve_source:runtime_context",
+                  "reserve_family:corp_scoreline",
+                  "reserve_required:5",
+                  "reserve_available:5",
+                  "relevant_action_min_cost:none"
+                ]
+              },
+              "evidence": [
+                "portfolio_candidate:runtime_context",
+                "strategy:corp.remote_scoring",
+                "runtime_status:productive",
+                "final:95",
+                "anchor:92",
+                "selection_score:101",
+                "role_bonus:2",
+                "target_bonus:0",
+                "reserve_bonus:4",
+                "scoreline_feasible:true",
+                "scoreline_total_agenda_points:16",
+                "scoreline_max_reachable_points:16",
+                "portfolio_candidate:intent_alternate"
+              ]
+            },
+            {
+              "strategyId": "corp.economy_rez_reserve",
+              "family": "corp_economy_reserve",
+              "candidateRole": "secondary",
+              "runtimeStatus": "productive",
+              "runtimeBlockers": [],
+              "confidence": "high",
+              "score": {
+                "anchor": 32,
+                "support": 100,
+                "final": 69
+              },
+              "selectionScore": 91,
+              "roleStatuses": [
+                {
+                  "roleId": "corp.economy",
+                  "status": "active",
+                  "source": "capability",
+                  "evidence": [
+                    "legal_gain_credit:true",
+                    "bank_tools:1",
+                    "rez_economy_tools:6"
+                  ]
+                }
+              ],
+              "targetVector": {
+                "kind": "economy",
+                "evidence": [
+                  "target_source:runtime_context",
+                  "target_strategy:corp.economy_rez_reserve"
+                ]
+              },
+              "reserve": {
+                "kind": "none",
+                "required": 0,
+                "satisfied": true,
+                "evidence": [
+                  "reserve_source:runtime_context",
+                  "reserve:none"
+                ]
+              },
+              "evidence": [
+                "portfolio_candidate:runtime_context",
+                "strategy:corp.economy_rez_reserve",
+                "runtime_status:productive",
+                "final:69",
+                "anchor:32",
+                "selection_score:91",
+                "role_bonus:18",
+                "target_bonus:4",
+                "reserve_bonus:0",
+                "portfolio_candidate:intent_alternate"
+              ]
+            },
+            {
+              "strategyId": "corp.damage_kill",
+              "family": "corp_damage_kill",
+              "candidateRole": "secondary",
+              "runtimeStatus": "productive",
+              "runtimeBlockers": [],
+              "confidence": "high",
+              "score": {
+                "anchor": 100,
+                "support": 80,
+                "final": 92
+              },
+              "selectionScore": 84,
+              "roleStatuses": [
+                {
+                  "roleId": "corp.punish_window",
+                  "status": "in_deck_unseen",
+                  "source": "player_view",
+                  "evidence": [
+                    "runner_tags:0",
+                    "legal_punish_payoff:false",
+                    "legal_tag_source:false",
+                    "blocked_payoff_missing_tag:false"
+                  ]
+                }
+              ],
+              "targetVector": {
+                "kind": "none",
+                "evidence": [
+                  "target_source:runtime_context",
+                  "target_strategy:corp.damage_kill",
+                  "target_reason:no_visible_semantic_damage_closeout"
+                ]
+              },
+              "reserve": {
+                "kind": "credits",
+                "required": 6,
+                "available": 5,
+                "satisfied": false,
+                "evidence": [
+                  "reserve_source:runtime_context",
+                  "reserve_family:corp_damage_kill",
+                  "reserve_required:6",
+                  "reserve_available:5",
+                  "relevant_action_min_cost:none"
+                ]
+              },
+              "evidence": [
+                "portfolio_candidate:runtime_context",
+                "strategy:corp.damage_kill",
+                "runtime_status:productive",
+                "final:92",
+                "anchor:100",
+                "selection_score:84",
+                "role_bonus:2",
+                "target_bonus:0",
+                "reserve_bonus:-10",
+                "portfolio_candidate:intent_alternate"
+              ]
+            }
+          ],
+          "blockedCandidates": [
+            {
+              "strategyId": "corp.central_stabilize",
+              "family": "corp_central_defense",
+              "candidateRole": "blocked",
+              "runtimeStatus": "supporting",
+              "runtimeBlockers": [
+                "supporting_only:corp.central_stabilize"
+              ],
+              "confidence": "medium",
+              "score": {
+                "anchor": 0,
+                "support": 95,
+                "final": 52
+              },
+              "selectionScore": 68,
+              "roleStatuses": [
+                {
+                  "roleId": "corp.ice_defense",
+                  "status": "visible",
+                  "source": "capability",
+                  "evidence": [
+                    "legal_install_ice:false",
+                    "visible_ice:4",
+                    "ice_known:11"
+                  ]
+                }
+              ],
+              "targetVector": {
+                "kind": "coverage",
+                "evidence": [
+                  "target_source:runtime_context",
+                  "target_strategy:corp.central_stabilize",
+                  "visible_ice:4"
+                ]
+              },
+              "reserve": {
+                "kind": "none",
+                "required": 0,
+                "satisfied": true,
+                "evidence": [
+                  "reserve_source:runtime_context",
+                  "reserve:none"
+                ]
+              },
+              "evidence": [
+                "portfolio_candidate:runtime_context",
+                "strategy:corp.central_stabilize",
+                "runtime_status:supporting",
+                "final:52",
+                "anchor:0",
+                "selection_score:68",
+                "role_bonus:12",
+                "target_bonus:4",
+                "reserve_bonus:0"
+              ]
+            },
+            {
+              "strategyId": "corp.rush_score",
+              "family": "corp_scoreline",
+              "candidateRole": "blocked",
+              "runtimeStatus": "blocked",
+              "runtimeBlockers": [
+                "below_productive_score_threshold",
+                "hard_support_gap:insufficient_etr_ice"
+              ],
+              "confidence": "medium",
+              "score": {
+                "anchor": 0,
+                "support": 65,
+                "final": 42
+              },
+              "selectionScore": 48,
+              "roleStatuses": [
+                {
+                  "roleId": "corp.score_window",
+                  "status": "in_deck_unseen",
+                  "source": "player_view",
+                  "evidence": [
+                    "legal_score:false",
+                    "legal_advance:false",
+                    "remote_with_agenda:false"
+                  ]
+                }
+              ],
+              "targetVector": {
+                "kind": "scoreline",
+                "evidence": [
+                  "target_source:runtime_context",
+                  "target_strategy:corp.rush_score",
+                  "legal_score:false",
+                  "legal_advance:false",
+                  "scoreline_feasible:true",
+                  "scoreline_max_reachable_points:16"
+                ]
+              },
+              "reserve": {
+                "kind": "credits",
+                "required": 5,
+                "available": 5,
+                "satisfied": true,
+                "evidence": [
+                  "reserve_source:runtime_context",
+                  "reserve_family:corp_scoreline",
+                  "reserve_required:5",
+                  "reserve_available:5",
+                  "relevant_action_min_cost:none"
+                ]
+              },
+              "evidence": [
+                "portfolio_candidate:runtime_context",
+                "strategy:corp.rush_score",
+                "runtime_status:blocked",
+                "final:42",
+                "anchor:0",
+                "selection_score:48",
+                "role_bonus:2",
+                "target_bonus:0",
+                "reserve_bonus:4",
+                "scoreline_feasible:true",
+                "scoreline_total_agenda_points:16",
+                "scoreline_max_reachable_points:16"
+              ]
+            },
+            {
+              "strategyId": "corp.tag_trace_punish",
+              "family": "corp_tag_trace_punish",
+              "candidateRole": "blocked",
+              "runtimeStatus": "diagnostic_only",
+              "runtimeBlockers": [
+                "below_productive_score_threshold",
+                "hard_support_gap:low_tag_sources",
+                "missing_strategy_anchor",
+                "tag_punish_source_payoff_pair_incomplete"
+              ],
+              "confidence": "low",
+              "score": {
+                "anchor": 0,
+                "support": 55,
+                "final": 22
+              },
+              "selectionScore": 14,
+              "roleStatuses": [
+                {
+                  "roleId": "corp.punish_window",
+                  "status": "in_deck_unseen",
+                  "source": "player_view",
+                  "evidence": [
+                    "runner_tags:0",
+                    "legal_punish_payoff:false",
+                    "legal_tag_source:false",
+                    "blocked_payoff_missing_tag:false"
+                  ]
+                }
+              ],
+              "targetVector": {
+                "kind": "none",
+                "evidence": [
+                  "target_source:runtime_context",
+                  "target_strategy:corp.tag_trace_punish",
+                  "target_reason:no_visible_semantic_punish_basis"
+                ]
+              },
+              "reserve": {
+                "kind": "credits",
+                "required": 6,
+                "available": 5,
+                "satisfied": false,
+                "evidence": [
+                  "reserve_source:runtime_context",
+                  "reserve_family:corp_tag_trace_punish",
+                  "reserve_required:6",
+                  "reserve_available:5",
+                  "relevant_action_min_cost:none"
+                ]
+              },
+              "evidence": [
+                "portfolio_candidate:runtime_context",
+                "strategy:corp.tag_trace_punish",
+                "runtime_status:diagnostic_only",
+                "final:22",
+                "anchor:0",
+                "selection_score:14",
+                "role_bonus:2",
+                "target_bonus:0",
+                "reserve_bonus:-10"
+              ]
+            },
+            {
+              "strategyId": "corp.draw_engine",
+              "family": "unknown",
+              "candidateRole": "blocked",
+              "runtimeStatus": "diagnostic_only",
+              "runtimeBlockers": [
+                "below_productive_score_threshold",
+                "missing_strategy_anchor"
+              ],
+              "confidence": "low",
+              "score": {
+                "anchor": 0,
+                "support": 45,
+                "final": 18
+              },
+              "selectionScore": 18,
+              "roleStatuses": [],
+              "targetVector": {
+                "kind": "none",
+                "evidence": [
+                  "target_source:runtime_context",
+                  "target_unknown:corp.draw_engine"
+                ]
+              },
+              "reserve": {
+                "kind": "none",
+                "required": 0,
+                "satisfied": true,
+                "evidence": [
+                  "reserve_source:runtime_context",
+                  "reserve:none"
+                ]
+              },
+              "evidence": [
+                "portfolio_candidate:runtime_context",
+                "strategy:corp.draw_engine",
+                "runtime_status:diagnostic_only",
+                "final:18",
+                "anchor:0",
+                "selection_score:18",
+                "role_bonus:0",
+                "target_bonus:0",
+                "reserve_bonus:0"
+              ]
+            },
+            {
+              "strategyId": "corp.deck_recycle_engine",
+              "family": "unknown",
+              "candidateRole": "blocked",
+              "runtimeStatus": "diagnostic_only",
+              "runtimeBlockers": [
+                "below_productive_score_threshold",
+                "missing_strategy_anchor"
+              ],
+              "confidence": "low",
+              "score": {
+                "anchor": 0,
+                "support": 35,
+                "final": 14
+              },
+              "selectionScore": 14,
+              "roleStatuses": [],
+              "targetVector": {
+                "kind": "none",
+                "evidence": [
+                  "target_source:runtime_context",
+                  "target_unknown:corp.deck_recycle_engine"
+                ]
+              },
+              "reserve": {
+                "kind": "none",
+                "required": 0,
+                "satisfied": true,
+                "evidence": [
+                  "reserve_source:runtime_context",
+                  "reserve:none"
+                ]
+              },
+              "evidence": [
+                "portfolio_candidate:runtime_context",
+                "strategy:corp.deck_recycle_engine",
+                "runtime_status:diagnostic_only",
+                "final:14",
+                "anchor:0",
+                "selection_score:14",
+                "role_bonus:0",
+                "target_bonus:0",
+                "reserve_bonus:0"
+              ]
+            }
+          ],
+          "evidence": [
+            "strategy_portfolio:runtime_context",
+            "strategy_portfolio_productive_count:8",
+            "strategy_portfolio_blocked_count:5",
+            "strategy_portfolio_active:corp.ice_tax_glacier",
+            "portfolio_active:corp.fast_advance",
+            "portfolio_transition:switch_margin_not_met"
+          ]
+        },
+        "evidence": [
+          "strategic_intent_state:player_view_only",
+          "side:corp",
+          "primary_strategy:corp.fast_advance",
+          "phase:enable",
+          "blocker_count:0",
+          "secondary_strategy_count:7",
+          "strategy_portfolio_candidate_count:8"
+        ]
+      },
+      "evidence": [
+        "strategic_intent_memory:player_view_only",
+        "strategic_intent_state_schema:strategic-intent-state-v1",
+        "memory_key:match_8107a9dffe8cd234:corp:corp-ai-v0.9-hard:fnv1a:f9ad60d8:corp",
+        "deck_snapshot:fnv1a:f9ad60d8:corp",
+        "primary_strategy:corp.fast_advance",
+        "phase:enable",
+        "transition:continued",
+        "decisions_committed:26"
+      ]
+    }
+  },
+  "expectation": {
+    "acceptableActions": [
+      {
+        "actionId": "corp.install_card.corp_onr_v1_214_project-babylon_1.remote_1.corp_onr_v1_214_project-babylon_1"
+      }
+    ],
+    "forbiddenActions": [
+      {
+        "actionId": "corp.install_card.corp_onr_v1_195_corporate-retreat_1.remote_1.corp_onr_v1_195_corporate-retreat_1"
+      }
+    ]
+  }
+}

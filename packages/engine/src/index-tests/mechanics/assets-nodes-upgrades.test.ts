@@ -825,7 +825,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
-  it("publishes BBS Whispering Campaign as generic card rez and replays it exactly", () => {
+  it("uses a generic rez_card LegalAction for BBS Whispering Campaign and replays it exactly", () => {
     let state = MECHANIC_SMOKE_GAMES.assetNodeEffects(
       "v1917-bbs-generic-card-rez-event",
     );
@@ -849,12 +849,17 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     );
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
+    const bbsRezAction = getLegalActions(state, "corp").find(
+      (action) => action.payload?.cardId === bbsId,
+    );
+
+    expect(bbsRezAction?.type).toBe("rez_card");
 
     state = apply(
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" && action.payload?.cardId === bbsId,
+        action.type === "rez_card" && action.payload?.cardId === bbsId,
     );
 
     expect(state.eventLog.at(-1)).toMatchObject({
