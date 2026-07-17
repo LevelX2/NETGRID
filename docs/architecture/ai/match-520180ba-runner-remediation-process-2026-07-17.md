@@ -93,6 +93,21 @@ historische Kandidaten werden als solche dokumentiert und nicht gefixt.
 Done-Gate: Unveränderte rote Zieltests werden grün, alle engen Gegenproben
 bleiben grün, und neue Unit-Tests decken jede generische Grenze ab.
 
+### P2-Ergebnis
+
+- Die Engine legt für jede Do-the-Drine-LegalAction nun gewählte
+  Damage-Menge, Damage-Typ und Nichtverhinderbarkeit offen in der
+  actor-privaten Action ab.
+- Der AI-Input-DTO übernimmt ausschließlich diese vier side-sicheren
+  Kostenfelder (`xValue`, `damageCannotBePrevented`, `damageType`,
+  `damageAmount`); unbekannte Payload-Felder bleiben gesperrt.
+- Die Runtime schließt unvermeidbaren Selbstschaden aus, wenn genau eine
+  sichtbare Handkarte eine aktuell blockierende Breaker-Coverage liefert und
+  die Damage-Menge mindestens die Hälfte der verbleibenden Hand treffen kann.
+  Ein unmittelbarer Sieg bleibt ausgenommen.
+- Zielcheckpoint D98 ist grün; die D118-Gegenprobe für den ersten
+  HQ-Informationsrun bleibt grün.
+
 ### P3 — Verifikation, Wissenspflege und Integration
 
 - Fokussierte Tests, angrenzende Decision-Checkpoints, Typecheck,

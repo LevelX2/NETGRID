@@ -1,4 +1,8 @@
-import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import { bestSemanticRuntimeChoice } from "./semantic-choice-ranking";
 import { semanticRuntimeChoiceWithEvidence } from "./semantic-runtime-score-components";
@@ -18,6 +22,8 @@ export type RunnerSelfDamageSurvivalAssessment = {
   effectiveSelfDamage: number;
   survivesSelfDamage: boolean;
   immediateWinByAction: boolean;
+  visibleCoverageCardsAtRisk: number;
+  coverageLossRisk: boolean;
   badPublicityBefore?: number;
   badPublicityAdded?: number;
   evidence: string[];
@@ -39,6 +45,10 @@ export type RunnerSelfDamageSurvivalAssessmentDependencies = {
   hintEffectsForCard: (definitionId: string) => readonly unknown[] | undefined;
   fakedHitCardId: string;
   badPublicityLossThreshold: number;
+  cardAddressesVisibleBreakerNeed: (
+    input: AiDecisionInput,
+    card: VisibleCard,
+  ) => boolean;
 };
 
 export type RunnerSelfDamageChoiceDependencies = {
@@ -81,16 +91,29 @@ export function runnerSelfDamageSurvivalAssessment(
   const effectiveSelfDamage = selfDamage.amount;
   const survivesSelfDamage = handAfterActionCost >= effectiveSelfDamage;
   const selfDamageUnpreventable = selfDamage.preventable === false;
+  const visibleCoverageCardsAtRisk = visibleCoverageCardsAtRiskForAction(
+    input,
+    action,
+    dependencies,
+  );
+  const coverageLossRisk =
+    selfDamageUnpreventable &&
+    survivesSelfDamage &&
+    !immediateWinByAction &&
+    visibleCoverageCardsAtRisk === 1 &&
+    effectiveSelfDamage * 2 >= handAfterActionCost;
   const selfDamageDispositionEvidence =
     !survivesSelfDamage && !immediateWinByAction
       ? ["why_self_damage_action_blocked:self_damage_flatline_risk"]
-      : [
-          `why_self_damage_action_allowed:${
-            immediateWinByAction
-              ? "lethal_but_winning_closeout"
-              : "survives_self_damage"
-          }`,
-        ];
+      : coverageLossRisk
+        ? ["why_self_damage_action_blocked:self_damage_coverage_loss_risk"]
+        : [
+            `why_self_damage_action_allowed:${
+              immediateWinByAction
+                ? "lethal_but_winning_closeout"
+                : "survives_self_damage"
+            }`,
+          ];
   const evidence = [
     "self_damage_survival_assessed:true",
     `self_damage_source:${sourceDefinitionId}`,
@@ -103,6 +126,8 @@ export function runnerSelfDamageSurvivalAssessment(
     `self_damage_effective:${effectiveSelfDamage}`,
     `self_damage_survives:${survivesSelfDamage}`,
     `self_damage_immediate_win:${immediateWinByAction}`,
+    `self_damage_visible_coverage_cards_at_risk:${visibleCoverageCardsAtRisk}`,
+    `self_damage_coverage_loss_risk:${coverageLossRisk}`,
     ...selfDamageDispositionEvidence,
     ...(badPublicityAdded > 0
       ? [
@@ -125,6 +150,8 @@ export function runnerSelfDamageSurvivalAssessment(
     effectiveSelfDamage,
     survivesSelfDamage,
     immediateWinByAction,
+    visibleCoverageCardsAtRisk,
+    coverageLossRisk,
     ...(badPublicityAdded > 0 ? { badPublicityBefore, badPublicityAdded } : {}),
     evidence,
   };
@@ -159,12 +186,18 @@ export function runnerSelfDamageSurvivalExclusion(
 ): SemanticRuntimeExclusion | undefined {
   const assessment = dependencies.survivalAssessment(input, action);
   if (!assessment) return undefined;
-  if (assessment.survivesSelfDamage || assessment.immediateWinByAction) {
-    return undefined;
+  if (assessment.immediateWinByAction) return undefined;
+  if (!assessment.survivesSelfDamage) {
+    return {
+      key: "self_damage_flatline_risk",
+      label: "Self-Damage-Flatline-Risiko",
+      reason: sortedUnique(assessment.evidence).join("|"),
+    };
   }
+  if (!assessment.coverageLossRisk) return undefined;
   return {
-    key: "self_damage_flatline_risk",
-    label: "Self-Damage-Flatline-Risiko",
+    key: "self_damage_coverage_loss_risk",
+    label: "Self-Damage gefährdet notwendige Breaker-Coverage",
     reason: sortedUnique(assessment.evidence).join("|"),
   };
 }
@@ -268,6 +301,20 @@ function actionConsumesOwnRunnerHandCard(
   );
 }
 
+function visibleCoverageCardsAtRiskForAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+  dependencies: RunnerSelfDamageSurvivalAssessmentDependencies,
+): number {
+  const sourceIsConsumed = actionConsumesOwnRunnerHandCard(input, action);
+  return input.playerView.own.gripOrHq.filter(
+    (card) =>
+      card.known &&
+      (!sourceIsConsumed || card.instanceId !== action.source) &&
+      dependencies.cardAddressesVisibleBreakerNeed(input, card),
+  ).length;
+}
+
 function visibleCorpBadPublicity(input: AiDecisionInput): number {
   const identity =
     input.side === "runner"
@@ -312,7 +359,10 @@ function booleanRecordValue(value: unknown, key: string): boolean | undefined {
 function preventablePayload(
   action: LegalAction,
 ): RunnerSelfDamageSurvivalAssessment["preventable"] {
-  if (booleanActionPayload(action, "unpreventableDamage") === true) {
+  if (
+    booleanActionPayload(action, "unpreventableDamage") === true ||
+    booleanActionPayload(action, "damageCannotBePrevented") === true
+  ) {
     return false;
   }
   if (booleanActionPayload(action, "preventableDamage") === true) return true;
