@@ -507,6 +507,7 @@ describe("access flow execution", () => {
       publicRevealDefinitionIds: "asset_def,ice_def",
       publicRevealTitles: "asset_def||ice_def",
       exposedServerLabels: "remote_1 root,remote_1 ICE 1",
+      exposedCardInstanceIds: "asset,ice",
     });
     expect(state.pendingChoice).toMatchObject({
       side: "runner",
@@ -520,7 +521,9 @@ describe("access flow execution", () => {
     expect(state.pendingChoice?.source).toContain(
       "p3_36.expose_installed_cards_review:asset|ice:schematics:onr_classic_032_schematics-search-engine:",
     );
-    expect(JSON.stringify(legalAction.payload)).not.toContain("CardInstance");
+    expect(JSON.stringify(legalAction.payload)).not.toMatch(
+      /"cardInstances"|"privatePayload"|"hq"\s*:/,
+    );
   });
 
   it("steals an accessed agenda after revalidating the current steal cost", () => {

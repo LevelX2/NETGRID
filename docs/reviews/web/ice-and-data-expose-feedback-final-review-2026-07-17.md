@@ -12,8 +12,8 @@ eindeutig sichtbar:
   etwa `Simple Barrier ICE (Remote 1 ICE 1)`.
 - Das Board markiert ausschließlich die öffentlich exposed und im PlayerView
   sichtbaren Karten mit einem farbigen Rahmen.
-- Die Markierung endet lokal nach zehn Sekunden oder unmittelbar beim nächsten
-  `turnSerial`.
+- Die Markierung bleibt lokal mindestens zehn Sekunden sichtbar; Run-Ende und
+  der nächste `turnSerial` verkürzen diese Mindestdauer nicht.
 - Die lokale Option `Exposed-Karten hervorheben` ist standardmäßig aktiv und
   persistiert im vorhandenen Gameplay-Settings-Speicher.
 
@@ -45,6 +45,18 @@ keinen Replay-Log und keinen StateHash.
 
 ## Restpunkte
 
-Keine. Das Verhalten ist auf die lokale Darstellung begrenzt und kann bei
-einem späteren allgemeinen Expose-Feedback bewusst als eigener Vertrag
-verallgemeinert werden.
+Keine.
+
+## Nachkorrektur: Schematics Search Engine
+
+Der bestehende lokale Board-Cue gilt nun auch für `Schematics Search Engine`:
+Beim HQ-Access enthält der öffentliche Expose-Event die Instanz-IDs aller in
+diesem Event ohnehin öffentlich exposed installierten Korp-Karten. Die UI
+markiert diese Karten ohne Einzelauswahl mit demselben grünen Rahmen für
+mindestens zehn Sekunden, auch über Run- und Turnwechsel hinweg. Full
+GameState, HQ-Inhalt und private Payloads bleiben ausgeschlossen.
+
+Verifiziert mit den fokussierten Engine-Tests für Access-Flow und öffentlichen
+Eventkontext (16 Tests), den Action-Board-UI-Tests (112 Tests), den Typechecks
+von Engine und Web sowie dem projektweiten Package-Boundary-Check (1.788
+Dateien).

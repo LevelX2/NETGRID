@@ -913,9 +913,9 @@ function GameplaySettings({
         zeigt mögliche Nicht-Run-Aktionen lokal verschiebbar an. Das
         KI-Bewertungsfenster zeigt lokale, redigierte KI-Trace-Daten für
         laufende KI-Matches. Exposed-Karten hervorheben markiert öffentlich
-        exposed Karten zehn Sekunden lang oder bis zum Zugende. Der
-        Spielstandsstreifen zeigt Credits, Agenda-Punkte und aktuelle Aktionen
-        platzsparend über dem Spielfeld.
+        exposed Karten mindestens zehn Sekunden lang, auch über Run- und Zugende
+        hinweg. Der Spielstandsstreifen zeigt Credits, Agenda-Punkte und
+        aktuelle Aktionen platzsparend über dem Spielfeld.
       </p>
     </div>
   );
