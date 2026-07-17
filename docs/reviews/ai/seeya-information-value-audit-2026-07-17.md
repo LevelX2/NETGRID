@@ -185,6 +185,27 @@ Unterhalb des gegnerischen Matchpoints entsteht kein pauschaler terminaler
 Bonus. Wenn keine neue exakte Position verbleibt, ist die Aktivierung stark
 negativ.
 
+### 2a. Bestätigte Damage-Strategie
+
+Unterhalb des Matchpoints darf SeeYa einen kleineren proaktiven
+Informationsbonus erhalten, wenn das side-sichere Schadensmodell die Gefahr
+als `confirmed` oder `critical` einstuft. Dafür müssen zusätzlich gelten:
+
+1. Die Einstufung beruht auf sichtbaren Korp-Karten, öffentlichen
+   Damage-Ereignissen oder einer sichtbaren Tag-/Trace-/Damage-Kombination;
+   unbekannte Deckkarten werden nicht unterstellt.
+2. Mindestens ein noch nicht exakt exponierter Remote-Root oder ein
+   unbekanntes Remote-ICE existiert. Ein unbekanntes zentrales ICE allein
+   reicht nicht.
+3. Der Runner besitzt mindestens den vom Schadensmodell empfohlenen
+   Handpuffer. Bei akut zu kleiner Hand haben Draw und Überleben Vorrang.
+4. Für eine Installation bleibt der vollständige Vertrag aus Installation,
+   Aktivierung und Folgeaktion bestehen.
+
+`suspected` erzeugt keinen Bonus. Der Damage-Informationswert bleibt unter
+dem Matchpoint-Wert; fortgeschrittene Remote-Roots erhalten innerhalb dieses
+kleineren Fensters die höchste Zielrelevanz.
+
 ### 3. Zielwahl
 
 Die Choice verwendet ausschließlich legale Optionen und sichtbare

@@ -2,7 +2,7 @@
 
 ## Status
 
-P1 bis P5 abgeschlossen, P6 aktiv. Die fachliche Umsetzung ist vom Nutzer
+P1 bis P6 abgeschlossen, P7 aktiv. Die fachliche Umsetzung ist vom Nutzer
 freigegeben; gearbeitet wird im separaten Worktree und ohne Änderung der
 Engine- oder LegalAction-Regeln.
 
@@ -65,8 +65,10 @@ deutlich aufgewertet werden, wenn alle folgenden Bedingungen erfüllt sind:
    tragen; eine akute Überlebens-, Run- oder Finanzierungsaktion wird nicht
    verdrängt.
 3. Entweder steht die Korp am Matchpoint und ein unbekannter Remote-Root kann
-   noch rechtzeitig geprüft werden, oder ein konkreter aktueller
-   Remote-Contest-/Informationsplan benötigt dieses Werkzeug.
+   noch rechtzeitig geprüft werden, das side-sichere Schadensmodell bestätigt
+   eine Damage-Strategie mit relevantem unbekanntem Remote-Ziel und sicherem
+   Handpuffer, oder ein konkreter aktueller Remote-Contest-/Informationsplan
+   benötigt dieses Werkzeug.
 
 Ohne konkretes Informationsfenster bleibt SeeYa eine optionale Entwicklung,
 nicht die bevorzugte `build_rig`-Aktion.
@@ -78,7 +80,8 @@ Eine Aktivierung ist nur positiv priorisiert, wenn:
 1. mindestens ein noch nicht exakt exponiertes legales Ziel existiert;
 2. nach Bezahlung mindestens ein Klick für eine Folgeaktion verbleibt;
 3. der Informationsgewinn eine aktuelle Entscheidung verändern kann, vor allem
-   bei gegnerischem Matchpoint und unbekanntem Remote-Root;
+   bei gegnerischem Matchpoint und unbekanntem Remote-Root oder bei bestätigter
+   sichtbarer Damage-Strategie mit relevantem unbekanntem Remote-Ziel;
 4. keine bereits bekannte, unmittelbar produktive Contest-Aktion oder ein
    konkreter notwendiger Funding-Schritt fachlich höherwertig ist.
 
@@ -172,7 +175,18 @@ betroffene Positionshistorie.
 - Done-Gate: keine relevante Regression, sauberer Arbeitsbranch.
 - Commit: `docs(ai): close SeeYa information value remediation`
 
-### P6 – Integration und Cleanup
+### P6 – Damage-Informationsgrund
+
+- Das vorhandene side-sichere Schadensmodell mit SeeYas Informationswert
+  verbinden.
+- Nur `confirmed`/`critical`, sicheren Handpuffer, unbekanntes Remote-Ziel und
+  die vollständige kurze Aktionssequenz zulassen.
+- `suspected`, zu kleinen Handpuffer und ausschließlich zentrale Ziele als
+  Gegenproben sichern.
+- Commits: `test(ai): lock damage-aware SeeYa scouting` und
+  `fix(ai): scout damage remotes with SeeYa`
+
+### P7 – Integration und Cleanup
 
 - Aktuelles `main` defensiv integrieren, Pflichtchecks wiederholen und lokal
   nach `main` mergen.
@@ -193,7 +207,7 @@ betroffene Positionshistorie.
 ## Controller-Prompt-Kern
 
 `/Goal Arbeite die SeeYa-Informationswert-Remediation sequenziell von P1 bis`
-`P6 im festgelegten Worktree ab. Sichere unveränderte rote Evidence vor dem`
+`P7 im festgelegten Worktree ab. Sichere unveränderte rote Evidence vor dem`
 `Fix, verwende nur side-sichere generische Kriterien, committe jedes Paket und`
 `merge erst nach vollständiger Verifikation lokal nach main. Entferne danach`
 `den sauberen Worktree und den gemergten Branch.`
@@ -203,6 +217,8 @@ betroffene Positionshistorie.
 - SeeYa besitzt einen dokumentierten, kostenbewussten Installations-,
   Aktivierungs- und Zielvertrag.
 - Historische Wiederholungen bleiben verhindert.
+- Bestätigte sichtbare Damage-Strategien erzeugen nur mit sicherem Handpuffer
+  und relevantem unbekanntem Remote-Ziel einen kleineren proaktiven Bonus.
 - 424A-F04 und alle fachlich angrenzenden Kontrollen sind grün.
 - Broker bleibt ohne akutes Informationsfenster eine zulässige
   Hintergrundaktion.
