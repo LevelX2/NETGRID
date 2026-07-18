@@ -7041,7 +7041,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(gameState.activeSide).toBe("runner");
     expect(gameState.timingPoint).toBe("run.jack_out_window");
     expect(getLegalActions(gameState, "runner")).toEqual([]);
-    expect(getLegalActions(gameState, "corp").map((action) => action.type).sort()).toEqual(["decline_rez", "rez_ice"]);
+    expect(getLegalActions(gameState, "corp").map((action) => action.type).sort()).toEqual(["decline_rez", "rez_card"]);
 
     record.gameState = gameState;
     record.match.baseline = gameState.baseline;

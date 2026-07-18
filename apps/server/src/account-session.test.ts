@@ -50,6 +50,11 @@ describe("AccountSessionService", () => {
       }
       await expect(service.verifyCsrfToken(created.sessionToken, created.csrfToken)).resolves.toBe(true);
       await expect(service.verifyCsrfToken(created.sessionToken, "wrong-csrf-token")).resolves.toBe(false);
+      const rotatedCsrfToken = await service.rotateCsrfToken(created.sessionToken);
+      expect(rotatedCsrfToken).toBeTruthy();
+      expect(rotatedCsrfToken).not.toBe(created.csrfToken);
+      await expect(service.verifyCsrfToken(created.sessionToken, created.csrfToken)).resolves.toBe(false);
+      await expect(service.verifyCsrfToken(created.sessionToken, rotatedCsrfToken ?? "")).resolves.toBe(true);
     } finally {
       db?.close();
       storage.close();

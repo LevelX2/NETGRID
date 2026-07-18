@@ -450,6 +450,8 @@ import {
   updateActionSlotCapacity,
   zoneHighlighted,
 } from "../features/game-board/board-view-helpers";
+import { AccountPanel } from "../features/account/AccountPanel";
+import { useAccountSession } from "../features/account/useAccountSession";
 
 const APP_NAME = "NETGRID";
 const APP_STATUS_LABEL = NETGRID_APP_STATUS_LABEL;
@@ -468,7 +470,7 @@ type AiDeckPolicy =
   | "seeded_random"
   | "same_as_participant_a";
 type AiTraceStartMode = "off" | "detailed";
-type EntryTab = "play" | "catalog" | "decks" | "recent" | "options";
+type EntryTab = "play" | "catalog" | "decks" | "recent" | "options" | "account";
 type DeckSideFilter = Side | "all";
 type RunOverlayPositionPreference = OverlayPositionPreference;
 
@@ -544,6 +546,7 @@ export default function Page() {
     useState<AiTraceStartMode>("detailed");
   const [testSetupMode, setTestSetupMode] = useState(false);
   const [displayName, setDisplayName] = useState("Teilnehmer A");
+  const accountSession = useAccountSession();
   const [matchStartSettingsLoaded, setMatchStartSettingsLoaded] =
     useState(false);
   const [countdownSeconds, setCountdownSeconds] = useState<3 | 5 | 10>(3);
@@ -1113,6 +1116,12 @@ export default function Page() {
         else setNotice("Session konnte nicht geladen werden.");
       });
   }, []);
+
+  useEffect(() => {
+    if (!accountSession.account) return;
+    setDisplayName(accountSession.account.displayName);
+    window.localStorage.setItem(DISPLAY_NAME_STORAGE_KEY, accountSession.account.displayName);
+  }, [accountSession.account]);
 
   useEffect(() => {
     const storedScheme = window.localStorage.getItem(COLOR_SCHEME_STORAGE_KEY);
@@ -5160,6 +5169,15 @@ export default function Page() {
                     <SlidersHorizontal size={16} />
                     Optionen
                   </button>
+                  <button
+                    className={`entryTab ${entryTab === "account" ? "active" : ""}`}
+                    onClick={() => setEntryTab("account")}
+                    type="button"
+                    aria-current={entryTab === "account" ? "page" : undefined}
+                  >
+                    <User size={16} />
+                    {accountSession.account ? "Profil" : "Account"}
+                  </button>
                 </nav>
                 {session && lobby ? (
                   <StartLobbyPanel
@@ -5519,6 +5537,9 @@ export default function Page() {
                       onCuePosition={setCuePosition}
                       onAiPacingMode={updateLocalAiPacingMode}
                     />
+                  ) : null}
+                  {entryTab === "account" ? (
+                    <AccountPanel accountSession={accountSession} />
                   ) : null}
                 </div>
               </div>

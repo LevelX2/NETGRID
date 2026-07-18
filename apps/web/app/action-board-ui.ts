@@ -64,6 +64,7 @@ const DECISION_ACTION_TYPES = new Set<LegalAction["type"]>([
   "jack_out",
   "continue_run",
   "rez_ice",
+  "rez_card",
   "decline_rez",
   "pump_breaker",
   "break_subroutine",
@@ -86,6 +87,7 @@ const ACTION_GROUP_LABELS: Record<LegalAction["type"], string> = {
   start_run: "Run",
   jack_out: "Run",
   rez_ice: "Begegnung",
+  rez_card: "Begegnung",
   decline_rez: "Begegnung",
   pump_breaker: "Begegnung",
   break_subroutine: "Begegnung",
@@ -960,7 +962,7 @@ export function isContextualLegalAction(action: LegalAction): boolean {
   if (action.type === "start_run" && serverRefsForAction(action).length > 0)
     return true;
   if (
-    action.type === "rez_ice" &&
+    (action.type === "rez_ice" || action.type === "rez_card") &&
     cardRefsForAction(action).length > 0 &&
     !action.timingPoint.startsWith("run.")
   )
@@ -1101,6 +1103,7 @@ export function contextualCardActionLabel(action: LegalAction): string {
     case "score_agenda":
       return scoreAgendaContextLabel(action);
     case "rez_ice":
+    case "rez_card":
       return "Rezzen";
     case "pump_breaker":
       return stripTrailingActionSourceParenthetical(
@@ -2775,7 +2778,7 @@ export function splitRunWindowActionsByServer(
   for (const action of actions) {
     if (
       view.run &&
-      action.type === "rez_ice" &&
+      (action.type === "rez_ice" || action.type === "rez_card") &&
       action.payload?.rootRez === true &&
       typeof action.payload.serverId === "string" &&
       action.payload.serverId !== view.run.attackedServerId

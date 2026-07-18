@@ -597,6 +597,16 @@ export class AccountSessionService {
     return safeEqual(session.csrfTokenHash, this.hashCsrfToken(csrfToken));
   }
 
+  async rotateCsrfToken(sessionToken: string): Promise<string | undefined> {
+    const authenticated = await this.authenticateSessionToken(sessionToken);
+    if (!authenticated.ok) return undefined;
+    const session = await this.storage.loadSession(authenticated.session.sessionId);
+    if (!session || session.revokedAt) return undefined;
+    const csrfToken = randomBytes(32).toString("base64url");
+    await this.storage.saveSession({ ...session, csrfTokenHash: this.hashCsrfToken(csrfToken), lastSeenAt: this.now() });
+    return csrfToken;
+  }
+
   async revokeSessionByToken(sessionToken: string): Promise<boolean> {
     const session = await this.storage.loadSessionByTokenHash(this.hashSessionToken(sessionToken));
     if (!session) return false;

@@ -632,7 +632,9 @@ async function routeHttp(
       if (!accountAuth) return sendJson(response, 503, accountUnavailablePayload());
       const auth = await accountAuth.authenticateSession(accountSessionToken(request) ?? "");
       if (!auth.ok) return sendJson(response, 401, accountAuthRequiredPayload());
-      sendJson(response, 200, { account: auth.account, session: auth.session });
+      const csrfToken = await accountAuth.sessions.rotateCsrfToken(accountSessionToken(request) ?? "");
+      if (!csrfToken) return sendJson(response, 401, accountAuthRequiredPayload());
+      sendJson(response, 200, { account: auth.account, session: auth.session, csrfToken });
       return;
     }
 
