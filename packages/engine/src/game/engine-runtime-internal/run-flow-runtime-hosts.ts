@@ -230,9 +230,7 @@ import {
   buildRunnerAgendaPointInstallAction,
   buildRunnerSelectedServerInstallAction,
 } from "../turn/runner-install-context-actions";
-import {
-  buildRunnerHostedProgramInstallAction,
-} from "../turn/runner-hosted-install-actions";
+import { buildRunnerHostedProgramInstallAction } from "../turn/runner-hosted-install-actions";
 import { buildRunnerProgramTrashBeforeInstallAction } from "../turn/runner-program-trash-install-actions";
 import { buildRunnerStackSearchProgramToGripAction } from "../turn/runner-hidden-zone-search-actions";
 import {
@@ -636,9 +634,7 @@ import {
   RUN_REPLACEMENT_OVERLAP_EVENT_SOURCE,
   TRACE_AWARE_RUN_EVENT_SOURCE,
 } from "../../mechanics/run-access";
-import {
-  RUN_TAX_UPGRADE_SOURCES,
-} from "../../mechanics/trace-tags";
+import { RUN_TAX_UPGRADE_SOURCES } from "../../mechanics/trace-tags";
 import { snapshotPersistentStealCostModifiersForSource } from "../../ability-engine/steal-cost-modifiers";
 import { createCardImplementationEffectAdapters } from "../../ability-engine/card-implementation-effect-adapters";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
@@ -679,8 +675,6 @@ export function createRunFlowRuntimeHosts(
   deps: RuntimeDeps,
   runtime: RuntimeDeps,
 ): import("./run-flow-runtime-port").RunFlowRuntimePort {
-  const { cardHasSubtype, runFlow, subroutinesForCurrentEncounter } = deps;
-
   function startRun(
     state: GameState,
     serverId: Exclude<ServerId, "new_remote">,
@@ -689,7 +683,7 @@ export function createRunFlowRuntimeHosts(
     options?: StartRunOptions,
     legalAction?: LegalAction,
   ): void {
-    runFlow.startRun(
+    deps.runFlow.startRun(
       state,
       serverId,
       pendingSuccessBonusCredits,
@@ -751,7 +745,7 @@ export function createRunFlowRuntimeHosts(
   }
 
   function continueRun(state: GameState, legalAction?: LegalAction): void {
-    runFlow.continueRun(state, legalAction);
+    deps.runFlow.continueRun(state, legalAction);
   }
 
   function addCurrentRunAccessCount(
@@ -795,9 +789,12 @@ export function createRunFlowRuntimeHosts(
     )
       throw new Error("Es gibt keine aktuelle ICE-Encounter zum Passieren.");
     const iceDefinition = definitionFor(state, run.encounteredIceId);
-    if (subtypeRequired && !cardHasSubtype(iceDefinition, subtypeRequired))
+    if (subtypeRequired && !deps.cardHasSubtype(iceDefinition, subtypeRequired))
       throw new Error("Diese ICE hat nicht den benoetigten Subtyp.");
-    const subroutines = subroutinesForCurrentEncounter(state, iceDefinition);
+    const subroutines = deps.subroutinesForCurrentEncounter(
+      state,
+      iceDefinition,
+    );
     for (let index = 0; index < subroutines.length; index += 1) {
       if (
         !run.brokenSubroutineIndexes.includes(index) &&

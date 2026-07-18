@@ -1,6 +1,6 @@
 # CODEX_STATUS
 
-Stand: 2026-07-15
+Stand: 2026-07-18
 
 ## Einstieg
 
@@ -42,6 +42,22 @@ Bank-/Plan-Arbitration und Mehr-ICE-Bezahlbarkeit besitzen unveränderte
 Decision-Checkpoint-Verträge. Der vollständige Abschlusslauf umfasst 333
 AI-Testdateien und 2253 grüne Tests. Führend ist
 `docs/reviews/ai/ai-match-424a-runner-endgame-remediation-final-2026-07-15.md`.
+
+## Geschlossene Account- und Deck-Alpha
+
+Die erste V2.0-Benutzerstufe ist als geschlossene Passwort-Alpha umgesetzt.
+Accounts entstehen nur durch Admin-Bootstrap oder einmalige Einladung;
+widerrufbare Sessions, Origin-/CSRF-Schutz, neutrales Loginverhalten und
+Hash-only-Persistenz sind aktiv. E-Mail, Passkeys, MFA und öffentliche
+Registrierung sind noch kein Produktvertrag.
+
+Ein Account kann bis zu 50 persönliche Server-Decks speichern. 40 kuratierte
+Standard-Decks sind unveränderlich direkt spielbar oder kopierbar; interne KI-,
+Test- und Retire-Klassen bleiben unsichtbar. Jeder Matchstart verwendet einen
+neu validierten immutable Snapshot und bleibt accountfrei in Engine, Replay,
+StateHash und KI. Führend sind
+`docs/releases/v2/v2-0-auth-privacy-cloud-decks/password-accounts-cloud-decks-final-review-2026-07-18.md`
+und `docs/runbooks/account-alpha-operations.md`.
 
 ## Current-State-Cleanup
 

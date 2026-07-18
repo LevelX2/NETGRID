@@ -1,7 +1,9 @@
 # V2.0 Account-, Session- und Passkey-Vertrag
 
 Stand: 2026-05-17  
-Status: Vertragsfreeze vor Implementierung  
+Status: für die geschlossene Alpha durch `password-account-auth-contract.md`
+abgelöst; Account-/Match-, Cookie-, CSRF-, Origin- und Privacy-Grenzen bleiben
+weiter gültig
 Quelle: `docs/releases/v2/v2-0-auth-privacy-cloud-decks/auth-privacy-decision-spike.md`
 
 ## Scope

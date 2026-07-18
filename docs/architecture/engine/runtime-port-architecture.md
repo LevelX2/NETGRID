@@ -1,6 +1,6 @@
 # Runtime Port Architecture
 
-Status: E07 all delegate signatures migrated
+Status: E08 statische Runtime-Komposition produktiv
 
 ## Problem
 
@@ -63,16 +63,34 @@ Die statische Schließung hat vier zuvor verdeckte Abweichungen sichtbar
 gemacht und korrigiert: Trace-Ziele bilden ihre Optionalität nun korrekt ab,
 ein Stack-Shuffle besitzt einen deterministischen Zweckstring, wirkungslose
 Run-Options-Felder wurden entfernt und der Trace-Counter-Runtime-Typ wird aus
-dem fachlichen Implementierungsvertrag abgeleitet. E08 kann damit den
-dynamischen Delegate-Store und die nun funktionslosen Wrappergrenzen entfernen.
+dem fachlichen Implementierungsvertrag abgeleitet. E08 hat damit den
+dynamischen Delegate-Store und die nun funktionslosen Wrappergrenzen entfernt.
+
+Die produktive Komposition besteht nun aus zwei klar getrennten Bausteinen:
+
+- `runtime-composition.ts` erzeugt die Portgruppen in ihrer fachlichen
+  Abhängigkeitsreihenfolge.
+- `runtime-port-bindings.ts` stellt 430 statisch typisierte ESM-Bindings bereit
+  und installiert sie nach dem vollständigen Aufbau des Port-Graphen.
+
+Der Composition Root erzeugt zuerst ein stabiles Dependency-Objekt und baut
+darauf den Port-Graphen auf. Erst nach dessen Installation laufen Card-, Flow-
+und Action-Konfiguration. Der State-Bootstrap ergänzt anschließend dasselbe
+Dependency-Objekt um die konkreten Funktionen. Dadurch sehen bereits erzeugte
+Factory-Closures die abschließende Komposition, ohne Proxy, Stringschlüssel oder
+generische Dispatch-Funktion. Die frühere 4-Modul-Zyklusfreigabe ist entfallen;
+als bekannte Zyklusschuld verbleibt nur noch der Run-Window-Zyklus für E13.
+Factory-Module greifen deshalb über `deps.member` auf das stabile Objekt zu und
+dürfen dessen Mitglieder nicht bei der Factory-Erzeugung destrukturieren.
 
 ## Invarianten
 
 - Portverträge enthalten kein `any`.
 - Jede migrierte Factory muss ihren deklarativen Port vollständig erfüllen.
 - Deklarative Ports enthalten keine Runtime-Werte und keine Bootstrap-Imports.
-- Fehlende Gruppen werfen vor dem ersten Funktionsaufruf einen benannten Fehler.
-- Eine installierte Registry kann nicht während eines Spiels rekomponiert
-  werden.
+- Der Port-Graph wird vor allen Bootstrap-Konfigurationen vollständig
+  installiert.
+- Der State-Bootstrap ergänzt genau das Dependency-Objekt, das alle Factories
+  bei ihrer Erzeugung erhalten haben.
 - Hidden Info, LegalAction-Revalidierung, Replay und Zufall werden durch die
   reine Kompositionsgrundlage nicht verändert.

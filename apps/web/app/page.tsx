@@ -283,7 +283,6 @@ import { DeckEditorPanel } from "../features/decks/DeckEditorPanel";
 import type {
   DeckLibraryResponse,
   DeckSnapshot,
-  DeckSnapshotsResponse,
   DeckTemplate,
   DeckTemplatesResponse,
   DeckValidationResponse,
@@ -305,6 +304,10 @@ import {
   editableDeckAllowedForMatchCardPool,
   snapshotAllowedForMatchCardPool,
 } from "../features/decks/deck-match-filters";
+import {
+  mergeVisibleGuestDecks,
+  visibleGuestDecks,
+} from "../features/decks/deck-library-visibility";
 import {
   enrichVisibleCard,
   visibleCardFromCatalogDetail,
@@ -450,6 +453,21 @@ import {
   updateActionSlotCapacity,
   zoneHighlighted,
 } from "../features/game-board/board-view-helpers";
+import { AccountPanel } from "../features/account/AccountPanel";
+import { useAccountSession } from "../features/account/useAccountSession";
+import { AccountDeckLibraryHeader } from "../features/account/AccountDeckLibraryHeader";
+import {
+  copyStandardDeck,
+  createAccountDeck,
+  deleteAccountDeck,
+  loadAccountDecks,
+  loadStandardDecks,
+  snapshotAccountDeck,
+  updateAccountDeck,
+  type AccountDeck,
+  type AccountDeckQuota,
+  type StandardDeck,
+} from "../features/account/account-deck-client";
 
 const APP_NAME = "NETGRID";
 const APP_STATUS_LABEL = NETGRID_APP_STATUS_LABEL;
@@ -468,7 +486,7 @@ type AiDeckPolicy =
   | "seeded_random"
   | "same_as_participant_a";
 type AiTraceStartMode = "off" | "detailed";
-type EntryTab = "play" | "catalog" | "decks" | "recent" | "options";
+type EntryTab = "play" | "catalog" | "decks" | "recent" | "options" | "account";
 type DeckSideFilter = Side | "all";
 type RunOverlayPositionPreference = OverlayPositionPreference;
 
@@ -544,6 +562,7 @@ export default function Page() {
     useState<AiTraceStartMode>("detailed");
   const [testSetupMode, setTestSetupMode] = useState(false);
   const [displayName, setDisplayName] = useState("Teilnehmer A");
+  const accountSession = useAccountSession();
   const [matchStartSettingsLoaded, setMatchStartSettingsLoaded] =
     useState(false);
   const [countdownSeconds, setCountdownSeconds] = useState<3 | 5 | 10>(3);
@@ -619,6 +638,14 @@ export default function Page() {
     useState<DeckSnapshot | null>(null);
   const [localDecks, setLocalDecks] = useState<EditableDeck[]>([]);
   const [localDecksLoaded, setLocalDecksLoaded] = useState(false);
+  const [guestDeckBacking, setGuestDeckBacking] = useState<EditableDeck[]>([]);
+  const [accountDeckRecords, setAccountDeckRecords] = useState<AccountDeck[]>(
+    [],
+  );
+  const [accountDeckQuota, setAccountDeckQuota] =
+    useState<AccountDeckQuota | null>(null);
+  const [standardDecks, setStandardDecks] = useState<StandardDeck[]>([]);
+  const [accountDeckBusy, setAccountDeckBusy] = useState(false);
   const [savedDeckFingerprints, setSavedDeckFingerprints] = useState<
     Record<string, string>
   >({});
@@ -1115,6 +1142,15 @@ export default function Page() {
   }, []);
 
   useEffect(() => {
+    if (!accountSession.account) return;
+    setDisplayName(accountSession.account.displayName);
+    window.localStorage.setItem(
+      DISPLAY_NAME_STORAGE_KEY,
+      accountSession.account.displayName,
+    );
+  }, [accountSession.account]);
+
+  useEffect(() => {
     const storedScheme = window.localStorage.getItem(COLOR_SCHEME_STORAGE_KEY);
     if (storedScheme === "black" || storedScheme === "white") {
       document.documentElement.dataset.theme = storedScheme;
@@ -1228,9 +1264,34 @@ export default function Page() {
   }, [aiPacingModeLoaded, localAiPacingMode]);
 
   useEffect(() => {
+    if (accountSession.status === "loading") return;
     let cancelled = false;
-    const legacyDecks = readLegacyBrowserDecks();
     async function loadDeckLibrary() {
+      if (accountSession.account) {
+        try {
+          const data = await loadAccountDecks();
+          if (cancelled) return;
+          setAccountDeckRecords(data.decks);
+          setAccountDeckQuota(data.quota);
+          setDeckLibraryStoragePath("NETGRID-Server · persönliche Decks");
+          applyLoadedDecks(data.decks.map((record) => record.deck));
+        } catch (error) {
+          if (!cancelled) {
+            setLocalDecks([]);
+            setAccountDeckRecords([]);
+            setAccountDeckQuota(null);
+            setNotice(
+              error instanceof Error
+                ? error.message
+                : "Persönliche Decks konnten nicht geladen werden.",
+            );
+          }
+        } finally {
+          if (!cancelled) setLocalDecksLoaded(true);
+        }
+        return;
+      }
+      const legacyDecks = readLegacyBrowserDecks();
       try {
         const response = await fetch("/api/decks/library", {
           cache: "no-store",
@@ -1248,11 +1309,15 @@ export default function Page() {
             );
         }
         if (cancelled) return;
+        setAccountDeckRecords([]);
+        setAccountDeckQuota(null);
+        setGuestDeckBacking(decks);
         setDeckLibraryStoragePath(data.storagePath ?? "");
-        applyLoadedDecks(decks);
+        applyLoadedDecks(visibleGuestDecks(decks));
       } catch {
         if (!cancelled) {
-          applyLoadedDecks(legacyDecks);
+          setGuestDeckBacking(legacyDecks);
+          applyLoadedDecks(visibleGuestDecks(legacyDecks));
           if (legacyDecks.length > 0)
             setNotice(
               "Datei-Deckbibliothek nicht erreichbar; Browser-Decks wurden nur als Übergang geladen.",
@@ -1266,7 +1331,67 @@ export default function Page() {
     return () => {
       cancelled = true;
     };
+  }, [accountSession.status, accountSession.account?.accountId]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void loadStandardDecks()
+      .then((data) => {
+        if (cancelled) return;
+        setStandardDecks(data.catalog.decks ?? []);
+        setDeckSnapshots(data.catalog.snapshots ?? []);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setStandardDecks([]);
+          setDeckSnapshots([]);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
+
+  useEffect(() => {
+    const firstRunner =
+      deckSnapshots.find((snapshot) => snapshot.side === "runner")
+        ?.deckSnapshotId ?? "";
+    const firstCorp =
+      deckSnapshots.find((snapshot) => snapshot.side === "corp")
+        ?.deckSnapshotId ?? "";
+    if (
+      !deckSnapshots.some(
+        (snapshot) =>
+          snapshot.side === "runner" &&
+          snapshot.deckSnapshotId === selectedRunnerSnapshotId,
+      )
+    )
+      setSelectedRunnerSnapshotId(firstRunner);
+    if (
+      !deckSnapshots.some(
+        (snapshot) =>
+          snapshot.side === "corp" &&
+          snapshot.deckSnapshotId === selectedCorpSnapshotId,
+      )
+    )
+      setSelectedCorpSnapshotId(firstCorp);
+    if (
+      !deckSnapshots.some(
+        (snapshot) =>
+          snapshot.side === "runner" &&
+          snapshot.deckSnapshotId === selectedParticipantBRunnerSnapshotId,
+      )
+    )
+      setSelectedParticipantBRunnerSnapshotId(firstRunner);
+    if (
+      !deckSnapshots.some(
+        (snapshot) =>
+          snapshot.side === "corp" &&
+          snapshot.deckSnapshotId === selectedParticipantBCorpSnapshotId,
+      )
+    )
+      setSelectedParticipantBCorpSnapshotId(firstCorp);
+  }, [deckSnapshots]);
 
   useEffect(() => {
     if (!localDecksLoaded) return;
@@ -1612,50 +1737,6 @@ export default function Page() {
   ]);
 
   useEffect(() => {
-    void fetch("/api/decks/snapshots", { cache: "no-store" })
-      .then((response) => response.json() as Promise<DeckSnapshotsResponse>)
-      .then((data) => {
-        setDeckSnapshots(data.snapshots ?? []);
-        if (
-          !data.snapshots?.some(
-            (snapshot) =>
-              snapshot.deckSnapshotId === DEFAULT_RUNNER_SNAPSHOT_ID,
-          )
-        )
-          setSelectedRunnerSnapshotId(
-            data.snapshots?.find((snapshot) => snapshot.side === "runner")
-              ?.deckSnapshotId ?? "",
-          );
-        if (
-          !data.snapshots?.some(
-            (snapshot) => snapshot.deckSnapshotId === DEFAULT_CORP_SNAPSHOT_ID,
-          )
-        )
-          setSelectedCorpSnapshotId(
-            data.snapshots?.find((snapshot) => snapshot.side === "corp")
-              ?.deckSnapshotId ?? "",
-          );
-        if (
-          !data.snapshots?.some(
-            (snapshot) =>
-              snapshot.deckSnapshotId === DEFAULT_RUNNER_SNAPSHOT_ID,
-          )
-        )
-          setSelectedParticipantBRunnerSnapshotId(
-            data.snapshots?.find((snapshot) => snapshot.side === "runner")
-              ?.deckSnapshotId ?? "",
-          );
-        if (
-          !data.snapshots?.some(
-            (snapshot) => snapshot.deckSnapshotId === DEFAULT_CORP_SNAPSHOT_ID,
-          )
-        )
-          setSelectedParticipantBCorpSnapshotId(
-            data.snapshots?.find((snapshot) => snapshot.side === "corp")
-              ?.deckSnapshotId ?? "",
-          );
-      })
-      .catch(() => setDeckSnapshots([]));
     void fetch("/api/decks/templates", { cache: "no-store" })
       .then((response) => response.json() as Promise<DeckTemplatesResponse>)
       .then((data) => setDeckTemplates(data.templates ?? []))
@@ -4548,6 +4629,42 @@ export default function Page() {
     rememberDisplayName(value);
   };
 
+  const useStandardDeckForMatch = (standard: StandardDeck) => {
+    const snapshotId = `standard_${standard.standardDeckId}_${standard.version}`;
+    if (standard.side === "runner") {
+      setSelectedRunnerSnapshotId(snapshotId);
+      setRunnerDeckSource("snapshot");
+    } else {
+      setSelectedCorpSnapshotId(snapshotId);
+      setCorpDeckSource("snapshot");
+    }
+    setEntryTab("play");
+    setNotice(`${standard.name} ist für den Matchstart ausgewählt.`);
+  };
+
+  const copyStandardToAccount = (standard: StandardDeck) => {
+    if (!accountSession.account) return;
+    setAccountDeckBusy(true);
+    void copyStandardDeck(standard.standardDeckId, accountSession.csrfToken)
+      .then((result) => {
+        const nextRecords = [...accountDeckRecords, result.deck];
+        setAccountDeckRecords(nextRecords);
+        setAccountDeckQuota(result.quota);
+        applyLoadedDecks(nextRecords.map((record) => record.deck));
+        setSelectedLocalDeckId(result.deck.cloudDeckId);
+        selectDeckForSide(result.deck.deck);
+        setNotice("Standard-Deck als persönliches Deck kopiert.");
+      })
+      .catch((error) =>
+        setNotice(
+          error instanceof Error
+            ? error.message
+            : "Standard-Deck konnte nicht kopiert werden.",
+        ),
+      )
+      .finally(() => setAccountDeckBusy(false));
+  };
+
   const createEmptyDeck = (side: Side) => {
     const now = new Date().toISOString();
     const templateIdentity = deckTemplates.find(
@@ -4569,6 +4686,29 @@ export default function Page() {
       createdAt: now,
       updatedAt: now,
     };
+    if (accountSession.account) {
+      setAccountDeckBusy(true);
+      void createAccountDeck(deck, accountSession.csrfToken)
+        .then((result) => {
+          const nextRecords = [...accountDeckRecords, result.deck];
+          setAccountDeckRecords(nextRecords);
+          setAccountDeckQuota(result.quota);
+          applyLoadedDecks(nextRecords.map((record) => record.deck));
+          setSelectedLocalDeckId(result.deck.cloudDeckId);
+          selectDeckForSide(result.deck.deck);
+          setNotice("Neues persönliches Deck angelegt.");
+        })
+        .catch((error) =>
+          setNotice(
+            error instanceof Error
+              ? error.message
+              : "Deck konnte nicht angelegt werden.",
+          ),
+        )
+        .finally(() => setAccountDeckBusy(false));
+      clearDeckValidation();
+      return;
+    }
     const nextDecks = [...localDecks, deck];
     setLocalDecks(nextDecks);
     void commitDeckLibrary(
@@ -4593,6 +4733,10 @@ export default function Page() {
 
   const saveSelectedDeck = () => {
     if (!selectedLocalDeck) return;
+    if (accountSession.account) {
+      void saveAccountDeck(selectedLocalDeck, "Persönliches Deck gespeichert.");
+      return;
+    }
     void commitDeckLibrary(localDecks, "Deck gespeichert.");
   };
 
@@ -4625,6 +4769,29 @@ export default function Page() {
       createdAt: now,
       updatedAt: now,
     };
+    if (accountSession.account) {
+      setAccountDeckBusy(true);
+      void createAccountDeck(copy, accountSession.csrfToken)
+        .then((result) => {
+          const nextRecords = [...accountDeckRecords, result.deck];
+          setAccountDeckRecords(nextRecords);
+          setAccountDeckQuota(result.quota);
+          applyLoadedDecks(nextRecords.map((record) => record.deck));
+          setSelectedLocalDeckId(result.deck.cloudDeckId);
+          selectDeckForSide(result.deck.deck);
+          setNotice("Persönliche Deck-Kopie gespeichert.");
+        })
+        .catch((error) =>
+          setNotice(
+            error instanceof Error
+              ? error.message
+              : "Deck-Kopie konnte nicht gespeichert werden.",
+          ),
+        )
+        .finally(() => setAccountDeckBusy(false));
+      clearDeckValidation();
+      return;
+    }
     const nextDecks = [...localDecks, copy];
     setLocalDecks(nextDecks);
     void commitDeckLibrary(nextDecks, "Deck-Kopie gespeichert.");
@@ -4635,6 +4802,29 @@ export default function Page() {
 
   const deleteSelectedDeck = () => {
     if (!selectedLocalDeck) return;
+    if (accountSession.account) {
+      setAccountDeckBusy(true);
+      void deleteAccountDeck(selectedLocalDeck.deckId, accountSession.csrfToken)
+        .then((result) => {
+          const nextRecords = accountDeckRecords.filter(
+            (record) => record.cloudDeckId !== selectedLocalDeck.deckId,
+          );
+          setAccountDeckRecords(nextRecords);
+          setAccountDeckQuota(result.quota);
+          applyLoadedDecks(nextRecords.map((record) => record.deck));
+          setNotice("Persönliches Deck gelöscht.");
+        })
+        .catch((error) =>
+          setNotice(
+            error instanceof Error
+              ? error.message
+              : "Deck konnte nicht gelöscht werden.",
+          ),
+        )
+        .finally(() => setAccountDeckBusy(false));
+      clearDeckValidation();
+      return;
+    }
     const nextDecks = localDecks.filter(
       (deck) => deck.deckId !== selectedLocalDeck.deckId,
     );
@@ -4646,6 +4836,28 @@ export default function Page() {
 
   const validateSelectedDeck = async () => {
     if (!selectedLocalDeck) return;
+    if (accountSession.account) {
+      try {
+        setAccountDeckBusy(true);
+        const saved = await saveAccountDeck(selectedLocalDeck);
+        const result = await snapshotAccountDeck(
+          saved.deckId,
+          accountSession.csrfToken,
+        );
+        setValidatedSnapshot(result.snapshot);
+        setDeckValidation(result.snapshot.validation);
+        setNotice("Persönliches Deck gespeichert und validiert.");
+      } catch (error) {
+        setNotice(
+          error instanceof Error
+            ? error.message
+            : "Deck braucht noch Korrekturen.",
+        );
+      } finally {
+        setAccountDeckBusy(false);
+      }
+      return;
+    }
     const result = await fetch("/api/decks/validate", {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -4727,6 +4939,29 @@ export default function Page() {
       createdAt: parsed.deck.createdAt || now,
       updatedAt: now,
     };
+    if (accountSession.account) {
+      setAccountDeckBusy(true);
+      void createAccountDeck(imported, accountSession.csrfToken)
+        .then((result) => {
+          const nextRecords = [...accountDeckRecords, result.deck];
+          setAccountDeckRecords(nextRecords);
+          setAccountDeckQuota(result.quota);
+          applyLoadedDecks(nextRecords.map((record) => record.deck));
+          setSelectedLocalDeckId(result.deck.cloudDeckId);
+          selectDeckForSide(result.deck.deck);
+          setNotice("Deck als persönliches Server-Deck importiert.");
+        })
+        .catch((error) =>
+          setNotice(
+            error instanceof Error
+              ? error.message
+              : "Deck-Import konnte nicht gespeichert werden.",
+          ),
+        )
+        .finally(() => setAccountDeckBusy(false));
+      clearDeckValidation();
+      return;
+    }
     const nextDecks = [
       ...localDecks.filter((deck) => deck.deckId !== imported.deckId),
       imported,
@@ -4741,6 +4976,40 @@ export default function Page() {
   function clearDeckValidation() {
     setDeckValidation(null);
     setValidatedSnapshot(null);
+  }
+
+  async function saveAccountDeck(
+    deck: EditableDeck,
+    successNotice?: string,
+  ): Promise<EditableDeck> {
+    const current = accountDeckRecords.find(
+      (record) => record.cloudDeckId === deck.deckId,
+    );
+    if (!current)
+      throw new Error(
+        "Persönliches Deck wurde nicht gefunden. Bitte neu laden.",
+      );
+    setAccountDeckBusy(true);
+    try {
+      const result = await updateAccountDeck(
+        deck,
+        current.deckVersion,
+        accountSession.csrfToken,
+      );
+      const nextRecords = accountDeckRecords.map((record) =>
+        record.cloudDeckId === result.deck.cloudDeckId ? result.deck : record,
+      );
+      setAccountDeckRecords(nextRecords);
+      setLocalDecks(nextRecords.map((record) => record.deck));
+      setSavedDeckFingerprints((currentFingerprints) => ({
+        ...currentFingerprints,
+        [result.deck.cloudDeckId]: deckFingerprint(result.deck.deck),
+      }));
+      if (successNotice) setNotice(successNotice);
+      return result.deck.deck;
+    } finally {
+      setAccountDeckBusy(false);
+    }
   }
 
   async function commitDeckLibrary(
@@ -4767,16 +5036,22 @@ export default function Page() {
   async function persistDeckLibrary(
     nextDecks: EditableDeck[],
   ): Promise<{ decks: EditableDeck[]; storagePath?: string }> {
+    const persistenceDecks = mergeVisibleGuestDecks(
+      guestDeckBacking.length > 0 ? guestDeckBacking : nextDecks,
+      nextDecks,
+    );
     const response = await fetch("/api/decks/library", {
       method: "PUT",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ decks: nextDecks }),
+      body: JSON.stringify({ decks: persistenceDecks }),
     });
     const data = (await response.json()) as DeckLibraryResponse;
     if (!response.ok || data.error)
       throw new Error(data.error?.message ?? "deck_library_save_failed");
+    const persistedDecks = data.decks ?? persistenceDecks;
+    setGuestDeckBacking(persistedDecks);
     return {
-      decks: data.decks ?? nextDecks,
+      decks: visibleGuestDecks(persistedDecks),
       ...(data.storagePath ? { storagePath: data.storagePath } : {}),
     };
   }
@@ -4853,6 +5128,25 @@ export default function Page() {
   async function validateDeckForMatch(
     deck: EditableDeck,
   ): Promise<DeckSnapshot> {
+    if (accountSession.account) {
+      const current = accountDeckRecords.find(
+        (record) => record.cloudDeckId === deck.deckId,
+      );
+      if (!current)
+        throw new Error(
+          "Persönliches Deck wurde nicht gefunden. Bitte neu laden.",
+        );
+      let savedDeck = deck;
+      if (deckFingerprint(deck) !== savedDeckFingerprints[deck.deckId])
+        savedDeck = await saveAccountDeck(deck);
+      const result = await snapshotAccountDeck(
+        savedDeck.deckId,
+        accountSession.csrfToken,
+      );
+      if (deck.side === "runner") setRunnerLocalSnapshot(result.snapshot);
+      else setCorpLocalSnapshot(result.snapshot);
+      return result.snapshot;
+    }
     const result = await fetch("/api/decks/validate", {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -5160,6 +5454,15 @@ export default function Page() {
                     <SlidersHorizontal size={16} />
                     Optionen
                   </button>
+                  <button
+                    className={`entryTab ${entryTab === "account" ? "active" : ""}`}
+                    onClick={() => setEntryTab("account")}
+                    type="button"
+                    aria-current={entryTab === "account" ? "page" : undefined}
+                  >
+                    <User size={16} />
+                    {accountSession.account ? "Profil" : "Account"}
+                  </button>
                 </nav>
                 {session && lobby ? (
                   <StartLobbyPanel
@@ -5410,30 +5713,40 @@ export default function Page() {
                     <CatalogPanel {...catalogPanelProps} />
                   ) : null}
                   {entryTab === "decks" ? (
-                    <DeckEditorPanel
-                      localDecks={localDecks}
-                      selectedDeck={selectedLocalDeck}
-                      selectedDeckDirty={selectedDeckDirty}
-                      storagePath={deckLibraryStoragePath}
-                      validation={deckValidation}
-                      validatedSnapshot={validatedSnapshot}
-                      playableCards={playableCatalogCards}
-                      cardDetailsById={catalogDetailsById}
-                      importText={deckImportText}
-                      exportText={deckExportText}
-                      onCreateEmpty={createEmptyDeck}
-                      onSelectDeck={setSelectedLocalDeckId}
-                      onUpdateDeck={updateSelectedDeck}
-                      onSave={saveSelectedDeck}
-                      onUpdateQuantity={updateDeckCardQuantity}
-                      onDuplicate={duplicateSelectedDeck}
-                      onDelete={deleteSelectedDeck}
-                      onValidate={validateSelectedDeck}
-                      onUseForMatch={useValidatedDeckForMatch}
-                      onExport={exportSelectedDeck}
-                      onImportText={setDeckImportText}
-                      onImport={importLocalDeck}
-                    />
+                    <>
+                      <AccountDeckLibraryHeader
+                        standards={standardDecks}
+                        quota={accountDeckQuota}
+                        accountMode={Boolean(accountSession.account)}
+                        busy={accountDeckBusy}
+                        onUseStandard={useStandardDeckForMatch}
+                        onCopyStandard={copyStandardToAccount}
+                      />
+                      <DeckEditorPanel
+                        localDecks={localDecks}
+                        selectedDeck={selectedLocalDeck}
+                        selectedDeckDirty={selectedDeckDirty}
+                        storagePath={deckLibraryStoragePath}
+                        validation={deckValidation}
+                        validatedSnapshot={validatedSnapshot}
+                        playableCards={playableCatalogCards}
+                        cardDetailsById={catalogDetailsById}
+                        importText={deckImportText}
+                        exportText={deckExportText}
+                        onCreateEmpty={createEmptyDeck}
+                        onSelectDeck={setSelectedLocalDeckId}
+                        onUpdateDeck={updateSelectedDeck}
+                        onSave={saveSelectedDeck}
+                        onUpdateQuantity={updateDeckCardQuantity}
+                        onDuplicate={duplicateSelectedDeck}
+                        onDelete={deleteSelectedDeck}
+                        onValidate={validateSelectedDeck}
+                        onUseForMatch={useValidatedDeckForMatch}
+                        onExport={exportSelectedDeck}
+                        onImportText={setDeckImportText}
+                        onImport={importLocalDeck}
+                      />
+                    </>
                   ) : null}
                   {entryTab === "recent" ? (
                     <RecentGamesPanel
@@ -5519,6 +5832,9 @@ export default function Page() {
                       onCuePosition={setCuePosition}
                       onAiPacingMode={updateLocalAiPacingMode}
                     />
+                  ) : null}
+                  {entryTab === "account" ? (
+                    <AccountPanel accountSession={accountSession} />
                   ) : null}
                 </div>
               </div>

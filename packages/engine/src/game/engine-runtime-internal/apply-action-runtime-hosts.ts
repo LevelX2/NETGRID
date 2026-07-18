@@ -691,52 +691,28 @@ export function createApplyActionRuntimeHosts(
   import("./action-runtime-port").ActionRuntimePort,
   "turnBasicExecutionHost" | "creditEconomyExecutionHost"
 > {
-  const {
-    applyRunnerDrawSummaryPayload,
-    corpZoneChoiceHandlerHost,
-    drawRunnerCards,
-    endTurn,
-    forfeitRunnerAgendaForPointCost,
-    hasCorpUtilityKind,
-    hiddenZoneArrangeChoiceHandlerHost,
-    resolveCorpInstalledEconomyAction,
-    resolveScoredAgendaCorpRdTopReveal,
-    resolveV1911RunnerHiddenZoneAbility,
-    revealCorpRdTop,
-    revealRunnerStackTop,
-    rezzedCorpRootCardIds,
-    shouldOpenCorpInstalledEconomyCreditChoice,
-    spendRunnerTagRemovalCredits,
-    startVirusCounterPurgePreserveChoice,
-    startCorpInstalledEconomyCreditChoice,
-    traceOrchestrationHost,
-    trashCorpInstalledCardToArchives,
-    trashRunnerInstalledCardToHeap,
-    uniqueDirectLongtailImplementationForCard,
-    visibleVirusCounterTargetIds,
-  } = deps;
-
   function turnBasicExecutionHost(state: GameState): TurnBasicExecutionHost {
     return {
       state,
       draw: {
         drawCorpCard,
-        drawRunnerCards,
-        applyRunnerDrawSummaryPayload,
+        drawRunnerCards: deps.drawRunnerCards,
+        applyRunnerDrawSummaryPayload: deps.applyRunnerDrawSummaryPayload,
       },
       turn: {
         spendClick,
         spendClicks,
-        endTurn,
+        endTurn: deps.endTurn,
       },
       credits: {
-        spendRunnerTagRemovalCredits,
+        spendRunnerTagRemovalCredits: deps.spendRunnerTagRemovalCredits,
       },
       cards: {
-        trashRunnerInstalledCardToHeap,
+        trashRunnerInstalledCardToHeap: deps.trashRunnerInstalledCardToHeap,
       },
       callbacks: {
-        startVirusCounterPurgePreserveChoice,
+        startVirusCounterPurgePreserveChoice:
+          deps.startVirusCounterPurgePreserveChoice,
       },
     };
   }
@@ -755,8 +731,9 @@ export function createApplyActionRuntimeHosts(
         publicServerLabelForCard,
         hasCardImplementationForDefinition: (definitionId) =>
           Boolean(cardImplementationForDefinitionId(definitionId)),
-        hasCorpUtilityKind,
-        uniqueDirectLongtailImplementationForCard,
+        hasCorpUtilityKind: deps.hasCorpUtilityKind,
+        uniqueDirectLongtailImplementationForCard:
+          deps.uniqueDirectLongtailImplementationForCard,
       },
       credits: {
         gain: credits,
@@ -766,35 +743,37 @@ export function createApplyActionRuntimeHosts(
         cardCounter,
         addCardCounter,
         spendCardCounter,
-        visibleVirusCounterTargetIds,
+        visibleVirusCounterTargetIds: deps.visibleVirusCounterTargetIds,
       },
       runner: {
         installedCardIds: runnerInstalledCardIds,
-        trashInstalledCardToHeap: trashRunnerInstalledCardToHeap,
-        forfeitAgendaForPointCost: forfeitRunnerAgendaForPointCost,
-        drawCards: drawRunnerCards,
-        applyDrawSummaryPayload: applyRunnerDrawSummaryPayload,
+        trashInstalledCardToHeap: deps.trashRunnerInstalledCardToHeap,
+        forfeitAgendaForPointCost: deps.forfeitRunnerAgendaForPointCost,
+        drawCards: deps.drawRunnerCards,
+        applyDrawSummaryPayload: deps.applyRunnerDrawSummaryPayload,
         ensureTurnFlags: ensureRunnerTurnFlags,
       },
       corp: {
-        rezzedRootCardIds: rezzedCorpRootCardIds,
+        rezzedRootCardIds: deps.rezzedCorpRootCardIds,
         installedCardIds: corpInstalledCardIds,
         publicInstalledCardIdentityKnown: publicInstalledCorpCardIdentityKnown,
         uninstallInstalledCardToHq: uninstallCorpInstalledCardToHq,
-        trashInstalledCardToArchives: trashCorpInstalledCardToArchives,
+        trashInstalledCardToArchives: deps.trashCorpInstalledCardToArchives,
       },
       hiddenZone: {
-        resolveV1911RunnerHiddenZoneAbility,
-        resolveScoredAgendaCorpRdTopReveal,
-        revealRunnerStackTop,
-        revealCorpRdTop,
+        resolveV1911RunnerHiddenZoneAbility:
+          deps.resolveV1911RunnerHiddenZoneAbility,
+        resolveScoredAgendaCorpRdTopReveal:
+          deps.resolveScoredAgendaCorpRdTopReveal,
+        revealRunnerStackTop: deps.revealRunnerStackTop,
+        revealCorpRdTop: deps.revealCorpRdTop,
         resolveReschedulerHqShuffleDraw: (
           stateForAction,
           legalAction,
           sourceCardId,
         ) =>
           resolveReschedulerHqShuffleDraw(
-            corpZoneChoiceHandlerHost(stateForAction, legalAction),
+            deps.corpZoneChoiceHandlerHost(stateForAction, legalAction),
             sourceCardId,
           ),
         startCorpAssetRdTopReorderChoice: (
@@ -803,17 +782,23 @@ export function createApplyActionRuntimeHosts(
           sourceCardId,
         ) =>
           startCorpAssetRdTopReorderChoice(
-            hiddenZoneArrangeChoiceHandlerHost(stateForAction, legalAction),
+            deps.hiddenZoneArrangeChoiceHandlerHost(
+              stateForAction,
+              legalAction,
+            ),
             sourceCardId,
           ),
       },
       delegates: {
-        shouldOpenCorpInstalledEconomyCreditChoice,
-        startCorpInstalledEconomyCreditChoice,
-        resolveCorpInstalledEconomyAction,
+        shouldOpenCorpInstalledEconomyCreditChoice:
+          deps.shouldOpenCorpInstalledEconomyCreditChoice,
+        startCorpInstalledEconomyCreditChoice:
+          deps.startCorpInstalledEconomyCreditChoice,
+        resolveCorpInstalledEconomyAction:
+          deps.resolveCorpInstalledEconomyAction,
         handleTraceOrchestrationAction: (legalAction) =>
           handleTraceOrchestrationAction(
-            traceOrchestrationHost(state),
+            deps.traceOrchestrationHost(state),
             legalAction,
           ),
         handleCorpSpecialDamageAbilityAction: (legalAction) =>

@@ -25,148 +25,6 @@ export function createCorpZoneRuntimeHosts(
   links: ChoiceHiddenZoneRuntimeLinks,
 ): import("./corp-zone-runtime-port").CorpZoneRuntimePort {
   const {
-    DAILY_CREDIT_RESOURCE_SOURCE,
-    BUTCHER_BOY_ID,
-    COCKROACH_ID,
-    ARCHIVES_TO_HQ_OPERATION_SOURCE,
-    HQ_AGENDA_REVEAL_ASSET_SOURCE,
-    RD_TOP5_REORDER_OPERATION_SOURCE,
-    DEAL_WITH_MILITECH_ID,
-    CARD_DEFINITIONS_BY_ID,
-    INITIAL_HAND_SIZE,
-    MYSTERY_BOX_ID,
-    RONIN_AROUND_ID,
-    RUN_ACCESS_PRESSURE_EVENT_SOURCE,
-    SELF_MODIFYING_CODE_ID,
-    SERVER_EXPOSE_PROGRAM_SOURCES,
-    PAID_STACK_SEARCH_RESOURCE_SOURCE,
-    SKIVVISS_ID,
-    SNEAK_PREVIEW_ID,
-    STACK_SEARCH_PROGRAM_SOURCES,
-    STACK_TOP_REORDER_RESOURCE_SOURCE,
-    TOO_MANY_DOORS_ID,
-    accessEffectHandlerHost,
-    addCardCounter,
-    affordableRezzedInstalledIceIdsForRunner,
-    agendaPointsForScoredCard,
-    appendResolvedEffectsToPayload,
-    applyRunnerStartOfTurnEffects,
-    availableRunnerProgramInstallCredits,
-    cardCounter,
-    cardHasSubtype,
-    cardImplementationForDefinitionId,
-    cardImplementationRuntimeDeps,
-    cockroachCounterTotal,
-    cockroachRandomHqDiscardActive,
-    completeDiscardPhase,
-    corpInstallRezSequenceHandlerHost,
-    corpInstalledCardIds,
-    corpUtilityImplementationForCard,
-    corpScoredAgendaForfeitTargets,
-    creditCostForAction,
-    definitionFor,
-    discardRandomCorpHqCards,
-    drawCorpCards,
-    encounterResolutionHostForState,
-    encounterSpecialWindowHostForState,
-    ensureRunnerTurnFlags,
-    executeCardImplementationEffects,
-    executeCardImplementationLifecycleEffects,
-    fortPassWindowHostForState,
-    fortRunSideFamiliesHostForState,
-    handForSide,
-    handleCorpInstallRezSequenceChoice,
-    handleCorpZoneChoice,
-    handleHiddenZoneArrangeChoice,
-    handleHiddenZoneNonSearchChoice,
-    handleHiddenZoneSearchChoice,
-    handleScoredAgendaFlowChoice,
-    hasCorpUtilityKind,
-    hasInstalledUniqueCardDefinition,
-    hasSuccessfulHqRunThisTurn,
-    isP358HiddenReplacementCompatibilityChoiceSource,
-    isUniqueCard,
-    lookTopStackShowToCorpThenInstallMatchingTargets,
-    maxHandSize,
-    mustServer,
-    outermostIceIndex,
-    poxCountersForServer,
-    publicServerLabel,
-    publicServerLabelForCard,
-    recordStateRandomMarkers,
-    removeFromAllZones,
-    resolveAardvarkInterceptionChoice,
-    resolveAccessChimeraDaemonTrashChoice,
-    resolveAccessInstalledRunnerProgramReturnChoice,
-    resolveAccessPaymentChoice,
-    resolveCardImplementationAdvancementDistributionChoice,
-    resolveCardImplementationMoveAdvancementChoice,
-    resolveVirusCounterPurgePreserveChoice,
-    resolveCrashEverettDrawChoice,
-    resolveEventModificationChoice,
-    resolveHammerStealthLossChoice,
-    resolveCorpInstalledEconomyCreditChoice,
-    resolvePreAccessTopRdReorderChoice,
-    resolvePassRezzedIceProgramTrashChoiceInRunModule,
-    resolveBrokenIceVirusCounterChoice,
-    resolvePostMeatDamageHiddenResourceChoice,
-    resolveHardwareTrashByCounterChoice,
-    resolveSuccessfulRunCreditLossSpendChoice,
-    resolveReplacementChoice,
-    resolveRunnerPrivateLookChoice,
-    resolveRunnerProgramTrashBeforeInstallChoice,
-    resolveHqIceSwapChoice,
-    resolveRezInterruptJackOutChoice,
-    resolveSuccessfulRunInterventionChoiceInRunModule,
-    resolveAdvancementPlacementChoice,
-    resolveSecretSpendCompareChoiceInRunModule,
-    resolveTraceChoice,
-    resolveActiveIceProgramTrashChoiceInRunModule,
-    rezCostForCard,
-    rezzedBlackIceIds,
-    rezzedCorpRootCardIds,
-    rezzedInstalledIceIds,
-    rollDeterministicDie,
-    runAccessTransitionHost,
-    runEndCleanupHost,
-    runRezWindowHostForState,
-    runnerEventLongtailForDefinition,
-    runnerEventLongtailKindForDefinition,
-    runnerInstalledCardIds,
-    runnerMemoryLimit,
-    runnerProgramUsesMemory,
-    runnerStoleAgendaSubtypeThisTurn,
-    scoredAgendaFlowHost,
-    scoredAgendaImplementationForDefinition,
-    scoredAgendaKindForDefinition,
-    searchStackInstallTargets,
-    selectedChoiceIds,
-    setCardCounter,
-    setHostedOn,
-    shouldLoadLegacyRecurringCredits,
-    shuffleRunnerStackAndRefreshZones,
-    shuffleStateIds,
-    temporaryProgramInstallableProgramIds,
-    spendCardCounter,
-    spendCredits,
-    spendRunnerInstallCredits,
-    startAujourdOuiTop5Activation,
-    startIncubatorTransformChoice,
-    startRun,
-    startRunnerStackArrangeChoice,
-    startRunnerStackSearchChoiceActivation,
-    successfulRunInterventionHost,
-    traceOrchestrationHost,
-    trashCorpInstalledCardToArchives,
-    trashRunnerInstalledCardToHeap,
-    uniqueDirectLongtailImplementationForDefinition,
-    unrezzedInstalledIceIds,
-    mustInstance,
-    credits,
-    withoutVariableIceState,
-  } = deps;
-
-  const {
     RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_ACTION,
     RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_CHOICE_SOURCE,
     canInstallRunnerProgramFromZone,
@@ -239,19 +97,21 @@ export function createCorpZoneRuntimeHosts(
       legalAction,
       ...(playerAction ? { playerAction } : {}),
       constants: {
-        corpHqAgendaRevealCardId: HQ_AGENDA_REVEAL_ASSET_SOURCE,
+        corpHqAgendaRevealCardId: deps.HQ_AGENDA_REVEAL_ASSET_SOURCE,
       },
       cards: {
-        definitionFor: (cardId) => definitionFor(state, cardId),
+        definitionFor: (cardId) => deps.definitionFor(state, cardId),
         hasCardImplementation: (definitionId) =>
-          Boolean(cardImplementationForDefinitionId(definitionId)),
-        mustInstance: (cardId) => mustInstance(state.cardInstances, cardId),
+          Boolean(deps.cardImplementationForDefinitionId(definitionId)),
+        mustInstance: (cardId) =>
+          deps.mustInstance(state.cardInstances, cardId),
         scoredAgendaKind: (cardId) =>
-          scoredAgendaImplementationForDefinition(definitionFor(state, cardId))
-            ?.kind,
+          deps.scoredAgendaImplementationForDefinition(
+            deps.definitionFor(state, cardId),
+          )?.kind,
         scoredAgendaDrawCount: (cardId) => {
-          const implementation = scoredAgendaImplementationForDefinition(
-            definitionFor(state, cardId),
+          const implementation = deps.scoredAgendaImplementationForDefinition(
+            deps.definitionFor(state, cardId),
           );
           return implementation?.kind ===
             "shuffle_hq_archives_into_rd_then_draw"
@@ -260,22 +120,22 @@ export function createCorpZoneRuntimeHosts(
         },
       },
       zones: {
-        rezzedCorpRootCardIds: () => rezzedCorpRootCardIds(state),
+        rezzedCorpRootCardIds: () => deps.rezzedCorpRootCardIds(state),
         shuffleCorpRnd: (cardIds, randomPurpose) =>
-          shuffleStateIds(state, cardIds, randomPurpose),
+          deps.shuffleStateIds(state, cardIds, randomPurpose),
       },
       credits: {
-        gainCorpCredits: (amount) => credits(state, "corp", amount),
+        gainCorpCredits: (amount) => deps.credits(state, "corp", amount),
       },
       draw: {
-        drawCorpCards: (amount) => drawCorpCards(state, amount),
+        drawCorpCards: (amount) => deps.drawCorpCards(state, amount),
       },
     };
   }
 
   function corpAgendaPointTotal(state: GameState): number {
     const scoredPoints = state.corp.scoreArea.reduce(
-      (sum, cardId) => sum + agendaPointsForScoredCard(state, cardId),
+      (sum, cardId) => sum + deps.agendaPointsForScoredCard(state, cardId),
       0,
     );
     return (
@@ -289,9 +149,9 @@ export function createCorpZoneRuntimeHosts(
   ): CardInstanceId[] {
     let total = 0;
     const selected: CardInstanceId[] = [];
-    for (const cardId of corpScoredAgendaForfeitTargets(state)) {
+    for (const cardId of deps.corpScoredAgendaForfeitTargets(state)) {
       selected.push(cardId);
-      total += agendaPointsForScoredCard(state, cardId);
+      total += deps.agendaPointsForScoredCard(state, cardId);
       if (total >= requiredPoints) return selected;
     }
     return [];
@@ -307,8 +167,9 @@ export function createCorpZoneRuntimeHosts(
     if (!state.corp.scoreArea.includes(sourceCardId))
       throw new Error("Die Scored Agenda ist nicht gescort.");
     if (
-      scoredAgendaKindForDefinition(definitionFor(state, sourceCardId)) !==
-      "shuffle_selected_hq_agendas_into_rd_gain_credits"
+      deps.scoredAgendaKindForDefinition(
+        deps.definitionFor(state, sourceCardId),
+      ) !== "shuffle_selected_hq_agendas_into_rd_gain_credits"
     )
       throw new Error("Die Agenda-Aktion passt nicht zur Scored-Agenda-Art.");
     revealCorpRdTop(state, legalAction);
@@ -318,9 +179,9 @@ export function createCorpZoneRuntimeHosts(
     state: GameState,
     serverId: Exclude<ServerId, "new_remote">,
   ): CardInstanceId | undefined {
-    const server = mustServer(state, serverId);
+    const server = deps.mustServer(state, serverId);
     return [...server.root, ...server.ice].find((cardId) => {
-      const instance = mustInstance(state.cardInstances, cardId);
+      const instance = deps.mustInstance(state.cardInstances, cardId);
       return !instance.rezzed;
     });
   }
@@ -335,7 +196,7 @@ export function createCorpZoneRuntimeHosts(
       throw new Error(
         "In diesem Server liegt keine unrezzed installierte Korp-Karte.",
       );
-    const definition = definitionFor(state, cardId);
+    const definition = deps.definitionFor(state, cardId);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       publicRevealKind: "expose",
@@ -363,7 +224,7 @@ export function createCorpZoneRuntimeHosts(
     const targets: CardInstanceId[] = [];
     for (const server of state.corp.servers) {
       for (const cardId of [...server.root, ...server.ice]) {
-        const instance = mustInstance(state.cardInstances, cardId);
+        const instance = deps.mustInstance(state.cardInstances, cardId);
         if (!instance.rezzed) targets.push(cardId);
       }
     }
@@ -404,8 +265,8 @@ export function createCorpZoneRuntimeHosts(
     targetCardId: CardInstanceId,
     scope: "inside_data_fort" | "any_installed",
   ): { publicPayload: Record<string, string | number | boolean> } {
-    const targetDefinition = definitionFor(state, targetCardId);
-    const sourceDefinition = CARD_DEFINITIONS_BY_ID[sourceDefinitionId];
+    const targetDefinition = deps.definitionFor(state, targetCardId);
+    const sourceDefinition = deps.CARD_DEFINITIONS_BY_ID[sourceDefinitionId];
     const context = installedCorpCardServerContext(state, targetCardId);
     state.pendingChoice = {
       choiceId: `p3_36_expose_installed_card_review_${state.stateVersion + 1}`,
@@ -462,9 +323,10 @@ export function createCorpZoneRuntimeHosts(
       throw new Error(
         "Diese installierte Korp-Karte kann nicht exposed werden.",
       );
-    const preventionOptions = corpInstalledCardIds(state)
+    const preventionOptions = deps
+      .corpInstalledCardIds(state)
       .filter((cardId) => {
-        const utility = corpUtilityImplementationForCard(state, cardId);
+        const utility = deps.corpUtilityImplementationForCard(state, cardId);
         if (utility?.kind !== "expose_prevention") return false;
         const cost = utility.cost.kind === "credit" ? utility.cost.amount : 0;
         return state.corp.credits >= cost;
@@ -481,7 +343,7 @@ export function createCorpZoneRuntimeHosts(
           { id: "pass", label: "Expose nicht verhindern" },
           ...preventionOptions.map((cardId) => ({
             id: `department_${cardId}`,
-            label: `${definitionFor(state, cardId).title}: Expose verhindern`,
+            label: `${deps.definitionFor(state, cardId).title}: Expose verhindern`,
             publicLabel: "Expose Prevention",
             value: cardId,
           })),
@@ -514,7 +376,7 @@ export function createCorpZoneRuntimeHosts(
   function installedRunnerIcebreakerIds(state: GameState): CardInstanceId[] {
     return state.runner.rig.programs
       .filter((cardId) =>
-        cardHasSubtype(definitionFor(state, cardId), "icebreaker"),
+        deps.cardHasSubtype(deps.definitionFor(state, cardId), "icebreaker"),
       )
       .sort();
   }
@@ -529,16 +391,19 @@ export function createCorpZoneRuntimeHosts(
     countersAfter: number;
     publicPayload: Record<string, string | number | boolean>;
   } {
-    if (counterType !== "militech" && counterType !== "breaker_strength_penalty")
+    if (
+      counterType !== "militech" &&
+      counterType !== "breaker_strength_penalty"
+    )
       throw new Error("Dieser Icebreaker-Counter-Typ wird nicht unterstuetzt.");
     const targetIds = installedRunnerIcebreakerIds(state);
     for (const cardId of targetIds)
-      addCardCounter(state, cardId, counterType, amount);
+      deps.addCardCounter(state, cardId, counterType, amount);
     return {
       amount: targetIds.length * amount,
       counterType,
       countersAfter: targetIds.reduce(
-        (sum, cardId) => sum + cardCounter(state, cardId, counterType),
+        (sum, cardId) => sum + deps.cardCounter(state, cardId, counterType),
         0,
       ),
       publicPayload: {
@@ -546,7 +411,7 @@ export function createCorpZoneRuntimeHosts(
         addedCounterAmount: targetIds.length * amount,
         targetCount: targetIds.length,
         targetCardDefinitionIds: targetIds
-          .map((cardId) => definitionFor(state, cardId).id)
+          .map((cardId) => deps.definitionFor(state, cardId).id)
           .join(","),
       },
     };
@@ -558,10 +423,10 @@ export function createCorpZoneRuntimeHosts(
     sourceDefinitionId: CardDefinitionId,
     reason: "lifecycle" | "access" | "operation",
   ): { publicPayload: Record<string, string | number | boolean> } {
-    const instance = mustInstance(state.cardInstances, cardId);
+    const instance = deps.mustInstance(state.cardInstances, cardId);
     if (instance.owner !== "corp")
       throw new Error("Nur Korp-Karten koennen in R&D gemischt werden.");
-    removeFromAllZones(state, cardId);
+    deps.removeFromAllZones(state, cardId);
     state.corp.rd.push(cardId);
     state.cardInstances[cardId] = {
       ...instance,
@@ -569,14 +434,14 @@ export function createCorpZoneRuntimeHosts(
       rezzed: false,
       zone: { side: "corp", zone: "rd" },
     };
-    state.corp.rd = shuffleStateIds(
+    state.corp.rd = deps.shuffleStateIds(
       state,
       state.corp.rd,
       `card_implementation.${sourceDefinitionId}.${reason}.shuffle_into_rd`,
     );
     for (const rdCardId of state.corp.rd) {
       state.cardInstances[rdCardId] = {
-        ...mustInstance(state.cardInstances, rdCardId),
+        ...deps.mustInstance(state.cardInstances, rdCardId),
         zone: { side: "corp", zone: "rd" },
       };
     }
@@ -604,19 +469,19 @@ export function createCorpZoneRuntimeHosts(
       throw new Error(
         "Die gescorte Agenda hat keinen gueltigen Installationsserver.",
       );
-    const server = mustServer(
+    const server = deps.mustServer(
       state,
       serverId as Exclude<ServerId, "new_remote">,
     );
     const targetIds = [...server.root, ...server.ice].sort();
     const publicDefinitionIds = targetIds
       .filter((targetId) => {
-        const instance = mustInstance(state.cardInstances, targetId);
+        const instance = deps.mustInstance(state.cardInstances, targetId);
         return instance.rezzed === true || instance.faceup === true;
       })
-      .map((targetId) => definitionFor(state, targetId).id);
+      .map((targetId) => deps.definitionFor(state, targetId).id);
     for (const targetId of targetIds) {
-      trashCorpInstalledCardToArchives(state, targetId, legalAction);
+      deps.trashCorpInstalledCardToArchives(state, targetId, legalAction);
     }
     return {
       publicPayload: {
@@ -634,7 +499,7 @@ export function createCorpZoneRuntimeHosts(
     state: GameState,
     legalAction: LegalAction,
   ): void {
-    if (!runnerStoleAgendaSubtypeThisTurn(state, "research"))
+    if (!deps.runnerStoleAgendaSubtypeThisTurn(state, "research"))
       throw new Error(
         "Deal with Militech benoetigt eine befreite Research-Agenda in diesem Zug.",
       );
@@ -645,12 +510,14 @@ export function createCorpZoneRuntimeHosts(
     );
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      sourceDefinitionId: DEAL_WITH_MILITECH_ID,
+      sourceDefinitionId: deps.DEAL_WITH_MILITECH_ID,
       ...result.publicPayload,
     };
   }
 
-  function multiExposeInstalledCorpCardTargets(state: GameState): CardInstanceId[] {
+  function multiExposeInstalledCorpCardTargets(
+    state: GameState,
+  ): CardInstanceId[] {
     return exposeInstalledCorpCardTargets(state, "any_installed");
   }
 
@@ -717,11 +584,13 @@ export function createCorpZoneRuntimeHosts(
   ): void {
     if (state.pendingChoice)
       throw new Error("Es ist bereits eine Choice offen.");
-    const options = multiExposeInstalledCorpCardTargets(state).map((cardId) => ({
-      id: exposeInstalledCorpCardChoiceOptionId(cardId),
-      label: multiExposeInstalledCorpCardOptionLabel(state, cardId),
-      value: cardId,
-    }));
+    const options = multiExposeInstalledCorpCardTargets(state).map(
+      (cardId) => ({
+        id: exposeInstalledCorpCardChoiceOptionId(cardId),
+        label: multiExposeInstalledCorpCardOptionLabel(state, cardId),
+        value: cardId,
+      }),
+    );
     if (options.length === 0)
       throw new Error(
         "Die Multi-Expose-Choice findet keine installierte verdeckte Korp-Karte.",
@@ -846,19 +715,26 @@ export function createCorpZoneRuntimeHosts(
     playerAction: PlayerAction,
   ): void {
     const choice = state.pendingChoice;
-    if (!choice || !choice.source.startsWith("card_implementation.multi_expose_installed_corp_cards"))
+    if (
+      !choice ||
+      !choice.source.startsWith(
+        "card_implementation.multi_expose_installed_corp_cards",
+      )
+    )
       throw new Error("Es ist keine Multi-Expose-Choice offen.");
     const selectedIds = selectedChoiceCardIds(choice, playerAction);
     const legalTargets = new Set(multiExposeInstalledCorpCardTargets(state));
     for (const cardId of selectedIds) {
       if (!legalTargets.has(cardId))
-        throw new Error("Diese Multi-Expose-Choice darf dieses Ziel nicht exposen.");
+        throw new Error(
+          "Diese Multi-Expose-Choice darf dieses Ziel nicht exposen.",
+        );
     }
     const labels = selectedIds.map((cardId: CardInstanceId) =>
       multiExposeInstalledCorpCardOptionLabel(state, cardId),
     );
     const definitionIds = selectedIds.map(
-      (cardId: CardInstanceId) => definitionFor(state, cardId).id,
+      (cardId: CardInstanceId) => deps.definitionFor(state, cardId).id,
     );
     delete state.pendingChoice;
     legalAction.payload = {
@@ -898,7 +774,8 @@ export function createCorpZoneRuntimeHosts(
       }
       if (!sourceCardId || !state.cardInstances[sourceCardId])
         throw new Error("Die Expose-Quelle ist nicht mehr installiert.");
-      const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+      const selected =
+        deps.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
       if (selected !== "done")
         throw new Error("Diese Expose-Ansicht kann nur beendet werden.");
       delete state.pendingChoice;
@@ -906,7 +783,8 @@ export function createCorpZoneRuntimeHosts(
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
         hiddenZoneBarrier: true,
-        hiddenZoneAction: "schematics_search_engine_expose_installed_cards_finish",
+        hiddenZoneAction:
+          "schematics_search_engine_expose_installed_cards_finish",
         sourceCardId,
         sourceDefinitionId,
       };
@@ -919,7 +797,8 @@ export function createCorpZoneRuntimeHosts(
         throw new Error("Die angezeigte Korp-Karte ist nicht mehr vorhanden.");
       if (!sourceCardId || !state.cardInstances[sourceCardId])
         throw new Error("Die Expose-Quelle ist nicht mehr installiert.");
-      const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+      const selected =
+        deps.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
       if (selected !== "done")
         throw new Error("Diese Expose-Ansicht kann nur beendet werden.");
       delete state.pendingChoice;
@@ -948,7 +827,7 @@ export function createCorpZoneRuntimeHosts(
       ] = choice.source.split(":");
       if (!sourceCardId || !state.cardInstances[sourceCardId])
         throw new Error("Die Expose-Quelle ist nicht mehr installiert.");
-      const sourceDefinition = definitionFor(state, sourceCardId);
+      const sourceDefinition = deps.definitionFor(state, sourceCardId);
       if (sourceDefinition.id !== sourceDefinitionId)
         throw new Error("Die Expose-Quelle passt nicht mehr zur Choice.");
       const selectedIds = selectedChoiceCardIds(choice, playerAction);
@@ -987,7 +866,8 @@ export function createCorpZoneRuntimeHosts(
       ] = choice.source.split(":");
       if (!sourceCardId || !state.cardInstances[sourceCardId])
         throw new Error("Die Expose-Quelle ist nicht mehr installiert.");
-      const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+      const selected =
+        deps.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
       if (selected === "fort_none") {
         delete state.pendingChoice;
         legalAction.payload = {
@@ -1037,7 +917,7 @@ export function createCorpZoneRuntimeHosts(
         choice.source.split(":");
       if (!sourceCardId || !state.cardInstances[sourceCardId])
         throw new Error("Die Expose-Quelle ist nicht mehr installiert.");
-      const sourceDefinition = definitionFor(state, sourceCardId);
+      const sourceDefinition = deps.definitionFor(state, sourceCardId);
       if (sourceDefinition.id !== sourceDefinitionId)
         throw new Error("Die Expose-Quelle passt nicht mehr zur Choice.");
       const selectedIds = selectedChoiceCardIds(choice, playerAction);
@@ -1052,7 +932,7 @@ export function createCorpZoneRuntimeHosts(
         exposeInstalledCorpCardLabel(state, cardId),
       );
       const definitions = selectedIds.map((cardId: CardInstanceId) =>
-        definitionFor(state, cardId),
+        deps.definitionFor(state, cardId),
       );
       delete state.pendingChoice;
       legalAction.payload = {
@@ -1079,7 +959,7 @@ export function createCorpZoneRuntimeHosts(
       choice.source.split(":");
     if (!sourceCardId || !state.cardInstances[sourceCardId])
       throw new Error("Die Expose-Quelle ist nicht mehr installiert.");
-    const sourceDefinition = definitionFor(state, sourceCardId);
+    const sourceDefinition = deps.definitionFor(state, sourceCardId);
     if (sourceDefinition.id !== sourceDefinitionId)
       throw new Error("Die Expose-Quelle passt nicht mehr zur Choice.");
     const selectedIds = selectedChoiceCardIds(choice, playerAction);
@@ -1096,7 +976,7 @@ export function createCorpZoneRuntimeHosts(
       exposeInstalledCorpCardLabel(state, cardId),
     );
     const definitions = selectedIds.map((cardId: CardInstanceId) =>
-      definitionFor(state, cardId),
+      deps.definitionFor(state, cardId),
     );
     delete state.pendingChoice;
     legalAction.payload = {
@@ -1131,7 +1011,8 @@ export function createCorpZoneRuntimeHosts(
       exposeSourceDefinitionId = "",
       scopeText = "any_installed",
     ] = choice.source.slice("corp.expose_prevention:".length).split(":");
-    const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+    const selected =
+      deps.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
     if (selected === "pass") {
       delete state.pendingChoice;
       const scope =
@@ -1162,13 +1043,13 @@ export function createCorpZoneRuntimeHosts(
     if (!sourceCardId)
       throw new Error("Die Expose-Prevention-Auswahl ist ungueltig.");
     const source = state.cardInstances[sourceCardId];
-    const utility = corpUtilityImplementationForCard(state, sourceCardId);
+    const utility = deps.corpUtilityImplementationForCard(state, sourceCardId);
     if (!source || utility?.kind !== "expose_prevention")
       throw new Error("Die Expose-Prevention-Quelle ist nicht mehr legal.");
     const cost = utility.cost.kind === "credit" ? utility.cost.amount : 0;
     if (state.corp.credits < cost)
       throw new Error("Die Korp kann Expose Prevention nicht bezahlen.");
-    spendCredits(state, "corp", cost);
+    deps.spendCredits(state, "corp", cost);
     state.cardInstances[sourceCardId] = {
       ...source,
       faceup: true,
@@ -1193,7 +1074,7 @@ export function createCorpZoneRuntimeHosts(
       .filter((server) => server.ice.length > 0)
       .map((server) => ({
         server,
-        cardId: server.ice[outermostIceIndex(server)]!,
+        cardId: server.ice[deps.outermostIceIndex(server)]!,
       }));
   }
 
@@ -1209,7 +1090,7 @@ export function createCorpZoneRuntimeHosts(
         "Es liegt kein outermost ICE zum Exposen in einem Data Fort.",
       );
     const sourceDefinition = sourceDefinitionId
-      ? CARD_DEFINITIONS_BY_ID[sourceDefinitionId]
+      ? deps.CARD_DEFINITIONS_BY_ID[sourceDefinitionId]
       : undefined;
     const payload = {
       hiddenZoneBarrier: true,
@@ -1220,7 +1101,7 @@ export function createCorpZoneRuntimeHosts(
       ...(sourceDefinition ? { sourceTitle: sourceDefinition.title } : {}),
       revealedCount: exposures.length,
       publicRevealDefinitionIds: exposures
-        .map(({ cardId }) => definitionFor(state, cardId).id)
+        .map(({ cardId }) => deps.definitionFor(state, cardId).id)
         .join(","),
       exposedServerIds: exposures.map(({ server }) => server.id).join(","),
       exposedServerLabels: exposures

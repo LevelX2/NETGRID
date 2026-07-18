@@ -26,7 +26,7 @@
   "summary": {
     "test_only_card_name": 45,
     "allowed_catalog_reference": 43,
-    "mechanics_constant_controls_behavior_by_card_id": 29,
+    "mechanics_constant_controls_behavior_by_card_id": 28,
     "functional_kind_uses_card_name": 2,
     "false_positive": 14
   },
@@ -230,7 +230,9 @@
         "questForCattekinPermanentActionGain"
       ],
       "targetKind": "start_turn_random_effect_table",
-      "targetState": ["runnerTurnFlags.persistentModifiers[]"],
+      "targetState": [
+        "runnerTurnFlags.persistentModifiers[]"
+      ],
       "params": {
         "dieFaces": 6,
         "outcomes": [
@@ -252,7 +254,9 @@
         "multiServerSuccessSequenceRun"
       ],
       "targetKind": "multi_server_success_sequence",
-      "targetState": ["runnerTurnFlags.pendingSequences[]"],
+      "targetState": [
+        "runnerTurnFlags.pendingSequences[]"
+      ],
       "params": {
         "sequence": "run_each_data_fort",
         "advanceOnSuccessfulRun": true,
@@ -269,7 +273,10 @@
         "delayedAccessEffects"
       ],
       "targetKind": "delayed_agenda_access_replacement",
-      "targetState": ["runDurationEffects[]", "delayedAccessEffects[]"],
+      "targetState": [
+        "runDurationEffects[]",
+        "delayedAccessEffects[]"
+      ],
       "params": {
         "replacementWindow": "agenda_access",
         "delay": "after_current_access_sequence"
@@ -284,7 +291,9 @@
         "codeViralCachePurgePreserveTargets"
       ],
       "targetKind": "purge_replacement_with_runner_virus_counter_cleanup",
-      "targetState": ["replacementEffects[]"],
+      "targetState": [
+        "replacementEffects[]"
+      ],
       "params": {
         "interruptedEvent": "corp_purge_virus_counters",
         "runnerVirusCounterCleanup": true
@@ -317,7 +326,9 @@
         "spendRecurringTraceCreditPool"
       ],
       "targetKind": "recurring_trace_credit_pool",
-      "targetState": ["recurringCreditPools[]"],
+      "targetState": [
+        "recurringCreditPools[]"
+      ],
       "params": {
         "amount": 1,
         "spendWindow": "trace",
@@ -333,7 +344,9 @@
         "runStartInterventions"
       ],
       "targetKind": "start_run_redirect_to_source_fort",
-      "targetState": ["runStartInterventions[]"],
+      "targetState": [
+        "runStartInterventions[]"
+      ],
       "params": {
         "redirectTarget": "source_fort",
         "triggerWindow": "run_start"
@@ -348,7 +361,9 @@
         "overadvance_bonus_agenda_points"
       ],
       "targetKind": "score_credit_swing_if_corp_credit_threshold_met / overadvance_bonus_agenda_points",
-      "targetState": ["scoredAgendaAbilities[]"],
+      "targetState": [
+        "scoredAgendaAbilities[]"
+      ],
       "params": {
         "triggerWindow": "agenda_scored",
         "conditionSource": "agenda_params"
@@ -1041,7 +1056,7 @@
     },
     {
       "path": "packages/engine/src/game/engine-runtime-internal/access-flow-runtime-hosts.ts",
-      "line": 629,
+      "line": 608,
       "column": 3,
       "token": "CODE_VIRAL_CACHE",
       "cardTitle": "Code Viral Cache",
@@ -1052,7 +1067,7 @@
     },
     {
       "path": "packages/engine/src/game/engine-runtime-internal/action-runtime-bootstrap.ts",
-      "line": 652,
+      "line": 622,
       "column": 3,
       "token": "CODE_VIRAL_CACHE",
       "cardTitle": "Code Viral Cache",
@@ -1096,7 +1111,7 @@
     },
     {
       "path": "packages/engine/src/game/engine-runtime-internal/card-runtime-bootstrap.ts",
-      "line": 641,
+      "line": 616,
       "column": 3,
       "token": "CODE_VIRAL_CACHE",
       "cardTitle": "Code Viral Cache",
@@ -1140,7 +1155,7 @@
     },
     {
       "path": "packages/engine/src/game/engine-runtime-internal/choice-hidden-zone-resolvers.ts",
-      "line": 632,
+      "line": 611,
       "column": 3,
       "token": "CODE_VIRAL_CACHE",
       "cardTitle": "Code Viral Cache",
@@ -1195,7 +1210,7 @@
     },
     {
       "path": "packages/engine/src/game/engine-runtime-internal/encounter-movement-runtime-hosts.ts",
-      "line": 612,
+      "line": 610,
       "column": 3,
       "token": "CODE_VIRAL_CACHE",
       "cardTitle": "Code Viral Cache",
@@ -1206,7 +1221,7 @@
     },
     {
       "path": "packages/engine/src/game/engine-runtime-internal/flow-runtime-bootstrap.ts",
-      "line": 653,
+      "line": 623,
       "column": 3,
       "token": "CODE_VIRAL_CACHE",
       "cardTitle": "Code Viral Cache",
@@ -1217,7 +1232,7 @@
     },
     {
       "path": "packages/engine/src/game/engine-runtime-internal/install-rez-runtime-hosts.ts",
-      "line": 629,
+      "line": 608,
       "column": 3,
       "token": "CODE_VIRAL_CACHE",
       "cardTitle": "Code Viral Cache",
@@ -1261,7 +1276,7 @@
     },
     {
       "path": "packages/engine/src/game/engine-runtime-internal/public-event-runtime-bootstrap.ts",
-      "line": 651,
+      "line": 621,
       "column": 3,
       "token": "CODE_VIRAL_CACHE",
       "cardTitle": "Code Viral Cache",
@@ -1272,7 +1287,7 @@
     },
     {
       "path": "packages/engine/src/game/engine-runtime-internal/run-flow-runtime-hosts.ts",
-      "line": 603,
+      "line": 601,
       "column": 3,
       "token": "CODE_VIRAL_CACHE",
       "cardTitle": "Code Viral Cache",
@@ -1283,7 +1298,7 @@
     },
     {
       "path": "packages/engine/src/game/engine-runtime-internal/runtime-bootstrap-support.ts",
-      "line": 656,
+      "line": 626,
       "column": 3,
       "token": "CODE_VIRAL_CACHE",
       "cardTitle": "Code Viral Cache",
@@ -1316,7 +1331,7 @@
     },
     {
       "path": "packages/engine/src/game/engine-runtime-internal/state-runtime-bootstrap.ts",
-      "line": 660,
+      "line": 629,
       "column": 3,
       "token": "CODE_VIRAL_CACHE",
       "cardTitle": "Code Viral Cache",
@@ -1328,17 +1343,6 @@
     {
       "path": "packages/engine/src/game/engine-runtime-internal/trigger-ability-runtime-hosts.ts",
       "line": 609,
-      "column": 3,
-      "token": "CODE_VIRAL_CACHE",
-      "cardTitle": "Code Viral Cache",
-      "tokenSource": "known_watch_token",
-      "category": "mechanics_constant_controls_behavior_by_card_id",
-      "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
-      "snippet": "CODE_VIRAL_CACHE_ID,"
-    },
-    {
-      "path": "packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts",
-      "line": 623,
       "column": 3,
       "token": "CODE_VIRAL_CACHE",
       "cardTitle": "Code Viral Cache",

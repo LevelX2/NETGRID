@@ -12,20 +12,15 @@ const engineRoot = path.join(repoRoot, "packages", "engine", "src");
 const runtimeRoot = path.join(engineRoot, "game", "engine-runtime-internal");
 const abilityRoot = path.join(engineRoot, "ability-engine");
 
-const delegateDebt = new Map([
-  ["action-runtime-delegates.ts", 0],
-  ["card-runtime-delegates.ts", 0],
-  ["choice-runtime-delegates.ts", 0],
-  ["flow-runtime-delegates.ts", 0],
-  ["state-runtime-delegates.ts", 0],
-]);
-const delegateExportCaps = new Map([
-  ["action-runtime-delegates.ts", 107],
-  ["card-runtime-delegates.ts", 50],
-  ["choice-runtime-delegates.ts", 89],
-  ["flow-runtime-delegates.ts", 58],
-  ["state-runtime-delegates.ts", 126],
-]);
+const forbiddenRuntimeDelegateFiles = [
+  "action-runtime-delegates.ts",
+  "card-runtime-delegates.ts",
+  "choice-runtime-delegates.ts",
+  "flow-runtime-delegates.ts",
+  "runtime-delegate-store.ts",
+  "runtime-delegates.ts",
+  "state-runtime-delegates.ts",
+];
 const runtimeImportFanoutDebt = new Map([
   ["game/engine-runtime-internal/access-flow-runtime-hosts.ts", 117],
   ["game/engine-runtime-internal/action-runtime-bootstrap.ts", 123],
@@ -52,14 +47,12 @@ const runtimeImportFanoutDebt = new Map([
   ["game/engine-runtime-internal/runtime-bootstrap-support.ts", 124],
   ["game/engine-runtime-internal/scored-economy-runtime-hosts.ts", 117],
   ["game/engine-runtime-internal/state-corp-runtime-resolvers.ts", 126],
-  ["game/engine-runtime-internal/state-runtime-bootstrap.ts", 122],
+  ["game/engine-runtime-internal/state-runtime-bootstrap.ts", 121],
   ["game/engine-runtime-internal/state-runtime-resolvers.ts", 126],
   ["game/engine-runtime-internal/trigger-ability-runtime-hosts.ts", 117],
-  ["game/engine-runtime-internal/turn-runtime-resolvers.ts", 125],
   ["game/engine-runtime-internal/zone-runtime-services.ts", 118],
 ]);
 const allowedCycleSignatures = new Set([
-  "game/engine-runtime-internal/runtime-bootstrap-support.ts|game/engine-runtime-internal/runtime-delegates.ts|game/engine-runtime-internal/state-corp-runtime-resolvers.ts|game/engine-runtime-internal/state-runtime-resolvers.ts",
   "game/run/fort-pass-window.ts|game/run/windows/after-passing-last-ice-window.ts|game/run/windows/run-window-host.ts",
 ]);
 const allowedLayerDebt = new Set([
@@ -111,6 +104,13 @@ const actualLayerDebt = new Set();
 
 for (const file of productionFiles) {
   const source = parseSource(file, readFileSync(file, "utf8"));
+  if (relativeEnginePath(file).startsWith("game/engine-runtime-internal/")) {
+    const dependencySnapshots = countRuntimeDependencySnapshots(source);
+    if (dependencySnapshots > 0)
+      findings.push(
+        `${relativeEnginePath(file)} captures ${dependencySnapshots} runtime dependency object destructuring snapshot(s)`,
+      );
+  }
   for (const statement of source.statements) {
     if (!isModuleDeclaration(statement)) continue;
     const specifier = statement.moduleSpecifier;
@@ -152,22 +152,10 @@ for (const allowed of allowedLayerDebt) {
     findings.push(`stale allowed-layer debt entry: ${allowed}`);
 }
 
-for (const [fileName, expectedUnsafeSignatures] of delegateDebt) {
-  const file = path.join(runtimeRoot, fileName);
-  const source = parseSource(file, readFileSync(file, "utf8"));
-  const unsafeSignatures = countUnsafeDelegateSignatures(source);
-  if (unsafeSignatures !== expectedUnsafeSignatures) {
-    findings.push(
-      `${runtimePath(fileName)} has ${unsafeSignatures} unsafe any delegate signatures; debt ledger expects ${expectedUnsafeSignatures}`,
-    );
-  }
-  const exportedFunctions = countExportedFunctions(source);
-  const cap = delegateExportCaps.get(fileName);
-  if (exportedFunctions > cap) {
-    findings.push(
-      `${runtimePath(fileName)} exports ${exportedFunctions} functions; allowed maximum is ${cap}`,
-    );
-  }
+const runtimeFileNames = new Set(readdirSync(runtimeRoot));
+for (const fileName of forbiddenRuntimeDelegateFiles) {
+  if (runtimeFileNames.has(fileName))
+    findings.push(`${runtimePath(fileName)} must not be reintroduced`);
 }
 
 for (const [file, targets] of graph) {
@@ -232,6 +220,40 @@ if (sourceLineCount(runtimePortContracts) > 160)
     `${runtimePath("runtime-port-contracts.ts")} exceeds 160 lines`,
   );
 
+const runtimePortBindings = path.join(runtimeRoot, "runtime-port-bindings.ts");
+const runtimePortBindingsSource = parseSource(
+  runtimePortBindings,
+  readFileSync(runtimePortBindings, "utf8"),
+);
+const runtimePortBindingCount = runtimePortBindingsSource.statements
+  .filter(
+    (statement) =>
+      ts.isVariableStatement(statement) &&
+      statement.modifiers?.some(
+        (modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword,
+      ),
+  )
+  .reduce(
+    (count, statement) => count + statement.declarationList.declarations.length,
+    0,
+  );
+if (runtimePortBindingCount !== 430)
+  findings.push(
+    `${runtimePath("runtime-port-bindings.ts")} exports ${runtimePortBindingCount} live bindings; expected 430`,
+  );
+const runtimePortBindingsAnyCount = countSyntaxKind(
+  runtimePortBindingsSource,
+  ts.SyntaxKind.AnyKeyword,
+);
+if (runtimePortBindingsAnyCount > 0)
+  findings.push(
+    `${runtimePath("runtime-port-bindings.ts")} contains ${runtimePortBindingsAnyCount} any type nodes`,
+  );
+if (sourceLineCount(runtimePortBindings) > 1300)
+  findings.push(
+    `${runtimePath("runtime-port-bindings.ts")} exceeds 1300 lines`,
+  );
+
 for (const fileName of runtimePortContractFiles) {
   const file = path.join(runtimeRoot, fileName);
   const source = parseSource(file, readFileSync(file, "utf8"));
@@ -258,7 +280,7 @@ if (findings.length > 0) {
 }
 
 console.log(
-  `ENGINE_SOURCE_STRUCTURE OK production=${productionFiles.length} relativeCycles=${actualCycles.length} unsafeDelegateSignatures=${sum(delegateDebt.values())}`,
+  `ENGINE_SOURCE_STRUCTURE OK production=${productionFiles.length} relativeCycles=${actualCycles.length} runtimePortBindings=${runtimePortBindingCount}`,
 );
 
 function collectSourceFiles(root) {
@@ -349,6 +371,22 @@ function countExportedFunctions(source) {
         (modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword,
       ),
   ).length;
+}
+
+function countRuntimeDependencySnapshots(source) {
+  let count = 0;
+  function visit(node) {
+    if (
+      ts.isVariableDeclaration(node) &&
+      ts.isObjectBindingPattern(node.name) &&
+      ts.isIdentifier(node.initializer) &&
+      node.initializer.text === "deps"
+    )
+      count += 1;
+    ts.forEachChild(node, visit);
+  }
+  visit(source);
+  return count;
 }
 
 function importFanoutFinding(relative, actual, debt) {
@@ -443,10 +481,6 @@ function signature(entries) {
   return entries.slice().sort().join("|");
 }
 
-function sum(values) {
-  return [...values].reduce((total, value) => total + value, 0);
-}
-
 function runSelfTest() {
   const graph = new Map([
     ["a", new Set(["b"])],
@@ -467,6 +501,18 @@ function runSelfTest() {
   )
     throw new Error(
       "engine source structure self-test failed: unsafe delegate",
+    );
+
+  if (
+    countRuntimeDependencySnapshots(
+      parseSource("runtime.ts", "const { action } = deps;"),
+    ) !== 1 ||
+    countRuntimeDependencySnapshots(
+      parseSource("runtime.ts", "const action = deps.action;"),
+    ) !== 0
+  )
+    throw new Error(
+      "engine source structure self-test failed: runtime dependency snapshot",
     );
 
   if (

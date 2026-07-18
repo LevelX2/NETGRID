@@ -695,34 +695,6 @@ export function createScoredEconomyRuntimeHosts(
   | "corpTraceDamageAbilityHost"
   | "corpSpecialDamageAbilityHost"
 > {
-  const {
-    agendaPoints,
-    agendaPointsForScoredCard,
-    automaticDrawCardsEffect,
-    canInstallCorpRootCardInServer,
-    cardHasSubtype,
-    cardImplementationRuntimeDeps,
-    corpAgendaPointTotal,
-    corpScoredAgendaForfeitTargets,
-    corpZoneChoiceHandlerHost,
-    effectiveAgendaDifficultyDeps,
-    forfeitCorpAgendaForPointCost,
-    isCorpInstallableCardType,
-    revealCorpRdTop,
-    rezzedCorpRootCardIds,
-    rootInstallRezzesOnInstall,
-    runRezWindowHostForState,
-    scoredAgendaImplementationForDefinition,
-    scoredAgendaKindForDefinition,
-    spendCorpAgendaPointCost,
-    spendVisibleCardCounter,
-    trashCorpInstalledCardToArchives,
-    trashOlderRegionUpgradesInServer,
-    uniqueDirectLongtailImplementationForCard,
-    uniqueDirectLongtailImplementationForDefinition,
-    isRegionUpgrade,
-  } = deps;
-
   function corpInstallRezSequenceHandlerHost(
     state: GameState,
     legalAction: LegalAction,
@@ -736,15 +708,17 @@ export function createScoredEconomyRuntimeHosts(
         definitionFor: (cardId) => definitionFor(state, cardId),
         mustInstance: (cardId) => mustInstance(state.cardInstances, cardId),
         scoredAgendaKind: (cardId) =>
-          scoredAgendaKindForDefinition(definitionFor(state, cardId)),
+          deps.scoredAgendaKindForDefinition(definitionFor(state, cardId)),
         scoredAgendaForCard: (cardId) =>
-          scoredAgendaImplementationForDefinition(definitionFor(state, cardId)),
+          deps.scoredAgendaImplementationForDefinition(
+            definitionFor(state, cardId),
+          ),
         isCorpInstallableCardType: (definition) =>
-          isCorpInstallableCardType(definition),
+          deps.isCorpInstallableCardType(definition),
         canInstallCorpRootCardInServer: (definition, server) =>
-          canInstallCorpRootCardInServer(state, definition, server),
-        isRegionUpgrade,
-        rootInstallRezzesOnInstall,
+          deps.canInstallCorpRootCardInServer(state, definition, server),
+        isRegionUpgrade: deps.isRegionUpgrade,
+        rootInstallRezzesOnInstall: deps.rootInstallRezzesOnInstall,
         rezCostForCard: (cardId) => rezCostForCard(state, cardId),
         isScoredAgendaFreeRezCandidate: (cardId) => {
           const instance = state.cardInstances[cardId];
@@ -771,7 +745,7 @@ export function createScoredEconomyRuntimeHosts(
         createRemote: () => createRemote(state),
         mustServer: (serverId) => mustServer(state, serverId),
         trashOlderRegionUpgradesInServer: (server, keepCardId, legalAction) =>
-          trashOlderRegionUpgradesInServer(
+          deps.trashOlderRegionUpgradesInServer(
             state,
             server,
             keepCardId,
@@ -783,7 +757,10 @@ export function createScoredEconomyRuntimeHosts(
       },
       callbacks: {
         resolveCorpRootRez: (cardId) => {
-          resolveCorpRootRezEffect(runRezWindowHostForState(state), cardId);
+          resolveCorpRootRezEffect(
+            deps.runRezWindowHostForState(state),
+            cardId,
+          );
         },
       },
     };
@@ -802,15 +779,15 @@ export function createScoredEconomyRuntimeHosts(
         definitionFor: (cardId) => definitionFor(state, cardId),
         mustInstance: (cardId) => mustInstance(state.cardInstances, cardId),
         scoredAgendaForDefinition: (definition) =>
-          scoredAgendaImplementationForDefinition(definition),
+          deps.scoredAgendaImplementationForDefinition(definition),
         effectiveAgendaDifficulty: (cardId) =>
           effectiveAgendaDifficulty(
-            effectiveAgendaDifficultyDeps,
+            deps.effectiveAgendaDifficultyDeps,
             state,
             cardId,
           ),
         hasSubtype: (definition, subtype) =>
-          cardHasSubtype(definition, subtype),
+          deps.cardHasSubtype(definition, subtype),
         isOveradvanceAgendaDefinition: (definitionId) =>
           OVERADVANCE_AGENDA_SOURCES.has(definitionId as CardDefinitionId),
       },
@@ -853,7 +830,7 @@ export function createScoredEconomyRuntimeHosts(
         executeOnScore: (definition, cardId) => {
           if (!legalAction) return;
           executeCardImplementationLifecycleEffects(
-            cardImplementationRuntimeDeps,
+            deps.cardImplementationRuntimeDeps,
             state,
             legalAction,
             definition,
@@ -869,7 +846,7 @@ export function createScoredEconomyRuntimeHosts(
           if (!legalAction) return;
           legalAction.resolvedEffects = [
             ...(legalAction.resolvedEffects ?? []),
-            automaticDrawCardsEffect(
+            deps.automaticDrawCardsEffect(
               `corp.start.scored_agenda_start_draw.${cardId}`,
               "corp",
               drawnCount,
@@ -902,7 +879,7 @@ export function createScoredEconomyRuntimeHosts(
           if (!legalAction)
             throw new Error("HQ-Agenda-Shuffle braucht eine LegalAction.");
           startScoredAgendaHqShuffleCreditsChoice(
-            corpZoneChoiceHandlerHost(state, legalAction),
+            deps.corpZoneChoiceHandlerHost(state, legalAction),
             { sourceCardId: cardId, creditPerAgendaPoint },
           );
         },
@@ -928,9 +905,9 @@ export function createScoredEconomyRuntimeHosts(
       cards: {
         definitionFor: (cardId) => definitionFor(state, cardId),
         scoredAgendaKindForDefinition: (definition) =>
-          scoredAgendaKindForDefinition(definition),
+          deps.scoredAgendaKindForDefinition(definition),
         scoredAgendaForDefinition: (definition) =>
-          scoredAgendaImplementationForDefinition(definition),
+          deps.scoredAgendaImplementationForDefinition(definition),
         isScoredRevealAgendaDefinition: (definitionId) =>
           SCORED_REVEAL_AGENDA_SOURCES.has(definitionId as CardDefinitionId),
       },
@@ -942,7 +919,7 @@ export function createScoredEconomyRuntimeHosts(
         cardCounter: (cardId, counterType) =>
           cardCounter(state, cardId, counterType),
         spendVisibleCardCounter: (cardId, counterType, amount) =>
-          spendVisibleCardCounter(state, cardId, counterType, amount),
+          deps.spendVisibleCardCounter(state, cardId, counterType, amount),
       },
       credits: {
         gainCorpCredits: (amount) => credits(state, "corp", amount),
@@ -984,7 +961,7 @@ export function createScoredEconomyRuntimeHosts(
       callbacks: {
         pushActivatedCardImplementationActions: (actions, cardId, definition) =>
           pushActivatedCardImplementationActions(
-            cardImplementationRuntimeDeps,
+            deps.cardImplementationRuntimeDeps,
             state,
             actions,
             "corp",
@@ -997,7 +974,7 @@ export function createScoredEconomyRuntimeHosts(
           definition,
         ) =>
           pushActivatedCardImplementationActionsForTiming(
-            cardImplementationRuntimeDeps,
+            deps.cardImplementationRuntimeDeps,
             state,
             actions,
             "corp",
@@ -1008,14 +985,14 @@ export function createScoredEconomyRuntimeHosts(
         resolveActivatedCardImplementationAbility: () => {
           if (!legalAction) return false;
           return resolveActivatedCardImplementationAbility(
-            cardImplementationRuntimeDeps,
+            deps.cardImplementationRuntimeDeps,
             state,
             legalAction,
           );
         },
         revealCorpRdTop: () => {
           if (!legalAction) throw new Error("Scored-Agenda-Aktion fehlt.");
-          revealCorpRdTop(state, legalAction);
+          deps.revealCorpRdTop(state, legalAction);
         },
         resolveHqArchivesShuffleDraw: (sourceCardId) => {
           if (!legalAction)
@@ -1023,7 +1000,7 @@ export function createScoredEconomyRuntimeHosts(
               "HQ/Archives-Shuffle-Draw braucht eine LegalAction.",
             );
           resolveHqArchivesShuffleDraw(
-            corpZoneChoiceHandlerHost(state, legalAction),
+            deps.corpZoneChoiceHandlerHost(state, legalAction),
             sourceCardId,
           );
         },
@@ -1046,7 +1023,7 @@ export function createScoredEconomyRuntimeHosts(
       callbacks: {
         pushActivatedCardImplementationActions: (actions, cardId, definition) =>
           pushActivatedCardImplementationActions(
-            cardImplementationRuntimeDeps,
+            deps.cardImplementationRuntimeDeps,
             state,
             actions,
             "corp",
@@ -1056,7 +1033,7 @@ export function createScoredEconomyRuntimeHosts(
         resolveActivatedCardImplementationAbility: () => {
           if (!legalAction) return false;
           return resolveActivatedCardImplementationAbility(
-            cardImplementationRuntimeDeps,
+            deps.cardImplementationRuntimeDeps,
             state,
             legalAction,
           );
@@ -1075,24 +1052,24 @@ export function createScoredEconomyRuntimeHosts(
       cards: {
         definitionFor: (cardId) => definitionFor(state, cardId),
         uniqueDirectLongtailImplementationForCard: (cardId) =>
-          uniqueDirectLongtailImplementationForCard(state, cardId),
+          deps.uniqueDirectLongtailImplementationForCard(state, cardId),
         uniqueDirectLongtailImplementationForDefinition: (definitionId) =>
-          uniqueDirectLongtailImplementationForDefinition(definitionId),
-        rezzedCorpRootCardIds: () => rezzedCorpRootCardIds(state),
+          deps.uniqueDirectLongtailImplementationForDefinition(definitionId),
+        rezzedCorpRootCardIds: () => deps.rezzedCorpRootCardIds(state),
       },
       actions: {
         buildLegalAction: (side, type, label, source, costs, payload) =>
           action(state, side, type, label, source, costs, payload),
       },
       agendaPoints: {
-        total: () => corpAgendaPointTotal(state),
-        scoredForfeitTargets: () => corpScoredAgendaForfeitTargets(state),
+        total: () => deps.corpAgendaPointTotal(state),
+        scoredForfeitTargets: () => deps.corpScoredAgendaForfeitTargets(state),
         pointsForScoredCard: (cardId) =>
-          agendaPointsForScoredCard(state, cardId),
+          deps.agendaPointsForScoredCard(state, cardId),
         forfeitCorpAgendaForPointCost: (cardId) =>
-          forfeitCorpAgendaForPointCost(state, cardId),
+          deps.forfeitCorpAgendaForPointCost(state, cardId),
         spendPointCost: (requiredPoints) =>
-          spendCorpAgendaPointCost(state, requiredPoints),
+          deps.spendCorpAgendaPointCost(state, requiredPoints),
       },
       damage: {
         resolveDamageOperation: (damageType, amount, sourceDefinitionId) => {
@@ -1112,7 +1089,7 @@ export function createScoredEconomyRuntimeHosts(
       },
       trash: {
         trashCorpInstalledCardToArchives: (cardId) =>
-          trashCorpInstalledCardToArchives(state, cardId),
+          deps.trashCorpInstalledCardToArchives(state, cardId),
       },
     };
   }

@@ -1,0 +1,592 @@
+{
+  "schemaVersion": "netgrid-standard-deck-curation-v1",
+  "curationId": "netgrid-standard-deck-curation-2026-07-18",
+  "curatedAt": "2026-07-18",
+  "policy": {
+    "normalUiClassifications": [
+      "standard"
+    ],
+    "hiddenClassifications": [
+      "internal_ai",
+      "test_fixture",
+      "retire"
+    ],
+    "retireMeans": "not copied into the active standard catalog; source evidence remains untouched"
+  },
+  "localDeckLibrary": {
+    "counts": {
+      "standard": 40,
+      "internal_ai": 2,
+      "retire": 1,
+      "test_fixture": 10
+    },
+    "entries": [
+      {
+        "sourceDeckId": "local_corp_cheap_bag_tricks",
+        "name": "Cheap Bag of Tricks",
+        "side": "corp",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_corp_cheap_bag_tricks"
+      },
+      {
+        "sourceDeckId": "local_corp_chrome_rush_bureau",
+        "name": "Chrome Rush Bureau",
+        "side": "corp",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_corp_chrome_rush_bureau"
+      },
+      {
+        "sourceDeckId": "local_classic_corp_remote_lab_deflection_2026_07_01",
+        "name": "Classic Corp - Remote Lab Deflection",
+        "side": "corp",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_classic_corp_remote_lab_deflection_2026_07_01"
+      },
+      {
+        "sourceDeckId": "local_classic_corp_superserum_control_grid_2026_07_01",
+        "name": "Classic Corp - Superserum Control Grid",
+        "side": "corp",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_classic_corp_superserum_control_grid_2026_07_01"
+      },
+      {
+        "sourceDeckId": "local_corp_code_rot_bitte_eintreten_2026_07_16",
+        "name": "CODE ROT: Bitte eintreten v2",
+        "side": "corp",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_corp_code_rot_bitte_eintreten_2026_07_16"
+      },
+      {
+        "sourceDeckId": "local_corp_mr96xg94",
+        "name": "Fast Advance, Baby",
+        "side": "corp",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_corp_mr96xg94"
+      },
+      {
+        "sourceDeckId": "local_corp_ivory_bastion",
+        "name": "Ivory Bastion",
+        "side": "corp",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_corp_ivory_bastion"
+      },
+      {
+        "sourceDeckId": "local_corp_ki_rush_score_static_mix_2026_06_29",
+        "name": "KI Rush Score - Static ICE Mix",
+        "side": "corp",
+        "classification": "internal_ai",
+        "reason": "explicit_ai_diagnostic_deck"
+      },
+      {
+        "sourceDeckId": "local_corp_ki_rush_score_window_v2_2026_06_29",
+        "name": "KI Rush Score Window v2",
+        "side": "corp",
+        "classification": "internal_ai",
+        "reason": "explicit_ai_diagnostic_deck"
+      },
+      {
+        "sourceDeckId": "local_corp_manhunt_pressure_bureau",
+        "name": "Manhunt Pressure Bureau",
+        "side": "corp",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_corp_manhunt_pressure_bureau"
+      },
+      {
+        "sourceDeckId": "local_corp_mph465dv",
+        "name": "Mumie",
+        "side": "corp",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_corp_mph465dv"
+      },
+      {
+        "sourceDeckId": "local_corp_neon_guillotine",
+        "name": "Neon Guillotine",
+        "side": "corp",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_corp_neon_guillotine"
+      },
+      {
+        "sourceDeckId": "local_corp_mp783q9z",
+        "name": "Neues Korp-Deck",
+        "side": "corp",
+        "classification": "retire",
+        "reason": "unfinished_placeholder"
+      },
+      {
+        "sourceDeckId": "local_corp_original_speed_v10",
+        "name": "Original Speed v1.0",
+        "side": "corp",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_corp_original_speed_v10"
+      },
+      {
+        "sourceDeckId": "local_proteus_corp_hidden_node_control_2026_05_25",
+        "name": "Proteus Korp - Hidden Node & Region Trap",
+        "side": "corp",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_proteus_corp_hidden_node_control_2026_05_25"
+      },
+      {
+        "sourceDeckId": "local_proteus_corp_variable_ice_gauntlet_2026_05_25",
+        "name": "Proteus Korp - Variable ICE Gauntlet",
+        "side": "corp",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_proteus_corp_variable_ice_gauntlet_2026_05_25"
+      },
+      {
+        "sourceDeckId": "local_corp_v1922_reclamation_grid",
+        "name": "Reclamation Grid",
+        "side": "corp",
+        "classification": "test_fixture",
+        "reason": "explicit_lab_or_release_fixture"
+      },
+      {
+        "sourceDeckId": "local_corp_rent_to_own_war_engine",
+        "name": "Rent to Own War Engine",
+        "side": "corp",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_corp_rent_to_own_war_engine"
+      },
+      {
+        "sourceDeckId": "local_corp_shadoe_tag_bag",
+        "name": "Shadoe Tag & Bag",
+        "side": "corp",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_corp_shadoe_tag_bag"
+      },
+      {
+        "sourceDeckId": "local_corp_siren_fortress",
+        "name": "Siren Fortress",
+        "side": "corp",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_corp_siren_fortress"
+      },
+      {
+        "sourceDeckId": "local_corp_syds_ice_pfandhaus_2026_07_09",
+        "name": "Syds ICE-Pfandhaus",
+        "side": "corp",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_corp_syds_ice_pfandhaus_2026_07_09"
+      },
+      {
+        "sourceDeckId": "local_corp_mp1ddh7c",
+        "name": "The Korp Master",
+        "side": "corp",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_corp_mp1ddh7c"
+      },
+      {
+        "sourceDeckId": "local_corp_tycho_ice_stack",
+        "name": "Tycho Ice Stack",
+        "side": "corp",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_corp_tycho_ice_stack"
+      },
+      {
+        "sourceDeckId": "local_corp_unused_black_ice_ambush_lab",
+        "name": "Unused Corp Black ICE Ambush Lab",
+        "side": "corp",
+        "classification": "test_fixture",
+        "reason": "explicit_lab_or_release_fixture"
+      },
+      {
+        "sourceDeckId": "local_corp_unused_remote_upgrade_lab",
+        "name": "Unused Corp Remote Upgrade Lab",
+        "side": "corp",
+        "classification": "test_fixture",
+        "reason": "explicit_lab_or_release_fixture"
+      },
+      {
+        "sourceDeckId": "local_corp_unused_proteus_remainder_lab",
+        "name": "Unused Proteus Korp Remainder Lab",
+        "side": "corp",
+        "classification": "test_fixture",
+        "reason": "explicit_lab_or_release_fixture"
+      },
+      {
+        "sourceDeckId": "local_corp_v1922_longtail_glacier_lab",
+        "name": "V1.9.22 Longtail Glacier Lab",
+        "side": "corp",
+        "classification": "test_fixture",
+        "reason": "explicit_lab_or_release_fixture"
+      },
+      {
+        "sourceDeckId": "local_corp_mp6g9eku",
+        "name": "Vom Tablet",
+        "side": "corp",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_corp_mp6g9eku"
+      },
+      {
+        "sourceDeckId": "local_runner_bit_denial_lock",
+        "name": "Bit-Denial Lock",
+        "side": "runner",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_runner_bit_denial_lock"
+      },
+      {
+        "sourceDeckId": "local_runner_blink_pressure_rig",
+        "name": "Blink Pressure Rig",
+        "side": "runner",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_runner_blink_pressure_rig"
+      },
+      {
+        "sourceDeckId": "local_classic_runner_cybernetics_risk_rig_2026_07_01",
+        "name": "Classic Runner - Cybernetics Risk Rig",
+        "side": "runner",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_classic_runner_cybernetics_risk_rig_2026_07_01"
+      },
+      {
+        "sourceDeckId": "local_classic_runner_prep_economy_pressure_2026_07_01",
+        "name": "Classic Runner - Prep Economy Pressure",
+        "side": "runner",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_classic_runner_prep_economy_pressure_2026_07_01"
+      },
+      {
+        "sourceDeckId": "local_runner_deep_market_engine",
+        "name": "Deep Market Engine",
+        "side": "runner",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_runner_deep_market_engine"
+      },
+      {
+        "sourceDeckId": "local_runner_ghost_circuit",
+        "name": "Ghost Circuit",
+        "side": "runner",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_runner_ghost_circuit"
+      },
+      {
+        "sourceDeckId": "local_runner_ice_destruction_runner",
+        "name": "Ice Destruction Runner",
+        "side": "runner",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_runner_ice_destruction_runner"
+      },
+      {
+        "sourceDeckId": "local_runner_inside_forgery_loop",
+        "name": "Inside Forgery Loop",
+        "side": "runner",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_runner_inside_forgery_loop"
+      },
+      {
+        "sourceDeckId": "local_runner_adb10896",
+        "name": "King of the Road",
+        "side": "runner",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_runner_adb10896"
+      },
+      {
+        "sourceDeckId": "local_runner_krashkurs_clown_kreditmaschine_2026_07_11",
+        "name": "Krashkurs: Clown-Kreditmaschine",
+        "side": "runner",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_runner_krashkurs_clown_kreditmaschine_2026_07_11"
+      },
+      {
+        "sourceDeckId": "local_runner_lucidrine_shell_traders",
+        "name": "Lucidrine Shell Traders",
+        "side": "runner",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_runner_lucidrine_shell_traders"
+      },
+      {
+        "sourceDeckId": "local_runner_mit_ansage_der_perfekte_coup_2026_07_09",
+        "name": "Mit Ansage: Der perfekte Coup",
+        "side": "runner",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_runner_mit_ansage_der_perfekte_coup_2026_07_09"
+      },
+      {
+        "sourceDeckId": "local_proteus_runner_breaker_lab_2026_05_25",
+        "name": "Proteus Runner - Breaker Lab & Virus Pressure",
+        "side": "runner",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_proteus_runner_breaker_lab_2026_05_25"
+      },
+      {
+        "sourceDeckId": "local_proteus_runner_hidden_sabotage_2026_05_25",
+        "name": "Proteus Runner - Hidden Backdoor Sabotage",
+        "side": "runner",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_proteus_runner_hidden_sabotage_2026_05_25"
+      },
+      {
+        "sourceDeckId": "local_runner_unused_proteus_remainder_lab",
+        "name": "Proteus Runner – Scrapheap Rumble",
+        "side": "runner",
+        "classification": "test_fixture",
+        "reason": "explicit_lab_or_release_fixture"
+      },
+      {
+        "sourceDeckId": "local_runner_rnd_interface_dig",
+        "name": "R&D Interface Dig",
+        "side": "runner",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_runner_rnd_interface_dig"
+      },
+      {
+        "sourceDeckId": "local_runner_redline_riot",
+        "name": "Redline Riot",
+        "side": "runner",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_runner_redline_riot"
+      },
+      {
+        "sourceDeckId": "local_runner_rent_i_con_shellspiel_2026_07_17",
+        "name": "Rent-I-Con: Das Shellspiel",
+        "side": "runner",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_runner_rent_i_con_shellspiel_2026_07_17"
+      },
+      {
+        "sourceDeckId": "local_runner_mp48400s",
+        "name": "Run til End",
+        "side": "runner",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_runner_mp48400s"
+      },
+      {
+        "sourceDeckId": "local_runner_skivviss_mill_pressure",
+        "name": "Skivviss Mill Pressure",
+        "side": "runner",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_runner_skivviss_mill_pressure"
+      },
+      {
+        "sourceDeckId": "local_runner_stealth_interface_starter",
+        "name": "Stealth Interface Starter",
+        "side": "runner",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_runner_stealth_interface_starter"
+      },
+      {
+        "sourceDeckId": "local_runner_unused_resource_cybernetics_lab",
+        "name": "Unused Runner Resource Cybernetics Lab",
+        "side": "runner",
+        "classification": "test_fixture",
+        "reason": "explicit_lab_or_release_fixture"
+      },
+      {
+        "sourceDeckId": "local_runner_unused_virus_breaker_lab",
+        "name": "Unused Runner Virus Breaker Lab",
+        "side": "runner",
+        "classification": "test_fixture",
+        "reason": "explicit_lab_or_release_fixture"
+      },
+      {
+        "sourceDeckId": "local_runner_v1922_hq_sabotage_suite",
+        "name": "V1.9.22 HQ Sabotage Suite",
+        "side": "runner",
+        "classification": "test_fixture",
+        "reason": "explicit_lab_or_release_fixture"
+      },
+      {
+        "sourceDeckId": "local_runner_v1922_valu_pak_breaker_lab",
+        "name": "V1.9.22 Valu-Pak Breaker Lab",
+        "side": "runner",
+        "classification": "test_fixture",
+        "reason": "explicit_lab_or_release_fixture"
+      }
+    ]
+  },
+  "projectSnapshots": {
+    "counts": {
+      "test_fixture": 10,
+      "internal_ai": 11
+    },
+    "entries": [
+      {
+        "deckSnapshotId": "classic_corp_ai_snapshot_v1",
+        "name": "Classic Corp AI - Agenda Tax Control",
+        "side": "corp",
+        "classification": "internal_ai",
+        "reason": "ai_pool_or_diagnostic_snapshot"
+      },
+      {
+        "deckSnapshotId": "demo_corp_001_snapshot_v0_6",
+        "name": "Corp Demo Deck 01 - Build & Score",
+        "side": "corp",
+        "classification": "test_fixture",
+        "reason": "historical_demo_or_format_fixture"
+      },
+      {
+        "deckSnapshotId": "demo_corp_004_snapshot_v0_6",
+        "name": "Corp Demo Deck 04 - Build, Tax & Tag",
+        "side": "corp",
+        "classification": "test_fixture",
+        "reason": "historical_demo_or_format_fixture"
+      },
+      {
+        "deckSnapshotId": "demo_corp_008_snapshot_v0_8",
+        "name": "Corp Demo Deck 08 - Starter Score Grid",
+        "side": "corp",
+        "classification": "test_fixture",
+        "reason": "historical_demo_or_format_fixture"
+      },
+      {
+        "deckSnapshotId": "demo_corp_123_snapshot_v1_2_3",
+        "name": "Corp Demo Deck 1.2.3 - Mechanic Unlock 1",
+        "side": "corp",
+        "classification": "test_fixture",
+        "reason": "historical_demo_or_format_fixture"
+      },
+      {
+        "deckSnapshotId": "demo_corp_130_snapshot_v1_3_0",
+        "name": "Corp Demo Deck 1.3.0 - Private Local Format",
+        "side": "corp",
+        "classification": "test_fixture",
+        "reason": "historical_demo_or_format_fixture"
+      },
+      {
+        "deckSnapshotId": "onr_origin_corp_ai_tag_ops_snapshot_v1",
+        "name": "Corp Origins AI - Tag Ops Control",
+        "side": "corp",
+        "classification": "internal_ai",
+        "reason": "ai_pool_or_diagnostic_snapshot"
+      },
+      {
+        "deckSnapshotId": "onr_origin_corp_ai_snapshot_v1",
+        "name": "Corp Origins AI - Tax & Punish",
+        "side": "corp",
+        "classification": "internal_ai",
+        "reason": "ai_pool_or_diagnostic_snapshot"
+      },
+      {
+        "deckSnapshotId": "proteus_corp_antibody_tax_snapshot_v2026_05_25",
+        "name": "Proteus Korp - Antibody Tax & Ambush",
+        "side": "corp",
+        "classification": "internal_ai",
+        "reason": "ai_pool_or_diagnostic_snapshot"
+      },
+      {
+        "deckSnapshotId": "proteus_corp_region_fast_score_snapshot_v2026_05_25",
+        "name": "Proteus Korp - Region Fast Score",
+        "side": "corp",
+        "classification": "internal_ai",
+        "reason": "ai_pool_or_diagnostic_snapshot"
+      },
+      {
+        "deckSnapshotId": "classic_runner_ai_snapshot_v1",
+        "name": "Classic Runner AI - Toolbox Pressure",
+        "side": "runner",
+        "classification": "internal_ai",
+        "reason": "ai_pool_or_diagnostic_snapshot"
+      },
+      {
+        "deckSnapshotId": "king_of_the_road_runner_ai_snapshot_v1",
+        "name": "King of the Road",
+        "side": "runner",
+        "classification": "internal_ai",
+        "reason": "ai_pool_or_diagnostic_snapshot"
+      },
+      {
+        "deckSnapshotId": "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
+        "name": "Proteus Runner - HQ Virus & Derez",
+        "side": "runner",
+        "classification": "internal_ai",
+        "reason": "ai_pool_or_diagnostic_snapshot"
+      },
+      {
+        "deckSnapshotId": "proteus_runner_rd_bad_publicity_snapshot_v2026_05_25",
+        "name": "Proteus Runner - R&D Virus & Bad Publicity",
+        "side": "runner",
+        "classification": "internal_ai",
+        "reason": "ai_pool_or_diagnostic_snapshot"
+      },
+      {
+        "deckSnapshotId": "demo_runner_001_snapshot_v0_6",
+        "name": "Runner Demo Deck 01 - Run & Steal",
+        "side": "runner",
+        "classification": "test_fixture",
+        "reason": "historical_demo_or_format_fixture"
+      },
+      {
+        "deckSnapshotId": "demo_runner_004_snapshot_v0_6",
+        "name": "Runner Demo Deck 04 - Setup & Pressure",
+        "side": "runner",
+        "classification": "test_fixture",
+        "reason": "historical_demo_or_format_fixture"
+      },
+      {
+        "deckSnapshotId": "demo_runner_008_snapshot_v0_8",
+        "name": "Runner Demo Deck 08 - Starter Pressure",
+        "side": "runner",
+        "classification": "test_fixture",
+        "reason": "historical_demo_or_format_fixture"
+      },
+      {
+        "deckSnapshotId": "demo_runner_123_snapshot_v1_2_3",
+        "name": "Runner Demo Deck 1.2.3 - Mechanic Unlock 1",
+        "side": "runner",
+        "classification": "test_fixture",
+        "reason": "historical_demo_or_format_fixture"
+      },
+      {
+        "deckSnapshotId": "demo_runner_130_snapshot_v1_3_0",
+        "name": "Runner Demo Deck 1.3.0 - Private Local Format",
+        "side": "runner",
+        "classification": "test_fixture",
+        "reason": "historical_demo_or_format_fixture"
+      },
+      {
+        "deckSnapshotId": "onr_origin_runner_ai_event_pressure_snapshot_v1",
+        "name": "Runner Origins AI - Event Pressure",
+        "side": "runner",
+        "classification": "internal_ai",
+        "reason": "ai_pool_or_diagnostic_snapshot"
+      },
+      {
+        "deckSnapshotId": "onr_origin_runner_ai_snapshot_v1",
+        "name": "Runner Origins AI - Probe Pressure",
+        "side": "runner",
+        "classification": "internal_ai",
+        "reason": "ai_pool_or_diagnostic_snapshot"
+      }
+    ]
+  }
+}

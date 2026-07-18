@@ -28,43 +28,6 @@ import type { CardLeavePlayCleanupImplementation } from "../../ability-engine/de
 export function createLifecycleRuntime(
   deps: RuntimeDeps,
 ): import("./lifecycle-runtime-port").LifecycleRuntimePort {
-  const {
-    HOST_RETURN_HARDWARE_SOURCE,
-    NEVINYRRAL_ID,
-    cardHasSubtype,
-    cardImplementationForDefinitionId,
-    cardImplementationRuntimeDeps,
-    drawTaxSourceIds,
-    clearCardCounters,
-    corpRootAgendaOrNodeCapacityInServer,
-    corpRootMainCardIdsInServer,
-    definitionFor,
-    emptyRunnerDrawSummary,
-    executeCardImplementationLifecycleEffects,
-    hasCardImplementationMemoryUnitModifier,
-    hostedCardsOn,
-    isDrawTaxSourceDefinition,
-    leavePlayCleanupImplementationsForCard,
-    mergeRunnerDrawSummary,
-    installedProgramTrashBackupHardwareIds,
-    mustArrayValue,
-    nextRandom,
-    publicCardTitle,
-    rezCostForCard,
-    remainingReplacementLongtailKindForCard,
-    removeFromAllZones,
-    runnerInstalledCardIds,
-    runnerUtilityLongtailKindForDefinition,
-    selectedChoiceIds,
-    setHostedOn,
-    spendCredits,
-    uniqueDirectLongtailKindForDefinition,
-    addRunnerTagsWithPrevention,
-    mustInstance,
-    credits,
-    withoutVariableIceState,
-  } = deps;
-
   function discardRandomCorpHqCards(
     state: GameState,
     maxCount: number,
@@ -74,18 +37,21 @@ export function createLifecycleRuntime(
     const discarded: CardInstanceId[] = [];
     const limit = Math.min(Math.max(0, Math.floor(maxCount)), available.length);
     for (let index = 0; index < limit; index += 1) {
-      const value = nextRandom(state, `${purposePrefix}:selection:${index}`);
+      const value = deps.nextRandom(
+        state,
+        `${purposePrefix}:selection:${index}`,
+      );
       const selectedIndex = Math.floor(value * available.length);
-      const cardId = mustArrayValue(
+      const cardId = deps.mustArrayValue(
         available,
         selectedIndex,
         "HQ discard selection missing.",
       );
       available.splice(selectedIndex, 1);
-      removeFromAllZones(state, cardId);
+      deps.removeFromAllZones(state, cardId);
       state.corp.archives.push(cardId);
       state.cardInstances[cardId] = {
-        ...mustInstance(state.cardInstances, cardId),
+        ...deps.mustInstance(state.cardInstances, cardId),
         faceup: false,
         rezzed: false,
         zone: { side: "corp", zone: "archives" },
@@ -100,7 +66,7 @@ export function createLifecycleRuntime(
     cardId: CardInstanceId,
   ): void {
     if (!state.runner.rig.programs.includes(cardId)) return;
-    const hostedIds = hostedCardsOn(state, cardId);
+    const hostedIds = deps.hostedCardsOn(state, cardId);
     const backedUpHostedIds = backupProgramsOnTrashBackupHardwareBeforeTrash(
       state,
       hostedIds,
@@ -109,8 +75,8 @@ export function createLifecycleRuntime(
       if (backedUpHostedIds.includes(hostedId)) continue;
       trashRunnerInstalledProgram(state, hostedId);
     }
-    const definition = definitionFor(state, cardId);
-    const instance = mustInstance(state.cardInstances, cardId);
+    const definition = deps.definitionFor(state, cardId);
+    const instance = deps.mustInstance(state.cardInstances, cardId);
     const usesMemory = runnerProgramUsesMemory(state, cardId);
     const memoryCost = runnerInstalledProgramMemoryCost(state, cardId);
     const {
@@ -126,7 +92,7 @@ export function createLifecycleRuntime(
         state.runner.memoryUsed - memoryCost,
       );
     }
-    removeFromAllZones(state, cardId);
+    deps.removeFromAllZones(state, cardId);
     if (instance.installedAsRunnerProgram?.removeFromGameOnLeavePlay) {
       removedFromGameZone(state).push(cardId);
       state.cardInstances[cardId] = {
@@ -139,7 +105,7 @@ export function createLifecycleRuntime(
           visibility: "public",
         },
       };
-      clearCardCounters(state, cardId);
+      deps.clearCardCounters(state, cardId);
       return;
     }
     state.runner.heap.push(cardId);
@@ -149,18 +115,18 @@ export function createLifecycleRuntime(
       rezzed: true,
       zone: { side: "runner", zone: "heap" },
     };
-    clearCardCounters(state, cardId);
+    deps.clearCardCounters(state, cardId);
   }
 
   function backupProgramsOnTrashBackupHardwareBeforeTrash(
     state: GameState,
     candidateProgramIds: CardInstanceId[],
   ): CardInstanceId[] {
-    const microtechId = installedProgramTrashBackupHardwareIds(state)[0];
+    const microtechId = deps.installedProgramTrashBackupHardwareIds(state)[0];
     if (!microtechId) return [];
     const eligible = candidateProgramIds
       .filter((cardId) => state.runner.rig.programs.includes(cardId))
-      .filter((cardId) => definitionFor(state, cardId).type === "program")
+      .filter((cardId) => deps.definitionFor(state, cardId).type === "program")
       .filter((cardId) => cardId !== microtechId)
       .sort();
     if (eligible.length === 0) return [];
@@ -169,11 +135,11 @@ export function createLifecycleRuntime(
         state.runner.memoryUsed = Math.max(
           0,
           state.runner.memoryUsed -
-            (definitionFor(state, cardId).memoryCost ?? 0),
+            (deps.definitionFor(state, cardId).memoryCost ?? 0),
         );
-      setHostedOn(state, cardId, microtechId);
+      deps.setHostedOn(state, cardId, microtechId);
       state.cardInstances[cardId] = {
-        ...mustInstance(state.cardInstances, cardId),
+        ...deps.mustInstance(state.cardInstances, cardId),
         faceup: true,
         rezzed: true,
         zone: { side: "runner", zone: "rig" },
@@ -187,15 +153,15 @@ export function createLifecycleRuntime(
     state: GameState,
     cardId: CardInstanceId,
   ): boolean {
-    const instance = mustInstance(state.cardInstances, cardId);
+    const instance = deps.mustInstance(state.cardInstances, cardId);
     if (!instance.hostedOn) return true;
-    const hostDefinition = definitionFor(state, instance.hostedOn);
+    const hostDefinition = deps.definitionFor(state, instance.hostedOn);
     if (
       (hostDefinition.type === "program" &&
-        cardHasSubtype(hostDefinition, "daemon")) ||
-      runnerUtilityLongtailKindForDefinition(hostDefinition.id) ===
+        deps.cardHasSubtype(hostDefinition, "daemon")) ||
+      deps.runnerUtilityLongtailKindForDefinition(hostDefinition.id) ===
         "replace_installed_program_trash_with_host_on_source" ||
-      hostDefinition.id === HOST_RETURN_HARDWARE_SOURCE
+      hostDefinition.id === deps.HOST_RETURN_HARDWARE_SOURCE
     )
       return false;
     return true;
@@ -205,7 +171,7 @@ export function createLifecycleRuntime(
     state: GameState,
     cardId: CardInstanceId,
   ): number {
-    const instance = mustInstance(state.cardInstances, cardId);
+    const instance = deps.mustInstance(state.cardInstances, cardId);
     if (instance.installedAsRunnerProgram)
       return Math.max(
         0,
@@ -213,7 +179,7 @@ export function createLifecycleRuntime(
       );
     return Math.max(
       0,
-      Math.floor(definitionFor(state, cardId).memoryCost ?? 0),
+      Math.floor(deps.definitionFor(state, cardId).memoryCost ?? 0),
     );
   }
 
@@ -228,8 +194,8 @@ export function createLifecycleRuntime(
     cardId: CardInstanceId,
     legalAction?: LegalAction,
   ): void {
-    const definition = definitionFor(state, cardId);
-    const sourceInstance = mustInstance(state.cardInstances, cardId);
+    const definition = deps.definitionFor(state, cardId);
+    const sourceInstance = deps.mustInstance(state.cardInstances, cardId);
     if (
       definition.type === "program" ||
       (state.runner.rig.programs.includes(cardId) &&
@@ -245,26 +211,29 @@ export function createLifecycleRuntime(
         ? state.runner.rig.hardware
         : state.runner.rig.resources;
     if (!rig.includes(cardId)) return;
-    executeCardImplementationLifecycleEffects(
-      cardImplementationRuntimeDeps,
+    deps.executeCardImplementationLifecycleEffects(
+      deps.cardImplementationRuntimeDeps,
       state,
       legalAction,
       definition,
       cardId,
       "on_leave_play",
     );
-    for (const hostedId of hostedCardsOn(state, cardId)) {
-      const hostedDefinition = definitionFor(state, hostedId);
+    for (const hostedId of deps.hostedCardsOn(state, cardId)) {
+      const hostedDefinition = deps.definitionFor(state, hostedId);
       if (hostedDefinition.type === "program")
         trashRunnerInstalledProgram(state, hostedId);
     }
-    const instanceAfterLifecycle = mustInstance(state.cardInstances, cardId);
+    const instanceAfterLifecycle = deps.mustInstance(
+      state.cardInstances,
+      cardId,
+    );
     const { hostedOn: _hostedOn, ...withoutHost } = instanceAfterLifecycle;
     void _hostedOn;
-    removeFromAllZones(state, cardId);
+    deps.removeFromAllZones(state, cardId);
     if (
       definition.type === "hardware" &&
-      !hasCardImplementationMemoryUnitModifier(definition) &&
+      !deps.hasCardImplementationMemoryUnitModifier(definition) &&
       (definition.memoryLimitBonus ?? 0) > 0
     )
       state.runner.memoryLimit = Math.max(
@@ -278,16 +247,16 @@ export function createLifecycleRuntime(
       rezzed: true,
       zone: { side: "runner", zone: "heap" },
     };
-    clearCardCounters(state, cardId);
+    deps.clearCardCounters(state, cardId);
   }
 
   function returnRunnerInstalledCardToGrip(
     state: GameState,
     cardId: CardInstanceId,
   ): void {
-    const definition = definitionFor(state, cardId);
-    if (!runnerInstalledCardIds(state).includes(cardId)) return;
-    const sourceInstance = mustInstance(state.cardInstances, cardId);
+    const definition = deps.definitionFor(state, cardId);
+    if (!deps.runnerInstalledCardIds(state).includes(cardId)) return;
+    const sourceInstance = deps.mustInstance(state.cardInstances, cardId);
     const memoryCost = runnerInstalledProgramMemoryCost(state, cardId);
     if (runnerProgramUsesMemory(state, cardId)) {
       state.runner.memoryUsed = Math.max(
@@ -306,7 +275,7 @@ export function createLifecycleRuntime(
       } = sourceInstance;
       void _hostedOn;
       void _installedAsRunnerProgram;
-      removeFromAllZones(state, cardId);
+      deps.removeFromAllZones(state, cardId);
       removedFromGameZone(state).push(cardId);
       state.cardInstances[cardId] = {
         ...withoutHost,
@@ -318,22 +287,25 @@ export function createLifecycleRuntime(
           visibility: "public",
         },
       };
-      clearCardCounters(state, cardId);
+      deps.clearCardCounters(state, cardId);
       return;
     }
     if (
       definition.type === "hardware" &&
-      !hasCardImplementationMemoryUnitModifier(definition) &&
+      !deps.hasCardImplementationMemoryUnitModifier(definition) &&
       (definition.memoryLimitBonus ?? 0) > 0
     )
       state.runner.memoryLimit = Math.max(
         0,
         state.runner.memoryLimit - (definition.memoryLimitBonus ?? 0),
       );
-    const instanceAfterLifecycle = mustInstance(state.cardInstances, cardId);
+    const instanceAfterLifecycle = deps.mustInstance(
+      state.cardInstances,
+      cardId,
+    );
     const { hostedOn: _hostedOn, ...withoutHost } = instanceAfterLifecycle;
     void _hostedOn;
-    removeFromAllZones(state, cardId);
+    deps.removeFromAllZones(state, cardId);
     state.runner.grip.push(cardId);
     state.cardInstances[cardId] = {
       ...withoutHost,
@@ -341,7 +313,7 @@ export function createLifecycleRuntime(
       rezzed: true,
       zone: { side: "runner", zone: "grip" },
     };
-    clearCardCounters(state, cardId);
+    deps.clearCardCounters(state, cardId);
   }
 
   function returnRunnerInstalledProgramsToGripForAccess(
@@ -352,14 +324,14 @@ export function createLifecycleRuntime(
     const returnedDefinitionIds: string[] = [];
     for (const cardId of cardIds) {
       if (!state.runner.rig.programs.includes(cardId)) continue;
-      if (definitionFor(state, cardId).type !== "program") continue;
-      const hostedIds = hostedCardsOn(state, cardId);
+      if (deps.definitionFor(state, cardId).type !== "program") continue;
+      const hostedIds = deps.hostedCardsOn(state, cardId);
       for (const hostedId of hostedIds) {
         if (!state.runner.rig.programs.includes(hostedId)) continue;
         trashRunnerInstalledCardToHeap(state, hostedId);
         daemonHostedTrashCount += 1;
       }
-      returnedDefinitionIds.push(definitionFor(state, cardId).id);
+      returnedDefinitionIds.push(deps.definitionFor(state, cardId).id);
       returnRunnerInstalledCardToGrip(state, cardId);
     }
     return {
@@ -377,42 +349,41 @@ export function createLifecycleRuntime(
     cardId: CardInstanceId,
     legalAction?: LegalAction,
   ): void {
-    for (const hostedId of hostedCardsOn(state, cardId)) {
-      const hostedInstance = mustInstance(state.cardInstances, hostedId);
+    for (const hostedId of deps.hostedCardsOn(state, cardId)) {
+      const hostedInstance = deps.mustInstance(state.cardInstances, hostedId);
       if (hostedInstance.owner === "corp")
         trashCorpInstalledCardToArchives(state, hostedId, legalAction);
     }
-    const instance = mustInstance(state.cardInstances, cardId);
-    const definition = definitionFor(state, cardId);
+    const instance = deps.mustInstance(state.cardInstances, cardId);
+    const definition = deps.definitionFor(state, cardId);
     const sourceServerId =
       instance.zone.side === "corp" && instance.zone.zone === "serverRoot"
         ? instance.zone.serverId
         : undefined;
-    const leavesFortCapacityModifier = leavePlayCleanupImplementationsForCard(
-      state,
-      cardId,
-    ).some(
-      (cleanup: CardLeavePlayCleanupImplementation) =>
-        cleanup.kind === "trash_agenda_or_node_if_fort_over_capacity" &&
-        cleanup.target === "agenda_or_node_inside_same_fort",
-    );
+    const leavesFortCapacityModifier = deps
+      .leavePlayCleanupImplementationsForCard(state, cardId)
+      .some(
+        (cleanup: CardLeavePlayCleanupImplementation) =>
+          cleanup.kind === "trash_agenda_or_node_if_fort_over_capacity" &&
+          cleanup.target === "agenda_or_node_inside_same_fort",
+      );
     const rezzedNevinyrralLeftPlay =
-      (uniqueDirectLongtailKindForDefinition(definition.id) ===
+      (deps.uniqueDirectLongtailKindForDefinition(definition.id) ===
         "rezzed_leave_action_gain_asset" ||
-        (definition.id === NEVINYRRAL_ID &&
-          !cardImplementationForDefinitionId(definition.id))) &&
+        (definition.id === deps.NEVINYRRAL_ID &&
+          !deps.cardImplementationForDefinitionId(definition.id))) &&
       instance.rezzed === true;
     const { hostedOn: _hostedOn, ...withoutHost } = instance;
     void _hostedOn;
-    removeFromAllZones(state, cardId);
+    deps.removeFromAllZones(state, cardId);
     state.corp.archives.push(cardId);
     state.cardInstances[cardId] = {
-      ...withoutVariableIceState(withoutHost),
+      ...deps.withoutVariableIceState(withoutHost),
       faceup: true,
       rezzed: true,
       zone: { side: "corp", zone: "archives" },
     };
-    clearCardCounters(state, cardId);
+    deps.clearCardCounters(state, cardId);
     if (sourceServerId && leavesFortCapacityModifier) {
       cleanupCorpRootAgendaOrNodeCapacityAfterLeavePlay(
         state,
@@ -447,12 +418,12 @@ export function createLifecycleRuntime(
       (candidate) => candidate.id === serverId,
     );
     if (!server) return;
-    const capacity = corpRootAgendaOrNodeCapacityInServer(state, server);
-    const mainIds = corpRootMainCardIdsInServer(state, server);
+    const capacity = deps.corpRootAgendaOrNodeCapacityInServer(state, server);
+    const mainIds = deps.corpRootMainCardIdsInServer(state, server);
     if (mainIds.length <= capacity) return;
     const targetId = mainIds[0];
     if (!targetId) return;
-    const targetDefinition = definitionFor(state, targetId);
+    const targetDefinition = deps.definitionFor(state, targetId);
     if (legalAction) {
       const effectIndex = legalAction.resolvedEffects?.length ?? 0;
       legalAction.resolvedEffects = [
@@ -466,7 +437,7 @@ export function createLifecycleRuntime(
           serverId: server.id,
           serverLabel: server.label,
           sourceDefinitionId,
-          sourceTitle: publicCardTitle(sourceDefinitionId),
+          sourceTitle: deps.publicCardTitle(sourceDefinitionId),
           cardDefinitionId: targetDefinition.id,
           cardTitle: targetDefinition.title,
         },
@@ -489,7 +460,7 @@ export function createLifecycleRuntime(
     if (!cardId) return undefined;
     state.runner.grip.push(cardId);
     state.cardInstances[cardId] = {
-      ...mustInstance(state.cardInstances, cardId),
+      ...deps.mustInstance(state.cardInstances, cardId),
       zone: { side: "runner", zone: "grip" },
     };
     return cardId;
@@ -499,13 +470,13 @@ export function createLifecycleRuntime(
     state: GameState,
     drawTaxDecision: DrawTaxDecision = "auto",
   ): RunnerDrawSummary {
-    const summary = emptyRunnerDrawSummary();
+    const summary = deps.emptyRunnerDrawSummary();
     const cardId = drawRunnerCardIntoGrip(state);
     if (!cardId) return summary;
     summary.drawnCount = 1;
     (summary.drawnCardIds ??= []).push(cardId);
     if (drawTaxDecision === "none") return summary;
-    const drawTaxSourceCardIds = drawTaxSourceIds(state);
+    const drawTaxSourceCardIds = deps.drawTaxSourceIds(state);
     if (drawTaxSourceCardIds.length > 0)
       throw new Error(
         "City Surveillance muss ueber die suspendierbare Ziehsequenz aufgeloest werden.",
@@ -557,11 +528,11 @@ export function createLifecycleRuntime(
     return state.corp.servers
       .flatMap((server) => server.root)
       .filter((cardId) => {
-        const instance = mustInstance(state.cardInstances, cardId);
+        const instance = deps.mustInstance(state.cardInstances, cardId);
         return (
           instance.rezzed !== true &&
-          isDrawTaxSourceDefinition(state, cardId) &&
-          state.corp.credits >= rezCostForCard(state, cardId)
+          deps.isDrawTaxSourceDefinition(state, cardId) &&
+          state.corp.credits >= deps.rezCostForCard(state, cardId)
         );
       });
   }
@@ -583,7 +554,7 @@ export function createLifecycleRuntime(
       options: [
         ...sourceCardIds.map((cardId) => ({
           id: `rez_${cardId}`,
-          label: `City Surveillance für ${rezCostForCard(state, cardId)} Credit rezzen`,
+          label: `City Surveillance für ${deps.rezCostForCard(state, cardId)} Credit rezzen`,
           publicLabel: "Installierte Karte rezzen",
           value: cardId,
         })),
@@ -597,7 +568,7 @@ export function createLifecycleRuntime(
   }
 
   function continueRunnerDrawSequence(state: GameState): RunnerDrawSummary {
-    const summary = emptyRunnerDrawSummary();
+    const summary = deps.emptyRunnerDrawSummary();
     const sequence = state.runnerDrawSequence;
     if (!sequence) return summary;
 
@@ -640,7 +611,7 @@ export function createLifecycleRuntime(
       sequence.drawnCardIds.push(cardId);
       summary.drawnCount += 1;
       (summary.drawnCardIds ??= []).push(cardId);
-      sequence.currentDrawTaxSourceIds = drawTaxSourceIds(state);
+      sequence.currentDrawTaxSourceIds = deps.drawTaxSourceIds(state);
       sequence.currentDrawTaxSourceIndex = 0;
       sequence.preDrawRezWindowPassed = false;
       sequence.drawTaxSourceCount = Math.max(
@@ -660,7 +631,7 @@ export function createLifecycleRuntime(
     return state.runner.rig.resources
       .filter(
         (cardId) =>
-          remainingReplacementLongtailKindForCard(state, cardId) ===
+          deps.remainingReplacementLongtailKindForCard(state, cardId) ===
           "hidden_draw_keep_or_top_replacement",
       )
       .sort()[0];
@@ -675,7 +646,7 @@ export function createLifecycleRuntime(
     if (state.pendingChoice)
       throw new Error("Es ist bereits eine Choice offen.");
     const options = drawnCardIds.flatMap((cardId) => {
-      const title = definitionFor(state, cardId).title;
+      const title = deps.definitionFor(state, cardId).title;
       return [
         {
           id: `trash_${cardId}`,
@@ -714,13 +685,13 @@ export function createLifecycleRuntime(
   ): RunnerDrawSummary {
     if (state.runnerDrawSequence)
       throw new Error("Es ist bereits eine Runner-Ziehsequenz aktiv.");
-    let summary = emptyRunnerDrawSummary();
+    let summary = deps.emptyRunnerDrawSummary();
     const crashSourceId =
       amount > 0 ? activeCrashEverettSourceId(state) : undefined;
     const drawAmount = amount + (crashSourceId ? 1 : 0);
     if (
       drawAmount > 0 &&
-      (drawTaxSourceIds(state).length > 0 ||
+      (deps.drawTaxSourceIds(state).length > 0 ||
         affordableUnrezzedDrawTaxSourceIds(state).length > 0)
     ) {
       state.runnerDrawSequence = {
@@ -738,7 +709,7 @@ export function createLifecycleRuntime(
       return continueRunnerDrawSequence(state);
     }
     for (let index = 0; index < drawAmount; index += 1)
-      summary = mergeRunnerDrawSummary(
+      summary = deps.mergeRunnerDrawSummary(
         summary,
         drawRunnerCard(state, drawTaxDecision),
       );
@@ -782,7 +753,7 @@ export function createLifecycleRuntime(
       Number(sourceIndex) !== sequence.currentDrawTaxSourceIndex
     )
       throw new Error("Die City-Surveillance-Quelle ist veraltet.");
-    const selected = selectedChoiceIds(playerAction.selectedChoices)[0];
+    const selected = deps.selectedChoiceIds(playerAction.selectedChoices)[0];
     if (!choice.options.some((option) => option.id === selected))
       throw new Error("Die City-Surveillance-Auswahl ist ungueltig.");
 
@@ -791,7 +762,7 @@ export function createLifecycleRuntime(
     if (selected === "pay_credit") {
       if (state.runner.credits <= 0)
         throw new Error("City Surveillance kann nicht bezahlt werden.");
-      spendCredits(state, "runner", 1);
+      deps.spendCredits(state, "runner", 1);
       sequence.drawTaxCreditsPaid += 1;
       creditsPaid = 1;
     } else if (selected === "take_tag") {
@@ -813,16 +784,16 @@ export function createLifecycleRuntime(
         sourceIndex: Number(sourceIndex),
         runnerTagsBefore,
       };
-      const suspended = addRunnerTagsWithPrevention(
+      const suspended = deps.addRunnerTagsWithPrevention(
         state,
         legalAction,
         1,
-        definitionFor(state, sourceCardId as CardInstanceId).id,
+        deps.definitionFor(state, sourceCardId as CardInstanceId).id,
       );
       if (suspended) {
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
-          sourceDefinitionId: definitionFor(
+          sourceDefinitionId: deps.definitionFor(
             state,
             sourceCardId as CardInstanceId,
           ).id,
@@ -843,7 +814,7 @@ export function createLifecycleRuntime(
     const continuationSummary = continueRunnerDrawSequence(state);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      sourceDefinitionId: definitionFor(state, sourceCardId).id,
+      sourceDefinitionId: deps.definitionFor(state, sourceCardId).id,
       drawTaxDecision: selected === "pay_credit" ? "pay" : "tag",
       drawTaxSourceCount: sourceCount,
       drawTaxCreditsPaid: creditsPaid,
@@ -879,7 +850,8 @@ export function createLifecycleRuntime(
     const continuationSummary = continueRunnerDrawSequence(state);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      sourceDefinitionId: definitionFor(state, continuation.sourceCardId).id,
+      sourceDefinitionId: deps.definitionFor(state, continuation.sourceCardId)
+        .id,
       drawTaxDecision: "tag",
       drawTaxSourceCount: sequence.currentDrawTaxSourceIds.length,
       drawTaxCreditsPaid: 0,
@@ -919,7 +891,7 @@ export function createLifecycleRuntime(
     const [, choiceSequenceId = ""] = choice.source.split(":");
     if (choiceSequenceId !== sequence.sequenceId)
       throw new Error("Die Runner-Ziehsequenz ist veraltet.");
-    const selected = selectedChoiceIds(playerAction.selectedChoices)[0];
+    const selected = deps.selectedChoiceIds(playerAction.selectedChoices)[0];
     if (!choice.options.some((option) => option.id === selected))
       throw new Error("Die City-Surveillance-Rez-Auswahl ist ungueltig.");
     delete state.pendingChoice;
@@ -940,10 +912,10 @@ export function createLifecycleRuntime(
       throw new Error("Die City-Surveillance-Rez-Auswahl ist ungueltig.");
     if (!affordableUnrezzedDrawTaxSourceIds(state).includes(sourceCardId))
       throw new Error("City Surveillance kann nicht mehr gerezzt werden.");
-    const instance = mustInstance(state.cardInstances, sourceCardId);
-    const definition = definitionFor(state, sourceCardId);
-    const rezCost = rezCostForCard(state, sourceCardId);
-    spendCredits(state, "corp", rezCost);
+    const instance = deps.mustInstance(state.cardInstances, sourceCardId);
+    const definition = deps.definitionFor(state, sourceCardId);
+    const rezCost = deps.rezCostForCard(state, sourceCardId);
+    deps.spendCredits(state, "corp", rezCost);
     state.cardInstances[sourceCardId] = {
       ...instance,
       faceup: true,
@@ -955,8 +927,8 @@ export function createLifecycleRuntime(
       rezCostPaid: rezCost,
       corpCreditsAfter: state.corp.credits,
     };
-    executeCardImplementationLifecycleEffects(
-      cardImplementationRuntimeDeps,
+    deps.executeCardImplementationLifecycleEffects(
+      deps.cardImplementationRuntimeDeps,
       state,
       legalAction,
       definition,
@@ -983,13 +955,14 @@ export function createLifecycleRuntime(
     const [, sourceCardId = "", drawnList = ""] = choice.source.split(":");
     if (
       !state.runner.rig.resources.includes(sourceCardId as CardInstanceId) ||
-      remainingReplacementLongtailKindForCard(
+      deps.remainingReplacementLongtailKindForCard(
         state,
         sourceCardId as CardInstanceId,
       ) !== "hidden_draw_keep_or_top_replacement"
     )
       throw new Error("Crash Everett ist nicht mehr installiert.");
-    const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+    const selected =
+      deps.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
     const option = choice.options.find(
       (candidate) => candidate.id === selected,
     );
@@ -1003,11 +976,11 @@ export function createLifecycleRuntime(
       );
     if (!state.runner.grip.includes(cardId as CardInstanceId))
       throw new Error("Die gewaehlte Karte ist nicht mehr im Grip.");
-    removeFromAllZones(state, cardId as CardInstanceId);
+    deps.removeFromAllZones(state, cardId as CardInstanceId);
     if (disposition === "trash") {
       state.runner.heap.push(cardId as CardInstanceId);
       state.cardInstances[cardId] = {
-        ...mustInstance(state.cardInstances, cardId as CardInstanceId),
+        ...deps.mustInstance(state.cardInstances, cardId as CardInstanceId),
         faceup: true,
         rezzed: true,
         zone: { side: "runner", zone: "heap" },
@@ -1015,7 +988,7 @@ export function createLifecycleRuntime(
     } else if (disposition === "top") {
       state.runner.stack.unshift(cardId as CardInstanceId);
       state.cardInstances[cardId] = {
-        ...mustInstance(state.cardInstances, cardId as CardInstanceId),
+        ...deps.mustInstance(state.cardInstances, cardId as CardInstanceId),
         faceup: false,
         rezzed: false,
         zone: { side: "runner", zone: "stack" },
@@ -1028,8 +1001,10 @@ export function createLifecycleRuntime(
       ...(legalAction.payload ?? {}),
       choiceVisibility: "hidden_info_barrier",
       drawReplacementSourceTitle: "Crash Everett, Inventive Fixer",
-      sourceDefinitionId: definitionFor(state, sourceCardId as CardInstanceId)
-        .id,
+      sourceDefinitionId: deps.definitionFor(
+        state,
+        sourceCardId as CardInstanceId,
+      ).id,
       crashEverettDisposition: disposition,
       crashEverettDrawnCardCount: legalDrawnCardIds.size,
       ...(disposition === "trash"
