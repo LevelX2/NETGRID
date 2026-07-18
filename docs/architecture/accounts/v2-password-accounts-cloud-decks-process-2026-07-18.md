@@ -2,7 +2,7 @@
 
 Stand: 2026-07-18
 
-Status: aktiv – P05 abgeschlossen, P06 als Nächstes
+Status: aktiv – P06 abgeschlossen, P07 als Nächstes
 
 Quelle: `docs/releases/v2/v2-0-auth-privacy-cloud-decks/user-profiles-password-cloud-decks-staged-plan-2026-07-18.md`
 
@@ -117,15 +117,15 @@ nur erlaubt, wenn das jeweilige Done-Gate dokumentiert erfüllt ist.
 
 ## Paketfolge
 
-| Paket | Titel | Kernziel | Commit-Vorschlag |
-| --- | --- | --- | --- |
-| P01 | Vertrag, Schema und Deckkuratierung | Passwort-first-Vertrag, gemeinsame SQLite-Migration und sichtbarer Standarddeck-Katalog einfrieren | `docs: freeze password account and standard deck contracts` |
-| P02 | Account- und Passwort-Service | Passwort-Credential, sichere Verifikation, Accountanlage, Sessions und Revocation implementieren | `feat(server): add password account service` |
-| P03 | Geschlossene Account-HTTP-API | Bootstrap/Invite, Login, Session, Logout, Passwortwechsel, CSRF/Origin/Rate-Limit anbinden | `feat(server): expose closed account auth api` |
-| P04 | Account-Weboberfläche | Anmelden, Einladung/Accountanlage, Profil, Logout und Sessionwiederherstellung umsetzen | `feat(web): add closed account login and profile flow` |
-| P05 | Persönliche Decks und Standards im Server | Owner-Storage, 50er-Quote, CRUD, Standard-Kopie und Matchstart-Handoff implementieren | `feat(server): add account deck library and standard decks` |
-| P06 | Deckeditor und Matchstart | `Standard-Decks`/`Meine Decks`, Kopieren, CRUD, Import und Auswahl integrieren | `feat(web): integrate account and standard deck libraries` |
-| P07 | Releaseabschluss | Gesamtchecks, Security-/Privacy-Matrix, Reviews, Status und Runbook abschließen | `docs: close v2 password accounts and cloud decks alpha` |
+| Paket | Titel                                     | Kernziel                                                                                           | Commit-Vorschlag                                            |
+| ----- | ----------------------------------------- | -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| P01   | Vertrag, Schema und Deckkuratierung       | Passwort-first-Vertrag, gemeinsame SQLite-Migration und sichtbarer Standarddeck-Katalog einfrieren | `docs: freeze password account and standard deck contracts` |
+| P02   | Account- und Passwort-Service             | Passwort-Credential, sichere Verifikation, Accountanlage, Sessions und Revocation implementieren   | `feat(server): add password account service`                |
+| P03   | Geschlossene Account-HTTP-API             | Bootstrap/Invite, Login, Session, Logout, Passwortwechsel, CSRF/Origin/Rate-Limit anbinden         | `feat(server): expose closed account auth api`              |
+| P04   | Account-Weboberfläche                     | Anmelden, Einladung/Accountanlage, Profil, Logout und Sessionwiederherstellung umsetzen            | `feat(web): add closed account login and profile flow`      |
+| P05   | Persönliche Decks und Standards im Server | Owner-Storage, 50er-Quote, CRUD, Standard-Kopie und Matchstart-Handoff implementieren              | `feat(server): add account deck library and standard decks` |
+| P06   | Deckeditor und Matchstart                 | `Standard-Decks`/`Meine Decks`, Kopieren, CRUD, Import und Auswahl integrieren                     | `feat(web): integrate account and standard deck libraries`  |
+| P07   | Releaseabschluss                          | Gesamtchecks, Security-/Privacy-Matrix, Reviews, Status und Runbook abschließen                    | `docs: close v2 password accounts and cloud decks alpha`    |
 
 ## Paketdetails
 
@@ -354,6 +354,27 @@ Done-Gate:
 
 - alle Must-Anforderungen und Sicherheitsgrenzen sind nachgewiesen; Branch ist
   sauber und bereit zur Main-Integration.
+
+## Paketnachweise
+
+### P06 – Deckeditor und Matchstart
+
+- Die Weboberfläche trennt kuratierte, unveränderliche Standard-Decks von
+  accountgebundenen persönlichen Decks; im Gastmodus bleiben nur neu
+  angelegte lokale Decks sichtbar.
+- Persönliche Decks unterstützen Anlage, Standard-Kopie, Umbenennung,
+  Bearbeitung, Duplikat, Import, Export, Löschung und erneute serverseitige
+  Snapshot-Validierung. Die Quote wird als `verwendet/50` angezeigt.
+- Ein realer Browserlauf auf der vom Startskript bereitgestellten LAN-Origin
+  hat Login, Standard-Kopie, Quote `1/50`, Umbenennen/Speichern und direkte
+  Standard-Auswahl am Matchstart bestätigt.
+- Der Browserlauf deckte auf, dass der vorhandene lokale Bibliotheksbestand
+  noch interne, Test- und kuratierte Quelldecks zeigte. Die UI filtert nun alle
+  im Kuration-Freeze klassifizierten Quell-IDs, bewahrt sie beim Schreiben der
+  lokalen Datei aber als unsichtbaren Bestand, damit keine Altdateien
+  unbeabsichtigt gelöscht werden.
+- Paketchecks grün: Server-/Web-Typecheck, Account-Deck-/Client-/Sichtbarkeits-
+  tests, Web-Produktionsbuild und `git diff --check`.
 
 ## Verifikationsregeln
 
