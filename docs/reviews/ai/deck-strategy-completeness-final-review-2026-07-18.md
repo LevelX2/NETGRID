@@ -23,10 +23,10 @@ Die aus Decklisten abgeleitete Strategie ist für den vollständigen aktuellen B
 - `@netgrid/ai` Typecheck: grün.
 - `@netgrid/web` Typecheck: grün.
 - `@netgrid/web` Volltest: 51 Dateien, 635 Tests grün.
-- `@netgrid/ai` Shard 1: 131 Dateien, 944 Tests grün.
+- `@netgrid/ai` Shard 1: 132 Dateien, 947 Tests grün.
 - `@netgrid/ai` Shard 2: 131 Dateien, 1.011 Tests grün.
 - `@netgrid/ai` Shard 3: 131 Dateien, 846 Tests grün.
-- AI-Gesamtbestand: 393 Dateien, 2.801 Tests grün.
+- AI-Gesamtbestand nach Integration des aktuellen `main`: 394 Dateien, 2.804 Tests grün.
 - `check:ai-deck-doctrine-strategy`: grün.
 - `git diff --check`: grün.
 

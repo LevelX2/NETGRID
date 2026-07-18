@@ -1,6 +1,6 @@
 # Deck Strategy Completeness Process 2026-07-18
 
-Status: paketweise abgeschlossen; lokaler Integrationsabschluss folgt dem DSC-06-Commit
+Status: abgeschlossen; aktuelles `main` integriert und lokaler Main-Merge verifiziert vorbereitet
 
 Quelle/Vorgabe: Vollprüfung der aus Decks abgeleiteten strategischen Pläne und ihrer produktiven Konsumenten vom 2026-07-18; direkte Umsetzung mit `paketprozess-worktree-goal`.
 
@@ -74,7 +74,7 @@ Bei Sicherheitsblocker: `package_active -> blocked_report`.
 - `DSC-03`: abgeschlossen und committed (`a9a980641`); Anchor-Provenienz derselben Karte wird gedämpft zusammengeführt, Kopienzahl besitzt abnehmenden Grenznutzen, eine Sättigungskurve hält Rangunterschiede sichtbar, Evidenzvielfalt entscheidet vor lexikografischer Reihenfolge und exakte Cutoff-Ties bleiben vollständig erhalten. Alle 40 Standarddecks sowie 2.790 AI-Tests in drei Shards sind grün.
 - `DSC-04`: abgeschlossen und committed (`3a26dfdf4`); allgemeine First-/Chosen-ICE-Bypass-Evidenz kann genau eine fehlende Coverage-Klasse konditional überbrücken, ohne einen Breaker zu erfinden. StrategicIntent übernimmt den produktiven Hard-/Soft-Gap-Vertrag und Runtime-Rollen kennzeichnen den Zugang als `conditional`. King of the Road ist produktiv, Ghost Circuit bleibt mit zwei echten Coverage-Lücken neutral.
 - `DSC-05`: abgeschlossen und committed (`ced165046`); alle abgeleiteten öffentlichen Metadatengruppen sind als produktiv/diagnostisch oder rein diagnostisch klassifiziert und besitzen benannte Consumer. Die erklärenden Seitenprofile und Legacy-Zählungen bleiben erhalten, Inspector-Warnungen tragen Kartenprovenienz, und AI007 zeigt die reale StrategicIntent-Wirkung korrekt an. AI-/Web-Typechecks sowie 71 fokussierte Tests sind grün.
-- `DSC-06`: abgeschlossen; das Gate prüft 40 aktive Standarddecks, 21 versionierte Snapshots, alle 24 Taxonomie-IDs, Metadaten-Consumer und Warnungsprovenienz. Ghost Circuit bleibt als einziges aktives Deck wegen zwei echter Coverage-Lücken neutral. Eine im Volltest sichtbare Broker-vs.-Tempo-Run-Konsumlücke ist behoben. Webtests, AI-/Web-Typechecks, AI006-Check sowie 2.801 AI-Tests in drei Shards sind grün; Abschlussreview und Wissensstatus sind aktualisiert.
+- `DSC-06`: abgeschlossen; das Gate prüft 40 aktive Standarddecks, 21 versionierte Snapshots, alle 24 Taxonomie-IDs, Metadaten-Consumer und Warnungsprovenienz. Ghost Circuit bleibt als einziges aktives Deck wegen zwei echter Coverage-Lücken neutral. Eine im Volltest sichtbare Broker-vs.-Tempo-Run-Konsumlücke ist behoben. Webtests, AI-/Web-Typechecks, AI006-Check sowie nach dem aktuellen Main-Abgleich 2.804 AI-Tests in drei Shards sind grün; Abschlussreview und Wissensstatus sind aktualisiert.
 
 ## Paketdetails
 
