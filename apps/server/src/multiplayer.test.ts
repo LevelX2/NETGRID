@@ -261,7 +261,7 @@ describe("V1.0.9 private internet hardening", () => {
       });
       expect(preflight.status).toBe(204);
       expect(preflight.headers.get("access-control-allow-origin")).toBe("https://netgrid.example");
-      expect(preflight.headers.get("access-control-allow-methods")).toBe("GET,POST,PUT,DELETE,OPTIONS");
+      expect(preflight.headers.get("access-control-allow-methods")).toBe("GET,POST,OPTIONS");
 
       const denied = await fetch(`${baseUrl}/health`, { headers: { origin: "https://evil.example" } });
       const deniedText = await denied.text();

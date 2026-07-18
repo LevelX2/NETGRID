@@ -2,7 +2,7 @@
 
 Stand: 2026-07-18
 
-Status: P07 abgeschlossen – finale Main-Integration als Nächstes
+Status: P07 und Integration aktuellen `main` verifiziert – bereit zum lokalen Merge
 
 Quelle: `docs/releases/v2/v2-0-auth-privacy-cloud-decks/user-profiles-password-cloud-decks-staged-plan-2026-07-18.md`
 
@@ -384,15 +384,26 @@ Done-Gate:
 - Grün: Workspace-Typecheck, Contracts/Test-Discovery, vollständige Server-
   und Web-Suite, drei AI-Shards, Package-Boundaries, Asset-Retention,
   Proteus-Readiness, Produktionsbuild und Browser-Smoke.
-- Der vollständige Servertest deckte eine alte CORS-Methodenerwartung auf; der
-  Test bildet nun die für persönliche Deck-CRUD freigegebenen Methoden `PUT`
-  und `DELETE` mit ab.
+- Der vollständige Servertest deckte auf, dass die CORS-Methoden zu breit
+  global erweitert waren. Nur `/api/account/decks` bewirbt nun die für
+  persönliche Deck-CRUD benötigten Methoden `PUT` und `DELETE`; die bestehende
+  Match-API bleibt bei `GET`, `POST` und `OPTIONS`.
 - Zwei AI-Ratchets sind nachweislich schon auf dem unveränderten lokalen
   `main` rot: zwei Corp-Score-Quelldateien liegen über ihren veralteten
   Zeilenlimits und ein generierter Full-Coverage-Report ist nicht aktuell.
   Der Accountbranch hat an diesen Artefakten keinen Diff; die Abweichungen
   werden im Final Review transparent geführt und nicht durch fachfremde
   Baselineänderungen kaschiert.
+
+### Finale Integrationsverifikation
+
+- Der aktuelle lokale `main` wurde konfliktfrei in den Arbeitsbranch
+  integriert.
+- Auf dem kombinierten Stand sind Workspace-Typecheck, Contracttests,
+  Test-Discovery, Package-Boundaries, das neue Engine-Strukturgate, die
+  vollständige Server- und Web-Suite sowie der Produktionsbuild grün.
+- Die route-spezifische CORS-Härtung ist mit 127 fokussierten Account-Deck-
+  und Multiplayer-Tests sowie Server-Typecheck erneut grün.
 
 ## Verifikationsregeln
 

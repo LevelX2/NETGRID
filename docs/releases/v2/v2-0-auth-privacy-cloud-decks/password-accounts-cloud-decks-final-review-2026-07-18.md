@@ -78,10 +78,10 @@ Grüne Nachweise:
 - `corepack pnpm build`;
 - realer Browser-Smoke und `git diff --check`.
 
-Der vollständige Servertest deckte eine veraltete CORS-Erwartung auf. Der
-Server erlaubt für die persönliche Deck-CRUD-API bewusst `PUT` und `DELETE`;
-der Regressionstest bildet nun den freigegebenen Methodensatz
-`GET,POST,PUT,DELETE,OPTIONS` ab.
+Der vollständige Servertest deckte auf, dass die CORS-Methoden zu breit global
+erweitert waren. Der Server bewirbt `PUT` und `DELETE` jetzt nur für
+`/api/account/decks`; die Match-API behält den engeren Methodensatz
+`GET,POST,OPTIONS`. Beide Routenverträge sind separat getestet.
 
 ## Geerbte projektweite Abweichungen
 
