@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import type { DeckDefinition, GameState } from "@netgrid/shared";
+import type {
+  DeckDefinition,
+  GameState,
+  ResolvedGameEffect,
+} from "@netgrid/shared";
 import {
   createGameAfterSetup,
   getPlayerView,
@@ -114,10 +118,7 @@ function corpMainClassic08FallGuyGame(seed: string): GameState {
       runnerDeck: {
         ...CLASSIC_08_RUNNER_DECK,
         id: `${CLASSIC_08_RUNNER_DECK.id}_fall_guy`,
-        cards: [
-          ...CLASSIC_08_RUNNER_DECK.cards,
-          { id: FALL_GUY, quantity: 1 },
-        ],
+        cards: [...CLASSIC_08_RUNNER_DECK.cards, { id: FALL_GUY, quantity: 1 }],
       },
       agendaPointsToWin: 99,
     }),
@@ -141,7 +142,10 @@ function toRunnerClassic08Game(seed: string): GameState {
   return state;
 }
 
-function latestPayload(state: GameState, predicate: (payload: Record<string, unknown>) => boolean): Record<string, unknown> | undefined {
+function latestPayload(
+  state: GameState,
+  predicate: (payload: Record<string, unknown>) => boolean,
+): Record<string, unknown> | undefined {
   return state.eventLog
     .slice()
     .reverse()
@@ -149,29 +153,23 @@ function latestPayload(state: GameState, predicate: (payload: Record<string, unk
     .find((payload): payload is Record<string, unknown> => {
       return Boolean(
         payload &&
-          typeof payload === "object" &&
-          predicate(payload as Record<string, unknown>),
+        typeof payload === "object" &&
+        predicate(payload as Record<string, unknown>),
       );
     });
 }
 
 function latestResolvedEffect(
   state: GameState,
-  predicate: (effect: Record<string, unknown>) => boolean,
-): Record<string, unknown> | undefined {
+  predicate: (effect: ResolvedGameEffect) => boolean,
+): ResolvedGameEffect | undefined {
   for (const entry of state.eventLog.slice().reverse()) {
     const effects = entry.publicPayload?.resolvedEffects;
     if (!Array.isArray(effects)) continue;
     const match = effects
       .slice()
       .reverse()
-      .find((effect): effect is Record<string, unknown> => {
-        return Boolean(
-          effect &&
-            typeof effect === "object" &&
-            predicate(effect as Record<string, unknown>),
-        );
-      });
+      .find((effect) => predicate(effect));
     if (match) return match;
   }
   return undefined;
@@ -259,7 +257,11 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
       runStartTaxSourceDefinitionIds: STREET_ENFORCER,
     });
 
-    state = apply(state, "runner", (action) => action.actionId === legal.actionId);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === legal.actionId,
+    );
 
     expect(state.runner.credits).toBe(2);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -328,7 +330,12 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
 
   it("rolls Satellite Monitors once per Runner run attempt at Corp turn start", () => {
     let state = corpMainClassic08Game("classic-08-satellite-monitors");
-    addRezzedCorpRootForTest(state, SATELLITE_MONITORS, "remote_1", "satellite");
+    addRezzedCorpRootForTest(
+      state,
+      SATELLITE_MONITORS,
+      "remote_1",
+      "satellite",
+    );
     state = toRunnerTurnFromCorpMain(state);
     state.runnerTurnFlags = {
       ...state.runnerTurnFlags!,
@@ -355,7 +362,9 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
       .map(Number);
     expect(dieRolls).toHaveLength(4);
     expect(state.randomDrawRecords).toHaveLength(randomBefore + 4);
-    expect(payload?.tagsAdded).toBe(dieRolls.filter((roll) => roll === 1).length);
+    expect(payload?.tagsAdded).toBe(
+      dieRolls.filter((roll) => roll === 1).length,
+    );
     expect(state.runner.tags).toBe(Number(payload?.tagsAdded ?? 0));
     expectValid(state);
   });
@@ -422,9 +431,7 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
       option.id.includes(fallGuyId),
     )?.id;
     const avoidState = applyChoice(state, "runner", String(fallGuyOption));
-    expect(avoidState.runner.tags).toBe(
-      Math.max(0, passState.runner.tags - 1),
-    );
+    expect(avoidState.runner.tags).toBe(Math.max(0, passState.runner.tags - 1));
     expect(avoidState.runner.heap).toContain(fallGuyId);
     expect(avoidState.randomDrawRecords).toHaveLength(randomDrawCount);
     expect(avoidState.pendingAddTagContinuation).toBeUndefined();
@@ -450,7 +457,9 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
       "remote_1",
       "other",
     );
-    const remote = state.corp.servers.find((server) => server.id === "remote_1");
+    const remote = state.corp.servers.find(
+      (server) => server.id === "remote_1",
+    );
     if (!remote) throw new Error("Missing remote_1");
     remote.root = [selfId, otherRootId];
     const gripBefore = state.runner.grip.length;
@@ -462,11 +471,7 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
     state = passRootRezWindowBeforeAccessIfOpen(state);
-    state = apply(
-      state,
-      "runner",
-      (action) => action.type === "access_card",
-    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
 
     expect(state.corp.archives).toContain(otherRootId);
     expect(state.corp.archives).not.toContain(selfId);
@@ -488,13 +493,11 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
       "simple_setup_hardware",
     );
     const firstProgramId = installRunnerProgramForTest(state, "simple_fracter");
-    const secondProgramId = installRunnerProgramForTest(state, "simple_decoder");
-    addRezzedCorpRootForTest(
+    const secondProgramId = installRunnerProgramForTest(
       state,
-      SHOCK_TREATMENT,
-      "remote_1",
-      "shock",
+      "simple_decoder",
     );
+    addRezzedCorpRootForTest(state, SHOCK_TREATMENT, "remote_1", "shock");
 
     state = apply(
       state,
@@ -503,11 +506,7 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
     state = passRootRezWindowBeforeAccessIfOpen(state);
-    state = apply(
-      state,
-      "runner",
-      (action) => action.type === "access_card",
-    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
 
     expect(state.runner.rig.hardware).not.toContain(hardwareId);
     expect(state.runner.rig.programs).not.toContain(firstProgramId);
@@ -547,7 +546,11 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
         action.payload?.targetCardId === iceId,
     );
 
-    state = apply(state, "corp", (action) => action.actionId === legal.actionId);
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === legal.actionId,
+    );
 
     expect(state.cardInstances[iceId]?.strengthModifier).toBeGreaterThan(0);
     expect(state.temporaryIceStrengthModifiersUntilEndOfTurn).toEqual([
@@ -567,7 +570,9 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     state = apply(state, "corp", (action) => action.type === "end_turn");
 
     expect(state.cardInstances[iceId]?.strengthModifier ?? 0).toBe(0);
-    expect(state.temporaryIceStrengthModifiersUntilEndOfTurn ?? []).toHaveLength(0);
+    expect(
+      state.temporaryIceStrengthModifiersUntilEndOfTurn ?? [],
+    ).toHaveLength(0);
     expectValid(state);
   });
 
@@ -595,7 +600,9 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
   });
 
   it("uses Indiscriminate Response Team after a successful run to redraw the Runner grip", () => {
-    let state = toRunnerClassic08Game("classic-08-indiscriminate-response-team");
+    let state = toRunnerClassic08Game(
+      "classic-08-indiscriminate-response-team",
+    );
     addRezzedCorpRootForTest(state, IRT, "remote_1", "irt");
     emptyRunnerGripForTest(state);
     moveRunnerCardCopyToGrip(state, "simple_economy_event");
@@ -607,7 +614,8 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     state = apply(
       state,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
 
     const payload = latestPayload(

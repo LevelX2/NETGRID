@@ -1,4 +1,9 @@
-import type { PlayerView, PublicGameEvent, Side, VisibleCard } from "@netgrid/shared";
+import type {
+  PlayerView,
+  PublicGameEvent,
+  Side,
+  VisibleCard,
+} from "@netgrid/shared";
 import {
   formatChronicleEffectItems,
   formatChronicleEvent,
@@ -9,6 +14,7 @@ import {
 } from "./chronicle";
 import { serverDisplayLabel } from "./action-board-ui";
 import { publicAccessOwnsOutcomeEvent } from "./access-presentation";
+import { payloadHasAbility } from "./action-payload";
 
 export type OpponentActionCue = {
   cueId: string;
@@ -65,9 +71,31 @@ export type CueActionUse = {
 };
 
 export type BoardHighlight =
-  | { kind: "server"; serverId?: string; serverLabel?: string; lane?: "ice" | "root" | "central" }
-  | { kind: "card"; cardInstanceId?: string; cardDefinitionId?: string; title?: string }
-  | { kind: "zone"; side: Side; zone: "hq" | "rd" | "archives" | "grip" | "stack" | "heap" | "rig" | "scoreArea" }
+  | {
+      kind: "server";
+      serverId?: string;
+      serverLabel?: string;
+      lane?: "ice" | "root" | "central";
+    }
+  | {
+      kind: "card";
+      cardInstanceId?: string;
+      cardDefinitionId?: string;
+      title?: string;
+    }
+  | {
+      kind: "zone";
+      side: Side;
+      zone:
+        | "hq"
+        | "rd"
+        | "archives"
+        | "grip"
+        | "stack"
+        | "heap"
+        | "rig"
+        | "scoreArea";
+    }
   | { kind: "run"; serverId?: string; serverLabel?: string; phase?: string }
   | { kind: "economy"; side: Side }
   | { kind: "decision"; side: Side };
@@ -115,7 +143,9 @@ export type CueDerivationInput = {
   contextByEventId?: Record<string, Omit<ChronicleContext, "side">>;
 };
 
-export function deriveOpponentActionCues(input: CueDerivationInput): OpponentActionCue[] {
+export function deriveOpponentActionCues(
+  input: CueDerivationInput,
+): OpponentActionCue[] {
   const actionUsesByEventId = deriveTurnActionUses(input.events);
   const relevantEvents = eventsAfter(input.events, input.lastPresentedEventId);
   const localAttention = hasLocalAttention(input.playerView, input.viewerSide);
@@ -124,39 +154,79 @@ export function deriveOpponentActionCues(input: CueDerivationInput): OpponentAct
   const cues = relevantEvents.flatMap((event) => {
     const payload = event.publicPayload ?? {};
     const actionType = stringValue(payload.actionType) ?? event.type;
-    if (actionType === "access_card" && stringValue(payload.cardDefinitionId) && stringValue(payload.title)) return [];
+    if (
+      actionType === "access_card" &&
+      stringValue(payload.cardDefinitionId) &&
+      stringValue(payload.title)
+    )
+      return [];
     if (publicAccessOwnsOutcomeEvent(input.events, event)) return [];
     const actor = sideValue(payload.actor);
     const opponent = Boolean(actor && actor !== input.viewerSide);
     const forcedPublicEffectCue = isForcedPublicEffectCue(actionType, payload);
-    const forcedEffectCueItems = formatChronicleEffectItems(event, input.viewerSide).filter(isForcedEffectCueItem);
-    const systemCue = !actor && actionType !== "game_created" && (input.includeAutomaticEffectCues || actionType === "game_end");
+    const forcedEffectCueItems = formatChronicleEffectItems(
+      event,
+      input.viewerSide,
+    ).filter(isForcedEffectCueItem);
+    const systemCue =
+      !actor &&
+      actionType !== "game_created" &&
+      (input.includeAutomaticEffectCues || actionType === "game_end");
     if (
       actionType === "resolve_choice" &&
       stringValue(payload.hiddenZoneAction) === "p3_33_private_look"
     )
       return [];
-    if (!input.includeOwnActions && !opponent && !systemCue && !forcedPublicEffectCue && forcedEffectCueItems.length === 0) return [];
-    if (actionType === "end_turn" && opponent && localAttention && !input.playerView.pendingChoice) return [];
+    if (
+      !input.includeOwnActions &&
+      !opponent &&
+      !systemCue &&
+      !forcedPublicEffectCue &&
+      forcedEffectCueItems.length === 0
+    )
+      return [];
+    if (
+      actionType === "end_turn" &&
+      opponent &&
+      localAttention &&
+      !input.playerView.pendingChoice
+    )
+      return [];
 
-    const item = formatChronicleEvent(event, input.viewerSide, input.contextByEventId?.[event.eventId] ?? {});
+    const item = formatChronicleEvent(
+      event,
+      input.viewerSide,
+      input.contextByEventId?.[event.eventId] ?? {},
+    );
     const aiExplanation = stringValue(payload.aiExplanation);
-    const source = aiExplanation || stringValue(payload.aiReasonCode) ? "ai" : forcedPublicEffectCue || !actor ? "system" : "human";
+    const source =
+      aiExplanation || stringValue(payload.aiReasonCode)
+        ? "ai"
+        : forcedPublicEffectCue || !actor
+          ? "system"
+          : "human";
     const visibility = item.visibility;
-    const highlight = deriveHighlight(actionType, payload, actor, visibility, visibleCards);
+    const highlight = deriveHighlight(
+      actionType,
+      payload,
+      actor,
+      visibility,
+      visibleCards,
+    );
     const relatedCard = deriveRelatedCard(payload, visibility, visibleCards);
     const relatedCardPositionBadge = relatedCard
       ? relatedIcePositionBadge(input.playerView, relatedCard)
       : undefined;
     const hasDedicatedImpactEffect = forcedEffectCueItems.some(
       (effectItem) =>
-        isTagGainEffectCueItem(effectItem) ||
-        isDamageEffectCueItem(effectItem),
+        isTagGainEffectCueItem(effectItem) || isDamageEffectCueItem(effectItem),
     );
     const sound = hasDedicatedImpactEffect
       ? undefined
       : actionSoundForActionType(actionType, visibility);
-    const soundCount = sound ? actionSoundCountForAction(actionType, payload) : 1;
+    const soundCount = sound
+      ? actionSoundCountForAction(actionType, payload)
+      : 1;
 
     const cue: OpponentActionCue = {
       cueId: `${input.viewerSide}:${event.eventId}`,
@@ -164,13 +234,17 @@ export function deriveOpponentActionCues(input: CueDerivationInput): OpponentAct
       viewerSide: input.viewerSide,
       ...(actor ? { actor } : {}),
       actorLabel: actorLabel(actor, source),
-      ...(actionUsesByEventId[event.eventId] ? { actionUse: actionUsesByEventId[event.eventId] } : {}),
+      ...(actionUsesByEventId[event.eventId]
+        ? { actionUse: actionUsesByEventId[event.eventId] }
+        : {}),
       opponent,
       source,
       actionType,
       title: item.title,
       ...(item.description ? { description: item.description } : {}),
-      ...(item.cardDefinitionId ? { cardDefinitionId: item.cardDefinitionId } : {}),
+      ...(item.cardDefinitionId
+        ? { cardDefinitionId: item.cardDefinitionId }
+        : {}),
       ...(item.cardTitle ? { cardTitle: item.cardTitle } : {}),
       visibility,
       importance: item.importance,
@@ -180,52 +254,73 @@ export function deriveOpponentActionCues(input: CueDerivationInput): OpponentAct
       ...(sound ? { sound } : {}),
       ...(sound && soundCount > 1 ? { soundCount } : {}),
       requiresLocalAttention: localAttention,
-      ...(aiExplanation ? { aiExplanation } : {})
+      ...(aiExplanation ? { aiExplanation } : {}),
     };
-    const effectCues = forcedEffectCueItems.map((effectItem, index): OpponentActionCue => {
-      const tagGainAmount = effectItem.chips.includes("Tag erhalten")
-        ? tagGainAmountFromPublicPayload(payload)
-        : 0;
-      const relatedCard =
-        effectItem.cardDefinitionId ? visibleCards.get(effectItem.cardDefinitionId) : undefined;
-      const relatedCardPositionBadge = relatedCard
-        ? relatedIcePositionBadge(input.playerView, relatedCard)
-        : undefined;
-      const effectSound = isTagGainEffectCueItem(effectItem)
-        ? "gain_tag"
-        : isDamageEffectCueItem(effectItem)
-          ? undefined
-          : "tag_or_damage";
-      return {
-        cueId: `${input.viewerSide}:${event.eventId}:effect:${index}`,
-        eventId: event.eventId,
-        viewerSide: input.viewerSide,
-        ...(effectItem.actor ? { actor: effectItem.actor } : actor ? { actor } : {}),
-        actorLabel: actorLabel(effectItem.actor ?? actor, "system"),
-        ...(actionUsesByEventId[event.eventId] ? { actionUse: actionUsesByEventId[event.eventId] } : {}),
-        opponent: Boolean((effectItem.actor ?? actor) && (effectItem.actor ?? actor) !== input.viewerSide),
-        source: "system",
-        actionType,
-        title: effectItem.title,
-        ...(effectItem.description ? { description: effectItem.description } : {}),
-        ...(effectItem.cardDefinitionId ? { cardDefinitionId: effectItem.cardDefinitionId } : {}),
-        ...(effectItem.cardTitle ? { cardTitle: effectItem.cardTitle } : {}),
-        visibility: effectItem.visibility,
-        importance: effectItem.importance,
-        ...(relatedCard ? { relatedCard } : {}),
-        ...(relatedCardPositionBadge ? { relatedCardPositionBadge } : {}),
-        ...(tagGainAmount > 0 ? { iconBadge: `+${tagGainAmount}` } : {}),
-        ...(effectSound ? { sound: effectSound } : {}),
-        requiresLocalAttention: localAttention,
-      };
-    });
+    const effectCues = forcedEffectCueItems.map(
+      (effectItem, index): OpponentActionCue => {
+        const tagGainAmount = effectItem.chips.includes("Tag erhalten")
+          ? tagGainAmountFromPublicPayload(payload)
+          : 0;
+        const relatedCard = effectItem.cardDefinitionId
+          ? visibleCards.get(effectItem.cardDefinitionId)
+          : undefined;
+        const relatedCardPositionBadge = relatedCard
+          ? relatedIcePositionBadge(input.playerView, relatedCard)
+          : undefined;
+        const effectSound = isTagGainEffectCueItem(effectItem)
+          ? "gain_tag"
+          : isDamageEffectCueItem(effectItem)
+            ? undefined
+            : "tag_or_damage";
+        return {
+          cueId: `${input.viewerSide}:${event.eventId}:effect:${index}`,
+          eventId: event.eventId,
+          viewerSide: input.viewerSide,
+          ...(effectItem.actor
+            ? { actor: effectItem.actor }
+            : actor
+              ? { actor }
+              : {}),
+          actorLabel: actorLabel(effectItem.actor ?? actor, "system"),
+          ...(actionUsesByEventId[event.eventId]
+            ? { actionUse: actionUsesByEventId[event.eventId] }
+            : {}),
+          opponent: Boolean(
+            (effectItem.actor ?? actor) &&
+            (effectItem.actor ?? actor) !== input.viewerSide,
+          ),
+          source: "system",
+          actionType,
+          title: effectItem.title,
+          ...(effectItem.description
+            ? { description: effectItem.description }
+            : {}),
+          ...(effectItem.cardDefinitionId
+            ? { cardDefinitionId: effectItem.cardDefinitionId }
+            : {}),
+          ...(effectItem.cardTitle ? { cardTitle: effectItem.cardTitle } : {}),
+          visibility: effectItem.visibility,
+          importance: effectItem.importance,
+          ...(relatedCard ? { relatedCard } : {}),
+          ...(relatedCardPositionBadge ? { relatedCardPositionBadge } : {}),
+          ...(tagGainAmount > 0 ? { iconBadge: `+${tagGainAmount}` } : {}),
+          ...(effectSound ? { sound: effectSound } : {}),
+          requiresLocalAttention: localAttention,
+        };
+      },
+    );
     return [cue, ...effectCues];
   });
 
   return cues;
 }
 
-export function deriveDamageImpactCues(input: Pick<CueDerivationInput, "viewerSide" | "playerView" | "events" | "lastPresentedEventId">): DamageImpactCue[] {
+export function deriveDamageImpactCues(
+  input: Pick<
+    CueDerivationInput,
+    "viewerSide" | "playerView" | "events" | "lastPresentedEventId"
+  >,
+): DamageImpactCue[] {
   const visibleCards = visibleCardsByDefinition(input.playerView);
   return eventsAfter(input.events, input.lastPresentedEventId)
     .map((event): DamageImpactCue | null => {
@@ -233,16 +328,30 @@ export function deriveDamageImpactCues(input: Pick<CueDerivationInput, "viewerSi
       if (payload.damageResolved !== true) return null;
       const damageType = damageTypeValue(payload.damageType);
       if (!damageType) return null;
-      const amount = nonNegativeIntegerValue(payload.damageAmount) ?? positiveIntegerValue(payload.cardsTrashed) ?? 0;
+      const amount =
+        nonNegativeIntegerValue(payload.damageAmount) ??
+        positiveIntegerValue(payload.cardsTrashed) ??
+        0;
       const preventedAmount = positiveIntegerValue(payload.preventedAmount);
-      if (amount <= 0 && payload.flatline !== true && preventedAmount === undefined) return null;
+      if (
+        amount <= 0 &&
+        payload.flatline !== true &&
+        preventedAmount === undefined
+      )
+        return null;
       const cardsTrashed = nonNegativeIntegerValue(payload.cardsTrashed);
-      const runnerGripBefore = nonNegativeIntegerValue(payload.runnerGripBefore);
+      const runnerGripBefore = nonNegativeIntegerValue(
+        payload.runnerGripBefore,
+      );
       const runnerGripAfter = nonNegativeIntegerValue(payload.runnerGripAfter);
       const coreDamageAfter = nonNegativeIntegerValue(payload.coreDamageAfter);
-      const runnerMaxHandSizeAfter = nonNegativeIntegerValue(payload.runnerMaxHandSizeAfter) ?? currentRunnerMaxHandSize(input.playerView, input.viewerSide);
+      const runnerMaxHandSizeAfter =
+        nonNegativeIntegerValue(payload.runnerMaxHandSizeAfter) ??
+        currentRunnerMaxHandSize(input.playerView, input.viewerSide);
       const sourceDefinitionId = stringValue(payload.sourceDefinitionId);
-      const visibleSource = sourceDefinitionId ? visibleCards.get(sourceDefinitionId) : undefined;
+      const visibleSource = sourceDefinitionId
+        ? visibleCards.get(sourceDefinitionId)
+        : undefined;
       return {
         cueId: `${input.viewerSide}:${event.eventId}:damage-impact`,
         eventId: event.eventId,
@@ -254,8 +363,10 @@ export function deriveDamageImpactCues(input: Pick<CueDerivationInput, "viewerSi
         ...(runnerGripAfter !== undefined ? { runnerGripAfter } : {}),
         flatline: payload.flatline === true,
         ...(coreDamageAfter !== undefined ? { coreDamageAfter } : {}),
-        ...(runnerMaxHandSizeAfter !== undefined ? { runnerMaxHandSizeAfter } : {}),
-        sourceLabel: visibleSource?.title ?? "Korp-Effekt"
+        ...(runnerMaxHandSizeAfter !== undefined
+          ? { runnerMaxHandSizeAfter }
+          : {}),
+        sourceLabel: visibleSource?.title ?? "Korp-Effekt",
       };
     })
     .filter((cue): cue is DamageImpactCue => Boolean(cue));
@@ -286,17 +397,29 @@ export function damageAudioCueFromPublicPayload(
 
 export function cueHasHiddenLeak(cue: OpponentActionCue): boolean {
   const serialized = JSON.stringify(cue);
-  if (cue.visibility !== "redacted") return /cardInstances|sessionToken|joinToken|privatePayload/i.test(serialized);
-  return /cardInstances|sessionToken|joinToken|privatePayload|imageUrl|Simple Agenda|simple_agenda/i.test(serialized);
+  if (cue.visibility !== "redacted")
+    return /cardInstances|sessionToken|joinToken|privatePayload/i.test(
+      serialized,
+    );
+  return /cardInstances|sessionToken|joinToken|privatePayload|imageUrl|Simple Agenda|simple_agenda/i.test(
+    serialized,
+  );
 }
 
-export function eventsAfter(events: PublicGameEvent[], lastPresentedEventId?: string | null): PublicGameEvent[] {
+export function eventsAfter(
+  events: PublicGameEvent[],
+  lastPresentedEventId?: string | null,
+): PublicGameEvent[] {
   if (!lastPresentedEventId) return events;
-  const index = events.findIndex((event) => event.eventId === lastPresentedEventId);
+  const index = events.findIndex(
+    (event) => event.eventId === lastPresentedEventId,
+  );
   return index >= 0 ? events.slice(index + 1) : [];
 }
 
-function deriveTurnActionUses(events: PublicGameEvent[]): Record<string, CueActionUse> {
+function deriveTurnActionUses(
+  events: PublicGameEvent[],
+): Record<string, CueActionUse> {
   const spentBySide: Partial<Record<Side, number>> = {};
   const result: Record<string, CueActionUse> = {};
   for (const event of events) {
@@ -314,10 +437,13 @@ function deriveTurnActionUses(events: PublicGameEvent[]): Record<string, CueActi
       const end = Math.max(start + clicks - 1, payloadEnd ?? 0);
       result[event.eventId] = {
         label: start === end ? String(start) : `${start}-${end}`,
-        title: start === end ? `${start}. Aktion in diesem Zug` : `Aktionen ${start} bis ${end} in diesem Zug`,
+        title:
+          start === end
+            ? `${start}. Aktion in diesem Zug`
+            : `Aktionen ${start} bis ${end} in diesem Zug`,
         clicks,
         start,
-        end
+        end,
       };
       spentBySide[actor] = end;
     }
@@ -332,50 +458,107 @@ function deriveHighlight(
   payload: Record<string, unknown>,
   actor: Side | undefined,
   visibility: ChronicleVisibility,
-  visibleCards: Map<string, VisibleCard>
+  visibleCards: Map<string, VisibleCard>,
 ): BoardHighlight | undefined {
   if (actionType === "game_created") return undefined;
-  if (actionType === "start_run" || actionType === "continue_run" || actionType === "rez_ice" || actionType === "decline_rez" || actionType === "break_subroutine" || actionType === "pump_breaker") {
-    return { kind: "run", ...(stringValue(payload.serverId) ? { serverId: stringValue(payload.serverId)! } : {}), ...(stringValue(payload.serverLabel) ? { serverLabel: serverDisplayLabel(stringValue(payload.serverLabel)!) } : {}), ...(stringValue(payload.runPhase) ? { phase: stringValue(payload.runPhase)! } : {}) };
+  if (
+    actionType === "start_run" ||
+    actionType === "continue_run" ||
+    actionType === "rez_ice" ||
+    actionType === "decline_rez" ||
+    actionType === "break_subroutine" ||
+    actionType === "pump_breaker"
+  ) {
+    return {
+      kind: "run",
+      ...(stringValue(payload.serverId)
+        ? { serverId: stringValue(payload.serverId)! }
+        : {}),
+      ...(stringValue(payload.serverLabel)
+        ? { serverLabel: serverDisplayLabel(stringValue(payload.serverLabel)!) }
+        : {}),
+      ...(stringValue(payload.runPhase)
+        ? { phase: stringValue(payload.runPhase)! }
+        : {}),
+    };
   }
   if (actionType === "mandatory_draw" || actionType === "draw_card") {
-    return { kind: "zone", side: actor ?? "corp", zone: actor === "runner" ? "grip" : "hq" };
+    return {
+      kind: "zone",
+      side: actor ?? "corp",
+      zone: actor === "runner" ? "grip" : "hq",
+    };
   }
-  if (actionType === "gain_credit") return { kind: "economy", side: actor ?? "corp" };
-  if (actionType === "score_agenda") return { kind: "zone", side: "corp", zone: "scoreArea" };
-  if (actionType === "steal_agenda") return { kind: "zone", side: "runner", zone: "scoreArea" };
+  if (actionType === "gain_credit")
+    return { kind: "economy", side: actor ?? "corp" };
+  if (actionType === "score_agenda")
+    return { kind: "zone", side: "corp", zone: "scoreArea" };
+  if (actionType === "steal_agenda")
+    return { kind: "zone", side: "runner", zone: "scoreArea" };
   if (actionType === "access_card") {
-    return { kind: "server", ...(stringValue(payload.serverId) ? { serverId: stringValue(payload.serverId)! } : {}), ...(stringValue(payload.serverLabel) ? { serverLabel: serverDisplayLabel(stringValue(payload.serverLabel)!) } : {}), lane: "central" };
+    return {
+      kind: "server",
+      ...(stringValue(payload.serverId)
+        ? { serverId: stringValue(payload.serverId)! }
+        : {}),
+      ...(stringValue(payload.serverLabel)
+        ? { serverLabel: serverDisplayLabel(stringValue(payload.serverLabel)!) }
+        : {}),
+      lane: "central",
+    };
   }
-  if (actionType === "trash_accessed_card") return { kind: "zone", side: actor === "runner" ? "corp" : "runner", zone: actor === "runner" ? "archives" : "heap" };
-  if (actionType === "trash_resource" || actionType === "remove_tag") return { kind: "zone", side: "runner", zone: "rig" };
+  if (actionType === "trash_accessed_card")
+    return {
+      kind: "zone",
+      side: actor === "runner" ? "corp" : "runner",
+      zone: actor === "runner" ? "archives" : "heap",
+    };
+  if (actionType === "trash_resource" || actionType === "remove_tag")
+    return { kind: "zone", side: "runner", zone: "rig" };
   if (visibility === "redacted") return serverHighlight(payload);
 
-  const cardDefinitionId = stringValue(payload.cardDefinitionId) ?? stringValue(payload.sourceDefinitionId);
-  const visibleCard = cardDefinitionId ? visibleCards.get(cardDefinitionId) : undefined;
+  const cardDefinitionId =
+    stringValue(payload.cardDefinitionId) ??
+    stringValue(payload.sourceDefinitionId);
+  const visibleCard = cardDefinitionId
+    ? visibleCards.get(cardDefinitionId)
+    : undefined;
   if (visibleCard?.instanceId) {
     return {
       kind: "card",
       cardInstanceId: visibleCard.instanceId,
-      ...(visibleCard.definitionId ? { cardDefinitionId: visibleCard.definitionId } : {}),
-      ...(visibleCard.title ? { title: visibleCard.title } : {})
+      ...(visibleCard.definitionId
+        ? { cardDefinitionId: visibleCard.definitionId }
+        : {}),
+      ...(visibleCard.title ? { title: visibleCard.title } : {}),
     };
   }
 
   if (actionType === "install_card") {
-    if (actor === "runner") return { kind: "zone", side: "runner", zone: "rig" };
+    if (actor === "runner")
+      return { kind: "zone", side: "runner", zone: "rig" };
     return serverHighlight(payload);
   }
-  if (actionType === "play_event") return { kind: "zone", side: "runner", zone: "heap" };
-  if (actionType === "play_operation") return { kind: "zone", side: "corp", zone: "archives" };
+  if (actionType === "play_event")
+    return { kind: "zone", side: "runner", zone: "heap" };
+  if (actionType === "play_operation")
+    return { kind: "zone", side: "corp", zone: "archives" };
   if (actionType === "advance_card") return serverHighlight(payload);
   return undefined;
 }
 
-function deriveRelatedCard(payload: Record<string, unknown>, visibility: ChronicleVisibility, visibleCards: Map<string, VisibleCard>): VisibleCard | undefined {
+function deriveRelatedCard(
+  payload: Record<string, unknown>,
+  visibility: ChronicleVisibility,
+  visibleCards: Map<string, VisibleCard>,
+): VisibleCard | undefined {
   if (visibility === "redacted") return undefined;
-  const cardDefinitionId = stringValue(payload.cardDefinitionId) ?? stringValue(payload.sourceDefinitionId);
-  const visibleCard = cardDefinitionId ? visibleCards.get(cardDefinitionId) : undefined;
+  const cardDefinitionId =
+    stringValue(payload.cardDefinitionId) ??
+    stringValue(payload.sourceDefinitionId);
+  const visibleCard = cardDefinitionId
+    ? visibleCards.get(cardDefinitionId)
+    : undefined;
   return visibleCard?.known ? visibleCard : undefined;
 }
 
@@ -412,9 +595,14 @@ function serverHighlight(payload: Record<string, unknown>): BoardHighlight {
   const zoneLabel = stringValue(payload.zoneLabel);
   return {
     kind: "server",
-    ...(stringValue(payload.serverId) ? { serverId: stringValue(payload.serverId)! } : {}),
-    ...(stringValue(payload.serverLabel) ? { serverLabel: serverDisplayLabel(stringValue(payload.serverLabel)!) } : {}),
-    lane: zoneLabel === "ICE" ? "ice" : zoneLabel === "Root" ? "root" : "central"
+    ...(stringValue(payload.serverId)
+      ? { serverId: stringValue(payload.serverId)! }
+      : {}),
+    ...(stringValue(payload.serverLabel)
+      ? { serverLabel: serverDisplayLabel(stringValue(payload.serverLabel)!) }
+      : {}),
+    lane:
+      zoneLabel === "ICE" ? "ice" : zoneLabel === "Root" ? "root" : "central",
   };
 }
 
@@ -423,8 +611,7 @@ export function actionSoundForActionType(
   visibility: ChronicleVisibility,
   payload?: Record<string, unknown>,
 ): ActionSoundKind | undefined {
-  if (payload && tagGainAmountFromPublicPayload(payload) > 0)
-    return "gain_tag";
+  if (payload && tagGainAmountFromPublicPayload(payload) > 0) return "gain_tag";
   switch (actionType) {
     case "mandatory_draw":
     case "draw_card":
@@ -465,7 +652,10 @@ export function actionSoundForActionType(
   }
 }
 
-export function turnStartAudioCue(current: TurnStartAudioState, previous?: TurnStartAudioState | null): TurnStartAudioCue | null {
+export function turnStartAudioCue(
+  current: TurnStartAudioState,
+  previous?: TurnStartAudioState | null,
+): TurnStartAudioCue | null {
   if (!previous || previous.matchId !== current.matchId) return null;
   const currentTurnSide = turnPhaseSide(current.phase);
   if (!currentTurnSide || currentTurnSide !== current.activeSide) return null;
@@ -473,30 +663,41 @@ export function turnStartAudioCue(current: TurnStartAudioState, previous?: TurnS
   return {
     key: `${current.matchId}:${current.stateVersion}:${currentTurnSide}`,
     side: currentTurnSide,
-    sound: currentTurnSide === "runner" ? "runner_turn" : "corp_turn"
+    sound: currentTurnSide === "runner" ? "runner_turn" : "corp_turn",
   };
 }
 
-export function actionSoundCountForAction(actionType: string, payload: Record<string, unknown> | undefined): number {
+export function actionSoundCountForAction(
+  actionType: string,
+  payload: Record<string, unknown> | undefined,
+): number {
   if (actionType !== "mandatory_draw" && actionType !== "draw_card") return 1;
   const amount = typeof payload?.amount === "number" ? payload.amount : 1;
   return Math.min(5, Math.max(1, Math.floor(amount)));
 }
 
-function isForcedPublicEffectCue(actionType: string, payload: Record<string, unknown>): boolean {
+function isForcedPublicEffectCue(
+  actionType: string,
+  payload: Record<string, unknown>,
+): boolean {
   return (
     actionType === "continue_run" &&
-    (payload.v1921UpgradeAbility === "rio_de_janeiro_passed_ice" ||
+    (payloadHasAbility(payload, "rio_de_janeiro_passed_ice") ||
       typeof payload.vacuumLinkDieRoll === "number" ||
       typeof payload.rezzedIceRewindDieRoll === "number")
   );
 }
 
-function isForcedEffectCueItem(item: { chips: string[]; category: string; visibility: ChronicleVisibility }): boolean {
+function isForcedEffectCueItem(item: {
+  chips: string[];
+  category: string;
+  visibility: ChronicleVisibility;
+}): boolean {
   return (
     item.visibility === "public" &&
     item.category === "danger" &&
-    (item.chips.includes("Access-Effekt") || item.chips.includes("Tag erhalten"))
+    (item.chips.includes("Access-Effekt") ||
+      item.chips.includes("Tag erhalten"))
   );
 }
 
@@ -515,7 +716,8 @@ function isDamageEffectCueItem(item: { chips: string[] }): boolean {
 }
 
 function turnPhaseSide(phase: PlayerView["phase"]): Side | null {
-  if (phase === "corp_draw_phase" || phase === "corp_action_phase") return "corp";
+  if (phase === "corp_draw_phase" || phase === "corp_action_phase")
+    return "corp";
   if (phase === "runner_action_phase" || phase === "run") return "runner";
   return null;
 }
@@ -531,16 +733,26 @@ function visibleCardsByDefinition(view: PlayerView): Map<string, VisibleCard> {
     ...(view.opponent.rig ?? []),
     ...view.servers.flatMap((server) => [...server.ice, ...server.root]),
     ...(view.run?.encounteredIce ? [view.run.encounteredIce] : []),
-    ...(view.run?.accessedCard ? [view.run.accessedCard] : [])
+    ...(view.run?.accessedCard ? [view.run.accessedCard] : []),
   ];
-  return new Map(cards.filter((card) => card.known && card.definitionId).map((card) => [card.definitionId!, card]));
+  return new Map(
+    cards
+      .filter((card) => card.known && card.definitionId)
+      .map((card) => [card.definitionId!, card]),
+  );
 }
 
 function hasLocalAttention(view: PlayerView, viewerSide: Side): boolean {
-  return Boolean(view.pendingChoice || (view.activeSide === viewerSide && view.legalActions.length > 0));
+  return Boolean(
+    view.pendingChoice ||
+    (view.activeSide === viewerSide && view.legalActions.length > 0),
+  );
 }
 
-function actorLabel(actor: Side | undefined, source: OpponentActionCue["source"]): string {
+function actorLabel(
+  actor: Side | undefined,
+  source: OpponentActionCue["source"],
+): string {
   if (source === "system") return "Spiel";
   if (!actor) return "Spiel";
   if (actor === "corp") return source === "ai" ? "Korp-KI" : "Korp";
@@ -556,18 +768,32 @@ function sideValue(value: unknown): Side | undefined {
 }
 
 function positiveIntegerValue(value: unknown): number | undefined {
-  return typeof value === "number" && Number.isInteger(value) && value > 0 ? value : undefined;
+  return typeof value === "number" && Number.isInteger(value) && value > 0
+    ? value
+    : undefined;
 }
 
 function nonNegativeIntegerValue(value: unknown): number | undefined {
-  return typeof value === "number" && Number.isInteger(value) && value >= 0 ? value : undefined;
+  return typeof value === "number" && Number.isInteger(value) && value >= 0
+    ? value
+    : undefined;
 }
 
-function damageTypeValue(value: unknown): DamageImpactCue["damageType"] | undefined {
-  return value === "net" || value === "meat" || value === "core" ? value : undefined;
+function damageTypeValue(
+  value: unknown,
+): DamageImpactCue["damageType"] | undefined {
+  return value === "net" || value === "meat" || value === "core"
+    ? value
+    : undefined;
 }
 
-function currentRunnerMaxHandSize(playerView: PlayerView, viewerSide: Side): number | undefined {
-  const value = viewerSide === "runner" ? playerView.own.maxHandSize : playerView.opponent.maxHandSize;
+function currentRunnerMaxHandSize(
+  playerView: PlayerView,
+  viewerSide: Side,
+): number | undefined {
+  const value =
+    viewerSide === "runner"
+      ? playerView.own.maxHandSize
+      : playerView.opponent.maxHandSize;
   return nonNegativeIntegerValue(value);
 }

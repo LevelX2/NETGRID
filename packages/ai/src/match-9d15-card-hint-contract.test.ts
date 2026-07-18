@@ -53,7 +53,7 @@ describe.each(hintSources)(
         expect.arrayContaining(["hardware", "multiaccess", "rd_pressure"]),
       );
       expect(rndInterface.planRoles).toEqual(["build_rig", "pressure_rnd"]);
-      expect(rndInterface.valueHints).toEqual({ runPressure: 3 });
+      expect(rndInterface.valueHints).toEqual({});
     });
 
     it("keeps Score as economy without residual run pressure", () => {

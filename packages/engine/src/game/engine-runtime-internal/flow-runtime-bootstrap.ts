@@ -1,4 +1,4 @@
-import * as runtimeDelegates from "./runtime-delegates";
+import * as runtimePorts from "./runtime-port-bindings";
 import {
   CARD_DEFINITIONS_BY_ID,
   type ActionType,
@@ -25,7 +25,7 @@ import {
   type GameState,
   type ImminentEvent,
   type LegalAction,
-  type LegacyAbilityPayloadField,
+  type AbilityPayloadDiscriminatorField,
   type PlayerAction,
   type PlayerController,
   type PublicGameEvent,
@@ -114,10 +114,7 @@ import {
   setHostedOn,
   uninstallCorpInstalledCardToHq,
 } from "../state/zone-mutation";
-export {
-  getLegalActions,
-  legalActionsFor,
-} from "../legal-actions";
+export { getLegalActions, legalActionsFor } from "../legal-actions";
 import {
   configureLegalActionHostComposition,
   type LegalActionHostCompositionHost,
@@ -126,9 +123,7 @@ export {
   eventVisibilityForAction,
   isHiddenInfoBarrierEvent,
 } from "../events/build-event";
-import {
-  configureEventContextHostComposition,
-} from "../events/event-context-hosts";
+import { configureEventContextHostComposition } from "../events/event-context-hosts";
 import { BAD_PUBLICITY_LOSS_THRESHOLD } from "../win-conditions";
 export { checkWinConditions } from "../win-conditions";
 import {
@@ -208,10 +203,7 @@ import {
   installCard as executeInstallCard,
   type InstallCardHost,
 } from "../install/install-card";
-import {
-  rezCard as executeRezCard,
-  type RezCardHost,
-} from "../rez/rez-card";
+import { rezCard as executeRezCard, type RezCardHost } from "../rez/rez-card";
 import {
   addRunnerTagsWithPrevention,
   aggregateDamageSummaries,
@@ -243,12 +235,8 @@ import {
   buildRunnerAgendaPointInstallAction,
   buildRunnerSelectedServerInstallAction,
 } from "../turn/runner-install-context-actions";
-import {
-  buildRunnerHostedProgramInstallAction,
-} from "../turn/runner-hosted-install-actions";
-import {
-  buildRunnerProgramTrashBeforeInstallAction,
-} from "../turn/runner-program-trash-install-actions";
+import { buildRunnerHostedProgramInstallAction } from "../turn/runner-hosted-install-actions";
+import { buildRunnerProgramTrashBeforeInstallAction } from "../turn/runner-program-trash-install-actions";
 import { buildRunnerStackSearchProgramToGripAction } from "../turn/runner-hidden-zone-search-actions";
 import {
   buildRunnerDelayedInstallRemoveCounterAction,
@@ -405,9 +393,7 @@ import {
   isSupportedEncounterTraceSuccessEffect,
   type EncounterPrintedEffectHost,
 } from "../run/encounter-printed-effects";
-import {
-  type EncounterPrintedNonTraceHost,
-} from "../run/encounter-printed-nontrace-effects";
+import { type EncounterPrintedNonTraceHost } from "../run/encounter-printed-nontrace-effects";
 import {
   breakAbilityMatchesIce,
   breakAbilityMatchesSubroutine,
@@ -423,18 +409,10 @@ import {
   createGameCardImplementationRuntimeDeps,
   type GameCardImplementationRuntimeDepsHost,
 } from "../card-implementation/card-implementation-runtime-deps";
-import {
-  type HiddenZoneRuntimeDepsHost,
-} from "../card-implementation/hidden-zone-runtime-deps";
-import {
-  type InstallRezRuntimeDepsHost,
-} from "../card-implementation/install-rez-runtime-deps";
-import {
-  type CounterLifecycleRuntimeDepsHost,
-} from "../card-implementation/counter-lifecycle-runtime-deps";
-import {
-  type TraceRuntimeDepsHost,
-} from "../card-implementation/trace-runtime-deps";
+import { type HiddenZoneRuntimeDepsHost } from "../card-implementation/hidden-zone-runtime-deps";
+import { type InstallRezRuntimeDepsHost } from "../card-implementation/install-rez-runtime-deps";
+import { type CounterLifecycleRuntimeDepsHost } from "../card-implementation/counter-lifecycle-runtime-deps";
+import { type TraceRuntimeDepsHost } from "../card-implementation/trace-runtime-deps";
 import {
   beginEncounter,
   isApproachIceExposeViewingWindowOpen,
@@ -508,10 +486,7 @@ import {
 import { type BoardStateActionExecutionHost } from "../board/board-state-action-execution";
 import { shuffleRunnerStackAndRefreshZones } from "../hidden-zone/runner-stack-shuffle";
 export { quoteCorpRezCost } from "../payment";
-export {
-  createGame,
-  createGameAfterSetup,
-} from "../create-game";
+export { createGame, createGameAfterSetup } from "../create-game";
 import { hashState } from "../hash";
 import { applyAction as applyActionFromGame } from "../apply-action";
 export { applyAction } from "../apply-action";
@@ -531,10 +506,7 @@ import { toPublicEvent } from "../view/public-event-view";
 export { redactPublicEventForSide } from "../view/public-event-view";
 export { hashGameState, hashState } from "../hash";
 import { validateGameState } from "../validation";
-export {
-  validateGameState,
-  validateGameStateForDebug,
-} from "../validation";
+export { validateGameState, validateGameStateForDebug } from "../validation";
 import {
   additionalSubroutinesForIce,
   currentEncounterAdditionalSubroutinesForIce,
@@ -638,9 +610,7 @@ import {
   corpInstalledEconomyActionProfileForPayload,
   type EconomyActionProfile,
 } from "../../mechanics/payment-costs";
-import {
-  isP358HiddenReplacementCompatibilityChoiceSource,
-} from "../../compatibility/payload-compatibility";
+import { isP358HiddenReplacementCompatibilityChoiceSource } from "../../compatibility/payload-compatibility";
 import {
   ALL_NIGHTER_ID,
   ARMADILLO_ARMORED_ROAD_HOME_ID,
@@ -692,9 +662,7 @@ import {
   ACCESS_NET_DAMAGE_UPGRADE_SOURCE,
   ACCESS_TRACE_DAMAGE_UPGRADE_SOURCE,
 } from "../../mechanics/server-upgrades";
-import {
-  RUN_TAX_UPGRADE_SOURCES,
-} from "../../mechanics/trace-tags";
+import { RUN_TAX_UPGRADE_SOURCES } from "../../mechanics/trace-tags";
 import { snapshotPersistentStealCostModifiersForSource } from "../../ability-engine/steal-cost-modifiers";
 import { createCardImplementationEffectAdapters } from "../../ability-engine/card-implementation-effect-adapters";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
@@ -730,8 +698,6 @@ import type {
   MakeRunEffectImplementation,
 } from "../../ability-engine/definition-types";
 
-const { abilityMetadata, accessEffectHandlerHost, accessFlowHost, activeObligationCount, activatedCardImplementationExecutionHost, activeCrashEverettSourceId, addActiveObligation, addCounterToAllInstalledRunnerIcebreakers, addCurrentRunAccessCount, addCorpTraceCounterPoolCounters, addRunnerFutureActionDebt, addVirusCounterWithCounterPrevention, addVisibleCardCounter, advanceableInstalledCardTargets, advancementDistributionOptions, affordableRezzedInstalledIceIdsForRunner, agendaPoints, appendRegionReplacementTrashEffect, appendResolvedEffectsToPayload, applyRunStartRandomStrengthBonus, applyCorpStartOfTurnEffects, applyPurgeableRunnerVirusCorpStartEffects, applyStartTurnRandomEffectTables, applyRunnerDrawSummaryPayload, applyRunnerForgoNextAction, applyRunnerStartOfTurnEffects, applyRunnerTraceCounterRunStartEffects, applyAdvancementCounterPlacement, archivesAccessRequiresDecisionOrEffect, assertBreakSubroutineCostQuoteValid, assertCorpIceInstallCostValid, assertCurrentSubroutineMatchesLegalAction, assertNonNegativeAmount, assertPositiveIntegerAmount, automaticCounterChangeEffect, automaticDrawCardsEffect, automaticGainCreditsEffect, automaticLoseCreditsEffect, automaticStealAgendaEffect, automaticTagEffect, automaticTrashCardEffect, availableRunnerProgramInstallCredits, availableRunnerTagRemovalCredits, awardRunnerEventAgendaPoint, backupProgramsOnTrashBackupHardwareBeforeTrash, boardStateActionExecutionHost, breachStateHost, breakAbilityForLegalAction, breakSubroutineCostBreakdown, canHostProgramOnDaemon, canInstallCorpRootCardInServer, canInstallRunnerProgramFromZone, canPlayTrashInstalledRunnerConnectionsThenAddBadPublicity, cardHasSubtype, cardImplementationRunnerEventResolver, cardInstallCapabilitiesForDefinition, choiceAction, chooseCorpAgendasForPointCost, cleanupCorpRootAgendaOrNodeCapacityAfterLeavePlay, clearEdgerunnerTempsInstallFlags, clearValuPakProgramInstallFlags, clickCostForAction, closeRunnerCostPenaltySupportWindowForPayment, cockroachCounterTotal, cockroachRandomHqDiscardActive, virusCounterPurgePreserveTargets, completeDiscardPhase, consumeEdgerunnerTempsInstallAction, consumeRunnerFutureActionDebt, consumeValuPakProgramInstallAction, continueRun, continueRandomDiceLoop, corpAgendaCounterOperationTarget, corpAgendaPointTotal, corpIceInstallAdditionalCost, corpIceInstallBaseCost, corpIceInstallTotalCost, corpInstallRezSequenceHandlerHost, corpOperationResolutionHost, corpRegionUpgradeIdsInServer, corpRootAgendaOrNodeCapacityInServer, corpRunnerActionPaidWindowActions, corpScoredAgendaForfeitTargets, corpSpecialDamageAbilityHost, corpTraceDamageAbilityHost, corpUtilityImplementationForCard, corpZoneChoiceHandlerHost, counterUtilityTriggerExecutionHost, creditCostForAction, creditEconomyExecutionHost, creditTextForPrompt, daemonHostedMemoryUsed, daemonHostingCapacity, diePromptText, discardChoice, discardRandomCorpHqCards, drawRunnerCard, drawRunnerCards, dupreStrengthCounterBonus, edgerunnerTempsInstallActionsRemaining, effectiveSubtypesForCard, emptyRunnerDrawSummary, encounterEntryHostForState, encounterPrintedEffectHostForState, encounterPrintedNonTraceHostForState, encounterResolutionHostForState, encounterSpecialWindowHostForState, encounterTemporaryTraceCreditsAvailable, endTurn, executeEffectCommands, expireScoredAgendaInstallRezCreditAbilities, exposeCorpCardInServer, exposedCorpCardInServer, exposeInstalledCorpCardForImplementation, exposeInstalledCorpCardLabel, exposeInstalledCorpCardsChoiceOptions, exposeInstalledCorpCardTargets, exposeOutermostIceOfEachDataFort, forfeitCorpAgendaForPointCost, forfeitRunnerAgendaForPointCost, fortCapacityModifiersForCard, fortPassWindowHostForState, fortRunSideFamiliesHostForState, corpTraceCounterPoolSourceIds, corpTraceCounterPoolTotal, corpTraceCounterPoolCounterType, hasCorpUtilityKind, hasHiddenResourceAccessStartActions, hasInstallCapabilityKindForDefinition, hasInstalledRunnerApDamageReducerHardware, hasInstalledUniqueCardDefinition, hiddenReplacementLongtailForDefinition, hiddenZoneArrangeChoiceHandlerHost, hiddenZoneNonSearchChoiceHandlerHost, hiddenZoneSearchActivationHandlerHost, hiddenZoneSearchActivationTargetHost, hiddenZoneSearchChoiceHandlerHost, hiddenZoneSearchHandlerHostBase, hostedProgramStrengthModifier, multiExposeInstalledCorpCardOptionLabel, multiExposeInstalledCorpCardTargets, icebreakerEncounterStrengthBonus, icebreakerHasSpecial, iceChoiceLabelForSide, iceStrengthBonusFor, iceStrengthFor, identityDefinition, identityModifierAmount, incubatorCounterTotal, installCardHost, installedAgendaOperationTarget, installedVirusCounterPurgePreserveSourceIds, installedCorpCardServerContext, installedRunnerConnectionIds, installedRunnerIcebreakerIds, installedRunnerProgramTrashOptionsForInstall, installedRunnerVirusSourceIds, installedVirusCounterTotalForDefinition, installRunnerProgramForFree, installRunnerProgramFromStackWithoutClick, installRunnerProgramFromZoneWithoutClick, installTargetBindingForDefinition, isObligationDebtDefinition, isDrawTaxSourceDefinition, isCorpInstallableCardType, isCorpTraceCounterPoolSource, isInstalledCorpCardAdvanceable, isCorpInstalledEconomyCreditSource, isRegionUpgrade, isUniqueCard, isVisibleVirusCounterCardForRunner, leavePlayCleanupImplementationsForCard, mergeRunnerDrawSummary, installedProgramTrashBackupHardwareIds, runnerHardwareBreakSubroutineAdditionalCost, movableAdvancementSourceIds, moveAdvancementOptions, mustInstallInsideSubsidiaryDataFort, runStartTaxForCorpRootAssets, normalizeSubtypeLabel, openPostMeatDamageReactionWindow, openRunnerCostPenaltySupportWindow, outermostIceExposures, outermostIceIndex, parseAdvancementDistributionValue, parseVirusCounterPurgePreserveOption, parseRandomDiceSplitChoiceSource, parseRandomDiceSplit, parseRunnerInstalledConnectionTrashBadPublicityChoiceSource, passCurrentEncounteredIce, pendingChoiceResolutionHost, permanentIcebreakerStrengthCounterBonus, playCardExecutionHost, randomDiceSplitOptions, postMeatDamageHiddenResourceCandidates, hardwareTrashByCounterEligibleHardwareIds, hardwareTrashByCounterLegalActions, hardwareTrashByCounterTrashCountFromChoiceSource, hardwareTrashByCounterTrashCountFromPayload, poxCountersForServer, poxInstallTax, preventOneVirusCounterWithCounterPrevention, printedCostCardImplementationMakeRunEffect, processDiscardStep, publicCardTitle, publicIcePositionLabelForCard, publicIceSelectionLabelForCard, pumpAbilityForLegalAction, pumpAmountForLegalAction, pumpDurationForLegalAction, pushCorpTraceDamageOrCardImplementationActions, queueIncubatorStartOfTurnTransforms, rabbitTraceLimitReductionForIceTrace, randomCorpHqCardsWithoutReplacement, randomCorpHqDiscard, recordBartmossEncounterUsage, recordSnowballBreakUsage, refreshRecurringCredits, relativeDamageSubroutineForCurrentEncounter, relativeIceStrengthBonusFor, relativeTraceSubroutinesForCurrentEncounter, remainingReplacementLongtailImplementationForCard, remainingReplacementLongtailImplementationForDefinition, remainingReplacementLongtailKindForCard, remainingReplacementLongtailKindForDefinition, removeActiveObligation, requiresDataFortInstallTarget, resolveCorpObligationEndOfTurn, resolveAgendaCounterOperation, resolveDerezRezzedBlackIceChoice, resolveDelayedAccessEffects, resolveBlinkBreakSubroutineAction, resolveCardImplementationAccessPaymentChoice, resolveCardImplementationAdvancementDistributionChoice, resolveCardImplementationMoveAdvancementChoice, resolveChimeraDaemonTrashChoice, resolveVirusCounterPurgePreserveChoice, resolvePayRezCostToTrashRezzedIceChoice, resolveCorpInstalledEconomyAction, resolveCrashEverettDrawChoice, resolveRunnerIcebreakerCounterEvent, resolveDiscardChoice, resolveExposeInstalledCorpCardsChoice, resolveFieldReporterEndOfRunnerTurn, resolveCorpChoiceRezOrTrashIceDecisionChoice, resolveCorpChoiceRezOrTrashIceTargetChoice, resolveMultiExposeInstalledCorpCardsChoice, resolveIncubatorTransformChoice, resolveCorpInstalledEconomyCreditChoice, resolveCorpOperationAddAdvancementCounters, resolveRunnerGripHeapStackShuffleDrawEvent, resolveMultiBreakSubroutinesAction, resolveEndTurnTagIfRunnerReceivedTag, resolvePaidSourceReturnToGripChoice, resolveP358HiddenReplacementChoice, resolveRandomDiceLoopEvent, resolvePostMeatDamageHiddenResourceChoice, resolvePostOnPlayGenericFollowups, resolveHardwareTrashByCounterChoice, resolveHardwareTrashByCounterOperation, resolveDelayedEndTurnDamageEffects, resolveRunnerProgramReturnChoice, resolveRunnerHostingChoice, resolveRunnerInstalledConnectionTrashBadPublicityChoice, resolveRunnerPrivateLookChoice, resolveRunnerProgramTrashBeforeInstallChoice, resolveRunnerTargetedEventImplementation, resolveTrashUnrezzedIceChoice, resolveSetupMulliganChoice, resolveTemporaryProgramInstallReturns, resolveAdvancementPlacementChoice, resolveAdvancementPlacementOperation, resolveTraceHardwareWreckerSuccess, resolveTraceTrashRunnerResourceSuccess, resolveTrashInstalledRunnerConnectionsThenAddBadPublicityEvent, resolveScoredAgendaCorpRdTopReveal, resolveV1911RunnerHiddenZoneAbility, resolveRandomDiceSplitChoice, restorePurgePreservedVirusCounters, returnRunnerInstalledCardToGrip, returnRunnerInstalledProgramsToGripForAccess, revealCorpRdTop, revealRunnerStackTop, rezActionExecutionHost, rezCardHost, rezzedBlackIceIds, rezzedCorpRootCardIds, rezzedIceOutsideThisIceCount, rezzedInstalledIceIds, rezzedCorpInstalledEconomyCreditSourceIds, rootInstallRezzesOnInstall, runAccessTransitionHost, runBreakSubroutineAdditionalCost, runCardImplementationActionHost, runEndCleanupHost, runFortTriggerExecutionHost, runMovementHostForState, runnerAccessActionHost, runnerActionsPerTurn, runnerBreakerActionExecutionHost, runnerCanPayInstallCost, runnerCostPenaltySupportCreditCapacity, runnerCounterDisplayName, runnerDrawActionContext, runnerDrawSummaryPublicPayload, runnerEncounterActionHostForState, runnerEventLongtailForDefinition, runnerEventLongtailKindForDefinition, runnerHasInstalledCardDefinition, runnerHasInstalledDefinition, runnerInstallableProgramIdsForValuPak, runnerInstalledCardCountByDefinition, runnerProgramInstallMemoryReachableAfterTrash, runnerProgramInstallRecurringCreditSourceIds, runnerProgramUsesMemory, runnerRecurringCredits, runnerSpecialTriggerExecutionHost, runnerTagRemovalRecurringCredits, runnerTagRemovalRecurringCreditSourceIds, runnerTraceCounterEffectDefinitions, runnerUtilityLongtailImplementationForCard, runnerUtilityLongtailKindForCard, runnerUtilityLongtailKindForDefinition, runRemainderStrengthBonusForBreaker, runRezWindowHostForState, runStartTaxForServerUpgrades, scoredAgendaAbilityHost, scoredAgendaFlowHost, scoredAgendaImplementationForDefinition, scoredAgendaImplementationForDefinitionId, scoredAgendaKindForDefinition, selectedChoiceCardIds, selectedChoiceCardIdsForChoice, serverDifficultyIncreaseFromRunCounters, serverDifficultyReductionFromUpgrades, setupMulliganChoice, shouldOfferRunnerProgramTrashBeforeInstall, shouldOpenCorpInstalledEconomyCreditChoice, shuffleCorpCardIntoRd, shuffleGripTrashAndStackThenDrawForCardImplementation, shuffleRunnerStack, skivvissCounterTotal, sourcePartsForP334Choice, specialZoneHarnessActions, spendCorpAgendaPointCost, spendEncounterTemporaryTraceCredits, spendCorpTraceCounterPoolCounters, spendRecurringTraceCreditPool, spendRunnerAccessTrashCredits, spendRunnerInstallCredits, spendRunnerTagRemovalCredits, spendVisibleCardCounter, spyCountersForServer, stableSubtypeList, startDerezRezzedBlackIceChoice, startCardImplementationAdvancementDistributionChoice, startCardImplementationMoveAdvancementChoice, startVirusCounterPurgePreserveChoice, startPayRezCostToTrashRezzedIceChoice, startCorpTurn, startCrashEverettDrawChoice, startDiscardPhase, startPostAccessInstalledProgramChoice, startExposeInstalledCorpCardsChoice, startCorpChoiceRezOrTrashIceChoice, startMultiExposeInstalledCorpCardsChoice, startIncubatorTransformChoice, startCorpInstalledEconomyCreditChoice, startPaidSourceReturnToGripChoice, startHardwareTrashByCounterChoice, startRun, startRunActionExecutionHost, startRunnerHostingChoice, startRunnerPrivateLookAtSpecificCorpCards, startRunnerPrivateLookChoice, startRunnerProgramTrashBeforeInstallChoice, startRunnerTurn, startTrashUnrezzedIceChoice, startRunnerProgramFreeMemoryChoice, startAdvancementPlacementChoice, startRandomDiceSplitChoice, startVirusCounterRunnerPrivateLookAtStart, subroutinesForCurrentEncounter, successfulRunInterventionHost, swapCorpHqAndRdTop, advancementPlacementLegalActions, advancementPlacementOptions, takeSetupMulligan, totalCounters, traceCounterEffectDefinitionFor, traceOrchestrationHost, trashCorpInstalledCardsInScoredSourceServer, trashCorpInstalledCardToArchives, trashFaceupRdCardsForCascade, trashOlderRegionUpgradesInServer, trashHardwareByCounter, trashRunnerInstalledCardToHeap, trashRunnerInstalledProgram, triggerAbilityExecutionHost, turnBasicExecutionHost, uniqueDirectLongtailImplementationForCard, uniqueDirectLongtailImplementationForDefinition, uniqueDirectLongtailKindForCard, uniqueDirectLongtailKindForDefinition, unrezzedInstalledIceIds, untapRunnerCardsAtTurnStart, v1915InstalledRevealHelperIds, validateAdvancementDistribution, validateCorpInstalledEconomyAction, valuPakProgramInstallActionsRemaining, valuPakTemporaryProgramInstallCredits, variableRezForDefinition, variableTraceSubroutineForCurrentEncounter, virusCounterCascadeTrashAtCorpStart, virusCounterCreditsAtRunnerStart, virusCounterDrawsAtCorpStart, virusCounterImplementationForCard, virusCounterImplementationForDefinition, visibleVirusCounterTargetIds, withoutVariableIceState } = runtimeDelegates;
-
 import {
   cloneState,
   agendaPointsForScoredCard,
@@ -757,15 +723,19 @@ export function configureFlowRuntimeBootstrap({
     >,
     options: { rezzedOnly?: boolean; unrezzedOnly?: boolean } = {},
   ): CardInstanceId[] {
-    return mustServer(state, serverId).root
-      .slice()
+    return mustServer(state, serverId)
+      .root.slice()
       .sort()
       .filter((cardId): cardId is CardInstanceId => {
         const instance = state.cardInstances[cardId];
-        if (!instance?.definitionId || instance.controller !== "corp") return false;
+        if (!instance?.definitionId || instance.controller !== "corp")
+          return false;
         if (options.rezzedOnly && instance.rezzed !== true) return false;
         if (options.unrezzedOnly && instance.rezzed === true) return false;
-        return corpUtilityImplementationForDefinition(instance.definitionId)?.kind === kind;
+        return (
+          corpUtilityImplementationForDefinition(instance.definitionId)
+            ?.kind === kind
+        );
       });
   }
 
@@ -797,13 +767,16 @@ export function configureFlowRuntimeBootstrap({
   ): boolean {
     if (
       isActivityGatedFortRunBlocked(
-        fortRunSideFamiliesHostForState(state),
+        runtimePorts.fortRunSideFamiliesHostForState(state),
         serverId,
       )
     )
       return false;
-    const upgradeRunStartTax = runStartTaxForServerUpgrades(state, serverId);
-    const rootAssetRunTax = runStartTaxForCorpRootAssets(state);
+    const upgradeRunStartTax = runtimePorts.runStartTaxForServerUpgrades(
+      state,
+      serverId,
+    );
+    const rootAssetRunTax = runtimePorts.runStartTaxForCorpRootAssets(state);
     const runStartTaxCredits =
       upgradeRunStartTax.amount + rootAssetRunTax.amount;
     return (
@@ -817,7 +790,10 @@ export function configureFlowRuntimeBootstrap({
     state: GameState,
     sourceCardId: CardInstanceId,
   ): number {
-    const utility = corpUtilityImplementationForCard(state, sourceCardId);
+    const utility = runtimePorts.corpUtilityImplementationForCard(
+      state,
+      sourceCardId,
+    );
     if (
       utility?.kind !== "start_run_redirect_to_source_fort" ||
       utility.timing !== "run_start" ||
@@ -838,7 +814,10 @@ export function configureFlowRuntimeBootstrap({
     const availableCredits = Math.max(
       0,
       state.corp.credits -
-        Math.max(0, Math.floor(state.corpTemporaryInstallRezCredits?.remaining ?? 0)),
+        Math.max(
+          0,
+          Math.floor(state.corpTemporaryInstallRezCredits?.remaining ?? 0),
+        ),
     );
     if (!run || state.pendingChoice) return false;
     const originalServerId = run.attackedServerId;
@@ -846,7 +825,8 @@ export function configureFlowRuntimeBootstrap({
       state,
       originalServerId,
     ).filter(
-      (cardId) => startRunRedirectCostCredits(state, cardId) <= availableCredits,
+      (cardId) =>
+        startRunRedirectCostCredits(state, cardId) <= availableCredits,
     );
     const reorderSourceIds = utilityInstalledOnFort(
       state,
@@ -879,7 +859,11 @@ export function configureFlowRuntimeBootstrap({
       unrezzedSpendCapSourceIds.length === 0 &&
       rezzedSpendCapSourceIds.length > 0
     ) {
-      openRunnerRunSpendCapChoice(state, rezzedSpendCapSourceIds[0]!, legalAction);
+      openRunnerRunSpendCapChoice(
+        state,
+        rezzedSpendCapSourceIds[0]!,
+        legalAction,
+      );
       return true;
     }
     run.runStartInterventions = redirectSourceIds.map((cardId) => {
@@ -906,7 +890,9 @@ export function configureFlowRuntimeBootstrap({
         ...redirectSourceIds.map((cardId) => {
           const targetServerId = corpServerIdForInstalledCard(state, cardId);
           if (!targetServerId)
-            throw new Error("Die Redirect-Quelle liegt nicht in einem Korp-Fort.");
+            throw new Error(
+              "Die Redirect-Quelle liegt nicht in einem Korp-Fort.",
+            );
           return {
             id: `redirect_${cardId}`,
             label: `${definitionFor(state, cardId).title}: Run umlenken`,
@@ -948,11 +934,10 @@ export function configureFlowRuntimeBootstrap({
         ...(legalAction.payload ?? {}),
         startOfRunRedirectWindowOpened: true,
         originalServerId,
-        redirectSourceDefinitionIds:
-          run.runStartInterventions
-            .map((intervention) => intervention.sourceDefinitionId)
-            .sort()
-            .join(","),
+        redirectSourceDefinitionIds: run.runStartInterventions
+          .map((intervention) => intervention.sourceDefinitionId)
+          .sort()
+          .join(","),
       };
     }
     return true;
@@ -969,7 +954,9 @@ export function configureFlowRuntimeBootstrap({
     if (!serverId)
       throw new Error("Die Spend-Cap-Quelle liegt nicht in einem Korp-Fort.");
     if (serverId !== run.attackedServerId)
-      throw new Error("Die Spend-Cap-Quelle liegt nicht auf dem laufenden Fort.");
+      throw new Error(
+        "Die Spend-Cap-Quelle liegt nicht auf dem laufenden Fort.",
+      );
     if (
       !source.rezzed ||
       corpUtilityImplementationForDefinition(source.definitionId)?.kind !==
@@ -1042,7 +1029,13 @@ export function configureFlowRuntimeBootstrap({
           };
           continue;
         }
-        if (!canInstallCorpRootCardInServer(testState, definition, testServer))
+        if (
+          !runtimePorts.canInstallCorpRootCardInServer(
+            testState,
+            definition,
+            testServer,
+          )
+        )
           return false;
         testServer.root.push(cardId);
         testState.cardInstances[cardId] = {
@@ -1051,7 +1044,10 @@ export function configureFlowRuntimeBootstrap({
         };
         if (
           corpRootMainCardIdsInServer(testState, testServer).length >
-          corpRootAgendaOrNodeCapacityInServer(testState, testServer)
+          runtimePorts.corpRootAgendaOrNodeCapacityInServer(
+            testState,
+            testServer,
+          )
         )
           return false;
       }
@@ -1077,12 +1073,18 @@ export function configureFlowRuntimeBootstrap({
       0,
       Math.floor(state.corpTemporaryInstallRezCredits?.remaining ?? 0),
     );
-    const spendableCorpCredits = Math.max(0, state.corp.credits - installRezReserved);
+    const spendableCorpCredits = Math.max(
+      0,
+      state.corp.credits - installRezReserved,
+    );
     if (spendableCorpCredits < amount)
       throw new Error("Die Korp kann die Run-Kosten nicht bezahlen.");
     const runTemporarySpend = Math.min(
       amount,
-      Math.max(0, Math.floor(state.run.corpRunTemporaryCredits?.remaining ?? 0)),
+      Math.max(
+        0,
+        Math.floor(state.run.corpRunTemporaryCredits?.remaining ?? 0),
+      ),
     );
     if (runTemporarySpend > 0 && state.run.corpRunTemporaryCredits)
       state.run.corpRunTemporaryCredits.remaining = Math.max(
@@ -1110,7 +1112,7 @@ export function configureFlowRuntimeBootstrap({
       const definition = definitionFor(state, pending.cardId);
       removeFromAllZones(state, pending.cardId);
       state.runner.stack.push(pending.cardId);
-      if (runnerProgramUsesMemory(state, pending.cardId)) {
+      if (runtimePorts.runnerProgramUsesMemory(state, pending.cardId)) {
         state.runner.memoryUsed = Math.max(
           0,
           state.runner.memoryUsed - (definition.memoryCost ?? 0),
@@ -1122,7 +1124,7 @@ export function configureFlowRuntimeBootstrap({
         rezzed: false,
         zone: { side: "runner", zone: "stack" },
       };
-      shuffleRunnerStack(
+      runtimePorts.shuffleRunnerStack(
         state,
         `run_end.test_spin.return_to_stack.${run.runId}.${pending.cardId}`,
       );
@@ -1182,208 +1184,236 @@ export function configureFlowRuntimeBootstrap({
 
   const runAccessLegalActionHostComposition =
     createRunAccessLegalActionHostComposition({
-    cards: {
-      definitionFor,
-      cardInstanceFor: (state, cardId) => mustInstance(state.cardInstances, cardId),
-      cardHasSubtype,
-      runnerProgramUsesMemory,
-      runnerInstalledCardIds,
-      publicInstalledCorpCardIdentityKnown,
-      effectiveSubtypesForCard,
-      hostedProgramStrengthModifier,
-      icebreakerEncounterStrengthBonus,
-      permanentIcebreakerStrengthCounterBonus,
-      canReplaceFortCardsFromHq,
-    },
-    servers: {
-      mustServer,
-      publicServerLabel,
-      randomHqAccess,
-    },
-    access: {
-      hasHiddenResourceAccessStartActions,
-      advanceArchivesBreachPastNonDecisionCards,
-      startRunnerPrivateLookChoice,
-    },
-    run: {
-      currentRun: mustRun,
-      currentEncounterSubroutines: subroutinesForCurrentEncounter,
-      runRemainderStrengthBonusForBreaker,
-      executeCardImplementationRunnerRunStartEffects: (
-        callbackState,
-        legalAction,
-      ) =>
-        executeCardImplementationRunnerRunStartEffects(
-          cardImplementationRuntimeDeps,
+      cards: {
+        definitionFor,
+        cardInstanceFor: (state, cardId) =>
+          mustInstance(state.cardInstances, cardId),
+        cardHasSubtype: runtimePorts.cardHasSubtype,
+        runnerProgramUsesMemory: runtimePorts.runnerProgramUsesMemory,
+        runnerInstalledCardIds,
+        publicInstalledCorpCardIdentityKnown,
+        effectiveSubtypesForCard: runtimePorts.effectiveSubtypesForCard,
+        hostedProgramStrengthModifier: runtimePorts.hostedProgramStrengthModifier,
+        icebreakerEncounterStrengthBonus: runtimePorts.icebreakerEncounterStrengthBonus,
+        permanentIcebreakerStrengthCounterBonus: runtimePorts.permanentIcebreakerStrengthCounterBonus,
+        canReplaceFortCardsFromHq,
+      },
+      servers: {
+        mustServer,
+        publicServerLabel,
+        randomHqAccess,
+      },
+      access: {
+        hasHiddenResourceAccessStartActions: runtimePorts.hasHiddenResourceAccessStartActions,
+        advanceArchivesBreachPastNonDecisionCards,
+        startRunnerPrivateLookChoice: runtimePorts.startRunnerPrivateLookChoice,
+      },
+      run: {
+        currentRun: mustRun,
+        currentEncounterSubroutines: runtimePorts.subroutinesForCurrentEncounter,
+        runRemainderStrengthBonusForBreaker:
+          runtimePorts.runRemainderStrengthBonusForBreaker,
+        executeCardImplementationRunnerRunStartEffects: (
           callbackState,
           legalAction,
-        ),
-      applyRunnerTraceCounterRunStartEffects,
-      applyRunStartRandomStrengthBonus,
-      openStartOfRunFortUtilityWindow,
-      finishRun,
-      successfulRunInterventionHost,
-      startPostAccessInstalledProgramChoice,
-    },
-    payment: {
-      spendCredits,
-      credits,
-      rezCostForCard,
-      creditCostForAction,
-      hostedPaymentCredits,
-      spendCorpRunTemporaryCreditsForCurrentRunCost,
-      restrictedHostedCreditSourceIds,
-      isRestrictedHostedCreditSource,
-      spendRunnerAccessTrashCredits,
-    },
-    choices: {
-      hiddenZoneArrangeChoiceHandlerHost,
-      openRunnerInstalledTrashPreventionWindow,
-    },
-    cardImplementation: {
-      accessEffectsForDefinition: (definitionId) =>
-        cardImplementationForDefinitionId(definitionId)?.accessEffects ?? [],
-      hiddenReplacementLongtailKindForDefinition: (definitionId) =>
-        cardImplementationForDefinitionId(definitionId)?.hiddenReplacementLongtail
-          ?.kind,
-      accessHookKindsForDefinition: (definitionId) =>
-        cardImplementationForDefinitionId(definitionId)?.accessHooks?.map(
-          (hook) => hook.kind,
-        ) ?? [],
-      runCardImplementationActionHost,
-    },
-    constants: {
-      setup: ACCESS_SETUP_AMBUSH_ASSET_SOURCE,
-      trap: ACCESS_TRAP_AMBUSH_ASSET_SOURCE,
-      crybaby: ACCESS_COST_UPGRADE_SOURCE,
-      taggedRunnerMeatDamageUpgrade: ACCESS_MEAT_DAMAGE_UPGRADE_SOURCE,
-      accessNetDamageUpgrade: ACCESS_NET_DAMAGE_UPGRADE_SOURCE,
-      oncePerRunAccessTraceUpgrade: ACCESS_TRACE_DAMAGE_UPGRADE_SOURCE,
-      hardwareTrashByAdvancementAsset:
-        ACCESS_HARDWARE_TRASH_ASSET_SOURCE,
-      programTrashByAdvancementAsset: ACCESS_PROGRAM_TRASH_ASSET_SOURCE,
-      advancementCoreDamageAsset: ACCESS_CORE_DAMAGE_ASSET_SOURCE,
-      advancementNetDamageAsset: ACCESS_NET_DAMAGE_ASSET_SOURCE,
-      chimera: CHIMERA_ID,
-    },
-    callbacks: {
-      rules: {
-        isV097OrLater,
-        isV099OrLater,
-      },
-      turn: {
-        ensureRunnerTurnFlags,
-        consumeRunnerFutureActionDebt,
-      },
-      trace: {
-        calculateRunnerLink: (state) =>
-          calculateRunnerLinkInTrace(traceOrchestrationHost(state)),
-        traceBidChoice,
-        addCorpTraceCounterPoolCounters,
-        corpTraceCounterPoolTotal,
-        recurringTraceCreditPoolTotal,
-        rabbitTraceLimitReductionForIceTrace,
-        resolveTraceHardwareWreckerSuccess,
-        resolveTraceTrashRunnerResourceSuccess,
-        supportsTraceSuccessEffect: (effect) =>
-          isSupportedEncounterTraceSuccessEffect(
-            effect,
-            traceCounterEffectDefinitionFor,
-          ),
-        startTraceFromOperation: (
-          state,
-          sourceDefinitionId,
-          baseTraceStrength,
-          legalAction,
-          successEffect,
         ) =>
-          startTraceFromOperationInTrace(
-            traceOrchestrationHost(state),
+          executeCardImplementationRunnerRunStartEffects(
+            cardImplementationRuntimeDeps,
+            callbackState,
+            legalAction,
+          ),
+        applyRunnerTraceCounterRunStartEffects:
+          runtimePorts.applyRunnerTraceCounterRunStartEffects,
+        applyRunStartRandomStrengthBonus:
+          runtimePorts.applyRunStartRandomStrengthBonus,
+        openStartOfRunFortUtilityWindow,
+        finishRun,
+        successfulRunInterventionHost:
+          runtimePorts.successfulRunInterventionHost,
+        startPostAccessInstalledProgramChoice:
+          runtimePorts.startPostAccessInstalledProgramChoice,
+      },
+      payment: {
+        spendCredits,
+        credits,
+        rezCostForCard,
+        creditCostForAction: runtimePorts.creditCostForAction,
+        hostedPaymentCredits,
+        spendCorpRunTemporaryCreditsForCurrentRunCost,
+        restrictedHostedCreditSourceIds,
+        isRestrictedHostedCreditSource,
+        spendRunnerAccessTrashCredits:
+          runtimePorts.spendRunnerAccessTrashCredits,
+      },
+      choices: {
+        hiddenZoneArrangeChoiceHandlerHost:
+          runtimePorts.hiddenZoneArrangeChoiceHandlerHost,
+        openRunnerInstalledTrashPreventionWindow,
+      },
+      cardImplementation: {
+        accessEffectsForDefinition: (definitionId) =>
+          cardImplementationForDefinitionId(definitionId)?.accessEffects ?? [],
+        hiddenReplacementLongtailKindForDefinition: (definitionId) =>
+          cardImplementationForDefinitionId(definitionId)
+            ?.hiddenReplacementLongtail?.kind,
+        accessHookKindsForDefinition: (definitionId) =>
+          cardImplementationForDefinitionId(definitionId)?.accessHooks?.map(
+            (hook) => hook.kind,
+          ) ?? [],
+        runCardImplementationActionHost:
+          runtimePorts.runCardImplementationActionHost,
+      },
+      constants: {
+        setup: ACCESS_SETUP_AMBUSH_ASSET_SOURCE,
+        trap: ACCESS_TRAP_AMBUSH_ASSET_SOURCE,
+        crybaby: ACCESS_COST_UPGRADE_SOURCE,
+        taggedRunnerMeatDamageUpgrade: ACCESS_MEAT_DAMAGE_UPGRADE_SOURCE,
+        accessNetDamageUpgrade: ACCESS_NET_DAMAGE_UPGRADE_SOURCE,
+        oncePerRunAccessTraceUpgrade: ACCESS_TRACE_DAMAGE_UPGRADE_SOURCE,
+        hardwareTrashByAdvancementAsset: ACCESS_HARDWARE_TRASH_ASSET_SOURCE,
+        programTrashByAdvancementAsset: ACCESS_PROGRAM_TRASH_ASSET_SOURCE,
+        advancementCoreDamageAsset: ACCESS_CORE_DAMAGE_ASSET_SOURCE,
+        advancementNetDamageAsset: ACCESS_NET_DAMAGE_ASSET_SOURCE,
+        chimera: CHIMERA_ID,
+      },
+      callbacks: {
+        rules: {
+          isV097OrLater,
+          isV099OrLater,
+        },
+        turn: {
+          ensureRunnerTurnFlags,
+          consumeRunnerFutureActionDebt:
+            runtimePorts.consumeRunnerFutureActionDebt,
+        },
+        trace: {
+          calculateRunnerLink: (state) =>
+            calculateRunnerLinkInTrace(
+              runtimePorts.traceOrchestrationHost(state),
+            ),
+          traceBidChoice,
+          addCorpTraceCounterPoolCounters:
+            runtimePorts.addCorpTraceCounterPoolCounters,
+          corpTraceCounterPoolTotal: runtimePorts.corpTraceCounterPoolTotal,
+          recurringTraceCreditPoolTotal,
+          rabbitTraceLimitReductionForIceTrace:
+            runtimePorts.rabbitTraceLimitReductionForIceTrace,
+          resolveTraceHardwareWreckerSuccess:
+            runtimePorts.resolveTraceHardwareWreckerSuccess,
+          resolveTraceTrashRunnerResourceSuccess:
+            runtimePorts.resolveTraceTrashRunnerResourceSuccess,
+          supportsTraceSuccessEffect: (effect) =>
+            isSupportedEncounterTraceSuccessEffect(
+              effect,
+              runtimePorts.traceCounterEffectDefinitionFor,
+            ),
+          startTraceFromOperation: (
+            state,
             sourceDefinitionId,
             baseTraceStrength,
             legalAction,
             successEffect,
-          ),
-        traceSuccessEffectForCardImplementation,
+          ) =>
+            startTraceFromOperationInTrace(
+              runtimePorts.traceOrchestrationHost(state),
+              sourceDefinitionId,
+              baseTraceStrength,
+              legalAction,
+              successEffect,
+            ),
+          traceSuccessEffectForCardImplementation,
+        },
+        damage: {
+          addRunnerTagsWithPrevention,
+          createDamageImminentEvent,
+          doDamage,
+          openDamageResolutionWindow,
+          openEventModificationWindow,
+          openReplacementWindow,
+          resolveDamageImminentEvent,
+          setDamagePayload,
+          resolveDamageOperation,
+        },
+        tags: {
+          addRunnerTagsWithPrevention,
+        },
+        counters: {
+          cardCounter,
+          addCardCounter,
+          setCardCounter,
+          spendCardCounter,
+          addVirusCounterWithCounterPrevention:
+            runtimePorts.addVirusCounterWithCounterPrevention,
+          preventOneVirusCounterWithCounterPrevention:
+            runtimePorts.preventOneVirusCounterWithCounterPrevention,
+          poxCountersForServer: runtimePorts.poxCountersForServer,
+          addCounterToAllInstalledRunnerIcebreakers:
+            runtimePorts.addCounterToAllInstalledRunnerIcebreakers,
+        },
+        ice: {
+          strengthForIce: runtimePorts.iceStrengthFor,
+          icebreakerHasSpecial: (state, breakerId, special) =>
+            runtimePorts.icebreakerHasSpecial(
+              state,
+              breakerId,
+              special as NonNullable<RuntimeIcebreakerAbility["special"]>,
+            ),
+          selectedServerIcebreakerStrengthCounterBonus:
+            runtimePorts.selectedServerIcebreakerStrengthCounterBonus,
+          resetBreakerStrength,
+          withoutVariableIceState: runtimePorts.withoutVariableIceState,
+        },
+        zones: {
+          removeFromAllZones,
+          trashCorpInstalledCardToArchives:
+            runtimePorts.trashCorpInstalledCardToArchives,
+          trashRunnerInstalledCardToHeap:
+            runtimePorts.trashRunnerInstalledCardToHeap,
+          trashRunnerInstalledProgram: runtimePorts.trashRunnerInstalledProgram,
+          cleanupEmptyRemotes,
+          ensureSpecialZones,
+          shuffleCorpCardIntoRd: runtimePorts.shuffleCorpCardIntoRd,
+          returnRunnerInstalledProgramsToGripForAccess:
+            runtimePorts.returnRunnerInstalledProgramsToGripForAccess,
+        },
+        effects: {
+          executeEffectCommands: runtimePorts.executeEffectCommands,
+          breakAbilityForLegalAction: runtimePorts.breakAbilityForLegalAction,
+          breakSubroutineCostBreakdown:
+            runtimePorts.breakSubroutineCostBreakdown,
+          abilityMetadata: runtimePorts.abilityMetadata,
+          revealCorpRdTop: runtimePorts.revealCorpRdTop,
+        },
+        rng: {
+          nextRandom,
+          rollDie: rollDeterministicDie,
+          shuffleStateIds,
+        },
+        misc: {
+          drawCorpCards,
+          drawRunnerCards: runtimePorts.drawRunnerCards,
+          awardRunnerEventAgendaPoint: runtimePorts.awardRunnerEventAgendaPoint,
+          activeObligationCount: runtimePorts.activeObligationCount,
+          addActiveObligation: runtimePorts.addActiveObligation,
+          applyRunnerForgoNextAction: runtimePorts.applyRunnerForgoNextAction,
+          hasInstalledRunnerApDamageReducerHardware:
+            runtimePorts.hasInstalledRunnerApDamageReducerHardware,
+          traceCounterEffectDefinitionFor:
+            runtimePorts.traceCounterEffectDefinitionFor,
+          installedRunnerVirusSourceIds:
+            runtimePorts.installedRunnerVirusSourceIds,
+          virusCounterImplementationForCard:
+            runtimePorts.virusCounterImplementationForCard,
+          agendaPointsForScoredCard,
+          snapshotPersistentStealCostModifiersForSource,
+          archivesAccessRequiresDecisionOrEffect:
+            runtimePorts.archivesAccessRequiresDecisionOrEffect,
+          resolveTestSpinRunEnd,
+          installedRevealHelperCount: (state) =>
+            runtimePorts.v1915InstalledRevealHelperIds(state).length,
+        },
       },
-      damage: {
-        addRunnerTagsWithPrevention,
-        createDamageImminentEvent,
-        doDamage,
-        openDamageResolutionWindow,
-        openEventModificationWindow,
-        openReplacementWindow,
-        resolveDamageImminentEvent,
-        setDamagePayload,
-        resolveDamageOperation,
-      },
-      tags: {
-        addRunnerTagsWithPrevention,
-      },
-      counters: {
-        cardCounter,
-        addCardCounter,
-        setCardCounter,
-        spendCardCounter,
-        addVirusCounterWithCounterPrevention,
-        preventOneVirusCounterWithCounterPrevention,
-        poxCountersForServer,
-        addCounterToAllInstalledRunnerIcebreakers,
-      },
-      ice: {
-        strengthForIce: iceStrengthFor,
-        icebreakerHasSpecial: (state, breakerId, special) =>
-          icebreakerHasSpecial(
-            state,
-            breakerId,
-            special as NonNullable<RuntimeIcebreakerAbility["special"]>,
-          ),
-        dupreStrengthCounterBonus,
-        resetBreakerStrength,
-        withoutVariableIceState,
-      },
-      zones: {
-        removeFromAllZones,
-        trashCorpInstalledCardToArchives,
-        trashRunnerInstalledCardToHeap,
-        trashRunnerInstalledProgram,
-        cleanupEmptyRemotes,
-        ensureSpecialZones,
-        shuffleCorpCardIntoRd,
-        returnRunnerInstalledProgramsToGripForAccess,
-      },
-      effects: {
-        executeEffectCommands,
-        breakAbilityForLegalAction,
-        breakSubroutineCostBreakdown,
-        abilityMetadata,
-        revealCorpRdTop,
-      },
-      rng: {
-        nextRandom,
-        rollDie: rollDeterministicDie,
-        shuffleStateIds,
-      },
-      misc: {
-        drawCorpCards,
-        drawRunnerCards,
-        awardRunnerEventAgendaPoint,
-        activeObligationCount,
-        addActiveObligation,
-        applyRunnerForgoNextAction,
-        hasInstalledRunnerApDamageReducerHardware,
-        traceCounterEffectDefinitionFor,
-        installedRunnerVirusSourceIds,
-        virusCounterImplementationForCard,
-        agendaPointsForScoredCard,
-        snapshotPersistentStealCostModifiersForSource,
-        archivesAccessRequiresDecisionOrEffect,
-        resolveTestSpinRunEnd,
-        installedRevealHelperCount: (state) =>
-          v1915InstalledRevealHelperIds(state).length,
-      },
-    },
-  } satisfies RunAccessLegalActionHostCompositionHost);
+    } satisfies RunAccessLegalActionHostCompositionHost);
 
   const runFlow = runAccessLegalActionHostComposition.runFlow;
   const accessFlow = runAccessLegalActionHostComposition.accessFlow;
@@ -1392,14 +1422,14 @@ export function configureFlowRuntimeBootstrap({
     cards: {
       agendaPointsForScoredCard,
       cardCounter,
-      hostedProgramStrengthModifier,
+      hostedProgramStrengthModifier: runtimePorts.hostedProgramStrengthModifier,
     },
     publicContext: {
-      creditCostForAction,
-      pumpAmountForLegalAction,
+      creditCostForAction: runtimePorts.creditCostForAction,
+      pumpAmountForLegalAction: runtimePorts.pumpAmountForLegalAction,
     },
     callbacks: {
-      breachStateHost,
+      breachStateHost: runtimePorts.breachStateHost,
       installedAccessBonusForServer,
       runnerHqAccessBonusForBreach,
     },
@@ -1419,24 +1449,26 @@ export function configureFlowRuntimeBootstrap({
       definitionFor,
       runnerInstalledCardIds,
       scoredCorpAgendaIds,
-      scoredAgendaKindForDefinition,
+      scoredAgendaKindForDefinition: runtimePorts.scoredAgendaKindForDefinition,
     },
     zones: {
       removeFromAllZones,
-      trashRunnerInstalledCardToHeap,
-      returnRunnerInstalledCardToGrip,
+      trashRunnerInstalledCardToHeap:
+        runtimePorts.trashRunnerInstalledCardToHeap,
+      returnRunnerInstalledCardToGrip:
+        runtimePorts.returnRunnerInstalledCardToGrip,
     },
     runner: {
-      drawRunnerCard,
+      drawRunnerCard: runtimePorts.drawRunnerCard,
       ensureRunnerTurnFlags,
-      addFutureActionDebt: addRunnerFutureActionDebt,
+      addFutureActionDebt: runtimePorts.addRunnerFutureActionDebt,
     },
     corp: {
-      agendaPointTotal: corpAgendaPointTotal,
-      chooseAgendasForPointCost: chooseCorpAgendasForPointCost,
+      agendaPointTotal: runtimePorts.corpAgendaPointTotal,
+      chooseAgendasForPointCost: runtimePorts.chooseCorpAgendasForPointCost,
       agendaPointsForScoredCard,
-      forfeitAgendaForPointCost: forfeitCorpAgendaForPointCost,
-      spendAgendaPointCost: spendCorpAgendaPointCost,
+      forfeitAgendaForPointCost: runtimePorts.forfeitCorpAgendaForPointCost,
+      spendAgendaPointCost: runtimePorts.spendCorpAgendaPointCost,
     },
     counters: {
       cardCounter: (state, cardId, counterType) =>
@@ -1452,7 +1484,8 @@ export function configureFlowRuntimeBootstrap({
       nextRandom,
     },
     reactions: {
-      openPostMeatDamageReactionWindow,
+      openPostMeatDamageReactionWindow:
+        runtimePorts.openPostMeatDamageReactionWindow,
     },
   };
 

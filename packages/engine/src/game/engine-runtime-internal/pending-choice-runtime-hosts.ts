@@ -25,170 +25,17 @@ import { resumeAccessEffectAfterTagPrevention } from "../access/access-effect-ha
 import { resumeOnPlayCardImplementationAfterTagPrevention } from "../../ability-engine/card-implementation-runtime";
 import { resumeSuccessfulRunAccessReplacementAfterTagPrevention } from "../run/run-access-transition";
 import { resumeRunEndCleanupAfterTagPrevention } from "../run/run-end-cleanup";
-import { resumeRunnerDrawSequenceAfterTagPrevention } from "./state-runtime-delegates";
 import {
   resumeEndTurnAfterTagPrevention,
+  resumeRunnerDrawSequenceAfterTagPrevention,
   resumeStartOfTurnAfterTagPrevention,
-} from "./action-runtime-delegates";
+} from "./runtime-port-bindings";
 import { resolveAccessProgramInstallMemoryChoice } from "../access/access-flow";
 
 export function createPendingChoiceRuntimeHosts(
   deps: RuntimeDeps,
   links: ChoiceHiddenZoneRuntimeLinks,
-) {
-  const {
-    DAILY_CREDIT_RESOURCE_SOURCE,
-    BUTCHER_BOY_ID,
-    COCKROACH_ID,
-    ARCHIVES_TO_HQ_OPERATION_SOURCE,
-    HQ_AGENDA_REVEAL_ASSET_SOURCE,
-    RD_TOP5_REORDER_OPERATION_SOURCE,
-    DEAL_WITH_MILITECH_ID,
-    CARD_DEFINITIONS_BY_ID,
-    INITIAL_HAND_SIZE,
-    MYSTERY_BOX_ID,
-    RONIN_AROUND_ID,
-    RUN_ACCESS_PRESSURE_EVENT_SOURCE,
-    SELF_MODIFYING_CODE_ID,
-    SERVER_EXPOSE_PROGRAM_SOURCES,
-    PAID_STACK_SEARCH_RESOURCE_SOURCE,
-    SKIVVISS_ID,
-    SNEAK_PREVIEW_ID,
-    STACK_SEARCH_PROGRAM_SOURCES,
-    STACK_TOP_REORDER_RESOURCE_SOURCE,
-    TOO_MANY_DOORS_ID,
-    accessEffectHandlerHost,
-    accessFlow,
-    addCardCounter,
-    affordableRezzedInstalledIceIdsForRunner,
-    agendaPointsForScoredCard,
-    appendResolvedEffectsToPayload,
-    applyRunnerStartOfTurnEffects,
-    availableRunnerProgramInstallCredits,
-    cardCounter,
-    cardHasSubtype,
-    cardImplementationForDefinitionId,
-    cardImplementationRuntimeDeps,
-    cockroachCounterTotal,
-    cockroachRandomHqDiscardActive,
-    completeDiscardPhase,
-    continueRun,
-    corpUtilityImplementationForCard,
-    corpInstallRezSequenceHandlerHost,
-    corpInstalledCardIds,
-    corpScoredAgendaForfeitTargets,
-    creditCostForAction,
-    definitionFor,
-    discardRandomCorpHqCards,
-    drawCorpCards,
-    encounterPrintedNonTraceHostForState,
-    encounterResolutionHostForState,
-    encounterSpecialWindowHostForState,
-    ensureRunnerTurnFlags,
-    executeCardImplementationEffects,
-    executeCardImplementationLifecycleEffects,
-    fortPassWindowHostForState,
-    fortRunSideFamiliesHostForState,
-    handForSide,
-    handleCorpInstallRezSequenceChoice,
-    handleCorpZoneChoice,
-    handleHiddenZoneArrangeChoice,
-    handleHiddenZoneNonSearchChoice,
-    handleHiddenZoneSearchChoice,
-    handleScoredAgendaFlowChoice,
-    hasCorpUtilityKind,
-    hasInstalledUniqueCardDefinition,
-    hasSuccessfulHqRunThisTurn,
-    isP358HiddenReplacementCompatibilityChoiceSource,
-    isUniqueCard,
-    lookTopStackShowToCorpThenInstallMatchingTargets,
-    maxHandSize,
-    mustServer,
-    outermostIceIndex,
-    poxCountersForServer,
-    publicServerLabel,
-    publicServerLabelForCard,
-    recordStateRandomMarkers,
-    removeFromAllZones,
-    resolveAardvarkInterceptionChoice,
-    resolveAccessChimeraDaemonTrashChoice,
-    resolveAccessInstalledRunnerProgramReturnChoice,
-    resolveAccessPaymentChoice,
-    resolveCardImplementationAdvancementDistributionChoice,
-    resolveCardImplementationMoveAdvancementChoice,
-    resolveVirusCounterPurgePreserveChoice,
-    resolveCrashEverettDrawChoice,
-    resolveRunnerDrawSequenceChoice,
-    resolveEventModificationChoice,
-    resolveFortHqReplacementChoice,
-    resolveHammerStealthLossChoice,
-    resolvePdcaDamageReplacementChoice,
-    resolveCorpInstalledEconomyCreditChoice,
-    resolvePreAccessTopRdReorderChoice,
-    resolvePassRezzedIceProgramTrashChoiceInRunModule,
-    resolveBrokenIceVirusCounterChoice,
-    resolvePostMeatDamageHiddenResourceChoice,
-    resolveHardwareTrashByCounterChoice,
-    resolveRevealRdUntilAgendaStoreInHqChoice,
-    resolveSuccessfulRunCreditLossSpendChoice,
-    resolveReplacementChoice,
-    resolveRunnerPrivateLookChoice,
-    resolveRunnerProgramTrashBeforeInstallChoice,
-    resolveDelayedInstallMemoryChoice,
-    resolveDelayedInstallStartTurnChoice,
-    resolveSenatorialFieldTripChoice,
-    resolveHqIceSwapChoice,
-    resolveRezInterruptJackOutChoice,
-    resolveSuccessfulRunInterventionChoiceInRunModule,
-    resolveAdvancementPlacementChoice,
-    resolveSecretSpendCompareChoiceInRunModule,
-    resolveTraceChoice,
-    resolveActiveIceProgramTrashChoiceInRunModule,
-    rezCostForCard,
-    rezzedBlackIceIds,
-    rezzedCorpRootCardIds,
-    rezzedInstalledIceIds,
-    rollDeterministicDie,
-    runnerSpecialTriggerExecutionHost,
-    runAccessTransitionHost,
-    runEndCleanupHost,
-    runRezWindowHostForState,
-    runnerEventLongtailForDefinition,
-    runnerEventLongtailKindForDefinition,
-    runnerInstalledCardIds,
-    runnerMemoryLimit,
-    runnerProgramUsesMemory,
-    runnerStoleAgendaSubtypeThisTurn,
-    scoredAgendaFlowHost,
-    scoredAgendaImplementationForDefinition,
-    scoredAgendaKindForDefinition,
-    searchStackInstallTargets,
-    selectedChoiceIds,
-    setCardCounter,
-    setHostedOn,
-    shouldLoadLegacyRecurringCredits,
-    shuffleRunnerStackAndRefreshZones,
-    shuffleStateIds,
-    temporaryProgramInstallableProgramIds,
-    spendCardCounter,
-    spendCredits,
-    spendRunnerInstallCredits,
-    startAujourdOuiTop5Activation,
-    startIncubatorTransformChoice,
-    startRun,
-    startRunnerStackArrangeChoice,
-    startRunnerStackSearchChoiceActivation,
-    successfulRunInterventionHost,
-    traceOrchestrationHost,
-    trashCorpInstalledCardToArchives,
-    trashRunnerInstalledCardToHeap,
-    uniqueDirectLongtailImplementationForDefinition,
-    unrezzedInstalledIceIds,
-    mustInstance,
-    credits,
-    withoutVariableIceState,
-  } = deps;
-
+): import("./pending-choice-runtime-port").PendingChoiceRuntimePort {
   const {
     RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_ACTION,
     RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_CHOICE_SOURCE:
@@ -292,7 +139,7 @@ export function createPendingChoiceRuntimeHosts(
       | "start"
       | undefined;
     if (run && runPhase === "start") {
-      const server = mustServer(state, run.attackedServerId);
+      const server = deps.mustServer(state, run.attackedServerId);
       if (server.ice.length > 0) {
         const iceIndex = server.ice.length - 1;
         const approachedIceId = server.ice[iceIndex];
@@ -345,7 +192,7 @@ export function createPendingChoiceRuntimeHosts(
   ): void {
     const run = state.run;
     if (!run) throw new Error("Es laeuft kein Run fuer die Spend-Cap-Ansage.");
-    const source = mustInstance(state.cardInstances, sourceCardId);
+    const source = deps.mustInstance(state.cardInstances, sourceCardId);
     if (
       source.zone.side !== "corp" ||
       (source.zone.zone !== "serverRoot" && source.zone.zone !== "serverIce")
@@ -358,7 +205,7 @@ export function createPendingChoiceRuntimeHosts(
       );
     if (
       source.rezzed !== true ||
-      corpUtilityImplementationForCard(state, sourceCardId)?.kind !==
+      deps.corpUtilityImplementationForCard(state, sourceCardId)?.kind !==
         "fort_start_runner_spend_cap"
     )
       throw new Error("Die Spend-Cap-Quelle ist nicht legal.");
@@ -406,14 +253,15 @@ export function createPendingChoiceRuntimeHosts(
         choice.source.split(":");
       if (run.runId !== runId || run.attackedServerId !== serverId)
         throw new Error("Die Spend-Cap-Choice passt nicht mehr zum Run.");
-      const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+      const selected =
+        deps.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
       const amount = Number(selected.replace(/^spend_/, ""));
       if (!Number.isInteger(amount) || amount < 0)
         throw new Error("Die Spend-Cap-Ansage ist ungueltig.");
-      const source = mustInstance(state.cardInstances, sourceCardId);
+      const source = deps.mustInstance(state.cardInstances, sourceCardId);
       if (
         source.rezzed !== true ||
-        corpUtilityImplementationForCard(state, sourceCardId)?.kind !==
+        deps.corpUtilityImplementationForCard(state, sourceCardId)?.kind !==
           "fort_start_runner_spend_cap"
       )
         throw new Error("Die Spend-Cap-Quelle ist nicht mehr legal.");
@@ -438,7 +286,8 @@ export function createPendingChoiceRuntimeHosts(
       !choice.source.startsWith("corp.start_of_run_redirect.herman_reorder") &&
       run
     ) {
-      const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+      const selected =
+        deps.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
       if (selected === "pass") {
         delete state.pendingChoice;
         legalAction.payload = {
@@ -446,13 +295,14 @@ export function createPendingChoiceRuntimeHosts(
           startOfRunRedirectDecision: "pass",
           originalServerId: originalRunStartServerId(run),
         };
-        const spendCap = mustServer(state, run.attackedServerId)
+        const spendCap = deps
+          .mustServer(state, run.attackedServerId)
           .root.slice()
           .sort()
           .find(
             (cardId) =>
               state.cardInstances[cardId]?.rezzed === true &&
-              corpUtilityImplementationForCard(state, cardId)?.kind ===
+              deps.corpUtilityImplementationForCard(state, cardId)?.kind ===
                 "fort_start_runner_spend_cap",
           );
         if (spendCap) {
@@ -472,11 +322,14 @@ export function createPendingChoiceRuntimeHosts(
       if (!sourceCardId)
         throw new Error("Die Start-of-run-Auswahl ist ungueltig.");
       if (selected.startsWith("herman_")) {
-        const server = mustServer(state, run.attackedServerId);
-        const selectedSource = mustInstance(state.cardInstances, sourceCardId);
+        const server = deps.mustServer(state, run.attackedServerId);
+        const selectedSource = deps.mustInstance(
+          state.cardInstances,
+          sourceCardId,
+        );
         if (
           selectedSource.rezzed !== true ||
-          corpUtilityImplementationForCard(state, sourceCardId)?.kind !==
+          deps.corpUtilityImplementationForCard(state, sourceCardId)?.kind !==
             "fort_start_reorder_ice"
         )
           throw new Error("Die Reorder-Quelle ist nicht legal.");
@@ -515,11 +368,11 @@ export function createPendingChoiceRuntimeHosts(
         return;
       }
       if (selected.startsWith("obfuscated_rez_")) {
-        const source = mustInstance(state.cardInstances, sourceCardId);
-        const cost = rezCostForCard(state, sourceCardId);
+        const source = deps.mustInstance(state.cardInstances, sourceCardId);
+        const cost = deps.rezCostForCard(state, sourceCardId);
         if (
           source.rezzed === true ||
-          corpUtilityImplementationForCard(state, sourceCardId)?.kind !==
+          deps.corpUtilityImplementationForCard(state, sourceCardId)?.kind !==
             "fort_start_runner_spend_cap" ||
           state.corp.credits < cost
         )
@@ -539,11 +392,11 @@ export function createPendingChoiceRuntimeHosts(
           rezCostPaid: cost,
           corpCreditsAfter: state.corp.credits,
         };
-        executeCardImplementationLifecycleEffects(
-          cardImplementationRuntimeDeps,
+        deps.executeCardImplementationLifecycleEffects(
+          deps.cardImplementationRuntimeDeps,
           state,
           legalAction,
-          definitionFor(state, sourceCardId),
+          deps.definitionFor(state, sourceCardId),
           sourceCardId,
           "on_rez",
         );
@@ -555,7 +408,7 @@ export function createPendingChoiceRuntimeHosts(
         openRunSpendCapChoice(state, sourceCardId, legalAction);
         return;
       }
-      const source = mustInstance(state.cardInstances, sourceCardId);
+      const source = deps.mustInstance(state.cardInstances, sourceCardId);
       if (
         source.zone.side !== "corp" ||
         (source.zone.zone !== "serverRoot" && source.zone.zone !== "serverIce")
@@ -571,7 +424,7 @@ export function createPendingChoiceRuntimeHosts(
         !targetServerId ||
         targetServerId !== intervention.targetServerId ||
         source.rezzed !== true ||
-        corpUtilityImplementationForCard(state, sourceCardId)?.kind !==
+        deps.corpUtilityImplementationForCard(state, sourceCardId)?.kind !==
           "start_run_redirect_to_source_fort"
       )
         throw new Error("Diese Redirect-Quelle ist nicht legal.");
@@ -610,7 +463,7 @@ export function createPendingChoiceRuntimeHosts(
       if (run.runId !== runId || run.attackedServerId !== serverId)
         throw new Error("Die Reorder-Choice passt nicht mehr zum Run.");
       const selectedIds = selectedChoiceCardIds(choice, playerAction);
-      const server = mustServer(state, serverId);
+      const server = deps.mustServer(state, serverId);
       if (
         selectedIds.length !== server.ice.length ||
         new Set(selectedIds).size !== selectedIds.length ||
@@ -622,11 +475,11 @@ export function createPendingChoiceRuntimeHosts(
       server.ice = selectedIds;
       for (const cardId of selectedIds) {
         state.cardInstances[cardId] = {
-          ...mustInstance(state.cardInstances, cardId),
+          ...deps.mustInstance(state.cardInstances, cardId),
           zone: { side: "corp", zone: "serverIce", serverId: server.id },
         };
       }
-      const source = mustInstance(state.cardInstances, sourceCardId);
+      const source = deps.mustInstance(state.cardInstances, sourceCardId);
       delete state.pendingChoice;
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
@@ -649,7 +502,7 @@ export function createPendingChoiceRuntimeHosts(
     playerAction: PlayerAction,
   ): void {
     resolveClassicDeflectorChoiceInRunModule(
-      encounterPrintedNonTraceHostForState(state, legalAction),
+      deps.encounterPrintedNonTraceHostForState(state, legalAction),
       legalAction,
       playerAction,
     );
@@ -668,12 +521,12 @@ export function createPendingChoiceRuntimeHosts(
         return;
       case "access_effect":
         resumeAccessEffectAfterTagPrevention(
-          accessEffectHandlerHost(state, legalAction),
+          deps.accessEffectHandlerHost(state, legalAction),
         );
         return;
       case "card_effect_on_play":
         resumeOnPlayCardImplementationAfterTagPrevention(
-          cardImplementationRuntimeDeps,
+          deps.cardImplementationRuntimeDeps,
           state,
           legalAction,
         );
@@ -683,13 +536,13 @@ export function createPendingChoiceRuntimeHosts(
         return;
       case "successful_run_access_replacement":
         resumeSuccessfulRunAccessReplacementAfterTagPrevention(
-          runAccessTransitionHost(state),
+          deps.runAccessTransitionHost(state),
           legalAction,
         );
         return;
       case "run_end_cleanup":
         resumeRunEndCleanupAfterTagPrevention(
-          runEndCleanupHost(state),
+          deps.runEndCleanupHost(state),
           legalAction,
         );
         return;
@@ -713,38 +566,43 @@ export function createPendingChoiceRuntimeHosts(
         resolveDiscardChoice,
       },
       replacement: {
-        resolveReplacementChoice,
-        resolveEventModificationChoice,
+        resolveReplacementChoice: deps.resolveReplacementChoice,
+        resolveEventModificationChoice: deps.resolveEventModificationChoice,
         resumeAddTagContinuation,
-        resolvePdcaDamageReplacementChoice,
+        resolvePdcaDamageReplacementChoice:
+          deps.resolvePdcaDamageReplacementChoice,
       },
       trace: {
         resolveTraceChoice: (_state, actionToResolve, playerActionToResolve) =>
-          resolveTraceChoice(
-            traceOrchestrationHost(state),
+          deps.resolveTraceChoice(
+            deps.traceOrchestrationHost(state),
             actionToResolve,
             playerActionToResolve,
           ),
       },
       hiddenZone: {
-        handleHiddenZoneArrangeChoice,
+        handleHiddenZoneArrangeChoice: deps.handleHiddenZoneArrangeChoice,
         hiddenZoneArrangeChoiceHandlerHost,
-        handleHiddenZoneNonSearchChoice,
+        handleHiddenZoneNonSearchChoice: deps.handleHiddenZoneNonSearchChoice,
         hiddenZoneNonSearchChoiceHandlerHost,
-        handleCorpZoneChoice,
+        handleCorpZoneChoice: deps.handleCorpZoneChoice,
         corpZoneChoiceHandlerHost,
-        isP358HiddenReplacementCompatibilityChoiceSource,
+        isP358HiddenReplacementCompatibilityChoiceSource:
+          deps.isP358HiddenReplacementCompatibilityChoiceSource,
         resolveP358HiddenReplacementChoice,
-        handleHiddenZoneSearchChoice,
+        handleHiddenZoneSearchChoice: deps.handleHiddenZoneSearchChoice,
         hiddenZoneSearchChoiceHandlerHost,
         resolveMultiExposeInstalledCorpCardsChoice,
         resolveExposeInstalledCorpCardsChoice,
         resolveExposePreventionChoice,
-        resolveCorpInstalledEconomyCreditChoice,
-        resolveCrashEverettDrawChoice,
-        resolveRunnerDrawSequenceChoice,
-        resolveHardwareTrashByCounterChoice,
-        resolveAdvancementPlacementChoice,
+        resolveCorpInstalledEconomyCreditChoice:
+          deps.resolveCorpInstalledEconomyCreditChoice,
+        resolveCrashEverettDrawChoice: deps.resolveCrashEverettDrawChoice,
+        resolveRunnerDrawSequenceChoice: deps.resolveRunnerDrawSequenceChoice,
+        resolveHardwareTrashByCounterChoice:
+          deps.resolveHardwareTrashByCounterChoice,
+        resolveAdvancementPlacementChoice:
+          deps.resolveAdvancementPlacementChoice,
         resolveDerezRezzedBlackIceChoice,
         resolvePayRezCostToTrashRezzedIceChoice,
         resolveCorpChoiceRezOrTrashIceTargetChoice,
@@ -758,21 +616,25 @@ export function createPendingChoiceRuntimeHosts(
         resolvePaidSourceReturnToGripChoice,
         resolveRunnerHostingChoice,
         resolveIncubatorTransformChoice,
-        resolveVirusCounterPurgePreserveChoice,
+        resolveVirusCounterPurgePreserveChoice:
+          deps.resolveVirusCounterPurgePreserveChoice,
         resolveChimeraDaemonTrashChoice,
         resolveRunnerProgramReturnChoice,
-        resolveRunnerPrivateLookChoice,
-        resolveSenatorialFieldTripChoice,
-        resolveFortHqReplacementChoice,
+        resolveRunnerPrivateLookChoice: deps.resolveRunnerPrivateLookChoice,
+        resolveSenatorialFieldTripChoice: deps.resolveSenatorialFieldTripChoice,
+        resolveFortHqReplacementChoice: deps.resolveFortHqReplacementChoice,
       },
       corp: {
-        handleCorpInstallRezSequenceChoice,
-        corpInstallRezSequenceHandlerHost,
-        handleScoredAgendaFlowChoice,
-        scoredAgendaFlowHost,
+        handleCorpInstallRezSequenceChoice:
+          deps.handleCorpInstallRezSequenceChoice,
+        corpInstallRezSequenceHandlerHost:
+          deps.corpInstallRezSequenceHandlerHost,
+        handleScoredAgendaFlowChoice: deps.handleScoredAgendaFlowChoice,
+        scoredAgendaFlowHost: deps.scoredAgendaFlowHost,
       },
       runner: {
-        resolveRunnerProgramTrashBeforeInstallChoice,
+        resolveRunnerProgramTrashBeforeInstallChoice:
+          deps.resolveRunnerProgramTrashBeforeInstallChoice,
         resolveDelayedInstallMemoryChoice: (
           _state,
           legalAction,
@@ -781,19 +643,19 @@ export function createPendingChoiceRuntimeHosts(
           const resumesStartOfTurn =
             state.pendingChoice?.source.split(":")[3] === "start_turn";
           const effects: ResolvedGameEffect[] = [];
-          resolveDelayedInstallMemoryChoice(
-            runnerSpecialTriggerExecutionHost(state),
+          deps.resolveDelayedInstallMemoryChoice(
+            deps.runnerSpecialTriggerExecutionHost(state),
             legalAction,
             playerAction,
             effects,
           );
           if (resumesStartOfTurn && !state.pendingChoice)
-            applyRunnerStartOfTurnEffects(
+            deps.applyRunnerStartOfTurnEffects(
               state,
               effects,
               "after_delayed_install_choice",
             );
-          appendResolvedEffectsToPayload(legalAction, effects);
+          deps.appendResolvedEffectsToPayload(legalAction, effects);
         },
         resolveDelayedInstallStartTurnChoice: (
           _state,
@@ -801,39 +663,47 @@ export function createPendingChoiceRuntimeHosts(
           playerAction,
         ) => {
           const effects: ResolvedGameEffect[] = [];
-          resolveDelayedInstallStartTurnChoice(
-            runnerSpecialTriggerExecutionHost(state),
+          deps.resolveDelayedInstallStartTurnChoice(
+            deps.runnerSpecialTriggerExecutionHost(state),
             legalAction,
             playerAction,
             effects,
           );
           if (!state.pendingChoice)
-            applyRunnerStartOfTurnEffects(
+            deps.applyRunnerStartOfTurnEffects(
               state,
               effects,
               "after_delayed_install_choice",
             );
-          appendResolvedEffectsToPayload(legalAction, effects);
+          deps.appendResolvedEffectsToPayload(legalAction, effects);
         },
       },
       run: {
-        resolveHqIceSwapChoice,
-        fortPassWindowHostForState,
-        resolveSecretSpendCompareChoiceInRunModule,
-        encounterSpecialWindowHostForState,
-        resolveHammerStealthLossChoice,
-        fortRunSideFamiliesHostForState,
-        resolveActiveIceProgramTrashChoiceInRunModule,
-        encounterResolutionHostForState,
-        resolvePassRezzedIceProgramTrashChoiceInRunModule,
-        resolveRezInterruptJackOutChoice,
-        runRezWindowHostForState,
-        resolveBrokenIceVirusCounterChoice,
-        runEndCleanupHost,
-        resolveAardvarkInterceptionChoice,
-        resolveSuccessfulRunInterventionChoiceInRunModule,
-        successfulRunInterventionHost,
-        resolvePostMeatDamageHiddenResourceChoice,
+        resolveHqIceSwapChoice: deps.resolveHqIceSwapChoice,
+        fortPassWindowHostForState: deps.fortPassWindowHostForState,
+        resolveSecretSpendCompareChoiceInRunModule:
+          deps.resolveSecretSpendCompareChoiceInRunModule,
+        encounterSpecialWindowHostForState:
+          deps.encounterSpecialWindowHostForState,
+        resolveHammerStealthLossChoice: deps.resolveHammerStealthLossChoice,
+        fortRunSideFamiliesHostForState: deps.fortRunSideFamiliesHostForState,
+        resolveActiveIceProgramTrashChoiceInRunModule:
+          deps.resolveActiveIceProgramTrashChoiceInRunModule,
+        encounterResolutionHostForState: deps.encounterResolutionHostForState,
+        resolvePassRezzedIceProgramTrashChoiceInRunModule:
+          deps.resolvePassRezzedIceProgramTrashChoiceInRunModule,
+        resolveRezInterruptJackOutChoice: deps.resolveRezInterruptJackOutChoice,
+        runRezWindowHostForState: deps.runRezWindowHostForState,
+        resolveBrokenIceVirusCounterChoice:
+          deps.resolveBrokenIceVirusCounterChoice,
+        runEndCleanupHost: deps.runEndCleanupHost,
+        resolveAardvarkInterceptionChoice:
+          deps.resolveAardvarkInterceptionChoice,
+        resolveSuccessfulRunInterventionChoiceInRunModule:
+          deps.resolveSuccessfulRunInterventionChoiceInRunModule,
+        successfulRunInterventionHost: deps.successfulRunInterventionHost,
+        resolvePostMeatDamageHiddenResourceChoice:
+          deps.resolvePostMeatDamageHiddenResourceChoice,
         resolveStartOfRunFortUtilityChoice,
         resolveClassicDeflectorChoice,
       },
@@ -844,20 +714,25 @@ export function createPendingChoiceRuntimeHosts(
           playerAction,
         ) => {
           resolveAccessProgramInstallMemoryChoice(
-            accessFlow.accessFlowHost(state),
+            deps.accessFlow.accessFlowHost(state),
             legalAction,
             playerAction,
           );
         },
-        resolveSuccessfulRunCreditLossSpendChoice,
-        runAccessTransitionHost,
-        resolvePreAccessTopRdReorderChoice,
-        resolveRevealRdUntilAgendaStoreInHqChoice,
+        resolveSuccessfulRunCreditLossSpendChoice:
+          deps.resolveSuccessfulRunCreditLossSpendChoice,
+        runAccessTransitionHost: deps.runAccessTransitionHost,
+        resolvePreAccessTopRdReorderChoice:
+          deps.resolvePreAccessTopRdReorderChoice,
+        resolveRevealRdUntilAgendaStoreInHqChoice:
+          deps.resolveRevealRdUntilAgendaStoreInHqChoice,
       },
       cardImplementation: {
         resolveCardImplementationAccessPaymentChoice,
-        resolveCardImplementationAdvancementDistributionChoice,
-        resolveCardImplementationMoveAdvancementChoice,
+        resolveCardImplementationAdvancementDistributionChoice:
+          deps.resolveCardImplementationAdvancementDistributionChoice,
+        resolveCardImplementationMoveAdvancementChoice:
+          deps.resolveCardImplementationMoveAdvancementChoice,
       },
       constants: {
         RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_CHOICE_SOURCE,
@@ -901,7 +776,7 @@ export function createPendingChoiceRuntimeHosts(
     requiredDiscardCount: number,
     stateVersion = state.stateVersion,
   ): ChoiceRequest {
-    const hand = handForSide(state, side);
+    const hand = deps.handForSide(state, side);
     return {
       choiceId: `discard_${side}_${stateVersion}`,
       side,
@@ -910,7 +785,7 @@ export function createPendingChoiceRuntimeHosts(
       kind: "select_cards",
       options: hand.map((cardId) => ({
         id: `card_${cardId}`,
-        label: definitionFor(state, cardId).title,
+        label: deps.definitionFor(state, cardId).title,
         publicLabel: "Handkarte",
         value: cardId,
       })),
@@ -939,20 +814,20 @@ export function createPendingChoiceRuntimeHosts(
       throw new Error("Discard ist im aktuellen Timingpoint nicht legal.");
     }
     const expectedCount =
-      handForSide(state, side).length - maxHandSize(state, side);
+      deps.handForSide(state, side).length - deps.maxHandSize(state, side);
     if (expectedCount !== choice.minSelections)
       throw new Error("Die Discard-Anzahl ist nicht mehr gueltig.");
     const cockroachRandomized =
-      side === "corp" && cockroachRandomHqDiscardActive(state);
+      side === "corp" && deps.cockroachRandomHqDiscardActive(state);
     let selectedCards: CardInstanceId[] = [];
     if (cockroachRandomized) {
-      selectedCards = discardRandomCorpHqCards(
+      selectedCards = deps.discardRandomCorpHqCards(
         state,
         expectedCount,
-        `v191.random.${COCKROACH_ID}.hq_discard_phase`,
+        `v191.random.${deps.COCKROACH_ID}.hq_discard_phase`,
       );
     } else {
-      const selectedIds = selectedChoiceIds(playerAction.selectedChoices);
+      const selectedIds = deps.selectedChoiceIds(playerAction.selectedChoices);
       selectedCards = selectedIds.map((optionId) => {
         const option = choice.options.find(
           (candidate) => candidate.id === optionId,
@@ -963,19 +838,19 @@ export function createPendingChoiceRuntimeHosts(
       });
       if (selectedCards.length !== expectedCount)
         throw new Error("Die Discard-Anzahl ist nicht mehr gueltig.");
-      const hand = handForSide(state, side);
+      const hand = deps.handForSide(state, side);
       for (const cardId of selectedCards) {
-        const instance = mustInstance(state.cardInstances, cardId);
+        const instance = deps.mustInstance(state.cardInstances, cardId);
         if (instance.owner !== side || !hand.includes(cardId))
           throw new Error("Eine Discard-Karte liegt nicht in der Hand.");
       }
 
       for (const cardId of selectedCards) {
-        removeFromAllZones(state, cardId);
+        deps.removeFromAllZones(state, cardId);
         if (side === "corp") {
           state.corp.archives.push(cardId);
           state.cardInstances[cardId] = {
-            ...mustInstance(state.cardInstances, cardId),
+            ...deps.mustInstance(state.cardInstances, cardId),
             faceup: false,
             rezzed: false,
             zone: { side: "corp", zone: "archives" },
@@ -983,7 +858,7 @@ export function createPendingChoiceRuntimeHosts(
         } else {
           state.runner.heap.push(cardId);
           state.cardInstances[cardId] = {
-            ...mustInstance(state.cardInstances, cardId),
+            ...deps.mustInstance(state.cardInstances, cardId),
             faceup: true,
             rezzed: true,
             zone: { side: "runner", zone: "heap" },
@@ -1001,14 +876,14 @@ export function createPendingChoiceRuntimeHosts(
       ...(cockroachRandomized
         ? {
             randomizedByCockroach: true,
-            cockroachCounterTotal: cockroachCounterTotal(state),
+            cockroachCounterTotal: deps.cockroachCounterTotal(state),
           }
         : {}),
       hiddenZoneBarrier: true,
       hiddenZoneAction: "discard_phase",
     };
     delete state.pendingChoice;
-    completeDiscardPhase(state, side, legalAction);
+    deps.completeDiscardPhase(state, side, legalAction);
   }
 
   function resolveSetupMulliganChoice(
@@ -1021,13 +896,13 @@ export function createPendingChoiceRuntimeHosts(
         state.pendingChoice?.side === "runner"
           ? "mulligan_runner"
           : "mulligan_corp",
-      initialHandSize: INITIAL_HAND_SIZE,
+      initialHandSize: deps.INITIAL_HAND_SIZE,
       resolved: {},
       mulligansTaken: {},
     };
     const side = state.pendingChoice?.side;
     if (!side) throw new Error("Es ist keine Setup-Choice offen.");
-    const selected = selectedChoiceIds(playerAction.selectedChoices)[0];
+    const selected = deps.selectedChoiceIds(playerAction.selectedChoices)[0];
     if (selected !== "keep" && selected !== "mulligan")
       throw new Error("Die Mulligan-Auswahl ist ungueltig.");
     if (setup.resolved[side])
@@ -1082,10 +957,10 @@ export function createPendingChoiceRuntimeHosts(
       const allIds = [...state.runner.grip, ...state.runner.stack];
       for (const id of allIds)
         state.cardInstances[id] = {
-          ...mustInstance(state.cardInstances, id),
+          ...deps.mustInstance(state.cardInstances, id),
           zone: { side: "runner", zone: "stack" },
         };
-      const shuffled = shuffleStateIds(
+      const shuffled = deps.shuffleStateIds(
         state,
         allIds,
         "setup.shuffle.runner.mulligan",
@@ -1095,10 +970,10 @@ export function createPendingChoiceRuntimeHosts(
       state.runner.stack = shuffled;
       for (const id of grip)
         state.cardInstances[id] = {
-          ...mustInstance(state.cardInstances, id),
+          ...deps.mustInstance(state.cardInstances, id),
           zone: { side: "runner", zone: "grip" },
         };
-      recordStateRandomMarkers(
+      deps.recordStateRandomMarkers(
         state,
         "setup.draw.runner.mulligan_hand",
         grip.length,
@@ -1109,10 +984,10 @@ export function createPendingChoiceRuntimeHosts(
     const allIds = [...state.corp.hq, ...state.corp.rd];
     for (const id of allIds)
       state.cardInstances[id] = {
-        ...mustInstance(state.cardInstances, id),
+        ...deps.mustInstance(state.cardInstances, id),
         zone: { side: "corp", zone: "rd" },
       };
-    const shuffled = shuffleStateIds(
+    const shuffled = deps.shuffleStateIds(
       state,
       allIds,
       "setup.shuffle.corp.mulligan",
@@ -1122,10 +997,14 @@ export function createPendingChoiceRuntimeHosts(
     state.corp.rd = shuffled;
     for (const id of hq)
       state.cardInstances[id] = {
-        ...mustInstance(state.cardInstances, id),
+        ...deps.mustInstance(state.cardInstances, id),
         zone: { side: "corp", zone: "hq" },
       };
-    recordStateRandomMarkers(state, "setup.draw.corp.mulligan_hand", hq.length);
+    deps.recordStateRandomMarkers(
+      state,
+      "setup.draw.corp.mulligan_hand",
+      hq.length,
+    );
   }
 
   return {

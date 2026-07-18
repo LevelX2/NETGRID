@@ -222,15 +222,17 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         "per_card_longtail",
       );
     }
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus).toBe(
-      "playable_mvp",
-    );
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_123_bodyweight-data-creche"]).toMatchObject(
-      {
-        installCost: 3,
-      },
-    );
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_124_corolla-speed-chip"]).toMatchObject({
+    expect(
+      CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus,
+    ).toBe("playable_mvp");
+    expect(
+      CARD_DEFINITIONS_BY_ID["onr_v1_123_bodyweight-data-creche"],
+    ).toMatchObject({
+      installCost: 3,
+    });
+    expect(
+      CARD_DEFINITIONS_BY_ID["onr_v1_124_corolla-speed-chip"],
+    ).toMatchObject({
       installCost: 1,
     });
   });
@@ -980,7 +982,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_event",
       cardDefinitionId: "onr_v1_102_open-ended-mileage-program",
-      v1922RunnerEventAbility: "remove_tag_optional_return",
+      abilityId: "remove_tag_optional_return",
       removedTags: 1,
       runnerTagsAfter: 0,
     });
@@ -993,7 +995,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       choiceKind: "select_option",
-      v1922RunnerEventAbility: "remove_tag_optional_return",
+      abilityId: "remove_tag_optional_return",
       returnedToGrip: true,
       paidCredits: 1,
       runnerCreditsAfter: 1,
@@ -1025,7 +1027,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     state.runner.credits = 5;
     state.runner.clicks = 4;
-    const blackIceId = "card_implementation_derez_rezzed_black_ice_black_ice" as CardInstanceId;
+    const blackIceId =
+      "card_implementation_derez_rezzed_black_ice_black_ice" as CardInstanceId;
     const rdServer = state.corp.servers.find((server) => server.id === "rd");
     expect(rdServer).toBeDefined();
     if (!rdServer) throw new Error("Missing R&D server");
@@ -1100,7 +1103,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_event",
       cardDefinitionId: "onr_v1_077_anonymous-tip",
-      v1922RunnerEventAbility: "derez_black_ice",
+      abilityId: "derez_black_ice",
     });
 
     const pendingChoice = state.pendingChoice;
@@ -1117,7 +1120,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       choiceKind: "select_cards",
-      v1922RunnerEventAbility: "derez_black_ice",
+      abilityId: "derez_black_ice",
       derezzedCount: 1,
       targetCardDefinitionId: "onr_v1_231_cortical-scrub",
     });
@@ -1221,7 +1224,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_event",
       cardDefinitionId: "onr_v1_086_forged-activation-orders",
-      v1922RunnerEventAbility: "force_rez_or_trash_ice",
+      abilityId: "force_rez_or_trash_ice",
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"cardInstances"|"privatePayload"|"rd"|"simple_barrier_ice"/,
@@ -1254,7 +1257,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       choiceKind: "select_cards",
-      v1922RunnerEventAbility: "force_rez_or_trash_ice",
+      abilityId: "force_rez_or_trash_ice",
       targetVisibility: "installed_ice_position",
       targetServerLabel: "R&D",
       targetIcePositionLabel: "ICE 1 in R&D",
@@ -1272,7 +1275,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       choiceKind: "select_option",
-      v1922RunnerEventAbility: "force_rez_or_trash_ice",
+      abilityId: "force_rez_or_trash_ice",
       corpDecision: "rez_ice",
       targetCardDefinitionId: "simple_barrier_ice",
       targetServerLabel: "R&D",
@@ -1396,7 +1399,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(trashState.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       choiceKind: "select_option",
-      v1922RunnerEventAbility: "force_rez_or_trash_ice",
+      abilityId: "force_rez_or_trash_ice",
       corpDecision: "trash_ice",
       trashedCount: 1,
       targetIcePositionLabel: "ICE 1 in HQ",
@@ -1405,9 +1408,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(trashState.eventLog.at(-1)?.publicPayload).not.toHaveProperty(
       "targetCardDefinitionId",
     );
-    expect(JSON.stringify(trashState.eventLog.at(-1)?.publicPayload)).not.toMatch(
-      /simple_barrier_ice/,
-    );
+    expect(
+      JSON.stringify(trashState.eventLog.at(-1)?.publicPayload),
+    ).not.toMatch(/simple_barrier_ice/);
     expect(JSON.stringify(getPlayerView(trashState, "runner"))).not.toMatch(
       /simple_barrier_ice|Simple Barrier ICE/,
     );
@@ -1530,8 +1533,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       choiceKind: "select_cards",
-      v1922RunnerEventAbility:
-        "successful_hq_run_pay_rez_cost_trash_rezzed_ice",
+      abilityId: "successful_hq_run_pay_rez_cost_trash_rezzed_ice",
       trashedCount: 1,
       targetCardDefinitionId: "simple_barrier_ice",
       targetServerLabel: "R&D",
@@ -1645,7 +1647,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_event",
       cardDefinitionId: "onr_v1_109_security-code-worm-chip",
-      v1922RunnerEventAbility: "successful_hq_run_trash_unrezzed_ice",
+      abilityId: "successful_hq_run_trash_unrezzed_ice",
     });
 
     const pendingChoice = state.pendingChoice;
@@ -1662,7 +1664,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       choiceKind: "select_cards",
-      v1922RunnerEventAbility: "successful_hq_run_trash_unrezzed_ice",
+      abilityId: "successful_hq_run_trash_unrezzed_ice",
       targetVisibility: "installed_ice_position",
       targetServerLabel: "R&D",
       trashedCount: 1,
@@ -1820,7 +1822,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_event",
       cardDefinitionId: "onr_v1_113_synchronized-attack-on-hq",
-      v1922RunnerEventAbility: "successful_hq_run_corp_pay_to_retain_hq",
+      abilityId: "successful_hq_run_corp_pay_to_retain_hq",
       hiddenZoneBarrier: true,
       hiddenZoneAction: "successful_hq_run_corp_pay_to_retain_hq",
     });
@@ -1848,7 +1850,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       choiceKind: "select_cards",
-      v1922RunnerEventAbility: "successful_hq_run_corp_pay_to_retain_hq",
+      abilityId: "successful_hq_run_corp_pay_to_retain_hq",
       hiddenZoneBarrier: true,
       hiddenZoneAction: "successful_hq_run_corp_pay_to_retain_hq",
       retainedCount: 2,
@@ -1948,7 +1950,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_event",
       cardDefinitionId: "onr_v1_117_valu-pak-software-bundle",
-      v1922RunnerEventAbility: "program_install_action_bundle",
+      abilityId: "program_install_action_bundle",
       gainedActions: 5,
       temporaryProgramInstallCredits: 1,
       valuPakProgramInstallActionsRemaining: 5,
@@ -1997,7 +1999,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "install_card",
       cardDefinitionId: "simple_decoder",
-      v1922RunnerEventAbility: "program_install_action_bundle",
+      abilityId: "program_install_action_bundle",
       valuPakInstallActionSpent: true,
       valuPakProgramInstallActionsRemaining: 4,
       valuPakTemporaryProgramInstallCreditsAfter: 0,
@@ -2089,9 +2091,11 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.runner.heap).toContain(trashId);
     expect(state.runner.rig.programs).toContain(targetId);
     expect(state.runner.memoryUsed).toBe(4);
-    expect(state.runnerTurnFlags?.valuPakProgramInstallActionsRemaining).toBe(4);
+    expect(state.runnerTurnFlags?.valuPakProgramInstallActionsRemaining).toBe(
+      4,
+    );
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      v1922RunnerEventAbility: "program_install_action_bundle",
+      abilityId: "program_install_action_bundle",
       valuPakInstallActionSpent: true,
     });
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
@@ -2184,7 +2188,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "pump_breaker",
       cardDefinitionId: "onr_v1_037_japanese-water-torture",
-      v1922RunnerProgramAbility: "variable_pump_future_action_debt",
+      abilityId: "variable_pump_future_action_debt",
       futureActionDebtAdded: 1,
       futureActionDebtPending: 3,
       breakerStrengthAfter: 5,
@@ -3171,9 +3175,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       runnerInstallPaymentSourceDefinitionIds:
         "onr_v1_075_zetatech-software-installer",
     });
-    expect(JSON.stringify(oneBitState.eventLog.at(-1)?.publicPayload)).not.toMatch(
-      /"privatePayload"|"cardInstances"|"grip"|"hq"|"rd"/,
-    );
+    expect(
+      JSON.stringify(oneBitState.eventLog.at(-1)?.publicPayload),
+    ).not.toMatch(/"privatePayload"|"cardInstances"|"grip"|"hq"|"rd"/);
 
     const twoBitState = apply(
       structuredClone(state),
@@ -3218,8 +3222,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     const secondInstallerId = Object.entries(state.cardInstances).find(
       ([cardId, instance]) =>
         cardId !== firstInstallerId &&
-        instance.definitionId ===
-          "onr_v1_075_zetatech-software-installer",
+        instance.definitionId === "onr_v1_075_zetatech-software-installer",
     )?.[0] as CardInstanceId | undefined;
     if (!secondInstallerId) throw new Error("Missing second Zetatech instance");
     state.runner.stack = state.runner.stack.filter(
@@ -3293,8 +3296,12 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       (action) => action.actionId === byAmounts.get("1,0")?.actionId,
     );
     expect(firstSourceState.runner.credits).toBe(0);
-    expect(cardCounterAmount(firstSourceState, installerIds[0]!, "bit")).toBe(1);
-    expect(cardCounterAmount(firstSourceState, installerIds[1]!, "bit")).toBe(2);
+    expect(cardCounterAmount(firstSourceState, installerIds[0]!, "bit")).toBe(
+      1,
+    );
+    expect(cardCounterAmount(firstSourceState, installerIds[1]!, "bit")).toBe(
+      2,
+    );
     expect(firstSourceState.runner.rig.programs).toContain(hammerId);
   });
 
@@ -3489,7 +3496,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "runner",
       (action) =>
         action.type === "trigger_ability" &&
-        action.payload?.v1922RunnerProgramAbility === "successful_run_force_rez",
+        action.payload?.v1922RunnerProgramAbility ===
+          "successful_run_force_rez",
     );
     expect(falseEcho.costs[0]?.credits).toBe(2);
     const stale = applyAction(state, {
@@ -3512,7 +3520,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.cardInstances[innerIce]?.rezzed).toBe(true);
     expect(state.cardInstances[outerIce]?.rezzed).toBe(true);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      v1922RunnerProgramAbility: "successful_run_force_rez",
+      abilityId: "successful_run_force_rez",
       checkedIceCount: 2,
       rezzedIceCount: 2,
       rezCostPaid: 5,
@@ -3544,7 +3552,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       reverseState.corp.servers.find((server) => server.id === "remote_1")?.ice,
     ).toEqual([outerIce, innerIce]);
     expect(reverseState.eventLog.at(-1)?.publicPayload).toMatchObject({
-      v1922RunnerProgramAbility: "successful_run_reverse_ice",
+      abilityId: "successful_run_reverse_ice",
       iceCount: 2,
       serverIceOrderReversed: true,
     });
@@ -3607,7 +3615,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(getPlayerView(state, "runner").own.memoryLimit).toBe(7);
     expect(cardCounterAmount(state, arasakaId, "bit")).toBe(3);
     expect(state.runner.scoreArea).toContain(spentAgendaId);
-    expect(state.specialZones?.removedFromGame ?? []).not.toContain(spentAgendaId);
+    expect(state.specialZones?.removedFromGame ?? []).not.toContain(
+      spentAgendaId,
+    );
     expect(state.cardInstances[spentAgendaId]?.agendaPointsSpent).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       cardDefinitionId: "onr_v1_119_arasaka-portable-prototype",
@@ -4046,7 +4056,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "rez_card",
-      v1922RunnerProgramAbility: "rez_interrupt_jack_out_choice",
+      abilityId: "rez_interrupt_jack_out_choice",
       rezInterruptChoiceOpened: true,
       rezzedCardDefinitionId: "simple_upgrade",
     });
@@ -4056,7 +4066,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.phase).toBe("runner_action_phase");
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
-      v1922RunnerProgramAbility: "rez_interrupt_jack_out",
+      abilityId: "rez_interrupt_jack_out",
       rezInterruptUsed: true,
       successfulRunWithoutAccess: true,
       rezzedCardDefinitionId: "simple_upgrade",
@@ -4380,7 +4390,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.runner.rig.programs).not.toContain(returnedId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "trigger_ability",
-      v1922RunnerHardwareAbility: "return_top_hosted_program",
+      abilityId: "return_top_hosted_program",
       returnedToGrip: true,
     });
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
@@ -4677,7 +4687,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "corp",
       (action) =>
         action.type === "gain_credit" &&
-        action.payload?.agendaAbility === "scored_agenda_credit_until_install_or_rez",
+        action.payload?.agendaAbility ===
+          "scored_agenda_credit_until_install_or_rez",
     );
     const wrongSide = applyAction(state, {
       matchId: state.matchId,
@@ -4707,13 +4718,14 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "corp",
       (action) =>
         action.type === "gain_credit" &&
-        action.payload?.agendaAbility === "scored_agenda_credit_until_install_or_rez",
+        action.payload?.agendaAbility ===
+          "scored_agenda_credit_until_install_or_rez",
     );
     expect(state.corp.credits).toBe(creditsBeforeAbility + 2);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "gain_credit",
       cardDefinitionId: "onr_v1_195_corporate-retreat",
-      agendaAbility: "scored_agenda_credit_until_install_or_rez",
+      abilityId: "scored_agenda_credit_until_install_or_rez",
       gainedCredits: 2,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
@@ -4733,7 +4745,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     expect(
       getLegalActions(state, "corp").some(
-        (action) => action.payload?.agendaAbility === "scored_agenda_credit_until_install_or_rez",
+        (action) =>
+          action.payload?.agendaAbility ===
+          "scored_agenda_credit_until_install_or_rez",
       ),
     ).toBe(false);
 
@@ -4901,9 +4915,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state = applyChoices(state, "corp", [`card_${iceId}`, `card_${assetId}`]);
 
     const remote = state.corp.servers.find(
-      (server) =>
-        server.kind === "remote" &&
-        server.ice.includes(iceId),
+      (server) => server.kind === "remote" && server.ice.includes(iceId),
     );
     expect(remote).toBeDefined();
     expect(state.cardInstances[iceId]?.zone).toMatchObject({
@@ -4980,7 +4992,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     state = applyChoices(state, "corp", []);
     expect(state.pendingChoice).toBeUndefined();
-    expect(state.dataFortReclamationSequence).toBeUndefined();
+    expect(state.hqInstallRezSequence).toBeUndefined();
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       hiddenZoneAction: "hq_to_new_remote_rez_sequence",
@@ -5322,9 +5334,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       corpChoice?.options
         .filter((option) => option.selectable !== false)
         .every((option) => option.card?.type === "ice"),
-    ).toBe(
-      true,
-    );
+    ).toBe(true);
     expect(
       state.corp.servers.some((server) =>
         server.ice.includes(installedBarrierId),
@@ -5339,7 +5349,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "score_agenda",
       cardDefinitionId: "onr_v1_216_security-purge",
-      agendaAbility: "agenda_purge",
+      abilityId: "agenda_purge",
       hiddenZoneAction: "agenda_purge_rd_top3_target_choice",
       revealedCount: 3,
       revealedIceCount: 2,
@@ -5433,7 +5443,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
-      agendaAbility: "agenda_purge",
+      abilityId: "agenda_purge",
       hiddenZoneAction: "agenda_purge_install_targets",
       revealedCount: 3,
       revealedIceCount: 2,
@@ -5999,7 +6009,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_operation",
       cardDefinitionId: "onr_v1_289_edgerunner-inc-temps",
-      v1922CorpOperationAbility: "install_action_bundle",
+      abilityId: "install_action_bundle",
       gainedActions: 3,
       edgerunnerTempsInstallActionsRemaining: 3,
       corpClicksAfter: 12,
@@ -6047,7 +6057,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     ).toMatchObject({ remainingActions: 2 });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "install_card",
-      v1922CorpOperationAbility: "install_action_bundle",
+      abilityId: "install_action_bundle",
       edgerunnerTempsInstallActionSpent: true,
       edgerunnerTempsInstallActionsRemaining: 2,
     });
@@ -6202,7 +6212,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.run?.futureEncounterEndTheRunSourceIceId).toBe(tutorId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "continue_run",
-      v1922CorpIceAbility: "tutor_future_end_the_run_subroutine",
+      abilityId: "tutor_future_end_the_run_subroutine",
       sourceDefinitionId: "onr_v1_274_tutor",
       resolvedEffects: [
         expect.objectContaining({
@@ -6370,7 +6380,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     ]);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "continue_run",
-      v1922CorpIceAbility: "virizz_break_cost_modifier",
+      abilityId: "virizz_break_cost_modifier",
       breakSubroutineAdditionalCost: 1,
       sourceDefinitionId: "onr_v1_277_virizz",
     });
@@ -6431,7 +6441,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "break_subroutine",
       cardDefinitionId: "onr_v1_031_hammer",
-      v1922CorpIceAbility: "virizz_break_cost_modifier",
+      abilityId: "virizz_break_cost_modifier",
       breakSubroutineAdditionalCost: 1,
       breakSubroutineTotalCost: 2,
     });
@@ -6526,7 +6536,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.runnerTurnFlags?.runLockActionsPending).toBe(6);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "continue_run",
-      v1922CorpIceAbility: "direct_run_lock",
+      abilityId: "direct_run_lock",
       runLockActionsAdded: 6,
       runLockActionsPending: 6,
       sourceDefinitionId: "onr_v1_247_haunting-inquisition",
@@ -6801,7 +6811,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "runner",
       (action) =>
         action.type === "jack_out" &&
-        action.payload?.v1922CorpIceAbility === "jack_out_tax_after_passed_rezzed_ice",
+        action.payload?.v1922CorpIceAbility ===
+          "jack_out_tax_after_passed_rezzed_ice",
     );
     expect(jackOut.costs[0]?.credits).toBe(1);
     expect(state.runner.credits).toBe(5);
@@ -6823,7 +6834,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.runner.heap).not.toContain(cyfermasterId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "jack_out",
-      v1922CorpIceAbility: "jack_out_tax_after_passed_rezzed_ice",
+      abilityId: "jack_out_tax_after_passed_rezzed_ice",
       jackOutAdditionalCost: 1,
       runnerCreditsAfter: 4,
     });

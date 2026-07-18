@@ -44,16 +44,16 @@
   },
   "summary": {
     "activeCards": 618,
-    "coveredCards": 601,
-    "deferredCards": 32,
-    "noSignalCards": 17,
-    "targetProfileGapCards": 88,
+    "coveredCards": 599,
+    "deferredCards": 0,
+    "noSignalCards": 19,
+    "targetProfileGapCards": 0,
     "structuralSignalViolationCards": 0,
     "unknownSignalCards": 0,
     "byNoSignalReason": {
-      "none": 601,
+      "none": 599,
       "legacy_fallback_only": 15,
-      "no_function_signal": 2
+      "no_function_signal": 4
     },
     "bySide": {
       "corp": 311,
@@ -71,104 +71,15 @@
       "hardware": 42,
       "identity": 2
     },
-    "targetProfileGapCardIds": [
-      "onr_classic_005_baskerville",
-      "onr_classic_006_bolter-swarm",
-      "onr_classic_022_self-destruct",
-      "onr_classic_023_shock-treatment",
-      "onr_classic_030_psychic-friend",
-      "onr_classic_031_rent-i-con",
-      "onr_proteus_004_fetal-ai",
-      "onr_proteus_005_marked-accounts",
-      "onr_proteus_009_viral-breeding-ground",
-      "onr_proteus_056_department-of-misinformation",
-      "onr_proteus_079_big-frackin-gun",
-      "onr_proteus_093_redecorator",
-      "onr_proteus_104_decoy-signal",
-      "onr_proteus_105_demolition-run",
-      "onr_proteus_107_drone-for-a-day",
-      "onr_proteus_110_hijack",
-      "onr_proteus_118_prearranged-drop",
-      "onr_proteus_119_promises-promises",
-      "onr_proteus_120_reconnaissance",
-      "onr_proteus_121_remote-detonator",
-      "onr_proteus_129_back-door-to-netwatch",
-      "onr_proteus_132_bolt-hole",
-      "onr_proteus_133_chiba-bank-account",
-      "onr_proteus_136_credit-subversion",
-      "onr_proteus_140_expendable-family-member",
-      "onr_proteus_141_get-ready-to-rumble",
-      "onr_proteus_142_hq-mole",
-      "onr_proteus_143_liberated-savings-account",
-      "onr_proteus_146_precision-bribery",
-      "onr_proteus_147_r-and-d-mole",
-      "onr_proteus_149_simulacrum",
-      "onr_proteus_152_swiss-bank-account",
-      "onr_proteus_154_wired-switchboard",
-      "onr_v1_008_boardwalk",
-      "onr_v1_017_deep-thought",
-      "onr_v1_020_dupre",
-      "onr_v1_022_emergency-self-construct",
-      "onr_v1_024_expert-schedule-analyzer",
-      "onr_v1_041_microtech-ai-interface",
-      "onr_v1_047_pile-driver",
-      "onr_v1_050_r-and-d-protocol-files",
-      "onr_v1_062_shredder-uplink-protocol",
-      "onr_v1_066_snowball",
-      "onr_v1_067_speed-trap",
-      "onr_v1_075_zetatech-software-installer",
-      "onr_v1_084_edited-shipping-manifests",
-      "onr_v1_096_kilroy-was-here",
-      "onr_v1_101_mit-west-tier",
-      "onr_v1_105_priority-wreck",
-      "onr_v1_106_private-ldl-access",
-      "onr_v1_107_romp-through-hq",
-      "onr_v1_118_weather-to-finance-pipe",
-      "onr_v1_142_record-reconstructor",
-      "onr_v1_157_crash-everett-inventive-fixer",
-      "onr_v1_179_silicon-saloon-franchise",
-      "onr_v1_182_submarine-uplink",
-      "onr_v1_183_technician-lover",
-      "onr_v1_189_artificial-security-directors",
-      "onr_v1_191_black-ice-quality-assurance",
-      "onr_v1_194_corporate-downsizing",
-      "onr_v1_197_data-fort-reclamation",
-      "onr_v1_200_encryption-breakthrough",
-      "onr_v1_201_executive-extraction",
-      "onr_v1_202_genetics-visionary-acquisition",
-      "onr_v1_204_ice-transmutation",
-      "onr_v1_212_priority-requisition",
-      "onr_v1_215_security-net-optimization",
-      "onr_v1_216_security-purge",
-      "onr_v1_219_superior-net-barriers",
-      "onr_v1_289_edgerunner-inc-temps",
-      "onr_v1_292_management-shake-up",
-      "onr_v1_296_off-site-backups",
-      "onr_v1_298_planning-consultants",
-      "onr_v1_300_project-consultants",
-      "onr_v1_304_systematic-layoffs",
-      "onr_v1_305_team-restructuring",
-      "onr_v1_312_chicago-branch",
-      "onr_v1_316_cowboy-sysop",
-      "onr_v1_317_data-masons",
-      "onr_v1_320_encoder-inc",
-      "onr_v1_324_fortress-architects",
-      "onr_v1_340_setup",
-      "onr_v1_341_skalderviken-sa-beta-test-site",
-      "onr_v1_345_trap",
-      "onr_v1_346_vacant-soulkiller",
-      "onr_v1_348_virus-test-site",
-      "onr_v1_357_dieter-esslin",
-      "onr_v1_365_paris-city-grid"
-    ],
+    "targetProfileGapCardIds": [],
     "structuralSignalViolations": [],
     "unknownSignalRows": [],
     "baselineDeltas": {
       "baseline": "P2_POST_TARGET_PROFILE_GAP_CLOSURE",
-      "coveredCards": 62,
-      "deferredCards": -13,
-      "noSignalCards": -8,
-      "targetProfileGapCards": 4
+      "coveredCards": 60,
+      "deferredCards": -45,
+      "noSignalCards": -6,
+      "targetProfileGapCards": -84
     }
   },
   "qualityGate": {
@@ -192,22 +103,34 @@
         "cardType": "identity"
       },
       {
-        "cardId": "onr_proteus_034_riddler",
-        "reason": "legacy_fallback_only",
-        "side": "corp",
-        "cardType": "ice"
-      },
-      {
         "cardId": "onr_proteus_074_siren",
         "reason": "no_function_signal",
         "side": "corp",
         "cardType": "asset"
       },
       {
+        "cardId": "onr_v1_083_desperate-competitor",
+        "reason": "no_function_signal",
+        "side": "runner",
+        "cardType": "event"
+      },
+      {
+        "cardId": "onr_v1_090_hot-tip-for-wns",
+        "reason": "no_function_signal",
+        "side": "runner",
+        "cardType": "event"
+      },
+      {
         "cardId": "onr_v1_173_restrictive-net-zoning",
         "reason": "no_function_signal",
         "side": "runner",
         "cardType": "resource"
+      },
+      {
+        "cardId": "onr_v1_220_tycho-extension",
+        "reason": "legacy_fallback_only",
+        "side": "corp",
+        "cardType": "agenda"
       },
       {
         "cardId": "runner_identity_001",
@@ -288,206 +211,7 @@
         "cardType": "agenda"
       }
     ],
-    "deferredReviewRows": [
-      {
-        "cardId": "corp_identity_001",
-        "scope": "inspector_warning_and_active_hint_quality",
-        "owner": "ai_semantic_catalog_review",
-        "warnings": ["deferred_requires_human_review", "legacy_fallback_only"]
-      },
-      {
-        "cardId": "efficient_fracter",
-        "scope": "inspector_warning_and_active_hint_quality",
-        "owner": "ai_semantic_catalog_review",
-        "warnings": ["deferred_requires_human_review"]
-      },
-      {
-        "cardId": "onr_proteus_079_big-frackin-gun",
-        "scope": "inspector_warning_and_active_hint_quality",
-        "owner": "ai_semantic_catalog_review",
-        "warnings": ["deferred_requires_human_review"]
-      },
-      {
-        "cardId": "onr_proteus_081_boring-bit",
-        "scope": "inspector_warning_and_active_hint_quality",
-        "owner": "ai_semantic_catalog_review",
-        "warnings": ["deferred_requires_human_review"]
-      },
-      {
-        "cardId": "onr_proteus_082_bulldozer",
-        "scope": "inspector_warning_and_active_hint_quality",
-        "owner": "ai_semantic_catalog_review",
-        "warnings": ["deferred_requires_human_review"]
-      },
-      {
-        "cardId": "onr_proteus_083_corrosion",
-        "scope": "inspector_warning_and_active_hint_quality",
-        "owner": "ai_semantic_catalog_review",
-        "warnings": ["deferred_requires_human_review"]
-      },
-      {
-        "cardId": "onr_proteus_087_forwards-legacy",
-        "scope": "inspector_warning_and_active_hint_quality",
-        "owner": "ai_semantic_catalog_review",
-        "warnings": ["deferred_requires_human_review"]
-      },
-      {
-        "cardId": "onr_proteus_093_redecorator",
-        "scope": "inspector_warning_and_active_hint_quality",
-        "owner": "ai_semantic_catalog_review",
-        "warnings": ["deferred_requires_human_review"]
-      },
-      {
-        "cardId": "onr_proteus_095_skeleton-passkeys",
-        "scope": "inspector_warning_and_active_hint_quality",
-        "owner": "ai_semantic_catalog_review",
-        "warnings": ["deferred_requires_human_review"]
-      },
-      {
-        "cardId": "onr_proteus_100_wrecking-ball",
-        "scope": "inspector_warning_and_active_hint_quality",
-        "owner": "ai_semantic_catalog_review",
-        "warnings": ["deferred_requires_human_review"]
-      },
-      {
-        "cardId": "onr_v1_002_ai-boon",
-        "scope": "inspector_warning_and_active_hint_quality",
-        "owner": "ai_semantic_catalog_review",
-        "warnings": ["deferred_requires_human_review"]
-      },
-      {
-        "cardId": "onr_v1_007_blink",
-        "scope": "inspector_warning_and_active_hint_quality",
-        "owner": "ai_semantic_catalog_review",
-        "warnings": ["deferred_requires_human_review"]
-      },
-      {
-        "cardId": "onr_v1_015_codeslinger",
-        "scope": "inspector_warning_and_active_hint_quality",
-        "owner": "ai_semantic_catalog_review",
-        "warnings": ["deferred_requires_human_review"]
-      },
-      {
-        "cardId": "onr_v1_055_reflector",
-        "scope": "inspector_warning_and_active_hint_quality",
-        "owner": "ai_semantic_catalog_review",
-        "warnings": ["deferred_requires_human_review"]
-      },
-      {
-        "cardId": "onr_v1_070_tinweasel",
-        "scope": "inspector_warning_and_active_hint_quality",
-        "owner": "ai_semantic_catalog_review",
-        "warnings": ["deferred_requires_human_review"]
-      },
-      {
-        "cardId": "onr_v1_083_desperate-competitor",
-        "scope": "inspector_warning",
-        "owner": "ai_semantic_catalog_review",
-        "warnings": [
-          "deferred_requires_human_review",
-          "function_signal_descriptor_gap"
-        ]
-      },
-      {
-        "cardId": "onr_v1_090_hot-tip-for-wns",
-        "scope": "inspector_warning",
-        "owner": "ai_semantic_catalog_review",
-        "warnings": [
-          "deferred_requires_human_review",
-          "function_signal_descriptor_gap"
-        ]
-      },
-      {
-        "cardId": "runner_identity_001",
-        "scope": "inspector_warning_and_active_hint_quality",
-        "owner": "ai_semantic_catalog_review",
-        "warnings": ["deferred_requires_human_review", "legacy_fallback_only"]
-      },
-      {
-        "cardId": "simple_decoder",
-        "scope": "inspector_warning_and_active_hint_quality",
-        "owner": "ai_semantic_catalog_review",
-        "warnings": ["deferred_requires_human_review"]
-      },
-      {
-        "cardId": "simple_draw_event",
-        "scope": "inspector_warning_and_active_hint_quality",
-        "owner": "ai_semantic_catalog_review",
-        "warnings": ["deferred_requires_human_review", "legacy_fallback_only"]
-      },
-      {
-        "cardId": "simple_economy_event",
-        "scope": "inspector_warning_and_active_hint_quality",
-        "owner": "ai_semantic_catalog_review",
-        "warnings": ["deferred_requires_human_review", "legacy_fallback_only"]
-      },
-      {
-        "cardId": "simple_fracter",
-        "scope": "inspector_warning_and_active_hint_quality",
-        "owner": "ai_semantic_catalog_review",
-        "warnings": ["deferred_requires_human_review"]
-      },
-      {
-        "cardId": "simple_killer",
-        "scope": "inspector_warning_and_active_hint_quality",
-        "owner": "ai_semantic_catalog_review",
-        "warnings": ["deferred_requires_human_review"]
-      },
-      {
-        "cardId": "simple_run_event",
-        "scope": "inspector_warning_and_active_hint_quality",
-        "owner": "ai_semantic_catalog_review",
-        "warnings": ["deferred_requires_human_review", "legacy_fallback_only"]
-      },
-      {
-        "cardId": "simple_setup_hardware",
-        "scope": "inspector_warning_and_active_hint_quality",
-        "owner": "ai_semantic_catalog_review",
-        "warnings": ["deferred_requires_human_review", "legacy_fallback_only"]
-      },
-      {
-        "cardId": "v08_adaptive_killer",
-        "scope": "inspector_warning_and_active_hint_quality",
-        "owner": "ai_semantic_catalog_review",
-        "warnings": ["deferred_requires_human_review"]
-      },
-      {
-        "cardId": "v08_burst_credit_event",
-        "scope": "inspector_warning_and_active_hint_quality",
-        "owner": "ai_semantic_catalog_review",
-        "warnings": ["deferred_requires_human_review", "legacy_fallback_only"]
-      },
-      {
-        "cardId": "v08_deep_draw_event",
-        "scope": "inspector_warning_and_active_hint_quality",
-        "owner": "ai_semantic_catalog_review",
-        "warnings": ["deferred_requires_human_review", "legacy_fallback_only"]
-      },
-      {
-        "cardId": "v08_memory_chip",
-        "scope": "inspector_warning_and_active_hint_quality",
-        "owner": "ai_semantic_catalog_review",
-        "warnings": ["deferred_requires_human_review", "legacy_fallback_only"]
-      },
-      {
-        "cardId": "v08_overclock_run_event",
-        "scope": "inspector_warning_and_active_hint_quality",
-        "owner": "ai_semantic_catalog_review",
-        "warnings": ["deferred_requires_human_review", "legacy_fallback_only"]
-      },
-      {
-        "cardId": "v08_precise_decoder",
-        "scope": "inspector_warning_and_active_hint_quality",
-        "owner": "ai_semantic_catalog_review",
-        "warnings": ["deferred_requires_human_review"]
-      },
-      {
-        "cardId": "v08_steady_fracter",
-        "scope": "inspector_warning_and_active_hint_quality",
-        "owner": "ai_semantic_catalog_review",
-        "warnings": ["deferred_requires_human_review"]
-      }
-    ]
+    "deferredReviewRows": []
   },
   "rows": [
     {
@@ -496,9 +220,9 @@
       "cardType": "identity",
       "aiSupportStatus": "ai_supported",
       "covered": false,
-      "deferred": true,
-      "deferred_review_scope": "inspector_warning_and_active_hint_quality",
-      "deferred_owner": "ai_semantic_catalog_review",
+      "deferred": false,
+      "deferred_review_scope": "none",
+      "deferred_owner": "none",
       "no_signal_reason": "legacy_fallback_only",
       "target_profile_gap": false,
       "signalCount": 0,
@@ -508,10 +232,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
-      ]
+      "warningCategories": ["legacy_fallback_only"]
     },
     {
       "cardId": "efficient_fracter",
@@ -519,9 +240,9 @@
       "cardType": "program",
       "aiSupportStatus": "ai_supported",
       "covered": true,
-      "deferred": true,
-      "deferred_review_scope": "inspector_warning_and_active_hint_quality",
-      "deferred_owner": "ai_semantic_catalog_review",
+      "deferred": false,
+      "deferred_review_scope": "none",
+      "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 1,
@@ -531,7 +252,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": ["deferred_requires_human_review"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_classic_001_data-fort-remapping",
@@ -649,12 +370,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "access.corp_agenda_steal_replacement",
-        "access.corp_delayed_agenda_score",
-        "access.corp_runner_agenda_program_install",
-        "access.runner_program_bounce"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -667,7 +383,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 9,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -693,7 +409,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["economy.rez_discount"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -706,7 +422,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 6,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -727,10 +443,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "corp_ice.next_ice_break_lock",
-        "economy.rez_discount"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -791,7 +504,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["economy.rez_discount"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -811,7 +524,7 @@
       "activeTacticSignals": ["corp_ice.encounter_tax", "run.corp_redirect"],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["run.corp_redirect"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -831,7 +544,7 @@
       "activeTacticSignals": ["corp_ice.encounter_tax", "run.corp_redirect"],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["run.corp_redirect"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -862,7 +575,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["corp_ice.mobile_position_change"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -892,7 +605,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["economy.rez_discount"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -941,7 +654,7 @@
       "activeTacticSignals": ["corp_ice.encounter_tax", "run.corp_redirect"],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["run.corp_redirect"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -961,7 +674,7 @@
       "activeTacticSignals": ["corp_ice.encounter_tax", "run.corp_redirect"],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["run.corp_redirect"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -1138,7 +851,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 6,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -1158,7 +871,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["access.corp_net_damage_ambush"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -1171,9 +884,9 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 6,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "access.corp_hardware_trash",
         "access.corp_program_trash",
@@ -1222,10 +935,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "ice.corp_strength_support",
-        "ice.corp_targeted_strength_boost"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -1356,7 +1066,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 2,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -1366,7 +1076,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["breaker.scaling_strength"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -1379,7 +1089,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 3,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -1390,7 +1100,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["breaker.emergency_coverage"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -1416,12 +1126,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "access.hq_full_reveal",
-        "info.expose",
-        "info.expose_installed_card",
-        "info.hq_information"
-      ],
+      "targetProfileExpectedBySignals": ["info.expose"],
       "warningCategories": []
     },
     {
@@ -1441,7 +1146,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["ice.derez"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -1566,7 +1271,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["run.lock"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -1955,10 +1660,11 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 4,
+      "signalCount": 5,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
         "economy.corp_credit_burst",
+        "economy.generic",
         "risk.bad_publicity_gain",
         "risk.bad_publicity_loss_condition",
         "score.economy_burst"
@@ -1972,7 +1678,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": ["legacy_fallback_only"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_proteus_003_corporate-headhunters",
@@ -1985,13 +1691,14 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 5,
+      "signalCount": 6,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
         "condition.requires_tagged_runner",
         "damage.corp_hand_size_pressure_on_successful_damage",
         "damage.corp_meat_damage_source",
         "damage.corp_tagged_meat_payoff",
+        "damage.payoff",
         "tag.corp_tagged_runner_payoff"
       ],
       "activeTacticSignals": [
@@ -2016,7 +1723,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 6,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -2036,10 +1743,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "access.corp_agenda_steal_tax",
-        "access.corp_net_damage_ambush"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -2052,7 +1756,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 4,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -2068,7 +1772,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["access.corp_tag_ambush"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -2142,11 +1846,12 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 4,
+      "signalCount": 5,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
         "advance.overadvance_payoff",
         "economy.corp_recurring_credit",
+        "economy.start_of_turn",
         "score.overadvance_bonus",
         "score.overadvance_scaling"
       ],
@@ -2171,9 +1876,9 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 5,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "access.agenda_ambush",
         "access.corp_program_disruption",
@@ -2261,9 +1966,14 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 2,
+      "signalCount": 4,
       "targetProfileCount": 0,
-      "derivedFunctionSignals": ["corp_ice.end_run", "damage.payoff"],
+      "derivedFunctionSignals": [
+        "corp_ice.end_run",
+        "corp_ice.outer_ice_scaling",
+        "damage.payoff",
+        "ice.etr"
+      ],
       "activeTacticSignals": [
         "corp_ice.damage_source",
         "corp_ice.end_run",
@@ -2275,7 +1985,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": ["legacy_fallback_only"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_proteus_013_caryatid",
@@ -2288,11 +1998,12 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 2,
+      "signalCount": 3,
       "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "corp_ice.end_run",
-        "corp_ice.type_choice_or_mode_choice"
+        "corp_ice.type_choice_or_mode_choice",
+        "ice.etr"
       ],
       "activeTacticSignals": [
         "corp_ice.end_run",
@@ -2300,7 +2011,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["corp_ice.type_choice_or_mode_choice"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -2398,11 +2109,12 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 2,
+      "signalCount": 3,
       "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "corp_ice.end_run",
-        "corp_ice.type_choice_or_mode_choice"
+        "corp_ice.type_choice_or_mode_choice",
+        "ice.etr"
       ],
       "activeTacticSignals": [
         "corp_ice.end_run",
@@ -2410,7 +2122,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["corp_ice.type_choice_or_mode_choice"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -2482,9 +2194,16 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 2,
+      "signalCount": 6,
       "targetProfileCount": 0,
-      "derivedFunctionSignals": ["corp_ice.end_run", "damage.payoff"],
+      "derivedFunctionSignals": [
+        "corp_ice.end_run",
+        "corp_ice.net_damage",
+        "corp_ice.rez_paid_scaling",
+        "damage.payoff",
+        "ice.etr",
+        "ice.strength_modifier"
+      ],
       "activeTacticSignals": [
         "corp_ice.damage_source",
         "corp_ice.end_run",
@@ -2495,7 +2214,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": ["legacy_fallback_only"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_proteus_021_dog-pile",
@@ -2508,9 +2227,15 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 2,
+      "signalCount": 5,
       "targetProfileCount": 0,
-      "derivedFunctionSignals": ["corp_ice.end_run", "damage.payoff"],
+      "derivedFunctionSignals": [
+        "corp_ice.end_run",
+        "corp_ice.outer_ice_scaling",
+        "damage.payoff",
+        "ice.etr",
+        "ice.strength_modifier"
+      ],
       "activeTacticSignals": [
         "corp_ice.damage_source",
         "corp_ice.end_run",
@@ -2523,7 +2248,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": ["legacy_fallback_only"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_proteus_022_food-fight",
@@ -2536,14 +2261,18 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 1,
+      "signalCount": 3,
       "targetProfileCount": 0,
-      "derivedFunctionSignals": ["corp_ice.end_run"],
+      "derivedFunctionSignals": [
+        "corp_ice.end_run",
+        "corp_ice.rez_paid_scaling",
+        "ice.etr"
+      ],
       "activeTacticSignals": ["corp_ice.end_run", "corp_ice.rez_paid_scaling"],
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": ["legacy_fallback_only"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_proteus_023_galatea",
@@ -2556,11 +2285,12 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 2,
+      "signalCount": 3,
       "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "corp_ice.end_run",
-        "corp_ice.type_choice_or_mode_choice"
+        "corp_ice.type_choice_or_mode_choice",
+        "ice.etr"
       ],
       "activeTacticSignals": [
         "corp_ice.end_run",
@@ -2568,7 +2298,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["corp_ice.type_choice_or_mode_choice"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -2582,14 +2312,18 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 1,
+      "signalCount": 3,
       "targetProfileCount": 0,
-      "derivedFunctionSignals": ["corp_ice.end_run"],
+      "derivedFunctionSignals": [
+        "corp_ice.end_run",
+        "corp_ice.rez_paid_scaling",
+        "ice.etr"
+      ],
       "activeTacticSignals": ["corp_ice.end_run", "corp_ice.rez_paid_scaling"],
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": ["legacy_fallback_only"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_proteus_025_homing-missile",
@@ -2602,11 +2336,15 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 2,
+      "signalCount": 6,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
         "corp_ice.conditional_end_run",
-        "corp_ice.trace_source"
+        "corp_ice.rez_paid_scaling",
+        "corp_ice.run_lock",
+        "corp_ice.trace_source",
+        "ice.etr",
+        "ice.strength_modifier"
       ],
       "activeTacticSignals": [
         "corp_ice.conditional_end_run",
@@ -2618,7 +2356,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": ["legacy_fallback_only"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_proteus_026_hunting-pack",
@@ -2631,9 +2369,10 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 2,
+      "signalCount": 3,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
+        "corp_ice.outer_ice_scaling",
         "corp_ice.tag_source",
         "corp_ice.trace_source"
       ],
@@ -2648,7 +2387,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": ["legacy_fallback_only"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_proteus_027_iceberg",
@@ -2686,11 +2425,12 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 2,
+      "signalCount": 3,
       "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "corp_ice.end_run",
-        "corp_ice.type_choice_or_mode_choice"
+        "corp_ice.type_choice_or_mode_choice",
+        "ice.etr"
       ],
       "activeTacticSignals": [
         "corp_ice.end_run",
@@ -2698,7 +2438,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["corp_ice.type_choice_or_mode_choice"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -2740,9 +2480,15 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 2,
+      "signalCount": 5,
       "targetProfileCount": 0,
-      "derivedFunctionSignals": ["corp_ice.end_run", "damage.payoff"],
+      "derivedFunctionSignals": [
+        "corp_ice.end_run",
+        "corp_ice.outer_ice_scaling",
+        "damage.payoff",
+        "ice.etr",
+        "ice.strength_modifier"
+      ],
       "activeTacticSignals": [
         "corp_ice.brain_damage",
         "corp_ice.damage_source",
@@ -2755,7 +2501,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": ["legacy_fallback_only"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_proteus_031_minotaur",
@@ -2833,7 +2579,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["corp_ice.mobile_position_change"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -2841,20 +2587,23 @@
       "side": "corp",
       "cardType": "ice",
       "aiSupportStatus": "ai_supported",
-      "covered": false,
+      "covered": true,
       "deferred": false,
       "deferred_review_scope": "none",
       "deferred_owner": "none",
-      "no_signal_reason": "legacy_fallback_only",
+      "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 0,
+      "signalCount": 2,
       "targetProfileCount": 0,
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "corp_ice.encounter_paid_subroutine_add",
+        "ice.etr"
+      ],
       "activeTacticSignals": ["corp_ice.encounter_paid_subroutine_add"],
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": ["legacy_fallback_only"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_proteus_035_roadblock",
@@ -2896,14 +2645,18 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 1,
+      "signalCount": 3,
       "targetProfileCount": 0,
-      "derivedFunctionSignals": ["corp_ice.end_run"],
+      "derivedFunctionSignals": [
+        "corp_ice.end_run",
+        "corp_ice.rez_paid_scaling",
+        "ice.etr"
+      ],
       "activeTacticSignals": ["corp_ice.end_run", "corp_ice.rez_paid_scaling"],
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": ["legacy_fallback_only"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_proteus_037_scaffolding",
@@ -2967,11 +2720,12 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 2,
+      "signalCount": 3,
       "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "corp_ice.end_run",
-        "corp_ice.type_choice_or_mode_choice"
+        "corp_ice.type_choice_or_mode_choice",
+        "ice.etr"
       ],
       "activeTacticSignals": [
         "corp_ice.end_run",
@@ -2979,7 +2733,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["corp_ice.type_choice_or_mode_choice"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -2993,11 +2747,12 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 2,
+      "signalCount": 3,
       "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "corp_ice.end_run",
-        "corp_ice.type_choice_or_mode_choice"
+        "corp_ice.type_choice_or_mode_choice",
+        "ice.etr"
       ],
       "activeTacticSignals": [
         "corp_ice.end_run",
@@ -3005,7 +2760,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["corp_ice.type_choice_or_mode_choice"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -3106,7 +2861,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["corp_ice.mobile_position_change"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -3120,9 +2875,14 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 2,
+      "signalCount": 4,
       "targetProfileCount": 0,
-      "derivedFunctionSignals": ["corp_ice.rez_economy", "economy.generic"],
+      "derivedFunctionSignals": [
+        "corp_ice.program_trash",
+        "corp_ice.rez_economy",
+        "corp_ice.runner_pay_or_program_trash",
+        "economy.generic"
+      ],
       "activeTacticSignals": [
         "corp_ice.program_trash",
         "corp_ice.rez_economy",
@@ -3236,7 +2996,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["ice.corp_temporary_rez"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -3294,7 +3054,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["ice.corp_installment_rez"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -3422,14 +3182,14 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 1,
       "targetProfileCount": 0,
       "derivedFunctionSignals": ["expose.corp_prevention"],
       "activeTacticSignals": ["expose.corp_prevention"],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["expose.corp_prevention"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -3540,7 +3300,7 @@
       "activeTacticSignals": ["ice.corp_reorder_fort"],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["ice.corp_reorder_fort"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -3597,11 +3357,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "advance.access_window_counter_support",
-        "advance.corp_counter_placement",
-        "advance.remote_score_window_support"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -3784,10 +3540,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "install.corp_uninstall_to_hq",
-        "remote.content_swap_defense"
-      ],
+      "targetProfileExpectedBySignals": ["install.corp_uninstall_to_hq"],
       "warningCategories": []
     },
     {
@@ -4039,13 +3792,13 @@
       "cardType": "program",
       "aiSupportStatus": "ai_supported",
       "covered": true,
-      "deferred": true,
-      "deferred_review_scope": "inspector_warning_and_active_hint_quality",
-      "deferred_owner": "ai_semantic_catalog_review",
+      "deferred": false,
+      "deferred_review_scope": "none",
+      "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 2,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "breaker.multi_subroutine_break",
         "breaker.sentry"
@@ -4054,7 +3807,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": ["breaker.multi_subroutine_break"],
-      "warningCategories": ["deferred_requires_human_review"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_proteus_080_black-widow",
@@ -4077,10 +3830,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "breaker.strength_bonus_vs_chosen_ice",
-        "breaker.targeted_ice_bonus"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -4089,9 +3839,9 @@
       "cardType": "program",
       "aiSupportStatus": "ai_supported",
       "covered": true,
-      "deferred": true,
-      "deferred_review_scope": "inspector_warning_and_active_hint_quality",
-      "deferred_owner": "ai_semantic_catalog_review",
+      "deferred": false,
+      "deferred_review_scope": "none",
+      "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 1,
@@ -4101,7 +3851,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": ["deferred_requires_human_review"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_proteus_082_bulldozer",
@@ -4109,9 +3859,9 @@
       "cardType": "program",
       "aiSupportStatus": "ai_supported",
       "covered": true,
-      "deferred": true,
-      "deferred_review_scope": "inspector_warning_and_active_hint_quality",
-      "deferred_owner": "ai_semantic_catalog_review",
+      "deferred": false,
+      "deferred_review_scope": "none",
+      "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 2,
@@ -4124,7 +3874,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": ["deferred_requires_human_review"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_proteus_083_corrosion",
@@ -4132,9 +3882,9 @@
       "cardType": "program",
       "aiSupportStatus": "ai_supported",
       "covered": true,
-      "deferred": true,
-      "deferred_review_scope": "inspector_warning_and_active_hint_quality",
-      "deferred_owner": "ai_semantic_catalog_review",
+      "deferred": false,
+      "deferred_review_scope": "none",
+      "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 1,
@@ -4144,7 +3894,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": ["deferred_requires_human_review"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_proteus_084_crumble",
@@ -4170,11 +3920,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "access.free_trash",
-        "access.hq_trash_pressure",
-        "access.trash_untrashable"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -4198,10 +3944,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "ice.derez",
-        "run.ends_run_after_effect"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -4234,9 +3977,9 @@
       "cardType": "program",
       "aiSupportStatus": "ai_supported",
       "covered": true,
-      "deferred": true,
-      "deferred_review_scope": "inspector_warning_and_active_hint_quality",
-      "deferred_owner": "ai_semantic_catalog_review",
+      "deferred": false,
+      "deferred_review_scope": "none",
+      "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 2,
@@ -4246,7 +3989,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": ["deferred_requires_human_review"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_proteus_088_fubar",
@@ -4269,10 +4012,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "breaker.configurable_coverage",
-        "breaker.one_time_mode_choice"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -4299,11 +4039,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "access.free_trash",
-        "access.rnd_trash_pressure",
-        "access.trash_untrashable"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -4371,10 +4107,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "breaker.configurable_coverage",
-        "breaker.reconfigurable_type"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -4383,13 +4116,13 @@
       "cardType": "program",
       "aiSupportStatus": "ai_supported",
       "covered": true,
-      "deferred": true,
-      "deferred_review_scope": "inspector_warning_and_active_hint_quality",
-      "deferred_owner": "ai_semantic_catalog_review",
+      "deferred": false,
+      "deferred_review_scope": "none",
+      "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 2,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "breaker.multi_subroutine_break",
         "breaker.sentry"
@@ -4398,7 +4131,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": ["breaker.multi_subroutine_break"],
-      "warningCategories": ["deferred_requires_human_review"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_proteus_094_scaldan",
@@ -4432,9 +4165,9 @@
       "cardType": "program",
       "aiSupportStatus": "ai_supported",
       "covered": true,
-      "deferred": true,
-      "deferred_review_scope": "inspector_warning_and_active_hint_quality",
-      "deferred_owner": "ai_semantic_catalog_review",
+      "deferred": false,
+      "deferred_review_scope": "none",
+      "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 1,
@@ -4444,7 +4177,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": ["deferred_requires_human_review"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_proteus_096_skullcap",
@@ -4552,9 +4285,9 @@
       "cardType": "program",
       "aiSupportStatus": "ai_supported",
       "covered": true,
-      "deferred": true,
-      "deferred_review_scope": "inspector_warning_and_active_hint_quality",
-      "deferred_owner": "ai_semantic_catalog_review",
+      "deferred": false,
+      "deferred_review_scope": "none",
+      "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 2,
@@ -4567,7 +4300,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": ["deferred_requires_human_review"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_proteus_101_all-hands",
@@ -4648,9 +4381,9 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 5,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "info.expose",
         "info.ice_approach_expose",
@@ -4661,10 +4394,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "info.expose",
-        "info.ice_approach_expose"
-      ],
+      "targetProfileExpectedBySignals": ["info.expose"],
       "warningCategories": []
     },
     {
@@ -4677,7 +4407,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 5,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -4690,10 +4420,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "fort.all_rezzed_ice_trash",
-        "fort.all_rezzed_ice_trash_tag_risk"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -4725,10 +4452,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "ice.derez",
-        "run.ends_run_after_effect"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -4741,7 +4465,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 4,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -4753,7 +4477,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["fort.all_rezzed_ice_trash_tag_risk"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -4810,9 +4534,9 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 4,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "economy.generic",
         "setup.hardware_install",
@@ -4846,7 +4570,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["info.expose", "info.run_recon"],
+      "targetProfileExpectedBySignals": ["info.expose"],
       "warningCategories": []
     },
     {
@@ -4884,9 +4608,13 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 1,
+      "signalCount": 3,
       "targetProfileCount": 0,
-      "derivedFunctionSignals": ["corp.bad_publicity_win_pressure"],
+      "derivedFunctionSignals": [
+        "corp.bad_publicity_win_pressure",
+        "fort.all_rezzed_ice_trash_tag_risk",
+        "risk.self_tag"
+      ],
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
@@ -4992,7 +4720,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 2,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -5002,7 +4730,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["access.next_agenda_credit"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -5015,7 +4743,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 2,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -5025,7 +4753,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["access.next_agenda_bonus"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -5038,9 +4766,9 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 7,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "economy.generic",
         "economy.run_restricted_credit",
@@ -5053,7 +4781,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["info.expose", "info.run_recon"],
+      "targetProfileExpectedBySignals": ["info.expose"],
       "warningCategories": []
     },
     {
@@ -5066,7 +4794,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 3,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -5077,10 +4805,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "fort.all_rezzed_ice_trash",
-        "fort.all_rezzed_ice_trash_tag_risk"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -5128,7 +4853,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["ice.derez_black_ice"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -5206,9 +4931,7 @@
       "targetProfileExpectedBySignals": [
         "setup.install_discount",
         "setup.program_install",
-        "setup.program_search",
-        "setup.search",
-        "setup.temporary_program_install"
+        "setup.search"
       ],
       "warningCategories": []
     },
@@ -5271,13 +4994,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [
-        "breaker.emergency_search",
-        "breaker.search_during_encounter",
-        "hidden.reveals_on_trash",
-        "setup.install_during_run",
-        "setup.install_support",
         "setup.program_install",
-        "setup.program_search",
         "setup.search"
       ],
       "warningCategories": ["descriptor_gap"]
@@ -5292,7 +5009,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 11,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -5311,7 +5028,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["hidden.reveals_on_trash"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": ["descriptor_gap"]
     },
     {
@@ -5383,7 +5100,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 8,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -5399,7 +5116,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["hidden.reveals_on_trash"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": ["descriptor_gap"]
     },
     {
@@ -5412,7 +5129,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 10,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -5430,7 +5147,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["hidden.reveals_on_trash"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": ["descriptor_gap"]
     },
     {
@@ -5493,7 +5210,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 10,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -5511,10 +5228,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "access.hq_sabotage_credit_loss",
-        "hidden.reveals_on_trash"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": ["descriptor_gap"]
     },
     {
@@ -5546,13 +5260,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "access.remote_full_trash",
-        "access.remote_sabotage_payoff",
-        "access.trash_untrashable",
-        "hidden.reveals_on_trash",
-        "remote.full_fort_trash"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": ["descriptor_gap"]
     },
     {
@@ -5602,7 +5310,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["setup.program_host"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -5615,7 +5323,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 8,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -5631,7 +5339,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["hidden.reveals_on_trash"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": ["descriptor_gap"]
     },
     {
@@ -5644,11 +5352,10 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
-      "signalCount": 10,
+      "target_profile_gap": false,
+      "signalCount": 9,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
-        "access.hq_random_discard_retaliation",
         "corp.random_discard_pressure",
         "defense.damage_retaliation",
         "hidden.one_shot_resource",
@@ -5662,10 +5369,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "access.hq_random_discard_retaliation",
-        "hidden.reveals_on_trash"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": ["descriptor_gap"]
     },
     {
@@ -5678,7 +5382,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 8,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -5694,10 +5398,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "access.hq_hidden_multiaccess",
-        "hidden.reveals_on_trash"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": ["descriptor_gap"]
     },
     {
@@ -5710,7 +5411,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 10,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -5728,7 +5429,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["hidden.reveals_on_trash"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": ["descriptor_gap"]
     },
     {
@@ -5782,12 +5483,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "access.current_access_trash",
-        "access.free_trash",
-        "access.trash_untrashable",
-        "hidden.reveals_on_trash"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": ["descriptor_gap"]
     },
     {
@@ -5800,9 +5496,9 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 2,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": ["fort.creation_lock", "resource.unique"],
       "activeTacticSignals": [],
       "unknownSignals": [],
@@ -5820,7 +5516,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 8,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -5836,10 +5532,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "access.rnd_hidden_multiaccess",
-        "hidden.reveals_on_trash"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": ["descriptor_gap"]
     },
     {
@@ -5880,7 +5573,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 11,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -5899,11 +5592,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "hidden.reveals_on_trash",
-        "run.bypass_ap_ice",
-        "run.encounter_escape"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": ["descriptor_gap"]
     },
     {
@@ -5970,7 +5659,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 10,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -5988,7 +5677,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["hidden.reveals_on_trash"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": ["descriptor_gap"]
     },
     {
@@ -6016,10 +5705,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "defense.resource_trash_prevention",
-        "hidden.reveals_on_trash"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": ["descriptor_gap"]
     },
     {
@@ -6032,7 +5718,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 8,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -6048,7 +5734,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["hidden.reveals_on_trash"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": ["descriptor_gap"]
     },
     {
@@ -6072,11 +5758,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "breaker.hosted_strength_penalty",
-        "setup.hosted_program_loss_risk",
-        "setup.program_host"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -6085,9 +5767,9 @@
       "cardType": "program",
       "aiSupportStatus": "ai_supported",
       "covered": true,
-      "deferred": true,
-      "deferred_review_scope": "inspector_warning_and_active_hint_quality",
-      "deferred_owner": "ai_semantic_catalog_review",
+      "deferred": false,
+      "deferred_review_scope": "none",
+      "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 2,
@@ -6097,7 +5779,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": ["deferred_requires_human_review"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_v1_003_baedekers-net-map",
@@ -6193,9 +5875,9 @@
       "cardType": "program",
       "aiSupportStatus": "ai_supported",
       "covered": true,
-      "deferred": true,
-      "deferred_review_scope": "inspector_warning_and_active_hint_quality",
-      "deferred_owner": "ai_semantic_catalog_review",
+      "deferred": false,
+      "deferred_review_scope": "none",
+      "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 2,
@@ -6205,7 +5887,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": ["deferred_requires_human_review"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_v1_008_boardwalk",
@@ -6217,7 +5899,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 6,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -6231,10 +5913,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "access.hq_random_reveal",
-        "info.hq_information"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -6386,9 +6065,9 @@
       "cardType": "program",
       "aiSupportStatus": "ai_supported",
       "covered": true,
-      "deferred": true,
-      "deferred_review_scope": "inspector_warning_and_active_hint_quality",
-      "deferred_owner": "ai_semantic_catalog_review",
+      "deferred": false,
+      "deferred_review_scope": "none",
+      "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 1,
@@ -6398,7 +6077,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": ["deferred_requires_human_review"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_v1_016_cyfermaster",
@@ -6430,7 +6109,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 6,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -6444,10 +6123,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "access.rnd_top_card",
-        "info.rnd_information"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": ["descriptor_gap"]
     },
     {
@@ -6503,12 +6179,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "breaker.break_any_subroutine",
-        "breaker.multi_subroutine_break",
-        "defense.encounter_threat_mitigation",
-        "encounter.emergency_subroutine_prevention"
-      ],
+      "targetProfileExpectedBySignals": ["breaker.multi_subroutine_break"],
       "warningCategories": []
     },
     {
@@ -6521,7 +6192,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 2,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -6531,7 +6202,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["breaker.scaling_strength"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -6564,7 +6235,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 7,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -6579,7 +6250,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["setup.hand_size_penalty"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -6617,7 +6288,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 3,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -6628,10 +6299,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "access.hq_full_reveal",
-        "info.hq_information"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -6676,7 +6344,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["ice.force_rez"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -6812,11 +6480,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "info.expose",
-        "info.expose_fort",
-        "info.persistent_expose"
-      ],
+      "targetProfileExpectedBySignals": ["info.expose"],
       "warningCategories": ["descriptor_gap", "function_signal_descriptor_gap"]
     },
     {
@@ -6840,11 +6504,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "breaker.hosted_strength_penalty",
-        "setup.hosted_program_loss_risk",
-        "setup.program_host"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -6960,11 +6620,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "setup.program_protection",
-        "setup.program_trash_prevention",
-        "setup.self_bounce"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -7017,7 +6673,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 5,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -7030,12 +6686,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "access.rnd_top_reorder",
-        "info.rnd_information",
-        "info.rnd_manipulation",
-        "run.replacement_access"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -7055,10 +6706,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "info.expose",
-        "info.expose_installed_card"
-      ],
+      "targetProfileExpectedBySignals": ["info.expose"],
       "warningCategories": ["descriptor_gap", "function_signal_descriptor_gap"]
     },
     {
@@ -7073,7 +6721,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 5,
-      "targetProfileCount": 1,
+      "targetProfileCount": 3,
       "derivedFunctionSignals": [
         "setup.install_discount",
         "setup.install_during_run",
@@ -7086,10 +6734,7 @@
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [
         "setup.install_discount",
-        "setup.install_during_run",
-        "setup.program_search",
-        "setup.search",
-        "setup.stack_top_program_install"
+        "setup.search"
       ],
       "warningCategories": ["descriptor_gap", "function_signal_descriptor_gap"]
     },
@@ -7114,10 +6759,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "ice.reorder_fort",
-        "ice.reverse_fort"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -7181,9 +6823,9 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "breaker.multi_subroutine_break",
         "breaker.stealth_payment_loss",
@@ -7255,7 +6897,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 5,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -7268,12 +6910,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "access.rnd_top_cards",
-        "info.rnd_information",
-        "run.replacement_access",
-        "run.rnd_scout_run"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": ["descriptor_gap", "function_signal_descriptor_gap"]
     },
     {
@@ -7368,9 +7005,9 @@
       "cardType": "program",
       "aiSupportStatus": "ai_supported",
       "covered": true,
-      "deferred": true,
-      "deferred_review_scope": "inspector_warning_and_active_hint_quality",
-      "deferred_owner": "ai_semantic_catalog_review",
+      "deferred": false,
+      "deferred_review_scope": "none",
+      "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 4,
@@ -7385,7 +7022,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": ["deferred_requires_human_review"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_v1_056_replicator",
@@ -7449,10 +7086,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "info.expose",
-        "info.expose_installed_card"
-      ],
+      "targetProfileExpectedBySignals": ["info.expose"],
       "warningCategories": ["descriptor_gap", "function_signal_descriptor_gap"]
     },
     {
@@ -7467,7 +7101,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 5,
-      "targetProfileCount": 1,
+      "targetProfileCount": 3,
       "derivedFunctionSignals": [
         "setup.install_during_run",
         "setup.install_support",
@@ -7479,10 +7113,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [
-        "setup.install_during_run",
-        "setup.install_support",
         "setup.program_install",
-        "setup.program_search",
         "setup.search"
       ],
       "warningCategories": ["descriptor_gap"]
@@ -7540,7 +7171,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 3,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -7551,11 +7182,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "access.hq_via_archives",
-        "run.central_access_conversion",
-        "run.replacement_access"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -7628,11 +7255,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "info.expose",
-        "info.ice_approach_expose",
-        "run.safe_jackout_window"
-      ],
+      "targetProfileExpectedBySignals": ["info.expose"],
       "warningCategories": ["descriptor_gap", "function_signal_descriptor_gap"]
     },
     {
@@ -7645,14 +7268,14 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 2,
       "targetProfileCount": 0,
       "derivedFunctionSignals": ["breaker.scaling_strength", "breaker.sentry"],
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["breaker.scaling_strength"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -7665,7 +7288,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 2,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -7675,7 +7298,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["run.jackout_vs_node_upgrade"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -7695,7 +7318,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["ice.trash_after_full_break"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -7718,10 +7341,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "setup.hosted_program_loss_risk",
-        "setup.program_host"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -7730,9 +7350,9 @@
       "cardType": "program",
       "aiSupportStatus": "ai_supported",
       "covered": true,
-      "deferred": true,
-      "deferred_review_scope": "inspector_warning_and_active_hint_quality",
-      "deferred_owner": "ai_semantic_catalog_review",
+      "deferred": false,
+      "deferred_review_scope": "none",
+      "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 1,
@@ -7742,7 +7362,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": ["deferred_requires_human_review"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_v1_071_vewy-vewy-quiet",
@@ -7838,9 +7458,9 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 4,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "economy.recurring",
         "economy.recurring_install_credit",
@@ -7899,7 +7519,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["ice.derez_black_ice"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -7967,7 +7587,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["ice.trash_rezzed"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -8019,23 +7639,20 @@
       "side": "runner",
       "cardType": "event",
       "aiSupportStatus": "ai_supported",
-      "covered": true,
-      "deferred": true,
-      "deferred_review_scope": "inspector_warning",
-      "deferred_owner": "ai_semantic_catalog_review",
-      "no_signal_reason": "none",
+      "covered": false,
+      "deferred": false,
+      "deferred_review_scope": "none",
+      "deferred_owner": "none",
+      "no_signal_reason": "no_function_signal",
       "target_profile_gap": false,
-      "signalCount": 1,
+      "signalCount": 0,
       "targetProfileCount": 0,
-      "derivedFunctionSignals": ["score.conditional_agenda_point"],
+      "derivedFunctionSignals": [],
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": [
-        "deferred_requires_human_review",
-        "function_signal_descriptor_gap"
-      ]
+      "warningCategories": []
     },
     {
       "cardId": "onr_v1_084_edited-shipping-manifests",
@@ -8047,7 +7664,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 5,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -8060,11 +7677,8 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "access.hq_replacement_economy",
-        "fort.all_rezzed_ice_trash_tag_risk"
-      ],
-      "warningCategories": ["function_signal_descriptor_gap"]
+      "targetProfileExpectedBySignals": [],
+      "warningCategories": []
     },
     {
       "cardId": "onr_v1_085_executive-wiretaps",
@@ -8107,7 +7721,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["ice.rez_or_trash_choice"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -8132,12 +7746,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "setup.program_recovery",
-        "setup.recovery",
-        "setup.search",
-        "setup.stack_shuffle"
-      ],
+      "targetProfileExpectedBySignals": ["setup.search"],
       "warningCategories": ["descriptor_gap"]
     },
     {
@@ -8157,7 +7766,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["fort.reorder_ice"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": ["descriptor_gap", "function_signal_descriptor_gap"]
     },
     {
@@ -8181,11 +7790,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "setup.card_recovery",
-        "setup.recovery",
-        "setup.search"
-      ],
+      "targetProfileExpectedBySignals": ["setup.search"],
       "warningCategories": []
     },
     {
@@ -8193,23 +7798,20 @@
       "side": "runner",
       "cardType": "event",
       "aiSupportStatus": "ai_supported",
-      "covered": true,
-      "deferred": true,
-      "deferred_review_scope": "inspector_warning",
-      "deferred_owner": "ai_semantic_catalog_review",
-      "no_signal_reason": "none",
+      "covered": false,
+      "deferred": false,
+      "deferred_review_scope": "none",
+      "deferred_owner": "none",
+      "no_signal_reason": "no_function_signal",
       "target_profile_gap": false,
-      "signalCount": 1,
+      "signalCount": 0,
       "targetProfileCount": 0,
-      "derivedFunctionSignals": ["score.black_ops_agenda_condition"],
+      "derivedFunctionSignals": [],
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": [
-        "deferred_requires_human_review",
-        "function_signal_descriptor_gap"
-      ]
+      "warningCategories": []
     },
     {
       "cardId": "onr_v1_091_hunt-club-bbs",
@@ -8228,7 +7830,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["info.expose", "info.expose_multiple"],
+      "targetProfileExpectedBySignals": ["info.expose"],
       "warningCategories": ["descriptor_gap"]
     },
     {
@@ -8248,10 +7850,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "info.expose",
-        "info.expose_outermost_ice"
-      ],
+      "targetProfileExpectedBySignals": ["info.expose"],
       "warningCategories": ["descriptor_gap"]
     },
     {
@@ -8276,12 +7875,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "setup.card_search",
-        "setup.search",
-        "setup.stack_filter",
-        "setup.stack_reorder"
-      ],
+      "targetProfileExpectedBySignals": ["setup.search", "setup.stack_filter"],
       "warningCategories": []
     },
     {
@@ -8339,7 +7933,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 3,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -8350,11 +7944,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "access.free_trash",
-        "access.rnd_trash_pressure",
-        "access.trash_untrashable"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": ["function_signal_descriptor_gap"]
     },
     {
@@ -8422,7 +8012,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["setup.card_search", "setup.search"],
+      "targetProfileExpectedBySignals": ["setup.search"],
       "warningCategories": ["descriptor_gap"]
     },
     {
@@ -8459,7 +8049,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 3,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -8470,10 +8060,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "setup.full_deck_reset",
-        "setup.stack_shuffle"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -8553,14 +8140,14 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 1,
       "targetProfileCount": 0,
       "derivedFunctionSignals": ["access.hq_replacement_corp_loss"],
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["access.hq_replacement_corp_loss"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -8573,14 +8160,14 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 1,
       "targetProfileCount": 0,
       "derivedFunctionSignals": ["access.hq_to_rnd_conversion"],
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["access.hq_to_rnd_conversion"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": ["descriptor_gap"]
     },
     {
@@ -8593,7 +8180,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 3,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -8604,11 +8191,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "access.free_trash",
-        "access.hq_trash_pressure",
-        "access.trash_untrashable"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -8648,7 +8231,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["ice.trash_unrezzed"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -8676,12 +8259,9 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [
-        "setup.end_of_turn_bounce",
         "setup.install_discount",
         "setup.program_install",
-        "setup.program_search",
-        "setup.search",
-        "setup.temporary_program_install"
+        "setup.search"
       ],
       "warningCategories": ["descriptor_gap"]
     },
@@ -8779,10 +8359,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "setup.program_search",
-        "setup.search"
-      ],
+      "targetProfileExpectedBySignals": ["setup.search"],
       "warningCategories": ["descriptor_gap"]
     },
     {
@@ -8853,7 +8430,6 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [
-        "setup.install_action_burst",
         "setup.install_credit",
         "setup.install_discount",
         "setup.program_install"
@@ -8870,14 +8446,14 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 1,
       "targetProfileCount": 0,
       "derivedFunctionSignals": ["access.hq_replacement_corp_loss"],
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["access.hq_replacement_corp_loss"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -9192,13 +8768,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "setup.program_backup",
-        "setup.program_recovery",
-        "setup.program_trash_replacement",
-        "setup.recovery",
-        "setup.stored_program_reclaim"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -9445,7 +9015,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 4,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -9457,12 +9027,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "access.rnd_topdeck_setup",
-        "corp.archives_to_rnd_pressure",
-        "run.archives_replacement_access",
-        "run.replacement_access"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -9673,12 +9238,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "setup.program_search",
-        "setup.search",
-        "setup.search_reveals_to_corp",
-        "setup.stack_filter"
-      ],
+      "targetProfileExpectedBySignals": ["setup.search", "setup.stack_filter"],
       "warningCategories": []
     },
     {
@@ -9819,9 +9379,9 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 5,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "resource.connection",
         "resource.unique",
@@ -10026,11 +9586,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "setup.recovery",
-        "setup.search",
-        "setup.top_trash_recovery"
-      ],
+      "targetProfileExpectedBySignals": ["setup.search"],
       "warningCategories": []
     },
     {
@@ -10133,12 +9689,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "setup.prep_resource_search",
-        "setup.search",
-        "setup.search_reveals_to_corp",
-        "setup.stack_filter"
-      ],
+      "targetProfileExpectedBySignals": ["setup.search", "setup.stack_filter"],
       "warningCategories": []
     },
     {
@@ -10291,9 +9842,7 @@
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [
         "info.expose",
-        "setup.hardware_search",
         "setup.search",
-        "setup.search_reveals_to_corp",
         "setup.stack_filter"
       ],
       "warningCategories": []
@@ -10324,11 +9873,8 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [
-        "setup.delayed_install",
         "setup.hardware_install",
-        "setup.install_countdown",
         "setup.install_discount",
-        "setup.install_from_hand_staged",
         "setup.program_install",
         "setup.search"
       ],
@@ -10357,12 +9903,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "setup.card_search",
-        "setup.program_search",
-        "setup.search",
-        "setup.search_reveals_to_corp"
-      ],
+      "targetProfileExpectedBySignals": ["setup.search"],
       "warningCategories": []
     },
     {
@@ -10403,9 +9944,9 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 5,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "economy.action_credit",
         "economy.generic",
@@ -10479,7 +10020,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 6,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -10493,7 +10034,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["run.ends_run_after_effect"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -10506,14 +10047,14 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 1,
       "targetProfileCount": 0,
       "derivedFunctionSignals": ["info.rnd_information"],
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["info.rnd_information"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": ["descriptor_gap", "function_signal_descriptor_gap"]
     },
     {
@@ -10585,12 +10126,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "defense.installed_card_trash_prevention",
-        "setup.program_protection",
-        "setup.program_trash_prevention",
-        "setup.search"
-      ],
+      "targetProfileExpectedBySignals": ["setup.search"],
       "warningCategories": []
     },
     {
@@ -10662,9 +10198,9 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "score.advance_burst",
         "score.agenda_difficulty_discount",
@@ -10715,7 +10251,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 4,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -10731,7 +10267,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["score.black_ice_strength_bonus"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -10806,9 +10342,9 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 6,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "economy.corp_agenda_reveal_burst",
         "economy.generic",
@@ -10903,9 +10439,9 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 5,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "economy.corp_install_rez_budget",
         "economy.generic",
@@ -10997,7 +10533,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 7,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -11018,7 +10554,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["score.ice_type_tax_support"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": ["descriptor_gap"]
     },
     {
@@ -11031,9 +10567,9 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "score.advance_burst",
         "score.agenda_difficulty_discount",
@@ -11058,9 +10594,9 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "score.advance_burst",
         "score.agenda_difficulty_discount",
@@ -11112,9 +10648,9 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 6,
-      "targetProfileCount": 0,
+      "targetProfileCount": 4,
       "derivedFunctionSignals": [
         "ice.corp_strength_bonus_chosen",
         "ice.corp_subroutine_repeat",
@@ -11351,9 +10887,9 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "economy.rez_discount",
         "ice.corp_free_rez_on_score",
@@ -11365,10 +10901,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "economy.rez_discount",
-        "score.free_rez_ice"
-      ],
+      "targetProfileExpectedBySignals": ["score.free_rez_ice"],
       "warningCategories": []
     },
     {
@@ -11446,9 +10979,9 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "ice.corp_fort_strength_bonus",
         "ice.corp_strength_bonus",
@@ -11474,9 +11007,9 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 6,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "economy.rez_discount",
         "ice.corp_free_rez",
@@ -11495,9 +11028,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [
-        "economy.rez_discount",
         "ice.corp_free_rez",
-        "install.corp_rnd_ice_install",
         "score.free_install_and_rez_ice"
       ],
       "warningCategories": []
@@ -11573,7 +11104,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 7,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -11594,7 +11125,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["score.ice_type_tax_support"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -11602,22 +11133,16 @@
       "side": "corp",
       "cardType": "agenda",
       "aiSupportStatus": "ai_supported",
-      "covered": true,
+      "covered": false,
       "deferred": false,
       "deferred_review_scope": "none",
       "deferred_owner": "none",
-      "no_signal_reason": "none",
+      "no_signal_reason": "legacy_fallback_only",
       "target_profile_gap": false,
-      "signalCount": 2,
+      "signalCount": 0,
       "targetProfileCount": 0,
-      "derivedFunctionSignals": [
-        "score.high_agenda_value",
-        "score.vanilla_points"
-      ],
-      "activeTacticSignals": [
-        "score.high_agenda_value",
-        "score.vanilla_points"
-      ],
+      "derivedFunctionSignals": [],
+      "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
@@ -12915,11 +12440,12 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 2,
+      "signalCount": 3,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
         "corp_ice.conditional_end_run",
-        "corp_ice.random_or_guessing"
+        "corp_ice.random_or_guessing",
+        "ice.etr"
       ],
       "activeTacticSignals": [
         "corp_ice.conditional_end_run",
@@ -12985,11 +12511,12 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 2,
+      "signalCount": 3,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
         "corp_ice.random_or_guessing",
-        "risk.random_outcome"
+        "risk.random_outcome",
+        "run.corp_run_rewind"
       ],
       "activeTacticSignals": [
         "corp_ice.encounter_tax",
@@ -13347,9 +12874,9 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "action.corp_install_only_action_bundle",
         "install.corp_action_bundle",
@@ -13430,9 +12957,9 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "condition.requires_installed_advanceable_card",
         "economy.burst",
@@ -13540,9 +13067,9 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 2,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "archives.corp_recovery",
         "hq.corp_card_recovery"
@@ -13594,9 +13121,9 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "info.corp_rnd_peek",
         "rnd.corp_topdeck_reorder",
@@ -13650,9 +13177,9 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "condition.requires_installed_advanceable_card",
         "economy.burst",
@@ -13767,9 +13294,9 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "condition.requires_installed_advanceable_card",
         "economy.burst",
@@ -13797,9 +13324,9 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "condition.requires_installed_advanceable_card",
         "economy.burst",
@@ -13995,9 +13522,9 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 1,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": ["score.advance_burst"],
       "activeTacticSignals": [
         "advance.corp_counter_placement",
@@ -14104,9 +13631,9 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 2,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "hq.corp_installed_card_bounce",
         "install.corp_uninstall_to_hq"
@@ -14130,9 +13657,9 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 2,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "economy.rez_discount",
         "ice.strength_modifier"
@@ -14144,7 +13671,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["economy.rez_discount"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -14208,9 +13735,9 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 2,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "economy.rez_discount",
         "remote.scoring_protection"
@@ -14222,7 +13749,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["economy.rez_discount"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -14304,9 +13831,9 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 1,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": ["setup.install_discount"],
       "activeTacticSignals": ["ice.corp_install_discount", "tax.ice"],
       "unknownSignals": [],
@@ -14716,7 +14243,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 6,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -14737,7 +14264,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["access.corp_net_damage_ambush"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -14750,14 +14277,14 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 1,
-      "targetProfileCount": 0,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": ["economy.rez_discount"],
       "activeTacticSignals": ["ice.corp_rez_discount", "tax.ice"],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["economy.rez_discount"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -14858,7 +14385,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 6,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -14881,10 +14408,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "access.corp_net_damage_ambush",
-        "access.corp_tag_ambush"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -14897,7 +14421,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 5,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -14916,7 +14440,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["access.corp_brain_damage_ambush"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -14957,7 +14481,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 5,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -14978,7 +14502,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["access.corp_net_damage_ambush"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": ["descriptor_gap"]
     },
     {
@@ -14998,7 +14522,7 @@
       "activeTacticSignals": ["run.corp_worm_lockout"],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["run.corp_worm_lockout"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": ["function_signal_descriptor_gap"]
     },
     {
@@ -15018,7 +14542,7 @@
       "activeTacticSignals": ["ice.corp_strength_support"],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["ice.corp_strength_support"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -15068,10 +14592,7 @@
       "activeTacticSignals": ["ice.corp_install_discount"],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "ice.corp_install_discount",
-        "setup.install_discount"
-      ],
+      "targetProfileExpectedBySignals": ["setup.install_discount"],
       "warningCategories": ["descriptor_gap", "function_signal_descriptor_gap"]
     },
     {
@@ -15099,7 +14620,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["access.corp_daemon_trash"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -15204,7 +14725,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 4,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -15221,7 +14742,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["access.corp_net_damage_ambush"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -15249,10 +14770,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "ice.corp_hq_runpath_insert",
-        "ice.corp_temporary_encounter"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -15280,10 +14798,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "ice.corp_hq_runpath_insert",
-        "ice.corp_install_during_run"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -15312,11 +14827,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "economy.rez_discount",
-        "ice.corp_rez_discount",
-        "ice.corp_strength_support"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -15393,11 +14904,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "economy.rez_discount",
-        "ice.corp_rez_discount",
-        "ice.corp_temporary_rez"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -15411,20 +14918,13 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 3,
+      "signalCount": 2,
       "targetProfileCount": 2,
-      "derivedFunctionSignals": [
-        "ice.corp_hq_runpath_insert",
-        "ice.corp_ice_swap",
-        "tax.remote"
-      ],
+      "derivedFunctionSignals": ["ice.corp_ice_swap", "tax.remote"],
       "activeTacticSignals": ["ice.corp_ice_swap"],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "ice.corp_hq_runpath_insert",
-        "ice.corp_ice_swap"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -15437,7 +14937,7 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": true,
+      "target_profile_gap": false,
       "signalCount": 4,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
@@ -15449,7 +14949,7 @@
       "activeTacticSignals": ["trace.corp_credit_support"],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["trace.corp_credit_support"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -15551,10 +15051,7 @@
       "activeTacticSignals": ["ice.corp_ice_swap"],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "ice.corp_hq_runpath_insert",
-        "ice.corp_ice_swap"
-      ],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -15584,7 +15081,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["ice.corp_subroutine_support"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": ["function_signal_descriptor_gap"]
     },
     {
@@ -15687,9 +15184,9 @@
       "cardType": "identity",
       "aiSupportStatus": "ai_supported",
       "covered": false,
-      "deferred": true,
-      "deferred_review_scope": "inspector_warning_and_active_hint_quality",
-      "deferred_owner": "ai_semantic_catalog_review",
+      "deferred": false,
+      "deferred_review_scope": "none",
+      "deferred_owner": "none",
       "no_signal_reason": "legacy_fallback_only",
       "target_profile_gap": false,
       "signalCount": 0,
@@ -15699,10 +15196,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
-      ]
+      "warningCategories": ["legacy_fallback_only"]
     },
     {
       "cardId": "simple_agenda",
@@ -15773,9 +15267,9 @@
       "cardType": "program",
       "aiSupportStatus": "ai_supported",
       "covered": true,
-      "deferred": true,
-      "deferred_review_scope": "inspector_warning_and_active_hint_quality",
-      "deferred_owner": "ai_semantic_catalog_review",
+      "deferred": false,
+      "deferred_review_scope": "none",
+      "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 1,
@@ -15785,7 +15279,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": ["deferred_requires_human_review"]
+      "warningCategories": []
     },
     {
       "cardId": "simple_draw_event",
@@ -15793,9 +15287,9 @@
       "cardType": "event",
       "aiSupportStatus": "ai_supported",
       "covered": false,
-      "deferred": true,
-      "deferred_review_scope": "inspector_warning_and_active_hint_quality",
-      "deferred_owner": "ai_semantic_catalog_review",
+      "deferred": false,
+      "deferred_review_scope": "none",
+      "deferred_owner": "none",
       "no_signal_reason": "legacy_fallback_only",
       "target_profile_gap": false,
       "signalCount": 0,
@@ -15805,10 +15299,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
-      ]
+      "warningCategories": ["legacy_fallback_only"]
     },
     {
       "cardId": "simple_draw_operation",
@@ -15859,9 +15350,9 @@
       "cardType": "event",
       "aiSupportStatus": "ai_supported",
       "covered": false,
-      "deferred": true,
-      "deferred_review_scope": "inspector_warning_and_active_hint_quality",
-      "deferred_owner": "ai_semantic_catalog_review",
+      "deferred": false,
+      "deferred_review_scope": "none",
+      "deferred_owner": "none",
       "no_signal_reason": "legacy_fallback_only",
       "target_profile_gap": false,
       "signalCount": 0,
@@ -15871,10 +15362,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
-      ]
+      "warningCategories": ["legacy_fallback_only"]
     },
     {
       "cardId": "simple_economy_operation",
@@ -15905,9 +15393,9 @@
       "cardType": "program",
       "aiSupportStatus": "ai_supported",
       "covered": true,
-      "deferred": true,
-      "deferred_review_scope": "inspector_warning_and_active_hint_quality",
-      "deferred_owner": "ai_semantic_catalog_review",
+      "deferred": false,
+      "deferred_review_scope": "none",
+      "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 1,
@@ -15917,7 +15405,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": ["deferred_requires_human_review"]
+      "warningCategories": []
     },
     {
       "cardId": "simple_killer",
@@ -15925,9 +15413,9 @@
       "cardType": "program",
       "aiSupportStatus": "ai_supported",
       "covered": true,
-      "deferred": true,
-      "deferred_review_scope": "inspector_warning_and_active_hint_quality",
-      "deferred_owner": "ai_semantic_catalog_review",
+      "deferred": false,
+      "deferred_review_scope": "none",
+      "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 1,
@@ -15937,7 +15425,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": ["deferred_requires_human_review"]
+      "warningCategories": []
     },
     {
       "cardId": "simple_priority_agenda",
@@ -15965,9 +15453,9 @@
       "cardType": "event",
       "aiSupportStatus": "ai_supported",
       "covered": false,
-      "deferred": true,
-      "deferred_review_scope": "inspector_warning_and_active_hint_quality",
-      "deferred_owner": "ai_semantic_catalog_review",
+      "deferred": false,
+      "deferred_review_scope": "none",
+      "deferred_owner": "none",
       "no_signal_reason": "legacy_fallback_only",
       "target_profile_gap": false,
       "signalCount": 0,
@@ -15977,10 +15465,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
-      ]
+      "warningCategories": ["legacy_fallback_only"]
     },
     {
       "cardId": "simple_sentry_ice",
@@ -16012,9 +15497,9 @@
       "cardType": "hardware",
       "aiSupportStatus": "ai_supported",
       "covered": false,
-      "deferred": true,
-      "deferred_review_scope": "inspector_warning_and_active_hint_quality",
-      "deferred_owner": "ai_semantic_catalog_review",
+      "deferred": false,
+      "deferred_review_scope": "none",
+      "deferred_owner": "none",
       "no_signal_reason": "legacy_fallback_only",
       "target_profile_gap": false,
       "signalCount": 0,
@@ -16024,10 +15509,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
-      ]
+      "warningCategories": ["legacy_fallback_only"]
     },
     {
       "cardId": "simple_tag_ice",
@@ -16123,9 +15605,9 @@
       "cardType": "program",
       "aiSupportStatus": "ai_supported",
       "covered": true,
-      "deferred": true,
-      "deferred_review_scope": "inspector_warning_and_active_hint_quality",
-      "deferred_owner": "ai_semantic_catalog_review",
+      "deferred": false,
+      "deferred_review_scope": "none",
+      "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 1,
@@ -16135,7 +15617,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": ["deferred_requires_human_review"]
+      "warningCategories": []
     },
     {
       "cardId": "v08_archive_planning_operation",
@@ -16163,9 +15645,9 @@
       "cardType": "event",
       "aiSupportStatus": "ai_supported",
       "covered": false,
-      "deferred": true,
-      "deferred_review_scope": "inspector_warning_and_active_hint_quality",
-      "deferred_owner": "ai_semantic_catalog_review",
+      "deferred": false,
+      "deferred_review_scope": "none",
+      "deferred_owner": "none",
       "no_signal_reason": "legacy_fallback_only",
       "target_profile_gap": false,
       "signalCount": 0,
@@ -16175,10 +15657,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
-      ]
+      "warningCategories": ["legacy_fallback_only"]
     },
     {
       "cardId": "v08_cashout_asset",
@@ -16232,9 +15711,9 @@
       "cardType": "event",
       "aiSupportStatus": "ai_supported",
       "covered": false,
-      "deferred": true,
-      "deferred_review_scope": "inspector_warning_and_active_hint_quality",
-      "deferred_owner": "ai_semantic_catalog_review",
+      "deferred": false,
+      "deferred_review_scope": "none",
+      "deferred_owner": "none",
       "no_signal_reason": "legacy_fallback_only",
       "target_profile_gap": false,
       "signalCount": 0,
@@ -16244,10 +15723,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
-      ]
+      "warningCategories": ["legacy_fallback_only"]
     },
     {
       "cardId": "v08_gate_ice",
@@ -16278,9 +15754,9 @@
       "cardType": "hardware",
       "aiSupportStatus": "ai_supported",
       "covered": false,
-      "deferred": true,
-      "deferred_review_scope": "inspector_warning_and_active_hint_quality",
-      "deferred_owner": "ai_semantic_catalog_review",
+      "deferred": false,
+      "deferred_review_scope": "none",
+      "deferred_owner": "none",
       "no_signal_reason": "legacy_fallback_only",
       "target_profile_gap": false,
       "signalCount": 0,
@@ -16290,10 +15766,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
-      ]
+      "warningCategories": ["legacy_fallback_only"]
     },
     {
       "cardId": "v08_overclock_run_event",
@@ -16301,9 +15774,9 @@
       "cardType": "event",
       "aiSupportStatus": "ai_supported",
       "covered": false,
-      "deferred": true,
-      "deferred_review_scope": "inspector_warning_and_active_hint_quality",
-      "deferred_owner": "ai_semantic_catalog_review",
+      "deferred": false,
+      "deferred_review_scope": "none",
+      "deferred_owner": "none",
       "no_signal_reason": "legacy_fallback_only",
       "target_profile_gap": false,
       "signalCount": 0,
@@ -16313,10 +15786,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
-      ]
+      "warningCategories": ["legacy_fallback_only"]
     },
     {
       "cardId": "v08_precise_decoder",
@@ -16324,9 +15794,9 @@
       "cardType": "program",
       "aiSupportStatus": "ai_supported",
       "covered": true,
-      "deferred": true,
-      "deferred_review_scope": "inspector_warning_and_active_hint_quality",
-      "deferred_owner": "ai_semantic_catalog_review",
+      "deferred": false,
+      "deferred_review_scope": "none",
+      "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 1,
@@ -16336,7 +15806,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": ["deferred_requires_human_review"]
+      "warningCategories": []
     },
     {
       "cardId": "v08_project_agenda",
@@ -16364,9 +15834,9 @@
       "cardType": "program",
       "aiSupportStatus": "ai_supported",
       "covered": true,
-      "deferred": true,
-      "deferred_review_scope": "inspector_warning_and_active_hint_quality",
-      "deferred_owner": "ai_semantic_catalog_review",
+      "deferred": false,
+      "deferred_review_scope": "none",
+      "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 1,
@@ -16376,7 +15846,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": ["deferred_requires_human_review"]
+      "warningCategories": []
     },
     {
       "cardId": "v08_wall_ice",

@@ -33,7 +33,8 @@ function instance(
     id: id as CardInstanceId,
     definitionId: definitionId as CardDefinitionId,
     owner: options.owner ?? (zone.side === "runner" ? "runner" : "corp"),
-    controller: options.controller ?? (zone.side === "runner" ? "runner" : "corp"),
+    controller:
+      options.controller ?? (zone.side === "runner" ? "runner" : "corp"),
     zone,
     faceup: options.faceup ?? false,
     rezzed: options.rezzed ?? false,
@@ -43,18 +44,20 @@ function instance(
   } as CardInstance;
 }
 
-function makeHost(options: {
-  run?: GameState["run"];
-  runnerPrograms?: CardInstanceId[];
-  corpRoot?: CardInstanceId[];
-  instances?: Record<string, CardInstance>;
-  definitions?: Record<string, CardDefinition>;
-  tokyoSourceIds?: CardInstanceId[];
-  tokyoAmount?: number;
-  dupreSourceIds?: CardInstanceId[];
-  runEndTrashSourceIds?: CardInstanceId[];
-  virusImplementations?: Record<string, CardVirusCounterImplementation>;
-} = {}): {
+function makeHost(
+  options: {
+    run?: GameState["run"];
+    runnerPrograms?: CardInstanceId[];
+    corpRoot?: CardInstanceId[];
+    instances?: Record<string, CardInstance>;
+    definitions?: Record<string, CardDefinition>;
+    tokyoSourceIds?: CardInstanceId[];
+    tokyoAmount?: number;
+    dupreSourceIds?: CardInstanceId[];
+    runEndTrashSourceIds?: CardInstanceId[];
+    virusImplementations?: Record<string, CardVirusCounterImplementation>;
+  } = {},
+): {
   host: RunEndCleanupHost;
   state: GameState;
   legalAction: LegalAction;
@@ -73,7 +76,11 @@ function makeHost(options: {
     ice_1: instance(
       "ice_1",
       "ice_def",
-      { side: "corp", zone: "serverIce", serverId: "remote_1" } as CardInstance["zone"],
+      {
+        side: "corp",
+        zone: "serverIce",
+        serverId: "remote_1",
+      } as CardInstance["zone"],
       { rezzed: true, faceup: true },
     ),
     dupre: instance(
@@ -85,7 +92,11 @@ function makeHost(options: {
     tokyo: instance(
       "tokyo",
       "tokyo_def",
-      { side: "corp", zone: "serverRoot", serverId: "remote_1" } as CardInstance["zone"],
+      {
+        side: "corp",
+        zone: "serverRoot",
+        serverId: "remote_1",
+      } as CardInstance["zone"],
       { rezzed: true, faceup: true },
     ),
     ...(options.instances ?? {}),
@@ -136,7 +147,10 @@ function makeHost(options: {
   } as unknown as GameState;
   let resetBreakerStrengthCount = 0;
   let cleanupDelayedCount = 0;
-  const damageCalls: Array<{ sourceDefinitionId: CardDefinitionId; amount: number }> = [];
+  const damageCalls: Array<{
+    sourceDefinitionId: CardDefinitionId;
+    amount: number;
+  }> = [];
   const legalAction = { payload: {} } as LegalAction;
   const tokyoSourceIds = new Set(options.tokyoSourceIds ?? ["tokyo"]);
   const dupreSourceIds = new Set(options.dupreSourceIds ?? ["dupre"]);
@@ -156,8 +170,9 @@ function makeHost(options: {
         return found;
       },
       withoutVariableIceState: (card) => {
-        const { variableIceState: _ignored, ...rest } =
-          card as CardInstance & { variableIceState?: unknown };
+        const { variableIceState: _ignored, ...rest } = card as CardInstance & {
+          variableIceState?: unknown;
+        };
         return rest as CardInstance;
       },
     },
@@ -194,8 +209,9 @@ function makeHost(options: {
     },
     choices: {
       selectedChoiceIds: (selectedChoices) => {
-        const raw = (selectedChoices as { selectedOptionIds?: unknown } | undefined)
-          ?.selectedOptionIds;
+        const raw = (
+          selectedChoices as { selectedOptionIds?: unknown } | undefined
+        )?.selectedOptionIds;
         return Array.isArray(raw)
           ? raw.filter((value): value is string => typeof value === "string")
           : [];
@@ -231,7 +247,10 @@ function makeHost(options: {
     },
     counters: {
       cardCounter: (cardId, counterType) =>
-        Math.max(0, Math.floor(instances[cardId]?.counters?.[counterType] ?? 0)),
+        Math.max(
+          0,
+          Math.floor(instances[cardId]?.counters?.[counterType] ?? 0),
+        ),
       setCardCounter: (cardId, counterType, amount) => {
         instances[cardId] = {
           ...instances[cardId]!,
@@ -243,8 +262,10 @@ function makeHost(options: {
         state.cardInstances[cardId] = instances[cardId]!;
       },
       addCardCounter: (cardId, counterType, amount) => {
-        const current =
-          Math.max(0, Math.floor(instances[cardId]?.counters?.[counterType] ?? 0));
+        const current = Math.max(
+          0,
+          Math.floor(instances[cardId]?.counters?.[counterType] ?? 0),
+        );
         instances[cardId] = {
           ...instances[cardId]!,
           counters: {
@@ -326,7 +347,8 @@ describe("multi-server success sequence run-end cleanup", () => {
           kind: "multi_server_success_sequence",
           sequence: "run_each_data_fort",
           sourceCardId: "pirate_1" as CardInstanceId,
-          sourceDefinitionId: "onr_proteus_116_pirate-broadcast" as CardDefinitionId,
+          sourceDefinitionId:
+            "onr_proteus_116_pirate-broadcast" as CardDefinitionId,
           sourceTitle: "Pirate Broadcast",
           pendingServerIds: ["archives"],
           successfulServerIds: ["hq"],
@@ -371,7 +393,8 @@ describe("multi-server success sequence run-end cleanup", () => {
           kind: "multi_server_success_sequence",
           sequence: "run_each_data_fort",
           sourceCardId: "pirate_1" as CardInstanceId,
-          sourceDefinitionId: "onr_proteus_116_pirate-broadcast" as CardDefinitionId,
+          sourceDefinitionId:
+            "onr_proteus_116_pirate-broadcast" as CardDefinitionId,
           sourceTitle: "Pirate Broadcast",
           pendingServerIds: ["archives"],
           successfulServerIds: ["hq"],
@@ -428,7 +451,11 @@ describe("run end cleanup", () => {
       } as unknown as NonNullable<GameState["run"]>,
     });
 
-    const result = handleRunEndCleanup(fixture.host, false, fixture.legalAction);
+    const result = handleRunEndCleanup(
+      fixture.host,
+      false,
+      fixture.legalAction,
+    );
 
     expect(result).toMatchObject({
       handled: true,
@@ -565,7 +592,9 @@ describe("run end cleanup", () => {
 
     handleRunEndCleanup(fixture.host, true, fixture.legalAction);
 
-    expect(fixture.state.cardInstances.cascade?.counters?.virus).toBeUndefined();
+    expect(
+      fixture.state.cardInstances.cascade?.counters?.virus,
+    ).toBeUndefined();
     expect(fixture.state.purgeableRunnerVirusCounters?.corp).toMatchObject({
       cascade: 1,
     });
@@ -879,7 +908,11 @@ describe("run end cleanup", () => {
       } as unknown as NonNullable<GameState["run"]>,
     });
 
-    const result = handleRunEndCleanup(fixture.host, false, fixture.legalAction);
+    const result = handleRunEndCleanup(
+      fixture.host,
+      false,
+      fixture.legalAction,
+    );
 
     expect(result.derezCardIds).toEqual(["ice_1"]);
     expect(fixture.state.cardInstances.ice_1?.rezzed).toBe(false);
@@ -901,10 +934,16 @@ describe("run end cleanup", () => {
       } as unknown as NonNullable<GameState["run"]>,
     });
 
-    const result = handleRunEndCleanup(fixture.host, false, fixture.legalAction);
+    const result = handleRunEndCleanup(
+      fixture.host,
+      false,
+      fixture.legalAction,
+    );
 
     expect(result.placedCounters).toBe(1);
-    expect(fixture.state.cardInstances.dupre?.selectedServerId).toBe("remote_1");
+    expect(fixture.state.cardInstances.dupre?.selectedServerId).toBe(
+      "remote_1",
+    );
     expect(fixture.state.cardInstances.dupre?.counters?.power).toBe(1);
   });
 
@@ -943,21 +982,17 @@ describe("run end cleanup", () => {
       visibility: "public",
     };
 
-    resolveBrokenIceVirusCounterChoice(
-      fixture.host,
-      fixture.legalAction,
-      {
-        side: "runner",
-        actionId: "runner.resolve_choice",
-        type: "resolve_choice",
-        selectedChoices: { selectedOptionIds: ["card_ice_1"] },
-      } as unknown as Parameters<typeof resolveBrokenIceVirusCounterChoice>[2],
-    );
+    resolveBrokenIceVirusCounterChoice(fixture.host, fixture.legalAction, {
+      side: "runner",
+      actionId: "runner.resolve_choice",
+      type: "resolve_choice",
+      selectedChoices: { selectedOptionIds: ["card_ice_1"] },
+    } as unknown as Parameters<typeof resolveBrokenIceVirusCounterChoice>[2]);
 
     expect(fixture.state.pendingChoice).toBeUndefined();
     expect(fixture.state.cardInstances.ice_1?.counters?.virus).toBe(2);
     expect(fixture.legalAction.payload).toMatchObject({
-      v181RunnerProgramAbility: "broken_ice_virus_counter",
+      abilityId: "broken_ice_virus_counter",
       brokenIceVirusCounterAdded: 2,
       targetCardDefinitionId: "ice_def",
       remainingCounters: 2,
@@ -990,7 +1025,11 @@ describe("run end cleanup", () => {
       "rent",
     ]);
 
-    const result = handleRunEndCleanup(fixture.host, false, fixture.legalAction);
+    const result = handleRunEndCleanup(
+      fixture.host,
+      false,
+      fixture.legalAction,
+    );
 
     expect(result.stateChanged).toBe(true);
     expect(fixture.state.runner.rig.programs).not.toContain("rent");
@@ -1006,11 +1045,17 @@ describe("run end cleanup", () => {
   it("applies Tokyo-Chiba unsuccessful-run aftermath without successful-run flags", () => {
     const fixture = makeHost({ tokyoAmount: 3 });
 
-    const result = handleRunEndCleanup(fixture.host, false, fixture.legalAction);
+    const result = handleRunEndCleanup(
+      fixture.host,
+      false,
+      fixture.legalAction,
+    );
 
     expect(result.gainedCredits).toBe(3);
     expect(fixture.state.corp.credits).toBe(7);
-    expect(fixture.state.runnerTurnFlags?.successfulRunThisTurn).toBeUndefined();
+    expect(
+      fixture.state.runnerTurnFlags?.successfulRunThisTurn,
+    ).toBeUndefined();
     expect(fixture.legalAction.payload).toMatchObject({
       unsuccessfulRunCorpCreditBonus: true,
       sourceDefinitionId: "tokyo_def",

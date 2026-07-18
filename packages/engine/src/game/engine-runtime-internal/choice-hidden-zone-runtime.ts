@@ -7,10 +7,12 @@ import { createHiddenZoneNonSearchRuntime } from "./hidden-zone-nonsearch-runtim
 import { createHiddenZoneNonSearchDiceLoopRuntime } from "./hidden-zone-nonsearch-dice-loop-runtime";
 import { createCorpZoneRuntimeHosts } from "./corp-zone-runtime-hosts";
 
-type ChoiceHiddenZoneRuntime = ChoiceHiddenZoneRuntimeLinks;
+type ChoiceHiddenZoneRuntime =
+  import("./choice-hidden-zone-runtime-port").ChoiceHiddenZoneRuntimePort;
 
 function requiredRuntimeMember<T>(name: string, member: T | undefined): T {
-  if (!member) throw new Error(`Runtime dependency ${name} is not initialized.`);
+  if (!member)
+    throw new Error(`Runtime dependency ${name} is not initialized.`);
   return member;
 }
 
@@ -41,63 +43,115 @@ function createChoiceHiddenZoneRuntimeLinks(
     name: K,
   ): ChoiceHiddenZoneRuntimeLinks[K] {
     const delegated = (...args: LinkParameters<K>): LinkReturn<K> => {
-      const member = requiredRuntimeMember(name, runtime[name]) as (
+      // The key selects one exact function contract, but TypeScript widens a
+      // generic indexed access here to the union of every link signature.
+      const member = requiredRuntimeMember(name, runtime[name]) as unknown as (
         ...memberArgs: LinkParameters<K>
       ) => LinkReturn<K>;
       return member(...args);
     };
-    return delegated as ChoiceHiddenZoneRuntimeLinks[K];
+    return delegated as unknown as ChoiceHiddenZoneRuntimeLinks[K];
   }
 
   return {
     canInstallRunnerProgramFromZone: link("canInstallRunnerProgramFromZone"),
-    hiddenZoneSearchActivationHandlerHost: link("hiddenZoneSearchActivationHandlerHost"),
-    hiddenZoneSearchActivationTargetHost: link("hiddenZoneSearchActivationTargetHost"),
-    hiddenZoneSearchChoiceHandlerHost: link("hiddenZoneSearchChoiceHandlerHost"),
+    hiddenZoneSearchActivationHandlerHost: link(
+      "hiddenZoneSearchActivationHandlerHost",
+    ),
+    hiddenZoneSearchActivationTargetHost: link(
+      "hiddenZoneSearchActivationTargetHost",
+    ),
+    hiddenZoneSearchChoiceHandlerHost: link(
+      "hiddenZoneSearchChoiceHandlerHost",
+    ),
     hiddenZoneSearchHandlerHostBase: link("hiddenZoneSearchHandlerHostBase"),
     installRunnerProgramForFree: link("installRunnerProgramForFree"),
-    installRunnerProgramFromStackWithoutClick: link("installRunnerProgramFromStackWithoutClick"),
-    installRunnerProgramFromZoneWithoutClick: link("installRunnerProgramFromZoneWithoutClick"),
-    resolveV1911RunnerHiddenZoneAbility: link("resolveV1911RunnerHiddenZoneAbility"),
+    installRunnerProgramFromStackWithoutClick: link(
+      "installRunnerProgramFromStackWithoutClick",
+    ),
+    installRunnerProgramFromZoneWithoutClick: link(
+      "installRunnerProgramFromZoneWithoutClick",
+    ),
+    resolveV1911RunnerHiddenZoneAbility: link(
+      "resolveV1911RunnerHiddenZoneAbility",
+    ),
     revealCorpRdTop: link("revealCorpRdTop"),
     revealRunnerStackTop: link("revealRunnerStackTop"),
     shuffleRunnerStack: link("shuffleRunnerStack"),
-    startRunnerProgramFreeMemoryChoice: link("startRunnerProgramFreeMemoryChoice"),
-    hiddenZoneArrangeChoiceHandlerHost: link("hiddenZoneArrangeChoiceHandlerHost"),
-    resolveP358HiddenReplacementChoice: link("resolveP358HiddenReplacementChoice"),
+    startRunnerProgramFreeMemoryChoice: link(
+      "startRunnerProgramFreeMemoryChoice",
+    ),
+    hiddenZoneArrangeChoiceHandlerHost: link(
+      "hiddenZoneArrangeChoiceHandlerHost",
+    ),
+    resolveP358HiddenReplacementChoice: link(
+      "resolveP358HiddenReplacementChoice",
+    ),
     RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_ACTION:
       "card_implementation_runner_installed_connection_trash_bad_publicity",
     RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_CHOICE_SOURCE:
       "card_implementation.runner_installed_connection_trash_bad_publicity",
-    canPlayTrashInstalledRunnerConnectionsThenAddBadPublicity: link("canPlayTrashInstalledRunnerConnectionsThenAddBadPublicity"),
-    hiddenZoneNonSearchChoiceHandlerHost: link("hiddenZoneNonSearchChoiceHandlerHost"),
+    canPlayTrashInstalledRunnerConnectionsThenAddBadPublicity: link(
+      "canPlayTrashInstalledRunnerConnectionsThenAddBadPublicity",
+    ),
+    hiddenZoneNonSearchChoiceHandlerHost: link(
+      "hiddenZoneNonSearchChoiceHandlerHost",
+    ),
     iceChoiceLabelForSide: link("iceChoiceLabelForSide"),
     installedRunnerConnectionIds: link("installedRunnerConnectionIds"),
-    parseRunnerInstalledConnectionTrashBadPublicityChoiceSource: link("parseRunnerInstalledConnectionTrashBadPublicityChoiceSource"),
+    parseRunnerInstalledConnectionTrashBadPublicityChoiceSource: link(
+      "parseRunnerInstalledConnectionTrashBadPublicityChoiceSource",
+    ),
     publicIcePositionLabelForCard: link("publicIcePositionLabelForCard"),
     publicIceSelectionLabelForCard: link("publicIceSelectionLabelForCard"),
     resolveDerezRezzedBlackIceChoice: link("resolveDerezRezzedBlackIceChoice"),
-    resolveCardImplementationAccessPaymentChoice: link("resolveCardImplementationAccessPaymentChoice"),
+    resolveCardImplementationAccessPaymentChoice: link(
+      "resolveCardImplementationAccessPaymentChoice",
+    ),
     resolveChimeraDaemonTrashChoice: link("resolveChimeraDaemonTrashChoice"),
-    resolvePayRezCostToTrashRezzedIceChoice: link("resolvePayRezCostToTrashRezzedIceChoice"),
-    resolveCorpChoiceRezOrTrashIceDecisionChoice: link("resolveCorpChoiceRezOrTrashIceDecisionChoice"),
-    resolveCorpChoiceRezOrTrashIceTargetChoice: link("resolveCorpChoiceRezOrTrashIceTargetChoice"),
-    resolveGripInstallTemporaryCreditChoice: link("resolveGripInstallTemporaryCreditChoice"),
-    resolveNonSearchProgramInstallMemoryChoice: link("resolveNonSearchProgramInstallMemoryChoice"),
+    resolvePayRezCostToTrashRezzedIceChoice: link(
+      "resolvePayRezCostToTrashRezzedIceChoice",
+    ),
+    resolveCorpChoiceRezOrTrashIceDecisionChoice: link(
+      "resolveCorpChoiceRezOrTrashIceDecisionChoice",
+    ),
+    resolveCorpChoiceRezOrTrashIceTargetChoice: link(
+      "resolveCorpChoiceRezOrTrashIceTargetChoice",
+    ),
+    resolveGripInstallTemporaryCreditChoice: link(
+      "resolveGripInstallTemporaryCreditChoice",
+    ),
+    resolveNonSearchProgramInstallMemoryChoice: link(
+      "resolveNonSearchProgramInstallMemoryChoice",
+    ),
     resolveIncubatorTransformChoice: link("resolveIncubatorTransformChoice"),
-    resolvePaidSourceReturnToGripChoice: link("resolvePaidSourceReturnToGripChoice"),
+    resolvePaidSourceReturnToGripChoice: link(
+      "resolvePaidSourceReturnToGripChoice",
+    ),
     resolveRunnerProgramReturnChoice: link("resolveRunnerProgramReturnChoice"),
     resolveRunnerHostingChoice: link("resolveRunnerHostingChoice"),
-    resolveRunnerInstalledConnectionTrashBadPublicityChoice: link("resolveRunnerInstalledConnectionTrashBadPublicityChoice"),
+    resolveRunnerInstalledConnectionTrashBadPublicityChoice: link(
+      "resolveRunnerInstalledConnectionTrashBadPublicityChoice",
+    ),
     resolveTrashUnrezzedIceChoice: link("resolveTrashUnrezzedIceChoice"),
-    resolveStackInstallRunCleanupChoice: link("resolveStackInstallRunCleanupChoice"),
-    resolveTrashInstalledRunnerConnectionsThenAddBadPublicityEvent: link("resolveTrashInstalledRunnerConnectionsThenAddBadPublicityEvent"),
+    resolveStackInstallRunCleanupChoice: link(
+      "resolveStackInstallRunCleanupChoice",
+    ),
+    resolveTrashInstalledRunnerConnectionsThenAddBadPublicityEvent: link(
+      "resolveTrashInstalledRunnerConnectionsThenAddBadPublicityEvent",
+    ),
     selectedChoiceCardIds: link("selectedChoiceCardIds"),
     selectedChoiceCardIdsForChoice: link("selectedChoiceCardIdsForChoice"),
     startDerezRezzedBlackIceChoice: link("startDerezRezzedBlackIceChoice"),
-    startPayRezCostToTrashRezzedIceChoice: link("startPayRezCostToTrashRezzedIceChoice"),
-    startCorpChoiceRezOrTrashIceChoice: link("startCorpChoiceRezOrTrashIceChoice"),
-    startPaidSourceReturnToGripChoice: link("startPaidSourceReturnToGripChoice"),
+    startPayRezCostToTrashRezzedIceChoice: link(
+      "startPayRezCostToTrashRezzedIceChoice",
+    ),
+    startCorpChoiceRezOrTrashIceChoice: link(
+      "startCorpChoiceRezOrTrashIceChoice",
+    ),
+    startPaidSourceReturnToGripChoice: link(
+      "startPaidSourceReturnToGripChoice",
+    ),
     startRunnerHostingChoice: link("startRunnerHostingChoice"),
     startTrashUnrezzedIceChoice: link("startTrashUnrezzedIceChoice"),
     continueRandomDiceLoop: link("continueRandomDiceLoop"),
@@ -109,31 +163,55 @@ function createChoiceHiddenZoneRuntimeLinks(
     resolveRandomDiceLoopEvent: link("resolveRandomDiceLoopEvent"),
     resolveRandomDiceSplitChoice: link("resolveRandomDiceSplitChoice"),
     startRandomDiceSplitChoice: link("startRandomDiceSplitChoice"),
-    addCounterToAllInstalledRunnerIcebreakers: link("addCounterToAllInstalledRunnerIcebreakers"),
+    addCounterToAllInstalledRunnerIcebreakers: link(
+      "addCounterToAllInstalledRunnerIcebreakers",
+    ),
     chooseCorpAgendasForPointCost: link("chooseCorpAgendasForPointCost"),
     corpAgendaPointTotal: link("corpAgendaPointTotal"),
     corpZoneChoiceHandlerHost: link("corpZoneChoiceHandlerHost"),
     exposeCorpCardInServer: link("exposeCorpCardInServer"),
-    exposeInstalledCorpCardForImplementation: link("exposeInstalledCorpCardForImplementation"),
+    exposeInstalledCorpCardForImplementation: link(
+      "exposeInstalledCorpCardForImplementation",
+    ),
     exposeInstalledCorpCardLabel: link("exposeInstalledCorpCardLabel"),
     exposeInstalledCorpCardTargets: link("exposeInstalledCorpCardTargets"),
-    exposeInstalledCorpCardsChoiceOptions: link("exposeInstalledCorpCardsChoiceOptions"),
+    exposeInstalledCorpCardsChoiceOptions: link(
+      "exposeInstalledCorpCardsChoiceOptions",
+    ),
     exposeOutermostIceOfEachDataFort: link("exposeOutermostIceOfEachDataFort"),
     exposedCorpCardInServer: link("exposedCorpCardInServer"),
-    multiExposeInstalledCorpCardOptionLabel: link("multiExposeInstalledCorpCardOptionLabel"),
-    multiExposeInstalledCorpCardTargets: link("multiExposeInstalledCorpCardTargets"),
+    multiExposeInstalledCorpCardOptionLabel: link(
+      "multiExposeInstalledCorpCardOptionLabel",
+    ),
+    multiExposeInstalledCorpCardTargets: link(
+      "multiExposeInstalledCorpCardTargets",
+    ),
     installedCorpCardServerContext: link("installedCorpCardServerContext"),
     installedRunnerIcebreakerIds: link("installedRunnerIcebreakerIds"),
     outermostIceExposures: link("outermostIceExposures"),
-    resolveRunnerIcebreakerCounterEvent: link("resolveRunnerIcebreakerCounterEvent"),
+    resolveRunnerIcebreakerCounterEvent: link(
+      "resolveRunnerIcebreakerCounterEvent",
+    ),
     resolveExposePreventionChoice: link("resolveExposePreventionChoice"),
-    resolveExposeInstalledCorpCardsChoice: link("resolveExposeInstalledCorpCardsChoice"),
-    resolveMultiExposeInstalledCorpCardsChoice: link("resolveMultiExposeInstalledCorpCardsChoice"),
-    resolveScoredAgendaCorpRdTopReveal: link("resolveScoredAgendaCorpRdTopReveal"),
+    resolveExposeInstalledCorpCardsChoice: link(
+      "resolveExposeInstalledCorpCardsChoice",
+    ),
+    resolveMultiExposeInstalledCorpCardsChoice: link(
+      "resolveMultiExposeInstalledCorpCardsChoice",
+    ),
+    resolveScoredAgendaCorpRdTopReveal: link(
+      "resolveScoredAgendaCorpRdTopReveal",
+    ),
     shuffleCorpCardIntoRd: link("shuffleCorpCardIntoRd"),
-    startExposeInstalledCorpCardsChoice: link("startExposeInstalledCorpCardsChoice"),
-    startMultiExposeInstalledCorpCardsChoice: link("startMultiExposeInstalledCorpCardsChoice"),
-    trashCorpInstalledCardsInScoredSourceServer: link("trashCorpInstalledCardsInScoredSourceServer"),
+    startExposeInstalledCorpCardsChoice: link(
+      "startExposeInstalledCorpCardsChoice",
+    ),
+    startMultiExposeInstalledCorpCardsChoice: link(
+      "startMultiExposeInstalledCorpCardsChoice",
+    ),
+    trashCorpInstalledCardsInScoredSourceServer: link(
+      "trashCorpInstalledCardsInScoredSourceServer",
+    ),
     discardChoice: link("discardChoice"),
     pendingChoiceResolutionHost: link("pendingChoiceResolutionHost"),
     resolveDiscardChoice: link("resolveDiscardChoice"),

@@ -1641,7 +1641,7 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
 });
 
 describe("MVP 0.1 engine foundation", () => {
-  it("normalizes legacy ability payloads into side-safe public ability schema", () => {
+  it("normalizes execution discriminators into the side-safe public ability schema", () => {
     const context = buildPublicAbilitySchemaContext(
       "resolve_choice",
       {
@@ -1775,7 +1775,9 @@ describe("MVP 0.1 engine foundation", () => {
     const agendaCardsInDeck = corpMasterDeck.cards.reduce(
       (sum, entry) =>
         sum +
-        (CARD_DEFINITIONS_BY_ID[entry.id]?.type === "agenda" ? entry.quantity : 0),
+        (CARD_DEFINITIONS_BY_ID[entry.id]?.type === "agenda"
+          ? entry.quantity
+          : 0),
       0,
     );
     expect(agendaCardsInDeck).toBe(12);
@@ -1790,8 +1792,8 @@ describe("MVP 0.1 engine foundation", () => {
       });
       const agendasInHand = state.corp.hq.filter(
         (id) =>
-          CARD_DEFINITIONS_BY_ID[state.cardInstances[id]!.definitionId]?.type ===
-          "agenda",
+          CARD_DEFINITIONS_BY_ID[state.cardInstances[id]!.definitionId]
+            ?.type === "agenda",
       ).length;
       agendaCardsInOpeningHands += agendasInHand;
       if (agendasInHand >= 4) fourPlusAgendaHands += 1;

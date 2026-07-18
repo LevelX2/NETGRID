@@ -29,7 +29,7 @@ export function DeckSlotSelect({
   disabled = false,
   onSource,
   onSnapshot,
-  onLocalDeck
+  onLocalDeck,
 }: {
   label: string;
   side: DeckSlotSide;
@@ -59,30 +59,41 @@ export function DeckSlotSelect({
         </span>
       </span>
       <span className="deckSlotControl">
-        <SideIcon className="deckSlotControlIcon" size={16} strokeWidth={1.9} aria-hidden="true" />
+        <SideIcon
+          className="deckSlotControlIcon"
+          size={16}
+          strokeWidth={1.9}
+          aria-hidden="true"
+        />
         <select
-          value={source === "local" && selectedLocalDeckId ? `local:${selectedLocalDeckId}` : selectedSnapshotId}
+          value={
+            source === "local" && selectedLocalDeckId
+              ? `local:${selectedLocalDeckId}`
+              : selectedSnapshotId
+          }
           disabled={disabled}
           aria-label={label}
           onChange={(event) => {
             if (event.target.value.startsWith("local:")) {
               onSource("local");
               onLocalDeck(event.target.value.slice("local:".length));
-            }
-            else {
+            } else {
               onSource("snapshot");
               onSnapshot(event.target.value);
             }
           }}
         >
           {snapshots.map((snapshot) => (
-            <option value={snapshot.deckSnapshotId} key={snapshot.deckSnapshotId}>
-              {optionMark} {sideLabel} · Projekt-Snapshot · {snapshot.name}
+            <option
+              value={snapshot.deckSnapshotId}
+              key={snapshot.deckSnapshotId}
+            >
+              {optionMark} {sideLabel} · Standard-Deck · {snapshot.name}
             </option>
           ))}
           {localDecks.map((deck) => (
             <option value={`local:${deck.deckId}`} key={deck.deckId}>
-              {optionMark} {sideLabel} · Deck-Editor · {deck.name}
+              {optionMark} {sideLabel} · Mein Deck · {deck.name}
             </option>
           ))}
         </select>
@@ -91,7 +102,14 @@ export function DeckSlotSelect({
   );
 }
 
-export function DeckMetadataLine({ entries }: { entries: Array<{ label: string; metadata: DeckPublicMetadataSummary | undefined }> }) {
+export function DeckMetadataLine({
+  entries,
+}: {
+  entries: Array<{
+    label: string;
+    metadata: DeckPublicMetadataSummary | undefined;
+  }>;
+}) {
   const visible = entries.filter((entry) => entry.metadata);
   if (visible.length === 0) return null;
   return (

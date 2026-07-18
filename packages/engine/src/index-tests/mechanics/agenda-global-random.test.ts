@@ -324,7 +324,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     );
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "gain_credit",
-      agendaAbility: "v1919_scored_agenda_reveal_rd_top",
+      abilityId: "v1919_scored_agenda_reveal_rd_top",
       revealKind: "reveal",
       cardDefinitionId: "simple_agenda",
       title: "Simple Agenda",
@@ -848,7 +848,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     expect(cardCounterAmount(faitState, faitId, "power")).toBe(1);
     expect(faitState.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "gain_credit",
-      v1919RunnerProgramAbility: "add_power_counter",
+      abilityId: "add_power_counter",
       addedCounterAmount: 1,
       remainingCounters: 1,
     });
@@ -1417,7 +1417,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(state.cardInstances[codeGateId]?.faceup).toBe(true);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
-      agendaAbility: "scored_subtype_reveal",
+      abilityId: "scored_subtype_reveal",
       hiddenZoneAction: "scored_subtype_reveal_code_gates",
       revealedCount: 1,
       gainedCredits: 1,
@@ -1468,7 +1468,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(state.winner).toBe("corp");
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "gain_credit",
-      v1920AssetAbility: "tagged_meat_damage",
+      abilityId: "tagged_meat_damage",
       agendaPointCost: 3,
       agendaPointCostPaid: 3,
       spentAgendaDefinitionIds: "onr_v1_204_ice-transmutation",
@@ -1689,7 +1689,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
-      agendaAbility: "scored_rezzed_ice_mark_modifier",
+      abilityId: "scored_rezzed_ice_mark_modifier",
       targetIceDefinitionId: "onr_v1_232_crystal-wall",
       strengthBonus: 1,
       duplicatedSubroutineCount: 1,
@@ -3170,7 +3170,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     );
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "gain_credit",
-      v1921AssetAbility: "schlaghund_tag_damage",
+      abilityId: "schlaghund_tag_damage",
       randomPurpose: "v1921.die.onr_v1_339_schlaghund.tag_damage",
       randomCounterAfter: randomBefore + 1,
       runnerTags: 6,
@@ -3276,7 +3276,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
       expect(rioPurpose).toContain(`.${iceId}.${upgradeId}`);
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
         actionType: "continue_run",
-        v1921UpgradeAbility: "rio_de_janeiro_passed_ice",
+        abilityId: "rio_de_janeiro_passed_ice",
         sourceDefinitionId: "onr_v1_367_rio-de-janeiro-city-grid",
         passedIceDefinitionId: "simple_barrier_ice",
         serverLabel: "Remote 1",
@@ -3289,7 +3289,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
         expect(
           getPlayerView(state, side).publicEvents.at(-1)?.publicPayload,
         ).toMatchObject({
-          v1921UpgradeAbility: "rio_de_janeiro_passed_ice",
+          abilityId: "rio_de_janeiro_passed_ice",
           sourceDefinitionId: "onr_v1_367_rio-de-janeiro-city-grid",
           passedIceDefinitionId: "simple_barrier_ice",
           serverLabel: "Remote 1",
@@ -3368,7 +3368,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
       );
       expect(state.eventLog.at(-1)?.publicPayload, definitionId).toMatchObject({
         actionType: "gain_credit",
-        v1921RunnerProgramAbility: "deterministic_die_probe",
+        abilityId: "deterministic_die_probe",
         randomPurpose,
         randomCounterAfter: randomBefore + 1,
       });
@@ -3443,7 +3443,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     );
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "start_run",
-      v1921RunnerProgramAbility: "run_start_random_strength_bonus",
+      abilityId: "run_start_random_strength_bonus",
       sourceDefinitionId: "onr_v1_002_ai-boon",
       randomPurpose: "v1921.die.onr_v1_002_ai-boon.run_start_strength",
       randomCounterAfter: randomBefore + 1,
@@ -3535,7 +3535,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     );
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_event",
-      v1921RunnerEventAbility: "random_dice_loop",
+      abilityId: "random_dice_loop",
       v1921DieRoll: 4,
       randomDiceSplitChoiceOpened: false,
       randomDiceLoopComplete: true,
@@ -3596,7 +3596,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
 
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_event",
-      v1921RunnerEventAbility: "random_dice_loop",
+      abilityId: "random_dice_loop",
       v1921DieRoll: 3,
       randomDiceSplitChoiceOpened: true,
       randomDiceLoopComplete: false,
@@ -3621,7 +3621,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     expect(state.runner.credits).toBe(creditsBeforeChoice + 1);
     expect(firstResolvePayload).toMatchObject({
       actionType: "resolve_choice",
-      v1921RunnerEventAbility: "random_dice_loop",
+      abilityId: "random_dice_loop",
       randomDiceSplitGainedCredits: 1,
       randomDiceSplitSetAsideDice: 2,
       randomDiceLoopQueuedBeforeRolls: 2,
@@ -3731,7 +3731,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     );
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "gain_credit",
-      v1921RunnerResourceAbility: "deterministic_die_probe",
+      abilityId: "deterministic_die_probe",
       randomPurpose: "v1921.die.onr_v1_172_quest-for-cattekin.resource_probe",
       randomCounterAfter: randomBefore + 1,
     });

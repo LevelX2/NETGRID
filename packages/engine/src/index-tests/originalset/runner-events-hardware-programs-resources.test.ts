@@ -648,7 +648,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
     state = applyChoice(state, "runner", "pay_1_return_to_grip");
     expect(state.runner.grip).toContain(eventId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      v1922RunnerEventAbility: "remove_tag_optional_return",
+      abilityId: "remove_tag_optional_return",
       returnedToGrip: true,
       paidCredits: 1,
     });
@@ -2449,7 +2449,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
     expect(databroker.runner.heap).toContain(brokerId);
     expect(databroker.eventLog.at(-1)?.publicPayload).toMatchObject({
       cardDefinitionId: "onr_v1_159_databroker",
-      resourceAbility: "databroker",
+      abilityId: "databroker",
       agendaPointCostPaid: 1,
       spentAgendaCardId: agendaId,
       gainedCredits: 10,
@@ -3089,7 +3089,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
       maxSelections: 1,
       visibility: "public",
     });
-    expect(choice?.source).toMatch(/^v1912\.shell_traders_start_turn:/);
+    expect(choice?.source).toMatch(/^runner_start\.delayed_install:/);
     expect(cardCounterAmount(state, programId, "shell")).toBe(2);
     expect(cardCounterAmount(state, hardwareId, "shell")).toBe(2);
     expect(state.runner.tags).toBe(tagsBeforeStart + 1);
@@ -3098,13 +3098,13 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
     );
     expect(hardwareOption).toMatchObject({
       label: "Simple Setup Hardware (2)",
-      metadata: { shellTradersRemainingCounters: 2 },
+      metadata: { delayedInstallRemainingCounters: 2 },
     });
     expect(
       getPlayerView(state, "runner").pendingChoice?.options.find(
         (option) => option.id === hardwareOption?.id,
       )?.metadata,
-    ).toMatchObject({ shellTradersRemainingCounters: 2 });
+    ).toMatchObject({ delayedInstallRemainingCounters: 2 });
     if (!hardwareOption) throw new Error("Shell-Traders-Hardwareoption fehlt.");
 
     state = applyChoice(state, "runner", hardwareOption.id);

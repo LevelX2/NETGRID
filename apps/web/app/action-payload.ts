@@ -1,5 +1,5 @@
 import {
-  LEGACY_ABILITY_PAYLOAD_FIELDS,
+  ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS,
   type LegalAction,
   type PublicGameEvent,
 } from "@netgrid/shared";
@@ -9,9 +9,9 @@ type PayloadLike = Record<string, unknown> | undefined;
 export function payloadAbilityId(payload: PayloadLike): string | null {
   const stable = stringValue(payload?.abilityId);
   if (stable) return stable;
-  for (const field of LEGACY_ABILITY_PAYLOAD_FIELDS) {
-    const legacy = stringValue(payload?.[field]);
-    if (legacy) return legacy;
+  for (const field of ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS) {
+    const discriminator = stringValue(payload?.[field]);
+    if (discriminator) return discriminator;
   }
   return (
     stringValue(payload?.hiddenZoneAction) ??

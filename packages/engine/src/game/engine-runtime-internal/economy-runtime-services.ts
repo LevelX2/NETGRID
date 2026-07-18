@@ -27,7 +27,7 @@ import {
   type GameState,
   type ImminentEvent,
   type LegalAction,
-  type LegacyAbilityPayloadField,
+  type AbilityPayloadDiscriminatorField,
   type PlayerAction,
   type PlayerController,
   type PublicGameEvent,
@@ -239,9 +239,7 @@ import {
   buildRunnerAgendaPointInstallAction,
   buildRunnerSelectedServerInstallAction,
 } from "../turn/runner-install-context-actions";
-import {
-  buildRunnerHostedProgramInstallAction,
-} from "../turn/runner-hosted-install-actions";
+import { buildRunnerHostedProgramInstallAction } from "../turn/runner-hosted-install-actions";
 import { buildRunnerProgramTrashBeforeInstallAction } from "../turn/runner-program-trash-install-actions";
 import { buildRunnerStackSearchProgramToGripAction } from "../turn/runner-hidden-zone-search-actions";
 import {
@@ -658,9 +656,7 @@ import {
   ACCESS_NET_DAMAGE_UPGRADE_SOURCE,
   ACCESS_TRACE_DAMAGE_UPGRADE_SOURCE,
 } from "../../mechanics/server-upgrades";
-import {
-  RUN_TAX_UPGRADE_SOURCES,
-} from "../../mechanics/trace-tags";
+import { RUN_TAX_UPGRADE_SOURCES } from "../../mechanics/trace-tags";
 import { snapshotPersistentStealCostModifiersForSource } from "../../ability-engine/steal-cost-modifiers";
 import { createCardImplementationEffectAdapters } from "../../ability-engine/card-implementation-effect-adapters";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
@@ -697,24 +693,14 @@ import type {
 } from "../../ability-engine/definition-types";
 import type { RuntimeDeps } from "./runtime-shared";
 
-export function createEconomyRuntimeServices(deps: RuntimeDeps) {
-  const {
-    activeCrashEverettSourceId,
-    availableRunnerProgramInstallCredits,
-    drawTaxSourceIds,
-    hasInstalledUniqueCardDefinition,
-    isUniqueCard,
-    runnerProgramUsesMemory,
-    scoredAgendaKindForDefinition,
-  } = deps;
-
-  function expireScoredAgendaInstallRezCreditAbilities(
-    state: GameState,
-  ): void {
+export function createEconomyRuntimeServices(
+  deps: RuntimeDeps,
+): import("./economy-runtime-port").EconomyRuntimePort {
+  function expireScoredAgendaInstallRezCreditAbilities(state: GameState): void {
     for (const agendaId of state.corp.scoreArea) {
       const definition = definitionFor(state, agendaId);
       if (
-        scoredAgendaKindForDefinition(definition) ===
+        deps.scoredAgendaKindForDefinition(definition) ===
         "scored_agenda_credit_until_install_or_rez"
       )
         setCardCounter(state, agendaId, "mark", 0);
@@ -833,12 +819,12 @@ export function createEconomyRuntimeServices(deps: RuntimeDeps) {
     return state.runner.grip.filter((cardId) => {
       const definition = definitionFor(state, cardId);
       const uniqueBlocked =
-        isUniqueCard(definition) &&
-        hasInstalledUniqueCardDefinition(state, "runner", definition.id);
+        deps.isUniqueCard(definition) &&
+        deps.hasInstalledUniqueCardDefinition(state, "runner", definition.id);
       return (
         definition.type === "program" &&
         !uniqueBlocked &&
-        availableRunnerProgramInstallCredits(state) >=
+        deps.availableRunnerProgramInstallCredits(state) >=
           (definition.installCost ?? 0) &&
         runnerProgramInstallMemoryReachableAfterTrash(state, definition)
       );
@@ -861,7 +847,7 @@ export function createEconomyRuntimeServices(deps: RuntimeDeps) {
     const maximumFreedMemory = installedRunnerProgramTrashOptionsForInstall(
       state,
     ).reduce((sum, cardId) => {
-      if (!runnerProgramUsesMemory(state, cardId)) return sum;
+      if (!deps.runnerProgramUsesMemory(state, cardId)) return sum;
       return sum + (definitionFor(state, cardId).memoryCost ?? 0);
     }, 0);
     return (
@@ -935,8 +921,8 @@ export function createEconomyRuntimeServices(deps: RuntimeDeps) {
 
   function runnerDrawActionContext(state: GameState): RunnerDrawActionContext {
     return {
-      drawTaxSourceCount: drawTaxSourceIds(state).length,
-      projectedDrawCount: activeCrashEverettSourceId(state) ? 2 : 1,
+      drawTaxSourceCount: deps.drawTaxSourceIds(state).length,
+      projectedDrawCount: deps.activeCrashEverettSourceId(state) ? 2 : 1,
     };
   }
 

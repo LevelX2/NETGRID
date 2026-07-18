@@ -3406,6 +3406,7 @@ describe("Semantic AI runtime cutover", () => {
         publicPayload: {
           resolvedEffects: [
             {
+              effectId: "conference-start-credit",
               kind: "gain_credits",
               side: "runner",
               amount: 2,

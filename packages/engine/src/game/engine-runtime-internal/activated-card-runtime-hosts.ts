@@ -27,7 +27,7 @@ import {
   type GameState,
   type ImminentEvent,
   type LegalAction,
-  type LegacyAbilityPayloadField,
+  type AbilityPayloadDiscriminatorField,
   type PlayerAction,
   type PlayerController,
   type PublicGameEvent,
@@ -230,9 +230,7 @@ import {
   buildRunnerAgendaPointInstallAction,
   buildRunnerSelectedServerInstallAction,
 } from "../turn/runner-install-context-actions";
-import {
-  buildRunnerHostedProgramInstallAction,
-} from "../turn/runner-hosted-install-actions";
+import { buildRunnerHostedProgramInstallAction } from "../turn/runner-hosted-install-actions";
 import { buildRunnerProgramTrashBeforeInstallAction } from "../turn/runner-program-trash-install-actions";
 import { buildRunnerStackSearchProgramToGripAction } from "../turn/runner-hidden-zone-search-actions";
 import {
@@ -649,9 +647,7 @@ import {
   ACCESS_NET_DAMAGE_UPGRADE_SOURCE,
   ACCESS_TRACE_DAMAGE_UPGRADE_SOURCE,
 } from "../../mechanics/server-upgrades";
-import {
-  RUN_TAX_UPGRADE_SOURCES,
-} from "../../mechanics/trace-tags";
+import { RUN_TAX_UPGRADE_SOURCES } from "../../mechanics/trace-tags";
 import { snapshotPersistentStealCostModifiersForSource } from "../../ability-engine/steal-cost-modifiers";
 import { createCardImplementationEffectAdapters } from "../../ability-engine/card-implementation-effect-adapters";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
@@ -691,28 +687,10 @@ import type { RuntimeDeps } from "./runtime-shared";
 export function createActivatedCardRuntimeHosts(
   deps: RuntimeDeps,
   runtime: RuntimeDeps,
-) {
-  const {
-    cardImplementationRuntimeDeps,
-    corpTraceDamageAbilityHost,
-    corpTracePaymentDeps,
-    encounterPrintedEffectHostForState,
-    encounterSpecialWindowHostForState,
-    fortRunSideFamiliesHostForState,
-    addCorpTraceCounterPoolCounters,
-    addRunnerTagsWithPrevention,
-    corpTraceCounterPoolTotal,
-    identityModifierAmount,
-    recurringTraceCreditPoolTotal,
-    rezzedCorpRootCardIds,
-    resolveTraceTrashRunnerResourceSuccess,
-    runnerTracePaymentDeps,
-    sanitizeId,
-    scoredAgendaAbilityHost,
-    traceCounterEffectDefinitionFor,
-    trashRunnerInstalledCardToHeap,
-  } = deps;
-
+): Pick<
+  import("./card-runtime-host-port").CardRuntimeHostPort,
+  "traceOrchestrationHost" | "activatedCardImplementationExecutionHost"
+> {
   function traceOrchestrationHost(state: GameState): TraceOrchestrationHost {
     return {
       state,
@@ -738,10 +716,10 @@ export function createActivatedCardRuntimeHosts(
           isTraceLinkForceJackOutSource(state, cardId),
       },
       payment: {
-        corpTracePaymentDeps,
-        runnerTracePaymentDeps,
+        corpTracePaymentDeps: deps.corpTracePaymentDeps,
+        runnerTracePaymentDeps: deps.runnerTracePaymentDeps,
         runnerTraceLinkCreditSourceIds: () =>
-          runnerTracePaymentDeps
+          deps.runnerTracePaymentDeps
             .runnerTraceLinkCreditSources(state)
             .map((source) => source.sourceCardInstanceId),
         hostedPaymentCredits: (cardId) => hostedPaymentCredits(state, cardId),
@@ -754,34 +732,36 @@ export function createActivatedCardRuntimeHosts(
       },
       runner: {
         identityModifierAmount: (side, kind, duration) =>
-          identityModifierAmount(state, side, kind, duration),
+          deps.identityModifierAmount(state, side, kind, duration),
       },
       corp: {
-        rezzedCorpRootCardIds: () => rezzedCorpRootCardIds(state),
+        rezzedCorpRootCardIds: () => deps.rezzedCorpRootCardIds(state),
       },
       counters: {
         cardCounter: (cardId, counterType) =>
           cardCounter(state, cardId, counterType as CounterType),
-        corpTraceCounterPoolTotal: () => corpTraceCounterPoolTotal(state),
+        corpTraceCounterPoolTotal: () => deps.corpTraceCounterPoolTotal(state),
         recurringTraceCreditPoolTotal: () =>
-          recurringTraceCreditPoolTotal(state),
+          deps.recurringTraceCreditPoolTotal(state),
       },
       fort: {
         fortTraceBitPoolSource: () =>
           state.run
-            ? fortTraceBitPoolSource(fortRunSideFamiliesHostForState(state))
+            ? fortTraceBitPoolSource(
+                deps.fortRunSideFamiliesHostForState(state),
+              )
             : undefined,
       },
       run: {
         markTraceLinkForceJackOutAfterEncounter: (cardId, legalAction) =>
           markTraceLinkForceJackOutAfterEncounter(
-            encounterSpecialWindowHostForState(state),
+            deps.encounterSpecialWindowHostForState(state),
             cardId,
             legalAction,
           ),
         applyPrintedTraceSuccessFollowups: (options) =>
           applyPrintedTraceSuccessFollowups(
-            encounterPrintedEffectHostForState(state, options.legalAction),
+            deps.encounterPrintedEffectHostForState(state, options.legalAction),
             options,
           ),
       },
@@ -789,26 +769,26 @@ export function createActivatedCardRuntimeHosts(
         supportsTraceSuccessEffect: (effect) =>
           isSupportedEncounterTraceSuccessEffect(
             effect,
-            traceCounterEffectDefinitionFor,
+            deps.traceCounterEffectDefinitionFor,
           ),
       },
       zones: {
         trashRunnerInstalledCardToHeap: (cardId, legalAction) =>
-          trashRunnerInstalledCardToHeap(state, cardId, legalAction),
+          deps.trashRunnerInstalledCardToHeap(state, cardId, legalAction),
       },
       callbacks: {
-        sanitizeId,
+        sanitizeId: deps.sanitizeId,
         addCorpTraceCounterPoolCounters: () =>
-          addCorpTraceCounterPoolCounters(state),
+          deps.addCorpTraceCounterPoolCounters(state),
         addRunnerTagsWithPrevention: (legalAction, amount, source) =>
-          addRunnerTagsWithPrevention(state, legalAction, amount, source),
+          deps.addRunnerTagsWithPrevention(state, legalAction, amount, source),
         resolveTraceTrashRunnerResourceSuccess: (
           sourceDefinitionId,
           sourceCardInstanceId,
           traceId,
           targetCardId,
         ) =>
-          resolveTraceTrashRunnerResourceSuccess(
+          deps.resolveTraceTrashRunnerResourceSuccess(
             state,
             sourceDefinitionId,
             sourceCardInstanceId,
@@ -829,19 +809,19 @@ export function createActivatedCardRuntimeHosts(
       callbacks: {
         handleCorpTraceDamageActivatedAbility: (actionToResolve: LegalAction) =>
           handleCorpTraceDamageActivatedAbility(
-            corpTraceDamageAbilityHost(state, actionToResolve),
+            deps.corpTraceDamageAbilityHost(state, actionToResolve),
           ).handled,
         handleScoredAgendaActivatedAbilityAction: (
           actionToResolve: LegalAction,
         ) =>
           handleScoredAgendaActivatedAbilityAction(
-            scoredAgendaAbilityHost(state, actionToResolve),
+            deps.scoredAgendaAbilityHost(state, actionToResolve),
           ).handled,
         resolveActivatedCardImplementationAbility: (
           actionToResolve: LegalAction,
         ) =>
           resolveActivatedCardImplementationAbility(
-            cardImplementationRuntimeDeps,
+            deps.cardImplementationRuntimeDeps,
             state,
             actionToResolve,
           ),

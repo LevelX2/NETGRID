@@ -27,7 +27,7 @@ import {
   type GameState,
   type ImminentEvent,
   type LegalAction,
-  type LegacyAbilityPayloadField,
+  type AbilityPayloadDiscriminatorField,
   type PlayerAction,
   type PlayerController,
   type PublicGameEvent,
@@ -230,9 +230,7 @@ import {
   buildRunnerAgendaPointInstallAction,
   buildRunnerSelectedServerInstallAction,
 } from "../turn/runner-install-context-actions";
-import {
-  buildRunnerHostedProgramInstallAction,
-} from "../turn/runner-hosted-install-actions";
+import { buildRunnerHostedProgramInstallAction } from "../turn/runner-hosted-install-actions";
 import { buildRunnerProgramTrashBeforeInstallAction } from "../turn/runner-program-trash-install-actions";
 import { buildRunnerStackSearchProgramToGripAction } from "../turn/runner-hidden-zone-search-actions";
 import {
@@ -651,9 +649,7 @@ import {
   ACCESS_NET_DAMAGE_UPGRADE_SOURCE,
   ACCESS_TRACE_DAMAGE_UPGRADE_SOURCE,
 } from "../../mechanics/server-upgrades";
-import {
-  RUN_TAX_UPGRADE_SOURCES,
-} from "../../mechanics/trace-tags";
+import { RUN_TAX_UPGRADE_SOURCES } from "../../mechanics/trace-tags";
 import { snapshotPersistentStealCostModifiersForSource } from "../../ability-engine/steal-cost-modifiers";
 import { createCardImplementationEffectAdapters } from "../../ability-engine/card-implementation-effect-adapters";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
@@ -693,27 +689,7 @@ import type { RuntimeDeps } from "./runtime-shared";
 export function createEncounterMovementRuntimeHosts(
   deps: RuntimeDeps,
   runtime: RuntimeDeps,
-) {
-  const {
-    accessFlow,
-    addRunnerFutureActionDebt,
-    assertBreakSubroutineCostQuoteValid,
-    assertCurrentSubroutineMatchesLegalAction,
-    breakAbilityForLegalAction,
-    effectiveSubtypesForCard,
-    executeEffectCommands,
-    expireScoredAgendaInstallRezCreditAbilities,
-    finishRun,
-    pumpAbilityForLegalAction,
-    pumpAmountForLegalAction,
-    pumpDurationForLegalAction,
-    resolveMultiBreakSubroutinesAction,
-    rezCardHost,
-    runFlow,
-    runRemainderStrengthBonusForBreaker,
-    subroutinesForCurrentEncounter,
-  } = deps;
-
+): import("./encounter-movement-runtime-port").EncounterMovementRuntimePort {
   function resolveBlinkBreakSubroutineAction(
     state: GameState,
     breakerId: CardInstanceId,
@@ -729,7 +705,7 @@ export function createEncounterMovementRuntimeHosts(
     if (!Number.isInteger(subroutineIndex) || subroutineIndex < 0)
       throw new Error("Blink-Subroutinenziel ist ungueltig.");
     const iceDefinition = definitionFor(state, encounteredIceId);
-    assertCurrentSubroutineMatchesLegalAction(
+    deps.assertCurrentSubroutineMatchesLegalAction(
       state,
       iceDefinition,
       subroutineIndex,
@@ -757,7 +733,7 @@ export function createEncounterMovementRuntimeHosts(
     );
     legalAction.payload = { ...(legalAction.payload ?? {}), blinkDieRoll: die };
     if (die >= 4) {
-      executeEffectCommands(state, [
+      deps.executeEffectCommands(state, [
         { type: "break_subroutine", subroutineIndex },
       ]);
       legalAction.payload = {
@@ -815,7 +791,7 @@ export function createEncounterMovementRuntimeHosts(
       )
     )
       return;
-    const previous = runRemainderStrengthBonusForBreaker(run, breakerId);
+    const previous = deps.runRemainderStrengthBonusForBreaker(run, breakerId);
     run.remainderStrengthBonusByBreaker = {
       ...(run.remainderStrengthBonusByBreaker ?? {}),
       [breakerId]: previous + 1,
@@ -834,71 +810,74 @@ export function createEncounterMovementRuntimeHosts(
   }
 
   function runnerAccessActionHost(state: GameState): RunnerAccessActionHost {
-    return accessFlow.runnerAccessActionHost(state);
+    return deps.accessFlow.runnerAccessActionHost(state);
   }
 
   function runnerEncounterActionHostForState(
     state: GameState,
   ): RunnerEncounterActionHost {
-    return runFlow.runnerEncounterActionHostForState(state);
+    return deps.runFlow.runnerEncounterActionHostForState(state);
   }
 
   function runMovementHostForState(state: GameState): RunMovementHost {
-    return runFlow.runMovementHostForState(state);
+    return deps.runFlow.runMovementHostForState(state);
   }
 
   function runRezWindowHostForState(state: GameState): RunRezWindowHost {
-    return runFlow.runRezWindowHostForState(state);
+    return deps.runFlow.runRezWindowHostForState(state);
   }
 
   function fortPassWindowHostForState(state: GameState): FortPassWindowHost {
-    return runFlow.fortPassWindowHostForState(state);
+    return deps.runFlow.fortPassWindowHostForState(state);
   }
 
   function fortRunSideFamiliesHostForState(
     state: GameState,
   ): FortRunSideFamiliesHost {
-    return runFlow.fortRunSideFamiliesHostForState(state);
+    return deps.runFlow.fortRunSideFamiliesHostForState(state);
   }
 
   function encounterEntryHostForState(state: GameState): EncounterEntryHost {
-    return runFlow.encounterEntryHostForState(state);
+    return deps.runFlow.encounterEntryHostForState(state);
   }
 
   function successfulRunInterventionHost(
     state: GameState,
   ): SuccessfulRunInterventionHost {
-    return runFlow.successfulRunInterventionHost(state);
+    return deps.runFlow.successfulRunInterventionHost(state);
   }
 
   function encounterResolutionHostForState(
     state: GameState,
   ): EncounterResolutionHost {
-    return runFlow.encounterResolutionHostForState(state);
+    return deps.runFlow.encounterResolutionHostForState(state);
   }
 
   function encounterSpecialWindowHostForState(
     state: GameState,
   ): EncounterSpecialWindowHost {
-    return runFlow.encounterSpecialWindowHostForState(state);
+    return deps.runFlow.encounterSpecialWindowHostForState(state);
   }
 
   function encounterPrintedEffectHostForState(
     state: GameState,
     legalAction?: LegalAction,
   ): EncounterPrintedEffectHost {
-    return runFlow.encounterPrintedEffectHostForState(state, legalAction);
+    return deps.runFlow.encounterPrintedEffectHostForState(state, legalAction);
   }
 
   function encounterPrintedNonTraceHostForState(
     state: GameState,
     legalAction?: LegalAction,
   ): EncounterPrintedNonTraceHost {
-    return runFlow.encounterPrintedNonTraceHostForState(state, legalAction);
+    return deps.runFlow.encounterPrintedNonTraceHostForState(
+      state,
+      legalAction,
+    );
   }
 
   function runEndCleanupHost(state: GameState): RunEndCleanupHost {
-    return runFlow.runEndCleanupHost(state);
+    return deps.runFlow.runEndCleanupHost(state);
   }
 
   function runnerBreakerActionExecutionHost(
@@ -910,31 +889,32 @@ export function createEncounterMovementRuntimeHosts(
         definitionFor: (cardId) => definitionFor(state, cardId),
         cardInstanceFor: (cardId) => mustInstance(state.cardInstances, cardId),
         effectiveSubtypesForCard: (cardId, definition) =>
-          effectiveSubtypesForCard(state, cardId, definition),
+          deps.effectiveSubtypesForCard(state, cardId, definition),
       },
       run: {
         currentRun: () => mustRun(state),
         currentEncounterSubroutines: (iceDefinition) =>
-          subroutinesForCurrentEncounter(state, iceDefinition),
-        runRemainderStrengthBonusForBreaker,
+          deps.subroutinesForCurrentEncounter(state, iceDefinition),
+        runRemainderStrengthBonusForBreaker:
+          deps.runRemainderStrengthBonusForBreaker,
         finishRun: (successful, legalAction) =>
-          finishRun(state, successful, legalAction),
+          deps.finishRun(state, successful, legalAction),
       },
       breaker: {
         pumpAbilityForLegalAction: (legalAction) =>
-          pumpAbilityForLegalAction(state, legalAction),
+          deps.pumpAbilityForLegalAction(state, legalAction),
         pumpAmountForLegalAction: (legalAction) =>
-          pumpAmountForLegalAction(state, legalAction),
+          deps.pumpAmountForLegalAction(state, legalAction),
         pumpDurationForLegalAction: (legalAction) =>
-          pumpDurationForLegalAction(state, legalAction),
+          deps.pumpDurationForLegalAction(state, legalAction),
         breakAbilityForLegalAction: (legalAction) =>
-          breakAbilityForLegalAction(state, legalAction),
+          deps.breakAbilityForLegalAction(state, legalAction),
         assertCurrentSubroutineMatchesLegalAction: (
           iceDefinition,
           subroutineIndex,
           legalAction,
         ) =>
-          assertCurrentSubroutineMatchesLegalAction(
+          deps.assertCurrentSubroutineMatchesLegalAction(
             state,
             iceDefinition,
             subroutineIndex,
@@ -945,14 +925,18 @@ export function createEncounterMovementRuntimeHosts(
           legalAction,
           subroutine,
         ) =>
-          assertBreakSubroutineCostQuoteValid(
+          deps.assertBreakSubroutineCostQuoteValid(
             state,
             breakerId,
             legalAction,
             subroutine,
           ),
         resolveMultiBreakSubroutinesAction: (breakerId, legalAction) =>
-          resolveMultiBreakSubroutinesAction(state, breakerId, legalAction),
+          deps.resolveMultiBreakSubroutinesAction(
+            state,
+            breakerId,
+            legalAction,
+          ),
         resolveBlinkBreakSubroutineAction: (
           breakerId,
           subroutineIndex,
@@ -1002,9 +986,9 @@ export function createEncounterMovementRuntimeHosts(
       },
       effects: {
         executeEffectCommands: (commands) =>
-          executeEffectCommands(state, commands),
+          deps.executeEffectCommands(state, commands),
         addRunnerFutureActionDebt: (amount) =>
-          addRunnerFutureActionDebt(state, amount),
+          deps.addRunnerFutureActionDebt(state, amount),
       },
       turn: {
         ensureRunnerTurnFlags: () => ensureRunnerTurnFlags(state),
@@ -1053,9 +1037,9 @@ export function createEncounterMovementRuntimeHosts(
     return {
       rez: {
         executeRezCard: (cardId, rootRez, legalAction) =>
-          executeRezCard(rezCardHost(state), cardId, rootRez, legalAction),
+          executeRezCard(deps.rezCardHost(state), cardId, rootRez, legalAction),
         expireScoredAgendaInstallRezCreditAbilities: () =>
-          expireScoredAgendaInstallRezCreditAbilities(state),
+          deps.expireScoredAgendaInstallRezCreditAbilities(state),
       },
       run: {
         passCorpRunRootRezWindow: (legalAction) =>

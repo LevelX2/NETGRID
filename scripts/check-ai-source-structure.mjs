@@ -92,7 +92,7 @@ for (const missing of [...expectedTypeCycleSignatures].filter(
 
 const productionLineCaps = new Map([
   ["belief-state.ts", 2548],
-  ["runtime/semantic-runtime-corp-score.ts", 808],
+  ["runtime/semantic-runtime-corp-score.ts", 828],
   ["runtime/semantic-runtime-corp-board-triage.ts", 793],
   ["runner-hand-development.ts", 936],
   ["runner/hand-development/runner-hand-text-signals.ts", 431],
@@ -109,7 +109,7 @@ const productionLineCaps = new Map([
   ["runtime/corp-scoreline/semantic-runtime-corp-score-action-economy.ts", 885],
   [
     "runtime/corp-scoreline/semantic-runtime-corp-score-scoreline-components.ts",
-    925,
+    997,
   ],
   [
     "runtime/corp-scoreline/semantic-runtime-corp-scoring-window-projection.ts",

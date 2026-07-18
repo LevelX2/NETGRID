@@ -31,6 +31,8 @@
   `docs/architecture/card-rules/card-rule-text-formatting-spec.md`.
 - Lokale Deckbibliothek:
   `docs/architecture/deck-library/local-file-deck-library-2026-05-07.md`.
+- Passwort-Accounts, persönliche Server-Decks und Standard-Deck-Kuration:
+  `docs/releases/v2/v2-0-auth-privacy-cloud-decks/password-accounts-cloud-decks-final-review-2026-07-18.md`.
 - Wiederverwendbare Funktionsnamen:
   [[../Architektur/Abstrakte Funktionsnamen und Wiederverwendung]].
 - Projektweiter Cleanup:
@@ -83,6 +85,8 @@
 - SQLite-Wartung: authentifizierte Maintenance-Control-Plane unter
   `/maintenance`, `docs/runbooks/maintenance-control-plane.md` sowie
   `storage:inspect`, `storage:backup` und `storage:restore`.
+- Geschlossene Account-Alpha: `docs/runbooks/account-alpha-operations.md` für
+  Admin-Bootstrap, Invite/Reset, Backup/Restore und Deckquote.
 - Browser-E2E: `scripts/run-e2e.mjs` und `tests/e2e/`.
 - Aktueller Playtest-Fund mit Chronicle-, Access-, Window- und Auto-End-
   Härtung:

@@ -3,7 +3,9 @@ import { describe, expect, it } from "vitest";
 
 import { selectedShellTradersStartTurnChoiceOptionId } from "./shell-traders-choice-option";
 
-type PendingChoice = NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>;
+type PendingChoice = NonNullable<
+  AiDecisionInput["playerView"]["pendingChoice"]
+>;
 
 describe("shell traders choice option", () => {
   it("uses structured remaining-counter metadata instead of label suffixes", () => {
@@ -11,12 +13,12 @@ describe("shell traders choice option", () => {
       {
         id: "card_decoder",
         label: "Simple Decoder (1)",
-        metadata: { shellTradersRemainingCounters: 3 },
+        metadata: { delayedInstallRemainingCounters: 3 },
       },
       {
         id: "card_fracter",
         label: "Simple Fracter (9)",
-        metadata: { shellTradersRemainingCounters: 1 },
+        metadata: { delayedInstallRemainingCounters: 1 },
       },
     ]);
 
@@ -59,7 +61,7 @@ function shellTradersChoice(options: PendingChoice["options"]): PendingChoice {
   return {
     choiceId: "choice_shell_traders",
     side: "runner",
-    source: "v1912.shell_traders_start_turn:shell_traders_1:1",
+    source: "runner_start.delayed_install:shell_traders_1:1",
     prompt: "The Shell Traders: 1 Shell-Counter entfernen",
     kind: "select_cards",
     options,

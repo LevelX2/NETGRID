@@ -157,7 +157,7 @@
   },
   "hardErrorCount": 0,
   "hardErrors": [],
-  "warningCount": 2312,
+  "warningCount": 2398,
   "warnings": [
     {
       "kind": "monolith_mechanical_duplication_candidate",
@@ -1205,6 +1205,21 @@
       "message": "Generated condition:requires_scored_agenda is absent from the active monolith."
     },
     {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_001_ai-board-member",
+      "message": "Active monolith has condition:requires_start_of_turn that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_001_ai-board-member",
+      "message": "Active monolith has effect:extra_action that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_001_ai-board-member",
+      "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
+    },
+    {
       "kind": "text_pattern_derivation",
       "cardId": "onr_proteus_001_ai-board-member",
       "message": "Derived facts use read-only text/descriptor pattern scans rather than imported TS descriptors."
@@ -1215,6 +1230,16 @@
       "message": "No structured mechanical fact was derived in the current full-coverage scope; active legacy hint remains the runtime fallback."
     },
     {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_002_charity-takeover",
+      "message": "Active monolith has effect:economy that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_002_charity-takeover",
+      "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
+    },
+    {
       "kind": "descriptor_or_schema_gap",
       "cardId": "onr_proteus_003_corporate-headhunters",
       "message": "Implementation produced facts, but descriptor/schema comparison still has gaps."
@@ -1223,6 +1248,26 @@
       "kind": "generated_fact_absent_from_active_monolith",
       "cardId": "onr_proteus_003_corporate-headhunters",
       "message": "Generated condition:requires_scored_agenda is absent from the active monolith."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_003_corporate-headhunters",
+      "message": "Active monolith has condition:requires_damage that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_003_corporate-headhunters",
+      "message": "Active monolith has condition:requires_runner_tagged that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_003_corporate-headhunters",
+      "message": "Active monolith has effect:damage that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_003_corporate-headhunters",
+      "message": "Active monolith has effect:hand_size_modifier that the current deriver does not reproduce."
     },
     {
       "kind": "text_pattern_derivation",
@@ -1280,6 +1325,26 @@
       "message": "Generated condition:requires_scored_agenda is absent from the active monolith."
     },
     {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_006_please-dont-choke-anyone",
+      "message": "Active monolith has condition:requires_damage that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_006_please-dont-choke-anyone",
+      "message": "Active monolith has condition:requires_turn_limit_available that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_006_please-dont-choke-anyone",
+      "message": "Active monolith has effect:extra_action that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_006_please-dont-choke-anyone",
+      "message": "Active monolith has effect:prevention_replacement that the current deriver does not reproduce."
+    },
+    {
       "kind": "text_pattern_derivation",
       "cardId": "onr_proteus_006_please-dont-choke-anyone",
       "message": "Derived facts use read-only text/descriptor pattern scans rather than imported TS descriptors."
@@ -1295,6 +1360,16 @@
       "message": "Generated condition:requires_scored_agenda is absent from the active monolith."
     },
     {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_007_project-venice",
+      "message": "Active monolith has condition:requires_advancement_counter that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_007_project-venice",
+      "message": "Active monolith has effect:extra_action that the current deriver does not reproduce."
+    },
+    {
       "kind": "text_pattern_derivation",
       "cardId": "onr_proteus_007_project-venice",
       "message": "Derived facts use read-only text/descriptor pattern scans rather than imported TS descriptors."
@@ -1310,6 +1385,16 @@
       "message": "Generated condition:requires_scored_agenda is absent from the active monolith."
     },
     {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_008_project-zurich",
+      "message": "Active monolith has condition:requires_advancement_counter that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_008_project-zurich",
+      "message": "Active monolith has effect:start_of_turn_economy that the current deriver does not reproduce."
+    },
+    {
       "kind": "text_pattern_derivation",
       "cardId": "onr_proteus_008_project-zurich",
       "message": "Derived facts use read-only text/descriptor pattern scans rather than imported TS descriptors."
@@ -1320,9 +1405,19 @@
       "message": "Implementation produced facts, but descriptor/schema comparison still has gaps."
     },
     {
-      "kind": "generated_fact_absent_from_active_monolith",
+      "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_proteus_009_viral-breeding-ground",
-      "message": "Generated condition:requires_accessed_card is absent from the active monolith."
+      "message": "Active monolith has condition:requires_advancement_counter that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_009_viral-breeding-ground",
+      "message": "Active monolith has effect:card_recovery that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_009_viral-breeding-ground",
+      "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
     },
     {
       "kind": "text_pattern_derivation",
@@ -1338,6 +1433,11 @@
       "kind": "generated_fact_absent_from_active_monolith",
       "cardId": "onr_proteus_010_world-domination",
       "message": "Generated condition:requires_scored_agenda is absent from the active monolith."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_010_world-domination",
+      "message": "Active monolith has effect:scored_agenda_action that the current deriver does not reproduce."
     },
     {
       "kind": "text_pattern_derivation",
@@ -1375,9 +1475,49 @@
       "message": "No structured mechanical fact was derived in the current full-coverage scope; active legacy hint remains the runtime fallback."
     },
     {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_012_bug-zapper",
+      "message": "Active monolith has condition:requires_encounter that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_012_bug-zapper",
+      "message": "Active monolith has condition:requires_unbroken_subroutine that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_012_bug-zapper",
+      "message": "Active monolith has effect:damage that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_012_bug-zapper",
+      "message": "Active monolith has effect:etr that the current deriver does not reproduce."
+    },
+    {
       "kind": "legacy_fallback_only",
       "cardId": "onr_proteus_013_caryatid",
       "message": "No structured mechanical fact was derived in the current full-coverage scope; active legacy hint remains the runtime fallback."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_013_caryatid",
+      "message": "Active monolith has condition:requires_encounter that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_013_caryatid",
+      "message": "Active monolith has condition:requires_unbroken_subroutine that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_013_caryatid",
+      "message": "Active monolith has effect:etr that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_013_caryatid",
+      "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
     },
     {
       "kind": "descriptor_or_schema_gap",
@@ -1495,6 +1635,26 @@
       "message": "No structured mechanical fact was derived in the current full-coverage scope; active legacy hint remains the runtime fallback."
     },
     {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_017_credit-blocks",
+      "message": "Active monolith has condition:requires_encounter that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_017_credit-blocks",
+      "message": "Active monolith has condition:requires_unbroken_subroutine that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_017_credit-blocks",
+      "message": "Active monolith has effect:etr that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_017_credit-blocks",
+      "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
+    },
+    {
       "kind": "text_pattern_derivation",
       "cardId": "onr_proteus_018_datacomb",
       "message": "Derived facts use read-only text/descriptor pattern scans rather than imported TS descriptors."
@@ -1540,9 +1700,59 @@
       "message": "No structured mechanical fact was derived in the current full-coverage scope; active legacy hint remains the runtime fallback."
     },
     {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_020_digiconda",
+      "message": "Active monolith has condition:requires_encounter that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_020_digiconda",
+      "message": "Active monolith has condition:requires_unbroken_subroutine that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_020_digiconda",
+      "message": "Active monolith has effect:damage that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_020_digiconda",
+      "message": "Active monolith has effect:etr that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_020_digiconda",
+      "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
+    },
+    {
       "kind": "legacy_fallback_only",
       "cardId": "onr_proteus_021_dog-pile",
       "message": "No structured mechanical fact was derived in the current full-coverage scope; active legacy hint remains the runtime fallback."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_021_dog-pile",
+      "message": "Active monolith has condition:requires_encounter that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_021_dog-pile",
+      "message": "Active monolith has condition:requires_unbroken_subroutine that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_021_dog-pile",
+      "message": "Active monolith has effect:damage that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_021_dog-pile",
+      "message": "Active monolith has effect:etr that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_021_dog-pile",
+      "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
     },
     {
       "kind": "legacy_fallback_only",
@@ -1550,9 +1760,44 @@
       "message": "No structured mechanical fact was derived in the current full-coverage scope; active legacy hint remains the runtime fallback."
     },
     {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_022_food-fight",
+      "message": "Active monolith has condition:requires_encounter that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_022_food-fight",
+      "message": "Active monolith has condition:requires_unbroken_subroutine that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_022_food-fight",
+      "message": "Active monolith has effect:etr that the current deriver does not reproduce."
+    },
+    {
       "kind": "legacy_fallback_only",
       "cardId": "onr_proteus_023_galatea",
       "message": "No structured mechanical fact was derived in the current full-coverage scope; active legacy hint remains the runtime fallback."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_023_galatea",
+      "message": "Active monolith has condition:requires_encounter that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_023_galatea",
+      "message": "Active monolith has condition:requires_unbroken_subroutine that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_023_galatea",
+      "message": "Active monolith has effect:etr that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_023_galatea",
+      "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
     },
     {
       "kind": "legacy_fallback_only",
@@ -1560,14 +1805,89 @@
       "message": "No structured mechanical fact was derived in the current full-coverage scope; active legacy hint remains the runtime fallback."
     },
     {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_024_gatekeeper",
+      "message": "Active monolith has condition:requires_encounter that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_024_gatekeeper",
+      "message": "Active monolith has condition:requires_unbroken_subroutine that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_024_gatekeeper",
+      "message": "Active monolith has effect:etr that the current deriver does not reproduce."
+    },
+    {
       "kind": "legacy_fallback_only",
       "cardId": "onr_proteus_025_homing-missile",
       "message": "No structured mechanical fact was derived in the current full-coverage scope; active legacy hint remains the runtime fallback."
     },
     {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_025_homing-missile",
+      "message": "Active monolith has condition:requires_encounter that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_025_homing-missile",
+      "message": "Active monolith has condition:requires_trace_success that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_025_homing-missile",
+      "message": "Active monolith has condition:requires_unbroken_subroutine that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_025_homing-missile",
+      "message": "Active monolith has effect:etr that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_025_homing-missile",
+      "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_025_homing-missile",
+      "message": "Active monolith has effect:run_lock that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_025_homing-missile",
+      "message": "Active monolith has effect:trace that the current deriver does not reproduce."
+    },
+    {
       "kind": "legacy_fallback_only",
       "cardId": "onr_proteus_026_hunting-pack",
       "message": "No structured mechanical fact was derived in the current full-coverage scope; active legacy hint remains the runtime fallback."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_026_hunting-pack",
+      "message": "Active monolith has condition:requires_encounter that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_026_hunting-pack",
+      "message": "Active monolith has condition:requires_trace_success that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_026_hunting-pack",
+      "message": "Active monolith has condition:requires_unbroken_subroutine that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_026_hunting-pack",
+      "message": "Active monolith has effect:tag that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_026_hunting-pack",
+      "message": "Active monolith has effect:trace that the current deriver does not reproduce."
     },
     {
       "kind": "descriptor_or_schema_gap",
@@ -1610,6 +1930,26 @@
       "message": "No structured mechanical fact was derived in the current full-coverage scope; active legacy hint remains the runtime fallback."
     },
     {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_028_lesser-arcana",
+      "message": "Active monolith has condition:requires_encounter that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_028_lesser-arcana",
+      "message": "Active monolith has condition:requires_unbroken_subroutine that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_028_lesser-arcana",
+      "message": "Active monolith has effect:etr that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_028_lesser-arcana",
+      "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
+    },
+    {
       "kind": "descriptor_or_schema_gap",
       "cardId": "onr_proteus_029_marionette",
       "message": "Implementation produced facts, but descriptor/schema comparison still has gaps."
@@ -1648,6 +1988,31 @@
       "kind": "legacy_fallback_only",
       "cardId": "onr_proteus_030_mastermind",
       "message": "No structured mechanical fact was derived in the current full-coverage scope; active legacy hint remains the runtime fallback."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_030_mastermind",
+      "message": "Active monolith has condition:requires_encounter that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_030_mastermind",
+      "message": "Active monolith has condition:requires_unbroken_subroutine that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_030_mastermind",
+      "message": "Active monolith has effect:damage that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_030_mastermind",
+      "message": "Active monolith has effect:etr that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_030_mastermind",
+      "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
     },
     {
       "kind": "descriptor_or_schema_gap",
@@ -1740,6 +2105,21 @@
       "message": "No structured mechanical fact was derived in the current full-coverage scope; active legacy hint remains the runtime fallback."
     },
     {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_034_riddler",
+      "message": "Active monolith has condition:requires_encounter that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_034_riddler",
+      "message": "Active monolith has condition:requires_unbroken_subroutine that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_034_riddler",
+      "message": "Active monolith has effect:etr that the current deriver does not reproduce."
+    },
+    {
       "kind": "text_pattern_derivation",
       "cardId": "onr_proteus_035_roadblock",
       "message": "Derived facts use read-only text/descriptor pattern scans rather than imported TS descriptors."
@@ -1748,6 +2128,21 @@
       "kind": "legacy_fallback_only",
       "cardId": "onr_proteus_036_sandstorm",
       "message": "No structured mechanical fact was derived in the current full-coverage scope; active legacy hint remains the runtime fallback."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_036_sandstorm",
+      "message": "Active monolith has condition:requires_encounter that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_036_sandstorm",
+      "message": "Active monolith has condition:requires_unbroken_subroutine that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_036_sandstorm",
+      "message": "Active monolith has effect:etr that the current deriver does not reproduce."
     },
     {
       "kind": "text_pattern_derivation",
@@ -1785,9 +2180,49 @@
       "message": "No structured mechanical fact was derived in the current full-coverage scope; active legacy hint remains the runtime fallback."
     },
     {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_039_sphinx-2006",
+      "message": "Active monolith has condition:requires_encounter that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_039_sphinx-2006",
+      "message": "Active monolith has condition:requires_unbroken_subroutine that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_039_sphinx-2006",
+      "message": "Active monolith has effect:etr that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_039_sphinx-2006",
+      "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
+    },
+    {
       "kind": "legacy_fallback_only",
       "cardId": "onr_proteus_040_sumo-2008",
       "message": "No structured mechanical fact was derived in the current full-coverage scope; active legacy hint remains the runtime fallback."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_040_sumo-2008",
+      "message": "Active monolith has condition:requires_encounter that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_040_sumo-2008",
+      "message": "Active monolith has condition:requires_unbroken_subroutine that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_040_sumo-2008",
+      "message": "Active monolith has effect:etr that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_040_sumo-2008",
+      "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
     },
     {
       "kind": "descriptor_or_schema_gap",
@@ -1865,19 +2300,14 @@
       "message": "Implementation produced facts, but descriptor/schema comparison still has gaps."
     },
     {
-      "kind": "generated_fact_absent_from_active_monolith",
+      "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_proteus_045_washed-up-solo-construct",
-      "message": "Generated condition:requires_encounter is absent from the active monolith."
+      "message": "Active monolith has effect:program_trash that the current deriver does not reproduce."
     },
     {
-      "kind": "generated_fact_absent_from_active_monolith",
+      "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_proteus_045_washed-up-solo-construct",
-      "message": "Generated condition:requires_unbroken_subroutine is absent from the active monolith."
-    },
-    {
-      "kind": "generated_fact_absent_from_active_monolith",
-      "cardId": "onr_proteus_045_washed-up-solo-construct",
-      "message": "Generated effect:economy is absent from the active monolith."
+      "message": "Active monolith has effect:run_tax that the current deriver does not reproduce."
     },
     {
       "kind": "text_pattern_derivation",
@@ -3292,7 +3722,17 @@
     {
       "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_proteus_113_live-news-feed",
-      "message": "Active monolith has effect:run_tax that the current deriver does not reproduce."
+      "message": "Active monolith has condition:requires_successful_run that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_113_live-news-feed",
+      "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_113_live-news-feed",
+      "message": "Active monolith has effect:tag that the current deriver does not reproduce."
     },
     {
       "kind": "legacy_fallback_only",
@@ -3675,11 +4115,6 @@
       "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
     },
     {
-      "kind": "monolith_mechanical_duplication_candidate",
-      "cardId": "onr_proteus_131_bargain-with-viacox",
-      "message": "Active monolith has effect:search that the current deriver does not reproduce."
-    },
-    {
       "kind": "descriptor_or_schema_gap",
       "cardId": "onr_proteus_132_bolt-hole",
       "message": "Implementation produced facts, but descriptor/schema comparison still has gaps."
@@ -3820,14 +4255,9 @@
       "message": "Generated condition:requires_successful_run is absent from the active monolith."
     },
     {
-      "kind": "generated_fact_absent_from_active_monolith",
-      "cardId": "onr_proteus_136_credit-subversion",
-      "message": "Generated effect:counter_economy is absent from the active monolith."
-    },
-    {
       "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_proteus_136_credit-subversion",
-      "message": "Active monolith has effect:access_replacement that the current deriver does not reproduce."
+      "message": "Active monolith has condition:requires_successful_hq_run that the current deriver does not reproduce."
     },
     {
       "kind": "monolith_mechanical_duplication_candidate",
@@ -3838,11 +4268,6 @@
       "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_proteus_136_credit-subversion",
       "message": "Active monolith has effect:prevention_replacement that the current deriver does not reproduce."
-    },
-    {
-      "kind": "monolith_mechanical_duplication_candidate",
-      "cardId": "onr_proteus_136_credit-subversion",
-      "message": "Active monolith has effect:tag_punish_payoff that the current deriver does not reproduce."
     },
     {
       "kind": "text_pattern_derivation",
@@ -3972,22 +4397,17 @@
     {
       "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_proteus_141_get-ready-to-rumble",
-      "message": "Active monolith has effect:access_replacement that the current deriver does not reproduce."
-    },
-    {
-      "kind": "monolith_mechanical_duplication_candidate",
-      "cardId": "onr_proteus_141_get-ready-to-rumble",
       "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
     },
     {
       "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_proteus_141_get-ready-to-rumble",
-      "message": "Active monolith has effect:prevention_replacement that the current deriver does not reproduce."
+      "message": "Active monolith has effect:persistent_counter_effect that the current deriver does not reproduce."
     },
     {
       "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_proteus_141_get-ready-to-rumble",
-      "message": "Active monolith has effect:tag_punish_payoff that the current deriver does not reproduce."
+      "message": "Active monolith has effect:prevention_replacement that the current deriver does not reproduce."
     },
     {
       "kind": "legacy_fallback_only",
@@ -3997,12 +4417,12 @@
     {
       "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_proteus_142_hq-mole",
-      "message": "Active monolith has effect:access_replacement that the current deriver does not reproduce."
+      "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
     },
     {
       "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_proteus_142_hq-mole",
-      "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
+      "message": "Active monolith has effect:multiaccess that the current deriver does not reproduce."
     },
     {
       "kind": "monolith_mechanical_duplication_candidate",
@@ -4087,12 +4507,12 @@
     {
       "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_proteus_147_r-and-d-mole",
-      "message": "Active monolith has effect:access_replacement that the current deriver does not reproduce."
+      "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
     },
     {
       "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_proteus_147_r-and-d-mole",
-      "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
+      "message": "Active monolith has effect:multiaccess that the current deriver does not reproduce."
     },
     {
       "kind": "monolith_mechanical_duplication_candidate",
@@ -5487,7 +5907,12 @@
     {
       "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_v1_083_desperate-competitor",
-      "message": "Active monolith has condition:requires_scored_agenda that the current deriver does not reproduce."
+      "message": "Active monolith has condition:requires_liberated_agenda_this_turn that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_083_desperate-competitor",
+      "message": "Active monolith has condition:requires_liberated_gray_ops_agenda that the current deriver does not reproduce."
     },
     {
       "kind": "monolith_mechanical_duplication_candidate",
@@ -5592,7 +6017,12 @@
     {
       "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_v1_090_hot-tip-for-wns",
-      "message": "Active monolith has condition:requires_scored_agenda that the current deriver does not reproduce."
+      "message": "Active monolith has condition:requires_liberated_agenda_this_turn that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_090_hot-tip-for-wns",
+      "message": "Active monolith has condition:requires_liberated_black_ops_agenda that the current deriver does not reproduce."
     },
     {
       "kind": "monolith_mechanical_duplication_candidate",
@@ -8360,6 +8790,16 @@
       "message": "Generated condition:requires_scored_agenda is absent from the active monolith."
     },
     {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_214_project-babylon",
+      "message": "Active monolith has condition:requires_advancement_counter that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_214_project-babylon",
+      "message": "Active monolith has effect:scored_agenda_action that the current deriver does not reproduce."
+    },
+    {
       "kind": "text_pattern_derivation",
       "cardId": "onr_v1_214_project-babylon",
       "message": "Derived facts use read-only text/descriptor pattern scans rather than imported TS descriptors."
@@ -9830,14 +10270,9 @@
       "message": "Implementation produced facts, but descriptor/schema comparison still has gaps."
     },
     {
-      "kind": "generated_fact_absent_from_active_monolith",
+      "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_v1_272_too-many-doors",
-      "message": "Generated condition:requires_encounter is absent from the active monolith."
-    },
-    {
-      "kind": "generated_fact_absent_from_active_monolith",
-      "cardId": "onr_v1_272_too-many-doors",
-      "message": "Generated condition:requires_unbroken_subroutine is absent from the active monolith."
+      "message": "Active monolith has effect:etr that the current deriver does not reproduce."
     },
     {
       "kind": "text_pattern_derivation",
@@ -9895,14 +10330,9 @@
       "message": "Implementation produced facts, but descriptor/schema comparison still has gaps."
     },
     {
-      "kind": "generated_fact_absent_from_active_monolith",
+      "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_v1_275_vacuum-link",
-      "message": "Generated condition:requires_encounter is absent from the active monolith."
-    },
-    {
-      "kind": "generated_fact_absent_from_active_monolith",
-      "cardId": "onr_v1_275_vacuum-link",
-      "message": "Generated condition:requires_unbroken_subroutine is absent from the active monolith."
+      "message": "Active monolith has effect:future_run_effect that the current deriver does not reproduce."
     },
     {
       "kind": "text_pattern_derivation",
@@ -11727,7 +12157,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/__missing__/corp_identity_001.ts",
       "implementationFound": false,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -11746,18 +12176,16 @@
           "corp_identity",
           "setup"
         ],
-        "planRoles": [
-          "build_scoring_remote"
-        ],
+        "planRoles": [],
         "effects": [],
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -11775,7 +12203,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -11791,7 +12219,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/__missing__/efficient_fracter.ts",
       "implementationFound": false,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -11827,11 +12255,11 @@
         },
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -11853,7 +12281,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -15022,9 +15450,9 @@
         "side": "runner",
         "cardType": "program",
         "roles": [
+          "breaker_fracter",
           "icebreaker",
-          "program",
-          "wall_breaker"
+          "program"
         ],
         "planRoles": [
           "break_ice"
@@ -15124,9 +15552,9 @@
         "side": "runner",
         "cardType": "program",
         "roles": [
+          "breaker_killer",
           "icebreaker",
-          "program",
-          "sentry_breaker"
+          "program"
         ],
         "planRoles": [
           "break_ice"
@@ -15226,10 +15654,10 @@
         "side": "runner",
         "cardType": "program",
         "roles": [
+          "breaker_killer",
           "icebreaker",
           "noisy",
-          "program",
-          "sentry_breaker"
+          "program"
         ],
         "planRoles": [
           "break_ice"
@@ -15383,7 +15811,7 @@
         "side": "runner",
         "cardType": "program",
         "roles": [
-          "code_gate_breaker",
+          "breaker_decoder",
           "icebreaker",
           "program"
         ],
@@ -16350,7 +16778,7 @@
           "agenda_pressure",
           "event",
           "rd_access_replacement",
-          "rd_run"
+          "rd_pressure"
         ],
         "planRoles": [
           "agenda_pressure",
@@ -18326,8 +18754,25 @@
           "corp_score_agenda",
           "score_next_turn"
         ],
-        "effects": [],
-        "conditions": [],
+        "effects": [
+          {
+            "kind": "extra_action",
+            "timing": "start_of_turn",
+            "scope": "corp",
+            "resource": "actions",
+            "amount": 1
+          },
+          {
+            "kind": "global_modifier",
+            "timing": "start_of_turn",
+            "scope": "corp"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_start_of_turn"
+          }
+        ],
         "lineSupport": [
           "corp.action_tempo"
         ],
@@ -18344,13 +18789,21 @@
         "generatedOnly": [
           "condition:requires_scored_agenda"
         ],
-        "manualOnly": []
+        "manualOnly": [
+          "condition:requires_start_of_turn",
+          "effect:extra_action",
+          "effect:global_modifier"
+        ]
       },
       "missingManualOverlay": [
-        "condition:requires_scored_agenda"
+        "condition:requires_scored_agenda",
+        "condition:requires_start_of_turn",
+        "effect:extra_action",
+        "effect:global_modifier"
       ],
       "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable."
       ],
       "confidence": "high",
       "warnings": [
@@ -18363,8 +18816,24 @@
           "message": "Generated facts contain fields not currently mirrored manually."
         },
         {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
           "kind": "generated_fact_without_manual_match",
           "message": "Generated condition:requires_scored_agenda has no manual ontology match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_start_of_turn has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:extra_action has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:global_modifier has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -18400,7 +18869,20 @@
           "corp_score_agenda",
           "score_next_turn"
         ],
-        "effects": [],
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "when_scored",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 9
+          },
+          {
+            "kind": "global_modifier",
+            "timing": "when_scored",
+            "scope": "corp"
+          }
+        ],
         "conditions": [],
         "lineSupport": [],
         "quality": {
@@ -18414,15 +18896,35 @@
       "overlap": {
         "matches": [],
         "generatedOnly": [],
-        "manualOnly": []
+        "manualOnly": [
+          "effect:economy",
+          "effect:global_modifier"
+        ]
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "effect:economy",
+        "effect:global_modifier"
+      ],
+      "descriptorGaps": [
+        "Manual ontology contains fields not currently derivable."
+      ],
       "confidence": "high",
       "warnings": [
         {
           "kind": "confidence_mismatch",
           "message": "Generated confidence high differs from manual confidence medium."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:economy has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:global_modifier has no generated basic fact match."
         }
       ],
       "fullCoverageScope": true,
@@ -18460,8 +18962,30 @@
           "corp_score_agenda",
           "score_next_turn"
         ],
-        "effects": [],
-        "conditions": [],
+        "effects": [
+          {
+            "kind": "damage",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "meat_damage",
+            "amount": 1
+          },
+          {
+            "kind": "hand_size_modifier",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "hand_size",
+            "amount": 1
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_damage"
+          },
+          {
+            "kind": "requires_runner_tagged"
+          }
+        ],
         "lineSupport": [
           "corp.damage_kill",
           "corp.tag_trace_punish"
@@ -18479,13 +19003,23 @@
         "generatedOnly": [
           "condition:requires_scored_agenda"
         ],
-        "manualOnly": []
+        "manualOnly": [
+          "condition:requires_damage",
+          "condition:requires_runner_tagged",
+          "effect:damage",
+          "effect:hand_size_modifier"
+        ]
       },
       "missingManualOverlay": [
-        "condition:requires_scored_agenda"
+        "condition:requires_damage",
+        "condition:requires_runner_tagged",
+        "condition:requires_scored_agenda",
+        "effect:damage",
+        "effect:hand_size_modifier"
       ],
       "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable."
       ],
       "confidence": "high",
       "warnings": [
@@ -18494,8 +19028,28 @@
           "message": "Generated facts contain fields not currently mirrored manually."
         },
         {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
           "kind": "generated_fact_without_manual_match",
           "message": "Generated condition:requires_scored_agenda has no manual ontology match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_damage has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_runner_tagged has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:damage has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:hand_size_modifier has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -18732,8 +19286,29 @@
           "corp_score_agenda",
           "score_next_turn"
         ],
-        "effects": [],
-        "conditions": [],
+        "effects": [
+          {
+            "kind": "extra_action",
+            "timing": "corp_turn",
+            "scope": "corp",
+            "resource": "actions",
+            "amount": 1
+          },
+          {
+            "kind": "prevention_replacement",
+            "timing": "damage_window",
+            "scope": "corp",
+            "resource": "damage"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_damage"
+          },
+          {
+            "kind": "requires_turn_limit_available"
+          }
+        ],
         "lineSupport": [
           "corp.action_tempo"
         ],
@@ -18750,13 +19325,23 @@
         "generatedOnly": [
           "condition:requires_scored_agenda"
         ],
-        "manualOnly": []
+        "manualOnly": [
+          "condition:requires_damage",
+          "condition:requires_turn_limit_available",
+          "effect:extra_action",
+          "effect:prevention_replacement"
+        ]
       },
       "missingManualOverlay": [
-        "condition:requires_scored_agenda"
+        "condition:requires_damage",
+        "condition:requires_scored_agenda",
+        "condition:requires_turn_limit_available",
+        "effect:extra_action",
+        "effect:prevention_replacement"
       ],
       "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable."
       ],
       "confidence": "high",
       "warnings": [
@@ -18769,8 +19354,28 @@
           "message": "Generated facts contain fields not currently mirrored manually."
         },
         {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
           "kind": "generated_fact_without_manual_match",
           "message": "Generated condition:requires_scored_agenda has no manual ontology match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_damage has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_turn_limit_available has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:extra_action has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:prevention_replacement has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -18812,8 +19417,19 @@
           "corp_score_agenda",
           "score_next_turn"
         ],
-        "effects": [],
-        "conditions": [],
+        "effects": [
+          {
+            "kind": "extra_action",
+            "timing": "start_of_turn",
+            "scope": "corp",
+            "resource": "actions"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_advancement_counter"
+          }
+        ],
         "lineSupport": [
           "corp.action_tempo",
           "corp.overadvance_value"
@@ -18831,13 +19447,19 @@
         "generatedOnly": [
           "condition:requires_scored_agenda"
         ],
-        "manualOnly": []
+        "manualOnly": [
+          "condition:requires_advancement_counter",
+          "effect:extra_action"
+        ]
       },
       "missingManualOverlay": [
-        "condition:requires_scored_agenda"
+        "condition:requires_advancement_counter",
+        "condition:requires_scored_agenda",
+        "effect:extra_action"
       ],
       "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable."
       ],
       "confidence": "high",
       "warnings": [
@@ -18846,8 +19468,20 @@
           "message": "Generated facts contain fields not currently mirrored manually."
         },
         {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
           "kind": "generated_fact_without_manual_match",
           "message": "Generated condition:requires_scored_agenda has no manual ontology match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_advancement_counter has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:extra_action has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -18889,8 +19523,19 @@
           "corp_score_agenda",
           "score_next_turn"
         ],
-        "effects": [],
-        "conditions": [],
+        "effects": [
+          {
+            "kind": "start_of_turn_economy",
+            "timing": "start_of_turn",
+            "scope": "corp",
+            "resource": "credits"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_advancement_counter"
+          }
+        ],
         "lineSupport": [
           "corp.overadvance_value"
         ],
@@ -18907,13 +19552,19 @@
         "generatedOnly": [
           "condition:requires_scored_agenda"
         ],
-        "manualOnly": []
+        "manualOnly": [
+          "condition:requires_advancement_counter",
+          "effect:start_of_turn_economy"
+        ]
       },
       "missingManualOverlay": [
-        "condition:requires_scored_agenda"
+        "condition:requires_advancement_counter",
+        "condition:requires_scored_agenda",
+        "effect:start_of_turn_economy"
       ],
       "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable."
       ],
       "confidence": "high",
       "warnings": [
@@ -18926,8 +19577,20 @@
           "message": "Generated facts contain fields not currently mirrored manually."
         },
         {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
           "kind": "generated_fact_without_manual_match",
           "message": "Generated condition:requires_scored_agenda has no manual ontology match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_advancement_counter has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:start_of_turn_economy has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -18969,8 +19632,27 @@
           "corp_score_agenda",
           "score_next_turn"
         ],
-        "effects": [],
-        "conditions": [],
+        "effects": [
+          {
+            "kind": "card_recovery",
+            "timing": "on_access",
+            "scope": "installed_program",
+            "resource": "cards"
+          },
+          {
+            "kind": "global_modifier",
+            "timing": "when_scored",
+            "scope": "fort"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_accessed_card"
+          },
+          {
+            "kind": "requires_advancement_counter"
+          }
+        ],
         "lineSupport": [
           "corp.ambush_bluff"
         ],
@@ -18983,17 +19665,23 @@
         }
       },
       "overlap": {
-        "matches": [],
-        "generatedOnly": [
+        "matches": [
           "condition:requires_accessed_card"
         ],
-        "manualOnly": []
+        "generatedOnly": [],
+        "manualOnly": [
+          "condition:requires_advancement_counter",
+          "effect:card_recovery",
+          "effect:global_modifier"
+        ]
       },
       "missingManualOverlay": [
-        "condition:requires_accessed_card"
+        "condition:requires_advancement_counter",
+        "effect:card_recovery",
+        "effect:global_modifier"
       ],
       "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
+        "Manual ontology contains fields not currently derivable."
       ],
       "confidence": "high",
       "warnings": [
@@ -19003,11 +19691,19 @@
         },
         {
           "kind": "descriptor_or_overlay_gap",
-          "message": "Generated facts contain fields not currently mirrored manually."
+          "message": "Manual ontology contains fields not currently derivable."
         },
         {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated condition:requires_accessed_card has no manual ontology match."
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_advancement_counter has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:card_recovery has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:global_modifier has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -19049,7 +19745,14 @@
           "corp_score_agenda",
           "score_next_turn"
         ],
-        "effects": [],
+        "effects": [
+          {
+            "kind": "scored_agenda_action",
+            "timing": "when_scored",
+            "scope": "corp",
+            "amount": 4
+          }
+        ],
         "conditions": [],
         "lineSupport": [
           "corp.remote_scoring"
@@ -19067,13 +19770,17 @@
         "generatedOnly": [
           "condition:requires_scored_agenda"
         ],
-        "manualOnly": []
+        "manualOnly": [
+          "effect:scored_agenda_action"
+        ]
       },
       "missingManualOverlay": [
-        "condition:requires_scored_agenda"
+        "condition:requires_scored_agenda",
+        "effect:scored_agenda_action"
       ],
       "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable."
       ],
       "confidence": "high",
       "warnings": [
@@ -19086,8 +19793,16 @@
           "message": "Generated facts contain fields not currently mirrored manually."
         },
         {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
           "kind": "generated_fact_without_manual_match",
           "message": "Generated condition:requires_scored_agenda has no manual ontology match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:scored_agenda_action has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -19232,8 +19947,28 @@
           "protect_remote",
           "protect_rnd"
         ],
-        "effects": [],
-        "conditions": [],
+        "effects": [
+          {
+            "kind": "damage",
+            "timing": "encounter_resolution",
+            "scope": "runner",
+            "resource": "net_damage",
+            "amount": 2
+          },
+          {
+            "kind": "etr",
+            "timing": "encounter_resolution",
+            "scope": "run_path"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ],
         "lineSupport": [
           "corp.damage_kill",
           "corp.ice_tax_glacier"
@@ -19249,12 +19984,45 @@
       "overlap": {
         "matches": [],
         "generatedOnly": [],
-        "manualOnly": []
+        "manualOnly": [
+          "condition:requires_encounter",
+          "condition:requires_unbroken_subroutine",
+          "effect:damage",
+          "effect:etr"
+        ]
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "condition:requires_encounter",
+        "condition:requires_unbroken_subroutine",
+        "effect:damage",
+        "effect:etr"
+      ],
+      "descriptorGaps": [
+        "Manual ontology contains fields not currently derivable."
+      ],
       "confidence": "high",
-      "warnings": [],
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_encounter has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_unbroken_subroutine has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:damage has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:etr has no generated basic fact match."
+        }
+      ],
       "fullCoverageScope": true,
       "coverageClass": "legacy_fallback_only"
     },
@@ -19287,8 +20055,26 @@
           "protect_remote",
           "protect_rnd"
         ],
-        "effects": [],
-        "conditions": [],
+        "effects": [
+          {
+            "kind": "etr",
+            "timing": "encounter_resolution",
+            "scope": "run_path"
+          },
+          {
+            "kind": "global_modifier",
+            "timing": "on_rez",
+            "scope": "ice"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ],
         "lineSupport": [],
         "quality": {
           "hintReviewed": true,
@@ -19301,15 +20087,47 @@
       "overlap": {
         "matches": [],
         "generatedOnly": [],
-        "manualOnly": []
+        "manualOnly": [
+          "condition:requires_encounter",
+          "condition:requires_unbroken_subroutine",
+          "effect:etr",
+          "effect:global_modifier"
+        ]
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "condition:requires_encounter",
+        "condition:requires_unbroken_subroutine",
+        "effect:etr",
+        "effect:global_modifier"
+      ],
+      "descriptorGaps": [
+        "Manual ontology contains fields not currently derivable."
+      ],
       "confidence": "high",
       "warnings": [
         {
           "kind": "confidence_mismatch",
           "message": "Generated confidence high differs from manual confidence medium."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_encounter has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_unbroken_subroutine has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:etr has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:global_modifier has no generated basic fact match."
         }
       ],
       "fullCoverageScope": true,
@@ -19750,8 +20568,26 @@
           "protect_remote",
           "protect_rnd"
         ],
-        "effects": [],
-        "conditions": [],
+        "effects": [
+          {
+            "kind": "etr",
+            "timing": "encounter_resolution",
+            "scope": "run_path"
+          },
+          {
+            "kind": "global_modifier",
+            "timing": "on_rez",
+            "scope": "ice"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ],
         "lineSupport": [],
         "quality": {
           "hintReviewed": true,
@@ -19764,15 +20600,47 @@
       "overlap": {
         "matches": [],
         "generatedOnly": [],
-        "manualOnly": []
+        "manualOnly": [
+          "condition:requires_encounter",
+          "condition:requires_unbroken_subroutine",
+          "effect:etr",
+          "effect:global_modifier"
+        ]
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "condition:requires_encounter",
+        "condition:requires_unbroken_subroutine",
+        "effect:etr",
+        "effect:global_modifier"
+      ],
+      "descriptorGaps": [
+        "Manual ontology contains fields not currently derivable."
+      ],
       "confidence": "high",
       "warnings": [
         {
           "kind": "confidence_mismatch",
           "message": "Generated confidence high differs from manual confidence medium."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_encounter has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_unbroken_subroutine has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:etr has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:global_modifier has no generated basic fact match."
         }
       ],
       "fullCoverageScope": true,
@@ -20047,8 +20915,34 @@
           "protect_remote",
           "protect_rnd"
         ],
-        "effects": [],
-        "conditions": [],
+        "effects": [
+          {
+            "kind": "damage",
+            "timing": "encounter_resolution",
+            "scope": "runner",
+            "resource": "net_damage",
+            "amount": 2
+          },
+          {
+            "kind": "etr",
+            "timing": "encounter_resolution",
+            "scope": "run_path"
+          },
+          {
+            "kind": "global_modifier",
+            "timing": "on_rez",
+            "scope": "ice",
+            "resource": "strength"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ],
         "lineSupport": [
           "corp.ice_tax_glacier"
         ],
@@ -20063,15 +20957,53 @@
       "overlap": {
         "matches": [],
         "generatedOnly": [],
-        "manualOnly": []
+        "manualOnly": [
+          "condition:requires_encounter",
+          "condition:requires_unbroken_subroutine",
+          "effect:damage",
+          "effect:etr",
+          "effect:global_modifier"
+        ]
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "condition:requires_encounter",
+        "condition:requires_unbroken_subroutine",
+        "effect:damage",
+        "effect:etr",
+        "effect:global_modifier"
+      ],
+      "descriptorGaps": [
+        "Manual ontology contains fields not currently derivable."
+      ],
       "confidence": "high",
       "warnings": [
         {
           "kind": "confidence_mismatch",
           "message": "Generated confidence high differs from manual confidence medium."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_encounter has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_unbroken_subroutine has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:damage has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:etr has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:global_modifier has no generated basic fact match."
         }
       ],
       "fullCoverageScope": true,
@@ -20107,8 +21039,34 @@
           "protect_remote",
           "protect_rnd"
         ],
-        "effects": [],
-        "conditions": [],
+        "effects": [
+          {
+            "kind": "damage",
+            "timing": "encounter_resolution",
+            "scope": "runner",
+            "resource": "net_damage",
+            "amount": 1
+          },
+          {
+            "kind": "etr",
+            "timing": "encounter_resolution",
+            "scope": "run_path"
+          },
+          {
+            "kind": "global_modifier",
+            "timing": "persistent",
+            "scope": "ice",
+            "resource": "strength"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ],
         "lineSupport": [
           "corp.damage_kill",
           "corp.ice_tax_glacier"
@@ -20124,12 +21082,51 @@
       "overlap": {
         "matches": [],
         "generatedOnly": [],
-        "manualOnly": []
+        "manualOnly": [
+          "condition:requires_encounter",
+          "condition:requires_unbroken_subroutine",
+          "effect:damage",
+          "effect:etr",
+          "effect:global_modifier"
+        ]
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "condition:requires_encounter",
+        "condition:requires_unbroken_subroutine",
+        "effect:damage",
+        "effect:etr",
+        "effect:global_modifier"
+      ],
+      "descriptorGaps": [
+        "Manual ontology contains fields not currently derivable."
+      ],
       "confidence": "high",
-      "warnings": [],
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_encounter has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_unbroken_subroutine has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:damage has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:etr has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:global_modifier has no generated basic fact match."
+        }
+      ],
       "fullCoverageScope": true,
       "coverageClass": "legacy_fallback_only"
     },
@@ -20162,8 +21159,22 @@
           "protect_remote",
           "protect_rnd"
         ],
-        "effects": [],
-        "conditions": [],
+        "effects": [
+          {
+            "kind": "etr",
+            "timing": "encounter_resolution",
+            "scope": "run_path",
+            "resource": "subroutines"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ],
         "lineSupport": [
           "corp.ice_tax_glacier"
         ],
@@ -20178,15 +21189,41 @@
       "overlap": {
         "matches": [],
         "generatedOnly": [],
-        "manualOnly": []
+        "manualOnly": [
+          "condition:requires_encounter",
+          "condition:requires_unbroken_subroutine",
+          "effect:etr"
+        ]
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "condition:requires_encounter",
+        "condition:requires_unbroken_subroutine",
+        "effect:etr"
+      ],
+      "descriptorGaps": [
+        "Manual ontology contains fields not currently derivable."
+      ],
       "confidence": "high",
       "warnings": [
         {
           "kind": "confidence_mismatch",
           "message": "Generated confidence high differs from manual confidence medium."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_encounter has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_unbroken_subroutine has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:etr has no generated basic fact match."
         }
       ],
       "fullCoverageScope": true,
@@ -20221,8 +21258,26 @@
           "protect_remote",
           "protect_rnd"
         ],
-        "effects": [],
-        "conditions": [],
+        "effects": [
+          {
+            "kind": "etr",
+            "timing": "encounter_resolution",
+            "scope": "run_path"
+          },
+          {
+            "kind": "global_modifier",
+            "timing": "on_rez",
+            "scope": "ice"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ],
         "lineSupport": [],
         "quality": {
           "hintReviewed": true,
@@ -20235,15 +21290,47 @@
       "overlap": {
         "matches": [],
         "generatedOnly": [],
-        "manualOnly": []
+        "manualOnly": [
+          "condition:requires_encounter",
+          "condition:requires_unbroken_subroutine",
+          "effect:etr",
+          "effect:global_modifier"
+        ]
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "condition:requires_encounter",
+        "condition:requires_unbroken_subroutine",
+        "effect:etr",
+        "effect:global_modifier"
+      ],
+      "descriptorGaps": [
+        "Manual ontology contains fields not currently derivable."
+      ],
       "confidence": "high",
       "warnings": [
         {
           "kind": "confidence_mismatch",
           "message": "Generated confidence high differs from manual confidence medium."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_encounter has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_unbroken_subroutine has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:etr has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:global_modifier has no generated basic fact match."
         }
       ],
       "fullCoverageScope": true,
@@ -20278,8 +21365,22 @@
           "protect_remote",
           "protect_rnd"
         ],
-        "effects": [],
-        "conditions": [],
+        "effects": [
+          {
+            "kind": "etr",
+            "timing": "encounter_resolution",
+            "scope": "run_path",
+            "resource": "subroutines"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ],
         "lineSupport": [
           "corp.ice_tax_glacier"
         ],
@@ -20294,15 +21395,41 @@
       "overlap": {
         "matches": [],
         "generatedOnly": [],
-        "manualOnly": []
+        "manualOnly": [
+          "condition:requires_encounter",
+          "condition:requires_unbroken_subroutine",
+          "effect:etr"
+        ]
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "condition:requires_encounter",
+        "condition:requires_unbroken_subroutine",
+        "effect:etr"
+      ],
+      "descriptorGaps": [
+        "Manual ontology contains fields not currently derivable."
+      ],
       "confidence": "high",
       "warnings": [
         {
           "kind": "confidence_mismatch",
           "message": "Generated confidence high differs from manual confidence medium."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_encounter has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_unbroken_subroutine has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:etr has no generated basic fact match."
         }
       ],
       "fullCoverageScope": true,
@@ -20338,8 +21465,41 @@
           "protect_remote",
           "protect_rnd"
         ],
-        "effects": [],
-        "conditions": [],
+        "effects": [
+          {
+            "kind": "etr",
+            "timing": "trace_success",
+            "scope": "run_path"
+          },
+          {
+            "kind": "global_modifier",
+            "timing": "on_rez",
+            "scope": "ice",
+            "resource": "strength"
+          },
+          {
+            "kind": "run_lock",
+            "timing": "trace_success",
+            "scope": "runner",
+            "resource": "actions"
+          },
+          {
+            "kind": "trace",
+            "timing": "encounter_resolution",
+            "scope": "trace"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_trace_success"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ],
         "lineSupport": [
           "corp.ice_tax_glacier"
         ],
@@ -20354,12 +21514,63 @@
       "overlap": {
         "matches": [],
         "generatedOnly": [],
-        "manualOnly": []
+        "manualOnly": [
+          "condition:requires_encounter",
+          "condition:requires_trace_success",
+          "condition:requires_unbroken_subroutine",
+          "effect:etr",
+          "effect:global_modifier",
+          "effect:run_lock",
+          "effect:trace"
+        ]
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "condition:requires_encounter",
+        "condition:requires_trace_success",
+        "condition:requires_unbroken_subroutine",
+        "effect:etr",
+        "effect:global_modifier",
+        "effect:run_lock",
+        "effect:trace"
+      ],
+      "descriptorGaps": [
+        "Manual ontology contains fields not currently derivable."
+      ],
       "confidence": "high",
-      "warnings": [],
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_encounter has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_trace_success has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_unbroken_subroutine has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:etr has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:global_modifier has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:run_lock has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:trace has no generated basic fact match."
+        }
+      ],
       "fullCoverageScope": true,
       "coverageClass": "legacy_fallback_only"
     },
@@ -20392,8 +21603,31 @@
           "protect_hq",
           "protect_rnd"
         ],
-        "effects": [],
-        "conditions": [],
+        "effects": [
+          {
+            "kind": "tag",
+            "timing": "trace_success",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 1
+          },
+          {
+            "kind": "trace",
+            "timing": "encounter_resolution",
+            "scope": "trace"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_trace_success"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ],
         "lineSupport": [
           "corp.ice_tax_glacier",
           "corp.tag_trace_punish"
@@ -20409,15 +21643,53 @@
       "overlap": {
         "matches": [],
         "generatedOnly": [],
-        "manualOnly": []
+        "manualOnly": [
+          "condition:requires_encounter",
+          "condition:requires_trace_success",
+          "condition:requires_unbroken_subroutine",
+          "effect:tag",
+          "effect:trace"
+        ]
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "condition:requires_encounter",
+        "condition:requires_trace_success",
+        "condition:requires_unbroken_subroutine",
+        "effect:tag",
+        "effect:trace"
+      ],
+      "descriptorGaps": [
+        "Manual ontology contains fields not currently derivable."
+      ],
       "confidence": "high",
       "warnings": [
         {
           "kind": "confidence_mismatch",
           "message": "Generated confidence high differs from manual confidence medium."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_encounter has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_trace_success has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_unbroken_subroutine has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:tag has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:trace has no generated basic fact match."
         }
       ],
       "fullCoverageScope": true,
@@ -20589,8 +21861,26 @@
           "protect_remote",
           "protect_rnd"
         ],
-        "effects": [],
-        "conditions": [],
+        "effects": [
+          {
+            "kind": "etr",
+            "timing": "encounter_resolution",
+            "scope": "run_path"
+          },
+          {
+            "kind": "global_modifier",
+            "timing": "on_rez",
+            "scope": "ice"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ],
         "lineSupport": [],
         "quality": {
           "hintReviewed": true,
@@ -20603,15 +21893,47 @@
       "overlap": {
         "matches": [],
         "generatedOnly": [],
-        "manualOnly": []
+        "manualOnly": [
+          "condition:requires_encounter",
+          "condition:requires_unbroken_subroutine",
+          "effect:etr",
+          "effect:global_modifier"
+        ]
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "condition:requires_encounter",
+        "condition:requires_unbroken_subroutine",
+        "effect:etr",
+        "effect:global_modifier"
+      ],
+      "descriptorGaps": [
+        "Manual ontology contains fields not currently derivable."
+      ],
       "confidence": "high",
       "warnings": [
         {
           "kind": "confidence_mismatch",
           "message": "Generated confidence high differs from manual confidence medium."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_encounter has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_unbroken_subroutine has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:etr has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:global_modifier has no generated basic fact match."
         }
       ],
       "fullCoverageScope": true,
@@ -20775,8 +22097,34 @@
           "protect_remote",
           "protect_rnd"
         ],
-        "effects": [],
-        "conditions": [],
+        "effects": [
+          {
+            "kind": "damage",
+            "timing": "encounter_resolution",
+            "scope": "runner",
+            "resource": "brain_damage",
+            "amount": 1
+          },
+          {
+            "kind": "etr",
+            "timing": "encounter_resolution",
+            "scope": "run_path"
+          },
+          {
+            "kind": "global_modifier",
+            "timing": "persistent",
+            "scope": "ice",
+            "resource": "strength"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ],
         "lineSupport": [
           "corp.damage_kill",
           "corp.ice_tax_glacier"
@@ -20792,12 +22140,51 @@
       "overlap": {
         "matches": [],
         "generatedOnly": [],
-        "manualOnly": []
+        "manualOnly": [
+          "condition:requires_encounter",
+          "condition:requires_unbroken_subroutine",
+          "effect:damage",
+          "effect:etr",
+          "effect:global_modifier"
+        ]
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "condition:requires_encounter",
+        "condition:requires_unbroken_subroutine",
+        "effect:damage",
+        "effect:etr",
+        "effect:global_modifier"
+      ],
+      "descriptorGaps": [
+        "Manual ontology contains fields not currently derivable."
+      ],
       "confidence": "high",
-      "warnings": [],
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_encounter has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_unbroken_subroutine has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:damage has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:etr has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:global_modifier has no generated basic fact match."
+        }
+      ],
       "fullCoverageScope": true,
       "coverageClass": "legacy_fallback_only"
     },
@@ -21181,8 +22568,22 @@
           "protect_remote",
           "protect_rnd"
         ],
-        "effects": [],
-        "conditions": [],
+        "effects": [
+          {
+            "kind": "etr",
+            "timing": "encounter_resolution",
+            "scope": "run_path",
+            "resource": "subroutines"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ],
         "lineSupport": [
           "corp.ice_tax_glacier"
         ],
@@ -21197,15 +22598,41 @@
       "overlap": {
         "matches": [],
         "generatedOnly": [],
-        "manualOnly": []
+        "manualOnly": [
+          "condition:requires_encounter",
+          "condition:requires_unbroken_subroutine",
+          "effect:etr"
+        ]
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "condition:requires_encounter",
+        "condition:requires_unbroken_subroutine",
+        "effect:etr"
+      ],
+      "descriptorGaps": [
+        "Manual ontology contains fields not currently derivable."
+      ],
       "confidence": "high",
       "warnings": [
         {
           "kind": "confidence_mismatch",
           "message": "Generated confidence high differs from manual confidence medium."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_encounter has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_unbroken_subroutine has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:etr has no generated basic fact match."
         }
       ],
       "fullCoverageScope": true,
@@ -21350,8 +22777,22 @@
           "protect_remote",
           "protect_rnd"
         ],
-        "effects": [],
-        "conditions": [],
+        "effects": [
+          {
+            "kind": "etr",
+            "timing": "encounter_resolution",
+            "scope": "run_path",
+            "resource": "subroutines"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ],
         "lineSupport": [
           "corp.ice_tax_glacier"
         ],
@@ -21366,15 +22807,41 @@
       "overlap": {
         "matches": [],
         "generatedOnly": [],
-        "manualOnly": []
+        "manualOnly": [
+          "condition:requires_encounter",
+          "condition:requires_unbroken_subroutine",
+          "effect:etr"
+        ]
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "condition:requires_encounter",
+        "condition:requires_unbroken_subroutine",
+        "effect:etr"
+      ],
+      "descriptorGaps": [
+        "Manual ontology contains fields not currently derivable."
+      ],
       "confidence": "high",
       "warnings": [
         {
           "kind": "confidence_mismatch",
           "message": "Generated confidence high differs from manual confidence medium."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_encounter has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_unbroken_subroutine has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:etr has no generated basic fact match."
         }
       ],
       "fullCoverageScope": true,
@@ -21621,8 +23088,26 @@
           "protect_remote",
           "protect_rnd"
         ],
-        "effects": [],
-        "conditions": [],
+        "effects": [
+          {
+            "kind": "etr",
+            "timing": "encounter_resolution",
+            "scope": "run_path"
+          },
+          {
+            "kind": "global_modifier",
+            "timing": "on_rez",
+            "scope": "ice"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ],
         "lineSupport": [],
         "quality": {
           "hintReviewed": true,
@@ -21635,15 +23120,47 @@
       "overlap": {
         "matches": [],
         "generatedOnly": [],
-        "manualOnly": []
+        "manualOnly": [
+          "condition:requires_encounter",
+          "condition:requires_unbroken_subroutine",
+          "effect:etr",
+          "effect:global_modifier"
+        ]
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "condition:requires_encounter",
+        "condition:requires_unbroken_subroutine",
+        "effect:etr",
+        "effect:global_modifier"
+      ],
+      "descriptorGaps": [
+        "Manual ontology contains fields not currently derivable."
+      ],
       "confidence": "high",
       "warnings": [
         {
           "kind": "confidence_mismatch",
           "message": "Generated confidence high differs from manual confidence medium."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_encounter has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_unbroken_subroutine has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:etr has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:global_modifier has no generated basic fact match."
         }
       ],
       "fullCoverageScope": true,
@@ -21678,8 +23195,26 @@
           "protect_remote",
           "protect_rnd"
         ],
-        "effects": [],
-        "conditions": [],
+        "effects": [
+          {
+            "kind": "etr",
+            "timing": "encounter_resolution",
+            "scope": "run_path"
+          },
+          {
+            "kind": "global_modifier",
+            "timing": "on_rez",
+            "scope": "ice"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ],
         "lineSupport": [],
         "quality": {
           "hintReviewed": true,
@@ -21692,15 +23227,47 @@
       "overlap": {
         "matches": [],
         "generatedOnly": [],
-        "manualOnly": []
+        "manualOnly": [
+          "condition:requires_encounter",
+          "condition:requires_unbroken_subroutine",
+          "effect:etr",
+          "effect:global_modifier"
+        ]
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "condition:requires_encounter",
+        "condition:requires_unbroken_subroutine",
+        "effect:etr",
+        "effect:global_modifier"
+      ],
+      "descriptorGaps": [
+        "Manual ontology contains fields not currently derivable."
+      ],
       "confidence": "high",
       "warnings": [
         {
           "kind": "confidence_mismatch",
           "message": "Generated confidence high differs from manual confidence medium."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_encounter has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_unbroken_subroutine has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:etr has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:global_modifier has no generated basic fact match."
         }
       ],
       "fullCoverageScope": true,
@@ -22200,8 +23767,35 @@
           "protect_hq",
           "protect_rnd"
         ],
-        "effects": [],
-        "conditions": [],
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "on_rez",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 3
+          },
+          {
+            "kind": "program_trash",
+            "timing": "encounter_resolution",
+            "scope": "installed_program"
+          },
+          {
+            "kind": "run_tax",
+            "timing": "encounter_resolution",
+            "scope": "runner",
+            "resource": "credits",
+            "amount": 1
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ],
         "lineSupport": [],
         "quality": {
           "hintReviewed": true,
@@ -22212,39 +23806,37 @@
         }
       },
       "overlap": {
-        "matches": [],
-        "generatedOnly": [
+        "matches": [
           "condition:requires_encounter",
           "condition:requires_unbroken_subroutine",
           "effect:economy"
         ],
-        "manualOnly": []
+        "generatedOnly": [],
+        "manualOnly": [
+          "effect:program_trash",
+          "effect:run_tax"
+        ]
       },
       "missingManualOverlay": [
-        "condition:requires_encounter",
-        "condition:requires_unbroken_subroutine",
-        "effect:economy"
+        "effect:program_trash",
+        "effect:run_tax"
       ],
       "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
+        "Manual ontology contains fields not currently derivable."
       ],
       "confidence": "high",
       "warnings": [
         {
           "kind": "descriptor_or_overlay_gap",
-          "message": "Generated facts contain fields not currently mirrored manually."
+          "message": "Manual ontology contains fields not currently derivable."
         },
         {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated condition:requires_encounter has no manual ontology match."
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:program_trash has no generated basic fact match."
         },
         {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated condition:requires_unbroken_subroutine has no manual ontology match."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:economy has no manual ontology match."
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:run_tax has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -25720,7 +27312,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/runner/programs/big-frackin-gun.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -25765,11 +27357,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -25791,7 +27383,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -25919,7 +27511,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/runner/programs/boring-bit.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -25962,11 +27554,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -25988,7 +27580,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -26016,7 +27608,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/runner/programs/bulldozer.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -26053,7 +27645,6 @@
         "cardType": "program",
         "roles": [
           "breaker_fracter",
-          "breaker_killer",
           "icebreaker",
           "program"
         ],
@@ -26065,11 +27656,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -26091,10 +27682,6 @@
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -26125,7 +27712,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/runner/programs/corrosion.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -26168,11 +27755,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -26194,7 +27781,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -26611,7 +28198,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/runner/programs/forwards-legacy.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -26658,11 +28245,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -26684,10 +28271,6 @@
       ],
       "confidence": "medium",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence medium differs from manual confidence low."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -27252,7 +28835,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/runner/programs/redecorator.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -27297,11 +28880,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -27323,7 +28906,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -27466,7 +29049,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/runner/programs/skeleton-passkeys.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -27510,11 +29093,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -27536,7 +29119,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -28086,7 +29669,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/runner/programs/wrecking-ball.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -28134,11 +29717,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -28162,7 +29745,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -28228,7 +29811,7 @@
           "run_pressure"
         ],
         "planRoles": [
-          "pressure_rnd"
+          "pressure_hq"
         ],
         "effects": [
           {
@@ -28356,7 +29939,7 @@
           "run_pressure"
         ],
         "planRoles": [
-          "pressure_rnd"
+          "pressure_hq"
         ],
         "effects": [
           {
@@ -29520,16 +31103,27 @@
           "run_pressure"
         ],
         "planRoles": [
-          "pressure_rnd"
+          "run_pressure"
         ],
         "effects": [
           {
-            "kind": "run_tax",
-            "timing": "action",
+            "kind": "global_modifier",
+            "timing": "successful_run",
             "scope": "corp"
+          },
+          {
+            "kind": "tag",
+            "timing": "successful_run",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 2
           }
         ],
-        "conditions": [],
+        "conditions": [
+          {
+            "kind": "requires_successful_run"
+          }
+        ],
         "lineSupport": [],
         "quality": {
           "hintReviewed": true,
@@ -29543,13 +31137,18 @@
         "matches": [],
         "generatedOnly": [],
         "manualOnly": [
-          "effect:run_tax"
+          "condition:requires_successful_run",
+          "effect:global_modifier",
+          "effect:tag"
         ]
       },
       "missingManualOverlay": [
-        "effect:run_tax"
+        "condition:requires_successful_run",
+        "effect:global_modifier",
+        "effect:tag"
       ],
       "descriptorGaps": [
+        "Intentionally manual strategic overlay is not derived: condition:requires_successful_run.",
         "Manual ontology contains fields not currently derivable."
       ],
       "confidence": "high",
@@ -29560,11 +31159,23 @@
         },
         {
           "kind": "descriptor_or_overlay_gap",
+          "message": "Intentionally manual strategic overlay is not derived: condition:requires_successful_run."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
           "message": "Manual ontology contains fields not currently derivable."
         },
         {
           "kind": "manual_ontology_without_generated_match",
-          "message": "Manual effect:run_tax has no generated basic fact match."
+          "message": "Manual condition:requires_successful_run has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:global_modifier has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:tag has no generated basic fact match."
         }
       ],
       "fullCoverageScope": true,
@@ -31485,11 +33096,6 @@
             "kind": "global_modifier",
             "timing": "persistent",
             "scope": "runner"
-          },
-          {
-            "kind": "search",
-            "timing": "persistent",
-            "scope": "runner"
           }
         ],
         "conditions": [],
@@ -31510,8 +33116,7 @@
           "effect:economy",
           "effect:extra_action",
           "effect:future_run_effect",
-          "effect:global_modifier",
-          "effect:search"
+          "effect:global_modifier"
         ]
       },
       "missingManualOverlay": [
@@ -31519,8 +33124,7 @@
         "effect:economy",
         "effect:extra_action",
         "effect:future_run_effect",
-        "effect:global_modifier",
-        "effect:search"
+        "effect:global_modifier"
       ],
       "descriptorGaps": [
         "Manual ontology contains fields not currently derivable."
@@ -31554,10 +33158,6 @@
         {
           "kind": "manual_ontology_without_generated_match",
           "message": "Manual effect:global_modifier has no generated basic fact match."
-        },
-        {
-          "kind": "manual_ontology_without_generated_match",
-          "message": "Manual effect:search has no generated basic fact match."
         }
       ],
       "fullCoverageScope": true,
@@ -32278,9 +33878,11 @@
         ],
         "effects": [
           {
-            "kind": "access_replacement",
-            "timing": "persistent",
-            "scope": "runner"
+            "kind": "counter_economy",
+            "timing": "after_successful_run",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 3
           },
           {
             "kind": "global_modifier",
@@ -32314,16 +33916,15 @@
           },
           {
             "kind": "prevention_replacement",
-            "timing": "persistent",
-            "scope": "runner"
-          },
-          {
-            "kind": "tag_punish_payoff",
             "timing": "persistent",
             "scope": "runner"
           }
         ],
-        "conditions": [],
+        "conditions": [
+          {
+            "kind": "requires_successful_hq_run"
+          }
+        ],
         "lineSupport": [
           "runner.hq_pressure"
         ],
@@ -32336,25 +33937,23 @@
         }
       },
       "overlap": {
-        "matches": [],
-        "generatedOnly": [
-          "condition:requires_successful_run",
+        "matches": [
           "effect:counter_economy"
         ],
+        "generatedOnly": [
+          "condition:requires_successful_run"
+        ],
         "manualOnly": [
-          "effect:access_replacement",
+          "condition:requires_successful_hq_run",
           "effect:global_modifier",
-          "effect:prevention_replacement",
-          "effect:tag_punish_payoff"
+          "effect:prevention_replacement"
         ]
       },
       "missingManualOverlay": [
+        "condition:requires_successful_hq_run",
         "condition:requires_successful_run",
-        "effect:access_replacement",
-        "effect:counter_economy",
         "effect:global_modifier",
-        "effect:prevention_replacement",
-        "effect:tag_punish_payoff"
+        "effect:prevention_replacement"
       ],
       "descriptorGaps": [
         "Generated facts contain fields not currently mirrored manually.",
@@ -32379,12 +33978,8 @@
           "message": "Generated condition:requires_successful_run has no manual ontology match."
         },
         {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:counter_economy has no manual ontology match."
-        },
-        {
           "kind": "manual_ontology_without_generated_match",
-          "message": "Manual effect:access_replacement has no generated basic fact match."
+          "message": "Manual condition:requires_successful_hq_run has no generated basic fact match."
         },
         {
           "kind": "manual_ontology_without_generated_match",
@@ -32393,10 +33988,6 @@
         {
           "kind": "manual_ontology_without_generated_match",
           "message": "Manual effect:prevention_replacement has no generated basic fact match."
-        },
-        {
-          "kind": "manual_ontology_without_generated_match",
-          "message": "Manual effect:tag_punish_payoff has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -33074,11 +34665,6 @@
         ],
         "effects": [
           {
-            "kind": "access_replacement",
-            "timing": "persistent",
-            "scope": "runner"
-          },
-          {
             "kind": "global_modifier",
             "timing": "persistent",
             "scope": "runner"
@@ -33094,9 +34680,11 @@
             "scope": "runner"
           },
           {
-            "kind": "prevention_replacement",
+            "kind": "persistent_counter_effect",
             "timing": "persistent",
-            "scope": "runner"
+            "scope": "hq",
+            "resource": "cards",
+            "amount": 2
           },
           {
             "kind": "prevention_replacement",
@@ -33119,7 +34707,7 @@
             "scope": "runner"
           },
           {
-            "kind": "tag_punish_payoff",
+            "kind": "prevention_replacement",
             "timing": "persistent",
             "scope": "runner"
           }
@@ -33138,17 +34726,15 @@
         "matches": [],
         "generatedOnly": [],
         "manualOnly": [
-          "effect:access_replacement",
           "effect:global_modifier",
-          "effect:prevention_replacement",
-          "effect:tag_punish_payoff"
+          "effect:persistent_counter_effect",
+          "effect:prevention_replacement"
         ]
       },
       "missingManualOverlay": [
-        "effect:access_replacement",
         "effect:global_modifier",
-        "effect:prevention_replacement",
-        "effect:tag_punish_payoff"
+        "effect:persistent_counter_effect",
+        "effect:prevention_replacement"
       ],
       "descriptorGaps": [
         "Manual ontology contains fields not currently derivable."
@@ -33165,19 +34751,15 @@
         },
         {
           "kind": "manual_ontology_without_generated_match",
-          "message": "Manual effect:access_replacement has no generated basic fact match."
-        },
-        {
-          "kind": "manual_ontology_without_generated_match",
           "message": "Manual effect:global_modifier has no generated basic fact match."
         },
         {
           "kind": "manual_ontology_without_generated_match",
-          "message": "Manual effect:prevention_replacement has no generated basic fact match."
+          "message": "Manual effect:persistent_counter_effect has no generated basic fact match."
         },
         {
           "kind": "manual_ontology_without_generated_match",
-          "message": "Manual effect:tag_punish_payoff has no generated basic fact match."
+          "message": "Manual effect:prevention_replacement has no generated basic fact match."
         }
       ],
       "fullCoverageScope": true,
@@ -33213,16 +34795,6 @@
         ],
         "effects": [
           {
-            "kind": "access_replacement",
-            "timing": "persistent",
-            "scope": "runner"
-          },
-          {
-            "kind": "access_replacement",
-            "timing": "persistent",
-            "scope": "runner"
-          },
-          {
             "kind": "global_modifier",
             "timing": "persistent",
             "scope": "runner"
@@ -33231,6 +34803,13 @@
             "kind": "global_modifier",
             "timing": "persistent",
             "scope": "runner"
+          },
+          {
+            "kind": "multiaccess",
+            "timing": "persistent",
+            "scope": "hq",
+            "resource": "cards",
+            "amount": 2
           },
           {
             "kind": "prevention_replacement",
@@ -33270,14 +34849,14 @@
         "matches": [],
         "generatedOnly": [],
         "manualOnly": [
-          "effect:access_replacement",
           "effect:global_modifier",
+          "effect:multiaccess",
           "effect:prevention_replacement"
         ]
       },
       "missingManualOverlay": [
-        "effect:access_replacement",
         "effect:global_modifier",
+        "effect:multiaccess",
         "effect:prevention_replacement"
       ],
       "descriptorGaps": [
@@ -33295,11 +34874,11 @@
         },
         {
           "kind": "manual_ontology_without_generated_match",
-          "message": "Manual effect:access_replacement has no generated basic fact match."
+          "message": "Manual effect:global_modifier has no generated basic fact match."
         },
         {
           "kind": "manual_ontology_without_generated_match",
-          "message": "Manual effect:global_modifier has no generated basic fact match."
+          "message": "Manual effect:multiaccess has no generated basic fact match."
         },
         {
           "kind": "manual_ontology_without_generated_match",
@@ -33787,16 +35366,6 @@
         ],
         "effects": [
           {
-            "kind": "access_replacement",
-            "timing": "persistent",
-            "scope": "runner"
-          },
-          {
-            "kind": "access_replacement",
-            "timing": "persistent",
-            "scope": "runner"
-          },
-          {
             "kind": "global_modifier",
             "timing": "persistent",
             "scope": "runner"
@@ -33805,6 +35374,13 @@
             "kind": "global_modifier",
             "timing": "persistent",
             "scope": "runner"
+          },
+          {
+            "kind": "multiaccess",
+            "timing": "persistent",
+            "scope": "rnd",
+            "resource": "cards",
+            "amount": 2
           },
           {
             "kind": "prevention_replacement",
@@ -33844,14 +35420,14 @@
         "matches": [],
         "generatedOnly": [],
         "manualOnly": [
-          "effect:access_replacement",
           "effect:global_modifier",
+          "effect:multiaccess",
           "effect:prevention_replacement"
         ]
       },
       "missingManualOverlay": [
-        "effect:access_replacement",
         "effect:global_modifier",
+        "effect:multiaccess",
         "effect:prevention_replacement"
       ],
       "descriptorGaps": [
@@ -33869,11 +35445,11 @@
         },
         {
           "kind": "manual_ontology_without_generated_match",
-          "message": "Manual effect:access_replacement has no generated basic fact match."
+          "message": "Manual effect:global_modifier has no generated basic fact match."
         },
         {
           "kind": "manual_ontology_without_generated_match",
-          "message": "Manual effect:global_modifier has no generated basic fact match."
+          "message": "Manual effect:multiaccess has no generated basic fact match."
         },
         {
           "kind": "manual_ontology_without_generated_match",
@@ -35091,7 +36667,7 @@
           "strategyCovered": false,
           "benchmarkCovered": false,
           "confidence": "medium",
-          "needsHumanReview": true
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -35675,7 +37251,7 @@
           "strategyCovered": false,
           "benchmarkCovered": true,
           "confidence": "medium",
-          "needsHumanReview": true
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -36469,7 +38045,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/codeslinger.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -36512,11 +38088,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -36538,7 +38114,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -36601,7 +38177,6 @@
         "cardType": "program",
         "roles": [
           "breaker_decoder",
-          "code_gate_breaker",
           "efficient_breaker",
           "icebreaker",
           "program"
@@ -36859,7 +38434,14 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "medium",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -36878,6 +38460,10 @@
       ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -37059,7 +38645,14 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "medium",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -37080,6 +38673,10 @@
       ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -37526,7 +39123,14 @@
         "conditions": [],
         "lineSupport": [
           "runner.survival_defense"
-        ]
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "medium",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -37561,6 +39165,10 @@
       ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -37946,7 +39554,14 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "medium",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -37965,6 +39580,10 @@
       ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -38330,7 +39949,7 @@
         "side": "runner",
         "cardType": "program",
         "roles": [
-          "barrier_breaker",
+          "breaker_fracter",
           "icebreaker",
           "program",
           "run_scaling"
@@ -38341,7 +39960,14 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "medium",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -38360,6 +39986,10 @@
       ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -38432,7 +40062,14 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "medium",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -38453,6 +40090,10 @@
       ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -38924,8 +40565,7 @@
           "breaker_fracter",
           "icebreaker",
           "noisy",
-          "program",
-          "wall_breaker"
+          "program"
         ],
         "planRoles": [
           "build_rig",
@@ -38933,7 +40573,14 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "medium",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -38954,6 +40601,10 @@
       ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -40144,8 +41795,7 @@
           "breaker_fracter",
           "icebreaker",
           "program",
-          "stealth_loss",
-          "wall_breaker"
+          "stealth_loss"
         ],
         "planRoles": [
           "break_walls",
@@ -40480,7 +42130,7 @@
           "access_replacement",
           "hidden_zone_tool",
           "program",
-          "rd_run"
+          "rd_pressure"
         ],
         "planRoles": [
           "information",
@@ -40708,7 +42358,6 @@
         "cardType": "program",
         "roles": [
           "breaker_decoder",
-          "code_gate_breaker",
           "efficient_breaker",
           "high_install_cost",
           "icebreaker",
@@ -40814,10 +42463,10 @@
         "side": "runner",
         "cardType": "program",
         "roles": [
+          "breaker_fracter",
           "icebreaker",
           "program",
-          "stealth_loss",
-          "wall_breaker"
+          "stealth_loss"
         ],
         "planRoles": [
           "break_walls",
@@ -40825,7 +42474,14 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "medium",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -40846,6 +42502,10 @@
       ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -40913,8 +42573,7 @@
           "breaker_killer",
           "icebreaker",
           "low_install_breaker",
-          "program",
-          "sentry_breaker"
+          "program"
         ],
         "planRoles": [
           "build_rig",
@@ -41052,8 +42711,8 @@
           "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -41070,7 +42729,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "text_pattern_derivation",
@@ -41534,8 +43193,7 @@
           "breaker_killer",
           "efficient_sentry_breaker",
           "icebreaker",
-          "program",
-          "sentry_breaker"
+          "program"
         ],
         "planRoles": [
           "build_rig",
@@ -42662,7 +44320,7 @@
           "strategyCovered": false,
           "benchmarkCovered": true,
           "confidence": "medium",
-          "needsHumanReview": true
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -43972,14 +45630,9 @@
         "cardType": "event",
         "roles": [
           "agenda_point_event",
-          "event",
-          "steal_reward"
+          "event"
         ],
-        "planRoles": [
-          "contest_remote",
-          "pressure_hq",
-          "pressure_rnd"
-        ],
+        "planRoles": [],
         "effects": [
           {
             "kind": "scored_agenda_action",
@@ -43989,7 +45642,10 @@
         ],
         "conditions": [
           {
-            "kind": "requires_scored_agenda"
+            "kind": "requires_liberated_agenda_this_turn"
+          },
+          {
+            "kind": "requires_liberated_gray_ops_agenda"
           }
         ],
         "lineSupport": [],
@@ -44005,12 +45661,14 @@
         "matches": [],
         "generatedOnly": [],
         "manualOnly": [
-          "condition:requires_scored_agenda",
+          "condition:requires_liberated_agenda_this_turn",
+          "condition:requires_liberated_gray_ops_agenda",
           "effect:scored_agenda_action"
         ]
       },
       "missingManualOverlay": [
-        "condition:requires_scored_agenda",
+        "condition:requires_liberated_agenda_this_turn",
+        "condition:requires_liberated_gray_ops_agenda",
         "effect:scored_agenda_action"
       ],
       "descriptorGaps": [
@@ -44028,7 +45686,11 @@
         },
         {
           "kind": "manual_ontology_without_generated_match",
-          "message": "Manual condition:requires_scored_agenda has no generated basic fact match."
+          "message": "Manual condition:requires_liberated_agenda_this_turn has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_liberated_gray_ops_agenda has no generated basic fact match."
         },
         {
           "kind": "manual_ontology_without_generated_match",
@@ -44098,11 +45760,10 @@
           "access_replacement",
           "economy",
           "event",
-          "hq_run",
+          "hq_pressure",
           "tag_self"
         ],
         "planRoles": [
-          "contest_remote",
           "pressure_hq"
         ],
         "effects": [
@@ -44751,14 +46412,9 @@
         "cardType": "event",
         "roles": [
           "agenda_point_event",
-          "event",
-          "steal_reward"
+          "event"
         ],
-        "planRoles": [
-          "contest_remote",
-          "pressure_hq",
-          "pressure_rnd"
-        ],
+        "planRoles": [],
         "effects": [
           {
             "kind": "scored_agenda_action",
@@ -44768,7 +46424,10 @@
         ],
         "conditions": [
           {
-            "kind": "requires_scored_agenda"
+            "kind": "requires_liberated_agenda_this_turn"
+          },
+          {
+            "kind": "requires_liberated_black_ops_agenda"
           }
         ],
         "lineSupport": [],
@@ -44784,12 +46443,14 @@
         "matches": [],
         "generatedOnly": [],
         "manualOnly": [
-          "condition:requires_scored_agenda",
+          "condition:requires_liberated_agenda_this_turn",
+          "condition:requires_liberated_black_ops_agenda",
           "effect:scored_agenda_action"
         ]
       },
       "missingManualOverlay": [
-        "condition:requires_scored_agenda",
+        "condition:requires_liberated_agenda_this_turn",
+        "condition:requires_liberated_black_ops_agenda",
         "effect:scored_agenda_action"
       ],
       "descriptorGaps": [
@@ -44807,7 +46468,11 @@
         },
         {
           "kind": "manual_ontology_without_generated_match",
-          "message": "Manual condition:requires_scored_agenda has no generated basic fact match."
+          "message": "Manual condition:requires_liberated_agenda_this_turn has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_liberated_black_ops_agenda has no generated basic fact match."
         },
         {
           "kind": "manual_ontology_without_generated_match",
@@ -46319,7 +47984,7 @@
         "cardType": "event",
         "roles": [
           "event",
-          "hq_run",
+          "hq_pressure",
           "rd_success_replacement"
         ],
         "planRoles": [
@@ -47399,7 +49064,7 @@
         "cardType": "event",
         "roles": [
           "event",
-          "tag_remove"
+          "tag_removal"
         ],
         "planRoles": [
           "clear_tags"
@@ -48629,7 +50294,7 @@
         "cardType": "hardware",
         "roles": [
           "hardware",
-          "tag_remove"
+          "tag_removal"
         ],
         "planRoles": [
           "build_rig",
@@ -54081,7 +55746,7 @@
         "planRoles": [
           "avoid_tags",
           "build_rig",
-          "remove_tags"
+          "clear_tags"
         ],
         "effects": [
           {
@@ -59726,8 +61391,19 @@
           "score_next_turn",
           "score_now"
         ],
-        "effects": [],
-        "conditions": [],
+        "effects": [
+          {
+            "kind": "scored_agenda_action",
+            "timing": "when_scored",
+            "scope": "corp",
+            "resource": "advancement_counters"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_advancement_counter"
+          }
+        ],
         "lineSupport": [
           "corp.overadvance_value"
         ],
@@ -59744,13 +61420,19 @@
         "generatedOnly": [
           "condition:requires_scored_agenda"
         ],
-        "manualOnly": []
+        "manualOnly": [
+          "condition:requires_advancement_counter",
+          "effect:scored_agenda_action"
+        ]
       },
       "missingManualOverlay": [
-        "condition:requires_scored_agenda"
+        "condition:requires_advancement_counter",
+        "condition:requires_scored_agenda",
+        "effect:scored_agenda_action"
       ],
       "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable."
       ],
       "confidence": "high",
       "warnings": [
@@ -59759,8 +61441,20 @@
           "message": "Generated facts contain fields not currently mirrored manually."
         },
         {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
           "kind": "generated_fact_without_manual_match",
           "message": "Generated condition:requires_scored_agenda has no manual ontology match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_advancement_counter has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:scored_agenda_action has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -60569,12 +62263,10 @@
         "cardType": "ice",
         "roles": [
           "ice",
-          "tag",
           "trace"
         ],
         "planRoles": [
-          "defend_server",
-          "tag_pressure"
+          "defend_server"
         ],
         "effects": [],
         "conditions": [],
@@ -63444,12 +65136,10 @@
         "cardType": "ice",
         "roles": [
           "ice",
-          "tag",
           "trace"
         ],
         "planRoles": [
-          "defend_server",
-          "tag_pressure"
+          "defend_server"
         ],
         "effects": [],
         "conditions": [],
@@ -64122,7 +65812,6 @@
         "cardType": "ice",
         "roles": [
           "ice",
-          "net_damage",
           "program_trash",
           "trace"
         ],
@@ -65436,8 +67125,7 @@
           "trace"
         ],
         "planRoles": [
-          "defend_server",
-          "tag_pressure"
+          "defend_server"
         ],
         "effects": [],
         "conditions": [],
@@ -67644,8 +69332,21 @@
           "protect_hq",
           "protect_rnd"
         ],
-        "effects": [],
-        "conditions": [],
+        "effects": [
+          {
+            "kind": "etr",
+            "timing": "encounter_resolution",
+            "scope": "run_path"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ],
         "lineSupport": [],
         "quality": {
           "hintReviewed": true,
@@ -67656,33 +69357,30 @@
         }
       },
       "overlap": {
-        "matches": [],
-        "generatedOnly": [
+        "matches": [
           "condition:requires_encounter",
           "condition:requires_unbroken_subroutine"
         ],
-        "manualOnly": []
+        "generatedOnly": [],
+        "manualOnly": [
+          "effect:etr"
+        ]
       },
       "missingManualOverlay": [
-        "condition:requires_encounter",
-        "condition:requires_unbroken_subroutine"
+        "effect:etr"
       ],
       "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
+        "Manual ontology contains fields not currently derivable."
       ],
       "confidence": "high",
       "warnings": [
         {
           "kind": "descriptor_or_overlay_gap",
-          "message": "Generated facts contain fields not currently mirrored manually."
+          "message": "Manual ontology contains fields not currently derivable."
         },
         {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated condition:requires_encounter has no manual ontology match."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated condition:requires_unbroken_subroutine has no manual ontology match."
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:etr has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -67972,8 +69670,21 @@
           "protect_hq",
           "protect_rnd"
         ],
-        "effects": [],
-        "conditions": [],
+        "effects": [
+          {
+            "kind": "future_run_effect",
+            "timing": "encounter_resolution",
+            "scope": "run_path"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ],
         "lineSupport": [
           "corp.ice_tax_glacier"
         ],
@@ -67986,19 +69697,20 @@
         }
       },
       "overlap": {
-        "matches": [],
-        "generatedOnly": [
+        "matches": [
           "condition:requires_encounter",
           "condition:requires_unbroken_subroutine"
         ],
-        "manualOnly": []
+        "generatedOnly": [],
+        "manualOnly": [
+          "effect:future_run_effect"
+        ]
       },
       "missingManualOverlay": [
-        "condition:requires_encounter",
-        "condition:requires_unbroken_subroutine"
+        "effect:future_run_effect"
       ],
       "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
+        "Manual ontology contains fields not currently derivable."
       ],
       "confidence": "high",
       "warnings": [
@@ -68008,15 +69720,11 @@
         },
         {
           "kind": "descriptor_or_overlay_gap",
-          "message": "Generated facts contain fields not currently mirrored manually."
+          "message": "Manual ontology contains fields not currently derivable."
         },
         {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated condition:requires_encounter has no manual ontology match."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated condition:requires_unbroken_subroutine has no manual ontology match."
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:future_run_effect has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -78754,8 +80462,6 @@
         "side": "corp",
         "cardType": "upgrade",
         "roles": [
-          "economy",
-          "tag",
           "upgrade"
         ],
         "planRoles": [
@@ -79949,7 +81655,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/__missing__/runner_identity_001.ts",
       "implementationFound": false,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -79968,18 +81674,16 @@
           "runner_identity",
           "setup"
         ],
-        "planRoles": [
-          "build_rig"
-        ],
+        "planRoles": [],
         "effects": [],
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -79997,7 +81701,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -80204,7 +81908,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/__missing__/simple_decoder.ts",
       "implementationFound": false,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -80239,11 +81943,11 @@
         },
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -80265,7 +81969,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -80289,7 +81993,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/__missing__/simple_draw_event.ts",
       "implementationFound": false,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -80315,11 +82019,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -80337,7 +82041,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -80373,7 +82077,7 @@
           "setup"
         ],
         "planRoles": [
-          "recover_economy"
+          "draw_for_answers"
         ],
         "effects": [
           {
@@ -80512,7 +82216,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/__missing__/simple_economy_event.ts",
       "implementationFound": false,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -80538,11 +82242,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -80560,7 +82264,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -80654,7 +82358,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/__missing__/simple_fracter.ts",
       "implementationFound": false,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -80689,11 +82393,11 @@
         },
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -80715,7 +82419,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -80739,7 +82443,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/__missing__/simple_killer.ts",
       "implementationFound": false,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -80774,11 +82478,11 @@
         },
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -80800,7 +82504,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -80884,7 +82588,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/__missing__/simple_run_event.ts",
       "implementationFound": false,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -80903,18 +82607,16 @@
           "event",
           "run_pressure"
         ],
-        "planRoles": [
-          "pressure_rnd"
-        ],
+        "planRoles": [],
         "effects": [],
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -80932,7 +82634,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -81012,7 +82714,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/__missing__/simple_setup_hardware.ts",
       "implementationFound": false,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -81031,18 +82733,16 @@
           "memory",
           "setup"
         ],
-        "planRoles": [
-          "safe_probe_run"
-        ],
+        "planRoles": [],
         "effects": [],
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -81060,7 +82760,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -81161,7 +82861,7 @@
           "tag_punishment"
         ],
         "planRoles": [
-          "recover_economy"
+          "punish_tagged_runner"
         ],
         "effects": [
           {
@@ -81314,9 +83014,7 @@
           "remote_support",
           "upgrade"
         ],
-        "planRoles": [
-          "recover_economy"
-        ],
+        "planRoles": [],
         "effects": [],
         "conditions": [],
         "lineSupport": [],
@@ -81355,7 +83053,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/__missing__/v08_adaptive_killer.ts",
       "implementationFound": false,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -81390,11 +83088,11 @@
         },
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -81416,7 +83114,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -81460,7 +83158,7 @@
           "setup"
         ],
         "planRoles": [
-          "recover_economy"
+          "draw_for_answers"
         ],
         "effects": [
           {
@@ -81520,7 +83218,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/__missing__/v08_burst_credit_event.ts",
       "implementationFound": false,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -81546,11 +83244,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -81568,7 +83266,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -81743,7 +83441,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/__missing__/v08_deep_draw_event.ts",
       "implementationFound": false,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -81769,11 +83467,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -81791,7 +83489,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -81872,7 +83570,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/__missing__/v08_memory_chip.ts",
       "implementationFound": false,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -81891,18 +83589,16 @@
           "memory",
           "setup"
         ],
-        "planRoles": [
-          "safe_probe_run"
-        ],
+        "planRoles": [],
         "effects": [],
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -81920,7 +83616,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -81936,7 +83632,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/__missing__/v08_overclock_run_event.ts",
       "implementationFound": false,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -81956,18 +83652,17 @@
           "run_pressure"
         ],
         "planRoles": [
-          "pressure_rnd",
           "recover_economy"
         ],
         "effects": [],
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -81985,7 +83680,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -82001,7 +83696,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/__missing__/v08_precise_decoder.ts",
       "implementationFound": false,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -82036,11 +83731,11 @@
         },
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -82062,7 +83757,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -82146,7 +83841,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/__missing__/v08_steady_fracter.ts",
       "implementationFound": false,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -82181,11 +83876,11 @@
         },
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -82207,7 +83902,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",

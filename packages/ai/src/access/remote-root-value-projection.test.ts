@@ -16,13 +16,37 @@ describe("remote root value projection", () => {
           type: "asset",
           counters: { bit: 5 },
         },
-        valueHints: { economy: 3 },
+        valueHints: { remoteRootValue: 3 },
       }),
     ).toMatchObject({
       kind: "finite_economy_pool",
       finitePoolValueRemaining: 5,
       finitePoolDepleted: false,
       valueScore: 3,
+    });
+  });
+
+  it("ignores unrelated value numbers in remote-root valuation", () => {
+    expect(
+      projectRemoteRootValue({
+        definitionId: "typed-root-value",
+        roles: ["ambush"],
+        valueHints: { damage: 15 },
+      }),
+    ).toMatchObject({
+      kind: "ambush",
+      valueScore: 0,
+    });
+
+    expect(
+      projectRemoteRootValue({
+        definitionId: "typed-root-value",
+        roles: ["ambush"],
+        valueHints: { damage: 15, remoteRootValue: 4 },
+      }),
+    ).toMatchObject({
+      kind: "ambush",
+      valueScore: 4,
     });
   });
 

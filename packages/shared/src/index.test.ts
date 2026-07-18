@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { CURRENT_RULES_BASELINE } from "./baselines";
-import { LEGACY_ABILITY_PAYLOAD_FIELDS } from "./ability-payload";
+import { ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS } from "./ability-payload";
 import { CORE_DEMO_DECK_IDS, LEGACY_FIXTURE_DECK_IDS } from "./demo-fixtures";
 import { DEMO_DECKS } from "./demo-decks";
 import {
@@ -11,13 +11,13 @@ import {
   CARD_DEFINITIONS_BY_ID,
   CURRENT_RULES_BASELINE as INDEX_CURRENT_RULES_BASELINE,
   DEMO_DECKS as INDEX_DEMO_DECKS,
-  LEGACY_ABILITY_PAYLOAD_FIELDS as INDEX_LEGACY_ABILITY_PAYLOAD_FIELDS,
+  ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS as INDEX_ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS,
   sanitizeAiDecisionDebug,
 } from "./index";
 
-describe("legacy ability payload compatibility registry", () => {
-  it("keeps stable coverage for historical ability payload aliases", () => {
-    expect(LEGACY_ABILITY_PAYLOAD_FIELDS).toEqual(
+describe("current ability payload discriminator registry", () => {
+  it("covers current runtime discriminator families without dead v1919 aliases", () => {
+    expect(ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS).toEqual(
       expect.arrayContaining([
         "v1911HiddenZoneAbility",
         "v1917AssetAbility",
@@ -28,11 +28,17 @@ describe("legacy ability payload compatibility registry", () => {
         "resourceAbility",
       ]),
     );
-    expect(new Set(LEGACY_ABILITY_PAYLOAD_FIELDS).size).toBe(
-      LEGACY_ABILITY_PAYLOAD_FIELDS.length,
+    expect(ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS).not.toContain(
+      "v1919AssetAbility",
     );
-    expect(INDEX_LEGACY_ABILITY_PAYLOAD_FIELDS).toBe(
-      LEGACY_ABILITY_PAYLOAD_FIELDS,
+    expect(ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS).not.toContain(
+      "v1919UpgradeAbility",
+    );
+    expect(new Set(ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS).size).toBe(
+      ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS.length,
+    );
+    expect(INDEX_ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS).toBe(
+      ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS,
     );
   });
 });

@@ -61,7 +61,7 @@ describe("AI hint ontology doctrine diagnostics", () => {
     expect(summary.lineSupportCounts.byKind["runner.remote_trash"] ?? 0).toBe(0);
   });
 
-  it("reports quality review gaps without changing plan weights", () => {
+  it("keeps reviewed fixture hints out of quality gaps without changing plan weights", () => {
     const summary = buildAiDeckOntologySummary({
       deckSnapshotId: "ontology-quality-pilot",
       side: "runner",
@@ -71,10 +71,10 @@ describe("AI hint ontology doctrine diagnostics", () => {
       ],
     });
 
-    expect(summary.quality.needsHumanReviewCardIds).toContain(
+    expect(summary.quality.needsHumanReviewCardIds).not.toContain(
       "runner_identity_001",
     );
-    expect(summary.quality.lowConfidenceCardIds).toContain(
+    expect(summary.quality.lowConfidenceCardIds).not.toContain(
       "runner_identity_001",
     );
     expect(summary.structuredCardCount).toBe(1);

@@ -1,7 +1,9 @@
 export {
-  LEGACY_ABILITY_PAYLOAD_FIELDS,
-  type LegacyAbilityPayloadField,
+  ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS,
+  type AbilityPayloadDiscriminatorField,
+  type AbilityPayloadDiscriminators,
 } from "./ability-payload";
+import type { AbilityPayloadDiscriminators } from "./ability-payload";
 import proteusCardsData from "../../../data/cards/proteus-cards.json";
 import classicCardsData from "../../../data/cards/classic-cards.json";
 export type {
@@ -423,14 +425,30 @@ export type ResolvedGameEffect = {
   removedCounterAmount?: number;
   remainingCounters?: number;
   addedCounterAmount?: number;
+  tagsAdded?: number;
   runnerTagsAfter?: number;
   redactedKind?: string;
   subroutineIndex?: number;
   subroutineType?: SubroutineType;
   dieRoll?: number;
+  dieSize?: number;
+  dieRolls?: string;
+  randomPurpose?: string;
+  randomCounterAfter?: number;
   randomDamageApplied?: boolean;
+  randomEffectOutcome?: string;
+  restrictedActionFamily?: RestrictedActionFamily;
+  runAttemptsLastTurn?: number;
+  badPublicityAdded?: number;
+  corpBadPublicityAfter?: number;
+  permanentActionGain?: boolean;
+  sourceTrashed?: boolean;
+  runnerClicksAfter?: number;
+  damageCannotBePrevented?: boolean;
   damageType?: DamageType;
   cardsTrashed?: number;
+  coreDamageAfter?: number;
+  flatline?: boolean;
   endedRun?: boolean;
   paidCredits?: number;
   preventable?: boolean;
@@ -442,6 +460,41 @@ export type ResolvedGameEffect = {
   cardTitle?: string;
   serverId?: ServerId;
   serverLabel?: string;
+};
+
+export type PublicAbilityFamily =
+  | "agenda-scoring"
+  | "damage-prevention"
+  | "hidden-zone"
+  | "hosting-counters"
+  | "payment-costs"
+  | "random-effects"
+  | "run-access"
+  | "trace-tags";
+
+export type PublicAbilityVisibility = {
+  class: EventVisibilityClass;
+  hiddenZoneBarrier?: boolean;
+  redactedKind?: string;
+};
+
+/**
+ * Side-safe fields shared by Chronicle, replay, AI and server projections.
+ * Event-specific fields remain possible, but common semantics must use these
+ * names and types instead of introducing another parallel payload vocabulary.
+ */
+export type PublicEventPayload = Record<string, unknown> & {
+  actor?: Side;
+  actionType?: string;
+  label?: string;
+  abilityFamily?: PublicAbilityFamily;
+  abilityId?: string;
+  effectKind?: string;
+  sourceDefinitionId?: string;
+  amounts?: Record<string, number>;
+  targets?: Record<string, string | number | boolean>;
+  visibility?: PublicAbilityVisibility;
+  resolvedEffects?: ResolvedGameEffect[];
 };
 
 export type SpecialZoneKind = "set_aside" | "removed_from_game";
@@ -666,7 +719,7 @@ export type ChoiceOption = {
   metadata?: {
     creditCost?: number;
     postBidTraceLinkDelta?: number;
-    shellTradersRemainingCounters?: number;
+    delayedInstallRemainingCounters?: number;
   };
 };
 
@@ -1347,10 +1400,12 @@ export type PublicGameEvent = {
   turnSerial?: number;
   stateHashAfter: StateHash;
   visibilityClass?: EventVisibilityClass;
-  publicPayload: Record<string, unknown>;
+  publicPayload: PublicEventPayload;
 };
 
 export type GameEvent = PublicGameEvent & {
+  // Persisted/local replay input is validated structurally at the replay edge;
+  // malformed stored data must remain representable so it can be rejected.
   privatePayload?: Partial<Record<Side, Record<string, unknown>>>;
 };
 
@@ -1433,7 +1488,7 @@ export type PendingAddTagContinuation =
       runnerTagsBefore: number;
     };
 
-export type DataFortReclamationSequenceState = {
+export type HqInstallRezSequenceState = {
   sourceAgendaId: CardInstanceId;
   sourceDefinitionId: CardDefinitionId;
   serverId: Exclude<ServerId, "new_remote">;
@@ -1464,7 +1519,7 @@ export type GameState = {
   agendaPointsToWin: number;
   setup?: SetupState;
   pendingChoice?: PendingChoice;
-  dataFortReclamationSequence?: DataFortReclamationSequenceState;
+  hqInstallRezSequence?: HqInstallRezSequenceState;
   pendingAddTagContinuation?: PendingAddTagContinuation;
   runnerDrawSequence?: RunnerDrawSequence;
   imminentEvent?: ImminentEvent;
@@ -1695,8 +1750,15 @@ export type LegalAction = {
   resolvedEffects?: ResolvedGameEffect[];
   visibility: "public" | "private_to_actor";
   expiresAtStateVersion: number;
-  payload?: Record<string, string | number | boolean>;
+  payload?: LegalActionPayload;
 };
+
+export type LegalActionPayload = Record<string, string | number | boolean> &
+  AbilityPayloadDiscriminators & {
+    abilityFamily?: PublicAbilityFamily;
+    abilityId?: string;
+    effectKind?: string;
+  };
 
 export type PlayerAction = {
   matchId: string;

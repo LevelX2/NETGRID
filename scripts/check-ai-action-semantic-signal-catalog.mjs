@@ -89,6 +89,9 @@ function buildReport() {
       signal,
     ]),
   );
+  const targetProfileRequiredSignalIds = new Set(
+    tacticSignalCatalog.signalPolicy?.targetProfileRequiredSignalIds ?? [],
+  );
 
   const rows = (activeHints.cards ?? [])
     .map((activeCard) =>
@@ -96,7 +99,8 @@ function buildReport() {
         activeCard,
         compiledCard: compiledByCardId.get(activeCard.cardId),
         inspectorCard: inspectorByCardId.get(activeCard.cardId),
-        signalById,
+      signalById,
+      targetProfileRequiredSignalIds,
       }),
     )
     .sort((left, right) => left.cardId.localeCompare(right.cardId));
@@ -140,7 +144,13 @@ function buildReport() {
   };
 }
 
-function buildRow({ activeCard, compiledCard, inspectorCard, signalById }) {
+function buildRow({
+  activeCard,
+  compiledCard,
+  inspectorCard,
+  signalById,
+  targetProfileRequiredSignalIds,
+}) {
   const derivedFunctionSignals = sortedUnique(
     inspectorCard?.derivedFunctionSignals ?? [],
   );
@@ -156,7 +166,7 @@ function buildRow({ activeCard, compiledCard, inspectorCard, signalById }) {
     pureStructuralSignal(signalId, signalIds),
   );
   const targetProfileExpectedBySignals = derivedFunctionSignals.filter(
-    (signalId) => signalById.get(signalId)?.targetProfileRelevant === true,
+    (signalId) => targetProfileRequiredSignalIds.has(signalId),
   );
   const targetProfileCount =
     arrayLength(activeCard.targetProfiles) +

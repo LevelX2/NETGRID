@@ -2,7 +2,7 @@
 
 `runtime-implementation.ts` has been removed.
 
-`public-api.ts` is the explicit internal public API barrel used by `game/engine-runtime.ts` and the package entrypoint. `runtime-bootstrap.ts` owns the import-time configuration order, and `runtime-delegates.ts` is now only the small initializer/barrel for mechanical delegate bindings into the ARCH-104 through ARCH-110 domain modules.
+`public-api.ts` is the explicit internal public API barrel used by `game/engine-runtime.ts` and the package entrypoint. `runtime-bootstrap.ts` owns the import-time configuration order. `runtime-composition.ts` builds the typed domain-port graph, while `runtime-port-bindings.ts` installs its statically typed ESM bindings before the bootstrap phases consume them.
 
 `choice-hidden-zone-runtime.ts` is now only the small aggregator for the choice and hidden-zone runtime bridges. ARCH-109 split the previous broad module into:
 
@@ -24,16 +24,7 @@ These files are runtime bridge modules. They wire existing choice and hidden-zon
 
 These files wire existing CardImplementation, trigger, install, rez and lifecycle behavior. They must not define a second CardImplementationRuntime, change RuntimeDeps keys, or move EffectInterpreter semantics. New card-domain logic belongs in `game/card-implementation`, `ability-engine` or the relevant domain module.
 
-`runtime-delegates.ts` delegates are split by ownership:
-
-- `action-runtime-delegates.ts`
-- `flow-runtime-delegates.ts`
-- `card-runtime-delegates.ts`
-- `state-runtime-delegates.ts`
-- `choice-runtime-delegates.ts`
-- `runtime-delegate-store.ts`
-
-Delegate modules are mechanical forwarders. Do not add new features permanently to `runtime-bootstrap.ts`, `runtime-delegates.ts` or delegate modules. New runtime domain logic belongs in the appropriate `game/*` module or in a focused internal runtime module.
+The old delegate store, delegate barrel and five forwarding modules have been removed. Do not recreate a string-keyed store, proxy dispatch or forwarding-module family. New runtime domain logic belongs in the appropriate `game/*` module or in a focused internal runtime module; new wiring belongs in the owning declarative port and factory group.
 
 `runtime-bootstrap.ts` is now only the import-time bootstrap orchestrator. ARCH-111 split the previous broad bootstrap file into explicit phases:
 
@@ -44,7 +35,7 @@ Delegate modules are mechanical forwarders. Do not add new features permanently 
 - `public-event-runtime-bootstrap.ts`
 - `runtime-bootstrap-support.ts`
 
-The orchestrator owns the global bootstrap order. Phase modules expose configure/initialize functions and must not configure each other at import time. Preserve the import-time side effect from `public-api.ts`: importing the public runtime must still execute the bootstrap exactly once through `runtime-bootstrap.ts`. New gameplay logic does not belong in bootstrap modules; put it in the owning game/domain module and wire it through a focused runtime bridge only when necessary.
+The orchestrator owns the global bootstrap order: create the stable dependency object, install the complete port graph, configure Card/Flow/Action, then let State populate the same dependency object. Phase modules expose configure/initialize functions and must not configure each other at import time. Preserve the import-time side effect from `public-api.ts`: importing the public runtime must still execute the bootstrap exactly once through `runtime-bootstrap.ts`. New gameplay logic does not belong in bootstrap modules; put it in the owning game/domain module and wire it through a focused runtime bridge only when necessary.
 
 `action-runtime-hosts.ts`, `flow-runtime-hosts.ts` and `state-runtime-services.ts` are now aggregators for smaller host/service families. ARCH-112 split them into:
 
@@ -67,3 +58,12 @@ The orchestrator owns the global bootstrap order. Phase modules expose configure
 These files are runtime wiring and adapter families. Aggregators must not grow new domain behavior; new gameplay, state, run/access, payment, damage, trace or action semantics belong in the owning `game/*` or `ability-engine/*` module first.
 
 The target architecture is now a small package facade, a small runtime facade, and private runtime domain modules protected by size and import gates. Future work should improve specific internal domain modules instead of growing the facades.
+
+`turn-runtime-resolvers.ts` is the small composition root for four focused turn state machines:
+
+- `turn-effect-runtime-resolvers.ts`
+- `turn-end-runtime-resolvers.ts`
+- `turn-corp-start-runtime-resolvers.ts`
+- `turn-runner-start-runtime-resolvers.ts`
+
+They share one stable `TurnRuntimePort` link object. Cross-domain links are resolved only when a turn action runs; factories must not invoke or snapshot incomplete links during composition. Turn continuation, hidden-info, effect ordering and deterministic random behavior remain owned by their focused modules.

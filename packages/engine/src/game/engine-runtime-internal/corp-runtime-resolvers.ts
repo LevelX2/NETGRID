@@ -31,7 +31,7 @@ import {
   type GameState,
   type ImminentEvent,
   type LegalAction,
-  type LegacyAbilityPayloadField,
+  type AbilityPayloadDiscriminatorField,
   type PlayerAction,
   type PlayerController,
   type PublicGameEvent,
@@ -234,9 +234,7 @@ import {
   buildRunnerAgendaPointInstallAction,
   buildRunnerSelectedServerInstallAction,
 } from "../turn/runner-install-context-actions";
-import {
-  buildRunnerHostedProgramInstallAction,
-} from "../turn/runner-hosted-install-actions";
+import { buildRunnerHostedProgramInstallAction } from "../turn/runner-hosted-install-actions";
 import { buildRunnerProgramTrashBeforeInstallAction } from "../turn/runner-program-trash-install-actions";
 import { buildRunnerStackSearchProgramToGripAction } from "../turn/runner-hidden-zone-search-actions";
 import {
@@ -654,9 +652,7 @@ import {
   ACCESS_NET_DAMAGE_UPGRADE_SOURCE,
   ACCESS_TRACE_DAMAGE_UPGRADE_SOURCE,
 } from "../../mechanics/server-upgrades";
-import {
-  RUN_TAX_UPGRADE_SOURCES,
-} from "../../mechanics/trace-tags";
+import { RUN_TAX_UPGRADE_SOURCES } from "../../mechanics/trace-tags";
 import { snapshotPersistentStealCostModifiersForSource } from "../../ability-engine/steal-cost-modifiers";
 import { createCardImplementationEffectAdapters } from "../../ability-engine/card-implementation-effect-adapters";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
@@ -691,443 +687,32 @@ import type {
   CardVirusCounterImplementation,
   MakeRunEffectImplementation,
 } from "../../ability-engine/definition-types";
-import type {
-  CorpAgendaPointCostResult,
-  RuntimeDeps,
-} from "./runtime-shared";
+import type { CorpAgendaPointCostResult, RuntimeDeps } from "./runtime-shared";
 
-export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
+export function createCorpRuntimeResolvers(
+  deps: RuntimeDeps,
+  turnCorpRuntime:
+    | import("./turn-corp-runtime-port").TurnCorpRuntimePort
+    | undefined = deps.turnCorpRuntime,
+): import("./corp-runtime-port").CorpRuntimePort {
+  if (!turnCorpRuntime)
+    throw new Error("Turn-Corp-Runtime muss vor den Corp-Resolvern bestehen.");
   const {
-    DEFAULT_CONTROLLERS,
-    INITIAL_HAND_SIZE,
-    PROTEUS_ARMAGEDDON_ID,
-    PROTEUS_SCALDAN_ID,
-    PROTEUS_TAXMAN_ID,
-    PIPE_COUNTER_CORP_START_EFFECT_SOURCE_ID,
-    RUNNER_EVENT_RESOLVERS,
-    TAG_REMOVAL_RECURRING_CREDIT_SOURCES,
-    accessEffectHandlerHost,
-    accessFlow,
-    accessFlowHost,
-    activatedCardImplementationExecutionHost,
-    activeCrashEverettSourceId,
-    addCounterToAllInstalledRunnerIcebreakers,
-    addCurrentRunAccessCount,
-    addCorpTraceCounterPoolCounters,
-    addRunnerFutureActionDebt,
-    addVirusCounterWithCounterPrevention,
-    addVisibleCardCounter,
-    affordableRezzedInstalledIceIdsForRunner,
-    agendaPoints,
-    agendaPointsForScoredCard,
-    appendRegionReplacementTrashEffect,
-    appendResolvedEffectsToPayload,
-    applyActionHostComposition,
-    applyRunStartRandomStrengthBonus,
-    applyCorpStartOfTurnEffects,
-    applyEffectCommands,
-    applyPurgeableRunnerVirusCorpStartEffects,
-    applyStartTurnRandomEffectTables,
-    applyRunnerDrawSummaryPayload,
-    applyRunnerForgoNextAction,
-    applyRunnerStartOfTurnEffects,
-    applyRunnerTraceCounterRunStartEffects,
-    archivesAccessRequiresDecisionOrEffect,
-    assertBreakSubroutineCostQuoteValid,
-    assertCorpIceInstallCostValid,
-    assertCurrentSubroutineMatchesLegalAction,
-    assertNonNegativeAmount,
-    assertPositiveIntegerAmount,
-    automaticCounterChangeEffect,
-    automaticDrawCardsEffect,
-    automaticGainCreditsEffect,
-    automaticLoseCreditsEffect,
-    automaticStealAgendaEffect,
-    automaticTagEffect,
-    automaticTrashCardEffect,
-    availableRunnerProgramInstallCredits,
-    availableRunnerTagRemovalCredits,
-    backupProgramsOnTrashBackupHardwareBeforeTrash,
-    boardStateActionExecutionHost,
-    breachStateHost,
-    breakAbilityForLegalAction,
-    breakSubroutineCostBreakdown,
-    canHostProgramOnDaemon,
-    canInstallCorpRootCardInServer,
-    canInstallRunnerProgramFromZone,
-    canPlayTrashInstalledRunnerConnectionsThenAddBadPublicity,
-    cardHasSubtype,
-    cardImplementationAgendaPointInstallCost,
-    cardImplementationEffectAdapters,
-    cardImplementationRunnerEventResolver,
-    cardImplementationRuntimeDeps,
-    cardInstallCapabilitiesForDefinition,
-    chooseCorpAgendasForPointCost,
-    drawTaxSourceIds,
-    cleanupCorpRootAgendaOrNodeCapacityAfterLeavePlay,
-    clearEdgerunnerTempsInstallFlags,
-    clearValuPakProgramInstallFlags,
-    clickCostForAction,
-    closeRunnerCostPenaltySupportWindowForPayment,
-    cockroachCounterTotal,
-    cockroachRandomHqDiscardActive,
-    virusCounterPurgePreserveTargets,
-    completeDiscardPhase,
-    consumeEdgerunnerTempsInstallAction,
-    consumeRunnerFutureActionDebt,
-    consumeValuPakProgramInstallAction,
-    continueRun,
-    continueRandomDiceLoop,
-    corpAgendaPointTotal,
-    corpIceInstallAdditionalCost,
-    corpIceInstallBaseCost,
-    corpIceInstallTotalCost,
-    corpInstallRezSequenceHandlerHost,
-    corpOperationResolutionHost,
-    corpRegionUpgradeIdsInServer,
-    corpRootAgendaOrNodeCapacityInServer,
-    corpRunnerActionPaidWindowActions,
-    corpScoredBlackOpsAgendaLastTurn,
-    corpSpecialDamageAbilityHost,
-    corpTraceDamageAbilityHost,
-    corpTracePaymentDeps,
-    corpUtilityImplementationForCard,
-    corpZoneChoiceHandlerHost,
-    counterLifecycleRuntimeDepsHost,
-    counterUtilityTriggerExecutionHost,
-    creditCostForAction,
-    creditEconomyExecutionHost,
-    creditTextForPrompt,
-    daemonHostedMemoryUsed,
-    daemonHostingCapacity,
-    damageCoreHost,
-    diePromptText,
-    discardChoice,
-    discardRandomCorpHqCards,
-    drawRunnerCard,
-    drawRunnerCards,
-    dupreStrengthCounterBonus,
-    edgerunnerTempsInstallActionsRemaining,
-    effectiveAgendaDifficultyDeps,
-    effectiveSubtypesForCard,
-    emptyRunnerDrawSummary,
-    encounterEntryHostForState,
-    encounterPrintedEffectHostForState,
-    encounterPrintedNonTraceHostForState,
-    encounterResolutionHostForState,
-    encounterSpecialWindowHostForState,
-    encounterTemporaryTraceCreditsAvailable,
-    endTurn,
-    executeEffectCommands,
-    expireScoredAgendaInstallRezCreditAbilities,
-    exposeCorpCardInServer,
-    exposeInstalledCorpCardForImplementation,
-    exposeInstalledCorpCardLabel,
-    exposeInstalledCorpCardTargets,
-    exposeInstalledCorpCardsChoiceOptions,
-    exposeOutermostIceOfEachDataFort,
-    exposedCorpCardInServer,
-    finishRun,
-    fortCapacityModifiersForCard,
-    fortPassWindowHostForState,
-    fortRunSideFamiliesHostForState,
-    gameCardImplementationRuntimeDepsHost,
-    corpTraceCounterPoolSourceIds,
-    corpTraceCounterPoolTotal,
-    corpTraceCounterPoolCounterType,
-    handForSide,
-    hasCardImplementationMemoryUnitModifier,
-    hasCorpUtilityKind,
-    hasHiddenResourceAccessStartActions,
-    hasInstallCapabilityKindForDefinition,
-    hasInstalledRunnerApDamageReducerHardware,
-    hasInstalledUniqueCardDefinition,
-    hiddenReplacementLongtailForDefinition,
-    hiddenZoneArrangeChoiceHandlerHost,
-    hiddenZoneNonSearchChoiceHandlerHost,
-    hiddenZoneRuntimeDepsHost,
-    hiddenZoneSearchActivationHandlerHost,
-    hiddenZoneSearchActivationTargetHost,
-    hiddenZoneSearchChoiceHandlerHost,
-    hiddenZoneSearchHandlerHostBase,
-    hostedProgramStrengthModifier,
-    multiExposeInstalledCorpCardOptionLabel,
-    multiExposeInstalledCorpCardTargets,
-    iceChoiceLabelForSide,
-    iceStrengthBonusFor,
-    iceStrengthFor,
-    icebreakerEncounterStrengthBonus,
-    icebreakerHasSpecial,
-    identityDefinition,
-    identityModifierAmount,
-    incubatorCounterTotal,
-    installCardHost,
-    installRezRuntimeDepsHost,
-    installRunnerProgramForFree,
-    installRunnerProgramFromStackWithoutClick,
-    installRunnerProgramFromZoneWithoutClick,
-    installTargetBindingForDefinition,
-    installedVirusCounterPurgePreserveSourceIds,
-    installedCorpCardServerContext,
-    installedRunnerConnectionIds,
-    installedRunnerIcebreakerIds,
-    installedRunnerProgramTrashOptionsForInstall,
-    installedRunnerVirusSourceIds,
-    installedVirusCounterTotalForDefinition,
-    isObligationDebtDefinition,
-    isDrawTaxSourceDefinition,
-    isCorpInstallableCardType,
-    isCorpTraceCounterPoolSource,
-    isCorpInstalledEconomyCreditSource,
-    isRegionUpgrade,
-    isUniqueCard,
-    isV097OrLater,
-    isV099OrLater,
-    isVersionAtLeast,
-    isVisibleVirusCounterCardForRunner,
-    recurringTraceCreditPoolSourceIds,
-    recurringTraceCreditPoolTotal,
-    leavePlayCleanupImplementationsForCard,
-    legalActionHostComposition,
-    mainActionHostComposition,
-    mergeRunnerDrawSummary,
-    installedProgramTrashBackupHardwareIds,
-    runnerHardwareBreakSubroutineAdditionalCost,
-    mustInstallInsideSubsidiaryDataFort,
-    runStartTaxForCorpRootAssets,
-    normalizeSubtypeLabel,
-    openPostMeatDamageReactionWindow,
-    openRunnerCostPenaltySupportWindow,
-    outermostIceExposures,
-    outermostIceIndex,
-    parseVirusCounterPurgePreserveOption,
-    parseRandomDiceSplitChoiceSource,
-    parseRandomDiceSplit,
-    parseRunnerInstalledConnectionTrashBadPublicityChoiceSource,
-    passCurrentEncounteredIce,
-    pendingChoiceResolutionHost,
-    permanentIcebreakerStrengthCounterBonus,
-    pickRunnerAgendaForAgendaPointCost,
-    playCardExecutionHost,
-    randomDiceSplitOptions,
-    postMeatDamageHiddenResourceCandidates,
-    poxCountersForServer,
-    poxInstallTax,
-    preventOneVirusCounterWithCounterPrevention,
-    printedCostCardImplementationMakeRunEffect,
-    privateLookCardIds,
-    processDiscardStep,
-    publicCardTitle,
-    publicIcePositionLabelForCard,
-    publicIceSelectionLabelForCard,
-    pumpAbilityForLegalAction,
-    pumpAmountForLegalAction,
-    pumpDurationForLegalAction,
-    pushCorpTraceDamageOrCardImplementationActions,
-    queueIncubatorStartOfTurnTransforms,
-    rabbitTraceLimitReductionForIceTrace,
-    randomCorpHqCardsWithoutReplacement,
-    randomCorpHqDiscard,
-    recordBartmossEncounterUsage,
-    recordSnowballBreakUsage,
-    refreshRecurringCredits,
-    relativeDamageSubroutineForCurrentEncounter,
-    relativeIceStrengthBonusFor,
-    relativeTraceSubroutinesForCurrentEncounter,
-    remainingReplacementLongtailImplementationForCard,
-    remainingReplacementLongtailImplementationForDefinition,
-    remainingReplacementLongtailKindForCard,
-    remainingReplacementLongtailKindForDefinition,
-    requireRunnerTagged,
-    requiresDataFortInstallTarget,
-    resolveCorpObligationEndOfTurn,
-    resolveDerezRezzedBlackIceChoice,
-    resolveDelayedAccessEffects,
-    resolveBlinkBreakSubroutineAction,
-    resolveCardImplementationAccessPaymentChoice,
-    resolveChimeraDaemonTrashChoice,
-    resolveVirusCounterPurgePreserveChoice,
-    resolvePayRezCostToTrashRezzedIceChoice,
-    resolveCrashEverettDrawChoice,
-    resolveRunnerIcebreakerCounterEvent,
-    resolveDiscardChoice,
-    resolveExposeInstalledCorpCardsChoice,
-    resolveFieldReporterEndOfRunnerTurn,
-    resolveCorpChoiceRezOrTrashIceDecisionChoice,
-    resolveCorpChoiceRezOrTrashIceTargetChoice,
-    resolveMultiExposeInstalledCorpCardsChoice,
-    resolveIncubatorTransformChoice,
-    resolveRunnerGripHeapStackShuffleDrawEvent,
-    resolveMultiBreakSubroutinesAction,
-    resolveEndTurnTagIfRunnerReceivedTag,
-    resolvePaidSourceReturnToGripChoice,
-    resolveP358HiddenReplacementChoice,
-    resolveRandomDiceLoopEvent,
-    resolvePostMeatDamageHiddenResourceChoice,
-    resolvePostOnPlayGenericFollowups,
-    resolveDelayedEndTurnDamageEffects,
-    resolveRunnerProgramReturnChoice,
-    resolveRunnerHostingChoice,
-    resolveRunnerInstalledConnectionTrashBadPublicityChoice,
-    resolveRunnerLastTurnInstalledResourceTargetId,
-    resolveRunnerPrivateLookChoice,
-    resolveRunnerProgramTrashBeforeInstallChoice,
-    resolveRunnerTargetedEventImplementation,
-    resolveTrashUnrezzedIceChoice,
-    resolveSetupMulliganChoice,
-    resolveTemporaryProgramInstallReturns,
-    resolveTraceHardwareWreckerSuccess,
-    resolveTraceTrashRunnerResourceSuccess,
-    resolveTrashInstalledRunnerConnectionsThenAddBadPublicityEvent,
-    resolveScoredAgendaCorpRdTopReveal,
-    resolveV1911RunnerHiddenZoneAbility,
-    resolveRandomDiceSplitChoice,
-    restorePurgePreservedVirusCounters,
-    returnRunnerInstalledCardToGrip,
-    returnRunnerInstalledProgramsToGripForAccess,
-    revealCorpRdTop,
-    revealRunnerStackTop,
-    rezActionExecutionHost,
-    rezCardHost,
-    rezzedBlackIceIds,
-    rezzedCorpRootCardIds,
-    rezzedIceOutsideThisIceCount,
-    rezzedInstalledIceIds,
-    rootInstallRezzesOnInstall,
-    runAccessLegalActionHostComposition,
-    runAccessTransitionHost,
-    runBreakSubroutineAdditionalCost,
-    runCardImplementationActionHost,
-    runEndCleanupHost,
-    runFlow,
-    runFortTriggerExecutionHost,
-    runMovementHostForState,
-    runRemainderStrengthBonusForBreaker,
-    runRezWindowHostForState,
-    runStartTaxForServerUpgrades,
-    runnerAccessActionHost,
-    runnerActionsPerTurn,
-    runnerBreakerActionExecutionHost,
-    runnerCanPayInstallCost,
-    runnerCostPenaltySupportCreditCapacity,
-    runnerCounterDisplayName,
-    runnerDrawActionContext,
-    runnerDrawSummaryPublicPayload,
-    runnerEncounterActionHostForState,
-    runnerEventLongtailForDefinition,
-    runnerEventLongtailKindForDefinition,
-    runnerHasInstalledCardDefinition,
-    runnerHasInstalledDefinition,
-    runnerInstallableProgramIdsForValuPak,
-    runnerInstalledCardCountByDefinition,
-    runnerInstalledHardwareTrashTarget,
-    runnerInstalledResourceLastTurn,
-    runnerLastTurnInstalledResourceIds,
-    runnerProgramInstallMemoryReachableAfterTrash,
-    runnerProgramInstallRecurringCreditSourceIds,
-    runnerProgramUsesMemory,
-    runnerRecurringCredits,
-    runnerRunAttemptsLastTurn,
-    runnerRunAttemptsThisGame,
-    runnerSpecialTriggerExecutionHost,
-    runnerStoleAgendaLastTurn,
-    runnerStoleAgendaSubtypeThisTurn,
-    runnerStolenAgendaAdvancementCountersLastTurn,
-    runnerTagRemovalRecurringCreditSourceIds,
-    runnerTagRemovalRecurringCredits,
-    runnerTraceCounterEffectDefinitions,
-    runnerTracePaymentDeps,
-    runnerTrashedNodeLastTurn,
-    runnerUtilityLongtailImplementationForCard,
-    runnerUtilityLongtailKindForCard,
-    runnerUtilityLongtailKindForDefinition,
-    sanitizeId,
-    scoredAgendaAbilityHost,
-    scoredAgendaFlowHost,
-    scoredAgendaImplementationForDefinition,
-    scoredAgendaImplementationForDefinitionId,
-    scoredAgendaKindForDefinition,
-    selectedChoiceCardIds,
-    selectedChoiceCardIdsForChoice,
-    serverDifficultyIncreaseFromRunCounters,
-    serverDifficultyReductionFromUpgrades,
-    setupMulliganChoice,
-    shouldOfferRunnerProgramTrashBeforeInstall,
-    shuffleCorpCardIntoRd,
-    shuffleGripTrashAndStackThenDrawForCardImplementation,
-    shuffleRunnerStack,
-    skivvissCounterTotal,
-    specialZoneHarnessActions,
-    spendAgendaPointFromScoredCard,
-    spendEncounterTemporaryTraceCredits,
-    spendCorpTraceCounterPoolCounters,
-    spendRecurringTraceCreditPool,
-    spendRunnerAccessTrashCredits,
-    spendRunnerInstallCredits,
-    spendRunnerTagRemovalCredits,
-    spendVisibleCardCounter,
-    spyCountersForServer,
-    stableSubtypeList,
-    startDerezRezzedBlackIceChoice,
-    startVirusCounterPurgePreserveChoice,
-    startPayRezCostToTrashRezzedIceChoice,
-    startCorpTurn,
-    startCrashEverettDrawChoice,
-    startDiscardPhase,
-    startPostAccessInstalledProgramChoice,
-    startExposeInstalledCorpCardsChoice,
-    startCorpChoiceRezOrTrashIceChoice,
-    startMultiExposeInstalledCorpCardsChoice,
-    startIncubatorTransformChoice,
-    startPaidSourceReturnToGripChoice,
-    startRun,
-    startRunActionExecutionHost,
-    startRunnerHostingChoice,
-    startRunnerPrivateLookAtSpecificCorpCards,
-    startRunnerPrivateLookChoice,
-    startRunnerProgramTrashBeforeInstallChoice,
-    startRunnerTurn,
-    startTrashUnrezzedIceChoice,
-    startRunnerProgramFreeMemoryChoice,
-    startRandomDiceSplitChoice,
-    startVirusCounterRunnerPrivateLookAtStart,
-    subroutinesForCurrentEncounter,
-    successfulRunInterventionHost,
-    swapCorpHqAndRdTop,
-    takeSetupMulligan,
-    totalCounters,
-    traceCounterEffectDefinitionFor,
-    traceOrchestrationHost,
-    traceRuntimeDepsHost,
-    trashCorpInstalledCardToArchives,
-    trashCorpInstalledCardsInScoredSourceServer,
-    trashFaceupRdCardsForCascade,
-    trashOlderRegionUpgradesInServer,
-    trashRunnerInstalledCardToHeap,
-    trashRunnerInstalledProgram,
-    triggerAbilityExecutionHost,
-    turnCorpRuntime,
-    turnBasicExecutionHost,
-    uniqueDirectLongtailImplementationForCard,
-    uniqueDirectLongtailImplementationForDefinition,
-    uniqueDirectLongtailKindForCard,
-    uniqueDirectLongtailKindForDefinition,
-    unrezzedInstalledIceIds,
-    untapRunnerCardsAtTurnStart,
-    v1915InstalledRevealHelperIds,
-    validateDeckDefinition,
-    valuPakProgramInstallActionsRemaining,
-    valuPakTemporaryProgramInstallCredits,
-    variableRezForDefinition,
-    variableTraceSubroutineForCurrentEncounter,
-    virusCounterCascadeTrashAtCorpStart,
-    virusCounterCreditsAtRunnerStart,
-    virusCounterDrawsAtCorpStart,
-    virusCounterImplementationForCard,
-    virusCounterImplementationForDefinition,
-    visibleVirusCounterTargetIds,
-    withoutVariableIceState,
-  } = deps;
+    advanceableInstalledCardTargets,
+    isInstalledCorpCardAdvanceable,
+    advancementDistributionOptions,
+    startCardImplementationAdvancementDistributionChoice,
+    parseAdvancementDistributionValue,
+    sourcePartsForP334Choice,
+    validateAdvancementDistribution,
+    resolveCardImplementationAdvancementDistributionChoice,
+    movableAdvancementSourceIds,
+    moveAdvancementOptions,
+    startCardImplementationMoveAdvancementChoice,
+    resolveCardImplementationMoveAdvancementChoice,
+    resolveCorpOperationAddAdvancementCounters,
+    awardRunnerEventAgendaPoint,
+  } = turnCorpRuntime;
 
   function forfeitRunnerAgendaForPointCost(
     state: GameState,
@@ -1137,11 +722,11 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
       throw new Error(
         "Der Runner kann mit dieser Agenda keine Kosten bezahlen.",
       );
-    if (agendaPointsForScoredCard(state, cardId) < 1)
+    if (deps.agendaPointsForScoredCard(state, cardId) < 1)
       throw new Error(
         "Die gewaehlte Runner-Agenda liefert keinen Agenda-Punkt fuer Kosten.",
       );
-    spendAgendaPointFromScoredCard(state, cardId);
+    deps.spendAgendaPointFromScoredCard(state, cardId);
   }
 
   function forfeitCorpAgendaForPointCost(
@@ -1149,28 +734,22 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     cardId: CardInstanceId,
   ): void {
     if (!cardId || !state.corp.scoreArea.includes(cardId))
-      throw new Error(
-        "Die Korp kann mit dieser Agenda keine Kosten bezahlen.",
-      );
-    if (agendaPointsForScoredCard(state, cardId) < 1)
+      throw new Error("Die Korp kann mit dieser Agenda keine Kosten bezahlen.");
+    if (deps.agendaPointsForScoredCard(state, cardId) < 1)
       throw new Error(
         "Die gewaehlte Korp-Agenda liefert keinen Agenda-Punkt fuer Kosten.",
       );
-    spendAgendaPointFromScoredCard(state, cardId);
+    deps.spendAgendaPointFromScoredCard(state, cardId);
   }
 
   function activeObligationCount(state: GameState): number {
     return Math.max(0, Math.floor(state.activeObligationDebtCount ?? 0));
   }
 
-  function addActiveObligation(
-    state: GameState,
-    amount: number,
-  ): void {
+  function addActiveObligation(state: GameState, amount: number): void {
     if (!Number.isInteger(amount) || amount <= 0)
       throw new Error("ACME-Verpflichtungsmenge ist ungueltig.");
-    state.activeObligationDebtCount =
-      activeObligationCount(state) + amount;
+    state.activeObligationDebtCount = activeObligationCount(state) + amount;
   }
 
   function removeActiveObligation(state: GameState): void {
@@ -1186,7 +765,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
   ): CorpAgendaPointCostResult {
     if (!Number.isInteger(requiredPoints) || requiredPoints <= 0)
       throw new Error("Agenda-Punkt-Kosten sind ungueltig.");
-    if (corpAgendaPointTotal(state) < requiredPoints)
+    if (deps.corpAgendaPointTotal(state) < requiredPoints)
       throw new Error("Die Korp hat nicht genug Agenda-Punkte.");
     let remaining = requiredPoints;
     let paidPoints = 0;
@@ -1204,13 +783,13 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     const spentAgendaDefinitionIds: CardDefinitionId[] = [];
     if (remaining > 0) {
       for (const agendaId of corpScoredAgendaForfeitTargets(state)) {
-        const points = agendaPointsForScoredCard(state, agendaId);
+        const points = deps.agendaPointsForScoredCard(state, agendaId);
         const spentFromAgenda = Math.min(points, remaining);
         if (spentFromAgenda <= 0) continue;
         spentAgendaIds.push(agendaId);
         spentAgendaDefinitionIds.push(definitionFor(state, agendaId).id);
         for (let index = 0; index < spentFromAgenda; index += 1) {
-          spendAgendaPointFromScoredCard(state, agendaId);
+          deps.spendAgendaPointFromScoredCard(state, agendaId);
         }
         paidPoints += spentFromAgenda;
         remaining -= spentFromAgenda;
@@ -1237,7 +816,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
         const leftRemaining = Math.max(
           0,
           effectiveAgendaDifficulty(
-            effectiveAgendaDifficultyDeps,
+            deps.effectiveAgendaDifficultyDeps,
             state,
             left,
           ) - mustInstance(state.cardInstances, left).advancementCounters,
@@ -1245,7 +824,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
         const rightRemaining = Math.max(
           0,
           effectiveAgendaDifficulty(
-            effectiveAgendaDifficultyDeps,
+            deps.effectiveAgendaDifficultyDeps,
             state,
             right,
           ) - mustInstance(state.cardInstances, right).advancementCounters,
@@ -1267,11 +846,11 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
       .slice()
       .sort((left, right) => {
         const byPoints =
-          agendaPointsForScoredCard(state, left) -
-          agendaPointsForScoredCard(state, right);
+          deps.agendaPointsForScoredCard(state, left) -
+          deps.agendaPointsForScoredCard(state, right);
         return byPoints !== 0 ? byPoints : left.localeCompare(right);
       })
-      .filter((cardId) => agendaPointsForScoredCard(state, cardId) >= 1);
+      .filter((cardId) => deps.agendaPointsForScoredCard(state, cardId) >= 1);
   }
 
   function hardwareTrashByCounterEligibleHardwareIds(
@@ -1283,7 +862,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
         const definition = definitionFor(state, cardId);
         return (
           definition.type === "hardware" &&
-          !cardHasSubtype(definition, "cybernetics")
+          !deps.cardHasSubtype(definition, "cybernetics")
         );
       })
       .sort((left, right) => {
@@ -1302,7 +881,8 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     cardId: CardInstanceId,
     definition: CardDefinition,
   ): LegalAction[] {
-    const eligibleHardwareIds = hardwareTrashByCounterEligibleHardwareIds(state);
+    const eligibleHardwareIds =
+      hardwareTrashByCounterEligibleHardwareIds(state);
     const maxTrashCount = Math.min(
       eligibleHardwareIds.length,
       state.corp.credits,
@@ -1335,7 +915,9 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
       legalAction.payload?.hardwareTrashByCounterTrashCount ?? 1,
     );
     if (!Number.isInteger(trashCount) || trashCount <= 0)
-      throw new Error("Hardware-Trash-by-Counter braucht eine gueltige X-Auswahl.");
+      throw new Error(
+        "Hardware-Trash-by-Counter braucht eine gueltige X-Auswahl.",
+      );
     return trashCount;
   }
 
@@ -1344,7 +926,8 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     legalAction: LegalAction,
   ): void {
     const trashCount = hardwareTrashByCounterTrashCountFromPayload(legalAction);
-    const eligibleHardwareIds = hardwareTrashByCounterEligibleHardwareIds(state);
+    const eligibleHardwareIds =
+      hardwareTrashByCounterEligibleHardwareIds(state);
     if (eligibleHardwareIds.length < trashCount)
       throw new Error(
         "Hardware-Trash-by-Counter findet nicht genug nicht-Cybernetics-Hardware.",
@@ -1397,7 +980,9 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     };
   }
 
-  function hardwareTrashByCounterTrashCountFromChoiceSource(source: string): number {
+  function hardwareTrashByCounterTrashCountFromChoiceSource(
+    source: string,
+  ): number {
     const [, rawTrashCount] = source.split(":");
     const trashCount = Number(rawTrashCount);
     if (!Number.isInteger(trashCount) || trashCount <= 0)
@@ -1413,18 +998,27 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     playerAction: PlayerAction,
   ): void {
     const choice = state.pendingChoice;
-    if (!choice || !choice.source.startsWith("card_implementation.installed_hardware_trash_by_counter"))
+    if (
+      !choice ||
+      !choice.source.startsWith(
+        "card_implementation.installed_hardware_trash_by_counter",
+      )
+    )
       throw new Error("Es ist keine Hardware-Trash-by-Counter-Choice offen.");
     const trashCount = hardwareTrashByCounterTrashCountFromChoiceSource(
       choice.source,
     );
-    const selectedIds = selectedChoiceCardIds(
+    const selectedIds = deps.selectedChoiceCardIds(
       choice,
       playerAction,
     ) as CardInstanceId[];
     if (selectedIds.length !== trashCount)
-      throw new Error("Hardware-Trash-by-Counter braucht genau X Hardware-Ziele.");
-    const legalTargets = new Set(hardwareTrashByCounterEligibleHardwareIds(state));
+      throw new Error(
+        "Hardware-Trash-by-Counter braucht genau X Hardware-Ziele.",
+      );
+    const legalTargets = new Set(
+      hardwareTrashByCounterEligibleHardwareIds(state),
+    );
     for (const cardId of selectedIds) {
       if (!legalTargets.has(cardId))
         throw new Error(
@@ -1457,7 +1051,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
         throw new Error(
           "Hardware-Trash-by-Counter darf dieses Hardware-Ziel nicht mehr trashen.",
         );
-      trashRunnerInstalledCardToHeap(state, cardId);
+      deps.trashRunnerInstalledCardToHeap(state, cardId);
     }
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
@@ -1561,7 +1155,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
         options.push({
           firstTargetId,
           ...(splitTargets ? { secondTargetId } : {}),
-          id: `placement_${sanitizeId(firstTargetId)}_${sanitizeId(secondTargetId)}`,
+          id: `placement_${deps.sanitizeId(firstTargetId)}_${deps.sanitizeId(secondTargetId)}`,
           label,
           publicLabel: label,
           value: splitTargets
@@ -1679,7 +1273,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
       addedAdvancementCounters: 2,
       targetCount,
       advancementPlacementDistribution: placementEntries
-        .map(([targetId, amount]) => `${sanitizeId(targetId)}:${amount}`)
+        .map(([targetId, amount]) => `${deps.sanitizeId(targetId)}:${amount}`)
         .join(","),
       ...(targetCount === 1
         ? {
@@ -1690,88 +1284,6 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
           }
         : {}),
     };
-  }
-
-  function callTurnCorpRuntime(delegateName: string, args: any[]): any {
-    const delegate = Object.getOwnPropertyDescriptor(
-      turnCorpRuntime,
-      delegateName,
-    )?.value;
-    if (typeof delegate !== "function")
-      throw new Error(`Turn-Corp-Runtime-Delegate fehlt: ${delegateName}.`);
-    return delegate(...args);
-  }
-
-  function advanceableInstalledCardTargets(...args: any[]): any {
-    return callTurnCorpRuntime("advanceableInstalledCardTargets", args);
-  }
-
-  function isInstalledCorpCardAdvanceable(...args: any[]): any {
-    return callTurnCorpRuntime("isInstalledCorpCardAdvanceable", args);
-  }
-
-  function advancementDistributionOptions(...args: any[]): any {
-    return callTurnCorpRuntime("advancementDistributionOptions", args);
-  }
-
-  function startCardImplementationAdvancementDistributionChoice(
-    ...args: any[]
-  ): any {
-    return callTurnCorpRuntime(
-      "startCardImplementationAdvancementDistributionChoice",
-      args,
-    );
-  }
-
-  function parseAdvancementDistributionValue(...args: any[]): any {
-    return callTurnCorpRuntime("parseAdvancementDistributionValue", args);
-  }
-
-  function sourcePartsForP334Choice(...args: any[]): any {
-    return callTurnCorpRuntime("sourcePartsForP334Choice", args);
-  }
-
-  function validateAdvancementDistribution(...args: any[]): any {
-    return callTurnCorpRuntime("validateAdvancementDistribution", args);
-  }
-
-  function resolveCardImplementationAdvancementDistributionChoice(
-    ...args: any[]
-  ): any {
-    return callTurnCorpRuntime(
-      "resolveCardImplementationAdvancementDistributionChoice",
-      args,
-    );
-  }
-
-  function movableAdvancementSourceIds(...args: any[]): any {
-    return callTurnCorpRuntime("movableAdvancementSourceIds", args);
-  }
-
-  function moveAdvancementOptions(...args: any[]): any {
-    return callTurnCorpRuntime("moveAdvancementOptions", args);
-  }
-
-  function startCardImplementationMoveAdvancementChoice(...args: any[]): any {
-    return callTurnCorpRuntime(
-      "startCardImplementationMoveAdvancementChoice",
-      args,
-    );
-  }
-
-  function resolveCardImplementationMoveAdvancementChoice(...args: any[]): any {
-    return callTurnCorpRuntime(
-      "resolveCardImplementationMoveAdvancementChoice",
-      args,
-    );
-  }
-
-  function resolveCorpOperationAddAdvancementCounters(...args: any[]): any {
-    return callTurnCorpRuntime("resolveCorpOperationAddAdvancementCounters", args);
-  }
-
-  function awardRunnerEventAgendaPoint(...args: any[]): any {
-    return callTurnCorpRuntime("awardRunnerEventAgendaPoint", args);
   }
 
   function choiceAction(state: GameState, choice: ChoiceRequest): LegalAction {
@@ -1850,7 +1362,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     if (profile.creditCost > 0) spendCredits(state, "corp", profile.creditCost);
     credits(state, "corp", profile.creditGain);
     if (profile.trashSource)
-      trashCorpInstalledCardToArchives(state, sourceCardId);
+      deps.trashCorpInstalledCardToArchives(state, sourceCardId);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       sourceDefinitionId: profile.sourceDefinitionId,
@@ -1873,7 +1385,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
       throw new Error(
         "Diese Economy-Faehigkeit ist nur in der Korp-Aktionsphase nutzbar.",
       );
-    if (!rezzedCorpRootCardIds(state).includes(sourceCardId))
+    if (!deps.rezzedCorpRootCardIds(state).includes(sourceCardId))
       throw new Error("Die Economy-Faehigkeit ist nicht rezzed installiert.");
     if (definitionFor(state, sourceCardId).id !== profile.sourceDefinitionId)
       throw new Error("Die Economy-Faehigkeit passt nicht zur Karte.");
@@ -1895,9 +1407,14 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
       );
   }
 
-  function rezzedCorpInstalledEconomyCreditSourceIds(state: GameState): CardInstanceId[] {
-    return rezzedCorpRootCardIds(state)
-      .filter((cardId: CardInstanceId) => isCorpInstalledEconomyCreditSource(state, cardId))
+  function rezzedCorpInstalledEconomyCreditSourceIds(
+    state: GameState,
+  ): CardInstanceId[] {
+    return deps
+      .rezzedCorpRootCardIds(state)
+      .filter((cardId: CardInstanceId) =>
+        deps.isCorpInstalledEconomyCreditSource(state, cardId),
+      )
       .sort();
   }
 
@@ -1920,16 +1437,21 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
   ): void {
     if (state.pendingChoice)
       throw new Error("Es ist bereits eine Choice offen.");
-    const economyCreditSourceIds = rezzedCorpInstalledEconomyCreditSourceIds(state);
+    const economyCreditSourceIds =
+      rezzedCorpInstalledEconomyCreditSourceIds(state);
     if (economyCreditSourceIds.length === 0)
-      throw new Error("Es ist keine rezzed installierte Economy-Credit-Quelle vorhanden.");
-    const sourceDefinitionId = definitionFor(state, economyCreditSourceIds[0]!).id;
+      throw new Error(
+        "Es ist keine rezzed installierte Economy-Credit-Quelle vorhanden.",
+      );
+    const sourceDefinitionId = definitionFor(
+      state,
+      economyCreditSourceIds[0]!,
+    ).id;
     state.pendingChoice = {
       choiceId: `corp_installed_economy_credit_choice_${state.stateVersion + 1}`,
       side: "corp",
       source: `corp_installed_economy.credit_choice:${state.stateVersion + 1}`,
-      prompt:
-        "Credit nehmen oder 2 Credits auf eine Economy-Quelle legen?",
+      prompt: "Credit nehmen oder 2 Credits auf eine Economy-Quelle legen?",
       kind: "select_option",
       options: [
         {
@@ -1966,7 +1488,10 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     playerAction: PlayerAction,
   ): void {
     const choice = state.pendingChoice;
-    if (!choice || !choice.source.startsWith("corp_installed_economy.credit_choice"))
+    if (
+      !choice ||
+      !choice.source.startsWith("corp_installed_economy.credit_choice")
+    )
       throw new Error("Es ist keine Economy-Credit-Choice offen.");
     if (choice.side !== "corp" || legalAction.side !== "corp")
       throw new Error("Nur die Korp darf diese Economy-Credit-Choice nutzen.");
@@ -1992,9 +1517,13 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
       (option) => option.id === selected,
     );
     const sourceCardId = String(selectedOption?.value ?? "");
-    if (!rezzedCorpInstalledEconomyCreditSourceIds(state).includes(sourceCardId))
-      throw new Error("Die gewaehlte Economy-Credit-Quelle ist nicht mehr legal.");
-    const counterPayload = addVisibleCardCounter(
+    if (
+      !rezzedCorpInstalledEconomyCreditSourceIds(state).includes(sourceCardId)
+    )
+      throw new Error(
+        "Die gewaehlte Economy-Credit-Quelle ist nicht mehr legal.",
+      );
+    const counterPayload = deps.addVisibleCardCounter(
       state,
       sourceCardId,
       "recurring_credit",

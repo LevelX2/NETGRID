@@ -1,7 +1,8 @@
 # V2.0 Auth- und Datenschutz-Entscheidungsschnitt
 
 Stand: 2026-05-17  
-Status: Decision-Spike, keine Implementierungsfreigabe
+Status: historischer Entscheidungsspike; die Passwort-first-Neuplanung vom
+2026-07-18 ist für die geschlossene Alpha führend
 
 ## Findings
 

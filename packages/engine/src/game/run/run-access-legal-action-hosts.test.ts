@@ -133,7 +133,8 @@ function hostFor(calls: string[]): RunAccessLegalActionHostCompositionHost {
         calls.push("runStartEffects"),
       applyRunnerTraceCounterRunStartEffects: () =>
         calls.push("traceCounterRunStart"),
-      applyRunStartRandomStrengthBonus: () => calls.push("runStartRandomStrengthBonus"),
+      applyRunStartRandomStrengthBonus: () =>
+        calls.push("runStartRandomStrengthBonus"),
       finishRun: (_state: GameState, successful: boolean) =>
         calls.push(`finishRun:${successful}`),
       successfulRunInterventionHost: (targetState: GameState) =>
@@ -256,7 +257,7 @@ function hostFor(calls: string[]): RunAccessLegalActionHostCompositionHost {
       ice: {
         strengthForIce: () => 0,
         icebreakerHasSpecial: () => false,
-        dupreStrengthCounterBonus: () => 0,
+        selectedServerIcebreakerStrengthCounterBonus: () => 0,
         resetBreakerStrength: () => calls.push("resetBreakerStrength"),
         withoutVariableIceState: (card: CardInstance) => card,
       },
@@ -344,17 +345,28 @@ describe("run-access-legal-action-hosts", () => {
   it("keeps Run and Access legal-action host edges delegated", () => {
     const calls: string[] = [];
     const currentState = state();
-    const composition = createRunAccessLegalActionHostComposition(hostFor(calls));
-
-    composition.runFlow.runCoreExecutionHost(currentState).access
-      .breachStateHost()
-      .servers.mustServer("hq");
-    composition.accessFlow.accessFlowHost(currentState).runner.ensureTurnFlags();
-    composition.runFlow.runMovementHostForState(currentState).cleanup.finishRun(
-      true,
+    const composition = createRunAccessLegalActionHostComposition(
+      hostFor(calls),
     );
-    composition.accessFlow.runnerAccessActionHost(currentState).actions
-      .buildLegalAction("runner", "access_card", "Karte accessen", "game_rule");
+
+    composition.runFlow
+      .runCoreExecutionHost(currentState)
+      .access.breachStateHost()
+      .servers.mustServer("hq");
+    composition.accessFlow
+      .accessFlowHost(currentState)
+      .runner.ensureTurnFlags();
+    composition.runFlow
+      .runMovementHostForState(currentState)
+      .cleanup.finishRun(true);
+    composition.accessFlow
+      .runnerAccessActionHost(currentState)
+      .actions.buildLegalAction(
+        "runner",
+        "access_card",
+        "Karte accessen",
+        "game_rule",
+      );
 
     expect(calls).toEqual([
       "mustServer:hq",
@@ -369,6 +381,8 @@ describe("run-access-legal-action-hosts", () => {
         ...hostFor([]),
         cards: undefined,
       } as unknown as RunAccessLegalActionHostCompositionHost),
-    ).toThrow("RunAccessLegalActionHostCompositionHost.cards ist erforderlich.");
+    ).toThrow(
+      "RunAccessLegalActionHostCompositionHost.cards ist erforderlich.",
+    );
   });
 });

@@ -1,18 +1,16 @@
 import type {
-  LegacyAbilityPayloadField,
+  AbilityPayloadDiscriminatorField,
   PlayerAction,
 } from "@netgrid/shared";
 
-// These payload keys are part of historic LegalAction IDs. Keep the field names
-// stable until PublicPayload, chronicle, replay, and action-board consumers have
-// a coordinated migration path.
-export const ACTION_ID_LEGACY_ABILITY_PAYLOAD_FIELDS = [
+// Only current execution discriminators that contribute to Action IDs belong
+// here. The order is deterministic because replay and stale-action validation
+// compare generated IDs inside the current build.
+export const ACTION_ID_ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS = [
   "v1911HiddenZoneAbility",
   "v1917AssetAbility",
   "v1918UpgradeAbility",
-  "v1919AssetAbility",
   "v1919OperationAbility",
-  "v1919UpgradeAbility",
   "v1919RunnerProgramAbility",
   "v1919RunnerEventAbility",
   "v1920AssetAbility",
@@ -25,7 +23,7 @@ export const ACTION_ID_LEGACY_ABILITY_PAYLOAD_FIELDS = [
   "delayedInstallAbility",
   "obligationDebtAbility",
   "agendaAbility",
-] as const satisfies readonly LegacyAbilityPayloadField[];
+] as const satisfies readonly AbilityPayloadDiscriminatorField[];
 
 const P358_HIDDEN_REPLACEMENT_CHOICE_PREFIX = "hidden_zone.";
 const P358_SUCCESSFUL_RUN_FORT_ICE_REORDER_CHOICE_PREFIX =
@@ -49,8 +47,12 @@ export function isP358SuccessfulRunFortIceReorderChoiceSource(
   return source.startsWith(P358_SUCCESSFUL_RUN_FORT_ICE_REORDER_CHOICE_PREFIX);
 }
 
-export function isSecretSpendGuessTargetedBypassRunChoiceSource(source: string): boolean {
-  return source.startsWith(SECRET_SPEND_GUESS_TARGETED_BYPASS_RUN_CHOICE_PREFIX);
+export function isSecretSpendGuessTargetedBypassRunChoiceSource(
+  source: string,
+): boolean {
+  return source.startsWith(
+    SECRET_SPEND_GUESS_TARGETED_BYPASS_RUN_CHOICE_PREFIX,
+  );
 }
 
 export function isP358ConcealAndReorderInstalledIceChoiceSource(

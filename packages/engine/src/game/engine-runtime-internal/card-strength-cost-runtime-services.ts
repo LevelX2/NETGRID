@@ -27,7 +27,7 @@ import {
   type GameState,
   type ImminentEvent,
   type LegalAction,
-  type LegacyAbilityPayloadField,
+  type AbilityPayloadDiscriminatorField,
   type PlayerAction,
   type PlayerController,
   type PublicGameEvent,
@@ -230,9 +230,7 @@ import {
   buildRunnerAgendaPointInstallAction,
   buildRunnerSelectedServerInstallAction,
 } from "../turn/runner-install-context-actions";
-import {
-  buildRunnerHostedProgramInstallAction,
-} from "../turn/runner-hosted-install-actions";
+import { buildRunnerHostedProgramInstallAction } from "../turn/runner-hosted-install-actions";
 import { buildRunnerProgramTrashBeforeInstallAction } from "../turn/runner-program-trash-install-actions";
 import { buildRunnerStackSearchProgramToGripAction } from "../turn/runner-hidden-zone-search-actions";
 import {
@@ -649,9 +647,7 @@ import {
   ACCESS_NET_DAMAGE_UPGRADE_SOURCE,
   ACCESS_TRACE_DAMAGE_UPGRADE_SOURCE,
 } from "../../mechanics/server-upgrades";
-import {
-  RUN_TAX_UPGRADE_SOURCES,
-} from "../../mechanics/trace-tags";
+import { RUN_TAX_UPGRADE_SOURCES } from "../../mechanics/trace-tags";
 import { snapshotPersistentStealCostModifiersForSource } from "../../ability-engine/steal-cost-modifiers";
 import { createCardImplementationEffectAdapters } from "../../ability-engine/card-implementation-effect-adapters";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
@@ -693,10 +689,11 @@ import type {
 
 export function createCardStrengthCostRuntimeServices(
   deps: RuntimeDeps,
-  runtime: RuntimeDeps,
-) {
-  const { scoredAgendaImplementationForDefinition } = deps;
-
+  runtime: Pick<
+    import("./lookup-runtime-port").LookupRuntimePort,
+    "relativeIceStrengthBonusFor"
+  >,
+): import("./card-strength-cost-runtime-port").CardStrengthCostRuntimePort {
   function iceStrengthBonusFor(
     state: GameState,
     iceId: CardInstanceId,
@@ -706,7 +703,7 @@ export function createCardStrengthCostRuntimeServices(
     for (const agendaId of scoredCorpAgendaIds(state)) {
       const agendaDefinition = definitionFor(state, agendaId);
       const scoredAgenda =
-        scoredAgendaImplementationForDefinition(agendaDefinition);
+        deps.scoredAgendaImplementationForDefinition(agendaDefinition);
       if (scoredAgenda?.kind === "choose_fort_ice_strength_bonus") {
         if (
           iceServerId &&
@@ -763,7 +760,9 @@ export function createCardStrengthCostRuntimeServices(
     return Math.max(0, Math.floor(run.breakSubroutineAdditionalCost ?? 0));
   }
 
-  function runnerHardwareBreakSubroutineAdditionalCost(state: GameState): number {
+  function runnerHardwareBreakSubroutineAdditionalCost(
+    state: GameState,
+  ): number {
     return state.runner.rig.hardware.some(
       (cardId) => definitionFor(state, cardId).id === MICROTECH_TRODE_SET_ID,
     )

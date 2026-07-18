@@ -1,4 +1,5 @@
 import {
+  ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS,
   CARD_DEFINITIONS_BY_ID,
   type CardDefinition,
   type CardInstanceId,
@@ -6,7 +7,7 @@ import {
   type GameEvent,
   type GameState,
   type LegalAction,
-  type LegacyAbilityPayloadField,
+  type AbilityPayloadDiscriminatorField,
   type PlayerAction,
   type Side,
   type StateHash,
@@ -14,7 +15,7 @@ import {
 import type { PublicContextForActionDependencies } from "../../public-context";
 import {
   buildPublicAbilitySchemaContext,
-  legacyAbilityPayloadEntries,
+  abilityPayloadDiscriminatorEntries,
 } from "../../mechanics/public-payload-schema";
 
 export type BuildEventHost = {
@@ -101,6 +102,12 @@ export function buildEventWithHost(
     ),
     ...reveal,
   };
+  // Execution discriminators may reach this point through actionContext so the
+  // normalized ability metadata can be derived. They are not part of the
+  // public contract: Chronicle, replay and AI consume `abilityId` instead.
+  for (const field of ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS) {
+    delete publicPayload[field];
+  }
   if (state.gameEndReason === "bad_publicity_7") {
     publicPayload.badPublicityThreshold =
       host.constants.badPublicityLossThreshold;
@@ -354,23 +361,26 @@ function revealForPublicEvent(
       "break_subroutine",
     ].includes(legalAction.type) ||
     (legalAction.type === "gain_credit" &&
-      hasLegacyAbilityPayload(legalAction.payload, "v1917AssetAbility", [
+      hasAbilityPayloadDiscriminator(legalAction.payload, "v1917AssetAbility", [
         "gain_credits",
       ])) ||
     (legalAction.type === "gain_credit" &&
-      hasLegacyAbilityPayload(legalAction.payload, "v1920AssetAbility")) ||
+      hasAbilityPayloadDiscriminator(
+        legalAction.payload,
+        "v1920AssetAbility",
+      )) ||
     (legalAction.type === "gain_credit" &&
       legalAction.payload?.traceStarted === true) ||
     legalAction.type === "activated_card_ability" ||
     (legalAction.type === "gain_credit" &&
-      hasLegacyAbilityPayload(legalAction.payload, "agendaAbility", [
+      hasAbilityPayloadDiscriminator(legalAction.payload, "agendaAbility", [
         "scored_agenda_credit_until_install_or_rez",
       ])) ||
     (legalAction.side === "runner" &&
       (legalAction.type === "gain_credit" ||
         legalAction.type === "trigger_ability" ||
         legalAction.type === "remove_tag") &&
-      hasLegacyAbilityPayload(legalAction.payload, "resourceAbility")) ||
+      hasAbilityPayloadDiscriminator(legalAction.payload, "resourceAbility")) ||
     (legalAction.side === "runner" && legalAction.type === "install_card");
   if (revealsCard && typeof legalAction.source === "string") {
     const cardId =
@@ -392,12 +402,12 @@ function revealForPublicEvent(
   return {};
 }
 
-function hasLegacyAbilityPayload(
+function hasAbilityPayloadDiscriminator(
   payload: LegalAction["payload"] | undefined,
-  field: LegacyAbilityPayloadField,
+  field: AbilityPayloadDiscriminatorField,
   abilityIds?: readonly string[],
 ): boolean {
-  return legacyAbilityPayloadEntries(payload, [field]).some(
+  return abilityPayloadDiscriminatorEntries(payload, [field]).some(
     (entry) => !abilityIds || abilityIds.includes(entry.abilityId),
   );
 }

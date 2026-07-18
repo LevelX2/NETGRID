@@ -27,7 +27,7 @@ import {
   type GameState,
   type ImminentEvent,
   type LegalAction,
-  type LegacyAbilityPayloadField,
+  type AbilityPayloadDiscriminatorField,
   type PlayerAction,
   type PlayerController,
   type PublicGameEvent,
@@ -120,9 +120,7 @@ import {
   configureLegalActionHostComposition,
   type LegalActionHostCompositionHost,
 } from "../legal-action-hosts";
-import {
-  configureEventContextHostComposition,
-} from "../events/event-context-hosts";
+import { configureEventContextHostComposition } from "../events/event-context-hosts";
 import { BAD_PUBLICITY_LOSS_THRESHOLD } from "../win-conditions";
 import {
   calculateRunnerLink as calculateRunnerLinkInTrace,
@@ -201,10 +199,7 @@ import {
   installCard as executeInstallCard,
   type InstallCardHost,
 } from "../install/install-card";
-import {
-  rezCard as executeRezCard,
-  type RezCardHost,
-} from "../rez/rez-card";
+import { rezCard as executeRezCard, type RezCardHost } from "../rez/rez-card";
 import {
   addRunnerTagsWithPrevention,
   aggregateDamageSummaries,
@@ -235,12 +230,8 @@ import {
   buildRunnerAgendaPointInstallAction,
   buildRunnerSelectedServerInstallAction,
 } from "../turn/runner-install-context-actions";
-import {
-  buildRunnerHostedProgramInstallAction,
-} from "../turn/runner-hosted-install-actions";
-import {
-  buildRunnerProgramTrashBeforeInstallAction,
-} from "../turn/runner-program-trash-install-actions";
+import { buildRunnerHostedProgramInstallAction } from "../turn/runner-hosted-install-actions";
+import { buildRunnerProgramTrashBeforeInstallAction } from "../turn/runner-program-trash-install-actions";
 import { buildRunnerStackSearchProgramToGripAction } from "../turn/runner-hidden-zone-search-actions";
 import {
   buildRunnerDelayedInstallRemoveCounterAction,
@@ -396,9 +387,7 @@ import {
   isSupportedEncounterTraceSuccessEffect,
   type EncounterPrintedEffectHost,
 } from "../run/encounter-printed-effects";
-import {
-  type EncounterPrintedNonTraceHost,
-} from "../run/encounter-printed-nontrace-effects";
+import { type EncounterPrintedNonTraceHost } from "../run/encounter-printed-nontrace-effects";
 import {
   breakAbilityMatchesIce,
   breakAbilityMatchesSubroutine,
@@ -414,18 +403,10 @@ import {
   createGameCardImplementationRuntimeDeps,
   type GameCardImplementationRuntimeDepsHost,
 } from "../card-implementation/card-implementation-runtime-deps";
-import {
-  type HiddenZoneRuntimeDepsHost,
-} from "../card-implementation/hidden-zone-runtime-deps";
-import {
-  type InstallRezRuntimeDepsHost,
-} from "../card-implementation/install-rez-runtime-deps";
-import {
-  type CounterLifecycleRuntimeDepsHost,
-} from "../card-implementation/counter-lifecycle-runtime-deps";
-import {
-  type TraceRuntimeDepsHost,
-} from "../card-implementation/trace-runtime-deps";
+import { type HiddenZoneRuntimeDepsHost } from "../card-implementation/hidden-zone-runtime-deps";
+import { type InstallRezRuntimeDepsHost } from "../card-implementation/install-rez-runtime-deps";
+import { type CounterLifecycleRuntimeDepsHost } from "../card-implementation/counter-lifecycle-runtime-deps";
+import { type TraceRuntimeDepsHost } from "../card-implementation/trace-runtime-deps";
 import {
   beginEncounter,
   isApproachIceExposeViewingWindowOpen,
@@ -613,9 +594,7 @@ import {
   corpInstalledEconomyActionProfileForPayload,
   type EconomyActionProfile,
 } from "../../mechanics/payment-costs";
-import {
-  isP358HiddenReplacementCompatibilityChoiceSource,
-} from "../../compatibility/payload-compatibility";
+import { isP358HiddenReplacementCompatibilityChoiceSource } from "../../compatibility/payload-compatibility";
 import {
   ALL_NIGHTER_ID,
   ARMADILLO_ARMORED_ROAD_HOME_ID,
@@ -667,9 +646,7 @@ import {
   ACCESS_NET_DAMAGE_UPGRADE_SOURCE,
   ACCESS_TRACE_DAMAGE_UPGRADE_SOURCE,
 } from "../../mechanics/server-upgrades";
-import {
-  RUN_TAX_UPGRADE_SOURCES,
-} from "../../mechanics/trace-tags";
+import { RUN_TAX_UPGRADE_SOURCES } from "../../mechanics/trace-tags";
 import { snapshotPersistentStealCostModifiersForSource } from "../../ability-engine/steal-cost-modifiers";
 import { createCardImplementationEffectAdapters } from "../../ability-engine/card-implementation-effect-adapters";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
@@ -706,8 +683,9 @@ import type {
 } from "../../ability-engine/definition-types";
 import type { RuntimeDeps } from "./runtime-shared";
 
-
-export function createLookupRuntimeServices(deps: RuntimeDeps) {
+export function createLookupRuntimeServices(
+  deps: RuntimeDeps,
+): import("./lookup-runtime-port").LookupRuntimePort {
   function normalizeSubtypeLabel(subtype: string): string {
     return subtype
       .toLowerCase()
@@ -715,7 +693,10 @@ export function createLookupRuntimeServices(deps: RuntimeDeps) {
       .replace(/^_+|_+$/g, "");
   }
 
-  function cardHasSubtype(definition: CardDefinition, subtype: string): boolean {
+  function cardHasSubtype(
+    definition: CardDefinition,
+    subtype: string,
+  ): boolean {
     const target = normalizeSubtypeLabel(subtype);
     return definition.subtypes.some(
       (candidate) => normalizeSubtypeLabel(candidate) === target,
@@ -723,8 +704,9 @@ export function createLookupRuntimeServices(deps: RuntimeDeps) {
   }
 
   function stableSubtypeList(subtypes: readonly string[]): string[] {
-    return [...new Set(subtypes.map((subtype) => normalizeSubtypeLabel(subtype)))]
-      .sort();
+    return [
+      ...new Set(subtypes.map((subtype) => normalizeSubtypeLabel(subtype))),
+    ].sort();
   }
 
   function effectiveSubtypesForCard(
@@ -749,30 +731,38 @@ export function createLookupRuntimeServices(deps: RuntimeDeps) {
     iceId: CardInstanceId,
   ): number {
     const instance = state.cardInstances[iceId];
-    if (!instance || instance.zone.side !== "corp" || instance.zone.zone !== "serverIce")
+    if (
+      !instance ||
+      instance.zone.side !== "corp" ||
+      instance.zone.zone !== "serverIce"
+    )
       return 0;
     const server = mustServer(state, instance.zone.serverId);
     const iceIndex = server.ice.indexOf(iceId);
     if (iceIndex < 0) return 0;
     return server.ice
       .slice(iceIndex + 1)
-      .filter((candidateId) => state.cardInstances[candidateId]?.rezzed === true)
-      .length;
+      .filter(
+        (candidateId) => state.cardInstances[candidateId]?.rezzed === true,
+      ).length;
   }
 
   function relativeIceStrengthBonusFor(
     state: GameState,
     iceId: CardInstanceId,
   ): number {
-    const relativeIce =
-      cardImplementationForDefinitionId(definitionFor(state, iceId).id)?.relativeIce;
+    const relativeIce = cardImplementationForDefinitionId(
+      definitionFor(state, iceId).id,
+    )?.relativeIce;
     const bonusPerCount = relativeIce?.strengthBonusPerCount;
     if (!bonusPerCount) return 0;
     return rezzedIceOutsideThisIceCount(state, iceId) * bonusPerCount;
   }
 
   function isRegionUpgrade(definition: CardDefinition): boolean {
-    return definition.type === "upgrade" && cardHasSubtype(definition, "region");
+    return (
+      definition.type === "upgrade" && cardHasSubtype(definition, "region")
+    );
   }
 
   function isUniqueCard(definition: CardDefinition): boolean {
@@ -861,14 +851,12 @@ export function createLookupRuntimeServices(deps: RuntimeDeps) {
     const hostInstance = mustInstance(state.cardInstances, hostId);
     if (hostInstance.hostedOn) return false;
     const hostDefinition = definitionFor(state, hostId);
-    if (
-      hostDefinition.type !== "program" &&
-      hostDefinition.type !== "hardware"
-    )
+    if (hostDefinition.type !== "program" && hostDefinition.type !== "hardware")
       return false;
     const implementation = cardImplementationForDefinitionId(hostDefinition.id);
     if (
-      implementation?.hostedProgramCapacity?.hostedProgramsAreInstalled !== true ||
+      implementation?.hostedProgramCapacity?.hostedProgramsAreInstalled !==
+        true ||
       !implementation.hostedProgramCapacity.allowedCardTypes.includes("program")
     )
       return false;
@@ -904,12 +892,15 @@ export function createLookupRuntimeServices(deps: RuntimeDeps) {
     const instance = state.cardInstances[cardId];
     if (!instance?.hostedOn) return 0;
     const definition = definitionFor(state, cardId);
-    if (definition.type !== "program" || !cardHasSubtype(definition, "icebreaker"))
+    if (
+      definition.type !== "program" ||
+      !cardHasSubtype(definition, "icebreaker")
+    )
       return 0;
     const hostDefinition = definitionFor(state, instance.hostedOn);
     const modifiers =
-      cardImplementationForDefinitionId(hostDefinition.id)?.hostedProgramModifiers ??
-      [];
+      cardImplementationForDefinitionId(hostDefinition.id)
+        ?.hostedProgramModifiers ?? [];
     return modifiers.reduce((sum, modifier) => {
       if (
         modifier.appliesTo !== "hosted_icebreakers" ||
@@ -928,9 +919,9 @@ export function createLookupRuntimeServices(deps: RuntimeDeps) {
   ): number {
     const instance = state.cardInstances[breakerId];
     if (!instance || instance.selectedCardId !== encounteredIceId) return 0;
-    const bonus =
-      cardImplementationForDefinitionId(definitionFor(state, breakerId).id)
-        ?.icebreakerEncounterStrengthBonus;
+    const bonus = cardImplementationForDefinitionId(
+      definitionFor(state, breakerId).id,
+    )?.icebreakerEncounterStrengthBonus;
     if (bonus?.kind !== "against_selected_installed_ice") return 0;
     return Math.max(0, Math.floor(bonus.amount));
   }
@@ -958,7 +949,9 @@ export function createLookupRuntimeServices(deps: RuntimeDeps) {
     return [...targets];
   }
 
-  function hasInstalledRunnerApDamageReducerHardware(state: GameState): boolean {
+  function hasInstalledRunnerApDamageReducerHardware(
+    state: GameState,
+  ): boolean {
     return state.runner.rig.hardware.some(
       (cardId) => definitionFor(state, cardId).id === MICROTECH_TRODE_SET_ID,
     );
@@ -1009,14 +1002,18 @@ export function createLookupRuntimeServices(deps: RuntimeDeps) {
     state: GameState,
     cardId: CardInstanceId,
   ): CardVirusCounterImplementation | undefined {
-    return virusCounterImplementationForDefinition(definitionFor(state, cardId).id);
+    return virusCounterImplementationForDefinition(
+      definitionFor(state, cardId).id,
+    );
   }
 
   function corpUtilityImplementationForCard(
     state: GameState,
     cardId: CardInstanceId,
   ): CardCorpUtilityImplementation | undefined {
-    return corpUtilityImplementationForDefinition(definitionFor(state, cardId).id);
+    return corpUtilityImplementationForDefinition(
+      definitionFor(state, cardId).id,
+    );
   }
 
   function hasCorpUtilityKind(
@@ -1030,7 +1027,9 @@ export function createLookupRuntimeServices(deps: RuntimeDeps) {
   function cardInstallCapabilitiesForDefinition(
     definitionId: CardDefinitionId,
   ) {
-    return cardImplementationForDefinitionId(definitionId)?.installCapabilities ?? [];
+    return (
+      cardImplementationForDefinitionId(definitionId)?.installCapabilities ?? []
+    );
   }
 
   function hasInstallCapabilityKindForDefinition(

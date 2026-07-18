@@ -246,7 +246,7 @@ export function resolveDelayedInstallStartTurnChoice(
 ): void {
   const { state } = host;
   const choice = state.pendingChoice;
-  if (!choice || !choice.source.startsWith("v1912.shell_traders_start_turn:"))
+  if (!choice || !choice.source.startsWith("runner_start.delayed_install:"))
     throw new Error("Es ist keine Shell-Traders-Startzugwahl offen.");
   if (legalAction.side !== "runner" || playerAction.side !== "runner")
     throw new Error("Nur der Runner darf das Shell-Traders-Ziel wählen.");
@@ -437,9 +437,9 @@ function startDelayedInstallStartTurnChoice(
   const { state } = host;
   const nextStateVersion = state.stateVersion + 1;
   state.pendingChoice = {
-    choiceId: `v1912_shell_traders_start_turn_${nextStateVersion}_${sourceCardId}`,
+    choiceId: `runner_start_delayed_install_${nextStateVersion}_${sourceCardId}`,
     side: "runner",
-    source: `v1912.shell_traders_start_turn:${sourceCardId}:${nextStateVersion}`,
+    source: `runner_start.delayed_install:${sourceCardId}:${nextStateVersion}`,
     prompt: `${host.cards.publicTitle(
       host.constants.SHELL_TRADERS_ID as CardDefinitionId,
     )}: Wähle eine Karte, von der 1 Shell-Counter entfernt wird.`,
@@ -455,7 +455,7 @@ function startDelayedInstallStartTurnChoice(
         id: `card_${cardId}`,
         label: `${definition.title} (${remainingCounters})`,
         value: cardId,
-        metadata: { shellTradersRemainingCounters: remainingCounters },
+        metadata: { delayedInstallRemainingCounters: remainingCounters },
       };
     }),
     minSelections: 1,

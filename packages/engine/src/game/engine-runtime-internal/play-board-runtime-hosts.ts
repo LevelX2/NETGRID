@@ -27,7 +27,7 @@ import {
   type GameState,
   type ImminentEvent,
   type LegalAction,
-  type LegacyAbilityPayloadField,
+  type AbilityPayloadDiscriminatorField,
   type PlayerAction,
   type PlayerController,
   type PublicGameEvent,
@@ -230,9 +230,7 @@ import {
   buildRunnerAgendaPointInstallAction,
   buildRunnerSelectedServerInstallAction,
 } from "../turn/runner-install-context-actions";
-import {
-  buildRunnerHostedProgramInstallAction,
-} from "../turn/runner-hosted-install-actions";
+import { buildRunnerHostedProgramInstallAction } from "../turn/runner-hosted-install-actions";
 import { buildRunnerProgramTrashBeforeInstallAction } from "../turn/runner-program-trash-install-actions";
 import { buildRunnerStackSearchProgramToGripAction } from "../turn/runner-hidden-zone-search-actions";
 import {
@@ -650,9 +648,7 @@ import {
   ACCESS_NET_DAMAGE_UPGRADE_SOURCE,
   ACCESS_TRACE_DAMAGE_UPGRADE_SOURCE,
 } from "../../mechanics/server-upgrades";
-import {
-  RUN_TAX_UPGRADE_SOURCES,
-} from "../../mechanics/trace-tags";
+import { RUN_TAX_UPGRADE_SOURCES } from "../../mechanics/trace-tags";
 import { snapshotPersistentStealCostModifiersForSource } from "../../ability-engine/steal-cost-modifiers";
 import { createCardImplementationEffectAdapters } from "../../ability-engine/card-implementation-effect-adapters";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
@@ -692,35 +688,12 @@ import type { RuntimeDeps } from "./runtime-shared";
 export function createPlayBoardRuntimeHosts(
   deps: RuntimeDeps,
   runtime: RuntimeDeps = {} as RuntimeDeps,
-) {
-  const {
-    RUNNER_EVENT_RESOLVERS,
-    advanceableInstalledCardTargets,
-    advancementDistributionOptions,
-    cardImplementationRunnerEventResolver,
-    cardImplementationRuntimeDeps,
-    fortRunSideFamiliesHostForState,
-    hiddenZoneArrangeChoiceHandlerHost,
-    hiddenZoneNonSearchChoiceHandlerHost,
-    installedAgendaOperationTarget,
-    isCorpInstallableCardType,
-    moveAdvancementOptions,
-    hardwareTrashByCounterEligibleHardwareIds,
-    requireRunnerTagged,
-    resolveAgendaCounterOperation,
-    resolveCorpOperationAddAdvancementCounters,
-    resolvePostOnPlayGenericFollowups,
-    resolveHardwareTrashByCounterOperation,
-    resolveRunnerLastTurnInstalledResourceTargetId,
-    resolveRunnerTargetedEventImplementation,
-    resolveAdvancementPlacementOperation,
-    runnerLastTurnInstalledResourceIds,
-    runnerStoleAgendaLastTurn,
-    runnerStolenAgendaAdvancementCountersLastTurn,
-    swapCorpHqAndRdTop,
-    trashRunnerInstalledCardToHeap,
-  } = deps;
-
+): Pick<
+  import("./action-runtime-port").ActionRuntimePort,
+  | "playCardExecutionHost"
+  | "corpOperationResolutionHost"
+  | "boardStateActionExecutionHost"
+> {
   function playCardExecutionHost(state: GameState): PlayCardExecutionHost {
     const operationHost = corpOperationResolutionHost(state);
     return {
@@ -759,8 +732,8 @@ export function createPlayBoardRuntimeHosts(
       },
       events: {
         runnerEventResolver: (definition) =>
-          cardImplementationRunnerEventResolver(definition) ??
-          RUNNER_EVENT_RESOLVERS[definition.id],
+          deps.cardImplementationRunnerEventResolver(definition) ??
+          deps.RUNNER_EVENT_RESOLVERS[definition.id],
       },
       operations: {
         canPlayCorpOperation: (definition) =>
@@ -768,31 +741,38 @@ export function createPlayBoardRuntimeHosts(
         resolveCorpOperation: (definition, legalAction) =>
           resolveCorpOperation(operationHost, definition, legalAction),
         resolveRunnerLastTurnInstalledResourceTargetId: (targetCardId) =>
-          resolveRunnerLastTurnInstalledResourceTargetId(state, targetCardId),
+          deps.resolveRunnerLastTurnInstalledResourceTargetId(
+            state,
+            targetCardId,
+          ),
       },
       cardImplementation: {
         canPlayPrintedCostOnPlay: (definition) =>
           canPlayPrintedCostOnPlayImplementation(
-            cardImplementationRuntimeDeps,
+            deps.cardImplementationRuntimeDeps,
             state,
             definition,
           ),
         executeOnPlayAbility: (legalAction, definition, cardId) =>
           executeOnPlayCardImplementationAbility(
-            cardImplementationRuntimeDeps,
+            deps.cardImplementationRuntimeDeps,
             state,
             legalAction,
             definition,
             cardId,
           ),
         resolveRunnerTargetedEventImplementation: (definition, legalAction) =>
-          resolveRunnerTargetedEventImplementation(
+          deps.resolveRunnerTargetedEventImplementation(
             state,
             definition,
             legalAction,
           ),
         resolvePostOnPlayGenericFollowups: (definition, legalAction) =>
-          resolvePostOnPlayGenericFollowups(state, definition, legalAction),
+          deps.resolvePostOnPlayGenericFollowups(
+            state,
+            definition,
+            legalAction,
+          ),
         hasPrintedCostOnPlay: hasPrintedCostOnPlayCardImplementation,
         additionalOperationCost:
           onPlayCardImplementationAdditionalOperationCost,
@@ -811,7 +791,7 @@ export function createPlayBoardRuntimeHosts(
         buildLegalAction: action,
       },
       cards: {
-        isCorpInstallableCardType,
+        isCorpInstallableCardType: deps.isCorpInstallableCardType,
         unrezzedInstalledIceIds: () =>
           Object.entries(state.cardInstances)
             .filter(
@@ -827,15 +807,15 @@ export function createPlayBoardRuntimeHosts(
       corp: {
         drawCorpCard: () => drawCorpCard(state),
         ensureTurnFlags: () => ensureCorpTurnFlags(state),
-        runnerStoleAgendaLastTurn: () => runnerStoleAgendaLastTurn(state),
+        runnerStoleAgendaLastTurn: () => deps.runnerStoleAgendaLastTurn(state),
         runnerStolenAgendaAdvancementCountersLastTurn: () =>
-          runnerStolenAgendaAdvancementCountersLastTurn(state),
-        swapCorpHqAndRdTop: () => swapCorpHqAndRdTop(state),
+          deps.runnerStolenAgendaAdvancementCountersLastTurn(state),
+        swapCorpHqAndRdTop: () => deps.swapCorpHqAndRdTop(state),
       },
       runner: {
-        requireRunnerTagged: () => requireRunnerTagged(state),
+        requireRunnerTagged: () => deps.requireRunnerTagged(state),
         runnerLastTurnInstalledResourceIds: () =>
-          runnerLastTurnInstalledResourceIds(state),
+          deps.runnerLastTurnInstalledResourceIds(state),
         isConcealedRunnerResource: (cardId) =>
           isConcealedRunnerResource(state, cardId),
         hiddenRunnerResourceSlotId,
@@ -869,7 +849,7 @@ export function createPlayBoardRuntimeHosts(
       },
       zones: {
         trashRunnerInstalledCardToHeap: (cardId) =>
-          trashRunnerInstalledCardToHeap(state, cardId),
+          deps.trashRunnerInstalledCardToHeap(state, cardId),
       },
       damage: {
         resolveDamageOperation: (
@@ -891,61 +871,69 @@ export function createPlayBoardRuntimeHosts(
       hiddenZone: {
         startCorpArchivesToHqChoice: (legalAction, sourceCardId) =>
           startCorpArchivesToHqChoice(
-            hiddenZoneNonSearchChoiceHandlerHost(state, legalAction),
+            deps.hiddenZoneNonSearchChoiceHandlerHost(state, legalAction),
             sourceCardId,
           ),
         startCorpHqCardToRdChoice: (legalAction, sourceCardId) =>
           startCorpHqCardToRdChoice(
-            hiddenZoneNonSearchChoiceHandlerHost(state, legalAction),
+            deps.hiddenZoneNonSearchChoiceHandlerHost(state, legalAction),
             sourceCardId,
           ),
         startCorpRdTopReorderChoice: (legalAction, sourceCardId) =>
           startCorpRdTopReorderChoice(
-            hiddenZoneArrangeChoiceHandlerHost(state, legalAction),
+            deps.hiddenZoneArrangeChoiceHandlerHost(state, legalAction),
             sourceCardId,
           ),
         resolveConcealAndReorderInstalledIce: (legalAction) =>
           resolveConcealAndReorderInstalledIce(
-            hiddenZoneArrangeChoiceHandlerHost(state, legalAction),
+            deps.hiddenZoneArrangeChoiceHandlerHost(state, legalAction),
           ),
       },
       board: {
         installedAgendaOperationTarget: () =>
-          installedAgendaOperationTarget(state),
+          deps.installedAgendaOperationTarget(state),
         advanceableInstalledCardTargets: () =>
-          advanceableInstalledCardTargets(state),
+          deps.advanceableInstalledCardTargets(state),
         advancementDistributionOptions: (amount, distribution) =>
-          advancementDistributionOptions(state, amount, distribution as never),
+          deps.advancementDistributionOptions(
+            state,
+            amount,
+            distribution as never,
+          ),
         moveAdvancementOptions: (sourceCardId, source, maxAmount) =>
-          moveAdvancementOptions(
+          deps.moveAdvancementOptions(
             state,
             sourceCardId,
             source as never,
             maxAmount,
           ),
         resolveAgendaCounterOperation: (legalAction, sourceDefinitionId) =>
-          resolveAgendaCounterOperation(state, legalAction, sourceDefinitionId),
+          deps.resolveAgendaCounterOperation(
+            state,
+            legalAction,
+            sourceDefinitionId,
+          ),
         resolveCorpOperationAddAdvancementCounters: (legalAction) =>
-          resolveCorpOperationAddAdvancementCounters(state, legalAction),
+          deps.resolveCorpOperationAddAdvancementCounters(state, legalAction),
         resolveAdvancementPlacementOperation: (legalAction) =>
-          resolveAdvancementPlacementOperation(state, legalAction),
+          deps.resolveAdvancementPlacementOperation(state, legalAction),
       },
       operations: {
         hardwareTrashByCounterEligibleHardwareIds: () =>
-          hardwareTrashByCounterEligibleHardwareIds(state),
+          deps.hardwareTrashByCounterEligibleHardwareIds(state),
         resolveHardwareTrashByCounterOperation: (legalAction) =>
-          resolveHardwareTrashByCounterOperation(state, legalAction),
+          deps.resolveHardwareTrashByCounterOperation(state, legalAction),
       },
       cardImplementation: {
         canPlayPrintedCostOnPlay: (definition) =>
           canPlayPrintedCostOnPlayImplementation(
-            cardImplementationRuntimeDeps,
+            deps.cardImplementationRuntimeDeps,
             state,
             definition,
           ),
         executeOnPlayAbility: (legalAction, definition, cardId) =>
           executeOnPlayCardImplementationAbility(
-            cardImplementationRuntimeDeps,
+            deps.cardImplementationRuntimeDeps,
             state,
             legalAction,
             definition,
@@ -975,12 +963,12 @@ export function createPlayBoardRuntimeHosts(
           isConcealedRunnerResource(state, cardId),
         hiddenRunnerResourceSlotId,
         trashInstalledCardToHeap: (cardId, legalAction) =>
-          trashRunnerInstalledCardToHeap(state, cardId, legalAction),
+          deps.trashRunnerInstalledCardToHeap(state, cardId, legalAction),
       },
       fort: {
         markFortActivityForRunGate: (serverId, legalAction) =>
           markFortActivityForRunGate(
-            fortRunSideFamiliesHostForState(state),
+            deps.fortRunSideFamiliesHostForState(state),
             serverId,
             legalAction,
           ),

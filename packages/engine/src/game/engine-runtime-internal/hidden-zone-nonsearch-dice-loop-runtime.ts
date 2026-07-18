@@ -23,15 +23,10 @@ type HiddenZoneNonSearchDiceLoopRuntimeDeps = RuntimeDeps & {
   ) => string[];
 };
 
-export function createHiddenZoneNonSearchDiceLoopRuntime(deps: RuntimeDeps) {
+export function createHiddenZoneNonSearchDiceLoopRuntime(
+  deps: RuntimeDeps,
+): import("./hidden-zone-dice-loop-runtime-port").HiddenZoneDiceLoopRuntimePort {
   const typedDeps = deps as HiddenZoneNonSearchDiceLoopRuntimeDeps;
-  const {
-    credits,
-    definitionFor,
-    rollDeterministicDie,
-    runnerEventLongtailKindForDefinition,
-    selectedChoiceIds,
-  } = typedDeps;
 
   function resolveRandomDiceLoopEvent(
     state: GameState,
@@ -45,7 +40,7 @@ export function createHiddenZoneNonSearchDiceLoopRuntime(deps: RuntimeDeps) {
       implementation.visibility !== "public"
     )
       throw new Error("Playful-AI-Implementation ist ungueltig.");
-    const dieRoll = rollDeterministicDie(
+    const dieRoll = typedDeps.rollDeterministicDie(
       state,
       `v1921.die.${sourceDefinitionId}.dice_loop.initial`,
     );
@@ -229,7 +224,7 @@ export function createHiddenZoneNonSearchDiceLoopRuntime(deps: RuntimeDeps) {
     const rolledDice: number[] = [];
     while (remainingDice > 0) {
       remainingDice -= 1;
-      const nextRoll = rollDeterministicDie(
+      const nextRoll = typedDeps.rollDeterministicDie(
         state,
         `v1921.die.${sourceDefinitionId}.dice_loop.followup.${state.stateVersion + 1}.${nextRollIndex}`,
       );
@@ -267,22 +262,27 @@ export function createHiddenZoneNonSearchDiceLoopRuntime(deps: RuntimeDeps) {
     playerAction: PlayerAction,
   ): void {
     const choice = state.pendingChoice;
-    if (!choice || !choice.source.startsWith("card_implementation.random_dice_split"))
+    if (
+      !choice ||
+      !choice.source.startsWith("card_implementation.random_dice_split")
+    )
       throw new Error("Es ist keine Playful-AI-Choice offen.");
     const choiceState = parseRandomDiceSplitChoiceSource(choice.source);
     const { sourceCardId, dieRoll, remainingDice, rollIndex } = choiceState;
     if (
       !sourceCardId ||
       !state.runner.heap.includes(sourceCardId) ||
-      runnerEventLongtailKindForDefinition(
-        definitionFor(state, sourceCardId),
+      typedDeps.runnerEventLongtailKindForDefinition(
+        typedDeps.definitionFor(state, sourceCardId),
       ) !== "random_dice_loop"
     )
       throw new Error(
         "Die Playful-AI-Choice gehoert nicht zur gespielten Karte.",
       );
-    const sourceDefinitionId = definitionFor(state, sourceCardId).id;
-    const selectedOptionId = selectedChoiceIds(playerAction.selectedChoices)[0];
+    const sourceDefinitionId = typedDeps.definitionFor(state, sourceCardId).id;
+    const selectedOptionId = typedDeps.selectedChoiceIds(
+      playerAction.selectedChoices,
+    )[0];
 
     delete state.pendingChoice;
     let gainedCredits = 0;
@@ -299,7 +299,7 @@ export function createHiddenZoneNonSearchDiceLoopRuntime(deps: RuntimeDeps) {
       const split = parseRandomDiceSplit(choice, selectedOptionId, dieRoll);
       gainedCredits = split.gainedCredits;
       setAsideDice = split.setAsideDice;
-      if (gainedCredits > 0) credits(state, "runner", gainedCredits);
+      if (gainedCredits > 0) typedDeps.credits(state, "runner", gainedCredits);
       queuedDiceBeforeRolls = remainingDice + setAsideDice;
       progress = continueRandomDiceLoop(
         state,

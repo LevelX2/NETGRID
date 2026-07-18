@@ -117,6 +117,16 @@ describe("ActionCardSemanticProfiles", () => {
     expect(netwatch?.tacticSignals).not.toContain("corp.score_closeout");
   });
 
+  it("keeps Runner agenda-point conversion distinct from Corp scoring", () => {
+    const profiles = buildActionCardSemanticProfilesByDefinitionId();
+    const desperate = profiles["onr_v1_083_desperate-competitor"];
+
+    expect(desperate?.tacticSignals).toContain(
+      "runner.agenda_point_conversion",
+    );
+    expect(desperate?.tacticSignals).not.toContain("corp.score_progress");
+  });
+
   it("preserves TKO's structured Runner action-loss signal", () => {
     const profiles = buildActionCardSemanticProfilesByDefinitionId();
 

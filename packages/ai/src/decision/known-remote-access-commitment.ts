@@ -366,10 +366,6 @@ function knownRemoteTrashTargetProfile(
   const hint = AI_HINTS_BY_CARD.get(definitionId);
   const roles = [...(hint?.roles ?? []), ...(hint?.planRoles ?? [])];
   if (hint?.remoteRole?.kind) roles.push(hint.remoteRole.kind);
-  const values = Object.values(hint?.valueHints ?? {}).filter(
-    (value): value is number => typeof value === "number",
-  );
-  const value = values.length > 0 ? Math.max(...values) : 0;
   const valueProjection = projectRemoteRootValue({
     definitionId,
     roles,
@@ -377,6 +373,7 @@ function knownRemoteTrashTargetProfile(
     ...(hint?.effects ? { effects: hint.effects } : {}),
     ...(hint?.valueHints ? { valueHints: hint.valueHints } : {}),
   });
+  const value = valueProjection.valueScore;
   const corpValueRemaining = valueProjection.finitePoolValueRemaining;
   const finitePoolEconomy = valueProjection.kind === "finite_economy_pool";
   const finitePoolDepleted = finitePoolEconomy && corpValueRemaining <= 0;

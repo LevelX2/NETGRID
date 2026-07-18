@@ -25,146 +25,7 @@ import { runnerProgramInstallMemoryReachable } from "../install/runner-program-i
 export function createHiddenZoneSearchRuntime(
   deps: RuntimeDeps,
   links: ChoiceHiddenZoneRuntimeLinks,
-) {
-  const {
-    DAILY_CREDIT_RESOURCE_SOURCE,
-    COCKROACH_ID,
-    ARCHIVES_TO_HQ_OPERATION_SOURCE,
-    HQ_AGENDA_REVEAL_ASSET_SOURCE,
-    RD_TOP5_REORDER_OPERATION_SOURCE,
-    DEAL_WITH_MILITECH_ID,
-    CARD_DEFINITIONS_BY_ID,
-    INITIAL_HAND_SIZE,
-    MYSTERY_BOX_ID,
-    RONIN_AROUND_ID,
-    RUN_ACCESS_PRESSURE_EVENT_SOURCE,
-    SELF_MODIFYING_CODE_ID,
-    SERVER_EXPOSE_PROGRAM_SOURCES,
-    PAID_STACK_SEARCH_RESOURCE_SOURCE,
-    SNEAK_PREVIEW_ID,
-    STACK_SEARCH_PROGRAM_SOURCES,
-    STACK_TOP_REORDER_RESOURCE_SOURCE,
-    TOO_MANY_DOORS_ID,
-    accessEffectHandlerHost,
-    addCardCounter,
-    affordableRezzedInstalledIceIdsForRunner,
-    agendaPointsForScoredCard,
-    appendResolvedEffectsToPayload,
-    applyRunnerStartOfTurnEffects,
-    availableRunnerProgramInstallCredits,
-    cardCounter,
-    cardHasSubtype,
-    cardImplementationForDefinitionId,
-    cardImplementationRuntimeDeps,
-    cockroachCounterTotal,
-    cockroachRandomHqDiscardActive,
-    completeDiscardPhase,
-    corpInstallRezSequenceHandlerHost,
-    corpInstalledCardIds,
-    corpScoredAgendaForfeitTargets,
-    creditCostForAction,
-    definitionFor,
-    discardRandomCorpHqCards,
-    drawCorpCards,
-    encounterResolutionHostForState,
-    encounterSpecialWindowHostForState,
-    ensureRunnerTurnFlags,
-    executeCardImplementationEffects,
-    executeCardImplementationLifecycleEffects,
-    fortPassWindowHostForState,
-    fortRunSideFamiliesHostForState,
-    handForSide,
-    handleCorpInstallRezSequenceChoice,
-    handleCorpZoneChoice,
-    handleHiddenZoneArrangeChoice,
-    handleHiddenZoneNonSearchChoice,
-    handleHiddenZoneSearchChoice,
-    handleScoredAgendaFlowChoice,
-    hasCorpUtilityKind,
-    hasInstalledUniqueCardDefinition,
-    hasSuccessfulHqRunThisTurn,
-    isP358HiddenReplacementCompatibilityChoiceSource,
-    isUniqueCard,
-    lookTopStackShowToCorpThenInstallMatchingTargets,
-    maxHandSize,
-    mustServer,
-    outermostIceIndex,
-    poxCountersForServer,
-    publicServerLabel,
-    publicServerLabelForCard,
-    recordStateRandomMarkers,
-    removeFromAllZones,
-    resolveAardvarkInterceptionChoice,
-    resolveAccessChimeraDaemonTrashChoice,
-    resolveAccessInstalledRunnerProgramReturnChoice,
-    resolveAccessPaymentChoice,
-    resolveCardImplementationAdvancementDistributionChoice,
-    resolveCardImplementationMoveAdvancementChoice,
-    resolveVirusCounterPurgePreserveChoice,
-    resolveCrashEverettDrawChoice,
-    resolveEventModificationChoice,
-    resolveHammerStealthLossChoice,
-    resolveCorpInstalledEconomyCreditChoice,
-    resolvePreAccessTopRdReorderChoice,
-    resolvePassRezzedIceProgramTrashChoiceInRunModule,
-    resolveBrokenIceVirusCounterChoice,
-    resolvePostMeatDamageHiddenResourceChoice,
-    resolveHardwareTrashByCounterChoice,
-    resolveSuccessfulRunCreditLossSpendChoice,
-    resolveReplacementChoice,
-    resolveRunnerPrivateLookChoice,
-    resolveRunnerProgramTrashBeforeInstallChoice,
-    resolveHqIceSwapChoice,
-    resolveRezInterruptJackOutChoice,
-    resolveSuccessfulRunInterventionChoiceInRunModule,
-    resolveAdvancementPlacementChoice,
-    resolveSecretSpendCompareChoiceInRunModule,
-    resolveTraceChoice,
-    resolveActiveIceProgramTrashChoiceInRunModule,
-    rezCostForCard,
-    rezzedBlackIceIds,
-    rezzedCorpRootCardIds,
-    rezzedInstalledIceIds,
-    rollDeterministicDie,
-    runAccessTransitionHost,
-    runEndCleanupHost,
-    runRezWindowHostForState,
-    runnerEventLongtailForDefinition,
-    runnerEventLongtailKindForDefinition,
-    runnerInstalledCardIds,
-    runnerMemoryLimit,
-    runnerProgramUsesMemory,
-    runnerStoleAgendaSubtypeThisTurn,
-    scoredAgendaFlowHost,
-    scoredAgendaImplementationForDefinition,
-    scoredAgendaKindForDefinition,
-    searchStackInstallTargets,
-    selectedChoiceIds,
-    setCardCounter,
-    setHostedOn,
-    shouldLoadLegacyRecurringCredits,
-    shuffleRunnerStackAndRefreshZones,
-    shuffleStateIds,
-    temporaryProgramInstallableProgramIds,
-    spendCardCounter,
-    spendCredits,
-    spendRunnerInstallCredits,
-    startAujourdOuiTop5Activation,
-    startIncubatorTransformChoice,
-    startRun,
-    startRunnerStackArrangeChoice,
-    startRunnerStackSearchChoiceActivation,
-    successfulRunInterventionHost,
-    traceOrchestrationHost,
-    trashCorpInstalledCardToArchives,
-    trashRunnerInstalledCardToHeap,
-    uniqueDirectLongtailImplementationForDefinition,
-    unrezzedInstalledIceIds,
-    mustInstance,
-    credits,
-    withoutVariableIceState,
-  } = deps;
-
+): import("./hidden-zone-search-runtime-port").HiddenZoneSearchRuntimePort {
   const {
     RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_ACTION,
     RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_CHOICE_SOURCE,
@@ -247,35 +108,36 @@ export function createHiddenZoneSearchRuntime(
       state,
       legalAction,
       constants: {
-        topStackTakeMatchingSourceId: DAILY_CREDIT_RESOURCE_SOURCE,
-        randomStackProgramInstallSourceId: MYSTERY_BOX_ID,
-        stackProgramFreeInstallSourceId: SELF_MODIFYING_CODE_ID,
-        stackSearchGripSourceId: PAID_STACK_SEARCH_RESOURCE_SOURCE,
-        temporaryProgramInstallSourceId: SNEAK_PREVIEW_ID,
+        topStackTakeMatchingSourceId: deps.DAILY_CREDIT_RESOURCE_SOURCE,
+        randomStackProgramInstallSourceId: deps.MYSTERY_BOX_ID,
+        stackProgramFreeInstallSourceId: deps.SELF_MODIFYING_CODE_ID,
+        stackSearchGripSourceId: deps.PAID_STACK_SEARCH_RESOURCE_SOURCE,
+        temporaryProgramInstallSourceId: deps.SNEAK_PREVIEW_ID,
       },
       cards: {
-        definitionFor: (cardId) => definitionFor(state, cardId),
+        definitionFor: (cardId) => deps.definitionFor(state, cardId),
         isUniqueRunnerDefinitionInstalled: (definition) =>
-          isUniqueCard(definition) &&
-          hasInstalledUniqueCardDefinition(state, "runner", definition.id),
+          deps.isUniqueCard(definition) &&
+          deps.hasInstalledUniqueCardDefinition(state, "runner", definition.id),
         runnerProgramUsesMemory: (cardId) =>
-          runnerProgramUsesMemory(state, cardId),
+          deps.runnerProgramUsesMemory(state, cardId),
       },
       zones: {
-        removeFromAllZones: (cardId) => removeFromAllZones(state, cardId),
+        removeFromAllZones: (cardId) => deps.removeFromAllZones(state, cardId),
         addToGrip: (cardId) => state.runner.grip.push(cardId),
         trashRunnerInstalledCardToHeap: (cardId) =>
-          trashRunnerInstalledCardToHeap(state, cardId),
+          deps.trashRunnerInstalledCardToHeap(state, cardId),
       },
       shuffleRunnerStack: (purpose) => shuffleRunnerStack(state, purpose),
-      spendRunnerCredits: (amount) => spendCredits(state, "runner", amount),
+      spendRunnerCredits: (amount) =>
+        deps.spendCredits(state, "runner", amount),
       installRunnerProgramFromStackWithoutClick: (cardId) =>
         installRunnerProgramFromStackWithoutClick(state, cardId, legalAction),
       startRunnerProgramFreeMemoryChoice: (cardId) =>
         startRunnerProgramFreeMemoryChoice(state, cardId),
       availableRunnerProgramInstallCredits: () =>
-        availableRunnerProgramInstallCredits(state),
-      runnerMemoryLimit: () => runnerMemoryLimit(state),
+        deps.availableRunnerProgramInstallCredits(state),
+      runnerMemoryLimit: () => deps.runnerMemoryLimit(state),
       install: {
         canInstallRunnerProgramFromZone: (cardId, sourceZone, installCost) =>
           canInstallRunnerProgramFromZone(
@@ -299,13 +161,13 @@ export function createHiddenZoneSearchRuntime(
         installRunnerProgramForFree: (cardId, options) =>
           installRunnerProgramForFree(state, cardId, legalAction, options),
         searchStackInstallTargets: (filter, installCost) =>
-          searchStackInstallTargets(
+          deps.searchStackInstallTargets(
             hiddenZoneSearchActivationTargetHost(state),
             filter,
             installCost,
           ),
         temporaryProgramInstallableProgramIds: (sourceZone) =>
-          temporaryProgramInstallableProgramIds(
+          deps.temporaryProgramInstallableProgramIds(
             hiddenZoneSearchActivationTargetHost(state),
             sourceZone,
           ),
@@ -314,7 +176,7 @@ export function createHiddenZoneSearchRuntime(
           allowedTypes,
           installCost,
         ) =>
-          lookTopStackShowToCorpThenInstallMatchingTargets(
+          deps.lookTopStackShowToCorpThenInstallMatchingTargets(
             hiddenZoneSearchActivationTargetHost(state),
             count,
             allowedTypes,
@@ -328,17 +190,18 @@ export function createHiddenZoneSearchRuntime(
     return {
       state,
       constants: {
-        topStackTakeMatchingSourceId: DAILY_CREDIT_RESOURCE_SOURCE,
-        randomStackProgramInstallSourceId: MYSTERY_BOX_ID,
-        stackProgramFreeInstallSourceId: SELF_MODIFYING_CODE_ID,
-        stackSearchGripSourceId: PAID_STACK_SEARCH_RESOURCE_SOURCE,
-        temporaryProgramInstallSourceId: SNEAK_PREVIEW_ID,
+        topStackTakeMatchingSourceId: deps.DAILY_CREDIT_RESOURCE_SOURCE,
+        randomStackProgramInstallSourceId: deps.MYSTERY_BOX_ID,
+        stackProgramFreeInstallSourceId: deps.SELF_MODIFYING_CODE_ID,
+        stackSearchGripSourceId: deps.PAID_STACK_SEARCH_RESOURCE_SOURCE,
+        temporaryProgramInstallSourceId: deps.SNEAK_PREVIEW_ID,
       },
       cards: {
-        definitionFor: (cardId: CardInstanceId) => definitionFor(state, cardId),
+        definitionFor: (cardId: CardInstanceId) =>
+          deps.definitionFor(state, cardId),
         isUniqueRunnerDefinitionInstalled: (definition: CardDefinition) =>
-          isUniqueCard(definition) &&
-          hasInstalledUniqueCardDefinition(state, "runner", definition.id),
+          deps.isUniqueCard(definition) &&
+          deps.hasInstalledUniqueCardDefinition(state, "runner", definition.id),
       },
       install: {
         canInstallRunnerProgramFromZone: (
@@ -353,7 +216,7 @@ export function createHiddenZoneSearchRuntime(
             installCost,
           ),
       },
-      runnerMemoryLimit: () => runnerMemoryLimit(state),
+      runnerMemoryLimit: () => deps.runnerMemoryLimit(state),
       shuffleRunnerStack: (purpose: string) =>
         shuffleRunnerStack(state, purpose),
     };
@@ -390,12 +253,12 @@ export function createHiddenZoneSearchRuntime(
       definition,
       usesMemory: true,
       mustInstance: (targetCardId) =>
-        mustInstance(state.cardInstances, targetCardId),
+        deps.mustInstance(state.cardInstances, targetCardId),
       setCardCounter: (targetCardId, counterType, amount) =>
-        setCardCounter(state, targetCardId, counterType, amount),
+        deps.setCardCounter(state, targetCardId, counterType, amount),
       addCardCounter: (targetCardId, counterType, amount) =>
-        addCardCounter(state, targetCardId, counterType, amount),
-      shouldLoadLegacyRecurringCredits,
+        deps.addCardCounter(state, targetCardId, counterType, amount),
+      shouldLoadLegacyRecurringCredits: deps.shouldLoadLegacyRecurringCredits,
     });
   }
 
@@ -405,29 +268,33 @@ export function createHiddenZoneSearchRuntime(
     legalAction: LegalAction,
   ): boolean {
     if (!state.runner.stack.includes(cardId)) return false;
-    const definition = definitionFor(state, cardId);
+    const definition = deps.definitionFor(state, cardId);
     if (definition.type !== "program") return false;
     if (
-      isUniqueCard(definition) &&
-      hasInstalledUniqueCardDefinition(state, "runner", definition.id)
+      deps.isUniqueCard(definition) &&
+      deps.hasInstalledUniqueCardDefinition(state, "runner", definition.id)
     )
       return false;
     if (
-      availableRunnerProgramInstallCredits(state) <
+      deps.availableRunnerProgramInstallCredits(state) <
       (definition.installCost ?? 0)
     )
       return false;
     if (
       state.runner.memoryUsed + (definition.memoryCost ?? 0) >
-      runnerMemoryLimit(state)
+      deps.runnerMemoryLimit(state)
     )
       return false;
 
-    spendRunnerInstallCredits(state, definition.installCost ?? 0, "program");
-    removeFromAllZones(state, cardId);
+    deps.spendRunnerInstallCredits(
+      state,
+      definition.installCost ?? 0,
+      "program",
+    );
+    deps.removeFromAllZones(state, cardId);
     completeHiddenZoneRunnerProgramInstall(state, cardId, definition);
-    executeCardImplementationLifecycleEffects(
-      cardImplementationRuntimeDeps,
+    deps.executeCardImplementationLifecycleEffects(
+      deps.cardImplementationRuntimeDeps,
       state,
       legalAction,
       definition,
@@ -451,26 +318,26 @@ export function createHiddenZoneSearchRuntime(
   ): boolean {
     const zoneIds = zone === "heap" ? state.runner.heap : state.runner.stack;
     if (!zoneIds.includes(cardId)) return false;
-    const definition = definitionFor(state, cardId);
+    const definition = deps.definitionFor(state, cardId);
     if (definition.type !== "program") return false;
     if (
-      isUniqueCard(definition) &&
-      hasInstalledUniqueCardDefinition(state, "runner", definition.id)
+      deps.isUniqueCard(definition) &&
+      deps.hasInstalledUniqueCardDefinition(state, "runner", definition.id)
     )
       return false;
     if (
       installCost === "normal" &&
-      availableRunnerProgramInstallCredits(state) <
+      deps.availableRunnerProgramInstallCredits(state) <
         (definition.installCost ?? 0)
     )
       return false;
     return runnerProgramInstallMemoryReachable({
       memoryUsed: state.runner.memoryUsed,
       targetMemoryCost: definition.memoryCost ?? 0,
-      memoryLimit: runnerMemoryLimit(state),
+      memoryLimit: deps.runnerMemoryLimit(state),
       trashableMemoryCosts: state.runner.rig.programs.map((installedCardId) =>
-        runnerProgramUsesMemory(state, installedCardId)
-          ? (definitionFor(state, installedCardId).memoryCost ?? 0)
+        deps.runnerProgramUsesMemory(state, installedCardId)
+          ? (deps.definitionFor(state, installedCardId).memoryCost ?? 0)
           : 0,
       ),
     });
@@ -485,13 +352,17 @@ export function createHiddenZoneSearchRuntime(
   ): boolean {
     if (!canInstallRunnerProgramFromZone(state, cardId, zone, installCost))
       return false;
-    const definition = definitionFor(state, cardId);
+    const definition = deps.definitionFor(state, cardId);
     if (installCost === "normal")
-      spendRunnerInstallCredits(state, definition.installCost ?? 0, "program");
-    removeFromAllZones(state, cardId);
+      deps.spendRunnerInstallCredits(
+        state,
+        definition.installCost ?? 0,
+        "program",
+      );
+    deps.removeFromAllZones(state, cardId);
     completeHiddenZoneRunnerProgramInstall(state, cardId, definition);
-    executeCardImplementationLifecycleEffects(
-      cardImplementationRuntimeDeps,
+    deps.executeCardImplementationLifecycleEffects(
+      deps.cardImplementationRuntimeDeps,
       state,
       legalAction,
       definition,
@@ -515,10 +386,10 @@ export function createHiddenZoneSearchRuntime(
     selectedProgramId: CardInstanceId,
   ): boolean {
     const options = state.runner.rig.programs
-      .filter((cardId) => runnerProgramUsesMemory(state, cardId))
+      .filter((cardId) => deps.runnerProgramUsesMemory(state, cardId))
       .sort()
       .map((cardId) => {
-        const definition = definitionFor(state, cardId);
+        const definition = deps.definitionFor(state, cardId);
         return { id: `card_${cardId}`, label: definition.title, value: cardId };
       });
     if (options.length === 0) return false;
@@ -547,7 +418,7 @@ export function createHiddenZoneSearchRuntime(
       memoryError?: string;
     } = {},
   ): CardInstanceId {
-    const definition = definitionFor(state, cardId);
+    const definition = deps.definitionFor(state, cardId);
     if (definition.type !== "program")
       throw new Error(
         options.typeError ??
@@ -555,24 +426,24 @@ export function createHiddenZoneSearchRuntime(
       );
     if (
       (options.checkUnique ?? true) &&
-      isUniqueCard(definition) &&
-      hasInstalledUniqueCardDefinition(state, "runner", definition.id)
+      deps.isUniqueCard(definition) &&
+      deps.hasInstalledUniqueCardDefinition(state, "runner", definition.id)
     )
       throw new Error(
         "Eine Unique-Karte mit diesem Namen ist bereits installiert.",
       );
     if (
       state.runner.memoryUsed + (definition.memoryCost ?? 0) >
-      runnerMemoryLimit(state)
+      deps.runnerMemoryLimit(state)
     )
       throw new Error(
         options.memoryError ??
           "Nicht genug Memory fuer die temporaere Programminstallation.",
       );
-    removeFromAllZones(state, cardId);
+    deps.removeFromAllZones(state, cardId);
     completeHiddenZoneRunnerProgramInstall(state, cardId, definition);
-    executeCardImplementationLifecycleEffects(
-      cardImplementationRuntimeDeps,
+    deps.executeCardImplementationLifecycleEffects(
+      deps.cardImplementationRuntimeDeps,
       state,
       legalAction,
       definition,
@@ -583,10 +454,10 @@ export function createHiddenZoneSearchRuntime(
   }
 
   function shuffleRunnerStack(state: GameState, purpose: string): void {
-    const result = shuffleRunnerStackAndRefreshZones({
+    const result = deps.shuffleRunnerStackAndRefreshZones({
       stack: state.runner.stack,
       cardInstances: state.cardInstances,
-      shuffle: (stack) => shuffleStateIds(state, stack, purpose),
+      shuffle: (stack) => deps.shuffleStateIds(state, stack, purpose),
     });
     state.runner.stack = result.shuffledStack;
   }
@@ -597,7 +468,7 @@ export function createHiddenZoneSearchRuntime(
   ): void {
     const cardId = state.runner.stack[0];
     if (!cardId) throw new Error("Der Stack ist leer.");
-    const definition = definitionFor(state, cardId);
+    const definition = deps.definitionFor(state, cardId);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       publicRevealKind: "reveal",
@@ -608,7 +479,7 @@ export function createHiddenZoneSearchRuntime(
   function revealCorpRdTop(state: GameState, legalAction: LegalAction): void {
     const cardId = state.corp.rd[0];
     if (!cardId) throw new Error("R&D ist leer.");
-    const definition = definitionFor(state, cardId);
+    const definition = deps.definitionFor(state, cardId);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       hiddenZoneBarrier: true,
@@ -625,34 +496,34 @@ export function createHiddenZoneSearchRuntime(
     if (legalAction.side !== "runner")
       throw new Error("Nur der Runner darf V1.9.11-Hidden-Zone-Helfer nutzen.");
     const sourceCardId = String(legalAction.payload?.cardId ?? "");
-    const installed = runnerInstalledCardIds(state);
+    const installed = deps.runnerInstalledCardIds(state);
     if (!installed.includes(sourceCardId))
       throw new Error("Der V1.9.11-Hidden-Zone-Helfer ist nicht installiert.");
-    const sourceDefinition = definitionFor(state, sourceCardId);
+    const sourceDefinition = deps.definitionFor(state, sourceCardId);
     const ability = String(legalAction.payload?.v1911HiddenZoneAbility ?? "");
     if (ability === "search_stack_program_to_grip") {
-      if (!STACK_SEARCH_PROGRAM_SOURCES.has(sourceDefinition.id))
+      if (!deps.STACK_SEARCH_PROGRAM_SOURCES.has(sourceDefinition.id))
         throw new Error("Diese Karte darf keine Stack-Search-Ability nutzen.");
-      if (cardImplementationForDefinitionId(sourceDefinition.id))
+      if (deps.cardImplementationForDefinitionId(sourceDefinition.id))
         throw new Error(
           "Diese Stack-Search-Ability wird deklarativ abgewickelt.",
         );
-      spendCredits(state, "runner", creditCostForAction(legalAction));
-      if (sourceDefinition.id === DAILY_CREDIT_RESOURCE_SOURCE) {
-        startAujourdOuiTop5Activation(
+      deps.spendCredits(state, "runner", deps.creditCostForAction(legalAction));
+      if (sourceDefinition.id === deps.DAILY_CREDIT_RESOURCE_SOURCE) {
+        deps.startAujourdOuiTop5Activation(
           hiddenZoneSearchActivationHandlerHost(state, legalAction),
           sourceCardId,
         );
       } else {
-        startRunnerStackSearchChoiceActivation(
+        deps.startRunnerStackSearchChoiceActivation(
           hiddenZoneSearchActivationHandlerHost(state, legalAction),
           {
             sourcePrefix:
-              sourceDefinition.id === PAID_STACK_SEARCH_RESOURCE_SOURCE
+              sourceDefinition.id === deps.PAID_STACK_SEARCH_RESOURCE_SOURCE
                 ? `runner.stack_search_to_grip:${sourceCardId}`
                 : "v1911.search_stack",
             choiceIdPrefix:
-              sourceDefinition.id === PAID_STACK_SEARCH_RESOURCE_SOURCE
+              sourceDefinition.id === deps.PAID_STACK_SEARCH_RESOURCE_SOURCE
                 ? "runner_stack_search_to_grip"
                 : "v1911_search_stack",
           },
@@ -663,18 +534,18 @@ export function createHiddenZoneSearchRuntime(
         hiddenZoneBarrier: true,
         sourceDefinitionId: sourceDefinition.id,
         hiddenZoneAction:
-          sourceDefinition.id === DAILY_CREDIT_RESOURCE_SOURCE
+          sourceDefinition.id === deps.DAILY_CREDIT_RESOURCE_SOURCE
             ? "v1911_aujourdoui_top5"
-            : sourceDefinition.id === PAID_STACK_SEARCH_RESOURCE_SOURCE
+            : sourceDefinition.id === deps.PAID_STACK_SEARCH_RESOURCE_SOURCE
               ? "runner_stack_search_to_grip"
               : "v1911_search_stack",
       };
       return;
     }
     if (ability === "expose_server_card") {
-      if (!SERVER_EXPOSE_PROGRAM_SOURCES.has(sourceDefinition.id))
+      if (!deps.SERVER_EXPOSE_PROGRAM_SOURCES.has(sourceDefinition.id))
         throw new Error("Diese Karte darf keine Expose-Ability nutzen.");
-      if (cardImplementationForDefinitionId(sourceDefinition.id))
+      if (deps.cardImplementationForDefinitionId(sourceDefinition.id))
         throw new Error("Diese Expose-Ability wird deklarativ abgewickelt.");
       exposeCorpCardInServer(
         state,
@@ -705,9 +576,9 @@ export function createHiddenZoneSearchRuntime(
       return;
     }
     if (ability === "arrange_stack_top2") {
-      if (sourceDefinition.id !== STACK_TOP_REORDER_RESOURCE_SOURCE)
+      if (sourceDefinition.id !== deps.STACK_TOP_REORDER_RESOURCE_SOURCE)
         throw new Error("Diese Karte darf keine Stack-Reorder-Ability nutzen.");
-      startRunnerStackArrangeChoice(
+      deps.startRunnerStackArrangeChoice(
         hiddenZoneArrangeChoiceHandlerHost(state, legalAction),
         {
           sourcePrefix: `v1911.arrange_stack_top2:${sourceCardId}`,

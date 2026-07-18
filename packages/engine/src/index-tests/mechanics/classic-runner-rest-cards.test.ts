@@ -491,7 +491,7 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
     expect(payload).toMatchObject({
       actionType: "play_event",
       cardDefinitionId: FINDERS_KEEPERS,
-      v1921RunnerEventAbility: "three_dice_gain_credits",
+      abilityId: "three_dice_gain_credits",
       randomDiceLoopRolledDice: 3,
       randomDiceLoopComplete: true,
       gainedCredits,

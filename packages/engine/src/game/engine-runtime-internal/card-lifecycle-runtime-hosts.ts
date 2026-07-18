@@ -27,7 +27,7 @@ import {
   type GameState,
   type ImminentEvent,
   type LegalAction,
-  type LegacyAbilityPayloadField,
+  type AbilityPayloadDiscriminatorField,
   type PlayerAction,
   type PlayerController,
   type PublicGameEvent,
@@ -694,53 +694,17 @@ import type { RuntimeDeps } from "./runtime-shared";
 export function createCardLifecycleRuntimeHosts(
   deps: RuntimeDeps,
   runtime: RuntimeDeps,
-) {
-  const {
-    PROTEUS_ARMAGEDDON_ID,
-    activeObligationCount,
-    applyRunnerDrawSummaryPayload,
-    assertCorpIceInstallCostValid,
-    availableRunnerProgramInstallCredits,
-    canHostProgramOnDaemon,
-    canInstallCorpRootCardInServer,
-    cardHasSubtype,
-    cardImplementationAgendaPointInstallCost,
-    cardImplementationRuntimeDeps,
-    closeRunnerCostPenaltySupportWindowForPayment,
-    consumeEdgerunnerTempsInstallAction,
-    consumeValuPakProgramInstallAction,
-    corpRootAgendaOrNodeCapacityInServer,
-    creditCostForAction,
-    drawRunnerCards,
-    encounterEntryHostForState,
-    expireScoredAgendaInstallRezCreditAbilities,
-    forfeitRunnerAgendaForPointCost,
-    fortRunSideFamiliesHostForState,
-    hasCardImplementationMemoryUnitModifier,
-    hasInstalledUniqueCardDefinition,
-    installedRunnerProgramTrashOptionsForInstall,
-    isObligationDebtDefinition,
-    isRegionUpgrade,
-    isUniqueCard,
-    openRunnerCostPenaltySupportWindow,
-    requiresDataFortInstallTarget,
-    rootInstallRezzesOnInstall,
-    runMovementHostForState,
-    runRezWindowHostForState,
-    runnerCanPayInstallCost,
-    runnerProgramInstallMemoryReachableAfterTrash,
-    runnerProgramUsesMemory,
-    selectedChoiceCardIds,
-    spendCorpAgendaPointCost,
-    spendRunnerInstallCredits,
-    stableSubtypeList,
-    startRunnerHostingChoice,
-    trashCorpInstalledCardToArchives,
-    trashOlderRegionUpgradesInServer,
-    trashRunnerInstalledCardToHeap,
-    variableRezForDefinition,
-  } = deps;
-
+): Pick<
+  import("./card-runtime-host-port").CardRuntimeHostPort,
+  | "installCardHost"
+  | "rezCardHost"
+  | "resolveRunnerTargetedEventImplementation"
+  | "resolvePostOnPlayGenericFollowups"
+  | "resolveRunnerGripHeapStackShuffleDrawEvent"
+  | "shuffleGripTrashAndStackThenDrawForCardImplementation"
+  | "startRunnerProgramTrashBeforeInstallChoice"
+  | "resolveRunnerProgramTrashBeforeInstallChoice"
+> {
   function spendCorpInstallRezCredits(state: GameState, amount: number): void {
     spendCredits(state, "corp", amount);
     if (amount <= 0 || !state.corpTemporaryInstallRezCredits) return;
@@ -756,15 +720,17 @@ export function createCardLifecycleRuntimeHosts(
       cards: {
         definitionFor: (cardId) => definitionFor(state, cardId),
         mustInstance: (cardId) => mustInstance(state.cardInstances, cardId),
-        isUniqueCard,
+        isUniqueCard: deps.isUniqueCard,
         hasInstalledUniqueCardDefinition: (side, definitionId) =>
-          hasInstalledUniqueCardDefinition(state, side, definitionId),
-        cardHasSubtype,
+          deps.hasInstalledUniqueCardDefinition(state, side, definitionId),
+        cardHasSubtype: deps.cardHasSubtype,
         isRunnerHardwareDeckDefinition,
-        hasCardImplementationMemoryUnitModifier,
+        hasCardImplementationMemoryUnitModifier:
+          deps.hasCardImplementationMemoryUnitModifier,
         shouldLoadLegacyRecurringCredits,
         damagePreventionSourcesForDefinition,
-        cardImplementationAgendaPointInstallCost,
+        cardImplementationAgendaPointInstallCost:
+          deps.cardImplementationAgendaPointInstallCost,
       },
       servers: {
         assertCorpCanCreateNewDataFort: () =>
@@ -774,16 +740,16 @@ export function createCardLifecycleRuntimeHosts(
         serverChoiceDisplayLabel: (serverId) =>
           serverChoiceDisplayLabel(state, serverId),
         canInstallCorpRootCardInServer: (definition, server) =>
-          canInstallCorpRootCardInServer(state, definition, server),
+          deps.canInstallCorpRootCardInServer(state, definition, server),
         corpRootAgendaOrNodeCapacityInServer: (server) =>
-          corpRootAgendaOrNodeCapacityInServer(state, server),
+          deps.corpRootAgendaOrNodeCapacityInServer(state, server),
         corpRootAssetIdsInServer: (server) =>
           corpRootAssetIdsInServer(state, server),
         corpRootMainCardIdsInServer: (server) =>
           corpRootMainCardIdsInServer(state, server),
-        rootInstallRezzesOnInstall,
+        rootInstallRezzesOnInstall: deps.rootInstallRezzesOnInstall,
         trashOlderRegionUpgradesInServer: (server, keepCardId, legalAction) =>
-          trashOlderRegionUpgradesInServer(
+          deps.trashOlderRegionUpgradesInServer(
             state,
             server,
             keepCardId,
@@ -791,7 +757,7 @@ export function createCardLifecycleRuntimeHosts(
           ),
         markFortActivityForRunGate: (serverId, legalAction) =>
           markFortActivityForRunGate(
-            fortRunSideFamiliesHostForState(state),
+            deps.fortRunSideFamiliesHostForState(state),
             serverId,
             legalAction,
           ),
@@ -799,13 +765,13 @@ export function createCardLifecycleRuntimeHosts(
       zones: {
         removeFromAllZones: (cardId) => removeFromAllZones(state, cardId),
         trashRunnerInstalledCardToHeap: (cardId) =>
-          trashRunnerInstalledCardToHeap(state, cardId),
+          deps.trashRunnerInstalledCardToHeap(state, cardId),
         trashCorpInstalledCardToArchives: (cardId, legalAction) =>
-          trashCorpInstalledCardToArchives(state, cardId, legalAction),
+          deps.trashCorpInstalledCardToArchives(state, cardId, legalAction),
       },
       runner: {
         ensureTurnFlags: () => ensureRunnerTurnFlags(state),
-        requiresDataFortInstallTarget,
+        requiresDataFortInstallTarget: deps.requiresDataFortInstallTarget,
         startRunnerProgramTrashBeforeInstallChoice: (cardId, legalAction) =>
           startRunnerProgramTrashBeforeInstallChoice(
             state,
@@ -813,52 +779,62 @@ export function createCardLifecycleRuntimeHosts(
             legalAction,
           ),
         forfeitRunnerAgendaForPointCost: (cardId) =>
-          forfeitRunnerAgendaForPointCost(state, cardId),
+          deps.forfeitRunnerAgendaForPointCost(state, cardId),
         consumeValuPakProgramInstallAction: (legalAction) =>
-          consumeValuPakProgramInstallAction(state, legalAction),
+          deps.consumeValuPakProgramInstallAction(state, legalAction),
         startRunnerHostingChoice: (cardId, legalAction) =>
-          startRunnerHostingChoice(state, cardId, legalAction),
+          deps.startRunnerHostingChoice(state, cardId, legalAction),
         hiddenRunnerResourceSlotId,
       },
       corp: {
         expireScoredAgendaInstallRezCreditAbilities: () =>
-          expireScoredAgendaInstallRezCreditAbilities(state),
+          deps.expireScoredAgendaInstallRezCreditAbilities(state),
         consumeEdgerunnerTempsInstallAction: (legalAction) =>
-          consumeEdgerunnerTempsInstallAction(state, legalAction),
-        isRegionUpgrade,
+          deps.consumeEdgerunnerTempsInstallAction(state, legalAction),
+        isRegionUpgrade: deps.isRegionUpgrade,
         isFortTraceBitPoolSource: (cardId) =>
           isFortTraceBitPoolSource(
-            fortRunSideFamiliesHostForState(state),
+            deps.fortRunSideFamiliesHostForState(state),
             cardId,
           ),
         fortTraceBitPoolCapacityForCard: (cardId) =>
           fortTraceBitPoolCapacityForCard(
-            fortRunSideFamiliesHostForState(state),
+            deps.fortRunSideFamiliesHostForState(state),
             cardId,
           ),
       },
       hosting: {
         canHostProgramOnDaemon: (hostCardId, definition) =>
-          canHostProgramOnDaemon(state, hostCardId, definition),
+          deps.canHostProgramOnDaemon(state, hostCardId, definition),
         hostedPaymentCredits: (cardId) => hostedPaymentCredits(state, cardId),
       },
       payment: {
         assertCorpIceInstallCostValid: (cardId, definition, legalAction) =>
-          assertCorpIceInstallCostValid(state, cardId, definition, legalAction),
+          deps.assertCorpIceInstallCostValid(
+            state,
+            cardId,
+            definition,
+            legalAction,
+          ),
         spendClick: (side) => spendClick(state, side),
         spendRunnerInstallCredits: (amount, cardType, paymentPayload) =>
-          spendRunnerInstallCredits(state, amount, cardType, paymentPayload),
+          deps.spendRunnerInstallCredits(
+            state,
+            amount,
+            cardType,
+            paymentPayload,
+          ),
         runnerCanPayInstallCost: (amount, cardType) =>
-          runnerCanPayInstallCost(state, amount, cardType),
+          deps.runnerCanPayInstallCost(state, amount, cardType),
         openRunnerCostPenaltySupportWindow: (legalAction, amount, cardType) =>
-          openRunnerCostPenaltySupportWindow(
+          deps.openRunnerCostPenaltySupportWindow(
             state,
             legalAction,
             amount,
             cardType,
           ),
         closeRunnerCostPenaltySupportWindowForPayment: (legalAction, amount) =>
-          closeRunnerCostPenaltySupportWindowForPayment(
+          deps.closeRunnerCostPenaltySupportWindowForPayment(
             state,
             legalAction,
             amount,
@@ -879,7 +855,7 @@ export function createCardLifecycleRuntimeHosts(
       lifecycle: {
         executeOnInstall: (legalAction, definition, cardId) =>
           executeCardImplementationLifecycleEffects(
-            cardImplementationRuntimeDeps,
+            deps.cardImplementationRuntimeDeps,
             state,
             legalAction,
             definition,
@@ -888,7 +864,7 @@ export function createCardLifecycleRuntimeHosts(
           ),
       },
       constants: {
-        PROTEUS_ARMAGEDDON_ID,
+        PROTEUS_ARMAGEDDON_ID: deps.PROTEUS_ARMAGEDDON_ID,
       },
     };
   }
@@ -901,14 +877,14 @@ export function createCardLifecycleRuntimeHosts(
         mustInstance: (cardId) => mustInstance(state.cardInstances, cardId),
         hasCardImplementationForDefinition: (definitionId) =>
           Boolean(cardImplementationForDefinitionId(definitionId)),
-        variableRezForDefinition,
-        stableSubtypeList,
+        variableRezForDefinition: deps.variableRezForDefinition,
+        stableSubtypeList: deps.stableSubtypeList,
       },
       run: {
         mustRun: () => mustRun(state),
         handleRunRootRezPostRez: (cardId, legalAction) =>
           handleRunRootRezPostRez(
-            runRezWindowHostForState(state),
+            deps.runRezWindowHostForState(state),
             cardId,
             legalAction,
           ),
@@ -918,7 +894,9 @@ export function createCardLifecycleRuntimeHosts(
             state.timingPoint === "run.approach_ice" &&
             run?.phase === "approach_ice" &&
             run.approachedIceId === cardId &&
-            corpRunRootRezActionsAvailable(runRezWindowHostForState(state)),
+            corpRunRootRezActionsAvailable(
+              deps.runRezWindowHostForState(state),
+            ),
           );
           if (rootRezWindowStillOpen) return true;
           if (
@@ -928,11 +906,11 @@ export function createCardLifecycleRuntimeHosts(
             (run.secretSpendGuessRunAutoPassIceId === cardId ||
               run.bypassFirstIceRemaining === true)
           ) {
-            passApproachedIce(runMovementHostForState(state), legalAction);
+            passApproachedIce(deps.runMovementHostForState(state), legalAction);
             return true;
           }
           const continuation = continueAfterCorpRootRezIfWindowIsComplete(
-            encounterEntryHostForState(state),
+            deps.encounterEntryHostForState(state),
             legalAction,
           );
           if (continuation.handled) return true;
@@ -940,7 +918,7 @@ export function createCardLifecycleRuntimeHosts(
         },
         beginEncounter: (cardId, legalAction) =>
           beginEncounter(
-            encounterEntryHostForState(state),
+            deps.encounterEntryHostForState(state),
             cardId,
             legalAction,
           ),
@@ -951,17 +929,17 @@ export function createCardLifecycleRuntimeHosts(
           assertCorpRezCostQuoteValid(state, cardId, legalAction),
         assertCorpRootRezCostQuoteValid: (cardId, legalAction) =>
           assertCorpRootRezCostQuoteValid(state, cardId, legalAction),
-        creditCostForAction,
+        creditCostForAction: deps.creditCostForAction,
         spendCredits: (side, amount) =>
           side === "corp"
             ? spendCorpInstallRezCredits(state, amount)
             : spendCredits(state, side, amount),
       },
       corp: {
-        isObligationDebtDefinition,
+        isObligationDebtDefinition: deps.isObligationDebtDefinition,
         spendCorpAgendaPointCost: (requiredPoints) =>
-          spendCorpAgendaPointCost(state, requiredPoints),
-        activeObligationCount: () => activeObligationCount(state),
+          deps.spendCorpAgendaPointCost(state, requiredPoints),
+        activeObligationCount: () => deps.activeObligationCount(state),
       },
       runner: {
         ensureTurnFlags: () => ensureRunnerTurnFlags(state),
@@ -973,7 +951,7 @@ export function createCardLifecycleRuntimeHosts(
       lifecycle: {
         executeOnRez: (legalAction, definition, cardId) =>
           executeCardImplementationLifecycleEffects(
-            cardImplementationRuntimeDeps,
+            deps.cardImplementationRuntimeDeps,
             state,
             legalAction,
             definition,
@@ -984,12 +962,12 @@ export function createCardLifecycleRuntimeHosts(
       fort: {
         isFortTraceBitPoolSource: (cardId) =>
           isFortTraceBitPoolSource(
-            fortRunSideFamiliesHostForState(state),
+            deps.fortRunSideFamiliesHostForState(state),
             cardId,
           ),
         fortTraceBitPoolCapacityForCard: (cardId) =>
           fortTraceBitPoolCapacityForCard(
-            fortRunSideFamiliesHostForState(state),
+            deps.fortRunSideFamiliesHostForState(state),
             cardId,
           ),
       },
@@ -1012,7 +990,7 @@ export function createCardLifecycleRuntimeHosts(
     if (!state.runner.rig.programs.includes(targetCardId))
       throw new Error("Das Ziel-Icebreaker-Programm ist nicht installiert.");
     const targetDefinition = definitionFor(state, targetCardId);
-    if (!cardHasSubtype(targetDefinition, "icebreaker"))
+    if (!deps.cardHasSubtype(targetDefinition, "icebreaker"))
       throw new Error("Das Ziel ist kein Icebreaker.");
     addCardCounter(state, targetCardId, effect.counterType, effect.amount);
     legalAction.payload = {
@@ -1049,7 +1027,7 @@ export function createCardLifecycleRuntimeHosts(
       for (const iceId of server.ice.slice()) {
         if (mustInstance(state.cardInstances, iceId).rezzed !== true) continue;
         trashedDefinitionIds.push(definitionFor(state, iceId).id);
-        trashCorpInstalledCardToArchives(state, iceId, legalAction);
+        deps.trashCorpInstalledCardToArchives(state, iceId, legalAction);
       }
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
@@ -1173,7 +1151,7 @@ export function createCardLifecycleRuntimeHosts(
         zone: { side: "runner", zone: "stack" },
       };
     }
-    const drawSummary = drawRunnerCards(state, 5);
+    const drawSummary = deps.drawRunnerCards(state, 5);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       cardId,
@@ -1183,7 +1161,7 @@ export function createCardLifecycleRuntimeHosts(
       specialZoneVisibility: "public",
       specialZoneReason: sourceDefinitionId,
     };
-    applyRunnerDrawSummaryPayload(state, legalAction, drawSummary);
+    deps.applyRunnerDrawSummaryPayload(state, legalAction, drawSummary);
   }
 
   function shuffleGripTrashAndStackThenDrawForCardImplementation(
@@ -1233,7 +1211,7 @@ export function createCardLifecycleRuntimeHosts(
         zone: { side: "runner", zone: "stack" },
       };
     }
-    const drawSummary = drawRunnerCards(state, drawCount);
+    const drawSummary = deps.drawRunnerCards(state, drawCount);
     const payload = {
       hiddenZoneBarrier: true,
       hiddenZoneAction: "p3_47_shuffle_grip_heap_stack_then_draw",
@@ -1253,7 +1231,7 @@ export function createCardLifecycleRuntimeHosts(
       ...(legalAction.payload ?? {}),
       ...payload,
     };
-    applyRunnerDrawSummaryPayload(state, legalAction, drawSummary);
+    deps.applyRunnerDrawSummaryPayload(state, legalAction, drawSummary);
     return { publicPayload: legalAction.payload ?? payload };
   }
 
@@ -1270,30 +1248,30 @@ export function createCardLifecycleRuntimeHosts(
         "Nur Programme koennen vor der Installation Programmtrash oeffnen.",
       );
     if (
-      isUniqueCard(definition) &&
-      hasInstalledUniqueCardDefinition(state, "runner", definition.id)
+      deps.isUniqueCard(definition) &&
+      deps.hasInstalledUniqueCardDefinition(state, "runner", definition.id)
     )
       throw new Error(
         "Eine Unique-Karte mit diesem Namen ist bereits installiert.",
       );
     if (
-      availableRunnerProgramInstallCredits(state) <
+      deps.availableRunnerProgramInstallCredits(state) <
       (definition.installCost ?? 0)
     )
       throw new Error("Nicht genug Credits fuer die Programminstallation.");
-    const options = installedRunnerProgramTrashOptionsForInstall(state).map(
-      (cardId: CardInstanceId) => {
+    const options = deps
+      .installedRunnerProgramTrashOptionsForInstall(state)
+      .map((cardId: CardInstanceId) => {
         const optionDefinition = definitionFor(state, cardId);
         return {
           id: `card_${cardId}`,
           label: optionDefinition.title,
           value: cardId,
         };
-      },
-    );
+      });
     if (options.length === 0)
       throw new Error("Es gibt kein installiertes Programm zum Trashen.");
-    if (!runnerProgramInstallMemoryReachableAfterTrash(state, definition))
+    if (!deps.runnerProgramInstallMemoryReachableAfterTrash(state, definition))
       throw new Error(
         "Durch Programmtrash kann nicht genug MU freigemacht werden.",
       );
@@ -1339,19 +1317,19 @@ export function createCardLifecycleRuntimeHosts(
         "Nur Programme koennen ueber diese Choice installiert werden.",
       );
     if (
-      isUniqueCard(definition) &&
-      hasInstalledUniqueCardDefinition(state, "runner", definition.id)
+      deps.isUniqueCard(definition) &&
+      deps.hasInstalledUniqueCardDefinition(state, "runner", definition.id)
     )
       throw new Error(
         "Eine Unique-Karte mit diesem Namen ist bereits installiert.",
       );
     if (
-      availableRunnerProgramInstallCredits(state) <
+      deps.availableRunnerProgramInstallCredits(state) <
       (definition.installCost ?? 0)
     )
       throw new Error("Nicht genug Credits fuer die Programminstallation.");
 
-    const trashIds = selectedChoiceCardIds(
+    const trashIds = deps.selectedChoiceCardIds(
       choice,
       playerAction,
     ) as CardInstanceId[];
@@ -1371,7 +1349,7 @@ export function createCardLifecycleRuntimeHosts(
       state.runner.memoryUsed +
       (definition.memoryCost ?? 0) -
       uniqueTrashIds.reduce((sum, cardId) => {
-        if (!runnerProgramUsesMemory(state, cardId)) return sum;
+        if (!deps.runnerProgramUsesMemory(state, cardId)) return sum;
         return sum + (definitionFor(state, cardId).memoryCost ?? 0);
       }, 0);
     const needsMemory = memoryAfterSelection > runnerMemoryLimit(state);
@@ -1410,7 +1388,7 @@ export function createCardLifecycleRuntimeHosts(
         ? { trashedCardDefinitionIds: trashedDefinitionIds.join(",") }
         : {}),
     };
-    const paymentResult = spendRunnerInstallCredits(
+    const paymentResult = deps.spendRunnerInstallCredits(
       state,
       definition.installCost ?? 0,
       definition.type,
@@ -1421,7 +1399,7 @@ export function createCardLifecycleRuntimeHosts(
       ...runnerInstallPaymentPublicPayload(paymentResult),
     };
     for (const cardId of uniqueTrashIds)
-      trashRunnerInstalledCardToHeap(state, cardId);
+      deps.trashRunnerInstalledCardToHeap(state, cardId);
     executeInstallCard(installCardHost(state), legalAction);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),

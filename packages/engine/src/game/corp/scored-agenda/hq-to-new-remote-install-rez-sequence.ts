@@ -3,7 +3,7 @@ import type {
   CardInstanceId,
   ChoiceRequest,
   CorpServer,
-  DataFortReclamationSequenceState,
+  HqInstallRezSequenceState,
   PlayerAction,
   ServerId,
 } from "@netgrid/shared";
@@ -53,7 +53,7 @@ export type HqToNewRemoteInstallRezStep =
   | "return_unused_credits"
   | "complete";
 
-const DATA_FORT_RECLAMATION_STEPS = {
+const HQ_INSTALL_REZ_STEPS = {
   selectHqCards: "select_hq_cards",
   installNextCard: "install_next_card",
   optionalRezCard: "optional_rez_card",
@@ -130,8 +130,8 @@ export function startHqToNewRemoteInstallRezChoice(
       payloadPatch: {
         ...primitivePayload,
         ...corpSequenceContextPayload({
-          step: DATA_FORT_RECLAMATION_STEPS.selectHqCards,
-          v1922CorpAgendaAbility: "hq_to_new_remote_install_rez",
+          step: HQ_INSTALL_REZ_STEPS.selectHqCards,
+          abilityId: "hq_to_new_remote_install_rez",
           sourceAgendaId: agendaId,
           hqToNewRemoteInstallRezChoiceOpened: false,
           hqToNewRemoteInstallRezCandidateCount: 0,
@@ -157,8 +157,8 @@ export function startHqToNewRemoteInstallRezChoice(
     payloadPatch: {
       ...primitivePayload,
       ...corpSequenceContextPayload({
-        step: DATA_FORT_RECLAMATION_STEPS.selectHqCards,
-        v1922CorpAgendaAbility: "hq_to_new_remote_install_rez",
+        step: HQ_INSTALL_REZ_STEPS.selectHqCards,
+        abilityId: "hq_to_new_remote_install_rez",
         sourceAgendaId: agendaId,
         cardImplementationSourceZone: sequence.sourceZone,
         cardImplementationTargetServer: sequence.targetServer,
@@ -233,11 +233,9 @@ export function resolveHqToNewRemoteInstallRezChoice(
     delete host.state.pendingChoice;
     const resolvedPayload = applySequencePayloadPatch(host.legalAction, {
       ...primitivePayload,
-      ...hiddenZoneChoicePayload(
-        "hq_to_new_remote_install_sequence",
-      ),
+      ...hiddenZoneChoicePayload("hq_to_new_remote_install_sequence"),
       ...corpSequenceContextPayload({
-        step: DATA_FORT_RECLAMATION_STEPS.returnUnusedCredits,
+        step: HQ_INSTALL_REZ_STEPS.returnUnusedCredits,
         sourceAgendaId: agendaId,
         selectedCount: 0,
         installedCount: 0,
@@ -266,7 +264,7 @@ export function resolveHqToNewRemoteInstallRezChoice(
   }
 
   const server = host.servers.createRemote();
-  host.state.dataFortReclamationSequence = {
+  host.state.hqInstallRezSequence = {
     sourceAgendaId: agendaId as CardInstanceId,
     sourceDefinitionId: host.cards.definitionFor(agendaId as CardInstanceId).id,
     serverId: server.id,
@@ -276,7 +274,7 @@ export function resolveHqToNewRemoteInstallRezChoice(
     temporaryCreditsRemaining: temporaryCreditAmount,
   };
   delete host.state.pendingChoice;
-  const result = advanceDataFortReclamationSequence(host, primitivePayload);
+  const result = advanceHqInstallRezSequence(host, primitivePayload);
   return {
     ...result,
     createdServerId: server.id,
@@ -285,11 +283,11 @@ export function resolveHqToNewRemoteInstallRezChoice(
   };
 }
 
-function advanceDataFortReclamationSequence(
+function advanceHqInstallRezSequence(
   host: CorpInstallRezSequenceHandlerHost,
-  primitivePayload = dataFortReclamationPrimitivePayload(host),
+  primitivePayload = hqInstallRezPrimitivePayload(host),
 ): CorpInstallRezSequenceHandlerResult {
-  const sequenceState = requireDataFortReclamationSequence(host);
+  const sequenceState = requireHqInstallRezSequence(host);
   const server = host.servers.mustServer(sequenceState.serverId);
   const installedIds: CardInstanceId[] = [];
   const immediatelyRezzedIds: CardInstanceId[] = [];
@@ -297,7 +295,7 @@ function advanceDataFortReclamationSequence(
 
   while (sequenceState.nextCardIndex < sequenceState.selectedCardIds.length) {
     const cardId = sequenceState.selectedCardIds[sequenceState.nextCardIndex]!;
-    const { definition, destination } = revalidateNextDataFortInstall(
+    const { definition, destination } = revalidateNextHqInstall(
       host,
       cardId,
       server,
@@ -346,7 +344,7 @@ function advanceDataFortReclamationSequence(
     sequenceState.nextCardIndex += 1;
 
     if (isHqToNewRemoteInstallRezRezCandidate(host, cardId, server.id)) {
-      host.state.pendingChoice = dataFortReclamationRezChoice(
+      host.state.pendingChoice = hqInstallRezChoice(
         host,
         sequenceState,
         cardId,
@@ -354,10 +352,10 @@ function advanceDataFortReclamationSequence(
       const resolvedPayload = applySequencePayloadPatch(host.legalAction, {
         ...primitivePayload,
         ...hiddenZoneChoicePayload("hq_to_new_remote_install_sequence"),
-        ...dataFortReclamationSequencePayload(
+        ...hqInstallRezSequencePayload(
           host,
           sequenceState,
-          DATA_FORT_RECLAMATION_STEPS.installNextCard,
+          HQ_INSTALL_REZ_STEPS.installNextCard,
           {
             installedCount: installedIds.length,
             immediateRezzedCount: immediatelyRezzedIds.length,
@@ -377,7 +375,7 @@ function advanceDataFortReclamationSequence(
     }
   }
 
-  return completeDataFortReclamationSequence(
+  return completeHqInstallRezSequence(
     host,
     sequenceState,
     primitivePayload,
@@ -387,7 +385,7 @@ function advanceDataFortReclamationSequence(
   );
 }
 
-function revalidateNextDataFortInstall(
+function revalidateNextHqInstall(
   host: CorpInstallRezSequenceHandlerHost,
   cardId: CardInstanceId,
   server: CorpServer,
@@ -397,15 +395,18 @@ function revalidateNextDataFortInstall(
   const definition = host.cards.definitionFor(cardId);
   if (!host.cards.isCorpInstallableCardType(definition))
     throw new Error("Eine gewaehlte Data-Fort-Karte ist nicht installierbar.");
-  if (definition.type === "ice") return { cardId, definition, destination: "ice" };
+  if (definition.type === "ice")
+    return { cardId, definition, destination: "ice" };
   if (!host.cards.canInstallCorpRootCardInServer(definition, server))
-    throw new Error("Diese Root-Karte kann nicht in das Data Fort installiert werden.");
+    throw new Error(
+      "Diese Root-Karte kann nicht in das Data Fort installiert werden.",
+    );
   return { cardId, definition, destination: "root" };
 }
 
-function dataFortReclamationRezChoice(
+function hqInstallRezChoice(
   host: CorpInstallRezSequenceHandlerHost,
-  sequenceState: DataFortReclamationSequenceState,
+  sequenceState: HqInstallRezSequenceState,
   cardId: CardInstanceId,
 ): ChoiceRequest {
   const sequenceLength = sequenceState.selectedCardIds.length;
@@ -425,10 +426,10 @@ function dataFortReclamationRezChoice(
   };
 }
 
-function requireDataFortReclamationSequence(
+function requireHqInstallRezSequence(
   host: CorpInstallRezSequenceHandlerHost,
-): DataFortReclamationSequenceState {
-  const sequenceState = host.state.dataFortReclamationSequence;
+): HqInstallRezSequenceState {
+  const sequenceState = host.state.hqInstallRezSequence;
   if (!sequenceState)
     throw new Error("Die Data-Fort-Reclamation-Sequenz ist nicht aktiv.");
   if (
@@ -436,7 +437,9 @@ function requireDataFortReclamationSequence(
     host.cards.scoredAgendaKind(sequenceState.sourceAgendaId) !==
       "score_install_hq_cards_into_new_remote_then_rez"
   )
-    throw new Error("Die Data-Fort-Reclamation-Agenda ist nicht mehr gescored.");
+    throw new Error(
+      "Die Data-Fort-Reclamation-Agenda ist nicht mehr gescored.",
+    );
   if (
     sequenceState.selectedCardIds.length === 0 ||
     sequenceState.selectedCardIds.length > 4 ||
@@ -456,10 +459,10 @@ function requireDataFortReclamationSequence(
   return sequenceState;
 }
 
-function dataFortReclamationPrimitivePayload(
+function hqInstallRezPrimitivePayload(
   host: CorpInstallRezSequenceHandlerHost,
 ): ReturnType<typeof cardImplementationPrimitivePayload> {
-  const sequenceState = requireDataFortReclamationSequence(host);
+  const sequenceState = requireHqInstallRezSequence(host);
   const sequence = requireHqToNewRemoteInstallRezSequence(
     host,
     sequenceState.sourceAgendaId,
@@ -473,9 +476,9 @@ function dataFortReclamationPrimitivePayload(
   });
 }
 
-function dataFortReclamationSequencePayload(
+function hqInstallRezSequencePayload(
   host: CorpInstallRezSequenceHandlerHost,
-  sequenceState: DataFortReclamationSequenceState,
+  sequenceState: HqInstallRezSequenceState,
   step: HqToNewRemoteInstallRezStep,
   extra: Record<string, string | number | boolean> = {},
 ): ReturnType<typeof corpSequenceContextPayload> {
@@ -509,9 +512,9 @@ function dataFortReclamationSequencePayload(
   });
 }
 
-function completeDataFortReclamationSequence(
+function completeHqInstallRezSequence(
   host: CorpInstallRezSequenceHandlerHost,
-  sequenceState: DataFortReclamationSequenceState,
+  sequenceState: HqInstallRezSequenceState,
   primitivePayload: ReturnType<typeof cardImplementationPrimitivePayload>,
   installedIds: CardInstanceId[],
   rezzedCardIds: CardInstanceId[],
@@ -521,10 +524,10 @@ function completeDataFortReclamationSequence(
   const resolvedPayload = applySequencePayloadPatch(host.legalAction, {
     ...primitivePayload,
     ...hiddenZoneChoicePayload("hq_to_new_remote_install_sequence"),
-    ...dataFortReclamationSequencePayload(
+    ...hqInstallRezSequencePayload(
       host,
       sequenceState,
-      DATA_FORT_RECLAMATION_STEPS.returnUnusedCredits,
+      HQ_INSTALL_REZ_STEPS.returnUnusedCredits,
       {
         temporaryCreditsReturned,
         corpCreditsSpent,
@@ -535,7 +538,7 @@ function completeDataFortReclamationSequence(
     ),
   });
   delete host.state.pendingChoice;
-  delete host.state.dataFortReclamationSequence;
+  delete host.state.hqInstallRezSequence;
   return {
     handled: true,
     stateChanged: true,
@@ -620,7 +623,7 @@ export function resolveHqToNewRemoteInstallRezRezChoice(
     host,
     "HQ-to-new-remote-Install-/Rez-Choice ist nicht offen.",
   );
-  const sequenceState = requireDataFortReclamationSequence(host);
+  const sequenceState = requireHqInstallRezSequence(host);
   const [, agendaId, serverId, cardId, sequencePositionText] =
     choice.source.split(":");
   const expectedCardId =
@@ -640,9 +643,13 @@ export function resolveHqToNewRemoteInstallRezRezChoice(
   host.servers.mustServer(sequenceState.serverId);
   const selectedIds = selectedChoiceCardIds(host, choice);
   if (selectedIds.length > 1)
-    throw new Error("Data Fort Reclamation darf nur die aktuelle Karte rezzen.");
+    throw new Error(
+      "Data Fort Reclamation darf nur die aktuelle Karte rezzen.",
+    );
   if (selectedIds.length === 1 && selectedIds[0] !== expectedCardId)
-    throw new Error("Eine andere Karte kann nicht mit Data Fort Reclamation gerezzt werden.");
+    throw new Error(
+      "Eine andere Karte kann nicht mit Data Fort Reclamation gerezzt werden.",
+    );
   if (
     expectedCardId &&
     !isHqToNewRemoteInstallRezRezCandidate(
@@ -653,7 +660,7 @@ export function resolveHqToNewRemoteInstallRezRezChoice(
   )
     throw new Error("Die aktuelle Data-Fort-Karte kann nicht gerezzed werden.");
 
-  const primitivePayload = dataFortReclamationPrimitivePayload(host);
+  const primitivePayload = hqInstallRezPrimitivePayload(host);
   const corpCreditsBefore = host.state.corp.credits;
   const rezzedCardIds: CardInstanceId[] = [];
   if (expectedCardId && selectedIds.length === 1) {
@@ -670,11 +677,12 @@ export function resolveHqToNewRemoteInstallRezRezChoice(
       faceup: true,
       rezzed: true,
     };
-    if (definition.type !== "ice") host.callbacks.resolveCorpRootRez(expectedCardId);
+    if (definition.type !== "ice")
+      host.callbacks.resolveCorpRootRez(expectedCardId);
     rezzedCardIds.push(expectedCardId);
   }
   delete host.state.pendingChoice;
-  const result = advanceDataFortReclamationSequence(host, primitivePayload);
+  const result = advanceHqInstallRezSequence(host, primitivePayload);
   return {
     ...result,
     rezzedCardIds: [...rezzedCardIds, ...(result.rezzedCardIds ?? [])],
@@ -684,10 +692,10 @@ export function resolveHqToNewRemoteInstallRezRezChoice(
           resolvedPayload: applySequencePayloadPatch(host.legalAction, {
             ...result.resolvedPayload,
             ...hiddenZoneChoicePayload("hq_to_new_remote_rez_sequence"),
-            ...dataFortReclamationSequencePayload(
+            ...hqInstallRezSequencePayload(
               host,
               sequenceState,
-              DATA_FORT_RECLAMATION_STEPS.optionalRezCard,
+              HQ_INSTALL_REZ_STEPS.optionalRezCard,
               {
                 rezzedCount: rezzedCardIds.length,
                 rezzedIceCount: rezzedCardIds.filter(

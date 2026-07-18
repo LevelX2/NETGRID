@@ -107,7 +107,7 @@ describe("AI005 hint inspector index", () => {
     expect(aiBoon.derivedFunctionSignals).toContain("breaker.sentry");
     expect(aiBoon.lineSupportClassification).toEqual([]);
     expect(aiBoon.warningCategories).not.toContain("legacy_lineSupport");
-    expect(aiBoon.warningCategories).toContain(
+    expect(aiBoon.warningCategories).not.toContain(
       "deferred_requires_human_review",
     );
 
