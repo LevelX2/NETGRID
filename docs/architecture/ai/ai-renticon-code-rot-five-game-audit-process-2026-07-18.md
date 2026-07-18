@@ -1,6 +1,6 @@
 # Rent-I-Con gegen CODE ROT: Fünf-Spiele-Audit vom 18.07.2026
 
-Status: Freigabepause nach abgeschlossenem P2-Review
+Status: Umsetzung freigegeben, Remediation-Zyklus 1 aktiv
 
 ## Quelle, Deckpaar und Ziel
 
@@ -86,7 +86,7 @@ Nutzerfreigabe Produktionsverhalten zu ändern.
 
 ## State Machine
 
-`preflight -> process_committed -> seeds_committed -> games_complete -> decisions_audited -> deck_audits_complete -> review_committed -> approval_pause`
+`preflight -> process_committed -> seeds_committed -> games_complete -> decisions_audited -> deck_audits_complete -> review_committed -> approval_pause -> remediation_red -> remediation_green -> five_game_cycle -> full_audit -> (remediation_red | zero_error_gate) -> final_verify -> main_merge -> cleanup`
 
 ## Sicherheits- und Fehlerbehandlung
 
@@ -106,4 +106,62 @@ Nutzerfreigabe Produktionsverhalten zu ändern.
 - P2 abgeschlossen und committed: `9e2c82add`; fünf Seeds ausgeführt,
   1.629/1.629 Entscheidungsversuche klassifiziert, beide Deck-Audits
   `status=ok`, Review und redaktionssicheres Ledger erstellt.
-- P3 aktiv: keine Produktionsänderung; Freigabe des Nutzers ausstehend.
+- P3 abgeschlossen: Nutzerfreigabe zur Umsetzung und zu wiederholten
+  Fünferzyklen erteilt.
+
+### P4 – Rote Remediation-Evidence
+
+- Die acht bestätigten Selfplay-Entscheidungen aus den Seeds 002, 003 und 004
+  als unveränderte `captured_selfplay`-Checkpoints sichern.
+- Für jede Fehlergruppe enge positive Gegenproben ergänzen.
+- Die verschachtelte Secret-Spend-/Target-Choice als Engine-Sequenztest bis
+  zum bisherigen Invariant-Abbruch reproduzieren.
+- Den vollständigen Export-Payload gegen rohe Karteninstanz-IDs testen.
+- Done-Gate: KI-Zielchecks melden ausschließlich `behavior_regression`,
+  Gegenproben bleiben grün, Engine- und Trace-Zieltests sind kausal rot.
+- Commit: `test(ai): capture five game remediation regressions`.
+
+### P5 – Engine- und Trace-Korrektur
+
+- Neue PendingChoices aus verschachtelten Choices auf die tatsächlich nächste
+  StateVersion synchronisieren, ohne die `applyAction`-Validierung zu lockern.
+- Detaillierte Action-Alternativen zentral und side-sicher sanitizen; den
+  gesamten Export statt nur aggregierter Findings blockierend prüfen.
+- Done-Gate: unveränderte Engine-/Trace-Zieltests grün, angrenzende Engine-
+  und Simulationstests grün.
+- Commit: `fix(engine): stabilize nested choice versions and traces`.
+
+### P6 – Generische Corp-KI-Korrektur
+
+- `dead_as_first_ice` und nicht finanzierbare äußere ICE-Installationen in der
+  finalen Arbitration zuverlässig ausschließen.
+- Begonnene, ausreichend geschützte Scorelines mit reservierter Advancement-
+  Finanzierung konvertieren und den Remote-Überbau begrenzen.
+- Kritischen Matchpoint-Zentralschutz vor stale Remote-Plan-Mapping stellen.
+- Done-Gate: alle acht unveränderten Checkpoints und ihre Gegenproben grün;
+  angrenzende Corp-Runtime-Regressionen grün.
+- Commit: `fix(ai): correct corp placement and scoreline arbitration`.
+
+### P7 – Wiederholter Fünferzyklus
+
+- Exakt die fünf festgeschriebenen Seeds mit unveränderten Deck-Hashes und
+  Hard-vs-Hard-Konfiguration erneut ausführen.
+- Jeden Entscheidungsversuch einschließlich Parent-/Child-Fenstern
+  klassifizieren und beide Deck-Hint-/Consumer-Audits wiederholen.
+- Bei einem neuen bestätigten Fehler: als roten Checkpoint sichern, generisch
+  beheben, fokussiert verifizieren und denselben Fünferzyklus erneut starten.
+- Done-Gate: fünf regulär abgeschlossene Spiele, null Engine-/Replay-/StateHash-
+  /Redaction-/Coverage-Fehler, keine Fallbacks oder Timeouts und nach
+  vollständigem Audit keine bestätigte bessere LegalAction.
+- Commit je zusätzlichem Fixzyklus; Abschlusscommit:
+  `test(ai): verify zero error five game cycle`.
+
+### P8 – Abschluss, Wissenspflege und lokale Integration
+
+- Finalreport und dauerhafte Engine-/KI-/Trace-Verträge dokumentieren.
+- Breite AI-/Engine-Gates ausführen, aktuelles `main` defensiv integrieren,
+  erneut verifizieren und den Arbeitsbranch lokal per Fast-Forward nach
+  `main` übernehmen.
+- Den sauberen Worktree entfernen, Entfernung doppelt verifizieren und den
+  vollständig gemergten Arbeitsbranch löschen.
+- Done-Gate: `main` grün und sauber; Worktree und Branch entfernt.
