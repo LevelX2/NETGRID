@@ -404,6 +404,12 @@ Done-Gate:
   vollständige Server- und Web-Suite sowie der Produktionsbuild grün.
 - Die route-spezifische CORS-Härtung ist mit 127 fokussierten Account-Deck-
   und Multiplayer-Tests sowie Server-Typecheck erneut grün.
+- Der reale Start des gleichzeitig integrierten Engine-Architekturstands
+  deckte einen ESM-Initialisierungszyklus im neuen Runtime-Delegate-Barrel auf.
+  Der parallel abgeschlossene Engine-Integrationscommit entfernte den
+  Delegate-Store und damit den Zyklus vollständig. Ein eigener Public-Entry-
+  Importtest, das Engine-Strukturgate und der reguläre Startpfad sichern den
+  kombinierten Stand. Server- und Web-Health antworten auf `main` mit HTTP 200.
 
 ## Verifikationsregeln
 
