@@ -324,7 +324,7 @@ describe("corp ICE placement candidate scoring", () => {
       iceRezCost: 3,
     });
 
-    expect(component?.value).toBeLessThanOrEqual(-1800);
+    expect(component?.value).toBeLessThanOrEqual(-4200);
     expect(component?.reason).toContain(
       "defer_reason:bad_first_ice_wait_for_followup",
     );
