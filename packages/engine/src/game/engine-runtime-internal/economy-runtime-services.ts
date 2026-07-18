@@ -696,21 +696,11 @@ import type { RuntimeDeps } from "./runtime-shared";
 export function createEconomyRuntimeServices(
   deps: RuntimeDeps,
 ): import("./economy-runtime-port").EconomyRuntimePort {
-  const {
-    activeCrashEverettSourceId,
-    availableRunnerProgramInstallCredits,
-    drawTaxSourceIds,
-    hasInstalledUniqueCardDefinition,
-    isUniqueCard,
-    runnerProgramUsesMemory,
-    scoredAgendaKindForDefinition,
-  } = deps;
-
   function expireScoredAgendaInstallRezCreditAbilities(state: GameState): void {
     for (const agendaId of state.corp.scoreArea) {
       const definition = definitionFor(state, agendaId);
       if (
-        scoredAgendaKindForDefinition(definition) ===
+        deps.scoredAgendaKindForDefinition(definition) ===
         "scored_agenda_credit_until_install_or_rez"
       )
         setCardCounter(state, agendaId, "mark", 0);
@@ -829,12 +819,12 @@ export function createEconomyRuntimeServices(
     return state.runner.grip.filter((cardId) => {
       const definition = definitionFor(state, cardId);
       const uniqueBlocked =
-        isUniqueCard(definition) &&
-        hasInstalledUniqueCardDefinition(state, "runner", definition.id);
+        deps.isUniqueCard(definition) &&
+        deps.hasInstalledUniqueCardDefinition(state, "runner", definition.id);
       return (
         definition.type === "program" &&
         !uniqueBlocked &&
-        availableRunnerProgramInstallCredits(state) >=
+        deps.availableRunnerProgramInstallCredits(state) >=
           (definition.installCost ?? 0) &&
         runnerProgramInstallMemoryReachableAfterTrash(state, definition)
       );
@@ -857,7 +847,7 @@ export function createEconomyRuntimeServices(
     const maximumFreedMemory = installedRunnerProgramTrashOptionsForInstall(
       state,
     ).reduce((sum, cardId) => {
-      if (!runnerProgramUsesMemory(state, cardId)) return sum;
+      if (!deps.runnerProgramUsesMemory(state, cardId)) return sum;
       return sum + (definitionFor(state, cardId).memoryCost ?? 0);
     }, 0);
     return (
@@ -931,8 +921,8 @@ export function createEconomyRuntimeServices(
 
   function runnerDrawActionContext(state: GameState): RunnerDrawActionContext {
     return {
-      drawTaxSourceCount: drawTaxSourceIds(state).length,
-      projectedDrawCount: activeCrashEverettSourceId(state) ? 2 : 1,
+      drawTaxSourceCount: deps.drawTaxSourceIds(state).length,
+      projectedDrawCount: deps.activeCrashEverettSourceId(state) ? 2 : 1,
     };
   }
 

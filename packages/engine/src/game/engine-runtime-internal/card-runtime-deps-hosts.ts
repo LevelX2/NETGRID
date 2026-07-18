@@ -707,30 +707,12 @@ export function createCardRuntimeDepsHosts(
   | "runStartTaxForCorpRootAssets"
   | "spendRunnerAccessTrashCredits"
 > {
-  const {
-    breakSubroutineCostBreakdown,
-    cardImplementationRuntimeDeps,
-    effectiveSubtypesForCard,
-    executeEffectCommands,
-    fortRunSideFamiliesHostForState,
-    hasCorpUtilityKind,
-    hostedProgramStrengthModifier,
-    iceStrengthFor,
-    icebreakerEncounterStrengthBonus,
-    icebreakerHasSpecial,
-    normalizeSubtypeLabel,
-    rezzedCorpRootCardIds,
-    rezzedIceOutsideThisIceCount,
-    runRemainderStrengthBonusForBreaker,
-    runnerAccessActionHost,
-  } = deps;
-
   function selectedServerIcebreakerStrengthCounterBonus(
     state: GameState,
     breakerId: CardInstanceId,
   ): number {
     if (
-      !icebreakerHasSpecial(
+      !deps.icebreakerHasSpecial(
         state,
         breakerId,
         "dupre_strength_counter_and_last_fort",
@@ -771,7 +753,7 @@ export function createCardRuntimeDepsHosts(
     breakerId: CardInstanceId,
   ): number {
     if (
-      icebreakerHasSpecial(
+      deps.icebreakerHasSpecial(
         state,
         breakerId,
         "dupre_strength_counter_and_last_fort",
@@ -908,7 +890,11 @@ export function createCardRuntimeDepsHosts(
       !ability ||
       !breakAbilityMatchesIce(
         ability,
-        effectiveSubtypesForCard(state, iceId as CardInstanceId, iceDefinition),
+        deps.effectiveSubtypesForCard(
+          state,
+          iceId as CardInstanceId,
+          iceDefinition,
+        ),
       )
     )
       throw new Error(
@@ -916,29 +902,27 @@ export function createCardRuntimeDepsHosts(
       );
     if (
       ability.selectedIceSubtypeFromBreaker &&
-      !effectiveSubtypesForCard(
-        state,
-        iceId as CardInstanceId,
-        iceDefinition,
-      ).includes(
-        normalizeSubtypeLabel(
-          mustInstance(state.cardInstances, breakerId).selectedSubtype ?? "",
-        ),
-      )
+      !deps
+        .effectiveSubtypesForCard(state, iceId as CardInstanceId, iceDefinition)
+        .includes(
+          deps.normalizeSubtypeLabel(
+            mustInstance(state.cardInstances, breakerId).selectedSubtype ?? "",
+          ),
+        )
     )
       throw new Error("Der gewählte Icebreaker-Typ passt nicht zum ICE.");
     const breakerStrength =
       currentRunIcebreakerBaseStrength(state, breakerId, breakerDefinition) +
       mustInstance(state.cardInstances, breakerId).strengthModifier +
-      hostedProgramStrengthModifier(state, breakerId) +
-      icebreakerEncounterStrengthBonus(state, breakerId, iceId) +
+      deps.hostedProgramStrengthModifier(state, breakerId) +
+      deps.icebreakerEncounterStrengthBonus(state, breakerId, iceId) +
       cardCounter(state, breakerId, "militech") +
       permanentIcebreakerStrengthCounterBonus(state, breakerId) +
       cardCounter(state, breakerId, "breaker_strength_penalty") * -1 +
       selectedServerIcebreakerStrengthCounterBonus(state, breakerId) +
       temporaryBreakerStrengthBonusUntilEndOfTurn(state, breakerId) +
-      runRemainderStrengthBonusForBreaker(run, breakerId);
-    if (breakerStrength < iceStrengthFor(state, iceId))
+      deps.runRemainderStrengthBonusForBreaker(run, breakerId);
+    if (breakerStrength < deps.iceStrengthFor(state, iceId))
       throw new Error("Der Icebreaker ist nicht stark genug fuer dieses ICE.");
     const rawIndexes =
       typeof legalAction.payload?.subroutineIndexes === "string"
@@ -991,7 +975,7 @@ export function createCardRuntimeDepsHosts(
         );
       }
     }
-    const expectedCost = breakSubroutineCostBreakdown(
+    const expectedCost = deps.breakSubroutineCostBreakdown(
       state,
       ability.cost.credits,
       subroutineIndexes.length,
@@ -1006,7 +990,7 @@ export function createCardRuntimeDepsHosts(
       legalAction,
     );
     if (payment.handled && payment.paid === false) return;
-    executeEffectCommands(
+    deps.executeEffectCommands(
       state,
       subroutineIndexes.map((subroutineIndex) => ({
         type: "break_subroutine",
@@ -1024,7 +1008,7 @@ export function createCardRuntimeDepsHosts(
       sourceDefinitionId: breakerDefinition.id,
     };
     applyPostBreakStealthLoss(
-      fortRunSideFamiliesHostForState(state),
+      deps.fortRunSideFamiliesHostForState(state),
       breakerId,
       legalAction,
     );
@@ -1053,21 +1037,23 @@ export function createCardRuntimeDepsHosts(
       !ability ||
       !breakAbilityMatchesIce(
         ability,
-        effectiveSubtypesForCard(state, run.encounteredIceId, iceDefinition),
+        deps.effectiveSubtypesForCard(
+          state,
+          run.encounteredIceId,
+          iceDefinition,
+        ),
       )
     )
       throw new Error("Breaker hat keine gueltige Break-Faehigkeit.");
     if (
       ability.selectedIceSubtypeFromBreaker &&
-      !effectiveSubtypesForCard(
-        state,
-        run.encounteredIceId,
-        iceDefinition,
-      ).includes(
-        normalizeSubtypeLabel(
-          mustInstance(state.cardInstances, breakerId).selectedSubtype ?? "",
-        ),
-      )
+      !deps
+        .effectiveSubtypesForCard(state, run.encounteredIceId, iceDefinition)
+        .includes(
+          deps.normalizeSubtypeLabel(
+            mustInstance(state.cardInstances, breakerId).selectedSubtype ?? "",
+          ),
+        )
     )
       throw new Error("Der gewählte Icebreaker-Typ passt nicht zum ICE.");
     if (!breakAbilityMatchesSubroutine(ability, subroutine))
@@ -1079,17 +1065,21 @@ export function createCardRuntimeDepsHosts(
     const breakerStrength =
       currentRunIcebreakerBaseStrength(state, breakerId, breakerDefinition) +
       mustInstance(state.cardInstances, breakerId).strengthModifier +
-      hostedProgramStrengthModifier(state, breakerId) +
-      icebreakerEncounterStrengthBonus(state, breakerId, run.encounteredIceId) +
+      deps.hostedProgramStrengthModifier(state, breakerId) +
+      deps.icebreakerEncounterStrengthBonus(
+        state,
+        breakerId,
+        run.encounteredIceId,
+      ) +
       cardCounter(state, breakerId, "militech") +
       permanentIcebreakerStrengthCounterBonus(state, breakerId) +
       cardCounter(state, breakerId, "breaker_strength_penalty") * -1 +
       selectedServerIcebreakerStrengthCounterBonus(state, breakerId) +
       temporaryBreakerStrengthBonusUntilEndOfTurn(state, breakerId) +
-      runRemainderStrengthBonusForBreaker(run, breakerId);
-    if (breakerStrength < iceStrengthFor(state, run.encounteredIceId))
+      deps.runRemainderStrengthBonusForBreaker(run, breakerId);
+    if (breakerStrength < deps.iceStrengthFor(state, run.encounteredIceId))
       throw new Error("Der Icebreaker ist nicht stark genug fuer dieses ICE.");
-    const expectedCost = breakSubroutineCostBreakdown(
+    const expectedCost = deps.breakSubroutineCostBreakdown(
       state,
       ability.cost.credits,
       1,
@@ -1214,7 +1204,7 @@ export function createCardRuntimeDepsHosts(
     return {
       ...subroutine,
       amount:
-        rezzedIceOutsideThisIceCount(state, iceId) *
+        deps.rezzedIceOutsideThisIceCount(state, iceId) *
         dynamicDamage.amountPerCount,
     };
   }
@@ -1227,7 +1217,7 @@ export function createCardRuntimeDepsHosts(
     const dynamicTrace = cardImplementationForDefinitionId(definition.id)
       ?.relativeIce?.dynamicTraceSubroutines;
     if (!dynamicTrace) return [];
-    const count = rezzedIceOutsideThisIceCount(state, iceId);
+    const count = deps.rezzedIceOutsideThisIceCount(state, iceId);
     return Array.from({ length: count }, (_, index) => ({
       id: `relative_ice_outside_${definition.id}.trace.${index + 1}`,
       type: "initiate_trace",
@@ -1265,7 +1255,7 @@ export function createCardRuntimeDepsHosts(
           timing: ActivatedCardAbilityImplementation["timing"],
         ) =>
           pushActivatedCardImplementationActionsForTiming(
-            cardImplementationRuntimeDeps,
+            deps.cardImplementationRuntimeDeps,
             state,
             actions,
             side,
@@ -1294,7 +1284,7 @@ export function createCardRuntimeDepsHosts(
     for (const cardId of server.root.slice().sort()) {
       const instance = mustInstance(state.cardInstances, cardId);
       if (!instance.rezzed) continue;
-      if (!hasCorpUtilityKind(state, cardId, "run_start_tax_runner_tags"))
+      if (!deps.hasCorpUtilityKind(state, cardId, "run_start_tax_runner_tags"))
         continue;
       const tagTax = Math.max(0, Math.floor(state.runner.tags));
       if (tagTax <= 0) continue;
@@ -1311,11 +1301,12 @@ export function createCardRuntimeDepsHosts(
     amount: number;
     sourceDefinitionIds: CardDefinitionId[];
   } {
-    const sourceDefinitionIds = rezzedCorpRootCardIds(state)
+    const sourceDefinitionIds = deps
+      .rezzedCorpRootCardIds(state)
       .filter(
         (cardId: CardInstanceId) =>
           definitionFor(state, cardId).id === TAG_HANDSIZE_ASSET_SOURCE ||
-          hasCorpUtilityKind(state, cardId, "run_start_tax"),
+          deps.hasCorpUtilityKind(state, cardId, "run_start_tax"),
       )
       .map((cardId: CardInstanceId) => definitionFor(state, cardId).id);
     return {
@@ -1330,7 +1321,7 @@ export function createCardRuntimeDepsHosts(
     accessedCardId: CardInstanceId,
   ): { recurringSpent: number; runnerCreditsSpent: number } {
     if (amount <= 0) return { recurringSpent: 0, runnerCreditsSpent: 0 };
-    const host = runnerAccessActionHost(state);
+    const host = deps.runnerAccessActionHost(state);
     if (availableRunnerAccessTrashCredits(host, accessedCardId) < amount)
       throw new Error("Der Runner kann die Trashkosten nicht bezahlen.");
     let remaining = amount;

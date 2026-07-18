@@ -32,145 +32,6 @@ export function createHiddenZoneNonSearchRuntime(
   links: ChoiceHiddenZoneRuntimeLinks,
 ): import("./hidden-zone-nonsearch-runtime-port").HiddenZoneNonSearchRuntimePort {
   const {
-    DAILY_CREDIT_RESOURCE_SOURCE,
-    COCKROACH_ID,
-    ARCHIVES_TO_HQ_OPERATION_SOURCE,
-    HQ_AGENDA_REVEAL_ASSET_SOURCE,
-    RD_TOP5_REORDER_OPERATION_SOURCE,
-    DEAL_WITH_MILITECH_ID,
-    CARD_DEFINITIONS_BY_ID,
-    INITIAL_HAND_SIZE,
-    MYSTERY_BOX_ID,
-    RONIN_AROUND_ID,
-    RUN_ACCESS_PRESSURE_EVENT_SOURCE,
-    SELF_MODIFYING_CODE_ID,
-    SERVER_EXPOSE_PROGRAM_SOURCES,
-    PAID_STACK_SEARCH_RESOURCE_SOURCE,
-    SNEAK_PREVIEW_ID,
-    STACK_SEARCH_PROGRAM_SOURCES,
-    STACK_TOP_REORDER_RESOURCE_SOURCE,
-    TOO_MANY_DOORS_ID,
-    accessEffectHandlerHost,
-    addCardCounter,
-    affordableRezzedInstalledIceIdsForRunner,
-    agendaPointsForScoredCard,
-    appendResolvedEffectsToPayload,
-    applyRunnerStartOfTurnEffects,
-    availableRunnerProgramInstallCredits,
-    cardCounter,
-    cardHasSubtype,
-    cardImplementationForDefinitionId,
-    cardImplementationRuntimeDeps,
-    cockroachCounterTotal,
-    cockroachRandomHqDiscardActive,
-    completeDiscardPhase,
-    corpInstallRezSequenceHandlerHost,
-    corpInstalledCardIds,
-    corpScoredAgendaForfeitTargets,
-    creditCostForAction,
-    definitionFor,
-    discardRandomCorpHqCards,
-    drawCorpCards,
-    encounterResolutionHostForState,
-    encounterSpecialWindowHostForState,
-    ensureRunnerTurnFlags,
-    executeCardImplementationEffects,
-    executeCardImplementationLifecycleEffects,
-    fortPassWindowHostForState,
-    fortRunSideFamiliesHostForState,
-    handForSide,
-    handleCorpInstallRezSequenceChoice,
-    handleCorpZoneChoice,
-    handleHiddenZoneArrangeChoice,
-    handleHiddenZoneNonSearchChoice,
-    handleHiddenZoneSearchChoice,
-    handleScoredAgendaFlowChoice,
-    hasCorpUtilityKind,
-    hasInstalledUniqueCardDefinition,
-    hasSuccessfulHqRunThisTurn,
-    isP358HiddenReplacementCompatibilityChoiceSource,
-    isUniqueCard,
-    lookTopStackShowToCorpThenInstallMatchingTargets,
-    maxHandSize,
-    mustServer,
-    outermostIceIndex,
-    poxCountersForServer,
-    publicServerLabel,
-    publicServerLabelForCard,
-    recordStateRandomMarkers,
-    removeFromAllZones,
-    resolveAardvarkInterceptionChoice,
-    resolveAccessChimeraDaemonTrashChoice,
-    resolveAccessInstalledRunnerProgramReturnChoice,
-    resolveAccessPaymentChoice,
-    resolveCardImplementationAdvancementDistributionChoice,
-    resolveCardImplementationMoveAdvancementChoice,
-    resolveVirusCounterPurgePreserveChoice,
-    resolveCrashEverettDrawChoice,
-    resolveEventModificationChoice,
-    resolveHammerStealthLossChoice,
-    resolveCorpInstalledEconomyCreditChoice,
-    resolvePreAccessTopRdReorderChoice,
-    resolvePassRezzedIceProgramTrashChoiceInRunModule,
-    resolveBrokenIceVirusCounterChoice,
-    resolvePostMeatDamageHiddenResourceChoice,
-    resolveHardwareTrashByCounterChoice,
-    resolveSuccessfulRunCreditLossSpendChoice,
-    resolveReplacementChoice,
-    resolveRunnerPrivateLookChoice,
-    resolveRunnerProgramTrashBeforeInstallChoice,
-    resolveHqIceSwapChoice,
-    resolveRezInterruptJackOutChoice,
-    resolveSuccessfulRunInterventionChoiceInRunModule,
-    resolveAdvancementPlacementChoice,
-    resolveSecretSpendCompareChoiceInRunModule,
-    resolveTraceChoice,
-    resolveActiveIceProgramTrashChoiceInRunModule,
-    rezCostForCard,
-    rezzedBlackIceIds,
-    rezzedCorpRootCardIds,
-    rezzedInstalledIceIds,
-    rollDeterministicDie,
-    runAccessTransitionHost,
-    runEndCleanupHost,
-    runRezWindowHostForState,
-    runnerEventLongtailForDefinition,
-    runnerEventLongtailKindForDefinition,
-    runnerInstalledCardIds,
-    runnerMemoryLimit,
-    runnerProgramUsesMemory,
-    runnerStoleAgendaSubtypeThisTurn,
-    scoredAgendaFlowHost,
-    scoredAgendaImplementationForDefinition,
-    scoredAgendaKindForDefinition,
-    searchStackInstallTargets,
-    selectedChoiceIds,
-    setCardCounter,
-    setHostedOn,
-    shouldLoadLegacyRecurringCredits,
-    shuffleRunnerStackAndRefreshZones,
-    shuffleStateIds,
-    temporaryProgramInstallableProgramIds,
-    spendCardCounter,
-    spendCredits,
-    spendRunnerInstallCredits,
-    startAujourdOuiTop5Activation,
-    startIncubatorTransformChoice,
-    startRun,
-    startRunnerStackArrangeChoice,
-    startRunnerStackSearchChoiceActivation,
-    successfulRunInterventionHost,
-    traceOrchestrationHost,
-    trashCorpInstalledCardToArchives,
-    trashRunnerInstalledCardToHeap,
-    uniqueDirectLongtailImplementationForDefinition,
-    unrezzedInstalledIceIds,
-    mustInstance,
-    credits,
-    withoutVariableIceState,
-  } = deps;
-
-  const {
     addCounterToAllInstalledRunnerIcebreakers,
     canInstallRunnerProgramFromZone,
     chooseCorpAgendasForPointCost,
@@ -228,25 +89,27 @@ export function createHiddenZoneNonSearchRuntime(
       legalAction,
       ...(playerAction ? { playerAction } : {}),
       constants: {
-        corpArchivesToHqOperationCardId: ARCHIVES_TO_HQ_OPERATION_SOURCE,
-        runAccessPressureEventCardId: RUN_ACCESS_PRESSURE_EVENT_SOURCE,
+        corpArchivesToHqOperationCardId: deps.ARCHIVES_TO_HQ_OPERATION_SOURCE,
+        runAccessPressureEventCardId: deps.RUN_ACCESS_PRESSURE_EVENT_SOURCE,
       },
       cards: {
-        definitionFor: (cardId) => definitionFor(state, cardId),
+        definitionFor: (cardId) => deps.definitionFor(state, cardId),
         corpUtilityForCard: (cardId) =>
-          cardImplementationForDefinitionId(definitionFor(state, cardId).id)
-            ?.corpUtility,
+          deps.cardImplementationForDefinitionId(
+            deps.definitionFor(state, cardId).id,
+          )?.corpUtility,
         hasCorpUtilityKind: (cardId, kind) =>
-          hasCorpUtilityKind(
+          deps.hasCorpUtilityKind(
             state,
             cardId,
-            kind as Parameters<typeof hasCorpUtilityKind>[2],
+            kind as Parameters<typeof deps.hasCorpUtilityKind>[2],
           ),
-        mustInstance: (cardId) => mustInstance(state.cardInstances, cardId),
+        mustInstance: (cardId) =>
+          deps.mustInstance(state.cardInstances, cardId),
         installedResourceTrashCreditGain: (cardId) => {
           const implementation =
-            uniqueDirectLongtailImplementationForDefinition(
-              definitionFor(state, cardId).id,
+            deps.uniqueDirectLongtailImplementationForDefinition(
+              deps.definitionFor(state, cardId).id,
             );
           return implementation?.kind === "start_turn_trash_for_credits"
             ? implementation.gainCredits
@@ -254,24 +117,26 @@ export function createHiddenZoneNonSearchRuntime(
         },
       },
       zones: {
-        removeFromAllZones: (cardId) => removeFromAllZones(state, cardId),
+        removeFromAllZones: (cardId) => deps.removeFromAllZones(state, cardId),
         trashRunnerInstalledCardToHeap: (cardId) =>
-          trashRunnerInstalledCardToHeap(state, cardId),
+          deps.trashRunnerInstalledCardToHeap(state, cardId),
       },
       servers: {
-        mustServer: (serverId) => mustServer(state, serverId),
-        publicServerLabel: (serverId) => publicServerLabel(state, serverId),
+        mustServer: (serverId) => deps.mustServer(state, serverId),
+        publicServerLabel: (serverId) =>
+          deps.publicServerLabel(state, serverId),
         iceChoiceLabelForSide: (cardId, visibleTo, fallback) =>
           iceChoiceLabelForSide(state, cardId, visibleTo, fallback),
       },
       callbacks: {
-        hasSuccessfulHqRunThisTurn: () => hasSuccessfulHqRunThisTurn(state),
-        spendCorpCredits: (amount) => spendCredits(state, "corp", amount),
-        gainRunnerCredits: (amount) => credits(state, "runner", amount),
+        hasSuccessfulHqRunThisTurn: () =>
+          deps.hasSuccessfulHqRunThisTurn(state),
+        spendCorpCredits: (amount) => deps.spendCredits(state, "corp", amount),
+        gainRunnerCredits: (amount) => deps.credits(state, "runner", amount),
         shuffleCorpCardIntoRd: (cardId, sourceDefinitionId) =>
           shuffleCorpCardIntoRd(state, cardId, sourceDefinitionId, "operation"),
         startRunWithAutoPass: (serverId, iceId) =>
-          startRun(
+          deps.startRun(
             state,
             serverId,
             undefined,
@@ -289,7 +154,7 @@ export function createHiddenZoneNonSearchRuntime(
   ): void {
     if (state.pendingChoice)
       throw new Error("Es ist bereits eine Choice offen.");
-    const targets = rezzedBlackIceIds(state);
+    const targets = deps.rezzedBlackIceIds(state);
     if (targets.length === 0)
       throw new Error("Keine gerezzte Black ICE als Ziel.");
     state.pendingChoice = {
@@ -299,8 +164,9 @@ export function createHiddenZoneNonSearchRuntime(
       prompt: "Black ICE derezzen",
       kind: "select_cards",
       options: targets.map((cardId: CardInstanceId) => {
-        const definition = definitionFor(state, cardId);
-        const serverLabel = publicServerLabelForCard(state, cardId) ?? "Server";
+        const definition = deps.definitionFor(state, cardId);
+        const serverLabel =
+          deps.publicServerLabelForCard(state, cardId) ?? "Server";
         return {
           id: `card_${cardId}`,
           label: `${definition.title} (${serverLabel})`,
@@ -327,11 +193,13 @@ export function createHiddenZoneNonSearchRuntime(
     )
       throw new Error("Es ist keine Derez-Black-ICE-Choice offen.");
     const selectedId = selectedChoiceCardIds(choice, playerAction)[0];
-    if (!selectedId || !rezzedBlackIceIds(state).includes(selectedId))
+    if (!selectedId || !deps.rezzedBlackIceIds(state).includes(selectedId))
       throw new Error("Das Ziel ist keine gerezzte Black ICE.");
-    const targetDefinition = definitionFor(state, selectedId);
+    const targetDefinition = deps.definitionFor(state, selectedId);
     state.cardInstances[selectedId] = {
-      ...withoutVariableIceState(mustInstance(state.cardInstances, selectedId)),
+      ...deps.withoutVariableIceState(
+        deps.mustInstance(state.cardInstances, selectedId),
+      ),
       faceup: false,
       rezzed: false,
     };
@@ -350,7 +218,7 @@ export function createHiddenZoneNonSearchRuntime(
   ): void {
     if (state.pendingChoice)
       throw new Error("Es ist bereits eine Choice offen.");
-    const targets = affordableRezzedInstalledIceIdsForRunner(state);
+    const targets = deps.affordableRezzedInstalledIceIdsForRunner(state);
     if (targets.length === 0)
       throw new Error("Keine bezahlbare gerezzte ICE als Ziel.");
     state.pendingChoice = {
@@ -360,8 +228,9 @@ export function createHiddenZoneNonSearchRuntime(
       prompt: "Gerezzte ICE trashen",
       kind: "select_cards",
       options: targets.map((cardId: CardInstanceId) => {
-        const definition = definitionFor(state, cardId);
-        const serverLabel = publicServerLabelForCard(state, cardId) ?? "Server";
+        const definition = deps.definitionFor(state, cardId);
+        const serverLabel =
+          deps.publicServerLabelForCard(state, cardId) ?? "Server";
         return {
           id: `card_${cardId}`,
           label: `${definition.title} (${serverLabel})`,
@@ -389,24 +258,25 @@ export function createHiddenZoneNonSearchRuntime(
       )
     )
       throw new Error("Es ist keine Pay-Rez-Cost-Trash-Choice offen.");
-    if (!hasSuccessfulHqRunThisTurn(state))
+    if (!deps.hasSuccessfulHqRunThisTurn(state))
       throw new Error(
         "Diese Choice benoetigt einen erfolgreichen HQ-Run in diesem Zug.",
       );
     const selectedId = selectedChoiceCardIds(choice, playerAction)[0];
-    if (!selectedId || !rezzedInstalledIceIds(state).includes(selectedId))
+    if (!selectedId || !deps.rezzedInstalledIceIds(state).includes(selectedId))
       throw new Error("Das Ziel ist keine gerezzte installierte ICE.");
-    const rezCost = rezCostForCard(state, selectedId);
+    const rezCost = deps.rezCostForCard(state, selectedId);
     if (state.runner.credits < rezCost)
       throw new Error(
         "Der Runner kann die Rez-Kosten fuer diese Choice nicht zahlen.",
       );
-    const definition = definitionFor(state, selectedId);
-    const serverLabel = publicServerLabelForCard(state, selectedId) ?? "Server";
+    const definition = deps.definitionFor(state, selectedId);
+    const serverLabel =
+      deps.publicServerLabelForCard(state, selectedId) ?? "Server";
     const icePositionLabel =
       publicIcePositionLabelForCard(state, selectedId) ?? serverLabel;
-    spendCredits(state, "runner", rezCost);
-    trashCorpInstalledCardToArchives(state, selectedId);
+    deps.spendCredits(state, "runner", rezCost);
+    deps.trashCorpInstalledCardToArchives(state, selectedId);
     delete state.pendingChoice;
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
@@ -431,7 +301,7 @@ export function createHiddenZoneNonSearchRuntime(
     const server = state.corp.servers.find(
       (candidate) => candidate.id === serverId,
     );
-    const serverLabel = publicServerLabel(state, serverId);
+    const serverLabel = deps.publicServerLabel(state, serverId);
     if (!server || !serverLabel) return serverLabel;
     const iceIndex = server.ice.indexOf(cardId);
     return iceIndex >= 0
@@ -453,7 +323,7 @@ export function createHiddenZoneNonSearchRuntime(
   ): void {
     if (state.pendingChoice)
       throw new Error("Es ist bereits eine Choice offen.");
-    const targets = unrezzedInstalledIceIds(state);
+    const targets = deps.unrezzedInstalledIceIds(state);
     if (targets.length === 0) throw new Error("Keine unrezzte ICE als Ziel.");
     state.pendingChoice = {
       choiceId: `card_implementation_corp_choice_rez_or_trash_ice_target_${state.stateVersion + 1}`,
@@ -491,9 +361,13 @@ export function createHiddenZoneNonSearchRuntime(
     )
       throw new Error("Es ist keine Rez-oder-Trash-Ziel-Choice offen.");
     const selectedId = selectedChoiceCardIds(choice, playerAction)[0];
-    if (!selectedId || !unrezzedInstalledIceIds(state).includes(selectedId))
+    if (
+      !selectedId ||
+      !deps.unrezzedInstalledIceIds(state).includes(selectedId)
+    )
       throw new Error("Das Ziel ist keine installierte unrezzte ICE.");
-    const serverLabel = publicServerLabelForCard(state, selectedId) ?? "Server";
+    const serverLabel =
+      deps.publicServerLabelForCard(state, selectedId) ?? "Server";
     const icePositionLabel =
       publicIcePositionLabelForCard(state, selectedId) ?? serverLabel;
     const choiceTargetLabel = icePositionLabel || "ICE";
@@ -504,8 +378,8 @@ export function createHiddenZoneNonSearchRuntime(
       prompt: `Rez-oder-Trash-Entscheidung: ${choiceTargetLabel} rezzen oder trashen`,
       kind: "select_option",
       options: [
-        ...(!mustInstance(state.cardInstances, selectedId).rezzed &&
-        state.corp.credits >= rezCostForCard(state, selectedId)
+        ...(!deps.mustInstance(state.cardInstances, selectedId).rezzed &&
+        state.corp.credits >= deps.rezCostForCard(state, selectedId)
           ? [
               {
                 id: "rez_ice",
@@ -552,27 +426,29 @@ export function createHiddenZoneNonSearchRuntime(
     const [, targetIceId] = choice.source.split(":");
     if (
       !targetIceId ||
-      !corpInstalledCardIds(state).includes(targetIceId) ||
-      mustInstance(state.cardInstances, targetIceId).zone.zone !== "serverIce"
+      !deps.corpInstalledCardIds(state).includes(targetIceId) ||
+      deps.mustInstance(state.cardInstances, targetIceId).zone.zone !==
+        "serverIce"
     )
       throw new Error("Das Ziel ist nicht mehr installierte ICE.");
-    if (mustInstance(state.cardInstances, targetIceId).rezzed)
+    if (deps.mustInstance(state.cardInstances, targetIceId).rezzed)
       throw new Error("Das Ziel ist nicht mehr unrezzte ICE.");
-    const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
-    const definition = definitionFor(state, targetIceId);
+    const selected =
+      deps.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+    const definition = deps.definitionFor(state, targetIceId);
     const serverLabel =
-      publicServerLabelForCard(state, targetIceId) ?? "Server";
+      deps.publicServerLabelForCard(state, targetIceId) ?? "Server";
     const icePositionLabel =
       publicIcePositionLabelForCard(state, targetIceId) ?? serverLabel;
     if (selected === "rez_ice") {
-      if (mustInstance(state.cardInstances, targetIceId).rezzed)
+      if (deps.mustInstance(state.cardInstances, targetIceId).rezzed)
         throw new Error("Die ICE ist bereits gerezzt.");
-      const rezCost = rezCostForCard(state, targetIceId);
+      const rezCost = deps.rezCostForCard(state, targetIceId);
       if (state.corp.credits < rezCost)
         throw new Error("Die Korp kann die ICE nicht rezzen.");
-      spendCredits(state, "corp", rezCost);
+      deps.spendCredits(state, "corp", rezCost);
       state.cardInstances[targetIceId] = {
-        ...mustInstance(state.cardInstances, targetIceId),
+        ...deps.mustInstance(state.cardInstances, targetIceId),
         rezzed: true,
         faceup: true,
       };
@@ -591,12 +467,12 @@ export function createHiddenZoneNonSearchRuntime(
     if (selected !== "trash_ice")
       throw new Error("Die Rez-oder-Trash-Korp-Entscheidung ist ungueltig.");
     const targetWasKnownToRunner =
-      mustInstance(state.cardInstances, targetIceId).faceup === true ||
-      mustInstance(state.cardInstances, targetIceId).rezzed === true;
-    trashCorpInstalledCardToArchives(state, targetIceId);
+      deps.mustInstance(state.cardInstances, targetIceId).faceup === true ||
+      deps.mustInstance(state.cardInstances, targetIceId).rezzed === true;
+    deps.trashCorpInstalledCardToArchives(state, targetIceId);
     if (!targetWasKnownToRunner) {
       state.cardInstances[targetIceId] = {
-        ...mustInstance(state.cardInstances, targetIceId),
+        ...deps.mustInstance(state.cardInstances, targetIceId),
         faceup: false,
         rezzed: false,
       };
@@ -624,7 +500,7 @@ export function createHiddenZoneNonSearchRuntime(
   ): void {
     if (state.pendingChoice)
       throw new Error("Es ist bereits eine Choice offen.");
-    const targets = unrezzedInstalledIceIds(state);
+    const targets = deps.unrezzedInstalledIceIds(state);
     if (targets.length === 0) throw new Error("Keine unrezzte ICE als Ziel.");
     state.pendingChoice = {
       choiceId: `card_implementation_trash_unrezzed_ice_${state.stateVersion + 1}`,
@@ -659,16 +535,20 @@ export function createHiddenZoneNonSearchRuntime(
       !choice.source.startsWith("card_implementation.trash_unrezzed_ice")
     )
       throw new Error("Es ist keine Trash-Unrezzed-ICE-Choice offen.");
-    if (!hasSuccessfulHqRunThisTurn(state))
+    if (!deps.hasSuccessfulHqRunThisTurn(state))
       throw new Error(
         "Diese Choice benoetigt einen erfolgreichen HQ-Run in diesem Zug.",
       );
     const selectedId = selectedChoiceCardIds(choice, playerAction)[0];
-    if (!selectedId || !unrezzedInstalledIceIds(state).includes(selectedId))
+    if (
+      !selectedId ||
+      !deps.unrezzedInstalledIceIds(state).includes(selectedId)
+    )
       throw new Error("Das Ziel ist keine unrezzte installierte ICE.");
-    const definition = definitionFor(state, selectedId);
-    const serverLabel = publicServerLabelForCard(state, selectedId) ?? "Server";
-    trashCorpInstalledCardToArchives(state, selectedId);
+    const definition = deps.definitionFor(state, selectedId);
+    const serverLabel =
+      deps.publicServerLabelForCard(state, selectedId) ?? "Server";
+    deps.trashCorpInstalledCardToArchives(state, selectedId);
     delete state.pendingChoice;
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
@@ -742,11 +622,11 @@ export function createHiddenZoneNonSearchRuntime(
         throw new Error("Die Quellkarte liegt nicht im Heap.");
       if (state.runner.credits < 1)
         throw new Error("Der Runner kann die Ruecknahme nicht bezahlen.");
-      spendCredits(state, "runner", 1);
-      removeFromAllZones(state, sourceCardId);
+      deps.spendCredits(state, "runner", 1);
+      deps.removeFromAllZones(state, sourceCardId);
       state.runner.grip.push(sourceCardId);
       state.cardInstances[sourceCardId] = {
-        ...mustInstance(state.cardInstances, sourceCardId),
+        ...deps.mustInstance(state.cardInstances, sourceCardId),
         faceup: true,
         zone: { side: "runner", zone: "grip" },
       };
@@ -767,7 +647,7 @@ export function createHiddenZoneNonSearchRuntime(
     hostId: CardInstanceId,
     legalAction: LegalAction,
   ): void {
-    const host = mustInstance(state.cardInstances, hostId);
+    const host = deps.mustInstance(state.cardInstances, hostId);
     if (
       host.definitionId !== "v099_host_resource" ||
       !state.runner.rig.resources.includes(hostId)
@@ -777,15 +657,15 @@ export function createHiddenZoneNonSearchRuntime(
       throw new Error("Es ist bereits eine Choice offen.");
     const options = state.runner.grip
       .filter((cardId) => {
-        const definition = definitionFor(state, cardId);
+        const definition = deps.definitionFor(state, cardId);
         return (
           definition.type === "program" &&
           state.runner.memoryUsed + (definition.memoryCost ?? 0) <=
-            runnerMemoryLimit(state)
+            deps.runnerMemoryLimit(state)
         );
       })
       .map((cardId) => {
-        const definition = definitionFor(state, cardId);
+        const definition = deps.definitionFor(state, cardId);
         return { id: `card_${cardId}`, label: definition.title, value: cardId };
       });
     if (options.length === 0) return;
@@ -821,12 +701,12 @@ export function createHiddenZoneNonSearchRuntime(
       definition,
       usesMemory: true,
       mustInstance: (targetCardId) =>
-        mustInstance(state.cardInstances, targetCardId),
+        deps.mustInstance(state.cardInstances, targetCardId),
       setCardCounter: (targetCardId, counterType, amount) =>
-        setCardCounter(state, targetCardId, counterType, amount),
+        deps.setCardCounter(state, targetCardId, counterType, amount),
       addCardCounter: (targetCardId, counterType, amount) =>
-        addCardCounter(state, targetCardId, counterType, amount),
-      shouldLoadLegacyRecurringCredits,
+        deps.addCardCounter(state, targetCardId, counterType, amount),
+      shouldLoadLegacyRecurringCredits: deps.shouldLoadLegacyRecurringCredits,
       ...(instancePatch ? { instancePatch } : {}),
     });
   }
@@ -842,24 +722,24 @@ export function createHiddenZoneNonSearchRuntime(
     const hostId = sourceParts[1];
     if (!hostId || !state.runner.rig.resources.includes(hostId))
       throw new Error("Der Host ist nicht mehr installiert.");
-    const hostDefinition = definitionFor(state, hostId);
+    const hostDefinition = deps.definitionFor(state, hostId);
     if (hostDefinition.id !== "v099_host_resource")
       throw new Error("Diese Karte kann in V0.99 nicht hosten.");
     const cardId = selectedChoiceCardIds(choice, playerAction)[0];
     if (!cardId || !state.runner.grip.includes(cardId))
       throw new Error("Die gewählte Karte liegt nicht in der Grip.");
-    const definition = definitionFor(state, cardId);
+    const definition = deps.definitionFor(state, cardId);
     if (definition.type !== "program")
       throw new Error(
         "Nur Programme können in dieser Hosting-Harness gehostet werden.",
       );
     if (
       state.runner.memoryUsed + (definition.memoryCost ?? 0) >
-      runnerMemoryLimit(state)
+      deps.runnerMemoryLimit(state)
     )
       throw new Error("Nicht genug Memory für das gehostete Programm.");
-    setHostedOn(state, cardId, hostId);
-    removeFromAllZones(state, cardId);
+    deps.setHostedOn(state, cardId, hostId);
+    deps.removeFromAllZones(state, cardId);
     completeHiddenZoneRunnerProgramInstall(state, cardId, definition, {
       hostedOn: hostId,
     });
@@ -881,7 +761,8 @@ export function createHiddenZoneNonSearchRuntime(
     const choice = state.pendingChoice;
     if (!choice || !choice.source.startsWith("v191.incubator_transform"))
       throw new Error("Es ist keine Incubator-Choice offen.");
-    const selectedId = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+    const selectedId =
+      deps.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
     const selectedOption = choice.options.find(
       (option) => option.id === selectedId,
     );
@@ -893,13 +774,13 @@ export function createHiddenZoneNonSearchRuntime(
       const cardId = value.slice("card:".length);
       if (!cardId || !state.cardInstances[cardId])
         throw new Error("Der gewählte Karten-Counter ist ungültig.");
-      const available = cardCounter(state, cardId, "virus");
+      const available = deps.cardCounter(state, cardId, "virus");
       if (available <= 0)
         throw new Error(
           "Der gewählte Karten-Counter ist nicht mehr verfügbar.",
         );
-      spendCardCounter(state, cardId, "virus", 1);
-      addCardCounter(state, cardId, "virus", 2);
+      deps.spendCardCounter(state, cardId, "virus", 1);
+      deps.addCardCounter(state, cardId, "virus", 2);
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
         hiddenZoneBarrier: true,
@@ -911,7 +792,7 @@ export function createHiddenZoneNonSearchRuntime(
         ServerId,
         "new_remote"
       >;
-      const available = poxCountersForServer(state, serverId);
+      const available = deps.poxCountersForServer(state, serverId);
       if (available <= 0)
         throw new Error("Der gewählte Pox-Counter ist nicht mehr verfügbar.");
       state.poxCountersByServer = {
@@ -929,7 +810,7 @@ export function createHiddenZoneNonSearchRuntime(
         ServerId,
         "new_remote"
       >;
-      mustServer(state, serverId);
+      deps.mustServer(state, serverId);
       const available = Math.max(
         0,
         Math.floor(state.serverAgendaCostCountersByServer?.[serverId] ?? 0),
@@ -950,7 +831,7 @@ export function createHiddenZoneNonSearchRuntime(
       throw new Error("Die Incubator-Auswahl hat einen ungültigen Targettyp.");
     }
 
-    const flags = ensureRunnerTurnFlags(state);
+    const flags = deps.ensureRunnerTurnFlags(state);
     const remaining = Math.max(
       0,
       Math.floor((flags.incubatorPendingTransforms ?? 0) - 1),
@@ -958,10 +839,10 @@ export function createHiddenZoneNonSearchRuntime(
     flags.incubatorPendingTransforms = remaining;
     delete state.pendingChoice;
     if (remaining > 0) {
-      startIncubatorTransformChoice(state);
+      deps.startIncubatorTransformChoice(state);
       return;
     }
-    applyRunnerStartOfTurnEffects(state);
+    deps.applyRunnerStartOfTurnEffects(state);
   }
 
   function resolveChimeraDaemonTrashChoice(
@@ -969,9 +850,9 @@ export function createHiddenZoneNonSearchRuntime(
     legalAction: LegalAction,
     playerAction: PlayerAction,
   ): void {
-    resolveAccessChimeraDaemonTrashChoice(
-      accessEffectHandlerHost(state, legalAction),
-      selectedChoiceIds(playerAction.selectedChoices)[0] ?? "",
+    deps.resolveAccessChimeraDaemonTrashChoice(
+      deps.accessEffectHandlerHost(state, legalAction),
+      deps.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "",
     );
   }
 
@@ -980,9 +861,9 @@ export function createHiddenZoneNonSearchRuntime(
     legalAction: LegalAction,
     playerAction: PlayerAction,
   ): void {
-    resolveAccessPaymentChoice(
-      accessEffectHandlerHost(state, legalAction),
-      selectedChoiceIds(playerAction.selectedChoices)[0] ?? "",
+    deps.resolveAccessPaymentChoice(
+      deps.accessEffectHandlerHost(state, legalAction),
+      deps.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "",
     );
   }
 
@@ -991,9 +872,9 @@ export function createHiddenZoneNonSearchRuntime(
     legalAction: LegalAction,
     playerAction: PlayerAction,
   ): void {
-    resolveAccessInstalledRunnerProgramReturnChoice(
-      accessEffectHandlerHost(state, legalAction),
-      selectedChoiceIds(playerAction.selectedChoices),
+    deps.resolveAccessInstalledRunnerProgramReturnChoice(
+      deps.accessEffectHandlerHost(state, legalAction),
+      deps.selectedChoiceIds(playerAction.selectedChoices),
     );
   }
 
@@ -1001,14 +882,16 @@ export function createHiddenZoneNonSearchRuntime(
     choice: ChoiceRequest,
     playerAction: PlayerAction,
   ): CardInstanceId[] {
-    return selectedChoiceIds(playerAction.selectedChoices).map((optionId) => {
-      const option = choice.options.find(
-        (candidate) => candidate.id === optionId,
-      );
-      if (typeof option?.value !== "string")
-        throw new Error("Die gewaehlte Kartenoption ist ungueltig.");
-      return option.value;
-    });
+    return deps
+      .selectedChoiceIds(playerAction.selectedChoices)
+      .map((optionId) => {
+        const option = choice.options.find(
+          (candidate) => candidate.id === optionId,
+        );
+        if (typeof option?.value !== "string")
+          throw new Error("Die gewaehlte Kartenoption ist ungueltig.");
+        return option.value;
+      });
   }
 
   function iceChoiceLabelForSide(
@@ -1017,8 +900,8 @@ export function createHiddenZoneNonSearchRuntime(
     visibleTo: Side,
     fallback: string,
   ): { label: string; publicLabel: string } {
-    const instance = mustInstance(state.cardInstances, cardId);
-    const definition = definitionFor(state, cardId);
+    const instance = deps.mustInstance(state.cardInstances, cardId);
+    const definition = deps.definitionFor(state, cardId);
     if (visibleTo === "corp" || instance.rezzed || instance.faceup) {
       return { label: definition.title, publicLabel: definition.title };
     }
@@ -1037,11 +920,11 @@ export function createHiddenZoneNonSearchRuntime(
     >;
 
   function installedRunnerConnectionIds(state: GameState): CardInstanceId[] {
-    return runnerInstalledCardIds(state).filter((cardId) => {
-      const definition = definitionFor(state, cardId);
+    return deps.runnerInstalledCardIds(state).filter((cardId) => {
+      const definition = deps.definitionFor(state, cardId);
       return (
         definition.type === "resource" &&
-        cardHasSubtype(definition, "connection")
+        deps.cardHasSubtype(definition, "connection")
       );
     });
   }
@@ -1100,7 +983,7 @@ export function createHiddenZoneNonSearchRuntime(
       kind: "select_cards",
       options: eligible.map((cardId) => ({
         id: `card_${cardId}`,
-        label: definitionFor(state, cardId).title,
+        label: deps.definitionFor(state, cardId).title,
         value: cardId,
       })),
       minSelections: implementation.count,
@@ -1149,14 +1032,16 @@ export function createHiddenZoneNonSearchRuntime(
     choice: ChoiceRequest,
     playerAction: PlayerAction,
   ): CardInstanceId[] {
-    return selectedChoiceIds(playerAction.selectedChoices).map((optionId) => {
-      const option = choice.options.find(
-        (candidate) => candidate.id === optionId,
-      );
-      if (typeof option?.value !== "string")
-        throw new Error("Die gewaehlte Kartenoption ist ungueltig.");
-      return option.value as CardInstanceId;
-    });
+    return deps
+      .selectedChoiceIds(playerAction.selectedChoices)
+      .map((optionId) => {
+        const option = choice.options.find(
+          (candidate) => candidate.id === optionId,
+        );
+        if (typeof option?.value !== "string")
+          throw new Error("Die gewaehlte Kartenoption ist ungueltig.");
+        return option.value as CardInstanceId;
+      });
   }
 
   function installRunnerGripCardWithTemporaryCredits(
@@ -1167,14 +1052,14 @@ export function createHiddenZoneNonSearchRuntime(
   ) {
     if (!state.runner.grip.includes(cardId))
       throw new Error("Die gewaehlte Karte liegt nicht im Grip.");
-    const definition = definitionFor(state, cardId);
+    const definition = deps.definitionFor(state, cardId);
     if (definition.type !== "program" && definition.type !== "hardware")
       throw new Error(
         "Die gewaehlte Karte ist kein Programm oder keine Hardware.",
       );
     if (
-      isUniqueCard(definition) &&
-      hasInstalledUniqueCardDefinition(state, "runner", definition.id)
+      deps.isUniqueCard(definition) &&
+      deps.hasInstalledUniqueCardDefinition(state, "runner", definition.id)
     )
       throw new Error(
         "Eine Unique-Karte mit diesem Namen ist bereits installiert.",
@@ -1182,7 +1067,7 @@ export function createHiddenZoneNonSearchRuntime(
     if (
       definition.type === "program" &&
       state.runner.memoryUsed + (definition.memoryCost ?? 0) >
-        runnerMemoryLimit(state)
+        deps.runnerMemoryLimit(state)
     )
       throw new Error("Der Runner hat nicht genug freien Speicher.");
     const installCost = definition.installCost ?? 0;
@@ -1192,21 +1077,21 @@ export function createHiddenZoneNonSearchRuntime(
       throw new Error(
         "Der Runner kann die Installationskosten nicht bezahlen.",
       );
-    if (runnerPaid > 0) spendCredits(state, "runner", runnerPaid);
-    removeFromAllZones(state, cardId);
+    if (runnerPaid > 0) deps.spendCredits(state, "runner", runnerPaid);
+    deps.removeFromAllZones(state, cardId);
     if (definition.type === "program") {
       completeHiddenZoneRunnerProgramInstall(state, cardId, definition);
     } else {
       state.runner.rig.hardware.push(cardId);
       state.cardInstances[cardId] = {
-        ...mustInstance(state.cardInstances, cardId),
+        ...deps.mustInstance(state.cardInstances, cardId),
         faceup: true,
         rezzed: true,
         zone: { side: "runner", zone: "rig" },
       };
     }
-    executeCardImplementationLifecycleEffects(
-      cardImplementationRuntimeDeps,
+    deps.executeCardImplementationLifecycleEffects(
+      deps.cardImplementationRuntimeDeps,
       state,
       legalAction,
       definition,
@@ -1295,7 +1180,7 @@ export function createHiddenZoneNonSearchRuntime(
     const selectedId = selectedIds[0];
     if (!selectedId)
       throw new Error("Genau ein Programm muss gewaehlt werden.");
-    const definition = definitionFor(state, selectedId);
+    const definition = deps.definitionFor(state, selectedId);
     if (
       nonSearchMemory.deferNonSearchProgramInstallForMemory(
         nonSearchProgramInstallMemoryHost,
@@ -1319,7 +1204,7 @@ export function createHiddenZoneNonSearchRuntime(
     shuffleRunnerStack(state, `pro018_test_spin:${choice.choiceId}:shuffle`);
     delete state.pendingChoice;
     const serverId = (serverIdRaw || "hq") as Exclude<ServerId, "new_remote">;
-    startRun(
+    deps.startRun(
       state,
       serverId,
       undefined,
@@ -1352,10 +1237,12 @@ export function createHiddenZoneNonSearchRuntime(
 
   const nonSearchProgramInstallMemoryHost: nonSearchMemory.NonSearchProgramInstallMemoryHost =
     {
-      definitionFor,
-      runnerMemoryLimit,
-      runnerProgramUsesMemory,
-      trashRunnerInstalledCardToHeap,
+      definitionFor: (state, cardId) => deps.definitionFor(state, cardId),
+      runnerMemoryLimit: (state) => deps.runnerMemoryLimit(state),
+      runnerProgramUsesMemory: (state, cardId) =>
+        deps.runnerProgramUsesMemory(state, cardId),
+      trashRunnerInstalledCardToHeap: (state, cardId) =>
+        deps.trashRunnerInstalledCardToHeap(state, cardId),
       continueGripInstall: resolveGripInstallTemporaryCreditChoice,
       continueStackInstall: resolveStackInstallRunCleanupChoice,
     };
@@ -1381,8 +1268,9 @@ export function createHiddenZoneNonSearchRuntime(
       throw new Error(
         "Die Runner-Connection-Trash-Choice gehoert nicht zur gespielten Karte.",
       );
-    const sourceDefinition = definitionFor(state, sourceCardId);
-    const implementation = runnerEventLongtailForDefinition(sourceDefinition);
+    const sourceDefinition = deps.definitionFor(state, sourceCardId);
+    const implementation =
+      deps.runnerEventLongtailForDefinition(sourceDefinition);
     if (
       sourceDefinition.id !== sourceDefinitionId ||
       implementation?.kind !==
@@ -1409,14 +1297,14 @@ export function createHiddenZoneNonSearchRuntime(
         );
     }
     const trashedCardDefinitionIds = selectedIds.map(
-      (cardId) => definitionFor(state, cardId).id,
+      (cardId) => deps.definitionFor(state, cardId).id,
     );
 
     delete state.pendingChoice;
     for (const cardId of selectedIds)
-      trashRunnerInstalledCardToHeap(state, cardId, legalAction);
+      deps.trashRunnerInstalledCardToHeap(state, cardId, legalAction);
 
-    const result = executeCardImplementationEffects(
+    const result = deps.executeCardImplementationEffects(
       state,
       {
         sourceCardId,
@@ -1443,7 +1331,7 @@ export function createHiddenZoneNonSearchRuntime(
       installedConnectionTrashChoiceResolved: true,
       ...result.publicPayload,
     };
-    appendResolvedEffectsToPayload(legalAction, result.resolvedEffects);
+    deps.appendResolvedEffectsToPayload(legalAction, result.resolvedEffects);
   }
 
   return {

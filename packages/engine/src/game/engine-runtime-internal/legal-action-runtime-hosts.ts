@@ -693,9 +693,6 @@ export function createLegalActionRuntimeHosts(
   | "hasHiddenResourceAccessStartActions"
   | "pushCorpTraceDamageOrCardImplementationActions"
 > {
-  const { cardImplementationRuntimeDeps, runCardImplementationActionHost } =
-    deps;
-
   function corpRunnerActionPaidWindowActions(state: GameState): LegalAction[] {
     const actions: LegalAction[] = [];
     for (const server of state.corp.servers) {
@@ -878,7 +875,7 @@ export function createLegalActionRuntimeHosts(
     try {
       return (
         buildRunnerAccessStartCardImplementationActions(
-          runCardImplementationActionHost(state),
+          deps.runCardImplementationActionHost(state),
         ).legalActions.length > 1
       );
     } finally {
@@ -904,7 +901,7 @@ export function createLegalActionRuntimeHosts(
       return;
     }
     pushActivatedCardImplementationActions(
-      cardImplementationRuntimeDeps,
+      deps.cardImplementationRuntimeDeps,
       state,
       actions,
       "corp",

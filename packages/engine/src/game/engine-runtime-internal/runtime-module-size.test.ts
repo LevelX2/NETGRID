@@ -68,8 +68,11 @@ describe("engine runtime module size gates", () => {
       ).toBeLessThanOrEqual(1500);
     }
     expect(
-      lineCount(join(runtimeInternalDir, "runtime-delegates.ts")),
-    ).toBeLessThanOrEqual(600);
+      lineCount(join(runtimeInternalDir, "runtime-port-bindings.ts")),
+    ).toBeLessThanOrEqual(1300);
+    expect(
+      lineCount(join(runtimeInternalDir, "runtime-composition.ts")),
+    ).toBeLessThanOrEqual(120);
     expect(
       lineCount(join(runtimeInternalDir, "card-runtime-hosts.ts")),
     ).toBeLessThanOrEqual(900);
@@ -113,18 +116,6 @@ describe("engine runtime module size gates", () => {
         lineCount(join(runtimeInternalDir, module)),
         `${module} exceeds the card runtime host submodule ceiling`,
       ).toBeLessThanOrEqual(1500);
-    }
-    for (const module of [
-      "action-runtime-delegates.ts",
-      "card-runtime-delegates.ts",
-      "choice-runtime-delegates.ts",
-      "flow-runtime-delegates.ts",
-      "state-runtime-delegates.ts",
-    ]) {
-      expect(
-        lineCount(join(runtimeInternalDir, module)),
-        `${module} exceeds the runtime delegate submodule ceiling`,
-      ).toBeLessThanOrEqual(1200);
     }
   });
 

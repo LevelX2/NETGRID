@@ -27,11 +27,27 @@ import type {
 
 // Runtime dependencies are the concrete composition-root surface. Do not
 // reintroduce string-index bags, proxy dispatch or generic member lookup here.
+type RuntimePortGroups = import("./runtime-port-contracts").RuntimePortGroups;
+type RuntimePortSurface = RuntimePortGroups["actionRuntimeHosts"] &
+  RuntimePortGroups["cardRuntimeHosts"] &
+  RuntimePortGroups["cardRuntimeResolvers"] &
+  RuntimePortGroups["choiceHiddenZoneResolvers"] &
+  RuntimePortGroups["choiceHiddenZoneRuntime"] &
+  RuntimePortGroups["corpRuntimeResolvers"] &
+  RuntimePortGroups["flowRuntimeHosts"] &
+  RuntimePortGroups["lifecycleRuntime"] &
+  RuntimePortGroups["stateCorpRuntimeResolvers"] &
+  RuntimePortGroups["stateRuntimeResolvers"] &
+  RuntimePortGroups["stateRuntimeServices"] &
+  RuntimePortGroups["turnCorpRuntime"] &
+  RuntimePortGroups["turnRuntimeResolvers"];
+
 export type RuntimeDeps = ReturnType<
   (typeof import("./state-runtime-bootstrap"))["initializeStateRuntimeBootstrap"]
-> & {
-  turnCorpRuntime?: import("./turn-corp-runtime-port").TurnCorpRuntimePort;
-};
+> &
+  RuntimePortSurface & {
+    turnCorpRuntime: RuntimePortGroups["turnCorpRuntime"];
+  };
 export type {
   GameState,
   LegalAction,

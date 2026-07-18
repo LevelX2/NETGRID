@@ -694,8 +694,6 @@ export function createCardStrengthCostRuntimeServices(
     "relativeIceStrengthBonusFor"
   >,
 ): import("./card-strength-cost-runtime-port").CardStrengthCostRuntimePort {
-  const { scoredAgendaImplementationForDefinition } = deps;
-
   function iceStrengthBonusFor(
     state: GameState,
     iceId: CardInstanceId,
@@ -705,7 +703,7 @@ export function createCardStrengthCostRuntimeServices(
     for (const agendaId of scoredCorpAgendaIds(state)) {
       const agendaDefinition = definitionFor(state, agendaId);
       const scoredAgenda =
-        scoredAgendaImplementationForDefinition(agendaDefinition);
+        deps.scoredAgendaImplementationForDefinition(agendaDefinition);
       if (scoredAgenda?.kind === "choose_fort_ice_strength_bonus") {
         if (
           iceServerId &&

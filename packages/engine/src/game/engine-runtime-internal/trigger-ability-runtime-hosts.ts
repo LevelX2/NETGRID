@@ -695,31 +695,6 @@ export function createTriggerAbilityRuntimeHosts(
   | "counterUtilityTriggerExecutionHost"
   | "triggerAbilityExecutionHost"
 > {
-  const {
-    activeObligationCount,
-    encounterEntryHostForState,
-    encounterSpecialWindowHostForState,
-    fortPassWindowHostForState,
-    hasCardImplementationMemoryUnitModifier,
-    hasInstalledUniqueCardDefinition,
-    hiddenZoneSearchActivationHandlerHost,
-    isUniqueCard,
-    publicCardTitle,
-    remainingReplacementLongtailKindForCard,
-    removeActiveObligation,
-    acceptExtraActionOffer,
-    declineExtraActionOffer,
-    resolvePdcaCounterAction,
-    resolveForcedActionNotPossible,
-    runnerProgramUsesMemory,
-    runnerUtilityLongtailImplementationForCard,
-    runnerUtilityLongtailKindForCard,
-    spyCountersForServer,
-    successfulRunInterventionHost,
-    traceCounterEffectDefinitionFor,
-    trashRunnerInstalledCardToHeap,
-  } = deps;
-
   function runnerSpecialTriggerExecutionHost(
     state: GameState,
   ): RunnerSpecialTriggerExecutionHost {
@@ -731,11 +706,12 @@ export function createTriggerAbilityRuntimeHosts(
       cards: {
         definitionFor,
         mustInstance,
-        isUniqueCard,
-        hasInstalledUniqueCardDefinition,
-        hasCardImplementationMemoryUnitModifier,
+        isUniqueCard: deps.isUniqueCard,
+        hasInstalledUniqueCardDefinition: deps.hasInstalledUniqueCardDefinition,
+        hasCardImplementationMemoryUnitModifier:
+          deps.hasCardImplementationMemoryUnitModifier,
         shouldLoadLegacyRecurringCredits,
-        publicTitle: publicCardTitle,
+        publicTitle: deps.publicCardTitle,
       },
       credits: {
         spend: spendCredits,
@@ -749,16 +725,16 @@ export function createTriggerAbilityRuntimeHosts(
       zones: {
         removeFromAllZones,
         ensureSpecialZones,
-        trashRunnerInstalledCardToHeap,
+        trashRunnerInstalledCardToHeap: deps.trashRunnerInstalledCardToHeap,
       },
       runner: {
         runnerMemoryLimit,
-        runnerProgramUsesMemory,
+        runnerProgramUsesMemory: deps.runnerProgramUsesMemory,
       },
       hiddenZone: {
         startHiddenStackProgramInstallActivation: (sourceCardId, legalAction) =>
           startHiddenStackProgramInstallActivation(
-            hiddenZoneSearchActivationHandlerHost(state, legalAction),
+            deps.hiddenZoneSearchActivationHandlerHost(state, legalAction),
             sourceCardId,
           ),
       },
@@ -790,46 +766,49 @@ export function createTriggerAbilityRuntimeHosts(
       run: {
         resolveSuccessfulRunFollowupAbility: (legalAction) =>
           resolveSuccessfulRunFollowupAbility(
-            successfulRunInterventionHost(state),
+            deps.successfulRunInterventionHost(state),
             legalAction,
           ),
         resolveFullyBrokenPassedIceDerezAndEndRun: (legalAction) =>
           resolveFullyBrokenPassedIceDerezAndEndRunInRunModule(
-            encounterSpecialWindowHostForState(state),
+            deps.encounterSpecialWindowHostForState(state),
             legalAction,
           ),
         resolveFullyBrokenPassedIceDerez: (legalAction) =>
           resolveFullyBrokenPassedIceDerezInRunModule(
-            encounterSpecialWindowHostForState(state),
+            deps.encounterSpecialWindowHostForState(state),
             legalAction,
           ),
         resolveFullyBrokenPassedIceTrash: (legalAction) =>
           resolveFullyBrokenPassedIceTrashInRunModule(
-            encounterSpecialWindowHostForState(state),
+            deps.encounterSpecialWindowHostForState(state),
             legalAction,
           ),
         resolveFortPassAdvancementWindow: (legalAction) =>
           resolveFortPassAdvancementWindow(
-            fortPassWindowHostForState(state),
+            deps.fortPassWindowHostForState(state),
             legalAction,
           ),
         resolveStartRunIceRepositionWindow: (legalAction) =>
           resolveStartRunIceRepositionWindow(
-            fortPassWindowHostForState(state),
+            deps.fortPassWindowHostForState(state),
             legalAction,
           ),
         resolveApproachIceExposeAbility: (legalAction) =>
           resolveApproachIceExposeAbility(
-            encounterEntryHostForState(state),
+            deps.encounterEntryHostForState(state),
             legalAction,
           ),
         resolveApproachIceExposeViewingDecision: (legalAction) =>
           resolveApproachIceExposeViewingDecision(
-            encounterEntryHostForState(state),
+            deps.encounterEntryHostForState(state),
             legalAction,
           ),
         startHqIceSwapChoice: (legalAction) =>
-          startHqIceSwapChoice(fortPassWindowHostForState(state), legalAction),
+          startHqIceSwapChoice(
+            deps.fortPassWindowHostForState(state),
+            legalAction,
+          ),
       },
       constants: {
         HOST_RETURN_HARDWARE_SOURCE,
@@ -848,8 +827,9 @@ export function createTriggerAbilityRuntimeHosts(
       },
       cards: {
         definitionFor,
-        runnerUtilityLongtailKindForCard,
-        runnerUtilityLongtailImplementationForCard,
+        runnerUtilityLongtailKindForCard: deps.runnerUtilityLongtailKindForCard,
+        runnerUtilityLongtailImplementationForCard:
+          deps.runnerUtilityLongtailImplementationForCard,
       },
       credits: {
         spend: spendCredits,
@@ -857,12 +837,12 @@ export function createTriggerAbilityRuntimeHosts(
       counters: {
         cardCounter,
         spendCardCounter,
-        spyCountersForServer,
-        traceCounterEffectDefinitionFor,
+        spyCountersForServer: deps.spyCountersForServer,
+        traceCounterEffectDefinitionFor: deps.traceCounterEffectDefinitionFor,
       },
       runner: {
         ensureTurnFlags: ensureRunnerTurnFlags,
-        trashInstalledCardToHeap: trashRunnerInstalledCardToHeap,
+        trashInstalledCardToHeap: deps.trashRunnerInstalledCardToHeap,
       },
       servers: {
         mustServer,
@@ -884,7 +864,8 @@ export function createTriggerAbilityRuntimeHosts(
       },
       cards: {
         definitionFor,
-        remainingReplacementLongtailKindForCard,
+        remainingReplacementLongtailKindForCard:
+          deps.remainingReplacementLongtailKindForCard,
         cardImplementationForDefinitionId: (definitionId) =>
           cardImplementationForDefinitionId(definitionId as CardDefinitionId),
       },
@@ -892,18 +873,18 @@ export function createTriggerAbilityRuntimeHosts(
         spend: spendCredits,
       },
       runner: {
-        trashInstalledCardToHeap: trashRunnerInstalledCardToHeap,
+        trashInstalledCardToHeap: deps.trashRunnerInstalledCardToHeap,
         ensureTurnFlags: ensureRunnerTurnFlags,
       },
       corp: {
-        activeObligationCount,
-        removeActiveObligation,
+        activeObligationCount: deps.activeObligationCount,
+        removeActiveObligation: deps.removeActiveObligation,
       },
       actionEconomy: {
-        acceptExtraActionOffer,
-        declineExtraActionOffer,
-        resolvePdcaCounterAction,
-        resolveForcedActionNotPossible,
+        acceptExtraActionOffer: deps.acceptExtraActionOffer,
+        declineExtraActionOffer: deps.declineExtraActionOffer,
+        resolvePdcaCounterAction: deps.resolvePdcaCounterAction,
+        resolveForcedActionNotPossible: deps.resolveForcedActionNotPossible,
       },
       runnerSpecial: {
         handleRunnerSpecialTriggerExecution: (legalAction) =>
@@ -929,7 +910,7 @@ export function createTriggerAbilityRuntimeHosts(
       hiddenZone: {
         handleHiddenZoneTriggerExecution: (legalAction) =>
           handleHiddenZoneTriggerExecution(
-            hiddenZoneSearchActivationHandlerHost(state, legalAction),
+            deps.hiddenZoneSearchActivationHandlerHost(state, legalAction),
             legalAction,
           ),
       },

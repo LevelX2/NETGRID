@@ -8,11 +8,11 @@ import type {
   PlayerAction,
   ServerId,
 } from "@netgrid/shared";
-import { selectedChoiceCardIds } from "./choice-runtime-delegates";
 import {
   canInstallCorpRootCardInServer,
   corpRootAgendaOrNodeCapacityInServer,
-} from "./flow-runtime-delegates";
+  selectedChoiceCardIds,
+} from "./runtime-port-bindings";
 import { cloneState } from "./runtime-bootstrap-support";
 import {
   corpRootMainCardIdsInServer,
@@ -93,7 +93,9 @@ export function replaceFortCardsFromHq(
     return { publicPayload: payload };
   }
   const selected =
-    hqSelection.length > 0 ? hqSelection : legalCandidates.slice(0, removedCount);
+    hqSelection.length > 0
+      ? hqSelection
+      : legalCandidates.slice(0, removedCount);
   if (selected.length !== removedCount)
     throw new Error("Fort-Ersatz braucht exakt gleich viele HQ-Ersatzkarten.");
   if (new Set(selected).size !== selected.length)
@@ -110,7 +112,9 @@ export function replaceFortCardsFromHq(
     selected,
   );
   if (!validInstallOrder)
-    throw new Error("Die Fort-Ersatzkarten sind gemeinsam nicht installierbar.");
+    throw new Error(
+      "Die Fort-Ersatzkarten sind gemeinsam nicht installierbar.",
+    );
   for (const cardId of [...removedIce, ...removedRoot]) {
     uninstallCorpInstalledCardToHq(state, cardId);
   }
@@ -143,7 +147,9 @@ export function replaceFortCardsFromHq(
         zone: { side: "corp", zone: "serverRoot", serverId: server.id },
       };
     } else {
-      throw new Error("Diese HQ-Karte kann nicht in das Fort installiert werden.");
+      throw new Error(
+        "Diese HQ-Karte kann nicht in das Fort installiert werden.",
+      );
     }
   }
   const payload = {
@@ -195,7 +201,9 @@ function hasLegalFortReplacementHqCombination(
 ): boolean {
   const candidates = state.corp.hq
     .filter((cardId) =>
-      isFortReplacementInstallableCandidateDefinition(definitionFor(state, cardId)),
+      isFortReplacementInstallableCandidateDefinition(
+        definitionFor(state, cardId),
+      ),
     )
     .sort();
   const visit = (startIndex: number, selected: CardInstanceId[]): boolean => {
@@ -222,11 +230,18 @@ function validFortReplacementInstallOrder(
   if (
     selected.some(
       (cardId) =>
-        !isFortReplacementInstallableCandidateDefinition(definitionFor(state, cardId)),
+        !isFortReplacementInstallableCandidateDefinition(
+          definitionFor(state, cardId),
+        ),
     )
   )
     return undefined;
-  return firstValidFortReplacementInstallPermutation(state, server, selected, []);
+  return firstValidFortReplacementInstallPermutation(
+    state,
+    server,
+    selected,
+    [],
+  );
 }
 
 function firstValidFortReplacementInstallPermutation(
@@ -342,7 +357,9 @@ export function resolveFortHqReplacementChoice(
     choice.source.split(":");
   const selectedIds = selectedChoiceCardIds(choice, playerAction);
   if (selectedIds.length !== Number(count))
-    throw new Error("Fort-Ersatz braucht exakt die geforderte Ersatzkartenzahl.");
+    throw new Error(
+      "Fort-Ersatz braucht exakt die geforderte Ersatzkartenzahl.",
+    );
   delete state.pendingChoice;
   replaceFortCardsFromHq(
     state,

@@ -16,8 +16,9 @@ Primary agent: `architecture-review-agent`
 | E04     | integriert                                 | Commit `16928c90c`; 13 typisierte Portgruppen und Registry-Basis           |
 | E05     | integriert                                 | Commit `2a0c68d9e`; 67 State-Service-Delegates statisch typisiert          |
 | E06     | integriert                                 | Commit `5f44141cc`; weitere 177 Delegate-Signaturen typisiert              |
-| E07     | verifiziert, Commit/Integration ausstehend | letzte 186 Signaturen typisiert; Delegate-Schuld null                      |
-| E08-E16 | ausstehend                                 | sequenziell nach E07                                                       |
+| E07     | integriert                                 | Commit `7f7d8a163`; letzte 186 Signaturen typisiert; Delegate-Schuld null  |
+| E08     | verifiziert, Commit/Integration ausstehend | Delegate-Store entfernt; erster Runtime-Zyklus entfernt                    |
+| E09-E16 | ausstehend                                 | sequenziell nach E08                                                       |
 
 ## Quelle und Vorgabe
 

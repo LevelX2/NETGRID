@@ -25,19 +25,6 @@ import type {
 export function createTurnCorpRuntime(
   deps: RuntimeDeps,
 ): import("./turn-corp-runtime-port").TurnCorpRuntimePort {
-  const {
-    cardImplementationForDefinitionId,
-    definitionFor,
-    mustArrayValue,
-    removeFromAllZones,
-    sanitizeId,
-    selectedChoiceIds,
-    setCardCounter,
-    mustInstance,
-    credits,
-    withoutVariableIceState,
-  } = deps;
-
   function advanceableInstalledCardTargets(state: GameState): CardInstanceId[] {
     return state.corp.servers
       .slice()
@@ -47,7 +34,7 @@ export function createTurnCorpRuntime(
           .slice()
           .sort()
           .filter((cardId) => {
-            const definition = definitionFor(state, cardId);
+            const definition = deps.definitionFor(state, cardId);
             return isInstalledCorpCardAdvanceable(state, cardId, definition);
           }),
       );
@@ -56,7 +43,7 @@ export function createTurnCorpRuntime(
   function isInstalledCorpCardAdvanceable(
     state: GameState,
     cardId: CardInstanceId,
-    definition = definitionFor(state, cardId),
+    definition = deps.definitionFor(state, cardId),
   ): boolean {
     const instance = state.cardInstances[cardId];
     if (
@@ -69,8 +56,8 @@ export function createTurnCorpRuntime(
       return false;
     if (definition.type === "agenda") return true;
     if (
-      cardImplementationForDefinitionId(definition.id)?.advanceable?.while ===
-      "installed_before_and_after_rez"
+      deps.cardImplementationForDefinitionId(definition.id)?.advanceable
+        ?.while === "installed_before_and_after_rez"
     )
       return true;
     return false;
@@ -97,10 +84,10 @@ export function createTurnCorpRuntime(
     if (amount <= 0 || targets.length === 0) return [];
     if (distribution === "single_target") {
       return targets.map((targetId) => {
-        const title = definitionFor(state, targetId).title;
+        const title = deps.definitionFor(state, targetId).title;
         const label = `${amount} Advancement-Counter auf ${title}`;
         return {
-          id: `placement_${sanitizeId(targetId)}_${amount}`,
+          id: `placement_${deps.sanitizeId(targetId)}_${amount}`,
           label,
           publicLabel: label,
           value: `${targetId}:${amount}`,
@@ -110,15 +97,15 @@ export function createTurnCorpRuntime(
     if (distribution === "up_to_distinct_targets_one_each") {
       const options: AdvancementDistributionOption[] = [];
       for (let firstIndex = 0; firstIndex < targets.length; firstIndex += 1) {
-        const firstTargetId = mustArrayValue(
+        const firstTargetId = deps.mustArrayValue(
           targets,
           firstIndex,
           "Advancement-Ziel fehlt.",
         );
-        const firstTitle = definitionFor(state, firstTargetId).title;
+        const firstTitle = deps.definitionFor(state, firstTargetId).title;
         const singleLabel = `1 Advancement-Counter auf ${firstTitle}`;
         options.push({
-          id: `placement_${sanitizeId(firstTargetId)}_one`,
+          id: `placement_${deps.sanitizeId(firstTargetId)}_one`,
           label: singleLabel,
           publicLabel: singleLabel,
           value: `${firstTargetId}:1`,
@@ -128,15 +115,15 @@ export function createTurnCorpRuntime(
           secondIndex < targets.length;
           secondIndex += 1
         ) {
-          const secondTargetId = mustArrayValue(
+          const secondTargetId = deps.mustArrayValue(
             targets,
             secondIndex,
             "Advancement-Ziel fehlt.",
           );
-          const secondTitle = definitionFor(state, secondTargetId).title;
+          const secondTitle = deps.definitionFor(state, secondTargetId).title;
           const label = `Je 1 Advancement-Counter auf ${firstTitle} und ${secondTitle}`;
           options.push({
-            id: `placement_${sanitizeId(firstTargetId)}_${sanitizeId(
+            id: `placement_${deps.sanitizeId(firstTargetId)}_${deps.sanitizeId(
               secondTargetId,
             )}`,
             label,
@@ -157,13 +144,15 @@ export function createTurnCorpRuntime(
         if (remaining !== 0 || placements.length === 0) return;
         const label = placements
           .map(([targetId, placed]) => {
-            const title = definitionFor(state, targetId).title;
+            const title = deps.definitionFor(state, targetId).title;
             return `${placed} auf ${title}`;
           })
           .join(", ");
         options.push({
           id: `placement_${placements
-            .map(([targetId, placed]) => `${sanitizeId(targetId)}_${placed}`)
+            .map(
+              ([targetId, placed]) => `${deps.sanitizeId(targetId)}_${placed}`,
+            )
             .join("_")}`,
           label,
           publicLabel: label,
@@ -173,7 +162,7 @@ export function createTurnCorpRuntime(
         });
         return;
       }
-      const targetId = mustArrayValue(
+      const targetId = deps.mustArrayValue(
         targets,
         targetIndex,
         "Advancement-Ziel fehlt.",
@@ -310,7 +299,9 @@ export function createTurnCorpRuntime(
     const choice = state.pendingChoice;
     if (!choice || !choice.source.startsWith("p3_34.distribute_advancement"))
       throw new Error("Es ist keine Advancement-Counter-Choice offen.");
-    const selectedOptionId = selectedChoiceIds(playerAction.selectedChoices)[0];
+    const selectedOptionId = deps.selectedChoiceIds(
+      playerAction.selectedChoices,
+    )[0];
     const selectedOption = choice.options.find(
       (option) => option.id === selectedOptionId,
     );
@@ -322,7 +313,8 @@ export function createTurnCorpRuntime(
     const placements = parseAdvancementDistributionValue(selectedOption.value);
     validateAdvancementDistribution(state, placements, amount, mode);
     for (const [targetId, placed] of placements) {
-      mustInstance(state.cardInstances, targetId).advancementCounters += placed;
+      deps.mustInstance(state.cardInstances, targetId).advancementCounters +=
+        placed;
     }
     const firstTargetId = placements[0]?.[0];
     legalAction.payload = {
@@ -341,16 +333,16 @@ export function createTurnCorpRuntime(
       ),
       targetCount: placements.length,
       targetCardDefinitionIds: placements
-        .map(([targetId]) => definitionFor(state, targetId).id)
+        .map(([targetId]) => deps.definitionFor(state, targetId).id)
         .join(","),
       advancementCounterDistribution: placements
-        .map(([targetId, placed]) => `${sanitizeId(targetId)}:${placed}`)
+        .map(([targetId, placed]) => `${deps.sanitizeId(targetId)}:${placed}`)
         .join(","),
       ...(firstTargetId
         ? {
             targetCardId: firstTargetId,
-            targetCardDefinitionId: definitionFor(state, firstTargetId).id,
-            advancementCountersAfter: mustInstance(
+            targetCardDefinitionId: deps.definitionFor(state, firstTargetId).id,
+            advancementCountersAfter: deps.mustInstance(
               state.cardInstances,
               firstTargetId,
             ).advancementCounters,
@@ -398,11 +390,11 @@ export function createTurnCorpRuntime(
       for (const toId of targetIds) {
         if (toId === fromId) continue;
         for (let amount = 1; amount <= cappedAmount; amount += 1) {
-          const fromTitle = definitionFor(state, fromId).title;
-          const toTitle = definitionFor(state, toId).title;
+          const fromTitle = deps.definitionFor(state, fromId).title;
+          const toTitle = deps.definitionFor(state, toId).title;
           const label = `${amount} Advancement-Counter von ${fromTitle} auf ${toTitle} bewegen`;
           options.push({
-            id: `move_${sanitizeId(fromId)}_${sanitizeId(toId)}_${amount}`,
+            id: `move_${deps.sanitizeId(fromId)}_${deps.sanitizeId(toId)}_${amount}`,
             label,
             publicLabel: label,
             value: `${fromId}|${toId}|${amount}`,
@@ -435,7 +427,7 @@ export function createTurnCorpRuntime(
       choiceId: `p3_34_move_advancement_${state.stateVersion + 1}`,
       side: "corp",
       source: `p3_34.move_advancement:${sourceDefinitionId}:${sourceCardId}:${sourceMode}:${maxAmount}:${state.stateVersion + 1}`,
-      prompt: `${definitionFor(state, sourceCardId).title}: Advancement-Counter bewegen`,
+      prompt: `${deps.definitionFor(state, sourceCardId).title}: Advancement-Counter bewegen`,
       kind: "select_option",
       options,
       minSelections: 1,
@@ -460,7 +452,9 @@ export function createTurnCorpRuntime(
     const choice = state.pendingChoice;
     if (!choice || !choice.source.startsWith("p3_34.move_advancement"))
       throw new Error("Es ist keine Advancement-Move-Choice offen.");
-    const selectedOptionId = selectedChoiceIds(playerAction.selectedChoices)[0];
+    const selectedOptionId = deps.selectedChoiceIds(
+      playerAction.selectedChoices,
+    )[0];
     const selectedOption = choice.options.find(
       (option) => option.id === selectedOptionId,
     );
@@ -501,7 +495,7 @@ export function createTurnCorpRuntime(
     if (!isInstalledCorpCardAdvanceable(state, toId as CardInstanceId))
       throw new Error("Das Ziel ist nicht advancebar installiert.");
     fromInstance.advancementCounters -= amount;
-    const toInstance = mustInstance(
+    const toInstance = deps.mustInstance(
       state.cardInstances,
       toId as CardInstanceId,
     );
@@ -513,12 +507,12 @@ export function createTurnCorpRuntime(
       advancementCountersMoved: amount,
       movedAdvancementCounters: amount,
       advancementCounterSourceCardId: fromId,
-      advancementCounterSourceDefinitionId: definitionFor(
+      advancementCounterSourceDefinitionId: deps.definitionFor(
         state,
         fromId as CardInstanceId,
       ).id,
       advancementCounterTargetCardId: toId,
-      advancementCounterTargetDefinitionId: definitionFor(
+      advancementCounterTargetDefinitionId: deps.definitionFor(
         state,
         toId as CardInstanceId,
       ).id,
@@ -537,7 +531,7 @@ export function createTurnCorpRuntime(
       throw new Error("Management Shake-Up findet keine advancebare Karte.");
     const placements: Record<CardInstanceId, number> = {};
     for (let index = 0; index < 3; index += 1) {
-      const targetId = mustArrayValue(
+      const targetId = deps.mustArrayValue(
         targets,
         index % targets.length,
         "Management-Shake-Up-Ziel fehlt.",
@@ -545,7 +539,8 @@ export function createTurnCorpRuntime(
       placements[targetId] = (placements[targetId] ?? 0) + 1;
     }
     for (const [targetId, amount] of Object.entries(placements)) {
-      mustInstance(state.cardInstances, targetId).advancementCounters += amount;
+      deps.mustInstance(state.cardInstances, targetId).advancementCounters +=
+        amount;
     }
     const targetCount = Object.keys(placements).length;
     legalAction.payload = {
@@ -554,7 +549,7 @@ export function createTurnCorpRuntime(
       addedAdvancementCounters: 3,
       targetCount,
       advancementCounterDistribution: Object.entries(placements)
-        .map(([targetId, amount]) => `${sanitizeId(targetId)}:${amount}`)
+        .map(([targetId, amount]) => `${deps.sanitizeId(targetId)}:${amount}`)
         .join(","),
     };
   }
@@ -567,15 +562,15 @@ export function createTurnCorpRuntime(
     const cardId = String(legalAction.payload?.cardId ?? "");
     if (!cardId || !state.cardInstances[cardId])
       throw new Error("Die Event-Karte fuer Agenda-Punkt-Gewinn fehlt.");
-    removeFromAllZones(state, cardId);
+    deps.removeFromAllZones(state, cardId);
     state.runner.scoreArea.push(cardId);
     state.cardInstances[cardId] = {
-      ...mustInstance(state.cardInstances, cardId),
+      ...deps.mustInstance(state.cardInstances, cardId),
       faceup: true,
       rezzed: true,
       zone: { side: "runner", zone: "scoreArea" },
     };
-    setCardCounter(state, cardId, "agenda", 1);
+    deps.setCardCounter(state, cardId, "agenda", 1);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       scoredAsAgenda: true,

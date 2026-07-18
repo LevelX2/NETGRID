@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, extname, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -72,15 +72,20 @@ function readRepoFile(path) {
 }
 
 function trackedFiles() {
-  const output = execFileSync("git", ["ls-files", ...scannedRoots], {
-    cwd: repoRoot,
-    encoding: "utf8",
-  });
+  const output = execFileSync(
+    "git",
+    ["ls-files", "--cached", "--others", "--exclude-standard", ...scannedRoots],
+    {
+      cwd: repoRoot,
+      encoding: "utf8",
+    },
+  );
   return output
     .split(/\r?\n/)
     .filter(Boolean)
     .filter((file) => productionExtensions.has(extname(file)))
     .filter((file) => !file.includes("/node_modules/"))
+    .filter((file) => existsSync(resolve(repoRoot, file)))
     .sort();
 }
 
