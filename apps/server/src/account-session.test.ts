@@ -14,9 +14,14 @@ describe("AccountSessionService", () => {
     let db: DatabaseSync | undefined;
     try {
       const service = new AccountSessionService(storage, { tokenSalt: "account-session-test-salt", now: () => "2026-05-17T10:00:00.000Z" });
-      await service.createAccount({ accountId: "acct_ludwig", displayName: "Ludwig", role: "admin" });
+      await service.createAccount({ accountId: "acct_ludwig", loginName: "Ludwig.Admin", displayName: "Ludwig", role: "admin" });
 
-      const created = await service.createSession({ accountId: "acct_ludwig", sessionToken: "raw-account-session-token", deviceLabel: "Laptop" });
+      const created = await service.createSession({
+        accountId: "acct_ludwig",
+        sessionToken: "raw-account-session-token",
+        csrfToken: "raw-account-csrf-token",
+        deviceLabel: "Laptop"
+      });
 
       db = new DatabaseSync(dbPath, { readOnly: true });
       const storedSession = db.prepare("SELECT session_token_hash AS sessionTokenHash FROM account_sessions WHERE account_id = ?").get("acct_ludwig") as
@@ -25,6 +30,7 @@ describe("AccountSessionService", () => {
       expect(storedSession?.sessionTokenHash).toMatch(/^sha256:[a-f0-9]{64}$/);
       expect(storedSession?.sessionTokenHash).not.toContain(created.sessionToken);
       expect(JSON.stringify(db.prepare("SELECT * FROM account_sessions").all())).not.toContain(created.sessionToken);
+      expect(JSON.stringify(db.prepare("SELECT * FROM account_sessions").all())).not.toContain(created.csrfToken);
 
       const authenticated = await service.authenticateSessionToken(created.sessionToken);
       expect(authenticated.ok).toBe(true);
@@ -33,6 +39,7 @@ describe("AccountSessionService", () => {
       if (authenticated.ok) {
         expect(authenticated.account).toEqual({
           accountId: "acct_ludwig",
+          loginName: "Ludwig.Admin",
           displayName: "Ludwig",
           status: "active",
           role: "admin",
@@ -41,6 +48,13 @@ describe("AccountSessionService", () => {
         });
         expect(authenticated.session).toMatchObject({ accountId: "acct_ludwig", deviceLabel: "Laptop" });
       }
+      await expect(service.verifyCsrfToken(created.sessionToken, created.csrfToken)).resolves.toBe(true);
+      await expect(service.verifyCsrfToken(created.sessionToken, "wrong-csrf-token")).resolves.toBe(false);
+      const rotatedCsrfToken = await service.rotateCsrfToken(created.sessionToken);
+      expect(rotatedCsrfToken).toBeTruthy();
+      expect(rotatedCsrfToken).not.toBe(created.csrfToken);
+      await expect(service.verifyCsrfToken(created.sessionToken, created.csrfToken)).resolves.toBe(false);
+      await expect(service.verifyCsrfToken(created.sessionToken, rotatedCsrfToken ?? "")).resolves.toBe(true);
     } finally {
       db?.close();
       storage.close();
