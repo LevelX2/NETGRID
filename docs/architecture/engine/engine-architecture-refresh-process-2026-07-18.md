@@ -7,23 +7,25 @@ Primary agent: `architecture-review-agent`
 
 ## Fortschritt
 
-| Paket   | Zustand     | Nachweis                                                                   |
-| ------- | ----------- | -------------------------------------------------------------------------- |
-| E00     | integriert  | Commit `6cfa0173e`, beidseitig mit `main` abgeglichen                      |
-| E01     | integriert  | Commit `a13cf8bc4`; Architektur-Target 0 Findings; 1.732 Engine-Tests grün |
-| E02     | integriert  | Commit `637c62a09`; Strukturguard und vier Fehlerklassen im Selftest grün  |
-| E03     | integriert  | Commit `e9fbd63a5`; 144 Verträge in sechs zyklusfreien Familien            |
-| E04     | integriert  | Commit `16928c90c`; 13 typisierte Portgruppen und Registry-Basis           |
-| E05     | integriert  | Commit `2a0c68d9e`; 67 State-Service-Delegates statisch typisiert          |
-| E06     | integriert  | Commit `5f44141cc`; weitere 177 Delegate-Signaturen typisiert              |
-| E07     | integriert  | Commit `7f7d8a163`; letzte 186 Signaturen typisiert; Delegate-Schuld null  |
-| E08     | integriert  | Commit `e24d17f39`, Main-Abgleich `e5d5a4f0d`; Runtime-Zyklus entfernt     |
-| E09     | integriert  | Commit `17efeb4f3`, Main-Abgleich `84f3e075b`; Turn-Runtime geteilt        |
-| E10     | integriert  | 1.736 Engine-, 2.723 KI- und 12 Shared-Tests; Web 633/635 nach Main-Sync   |
-| E11     | integriert  | Damage-Domäne in sechs Module geteilt; 1.736 Engine-Tests und Gates grün   |
-| E12     | integriert  | Access-Domäne geteilt; Hidden-Info-/Breach-Verträge und 1.736 Tests grün   |
-| E13     | verifiziert | Run-Hotspots geteilt; keine relativen Importzyklen; 1.736 Tests grün       |
-| E14-E16 | ausstehend  | sequenziell nach E13                                                       |
+| Paket | Zustand     | Nachweis                                                                   |
+| ----- | ----------- | -------------------------------------------------------------------------- |
+| E00   | integriert  | Commit `6cfa0173e`, beidseitig mit `main` abgeglichen                      |
+| E01   | integriert  | Commit `a13cf8bc4`; Architektur-Target 0 Findings; 1.732 Engine-Tests grün |
+| E02   | integriert  | Commit `637c62a09`; Strukturguard und vier Fehlerklassen im Selftest grün  |
+| E03   | integriert  | Commit `e9fbd63a5`; 144 Verträge in sechs zyklusfreien Familien            |
+| E04   | integriert  | Commit `16928c90c`; 13 typisierte Portgruppen und Registry-Basis           |
+| E05   | integriert  | Commit `2a0c68d9e`; 67 State-Service-Delegates statisch typisiert          |
+| E06   | integriert  | Commit `5f44141cc`; weitere 177 Delegate-Signaturen typisiert              |
+| E07   | integriert  | Commit `7f7d8a163`; letzte 186 Signaturen typisiert; Delegate-Schuld null  |
+| E08   | integriert  | Commit `e24d17f39`, Main-Abgleich `e5d5a4f0d`; Runtime-Zyklus entfernt     |
+| E09   | integriert  | Commit `17efeb4f3`, Main-Abgleich `84f3e075b`; Turn-Runtime geteilt        |
+| E10   | integriert  | 1.736 Engine-, 2.723 KI- und 12 Shared-Tests; Web 633/635 nach Main-Sync   |
+| E11   | integriert  | Damage-Domäne in sechs Module geteilt; 1.736 Engine-Tests und Gates grün   |
+| E12   | integriert  | Access-Domäne geteilt; Hidden-Info-/Breach-Verträge und 1.736 Tests grün   |
+| E13   | integriert  | Run-Hotspots geteilt; keine relativen Importzyklen; 1.736 Tests grün       |
+| E14   | integriert  | Registry nach Set/Seite/Typ; Coverage geteilt; 1.739 Engine-Tests grün     |
+| E15   | verifiziert | Release-Smokes geteilt; Source-Contract-Report und Testgrößengate ergänzt  |
+| E16   | ausstehend  | vollständige Abschlussgates, Review, Wissenspflege und Cleanup             |
 
 ## Quelle und Vorgabe
 
@@ -231,6 +233,33 @@ Followups liegen in klar gerichteten Modulen. Die regelrelevante
 Cleanup-Reihenfolge ist am Code dokumentiert; Modulgrenzen und Größen sind im
 Strukturguard ausführbar. Engine-Suite mit 1.736 Tests, Engine-Typecheck,
 Package Boundaries und Strukturguard sind grün.
+
+### E14 Registry und Coverage
+
+Die 27 nummerierten CardImplementation-Sammelgruppen sind durch 27 fachliche
+Subregistries nach Set, Seite und Kartentyp ersetzt. Der Katalog besitzt eine
+explizite deterministische Gruppenreihenfolge und erzeugt seine flache Registry
+aus genau dieser Quelle. 29 überholte Sammel-/Aggregatdateien wurden entfernt.
+
+Ein neuer Strukturtest beweist Gruppenreihenfolge, Flattening-Parität,
+Duplikatfreiheit sowie Set-/Seite-/Typ-Abgleich gegen die Shared CardDefinitions.
+Die Coverage-Regelableitung umfasst noch 528 Zeilen; die 855-zeilige explizite
+Source-Location-Ausnahmekarte liegt als reines Datenmodul separat. Der
+Strukturguard verbietet neue nummerierte Registry-Gruppen und begrenzt beide
+Coverage-Module. Die vollständige Engine-Suite umfasst nach dem Main-Abgleich
+1.739 grüne Tests.
+
+### E15 Teststruktur und Quellverträge
+
+Zwei Release-Sammeltests mit 8.648 und 4.205 Zeilen sind mechanisch und ohne
+Testfalländerung in elf releasebezogene Dateien geteilt. Auf dem nach E14 mit
+`main` kombinierten Stand bleiben alle 1.739 Engine-Tests erhalten; die Zahl
+physischer Testdateien steigt von 192 auf 201.
+
+Ein neuer Test-Quellvertrag verbietet die alten Sammeldateien, begrenzt die
+Release-Smokes auf 3.000 und alle Engine-Testdateien auf 7.000 Zeilen. Der
+Source-Contract-Report fasst produktive Modul-, Zyklus-, Port-, Registry-,
+Kommentar- und Testverträge samt ausführbaren Gates zusammen.
 
 ### E14 Registry und Coverage
 

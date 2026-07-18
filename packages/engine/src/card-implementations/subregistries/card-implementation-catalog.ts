@@ -1,60 +1,213 @@
 import type { CardImplementationDefinition } from "../types";
-import { CLASSIC_CARD_IMPLEMENTATIONS } from "./classic-card-implementations";
-import { CARD_IMPLEMENTATION_GROUP_001 } from "./card-implementation-group-001";
-import { CARD_IMPLEMENTATION_GROUP_002 } from "./card-implementation-group-002";
-import { CARD_IMPLEMENTATION_GROUP_003 } from "./card-implementation-group-003";
-import { CARD_IMPLEMENTATION_GROUP_004 } from "./card-implementation-group-004";
-import { CARD_IMPLEMENTATION_GROUP_005 } from "./card-implementation-group-005";
-import { CARD_IMPLEMENTATION_GROUP_006 } from "./card-implementation-group-006";
-import { CARD_IMPLEMENTATION_GROUP_007 } from "./card-implementation-group-007";
-import { CARD_IMPLEMENTATION_GROUP_008 } from "./card-implementation-group-008";
-import { CARD_IMPLEMENTATION_GROUP_009 } from "./card-implementation-group-009";
-import { CARD_IMPLEMENTATION_GROUP_010 } from "./card-implementation-group-010";
-import { CARD_IMPLEMENTATION_GROUP_011 } from "./card-implementation-group-011";
-import { CARD_IMPLEMENTATION_GROUP_012 } from "./card-implementation-group-012";
-import { CARD_IMPLEMENTATION_GROUP_013 } from "./card-implementation-group-013";
-import { CARD_IMPLEMENTATION_GROUP_014 } from "./card-implementation-group-014";
-import { CARD_IMPLEMENTATION_GROUP_015 } from "./card-implementation-group-015";
-import { CARD_IMPLEMENTATION_GROUP_016 } from "./card-implementation-group-016";
-import { CARD_IMPLEMENTATION_GROUP_017 } from "./card-implementation-group-017";
-import { CARD_IMPLEMENTATION_GROUP_018 } from "./card-implementation-group-018";
-import { CARD_IMPLEMENTATION_GROUP_019 } from "./card-implementation-group-019";
-import { CARD_IMPLEMENTATION_GROUP_020 } from "./card-implementation-group-020";
-import { CARD_IMPLEMENTATION_GROUP_021 } from "./card-implementation-group-021";
-import { CARD_IMPLEMENTATION_GROUP_022 } from "./card-implementation-group-022";
-import { CARD_IMPLEMENTATION_GROUP_023 } from "./card-implementation-group-023";
-import { CARD_IMPLEMENTATION_GROUP_024 } from "./card-implementation-group-024";
-import { CARD_IMPLEMENTATION_GROUP_025 } from "./card-implementation-group-025";
-import { CARD_IMPLEMENTATION_GROUP_026 } from "./card-implementation-group-026";
-import { CARD_IMPLEMENTATION_GROUP_027 } from "./card-implementation-group-027";
+import { CLASSIC_CORP_AGENDA_IMPLEMENTATIONS } from "./classic-corp-agenda-implementations";
+import { CLASSIC_CORP_ASSET_IMPLEMENTATIONS } from "./classic-corp-asset-implementations";
+import { CLASSIC_CORP_ICE_IMPLEMENTATIONS } from "./classic-corp-ice-implementations";
+import { CLASSIC_CORP_OPERATION_IMPLEMENTATIONS } from "./classic-corp-operation-implementations";
+import { CLASSIC_CORP_UPGRADE_IMPLEMENTATIONS } from "./classic-corp-upgrade-implementations";
+import { CLASSIC_RUNNER_EVENT_IMPLEMENTATIONS } from "./classic-runner-event-implementations";
+import { CLASSIC_RUNNER_HARDWARE_IMPLEMENTATIONS } from "./classic-runner-hardware-implementations";
+import { CLASSIC_RUNNER_PROGRAM_IMPLEMENTATIONS } from "./classic-runner-program-implementations";
+import { CLASSIC_RUNNER_RESOURCE_IMPLEMENTATIONS } from "./classic-runner-resource-implementations";
+import { ONR_V1_CORP_AGENDA_IMPLEMENTATIONS } from "./onr-v1-corp-agenda-implementations";
+import { ONR_V1_CORP_ASSET_IMPLEMENTATIONS } from "./onr-v1-corp-asset-implementations";
+import { ONR_V1_CORP_ICE_IMPLEMENTATIONS } from "./onr-v1-corp-ice-implementations";
+import { ONR_V1_CORP_OPERATION_IMPLEMENTATIONS } from "./onr-v1-corp-operation-implementations";
+import { ONR_V1_CORP_UPGRADE_IMPLEMENTATIONS } from "./onr-v1-corp-upgrade-implementations";
+import { ONR_V1_RUNNER_EVENT_IMPLEMENTATIONS } from "./onr-v1-runner-event-implementations";
+import { ONR_V1_RUNNER_HARDWARE_IMPLEMENTATIONS } from "./onr-v1-runner-hardware-implementations";
+import { ONR_V1_RUNNER_PROGRAM_IMPLEMENTATIONS } from "./onr-v1-runner-program-implementations";
+import { ONR_V1_RUNNER_RESOURCE_IMPLEMENTATIONS } from "./onr-v1-runner-resource-implementations";
+import { PROTEUS_CORP_AGENDA_IMPLEMENTATIONS } from "./proteus-corp-agenda-implementations";
+import { PROTEUS_CORP_ASSET_IMPLEMENTATIONS } from "./proteus-corp-asset-implementations";
+import { PROTEUS_CORP_ICE_IMPLEMENTATIONS } from "./proteus-corp-ice-implementations";
+import { PROTEUS_CORP_OPERATION_IMPLEMENTATIONS } from "./proteus-corp-operation-implementations";
+import { PROTEUS_CORP_UPGRADE_IMPLEMENTATIONS } from "./proteus-corp-upgrade-implementations";
+import { PROTEUS_RUNNER_EVENT_IMPLEMENTATIONS } from "./proteus-runner-event-implementations";
+import { PROTEUS_RUNNER_HARDWARE_IMPLEMENTATIONS } from "./proteus-runner-hardware-implementations";
+import { PROTEUS_RUNNER_PROGRAM_IMPLEMENTATIONS } from "./proteus-runner-program-implementations";
+import { PROTEUS_RUNNER_RESOURCE_IMPLEMENTATIONS } from "./proteus-runner-resource-implementations";
 
-export const CARD_IMPLEMENTATION_CATALOG = [
-  ...CLASSIC_CARD_IMPLEMENTATIONS,
-  ...CARD_IMPLEMENTATION_GROUP_001,
-  ...CARD_IMPLEMENTATION_GROUP_002,
-  ...CARD_IMPLEMENTATION_GROUP_003,
-  ...CARD_IMPLEMENTATION_GROUP_004,
-  ...CARD_IMPLEMENTATION_GROUP_005,
-  ...CARD_IMPLEMENTATION_GROUP_006,
-  ...CARD_IMPLEMENTATION_GROUP_007,
-  ...CARD_IMPLEMENTATION_GROUP_008,
-  ...CARD_IMPLEMENTATION_GROUP_009,
-  ...CARD_IMPLEMENTATION_GROUP_010,
-  ...CARD_IMPLEMENTATION_GROUP_011,
-  ...CARD_IMPLEMENTATION_GROUP_012,
-  ...CARD_IMPLEMENTATION_GROUP_013,
-  ...CARD_IMPLEMENTATION_GROUP_014,
-  ...CARD_IMPLEMENTATION_GROUP_015,
-  ...CARD_IMPLEMENTATION_GROUP_016,
-  ...CARD_IMPLEMENTATION_GROUP_017,
-  ...CARD_IMPLEMENTATION_GROUP_018,
-  ...CARD_IMPLEMENTATION_GROUP_019,
-  ...CARD_IMPLEMENTATION_GROUP_020,
-  ...CARD_IMPLEMENTATION_GROUP_021,
-  ...CARD_IMPLEMENTATION_GROUP_022,
-  ...CARD_IMPLEMENTATION_GROUP_023,
-  ...CARD_IMPLEMENTATION_GROUP_024,
-  ...CARD_IMPLEMENTATION_GROUP_025,
-  ...CARD_IMPLEMENTATION_GROUP_026,
-  ...CARD_IMPLEMENTATION_GROUP_027,
-] as const satisfies readonly CardImplementationDefinition[];
+export type CardImplementationCatalogGroup = {
+  set: "classic" | "onr-v1" | "proteus";
+  side: "corp" | "runner";
+  cardType:
+    | "agenda"
+    | "asset"
+    | "event"
+    | "hardware"
+    | "ice"
+    | "operation"
+    | "program"
+    | "resource"
+    | "upgrade";
+  implementations: readonly CardImplementationDefinition[];
+};
+
+// Set, side and type order is explicit so registry iteration and replay remain deterministic.
+export const CARD_IMPLEMENTATION_CATALOG_GROUPS = [
+  {
+    set: "classic",
+    side: "corp",
+    cardType: "agenda",
+    implementations: CLASSIC_CORP_AGENDA_IMPLEMENTATIONS,
+  },
+  {
+    set: "classic",
+    side: "corp",
+    cardType: "asset",
+    implementations: CLASSIC_CORP_ASSET_IMPLEMENTATIONS,
+  },
+  {
+    set: "classic",
+    side: "corp",
+    cardType: "ice",
+    implementations: CLASSIC_CORP_ICE_IMPLEMENTATIONS,
+  },
+  {
+    set: "classic",
+    side: "corp",
+    cardType: "operation",
+    implementations: CLASSIC_CORP_OPERATION_IMPLEMENTATIONS,
+  },
+  {
+    set: "classic",
+    side: "corp",
+    cardType: "upgrade",
+    implementations: CLASSIC_CORP_UPGRADE_IMPLEMENTATIONS,
+  },
+  {
+    set: "classic",
+    side: "runner",
+    cardType: "event",
+    implementations: CLASSIC_RUNNER_EVENT_IMPLEMENTATIONS,
+  },
+  {
+    set: "classic",
+    side: "runner",
+    cardType: "hardware",
+    implementations: CLASSIC_RUNNER_HARDWARE_IMPLEMENTATIONS,
+  },
+  {
+    set: "classic",
+    side: "runner",
+    cardType: "program",
+    implementations: CLASSIC_RUNNER_PROGRAM_IMPLEMENTATIONS,
+  },
+  {
+    set: "classic",
+    side: "runner",
+    cardType: "resource",
+    implementations: CLASSIC_RUNNER_RESOURCE_IMPLEMENTATIONS,
+  },
+  {
+    set: "onr-v1",
+    side: "corp",
+    cardType: "agenda",
+    implementations: ONR_V1_CORP_AGENDA_IMPLEMENTATIONS,
+  },
+  {
+    set: "onr-v1",
+    side: "corp",
+    cardType: "asset",
+    implementations: ONR_V1_CORP_ASSET_IMPLEMENTATIONS,
+  },
+  {
+    set: "onr-v1",
+    side: "corp",
+    cardType: "ice",
+    implementations: ONR_V1_CORP_ICE_IMPLEMENTATIONS,
+  },
+  {
+    set: "onr-v1",
+    side: "corp",
+    cardType: "operation",
+    implementations: ONR_V1_CORP_OPERATION_IMPLEMENTATIONS,
+  },
+  {
+    set: "onr-v1",
+    side: "corp",
+    cardType: "upgrade",
+    implementations: ONR_V1_CORP_UPGRADE_IMPLEMENTATIONS,
+  },
+  {
+    set: "onr-v1",
+    side: "runner",
+    cardType: "event",
+    implementations: ONR_V1_RUNNER_EVENT_IMPLEMENTATIONS,
+  },
+  {
+    set: "onr-v1",
+    side: "runner",
+    cardType: "hardware",
+    implementations: ONR_V1_RUNNER_HARDWARE_IMPLEMENTATIONS,
+  },
+  {
+    set: "onr-v1",
+    side: "runner",
+    cardType: "program",
+    implementations: ONR_V1_RUNNER_PROGRAM_IMPLEMENTATIONS,
+  },
+  {
+    set: "onr-v1",
+    side: "runner",
+    cardType: "resource",
+    implementations: ONR_V1_RUNNER_RESOURCE_IMPLEMENTATIONS,
+  },
+  {
+    set: "proteus",
+    side: "corp",
+    cardType: "agenda",
+    implementations: PROTEUS_CORP_AGENDA_IMPLEMENTATIONS,
+  },
+  {
+    set: "proteus",
+    side: "corp",
+    cardType: "asset",
+    implementations: PROTEUS_CORP_ASSET_IMPLEMENTATIONS,
+  },
+  {
+    set: "proteus",
+    side: "corp",
+    cardType: "ice",
+    implementations: PROTEUS_CORP_ICE_IMPLEMENTATIONS,
+  },
+  {
+    set: "proteus",
+    side: "corp",
+    cardType: "operation",
+    implementations: PROTEUS_CORP_OPERATION_IMPLEMENTATIONS,
+  },
+  {
+    set: "proteus",
+    side: "corp",
+    cardType: "upgrade",
+    implementations: PROTEUS_CORP_UPGRADE_IMPLEMENTATIONS,
+  },
+  {
+    set: "proteus",
+    side: "runner",
+    cardType: "event",
+    implementations: PROTEUS_RUNNER_EVENT_IMPLEMENTATIONS,
+  },
+  {
+    set: "proteus",
+    side: "runner",
+    cardType: "hardware",
+    implementations: PROTEUS_RUNNER_HARDWARE_IMPLEMENTATIONS,
+  },
+  {
+    set: "proteus",
+    side: "runner",
+    cardType: "program",
+    implementations: PROTEUS_RUNNER_PROGRAM_IMPLEMENTATIONS,
+  },
+  {
+    set: "proteus",
+    side: "runner",
+    cardType: "resource",
+    implementations: PROTEUS_RUNNER_RESOURCE_IMPLEMENTATIONS,
+  },
+] as const satisfies readonly CardImplementationCatalogGroup[];
+
+export const CARD_IMPLEMENTATION_CATALOG =
+  CARD_IMPLEMENTATION_CATALOG_GROUPS.flatMap((group) => group.implementations);

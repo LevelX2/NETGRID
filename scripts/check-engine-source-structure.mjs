@@ -18,6 +18,7 @@ const abilityPayloadRegistryFile = path.join(
 );
 const runtimeRoot = path.join(engineRoot, "game", "engine-runtime-internal");
 const abilityRoot = path.join(engineRoot, "ability-engine");
+const cardImplementationRoot = path.join(engineRoot, "card-implementations");
 const damageRoot = path.join(engineRoot, "game", "damage");
 const accessRoot = path.join(engineRoot, "game", "access");
 const runRoot = path.join(engineRoot, "game", "run");
@@ -299,6 +300,27 @@ for (const [fileName, maximumLines] of runDomainModuleLimits) {
       `game/run/${fileName} has ${lineCount} lines; allowed maximum is ${maximumLines}`,
     );
 }
+
+const cardSubregistryRoot = path.join(cardImplementationRoot, "subregistries");
+for (const fileName of readdirSync(cardSubregistryRoot)) {
+  if (/^card-implementation-group-\d{3}\.ts$/.test(fileName))
+    findings.push(
+      `card-implementations/subregistries/${fileName} uses a numbered registry group`,
+    );
+}
+const coverageSourceLocations = path.join(
+  cardImplementationRoot,
+  "coverage-source-locations.ts",
+);
+if (!existsSync(coverageSourceLocations))
+  findings.push("card-implementations/coverage-source-locations.ts is missing");
+else if (sourceLineCount(coverageSourceLocations) > 1000)
+  findings.push(
+    "card-implementations/coverage-source-locations.ts exceeds 1000 lines",
+  );
+const coverageFacade = path.join(cardImplementationRoot, "coverage.ts");
+if (sourceLineCount(coverageFacade) > 600)
+  findings.push("card-implementations/coverage.ts exceeds 600 lines");
 
 const runtimePortContracts = path.join(
   runtimeRoot,
