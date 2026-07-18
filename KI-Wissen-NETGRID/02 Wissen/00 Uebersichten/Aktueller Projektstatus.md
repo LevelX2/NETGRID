@@ -245,9 +245,19 @@ Stand: 2026-07-18
 - Das Engine-Architektur-Zielgate ist grün. Mark-Counter-Anzeigen werden über
   generische Kartendefinitionsmetadaten statt direkter Karten-ID-Verzweigungen
   projiziert.
-- Kompatibilitätsnamen in Ability-Payloads sind noch aktiver Engine-Vertrag;
-  sie dürfen erst nach Normalisierung aller aktuellen Producer/Consumer
-  entfernt werden.
+- Der Engine Architecture Refresh vom 18.07.2026 ist vollständig umgesetzt:
+  430 Runtime-Port-Bindings sind statisch typisiert, der produktive relative
+  Importgraph ist zyklenfrei und Turn-, Damage-, Access- sowie Run-Domänen sind
+  fachlich geteilt. CardImplementations werden deterministisch nach Set, Seite
+  und Typ registriert. 202 Engine-Testdateien mit 1.741 Tests sind grün.
+- Interne Ability-Payload-Discriminatorfelder sind normalisiert und werden
+  nicht in PublicEvents weitergereicht. Einzelne historisch benannte
+  Präsentations-/Mechanikfelder bleiben nur dort bestehen, wo aktuelle
+  Producer und Consumer sie noch verwenden; führend ist das Final Review
+  `docs/reviews/engine/engine-architecture-refresh-final-review-2026-07-18.md`.
+- `public-context.ts`, eingefrorener Runtime-Integrations-Fan-out und der große
+  Per-Card-Longtail-Test bleiben als begrenzte nächste Architekturpunkte
+  dokumentiert; sie sind keine roten Korrektheits- oder Release-Gates.
 - Umfangreiche Benchmark-Rohdaten gehören nach `data/local/`; versioniert
   werden nur kleine aktuelle Summaries und reproduzierbare Fixtures.
 - Offizielle Artworks, Frames, Logos und externe Kartendatenbankabhängigkeiten

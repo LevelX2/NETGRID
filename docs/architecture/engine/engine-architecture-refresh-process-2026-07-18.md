@@ -1,31 +1,31 @@
 # Engine Architecture Refresh Process 2026-07-18
 
-Status: in progress
+Status: vollständig umgesetzt, in `main` integriert und bereinigt
 Branch: `codex/engine-architecture-refresh`
 Worktree: `C:\Projekte\NETGRID_ENGINE_ARCHITECTURE_REFRESH`
 Primary agent: `architecture-review-agent`
 
 ## Fortschritt
 
-| Paket | Zustand     | Nachweis                                                                   |
-| ----- | ----------- | -------------------------------------------------------------------------- |
-| E00   | integriert  | Commit `6cfa0173e`, beidseitig mit `main` abgeglichen                      |
-| E01   | integriert  | Commit `a13cf8bc4`; Architektur-Target 0 Findings; 1.732 Engine-Tests grün |
-| E02   | integriert  | Commit `637c62a09`; Strukturguard und vier Fehlerklassen im Selftest grün  |
-| E03   | integriert  | Commit `e9fbd63a5`; 144 Verträge in sechs zyklusfreien Familien            |
-| E04   | integriert  | Commit `16928c90c`; 13 typisierte Portgruppen und Registry-Basis           |
-| E05   | integriert  | Commit `2a0c68d9e`; 67 State-Service-Delegates statisch typisiert          |
-| E06   | integriert  | Commit `5f44141cc`; weitere 177 Delegate-Signaturen typisiert              |
-| E07   | integriert  | Commit `7f7d8a163`; letzte 186 Signaturen typisiert; Delegate-Schuld null  |
-| E08   | integriert  | Commit `e24d17f39`, Main-Abgleich `e5d5a4f0d`; Runtime-Zyklus entfernt     |
-| E09   | integriert  | Commit `17efeb4f3`, Main-Abgleich `84f3e075b`; Turn-Runtime geteilt        |
-| E10   | integriert  | 1.736 Engine-, 2.723 KI- und 12 Shared-Tests; Web 633/635 nach Main-Sync   |
-| E11   | integriert  | Damage-Domäne in sechs Module geteilt; 1.736 Engine-Tests und Gates grün   |
-| E12   | integriert  | Access-Domäne geteilt; Hidden-Info-/Breach-Verträge und 1.736 Tests grün   |
-| E13   | integriert  | Run-Hotspots geteilt; keine relativen Importzyklen; 1.736 Tests grün       |
-| E14   | integriert  | Registry nach Set/Seite/Typ; Coverage geteilt; 1.739 Engine-Tests grün     |
-| E15   | verifiziert | Release-Smokes geteilt; Source-Contract-Report und Testgrößengate ergänzt  |
-| E16   | ausstehend  | vollständige Abschlussgates, Review, Wissenspflege und Cleanup             |
+| Paket | Zustand    | Nachweis                                                                   |
+| ----- | ---------- | -------------------------------------------------------------------------- |
+| E00   | integriert | Commit `6cfa0173e`, beidseitig mit `main` abgeglichen                      |
+| E01   | integriert | Commit `a13cf8bc4`; Architektur-Target 0 Findings; 1.732 Engine-Tests grün |
+| E02   | integriert | Commit `637c62a09`; Strukturguard und vier Fehlerklassen im Selftest grün  |
+| E03   | integriert | Commit `e9fbd63a5`; 144 Verträge in sechs zyklusfreien Familien            |
+| E04   | integriert | Commit `16928c90c`; 13 typisierte Portgruppen und Registry-Basis           |
+| E05   | integriert | Commit `2a0c68d9e`; 67 State-Service-Delegates statisch typisiert          |
+| E06   | integriert | Commit `5f44141cc`; weitere 177 Delegate-Signaturen typisiert              |
+| E07   | integriert | Commit `7f7d8a163`; letzte 186 Signaturen typisiert; Delegate-Schuld null  |
+| E08   | integriert | Commit `e24d17f39`, Main-Abgleich `e5d5a4f0d`; Runtime-Zyklus entfernt     |
+| E09   | integriert | Commit `17efeb4f3`, Main-Abgleich `84f3e075b`; Turn-Runtime geteilt        |
+| E10   | integriert | 1.736 Engine-, 2.723 KI- und 12 Shared-Tests; Web 633/635 nach Main-Sync   |
+| E11   | integriert | Damage-Domäne in sechs Module geteilt; 1.736 Engine-Tests und Gates grün   |
+| E12   | integriert | Access-Domäne geteilt; Hidden-Info-/Breach-Verträge und 1.736 Tests grün   |
+| E13   | integriert | Run-Hotspots geteilt; keine relativen Importzyklen; 1.736 Tests grün       |
+| E14   | integriert | Registry nach Set/Seite/Typ; Coverage geteilt; 1.739 Engine-Tests grün     |
+| E15   | integriert | 202 Dateien/1.741 Tests; Release-Smokes und Source-Verträge geteilt        |
+| E16   | integriert | Abschlussgates grün; Review/Wissen aktuell; Worktree und Branch entfernt   |
 
 ## Quelle und Vorgabe
 
@@ -257,27 +257,63 @@ Testfalländerung in elf releasebezogene Dateien geteilt. Auf dem nach E14 mit
 physischer Testdateien steigt von 192 auf 201.
 
 Ein neuer Test-Quellvertrag verbietet die alten Sammeldateien, begrenzt die
-Release-Smokes auf 3.000 und alle Engine-Testdateien auf 7.000 Zeilen. Der
-Source-Contract-Report fasst produktive Modul-, Zyklus-, Port-, Registry-,
-Kommentar- und Testverträge samt ausführbaren Gates zusammen.
+Release-Smokes auf 3.000 und alle Engine-Testdateien auf 7.000 Zeilen. Mit dem
+Vertragstest umfasst der integrierte Stand 202 Testdateien und 1.741 grüne
+Tests. Der Source-Contract-Report fasst produktive Modul-, Zyklus-, Port-,
+Registry-, Kommentar- und Testverträge samt ausführbaren Gates zusammen.
 
-### E14 Registry und Coverage
+### Paketdefinition E14: Registry und Coverage
 
 Nummerierte Kartenblöcke werden durch Set-/Side-/Type-Strukturen oder eine
 deterministisch generierte äquivalente Registry ersetzt. Parität, Reihenfolge
 und Duplikatfreiheit sind ausführbar geprüft.
 
-### E15 Tests und Kommentare
+### Paketdefinition E15: Tests und Kommentare
 
 Große Sammeltests werden mechanisch geteilt. Kommentare dokumentieren nur
 Autorität, Sichtbarkeit, Determinismus, Mutationsreihenfolge und andere nicht
 offensichtliche Verträge.
 
-### E16 Abschluss
+### Paketdefinition E16: Abschluss
 
 Audit und Wissensstand zeigen den neuen Current State. Arbeitsbranch und
 `main` sind vollständig verifiziert. Nach dem letzten Merge werden Worktree und
 gemergter Branch nach den Cleanup-Regeln entfernt.
+
+### E16 Final Review und Abschlussgates
+
+Das Final Review bestätigt die vollständige Umsetzung der Pakete E00 bis E16:
+998 produktive Engine-Quellen besitzen null relative Importzyklen und 430
+statisch typisierte Runtime-Port-Bindings. Die Engine-Suite umfasst 202
+Testdateien mit 1.741 Tests. Architekturziel, Card-Function-Abstraction,
+Package Boundaries, Strukturguard samt Selftest, Testdiscovery sowie Engine-,
+Shared- und Root-Typecheck sind grün.
+
+Der kombinierte Workspace-Lauf bestätigt zusätzlich 2.760/2.760 KI-Tests,
+173/173 Server-Tests und 8/8 Root-Spezifikationstests. Ein nach dem Main-Sync
+neu hinzugekommener Servertest prüft nun ausdrücklich, dass die fachliche
+Corp-Entscheidung öffentlich bleibt, der interne Ability-Discriminator aber
+nicht in `PublicEvents` leakt. Die bereits in E10 dokumentierten zwei
+Web-Katalog-Hint-Fehler bleiben mit 633/635 grünen Tests unverändert und sind
+auf aktuellem `main` identisch reproduzierbar; sie gehören nicht zum
+Engine-Refresh.
+
+Die E16-Dokumente entsprechen Prettier und `git diff --check` ist grün. Der
+bestehende 8.000-Zeilen-Servertest bleibt außerhalb einer rein mechanischen
+Gesamtformatierung: Eine fünfzeilige Vertragskorrektur rechtfertigt keinen
+8.500-Zeilen-Formatierungsdiff in einem fremden Monolithen.
+
+Der finale Stand wurde unter Commit `9ac4f710c` per Fast-forward nach `main`
+integriert. Der saubere Arbeits-Worktree
+`C:\Projekte\NETGRID_ENGINE_ARCHITECTURE_REFRESH` und der vollständig gemergte
+Branch `codex/engine-architecture-refresh` wurden anschließend entfernt; Pfad,
+Worktree-Registrierung und Branch-Abwesenheit sind verifiziert.
+
+`public-context.ts`, der eingefrorene Runtime-Integrations-Fan-out, der knapp
+unter dem Gate liegende Per-Card-Longtail-Test und die manuelle
+Coverage-Source-Location-Karte sind im Final Review als begrenzte Folgepunkte
+dokumentiert. Sie schwächen weder Regelautorität noch Hidden Info, Replay,
+StateHash oder Determinismus und blockieren den Architekturabschluss nicht.
 
 ## Verifikationsregeln
 

@@ -191,3 +191,25 @@ Nutzerfreigabe Produktionsverhalten zu ändern.
 - Detaillierte Alternativen verwenden im Selfplay-Export stabile
   typ-/rangbasierte IDs und behalten nur redaktionssichere Why-/Score-Felder.
 - Engine-ApplyAction-Tests, Trace-Tests sowie Engine- und AI-Typecheck grün.
+
+## Remediation-Zyklen 2 bis 11
+
+- Die unveränderten Seeds `ai-renticon-code-rot-20260718-001` bis `-005`
+  wurden in zehn weiteren vollständigen Fünferserien mit denselben Deck-Hashes
+  und Hard-vs-Hard-Controllern ausgeführt. Nach jeder abgeschlossenen
+  Iteration wurde `main` in den Arbeitsbranch und der verifizierte Branch
+  zurück nach `main` integriert.
+- Bestätigte Folgebefunde wurden jeweils vor dem Fix als
+  `captured_selfplay`-Checkpoint konserviert. Die generischen Korrekturen
+  schlossen Scoreline-, Board-Triage-, Matchpoint-, ICE-, Runner-Kapazitäts-,
+  Search-, Funding- und Plan-Arbitrationsgrenzen, ohne LegalActions oder
+  Hidden-Info-Verträge zu umgehen.
+- Cycle 10 belegte als letzten Fehler ein Advance mit dem letzten Credit,
+  obwohl unrezztes Remote-ICE danach vollständig unfundiert blieb. Der rote
+  State-117-Checkpoint und zwei enge Advance-Gegenproben grenzen die
+  Korrektur ab.
+- Cycle 11 bildet das Abschlussgate: fünf reguläre Spiele, 2.052/2.052
+  klassifizierte Entscheidungen, vollständige Why-/WhyNot-Abdeckung, null
+  IllegalActions, Rejections, Replayfehler, Action-Limits, Redaction-Funde
+  oder bestätigte Fehlentscheidungen. Beide Deck-Hint-/Consumer-Audits sind
+  für 26/26 eindeutige und 45/45 Karten ohne Blocker oder Warnung grün.
