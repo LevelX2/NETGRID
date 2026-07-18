@@ -2,7 +2,7 @@
 
 Stand: 2026-07-18
 
-Status: frozen für die geschlossene Alpha
+Status: umgesetzt und für die geschlossene Alpha verifiziert
 
 ## Muss-Anforderungen
 
@@ -80,3 +80,20 @@ Betrieb sind nicht Teil dieser Alpha.
 
 Alle Muss-Anforderungen besitzen einen Test oder eine explizite
 Verifikationszeile in `password-accounts-cloud-decks-test-matrix.md`.
+
+## Implementierungsstand
+
+- `AUTH-001` bis `AUTH-010` sind durch den SQLite-Accountstorage, den
+  Passwort-/Session-Service, die geschlossene HTTP-API und die Accountseite
+  umgesetzt. Es gibt weiterhin keine öffentliche Registrierung.
+- `DECK-001` bis `DECK-007` sind durch den ownergebundenen Account-Deckstorage,
+  die atomare 50er-Quote, Optimistic Locking, Revalidierung, Export und
+  Accountlöschung umgesetzt.
+- `STD-001` bis `STD-005` sind durch 40 kuratierte Standard-Decks und die
+  Trennung der Klassen `standard`, `internal_ai`, `test_fixture` und `retire`
+  umgesetzt.
+- `SEC-001` bis `SEC-005` sind durch Hash-only-Persistenz, Cookie-/CSRF-/Origin-
+  Schutz, getrennte Match-Capabilities, Payload-Redaction und die gemeinsame
+  SQLite-Migrations-/Backup-Grenze nachgewiesen.
+- E-Mail, Passkeys und MFA bleiben vorbereitete Folgestufen und sind keine
+  verdeckte Voraussetzung dieser Alpha.

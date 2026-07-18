@@ -2,7 +2,7 @@
 
 Stand: 2026-07-18
 
-Status: aktiv – P06 abgeschlossen, P07 als Nächstes
+Status: P07 abgeschlossen – finale Main-Integration als Nächstes
 
 Quelle: `docs/releases/v2/v2-0-auth-privacy-cloud-decks/user-profiles-password-cloud-decks-staged-plan-2026-07-18.md`
 
@@ -375,6 +375,24 @@ Done-Gate:
   unbeabsichtigt gelöscht werden.
 - Paketchecks grün: Server-/Web-Typecheck, Account-Deck-/Client-/Sichtbarkeits-
   tests, Web-Produktionsbuild und `git diff --check`.
+
+### P07 – Releaseabschluss
+
+- Requirements und Testmatrix sind auf den verifizierten Implementierungsstand
+  gesetzt; Final Review, Betriebs-Runbook, Projektstatus, Index, Codex-Status
+  und Monatslog sind aktualisiert.
+- Grün: Workspace-Typecheck, Contracts/Test-Discovery, vollständige Server-
+  und Web-Suite, drei AI-Shards, Package-Boundaries, Asset-Retention,
+  Proteus-Readiness, Produktionsbuild und Browser-Smoke.
+- Der vollständige Servertest deckte eine alte CORS-Methodenerwartung auf; der
+  Test bildet nun die für persönliche Deck-CRUD freigegebenen Methoden `PUT`
+  und `DELETE` mit ab.
+- Zwei AI-Ratchets sind nachweislich schon auf dem unveränderten lokalen
+  `main` rot: zwei Corp-Score-Quelldateien liegen über ihren veralteten
+  Zeilenlimits und ein generierter Full-Coverage-Report ist nicht aktuell.
+  Der Accountbranch hat an diesen Artefakten keinen Diff; die Abweichungen
+  werden im Final Review transparent geführt und nicht durch fachfremde
+  Baselineänderungen kaschiert.
 
 ## Verifikationsregeln
 

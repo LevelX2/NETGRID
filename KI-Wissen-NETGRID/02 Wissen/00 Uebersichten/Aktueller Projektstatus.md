@@ -1,6 +1,6 @@
 # Aktueller Projektstatus
 
-Stand: 2026-07-16
+Stand: 2026-07-18
 
 ## Führender Produktstand
 
@@ -152,6 +152,18 @@ Stand: 2026-07-16
 - SQLite ist der aktuelle Standardstorage. Backup, Restore, Inspect,
   Maintenance, Retention-Schutz und Cleanup arbeiten auf der aktuellen
   SQLite-Datenbank.
+- Die geschlossene V2.0-Passwort-Account-Alpha ist umgesetzt. Accounts werden
+  nur durch lokalen Admin-Bootstrap oder einmalige Einladung angelegt;
+  widerrufbare Account-Sessions laufen über ein `HttpOnly`-Cookie und bleiben
+  von Maintenance- und Match-Capabilities getrennt. E-Mail, Passkeys, MFA und
+  öffentliche Registrierung sind noch nicht enthalten.
+- Ein Account kann bis zu 50 ownergebundene persönliche Server-Decks halten.
+  40 kuratierte Standard-Decks sind direkt spielbar oder kopierbar; interne
+  KI-, Test- und ausgemusterte Decks sind in der normalen UI unsichtbar.
+  Matchstarts erzeugen weiterhin ausschließlich neu validierte immutable
+  Snapshots. Führend sind
+  `docs/releases/v2/v2-0-auth-privacy-cloud-decks/password-accounts-cloud-decks-final-review-2026-07-18.md`
+  und `docs/runbooks/account-alpha-operations.md`.
 - Der einmalige JSON-/Alt-SQLite-Import wurde am 2026-05-06 abgeschlossen und
   ist seit dem Current-State-Projekt-Cleanup kein Start-/CLI-/Health-Vertrag
   mehr.
