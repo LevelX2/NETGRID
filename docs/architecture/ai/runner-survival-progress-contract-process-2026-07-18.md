@@ -1,6 +1,6 @@
 # Runner-Survival-Progress-Contract-Prozess
 
-Status: P5 verifiziert; Integration und Cleanup ausstehend
+Status: vollständig abgeschlossen
 
 ## Quelle/Vorgabe
 
@@ -267,7 +267,7 @@ Commit: `fix(ai): detect stalled runner survival loops`
 
 ### P5: Benchmark, Review, Integration und Cleanup
 
-Status: Verifikation abgeschlossen; Integration und Cleanup ausstehend
+Status: abgeschlossen
 
 Ziel: Zielregressionen und breite Gates verifizieren, den aktuellen
 AI-Behavior-Benchmark commit-rein ausführen, Ergebnis dokumentieren, aktuelles
@@ -312,6 +312,13 @@ des integrierten Stands. `check:ai` erreicht ausschließlich vier auf aktuellem
 `main` reproduzierbare Source-Structure-Pfade und keinen zusätzlichen Pfad aus
 diesem Paket. Führender Review ist
 `docs/reviews/ai/ai-behavior-baseline-v1-runner-survival-progress-2026-07-18.md`.
+
+Abschluss: Der Arbeitsbranch wurde nach defensivem Main-Abgleich lokal per
+Fast-Forward in `main` integriert. Der Worktree ist in Git deregistriert und
+sein Pfad wurde einschließlich der verbliebenen ignorierten pnpm-Junctions
+wiederherstellbar in den Papierkorb verschoben. Registrierung und Pfad wurden
+anschließend jeweils als nicht mehr vorhanden verifiziert; der vollständig in
+`main` enthaltene Arbeitsbranch wurde gelöscht.
 
 Commit: `docs(ai): close runner survival progress remediation`
 
