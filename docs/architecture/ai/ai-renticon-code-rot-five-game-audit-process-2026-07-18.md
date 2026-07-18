@@ -180,3 +180,14 @@ Nutzerfreigabe Produktionsverhalten zu ändern.
   contestbare Scoreline und Lage unterhalb des Runner-Matchpoints.
 - Keine Fixture-, Runtime-, LegalAction- oder Redaction-Drift in den
   versionierten Checkpoint-Oberflächen.
+
+### Engine-/Trace-Gate
+
+- `applyAction` synchronisiert eine aus der Elternaktion neu entstandene
+  PendingChoice auf deren tatsächlich erzeugte StateVersion und validiert den
+  resultierenden State weiterhin unverändert.
+- Beide echten Abbruchzustände aus Seed 001 und 005 sind mit derselben
+  Decision-Expectation grün.
+- Detaillierte Alternativen verwenden im Selfplay-Export stabile
+  typ-/rangbasierte IDs und behalten nur redaktionssichere Why-/Score-Felder.
+- Engine-ApplyAction-Tests, Trace-Tests sowie Engine- und AI-Typecheck grün.

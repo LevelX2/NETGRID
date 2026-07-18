@@ -56,9 +56,92 @@ export function selfplayTraceFactsForDecision(
     ...(safeDebug.planKind ? { planKind: safeDebug.planKind } : {}),
     ...(debugFacts.length > 0 ? { debugFacts } : {}),
     ...(safeDebug.actionAlternatives && safeDebug.actionAlternatives.length > 0
-      ? { actionAlternatives: safeDebug.actionAlternatives }
+      ? {
+          actionAlternatives: safeDebug.actionAlternatives.map((alternative) =>
+            safeSelfplayActionAlternative(alternative, dependencies),
+          ),
+        }
       : {}),
   };
+}
+
+function safeSelfplayActionAlternative(
+  alternative: AiDecisionActionAlternative,
+  dependencies: SelfplayTraceFactsDependencies,
+): AiDecisionActionAlternative {
+  const actionType =
+    safeSelfplayText(alternative.actionType, dependencies) ?? "redacted";
+  const result: AiDecisionActionAlternative = {
+    rank: alternative.rank,
+    actionId: `selfplay_action:${actionType}:${alternative.rank}`,
+    actionType,
+    selected: alternative.selected,
+    whyChosen: dependencies.safeSelfplayFacts(alternative.whyChosen ?? []),
+    whyNot: dependencies.safeSelfplayFacts(alternative.whyNot ?? []),
+  };
+  if (alternative.excluded !== undefined)
+    result.excluded = alternative.excluded;
+  if (alternative.score !== undefined) result.score = alternative.score;
+  if (alternative.priority !== undefined) result.priority = alternative.priority;
+  const scoreBreakdown = alternative.scoreBreakdown
+    ?.map((component) => {
+      const key = safeSelfplayText(component.key, dependencies);
+      const label = safeSelfplayText(component.label, dependencies);
+      if (!key || !label) return undefined;
+      const reason = safeSelfplayText(component.reason, dependencies);
+      return {
+        key,
+        label,
+        value: component.value,
+        ...(component.weight !== undefined ? { weight: component.weight } : {}),
+        ...(reason ? { reason } : {}),
+      };
+    })
+    .filter((component): component is NonNullable<typeof component> =>
+      Boolean(component),
+    );
+  if (scoreBreakdown && scoreBreakdown.length > 0) {
+    result.scoreBreakdown = scoreBreakdown;
+  }
+  if (alternative.economy) {
+    const economyKind = safeSelfplayText(
+      alternative.economy.economyKind,
+      dependencies,
+    );
+    if (economyKind) {
+      const ability = safeSelfplayText(alternative.economy.ability, dependencies);
+      const economyNeed = safeSelfplayText(
+        alternative.economy.economyNeed,
+        dependencies,
+      );
+      result.economy = {
+        economyKind,
+        ...(ability ? { ability } : {}),
+        ...(economyNeed ? { economyNeed } : {}),
+        ...(alternative.economy.immediateGain !== undefined
+          ? { immediateGain: alternative.economy.immediateGain }
+          : {}),
+        ...(alternative.economy.netCredits !== undefined
+          ? { netCredits: alternative.economy.netCredits }
+          : {}),
+        ...(alternative.economy.storedCredits !== undefined
+          ? { storedCredits: alternative.economy.storedCredits }
+          : {}),
+        ...(alternative.economy.futurePoolAfter !== undefined
+          ? { futurePoolAfter: alternative.economy.futurePoolAfter }
+          : {}),
+      };
+    }
+  }
+  return result;
+}
+
+function safeSelfplayText(
+  value: unknown,
+  dependencies: SelfplayTraceFactsDependencies,
+): string | undefined {
+  if (typeof value !== "string" && typeof value !== "number") return undefined;
+  return dependencies.safeSelfplayFacts([String(value)])[0];
 }
 
 export function selfplayTraceFactsForSimulationDecision(

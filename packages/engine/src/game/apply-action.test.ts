@@ -84,6 +84,43 @@ describe("game apply-action core", () => {
     });
   });
 
+  it("binds a nested PendingChoice to the state version produced by its parent action", () => {
+    const state = createGame({
+      seed: "nested-pending-choice-state-version",
+      setupMode: "completed",
+    });
+    const action = playerActionFor(state, mandatoryDrawLegalAction(state));
+    const result = buildApplyAction(
+      {
+        actions: {
+          performAction: (next) => {
+            next.pendingChoice = {
+              choiceId: "nested_pending_choice",
+              side: "runner",
+              source: "nested.pending_choice",
+              kind: "select_option",
+              prompt: "Nested Choice",
+              options: [{ id: "ok", label: "OK" }],
+              minSelections: 1,
+              maxSelections: 1,
+              stateVersion: next.stateVersion,
+              visibility: "public",
+            };
+          },
+        },
+      },
+      state,
+      action,
+    );
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.state.pendingChoice?.stateVersion).toBe(
+      result.state.stateVersion,
+    );
+    expect(state.pendingChoice).toBeUndefined();
+  });
+
   it("keeps invalid and stale action behavior stable", () => {
     const state = createGame({
       seed: "arch-61-apply-action-invalid",
