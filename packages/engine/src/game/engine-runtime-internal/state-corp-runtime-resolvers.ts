@@ -36,7 +36,7 @@ import {
   type GameState,
   type ImminentEvent,
   type LegalAction,
-  type LegacyAbilityPayloadField,
+  type AbilityPayloadDiscriminatorField,
   type PlayerAction,
   type PlayerController,
   type PublicGameEvent,

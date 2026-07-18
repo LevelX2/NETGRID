@@ -19,12 +19,8 @@ import {
 } from "../../index";
 import { collectActiveModifiers } from "../../ability-engine/active-modifiers";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
-import {
-  cardImplementationCoverageForDefinitionId,
-} from "../../card-implementations/coverage";
-import {
-  cardImplementationForDefinitionId,
-} from "../../card-implementations/registry";
+import { cardImplementationCoverageForDefinitionId } from "../../card-implementations/coverage";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { buildPublicAbilitySchemaContext } from "../../mechanics/public-payload-schema";
 import { publicContextForAction } from "../../public-context";
 import {
@@ -217,13 +213,14 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]
-        ?.implementationStatus,
+      CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus,
     ).toBe("playable_mvp");
   });
 
   it("keeps ESA Contract install, rez, activated draw, access and trash side-safe", () => {
-    let state = MECHANIC_SMOKE_GAMES.assetNodeEffects("v1917-generic-asset-install-rez-access");
+    let state = MECHANIC_SMOKE_GAMES.assetNodeEffects(
+      "v1917-generic-asset-install-rez-access",
+    );
     state.corp.credits = 10;
     state.runner.credits = 10;
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
@@ -323,9 +320,9 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
         }),
       ],
     });
-    expect(
-      JSON.stringify(state.eventLog.at(-1)?.publicPayload),
-    ).not.toMatch(/"privatePayload"|"cardInstances"|"hq"|"rd"/);
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"privatePayload"|"cardInstances"|"hq"|"rd"/,
+    );
 
     let accessState = toRunnerTurn(
       MECHANIC_SMOKE_GAMES.assetNodeEffects("v1917-generic-asset-access-trash"),
@@ -375,7 +372,9 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
   });
 
   it("applies rezzed V1.9.17 recurring campaign credits at Corp turn start", () => {
-    let state = MECHANIC_SMOKE_GAMES.assetNodeEffects("v1917-recurring-campaign-start-turn");
+    let state = MECHANIC_SMOKE_GAMES.assetNodeEffects(
+      "v1917-recurring-campaign-start-turn",
+    );
     state.corp.credits = 10;
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     const campaignId = moveCorpCardToHq(state, "onr_v1_326_holovid-campaign");
@@ -412,7 +411,9 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       "onr_v1_326_holovid-campaign",
     ] as const;
     for (const definitionId of economyAssets) {
-      let state = MECHANIC_SMOKE_GAMES.assetNodeEffects(`v1917-economy-asset-${definitionId}`);
+      let state = MECHANIC_SMOKE_GAMES.assetNodeEffects(
+        `v1917-economy-asset-${definitionId}`,
+      );
       state.corp.credits = 10;
       state = apply(
         state,
@@ -451,12 +452,17 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     let noFirm = MECHANIC_SMOKE_GAMES.assetNodeEffects(
       "v1917-investment-firm-no-source",
     );
-    noFirm = apply(noFirm, "corp", (action) => action.type === "mandatory_draw");
+    noFirm = apply(
+      noFirm,
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
     const noFirmCreditsBefore = noFirm.corp.credits;
     noFirm = apply(
       noFirm,
       "corp",
-      (action) => action.type === "gain_credit" && action.source === "basic_action",
+      (action) =>
+        action.type === "gain_credit" && action.source === "basic_action",
     );
     expect(noFirm.corp.credits).toBe(noFirmCreditsBefore + 1);
     expect(noFirm.pendingChoice).toBeUndefined();
@@ -498,7 +504,8 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     state = apply(
       state,
       "corp",
-      (action) => action.type === "gain_credit" && action.source === "basic_action",
+      (action) =>
+        action.type === "gain_credit" && action.source === "basic_action",
     );
 
     expect(state.corp.credits).toBe(creditsBefore);
@@ -509,8 +516,15 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       minSelections: 1,
       maxSelections: 1,
     });
-    expect(getPlayerView(state, "corp").pendingChoice?.options.map((option) => option.id)).toEqual(
-      expect.arrayContaining(["take_credit", `corp_installed_economy_credit_${firmId}`]),
+    expect(
+      getPlayerView(state, "corp").pendingChoice?.options.map(
+        (option) => option.id,
+      ),
+    ).toEqual(
+      expect.arrayContaining([
+        "take_credit",
+        `corp_installed_economy_credit_${firmId}`,
+      ]),
     );
     const resolve = mustAction(
       state,
@@ -606,7 +620,9 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     expect(state.corp.archives).not.toContain(firmId);
     expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toContainEqual(
       expect.objectContaining({
-        effectId: expect.stringContaining("corp.start.installed_economy_credit"),
+        effectId: expect.stringContaining(
+          "corp.start.installed_economy_credit",
+        ),
         kind: "gain_credits",
         amount: 1,
         sourceDefinitionId: "onr_v1_329_investment-firm",
@@ -614,7 +630,9 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     );
     expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toContainEqual(
       expect.objectContaining({
-        effectId: expect.stringContaining("corp.start.installed_economy_credit.counter"),
+        effectId: expect.stringContaining(
+          "corp.start.installed_economy_credit.counter",
+        ),
         kind: "counter_change",
         counterType: "recurring_credit",
         removedCounterAmount: 1,
@@ -637,7 +655,9 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     expect(cardCounterAmount(state, firmId, "recurring_credit")).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toContainEqual(
       expect.objectContaining({
-        effectId: expect.stringContaining("corp.start.installed_economy_credit.counter"),
+        effectId: expect.stringContaining(
+          "corp.start.installed_economy_credit.counter",
+        ),
         kind: "counter_change",
         counterType: "recurring_credit",
         removedCounterAmount: 1,
@@ -673,7 +693,9 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     const secondFirm = `${firstFirm}_copy` as typeof firstFirm;
     const firstFirmZone = multi.cardInstances[firstFirm]?.zone;
     const firstFirmServerId =
-      firstFirmZone?.zone === "serverRoot" ? firstFirmZone.serverId : "remote_1";
+      firstFirmZone?.zone === "serverRoot"
+        ? firstFirmZone.serverId
+        : "remote_1";
     multi.cardInstances[secondFirm] = {
       ...multi.cardInstances[firstFirm]!,
       instanceId: secondFirm,
@@ -692,9 +714,12 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     multi = apply(
       multi,
       "corp",
-      (action) => action.type === "gain_credit" && action.source === "basic_action",
+      (action) =>
+        action.type === "gain_credit" && action.source === "basic_action",
     );
-    const multiOptions = multi.pendingChoice?.options.map((option) => option.id);
+    const multiOptions = multi.pendingChoice?.options.map(
+      (option) => option.id,
+    );
     expect(multiOptions).toHaveLength(3);
     expect(multiOptions).toEqual(
       expect.arrayContaining([
@@ -708,7 +733,9 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
   });
 
   it("loads and spends Spinn Public Relations bits through CardImplementation", () => {
-    let state = MECHANIC_SMOKE_GAMES.assetNodeEffects("v1917-spinn-public-relations-pool");
+    let state = MECHANIC_SMOKE_GAMES.assetNodeEffects(
+      "v1917-spinn-public-relations-pool",
+    );
     state.corp.credits = 10;
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     const spinnId = moveCorpCardToHq(
@@ -728,8 +755,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       "corp",
       (action) =>
         action.type === "rez_card" &&
-        sourceDefinition(state, action) ===
-          "onr_v1_344_spinn-public-relations",
+        sourceDefinition(state, action) === "onr_v1_344_spinn-public-relations",
     );
     const creditsBeforeLoad = state.corp.credits;
 
@@ -758,7 +784,11 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       state = toRunnerTurnFromCorpMain(state);
       state = apply(state, "runner", (action) => action.type === "end_turn");
       if (turns < 2)
-        state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+        state = apply(
+          state,
+          "corp",
+          (action) => action.type === "mandatory_draw",
+        );
     }
 
     expect(cardCounterAmount(state, spinnId, "bit")).toBe(0);
@@ -830,15 +860,8 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       "v1917-bbs-generic-card-rez-event",
     );
     state.corp.credits = 10;
-    state = apply(
-      state,
-      "corp",
-      (action) => action.type === "mandatory_draw",
-    );
-    const bbsId = moveCorpCardToHq(
-      state,
-      "onr_v1_309_bbs-whispering-campaign",
-    );
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    const bbsId = moveCorpCardToHq(state, "onr_v1_309_bbs-whispering-campaign");
     state = apply(
       state,
       "corp",
@@ -935,9 +958,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
   });
 
   it("starts V1.9.17 trace asset abilities through the side-safe trace window", () => {
-    const traceAssets = [
-      ["onr_v1_310_blood-cat", 5],
-    ] as const;
+    const traceAssets = [["onr_v1_310_blood-cat", 5]] as const;
     for (const [definitionId, baseTraceStrength] of traceAssets) {
       let state = MECHANIC_SMOKE_GAMES.assetNodeEffects(
         `v1917-trace-asset-window-${definitionId}`,
@@ -992,7 +1013,9 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
   });
 
   it("uses Krumz as a trace-only bit source and refreshes it at Corp turn start", () => {
-    let state = MECHANIC_SMOKE_GAMES.assetNodeEffects("v1917-krumz-trace-bit-source");
+    let state = MECHANIC_SMOKE_GAMES.assetNodeEffects(
+      "v1917-krumz-trace-bit-source",
+    );
     state.corp.credits = 10;
     state.runner.credits = 0;
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
@@ -1038,9 +1061,9 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
         action.type === "activated_card_ability" &&
         action.payload?.cardId === bloodCatId,
     );
-    expect(state.pendingChoice?.options.some((option) => option.id === "bid_1")).toBe(
-      true,
-    );
+    expect(
+      state.pendingChoice?.options.some((option) => option.id === "bid_1"),
+    ).toBe(true);
     state = applyChoice(state, "corp", "bid_1");
 
     expect(cardCounterAmount(state, krumzId, "bit")).toBe(0);
@@ -1092,9 +1115,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       getPlayerView(state, "corp").pendingChoice?.options.map(
         (option) => option.publicLabel,
       ),
-    ).toEqual(
-      expect.arrayContaining(["HQ-Agenda", "HQ-Agenda"]),
-    );
+    ).toEqual(expect.arrayContaining(["HQ-Agenda", "HQ-Agenda"]));
     expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
     expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
       operationId,
@@ -1102,7 +1123,9 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
 
     state = applyChoices(state, "corp", [`card_${agendaId}`]);
 
-    expect(state.corp.hq).toEqual(expect.arrayContaining([agendaId, operationId]));
+    expect(state.corp.hq).toEqual(
+      expect.arrayContaining([agendaId, operationId]),
+    );
     expect(state.corp.credits).toBe(creditsBefore + 1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneBarrier: true,
@@ -1117,7 +1140,9 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       gainedCredits: 1,
     });
     const corpPublicEvent = getPlayerView(state, "corp").publicEvents.at(-1);
-    const runnerPublicEvent = getPlayerView(state, "runner").publicEvents.at(-1);
+    const runnerPublicEvent = getPlayerView(state, "runner").publicEvents.at(
+      -1,
+    );
     expect(corpPublicEvent?.publicPayload).toMatchObject(
       runnerPublicEvent?.publicPayload ?? {},
     );
@@ -1138,7 +1163,9 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
   });
 
   it("resolves Rescheduler as deterministic HQ shuffle into R&D and draw", () => {
-    let reorderState = MECHANIC_SMOKE_GAMES.assetNodeEffects("v1917-rescheduler-hq-shuffle");
+    let reorderState = MECHANIC_SMOKE_GAMES.assetNodeEffects(
+      "v1917-rescheduler-hq-shuffle",
+    );
     reorderState.corp.credits = 10;
     reorderState = apply(
       reorderState,
@@ -1200,7 +1227,9 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
   });
 
   it("resolves V1.9.17 Solo Squad damage through a typed rezzed asset LegalAction", () => {
-    let state = MECHANIC_SMOKE_GAMES.assetNodeEffects("v1917-solo-squad-damage");
+    let state = MECHANIC_SMOKE_GAMES.assetNodeEffects(
+      "v1917-solo-squad-damage",
+    );
     state.corp.credits = 10;
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     const soloSquadId = moveCorpCardToHq(state, "onr_v1_342_solo-squad");
@@ -1276,7 +1305,9 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
   });
 
   it("uses Cowboy Sysop and Disinfectant, Inc. through visible installed-card targets", () => {
-    let cowboyState = MECHANIC_SMOKE_GAMES.assetNodeEffects("v1917-cowboy-installed-target");
+    let cowboyState = MECHANIC_SMOKE_GAMES.assetNodeEffects(
+      "v1917-cowboy-installed-target",
+    );
     cowboyState.corp.credits = 10;
     cowboyState = apply(
       cowboyState,
@@ -1374,7 +1405,8 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     );
     expect(
       getLegalActions(disinfectantState, "corp").some(
-        (action) => action.payload?.v1917AssetAbility === "remove_virus_counter",
+        (action) =>
+          action.payload?.v1917AssetAbility === "remove_virus_counter",
       ),
     ).toBe(false);
     expect(
@@ -1423,7 +1455,11 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
           action.type === "rez_card" &&
           sourceDefinition(state, action) === definitionId,
       );
-      state = apply(state, "runner", (action) => action.type === "continue_run");
+      state = apply(
+        state,
+        "runner",
+        (action) => action.type === "continue_run",
+      );
       state = apply(state, "runner", (action) => action.type === "access_card");
       if (definitionId === "onr_v1_345_trap") {
         expect(state.pendingChoice?.source).toContain("p3_35.access_payment");
@@ -1432,7 +1468,9 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
 
       expect(state.run?.accessedCardId).toBe(ambushId);
       expect(state.runner.tags).toBe(tagsBefore + expectedTagsAdded);
-      expect(state.runner.grip.length).toBe(Math.max(0, gripBefore - damageAmount));
+      expect(state.runner.grip.length).toBe(
+        Math.max(0, gripBefore - damageAmount),
+      );
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
         hiddenZoneBarrier: true,
         hiddenZoneAction: "v1917_access_ambush",
@@ -1467,8 +1505,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]
-        ?.implementationStatus,
+      CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus,
     ).toBe("playable_mvp");
   });
 
@@ -1633,9 +1670,11 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       "runner",
       (action) => action.payload?.runnerAbility === "remove_crying_counter",
     );
-    expect(cardCounterAmount(traceState, traceState.runner.identity, "crying")).toBe(0);
+    expect(
+      cardCounterAmount(traceState, traceState.runner.identity, "crying"),
+    ).toBe(0);
     expect(traceState.eventLog.at(-1)?.publicPayload).toMatchObject({
-      runnerAbility: "remove_crying_counter",
+      abilityId: "remove_crying_counter",
       removedCounterAmount: 1,
       remainingCounters: 0,
     });
@@ -1657,7 +1696,12 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       },
     ] as const;
 
-    for (const { definitionId, damageType, damageAmount, startingTags } of cases) {
+    for (const {
+      definitionId,
+      damageType,
+      damageAmount,
+      startingTags,
+    } of cases) {
       let state = toRunnerTurn(
         MECHANIC_SMOKE_GAMES.assetNodeEffects(
           `v1918-upgrade-access-ambush-${definitionId}`,
@@ -1924,10 +1968,25 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
     unrezzed = passRootRezWindowBeforeAccessIfOpen(unrezzed);
-    unrezzed = apply(unrezzed, "runner", (action) => action.type === "access_card");
-    unrezzed = apply(unrezzed, "runner", (action) => action.type === "decline_trash");
-    unrezzed = apply(unrezzed, "runner", (action) => action.type === "access_card");
-    expect(mustAction(unrezzed, "runner", (action) => action.type === "steal_agenda").costs).toEqual([]);
+    unrezzed = apply(
+      unrezzed,
+      "runner",
+      (action) => action.type === "access_card",
+    );
+    unrezzed = apply(
+      unrezzed,
+      "runner",
+      (action) => action.type === "decline_trash",
+    );
+    unrezzed = apply(
+      unrezzed,
+      "runner",
+      (action) => action.type === "access_card",
+    );
+    expect(
+      mustAction(unrezzed, "runner", (action) => action.type === "steal_agenda")
+        .costs,
+    ).toEqual([]);
 
     let otherFort = toRunnerTurn(
       MECHANIC_SMOKE_GAMES.assetNodeEffects("p311-red-herrings-other-fort"),
@@ -1943,14 +2002,27 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     otherFort = apply(
       otherFort,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "hq",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "hq",
     );
-    otherFort = apply(otherFort, "runner", (action) => action.type === "access_card");
-    expect(mustAction(otherFort, "runner", (action) => action.type === "steal_agenda").costs).toEqual([]);
+    otherFort = apply(
+      otherFort,
+      "runner",
+      (action) => action.type === "access_card",
+    );
+    expect(
+      mustAction(
+        otherFort,
+        "runner",
+        (action) => action.type === "steal_agenda",
+      ).costs,
+    ).toEqual([]);
   });
 
   it("keeps V1.9.18 city-grid region replacement server-bound and visible", () => {
-    let state = MECHANIC_SMOKE_GAMES.assetNodeEffects("v1918-city-grid-region-install");
+    let state = MECHANIC_SMOKE_GAMES.assetNodeEffects(
+      "v1918-city-grid-region-install",
+    );
     state.corp.credits = 20;
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     const firstGridId = moveCorpCardToHq(
@@ -2020,7 +2092,9 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
   });
 
   it("keeps hidden old region names out of replacement events", () => {
-    let state = MECHANIC_SMOKE_GAMES.assetNodeEffects("v1918-hidden-region-replacement");
+    let state = MECHANIC_SMOKE_GAMES.assetNodeEffects(
+      "v1918-hidden-region-replacement",
+    );
     state.corp.credits = 20;
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     const firstGridId = moveCorpCardToHq(
@@ -2127,7 +2201,11 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
         action.payload?.placement === "root",
     );
     expect(installJerusalem.costs).toEqual([{ clicks: 1, credits: 2 }]);
-    state = apply(state, "corp", (action) => action.actionId === installJerusalem.actionId);
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === installJerusalem.actionId,
+    );
     expect(state.corp.credits).toBe(0);
     expect(state.cardInstances[jerusalemId]).toMatchObject({
       faceup: true,
@@ -2187,7 +2265,9 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
         action.payload?.cardId === newGalvestonId &&
         action.payload?.serverId === "new_remote",
     );
-    expect(installOtherFortRegion.payload?.regionReplacementWarning).toBeUndefined();
+    expect(
+      installOtherFortRegion.payload?.regionReplacementWarning,
+    ).toBeUndefined();
     state = apply(
       state,
       "corp",
@@ -2201,7 +2281,9 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
   });
 
   it("covers V1.9.18 counter and hidden-zone upgrade actions with migrated tag-condition suppression", () => {
-    let state = MECHANIC_SMOKE_GAMES.assetNodeEffects("v1918-counter-tag-hidden-actions");
+    let state = MECHANIC_SMOKE_GAMES.assetNodeEffects(
+      "v1918-counter-tag-hidden-actions",
+    );
     state.corp.credits = 10;
     state.runner.tags = 1;
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
@@ -2232,7 +2314,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     expect(cardCounterAmount(state, drDreffId, "power")).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "gain_credit",
-      v1918UpgradeAbility: "add_power_counter",
+      abilityId: "add_power_counter",
       addedCounterAmount: 1,
       remainingCounters: 1,
     });
@@ -2298,7 +2380,11 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
         },
         agendaPointsToWin: 7,
       });
-      state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+      state = apply(
+        state,
+        "corp",
+        (action) => action.type === "mandatory_draw",
+      );
       state.corp.credits = 30;
       state.runner.credits = 20;
       const crystalId = putCorpRootInRemote(
@@ -2328,7 +2414,8 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       state = apply(
         state,
         "runner",
-        (action) => action.type === "install_card" && action.source === decoderId,
+        (action) =>
+          action.type === "install_card" && action.source === decoderId,
       );
       state.runner.credits = 20;
       state.runner.clicks = 4;
@@ -2399,7 +2486,9 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     });
     expect(staleResult.ok).toBe(true);
     if (staleResult.ok)
-      expect(staleResult.state.runner.credits).toBe(sameFort.runner.credits - 1);
+      expect(staleResult.state.runner.credits).toBe(
+        sameFort.runner.credits - 1,
+      );
 
     const { state: otherFort } = approachIce(
       "p316-crystal-other-fort",
@@ -2656,8 +2745,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     expect(
       getLegalActions(state, "corp").some(
         (action) =>
-          action.type === "score_agenda" &&
-          action.payload?.cardId === agendaId,
+          action.type === "score_agenda" && action.payload?.cardId === agendaId,
       ),
     ).toBe(false);
 
@@ -2670,8 +2758,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       state,
       "corp",
       (action) =>
-        action.type === "score_agenda" &&
-        action.payload?.cardId === agendaId,
+        action.type === "score_agenda" && action.payload?.cardId === agendaId,
     );
     expect(
       getPlayerView(state, "corp")
@@ -2730,8 +2817,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     expect(
       getLegalActions(otherFort, "corp").some(
         (action) =>
-          action.type === "score_agenda" &&
-          action.payload?.cardId === agendaId,
+          action.type === "score_agenda" && action.payload?.cardId === agendaId,
       ),
     ).toBe(false);
   });
@@ -2808,7 +2894,9 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     expect(traceReplay.ok).toBe(true);
     expect(hashState(traceReplay.state)).toBe(hashState(traceState));
 
-    let runState = toRunnerTurn(MECHANIC_SMOKE_GAMES.assetNodeEffects("v1918-stealth-block"));
+    let runState = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.assetNodeEffects("v1918-stealth-block"),
+    );
     runState.runner.credits = 20;
     const surveillanceId = putCorpRootInRemote(
       runState,
@@ -2843,8 +2931,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
 
     const runAction = getLegalActions(runState, "runner").find(
       (action) =>
-        action.type === "start_run" &&
-        action.payload?.serverId === "remote_1",
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
     expect(runAction?.payload?.v1918UpgradeAbility).toBeUndefined();
     expect(runAction?.costs).toEqual([{ clicks: 1 }]);

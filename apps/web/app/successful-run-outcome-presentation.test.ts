@@ -50,7 +50,7 @@ describe("successful run outcome presentation", () => {
   it("retains the latest result until that local event is dismissed", () => {
     const earlierPresentationEvent = event("evt_earlier", "play_event", 4);
     const presentationEvent = event("evt_weather", "continue_run", 4);
-    const laterEvent = {
+    const laterEvent: PublicGameEvent = {
       ...event("evt_later", "gain_credit", 0),
       publicPayload: { actionType: "gain_credit", actor: "runner" },
     };

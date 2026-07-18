@@ -1,42 +1,31 @@
 import {
-  LEGACY_ABILITY_PAYLOAD_FIELDS,
+  ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS,
   type ActionType,
+  type AbilityPayloadDiscriminatorField,
   type EventVisibilityClass,
-  type LegacyAbilityPayloadField,
+  type PublicAbilityFamily,
+  type PublicEventPayload,
 } from "@netgrid/shared";
 
-export type AbilityFamily =
-  | "agenda-scoring"
-  | "damage-prevention"
-  | "hidden-zone"
-  | "hosting-counters"
-  | "payment-costs"
-  | "random-effects"
-  | "run-access"
-  | "trace-tags";
+export type PublicAbilitySchemaContext = Pick<
+  PublicEventPayload,
+  | "abilityFamily"
+  | "abilityId"
+  | "effectKind"
+  | "sourceDefinitionId"
+  | "amounts"
+  | "targets"
+  | "visibility"
+>;
 
-export type PublicAbilitySchemaContext = {
-  abilityFamily?: AbilityFamily;
-  abilityId?: string;
-  effectKind?: string;
-  sourceDefinitionId?: string;
-  amounts?: Record<string, number>;
-  targets?: Record<string, string | number | boolean>;
-  visibility?: {
-    class: EventVisibilityClass;
-    hiddenZoneBarrier?: boolean;
-    redactedKind?: string;
-  };
-};
-
-export type LegacyAbilityPayloadEntry = {
-  field: LegacyAbilityPayloadField;
+export type AbilityPayloadDiscriminatorEntry = {
+  field: AbilityPayloadDiscriminatorField;
   abilityId: string;
 };
 
 export type PublicAbilityMetadata = {
-  abilityField?: LegacyAbilityPayloadField;
-  abilityFamily?: AbilityFamily;
+  abilityField?: AbilityPayloadDiscriminatorField;
+  abilityFamily?: PublicAbilityFamily;
   abilityId?: string;
   effectKind?: string;
 };
@@ -195,12 +184,12 @@ const TARGET_KEYS = [
   "timingFamily",
 ] as const;
 
-export function legacyAbilityPayloadEntries(
+export function abilityPayloadDiscriminatorEntries(
   payload: Record<string, unknown> | undefined,
-  fields: readonly LegacyAbilityPayloadField[] = LEGACY_ABILITY_PAYLOAD_FIELDS,
-): LegacyAbilityPayloadEntry[] {
+  fields: readonly AbilityPayloadDiscriminatorField[] = ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS,
+): AbilityPayloadDiscriminatorEntry[] {
   if (!payload) return [];
-  const entries: LegacyAbilityPayloadEntry[] = [];
+  const entries: AbilityPayloadDiscriminatorEntry[] = [];
   for (const field of fields) {
     const abilityId = stringValue(payload[field]);
     if (abilityId) entries.push({ field, abilityId });
@@ -214,12 +203,12 @@ export function publicAbilityMetadata(
   context: Record<string, unknown> = {},
 ): PublicAbilityMetadata {
   const combined = { ...(payload ?? {}), ...context };
-  const legacyAbility = legacyAbilityPayloadEntries(combined)[0];
-  const abilityId = stringValue(combined.abilityId) ?? legacyAbility?.abilityId;
+  const discriminator = abilityPayloadDiscriminatorEntries(combined)[0];
+  const abilityId = stringValue(combined.abilityId) ?? discriminator?.abilityId;
   const hiddenZoneAction = stringValue(combined.hiddenZoneAction);
   const inferredAbilityId = abilityId ?? hiddenZoneAction;
   const family = stringValue(combined.abilityFamily) as
-    | AbilityFamily
+    | PublicAbilityFamily
     | undefined;
   const abilityFamily = isAbilityFamily(family)
     ? family
@@ -229,7 +218,7 @@ export function publicAbilityMetadata(
     inferEffectKind(actionType, inferredAbilityId, combined);
 
   return {
-    ...(legacyAbility ? { abilityField: legacyAbility.field } : {}),
+    ...(discriminator ? { abilityField: discriminator.field } : {}),
     ...(abilityFamily ? { abilityFamily } : {}),
     ...(inferredAbilityId ? { abilityId: inferredAbilityId } : {}),
     ...(effectKind ? { effectKind } : {}),
@@ -268,7 +257,7 @@ export function buildPublicAbilitySchemaContext(
 function inferAbilityFamily(
   abilityId: string | undefined,
   payload: Record<string, unknown>,
-): AbilityFamily | undefined {
+): PublicAbilityFamily | undefined {
   const haystack = [
     abilityId,
     stringValue(payload.hiddenZoneAction),
@@ -369,7 +358,9 @@ function numberValue(value: unknown): number | undefined {
     : undefined;
 }
 
-function isAbilityFamily(value: string | undefined): value is AbilityFamily {
+function isAbilityFamily(
+  value: string | undefined,
+): value is PublicAbilityFamily {
   return (
     value === "agenda-scoring" ||
     value === "damage-prevention" ||

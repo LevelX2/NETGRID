@@ -144,9 +144,12 @@ export function formatChronicleEvent(
   const subject = subjectFor(actor, side, isAi);
   const effect = summarizeContextCardEffect(actionType, cardText);
   const mergedCardResolverEffect = mergedCardResolverEventEffect(event);
-  const agendaAbility = stringValue(payload.agendaAbility);
-  const hiddenZoneAction = stringValue(payload.hiddenZoneAction);
   const abilityId = payloadAbilityId(payload);
+  const agendaAbility =
+    payload.abilityFamily === "agenda-scoring"
+      ? abilityId
+      : stringValue(payload.agendaAbility);
+  const hiddenZoneAction = stringValue(payload.hiddenZoneAction);
   const playfulAiDiceLoop = isPlayfulAiDiceLoopPayload(payload, abilityId);
   const searchReveal = stringValue(payload.searchReveal);
   const searchDestination = stringValue(payload.searchDestination);
@@ -154,7 +157,7 @@ export function formatChronicleEvent(
     payload,
     abilityId ?? undefined,
   );
-  const v1919OperationAbility = stringValue(payload.v1919OperationAbility);
+  const v1919OperationAbility = abilityId;
   const shellTradersTargetTitle =
     shellTradersAbility === "set_aside_from_grip" ||
     shellTradersAbility === "remove_shell_counter" ||
@@ -162,9 +165,7 @@ export function formatChronicleEvent(
     shellTradersAbility === "auto_install_after_memory_choice"
       ? (targetCardTitleFromPayload(payload) ?? cardTitle)
       : undefined;
-  const v1922RunnerProgramAbility = stringValue(
-    payload.v1922RunnerProgramAbility,
-  );
+  const v1922RunnerProgramAbility = abilityId;
 
   const baseChipList = baseChips(actor, isAi);
   let cardDetailLines = context.cardDetailLines ?? [];
@@ -2305,8 +2306,7 @@ export function formatChronicleEvent(
       }
       if (
         actionType === "play_event" &&
-        stringValue(payload.v1921RunnerEventAbility) ===
-          "three_dice_gain_credits"
+        abilityId === "three_dice_gain_credits"
       ) {
         const dieRolls = numberArrayValue(payload.randomDiceLoopRolls);
         const gainedCredits = numberValue(payload.gainedCredits) ?? 0;
@@ -2555,7 +2555,7 @@ export function formatChronicleEvent(
       const target = serverLabel ?? runTargetFromLabel(label);
       const isWilsonRun =
         payload.runOnlyAction === true ||
-        stringValue(payload.runnerAbility) === "gain_run_only_action" ||
+        abilityId === "gain_run_only_action" ||
         /^Wilson-Run\b/i.test(label ?? "");
       title = phrase(
         subject,
@@ -2655,8 +2655,7 @@ export function formatChronicleEvent(
           payload.breakSubroutineAdditionalCost,
         );
         const virizzBreakCostApplied =
-          stringValue(payload.v1922CorpIceAbility) ===
-            "virizz_break_cost_modifier" &&
+          abilityId === "virizz_break_cost_modifier" &&
           breakSubroutineAdditionalCost !== undefined &&
           breakSubroutineAdditionalCost > 0;
         const subroutineLabel = breakSubroutineLabel(
@@ -3148,7 +3147,7 @@ export function formatChronicleEvent(
     case "jack_out": {
       const target = serverLabel ?? "dem angegriffenen Server";
       category = "run";
-      if (payload.v1922CorpIceAbility === "viral_15_jack_out_tax") {
+      if (abilityId === "viral_15_jack_out_tax") {
         const jackOutAdditionalCost = numberValue(
           payload.jackOutAdditionalCost,
         );
@@ -3436,7 +3435,7 @@ export function formatChronicleEvent(
       chips.push("Kontrolle");
       break;
     case "trigger_ability": {
-      const resourceAbility = stringValue(payload.resourceAbility);
+      const resourceAbility = abilityId;
       if (isISpySuccessfulRunFollowupPayload(payload)) {
         const targetServerLabel =
           serverLabel ??
@@ -3652,10 +3651,7 @@ export function formatChronicleEvent(
       break;
   }
 
-  const v181RunnerProgramAbility = stringValue(
-    payload.v181RunnerProgramAbility,
-  );
-  if (v181RunnerProgramAbility === "pattels_virus_counter_choice") {
+  if (abilityId === "broken_ice_virus_counter_choice") {
     const candidateCount = numberValue(payload.pattelsVirusCandidateCount) ?? 0;
     category = "run";
     importance = "important";
@@ -3666,7 +3662,7 @@ export function formatChronicleEvent(
     );
     chips.push("Pattel's Virus", "Choice", `${candidateCount} ICE`);
   }
-  if (v181RunnerProgramAbility === "pattels_virus_counter") {
+  if (abilityId === "broken_ice_virus_counter") {
     const remaining = numberValue(payload.remainingCounters);
     const targetDefinitionId = stringValue(payload.targetCardDefinitionId);
     category = "run";
@@ -3683,7 +3679,7 @@ export function formatChronicleEvent(
       ...(remaining !== undefined ? [`${remaining} auf ICE`] : []),
     );
   }
-  if (v181RunnerProgramAbility === "pox_counter") {
+  if (abilityId === "pox_counter") {
     const countersAfter = numberValue(payload.poxCountersAfter);
     const targetServerLabel = displayServerLabel(
       stringValue(payload.targetServerLabel),
@@ -3930,11 +3926,10 @@ function aiBoonRunStrengthChronicleItem(
   event: PublicGameEvent,
 ): ChronicleItem | undefined {
   const payload = event.publicPayload ?? {};
-  const dieRoll = numberValue(payload.v1921DieRoll);
+  const dieRoll = payloadRandomRoll(payload);
   const runStrength = numberValue(payload.runStartRandomStrength);
   if (
-    stringValue(payload.v1921RunnerProgramAbility) !==
-      "run_start_random_strength_bonus" ||
+    payloadAbilityId(payload) !== "run_start_random_strength_bonus" ||
     stringValue(payload.sourceDefinitionId) !== "onr_v1_002_ai-boon" ||
     dieRoll === undefined ||
     runStrength === undefined
@@ -5456,10 +5451,7 @@ function chronicleItemIsStartTurnEffectFromEvent(
 function startTurnRandomEffectOutcome(
   effect: ResolvedGameEffect,
 ): string | undefined {
-  const payload = effect as Record<string, unknown>;
-  const outcome =
-    stringValue(payload.randomEffectOutcome) ??
-    stringValue(payload.questForCattekinOutcome);
+  const outcome = stringValue(effect.randomEffectOutcome);
   if (
     outcome === "no_effect" ||
     outcome === "permanent_action" ||
@@ -6149,19 +6141,13 @@ function isPlayfulAiDiceLoopPayload(
   payload: Record<string, unknown>,
   abilityId: string | null,
 ): boolean {
-  const eventAbility = stringValue(payload.v1921RunnerEventAbility);
-  if (
-    abilityId === "playful_ai_dice_loop" ||
-    eventAbility === "playful_ai_dice_loop"
-  )
-    return true;
+  if (abilityId === "playful_ai_dice_loop") return true;
   const sourceDefinitionId =
     stringValue(payload.sourceDefinitionId) ??
     stringValue(payload.cardDefinitionId) ??
     stringValueFromRecord(payload.targets, "sourceDefinitionId");
   return (
-    sourceDefinitionId === PLAYFUL_AI_ID &&
-    (abilityId === "random_dice_loop" || eventAbility === "random_dice_loop")
+    sourceDefinitionId === PLAYFUL_AI_ID && abilityId === "random_dice_loop"
   );
 }
 
@@ -6644,9 +6630,7 @@ function displayServerLabel(label: string | undefined): string | undefined {
 function forcedRandomActionChronicleText(
   effect: ResolvedGameEffect,
 ): { title: string; chip: string } | undefined {
-  const restriction = stringValue(
-    (effect as Record<string, unknown>).restrictedActionFamily,
-  );
+  const restriction = effect.restrictedActionFamily;
   if (restriction === "draw_card")
     return { title: "eine Karte ziehen", chip: "Karte ziehen" };
   if (restriction === "gain_credit")

@@ -60,6 +60,43 @@ describe("game event builder", () => {
     expect(toPublicEvent(event)).not.toHaveProperty("privatePayload");
   });
 
+  it("publishes normalized ability metadata without execution discriminators", () => {
+    const previous = createGame({
+      seed: "arch-60-normalized-ability-event",
+      setupMode: "completed",
+    });
+    const next = nextState(previous);
+    const legalAction = {
+      ...mandatoryDrawLegalAction(previous),
+      type: "resolve_choice",
+      payload: {
+        v1922RunnerEventAbility:
+          "successful_hq_run_pay_rez_cost_trash_rezzed_ice",
+        sourceDefinitionId: "onr_v1_080_core-command-jettison-ice",
+      },
+    } satisfies LegalAction;
+
+    const event = buildEventWithHost(
+      testBuildEventHost({
+        v1922RunnerEventAbility:
+          "successful_hq_run_pay_rez_cost_trash_rezzed_ice",
+      }),
+      previous.stateVersion,
+      next.stateVersion,
+      hashState(next),
+      previous,
+      next,
+      legalAction,
+      playerActionFor(previous, legalAction),
+    );
+
+    expect(event.publicPayload.abilityId).toBe(
+      "successful_hq_run_pay_rez_cost_trash_rezzed_ice",
+    );
+    expect(event.publicPayload).not.toHaveProperty("v1922RunnerEventAbility");
+    expect(event.privatePayload?.corp?.legalAction).toEqual(legalAction);
+  });
+
   it("preserves bad-publicity compatibility fields and redacted source cleanup", () => {
     const previous = createGame({
       seed: "arch-60-bad-publicity-event",

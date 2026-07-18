@@ -648,7 +648,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
     state = applyChoice(state, "runner", "pay_1_return_to_grip");
     expect(state.runner.grip).toContain(eventId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      v1922RunnerEventAbility: "remove_tag_optional_return",
+      abilityId: "remove_tag_optional_return",
       returnedToGrip: true,
       paidCredits: 1,
     });
@@ -2449,7 +2449,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
     expect(databroker.runner.heap).toContain(brokerId);
     expect(databroker.eventLog.at(-1)?.publicPayload).toMatchObject({
       cardDefinitionId: "onr_v1_159_databroker",
-      resourceAbility: "databroker",
+      abilityId: "databroker",
       agendaPointCostPaid: 1,
       spentAgendaCardId: agendaId,
       gainedCredits: 10,

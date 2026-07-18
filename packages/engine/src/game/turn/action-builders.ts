@@ -1,12 +1,7 @@
-import type {
-  ActionType,
-  GameState,
-  LegalAction,
-  Side,
-} from "@netgrid/shared";
+import type { ActionType, GameState, LegalAction, Side } from "@netgrid/shared";
 import { buildPublicAbilitySchemaContext } from "../../mechanics/public-payload-schema";
-import { ACTION_ID_LEGACY_ABILITY_PAYLOAD_FIELDS } from "../../compatibility/payload-compatibility";
-import { legacyAbilityPayloadEntries } from "../../mechanics/public-payload-schema";
+import { ACTION_ID_ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS } from "../../compatibility/payload-compatibility";
+import { abilityPayloadDiscriminatorEntries } from "../../mechanics/public-payload-schema";
 
 export type LegalActionMetadata = Partial<
   Pick<
@@ -157,9 +152,9 @@ export function makeActionId(
     parts.push(String(payload.payOrEndRunSubroutineIndexes));
   if (payload?.payOrEndRunSubroutinePayment !== undefined)
     parts.push(String(payload.payOrEndRunSubroutinePayment));
-  for (const entry of legacyAbilityPayloadEntries(
+  for (const entry of abilityPayloadDiscriminatorEntries(
     payload,
-    ACTION_ID_LEGACY_ABILITY_PAYLOAD_FIELDS,
+    ACTION_ID_ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS,
   )) {
     parts.push(entry.abilityId);
   }
@@ -175,8 +170,7 @@ export function makeActionId(
     parts.push(String(payload.secondTargetCardId));
   if (payload?.hardwareTrashByCounterTrashCount)
     parts.push(String(payload.hardwareTrashByCounterTrashCount));
-  if (payload?.drawTaxDecision)
-    parts.push(String(payload.drawTaxDecision));
+  if (payload?.drawTaxDecision) parts.push(String(payload.drawTaxDecision));
   if (payload?.approachIceExposeDecision)
     parts.push(String(payload.approachIceExposeDecision));
   if (payload?.approachIceExposeViewDecision)

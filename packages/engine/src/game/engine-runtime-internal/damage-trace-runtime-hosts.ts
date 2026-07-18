@@ -27,7 +27,7 @@ import {
   type GameState,
   type ImminentEvent,
   type LegalAction,
-  type LegacyAbilityPayloadField,
+  type AbilityPayloadDiscriminatorField,
   type PlayerAction,
   type PlayerController,
   type PublicGameEvent,
@@ -120,9 +120,7 @@ import {
   configureLegalActionHostComposition,
   type LegalActionHostCompositionHost,
 } from "../legal-action-hosts";
-import {
-  configureEventContextHostComposition,
-} from "../events/event-context-hosts";
+import { configureEventContextHostComposition } from "../events/event-context-hosts";
 import { BAD_PUBLICITY_LOSS_THRESHOLD } from "../win-conditions";
 import {
   calculateRunnerLink as calculateRunnerLinkInTrace,
@@ -201,10 +199,7 @@ import {
   installCard as executeInstallCard,
   type InstallCardHost,
 } from "../install/install-card";
-import {
-  rezCard as executeRezCard,
-  type RezCardHost,
-} from "../rez/rez-card";
+import { rezCard as executeRezCard, type RezCardHost } from "../rez/rez-card";
 import {
   addRunnerTagsWithPrevention,
   aggregateDamageSummaries,
@@ -235,12 +230,8 @@ import {
   buildRunnerAgendaPointInstallAction,
   buildRunnerSelectedServerInstallAction,
 } from "../turn/runner-install-context-actions";
-import {
-  buildRunnerHostedProgramInstallAction,
-} from "../turn/runner-hosted-install-actions";
-import {
-  buildRunnerProgramTrashBeforeInstallAction,
-} from "../turn/runner-program-trash-install-actions";
+import { buildRunnerHostedProgramInstallAction } from "../turn/runner-hosted-install-actions";
+import { buildRunnerProgramTrashBeforeInstallAction } from "../turn/runner-program-trash-install-actions";
 import { buildRunnerStackSearchProgramToGripAction } from "../turn/runner-hidden-zone-search-actions";
 import {
   buildRunnerDelayedInstallRemoveCounterAction,
@@ -396,9 +387,7 @@ import {
   isSupportedEncounterTraceSuccessEffect,
   type EncounterPrintedEffectHost,
 } from "../run/encounter-printed-effects";
-import {
-  type EncounterPrintedNonTraceHost,
-} from "../run/encounter-printed-nontrace-effects";
+import { type EncounterPrintedNonTraceHost } from "../run/encounter-printed-nontrace-effects";
 import {
   breakAbilityMatchesIce,
   breakAbilityMatchesSubroutine,
@@ -414,18 +403,10 @@ import {
   createGameCardImplementationRuntimeDeps,
   type GameCardImplementationRuntimeDepsHost,
 } from "../card-implementation/card-implementation-runtime-deps";
-import {
-  type HiddenZoneRuntimeDepsHost,
-} from "../card-implementation/hidden-zone-runtime-deps";
-import {
-  type InstallRezRuntimeDepsHost,
-} from "../card-implementation/install-rez-runtime-deps";
-import {
-  type CounterLifecycleRuntimeDepsHost,
-} from "../card-implementation/counter-lifecycle-runtime-deps";
-import {
-  type TraceRuntimeDepsHost,
-} from "../card-implementation/trace-runtime-deps";
+import { type HiddenZoneRuntimeDepsHost } from "../card-implementation/hidden-zone-runtime-deps";
+import { type InstallRezRuntimeDepsHost } from "../card-implementation/install-rez-runtime-deps";
+import { type CounterLifecycleRuntimeDepsHost } from "../card-implementation/counter-lifecycle-runtime-deps";
+import { type TraceRuntimeDepsHost } from "../card-implementation/trace-runtime-deps";
 import {
   beginEncounter,
   isApproachIceExposeViewingWindowOpen,
@@ -614,9 +595,7 @@ import {
   corpInstalledEconomyActionProfileForPayload,
   type EconomyActionProfile,
 } from "../../mechanics/payment-costs";
-import {
-  isP358HiddenReplacementCompatibilityChoiceSource,
-} from "../../compatibility/payload-compatibility";
+import { isP358HiddenReplacementCompatibilityChoiceSource } from "../../compatibility/payload-compatibility";
 import {
   ALL_NIGHTER_ID,
   ARMADILLO_ARMORED_ROAD_HOME_ID,
@@ -668,9 +647,7 @@ import {
   ACCESS_NET_DAMAGE_UPGRADE_SOURCE,
   ACCESS_TRACE_DAMAGE_UPGRADE_SOURCE,
 } from "../../mechanics/server-upgrades";
-import {
-  RUN_TAX_UPGRADE_SOURCES,
-} from "../../mechanics/trace-tags";
+import { RUN_TAX_UPGRADE_SOURCES } from "../../mechanics/trace-tags";
 import { snapshotPersistentStealCostModifiersForSource } from "../../ability-engine/steal-cost-modifiers";
 import { createCardImplementationEffectAdapters } from "../../ability-engine/card-implementation-effect-adapters";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
@@ -710,7 +687,6 @@ import type {
   RuntimeDeps,
 } from "./runtime-shared";
 
-
 export function createDamageTraceRuntimeHosts(
   deps: RuntimeDeps,
 ): import("./damage-trace-runtime-port").DamageTraceRuntimePort {
@@ -743,15 +719,17 @@ export function createDamageTraceRuntimeHosts(
   function runnerUtilityLongtailKindForDefinition(
     definitionId: CardDefinitionId,
   ): CardRunnerUtilityLongtailImplementation["kind"] | undefined {
-    return cardImplementationForDefinitionId(definitionId)?.runnerUtilityLongtail
-      ?.kind;
+    return cardImplementationForDefinitionId(definitionId)
+      ?.runnerUtilityLongtail?.kind;
   }
 
   function runnerUtilityLongtailKindForCard(
     state: GameState,
     cardId: CardInstanceId,
   ): CardRunnerUtilityLongtailImplementation["kind"] | undefined {
-    return runnerUtilityLongtailKindForDefinition(definitionFor(state, cardId).id);
+    return runnerUtilityLongtailKindForDefinition(
+      definitionFor(state, cardId).id,
+    );
   }
 
   function runnerUtilityLongtailImplementationForCard(
@@ -765,7 +743,8 @@ export function createDamageTraceRuntimeHosts(
   function uniqueDirectLongtailImplementationForDefinition(
     definitionId: CardDefinitionId,
   ): CardUniqueDirectLongtailImplementation | undefined {
-    return cardImplementationForDefinitionId(definitionId)?.uniqueDirectLongtail;
+    return cardImplementationForDefinitionId(definitionId)
+      ?.uniqueDirectLongtail;
   }
 
   function uniqueDirectLongtailKindForDefinition(
@@ -817,7 +796,8 @@ export function createDamageTraceRuntimeHosts(
     state: GameState,
     cardId: CardInstanceId,
   ): CardRemainingReplacementLongtailImplementation["kind"] | undefined {
-    return remainingReplacementLongtailImplementationForCard(state, cardId)?.kind;
+    return remainingReplacementLongtailImplementationForCard(state, cardId)
+      ?.kind;
   }
 
   function isObligationDebtDefinition(definitionId: CardDefinitionId): boolean {
@@ -827,14 +807,20 @@ export function createDamageTraceRuntimeHosts(
     );
   }
 
-  function isDrawTaxSourceDefinition(state: GameState, cardId: CardInstanceId): boolean {
+  function isDrawTaxSourceDefinition(
+    state: GameState,
+    cardId: CardInstanceId,
+  ): boolean {
     return (
       remainingReplacementLongtailKindForCard(state, cardId) ===
       "runner_draw_tax_tag"
     );
   }
 
-  function isCorpInstalledEconomyCreditSource(state: GameState, cardId: CardInstanceId): boolean {
+  function isCorpInstalledEconomyCreditSource(
+    state: GameState,
+    cardId: CardInstanceId,
+  ): boolean {
     return (
       remainingReplacementLongtailKindForCard(state, cardId) ===
       "basic_credit_diversion_to_recurring_credits"
@@ -922,7 +908,12 @@ export function createDamageTraceRuntimeHosts(
   function corpTraceCounterPoolTotal(state: GameState): number {
     return corpTraceCounterPoolSourceIds(state).reduce(
       (sum, cardId) =>
-        sum + cardCounter(state, cardId, corpTraceCounterPoolCounterType(state, cardId)),
+        sum +
+        cardCounter(
+          state,
+          cardId,
+          corpTraceCounterPoolCounterType(state, cardId),
+        ),
       0,
     );
   }
@@ -949,7 +940,12 @@ export function createDamageTraceRuntimeHosts(
   function addCorpTraceCounterPoolCounters(state: GameState): number {
     let added = 0;
     for (const cardId of corpTraceCounterPoolSourceIds(state)) {
-      addCardCounter(state, cardId, corpTraceCounterPoolCounterType(state, cardId), 1);
+      addCardCounter(
+        state,
+        cardId,
+        corpTraceCounterPoolCounterType(state, cardId),
+        1,
+      );
       added += 1;
     }
     return added;
@@ -957,7 +953,10 @@ export function createDamageTraceRuntimeHosts(
 
   function rabbitTraceLimitReductionForIceTrace(state: GameState): number {
     const reductions = state.runner.rig.programs.map((cardId) => {
-      const implementation = runnerUtilityLongtailImplementationForCard(state, cardId);
+      const implementation = runnerUtilityLongtailImplementationForCard(
+        state,
+        cardId,
+      );
       if (
         implementation?.kind === "rabbit_ice_trace_limit_reduction" &&
         mustInstance(state.cardInstances, cardId).rezzed

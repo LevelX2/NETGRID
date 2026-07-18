@@ -1,5 +1,5 @@
 import {
-  LEGACY_ABILITY_PAYLOAD_FIELDS,
+  ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS,
   type AiDecisionInput,
   type AiDifficulty,
   type CounterDisplay,
@@ -7,6 +7,7 @@ import {
   type Cost,
   type LegalAction,
   type PlayerView,
+  type PublicAbilityFamily,
   type PublicGameEvent,
   type ResolvedGameEffect,
   type Side,
@@ -16,16 +17,6 @@ import {
   type VisibleChoiceRequest,
   type VisibleEffectiveIceRunQuote,
 } from "@netgrid/shared";
-
-type AiPublicPayloadAbilityFamily =
-  | "agenda-scoring"
-  | "damage-prevention"
-  | "hidden-zone"
-  | "hosting-counters"
-  | "payment-costs"
-  | "random-effects"
-  | "run-access"
-  | "trace-tags";
 
 export type BuildAiDecisionInputDtoParams = {
   side: Side;
@@ -131,7 +122,7 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "payOrTrashProgramSubroutinePayment",
   "payOrEndRunSubroutineIndexes",
   "payOrEndRunSubroutinePayment",
-  ...LEGACY_ABILITY_PAYLOAD_FIELDS,
+  ...ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS,
 ]);
 
 const PUBLIC_PAYLOAD_PRIMITIVE_KEYS = new Set<string>([
@@ -254,7 +245,6 @@ const PUBLIC_PAYLOAD_PRIMITIVE_KEYS = new Set<string>([
   "blinkDamageAmount",
   "randomCounterAfter",
   "returnedCount",
-  ...LEGACY_ABILITY_PAYLOAD_FIELDS,
 ]);
 
 const PUBLIC_PAYLOAD_STRING_ARRAY_KEYS = new Set([
@@ -350,17 +340,16 @@ const PUBLIC_DECK_METADATA_KEYS = new Set([
   "cardPoolSnapshotId",
 ]);
 
-const ALLOWED_ABILITY_FAMILIES: ReadonlySet<AiPublicPayloadAbilityFamily> =
-  new Set([
-    "agenda-scoring",
-    "damage-prevention",
-    "hidden-zone",
-    "hosting-counters",
-    "payment-costs",
-    "random-effects",
-    "run-access",
-    "trace-tags",
-  ]);
+const ALLOWED_ABILITY_FAMILIES: ReadonlySet<PublicAbilityFamily> = new Set([
+  "agenda-scoring",
+  "damage-prevention",
+  "hidden-zone",
+  "hosting-counters",
+  "payment-costs",
+  "random-effects",
+  "run-access",
+  "trace-tags",
+]);
 
 export function buildAiDecisionInputDto(
   params: BuildAiDecisionInputDtoParams,
@@ -965,9 +954,7 @@ function sanitizeAllowedPrimitiveRecord(
   }
   if (
     typeof result.abilityFamily === "string" &&
-    !ALLOWED_ABILITY_FAMILIES.has(
-      result.abilityFamily as AiPublicPayloadAbilityFamily,
-    )
+    !ALLOWED_ABILITY_FAMILIES.has(result.abilityFamily as PublicAbilityFamily)
   )
     delete result.abilityFamily;
   return result;

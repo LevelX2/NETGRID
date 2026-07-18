@@ -9,6 +9,13 @@ const repoRoot = path.resolve(
   "..",
 );
 const engineRoot = path.join(repoRoot, "packages", "engine", "src");
+const abilityPayloadRegistryFile = path.join(
+  repoRoot,
+  "packages",
+  "shared",
+  "src",
+  "ability-payload.ts",
+);
 const runtimeRoot = path.join(engineRoot, "game", "engine-runtime-internal");
 const abilityRoot = path.join(engineRoot, "ability-engine");
 
@@ -101,9 +108,29 @@ const productionFileSet = new Set(productionFiles);
 const graph = new Map(productionFiles.map((file) => [file, new Set()]));
 const findings = [];
 const actualLayerDebt = new Set();
+const actualVersionedAbilityPayloadFields = new Set();
+const registeredAbilityPayloadFields = new Set(
+  stringLiteralArrayValues(
+    parseSource(
+      abilityPayloadRegistryFile,
+      readFileSync(abilityPayloadRegistryFile, "utf8"),
+    ),
+    "ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS",
+  ),
+);
 
 for (const file of productionFiles) {
   const source = parseSource(file, readFileSync(file, "utf8"));
+  for (const field of versionedAbilityPayloadFields(source))
+    actualVersionedAbilityPayloadFields.add(field);
+  const resolvedEffectAssertionCount = countTypeAssertionsNamed(
+    source,
+    "ResolvedGameEffect",
+  );
+  if (resolvedEffectAssertionCount > 0)
+    findings.push(
+      `${relativeEnginePath(file)} bypasses ResolvedGameEffect validation with ${resolvedEffectAssertionCount} type assertion(s)`,
+    );
   if (relativeEnginePath(file).startsWith("game/engine-runtime-internal/")) {
     const dependencySnapshots = countRuntimeDependencySnapshots(source);
     if (dependencySnapshots > 0)
@@ -127,6 +154,11 @@ for (const file of productionFiles) {
     );
     if (layerFinding) actualLayerDebt.add(layerFinding);
   }
+}
+
+for (const field of actualVersionedAbilityPayloadFields) {
+  if (!registeredAbilityPayloadFields.has(field))
+    findings.push(`unregistered versioned ability payload field: ${field}`);
 }
 
 const actualCycles = cyclicComponents(graph);
@@ -422,6 +454,55 @@ function countSyntaxKind(node, kind) {
   return count;
 }
 
+function countTypeAssertionsNamed(node, typeName) {
+  let count = 0;
+  function visit(current) {
+    if (
+      (ts.isAsExpression(current) || ts.isTypeAssertionExpression(current)) &&
+      ts.isTypeReferenceNode(current.type) &&
+      ts.isIdentifier(current.type.typeName) &&
+      current.type.typeName.text === typeName
+    )
+      count += 1;
+    ts.forEachChild(current, visit);
+  }
+  visit(node);
+  return count;
+}
+
+function stringLiteralArrayValues(source, variableName) {
+  for (const statement of source.statements) {
+    if (!ts.isVariableStatement(statement)) continue;
+    for (const declaration of statement.declarationList.declarations) {
+      if (
+        ts.isIdentifier(declaration.name) &&
+        declaration.name.text === variableName &&
+        declaration.initializer &&
+        ts.isAsExpression(declaration.initializer) &&
+        ts.isArrayLiteralExpression(declaration.initializer.expression)
+      )
+        return declaration.initializer.expression.elements
+          .filter(ts.isStringLiteral)
+          .map((element) => element.text);
+    }
+  }
+  return [];
+}
+
+function versionedAbilityPayloadFields(source) {
+  const fields = new Set();
+  function visit(node) {
+    if (
+      (ts.isIdentifier(node) || ts.isStringLiteral(node)) &&
+      /^v\d+[A-Za-z0-9]*Ability$/.test(node.text)
+    )
+      fields.add(node.text);
+    ts.forEachChild(node, visit);
+  }
+  visit(source);
+  return fields;
+}
+
 function cyclicComponents(graph) {
   let nextIndex = 0;
   const stack = [];
@@ -513,6 +594,35 @@ function runSelfTest() {
   )
     throw new Error(
       "engine source structure self-test failed: runtime dependency snapshot",
+    );
+
+  if (
+    countTypeAssertionsNamed(
+      parseSource(
+        "effect.ts",
+        "declare const value: unknown; const bypass = value as ResolvedGameEffect;",
+      ),
+      "ResolvedGameEffect",
+    ) !== 1
+  )
+    throw new Error(
+      "engine source structure self-test failed: resolved effect assertion",
+    );
+
+  if (
+    signature(
+      Array.from(
+        versionedAbilityPayloadFields(
+          parseSource(
+            "payload.ts",
+            'const payload = { v123RunnerAbility: "test" };',
+          ),
+        ),
+      ),
+    ) !== "v123RunnerAbility"
+  )
+    throw new Error(
+      "engine source structure self-test failed: ability payload registry",
     );
 
   if (

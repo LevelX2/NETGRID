@@ -1,6 +1,7 @@
 import type {
   AiDecisionInput,
   LegalAction,
+  PublicGameEvent,
   VisibleCard,
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
@@ -931,7 +932,7 @@ function corpInputForCentralInstall(
   } as unknown as AiDecisionInput;
 }
 
-function publicArchivesRunEvent(eventId: string) {
+function publicArchivesRunEvent(eventId: string): PublicGameEvent {
   return {
     eventId,
     type: "start_run",

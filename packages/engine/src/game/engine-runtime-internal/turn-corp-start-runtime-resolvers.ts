@@ -403,7 +403,7 @@ export function createTurnCorpStartRuntimeResolvers(
             tagsAdded,
             runnerTagsAfter: state.runner.tags,
             randomCounterAfter: state.randomCounter,
-          } as ResolvedGameEffect);
+          });
         }
       }
       if (deps.isCorpInstalledEconomyCreditSource(state, cardId)) {
@@ -489,7 +489,7 @@ export function createTurnCorpStartRuntimeResolvers(
               corpBadPublicityAfter: state.corp.badPublicity,
             }
           : {}),
-      } as ResolvedGameEffect);
+      });
     }
     const taxCounters = purgeableRunnerVirusCounterAmount(corpCounters, "tax");
     const taxLoss = Math.min(state.corp.credits, Math.floor(taxCounters / 2));
@@ -565,7 +565,7 @@ export function createTurnCorpStartRuntimeResolvers(
         randomPurpose,
         restrictedActionFamily: restriction,
         randomCounterAfter: state.randomCounter,
-      } as ResolvedGameEffect);
+      });
       return;
     }
   }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  ACTION_ID_LEGACY_ABILITY_PAYLOAD_FIELDS,
+  ACTION_ID_ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS,
   isP358ConcealAndReorderInstalledIceChoiceSource,
   isP358HiddenReplacementCompatibilityChoiceSource,
   isP358SuccessfulRunFortIceReorderChoiceSource,
@@ -19,14 +19,12 @@ import {
 } from "./runtime-compatibility";
 
 describe("P3.71 PendingChoice replay compatibility marker stability", () => {
-  it("keeps legacy PublicPayload ability fields stable for ActionID and replay compatibility", () => {
-    expect(ACTION_ID_LEGACY_ABILITY_PAYLOAD_FIELDS).toStrictEqual([
+  it("keeps current ability discriminators ordered for ActionID determinism", () => {
+    expect(ACTION_ID_ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS).toStrictEqual([
       "v1911HiddenZoneAbility",
       "v1917AssetAbility",
       "v1918UpgradeAbility",
-      "v1919AssetAbility",
       "v1919OperationAbility",
-      "v1919UpgradeAbility",
       "v1919RunnerProgramAbility",
       "v1919RunnerEventAbility",
       "v1920AssetAbility",

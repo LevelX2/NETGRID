@@ -218,9 +218,11 @@ export function publicContextForAction(
       if (value !== undefined) context[key] = value;
     }
   }
-  if (typeof legalAction.payload?.v181RunnerProgramAbility === "string") {
-    context.v181RunnerProgramAbility =
-      legalAction.payload.v181RunnerProgramAbility;
+  if (
+    legalAction.payload?.abilityId === "broken_ice_virus_counter" ||
+    legalAction.payload?.abilityId === "broken_ice_virus_counter_choice" ||
+    legalAction.payload?.abilityId === "pox_counter"
+  ) {
     for (const key of [
       "brokenIceVirusCounterCandidateCount",
       "brokenIceVirusCounterAdded",
@@ -1694,21 +1696,6 @@ export function publicContextForAction(
   ) {
     context.agendaAbility = "v1919_scored_agenda_reveal_rd_top";
   }
-  if (typeof legalAction.payload?.v1919AssetAbility === "string") {
-    context.v1919AssetAbility = legalAction.payload.v1919AssetAbility;
-    if (typeof legalAction.payload.addedCounterAmount === "number")
-      context.addedCounterAmount = legalAction.payload.addedCounterAmount;
-    if (typeof legalAction.payload.remainingCounters === "number")
-      context.remainingCounters = legalAction.payload.remainingCounters;
-    if (typeof legalAction.payload.advancementCounterCount === "number")
-      context.advancementCounterCount =
-        legalAction.payload.advancementCounterCount;
-    if (typeof legalAction.payload.gainedCredits === "number")
-      context.gainedCredits = legalAction.payload.gainedCredits;
-    if (typeof legalAction.payload.corpCreditsAfter === "number")
-      context.corpCreditsAfter = legalAction.payload.corpCreditsAfter;
-    if (legalAction.payload.selfTrashed === true) context.selfTrashed = true;
-  }
   if (typeof legalAction.payload?.v1919OperationAbility === "string") {
     context.v1919OperationAbility = legalAction.payload.v1919OperationAbility;
     if (typeof legalAction.payload.targetCardId === "string")
@@ -1837,21 +1824,6 @@ export function publicContextForAction(
         legalAction.payload.returnedCardDefinitionId;
     if (legalAction.payload.returnedToGrip === true)
       context.returnedToGrip = true;
-  }
-  if (typeof legalAction.payload?.v1919UpgradeAbility === "string") {
-    context.v1919UpgradeAbility = legalAction.payload.v1919UpgradeAbility;
-    if (typeof legalAction.payload.agendaPointCost === "number")
-      context.agendaPointCost = legalAction.payload.agendaPointCost;
-    if (typeof legalAction.payload.agendaPointCostPaid === "number")
-      context.agendaPointCostPaid = legalAction.payload.agendaPointCostPaid;
-    if (legalAction.payload.stealBlockedByAgendaPointCost === true)
-      context.stealBlockedByAgendaPointCost = true;
-    if (legalAction.payload.specialZone)
-      context.specialZone = legalAction.payload.specialZone;
-    if (legalAction.payload.specialZoneVisibility)
-      context.specialZoneVisibility = legalAction.payload.specialZoneVisibility;
-    if (legalAction.payload.specialZoneReason)
-      context.specialZoneReason = legalAction.payload.specialZoneReason;
   }
   if (typeof legalAction.payload?.v1919RunnerProgramAbility === "string") {
     context.v1919RunnerProgramAbility =

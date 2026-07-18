@@ -84,7 +84,7 @@ export function createTurnStartTagContinuationResolver(
         tagsAdded,
         runnerTagsAfter: state.runner.tags,
         randomCounterAfter: state.randomCounter,
-      } as ResolvedGameEffect);
+      });
       delete state.pendingAddTagContinuation;
       const suspended = callbacks.applyCorpStartOfTurnEffects(
         state,

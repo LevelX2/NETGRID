@@ -4873,7 +4873,7 @@ describe("V1.8.1 Mechanikpaket H", () => {
     expect(state.cardInstances[innerIceId]?.counters?.virus).toBe(1);
     expect(state.cardInstances[outerIceId]?.counters?.virus ?? 0).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      v181RunnerProgramAbility: "broken_ice_virus_counter",
+      abilityId: "broken_ice_virus_counter",
       brokenIceVirusCounterAdded: 1,
       targetCardDefinitionId: "onr_v1_279_wall-of-static",
     });
@@ -7486,7 +7486,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
     expect(state.corp.credits).toBe(21);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "end_turn",
-      obligationDebtAbility: "end_of_turn_payment",
+      abilityId: "end_of_turn_payment",
       obligationDebtPaymentPaid: 1,
       corpCreditsAfter: 21,
     });
@@ -7680,7 +7680,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
       actionType: "resolve_choice",
       hiddenZoneBarrier: true,
       hiddenZoneAction: "scored_subtype_reveal_walls",
-      agendaAbility: "scored_subtype_reveal",
+      abilityId: "scored_subtype_reveal",
       revealedCount: 2,
       rezzedMatchingIceCount: 1,
       countedMatchingIceCount: 3,
@@ -7799,7 +7799,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
     expect(state.gameEndReason).toBe("obligation_debt_unpaid");
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "end_turn",
-      obligationDebtAbility: "end_of_turn_payment",
+      abilityId: "end_of_turn_payment",
       obligationDebtPaymentFailed: true,
       gameEndReason: "obligation_debt_unpaid",
     });
@@ -7849,7 +7849,7 @@ describe("V1.9.5 Mechanikpaket N", () => {
     expect(agendaPoints(state, "corp")).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "trigger_ability",
-      obligationDebtAbility: "remove_obligation",
+      abilityId: "remove_obligation",
       obligationDebtPaymentPaid: 12,
       gainedAgendaPoints: 1,
       obligationDebtCountAfter: 0,

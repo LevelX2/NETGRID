@@ -3461,7 +3461,7 @@ describe("formatChronicleEvent", () => {
     const pattel = formatChronicleEvent(
       makeEvent("resolve_choice", {
         actor: "runner",
-        v181RunnerProgramAbility: "pattels_virus_counter",
+        abilityId: "broken_ice_virus_counter",
         targetCardDefinitionId: "onr_v1_279_wall-of-static",
         remainingCounters: 2,
       }),
@@ -3471,7 +3471,7 @@ describe("formatChronicleEvent", () => {
     const pox = formatChronicleEvent(
       makeEvent("access_card", {
         actor: "runner",
-        v181RunnerProgramAbility: "pox_counter",
+        abilityId: "pox_counter",
         targetServerLabel: "R&D",
         poxCountersAfter: 3,
       }),
@@ -6799,7 +6799,7 @@ describe("formatChronicleEvent", () => {
             sourceDefinitionId: "onr_v1_172_quest-for-cattekin",
             sourceTitle: "Quest for Cattekin",
             v1921DieRoll: 4,
-            questForCattekinOutcome: "no_effect",
+            randomEffectOutcome: "no_effect",
           },
           {
             effectId: "quest-core",
@@ -6811,7 +6811,7 @@ describe("formatChronicleEvent", () => {
             sourceDefinitionId: "onr_v1_172_quest-for-cattekin",
             sourceTitle: "Quest for Cattekin",
             v1921DieRoll: 1,
-            questForCattekinOutcome: "core_damage",
+            randomEffectOutcome: "core_damage",
             damageCannotBePrevented: true,
             damageType: "core",
           },
@@ -6825,7 +6825,7 @@ describe("formatChronicleEvent", () => {
             sourceDefinitionId: "onr_v1_172_quest-for-cattekin",
             sourceTitle: "Quest for Cattekin",
             v1921DieRoll: 2,
-            questForCattekinOutcome: "net_damage",
+            randomEffectOutcome: "net_damage",
             damageCannotBePrevented: true,
             damageType: "net",
           },
@@ -6839,7 +6839,7 @@ describe("formatChronicleEvent", () => {
             sourceDefinitionId: "onr_v1_172_quest-for-cattekin",
             sourceTitle: "Quest for Cattekin",
             v1921DieRoll: 6,
-            questForCattekinOutcome: "permanent_action",
+            randomEffectOutcome: "permanent_action",
             sourceTrashed: true,
             permanentActionGain: true,
           },

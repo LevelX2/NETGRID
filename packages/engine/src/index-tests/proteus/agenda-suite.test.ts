@@ -91,7 +91,13 @@ function addCorpCard(
   else {
     let server = state.corp.servers.find((candidate) => candidate.id === zone);
     if (!server) {
-      server = { id: zone, kind: "remote", label: "Remote 1", ice: [], root: [] };
+      server = {
+        id: zone,
+        kind: "remote",
+        label: "Remote 1",
+        ice: [],
+        root: [],
+      };
       state.corp.servers.push(server);
     }
     server.root.unshift(cardId);
@@ -145,7 +151,9 @@ function installRunnerPreventionCard(
   faceup = true,
 ): CardInstanceId {
   const cardId = addRunnerGripCard(state, definitionId, id);
-  state.runner.grip = state.runner.grip.filter((candidate) => candidate !== cardId);
+  state.runner.grip = state.runner.grip.filter(
+    (candidate) => candidate !== cardId,
+  );
   state.runner.rig[type === "hardware" ? "hardware" : "resources"].push(cardId);
   state.cardInstances[cardId] = {
     ...state.cardInstances[cardId]!,
@@ -175,7 +183,10 @@ function scoreCorpAgenda(
   return cardId;
 }
 
-function removeEverywhereForTest(state: GameState, cardId: CardInstanceId): void {
+function removeEverywhereForTest(
+  state: GameState,
+  cardId: CardInstanceId,
+): void {
   state.corp.hq = state.corp.hq.filter((id) => id !== cardId);
   state.corp.rd = state.corp.rd.filter((id) => id !== cardId);
   state.corp.archives = state.corp.archives.filter((id) => id !== cardId);
@@ -229,15 +240,14 @@ function accessTopCard(
   serverId: Exclude<ServerId, "new_remote">,
 ): GameState {
   openAccess(state, serverId);
-  return apply(
-    state,
-    "runner",
-    (action) => action.type === "access_card",
-  );
+  return apply(state, "runner", (action) => action.type === "access_card");
 }
 
 function expectReplayStable(before: GameState, after: GameState): void {
-  const replay = replayEvents(before, after.eventLog.slice(before.eventLog.length));
+  const replay = replayEvents(
+    before,
+    after.eventLog.slice(before.eventLog.length),
+  );
   expect(replay.ok).toBe(true);
   expect(hashState(replay.state)).toBe(hashState(after));
 }
@@ -271,7 +281,11 @@ describe("Proteus PRO013 agenda suite behavior", () => {
     );
     expect(action.costs).toEqual([{ clicks: 1 }]);
     const before = structuredClone(state);
-    state = apply(state, "corp", (candidate) => candidate.actionId === action.actionId);
+    state = apply(
+      state,
+      "corp",
+      (candidate) => candidate.actionId === action.actionId,
+    );
     expect(state.corp.clicks).toBe(3);
     expect(state.runner.heap).toHaveLength(heapBefore + 1);
     expect(state.runner.maxHandSize).toBe(4);
@@ -325,7 +339,11 @@ describe("Proteus PRO013 agenda suite behavior", () => {
       damageAmount: 2,
       publicRevealDefinitionId: FETAL_AI,
     });
-    const steal = mustAction(fetal, "runner", (action) => action.type === "steal_agenda");
+    const steal = mustAction(
+      fetal,
+      "runner",
+      (action) => action.type === "steal_agenda",
+    );
     expect(steal.costs).toEqual([{ credits: 2 }]);
     const staleZone = structuredClone(fetal);
     staleZone.cardInstances[fetalId] = {
@@ -335,8 +353,14 @@ describe("Proteus PRO013 agenda suite behavior", () => {
     expect(applyLegal(staleZone, "runner", steal, "fetal-zone").ok).toBe(false);
     const brokeRunner = structuredClone(fetal);
     brokeRunner.runner.credits = 1;
-    expect(applyLegal(brokeRunner, "runner", steal, "fetal-cost").ok).toBe(false);
-    fetal = apply(fetal, "runner", (action) => action.actionId === steal.actionId);
+    expect(applyLegal(brokeRunner, "runner", steal, "fetal-cost").ok).toBe(
+      false,
+    );
+    fetal = apply(
+      fetal,
+      "runner",
+      (action) => action.actionId === steal.actionId,
+    );
     expect(fetal.runner.credits).toBe(28);
     expect(fetal.runner.scoreArea).toContain(fetalId);
     expectReplayStable(before, fetal);
@@ -349,7 +373,12 @@ describe("Proteus PRO013 agenda suite behavior", () => {
 
     let marked = baseState("pro013-marked");
     addCorpCard(marked, FETAL_AI, "pro013_fetal_hidden_rd", "rd");
-    const markedId = addCorpCard(marked, MARKED_ACCOUNTS, "pro013_marked_rd", "rd");
+    const markedId = addCorpCard(
+      marked,
+      MARKED_ACCOUNTS,
+      "pro013_marked_rd",
+      "rd",
+    );
     marked = accessTopCard(marked, "rd");
     expect(marked.run?.accessedCardId).toBe(markedId);
     expect(marked.runner.tags).toBe(1);
@@ -360,7 +389,12 @@ describe("Proteus PRO013 agenda suite behavior", () => {
       publicRevealDefinitionId: MARKED_ACCOUNTS,
     });
     let markedArchives = baseState("pro013-marked-archives");
-    addCorpCard(markedArchives, MARKED_ACCOUNTS, "pro013_marked_archives", "archives");
+    addCorpCard(
+      markedArchives,
+      MARKED_ACCOUNTS,
+      "pro013_marked_archives",
+      "archives",
+    );
     markedArchives = accessTopCard(markedArchives, "archives");
     expect(markedArchives.runner.tags).toBe(0);
   });
@@ -372,8 +406,7 @@ describe("Proteus PRO013 agenda suite behavior", () => {
       state,
       "runner",
       (action) =>
-        action.type === "install_card" &&
-        action.payload?.cardId === fallGuyId,
+        action.type === "install_card" && action.payload?.cardId === fallGuyId,
     );
     addCorpCard(state, FETAL_AI, "pro013_fetal_stays_hidden_rd", "rd");
     const markedId = addCorpCard(
@@ -391,7 +424,9 @@ describe("Proteus PRO013 agenda suite behavior", () => {
     expect(state.runner.tags).toBe(0);
     expect(state.pendingChoice?.source).toContain("event_modification");
     expect(state.cardInstances[markedId]?.faceup).toBe(true);
-    expect(state.cardInstances["pro013_fetal_stays_hidden_rd"]?.faceup).toBe(false);
+    expect(state.cardInstances["pro013_fetal_stays_hidden_rd"]?.faceup).toBe(
+      false,
+    );
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "access_card",
       eventModificationWindowOpened: true,
@@ -411,9 +446,9 @@ describe("Proteus PRO013 agenda suite behavior", () => {
     expect(passState.runner.tags).toBe(1);
     expect(passState.runner.rig.resources).toContain(fallGuyId);
     expect(passState.pendingAddTagContinuation).toBeUndefined();
-    expect(passState.cardInstances["pro013_fetal_stays_hidden_rd"]?.faceup).toBe(
-      false,
-    );
+    expect(
+      passState.cardInstances["pro013_fetal_stays_hidden_rd"]?.faceup,
+    ).toBe(false);
     expect(passState.eventLog.at(-1)?.publicPayload).toMatchObject({
       eventModificationDecision: "pass",
       tagsAdded: 1,
@@ -426,7 +461,9 @@ describe("Proteus PRO013 agenda suite behavior", () => {
 
     expect(state.runner.tags).toBe(0);
     expect(state.runner.heap).toContain(fallGuyId);
-    expect(state.cardInstances["pro013_fetal_stays_hidden_rd"]?.faceup).toBe(false);
+    expect(state.cardInstances["pro013_fetal_stays_hidden_rd"]?.faceup).toBe(
+      false,
+    );
     const resolvePayload = state.eventLog.at(-1)?.publicPayload;
     expect(resolvePayload).toMatchObject({
       actionType: "resolve_choice",
@@ -448,7 +485,9 @@ describe("Proteus PRO013 agenda suite behavior", () => {
       hiddenZoneAction: "v1917_access_ambush",
     });
     expect(resolvePayload).not.toHaveProperty("publicRevealDefinitionId");
-    expect(JSON.stringify(resolvePayload)).not.toContain("pro013_fetal_stays_hidden_rd");
+    expect(JSON.stringify(resolvePayload)).not.toContain(
+      "pro013_fetal_stays_hidden_rd",
+    );
     expectReplayStable(before, state);
   });
 
@@ -578,13 +617,19 @@ describe("Proteus PRO013 agenda suite behavior", () => {
     zurich.activeSide = "corp";
     zurich.phase = "corp_action_phase";
     zurich.timingPoint = "corp_action.main";
-    const zurichId = addCorpCard(zurich, PROJECT_ZURICH, "pro013_zurich", "remote_1");
+    const zurichId = addCorpCard(
+      zurich,
+      PROJECT_ZURICH,
+      "pro013_zurich",
+      "remote_1",
+    );
     zurich.cardInstances[zurichId]!.advancementCounters = 7;
     const before = structuredClone(zurich);
     zurich = apply(
       zurich,
       "corp",
-      (action) => action.type === "score_agenda" && action.payload?.cardId === zurichId,
+      (action) =>
+        action.type === "score_agenda" && action.payload?.cardId === zurichId,
     );
     expect(zurich.corp.scoreArea).toContain(zurichId);
     expect(zurich.cardInstances[zurichId]?.counters?.mark).toBe(2);
@@ -610,12 +655,18 @@ describe("Proteus PRO013 agenda suite behavior", () => {
     world.activeSide = "corp";
     world.phase = "corp_action_phase";
     world.timingPoint = "corp_action.main";
-    const worldId = addCorpCard(world, WORLD_DOMINATION, "pro013_world", "remote_1");
+    const worldId = addCorpCard(
+      world,
+      WORLD_DOMINATION,
+      "pro013_world",
+      "remote_1",
+    );
     world.cardInstances[worldId]!.advancementCounters = 12;
     world = apply(
       world,
       "corp",
-      (action) => action.type === "score_agenda" && action.payload?.cardId === worldId,
+      (action) =>
+        action.type === "score_agenda" && action.payload?.cardId === worldId,
     );
     expect(world.corp.scoreArea).toContain(worldId);
     expect(world.winner).toBe("corp");
@@ -638,7 +689,11 @@ describe("Proteus PRO013 agenda suite behavior", () => {
         action.payload?.serverId === "hq",
     );
     expect(play.costs).toEqual([{ clicks: 1, credits: 12 }]);
-    state = apply(state, "runner", (action) => action.actionId === play.actionId);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === play.actionId,
+    );
     expect(state.runner.scoreArea).not.toContain(hqAgenda);
     expect(state.runner.scoreArea).toContain(blackmailId);
     expect(state.cardInstances[blackmailId]?.counters?.agenda).toBe(1);
@@ -669,15 +724,24 @@ describe("Proteus PRO013 agenda suite behavior", () => {
     clearCorpCentralZone(state, "hq");
     clearCorpCentralZone(state, "rd");
     clearCorpCentralZone(state, "archives");
-    const pirateId = addRunnerGripCard(state, PIRATE_BROADCAST, "pro013_pirate");
+    const pirateId = addRunnerGripCard(
+      state,
+      PIRATE_BROADCAST,
+      "pro013_pirate",
+    );
     const before = structuredClone(state);
     const play = mustAction(
       state,
       "runner",
-      (action) => action.type === "play_event" && action.payload?.cardId === pirateId,
+      (action) =>
+        action.type === "play_event" && action.payload?.cardId === pirateId,
     );
     expect(play.costs).toEqual([{ clicks: 1, credits: 1 }]);
-    state = apply(state, "runner", (action) => action.actionId === play.actionId);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === play.actionId,
+    );
     expect(state.runner.credits).toBe(29);
     expect(state.runnerTurnFlags?.pendingSequences?.[0]).toMatchObject({
       kind: "multi_server_success_sequence",
@@ -697,8 +761,17 @@ describe("Proteus PRO013 agenda suite behavior", () => {
           bonusRunNoClick: true,
         },
       });
-      state = apply(state, "runner", (action) => action.actionId === legal[0]!.actionId);
-      if (state.run) state = apply(state, "runner", (action) => action.type === "access_card");
+      state = apply(
+        state,
+        "runner",
+        (action) => action.actionId === legal[0]!.actionId,
+      );
+      if (state.run)
+        state = apply(
+          state,
+          "runner",
+          (action) => action.type === "access_card",
+        );
     }
     expect(state.runner.scoreArea).toContain(pirateId);
     expect(state.cardInstances[pirateId]?.counters?.agenda).toBe(1);
@@ -732,40 +805,62 @@ describe("Proteus PRO013 agenda suite behavior", () => {
       failed,
       "runner",
       (action) =>
-        action.payload?.runnerAbility === "multi_server_success_sequence_failed",
+        action.payload?.runnerAbility ===
+        "multi_server_success_sequence_failed",
     );
     expect(failed.runnerTurnFlags?.pendingSequences).toBeUndefined();
     expect(failed.runnerTurnFlags?.forgoNextActionsPending).toBe(1);
     expect(failed.runner.clicks).toBe(clicksBefore);
     expect(failed.eventLog.at(-1)?.publicPayload).toMatchObject({
-      runnerAbility: "multi_server_success_sequence_failed",
+      abilityId: "multi_server_success_sequence_failed",
       amounts: { actionDebtAdded: 1 },
     });
   });
 
   it("Promises, Promises marks the next agenda access only, survives non-agenda access, expires at turn end, and adds exactly one steal point", () => {
     let state = baseState("pro013-promises");
-    const promisesId = addRunnerGripCard(state, PROMISES_PROMISES, "pro013_promises");
-    const assetId = addCorpCard(state, NON_AGENDA_ASSET, "pro013_non_agenda", "remote_1");
-    const agendaId = addCorpCard(state, MARKED_ACCOUNTS, "pro013_promised_agenda", "rd");
+    const promisesId = addRunnerGripCard(
+      state,
+      PROMISES_PROMISES,
+      "pro013_promises",
+    );
+    const assetId = addCorpCard(
+      state,
+      NON_AGENDA_ASSET,
+      "pro013_non_agenda",
+      "remote_1",
+    );
+    const agendaId = addCorpCard(
+      state,
+      MARKED_ACCOUNTS,
+      "pro013_promised_agenda",
+      "rd",
+    );
     const before = structuredClone(state);
     state = apply(
       state,
       "runner",
-      (action) => action.type === "play_event" && action.payload?.cardId === promisesId,
+      (action) =>
+        action.type === "play_event" && action.payload?.cardId === promisesId,
     );
     expectReplayStable(before, state);
     expect(state.runner.credits).toBe(28);
-    expect(state.runnerTurnFlags?.nextAgendaAccessAgendaPointPending).toBe(true);
+    expect(state.runnerTurnFlags?.nextAgendaAccessAgendaPointPending).toBe(
+      true,
+    );
 
     state = accessTopCard(state, "remote_1");
     expect(state.run?.accessedCardId).toBe(assetId);
-    expect(state.runnerTurnFlags?.nextAgendaAccessAgendaPointPending).toBe(true);
+    expect(state.runnerTurnFlags?.nextAgendaAccessAgendaPointPending).toBe(
+      true,
+    );
     state = apply(state, "runner", (action) => action.type === "decline_trash");
 
     state = accessTopCard(state, "rd");
     expect(state.run?.accessedCardId).toBe(agendaId);
-    expect(state.runnerTurnFlags?.nextAgendaAccessAgendaPointPending).toBe(false);
+    expect(state.runnerTurnFlags?.nextAgendaAccessAgendaPointPending).toBe(
+      false,
+    );
     expect(state.run?.nextAgendaAccessAgendaPointBonus).toMatchObject({
       amount: 1,
       cardId: agendaId,
@@ -788,10 +883,13 @@ describe("Proteus PRO013 agenda suite behavior", () => {
       expires,
       "runner",
       (action) =>
-        action.type === "play_event" && action.payload?.cardId === expiringPromises,
+        action.type === "play_event" &&
+        action.payload?.cardId === expiringPromises,
     );
     expires = apply(expires, "runner", (action) => action.type === "end_turn");
     expires = toRunnerTurn(expires);
-    expect(expires.runnerTurnFlags?.nextAgendaAccessAgendaPointPending).toBe(false);
+    expect(expires.runnerTurnFlags?.nextAgendaAccessAgendaPointPending).toBe(
+      false,
+    );
   });
 });

@@ -214,22 +214,28 @@ describe("V1.0.5K Card Release", () => {
       rezCost: 2,
       strength: 1,
     });
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_239_endless-corridor"]).toMatchObject({
-      rezCost: 4,
-      strength: 2,
-    });
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_239_endless-corridor"]).toMatchObject(
+      {
+        rezCost: 4,
+        strength: 2,
+      },
+    );
     expect(CARD_DEFINITIONS_BY_ID["onr_v1_144_tycho-mem-chip"]).toMatchObject({
       installCost: 5,
       memoryLimitBonus: 3,
     });
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_146_zetatech-mem-chip"]).toMatchObject({
+    expect(
+      CARD_DEFINITIONS_BY_ID["onr_v1_146_zetatech-mem-chip"],
+    ).toMatchObject({
       installCost: 3,
       memoryLimitBonus: 2,
     });
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_203_hostile-takeover"]).toMatchObject({
-      advancementRequirement: 3,
-      agendaPoints: 1,
-    });
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_203_hostile-takeover"]).toMatchObject(
+      {
+        advancementRequirement: 3,
+        agendaPoints: 1,
+      },
+    );
   });
 
   it("validates the V1.0.5K smoke decks and starts on the current rules baseline", () => {
@@ -1489,7 +1495,9 @@ describe("V1.1.2K Card Release", () => {
     );
     expect(operationState.runner.tags).toBe(beforeVoucherTags);
     expect(operationState.corp.credits).toBe(beforeVoucherCredits);
-    expect(operationState.pendingChoice?.source).toContain("event_modification");
+    expect(operationState.pendingChoice?.source).toContain(
+      "event_modification",
+    );
 
     const voucherPassState = applyChoice(
       structuredClone(operationState),
@@ -1638,10 +1646,14 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       memoryCost: 1,
       strength: 2,
     });
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_081_custodial-position"]).toMatchObject({
+    expect(
+      CARD_DEFINITIONS_BY_ID["onr_v1_081_custodial-position"],
+    ).toMatchObject({
       cost: 2,
     });
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_085_executive-wiretaps"]).toMatchObject({
+    expect(
+      CARD_DEFINITIONS_BY_ID["onr_v1_085_executive-wiretaps"],
+    ).toMatchObject({
       cost: 2,
     });
     expect(CARD_DEFINITIONS_BY_ID["onr_v1_101_mit-west-tier"]).toMatchObject({
@@ -1655,7 +1667,9 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       rezCost: 2,
       strength: 5,
     });
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_297_overtime-incentives"]).toMatchObject({
+    expect(
+      CARD_DEFINITIONS_BY_ID["onr_v1_297_overtime-incentives"],
+    ).toMatchObject({
       cost: 4,
     });
     expect(CARD_DEFINITIONS_BY_ID["onr_v1_306_trojan-horse"]).toMatchObject({
@@ -3090,7 +3104,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
                 "runner.start.random_effect_table.",
               ) === true,
           ) as Record<string, unknown> | undefined;
-        if (effect && targetRolls.includes(Number(effect.v1921DieRoll)))
+        if (effect && targetRolls.includes(Number(effect.dieRoll)))
           return { state, effect, questId, randomBefore };
       }
       throw new Error(

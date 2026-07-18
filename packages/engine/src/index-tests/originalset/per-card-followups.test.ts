@@ -916,7 +916,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     expect(state.runner.credits).toBe(4);
     expect(state.runner.clicks).toBe(3);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      runnerAbility: "remove_runner_trace_counter",
+      abilityId: "remove_runner_trace_counter",
       counterType: "trace_tag_counter",
       removedCounterAmount: 1,
       remainingCounters: 1,
@@ -2849,7 +2849,7 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
     );
     expect(state.corp.hq.length).toBeLessThanOrEqual(5);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      agendaAbility: "hq_archives_shuffle_draw",
+      abilityId: "hq_archives_shuffle_draw",
       cardDefinitionId: "onr_v1_188_ai-chief-financial-officer",
       sourceDefinitionId: "onr_v1_188_ai-chief-financial-officer",
       hiddenZoneAction: "hq_archives_shuffle_into_rd",
@@ -3222,7 +3222,7 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
         (state.cardInstances[virusId]?.advancementCounters ?? 0),
     ).toBe(3);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      v1919OperationAbility: "add_advancement_counters",
+      abilityId: "add_advancement_counters",
       addedAdvancementCounters: 3,
       targetCount: 2,
     });

@@ -131,7 +131,7 @@ export function startHqToNewRemoteInstallRezChoice(
         ...primitivePayload,
         ...corpSequenceContextPayload({
           step: HQ_INSTALL_REZ_STEPS.selectHqCards,
-          v1922CorpAgendaAbility: "hq_to_new_remote_install_rez",
+          abilityId: "hq_to_new_remote_install_rez",
           sourceAgendaId: agendaId,
           hqToNewRemoteInstallRezChoiceOpened: false,
           hqToNewRemoteInstallRezCandidateCount: 0,
@@ -158,7 +158,7 @@ export function startHqToNewRemoteInstallRezChoice(
       ...primitivePayload,
       ...corpSequenceContextPayload({
         step: HQ_INSTALL_REZ_STEPS.selectHqCards,
-        v1922CorpAgendaAbility: "hq_to_new_remote_install_rez",
+        abilityId: "hq_to_new_remote_install_rez",
         sourceAgendaId: agendaId,
         cardImplementationSourceZone: sequence.sourceZone,
         cardImplementationTargetServer: sequence.targetServer,

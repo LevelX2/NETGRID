@@ -426,7 +426,7 @@ export function createTurnRunnerStartRuntimeResolvers(
         reason: "start_of_turn",
         sourceDefinitionId,
         sourceTitle: links.publicCardTitle(sourceDefinitionId),
-        v1921DieRoll: dieRoll,
+        dieRoll,
         randomEffectOutcome: grantsAction
           ? "permanent_action"
           : dealsDamage
@@ -452,7 +452,7 @@ export function createTurnRunnerStartRuntimeResolvers(
                 : {}),
             }
           : {}),
-      } as ResolvedGameEffect);
+      });
     }
   }
 
@@ -496,7 +496,7 @@ export function createTurnRunnerStartRuntimeResolvers(
           ...(damageSummary.coreDamageAfter !== undefined
             ? { coreDamageAfter: damageSummary.coreDamageAfter }
             : {}),
-        } as ResolvedGameEffect);
+        });
       } else {
         setCardCounter(state, sourceId, "drip", current + 1);
         state.runner.clicks += 1;
@@ -561,7 +561,7 @@ export function createTurnRunnerStartRuntimeResolvers(
         randomCounterAfter: state.randomCounter,
         restrictedActionFamily: grant.restriction,
         ...(grant.targetServerId ? { serverId: grant.targetServerId } : {}),
-      } as ResolvedGameEffect);
+      });
     }
   }
 
