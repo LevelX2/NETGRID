@@ -163,6 +163,8 @@ export function runnerHandTextHasDefenseSignal(text: string): boolean {
     runnerHandTokensIncludePhrase(tokens, ["damage", "prevention"]) ||
     runnerHandTokensIncludePhrase(tokens, ["net", "damage"]) ||
     runnerHandTokensIncludePhrase(tokens, ["meat", "damage"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["program", "trash", "prevention"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["program", "backup"]) ||
     runnerHandTokensIncludeInOrder(tokens, "remove", "tag") ||
     runnerHandTokensIncludePhrase(tokens, ["hand", "size"])
   );

@@ -91,9 +91,10 @@ function strategyAnchorsBySignalId(derivationRules) {
   );
 }
 
-function hasExplicitNoRuntimePolicy(signal) {
+function hasExplicitNoRuntimePolicy(signal, readOnlySemanticsSignalIds) {
   const notes = String(signal.notes ?? "").toLocaleLowerCase("en-US");
   return (
+    readOnlySemanticsSignalIds.has(signal.signalId) ||
     notes.includes("does not create planner") ||
     notes.includes("does not create runtime") ||
     notes.includes("no runtime") ||
@@ -127,6 +128,9 @@ export function buildAiTacticSignalConsumerReport() {
   const signalIds = signals
     .map((signal) => signal.signalId)
     .filter((signalId) => typeof signalId === "string");
+  const readOnlySemanticsSignalIds = new Set(
+    tacticSignalData.signalPolicy?.readOnlySemanticsSignalIds ?? [],
+  );
   const sourceRefsBySignal = sourceRefsBySignalId(signalIds);
   const anchorsBySignal = strategyAnchorsBySignalId(
     functionDerivationData.derivationRules ?? [],
@@ -135,7 +139,10 @@ export function buildAiTacticSignalConsumerReport() {
   const signalCoverage = signals.map((signal) => {
     const sourceRefs = sourceRefsBySignal.get(signal.signalId) ?? [];
     const derivedStrategyAnchors = anchorsBySignal.get(signal.signalId) ?? [];
-    const explicitNoRuntimePolicy = hasExplicitNoRuntimePolicy(signal);
+    const explicitNoRuntimePolicy = hasExplicitNoRuntimePolicy(
+      signal,
+      readOnlySemanticsSignalIds,
+    );
     const consumerModes = [
       ...(sourceRefs.length > 0 ? ["runtime_source_reference"] : []),
       ...(derivedStrategyAnchors.length > 0
@@ -159,6 +166,16 @@ export function buildAiTacticSignalConsumerReport() {
   });
 
   const hardErrors = [];
+  for (const signalId of readOnlySemanticsSignalIds) {
+    if (!signalIds.includes(signalId)) {
+      hardErrors.push({
+        kind: "unknown_read_only_semantics_signal",
+        signalId,
+        message:
+          "readOnlySemanticsSignalIds may only classify an existing tactic signal.",
+      });
+    }
+  }
   for (const coverage of signalCoverage) {
     if (
       coverage.coverageRequirement ===

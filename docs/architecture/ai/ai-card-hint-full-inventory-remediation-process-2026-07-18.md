@@ -176,6 +176,19 @@ Decision-Checkpoints und `git diff --check`.
 Done-Gate: Kein Signal mit `consumer_or_explicit_policy_required` bleibt ohne
 Consumer-Modus.
 
+Ergebnis:
+
+- Microtech Backup Drive wird über den strukturierten Effekt
+  `program_trash_prevention` als Programmschutz in der Runner-Handentwicklung
+  erkannt und nicht mehr als zwecklose Hardware behandelt;
+- die 22 weiterhin nützlichen Diagnose-Signale sind zentral als
+  `readOnlySemanticsSignalIds` klassifiziert, weil ihre produktive Bedeutung
+  bereits über Effects, BreakerProfile, TargetProfile oder LegalActions läuft;
+- die nie zugewiesenen und durch präzisere Semantik ersetzten Definitionen
+  `breaker.subroutine_prevention` und `ice.recovery` wurden entfernt;
+- der Consumer-Report weist 671 Signale, 294 coverage-pflichtige Verträge und
+  null unverbrauchte Pflichtverträge aus.
+
 Commit: `feat(ai): close tactic signal consumer contracts`
 
 ### AIH-04 – Pair- und Value-Ontologie
