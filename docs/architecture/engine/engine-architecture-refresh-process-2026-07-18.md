@@ -7,25 +7,25 @@ Primary agent: `architecture-review-agent`
 
 ## Fortschritt
 
-| Paket | Zustand     | Nachweis                                                                   |
-| ----- | ----------- | -------------------------------------------------------------------------- |
-| E00   | integriert  | Commit `6cfa0173e`, beidseitig mit `main` abgeglichen                      |
-| E01   | integriert  | Commit `a13cf8bc4`; Architektur-Target 0 Findings; 1.732 Engine-Tests grün |
-| E02   | integriert  | Commit `637c62a09`; Strukturguard und vier Fehlerklassen im Selftest grün  |
-| E03   | integriert  | Commit `e9fbd63a5`; 144 Verträge in sechs zyklusfreien Familien            |
-| E04   | integriert  | Commit `16928c90c`; 13 typisierte Portgruppen und Registry-Basis           |
-| E05   | integriert  | Commit `2a0c68d9e`; 67 State-Service-Delegates statisch typisiert          |
-| E06   | integriert  | Commit `5f44141cc`; weitere 177 Delegate-Signaturen typisiert              |
-| E07   | integriert  | Commit `7f7d8a163`; letzte 186 Signaturen typisiert; Delegate-Schuld null  |
-| E08   | integriert  | Commit `e24d17f39`, Main-Abgleich `e5d5a4f0d`; Runtime-Zyklus entfernt     |
-| E09   | integriert  | Commit `17efeb4f3`, Main-Abgleich `84f3e075b`; Turn-Runtime geteilt        |
-| E10   | integriert  | 1.736 Engine-, 2.723 KI- und 12 Shared-Tests; Web 633/635 nach Main-Sync   |
-| E11   | integriert  | Damage-Domäne in sechs Module geteilt; 1.736 Engine-Tests und Gates grün   |
-| E12   | integriert  | Access-Domäne geteilt; Hidden-Info-/Breach-Verträge und 1.736 Tests grün   |
-| E13   | integriert  | Run-Hotspots geteilt; keine relativen Importzyklen; 1.736 Tests grün       |
-| E14   | integriert  | Registry nach Set/Seite/Typ; Coverage geteilt; 1.739 Engine-Tests grün     |
-| E15   | integriert  | 202 Dateien/1.741 Tests; Release-Smokes und Source-Verträge geteilt        |
-| E16   | integriert  | Abschlussgates grün; Review/Wissen aktuell; Worktree und Branch entfernt   |
+| Paket | Zustand    | Nachweis                                                                   |
+| ----- | ---------- | -------------------------------------------------------------------------- |
+| E00   | integriert | Commit `6cfa0173e`, beidseitig mit `main` abgeglichen                      |
+| E01   | integriert | Commit `a13cf8bc4`; Architektur-Target 0 Findings; 1.732 Engine-Tests grün |
+| E02   | integriert | Commit `637c62a09`; Strukturguard und vier Fehlerklassen im Selftest grün  |
+| E03   | integriert | Commit `e9fbd63a5`; 144 Verträge in sechs zyklusfreien Familien            |
+| E04   | integriert | Commit `16928c90c`; 13 typisierte Portgruppen und Registry-Basis           |
+| E05   | integriert | Commit `2a0c68d9e`; 67 State-Service-Delegates statisch typisiert          |
+| E06   | integriert | Commit `5f44141cc`; weitere 177 Delegate-Signaturen typisiert              |
+| E07   | integriert | Commit `7f7d8a163`; letzte 186 Signaturen typisiert; Delegate-Schuld null  |
+| E08   | integriert | Commit `e24d17f39`, Main-Abgleich `e5d5a4f0d`; Runtime-Zyklus entfernt     |
+| E09   | integriert | Commit `17efeb4f3`, Main-Abgleich `84f3e075b`; Turn-Runtime geteilt        |
+| E10   | integriert | 1.736 Engine-, 2.723 KI- und 12 Shared-Tests; Web 633/635 nach Main-Sync   |
+| E11   | integriert | Damage-Domäne in sechs Module geteilt; 1.736 Engine-Tests und Gates grün   |
+| E12   | integriert | Access-Domäne geteilt; Hidden-Info-/Breach-Verträge und 1.736 Tests grün   |
+| E13   | integriert | Run-Hotspots geteilt; keine relativen Importzyklen; 1.736 Tests grün       |
+| E14   | integriert | Registry nach Set/Seite/Typ; Coverage geteilt; 1.739 Engine-Tests grün     |
+| E15   | integriert | 202 Dateien/1.741 Tests; Release-Smokes und Source-Verträge geteilt        |
+| E16   | integriert | Abschlussgates grün; Review/Wissen aktuell; Worktree und Branch entfernt   |
 
 ## Quelle und Vorgabe
 
