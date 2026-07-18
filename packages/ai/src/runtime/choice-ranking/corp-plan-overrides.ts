@@ -6,6 +6,23 @@ import {
   tacticalPlanCorpBoardTriageMismatchShouldYield,
 } from "./semantic-choice-ranking-support";
 
+export function strongerExistingCorpOverrideMustBePreserved(
+  mapping: PlanStepMappingResult,
+  existingOverride: SemanticRuntimeChoice | undefined,
+  strategicOverride: SemanticRuntimeChoice,
+): boolean {
+  if (!existingOverride || existingOverride.score < strategicOverride.score) {
+    return false;
+  }
+  if (mapping.plan.side === "runner") return true;
+  return existingOverride.scoreBreakdown.some((component) =>
+    [
+      "corp_board_triage_alignment",
+      "corp_operation_burst_economy",
+    ].includes(component.key),
+  );
+}
+
 export function tacticalPlanCorpScoreConversionBlocksOffPlanOverride(
   mapping: PlanStepMappingResult,
   mappedChoice: SemanticRuntimeChoice,

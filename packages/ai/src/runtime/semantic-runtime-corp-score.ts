@@ -1,9 +1,4 @@
-import type {
-  AiDecisionInput,
-  AiDecisionScoreComponent,
-  LegalAction,
-  VisibleCard,
-} from "@netgrid/shared";
+import type { AiDecisionInput, AiDecisionScoreComponent, LegalAction, VisibleCard } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import { corpPurgeImpactScoreComponent } from "./corp-purge-impact";
 import { actionProvidesCredits } from "../actions/action-effect-classification";
@@ -23,7 +18,6 @@ import {
   corpUpgradeInstallPlacementComponent,
 } from "./corp-upgrade-placement";
 import { visibleCardDefinition } from "./card-definition-lookup";
-import { createAiHintsByCard } from "../ai-hints";
 import { rolesMatch } from "./role-match";
 import { semanticRuntimeCorpCentralPressureAssessment } from "./semantic-runtime-corp-central-pressure";
 import type { CorpScoringWindowAssessment } from "./semantic-runtime-corp-scoring-window";
@@ -35,7 +29,7 @@ import {
   traceTagExpectedSuccessEstimate,
 } from "./trace-tag-success-estimate";
 import type { SemanticRuntimeCorpScoreDependencies } from "./corp-scoreline/semantic-runtime-corp-score-contracts";
-
+import { corpConditionalScoreEconomyComponent } from "./corp-scoreline/semantic-runtime-corp-score-conditional-economy";
 export type { SemanticRuntimeCorpScoreDependencies } from "./corp-scoreline/semantic-runtime-corp-score-contracts";
 import {
   corpActionCandidateHasScoreCloseoutSignal,
@@ -232,6 +226,8 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
       value: 1200,
       reason: "score_agenda",
     });
+    const conditionalScoreEconomy = corpConditionalScoreEconomyComponent(input, action);
+    if (conditionalScoreEconomy) components.push(conditionalScoreEconomy);
     const safetyGate = dependencies.corpScoreNowSafetyGate(input, action);
     if (!safetyGate.allowed) {
       components.push({

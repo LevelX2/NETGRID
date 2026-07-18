@@ -14021,13 +14021,6 @@
           "timing": "when_scored"
         },
         {
-          "amount": 12,
-          "kind": "economy",
-          "resource": "credits",
-          "scope": "corp",
-          "timing": "when_scored"
-        },
-        {
           "kind": "counter_economy",
           "resource": "credits",
           "scope": "corp",
@@ -16483,13 +16476,6 @@
           "amount": 2,
           "kind": "run_tax",
           "repeatable": true,
-          "resource": "credits",
-          "scope": "run_path",
-          "timing": "encounter"
-        },
-        {
-          "amount": 2,
-          "kind": "run_tax",
           "resource": "credits",
           "scope": "run_path",
           "timing": "encounter"
@@ -21554,13 +21540,6 @@
         {
           "kind": "remote_protection",
           "scope": "run_path",
-          "timing": "encounter"
-        },
-        {
-          "amount": 2,
-          "kind": "damage",
-          "resource": "damage",
-          "scope": "runner",
           "timing": "encounter"
         },
         {

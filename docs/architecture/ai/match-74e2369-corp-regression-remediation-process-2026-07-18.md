@@ -1,6 +1,6 @@
 # Match 74e2369: Corp-KI-Regressionsbehebung
 
-Status: P4 aktiv
+Status: P5 aktiv
 
 ## Quelle und Gesamtziel
 
@@ -112,7 +112,7 @@ Status: abgeschlossen
 
 ### P4 – Hint-Kompilierung und Corporate-War-Consumer
 
-Status: aktiv
+Status: abgeschlossen
 
 - die drei blockierenden Effektkern-Überlappungen an ihrer gemeinsamen
   Ursache deduplizieren;
@@ -123,7 +123,7 @@ Status: aktiv
 
 ### P5 – Breite Verifikation und Wissenspflege
 
-Status: ausstehend
+Status: aktiv
 
 - fokussierte Checkpoints, Gegenproben, angrenzende Regressionen,
   AI-Testshards beziehungsweise vollständige AI-Suite und Typecheck;
@@ -173,3 +173,11 @@ Status: ausstehend
   erhält einen Discard-Abschlag. Vier historische Auswahlcheckpoints, der
   frühere Night-Shift-Fall, 61 weitere fokussierte Plan-/Arbitration-/Discard-
   Tests und der AI-Typecheck sind grün.
+- P4 abgeschlossen: Die Compiled-Hint-Zusammenführung erhält bei drei
+  überprüften Karten den fachlich führenden Active-Effektkern und ergänzt nur
+  weiterhin eigenständige abgeleitete Effekte. Der vollständige Deck-Audit
+  prüft 22/22 unterschiedliche Karten beziehungsweise 47 Karten insgesamt
+  mit `status=ok`, null Blockern und null Warnungen. Der neue generische
+  Score-Ökonomie-Consumer bewertet `Corporate War` bei erfüllter Schwelle als
+  +12-Credit-Burst und darunter mit dem tatsächlich verlorenen Creditbestand;
+  der historische dringende Zwei-Credit-Score bleibt grün.
