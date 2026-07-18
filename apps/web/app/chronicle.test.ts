@@ -3189,6 +3189,16 @@ describe("formatChronicleEvent", () => {
       }),
       "runner",
     );
+    const noDiscardChoice = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        v1922RunnerEventAbility: "successful_hq_run_corp_pay_to_retain_hq",
+        retainedCount: 3,
+        discardedCount: 0,
+        aiExplanation: "legal choice",
+      }),
+      "runner",
+    );
 
     expect(aiChoice.title).toBe(
       "Synchronized Attack on HQ: Die Korp-KI behält 2 HQ-Karten, wirft 3 HQ-Karten verdeckt ab und bezahlt dafür 4 Credits.",
@@ -3210,6 +3220,9 @@ describe("formatChronicleEvent", () => {
     expect(aiChoice.title).not.toContain("Entscheidung beantwortet");
     expect(humanChoice.title).toBe(
       "Synchronized Attack on HQ: Die Korp behält 1 HQ-Karte, wirft 1 HQ-Karte verdeckt ab und bezahlt dafür 2 Credits.",
+    );
+    expect(noDiscardChoice.title).toBe(
+      "Synchronized Attack on HQ: Die Korp-KI behält 3 HQ-Karten, wirft keine HQ-Karten verdeckt ab und bezahlt dafür 6 Credits.",
     );
   });
 

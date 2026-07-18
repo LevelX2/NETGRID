@@ -6146,6 +6146,7 @@ function socialEngineeringGuessTitle(
 }
 
 function hqCardCountText(amount: number): string {
+  if (amount === 0) return "keine HQ-Karten";
   return `${amount} HQ-Karte${amount === 1 ? "" : "n"}`;
 }
 
