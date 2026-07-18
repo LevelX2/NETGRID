@@ -78,6 +78,26 @@ export function tacticalPlanCorpScorelineSupportBlocksOffPlanOverride(
   mappedActionIds: ReadonlySet<string>,
 ): boolean {
   if (
+    mappedChoice.score < 0 &&
+    overrideChoice.score > 0 &&
+    mappedChoice.scoreBreakdown.some(
+      (component) =>
+        component.key === "corp_board_triage_mismatch" &&
+        component.value < 0,
+    ) &&
+    overrideChoice.scoreBreakdown.some(
+      (component) =>
+        component.key === "corp_ice_placement_evaluator" &&
+        component.value > 0 &&
+        component.reason?.includes("rez_affordable:true") &&
+        component.reason.includes("recommendation:install_now") &&
+        /server:(hq|rd)(?:\||$)/.test(component.reason),
+    )
+  ) {
+    return false;
+  }
+
+  if (
     mappedChoice.scoreBreakdown.some(
       (component) =>
         component.key === "corp_passive_scoreline_available" &&
