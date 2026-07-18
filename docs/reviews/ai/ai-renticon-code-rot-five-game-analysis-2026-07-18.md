@@ -1,6 +1,8 @@
 # KI-Spielanalyse: Rent-I-Con gegen CODE ROT vom 18.07.2026
 
-Status: Analyse abgeschlossen, Umsetzung nicht freigegeben
+Status: Baseline-Analyse abgeschlossen; Remediation umgesetzt und durch den
+Cycle-7-Null-Fehler-Lauf abgeschlossen. Führender Abschlussbericht:
+`docs/reviews/ai/ai-renticon-code-rot-five-game-remediation-final-2026-07-18.md`
 
 ## Kurzurteil
 

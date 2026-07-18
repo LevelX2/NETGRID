@@ -1,0 +1,207 @@
+{
+  "schemaVersion": "ai-match-snapshot-selfplay-seed-manifest-v1",
+  "generatedAt": "2026-07-18T07:33:25.017Z",
+  "gitHead": "b838edf63b73e34c7f7c9a5acb1198dda43f1d95",
+  "source": {
+    "matchId": "match_a7593a9bf8632052",
+    "database": "data/runtime/multiplayer/netgrid.sqlite",
+    "databaseReadOnly": true
+  },
+  "decks": {
+    "runner": {
+      "side": "runner",
+      "name": "Rent-I-Con: Das Shellspiel",
+      "snapshotId": "local_runner_rent_i_con_shellspiel_2026_07_17_snapshot_v0_6",
+      "sourceDeckId": "local_runner_rent_i_con_shellspiel_2026_07_17",
+      "identityCardId": "runner_identity_001",
+      "deckHash": "fnv1a:ed5cbfb6",
+      "cardPoolSnapshotId": "card-snapshot-0.8",
+      "formatProfileId": "netgrid_private_local_classic_proteus_playtest_v1",
+      "uniqueCards": 26,
+      "cardCount": 45
+    },
+    "corp": {
+      "side": "corp",
+      "name": "CODE ROT: Bitte eintreten v2",
+      "snapshotId": "local_corp_code_rot_bitte_eintreten_2026_07_16_snapshot_v0_6",
+      "sourceDeckId": "local_corp_code_rot_bitte_eintreten_2026_07_16",
+      "identityCardId": "corp_identity_001",
+      "deckHash": "fnv1a:65883820",
+      "cardPoolSnapshotId": "card-snapshot-0.8",
+      "formatProfileId": "netgrid_private_local_classic_proteus_playtest_v1",
+      "uniqueCards": 26,
+      "cardCount": 45
+    }
+  },
+  "seeds": [
+    "ai-renticon-code-rot-20260718-001",
+    "ai-renticon-code-rot-20260718-002",
+    "ai-renticon-code-rot-20260718-003",
+    "ai-renticon-code-rot-20260718-004",
+    "ai-renticon-code-rot-20260718-005"
+  ],
+  "config": {
+    "seeds": [
+      "ai-renticon-code-rot-20260718-001",
+      "ai-renticon-code-rot-20260718-002",
+      "ai-renticon-code-rot-20260718-003",
+      "ai-renticon-code-rot-20260718-004",
+      "ai-renticon-code-rot-20260718-005"
+    ],
+    "maxActions": 600,
+    "agendaPointsToWin": 7,
+    "runnerDifficulty": "hard",
+    "corpDifficulty": "hard",
+    "runnerControllerMode": "current_candidate",
+    "corpControllerMode": "current_candidate",
+    "detailedActionAlternativesEvaluatedInMemory": true,
+    "detailedActionAlternativesPersisted": true
+  },
+  "rerunCommand": "corepack pnpm --filter @netgrid/server exec tsx ../../scripts/run-ai-match-snapshot-selfplay-audit.ts --source-repo \"C:\\Projekte\\NETGRID\" --match-id match_a7593a9bf8632052 --runner-name \"Rent-I-Con: Das Shellspiel\" --runner-hash fnv1a:ed5cbfb6 --corp-name \"CODE ROT: Bitte eintreten v2\" --corp-hash fnv1a:65883820 --seeds ai-renticon-code-rot-20260718-001,ai-renticon-code-rot-20260718-002,ai-renticon-code-rot-20260718-003,ai-renticon-code-rot-20260718-004,ai-renticon-code-rot-20260718-005 --max-actions 600 --out data/runtime/ai-selfplay-audit/renticon-code-rot-2026-07-18/cycle-2-five-game-corpus.json --manifest docs/reviews/ai/ai-renticon-code-rot-five-game-cycle-2-seeds-2026-07-18.json --audit-input-dir data/runtime/ai-selfplay-audit/renticon-code-rot-2026-07-18/cycle-2",
+  "results": [
+    {
+      "seed": "ai-renticon-code-rot-20260718-001",
+      "runStatus": "regularly_completed",
+      "winner": "runner",
+      "gameEndReason": "corp_deck_empty",
+      "actions": 439,
+      "turns": 62,
+      "finalAgendaPoints": {
+        "runner": 2,
+        "corp": 4
+      },
+      "finalStateHash": "fnv1a:71db46e3",
+      "replayOk": true,
+      "replayErrors": [],
+      "errors": []
+    },
+    {
+      "seed": "ai-renticon-code-rot-20260718-002",
+      "runStatus": "regularly_completed",
+      "winner": "corp",
+      "gameEndReason": "agenda_points",
+      "actions": 480,
+      "turns": 58,
+      "finalAgendaPoints": {
+        "runner": 3,
+        "corp": 8
+      },
+      "finalStateHash": "fnv1a:3e5537a8",
+      "replayOk": true,
+      "replayErrors": [],
+      "errors": []
+    },
+    {
+      "seed": "ai-renticon-code-rot-20260718-003",
+      "runStatus": "regularly_completed",
+      "winner": "runner",
+      "gameEndReason": "corp_deck_empty",
+      "actions": 436,
+      "turns": 54,
+      "finalAgendaPoints": {
+        "runner": 6,
+        "corp": 0
+      },
+      "finalStateHash": "fnv1a:53fb8013",
+      "replayOk": true,
+      "replayErrors": [],
+      "errors": []
+    },
+    {
+      "seed": "ai-renticon-code-rot-20260718-004",
+      "runStatus": "regularly_completed",
+      "winner": "runner",
+      "gameEndReason": "corp_deck_empty",
+      "actions": 413,
+      "turns": 52,
+      "finalAgendaPoints": {
+        "runner": 6,
+        "corp": 2
+      },
+      "finalStateHash": "fnv1a:eec7d261",
+      "replayOk": true,
+      "replayErrors": [],
+      "errors": []
+    },
+    {
+      "seed": "ai-renticon-code-rot-20260718-005",
+      "runStatus": "regularly_completed",
+      "winner": "runner",
+      "gameEndReason": "corp_deck_empty",
+      "actions": 480,
+      "turns": 64,
+      "finalAgendaPoints": {
+        "runner": 6,
+        "corp": 6
+      },
+      "finalStateHash": "fnv1a:eaf13c57",
+      "replayOk": true,
+      "replayErrors": [],
+      "errors": []
+    }
+  ],
+  "coverage": {
+    "games": 5,
+    "expectedDecisionAttempts": 2248,
+    "appliedDecisionTraces": 2248,
+    "rejectedDecisionAttempts": 0,
+    "matchedAppliedDecisions": 2248,
+    "actionAlternativeDecisionCount": 2248,
+    "missingAppliedTraceRows": 0,
+    "whyCoverage": {
+      "schemaVersion": "semantic-runtime-why-coverage-v1",
+      "scope": "semantic_runtime_why_coverage_report_only",
+      "auditStatus": "complete",
+      "sampleCount": 2248,
+      "decisionsRequiringWhyNot": 1440,
+      "decisionsNotRequiringWhyNot": 808,
+      "decisionsWithTopLevelWhyNot": 1440,
+      "decisionsMissingTopLevelWhyNot": 0,
+      "decisionsWithRuntimeWhyNotSection": 1440,
+      "decisionsMissingRuntimeWhyNotSection": 0,
+      "actionAlternativeCount": 15288,
+      "selectedActionAlternativeCount": 2248,
+      "selectedActionAlternativesWithWhyChosen": 2248,
+      "selectedActionAlternativesMissingWhyChosen": 0,
+      "nonSelectedActionAlternativeCount": 13040,
+      "nonSelectedActionAlternativesWithWhyNot": 13040,
+      "nonSelectedActionAlternativesMissingWhyNot": 0,
+      "actionAlternativesWithWhyChosen": 2248,
+      "actionAlternativesMissingWhyChosen": 13040,
+      "actionAlternativesWithWhyNot": 13040,
+      "actionAlternativesMissingWhyNot": 2248,
+      "rankedAlternativeCount": 0,
+      "rankedAlternativesWithWhyNot": 0,
+      "rankedAlternativesMissingWhyNot": 0,
+      "redactionStatus": "passed",
+      "productiveUseAllowed": false,
+      "noRuntimeEffect": true,
+      "missingCoverageSignals": [],
+      "evidence": [
+        "semantic_runtime_why_coverage:report_only",
+        "audit_status:complete",
+        "sample_count:2248",
+        "decision_top_level_why_not_count:1440",
+        "action_alternative_count:15288",
+        "selected_action_alternative_count:2248",
+        "non_selected_action_alternative_count:13040",
+        "ranked_alternative_count:0"
+      ]
+    }
+  },
+  "integrity": {
+    "illegalActions": 0,
+    "rejectedDecisionAttempts": 0,
+    "replayFailures": 0,
+    "gamesWithErrors": 0,
+    "engineAbortedGames": 0,
+    "regularlyCompletedGames": 5,
+    "actionLimitReached": 0,
+    "actionLimitReachedWithoutError": 0,
+    "findingsRedactionSafe": true,
+    "inMemoryAlternativeRedactionFindingCount": 0,
+    "fullTraceRedactionSafe": true,
+    "forbiddenCorpusMarkers": []
+  },
+  "corpusPath": "data/runtime/ai-selfplay-audit/renticon-code-rot-2026-07-18/cycle-2-five-game-corpus.json"
+}

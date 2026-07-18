@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "ai-selfplay-decision-annotations-v1",
+  "findings": [
+    {
+      "id": "detector_repeated_archives_visible_state_changed",
+      "classification": "reviewed_detector_false_positive",
+      "decisions": [
+        {
+          "seed": "ai-renticon-code-rot-20260718-001",
+          "stateVersionBefore": 401
+        },
+        {
+          "seed": "ai-renticon-code-rot-20260718-003",
+          "stateVersionBefore": 417
+        }
+      ]
+    },
+    {
+      "id": "detector_corp_never_scores_without_legal_score_window",
+      "classification": "reviewed_detector_false_positive",
+      "decisions": [
+        {
+          "seed": "ai-renticon-code-rot-20260718-003",
+          "stateVersionBefore": 476
+        }
+      ]
+    },
+    {
+      "id": "intentional_inevitable_deckout_controller",
+      "classification": "reviewed_controller_exception",
+      "decisions": [
+        {
+          "seed": "ai-renticon-code-rot-20260718-001",
+          "stateVersionBefore": 436
+        },
+        {
+          "seed": "ai-renticon-code-rot-20260718-003",
+          "stateVersionBefore": 475
+        },
+        {
+          "seed": "ai-renticon-code-rot-20260718-004",
+          "stateVersionBefore": 403
+        }
+      ]
+    },
+    {
+      "id": "intentional_survival_defense_stall",
+      "classification": "reviewed_controller_exception",
+      "decisions": [
+        {
+          "seed": "ai-renticon-code-rot-20260718-003",
+          "stateVersionBefore": 466
+        },
+        {
+          "seed": "ai-renticon-code-rot-20260718-003",
+          "stateVersionBefore": 467
+        }
+      ]
+    },
+    {
+      "id": "corp_free_upgrade_over_unfunded_ice",
+      "classification": "reviewed_controller_exception",
+      "decisions": [
+        {
+          "seed": "ai-renticon-code-rot-20260718-005",
+          "stateVersionBefore": 226
+        }
+      ]
+    }
+  ]
+}
