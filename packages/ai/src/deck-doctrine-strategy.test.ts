@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import snapshotsData08 from "../../../data/decks/deck-snapshots-0.8.json";
+import standardDeckCatalog from "../../../data/decks/standard-deck-catalog-1.0.0.json";
 import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
 import {
   buildDeckDoctrineV2Diagnostic,
@@ -273,6 +274,65 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
     expect(profile.strategyScores["corp.remote_scoring"]?.anchorScore).toBe(0);
   });
 
+  it("recognizes real cheap ICE for the Chrome Rush Bureau rush line", () => {
+    const profile = buildDeckStrategyProfile(
+      standardDeckByName("Chrome Rush Bureau"),
+    );
+    const rush = profile.strategyScores["corp.rush_score"];
+
+    expect(rush?.supportEvidence).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          signal: "cheap_ice",
+          reason: "support:earlyIce",
+        }),
+      ]),
+    );
+    expect(rush?.supportScore).toBeGreaterThanOrEqual(65);
+    expect(rush?.runtimeStatus).toBe("productive");
+    expect(rush?.runtimeBlockers).toEqual([]);
+  });
+
+  it("keeps new Corp support dimensions semantically distinct from their anchors", () => {
+    const actionTempo = buildDeckStrategyProfile(
+      standardDeckByName("Proteus Korp - Variable ICE Gauntlet"),
+    ).strategyScores["corp.action_tempo"];
+    const overadvance = buildDeckStrategyProfile(
+      standardDeckByName("Chrome Rush Bureau"),
+    ).strategyScores["corp.overadvance_value"];
+    const drawEngine = buildDeckStrategyProfile(
+      standardDeckByName("Classic Corp - Remote Lab Deflection"),
+    ).strategyScores["corp.draw_engine"];
+
+    const boardSafety = actionTempo?.supportEvidence.filter(
+      (entry) => entry.reason === "support:boardSafety",
+    );
+    expect(boardSafety?.length).toBeGreaterThan(0);
+    expect(
+      boardSafety?.every((entry) => !entry.signal?.startsWith("action.corp_")),
+    ).toBe(true);
+
+    const remoteSafety = overadvance?.supportEvidence.filter(
+      (entry) => entry.reason === "support:remoteSafety",
+    );
+    expect(remoteSafety?.length).toBeGreaterThan(0);
+    expect(
+      remoteSafety?.every(
+        (entry) =>
+          !entry.signal?.startsWith("advance.overadvance_") &&
+          !entry.signal?.startsWith("score.overadvance_"),
+      ),
+    ).toBe(true);
+
+    const safety = drawEngine?.supportEvidence.filter(
+      (entry) => entry.reason === "support:safety",
+    );
+    expect(safety?.length).toBeGreaterThan(0);
+    expect(
+      safety?.every((entry) => !entry.signal?.startsWith("draw.corp_")),
+    ).toBe(true);
+  });
+
   it("does not invent legacy strategy evidence for a generic run event", () => {
     const profile = buildDeckStrategyProfile({
       deckSnapshotId: "ai006-runner-legacy-only-diagnostic",
@@ -456,6 +516,21 @@ function snapshotById(snapshotId: string): AiDeckStrategyDeckSnapshot {
       ? { publicMetadata: snapshot.publicMetadata }
       : {}),
     cards: snapshot.cards.map((card) => ({
+      cardId: card.cardId,
+      quantity: card.quantity,
+    })),
+  };
+}
+
+function standardDeckByName(name: string): AiDeckStrategyDeckSnapshot {
+  const deck = standardDeckCatalog.decks.find(
+    (candidate) => candidate.name === name,
+  );
+  if (!deck) throw new Error(`Missing standard deck fixture ${name}`);
+  return {
+    deckSnapshotId: `standard_${deck.standardDeckId}_${deck.version}`,
+    side: deck.side as "runner" | "corp",
+    cards: deck.cards.map((card) => ({
       cardId: card.cardId,
       quantity: card.quantity,
     })),

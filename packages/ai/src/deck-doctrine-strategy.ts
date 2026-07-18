@@ -270,10 +270,12 @@ type InspectorCard = {
 type RuntimeCardForStrategy = {
   side?: Side;
   type?: string;
-  cost?: number;
-  rezCost?: number;
-  advancementRequirement?: number;
-  agendaPoints?: number;
+  numeric?: {
+    cost?: number | null;
+    rezCost?: number | null;
+    advancementRequirement?: number | null;
+    agendaPoints?: number | null;
+  };
   subtypes?: string[];
   subroutines?: Array<{ type?: string }>;
 };
@@ -374,6 +376,11 @@ const HARD_PRODUCTIVE_GAPS = new Set([
   "low_tag_sources",
   "payoff_without_enablers",
   "low_punish_payoff_density",
+  "missing_tempo_source",
+  "missing_advancement_window",
+  "missing_draw_source",
+  "missing_recycle_source",
+  "missing_draw_or_shuffle",
 ]);
 
 export function buildDeckStrategyProfile(
@@ -651,10 +658,10 @@ function deckStrategyStats(
           ? { costProfileReserveRisk: hint.costProfile.reserveRisk }
           : {}),
         runtimeSubtypes: sortedUnique(runtimeCard?.subtypes ?? []),
-        ...(typeof runtimeCard?.rezCost === "number"
-          ? { runtimeCost: runtimeCard.rezCost }
-          : typeof runtimeCard?.cost === "number"
-            ? { runtimeCost: runtimeCard.cost }
+        ...(typeof runtimeCard?.numeric?.rezCost === "number"
+          ? { runtimeCost: runtimeCard.numeric.rezCost }
+          : typeof runtimeCard?.numeric?.cost === "number"
+            ? { runtimeCost: runtimeCard.numeric.cost }
             : {}),
       }),
     );
@@ -1038,7 +1045,7 @@ function scoreSupport(
   }
   return {
     score: clampRound(weightedScore / Math.max(0.001, weightTotal), 0, 100),
-    evidence: sortedEvidence(evidence).slice(0, 24),
+    evidence: sortedEvidence(evidence).slice(0, 48),
     gaps: sortedUnique(gaps),
   };
 }
@@ -1206,6 +1213,101 @@ function supportComponentScore(
       );
     case "tagSource":
       return evidenceFromSignals(stats, dimension, ["tag.source"], 2);
+    case "tempoSource":
+      return evidenceFromSignals(
+        stats,
+        dimension,
+        [
+          "action.corp_counter_to_extra_action",
+          "action.corp_extra_action",
+          "action.corp_extra_action_burst",
+          "action.corp_extra_action_support",
+          "action.corp_future_extra_action",
+          "action.corp_random_recurring_extra_action",
+          "action.corp_recurring_extra_action",
+          "action.corp_recurring_extra_action_limited",
+          "action.corp_repeatable_extra_action",
+          "tempo.corp_action_burst",
+          "tempo.corp_install_burst",
+          "tempo.corp_recurring_action",
+        ],
+        2,
+      );
+    case "boardSafety":
+      return centralDefenseSupport(stats, dimension);
+    case "advancementWindow":
+      return evidenceFromSignals(
+        stats,
+        dimension,
+        [
+          "advance.overadvance_payoff",
+          "score.overadvance_bonus",
+          "score.overadvance_scaling",
+          "score.advance_burst",
+          "score.agenda_action",
+        ],
+        2,
+      );
+    case "remoteSafety":
+      return evidenceFromSignals(
+        stats,
+        dimension,
+        [
+          "remote.scoring_protection",
+          "remote.agenda_steal_tax",
+          "tax.remote",
+          "ice.etr",
+        ],
+        3,
+      );
+    case "drawSource":
+      return evidenceFromSignals(
+        stats,
+        dimension,
+        [
+          "draw.corp_action_draw",
+          "draw.corp_draw",
+          "draw.corp_draw_action",
+          "draw.corp_recurring",
+          "draw.corp_recurring_optional",
+          "score.recurring_draw",
+        ],
+        2,
+      );
+    case "safety":
+      return centralDefenseSupport(stats, dimension);
+    case "recycleSource":
+      return evidenceFromSignals(
+        stats,
+        dimension,
+        [
+          "archives.corp_recovery",
+          "archives.corp_recycle_to_rnd",
+          "hq.corp_card_recovery",
+          "hq.corp_hand_to_rnd_shuffle",
+          "rnd.corp_shuffle_hq_into_rnd",
+          "rnd.corp_shuffle_recycle",
+        ],
+        2,
+      );
+    case "drawOrShuffle":
+      return evidenceFromSignals(
+        stats,
+        dimension,
+        [
+          "draw.corp_action_draw",
+          "draw.corp_draw",
+          "draw.corp_draw_action",
+          "draw.corp_recurring",
+          "draw.corp_recurring_optional",
+          "hq.corp_hand_to_rnd_shuffle",
+          "rnd.corp_agenda_shuffle_from_hq",
+          "rnd.corp_self_shuffle_access",
+          "rnd.corp_shuffle_hq_into_rnd",
+          "rnd.corp_shuffle_recycle",
+        ],
+        2,
+      );
     case "threatAssessment":
       return evidenceFromSignals(
         stats,
@@ -1221,7 +1323,9 @@ function supportComponentScore(
         2,
       );
     default:
-      return evidenceFromSignals(stats, dimension, goal.anchorSignals ?? [], 2);
+      throw new Error(
+        `Unsupported deck strategy support dimension ${dimension} for ${goal.strategyId}`,
+      );
   }
 }
 
@@ -1622,6 +1726,22 @@ function corpGapsForDimension(
         : ["low_punish_payoff_density"];
     case "agendaDensity":
       return ["low_agenda_density"];
+    case "tempoSource":
+      return ["missing_tempo_source"];
+    case "boardSafety":
+      return ["low_board_safety_support"];
+    case "advancementWindow":
+      return ["missing_advancement_window"];
+    case "remoteSafety":
+      return ["low_remote_safety_support"];
+    case "drawSource":
+      return ["missing_draw_source"];
+    case "safety":
+      return ["low_engine_safety_support"];
+    case "recycleSource":
+      return ["missing_recycle_source"];
+    case "drawOrShuffle":
+      return ["missing_draw_or_shuffle"];
     default:
       return [`low_${dimension}_support`];
   }
@@ -2017,13 +2137,14 @@ function sortedEvidence(
   return sortedUniqueObjects(
     evidence,
     (entry) =>
-      `${entry.cardId}:${entry.quantity}:${entry.source}:${entry.signal ?? ""}:${entry.strategyId ?? ""}:${entry.role ?? ""}`,
+      `${entry.cardId}:${entry.quantity}:${entry.source}:${entry.signal ?? ""}:${entry.strategyId ?? ""}:${entry.role ?? ""}:${entry.reason}`,
   ).sort(
     (left, right) =>
       left.cardId.localeCompare(right.cardId) ||
       left.source.localeCompare(right.source) ||
       (left.signal ?? "").localeCompare(right.signal ?? "") ||
-      (left.strategyId ?? "").localeCompare(right.strategyId ?? ""),
+      (left.strategyId ?? "").localeCompare(right.strategyId ?? "") ||
+      left.reason.localeCompare(right.reason),
   );
 }
 
