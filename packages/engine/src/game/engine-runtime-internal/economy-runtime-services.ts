@@ -239,9 +239,7 @@ import {
   buildRunnerAgendaPointInstallAction,
   buildRunnerSelectedServerInstallAction,
 } from "../turn/runner-install-context-actions";
-import {
-  buildRunnerHostedProgramInstallAction,
-} from "../turn/runner-hosted-install-actions";
+import { buildRunnerHostedProgramInstallAction } from "../turn/runner-hosted-install-actions";
 import { buildRunnerProgramTrashBeforeInstallAction } from "../turn/runner-program-trash-install-actions";
 import { buildRunnerStackSearchProgramToGripAction } from "../turn/runner-hidden-zone-search-actions";
 import {
@@ -658,9 +656,7 @@ import {
   ACCESS_NET_DAMAGE_UPGRADE_SOURCE,
   ACCESS_TRACE_DAMAGE_UPGRADE_SOURCE,
 } from "../../mechanics/server-upgrades";
-import {
-  RUN_TAX_UPGRADE_SOURCES,
-} from "../../mechanics/trace-tags";
+import { RUN_TAX_UPGRADE_SOURCES } from "../../mechanics/trace-tags";
 import { snapshotPersistentStealCostModifiersForSource } from "../../ability-engine/steal-cost-modifiers";
 import { createCardImplementationEffectAdapters } from "../../ability-engine/card-implementation-effect-adapters";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
@@ -697,7 +693,9 @@ import type {
 } from "../../ability-engine/definition-types";
 import type { RuntimeDeps } from "./runtime-shared";
 
-export function createEconomyRuntimeServices(deps: RuntimeDeps) {
+export function createEconomyRuntimeServices(
+  deps: RuntimeDeps,
+): import("./economy-runtime-port").EconomyRuntimePort {
   const {
     activeCrashEverettSourceId,
     availableRunnerProgramInstallCredits,
@@ -708,9 +706,7 @@ export function createEconomyRuntimeServices(deps: RuntimeDeps) {
     scoredAgendaKindForDefinition,
   } = deps;
 
-  function expireScoredAgendaInstallRezCreditAbilities(
-    state: GameState,
-  ): void {
+  function expireScoredAgendaInstallRezCreditAbilities(state: GameState): void {
     for (const agendaId of state.corp.scoreArea) {
       const definition = definitionFor(state, agendaId);
       if (

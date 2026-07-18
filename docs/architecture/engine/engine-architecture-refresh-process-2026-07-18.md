@@ -13,8 +13,9 @@ Primary agent: `architecture-review-agent`
 | E01     | integriert                                 | Commit `a13cf8bc4`; Architektur-Target 0 Findings; 1.732 Engine-Tests grün |
 | E02     | integriert                                 | Commit `637c62a09`; Strukturguard und vier Fehlerklassen im Selftest grün  |
 | E03     | integriert                                 | Commit `e9fbd63a5`; 144 Verträge in sechs zyklusfreien Familien            |
-| E04     | verifiziert, Commit/Integration ausstehend | 13 Factory-abgeleitete Portgruppen; Registry- und Strukturtests grün       |
-| E05-E16 | ausstehend                                 | sequenziell nach E04                                                       |
+| E04     | integriert                                 | Commit `16928c90c`; 13 typisierte Portgruppen und Registry-Basis           |
+| E05     | verifiziert, Commit/Integration ausstehend | 67 State-Service-Delegates typisiert; 1.734 Engine-Tests grün              |
+| E06-E16 | ausstehend                                 | sequenziell nach E05                                                       |
 
 ## Quelle und Vorgabe
 

@@ -1,456 +1,402 @@
-import { runtimeDelegate } from "./runtime-delegate-store";
-
-export function expireScoredAgendaInstallRezCreditAbilities(
-  ...args: any[]
-): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "expireScoredAgendaInstallRezCreditAbilities",
-  )(...args);
-}
-
-export function isCorpInstallableCardType(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "isCorpInstallableCardType",
-  )(...args);
-}
-
-export function edgerunnerTempsInstallActionsRemaining(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "edgerunnerTempsInstallActionsRemaining",
-  )(...args);
-}
-
-export function clearEdgerunnerTempsInstallFlags(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "clearEdgerunnerTempsInstallFlags",
-  )(...args);
-}
-
-export function consumeEdgerunnerTempsInstallAction(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "consumeEdgerunnerTempsInstallAction",
-  )(...args);
-}
-
-export function valuPakProgramInstallActionsRemaining(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "valuPakProgramInstallActionsRemaining",
-  )(...args);
-}
-
-export function valuPakTemporaryProgramInstallCredits(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "valuPakTemporaryProgramInstallCredits",
-  )(...args);
-}
-
-export function runnerInstallableProgramIdsForValuPak(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "runnerInstallableProgramIdsForValuPak",
-  )(...args);
-}
-
-export function installedRunnerProgramTrashOptionsForInstall(
-  ...args: any[]
-): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "installedRunnerProgramTrashOptionsForInstall",
-  )(...args);
-}
-
-export function runnerProgramInstallMemoryReachableAfterTrash(
-  ...args: any[]
-): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "runnerProgramInstallMemoryReachableAfterTrash",
-  )(...args);
-}
-
-export function shouldOfferRunnerProgramTrashBeforeInstall(
-  ...args: any[]
-): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "shouldOfferRunnerProgramTrashBeforeInstall",
-  )(...args);
-}
-
-export function clearValuPakProgramInstallFlags(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "clearValuPakProgramInstallFlags",
-  )(...args);
-}
-
-export function consumeValuPakProgramInstallAction(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "consumeValuPakProgramInstallAction",
-  )(...args);
-}
-
-export function runnerDrawActionContext(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "runnerDrawActionContext",
-  )(...args);
-}
-
-export function normalizeSubtypeLabel(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "normalizeSubtypeLabel",
-  )(...args);
-}
-
-export function cardHasSubtype(...args: any[]): any {
-  return runtimeDelegate("stateRuntimeServices", "cardHasSubtype")(...args);
-}
-
-export function stableSubtypeList(...args: any[]): any {
-  return runtimeDelegate("stateRuntimeServices", "stableSubtypeList")(...args);
-}
-
-export function effectiveSubtypesForCard(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "effectiveSubtypesForCard",
-  )(...args);
-}
-
-export function rezzedIceOutsideThisIceCount(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "rezzedIceOutsideThisIceCount",
-  )(...args);
-}
-
-export function relativeIceStrengthBonusFor(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "relativeIceStrengthBonusFor",
-  )(...args);
-}
-
-export function isRegionUpgrade(...args: any[]): any {
-  return runtimeDelegate("stateRuntimeServices", "isRegionUpgrade")(...args);
-}
-
-export function isUniqueCard(...args: any[]): any {
-  return runtimeDelegate("stateRuntimeServices", "isUniqueCard")(...args);
-}
-
-export function rezzedBlackIceIds(...args: any[]): any {
-  return runtimeDelegate("stateRuntimeServices", "rezzedBlackIceIds")(...args);
-}
-
-export function rezzedInstalledIceIds(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "rezzedInstalledIceIds",
-  )(...args);
-}
-
-export function affordableRezzedInstalledIceIdsForRunner(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "affordableRezzedInstalledIceIdsForRunner",
-  )(...args);
-}
-
-export function unrezzedInstalledIceIds(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "unrezzedInstalledIceIds",
-  )(...args);
-}
-
-export function hasInstalledUniqueCardDefinition(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "hasInstalledUniqueCardDefinition",
-  )(...args);
-}
-
-export function daemonHostingCapacity(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "daemonHostingCapacity",
-  )(...args);
-}
-
-export function daemonHostedMemoryUsed(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "daemonHostedMemoryUsed",
-  )(...args);
-}
-
-export function canHostProgramOnDaemon(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "canHostProgramOnDaemon",
-  )(...args);
-}
-
-export function hostedProgramStrengthModifier(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "hostedProgramStrengthModifier",
-  )(...args);
-}
-
-export function icebreakerEncounterStrengthBonus(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "icebreakerEncounterStrengthBonus",
-  )(...args);
-}
-
-export function rezzedCorpRootCardIds(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "rezzedCorpRootCardIds",
-  )(...args);
-}
-
-export function visibleVirusCounterTargetIds(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "visibleVirusCounterTargetIds",
-  )(...args);
-}
-
-export function iceStrengthBonusFor(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "iceStrengthBonusFor",
-  )(...args);
-}
-
-export function iceStrengthFor(...args: any[]): any {
-  return runtimeDelegate("stateRuntimeServices", "iceStrengthFor")(...args);
-}
-
-export function runRemainderStrengthBonusForBreaker(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "runRemainderStrengthBonusForBreaker",
-  )(...args);
-}
-
-export function runBreakSubroutineAdditionalCost(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "runBreakSubroutineAdditionalCost",
-  )(...args);
-}
-
-export function runnerHardwareBreakSubroutineAdditionalCost(
-  ...args: any[]
-): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "runnerHardwareBreakSubroutineAdditionalCost",
-  )(...args);
-}
-
-export function breakSubroutineCostBreakdown(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "breakSubroutineCostBreakdown",
-  )(...args);
-}
-
-export function hasInstalledRunnerApDamageReducerHardware(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "hasInstalledRunnerApDamageReducerHardware",
-  )(...args);
-}
-
-export function runnerHasInstalledCardDefinition(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "runnerHasInstalledCardDefinition",
-  )(...args);
-}
-
-export function runnerInstalledCardCountByDefinition(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "runnerInstalledCardCountByDefinition",
-  )(...args);
-}
-
-export function installedVirusCounterTotalForDefinition(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "installedVirusCounterTotalForDefinition",
-  )(...args);
-}
-
-export function virusCounterImplementationForDefinition(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "virusCounterImplementationForDefinition",
-  )(...args);
-}
-
-export function virusCounterImplementationForCard(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "virusCounterImplementationForCard",
-  )(...args);
-}
-
-export function corpUtilityImplementationForCard(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "corpUtilityImplementationForCard",
-  )(...args);
-}
-
-export function hasCorpUtilityKind(...args: any[]): any {
-  return runtimeDelegate("stateRuntimeServices", "hasCorpUtilityKind")(...args);
-}
-
-export function cardInstallCapabilitiesForDefinition(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "cardInstallCapabilitiesForDefinition",
-  )(...args);
-}
-
-export function hasInstallCapabilityKindForDefinition(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "hasInstallCapabilityKindForDefinition",
-  )(...args);
-}
-
-export function rootInstallRezzesOnInstall(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "rootInstallRezzesOnInstall",
-  )(...args);
-}
-
-export function mustInstallInsideSubsidiaryDataFort(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "mustInstallInsideSubsidiaryDataFort",
-  )(...args);
-}
-
-export function fortCapacityModifiersForCard(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "fortCapacityModifiersForCard",
-  )(...args);
-}
-
-export function leavePlayCleanupImplementationsForCard(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "leavePlayCleanupImplementationsForCard",
-  )(...args);
-}
-
-export function installedRunnerVirusSourceIds(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "installedRunnerVirusSourceIds",
-  )(...args);
-}
-
-export function cockroachCounterTotal(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "cockroachCounterTotal",
-  )(...args);
-}
-
-export function incubatorCounterTotal(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "incubatorCounterTotal",
-  )(...args);
-}
-
-export function cockroachRandomHqDiscardActive(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "cockroachRandomHqDiscardActive",
-  )(...args);
-}
-
-export function isVisibleVirusCounterCardForRunner(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "isVisibleVirusCounterCardForRunner",
-  )(...args);
-}
-
-export function corpIceInstallBaseCost(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "corpIceInstallBaseCost",
-  )(...args);
-}
-
-export function outermostIceIndex(...args: any[]): any {
-  return runtimeDelegate("stateRuntimeServices", "outermostIceIndex")(...args);
-}
-
-export function poxCountersForServer(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "poxCountersForServer",
-  )(...args);
-}
-
-export function spyCountersForServer(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "spyCountersForServer",
-  )(...args);
-}
-
-export function poxInstallTax(...args: any[]): any {
-  return runtimeDelegate("stateRuntimeServices", "poxInstallTax")(...args);
-}
-
-export function corpIceInstallAdditionalCost(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "corpIceInstallAdditionalCost",
-  )(...args);
-}
-
-export function corpIceInstallTotalCost(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "corpIceInstallTotalCost",
-  )(...args);
-}
-
-export function assertCorpIceInstallCostValid(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeServices",
-    "assertCorpIceInstallCostValid",
-  )(...args);
-}
+import { runtimeDelegate, runtimeDelegates } from "./runtime-delegate-store";
+import type {
+  StateRuntimePortFunction,
+  StateRuntimePortGroups,
+} from "./runtime-port-contracts";
+
+const typedRuntimePorts = runtimeDelegates as unknown as StateRuntimePortGroups;
+
+export const expireScoredAgendaInstallRezCreditAbilities: StateRuntimePortFunction<
+  "expireScoredAgendaInstallRezCreditAbilities"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.expireScoredAgendaInstallRezCreditAbilities(
+    ...args,
+  );
+
+export const isCorpInstallableCardType: StateRuntimePortFunction<
+  "isCorpInstallableCardType"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.isCorpInstallableCardType(...args);
+
+export const edgerunnerTempsInstallActionsRemaining: StateRuntimePortFunction<
+  "edgerunnerTempsInstallActionsRemaining"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.edgerunnerTempsInstallActionsRemaining(
+    ...args,
+  );
+
+export const clearEdgerunnerTempsInstallFlags: StateRuntimePortFunction<
+  "clearEdgerunnerTempsInstallFlags"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.clearEdgerunnerTempsInstallFlags(
+    ...args,
+  );
+
+export const consumeEdgerunnerTempsInstallAction: StateRuntimePortFunction<
+  "consumeEdgerunnerTempsInstallAction"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.consumeEdgerunnerTempsInstallAction(
+    ...args,
+  );
+
+export const valuPakProgramInstallActionsRemaining: StateRuntimePortFunction<
+  "valuPakProgramInstallActionsRemaining"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.valuPakProgramInstallActionsRemaining(
+    ...args,
+  );
+
+export const valuPakTemporaryProgramInstallCredits: StateRuntimePortFunction<
+  "valuPakTemporaryProgramInstallCredits"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.valuPakTemporaryProgramInstallCredits(
+    ...args,
+  );
+
+export const runnerInstallableProgramIdsForValuPak: StateRuntimePortFunction<
+  "runnerInstallableProgramIdsForValuPak"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.runnerInstallableProgramIdsForValuPak(
+    ...args,
+  );
+
+export const installedRunnerProgramTrashOptionsForInstall: StateRuntimePortFunction<
+  "installedRunnerProgramTrashOptionsForInstall"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.installedRunnerProgramTrashOptionsForInstall(
+    ...args,
+  );
+
+export const runnerProgramInstallMemoryReachableAfterTrash: StateRuntimePortFunction<
+  "runnerProgramInstallMemoryReachableAfterTrash"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.runnerProgramInstallMemoryReachableAfterTrash(
+    ...args,
+  );
+
+export const shouldOfferRunnerProgramTrashBeforeInstall: StateRuntimePortFunction<
+  "shouldOfferRunnerProgramTrashBeforeInstall"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.shouldOfferRunnerProgramTrashBeforeInstall(
+    ...args,
+  );
+
+export const clearValuPakProgramInstallFlags: StateRuntimePortFunction<
+  "clearValuPakProgramInstallFlags"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.clearValuPakProgramInstallFlags(
+    ...args,
+  );
+
+export const consumeValuPakProgramInstallAction: StateRuntimePortFunction<
+  "consumeValuPakProgramInstallAction"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.consumeValuPakProgramInstallAction(
+    ...args,
+  );
+
+export const runnerDrawActionContext: StateRuntimePortFunction<
+  "runnerDrawActionContext"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.runnerDrawActionContext(...args);
+
+export const normalizeSubtypeLabel: StateRuntimePortFunction<
+  "normalizeSubtypeLabel"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.normalizeSubtypeLabel(...args);
+
+export const cardHasSubtype: StateRuntimePortFunction<"cardHasSubtype"> = (
+  ...args
+) => typedRuntimePorts.stateRuntimeServices.cardHasSubtype(...args);
+
+export const stableSubtypeList: StateRuntimePortFunction<
+  "stableSubtypeList"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.stableSubtypeList(...args);
+
+export const effectiveSubtypesForCard: StateRuntimePortFunction<
+  "effectiveSubtypesForCard"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.effectiveSubtypesForCard(...args);
+
+export const rezzedIceOutsideThisIceCount: StateRuntimePortFunction<
+  "rezzedIceOutsideThisIceCount"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.rezzedIceOutsideThisIceCount(...args);
+
+export const relativeIceStrengthBonusFor: StateRuntimePortFunction<
+  "relativeIceStrengthBonusFor"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.relativeIceStrengthBonusFor(...args);
+
+export const isRegionUpgrade: StateRuntimePortFunction<"isRegionUpgrade"> = (
+  ...args
+) => typedRuntimePorts.stateRuntimeServices.isRegionUpgrade(...args);
+
+export const isUniqueCard: StateRuntimePortFunction<"isUniqueCard"> = (
+  ...args
+) => typedRuntimePorts.stateRuntimeServices.isUniqueCard(...args);
+
+export const rezzedBlackIceIds: StateRuntimePortFunction<
+  "rezzedBlackIceIds"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.rezzedBlackIceIds(...args);
+
+export const rezzedInstalledIceIds: StateRuntimePortFunction<
+  "rezzedInstalledIceIds"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.rezzedInstalledIceIds(...args);
+
+export const affordableRezzedInstalledIceIdsForRunner: StateRuntimePortFunction<
+  "affordableRezzedInstalledIceIdsForRunner"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.affordableRezzedInstalledIceIdsForRunner(
+    ...args,
+  );
+
+export const unrezzedInstalledIceIds: StateRuntimePortFunction<
+  "unrezzedInstalledIceIds"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.unrezzedInstalledIceIds(...args);
+
+export const hasInstalledUniqueCardDefinition: StateRuntimePortFunction<
+  "hasInstalledUniqueCardDefinition"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.hasInstalledUniqueCardDefinition(
+    ...args,
+  );
+
+export const daemonHostingCapacity: StateRuntimePortFunction<
+  "daemonHostingCapacity"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.daemonHostingCapacity(...args);
+
+export const daemonHostedMemoryUsed: StateRuntimePortFunction<
+  "daemonHostedMemoryUsed"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.daemonHostedMemoryUsed(...args);
+
+export const canHostProgramOnDaemon: StateRuntimePortFunction<
+  "canHostProgramOnDaemon"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.canHostProgramOnDaemon(...args);
+
+export const hostedProgramStrengthModifier: StateRuntimePortFunction<
+  "hostedProgramStrengthModifier"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.hostedProgramStrengthModifier(...args);
+
+export const icebreakerEncounterStrengthBonus: StateRuntimePortFunction<
+  "icebreakerEncounterStrengthBonus"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.icebreakerEncounterStrengthBonus(
+    ...args,
+  );
+
+export const rezzedCorpRootCardIds: StateRuntimePortFunction<
+  "rezzedCorpRootCardIds"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.rezzedCorpRootCardIds(...args);
+
+export const visibleVirusCounterTargetIds: StateRuntimePortFunction<
+  "visibleVirusCounterTargetIds"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.visibleVirusCounterTargetIds(...args);
+
+export const iceStrengthBonusFor: StateRuntimePortFunction<
+  "iceStrengthBonusFor"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.iceStrengthBonusFor(...args);
+
+export const iceStrengthFor: StateRuntimePortFunction<"iceStrengthFor"> = (
+  ...args
+) => typedRuntimePorts.stateRuntimeServices.iceStrengthFor(...args);
+
+export const runRemainderStrengthBonusForBreaker: StateRuntimePortFunction<
+  "runRemainderStrengthBonusForBreaker"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.runRemainderStrengthBonusForBreaker(
+    ...args,
+  );
+
+export const runBreakSubroutineAdditionalCost: StateRuntimePortFunction<
+  "runBreakSubroutineAdditionalCost"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.runBreakSubroutineAdditionalCost(
+    ...args,
+  );
+
+export const runnerHardwareBreakSubroutineAdditionalCost: StateRuntimePortFunction<
+  "runnerHardwareBreakSubroutineAdditionalCost"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.runnerHardwareBreakSubroutineAdditionalCost(
+    ...args,
+  );
+
+export const breakSubroutineCostBreakdown: StateRuntimePortFunction<
+  "breakSubroutineCostBreakdown"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.breakSubroutineCostBreakdown(...args);
+
+export const hasInstalledRunnerApDamageReducerHardware: StateRuntimePortFunction<
+  "hasInstalledRunnerApDamageReducerHardware"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.hasInstalledRunnerApDamageReducerHardware(
+    ...args,
+  );
+
+export const runnerHasInstalledCardDefinition: StateRuntimePortFunction<
+  "runnerHasInstalledCardDefinition"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.runnerHasInstalledCardDefinition(
+    ...args,
+  );
+
+export const runnerInstalledCardCountByDefinition: StateRuntimePortFunction<
+  "runnerInstalledCardCountByDefinition"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.runnerInstalledCardCountByDefinition(
+    ...args,
+  );
+
+export const installedVirusCounterTotalForDefinition: StateRuntimePortFunction<
+  "installedVirusCounterTotalForDefinition"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.installedVirusCounterTotalForDefinition(
+    ...args,
+  );
+
+export const virusCounterImplementationForDefinition: StateRuntimePortFunction<
+  "virusCounterImplementationForDefinition"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.virusCounterImplementationForDefinition(
+    ...args,
+  );
+
+export const virusCounterImplementationForCard: StateRuntimePortFunction<
+  "virusCounterImplementationForCard"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.virusCounterImplementationForCard(
+    ...args,
+  );
+
+export const corpUtilityImplementationForCard: StateRuntimePortFunction<
+  "corpUtilityImplementationForCard"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.corpUtilityImplementationForCard(
+    ...args,
+  );
+
+export const hasCorpUtilityKind: StateRuntimePortFunction<
+  "hasCorpUtilityKind"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.hasCorpUtilityKind(...args);
+
+export const cardInstallCapabilitiesForDefinition: StateRuntimePortFunction<
+  "cardInstallCapabilitiesForDefinition"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.cardInstallCapabilitiesForDefinition(
+    ...args,
+  );
+
+export const hasInstallCapabilityKindForDefinition: StateRuntimePortFunction<
+  "hasInstallCapabilityKindForDefinition"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.hasInstallCapabilityKindForDefinition(
+    ...args,
+  );
+
+export const rootInstallRezzesOnInstall: StateRuntimePortFunction<
+  "rootInstallRezzesOnInstall"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.rootInstallRezzesOnInstall(...args);
+
+export const mustInstallInsideSubsidiaryDataFort: StateRuntimePortFunction<
+  "mustInstallInsideSubsidiaryDataFort"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.mustInstallInsideSubsidiaryDataFort(
+    ...args,
+  );
+
+export const fortCapacityModifiersForCard: StateRuntimePortFunction<
+  "fortCapacityModifiersForCard"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.fortCapacityModifiersForCard(...args);
+
+export const leavePlayCleanupImplementationsForCard: StateRuntimePortFunction<
+  "leavePlayCleanupImplementationsForCard"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.leavePlayCleanupImplementationsForCard(
+    ...args,
+  );
+
+export const installedRunnerVirusSourceIds: StateRuntimePortFunction<
+  "installedRunnerVirusSourceIds"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.installedRunnerVirusSourceIds(...args);
+
+export const cockroachCounterTotal: StateRuntimePortFunction<
+  "cockroachCounterTotal"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.cockroachCounterTotal(...args);
+
+export const incubatorCounterTotal: StateRuntimePortFunction<
+  "incubatorCounterTotal"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.incubatorCounterTotal(...args);
+
+export const cockroachRandomHqDiscardActive: StateRuntimePortFunction<
+  "cockroachRandomHqDiscardActive"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.cockroachRandomHqDiscardActive(
+    ...args,
+  );
+
+export const isVisibleVirusCounterCardForRunner: StateRuntimePortFunction<
+  "isVisibleVirusCounterCardForRunner"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.isVisibleVirusCounterCardForRunner(
+    ...args,
+  );
+
+export const corpIceInstallBaseCost: StateRuntimePortFunction<
+  "corpIceInstallBaseCost"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.corpIceInstallBaseCost(...args);
+
+export const outermostIceIndex: StateRuntimePortFunction<
+  "outermostIceIndex"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.outermostIceIndex(...args);
+
+export const poxCountersForServer: StateRuntimePortFunction<
+  "poxCountersForServer"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.poxCountersForServer(...args);
+
+export const spyCountersForServer: StateRuntimePortFunction<
+  "spyCountersForServer"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.spyCountersForServer(...args);
+
+export const poxInstallTax: StateRuntimePortFunction<"poxInstallTax"> = (
+  ...args
+) => typedRuntimePorts.stateRuntimeServices.poxInstallTax(...args);
+
+export const corpIceInstallAdditionalCost: StateRuntimePortFunction<
+  "corpIceInstallAdditionalCost"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.corpIceInstallAdditionalCost(...args);
+
+export const corpIceInstallTotalCost: StateRuntimePortFunction<
+  "corpIceInstallTotalCost"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.corpIceInstallTotalCost(...args);
+
+export const assertCorpIceInstallCostValid: StateRuntimePortFunction<
+  "assertCorpIceInstallCostValid"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeServices.assertCorpIceInstallCostValid(...args);
 
 export function serverDifficultyIncreaseFromRunCounters(...args: any[]): any {
   return runtimeDelegate(
@@ -571,7 +517,9 @@ export function resolveRunnerDrawSequenceChoice(...args: any[]): any {
   )(...args);
 }
 
-export function resumeRunnerDrawSequenceAfterTagPrevention(...args: any[]): any {
+export function resumeRunnerDrawSequenceAfterTagPrevention(
+  ...args: any[]
+): any {
   return runtimeDelegate(
     "lifecycleRuntime",
     "resumeRunnerDrawSequenceAfterTagPrevention",

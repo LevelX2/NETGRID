@@ -1,39 +1,70 @@
-import type { createChoiceHiddenZoneRuntime } from "./choice-hidden-zone-runtime";
-import type { createLifecycleRuntime } from "./lifecycle-runtime";
-import type { createTurnCorpRuntime } from "./turn-corp-runtime";
-import type { createActionRuntimeHosts } from "./action-runtime-hosts";
-import type { createCardRuntimeHosts } from "./card-runtime-hosts";
-import type { createFlowRuntimeHosts } from "./flow-runtime-hosts";
-import type { createStateRuntimeServices } from "./state-runtime-services";
-import type { createCardRuntimeResolvers } from "./card-runtime-resolvers";
-import type { createChoiceHiddenZoneResolvers } from "./choice-hidden-zone-resolvers";
-import type { createCorpRuntimeResolvers } from "./corp-runtime-resolvers";
-import type { createStateRuntimeResolvers } from "./state-runtime-resolvers";
-import type { createTurnRuntimeResolvers } from "./turn-runtime-resolvers";
-import type { createStateCorpRuntimeResolvers } from "./state-corp-runtime-resolvers";
-
 /**
  * Statically derives every composition port from its concrete factory. A
  * factory signature change therefore reaches all migrated consumers without a
  * string lookup or a duplicate hand-written function contract.
  */
 export type RuntimePortGroups = {
-  actionRuntimeHosts: ReturnType<typeof createActionRuntimeHosts>;
-  cardRuntimeHosts: ReturnType<typeof createCardRuntimeHosts>;
-  cardRuntimeResolvers: ReturnType<typeof createCardRuntimeResolvers>;
-  choiceHiddenZoneResolvers: ReturnType<typeof createChoiceHiddenZoneResolvers>;
-  choiceHiddenZoneRuntime: ReturnType<typeof createChoiceHiddenZoneRuntime>;
-  corpRuntimeResolvers: ReturnType<typeof createCorpRuntimeResolvers>;
-  flowRuntimeHosts: ReturnType<typeof createFlowRuntimeHosts>;
-  lifecycleRuntime: ReturnType<typeof createLifecycleRuntime>;
-  stateCorpRuntimeResolvers: ReturnType<typeof createStateCorpRuntimeResolvers>;
-  stateRuntimeResolvers: ReturnType<typeof createStateRuntimeResolvers>;
-  stateRuntimeServices: ReturnType<typeof createStateRuntimeServices>;
-  turnCorpRuntime: ReturnType<typeof createTurnCorpRuntime>;
-  turnRuntimeResolvers: ReturnType<typeof createTurnRuntimeResolvers>;
+  actionRuntimeHosts: ReturnType<
+    (typeof import("./action-runtime-hosts"))["createActionRuntimeHosts"]
+  >;
+  cardRuntimeHosts: ReturnType<
+    (typeof import("./card-runtime-hosts"))["createCardRuntimeHosts"]
+  >;
+  cardRuntimeResolvers: ReturnType<
+    (typeof import("./card-runtime-resolvers"))["createCardRuntimeResolvers"]
+  >;
+  choiceHiddenZoneResolvers: ReturnType<
+    (typeof import("./choice-hidden-zone-resolvers"))["createChoiceHiddenZoneResolvers"]
+  >;
+  choiceHiddenZoneRuntime: ReturnType<
+    (typeof import("./choice-hidden-zone-runtime"))["createChoiceHiddenZoneRuntime"]
+  >;
+  corpRuntimeResolvers: ReturnType<
+    (typeof import("./corp-runtime-resolvers"))["createCorpRuntimeResolvers"]
+  >;
+  flowRuntimeHosts: ReturnType<
+    (typeof import("./flow-runtime-hosts"))["createFlowRuntimeHosts"]
+  >;
+  lifecycleRuntime: ReturnType<
+    (typeof import("./lifecycle-runtime"))["createLifecycleRuntime"]
+  >;
+  stateCorpRuntimeResolvers: ReturnType<
+    (typeof import("./state-corp-runtime-resolvers"))["createStateCorpRuntimeResolvers"]
+  >;
+  stateRuntimeResolvers: ReturnType<
+    (typeof import("./state-runtime-resolvers"))["createStateRuntimeResolvers"]
+  >;
+  stateRuntimeServices: import("./state-runtime-services").StateRuntimeServices;
+  turnCorpRuntime: ReturnType<
+    (typeof import("./turn-corp-runtime"))["createTurnCorpRuntime"]
+  >;
+  turnRuntimeResolvers: ReturnType<
+    (typeof import("./turn-runtime-resolvers"))["createTurnRuntimeResolvers"]
+  >;
 };
 
 export type RuntimePortSet = Partial<RuntimePortGroups>;
+
+export type StateRuntimePortGroups = {
+  stateRuntimeServices: import("./state-runtime-services").StateRuntimeServices;
+};
+
+export type StateRuntimePortFunction<
+  Name extends keyof StateRuntimePortGroups["stateRuntimeServices"],
+> = StateRuntimePortGroups["stateRuntimeServices"][Name] extends (
+  ...args: infer Arguments
+) => infer Result
+  ? (...args: Arguments) => Result
+  : never;
+
+export type RuntimePortFunction<
+  Group extends keyof RuntimePortGroups,
+  Name extends keyof RuntimePortGroups[Group],
+> = RuntimePortGroups[Group][Name] extends (
+  ...args: infer Arguments
+) => infer Result
+  ? (...args: Arguments) => Result
+  : never;
 
 /**
  * Typed installation boundary for the staged delegate migration. Missing

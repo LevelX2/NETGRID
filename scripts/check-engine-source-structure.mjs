@@ -17,7 +17,7 @@ const delegateDebt = new Map([
   ["card-runtime-delegates.ts", 50],
   ["choice-runtime-delegates.ts", 89],
   ["flow-runtime-delegates.ts", 58],
-  ["state-runtime-delegates.ts", 126],
+  ["state-runtime-delegates.ts", 59],
 ]);
 const delegateExportCaps = new Map([
   ["action-runtime-delegates.ts", 107],
@@ -67,6 +67,13 @@ const allowedLayerDebt = new Set([
   "ability-engine/card-implementation-runtime-activated-costs.ts -> game/payment/runner-payment-support.ts",
   "ability-engine/cost-pipeline.ts -> game/payment/index.ts",
 ]);
+const stateRuntimePortFiles = [
+  "card-strength-cost-runtime-port.ts",
+  "counter-turn-runtime-port.ts",
+  "economy-runtime-port.ts",
+  "lookup-runtime-port.ts",
+  "zone-runtime-port.ts",
+];
 
 if (process.argv.includes("--self-test")) {
   runSelfTest();
@@ -201,6 +208,25 @@ if (sourceLineCount(runtimePortContracts) > 160)
   findings.push(
     `${runtimePath("runtime-port-contracts.ts")} exceeds 160 lines`,
   );
+
+for (const fileName of stateRuntimePortFiles) {
+  const file = path.join(runtimeRoot, fileName);
+  const source = parseSource(file, readFileSync(file, "utf8"));
+  const anyCount = countSyntaxKind(source, ts.SyntaxKind.AnyKeyword);
+  if (anyCount > 0)
+    findings.push(
+      `${runtimePath(fileName)} contains ${anyCount} any type nodes`,
+    );
+  if (sourceLineCount(file) > 180)
+    findings.push(`${runtimePath(fileName)} exceeds 180 lines`);
+  const valueStatement = source.statements.find(
+    (statement) => !isDeclarativeContractStatement(statement),
+  );
+  if (valueStatement)
+    findings.push(
+      `${runtimePath(fileName)} contains runtime statement kind ${ts.SyntaxKind[valueStatement.kind]}`,
+    );
+}
 
 if (findings.length > 0) {
   console.error("ENGINE_SOURCE_STRUCTURE FAILED");

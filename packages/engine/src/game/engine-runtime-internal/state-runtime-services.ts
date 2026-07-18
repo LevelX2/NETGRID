@@ -4,9 +4,22 @@ import { createCounterTurnRuntimeServices } from "./counter-turn-runtime-service
 import { createEconomyRuntimeServices } from "./economy-runtime-services";
 import { createLookupRuntimeServices } from "./lookup-runtime-services";
 import { createZoneRuntimeServices } from "./zone-runtime-services";
+import type { EconomyRuntimePort } from "./economy-runtime-port";
+import type { LookupRuntimePort } from "./lookup-runtime-port";
+import type { CardStrengthCostRuntimePort } from "./card-strength-cost-runtime-port";
+import type { CounterTurnRuntimePort } from "./counter-turn-runtime-port";
+import type { ZoneRuntimePort } from "./zone-runtime-port";
 
-export function createStateRuntimeServices(deps: RuntimeDeps) {
-  const runtime = {} as RuntimeDeps;
+export type StateRuntimeServices = EconomyRuntimePort &
+  LookupRuntimePort &
+  CardStrengthCostRuntimePort &
+  CounterTurnRuntimePort &
+  ZoneRuntimePort;
+
+export function createStateRuntimeServices(
+  deps: RuntimeDeps,
+): StateRuntimeServices {
+  const runtime = {} as StateRuntimeServices;
   Object.assign(
     runtime,
     createEconomyRuntimeServices(deps),
