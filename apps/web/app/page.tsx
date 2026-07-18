@@ -308,6 +308,7 @@ import {
   mergeVisibleGuestDecks,
   visibleGuestDecks,
 } from "../features/decks/deck-library-visibility";
+import { resolveDeckSlotSelection } from "../features/decks/deck-slot-selection";
 import {
   enrichVisibleCard,
   visibleCardFromCatalogDetail,
@@ -3704,15 +3705,25 @@ export default function Page() {
     snapshotId: string,
     localDeckId: string,
   ) {
-    if (source === "local") {
-      const deck = localDecks.find(
-        (candidate) =>
-          candidate.deckId === localDeckId && candidate.side === side,
+    const snapshots = side === "runner" ? runnerSnapshots : corpSnapshots;
+    const sideLocalDecks = matchStartLocalDecks.filter(
+      (candidate) => candidate.side === side,
+    );
+    const selection = resolveDeckSlotSelection({
+      source,
+      selectedSnapshotId: snapshotId,
+      selectedLocalDeckId: localDeckId,
+      snapshots,
+      localDecks: sideLocalDecks,
+    });
+    if (!selection)
+      throw new Error(
+        `Kein matchstartfähiges ${sideLabel(side)}-Deck verfügbar.`,
       );
-      if (!deck)
-        throw new Error(
-          `Bitte wähle ein gespeichertes ${sideLabel(side)}-Deck.`,
-        );
+    if (selection.source === "local") {
+      const deck = sideLocalDecks.find(
+        (candidate) => candidate.deckId === selection.localDeckId,
+      )!;
       if (savedDeckFingerprints[deck.deckId] !== deckFingerprint(deck))
         throw new Error(
           `Bitte speichere das ${sideLabel(side)}-Deck vor dem Matchstart.`,
@@ -3723,8 +3734,8 @@ export default function Page() {
         : { corpDeckSnapshot: snapshot };
     }
     return side === "runner"
-      ? { runnerDeckSnapshotId: snapshotId }
-      : { corpDeckSnapshotId: snapshotId };
+      ? { runnerDeckSnapshotId: selection.snapshotId }
+      : { corpDeckSnapshotId: selection.snapshotId };
   }
 
   const refreshOpenLanMatches = async (silent = false) => {
@@ -4634,9 +4645,13 @@ export default function Page() {
     if (standard.side === "runner") {
       setSelectedRunnerSnapshotId(snapshotId);
       setRunnerDeckSource("snapshot");
+      setSelectedParticipantBRunnerSnapshotId(snapshotId);
+      setParticipantBRunnerDeckSource("snapshot");
     } else {
       setSelectedCorpSnapshotId(snapshotId);
       setCorpDeckSource("snapshot");
+      setSelectedParticipantBCorpSnapshotId(snapshotId);
+      setParticipantBCorpDeckSource("snapshot");
     }
     setEntryTab("play");
     setNotice(`${standard.name} ist für den Matchstart ausgewählt.`);
@@ -4880,15 +4895,10 @@ export default function Page() {
     if (!validatedSnapshot) return;
     if (validatedSnapshot.side === "runner") {
       setRunnerLocalSnapshot(validatedSnapshot);
-      setRunnerDeckSource("local");
-      if (selectedLocalDeck)
-        setSelectedRunnerLocalDeckId(selectedLocalDeck.deckId);
     } else {
       setCorpLocalSnapshot(validatedSnapshot);
-      setCorpDeckSource("local");
-      if (selectedLocalDeck)
-        setSelectedCorpLocalDeckId(selectedLocalDeck.deckId);
     }
+    if (selectedLocalDeck) selectDeckForSide(selectedLocalDeck);
     setEntryTab("play");
     setNotice("Deck-Snapshot für Match Setup gesetzt.");
   };
@@ -4897,15 +4907,10 @@ export default function Page() {
     if (!validatedSnapshot) return;
     if (validatedSnapshot.side === "runner") {
       setRunnerLocalSnapshot(validatedSnapshot);
-      setRunnerDeckSource("local");
-      if (selectedLocalDeck)
-        setSelectedRunnerLocalDeckId(selectedLocalDeck.deckId);
     } else {
       setCorpLocalSnapshot(validatedSnapshot);
-      setCorpDeckSource("local");
-      if (selectedLocalDeck)
-        setSelectedCorpLocalDeckId(selectedLocalDeck.deckId);
     }
+    if (selectedLocalDeck) selectDeckForSide(selectedLocalDeck);
     setNotice("Deck-Snapshot für den nächsten Matchstart vorgemerkt.");
   };
 
@@ -5119,9 +5124,13 @@ export default function Page() {
     if (deck.side === "runner") {
       setSelectedRunnerLocalDeckId(deck.deckId);
       setRunnerDeckSource("local");
+      setSelectedParticipantBRunnerLocalDeckId(deck.deckId);
+      setParticipantBRunnerDeckSource("local");
     } else {
       setSelectedCorpLocalDeckId(deck.deckId);
       setCorpDeckSource("local");
+      setSelectedParticipantBCorpLocalDeckId(deck.deckId);
+      setParticipantBCorpDeckSource("local");
     }
   }
 

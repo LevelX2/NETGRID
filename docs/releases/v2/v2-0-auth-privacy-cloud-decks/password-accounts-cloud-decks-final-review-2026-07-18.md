@@ -105,3 +105,22 @@ sind erfüllt. Der Stand ist für privaten Betrieb und weitere Playtests
 freigegeben. Er ist keine Freigabe für öffentliche Selbstregistrierung oder
 einen offenen Internetdienst. E-Mail-Verifikation/Recovery, Passkeys, MFA,
 Missbrauchsschutz und Public-Operations bleiben eigene Folgegates.
+
+## Nachkorrektur: Standard-Decks im Matchstart
+
+Ein Playtest am 2026-07-18 zeigte zwei gekoppelte Matchstartfehler: Ein nicht
+mehr vorhandenes persönliches Deck konnte intern weiter als Auswahlquelle
+gespeichert sein, obwohl das Auswahlfeld bereits ein Standard-Deck anzeigte.
+Außerdem waren die kuratierten Standard-Snapshots zwar über die Deck-API
+sichtbar, aber noch nicht im autoritativen Server-Resolver registriert.
+
+Der Client normalisiert ungültige gespeicherte Deckslots nun auf die tatsächlich
+sichtbare Standardauswahl. „Direkt spielen“ und die Deck-Editor-Auswahl setzen
+den gewählten Seitenslot für beide Teilnehmerprofile, damit der Slot unabhängig
+von Seitenwahl und KI-Zuordnung verfügbar ist. Der Server löst alle aktiven
+kurierten Standard-Snapshot-IDs als unveränderliche Matchstart-Snapshots auf.
+
+Verifiziert wurde der reale Browserstart als Runner mit
+„Rent-I-Con: Das Shellspiel“ gegen „Cheap Bag of Tricks“ im kombinierten
+Classic-/Protheus-Pool bis zum erstellten Match (`HTTP 201`). Ergänzend sind
+Server-Resolver-, Client-Fallback- und Typprüfungen grün.
