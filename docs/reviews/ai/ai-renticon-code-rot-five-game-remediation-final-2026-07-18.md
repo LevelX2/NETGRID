@@ -1,16 +1,16 @@
 # KI-Remediation: Rent-I-Con gegen CODE ROT vom 18.07.2026
 
-Status: abgeschlossen, Null-Fehler-Gate in Cycle 7 erreicht
+Status: abgeschlossen, integriertes Null-Fehler-Gate in Cycle 9 erreicht
 
 ## Ergebnis
 
 Die Baseline-Probleme und alle in den anschließenden Fünferzyklen bestätigten
-KI-Fehlentscheidungen wurden behoben. Cycle 7 wiederholte dieselben fünf
+KI-Fehlentscheidungen wurden behoben. Cycle 9 wiederholte dieselben fünf
 festgeschriebenen Seeds vollständig und endete mit fünf regulären Partien,
-2.069 von 2.069 angewandten Entscheidungen, vollständiger Why-/WhyNot-
+1.971 von 1.971 angewandten Entscheidungen, vollständiger Why-/WhyNot-
 Abdeckung und null bestätigten Fehlern.
 
-Die Remediation-Zyklen umfassen insgesamt 35 regulär abgeschlossene Partien.
+Die Remediation-Zyklen umfassen insgesamt 45 regulär abgeschlossene Partien.
 Der ursprüngliche Baseline-Lauf mit zwei Engine-Abbrüchen bleibt als getrennte
 Vorher-Evidence erhalten.
 
@@ -32,14 +32,16 @@ Vorher-Evidence erhalten.
 | 4 | 2.227 | 5/5 | passive Scoreline-Unterstützung verdrängt Advance |
 | 5 | 2.196 | 5/5 | überholte Runner-Kapazitätspläne |
 | 6 | 2.072 | 5/5 | No-Need-Suche und nicht finanzierbarer Matchpoint-Schutz |
-| 7 | 2.069 | 5/5 | keiner; Null-Fehler-Gate erreicht |
+| 7 | 2.069 | 5/5 | keiner; Null-Fehler-Gate vor Main-Abgleich |
+| 8 | 2.091 | 5/5 | negative Remote-Planbindung verdrängt finanzierbares HQ-ICE |
+| 9 | 1.971 | 5/5 | keiner; integriertes Null-Fehler-Gate erreicht |
 
-## Cycle-7-Spielergebnisse
+## Cycle-9-Spielergebnisse
 
 | Seed | Sieger / Grund | Aktionen | Züge | Runner–Corp | StateHash |
 |---|---|---:|---:|---:|---|
-| `-001` | Runner / Corp-Deck leer | 438 | 58 | 3–4 | `fnv1a:cf901433` |
-| `-002` | Runner / Agenda-Punkte | 444 | 57 | 7–4 | `fnv1a:c84e6098` |
+| `-001` | Runner / Corp-Deck leer | 428 | 58 | 3–4 | `fnv1a:3d763290` |
+| `-002` | Runner / Agenda-Punkte | 356 | 43 | 8–1 | `fnv1a:c58913f9` |
 | `-003` | Runner / Corp-Deck leer | 477 | 64 | 5–0 | `fnv1a:831ec2a1` |
 | `-004` | Runner / Corp-Deck leer | 405 | 60 | 2–6 | `fnv1a:66df3f1e` |
 | `-005` | Runner / Agenda-Punkte | 305 | 41 | 7–0 | `fnv1a:84e9877a` |
@@ -47,14 +49,14 @@ Vorher-Evidence erhalten.
 Die Ergebnisverteilung ist kein Balanceurteil; das Gate bewertet Regel-
 korrektheit und nachvollziehbare Entscheidungen für genau diese Seeds.
 
-## Cycle-7-Integrität
+## Cycle-9-Integrität
 
-- 2.069 erwartete und 2.069 angewandte Decision-Traces;
+- 1.971 erwartete und 1.971 angewandte Decision-Traces;
 - null illegale Aktionen, abgelehnte Versuche, Engine-Abbrüche oder
   Action-Limit-Enden;
 - fünf erfolgreiche deterministische Replays, null StateHash-Abweichungen;
-- 2.069/2.069 gewählte Alternativen mit `WhyChosen`;
-- 12.293/12.293 nicht gewählte Alternativen mit `WhyNot`;
+- 1.971/1.971 gewählte Alternativen mit `WhyChosen`;
+- 11.519/11.519 nicht gewählte Alternativen mit `WhyNot`;
 - null fehlende Top-Level- oder Runtime-WhyNot-Abschnitte;
 - vollständiger Corpus und Findings redaktionssicher, keine verbotenen Marker.
 - Runner- und Corp-Deck-Hint-Consumer jeweils `status=ok`: 26/26 eindeutige
@@ -62,9 +64,9 @@ korrektheit und nachvollziehbare Entscheidungen für genau diese Seeds.
 
 ## Vollständige Prüfung der heuristischen Hinweise
 
-Cycle 7 erzeugte 48 Detector-Hinweise, aber keinen bestätigten Spielfehler:
+Cycle 9 erzeugte 60 Detector-Hinweise, aber keinen bestätigten Spielfehler:
 
-- 45 `plan_step_action_mismatch`: In jedem Fall war die gewählte Aktion
+- 57 `plan_step_action_mismatch`: In jedem Fall war die gewählte Aktion
   Rang 1, hatte den höchsten zulässigen semantischen Score und wurde über den
   regulären Semantic-Controller gewählt. Der Detector verglich lediglich den
   Aktionstyp mit einem noch sichtbaren Planlabel.
@@ -90,6 +92,8 @@ Ausnahmen, keine Fehler.
 - wirkungsloses erstes positionsabhängiges ICE wird hart abgewertet;
 - aktive Agenda-, Scoreline-, Board-Triage- und Matchpoint-Prioritäten wurden
   gegen unfundierte oder off-path Installationen abgesichert;
+- negative Remote-Scoreline-Bindungen geben an positive, sofort finanzierbare
+  zentrale ICE-Platzierungen ab;
 - Runner-Run-Kosten berücksichtigen eingeschränkte Run-Credits;
 - überholte Search-, Draw-, Install-, Credit- und Kapazitätspläne geben an
   positive Alternativen ab;
@@ -101,12 +105,12 @@ Remediation-Checkpoint-Suites laufen grün.
 
 ## Führende Evidence
 
-- Cycle-7-Seedmanifest:
-  `docs/reviews/ai/ai-renticon-code-rot-five-game-cycle-7-seeds-2026-07-18.json`
-- Cycle-7-Entscheidungsledger:
-  `docs/reviews/ai/ai-renticon-code-rot-five-game-cycle-7-decision-ledger-2026-07-18.json`
-- Cycle-7-Annotationen:
-  `docs/reviews/ai/ai-renticon-code-rot-five-game-cycle-7-annotations-2026-07-18.json`
+- Cycle-9-Seedmanifest:
+  `docs/reviews/ai/ai-renticon-code-rot-five-game-cycle-9-seeds-2026-07-18.json`
+- Cycle-9-Entscheidungsledger:
+  `docs/reviews/ai/ai-renticon-code-rot-five-game-cycle-9-decision-ledger-2026-07-18.json`
+- Cycle-9-Annotationen:
+  `docs/reviews/ai/ai-renticon-code-rot-five-game-cycle-9-annotations-2026-07-18.json`
 - Baseline-Analyse:
   `docs/reviews/ai/ai-renticon-code-rot-five-game-analysis-2026-07-18.md`
 - reproduzierbarer Runner:

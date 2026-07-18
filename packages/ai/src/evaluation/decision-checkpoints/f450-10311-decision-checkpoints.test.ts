@@ -52,11 +52,11 @@ describe("F450 and 10311 exact decision checkpoints", () => {
     expectCheckpointToPass(fixture(cp03ControlJson));
   });
 
-  it("keeps funding the Cybermodem plan while installation is unaffordable", () => {
+  it("converts rich credits into R&D pressure while Cybermodem remains unaffordable", () => {
     const stillUnaffordable = mutateFixture(cp04Json, (checkpoint) => {
       checkpoint.engine.testOnlyGameState.runner.credits = 10;
       checkpoint.expectation = {
-        acceptableActions: [{ type: "gain_credit" }],
+        acceptableActions: [{ type: "start_run", targetServerId: "rd" }],
       };
     });
 

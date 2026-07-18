@@ -33,7 +33,7 @@ describe("match FD6320 runner decision checkpoints", () => {
     expectCheckpointToPass(freshRnd);
   });
 
-  it("does not force the HQ run below matchpoint", () => {
+  it("funds the hand instead of drawing into overflow below matchpoint", () => {
     const belowMatchpoint = mutateFixture(
       reachableHqMatchpointJson,
       (checkpoint) => {
@@ -53,7 +53,7 @@ describe("match FD6320 runner decision checkpoints", () => {
         checkpoint.source.kind = "synthetic_companion";
         checkpoint.source.findingId = "FD6320-C02-NO-MATCHPOINT-FORCE";
         checkpoint.expectation = {
-          acceptableActions: [{ type: "draw_card" }],
+          acceptableActions: [{ type: "gain_credit" }],
         };
       },
     );
