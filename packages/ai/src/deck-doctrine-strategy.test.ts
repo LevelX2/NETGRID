@@ -6,6 +6,7 @@ import {
   buildDeckDoctrineV2Diagnostic,
   buildDeckStrategyProfile,
   compareDeckStrategyRanking,
+  DECK_STRATEGY_METADATA_CONSUMER_CONTRACT,
   selectRankedStrategyIdsWithCutoffTies,
   type DeckStrategyScore,
 } from "./deck-doctrine-strategy";
@@ -27,6 +28,53 @@ const realDoctrineSnapshotIds = [
 ] as const;
 
 describe("DeckDoctrine strategy aggregation diagnostics", () => {
+  it("classifies every derived public metadata group by consumer mode", () => {
+    expect(
+      Object.keys(DECK_STRATEGY_METADATA_CONSUMER_CONTRACT).sort(),
+    ).toEqual([
+      "corpProfile.economyProfile",
+      "corpProfile.iceProfile",
+      "corpProfile.punishProfile",
+      "corpProfile.remoteProfile",
+      "corpProfile.scoreProfile",
+      "functionSignalCounts",
+      "legacySignalCounts",
+      "primaryStrategies",
+      "runnerProfile.coverageProfile",
+      "runnerProfile.defenseProfile",
+      "runnerProfile.economyProfile",
+      "runnerProfile.pressureProfile",
+      "runnerProfile.setupProfile",
+      "secondaryStrategies",
+      "strategyScores",
+      "warnings",
+    ]);
+    expect(
+      DECK_STRATEGY_METADATA_CONSUMER_CONTRACT.legacySignalCounts,
+    ).toMatchObject({ mode: "diagnostic_only" });
+    expect(
+      DECK_STRATEGY_METADATA_CONSUMER_CONTRACT["corpProfile.economyProfile"],
+    ).toMatchObject({ mode: "productive_and_diagnostic" });
+    expect(
+      Object.values(DECK_STRATEGY_METADATA_CONSUMER_CONTRACT).every(
+        (entry) => entry.consumers.length > 0,
+      ),
+    ).toBe(true);
+  });
+
+  it("keeps inspector warning provenance per affected card", () => {
+    const profile = buildDeckStrategyProfile(
+      standardDeckByName("King of the Road"),
+    );
+    const inspectorWarnings = profile.warnings.filter((warning) =>
+      warning.startsWith("inspector:"),
+    );
+
+    expect(inspectorWarnings.length).toBeGreaterThan(0);
+    expect(
+      inspectorWarnings.every((warning) => /:onr_[a-z0-9_-]+$/.test(warning)),
+    ).toBe(true);
+  });
   it("dampens duplicate metadata and additional copies of the same anchor card", () => {
     const oneCopy = buildDeckStrategyProfile({
       deckSnapshotId: "one-copy-recycle-anchor",

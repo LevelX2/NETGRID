@@ -114,6 +114,83 @@ export type CorpDeckStrategyProfiles = {
   };
 };
 
+export type DeckStrategyMetadataConsumerMode =
+  | "productive_and_diagnostic"
+  | "diagnostic_only";
+
+export const DECK_STRATEGY_METADATA_CONSUMER_CONTRACT = {
+  strategyScores: {
+    mode: "productive_and_diagnostic",
+    consumers: ["StrategicIntentState", "AI007 strategy viewer"],
+  },
+  primaryStrategies: {
+    mode: "productive_and_diagnostic",
+    consumers: ["StrategicRuntimeContext", "AI007 strategy viewer"],
+  },
+  secondaryStrategies: {
+    mode: "productive_and_diagnostic",
+    consumers: ["StrategicRuntimeContext", "AI007 strategy viewer"],
+  },
+  functionSignalCounts: {
+    mode: "productive_and_diagnostic",
+    consumers: ["RunnerStrategicIntent", "AI007 strategy viewer"],
+  },
+  legacySignalCounts: {
+    mode: "diagnostic_only",
+    consumers: ["AI007 legacy signal groups", "AI006 invariant check"],
+  },
+  "runnerProfile.coverageProfile": {
+    mode: "diagnostic_only",
+    consumers: ["AI007 Runner profile viewer"],
+  },
+  "runnerProfile.economyProfile": {
+    mode: "diagnostic_only",
+    consumers: ["AI007 Runner profile viewer"],
+  },
+  "runnerProfile.setupProfile": {
+    mode: "diagnostic_only",
+    consumers: ["AI007 Runner profile viewer"],
+  },
+  "runnerProfile.pressureProfile": {
+    mode: "diagnostic_only",
+    consumers: ["AI007 Runner profile viewer"],
+  },
+  "runnerProfile.defenseProfile": {
+    mode: "diagnostic_only",
+    consumers: ["AI007 Runner profile viewer"],
+  },
+  "corpProfile.iceProfile": {
+    mode: "diagnostic_only",
+    consumers: ["AI007 Corp profile viewer"],
+  },
+  "corpProfile.scoreProfile": {
+    mode: "diagnostic_only",
+    consumers: ["AI007 Corp profile viewer"],
+  },
+  "corpProfile.economyProfile": {
+    mode: "productive_and_diagnostic",
+    consumers: ["CorpStrategicIntent", "AI007 Corp profile viewer"],
+  },
+  "corpProfile.punishProfile": {
+    mode: "productive_and_diagnostic",
+    consumers: ["CorpStrategicIntent", "StrategicRuntimeContext"],
+  },
+  "corpProfile.remoteProfile": {
+    mode: "diagnostic_only",
+    consumers: ["AI007 Corp profile viewer"],
+  },
+  warnings: {
+    mode: "diagnostic_only",
+    consumers: ["AI007 warning viewer", "DeckDoctrine v2 diagnostic"],
+  },
+} as const satisfies Record<
+  string,
+  {
+    mode: DeckStrategyMetadataConsumerMode;
+    consumers: readonly string[];
+  }
+>;
+
 export type AiDeckStrategyProfile = {
   schemaVersion: "ai-deck-strategy-profile-v1";
   taskId: "AI006";
@@ -2182,7 +2259,7 @@ function deckWarnings(stats: DeckStrategyStats): string[] {
       warnings.add(`side_mismatch:${card.cardId}:${hint.side}`);
     }
     for (const category of card.warningCategories) {
-      warnings.add(`inspector:${category}`);
+      warnings.add(`inspector:${category}:${card.cardId}`);
     }
   }
   return [...warnings].sort();

@@ -8,7 +8,11 @@ import {
   buildDeckStrategyProfile,
   buildRunnerStrategicIntentProfile,
 } from "@netgrid/ai";
-import type { DeckSnapshot, DeckValidationResult, EditableDeck } from "@netgrid/decks";
+import type {
+  DeckSnapshot,
+  DeckValidationResult,
+  EditableDeck,
+} from "@netgrid/decks";
 import { assertDeckPayloadSafe } from "@netgrid/decks";
 import type { Side } from "@netgrid/shared";
 import strategyGoalsData from "../../../../../../data/ai/strategy-goals-v1.json";
@@ -45,7 +49,8 @@ type DeckValidationResponseBody = {
   error?: { message: string };
 };
 
-const RESPONSE_SCHEMA_VERSION = "ai007-deck-strategy-viewer-response-v1" as const;
+const RESPONSE_SCHEMA_VERSION =
+  "ai007-deck-strategy-viewer-response-v1" as const;
 const VIEWER_SCHEMA_VERSION = "ai007-deck-strategy-viewer-v1" as const;
 const STRATEGY_GOALS_BY_ID = new Map(
   (strategyGoalsData.strategyGoals as StrategyGoal[]).map((goal) => [
@@ -60,7 +65,10 @@ export function deckStrategyProfileViewerResponse(
 ): DeckStrategyProfileViewerResponse {
   const deckInfo = deckInfoFromUnknown(deckPayload);
   if (!isEditableDeckLike(deckPayload)) {
-    return unavailableResponse("Deckprofil konnte nicht berechnet werden", deckInfo);
+    return unavailableResponse(
+      "Deckprofil konnte nicht berechnet werden",
+      deckInfo,
+    );
   }
   if (deckPayload.cards.length === 0) {
     return unavailableResponse("Deck enthält keine Karten", deckInfo);
@@ -68,7 +76,10 @@ export function deckStrategyProfileViewerResponse(
 
   const validationResponse = deckValidationResponse(deckPayload);
   if (validationResponse.status !== 200) {
-    return unavailableResponse("Deckprofil konnte nicht berechnet werden", deckInfo);
+    return unavailableResponse(
+      "Deckprofil konnte nicht berechnet werden",
+      deckInfo,
+    );
   }
   const body = validationResponse.body as DeckValidationResponseBody;
   if (body.error) {
@@ -92,26 +103,27 @@ export function deckStrategyProfileViewerResponse(
         quantity: entry.quantity,
       })),
     });
-    const runnerStrategicIntent = profile.side === "runner"
-      ? buildRunnerStrategicIntentViewer(
-          buildRunnerStrategicIntentProfile({
-            strategyProfile: profile,
-            deckCapabilities: buildDeckCapabilityProfile({
-              side: body.snapshot.side,
-              deckSnapshot: {
-                deckSnapshotId: body.snapshot.deckSnapshotId,
+    const runnerStrategicIntent =
+      profile.side === "runner"
+        ? buildRunnerStrategicIntentViewer(
+            buildRunnerStrategicIntentProfile({
+              strategyProfile: profile,
+              deckCapabilities: buildDeckCapabilityProfile({
                 side: body.snapshot.side,
-                formatProfileId: body.snapshot.formatProfileId,
-                publicMetadata: body.snapshot.publicMetadata,
-                cards: body.snapshot.cards.map((entry) => ({
-                  cardId: entry.cardId,
-                  quantity: entry.quantity,
-                })),
-              },
+                deckSnapshot: {
+                  deckSnapshotId: body.snapshot.deckSnapshotId,
+                  side: body.snapshot.side,
+                  formatProfileId: body.snapshot.formatProfileId,
+                  publicMetadata: body.snapshot.publicMetadata,
+                  cards: body.snapshot.cards.map((entry) => ({
+                    cardId: entry.cardId,
+                    quantity: entry.quantity,
+                  })),
+                },
+              }),
             }),
-          }),
-        )
-      : undefined;
+          )
+        : undefined;
     const viewer = buildDeckStrategyProfileViewer(
       profile,
       body.snapshot,
@@ -125,10 +137,17 @@ export function deckStrategyProfileViewerResponse(
       viewer,
     };
     const safety = assertDeckPayloadSafe(response);
-    if (!safety.ok) return unavailableResponse("Deckprofil wurde sicherheitshalber blockiert", deckInfo);
+    if (!safety.ok)
+      return unavailableResponse(
+        "Deckprofil wurde sicherheitshalber blockiert",
+        deckInfo,
+      );
     return response;
   } catch {
-    return unavailableResponse("Deckprofil konnte nicht berechnet werden", deckInfo);
+    return unavailableResponse(
+      "Deckprofil konnte nicht berechnet werden",
+      deckInfo,
+    );
   }
 }
 
@@ -140,9 +159,13 @@ export function buildDeckStrategyProfileViewer(
 ): DeckStrategyProfileViewer {
   const strategies = strategyRows(profile);
   const evidenceStrategies = strategies
-    .filter((strategy) => strategy.status === "primary" || strategy.status === "secondary")
+    .filter(
+      (strategy) =>
+        strategy.status === "primary" || strategy.status === "secondary",
+    )
     .slice(0, 8);
-  const fallbackEvidenceStrategies = evidenceStrategies.length > 0 ? evidenceStrategies : strategies.slice(0, 3);
+  const fallbackEvidenceStrategies =
+    evidenceStrategies.length > 0 ? evidenceStrategies : strategies.slice(0, 3);
   const viewer: DeckStrategyProfileViewer = {
     schemaVersion: VIEWER_SCHEMA_VERSION,
     taskId: "AI007",
@@ -156,15 +179,16 @@ export function buildDeckStrategyProfileViewer(
       aggregation: "AI006 strategy aggregation",
       profileSchemaVersion: profile.schemaVersion,
       profileTaskId: profile.taskId,
-      plannerEffect: "none",
+      plannerEffect: profile.source.plannerEffect,
       deckHash: snapshot.deckHash,
     },
     diagnosticNotice:
-      "Diagnostisches KI-Deckprofil: Strategieprofile werden aus neuer KI-Semantik berechnet. Noch keine direkte Plannerwirkung. Hinweis: Der aktuelle KI-Spieler verwendet teilweise noch bestehende DeckDoctrine-/Legacy-PlanWeights; Legacy-Signale werden getrennt gezählt.",
+      "KI-Deckprofil: StrategyScores und ausgewählte Strategien fließen als StrategicIntent-Eingabe in die Laufzeitplanung ein. Seitenprofile und Legacy-Signale bleiben diagnostische Erklärdaten ohne eigene Plannerwirkung.",
     primaryStrategies: profile.primaryStrategies,
     secondaryStrategies: profile.secondaryStrategies,
     strategies,
-    sideProfileTitle: profile.side === "runner" ? "Runner-Profil" : "Korp-Profil",
+    sideProfileTitle:
+      profile.side === "runner" ? "Runner-Profil" : "Korp-Profil",
     sideProfileGroups:
       profile.side === "runner"
         ? runnerProfileSections(profile.runnerProfile)
@@ -173,7 +197,10 @@ export function buildDeckStrategyProfileViewer(
       evidenceGroupForStrategy(strategy, profile),
     ),
     ...(runnerStrategicIntent ? { runnerStrategicIntent } : {}),
-    functionSignalCounts: countEntries(profile.functionSignalCounts, "function-signals"),
+    functionSignalCounts: countEntries(
+      profile.functionSignalCounts,
+      "function-signals",
+    ),
     legacySignalGroups: legacySignalGroups(profile.legacySignalCounts),
     warnings: warningEntries(profile.warnings),
   };
@@ -190,10 +217,26 @@ function statusEntries(
     { label: "Deck-ID", value: deck.deckId, tone: "legacy" },
     { label: "Seite", value: sideLabel(profile.side), tone: "info" },
     { label: "Karten", value: String(profile.cardCount), tone: "info" },
-    { label: "Analysequelle", value: "Diagnostisches KI-Deckprofil", tone: "valid" },
-    { label: "Aggregation", value: "AI006 strategy aggregation aus neuer KI-Semantik", tone: "valid" },
-    { label: "Plannerwirkung", value: "Noch keine direkte Plannerwirkung", tone: "warning" },
-    { label: "Legacy-Signale", value: "getrennt gezählt", tone: "legacy" },
+    {
+      label: "Analysequelle",
+      value: "Diagnostisches KI-Deckprofil",
+      tone: "valid",
+    },
+    {
+      label: "Aggregation",
+      value: "AI006 strategy aggregation aus neuer KI-Semantik",
+      tone: "valid",
+    },
+    {
+      label: "Plannerwirkung",
+      value: "StrategicIntent-Eingabe aktiv",
+      tone: "valid",
+    },
+    {
+      label: "Diagnostische Metadaten",
+      value: "Seitenprofile und Legacy-Signale",
+      tone: "legacy",
+    },
     { label: "Profil-Schema", value: profile.schemaVersion, tone: "legacy" },
     { label: "Deck-Hash", value: snapshot.deckHash, tone: "legacy" },
   ];
@@ -204,7 +247,14 @@ function buildRunnerStrategicIntentViewer(
 ): DeckStrategyProfileRunnerStrategicIntentViewer {
   const executionStyleEntries = intent.executionStyle
     ? [intentEntry("Ausführungsstil", intent.executionStyle, "valid")]
-    : [intentEntry("Ausführungsstil", "runner.unknown", "legacy", "kein eindeutiger Run-Tempo-Anker")];
+    : [
+        intentEntry(
+          "Ausführungsstil",
+          "runner.unknown",
+          "legacy",
+          "kein eindeutiger Run-Tempo-Anker",
+        ),
+      ];
   return {
     schemaVersion: intent.schemaVersion,
     title: "Abgeleitete KI-Spielabsicht",
@@ -218,11 +268,31 @@ function buildRunnerStrategicIntentViewer(
       plannerEffect: intent.source.plannerEffect,
     },
     statusEntries: [
-      { label: "Analyseabschnitt", value: "Abgeleitete KI-Spielabsicht", tone: "valid" },
-      { label: "Interpretation", value: "Runtime-nahe Projektion", tone: "valid" },
-      { label: "Profilquelle", value: "Diagnoseprofil + DeckCapabilities", tone: "info" },
-      { label: "Plannerwirkung", value: "Read-only im Deckeditor", tone: "warning" },
-      { label: "Confidence", value: formatDeckStrategyValue(intent.confidence), tone: confidenceTone(intent.confidence) },
+      {
+        label: "Analyseabschnitt",
+        value: "Abgeleitete KI-Spielabsicht",
+        tone: "valid",
+      },
+      {
+        label: "Interpretation",
+        value: "Runtime-nahe Projektion",
+        tone: "valid",
+      },
+      {
+        label: "Profilquelle",
+        value: "Diagnoseprofil + DeckCapabilities",
+        tone: "info",
+      },
+      {
+        label: "Plannerwirkung",
+        value: "Read-only im Deckeditor",
+        tone: "warning",
+      },
+      {
+        label: "Confidence",
+        value: formatDeckStrategyValue(intent.confidence),
+        tone: confidenceTone(intent.confidence),
+      },
     ],
     sections: [
       {
@@ -302,8 +372,10 @@ function confidenceTone(
 }
 
 function formatRunnerStrategicIntentEvidence(fact: string): string {
-  if (fact === "deck_strategy_profile:present") return "Diagnostisches Deckprofil vorhanden";
-  if (fact === "deck_strategy_profile:missing") return "Diagnostisches Deckprofil fehlt";
+  if (fact === "deck_strategy_profile:present")
+    return "Diagnostisches Deckprofil vorhanden";
+  if (fact === "deck_strategy_profile:missing")
+    return "Diagnostisches Deckprofil fehlt";
   if (fact === "deck_capabilities:present") return "DeckCapabilities vorhanden";
   if (fact === "deck_capabilities:missing") return "DeckCapabilities fehlen";
 
@@ -359,7 +431,9 @@ function formatRunnerStrategicIntentList(value: string): string {
     .join(", ");
 }
 
-function strategyRows(profile: AiDeckStrategyProfile): DeckStrategyProfileStrategyRow[] {
+function strategyRows(
+  profile: AiDeckStrategyProfile,
+): DeckStrategyProfileStrategyRow[] {
   return Object.entries(profile.strategyScores)
     .map(([strategyId, score]) => {
       const goal = STRATEGY_GOALS_BY_ID.get(strategyId);
@@ -372,7 +446,8 @@ function strategyRows(profile: AiDeckStrategyProfile): DeckStrategyProfileStrate
         finalScore: score.finalScore,
         confidence: score.confidence,
         status: strategyStatus(strategyId, score.finalScore, profile),
-        evidenceCount: score.anchorEvidence.length + score.supportEvidence.length,
+        evidenceCount:
+          score.anchorEvidence.length + score.supportEvidence.length,
         gapCount: score.supportGaps.length,
       };
     })
@@ -425,7 +500,9 @@ function evidenceGroupForStrategy(
   };
 }
 
-function anchorEvidenceEntry(evidence: DeckStrategyEvidence): DeckStrategyProfileAnchorEvidence {
+function anchorEvidenceEntry(
+  evidence: DeckStrategyEvidence,
+): DeckStrategyProfileAnchorEvidence {
   return {
     cardId: evidence.cardId,
     cardTitle: cardTitle(evidence.cardId),
@@ -455,15 +532,13 @@ function supportEvidenceEntries(
     const signal = entry.signal ?? entry.strategyId ?? entry.source;
     const category = supportCategory(entry.reason);
     const key = `${category}:${signal}`;
-    const group =
-      groups.get(key) ??
-      {
-        signal,
-        category,
-        count: 0,
-        exampleCards: new Set<string>(),
-        sources: new Set<string>(),
-      };
+    const group = groups.get(key) ?? {
+      signal,
+      category,
+      count: 0,
+      exampleCards: new Set<string>(),
+      sources: new Set<string>(),
+    };
     group.count += entry.quantity;
     group.exampleCards.add(cardTitle(entry.cardId));
     group.sources.add(entry.source);
@@ -478,7 +553,10 @@ function supportEvidenceEntries(
       exampleCards: [...group.exampleCards].sort().slice(0, 5),
       sources: [...group.sources].sort(),
     }))
-    .sort((left, right) => right.count - left.count || left.signal.localeCompare(right.signal));
+    .sort(
+      (left, right) =>
+        right.count - left.count || left.signal.localeCompare(right.signal),
+    );
 }
 
 function supportCategory(reason: string): string {
@@ -571,7 +649,8 @@ function corpProfileSections(
       title: "Score",
       entries: numericEntries(profile.scoreProfile, {
         scoreAcceleration: "Score acceleration",
-        agendaInstallAdvanceScoreSupport: "Agenda install/advance/score support",
+        agendaInstallAdvanceScoreSupport:
+          "Agenda install/advance/score support",
         remoteScoringProtection: "Remote scoring protection",
         stealTax: "Steal tax",
       }),
@@ -646,7 +725,9 @@ function countEntries(
   label: string,
 ): DeckStrategyProfileEntry[] {
   return Object.entries(record)
-    .sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))
+    .sort(
+      (left, right) => right[1] - left[1] || left[0].localeCompare(right[0]),
+    )
     .map(([key, value]) => ({
       label,
       value: `${key}: ${value}`,
@@ -657,7 +738,10 @@ function countEntries(
 function legacySignalGroups(
   record: Record<string, number>,
 ): DeckStrategyProfileSection[] {
-  const groups: Record<"roles" | "planRoles" | "lineSupport" | "other", DeckStrategyProfileEntry[]> = {
+  const groups: Record<
+    "roles" | "planRoles" | "lineSupport" | "other",
+    DeckStrategyProfileEntry[]
+  > = {
     roles: [],
     planRoles: [],
     lineSupport: [],
@@ -680,13 +764,27 @@ function legacySignalGroups(
   }
   return [
     { key: "legacy-roles", title: "Legacy roles", entries: groups.roles },
-    { key: "legacy-planRoles", title: "Legacy planRoles", entries: groups.planRoles },
-    { key: "legacy-lineSupport", title: "Legacy lineSupport", entries: groups.lineSupport },
-    { key: "legacy-other", title: "Weitere Legacy-/Migrationssignale", entries: groups.other },
+    {
+      key: "legacy-planRoles",
+      title: "Legacy planRoles",
+      entries: groups.planRoles,
+    },
+    {
+      key: "legacy-lineSupport",
+      title: "Legacy lineSupport",
+      entries: groups.lineSupport,
+    },
+    {
+      key: "legacy-other",
+      title: "Weitere Legacy-/Migrationssignale",
+      entries: groups.other,
+    },
   ].filter((section) => section.entries.length > 0);
 }
 
-function warningEntries(warnings: string[]): DeckStrategyProfileViewer["warnings"] {
+function warningEntries(
+  warnings: string[],
+): DeckStrategyProfileViewer["warnings"] {
   return warnings.map((warning) => ({
     label: warningLabel(warning),
     value: warning,
@@ -709,9 +807,13 @@ function warningTone(warning: string): DeckStrategyProfileTone {
   return "info";
 }
 
-function deckValidationUnavailableReason(validation: DeckValidationResult): string {
-  if (validation.errorCodes?.includes("minimum_deck_size")) return "Deckprofil konnte nicht berechnet werden: Deck ist unvollständig";
-  if (validation.errorCodes?.includes("format_profile_unsupported")) return "Deckprofil konnte nicht berechnet werden: Formatprofil nicht unterstützt";
+function deckValidationUnavailableReason(
+  validation: DeckValidationResult,
+): string {
+  if (validation.errorCodes?.includes("minimum_deck_size"))
+    return "Deckprofil konnte nicht berechnet werden: Deck ist unvollständig";
+  if (validation.errorCodes?.includes("format_profile_unsupported"))
+    return "Deckprofil konnte nicht berechnet werden: Formatprofil nicht unterstützt";
   return "Deckprofil konnte nicht berechnet werden: Deckvalidierung nicht erfolgreich";
 }
 
@@ -729,17 +831,25 @@ function unavailableResponse(
   return { ...base, deck };
 }
 
-function deckInfoFromUnknown(value: unknown): DeckStrategyProfileUnavailableDeckInfo {
+function deckInfoFromUnknown(
+  value: unknown,
+): DeckStrategyProfileUnavailableDeckInfo {
   if (!value || typeof value !== "object") return {};
   const record = value as Record<string, unknown>;
   const deck: DeckStrategyProfileUnavailableDeckInfo = {};
   if (typeof record.deckId === "string") deck.deckId = record.deckId;
   if (typeof record.name === "string") deck.deckName = record.name;
-  if (record.side === "runner" || record.side === "corp") deck.side = record.side;
+  if (record.side === "runner" || record.side === "corp")
+    deck.side = record.side;
   if (Array.isArray(record.cards)) {
     deck.cardCount = record.cards.reduce((sum, entry) => {
       const quantity = (entry as { quantity?: unknown }).quantity;
-      return sum + (typeof quantity === "number" && Number.isFinite(quantity) ? Math.max(0, Math.floor(quantity)) : 0);
+      return (
+        sum +
+        (typeof quantity === "number" && Number.isFinite(quantity)
+          ? Math.max(0, Math.floor(quantity))
+          : 0)
+      );
     }, 0);
   }
   return deck;
@@ -762,15 +872,15 @@ function isEditableDeckLike(value: unknown): value is EditableDeck {
   const deck = value as Partial<EditableDeck>;
   return Boolean(
     typeof deck.deckId === "string" &&
-      typeof deck.deckVersion === "string" &&
-      typeof deck.name === "string" &&
-      (deck.side === "runner" || deck.side === "corp") &&
-      typeof deck.identityCardId === "string" &&
-      typeof deck.cardPoolSnapshotId === "string" &&
-      typeof deck.formatProfileId === "string" &&
-      Array.isArray(deck.cards) &&
-      typeof deck.createdAt === "string" &&
-      typeof deck.updatedAt === "string",
+    typeof deck.deckVersion === "string" &&
+    typeof deck.name === "string" &&
+    (deck.side === "runner" || deck.side === "corp") &&
+    typeof deck.identityCardId === "string" &&
+    typeof deck.cardPoolSnapshotId === "string" &&
+    typeof deck.formatProfileId === "string" &&
+    Array.isArray(deck.cards) &&
+    typeof deck.createdAt === "string" &&
+    typeof deck.updatedAt === "string",
   );
 }
 

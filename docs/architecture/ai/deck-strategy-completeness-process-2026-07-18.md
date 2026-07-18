@@ -72,8 +72,9 @@ Bei Sicherheitsblocker: `package_active -> blocked_report`.
 - `DSC-01`: abgeschlossen und committed (`1a114def3`).
 - `DSC-02`: abgeschlossen und committed (`fb5dda338`); zentraler Runtime-Registry-Vertrag deckt alle 24 Taxonomie-IDs ab. Die vier neueren Corp-Strategien sind über Intent-Familie, Rollenstatus, Target/Reserve, CorpEnginePlan, TacticalGoal, Action-Fit und Discard-Fit angebunden. Reale Standarddeck-Regressionen sowie 75 fokussierte Tests und AI-Typecheck sind grün.
 - `DSC-03`: abgeschlossen und committed (`a9a980641`); Anchor-Provenienz derselben Karte wird gedämpft zusammengeführt, Kopienzahl besitzt abnehmenden Grenznutzen, eine Sättigungskurve hält Rangunterschiede sichtbar, Evidenzvielfalt entscheidet vor lexikografischer Reihenfolge und exakte Cutoff-Ties bleiben vollständig erhalten. Alle 40 Standarddecks sowie 2.790 AI-Tests in drei Shards sind grün.
-- `DSC-04`: abgeschlossen; allgemeine First-/Chosen-ICE-Bypass-Evidenz kann genau eine fehlende Coverage-Klasse konditional überbrücken, ohne einen Breaker zu erfinden. StrategicIntent übernimmt den produktiven Hard-/Soft-Gap-Vertrag und Runtime-Rollen kennzeichnen den Zugang als `conditional`. King of the Road ist produktiv, Ghost Circuit bleibt mit zwei echten Coverage-Lücken neutral.
-- `DSC-05` und `DSC-06`: ausstehend.
+- `DSC-04`: abgeschlossen und committed (`3a26dfdf4`); allgemeine First-/Chosen-ICE-Bypass-Evidenz kann genau eine fehlende Coverage-Klasse konditional überbrücken, ohne einen Breaker zu erfinden. StrategicIntent übernimmt den produktiven Hard-/Soft-Gap-Vertrag und Runtime-Rollen kennzeichnen den Zugang als `conditional`. King of the Road ist produktiv, Ghost Circuit bleibt mit zwei echten Coverage-Lücken neutral.
+- `DSC-05`: abgeschlossen; alle abgeleiteten öffentlichen Metadatengruppen sind als produktiv/diagnostisch oder rein diagnostisch klassifiziert und besitzen benannte Consumer. Die erklärenden Seitenprofile und Legacy-Zählungen bleiben erhalten, Inspector-Warnungen tragen Kartenprovenienz, und AI007 zeigt die reale StrategicIntent-Wirkung korrekt an. AI-/Web-Typechecks sowie 71 fokussierte Tests sind grün.
+- `DSC-06`: ausstehend.
 
 ## Paketdetails
 
