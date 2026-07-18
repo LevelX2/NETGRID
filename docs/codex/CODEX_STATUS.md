@@ -122,7 +122,8 @@ Unrezzed-Ausnahme und verursacht dann genau 1 Net Damage statt
 advancementskalierendem Schaden. Bel-Digmo und Stereogram bleiben reine
 R&D-/Archives-Kontrollfälle.
 
-Der vollständige Engine-Lauf ist mit 186 Testdateien und 1.687 Tests grün.
+Der vollständige Engine-Lauf ist nach dem Engine Architecture Refresh mit 202
+Testdateien und 1.741 Tests grün.
 Führend sind
 `docs/architecture/card-rules/node-access-rez-contract-process-2026-07-15.md`
 und
@@ -134,9 +135,15 @@ und
   `apps/server/src/multiplayer.test.ts` und Teile des Corp-AI-Scorings sind
   weiterhin groß.
 - Das Engine-Architektur-Zielgate ist ohne Baseline-Ausnahme grün;
-  Mark-Counter-Anzeigen sind datengetrieben.
-- Ability-Payloadfelder mit historischem Namen sind noch aktive Producer-/
-  Consumer-Verträge und erst nach eigener Normalisierung entfernbar.
+  Mark-Counter-Anzeigen sind datengetrieben. 430 Runtime-Port-Bindings sind
+  statisch typisiert; der produktive relative Importgraph ist zyklenfrei.
+- Ability-Discriminatorfelder sind normalisiert und PublicEvents enthalten
+  keine internen Discriminatornamen mehr. Verbleibende historisch benannte
+  Präsentationsfelder werden nur mit nachgewiesener Producer-/Consumer-Parität
+  in einem eigenen Folgepaket entfernt.
+- Damage, Access, Run und Turn sind fachlich modularisiert; Registries sind
+  nach Set, Seite und Kartentyp geordnet. Führend ist
+  `docs/reviews/engine/engine-architecture-refresh-final-review-2026-07-18.md`.
 - Fremde Worktrees werden nur mit sauberem Status und eindeutigem
   Eigentumsnachweis entfernt.
 

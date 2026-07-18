@@ -1,6 +1,6 @@
 # Engine Architecture Refresh Process 2026-07-18
 
-Status: in progress
+Status: vollständig umgesetzt; E16-Abschlussintegration und Cleanup laufen
 Branch: `codex/engine-architecture-refresh`
 Worktree: `C:\Projekte\NETGRID_ENGINE_ARCHITECTURE_REFRESH`
 Primary agent: `architecture-review-agent`
@@ -24,8 +24,8 @@ Primary agent: `architecture-review-agent`
 | E12   | integriert  | Access-Domäne geteilt; Hidden-Info-/Breach-Verträge und 1.736 Tests grün   |
 | E13   | integriert  | Run-Hotspots geteilt; keine relativen Importzyklen; 1.736 Tests grün       |
 | E14   | integriert  | Registry nach Set/Seite/Typ; Coverage geteilt; 1.739 Engine-Tests grün     |
-| E15   | verifiziert | Release-Smokes geteilt; Source-Contract-Report und Testgrößengate ergänzt  |
-| E16   | ausstehend  | vollständige Abschlussgates, Review, Wissenspflege und Cleanup             |
+| E15   | integriert  | 202 Dateien/1.741 Tests; Release-Smokes und Source-Verträge geteilt        |
+| E16   | verifiziert | Abschlussgates, Final Review und Wissenspflege grün; Integration läuft     |
 
 ## Quelle und Vorgabe
 
@@ -257,27 +257,43 @@ Testfalländerung in elf releasebezogene Dateien geteilt. Auf dem nach E14 mit
 physischer Testdateien steigt von 192 auf 201.
 
 Ein neuer Test-Quellvertrag verbietet die alten Sammeldateien, begrenzt die
-Release-Smokes auf 3.000 und alle Engine-Testdateien auf 7.000 Zeilen. Der
-Source-Contract-Report fasst produktive Modul-, Zyklus-, Port-, Registry-,
-Kommentar- und Testverträge samt ausführbaren Gates zusammen.
+Release-Smokes auf 3.000 und alle Engine-Testdateien auf 7.000 Zeilen. Mit dem
+Vertragstest umfasst der integrierte Stand 202 Testdateien und 1.741 grüne
+Tests. Der Source-Contract-Report fasst produktive Modul-, Zyklus-, Port-,
+Registry-, Kommentar- und Testverträge samt ausführbaren Gates zusammen.
 
-### E14 Registry und Coverage
+### Paketdefinition E14: Registry und Coverage
 
 Nummerierte Kartenblöcke werden durch Set-/Side-/Type-Strukturen oder eine
 deterministisch generierte äquivalente Registry ersetzt. Parität, Reihenfolge
 und Duplikatfreiheit sind ausführbar geprüft.
 
-### E15 Tests und Kommentare
+### Paketdefinition E15: Tests und Kommentare
 
 Große Sammeltests werden mechanisch geteilt. Kommentare dokumentieren nur
 Autorität, Sichtbarkeit, Determinismus, Mutationsreihenfolge und andere nicht
 offensichtliche Verträge.
 
-### E16 Abschluss
+### Paketdefinition E16: Abschluss
 
 Audit und Wissensstand zeigen den neuen Current State. Arbeitsbranch und
 `main` sind vollständig verifiziert. Nach dem letzten Merge werden Worktree und
 gemergter Branch nach den Cleanup-Regeln entfernt.
+
+### E16 Final Review und Abschlussgates
+
+Das Final Review bestätigt die vollständige Umsetzung der Pakete E00 bis E16:
+998 produktive Engine-Quellen besitzen null relative Importzyklen und 430
+statisch typisierte Runtime-Port-Bindings. Die Engine-Suite umfasst 202
+Testdateien mit 1.741 Tests. Architekturziel, Card-Function-Abstraction,
+Package Boundaries, Strukturguard samt Selftest, Testdiscovery sowie Engine-,
+Shared- und Root-Typecheck sind grün.
+
+`public-context.ts`, der eingefrorene Runtime-Integrations-Fan-out, der knapp
+unter dem Gate liegende Per-Card-Longtail-Test und die manuelle
+Coverage-Source-Location-Karte sind im Final Review als begrenzte Folgepunkte
+dokumentiert. Sie schwächen weder Regelautorität noch Hidden Info, Replay,
+StateHash oder Determinismus und blockieren den Architekturabschluss nicht.
 
 ## Verifikationsregeln
 
