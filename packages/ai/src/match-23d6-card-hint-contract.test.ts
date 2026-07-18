@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import activeHints from "../../../data/ai/ai-card-hints-active.json";
-import compiledHints from "../../../data/ai/ai-card-hints-compiled.json";
 import inspectorIndex from "../../../data/ai/ai-hint-inspector-index.json";
 import { buildActionCardSemanticProfilesByDefinitionId } from "./actions/action-card-semantic-profiles";
 
@@ -22,10 +21,7 @@ type Hint = {
 };
 
 describe("match 23D6 card-hint contract", () => {
-  it.each([
-    ["active", activeHints.cards],
-    ["compiled", compiledHints.cards],
-  ])(
+  it.each([["active", activeHints.cards]])(
     "models Viacox as mandatory random action risk, not stack search, in %s hints",
     (_source, cards) => {
       const viacox = hint(cards as Hint[], VIACOX);
@@ -64,8 +60,8 @@ describe("match 23D6 card-hint contract", () => {
     expect(profile?.tacticSignals).not.toContain("setup.search");
   });
 
-  it("normalizes Skullcap's typed damage prevention to one compiled generic effect", () => {
-    const skullcap = hint(compiledHints.cards as Hint[], SKULLCAP);
+  it("normalizes Skullcap's typed damage prevention to one active generic effect", () => {
+    const skullcap = hint(activeHints.cards as Hint[], SKULLCAP);
     const genericDamagePrevention = skullcap.effects?.filter(
       (effect) =>
         effect.kind === "damage_prevention" &&

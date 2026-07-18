@@ -19,7 +19,7 @@ describe("aiDecisionDebugDeckStrategySummary", () => {
             "deck_strategy_secondary_count:1",
             "deck_strategy_primary:runner.rnd_pressure:72:high:productive",
             "deck_strategy_secondary:runner.remote_contest:51:medium:productive",
-            "deck_strategy_warning:missing_compiled_hint:runner_x",
+            "deck_strategy_warning:missing_card_hint:runner_x",
             "strategic_intent_state:runner.rnd_pressure",
             "strategic_intent_family:runner_central_pressure",
             "strategic_intent_phase:pressure",
@@ -57,7 +57,7 @@ describe("aiDecisionDebugDeckStrategySummary", () => {
       "4 Credits benötigt · 6 verfügbar · erfüllt",
     ]);
     expect(summary.blockers).toEqual(["Support-Lücke · weich"]);
-    expect(summary.warnings).toEqual(["missing compiled hint:runner x"]);
+    expect(summary.warnings).toEqual(["missing card hint:runner x"]);
     expect(JSON.stringify(summary)).not.toMatch(
       /cardInstances|privatePayload|FullState|sessionToken|reconnectToken|joinToken|decklist|hidden-card/i,
     );

@@ -6,7 +6,10 @@ import {
   rememberStrategicIntentState,
   resetStrategicIntentMemory,
 } from "./strategic-intent-memory";
-import type { AiDeckStrategyProfile, DeckStrategyScore } from "./deck-doctrine-strategy";
+import type {
+  AiDeckStrategyProfile,
+  DeckStrategyScore,
+} from "./deck-doctrine-strategy";
 
 describe("StrategicIntent memory", () => {
   afterEach(() => {
@@ -166,7 +169,7 @@ function strategyProfile(
     source: {
       mode: "ai_internal_strategy_profile",
       strategyGoals: "data/ai/strategy-goals-v1.json",
-      compiledHints: "data/ai/ai-card-hints-compiled.json",
+      activeHints: "data/ai/ai-card-hints-active.json",
       inspectorIndex: "data/ai/ai-hint-inspector-index.json",
       plannerEffect: "strategic_intent_input",
     },

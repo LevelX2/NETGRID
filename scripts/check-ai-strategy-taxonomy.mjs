@@ -14,7 +14,6 @@ const TASK_ID = "AI004";
 const UPDATES_TASK_ID = "AI003/AI003-1";
 
 const ACTIVE_HINTS_PATH = "data/ai/ai-card-hints-active.json";
-const COMPILED_HINTS_PATH = "data/ai/ai-card-hints-compiled.json";
 const STRATEGY_GOALS_PATH = "data/ai/strategy-goals-v1.json";
 const STRATEGIC_ROLES_PATH = "data/ai/strategic-roles-v1.json";
 const FUNCTION_SIGNAL_DERIVATION_PATH =
@@ -555,7 +554,6 @@ const ROLE_PLAN_ROLE_TRIAGE = {
 export function buildAiStrategyTaxonomyReport(options = {}) {
   const repoRoot = options.repoRoot ?? REPO_ROOT;
   const activeHints = readJson(repoRoot, ACTIVE_HINTS_PATH);
-  const compiledHints = readJson(repoRoot, COMPILED_HINTS_PATH);
   const strategyGoalsData = readJson(repoRoot, STRATEGY_GOALS_PATH);
   const strategicRolesData = readJson(repoRoot, STRATEGIC_ROLES_PATH);
   const functionDerivationData = readJson(
@@ -617,32 +615,17 @@ export function buildAiStrategyTaxonomyReport(options = {}) {
     hardErrors,
   );
   validateNoManualFunctionTags(activeHints, ACTIVE_HINTS_PATH, hardErrors);
-  validateNoManualFunctionTags(compiledHints, COMPILED_HINTS_PATH, hardErrors);
   validateOpponentSignals(activeHints, ACTIVE_HINTS_PATH, hardErrors);
-  validateOpponentSignals(compiledHints, COMPILED_HINTS_PATH, hardErrors);
   validateHiddenInfoKeys(activeHints, ACTIVE_HINTS_PATH, hardErrors);
-  validateHiddenInfoKeys(compiledHints, COMPILED_HINTS_PATH, hardErrors);
   validateLineSupportValues(
     activeHints,
     ACTIVE_HINTS_PATH,
     strategyIds,
     hardErrors,
   );
-  validateLineSupportValues(
-    compiledHints,
-    COMPILED_HINTS_PATH,
-    strategyIds,
-    hardErrors,
-  );
   validateStrategicRoleIfPresent(
     activeHints,
     ACTIVE_HINTS_PATH,
-    strategicRoleIds,
-    hardErrors,
-  );
-  validateStrategicRoleIfPresent(
-    compiledHints,
-    COMPILED_HINTS_PATH,
     strategicRoleIds,
     hardErrors,
   );
@@ -654,35 +637,14 @@ export function buildAiStrategyTaxonomyReport(options = {}) {
     new Set([...functionSignalIds, ...tacticSignalIds]),
     hardErrors,
   );
-  validateStrategySupportPairsIfPresent(
-    compiledHints,
-    COMPILED_HINTS_PATH,
-    strategyIds,
-    strategicRoleIds,
-    new Set([...functionSignalIds, ...tacticSignalIds]),
-    hardErrors,
-  );
-
   const activeCards = activeHints.cards ?? [];
-  const compiledCards = compiledHints.cards ?? [];
   const activeCardIds = sortedUnique(activeCards.map((card) => card.cardId));
-  const compiledCardIds = sortedUnique(
-    compiledCards.map((card) => card.cardId),
-  );
-  const sameCardIdSet = sameStringArray(activeCardIds, compiledCardIds);
-  if (!sameCardIdSet) {
-    hardErrors.push({
-      kind: "active_compiled_card_id_drift",
-      path: COMPILED_HINTS_PATH,
-      message: "Active and compiled AI hints do not have the same card IDs.",
-    });
-  }
 
-  const compiledFieldCounts = collectFieldCounts(compiledCards);
+  const activeFieldCounts = collectFieldCounts(activeCards);
   const valueInventories = {
-    roles: collectValueInventory(compiledCards, "roles"),
-    planRoles: collectValueInventory(compiledCards, "planRoles"),
-    lineSupport: collectValueInventory(compiledCards, "lineSupport"),
+    roles: collectValueInventory(activeCards, "roles"),
+    planRoles: collectValueInventory(activeCards, "planRoles"),
+    lineSupport: collectValueInventory(activeCards, "lineSupport"),
   };
   const aliasReport = buildAliasReport({
     valueInventories,
@@ -690,12 +652,12 @@ export function buildAiStrategyTaxonomyReport(options = {}) {
     functionSignalIds,
   });
   const functionSignalSummary = deriveFunctionSignalSummary(
-    compiledCards,
+    activeCards,
     derivationRules,
   );
   const derivationSmokeTests = buildDerivationSmokeTests(derivationRules);
   const sideAwareDerivation = analyzeSideAwareDerivation(
-    compiledCards,
+    activeCards,
     derivationRules,
   );
   for (const mismatch of sideAwareDerivation.wrongSideAnchorMatches) {
@@ -820,7 +782,6 @@ export function buildAiStrategyTaxonomyReport(options = {}) {
     ),
     source: {
       activeHintsPath: ACTIVE_HINTS_PATH,
-      compiledHintsPath: COMPILED_HINTS_PATH,
       strategyGoalsPath: STRATEGY_GOALS_PATH,
       strategicRolesPath: STRATEGIC_ROLES_PATH,
       functionSignalDerivationPath: FUNCTION_SIGNAL_DERIVATION_PATH,
@@ -830,9 +791,7 @@ export function buildAiStrategyTaxonomyReport(options = {}) {
     },
     hintCounts: {
       active: activeCards.length,
-      compiled: compiledCards.length,
-      sameCardIdSet,
-      allCompiledAiSupported: compiledCards.every(
+      allHintsAiSupported: activeCards.every(
         (hint) => hint.aiSupportStatus === "ai_supported",
       ),
     },
@@ -904,7 +863,7 @@ export function buildAiStrategyTaxonomyReport(options = {}) {
         "requiredMechanics",
         "scenarioRefs",
       ],
-      compiledFieldCounts,
+      activeFieldCounts,
     },
     wildGrowth: {
       roleValueCount: valueInventories.roles.length,
@@ -932,7 +891,7 @@ export function buildAiStrategyTaxonomyReport(options = {}) {
     derivationSmokeTests,
     aliasSummary: aliasReport.summary,
     ai004Triage: {
-      lineSupport: buildLineSupportTriage(compiledCards, strategyIds),
+      lineSupport: buildLineSupportTriage(activeCards, strategyIds),
       roles: aliasReport.roles,
       planRoles: aliasReport.planRoles,
       descriptorGaps: buildDescriptorGapTriage(descriptorGaps),
@@ -1041,7 +1000,7 @@ function buildAliasReport({
     taskId: TASK_ID,
     generatedAt: GENERATED_AT,
     source: {
-      compiledHintsPath: COMPILED_HINTS_PATH,
+      activeHintsPath: ACTIVE_HINTS_PATH,
       strategyGoalsPath: STRATEGY_GOALS_PATH,
       functionSignalDerivationPath: FUNCTION_SIGNAL_DERIVATION_PATH,
       lineSupportLegacyPolicy: "warn_only_in_ai003",
@@ -2697,7 +2656,7 @@ function validateNoManualFunctionTags(value, sourcePath, errors) {
           kind: "manual_functionTags_field",
           path: `${pathLabel}.${key}`,
           message:
-            "AI003 forbids manual functionTags in active or compiled hints.",
+            "AI003 forbids manual functionTags in active or Karten-Hints.",
         });
       }
       visit(child, `${pathLabel}.${key}`);

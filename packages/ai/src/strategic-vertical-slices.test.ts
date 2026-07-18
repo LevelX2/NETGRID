@@ -61,7 +61,9 @@ describe("Deck strategy runtime vertical slices", () => {
       const score = profile.strategyScores[expectedStrategy];
 
       expect(score).toBeDefined();
-      expect((score?.anchorScore ?? 0) + (score?.supportScore ?? 0)).toBeGreaterThan(0);
+      expect(
+        (score?.anchorScore ?? 0) + (score?.supportScore ?? 0),
+      ).toBeGreaterThan(0);
       expect(score?.runtimeStatus).not.toBe("diagnostic_only");
     }
   });
@@ -144,10 +146,7 @@ describe("Deck strategy runtime vertical slices", () => {
     const noWindowInput = strategicInput({
       side: "corp",
       snapshot: corpTagPunishSnapshot(),
-      actions: [
-        { ...punish, costs: [{ credits: 5 }] },
-        gain,
-      ],
+      actions: [{ ...punish, costs: [{ credits: 5 }] }, gain],
       credits: 2,
       gripOrHq: [closedAccounts],
       runnerTags: 0,
@@ -165,7 +164,9 @@ describe("Deck strategy runtime vertical slices", () => {
     expect(tagged.actionId).toBe("closed-accounts");
     expect(tagged.evidence).toContain("semantic_strategic_action_fit:true");
     expect(noWindow.actionId).toBe("gain-credit");
-    expect(noWindow.evidence).not.toContain("corp_tagged_runner_payoff_pressure");
+    expect(noWindow.evidence).not.toContain(
+      "corp_tagged_runner_payoff_pressure",
+    );
   });
 
   it("keeps Corp scoreline terminal windows above setup, but avoids contestable advances", () => {
@@ -223,7 +224,9 @@ describe("Deck strategy runtime vertical slices", () => {
     const contestableDecision = chooseCorpAction(contestableInput);
 
     expect(scoreDecision.actionId).toBe("score-agenda");
-    expect(scoreDecision.evidence).toContain("semantic_strategic_action_fit:true");
+    expect(scoreDecision.evidence).toContain(
+      "semantic_strategic_action_fit:true",
+    );
     expect(contestableDecision.actionId).toBe("gain-credit");
   });
 
@@ -247,10 +250,16 @@ describe("Deck strategy runtime vertical slices", () => {
       side: "corp",
       snapshot: corpIceTaxSnapshot(),
       actions: [
-        legalAction("install-expensive-ice", "corp", "install_card", "Install ICE", {
-          cost: 100,
-          payload: { placement: "ice", serverId: "rd" },
-        }),
+        legalAction(
+          "install-expensive-ice",
+          "corp",
+          "install_card",
+          "Install ICE",
+          {
+            cost: 100,
+            payload: { placement: "ice", serverId: "rd" },
+          },
+        ),
         gain,
       ],
       credits: 2,
@@ -287,12 +296,16 @@ describe("Deck strategy runtime vertical slices", () => {
         server("hq"),
         server("rd"),
         server("archives"),
-        server("remote_1", [], [
-          visibleCard("agenda", "corp", "agenda", {
-            definitionId: "simple_agenda",
-            title: "Simple Agenda",
-          }),
-        ]),
+        server(
+          "remote_1",
+          [],
+          [
+            visibleCard("agenda", "corp", "agenda", {
+              definitionId: "simple_agenda",
+              title: "Simple Agenda",
+            }),
+          ],
+        ),
       ],
       targetVector: {
         kind: "remote",
@@ -333,7 +346,9 @@ describe("Deck strategy runtime vertical slices", () => {
     const safetyDecision = chooseRunnerAction(safetyInput);
 
     expect(remoteDecision.actionId).toBe("run-remote");
-    expect(remoteDecision.evidence).toContain("semantic_strategic_action_fit:true");
+    expect(remoteDecision.evidence).toContain(
+      "semantic_strategic_action_fit:true",
+    );
     expect(safetyDecision.actionId).toBe("draw");
     expect(JSON.stringify(safetyDecision.decisionDebug)).toContain(
       "runner_hand_buffer_need",
@@ -432,8 +447,10 @@ function playerViewFor(params: {
     stateVersion: 1,
     side: params.side,
     activeSide: params.side,
-    phase: params.side === "runner" ? "runner_action_phase" : "corp_action_phase",
-    timingPoint: params.side === "runner" ? "runner_action.main" : "corp_action.main",
+    phase:
+      params.side === "runner" ? "runner_action_phase" : "corp_action_phase",
+    timingPoint:
+      params.side === "runner" ? "runner_action.main" : "corp_action.main",
     own: {
       identity: visibleIdentity(params.side),
       credits: params.credits,
@@ -610,7 +627,7 @@ function productiveStrategyProfile(
     source: {
       mode: "ai_internal_strategy_profile",
       strategyGoals: "data/ai/strategy-goals-v1.json",
-      compiledHints: "data/ai/ai-card-hints-compiled.json",
+      activeHints: "data/ai/ai-card-hints-active.json",
       inspectorIndex: "data/ai/ai-hint-inspector-index.json",
       plannerEffect: "strategic_intent_input",
     },

@@ -30,7 +30,7 @@ describe("discard keep score", () => {
     );
   });
 
-  it("discounts only a duplicate Corp agenda whose remaining copy wins", () => {
+  it("never discounts Corp agendas merely because HQ contains a duplicate", () => {
     const tycho = {
       ...corpCard("onr_v1_220_tycho-extension", "agenda"),
       agendaPoints: 4,
@@ -39,20 +39,31 @@ describe("discard keep score", () => {
       ...tycho,
       instanceId: "tycho-duplicate-instance",
     };
-    const redundantAtFour = score(tycho, [], "corp", [], {}, {
-      agendaPoints: 4,
-      extraGrip: [duplicateTycho],
-    });
-    const neededAtZero = score(tycho, [], "corp", [], {}, {
-      agendaPoints: 0,
-      extraGrip: [duplicateTycho],
-    });
-
-    expect(redundantAtFour.baseValue).toBeLessThan(neededAtZero.baseValue);
-    expect(redundantAtFour.evidence).toContain(
-      "discard_score:corp_redundant_winning_agenda_duplicate",
+    const redundantAtFour = score(
+      tycho,
+      [],
+      "corp",
+      [],
+      {},
+      {
+        agendaPoints: 4,
+        extraGrip: [duplicateTycho],
+      },
     );
-    expect(neededAtZero.evidence).not.toContain(
+    const neededAtZero = score(
+      tycho,
+      [],
+      "corp",
+      [],
+      {},
+      {
+        agendaPoints: 0,
+        extraGrip: [duplicateTycho],
+      },
+    );
+
+    expect(redundantAtFour.baseValue).toBe(neededAtZero.baseValue);
+    expect(redundantAtFour.evidence).not.toContain(
       "discard_score:corp_redundant_winning_agenda_duplicate",
     );
   });

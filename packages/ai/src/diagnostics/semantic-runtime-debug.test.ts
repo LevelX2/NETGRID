@@ -205,7 +205,7 @@ describe("SemanticRuntimeDebug", () => {
             runtimeStatus: "productive",
           },
         },
-        warnings: ["missing_compiled_hint:runner_x"],
+        warnings: ["missing_card_hint:runner_x"],
       },
       ownStrategicIntentState: {
         primaryStrategy: {

@@ -1,4 +1,4 @@
-import compiledHints from "../../../data/ai/ai-card-hints-compiled.json";
+import activeHints from "../../../data/ai/ai-card-hints-active.json";
 import { describe, expect, it } from "vitest";
 
 type Effect = Record<string, unknown>;
@@ -51,10 +51,10 @@ describe("latest two Corp match deck hint contracts", () => {
 });
 
 function hint(cardId: string): Hint {
-  const result = (compiledHints.cards as Hint[]).find(
+  const result = (activeHints.cards as Hint[]).find(
     (entry) => entry.cardId === cardId,
   );
-  if (!result) throw new Error(`Missing compiled hint: ${cardId}`);
+  if (!result) throw new Error(`Missing Karten-Hint: ${cardId}`);
   return result;
 }
 

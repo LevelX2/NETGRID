@@ -10,10 +10,9 @@ const outputPath = path.join(
 const shouldWrite = process.argv.includes("--write");
 const shouldCheck = process.argv.includes("--check");
 
-const [manifest, activeHints, compiledHints, pilotDecks] = await Promise.all([
+const [manifest, activeHints, pilotDecks] = await Promise.all([
   readJson("data/manifests/proteus-card-support.json"),
   readJson("data/ai/ai-card-hints-active.json"),
-  readJson("data/ai/ai-card-hints-compiled.json"),
   readJson("data/decks/proteus-playtest-decks-2026-05-25.json"),
 ]);
 
@@ -23,50 +22,45 @@ const manifestCards = [...(manifest.cards ?? [])].sort((left, right) =>
 const activeById = new Map(
   (activeHints.cards ?? []).map((entry) => [entry.cardId, entry]),
 );
-const compiledById = new Map(
-  (compiledHints.cards ?? []).map((entry) => [entry.cardId, entry]),
-);
 const pilotDeckIdsByCard = buildPilotDeckIndex(pilotDecks.decks ?? []);
 
 const cards = manifestCards.map((manifestCard) => {
-  const activeHint = activeById.get(manifestCard.cardId);
-  const compiledHint = compiledById.get(manifestCard.cardId);
-  assert(activeHint, `Missing active hint for ${manifestCard.cardId}.`);
-  assert(compiledHint, `Missing compiled hint for ${manifestCard.cardId}.`);
-  const classification = classifyCard(activeHint, compiledHint);
+  const cardHint = activeById.get(manifestCard.cardId);
+  assert(cardHint, `Missing Karten-Hint for ${manifestCard.cardId}.`);
+  const classification = classifyCard(cardHint);
   const pilotDeckIds = [
     ...(pilotDeckIdsByCard.get(manifestCard.cardId) ?? []),
   ].sort();
   return {
     cardId: manifestCard.cardId,
-    side: activeHint.side,
-    cardType: activeHint.cardType,
+    side: cardHint.side,
+    cardType: cardHint.cardType,
     primaryFamily: classification.family,
     classificationReasons: classification.reasons,
     pilotDeckIds,
     evidence: {
-      hintReviewed: activeHint.quality?.hintReviewed === true,
-      strategyCovered: activeHint.quality?.strategyCovered === true,
-      benchmarkCovered: activeHint.quality?.benchmarkCovered === true,
-      confidence: activeHint.quality?.confidence ?? "unknown",
+      hintReviewed: cardHint.quality?.hintReviewed === true,
+      strategyCovered: cardHint.quality?.strategyCovered === true,
+      benchmarkCovered: cardHint.quality?.benchmarkCovered === true,
+      confidence: cardHint.quality?.confidence ?? "unknown",
       scenarioRefs: [
-        ...(activeHint.scenarioRefs ?? []),
+        ...(cardHint.scenarioRefs ?? []),
         ...(pilotDeckIds.length > 0
           ? [
               `data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_${classification.family}`,
             ]
           : []),
       ].sort(),
-      targetProfileCount: Array.isArray(compiledHint.targetProfiles)
-        ? compiledHint.targetProfiles.length
+      targetProfileCount: Array.isArray(cardHint.targetProfiles)
+        ? cardHint.targetProfiles.length
         : 0,
-      effectCount: Array.isArray(activeHint.effects)
-        ? activeHint.effects.length
+      effectCount: Array.isArray(cardHint.effects)
+        ? cardHint.effects.length
         : 0,
     },
     removalConditions: removalConditionsFor(
       classification.family,
-      activeHint.quality,
+      cardHint.quality,
       pilotDeckIds.length > 0,
     ),
   };
@@ -88,7 +82,6 @@ const inventory = {
   generatedFrom: [
     "data/manifests/proteus-card-support.json",
     "data/ai/ai-card-hints-active.json",
-    "data/ai/ai-card-hints-compiled.json",
     "data/decks/proteus-playtest-decks-2026-05-25.json",
     "data/scenarios/proteus-ai-family-decision-smokes-v1.json",
   ],
@@ -144,14 +137,14 @@ if (shouldWrite) {
   process.stdout.write(serialized);
 }
 
-function classifyCard(activeHint, compiledHint) {
-  const semantic = semanticText(activeHint, compiledHint);
+function classifyCard(cardHint) {
+  const semantic = semanticText(cardHint);
   const roles = new Set([
-    ...(activeHint.roles ?? []),
-    ...(activeHint.riskTags ?? []),
+    ...(cardHint.roles ?? []),
+    ...(cardHint.riskTags ?? []),
   ]);
-  const effects = activeHint.effects ?? [];
-  const targetProfiles = compiledHint.targetProfiles ?? [];
+  const effects = cardHint.effects ?? [];
+  const targetProfiles = cardHint.targetProfiles ?? [];
 
   if (
     roles.has("hidden_zone_tool") ||
@@ -173,7 +166,7 @@ function classifyCard(activeHint, compiledHint) {
     /\bselected x\b|\bvariable x\b|\bx cost\b|\bcosts? x\b|rez_paid_scaling/.test(
       semantic,
     ) ||
-    (activeHint.manualNotes ?? []).some((note) => /\bX\b/.test(note))
+    (cardHint.manualNotes ?? []).some((note) => /\bX\b/.test(note))
   ) {
     return result("x_cost", "variable_x_semantics");
   }
@@ -200,26 +193,24 @@ function classifyCard(activeHint, compiledHint) {
   if (
     effects.length >= 4 ||
     targetProfiles.length > 1 ||
-    (activeHint.strategySupportPairs ?? []).length > 2
+    (cardHint.strategySupportPairs ?? []).length > 2
   ) {
     return result("complex_multi_ability", "multiple_semantic_surfaces");
   }
   return result("baseline", "no_specialized_readiness_model_required");
 }
 
-function semanticText(activeHint, compiledHint) {
+function semanticText(cardHint) {
   return [
-    activeHint.roles,
-    activeHint.planRoles,
-    activeHint.requiredMechanics,
-    activeHint.riskTags,
-    activeHint.tacticSignals,
-    activeHint.effects,
-    activeHint.conditions,
-    activeHint.targetProfiles,
-    activeHint.manualNotes,
-    compiledHint.targetProfiles,
-    compiledHint.conditions,
+    cardHint.roles,
+    cardHint.planRoles,
+    cardHint.requiredMechanics,
+    cardHint.riskTags,
+    cardHint.tacticSignals,
+    cardHint.effects,
+    cardHint.conditions,
+    cardHint.manualNotes,
+    cardHint.targetProfiles,
   ]
     .flatMap(flattenSemanticValue)
     .join(" ")

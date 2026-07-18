@@ -9,7 +9,7 @@
       "stages": {
         "hint_ready": {
           "ready": true,
-          "reason": "Alle 154 Proteus-Karten besitzen aktive und kompilierte AI-Hints."
+          "reason": "Alle 154 Proteus-Karten besitzen einen geprüften Karten-Hint in der einzigen Hint-Quelle."
         },
         "selected_ai_playtest_ready": {
           "ready": true,
@@ -23,10 +23,9 @@
       "evidence": {
         "cardCount": 154,
         "aiSupportedCardCount": 154,
-        "activeHintCount": 154,
-        "compiledHintCount": 154,
+        "hintCount": 154,
         "uniqueScenarioRefCount": 1,
-        "humanReviewedHintCount": 146,
+        "humanReviewedHintCount": 154,
         "strategyCoveredHintCount": 55,
         "benchmarkCoveredHintCount": 6,
         "selectedDeckSmoke": true,

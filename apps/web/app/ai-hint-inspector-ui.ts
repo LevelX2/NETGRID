@@ -30,14 +30,12 @@ export type CatalogAiInspector = {
   source: Record<string, unknown>;
   supportStatus: {
     aiSupportStatus: string;
-    compiledHintFound: boolean;
+    hintFound: boolean;
     mechanicalFactsFound: boolean;
-    generatedFactsFound: boolean;
-    overlayFields: string[];
     legacyFallbackOnly: boolean;
     warningCount: number;
   };
-  compiledHint: {
+  cardHint: {
     aiSupportStatus: string;
     requiredMechanics: string[];
     valueHints: Record<string, number>;
@@ -270,8 +268,7 @@ function qualityDetailsSection(
   return {
     key: "qualityDetails",
     title: "Interne Qualität / Reviewdaten",
-    description:
-      "Interne Qualitäts- und Review-Metadaten aus dem compiled Hint.",
+    description: "Interne Qualitäts- und Review-Metadaten aus dem Karten-Hint.",
     emptyText: "Keine internen Qualität- oder Reviewdaten vorhanden.",
     entries: qualityEntries(inspector),
   };
@@ -280,10 +277,10 @@ function qualityDetailsSection(
 function checkpointsSection(inspector: CatalogAiInspector): AiInspectorSection {
   const entries: AiInspectorEntry[] = [];
   const support = inspector.supportStatus;
-  if (!support.compiledHintFound) {
+  if (!support.hintFound) {
     entries.push({
-      label: "Missing compiled hint",
-      value: "missing compiled hint",
+      label: "Fehlender Karten-Hint",
+      value: "Karten-Hint fehlt",
       tone: "danger",
     });
   }
@@ -336,7 +333,7 @@ function checkpointsSection(inspector: CatalogAiInspector): AiInspectorSection {
     key: "checkpoints",
     title: "Prüfpunkte",
     description:
-      "Echte fachliche Prüfpunkte: Human Review, niedrige Confidence, Descriptor-Gaps, Missing compiled hint, Invalid/Hard Problem und kompakter Legacy-Hinweis.",
+      "Echte fachliche Prüfpunkte: Human Review, niedrige Confidence, Descriptor-Gaps, fehlender Karten-Hint, Invalid/Hard Problem und kompakter Legacy-Hinweis.",
     emptyText: "Keine fachlichen Prüfpunkte.",
     entries,
   };
@@ -382,7 +379,7 @@ function legacyMigrationSection(
           },
         ]
       : []),
-    ...compiledHintEntries(inspector),
+    ...cardHintEntries(inspector),
     ...stringEntries("Legacy roles", inspector.legacyRoles.roles, "legacy"),
     ...stringEntries(
       "Legacy planRoles",
@@ -422,20 +419,18 @@ function legacyMigrationSection(
   };
 }
 
-function compiledHintEntries(
-  inspector: CatalogAiInspector,
-): AiInspectorEntry[] {
-  const hint = inspector.compiledHint;
+function cardHintEntries(inspector: CatalogAiInspector): AiInspectorEntry[] {
+  const hint = inspector.cardHint;
   const entries: AiInspectorEntry[] = [
     {
       label: "Quelle",
-      value: String(inspector.source.compiledHintsPath ?? "compiled hint"),
+      value: String(inspector.source.activeHintsPath ?? "Karten-Hint"),
       tone: "info",
     },
   ];
   if (!hint) {
     entries.push({
-      label: "Compiled Hint",
+      label: "Karten-Hint",
       value: "nicht vorhanden",
       tone: "danger",
     });
@@ -454,9 +449,6 @@ function compiledHintEntries(
   entries.push(...stringEntries("Manual Notes", hint.manualNotes, "legacy"));
   entries.push(
     ...stringEntries("Strategic Notes", hint.strategicNotes, "legacy"),
-  );
-  entries.push(
-    ...stringEntries("Overlay", inspector.supportStatus.overlayFields, "info"),
   );
   return entries;
 }
@@ -495,11 +487,11 @@ function mechanicalDetailsEntries(
   inspector: CatalogAiInspector,
 ): AiInspectorEntry[] {
   const entries = mechanicalFactEntries(inspector);
-  const compiledHintsPath = inspector.source.compiledHintsPath;
-  if (typeof compiledHintsPath === "string") {
+  const activeHintsPath = inspector.source.activeHintsPath;
+  if (typeof activeHintsPath === "string") {
     entries.push({
-      label: "Compiled source",
-      value: compiledHintsPath,
+      label: "Hint-Quelle",
+      value: activeHintsPath,
       tone: "info",
     });
   }
@@ -722,7 +714,7 @@ function stringArrayField(
 }
 
 function checkpointLabelForCategory(category: string): string {
-  if (category.includes("missing")) return "Missing compiled hint";
+  if (category.includes("missing")) return "Fehlender Karten-Hint";
   if (
     category.includes("invalid") ||
     category.includes("hard") ||
@@ -741,7 +733,7 @@ function checkpointLabelForCategory(category: string): string {
 }
 
 function checkpointToneForLabel(label: string): AiInspectorTone {
-  if (label === "Missing compiled hint" || label === "Invalid / Hard Problem")
+  if (label === "Fehlender Karten-Hint" || label === "Invalid / Hard Problem")
     return "danger";
   if (label === "Deferred / Human Review" || label === "Descriptor-Gap")
     return "warning";

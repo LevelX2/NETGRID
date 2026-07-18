@@ -1,5 +1,4 @@
 import activeHints from "../../../data/ai/ai-card-hints-active.json";
-import compiledHints from "../../../data/ai/ai-card-hints-compiled.json";
 import { describe, expect, it } from "vitest";
 
 type HintEffect = {
@@ -32,10 +31,7 @@ type HintCard = {
   };
 };
 
-const hintSources = [
-  ["active", activeHints.cards],
-  ["compiled", compiledHints.cards],
-] as const;
+const hintSources = [["active", activeHints.cards]] as const;
 
 describe.each(hintSources)(
   "9D15 non-Broker card hints in %s",

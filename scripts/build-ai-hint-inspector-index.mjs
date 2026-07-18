@@ -18,13 +18,11 @@ const TASK_ID = "AI005";
 const SCHEMA_VERSION = "ai-hint-inspector-index-v1";
 
 const ACTIVE_HINTS_PATH = "data/ai/ai-card-hints-active.json";
-const COMPILED_HINTS_PATH = "data/ai/ai-card-hints-compiled.json";
 const STRATEGY_GOALS_PATH = "data/ai/strategy-goals-v1.json";
 const STRATEGIC_ROLES_PATH = "data/ai/strategic-roles-v1.json";
 const FUNCTION_SIGNAL_DERIVATION_PATH =
   "data/ai/function-signal-derivation-v1.json";
 const TACTIC_SIGNAL_CATALOG_PATH = "data/ai/tactic-signals-v1.json";
-const MANUAL_OVERLAY_ROOT = "data/ai/hints/overlays";
 const INSPECTOR_INDEX_PATH = "data/ai/ai-hint-inspector-index.json";
 
 const MECHANICAL_FACT_FIELDS = [
@@ -56,7 +54,6 @@ const FORBIDDEN_OUTPUT_KEYS = [
 export function buildAiHintInspectorIndex(options = {}) {
   const repoRoot = options.repoRoot ?? REPO_ROOT;
   const activeHints = readJson(repoRoot, ACTIVE_HINTS_PATH);
-  const compiledHints = readJson(repoRoot, COMPILED_HINTS_PATH);
   const strategyGoalsData = readJson(repoRoot, STRATEGY_GOALS_PATH);
   const strategicRolesData = readJson(repoRoot, STRATEGIC_ROLES_PATH);
   const functionDerivationData = readJson(
@@ -69,10 +66,6 @@ export function buildAiHintInspectorIndex(options = {}) {
   );
   const { report, aliasReport } = buildAiStrategyTaxonomyReport({ repoRoot });
 
-  const activeByCardId = new Map(
-    (activeHints.cards ?? []).map((hint) => [hint.cardId, hint]),
-  );
-  const overlayByCardId = readManualOverlays(repoRoot, MANUAL_OVERLAY_ROOT);
   const strategyIds = new Set(
     (strategyGoalsData.strategyGoals ?? [])
       .map((goal) => goal.strategyId)
@@ -105,23 +98,10 @@ export function buildAiHintInspectorIndex(options = {}) {
     ]),
   );
 
-  const cards = (compiledHints.cards ?? [])
+  const cards = (activeHints.cards ?? [])
     .map((hint) => {
-      const activeHint = activeByCardId.get(hint.cardId) ?? {};
-      const overlay = overlayByCardId.get(hint.cardId) ?? {};
       const mechanicalFactFields = MECHANICAL_FACT_FIELDS.filter((field) =>
         hasMeaningfulValue(hint[field]),
-      );
-      const activeMechanicalFactFields = MECHANICAL_FACT_FIELDS.filter(
-        (field) => hasMeaningfulValue(activeHint[field]),
-      );
-      const overlayFields = Object.keys(overlay).sort();
-      const generatedFactFields = MECHANICAL_FACT_FIELDS.filter((field) =>
-        isCompiledGeneratedField(
-          hint[field],
-          activeHint[field],
-          overlay[field],
-        ),
       );
       const functionSignals = deriveFunctionSignalsFromHint(
         hint,
@@ -179,8 +159,6 @@ export function buildAiHintInspectorIndex(options = {}) {
         descriptorGaps,
         wrongSideAnchorMatches,
         mechanicalFactFields,
-        generatedFactFields,
-        overlayFields,
       });
       const cardLevelStrategyAnchors = strategyAnchorsFromLineSupport({
         lineSupportClassification,
@@ -206,14 +184,9 @@ export function buildAiHintInspectorIndex(options = {}) {
         cardType: hint.cardType,
         supportStatus: {
           aiSupportStatus: hint.aiSupportStatus ?? "none",
-          compiledHintFound: true,
+          hintFound: true,
           mechanicalFactsFound: mechanicalFactFields.length > 0,
-          generatedFactsFound: generatedFactFields.length > 0,
-          overlayFields,
-          legacyFallbackOnly:
-            mechanicalFactFields.length === 0 &&
-            generatedFactFields.length === 0 &&
-            overlayFields.length === 0,
+          legacyFallbackOnly: mechanicalFactFields.length === 0,
           warningCount: warningCategories.length,
         },
         derivedFunctionSignals: inspectorFunctionSignals,
@@ -236,10 +209,7 @@ export function buildAiHintInspectorIndex(options = {}) {
           legacyLineSupportPresent: lineSupportClassification.some(
             (entry) => entry.triageCategory !== "normalized_strategy_id",
           ),
-          activeMechanicalFactFields,
-          compiledMechanicalFactFields: mechanicalFactFields,
-          generatedFactFields,
-          overlayFields,
+          mechanicalFactFields,
         },
         strategicRoleStatus: {
           values: hint.strategicRole ?? [],
@@ -260,24 +230,16 @@ export function buildAiHintInspectorIndex(options = {}) {
     generatedAt: GENERATED_AT,
     source: {
       activeHintsPath: ACTIVE_HINTS_PATH,
-      compiledHintsPath: COMPILED_HINTS_PATH,
       strategyGoalsPath: STRATEGY_GOALS_PATH,
       strategicRolesPath: STRATEGIC_ROLES_PATH,
       functionSignalDerivationPath: FUNCTION_SIGNAL_DERIVATION_PATH,
       tacticSignalCatalogPath: TACTIC_SIGNAL_CATALOG_PATH,
-      manualOverlayRoot: MANUAL_OVERLAY_ROOT,
       mode: "read-only card-catalog inspector index; no hint migration, planner effect, LegalAction effect or runtime state input",
     },
     summary: {
       cardCount: cards.length,
       cardsWithMechanicalFacts: cards.filter(
         (card) => card.supportStatus.mechanicalFactsFound,
-      ).length,
-      cardsWithGeneratedFacts: cards.filter(
-        (card) => card.supportStatus.generatedFactsFound,
-      ).length,
-      cardsWithOverlays: cards.filter(
-        (card) => card.supportStatus.overlayFields.length > 0,
       ).length,
       cardsWithFunctionSignals: cards.filter(
         (card) => card.derivedFunctionSignals.length > 0,
@@ -520,8 +482,6 @@ function warningCategoriesForCard({
   descriptorGaps,
   wrongSideAnchorMatches,
   mechanicalFactFields,
-  generatedFactFields,
-  overlayFields,
 }) {
   const warnings = [];
   const allClassifications = [
@@ -561,11 +521,7 @@ function warningCategoriesForCard({
   ) {
     warnings.push("asset_economy_without_economy_evidence");
   }
-  if (
-    mechanicalFactFields.length === 0 &&
-    generatedFactFields.length === 0 &&
-    overlayFields.length === 0
-  ) {
+  if (mechanicalFactFields.length === 0) {
     warnings.push("legacy_fallback_only");
   }
   return sortedUnique(warnings);
@@ -586,49 +542,6 @@ export function assetEconomyHasIndependentEvidence(hint) {
       "finite_economy_pool",
     ]).has(effect.kind);
   });
-}
-
-function readManualOverlays(repoRoot, rootPath) {
-  const absoluteRoot = path.join(repoRoot, rootPath);
-  const overlays = new Map();
-  if (!fs.existsSync(absoluteRoot)) return overlays;
-  for (const filePath of listJsonFiles(absoluteRoot)) {
-    const data = JSON.parse(fs.readFileSync(filePath, "utf8"));
-    for (const card of data.cards ?? []) {
-      if (!card.cardId || !isRecord(card.overlay)) continue;
-      const current = overlays.get(card.cardId) ?? {};
-      overlays.set(card.cardId, { ...current, ...card.overlay });
-    }
-  }
-  return overlays;
-}
-
-function listJsonFiles(root) {
-  const files = [];
-  for (const entry of fs.readdirSync(root, { withFileTypes: true })) {
-    const entryPath = path.join(root, entry.name);
-    if (entry.isDirectory()) files.push(...listJsonFiles(entryPath));
-    else if (entry.isFile() && entry.name.endsWith(".json"))
-      files.push(entryPath);
-  }
-  return files.sort((left, right) => left.localeCompare(right));
-}
-
-function isCompiledGeneratedField(compiledValue, activeValue, overlayValue) {
-  if (!hasMeaningfulValue(compiledValue)) return false;
-  if (
-    hasMeaningfulValue(activeValue) &&
-    stableStringify(compiledValue) === stableStringify(activeValue)
-  ) {
-    return false;
-  }
-  if (
-    hasMeaningfulValue(overlayValue) &&
-    stableStringify(compiledValue) === stableStringify(overlayValue)
-  ) {
-    return false;
-  }
-  return true;
 }
 
 function hasMeaningfulValue(value) {
@@ -757,8 +670,6 @@ export function runCli(argv = process.argv.slice(2)) {
         "AI_HINT_INSPECTOR_INDEX OK",
         `cards=${artifact.summary.cardCount}`,
         `mechanical=${artifact.summary.cardsWithMechanicalFacts}`,
-        `generated=${artifact.summary.cardsWithGeneratedFacts}`,
-        `overlays=${artifact.summary.cardsWithOverlays}`,
         `signals=${artifact.summary.cardsWithFunctionSignals}`,
         `anchors=${artifact.summary.cardsWithStrategyAnchors}`,
         `warnings=${artifact.summary.cardsWithWarnings}`,

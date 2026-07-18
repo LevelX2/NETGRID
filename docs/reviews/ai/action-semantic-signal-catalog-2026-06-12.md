@@ -1,6 +1,6 @@
 # Action Semantic Signal Catalog Gate 2026-06-12
 
-Diagnosebericht fuer aktive Karten. Der Bericht nutzt Active Hints, Compiled Hints, den Hint-Inspector-Index und den Tactic-Signal-Katalog.
+Diagnosebericht fuer aktive Karten. Der Bericht nutzt Active Hints, Karten-Hints, den Hint-Inspector-Index und den Tactic-Signal-Katalog.
 
 Keine Runtime-Anbindung, keine Action-Auswahl, kein Scoring und keine Hidden-Info-Projektion.
 

@@ -1,8 +1,11 @@
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
 import activeHints from "../../../data/ai/ai-card-hints-active.json";
-import compiledHints from "../../../data/ai/ai-card-hints-compiled.json";
 import inspectorIndex from "../../../data/ai/ai-hint-inspector-index.json";
 import { buildActionSemanticCandidates } from "./action-semantic-candidate";
 import { buildActionCardSemanticProfilesByDefinitionId } from "./actions/action-card-semantic-profiles";
@@ -23,10 +26,7 @@ type Hint = {
 };
 
 describe("match FD7671 card-hint contract", () => {
-  it.each([
-    ["active", activeHints.cards],
-    ["compiled", compiledHints.cards],
-  ])(
+  it.each([["active", activeHints.cards]])(
     "models Rex as trace run-lock ICE without tag semantics in %s hints",
     (_source, cards) => {
       const rex = (cards as Hint[]).find(
@@ -58,7 +58,7 @@ describe("match FD7671 card-hint contract", () => {
     },
   );
 
-  it("preserves Rex run-lock defense through compiled runtime consumers", () => {
+  it("preserves Rex run-lock defense through active runtime consumers", () => {
     const runtimeHint = createAiHintsByCard().get("onr_v1_264_rex");
     expect(runtimeHint?.roles).toEqual(["ice", "trace"]);
     expect(runtimeHint?.planRoles).toEqual(["defend_server"]);
