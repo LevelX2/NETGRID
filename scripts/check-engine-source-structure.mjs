@@ -10,6 +10,7 @@ const repoRoot = path.resolve(
 );
 const engineRoot = path.join(repoRoot, "packages", "engine", "src");
 const runtimeRoot = path.join(engineRoot, "game", "engine-runtime-internal");
+const abilityRoot = path.join(engineRoot, "ability-engine");
 
 const delegateDebt = new Map([
   ["action-runtime-delegates.ts", 107],
@@ -153,6 +154,33 @@ for (const relative of runtimeImportFanoutDebt.keys()) {
     findings.push(`stale fan-out debt entry: ${relative}`);
 }
 
+const definitionFacade = path.join(abilityRoot, "definition-types.ts");
+if (sourceLineCount(definitionFacade) > 20)
+  findings.push("ability-engine/definition-types.ts exceeds 20 lines");
+const definitionFamilyFiles = readdirSync(abilityRoot)
+  .filter((name) => /^definition-.*-contracts\.ts$/.test(name))
+  .sort();
+if (definitionFamilyFiles.length !== 6)
+  findings.push(
+    `ability contract structure has ${definitionFamilyFiles.length} family modules; expected 6`,
+  );
+for (const fileName of definitionFamilyFiles) {
+  const file = path.join(abilityRoot, fileName);
+  const lineCount = sourceLineCount(file);
+  if (lineCount > 1200)
+    findings.push(
+      `ability-engine/${fileName} has ${lineCount} lines; allowed maximum is 1200`,
+    );
+  const source = parseSource(file, readFileSync(file, "utf8"));
+  const valueStatement = source.statements.find(
+    (statement) => !isDeclarativeContractStatement(statement),
+  );
+  if (valueStatement)
+    findings.push(
+      `ability-engine/${fileName} contains runtime statement kind ${ts.SyntaxKind[valueStatement.kind]}`,
+    );
+}
+
 if (findings.length > 0) {
   console.error("ENGINE_SOURCE_STRUCTURE FAILED");
   for (const finding of findings.sort()) console.error(`- ${finding}`);
@@ -262,6 +290,22 @@ function importFanoutFinding(relative, actual, debt) {
   return undefined;
 }
 
+function isDeclarativeContractStatement(statement) {
+  if (
+    ts.isTypeAliasDeclaration(statement) ||
+    ts.isInterfaceDeclaration(statement)
+  )
+    return true;
+  if (ts.isImportDeclaration(statement))
+    return statement.importClause?.isTypeOnly === true;
+  return ts.isExportDeclaration(statement) && statement.isTypeOnly;
+}
+
+function sourceLineCount(file) {
+  const text = readFileSync(file, "utf8");
+  return text.replace(/\r?\n$/, "").split(/\r?\n/).length;
+}
+
 function cyclicComponents(graph) {
   let nextIndex = 0;
   const stack = [];
@@ -363,6 +407,20 @@ function runSelfTest() {
     forbiddenLayerEdge("game/state/example.ts", "ability-engine/example.ts")
   )
     throw new Error("engine source structure self-test failed: layer edge");
+
+  const valueContractSource = parseSource(
+    "contract.ts",
+    "export const executesAtRuntime = true;",
+  );
+  if (
+    valueContractSource.statements.every(isDeclarativeContractStatement) ||
+    !parseSource("contract.ts", "export type Safe = string;").statements.every(
+      isDeclarativeContractStatement,
+    )
+  )
+    throw new Error(
+      "engine source structure self-test failed: declarative contracts",
+    );
 
   console.log("ENGINE_SOURCE_STRUCTURE_SELFTEST OK");
 }
