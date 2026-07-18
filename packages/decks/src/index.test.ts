@@ -6,6 +6,8 @@ import profilesData from "../../../data/decks/deck-format-profiles-0.6.json";
 import profilesData08 from "../../../data/decks/deck-format-profiles-0.8.json";
 import profilesData130 from "../../../data/decks/deck-format-profiles-1.3.0.json";
 import classicPlaytestDecksData from "../../../data/decks/classic-playtest-decks-2026-07-01.json";
+import standardDeckCatalogData from "../../../data/decks/standard-deck-catalog-1.0.0.json";
+import standardDeckCurationData from "../../../data/decks/standard-deck-curation-2026-07-18.json";
 import templatesData from "../../../data/decks/deck-templates-0.6.json";
 import snapshotsData from "../../../data/decks/deck-snapshots-0.6.json";
 import snapshotsData08 from "../../../data/decks/deck-snapshots-0.8.json";
@@ -77,7 +79,59 @@ type ClassicEditableDeckEntry = {
   deck: EditableDeck;
 };
 
+type StandardDeckCatalogEntry = {
+  standardDeckId: string;
+  version: string;
+  status: "active";
+  name: string;
+  side: "runner" | "corp";
+  identityCardId: string;
+  cardPoolSnapshotId: string;
+  cardPoolVersion?: string;
+  formatProfileId: string;
+  formatProfileVersion?: string;
+  cards: Array<{ cardId: string; quantity: number }>;
+  source: { kind: "curated_local_deck"; sourceDeckId: string; sourceDeckVersion: string };
+};
+
 describe("deck validation and snapshots", () => {
+  it("keeps the curated standard-deck catalog unique, complete, and match-valid", () => {
+    const runtimeCardsById = createRuntimeCardsById();
+    const profiles = [...(profilesData08.profiles as DeckFormatProfile[]), ...(profilesData130.profiles as DeckFormatProfile[])];
+    const entries = standardDeckCatalogData.decks as StandardDeckCatalogEntry[];
+    const localCuration = standardDeckCurationData.localDeckLibrary;
+    const projectCuration = standardDeckCurationData.projectSnapshots;
+
+    expect(entries).toHaveLength(40);
+    expect(new Set(entries.map((entry) => entry.standardDeckId)).size).toBe(entries.length);
+    expect(localCuration.counts).toEqual({ standard: 40, internal_ai: 2, retire: 1, test_fixture: 10 });
+    expect(projectCuration.counts).toEqual({ test_fixture: 10, internal_ai: 11 });
+    expect(localCuration.entries.filter((entry) => entry.classification === "standard")).toHaveLength(entries.length);
+    expect(projectCuration.entries.every((entry) => entry.classification !== "standard")).toBe(true);
+
+    for (const entry of entries) {
+      const profile = profiles.find((candidate) => candidate.profileId === entry.formatProfileId);
+      expect(profile, `missing profile for ${entry.standardDeckId}`).toBeDefined();
+      const deck: EditableDeck = {
+        deckId: entry.standardDeckId,
+        deckVersion: entry.version,
+        name: entry.name,
+        side: entry.side,
+        identityCardId: entry.identityCardId,
+        cardPoolSnapshotId: entry.cardPoolSnapshotId,
+        ...(entry.cardPoolVersion ? { cardPoolVersion: entry.cardPoolVersion } : {}),
+        formatProfileId: entry.formatProfileId,
+        ...(entry.formatProfileVersion ? { formatProfileVersion: entry.formatProfileVersion } : {}),
+        cards: entry.cards,
+        createdAt: "2026-07-18T00:00:00.000Z",
+        updatedAt: "2026-07-18T00:00:00.000Z",
+      };
+      const validation = validateEditableDeck(deck, { cardsById: runtimeCardsById, profile: profile! });
+      expect(validation.errors, `${entry.standardDeckId}: ${validation.errors.join(" | ")}`).toEqual([]);
+      expect(validation.ok).toBe(true);
+    }
+  });
+
   it("validates every frozen V0.6 deck snapshot", () => {
     expect(snapshots).toHaveLength(4);
     for (const snapshot of snapshots) {

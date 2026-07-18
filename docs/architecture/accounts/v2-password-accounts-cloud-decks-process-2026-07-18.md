@@ -2,7 +2,7 @@
 
 Stand: 2026-07-18
 
-Status: aktiv
+Status: aktiv – P01 abgeschlossen, P02 als Nächstes
 
 Quelle: `docs/releases/v2/v2-0-auth-privacy-cloud-decks/user-profiles-password-cloud-decks-staged-plan-2026-07-18.md`
 
