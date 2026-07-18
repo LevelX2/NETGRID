@@ -1,6 +1,6 @@
 # Aktueller Projektstatus
 
-Stand: 2026-07-16
+Stand: 2026-07-18
 
 ## Führender Produktstand
 
@@ -53,6 +53,14 @@ Stand: 2026-07-16
 
 ## KI
 
+- Der Vollbestandsaudit aller 618 aktiven und kompilierten Kartenhints trennt
+  17 konkrete produktive Kartenkorrekturen, 28 Karten mit rohen
+  `tacticSignals` ohne strukturierte `effects`, 33 aktive Card-Signal-
+  Zuweisungen ohne Consumer/Policy sowie größere ungeklärte
+  `strategySupportPairs`- und `valueHints`-Flächen. Es wurde noch nichts
+  implementiert; die priorisierte Maßnahmenliste wartet auf Rücksprache und
+  anschließende Worktree-Umsetzung. Führend ist
+  `docs/reviews/ai/ai-card-hint-full-inventory-audit-2026-07-18.md`.
 - Die Semantic Runtime ist der einzige produktive Entscheidungsweg.
 - `@netgrid/ai` exportiert nur Live-Verträge; Simulation, Selfplay und
   Benchmarks liegen unter `@netgrid/ai/simulation`.
