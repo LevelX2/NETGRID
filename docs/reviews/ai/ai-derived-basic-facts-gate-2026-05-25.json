@@ -10368,7 +10368,6 @@
           "tag_self"
         ],
         "planRoles": [
-          "contest_remote",
           "pressure_hq"
         ],
         "effects": [
@@ -16987,12 +16986,10 @@
         "cardType": "ice",
         "roles": [
           "ice",
-          "tag",
           "trace"
         ],
         "planRoles": [
-          "defend_server",
-          "tag_pressure"
+          "defend_server"
         ],
         "effects": [],
         "conditions": [],
@@ -19045,12 +19042,10 @@
         "cardType": "ice",
         "roles": [
           "ice",
-          "tag",
           "trace"
         ],
         "planRoles": [
-          "defend_server",
-          "tag_pressure"
+          "defend_server"
         ],
         "effects": [],
         "conditions": [],
@@ -19499,7 +19494,6 @@
         "cardType": "ice",
         "roles": [
           "ice",
-          "net_damage",
           "program_trash",
           "trace"
         ],
@@ -20196,8 +20190,7 @@
           "trace"
         ],
         "planRoles": [
-          "defend_server",
-          "tag_pressure"
+          "defend_server"
         ],
         "effects": [],
         "conditions": [],
@@ -29012,8 +29005,6 @@
         "side": "corp",
         "cardType": "upgrade",
         "roles": [
-          "economy",
-          "tag",
           "upgrade"
         ],
         "planRoles": [

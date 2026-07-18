@@ -5866,12 +5866,15 @@
           "kind": "scored_agenda_action",
           "timing": "action",
           "scope": "runner",
-          "target": "conditional_agenda_point"
+          "target": "liberated_gray_ops_agenda_point"
         }
       ],
       "conditions": [
         {
-          "kind": "requires_scored_agenda"
+          "kind": "requires_liberated_agenda_this_turn"
+        },
+        {
+          "kind": "requires_liberated_gray_ops_agenda"
         }
       ]
     },
@@ -5887,7 +5890,6 @@
         "tag_self"
       ],
       "planRoles": [
-        "contest_remote",
         "pressure_hq"
       ],
       "requiredMechanics": [
@@ -6398,12 +6400,15 @@
           "kind": "scored_agenda_action",
           "timing": "action",
           "scope": "runner",
-          "target": "black_ops_agenda_condition"
+          "target": "liberated_black_ops_agenda_point"
         }
       ],
       "conditions": [
         {
-          "kind": "requires_scored_agenda"
+          "kind": "requires_liberated_agenda_this_turn"
+        },
+        {
+          "kind": "requires_liberated_black_ops_agenda"
         }
       ]
     },
@@ -16495,18 +16500,15 @@
       "cardType": "ice",
       "roles": [
         "ice",
-        "trace",
-        "tag"
+        "trace"
       ],
       "planRoles": [
-        "defend_server",
-        "tag_pressure"
+        "defend_server"
       ],
       "requiredMechanics": [
         "install_ice",
         "rez_ice",
-        "trace",
-        "add_tag"
+        "trace"
       ],
       "valueHints": {
         "defense": 1
@@ -18461,18 +18463,15 @@
       "cardType": "ice",
       "roles": [
         "ice",
-        "trace",
-        "tag"
+        "trace"
       ],
       "planRoles": [
-        "defend_server",
-        "tag_pressure"
+        "defend_server"
       ],
       "requiredMechanics": [
         "install_ice",
         "rez_ice",
-        "trace",
-        "add_tag"
+        "trace"
       ],
       "valueHints": {
         "defense": 1
@@ -18903,8 +18902,7 @@
       "roles": [
         "ice",
         "trace",
-        "program_trash",
-        "net_damage"
+        "program_trash"
       ],
       "planRoles": [
         "defend_server",
@@ -18914,15 +18912,13 @@
         "install_ice",
         "rez_ice",
         "trace",
-        "trash_installed_program",
-        "net_damage"
+        "trash_installed_program"
       ],
       "valueHints": {
         "defense": 2
       },
       "riskTags": [
         "trace_window",
-        "damage_window",
         "installed_card_destroy"
       ],
       "aiSupportStatus": "ai_supported",
@@ -19789,8 +19785,7 @@
         "end_run"
       ],
       "planRoles": [
-        "defend_server",
-        "tag_pressure"
+        "defend_server"
       ],
       "requiredMechanics": [
         "install_ice",
@@ -30295,25 +30290,17 @@
       "side": "corp",
       "cardType": "upgrade",
       "roles": [
-        "upgrade",
-        "tag",
-        "economy"
+        "upgrade"
       ],
       "planRoles": [
         "remote_upgrade_tax"
       ],
       "requiredMechanics": [
         "install_upgrade",
-        "rez_card",
-        "tag_condition",
-        "gain_credit"
+        "rez_card"
       ],
-      "valueHints": {
-        "economy": 1
-      },
-      "riskTags": [
-        "tag_risk"
-      ],
+      "valueHints": {},
+      "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1918-smokes.json#corp_v1918_upgrade_trace_tag_condition"
@@ -30331,7 +30318,7 @@
         {
           "kind": "zone_shuffle",
           "scope": "hq",
-          "target": "ice.corp_hq_runpath_insert",
+          "target": "ice.corp_ice_swap",
           "timing": "during_run"
         },
         {
@@ -34652,12 +34639,31 @@
       "lineSupport": [],
       "strategicRole": [],
       "strategySupportPairs": [],
-      "manualNotes": [
-        "ICE-V2: set=proteus; changedAgainstUploadedReport=none.",
-        "ICE-V2: Target/Constraints: TargetProfile: installiertes Runner-Programm als legales Trash-Ziel erforderlich.",
-        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
-      ],
       "effects": [
+        {
+          "kind": "program_trash",
+          "scope": "installed_program",
+          "target": "corp_ice.program_trash",
+          "timing": "encounter_resolution"
+        },
+        {
+          "amount": 1,
+          "finite": true,
+          "kind": "run_tax",
+          "resource": "credits",
+          "scope": "runner",
+          "target": "corp_ice.runner_pay_or_program_trash",
+          "timing": "encounter_resolution"
+        },
+        {
+          "amount": 3,
+          "finite": true,
+          "kind": "economy",
+          "resource": "credits",
+          "scope": "corp",
+          "target": "corp_ice.rez_economy",
+          "timing": "on_rez"
+        },
         {
           "amount": 3,
           "kind": "economy",
@@ -34673,6 +34679,12 @@
         {
           "kind": "requires_unbroken_subroutine"
         }
+      ],
+      "manualNotes": [
+        "AIH-01: Programmtrash oder Runner-Zahlung und die Rez-Economy sind als strukturierte Effekte transportiert.",
+        "ICE-V2: set=proteus; changedAgainstUploadedReport=effects, conditions.",
+        "ICE-V2: Target/Constraints: TargetProfile: installiertes Runner-Programm als legales Trash-Ziel erforderlich.",
+        "ICE-V2: Rationale: Der frühere Taktiksignal-only-Stand bildete den Kartenzweck im allgemeinen Action-Profil nicht ab."
       ]
     },
     {
@@ -37682,7 +37694,6 @@
       "cardType": "program",
       "roles": [
         "breaker_fracter",
-        "breaker_killer",
         "icebreaker",
         "program"
       ],
@@ -37703,11 +37714,16 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-18",
+        "reviewedBy": "codex"
       },
+      "manualNotes": [
+        "AIH-01: Reguläre Coverage bleibt wall; der kostenlose nächste Sentry-Subroutine-Break ist ein konditionaler Folgeeffekt und keine Killer-Coverage."
+      ],
       "effects": [
         {
           "kind": "breaker",
@@ -38951,7 +38967,7 @@
         "run_pressure"
       ],
       "planRoles": [
-        "pressure_rnd"
+        "pressure_hq"
       ],
       "requiredMechanics": [],
       "valueHints": {
@@ -39019,7 +39035,7 @@
         "run_pressure"
       ],
       "planRoles": [
-        "pressure_rnd"
+        "pressure_hq"
       ],
       "requiredMechanics": [],
       "valueHints": {
@@ -39691,7 +39707,7 @@
         "run_pressure"
       ],
       "planRoles": [
-        "pressure_rnd"
+        "run_pressure"
       ],
       "requiredMechanics": [],
       "valueHints": {
@@ -39715,10 +39731,24 @@
       },
       "effects": [
         {
-          "kind": "run_tax",
-          "timing": "action",
+          "kind": "tag",
+          "timing": "successful_run",
+          "scope": "runner",
+          "resource": "tags",
+          "amount": 2,
+          "target": "self_tag",
+          "finite": true
+        },
+        {
+          "kind": "global_modifier",
+          "timing": "successful_run",
           "scope": "corp",
           "target": "bad_publicity_win_pressure"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_successful_run"
         }
       ]
     },
@@ -41397,16 +41427,13 @@
           "timing": "persistent"
         },
         {
-          "kind": "tag_punish_payoff",
-          "scope": "runner",
-          "target": "corp.economy_pressure",
-          "timing": "persistent"
-        },
-        {
-          "kind": "access_replacement",
-          "scope": "runner",
+          "amount": 3,
+          "finite": true,
+          "kind": "counter_economy",
+          "resource": "credits",
+          "scope": "corp",
           "target": "access.hq_sabotage_credit_loss",
-          "timing": "persistent"
+          "timing": "after_successful_run"
         },
         {
           "amount": 3,
@@ -41417,6 +41444,9 @@
         }
       ],
       "conditions": [
+        {
+          "kind": "requires_successful_hq_run"
+        },
         {
           "kind": "requires_successful_run"
         }
@@ -41925,16 +41955,13 @@
           "target": "defense.damage_retaliation"
         },
         {
-          "kind": "tag_punish_payoff",
+          "kind": "persistent_counter_effect",
           "timing": "persistent",
-          "scope": "runner",
-          "target": "corp.random_discard_pressure"
-        },
-        {
-          "kind": "access_replacement",
-          "timing": "persistent",
-          "scope": "runner",
-          "target": "access.hq_random_discard_retaliation"
+          "scope": "hq",
+          "resource": "cards",
+          "amount": 2,
+          "target": "random_discard",
+          "finite": true
         }
       ]
     },
@@ -42016,16 +42043,13 @@
           "target": "hidden.reveals_on_trash"
         },
         {
-          "kind": "access_replacement",
+          "kind": "multiaccess",
           "timing": "persistent",
-          "scope": "runner",
-          "target": "access.hq_multiaccess"
-        },
-        {
-          "kind": "access_replacement",
-          "timing": "persistent",
-          "scope": "runner",
-          "target": "access.hq_hidden_multiaccess"
+          "scope": "hq",
+          "resource": "cards",
+          "amount": 2,
+          "target": "access.hq_hidden_multiaccess",
+          "finite": true
         }
       ]
     },
@@ -42418,16 +42442,13 @@
           "target": "hidden.reveals_on_trash"
         },
         {
-          "kind": "access_replacement",
+          "kind": "multiaccess",
           "timing": "persistent",
-          "scope": "runner",
-          "target": "access.rnd_multiaccess"
-        },
-        {
-          "kind": "access_replacement",
-          "timing": "persistent",
-          "scope": "runner",
-          "target": "access.rnd_hidden_multiaccess"
+          "scope": "rnd",
+          "resource": "cards",
+          "amount": 2,
+          "target": "access.rnd_hidden_multiaccess",
+          "finite": true
         }
       ]
     },

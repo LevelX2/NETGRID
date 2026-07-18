@@ -11,24 +11,25 @@ Keine Runtime-Anbindung, keine Action-Auswahl, kein Scoring und keine Hidden-Inf
 | Metric                                                         | Count |
 | -------------------------------------------------------------- | ----: |
 | Active cards                                                   |   618 |
-| covered                                                        |   601 |
-| deferred                                                       |    32 |
-| no_signal_reason != none                                       |    17 |
-| target_profile_gap                                             |    88 |
+| covered                                                        |   599 |
+| deferred                                                       |    31 |
+| no_signal_reason != none                                       |    19 |
+| target_profile_gap                                             |    90 |
 | structural signal violations                                   |     0 |
 | unknown signals                                                |     0 |
-| covered delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE            |   +62 |
-| deferred delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE           |   -13 |
-| no_signal delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE          |    -8 |
-| target_profile_gap delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE |    +4 |
+| covered delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE            |   +60 |
+| deferred delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE           |   -14 |
+| no_signal delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE          |    -6 |
+| target_profile_gap delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE |    +6 |
 
 ## No Signal Reasons
 
-| no_signal_reason       | Cards |
-| ---------------------- | ----: |
-| `none`                 |   601 |
-| `legacy_fallback_only` |    15 |
-| `no_function_signal`   |     2 |
+| no_signal_reason                 | Cards |
+| -------------------------------- | ----: |
+| `none`                           |   599 |
+| `legacy_fallback_only`           |    15 |
+| `deferred_requires_human_review` |     2 |
+| `no_function_signal`             |     2 |
 
 ## Target Profile Gaps
 
@@ -43,6 +44,7 @@ Keine Runtime-Anbindung, keine Action-Auswahl, kein Scoring und keine Hidden-Inf
 | `onr_proteus_004_fetal-ai`                     | corp   | agenda   | `access.corp_agenda_steal_tax`, `access.corp_net_damage_ambush`           |
 | `onr_proteus_005_marked-accounts`              | corp   | agenda   | `access.corp_tag_ambush`                                                  |
 | `onr_proteus_009_viral-breeding-ground`        | corp   | agenda   | `access.corp_program_disruption`, `access.corp_runner_program_bounce`     |
+| `onr_proteus_045_washed-up-solo-construct`     | corp   | ice      | `corp_ice.runner_pay_or_program_trash`                                    |
 | `onr_proteus_056_department-of-misinformation` | corp   | asset    | `expose.corp_prevention`                                                  |
 | `onr_proteus_079_big-frackin-gun`              | runner | program  | `breaker.multi_subroutine_break`                                          |
 | `onr_proteus_093_redecorator`                  | runner | program  | `breaker.multi_subroutine_break`                                          |
@@ -50,6 +52,7 @@ Keine Runtime-Anbindung, keine Action-Auswahl, kein Scoring und keine Hidden-Inf
 | `onr_proteus_105_demolition-run`               | runner | event    | `fort.all_rezzed_ice_trash`, `fort.all_rezzed_ice_trash_tag_risk`         |
 | `onr_proteus_107_drone-for-a-day`              | runner | event    | `fort.all_rezzed_ice_trash_tag_risk`                                      |
 | `onr_proteus_110_hijack`                       | runner | event    | `setup.hardware_install`, `setup.install_credit`, `setup.program_install` |
+| `onr_proteus_113_live-news-feed`               | runner | event    | `fort.all_rezzed_ice_trash_tag_risk`                                      |
 | `onr_proteus_118_prearranged-drop`             | runner | event    | `access.next_agenda_credit`                                               |
 | `onr_proteus_119_promises-promises`            | runner | event    | `access.next_agenda_bonus`                                                |
 | `onr_proteus_120_reconnaissance`               | runner | event    | `info.expose`, `info.run_recon`                                           |
@@ -59,39 +62,39 @@ Keine Runtime-Anbindung, keine Action-Auswahl, kein Scoring und keine Hidden-Inf
 | `onr_proteus_133_chiba-bank-account`           | runner | resource | `hidden.reveals_on_trash`                                                 |
 | `onr_proteus_136_credit-subversion`            | runner | resource | `access.hq_sabotage_credit_loss`, `hidden.reveals_on_trash`               |
 | `onr_proteus_140_expendable-family-member`     | runner | resource | `hidden.reveals_on_trash`                                                 |
-| `onr_proteus_141_get-ready-to-rumble`          | runner | resource | `access.hq_random_discard_retaliation`, `hidden.reveals_on_trash`         |
+| `onr_proteus_141_get-ready-to-rumble`          | runner | resource | `hidden.reveals_on_trash`                                                 |
 | `onr_proteus_142_hq-mole`                      | runner | resource | `access.hq_hidden_multiaccess`, `hidden.reveals_on_trash`                 |
 | `onr_proteus_143_liberated-savings-account`    | runner | resource | `hidden.reveals_on_trash`                                                 |
-| `onr_proteus_146_precision-bribery`            | runner | resource | `fort.creation_lock`                                                      |
-| `onr_proteus_147_r-and-d-mole`                 | runner | resource | `access.rnd_hidden_multiaccess`, `hidden.reveals_on_trash`                |
 
 ## No Signal Review Start
 
-| Card                                | Side   | Type     | Reason                 |
-| ----------------------------------- | ------ | -------- | ---------------------- |
-| `corp_identity_001`                 | corp   | identity | `legacy_fallback_only` |
-| `onr_proteus_034_riddler`           | corp   | ice      | `legacy_fallback_only` |
-| `onr_proteus_074_siren`             | corp   | asset    | `no_function_signal`   |
-| `onr_v1_173_restrictive-net-zoning` | runner | resource | `no_function_signal`   |
-| `runner_identity_001`               | runner | identity | `legacy_fallback_only` |
-| `simple_agenda`                     | corp   | agenda   | `legacy_fallback_only` |
-| `simple_draw_event`                 | runner | event    | `legacy_fallback_only` |
-| `simple_economy_event`              | runner | event    | `legacy_fallback_only` |
-| `simple_priority_agenda`            | corp   | agenda   | `legacy_fallback_only` |
-| `simple_run_event`                  | runner | event    | `legacy_fallback_only` |
-| `simple_setup_hardware`             | runner | hardware | `legacy_fallback_only` |
-| `simple_upgrade`                    | corp   | upgrade  | `legacy_fallback_only` |
-| `v08_burst_credit_event`            | runner | event    | `legacy_fallback_only` |
-| `v08_deep_draw_event`               | runner | event    | `legacy_fallback_only` |
-| `v08_memory_chip`                   | runner | hardware | `legacy_fallback_only` |
-| `v08_overclock_run_event`           | runner | event    | `legacy_fallback_only` |
-| `v08_project_agenda`                | corp   | agenda   | `legacy_fallback_only` |
+| Card                                | Side   | Type     | Reason                           |
+| ----------------------------------- | ------ | -------- | -------------------------------- |
+| `corp_identity_001`                 | corp   | identity | `legacy_fallback_only`           |
+| `onr_proteus_034_riddler`           | corp   | ice      | `legacy_fallback_only`           |
+| `onr_proteus_074_siren`             | corp   | asset    | `no_function_signal`             |
+| `onr_v1_083_desperate-competitor`   | runner | event    | `deferred_requires_human_review` |
+| `onr_v1_090_hot-tip-for-wns`        | runner | event    | `deferred_requires_human_review` |
+| `onr_v1_173_restrictive-net-zoning` | runner | resource | `no_function_signal`             |
+| `runner_identity_001`               | runner | identity | `legacy_fallback_only`           |
+| `simple_agenda`                     | corp   | agenda   | `legacy_fallback_only`           |
+| `simple_draw_event`                 | runner | event    | `legacy_fallback_only`           |
+| `simple_economy_event`              | runner | event    | `legacy_fallback_only`           |
+| `simple_priority_agenda`            | corp   | agenda   | `legacy_fallback_only`           |
+| `simple_run_event`                  | runner | event    | `legacy_fallback_only`           |
+| `simple_setup_hardware`             | runner | hardware | `legacy_fallback_only`           |
+| `simple_upgrade`                    | corp   | upgrade  | `legacy_fallback_only`           |
+| `v08_burst_credit_event`            | runner | event    | `legacy_fallback_only`           |
+| `v08_deep_draw_event`               | runner | event    | `legacy_fallback_only`           |
+| `v08_memory_chip`                   | runner | hardware | `legacy_fallback_only`           |
+| `v08_overclock_run_event`           | runner | event    | `legacy_fallback_only`           |
+| `v08_project_agenda`                | corp   | agenda   | `legacy_fallback_only`           |
 
 ## Deferred Review Scope
 
 | Scope                                       | Cards |
 | ------------------------------------------- | ----: |
-| `inspector_warning_and_active_hint_quality` |    30 |
+| `inspector_warning_and_active_hint_quality` |    29 |
 | `inspector_warning`                         |     2 |
 
 ## Row Contract

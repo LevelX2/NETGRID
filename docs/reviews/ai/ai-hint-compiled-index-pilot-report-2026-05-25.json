@@ -13203,7 +13203,7 @@
           "hq_run",
           "tag_self"
         ],
-        "planRoles": ["contest_remote", "pressure_hq"],
+        "planRoles": ["pressure_hq"],
         "aiSupportStatus": "ai_supported",
         "effects": [
           {
@@ -18552,8 +18552,8 @@
         "cardId": "onr_v1_221_asp",
         "side": "corp",
         "cardType": "ice",
-        "roles": ["ice", "tag", "trace"],
-        "planRoles": ["defend_server", "tag_pressure"],
+        "roles": ["ice", "trace"],
+        "planRoles": ["defend_server"],
         "aiSupportStatus": "ai_supported",
         "effects": [
           {
@@ -20266,8 +20266,8 @@
         "cardId": "onr_v1_241_fang-2-0",
         "side": "corp",
         "cardType": "ice",
-        "roles": ["ice", "tag", "trace"],
-        "planRoles": ["defend_server", "tag_pressure"],
+        "roles": ["ice", "trace"],
+        "planRoles": ["defend_server"],
         "aiSupportStatus": "ai_supported",
         "effects": [
           {
@@ -20643,7 +20643,7 @@
         "cardId": "onr_v1_246_fragmentation-storm",
         "side": "corp",
         "cardType": "ice",
-        "roles": ["ice", "net_damage", "program_trash", "trace"],
+        "roles": ["ice", "program_trash", "trace"],
         "planRoles": ["defend_server", "program_pressure"],
         "aiSupportStatus": "ai_supported",
         "effects": [
@@ -21190,7 +21190,7 @@
         "side": "corp",
         "cardType": "ice",
         "roles": ["core_damage", "end_run", "ice", "trace"],
-        "planRoles": ["defend_server", "tag_pressure"],
+        "planRoles": ["defend_server"],
         "aiSupportStatus": "ai_supported",
         "effects": [
           {
@@ -29223,7 +29223,7 @@
         "cardId": "onr_v1_364_omni-kismet-ph-d",
         "side": "corp",
         "cardType": "upgrade",
-        "roles": ["economy", "tag", "upgrade"],
+        "roles": ["upgrade"],
         "planRoles": ["remote_upgrade_tax"],
         "aiSupportStatus": "ai_supported",
         "effects": [

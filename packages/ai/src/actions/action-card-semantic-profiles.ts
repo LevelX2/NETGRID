@@ -327,7 +327,12 @@ function effectTacticSignals(
     case "advance_burst":
       return [...base, "corp.score_progress", "corp.score_closeout"];
     case "scored_agenda_action":
-      return [...base, "corp.score_progress"];
+      return [
+        ...base,
+        hint.side === "runner"
+          ? "runner.agenda_point_conversion"
+          : "corp.score_progress",
+      ];
     case "remote_protection":
     case "remote_build":
     case "remote_tax":

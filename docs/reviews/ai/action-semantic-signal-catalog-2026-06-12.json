@@ -44,15 +44,16 @@
   },
   "summary": {
     "activeCards": 618,
-    "coveredCards": 601,
-    "deferredCards": 32,
-    "noSignalCards": 17,
-    "targetProfileGapCards": 88,
+    "coveredCards": 599,
+    "deferredCards": 31,
+    "noSignalCards": 19,
+    "targetProfileGapCards": 90,
     "structuralSignalViolationCards": 0,
     "unknownSignalCards": 0,
     "byNoSignalReason": {
-      "none": 601,
+      "none": 599,
       "legacy_fallback_only": 15,
+      "deferred_requires_human_review": 2,
       "no_function_signal": 2
     },
     "bySide": {
@@ -81,6 +82,7 @@
       "onr_proteus_004_fetal-ai",
       "onr_proteus_005_marked-accounts",
       "onr_proteus_009_viral-breeding-ground",
+      "onr_proteus_045_washed-up-solo-construct",
       "onr_proteus_056_department-of-misinformation",
       "onr_proteus_079_big-frackin-gun",
       "onr_proteus_093_redecorator",
@@ -88,6 +90,7 @@
       "onr_proteus_105_demolition-run",
       "onr_proteus_107_drone-for-a-day",
       "onr_proteus_110_hijack",
+      "onr_proteus_113_live-news-feed",
       "onr_proteus_118_prearranged-drop",
       "onr_proteus_119_promises-promises",
       "onr_proteus_120_reconnaissance",
@@ -165,10 +168,10 @@
     "unknownSignalRows": [],
     "baselineDeltas": {
       "baseline": "P2_POST_TARGET_PROFILE_GAP_CLOSURE",
-      "coveredCards": 62,
-      "deferredCards": -13,
-      "noSignalCards": -8,
-      "targetProfileGapCards": 4
+      "coveredCards": 60,
+      "deferredCards": -14,
+      "noSignalCards": -6,
+      "targetProfileGapCards": 6
     }
   },
   "qualityGate": {
@@ -202,6 +205,18 @@
         "reason": "no_function_signal",
         "side": "corp",
         "cardType": "asset"
+      },
+      {
+        "cardId": "onr_v1_083_desperate-competitor",
+        "reason": "deferred_requires_human_review",
+        "side": "runner",
+        "cardType": "event"
+      },
+      {
+        "cardId": "onr_v1_090_hot-tip-for-wns",
+        "reason": "deferred_requires_human_review",
+        "side": "runner",
+        "cardType": "event"
       },
       {
         "cardId": "onr_v1_173_restrictive-net-zoning",
@@ -309,12 +324,6 @@
       },
       {
         "cardId": "onr_proteus_081_boring-bit",
-        "scope": "inspector_warning_and_active_hint_quality",
-        "owner": "ai_semantic_catalog_review",
-        "warnings": ["deferred_requires_human_review"]
-      },
-      {
-        "cardId": "onr_proteus_082_bulldozer",
         "scope": "inspector_warning_and_active_hint_quality",
         "owner": "ai_semantic_catalog_review",
         "warnings": ["deferred_requires_human_review"]
@@ -3119,10 +3128,15 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": false,
-      "signalCount": 2,
+      "target_profile_gap": true,
+      "signalCount": 4,
       "targetProfileCount": 0,
-      "derivedFunctionSignals": ["corp_ice.rez_economy", "economy.generic"],
+      "derivedFunctionSignals": [
+        "corp_ice.program_trash",
+        "corp_ice.rez_economy",
+        "corp_ice.runner_pay_or_program_trash",
+        "economy.generic"
+      ],
       "activeTacticSignals": [
         "corp_ice.program_trash",
         "corp_ice.rez_economy",
@@ -3130,7 +3144,9 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [],
+      "targetProfileExpectedBySignals": [
+        "corp_ice.runner_pay_or_program_trash"
+      ],
       "warningCategories": []
     },
     {
@@ -4109,9 +4125,9 @@
       "cardType": "program",
       "aiSupportStatus": "ai_supported",
       "covered": true,
-      "deferred": true,
-      "deferred_review_scope": "inspector_warning_and_active_hint_quality",
-      "deferred_owner": "ai_semantic_catalog_review",
+      "deferred": false,
+      "deferred_review_scope": "none",
+      "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 2,
@@ -4124,7 +4140,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": ["deferred_requires_human_review"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_proteus_083_corrosion",
@@ -4883,14 +4899,18 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": false,
-      "signalCount": 1,
+      "target_profile_gap": true,
+      "signalCount": 3,
       "targetProfileCount": 0,
-      "derivedFunctionSignals": ["corp.bad_publicity_win_pressure"],
+      "derivedFunctionSignals": [
+        "corp.bad_publicity_win_pressure",
+        "fort.all_rezzed_ice_trash_tag_risk",
+        "risk.self_tag"
+      ],
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [],
+      "targetProfileExpectedBySignals": ["fort.all_rezzed_ice_trash_tag_risk"],
       "warningCategories": []
     },
     {
@@ -5645,10 +5665,9 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": true,
-      "signalCount": 10,
+      "signalCount": 9,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
-        "access.hq_random_discard_retaliation",
         "corp.random_discard_pressure",
         "defense.damage_retaliation",
         "hidden.one_shot_resource",
@@ -5662,10 +5681,7 @@
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "access.hq_random_discard_retaliation",
-        "hidden.reveals_on_trash"
-      ],
+      "targetProfileExpectedBySignals": ["hidden.reveals_on_trash"],
       "warningCategories": ["descriptor_gap"]
     },
     {
@@ -8019,15 +8035,15 @@
       "side": "runner",
       "cardType": "event",
       "aiSupportStatus": "ai_supported",
-      "covered": true,
+      "covered": false,
       "deferred": true,
       "deferred_review_scope": "inspector_warning",
       "deferred_owner": "ai_semantic_catalog_review",
-      "no_signal_reason": "none",
+      "no_signal_reason": "deferred_requires_human_review",
       "target_profile_gap": false,
-      "signalCount": 1,
+      "signalCount": 0,
       "targetProfileCount": 0,
-      "derivedFunctionSignals": ["score.conditional_agenda_point"],
+      "derivedFunctionSignals": [],
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
@@ -8064,7 +8080,7 @@
         "access.hq_replacement_economy",
         "fort.all_rezzed_ice_trash_tag_risk"
       ],
-      "warningCategories": ["function_signal_descriptor_gap"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_v1_085_executive-wiretaps",
@@ -8193,15 +8209,15 @@
       "side": "runner",
       "cardType": "event",
       "aiSupportStatus": "ai_supported",
-      "covered": true,
+      "covered": false,
       "deferred": true,
       "deferred_review_scope": "inspector_warning",
       "deferred_owner": "ai_semantic_catalog_review",
-      "no_signal_reason": "none",
+      "no_signal_reason": "deferred_requires_human_review",
       "target_profile_gap": false,
-      "signalCount": 1,
+      "signalCount": 0,
       "targetProfileCount": 0,
-      "derivedFunctionSignals": ["score.black_ops_agenda_condition"],
+      "derivedFunctionSignals": [],
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
@@ -15411,20 +15427,13 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 3,
+      "signalCount": 2,
       "targetProfileCount": 2,
-      "derivedFunctionSignals": [
-        "ice.corp_hq_runpath_insert",
-        "ice.corp_ice_swap",
-        "tax.remote"
-      ],
+      "derivedFunctionSignals": ["ice.corp_ice_swap", "tax.remote"],
       "activeTacticSignals": ["ice.corp_ice_swap"],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [
-        "ice.corp_hq_runpath_insert",
-        "ice.corp_ice_swap"
-      ],
+      "targetProfileExpectedBySignals": ["ice.corp_ice_swap"],
       "warningCategories": []
     },
     {

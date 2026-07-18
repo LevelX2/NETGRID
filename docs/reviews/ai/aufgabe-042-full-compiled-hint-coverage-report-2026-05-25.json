@@ -157,7 +157,7 @@
   },
   "hardErrorCount": 0,
   "hardErrors": [],
-  "warningCount": 2312,
+  "warningCount": 2311,
   "warnings": [
     {
       "kind": "monolith_mechanical_duplication_candidate",
@@ -1865,19 +1865,14 @@
       "message": "Implementation produced facts, but descriptor/schema comparison still has gaps."
     },
     {
-      "kind": "generated_fact_absent_from_active_monolith",
+      "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_proteus_045_washed-up-solo-construct",
-      "message": "Generated condition:requires_encounter is absent from the active monolith."
+      "message": "Active monolith has effect:program_trash that the current deriver does not reproduce."
     },
     {
-      "kind": "generated_fact_absent_from_active_monolith",
+      "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_proteus_045_washed-up-solo-construct",
-      "message": "Generated condition:requires_unbroken_subroutine is absent from the active monolith."
-    },
-    {
-      "kind": "generated_fact_absent_from_active_monolith",
-      "cardId": "onr_proteus_045_washed-up-solo-construct",
-      "message": "Generated effect:economy is absent from the active monolith."
+      "message": "Active monolith has effect:run_tax that the current deriver does not reproduce."
     },
     {
       "kind": "text_pattern_derivation",
@@ -3292,7 +3287,17 @@
     {
       "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_proteus_113_live-news-feed",
-      "message": "Active monolith has effect:run_tax that the current deriver does not reproduce."
+      "message": "Active monolith has condition:requires_successful_run that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_113_live-news-feed",
+      "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_113_live-news-feed",
+      "message": "Active monolith has effect:tag that the current deriver does not reproduce."
     },
     {
       "kind": "legacy_fallback_only",
@@ -3675,11 +3680,6 @@
       "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
     },
     {
-      "kind": "monolith_mechanical_duplication_candidate",
-      "cardId": "onr_proteus_131_bargain-with-viacox",
-      "message": "Active monolith has effect:search that the current deriver does not reproduce."
-    },
-    {
       "kind": "descriptor_or_schema_gap",
       "cardId": "onr_proteus_132_bolt-hole",
       "message": "Implementation produced facts, but descriptor/schema comparison still has gaps."
@@ -3820,14 +3820,9 @@
       "message": "Generated condition:requires_successful_run is absent from the active monolith."
     },
     {
-      "kind": "generated_fact_absent_from_active_monolith",
-      "cardId": "onr_proteus_136_credit-subversion",
-      "message": "Generated effect:counter_economy is absent from the active monolith."
-    },
-    {
       "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_proteus_136_credit-subversion",
-      "message": "Active monolith has effect:access_replacement that the current deriver does not reproduce."
+      "message": "Active monolith has condition:requires_successful_hq_run that the current deriver does not reproduce."
     },
     {
       "kind": "monolith_mechanical_duplication_candidate",
@@ -3838,11 +3833,6 @@
       "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_proteus_136_credit-subversion",
       "message": "Active monolith has effect:prevention_replacement that the current deriver does not reproduce."
-    },
-    {
-      "kind": "monolith_mechanical_duplication_candidate",
-      "cardId": "onr_proteus_136_credit-subversion",
-      "message": "Active monolith has effect:tag_punish_payoff that the current deriver does not reproduce."
     },
     {
       "kind": "text_pattern_derivation",
@@ -3972,22 +3962,17 @@
     {
       "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_proteus_141_get-ready-to-rumble",
-      "message": "Active monolith has effect:access_replacement that the current deriver does not reproduce."
-    },
-    {
-      "kind": "monolith_mechanical_duplication_candidate",
-      "cardId": "onr_proteus_141_get-ready-to-rumble",
       "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
     },
     {
       "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_proteus_141_get-ready-to-rumble",
-      "message": "Active monolith has effect:prevention_replacement that the current deriver does not reproduce."
+      "message": "Active monolith has effect:persistent_counter_effect that the current deriver does not reproduce."
     },
     {
       "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_proteus_141_get-ready-to-rumble",
-      "message": "Active monolith has effect:tag_punish_payoff that the current deriver does not reproduce."
+      "message": "Active monolith has effect:prevention_replacement that the current deriver does not reproduce."
     },
     {
       "kind": "legacy_fallback_only",
@@ -3997,12 +3982,12 @@
     {
       "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_proteus_142_hq-mole",
-      "message": "Active monolith has effect:access_replacement that the current deriver does not reproduce."
+      "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
     },
     {
       "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_proteus_142_hq-mole",
-      "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
+      "message": "Active monolith has effect:multiaccess that the current deriver does not reproduce."
     },
     {
       "kind": "monolith_mechanical_duplication_candidate",
@@ -4087,12 +4072,12 @@
     {
       "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_proteus_147_r-and-d-mole",
-      "message": "Active monolith has effect:access_replacement that the current deriver does not reproduce."
+      "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
     },
     {
       "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_proteus_147_r-and-d-mole",
-      "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
+      "message": "Active monolith has effect:multiaccess that the current deriver does not reproduce."
     },
     {
       "kind": "monolith_mechanical_duplication_candidate",
@@ -5487,7 +5472,12 @@
     {
       "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_v1_083_desperate-competitor",
-      "message": "Active monolith has condition:requires_scored_agenda that the current deriver does not reproduce."
+      "message": "Active monolith has condition:requires_liberated_agenda_this_turn that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_083_desperate-competitor",
+      "message": "Active monolith has condition:requires_liberated_gray_ops_agenda that the current deriver does not reproduce."
     },
     {
       "kind": "monolith_mechanical_duplication_candidate",
@@ -5592,7 +5582,12 @@
     {
       "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_v1_090_hot-tip-for-wns",
-      "message": "Active monolith has condition:requires_scored_agenda that the current deriver does not reproduce."
+      "message": "Active monolith has condition:requires_liberated_agenda_this_turn that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_090_hot-tip-for-wns",
+      "message": "Active monolith has condition:requires_liberated_black_ops_agenda that the current deriver does not reproduce."
     },
     {
       "kind": "monolith_mechanical_duplication_candidate",
@@ -22200,8 +22195,35 @@
           "protect_hq",
           "protect_rnd"
         ],
-        "effects": [],
-        "conditions": [],
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "on_rez",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 3
+          },
+          {
+            "kind": "program_trash",
+            "timing": "encounter_resolution",
+            "scope": "installed_program"
+          },
+          {
+            "kind": "run_tax",
+            "timing": "encounter_resolution",
+            "scope": "runner",
+            "resource": "credits",
+            "amount": 1
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ],
         "lineSupport": [],
         "quality": {
           "hintReviewed": true,
@@ -22212,39 +22234,37 @@
         }
       },
       "overlap": {
-        "matches": [],
-        "generatedOnly": [
+        "matches": [
           "condition:requires_encounter",
           "condition:requires_unbroken_subroutine",
           "effect:economy"
         ],
-        "manualOnly": []
+        "generatedOnly": [],
+        "manualOnly": [
+          "effect:program_trash",
+          "effect:run_tax"
+        ]
       },
       "missingManualOverlay": [
-        "condition:requires_encounter",
-        "condition:requires_unbroken_subroutine",
-        "effect:economy"
+        "effect:program_trash",
+        "effect:run_tax"
       ],
       "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
+        "Manual ontology contains fields not currently derivable."
       ],
       "confidence": "high",
       "warnings": [
         {
           "kind": "descriptor_or_overlay_gap",
-          "message": "Generated facts contain fields not currently mirrored manually."
+          "message": "Manual ontology contains fields not currently derivable."
         },
         {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated condition:requires_encounter has no manual ontology match."
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:program_trash has no generated basic fact match."
         },
         {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated condition:requires_unbroken_subroutine has no manual ontology match."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:economy has no manual ontology match."
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:run_tax has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -26016,7 +26036,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/runner/programs/bulldozer.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -26053,7 +26073,6 @@
         "cardType": "program",
         "roles": [
           "breaker_fracter",
-          "breaker_killer",
           "icebreaker",
           "program"
         ],
@@ -26065,11 +26084,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -26091,10 +26110,6 @@
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -28228,7 +28243,7 @@
           "run_pressure"
         ],
         "planRoles": [
-          "pressure_rnd"
+          "pressure_hq"
         ],
         "effects": [
           {
@@ -28356,7 +28371,7 @@
           "run_pressure"
         ],
         "planRoles": [
-          "pressure_rnd"
+          "pressure_hq"
         ],
         "effects": [
           {
@@ -29520,16 +29535,27 @@
           "run_pressure"
         ],
         "planRoles": [
-          "pressure_rnd"
+          "run_pressure"
         ],
         "effects": [
           {
-            "kind": "run_tax",
-            "timing": "action",
+            "kind": "global_modifier",
+            "timing": "successful_run",
             "scope": "corp"
+          },
+          {
+            "kind": "tag",
+            "timing": "successful_run",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 2
           }
         ],
-        "conditions": [],
+        "conditions": [
+          {
+            "kind": "requires_successful_run"
+          }
+        ],
         "lineSupport": [],
         "quality": {
           "hintReviewed": true,
@@ -29543,13 +29569,18 @@
         "matches": [],
         "generatedOnly": [],
         "manualOnly": [
-          "effect:run_tax"
+          "condition:requires_successful_run",
+          "effect:global_modifier",
+          "effect:tag"
         ]
       },
       "missingManualOverlay": [
-        "effect:run_tax"
+        "condition:requires_successful_run",
+        "effect:global_modifier",
+        "effect:tag"
       ],
       "descriptorGaps": [
+        "Intentionally manual strategic overlay is not derived: condition:requires_successful_run.",
         "Manual ontology contains fields not currently derivable."
       ],
       "confidence": "high",
@@ -29560,11 +29591,23 @@
         },
         {
           "kind": "descriptor_or_overlay_gap",
+          "message": "Intentionally manual strategic overlay is not derived: condition:requires_successful_run."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
           "message": "Manual ontology contains fields not currently derivable."
         },
         {
           "kind": "manual_ontology_without_generated_match",
-          "message": "Manual effect:run_tax has no generated basic fact match."
+          "message": "Manual condition:requires_successful_run has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:global_modifier has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:tag has no generated basic fact match."
         }
       ],
       "fullCoverageScope": true,
@@ -31485,11 +31528,6 @@
             "kind": "global_modifier",
             "timing": "persistent",
             "scope": "runner"
-          },
-          {
-            "kind": "search",
-            "timing": "persistent",
-            "scope": "runner"
           }
         ],
         "conditions": [],
@@ -31510,8 +31548,7 @@
           "effect:economy",
           "effect:extra_action",
           "effect:future_run_effect",
-          "effect:global_modifier",
-          "effect:search"
+          "effect:global_modifier"
         ]
       },
       "missingManualOverlay": [
@@ -31519,8 +31556,7 @@
         "effect:economy",
         "effect:extra_action",
         "effect:future_run_effect",
-        "effect:global_modifier",
-        "effect:search"
+        "effect:global_modifier"
       ],
       "descriptorGaps": [
         "Manual ontology contains fields not currently derivable."
@@ -31554,10 +31590,6 @@
         {
           "kind": "manual_ontology_without_generated_match",
           "message": "Manual effect:global_modifier has no generated basic fact match."
-        },
-        {
-          "kind": "manual_ontology_without_generated_match",
-          "message": "Manual effect:search has no generated basic fact match."
         }
       ],
       "fullCoverageScope": true,
@@ -32278,9 +32310,11 @@
         ],
         "effects": [
           {
-            "kind": "access_replacement",
-            "timing": "persistent",
-            "scope": "runner"
+            "kind": "counter_economy",
+            "timing": "after_successful_run",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 3
           },
           {
             "kind": "global_modifier",
@@ -32314,16 +32348,15 @@
           },
           {
             "kind": "prevention_replacement",
-            "timing": "persistent",
-            "scope": "runner"
-          },
-          {
-            "kind": "tag_punish_payoff",
             "timing": "persistent",
             "scope": "runner"
           }
         ],
-        "conditions": [],
+        "conditions": [
+          {
+            "kind": "requires_successful_hq_run"
+          }
+        ],
         "lineSupport": [
           "runner.hq_pressure"
         ],
@@ -32336,25 +32369,23 @@
         }
       },
       "overlap": {
-        "matches": [],
-        "generatedOnly": [
-          "condition:requires_successful_run",
+        "matches": [
           "effect:counter_economy"
         ],
+        "generatedOnly": [
+          "condition:requires_successful_run"
+        ],
         "manualOnly": [
-          "effect:access_replacement",
+          "condition:requires_successful_hq_run",
           "effect:global_modifier",
-          "effect:prevention_replacement",
-          "effect:tag_punish_payoff"
+          "effect:prevention_replacement"
         ]
       },
       "missingManualOverlay": [
+        "condition:requires_successful_hq_run",
         "condition:requires_successful_run",
-        "effect:access_replacement",
-        "effect:counter_economy",
         "effect:global_modifier",
-        "effect:prevention_replacement",
-        "effect:tag_punish_payoff"
+        "effect:prevention_replacement"
       ],
       "descriptorGaps": [
         "Generated facts contain fields not currently mirrored manually.",
@@ -32379,12 +32410,8 @@
           "message": "Generated condition:requires_successful_run has no manual ontology match."
         },
         {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:counter_economy has no manual ontology match."
-        },
-        {
           "kind": "manual_ontology_without_generated_match",
-          "message": "Manual effect:access_replacement has no generated basic fact match."
+          "message": "Manual condition:requires_successful_hq_run has no generated basic fact match."
         },
         {
           "kind": "manual_ontology_without_generated_match",
@@ -32393,10 +32420,6 @@
         {
           "kind": "manual_ontology_without_generated_match",
           "message": "Manual effect:prevention_replacement has no generated basic fact match."
-        },
-        {
-          "kind": "manual_ontology_without_generated_match",
-          "message": "Manual effect:tag_punish_payoff has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -33074,11 +33097,6 @@
         ],
         "effects": [
           {
-            "kind": "access_replacement",
-            "timing": "persistent",
-            "scope": "runner"
-          },
-          {
             "kind": "global_modifier",
             "timing": "persistent",
             "scope": "runner"
@@ -33094,9 +33112,11 @@
             "scope": "runner"
           },
           {
-            "kind": "prevention_replacement",
+            "kind": "persistent_counter_effect",
             "timing": "persistent",
-            "scope": "runner"
+            "scope": "hq",
+            "resource": "cards",
+            "amount": 2
           },
           {
             "kind": "prevention_replacement",
@@ -33119,7 +33139,7 @@
             "scope": "runner"
           },
           {
-            "kind": "tag_punish_payoff",
+            "kind": "prevention_replacement",
             "timing": "persistent",
             "scope": "runner"
           }
@@ -33138,17 +33158,15 @@
         "matches": [],
         "generatedOnly": [],
         "manualOnly": [
-          "effect:access_replacement",
           "effect:global_modifier",
-          "effect:prevention_replacement",
-          "effect:tag_punish_payoff"
+          "effect:persistent_counter_effect",
+          "effect:prevention_replacement"
         ]
       },
       "missingManualOverlay": [
-        "effect:access_replacement",
         "effect:global_modifier",
-        "effect:prevention_replacement",
-        "effect:tag_punish_payoff"
+        "effect:persistent_counter_effect",
+        "effect:prevention_replacement"
       ],
       "descriptorGaps": [
         "Manual ontology contains fields not currently derivable."
@@ -33165,19 +33183,15 @@
         },
         {
           "kind": "manual_ontology_without_generated_match",
-          "message": "Manual effect:access_replacement has no generated basic fact match."
-        },
-        {
-          "kind": "manual_ontology_without_generated_match",
           "message": "Manual effect:global_modifier has no generated basic fact match."
         },
         {
           "kind": "manual_ontology_without_generated_match",
-          "message": "Manual effect:prevention_replacement has no generated basic fact match."
+          "message": "Manual effect:persistent_counter_effect has no generated basic fact match."
         },
         {
           "kind": "manual_ontology_without_generated_match",
-          "message": "Manual effect:tag_punish_payoff has no generated basic fact match."
+          "message": "Manual effect:prevention_replacement has no generated basic fact match."
         }
       ],
       "fullCoverageScope": true,
@@ -33213,16 +33227,6 @@
         ],
         "effects": [
           {
-            "kind": "access_replacement",
-            "timing": "persistent",
-            "scope": "runner"
-          },
-          {
-            "kind": "access_replacement",
-            "timing": "persistent",
-            "scope": "runner"
-          },
-          {
             "kind": "global_modifier",
             "timing": "persistent",
             "scope": "runner"
@@ -33231,6 +33235,13 @@
             "kind": "global_modifier",
             "timing": "persistent",
             "scope": "runner"
+          },
+          {
+            "kind": "multiaccess",
+            "timing": "persistent",
+            "scope": "hq",
+            "resource": "cards",
+            "amount": 2
           },
           {
             "kind": "prevention_replacement",
@@ -33270,14 +33281,14 @@
         "matches": [],
         "generatedOnly": [],
         "manualOnly": [
-          "effect:access_replacement",
           "effect:global_modifier",
+          "effect:multiaccess",
           "effect:prevention_replacement"
         ]
       },
       "missingManualOverlay": [
-        "effect:access_replacement",
         "effect:global_modifier",
+        "effect:multiaccess",
         "effect:prevention_replacement"
       ],
       "descriptorGaps": [
@@ -33295,11 +33306,11 @@
         },
         {
           "kind": "manual_ontology_without_generated_match",
-          "message": "Manual effect:access_replacement has no generated basic fact match."
+          "message": "Manual effect:global_modifier has no generated basic fact match."
         },
         {
           "kind": "manual_ontology_without_generated_match",
-          "message": "Manual effect:global_modifier has no generated basic fact match."
+          "message": "Manual effect:multiaccess has no generated basic fact match."
         },
         {
           "kind": "manual_ontology_without_generated_match",
@@ -33787,16 +33798,6 @@
         ],
         "effects": [
           {
-            "kind": "access_replacement",
-            "timing": "persistent",
-            "scope": "runner"
-          },
-          {
-            "kind": "access_replacement",
-            "timing": "persistent",
-            "scope": "runner"
-          },
-          {
             "kind": "global_modifier",
             "timing": "persistent",
             "scope": "runner"
@@ -33805,6 +33806,13 @@
             "kind": "global_modifier",
             "timing": "persistent",
             "scope": "runner"
+          },
+          {
+            "kind": "multiaccess",
+            "timing": "persistent",
+            "scope": "rnd",
+            "resource": "cards",
+            "amount": 2
           },
           {
             "kind": "prevention_replacement",
@@ -33844,14 +33852,14 @@
         "matches": [],
         "generatedOnly": [],
         "manualOnly": [
-          "effect:access_replacement",
           "effect:global_modifier",
+          "effect:multiaccess",
           "effect:prevention_replacement"
         ]
       },
       "missingManualOverlay": [
-        "effect:access_replacement",
         "effect:global_modifier",
+        "effect:multiaccess",
         "effect:prevention_replacement"
       ],
       "descriptorGaps": [
@@ -33869,11 +33877,11 @@
         },
         {
           "kind": "manual_ontology_without_generated_match",
-          "message": "Manual effect:access_replacement has no generated basic fact match."
+          "message": "Manual effect:global_modifier has no generated basic fact match."
         },
         {
           "kind": "manual_ontology_without_generated_match",
-          "message": "Manual effect:global_modifier has no generated basic fact match."
+          "message": "Manual effect:multiaccess has no generated basic fact match."
         },
         {
           "kind": "manual_ontology_without_generated_match",
@@ -43989,7 +43997,10 @@
         ],
         "conditions": [
           {
-            "kind": "requires_scored_agenda"
+            "kind": "requires_liberated_agenda_this_turn"
+          },
+          {
+            "kind": "requires_liberated_gray_ops_agenda"
           }
         ],
         "lineSupport": [],
@@ -44005,12 +44016,14 @@
         "matches": [],
         "generatedOnly": [],
         "manualOnly": [
-          "condition:requires_scored_agenda",
+          "condition:requires_liberated_agenda_this_turn",
+          "condition:requires_liberated_gray_ops_agenda",
           "effect:scored_agenda_action"
         ]
       },
       "missingManualOverlay": [
-        "condition:requires_scored_agenda",
+        "condition:requires_liberated_agenda_this_turn",
+        "condition:requires_liberated_gray_ops_agenda",
         "effect:scored_agenda_action"
       ],
       "descriptorGaps": [
@@ -44028,7 +44041,11 @@
         },
         {
           "kind": "manual_ontology_without_generated_match",
-          "message": "Manual condition:requires_scored_agenda has no generated basic fact match."
+          "message": "Manual condition:requires_liberated_agenda_this_turn has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_liberated_gray_ops_agenda has no generated basic fact match."
         },
         {
           "kind": "manual_ontology_without_generated_match",
@@ -44102,7 +44119,6 @@
           "tag_self"
         ],
         "planRoles": [
-          "contest_remote",
           "pressure_hq"
         ],
         "effects": [
@@ -44768,7 +44784,10 @@
         ],
         "conditions": [
           {
-            "kind": "requires_scored_agenda"
+            "kind": "requires_liberated_agenda_this_turn"
+          },
+          {
+            "kind": "requires_liberated_black_ops_agenda"
           }
         ],
         "lineSupport": [],
@@ -44784,12 +44803,14 @@
         "matches": [],
         "generatedOnly": [],
         "manualOnly": [
-          "condition:requires_scored_agenda",
+          "condition:requires_liberated_agenda_this_turn",
+          "condition:requires_liberated_black_ops_agenda",
           "effect:scored_agenda_action"
         ]
       },
       "missingManualOverlay": [
-        "condition:requires_scored_agenda",
+        "condition:requires_liberated_agenda_this_turn",
+        "condition:requires_liberated_black_ops_agenda",
         "effect:scored_agenda_action"
       ],
       "descriptorGaps": [
@@ -44807,7 +44828,11 @@
         },
         {
           "kind": "manual_ontology_without_generated_match",
-          "message": "Manual condition:requires_scored_agenda has no generated basic fact match."
+          "message": "Manual condition:requires_liberated_agenda_this_turn has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_liberated_black_ops_agenda has no generated basic fact match."
         },
         {
           "kind": "manual_ontology_without_generated_match",
@@ -60569,12 +60594,10 @@
         "cardType": "ice",
         "roles": [
           "ice",
-          "tag",
           "trace"
         ],
         "planRoles": [
-          "defend_server",
-          "tag_pressure"
+          "defend_server"
         ],
         "effects": [],
         "conditions": [],
@@ -63444,12 +63467,10 @@
         "cardType": "ice",
         "roles": [
           "ice",
-          "tag",
           "trace"
         ],
         "planRoles": [
-          "defend_server",
-          "tag_pressure"
+          "defend_server"
         ],
         "effects": [],
         "conditions": [],
@@ -64122,7 +64143,6 @@
         "cardType": "ice",
         "roles": [
           "ice",
-          "net_damage",
           "program_trash",
           "trace"
         ],
@@ -65436,8 +65456,7 @@
           "trace"
         ],
         "planRoles": [
-          "defend_server",
-          "tag_pressure"
+          "defend_server"
         ],
         "effects": [],
         "conditions": [],
@@ -78754,8 +78773,6 @@
         "side": "corp",
         "cardType": "upgrade",
         "roles": [
-          "economy",
-          "tag",
           "upgrade"
         ],
         "planRoles": [
