@@ -64,7 +64,14 @@ function semanticRuntimeStrategicActionFit(
   if (state.blockers.some((blocker) => blocker.severity === "hard")) {
     return undefined;
   }
-  if (!strategicIntentPhaseAllowsAction(input, state, action, actionSemanticCandidate)) {
+  if (
+    !strategicIntentPhaseAllowsAction(
+      input,
+      state,
+      action,
+      actionSemanticCandidate,
+    )
+  ) {
     return undefined;
   }
   const baseValue =
@@ -169,6 +176,35 @@ function corpStrategicActionFitValue(
         corpActionLooksLikeScoreLine(input, action)
         ? 130
         : 0;
+    case "corp_action_tempo":
+      if (action.type === "score_agenda") return 190;
+      return candidateSupportsStrategy(
+        actionSemanticCandidate,
+        "corp.action_tempo",
+        ["action.corp_", "tempo.corp_"],
+      )
+        ? 170
+        : 0;
+    case "corp_overadvance":
+      if (action.type === "advance_card") return 210;
+      return action.type === "score_agenda" ? 190 : 0;
+    case "corp_draw_engine":
+      if (action.type === "draw_card") return 185;
+      return candidateSupportsStrategy(
+        actionSemanticCandidate,
+        "corp.draw_engine",
+        ["draw.corp_"],
+      )
+        ? 155
+        : 0;
+    case "corp_recycle_engine":
+      return candidateSupportsStrategy(
+        actionSemanticCandidate,
+        "corp.deck_recycle_engine",
+        ["archives.corp_recycle_", "rnd.corp_shuffle_", "hq.corp_hand_"],
+      )
+        ? 185
+        : 0;
     case "corp_ice_tax":
     case "corp_central_defense":
       if (action.type === "rez_ice") return 160;
@@ -192,7 +228,12 @@ function corpStrategicActionFitValue(
         action,
         actionSemanticCandidate,
       ) !== "none" ||
-        corpStrategicPunishAction(input, action, scopeId, actionSemanticCandidate)
+        corpStrategicPunishAction(
+          input,
+          action,
+          scopeId,
+          actionSemanticCandidate,
+        )
         ? 180
         : 0;
     default:
@@ -273,6 +314,21 @@ function semanticSignals(
   ]);
 }
 
+function candidateSupportsStrategy(
+  candidate: ActionSemanticCandidate | undefined,
+  strategyId: string,
+  signalPrefixes: readonly string[],
+): boolean {
+  const signals = semanticSignals(candidate);
+  return (
+    signals.has(`line_support:${strategyId}`) ||
+    signals.has(`strategy_support:${strategyId}`) ||
+    [...signals].some((signal) =>
+      signalPrefixes.some((prefix) => signal.startsWith(prefix)),
+    )
+  );
+}
+
 function strategicIntentPhaseActionBonus(
   phase: NonNullable<
     AiDecisionInputWithDeckCapabilities["ownStrategicIntentState"]
@@ -303,7 +359,12 @@ function strategicIntentPhaseAllowsAction(
   if (
     state.targetVector.kind === "tag" &&
     input.playerView.opponent.tags > 0 &&
-    corpStrategicPunishAction(input, action, "corp_tag_punish", actionSemanticCandidate)
+    corpStrategicPunishAction(
+      input,
+      action,
+      "corp_tag_punish",
+      actionSemanticCandidate,
+    )
   ) {
     return true;
   }
@@ -393,11 +454,7 @@ function visibleCardHasAnyToken(
   terms: readonly string[],
 ): boolean {
   const termSet = new Set(terms);
-  return [
-    card.title,
-    card.definitionId,
-    card.rulesText,
-  ]
+  return [card.title, card.definitionId, card.rulesText]
     .flatMap((entry) => visibleCardTokens(entry))
     .some((token) => termSet.has(token));
 }

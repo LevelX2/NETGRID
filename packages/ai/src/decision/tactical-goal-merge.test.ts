@@ -75,11 +75,57 @@ describe("tactical goal merge", () => {
         "corp.intent.scoreline",
       ]),
     );
-    expect(goals.find((goal) => goal.goalId === "corp.intent.scoreline"))
-      .toMatchObject({
-        family: "corp_scoreline",
-        source: "strategic_intent",
-      });
+    expect(
+      goals.find((goal) => goal.goalId === "corp.intent.scoreline"),
+    ).toMatchObject({
+      family: "corp_scoreline",
+      source: "strategic_intent",
+    });
+  });
+
+  it("turns a Corp draw engine into strategic and Corp-intent engine goals", () => {
+    const input = inputFor("corp", [
+      legalAction("draw-1", "draw_card", "corp"),
+    ]);
+    const baseState = strategicState("corp");
+    const strategicIntentState: StrategicIntentState = {
+      ...baseState,
+      primaryStrategy: {
+        ...baseState.primaryStrategy,
+        strategyId: "corp.draw_engine",
+        family: "corp_draw_engine",
+      },
+      targetVector: {
+        kind: "none",
+        evidence: ["target_from_strategy:corp.draw_engine"],
+      },
+    };
+    const frame = buildSemanticDecisionFrame({
+      input,
+      actionCandidates: candidatesFor(input),
+      strategicIntentState,
+      corpStrategicIntent: {
+        ...corpIntent(),
+        scorePlan: [],
+        defensePlan: [],
+        enginePlan: ["corp.draw_engine"],
+      },
+    });
+
+    const goals = buildMergedTacticalGoals({ frame });
+
+    expect(goals).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          goalId: "corp.strategic.engine",
+          family: "corp_engine",
+        }),
+        expect.objectContaining({
+          goalId: "corp.intent.engine",
+          family: "corp_engine",
+        }),
+      ]),
+    );
   });
 
   it("deduplicates goals by id and target while preserving source evidence", () => {
@@ -210,6 +256,7 @@ function corpIntent(): CorpStrategicIntentProfile {
     scorePlan: ["corp.remote_scoreline"],
     defensePlan: ["corp.remote_protect"],
     economyPlan: [],
+    enginePlan: [],
     punishPlan: [],
     riskProfile: [],
     rejectedIntents: [],

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import standardDeckCatalog from "../../../../data/decks/standard-deck-catalog-1.0.0.json";
 import type {
   LegalAction,
   PlayerView,
@@ -10,11 +11,15 @@ import type {
   CoverageState,
   DeckCapabilityProfile,
 } from "../deck-capabilities";
+import { buildDeckCapabilityProfile } from "../deck-capabilities";
 import type {
   AiDeckStrategyProfile,
   DeckStrategyRuntimeStatus,
   DeckStrategyScore,
 } from "../deck-doctrine-strategy";
+import { buildDeckStrategyProfile } from "../deck-doctrine-strategy";
+import type { AiDeckStrategyDeckSnapshot } from "../deck-strategy-snapshot";
+import { buildStrategicIntentState } from "../strategic-intent-state";
 import {
   buildStrategicRuntimeContext,
   targetOpportunityBonus,
@@ -69,6 +74,64 @@ describe("strategic runtime context", () => {
     );
   });
 
+  it("marks King of the Road's missing wall breaker as conditional instead of present", () => {
+    const snapshot = standardDeckSnapshot("King of the Road");
+    const strategyProfile = buildDeckStrategyProfile(snapshot);
+    const deckCapabilities = buildDeckCapabilityProfile({
+      side: "runner",
+      deckSnapshot: snapshot,
+      legalActions: [],
+    });
+    const context = buildStrategicRuntimeContext({
+      side: "runner",
+      playerView: playerView("runner", { credits: 8 }),
+      legalActions: [],
+      strategyProfile,
+      deckCapabilities,
+      deckSnapshot: snapshot,
+    });
+
+    expect(context.roleStatuses).toContainEqual(
+      expect.objectContaining({
+        roleId: "runner.breaker.wall",
+        status: "conditional",
+        evidence: expect.arrayContaining(["conditional_access:true"]),
+      }),
+    );
+    expect(context.roleStatuses).toContainEqual(
+      expect.objectContaining({
+        roleId: "runner.breaker.code_gate",
+        status: "in_deck_unseen",
+      }),
+    );
+    expect(context.roleStatuses).toContainEqual(
+      expect.objectContaining({
+        roleId: "runner.breaker.sentry",
+        status: "in_deck_unseen",
+      }),
+    );
+    const state = buildStrategicIntentState({
+      side: "runner",
+      stateVersion: 6,
+      strategyProfile,
+      deckCapabilities,
+      availableCredits: 8,
+      ...(context.strategyPortfolio.activeStrategyId
+        ? {
+            preferredStrategyId: context.strategyPortfolio.activeStrategyId,
+          }
+        : {}),
+      strategyPortfolio: context.strategyPortfolio,
+      roleStatuses: context.roleStatuses,
+      targetVector: context.targetVector,
+      reserveRequirement: context.reserveRequirement,
+    });
+    expect(
+      state.blockers.filter((blocker) => blocker.severity === "hard"),
+    ).toEqual([]);
+    expect(state.phase).not.toBe("recover");
+  });
+
   it("derives Corp score window, scoreline target and reserve from runtime facts", () => {
     const context = buildStrategicRuntimeContext({
       side: "corp",
@@ -118,6 +181,67 @@ describe("strategic runtime context", () => {
       ]),
     );
   });
+
+  it.each([
+    [
+      "corp.action_tempo",
+      "corp_action_tempo",
+      "corp.score_window",
+      "scoreline",
+    ],
+    [
+      "corp.overadvance_value",
+      "corp_overadvance",
+      "corp.score_window",
+      "scoreline",
+    ],
+    ["corp.draw_engine", "corp_draw_engine", "corp.draw_engine", "none"],
+    [
+      "corp.deck_recycle_engine",
+      "corp_recycle_engine",
+      "corp.recycle_engine",
+      "none",
+    ],
+  ] as const)(
+    "builds a classified runtime context for %s",
+    (strategyId, family, roleId, targetKind) => {
+      const context = buildStrategicRuntimeContext({
+        side: "corp",
+        playerView: playerView("corp", { credits: 8 }),
+        legalActions: [
+          action("draw", "corp", "draw_card", 0),
+          action("trigger", "corp", "trigger_ability", 0, {
+            sourceDefinitionId:
+              strategyId === "corp.deck_recycle_engine"
+                ? "onr_v1_188_ai-chief-financial-officer"
+                : strategyId === "corp.action_tempo"
+                  ? "onr_proteus_001_ai-board-member"
+                  : "onr_classic_025_strategic-planning-group",
+          }),
+          action("advance", "corp", "advance_card", 1),
+        ],
+        strategyProfile: multiStrategyProfile("corp", {
+          primary: [strategyId],
+          scores: { [strategyId]: score(strategyId) },
+        }),
+      });
+
+      expect(context.strategyPortfolio.productiveCandidates[0]).toMatchObject({
+        strategyId,
+        family,
+      });
+      expect(context.roleStatuses).toContainEqual(
+        expect.objectContaining({ roleId }),
+      );
+      expect(context.targetVector.kind).toBe(targetKind);
+      expect(context.targetVector.evidence).toContain(
+        `target_strategy:${strategyId}`,
+      );
+      expect(context.targetVector.evidence.join("|")).not.toContain(
+        "target_unknown",
+      );
+    },
+  );
 
   it("selects a concrete board opportunity while retaining the strategy portfolio", () => {
     const context = buildStrategicRuntimeContext({
@@ -693,5 +817,20 @@ function visibleCard(
     controller: owner,
     type,
     ...overrides,
+  };
+}
+
+function standardDeckSnapshot(name: string): AiDeckStrategyDeckSnapshot {
+  const deck = standardDeckCatalog.decks.find(
+    (candidate) => candidate.name === name,
+  );
+  if (!deck) throw new Error(`Missing standard deck fixture ${name}`);
+  return {
+    deckSnapshotId: `standard_${deck.standardDeckId}_${deck.version}`,
+    side: deck.side as Side,
+    cards: deck.cards.map((card) => ({
+      cardId: card.cardId,
+      quantity: card.quantity,
+    })),
   };
 }

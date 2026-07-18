@@ -1,6 +1,11 @@
 export type DeckStrategyViewerSide = "runner" | "corp";
 
-export type DeckStrategyProfileTone = "valid" | "warning" | "danger" | "info" | "legacy";
+export type DeckStrategyProfileTone =
+  | "valid"
+  | "warning"
+  | "danger"
+  | "info"
+  | "legacy";
 
 export type DeckStrategyProfileStrategyStatus =
   | "primary"
@@ -106,7 +111,7 @@ export type DeckStrategyProfileViewer = {
     aggregation: "AI006 strategy aggregation";
     profileSchemaVersion: string;
     profileTaskId: string;
-    plannerEffect: "none";
+    plannerEffect: "strategic_intent_input";
     deckHash?: string;
   };
   diagnosticNotice: string;
@@ -152,7 +157,7 @@ export type DeckStrategyProfileJsonExport = {
   taskId: "AI007";
   exportKind: "diagnostic_ai_deck_profile";
   exportedAt: string;
-  plannerEffect: "none";
+  plannerEffect: "strategic_intent_input";
   deck: {
     deckId: string;
     deckName: string;
@@ -199,7 +204,7 @@ export function deckStrategyProfileJsonExport(
     taskId: "AI007",
     exportKind: "diagnostic_ai_deck_profile",
     exportedAt,
-    plannerEffect: "none",
+    plannerEffect: "strategic_intent_input",
     deck: {
       deckId: viewer.deckId,
       deckName: viewer.deckName,
@@ -215,7 +220,9 @@ export function deckStrategyProfileJsonExport(
   };
   const forbiddenFields = forbiddenDeckStrategyFields(payload);
   if (forbiddenFields.length > 0) {
-    throw new Error(`Deck strategy profile export contains forbidden fields: ${forbiddenFields.join(", ")}`);
+    throw new Error(
+      `Deck strategy profile export contains forbidden fields: ${forbiddenFields.join(", ")}`,
+    );
   }
   return payload;
 }
@@ -230,7 +237,9 @@ export function serializeDeckStrategyProfileJsonExport(
 export function deckStrategyProfileJsonExportFileName(
   viewer: Pick<DeckStrategyProfileViewer, "deckName" | "deckId" | "side">,
 ): string {
-  const deckName = safeDeckStrategyProfileFileNamePart(viewer.deckName || viewer.deckId);
+  const deckName = safeDeckStrategyProfileFileNamePart(
+    viewer.deckName || viewer.deckId,
+  );
   return `netgrid-ki-deckprofil-${viewer.side}-${deckName}.json`;
 }
 
@@ -251,7 +260,9 @@ export function deckStrategyEvidenceKey(
   return `${strategyId}-${source}-${index}-${value}`;
 }
 
-export function strategyStatusLabel(status: DeckStrategyProfileStrategyStatus): string {
+export function strategyStatusLabel(
+  status: DeckStrategyProfileStrategyStatus,
+): string {
   switch (status) {
     case "primary":
       return "Primär";
@@ -357,7 +368,10 @@ export function containsForbiddenDeckStrategyField(value: unknown): boolean {
   return forbiddenDeckStrategyFields(value).length > 0;
 }
 
-export function forbiddenDeckStrategyFields(value: unknown, found = new Set<string>()): string[] {
+export function forbiddenDeckStrategyFields(
+  value: unknown,
+  found = new Set<string>(),
+): string[] {
   if (value === null || typeof value !== "object") return [...found].sort();
   if (Array.isArray(value)) {
     for (const item of value) forbiddenDeckStrategyFields(item, found);

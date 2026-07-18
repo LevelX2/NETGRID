@@ -26,8 +26,7 @@ export function discardPlanFitBonus(
     if (plan === "recover_economy" && rolesMatch(roles, ["economy", "tempo"]))
       bonus += 42;
     if (
-      (plan === "pressure_hq" ||
-        plan === "pressure_rnd") &&
+      (plan === "pressure_hq" || plan === "pressure_rnd") &&
       rolesMatch(roles, ["run_pressure", plan, "multiaccess", "breaker_"])
     )
       bonus += 36;
@@ -103,12 +102,22 @@ export function discardStrategicFitBonus(
       bonus += 30;
     if (
       strategySet.has("runner.hq_pressure") &&
-      rolesMatch(roles, ["pressure_hq", "run_pressure", "multiaccess", "breaker_"])
+      rolesMatch(roles, [
+        "pressure_hq",
+        "run_pressure",
+        "multiaccess",
+        "breaker_",
+      ])
     )
       bonus += 26;
     if (
       strategySet.has("runner.rnd_pressure") &&
-      rolesMatch(roles, ["pressure_rnd", "run_pressure", "multiaccess", "breaker_"])
+      rolesMatch(roles, [
+        "pressure_rnd",
+        "run_pressure",
+        "multiaccess",
+        "breaker_",
+      ])
     )
       bonus += 26;
     if (
@@ -120,18 +129,32 @@ export function discardStrategicFitBonus(
     if (
       strategySet.has("corp.ice_tax_glacier") &&
       (type === "ice" ||
-        rolesMatch(roles, ["ice", "etr_ice", "taxing_ice", "remote", "economy"]))
+        rolesMatch(roles, [
+          "ice",
+          "etr_ice",
+          "taxing_ice",
+          "remote",
+          "economy",
+        ]))
     )
       bonus += 30;
     if (
       (strategySet.has("corp.rush_score") ||
         strategySet.has("corp.remote_scoring") ||
-        strategySet.has("corp.fast_advance")) &&
+        strategySet.has("corp.fast_advance") ||
+        strategySet.has("corp.action_tempo") ||
+        strategySet.has("corp.overadvance_value")) &&
       (type === "agenda" ||
         cost <= 3 ||
         rolesMatch(roles, ["score", "ice", "tempo", "advance"]))
     )
       bonus += 24;
+    if (
+      (strategySet.has("corp.draw_engine") ||
+        strategySet.has("corp.deck_recycle_engine")) &&
+      rolesMatch(roles, ["draw", "recycle", "shuffle", "recovery"])
+    )
+      bonus += 26;
     if (
       strategySet.has("corp.asset_economy") &&
       (type === "asset" ||

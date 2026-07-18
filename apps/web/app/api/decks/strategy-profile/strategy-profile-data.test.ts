@@ -9,7 +9,8 @@ import {
 } from "./strategy-profile-data";
 
 const snapshots = snapshotsData08.snapshots as DeckSnapshot[];
-const benchmarkSnapshots = benchmarkSnapshotsData.snapshots as unknown as DeckSnapshot[];
+const benchmarkSnapshots =
+  benchmarkSnapshotsData.snapshots as unknown as DeckSnapshot[];
 
 describe("AI007 DeckDoctrine strategy profile view model", () => {
   it("builds a dynamic Runner viewer with strategy scores and side profiles", () => {
@@ -21,27 +22,43 @@ describe("AI007 DeckDoctrine strategy profile view model", () => {
     expect(viewer.source).toMatchObject({
       label: "Diagnostisches KI-Deckprofil",
       aggregation: "AI006 strategy aggregation",
-      plannerEffect: "none",
+      plannerEffect: "strategic_intent_input",
     });
-    expect(viewer.runnerStrategicIntent?.title).toBe("Abgeleitete KI-Spielabsicht");
+    expect(viewer.runnerStrategicIntent?.title).toBe(
+      "Abgeleitete KI-Spielabsicht",
+    );
     expect(viewer.statusEntries.map((entry) => entry.value)).toContain(
       "AI006 strategy aggregation aus neuer KI-Semantik",
     );
     expect(viewer.statusEntries).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ label: "Analysequelle", value: "Diagnostisches KI-Deckprofil" }),
-        expect.objectContaining({ label: "Plannerwirkung", value: "Noch keine direkte Plannerwirkung" }),
-        expect.objectContaining({ label: "Legacy-Signale", value: "getrennt gezählt" }),
+        expect.objectContaining({
+          label: "Analysequelle",
+          value: "Diagnostisches KI-Deckprofil",
+        }),
+        expect.objectContaining({
+          label: "Plannerwirkung",
+          value: "StrategicIntent-Eingabe aktiv",
+        }),
+        expect.objectContaining({
+          label: "Diagnostische Metadaten",
+          value: "Seitenprofile und Legacy-Signale",
+        }),
       ]),
     );
-    expect(viewer.diagnosticNotice).toContain("Strategieprofile werden aus neuer KI-Semantik berechnet");
-    expect(viewer.diagnosticNotice).toContain("Noch keine direkte Plannerwirkung");
-    expect(viewer.diagnosticNotice).toContain("Legacy-PlanWeights");
+    expect(viewer.diagnosticNotice).toContain("StrategicIntent-Eingabe");
+    expect(viewer.diagnosticNotice).toContain(
+      "diagnostische Erklärdaten ohne eigene Plannerwirkung",
+    );
     expect(viewer.strategies.length).toBeGreaterThan(3);
     expect(viewer.strategies[0]?.finalScore).toBeGreaterThanOrEqual(
       viewer.strategies[1]?.finalScore ?? 0,
     );
-    expect(viewer.strategies.some((strategy) => strategy.strategyId.startsWith("runner."))).toBe(true);
+    expect(
+      viewer.strategies.some((strategy) =>
+        strategy.strategyId.startsWith("runner."),
+      ),
+    ).toBe(true);
     expect(viewer.sideProfileGroups.map((section) => section.title)).toEqual([
       "Coverage",
       "Economy",
@@ -61,7 +78,11 @@ describe("AI007 DeckDoctrine strategy profile view model", () => {
     const viewer = expectAvailable(response);
 
     expect(viewer.runnerStrategicIntent).toBeUndefined();
-    expect(viewer.strategies.some((strategy) => strategy.strategyId.startsWith("corp."))).toBe(true);
+    expect(
+      viewer.strategies.some((strategy) =>
+        strategy.strategyId.startsWith("corp."),
+      ),
+    ).toBe(true);
     expect(viewer.sideProfileGroups.map((section) => section.title)).toEqual([
       "ICE",
       "Score",
@@ -80,7 +101,9 @@ describe("AI007 DeckDoctrine strategy profile view model", () => {
 
   it("adds a redacted Runner strategic intent view for Blink Pressure Rig", () => {
     const response = deckStrategyProfileViewerResponse(
-      editableDeckFromBenchmarkSnapshot("local_realistic_runner_blink_pressure_rig_snapshot_v1"),
+      editableDeckFromBenchmarkSnapshot(
+        "local_realistic_runner_blink_pressure_rig_snapshot_v1",
+      ),
     );
     const viewer = expectAvailable(response);
     const intent = viewer.runnerStrategicIntent;
@@ -125,12 +148,28 @@ describe("AI007 DeckDoctrine strategy profile view model", () => {
     expect(evidenceViewer.evidenceGroups.length).toBeGreaterThan(0);
     expect(evidenceText).toMatch(/anchorEvidence/);
     expect(evidenceText).toMatch(/supportEvidence/);
-    expect(evidenceViewer.evidenceGroups.some((group) => group.anchorEvidence.length > 0)).toBe(true);
-    expect(evidenceViewer.evidenceGroups.some((group) => group.supportEvidence.length > 0)).toBe(true);
-    expect(gapViewer.strategies.some((strategy) => strategy.gapCount > 0)).toBe(true);
-    const legacyGroupTitles = gapViewer.legacySignalGroups.map((group) => group.title);
-    expect(legacyGroupTitles).toEqual(expect.arrayContaining(["Legacy roles", "Legacy planRoles"]));
-    expect(legacyGroupTitles.every((title) => title.startsWith("Legacy"))).toBe(true);
+    expect(
+      evidenceViewer.evidenceGroups.some(
+        (group) => group.anchorEvidence.length > 0,
+      ),
+    ).toBe(true);
+    expect(
+      evidenceViewer.evidenceGroups.some(
+        (group) => group.supportEvidence.length > 0,
+      ),
+    ).toBe(true);
+    expect(gapViewer.strategies.some((strategy) => strategy.gapCount > 0)).toBe(
+      true,
+    );
+    const legacyGroupTitles = gapViewer.legacySignalGroups.map(
+      (group) => group.title,
+    );
+    expect(legacyGroupTitles).toEqual(
+      expect.arrayContaining(["Legacy roles", "Legacy planRoles"]),
+    );
+    expect(legacyGroupTitles.every((title) => title.startsWith("Legacy"))).toBe(
+      true,
+    );
   });
 
   it("does not expose planner, action-score or runtime-only fields", () => {
@@ -155,7 +194,9 @@ describe("AI007 DeckDoctrine strategy profile view model", () => {
       status: "unavailable",
       reason: "Deck enthält keine Karten",
     });
-    expect(deckStrategyProfileViewerResponse({ side: "unknown", cards: [] })).toMatchObject({
+    expect(
+      deckStrategyProfileViewerResponse({ side: "unknown", cards: [] }),
+    ).toMatchObject({
       status: "unavailable",
       reason: "Deckprofil konnte nicht berechnet werden",
     });
@@ -221,19 +262,27 @@ describe("AI007 DeckDoctrine strategy profile view model", () => {
 
     expect(viewer.sideProfileGroups).toEqual([]);
     expect(viewer.evidenceGroups[0]?.supportGaps).toEqual([
-      { gapName: "weak_sentry_coverage", strategyId: "runner.rnd_pressure", tone: "warning" },
+      {
+        gapName: "weak_sentry_coverage",
+        strategyId: "runner.rnd_pressure",
+        tone: "warning",
+      },
     ]);
   });
 });
 
 function editableDeckFromSnapshot(snapshotId: string): EditableDeck {
-  const snapshot = snapshots.find((candidate) => candidate.deckSnapshotId === snapshotId);
+  const snapshot = snapshots.find(
+    (candidate) => candidate.deckSnapshotId === snapshotId,
+  );
   if (!snapshot) throw new Error(`Missing snapshot ${snapshotId}`);
   return editableDeckFromDeckSnapshot(snapshot);
 }
 
 function editableDeckFromBenchmarkSnapshot(snapshotId: string): EditableDeck {
-  const snapshot = benchmarkSnapshots.find((candidate) => candidate.deckSnapshotId === snapshotId);
+  const snapshot = benchmarkSnapshots.find(
+    (candidate) => candidate.deckSnapshotId === snapshotId,
+  );
   if (!snapshot) throw new Error(`Missing benchmark snapshot ${snapshotId}`);
   return editableDeckFromDeckSnapshot(snapshot);
 }
@@ -246,9 +295,13 @@ function editableDeckFromDeckSnapshot(snapshot: DeckSnapshot): EditableDeck {
     side: snapshot.side,
     identityCardId: snapshot.identityCardId,
     cardPoolSnapshotId: snapshot.cardPoolSnapshotId,
-    ...(snapshot.cardPoolVersion ? { cardPoolVersion: snapshot.cardPoolVersion } : {}),
+    ...(snapshot.cardPoolVersion
+      ? { cardPoolVersion: snapshot.cardPoolVersion }
+      : {}),
     formatProfileId: snapshot.formatProfileId,
-    ...(snapshot.formatProfileVersion ? { formatProfileVersion: snapshot.formatProfileVersion } : {}),
+    ...(snapshot.formatProfileVersion
+      ? { formatProfileVersion: snapshot.formatProfileVersion }
+      : {}),
     cards: snapshot.cards.map((card) => ({
       cardId: card.cardId,
       quantity: card.quantity,
@@ -266,9 +319,16 @@ function expectAvailable(
   return response.viewer;
 }
 
-function flattenEntries(value: Array<{ entries: Array<{ label: string; value: string }> }> | Array<{ label: string; value: string }>): string {
-  const entries = "entries" in (value[0] ?? {})
-    ? (value as Array<{ entries: Array<{ label: string; value: string }> }>).flatMap((section) => section.entries)
-    : (value as Array<{ label: string; value: string }>);
+function flattenEntries(
+  value:
+    | Array<{ entries: Array<{ label: string; value: string }> }>
+    | Array<{ label: string; value: string }>,
+): string {
+  const entries =
+    "entries" in (value[0] ?? {})
+      ? (
+          value as Array<{ entries: Array<{ label: string; value: string }> }>
+        ).flatMap((section) => section.entries)
+      : (value as Array<{ label: string; value: string }>);
   return entries.map((entry) => `${entry.label} ${entry.value}`).join("\n");
 }

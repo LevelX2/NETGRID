@@ -32,6 +32,12 @@ export type CorpEconomyPlan =
   | "corp.rez_reserve"
   | "corp.economy_before_pressure";
 
+export type CorpEnginePlan =
+  | "corp.action_tempo_engine"
+  | "corp.overadvance_engine"
+  | "corp.draw_engine"
+  | "corp.deck_recycle_engine";
+
 export type CorpPunishPlan =
   | "corp.tag_trace_punish"
   | "corp.damage_kill"
@@ -68,6 +74,7 @@ export type CorpStrategicIntentProfile = {
   scorePlan: CorpScorePlan[];
   defensePlan: CorpDefensePlan[];
   economyPlan: CorpEconomyPlan[];
+  enginePlan: CorpEnginePlan[];
   punishPlan: CorpPunishPlan[];
   riskProfile: CorpStrategicIntentRisk[];
   rejectedIntents: CorpRejectedIntent[];
@@ -90,7 +97,9 @@ export function buildCorpStrategicIntentProfile(
   const deckCapabilities = params.deckCapabilities;
   const strategicIntentState = params.strategicIntentState;
   const side =
-    strategicIntentState?.side ?? strategyProfile?.side ?? deckCapabilities?.side;
+    strategicIntentState?.side ??
+    strategyProfile?.side ??
+    deckCapabilities?.side;
   if (side !== "corp") {
     return {
       schemaVersion: CORP_STRATEGIC_INTENT_SCHEMA_VERSION,
@@ -100,6 +109,7 @@ export function buildCorpStrategicIntentProfile(
       scorePlan: [],
       defensePlan: [],
       economyPlan: [],
+      enginePlan: [],
       punishPlan: [],
       riskProfile: [
         "corp.low_confidence_strategy_projection",
@@ -136,6 +146,7 @@ export function buildCorpStrategicIntentProfile(
       scorePlan: [],
       defensePlan: [],
       economyPlan: [],
+      enginePlan: [],
       punishPlan: [],
       riskProfile,
       rejectedIntents,
@@ -149,6 +160,7 @@ export function buildCorpStrategicIntentProfile(
           scorePlan: [],
           defensePlan: [],
           economyPlan: [],
+          enginePlan: [],
           punishPlan: [],
           riskProfile,
           rejectedIntents,
@@ -196,6 +208,20 @@ export function buildCorpStrategicIntentProfile(
       ? ["corp.economy_before_pressure" as const]
       : []),
   ]);
+  const enginePlan = sortedIntentValues<CorpEnginePlan>([
+    ...(productiveOrAnchored(strategyProfile, "corp.action_tempo")
+      ? ["corp.action_tempo_engine" as const]
+      : []),
+    ...(productiveOrAnchored(strategyProfile, "corp.overadvance_value")
+      ? ["corp.overadvance_engine" as const]
+      : []),
+    ...(productiveOrAnchored(strategyProfile, "corp.draw_engine")
+      ? ["corp.draw_engine" as const]
+      : []),
+    ...(productiveOrAnchored(strategyProfile, "corp.deck_recycle_engine")
+      ? ["corp.deck_recycle_engine" as const]
+      : []),
+  ]);
   const punishPlan = sortedIntentValues<CorpPunishPlan>([
     ...(productiveOrAnchored(strategyProfile, "corp.tag_trace_punish") &&
     hasTagPayoffPair(strategyProfile)
@@ -218,7 +244,8 @@ export function buildCorpStrategicIntentProfile(
       : []),
     ...(scorePlan.length === 0 &&
     defensePlan.length === 0 &&
-    punishPlan.length === 0
+    punishPlan.length === 0 &&
+    enginePlan.length === 0
       ? ["corp.no_productive_anchor" as const]
       : []),
     ...(strategicIntentState?.reserve.satisfied === false
@@ -235,10 +262,12 @@ export function buildCorpStrategicIntentProfile(
       scorePlan,
       defensePlan,
       punishPlan,
+      enginePlan,
     }),
     scorePlan,
     defensePlan,
     economyPlan,
+    enginePlan,
     punishPlan,
     riskProfile,
     rejectedIntents,
@@ -249,6 +278,7 @@ export function buildCorpStrategicIntentProfile(
       scorePlan,
       defensePlan,
       punishPlan,
+      enginePlan,
       riskProfile,
     }),
     evidence: strategicIntentEvidence({
@@ -258,6 +288,7 @@ export function buildCorpStrategicIntentProfile(
       scorePlan,
       defensePlan,
       economyPlan,
+      enginePlan,
       punishPlan,
       riskProfile,
       rejectedIntents,
@@ -265,7 +296,9 @@ export function buildCorpStrategicIntentProfile(
   };
 }
 
-function sourceFor(params: BuildCorpStrategicIntentProfileParams): CorpStrategicIntentProfile["source"] {
+function sourceFor(
+  params: BuildCorpStrategicIntentProfileParams,
+): CorpStrategicIntentProfile["source"] {
   return {
     deckStrategyProfile: params.strategyProfile
       ? "ai_internal_strategy_profile"
@@ -283,10 +316,16 @@ function primaryWinIntentFor(params: {
   scorePlan: readonly CorpScorePlan[];
   defensePlan: readonly CorpDefensePlan[];
   punishPlan: readonly CorpPunishPlan[];
+  enginePlan: readonly CorpEnginePlan[];
 }): CorpPrimaryWinIntent {
   switch (params.strategicIntentState?.primaryStrategy.strategyId) {
     case "corp.fast_advance":
       return "corp.score_fast_advance";
+    case "corp.action_tempo":
+    case "corp.overadvance_value":
+    case "corp.draw_engine":
+    case "corp.deck_recycle_engine":
+      return "corp.score_agendas";
     case "corp.ice_tax_glacier":
       return "corp.tax_and_score";
     case "corp.tag_trace_punish":
@@ -319,8 +358,8 @@ function productiveOrAnchored(
   const score = strategyScore(strategyProfile, strategyId);
   return Boolean(
     score &&
-      (score.runtimeStatus === "productive" ||
-        (score.anchorScore > 0 && score.finalScore >= SCORE_THRESHOLD)),
+    (score.runtimeStatus === "productive" ||
+      (score.anchorScore > 0 && score.finalScore >= SCORE_THRESHOLD)),
   );
 }
 
@@ -351,8 +390,10 @@ function hasRemoteScoreSupport(
   deckCapabilities: DeckCapabilityProfile | undefined,
 ): boolean {
   return (
-    (deckCapabilities?.corp?.scorePlanProfile.scoreSupportToolsKnown ?? 0) > 0 ||
-    (deckCapabilities?.corp?.remotePlanProfile.remoteProtectionToolsKnown ?? 0) > 0
+    (deckCapabilities?.corp?.scorePlanProfile.scoreSupportToolsKnown ?? 0) >
+      0 ||
+    (deckCapabilities?.corp?.remotePlanProfile.remoteProtectionToolsKnown ??
+      0) > 0
   );
 }
 
@@ -371,10 +412,10 @@ function hasIceTaxSupport(
   const iceTax = deckCapabilities?.corp?.iceTaxProfile;
   return Boolean(
     iceTax &&
-      (iceTax.barrierIceKnown > 0 ||
-        iceTax.codeGateIceKnown > 0 ||
-        iceTax.sentryIceKnown > 0 ||
-        iceTax.taxingIceKnown > 0),
+    (iceTax.barrierIceKnown > 0 ||
+      iceTax.codeGateIceKnown > 0 ||
+      iceTax.sentryIceKnown > 0 ||
+      iceTax.taxingIceKnown > 0),
   );
 }
 
@@ -382,8 +423,8 @@ function hasRemoteProtectionSupport(
   deckCapabilities: DeckCapabilityProfile | undefined,
 ): boolean {
   return (
-    (deckCapabilities?.corp?.remotePlanProfile.remoteProtectionToolsKnown ?? 0) >
-    0
+    (deckCapabilities?.corp?.remotePlanProfile.remoteProtectionToolsKnown ??
+      0) > 0
   );
 }
 
@@ -392,8 +433,8 @@ function hasAssetEconomySupport(
   strategyProfile: AiDeckStrategyProfile | undefined,
 ): boolean {
   return (
-    (deckCapabilities?.corp?.remotePlanProfile.remoteEconomyToolsKnown ?? 0) > 0 ||
-    (strategyProfile?.corpProfile?.economyProfile.assetEconomy ?? 0) > 0
+    (deckCapabilities?.corp?.remotePlanProfile.remoteEconomyToolsKnown ?? 0) >
+      0 || (strategyProfile?.corpProfile?.economyProfile.assetEconomy ?? 0) > 0
   );
 }
 
@@ -415,11 +456,11 @@ function hasAnyEconomySupport(
   const economy = strategyProfile?.corpProfile?.economyProfile;
   return Boolean(
     hasAssetEconomySupport(deckCapabilities, strategyProfile) ||
-      hasRezReserveSupport(deckCapabilities, strategyProfile) ||
-      (economy &&
-        (economy.operationEconomy > 0 ||
-          economy.recurring > 0 ||
-          economy.finite > 0)),
+    hasRezReserveSupport(deckCapabilities, strategyProfile) ||
+    (economy &&
+      (economy.operationEconomy > 0 ||
+        economy.recurring > 0 ||
+        economy.finite > 0)),
   );
 }
 
@@ -429,17 +470,15 @@ function hasTagPayoffPair(
   const punish = strategyProfile?.corpProfile?.punishProfile;
   return Boolean(
     punish &&
-      (punish.tagSources > 0 || punish.traceDensity > 0) &&
-      punish.tagPayoff > 0,
+    (punish.tagSources > 0 || punish.traceDensity > 0) &&
+    punish.tagPayoff > 0,
   );
 }
 
 function hasAmbushSupport(
   deckCapabilities: DeckCapabilityProfile | undefined,
 ): boolean {
-  return (
-    (deckCapabilities?.corp?.remotePlanProfile.ambushToolsKnown ?? 0) > 0
-  );
+  return (deckCapabilities?.corp?.remotePlanProfile.ambushToolsKnown ?? 0) > 0;
 }
 
 function rejectedCorpIntents(
@@ -526,9 +565,14 @@ function confidenceFor(params: {
   scorePlan: readonly CorpScorePlan[];
   defensePlan: readonly CorpDefensePlan[];
   punishPlan: readonly CorpPunishPlan[];
+  enginePlan: readonly CorpEnginePlan[];
   riskProfile: readonly CorpStrategicIntentRisk[];
 }): CorpStrategicIntentConfidence {
-  if (!params.strategyProfile && !params.deckCapabilities && !params.strategicIntentState) {
+  if (
+    !params.strategyProfile &&
+    !params.deckCapabilities &&
+    !params.strategicIntentState
+  ) {
     return "low";
   }
   if (
@@ -537,11 +581,17 @@ function confidenceFor(params: {
     params.riskProfile.length === 0 &&
     (params.scorePlan.length > 0 ||
       params.defensePlan.length > 0 ||
-      params.punishPlan.length > 0)
+      params.punishPlan.length > 0 ||
+      params.enginePlan.length > 0)
   ) {
     return "high";
   }
-  if (params.scorePlan.length > 0 || params.defensePlan.length > 0 || params.punishPlan.length > 0) {
+  if (
+    params.scorePlan.length > 0 ||
+    params.defensePlan.length > 0 ||
+    params.punishPlan.length > 0 ||
+    params.enginePlan.length > 0
+  ) {
     return "medium";
   }
   return "low";
@@ -554,6 +604,7 @@ function strategicIntentEvidence(params: {
   scorePlan: readonly CorpScorePlan[];
   defensePlan: readonly CorpDefensePlan[];
   economyPlan: readonly CorpEconomyPlan[];
+  enginePlan: readonly CorpEnginePlan[];
   punishPlan: readonly CorpPunishPlan[];
   riskProfile: readonly CorpStrategicIntentRisk[];
   rejectedIntents: readonly CorpRejectedIntent[];
@@ -572,6 +623,10 @@ function strategicIntentEvidence(params: {
           redactedStrategyScoreEvidence("corp.ice_tax_glacier", profile),
           redactedStrategyScoreEvidence("corp.tag_trace_punish", profile),
           redactedStrategyScoreEvidence("corp.damage_kill", profile),
+          redactedStrategyScoreEvidence("corp.action_tempo", profile),
+          redactedStrategyScoreEvidence("corp.overadvance_value", profile),
+          redactedStrategyScoreEvidence("corp.draw_engine", profile),
+          redactedStrategyScoreEvidence("corp.deck_recycle_engine", profile),
         ]
       : []),
     `deck_capabilities:${capabilities ? "present" : "missing"}`,
@@ -597,6 +652,7 @@ function strategicIntentEvidence(params: {
     `score_plan:${params.scorePlan.join("|") || "none"}`,
     `defense_plan:${params.defensePlan.join("|") || "none"}`,
     `economy_plan:${params.economyPlan.join("|") || "none"}`,
+    `engine_plan:${params.enginePlan.join("|") || "none"}`,
     `punish_plan:${params.punishPlan.join("|") || "none"}`,
     `risk_profile:${params.riskProfile.join("|") || "none"}`,
     `rejected_intents:${params.rejectedIntents.join("|") || "none"}`,
