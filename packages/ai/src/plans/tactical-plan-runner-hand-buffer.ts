@@ -12,6 +12,10 @@ import {
 } from "./tactical-plan-action-values";
 import { createPlanStep, createTacticalPlan } from "./tactical-plan-builders";
 import { actionServerId, isRemoteServer } from "./tactical-plan-server-targets";
+import {
+  runnerSurvivalActionProgress,
+  runnerSurvivalMinimumCredits,
+} from "./tactical-plan-runner-survival-progress";
 import { runnerMeaningfulRunOpportunityAvailable } from "./tactical-plan-runner-support-actions";
 import type {
   TacticalPlan,
@@ -152,19 +156,6 @@ export function runnerHandBufferPlans(
   runnerGoalEvidence: readonly string[],
   dependencies: TacticalPlanCreditValueDependencies,
 ): TacticalPlan[] {
-  const hasSurvivalAction = context.input.legalActions.some((action) =>
-    [
-      "draw_card",
-      "gain_credit",
-      "install_card",
-      "play_event",
-      "trigger_ability",
-      "activated_card_ability",
-    ].includes(action.type),
-  );
-  if (!hasSurvivalAction) {
-    return [];
-  }
   const assessment = runnerHandBufferAssessment(context.input);
   if (
     !assessment.damagePressure &&
@@ -173,6 +164,33 @@ export function runnerHandBufferPlans(
     return [];
   }
   if (!assessment.active) return [];
+  const survivalPlanActive = assessment.damagePressure;
+  const survivalMinimumCredits = survivalPlanActive
+    ? runnerSurvivalMinimumCredits({
+        input: context.input,
+        candidates: context.candidates,
+        economyPosture: context.runnerEconomyPosture,
+        flatlineRiskLevel: assessment.flatlineRiskLevel,
+      })
+    : 0;
+  const candidatesByActionId = new Map(
+    (context.candidates ?? []).map((candidate) => [
+      candidate.actionId,
+      candidate,
+    ]),
+  );
+  const hasProgressCapableAction = context.input.legalActions.some((action) =>
+    survivalPlanActive
+      ? runnerSurvivalActionProgress({
+          input: context.input,
+          action,
+          candidate: candidatesByActionId.get(action.actionId),
+          minimumCredits: survivalMinimumCredits,
+          dependencies,
+        }).progressCapable
+      : action.type === "draw_card",
+  );
+  if (!hasProgressCapableAction) return [];
   if (
     assessment.flatlineRiskLevel === "confirmed" &&
     assessment.handCount >= 2 &&
@@ -198,7 +216,6 @@ export function runnerHandBufferPlans(
   ) {
     return [];
   }
-  const survivalPlanActive = assessment.damagePressure;
   const planId = survivalPlanActive
     ? "runner.survival_defense"
     : "runner.restore_hand_buffer";
@@ -232,6 +249,9 @@ export function runnerHandBufferPlans(
           kind: capabilityKind,
           side: "runner",
           target: { kind: "capability", id: targetId },
+          ...(survivalPlanActive
+            ? { minimumCredits: survivalMinimumCredits }
+            : {}),
           evidence: assessment.evidence,
         },
       ],
@@ -245,7 +265,6 @@ export function runnerHandBufferPlans(
               "flatline_prevention",
               "net_damage_prevention",
               "survival",
-              "economy.gain_credit",
             ]
           : ["draw.card"],
         requiredCapabilities: [
@@ -254,6 +273,9 @@ export function runnerHandBufferPlans(
             kind: capabilityKind,
             side: "runner",
             target: { kind: "capability", id: targetId },
+            ...(survivalPlanActive
+              ? { minimumCredits: survivalMinimumCredits }
+              : {}),
             evidence: assessment.evidence,
           },
         ],
@@ -264,7 +286,19 @@ export function runnerHandBufferPlans(
           ...assessment.evidence,
         ],
       }),
-      evidence: [...assessment.evidence, ...runnerGoalEvidence],
+      evidence: [
+        ...assessment.evidence,
+        ...(survivalPlanActive
+          ? [
+              `runner_survival_minimum_credits:${survivalMinimumCredits}`,
+              `runner_survival_reserve_gap:${Math.max(
+                0,
+                survivalMinimumCredits - context.input.playerView.own.credits,
+              )}`,
+            ]
+          : []),
+        ...runnerGoalEvidence,
+      ],
       scoreBreakdown: [
         {
           key: "runner_restore_hand_buffer",

@@ -1,6 +1,6 @@
 # Runner-Survival-Progress-Contract-Prozess
 
-Status: P0 abgeschlossen; P1 aktiv
+Status: P1 abgeschlossen; P2 aktiv
 
 ## Quelle/Vorgabe
 
@@ -114,7 +114,7 @@ Commit: `docs(ai): plan runner survival progress contract`
 
 ### P1: Survival-Aktionsvertrag und Kandidaten-Mapping
 
-Status: aktiv
+Status: abgeschlossen
 
 Ziel: `gain_credit` mappt nur bei einer sichtbaren konkreten Survival-
 Finanzierungslücke auf `find_survival_answer`; oberhalb des Ziels und ohne
@@ -140,11 +140,18 @@ Done-Gate: Credit ohne konkrete Lücke mappt nicht; Credit unter einer
 konkreten finanzierbaren Prevention-Lücke mappt; echte Draw-/Prevention-Fälle
 bleiben grün.
 
+Ergebnis: Planner und Kandidaten-Mapping verwenden denselben side-sicheren
+Fortschrittsvertrag. Der Survival-Plan trägt eine explizite Mindestreserve;
+Basic Credits oberhalb dieser Reserve mappen nicht mehr, während ein Credit
+unterhalb der akuten Reaktionsreserve und echte Draw-/Prevention-Aktionen
+gültig bleiben. 78 fokussierte Plan-/Mapping-Tests und der AI-Typecheck sind
+grün.
+
 Commit: `fix(ai): require concrete survival credit progress`
 
 ### P2: Beobachtbarer Planfortschritt und TTL-Abbruch
 
-Status: ausstehend
+Status: aktiv
 
 Ziel: `runner.survival_defense` bleibt nur `progressing`, wenn sich Hand,
 akute Gefahr, Prevention-Zustand oder konkrete Reserve-Lücke verbessert.

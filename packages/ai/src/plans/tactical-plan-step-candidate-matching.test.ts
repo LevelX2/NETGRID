@@ -266,6 +266,79 @@ describe("candidateMatchesStep", () => {
     ).toBe(true);
   });
 
+  it("maps basic credits only while a concrete survival reserve gap shrinks", () => {
+    const step = planStep("find_survival_answer", ["draw.card"]);
+    step.requiredCapabilities = [
+      {
+        capabilityId: "runner.survival_defense",
+        kind: "survival",
+        side: "runner",
+        minimumCredits: 4,
+        evidence: ["test_reaction_reserve"],
+      },
+    ];
+    const plan = tacticalPlan(step, "runner");
+    plan.type = "runner.survival_defense";
+    plan.requiredCapabilities = [...step.requiredCapabilities];
+    const basicCredit = legalAction(
+      "basic-credit",
+      "gain_credit",
+      {},
+      "runner",
+    );
+    const candidate = candidateFor(basicCredit, {
+      actorSide: "runner",
+      semanticActionType: "economy.gain_credit",
+      actionTacticSignals: ["economy.gain_credit"],
+    });
+    const input = runnerInput();
+    const dependencies = testDependencies();
+
+    input.playerView.own.credits = 6;
+    expect(
+      candidateMatchesStep(
+        plan,
+        step,
+        candidate,
+        basicCredit,
+        input,
+        dependencies,
+      ),
+    ).toBe(false);
+    expect(
+      planStepCandidatePriority(
+        plan,
+        step,
+        candidate,
+        basicCredit,
+        input,
+        dependencies,
+      ),
+    ).toBe(0);
+
+    input.playerView.own.credits = 3;
+    expect(
+      candidateMatchesStep(
+        plan,
+        step,
+        candidate,
+        basicCredit,
+        input,
+        dependencies,
+      ),
+    ).toBe(true);
+    expect(
+      planStepCandidatePriority(
+        plan,
+        step,
+        candidate,
+        basicCredit,
+        input,
+        dependencies,
+      ),
+    ).toBe(110);
+  });
+
   it("prioritizes concrete success-window payoffs over generic followups", () => {
     const step = planStep("convert_success_window", ["run.success_followup"]);
     const plan = tacticalPlan(step, "runner");

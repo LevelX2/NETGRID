@@ -27,6 +27,7 @@ import {
   type TacticalPlanCreditValueDependencies,
 } from "./tactical-plan-action-values";
 import { runnerHasConcreteFundingNeed } from "./tactical-plan-runner-funding-need";
+import { runnerSurvivalActionProgress } from "./tactical-plan-runner-survival-progress";
 import { actionServerId } from "./tactical-plan-server-targets";
 import type { PlanStep, TacticalPlan } from "./tactical-plan-types";
 import { visibleCardByInstanceId } from "./tactical-plan-visible-cards";
@@ -59,7 +60,14 @@ export function planStepCandidatePriority(
     return tagClearStepPriority(candidate, action, input);
   }
   if (step.kind === "find_survival_answer") {
-    return survivalAnswerStepPriority(candidate, action, input, dependencies);
+    return survivalAnswerStepPriority(
+      plan,
+      step,
+      candidate,
+      action,
+      input,
+      dependencies,
+    );
   }
   if (step.kind === "convert_success_window") {
     return successWindowStepPriority(candidate, action);
@@ -150,8 +158,14 @@ export function candidateMatchesStep(
   }
   if (step.kind === "find_survival_answer") {
     return (
-      survivalAnswerStepMatchesAction(candidate, action, input, dependencies) &&
-      candidateTargetMatchesPlan(plan, candidate, action)
+      survivalAnswerStepMatchesAction(
+        plan,
+        step,
+        candidate,
+        action,
+        input,
+        dependencies,
+      ) && candidateTargetMatchesPlan(plan, candidate, action)
     );
   }
   if (step.kind === "install_breaker" && action.type === "install_card") {
@@ -209,77 +223,54 @@ export function candidateMatchesStep(
 }
 
 function survivalAnswerStepPriority(
+  plan: TacticalPlan,
+  step: PlanStep,
   candidate: ActionSemanticCandidate,
   action: LegalAction,
   input: AiDecisionInput,
   dependencies: TacticalPlanCreditValueDependencies,
 ): number {
-  if (action.type === "draw_card") return 260;
-  if (candidateShowsDamageSurvivalSemantics(candidate)) return 360;
-  if (legalActionCreditNetGain(input, action, dependencies) > 0) return 110;
+  const progress = runnerSurvivalActionProgress({
+    input,
+    action,
+    candidate,
+    minimumCredits: runnerSurvivalMinimumCreditsFromPlanStep(plan, step),
+    dependencies,
+  });
+  if (!progress.progressCapable) return 0;
+  if (progress.kind === "draw") return 260;
+  if (progress.kind === "damage_prevention") return 360;
+  if (progress.kind === "fund_reaction_reserve") return 110;
   return 0;
 }
 
 function survivalAnswerStepMatchesAction(
+  plan: TacticalPlan,
+  step: PlanStep,
   candidate: ActionSemanticCandidate,
   action: LegalAction,
   input: AiDecisionInput,
   dependencies: TacticalPlanCreditValueDependencies,
 ): boolean {
-  if (action.type === "draw_card") return true;
-  if (
-    (action.type === "install_card" ||
-      action.type === "play_event" ||
-      action.type === "trigger_ability" ||
-      action.type === "activated_card_ability") &&
-    candidateShowsDamageSurvivalSemantics(candidate)
-  ) {
-    return true;
-  }
-  return (
-    action.type === "gain_credit" &&
-    legalActionCreditNetGain(input, action, dependencies) > 0
-  );
+  return runnerSurvivalActionProgress({
+    input,
+    action,
+    candidate,
+    minimumCredits: runnerSurvivalMinimumCreditsFromPlanStep(plan, step),
+    dependencies,
+  }).progressCapable;
 }
 
-function candidateShowsDamageSurvivalSemantics(
-  candidate: ActionSemanticCandidate,
-): boolean {
-  return candidateSurvivalTokens(candidate).some((token) =>
-    [
-      "damage.prevent",
-      "damage_prevention",
-      "flatline_prevention",
-      "net_damage_prevention",
-      "survival.damage_prevention",
-      "survival.flatline_prevention",
-    ].includes(token),
+function runnerSurvivalMinimumCreditsFromPlanStep(
+  plan: TacticalPlan,
+  step: PlanStep,
+): number {
+  return Math.max(
+    0,
+    ...[...plan.requiredCapabilities, ...step.requiredCapabilities]
+      .filter((capability) => capability.kind === "survival")
+      .map((capability) => capability.minimumCredits ?? 0),
   );
-}
-
-function candidateSurvivalTokens(candidate: ActionSemanticCandidate): string[] {
-  return [
-    candidate.semanticActionType,
-    candidate.sourceCardId,
-    candidate.abilityId,
-    ...candidate.cardContextSignals,
-    ...candidate.actionTacticSignals,
-    ...candidate.strategySupport.flatMap((support) => [
-      support.strategyId,
-      support.role,
-      `${support.strategyId}:${support.role}`,
-    ]),
-    ...candidate.conditions.map((condition) => condition.kind),
-    ...candidate.risks.map((risk) => risk.kind),
-    ...candidate.constraints.map((constraint) => constraint.kind),
-    ...candidate.costProfile.additionalCosts,
-    ...candidate.evidence,
-  ]
-    .filter((value): value is string => Boolean(value))
-    .flatMap((value) => {
-      const normalized = value.toLocaleLowerCase("en-US");
-      return [normalized, ...normalized.split(/[.:_\-\s]+/).filter(Boolean)];
-    });
 }
 
 function tagClearStepPriority(

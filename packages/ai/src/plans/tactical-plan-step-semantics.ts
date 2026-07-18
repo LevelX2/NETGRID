@@ -29,7 +29,6 @@ export function candidateSemanticsMatchStep(
         "survival",
         "survival.flatline_prevention",
         "draw.card",
-        "economy.gain_credit",
         "search.stack",
       ]);
     case "setup_search_engine":
@@ -247,7 +246,6 @@ export function actionTypeMatchesStep(
     case "find_survival_answer":
       return (
         actionType === "draw_card" ||
-        actionType === "gain_credit" ||
         actionType === "install_card" ||
         actionType === "play_event" ||
         actionType === "trigger_ability" ||
