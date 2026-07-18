@@ -296,6 +296,7 @@ export function tacticalPlanMappedChoice(
     if (
       tacticalPlanHandBufferMappingBlocksProbeRunOverride(
         mapping,
+        mappedChoice,
         overrideChoice,
         scoreGap,
       )
@@ -602,8 +603,7 @@ function urgentCorpSemanticChoice(
 
   const visibleRunnerCredits = input.playerView.opponent?.credits ?? 0;
   if (
-    visibleRunnerCredits >=
-    CORP_ACTIVE_REMOTE_ADVANCE_RUNNER_CREDIT_CEILING
+    visibleRunnerCredits >= CORP_ACTIVE_REMOTE_ADVANCE_RUNNER_CREDIT_CEILING
   ) {
     return undefined;
   }

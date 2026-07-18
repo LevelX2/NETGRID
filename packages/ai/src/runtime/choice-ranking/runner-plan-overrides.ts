@@ -36,7 +36,9 @@ export function tacticalPlanDeferredDevelopmentInstallShouldYield(
         component.key === "runner_no_run_economy_install_commitment" ||
         (component.key === "runner_persistent_install_fit" &&
           (component.value <= -500 ||
-            (component.reason ?? "").includes("duplicate:redundant_duplicate") ||
+            (component.reason ?? "").includes(
+              "duplicate:redundant_duplicate",
+            ) ||
             (component.reason ?? "").includes("duplicate:useful_backup") ||
             (component.reason ?? "").includes("delta:backup_only")))),
   );
@@ -450,12 +452,15 @@ function runnerEconomyCommitmentCanInterruptPlan(
 
 export function tacticalPlanHandBufferMappingBlocksProbeRunOverride(
   mapping: PlanStepMappingResult,
+  mappedChoice: SemanticRuntimeChoice,
   overrideChoice: SemanticRuntimeChoice,
   scoreGap: number,
 ): boolean {
   return (
     (mapping.plan.type === "runner.restore_hand_buffer" ||
       mapping.plan.type === "runner.survival_defense") &&
+    (mapping.plan.type !== "runner.survival_defense" ||
+      runnerSurvivalMappingHasProgressPriority(mapping, mappedChoice)) &&
     overrideChoice.action.type === "start_run" &&
     semanticRuntimeChoiceStrategicFitLevel(overrideChoice) === "none" &&
     scoreGap <= 1800
@@ -564,20 +569,26 @@ export function tacticalPlanLowValueRecoveryMappingShouldYield(
       "runner_late_no_funding_credit_repeat",
       "runner_basic_setup_over_ready_pressure",
     ]) ||
-    [
-      "runner_expected_draw_overflow",
-    ].some((key) =>
+    ["runner_expected_draw_overflow"].some((key) =>
       semanticRuntimeChoiceHasScoreBreakdownComponent(mappedChoice, key),
     )
   ) {
     return true;
   }
-  return (
-    mapping.plan.type !== "runner.survival_defense" &&
-    semanticRuntimeChoiceHasScoreBreakdownComponent(
-      mappedChoice,
-      "runner_rich_basic_credit_without_conversion",
-    )
+  return semanticRuntimeChoiceHasScoreBreakdownComponent(
+    mappedChoice,
+    "runner_rich_basic_credit_without_conversion",
+  );
+}
+
+export function runnerSurvivalMappingHasProgressPriority(
+  mapping: PlanStepMappingResult,
+  mappedChoice: SemanticRuntimeChoice,
+): boolean {
+  if (mapping.plan.type !== "runner.survival_defense") return true;
+  return mapping.actionPriorities.some(
+    (entry) =>
+      entry.actionId === mappedChoice.action.actionId && entry.priority > 0,
   );
 }
 

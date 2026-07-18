@@ -211,6 +211,19 @@ export function tagClearMapping(
   });
 }
 
+export function survivalMapping(
+  legalActions: LegalAction[],
+  actionPriority: number,
+): PlanStepMappingResult {
+  return planMapping("runner.survival_defense", legalActions, {
+    stepKind: "find_survival_answer",
+    actionPriorities: legalActions.map((action) => ({
+      actionId: action.actionId,
+      priority: actionPriority,
+    })),
+  });
+}
+
 export function remoteContestMapping(
   legalActions: LegalAction[],
   overrides: {

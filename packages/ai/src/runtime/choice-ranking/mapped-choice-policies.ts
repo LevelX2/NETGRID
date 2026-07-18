@@ -4,6 +4,7 @@ import { semanticRuntimeServerId } from "../semantic-runtime-scope";
 import { semanticRuntimeChoiceHasScoreComponent } from "./semantic-choice-ranking-support";
 import {
   mappedPlanHasImmediateVisibleRunPayoff,
+  runnerSurvivalMappingHasProgressPriority,
   runnerPlanOverrideIsHardInterrupt,
   runnerPlanTypeRequiresPlanDominance,
   semanticRuntimeChoiceIsDamagePressureHandBufferDraw,
@@ -90,8 +91,7 @@ export function tacticalPlanStepPriorityKeepsMappedChoice(
     overrideChoice.score > 0 &&
     mappedChoice.scoreBreakdown.some(
       (component) =>
-        component.key === "corp_remote_sprawl_penalty" &&
-        component.value < 0,
+        component.key === "corp_remote_sprawl_penalty" && component.value < 0,
     )
   ) {
     return false;
@@ -170,6 +170,9 @@ export function tacticalPlanRunnerMappingBlocksOffPlanOverride(
 ): boolean {
   if (mapping.plan.side !== "runner") return false;
   if (!runnerPlanTypeRequiresPlanDominance(mapping.plan.type)) return false;
+  if (!runnerSurvivalMappingHasProgressPriority(mapping, mappedChoice)) {
+    return false;
+  }
   if (mappedActionIds.has(overrideChoice.action.actionId)) return false;
   if (exceptions.repeatedRunShouldYield) return false;
   if (exceptions.nonPositiveProjectedRunShouldYield) return false;

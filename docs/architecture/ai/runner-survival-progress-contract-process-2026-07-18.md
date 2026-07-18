@@ -1,6 +1,6 @@
 # Runner-Survival-Progress-Contract-Prozess
 
-Status: P2 abgeschlossen; P3 aktiv
+Status: P3 abgeschlossen; P4 aktiv
 
 ## Quelle/Vorgabe
 
@@ -190,7 +190,7 @@ Commit: `fix(ai): expire stalled runner survival plans`
 
 ### P3: Plan-Arbitration absichern
 
-Status: aktiv
+Status: abgeschlossen
 
 Ziel: Nur progressfähige Survival-Aktionen erhalten Plan-Dominanz. Ein
 nichtprogressiver Basic Credit darf keine besser bewertete legale Alternative
@@ -215,11 +215,20 @@ Checks: fokussierte Ranking-/Checkpoint-Vitests, AI-Typecheck,
 Done-Gate: negative nichtprogressive Credit-Aktion verliert gegen eine
 positive Alternative; echter Survival-Fortschritt bleibt plan-dominant.
 
+Ergebnis: Survival-Dominanz verlangt jetzt eine positive, vom gemeinsamen
+P1-Vertrag erzeugte Step-Priorität. Ein altes oder anderweitig
+nichtprogressives Mapping kann weder den Handbuffer-Probe-Guard noch den
+allgemeinen Runner-Plancontroller für eine absolute Sperre verwenden. Die
+Ausnahme vom Rich-Basic-Credit-Yield wurde entfernt. Ein negativer Credit gibt
+eine positive Entwicklung frei; echter Draw mit Step-Priorität 260 bleibt
+plan-dominant. 138 fokussierte Ranking-, Mapping- und Plan-Tests sowie der
+AI-Typecheck sind grün.
+
 Commit: `fix(ai): yield stalled survival plan arbitration`
 
 ### P4: Diagnostik und Loop-Gate
 
-Status: ausstehend
+Status: aktiv
 
 Ziel: Diagnostics melden nur nachweisbare Coverage-Reparatur und erkennen
 wiederholte Survival-Aktionen ohne Fortschritt als High-Severity-Fund.
