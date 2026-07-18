@@ -20,8 +20,9 @@ Primary agent: `architecture-review-agent`
 | E08     | integriert  | Commit `e24d17f39`, Main-Abgleich `e5d5a4f0d`; Runtime-Zyklus entfernt     |
 | E09     | integriert  | Commit `17efeb4f3`, Main-Abgleich `84f3e075b`; Turn-Runtime geteilt        |
 | E10     | integriert  | 1.736 Engine-, 2.723 KI- und 12 Shared-Tests; Web 633/635 nach Main-Sync   |
-| E11     | verifiziert | Damage-Domäne in sechs Module geteilt; 1.736 Engine-Tests und Gates grün   |
-| E12-E16 | ausstehend  | sequenziell nach E11                                                       |
+| E11     | integriert  | Damage-Domäne in sechs Module geteilt; 1.736 Engine-Tests und Gates grün   |
+| E12     | verifiziert | Access-Domäne geteilt; Hidden-Info-/Breach-Verträge und 1.736 Tests grün   |
+| E13-E16 | ausstehend  | sequenziell nach E12                                                       |
 
 ## Quelle und Vorgabe
 
@@ -200,6 +201,20 @@ die persistierte Kandidatenreihenfolge sind unmittelbar am Code dokumentiert.
 Der Strukturguard verlangt alle sechs Module und begrenzt ihre Größe. Der
 vollständige Engine-Lauf mit 1.736 Tests, Engine-Typecheck, Package Boundaries,
 Strukturguard und dessen Selftest sind grün.
+
+### E12 Access-Domäne
+
+Die Access-Effect-Datei mit 1.900 Zeilen und der Access-Flow mit 1.441 Zeilen
+sind in klar gerichtete Teilmodule aufgeteilt. Der größte produktive Baustein
+liegt bei 1.099 Zeilen. Öffentliche Fassaden halten bestehende Runtime-Consumer
+stabil; Breach-Lifecycle, Hidden-Info-Freigabe, Steal-/Trash-/Install-Auflösung,
+deklarative CardImplementation-Effekte und begrenzte Legacy-Fallbacks besitzen
+getrennte Verantwortlichkeiten.
+
+Die Hidden-Info-Barriere am tatsächlichen Reveal und die Exklusivität zwischen
+CardImplementation und Legacy-Fallback sind am Code dokumentiert. Der
+Strukturguard verlangt die neuen Module und begrenzt ihre Größe. Engine-Suite
+mit 1.736 Tests und Engine-Typecheck sind auf dem Paketstand grün.
 
 ### E14 Registry und Coverage
 

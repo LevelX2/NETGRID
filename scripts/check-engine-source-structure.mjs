@@ -19,6 +19,7 @@ const abilityPayloadRegistryFile = path.join(
 const runtimeRoot = path.join(engineRoot, "game", "engine-runtime-internal");
 const abilityRoot = path.join(engineRoot, "ability-engine");
 const damageRoot = path.join(engineRoot, "game", "damage");
+const accessRoot = path.join(engineRoot, "game", "access");
 
 const forbiddenRuntimeDelegateFiles = [
   "action-runtime-delegates.ts",
@@ -105,6 +106,16 @@ const damageDomainModuleLimits = new Map([
   ["prevention-sources.ts", 1100],
   ["prevention-window.ts", 950],
   ["damage-replacement.ts", 750],
+]);
+const accessDomainModuleLimits = new Map([
+  ["access-flow.ts", 80],
+  ["access-flow-context.ts", 260],
+  ["access-breach-lifecycle.ts", 700],
+  ["access-resolution-actions.ts", 900],
+  ["access-effect-handlers.ts", 500],
+  ["access-effect-context.ts", 240],
+  ["access-effect-execution.ts", 1250],
+  ["access-effect-legacy.ts", 550],
 ]);
 
 if (process.argv.includes("--self-test")) {
@@ -250,6 +261,19 @@ for (const [fileName, maximumLines] of damageDomainModuleLimits) {
   if (lineCount > maximumLines)
     findings.push(
       `game/damage/${fileName} has ${lineCount} lines; allowed maximum is ${maximumLines}`,
+    );
+}
+
+for (const [fileName, maximumLines] of accessDomainModuleLimits) {
+  const file = path.join(accessRoot, fileName);
+  if (!existsSync(file)) {
+    findings.push(`game/access/${fileName} is missing`);
+    continue;
+  }
+  const lineCount = sourceLineCount(file);
+  if (lineCount > maximumLines)
+    findings.push(
+      `game/access/${fileName} has ${lineCount} lines; allowed maximum is ${maximumLines}`,
     );
 }
 
