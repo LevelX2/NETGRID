@@ -136,9 +136,11 @@ Stand: 2026-07-18
   sichtbare konkrete Reaktions- oder Prevention-Lücke. Ohne Handgewinn,
   Risikoreduktion oder verringerte Reservelücke verliert der Plan seine TTL
   und seine absolute Arbitration. Im 60-Spiele-Panel sinken die bestätigten
-  Survival-Credit-Folgen in Net-Damage-08/-09 und Hybrid-04/-07 vollständig
-  auf null; C-09 endet nach 421 statt 480 Aktionen regulär. Zwei unabhängige
-  Action-Limits in Net-Damage-07 und Hybrid-05 bleiben offen. Führend ist
+  nichtprogressiven Survival-Credit-Folgen in Net-Damage-08/-09 und
+  Hybrid-04/-07 vollständig auf null; C-09 nutzt nur einen konkret
+  finanzierenden Credit von 3 auf das sichtbare Ziel 4 und endet nach 416
+  statt 480 Aktionen regulär. Drei unabhängige Action-Limits in Net-Damage-07,
+  Hybrid-01 und Hybrid-05 bleiben offen. Führend ist
   `docs/reviews/ai/ai-behavior-baseline-v1-runner-survival-progress-2026-07-18.md`.
 - Der Planportfolio-Rollout wurde zusätzlich gegen einen isolierten
   Hybrid-Control am exakten Ausgangs-Commit geprüft. Control und Kandidat

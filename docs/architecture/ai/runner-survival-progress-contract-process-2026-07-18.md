@@ -300,9 +300,15 @@ Survival-Draws bleiben unverändert. Drei AI-Testshards mit insgesamt 392
 Dateien und 2.773 Tests, die vier ausgelagerten Zielregressionen, der
 AI-Typecheck, Format und Diff-Check sind grün. Replay-, Redaction-, Runtime-,
 Fallback-, Timeout-, IllegalAction- und Hidden-Info-Gates bleiben null/grün.
-Der Standardbenchmark enthält nur noch zwei bereits vorher identische,
+Der Vor-Integrationsbenchmark enthält nur noch zwei bereits vorher identische,
 unabhängige Action-Limits in Net-Damage-07 und Hybrid-05; beide enthalten
-keine Survival-Credits. `check:ai` erreicht ausschließlich vier auf aktuellem
+keine Survival-Credits. Nach dem Main-Abgleich sind 71 fokussierte Tests sowie
+396 AI-Testdateien mit 2.817 Tests grün. Der wiederholte Standardbenchmark auf
+`d5199cdb0` bestätigt C-09 mit nur einem konkret finanzierenden Credit von 3
+auf das sichtbare Ziel 4 und regulärer Flatline nach 416 Aktionen. Die drei
+Limits Net-Damage-07, Hybrid-01 und Hybrid-05 enthalten jeweils null
+Survival-Credits; Hybrid-01 ist ein neuer, getrennt zu analysierender Befund
+des integrierten Stands. `check:ai` erreicht ausschließlich vier auf aktuellem
 `main` reproduzierbare Source-Structure-Pfade und keinen zusätzlichen Pfad aus
 diesem Paket. Führender Review ist
 `docs/reviews/ai/ai-behavior-baseline-v1-runner-survival-progress-2026-07-18.md`.
