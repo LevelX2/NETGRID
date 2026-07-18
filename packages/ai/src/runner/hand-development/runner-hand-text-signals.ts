@@ -47,7 +47,6 @@ export function runnerHandTextHasTemporaryCounterSignal(text: string): boolean {
     "stored",
   ]);
 }
-
 export function runnerHandTextHasBreakerStrengthSupportSignal(
   text: string,
 ): boolean {
@@ -58,7 +57,6 @@ export function runnerHandTextHasBreakerStrengthSupportSignal(
     !runnerHandTokensIncludeInOrder(tokens, "break", "subroutine")
   );
 }
-
 export function runnerHandTextHasIceStrengthReductionSignal(
   text: string,
 ): boolean {

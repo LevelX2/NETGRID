@@ -1,4 +1,5 @@
 import type { VisibleCard } from "@netgrid/shared";
+import type { AiRuntimeValueHints } from "../ai-hints";
 
 export type RemoteRootValueKind =
   | "finite_economy_pool"
@@ -21,7 +22,7 @@ export type RemoteRootValueProjectionInput = {
     scope?: string;
     timing?: string;
   }[];
-  valueHints?: Record<string, number | undefined>;
+  valueHints?: AiRuntimeValueHints;
 };
 
 export type RemoteRootValueProjection = {
@@ -38,12 +39,7 @@ export function projectRemoteRootValue(
   const roles = input.roles ?? [];
   const effects = input.effects ?? [];
   const counters = input.visibleCard?.counters ?? {};
-  const valueScore = Math.max(
-    0,
-    ...Object.values(input.valueHints ?? {}).filter(
-      (value): value is number => typeof value === "number",
-    ),
-  );
+  const valueScore = Math.max(0, input.valueHints?.remoteRootValue ?? 0);
   const hasFiniteEconomyEffect = effects.some(
     (effect) =>
       effect.kind === "economy" &&

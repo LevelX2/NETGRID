@@ -213,6 +213,26 @@ Done-Gate: Keine erhaltene Pair-/Value-Zuweisung ist still wirkungslos; das
 Entfernen eines Wertes löscht keinen nicht anderweitig erkennbaren
 Kartenzweck.
 
+Ergebnis:
+
+- 733 untypisierte und gegenüber Rollen/Effects redundante Value-Zuweisungen
+  wurden entfernt; keine der betroffenen Karten war ausschließlich durch
+  diesen Zahlenwert funktional beschrieben;
+- 102 Corp-Assets/-Upgrades wurden ohne Verlust ihrer bisherigen
+  Root-/Trashbewertung auf den eindeutigen Runtime-Schlüssel
+  `remoteRootValue` migriert; generisches `Object.values(valueHints)` ist aus
+  beiden Remote-Entscheidungspfaden entfernt;
+- der verbleibende Vertrag umfasst nur noch 203 schlüsselspezifisch
+  konsumierbare Werte (`economy`, `damage`, drei Loan-Werte und
+  `remoteRootValue`);
+- von 241 `strategySupportPairs` sind 125 über Opening- oder
+  Upgrade-Placement-Verträge runtimewirksam und 116 ausdrücklich
+  Evidence-only; 46 `requiredMechanics=memory` sind runtimewirksam, die
+  übrigen 1.776 Mechanikzuweisungen sowie 628 `scenarioRefs` sind
+  Evidence-only;
+- ein neues Metadaten-Gate verhindert untypisierte Werte und unzulässige
+  `remoteRootValue`-Zuweisungen.
+
 Commit: `refactor(ai): close hint metadata ontology contracts`
 
 ### AIH-05 – Qualitäts-, Target- und Testset-Restbestand

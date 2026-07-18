@@ -36,9 +36,7 @@
         "subtype_fracter",
         "subtype_icebreaker"
       ],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": ["encounter"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -71,10 +69,7 @@
         "subtype_daemon",
         "hosted_program_lifecycle"
       ],
-      "valueHints": {
-        "rigCoverage": 2,
-        "utility": 2
-      },
+      "valueHints": {},
       "riskTags": ["hosting", "runner_memory"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -119,9 +114,7 @@
         "run_flow_lock_resolver",
         "recurring_pool_start_turn_resolver"
       ],
-      "valueHints": {
-        "startRunStrengthPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "random_counter_replay_required",
         "public_payload_only",
@@ -168,9 +161,7 @@
       "roles": ["program", "link", "recurring"],
       "planRoles": ["build_rig", "trace_bid_support"],
       "requiredMechanics": ["install_program", "base_link", "recurring_credit"],
-      "valueHints": {
-        "link": 1
-      },
+      "valueHints": {},
       "riskTags": ["trace_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -219,9 +210,7 @@
       "roles": ["program", "daemon", "hosting"],
       "planRoles": ["build_rig"],
       "requiredMechanics": ["install_program", "hosting"],
-      "valueHints": {
-        "rig": 1
-      },
+      "valueHints": {},
       "riskTags": ["hosting_lifecycle"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -269,10 +258,7 @@
         "pump_breaker",
         "trash_self"
       ],
-      "valueHints": {
-        "runPressure": 2,
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": ["encounter", "random_outcome"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -322,10 +308,7 @@
         "subtype_icebreaker",
         "subtype_killer"
       ],
-      "valueHints": {
-        "runPressure": 3,
-        "rigCoverage": 3
-      },
+      "valueHints": {},
       "riskTags": ["encounter", "credit_intensive"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -375,10 +358,7 @@
         "memory",
         "net_damage"
       ],
-      "valueHints": {
-        "runPressure": 2,
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": ["encounter", "random_outcome"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -430,9 +410,7 @@
         "typed_counter_virus_purge_resolver",
         "recurring_pool_start_turn_resolver"
       ],
-      "valueHints": {
-        "hqRunCounterPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "random_counter_replay_required",
         "public_payload_only",
@@ -495,7 +473,6 @@
         "virus_purge"
       ],
       "valueHints": {
-        "tempo": 1,
         "economy": 1
       },
       "riskTags": ["counter_state"],
@@ -560,7 +537,6 @@
         "virus_purge"
       ],
       "valueHints": {
-        "tempo": 1,
         "economy": 1
       },
       "riskTags": ["counter_state", "hidden_zone_projection"],
@@ -626,7 +602,6 @@
         "run_credit_spend_rules"
       ],
       "valueHints": {
-        "runPressure": 2,
         "economy": 2
       },
       "riskTags": ["credit_reserve", "run_only_spend"],
@@ -678,10 +653,7 @@
         "memory",
         "persistent_modifier"
       ],
-      "valueHints": {
-        "runPressure": 2,
-        "rigCoverage": 1
-      },
+      "valueHints": {},
       "riskTags": ["credit_reserve"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -726,10 +698,7 @@
         "memory",
         "successful_run"
       ],
-      "valueHints": {
-        "runPressure": 2,
-        "rigCoverage": 1
-      },
+      "valueHints": {},
       "riskTags": ["counter_setup", "random_outcome"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -785,10 +754,7 @@
       ],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": ["install_program", "memory", "subtype_icebreaker"],
-      "valueHints": {
-        "rigCoverage": 2,
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": ["encounter", "credit_reserve"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -839,10 +805,7 @@
         "break_subroutine",
         "encounter_ice"
       ],
-      "valueHints": {
-        "rigCoverage": 2,
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": ["encounter", "credit_reserve"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -877,10 +840,7 @@
         "subtype_decoder",
         "subtype_icebreaker"
       ],
-      "valueHints": {
-        "runPressure": 2,
-        "rigCoverage": 3
-      },
+      "valueHints": {},
       "riskTags": ["encounter", "credit_reserve"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -929,7 +889,6 @@
         "virus_purge"
       ],
       "valueHints": {
-        "tempo": 1,
         "economy": 1
       },
       "riskTags": ["counter_state", "hidden_zone_projection"],
@@ -1005,10 +964,7 @@
         "encounter_ice",
         "restricted_breaker_targets"
       ],
-      "valueHints": {
-        "runPressure": 2,
-        "rigCoverage": 1
-      },
+      "valueHints": {},
       "riskTags": ["encounter", "timing_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -1034,9 +990,7 @@
         "encounter_ice",
         "end_run_after_breaker_use"
       ],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter",
         "timing_window",
@@ -1125,9 +1079,7 @@
       "roles": ["program", "run_flow"],
       "planRoles": ["build_rig", "run_pressure"],
       "requiredMechanics": ["install_program", "run_flow"],
-      "valueHints": {
-        "run": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -1151,10 +1103,7 @@
         "subtype_icebreaker",
         "subtype_worm"
       ],
-      "valueHints": {
-        "rigCoverage": 2,
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": ["encounter", "credit_reserve"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -1196,9 +1145,7 @@
         "action_economy_handsize_modifier_resolver",
         "damage_event_prevention_resolver"
       ],
-      "valueHints": {
-        "modifier": 1
-      },
+      "valueHints": {},
       "riskTags": ["modifier_layering", "state_hash_replay_stable"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -1275,11 +1222,7 @@
         "damage_prevention",
         "core_damage"
       ],
-      "valueHints": {
-        "runPressure": 2,
-        "survivability": 3,
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": ["encounter", "credit_reserve"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -1295,9 +1238,7 @@
       "roles": ["program", "access"],
       "planRoles": ["build_rig", "run_pressure"],
       "requiredMechanics": ["install_program", "access", "multiaccess"],
-      "valueHints": {
-        "access": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -1334,9 +1275,7 @@
         "agenda_difficulty",
         "overadvance"
       ],
-      "valueHints": {
-        "agenda": 1
-      },
+      "valueHints": {},
       "riskTags": ["agenda_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -1393,10 +1332,7 @@
         "runner_turn_start_recurring_refresh",
         "runner_program_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2,
-        "accessEconomy": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -1444,9 +1380,7 @@
         "v1922_runner_program_flak_ap_breaker",
         "runner_program_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -1469,9 +1403,7 @@
         "damage_prevention",
         "core_damage"
       ],
-      "valueHints": {
-        "survivability": 3
-      },
+      "valueHints": {},
       "riskTags": ["damage_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -1521,9 +1453,7 @@
         "typed_counter_virus_purge_resolver",
         "action_economy_handsize_modifier_resolver"
       ],
-      "valueHints": {
-        "modifier": 1
-      },
+      "valueHints": {},
       "riskTags": ["modifier_layering", "state_hash_replay_stable"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -1580,10 +1510,7 @@
         "pump_breaker",
         "run_persistent_bonus"
       ],
-      "valueHints": {
-        "runPressure": 2,
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": ["credit_reserve", "encounter"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -1602,9 +1529,7 @@
         "runner_program_resolver",
         "corp_ice_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -1629,9 +1554,7 @@
         "expose_fort_cards",
         "corp_paid_counter_removal"
       ],
-      "valueHints": {
-        "information": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_zone_projection", "successful_run_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -1673,9 +1596,7 @@
       "roles": ["program"],
       "planRoles": ["build_rig"],
       "requiredMechanics": ["install_program"],
-      "valueHints": {
-        "rig": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -1723,10 +1644,7 @@
         "start_of_turn_trigger",
         "successful_run"
       ],
-      "valueHints": {
-        "runPressure": 1,
-        "utility": 3
-      },
+      "valueHints": {},
       "riskTags": ["counter_setup", "random_outcome"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -1783,9 +1701,7 @@
       "roles": ["program", "stealth", "recurring"],
       "planRoles": ["build_rig", "run_support"],
       "requiredMechanics": ["install_program", "stealth", "recurring_credit"],
-      "valueHints": {
-        "run": 1
-      },
+      "valueHints": {},
       "riskTags": ["stealth_credit_restriction"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -1830,10 +1746,7 @@
         "subtype_noisy",
         "stealth_loss"
       ],
-      "valueHints": {
-        "runPressure": 2,
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": ["credit_reserve", "stealth_conflict"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -1851,9 +1764,7 @@
         "v1922_runner_program_japanese_water_torture_future_action_debt",
         "runner_program_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -1907,9 +1818,7 @@
         "program_trash_prevention",
         "return_to_hand"
       ],
-      "valueHints": {
-        "survival": 2
-      },
+      "valueHints": {},
       "riskTags": ["trash_prevention_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -1965,10 +1874,7 @@
       ],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": ["install_program", "memory", "subtype_icebreaker"],
-      "valueHints": {
-        "rigCoverage": 3,
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": ["encounter", "credit_intensive", "credit_reserve"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -2017,10 +1923,7 @@
         "subtype_icebreaker",
         "subtype_killer"
       ],
-      "valueHints": {
-        "runPressure": 2,
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": ["encounter"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -2063,9 +1966,7 @@
       "roles": ["program", "access"],
       "planRoles": ["build_rig", "run_pressure"],
       "requiredMechanics": ["install_program", "access", "multiaccess"],
-      "valueHints": {
-        "access": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -2121,10 +2022,7 @@
         "expose_server_card",
         "legal_action_only"
       ],
-      "valueHints": {
-        "information": 2,
-        "tempo": 1
-      },
+      "valueHints": {},
       "riskTags": ["hidden_info_barrier", "server_targeting"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -2167,9 +2065,7 @@
       "roles": ["program", "hidden_zone", "hidden_zone_tool", "stack_search"],
       "planRoles": ["build_rig", "information", "recover_rig"],
       "requiredMechanics": ["install_program", "run_flow", "hidden_zone_tool"],
-      "valueHints": {
-        "information": 1
-      },
+      "valueHints": {},
       "riskTags": ["hidden_zone_projection"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -2232,9 +2128,7 @@
         "v1922_runner_program_install_surface_ability_gated",
         "runner_program_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -2288,9 +2182,7 @@
         "v1922_runner_program_newsgroup_filter_gain_2",
         "runner_program_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -2345,10 +2237,7 @@
         "successful_run",
         "virus_counters"
       ],
-      "valueHints": {
-        "runPressure": 2,
-        "utility": 2
-      },
+      "valueHints": {},
       "riskTags": ["encounter", "virus_cleanup"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -2447,10 +2336,7 @@
         "subtype_noisy",
         "stealth_loss"
       ],
-      "valueHints": {
-        "rigCoverage": 2,
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": ["credit_reserve", "stealth_conflict"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -2498,9 +2384,7 @@
         "node_trash_recurring_credit",
         "recurring_start_turn"
       ],
-      "valueHints": {
-        "trashEconomy": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -2558,10 +2442,7 @@
         "successful_run",
         "virus_counters"
       ],
-      "valueHints": {
-        "runPressure": 2,
-        "utility": 2
-      },
+      "valueHints": {},
       "riskTags": ["encounter", "virus_cleanup"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -2618,9 +2499,7 @@
         "access_replacement",
         "top_rd_look"
       ],
-      "valueHints": {
-        "access": 1
-      },
+      "valueHints": {},
       "riskTags": ["hidden_zone_projection", "access_replacement"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -2683,9 +2562,7 @@
         "v1922_runner_program_install_surface_ability_gated",
         "runner_program_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -2736,10 +2613,7 @@
         "break_subroutine",
         "encounter_ice"
       ],
-      "valueHints": {
-        "runPressure": 2,
-        "rigCoverage": 3
-      },
+      "valueHints": {},
       "riskTags": ["encounter", "credit_reserve", "credit_intensive"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -2787,9 +2661,7 @@
         "break_wall_subroutine",
         "stealth_loss"
       ],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": ["encounter_window", "stealth_credit_accounting"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -2816,11 +2688,7 @@
         "subtype_icebreaker",
         "subtype_killer"
       ],
-      "valueHints": {
-        "runPressure": 2,
-        "rigCoverage": 2,
-        "tempo": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter",
         "credit_reserve",
@@ -2872,9 +2740,7 @@
         "v1922_runner_program_reflector_tagged_breaker",
         "runner_program_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -2927,10 +2793,7 @@
         "pump_strength",
         "break_trace_subroutine"
       ],
-      "valueHints": {
-        "trace": 1,
-        "breaker": 1
-      },
+      "valueHints": {},
       "riskTags": ["tag_window", "encounter_timing"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -2987,9 +2850,7 @@
         "v1922_runner_program_install_surface_ability_gated",
         "runner_program_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -3046,10 +2907,7 @@
         "expose_server_card",
         "legal_action_only"
       ],
-      "valueHints": {
-        "information": 2,
-        "tempo": 1
-      },
+      "valueHints": {},
       "riskTags": ["hidden_info_barrier", "server_targeting"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -3099,10 +2957,7 @@
         "shuffle",
         "legal_action_only"
       ],
-      "valueHints": {
-        "consistency": 3,
-        "tempo": 1
-      },
+      "valueHints": {},
       "riskTags": ["hidden_info_barrier", "shuffle_invalidates_memory"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -3167,10 +3022,7 @@
         "subtype_icebreaker",
         "subtype_killer"
       ],
-      "valueHints": {
-        "runPressure": 2,
-        "rigCoverage": 3
-      },
+      "valueHints": {},
       "riskTags": ["encounter", "credit_reserve", "credit_intensive"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -3217,9 +3069,7 @@
         "v1922_runner_program_net_damage_prevention",
         "runner_program_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -3262,9 +3112,7 @@
       "roles": ["program", "access"],
       "planRoles": ["build_rig", "run_pressure"],
       "requiredMechanics": ["install_program", "run_flow", "access"],
-      "valueHints": {
-        "access": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -3306,10 +3154,7 @@
         "link",
         "post_bid_link"
       ],
-      "valueHints": {
-        "trace": 1,
-        "postBidLink": 2
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -3346,10 +3191,7 @@
         "corp_start_turn_extra_draw",
         "virus_purge"
       ],
-      "valueHints": {
-        "tempo": 1,
-        "pressure": 2
-      },
+      "valueHints": {},
       "riskTags": ["counter_state"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -3399,9 +3241,7 @@
       "roles": ["program", "hidden_zone"],
       "planRoles": ["build_rig", "information"],
       "requiredMechanics": ["install_program", "run_flow", "hidden_zone_tool"],
-      "valueHints": {
-        "information": 1
-      },
+      "valueHints": {},
       "riskTags": ["hidden_zone_projection"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -3463,10 +3303,7 @@
         "encounter_ice",
         "run_strength_modifier"
       ],
-      "valueHints": {
-        "rigCoverage": 2,
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": ["encounter", "credit_reserve"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -3507,9 +3344,7 @@
         "v1922_runner_program_install_surface_ability_gated",
         "runner_program_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -3546,9 +3381,7 @@
         "v1922_runner_program_install_surface_ability_gated",
         "runner_program_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -3617,10 +3450,7 @@
         "hosted_card_cleanup",
         "hosted_program_memory_model"
       ],
-      "valueHints": {
-        "utility": 2,
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": ["hosting_cleanup"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -3657,10 +3487,7 @@
         "subtype_decoder",
         "subtype_icebreaker"
       ],
-      "valueHints": {
-        "runPressure": 2,
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": ["encounter"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -3710,9 +3537,7 @@
       ],
       "planRoles": ["build_rig", "run_support"],
       "requiredMechanics": ["install_program", "stealth"],
-      "valueHints": {
-        "run": 1
-      },
+      "valueHints": {},
       "riskTags": ["stealth_credit_restriction"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -3757,10 +3582,7 @@
         "subtype_icebreaker",
         "subtype_killer"
       ],
-      "valueHints": {
-        "runPressure": 2,
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": ["encounter", "credit_intensive"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -3808,10 +3630,7 @@
         "subtype_decoder",
         "subtype_icebreaker"
       ],
-      "valueHints": {
-        "runPressure": 2,
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": ["encounter"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -3865,10 +3684,7 @@
         "subtype_icebreaker",
         "subtype_worm"
       ],
-      "valueHints": {
-        "rigCoverage": 2,
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": ["encounter", "credit_reserve"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -3915,9 +3731,7 @@
         "v1922_runner_program_zetatech_software_installer_recurring_program_install_overlay",
         "runner_program_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -3980,9 +3794,7 @@
         "play_event",
         "run"
       ],
-      "valueHints": {
-        "runPressure": 3
-      },
+      "valueHints": {},
       "riskTags": ["encounter", "timing_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -4030,9 +3842,7 @@
         "runner_event_resolver",
         "corp_ice_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -4084,9 +3894,7 @@
         "prevention",
         "agenda_difficulty"
       ],
-      "valueHints": {
-        "defense": 1
-      },
+      "valueHints": {},
       "riskTags": ["tag_risk", "replacement_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -4159,10 +3967,7 @@
       "roles": ["draw", "setup"],
       "planRoles": ["draw_for_answers"],
       "requiredMechanics": ["play_event"],
-      "valueHints": {
-        "cardFlow": 4,
-        "setup": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_zone_change", "public_play"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -4199,9 +4004,7 @@
         "runner_event_resolver",
         "corp_ice_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -4256,9 +4059,7 @@
       "roles": ["event", "multiaccess", "run_event"],
       "planRoles": ["pressure_rnd"],
       "requiredMechanics": ["access", "play_event", "run"],
-      "valueHints": {
-        "runPressure": 3
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -4311,10 +4112,7 @@
         "militech_counter",
         "icebreaker_strength_modifier"
       ],
-      "valueHints": {
-        "tempo": 2,
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": ["conditional"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -4366,10 +4164,7 @@
         "play_event",
         "stolen_agenda_check"
       ],
-      "valueHints": {
-        "scoring": 2,
-        "runPressure": 1
-      },
+      "valueHints": {},
       "riskTags": ["conditional"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -4414,10 +4209,7 @@
         "runner_gain_credits",
         "runner_gain_tag"
       ],
-      "valueHints": {
-        "runPressure": 2,
-        "utility": 2
-      },
+      "valueHints": {},
       "riskTags": ["access_replacement", "tag_self"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -4476,9 +4268,7 @@
       "roles": ["event", "multiaccess", "run_event"],
       "planRoles": ["pressure_hq"],
       "requiredMechanics": ["access", "play_event", "run"],
-      "valueHints": {
-        "runPressure": 3
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -4532,9 +4322,7 @@
         "runner_event_resolver",
         "corp_ice_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -4592,10 +4380,7 @@
         "shuffle",
         "legal_action_only"
       ],
-      "valueHints": {
-        "consistency": 3,
-        "tempo": 1
-      },
+      "valueHints": {},
       "riskTags": ["hidden_info_barrier", "shuffle_invalidates_memory"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -4669,10 +4454,7 @@
         "expose_server_card",
         "legal_action_only"
       ],
-      "valueHints": {
-        "information": 3,
-        "run_safety": 1
-      },
+      "valueHints": {},
       "riskTags": ["hidden_info_barrier", "server_targeting"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -4720,10 +4502,7 @@
         "heap_to_grip",
         "legal_action_only"
       ],
-      "valueHints": {
-        "recursion": 3,
-        "tempo": 1
-      },
+      "valueHints": {},
       "riskTags": ["public_trash_to_hand"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -4778,10 +4557,7 @@
         "play_event",
         "stolen_agenda_check"
       ],
-      "valueHints": {
-        "scoring": 2,
-        "runPressure": 1
-      },
+      "valueHints": {},
       "riskTags": ["conditional"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -4820,9 +4596,7 @@
       "roles": ["event", "expose", "hidden_zone_tool"],
       "planRoles": ["safe_probe_run"],
       "requiredMechanics": ["expose_installed_cards", "side_safe_targeting"],
-      "valueHints": {
-        "information": 2
-      },
+      "valueHints": {},
       "riskTags": ["public_reveal", "hidden_info_barrier"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -4869,9 +4643,7 @@
         "expose_outermost_ice_each_data_fort",
         "legal_action_only"
       ],
-      "valueHints": {
-        "information": 2
-      },
+      "valueHints": {},
       "riskTags": ["public_reveal", "hidden_info_barrier"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -4918,9 +4690,7 @@
         "v1922_runner_event_stack_top5_choose_one_arrange_rest",
         "runner_event_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -4987,9 +4757,7 @@
         "run",
         "successful_run"
       ],
-      "valueHints": {
-        "runPressure": 3
-      },
+      "valueHints": {},
       "riskTags": ["credit_reserve", "encounter"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -5026,10 +4794,7 @@
       "roles": ["draw", "setup"],
       "planRoles": ["draw_for_answers"],
       "requiredMechanics": ["play_event"],
-      "valueHints": {
-        "cardFlow": 3,
-        "setup": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_zone_change", "public_play"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -5068,10 +4833,7 @@
         "successful_run",
         "trash_on_access"
       ],
-      "valueHints": {
-        "runPressure": 3,
-        "utility": 2
-      },
+      "valueHints": {},
       "riskTags": ["encounter", "timing_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -5127,8 +4889,7 @@
       "planRoles": ["recover_economy"],
       "requiredMechanics": ["play_event"],
       "valueHints": {
-        "economy": 3,
-        "tempo": 2
+        "economy": 3
       },
       "riskTags": ["public_play"],
       "aiSupportStatus": "ai_supported",
@@ -5163,9 +4924,7 @@
       "roles": ["event", "run_flow"],
       "planRoles": ["run_pressure"],
       "requiredMechanics": ["play_event", "start_run"],
-      "valueHints": {
-        "run": 1
-      },
+      "valueHints": {},
       "riskTags": ["run_commitment"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -5214,10 +4973,7 @@
         "shuffle",
         "legal_action_only"
       ],
-      "valueHints": {
-        "consistency": 3,
-        "tempo": 1
-      },
+      "valueHints": {},
       "riskTags": ["hidden_info_barrier", "shuffle_invalidates_memory"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -5272,9 +5028,7 @@
         "v1922_runner_event_installed_trash_gain_credits",
         "runner_event_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -5320,9 +5074,7 @@
         "draw_cards",
         "remove_from_game"
       ],
-      "valueHints": {
-        "cardFlow": 3
-      },
+      "valueHints": {},
       "riskTags": ["hidden_zone_projection"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -5369,9 +5121,7 @@
         "v1922_runner_event_remove_tag_optional_return",
         "runner_event_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -5421,9 +5171,7 @@
         "v1922_runner_event_grip_trash_gain_credits",
         "runner_event_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -5472,9 +5220,7 @@
         "deterministic_random_card_resolver",
         "generic_asset_node_ability_resolver"
       ],
-      "valueHints": {
-        "playfulAiGainAllPriority": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "random_counter_replay_required",
         "event_heap_movement",
@@ -5514,9 +5260,7 @@
         "play_event",
         "start_run"
       ],
-      "valueHints": {
-        "runPressure": 3
-      },
+      "valueHints": {},
       "riskTags": ["run_commitment"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -5566,9 +5310,7 @@
         "hq_run",
         "access_replacement"
       ],
-      "valueHints": {
-        "runPressure": 3
-      },
+      "valueHints": {},
       "riskTags": ["access_replacement"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -5615,10 +5357,7 @@
         "successful_run",
         "trash_on_access"
       ],
-      "valueHints": {
-        "runPressure": 3,
-        "utility": 2
-      },
+      "valueHints": {},
       "riskTags": ["encounter", "timing_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -5719,9 +5458,7 @@
         "runner_event_resolver",
         "corp_ice_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -5782,10 +5519,7 @@
         "shuffle",
         "legal_action_only"
       ],
-      "valueHints": {
-        "tempo": 3,
-        "consistency": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "temporary_install",
         "shuffle_invalidates_memory",
@@ -5860,9 +5594,7 @@
       "roles": ["access", "event"],
       "planRoles": ["run_pressure"],
       "requiredMechanics": ["play_event", "start_run", "access"],
-      "valueHints": {
-        "access": 1
-      },
+      "valueHints": {},
       "riskTags": ["run_commitment"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -5917,9 +5649,7 @@
       "roles": ["access", "event", "trace"],
       "planRoles": ["run_pressure", "trace_bid_support"],
       "requiredMechanics": ["play_event", "start_run", "trace", "access"],
-      "valueHints": {
-        "access": 1
-      },
+      "valueHints": {},
       "riskTags": ["trace_window", "run_commitment"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -5960,9 +5690,7 @@
         "v1922_runner_event_successful_hq_run_corp_pay_to_retain_hq",
         "runner_event_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -6011,10 +5739,7 @@
       "roles": ["event", "hidden_zone_tool", "program_search"],
       "planRoles": ["build_rig", "draw_for_answers"],
       "requiredMechanics": ["search_stack", "show_to_corp", "shuffle_stack"],
-      "valueHints": {
-        "rigCoverage": 2,
-        "cardFlow": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_zone_projection"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -6086,10 +5811,7 @@
         "play_event",
         "random_discard"
       ],
-      "valueHints": {
-        "runPressure": 1,
-        "utility": 3
-      },
+      "valueHints": {},
       "riskTags": ["conditional", "timing_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -6134,9 +5856,7 @@
       "roles": ["event", "tag_remove"],
       "planRoles": ["clear_tags"],
       "requiredMechanics": ["play_event", "remove_tag"],
-      "valueHints": {
-        "tagRelief": 2
-      },
+      "valueHints": {},
       "riskTags": ["tag_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -6186,9 +5906,7 @@
         "runner_program_resolver",
         "runner_event_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -6257,7 +5975,6 @@
         "successful_run"
       ],
       "valueHints": {
-        "runPressure": 2,
         "economy": 2
       },
       "riskTags": ["encounter"],
@@ -6316,9 +6033,7 @@
         "deck_unique_replacement",
         "successful_run_bonus_run"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -6387,9 +6102,7 @@
         "tag_avoid",
         "damage_prevention"
       ],
-      "valueHints": {
-        "survival": 1
-      },
+      "valueHints": {},
       "riskTags": ["tag_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -6439,9 +6152,7 @@
         "damage_prevention",
         "ablative_counter"
       ],
-      "valueHints": {
-        "survival": 2
-      },
+      "valueHints": {},
       "riskTags": ["damage_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -6494,11 +6205,7 @@
         "per_card_longtail_resolver_gate; install_hardware_memory_surface",
         "install_hardware_memory_surface"
       ],
-      "valueHints": {
-        "memoryLimitBonus": 1,
-        "perCardLongtailPriority": 2,
-        "recurringCredits": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -6556,9 +6263,7 @@
         "per_card_longtail_resolver_gate; install_hardware_memory_surface",
         "install_hardware_memory_surface"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -6613,9 +6318,7 @@
         "per_card_longtail_resolver_gate; install_hardware_memory_surface",
         "install_hardware_memory_surface"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -6656,9 +6359,7 @@
       "roles": ["hardware", "damage_prevention", "rig_defense"],
       "planRoles": ["build_rig", "survive_meat_damage"],
       "requiredMechanics": ["install_hardware", "damage_prevention"],
-      "valueHints": {
-        "survivability": 2
-      },
+      "valueHints": {},
       "riskTags": ["damage_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -6693,9 +6394,7 @@
       "roles": ["hardware", "tag_remove"],
       "planRoles": ["build_rig", "clear_tags"],
       "requiredMechanics": ["install_hardware", "remove_tag"],
-      "valueHints": {
-        "tagRelief": 1
-      },
+      "valueHints": {},
       "riskTags": ["tag_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -6736,9 +6435,7 @@
         "meat_damage",
         "damage_prevention"
       ],
-      "valueHints": {
-        "survival": 1
-      },
+      "valueHints": {},
       "riskTags": ["damage_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -6780,9 +6477,7 @@
         "damage_prevention",
         "damage_prevention_turn_limit"
       ],
-      "valueHints": {
-        "survival": 2
-      },
+      "valueHints": {},
       "riskTags": ["damage_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -6821,9 +6516,7 @@
         "multiaccess_hq",
         "successful_run"
       ],
-      "valueHints": {
-        "runPressure": 3
-      },
+      "valueHints": {},
       "riskTags": ["credit_reserve"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -6866,9 +6559,7 @@
         "recent_damage_gate",
         "draw_cards"
       ],
-      "valueHints": {
-        "survival": 2
-      },
+      "valueHints": {},
       "riskTags": ["damage_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -6916,9 +6607,7 @@
         "per_card_longtail_resolver_gate; install_hardware_memory_surface",
         "install_hardware_memory_surface"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -6977,9 +6666,7 @@
       "roles": ["hardware", "link"],
       "planRoles": ["build_rig", "trace_bid_support"],
       "requiredMechanics": ["install_hardware", "trace", "link"],
-      "valueHints": {
-        "link": 1
-      },
+      "valueHints": {},
       "riskTags": ["tag_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -7031,9 +6718,7 @@
         "persistent_special_state_resolver",
         "action_economy_handsize_modifier_resolver"
       ],
-      "valueHints": {
-        "modifier": 1
-      },
+      "valueHints": {},
       "riskTags": ["modifier_layering", "state_hash_replay_stable"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -7072,9 +6757,7 @@
         "persistent_special_state_resolver",
         "action_economy_handsize_modifier_resolver"
       ],
-      "valueHints": {
-        "modifier": 1
-      },
+      "valueHints": {},
       "riskTags": ["modifier_layering", "state_hash_replay_stable"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -7110,9 +6793,7 @@
       "roles": ["hardware", "tag_avoid"],
       "planRoles": ["build_rig", "avoid_tags"],
       "requiredMechanics": ["install_hardware", "tag_avoid", "credit_cost"],
-      "valueHints": {
-        "survival": 1
-      },
+      "valueHints": {},
       "riskTags": ["tag_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -7151,9 +6832,7 @@
         "per_card_longtail_resolver_gate; install_hardware_memory_surface",
         "install_hardware_memory_surface"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -7211,9 +6890,7 @@
         "per_card_longtail_resolver_gate; install_hardware_memory_surface",
         "install_hardware_memory_surface"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -7272,9 +6949,7 @@
         "trace_link_recurring_credit",
         "recurring_start_turn"
       ],
-      "valueHints": {
-        "traceBidSupport": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -7328,9 +7003,7 @@
       "roles": ["hardware", "multiaccess", "rd_pressure"],
       "planRoles": ["build_rig", "pressure_rnd"],
       "requiredMechanics": ["install_hardware", "rd_additional_access"],
-      "valueHints": {
-        "runPressure": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_zone_access_queue",
         "public_payload_only",
@@ -7371,9 +7044,7 @@
       "roles": ["hardware", "recurring"],
       "planRoles": ["build_rig", "run_support"],
       "requiredMechanics": ["install_hardware", "recurring_credit"],
-      "valueHints": {
-        "run": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -7430,9 +7101,7 @@
       "roles": ["hardware", "recurring"],
       "planRoles": ["build_rig", "run_support"],
       "requiredMechanics": ["install_hardware", "recurring_credit"],
-      "valueHints": {
-        "run": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -7482,9 +7151,7 @@
       "roles": ["hardware", "access"],
       "planRoles": ["build_rig", "run_pressure"],
       "requiredMechanics": ["install_hardware", "access", "multiaccess"],
-      "valueHints": {
-        "access": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -7538,9 +7205,7 @@
         "link_bits",
         "deck_unique_replacement"
       ],
-      "valueHints": {
-        "survival": 1
-      },
+      "valueHints": {},
       "riskTags": ["damage_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -7597,11 +7262,7 @@
       "roles": ["hardware", "memory", "memory_support", "setup", "build_rig"],
       "planRoles": ["build_rig"],
       "requiredMechanics": ["install_hardware", "subtype_chip"],
-      "valueHints": {
-        "memory": 3,
-        "rigCoverage": 2,
-        "setup": 2
-      },
+      "valueHints": {},
       "riskTags": ["install_runner", "credit_reserve"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -7635,10 +7296,7 @@
       "roles": ["memory", "setup", "build_rig"],
       "planRoles": ["build_rig"],
       "requiredMechanics": ["install_hardware"],
-      "valueHints": {
-        "memory": 1,
-        "setup": 2
-      },
+      "valueHints": {},
       "riskTags": ["install_runner"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -7671,11 +7329,7 @@
       "roles": ["hardware", "memory", "memory_support", "setup", "build_rig"],
       "planRoles": ["build_rig"],
       "requiredMechanics": ["install_hardware", "subtype_chip"],
-      "valueHints": {
-        "memory": 2,
-        "rigCoverage": 2,
-        "setup": 2
-      },
+      "valueHints": {},
       "riskTags": ["install_runner", "credit_reserve"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -7716,11 +7370,7 @@
         "recurring_pool_start_turn_resolver",
         "killer_restricted_run_credit_payment"
       ],
-      "valueHints": {
-        "killerRunCreditPriority": 2,
-        "installCost": 5,
-        "recurringCredits": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "killer_restricted_payment",
         "legal_actions_only",
@@ -7766,9 +7416,7 @@
         "base_link",
         "one_base_link_per_trace"
       ],
-      "valueHints": {
-        "link": 9
-      },
+      "valueHints": {},
       "riskTags": ["trace_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -7811,9 +7459,7 @@
       "roles": ["link", "resource"],
       "planRoles": ["build_rig", "trace_bid_support"],
       "requiredMechanics": ["install_resource", "base_link"],
-      "valueHints": {
-        "link": 1
-      },
+      "valueHints": {},
       "riskTags": ["trace_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -7862,9 +7508,7 @@
       "roles": ["link", "resource"],
       "planRoles": ["build_rig", "trace_bid_support"],
       "requiredMechanics": ["install_resource", "base_link"],
-      "valueHints": {
-        "link": 1
-      },
+      "valueHints": {},
       "riskTags": ["trace_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -7920,10 +7564,7 @@
         "shuffle",
         "legal_action_only"
       ],
-      "valueHints": {
-        "consistency": 3,
-        "information": 1
-      },
+      "valueHints": {},
       "riskTags": ["hidden_info_barrier", "shuffle_invalidates_memory"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -7984,9 +7625,7 @@
       "roles": ["link", "resource"],
       "planRoles": ["build_rig", "trace_bid_support"],
       "requiredMechanics": ["install_resource", "base_link"],
-      "valueHints": {
-        "link": 1
-      },
+      "valueHints": {},
       "riskTags": ["trace_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -8035,9 +7674,7 @@
       "roles": ["link", "resource"],
       "planRoles": ["build_rig", "trace_bid_support"],
       "requiredMechanics": ["install_resource", "base_link"],
-      "valueHints": {
-        "link": 1
-      },
+      "valueHints": {},
       "riskTags": ["trace_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -8098,7 +7735,6 @@
         "take_click_ability"
       ],
       "valueHints": {
-        "utility": 2,
         "economy": 3
       },
       "riskTags": ["resource_trash_if_tagged", "click_cost"],
@@ -8151,9 +7787,7 @@
         "virus_counter_purge_replacement",
         "corp_paid_trash_action"
       ],
-      "valueHints": {
-        "virus": 2
-      },
+      "valueHints": {},
       "riskTags": ["purge_window", "corp_trash_action"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -8207,10 +7841,7 @@
         "persistent_modifier",
         "unique_card"
       ],
-      "valueHints": {
-        "utility": 2,
-        "scoring": 1
-      },
+      "valueHints": {},
       "riskTags": ["agenda_cost", "board_tradeoff"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -8261,9 +7892,7 @@
       "roles": ["connection", "draw", "resource", "unique"],
       "planRoles": ["build_rig", "draw"],
       "requiredMechanics": ["install_resource", "resource_tag_interaction"],
-      "valueHints": {
-        "draw": 1
-      },
+      "valueHints": {},
       "riskTags": ["resource_trash_if_tagged"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -8312,9 +7941,7 @@
       "roles": ["resource", "tag_removal"],
       "planRoles": ["build_rig", "recover_economy"],
       "requiredMechanics": ["install_resource", "remove_tags", "trash_on_use"],
-      "valueHints": {
-        "survivability": 2
-      },
+      "valueHints": {},
       "riskTags": ["board_tradeoff"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -8399,9 +8026,7 @@
         "agenda_point_cost_resolver",
         "damage_event_prevention_resolver"
       ],
-      "valueHints": {
-        "modifier": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "modifier_layering",
         "state_hash_replay_stable",
@@ -8456,9 +8081,7 @@
       "roles": ["resource", "tag_avoid"],
       "planRoles": ["build_rig", "avoid_tags"],
       "requiredMechanics": ["install_resource", "tag_avoid"],
-      "valueHints": {
-        "survival": 1
-      },
+      "valueHints": {},
       "riskTags": ["tag_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -8495,9 +8118,7 @@
       "roles": ["economy", "resource"],
       "planRoles": ["build_rig", "information"],
       "requiredMechanics": ["install_resource", "resource_tag_interaction"],
-      "valueHints": {
-        "information": 1
-      },
+      "valueHints": {},
       "riskTags": ["resource_trash_if_tagged"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -8596,9 +8217,7 @@
         "link",
         "recurring_start_turn"
       ],
-      "valueHints": {
-        "traceDefense": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "resource_trash_if_tagged",
         "restricted_payment",
@@ -8743,9 +8362,7 @@
         "resource_tag_interaction",
         "damage_prevention"
       ],
-      "valueHints": {
-        "survival": 1
-      },
+      "valueHints": {},
       "riskTags": ["resource_trash_if_tagged"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -8799,8 +8416,8 @@
       ],
       "valueHints": {
         "installCreditGain": 12,
-        "startOfTurnCreditLoss": 1,
-        "leavePlayPayCost": 10
+        "leavePlayPayCost": 10,
+        "startOfTurnCreditLoss": 1
       },
       "riskTags": [
         "credit_swing",
@@ -8865,10 +8482,7 @@
         "shuffle",
         "legal_action_only"
       ],
-      "valueHints": {
-        "consistency": 3,
-        "information": 1
-      },
+      "valueHints": {},
       "riskTags": ["hidden_info_barrier", "shuffle_invalidates_memory"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -8935,9 +8549,7 @@
         "action_cost",
         "credit_cost"
       ],
-      "valueHints": {
-        "survival": 1
-      },
+      "valueHints": {},
       "riskTags": ["tag_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -8992,9 +8604,7 @@
         "action_economy_handsize_modifier_resolver",
         "damage_event_prevention_resolver"
       ],
-      "valueHints": {
-        "modifier": 1
-      },
+      "valueHints": {},
       "riskTags": ["modifier_layering", "state_hash_replay_stable"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -9051,9 +8661,7 @@
         "recurring_pool_start_turn_resolver",
         "damage_event_prevention_resolver"
       ],
-      "valueHints": {
-        "startTurnRandomPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "random_counter_replay_required",
         "public_payload_only",
@@ -9127,10 +8735,7 @@
         "choose_data_fort_on_install",
         "ice_install_extra_cost_2"
       ],
-      "valueHints": {
-        "utility": 2,
-        "runPressure": 1
-      },
+      "valueHints": {},
       "riskTags": ["board_presence"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -9225,10 +8830,7 @@
         "reorder_stack",
         "legal_action_only"
       ],
-      "valueHints": {
-        "information": 2,
-        "consistency": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_info_barrier", "reorder_updates_memory"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -9296,9 +8898,7 @@
         "start_turn_counter_removal",
         "paid_counter_removal"
       ],
-      "valueHints": {
-        "tempo": 2
-      },
+      "valueHints": {},
       "riskTags": ["counter_state", "mu_check"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -9371,10 +8971,7 @@
         "shuffle",
         "legal_action_only"
       ],
-      "valueHints": {
-        "consistency": 3,
-        "tempo": 1
-      },
+      "valueHints": {},
       "riskTags": ["hidden_info_barrier", "shuffle_invalidates_memory"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -9447,8 +9044,7 @@
         "take_click_ability"
       ],
       "valueHints": {
-        "economy": 3,
-        "tempo": 1
+        "economy": 3
       },
       "riskTags": [
         "resource_trash_if_tagged",
@@ -9502,8 +9098,7 @@
       "planRoles": ["draw_for_answers", "recover_economy"],
       "requiredMechanics": ["draw", "gain_credit", "install_resource"],
       "valueHints": {
-        "economy": 2,
-        "cardFlow": 2
+        "economy": 2
       },
       "riskTags": ["board_presence"],
       "aiSupportStatus": "ai_supported",
@@ -9555,7 +9150,6 @@
         "choice_resolution"
       ],
       "valueHints": {
-        "utility": 2,
         "economy": 2
       },
       "riskTags": ["board_tradeoff"],
@@ -9611,10 +9205,7 @@
         "link",
         "post_bid_link"
       ],
-      "valueHints": {
-        "link": 1,
-        "postBidLink": 1
-      },
+      "valueHints": {},
       "riskTags": ["resource_trash_if_tagged"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -9657,9 +9248,7 @@
       "roles": ["link", "resource", "run_drawback"],
       "planRoles": ["build_rig", "trace_bid_support"],
       "requiredMechanics": ["install_resource", "base_link", "counter"],
-      "valueHints": {
-        "link": 1
-      },
+      "valueHints": {},
       "riskTags": ["trace_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -9714,9 +9303,7 @@
       "roles": ["rd_pressure", "resource"],
       "planRoles": ["build_rig", "information"],
       "requiredMechanics": ["install_resource", "resource_tag_interaction"],
-      "valueHints": {
-        "information": 1
-      },
+      "valueHints": {},
       "riskTags": ["resource_trash_if_tagged"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -9748,8 +9335,7 @@
       "planRoles": ["recover_economy", "contest_remote"],
       "requiredMechanics": ["start_turn_gain_2", "trash_on_run"],
       "valueHints": {
-        "economy": 2,
-        "runPressure": 1
+        "economy": 2
       },
       "riskTags": ["board_presence", "timing_window"],
       "aiSupportStatus": "ai_supported",
@@ -9793,9 +9379,7 @@
         "trauma_counter",
         "action_counter"
       ],
-      "valueHints": {
-        "survival": 2
-      },
+      "valueHints": {},
       "riskTags": ["damage_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -9836,9 +9420,7 @@
         "program_trash_prevention",
         "hardware_trash_prevention"
       ],
-      "valueHints": {
-        "survival": 2
-      },
+      "valueHints": {},
       "riskTags": ["trash_prevention_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -9906,9 +9488,7 @@
         "meat_damage",
         "damage_prevention"
       ],
-      "valueHints": {
-        "survival": 1
-      },
+      "valueHints": {},
       "riskTags": ["tag_window", "damage_window", "run_spending_cap"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -9983,10 +9563,7 @@
         "shuffle_hidden_zone",
         "take_click_ability"
       ],
-      "valueHints": {
-        "scoring": 2,
-        "cardFlow": 3
-      },
+      "valueHints": {},
       "riskTags": ["hidden_zone_change", "timing_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -10087,9 +9664,7 @@
         "hidden_zone",
         "overadvance"
       ],
-      "valueHints": {
-        "agenda": 2
-      },
+      "valueHints": {},
       "riskTags": ["score_window", "hidden_zone_barrier"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -10136,9 +9711,7 @@
         "global_static_modifier_layer_resolver",
         "damage_event_prevention_resolver"
       ],
-      "valueHints": {
-        "modifier": 1
-      },
+      "valueHints": {},
       "riskTags": ["modifier_layering", "state_hash_replay_stable"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -10184,9 +9757,7 @@
         "hidden_zone_search_reveal_reorder_resolver",
         "global_static_modifier_layer_resolver"
       ],
-      "valueHints": {
-        "modifier": 1
-      },
+      "valueHints": {},
       "riskTags": ["modifier_layering", "state_hash_replay_stable"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -10244,9 +9815,7 @@
         "typed_counter_virus_purge_resolver",
         "action_economy_handsize_modifier_resolver"
       ],
-      "valueHints": {
-        "modifier": 1
-      },
+      "valueHints": {},
       "riskTags": ["modifier_layering", "state_hash_replay_stable"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -10325,7 +9894,6 @@
         "take_click_ability"
       ],
       "valueHints": {
-        "scoring": 2,
         "economy": 2
       },
       "riskTags": ["hidden_until_score_or_access"],
@@ -10390,10 +9958,7 @@
         "hq_agenda_shuffle_into_rd",
         "legal_action_only"
       ],
-      "valueHints": {
-        "agenda": 2,
-        "information": 2
-      },
+      "valueHints": {},
       "riskTags": ["public_reveal", "scored_agenda_action"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -10444,9 +10009,7 @@
         "v1922_scored_agenda_action_gain_2_until_install_or_rez",
         "corp_agenda_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -10501,9 +10064,7 @@
         "v1922_corp_agenda_on_score_credit_threshold",
         "corp_agenda_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -10550,9 +10111,7 @@
         "v1922_corp_agenda_data_fort_reclamation_hq_install_sequence",
         "corp_agenda_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -10607,7 +10166,6 @@
         "counter"
       ],
       "valueHints": {
-        "agenda": 2,
         "economy": 1
       },
       "riskTags": ["scored_agenda_action"],
@@ -10643,7 +10201,6 @@
         "start_of_turn_credit_gain"
       ],
       "valueHints": {
-        "agenda": 2,
         "economy": 1
       },
       "riskTags": ["start_of_turn_trigger"],
@@ -10744,7 +10301,6 @@
         "global_static_modifier_layer_resolver"
       ],
       "valueHints": {
-        "modifier": 1,
         "economy": 1
       },
       "riskTags": ["modifier_layering", "state_hash_replay_stable"],
@@ -10799,10 +10355,7 @@
         "persistent_modifier",
         "score"
       ],
-      "valueHints": {
-        "scoring": 2,
-        "tempo": 1
-      },
+      "valueHints": {},
       "riskTags": ["hidden_until_score_or_access"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -10849,9 +10402,7 @@
         "hidden_zone",
         "overadvance"
       ],
-      "valueHints": {
-        "agenda": 2
-      },
+      "valueHints": {},
       "riskTags": ["score_window", "hidden_zone_barrier"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -10902,9 +10453,7 @@
         "steal",
         "subtype_gray_ops"
       ],
-      "valueHints": {
-        "scoring": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_until_score_or_access"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -10942,9 +10491,7 @@
         "ice_strength_modifier_resolver",
         "subroutine_modifier_resolver"
       ],
-      "valueHints": {
-        "modifier": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "modifier_layering",
         "score_window",
@@ -10998,9 +10545,7 @@
         "action_economy_handsize_modifier_resolver",
         "global_static_modifier_layer_resolver"
       ],
-      "valueHints": {
-        "modifier": 1
-      },
+      "valueHints": {},
       "riskTags": ["modifier_layering", "state_hash_replay_stable"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -11028,9 +10573,7 @@
         "v1922_scored_agenda_action_gain_3_for_2_actions",
         "corp_agenda_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -11093,10 +10636,7 @@
         "take_click_ability",
         "trace"
       ],
-      "valueHints": {
-        "scoring": 2,
-        "threat": 3
-      },
+      "valueHints": {},
       "riskTags": ["hidden_until_score_or_access", "tag_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -11192,10 +10732,7 @@
         "tag_condition",
         "take_click_ability"
       ],
-      "valueHints": {
-        "scoring": 2,
-        "threat": 3
-      },
+      "valueHints": {},
       "riskTags": ["hidden_until_score_or_access", "tag_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -11293,7 +10830,6 @@
         "take_click_ability"
       ],
       "valueHints": {
-        "scoring": 3,
         "economy": 2
       },
       "riskTags": ["hidden_until_score_or_access"],
@@ -11354,9 +10890,7 @@
         "v1922_scored_agenda_action_gain_3",
         "corp_agenda_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -11422,8 +10956,7 @@
         "start_of_turn_trigger"
       ],
       "valueHints": {
-        "economy": 2,
-        "scoring": 2
+        "economy": 2
       },
       "riskTags": ["hidden_until_score_or_access"],
       "aiSupportStatus": "ai_supported",
@@ -11469,11 +11002,7 @@
         "rez_ice",
         "on_score_rez_ice_free"
       ],
-      "valueHints": {
-        "scoring": 4,
-        "tempo": 3,
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_until_score_or_access",
         "score_window",
@@ -11543,10 +11072,7 @@
         "take_click_ability",
         "trace"
       ],
-      "valueHints": {
-        "scoring": 2,
-        "threat": 3
-      },
+      "valueHints": {},
       "riskTags": ["hidden_until_score_or_access", "tag_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -11650,9 +11176,7 @@
         "install_remote",
         "score"
       ],
-      "valueHints": {
-        "scoring": 3
-      },
+      "valueHints": {},
       "riskTags": ["hidden_until_score_or_access"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -11706,10 +11230,7 @@
         "global_ice_strength_modifier",
         "persistent_modifier"
       ],
-      "valueHints": {
-        "scoring": 3,
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_until_score_or_access"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -11765,9 +11286,7 @@
         "v1922_corp_agenda_security_purge_rd_top3",
         "corp_agenda_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -11824,10 +11343,7 @@
         "tag_condition",
         "take_click_ability"
       ],
-      "valueHints": {
-        "scoring": 3,
-        "threat": 4
-      },
+      "valueHints": {},
       "riskTags": ["hidden_until_score_or_access", "tag_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -11921,9 +11437,7 @@
         "persistent_special_state_resolver",
         "action_economy_handsize_modifier_resolver"
       ],
-      "valueHints": {
-        "modifier": 1
-      },
+      "valueHints": {},
       "riskTags": ["modifier_layering", "state_hash_replay_stable"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -11988,8 +11502,6 @@
         "persistent_modifier"
       ],
       "valueHints": {
-        "scoring": 4,
-        "defense": 3,
         "economy": 2
       },
       "riskTags": [
@@ -12067,9 +11579,7 @@
         "steal",
         "subtype_asset"
       ],
-      "valueHints": {
-        "scoring": 4
-      },
+      "valueHints": {},
       "riskTags": ["hidden_until_score_or_access"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -12095,9 +11605,7 @@
       "roles": ["ice", "trace"],
       "planRoles": ["defend_server"],
       "requiredMechanics": ["install_ice", "rez_ice", "trace"],
-      "valueHints": {
-        "defense": 1
-      },
+      "valueHints": {},
       "riskTags": ["trace_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -12149,10 +11657,7 @@
         "rez_ice",
         "run_cost_modifier"
       ],
-      "valueHints": {
-        "defense": 3,
-        "threat": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -12228,10 +11733,7 @@
         "rez_ice",
         "trash_installed_program"
       ],
-      "valueHints": {
-        "defense": 4,
-        "threat": 4
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice", "program_trash"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -12288,10 +11790,7 @@
         "net_damage",
         "breaker_restriction"
       ],
-      "valueHints": {
-        "defense": 2,
-        "threat": 4
-      },
+      "valueHints": {},
       "riskTags": ["damage_window", "hidden_ice", "next_ice_lock"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -12374,10 +11873,7 @@
         "persistent_modifier",
         "rez_ice"
       ],
-      "valueHints": {
-        "defense": 2,
-        "threat": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -12443,10 +11939,7 @@
         "persistent_modifier",
         "rez_ice"
       ],
-      "valueHints": {
-        "defense": 2,
-        "threat": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -12515,7 +12008,6 @@
         "counter_remove_action"
       ],
       "valueHints": {
-        "defense": 2,
         "damage": 2
       },
       "riskTags": ["trace_window", "damage_window"],
@@ -12609,9 +12101,7 @@
         "meat_damage",
         "end_the_run"
       ],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["trace_window", "damage_window", "unpreventable_damage"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -12713,10 +12203,7 @@
         "core_damage",
         "flatline"
       ],
-      "valueHints": {
-        "defense": 3,
-        "threat": 3
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -12771,9 +12258,7 @@
         "rez_ice",
         "subtype_code_gate"
       ],
-      "valueHints": {
-        "defense": 3
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -12832,10 +12317,7 @@
         "core_damage",
         "flatline"
       ],
-      "valueHints": {
-        "defense": 2,
-        "threat": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -12922,9 +12404,7 @@
         "rez_ice",
         "subtype_wall"
       ],
-      "valueHints": {
-        "defense": 3
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -12982,10 +12462,7 @@
         "uninstall_runner_program",
         "end_the_run"
       ],
-      "valueHints": {
-        "defense": 3,
-        "threat": 3
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -13023,9 +12500,7 @@
         "net_damage",
         "next_encounter_no_break"
       ],
-      "valueHints": {
-        "defense": 1
-      },
+      "valueHints": {},
       "riskTags": ["damage_window", "next_encounter_modifier"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -13090,10 +12565,7 @@
         "rez_ice",
         "trash_installed_program"
       ],
-      "valueHints": {
-        "defense": 4,
-        "threat": 4
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice", "program_trash"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -13132,10 +12604,7 @@
         "counter",
         "runner_counter_removal"
       ],
-      "valueHints": {
-        "defense": 4,
-        "threat": 4
-      },
+      "valueHints": {},
       "riskTags": [
         "tag_window",
         "counter_pressure",
@@ -13225,9 +12694,7 @@
         "rez_ice",
         "subtype_wall"
       ],
-      "valueHints": {
-        "defense": 1
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -13285,9 +12752,7 @@
         "rez_ice",
         "subtype_wall"
       ],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -13344,9 +12809,7 @@
         "rez_ice",
         "subtype_code_gate"
       ],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -13403,9 +12866,7 @@
         "trace",
         "end_the_run"
       ],
-      "valueHints": {
-        "defense": 1
-      },
+      "valueHints": {},
       "riskTags": ["trace_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -13451,9 +12912,7 @@
       "roles": ["ice", "trace"],
       "planRoles": ["defend_server"],
       "requiredMechanics": ["install_ice", "rez_ice", "trace"],
-      "valueHints": {
-        "defense": 1
-      },
+      "valueHints": {},
       "riskTags": ["trace_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -13505,10 +12964,7 @@
         "install_ice",
         "rez_ice"
       ],
-      "valueHints": {
-        "defense": 2,
-        "threat": 4
-      },
+      "valueHints": {},
       "riskTags": ["damage", "hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -13566,10 +13022,7 @@
         "add_tag",
         "subtype_sentry"
       ],
-      "valueHints": {
-        "defense": 2,
-        "threat": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice", "tag", "trace"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -13638,9 +13091,7 @@
         "rez_ice",
         "subtype_code_gate"
       ],
-      "valueHints": {
-        "defense": 1
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -13697,9 +13148,7 @@
         "rez_ice",
         "subtype_wall"
       ],
-      "valueHints": {
-        "defense": 3
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -13756,9 +13205,7 @@
         "trace",
         "trash_installed_program"
       ],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["trace_window", "installed_card_destroy"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -13809,9 +13256,7 @@
         "v1922_corp_ice_haunting_inquisition_run_lock",
         "corp_ice_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -13867,9 +13312,7 @@
         "meat_damage",
         "end_the_run"
       ],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["trace_window", "damage_window", "unpreventable_damage"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -13943,10 +13386,7 @@
         "add_tag",
         "subtype_sentry"
       ],
-      "valueHints": {
-        "defense": 2,
-        "threat": 3
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice", "tag", "trace"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -14017,10 +13457,7 @@
         "reveal_rd_top",
         "legal_action_only"
       ],
-      "valueHints": {
-        "defense": 2,
-        "information": 2
-      },
+      "valueHints": {},
       "riskTags": ["public_reveal", "subroutine_bound"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -14084,10 +13521,7 @@
         "rez_ice",
         "trace"
       ],
-      "valueHints": {
-        "defense": 3,
-        "threat": 4
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice", "tag_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -14139,9 +13573,7 @@
         "rez_ice",
         "subtype_code_gate"
       ],
-      "valueHints": {
-        "defense": 3
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -14199,9 +13631,7 @@
         "rez_ice",
         "subtype_wall"
       ],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["damage", "hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -14245,10 +13675,7 @@
         "core_damage",
         "flatline"
       ],
-      "valueHints": {
-        "defense": 4,
-        "threat": 4
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -14298,9 +13725,7 @@
       "roles": ["ice", "trace", "core_damage", "end_run"],
       "planRoles": ["defend_server"],
       "requiredMechanics": ["install_ice", "rez_ice", "trace", "core_damage"],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["trace_window", "damage_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -14371,9 +13796,7 @@
         "rez_ice",
         "subtype_code_gate"
       ],
-      "valueHints": {
-        "defense": 4
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -14431,9 +13854,7 @@
         "rez_ice",
         "subtype_code_gate"
       ],
-      "valueHints": {
-        "defense": 3
-      },
+      "valueHints": {},
       "riskTags": ["damage", "hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -14483,10 +13904,7 @@
         "net_damage",
         "breaker_restriction"
       ],
-      "valueHints": {
-        "defense": 2,
-        "threat": 3
-      },
+      "valueHints": {},
       "riskTags": ["damage_window", "hidden_ice", "next_ice_lock"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -14558,9 +13976,7 @@
         "subtype_deckrash",
         "subtype_sentry"
       ],
-      "valueHints": {
-        "defense": 3
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -14612,9 +14028,7 @@
       "roles": ["ice", "trace", "tag", "counter"],
       "planRoles": ["defend_server", "tag_pressure"],
       "requiredMechanics": ["install_ice", "rez_ice", "trace", "add_tag"],
-      "valueHints": {
-        "defense": 1
-      },
+      "valueHints": {},
       "riskTags": ["trace_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -14672,9 +14086,7 @@
         "rez_ice",
         "subtype_code_gate"
       ],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -14732,9 +14144,7 @@
         "rez_ice",
         "subtype_wall"
       ],
-      "valueHints": {
-        "defense": 3
-      },
+      "valueHints": {},
       "riskTags": ["damage", "hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -14776,9 +14186,7 @@
         "rez_ice",
         "subtype_wall"
       ],
-      "valueHints": {
-        "defense": 3
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -14835,9 +14243,7 @@
         "trace",
         "end_the_run"
       ],
-      "valueHints": {
-        "defense": 1
-      },
+      "valueHints": {},
       "riskTags": ["trace_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -14888,9 +14294,7 @@
         "rez_ice",
         "subtype_wall"
       ],
-      "valueHints": {
-        "defense": 4
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -14947,9 +14351,7 @@
         "rez_ice",
         "subtype_code_gate"
       ],
-      "valueHints": {
-        "defense": 3
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -15007,10 +14409,7 @@
         "uninstall_runner_program",
         "end_the_run"
       ],
-      "valueHints": {
-        "defense": 3,
-        "threat": 3
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -15060,10 +14459,7 @@
         "jack_out_restriction",
         "rez_ice"
       ],
-      "valueHints": {
-        "defense": 2,
-        "threat": 4
-      },
+      "valueHints": {},
       "riskTags": ["encounter", "hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -15125,9 +14521,7 @@
         "rez_ice",
         "subtype_wall"
       ],
-      "valueHints": {
-        "defense": 4
-      },
+      "valueHints": {},
       "riskTags": ["damage", "hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -15169,9 +14563,7 @@
         "rez_ice",
         "subtype_code_gate"
       ],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -15229,10 +14621,7 @@
         "next_action_forfeit",
         "rez_ice"
       ],
-      "valueHints": {
-        "defense": 3,
-        "threat": 4
-      },
+      "valueHints": {},
       "riskTags": ["action_lock", "hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -15302,10 +14691,7 @@
         "reorder_rd_top2",
         "legal_action_only"
       ],
-      "valueHints": {
-        "defense": 2,
-        "information": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_info_barrier",
         "subroutine_bound",
@@ -15350,10 +14736,7 @@
         "uninstall_runner_program",
         "end_the_run"
       ],
-      "valueHints": {
-        "defense": 2,
-        "threat": 3
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -15389,9 +14772,7 @@
         "v1922_corp_ice_future_end_the_run_subroutine",
         "corp_ice_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -15481,10 +14862,7 @@
         "rez_ice",
         "run_rewind"
       ],
-      "valueHints": {
-        "defense": 3,
-        "threat": 3
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice", "random_outcome"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -15540,9 +14918,7 @@
         "runner_program_resolver",
         "corp_ice_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -15627,9 +15003,7 @@
         "v1922_corp_ice_break_cost_modifier",
         "corp_ice_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -15708,9 +15082,7 @@
         "rez_ice",
         "subtype_wall"
       ],
-      "valueHints": {
-        "defense": 4
-      },
+      "valueHints": {},
       "riskTags": ["damage", "hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -15788,9 +15160,7 @@
         "rez_ice",
         "subtype_wall"
       ],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -15846,9 +15216,7 @@
         "v1922_corp_ice_core_damage_etr",
         "corp_ice_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -15956,9 +15324,7 @@
       "roles": ["draw_operation", "operation"],
       "planRoles": ["recover_economy"],
       "requiredMechanics": ["draw", "play_operation"],
-      "valueHints": {
-        "cardFlow": 2
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -16015,9 +15381,7 @@
         "tags",
         "trace"
       ],
-      "valueHints": {
-        "threat": 3
-      },
+      "valueHints": {},
       "riskTags": ["tag_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -16103,9 +15467,7 @@
         "tags",
         "trace"
       ],
-      "valueHints": {
-        "threat": 2
-      },
+      "valueHints": {},
       "riskTags": ["tag_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -16186,8 +15548,7 @@
         "tags"
       ],
       "valueHints": {
-        "economy": 3,
-        "threat": 3
+        "economy": 3
       },
       "riskTags": ["tag"],
       "aiSupportStatus": "ai_supported",
@@ -16261,9 +15622,7 @@
       ],
       "planRoles": ["bait_runner", "protect_hq"],
       "requiredMechanics": ["play_operation", "tags", "trash_resource"],
-      "valueHints": {
-        "threat": 3
-      },
+      "valueHints": {},
       "riskTags": ["tag_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -16345,9 +15704,7 @@
         "tags",
         "subtype_gray_ops"
       ],
-      "valueHints": {
-        "threat": 3
-      },
+      "valueHints": {},
       "riskTags": ["tag", "public_play"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -16422,8 +15779,7 @@
       "planRoles": ["recover_economy"],
       "requiredMechanics": ["credits", "draw", "play_operation"],
       "valueHints": {
-        "economy": 3,
-        "cardFlow": 2
+        "economy": 3
       },
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
@@ -16483,9 +15839,7 @@
         "v1922_corp_operation_install_action_bundle",
         "corp_operation_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -16589,9 +15943,7 @@
       "roles": ["operation", "counter", "agenda"],
       "planRoles": ["corp_agenda_operation"],
       "requiredMechanics": ["play_operation", "counter", "agenda_difficulty"],
-      "valueHints": {
-        "agenda": 1
-      },
+      "valueHints": {},
       "riskTags": ["score_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -16666,9 +16018,7 @@
         "advancement_counter",
         "overadvance"
       ],
-      "valueHints": {
-        "agenda": 1
-      },
+      "valueHints": {},
       "riskTags": ["score_window", "counter_accounting"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -16748,8 +16098,7 @@
         "subtype_gray_ops"
       ],
       "valueHints": {
-        "economy": 3,
-        "threat": 3
+        "economy": 3
       },
       "riskTags": ["tag", "public_play"],
       "aiSupportStatus": "ai_supported",
@@ -16904,8 +16253,7 @@
       "planRoles": ["recover_economy"],
       "requiredMechanics": ["credits", "draw", "play_operation"],
       "valueHints": {
-        "economy": 3,
-        "cardFlow": 2
+        "economy": 3
       },
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
@@ -16965,9 +16313,7 @@
         "v1922_corp_operation_private_archives_to_hq",
         "corp_operation_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -17083,9 +16429,7 @@
         "v1922_corp_operation_private_rd_top5_reorder",
         "corp_operation_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -17139,9 +16483,7 @@
         "runner_is_tagged",
         "trash_hardware"
       ],
-      "valueHints": {
-        "tagPunish": 2
-      },
+      "valueHints": {},
       "riskTags": ["requires_visible_tag"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -17224,9 +16566,7 @@
         "agenda_difficulty",
         "overadvance"
       ],
-      "valueHints": {
-        "agenda": 1
-      },
+      "valueHints": {},
       "riskTags": ["score_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -17299,9 +16639,7 @@
         "subtype_black_ops",
         "tags"
       ],
-      "valueHints": {
-        "threat": 4
-      },
+      "valueHints": {},
       "riskTags": ["damage", "tag"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -17396,9 +16734,7 @@
         "subtype_black_ops",
         "tags"
       ],
-      "valueHints": {
-        "threat": 4
-      },
+      "valueHints": {},
       "riskTags": ["damage", "tag"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -17552,9 +16888,7 @@
         "agenda_difficulty",
         "overadvance"
       ],
-      "valueHints": {
-        "advance": 2
-      },
+      "valueHints": {},
       "riskTags": ["counter_accounting", "target_revalidation"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -17622,9 +16956,7 @@
       "roles": ["operation", "counter", "agenda"],
       "planRoles": ["corp_agenda_operation"],
       "requiredMechanics": ["play_operation", "counter", "agenda_difficulty"],
-      "valueHints": {
-        "agenda": 1
-      },
+      "valueHints": {},
       "riskTags": ["counter_accounting"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -17694,9 +17026,7 @@
         "give_runner_tag",
         "tags"
       ],
-      "valueHints": {
-        "threat": 3
-      },
+      "valueHints": {},
       "riskTags": ["tag", "public_play"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -17762,9 +17092,7 @@
         "subtype_black_ops",
         "tags"
       ],
-      "valueHints": {
-        "threat": 4
-      },
+      "valueHints": {},
       "riskTags": ["damage", "tag"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -17872,7 +17200,7 @@
       ],
       "valueHints": {
         "economy": 4,
-        "risk": 4
+        "remoteRootValue": 4
       },
       "riskTags": [
         "agenda_point_cost",
@@ -17935,7 +17263,8 @@
         "trash_on_access"
       ],
       "valueHints": {
-        "economy": 2
+        "economy": 2,
+        "remoteRootValue": 2
       },
       "riskTags": ["runner_trash_value"],
       "aiSupportStatus": "ai_supported",
@@ -18004,7 +17333,7 @@
       "planRoles": ["remote_asset_pressure"],
       "requiredMechanics": ["install_asset", "rez_card", "trace"],
       "valueHints": {
-        "trace": 3
+        "remoteRootValue": 3
       },
       "riskTags": ["trace_window"],
       "aiSupportStatus": "ai_supported",
@@ -18070,7 +17399,8 @@
         "gain_credit"
       ],
       "valueHints": {
-        "economy": 2
+        "economy": 2,
+        "remoteRootValue": 2
       },
       "riskTags": ["recurring_refresh"],
       "aiSupportStatus": "ai_supported",
@@ -18140,7 +17470,7 @@
         "agenda_difficulty"
       ],
       "valueHints": {
-        "remote": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["runner_trash_value"],
       "aiSupportStatus": "ai_supported",
@@ -18220,7 +17550,7 @@
         "global_static_modifier_layer_resolver"
       ],
       "valueHints": {
-        "modifier": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["modifier_layering", "state_hash_replay_stable"],
       "aiSupportStatus": "ai_supported",
@@ -18290,7 +17620,8 @@
         "gain_credit"
       ],
       "valueHints": {
-        "economy": 2
+        "economy": 2,
+        "remoteRootValue": 2
       },
       "riskTags": ["hidden_zone_barrier", "start_of_turn_window"],
       "aiSupportStatus": "ai_supported",
@@ -18355,7 +17686,8 @@
         "installed_card_destroy"
       ],
       "valueHints": {
-        "damage": 1
+        "damage": 1,
+        "remoteRootValue": 1
       },
       "riskTags": ["access_window", "visible_targeting"],
       "aiSupportStatus": "ai_supported",
@@ -18426,7 +17758,7 @@
         "trash_installed_runner_card"
       ],
       "valueHints": {
-        "board_pressure": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["visible_targeting"],
       "aiSupportStatus": "ai_supported",
@@ -18477,8 +17809,8 @@
         "persistent_modifier"
       ],
       "valueHints": {
-        "defense": 2,
-        "economy": 2
+        "economy": 2,
+        "remoteRootValue": 2
       },
       "riskTags": ["hidden_root"],
       "aiSupportStatus": "ai_supported",
@@ -18551,7 +17883,7 @@
       "planRoles": ["remote_asset_economy"],
       "requiredMechanics": ["install_asset", "rez_card", "trash_on_access"],
       "valueHints": {
-        "remote": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["runner_trash_value"],
       "aiSupportStatus": "ai_supported",
@@ -18619,7 +17951,7 @@
         "remove_virus_counter"
       ],
       "valueHints": {
-        "counter_control": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["visible_targeting"],
       "aiSupportStatus": "ai_supported",
@@ -18666,8 +17998,8 @@
         "persistent_modifier"
       ],
       "valueHints": {
-        "defense": 2,
-        "economy": 2
+        "economy": 2,
+        "remoteRootValue": 2
       },
       "riskTags": ["hidden_root"],
       "aiSupportStatus": "ai_supported",
@@ -18735,7 +18067,8 @@
       "planRoles": ["remote_asset_economy"],
       "requiredMechanics": ["install_asset", "rez_card", "gain_credit"],
       "valueHints": {
-        "economy": 2
+        "economy": 2,
+        "remoteRootValue": 2
       },
       "riskTags": ["runner_trash_value"],
       "aiSupportStatus": "ai_supported",
@@ -18783,7 +18116,7 @@
         "global_static_modifier_layer_resolver"
       ],
       "valueHints": {
-        "modifier": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["modifier_layering", "state_hash_replay_stable"],
       "aiSupportStatus": "ai_supported",
@@ -18838,7 +18171,7 @@
         "overadvance"
       ],
       "valueHints": {
-        "remote": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["access_window", "visible_targeting"],
       "aiSupportStatus": "ai_supported",
@@ -18909,7 +18242,7 @@
         "global_static_modifier_layer_resolver"
       ],
       "valueHints": {
-        "modifier": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["modifier_layering", "state_hash_replay_stable"],
       "aiSupportStatus": "ai_supported",
@@ -18965,7 +18298,7 @@
         "global_static_modifier_layer_resolver"
       ],
       "valueHints": {
-        "modifier": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["modifier_layering", "state_hash_replay_stable"],
       "aiSupportStatus": "ai_supported",
@@ -19022,7 +18355,8 @@
         "self_trash"
       ],
       "valueHints": {
-        "economy": 2
+        "economy": 2,
+        "remoteRootValue": 2
       },
       "riskTags": ["public_counter_lifecycle"],
       "aiSupportStatus": "ai_supported",
@@ -19084,7 +18418,7 @@
       ],
       "valueHints": {
         "damage": 15,
-        "agendaPointCost": 3
+        "remoteRootValue": 15
       },
       "riskTags": [
         "damage_window",
@@ -19167,7 +18501,8 @@
         "agenda_difficulty"
       ],
       "valueHints": {
-        "economy": 1
+        "economy": 1,
+        "remoteRootValue": 1
       },
       "riskTags": ["runner_trash_value"],
       "aiSupportStatus": "ai_supported",
@@ -19227,7 +18562,8 @@
         "gain_credit"
       ],
       "valueHints": {
-        "economy": 2
+        "economy": 2,
+        "remoteRootValue": 2
       },
       "riskTags": ["recurring_refresh"],
       "aiSupportStatus": "ai_supported",
@@ -19292,7 +18628,7 @@
         "recurring_start_turn"
       ],
       "valueHints": {
-        "traceBidCredit": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["trace_window", "counter_accounting"],
       "aiSupportStatus": "ai_supported",
@@ -19347,7 +18683,7 @@
         "action_economy_handsize_modifier_resolver"
       ],
       "valueHints": {
-        "modifier": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["modifier_layering", "state_hash_replay_stable"],
       "aiSupportStatus": "ai_supported",
@@ -19396,8 +18732,7 @@
         "global_static_modifier_layer_resolver"
       ],
       "valueHints": {
-        "runStartTaxCredits": 1,
-        "rezBeforeRunnerRunPriority": 2
+        "remoteRootValue": 2
       },
       "riskTags": [
         "run_start_tax_layering",
@@ -19452,7 +18787,7 @@
       "planRoles": ["remote_asset_economy"],
       "requiredMechanics": ["install_asset", "rez_card", "trash_on_access"],
       "valueHints": {
-        "remote": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["runner_trash_value"],
       "aiSupportStatus": "ai_supported",
@@ -19518,7 +18853,7 @@
         "action_economy_handsize_modifier_resolver"
       ],
       "valueHints": {
-        "modifier": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["modifier_layering", "state_hash_replay_stable"],
       "aiSupportStatus": "ai_supported",
@@ -19584,7 +18919,7 @@
         "action_economy_handsize_modifier_resolver"
       ],
       "valueHints": {
-        "modifier": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["modifier_layering", "state_hash_replay_stable"],
       "aiSupportStatus": "ai_supported",
@@ -19631,7 +18966,7 @@
         "deterministic_shuffle"
       ],
       "valueHints": {
-        "hidden_zone": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["hidden_zone_barrier", "random_counter"],
       "aiSupportStatus": "ai_supported",
@@ -19690,7 +19025,8 @@
       "planRoles": ["remote_asset_economy"],
       "requiredMechanics": ["install_asset", "rez_card", "gain_credit"],
       "valueHints": {
-        "economy": 2
+        "economy": 2,
+        "remoteRootValue": 2
       },
       "riskTags": ["runner_trash_value"],
       "aiSupportStatus": "ai_supported",
@@ -19753,7 +19089,7 @@
         "global_static_modifier_layer_resolver"
       ],
       "valueHints": {
-        "modifier": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["modifier_layering", "state_hash_replay_stable"],
       "aiSupportStatus": "ai_supported",
@@ -19814,8 +19150,7 @@
         "damage_event_prevention_resolver"
       ],
       "valueHints": {
-        "tagDamagePriority": 3,
-        "threat": 4
+        "remoteRootValue": 4
       },
       "riskTags": [
         "random_counter_replay_required",
@@ -19891,7 +19226,8 @@
       "planRoles": ["remote_asset_trap"],
       "requiredMechanics": ["install_asset", "access_ambush", "net_damage"],
       "valueHints": {
-        "damage": 1
+        "damage": 1,
+        "remoteRootValue": 1
       },
       "riskTags": ["access_window", "damage_window"],
       "aiSupportStatus": "ai_supported",
@@ -19963,8 +19299,8 @@
         "persistent_modifier"
       ],
       "valueHints": {
-        "defense": 2,
-        "economy": 1
+        "economy": 1,
+        "remoteRootValue": 2
       },
       "riskTags": ["hidden_root"],
       "aiSupportStatus": "ai_supported",
@@ -20019,7 +19355,8 @@
       "planRoles": ["remote_asset_pressure"],
       "requiredMechanics": ["install_asset", "rez_card", "meat_damage"],
       "valueHints": {
-        "damage": 1
+        "damage": 1,
+        "remoteRootValue": 1
       },
       "riskTags": ["damage_window"],
       "aiSupportStatus": "ai_supported",
@@ -20093,7 +19430,7 @@
         "global_static_modifier_layer_resolver"
       ],
       "valueHints": {
-        "modifier": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["modifier_layering", "state_hash_replay_stable"],
       "aiSupportStatus": "ai_supported",
@@ -20143,7 +19480,7 @@
       ],
       "valueHints": {
         "economy": 6,
-        "tempo": 1
+        "remoteRootValue": 6
       },
       "riskTags": ["pool_exhaustion", "runner_trash_value"],
       "aiSupportStatus": "ai_supported",
@@ -20208,7 +19545,7 @@
       ],
       "valueHints": {
         "damage": 1,
-        "tag": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["access_window", "damage_window", "tag_risk"],
       "aiSupportStatus": "ai_supported",
@@ -20300,7 +19637,8 @@
         "core_damage"
       ],
       "valueHints": {
-        "damage": 1
+        "damage": 1,
+        "remoteRootValue": 1
       },
       "riskTags": ["access_window", "damage_window"],
       "aiSupportStatus": "ai_supported",
@@ -20379,7 +19717,8 @@
         "advancement_counter_transfer"
       ],
       "valueHints": {
-        "economy": 1
+        "economy": 1,
+        "remoteRootValue": 1
       },
       "riskTags": ["counter_accounting"],
       "aiSupportStatus": "ai_supported",
@@ -20450,7 +19789,8 @@
         "hidden_zone"
       ],
       "valueHints": {
-        "damage": 1
+        "damage": 1,
+        "remoteRootValue": 1
       },
       "riskTags": ["access_window", "hidden_zone_barrier"],
       "aiSupportStatus": "ai_supported",
@@ -20532,8 +19872,7 @@
         "server_icebreaker_worm_use_then_breach_failover"
       ],
       "valueHints": {
-        "defense": 3,
-        "threat": 2
+        "remoteRootValue": 3
       },
       "riskTags": ["timing_window", "runner_breaker_dependency"],
       "aiSupportStatus": "ai_supported",
@@ -20600,7 +19939,7 @@
         "persistent_modifier"
       ],
       "valueHints": {
-        "defense": 2
+        "remoteRootValue": 2
       },
       "riskTags": ["hidden_root"],
       "aiSupportStatus": "ai_supported",
@@ -20676,8 +20015,7 @@
         "corp_access_delay_and_return_to_server_then_start_turn_score"
       ],
       "valueHints": {
-        "defense": 2,
-        "threat": 2
+        "remoteRootValue": 2
       },
       "riskTags": ["delayed_scoring", "access_timing"],
       "aiSupportStatus": "ai_supported",
@@ -20750,7 +20088,7 @@
       ],
       "valueHints": {
         "economy": 2,
-        "defense": 2
+        "remoteRootValue": 2
       },
       "riskTags": ["server_bound_modifier"],
       "aiSupportStatus": "ai_supported",
@@ -20831,8 +20169,7 @@
         "daemon_trash_choice"
       ],
       "valueHints": {
-        "defense": 2,
-        "threat": 3
+        "remoteRootValue": 3
       },
       "riskTags": ["access_timing", "runner_daemon_dependency"],
       "aiSupportStatus": "ai_supported",
@@ -20916,7 +20253,7 @@
         "runner_counter_removal"
       ],
       "valueHints": {
-        "trace": 2
+        "remoteRootValue": 2
       },
       "riskTags": ["access_window", "trace_window", "counter_state"],
       "aiSupportStatus": "ai_supported",
@@ -20983,8 +20320,7 @@
         "persistent_modifier"
       ],
       "valueHints": {
-        "remote": 2,
-        "tax": 2
+        "remoteRootValue": 2
       },
       "riskTags": [
         "region_unique_server",
@@ -21072,7 +20408,8 @@
         "tag_condition"
       ],
       "valueHints": {
-        "damage": 3
+        "damage": 3,
+        "remoteRootValue": 3
       },
       "riskTags": [
         "access_window",
@@ -21168,7 +20505,8 @@
         "net_damage"
       ],
       "valueHints": {
-        "damage": 1
+        "damage": 1,
+        "remoteRootValue": 1
       },
       "riskTags": ["access_window", "damage_window"],
       "aiSupportStatus": "ai_supported",
@@ -21242,7 +20580,7 @@
         "power_counter"
       ],
       "valueHints": {
-        "tax": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["run_start_window"],
       "aiSupportStatus": "ai_supported",
@@ -21354,9 +20692,7 @@
         "encounter_ice"
       ],
       "valueHints": {
-        "remote": 2,
-        "defense": 2,
-        "tempo": 1
+        "remoteRootValue": 2
       },
       "riskTags": [
         "runner_trash_value",
@@ -21466,7 +20802,7 @@
         "global_static_modifier_layer_resolver"
       ],
       "valueHints": {
-        "modifier": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["modifier_layering", "state_hash_replay_stable"],
       "aiSupportStatus": "ai_supported",
@@ -21568,9 +20904,7 @@
         "persistent_modifier"
       ],
       "valueHints": {
-        "remote": 2,
-        "scoring": 1,
-        "utility": 1
+        "remoteRootValue": 2
       },
       "riskTags": [
         "runner_trash_value",
@@ -21648,8 +20982,7 @@
         "trash_cost_modifier"
       ],
       "valueHints": {
-        "tax": 2,
-        "remote": 1
+        "remoteRootValue": 2
       },
       "riskTags": ["region_unique_server", "runner_trash_value"],
       "aiSupportStatus": "ai_supported",
@@ -21709,7 +21042,7 @@
         "temporary_derez"
       ],
       "valueHints": {
-        "remote": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["run_window", "source_bound_rez_cost"],
       "aiSupportStatus": "ai_supported",
@@ -21873,8 +21206,8 @@
         "counter_refresh"
       ],
       "valueHints": {
-        "trace": 2,
-        "economy": 1
+        "economy": 1,
+        "remoteRootValue": 2
       },
       "riskTags": [
         "trace_window",
@@ -21959,8 +21292,7 @@
         "access_breach"
       ],
       "valueHints": {
-        "tax": 3,
-        "scoring": 2
+        "remoteRootValue": 3
       },
       "riskTags": ["access_window", "runner_trash_value"],
       "aiSupportStatus": "ai_supported",
@@ -22035,7 +21367,7 @@
         "generic_upgrade_root_server_resolver"
       ],
       "valueHints": {
-        "afterPassIcePriority": 2
+        "remoteRootValue": 2
       },
       "riskTags": [
         "random_counter_replay_required",
@@ -22096,7 +21428,7 @@
         "overadvance"
       ],
       "valueHints": {
-        "agenda": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["score_window"],
       "aiSupportStatus": "ai_supported",
@@ -22169,7 +21501,7 @@
         "trash_on_access"
       ],
       "valueHints": {
-        "remote": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["region_unique_server"],
       "aiSupportStatus": "ai_supported",
@@ -22250,8 +21582,7 @@
         "subroutine_modifier_resolver"
       ],
       "valueHints": {
-        "remote": 2,
-        "tax": 2
+        "remoteRootValue": 2
       },
       "riskTags": ["runner_trash_value", "fort_ice_modifier"],
       "aiSupportStatus": "ai_supported",
@@ -22349,8 +21680,8 @@
         "persistent_modifier"
       ],
       "valueHints": {
-        "defense": 1,
-        "economy": 2
+        "economy": 2,
+        "remoteRootValue": 2
       },
       "riskTags": ["hidden_root"],
       "aiSupportStatus": "ai_supported",
@@ -22406,7 +21737,7 @@
         "tag"
       ],
       "valueHints": {
-        "trace": 4
+        "remoteRootValue": 4
       },
       "riskTags": ["trace_window", "access_window"],
       "aiSupportStatus": "ai_supported",
@@ -22455,7 +21786,7 @@
         "stealth_recurring_credit"
       ],
       "valueHints": {
-        "tax": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["run_start_window", "stealth_credit_accounting"],
       "aiSupportStatus": "ai_supported",
@@ -22515,7 +21846,7 @@
         "overadvance"
       ],
       "valueHints": {
-        "agenda": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["region_unique_server"],
       "aiSupportStatus": "ai_supported",
@@ -22608,9 +21939,7 @@
       "roles": ["agenda"],
       "planRoles": ["corp_score_agenda", "score_next_turn"],
       "requiredMechanics": [],
-      "valueHints": {
-        "scoring": 3
-      },
+      "valueHints": {},
       "riskTags": ["hidden_until_score_or_access"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -22674,9 +22003,7 @@
       "roles": ["agenda"],
       "planRoles": ["corp_score_agenda", "score_next_turn"],
       "requiredMechanics": [],
-      "valueHints": {
-        "scoring": 3
-      },
+      "valueHints": {},
       "riskTags": ["hidden_until_score_or_access"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -22728,9 +22055,7 @@
       "roles": ["agenda"],
       "planRoles": ["corp_score_agenda", "score_next_turn"],
       "requiredMechanics": [],
-      "valueHints": {
-        "scoring": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "damage_window",
         "hidden_until_score_or_access",
@@ -22791,9 +22116,7 @@
       "roles": ["agenda"],
       "planRoles": ["corp_score_agenda", "score_next_turn"],
       "requiredMechanics": [],
-      "valueHints": {
-        "scoring": 3
-      },
+      "valueHints": {},
       "riskTags": ["damage_window", "hidden_until_score_or_access"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -22851,9 +22174,7 @@
       "roles": ["agenda"],
       "planRoles": ["corp_score_agenda", "score_next_turn"],
       "requiredMechanics": [],
-      "valueHints": {
-        "scoring": 3
-      },
+      "valueHints": {},
       "riskTags": ["hidden_until_score_or_access", "tag_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -22926,9 +22247,7 @@
       "roles": ["agenda"],
       "planRoles": ["corp_score_agenda", "score_next_turn"],
       "requiredMechanics": [],
-      "valueHints": {
-        "scoring": 3
-      },
+      "valueHints": {},
       "riskTags": ["damage_window", "hidden_until_score_or_access"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -22983,9 +22302,7 @@
       "roles": ["agenda"],
       "planRoles": ["corp_score_agenda", "score_next_turn"],
       "requiredMechanics": [],
-      "valueHints": {
-        "scoring": 3
-      },
+      "valueHints": {},
       "riskTags": ["hidden_until_score_or_access"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -23049,9 +22366,7 @@
       "roles": ["agenda"],
       "planRoles": ["corp_score_agenda", "score_next_turn"],
       "requiredMechanics": [],
-      "valueHints": {
-        "scoring": 3
-      },
+      "valueHints": {},
       "riskTags": ["hidden_until_score_or_access"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -23116,9 +22431,7 @@
       "roles": ["agenda"],
       "planRoles": ["corp_score_agenda", "score_next_turn"],
       "requiredMechanics": [],
-      "valueHints": {
-        "scoring": 3
-      },
+      "valueHints": {},
       "riskTags": ["hidden_until_score_or_access"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -23176,9 +22489,7 @@
       "roles": ["agenda"],
       "planRoles": ["corp_score_agenda", "score_next_turn"],
       "requiredMechanics": [],
-      "valueHints": {
-        "scoring": 3
-      },
+      "valueHints": {},
       "riskTags": ["hidden_until_score_or_access"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -23219,9 +22530,7 @@
       "roles": ["damage_ice", "ice", "sentry_ice"],
       "planRoles": ["protect_hq", "protect_rnd"],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["damage_window", "hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -23290,9 +22599,7 @@
       "roles": ["damage_ice", "etr_ice", "ice", "sentry_ice"],
       "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["damage_window", "hidden_ice", "position_dependent_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -23376,9 +22683,7 @@
       "roles": ["barrier_ice", "etr_ice", "ice"],
       "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -23432,9 +22737,7 @@
       "roles": ["damage_ice", "ice", "sentry_ice", "trace_ice"],
       "planRoles": ["protect_hq", "protect_rnd"],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["damage_window", "hidden_ice", "trace_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -23473,9 +22776,7 @@
       "roles": ["etr_ice", "ice", "sentry_ice"],
       "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -23526,9 +22827,7 @@
       "roles": ["ice", "sentry_ice"],
       "planRoles": ["protect_hq", "protect_rnd"],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -23590,9 +22889,7 @@
       "roles": ["etr_ice", "ice", "sentry_ice"],
       "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice", "credit_reserve"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -23648,9 +22945,7 @@
       "roles": ["barrier_ice", "etr_ice", "ice"],
       "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -23705,9 +23000,7 @@
       "roles": ["damage_ice", "etr_ice", "ice", "sentry_ice"],
       "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["damage_window", "hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -23786,9 +23079,7 @@
       "roles": ["damage_ice", "etr_ice", "ice", "sentry_ice"],
       "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["damage_window", "hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -23862,9 +23153,7 @@
       "roles": ["damage_ice", "etr_ice", "ice", "sentry_ice"],
       "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["damage_window", "hidden_ice", "position_dependent_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -23944,9 +23233,7 @@
       "roles": ["etr_ice", "ice", "sentry_ice"],
       "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -24005,9 +23292,7 @@
       "roles": ["barrier_ice", "etr_ice", "ice"],
       "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -24074,9 +23359,7 @@
       "roles": ["code_gate_ice", "etr_ice", "ice"],
       "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -24150,9 +23433,7 @@
       "roles": ["etr_ice", "ice", "sentry_ice", "trace_ice"],
       "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice", "trace_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -24220,9 +23501,7 @@
       "roles": ["ice", "sentry_ice", "tag_ice", "trace_ice"],
       "planRoles": ["protect_hq", "protect_rnd"],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice",
         "position_dependent_ice",
@@ -24295,9 +23574,7 @@
       "roles": ["barrier_ice", "damage_ice", "etr_ice", "ice"],
       "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["damage_window", "hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -24362,9 +23639,7 @@
       "roles": ["etr_ice", "ice", "sentry_ice"],
       "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -24418,9 +23693,7 @@
       "roles": ["etr_ice", "ice", "sentry_ice"],
       "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -24483,9 +23756,7 @@
       "roles": ["damage_ice", "etr_ice", "ice", "sentry_ice"],
       "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["damage_window", "hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -24550,9 +23821,7 @@
       "roles": ["etr_ice", "ice", "sentry_ice"],
       "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -24601,9 +23870,7 @@
       "roles": ["code_gate_ice", "etr_ice", "ice"],
       "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -24651,9 +23918,7 @@
       "roles": ["barrier_ice", "damage_ice", "etr_ice", "ice"],
       "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["damage_window", "hidden_ice", "same_fort_reposition"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -24721,9 +23986,7 @@
       "roles": ["code_gate_ice", "etr_ice", "ice"],
       "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice", "paid_etr_requires_corp_credits"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -24766,9 +24029,7 @@
       "roles": ["code_gate_ice", "etr_ice", "ice"],
       "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -24838,9 +24099,7 @@
       "roles": ["barrier_ice", "etr_ice", "ice"],
       "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -24881,9 +24140,7 @@
       "roles": ["barrier_ice", "etr_ice", "ice"],
       "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -24938,9 +24195,7 @@
       "roles": ["barrier_ice", "etr_ice", "ice"],
       "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -25006,9 +24261,7 @@
       "roles": ["code_gate_ice", "etr_ice", "ice"],
       "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -25080,9 +24333,7 @@
       "roles": ["etr_ice", "ice", "sentry_ice"],
       "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -25136,9 +24387,7 @@
       "roles": ["barrier_ice", "etr_ice", "ice"],
       "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -25170,9 +24419,7 @@
       "roles": ["code_gate_ice", "etr_ice", "ice"],
       "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -25227,9 +24474,7 @@
       "roles": ["code_gate_ice", "etr_ice", "ice"],
       "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -25284,9 +24529,7 @@
       "roles": ["barrier_ice", "etr_ice", "ice"],
       "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -25334,9 +24577,7 @@
       "roles": ["ice", "sentry_ice"],
       "planRoles": ["protect_hq", "protect_rnd"],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -25500,9 +24741,7 @@
       "roles": ["operation"],
       "planRoles": ["build_scoring_remote"],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": ["tag_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -25562,9 +24801,7 @@
       "roles": ["operation"],
       "planRoles": ["build_scoring_remote"],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -25640,9 +24877,7 @@
       "roles": ["operation"],
       "planRoles": ["build_scoring_remote"],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": ["tag_window", "trace_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -25717,9 +24952,7 @@
       "roles": ["operation"],
       "planRoles": ["build_scoring_remote"],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -25800,9 +25033,7 @@
       "roles": ["operation"],
       "planRoles": ["build_scoring_remote"],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": ["tag_window", "trace_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -25872,9 +25103,7 @@
       "roles": ["operation"],
       "planRoles": ["build_scoring_remote"],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": ["tag_window", "trace_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -25972,7 +25201,7 @@
       "planRoles": ["build_scoring_remote"],
       "requiredMechanics": [],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["damage_window", "hidden_root"],
       "aiSupportStatus": "ai_supported",
@@ -26042,7 +25271,7 @@
       "planRoles": ["build_scoring_remote"],
       "requiredMechanics": [],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["damage_window", "hidden_root"],
       "aiSupportStatus": "ai_supported",
@@ -26095,7 +25324,7 @@
       "planRoles": ["build_scoring_remote"],
       "requiredMechanics": [],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["hidden_root"],
       "aiSupportStatus": "ai_supported",
@@ -26136,7 +25365,7 @@
       "planRoles": ["build_scoring_remote"],
       "requiredMechanics": [],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["hidden_root"],
       "aiSupportStatus": "ai_supported",
@@ -26204,7 +25433,8 @@
       "planRoles": ["recover_economy"],
       "requiredMechanics": [],
       "valueHints": {
-        "economy": 2
+        "economy": 2,
+        "remoteRootValue": 2
       },
       "riskTags": ["hidden_root"],
       "aiSupportStatus": "ai_supported",
@@ -26264,7 +25494,8 @@
       "planRoles": ["recover_economy"],
       "requiredMechanics": [],
       "valueHints": {
-        "economy": 2
+        "economy": 2,
+        "remoteRootValue": 2
       },
       "riskTags": ["hidden_root"],
       "aiSupportStatus": "ai_supported",
@@ -26328,7 +25559,7 @@
       "planRoles": ["build_scoring_remote"],
       "requiredMechanics": [],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["hidden_root"],
       "aiSupportStatus": "ai_supported",
@@ -26399,7 +25630,8 @@
       "planRoles": ["recover_economy"],
       "requiredMechanics": [],
       "valueHints": {
-        "economy": 2
+        "economy": 2,
+        "remoteRootValue": 2
       },
       "riskTags": ["hidden_root", "trace_window"],
       "aiSupportStatus": "ai_supported",
@@ -26462,7 +25694,7 @@
       "planRoles": ["build_scoring_remote"],
       "requiredMechanics": [],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["hidden_root"],
       "aiSupportStatus": "ai_supported",
@@ -26552,7 +25784,7 @@
       "planRoles": ["build_scoring_remote"],
       "requiredMechanics": [],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["hidden_root"],
       "aiSupportStatus": "ai_supported",
@@ -26632,7 +25864,7 @@
       "planRoles": ["build_scoring_remote"],
       "requiredMechanics": [],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["hidden_root"],
       "aiSupportStatus": "ai_supported",
@@ -26709,7 +25941,7 @@
       "planRoles": ["build_scoring_remote"],
       "requiredMechanics": [],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["hidden_root"],
       "aiSupportStatus": "ai_supported",
@@ -26787,7 +26019,7 @@
       "planRoles": ["build_scoring_remote"],
       "requiredMechanics": [],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["hidden_root"],
       "aiSupportStatus": "ai_supported",
@@ -26850,7 +26082,7 @@
       "planRoles": ["build_scoring_remote"],
       "requiredMechanics": [],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["hidden_root"],
       "aiSupportStatus": "ai_supported",
@@ -26900,7 +26132,7 @@
       "planRoles": ["build_scoring_remote"],
       "requiredMechanics": [],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["hidden_root"],
       "aiSupportStatus": "ai_supported",
@@ -26971,7 +26203,7 @@
       "planRoles": ["build_scoring_remote"],
       "requiredMechanics": [],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["hidden_root"],
       "aiSupportStatus": "ai_supported",
@@ -27060,7 +26292,7 @@
       "planRoles": ["build_scoring_remote"],
       "requiredMechanics": [],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["hidden_root"],
       "aiSupportStatus": "ai_supported",
@@ -27136,7 +26368,7 @@
       "planRoles": ["build_scoring_remote"],
       "requiredMechanics": [],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["hidden_root"],
       "aiSupportStatus": "ai_supported",
@@ -27232,7 +26464,7 @@
       "planRoles": ["build_scoring_remote"],
       "requiredMechanics": [],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["hidden_root"],
       "aiSupportStatus": "ai_supported",
@@ -27310,7 +26542,7 @@
       "planRoles": ["build_scoring_remote"],
       "requiredMechanics": [],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["hidden_root"],
       "aiSupportStatus": "ai_supported",
@@ -27367,7 +26599,7 @@
       "planRoles": ["build_scoring_remote"],
       "requiredMechanics": [],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["hidden_root"],
       "aiSupportStatus": "ai_supported",
@@ -27425,7 +26657,7 @@
       "planRoles": ["build_scoring_remote"],
       "requiredMechanics": [],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["damage_window", "hidden_root"],
       "aiSupportStatus": "ai_supported",
@@ -27497,7 +26729,8 @@
       "planRoles": ["recover_economy"],
       "requiredMechanics": [],
       "valueHints": {
-        "economy": 2
+        "economy": 2,
+        "remoteRootValue": 2
       },
       "riskTags": ["hidden_root"],
       "aiSupportStatus": "ai_supported",
@@ -27555,7 +26788,7 @@
       "planRoles": ["build_scoring_remote"],
       "requiredMechanics": [],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["hidden_root"],
       "aiSupportStatus": "ai_supported",
@@ -27632,9 +26865,7 @@
       "roles": ["program"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -27693,9 +26924,7 @@
       "roles": ["breaker_killer", "icebreaker", "program"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": ["encounter"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -27716,9 +26945,7 @@
       "roles": ["breaker_killer", "icebreaker", "program"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": ["encounter"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -27768,9 +26995,7 @@
       "roles": ["breaker_fracter", "icebreaker", "program"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": ["encounter"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -27791,9 +27016,7 @@
       "roles": ["breaker_fracter", "icebreaker", "program"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": ["encounter"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -27819,9 +27042,7 @@
       "roles": ["breaker_fracter", "icebreaker", "program"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": ["encounter"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -27842,9 +27063,7 @@
       "roles": ["program"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -27928,9 +27147,7 @@
       "roles": ["program"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -27979,9 +27196,7 @@
       "roles": ["program"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": ["damage_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -28027,9 +27242,7 @@
       "roles": ["breaker_killer", "icebreaker", "program"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": ["encounter"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -28050,9 +27263,7 @@
       "roles": ["breaker_decoder", "breaker_fracter", "icebreaker", "program"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": ["encounter"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -28101,9 +27312,7 @@
       "roles": ["program"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -28187,9 +27396,7 @@
       "roles": ["program"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -28244,9 +27451,7 @@
       "roles": ["icebreaker_support", "program", "run_support"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": ["encounter"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -28300,9 +27505,7 @@
       "roles": ["breaker_decoder", "breaker_fracter", "icebreaker", "program"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": ["encounter"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -28366,9 +27569,7 @@
       "roles": ["breaker_killer", "icebreaker", "program"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": ["encounter"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -28389,9 +27590,7 @@
       "roles": ["program"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -28450,9 +27649,7 @@
       "roles": ["breaker_decoder", "icebreaker", "program"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": ["encounter"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -28473,9 +27670,7 @@
       "roles": ["program"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": ["damage_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -28518,9 +27713,7 @@
       "roles": ["program"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -28573,9 +27766,7 @@
       "roles": ["program"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -28630,9 +27821,7 @@
       "roles": ["program"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -28685,9 +27874,7 @@
       "roles": ["breaker_fracter", "icebreaker", "program"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": ["encounter"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -28708,9 +27895,7 @@
       "roles": ["event", "run_pressure"],
       "planRoles": ["pressure_hq"],
       "requiredMechanics": [],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -28765,9 +27950,7 @@
       "roles": ["event", "run_pressure"],
       "planRoles": ["pressure_hq"],
       "requiredMechanics": [],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -28854,9 +28037,7 @@
       "roles": ["event", "run_pressure"],
       "planRoles": ["pressure_rnd"],
       "requiredMechanics": [],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -28899,9 +28080,7 @@
       "roles": ["event", "run_pressure"],
       "planRoles": ["pressure_rnd"],
       "requiredMechanics": [],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": ["tag_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -28960,9 +28139,7 @@
         "derez_ice",
         "end_run"
       ],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -29085,9 +28262,7 @@
       "roles": ["event"],
       "planRoles": ["build_rig"],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": ["damage_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -29118,9 +28293,7 @@
       "roles": ["event", "run_pressure"],
       "planRoles": ["pressure_rnd"],
       "requiredMechanics": [],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -29208,9 +28381,7 @@
       "roles": ["event"],
       "planRoles": ["build_rig"],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -29253,9 +28424,7 @@
       "roles": ["event"],
       "planRoles": ["build_rig"],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": ["damage_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -29300,9 +28469,7 @@
       "roles": ["event", "run_pressure"],
       "planRoles": ["run_pressure"],
       "requiredMechanics": [],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": ["tag_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -29387,9 +28554,7 @@
       "roles": ["event"],
       "planRoles": ["build_rig"],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -29450,9 +28615,7 @@
       "roles": ["event", "run_pressure"],
       "planRoles": ["pressure_rnd"],
       "requiredMechanics": [],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -29495,9 +28658,7 @@
       "roles": ["event"],
       "planRoles": ["build_rig"],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -29568,9 +28729,7 @@
       "roles": ["event"],
       "planRoles": ["build_rig"],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -29610,8 +28769,7 @@
       "planRoles": ["recover_economy"],
       "requiredMechanics": [],
       "valueHints": {
-        "economy": 1,
-        "runPressure": 2
+        "economy": 1
       },
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
@@ -29656,9 +28814,7 @@
       "roles": ["event", "run_pressure"],
       "planRoles": ["pressure_rnd"],
       "requiredMechanics": [],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": ["tag_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -29704,9 +28860,7 @@
       "roles": ["event", "run_pressure"],
       "planRoles": ["pressure_rnd"],
       "requiredMechanics": [],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -29761,9 +28915,7 @@
       "roles": ["event"],
       "planRoles": ["build_rig"],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -29857,9 +29009,7 @@
       "roles": ["event", "run_pressure"],
       "planRoles": ["pressure_rnd"],
       "requiredMechanics": [],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -29890,9 +29040,7 @@
       "roles": ["event", "run_pressure"],
       "planRoles": ["pressure_rnd"],
       "requiredMechanics": [],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": ["damage_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -29970,9 +29118,7 @@
       "roles": ["event", "run_pressure"],
       "planRoles": ["pressure_rnd"],
       "requiredMechanics": [],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": ["damage_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -30009,9 +29155,7 @@
       "roles": ["hidden_zone_tool", "program_search", "resource"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": ["hidden_zone_barrier"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -30140,9 +29284,7 @@
       ],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": ["hidden_zone_barrier", "tag_window", "trace_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -30365,9 +29507,7 @@
       "roles": ["damage_prevention", "hidden_zone_tool", "resource"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": ["damage_window", "hidden_zone_barrier"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -30522,7 +29662,6 @@
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
       "valueHints": {
-        "memory": 1,
         "economy": 2
       },
       "riskTags": [],
@@ -30586,9 +29725,7 @@
       "roles": ["hardware"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": ["damage_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -30630,9 +29767,7 @@
       "roles": ["access_trash", "hidden_zone_tool", "hq_pressure", "resource"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": ["hidden_zone_barrier"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -30720,9 +29855,7 @@
       ],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": ["hidden_zone_barrier"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -30827,9 +29960,7 @@
       "roles": ["hardware", "memory"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "memory": 1
-      },
+      "valueHints": {},
       "riskTags": ["trace_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -30885,9 +30016,7 @@
       "roles": ["hardware", "memory"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "memory": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -30944,9 +30073,7 @@
       "roles": ["hidden_zone_tool", "resource", "tag_avoid"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": ["hidden_zone_barrier", "tag_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -31024,9 +30151,7 @@
       ],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": ["damage_window", "hidden_zone_barrier"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -31108,9 +30233,7 @@
       "roles": ["hidden_zone_tool", "multiaccess", "resource"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": ["hidden_zone_barrier"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -31263,9 +30386,7 @@
       "roles": ["hardware"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": ["damage_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -31309,9 +30430,7 @@
       "roles": ["access_trash", "hidden_zone_tool", "resource"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": ["hidden_zone_barrier"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -31408,9 +30527,7 @@
       "roles": ["remote_support", "resource", "unique"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -31449,9 +30566,7 @@
       "roles": ["hidden_zone_tool", "rd_multiaccess", "resource"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": ["hidden_zone_barrier"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -31586,9 +30701,7 @@
       "roles": ["connection", "hidden_zone_tool", "resource", "run_bypass"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": ["hidden_zone_barrier"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -31730,9 +30843,7 @@
       "roles": ["hardware", "memory"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "memory": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -31875,9 +30986,7 @@
       "roles": ["hidden_zone_tool", "resource", "trash_prevention"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": ["hidden_zone_barrier"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -31956,9 +31065,7 @@
       "roles": ["hidden_zone_tool", "post_bid_link", "resource"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": ["hidden_zone_barrier", "trace_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -32064,9 +31171,7 @@
         "score",
         "steal"
       ],
-      "valueHints": {
-        "scoring": 4
-      },
+      "valueHints": {},
       "riskTags": ["hidden_until_score_or_access"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -32094,9 +31199,7 @@
         "rez_ice",
         "subtype_barrier"
       ],
-      "valueHints": {
-        "defense": 3
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -32133,9 +31236,7 @@
         "rez_ice",
         "subtype_code_gate"
       ],
-      "valueHints": {
-        "defense": 3
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -32172,9 +31273,7 @@
         "subtype_decoder",
         "subtype_icebreaker"
       ],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": ["encounter"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -32201,9 +31300,7 @@
       "roles": ["draw", "setup"],
       "planRoles": ["draw_for_answers"],
       "requiredMechanics": ["play_event"],
-      "valueHints": {
-        "cardFlow": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_zone_change"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -32224,9 +31321,7 @@
       "roles": ["draw_operation", "setup"],
       "planRoles": ["recover_economy"],
       "requiredMechanics": ["play_operation"],
-      "valueHints": {
-        "cardFlow": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_zone_change"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -32265,7 +31360,8 @@
         "trash_on_access"
       ],
       "valueHints": {
-        "economy": 3
+        "economy": 3,
+        "remoteRootValue": 3
       },
       "riskTags": ["hidden_root"],
       "aiSupportStatus": "ai_supported",
@@ -32361,9 +31457,7 @@
         "subtype_fracter",
         "subtype_icebreaker"
       ],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": ["encounter"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -32395,9 +31489,7 @@
         "subtype_icebreaker",
         "subtype_killer"
       ],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": ["encounter"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -32431,9 +31523,7 @@
         "score",
         "steal"
       ],
-      "valueHints": {
-        "scoring": 4
-      },
+      "valueHints": {},
       "riskTags": ["hidden_until_score_or_access"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -32456,9 +31546,7 @@
       "roles": ["event", "run_pressure"],
       "planRoles": ["pressure_rnd"],
       "requiredMechanics": ["play_event"],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": ["run"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -32484,9 +31572,7 @@
         "rez_ice",
         "subtype_sentry"
       ],
-      "valueHints": {
-        "defense": 3
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -32522,9 +31608,7 @@
       "roles": ["memory", "setup"],
       "planRoles": ["safe_probe_run"],
       "requiredMechanics": ["install_hardware"],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": ["install_runner"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -32552,10 +31636,7 @@
         "end_the_run",
         "subtype_sentry"
       ],
-      "valueHints": {
-        "defense": 3,
-        "threat": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice", "tag"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -32592,9 +31673,7 @@
       "roles": ["tag_punishment"],
       "planRoles": ["recover_economy"],
       "requiredMechanics": ["play_operation"],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": ["public_play", "tag"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -32638,9 +31717,7 @@
         "rez_ice",
         "subtype_barrier"
       ],
-      "valueHints": {
-        "defense": 3
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -32682,7 +31759,7 @@
         "trash_on_access"
       ],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": ["hidden_root"],
       "aiSupportStatus": "ai_supported",
@@ -32722,9 +31799,7 @@
         "subtype_icebreaker",
         "subtype_killer"
       ],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": ["encounter"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -32751,9 +31826,7 @@
       "roles": ["draw_operation", "setup"],
       "planRoles": ["recover_economy"],
       "requiredMechanics": ["play_operation"],
-      "valueHints": {
-        "cardFlow": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_zone_change"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -32816,7 +31889,8 @@
         "trash_on_access"
       ],
       "valueHints": {
-        "economy": 3
+        "economy": 3,
+        "remoteRootValue": 3
       },
       "riskTags": ["hidden_root"],
       "aiSupportStatus": "ai_supported",
@@ -32884,9 +31958,7 @@
       "roles": ["draw", "setup"],
       "planRoles": ["draw_for_answers"],
       "requiredMechanics": ["play_event"],
-      "valueHints": {
-        "cardFlow": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_zone_change"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -32912,9 +31984,7 @@
         "rez_ice",
         "subtype_code_gate"
       ],
-      "valueHints": {
-        "defense": 3
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -32946,9 +32016,7 @@
       "roles": ["memory", "setup"],
       "planRoles": ["safe_probe_run"],
       "requiredMechanics": ["install_hardware"],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": ["install_runner"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -32970,8 +32038,7 @@
       "planRoles": ["pressure_rnd", "recover_economy"],
       "requiredMechanics": ["play_event"],
       "valueHints": {
-        "economy": 3,
-        "runPressure": 2
+        "economy": 3
       },
       "riskTags": ["run"],
       "aiSupportStatus": "ai_supported",
@@ -32998,9 +32065,7 @@
         "subtype_decoder",
         "subtype_icebreaker"
       ],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": ["encounter"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -33034,9 +32099,7 @@
         "score",
         "steal"
       ],
-      "valueHints": {
-        "scoring": 4
-      },
+      "valueHints": {},
       "riskTags": ["hidden_until_score_or_access"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -33064,9 +32127,7 @@
         "subtype_fracter",
         "subtype_icebreaker"
       ],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": ["encounter"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -33098,9 +32159,7 @@
         "rez_ice",
         "subtype_barrier"
       ],
-      "valueHints": {
-        "defense": 3
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -33137,9 +32196,7 @@
         "rez_ice",
         "subtype_sentry"
       ],
-      "valueHints": {
-        "defense": 3
-      },
+      "valueHints": {},
       "riskTags": ["hidden_ice", "tag"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -33180,10 +32237,7 @@
         "shuffle_hq_to_rd",
         "double_action_cost"
       ],
-      "valueHints": {
-        "cardVelocity": 5,
-        "utility": 2
-      },
+      "valueHints": {},
       "riskTags": ["double_action", "hq_card_selection", "hidden_zone"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -33265,10 +32319,7 @@
         "reveal",
         "double_action_cost"
       ],
-      "valueHints": {
-        "defense": 3,
-        "recursion": 3
-      },
+      "valueHints": {},
       "riskTags": ["archives_dependency", "double_action", "reveal_to_runner"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -33370,8 +32421,7 @@
         "draw_cards"
       ],
       "valueHints": {
-        "disruption": 3,
-        "defense": 2
+        "remoteRootValue": 3
       },
       "riskTags": ["hidden_zone", "successful_run"],
       "aiSupportStatus": "ai_supported",
@@ -33450,8 +32500,7 @@
         "subtype_noisy"
       ],
       "valueHints": {
-        "defense": 2,
-        "tax": 2
+        "remoteRootValue": 2
       },
       "riskTags": ["run_cost_modifier", "region"],
       "aiSupportStatus": "ai_supported",
@@ -33515,8 +32564,7 @@
         "run_attempt_count"
       ],
       "valueHints": {
-        "tagPressure": 2,
-        "disruption": 2
+        "remoteRootValue": 2
       },
       "riskTags": ["tag", "random_effect"],
       "aiSupportStatus": "ai_supported",
@@ -33587,8 +32635,8 @@
         "tap_source"
       ],
       "valueHints": {
-        "ambush": 3,
-        "damage": 2
+        "damage": 2,
+        "remoteRootValue": 3
       },
       "riskTags": ["hidden_zone", "net_damage", "subsidiary_only"],
       "aiSupportStatus": "ai_supported",
@@ -33687,8 +32735,7 @@
         "trash_programs"
       ],
       "valueHints": {
-        "ambush": 3,
-        "disruption": 3
+        "remoteRootValue": 3
       },
       "riskTags": ["hidden_zone", "tag_threshold", "rig_trash"],
       "aiSupportStatus": "ai_supported",
@@ -33800,8 +32847,7 @@
         "temporary_ice_strength"
       ],
       "valueHints": {
-        "defense": 3,
-        "utility": 2
+        "remoteRootValue": 3
       },
       "riskTags": ["targeted_ice", "temporary_modifier"],
       "aiSupportStatus": "ai_supported",
@@ -33901,8 +32947,7 @@
         "unique"
       ],
       "valueHints": {
-        "cardVelocity": 3,
-        "utility": 3
+        "remoteRootValue": 3
       },
       "riskTags": ["hidden_zone", "draw_replacement", "unique"],
       "aiSupportStatus": "ai_supported",
@@ -33974,8 +33019,7 @@
       "planRoles": ["build_scoring_remote", "punish_tagged_runner"],
       "requiredMechanics": ["run_start_tax", "runner_tags", "same_fort"],
       "valueHints": {
-        "tax": 3,
-        "defense": 2
+        "remoteRootValue": 3
       },
       "riskTags": ["run_cost_modifier", "tag_synergy"],
       "aiSupportStatus": "ai_supported",
@@ -34115,10 +33159,7 @@
         "draw_cards",
         "double_action_cost"
       ],
-      "valueHints": {
-        "tagSafety": 4,
-        "cardVelocity": 3
-      },
+      "valueHints": {},
       "riskTags": ["double_action", "tag_clear_timing"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -34231,8 +33272,7 @@
         "double_action_cost"
       ],
       "valueHints": {
-        "economy": 2,
-        "cardVelocity": 3
+        "economy": 2
       },
       "riskTags": ["double_action"],
       "aiSupportStatus": "ai_supported",
@@ -34293,10 +33333,7 @@
         "break_wall_subroutine",
         "pump_icebreaker_strength"
       ],
-      "valueHints": {
-        "breaker": 2,
-        "efficiency": 2
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -34348,10 +33385,7 @@
         "break_sentry_subroutine",
         "pump_icebreaker_strength"
       ],
-      "valueHints": {
-        "breaker": 2,
-        "burstStrength": 3
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -34405,10 +33439,7 @@
         "tag_self",
         "stealth_credit_loss"
       ],
-      "valueHints": {
-        "breaker": 2,
-        "efficiency": 2
-      },
+      "valueHints": {},
       "riskTags": ["noisy", "tag_risk", "stealth_loss"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -34486,10 +33517,7 @@
         "pump_icebreaker_strength",
         "run_duration_strength"
       ],
-      "valueHints": {
-        "breaker": 2,
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": ["run_duration_strength"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -34548,10 +33576,7 @@
         "pump_icebreaker_strength",
         "run_end_self_trash"
       ],
-      "valueHints": {
-        "breaker": 2,
-        "emergencyBreaker": 3
-      },
+      "valueHints": {},
       "riskTags": ["self_trash"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -34620,9 +33645,7 @@
         "hq_access_trigger",
         "expose_installed_corp_cards"
       ],
-      "valueHints": {
-        "information": 3
-      },
+      "valueHints": {},
       "riskTags": ["public_reveal"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -34701,9 +33724,7 @@
         "tap_source",
         "derez_ice"
       ],
-      "valueHints": {
-        "tempo": 3
-      },
+      "valueHints": {},
       "riskTags": ["timing_window", "tap_source"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -34788,12 +33809,7 @@
         "runner_counter_removal",
         "sleepy_noisy_rez_discount"
       ],
-      "valueHints": {
-        "defense": 3,
-        "damageThreat": 3,
-        "tracePressure": 2,
-        "runControl": 3
-      },
+      "valueHints": {},
       "riskTags": ["ap_damage", "trace", "runner_counter", "noisy_discount"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -34933,12 +33949,7 @@
         "next_encounter_no_break_subroutines",
         "sleepy_noisy_rez_discount"
       ],
-      "valueHints": {
-        "defense": 3,
-        "damageThreat": 4,
-        "tempo": 2,
-        "runControl": 3
-      },
+      "valueHints": {},
       "riskTags": ["ap_damage", "next_encounter_lock", "noisy_discount"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -35041,10 +34052,7 @@
         "random_die_resolution",
         "core_damage"
       ],
-      "valueHints": {
-        "defense": 2,
-        "damageThreat": 2
-      },
+      "valueHints": {},
       "riskTags": ["deterministic_random", "core_damage"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -35122,10 +34130,7 @@
         "end_the_run",
         "sleepy_noisy_rez_discount"
       ],
-      "valueHints": {
-        "defense": 3,
-        "programPressure": 3
-      },
+      "valueHints": {},
       "riskTags": ["program_trash", "noisy_discount"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -35218,10 +34223,7 @@
         "end_the_run",
         "sleepy_noisy_rez_discount"
       ],
-      "valueHints": {
-        "defense": 4,
-        "programPressure": 3
-      },
+      "valueHints": {},
       "riskTags": ["program_trash", "noisy_discount"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -35309,10 +34311,7 @@
       "roles": ["ice", "code_gate_ice", "etr_ice", "taxing_ice"],
       "planRoles": ["build_scoring_remote", "protect_hq", "protect_rnd"],
       "requiredMechanics": ["rez_ice", "end_the_run", "delayed_turn_end_trash"],
-      "valueHints": {
-        "defense": 2,
-        "tempo": 2
-      },
+      "valueHints": {},
       "riskTags": ["self_trash", "turn_end_delayed_effect"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -35384,10 +34383,7 @@
         "deflect_run",
         "encounter_reposition"
       ],
-      "valueHints": {
-        "defense": 2,
-        "runControl": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "run_redirect",
         "archives_only_target",
@@ -35469,10 +34465,7 @@
         "deflect_run",
         "encounter_reposition"
       ],
-      "valueHints": {
-        "defense": 2,
-        "runControl": 3
-      },
+      "valueHints": {},
       "riskTags": ["run_redirect", "corp_credit_cost", "target_fort_choice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -35567,10 +34560,7 @@
         "end_the_run",
         "start_run_ice_move"
       ],
-      "valueHints": {
-        "defense": 4,
-        "runControl": 4
-      },
+      "valueHints": {},
       "riskTags": [
         "agenda_point_cost",
         "start_run_reposition",
@@ -35686,10 +34676,7 @@
         "encounter_reposition",
         "auto_break_without_target"
       ],
-      "valueHints": {
-        "defense": 2,
-        "runControl": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "run_redirect",
         "subsidiary_target_only",
@@ -35782,10 +34769,7 @@
         "deflect_run",
         "encounter_reposition"
       ],
-      "valueHints": {
-        "defense": 3,
-        "runControl": 3
-      },
+      "valueHints": {},
       "riskTags": ["run_redirect", "corp_credit_cost", "target_fort_choice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -35879,11 +34863,7 @@
         "corp_during_run_paid_ability",
         "end_run"
       ],
-      "valueHints": {
-        "agendaPoints": 2,
-        "defense": 3,
-        "runControl": 4
-      },
+      "valueHints": {},
       "riskTags": ["public_counter", "scored_counter", "single_use"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -35969,11 +34949,7 @@
         "purge_runner_virus_counters",
         "virus_counter_prevention"
       ],
-      "valueHints": {
-        "agendaPoints": 2,
-        "defense": 2,
-        "virusPressure": 4
-      },
+      "valueHints": {},
       "riskTags": ["virus_meta", "temporary_prevention"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -36041,10 +35017,7 @@
       "roles": ["agenda", "draw"],
       "planRoles": ["score_agenda", "draw"],
       "requiredMechanics": ["score_agenda", "start_turn_trigger", "draw_cards"],
-      "valueHints": {
-        "agendaPoints": 2,
-        "cardVelocity": 3
-      },
+      "valueHints": {},
       "riskTags": ["start_turn_trigger"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -36114,11 +35087,7 @@
         "runner_score_action",
         "remove_from_game_on_leave_play"
       ],
-      "valueHints": {
-        "agendaPoints": 3,
-        "defense": 3,
-        "tax": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "access_replacement",
         "memory_pressure_for_runner",
@@ -36229,11 +35198,7 @@
         "temporary_memory_limit_modifier",
         "trash_installed_program_if_over_memory"
       ],
-      "valueHints": {
-        "disruption": 4,
-        "programPressure": 4,
-        "tagPunish": 3
-      },
+      "valueHints": {},
       "riskTags": ["memory_pressure", "program_trash", "tag_condition"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -36327,10 +35292,7 @@
         "search_stack",
         "shuffle_stack"
       ],
-      "valueHints": {
-        "setupConsistency": 4,
-        "cardSelection": 4
-      },
+      "valueHints": {},
       "riskTags": [
         "grip_trash",
         "hidden_zone_projection",
@@ -36428,9 +35390,7 @@
         "take_tag"
       ],
       "valueHints": {
-        "economy": 5,
-        "agendaPressure": -4,
-        "tagSafety": -2
+        "economy": 5
       },
       "riskTags": [
         "agenda_transfer",
@@ -36505,8 +35465,7 @@
         "gain_credits"
       ],
       "valueHints": {
-        "economy": 4,
-        "tagSafety": 0
+        "economy": 4
       },
       "riskTags": [
         "brain_damage",
@@ -36589,11 +35548,7 @@
         "reveal_cards_until_agenda",
         "move_card_to_hq"
       ],
-      "valueHints": {
-        "runPressure": 4,
-        "information": 4,
-        "accessPressure": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_zone",
         "rd_reveal",
@@ -36686,10 +35641,7 @@
         "successful_run_bonus_access",
         "no_noisy_icebreaker_or_trace_condition"
       ],
-      "valueHints": {
-        "runPressure": 4,
-        "accessPressure": 4
-      },
+      "valueHints": {},
       "riskTags": [
         "conditional_access",
         "run_success_dependency",
@@ -36787,10 +35739,7 @@
         "run_duration_rez_cost_surcharge",
         "double_action_cost"
       ],
-      "valueHints": {
-        "runPressure": 4,
-        "tax": 4
-      },
+      "valueHints": {},
       "riskTags": [
         "run_cost_modifier",
         "double_action",
@@ -36873,9 +35822,7 @@
         "leave_play_credit_loss"
       ],
       "valueHints": {
-        "economy": 2,
-        "tagSafety": -3,
-        "traceSafety": -3
+        "economy": 2
       },
       "riskTags": [
         "trace_liability",
@@ -36964,8 +35911,7 @@
         "unique_resource"
       ],
       "valueHints": {
-        "economy": 2,
-        "eventSupport": 2
+        "economy": 2
       },
       "riskTags": ["prep_dependency", "unique_resource"],
       "aiSupportStatus": "ai_supported",
@@ -37019,10 +35965,7 @@
         "paid_tap_ability",
         "private_hq_look"
       ],
-      "valueHints": {
-        "information": 4,
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_zone", "tap_source", "credit_cost"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -37093,12 +36036,7 @@
         "restricted_credit_pool",
         "damage_prevention_turn_limit"
       ],
-      "valueHints": {
-        "memory": 2,
-        "handSize": 1,
-        "traceSafety": 1,
-        "survival": 2
-      },
+      "valueHints": {},
       "riskTags": ["deck_unique", "restricted_credits", "damage_window"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -37194,12 +36132,7 @@
         "random_start_turn_damage",
         "leave_play_damage"
       ],
-      "valueHints": {
-        "memory": 2,
-        "runSupport": 3,
-        "traceSafety": 1,
-        "survival": -3
-      },
+      "valueHints": {},
       "riskTags": [
         "deck_unique",
         "restricted_credits",
@@ -37299,10 +36232,7 @@
       "roles": ["hardware", "memory", "setup"],
       "planRoles": ["runner_install_hardware", "rig_setup"],
       "requiredMechanics": ["install_hardware", "memory_limit_from_grip_size"],
-      "valueHints": {
-        "memory": 4,
-        "rigSupport": 3
-      },
+      "valueHints": {},
       "riskTags": ["dynamic_memory", "grip_size_dependency"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -37353,10 +36283,7 @@
         "paid_tap_ability",
         "private_rnd_top_look"
       ],
-      "valueHints": {
-        "information": 4,
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": ["hidden_zone", "tap_source", "credit_cost"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -37426,10 +36353,7 @@
         "future_action_debt",
         "credit_cost"
       ],
-      "valueHints": {
-        "tagSafety": 4,
-        "tempo": -2
-      },
+      "valueHints": {},
       "riskTags": ["future_action_debt", "tag_prevention", "credit_cost"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -37492,8 +36416,7 @@
         "play_event_payment"
       ],
       "valueHints": {
-        "economy": 2,
-        "eventSupport": 3
+        "economy": 2
       },
       "riskTags": ["hosted_counters", "restricted_credits"],
       "aiSupportStatus": "ai_supported",
@@ -37545,7 +36468,7 @@
       ],
       "valueHints": {
         "economy": 2,
-        "remote": 1
+        "remoteRootValue": 2
       },
       "riskTags": ["runner_trash_value", "stored_credit_exposure"],
       "aiSupportStatus": "ai_supported",
@@ -37604,7 +36527,6 @@
         "trace_link_payment"
       ],
       "valueHints": {
-        "traceSafety": 3,
         "economy": 1
       },
       "riskTags": ["restricted_credits"],

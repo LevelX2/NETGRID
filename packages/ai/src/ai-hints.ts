@@ -19,7 +19,7 @@ export type AiCardHint = AiHintOntologyExtension & {
   roles: string[];
   planRoles: string[];
   aiSupportStatus: "none" | "hinted_only" | "scenario_ready" | "ai_supported";
-  valueHints?: Record<string, number>;
+  valueHints?: AiRuntimeValueHints;
   manualNotes?: string[];
   strategicNotes?: string[];
   descriptorGaps?: string[];
@@ -27,6 +27,18 @@ export type AiCardHint = AiHintOntologyExtension & {
     Record<string, unknown> & { visibleEvidenceOnly: true }
   >;
 };
+
+export type AiRuntimeValueHintKey =
+  | "damage"
+  | "economy"
+  | "installCreditGain"
+  | "leavePlayPayCost"
+  | "remoteRootValue"
+  | "startOfTurnCreditLoss";
+
+export type AiRuntimeValueHints = Partial<
+  Record<AiRuntimeValueHintKey, number>
+>;
 
 export const CARD_ROLES_BY_CARD = new Map(
   (cardRoleManifestData.cards as CardRole[]).map((card) => [card.cardId, card]),

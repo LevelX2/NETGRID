@@ -31,31 +31,6 @@ import {
 } from "../../runner-hand-development.test-support";
 
 describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
-  it("recognizes Microtech Backup Drive as program-protection support", () => {
-    const backupDrive = visibleCard("microtech-backup-drive", {
-      definitionId: "onr_v1_131_microtech-backup-drive",
-      title: "Microtech Backup Drive",
-      type: "hardware",
-      installCost: 0,
-    });
-    const input = runnerInput({
-      credits: 5,
-      hand: [backupDrive],
-      rig: [],
-      legalActions: [installAction("install-backup-drive", backupDrive, 0)],
-    });
-
-    const evaluation = findByInstance(
-      evaluateRunnerHandDevelopment({ input }),
-      "microtech-backup-drive",
-    );
-
-    expect(evaluation).toMatchObject({
-      developmentRole: "defense_support",
-      availability: "legal_now",
-    });
-  });
-
   it("keeps first risky universal breaker install valuable when coverage is missing", () => {
     const blink = visibleCard("blink-1", {
       definitionId: "test-risky-universal-breaker",

@@ -54,9 +54,7 @@
         "subtype_fracter",
         "subtype_icebreaker"
       ],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter"
       ],
@@ -101,10 +99,7 @@
         "subtype_daemon",
         "hosted_program_lifecycle"
       ],
-      "valueHints": {
-        "rigCoverage": 2,
-        "utility": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hosting",
         "runner_memory"
@@ -175,9 +170,7 @@
         "run_flow_lock_resolver",
         "recurring_pool_start_turn_resolver"
       ],
-      "valueHints": {
-        "startRunStrengthPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "random_counter_replay_required",
         "public_payload_only",
@@ -239,9 +232,7 @@
         "base_link",
         "recurring_credit"
       ],
-      "valueHints": {
-        "link": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "trace_window"
       ],
@@ -301,9 +292,7 @@
         "install_program",
         "hosting"
       ],
-      "valueHints": {
-        "rig": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "hosting_lifecycle"
       ],
@@ -380,10 +369,7 @@
         "pump_breaker",
         "trash_self"
       ],
-      "valueHints": {
-        "runPressure": 2,
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter",
         "random_outcome"
@@ -449,10 +435,7 @@
         "subtype_icebreaker",
         "subtype_killer"
       ],
-      "valueHints": {
-        "runPressure": 3,
-        "rigCoverage": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter",
         "credit_intensive"
@@ -515,10 +498,7 @@
         "memory",
         "net_damage"
       ],
-      "valueHints": {
-        "runPressure": 2,
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter",
         "random_outcome"
@@ -583,9 +563,7 @@
         "typed_counter_virus_purge_resolver",
         "recurring_pool_start_turn_resolver"
       ],
-      "valueHints": {
-        "hqRunCounterPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "random_counter_replay_required",
         "public_payload_only",
@@ -665,7 +643,6 @@
         "virus_purge"
       ],
       "valueHints": {
-        "tempo": 1,
         "economy": 1
       },
       "riskTags": [
@@ -734,7 +711,6 @@
         "virus_purge"
       ],
       "valueHints": {
-        "tempo": 1,
         "economy": 1
       },
       "riskTags": [
@@ -806,7 +782,6 @@
         "run_credit_spend_rules"
       ],
       "valueHints": {
-        "runPressure": 2,
         "economy": 2
       },
       "riskTags": [
@@ -875,10 +850,7 @@
         "memory",
         "persistent_modifier"
       ],
-      "valueHints": {
-        "runPressure": 2,
-        "rigCoverage": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "credit_reserve"
       ],
@@ -940,10 +912,7 @@
         "memory",
         "successful_run"
       ],
-      "valueHints": {
-        "runPressure": 2,
-        "rigCoverage": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "counter_setup",
         "random_outcome"
@@ -1009,10 +978,7 @@
         "memory",
         "subtype_icebreaker"
       ],
-      "valueHints": {
-        "rigCoverage": 2,
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter",
         "credit_reserve"
@@ -1076,10 +1042,7 @@
         "break_subroutine",
         "encounter_ice"
       ],
-      "valueHints": {
-        "rigCoverage": 2,
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter",
         "credit_reserve"
@@ -1133,10 +1096,7 @@
         "subtype_decoder",
         "subtype_icebreaker"
       ],
-      "valueHints": {
-        "runPressure": 2,
-        "rigCoverage": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter",
         "credit_reserve"
@@ -1197,7 +1157,6 @@
         "virus_purge"
       ],
       "valueHints": {
-        "tempo": 1,
         "economy": 1
       },
       "riskTags": [
@@ -1295,10 +1254,7 @@
         "encounter_ice",
         "restricted_breaker_targets"
       ],
-      "valueHints": {
-        "runPressure": 2,
-        "rigCoverage": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter",
         "timing_window"
@@ -1344,9 +1300,7 @@
         "encounter_ice",
         "end_run_after_breaker_use"
       ],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter",
         "timing_window",
@@ -1448,9 +1402,7 @@
         "install_program",
         "run_flow"
       ],
-      "valueHints": {
-        "run": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -1495,10 +1447,7 @@
         "subtype_icebreaker",
         "subtype_worm"
       ],
-      "valueHints": {
-        "rigCoverage": 2,
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter",
         "credit_reserve"
@@ -1551,9 +1500,7 @@
         "action_economy_handsize_modifier_resolver",
         "damage_event_prevention_resolver"
       ],
-      "valueHints": {
-        "modifier": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "modifier_layering",
         "state_hash_replay_stable"
@@ -1666,11 +1613,7 @@
         "damage_prevention",
         "core_damage"
       ],
-      "valueHints": {
-        "runPressure": 2,
-        "survivability": 3,
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter",
         "credit_reserve"
@@ -1762,9 +1705,7 @@
         "access",
         "multiaccess"
       ],
-      "valueHints": {
-        "access": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -1822,9 +1763,7 @@
         "agenda_difficulty",
         "overadvance"
       ],
-      "valueHints": {
-        "agenda": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "agenda_window"
       ],
@@ -1890,10 +1829,7 @@
         "runner_turn_start_recurring_refresh",
         "runner_program_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2,
-        "accessEconomy": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -1950,9 +1886,7 @@
         "v1922_runner_program_flak_ap_breaker",
         "runner_program_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -1995,9 +1929,7 @@
         "damage_prevention",
         "core_damage"
       ],
-      "valueHints": {
-        "survivability": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "damage_window"
       ],
@@ -2100,9 +2032,7 @@
         "typed_counter_virus_purge_resolver",
         "action_economy_handsize_modifier_resolver"
       ],
-      "valueHints": {
-        "modifier": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "modifier_layering",
         "state_hash_replay_stable"
@@ -2170,10 +2100,7 @@
         "pump_breaker",
         "run_persistent_bonus"
       ],
-      "valueHints": {
-        "runPressure": 2,
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "credit_reserve",
         "encounter"
@@ -2216,9 +2143,7 @@
         "runner_program_resolver",
         "corp_ice_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -2268,9 +2193,7 @@
         "expose_fort_cards",
         "corp_paid_counter_removal"
       ],
-      "valueHints": {
-        "information": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_zone_projection",
         "successful_run_window"
@@ -2333,9 +2256,7 @@
       "requiredMechanics": [
         "install_program"
       ],
-      "valueHints": {
-        "rig": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -2406,10 +2327,7 @@
         "start_of_turn_trigger",
         "successful_run"
       ],
-      "valueHints": {
-        "runPressure": 1,
-        "utility": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "counter_setup",
         "random_outcome"
@@ -2480,9 +2398,7 @@
         "stealth",
         "recurring_credit"
       ],
-      "valueHints": {
-        "run": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "stealth_credit_restriction"
       ],
@@ -2532,10 +2448,7 @@
         "subtype_noisy",
         "stealth_loss"
       ],
-      "valueHints": {
-        "runPressure": 2,
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "credit_reserve",
         "stealth_conflict"
@@ -2580,9 +2493,7 @@
         "v1922_runner_program_japanese_water_torture_future_action_debt",
         "runner_program_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -2645,9 +2556,7 @@
         "program_trash_prevention",
         "return_to_hand"
       ],
-      "valueHints": {
-        "survival": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "trash_prevention_window"
       ],
@@ -2732,10 +2641,7 @@
         "memory",
         "subtype_icebreaker"
       ],
-      "valueHints": {
-        "rigCoverage": 3,
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter",
         "credit_intensive",
@@ -2796,10 +2702,7 @@
         "subtype_icebreaker",
         "subtype_killer"
       ],
-      "valueHints": {
-        "runPressure": 2,
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter"
       ],
@@ -2856,9 +2759,7 @@
         "access",
         "multiaccess"
       ],
-      "valueHints": {
-        "access": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -2938,10 +2839,7 @@
         "expose_server_card",
         "legal_action_only"
       ],
-      "valueHints": {
-        "information": 2,
-        "tempo": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_info_barrier",
         "server_targeting"
@@ -3007,9 +2905,7 @@
         "run_flow",
         "hidden_zone_tool"
       ],
-      "valueHints": {
-        "information": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_zone_projection"
       ],
@@ -3120,9 +3016,7 @@
         "v1922_runner_program_install_surface_ability_gated",
         "runner_program_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -3185,9 +3079,7 @@
         "v1922_runner_program_newsgroup_filter_gain_2",
         "runner_program_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -3257,10 +3149,7 @@
         "successful_run",
         "virus_counters"
       ],
-      "valueHints": {
-        "runPressure": 2,
-        "utility": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter",
         "virus_cleanup"
@@ -3373,10 +3262,7 @@
         "subtype_noisy",
         "stealth_loss"
       ],
-      "valueHints": {
-        "rigCoverage": 2,
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "credit_reserve",
         "stealth_conflict"
@@ -3441,9 +3327,7 @@
         "node_trash_recurring_credit",
         "recurring_start_turn"
       ],
-      "valueHints": {
-        "trashEconomy": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -3515,10 +3399,7 @@
         "successful_run",
         "virus_counters"
       ],
-      "valueHints": {
-        "runPressure": 2,
-        "utility": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter",
         "virus_cleanup"
@@ -3586,9 +3467,7 @@
         "access_replacement",
         "top_rd_look"
       ],
-      "valueHints": {
-        "access": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_zone_projection",
         "access_replacement"
@@ -3671,9 +3550,7 @@
         "v1922_runner_program_install_surface_ability_gated",
         "runner_program_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -3739,10 +3616,7 @@
         "break_subroutine",
         "encounter_ice"
       ],
-      "valueHints": {
-        "runPressure": 2,
-        "rigCoverage": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter",
         "credit_reserve",
@@ -3804,9 +3678,7 @@
         "break_wall_subroutine",
         "stealth_loss"
       ],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter_window",
         "stealth_credit_accounting"
@@ -3856,11 +3728,7 @@
         "subtype_icebreaker",
         "subtype_killer"
       ],
-      "valueHints": {
-        "runPressure": 2,
-        "rigCoverage": 2,
-        "tempo": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter",
         "credit_reserve",
@@ -3921,9 +3789,7 @@
         "v1922_runner_program_reflector_tagged_breaker",
         "runner_program_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -3988,10 +3854,7 @@
         "pump_strength",
         "break_trace_subroutine"
       ],
-      "valueHints": {
-        "trace": 1,
-        "breaker": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "tag_window",
         "encounter_timing"
@@ -4053,9 +3916,7 @@
         "v1922_runner_program_install_surface_ability_gated",
         "runner_program_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -4125,10 +3986,7 @@
         "expose_server_card",
         "legal_action_only"
       ],
-      "valueHints": {
-        "information": 2,
-        "tempo": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_info_barrier",
         "server_targeting"
@@ -4195,10 +4053,7 @@
         "shuffle",
         "legal_action_only"
       ],
-      "valueHints": {
-        "consistency": 3,
-        "tempo": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_info_barrier",
         "shuffle_invalidates_memory"
@@ -4293,10 +4148,7 @@
         "subtype_icebreaker",
         "subtype_killer"
       ],
-      "valueHints": {
-        "runPressure": 2,
-        "rigCoverage": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter",
         "credit_reserve",
@@ -4356,9 +4208,7 @@
         "v1922_runner_program_net_damage_prevention",
         "runner_program_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -4444,9 +4294,7 @@
         "run_flow",
         "access"
       ],
-      "valueHints": {
-        "access": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -4510,10 +4358,7 @@
         "link",
         "post_bid_link"
       ],
-      "valueHints": {
-        "trace": 1,
-        "postBidLink": 2
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -4577,10 +4422,7 @@
         "corp_start_turn_extra_draw",
         "virus_purge"
       ],
-      "valueHints": {
-        "tempo": 1,
-        "pressure": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "counter_state"
       ],
@@ -4642,9 +4484,7 @@
         "run_flow",
         "hidden_zone_tool"
       ],
-      "valueHints": {
-        "information": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_zone_projection"
       ],
@@ -4725,10 +4565,7 @@
         "encounter_ice",
         "run_strength_modifier"
       ],
-      "valueHints": {
-        "rigCoverage": 2,
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter",
         "credit_reserve"
@@ -4783,9 +4620,7 @@
         "v1922_runner_program_install_surface_ability_gated",
         "runner_program_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -4829,9 +4664,7 @@
         "v1922_runner_program_install_surface_ability_gated",
         "runner_program_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -4911,10 +4744,7 @@
         "hosted_card_cleanup",
         "hosted_program_memory_model"
       ],
-      "valueHints": {
-        "utility": 2,
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hosting_cleanup"
       ],
@@ -4975,10 +4805,7 @@
         "subtype_decoder",
         "subtype_icebreaker"
       ],
-      "valueHints": {
-        "runPressure": 2,
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter"
       ],
@@ -5040,9 +4867,7 @@
         "install_program",
         "stealth"
       ],
-      "valueHints": {
-        "run": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "stealth_credit_restriction"
       ],
@@ -5106,10 +4931,7 @@
         "subtype_icebreaker",
         "subtype_killer"
       ],
-      "valueHints": {
-        "runPressure": 2,
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter",
         "credit_intensive"
@@ -5168,10 +4990,7 @@
         "subtype_decoder",
         "subtype_icebreaker"
       ],
-      "valueHints": {
-        "runPressure": 2,
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter"
       ],
@@ -5232,10 +5051,7 @@
         "subtype_icebreaker",
         "subtype_worm"
       ],
-      "valueHints": {
-        "rigCoverage": 2,
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter",
         "credit_reserve"
@@ -5294,9 +5110,7 @@
         "v1922_runner_program_zetatech_software_installer_recurring_program_install_overlay",
         "runner_program_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -5367,9 +5181,7 @@
         "play_event",
         "run"
       ],
-      "valueHints": {
-        "runPressure": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter",
         "timing_window"
@@ -5427,9 +5239,7 @@
         "runner_event_resolver",
         "corp_ice_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -5488,9 +5298,7 @@
         "prevention",
         "agenda_difficulty"
       ],
-      "valueHints": {
-        "defense": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "tag_risk",
         "replacement_window"
@@ -5589,10 +5397,7 @@
       "requiredMechanics": [
         "play_event"
       ],
-      "valueHints": {
-        "cardFlow": 4,
-        "setup": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_zone_change",
         "public_play"
@@ -5640,9 +5445,7 @@
         "runner_event_resolver",
         "corp_ice_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -5707,9 +5510,7 @@
         "play_event",
         "run"
       ],
-      "valueHints": {
-        "runPressure": 3
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -5774,10 +5575,7 @@
         "militech_counter",
         "icebreaker_strength_modifier"
       ],
-      "valueHints": {
-        "tempo": 2,
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "conditional"
       ],
@@ -5841,10 +5639,7 @@
         "play_event",
         "stolen_agenda_check"
       ],
-      "valueHints": {
-        "scoring": 2,
-        "runPressure": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "conditional"
       ],
@@ -5899,10 +5694,7 @@
         "runner_gain_credits",
         "runner_gain_tag"
       ],
-      "valueHints": {
-        "runPressure": 2,
-        "utility": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "access_replacement",
         "tag_self"
@@ -5997,9 +5789,7 @@
         "play_event",
         "run"
       ],
-      "valueHints": {
-        "runPressure": 3
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -6065,9 +5855,7 @@
         "runner_event_resolver",
         "corp_ice_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -6132,10 +5920,7 @@
         "shuffle",
         "legal_action_only"
       ],
-      "valueHints": {
-        "consistency": 3,
-        "tempo": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_info_barrier",
         "shuffle_invalidates_memory"
@@ -6235,10 +6020,7 @@
         "expose_server_card",
         "legal_action_only"
       ],
-      "valueHints": {
-        "information": 3,
-        "run_safety": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_info_barrier",
         "server_targeting"
@@ -6295,10 +6077,7 @@
         "heap_to_grip",
         "legal_action_only"
       ],
-      "valueHints": {
-        "recursion": 3,
-        "tempo": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "public_trash_to_hand"
       ],
@@ -6375,10 +6154,7 @@
         "play_event",
         "stolen_agenda_check"
       ],
-      "valueHints": {
-        "scoring": 2,
-        "runPressure": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "conditional"
       ],
@@ -6428,9 +6204,7 @@
         "expose_installed_cards",
         "side_safe_targeting"
       ],
-      "valueHints": {
-        "information": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "public_reveal",
         "hidden_info_barrier"
@@ -6487,9 +6261,7 @@
         "expose_outermost_ice_each_data_fort",
         "legal_action_only"
       ],
-      "valueHints": {
-        "information": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "public_reveal",
         "hidden_info_barrier"
@@ -6546,9 +6318,7 @@
         "v1922_runner_event_stack_top5_choose_one_arrange_rest",
         "runner_event_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -6635,9 +6405,7 @@
         "run",
         "successful_run"
       ],
-      "valueHints": {
-        "runPressure": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "credit_reserve",
         "encounter"
@@ -6684,10 +6452,7 @@
       "requiredMechanics": [
         "play_event"
       ],
-      "valueHints": {
-        "cardFlow": 3,
-        "setup": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_zone_change",
         "public_play"
@@ -6737,10 +6502,7 @@
         "successful_run",
         "trash_on_access"
       ],
-      "valueHints": {
-        "runPressure": 3,
-        "utility": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter",
         "timing_window"
@@ -6810,8 +6572,7 @@
         "play_event"
       ],
       "valueHints": {
-        "economy": 3,
-        "tempo": 2
+        "economy": 3
       },
       "riskTags": [
         "public_play"
@@ -6856,9 +6617,7 @@
         "play_event",
         "start_run"
       ],
-      "valueHints": {
-        "run": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "run_commitment"
       ],
@@ -6917,10 +6676,7 @@
         "shuffle",
         "legal_action_only"
       ],
-      "valueHints": {
-        "consistency": 3,
-        "tempo": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_info_barrier",
         "shuffle_invalidates_memory"
@@ -6996,9 +6752,7 @@
         "v1922_runner_event_installed_trash_gain_credits",
         "runner_event_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -7050,9 +6804,7 @@
         "draw_cards",
         "remove_from_game"
       ],
-      "valueHints": {
-        "cardFlow": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_zone_projection"
       ],
@@ -7108,9 +6860,7 @@
         "v1922_runner_event_remove_tag_optional_return",
         "runner_event_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -7173,9 +6923,7 @@
         "v1922_runner_event_grip_trash_gain_credits",
         "runner_event_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -7240,9 +6988,7 @@
         "deterministic_random_card_resolver",
         "generic_asset_node_ability_resolver"
       ],
-      "valueHints": {
-        "playfulAiGainAllPriority": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "random_counter_replay_required",
         "event_heap_movement",
@@ -7290,9 +7036,7 @@
         "play_event",
         "start_run"
       ],
-      "valueHints": {
-        "runPressure": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "run_commitment"
       ],
@@ -7360,9 +7104,7 @@
         "hq_run",
         "access_replacement"
       ],
-      "valueHints": {
-        "runPressure": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "access_replacement"
       ],
@@ -7422,10 +7164,7 @@
         "successful_run",
         "trash_on_access"
       ],
-      "valueHints": {
-        "runPressure": 3,
-        "utility": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter",
         "timing_window"
@@ -7549,9 +7288,7 @@
         "runner_event_resolver",
         "corp_ice_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -7619,10 +7356,7 @@
         "shuffle",
         "legal_action_only"
       ],
-      "valueHints": {
-        "tempo": 3,
-        "consistency": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "temporary_install",
         "shuffle_invalidates_memory",
@@ -7710,9 +7444,7 @@
         "start_run",
         "access"
       ],
-      "valueHints": {
-        "access": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "run_commitment"
       ],
@@ -7781,9 +7513,7 @@
         "trace",
         "access"
       ],
-      "valueHints": {
-        "access": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "trace_window",
         "run_commitment"
@@ -7834,9 +7564,7 @@
         "v1922_runner_event_successful_hq_run_corp_pay_to_retain_hq",
         "runner_event_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -7896,10 +7624,7 @@
         "show_to_corp",
         "shuffle_stack"
       ],
-      "valueHints": {
-        "rigCoverage": 2,
-        "cardFlow": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_zone_projection"
       ],
@@ -7991,10 +7716,7 @@
         "play_event",
         "random_discard"
       ],
-      "valueHints": {
-        "runPressure": 1,
-        "utility": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "conditional",
         "timing_window"
@@ -8050,9 +7772,7 @@
         "play_event",
         "remove_tag"
       ],
-      "valueHints": {
-        "tagRelief": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "tag_window"
       ],
@@ -8124,9 +7844,7 @@
         "runner_program_resolver",
         "runner_event_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -8203,7 +7921,6 @@
         "successful_run"
       ],
       "valueHints": {
-        "runPressure": 2,
         "economy": 2
       },
       "riskTags": [
@@ -8272,9 +7989,7 @@
         "deck_unique_replacement",
         "successful_run_bonus_run"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -8349,9 +8064,7 @@
         "tag_avoid",
         "damage_prevention"
       ],
-      "valueHints": {
-        "survival": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "tag_window"
       ],
@@ -8449,9 +8162,7 @@
         "damage_prevention",
         "ablative_counter"
       ],
-      "valueHints": {
-        "survival": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "damage_window"
       ],
@@ -8539,11 +8250,7 @@
         "per_card_longtail_resolver_gate; install_hardware_memory_surface",
         "install_hardware_memory_surface"
       ],
-      "valueHints": {
-        "memoryLimitBonus": 1,
-        "perCardLongtailPriority": 2,
-        "recurringCredits": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -8607,9 +8314,7 @@
         "per_card_longtail_resolver_gate; install_hardware_memory_surface",
         "install_hardware_memory_surface"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -8670,9 +8375,7 @@
         "per_card_longtail_resolver_gate; install_hardware_memory_surface",
         "install_hardware_memory_surface"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -8723,9 +8426,7 @@
         "install_hardware",
         "damage_prevention"
       ],
-      "valueHints": {
-        "survivability": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "damage_window"
       ],
@@ -8804,9 +8505,7 @@
         "install_hardware",
         "remove_tag"
       ],
-      "valueHints": {
-        "tagRelief": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "tag_window"
       ],
@@ -8861,9 +8560,7 @@
         "meat_damage",
         "damage_prevention"
       ],
-      "valueHints": {
-        "survival": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "damage_window"
       ],
@@ -8946,9 +8643,7 @@
         "damage_prevention",
         "damage_prevention_turn_limit"
       ],
-      "valueHints": {
-        "survival": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "damage_window"
       ],
@@ -9029,9 +8724,7 @@
         "multiaccess_hq",
         "successful_run"
       ],
-      "valueHints": {
-        "runPressure": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "credit_reserve"
       ],
@@ -9090,9 +8783,7 @@
         "recent_damage_gate",
         "draw_cards"
       ],
-      "valueHints": {
-        "survival": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "damage_window"
       ],
@@ -9188,9 +8879,7 @@
         "per_card_longtail_resolver_gate; install_hardware_memory_surface",
         "install_hardware_memory_surface"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -9281,9 +8970,7 @@
         "trace",
         "link"
       ],
-      "valueHints": {
-        "link": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "tag_window"
       ],
@@ -9340,9 +9027,7 @@
         "persistent_special_state_resolver",
         "action_economy_handsize_modifier_resolver"
       ],
-      "valueHints": {
-        "modifier": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "modifier_layering",
         "state_hash_replay_stable"
@@ -9394,9 +9079,7 @@
         "persistent_special_state_resolver",
         "action_economy_handsize_modifier_resolver"
       ],
-      "valueHints": {
-        "modifier": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "modifier_layering",
         "state_hash_replay_stable"
@@ -9452,9 +9135,7 @@
         "tag_avoid",
         "credit_cost"
       ],
-      "valueHints": {
-        "survival": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "tag_window"
       ],
@@ -9513,9 +9194,7 @@
         "per_card_longtail_resolver_gate; install_hardware_memory_surface",
         "install_hardware_memory_surface"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -9585,9 +9264,7 @@
         "per_card_longtail_resolver_gate; install_hardware_memory_surface",
         "install_hardware_memory_surface"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -9654,9 +9331,7 @@
         "trace_link_recurring_credit",
         "recurring_start_turn"
       ],
-      "valueHints": {
-        "traceBidSupport": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -9726,9 +9401,7 @@
         "install_hardware",
         "rd_additional_access"
       ],
-      "valueHints": {
-        "runPressure": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_zone_access_queue",
         "public_payload_only",
@@ -9783,9 +9456,7 @@
         "install_hardware",
         "recurring_credit"
       ],
-      "valueHints": {
-        "run": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -9884,9 +9555,7 @@
         "install_hardware",
         "recurring_credit"
       ],
-      "valueHints": {
-        "run": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -9955,9 +9624,7 @@
         "access",
         "multiaccess"
       ],
-      "valueHints": {
-        "access": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -10031,9 +9698,7 @@
         "link_bits",
         "deck_unique_replacement"
       ],
-      "valueHints": {
-        "survival": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "damage_window"
       ],
@@ -10142,11 +9807,7 @@
         "install_hardware",
         "subtype_chip"
       ],
-      "valueHints": {
-        "memory": 3,
-        "rigCoverage": 2,
-        "setup": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "install_runner",
         "credit_reserve"
@@ -10193,10 +9854,7 @@
       "requiredMechanics": [
         "install_hardware"
       ],
-      "valueHints": {
-        "memory": 1,
-        "setup": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "install_runner"
       ],
@@ -10244,11 +9902,7 @@
         "install_hardware",
         "subtype_chip"
       ],
-      "valueHints": {
-        "memory": 2,
-        "rigCoverage": 2,
-        "setup": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "install_runner",
         "credit_reserve"
@@ -10299,11 +9953,7 @@
         "recurring_pool_start_turn_resolver",
         "killer_restricted_run_credit_payment"
       ],
-      "valueHints": {
-        "killerRunCreditPriority": 2,
-        "installCost": 5,
-        "recurringCredits": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "killer_restricted_payment",
         "legal_actions_only",
@@ -10355,9 +10005,7 @@
         "base_link",
         "one_base_link_per_trace"
       ],
-      "valueHints": {
-        "link": 9
-      },
+      "valueHints": {},
       "riskTags": [
         "trace_window"
       ],
@@ -10430,9 +10078,7 @@
         "install_resource",
         "base_link"
       ],
-      "valueHints": {
-        "link": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "trace_window"
       ],
@@ -10518,9 +10164,7 @@
         "install_resource",
         "base_link"
       ],
-      "valueHints": {
-        "link": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "trace_window"
       ],
@@ -10611,10 +10255,7 @@
         "shuffle",
         "legal_action_only"
       ],
-      "valueHints": {
-        "consistency": 3,
-        "information": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_info_barrier",
         "shuffle_invalidates_memory"
@@ -10691,9 +10332,7 @@
         "install_resource",
         "base_link"
       ],
-      "valueHints": {
-        "link": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "trace_window"
       ],
@@ -10779,9 +10418,7 @@
         "install_resource",
         "base_link"
       ],
-      "valueHints": {
-        "link": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "trace_window"
       ],
@@ -10874,7 +10511,6 @@
         "take_click_ability"
       ],
       "valueHints": {
-        "utility": 2,
         "economy": 3
       },
       "riskTags": [
@@ -10957,9 +10593,7 @@
         "virus_counter_purge_replacement",
         "corp_paid_trash_action"
       ],
-      "valueHints": {
-        "virus": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "purge_window",
         "corp_trash_action"
@@ -11024,10 +10658,7 @@
         "persistent_modifier",
         "unique_card"
       ],
-      "valueHints": {
-        "utility": 2,
-        "scoring": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "agenda_cost",
         "board_tradeoff"
@@ -11110,9 +10741,7 @@
         "install_resource",
         "resource_tag_interaction"
       ],
-      "valueHints": {
-        "draw": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "resource_trash_if_tagged"
       ],
@@ -11187,9 +10816,7 @@
         "remove_tags",
         "trash_on_use"
       ],
-      "valueHints": {
-        "survivability": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "board_tradeoff"
       ],
@@ -11302,9 +10929,7 @@
         "agenda_point_cost_resolver",
         "damage_event_prevention_resolver"
       ],
-      "valueHints": {
-        "modifier": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "modifier_layering",
         "state_hash_replay_stable",
@@ -11401,9 +11026,7 @@
         "install_resource",
         "tag_avoid"
       ],
-      "valueHints": {
-        "survival": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "tag_window"
       ],
@@ -11463,9 +11086,7 @@
         "install_resource",
         "resource_tag_interaction"
       ],
-      "valueHints": {
-        "information": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "resource_trash_if_tagged"
       ],
@@ -11587,9 +11208,7 @@
         "link",
         "recurring_start_turn"
       ],
-      "valueHints": {
-        "traceDefense": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "resource_trash_if_tagged",
         "restricted_payment",
@@ -11773,9 +11392,7 @@
         "resource_tag_interaction",
         "damage_prevention"
       ],
-      "valueHints": {
-        "survival": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "resource_trash_if_tagged"
       ],
@@ -11876,8 +11493,8 @@
       ],
       "valueHints": {
         "installCreditGain": 12,
-        "startOfTurnCreditLoss": 1,
-        "leavePlayPayCost": 10
+        "leavePlayPayCost": 10,
+        "startOfTurnCreditLoss": 1
       },
       "riskTags": [
         "credit_swing",
@@ -11981,10 +11598,7 @@
         "shuffle",
         "legal_action_only"
       ],
-      "valueHints": {
-        "consistency": 3,
-        "information": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_info_barrier",
         "shuffle_invalidates_memory"
@@ -12065,9 +11679,7 @@
         "action_cost",
         "credit_cost"
       ],
-      "valueHints": {
-        "survival": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "tag_window"
       ],
@@ -12152,9 +11764,7 @@
         "action_economy_handsize_modifier_resolver",
         "damage_event_prevention_resolver"
       ],
-      "valueHints": {
-        "modifier": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "modifier_layering",
         "state_hash_replay_stable"
@@ -12219,9 +11829,7 @@
         "recurring_pool_start_turn_resolver",
         "damage_event_prevention_resolver"
       ],
-      "valueHints": {
-        "startTurnRandomPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "random_counter_replay_required",
         "public_payload_only",
@@ -12300,10 +11908,7 @@
         "choose_data_fort_on_install",
         "ice_install_extra_cost_2"
       ],
-      "valueHints": {
-        "utility": 2,
-        "runPressure": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "board_presence"
       ],
@@ -12421,10 +12026,7 @@
         "reorder_stack",
         "legal_action_only"
       ],
-      "valueHints": {
-        "information": 2,
-        "consistency": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_info_barrier",
         "reorder_updates_memory"
@@ -12509,9 +12111,7 @@
         "start_turn_counter_removal",
         "paid_counter_removal"
       ],
-      "valueHints": {
-        "tempo": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "counter_state",
         "mu_check"
@@ -12610,10 +12210,7 @@
         "shuffle",
         "legal_action_only"
       ],
-      "valueHints": {
-        "consistency": 3,
-        "tempo": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_info_barrier",
         "shuffle_invalidates_memory"
@@ -12714,8 +12311,7 @@
         "take_click_ability"
       ],
       "valueHints": {
-        "economy": 3,
-        "tempo": 1
+        "economy": 3
       },
       "riskTags": [
         "resource_trash_if_tagged",
@@ -12806,8 +12402,7 @@
         "install_resource"
       ],
       "valueHints": {
-        "economy": 2,
-        "cardFlow": 2
+        "economy": 2
       },
       "riskTags": [
         "board_presence"
@@ -12883,7 +12478,6 @@
         "choice_resolution"
       ],
       "valueHints": {
-        "utility": 2,
         "economy": 2
       },
       "riskTags": [
@@ -12949,10 +12543,7 @@
         "link",
         "post_bid_link"
       ],
-      "valueHints": {
-        "link": 1,
-        "postBidLink": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "resource_trash_if_tagged"
       ],
@@ -13027,9 +12618,7 @@
         "base_link",
         "counter"
       ],
-      "valueHints": {
-        "link": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "trace_window"
       ],
@@ -13121,9 +12710,7 @@
         "install_resource",
         "resource_tag_interaction"
       ],
-      "valueHints": {
-        "information": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "resource_trash_if_tagged"
       ],
@@ -13167,8 +12754,7 @@
         "trash_on_run"
       ],
       "valueHints": {
-        "economy": 2,
-        "runPressure": 1
+        "economy": 2
       },
       "riskTags": [
         "board_presence",
@@ -13229,9 +12815,7 @@
         "trauma_counter",
         "action_counter"
       ],
-      "valueHints": {
-        "survival": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "damage_window"
       ],
@@ -13313,9 +12897,7 @@
         "program_trash_prevention",
         "hardware_trash_prevention"
       ],
-      "valueHints": {
-        "survival": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "trash_prevention_window"
       ],
@@ -13408,9 +12990,7 @@
         "meat_damage",
         "damage_prevention"
       ],
-      "valueHints": {
-        "survival": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "tag_window",
         "damage_window",
@@ -13535,10 +13115,7 @@
         "shuffle_hidden_zone",
         "take_click_ability"
       ],
-      "valueHints": {
-        "scoring": 2,
-        "cardFlow": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_zone_change",
         "timing_window"
@@ -13652,9 +13229,7 @@
         "hidden_zone",
         "overadvance"
       ],
-      "valueHints": {
-        "agenda": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "score_window",
         "hidden_zone_barrier"
@@ -13732,9 +13307,7 @@
         "global_static_modifier_layer_resolver",
         "damage_event_prevention_resolver"
       ],
-      "valueHints": {
-        "modifier": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "modifier_layering",
         "state_hash_replay_stable"
@@ -13807,9 +13380,7 @@
         "hidden_zone_search_reveal_reorder_resolver",
         "global_static_modifier_layer_resolver"
       ],
-      "valueHints": {
-        "modifier": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "modifier_layering",
         "state_hash_replay_stable"
@@ -13894,9 +13465,7 @@
         "typed_counter_virus_purge_resolver",
         "action_economy_handsize_modifier_resolver"
       ],
-      "valueHints": {
-        "modifier": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "modifier_layering",
         "state_hash_replay_stable"
@@ -13998,7 +13567,6 @@
         "take_click_ability"
       ],
       "valueHints": {
-        "scoring": 2,
         "economy": 2
       },
       "riskTags": [
@@ -14071,10 +13639,7 @@
         "hq_agenda_shuffle_into_rd",
         "legal_action_only"
       ],
-      "valueHints": {
-        "agenda": 2,
-        "information": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "public_reveal",
         "scored_agenda_action"
@@ -14174,9 +13739,7 @@
         "v1922_scored_agenda_action_gain_2_until_install_or_rez",
         "corp_agenda_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -14238,9 +13801,7 @@
         "v1922_corp_agenda_on_score_credit_threshold",
         "corp_agenda_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -14318,9 +13879,7 @@
         "v1922_corp_agenda_data_fort_reclamation_hq_install_sequence",
         "corp_agenda_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -14420,7 +13979,6 @@
         "counter"
       ],
       "valueHints": {
-        "agenda": 2,
         "economy": 1
       },
       "riskTags": [
@@ -14485,7 +14043,6 @@
         "start_of_turn_credit_gain"
       ],
       "valueHints": {
-        "agenda": 2,
         "economy": 1
       },
       "riskTags": [
@@ -14600,7 +14157,6 @@
         "global_static_modifier_layer_resolver"
       ],
       "valueHints": {
-        "modifier": 1,
         "economy": 1
       },
       "riskTags": [
@@ -14704,10 +14260,7 @@
         "persistent_modifier",
         "score"
       ],
-      "valueHints": {
-        "scoring": 2,
-        "tempo": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_until_score_or_access"
       ],
@@ -14782,9 +14335,7 @@
         "hidden_zone",
         "overadvance"
       ],
-      "valueHints": {
-        "agenda": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "score_window",
         "hidden_zone_barrier"
@@ -14865,9 +14416,7 @@
         "steal",
         "subtype_gray_ops"
       ],
-      "valueHints": {
-        "scoring": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_until_score_or_access"
       ],
@@ -14924,9 +14473,7 @@
         "ice_strength_modifier_resolver",
         "subroutine_modifier_resolver"
       ],
-      "valueHints": {
-        "modifier": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "modifier_layering",
         "score_window",
@@ -15013,9 +14560,7 @@
         "action_economy_handsize_modifier_resolver",
         "global_static_modifier_layer_resolver"
       ],
-      "valueHints": {
-        "modifier": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "modifier_layering",
         "state_hash_replay_stable"
@@ -15065,9 +14610,7 @@
         "v1922_scored_agenda_action_gain_3_for_2_actions",
         "corp_agenda_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -15139,10 +14682,7 @@
         "take_click_ability",
         "trace"
       ],
-      "valueHints": {
-        "scoring": 2,
-        "threat": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_until_score_or_access",
         "tag_window"
@@ -15265,10 +14805,7 @@
         "tag_condition",
         "take_click_ability"
       ],
-      "valueHints": {
-        "scoring": 2,
-        "threat": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_until_score_or_access",
         "tag_window"
@@ -15396,7 +14933,6 @@
         "take_click_ability"
       ],
       "valueHints": {
-        "scoring": 3,
         "economy": 2
       },
       "riskTags": [
@@ -15480,9 +15016,7 @@
         "v1922_scored_agenda_action_gain_3",
         "corp_agenda_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -15563,8 +15097,7 @@
         "start_of_turn_trigger"
       ],
       "valueHints": {
-        "economy": 2,
-        "scoring": 2
+        "economy": 2
       },
       "riskTags": [
         "hidden_until_score_or_access"
@@ -15626,11 +15159,7 @@
         "rez_ice",
         "on_score_rez_ice_free"
       ],
-      "valueHints": {
-        "scoring": 4,
-        "tempo": 3,
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_until_score_or_access",
         "score_window",
@@ -15742,10 +15271,7 @@
         "take_click_ability",
         "trace"
       ],
-      "valueHints": {
-        "scoring": 2,
-        "threat": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_until_score_or_access",
         "tag_window"
@@ -15883,9 +15409,7 @@
         "install_remote",
         "score"
       ],
-      "valueHints": {
-        "scoring": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_until_score_or_access"
       ],
@@ -15953,10 +15477,7 @@
         "global_ice_strength_modifier",
         "persistent_modifier"
       ],
-      "valueHints": {
-        "scoring": 3,
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_until_score_or_access"
       ],
@@ -16046,9 +15567,7 @@
         "v1922_corp_agenda_security_purge_rd_top3",
         "corp_agenda_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -16148,10 +15667,7 @@
         "tag_condition",
         "take_click_ability"
       ],
-      "valueHints": {
-        "scoring": 3,
-        "threat": 4
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_until_score_or_access",
         "tag_window"
@@ -16272,9 +15788,7 @@
         "persistent_special_state_resolver",
         "action_economy_handsize_modifier_resolver"
       ],
-      "valueHints": {
-        "modifier": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "modifier_layering",
         "state_hash_replay_stable"
@@ -16360,8 +15874,6 @@
         "persistent_modifier"
       ],
       "valueHints": {
-        "scoring": 4,
-        "defense": 3,
         "economy": 2
       },
       "riskTags": [
@@ -16482,9 +15994,7 @@
         "steal",
         "subtype_asset"
       ],
-      "valueHints": {
-        "scoring": 4
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_until_score_or_access"
       ],
@@ -16521,9 +16031,7 @@
         "rez_ice",
         "trace"
       ],
-      "valueHints": {
-        "defense": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "trace_window"
       ],
@@ -16626,10 +16134,7 @@
         "rez_ice",
         "run_cost_modifier"
       ],
-      "valueHints": {
-        "defense": 3,
-        "threat": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -16741,10 +16246,7 @@
         "rez_ice",
         "trash_installed_program"
       ],
-      "valueHints": {
-        "defense": 4,
-        "threat": 4
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice",
         "program_trash"
@@ -16824,10 +16326,7 @@
         "net_damage",
         "breaker_restriction"
       ],
-      "valueHints": {
-        "defense": 2,
-        "threat": 4
-      },
+      "valueHints": {},
       "riskTags": [
         "damage_window",
         "hidden_ice",
@@ -16943,10 +16442,7 @@
         "persistent_modifier",
         "rez_ice"
       ],
-      "valueHints": {
-        "defense": 2,
-        "threat": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -17051,10 +16547,7 @@
         "persistent_modifier",
         "rez_ice"
       ],
-      "valueHints": {
-        "defense": 2,
-        "threat": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -17156,7 +16649,6 @@
         "counter_remove_action"
       ],
       "valueHints": {
-        "defense": 2,
         "damage": 2
       },
       "riskTags": [
@@ -17288,9 +16780,7 @@
         "meat_damage",
         "end_the_run"
       ],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "trace_window",
         "damage_window",
@@ -17431,10 +16921,7 @@
         "core_damage",
         "flatline"
       ],
-      "valueHints": {
-        "defense": 3,
-        "threat": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -17529,9 +17016,7 @@
         "rez_ice",
         "subtype_code_gate"
       ],
-      "valueHints": {
-        "defense": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -17603,10 +17088,7 @@
         "core_damage",
         "flatline"
       ],
-      "valueHints": {
-        "defense": 2,
-        "threat": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -17706,9 +17188,7 @@
         "rez_ice",
         "subtype_wall"
       ],
-      "valueHints": {
-        "defense": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -17778,10 +17258,7 @@
         "uninstall_runner_program",
         "end_the_run"
       ],
-      "valueHints": {
-        "defense": 3,
-        "threat": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -17855,9 +17332,7 @@
         "net_damage",
         "next_encounter_no_break"
       ],
-      "valueHints": {
-        "defense": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "damage_window",
         "next_encounter_modifier"
@@ -17971,10 +17446,7 @@
         "rez_ice",
         "trash_installed_program"
       ],
-      "valueHints": {
-        "defense": 4,
-        "threat": 4
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice",
         "program_trash"
@@ -18053,10 +17525,7 @@
         "counter",
         "runner_counter_removal"
       ],
-      "valueHints": {
-        "defense": 4,
-        "threat": 4
-      },
+      "valueHints": {},
       "riskTags": [
         "tag_window",
         "counter_pressure",
@@ -18174,9 +17643,7 @@
         "rez_ice",
         "subtype_wall"
       ],
-      "valueHints": {
-        "defense": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -18245,9 +17712,7 @@
         "rez_ice",
         "subtype_wall"
       ],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -18315,9 +17780,7 @@
         "rez_ice",
         "subtype_code_gate"
       ],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -18385,9 +17848,7 @@
         "trace",
         "end_the_run"
       ],
-      "valueHints": {
-        "defense": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "trace_window"
       ],
@@ -18484,9 +17945,7 @@
         "rez_ice",
         "trace"
       ],
-      "valueHints": {
-        "defense": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "trace_window"
       ],
@@ -18588,10 +18047,7 @@
         "install_ice",
         "rez_ice"
       ],
-      "valueHints": {
-        "defense": 2,
-        "threat": 4
-      },
+      "valueHints": {},
       "riskTags": [
         "damage",
         "hidden_ice"
@@ -18691,10 +18147,7 @@
         "add_tag",
         "subtype_sentry"
       ],
-      "valueHints": {
-        "defense": 2,
-        "threat": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice",
         "tag",
@@ -18785,9 +18238,7 @@
         "rez_ice",
         "subtype_code_gate"
       ],
-      "valueHints": {
-        "defense": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -18855,9 +18306,7 @@
         "rez_ice",
         "subtype_wall"
       ],
-      "valueHints": {
-        "defense": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -18925,9 +18374,7 @@
         "trace",
         "trash_installed_program"
       ],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "trace_window",
         "installed_card_destroy"
@@ -19034,9 +18481,7 @@
         "v1922_corp_ice_haunting_inquisition_run_lock",
         "corp_ice_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -19128,9 +18573,7 @@
         "meat_damage",
         "end_the_run"
       ],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "trace_window",
         "damage_window",
@@ -19261,10 +18704,7 @@
         "add_tag",
         "subtype_sentry"
       ],
-      "valueHints": {
-        "defense": 2,
-        "threat": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice",
         "tag",
@@ -19359,10 +18799,7 @@
         "reveal_rd_top",
         "legal_action_only"
       ],
-      "valueHints": {
-        "defense": 2,
-        "information": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "public_reveal",
         "subroutine_bound"
@@ -19441,10 +18878,7 @@
         "rez_ice",
         "trace"
       ],
-      "valueHints": {
-        "defense": 3,
-        "threat": 4
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice",
         "tag_window"
@@ -19550,9 +18984,7 @@
         "rez_ice",
         "subtype_code_gate"
       ],
-      "valueHints": {
-        "defense": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -19622,9 +19054,7 @@
         "rez_ice",
         "subtype_wall"
       ],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "damage",
         "hidden_ice"
@@ -19706,10 +19136,7 @@
         "core_damage",
         "flatline"
       ],
-      "valueHints": {
-        "defense": 4,
-        "threat": 4
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -19804,9 +19231,7 @@
         "trace",
         "core_damage"
       ],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "trace_window",
         "damage_window"
@@ -19952,9 +19377,7 @@
         "rez_ice",
         "subtype_code_gate"
       ],
-      "valueHints": {
-        "defense": 4
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -20024,9 +19447,7 @@
         "rez_ice",
         "subtype_code_gate"
       ],
-      "valueHints": {
-        "defense": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "damage",
         "hidden_ice"
@@ -20110,10 +19531,7 @@
         "net_damage",
         "breaker_restriction"
       ],
-      "valueHints": {
-        "defense": 2,
-        "threat": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "damage_window",
         "hidden_ice",
@@ -20215,9 +19633,7 @@
         "subtype_deckrash",
         "subtype_sentry"
       ],
-      "valueHints": {
-        "defense": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -20286,9 +19702,7 @@
         "trace",
         "add_tag"
       ],
-      "valueHints": {
-        "defense": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "trace_window"
       ],
@@ -20391,9 +19805,7 @@
         "rez_ice",
         "subtype_code_gate"
       ],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -20463,9 +19875,7 @@
         "rez_ice",
         "subtype_wall"
       ],
-      "valueHints": {
-        "defense": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "damage",
         "hidden_ice"
@@ -20544,9 +19954,7 @@
         "rez_ice",
         "subtype_wall"
       ],
-      "valueHints": {
-        "defense": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -20613,9 +20021,7 @@
         "trace",
         "end_the_run"
       ],
-      "valueHints": {
-        "defense": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "trace_window"
       ],
@@ -20715,9 +20121,7 @@
         "rez_ice",
         "subtype_wall"
       ],
-      "valueHints": {
-        "defense": 4
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -20785,9 +20189,7 @@
         "rez_ice",
         "subtype_code_gate"
       ],
-      "valueHints": {
-        "defense": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -20857,10 +20259,7 @@
         "uninstall_runner_program",
         "end_the_run"
       ],
-      "valueHints": {
-        "defense": 3,
-        "threat": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -20936,10 +20335,7 @@
         "jack_out_restriction",
         "rez_ice"
       ],
-      "valueHints": {
-        "defense": 2,
-        "threat": 4
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter",
         "hidden_ice"
@@ -21036,9 +20432,7 @@
         "rez_ice",
         "subtype_wall"
       ],
-      "valueHints": {
-        "defense": 4
-      },
+      "valueHints": {},
       "riskTags": [
         "damage",
         "hidden_ice"
@@ -21117,9 +20511,7 @@
         "rez_ice",
         "subtype_code_gate"
       ],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -21190,10 +20582,7 @@
         "next_action_forfeit",
         "rez_ice"
       ],
-      "valueHints": {
-        "defense": 3,
-        "threat": 4
-      },
+      "valueHints": {},
       "riskTags": [
         "action_lock",
         "hidden_ice"
@@ -21307,10 +20696,7 @@
         "reorder_rd_top2",
         "legal_action_only"
       ],
-      "valueHints": {
-        "defense": 2,
-        "information": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_info_barrier",
         "subroutine_bound",
@@ -21363,10 +20749,7 @@
         "uninstall_runner_program",
         "end_the_run"
       ],
-      "valueHints": {
-        "defense": 2,
-        "threat": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -21439,9 +20822,7 @@
         "v1922_corp_ice_future_end_the_run_subroutine",
         "corp_ice_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -21547,10 +20928,7 @@
         "rez_ice",
         "run_rewind"
       ],
-      "valueHints": {
-        "defense": 3,
-        "threat": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice",
         "random_outcome"
@@ -21620,9 +20998,7 @@
         "runner_program_resolver",
         "corp_ice_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -21730,9 +21106,7 @@
         "v1922_corp_ice_break_cost_modifier",
         "corp_ice_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -21829,9 +21203,7 @@
         "rez_ice",
         "subtype_wall"
       ],
-      "valueHints": {
-        "defense": 4
-      },
+      "valueHints": {},
       "riskTags": [
         "damage",
         "hidden_ice"
@@ -21947,9 +21319,7 @@
         "rez_ice",
         "subtype_wall"
       ],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -22016,9 +21386,7 @@
         "v1922_corp_ice_core_damage_etr",
         "corp_ice_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -22172,9 +21540,7 @@
         "draw",
         "play_operation"
       ],
-      "valueHints": {
-        "cardFlow": 2
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -22243,9 +21609,7 @@
         "tags",
         "trace"
       ],
-      "valueHints": {
-        "threat": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "tag_window"
       ],
@@ -22355,9 +21719,7 @@
         "tags",
         "trace"
       ],
-      "valueHints": {
-        "threat": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "tag_window"
       ],
@@ -22466,8 +21828,7 @@
         "tags"
       ],
       "valueHints": {
-        "economy": 3,
-        "threat": 3
+        "economy": 3
       },
       "riskTags": [
         "tag"
@@ -22560,9 +21921,7 @@
         "tags",
         "trash_resource"
       ],
-      "valueHints": {
-        "threat": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "tag_window"
       ],
@@ -22668,9 +22027,7 @@
         "tags",
         "subtype_gray_ops"
       ],
-      "valueHints": {
-        "threat": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "tag",
         "public_play"
@@ -22769,8 +22126,7 @@
         "play_operation"
       ],
       "valueHints": {
-        "economy": 3,
-        "cardFlow": 2
+        "economy": 3
       },
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
@@ -22854,9 +22210,7 @@
         "v1922_corp_operation_install_action_bundle",
         "corp_operation_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -22977,9 +22331,7 @@
         "counter",
         "agenda_difficulty"
       ],
-      "valueHints": {
-        "agenda": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "score_window"
       ],
@@ -23066,9 +22418,7 @@
         "advancement_counter",
         "overadvance"
       ],
-      "valueHints": {
-        "agenda": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "score_window",
         "counter_accounting"
@@ -23171,8 +22521,7 @@
         "subtype_gray_ops"
       ],
       "valueHints": {
-        "economy": 3,
-        "threat": 3
+        "economy": 3
       },
       "riskTags": [
         "tag",
@@ -23376,8 +22725,7 @@
         "play_operation"
       ],
       "valueHints": {
-        "economy": 3,
-        "cardFlow": 2
+        "economy": 3
       },
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
@@ -23447,9 +22795,7 @@
         "v1922_corp_operation_private_archives_to_hq",
         "corp_operation_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -23598,9 +22944,7 @@
         "v1922_corp_operation_private_rd_top5_reorder",
         "corp_operation_resolver"
       ],
-      "valueHints": {
-        "perCardLongtailPriority": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
@@ -23676,9 +23020,7 @@
         "runner_is_tagged",
         "trash_hardware"
       ],
-      "valueHints": {
-        "tagPunish": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "requires_visible_tag"
       ],
@@ -23784,9 +23126,7 @@
         "agenda_difficulty",
         "overadvance"
       ],
-      "valueHints": {
-        "agenda": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "score_window"
       ],
@@ -23894,9 +23234,7 @@
         "subtype_black_ops",
         "tags"
       ],
-      "valueHints": {
-        "threat": 4
-      },
+      "valueHints": {},
       "riskTags": [
         "damage",
         "tag"
@@ -24018,9 +23356,7 @@
         "subtype_black_ops",
         "tags"
       ],
-      "valueHints": {
-        "threat": 4
-      },
+      "valueHints": {},
       "riskTags": [
         "damage",
         "tag"
@@ -24205,9 +23541,7 @@
         "agenda_difficulty",
         "overadvance"
       ],
-      "valueHints": {
-        "advance": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "counter_accounting",
         "target_revalidation"
@@ -24315,9 +23649,7 @@
         "counter",
         "agenda_difficulty"
       ],
-      "valueHints": {
-        "agenda": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "counter_accounting"
       ],
@@ -24423,9 +23755,7 @@
         "give_runner_tag",
         "tags"
       ],
-      "valueHints": {
-        "threat": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "tag",
         "public_play"
@@ -24515,9 +23845,7 @@
         "subtype_black_ops",
         "tags"
       ],
-      "valueHints": {
-        "threat": 4
-      },
+      "valueHints": {},
       "riskTags": [
         "damage",
         "tag"
@@ -24650,7 +23978,7 @@
       ],
       "valueHints": {
         "economy": 4,
-        "risk": 4
+        "remoteRootValue": 4
       },
       "riskTags": [
         "agenda_point_cost",
@@ -24739,7 +24067,8 @@
         "trash_on_access"
       ],
       "valueHints": {
-        "economy": 2
+        "economy": 2,
+        "remoteRootValue": 2
       },
       "riskTags": [
         "runner_trash_value"
@@ -24845,7 +24174,7 @@
         "trace"
       ],
       "valueHints": {
-        "trace": 3
+        "remoteRootValue": 3
       },
       "riskTags": [
         "trace_window"
@@ -24947,7 +24276,8 @@
         "gain_credit"
       ],
       "valueHints": {
-        "economy": 2
+        "economy": 2,
+        "remoteRootValue": 2
       },
       "riskTags": [
         "recurring_refresh"
@@ -25064,7 +24394,7 @@
         "agenda_difficulty"
       ],
       "valueHints": {
-        "remote": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "runner_trash_value"
@@ -25166,7 +24496,7 @@
         "global_static_modifier_layer_resolver"
       ],
       "valueHints": {
-        "modifier": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "modifier_layering",
@@ -25276,7 +24606,8 @@
         "gain_credit"
       ],
       "valueHints": {
-        "economy": 2
+        "economy": 2,
+        "remoteRootValue": 2
       },
       "riskTags": [
         "hidden_zone_barrier",
@@ -25360,7 +24691,8 @@
         "installed_card_destroy"
       ],
       "valueHints": {
-        "damage": 1
+        "damage": 1,
+        "remoteRootValue": 1
       },
       "riskTags": [
         "access_window",
@@ -25465,7 +24797,7 @@
         "trash_installed_runner_card"
       ],
       "valueHints": {
-        "board_pressure": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "visible_targeting"
@@ -25533,8 +24865,8 @@
         "persistent_modifier"
       ],
       "valueHints": {
-        "defense": 2,
-        "economy": 2
+        "economy": 2,
+        "remoteRootValue": 2
       },
       "riskTags": [
         "hidden_root"
@@ -25644,7 +24976,7 @@
         "trash_on_access"
       ],
       "valueHints": {
-        "remote": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "runner_trash_value"
@@ -25730,7 +25062,7 @@
         "remove_virus_counter"
       ],
       "valueHints": {
-        "counter_control": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "visible_targeting"
@@ -25790,8 +25122,8 @@
         "persistent_modifier"
       ],
       "valueHints": {
-        "defense": 2,
-        "economy": 2
+        "economy": 2,
+        "remoteRootValue": 2
       },
       "riskTags": [
         "hidden_root"
@@ -25905,7 +25237,8 @@
         "gain_credit"
       ],
       "valueHints": {
-        "economy": 2
+        "economy": 2,
+        "remoteRootValue": 2
       },
       "riskTags": [
         "runner_trash_value"
@@ -25970,7 +25303,7 @@
         "global_static_modifier_layer_resolver"
       ],
       "valueHints": {
-        "modifier": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "modifier_layering",
@@ -26057,7 +25390,7 @@
         "overadvance"
       ],
       "valueHints": {
-        "remote": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "access_window",
@@ -26162,7 +25495,7 @@
         "global_static_modifier_layer_resolver"
       ],
       "valueHints": {
-        "modifier": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "modifier_layering",
@@ -26249,7 +25582,7 @@
         "global_static_modifier_layer_resolver"
       ],
       "valueHints": {
-        "modifier": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "modifier_layering",
@@ -26336,7 +25669,8 @@
         "self_trash"
       ],
       "valueHints": {
-        "economy": 2
+        "economy": 2,
+        "remoteRootValue": 2
       },
       "riskTags": [
         "public_counter_lifecycle"
@@ -26451,7 +25785,7 @@
       ],
       "valueHints": {
         "damage": 15,
-        "agendaPointCost": 3
+        "remoteRootValue": 15
       },
       "riskTags": [
         "damage_window",
@@ -26569,7 +25903,8 @@
         "agenda_difficulty"
       ],
       "valueHints": {
-        "economy": 1
+        "economy": 1,
+        "remoteRootValue": 1
       },
       "riskTags": [
         "runner_trash_value"
@@ -26675,7 +26010,8 @@
         "gain_credit"
       ],
       "valueHints": {
-        "economy": 2
+        "economy": 2,
+        "remoteRootValue": 2
       },
       "riskTags": [
         "recurring_refresh"
@@ -26774,7 +26110,7 @@
         "recurring_start_turn"
       ],
       "valueHints": {
-        "traceBidCredit": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "trace_window",
@@ -26846,7 +26182,7 @@
         "action_economy_handsize_modifier_resolver"
       ],
       "valueHints": {
-        "modifier": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "modifier_layering",
@@ -26911,8 +26247,7 @@
         "global_static_modifier_layer_resolver"
       ],
       "valueHints": {
-        "runStartTaxCredits": 1,
-        "rezBeforeRunnerRunPriority": 2
+        "remoteRootValue": 2
       },
       "riskTags": [
         "run_start_tax_layering",
@@ -27010,7 +26345,7 @@
         "trash_on_access"
       ],
       "valueHints": {
-        "remote": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "runner_trash_value"
@@ -27101,7 +26436,7 @@
         "action_economy_handsize_modifier_resolver"
       ],
       "valueHints": {
-        "modifier": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "modifier_layering",
@@ -27198,7 +26533,7 @@
         "action_economy_handsize_modifier_resolver"
       ],
       "valueHints": {
-        "modifier": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "modifier_layering",
@@ -27280,7 +26615,7 @@
         "deterministic_shuffle"
       ],
       "valueHints": {
-        "hidden_zone": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "hidden_zone_barrier",
@@ -27365,7 +26700,8 @@
         "gain_credit"
       ],
       "valueHints": {
-        "economy": 2
+        "economy": 2,
+        "remoteRootValue": 2
       },
       "riskTags": [
         "runner_trash_value"
@@ -27466,7 +26802,7 @@
         "global_static_modifier_layer_resolver"
       ],
       "valueHints": {
-        "modifier": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "modifier_layering",
@@ -27544,8 +26880,7 @@
         "damage_event_prevention_resolver"
       ],
       "valueHints": {
-        "tagDamagePriority": 3,
-        "threat": 4
+        "remoteRootValue": 4
       },
       "riskTags": [
         "random_counter_replay_required",
@@ -27660,7 +26995,8 @@
         "net_damage"
       ],
       "valueHints": {
-        "damage": 1
+        "damage": 1,
+        "remoteRootValue": 1
       },
       "riskTags": [
         "access_window",
@@ -27780,8 +27116,8 @@
         "persistent_modifier"
       ],
       "valueHints": {
-        "defense": 2,
-        "economy": 1
+        "economy": 1,
+        "remoteRootValue": 2
       },
       "riskTags": [
         "hidden_root"
@@ -27872,7 +27208,8 @@
         "meat_damage"
       ],
       "valueHints": {
-        "damage": 1
+        "damage": 1,
+        "remoteRootValue": 1
       },
       "riskTags": [
         "damage_window"
@@ -27983,7 +27320,7 @@
         "global_static_modifier_layer_resolver"
       ],
       "valueHints": {
-        "modifier": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "modifier_layering",
@@ -28064,7 +27401,7 @@
       ],
       "valueHints": {
         "economy": 6,
-        "tempo": 1
+        "remoteRootValue": 6
       },
       "riskTags": [
         "pool_exhaustion",
@@ -28190,7 +27527,7 @@
       ],
       "valueHints": {
         "damage": 1,
-        "tag": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "access_window",
@@ -28325,7 +27662,8 @@
         "core_damage"
       ],
       "valueHints": {
-        "damage": 1
+        "damage": 1,
+        "remoteRootValue": 1
       },
       "riskTags": [
         "access_window",
@@ -28452,7 +27790,8 @@
         "advancement_counter_transfer"
       ],
       "valueHints": {
-        "economy": 1
+        "economy": 1,
+        "remoteRootValue": 1
       },
       "riskTags": [
         "counter_accounting"
@@ -28548,7 +27887,8 @@
         "hidden_zone"
       ],
       "valueHints": {
-        "damage": 1
+        "damage": 1,
+        "remoteRootValue": 1
       },
       "riskTags": [
         "access_window",
@@ -28665,8 +28005,7 @@
         "server_icebreaker_worm_use_then_breach_failover"
       ],
       "valueHints": {
-        "defense": 3,
-        "threat": 2
+        "remoteRootValue": 3
       },
       "riskTags": [
         "timing_window",
@@ -28748,7 +28087,7 @@
         "persistent_modifier"
       ],
       "valueHints": {
-        "defense": 2
+        "remoteRootValue": 2
       },
       "riskTags": [
         "hidden_root"
@@ -28850,8 +28189,7 @@
         "corp_access_delay_and_return_to_server_then_start_turn_score"
       ],
       "valueHints": {
-        "defense": 2,
-        "threat": 2
+        "remoteRootValue": 2
       },
       "riskTags": [
         "delayed_scoring",
@@ -28939,7 +28277,7 @@
       ],
       "valueHints": {
         "economy": 2,
-        "defense": 2
+        "remoteRootValue": 2
       },
       "riskTags": [
         "server_bound_modifier"
@@ -29046,8 +28384,7 @@
         "daemon_trash_choice"
       ],
       "valueHints": {
-        "defense": 2,
-        "threat": 3
+        "remoteRootValue": 3
       },
       "riskTags": [
         "access_timing",
@@ -29147,7 +28484,7 @@
         "runner_counter_removal"
       ],
       "valueHints": {
-        "trace": 2
+        "remoteRootValue": 2
       },
       "riskTags": [
         "access_window",
@@ -29275,8 +28612,7 @@
         "persistent_modifier"
       ],
       "valueHints": {
-        "remote": 2,
-        "tax": 2
+        "remoteRootValue": 2
       },
       "riskTags": [
         "region_unique_server",
@@ -29390,7 +28726,8 @@
         "tag_condition"
       ],
       "valueHints": {
-        "damage": 3
+        "damage": 3,
+        "remoteRootValue": 3
       },
       "riskTags": [
         "access_window",
@@ -29517,7 +28854,8 @@
         "net_damage"
       ],
       "valueHints": {
-        "damage": 1
+        "damage": 1,
+        "remoteRootValue": 1
       },
       "riskTags": [
         "access_window",
@@ -29618,7 +28956,7 @@
         "power_counter"
       ],
       "valueHints": {
-        "tax": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "run_start_window"
@@ -29755,9 +29093,7 @@
         "encounter_ice"
       ],
       "valueHints": {
-        "remote": 2,
-        "defense": 2,
-        "tempo": 1
+        "remoteRootValue": 2
       },
       "riskTags": [
         "runner_trash_value",
@@ -29891,7 +29227,7 @@
         "global_static_modifier_layer_resolver"
       ],
       "valueHints": {
-        "modifier": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "modifier_layering",
@@ -30026,9 +29362,7 @@
         "persistent_modifier"
       ],
       "valueHints": {
-        "remote": 2,
-        "scoring": 1,
-        "utility": 1
+        "remoteRootValue": 2
       },
       "riskTags": [
         "runner_trash_value",
@@ -30132,8 +29466,7 @@
         "trash_cost_modifier"
       ],
       "valueHints": {
-        "tax": 2,
-        "remote": 1
+        "remoteRootValue": 2
       },
       "riskTags": [
         "region_unique_server",
@@ -30214,7 +29547,7 @@
         "temporary_derez"
       ],
       "valueHints": {
-        "remote": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "run_window",
@@ -30431,8 +29764,8 @@
         "counter_refresh"
       ],
       "valueHints": {
-        "trace": 2,
-        "economy": 1
+        "economy": 1,
+        "remoteRootValue": 2
       },
       "riskTags": [
         "trace_window",
@@ -30525,8 +29858,7 @@
         "access_breach"
       ],
       "valueHints": {
-        "tax": 3,
-        "scoring": 2
+        "remoteRootValue": 3
       },
       "riskTags": [
         "access_window",
@@ -30619,7 +29951,7 @@
         "generic_upgrade_root_server_resolver"
       ],
       "valueHints": {
-        "afterPassIcePriority": 2
+        "remoteRootValue": 2
       },
       "riskTags": [
         "random_counter_replay_required",
@@ -30712,7 +30044,7 @@
         "overadvance"
       ],
       "valueHints": {
-        "agenda": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "score_window"
@@ -30802,7 +30134,7 @@
         "trash_on_access"
       ],
       "valueHints": {
-        "remote": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "region_unique_server"
@@ -30909,8 +30241,7 @@
         "subroutine_modifier_resolver"
       ],
       "valueHints": {
-        "remote": 2,
-        "tax": 2
+        "remoteRootValue": 2
       },
       "riskTags": [
         "runner_trash_value",
@@ -31041,8 +30372,8 @@
         "persistent_modifier"
       ],
       "valueHints": {
-        "defense": 1,
-        "economy": 2
+        "economy": 2,
+        "remoteRootValue": 2
       },
       "riskTags": [
         "hidden_root"
@@ -31108,7 +30439,7 @@
         "tag"
       ],
       "valueHints": {
-        "trace": 4
+        "remoteRootValue": 4
       },
       "riskTags": [
         "trace_window",
@@ -31199,7 +30530,7 @@
         "stealth_recurring_credit"
       ],
       "valueHints": {
-        "tax": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "run_start_window",
@@ -31271,7 +30602,7 @@
         "overadvance"
       ],
       "valueHints": {
-        "agenda": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "region_unique_server"
@@ -31396,9 +30727,7 @@
         "score_next_turn"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "scoring": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_until_score_or_access"
       ],
@@ -31473,9 +30802,7 @@
         "score_next_turn"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "scoring": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_until_score_or_access"
       ],
@@ -31541,9 +30868,7 @@
         "score_next_turn"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "scoring": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "damage_window",
         "hidden_until_score_or_access",
@@ -31615,9 +30940,7 @@
         "score_next_turn"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "scoring": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "damage_window",
         "hidden_until_score_or_access"
@@ -31709,9 +31032,7 @@
         "score_next_turn"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "scoring": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_until_score_or_access",
         "tag_window"
@@ -31822,9 +31143,7 @@
         "score_next_turn"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "scoring": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "damage_window",
         "hidden_until_score_or_access"
@@ -31898,9 +31217,7 @@
         "score_next_turn"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "scoring": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_until_score_or_access"
       ],
@@ -31986,9 +31303,7 @@
         "score_next_turn"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "scoring": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_until_score_or_access"
       ],
@@ -32068,9 +31383,7 @@
         "score_next_turn"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "scoring": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_until_score_or_access"
       ],
@@ -32139,9 +31452,7 @@
         "score_next_turn"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "scoring": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_until_score_or_access"
       ],
@@ -32203,9 +31514,7 @@
         "protect_rnd"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "damage_window",
         "hidden_ice"
@@ -32311,9 +31620,7 @@
         "protect_remote"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "damage_window",
         "hidden_ice",
@@ -32419,9 +31726,7 @@
         "protect_remote"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -32485,9 +31790,7 @@
         "protect_rnd"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "damage_window",
         "hidden_ice",
@@ -32563,9 +31866,7 @@
         "protect_remote"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -32653,9 +31954,7 @@
         "protect_rnd"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -32769,9 +32068,7 @@
         "protect_remote"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice",
         "credit_reserve"
@@ -32838,9 +32135,7 @@
         "protect_remote"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -32906,9 +32201,7 @@
         "protect_remote"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "damage_window",
         "hidden_ice"
@@ -33034,9 +32327,7 @@
         "protect_remote"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "damage_window",
         "hidden_ice"
@@ -33132,9 +32423,7 @@
         "protect_remote"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "damage_window",
         "hidden_ice",
@@ -33236,9 +32525,7 @@
         "protect_remote"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -33320,9 +32607,7 @@
         "protect_remote"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -33403,9 +32688,7 @@
         "protect_remote"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -33505,9 +32788,7 @@
         "protect_remote"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice",
         "trace_window"
@@ -33599,9 +32880,7 @@
         "protect_rnd"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice",
         "position_dependent_ice",
@@ -33689,9 +32968,7 @@
         "protect_remote"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "damage_window",
         "hidden_ice"
@@ -33804,9 +33081,7 @@
         "protect_remote"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -33870,9 +33145,7 @@
         "protect_remote"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -33975,9 +33248,7 @@
         "protect_remote"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "damage_window",
         "hidden_ice"
@@ -34059,9 +33330,7 @@
         "protect_remote"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -34142,9 +33411,7 @@
         "protect_remote"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -34224,9 +33491,7 @@
         "protect_remote"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "damage_window",
         "hidden_ice",
@@ -34340,9 +33605,7 @@
         "protect_remote"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice",
         "paid_etr_requires_corp_credits"
@@ -34404,9 +33667,7 @@
         "protect_remote"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -34490,9 +33751,7 @@
         "protect_remote"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -34552,9 +33811,7 @@
         "protect_remote"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -34619,9 +33876,7 @@
         "protect_remote"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -34722,9 +33977,7 @@
         "protect_remote"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -34810,9 +34063,7 @@
         "protect_remote"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -34876,9 +34127,7 @@
         "protect_remote"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -34943,9 +34192,7 @@
         "protect_remote"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -35010,9 +34257,7 @@
         "protect_remote"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -35077,9 +34322,7 @@
         "protect_remote"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -35161,9 +34404,7 @@
         "protect_rnd"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "defense": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -35357,9 +34598,7 @@
         "build_scoring_remote"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "tag_window"
       ],
@@ -35438,9 +34677,7 @@
         "build_scoring_remote"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -35530,9 +34767,7 @@
         "build_scoring_remote"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "tag_window",
         "trace_window"
@@ -35623,9 +34858,7 @@
         "build_scoring_remote"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -35720,9 +34953,7 @@
         "build_scoring_remote"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "tag_window",
         "trace_window"
@@ -35818,9 +35049,7 @@
         "build_scoring_remote"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "tag_window",
         "trace_window"
@@ -35935,7 +35164,7 @@
       ],
       "requiredMechanics": [],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "damage_window",
@@ -36036,7 +35265,7 @@
       ],
       "requiredMechanics": [],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "damage_window",
@@ -36107,7 +35336,7 @@
       ],
       "requiredMechanics": [],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "hidden_root"
@@ -36156,7 +35385,7 @@
       ],
       "requiredMechanics": [],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "hidden_root"
@@ -36255,7 +35484,8 @@
       ],
       "requiredMechanics": [],
       "valueHints": {
-        "economy": 2
+        "economy": 2,
+        "remoteRootValue": 2
       },
       "riskTags": [
         "hidden_root"
@@ -36327,7 +35557,8 @@
       ],
       "requiredMechanics": [],
       "valueHints": {
-        "economy": 2
+        "economy": 2,
+        "remoteRootValue": 2
       },
       "riskTags": [
         "hidden_root"
@@ -36405,7 +35636,7 @@
       ],
       "requiredMechanics": [],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "hidden_root"
@@ -36492,7 +35723,8 @@
       ],
       "requiredMechanics": [],
       "valueHints": {
-        "economy": 2
+        "economy": 2,
+        "remoteRootValue": 2
       },
       "riskTags": [
         "hidden_root",
@@ -36572,7 +35804,7 @@
       ],
       "requiredMechanics": [],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "hidden_root"
@@ -36675,7 +35907,7 @@
       ],
       "requiredMechanics": [],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "hidden_root"
@@ -36770,7 +36002,7 @@
       ],
       "requiredMechanics": [],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "hidden_root"
@@ -36865,7 +36097,7 @@
       ],
       "requiredMechanics": [],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "hidden_root"
@@ -36968,7 +36200,7 @@
       ],
       "requiredMechanics": [],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "hidden_root"
@@ -37048,7 +36280,7 @@
       ],
       "requiredMechanics": [],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "hidden_root"
@@ -37114,7 +36346,7 @@
       ],
       "requiredMechanics": [],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "hidden_root"
@@ -37196,7 +36428,7 @@
       ],
       "requiredMechanics": [],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "hidden_root"
@@ -37298,7 +36530,7 @@
       ],
       "requiredMechanics": [],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "hidden_root"
@@ -37393,7 +36625,7 @@
       ],
       "requiredMechanics": [],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "hidden_root"
@@ -37502,7 +36734,7 @@
       ],
       "requiredMechanics": [],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "hidden_root"
@@ -37605,7 +36837,7 @@
       ],
       "requiredMechanics": [],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "hidden_root"
@@ -37676,7 +36908,7 @@
       ],
       "requiredMechanics": [],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "hidden_root"
@@ -37750,7 +36982,7 @@
       ],
       "requiredMechanics": [],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "damage_window",
@@ -37850,7 +37082,8 @@
       ],
       "requiredMechanics": [],
       "valueHints": {
-        "economy": 2
+        "economy": 2,
+        "remoteRootValue": 2
       },
       "riskTags": [
         "hidden_root"
@@ -37915,7 +37148,7 @@
       ],
       "requiredMechanics": [],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "hidden_root"
@@ -38017,9 +37250,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -38085,9 +37316,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter"
       ],
@@ -38133,9 +37362,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter"
       ],
@@ -38205,9 +37432,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter"
       ],
@@ -38251,9 +37476,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter"
       ],
@@ -38305,9 +37528,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter"
       ],
@@ -38349,9 +37570,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -38447,9 +37666,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -38507,9 +37724,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "damage_window"
       ],
@@ -38609,9 +37824,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter"
       ],
@@ -38658,9 +37871,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter"
       ],
@@ -38729,9 +37940,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -38827,9 +38036,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -38895,9 +38102,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter"
       ],
@@ -38964,9 +38169,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter"
       ],
@@ -39052,9 +38255,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter"
       ],
@@ -39098,9 +38299,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -39166,9 +38365,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter"
       ],
@@ -39211,9 +38408,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "damage_window"
       ],
@@ -39284,9 +38479,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -39344,9 +38537,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -39410,9 +38601,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -39472,9 +38661,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "rigCoverage": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter"
       ],
@@ -39519,9 +38706,7 @@
         "pressure_hq"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -39587,9 +38772,7 @@
         "pressure_hq"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -39711,9 +38894,7 @@
         "pressure_rnd"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -39761,9 +38942,7 @@
         "pressure_rnd"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "tag_window"
       ],
@@ -39843,9 +39022,7 @@
         "derez_ice",
         "end_run"
       ],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -39993,9 +39170,7 @@
         "build_rig"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "damage_window"
       ],
@@ -40040,9 +39215,7 @@
         "pressure_rnd"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -40139,9 +39312,7 @@
         "build_rig"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -40190,9 +39361,7 @@
         "build_rig"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "damage_window"
       ],
@@ -40259,9 +39428,7 @@
         "run_pressure"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "tag_window"
       ],
@@ -40357,9 +39524,7 @@
         "build_rig"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -40429,9 +39594,7 @@
         "pressure_rnd"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -40478,9 +39641,7 @@
         "build_rig"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -40560,9 +39721,7 @@
         "build_rig"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -40612,8 +39771,7 @@
       ],
       "requiredMechanics": [],
       "valueHints": {
-        "economy": 1,
-        "runPressure": 2
+        "economy": 1
       },
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
@@ -40663,9 +39821,7 @@
         "pressure_rnd"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "tag_window"
       ],
@@ -40718,9 +39874,7 @@
         "pressure_rnd"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -40785,9 +39939,7 @@
         "build_rig"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -40906,9 +40058,7 @@
         "pressure_rnd"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -40944,9 +40094,7 @@
         "pressure_rnd"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "damage_window"
       ],
@@ -41035,9 +40183,7 @@
         "pressure_rnd"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "damage_window"
       ],
@@ -41083,9 +40229,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_zone_barrier"
       ],
@@ -41244,9 +40388,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_zone_barrier",
         "tag_window",
@@ -41522,9 +40664,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "damage_window",
         "hidden_zone_barrier"
@@ -41739,7 +40879,6 @@
       ],
       "requiredMechanics": [],
       "valueHints": {
-        "memory": 1,
         "economy": 2
       },
       "riskTags": [],
@@ -41808,9 +40947,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "damage_window"
       ],
@@ -41907,9 +41044,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_zone_barrier"
       ],
@@ -42016,9 +41151,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_zone_barrier"
       ],
@@ -42158,9 +41291,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "memory": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "trace_window"
       ],
@@ -42243,9 +41374,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "memory": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -42336,9 +41465,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_zone_barrier",
         "tag_window"
@@ -42434,9 +41561,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "damage_window",
         "hidden_zone_barrier"
@@ -42528,9 +41653,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_zone_barrier"
       ],
@@ -42710,9 +41833,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "damage_window"
       ],
@@ -42765,9 +41886,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_zone_barrier"
       ],
@@ -42875,9 +41994,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -42927,9 +42044,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_zone_barrier"
       ],
@@ -43113,9 +42228,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_zone_barrier"
       ],
@@ -43271,9 +42384,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "memory": 1
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -43447,9 +42558,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_zone_barrier"
       ],
@@ -43547,9 +42656,7 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_zone_barrier",
         "trace_window"
@@ -43687,9 +42794,7 @@
         "score",
         "steal"
       ],
-      "valueHints": {
-        "scoring": 4
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_until_score_or_access"
       ],
@@ -43724,9 +42829,7 @@
         "rez_ice",
         "subtype_barrier"
       ],
-      "valueHints": {
-        "defense": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -43772,9 +42875,7 @@
         "rez_ice",
         "subtype_code_gate"
       ],
-      "valueHints": {
-        "defense": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -43820,9 +42921,7 @@
         "subtype_decoder",
         "subtype_icebreaker"
       ],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter"
       ],
@@ -43860,9 +42959,7 @@
       "requiredMechanics": [
         "play_event"
       ],
-      "valueHints": {
-        "cardFlow": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_zone_change"
       ],
@@ -43892,9 +42989,7 @@
       "requiredMechanics": [
         "play_operation"
       ],
-      "valueHints": {
-        "cardFlow": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_zone_change"
       ],
@@ -43943,7 +43038,8 @@
         "trash_on_access"
       ],
       "valueHints": {
-        "economy": 3
+        "economy": 3,
+        "remoteRootValue": 3
       },
       "riskTags": [
         "hidden_root"
@@ -44066,9 +43162,7 @@
         "subtype_fracter",
         "subtype_icebreaker"
       ],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter"
       ],
@@ -44108,9 +43202,7 @@
         "subtype_icebreaker",
         "subtype_killer"
       ],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter"
       ],
@@ -44153,9 +43245,7 @@
         "score",
         "steal"
       ],
-      "valueHints": {
-        "scoring": 4
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_until_score_or_access"
       ],
@@ -44187,9 +43277,7 @@
       "requiredMechanics": [
         "play_event"
       ],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "run"
       ],
@@ -44222,9 +43310,7 @@
         "rez_ice",
         "subtype_sentry"
       ],
-      "valueHints": {
-        "defense": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -44269,9 +43355,7 @@
       "requiredMechanics": [
         "install_hardware"
       ],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "install_runner"
       ],
@@ -44308,10 +43392,7 @@
         "end_the_run",
         "subtype_sentry"
       ],
-      "valueHints": {
-        "defense": 3,
-        "threat": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice",
         "tag"
@@ -44357,9 +43438,7 @@
       "requiredMechanics": [
         "play_operation"
       ],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "public_play",
         "tag"
@@ -44418,9 +43497,7 @@
         "rez_ice",
         "subtype_barrier"
       ],
-      "valueHints": {
-        "defense": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -44469,7 +43546,7 @@
         "trash_on_access"
       ],
       "valueHints": {
-        "utility": 1
+        "remoteRootValue": 1
       },
       "riskTags": [
         "hidden_root"
@@ -44515,9 +43592,7 @@
         "subtype_icebreaker",
         "subtype_killer"
       ],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter"
       ],
@@ -44555,9 +43630,7 @@
       "requiredMechanics": [
         "play_operation"
       ],
-      "valueHints": {
-        "cardFlow": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_zone_change"
       ],
@@ -44639,7 +43712,8 @@
         "trash_on_access"
       ],
       "valueHints": {
-        "economy": 3
+        "economy": 3,
+        "remoteRootValue": 3
       },
       "riskTags": [
         "hidden_root"
@@ -44729,9 +43803,7 @@
       "requiredMechanics": [
         "play_event"
       ],
-      "valueHints": {
-        "cardFlow": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_zone_change"
       ],
@@ -44765,9 +43837,7 @@
         "rez_ice",
         "subtype_code_gate"
       ],
-      "valueHints": {
-        "defense": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -44811,9 +43881,7 @@
       "requiredMechanics": [
         "install_hardware"
       ],
-      "valueHints": {
-        "utility": 1
-      },
+      "valueHints": {},
       "riskTags": [
         "install_runner"
       ],
@@ -44845,8 +43913,7 @@
         "play_event"
       ],
       "valueHints": {
-        "economy": 3,
-        "runPressure": 2
+        "economy": 3
       },
       "riskTags": [
         "run"
@@ -44879,9 +43946,7 @@
         "subtype_decoder",
         "subtype_icebreaker"
       ],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter"
       ],
@@ -44924,9 +43989,7 @@
         "score",
         "steal"
       ],
-      "valueHints": {
-        "scoring": 4
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_until_score_or_access"
       ],
@@ -44960,9 +44023,7 @@
         "subtype_fracter",
         "subtype_icebreaker"
       ],
-      "valueHints": {
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "encounter"
       ],
@@ -45003,9 +44064,7 @@
         "rez_ice",
         "subtype_barrier"
       ],
-      "valueHints": {
-        "defense": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice"
       ],
@@ -45052,9 +44111,7 @@
         "rez_ice",
         "subtype_sentry"
       ],
-      "valueHints": {
-        "defense": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_ice",
         "tag"
@@ -45103,10 +44160,7 @@
         "shuffle_hq_to_rd",
         "double_action_cost"
       ],
-      "valueHints": {
-        "cardVelocity": 5,
-        "utility": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "double_action",
         "hq_card_selection",
@@ -45203,10 +44257,7 @@
         "reveal",
         "double_action_cost"
       ],
-      "valueHints": {
-        "defense": 3,
-        "recursion": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "archives_dependency",
         "double_action",
@@ -45326,8 +44377,7 @@
         "draw_cards"
       ],
       "valueHints": {
-        "disruption": 3,
-        "defense": 2
+        "remoteRootValue": 3
       },
       "riskTags": [
         "hidden_zone",
@@ -45422,8 +44472,7 @@
         "subtype_noisy"
       ],
       "valueHints": {
-        "defense": 2,
-        "tax": 2
+        "remoteRootValue": 2
       },
       "riskTags": [
         "run_cost_modifier",
@@ -45498,8 +44547,7 @@
         "run_attempt_count"
       ],
       "valueHints": {
-        "tagPressure": 2,
-        "disruption": 2
+        "remoteRootValue": 2
       },
       "riskTags": [
         "tag",
@@ -45583,8 +44631,8 @@
         "tap_source"
       ],
       "valueHints": {
-        "ambush": 3,
-        "damage": 2
+        "damage": 2,
+        "remoteRootValue": 3
       },
       "riskTags": [
         "hidden_zone",
@@ -45702,8 +44750,7 @@
         "trash_programs"
       ],
       "valueHints": {
-        "ambush": 3,
-        "disruption": 3
+        "remoteRootValue": 3
       },
       "riskTags": [
         "hidden_zone",
@@ -45831,8 +44878,7 @@
         "temporary_ice_strength"
       ],
       "valueHints": {
-        "defense": 3,
-        "utility": 2
+        "remoteRootValue": 3
       },
       "riskTags": [
         "targeted_ice",
@@ -45948,8 +44994,7 @@
         "unique"
       ],
       "valueHints": {
-        "cardVelocity": 3,
-        "utility": 3
+        "remoteRootValue": 3
       },
       "riskTags": [
         "hidden_zone",
@@ -46040,8 +45085,7 @@
         "same_fort"
       ],
       "valueHints": {
-        "tax": 3,
-        "defense": 2
+        "remoteRootValue": 3
       },
       "riskTags": [
         "run_cost_modifier",
@@ -46206,10 +45250,7 @@
         "draw_cards",
         "double_action_cost"
       ],
-      "valueHints": {
-        "tagSafety": 4,
-        "cardVelocity": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "double_action",
         "tag_clear_timing"
@@ -46354,8 +45395,7 @@
         "double_action_cost"
       ],
       "valueHints": {
-        "economy": 2,
-        "cardVelocity": 3
+        "economy": 2
       },
       "riskTags": [
         "double_action"
@@ -46424,10 +45464,7 @@
         "break_wall_subroutine",
         "pump_icebreaker_strength"
       ],
-      "valueHints": {
-        "breaker": 2,
-        "efficiency": 2
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -46487,10 +45524,7 @@
         "break_sentry_subroutine",
         "pump_icebreaker_strength"
       ],
-      "valueHints": {
-        "breaker": 2,
-        "burstStrength": 3
-      },
+      "valueHints": {},
       "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -46553,10 +45587,7 @@
         "tag_self",
         "stealth_credit_loss"
       ],
-      "valueHints": {
-        "breaker": 2,
-        "efficiency": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "noisy",
         "tag_risk",
@@ -46650,10 +45681,7 @@
         "pump_icebreaker_strength",
         "run_duration_strength"
       ],
-      "valueHints": {
-        "breaker": 2,
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "run_duration_strength"
       ],
@@ -46725,10 +45753,7 @@
         "pump_icebreaker_strength",
         "run_end_self_trash"
       ],
-      "valueHints": {
-        "breaker": 2,
-        "emergencyBreaker": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "self_trash"
       ],
@@ -46811,9 +45836,7 @@
         "hq_access_trigger",
         "expose_installed_corp_cards"
       ],
-      "valueHints": {
-        "information": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "public_reveal"
       ],
@@ -46904,9 +45927,7 @@
         "tap_source",
         "derez_ice"
       ],
-      "valueHints": {
-        "tempo": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "timing_window",
         "tap_source"
@@ -46998,12 +46019,7 @@
         "runner_counter_removal",
         "sleepy_noisy_rez_discount"
       ],
-      "valueHints": {
-        "defense": 3,
-        "damageThreat": 3,
-        "tracePressure": 2,
-        "runControl": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "ap_damage",
         "trace",
@@ -47158,12 +46174,7 @@
         "next_encounter_no_break_subroutines",
         "sleepy_noisy_rez_discount"
       ],
-      "valueHints": {
-        "defense": 3,
-        "damageThreat": 4,
-        "tempo": 2,
-        "runControl": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "ap_damage",
         "next_encounter_lock",
@@ -47289,10 +46300,7 @@
         "random_die_resolution",
         "core_damage"
       ],
-      "valueHints": {
-        "defense": 2,
-        "damageThreat": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "deterministic_random",
         "core_damage"
@@ -47386,10 +46394,7 @@
         "end_the_run",
         "sleepy_noisy_rez_discount"
       ],
-      "valueHints": {
-        "defense": 3,
-        "programPressure": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "program_trash",
         "noisy_discount"
@@ -47497,10 +46502,7 @@
         "end_the_run",
         "sleepy_noisy_rez_discount"
       ],
-      "valueHints": {
-        "defense": 4,
-        "programPressure": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "program_trash",
         "noisy_discount"
@@ -47607,10 +46609,7 @@
         "end_the_run",
         "delayed_turn_end_trash"
       ],
-      "valueHints": {
-        "defense": 2,
-        "tempo": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "self_trash",
         "turn_end_delayed_effect"
@@ -47692,10 +46691,7 @@
         "deflect_run",
         "encounter_reposition"
       ],
-      "valueHints": {
-        "defense": 2,
-        "runControl": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "run_redirect",
         "archives_only_target",
@@ -47798,10 +46794,7 @@
         "deflect_run",
         "encounter_reposition"
       ],
-      "valueHints": {
-        "defense": 2,
-        "runControl": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "run_redirect",
         "corp_credit_cost",
@@ -47926,10 +46919,7 @@
         "end_the_run",
         "start_run_ice_move"
       ],
-      "valueHints": {
-        "defense": 4,
-        "runControl": 4
-      },
+      "valueHints": {},
       "riskTags": [
         "agenda_point_cost",
         "start_run_reposition",
@@ -48059,10 +47049,7 @@
         "encounter_reposition",
         "auto_break_without_target"
       ],
-      "valueHints": {
-        "defense": 2,
-        "runControl": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "run_redirect",
         "subsidiary_target_only",
@@ -48177,10 +47164,7 @@
         "deflect_run",
         "encounter_reposition"
       ],
-      "valueHints": {
-        "defense": 3,
-        "runControl": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "run_redirect",
         "corp_credit_cost",
@@ -48302,11 +47286,7 @@
         "corp_during_run_paid_ability",
         "end_run"
       ],
-      "valueHints": {
-        "agendaPoints": 2,
-        "defense": 3,
-        "runControl": 4
-      },
+      "valueHints": {},
       "riskTags": [
         "public_counter",
         "scored_counter",
@@ -48405,11 +47385,7 @@
         "purge_runner_virus_counters",
         "virus_counter_prevention"
       ],
-      "valueHints": {
-        "agendaPoints": 2,
-        "defense": 2,
-        "virusPressure": 4
-      },
+      "valueHints": {},
       "riskTags": [
         "virus_meta",
         "temporary_prevention"
@@ -48494,10 +47470,7 @@
         "start_turn_trigger",
         "draw_cards"
       ],
-      "valueHints": {
-        "agendaPoints": 2,
-        "cardVelocity": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "start_turn_trigger"
       ],
@@ -48585,11 +47558,7 @@
         "runner_score_action",
         "remove_from_game_on_leave_play"
       ],
-      "valueHints": {
-        "agendaPoints": 3,
-        "defense": 3,
-        "tax": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "access_replacement",
         "memory_pressure_for_runner",
@@ -48711,11 +47680,7 @@
         "temporary_memory_limit_modifier",
         "trash_installed_program_if_over_memory"
       ],
-      "valueHints": {
-        "disruption": 4,
-        "programPressure": 4,
-        "tagPunish": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "memory_pressure",
         "program_trash",
@@ -48824,10 +47789,7 @@
         "search_stack",
         "shuffle_stack"
       ],
-      "valueHints": {
-        "setupConsistency": 4,
-        "cardSelection": 4
-      },
+      "valueHints": {},
       "riskTags": [
         "grip_trash",
         "hidden_zone_projection",
@@ -48934,9 +47896,7 @@
         "take_tag"
       ],
       "valueHints": {
-        "economy": 5,
-        "agendaPressure": -4,
-        "tagSafety": -2
+        "economy": 5
       },
       "riskTags": [
         "agenda_transfer",
@@ -49018,8 +47978,7 @@
         "gain_credits"
       ],
       "valueHints": {
-        "economy": 4,
-        "tagSafety": 0
+        "economy": 4
       },
       "riskTags": [
         "brain_damage",
@@ -49116,11 +48075,7 @@
         "reveal_cards_until_agenda",
         "move_card_to_hq"
       ],
-      "valueHints": {
-        "runPressure": 4,
-        "information": 4,
-        "accessPressure": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_zone",
         "rd_reveal",
@@ -49224,10 +48179,7 @@
         "successful_run_bonus_access",
         "no_noisy_icebreaker_or_trace_condition"
       ],
-      "valueHints": {
-        "runPressure": 4,
-        "accessPressure": 4
-      },
+      "valueHints": {},
       "riskTags": [
         "conditional_access",
         "run_success_dependency",
@@ -49336,10 +48288,7 @@
         "run_duration_rez_cost_surcharge",
         "double_action_cost"
       ],
-      "valueHints": {
-        "runPressure": 4,
-        "tax": 4
-      },
+      "valueHints": {},
       "riskTags": [
         "run_cost_modifier",
         "double_action",
@@ -49437,9 +48386,7 @@
         "leave_play_credit_loss"
       ],
       "valueHints": {
-        "economy": 2,
-        "tagSafety": -3,
-        "traceSafety": -3
+        "economy": 2
       },
       "riskTags": [
         "trace_liability",
@@ -49538,8 +48485,7 @@
         "unique_resource"
       ],
       "valueHints": {
-        "economy": 2,
-        "eventSupport": 2
+        "economy": 2
       },
       "riskTags": [
         "prep_dependency",
@@ -49603,10 +48549,7 @@
         "paid_tap_ability",
         "private_hq_look"
       ],
-      "valueHints": {
-        "information": 4,
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_zone",
         "tap_source",
@@ -49698,12 +48641,7 @@
         "restricted_credit_pool",
         "damage_prevention_turn_limit"
       ],
-      "valueHints": {
-        "memory": 2,
-        "handSize": 1,
-        "traceSafety": 1,
-        "survival": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "deck_unique",
         "restricted_credits",
@@ -49808,12 +48746,7 @@
         "random_start_turn_damage",
         "leave_play_damage"
       ],
-      "valueHints": {
-        "memory": 2,
-        "runSupport": 3,
-        "traceSafety": 1,
-        "survival": -3
-      },
+      "valueHints": {},
       "riskTags": [
         "deck_unique",
         "restricted_credits",
@@ -49925,10 +48858,7 @@
         "install_hardware",
         "memory_limit_from_grip_size"
       ],
-      "valueHints": {
-        "memory": 4,
-        "rigSupport": 3
-      },
+      "valueHints": {},
       "riskTags": [
         "dynamic_memory",
         "grip_size_dependency"
@@ -49989,10 +48919,7 @@
         "paid_tap_ability",
         "private_rnd_top_look"
       ],
-      "valueHints": {
-        "information": 4,
-        "runPressure": 2
-      },
+      "valueHints": {},
       "riskTags": [
         "hidden_zone",
         "tap_source",
@@ -50079,10 +49006,7 @@
         "future_action_debt",
         "credit_cost"
       ],
-      "valueHints": {
-        "tagSafety": 4,
-        "tempo": -2
-      },
+      "valueHints": {},
       "riskTags": [
         "future_action_debt",
         "tag_prevention",
@@ -50159,8 +49083,7 @@
         "play_event_payment"
       ],
       "valueHints": {
-        "economy": 2,
-        "eventSupport": 3
+        "economy": 2
       },
       "riskTags": [
         "hosted_counters",
@@ -50223,7 +49146,7 @@
       ],
       "valueHints": {
         "economy": 2,
-        "remote": 1
+        "remoteRootValue": 2
       },
       "riskTags": [
         "runner_trash_value",
@@ -50297,7 +49220,6 @@
         "trace_link_payment"
       ],
       "valueHints": {
-        "traceSafety": 3,
         "economy": 1
       },
       "riskTags": [
