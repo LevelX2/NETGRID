@@ -7,11 +7,12 @@ Primary agent: `architecture-review-agent`
 
 ## Fortschritt
 
-| Paket   | Zustand                                    | Nachweis                                                                        |
-| ------- | ------------------------------------------ | ------------------------------------------------------------------------------- |
-| E00     | integriert                                 | Commit `6cfa0173e`, beidseitig mit `main` abgeglichen                           |
-| E01     | verifiziert, Commit/Integration ausstehend | Architektur-Target 0 Findings; 204 fokussierte Engine-Tests und 2 KI-Tests grün |
-| E02-E16 | ausstehend                                 | sequenziell nach E01                                                            |
+| Paket   | Zustand                                    | Nachweis                                                                   |
+| ------- | ------------------------------------------ | -------------------------------------------------------------------------- |
+| E00     | integriert                                 | Commit `6cfa0173e`, beidseitig mit `main` abgeglichen                      |
+| E01     | integriert                                 | Commit `a13cf8bc4`; Architektur-Target 0 Findings; 1.732 Engine-Tests grün |
+| E02     | verifiziert, Commit/Integration ausstehend | Strukturguard und vier Fehlerklassen im Selftest grün                      |
+| E03-E16 | ausstehend                                 | sequenziell nach E02                                                       |
 
 ## Quelle und Vorgabe
 
@@ -207,6 +208,8 @@ corepack pnpm --filter @netgrid/shared typecheck
 corepack pnpm check:package-boundaries
 corepack pnpm check:engine-cardimplementation-architecture-target
 corepack pnpm check:card-function-abstraction
+corepack pnpm check:engine-source-structure
+corepack pnpm check:engine-source-structure:selftest
 corepack pnpm check:test-discovery
 corepack pnpm typecheck
 ```
