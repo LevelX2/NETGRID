@@ -421,19 +421,19 @@ describe("runner special trigger execution", () => {
       maxSelections: 1,
       visibility: "public",
     });
-    expect(choice?.source).toMatch(/^v1912\.shell_traders_start_turn:shell_1:/);
+    expect(choice?.source).toMatch(/^runner_start\.delayed_install:shell_1:/);
     expect(choice?.options).toEqual([
       expect.objectContaining({
         id: `card_${firstTargetId}`,
         value: firstTargetId,
         label: "Alpha Program (2)",
-        metadata: { shellTradersRemainingCounters: 2 },
+        metadata: { delayedInstallRemainingCounters: 2 },
       }),
       expect.objectContaining({
         id: `card_${secondTargetId}`,
         value: secondTargetId,
         label: "Beta Program (3)",
-        metadata: { shellTradersRemainingCounters: 3 },
+        metadata: { delayedInstallRemainingCounters: 3 },
       }),
     ]);
     expect(counter(state, firstTargetId, "shell")).toBe(2);
@@ -497,7 +497,7 @@ describe("runner special trigger execution", () => {
     applyDelayedInstallStartOfTurn(host, effects);
 
     expect(state.pendingChoice?.source).toMatch(
-      /^v1912\.shell_traders_start_turn:shell_2:/,
+      /^runner_start\.delayed_install:shell_2:/,
     );
     expect(counter(state, firstTargetId, "shell")).toBe(2);
     expect(counter(state, secondTargetId, "shell")).toBe(2);

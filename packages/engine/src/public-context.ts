@@ -1436,11 +1436,14 @@ export function publicContextForAction(
   }
   if (legalAction.payload?.bypassFirstIce === true)
     context.bypassFirstIce = true;
-  if (legalAction.payload?.insideJobAutoPassedIce === true) {
-    context.insideJobAutoPassedIce = true;
-    if (typeof legalAction.payload.insideJobPassedIceDefinitionId === "string")
-      context.insideJobPassedIceDefinitionId =
-        legalAction.payload.insideJobPassedIceDefinitionId;
+  if (legalAction.payload?.runStartBypassAutoPassedIce === true) {
+    context.runStartBypassAutoPassedIce = true;
+    if (
+      typeof legalAction.payload.runStartBypassPassedIceDefinitionId ===
+      "string"
+    )
+      context.runStartBypassPassedIceDefinitionId =
+        legalAction.payload.runStartBypassPassedIceDefinitionId;
   }
   if (legalAction.payload?.scoredAsAgenda === true)
     context.scoredAsAgenda = true;

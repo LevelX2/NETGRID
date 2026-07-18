@@ -5,6 +5,14 @@ Branch: `codex/engine-architecture-refresh`
 Worktree: `C:\Projekte\NETGRID_ENGINE_ARCHITECTURE_REFRESH`
 Primary agent: `architecture-review-agent`
 
+## Fortschritt
+
+| Paket   | Zustand                                    | Nachweis                                                                        |
+| ------- | ------------------------------------------ | ------------------------------------------------------------------------------- |
+| E00     | integriert                                 | Commit `6cfa0173e`, beidseitig mit `main` abgeglichen                           |
+| E01     | verifiziert, Commit/Integration ausstehend | Architektur-Target 0 Findings; 204 fokussierte Engine-Tests und 2 KI-Tests grün |
+| E02-E16 | ausstehend                                 | sequenziell nach E01                                                            |
+
 ## Quelle und Vorgabe
 
 Der Prozess setzt den vollständigen Engine-Strukturreview vom 18.07.2026 um.
@@ -98,25 +106,25 @@ paketnahen Regressionstests.
 
 ## Paketfolge
 
-| Paket | Ziel | Kernchecks | Commit-Vorschlag |
-| --- | --- | --- | --- |
-| E00 | Prozess- und Auditbaseline | `git diff --check` | `docs(engine): plan architecture refresh process` |
-| E01 | Rote Architektur-Gates reparieren | Engine-Typecheck, fokussierte Tests, beide Architekturchecks | `refactor(engine): restore architecture gates` |
-| E02 | Ausführbaren Strukturguard ergänzen | Guard + Selftest, Package Boundaries | `test(engine): enforce source structure boundaries` |
-| E03 | Ability-Verträge nach Familien teilen | Engine-Typecheck, Ability-/Coverage-Tests | `refactor(engine): split ability contracts by domain` |
-| E04 | Typisierte Runtime-Port-Grundlage | Engine-Typecheck, Runtime-Domain-Tests | `refactor(engine): introduce typed runtime ports` |
-| E05 | State/Economy/Counter/Zone-Cluster migrieren | Cluster-Tests, Engine-Typecheck | `refactor(engine): type state runtime cluster` |
-| E06 | Turn/Action/Corp/Card-Lifecycle-Cluster migrieren | Turn-/Action-/Lifecycle-Tests | `refactor(engine): type action runtime cluster` |
-| E07 | Run/Access/Choice/Hidden/Damage/Trace-Cluster migrieren | Hidden-Info-, Run-, Access-, Damage-Tests | `refactor(engine): type flow runtime cluster` |
-| E08 | Delegate-Store und Runtime-Zyklen entfernen | Vollständige Engine-Suite, Strukturguard | `refactor(engine): remove runtime delegate store` |
-| E09 | Turn-Domäne aufteilen | Turn-, Tag-, Discard-, Lifecycle-Tests | `refactor(engine): split turn runtime domains` |
-| E10 | Event-/Payload-Vertrag normalisieren | Chronicle, Hidden Info, Replay, AI-Signale | `refactor(engine): normalize event payload contracts` |
-| E11 | Damage-Domäne aufteilen | Damage-/Prevention-/Replacement-Tests | `refactor(engine): split damage runtime domains` |
-| E12 | Access-Domäne aufteilen | Access-/Breach-/Visibility-Tests | `refactor(engine): split access runtime domains` |
-| E13 | Run-Domäne und Window-Zyklus bereinigen | Run-/Window-/Replay-Tests | `refactor(engine): split run window domains` |
-| E14 | Registry und Coverage semantisch strukturieren | Registry-, Manifest-, Coverage-Checks | `refactor(engine): organize card registries by domain` |
-| E15 | Teststruktur und Quellverträge nachziehen | Testdiscovery, Engine-Suite, Source-Contract-Report | `test(engine): modularize suites and document contracts` |
-| E16 | Vollständige Gates, Final Review und Wissenspflege | alle Abschlusschecks | `docs(engine): finalize architecture refresh` |
+| Paket | Ziel                                                    | Kernchecks                                                   | Commit-Vorschlag                                         |
+| ----- | ------------------------------------------------------- | ------------------------------------------------------------ | -------------------------------------------------------- |
+| E00   | Prozess- und Auditbaseline                              | `git diff --check`                                           | `docs(engine): plan architecture refresh process`        |
+| E01   | Rote Architektur-Gates reparieren                       | Engine-Typecheck, fokussierte Tests, beide Architekturchecks | `refactor(engine): restore architecture gates`           |
+| E02   | Ausführbaren Strukturguard ergänzen                     | Guard + Selftest, Package Boundaries                         | `test(engine): enforce source structure boundaries`      |
+| E03   | Ability-Verträge nach Familien teilen                   | Engine-Typecheck, Ability-/Coverage-Tests                    | `refactor(engine): split ability contracts by domain`    |
+| E04   | Typisierte Runtime-Port-Grundlage                       | Engine-Typecheck, Runtime-Domain-Tests                       | `refactor(engine): introduce typed runtime ports`        |
+| E05   | State/Economy/Counter/Zone-Cluster migrieren            | Cluster-Tests, Engine-Typecheck                              | `refactor(engine): type state runtime cluster`           |
+| E06   | Turn/Action/Corp/Card-Lifecycle-Cluster migrieren       | Turn-/Action-/Lifecycle-Tests                                | `refactor(engine): type action runtime cluster`          |
+| E07   | Run/Access/Choice/Hidden/Damage/Trace-Cluster migrieren | Hidden-Info-, Run-, Access-, Damage-Tests                    | `refactor(engine): type flow runtime cluster`            |
+| E08   | Delegate-Store und Runtime-Zyklen entfernen             | Vollständige Engine-Suite, Strukturguard                     | `refactor(engine): remove runtime delegate store`        |
+| E09   | Turn-Domäne aufteilen                                   | Turn-, Tag-, Discard-, Lifecycle-Tests                       | `refactor(engine): split turn runtime domains`           |
+| E10   | Event-/Payload-Vertrag normalisieren                    | Chronicle, Hidden Info, Replay, AI-Signale                   | `refactor(engine): normalize event payload contracts`    |
+| E11   | Damage-Domäne aufteilen                                 | Damage-/Prevention-/Replacement-Tests                        | `refactor(engine): split damage runtime domains`         |
+| E12   | Access-Domäne aufteilen                                 | Access-/Breach-/Visibility-Tests                             | `refactor(engine): split access runtime domains`         |
+| E13   | Run-Domäne und Window-Zyklus bereinigen                 | Run-/Window-/Replay-Tests                                    | `refactor(engine): split run window domains`             |
+| E14   | Registry und Coverage semantisch strukturieren          | Registry-, Manifest-, Coverage-Checks                        | `refactor(engine): organize card registries by domain`   |
+| E15   | Teststruktur und Quellverträge nachziehen               | Testdiscovery, Engine-Suite, Source-Contract-Report          | `test(engine): modularize suites and document contracts` |
+| E16   | Vollständige Gates, Final Review und Wissenspflege      | alle Abschlusschecks                                         | `docs(engine): finalize architecture refresh`            |
 
 ## Paketdetails und Done-Gates
 

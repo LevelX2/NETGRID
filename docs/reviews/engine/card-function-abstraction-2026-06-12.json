@@ -24,9 +24,8 @@
     "false_positive"
   ],
   "summary": {
-    "test_only_card_name": 48,
+    "test_only_card_name": 45,
     "allowed_catalog_reference": 43,
-    "runtime_state_field_uses_card_name": 4,
     "mechanics_constant_controls_behavior_by_card_id": 29,
     "functional_kind_uses_card_name": 2,
     "false_positive": 14
@@ -35,36 +34,36 @@
     "status": "baseline_enforced",
     "tokenSource": "Kartentitel und cardDefinitionId-Slug-/CamelCase-Varianten aus packages/shared/src/card-definitions.ts",
     "tokenCount": 1317,
-    "baselineCount": 153,
+    "baselineCount": 154,
     "summary": {
-      "runtime_state_field_uses_card_name": 8,
-      "new_unclassified_card_name_leak": 138,
+      "new_unclassified_card_name_leak": 147,
       "functional_kind_uses_card_name": 7
     },
     "fingerprints": [
-      "packages/engine/src/game/abilities/runner-special-trigger-execution.ts|334|21|shellTraders|The Shell Traders|runtime_state_field_uses_card_name",
-      "packages/engine/src/game/run/run-movement.ts|326|9|InsideJob|Inside Job|runtime_state_field_uses_card_name",
-      "packages/engine/src/game/run/run-movement.ts|377|11|InsideJob|Inside Job|runtime_state_field_uses_card_name",
-      "packages/engine/src/game/run/run-movement.ts|901|14|InsideJob|Inside Job|runtime_state_field_uses_card_name",
-      "packages/engine/src/game/run/run-movement.ts|911|5|insideJob|Inside Job|runtime_state_field_uses_card_name",
-      "packages/engine/src/game/run/run-movement.ts|912|5|insideJob|Inside Job|runtime_state_field_uses_card_name",
-      "packages/engine/src/mechanics/public-payload-schema.ts|152|4|insideJob|Inside Job|runtime_state_field_uses_card_name",
-      "packages/engine/src/mechanics/public-payload-schema.ts|180|4|insideJob|Inside Job|runtime_state_field_uses_card_name",
-      "packages/shared/src/index.ts|666|5|shellTraders|The Shell Traders|new_unclassified_card_name_leak",
-      "scripts/build-ai-compiled-hints.mjs|45|15|bodyweight-synthetic-blood|Bodyweight™ Synthetic Blood|new_unclassified_card_name_leak",
-      "scripts/build-ai-compiled-hints.mjs|46|15|custodial-position|Custodial Position|new_unclassified_card_name_leak",
-      "scripts/build-ai-compiled-hints.mjs|47|15|executive-wiretaps|Executive Wiretaps|new_unclassified_card_name_leak",
-      "scripts/build-ai-compiled-hints.mjs|48|15|jack-n-joe|Jack 'n' Joe|new_unclassified_card_name_leak",
-      "scripts/build-ai-compiled-hints.mjs|49|15|livewires-contacts|Livewire's Contacts|new_unclassified_card_name_leak",
-      "scripts/build-ai-compiled-hints.mjs|760|9|selfModifyingCode|Self-Modifying Code|new_unclassified_card_name_leak",
-      "scripts/build-ai-compiled-hints.mjs|761|17|self-modifying-code|Self-Modifying Code|new_unclassified_card_name_leak",
-      "scripts/build-ai-compiled-hints.mjs|764|5|selfModifyingCode|Self-Modifying Code|new_unclassified_card_name_leak",
-      "scripts/build-ai-compiled-hints.mjs|769|14|self_modifying_code|Self-Modifying Code|functional_kind_uses_card_name",
-      "scripts/build-ai-compiled-hints.mjs|770|27|self-modifying-code|Self-Modifying Code|new_unclassified_card_name_leak",
-      "scripts/build-ai-compiled-hints.mjs|774|46|bbs-whispering-campaign|BBS Whispering Campaign|new_unclassified_card_name_leak",
-      "scripts/build-ai-compiled-hints.mjs|778|27|bbs-whispering-campaign|BBS Whispering Campaign|new_unclassified_card_name_leak",
-      "scripts/build-ai-compiled-hints.mjs|784|17|ball-and-chain|Ball and Chain|new_unclassified_card_name_leak",
-      "scripts/build-ai-compiled-hints.mjs|785|17|canis-major|Canis Major|new_unclassified_card_name_leak",
+      "scripts/build-ai-compiled-hints.mjs|45|15|corporate-coup|Corporate Coup|new_unclassified_card_name_leak",
+      "scripts/build-ai-compiled-hints.mjs|46|15|hostile-takeover|Hostile Takeover|new_unclassified_card_name_leak",
+      "scripts/build-ai-compiled-hints.mjs|47|15|marine-arcology|Marine Arcology|new_unclassified_card_name_leak",
+      "scripts/build-ai-compiled-hints.mjs|48|15|accounts-receivable|Accounts Receivable|new_unclassified_card_name_leak",
+      "scripts/build-ai-compiled-hints.mjs|49|15|closed-accounts|Closed Accounts|new_unclassified_card_name_leak",
+      "scripts/build-ai-compiled-hints.mjs|50|15|efficiency-experts|Efficiency Experts|new_unclassified_card_name_leak",
+      "scripts/build-ai-compiled-hints.mjs|51|15|night-shift|Night Shift|new_unclassified_card_name_leak",
+      "scripts/build-ai-compiled-hints.mjs|52|15|overtime-incentives|Overtime Incentives|new_unclassified_card_name_leak",
+      "scripts/build-ai-compiled-hints.mjs|53|15|scorched-earth|Scorched Earth|new_unclassified_card_name_leak",
+      "scripts/build-ai-compiled-hints.mjs|54|15|red-herrings|Red Herrings|new_unclassified_card_name_leak",
+      "scripts/build-ai-compiled-hints.mjs|55|15|bodyweight-synthetic-blood|Bodyweight™ Synthetic Blood|new_unclassified_card_name_leak",
+      "scripts/build-ai-compiled-hints.mjs|56|15|custodial-position|Custodial Position|new_unclassified_card_name_leak",
+      "scripts/build-ai-compiled-hints.mjs|57|15|executive-wiretaps|Executive Wiretaps|new_unclassified_card_name_leak",
+      "scripts/build-ai-compiled-hints.mjs|58|15|jack-n-joe|Jack 'n' Joe|new_unclassified_card_name_leak",
+      "scripts/build-ai-compiled-hints.mjs|59|15|livewires-contacts|Livewire's Contacts|new_unclassified_card_name_leak",
+      "scripts/build-ai-compiled-hints.mjs|777|9|selfModifyingCode|Self-Modifying Code|new_unclassified_card_name_leak",
+      "scripts/build-ai-compiled-hints.mjs|778|17|self-modifying-code|Self-Modifying Code|new_unclassified_card_name_leak",
+      "scripts/build-ai-compiled-hints.mjs|781|5|selfModifyingCode|Self-Modifying Code|new_unclassified_card_name_leak",
+      "scripts/build-ai-compiled-hints.mjs|786|14|self_modifying_code|Self-Modifying Code|functional_kind_uses_card_name",
+      "scripts/build-ai-compiled-hints.mjs|787|27|self-modifying-code|Self-Modifying Code|new_unclassified_card_name_leak",
+      "scripts/build-ai-compiled-hints.mjs|791|46|bbs-whispering-campaign|BBS Whispering Campaign|new_unclassified_card_name_leak",
+      "scripts/build-ai-compiled-hints.mjs|795|27|bbs-whispering-campaign|BBS Whispering Campaign|new_unclassified_card_name_leak",
+      "scripts/build-ai-compiled-hints.mjs|801|17|ball-and-chain|Ball and Chain|new_unclassified_card_name_leak",
+      "scripts/build-ai-compiled-hints.mjs|802|17|canis-major|Canis Major|new_unclassified_card_name_leak",
       "scripts/check-ai-derived-facts.mjs|657|17|viral-15|Viral 15|new_unclassified_card_name_leak",
       "scripts/check-ai-derived-facts.mjs|814|9|EmployeeEmpowerment|Employee Empowerment|new_unclassified_card_name_leak",
       "scripts/check-ai-derived-facts.mjs|908|15|corporate_downsizing|Corporate Downsizing|functional_kind_uses_card_name",
@@ -120,14 +119,14 @@
       "scripts/check-ai-derived-facts.mjs|3557|43|power_grid_overload|Power Grid Overload|new_unclassified_card_name_leak",
       "scripts/check-ai-derived-facts.mjs|3561|43|power_grid_overload|Power Grid Overload|new_unclassified_card_name_leak",
       "scripts/check-ai-derived-facts.mjs|3566|108|cowboy_sysop|Cowboy Sysop|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|3773|15|microtech_backup_drive|Microtech Backup Drive|functional_kind_uses_card_name",
-      "scripts/check-ai-derived-facts.mjs|3786|47|microtech_backup_drive|Microtech Backup Drive|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|3794|47|microtech_backup_drive|Microtech Backup Drive|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|3799|47|microtech_backup_drive|Microtech Backup Drive|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|3804|47|microtech_backup_drive|Microtech Backup Drive|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|3912|12|EmployeeEmpowerment|Employee Empowerment|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|3914|33|employee-empowerment|Employee Empowerment|new_unclassified_card_name_leak",
-      "scripts/check-ai-derived-facts.mjs|4481|30|crystal-palace-station-grid|Crystal Palace Station Grid|new_unclassified_card_name_leak",
+      "scripts/check-ai-derived-facts.mjs|3795|15|microtech_backup_drive|Microtech Backup Drive|functional_kind_uses_card_name",
+      "scripts/check-ai-derived-facts.mjs|3808|47|microtech_backup_drive|Microtech Backup Drive|new_unclassified_card_name_leak",
+      "scripts/check-ai-derived-facts.mjs|3816|47|microtech_backup_drive|Microtech Backup Drive|new_unclassified_card_name_leak",
+      "scripts/check-ai-derived-facts.mjs|3821|47|microtech_backup_drive|Microtech Backup Drive|new_unclassified_card_name_leak",
+      "scripts/check-ai-derived-facts.mjs|3826|47|microtech_backup_drive|Microtech Backup Drive|new_unclassified_card_name_leak",
+      "scripts/check-ai-derived-facts.mjs|3934|12|EmployeeEmpowerment|Employee Empowerment|new_unclassified_card_name_leak",
+      "scripts/check-ai-derived-facts.mjs|3936|33|employee-empowerment|Employee Empowerment|new_unclassified_card_name_leak",
+      "scripts/check-ai-derived-facts.mjs|4503|30|crystal-palace-station-grid|Crystal Palace Station Grid|new_unclassified_card_name_leak",
       "scripts/check-ai-hint-compiled-index.mjs|73|44|crystal-palace-station-grid|Crystal Palace Station Grid|new_unclassified_card_name_leak",
       "scripts/check-ai-hint-quality.mjs|53|15|crystal-palace-station-grid|Crystal Palace Station Grid|new_unclassified_card_name_leak",
       "scripts/check-ai-manual-overlays.mjs|118|44|crystal-palace-station-grid|Crystal Palace Station Grid|new_unclassified_card_name_leak",
@@ -231,9 +230,7 @@
         "questForCattekinPermanentActionGain"
       ],
       "targetKind": "start_turn_random_effect_table",
-      "targetState": [
-        "runnerTurnFlags.persistentModifiers[]"
-      ],
+      "targetState": ["runnerTurnFlags.persistentModifiers[]"],
       "params": {
         "dieFaces": 6,
         "outcomes": [
@@ -255,9 +252,7 @@
         "multiServerSuccessSequenceRun"
       ],
       "targetKind": "multi_server_success_sequence",
-      "targetState": [
-        "runnerTurnFlags.pendingSequences[]"
-      ],
+      "targetState": ["runnerTurnFlags.pendingSequences[]"],
       "params": {
         "sequence": "run_each_data_fort",
         "advanceOnSuccessfulRun": true,
@@ -274,10 +269,7 @@
         "delayedAccessEffects"
       ],
       "targetKind": "delayed_agenda_access_replacement",
-      "targetState": [
-        "runDurationEffects[]",
-        "delayedAccessEffects[]"
-      ],
+      "targetState": ["runDurationEffects[]", "delayedAccessEffects[]"],
       "params": {
         "replacementWindow": "agenda_access",
         "delay": "after_current_access_sequence"
@@ -292,9 +284,7 @@
         "codeViralCachePurgePreserveTargets"
       ],
       "targetKind": "purge_replacement_with_runner_virus_counter_cleanup",
-      "targetState": [
-        "replacementEffects[]"
-      ],
+      "targetState": ["replacementEffects[]"],
       "params": {
         "interruptedEvent": "corp_purge_virus_counters",
         "runnerVirusCounterCleanup": true
@@ -327,9 +317,7 @@
         "spendRecurringTraceCreditPool"
       ],
       "targetKind": "recurring_trace_credit_pool",
-      "targetState": [
-        "recurringCreditPools[]"
-      ],
+      "targetState": ["recurringCreditPools[]"],
       "params": {
         "amount": 1,
         "spendWindow": "trace",
@@ -345,9 +333,7 @@
         "runStartInterventions"
       ],
       "targetKind": "start_run_redirect_to_source_fort",
-      "targetState": [
-        "runStartInterventions[]"
-      ],
+      "targetState": ["runStartInterventions[]"],
       "params": {
         "redirectTarget": "source_fort",
         "triggerWindow": "run_start"
@@ -362,9 +348,7 @@
         "overadvance_bonus_agenda_points"
       ],
       "targetKind": "score_credit_swing_if_corp_credit_threshold_met / overadvance_bonus_agenda_points",
-      "targetState": [
-        "scoredAgendaAbilities[]"
-      ],
+      "targetState": ["scoredAgendaAbilities[]"],
       "params": {
         "triggerWindow": "agenda_scored",
         "conditionSource": "agenda_params"
@@ -968,61 +952,6 @@
       "snippet": "const SHELL_TRADERS_ID = \"shell_traders\";"
     },
     {
-      "path": "packages/engine/src/game/abilities/runner-special-trigger-execution.test.ts",
-      "line": 425,
-      "column": 16,
-      "token": "shell_traders",
-      "cardTitle": "Shell Traders",
-      "tokenSource": "known_watch_token",
-      "category": "test_only_card_name",
-      "targetAbstraction": "delayed_install_sequence",
-      "snippet": "/^v1912\\.shell_traders_start_turn:shell_1:/,"
-    },
-    {
-      "path": "packages/engine/src/game/abilities/runner-special-trigger-execution.test.ts",
-      "line": 502,
-      "column": 16,
-      "token": "shell_traders",
-      "cardTitle": "Shell Traders",
-      "tokenSource": "known_watch_token",
-      "category": "test_only_card_name",
-      "targetAbstraction": "delayed_install_sequence",
-      "snippet": "/^v1912\\.shell_traders_start_turn:shell_2:/,"
-    },
-    {
-      "path": "packages/engine/src/game/abilities/runner-special-trigger-execution.ts",
-      "line": 243,
-      "column": 38,
-      "token": "shell_traders",
-      "cardTitle": "Shell Traders",
-      "tokenSource": "known_watch_token",
-      "category": "runtime_state_field_uses_card_name",
-      "targetAbstraction": "delayed_install_sequence",
-      "snippet": "!choice.source.startsWith(\"v1912.shell_traders_start_turn:\")"
-    },
-    {
-      "path": "packages/engine/src/game/abilities/runner-special-trigger-execution.ts",
-      "line": 316,
-      "column": 22,
-      "token": "shell_traders",
-      "cardTitle": "Shell Traders",
-      "tokenSource": "known_watch_token",
-      "category": "runtime_state_field_uses_card_name",
-      "targetAbstraction": "delayed_install_sequence",
-      "snippet": "choiceId: `v1912_shell_traders_start_turn_${nextStateVersion}_${sourceCardId}`,"
-    },
-    {
-      "path": "packages/engine/src/game/abilities/runner-special-trigger-execution.ts",
-      "line": 318,
-      "column": 20,
-      "token": "shell_traders",
-      "cardTitle": "Shell Traders",
-      "tokenSource": "known_watch_token",
-      "category": "runtime_state_field_uses_card_name",
-      "targetAbstraction": "delayed_install_sequence",
-      "snippet": "source: `v1912.shell_traders_start_turn:${sourceCardId}:${nextStateVersion}`,"
-    },
-    {
       "path": "packages/engine/src/game/abilities/trigger-ability-execution.test.ts",
       "line": 45,
       "column": 27,
@@ -1065,28 +994,6 @@
       "category": "test_only_card_name",
       "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
       "snippet": "sourceDefinitionId: \"code_viral_cache_definition\","
-    },
-    {
-      "path": "packages/engine/src/game/choices/pending-choice-resolution.test.ts",
-      "line": 39,
-      "column": 14,
-      "token": "shell_traders",
-      "cardTitle": "Shell Traders",
-      "tokenSource": "known_watch_token",
-      "category": "test_only_card_name",
-      "targetAbstraction": "delayed_install_sequence",
-      "snippet": "\"v1912.shell_traders_start_turn:shell_1:1\","
-    },
-    {
-      "path": "packages/engine/src/game/choices/pending-choice-resolution.ts",
-      "line": 349,
-      "column": 50,
-      "token": "shell_traders",
-      "cardTitle": "Shell Traders",
-      "tokenSource": "known_watch_token",
-      "category": "runtime_state_field_uses_card_name",
-      "targetAbstraction": "delayed_install_sequence",
-      "snippet": "state.pendingChoice.source.startsWith(\"v1912.shell_traders_start_turn:\")"
     },
     {
       "path": "packages/engine/src/game/corp/scored-agenda-flow.test.ts",
@@ -1145,7 +1052,7 @@
     },
     {
       "path": "packages/engine/src/game/engine-runtime-internal/action-runtime-bootstrap.ts",
-      "line": 651,
+      "line": 652,
       "column": 3,
       "token": "CODE_VIRAL_CACHE",
       "cardTitle": "Code Viral Cache",
@@ -1178,7 +1085,7 @@
     },
     {
       "path": "packages/engine/src/game/engine-runtime-internal/card-lifecycle-runtime-hosts.ts",
-      "line": 615,
+      "line": 616,
       "column": 3,
       "token": "CODE_VIRAL_CACHE",
       "cardTitle": "Code Viral Cache",
@@ -1321,7 +1228,7 @@
     },
     {
       "path": "packages/engine/src/game/engine-runtime-internal/legal-action-runtime-hosts.ts",
-      "line": 610,
+      "line": 609,
       "column": 3,
       "token": "CODE_VIRAL_CACHE",
       "cardTitle": "Code Viral Cache",
@@ -1409,7 +1316,7 @@
     },
     {
       "path": "packages/engine/src/game/engine-runtime-internal/state-runtime-bootstrap.ts",
-      "line": 659,
+      "line": 660,
       "column": 3,
       "token": "CODE_VIRAL_CACHE",
       "cardTitle": "Code Viral Cache",
@@ -1431,7 +1338,7 @@
     },
     {
       "path": "packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts",
-      "line": 644,
+      "line": 623,
       "column": 3,
       "token": "CODE_VIRAL_CACHE",
       "cardTitle": "Code Viral Cache",
@@ -1541,7 +1448,7 @@
     },
     {
       "path": "packages/engine/src/game/turn/corp-main-actions.test.ts",
-      "line": 256,
+      "line": 257,
       "column": 36,
       "token": "disinfectant",
       "cardTitle": "Disinfectant",
@@ -1849,7 +1756,7 @@
     },
     {
       "path": "scripts/check-ai-derived-facts.mjs",
-      "line": 3745,
+      "line": 3767,
       "column": 15,
       "token": "shell_traders",
       "cardTitle": "Shell Traders",
@@ -1860,7 +1767,7 @@
     },
     {
       "path": "scripts/check-ai-derived-facts.mjs",
-      "line": 3755,
+      "line": 3777,
       "column": 51,
       "token": "shell_traders",
       "cardTitle": "Shell Traders",
@@ -1871,7 +1778,7 @@
     },
     {
       "path": "scripts/check-ai-derived-facts.mjs",
-      "line": 3760,
+      "line": 3782,
       "column": 51,
       "token": "shell_traders",
       "cardTitle": "Shell Traders",
@@ -1882,7 +1789,7 @@
     },
     {
       "path": "scripts/check-ai-derived-facts.mjs",
-      "line": 3765,
+      "line": 3787,
       "column": 51,
       "token": "shell_traders",
       "cardTitle": "Shell Traders",

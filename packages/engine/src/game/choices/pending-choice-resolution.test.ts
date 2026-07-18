@@ -36,7 +36,7 @@ describe("pending choice resolution", () => {
   it("dispatches Shell Traders start-of-turn choices through the runner callback", () => {
     const state = stateWithChoice(
       "shell_choice",
-      "v1912.shell_traders_start_turn:shell_1:1",
+      "runner_start.delayed_install:shell_1:1",
     );
     const resolveDelayedInstallStartTurnChoice = vi.fn();
 
