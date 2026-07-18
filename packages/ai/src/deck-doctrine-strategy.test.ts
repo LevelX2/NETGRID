@@ -1,9 +1,14 @@
 import { describe, expect, it } from "vitest";
 import snapshotsData08 from "../../../data/decks/deck-snapshots-0.8.json";
+import standardDeckCatalog from "../../../data/decks/standard-deck-catalog-1.0.0.json";
 import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
 import {
   buildDeckDoctrineV2Diagnostic,
   buildDeckStrategyProfile,
+  compareDeckStrategyRanking,
+  DECK_STRATEGY_METADATA_CONSUMER_CONTRACT,
+  selectRankedStrategyIdsWithCutoffTies,
+  type DeckStrategyScore,
 } from "./deck-doctrine-strategy";
 
 const snapshots = snapshotsData08.snapshots as Array<{
@@ -23,6 +28,181 @@ const realDoctrineSnapshotIds = [
 ] as const;
 
 describe("DeckDoctrine strategy aggregation diagnostics", () => {
+  it("classifies every derived public metadata group by consumer mode", () => {
+    expect(
+      Object.keys(DECK_STRATEGY_METADATA_CONSUMER_CONTRACT).sort(),
+    ).toEqual([
+      "corpProfile.economyProfile",
+      "corpProfile.iceProfile",
+      "corpProfile.punishProfile",
+      "corpProfile.remoteProfile",
+      "corpProfile.scoreProfile",
+      "functionSignalCounts",
+      "legacySignalCounts",
+      "primaryStrategies",
+      "runnerProfile.coverageProfile",
+      "runnerProfile.defenseProfile",
+      "runnerProfile.economyProfile",
+      "runnerProfile.pressureProfile",
+      "runnerProfile.setupProfile",
+      "secondaryStrategies",
+      "strategyScores",
+      "warnings",
+    ]);
+    expect(
+      DECK_STRATEGY_METADATA_CONSUMER_CONTRACT.legacySignalCounts,
+    ).toMatchObject({ mode: "diagnostic_only" });
+    expect(
+      DECK_STRATEGY_METADATA_CONSUMER_CONTRACT["corpProfile.economyProfile"],
+    ).toMatchObject({ mode: "productive_and_diagnostic" });
+    expect(
+      Object.values(DECK_STRATEGY_METADATA_CONSUMER_CONTRACT).every(
+        (entry) => entry.consumers.length > 0,
+      ),
+    ).toBe(true);
+  });
+
+  it("keeps inspector warning provenance per affected card", () => {
+    const profile = buildDeckStrategyProfile(
+      standardDeckByName("King of the Road"),
+    );
+    const inspectorWarnings = profile.warnings.filter((warning) =>
+      warning.startsWith("inspector:"),
+    );
+
+    expect(inspectorWarnings.length).toBeGreaterThan(0);
+    expect(
+      inspectorWarnings.every((warning) => /:onr_[a-z0-9_-]+$/.test(warning)),
+    ).toBe(true);
+  });
+  it("dampens duplicate metadata and additional copies of the same anchor card", () => {
+    const oneCopy = buildDeckStrategyProfile({
+      deckSnapshotId: "one-copy-recycle-anchor",
+      side: "corp",
+      cards: [{ cardId: "onr_v1_188_ai-chief-financial-officer", quantity: 1 }],
+    }).strategyScores["corp.deck_recycle_engine"];
+    const threeCopies = buildDeckStrategyProfile({
+      deckSnapshotId: "three-copy-recycle-anchor",
+      side: "corp",
+      cards: [{ cardId: "onr_v1_188_ai-chief-financial-officer", quantity: 3 }],
+    }).strategyScores["corp.deck_recycle_engine"];
+
+    expect(oneCopy?.anchorEvidence.length).toBeGreaterThan(1);
+    expect(oneCopy?.anchorScore).toBeLessThan(70);
+    expect(threeCopies?.anchorScore).toBeLessThan(100);
+    expect(threeCopies?.anchorScore ?? 0).toBeLessThan(
+      (oneCopy?.anchorScore ?? 0) * 3,
+    );
+  });
+
+  it("uses evidence diversity before lexical strategy ids for equal scores", () => {
+    const concentrated = rankingScore(["one"], ["support-one"]);
+    const diverse = rankingScore(
+      ["one", "two"],
+      ["support-one", "support-two"],
+    );
+    const ranked = [
+      ["aaa.concentrated", concentrated] as const,
+      ["zzz.diverse", diverse] as const,
+    ].sort(compareDeckStrategyRanking);
+
+    expect(ranked.map(([strategyId]) => strategyId)).toEqual([
+      "zzz.diverse",
+      "aaa.concentrated",
+    ]);
+  });
+
+  it("keeps every exactly tied strategy at the nominal primary cutoff", () => {
+    const tiedScore = rankingScore(["anchor"], ["support"]);
+    const ranked = [
+      ["corp.first", tiedScore],
+      ["corp.second", tiedScore],
+      ["corp.third", tiedScore],
+      ["corp.fourth", tiedScore],
+    ] as const;
+
+    expect(selectRankedStrategyIdsWithCutoffTies(ranked, 3)).toEqual([
+      "corp.first",
+      "corp.second",
+      "corp.third",
+      "corp.fourth",
+    ]);
+  });
+
+  it("reduces full anchor saturation across the active standard deck catalog", () => {
+    const profiles = standardDeckCatalog.decks.map((deck) =>
+      buildDeckStrategyProfile(standardDeckByName(deck.name)),
+    );
+    const profilesWithSaturatedAnchors = profiles.filter((profile) =>
+      profile.primaryStrategies.some(
+        (strategyId) => profile.strategyScores[strategyId]?.anchorScore === 100,
+      ),
+    );
+
+    expect(profiles).toHaveLength(40);
+    expect(profilesWithSaturatedAnchors.length).toBeLessThan(17);
+  });
+
+  it.each([
+    ["Chrome Rush Bureau", "corp.rush_score"],
+    ["Proteus Korp - Variable ICE Gauntlet", "corp.action_tempo"],
+    ["Classic Corp - Remote Lab Deflection", "corp.draw_engine"],
+    ["Siren Fortress", "corp.deck_recycle_engine"],
+  ] as const)(
+    "keeps the visible deck focus of %s in its selected strategy portfolio",
+    (deckName, expectedStrategyId) => {
+      const profile = buildDeckStrategyProfile(standardDeckByName(deckName));
+
+      expect([
+        ...profile.primaryStrategies,
+        ...profile.secondaryStrategies,
+      ]).toContain(expectedStrategyId);
+    },
+  );
+
+  it("keeps King of the Road productive through a bounded conditional wall bypass", () => {
+    const profile = buildDeckStrategyProfile(
+      standardDeckByName("King of the Road"),
+    );
+    const selectedScores = [
+      ...profile.primaryStrategies,
+      ...profile.secondaryStrategies,
+    ].map((strategyId) => profile.strategyScores[strategyId]);
+
+    expect(profile.primaryStrategies.length).toBeGreaterThan(0);
+    expect(
+      selectedScores.some(
+        (score) =>
+          score?.runtimeStatus === "productive" &&
+          score.supportGaps.includes("conditional_wall_access_path"),
+      ),
+    ).toBe(true);
+    expect(
+      selectedScores.some((score) =>
+        score?.supportGaps.includes("missing_wall_coverage"),
+      ),
+    ).toBe(false);
+  });
+
+  it("does not use one conditional path to invent Ghost Circuit coverage", () => {
+    const profile = buildDeckStrategyProfile(
+      standardDeckByName("Ghost Circuit"),
+    );
+    const breakerDependentScores = Object.values(profile.strategyScores).filter(
+      (score) =>
+        score.supportGaps.includes("missing_code_gate_coverage") ||
+        score.supportGaps.includes("weak_sentry_coverage"),
+    );
+
+    expect(breakerDependentScores.length).toBeGreaterThan(0);
+    expect(
+      breakerDependentScores.every(
+        (score) =>
+          score.runtimeStatus !== "productive" &&
+          !score.supportGaps.some((gap) => gap.startsWith("conditional_")),
+      ),
+    ).toBe(true);
+  });
   it("detects Runner R&D and interface pressure from normalized multiaccess evidence", () => {
     const profile = buildDeckStrategyProfile(
       snapshotById("onr_origin_runner_ai_snapshot_v1"),
@@ -273,6 +453,65 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
     expect(profile.strategyScores["corp.remote_scoring"]?.anchorScore).toBe(0);
   });
 
+  it("recognizes real cheap ICE for the Chrome Rush Bureau rush line", () => {
+    const profile = buildDeckStrategyProfile(
+      standardDeckByName("Chrome Rush Bureau"),
+    );
+    const rush = profile.strategyScores["corp.rush_score"];
+
+    expect(rush?.supportEvidence).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          signal: "cheap_ice",
+          reason: "support:earlyIce",
+        }),
+      ]),
+    );
+    expect(rush?.supportScore).toBeGreaterThanOrEqual(65);
+    expect(rush?.runtimeStatus).toBe("productive");
+    expect(rush?.runtimeBlockers).toEqual([]);
+  });
+
+  it("keeps new Corp support dimensions semantically distinct from their anchors", () => {
+    const actionTempo = buildDeckStrategyProfile(
+      standardDeckByName("Proteus Korp - Variable ICE Gauntlet"),
+    ).strategyScores["corp.action_tempo"];
+    const overadvance = buildDeckStrategyProfile(
+      standardDeckByName("Chrome Rush Bureau"),
+    ).strategyScores["corp.overadvance_value"];
+    const drawEngine = buildDeckStrategyProfile(
+      standardDeckByName("Classic Corp - Remote Lab Deflection"),
+    ).strategyScores["corp.draw_engine"];
+
+    const boardSafety = actionTempo?.supportEvidence.filter(
+      (entry) => entry.reason === "support:boardSafety",
+    );
+    expect(boardSafety?.length).toBeGreaterThan(0);
+    expect(
+      boardSafety?.every((entry) => !entry.signal?.startsWith("action.corp_")),
+    ).toBe(true);
+
+    const remoteSafety = overadvance?.supportEvidence.filter(
+      (entry) => entry.reason === "support:remoteSafety",
+    );
+    expect(remoteSafety?.length).toBeGreaterThan(0);
+    expect(
+      remoteSafety?.every(
+        (entry) =>
+          !entry.signal?.startsWith("advance.overadvance_") &&
+          !entry.signal?.startsWith("score.overadvance_"),
+      ),
+    ).toBe(true);
+
+    const safety = drawEngine?.supportEvidence.filter(
+      (entry) => entry.reason === "support:safety",
+    );
+    expect(safety?.length).toBeGreaterThan(0);
+    expect(
+      safety?.every((entry) => !entry.signal?.startsWith("draw.corp_")),
+    ).toBe(true);
+  });
+
   it("does not invent legacy strategy evidence for a generic run event", () => {
     const profile = buildDeckStrategyProfile({
       deckSnapshotId: "ai006-runner-legacy-only-diagnostic",
@@ -458,6 +697,49 @@ function snapshotById(snapshotId: string): AiDeckStrategyDeckSnapshot {
     cards: snapshot.cards.map((card) => ({
       cardId: card.cardId,
       quantity: card.quantity,
+    })),
+  };
+}
+
+function standardDeckByName(name: string): AiDeckStrategyDeckSnapshot {
+  const deck = standardDeckCatalog.decks.find(
+    (candidate) => candidate.name === name,
+  );
+  if (!deck) throw new Error(`Missing standard deck fixture ${name}`);
+  return {
+    deckSnapshotId: `standard_${deck.standardDeckId}_${deck.version}`,
+    side: deck.side as "runner" | "corp",
+    cards: deck.cards.map((card) => ({
+      cardId: card.cardId,
+      quantity: card.quantity,
+    })),
+  };
+}
+
+function rankingScore(
+  anchorCardIds: readonly string[],
+  supportCardIds: readonly string[],
+): DeckStrategyScore {
+  return {
+    anchorScore: 60,
+    supportScore: 60,
+    finalScore: 60,
+    confidence: "medium",
+    runtimeStatus: "productive",
+    runtimeBlockers: [],
+    supportGaps: [],
+    anchorEvidence: anchorCardIds.map((cardId) => ({
+      cardId,
+      quantity: 1,
+      source: "derivedStrategyAnchor",
+      reason: "test",
+    })),
+    supportEvidence: supportCardIds.map((cardId) => ({
+      cardId,
+      quantity: 1,
+      source: "functionSignal",
+      signal: "test.support",
+      reason: "test",
     })),
   };
 }

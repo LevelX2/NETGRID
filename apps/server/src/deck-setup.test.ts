@@ -3,6 +3,38 @@ import { describe, expect, it } from "vitest";
 import { resolveParticipantDeckSetup } from "./deck-setup";
 
 describe("AI deck readiness stages", () => {
+  it("resolves curated standard decks for match start", () => {
+    const participants = resolveParticipantDeckSetup(
+      {
+        participantADecks: {
+          runnerDeckSnapshotId:
+            "standard_standard_runner_rent_i_con_shellspiel_2026_07_17_1.0.0",
+          corpDeckSnapshotId:
+            "standard_standard_corp_cheap_bag_tricks_1.0.0",
+        },
+        participantBDecks: {
+          runnerDeckSnapshotId:
+            "standard_standard_runner_bit_denial_lock_1.0.0",
+          corpDeckSnapshotId:
+            "standard_standard_corp_cheap_bag_tricks_1.0.0",
+        },
+      },
+      {
+        seed: "standard-match-start",
+        aiPlayer: "player_b",
+        aiDeckPolicy: "selected",
+        cardPool: "originalset_classic_proteus",
+      },
+    );
+
+    expect(participants.player_a.runnerSnapshot.name).toBe(
+      "Rent-I-Con: Das Shellspiel",
+    );
+    expect(participants.player_b.corpSnapshot.name).toBe(
+      "Cheap Bag of Tricks",
+    );
+  });
+
   it("allows selected Proteus playtest decks at the approved stage", () => {
     const setup = resolveParticipantDeckSetup(
       {

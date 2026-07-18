@@ -160,6 +160,7 @@ export function tacticalPlanRunnerMappingBlocksOffPlanOverride(
     corpBoardTriageMismatchShouldYield: boolean;
     deferredDevelopmentInstallShouldYield: boolean;
     backgroundBankBuildShouldYield: boolean;
+    committedBankBuildShouldYield: boolean;
     noNeedSearchShouldYield: boolean;
     coverageProbeRunShouldYield: boolean;
     lowValueRunEventShouldYield: boolean;
@@ -183,6 +184,7 @@ export function tacticalPlanRunnerMappingBlocksOffPlanOverride(
   if (exceptions.corpBoardTriageMismatchShouldYield) return false;
   if (exceptions.deferredDevelopmentInstallShouldYield) return false;
   if (exceptions.backgroundBankBuildShouldYield) return false;
+  if (exceptions.committedBankBuildShouldYield) return false;
   if (exceptions.noNeedSearchShouldYield) return false;
   if (exceptions.coverageProbeRunShouldYield) return false;
   if (exceptions.lowValueRunEventShouldYield) return false;
@@ -234,6 +236,32 @@ export function tacticalPlanBackgroundBankBuildShouldYield(
           mappedChoice,
           "runner_bank_investment_commitment",
         )))
+  );
+}
+
+export function tacticalPlanCommittedBankBuildShouldYield(
+  mapping: PlanStepMappingResult,
+  mappedChoice: SemanticRuntimeChoice,
+  overrideChoice: SemanticRuntimeChoice,
+  scoreGap: number,
+): boolean {
+  return (
+    mapping.plan.type === "runner.opportunistic_central_run" &&
+    mappedChoice.action.type === "start_run" &&
+    scoreGap > 0 &&
+    mappedChoice.scoreBreakdown.some(
+      (component) =>
+        component.key === "runner_bank_commitment_build_over_low_run" &&
+        component.value < 0,
+    ) &&
+    overrideChoice.scoreBreakdown.some(
+      (component) =>
+        component.key === "runner_bank_investment_commitment" &&
+        component.value > 0 &&
+        /bankCommitmentStatus:build_(?:first|second)_load/.test(
+          component.reason ?? "",
+        ),
+    )
   );
 }
 

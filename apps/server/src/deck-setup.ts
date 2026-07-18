@@ -1,6 +1,7 @@
 import profilesData from "../../../data/decks/deck-format-profiles-0.8.json";
 import profilesData130 from "../../../data/decks/deck-format-profiles-1.3.0.json";
 import snapshotsData from "../../../data/decks/deck-snapshots-0.8.json";
+import standardDeckCatalogData from "../../../data/decks/standard-deck-catalog-1.0.0.json";
 import aiDeckPoolData from "../../../data/ai/ai-deck-pool-1.1.0.json";
 import { createHash } from "node:crypto";
 import {
@@ -10,10 +11,13 @@ import {
 } from "@netgrid/catalog";
 import {
   buildEngineDeck,
+  createDeckSnapshot,
   validateDeckSnapshot,
+  type DeckCardEntry,
   type DeckFormatProfile,
   type DeckSnapshot,
   type DeckValidationContext,
+  type EditableDeck,
 } from "@netgrid/decks";
 import type { ApiMatchCardPool } from "@netgrid/shared";
 
@@ -69,12 +73,75 @@ const profiles = [
   ...(profilesData.profiles as DeckFormatProfile[]),
   ...(profilesData130.profiles as DeckFormatProfile[]),
 ];
-const frozenSnapshots = snapshotsData.snapshots as DeckSnapshot[];
+const frozenSnapshots = [
+  ...(snapshotsData.snapshots as DeckSnapshot[]),
+  ...curatedStandardSnapshots(),
+];
 const aiDeckPool = aiDeckPoolData.entries as Array<{
   snapshotId: string;
   side: "runner" | "corp";
   tags: string[];
 }>;
+
+type CuratedStandardDeck = {
+  standardDeckId: string;
+  version: string;
+  status: "active";
+  name: string;
+  side: "runner" | "corp";
+  identityCardId: string;
+  cardPoolSnapshotId: string;
+  cardPoolVersion?: string;
+  formatProfileId: string;
+  formatProfileVersion?: string;
+  cards: DeckCardEntry[];
+};
+
+function curatedStandardSnapshots(): DeckSnapshot[] {
+  const curatedAt = `${standardDeckCatalogData.curatedAt}T00:00:00.000Z`;
+  return (standardDeckCatalogData.decks as CuratedStandardDeck[])
+    .filter((deck) => deck.status === "active")
+    .map((deck) => {
+      const profile = [...profiles]
+        .reverse()
+        .find(
+          (candidate) =>
+            candidate.profileId === deck.formatProfileId &&
+            (!deck.formatProfileVersion ||
+              candidate.version === deck.formatProfileVersion),
+        );
+      if (!profile) throw new Error("standard_deck_format_profile_not_found");
+      const editable: EditableDeck = {
+        deckId: deck.standardDeckId,
+        deckVersion: "1",
+        name: deck.name,
+        side: deck.side,
+        identityCardId: deck.identityCardId,
+        cardPoolSnapshotId: deck.cardPoolSnapshotId,
+        ...(deck.cardPoolVersion
+          ? { cardPoolVersion: deck.cardPoolVersion }
+          : {}),
+        formatProfileId: deck.formatProfileId,
+        ...(deck.formatProfileVersion
+          ? { formatProfileVersion: deck.formatProfileVersion }
+          : {}),
+        cards: deck.cards.map((entry) => ({ ...entry })),
+        createdAt: curatedAt,
+        updatedAt: curatedAt,
+      };
+      const rulesBaselineId = profile.rulesBaselineIds[0];
+      const snapshot = createDeckSnapshot(
+        editable,
+        { cardsById, profile },
+        {
+          snapshotId: `standard_${deck.standardDeckId}_${deck.version}`,
+          ...(rulesBaselineId ? { rulesBaselineId } : {}),
+        },
+      );
+      if (!snapshot.validation.ok) throw new Error("standard_deck_invalid");
+      return snapshot;
+    });
+}
 
 export function resolveDeckSetup(
   input: ParticipantDeckPairInput = {},

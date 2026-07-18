@@ -34,6 +34,7 @@ export function tacticalPlanOverrideReason(input: {
   inferiorRunTargetShouldYield: boolean;
   corpBoardTriageMismatchShouldYield: boolean;
   backgroundBankBuildShouldYield: boolean;
+  committedBankBuildShouldYield: boolean;
   hardInterruptShouldYield: boolean;
   thresholdReason: string;
 }): string {
@@ -77,6 +78,7 @@ export function tacticalPlanOverrideReason(input: {
       input.backgroundBankBuildShouldYield,
       "background_bank_build_mapping_yield",
     ],
+    [input.committedBankBuildShouldYield, "committed_bank_build_mapping_yield"],
     [input.hardInterruptShouldYield, "runner_hard_interrupt"],
   ] as const;
   return candidates.find(([matches]) => matches)?.[1] ?? input.thresholdReason;

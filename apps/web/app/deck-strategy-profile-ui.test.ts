@@ -19,15 +19,35 @@ import {
 
 describe("AI007 deck strategy profile UI helpers", () => {
   it("formats strategy IDs, scores and status labels for display", () => {
-    expect(formatStrategyLabel("runner.interface_closeout")).toBe("Interface Closeout");
-    expect(formatStrategyLabel("corp.tag_trace_punish")).toBe("Tag Trace Punish");
-    expect(formatDeckStrategyValue("legacy_lineSupport")).toBe("legacy line support");
-    expect(formatRunnerStrategicIntentValue("runner.steal_agendas_default")).toBe("Agenda-Steal");
-    expect(formatRunnerStrategicIntentValue("runner.run_event_tempo")).toBe("Run-Event-Tempo");
-    expect(formatRunnerStrategicIntentValue("runner.search.breaker")).toBe("Breaker-Suche");
-    expect(formatRunnerStrategicIntentValue("runner.search_breaker_setup")).toBe("Breaker-Suche");
-    expect(formatRunnerStrategicIntentValue("runner.hq_pressure")).toBe("HQ-Druck");
-    expect(formatRunnerStrategicIntentValue("runner.risky_universal_breaker_pressure")).toBe("Riskante Universalbreaker-Coverage");
+    expect(formatStrategyLabel("runner.interface_closeout")).toBe(
+      "Interface Closeout",
+    );
+    expect(formatStrategyLabel("corp.tag_trace_punish")).toBe(
+      "Tag Trace Punish",
+    );
+    expect(formatDeckStrategyValue("legacy_lineSupport")).toBe(
+      "legacy line support",
+    );
+    expect(
+      formatRunnerStrategicIntentValue("runner.steal_agendas_default"),
+    ).toBe("Agenda-Steal");
+    expect(formatRunnerStrategicIntentValue("runner.run_event_tempo")).toBe(
+      "Run-Event-Tempo",
+    );
+    expect(formatRunnerStrategicIntentValue("runner.search.breaker")).toBe(
+      "Breaker-Suche",
+    );
+    expect(
+      formatRunnerStrategicIntentValue("runner.search_breaker_setup"),
+    ).toBe("Breaker-Suche");
+    expect(formatRunnerStrategicIntentValue("runner.hq_pressure")).toBe(
+      "HQ-Druck",
+    );
+    expect(
+      formatRunnerStrategicIntentValue(
+        "runner.risky_universal_breaker_pressure",
+      ),
+    ).toBe("Riskante Universalbreaker-Coverage");
     expect(formatStrategyScore(74.4)).toBe("74");
     expect(scoreWidthPercent(124)).toBe("100%");
     expect(strategyStatusLabel("primary")).toBe("Primär");
@@ -37,11 +57,20 @@ describe("AI007 deck strategy profile UI helpers", () => {
 
   it("creates stable non-JSON render keys", () => {
     expect(
-      deckStrategyProfileEntryKey("runner-coverage", { label: "Wall", value: "2", tone: "info" }, 0),
+      deckStrategyProfileEntryKey(
+        "runner-coverage",
+        { label: "Wall", value: "2", tone: "info" },
+        0,
+      ),
     ).toBe("runner-coverage-0-Wall-2");
-    expect(deckStrategyEvidenceKey("runner.rnd_pressure", "anchor", "R&D Interface", 1)).toBe(
-      "runner.rnd_pressure-anchor-1-R&D Interface",
-    );
+    expect(
+      deckStrategyEvidenceKey(
+        "runner.rnd_pressure",
+        "anchor",
+        "R&D Interface",
+        1,
+      ),
+    ).toBe("runner.rnd_pressure-anchor-1-R&D Interface");
   });
 
   it("detects runtime-only and planner-only field names", () => {
@@ -65,14 +94,17 @@ describe("AI007 deck strategy profile UI helpers", () => {
 
   it("serializes the diagnostic viewer as a safe JSON export", () => {
     const viewer = sampleViewer();
-    const payload = deckStrategyProfileJsonExport(viewer, "2026-06-07T10:00:00.000Z");
+    const payload = deckStrategyProfileJsonExport(
+      viewer,
+      "2026-06-07T10:00:00.000Z",
+    );
 
     expect(payload).toMatchObject({
       schemaVersion: "ai007-deck-strategy-json-export-v1",
       taskId: "AI007",
       exportKind: "diagnostic_ai_deck_profile",
       exportedAt: "2026-06-07T10:00:00.000Z",
-      plannerEffect: "none",
+      plannerEffect: "strategic_intent_input",
       deck: {
         deckId: "deck-1",
         deckName: "Test Deck",
@@ -86,8 +118,17 @@ describe("AI007 deck strategy profile UI helpers", () => {
       },
     });
     expect(payload.viewer).toEqual(viewer);
-    expect(JSON.parse(serializeDeckStrategyProfileJsonExport(viewer, "2026-06-07T10:00:00.000Z"))).toEqual(payload);
-    expect(deckStrategyProfileJsonExportFileName(viewer)).toBe("netgrid-ki-deckprofil-runner-test-deck.json");
+    expect(
+      JSON.parse(
+        serializeDeckStrategyProfileJsonExport(
+          viewer,
+          "2026-06-07T10:00:00.000Z",
+        ),
+      ),
+    ).toEqual(payload);
+    expect(deckStrategyProfileJsonExportFileName(viewer)).toBe(
+      "netgrid-ki-deckprofil-runner-test-deck.json",
+    );
   });
 
   it("blocks JSON exports when forbidden fields are accidentally attached", () => {
@@ -96,9 +137,9 @@ describe("AI007 deck strategy profile UI helpers", () => {
       stateHash: "must-not-export",
     } as unknown as DeckStrategyProfileViewer;
 
-    expect(() => deckStrategyProfileJsonExport(unsafeViewer, "2026-06-07T10:00:00.000Z")).toThrow(
-      /stateHash/,
-    );
+    expect(() =>
+      deckStrategyProfileJsonExport(unsafeViewer, "2026-06-07T10:00:00.000Z"),
+    ).toThrow(/stateHash/);
   });
 });
 
@@ -116,7 +157,7 @@ function sampleViewer(): DeckStrategyProfileViewer {
       aggregation: "AI006 strategy aggregation",
       profileSchemaVersion: "ai-deck-strategy-profile-v1",
       profileTaskId: "AI006",
-      plannerEffect: "none",
+      plannerEffect: "strategic_intent_input",
       deckHash: "fnv1a:test",
     },
     diagnosticNotice: "Diagnostisches KI-Deckprofil",
@@ -138,7 +179,9 @@ function sampleViewer(): DeckStrategyProfileViewer {
     sideProfileTitle: "Runner-Profil",
     sideProfileGroups: [],
     evidenceGroups: [],
-    functionSignalCounts: [{ label: "function-signals", value: "breaker.wall: 1", tone: "info" }],
+    functionSignalCounts: [
+      { label: "function-signals", value: "breaker.wall: 1", tone: "info" },
+    ],
     legacySignalGroups: [],
     warnings: [],
   };

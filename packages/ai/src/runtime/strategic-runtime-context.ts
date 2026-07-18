@@ -29,6 +29,8 @@ import {
 } from "../tag-punish-ontology-consumer";
 import { visibleSourceDefinitionsByInstanceId } from "./visible-source-definitions";
 import { assessRunnerBreakerDevelopment } from "../runner-breaker-development";
+import { strategicFamilyForStrategyId } from "../strategy-runtime-registry";
+import { buildActionCardSemanticProfilesByDefinitionId } from "../actions/action-card-semantic-profiles";
 
 export type StrategicRuntimeContext = {
   roleStatuses: StrategicRoleStatusSnapshot[];
@@ -52,7 +54,7 @@ export function buildStrategicRuntimeContext(
   const strategyPortfolio = buildRuntimeStrategyPortfolio(params);
   const strategyId = strategyPortfolio.activeStrategyId;
   const family = strategyId
-    ? strategicFamilyForStrategy(strategyId)
+    ? strategicFamilyForStrategyId(strategyId)
     : "neutral";
   const activeCandidate = strategyPortfolio.productiveCandidates.find(
     (candidate) => candidate.strategyId === strategyId,
@@ -239,7 +241,7 @@ function runtimePortfolioCandidate(
   const profile = params.strategyProfile;
   const score = profile?.strategyScores[strategyId];
   if (!profile || !score) return undefined;
-  const family = strategicFamilyForStrategy(strategyId);
+  const family = strategicFamilyForStrategyId(strategyId);
   const roleStatuses = roleStatusesForFamily(params, family);
   const targetVector = targetVectorForFamily(params, family, strategyId);
   const reserve = reserveRequirementForFamily(params, family);
@@ -314,6 +316,8 @@ function roleReadinessBonus(
         return sum + 8;
       case "in_deck_unseen":
         return sum + 2;
+      case "conditional":
+        return sum + 1;
       case "temporarily_unavailable":
         return sum - 8;
       case "absent":
@@ -389,48 +393,6 @@ function uniqueStrings(values: readonly string[]): string[] {
   return [...new Set(values.filter((value) => value.length > 0))];
 }
 
-function strategicFamilyForStrategy(strategyId: string): StrategicIntentFamily {
-  switch (strategyId) {
-    case "runner.rig_first":
-    case "runner.economy_first":
-    case "runner.search.breaker":
-      return "runner_setup";
-    case "runner.rnd_pressure":
-    case "runner.hq_pressure":
-    case "runner.interface_closeout":
-      return "runner_central_pressure";
-    case "runner.remote_contest":
-      return "runner_remote_contest";
-    case "runner.remote_trash":
-      return "runner_remote_trash";
-    case "runner.survival_defense":
-      return "runner_survival";
-    case "runner.run_event_tempo":
-      return "runner_tempo";
-    case "corp.remote_scoring":
-    case "corp.rush_score":
-      return "corp_scoreline";
-    case "corp.fast_advance":
-      return "corp_fast_advance";
-    case "corp.ice_tax_glacier":
-      return "corp_ice_tax";
-    case "corp.central_stabilize":
-      return "corp_central_defense";
-    case "corp.asset_economy":
-      return "corp_asset_economy";
-    case "corp.tag_trace_punish":
-      return "corp_tag_trace_punish";
-    case "corp.damage_kill":
-      return "corp_damage_kill";
-    case "corp.ambush_bluff":
-      return "corp_ambush";
-    case "corp.economy_rez_reserve":
-      return "corp_economy_reserve";
-    default:
-      return "unknown";
-  }
-}
-
 function roleStatusesForFamily(
   params: BuildStrategicRuntimeContextParams,
   family: StrategicIntentFamily,
@@ -477,11 +439,14 @@ function runnerCoverageRoles(
 ): StrategicRoleStatusSnapshot[] {
   const matrix = params.deckCapabilities?.runner?.breakerCoverageMatrix;
   if (!matrix) return [];
+  const conditionalCoverageKinds = runnerConditionalCoverageKinds(
+    params.strategyProfile,
+  );
   const coverageKinds: BreakerCoverageKind[] = ["wall", "code_gate", "sentry"];
   return coverageKinds.map((coverage) =>
     roleStatus(
       `runner.breaker.${coverage}`,
-      coverageStatus(matrix[coverage]),
+      coverageStatus(matrix[coverage], conditionalCoverageKinds.has(coverage)),
       "capability",
       [
         `coverage:${coverage}`,
@@ -490,19 +455,38 @@ function runnerCoverageRoles(
         `in_deck:${matrix[coverage].inDeckKnown}`,
         `searchable_now:${matrix[coverage].searchableNow}`,
         `missing:${matrix[coverage].missing}`,
+        `conditional_access:${conditionalCoverageKinds.has(coverage)}`,
       ],
     ),
   );
 }
 
-function coverageStatus(state: CoverageState): StrategicRoleStatus {
+function coverageStatus(
+  state: CoverageState,
+  conditionalAccess: boolean,
+): StrategicRoleStatus {
   if (state.installed) return "active";
   if (state.inHand) return "installable";
   if (state.searchableNow || state.inDeckKnown || state.drawOnly) {
     return "in_deck_unseen";
   }
-  if (state.missing) return "absent";
+  if (state.missing) return conditionalAccess ? "conditional" : "absent";
   return "unknown";
+}
+
+function runnerConditionalCoverageKinds(
+  strategyProfile: AiDeckStrategyProfile | undefined,
+): Set<BreakerCoverageKind> {
+  const result = new Set<BreakerCoverageKind>();
+  for (const score of Object.values(strategyProfile?.strategyScores ?? {})) {
+    if (score.runtimeStatus !== "productive") continue;
+    for (const kind of ["wall", "code_gate", "sentry"] as const) {
+      if (score.supportGaps.includes(`conditional_${kind}_access_path`)) {
+        result.add(kind);
+      }
+    }
+  }
+  return result;
 }
 
 function runnerSurvivalStatus(
@@ -525,6 +509,8 @@ function corpRoleStatuses(
   switch (family) {
     case "corp_scoreline":
     case "corp_fast_advance":
+    case "corp_action_tempo":
+    case "corp_overadvance":
       return [
         roleStatus(
           "corp.score_window",
@@ -534,6 +520,23 @@ function corpRoleStatuses(
             `legal_score:${hasLegalAction(params.legalActions, "score_agenda")}`,
             `legal_advance:${hasLegalAction(params.legalActions, "advance_card")}`,
             `remote_with_agenda:${remoteWithVisibleAgenda(params.playerView)}`,
+          ],
+        ),
+      ];
+    case "corp_draw_engine":
+    case "corp_recycle_engine":
+      return [
+        roleStatus(
+          family === "corp_draw_engine"
+            ? "corp.draw_engine"
+            : "corp.recycle_engine",
+          corpEngineStatus(params, family),
+          "player_view",
+          [
+            `legal_draw:${hasLegalAction(params.legalActions, "draw_card")}`,
+            `legal_trigger:${hasLegalAction(params.legalActions, "trigger_ability")}`,
+            `legal_activated:${hasLegalAction(params.legalActions, "activated_card_ability")}`,
+            `legal_strategy_engine:${hasLegalStrategyAction(params, family === "corp_draw_engine" ? "corp.draw_engine" : "corp.deck_recycle_engine")}`,
           ],
         ),
       ];
@@ -579,6 +582,28 @@ function corpRoleStatuses(
     default:
       return [];
   }
+}
+
+function corpEngineStatus(
+  params: BuildStrategicRuntimeContextParams,
+  family: Extract<
+    StrategicIntentFamily,
+    "corp_draw_engine" | "corp_recycle_engine"
+  >,
+): StrategicRoleStatus {
+  if (
+    (family === "corp_draw_engine" &&
+      hasLegalAction(params.legalActions, "draw_card")) ||
+    hasLegalStrategyAction(
+      params,
+      family === "corp_draw_engine"
+        ? "corp.draw_engine"
+        : "corp.deck_recycle_engine",
+    )
+  ) {
+    return "active";
+  }
+  return "in_deck_unseen";
 }
 
 function corpScoreWindowStatus(
@@ -746,7 +771,12 @@ function corpTargetVector(
   family: StrategicIntentFamily,
   strategyId: string,
 ): StrategicTargetVector {
-  if (family === "corp_scoreline" || family === "corp_fast_advance") {
+  if (
+    family === "corp_scoreline" ||
+    family === "corp_fast_advance" ||
+    family === "corp_action_tempo" ||
+    family === "corp_overadvance"
+  ) {
     const feasibility = corpScorelineFeasibility(params, family);
     return {
       kind: "scoreline",
@@ -851,6 +881,16 @@ function corpTargetVector(
       ],
     };
   }
+  if (family === "corp_draw_engine" || family === "corp_recycle_engine") {
+    return {
+      kind: "none",
+      evidence: [
+        "target_source:runtime_context",
+        `target_strategy:${strategyId}`,
+        "target_mode:engine",
+      ],
+    };
+  }
   return {
     kind: "none",
     evidence: ["target_source:runtime_context", `target_unknown:${strategyId}`],
@@ -869,7 +909,12 @@ function corpScorelineFeasibility(
   | undefined {
   if (
     params.side !== "corp" ||
-    (family !== "corp_scoreline" && family !== "corp_fast_advance") ||
+    ![
+      "corp_scoreline",
+      "corp_fast_advance",
+      "corp_action_tempo",
+      "corp_overadvance",
+    ].includes(family) ||
     !params.deckSnapshot
   ) {
     return undefined;
@@ -899,7 +944,7 @@ function reserveRequirementForFamily(
 ): StrategicReserveRequirement {
   const required = Math.max(
     defaultReserveCreditsForFamily(family),
-    cheapestRelevantActionCost(params.legalActions, family) ?? 0,
+    cheapestRelevantActionCost(params, family) ?? 0,
   );
   if (required <= 0) {
     return {
@@ -920,7 +965,7 @@ function reserveRequirementForFamily(
       `reserve_family:${family}`,
       `reserve_required:${required}`,
       `reserve_available:${available}`,
-      `relevant_action_min_cost:${cheapestRelevantActionCost(params.legalActions, family) ?? "none"}`,
+      `relevant_action_min_cost:${cheapestRelevantActionCost(params, family) ?? "none"}`,
     ],
   };
 }
@@ -933,6 +978,7 @@ function defaultReserveCreditsForFamily(family: StrategicIntentFamily): number {
       return 4;
     case "corp_scoreline":
     case "corp_fast_advance":
+    case "corp_overadvance":
     case "corp_ice_tax":
       return 5;
     case "corp_tag_trace_punish":
@@ -944,11 +990,11 @@ function defaultReserveCreditsForFamily(family: StrategicIntentFamily): number {
 }
 
 function cheapestRelevantActionCost(
-  legalActions: readonly LegalAction[],
+  params: BuildStrategicRuntimeContextParams,
   family: StrategicIntentFamily,
 ): number | undefined {
-  const costs = legalActions
-    .filter((action) => actionMatchesFamily(action, family))
+  const costs = params.legalActions
+    .filter((action) => actionMatchesFamily(action, family, params))
     .map(actionCreditCost);
   if (costs.length === 0) return undefined;
   return Math.min(...costs);
@@ -957,6 +1003,7 @@ function cheapestRelevantActionCost(
 function actionMatchesFamily(
   action: LegalAction,
   family: StrategicIntentFamily,
+  params: BuildStrategicRuntimeContextParams,
 ): boolean {
   switch (family) {
     case "runner_central_pressure":
@@ -972,7 +1019,20 @@ function actionMatchesFamily(
       return action.type === "draw_card" || action.type === "remove_tag";
     case "corp_scoreline":
     case "corp_fast_advance":
+    case "corp_action_tempo":
+      return (
+        action.type === "score_agenda" ||
+        actionSupportsStrategy(params, action, "corp.action_tempo")
+      );
+    case "corp_overadvance":
       return action.type === "score_agenda" || action.type === "advance_card";
+    case "corp_draw_engine":
+      return (
+        action.type === "draw_card" ||
+        actionSupportsStrategy(params, action, "corp.draw_engine")
+      );
+    case "corp_recycle_engine":
+      return actionSupportsStrategy(params, action, "corp.deck_recycle_engine");
     case "corp_ice_tax":
     case "corp_central_defense":
       return action.type === "rez_ice" || hasInstallIcePayload(action);
@@ -990,6 +1050,33 @@ function actionMatchesFamily(
     default:
       return false;
   }
+}
+
+function hasLegalStrategyAction(
+  params: BuildStrategicRuntimeContextParams,
+  strategyId: string,
+): boolean {
+  return params.legalActions.some((action) =>
+    actionSupportsStrategy(params, action, strategyId),
+  );
+}
+
+function actionSupportsStrategy(
+  params: BuildStrategicRuntimeContextParams,
+  action: LegalAction,
+  strategyId: string,
+): boolean {
+  const definitionId = sourceDefinitionIdForAction(
+    action,
+    visibleSourceDefinitionsByInstanceId(params.playerView),
+  );
+  if (!definitionId) return false;
+  const profile = buildActionCardSemanticProfilesByDefinitionId()[definitionId];
+  return Boolean(
+    profile?.strategySupport?.some(
+      (support) => support.strategyId === strategyId,
+    ) || profile?.compatibilitySignals?.includes(`line_support:${strategyId}`),
+  );
 }
 
 function corpPunishAssessments(

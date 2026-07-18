@@ -148,12 +148,16 @@ export type {
   OpeningHandEvaluation,
   RunnerOpeningHandEvaluation,
 } from "./deck-opening-hand";
-export { buildDeckStrategyProfile } from "./deck-doctrine-strategy";
+export {
+  buildDeckStrategyProfile,
+  DECK_STRATEGY_METADATA_CONSUMER_CONTRACT,
+} from "./deck-doctrine-strategy";
 export type {
   AiDeckStrategyProfile,
   CorpDeckStrategyProfiles,
   DeckStrategyConfidence,
   DeckStrategyEvidence,
+  DeckStrategyMetadataConsumerMode,
   DeckStrategyScore,
   RunnerDeckStrategyProfiles,
 } from "./deck-doctrine-strategy";

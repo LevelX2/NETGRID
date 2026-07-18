@@ -1,9 +1,17 @@
 import { describe, expect, it } from "vitest";
-import type { AiDecisionInput, LegalAction, PlayerView, Side } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  PlayerView,
+  Side,
+} from "@netgrid/shared";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import { semanticRuntimeStrategicActionFitEvidence } from "./strategic-action-fit";
 import { buildStrategicIntentState } from "../strategic-intent-state";
-import type { AiDeckStrategyProfile, DeckStrategyScore } from "../deck-doctrine-strategy";
+import type {
+  AiDeckStrategyProfile,
+  DeckStrategyScore,
+} from "../deck-doctrine-strategy";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 
 describe("semanticRuntimeStrategicActionFitEvidence", () => {
@@ -63,28 +71,31 @@ describe("semanticRuntimeStrategicActionFitEvidence", () => {
     const noisySource = action("noisy-economy", "corp", "install_card");
     noisySource.label = "Install upgrade";
     noisySource.source = "creditor-bankish";
-    const input = corpStrategicInput([labelOnly, sourced, noisySource], [
-      {
-        instanceId: "economy-asset",
-        definitionId: "custom-economy-asset",
-        title: "Neutral Asset",
-        rulesText: "Gain credits when used.",
-        type: "asset",
-        known: true,
-        owner: "corp",
-        controller: "corp",
-      },
-      {
-        instanceId: "creditor-bankish",
-        definitionId: "custom-creditor-bankish",
-        title: "Creditor Bankish",
-        rulesText: "Gainish creditsish when used.",
-        type: "upgrade",
-        known: true,
-        owner: "corp",
-        controller: "corp",
-      },
-    ]);
+    const input = corpStrategicInput(
+      [labelOnly, sourced, noisySource],
+      [
+        {
+          instanceId: "economy-asset",
+          definitionId: "custom-economy-asset",
+          title: "Neutral Asset",
+          rulesText: "Gain credits when used.",
+          type: "asset",
+          known: true,
+          owner: "corp",
+          controller: "corp",
+        },
+        {
+          instanceId: "creditor-bankish",
+          definitionId: "custom-creditor-bankish",
+          title: "Creditor Bankish",
+          rulesText: "Gainish creditsish when used.",
+          type: "upgrade",
+          known: true,
+          owner: "corp",
+          controller: "corp",
+        },
+      ],
+    );
 
     expect(
       semanticRuntimeStrategicActionFitEvidence(
@@ -212,6 +223,60 @@ describe("semanticRuntimeStrategicActionFitEvidence", () => {
       ),
     ).toEqual([]);
   });
+
+  it.each([
+    ["corp_action_tempo", "corp.action_tempo", "trigger_ability"],
+    ["corp_overadvance", "corp.overadvance_value", "advance_card"],
+    ["corp_draw_engine", "corp.draw_engine", "draw_card"],
+    ["corp_recycle_engine", "corp.deck_recycle_engine", "trigger_ability"],
+  ] as const)(
+    "scores a legal action for the %s strategy consumer",
+    (family, strategyId, actionType) => {
+      const legalAction = action("strategy-action", "corp", actionType);
+      const [baseCandidate] = buildActionSemanticCandidates({
+        legalActions: [legalAction],
+        observerSide: "corp",
+        stateVersion: 1,
+      });
+      if (!baseCandidate) throw new Error("expected semantic candidate");
+      const actionSemanticCandidate = {
+        ...baseCandidate,
+        actionTacticSignals: [
+          ...(family === "corp_action_tempo"
+            ? ["action.corp_extra_action"]
+            : []),
+          ...(family === "corp_recycle_engine"
+            ? ["archives.corp_recycle_to_rnd"]
+            : []),
+        ],
+      };
+      const input = strategicInput(
+        "corp",
+        [legalAction],
+        family,
+        strategyId,
+        family === "corp_overadvance" || family === "corp_action_tempo"
+          ? "scoreline"
+          : "none",
+        8,
+      );
+
+      expect(
+        semanticRuntimeStrategicActionFitEvidence(
+          input,
+          legalAction,
+          "corp.semantic.strategy",
+          actionSemanticCandidate,
+        ),
+      ).toEqual(
+        expect.arrayContaining([
+          "semantic_strategic_action_fit:true",
+          `strategic_action_fit_family:${family}`,
+          `strategic_action_fit_strategy:${strategyId}`,
+        ]),
+      );
+    },
+  );
 });
 
 function aiInput(

@@ -114,6 +114,83 @@ export type CorpDeckStrategyProfiles = {
   };
 };
 
+export type DeckStrategyMetadataConsumerMode =
+  | "productive_and_diagnostic"
+  | "diagnostic_only";
+
+export const DECK_STRATEGY_METADATA_CONSUMER_CONTRACT = {
+  strategyScores: {
+    mode: "productive_and_diagnostic",
+    consumers: ["StrategicIntentState", "AI007 strategy viewer"],
+  },
+  primaryStrategies: {
+    mode: "productive_and_diagnostic",
+    consumers: ["StrategicRuntimeContext", "AI007 strategy viewer"],
+  },
+  secondaryStrategies: {
+    mode: "productive_and_diagnostic",
+    consumers: ["StrategicRuntimeContext", "AI007 strategy viewer"],
+  },
+  functionSignalCounts: {
+    mode: "productive_and_diagnostic",
+    consumers: ["RunnerStrategicIntent", "AI007 strategy viewer"],
+  },
+  legacySignalCounts: {
+    mode: "diagnostic_only",
+    consumers: ["AI007 legacy signal groups", "AI006 invariant check"],
+  },
+  "runnerProfile.coverageProfile": {
+    mode: "diagnostic_only",
+    consumers: ["AI007 Runner profile viewer"],
+  },
+  "runnerProfile.economyProfile": {
+    mode: "diagnostic_only",
+    consumers: ["AI007 Runner profile viewer"],
+  },
+  "runnerProfile.setupProfile": {
+    mode: "diagnostic_only",
+    consumers: ["AI007 Runner profile viewer"],
+  },
+  "runnerProfile.pressureProfile": {
+    mode: "diagnostic_only",
+    consumers: ["AI007 Runner profile viewer"],
+  },
+  "runnerProfile.defenseProfile": {
+    mode: "diagnostic_only",
+    consumers: ["AI007 Runner profile viewer"],
+  },
+  "corpProfile.iceProfile": {
+    mode: "diagnostic_only",
+    consumers: ["AI007 Corp profile viewer"],
+  },
+  "corpProfile.scoreProfile": {
+    mode: "diagnostic_only",
+    consumers: ["AI007 Corp profile viewer"],
+  },
+  "corpProfile.economyProfile": {
+    mode: "productive_and_diagnostic",
+    consumers: ["CorpStrategicIntent", "AI007 Corp profile viewer"],
+  },
+  "corpProfile.punishProfile": {
+    mode: "productive_and_diagnostic",
+    consumers: ["CorpStrategicIntent", "StrategicRuntimeContext"],
+  },
+  "corpProfile.remoteProfile": {
+    mode: "diagnostic_only",
+    consumers: ["AI007 Corp profile viewer"],
+  },
+  warnings: {
+    mode: "diagnostic_only",
+    consumers: ["AI007 warning viewer", "DeckDoctrine v2 diagnostic"],
+  },
+} as const satisfies Record<
+  string,
+  {
+    mode: DeckStrategyMetadataConsumerMode;
+    consumers: readonly string[];
+  }
+>;
+
 export type AiDeckStrategyProfile = {
   schemaVersion: "ai-deck-strategy-profile-v1";
   taskId: "AI006";
@@ -270,10 +347,12 @@ type InspectorCard = {
 type RuntimeCardForStrategy = {
   side?: Side;
   type?: string;
-  cost?: number;
-  rezCost?: number;
-  advancementRequirement?: number;
-  agendaPoints?: number;
+  numeric?: {
+    cost?: number | null;
+    rezCost?: number | null;
+    advancementRequirement?: number | null;
+    agendaPoints?: number | null;
+  };
   subtypes?: string[];
   subroutines?: Array<{ type?: string }>;
 };
@@ -356,6 +435,10 @@ const BREAKER_COVERAGE_SIGNAL_IDS = new Set([
   "breaker.wall",
   "breaker.watchdog",
 ]);
+const CONDITIONAL_GENERAL_ACCESS_SIGNAL_IDS = new Set([
+  "run.bypass_chosen_ice",
+  "run.bypass_first_ice",
+]);
 const SUPPORT_ONLY_STRATEGY_IDS = new Set([
   "runner.economy_first",
   "runner.survival_defense",
@@ -374,7 +457,16 @@ const HARD_PRODUCTIVE_GAPS = new Set([
   "low_tag_sources",
   "payoff_without_enablers",
   "low_punish_payoff_density",
+  "missing_tempo_source",
+  "missing_advancement_window",
+  "missing_draw_source",
+  "missing_recycle_source",
+  "missing_draw_or_shuffle",
 ]);
+
+export function isHardProductiveSupportGap(gap: string): boolean {
+  return HARD_PRODUCTIVE_GAPS.has(gap);
+}
 
 export function buildDeckStrategyProfile(
   snapshot: AiDeckStrategyDeckSnapshot,
@@ -417,28 +509,25 @@ export function buildDeckStrategyProfile(
   }
 
   const rankedStrategies = Object.entries(strategyScores).sort(
-    (left, right) =>
-      right[1].finalScore - left[1].finalScore ||
-      right[1].anchorScore - left[1].anchorScore ||
-      left[0].localeCompare(right[0]),
+    compareDeckStrategyRanking,
   );
-  const primaryStrategies = rankedStrategies
-    .filter(
+  const primaryStrategies = selectRankedStrategyIdsWithCutoffTies(
+    rankedStrategies.filter(
       ([, score]) =>
         score.finalScore >= 45 && score.runtimeStatus === "productive",
-    )
-    .slice(0, 3)
-    .map(([strategyId]) => strategyId);
+    ),
+    3,
+  );
   const primaryStrategySet = new Set(primaryStrategies);
-  const secondaryStrategies = rankedStrategies
-    .filter(
+  const secondaryStrategies = selectRankedStrategyIdsWithCutoffTies(
+    rankedStrategies.filter(
       ([strategyId, score]) =>
         score.finalScore >= 30 &&
         score.runtimeStatus === "productive" &&
         !primaryStrategySet.has(strategyId),
-    )
-    .slice(0, 5)
-    .map(([strategyId]) => strategyId);
+    ),
+    5,
+  );
 
   return removeUndefined({
     schemaVersion: "ai-deck-strategy-profile-v1",
@@ -651,10 +740,10 @@ function deckStrategyStats(
           ? { costProfileReserveRisk: hint.costProfile.reserveRisk }
           : {}),
         runtimeSubtypes: sortedUnique(runtimeCard?.subtypes ?? []),
-        ...(typeof runtimeCard?.rezCost === "number"
-          ? { runtimeCost: runtimeCard.rezCost }
-          : typeof runtimeCard?.cost === "number"
-            ? { runtimeCost: runtimeCard.cost }
+        ...(typeof runtimeCard?.numeric?.rezCost === "number"
+          ? { runtimeCost: runtimeCard.numeric.rezCost }
+          : typeof runtimeCard?.numeric?.cost === "number"
+            ? { runtimeCost: runtimeCard.numeric.cost }
             : {}),
       }),
     );
@@ -961,16 +1050,96 @@ function lineSupportAnchorAllowed(
 }
 
 function scoreAnchors(evidence: DeckStrategyEvidence[]): number {
-  const points = evidence.reduce((sum, entry) => {
-    const base =
-      entry.source === "derivedStrategyAnchor"
-        ? 32
-        : entry.source === "lineSupport"
-          ? 28
-          : 12;
-    return sum + base * entry.quantity;
+  const evidenceByCard = new Map<string, DeckStrategyEvidence[]>();
+  for (const entry of evidence) {
+    const entries = evidenceByCard.get(entry.cardId) ?? [];
+    entries.push(entry);
+    evidenceByCard.set(entry.cardId, entries);
+  }
+  const points = [...evidenceByCard.values()].reduce((sum, entries) => {
+    const strongestBase = Math.max(
+      ...entries.map((entry) => anchorEvidenceBase(entry.source)),
+    );
+    const quantity = Math.max(...entries.map((entry) => entry.quantity));
+    const distinctSources = new Set(entries.map((entry) => entry.source)).size;
+    const provenanceReinforcement = Math.min(12, (distinctSources - 1) * 6);
+    return (
+      sum +
+      (strongestBase + provenanceReinforcement) *
+        diminishingCopyWeight(quantity)
+    );
   }, 0);
-  return clampRound(points, 0, 100);
+  if (points <= 0) return 0;
+  return clampRound((points / (points + 55)) * 100, 0, 100);
+}
+
+function anchorEvidenceBase(source: DeckStrategyEvidence["source"]): number {
+  switch (source) {
+    case "derivedStrategyAnchor":
+      return 32;
+    case "lineSupport":
+      return 28;
+    case "strategicRole":
+      return 12;
+    default:
+      return 0;
+  }
+}
+
+function diminishingCopyWeight(quantity: number): number {
+  let weight = 0;
+  for (let copy = 0; copy < Math.max(0, quantity); copy += 1) {
+    weight += Math.pow(0.55, copy);
+  }
+  return weight;
+}
+
+function strategyEvidenceDiversity(score: DeckStrategyScore): number {
+  const anchorCards = new Set(
+    score.anchorEvidence.map((evidence) => evidence.cardId),
+  ).size;
+  const anchorSources = new Set(
+    score.anchorEvidence.map((evidence) => evidence.source),
+  ).size;
+  const supportCards = new Set(
+    score.supportEvidence.map((evidence) => evidence.cardId),
+  ).size;
+  return anchorCards * 4 + anchorSources * 2 + supportCards;
+}
+
+export function compareDeckStrategyRanking(
+  left: readonly [string, DeckStrategyScore],
+  right: readonly [string, DeckStrategyScore],
+): number {
+  return (
+    right[1].finalScore - left[1].finalScore ||
+    right[1].anchorScore - left[1].anchorScore ||
+    strategyEvidenceDiversity(right[1]) - strategyEvidenceDiversity(left[1]) ||
+    left[0].localeCompare(right[0])
+  );
+}
+
+export function selectRankedStrategyIdsWithCutoffTies(
+  rankedStrategies: ReadonlyArray<readonly [string, DeckStrategyScore]>,
+  nominalLimit: number,
+): string[] {
+  if (nominalLimit <= 0 || rankedStrategies.length === 0) return [];
+  if (rankedStrategies.length <= nominalLimit) {
+    return rankedStrategies.map(([strategyId]) => strategyId);
+  }
+  const cutoff = rankedStrategies[nominalLimit - 1]?.[1];
+  if (!cutoff) return [];
+  const cutoffDiversity = strategyEvidenceDiversity(cutoff);
+  return rankedStrategies
+    .filter(([, score], index) => {
+      if (index < nominalLimit) return true;
+      return (
+        score.finalScore === cutoff.finalScore &&
+        score.anchorScore === cutoff.anchorScore &&
+        strategyEvidenceDiversity(score) === cutoffDiversity
+      );
+    })
+    .map(([strategyId]) => strategyId);
 }
 
 function adjustCorpWinConditionScore(
@@ -1038,7 +1207,7 @@ function scoreSupport(
   }
   return {
     score: clampRound(weightedScore / Math.max(0.001, weightTotal), 0, 100),
-    evidence: sortedEvidence(evidence).slice(0, 24),
+    evidence: sortedEvidence(evidence).slice(0, 48),
     gaps: sortedUnique(gaps),
   };
 }
@@ -1206,6 +1375,101 @@ function supportComponentScore(
       );
     case "tagSource":
       return evidenceFromSignals(stats, dimension, ["tag.source"], 2);
+    case "tempoSource":
+      return evidenceFromSignals(
+        stats,
+        dimension,
+        [
+          "action.corp_counter_to_extra_action",
+          "action.corp_extra_action",
+          "action.corp_extra_action_burst",
+          "action.corp_extra_action_support",
+          "action.corp_future_extra_action",
+          "action.corp_random_recurring_extra_action",
+          "action.corp_recurring_extra_action",
+          "action.corp_recurring_extra_action_limited",
+          "action.corp_repeatable_extra_action",
+          "tempo.corp_action_burst",
+          "tempo.corp_install_burst",
+          "tempo.corp_recurring_action",
+        ],
+        2,
+      );
+    case "boardSafety":
+      return centralDefenseSupport(stats, dimension);
+    case "advancementWindow":
+      return evidenceFromSignals(
+        stats,
+        dimension,
+        [
+          "advance.overadvance_payoff",
+          "score.overadvance_bonus",
+          "score.overadvance_scaling",
+          "score.advance_burst",
+          "score.agenda_action",
+        ],
+        2,
+      );
+    case "remoteSafety":
+      return evidenceFromSignals(
+        stats,
+        dimension,
+        [
+          "remote.scoring_protection",
+          "remote.agenda_steal_tax",
+          "tax.remote",
+          "ice.etr",
+        ],
+        3,
+      );
+    case "drawSource":
+      return evidenceFromSignals(
+        stats,
+        dimension,
+        [
+          "draw.corp_action_draw",
+          "draw.corp_draw",
+          "draw.corp_draw_action",
+          "draw.corp_recurring",
+          "draw.corp_recurring_optional",
+          "score.recurring_draw",
+        ],
+        2,
+      );
+    case "safety":
+      return centralDefenseSupport(stats, dimension);
+    case "recycleSource":
+      return evidenceFromSignals(
+        stats,
+        dimension,
+        [
+          "archives.corp_recovery",
+          "archives.corp_recycle_to_rnd",
+          "hq.corp_card_recovery",
+          "hq.corp_hand_to_rnd_shuffle",
+          "rnd.corp_shuffle_hq_into_rnd",
+          "rnd.corp_shuffle_recycle",
+        ],
+        2,
+      );
+    case "drawOrShuffle":
+      return evidenceFromSignals(
+        stats,
+        dimension,
+        [
+          "draw.corp_action_draw",
+          "draw.corp_draw",
+          "draw.corp_draw_action",
+          "draw.corp_recurring",
+          "draw.corp_recurring_optional",
+          "hq.corp_hand_to_rnd_shuffle",
+          "rnd.corp_agenda_shuffle_from_hq",
+          "rnd.corp_self_shuffle_access",
+          "rnd.corp_shuffle_hq_into_rnd",
+          "rnd.corp_shuffle_recycle",
+        ],
+        2,
+      );
     case "threatAssessment":
       return evidenceFromSignals(
         stats,
@@ -1221,7 +1485,9 @@ function supportComponentScore(
         2,
       );
     default:
-      return evidenceFromSignals(stats, dimension, goal.anchorSignals ?? [], 2);
+      throw new Error(
+        `Unsupported deck strategy support dimension ${dimension} for ${goal.strategyId}`,
+      );
   }
 }
 
@@ -1340,32 +1606,57 @@ function breakerCoverageSupport(
     universal + accessCapableSignalCount(stats, "breaker.code_gate");
   const sentry = universal + accessCapableSignalCount(stats, "breaker.sentry");
   const covered = [wall, codeGate, sentry].filter((count) => count > 0).length;
+  const conditionalAccessCount = generalConditionalAccessCount(stats);
   const score =
-    covered === 3 ? 100 : covered === 2 ? 72 : covered === 1 ? 38 : 0;
+    covered === 3
+      ? 100
+      : covered === 2 && conditionalAccessCount >= 2
+        ? 82
+        : covered === 2
+          ? 72
+          : covered === 1
+            ? 38
+            : 0;
   return {
     score,
     evidence: sortedEvidence(
-      stats.cards
-        .filter(
-          (card) =>
-            !card.accessBreakerCoverageBlocked &&
-            card.functionSignals.some((signal) =>
-              BREAKER_COVERAGE_SIGNAL_IDS.has(signal),
-            ),
-        )
-        .flatMap((card) =>
-          card.functionSignals
-            .filter((signal) => BREAKER_COVERAGE_SIGNAL_IDS.has(signal))
-            .map((signal) => ({
-              cardId: card.cardId,
-              quantity: card.quantity,
-              source: "functionSignal" as const,
-              signal,
-              reason: `support:${dimension}`,
-            })),
-        ),
+      stats.cards.flatMap((card) => [
+        ...(!card.accessBreakerCoverageBlocked
+          ? card.functionSignals
+              .filter((signal) => BREAKER_COVERAGE_SIGNAL_IDS.has(signal))
+              .map((signal) => ({
+                cardId: card.cardId,
+                quantity: card.quantity,
+                source: "functionSignal" as const,
+                signal,
+                reason: `support:${dimension}`,
+              }))
+          : []),
+        ...card.functionSignals
+          .filter((signal) => CONDITIONAL_GENERAL_ACCESS_SIGNAL_IDS.has(signal))
+          .map((signal) => ({
+            cardId: card.cardId,
+            quantity: card.quantity,
+            source: "functionSignal" as const,
+            signal,
+            reason: `support:${dimension}:conditional_access`,
+          })),
+      ]),
     ),
   };
+}
+
+function generalConditionalAccessCount(stats: DeckStrategyStats): number {
+  return stats.cards.reduce(
+    (sum, card) =>
+      sum +
+      (card.functionSignals.some((signal) =>
+        CONDITIONAL_GENERAL_ACCESS_SIGNAL_IDS.has(signal),
+      )
+        ? card.quantity
+        : 0),
+    0,
+  );
 }
 
 function centralDefenseSupport(
@@ -1567,17 +1858,36 @@ function runnerGapsForDimension(
     case "breakerCoverage": {
       const gaps: string[] = [];
       const universal = accessCapableSignalCount(stats, "breaker.universal");
-      if (accessCapableSignalCount(stats, "breaker.wall") + universal === 0) {
-        gaps.push("missing_wall_coverage");
-      }
-      if (
-        accessCapableSignalCount(stats, "breaker.code_gate") + universal ===
-        0
-      ) {
-        gaps.push("missing_code_gate_coverage");
-      }
-      if (accessCapableSignalCount(stats, "breaker.sentry") + universal === 0) {
-        gaps.push("weak_sentry_coverage");
+      const missingCoverage = [
+        {
+          kind: "wall",
+          missing:
+            accessCapableSignalCount(stats, "breaker.wall") + universal === 0,
+          hardGap: "missing_wall_coverage",
+        },
+        {
+          kind: "code_gate",
+          missing:
+            accessCapableSignalCount(stats, "breaker.code_gate") + universal ===
+            0,
+          hardGap: "missing_code_gate_coverage",
+        },
+        {
+          kind: "sentry",
+          missing:
+            accessCapableSignalCount(stats, "breaker.sentry") + universal === 0,
+          hardGap: "weak_sentry_coverage",
+        },
+      ].filter((entry) => entry.missing);
+      const conditionalBridgeAvailable =
+        missingCoverage.length === 1 &&
+        generalConditionalAccessCount(stats) >= 2;
+      for (const missing of missingCoverage) {
+        gaps.push(
+          conditionalBridgeAvailable
+            ? `conditional_${missing.kind}_access_path`
+            : missing.hardGap,
+        );
       }
       return gaps.length > 0 ? gaps : ["weak_breaker_coverage"];
     }
@@ -1622,6 +1932,22 @@ function corpGapsForDimension(
         : ["low_punish_payoff_density"];
     case "agendaDensity":
       return ["low_agenda_density"];
+    case "tempoSource":
+      return ["missing_tempo_source"];
+    case "boardSafety":
+      return ["low_board_safety_support"];
+    case "advancementWindow":
+      return ["missing_advancement_window"];
+    case "remoteSafety":
+      return ["low_remote_safety_support"];
+    case "drawSource":
+      return ["missing_draw_source"];
+    case "safety":
+      return ["low_engine_safety_support"];
+    case "recycleSource":
+      return ["missing_recycle_source"];
+    case "drawOrShuffle":
+      return ["missing_draw_or_shuffle"];
     default:
       return [`low_${dimension}_support`];
   }
@@ -1698,7 +2024,7 @@ function strategyRuntimeBlockers(
     blockers.push(`supporting_only:${goal.strategyId}`);
   }
   for (const gap of supportGaps) {
-    if (HARD_PRODUCTIVE_GAPS.has(gap)) {
+    if (isHardProductiveSupportGap(gap)) {
       blockers.push(`hard_support_gap:${gap}`);
     }
   }
@@ -1933,7 +2259,7 @@ function deckWarnings(stats: DeckStrategyStats): string[] {
       warnings.add(`side_mismatch:${card.cardId}:${hint.side}`);
     }
     for (const category of card.warningCategories) {
-      warnings.add(`inspector:${category}`);
+      warnings.add(`inspector:${category}:${card.cardId}`);
     }
   }
   return [...warnings].sort();
@@ -2017,13 +2343,14 @@ function sortedEvidence(
   return sortedUniqueObjects(
     evidence,
     (entry) =>
-      `${entry.cardId}:${entry.quantity}:${entry.source}:${entry.signal ?? ""}:${entry.strategyId ?? ""}:${entry.role ?? ""}`,
+      `${entry.cardId}:${entry.quantity}:${entry.source}:${entry.signal ?? ""}:${entry.strategyId ?? ""}:${entry.role ?? ""}:${entry.reason}`,
   ).sort(
     (left, right) =>
       left.cardId.localeCompare(right.cardId) ||
       left.source.localeCompare(right.source) ||
       (left.signal ?? "").localeCompare(right.signal ?? "") ||
-      (left.strategyId ?? "").localeCompare(right.strategyId ?? ""),
+      (left.strategyId ?? "").localeCompare(right.strategyId ?? "") ||
+      left.reason.localeCompare(right.reason),
   );
 }
 

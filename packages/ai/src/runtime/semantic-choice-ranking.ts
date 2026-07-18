@@ -15,6 +15,7 @@ import {
 import {
   bestPlanCompatibleSemanticChoice,
   tacticalPlanBackgroundBankBuildShouldYield,
+  tacticalPlanCommittedBankBuildShouldYield,
   tacticalPlanFundedDevelopmentContinuationBlocksOverride,
   tacticalPlanInferiorRunTargetMappingShouldYield,
   tacticalPlanLowValueRunEventMappingShouldYield,
@@ -453,6 +454,13 @@ export function tacticalPlanMappedChoice(
         overrideChoice,
         scoreGap,
       );
+    const committedBankBuildShouldYield =
+      tacticalPlanCommittedBankBuildShouldYield(
+        mapping,
+        mappedChoice,
+        overrideChoice,
+        scoreGap,
+      );
     const unconvertibleFundingShouldYieldToBank =
       tacticalPlanUnconvertibleFundingShouldYieldToBank(
         mapping,
@@ -486,6 +494,7 @@ export function tacticalPlanMappedChoice(
           corpBoardTriageMismatchShouldYield,
           deferredDevelopmentInstallShouldYield,
           backgroundBankBuildShouldYield,
+          committedBankBuildShouldYield,
           noNeedSearchShouldYield,
           coverageProbeRunShouldYield,
           lowValueRunEventShouldYield,
@@ -512,6 +521,7 @@ export function tacticalPlanMappedChoice(
       inferiorRunTargetShouldYield ||
       corpBoardTriageMismatchShouldYield ||
       backgroundBankBuildShouldYield ||
+      committedBankBuildShouldYield ||
       deferredDevelopmentInstallShouldYield ||
       hardInterruptShouldYield ||
       noNeedSearchShouldYield ||
@@ -542,6 +552,7 @@ export function tacticalPlanMappedChoice(
           inferiorRunTargetShouldYield,
           corpBoardTriageMismatchShouldYield,
           backgroundBankBuildShouldYield,
+          committedBankBuildShouldYield,
           hardInterruptShouldYield,
           thresholdReason: threshold.reason,
         }),

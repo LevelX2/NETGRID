@@ -105,3 +105,45 @@ sind erfüllt. Der Stand ist für privaten Betrieb und weitere Playtests
 freigegeben. Er ist keine Freigabe für öffentliche Selbstregistrierung oder
 einen offenen Internetdienst. E-Mail-Verifikation/Recovery, Passkeys, MFA,
 Missbrauchsschutz und Public-Operations bleiben eigene Folgegates.
+
+## Nachkorrektur: Standard-Decks im Matchstart
+
+Ein Playtest am 2026-07-18 zeigte zwei gekoppelte Matchstartfehler: Ein nicht
+mehr vorhandenes persönliches Deck konnte intern weiter als Auswahlquelle
+gespeichert sein, obwohl das Auswahlfeld bereits ein Standard-Deck anzeigte.
+Außerdem waren die kuratierten Standard-Snapshots zwar über die Deck-API
+sichtbar, aber noch nicht im autoritativen Server-Resolver registriert.
+
+Der Client normalisiert ungültige gespeicherte Deckslots nun auf die tatsächlich
+sichtbare Standardauswahl. „Direkt spielen“ und die Deck-Editor-Auswahl setzen
+den gewählten Seitenslot für beide Teilnehmerprofile, damit der Slot unabhängig
+von Seitenwahl und KI-Zuordnung verfügbar ist. Der Server löst alle aktiven
+kurierten Standard-Snapshot-IDs als unveränderliche Matchstart-Snapshots auf.
+
+Verifiziert wurde der reale Browserstart als Runner mit
+„Rent-I-Con: Das Shellspiel“ gegen „Cheap Bag of Tricks“ im kombinierten
+Classic-/Protheus-Pool bis zum erstellten Match (`HTTP 201`). Ergänzend sind
+Server-Resolver-, Client-Fallback- und Typprüfungen grün.
+
+## Erweiterung: Zufällige Standard-Decks je Matchslot
+
+Jeder Runner- und Korp-Deckslot am Matchstart bietet nun zusätzlich
+„Zufälliges Standard-Deck“ an. Das gilt sowohl für die eigenen Slots als auch
+für die explizit gewählten KI-Slots in den erweiterten Optionen. Die Auswahl
+wird lokal gespeichert, bleibt bis zum Start als Zufallswunsch sichtbar und
+wird erst beim Erstellen des Matches auf einen konkreten kuratierten
+Standard-Snapshot aufgelöst.
+
+Die Auflösung ist über Matchseed und Slotkennung deterministisch. Die
+Kandidaten werden zuvor nach Seite, Deckvalidierung und aktivem Kartenpool
+gefiltert und unabhängig von der API-Reihenfolge stabil sortiert. Der Server
+erhält weiterhin ausschließlich konkrete unveränderliche Snapshot-IDs; Replay,
+StateHash und autoritative Deckvalidierung bleiben dadurch unverändert. Nach
+dem erfolgreichen Start zeigt die Statusmeldung die tatsächlich verwendeten
+Decknamen aus den öffentlichen Servermetadaten.
+
+Ein realer Browserlauf setzte die beiden eigenen sowie beide KI-Slots auf
+„Zufälliges Standard-Deck“. Der Start endete mit `HTTP 201`, übertrug vier
+konkrete Standard-Snapshot-IDs und zeigte anschließend „Bit-Denial Lock“ gegen
+„Rent to Own War Engine“ als tatsächlich aktive Decks. Der Testmatch wurde
+danach regulär aufgegeben. Persistenz-, Resolver- und Typprüfungen sind grün.

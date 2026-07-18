@@ -1,6 +1,13 @@
 "use client";
 
+import { useEffect } from "react";
 import { Building2, Cable } from "lucide-react";
+
+import {
+  RANDOM_STANDARD_DECK_SOURCE,
+  resolveDeckSlotSelection,
+  type DeckSlotSource,
+} from "./deck-slot-selection";
 
 export type DeckSlotSide = "runner" | "corp";
 
@@ -35,17 +42,46 @@ export function DeckSlotSelect({
   side: DeckSlotSide;
   snapshots: DeckSlotSnapshot[];
   localDecks: DeckSlotLocalDeck[];
-  source: "snapshot" | "local";
+  source: DeckSlotSource;
   selectedSnapshotId: string;
   selectedLocalDeckId: string;
   disabled?: boolean;
-  onSource(value: "snapshot" | "local"): void;
+  onSource(value: DeckSlotSource): void;
   onSnapshot(value: string): void;
   onLocalDeck(value: string): void;
 }) {
   const SideIcon = side === "runner" ? Cable : Building2;
   const sideLabel = side === "runner" ? "Runner" : "Korp";
   const optionMark = side === "runner" ? "⌁" : "▦";
+  const resolvedSelection = resolveDeckSlotSelection({
+    source,
+    selectedSnapshotId,
+    selectedLocalDeckId,
+    snapshots,
+    localDecks,
+  });
+
+  useEffect(() => {
+    if (!resolvedSelection) return;
+    if (resolvedSelection.source === RANDOM_STANDARD_DECK_SOURCE) return;
+    if (resolvedSelection.source === "snapshot") {
+      if (source !== "snapshot") onSource("snapshot");
+      if (selectedSnapshotId !== resolvedSelection.snapshotId)
+        onSnapshot(resolvedSelection.snapshotId);
+      return;
+    }
+    if (source !== "local") onSource("local");
+    if (selectedLocalDeckId !== resolvedSelection.localDeckId)
+      onLocalDeck(resolvedSelection.localDeckId);
+  }, [
+    onLocalDeck,
+    onSnapshot,
+    onSource,
+    resolvedSelection,
+    selectedLocalDeckId,
+    selectedSnapshotId,
+    source,
+  ]);
 
   return (
     <label className={`deckSlotSelect ${side}`}>
@@ -67,14 +103,18 @@ export function DeckSlotSelect({
         />
         <select
           value={
-            source === "local" && selectedLocalDeckId
-              ? `local:${selectedLocalDeckId}`
-              : selectedSnapshotId
+            resolvedSelection?.source === RANDOM_STANDARD_DECK_SOURCE
+              ? "random:standard"
+              : resolvedSelection?.source === "local"
+                ? `local:${resolvedSelection.localDeckId}`
+                : (resolvedSelection?.snapshotId ?? "")
           }
           disabled={disabled}
           aria-label={label}
           onChange={(event) => {
-            if (event.target.value.startsWith("local:")) {
+            if (event.target.value === "random:standard") {
+              onSource(RANDOM_STANDARD_DECK_SOURCE);
+            } else if (event.target.value.startsWith("local:")) {
               onSource("local");
               onLocalDeck(event.target.value.slice("local:".length));
             } else {
@@ -83,6 +123,9 @@ export function DeckSlotSelect({
             }
           }}
         >
+          <option value="random:standard">
+            🎲 {sideLabel} · Zufälliges Standard-Deck
+          </option>
           {snapshots.map((snapshot) => (
             <option
               value={snapshot.deckSnapshotId}

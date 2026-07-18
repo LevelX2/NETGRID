@@ -1282,7 +1282,6 @@
         "role:breaker_decoder": 5,
         "role:breaker_killer": 5,
         "role:build_rig": 1,
-        "role:code_gate_breaker": 2,
         "role:draw": 4,
         "role:economy": 4,
         "role:efficient_breaker": 6,
@@ -1294,13 +1293,10 @@
         "role:low_install_breaker": 1,
         "role:memory": 1,
         "role:program": 4,
-        "role:sentry_breaker": 2,
         "role:setup": 5,
         "role:tempo": 2
       },
-      "warnings": [
-        "inspector:deferred_requires_human_review"
-      ],
+      "warnings": [],
       "runnerProfile": {
         "coverageProfile": {
           "wall": {
@@ -1465,9 +1461,9 @@
           ]
         },
         "runner.hq_pressure": {
-          "anchorScore": 100,
+          "anchorScore": 67,
           "supportScore": 55,
-          "finalScore": 82,
+          "finalScore": 62,
           "anchorEvidence": [
             {
               "cardId": "onr_v1_085_executive-wiretaps",
@@ -1578,16 +1574,16 @@
             "low_economy_support",
             "weak_tag_damage_defense"
           ],
-          "confidence": "high",
+          "confidence": "medium",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
             "hard_support_gap:low_economy_support"
           ]
         },
         "runner.interface_closeout": {
-          "anchorScore": 100,
+          "anchorScore": 77,
           "supportScore": 65,
-          "finalScore": 86,
+          "finalScore": 72,
           "anchorEvidence": [
             {
               "cardId": "onr_v1_081_custodial-position",
@@ -2028,9 +2024,9 @@
           ]
         },
         "runner.rnd_pressure": {
-          "anchorScore": 100,
+          "anchorScore": 55,
           "supportScore": 65,
-          "finalScore": 86,
+          "finalScore": 59,
           "anchorEvidence": [
             {
               "cardId": "onr_v1_081_custodial-position",
@@ -2167,16 +2163,16 @@
             "low_economy_support",
             "weak_tag_damage_defense"
           ],
-          "confidence": "high",
+          "confidence": "medium",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
             "hard_support_gap:low_economy_support"
           ]
         },
         "runner.run_event_tempo": {
-          "anchorScore": 100,
+          "anchorScore": 68,
           "supportScore": 60,
-          "finalScore": 84,
+          "finalScore": 65,
           "anchorEvidence": [
             {
               "cardId": "onr_v1_081_custodial-position",
@@ -2516,9 +2512,7 @@
         "role:run_event": 4,
         "role:setup": 3
       },
-      "warnings": [
-        "inspector:deferred_requires_human_review"
-      ],
+      "warnings": [],
       "runnerProfile": {
         "coverageProfile": {
           "wall": {
@@ -2558,8 +2552,8 @@
           "memoryHandSize": 11
         },
         "pressureProfile": {
-          "rnd": 5,
-          "hq": 6,
+          "rnd": 4,
+          "hq": 5,
           "remote": 0,
           "archives": "unknown"
         },
@@ -2672,9 +2666,9 @@
           ]
         },
         "runner.hq_pressure": {
-          "anchorScore": 100,
+          "anchorScore": 67,
           "supportScore": 85,
-          "finalScore": 94,
+          "finalScore": 74,
           "anchorEvidence": [
             {
               "cardId": "onr_v1_084_edited-shipping-manifests",
@@ -2796,9 +2790,9 @@
           "runtimeBlockers": []
         },
         "runner.interface_closeout": {
-          "anchorScore": 100,
+          "anchorScore": 55,
           "supportScore": 90,
-          "finalScore": 96,
+          "finalScore": 69,
           "anchorEvidence": [
             {
               "cardId": "onr_v1_129_hq-interface",
@@ -3578,8 +3572,8 @@
         }
       },
       "primaryStrategies": [
-        "runner.interface_closeout",
         "runner.hq_pressure",
+        "runner.interface_closeout",
         "runner.rig_first"
       ],
       "secondaryStrategies": [],
@@ -3620,8 +3614,7 @@
         "role:event": 2,
         "role:flex_breaker": 2,
         "role:hardware": 3,
-        "role:hq_pressure": 2,
-        "role:hq_run": 1,
+        "role:hq_pressure": 3,
         "role:icebreaker": 8,
         "role:icebreaker_support": 6,
         "role:memory": 2,
@@ -3674,7 +3667,7 @@
         },
         "pressureProfile": {
           "rnd": 0,
-          "hq": 5,
+          "hq": 4,
           "remote": 0,
           "archives": "unknown"
         },
@@ -3702,8 +3695,8 @@
       "strategyScores": {
         "corp.action_tempo": {
           "anchorScore": 0,
-          "supportScore": 25,
-          "finalScore": 10,
+          "supportScore": 75,
+          "finalScore": 30,
           "anchorEvidence": [],
           "supportEvidence": [
             {
@@ -3712,6 +3705,62 @@
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_232_crystal-wall",
+              "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:boardSafety"
+            },
+            {
+              "cardId": "onr_v1_232_crystal-wall",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:boardSafety"
+            },
+            {
+              "cardId": "onr_v1_237_data-wall",
+              "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:boardSafety"
+            },
+            {
+              "cardId": "onr_v1_237_data-wall",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:boardSafety"
+            },
+            {
+              "cardId": "onr_v1_261_quandary",
+              "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:boardSafety"
+            },
+            {
+              "cardId": "onr_v1_261_quandary",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:boardSafety"
+            },
+            {
+              "cardId": "onr_v1_279_wall-of-static",
+              "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:boardSafety"
+            },
+            {
+              "cardId": "onr_v1_279_wall-of-static",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:boardSafety"
             },
             {
               "cardId": "onr_v1_285_closed-accounts",
@@ -3728,6 +3777,34 @@
               "reason": "support:economy"
             },
             {
+              "cardId": "onr_v1_297_overtime-incentives",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "action.corp_extra_action_burst",
+              "reason": "support:tempoSource"
+            },
+            {
+              "cardId": "onr_v1_297_overtime-incentives",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "action.corp_extra_action_support",
+              "reason": "support:tempoSource"
+            },
+            {
+              "cardId": "onr_v1_297_overtime-incentives",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "tempo.corp_action_burst",
+              "reason": "support:tempoSource"
+            },
+            {
+              "cardId": "onr_v1_301_punitive-counterstrike",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "damage.payoff",
+              "reason": "support:boardSafety"
+            },
+            {
               "cardId": "onr_v1_317_data-masons",
               "quantity": 1,
               "source": "functionSignal",
@@ -3736,12 +3813,10 @@
             }
           ],
           "supportGaps": [
-            "low_boardSafety_support",
-            "low_scorePlan_support",
-            "low_tempoSource_support"
+            "low_scorePlan_support"
           ],
           "confidence": "low",
-          "runtimeStatus": "diagnostic_only",
+          "runtimeStatus": "blocked",
           "runtimeBlockers": [
             "below_productive_score_threshold",
             "missing_strategy_anchor"
@@ -3898,9 +3973,23 @@
             {
               "cardId": "onr_v1_232_crystal-wall",
               "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:ice"
+            },
+            {
+              "cardId": "onr_v1_232_crystal-wall",
+              "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_232_crystal-wall",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:ice"
             },
             {
               "cardId": "onr_v1_237_data-wall",
@@ -3912,9 +4001,23 @@
             {
               "cardId": "onr_v1_237_data-wall",
               "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:ice"
+            },
+            {
+              "cardId": "onr_v1_237_data-wall",
+              "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_237_data-wall",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:ice"
             },
             {
               "cardId": "onr_v1_261_quandary",
@@ -3926,9 +4029,23 @@
             {
               "cardId": "onr_v1_261_quandary",
               "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:ice"
+            },
+            {
+              "cardId": "onr_v1_261_quandary",
+              "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_261_quandary",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:ice"
             },
             {
               "cardId": "onr_v1_279_wall-of-static",
@@ -3940,9 +4057,23 @@
             {
               "cardId": "onr_v1_279_wall-of-static",
               "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:ice"
+            },
+            {
+              "cardId": "onr_v1_279_wall-of-static",
+              "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_279_wall-of-static",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:ice"
             },
             {
               "cardId": "onr_v1_285_closed-accounts",
@@ -3966,6 +4097,13 @@
               "reason": "support:centralDefense"
             },
             {
+              "cardId": "onr_v1_301_punitive-counterstrike",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "damage.payoff",
+              "reason": "support:ice"
+            },
+            {
               "cardId": "onr_v1_317_data-masons",
               "quantity": 1,
               "source": "functionSignal",
@@ -3984,9 +4122,9 @@
           ]
         },
         "corp.damage_kill": {
-          "anchorScore": 40,
+          "anchorScore": 38,
           "supportScore": 45,
-          "finalScore": 42,
+          "finalScore": 41,
           "anchorEvidence": [
             {
               "cardId": "onr_v1_301_punitive-counterstrike",
@@ -4054,8 +4192,8 @@
         },
         "corp.deck_recycle_engine": {
           "anchorScore": 0,
-          "supportScore": 35,
-          "finalScore": 14,
+          "supportScore": 65,
+          "finalScore": 26,
           "anchorEvidence": [],
           "supportEvidence": [
             {
@@ -4087,11 +4225,25 @@
               "reason": "support:agendaDensity"
             },
             {
+              "cardId": "onr_v1_282_annual-reviews",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "draw.corp_draw",
+              "reason": "support:drawOrShuffle"
+            },
+            {
               "cardId": "onr_v1_285_closed-accounts",
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_295_night-shift",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "draw.corp_draw",
+              "reason": "support:drawOrShuffle"
             },
             {
               "cardId": "onr_v1_295_night-shift",
@@ -4109,20 +4261,20 @@
             }
           ],
           "supportGaps": [
-            "low_drawOrShuffle_support",
-            "low_recycleSource_support"
+            "missing_recycle_source"
           ],
           "confidence": "low",
           "runtimeStatus": "diagnostic_only",
           "runtimeBlockers": [
             "below_productive_score_threshold",
+            "hard_support_gap:missing_recycle_source",
             "missing_strategy_anchor"
           ]
         },
         "corp.draw_engine": {
           "anchorScore": 0,
-          "supportScore": 20,
-          "finalScore": 8,
+          "supportScore": 75,
+          "finalScore": 30,
           "anchorEvidence": [],
           "supportEvidence": [
             {
@@ -4133,6 +4285,69 @@
               "reason": "support:economy"
             },
             {
+              "cardId": "onr_v1_232_crystal-wall",
+              "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:safety"
+            },
+            {
+              "cardId": "onr_v1_232_crystal-wall",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:safety"
+            },
+            {
+              "cardId": "onr_v1_237_data-wall",
+              "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:safety"
+            },
+            {
+              "cardId": "onr_v1_237_data-wall",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:safety"
+            },
+            {
+              "cardId": "onr_v1_261_quandary",
+              "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:safety"
+            },
+            {
+              "cardId": "onr_v1_261_quandary",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:safety"
+            },
+            {
+              "cardId": "onr_v1_279_wall-of-static",
+              "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:safety"
+            },
+            {
+              "cardId": "onr_v1_279_wall-of-static",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:safety"
+            },
+            {
+              "cardId": "onr_v1_282_annual-reviews",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "draw.corp_draw",
+              "reason": "support:drawSource"
+            },
+            {
               "cardId": "onr_v1_285_closed-accounts",
               "quantity": 1,
               "source": "functionSignal",
@@ -4143,8 +4358,22 @@
               "cardId": "onr_v1_295_night-shift",
               "quantity": 2,
               "source": "functionSignal",
+              "signal": "draw.corp_draw",
+              "reason": "support:drawSource"
+            },
+            {
+              "cardId": "onr_v1_295_night-shift",
+              "quantity": 2,
+              "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_301_punitive-counterstrike",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "damage.payoff",
+              "reason": "support:safety"
             },
             {
               "cardId": "onr_v1_317_data-masons",
@@ -4155,21 +4384,19 @@
             }
           ],
           "supportGaps": [
-            "low_drawSource_support",
-            "low_safety_support",
             "low_scorePlan_support"
           ],
           "confidence": "low",
-          "runtimeStatus": "diagnostic_only",
+          "runtimeStatus": "blocked",
           "runtimeBlockers": [
             "below_productive_score_threshold",
             "missing_strategy_anchor"
           ]
         },
         "corp.economy_rez_reserve": {
-          "anchorScore": 44,
+          "anchorScore": 41,
           "supportScore": 90,
-          "finalScore": 69,
+          "finalScore": 68,
           "anchorEvidence": [
             {
               "cardId": "onr_v1_317_data-masons",
@@ -4196,6 +4423,13 @@
               "reason": "support:economy"
             },
             {
+              "cardId": "onr_v1_203_hostile-takeover",
+              "quantity": 3,
+              "source": "functionSignal",
+              "signal": "economy.generic",
+              "reason": "support:rezReserve"
+            },
+            {
               "cardId": "onr_v1_232_crystal-wall",
               "quantity": 2,
               "source": "compiledHint",
@@ -4266,6 +4500,13 @@
               "reason": "support:economy"
             },
             {
+              "cardId": "onr_v1_295_night-shift",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "economy.generic",
+              "reason": "support:rezReserve"
+            },
+            {
               "cardId": "onr_v1_301_punitive-counterstrike",
               "quantity": 1,
               "source": "functionSignal",
@@ -4278,6 +4519,13 @@
               "source": "functionSignal",
               "signal": "economy.rez_discount",
               "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_317_data-masons",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "economy.rez_discount",
+              "reason": "support:rezReserve"
             }
           ],
           "supportGaps": [
@@ -4288,9 +4536,9 @@
           "runtimeBlockers": []
         },
         "corp.fast_advance": {
-          "anchorScore": 56,
+          "anchorScore": 44,
           "supportScore": 60,
-          "finalScore": 58,
+          "finalScore": 50,
           "anchorEvidence": [
             {
               "cardId": "onr_v1_297_overtime-incentives",
@@ -4423,9 +4671,9 @@
           "runtimeBlockers": []
         },
         "corp.ice_tax_glacier": {
-          "anchorScore": 100,
+          "anchorScore": 84,
           "supportScore": 90,
-          "finalScore": 94,
+          "finalScore": 88,
           "anchorEvidence": [
             {
               "cardId": "onr_v1_232_crystal-wall",
@@ -4511,6 +4759,13 @@
               "reason": "support:economy"
             },
             {
+              "cardId": "onr_v1_203_hostile-takeover",
+              "quantity": 3,
+              "source": "functionSignal",
+              "signal": "economy.generic",
+              "reason": "support:rezReserve"
+            },
+            {
               "cardId": "onr_v1_232_crystal-wall",
               "quantity": 2,
               "source": "compiledHint",
@@ -4520,9 +4775,23 @@
             {
               "cardId": "onr_v1_232_crystal-wall",
               "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:ice"
+            },
+            {
+              "cardId": "onr_v1_232_crystal-wall",
+              "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_232_crystal-wall",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:ice"
             },
             {
               "cardId": "onr_v1_237_data-wall",
@@ -4534,9 +4803,23 @@
             {
               "cardId": "onr_v1_237_data-wall",
               "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:ice"
+            },
+            {
+              "cardId": "onr_v1_237_data-wall",
+              "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_237_data-wall",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:ice"
             },
             {
               "cardId": "onr_v1_261_quandary",
@@ -4548,9 +4831,23 @@
             {
               "cardId": "onr_v1_261_quandary",
               "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:ice"
+            },
+            {
+              "cardId": "onr_v1_261_quandary",
+              "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_261_quandary",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:ice"
             },
             {
               "cardId": "onr_v1_279_wall-of-static",
@@ -4562,9 +4859,23 @@
             {
               "cardId": "onr_v1_279_wall-of-static",
               "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:ice"
+            },
+            {
+              "cardId": "onr_v1_279_wall-of-static",
+              "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_279_wall-of-static",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:ice"
             },
             {
               "cardId": "onr_v1_285_closed-accounts",
@@ -4581,6 +4892,13 @@
               "reason": "support:economy"
             },
             {
+              "cardId": "onr_v1_295_night-shift",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "economy.generic",
+              "reason": "support:rezReserve"
+            },
+            {
               "cardId": "onr_v1_301_punitive-counterstrike",
               "quantity": 1,
               "source": "functionSignal",
@@ -4588,11 +4906,25 @@
               "reason": "support:centralDefense"
             },
             {
+              "cardId": "onr_v1_301_punitive-counterstrike",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "damage.payoff",
+              "reason": "support:ice"
+            },
+            {
               "cardId": "onr_v1_317_data-masons",
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.rez_discount",
               "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_317_data-masons",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "economy.rez_discount",
+              "reason": "support:rezReserve"
             }
           ],
           "supportGaps": [
@@ -4605,9 +4937,9 @@
           ]
         },
         "corp.overadvance_value": {
-          "anchorScore": 40,
+          "anchorScore": 38,
           "supportScore": 75,
-          "finalScore": 54,
+          "finalScore": 53,
           "anchorEvidence": [
             {
               "cardId": "onr_v1_214_project-babylon",
@@ -4654,6 +4986,34 @@
               "source": "functionSignal",
               "signal": "score.overadvance_scaling",
               "reason": "support:advancementWindow"
+            },
+            {
+              "cardId": "onr_v1_232_crystal-wall",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:remoteSafety"
+            },
+            {
+              "cardId": "onr_v1_237_data-wall",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:remoteSafety"
+            },
+            {
+              "cardId": "onr_v1_261_quandary",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:remoteSafety"
+            },
+            {
+              "cardId": "onr_v1_279_wall-of-static",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:remoteSafety"
             },
             {
               "cardId": "onr_v1_285_closed-accounts",
@@ -4728,9 +5088,23 @@
             {
               "cardId": "onr_v1_232_crystal-wall",
               "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:ice"
+            },
+            {
+              "cardId": "onr_v1_232_crystal-wall",
+              "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_232_crystal-wall",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:ice"
             },
             {
               "cardId": "onr_v1_237_data-wall",
@@ -4742,9 +5116,23 @@
             {
               "cardId": "onr_v1_237_data-wall",
               "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:ice"
+            },
+            {
+              "cardId": "onr_v1_237_data-wall",
+              "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_237_data-wall",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:ice"
             },
             {
               "cardId": "onr_v1_261_quandary",
@@ -4756,9 +5144,23 @@
             {
               "cardId": "onr_v1_261_quandary",
               "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:ice"
+            },
+            {
+              "cardId": "onr_v1_261_quandary",
+              "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_261_quandary",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:ice"
             },
             {
               "cardId": "onr_v1_279_wall-of-static",
@@ -4770,9 +5172,23 @@
             {
               "cardId": "onr_v1_279_wall-of-static",
               "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:ice"
+            },
+            {
+              "cardId": "onr_v1_279_wall-of-static",
+              "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_279_wall-of-static",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:ice"
             },
             {
               "cardId": "onr_v1_285_closed-accounts",
@@ -4796,6 +5212,13 @@
               "reason": "support:centralDefense"
             },
             {
+              "cardId": "onr_v1_301_punitive-counterstrike",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "damage.payoff",
+              "reason": "support:ice"
+            },
+            {
               "cardId": "onr_v1_317_data-masons",
               "quantity": 1,
               "source": "functionSignal",
@@ -4813,8 +5236,8 @@
         },
         "corp.rush_score": {
           "anchorScore": 0,
-          "supportScore": 65,
-          "finalScore": 42,
+          "supportScore": 100,
+          "finalScore": 65,
           "anchorEvidence": [],
           "supportEvidence": [
             {
@@ -4869,6 +5292,13 @@
             {
               "cardId": "onr_v1_237_data-wall",
               "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cheap_ice",
+              "reason": "support:earlyIce"
+            },
+            {
+              "cardId": "onr_v1_237_data-wall",
+              "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
@@ -4879,6 +5309,13 @@
               "source": "compiledHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_261_quandary",
+              "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cheap_ice",
+              "reason": "support:earlyIce"
             },
             {
               "cardId": "onr_v1_261_quandary",
@@ -4893,6 +5330,13 @@
               "source": "compiledHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_279_wall-of-static",
+              "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cheap_ice",
+              "reason": "support:earlyIce"
             },
             {
               "cardId": "onr_v1_279_wall-of-static",
@@ -4930,20 +5374,15 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "insufficient_etr_ice"
-          ],
-          "confidence": "medium",
-          "runtimeStatus": "blocked",
-          "runtimeBlockers": [
-            "below_productive_score_threshold",
-            "hard_support_gap:insufficient_etr_ice"
-          ]
+          "supportGaps": [],
+          "confidence": "high",
+          "runtimeStatus": "productive",
+          "runtimeBlockers": []
         },
         "corp.tag_trace_punish": {
-          "anchorScore": 100,
+          "anchorScore": 62,
           "supportScore": 55,
-          "finalScore": 82,
+          "finalScore": 59,
           "anchorEvidence": [
             {
               "cardId": "onr_v1_285_closed-accounts",
@@ -5047,7 +5486,7 @@
             "low_tag_sources",
             "low_traceSupport_support"
           ],
-          "confidence": "high",
+          "confidence": "medium",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
             "hard_support_gap:low_tag_sources",
@@ -5057,10 +5496,12 @@
       },
       "primaryStrategies": [
         "corp.economy_rez_reserve",
-        "corp.fast_advance",
+        "corp.rush_score",
         "corp.overadvance_value"
       ],
-      "secondaryStrategies": [],
+      "secondaryStrategies": [
+        "corp.fast_advance"
+      ],
       "functionSignalCounts": {
         "action.corp_extra_action_burst": 2,
         "action.corp_extra_action_support": 2,
@@ -5121,7 +5562,7 @@
         "role:upgrade": 1
       },
       "warnings": [
-        "inspector:legacy_fallback_only"
+        "inspector:legacy_fallback_only:onr_v1_220_tycho-extension"
       ],
       "corpProfile": {
         "iceProfile": {
@@ -5135,7 +5576,7 @@
         },
         "scoreProfile": {
           "scoreAcceleration": 0,
-          "agendaInstallAdvanceScoreSupport": 7,
+          "agendaInstallAdvanceScoreSupport": 6,
           "remoteScoringProtection": 0,
           "stealTax": 0
         },
@@ -5176,8 +5617,8 @@
       "strategyScores": {
         "corp.action_tempo": {
           "anchorScore": 0,
-          "supportScore": 25,
-          "finalScore": 10,
+          "supportScore": 75,
+          "finalScore": 30,
           "anchorEvidence": [],
           "supportEvidence": [
             {
@@ -5188,11 +5629,102 @@
               "reason": "support:economy"
             },
             {
+              "cardId": "onr_v1_237_data-wall",
+              "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:boardSafety"
+            },
+            {
+              "cardId": "onr_v1_237_data-wall",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:boardSafety"
+            },
+            {
+              "cardId": "onr_v1_243_fetch-4-0-1",
+              "quantity": 1,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:boardSafety"
+            },
+            {
+              "cardId": "onr_v1_243_fetch-4-0-1",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "tag.source",
+              "reason": "support:boardSafety"
+            },
+            {
+              "cardId": "onr_v1_243_fetch-4-0-1",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "trace.source",
+              "reason": "support:boardSafety"
+            },
+            {
+              "cardId": "onr_v1_249_hunter",
+              "quantity": 1,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:boardSafety"
+            },
+            {
+              "cardId": "onr_v1_249_hunter",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "tag.source",
+              "reason": "support:boardSafety"
+            },
+            {
+              "cardId": "onr_v1_249_hunter",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "trace.source",
+              "reason": "support:boardSafety"
+            },
+            {
+              "cardId": "onr_v1_261_quandary",
+              "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:boardSafety"
+            },
+            {
+              "cardId": "onr_v1_261_quandary",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:boardSafety"
+            },
+            {
+              "cardId": "onr_v1_279_wall-of-static",
+              "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:boardSafety"
+            },
+            {
+              "cardId": "onr_v1_279_wall-of-static",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:boardSafety"
+            },
+            {
               "cardId": "onr_v1_285_closed-accounts",
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.counter",
               "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_287_datapool-by-zetatech",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "tag.source",
+              "reason": "support:boardSafety"
             },
             {
               "cardId": "onr_v1_293_netwatch-credit-voucher",
@@ -5202,11 +5734,39 @@
               "reason": "support:economy"
             },
             {
+              "cardId": "onr_v1_293_netwatch-credit-voucher",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "tag.source",
+              "reason": "support:boardSafety"
+            },
+            {
               "cardId": "onr_v1_295_night-shift",
               "quantity": 2,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_297_overtime-incentives",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "action.corp_extra_action_burst",
+              "reason": "support:tempoSource"
+            },
+            {
+              "cardId": "onr_v1_297_overtime-incentives",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "action.corp_extra_action_support",
+              "reason": "support:tempoSource"
+            },
+            {
+              "cardId": "onr_v1_297_overtime-incentives",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "tempo.corp_action_burst",
+              "reason": "support:tempoSource"
             },
             {
               "cardId": "onr_v1_317_data-masons",
@@ -5217,12 +5777,10 @@
             }
           ],
           "supportGaps": [
-            "low_boardSafety_support",
-            "low_scorePlan_support",
-            "low_tempoSource_support"
+            "low_scorePlan_support"
           ],
           "confidence": "low",
-          "runtimeStatus": "diagnostic_only",
+          "runtimeStatus": "blocked",
           "runtimeBlockers": [
             "below_productive_score_threshold",
             "missing_strategy_anchor"
@@ -5393,9 +5951,23 @@
             {
               "cardId": "onr_v1_237_data-wall",
               "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:ice"
+            },
+            {
+              "cardId": "onr_v1_237_data-wall",
+              "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_237_data-wall",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:ice"
             },
             {
               "cardId": "onr_v1_243_fetch-4-0-1",
@@ -5403,6 +5975,13 @@
               "source": "compiledHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_243_fetch-4-0-1",
+              "quantity": 1,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:ice"
             },
             {
               "cardId": "onr_v1_243_fetch-4-0-1",
@@ -5415,8 +5994,22 @@
               "cardId": "onr_v1_243_fetch-4-0-1",
               "quantity": 1,
               "source": "functionSignal",
+              "signal": "tag.source",
+              "reason": "support:ice"
+            },
+            {
+              "cardId": "onr_v1_243_fetch-4-0-1",
+              "quantity": 1,
+              "source": "functionSignal",
               "signal": "trace.source",
               "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_243_fetch-4-0-1",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "trace.source",
+              "reason": "support:ice"
             },
             {
               "cardId": "onr_v1_249_hunter",
@@ -5424,6 +6017,13 @@
               "source": "compiledHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_249_hunter",
+              "quantity": 1,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:ice"
             },
             {
               "cardId": "onr_v1_249_hunter",
@@ -5436,10 +6036,24 @@
               "cardId": "onr_v1_249_hunter",
               "quantity": 1,
               "source": "functionSignal",
+              "signal": "tag.source",
+              "reason": "support:ice"
+            },
+            {
+              "cardId": "onr_v1_249_hunter",
+              "quantity": 1,
+              "source": "functionSignal",
               "signal": "trace.source",
               "reason": "support:centralDefense"
             },
             {
+              "cardId": "onr_v1_249_hunter",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "trace.source",
+              "reason": "support:ice"
+            },
+            {
               "cardId": "onr_v1_261_quandary",
               "quantity": 2,
               "source": "compiledHint",
@@ -5449,9 +6063,23 @@
             {
               "cardId": "onr_v1_261_quandary",
               "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:ice"
+            },
+            {
+              "cardId": "onr_v1_261_quandary",
+              "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_261_quandary",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:ice"
             },
             {
               "cardId": "onr_v1_279_wall-of-static",
@@ -5463,9 +6091,23 @@
             {
               "cardId": "onr_v1_279_wall-of-static",
               "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:ice"
+            },
+            {
+              "cardId": "onr_v1_279_wall-of-static",
+              "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_279_wall-of-static",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:ice"
             },
             {
               "cardId": "onr_v1_285_closed-accounts",
@@ -5482,6 +6124,13 @@
               "reason": "support:centralDefense"
             },
             {
+              "cardId": "onr_v1_287_datapool-by-zetatech",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "tag.source",
+              "reason": "support:ice"
+            },
+            {
               "cardId": "onr_v1_293_netwatch-credit-voucher",
               "quantity": 1,
               "source": "functionSignal",
@@ -5494,6 +6143,13 @@
               "source": "functionSignal",
               "signal": "tag.source",
               "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_293_netwatch-credit-voucher",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "tag.source",
+              "reason": "support:ice"
             },
             {
               "cardId": "onr_v1_295_night-shift",
@@ -5618,8 +6274,8 @@
         },
         "corp.deck_recycle_engine": {
           "anchorScore": 0,
-          "supportScore": 35,
-          "finalScore": 14,
+          "supportScore": 65,
+          "finalScore": 26,
           "anchorEvidence": [],
           "supportEvidence": [
             {
@@ -5644,6 +6300,13 @@
               "reason": "support:agendaDensity"
             },
             {
+              "cardId": "onr_v1_282_annual-reviews",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "draw.corp_draw",
+              "reason": "support:drawOrShuffle"
+            },
+            {
               "cardId": "onr_v1_285_closed-accounts",
               "quantity": 2,
               "source": "functionSignal",
@@ -5661,6 +6324,13 @@
               "cardId": "onr_v1_295_night-shift",
               "quantity": 2,
               "source": "functionSignal",
+              "signal": "draw.corp_draw",
+              "reason": "support:drawOrShuffle"
+            },
+            {
+              "cardId": "onr_v1_295_night-shift",
+              "quantity": 2,
+              "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
             },
@@ -5673,20 +6343,20 @@
             }
           ],
           "supportGaps": [
-            "low_drawOrShuffle_support",
-            "low_recycleSource_support"
+            "missing_recycle_source"
           ],
           "confidence": "low",
           "runtimeStatus": "diagnostic_only",
           "runtimeBlockers": [
             "below_productive_score_threshold",
+            "hard_support_gap:missing_recycle_source",
             "missing_strategy_anchor"
           ]
         },
         "corp.draw_engine": {
           "anchorScore": 0,
-          "supportScore": 20,
-          "finalScore": 8,
+          "supportScore": 75,
+          "finalScore": 30,
           "anchorEvidence": [],
           "supportEvidence": [
             {
@@ -5697,6 +6367,97 @@
               "reason": "support:economy"
             },
             {
+              "cardId": "onr_v1_237_data-wall",
+              "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:safety"
+            },
+            {
+              "cardId": "onr_v1_237_data-wall",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:safety"
+            },
+            {
+              "cardId": "onr_v1_243_fetch-4-0-1",
+              "quantity": 1,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:safety"
+            },
+            {
+              "cardId": "onr_v1_243_fetch-4-0-1",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "tag.source",
+              "reason": "support:safety"
+            },
+            {
+              "cardId": "onr_v1_243_fetch-4-0-1",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "trace.source",
+              "reason": "support:safety"
+            },
+            {
+              "cardId": "onr_v1_249_hunter",
+              "quantity": 1,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:safety"
+            },
+            {
+              "cardId": "onr_v1_249_hunter",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "tag.source",
+              "reason": "support:safety"
+            },
+            {
+              "cardId": "onr_v1_249_hunter",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "trace.source",
+              "reason": "support:safety"
+            },
+            {
+              "cardId": "onr_v1_261_quandary",
+              "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:safety"
+            },
+            {
+              "cardId": "onr_v1_261_quandary",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:safety"
+            },
+            {
+              "cardId": "onr_v1_279_wall-of-static",
+              "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:safety"
+            },
+            {
+              "cardId": "onr_v1_279_wall-of-static",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:safety"
+            },
+            {
+              "cardId": "onr_v1_282_annual-reviews",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "draw.corp_draw",
+              "reason": "support:drawSource"
+            },
+            {
               "cardId": "onr_v1_285_closed-accounts",
               "quantity": 2,
               "source": "functionSignal",
@@ -5704,11 +6465,32 @@
               "reason": "support:economy"
             },
             {
+              "cardId": "onr_v1_287_datapool-by-zetatech",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "tag.source",
+              "reason": "support:safety"
+            },
+            {
               "cardId": "onr_v1_293_netwatch-credit-voucher",
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_293_netwatch-credit-voucher",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "tag.source",
+              "reason": "support:safety"
+            },
+            {
+              "cardId": "onr_v1_295_night-shift",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "draw.corp_draw",
+              "reason": "support:drawSource"
             },
             {
               "cardId": "onr_v1_295_night-shift",
@@ -5726,21 +6508,19 @@
             }
           ],
           "supportGaps": [
-            "low_drawSource_support",
-            "low_safety_support",
             "low_scorePlan_support"
           ],
           "confidence": "low",
-          "runtimeStatus": "diagnostic_only",
+          "runtimeStatus": "blocked",
           "runtimeBlockers": [
             "below_productive_score_threshold",
             "missing_strategy_anchor"
           ]
         },
         "corp.economy_rez_reserve": {
-          "anchorScore": 44,
+          "anchorScore": 41,
           "supportScore": 90,
-          "finalScore": 69,
+          "finalScore": 68,
           "anchorEvidence": [
             {
               "cardId": "onr_v1_317_data-masons",
@@ -5765,6 +6545,13 @@
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_203_hostile-takeover",
+              "quantity": 3,
+              "source": "functionSignal",
+              "signal": "economy.generic",
+              "reason": "support:rezReserve"
             },
             {
               "cardId": "onr_v1_237_data-wall",
@@ -5875,6 +6662,13 @@
               "cardId": "onr_v1_293_netwatch-credit-voucher",
               "quantity": 1,
               "source": "functionSignal",
+              "signal": "economy.generic",
+              "reason": "support:rezReserve"
+            },
+            {
+              "cardId": "onr_v1_293_netwatch-credit-voucher",
+              "quantity": 1,
+              "source": "functionSignal",
               "signal": "tag.source",
               "reason": "support:ice"
             },
@@ -5886,11 +6680,25 @@
               "reason": "support:economy"
             },
             {
+              "cardId": "onr_v1_295_night-shift",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "economy.generic",
+              "reason": "support:rezReserve"
+            },
+            {
               "cardId": "onr_v1_317_data-masons",
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.rez_discount",
               "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_317_data-masons",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "economy.rez_discount",
+              "reason": "support:rezReserve"
             }
           ],
           "supportGaps": [
@@ -5901,9 +6709,9 @@
           "runtimeBlockers": []
         },
         "corp.fast_advance": {
-          "anchorScore": 56,
+          "anchorScore": 44,
           "supportScore": 60,
-          "finalScore": 58,
+          "finalScore": 50,
           "anchorEvidence": [
             {
               "cardId": "onr_v1_297_overtime-incentives",
@@ -6071,9 +6879,9 @@
           "runtimeBlockers": []
         },
         "corp.ice_tax_glacier": {
-          "anchorScore": 100,
+          "anchorScore": 81,
           "supportScore": 90,
-          "finalScore": 94,
+          "finalScore": 87,
           "anchorEvidence": [
             {
               "cardId": "onr_v1_237_data-wall",
@@ -6152,11 +6960,25 @@
               "reason": "support:economy"
             },
             {
+              "cardId": "onr_v1_203_hostile-takeover",
+              "quantity": 3,
+              "source": "functionSignal",
+              "signal": "economy.generic",
+              "reason": "support:rezReserve"
+            },
+            {
               "cardId": "onr_v1_237_data-wall",
               "quantity": 2,
               "source": "compiledHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_237_data-wall",
+              "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:ice"
             },
             {
               "cardId": "onr_v1_237_data-wall",
@@ -6166,11 +6988,25 @@
               "reason": "support:centralDefense"
             },
             {
+              "cardId": "onr_v1_237_data-wall",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:ice"
+            },
+            {
               "cardId": "onr_v1_243_fetch-4-0-1",
               "quantity": 1,
               "source": "compiledHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_243_fetch-4-0-1",
+              "quantity": 1,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:ice"
             },
             {
               "cardId": "onr_v1_243_fetch-4-0-1",
@@ -6183,8 +7019,22 @@
               "cardId": "onr_v1_243_fetch-4-0-1",
               "quantity": 1,
               "source": "functionSignal",
+              "signal": "tag.source",
+              "reason": "support:ice"
+            },
+            {
+              "cardId": "onr_v1_243_fetch-4-0-1",
+              "quantity": 1,
+              "source": "functionSignal",
               "signal": "trace.source",
               "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_243_fetch-4-0-1",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "trace.source",
+              "reason": "support:ice"
             },
             {
               "cardId": "onr_v1_249_hunter",
@@ -6192,6 +7042,13 @@
               "source": "compiledHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_249_hunter",
+              "quantity": 1,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:ice"
             },
             {
               "cardId": "onr_v1_249_hunter",
@@ -6204,10 +7061,24 @@
               "cardId": "onr_v1_249_hunter",
               "quantity": 1,
               "source": "functionSignal",
+              "signal": "tag.source",
+              "reason": "support:ice"
+            },
+            {
+              "cardId": "onr_v1_249_hunter",
+              "quantity": 1,
+              "source": "functionSignal",
               "signal": "trace.source",
               "reason": "support:centralDefense"
             },
             {
+              "cardId": "onr_v1_249_hunter",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "trace.source",
+              "reason": "support:ice"
+            },
+            {
               "cardId": "onr_v1_261_quandary",
               "quantity": 2,
               "source": "compiledHint",
@@ -6217,9 +7088,23 @@
             {
               "cardId": "onr_v1_261_quandary",
               "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:ice"
+            },
+            {
+              "cardId": "onr_v1_261_quandary",
+              "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_261_quandary",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:ice"
             },
             {
               "cardId": "onr_v1_279_wall-of-static",
@@ -6231,9 +7116,23 @@
             {
               "cardId": "onr_v1_279_wall-of-static",
               "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:ice"
+            },
+            {
+              "cardId": "onr_v1_279_wall-of-static",
+              "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_279_wall-of-static",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:ice"
             },
             {
               "cardId": "onr_v1_285_closed-accounts",
@@ -6250,11 +7149,25 @@
               "reason": "support:centralDefense"
             },
             {
+              "cardId": "onr_v1_287_datapool-by-zetatech",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "tag.source",
+              "reason": "support:ice"
+            },
+            {
               "cardId": "onr_v1_293_netwatch-credit-voucher",
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_293_netwatch-credit-voucher",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "economy.generic",
+              "reason": "support:rezReserve"
             },
             {
               "cardId": "onr_v1_293_netwatch-credit-voucher",
@@ -6264,6 +7177,13 @@
               "reason": "support:centralDefense"
             },
             {
+              "cardId": "onr_v1_293_netwatch-credit-voucher",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "tag.source",
+              "reason": "support:ice"
+            },
+            {
               "cardId": "onr_v1_295_night-shift",
               "quantity": 2,
               "source": "functionSignal",
@@ -6271,11 +7191,25 @@
               "reason": "support:economy"
             },
             {
+              "cardId": "onr_v1_295_night-shift",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "economy.generic",
+              "reason": "support:rezReserve"
+            },
+            {
               "cardId": "onr_v1_317_data-masons",
               "quantity": 1,
               "source": "functionSignal",
               "signal": "economy.rez_discount",
               "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_317_data-masons",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "economy.rez_discount",
+              "reason": "support:rezReserve"
             }
           ],
           "supportGaps": [
@@ -6289,8 +7223,8 @@
         },
         "corp.overadvance_value": {
           "anchorScore": 0,
-          "supportScore": 25,
-          "finalScore": 10,
+          "supportScore": 40,
+          "finalScore": 16,
           "anchorEvidence": [],
           "supportEvidence": [
             {
@@ -6299,6 +7233,27 @@
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_237_data-wall",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:remoteSafety"
+            },
+            {
+              "cardId": "onr_v1_261_quandary",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:remoteSafety"
+            },
+            {
+              "cardId": "onr_v1_279_wall-of-static",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:remoteSafety"
             },
             {
               "cardId": "onr_v1_285_closed-accounts",
@@ -6330,14 +7285,14 @@
             }
           ],
           "supportGaps": [
-            "low_advancementWindow_support",
-            "low_remoteSafety_support",
-            "low_scorePlan_support"
+            "low_scorePlan_support",
+            "missing_advancement_window"
           ],
           "confidence": "low",
           "runtimeStatus": "diagnostic_only",
           "runtimeBlockers": [
             "below_productive_score_threshold",
+            "hard_support_gap:missing_advancement_window",
             "missing_strategy_anchor"
           ]
         },
@@ -6378,6 +7333,273 @@
             {
               "cardId": "onr_v1_237_data-wall",
               "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:ice"
+            },
+            {
+              "cardId": "onr_v1_237_data-wall",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_237_data-wall",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:ice"
+            },
+            {
+              "cardId": "onr_v1_243_fetch-4-0-1",
+              "quantity": 1,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_243_fetch-4-0-1",
+              "quantity": 1,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:ice"
+            },
+            {
+              "cardId": "onr_v1_243_fetch-4-0-1",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "tag.source",
+              "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_243_fetch-4-0-1",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "tag.source",
+              "reason": "support:ice"
+            },
+            {
+              "cardId": "onr_v1_243_fetch-4-0-1",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "trace.source",
+              "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_243_fetch-4-0-1",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "trace.source",
+              "reason": "support:ice"
+            },
+            {
+              "cardId": "onr_v1_249_hunter",
+              "quantity": 1,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_249_hunter",
+              "quantity": 1,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:ice"
+            },
+            {
+              "cardId": "onr_v1_249_hunter",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "tag.source",
+              "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_249_hunter",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "tag.source",
+              "reason": "support:ice"
+            },
+            {
+              "cardId": "onr_v1_249_hunter",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "trace.source",
+              "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_249_hunter",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "trace.source",
+              "reason": "support:ice"
+            },
+            {
+              "cardId": "onr_v1_261_quandary",
+              "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_261_quandary",
+              "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:ice"
+            },
+            {
+              "cardId": "onr_v1_261_quandary",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_261_quandary",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:ice"
+            },
+            {
+              "cardId": "onr_v1_279_wall-of-static",
+              "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_279_wall-of-static",
+              "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:ice"
+            },
+            {
+              "cardId": "onr_v1_279_wall-of-static",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_279_wall-of-static",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "ice.etr",
+              "reason": "support:ice"
+            },
+            {
+              "cardId": "onr_v1_285_closed-accounts",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "economy.counter",
+              "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_287_datapool-by-zetatech",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "tag.source",
+              "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_287_datapool-by-zetatech",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "tag.source",
+              "reason": "support:ice"
+            },
+            {
+              "cardId": "onr_v1_293_netwatch-credit-voucher",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "economy.generic",
+              "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_293_netwatch-credit-voucher",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "tag.source",
+              "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_293_netwatch-credit-voucher",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "tag.source",
+              "reason": "support:ice"
+            },
+            {
+              "cardId": "onr_v1_295_night-shift",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "economy.generic",
+              "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_317_data-masons",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "economy.rez_discount",
+              "reason": "support:economy"
+            }
+          ],
+          "supportGaps": [],
+          "confidence": "medium",
+          "runtimeStatus": "blocked",
+          "runtimeBlockers": [
+            "below_productive_score_threshold",
+            "missing_strategy_anchor"
+          ]
+        },
+        "corp.rush_score": {
+          "anchorScore": 0,
+          "supportScore": 100,
+          "finalScore": 65,
+          "anchorEvidence": [],
+          "supportEvidence": [
+            {
+              "cardId": "onr_v1_203_hostile-takeover",
+              "quantity": 3,
+              "source": "compiledHint",
+              "signal": "cardType:agenda",
+              "reason": "support:agendaDensity"
+            },
+            {
+              "cardId": "onr_v1_203_hostile-takeover",
+              "quantity": 3,
+              "source": "functionSignal",
+              "signal": "economy.generic",
+              "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_220_tycho-extension",
+              "quantity": 1,
+              "source": "compiledHint",
+              "signal": "cardType:agenda",
+              "reason": "support:agendaDensity"
+            },
+            {
+              "cardId": "onr_v1_237_data-wall",
+              "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cardType:ice",
+              "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_237_data-wall",
+              "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cheap_ice",
+              "reason": "support:earlyIce"
+            },
+            {
+              "cardId": "onr_v1_237_data-wall",
+              "quantity": 2,
               "source": "functionSignal",
               "signal": "ice.etr",
               "reason": "support:centralDefense"
@@ -6388,6 +7610,13 @@
               "source": "compiledHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_243_fetch-4-0-1",
+              "quantity": 1,
+              "source": "compiledHint",
+              "signal": "cheap_ice",
+              "reason": "support:earlyIce"
             },
             {
               "cardId": "onr_v1_243_fetch-4-0-1",
@@ -6409,6 +7638,13 @@
               "source": "compiledHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_249_hunter",
+              "quantity": 1,
+              "source": "compiledHint",
+              "signal": "cheap_ice",
+              "reason": "support:earlyIce"
             },
             {
               "cardId": "onr_v1_249_hunter",
@@ -6430,6 +7666,13 @@
               "source": "compiledHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_261_quandary",
+              "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cheap_ice",
+              "reason": "support:earlyIce"
             },
             {
               "cardId": "onr_v1_261_quandary",
@@ -6444,6 +7687,13 @@
               "source": "compiledHint",
               "signal": "cardType:ice",
               "reason": "support:centralDefense"
+            },
+            {
+              "cardId": "onr_v1_279_wall-of-static",
+              "quantity": 2,
+              "source": "compiledHint",
+              "signal": "cheap_ice",
+              "reason": "support:earlyIce"
             },
             {
               "cardId": "onr_v1_279_wall-of-static",
@@ -6496,181 +7746,14 @@
             }
           ],
           "supportGaps": [],
-          "confidence": "medium",
-          "runtimeStatus": "blocked",
-          "runtimeBlockers": [
-            "below_productive_score_threshold",
-            "missing_strategy_anchor"
-          ]
-        },
-        "corp.rush_score": {
-          "anchorScore": 0,
-          "supportScore": 65,
-          "finalScore": 42,
-          "anchorEvidence": [],
-          "supportEvidence": [
-            {
-              "cardId": "onr_v1_203_hostile-takeover",
-              "quantity": 3,
-              "source": "compiledHint",
-              "signal": "cardType:agenda",
-              "reason": "support:agendaDensity"
-            },
-            {
-              "cardId": "onr_v1_203_hostile-takeover",
-              "quantity": 3,
-              "source": "functionSignal",
-              "signal": "economy.generic",
-              "reason": "support:economy"
-            },
-            {
-              "cardId": "onr_v1_220_tycho-extension",
-              "quantity": 1,
-              "source": "compiledHint",
-              "signal": "cardType:agenda",
-              "reason": "support:agendaDensity"
-            },
-            {
-              "cardId": "onr_v1_237_data-wall",
-              "quantity": 2,
-              "source": "compiledHint",
-              "signal": "cardType:ice",
-              "reason": "support:centralDefense"
-            },
-            {
-              "cardId": "onr_v1_237_data-wall",
-              "quantity": 2,
-              "source": "functionSignal",
-              "signal": "ice.etr",
-              "reason": "support:centralDefense"
-            },
-            {
-              "cardId": "onr_v1_243_fetch-4-0-1",
-              "quantity": 1,
-              "source": "compiledHint",
-              "signal": "cardType:ice",
-              "reason": "support:centralDefense"
-            },
-            {
-              "cardId": "onr_v1_243_fetch-4-0-1",
-              "quantity": 1,
-              "source": "functionSignal",
-              "signal": "tag.source",
-              "reason": "support:centralDefense"
-            },
-            {
-              "cardId": "onr_v1_243_fetch-4-0-1",
-              "quantity": 1,
-              "source": "functionSignal",
-              "signal": "trace.source",
-              "reason": "support:centralDefense"
-            },
-            {
-              "cardId": "onr_v1_249_hunter",
-              "quantity": 1,
-              "source": "compiledHint",
-              "signal": "cardType:ice",
-              "reason": "support:centralDefense"
-            },
-            {
-              "cardId": "onr_v1_249_hunter",
-              "quantity": 1,
-              "source": "functionSignal",
-              "signal": "tag.source",
-              "reason": "support:centralDefense"
-            },
-            {
-              "cardId": "onr_v1_249_hunter",
-              "quantity": 1,
-              "source": "functionSignal",
-              "signal": "trace.source",
-              "reason": "support:centralDefense"
-            },
-            {
-              "cardId": "onr_v1_261_quandary",
-              "quantity": 2,
-              "source": "compiledHint",
-              "signal": "cardType:ice",
-              "reason": "support:centralDefense"
-            },
-            {
-              "cardId": "onr_v1_261_quandary",
-              "quantity": 2,
-              "source": "functionSignal",
-              "signal": "ice.etr",
-              "reason": "support:centralDefense"
-            },
-            {
-              "cardId": "onr_v1_279_wall-of-static",
-              "quantity": 2,
-              "source": "compiledHint",
-              "signal": "cardType:ice",
-              "reason": "support:centralDefense"
-            },
-            {
-              "cardId": "onr_v1_279_wall-of-static",
-              "quantity": 2,
-              "source": "functionSignal",
-              "signal": "ice.etr",
-              "reason": "support:centralDefense"
-            },
-            {
-              "cardId": "onr_v1_285_closed-accounts",
-              "quantity": 2,
-              "source": "functionSignal",
-              "signal": "economy.counter",
-              "reason": "support:economy"
-            },
-            {
-              "cardId": "onr_v1_287_datapool-by-zetatech",
-              "quantity": 1,
-              "source": "functionSignal",
-              "signal": "tag.source",
-              "reason": "support:centralDefense"
-            },
-            {
-              "cardId": "onr_v1_293_netwatch-credit-voucher",
-              "quantity": 1,
-              "source": "functionSignal",
-              "signal": "economy.generic",
-              "reason": "support:economy"
-            },
-            {
-              "cardId": "onr_v1_293_netwatch-credit-voucher",
-              "quantity": 1,
-              "source": "functionSignal",
-              "signal": "tag.source",
-              "reason": "support:centralDefense"
-            },
-            {
-              "cardId": "onr_v1_295_night-shift",
-              "quantity": 2,
-              "source": "functionSignal",
-              "signal": "economy.generic",
-              "reason": "support:economy"
-            },
-            {
-              "cardId": "onr_v1_317_data-masons",
-              "quantity": 1,
-              "source": "functionSignal",
-              "signal": "economy.rez_discount",
-              "reason": "support:economy"
-            }
-          ],
-          "supportGaps": [
-            "insufficient_etr_ice"
-          ],
-          "confidence": "medium",
-          "runtimeStatus": "blocked",
-          "runtimeBlockers": [
-            "below_productive_score_threshold",
-            "hard_support_gap:insufficient_etr_ice"
-          ]
+          "confidence": "high",
+          "runtimeStatus": "productive",
+          "runtimeBlockers": []
         },
         "corp.tag_trace_punish": {
-          "anchorScore": 100,
+          "anchorScore": 79,
           "supportScore": 100,
-          "finalScore": 100,
+          "finalScore": 87,
           "anchorEvidence": [
             {
               "cardId": "onr_v1_243_fetch-4-0-1",
@@ -6849,9 +7932,11 @@
       "primaryStrategies": [
         "corp.tag_trace_punish",
         "corp.economy_rez_reserve",
+        "corp.rush_score"
+      ],
+      "secondaryStrategies": [
         "corp.fast_advance"
       ],
-      "secondaryStrategies": [],
       "functionSignalCounts": {
         "action.corp_extra_action_burst": 2,
         "action.corp_extra_action_support": 2,
@@ -6910,7 +7995,7 @@
         "role:upgrade": 1
       },
       "warnings": [
-        "inspector:legacy_fallback_only"
+        "inspector:legacy_fallback_only:onr_v1_220_tycho-extension"
       ],
       "corpProfile": {
         "iceProfile": {
@@ -6924,7 +8009,7 @@
         },
         "scoreProfile": {
           "scoreAcceleration": 0,
-          "agendaInstallAdvanceScoreSupport": 6,
+          "agendaInstallAdvanceScoreSupport": 5,
           "remoteScoringProtection": 0,
           "stealTax": 0
         },
@@ -6977,17 +8062,16 @@
     ],
     "primaryStrategyCounts": {
       "corp.economy_rez_reserve": 2,
-      "corp.fast_advance": 2,
       "corp.overadvance_value": 1,
+      "corp.rush_score": 2,
       "corp.tag_trace_punish": 1,
       "runner.hq_pressure": 1,
       "runner.interface_closeout": 1,
       "runner.rig_first": 1
     },
     "warningCounts": {
-      "inspector:deferred_requires_human_review": 2,
-      "inspector:legacy_fallback_only": 2
+      "inspector:legacy_fallback_only:onr_v1_220_tycho-extension": 2
     },
-    "contentSha256": "fca63b657b82107a8473e5a1f20c776b40c013e7f9ee8e6cc29318043ec1b586"
+    "contentSha256": "43c56f359943235a781b93b733b7f529b19e6e8ec64230f712b3ed5c04803217"
   }
 }
