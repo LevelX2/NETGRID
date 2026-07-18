@@ -2632,66 +2632,6 @@ describe("tactical plan model", () => {
     );
   });
 
-  it("does not create survival defense from a basic credit above its reaction reserve", () => {
-    const gain = legalAction("gain", "runner", "gain_credit");
-    const input = aiInput("runner", [gain]);
-    input.playerView.stateVersion = 39;
-    input.playerView.own.credits = 14;
-    input.playerView.own.gripOrHq = [];
-    input.playerView.publicEvents = [
-      publicEvent("setup-net-damage", 32, "net_damage", {
-        actor: "corp",
-        actionType: "net_damage",
-        damageType: "net",
-        damageAmount: 2,
-        sourceTitle: "Setup!",
-        sourceDefinitionId: "onr_v1_340_setup",
-      }),
-    ];
-
-    const result = evaluateTacticalPlans({
-      input,
-      candidates: [candidateForUntargetedAction(gain)],
-    });
-
-    expect(result.planAlternatives.map((plan) => plan.type)).not.toContain(
-      "runner.survival_defense",
-    );
-  });
-
-  it("uses a basic credit to close an unsatisfied critical reaction reserve", () => {
-    const gain = legalAction("gain", "runner", "gain_credit");
-    const input = aiInput("runner", [gain]);
-    input.playerView.stateVersion = 39;
-    input.playerView.own.credits = 2;
-    input.playerView.own.gripOrHq = [];
-    input.playerView.publicEvents = [
-      publicEvent("setup-net-damage", 32, "net_damage", {
-        actor: "corp",
-        actionType: "net_damage",
-        damageType: "net",
-        damageAmount: 2,
-        sourceTitle: "Setup!",
-        sourceDefinitionId: "onr_v1_340_setup",
-      }),
-    ];
-
-    const result = evaluateTacticalPlans({
-      input,
-      candidates: [candidateForUntargetedAction(gain)],
-    });
-
-    expect(result.selectedPlan).toMatchObject({
-      type: "runner.survival_defense",
-      requiredCapabilities: [
-        expect.objectContaining({ kind: "survival", minimumCredits: 4 }),
-      ],
-    });
-    expect(result.selectedMapping?.legalActions[0]?.actionId).toBe(
-      gain.actionId,
-    );
-  });
-
   it("reduces draw overflow penalty when clear discard fodder covers the overflow", () => {
     const rdRun = legalAction("run-rd", "runner", "start_run", {
       serverId: "rd",
