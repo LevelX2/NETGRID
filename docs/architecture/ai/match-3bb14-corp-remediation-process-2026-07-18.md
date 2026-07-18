@@ -1,6 +1,6 @@
 # Match-3bb14-Corp-KI-Remediation (2026-07-18)
 
-Status: P0 aktiv
+Status: P5 abgeschlossen, P6 lokale Integration ausstehend
 
 ## Quelle und Gesamtziel
 
@@ -143,6 +143,23 @@ corepack pnpm exec vitest run `
 corepack pnpm --filter @netgrid/ai typecheck
 git diff --check
 ```
+
+## Paketabschluss
+
+- P0: `d78c3498b` (`docs(ai): plan match 3bb14 remediation`)
+- P1: `04e8321c6` (`test(ai): capture match 3bb14 corp regressions`)
+- P2: `885bb7191` (`fix(ai): respect scored-only tag source timing`)
+- P3: `51eeb6db0` (`fix(ai): model public staged breaker coverage`)
+- P4: `1942542e7` (`fix(ai): project realistic corp scoring horizons`)
+- P4-Folgeprüfung: `542abcf6b`
+  (`fix(ai): preserve safety after timing correction`)
+
+Die spielgleichen Zielverträge und alle fokussierten Gegenproben sind grün.
+Der vollständige Abschlusslauf am 19.07.2026 bestand 402/402 Testdateien und
+2.846/2.846 Tests; der AI-Typecheck und `git diff --check` sind ebenfalls
+grün. Evidence und Final-Review liegen unter `docs/reviews/ai/`. Punkt 4 der
+ursprünglichen Spielanalyse bleibt weiterhin explizites Nicht-Ziel dieses
+Prozesses.
 
 ## /Goal
 
