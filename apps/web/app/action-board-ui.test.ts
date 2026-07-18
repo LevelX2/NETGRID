@@ -3727,6 +3727,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
         targetCardDefinitionId: "simple_fracter",
         counterType: "shell",
         removeCounterAmount: 1,
+        remainingCountersBefore: 2,
       },
     );
 
@@ -3743,13 +3744,13 @@ describe("V1.0.6 resource and card-display helpers", () => {
     ).toBe(true);
     expect(actionButtonLabel(prepare)).toBe("Simple Fracter zur Seite legen");
     expect(actionButtonLabel(remove)).toBe(
-      "Shell-Counter von Simple Fracter entfernen",
+      "Shell-Counter von Simple Fracter (2) entfernen",
     );
     expect(contextualCardActionLabel(prepare)).toBe(
       "Simple Fracter zur Seite legen",
     );
     expect(contextualCardActionLabel(remove)).toBe(
-      "Shell-Counter von Simple Fracter entfernen",
+      "Shell-Counter von Simple Fracter (2) entfernen",
     );
   });
 
@@ -3785,8 +3786,8 @@ describe("V1.0.6 resource and card-display helpers", () => {
     ]);
   });
 
-  it("keeps parallel Shell Traders counter actions distinguishable by target", () => {
-    const fracter = legalAction(
+  it("keeps same-title Shell Traders counter actions distinguishable by remaining counters", () => {
+    const fracterWithTwoCounters = legalAction(
       "runner",
       "trigger_ability",
       "shell_traders_1",
@@ -3798,9 +3799,10 @@ describe("V1.0.6 resource and card-display helpers", () => {
         targetCardDefinitionId: "simple_fracter",
         counterType: "shell",
         removeCounterAmount: 1,
+        remainingCountersBefore: 2,
       },
     );
-    const decoder = legalAction(
+    const fracterWithFourCounters = legalAction(
       "runner",
       "trigger_ability",
       "shell_traders_1",
@@ -3808,16 +3810,20 @@ describe("V1.0.6 resource and card-display helpers", () => {
       {
         cardId: "shell_traders_1",
         delayedInstallAbility: "remove_shell_counter",
-        targetCardId: "simple_decoder_1",
-        targetCardDefinitionId: "simple_decoder",
+        targetCardId: "simple_fracter_2",
+        targetCardDefinitionId: "simple_fracter",
         counterType: "shell",
         removeCounterAmount: 1,
+        remainingCountersBefore: 4,
       },
     );
 
-    expect([actionButtonLabel(fracter), actionButtonLabel(decoder)]).toEqual([
-      "Shell-Counter von Simple Fracter entfernen",
-      "Shell-Counter von Simple Decoder entfernen",
+    expect([
+      actionButtonLabel(fracterWithTwoCounters),
+      actionButtonLabel(fracterWithFourCounters),
+    ]).toEqual([
+      "Shell-Counter von Simple Fracter (2) entfernen",
+      "Shell-Counter von Simple Fracter (4) entfernen",
     ]);
   });
 

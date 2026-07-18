@@ -1288,8 +1288,16 @@ function resourceAbilityContextLabel(action: LegalAction): string | null {
   }
   if (actionHasAbility(action, "remove_shell_counter")) {
     const targetTitle = shellTradersTargetTitle(action);
-    return targetTitle
-      ? `Shell-Counter von ${targetTitle} entfernen`
+    const remainingCounters = action.payload?.remainingCountersBefore;
+    const targetLabel =
+      targetTitle &&
+      typeof remainingCounters === "number" &&
+      Number.isInteger(remainingCounters) &&
+      remainingCounters >= 0
+        ? `${targetTitle} (${remainingCounters})`
+        : targetTitle;
+    return targetLabel
+      ? `Shell-Counter von ${targetLabel} entfernen`
       : "Shell-Counter entfernen";
   }
   switch (action.payload?.resourceAbility) {
