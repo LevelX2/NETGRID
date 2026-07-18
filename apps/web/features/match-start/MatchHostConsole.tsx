@@ -1,6 +1,14 @@
 "use client";
 
-import { Bot, Building2, Dices, UserPlus, UserRound, Zap } from "lucide-react";
+import {
+  BadgeCheck,
+  Bot,
+  Building2,
+  Dices,
+  UserPlus,
+  UserRound,
+  Zap,
+} from "lucide-react";
 
 import {
   type HumanAiSideSelection,
@@ -48,6 +56,7 @@ export function MatchHostConsole({
   seriesGamesPlanned,
   matchCardPool,
   displayName,
+  identityKind,
   isHumanVsAi,
   humanAiSideSelection,
   gameMode,
@@ -122,6 +131,7 @@ export function MatchHostConsole({
   seriesGamesPlanned: MatchStartSeriesGames;
   matchCardPool: MatchCardPoolSelection;
   displayName: string;
+  identityKind: "account" | "guest";
   isHumanVsAi: boolean;
   humanAiSideSelection: HumanAiSideSelection;
   gameMode: string;
@@ -199,29 +209,45 @@ export function MatchHostConsole({
   return (
     <div className="matchStartConsole">
       <section
-        className="matchStartIdentity"
+        className={`matchStartIdentity ${identityKind}`}
         aria-label={
           gameMode === "ai_vs_ai" ? "Beobachterprofil" : "Spielerprofil"
         }
       >
         <div className="matchStartIdentityIcon" aria-hidden="true">
-          <UserRound size={22} />
+          {identityKind === "account" ? (
+            <BadgeCheck size={22} />
+          ) : (
+            <UserRound size={22} />
+          )}
         </div>
         <label>
-          <span>
-            {gameMode === "ai_vs_ai" ? "Beobachtername" : "Dein Name"}
+          <span className="matchStartIdentityLabel">
+            <span>
+              {identityKind === "account"
+                ? "Account-Anzeigename"
+                : gameMode === "ai_vs_ai"
+                  ? "Beobachtername"
+                  : "Gastname"}
+            </span>
+            <span className={`playerIdentityBadge ${identityKind}`}>
+              {identityKind === "account" ? "Account" : "Gast"}
+            </span>
           </span>
           <input
             value={displayName}
             onChange={(event) => onDisplayName(event.target.value)}
             aria-label="Name"
+            readOnly={identityKind === "account"}
             autoComplete="nickname"
             maxLength={80}
           />
           <small>
-            {gameMode === "ai_vs_ai"
-              ? "Kennzeichnet deine lokale Beobachtersitzung."
-              : "Erscheint in Lobby, Spiel und Ergebnis."}
+            {identityKind === "account"
+              ? "Der Anzeigename deines angemeldeten Accounts wird für Lobby, Spiel und Ergebnis verwendet."
+              : gameMode === "ai_vs_ai"
+                ? "Kennzeichnet deine lokale Beobachtersitzung."
+                : "Der frei gewählte Gastname erscheint in Lobby, Spiel und Ergebnis."}
           </small>
         </label>
       </section>

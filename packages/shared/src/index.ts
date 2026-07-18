@@ -26,6 +26,7 @@ export type {
   ApiMatchStatus,
   ApiOpponentStatus,
   ApiPendingUndoRequest,
+  ApiPlayerIdentityKind,
   ApiPlayerClockConfig,
   ApiPlayerClockMode,
   ApiPlayerClockSnapshot,

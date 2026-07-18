@@ -43,6 +43,7 @@ import {
   type ApiPlayerClockConfig,
   type ApiPlayerClockSnapshot,
   type ApiPendingUndoRequest,
+  type ApiPlayerIdentityKind,
   type AiDecision,
   type AiDifficulty,
   type AiDecisionDebug,
@@ -217,6 +218,7 @@ export type MatchRecord = {
   aiControllers?: Partial<Record<Side, PlayerController>>;
   aiPacingMode?: AiPacingMode;
   aiTraceMode?: AiDecisionTraceMode;
+  participantIdentities?: Partial<Record<SeriesPlayerSlot, Exclude<ApiPlayerIdentityKind, "ai">>>;
   discoverableInLan?: boolean;
   series?: MatchSeriesState;
   retentionProtection?: {
@@ -754,6 +756,8 @@ export class MultiplayerService {
     playMode?: "human_vs_ai";
     humanSide?: HostSideSelection;
     displayName?: string;
+    identityKind?: Exclude<ApiPlayerIdentityKind, "ai">;
+    participantIdentities?: Partial<Record<SeriesPlayerSlot, Exclude<ApiPlayerIdentityKind, "ai">>>;
     seed?: string;
     settings?: Partial<MatchSettings>;
     countdownSeconds?: number;
@@ -840,6 +844,10 @@ export class MultiplayerService {
           },
           ...(aiPacingMode ? { aiPacingMode } : {}),
           ...(aiTraceMode !== "off" ? { aiTraceMode } : {}),
+          participantIdentities: {
+            ...(input.participantIdentities ?? {}),
+            player_a: input.participantIdentities?.player_a ?? input.identityKind ?? "guest"
+          },
           ...(matchFormat === "two_game_side_swap"
             ? {
                 series: {
@@ -981,6 +989,14 @@ export class MultiplayerService {
         ...(mode === "human_vs_human" ? {} : { aiControllers: aiControllersFor(controllers) }),
         ...(aiPacingMode ? { aiPacingMode } : {}),
         ...(aiTraceMode !== "off" ? { aiTraceMode } : {}),
+        ...(mode !== "ai_vs_ai"
+          ? {
+              participantIdentities: {
+                ...(input.participantIdentities ?? {}),
+                player_a: input.participantIdentities?.player_a ?? input.identityKind ?? "guest"
+              }
+            }
+          : {}),
         discoverableInLan,
         ...(settings.matchFormat === "two_game_side_swap"
           ? {
@@ -1138,7 +1154,7 @@ export class MultiplayerService {
     return { matchId, status: record.match.status, availableSide: tokenRecord.allowedSide };
   }
 
-  async joinMatch(matchId: string, input: { token?: string; displayName?: string } & ParticipantDeckPairInput): Promise<JoinMatchResult | { error: SafeErrorPayload }> {
+  async joinMatch(matchId: string, input: { token?: string; displayName?: string; identityKind?: Exclude<ApiPlayerIdentityKind, "ai"> } & ParticipantDeckPairInput): Promise<JoinMatchResult | { error: SafeErrorPayload }> {
     const record = await this.mustLoad(matchId);
     if (!record) return { error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
     if (isTerminalStatus(record.match.status)) return { error: safeError("match_terminal", "Dieses private Match ist bereits abgeschlossen.") };
@@ -1162,6 +1178,10 @@ export class MultiplayerService {
       createdAt: now,
       lastSeenAt: now
     });
+    record.match.participantIdentities = {
+      ...(record.match.participantIdentities ?? {}),
+      player_b: input.identityKind ?? "guest"
+    };
     record.tokens = record.tokens.map((candidate) => (candidate.tokenId === tokenRecord.tokenId ? { ...candidate, usedAt: now } : candidate));
     record.tokens.push(this.tokenRecord(matchId, tokenRecord.allowedSide, "session", sessionToken, now));
     record.tokens.push(this.tokenRecord(matchId, tokenRecord.allowedSide, "reconnect", reconnectToken, now));
@@ -1245,7 +1265,7 @@ export class MultiplayerService {
       candidate.sessionId === session.sessionId
         ? {
             ...candidate,
-            displayName: input.displayName?.trim() || candidate.displayName,
+            displayName: identityKindForSide(record, candidate.side) === "account" ? candidate.displayName : input.displayName?.trim() || candidate.displayName,
             sessionTokenHash: this.hashToken(sessionToken),
             reconnectTokenHash: this.hashToken(reconnectToken),
             lastSeenAt: now
@@ -2316,6 +2336,7 @@ export class MultiplayerService {
       hostSide: session.side,
       mode: record.match.mode,
       displayName: displayName ?? session.displayName,
+      ...(record.match.participantIdentities ? { participantIdentities: record.match.participantIdentities } : {}),
       settings: record.match.settings,
       ...(record.startLobby?.countdownSeconds ? { countdownSeconds: record.startLobby.countdownSeconds } : {}),
       participantADecks: participants[requesterPlayer],
@@ -3750,12 +3771,14 @@ function recentGameResultEntryFor(record: StoredMatch): RecentGameResultEntry | 
     reason: resultReason(state, winner, runnerAgendaPoints, corpAgendaPoints, record.match.settings.agendaPointsToWin),
     runner: {
       displayName: publicDisplayNameForSide(record, "runner"),
+      identityKind: identityKindForSide(record, "runner"),
       agendaPoints: runnerAgendaPoints,
       matchPoints: runnerMatchPoints,
       ...(record.match.deckSetup.runner.deckName ? { deckName: record.match.deckSetup.runner.deckName } : {})
     },
     corp: {
       displayName: publicDisplayNameForSide(record, "corp"),
+      identityKind: identityKindForSide(record, "corp"),
       agendaPoints: corpAgendaPoints,
       matchPoints: corpMatchPoints,
       ...(record.match.deckSetup.corp.deckName ? { deckName: record.match.deckSetup.corp.deckName } : {})
@@ -3787,8 +3810,8 @@ function recentSeriesResultEntryFor(records: StoredMatch[]): ApiRecentSeriesResu
   const games = [...resultsByMatchId.values()].sort((left, right) => left.gameNumber - right.gameNumber || left.finishedAt.localeCompare(right.finishedAt));
   if (games.length === 0) return undefined;
   const playerStats: ApiRecentSeriesResult["players"] = {
-    player_a: { displayName: publicDisplayNameForSeriesPlayer(latestRecord, "player_a"), matchPoints: 0, agendaPoints: 0, wins: 0 },
-    player_b: { displayName: publicDisplayNameForSeriesPlayer(latestRecord, "player_b"), matchPoints: 0, agendaPoints: 0, wins: 0 }
+    player_a: { displayName: publicDisplayNameForSeriesPlayer(latestRecord, "player_a"), identityKind: identityKindForSeriesPlayer(latestRecord, "player_a"), matchPoints: 0, agendaPoints: 0, wins: 0 },
+    player_b: { displayName: publicDisplayNameForSeriesPlayer(latestRecord, "player_b"), identityKind: identityKindForSeriesPlayer(latestRecord, "player_b"), matchPoints: 0, agendaPoints: 0, wins: 0 }
   };
   const gameEntries: ApiRecentSeriesGameResult[] = games.map((result) => {
     const winnerPlayer = winningSeriesPlayer(result);
@@ -3852,6 +3875,29 @@ function publicDisplayNameForSeriesPlayer(record: StoredMatch, player: SeriesPla
   if (series.runnerPlayer === player) return publicDisplayNameForSide(record, "runner");
   if (series.corpPlayer === player) return publicDisplayNameForSide(record, "corp");
   return player === "player_a" ? "Spieler A" : "Spieler B";
+}
+
+function identityKindForSeriesPlayer(record: StoredMatch, player: SeriesPlayerSlot): ApiPlayerIdentityKind {
+  if (record.match.mode === "ai_vs_ai") return "ai";
+  const series = record.match.series;
+  if (series?.runnerPlayer === player) return identityKindForSide(record, "runner");
+  if (series?.corpPlayer === player) return identityKindForSide(record, "corp");
+  return record.match.participantIdentities?.[player] ?? "guest";
+}
+
+function identityKindForSide(record: StoredMatch, side: Side): ApiPlayerIdentityKind {
+  if (record.match.aiControllers?.[side]?.type === "ai") return "ai";
+  const assignment = record.match.deckSetup.assignment ?? record.startLobby?.sideAssignment;
+  const player = record.match.series
+    ? seriesPlayerForSide(record.match.series, side)
+    : assignment
+      ? side === "runner"
+        ? assignment.runnerPlayer
+        : assignment.corpPlayer
+      : record.sessions[0]?.side === side
+        ? "player_a"
+        : "player_b";
+  return record.match.participantIdentities?.[player] ?? "guest";
 }
 
 function publicDisplayNameForSide(record: StoredMatch, side: Side): string {

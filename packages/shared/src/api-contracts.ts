@@ -108,6 +108,8 @@ export type ApiGameResultSummary = {
   series?: ApiSeriesResultSummary;
 };
 
+export type ApiPlayerIdentityKind = "account" | "guest" | "ai";
+
 export type ApiRecentGameResult = {
   entryType?: "single_game";
   resultId?: string;
@@ -122,12 +124,14 @@ export type ApiRecentGameResult = {
   reason: ApiGameResultReason;
   runner: {
     displayName: string;
+    identityKind?: ApiPlayerIdentityKind;
     agendaPoints: number;
     matchPoints?: number;
     deckName?: string;
   };
   corp: {
     displayName: string;
+    identityKind?: ApiPlayerIdentityKind;
     agendaPoints: number;
     matchPoints?: number;
     deckName?: string;
@@ -180,6 +184,7 @@ export type ApiRecentSeriesResult = {
     ApiSeriesPlayerSlot,
     {
       displayName: string;
+      identityKind?: ApiPlayerIdentityKind;
       matchPoints: number;
       agendaPoints: number;
       wins: number;

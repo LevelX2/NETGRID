@@ -1,7 +1,7 @@
 "use client";
 
-import { Award, RotateCcw } from "lucide-react";
-import type { ApiMatchFormat, ApiRecentGameResult, ApiRecentResultEntry, ApiRecentSeriesResult, Winner } from "@netgrid/shared";
+import { Award, BadgeCheck, Bot, RotateCcw, UserRound } from "lucide-react";
+import type { ApiMatchFormat, ApiPlayerIdentityKind, ApiRecentGameResult, ApiRecentResultEntry, ApiRecentSeriesResult, Winner } from "@netgrid/shared";
 import { recentResultsEmptyText, recentSeriesWinnerLabel, seriesStatusLabel, singleRecentMatchPoints } from "../../app/recent-results-ui";
 
 export function RecentGamesPanel({
@@ -61,9 +61,11 @@ function RecentGameResultCard({ result }: { result: ApiRecentGameResult }) {
         <div>
           <p className="recentGameMatchup">
             <strong>{result.runner.displayName}</strong>
+            <PlayerIdentityBadge kind={result.runner.identityKind} />
             <span>Runner</span>
             <em>gegen</em>
             <strong>{result.corp.displayName}</strong>
+            <PlayerIdentityBadge kind={result.corp.identityKind} />
             <span>Korp</span>
           </p>
           <p className="recentGameMeta">
@@ -106,9 +108,11 @@ function RecentSeriesResultCard({ result }: { result: ApiRecentSeriesResult }) {
         <div>
           <p className="recentGameMatchup">
             <strong>{result.players.player_a.displayName}</strong>
+            <PlayerIdentityBadge kind={result.players.player_a.identityKind} />
             <span>Spieler A</span>
             <em>gegen</em>
             <strong>{result.players.player_b.displayName}</strong>
+            <PlayerIdentityBadge kind={result.players.player_b.identityKind} />
             <span>Spieler B</span>
           </p>
           <p className="recentGameMeta">
@@ -143,6 +147,21 @@ function RecentSeriesResultCard({ result }: { result: ApiRecentSeriesResult }) {
         ))}
       </ol>
     </article>
+  );
+}
+
+function PlayerIdentityBadge({ kind = "guest" }: { kind: ApiPlayerIdentityKind | undefined }) {
+  const label = kind === "account" ? "Account" : kind === "ai" ? "KI" : "Gast";
+  const Icon = kind === "account" ? BadgeCheck : kind === "ai" ? Bot : UserRound;
+  return (
+    <span
+      className={`playerIdentityBadge ${kind}`}
+      aria-label={`Identität: ${label}`}
+      title={kind === "account" ? "Angemeldeter Account" : kind === "ai" ? "KI-Spieler" : "Nicht angemeldeter Gast"}
+    >
+      <Icon size={11} aria-hidden="true" />
+      {label}
+    </span>
   );
 }
 

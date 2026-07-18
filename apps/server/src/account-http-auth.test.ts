@@ -15,8 +15,9 @@ describe("closed account HTTP API", () => {
       passwordKdf: TEST_ACCOUNT_PASSWORD_KDF,
     });
     await accountAuth.bootstrapAdmin({ loginName: "admin", displayName: "Admin", password: ADMIN_PASSWORD });
+    const matchStorage = new InMemoryMatchStorage();
     const handle = createNetgridHttpServer(
-      new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "account-http-match-salt" }),
+      new MultiplayerService(matchStorage, { tokenSalt: "account-http-match-salt" }),
       { deploymentConfig: loadDeploymentConfig({} as NodeJS.ProcessEnv), accountAuth },
     );
     const baseUrl = await listen(handle);
@@ -73,6 +74,34 @@ describe("closed account HTTP API", () => {
       const accountSession = await fetch(`${baseUrl}/api/account/session`, { headers: { cookie } });
       expect(accountSession.status).toBe(200);
       expect(await accountSession.json()).toMatchObject({ account: { loginName: "admin", role: "admin" } });
+
+      const createdMatch = await fetch(`${baseUrl}/api/matches`, {
+        method: "POST",
+        headers: { "content-type": "application/json", origin: ORIGIN, cookie },
+        body: JSON.stringify({ hostSide: "runner", playMode: "human_vs_ai", humanSide: "runner", displayName: "Manipulierter Gastname", seed: "account-name-is-authoritative" }),
+      });
+      expect(createdMatch.status).toBe(201);
+      const storedMatch = (await matchStorage.list()).find((record) => record.match.seed === "account-name-is-authoritative");
+      expect(storedMatch?.sessions[0]?.displayName).toBe("Admin");
+      expect(storedMatch?.match.participantIdentities).toEqual({ player_a: "account" });
+
+      const guestLobby = await fetch(`${baseUrl}/api/matches`, {
+        method: "POST",
+        headers: { "content-type": "application/json", origin: ORIGIN },
+        body: JSON.stringify({ hostSide: "runner", mode: "human_vs_human", displayName: "Gastgeber", seed: "account-join-name-is-authoritative" }),
+      });
+      expect(guestLobby.status).toBe(201);
+      const guestLobbyPayload = await guestLobby.json() as { joinUrl: string };
+      const guestLobbyUrl = new URL(guestLobbyPayload.joinUrl);
+      const joined = await fetch(`${baseUrl}/api/matches/${encodeURIComponent(guestLobbyUrl.searchParams.get("matchId") ?? "")}/join`, {
+        method: "POST",
+        headers: { "content-type": "application/json", origin: ORIGIN, cookie },
+        body: JSON.stringify({ token: guestLobbyUrl.searchParams.get("joinToken"), displayName: "Manipulierter Beitrittsname" }),
+      });
+      expect(joined.status).toBe(200);
+      const joinedMatch = (await matchStorage.list()).find((record) => record.match.seed === "account-join-name-is-authoritative");
+      expect(joinedMatch?.sessions[1]?.displayName).toBe("Admin");
+      expect(joinedMatch?.match.participantIdentities).toEqual({ player_a: "guest", player_b: "account" });
     } finally {
       await handle.close();
     }

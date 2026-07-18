@@ -4660,6 +4660,7 @@ export default function Page() {
   };
 
   const updateDisplayName = (value: string) => {
+    if (accountSession.account) return;
     setDisplayName(value);
     rememberDisplayName(value);
   };
@@ -5577,6 +5578,9 @@ export default function Page() {
                           seriesGamesPlanned={seriesGamesPlanned}
                           matchCardPool={matchCardPool}
                           displayName={displayName}
+                          identityKind={
+                            accountSession.account ? "account" : "guest"
+                          }
                           isHumanVsAi={isHumanVsAi}
                           humanAiSideSelection={humanAiSideSelection}
                           gameMode={gameMode}
@@ -5690,6 +5694,9 @@ export default function Page() {
                           joinTokenTrimmed={joinTokenTrimmed}
                           joinLinkInput={joinLinkInput}
                           displayName={displayName}
+                          identityKind={
+                            accountSession.account ? "account" : "guest"
+                          }
                           runnerSnapshots={runnerSnapshots}
                           corpSnapshots={corpSnapshots}
                           localDecks={matchStartLocalDecks}

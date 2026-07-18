@@ -667,6 +667,17 @@ select {
   background: color-mix(in srgb, var(--runner), var(--field-bg) 84%);
 }
 
+.matchStartIdentity.account {
+  border-color: color-mix(in srgb, var(--success), var(--line) 44%);
+  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--success), white 8%);
+}
+
+.matchStartIdentity.account .matchStartIdentityIcon {
+  border-color: color-mix(in srgb, var(--success), var(--line) 38%);
+  color: color-mix(in srgb, var(--success), white 20%);
+  background: color-mix(in srgb, var(--success), var(--field-bg) 88%);
+}
+
 .matchStartIdentity label {
   display: grid;
   gap: 5px;
@@ -687,6 +698,52 @@ select {
   color: var(--muted);
   font-size: 11px;
   font-weight: 500;
+}
+
+.matchStartIdentityLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.matchStartIdentity input[readonly] {
+  cursor: default;
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--success), var(--line) 48%);
+  background: color-mix(in srgb, var(--success), var(--field-bg) 94%);
+}
+
+.playerIdentityBadge {
+  min-height: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.playerIdentityBadge.account {
+  border-color: color-mix(in srgb, var(--success), var(--line) 38%);
+  color: color-mix(in srgb, var(--success), white 18%);
+  background: color-mix(in srgb, var(--success), var(--panel) 88%);
+}
+
+.playerIdentityBadge.guest {
+  color: var(--muted);
+  background: var(--panel-soft);
+}
+
+.playerIdentityBadge.ai {
+  border-color: color-mix(in srgb, var(--corp), var(--line) 42%);
+  color: color-mix(in srgb, var(--corp), white 28%);
+  background: color-mix(in srgb, var(--corp), var(--panel) 90%);
 }
 
 .matchStartSection {
@@ -1137,6 +1194,23 @@ select {
 
 .recentGameMatchup strong {
   overflow-wrap: anywhere;
+}
+
+.recentGameMatchup .playerIdentityBadge {
+  color: inherit;
+  font-size: 10px;
+}
+
+.recentGameMatchup .playerIdentityBadge.account {
+  color: color-mix(in srgb, var(--success), white 18%);
+}
+
+.recentGameMatchup .playerIdentityBadge.guest {
+  color: var(--muted);
+}
+
+.recentGameMatchup .playerIdentityBadge.ai {
+  color: color-mix(in srgb, var(--corp), white 28%);
 }
 
 .recentGameMatchup span,
@@ -15590,8 +15664,7 @@ select,
 .matchStartLogoWordmark {
   width: 100%;
   height: auto;
-  filter:
-    drop-shadow(0 0 16px rgb(0 213 255 / 0.7))
+  filter: drop-shadow(0 0 16px rgb(0 213 255 / 0.7))
     drop-shadow(0 0 42px rgb(0 119 255 / 0.38));
 }
 
