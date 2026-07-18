@@ -1,6 +1,6 @@
 # Match 74e2369: Corp-KI-Regressionsbehebung
 
-Status: P0 aktiv
+Status: P2 aktiv
 
 ## Quelle und Gesamtziel
 
@@ -63,7 +63,7 @@ Nicht freigabereif bleiben die eigenständige Umstimmung der konkreten
 
 ### P0 – Prozessvertrag
 
-Status: aktiv
+Status: abgeschlossen
 
 - Scope, `/Goal`, Invarianten, Paketfolge und Integrationsregeln sichern.
 - Check: `git diff --check`.
@@ -71,7 +71,7 @@ Status: aktiv
 
 ### P1 – Evidence, Baseline und Regressionsursprung
 
-Status: ausstehend
+Status: abgeschlossen
 
 - 136/136 Entscheidungen, bessere Alternativen und Nicht-Findings dauerhaft
   dokumentieren.
@@ -85,7 +85,7 @@ Status: ausstehend
 
 ### P2 – Spielgleiche rote Evidence
 
-Status: ausstehend
+Status: aktiv
 
 - historische Decision-Checkpoints für R&D-Verteidigung, Agenda-Zielwahl,
   `Night Shift` und Abwurfentscheidung capturen;
@@ -151,3 +151,17 @@ Status: ausstehend
 - Pflichtchecks sind grün oder ein verbleibender Baselinefehler ist identisch
   auf unverändertem aktuellem `main` reproduziert.
 - `main` enthält alle Paketcommits; es erfolgt kein Push und kein PR.
+
+## Ausführungsstand
+
+- P0 im Commit `52dc5e30b` abgeschlossen.
+- P1 abgeschlossen: 136/136 Decisions sind klassifiziert; alle 2817
+  bestehenden AI-Tests und der AI-Typecheck sind grün. Der einzige rote
+  globale AI-Gate-Teil ist die unveränderte Source-Structure-Baseline mit vier
+  Dateigrößenüberschreitungen. Git-Historie und Consumer-Kette belegen eine
+  Plan-Kompositionslücke bei Night Shift/R&D sowie seit Mai bestehende
+  Compiled-Hint-Überlappungen hinter korrekt überarbeiteten Active Hints.
+- P2 aktiv: fünf strikte Checkpoints wurden mit null Warmup-Drifts capturt und
+  scheitern ausschließlich als `behavior_regression`; drei Hint-Verträge sind
+  rot, während 43 angrenzende Gegenverträge und drei Hint-Erhaltungsproben grün
+  bleiben.
