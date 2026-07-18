@@ -595,7 +595,6 @@ function urgentCorpSemanticChoice(
           "corp_matchpoint_hq_protection_mismatch",
           "corp_central_unrezzable_ice_install_stop",
           "corp_active_scoreline_off_path_spend",
-          "corp_board_triage_mismatch",
         ]),
     )
     .sort((left, right) => right.score - left.score)[0];
@@ -625,11 +624,24 @@ function urgentCorpSemanticChoice(
           "corp_active_remote_agenda_unsafe_advance",
           "corp_active_remote_agenda_underfunded_advance",
           "corp_contestable_remote_score_penalty",
-          "corp_board_triage_mismatch",
+          "corp_trace_without_conversion_window",
+          "corp_last_click_trace_without_payoff",
         ]) &&
+        !semanticRuntimeChoiceHasDeckoutAgendaFloodMismatch(choice) &&
         !semanticRuntimeChoiceHasUnsafeScoringWindow(choice),
     )
     .sort((left, right) => right.score - left.score)[0];
+}
+
+function semanticRuntimeChoiceHasDeckoutAgendaFloodMismatch(
+  choice: SemanticRuntimeChoice,
+): boolean {
+  return choice.scoreBreakdown.some(
+    (component) =>
+      component.key === "corp_board_triage_mismatch" &&
+      component.value < 0 &&
+      component.reason?.includes("corp_deckout_agenda_flood:true") === true,
+  );
 }
 
 function semanticRuntimeChoiceHasUnsafeScoringWindow(
@@ -638,7 +650,11 @@ function semanticRuntimeChoiceHasUnsafeScoringWindow(
   return choice.scoreBreakdown.some(
     (component) =>
       component.key === "corp_scoring_window_assessment" &&
-      component.reason?.includes("window_kind:unsafe") === true,
+      component.reason?.includes("window_kind:unsafe") === true &&
+      !(
+        component.reason.includes("runner_can_contest_before_score:false") &&
+        component.reason.includes("runner_can_reach_access_before_score:false")
+      ),
   );
 }
 
