@@ -51,6 +51,28 @@ export type AccountCredentialRecord = {
   revokedAt?: string;
 };
 
+export type AccountInviteRecord = {
+  inviteId: string;
+  inviteTokenHash: string;
+  targetAccountId: string;
+  createdByAccountId?: string;
+  createdAt: string;
+  expiresAt: string;
+  usedAt?: string;
+  revokedAt?: string;
+};
+
+export type AccountResetTokenRecord = {
+  resetId: string;
+  resetTokenHash: string;
+  targetAccountId: string;
+  createdByAccountId?: string;
+  createdAt: string;
+  expiresAt: string;
+  usedAt?: string;
+  revokedAt?: string;
+};
+
 export type AccountSessionRecord = {
   sessionId: string;
   accountId: string;
@@ -91,6 +113,12 @@ export type AccountStorage = {
   loadSession(sessionId: string): Promise<AccountSessionRecord | undefined>;
   loadSessionByTokenHash(sessionTokenHash: string): Promise<AccountSessionRecord | undefined>;
   listSessionsForAccount(accountId: string): Promise<AccountSessionRecord[]>;
+  saveInvite(invite: AccountInviteRecord): Promise<void>;
+  loadInviteByTokenHash(inviteTokenHash: string): Promise<AccountInviteRecord | undefined>;
+  claimInvite(inviteId: string, usedAt: string): Promise<boolean>;
+  saveResetToken(reset: AccountResetTokenRecord): Promise<void>;
+  loadResetTokenByHash(resetTokenHash: string): Promise<AccountResetTokenRecord | undefined>;
+  claimResetToken(resetId: string, usedAt: string): Promise<boolean>;
   close?(): void;
 };
 
@@ -99,6 +127,7 @@ export type CreateAccountInput = {
   loginName?: string;
   displayName: string;
   role?: AccountRole;
+  status?: AccountStatus;
 };
 
 export type CreateAccountSessionInput = {
@@ -121,6 +150,8 @@ export class InMemoryAccountStorage implements AccountStorage {
   private readonly passwordCredentials = new Map<string, AccountPasswordCredentialRecord>();
   private readonly credentials = new Map<string, AccountCredentialRecord>();
   private readonly sessions = new Map<string, AccountSessionRecord>();
+  private readonly invites = new Map<string, AccountInviteRecord>();
+  private readonly resetTokens = new Map<string, AccountResetTokenRecord>();
 
   async saveAccount(account: AccountRecord): Promise<void> {
     this.accounts.set(account.accountId, clone(account));
@@ -174,6 +205,38 @@ export class InMemoryAccountStorage implements AccountStorage {
 
   async listSessionsForAccount(accountId: string): Promise<AccountSessionRecord[]> {
     return [...this.sessions.values()].filter((session) => session.accountId === accountId).map((session) => clone(session));
+  }
+
+  async saveInvite(invite: AccountInviteRecord): Promise<void> {
+    this.invites.set(invite.inviteId, clone(invite));
+  }
+
+  async loadInviteByTokenHash(inviteTokenHash: string): Promise<AccountInviteRecord | undefined> {
+    const invite = [...this.invites.values()].find((candidate) => candidate.inviteTokenHash === inviteTokenHash);
+    return invite ? clone(invite) : undefined;
+  }
+
+  async claimInvite(inviteId: string, usedAt: string): Promise<boolean> {
+    const invite = this.invites.get(inviteId);
+    if (!invite || invite.usedAt || invite.revokedAt || Date.parse(invite.expiresAt) <= Date.parse(usedAt)) return false;
+    this.invites.set(inviteId, { ...invite, usedAt });
+    return true;
+  }
+
+  async saveResetToken(resetToken: AccountResetTokenRecord): Promise<void> {
+    this.resetTokens.set(resetToken.resetId, clone(resetToken));
+  }
+
+  async loadResetTokenByHash(resetTokenHash: string): Promise<AccountResetTokenRecord | undefined> {
+    const resetToken = [...this.resetTokens.values()].find((candidate) => candidate.resetTokenHash === resetTokenHash);
+    return resetToken ? clone(resetToken) : undefined;
+  }
+
+  async claimResetToken(resetId: string, usedAt: string): Promise<boolean> {
+    const resetToken = this.resetTokens.get(resetId);
+    if (!resetToken || resetToken.usedAt || resetToken.revokedAt || Date.parse(resetToken.expiresAt) <= Date.parse(usedAt)) return false;
+    this.resetTokens.set(resetId, { ...resetToken, usedAt });
+    return true;
   }
 }
 
@@ -354,6 +417,76 @@ export class SqliteAccountStorage implements AccountStorage {
     return (this.db.prepare("SELECT * FROM account_sessions WHERE account_id = ? ORDER BY created_at ASC").all(accountId) as AccountSessionRow[]).map(sessionFromRow);
   }
 
+  async saveInvite(invite: AccountInviteRecord): Promise<void> {
+    this.db.prepare(
+      `INSERT INTO account_invites (
+        invite_id, invite_token_hash, target_account_id, created_by_account_id,
+        created_at, expires_at, used_at, revoked_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(invite_id) DO UPDATE SET
+        invite_token_hash = excluded.invite_token_hash,
+        expires_at = excluded.expires_at,
+        used_at = excluded.used_at,
+        revoked_at = excluded.revoked_at`,
+    ).run(
+      invite.inviteId,
+      invite.inviteTokenHash,
+      invite.targetAccountId,
+      invite.createdByAccountId ?? null,
+      invite.createdAt,
+      invite.expiresAt,
+      invite.usedAt ?? null,
+      invite.revokedAt ?? null,
+    );
+  }
+
+  async loadInviteByTokenHash(inviteTokenHash: string): Promise<AccountInviteRecord | undefined> {
+    const row = this.db.prepare("SELECT * FROM account_invites WHERE invite_token_hash = ?").get(inviteTokenHash) as AccountInviteRow | undefined;
+    return row ? inviteFromRow(row) : undefined;
+  }
+
+  async claimInvite(inviteId: string, usedAt: string): Promise<boolean> {
+    const result = this.db.prepare(
+      "UPDATE account_invites SET used_at = ? WHERE invite_id = ? AND used_at IS NULL AND revoked_at IS NULL AND expires_at > ?",
+    ).run(usedAt, inviteId, usedAt);
+    return Number(result.changes) === 1;
+  }
+
+  async saveResetToken(resetToken: AccountResetTokenRecord): Promise<void> {
+    this.db.prepare(
+      `INSERT INTO account_reset_tokens (
+        reset_id, reset_token_hash, target_account_id, created_by_account_id,
+        created_at, expires_at, used_at, revoked_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(reset_id) DO UPDATE SET
+        reset_token_hash = excluded.reset_token_hash,
+        expires_at = excluded.expires_at,
+        used_at = excluded.used_at,
+        revoked_at = excluded.revoked_at`,
+    ).run(
+      resetToken.resetId,
+      resetToken.resetTokenHash,
+      resetToken.targetAccountId,
+      resetToken.createdByAccountId ?? null,
+      resetToken.createdAt,
+      resetToken.expiresAt,
+      resetToken.usedAt ?? null,
+      resetToken.revokedAt ?? null,
+    );
+  }
+
+  async loadResetTokenByHash(resetTokenHash: string): Promise<AccountResetTokenRecord | undefined> {
+    const row = this.db.prepare("SELECT * FROM account_reset_tokens WHERE reset_token_hash = ?").get(resetTokenHash) as AccountResetTokenRow | undefined;
+    return row ? resetTokenFromRow(row) : undefined;
+  }
+
+  async claimResetToken(resetId: string, usedAt: string): Promise<boolean> {
+    const result = this.db.prepare(
+      "UPDATE account_reset_tokens SET used_at = ? WHERE reset_id = ? AND used_at IS NULL AND revoked_at IS NULL AND expires_at > ?",
+    ).run(usedAt, resetId, usedAt);
+    return Number(result.changes) === 1;
+  }
+
   close(): void {
     this.db.close();
   }
@@ -394,7 +527,7 @@ export class AccountSessionService {
       loginName: loginName.display,
       loginNameNormalized: loginName.normalized,
       displayName: input.displayName.trim(),
-      status: "active",
+      status: input.status ?? "active",
       role: input.role ?? "user",
       credentialVersion: 1,
       createdAt: now,
@@ -498,6 +631,10 @@ export class AccountSessionService {
     return `sha256:${createHmac("sha256", this.tokenSalt).update(`account-${purpose}:${value}`).digest("hex")}`;
   }
 
+  hashOneTimeToken(purpose: "invite" | "reset", value: string): string {
+    return `sha256:${createHmac("sha256", this.tokenSalt).update(`account-${purpose}:${value}`).digest("hex")}`;
+  }
+
   private expiresAt(now: string): string {
     return new Date(Date.parse(now) + this.maxSessionAgeDays * 24 * 60 * 60 * 1000).toISOString();
   }
@@ -554,6 +691,28 @@ type AccountSessionRow = {
   expires_at: string;
   revoked_at: string | null;
   device_label: string | null;
+};
+
+type AccountInviteRow = {
+  invite_id: string;
+  invite_token_hash: string;
+  target_account_id: string;
+  created_by_account_id: string | null;
+  created_at: string;
+  expires_at: string;
+  used_at: string | null;
+  revoked_at: string | null;
+};
+
+type AccountResetTokenRow = {
+  reset_id: string;
+  reset_token_hash: string;
+  target_account_id: string;
+  created_by_account_id: string | null;
+  created_at: string;
+  expires_at: string;
+  used_at: string | null;
+  revoked_at: string | null;
 };
 
 function accountFromRow(row: AccountRow): AccountRecord {
@@ -614,6 +773,32 @@ function sessionFromRow(row: AccountSessionRow): AccountSessionRecord {
     expiresAt: row.expires_at,
     ...(row.revoked_at ? { revokedAt: row.revoked_at } : {}),
     ...(row.device_label ? { deviceLabel: row.device_label } : {}),
+  };
+}
+
+function inviteFromRow(row: AccountInviteRow): AccountInviteRecord {
+  return {
+    inviteId: row.invite_id,
+    inviteTokenHash: row.invite_token_hash,
+    targetAccountId: row.target_account_id,
+    createdAt: row.created_at,
+    expiresAt: row.expires_at,
+    ...(row.created_by_account_id ? { createdByAccountId: row.created_by_account_id } : {}),
+    ...(row.used_at ? { usedAt: row.used_at } : {}),
+    ...(row.revoked_at ? { revokedAt: row.revoked_at } : {}),
+  };
+}
+
+function resetTokenFromRow(row: AccountResetTokenRow): AccountResetTokenRecord {
+  return {
+    resetId: row.reset_id,
+    resetTokenHash: row.reset_token_hash,
+    targetAccountId: row.target_account_id,
+    createdAt: row.created_at,
+    expiresAt: row.expires_at,
+    ...(row.created_by_account_id ? { createdByAccountId: row.created_by_account_id } : {}),
+    ...(row.used_at ? { usedAt: row.used_at } : {}),
+    ...(row.revoked_at ? { revokedAt: row.revoked_at } : {}),
   };
 }
 

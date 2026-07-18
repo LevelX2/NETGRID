@@ -58,6 +58,13 @@ import {
   MaintenanceAuthService,
   maintenanceAuthPathFromEnv
 } from "./maintenance-auth";
+import { AccountAuthService } from "./account-password";
+import {
+  ACCOUNT_SESSION_COOKIE_NAME,
+  ACCOUNT_SESSION_MAX_AGE_DAYS,
+  SqliteAccountStorage,
+  type AccountSessionAuthResult,
+} from "./account-session";
 
 type ClientWsMessage =
   | { type: "join_match"; payload: { matchId: string; sessionToken: string; side: Side } }
@@ -103,11 +110,12 @@ export type NetgridServerHandle = {
   close(): Promise<void>;
 };
 
-type NetgridServerOptions = {
+export type NetgridServerOptions = {
   deploymentConfig?: DeploymentConfig;
   rateLimiter?: FixedWindowRateLimiter;
   connectionAudit?: ConnectionAuditLogger;
   maintenanceAuth?: MaintenanceAuthService;
+  accountAuth?: AccountAuthService;
 };
 
 export class NetgridRealtimeServer {
@@ -515,8 +523,9 @@ export function createNetgridHttpServer(service?: MultiplayerService, options: N
   const rateLimiter = options.rateLimiter ?? createRateLimiter(deploymentConfig.rateLimitProfile);
   const connectionAudit = options.connectionAudit ?? createConnectionAuditLoggerFromEnv();
   const maintenanceAuth = options.maintenanceAuth ?? new MaintenanceAuthService(new JsonFileMaintenanceCredentialStore(maintenanceAuthPathFromEnv()));
+  const accountAuth = options.accountAuth;
   const realtime = new NetgridRealtimeServer(activeService, deploymentConfig, rateLimiter, connectionAudit);
-  const server = createServer((request, response) => void routeHttp(activeService, realtime, deploymentConfig, rateLimiter, maintenanceAuth, request, response));
+  const server = createServer((request, response) => void routeHttp(activeService, realtime, deploymentConfig, rateLimiter, maintenanceAuth, accountAuth, request, response));
   realtime.attach(server);
   const cleanupTimer = deploymentConfig.profile === "local" ? startMaintenanceCleanupTimer(activeService) : undefined;
   return {
@@ -532,6 +541,7 @@ export function createNetgridHttpServer(service?: MultiplayerService, options: N
           .then(() =>
             server.close((error) => {
               if (cleanupTimer) clearInterval(cleanupTimer);
+              accountAuth?.close();
               activeService.closeStorage();
               return error ? reject(error) : resolve();
             })
@@ -541,8 +551,8 @@ export function createNetgridHttpServer(service?: MultiplayerService, options: N
   };
 }
 
-export async function startNetgridServer(options: { port?: number; host?: string; service?: MultiplayerService } = {}): Promise<NetgridServerHandle & { url: string; bindUrl: string }> {
-  const handle = createNetgridHttpServer(options.service);
+export async function startNetgridServer(options: { port?: number; host?: string; service?: MultiplayerService; accountAuth?: AccountAuthService } = {}): Promise<NetgridServerHandle & { url: string; bindUrl: string }> {
+  const handle = createNetgridHttpServer(options.service, { accountAuth: options.accountAuth ?? createConfiguredAccountAuth() });
   const port = options.port ?? Number(process.env.PORT ?? 8787);
   const host = (options.host ?? process.env.HOST ?? "0.0.0.0").trim();
   await new Promise<void>((resolveListen) => handle.server.listen(port, host, resolveListen));
@@ -551,6 +561,12 @@ export async function startNetgridServer(options: { port?: number; host?: string
   const bindUrl = `http://${host}:${port}`;
   handle.realtime.recordServerStart(url);
   return { ...handle, url, bindUrl };
+}
+
+export function createConfiguredAccountAuth(env: NodeJS.ProcessEnv = process.env): AccountAuthService {
+  const dbPath = envValue(env, "NETGRID_ACCOUNT_SQLITE_PATH") ?? envValue(env, "NETGRID_SQLITE_STORAGE_PATH") ?? DEFAULT_SQLITE_STORAGE_PATH;
+  const backupDir = envValue(env, "NETGRID_STORAGE_BACKUP_DIR") ?? DEFAULT_STORAGE_BACKUP_DIR;
+  return new AccountAuthService(new SqliteAccountStorage({ dbPath, backupDir }));
 }
 
 function startMaintenanceCleanupTimer(service: MultiplayerService): ReturnType<typeof setInterval> | undefined {
@@ -571,6 +587,7 @@ async function routeHttp(
   deploymentConfig: DeploymentConfig,
   rateLimiter: FixedWindowRateLimiter,
   maintenanceAuth: MaintenanceAuthService,
+  accountAuth: AccountAuthService | undefined,
   request: IncomingMessage,
   response: ServerResponse
 ): Promise<void> {
@@ -592,6 +609,164 @@ async function routeHttp(
   try {
     if (request.method === "GET" && url.pathname === "/health") {
       sendJson(response, 200, redactedHealth(await service.storageHealth(), deploymentConfig));
+      return;
+    }
+
+    if (url.pathname === "/api/account/login" && request.method === "POST") {
+      if (!accountAuth) return sendJson(response, 503, accountUnavailablePayload());
+      if (!ensureAccountOrigin(response, request, deploymentConfig)) return;
+      if (!checkRateLimit(response, rateLimiter, "token_probe", request, deploymentConfig, "account-login")) return;
+      const body = await readJson(request);
+      const result = await accountAuth.login({
+        loginName: typeof body.loginName === "string" ? body.loginName : "",
+        password: typeof body.password === "string" ? body.password : "",
+        ...(typeof body.deviceLabel === "string" ? { deviceLabel: body.deviceLabel } : {}),
+      });
+      if (!result.ok) return sendJson(response, 401, accountInvalidCredentialsPayload());
+      response.setHeader("set-cookie", accountSessionCookie(result.session.sessionToken, request, deploymentConfig));
+      sendJson(response, 200, { account: result.account, session: result.session.session, csrfToken: result.session.csrfToken });
+      return;
+    }
+
+    if (url.pathname === "/api/account/session" && request.method === "GET") {
+      if (!accountAuth) return sendJson(response, 503, accountUnavailablePayload());
+      const auth = await accountAuth.authenticateSession(accountSessionToken(request) ?? "");
+      if (!auth.ok) return sendJson(response, 401, accountAuthRequiredPayload());
+      sendJson(response, 200, { account: auth.account, session: auth.session });
+      return;
+    }
+
+    if (url.pathname === "/api/account/logout" && request.method === "POST") {
+      if (!accountAuth) return sendJson(response, 503, accountUnavailablePayload());
+      const auth = await ensureAccountMutationAccess(response, request, deploymentConfig, accountAuth);
+      if (!auth) return;
+      await accountAuth.sessions.revokeSessionByToken(accountSessionToken(request) ?? "");
+      response.setHeader("set-cookie", clearAccountSessionCookie(request, deploymentConfig));
+      sendJson(response, 200, { ok: true });
+      return;
+    }
+
+    if (url.pathname === "/api/account/sessions/revoke-all" && request.method === "POST") {
+      if (!accountAuth) return sendJson(response, 503, accountUnavailablePayload());
+      const auth = await ensureAccountMutationAccess(response, request, deploymentConfig, accountAuth);
+      if (!auth) return;
+      const revoked = await accountAuth.sessions.revokeAllAccountSessions(auth.account.accountId);
+      response.setHeader("set-cookie", clearAccountSessionCookie(request, deploymentConfig));
+      sendJson(response, 200, { ok: true, revoked });
+      return;
+    }
+
+    if (url.pathname === "/api/account/password" && request.method === "POST") {
+      if (!accountAuth) return sendJson(response, 503, accountUnavailablePayload());
+      const auth = await ensureAccountMutationAccess(response, request, deploymentConfig, accountAuth);
+      if (!auth) return;
+      if (!checkRateLimit(response, rateLimiter, "token_probe", request, deploymentConfig, "account-password")) return;
+      const body = await readJson(request);
+      try {
+        const changed = await accountAuth.changePassword({
+          accountId: auth.account.accountId,
+          currentPassword: typeof body.currentPassword === "string" ? body.currentPassword : "",
+          newPassword: typeof body.newPassword === "string" ? body.newPassword : "",
+        });
+        if (!changed) return sendJson(response, 401, accountInvalidCredentialsPayload());
+      } catch (error) {
+        const payload = accountInputErrorPayload(error);
+        if (payload) return sendJson(response, 400, payload);
+        throw error;
+      }
+      response.setHeader("set-cookie", clearAccountSessionCookie(request, deploymentConfig));
+      sendJson(response, 200, { ok: true, sessionsRevoked: true });
+      return;
+    }
+
+    const inviteRoute = /^\/api\/account\/invites\/([^/]+)$/.exec(url.pathname);
+    if (inviteRoute && request.method === "GET") {
+      if (!accountAuth) return sendJson(response, 503, accountUnavailablePayload());
+      if (!checkRateLimit(response, rateLimiter, "token_probe", request, deploymentConfig, "account-invite-inspect")) return;
+      const invite = await accountAuth.inspectInvite(decodeURIComponent(inviteRoute[1] ?? ""));
+      if (!invite) return sendJson(response, 404, accountOneTimeTokenInvalidPayload());
+      sendJson(response, 200, { invite });
+      return;
+    }
+
+    const inviteAcceptRoute = /^\/api\/account\/invites\/([^/]+)\/accept$/.exec(url.pathname);
+    if (inviteAcceptRoute && request.method === "POST") {
+      if (!accountAuth) return sendJson(response, 503, accountUnavailablePayload());
+      if (!ensureAccountOrigin(response, request, deploymentConfig)) return;
+      if (!checkRateLimit(response, rateLimiter, "token_probe", request, deploymentConfig, "account-invite-accept")) return;
+      const body = await readJson(request);
+      try {
+        const accepted = await accountAuth.acceptInvite({
+          inviteToken: decodeURIComponent(inviteAcceptRoute[1] ?? ""),
+          password: typeof body.password === "string" ? body.password : "",
+          ...(typeof body.deviceLabel === "string" ? { deviceLabel: body.deviceLabel } : {}),
+        });
+        if (!accepted) return sendJson(response, 404, accountOneTimeTokenInvalidPayload());
+        response.setHeader("set-cookie", accountSessionCookie(accepted.session.sessionToken, request, deploymentConfig));
+        sendJson(response, 200, { account: accepted.account, session: accepted.session.session, csrfToken: accepted.session.csrfToken });
+      } catch (error) {
+        const payload = accountInputErrorPayload(error);
+        if (payload) return sendJson(response, 400, payload);
+        throw error;
+      }
+      return;
+    }
+
+    const resetAcceptRoute = /^\/api\/account\/resets\/([^/]+)\/accept$/.exec(url.pathname);
+    if (resetAcceptRoute && request.method === "POST") {
+      if (!accountAuth) return sendJson(response, 503, accountUnavailablePayload());
+      if (!ensureAccountOrigin(response, request, deploymentConfig)) return;
+      if (!checkRateLimit(response, rateLimiter, "token_probe", request, deploymentConfig, "account-reset-accept")) return;
+      const body = await readJson(request);
+      try {
+        const accepted = await accountAuth.acceptReset({
+          resetToken: decodeURIComponent(resetAcceptRoute[1] ?? ""),
+          newPassword: typeof body.newPassword === "string" ? body.newPassword : "",
+        });
+        if (!accepted) return sendJson(response, 404, accountOneTimeTokenInvalidPayload());
+      } catch (error) {
+        const payload = accountInputErrorPayload(error);
+        if (payload) return sendJson(response, 400, payload);
+        throw error;
+      }
+      response.setHeader("set-cookie", clearAccountSessionCookie(request, deploymentConfig));
+      sendJson(response, 200, { ok: true, sessionsRevoked: true });
+      return;
+    }
+
+    if (url.pathname === "/api/account/admin/invites" && request.method === "POST") {
+      if (!accountAuth) return sendJson(response, 503, accountUnavailablePayload());
+      const auth = await ensureAccountMutationAccess(response, request, deploymentConfig, accountAuth, "admin");
+      if (!auth) return;
+      const body = await readJson(request);
+      try {
+        const created = await accountAuth.createInvite({
+          loginName: typeof body.loginName === "string" ? body.loginName : "",
+          displayName: typeof body.displayName === "string" ? body.displayName : "",
+          createdByAccountId: auth.account.accountId,
+          ...(typeof body.expiresInHours === "number" ? { expiresInHours: body.expiresInHours } : {}),
+        });
+        sendJson(response, 201, created);
+      } catch (error) {
+        const payload = accountInputErrorPayload(error);
+        if (payload) return sendJson(response, 400, payload);
+        throw error;
+      }
+      return;
+    }
+
+    if (url.pathname === "/api/account/admin/resets" && request.method === "POST") {
+      if (!accountAuth) return sendJson(response, 503, accountUnavailablePayload());
+      const auth = await ensureAccountMutationAccess(response, request, deploymentConfig, accountAuth, "admin");
+      if (!auth) return;
+      const body = await readJson(request);
+      const created = await accountAuth.createResetToken({
+        loginName: typeof body.loginName === "string" ? body.loginName : "",
+        createdByAccountId: auth.account.accountId,
+        ...(typeof body.expiresInHours === "number" ? { expiresInHours: body.expiresInHours } : {}),
+      });
+      if (!created) return sendJson(response, 404, accountOneTimeTokenInvalidPayload());
+      sendJson(response, 201, created);
       return;
     }
 
@@ -1332,6 +1507,98 @@ function checkRateLimit(
   if (limited.retryAfterSeconds) response.setHeader("retry-after", String(limited.retryAfterSeconds));
   sendJson(response, 429, rateLimitedPayload());
   return false;
+}
+
+async function ensureAccountMutationAccess(
+  response: ServerResponse,
+  request: IncomingMessage,
+  deploymentConfig: DeploymentConfig,
+  accountAuth: AccountAuthService,
+  requiredRole?: "admin",
+): Promise<Extract<AccountSessionAuthResult, { ok: true }> | undefined> {
+  if (!ensureAccountOrigin(response, request, deploymentConfig)) return undefined;
+  const sessionToken = accountSessionToken(request) ?? "";
+  const auth = await accountAuth.authenticateSession(sessionToken);
+  if (!auth.ok) {
+    sendJson(response, 401, accountAuthRequiredPayload());
+    return undefined;
+  }
+  if (requiredRole && auth.account.role !== requiredRole) {
+    sendJson(response, 403, { error: { code: "account_admin_required", message: "Für diese Operation ist ein Admin-Account erforderlich." } });
+    return undefined;
+  }
+  const csrfToken = firstHeaderValue(request.headers["x-netgrid-csrf"]);
+  if (!csrfToken || !(await accountAuth.verifyCsrf(sessionToken, csrfToken))) {
+    sendJson(response, 403, accountRequestRejectedPayload());
+    return undefined;
+  }
+  return auth;
+}
+
+function ensureAccountOrigin(response: ServerResponse, request: IncomingMessage, deploymentConfig: DeploymentConfig): boolean {
+  const origin = firstHeaderValue(request.headers.origin);
+  if (!origin || !isOriginAllowed(origin, deploymentConfig)) {
+    sendJson(response, 403, accountRequestRejectedPayload());
+    return false;
+  }
+  return true;
+}
+
+function accountSessionToken(request: IncomingMessage): string | undefined {
+  const cookieHeader = request.headers.cookie;
+  if (!cookieHeader) return undefined;
+  for (const part of cookieHeader.split(";")) {
+    const separator = part.indexOf("=");
+    if (separator < 0) continue;
+    if (part.slice(0, separator).trim() !== ACCOUNT_SESSION_COOKIE_NAME) continue;
+    return part.slice(separator + 1).trim() || undefined;
+  }
+  return undefined;
+}
+
+function accountSessionCookie(sessionToken: string, request: IncomingMessage, deploymentConfig: DeploymentConfig): string {
+  const secure = isAccountTlsRequest(request, deploymentConfig) ? "; Secure" : "";
+  return `${ACCOUNT_SESSION_COOKIE_NAME}=${sessionToken}; HttpOnly; SameSite=Lax; Path=/; Max-Age=${ACCOUNT_SESSION_MAX_AGE_DAYS * 24 * 60 * 60}${secure}`;
+}
+
+function clearAccountSessionCookie(request: IncomingMessage, deploymentConfig: DeploymentConfig): string {
+  const secure = isAccountTlsRequest(request, deploymentConfig) ? "; Secure" : "";
+  return `${ACCOUNT_SESSION_COOKIE_NAME}=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0${secure}`;
+}
+
+function isAccountTlsRequest(request: IncomingMessage, deploymentConfig: DeploymentConfig): boolean {
+  if (deploymentConfig.profile === "private_internet") return true;
+  if ((request.socket as IncomingMessage["socket"] & { encrypted?: boolean }).encrypted === true) return true;
+  if (!deploymentConfig.trustProxyHeaders) return false;
+  return firstHeaderValue(request.headers["x-forwarded-proto"])?.split(",")[0]?.trim().toLowerCase() === "https";
+}
+
+function accountUnavailablePayload(): { error: { code: "account_auth_unavailable"; message: string } } {
+  return { error: { code: "account_auth_unavailable", message: "Die Account-Anmeldung ist in diesem Serverprozess nicht aktiviert." } };
+}
+
+function accountAuthRequiredPayload(): { error: { code: "account_auth_required"; message: string } } {
+  return { error: { code: "account_auth_required", message: "Eine gültige Account-Sitzung ist erforderlich." } };
+}
+
+function accountInvalidCredentialsPayload(): { error: { code: "account_invalid_credentials"; message: string } } {
+  return { error: { code: "account_invalid_credentials", message: "Anmeldename oder Passwort ist nicht korrekt." } };
+}
+
+function accountOneTimeTokenInvalidPayload(): { error: { code: "account_token_invalid"; message: string } } {
+  return { error: { code: "account_token_invalid", message: "Der Link ist ungültig, abgelaufen oder bereits verwendet." } };
+}
+
+function accountRequestRejectedPayload(): { error: { code: "account_request_rejected"; message: string } } {
+  return { error: { code: "account_request_rejected", message: "Die Account-Anfrage wurde aus Sicherheitsgründen abgelehnt." } };
+}
+
+function accountInputErrorPayload(error: unknown): { error: { code: string; message: string } } | undefined {
+  const code = error instanceof Error ? error.message : "";
+  if (code.startsWith("account_password_")) return { error: { code, message: "Das Passwort erfüllt die Sicherheitsanforderungen nicht." } };
+  if (code === "login_name_invalid" || code === "display_name_invalid") return { error: { code, message: "Anmeldename oder Anzeigename ist ungültig." } };
+  if (code === "login_name_unavailable" || code === "account_exists") return { error: { code: "login_name_unavailable", message: "Dieser Anmeldename ist nicht verfügbar." } };
+  return undefined;
 }
 
 function ensureMaintenanceTransport(response: ServerResponse, request: IncomingMessage, deploymentConfig: DeploymentConfig): boolean {

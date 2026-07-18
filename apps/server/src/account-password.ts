@@ -1,6 +1,8 @@
 import { randomBytes, scrypt, timingSafeEqual } from "node:crypto";
 import type {
+  AccountInviteRecord,
   AccountPasswordCredentialRecord,
+  AccountResetTokenRecord,
   AccountRole,
   AccountSelfView,
   AccountSessionAuthResult,
@@ -40,6 +42,12 @@ export const TEST_ACCOUNT_PASSWORD_KDF: AccountPasswordKdfParameters = {
 export type AccountPasswordLoginResult =
   | { ok: true; account: AccountSelfView; session: CreateAccountSessionResult }
   | { ok: false; errorCode: "invalid_credentials" };
+
+export type AccountInvitePublicView = {
+  loginName: string;
+  displayName: string;
+  expiresAt: string;
+};
 
 export class AccountAuthService {
   readonly sessions: AccountSessionService;
@@ -101,6 +109,110 @@ export class AccountAuthService {
       ...(input.deviceLabel ? { deviceLabel: input.deviceLabel } : {}),
     });
     return { account, session };
+  }
+
+  async createInvite(input: {
+    loginName: string;
+    displayName: string;
+    createdByAccountId?: string;
+    expiresInHours?: number;
+  }): Promise<{ inviteToken: string; invite: AccountInvitePublicView }> {
+    const account = await this.sessions.createAccount({
+      loginName: input.loginName,
+      displayName: input.displayName,
+      role: "user",
+      status: "disabled",
+    });
+    const now = this.now();
+    const inviteToken = randomBytes(32).toString("base64url");
+    const expiresAt = new Date(Date.parse(now) + clampHours(input.expiresInHours, 72) * 60 * 60 * 1000).toISOString();
+    const invite: AccountInviteRecord = {
+      inviteId: randomId("acct_inv"),
+      inviteTokenHash: this.sessions.hashOneTimeToken("invite", inviteToken),
+      targetAccountId: account.accountId,
+      createdAt: now,
+      expiresAt,
+      ...(input.createdByAccountId ? { createdByAccountId: input.createdByAccountId } : {}),
+    };
+    await this.storage.saveInvite(invite);
+    return { inviteToken, invite: { loginName: account.loginName, displayName: account.displayName, expiresAt } };
+  }
+
+  async inspectInvite(inviteToken: string): Promise<AccountInvitePublicView | undefined> {
+    const invite = await this.storage.loadInviteByTokenHash(this.sessions.hashOneTimeToken("invite", inviteToken));
+    if (!invite || !isOneTimeTokenUsable(invite, this.now())) return undefined;
+    const account = await this.storage.loadAccount(invite.targetAccountId);
+    if (!account || account.status !== "disabled") return undefined;
+    return { loginName: account.loginName, displayName: account.displayName, expiresAt: invite.expiresAt };
+  }
+
+  async acceptInvite(input: { inviteToken: string; password: string; deviceLabel?: string }): Promise<{
+    account: AccountSelfView;
+    session: CreateAccountSessionResult;
+  } | undefined> {
+    const invite = await this.storage.loadInviteByTokenHash(this.sessions.hashOneTimeToken("invite", input.inviteToken));
+    const now = this.now();
+    if (!invite || !isOneTimeTokenUsable(invite, now)) return undefined;
+    const account = await this.storage.loadAccount(invite.targetAccountId);
+    if (!account || account.status !== "disabled") return undefined;
+    validateNewAccountPassword(input.password, account.loginName);
+    const credential = await createPasswordCredential({
+      accountId: account.accountId,
+      password: input.password,
+      changedAt: now,
+      parameters: this.passwordKdf,
+    });
+    if (!(await this.storage.claimInvite(invite.inviteId, now))) return undefined;
+    const activeAccount = { ...account, status: "active" as const, updatedAt: now };
+    await this.storage.savePasswordCredential(credential);
+    await this.storage.saveAccount(activeAccount);
+    const session = await this.sessions.createSession({
+      accountId: activeAccount.accountId,
+      ...(input.deviceLabel ? { deviceLabel: input.deviceLabel } : {}),
+    });
+    return { account: accountSelfView(activeAccount), session };
+  }
+
+  async createResetToken(input: {
+    loginName: string;
+    createdByAccountId?: string;
+    expiresInHours?: number;
+  }): Promise<{ resetToken: string; expiresAt: string } | undefined> {
+    const account = await this.storage.loadAccountByLoginNameNormalized(normalizeLoginName(input.loginName).normalized);
+    if (!account || account.status === "deleted") return undefined;
+    const now = this.now();
+    const resetToken = randomBytes(32).toString("base64url");
+    const expiresAt = new Date(Date.parse(now) + clampHours(input.expiresInHours, 2) * 60 * 60 * 1000).toISOString();
+    const record: AccountResetTokenRecord = {
+      resetId: randomId("acct_reset"),
+      resetTokenHash: this.sessions.hashOneTimeToken("reset", resetToken),
+      targetAccountId: account.accountId,
+      createdAt: now,
+      expiresAt,
+      ...(input.createdByAccountId ? { createdByAccountId: input.createdByAccountId } : {}),
+    };
+    await this.storage.saveResetToken(record);
+    return { resetToken, expiresAt };
+  }
+
+  async acceptReset(input: { resetToken: string; newPassword: string }): Promise<boolean> {
+    const resetToken = await this.storage.loadResetTokenByHash(this.sessions.hashOneTimeToken("reset", input.resetToken));
+    const now = this.now();
+    if (!resetToken || !isOneTimeTokenUsable(resetToken, now)) return false;
+    const account = await this.storage.loadAccount(resetToken.targetAccountId);
+    if (!account || account.status === "deleted") return false;
+    validateNewAccountPassword(input.newPassword, account.loginName);
+    const credential = await createPasswordCredential({
+      accountId: account.accountId,
+      password: input.newPassword,
+      changedAt: now,
+      parameters: this.passwordKdf,
+    });
+    if (!(await this.storage.claimResetToken(resetToken.resetId, now))) return false;
+    await this.storage.savePasswordCredential(credential);
+    await this.storage.saveAccount({ ...account, status: "active", credentialVersion: account.credentialVersion + 1, updatedAt: now });
+    await this.sessions.revokeAllAccountSessions(account.accountId);
+    return true;
   }
 
   async login(input: { loginName: string; password: string; deviceLabel?: string }): Promise<AccountPasswordLoginResult> {
@@ -173,6 +285,10 @@ export class AccountAuthService {
 
   async verifyCsrf(sessionToken: string, csrfToken: string): Promise<boolean> {
     return this.sessions.verifyCsrfToken(sessionToken, csrfToken);
+  }
+
+  close(): void {
+    this.storage.close?.();
   }
 }
 
@@ -287,4 +403,17 @@ const COMMON_PASSWORD_BLOCKLIST = new Set([
 
 export function validateAccountLoginName(loginName: string): void {
   validateLoginName(normalizeLoginName(loginName));
+}
+
+function isOneTimeTokenUsable(record: { usedAt?: string; revokedAt?: string; expiresAt: string }, now: string): boolean {
+  return !record.usedAt && !record.revokedAt && Date.parse(record.expiresAt) > Date.parse(now);
+}
+
+function clampHours(value: number | undefined, fallback: number): number {
+  if (!Number.isFinite(value)) return fallback;
+  return Math.min(168, Math.max(1, Math.floor(value ?? fallback)));
+}
+
+function randomId(prefix: string): string {
+  return `${prefix}_${randomBytes(12).toString("hex")}`;
 }
