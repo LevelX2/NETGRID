@@ -859,6 +859,20 @@ export function splitLegalActions(actions: LegalAction[]): {
   return { primaryActions, contextualActions };
 }
 
+export function shouldShowEmptyLegalActionMessage(input: {
+  primaryActionCount: number;
+  hasSelectedContext: boolean;
+  cardContextActive: boolean;
+  hasHiddenContextActions: boolean;
+}): boolean {
+  return (
+    input.primaryActionCount === 0 &&
+    !input.hasSelectedContext &&
+    !input.cardContextActive &&
+    !input.hasHiddenContextActions
+  );
+}
+
 function hasSelectableActionContext(action: LegalAction): boolean {
   return (
     cardRefsForAction(action).length > 0 ||
@@ -958,6 +972,12 @@ export function automaticCorpRunPassAction(
 
 export function isContextualLegalAction(action: LegalAction): boolean {
   if (action.type === "start_run" && action.payload?.bonusRunNoClick === true)
+    return false;
+  if (
+    action.type === "activated_card_ability" &&
+    action.payload?.cardImplementationAbilityTiming ===
+      "runner_cost_penalty_support"
+  )
     return false;
   if (action.type === "start_run" && serverRefsForAction(action).length > 0)
     return true;

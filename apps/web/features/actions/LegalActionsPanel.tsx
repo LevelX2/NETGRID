@@ -26,6 +26,7 @@ import {
   runAwareActionButtonLabel,
   serverDisplayLabel,
   serverTargetIdForChoiceOption,
+  shouldShowEmptyLegalActionMessage,
   shouldUseCardChoicePanel,
   shouldUseFieldCardChoice,
   type ActionContext,
@@ -395,9 +396,12 @@ export function LegalActionsPanel({
               "Wähle hier eine Aktion oder wähle im Spielfeld eine eigene Spielkarte bzw. ein sichtbares Spielobjekt für weitere Optionen."}
           </p>
         ) : null}
-        {primaryActions.length === 0 &&
-        !selectedContext &&
-        !cardContextActive ? (
+        {shouldShowEmptyLegalActionMessage({
+          primaryActionCount: primaryActions.length,
+          hasSelectedContext: selectedContext !== null,
+          cardContextActive,
+          hasHiddenContextActions,
+        }) ? (
           <p className="meta">Keine Aktion in diesem Fenster.</p>
         ) : null}
       </div>

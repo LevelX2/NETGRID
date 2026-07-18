@@ -59,6 +59,7 @@ import {
   showInstalledCorpState,
   shouldUseFieldCardChoice,
   shouldUseCardChoicePanel,
+  shouldShowEmptyLegalActionMessage,
   splitArchiveCardsForDisplay,
   currentRunTimelineStep,
   groupRunnerRigCards,
@@ -184,6 +185,45 @@ describe("V1.0.5 action board UI helpers", () => {
       ),
     ).toHaveLength(1);
     expect(actionButtonLabel(actions[1]!)).toBe("Run auf R&D");
+  });
+
+  it("keeps runner payment-support abilities directly visible in the main panel", () => {
+    const chibaSupport = legalAction(
+      "runner",
+      "activated_card_ability",
+      "runner_chiba_1",
+      "Chiba Bank Account: 4 Credits nehmen",
+      {
+        cardId: "runner_chiba_1",
+        cardImplementationAbilityTiming: "runner_cost_penalty_support",
+        costPenaltySupportWindowId: "runner_cost_penalty_support.217",
+      },
+      "runner_action.main",
+    );
+
+    const split = splitLegalActions([chibaSupport]);
+
+    expect(split.primaryActions).toEqual([chibaSupport]);
+    expect(split.contextualActions).toEqual([]);
+  });
+
+  it("does not show the empty-action message while contextual actions are available", () => {
+    expect(
+      shouldShowEmptyLegalActionMessage({
+        primaryActionCount: 0,
+        hasSelectedContext: false,
+        cardContextActive: false,
+        hasHiddenContextActions: true,
+      }),
+    ).toBe(false);
+    expect(
+      shouldShowEmptyLegalActionMessage({
+        primaryActionCount: 0,
+        hasSelectedContext: false,
+        cardContextActive: false,
+        hasHiddenContextActions: false,
+      }),
+    ).toBe(true);
   });
 
   it("keeps All-Nighter bonus run choices visible in the main action panel", () => {
