@@ -17,8 +17,9 @@ Primary agent: `architecture-review-agent`
 | E05     | integriert                                 | Commit `2a0c68d9e`; 67 State-Service-Delegates statisch typisiert          |
 | E06     | integriert                                 | Commit `5f44141cc`; weitere 177 Delegate-Signaturen typisiert              |
 | E07     | integriert                                 | Commit `7f7d8a163`; letzte 186 Signaturen typisiert; Delegate-Schuld null  |
-| E08     | verifiziert, Commit/Integration ausstehend | Delegate-Store entfernt; erster Runtime-Zyklus entfernt                    |
-| E09-E16 | ausstehend                                 | sequenziell nach E08                                                       |
+| E08     | integriert                                 | Commit `e24d17f39`, Main-Abgleich `e5d5a4f0d`; Runtime-Zyklus entfernt     |
+| E09     | verifiziert, Commit/Integration ausstehend | Turn-Runtime in vier fachliche Zustandsmaschinen geteilt                   |
+| E10-E16 | ausstehend                                 | sequenziell nach E09                                                       |
 
 ## Quelle und Vorgabe
 

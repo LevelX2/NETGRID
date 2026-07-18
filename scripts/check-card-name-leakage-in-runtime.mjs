@@ -467,10 +467,14 @@ const functionalFiles = new Set([
 ]);
 
 function listFiles() {
-  const output = execFileSync("git", ["ls-files", ...scopedRoots], {
-    cwd: repoRoot,
-    encoding: "utf8",
-  });
+  const output = execFileSync(
+    "git",
+    ["ls-files", "--cached", "--others", "--exclude-standard", ...scopedRoots],
+    {
+      cwd: repoRoot,
+      encoding: "utf8",
+    },
+  );
   return output
     .split(/\r?\n/)
     .filter(Boolean)

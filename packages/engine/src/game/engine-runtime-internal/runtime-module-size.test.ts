@@ -74,6 +74,20 @@ describe("engine runtime module size gates", () => {
       lineCount(join(runtimeInternalDir, "runtime-composition.ts")),
     ).toBeLessThanOrEqual(120);
     expect(
+      lineCount(join(runtimeInternalDir, "turn-runtime-resolvers.ts")),
+    ).toBeLessThanOrEqual(150);
+    for (const module of [
+      "turn-corp-start-runtime-resolvers.ts",
+      "turn-effect-runtime-resolvers.ts",
+      "turn-end-runtime-resolvers.ts",
+      "turn-runner-start-runtime-resolvers.ts",
+    ]) {
+      expect(
+        lineCount(join(runtimeInternalDir, module)),
+        `${module} exceeds the turn runtime domain ceiling`,
+      ).toBeLessThanOrEqual(1000);
+    }
+    expect(
       lineCount(join(runtimeInternalDir, "card-runtime-hosts.ts")),
     ).toBeLessThanOrEqual(900);
     expect(

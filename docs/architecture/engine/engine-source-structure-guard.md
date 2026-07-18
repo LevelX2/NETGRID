@@ -43,6 +43,11 @@ technischen Delegate-Store, alle fünf Wrapperdateien und die zugehörige
 bereinigt.
 Import-Fan-out über 100 bleibt ebenfalls abzubauen.
 
+E09 reduzierte `turn-runtime-resolvers.ts` von einem dreistelligen Fan-out auf
+einen kleinen Composition Root. Der zugehörige Schuldeneintrag ist entfernt;
+vier fachliche Turn-Teilmodule werden zusätzlich durch explizite Größenlimits
+geschützt.
+
 Der Selftest `corepack pnpm check:engine-source-structure:selftest` erzeugt
 isolierte Gegenbeispiele für unsichere Funktionssignaturen, Zyklen, Fan-out und
 verbotene Schichtkanten. Er beweist damit, dass jede Fehlerklasse tatsächlich

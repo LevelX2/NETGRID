@@ -58,3 +58,12 @@ The orchestrator owns the global bootstrap order: create the stable dependency o
 These files are runtime wiring and adapter families. Aggregators must not grow new domain behavior; new gameplay, state, run/access, payment, damage, trace or action semantics belong in the owning `game/*` or `ability-engine/*` module first.
 
 The target architecture is now a small package facade, a small runtime facade, and private runtime domain modules protected by size and import gates. Future work should improve specific internal domain modules instead of growing the facades.
+
+`turn-runtime-resolvers.ts` is the small composition root for four focused turn state machines:
+
+- `turn-effect-runtime-resolvers.ts`
+- `turn-end-runtime-resolvers.ts`
+- `turn-corp-start-runtime-resolvers.ts`
+- `turn-runner-start-runtime-resolvers.ts`
+
+They share one stable `TurnRuntimePort` link object. Cross-domain links are resolved only when a turn action runs; factories must not invoke or snapshot incomplete links during composition. Turn continuation, hidden-info, effect ordering and deterministic random behavior remain owned by their focused modules.

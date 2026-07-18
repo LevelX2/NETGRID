@@ -50,7 +50,6 @@ const runtimeImportFanoutDebt = new Map([
   ["game/engine-runtime-internal/state-runtime-bootstrap.ts", 121],
   ["game/engine-runtime-internal/state-runtime-resolvers.ts", 126],
   ["game/engine-runtime-internal/trigger-ability-runtime-hosts.ts", 117],
-  ["game/engine-runtime-internal/turn-runtime-resolvers.ts", 125],
   ["game/engine-runtime-internal/zone-runtime-services.ts", 118],
 ]);
 const allowedCycleSignatures = new Set([
