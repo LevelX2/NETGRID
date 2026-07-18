@@ -1,0 +1,101 @@
+# Rent-I-Con gegen CODE ROT: Fünf-Spiele-Audit vom 18.07.2026
+
+Status: aktiv, P0 abgeschlossen
+
+## Quelle, Deckpaar und Ziel
+
+Ausgangspunkt ist das jüngste gespeicherte Spiel
+`match_a7593a9bf8632052`. Verwendet werden exakt dessen Deckstände:
+
+- Runner: `Rent-I-Con: Das Shellspiel`, Snapshot
+  `local_runner_rent_i_con_shellspiel_2026_07_17_snapshot_v0_6`,
+  Deck-Hash `fnv1a:ed5cbfb6`;
+- Corp: `CODE ROT: Bitte eintreten v2`, Snapshot
+  `local_corp_code_rot_bitte_eintreten_2026_07_16_snapshot_v0_6`,
+  Deck-Hash `fnv1a:65883820`.
+
+`/Goal`: Fünf vollständig deterministische KI-gegen-KI-Partien dieses
+Deckpaars mit dauerhaft gesicherten Seeds und detaillierter, side-sicherer
+Decision-Evidence ausführen, jede KI-Entscheidung klassifizieren, beide
+Deck-Hint-/Consumer-Ketten prüfen und bestätigte Fehlentscheidungen samt
+besserer legaler Alternative dokumentieren, ohne vor der ausdrücklichen
+Nutzerfreigabe Produktionsverhalten zu ändern.
+
+- Arbeitsbranch: `codex/ai-renticon-code-rot-five-game-audit`
+- Worktree: `C:\Projekte\NETGRID_AI_RENTICON_CODE_ROT_FIVE_GAME_AUDIT`
+- Ausgangs-`main`: `2b19e9b58e650c2954d0e1aec7d6fbac35b654db`
+- Runtime-SQLite: ausschließlich read-only Referenzquelle
+- Push oder Pull Request: nicht Teil des Prozesses
+
+## Invarianten und Grenzen
+
+- Rules Engine und `LegalActions` bleiben die einzige Aktionsautorität.
+- Auswertung und Artefakte verwenden nur side-sichere PlayerViews,
+  LegalActions, PublicEvents, AI-Traces und freigegebene Deck-Snapshots.
+- Seed, Deck-Hashes, Git-Stand, Aktionslimit und Ausführungsbefehl werden so
+  gesichert, dass dieselben fünf Läufe später identisch wiederholbar sind.
+- Jede Runner- und Corp-Entscheidung der fünf Spiele gehört zum Nenner; reine
+  Detector-Stichproben gelten nicht als vollständige Analyse.
+- Replay-, StateHash-, Redaction- oder Decision-Coverage-Fehler blockieren
+  eine fachliche Bewertung des betroffenen Laufs.
+- Vor einer ausdrücklichen Nutzerfreigabe werden keine KI-, Hint-, Engine-
+  oder UI-Fixes umgesetzt.
+- Fremde Worktrees und zwischenzeitliche Änderungen auf `main` bleiben
+  unangetastet.
+
+## Paketfolge
+
+### P0 – Preflight und Prozessbasis
+
+- Worktree, Branch, Scope, Deckidentität, Invarianten und Paketfolge sichern.
+- Done-Gate: Prozessartefakt ist separat committed.
+- Commit: `docs(ai): plan five game deck audit`.
+
+### P1 – Reproduzierbarer Selfplay-Korpus
+
+- Exakte Snapshots aus der gespeicherten Match-Evidence side-sicher laden.
+- Fünf feste Seeds und vollständige Laufkonfiguration im Seed-Manifest
+  versionieren.
+- Fünf Spiele mit Detailtraces bis zum regulären Ergebnis oder einem
+  sichtbar klassifizierten Aktionslimit ausführen.
+- Done-Gate: Deck-Hashes stimmen; fünf Resultate besitzen Replay-,
+  Redaction-, StateHash- und Coverage-Nachweis.
+- Commit: `test(ai): record reproducible five game corpus`.
+
+### P2 – Vollständige Entscheidungs- und Deckanalyse
+
+- Jede Runner- und Corp-Decision einschließlich Choice-, Rez-, Run-, Access-
+  und weiterer Parent-/Child-Fenster klassifizieren.
+- Für jeden belastbaren Befund eine bessere konkrete LegalAction und die
+  sinnvolle Folgeauswahl benennen.
+- Beide vollständigen Deck-Hint-/Consumer-Audits ausführen; nur
+  `status=ok` schließt die jeweilige Kette.
+- Done-Gate: Decision-Nenner vollständig geschlossen, Befunde dedupliziert,
+  Unsicherheiten und Nicht-Findings ausdrücklich dokumentiert.
+- Commit: `docs(ai): analyze five selfplay games`.
+
+### P3 – Review und Freigabepause
+
+- Ergebnisübersicht, Einzelspielverläufe, Fehlentscheidungen, bessere
+  Alternativen und geplante Anpassungsmaßnahmen als führendes Review
+  dokumentieren.
+- Dem Nutzer alle eindeutigen Punkte vorlegen und genau eine Freigabefrage
+  für eine mögliche Umsetzung stellen.
+- Done-Gate: Keine Produktionsänderung; Worktree bleibt für eine mögliche
+  freigegebene Remediation erhalten.
+
+## State Machine
+
+`preflight -> process_committed -> seeds_committed -> games_complete -> decisions_audited -> deck_audits_complete -> review_committed -> approval_pause`
+
+## Sicherheits- und Fehlerbehandlung
+
+- Ein nicht auflösbarer Snapshot- oder Hash-Drift stoppt die Läufe.
+- Ein am Aktionslimit beendetes Spiel wird nicht als Sieg gewertet und
+  ausdrücklich als unvollständig ausgewiesen; sein bis dahin vorhandener
+  Decision-Nenner bleibt prüfpflichtig.
+- Nicht reproduzierbare, hidden-info-abhängige oder nicht durch LegalActions
+  belegte Vermutungen werden nicht als KI-Fehler klassifiziert.
+- Erst nach Nutzerfreigabe dürfen bestätigte Punkte über spielgleiche rote
+  Checkpoints in weitere Umsetzungspakete überführt werden.
+
