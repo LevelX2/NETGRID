@@ -371,9 +371,14 @@ export function scoringWindowAccessAssessment(
     visibleRunnerBaseContestCredits +
     visibleRunnerExtraCredits +
     visibleRunnerPreRunCreditBonus;
-  const visibleRunnerIcebreakerCount = visibleRunnerInstalledIcebreakerCount(
-    input.playerView.opponent.rig ?? [],
+  const runnerPathCandidates = visibleRunnerBreakerPathCandidates(
+    input,
+    visibleRunnerContestCredits,
+    visibleRunnerExtraCredits > 0,
   );
+  const baseRunnerPathCandidate = runnerPathCandidates[0]!;
+  const visibleRunnerIcebreakerCount =
+    baseRunnerPathCandidate.visibleIcebreakerCount;
   if (!server || server.ice.length === 0) {
     return {
       runnerCanReachAccessNow: true,
@@ -397,17 +402,28 @@ export function scoringWindowAccessAssessment(
     known: ice.known !== false,
     rezzed: true,
   }));
-  const assessment = assessKnownRezzedIcePath(
-    projectedIce,
-    input.playerView.opponent.rig ?? [],
-    visibleRunnerContestCredits,
-    [...server.root],
+  const evaluatedRunnerPaths = runnerPathCandidates.map((candidate) => ({
+    ...candidate,
+    assessment: assessKnownRezzedIcePath(
+      projectedIce,
+      candidate.rig,
+      candidate.creditsAfterStagedInstall,
+      [...server.root],
+    ),
+  }));
+  const selectedRunnerPath = evaluatedRunnerPaths.reduce((best, candidate) =>
+    scoringWindowRunnerPathCandidateIsBetter(candidate, best)
+      ? candidate
+      : best,
   );
+  const assessment = selectedRunnerPath.assessment;
+  const effectiveVisibleRunnerIcebreakerCount =
+    selectedRunnerPath.visibleIcebreakerCount;
   const unmodeledIceCount = projectedIce.filter(
     (ice) => !iceHasModeledRunImpact(ice),
   ).length;
   const unmodeledBlocksVisibleAccess =
-    unmodeledIceCount > 0 && visibleRunnerIcebreakerCount === 0;
+    unmodeledIceCount > 0 && effectiveVisibleRunnerIcebreakerCount === 0;
   const observedReachability = server
     ? semanticRuntimeCorpObservedRemoteReachability(input, server.id, server)
     : undefined;
@@ -432,10 +448,14 @@ export function scoringWindowAccessAssessment(
     missingVisibleBreakerCoverage,
     effectiveIceCount: assessment.assessedKnownIceCount,
     unmodeledIceCount,
-    visibleRunnerIcebreakerCount,
+    visibleRunnerIcebreakerCount: effectiveVisibleRunnerIcebreakerCount,
     visibleRunnerContestCredits,
     ...(assessment.visibleBreakCost !== undefined
-      ? { visibleBreakCost: assessment.visibleBreakCost }
+      ? {
+          visibleBreakCost:
+            assessment.visibleBreakCost +
+            selectedRunnerPath.stagedInstallCreditCost,
+        }
       : {}),
     evidence: [
       `remote_access:assessed_known_ice:${assessment.assessedKnownIceCount}`,
@@ -443,9 +463,14 @@ export function scoringWindowAccessAssessment(
       `remote_access:credits_after_path:${assessment.creditsAfterPath}`,
       `remote_access:unmodeled_ice_count:${unmodeledIceCount}`,
       `remote_access:unmodeled_blocks_visible_access:${unmodeledBlocksVisibleAccess}`,
-      `visible_runner_icebreaker_count:${visibleRunnerIcebreakerCount}`,
+      `visible_runner_icebreaker_count:${effectiveVisibleRunnerIcebreakerCount}`,
+      `public_staged_breaker_used:${selectedRunnerPath.stagedBreakerCount > 0}`,
+      `public_staged_breaker_count:${selectedRunnerPath.stagedBreakerCount}`,
+      `public_staged_breaker_install_credit_cost:${selectedRunnerPath.stagedInstallCreditCost}`,
       ...(assessment.visibleBreakCost !== undefined
-        ? [`remote_access:visible_break_cost:${assessment.visibleBreakCost}`]
+        ? [
+            `remote_access:visible_break_cost:${assessment.visibleBreakCost + selectedRunnerPath.stagedInstallCreditCost}`,
+          ]
         : []),
       ...(assessment.noAccessReason
         ? [`remote_access:no_access_reason:${assessment.noAccessReason}`]
@@ -1431,6 +1456,137 @@ function visibleRunnerInstalledIcebreakerCount(
         (subtype) => subtype.toLocaleLowerCase("en-US") === "icebreaker",
       ),
   ).length;
+}
+
+type ScoringWindowRunnerPathCandidate = {
+  rig: VisibleCard[];
+  creditsAfterStagedInstall: number;
+  stagedInstallCreditCost: number;
+  stagedBreakerCount: number;
+  visibleIcebreakerCount: number;
+};
+
+function visibleRunnerBreakerPathCandidates(
+  input: AiDecisionInput,
+  visibleRunnerContestCredits: number,
+  futureRunnerTurnStartAvailable: boolean,
+): ScoringWindowRunnerPathCandidate[] {
+  const installedRig = [...(input.playerView.opponent.rig ?? [])];
+  const baseCandidate: ScoringWindowRunnerPathCandidate = {
+    rig: installedRig,
+    creditsAfterStagedInstall: visibleRunnerContestCredits,
+    stagedInstallCreditCost: 0,
+    stagedBreakerCount: 0,
+    visibleIcebreakerCount:
+      visibleRunnerInstalledIcebreakerCount(installedRig),
+  };
+  if (!visibleRunnerHasPaidDelayedInstallSource(installedRig)) {
+    return [baseCandidate];
+  }
+  const stagedBreakers = (input.playerView.specialZones?.setAside ?? []).filter(
+    (card) =>
+      visibleRunnerPublicStagedBreaker(card) &&
+      visibleRunnerStagedProgramFitsMemory(input, card),
+  );
+  return [
+    baseCandidate,
+    ...stagedBreakers.flatMap((card) => {
+      const installCreditCost = Math.max(
+        0,
+        Math.floor(card.counters?.shell ?? 0) -
+          (futureRunnerTurnStartAvailable ? 1 : 0),
+      );
+      if (installCreditCost > visibleRunnerContestCredits) return [];
+      const projectedRig = [...installedRig, card];
+      return [
+        {
+          rig: projectedRig,
+          creditsAfterStagedInstall:
+            visibleRunnerContestCredits - installCreditCost,
+          stagedInstallCreditCost: installCreditCost,
+          stagedBreakerCount: 1,
+          visibleIcebreakerCount:
+            visibleRunnerInstalledIcebreakerCount(projectedRig),
+        },
+      ];
+    }),
+  ];
+}
+
+function visibleRunnerHasPaidDelayedInstallSource(
+  rig: readonly VisibleCard[],
+): boolean {
+  return rig.some((card) => {
+    if (card.known === false || !card.definitionId) return false;
+    const hint = AI_HINTS_BY_CARD.get(card.definitionId);
+    return (
+      hint?.roles?.includes("delayed_install") === true &&
+      hint.effects?.some(
+        (effect) =>
+          effect.timing === "persistent" &&
+          "target" in effect &&
+          effect.target === "setup.install_countdown",
+      ) === true
+    );
+  });
+}
+
+function visibleRunnerPublicStagedBreaker(card: VisibleCard): boolean {
+  return (
+    card.known === true &&
+    card.owner === "runner" &&
+    card.type === "program" &&
+    typeof card.counters?.shell === "number" &&
+    visibleRunnerInstalledIcebreakerCount([card]) === 1
+  );
+}
+
+function visibleRunnerStagedProgramFitsMemory(
+  input: AiDecisionInput,
+  card: VisibleCard,
+): boolean {
+  const memoryUsed = input.playerView.opponent.memoryUsed;
+  const memoryLimit = input.playerView.opponent.memoryLimit;
+  if (
+    typeof memoryUsed !== "number" ||
+    typeof memoryLimit !== "number" ||
+    typeof card.memoryCost !== "number"
+  ) {
+    return true;
+  }
+  return memoryUsed + Math.max(0, card.memoryCost) <= memoryLimit;
+}
+
+function scoringWindowRunnerPathCandidateIsBetter(
+  candidate: ScoringWindowRunnerPathCandidate & {
+    assessment: ReturnType<typeof assessKnownRezzedIcePath>;
+  },
+  current: ScoringWindowRunnerPathCandidate & {
+    assessment: ReturnType<typeof assessKnownRezzedIcePath>;
+  },
+): boolean {
+  if (candidate.assessment.canReachAccess !== current.assessment.canReachAccess) {
+    return candidate.assessment.canReachAccess;
+  }
+  if (
+    candidate.assessment.creditsAfterPath !==
+    current.assessment.creditsAfterPath
+  ) {
+    return (
+      candidate.assessment.creditsAfterPath >
+      current.assessment.creditsAfterPath
+    );
+  }
+  const candidateTotalCost =
+    (candidate.assessment.visibleBreakCost ?? Number.POSITIVE_INFINITY) +
+    candidate.stagedInstallCreditCost;
+  const currentTotalCost =
+    (current.assessment.visibleBreakCost ?? Number.POSITIVE_INFINITY) +
+    current.stagedInstallCreditCost;
+  if (candidateTotalCost !== currentTotalCost) {
+    return candidateTotalCost < currentTotalCost;
+  }
+  return candidate.stagedBreakerCount < current.stagedBreakerCount;
 }
 
 function iceHasModeledRunImpact(ice: VisibleCard): boolean {
