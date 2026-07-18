@@ -14,6 +14,7 @@ export type StructuredTagPunishProfile = {
   tagSource: boolean;
   traceTagSource: boolean;
   payoff: boolean;
+  requiresScoredAgenda: boolean;
   requiresRunnerTagged: boolean;
   requiresTraceSuccess: boolean;
   effectKinds: KnownHintEffectKind[];
@@ -192,6 +193,9 @@ function tagPunishProfileFromHint(
   const requiresRunnerTagged = conditions.some(
     (condition) => condition.kind === "requires_runner_tagged",
   );
+  const requiresScoredAgenda = conditions.some(
+    (condition) => condition.kind === "requires_scored_agenda",
+  );
   const requiresTraceSuccess = conditions.some(
     (condition) => condition.kind === "requires_trace_success",
   );
@@ -206,6 +210,7 @@ function tagPunishProfileFromHint(
     tagSource,
     traceTagSource,
     payoff,
+    requiresScoredAgenda,
     requiresRunnerTagged,
     requiresTraceSuccess,
     effectKinds,

@@ -98,6 +98,42 @@ describe("createCorpTagSourcePayoffContext", () => {
     ).toBe(false);
   });
 
+  it("does not activate scored-only tag sources through install or rez actions", () => {
+    const context = createCorpTagSourcePayoffContext({
+      sourceDefinitionIdForAction: (_input, action) => {
+        const cardId = action.payload?.cardId;
+        return typeof cardId === "string" ? cardId : undefined;
+      },
+      visibleMeatDamagePayoff: () => false,
+      tagPunishAssessmentForAction: () => undefined,
+      tagSourceProfileForDefinition: (definitionId) =>
+        definitionId === "custom-scored-only-tag-agenda"
+          ? { requiresScoredAgenda: true }
+          : definitionId === "custom-persistent-tag-asset"
+            ? { requiresScoredAgenda: false }
+            : undefined,
+      payoffProfileForDefinition: () => undefined,
+    });
+    const input = inputWithHqCard(visibleCard("corp-card"));
+
+    for (const type of ["install_card", "rez_card", "rez_ice"]) {
+      expect(
+        context.corpUnprotectedPersistentTagAssetSetup(
+          input,
+          corpAction(type, { cardId: "custom-scored-only-tag-agenda" }),
+        ),
+      ).toBe(false);
+    }
+    expect(
+      context.corpUnprotectedPersistentTagAssetSetup(
+        input,
+        corpAction("install_card", {
+          cardId: "custom-persistent-tag-asset",
+        }),
+      ),
+    ).toBe(true);
+  });
+
   it("values persistent tag-engine activation only with a visible payoff", () => {
     const context = createCorpTagSourcePayoffContext({
       sourceDefinitionIdForAction: (_input, action) => {

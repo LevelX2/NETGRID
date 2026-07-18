@@ -7,6 +7,11 @@ type CorpTagPunishAssessment = {
   isTagSource?: boolean;
 };
 
+type CorpTagSourceProfile = {
+  tagSource?: boolean;
+  requiresScoredAgenda?: boolean;
+};
+
 export type CorpTagSourcePayoffContextDependencies = {
   sourceDefinitionIdForAction: (
     input: AiDecisionInput,
@@ -19,7 +24,7 @@ export type CorpTagSourcePayoffContextDependencies = {
   ) => CorpTagPunishAssessment | undefined;
   tagSourceProfileForDefinition: (
     definitionId: string | undefined,
-  ) => unknown | undefined;
+  ) => CorpTagSourceProfile | undefined;
   payoffProfileForDefinition: (definitionId: string) => unknown | undefined;
 };
 
@@ -128,9 +133,14 @@ export function createCorpTagSourcePayoffContext(
       input,
       action,
     );
-    return Boolean(
-      dependencies.tagSourceProfileForDefinition(sourceDefinitionId),
-    );
+    const profile =
+      dependencies.tagSourceProfileForDefinition(sourceDefinitionId);
+    if (!profile) return false;
+
+    // Installing or rezzing creates a persistent board source, but it can never
+    // activate an effect whose rules contract requires the card to be scored.
+    // Such effects become available through later score-area abilities instead.
+    return profile.requiresScoredAgenda !== true;
   };
 
   const corpPersistentTagEngineVisiblePayoffProfile = (

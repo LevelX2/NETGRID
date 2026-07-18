@@ -86,6 +86,7 @@ function profile(
     tagSource: false,
     traceTagSource: false,
     payoff: false,
+    requiresScoredAgenda: false,
     requiresRunnerTagged: false,
     requiresTraceSuccess: false,
     effectKinds: [],
