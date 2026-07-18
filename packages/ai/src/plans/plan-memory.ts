@@ -19,6 +19,10 @@ import {
   planPortfolioEntryForPlan,
 } from "./plan-portfolio";
 import type { RunnerEconomyPosture } from "../runner-run-target-evaluation";
+import {
+  runnerSurvivalFlatlineRiskLevelFromPlan,
+  runnerSurvivalMinimumCreditsForPlan,
+} from "./tactical-plan-runner-survival-progress";
 
 export type PlanContinuityMemorySnapshot = {
   type?: string;
@@ -213,6 +217,7 @@ export function createTacticalPlanMemorySnapshot(params: {
     ...(params.plan.target ? { target: params.plan.target } : {}),
     selectedStepKind: params.step.kind,
     selectedActionId: params.selectedAction.actionId,
+    selectedActionType: params.selectedAction.type,
     ...scoreConversionDesiredCountersField(params.plan),
     blockedBy: params.plan.blockers.map((blocker) => blocker.kind),
     ttlDecisionsRemaining,
@@ -228,11 +233,41 @@ export function createTacticalPlanMemorySnapshot(params: {
       opponentAgendaPoints: params.input.playerView.opponent.agendaPoints,
       opponentTags: params.input.playerView.opponent.tags,
       opponentCoreDamage: params.input.playerView.opponent.coreDamage ?? 0,
+      ...runnerSurvivalProgressBaseline(params.input, params.plan, params.step),
     },
     ...(params.whyPlanAbandoned
       ? { whyPlanAbandoned: params.whyPlanAbandoned }
       : {}),
     updatedAtStateVersion: params.input.playerView.stateVersion,
+  };
+}
+
+function runnerSurvivalProgressBaseline(
+  input: AiDecisionInput,
+  plan: TacticalPlan,
+  step: PlanStep,
+):
+  | Pick<
+      NonNullable<TacticalPlanMemorySnapshot["progressBaseline"]>,
+      | "ownHandCount"
+      | "runnerFlatlineRiskLevel"
+      | "runnerSurvivalMinimumCredits"
+      | "runnerSurvivalReserveGap"
+    >
+  | Record<string, never> {
+  if (plan.type !== "runner.survival_defense") return {};
+  const minimumCredits = runnerSurvivalMinimumCreditsForPlan(plan, step);
+  const flatlineRiskLevel = runnerSurvivalFlatlineRiskLevelFromPlan(plan);
+  return {
+    ownHandCount: input.playerView.own.gripOrHq.length,
+    ...(flatlineRiskLevel
+      ? { runnerFlatlineRiskLevel: flatlineRiskLevel }
+      : {}),
+    runnerSurvivalMinimumCredits: minimumCredits,
+    runnerSurvivalReserveGap: Math.max(
+      0,
+      minimumCredits - input.playerView.own.credits,
+    ),
   };
 }
 

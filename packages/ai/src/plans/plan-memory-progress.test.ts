@@ -103,7 +103,107 @@ describe("tactical plan observable progress", () => {
 
     expect(getTacticalPlanMemorySnapshot(decisionInput)).toBeUndefined();
   });
+
+  it("records the survival baseline and expires repeated no-progress decisions", () => {
+    const step = createPlanStep({
+      stepId: "find_survival_answer",
+      kind: "find_survival_answer",
+      desiredActionSemantics: ["draw.card", "damage.prevent"],
+      requiredCapabilities: [
+        {
+          capabilityId: "runner.survival_defense",
+          kind: "survival",
+          side: "runner",
+          minimumCredits: 4,
+          evidence: ["test"],
+        },
+      ],
+    });
+    step.mappingStatus = "matched";
+    const plan = createTacticalPlan({
+      planId: "runner.survival_defense",
+      side: "runner",
+      type: "runner.survival_defense",
+      status: "active",
+      priority: 900,
+      horizonTurns: 1,
+      target: { kind: "capability", id: "runner_survival_defense" },
+      currentStep: step,
+      requiredCapabilities: [...step.requiredCapabilities],
+      evidence: ["runner_flatline_risk_level:critical"],
+      stateVersion: 202,
+    });
+    const firstInput = runnerInput(202, 6);
+    firstInput.playerView.own.gripOrHq = [
+      { instanceId: "runner-card", known: true },
+    ];
+    const firstFailure = createTacticalPlanMemorySnapshot({
+      input: firstInput,
+      plan,
+      step,
+      selectedAction: runnerBasicCreditAction(),
+      previousPlan: runnerSurvivalMemory(2, 201),
+      planProgressionReason: "no_observable_progress",
+    });
+    const secondFailure = createTacticalPlanMemorySnapshot({
+      input: runnerInput(203, 7),
+      plan,
+      step,
+      selectedAction: runnerBasicCreditAction(),
+      previousPlan: firstFailure,
+      planProgressionReason: "no_observable_progress",
+    });
+
+    expect(firstFailure).toMatchObject({
+      status: "progressing",
+      selectedActionType: "gain_credit",
+      ttlDecisionsRemaining: 1,
+      progressBaseline: {
+        ownHandCount: 1,
+        runnerFlatlineRiskLevel: "critical",
+        runnerSurvivalMinimumCredits: 4,
+        runnerSurvivalReserveGap: 0,
+      },
+    });
+    expect(secondFailure).toMatchObject({
+      status: "abandoned",
+      ttlDecisionsRemaining: 0,
+    });
+  });
 });
+
+function runnerSurvivalMemory(
+  ttlDecisionsRemaining: number,
+  stateVersion: number,
+): TacticalPlanMemorySnapshot {
+  return {
+    schemaVersion: "tactical-plan-v1",
+    memoryId: "plan-progress:runner:current_candidate",
+    side: "runner",
+    planId: "runner.survival_defense",
+    type: "runner.survival_defense",
+    status: "progressing",
+    selectedStepKind: "find_survival_answer",
+    selectedActionId: "runner-credit",
+    selectedActionType: "gain_credit",
+    blockedBy: [],
+    ttlDecisionsRemaining,
+    planProgressionReason: "continued_previous_plan",
+    progressBaseline: {
+      ownCredits: 6,
+      opponentCredits: 6,
+      ownAgendaPoints: 0,
+      opponentAgendaPoints: 2,
+      opponentTags: 0,
+      opponentCoreDamage: 0,
+      ownHandCount: 1,
+      runnerFlatlineRiskLevel: "critical",
+      runnerSurvivalMinimumCredits: 4,
+      runnerSurvivalReserveGap: 0,
+    },
+    updatedAtStateVersion: stateVersion,
+  };
+}
 
 function previousMemory(
   ttlDecisionsRemaining: number,
@@ -148,6 +248,15 @@ function runnerCreditAction(): LegalAction {
     label: "2 Credits nehmen",
     source: "newsgroup",
     timingPoint: "runner_action.main",
+  };
+}
+
+function runnerBasicCreditAction(): LegalAction {
+  return {
+    ...runnerCreditAction(),
+    actionId: "runner-credit",
+    type: "gain_credit",
+    source: "basic_action",
   };
 }
 

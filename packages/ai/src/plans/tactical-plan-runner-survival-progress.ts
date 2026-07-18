@@ -6,6 +6,7 @@ import {
   legalActionCreditNetGain,
   type TacticalPlanCreditValueDependencies,
 } from "./tactical-plan-action-values";
+import type { PlanStep, TacticalPlan } from "./tactical-plan-types";
 
 export type RunnerSurvivalProgressKind =
   | "draw"
@@ -145,6 +146,33 @@ export function runnerSurvivalActionProgress(params: {
       "runner_survival_progress:fund_reaction_reserve",
     ],
   };
+}
+
+export function runnerSurvivalMinimumCreditsForPlan(
+  plan: TacticalPlan,
+  step: PlanStep,
+): number {
+  return Math.max(
+    0,
+    ...[...plan.requiredCapabilities, ...step.requiredCapabilities]
+      .filter((capability) => capability.kind === "survival")
+      .map((capability) => capability.minimumCredits ?? 0),
+  );
+}
+
+export function runnerSurvivalFlatlineRiskLevelFromPlan(
+  plan: TacticalPlan,
+): "none" | "suspected" | "confirmed" | "critical" | undefined {
+  const prefix = "runner_flatline_risk_level:";
+  const level = plan.evidence
+    .find((entry) => entry.startsWith(prefix))
+    ?.slice(prefix.length);
+  return level === "none" ||
+    level === "suspected" ||
+    level === "confirmed" ||
+    level === "critical"
+    ? level
+    : undefined;
 }
 
 export function candidateShowsDamageSurvivalSemantics(

@@ -27,7 +27,10 @@ import {
   type TacticalPlanCreditValueDependencies,
 } from "./tactical-plan-action-values";
 import { runnerHasConcreteFundingNeed } from "./tactical-plan-runner-funding-need";
-import { runnerSurvivalActionProgress } from "./tactical-plan-runner-survival-progress";
+import {
+  runnerSurvivalActionProgress,
+  runnerSurvivalMinimumCreditsForPlan,
+} from "./tactical-plan-runner-survival-progress";
 import { actionServerId } from "./tactical-plan-server-targets";
 import type { PlanStep, TacticalPlan } from "./tactical-plan-types";
 import { visibleCardByInstanceId } from "./tactical-plan-visible-cards";
@@ -234,7 +237,7 @@ function survivalAnswerStepPriority(
     input,
     action,
     candidate,
-    minimumCredits: runnerSurvivalMinimumCreditsFromPlanStep(plan, step),
+    minimumCredits: runnerSurvivalMinimumCreditsForPlan(plan, step),
     dependencies,
   });
   if (!progress.progressCapable) return 0;
@@ -256,21 +259,9 @@ function survivalAnswerStepMatchesAction(
     input,
     action,
     candidate,
-    minimumCredits: runnerSurvivalMinimumCreditsFromPlanStep(plan, step),
+    minimumCredits: runnerSurvivalMinimumCreditsForPlan(plan, step),
     dependencies,
   }).progressCapable;
-}
-
-function runnerSurvivalMinimumCreditsFromPlanStep(
-  plan: TacticalPlan,
-  step: PlanStep,
-): number {
-  return Math.max(
-    0,
-    ...[...plan.requiredCapabilities, ...step.requiredCapabilities]
-      .filter((capability) => capability.kind === "survival")
-      .map((capability) => capability.minimumCredits ?? 0),
-  );
 }
 
 function tagClearStepPriority(

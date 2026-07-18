@@ -264,6 +264,7 @@ export type TacticalPlanMemorySnapshot = {
   target?: PlanTarget;
   selectedStepKind?: PlanStepKind;
   selectedActionId?: string;
+  selectedActionType?: LegalAction["type"];
   scoreConversionDesiredAdvancementCounters?: number;
   blockedBy: string[];
   ttlDecisionsRemaining: number;
@@ -275,6 +276,10 @@ export type TacticalPlanMemorySnapshot = {
     opponentAgendaPoints: number;
     opponentTags: number;
     opponentCoreDamage: number;
+    ownHandCount?: number;
+    runnerFlatlineRiskLevel?: "none" | "suspected" | "confirmed" | "critical";
+    runnerSurvivalMinimumCredits?: number;
+    runnerSurvivalReserveGap?: number;
   };
   whyPlanAbandoned?: string;
   updatedAtStateVersion: number;

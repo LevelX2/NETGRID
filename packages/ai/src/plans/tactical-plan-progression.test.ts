@@ -198,4 +198,161 @@ describe("tactical plan progression", () => {
       "plan_progression:no_observable_progress",
     );
   });
+
+  it("withholds survival continuity when hand, risk, and reserve gap do not improve", () => {
+    const plan = survivalPlan(12);
+    const previousPlan = survivalMemory({
+      credits: 6,
+      reserveGap: 0,
+      selectedActionType: "gain_credit",
+    });
+    const input = runnerProgressInput(12, 7, 1);
+
+    const result = progressTacticalPlans([plan], previousPlan, input);
+
+    expect(result.planProgressionReason).toBe("no_observable_progress");
+    expect(result.plans[0]).toMatchObject({
+      status: "active",
+      priority: 800,
+    });
+    expect(result.plans[0]?.evidence).toContain(
+      "plan_progression:no_observable_progress",
+    );
+  });
+
+  it("continues survival only when the concrete reserve gap shrinks", () => {
+    const plan = survivalPlan(12);
+    const previousPlan = survivalMemory({
+      credits: 2,
+      reserveGap: 2,
+      selectedActionType: "gain_credit",
+    });
+    const input = runnerProgressInput(12, 3, 1);
+
+    const result = progressTacticalPlans([plan], previousPlan, input);
+
+    expect(result.planProgressionReason).toBe("previous_plan_considered");
+    expect(result.plans[0]).toMatchObject({
+      status: "progressing",
+      priority: 920,
+    });
+  });
+
+  it("continues survival when a draw visibly increases the hand", () => {
+    const plan = survivalPlan(12);
+    const previousPlan = survivalMemory({
+      credits: 6,
+      reserveGap: 0,
+      selectedActionType: "draw_card",
+    });
+    const input = runnerProgressInput(12, 6, 2);
+
+    const result = progressTacticalPlans([plan], previousPlan, input);
+
+    expect(result.planProgressionReason).toBe("previous_plan_considered");
+    expect(result.plans[0]).toMatchObject({
+      status: "progressing",
+      priority: 920,
+    });
+  });
 });
+
+function survivalPlan(stateVersion: number) {
+  return createTacticalPlan({
+    planId: "runner.survival_defense",
+    side: "runner",
+    type: "runner.survival_defense",
+    status: "active",
+    priority: 800,
+    horizonTurns: 1,
+    target: { kind: "capability", id: "runner_survival_defense" },
+    currentStep: createPlanStep({
+      stepId: "find_survival_answer",
+      kind: "find_survival_answer",
+      desiredActionSemantics: ["draw.card", "damage.prevent"],
+      requiredCapabilities: [
+        {
+          capabilityId: "runner.survival_defense",
+          kind: "survival",
+          side: "runner",
+          minimumCredits: 4,
+          evidence: ["test"],
+        },
+      ],
+    }),
+    requiredCapabilities: [
+      {
+        capabilityId: "runner.survival_defense",
+        kind: "survival",
+        side: "runner",
+        minimumCredits: 4,
+        evidence: ["test"],
+      },
+    ],
+    evidence: ["runner_flatline_risk_level:critical"],
+    stateVersion,
+  });
+}
+
+function survivalMemory(params: {
+  credits: number;
+  reserveGap: number;
+  selectedActionType: "gain_credit" | "draw_card";
+}): TacticalPlanMemorySnapshot {
+  return {
+    schemaVersion: "tactical-plan-v1",
+    memoryId: "previous-survival",
+    side: "runner",
+    planId: "runner.survival_defense",
+    type: "runner.survival_defense",
+    status: "progressing",
+    target: { kind: "capability", id: "runner_survival_defense" },
+    selectedStepKind: "find_survival_answer",
+    selectedActionId: "survival-action",
+    selectedActionType: params.selectedActionType,
+    blockedBy: [],
+    ttlDecisionsRemaining: 2,
+    planProgressionReason: "selected_new_plan",
+    progressBaseline: {
+      ownCredits: params.credits,
+      opponentCredits: 5,
+      ownAgendaPoints: 0,
+      opponentAgendaPoints: 2,
+      opponentTags: 0,
+      opponentCoreDamage: 0,
+      ownHandCount: 1,
+      runnerFlatlineRiskLevel: "critical",
+      runnerSurvivalMinimumCredits: 4,
+      runnerSurvivalReserveGap: params.reserveGap,
+    },
+    updatedAtStateVersion: 11,
+  };
+}
+
+function runnerProgressInput(
+  stateVersion: number,
+  credits: number,
+  handCount: number,
+): AiDecisionInput {
+  return {
+    side: "runner",
+    playerView: {
+      stateVersion,
+      own: {
+        credits,
+        clicks: 3,
+        agendaPoints: 0,
+        gripOrHq: Array.from({ length: handCount }, (_, index) => ({
+          instanceId: `runner-card-${index}`,
+          known: true,
+        })),
+      },
+      opponent: {
+        credits: 5,
+        agendaPoints: 2,
+        tags: 0,
+        coreDamage: 0,
+      },
+    },
+  } as AiDecisionInput;
+}

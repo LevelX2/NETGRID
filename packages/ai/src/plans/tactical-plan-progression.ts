@@ -4,6 +4,7 @@ import type {
   TacticalPlan,
   TacticalPlanMemorySnapshot,
 } from "./tactical-plan-types";
+import { runnerSurvivalFlatlineRiskLevelFromPlan } from "./tactical-plan-runner-survival-progress";
 
 const PLAN_CONTINUITY_PRIORITY_BONUS = 120;
 const PLAN_CONTINUITY_SCORE_NORMALIZATION_DIVISOR = 10;
@@ -30,6 +31,11 @@ export function progressTacticalPlans(
   const previousPunishMadeNoProgress =
     input !== undefined &&
     punishPlanMadeNoObservableProgress(previousPlan, input);
+  const previousSurvivalMadeNoProgress =
+    input !== undefined &&
+    survivalPlanMadeNoObservableProgress(plans, previousPlan, input);
+  const previousPlanMadeNoProgress =
+    previousPunishMadeNoProgress || previousSurvivalMadeNoProgress;
   const creditBaseShouldYieldToRdOpportunity =
     previousPlan.type === "runner.build_credit_base" &&
     plans.some(isCheapUnknownRdOpportunityPlan) &&
@@ -40,7 +46,7 @@ export function progressTacticalPlans(
     previousPlan.ttlDecisionsRemaining <= 0;
   const continued = plans.map((plan) => {
     if (!samePlanLine(plan, previousPlan)) return plan;
-    if (previousPunishMadeNoProgress) {
+    if (previousPlanMadeNoProgress) {
       const abandoned = previousPlan.ttlDecisionsRemaining <= 1;
       return {
         ...plan,
@@ -143,12 +149,16 @@ export function progressTacticalPlans(
       planProgressionReason: "previous_central_probe_satisfied",
     };
   }
-  if (previousPunishMadeNoProgress) {
+  if (previousPlanMadeNoProgress) {
     return {
       plans: continued,
       planProgressionReason: "no_observable_progress",
       ...(previousPlan.ttlDecisionsRemaining <= 1
-        ? { whyPlanAbandoned: "repeated_punish_without_visible_conversion" }
+        ? {
+            whyPlanAbandoned: previousSurvivalMadeNoProgress
+              ? "repeated_survival_without_visible_progress"
+              : "repeated_punish_without_visible_conversion",
+          }
         : {}),
     };
   }
@@ -163,6 +173,70 @@ export function progressTacticalPlans(
     plans: continued,
     planProgressionReason: "previous_plan_considered",
   };
+}
+
+function survivalPlanMadeNoObservableProgress(
+  plans: readonly TacticalPlan[],
+  previousPlan: TacticalPlanMemorySnapshot,
+  input: AiDecisionInput,
+): boolean {
+  const baseline = previousPlan.progressBaseline;
+  const currentPlan = plans.find(
+    (plan) =>
+      plan.type === "runner.survival_defense" &&
+      samePlanLine(plan, previousPlan),
+  );
+  if (
+    previousPlan.type !== "runner.survival_defense" ||
+    !baseline ||
+    !currentPlan ||
+    input.side !== "runner" ||
+    input.playerView.stateVersion <= previousPlan.updatedAtStateVersion
+  ) {
+    return false;
+  }
+  const preventionActionTaken =
+    previousPlan.selectedActionType === "install_card" ||
+    previousPlan.selectedActionType === "play_event" ||
+    previousPlan.selectedActionType === "trigger_ability" ||
+    previousPlan.selectedActionType === "activated_card_ability";
+  const handIncreased =
+    baseline.ownHandCount !== undefined &&
+    input.playerView.own.gripOrHq.length > baseline.ownHandCount;
+  const currentRiskLevel = runnerSurvivalFlatlineRiskLevelFromPlan(currentPlan);
+  const riskReduced =
+    baseline.runnerFlatlineRiskLevel !== undefined &&
+    currentRiskLevel !== undefined &&
+    flatlineRiskRank(currentRiskLevel) <
+      flatlineRiskRank(baseline.runnerFlatlineRiskLevel);
+  const currentReserveGap = Math.max(
+    0,
+    (baseline.runnerSurvivalMinimumCredits ?? 0) - input.playerView.own.credits,
+  );
+  const reserveGapReduced =
+    baseline.runnerSurvivalReserveGap !== undefined &&
+    currentReserveGap < baseline.runnerSurvivalReserveGap;
+  return !(
+    preventionActionTaken ||
+    handIncreased ||
+    riskReduced ||
+    reserveGapReduced
+  );
+}
+
+function flatlineRiskRank(
+  level: "none" | "suspected" | "confirmed" | "critical",
+): number {
+  switch (level) {
+    case "none":
+      return 0;
+    case "suspected":
+      return 1;
+    case "confirmed":
+      return 2;
+    case "critical":
+      return 3;
+  }
 }
 
 function punishPlanMadeNoObservableProgress(

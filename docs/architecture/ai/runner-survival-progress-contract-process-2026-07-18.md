@@ -1,6 +1,6 @@
 # Runner-Survival-Progress-Contract-Prozess
 
-Status: P1 abgeschlossen; P2 aktiv
+Status: P2 abgeschlossen; P3 aktiv
 
 ## Quelle/Vorgabe
 
@@ -151,7 +151,7 @@ Commit: `fix(ai): require concrete survival credit progress`
 
 ### P2: Beobachtbarer Planfortschritt und TTL-Abbruch
 
-Status: aktiv
+Status: abgeschlossen
 
 Ziel: `runner.survival_defense` bleibt nur `progressing`, wenn sich Hand,
 akute Gefahr, Prevention-Zustand oder konkrete Reserve-Lücke verbessert.
@@ -176,11 +176,21 @@ Checks: fokussierte Memory-/Progression-Vitests, AI-Typecheck,
 Done-Gate: unveränderter Survival-Zustand erneuert die TTL nicht; echter
 Fortschritt bleibt stabil; andere Plantypen ändern ihr Verhalten nicht.
 
+Ergebnis: Die Plan-Memory speichert für `runner.survival_defense` den
+Handstand, das akute Flatline-Risiko, die Mindestreserve und die verbleibende
+Reservelücke sowie den gewählten ActionType. Nur Handgewinn, Risikoreduktion,
+verringerte Reservelücke oder eine bereits durch P1 als Prevention gemappte
+Aktion erhalten die Kontinuität. Andernfalls wird
+`no_observable_progress` gesetzt, die TTL dekrementiert und der Plan nach der
+zweiten Wiederholung mit `repeated_survival_without_visible_progress`
+abgebrochen. 88 fokussierte Plan-, Memory- und Mapping-Tests sowie der
+AI-Typecheck sind grün.
+
 Commit: `fix(ai): expire stalled runner survival plans`
 
 ### P3: Plan-Arbitration absichern
 
-Status: ausstehend
+Status: aktiv
 
 Ziel: Nur progressfähige Survival-Aktionen erhalten Plan-Dominanz. Ein
 nichtprogressiver Basic Credit darf keine besser bewertete legale Alternative
