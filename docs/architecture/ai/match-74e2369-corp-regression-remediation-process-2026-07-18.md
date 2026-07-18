@@ -1,6 +1,6 @@
 # Match 74e2369: Corp-KI-Regressionsbehebung
 
-Status: P6 aktiv
+Status: abgeschlossen
 
 ## Quelle und Gesamtziel
 
@@ -133,7 +133,7 @@ Status: abgeschlossen
 
 ### P6 – Main-Abgleich und lokale Integration
 
-Status: ausstehend
+Status: abgeschlossen
 
 - aktuelles lokales `main` defensiv einbinden und relevante Gates wiederholen;
 - Arbeitsbranch sauber lokal nach `main` mergen;
@@ -187,3 +187,8 @@ Status: ausstehend
   ausschließlich dieselben vier vorab belegten Dateigrößenverstöße; die
   geänderten übergroßen Dateien wurden gegenüber der Baseline nicht
   vergrößert. Abschlussreport und Projektlog sind nachgezogen.
+- P6 abgeschlossen: Das lokale `main` war seit Prozessstart unverändert und
+  sauber. Der Arbeitsbranch wurde konfliktfrei per Merge-Commit integriert;
+  auf dem resultierenden Main-Stand sind die 15 engsten Replay-/Consumer-
+  Tests, der AI-Typecheck und der vollständige 22-Karten-Audit erneut grün.
+  Es erfolgte kein Push und kein Pull Request.
