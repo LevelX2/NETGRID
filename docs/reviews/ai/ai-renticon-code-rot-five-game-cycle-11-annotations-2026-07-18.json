@@ -1,0 +1,125 @@
+{
+  "schemaVersion": "ai-selfplay-decision-annotations-v1",
+  "findings": [
+    {
+      "id": "detector_plan_label_mismatch_without_selection_error",
+      "classification": "reviewed_detector_false_positive",
+      "decisions": [
+        { "seed": "ai-renticon-code-rot-20260718-002", "stateVersionBefore": 13 },
+        { "seed": "ai-renticon-code-rot-20260718-002", "stateVersionBefore": 141 },
+        { "seed": "ai-renticon-code-rot-20260718-002", "stateVersionBefore": 142 },
+        { "seed": "ai-renticon-code-rot-20260718-002", "stateVersionBefore": 143 },
+        { "seed": "ai-renticon-code-rot-20260718-002", "stateVersionBefore": 144 },
+        { "seed": "ai-renticon-code-rot-20260718-002", "stateVersionBefore": 152 },
+        { "seed": "ai-renticon-code-rot-20260718-002", "stateVersionBefore": 153 },
+        { "seed": "ai-renticon-code-rot-20260718-002", "stateVersionBefore": 216 },
+        { "seed": "ai-renticon-code-rot-20260718-002", "stateVersionBefore": 217 },
+        { "seed": "ai-renticon-code-rot-20260718-002", "stateVersionBefore": 250 },
+        { "seed": "ai-renticon-code-rot-20260718-002", "stateVersionBefore": 251 },
+        { "seed": "ai-renticon-code-rot-20260718-002", "stateVersionBefore": 252 },
+        { "seed": "ai-renticon-code-rot-20260718-002", "stateVersionBefore": 301 },
+        { "seed": "ai-renticon-code-rot-20260718-002", "stateVersionBefore": 309 },
+        { "seed": "ai-renticon-code-rot-20260718-002", "stateVersionBefore": 310 },
+        { "seed": "ai-renticon-code-rot-20260718-002", "stateVersionBefore": 311 },
+        { "seed": "ai-renticon-code-rot-20260718-002", "stateVersionBefore": 312 },
+        { "seed": "ai-renticon-code-rot-20260718-002", "stateVersionBefore": 319 },
+        { "seed": "ai-renticon-code-rot-20260718-002", "stateVersionBefore": 320 },
+        { "seed": "ai-renticon-code-rot-20260718-003", "stateVersionBefore": 82 },
+        { "seed": "ai-renticon-code-rot-20260718-003", "stateVersionBefore": 92 },
+        { "seed": "ai-renticon-code-rot-20260718-003", "stateVersionBefore": 93 },
+        { "seed": "ai-renticon-code-rot-20260718-003", "stateVersionBefore": 101 },
+        { "seed": "ai-renticon-code-rot-20260718-003", "stateVersionBefore": 102 },
+        { "seed": "ai-renticon-code-rot-20260718-003", "stateVersionBefore": 103 },
+        { "seed": "ai-renticon-code-rot-20260718-003", "stateVersionBefore": 195 },
+        { "seed": "ai-renticon-code-rot-20260718-003", "stateVersionBefore": 203 },
+        { "seed": "ai-renticon-code-rot-20260718-003", "stateVersionBefore": 204 },
+        { "seed": "ai-renticon-code-rot-20260718-003", "stateVersionBefore": 205 },
+        { "seed": "ai-renticon-code-rot-20260718-003", "stateVersionBefore": 206 },
+        { "seed": "ai-renticon-code-rot-20260718-003", "stateVersionBefore": 214 },
+        { "seed": "ai-renticon-code-rot-20260718-003", "stateVersionBefore": 215 },
+        { "seed": "ai-renticon-code-rot-20260718-003", "stateVersionBefore": 216 },
+        { "seed": "ai-renticon-code-rot-20260718-003", "stateVersionBefore": 217 },
+        { "seed": "ai-renticon-code-rot-20260718-003", "stateVersionBefore": 248 },
+        { "seed": "ai-renticon-code-rot-20260718-004", "stateVersionBefore": 75 },
+        { "seed": "ai-renticon-code-rot-20260718-004", "stateVersionBefore": 82 },
+        { "seed": "ai-renticon-code-rot-20260718-004", "stateVersionBefore": 83 },
+        { "seed": "ai-renticon-code-rot-20260718-004", "stateVersionBefore": 181 },
+        { "seed": "ai-renticon-code-rot-20260718-004", "stateVersionBefore": 189 },
+        { "seed": "ai-renticon-code-rot-20260718-004", "stateVersionBefore": 190 },
+        { "seed": "ai-renticon-code-rot-20260718-004", "stateVersionBefore": 191 },
+        { "seed": "ai-renticon-code-rot-20260718-004", "stateVersionBefore": 192 },
+        { "seed": "ai-renticon-code-rot-20260718-004", "stateVersionBefore": 200 },
+        { "seed": "ai-renticon-code-rot-20260718-004", "stateVersionBefore": 201 },
+        { "seed": "ai-renticon-code-rot-20260718-004", "stateVersionBefore": 239 },
+        { "seed": "ai-renticon-code-rot-20260718-004", "stateVersionBefore": 240 },
+        { "seed": "ai-renticon-code-rot-20260718-004", "stateVersionBefore": 241 },
+        { "seed": "ai-renticon-code-rot-20260718-004", "stateVersionBefore": 248 },
+        { "seed": "ai-renticon-code-rot-20260718-004", "stateVersionBefore": 249 },
+        { "seed": "ai-renticon-code-rot-20260718-005", "stateVersionBefore": 251 },
+        { "seed": "ai-renticon-code-rot-20260718-005", "stateVersionBefore": 252 },
+        { "seed": "ai-renticon-code-rot-20260718-005", "stateVersionBefore": 253 },
+        { "seed": "ai-renticon-code-rot-20260718-005", "stateVersionBefore": 289 },
+        { "seed": "ai-renticon-code-rot-20260718-005", "stateVersionBefore": 290 },
+        { "seed": "ai-renticon-code-rot-20260718-005", "stateVersionBefore": 298 },
+        { "seed": "ai-renticon-code-rot-20260718-005", "stateVersionBefore": 299 }
+      ]
+    },
+    {
+      "id": "detector_repeated_archives_visible_state_changed",
+      "classification": "reviewed_detector_false_positive",
+      "decisions": [
+        { "seed": "ai-renticon-code-rot-20260718-001", "stateVersionBefore": 424 }
+      ]
+    },
+    {
+      "id": "intentional_remote_contest_funding_step",
+      "classification": "reviewed_controller_exception",
+      "decisions": [
+        { "seed": "ai-renticon-code-rot-20260718-001", "stateVersionBefore": 308 },
+        { "seed": "ai-renticon-code-rot-20260718-005", "stateVersionBefore": 70 }
+      ]
+    },
+    {
+      "id": "intentional_safe_scoreline_advance",
+      "classification": "reviewed_controller_exception",
+      "decisions": [
+        { "seed": "ai-renticon-code-rot-20260718-001", "stateVersionBefore": 99 },
+        { "seed": "ai-renticon-code-rot-20260718-001", "stateVersionBefore": 391 },
+        { "seed": "ai-renticon-code-rot-20260718-003", "stateVersionBefore": 160 },
+        { "seed": "ai-renticon-code-rot-20260718-003", "stateVersionBefore": 161 },
+        { "seed": "ai-renticon-code-rot-20260718-004", "stateVersionBefore": 120 },
+        { "seed": "ai-renticon-code-rot-20260718-004", "stateVersionBefore": 234 },
+        { "seed": "ai-renticon-code-rot-20260718-004", "stateVersionBefore": 270 }
+      ]
+    },
+    {
+      "id": "intentional_inevitable_deckout_controller",
+      "classification": "reviewed_controller_exception",
+      "decisions": [
+        { "seed": "ai-renticon-code-rot-20260718-001", "stateVersionBefore": 483 },
+        { "seed": "ai-renticon-code-rot-20260718-002", "stateVersionBefore": 442 }
+      ]
+    },
+    {
+      "id": "intentional_runner_run_plan_abort",
+      "classification": "reviewed_controller_exception",
+      "decisions": [
+        { "seed": "ai-renticon-code-rot-20260718-005", "stateVersionBefore": 278 }
+      ]
+    },
+    {
+      "id": "intentional_runner_hand_plan_search_event",
+      "classification": "reviewed_controller_exception",
+      "decisions": [
+        { "seed": "ai-renticon-code-rot-20260718-005", "stateVersionBefore": 310 }
+      ]
+    },
+    {
+      "id": "intentional_corp_score_window_funding",
+      "classification": "reviewed_controller_exception",
+      "decisions": [
+        { "seed": "ai-renticon-code-rot-20260718-005", "stateVersionBefore": 341 }
+      ]
+    }
+  ]
+}
