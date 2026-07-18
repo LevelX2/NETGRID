@@ -1,6 +1,6 @@
 # Engine Architecture Refresh Process 2026-07-18
 
-Status: vollständig umgesetzt; E16-Abschlussintegration und Cleanup laufen
+Status: vollständig umgesetzt, in `main` integriert und bereinigt
 Branch: `codex/engine-architecture-refresh`
 Worktree: `C:\Projekte\NETGRID_ENGINE_ARCHITECTURE_REFRESH`
 Primary agent: `architecture-review-agent`
@@ -25,7 +25,7 @@ Primary agent: `architecture-review-agent`
 | E13   | integriert  | Run-Hotspots geteilt; keine relativen Importzyklen; 1.736 Tests grün       |
 | E14   | integriert  | Registry nach Set/Seite/Typ; Coverage geteilt; 1.739 Engine-Tests grün     |
 | E15   | integriert  | 202 Dateien/1.741 Tests; Release-Smokes und Source-Verträge geteilt        |
-| E16   | verifiziert | Abschlussgates, Final Review und Wissenspflege grün; Integration läuft     |
+| E16   | integriert  | Abschlussgates grün; Review/Wissen aktuell; Worktree und Branch entfernt   |
 
 ## Quelle und Vorgabe
 
@@ -302,6 +302,12 @@ Die E16-Dokumente entsprechen Prettier und `git diff --check` ist grün. Der
 bestehende 8.000-Zeilen-Servertest bleibt außerhalb einer rein mechanischen
 Gesamtformatierung: Eine fünfzeilige Vertragskorrektur rechtfertigt keinen
 8.500-Zeilen-Formatierungsdiff in einem fremden Monolithen.
+
+Der finale Stand wurde unter Commit `9ac4f710c` per Fast-forward nach `main`
+integriert. Der saubere Arbeits-Worktree
+`C:\Projekte\NETGRID_ENGINE_ARCHITECTURE_REFRESH` und der vollständig gemergte
+Branch `codex/engine-architecture-refresh` wurden anschließend entfernt; Pfad,
+Worktree-Registrierung und Branch-Abwesenheit sind verifiziert.
 
 `public-context.ts`, der eingefrorene Runtime-Integrations-Fan-out, der knapp
 unter dem Gate liegende Per-Card-Longtail-Test und die manuelle
