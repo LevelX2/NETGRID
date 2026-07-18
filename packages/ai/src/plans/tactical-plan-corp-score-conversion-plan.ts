@@ -47,7 +47,7 @@ export function buildCorpScoreConversionPlans(
         side: "corp",
         type: "corp.create_score_window",
         status: "active",
-        priority: 970 + strategicBoost,
+        priority: 970 + strategicBoost + path.agendaPoints,
         horizonTurns: 1,
         target: { kind: "card", id: path.agendaCardId },
         currentStep: current,

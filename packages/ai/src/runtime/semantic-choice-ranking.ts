@@ -11,6 +11,7 @@ import {
   tacticalPlanCorpEconomyActivationBlocksOffPlanOverride,
   tacticalPlanCorpScoreConversionBlocksOffPlanOverride,
   tacticalPlanCorpScorelineSupportBlocksOffPlanOverride,
+  strongerExistingCorpOverrideMustBePreserved as preserveCorpOverride,
 } from "./choice-ranking/corp-plan-overrides";
 import {
   bestPlanCompatibleSemanticChoice,
@@ -150,9 +151,7 @@ export function tacticalPlanMappedChoice(
       strategicOverrideChoice &&
       strategicOverrideChoice.score > 0 &&
       strategicOverrideChoice.score > mappedChoice.score &&
-      (mapping.plan.side !== "runner" ||
-        strategicOverrideChoice.score >
-          (overrideChoice?.score ?? Number.NEGATIVE_INFINITY))
+      !preserveCorpOverride(mapping, overrideChoice, strategicOverrideChoice)
     ) {
       overrideChoice = strategicOverrideChoice;
     }

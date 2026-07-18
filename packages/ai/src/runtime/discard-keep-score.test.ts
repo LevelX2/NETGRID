@@ -30,6 +30,33 @@ describe("discard keep score", () => {
     );
   });
 
+  it("discounts only a duplicate Corp agenda whose remaining copy wins", () => {
+    const tycho = {
+      ...corpCard("onr_v1_220_tycho-extension", "agenda"),
+      agendaPoints: 4,
+    };
+    const duplicateTycho = {
+      ...tycho,
+      instanceId: "tycho-duplicate-instance",
+    };
+    const redundantAtFour = score(tycho, [], "corp", [], {}, {
+      agendaPoints: 4,
+      extraGrip: [duplicateTycho],
+    });
+    const neededAtZero = score(tycho, [], "corp", [], {}, {
+      agendaPoints: 0,
+      extraGrip: [duplicateTycho],
+    });
+
+    expect(redundantAtFour.baseValue).toBeLessThan(neededAtZero.baseValue);
+    expect(redundantAtFour.evidence).toContain(
+      "discard_score:corp_redundant_winning_agenda_duplicate",
+    );
+    expect(neededAtZero.evidence).not.toContain(
+      "discard_score:corp_redundant_winning_agenda_duplicate",
+    );
+  });
+
   it("preserves a reviewed advancement burst while a visible agenda can use it", () => {
     const systematicLayoffs = corpCard(
       "onr_v1_304_systematic-layoffs",

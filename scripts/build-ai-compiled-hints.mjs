@@ -42,6 +42,8 @@ const OVERLAY_FIELDS = [
   "opponentSignals",
 ];
 const REVIEWED_EFFECT_NORMALIZATION_CARD_IDS = new Set([
+  "onr_v1_196_corporate-war",
+  "onr_v1_222_ball-and-chain",
   "onr_v1_193_corporate-coup",
   "onr_v1_203_hostile-takeover",
   "onr_v1_206_marine-arcology",
@@ -61,6 +63,9 @@ const REVIEWED_EFFECT_NORMALIZATION_CARD_IDS = new Set([
   "onr_proteus_096_skullcap",
   "onr_proteus_101_all-hands",
   "onr_proteus_122_rush-hour",
+]);
+const REVIEWED_EFFECT_ACTIVE_CORE_OVERRIDE_CARD_IDS = new Set([
+  "onr_v1_278_wall-of-ice",
 ]);
 const HIDDEN_INFO_FIELDS = new Set([
   "opponentDeckList",
@@ -432,9 +437,14 @@ function mergeMechanicalField(field, activeValue, generatedValue, cardId) {
   if (!isMeaningful(generatedValue)) return stableValue(activeValue);
   if (
     field === "effects" &&
-    REVIEWED_EFFECT_NORMALIZATION_CARD_IDS.has(cardId)
+    (REVIEWED_EFFECT_NORMALIZATION_CARD_IDS.has(cardId) ||
+      REVIEWED_EFFECT_ACTIVE_CORE_OVERRIDE_CARD_IDS.has(cardId))
   ) {
-    return mergeMechanicalEffects(activeValue, generatedValue);
+    return mergeMechanicalEffects(
+      activeValue,
+      generatedValue,
+      REVIEWED_EFFECT_ACTIVE_CORE_OVERRIDE_CARD_IDS.has(cardId),
+    );
   }
   if (["effects", "conditions", "targetProfiles"].includes(field)) {
     return uniqueBySerialized([
@@ -456,7 +466,11 @@ function mergeMechanicalField(field, activeValue, generatedValue, cardId) {
   return stableValue(generatedValue);
 }
 
-function mergeMechanicalEffects(activeValue, generatedValue) {
+function mergeMechanicalEffects(
+  activeValue,
+  generatedValue,
+  preferActiveCore = false,
+) {
   const merged = (Array.isArray(activeValue) ? activeValue : []).map((effect) =>
     stableValue(effect),
   );
@@ -465,7 +479,11 @@ function mergeMechanicalEffects(activeValue, generatedValue) {
     : []) {
     const normalizedGenerated = stableValue(generatedEffect);
     const compatibleIndices = merged.flatMap((activeEffect, index) =>
-      mechanicalEffectsAreCompatible(activeEffect, normalizedGenerated)
+      mechanicalEffectsAreCompatible(
+        activeEffect,
+        normalizedGenerated,
+        preferActiveCore,
+      )
         ? [index]
         : [],
     );
@@ -482,11 +500,19 @@ function mergeMechanicalEffects(activeValue, generatedValue) {
   return uniqueBySerialized(merged).map(stableValue);
 }
 
-function mechanicalEffectsAreCompatible(left, right) {
+function mechanicalEffectsAreCompatible(left, right, preferActiveCore) {
   if (!left || !right || typeof left !== "object" || typeof right !== "object")
     return false;
   for (const field of ["kind", "timing", "scope"]) {
     if (left[field] !== right[field]) return false;
+  }
+  if (preferActiveCore) {
+    return ["resource", "target"].every(
+      (field) =>
+        !isMeaningful(left[field]) ||
+        !isMeaningful(right[field]) ||
+        left[field] === right[field],
+    );
   }
   for (const field of [
     "resource",
