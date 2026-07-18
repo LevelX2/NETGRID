@@ -4,7 +4,9 @@ import { createLegalActionRuntimeHosts } from "./legal-action-runtime-hosts";
 import { createPlayBoardRuntimeHosts } from "./play-board-runtime-hosts";
 import { createScoredEconomyRuntimeHosts } from "./scored-economy-runtime-hosts";
 
-export function createActionRuntimeHosts(deps: RuntimeDeps) {
+export function createActionRuntimeHosts(
+  deps: RuntimeDeps,
+): import("./action-runtime-port").ActionRuntimePort {
   const runtime = {} as RuntimeDeps;
   Object.assign(
     runtime,

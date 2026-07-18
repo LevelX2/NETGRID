@@ -666,7 +666,7 @@ export type ChoiceOption = {
   metadata?: {
     creditCost?: number;
     postBidTraceLinkDelta?: number;
-    shellTradersRemainingCounters?: number;
+    delayedInstallRemainingCounters?: number;
   };
 };
 
@@ -1433,7 +1433,7 @@ export type PendingAddTagContinuation =
       runnerTagsBefore: number;
     };
 
-export type DataFortReclamationSequenceState = {
+export type HqInstallRezSequenceState = {
   sourceAgendaId: CardInstanceId;
   sourceDefinitionId: CardDefinitionId;
   serverId: Exclude<ServerId, "new_remote">;
@@ -1464,7 +1464,7 @@ export type GameState = {
   agendaPointsToWin: number;
   setup?: SetupState;
   pendingChoice?: PendingChoice;
-  dataFortReclamationSequence?: DataFortReclamationSequenceState;
+  hqInstallRezSequence?: HqInstallRezSequenceState;
   pendingAddTagContinuation?: PendingAddTagContinuation;
   runnerDrawSequence?: RunnerDrawSequence;
   imminentEvent?: ImminentEvent;

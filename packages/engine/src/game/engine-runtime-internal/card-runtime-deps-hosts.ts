@@ -107,9 +107,7 @@ import {
   setCardCounter,
   spendCardCounter,
 } from "../state/turn-flags-counters";
-import {
-  temporaryBreakerStrengthBonusUntilEndOfTurn,
-} from "../state/temporary-breaker-strength";
+import { temporaryBreakerStrengthBonusUntilEndOfTurn } from "../state/temporary-breaker-strength";
 import {
   cleanupEmptyRemotes,
   createRemote,
@@ -233,9 +231,7 @@ import {
   buildRunnerAgendaPointInstallAction,
   buildRunnerSelectedServerInstallAction,
 } from "../turn/runner-install-context-actions";
-import {
-  buildRunnerHostedProgramInstallAction,
-} from "../turn/runner-hosted-install-actions";
+import { buildRunnerHostedProgramInstallAction } from "../turn/runner-hosted-install-actions";
 import { buildRunnerProgramTrashBeforeInstallAction } from "../turn/runner-program-trash-install-actions";
 import { buildRunnerStackSearchProgramToGripAction } from "../turn/runner-hidden-zone-search-actions";
 import {
@@ -651,9 +647,7 @@ import {
   ACCESS_NET_DAMAGE_UPGRADE_SOURCE,
   ACCESS_TRACE_DAMAGE_UPGRADE_SOURCE,
 } from "../../mechanics/server-upgrades";
-import {
-  RUN_TAX_UPGRADE_SOURCES,
-} from "../../mechanics/trace-tags";
+import { RUN_TAX_UPGRADE_SOURCES } from "../../mechanics/trace-tags";
 import { snapshotPersistentStealCostModifiersForSource } from "../../ability-engine/steal-cost-modifiers";
 import { createCardImplementationEffectAdapters } from "../../ability-engine/card-implementation-effect-adapters";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
@@ -693,7 +687,26 @@ import type { RuntimeDeps } from "./runtime-shared";
 export function createCardRuntimeDepsHosts(
   deps: RuntimeDeps,
   runtime: RuntimeDeps,
-) {
+): Pick<
+  import("./card-runtime-host-port").CardRuntimeHostPort,
+  | "selectedServerIcebreakerStrengthCounterBonus"
+  | "permanentIcebreakerStrengthCounterBonus"
+  | "pumpAmountForLegalAction"
+  | "pumpAbilityForLegalAction"
+  | "breakAbilityForLegalAction"
+  | "pumpDurationForLegalAction"
+  | "assertCurrentSubroutineMatchesLegalAction"
+  | "resolveMultiBreakSubroutinesAction"
+  | "assertBreakSubroutineCostQuoteValid"
+  | "subroutinesForCurrentEncounter"
+  | "variableTraceSubroutineForCurrentEncounter"
+  | "relativeDamageSubroutineForCurrentEncounter"
+  | "relativeTraceSubroutinesForCurrentEncounter"
+  | "runCardImplementationActionHost"
+  | "runStartTaxForServerUpgrades"
+  | "runStartTaxForCorpRootAssets"
+  | "spendRunnerAccessTrashCredits"
+> {
   const {
     breakSubroutineCostBreakdown,
     cardImplementationRuntimeDeps,
@@ -712,7 +725,7 @@ export function createCardRuntimeDepsHosts(
     runnerAccessActionHost,
   } = deps;
 
-  function dupreStrengthCounterBonus(
+  function selectedServerIcebreakerStrengthCounterBonus(
     state: GameState,
     breakerId: CardInstanceId,
   ): number {
@@ -922,7 +935,7 @@ export function createCardRuntimeDepsHosts(
       cardCounter(state, breakerId, "militech") +
       permanentIcebreakerStrengthCounterBonus(state, breakerId) +
       cardCounter(state, breakerId, "breaker_strength_penalty") * -1 +
-      dupreStrengthCounterBonus(state, breakerId) +
+      selectedServerIcebreakerStrengthCounterBonus(state, breakerId) +
       temporaryBreakerStrengthBonusUntilEndOfTurn(state, breakerId) +
       runRemainderStrengthBonusForBreaker(run, breakerId);
     if (breakerStrength < iceStrengthFor(state, iceId))
@@ -1071,7 +1084,7 @@ export function createCardRuntimeDepsHosts(
       cardCounter(state, breakerId, "militech") +
       permanentIcebreakerStrengthCounterBonus(state, breakerId) +
       cardCounter(state, breakerId, "breaker_strength_penalty") * -1 +
-      dupreStrengthCounterBonus(state, breakerId) +
+      selectedServerIcebreakerStrengthCounterBonus(state, breakerId) +
       temporaryBreakerStrengthBonusUntilEndOfTurn(state, breakerId) +
       runRemainderStrengthBonusForBreaker(run, breakerId);
     if (breakerStrength < iceStrengthFor(state, run.encounteredIceId))
@@ -1301,8 +1314,7 @@ export function createCardRuntimeDepsHosts(
     const sourceDefinitionIds = rezzedCorpRootCardIds(state)
       .filter(
         (cardId: CardInstanceId) =>
-          definitionFor(state, cardId).id ===
-            TAG_HANDSIZE_ASSET_SOURCE ||
+          definitionFor(state, cardId).id === TAG_HANDSIZE_ASSET_SOURCE ||
           hasCorpUtilityKind(state, cardId, "run_start_tax"),
       )
       .map((cardId: CardInstanceId) => definitionFor(state, cardId).id);
@@ -1341,7 +1353,7 @@ export function createCardRuntimeDepsHosts(
   }
 
   return {
-    dupreStrengthCounterBonus,
+    selectedServerIcebreakerStrengthCounterBonus,
     permanentIcebreakerStrengthCounterBonus,
     pumpAmountForLegalAction,
     pumpAbilityForLegalAction,

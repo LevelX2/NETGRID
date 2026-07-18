@@ -23,7 +23,7 @@ import type { ChoiceHiddenZoneRuntimeLinks } from "./choice-hidden-zone-runtime-
 export function createCorpZoneRuntimeHosts(
   deps: RuntimeDeps,
   links: ChoiceHiddenZoneRuntimeLinks,
-) {
+): import("./corp-zone-runtime-port").CorpZoneRuntimePort {
   const {
     DAILY_CREDIT_RESOURCE_SOURCE,
     BUTCHER_BOY_ID,

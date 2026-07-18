@@ -23,7 +23,7 @@ import type { ChoiceHiddenZoneRuntimeLinks } from "./choice-hidden-zone-runtime-
 export function createHiddenZoneArrangeRuntime(
   deps: RuntimeDeps,
   links: ChoiceHiddenZoneRuntimeLinks,
-) {
+): import("./hidden-zone-arrange-runtime-port").HiddenZoneArrangeRuntimePort {
   const {
     DAILY_CREDIT_RESOURCE_SOURCE,
     BUTCHER_BOY_ID,

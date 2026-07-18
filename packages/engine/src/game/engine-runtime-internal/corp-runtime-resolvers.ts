@@ -234,9 +234,7 @@ import {
   buildRunnerAgendaPointInstallAction,
   buildRunnerSelectedServerInstallAction,
 } from "../turn/runner-install-context-actions";
-import {
-  buildRunnerHostedProgramInstallAction,
-} from "../turn/runner-hosted-install-actions";
+import { buildRunnerHostedProgramInstallAction } from "../turn/runner-hosted-install-actions";
 import { buildRunnerProgramTrashBeforeInstallAction } from "../turn/runner-program-trash-install-actions";
 import { buildRunnerStackSearchProgramToGripAction } from "../turn/runner-hidden-zone-search-actions";
 import {
@@ -654,9 +652,7 @@ import {
   ACCESS_NET_DAMAGE_UPGRADE_SOURCE,
   ACCESS_TRACE_DAMAGE_UPGRADE_SOURCE,
 } from "../../mechanics/server-upgrades";
-import {
-  RUN_TAX_UPGRADE_SOURCES,
-} from "../../mechanics/trace-tags";
+import { RUN_TAX_UPGRADE_SOURCES } from "../../mechanics/trace-tags";
 import { snapshotPersistentStealCostModifiersForSource } from "../../ability-engine/steal-cost-modifiers";
 import { createCardImplementationEffectAdapters } from "../../ability-engine/card-implementation-effect-adapters";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
@@ -691,12 +687,14 @@ import type {
   CardVirusCounterImplementation,
   MakeRunEffectImplementation,
 } from "../../ability-engine/definition-types";
-import type {
-  CorpAgendaPointCostResult,
-  RuntimeDeps,
-} from "./runtime-shared";
+import type { CorpAgendaPointCostResult, RuntimeDeps } from "./runtime-shared";
 
-export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
+export function createCorpRuntimeResolvers(
+  deps: RuntimeDeps,
+  turnCorpRuntime:
+    | import("./turn-corp-runtime-port").TurnCorpRuntimePort
+    | undefined = deps.turnCorpRuntime,
+): import("./corp-runtime-port").CorpRuntimePort {
   const {
     DEFAULT_CONTROLLERS,
     INITIAL_HAND_SIZE,
@@ -806,7 +804,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     discardRandomCorpHqCards,
     drawRunnerCard,
     drawRunnerCards,
-    dupreStrengthCounterBonus,
+    selectedServerIcebreakerStrengthCounterBonus,
     edgerunnerTempsInstallActionsRemaining,
     effectiveAgendaDifficultyDeps,
     effectiveSubtypesForCard,
@@ -1106,7 +1104,6 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     trashRunnerInstalledCardToHeap,
     trashRunnerInstalledProgram,
     triggerAbilityExecutionHost,
-    turnCorpRuntime,
     turnBasicExecutionHost,
     uniqueDirectLongtailImplementationForCard,
     uniqueDirectLongtailImplementationForDefinition,
@@ -1129,6 +1126,25 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     withoutVariableIceState,
   } = deps;
 
+  if (!turnCorpRuntime)
+    throw new Error("Turn-Corp-Runtime muss vor den Corp-Resolvern bestehen.");
+  const {
+    advanceableInstalledCardTargets,
+    isInstalledCorpCardAdvanceable,
+    advancementDistributionOptions,
+    startCardImplementationAdvancementDistributionChoice,
+    parseAdvancementDistributionValue,
+    sourcePartsForP334Choice,
+    validateAdvancementDistribution,
+    resolveCardImplementationAdvancementDistributionChoice,
+    movableAdvancementSourceIds,
+    moveAdvancementOptions,
+    startCardImplementationMoveAdvancementChoice,
+    resolveCardImplementationMoveAdvancementChoice,
+    resolveCorpOperationAddAdvancementCounters,
+    awardRunnerEventAgendaPoint,
+  } = turnCorpRuntime;
+
   function forfeitRunnerAgendaForPointCost(
     state: GameState,
     cardId: CardInstanceId,
@@ -1149,9 +1165,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     cardId: CardInstanceId,
   ): void {
     if (!cardId || !state.corp.scoreArea.includes(cardId))
-      throw new Error(
-        "Die Korp kann mit dieser Agenda keine Kosten bezahlen.",
-      );
+      throw new Error("Die Korp kann mit dieser Agenda keine Kosten bezahlen.");
     if (agendaPointsForScoredCard(state, cardId) < 1)
       throw new Error(
         "Die gewaehlte Korp-Agenda liefert keinen Agenda-Punkt fuer Kosten.",
@@ -1163,14 +1177,10 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     return Math.max(0, Math.floor(state.activeObligationDebtCount ?? 0));
   }
 
-  function addActiveObligation(
-    state: GameState,
-    amount: number,
-  ): void {
+  function addActiveObligation(state: GameState, amount: number): void {
     if (!Number.isInteger(amount) || amount <= 0)
       throw new Error("ACME-Verpflichtungsmenge ist ungueltig.");
-    state.activeObligationDebtCount =
-      activeObligationCount(state) + amount;
+    state.activeObligationDebtCount = activeObligationCount(state) + amount;
   }
 
   function removeActiveObligation(state: GameState): void {
@@ -1302,7 +1312,8 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     cardId: CardInstanceId,
     definition: CardDefinition,
   ): LegalAction[] {
-    const eligibleHardwareIds = hardwareTrashByCounterEligibleHardwareIds(state);
+    const eligibleHardwareIds =
+      hardwareTrashByCounterEligibleHardwareIds(state);
     const maxTrashCount = Math.min(
       eligibleHardwareIds.length,
       state.corp.credits,
@@ -1335,7 +1346,9 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
       legalAction.payload?.hardwareTrashByCounterTrashCount ?? 1,
     );
     if (!Number.isInteger(trashCount) || trashCount <= 0)
-      throw new Error("Hardware-Trash-by-Counter braucht eine gueltige X-Auswahl.");
+      throw new Error(
+        "Hardware-Trash-by-Counter braucht eine gueltige X-Auswahl.",
+      );
     return trashCount;
   }
 
@@ -1344,7 +1357,8 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     legalAction: LegalAction,
   ): void {
     const trashCount = hardwareTrashByCounterTrashCountFromPayload(legalAction);
-    const eligibleHardwareIds = hardwareTrashByCounterEligibleHardwareIds(state);
+    const eligibleHardwareIds =
+      hardwareTrashByCounterEligibleHardwareIds(state);
     if (eligibleHardwareIds.length < trashCount)
       throw new Error(
         "Hardware-Trash-by-Counter findet nicht genug nicht-Cybernetics-Hardware.",
@@ -1397,7 +1411,9 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     };
   }
 
-  function hardwareTrashByCounterTrashCountFromChoiceSource(source: string): number {
+  function hardwareTrashByCounterTrashCountFromChoiceSource(
+    source: string,
+  ): number {
     const [, rawTrashCount] = source.split(":");
     const trashCount = Number(rawTrashCount);
     if (!Number.isInteger(trashCount) || trashCount <= 0)
@@ -1413,7 +1429,12 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     playerAction: PlayerAction,
   ): void {
     const choice = state.pendingChoice;
-    if (!choice || !choice.source.startsWith("card_implementation.installed_hardware_trash_by_counter"))
+    if (
+      !choice ||
+      !choice.source.startsWith(
+        "card_implementation.installed_hardware_trash_by_counter",
+      )
+    )
       throw new Error("Es ist keine Hardware-Trash-by-Counter-Choice offen.");
     const trashCount = hardwareTrashByCounterTrashCountFromChoiceSource(
       choice.source,
@@ -1423,8 +1444,12 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
       playerAction,
     ) as CardInstanceId[];
     if (selectedIds.length !== trashCount)
-      throw new Error("Hardware-Trash-by-Counter braucht genau X Hardware-Ziele.");
-    const legalTargets = new Set(hardwareTrashByCounterEligibleHardwareIds(state));
+      throw new Error(
+        "Hardware-Trash-by-Counter braucht genau X Hardware-Ziele.",
+      );
+    const legalTargets = new Set(
+      hardwareTrashByCounterEligibleHardwareIds(state),
+    );
     for (const cardId of selectedIds) {
       if (!legalTargets.has(cardId))
         throw new Error(
@@ -1692,88 +1717,6 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     };
   }
 
-  function callTurnCorpRuntime(delegateName: string, args: any[]): any {
-    const delegate = Object.getOwnPropertyDescriptor(
-      turnCorpRuntime,
-      delegateName,
-    )?.value;
-    if (typeof delegate !== "function")
-      throw new Error(`Turn-Corp-Runtime-Delegate fehlt: ${delegateName}.`);
-    return delegate(...args);
-  }
-
-  function advanceableInstalledCardTargets(...args: any[]): any {
-    return callTurnCorpRuntime("advanceableInstalledCardTargets", args);
-  }
-
-  function isInstalledCorpCardAdvanceable(...args: any[]): any {
-    return callTurnCorpRuntime("isInstalledCorpCardAdvanceable", args);
-  }
-
-  function advancementDistributionOptions(...args: any[]): any {
-    return callTurnCorpRuntime("advancementDistributionOptions", args);
-  }
-
-  function startCardImplementationAdvancementDistributionChoice(
-    ...args: any[]
-  ): any {
-    return callTurnCorpRuntime(
-      "startCardImplementationAdvancementDistributionChoice",
-      args,
-    );
-  }
-
-  function parseAdvancementDistributionValue(...args: any[]): any {
-    return callTurnCorpRuntime("parseAdvancementDistributionValue", args);
-  }
-
-  function sourcePartsForP334Choice(...args: any[]): any {
-    return callTurnCorpRuntime("sourcePartsForP334Choice", args);
-  }
-
-  function validateAdvancementDistribution(...args: any[]): any {
-    return callTurnCorpRuntime("validateAdvancementDistribution", args);
-  }
-
-  function resolveCardImplementationAdvancementDistributionChoice(
-    ...args: any[]
-  ): any {
-    return callTurnCorpRuntime(
-      "resolveCardImplementationAdvancementDistributionChoice",
-      args,
-    );
-  }
-
-  function movableAdvancementSourceIds(...args: any[]): any {
-    return callTurnCorpRuntime("movableAdvancementSourceIds", args);
-  }
-
-  function moveAdvancementOptions(...args: any[]): any {
-    return callTurnCorpRuntime("moveAdvancementOptions", args);
-  }
-
-  function startCardImplementationMoveAdvancementChoice(...args: any[]): any {
-    return callTurnCorpRuntime(
-      "startCardImplementationMoveAdvancementChoice",
-      args,
-    );
-  }
-
-  function resolveCardImplementationMoveAdvancementChoice(...args: any[]): any {
-    return callTurnCorpRuntime(
-      "resolveCardImplementationMoveAdvancementChoice",
-      args,
-    );
-  }
-
-  function resolveCorpOperationAddAdvancementCounters(...args: any[]): any {
-    return callTurnCorpRuntime("resolveCorpOperationAddAdvancementCounters", args);
-  }
-
-  function awardRunnerEventAgendaPoint(...args: any[]): any {
-    return callTurnCorpRuntime("awardRunnerEventAgendaPoint", args);
-  }
-
   function choiceAction(state: GameState, choice: ChoiceRequest): LegalAction {
     return action(
       state,
@@ -1895,9 +1838,13 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
       );
   }
 
-  function rezzedCorpInstalledEconomyCreditSourceIds(state: GameState): CardInstanceId[] {
+  function rezzedCorpInstalledEconomyCreditSourceIds(
+    state: GameState,
+  ): CardInstanceId[] {
     return rezzedCorpRootCardIds(state)
-      .filter((cardId: CardInstanceId) => isCorpInstalledEconomyCreditSource(state, cardId))
+      .filter((cardId: CardInstanceId) =>
+        isCorpInstalledEconomyCreditSource(state, cardId),
+      )
       .sort();
   }
 
@@ -1920,16 +1867,21 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
   ): void {
     if (state.pendingChoice)
       throw new Error("Es ist bereits eine Choice offen.");
-    const economyCreditSourceIds = rezzedCorpInstalledEconomyCreditSourceIds(state);
+    const economyCreditSourceIds =
+      rezzedCorpInstalledEconomyCreditSourceIds(state);
     if (economyCreditSourceIds.length === 0)
-      throw new Error("Es ist keine rezzed installierte Economy-Credit-Quelle vorhanden.");
-    const sourceDefinitionId = definitionFor(state, economyCreditSourceIds[0]!).id;
+      throw new Error(
+        "Es ist keine rezzed installierte Economy-Credit-Quelle vorhanden.",
+      );
+    const sourceDefinitionId = definitionFor(
+      state,
+      economyCreditSourceIds[0]!,
+    ).id;
     state.pendingChoice = {
       choiceId: `corp_installed_economy_credit_choice_${state.stateVersion + 1}`,
       side: "corp",
       source: `corp_installed_economy.credit_choice:${state.stateVersion + 1}`,
-      prompt:
-        "Credit nehmen oder 2 Credits auf eine Economy-Quelle legen?",
+      prompt: "Credit nehmen oder 2 Credits auf eine Economy-Quelle legen?",
       kind: "select_option",
       options: [
         {
@@ -1966,7 +1918,10 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     playerAction: PlayerAction,
   ): void {
     const choice = state.pendingChoice;
-    if (!choice || !choice.source.startsWith("corp_installed_economy.credit_choice"))
+    if (
+      !choice ||
+      !choice.source.startsWith("corp_installed_economy.credit_choice")
+    )
       throw new Error("Es ist keine Economy-Credit-Choice offen.");
     if (choice.side !== "corp" || legalAction.side !== "corp")
       throw new Error("Nur die Korp darf diese Economy-Credit-Choice nutzen.");
@@ -1992,8 +1947,12 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
       (option) => option.id === selected,
     );
     const sourceCardId = String(selectedOption?.value ?? "");
-    if (!rezzedCorpInstalledEconomyCreditSourceIds(state).includes(sourceCardId))
-      throw new Error("Die gewaehlte Economy-Credit-Quelle ist nicht mehr legal.");
+    if (
+      !rezzedCorpInstalledEconomyCreditSourceIds(state).includes(sourceCardId)
+    )
+      throw new Error(
+        "Die gewaehlte Economy-Credit-Quelle ist nicht mehr legal.",
+      );
     const counterPayload = addVisibleCardCounter(
       state,
       sourceCardId,

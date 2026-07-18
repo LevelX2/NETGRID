@@ -999,13 +999,14 @@ function sanitizeChoiceOptionMetadata(
     postBidTraceLinkDelta > 0
   )
     result.postBidTraceLinkDelta = postBidTraceLinkDelta;
-  const shellTradersRemainingCounters = metadata.shellTradersRemainingCounters;
+  const delayedInstallRemainingCounters =
+    metadata.delayedInstallRemainingCounters;
   if (
-    typeof shellTradersRemainingCounters === "number" &&
-    Number.isInteger(shellTradersRemainingCounters) &&
-    shellTradersRemainingCounters >= 0
+    typeof delayedInstallRemainingCounters === "number" &&
+    Number.isInteger(delayedInstallRemainingCounters) &&
+    delayedInstallRemainingCounters >= 0
   )
-    result.shellTradersRemainingCounters = shellTradersRemainingCounters;
+    result.delayedInstallRemainingCounters = delayedInstallRemainingCounters;
   return Object.keys(result).length > 0 ? result : undefined;
 }
 

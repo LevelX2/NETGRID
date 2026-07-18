@@ -323,7 +323,7 @@ export function passApproachedIce(
   }
   const ice = host.cards.cardInstanceFor(run.approachedIceId);
   if (ice.rezzed && run.bypassFirstIceRemaining) {
-    markInsideJobAutoPass(host, run.approachedIceId, legalAction);
+    markRunStartBypassAutoPass(host, run.approachedIceId, legalAction);
     run.bypassFirstIceRemaining = false;
     return movePastCurrentIce(host, legalAction);
   }
@@ -374,7 +374,7 @@ export function approachOrEncounterIce(
     }
     if (secretSpendAutoPass) return passApproachedIce(host, legalAction);
     if (run.bypassFirstIceRemaining) {
-      markInsideJobAutoPass(host, approachedIceId, legalAction);
+      markRunStartBypassAutoPass(host, approachedIceId, legalAction);
       run.bypassFirstIceRemaining = false;
       return movePastCurrentIce(host, legalAction);
     }
@@ -898,7 +898,7 @@ function markSecretSpendGuessAutoPass(
   };
 }
 
-function markInsideJobAutoPass(
+function markRunStartBypassAutoPass(
   host: RunMovementHost,
   passedIceId: CardInstanceId,
   legalAction: LegalAction | undefined,
@@ -908,8 +908,9 @@ function markInsideJobAutoPass(
   const serverLabel = host.servers.publicServerLabel(run.attackedServerId);
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
-    insideJobAutoPassedIce: true,
-    insideJobPassedIceDefinitionId: host.cards.definitionFor(passedIceId).id,
+    runStartBypassAutoPassedIce: true,
+    runStartBypassPassedIceDefinitionId:
+      host.cards.definitionFor(passedIceId).id,
     serverId: run.attackedServerId,
     ...(serverLabel ? { serverLabel } : {}),
   };

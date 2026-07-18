@@ -708,7 +708,9 @@ import type {
 import type { RuntimeDeps } from "./runtime-shared";
 
 
-export function createAccessFlowRuntimeHosts(deps: RuntimeDeps) {
+export function createAccessFlowRuntimeHosts(
+  deps: RuntimeDeps,
+): import("./access-flow-runtime-port").AccessFlowRuntimePort {
   const {
     accessFlow,
     runFlow,

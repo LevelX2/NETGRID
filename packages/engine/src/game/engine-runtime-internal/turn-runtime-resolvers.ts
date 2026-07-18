@@ -720,8 +720,11 @@ import {
   resolveForcedActionNotPossible,
   restrictedActionFamilyForRandomActionRoll,
 } from "./turn-action-economy-runtime";
+import { createTurnStartTagContinuationResolver } from "./turn-start-tag-continuation";
 
-export function createTurnRuntimeResolvers(deps: RuntimeDeps) {
+export function createTurnRuntimeResolvers(
+  deps: RuntimeDeps,
+): import("./turn-runtime-port").TurnRuntimePort {
   const {
     DEFAULT_CONTROLLERS,
     INITIAL_HAND_SIZE,
@@ -825,7 +828,7 @@ export function createTurnRuntimeResolvers(deps: RuntimeDeps) {
     discardRandomCorpHqCards,
     drawRunnerCard,
     drawRunnerCards,
-    dupreStrengthCounterBonus,
+    selectedServerIcebreakerStrengthCounterBonus,
     edgerunnerTempsInstallActionsRemaining,
     effectiveAgendaDifficultyDeps,
     effectiveSubtypesForCard,
@@ -1158,6 +1161,13 @@ export function createTurnRuntimeResolvers(deps: RuntimeDeps) {
     visibleVirusCounterTargetIds,
     withoutVariableIceState,
   } = deps;
+  const resumeStartOfTurnAfterTagPrevention =
+    createTurnStartTagContinuationResolver(deps, {
+      applyCorpStartOfTurnEffects,
+      openCorpStartTurnRestrictedActionOffers,
+      applyRunnerStartOfTurnEffects,
+      appendResolvedEffectsToPayload,
+    });
 
   function resolveEndTurnTagIfRunnerReceivedTag(
     state: GameState,
@@ -3122,99 +3132,6 @@ export function createTurnRuntimeResolvers(deps: RuntimeDeps) {
       visibility: "hidden_info_barrier",
     };
     return true;
-  }
-
-  function resumeStartOfTurnAfterTagPrevention(
-    state: GameState,
-    legalAction: LegalAction,
-  ): void {
-    const continuation = state.pendingAddTagContinuation;
-    if (!continuation)
-      throw new Error("Es ist keine Start-of-turn-Tag-Fortsetzung offen.");
-    if (state.pendingChoice || state.eventModificationWindow)
-      throw new Error("Das Add-Tag-Fenster ist noch nicht abgeschlossen.");
-    const effects: AutomaticEffectCollector = [];
-
-    if (continuation.kind === "corp_start_turn") {
-      const tagsAdded = Math.max(
-        0,
-        state.runner.tags - continuation.runnerTagsBefore,
-      );
-      const rootCardIds = rezzedCorpRootCardIds(state);
-      if (
-        continuation.nextRootCardIndex <= 0 ||
-        rootCardIds[continuation.nextRootCardIndex - 1] !==
-          continuation.sourceCardId ||
-        definitionFor(state, continuation.sourceCardId).id !==
-          continuation.sourceDefinitionId
-      )
-        throw new Error("Die Corp-Start-Tag-Fortsetzung ist veraltet.");
-      effects.push({
-        effectId: `corp.start.classic.satellite_monitors.${continuation.sourceCardId}`,
-        kind: tagsAdded > 0 ? "add_tags" : "counter_change",
-        visibility: "public",
-        side: "runner",
-        amount: tagsAdded,
-        reason: "start_of_turn",
-        sourceDefinitionId: continuation.sourceDefinitionId,
-        sourceTitle: publicCardTitle(continuation.sourceDefinitionId),
-        runAttemptsLastTurn: continuation.runAttemptsLastTurn,
-        dieSize: 6,
-        dieRolls: continuation.dieRolls.join(","),
-        tagsAdded,
-        runnerTagsAfter: state.runner.tags,
-        randomCounterAfter: state.randomCounter,
-      } as ResolvedGameEffect);
-      delete state.pendingAddTagContinuation;
-      const suspended = applyCorpStartOfTurnEffects(
-        state,
-        effects,
-        legalAction,
-        continuation.nextRootCardIndex,
-        true,
-      );
-      if (!suspended) openCorpStartTurnRestrictedActionOffers(state, effects);
-      appendResolvedEffectsToPayload(legalAction, effects);
-      return;
-    }
-
-    if (continuation.kind === "runner_start_turn") {
-      const tagsAdded = Math.max(
-        0,
-        state.runner.tags - continuation.runnerTagsBefore,
-      );
-      const counterEffect =
-        runnerTraceCounterEffectDefinitions()[
-          continuation.nextCounterEffectIndex - 1
-        ];
-      if (
-        !counterEffect ||
-        counterEffect.sourceDefinitionId !== continuation.sourceDefinitionId ||
-        counterEffect.counterType !== continuation.counterType ||
-        counterEffect.startOfRunnerTurn?.kind !== "add_tags"
-      )
-        throw new Error("Die Runner-Start-Tag-Fortsetzung ist veraltet.");
-      if (tagsAdded > 0)
-        effects.push(
-          automaticTagEffect(
-            `runner.start.${continuation.counterType}`,
-            tagsAdded,
-            continuation.sourceDefinitionId,
-          ),
-        );
-      delete state.pendingAddTagContinuation;
-      applyRunnerStartOfTurnEffects(
-        state,
-        effects,
-        "begin",
-        legalAction,
-        continuation.nextCounterEffectIndex,
-      );
-      appendResolvedEffectsToPayload(legalAction, effects);
-      return;
-    }
-
-    throw new Error("Die Add-Tag-Fortsetzung gehoert nicht zum Turn-Start.");
   }
 
   return {

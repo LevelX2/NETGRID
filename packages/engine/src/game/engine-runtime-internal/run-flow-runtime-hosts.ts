@@ -678,7 +678,7 @@ import type { RuntimeDeps } from "./runtime-shared";
 export function createRunFlowRuntimeHosts(
   deps: RuntimeDeps,
   runtime: RuntimeDeps,
-) {
+): import("./run-flow-runtime-port").RunFlowRuntimePort {
   const { cardHasSubtype, runFlow, subroutinesForCurrentEncounter } = deps;
 
   function startRun(

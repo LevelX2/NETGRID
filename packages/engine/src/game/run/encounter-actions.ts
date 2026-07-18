@@ -68,7 +68,9 @@ export type RunnerEncounterActionHost = {
     strengthForIce: (iceId: CardInstanceId) => number;
   };
   breaker: {
-    dupreStrengthCounterBonus: (breakerId: CardInstanceId) => number;
+    selectedServerIcebreakerStrengthCounterBonus: (
+      breakerId: CardInstanceId,
+    ) => number;
   };
   payment: {
     availableRunnerRunCredits: (breakerId?: CardInstanceId) => number;
@@ -190,7 +192,7 @@ export function buildRunnerEncounterActions(
       host.cards.cardCounter(breakerId, "militech") +
       (host.cards.permanentIcebreakerStrengthCounterBonus?.(breakerId) ?? 0) +
       host.cards.cardCounter(breakerId, "breaker_strength_penalty") * -1 +
-      host.breaker.dupreStrengthCounterBonus(breakerId) +
+      host.breaker.selectedServerIcebreakerStrengthCounterBonus(breakerId) +
       temporaryBreakerStrengthBonusUntilEndOfTurn(host.state, breakerId) +
       host.run.runRemainderStrengthBonusForBreaker(breakerId);
     const breakerAbilities = icebreakerAbilitiesForDefinition(breaker);

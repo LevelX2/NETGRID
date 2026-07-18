@@ -1,631 +1,670 @@
-import { runtimeDelegate } from "./runtime-delegate-store";
-
-export function startRunnerPrivateLookChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneResolvers",
-    "startRunnerPrivateLookChoice",
-  )(...args);
-}
-
-export function resolveRunnerPrivateLookChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneResolvers",
-    "resolveRunnerPrivateLookChoice",
-  )(...args);
-}
-
-export function startPostAccessInstalledProgramChoice(
-  ...args: any[]
-): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneResolvers",
-    "startPostAccessInstalledProgramChoice",
-  )(...args);
-}
-
-export function v1915InstalledRevealHelperIds(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneResolvers",
-    "v1915InstalledRevealHelperIds",
-  )(...args);
-}
-
-export function runnerHasInstalledDefinition(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneResolvers",
-    "runnerHasInstalledDefinition",
-  )(...args);
-}
-
-export function trashOlderRegionUpgradesInServer(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneResolvers",
-    "trashOlderRegionUpgradesInServer",
-  )(...args);
-}
-
-export function appendRegionReplacementTrashEffect(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneResolvers",
-    "appendRegionReplacementTrashEffect",
-  )(...args);
-}
-
-export function hiddenZoneSearchHandlerHostBase(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "hiddenZoneSearchHandlerHostBase",
-  )(...args);
-}
-
-export function hiddenZoneSearchActivationTargetHost(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "hiddenZoneSearchActivationTargetHost",
-  )(...args);
-}
-
-export function hiddenZoneSearchChoiceHandlerHost(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "hiddenZoneSearchChoiceHandlerHost",
-  )(...args);
-}
-
-export function hiddenZoneSearchActivationHandlerHost(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "hiddenZoneSearchActivationHandlerHost",
-  )(...args);
-}
-
-export function hiddenZoneArrangeChoiceHandlerHost(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "hiddenZoneArrangeChoiceHandlerHost",
-  )(...args);
-}
-
-export function hiddenZoneNonSearchChoiceHandlerHost(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "hiddenZoneNonSearchChoiceHandlerHost",
-  )(...args);
-}
-
-export function corpZoneChoiceHandlerHost(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "corpZoneChoiceHandlerHost",
-  )(...args);
-}
-
-export function pendingChoiceResolutionHost(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "pendingChoiceResolutionHost",
-  )(...args);
-}
-
-export function setupMulliganChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "setupMulliganChoice",
-  )(...args);
-}
-
-export function discardChoice(...args: any[]): any {
-  return runtimeDelegate("choiceHiddenZoneRuntime", "discardChoice")(...args);
-}
-
-export function resolveDiscardChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "resolveDiscardChoice",
-  )(...args);
-}
-
-export function resolveSetupMulliganChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "resolveSetupMulliganChoice",
-  )(...args);
-}
-
-export function takeSetupMulligan(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "takeSetupMulligan",
-  )(...args);
-}
-
-export function installRunnerProgramFromStackWithoutClick(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "installRunnerProgramFromStackWithoutClick",
-  )(...args);
-}
-
-export function canInstallRunnerProgramFromZone(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "canInstallRunnerProgramFromZone",
-  )(...args);
-}
-
-export function installRunnerProgramFromZoneWithoutClick(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "installRunnerProgramFromZoneWithoutClick",
-  )(...args);
-}
-
-export function startRunnerProgramFreeMemoryChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "startRunnerProgramFreeMemoryChoice",
-  )(...args);
-}
-
-export function installRunnerProgramForFree(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "installRunnerProgramForFree",
-  )(...args);
-}
-
-export function startDerezRezzedBlackIceChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "startDerezRezzedBlackIceChoice",
-  )(...args);
-}
-
-export function resolveDerezRezzedBlackIceChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "resolveDerezRezzedBlackIceChoice",
-  )(...args);
-}
-
-export function startPayRezCostToTrashRezzedIceChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "startPayRezCostToTrashRezzedIceChoice",
-  )(...args);
-}
-
-export function resolvePayRezCostToTrashRezzedIceChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "resolvePayRezCostToTrashRezzedIceChoice",
-  )(...args);
-}
-
-export function publicIcePositionLabelForCard(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "publicIcePositionLabelForCard",
-  )(...args);
-}
-
-export function publicIceSelectionLabelForCard(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "publicIceSelectionLabelForCard",
-  )(...args);
-}
-
-export function startCorpChoiceRezOrTrashIceChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "startCorpChoiceRezOrTrashIceChoice",
-  )(...args);
-}
-
-export function resolveCorpChoiceRezOrTrashIceTargetChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "resolveCorpChoiceRezOrTrashIceTargetChoice",
-  )(...args);
-}
-
-export function resolveCorpChoiceRezOrTrashIceDecisionChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "resolveCorpChoiceRezOrTrashIceDecisionChoice",
-  )(...args);
-}
-
-export function startTrashUnrezzedIceChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "startTrashUnrezzedIceChoice",
-  )(...args);
-}
-
-export function resolveTrashUnrezzedIceChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "resolveTrashUnrezzedIceChoice",
-  )(...args);
-}
-
-export function startPaidSourceReturnToGripChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "startPaidSourceReturnToGripChoice",
-  )(...args);
-}
-
-export function resolvePaidSourceReturnToGripChoice(
-  ...args: any[]
-): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "resolvePaidSourceReturnToGripChoice",
-  )(...args);
-}
-
-export function corpAgendaPointTotal(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "corpAgendaPointTotal",
-  )(...args);
-}
-
-export function chooseCorpAgendasForPointCost(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "chooseCorpAgendasForPointCost",
-  )(...args);
-}
-
-export function startRunnerHostingChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "startRunnerHostingChoice",
-  )(...args);
-}
-
-export function resolveRunnerHostingChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "resolveRunnerHostingChoice",
-  )(...args);
-}
-
-export function resolveIncubatorTransformChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "resolveIncubatorTransformChoice",
-  )(...args);
-}
-
-export function resolveChimeraDaemonTrashChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "resolveChimeraDaemonTrashChoice",
-  )(...args);
-}
-
-export function resolveCardImplementationAccessPaymentChoice(
-  ...args: any[]
-): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "resolveCardImplementationAccessPaymentChoice",
-  )(...args);
-}
-
-export function resolveRunnerProgramReturnChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "resolveRunnerProgramReturnChoice",
-  )(...args);
-}
-
-export function selectedChoiceCardIds(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "selectedChoiceCardIds",
-  )(...args);
-}
-
-export function iceChoiceLabelForSide(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "iceChoiceLabelForSide",
-  )(...args);
-}
-
-export function resolveP358HiddenReplacementChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "resolveP358HiddenReplacementChoice",
-  )(...args);
-}
-
-export function installedRunnerConnectionIds(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "installedRunnerConnectionIds",
-  )(...args);
-}
-
-export function canPlayTrashInstalledRunnerConnectionsThenAddBadPublicity(
-  ...args: any[]
-): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "canPlayTrashInstalledRunnerConnectionsThenAddBadPublicity",
-  )(...args);
-}
-
-export function resolveTrashInstalledRunnerConnectionsThenAddBadPublicityEvent(
-  ...args: any[]
-): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "resolveTrashInstalledRunnerConnectionsThenAddBadPublicityEvent",
-  )(...args);
-}
-
-export function parseRunnerInstalledConnectionTrashBadPublicityChoiceSource(
-  ...args: any[]
-): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "parseRunnerInstalledConnectionTrashBadPublicityChoiceSource",
-  )(...args);
-}
-
-export function selectedChoiceCardIdsForChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "selectedChoiceCardIdsForChoice",
-  )(...args);
-}
-
-export function resolveRunnerInstalledConnectionTrashBadPublicityChoice(
-  ...args: any[]
-): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "resolveRunnerInstalledConnectionTrashBadPublicityChoice",
-  )(...args);
-}
-
-export function resolveRandomDiceLoopEvent(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "resolveRandomDiceLoopEvent",
-  )(...args);
-}
-
-export function startRandomDiceSplitChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "startRandomDiceSplitChoice",
-  )(...args);
-}
-
-export function creditTextForPrompt(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "creditTextForPrompt",
-  )(...args);
-}
-
-export function diePromptText(...args: any[]): any {
-  return runtimeDelegate("choiceHiddenZoneRuntime", "diePromptText")(...args);
-}
-
-export function randomDiceSplitOptions(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "randomDiceSplitOptions",
-  )(...args);
-}
-
-export function parseRandomDiceSplitChoiceSource(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "parseRandomDiceSplitChoiceSource",
-  )(...args);
-}
-
-export function parseRandomDiceSplit(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "parseRandomDiceSplit",
-  )(...args);
-}
-
-export function continueRandomDiceLoop(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "continueRandomDiceLoop",
-  )(...args);
-}
-
-export function resolveRandomDiceSplitChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "resolveRandomDiceSplitChoice",
-  )(...args);
-}
-
-export function shuffleRunnerStack(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "shuffleRunnerStack",
-  )(...args);
-}
-
-export function revealRunnerStackTop(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "revealRunnerStackTop",
-  )(...args);
-}
-
-export function revealCorpRdTop(...args: any[]): any {
-  return runtimeDelegate("choiceHiddenZoneRuntime", "revealCorpRdTop")(...args);
-}
-
-export function resolveV1911RunnerHiddenZoneAbility(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "resolveV1911RunnerHiddenZoneAbility",
-  )(...args);
-}
-
-export function resolveScoredAgendaCorpRdTopReveal(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "resolveScoredAgendaCorpRdTopReveal",
-  )(...args);
-}
-
-export function exposedCorpCardInServer(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "exposedCorpCardInServer",
-  )(...args);
-}
-
-export function exposeCorpCardInServer(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "exposeCorpCardInServer",
-  )(...args);
-}
-
-export function installedCorpCardServerContext(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "installedCorpCardServerContext",
-  )(...args);
-}
-
-export function exposeInstalledCorpCardTargets(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "exposeInstalledCorpCardTargets",
-  )(...args);
-}
-
-export function exposeInstalledCorpCardLabel(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "exposeInstalledCorpCardLabel",
-  )(...args);
-}
-
-export function exposeInstalledCorpCardForImplementation(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "exposeInstalledCorpCardForImplementation",
-  )(...args);
-}
-
-export function installedRunnerIcebreakerIds(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "installedRunnerIcebreakerIds",
-  )(...args);
-}
-
-export function addCounterToAllInstalledRunnerIcebreakers(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "addCounterToAllInstalledRunnerIcebreakers",
-  )(...args);
-}
-
-export function shuffleCorpCardIntoRd(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "shuffleCorpCardIntoRd",
-  )(...args);
-}
-
-export function trashCorpInstalledCardsInScoredSourceServer(
-  ...args: any[]
-): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "trashCorpInstalledCardsInScoredSourceServer",
-  )(...args);
-}
-
-export function resolveRunnerIcebreakerCounterEvent(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "resolveRunnerIcebreakerCounterEvent",
-  )(...args);
-}
-
-export function multiExposeInstalledCorpCardTargets(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "multiExposeInstalledCorpCardTargets",
-  )(...args);
-}
-
-export function multiExposeInstalledCorpCardOptionLabel(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "multiExposeInstalledCorpCardOptionLabel",
-  )(...args);
-}
-
-export function exposeInstalledCorpCardsChoiceOptions(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "exposeInstalledCorpCardsChoiceOptions",
-  )(...args);
-}
-
-export function startMultiExposeInstalledCorpCardsChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "startMultiExposeInstalledCorpCardsChoice",
-  )(...args);
-}
-
-export function startExposeInstalledCorpCardsChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "startExposeInstalledCorpCardsChoice",
-  )(...args);
-}
-
-export function resolveMultiExposeInstalledCorpCardsChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "resolveMultiExposeInstalledCorpCardsChoice",
-  )(...args);
-}
-
-export function resolveExposeInstalledCorpCardsChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "resolveExposeInstalledCorpCardsChoice",
-  )(...args);
-}
-
-export function outermostIceExposures(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "outermostIceExposures",
-  )(...args);
-}
-
-export function exposeOutermostIceOfEachDataFort(...args: any[]): any {
-  return runtimeDelegate(
-    "choiceHiddenZoneRuntime",
-    "exposeOutermostIceOfEachDataFort",
-  )(...args);
-}
+import { runtimeDelegates } from "./runtime-delegate-store";
+import type {
+  ChoiceRuntimePortFunction,
+  ChoiceRuntimePortGroups,
+} from "./runtime-port-contracts";
+
+const typedRuntimePorts =
+  runtimeDelegates as unknown as ChoiceRuntimePortGroups;
+
+export const startRunnerPrivateLookChoice: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneResolvers",
+  "startRunnerPrivateLookChoice"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneResolvers.startRunnerPrivateLookChoice(
+    ...args,
+  );
+
+export const resolveRunnerPrivateLookChoice: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneResolvers",
+  "resolveRunnerPrivateLookChoice"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneResolvers.resolveRunnerPrivateLookChoice(
+    ...args,
+  );
+
+export const startPostAccessInstalledProgramChoice: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneResolvers",
+  "startPostAccessInstalledProgramChoice"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneResolvers.startPostAccessInstalledProgramChoice(
+    ...args,
+  );
+
+export const v1915InstalledRevealHelperIds: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneResolvers",
+  "v1915InstalledRevealHelperIds"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneResolvers.v1915InstalledRevealHelperIds(
+    ...args,
+  );
+
+export const runnerHasInstalledDefinition: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneResolvers",
+  "runnerHasInstalledDefinition"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneResolvers.runnerHasInstalledDefinition(
+    ...args,
+  );
+
+export const trashOlderRegionUpgradesInServer: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneResolvers",
+  "trashOlderRegionUpgradesInServer"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneResolvers.trashOlderRegionUpgradesInServer(
+    ...args,
+  );
+
+export const appendRegionReplacementTrashEffect: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneResolvers",
+  "appendRegionReplacementTrashEffect"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneResolvers.appendRegionReplacementTrashEffect(
+    ...args,
+  );
+
+export const hiddenZoneSearchHandlerHostBase: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "hiddenZoneSearchHandlerHostBase"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.hiddenZoneSearchHandlerHostBase(
+    ...args,
+  );
+
+export const hiddenZoneSearchActivationTargetHost: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "hiddenZoneSearchActivationTargetHost"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.hiddenZoneSearchActivationTargetHost(
+    ...args,
+  );
+
+export const hiddenZoneSearchChoiceHandlerHost: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "hiddenZoneSearchChoiceHandlerHost"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.hiddenZoneSearchChoiceHandlerHost(
+    ...args,
+  );
+
+export const hiddenZoneSearchActivationHandlerHost: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "hiddenZoneSearchActivationHandlerHost"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.hiddenZoneSearchActivationHandlerHost(
+    ...args,
+  );
+
+export const hiddenZoneArrangeChoiceHandlerHost: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "hiddenZoneArrangeChoiceHandlerHost"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.hiddenZoneArrangeChoiceHandlerHost(
+    ...args,
+  );
+
+export const hiddenZoneNonSearchChoiceHandlerHost: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "hiddenZoneNonSearchChoiceHandlerHost"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.hiddenZoneNonSearchChoiceHandlerHost(
+    ...args,
+  );
+
+export const corpZoneChoiceHandlerHost: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "corpZoneChoiceHandlerHost"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.corpZoneChoiceHandlerHost(...args);
+
+export const pendingChoiceResolutionHost: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "pendingChoiceResolutionHost"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.pendingChoiceResolutionHost(
+    ...args,
+  );
+
+export const setupMulliganChoice: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "setupMulliganChoice"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.setupMulliganChoice(...args);
+
+export const discardChoice: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "discardChoice"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.discardChoice(...args);
+
+export const resolveDiscardChoice: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "resolveDiscardChoice"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.resolveDiscardChoice(...args);
+
+export const resolveSetupMulliganChoice: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "resolveSetupMulliganChoice"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.resolveSetupMulliganChoice(...args);
+
+export const takeSetupMulligan: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "takeSetupMulligan"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.takeSetupMulligan(...args);
+
+export const installRunnerProgramFromStackWithoutClick: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "installRunnerProgramFromStackWithoutClick"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.installRunnerProgramFromStackWithoutClick(
+    ...args,
+  );
+
+export const canInstallRunnerProgramFromZone: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "canInstallRunnerProgramFromZone"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.canInstallRunnerProgramFromZone(
+    ...args,
+  );
+
+export const installRunnerProgramFromZoneWithoutClick: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "installRunnerProgramFromZoneWithoutClick"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.installRunnerProgramFromZoneWithoutClick(
+    ...args,
+  );
+
+export const startRunnerProgramFreeMemoryChoice: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "startRunnerProgramFreeMemoryChoice"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.startRunnerProgramFreeMemoryChoice(
+    ...args,
+  );
+
+export const installRunnerProgramForFree: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "installRunnerProgramForFree"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.installRunnerProgramForFree(
+    ...args,
+  );
+
+export const startDerezRezzedBlackIceChoice: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "startDerezRezzedBlackIceChoice"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.startDerezRezzedBlackIceChoice(
+    ...args,
+  );
+
+export const resolveDerezRezzedBlackIceChoice: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "resolveDerezRezzedBlackIceChoice"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.resolveDerezRezzedBlackIceChoice(
+    ...args,
+  );
+
+export const startPayRezCostToTrashRezzedIceChoice: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "startPayRezCostToTrashRezzedIceChoice"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.startPayRezCostToTrashRezzedIceChoice(
+    ...args,
+  );
+
+export const resolvePayRezCostToTrashRezzedIceChoice: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "resolvePayRezCostToTrashRezzedIceChoice"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.resolvePayRezCostToTrashRezzedIceChoice(
+    ...args,
+  );
+
+export const publicIcePositionLabelForCard: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "publicIcePositionLabelForCard"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.publicIcePositionLabelForCard(
+    ...args,
+  );
+
+export const publicIceSelectionLabelForCard: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "publicIceSelectionLabelForCard"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.publicIceSelectionLabelForCard(
+    ...args,
+  );
+
+export const startCorpChoiceRezOrTrashIceChoice: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "startCorpChoiceRezOrTrashIceChoice"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.startCorpChoiceRezOrTrashIceChoice(
+    ...args,
+  );
+
+export const resolveCorpChoiceRezOrTrashIceTargetChoice: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "resolveCorpChoiceRezOrTrashIceTargetChoice"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.resolveCorpChoiceRezOrTrashIceTargetChoice(
+    ...args,
+  );
+
+export const resolveCorpChoiceRezOrTrashIceDecisionChoice: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "resolveCorpChoiceRezOrTrashIceDecisionChoice"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.resolveCorpChoiceRezOrTrashIceDecisionChoice(
+    ...args,
+  );
+
+export const startTrashUnrezzedIceChoice: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "startTrashUnrezzedIceChoice"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.startTrashUnrezzedIceChoice(
+    ...args,
+  );
+
+export const resolveTrashUnrezzedIceChoice: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "resolveTrashUnrezzedIceChoice"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.resolveTrashUnrezzedIceChoice(
+    ...args,
+  );
+
+export const startPaidSourceReturnToGripChoice: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "startPaidSourceReturnToGripChoice"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.startPaidSourceReturnToGripChoice(
+    ...args,
+  );
+
+export const resolvePaidSourceReturnToGripChoice: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "resolvePaidSourceReturnToGripChoice"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.resolvePaidSourceReturnToGripChoice(
+    ...args,
+  );
+
+export const corpAgendaPointTotal: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "corpAgendaPointTotal"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.corpAgendaPointTotal(...args);
+
+export const chooseCorpAgendasForPointCost: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "chooseCorpAgendasForPointCost"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.chooseCorpAgendasForPointCost(
+    ...args,
+  );
+
+export const startRunnerHostingChoice: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "startRunnerHostingChoice"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.startRunnerHostingChoice(...args);
+
+export const resolveRunnerHostingChoice: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "resolveRunnerHostingChoice"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.resolveRunnerHostingChoice(...args);
+
+export const resolveIncubatorTransformChoice: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "resolveIncubatorTransformChoice"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.resolveIncubatorTransformChoice(
+    ...args,
+  );
+
+export const resolveChimeraDaemonTrashChoice: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "resolveChimeraDaemonTrashChoice"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.resolveChimeraDaemonTrashChoice(
+    ...args,
+  );
+
+export const resolveCardImplementationAccessPaymentChoice: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "resolveCardImplementationAccessPaymentChoice"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.resolveCardImplementationAccessPaymentChoice(
+    ...args,
+  );
+
+export const resolveRunnerProgramReturnChoice: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "resolveRunnerProgramReturnChoice"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.resolveRunnerProgramReturnChoice(
+    ...args,
+  );
+
+export const selectedChoiceCardIds: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "selectedChoiceCardIds"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.selectedChoiceCardIds(...args);
+
+export const iceChoiceLabelForSide: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "iceChoiceLabelForSide"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.iceChoiceLabelForSide(...args);
+
+export const resolveP358HiddenReplacementChoice: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "resolveP358HiddenReplacementChoice"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.resolveP358HiddenReplacementChoice(
+    ...args,
+  );
+
+export const installedRunnerConnectionIds: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "installedRunnerConnectionIds"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.installedRunnerConnectionIds(
+    ...args,
+  );
+
+export const canPlayTrashInstalledRunnerConnectionsThenAddBadPublicity: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "canPlayTrashInstalledRunnerConnectionsThenAddBadPublicity"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.canPlayTrashInstalledRunnerConnectionsThenAddBadPublicity(
+    ...args,
+  );
+
+export const resolveTrashInstalledRunnerConnectionsThenAddBadPublicityEvent: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "resolveTrashInstalledRunnerConnectionsThenAddBadPublicityEvent"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.resolveTrashInstalledRunnerConnectionsThenAddBadPublicityEvent(
+    ...args,
+  );
+
+export const parseRunnerInstalledConnectionTrashBadPublicityChoiceSource: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "parseRunnerInstalledConnectionTrashBadPublicityChoiceSource"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.parseRunnerInstalledConnectionTrashBadPublicityChoiceSource(
+    ...args,
+  );
+
+export const selectedChoiceCardIdsForChoice: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "selectedChoiceCardIdsForChoice"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.selectedChoiceCardIdsForChoice(
+    ...args,
+  );
+
+export const resolveRunnerInstalledConnectionTrashBadPublicityChoice: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "resolveRunnerInstalledConnectionTrashBadPublicityChoice"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.resolveRunnerInstalledConnectionTrashBadPublicityChoice(
+    ...args,
+  );
+
+export const resolveRandomDiceLoopEvent: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "resolveRandomDiceLoopEvent"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.resolveRandomDiceLoopEvent(...args);
+
+export const startRandomDiceSplitChoice: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "startRandomDiceSplitChoice"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.startRandomDiceSplitChoice(...args);
+
+export const creditTextForPrompt: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "creditTextForPrompt"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.creditTextForPrompt(...args);
+
+export const diePromptText: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "diePromptText"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.diePromptText(...args);
+
+export const randomDiceSplitOptions: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "randomDiceSplitOptions"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.randomDiceSplitOptions(...args);
+
+export const parseRandomDiceSplitChoiceSource: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "parseRandomDiceSplitChoiceSource"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.parseRandomDiceSplitChoiceSource(
+    ...args,
+  );
+
+export const parseRandomDiceSplit: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "parseRandomDiceSplit"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.parseRandomDiceSplit(...args);
+
+export const continueRandomDiceLoop: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "continueRandomDiceLoop"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.continueRandomDiceLoop(...args);
+
+export const resolveRandomDiceSplitChoice: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "resolveRandomDiceSplitChoice"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.resolveRandomDiceSplitChoice(
+    ...args,
+  );
+
+export const shuffleRunnerStack: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "shuffleRunnerStack"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.shuffleRunnerStack(...args);
+
+export const revealRunnerStackTop: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "revealRunnerStackTop"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.revealRunnerStackTop(...args);
+
+export const revealCorpRdTop: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "revealCorpRdTop"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.revealCorpRdTop(...args);
+
+export const resolveV1911RunnerHiddenZoneAbility: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "resolveV1911RunnerHiddenZoneAbility"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.resolveV1911RunnerHiddenZoneAbility(
+    ...args,
+  );
+
+export const resolveScoredAgendaCorpRdTopReveal: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "resolveScoredAgendaCorpRdTopReveal"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.resolveScoredAgendaCorpRdTopReveal(
+    ...args,
+  );
+
+export const exposedCorpCardInServer: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "exposedCorpCardInServer"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.exposedCorpCardInServer(...args);
+
+export const exposeCorpCardInServer: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "exposeCorpCardInServer"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.exposeCorpCardInServer(...args);
+
+export const installedCorpCardServerContext: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "installedCorpCardServerContext"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.installedCorpCardServerContext(
+    ...args,
+  );
+
+export const exposeInstalledCorpCardTargets: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "exposeInstalledCorpCardTargets"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.exposeInstalledCorpCardTargets(
+    ...args,
+  );
+
+export const exposeInstalledCorpCardLabel: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "exposeInstalledCorpCardLabel"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.exposeInstalledCorpCardLabel(
+    ...args,
+  );
+
+export const exposeInstalledCorpCardForImplementation: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "exposeInstalledCorpCardForImplementation"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.exposeInstalledCorpCardForImplementation(
+    ...args,
+  );
+
+export const installedRunnerIcebreakerIds: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "installedRunnerIcebreakerIds"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.installedRunnerIcebreakerIds(
+    ...args,
+  );
+
+export const addCounterToAllInstalledRunnerIcebreakers: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "addCounterToAllInstalledRunnerIcebreakers"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.addCounterToAllInstalledRunnerIcebreakers(
+    ...args,
+  );
+
+export const shuffleCorpCardIntoRd: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "shuffleCorpCardIntoRd"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.shuffleCorpCardIntoRd(...args);
+
+export const trashCorpInstalledCardsInScoredSourceServer: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "trashCorpInstalledCardsInScoredSourceServer"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.trashCorpInstalledCardsInScoredSourceServer(
+    ...args,
+  );
+
+export const resolveRunnerIcebreakerCounterEvent: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "resolveRunnerIcebreakerCounterEvent"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.resolveRunnerIcebreakerCounterEvent(
+    ...args,
+  );
+
+export const multiExposeInstalledCorpCardTargets: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "multiExposeInstalledCorpCardTargets"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.multiExposeInstalledCorpCardTargets(
+    ...args,
+  );
+
+export const multiExposeInstalledCorpCardOptionLabel: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "multiExposeInstalledCorpCardOptionLabel"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.multiExposeInstalledCorpCardOptionLabel(
+    ...args,
+  );
+
+export const exposeInstalledCorpCardsChoiceOptions: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "exposeInstalledCorpCardsChoiceOptions"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.exposeInstalledCorpCardsChoiceOptions(
+    ...args,
+  );
+
+export const startMultiExposeInstalledCorpCardsChoice: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "startMultiExposeInstalledCorpCardsChoice"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.startMultiExposeInstalledCorpCardsChoice(
+    ...args,
+  );
+
+export const startExposeInstalledCorpCardsChoice: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "startExposeInstalledCorpCardsChoice"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.startExposeInstalledCorpCardsChoice(
+    ...args,
+  );
+
+export const resolveMultiExposeInstalledCorpCardsChoice: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "resolveMultiExposeInstalledCorpCardsChoice"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.resolveMultiExposeInstalledCorpCardsChoice(
+    ...args,
+  );
+
+export const resolveExposeInstalledCorpCardsChoice: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "resolveExposeInstalledCorpCardsChoice"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.resolveExposeInstalledCorpCardsChoice(
+    ...args,
+  );
+
+export const outermostIceExposures: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "outermostIceExposures"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.outermostIceExposures(...args);
+
+export const exposeOutermostIceOfEachDataFort: ChoiceRuntimePortFunction<
+  "choiceHiddenZoneRuntime",
+  "exposeOutermostIceOfEachDataFort"
+> = (...args) =>
+  typedRuntimePorts.choiceHiddenZoneRuntime.exposeOutermostIceOfEachDataFort(
+    ...args,
+  );

@@ -25,7 +25,7 @@ import { runnerProgramInstallMemoryReachable } from "../install/runner-program-i
 export function createHiddenZoneSearchRuntime(
   deps: RuntimeDeps,
   links: ChoiceHiddenZoneRuntimeLinks,
-) {
+): import("./hidden-zone-search-runtime-port").HiddenZoneSearchRuntimePort {
   const {
     DAILY_CREDIT_RESOURCE_SOURCE,
     COCKROACH_ID,

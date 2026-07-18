@@ -230,9 +230,7 @@ import {
   buildRunnerAgendaPointInstallAction,
   buildRunnerSelectedServerInstallAction,
 } from "../turn/runner-install-context-actions";
-import {
-  buildRunnerHostedProgramInstallAction,
-} from "../turn/runner-hosted-install-actions";
+import { buildRunnerHostedProgramInstallAction } from "../turn/runner-hosted-install-actions";
 import { buildRunnerProgramTrashBeforeInstallAction } from "../turn/runner-program-trash-install-actions";
 import { buildRunnerStackSearchProgramToGripAction } from "../turn/runner-hidden-zone-search-actions";
 import {
@@ -650,9 +648,7 @@ import {
   ACCESS_NET_DAMAGE_UPGRADE_SOURCE,
   ACCESS_TRACE_DAMAGE_UPGRADE_SOURCE,
 } from "../../mechanics/server-upgrades";
-import {
-  RUN_TAX_UPGRADE_SOURCES,
-} from "../../mechanics/trace-tags";
+import { RUN_TAX_UPGRADE_SOURCES } from "../../mechanics/trace-tags";
 import { snapshotPersistentStealCostModifiersForSource } from "../../ability-engine/steal-cost-modifiers";
 import { createCardImplementationEffectAdapters } from "../../ability-engine/card-implementation-effect-adapters";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
@@ -692,7 +688,13 @@ import type { RuntimeDeps } from "./runtime-shared";
 export function createTriggerAbilityRuntimeHosts(
   deps: RuntimeDeps,
   runtime: RuntimeDeps,
-) {
+): Pick<
+  import("./card-runtime-host-port").CardRuntimeHostPort,
+  | "runnerSpecialTriggerExecutionHost"
+  | "runFortTriggerExecutionHost"
+  | "counterUtilityTriggerExecutionHost"
+  | "triggerAbilityExecutionHost"
+> {
   const {
     activeObligationCount,
     encounterEntryHostForState,
@@ -827,10 +829,7 @@ export function createTriggerAbilityRuntimeHosts(
             legalAction,
           ),
         startHqIceSwapChoice: (legalAction) =>
-          startHqIceSwapChoice(
-            fortPassWindowHostForState(state),
-            legalAction,
-          ),
+          startHqIceSwapChoice(fortPassWindowHostForState(state), legalAction),
       },
       constants: {
         HOST_RETURN_HARDWARE_SOURCE,

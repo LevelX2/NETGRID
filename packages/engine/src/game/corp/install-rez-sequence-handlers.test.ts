@@ -122,11 +122,7 @@ function makeHost(
       "agenda",
       "Priority Requisition",
     ),
-    agenda_purge_agenda: definition(
-      "agenda_purge",
-      "agenda",
-      "Security Purge",
-    ),
+    agenda_purge_agenda: definition("agenda_purge", "agenda", "Security Purge"),
     ice_1: definition("ice_1_def", "ice", "ICE 1", 3),
     ice_2: definition("ice_2_def", "ice", "ICE 2", 4),
     asset_1: definition("asset_1_def", "asset", "Asset 1", 6),
@@ -337,7 +333,10 @@ describe("corp install rez sequence handlers", () => {
       hq: ["operation_1", "asset_1", "ice_1"] as CardInstanceId[],
     });
 
-    startHqToNewRemoteInstallRezChoice(host, "data_fort_agenda" as CardInstanceId);
+    startHqToNewRemoteInstallRezChoice(
+      host,
+      "data_fort_agenda" as CardInstanceId,
+    );
 
     expect(host.state.pendingChoice?.source).toBe(
       "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez:data_fort_agenda:8",
@@ -398,7 +397,7 @@ describe("corp install rez sequence handlers", () => {
     expect(
       host.state.pendingChoice?.options.map((option) => option.value),
     ).toEqual(["ice_1"]);
-    expect(host.state.dataFortReclamationSequence).toMatchObject({
+    expect(host.state.hqInstallRezSequence).toMatchObject({
       selectedCardIds: ["ice_1", "asset_1"],
       nextCardIndex: 1,
       temporaryCreditsProvided: 10,
@@ -701,7 +700,7 @@ describe("corp install rez sequence handlers", () => {
     const finalResult = handleCorpInstallRezSequenceChoice(host);
     expect(finalResult.temporaryCreditsReturned).toBe(7);
     expect(host.state.pendingChoice).toBeUndefined();
-    expect(host.state.dataFortReclamationSequence).toBeUndefined();
+    expect(host.state.hqInstallRezSequence).toBeUndefined();
     expect(host.state.cardInstances.ice_1).toMatchObject({
       rezzed: true,
       zone: { side: "corp", zone: "serverIce", serverId: "remote_1" },

@@ -20,16 +20,17 @@ import type {
   HiddenZoneSearchChoiceHandlerHost,
 } from "../hidden-zone/search-choice-handlers";
 import type { PendingChoiceResolutionHost } from "../choices/pending-choice-resolution";
-import type { CardRunnerEventLongtailImplementation } from "../../ability-engine/definition-types";
+import type {
+  CardRunnerEventLongtailImplementation,
+  RunnerTraceCounterEffectImplementation,
+} from "../../ability-engine/definition-types";
 
 // Runtime dependencies are the concrete composition-root surface. Do not
 // reintroduce string-index bags, proxy dispatch or generic member lookup here.
 export type RuntimeDeps = ReturnType<
   (typeof import("./state-runtime-bootstrap"))["initializeStateRuntimeBootstrap"]
 > & {
-  turnCorpRuntime?: ReturnType<
-    (typeof import("./turn-corp-runtime"))["createTurnCorpRuntime"]
-  >;
+  turnCorpRuntime?: import("./turn-corp-runtime-port").TurnCorpRuntimePort;
 };
 export type {
   GameState,
@@ -101,15 +102,10 @@ export type CorpAgendaPointCostResult = {
   spentAgendaIds: CardInstanceId[];
   spentAgendaDefinitionIds: CardDefinitionId[];
 };
-export type RunnerTraceCounterEffectRuntime = {
-  counterType: CounterType;
-  sourceDefinitionId: CardDefinitionId;
-  amount?: number;
-  runStart?: {
-    amountPerCounter: number;
-    damageType: "brain" | "net";
+export type RunnerTraceCounterEffectRuntime =
+  RunnerTraceCounterEffectImplementation & {
+    sourceDefinitionId: CardDefinitionId;
   };
-};
 export type VisibleCounterPayload = {
   counterType: CounterType;
   addedCounterAmount?: number;

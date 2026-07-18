@@ -25,7 +25,7 @@ export type CorpInstallRezSequenceHandlerHost = {
     | "corp"
     | "cardInstances"
     | "pendingChoice"
-    | "dataFortReclamationSequence"
+    | "hqInstallRezSequence"
     | "stateVersion"
   >;
   legalAction: LegalAction;

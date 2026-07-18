@@ -4,7 +4,9 @@ import { createCardLifecycleRuntimeHosts } from "./card-lifecycle-runtime-hosts"
 import { createCardRuntimeDepsHosts } from "./card-runtime-deps-hosts";
 import { createTriggerAbilityRuntimeHosts } from "./trigger-ability-runtime-hosts";
 
-export function createCardRuntimeHosts(deps: RuntimeDeps) {
+export function createCardRuntimeHosts(
+  deps: RuntimeDeps,
+): import("./card-runtime-host-port").CardRuntimeHostPort {
   const runtime = {} as RuntimeDeps;
   Object.assign(
     runtime,

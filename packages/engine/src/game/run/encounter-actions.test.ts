@@ -151,7 +151,7 @@ function hostFor(
         definitions[state.cardInstances[iceId]!.definitionId]!.strength ?? 0,
     },
     breaker: {
-      dupreStrengthCounterBonus: () => 0,
+      selectedServerIcebreakerStrengthCounterBonus: () => 0,
     },
     payment: {
       availableRunnerRunCredits: () => state.runner.credits,
