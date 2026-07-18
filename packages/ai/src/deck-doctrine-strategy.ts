@@ -358,6 +358,10 @@ const BREAKER_COVERAGE_SIGNAL_IDS = new Set([
   "breaker.wall",
   "breaker.watchdog",
 ]);
+const CONDITIONAL_GENERAL_ACCESS_SIGNAL_IDS = new Set([
+  "run.bypass_chosen_ice",
+  "run.bypass_first_ice",
+]);
 const SUPPORT_ONLY_STRATEGY_IDS = new Set([
   "runner.economy_first",
   "runner.survival_defense",
@@ -382,6 +386,10 @@ const HARD_PRODUCTIVE_GAPS = new Set([
   "missing_recycle_source",
   "missing_draw_or_shuffle",
 ]);
+
+export function isHardProductiveSupportGap(gap: string): boolean {
+  return HARD_PRODUCTIVE_GAPS.has(gap);
+}
 
 export function buildDeckStrategyProfile(
   snapshot: AiDeckStrategyDeckSnapshot,
@@ -1521,32 +1529,57 @@ function breakerCoverageSupport(
     universal + accessCapableSignalCount(stats, "breaker.code_gate");
   const sentry = universal + accessCapableSignalCount(stats, "breaker.sentry");
   const covered = [wall, codeGate, sentry].filter((count) => count > 0).length;
+  const conditionalAccessCount = generalConditionalAccessCount(stats);
   const score =
-    covered === 3 ? 100 : covered === 2 ? 72 : covered === 1 ? 38 : 0;
+    covered === 3
+      ? 100
+      : covered === 2 && conditionalAccessCount >= 2
+        ? 82
+        : covered === 2
+          ? 72
+          : covered === 1
+            ? 38
+            : 0;
   return {
     score,
     evidence: sortedEvidence(
-      stats.cards
-        .filter(
-          (card) =>
-            !card.accessBreakerCoverageBlocked &&
-            card.functionSignals.some((signal) =>
-              BREAKER_COVERAGE_SIGNAL_IDS.has(signal),
-            ),
-        )
-        .flatMap((card) =>
-          card.functionSignals
-            .filter((signal) => BREAKER_COVERAGE_SIGNAL_IDS.has(signal))
-            .map((signal) => ({
-              cardId: card.cardId,
-              quantity: card.quantity,
-              source: "functionSignal" as const,
-              signal,
-              reason: `support:${dimension}`,
-            })),
-        ),
+      stats.cards.flatMap((card) => [
+        ...(!card.accessBreakerCoverageBlocked
+          ? card.functionSignals
+              .filter((signal) => BREAKER_COVERAGE_SIGNAL_IDS.has(signal))
+              .map((signal) => ({
+                cardId: card.cardId,
+                quantity: card.quantity,
+                source: "functionSignal" as const,
+                signal,
+                reason: `support:${dimension}`,
+              }))
+          : []),
+        ...card.functionSignals
+          .filter((signal) => CONDITIONAL_GENERAL_ACCESS_SIGNAL_IDS.has(signal))
+          .map((signal) => ({
+            cardId: card.cardId,
+            quantity: card.quantity,
+            source: "functionSignal" as const,
+            signal,
+            reason: `support:${dimension}:conditional_access`,
+          })),
+      ]),
     ),
   };
+}
+
+function generalConditionalAccessCount(stats: DeckStrategyStats): number {
+  return stats.cards.reduce(
+    (sum, card) =>
+      sum +
+      (card.functionSignals.some((signal) =>
+        CONDITIONAL_GENERAL_ACCESS_SIGNAL_IDS.has(signal),
+      )
+        ? card.quantity
+        : 0),
+    0,
+  );
 }
 
 function centralDefenseSupport(
@@ -1748,17 +1781,36 @@ function runnerGapsForDimension(
     case "breakerCoverage": {
       const gaps: string[] = [];
       const universal = accessCapableSignalCount(stats, "breaker.universal");
-      if (accessCapableSignalCount(stats, "breaker.wall") + universal === 0) {
-        gaps.push("missing_wall_coverage");
-      }
-      if (
-        accessCapableSignalCount(stats, "breaker.code_gate") + universal ===
-        0
-      ) {
-        gaps.push("missing_code_gate_coverage");
-      }
-      if (accessCapableSignalCount(stats, "breaker.sentry") + universal === 0) {
-        gaps.push("weak_sentry_coverage");
+      const missingCoverage = [
+        {
+          kind: "wall",
+          missing:
+            accessCapableSignalCount(stats, "breaker.wall") + universal === 0,
+          hardGap: "missing_wall_coverage",
+        },
+        {
+          kind: "code_gate",
+          missing:
+            accessCapableSignalCount(stats, "breaker.code_gate") + universal ===
+            0,
+          hardGap: "missing_code_gate_coverage",
+        },
+        {
+          kind: "sentry",
+          missing:
+            accessCapableSignalCount(stats, "breaker.sentry") + universal === 0,
+          hardGap: "weak_sentry_coverage",
+        },
+      ].filter((entry) => entry.missing);
+      const conditionalBridgeAvailable =
+        missingCoverage.length === 1 &&
+        generalConditionalAccessCount(stats) >= 2;
+      for (const missing of missingCoverage) {
+        gaps.push(
+          conditionalBridgeAvailable
+            ? `conditional_${missing.kind}_access_path`
+            : missing.hardGap,
+        );
       }
       return gaps.length > 0 ? gaps : ["weak_breaker_coverage"];
     }
@@ -1895,7 +1947,7 @@ function strategyRuntimeBlockers(
     blockers.push(`supporting_only:${goal.strategyId}`);
   }
   for (const gap of supportGaps) {
-    if (HARD_PRODUCTIVE_GAPS.has(gap)) {
+    if (isHardProductiveSupportGap(gap)) {
       blockers.push(`hard_support_gap:${gap}`);
     }
   }

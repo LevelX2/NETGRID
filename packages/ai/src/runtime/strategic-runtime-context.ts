@@ -316,6 +316,8 @@ function roleReadinessBonus(
         return sum + 8;
       case "in_deck_unseen":
         return sum + 2;
+      case "conditional":
+        return sum + 1;
       case "temporarily_unavailable":
         return sum - 8;
       case "absent":
@@ -437,11 +439,14 @@ function runnerCoverageRoles(
 ): StrategicRoleStatusSnapshot[] {
   const matrix = params.deckCapabilities?.runner?.breakerCoverageMatrix;
   if (!matrix) return [];
+  const conditionalCoverageKinds = runnerConditionalCoverageKinds(
+    params.strategyProfile,
+  );
   const coverageKinds: BreakerCoverageKind[] = ["wall", "code_gate", "sentry"];
   return coverageKinds.map((coverage) =>
     roleStatus(
       `runner.breaker.${coverage}`,
-      coverageStatus(matrix[coverage]),
+      coverageStatus(matrix[coverage], conditionalCoverageKinds.has(coverage)),
       "capability",
       [
         `coverage:${coverage}`,
@@ -450,19 +455,38 @@ function runnerCoverageRoles(
         `in_deck:${matrix[coverage].inDeckKnown}`,
         `searchable_now:${matrix[coverage].searchableNow}`,
         `missing:${matrix[coverage].missing}`,
+        `conditional_access:${conditionalCoverageKinds.has(coverage)}`,
       ],
     ),
   );
 }
 
-function coverageStatus(state: CoverageState): StrategicRoleStatus {
+function coverageStatus(
+  state: CoverageState,
+  conditionalAccess: boolean,
+): StrategicRoleStatus {
   if (state.installed) return "active";
   if (state.inHand) return "installable";
   if (state.searchableNow || state.inDeckKnown || state.drawOnly) {
     return "in_deck_unseen";
   }
-  if (state.missing) return "absent";
+  if (state.missing) return conditionalAccess ? "conditional" : "absent";
   return "unknown";
+}
+
+function runnerConditionalCoverageKinds(
+  strategyProfile: AiDeckStrategyProfile | undefined,
+): Set<BreakerCoverageKind> {
+  const result = new Set<BreakerCoverageKind>();
+  for (const score of Object.values(strategyProfile?.strategyScores ?? {})) {
+    if (score.runtimeStatus !== "productive") continue;
+    for (const kind of ["wall", "code_gate", "sentry"] as const) {
+      if (score.supportGaps.includes(`conditional_${kind}_access_path`)) {
+        result.add(kind);
+      }
+    }
+  }
+  return result;
 }
 
 function runnerSurvivalStatus(

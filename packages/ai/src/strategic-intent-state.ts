@@ -5,6 +5,7 @@ import type {
   DeckStrategyRuntimeStatus,
   DeckStrategyScore,
 } from "./deck-doctrine-strategy";
+import { isHardProductiveSupportGap } from "./deck-doctrine-strategy";
 import type { DeckCapabilityProfile } from "./deck-capabilities";
 import { assertSemanticObjectSideSafe } from "./diagnostics/semantic-redaction";
 import {
@@ -33,6 +34,7 @@ export type StrategicRoleStatus =
   | "installable"
   | "active"
   | "temporarily_unavailable"
+  | "conditional"
   | "unknown";
 
 export type StrategicIntentCompleteness = "none" | "partial" | "complete";
@@ -635,7 +637,10 @@ function buildBlockers(
   for (const gap of primary.supportGaps) {
     blockers.push({
       blockerId: `${primary.strategyId}:support_gap:${gap}`,
-      severity: primary.completeness === "complete" ? "soft" : "hard",
+      severity:
+        primary.completeness === "complete" || !isHardProductiveSupportGap(gap)
+          ? "soft"
+          : "hard",
       reason: "support_gap",
       removalCondition: `resolve support gap ${gap}`,
       evidence: [`support_gap:${gap}`],

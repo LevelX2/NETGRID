@@ -111,6 +111,50 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
       ]).toContain(expectedStrategyId);
     },
   );
+
+  it("keeps King of the Road productive through a bounded conditional wall bypass", () => {
+    const profile = buildDeckStrategyProfile(
+      standardDeckByName("King of the Road"),
+    );
+    const selectedScores = [
+      ...profile.primaryStrategies,
+      ...profile.secondaryStrategies,
+    ].map((strategyId) => profile.strategyScores[strategyId]);
+
+    expect(profile.primaryStrategies.length).toBeGreaterThan(0);
+    expect(
+      selectedScores.some(
+        (score) =>
+          score?.runtimeStatus === "productive" &&
+          score.supportGaps.includes("conditional_wall_access_path"),
+      ),
+    ).toBe(true);
+    expect(
+      selectedScores.some((score) =>
+        score?.supportGaps.includes("missing_wall_coverage"),
+      ),
+    ).toBe(false);
+  });
+
+  it("does not use one conditional path to invent Ghost Circuit coverage", () => {
+    const profile = buildDeckStrategyProfile(
+      standardDeckByName("Ghost Circuit"),
+    );
+    const breakerDependentScores = Object.values(profile.strategyScores).filter(
+      (score) =>
+        score.supportGaps.includes("missing_code_gate_coverage") ||
+        score.supportGaps.includes("weak_sentry_coverage"),
+    );
+
+    expect(breakerDependentScores.length).toBeGreaterThan(0);
+    expect(
+      breakerDependentScores.every(
+        (score) =>
+          score.runtimeStatus !== "productive" &&
+          !score.supportGaps.some((gap) => gap.startsWith("conditional_")),
+      ),
+    ).toBe(true);
+  });
   it("detects Runner R&D and interface pressure from normalized multiaccess evidence", () => {
     const profile = buildDeckStrategyProfile(
       snapshotById("onr_origin_runner_ai_snapshot_v1"),

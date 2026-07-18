@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import benchmarkSnapshotsData from "../../../data/ai/ai-local-realistic-benchmark-deck-snapshots-2026-05-23.json";
+import standardDeckCatalog from "../../../data/decks/standard-deck-catalog-1.0.0.json";
 import { buildDeckCapabilityProfile } from "./deck-capabilities";
 import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
 import { buildDeckStrategyProfile } from "./deck-doctrine-strategy";
@@ -13,6 +14,30 @@ const benchmarkSnapshots = benchmarkSnapshotsData.snapshots as Array<{
 }>;
 
 describe("Runner StrategicIntentProjection", () => {
+  it("projects King of the Road through its explicit conditional access line", () => {
+    const intent = runnerStrategicIntentForSnapshot(
+      standardDeckSnapshot("King of the Road"),
+    );
+
+    expect(intent.primaryWinIntent).toBe("runner.steal_agendas_default");
+    expect(intent.executionStyle).toBe("runner.run_event_tempo");
+    expect(intent.pressureVectors).toContain("runner.central_probe_pressure");
+    expect(intent.riskProfile).not.toContain(
+      "runner.low_confidence_strategy_projection",
+    );
+  });
+
+  it("keeps Ghost Circuit neutral when multiple real coverage classes are missing", () => {
+    const intent = runnerStrategicIntentForSnapshot(
+      standardDeckSnapshot("Ghost Circuit"),
+    );
+
+    expect(intent.primaryWinIntent).toBe("runner.unknown");
+    expect(intent.pressureVectors).toEqual([]);
+    expect(intent.riskProfile).toContain(
+      "runner.low_confidence_strategy_projection",
+    );
+  });
   it("projects Blink Pressure Rig strategy signals into a generic Runner intent profile", () => {
     const snapshot = benchmarkSnapshotById(
       "local_realistic_runner_blink_pressure_rig_snapshot_v1",
@@ -104,35 +129,26 @@ describe("Runner StrategicIntentProjection", () => {
     },
     {
       name: "synthetic HQ pressure deck",
-      snapshot: syntheticSnapshot(
-        "synthetic_runner_hq_pressure_fixture",
-        [
-          ["onr_v1_024_expert-schedule-analyzer", 2],
-          ["onr_v1_085_executive-wiretaps", 2],
-          ["onr_v1_129_hq-interface", 2],
-          ["onr_v1_016_cyfermaster", 1],
-          ["onr_v1_021_dwarf", 1],
-          ["onr_v1_066_snowball", 1],
-          ["onr_v1_079_bodyweight-synthetic-blood", 3],
-          ["onr_v1_097_livewires-contacts", 3],
-          ["onr_v1_154_broker", 2],
-        ],
-      ),
+      snapshot: syntheticSnapshot("synthetic_runner_hq_pressure_fixture", [
+        ["onr_v1_024_expert-schedule-analyzer", 2],
+        ["onr_v1_085_executive-wiretaps", 2],
+        ["onr_v1_129_hq-interface", 2],
+        ["onr_v1_016_cyfermaster", 1],
+        ["onr_v1_021_dwarf", 1],
+        ["onr_v1_066_snowball", 1],
+        ["onr_v1_079_bodyweight-synthetic-blood", 3],
+        ["onr_v1_097_livewires-contacts", 3],
+        ["onr_v1_154_broker", 2],
+      ]),
       executionStyle: "runner.run_event_tempo",
-      setupEngine: [
-        "runner.rig_first",
-        "runner.economy_setup_before_pressure",
-      ],
+      setupEngine: ["runner.rig_first", "runner.economy_setup_before_pressure"],
       pressureVectors: ["runner.central_probe_pressure"],
       riskProfile: [],
       rejectedIntents: [
         "runner.bad_publicity_pressure",
         "runner.dedicated_rnd_multiaccess",
       ],
-      notRejected: [
-        "runner.dedicated_hq_multiaccess",
-        "runner.hq_depletion",
-      ],
+      notRejected: ["runner.dedicated_hq_multiaccess", "runner.hq_depletion"],
       evidenceNeedles: [
         "strategy_score:runner.hq_pressure",
         "runtime=productive",
@@ -158,10 +174,7 @@ describe("Runner StrategicIntentProjection", () => {
         ],
       ),
       executionStyle: "runner.run_event_tempo",
-      setupEngine: [
-        "runner.rig_first",
-        "runner.economy_setup_before_pressure",
-      ],
+      setupEngine: ["runner.rig_first", "runner.economy_setup_before_pressure"],
       pressureVectors: [
         "runner.central_probe_pressure",
         "runner.conditional_remote_contest",
@@ -255,8 +268,12 @@ describe("Runner StrategicIntentProjection", () => {
       deckCapabilities,
     });
 
-    expect(strategyProfile.strategyScores["runner.rnd_pressure"]?.anchorScore).toBe(0);
-    expect(strategyProfile.strategyScores["runner.hq_pressure"]?.anchorScore).toBe(0);
+    expect(
+      strategyProfile.strategyScores["runner.rnd_pressure"]?.anchorScore,
+    ).toBe(0);
+    expect(
+      strategyProfile.strategyScores["runner.hq_pressure"]?.anchorScore,
+    ).toBe(0);
     expect(intent.primaryWinIntent).toBe("runner.unknown");
     expect(intent.setupEngine).toEqual([]);
     expect(intent.pressureVectors).toEqual([]);
@@ -350,6 +367,21 @@ function benchmarkSnapshotById(snapshotId: string): AiDeckStrategyDeckSnapshot {
     deckSnapshotId: snapshot.deckSnapshotId,
     side: snapshot.side,
     cards: snapshot.cards.map((card) => ({
+      cardId: card.cardId,
+      quantity: card.quantity,
+    })),
+  };
+}
+
+function standardDeckSnapshot(name: string): AiDeckStrategyDeckSnapshot {
+  const deck = standardDeckCatalog.decks.find(
+    (candidate) => candidate.name === name,
+  );
+  if (!deck) throw new Error(`Missing standard deck fixture ${name}`);
+  return {
+    deckSnapshotId: `standard_${deck.standardDeckId}_${deck.version}`,
+    side: deck.side as "runner",
+    cards: deck.cards.map((card) => ({
       cardId: card.cardId,
       quantity: card.quantity,
     })),
