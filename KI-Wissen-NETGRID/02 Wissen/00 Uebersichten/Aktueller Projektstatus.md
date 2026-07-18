@@ -199,6 +199,15 @@ Stand: 2026-07-16
 
 ## Aktuelle Risiken und offene Gates
 
+- Für eine erste Benutzerverwaltung im privaten Internetbetrieb liegt seit
+  2026-07-18 ein stufenweiser V2.0-Planungsentwurf vor. Er schlägt eine
+  geschlossene Passwort-Account-Alpha, accountgebundene SQLite-Decks mit einem
+  Defaultlimit von 50, kuratierte Standard-Decks sowie nachgelagerte E-Mail-,
+  Passkey- und MFA-Stufen vor. Die vorhandene Account-Session-Foundation ist
+  noch nicht an HTTP-Server oder Weboberfläche angebunden. Vor Umsetzung muss
+  der Wechsel vom älteren Passkey-first-Vertrag zu Passwort-first ausdrücklich
+  freigegeben werden. Führend für diesen Entwurf ist
+  `docs/releases/v2/v2-0-auth-privacy-cloud-decks/user-profiles-password-cloud-decks-staged-plan-2026-07-18.md`.
 - `apps/web/app/page.tsx`, `apps/web/app/chronicle.ts`,
   `apps/server/src/multiplayer.test.ts` und mehrere Corp-AI-Scoringdateien sind
   verbleibende Komplexitätsschwerpunkte.

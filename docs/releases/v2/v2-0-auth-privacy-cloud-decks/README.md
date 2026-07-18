@@ -4,6 +4,10 @@ Diese Gruppe enthält die V2.0-Verträge für private Accounts, Sessions, Passke
 
 ## Artefakte
 
+- `user-profiles-password-cloud-decks-staged-plan-2026-07-18.md`:
+  aktueller Releaseplan-Entwurf für eine geschlossene Passwort-Account-Alpha,
+  bis zu 50 persönliche Server-Decks, Standard-Deck-Kuratierung sowie spätere
+  E-Mail-, Passkey- und MFA-Stufen.
 - `auth-privacy-decision-spike.md`: Entscheidungsschnitt für geschlossene private Accounts, Allowlist/Invite und Passkey-first.
 - `account-session-auth-contract.md`: Account-, Credential-, Session-, Invite-, Cookie- und CSRF-Vertrag.
 - `account-session-foundation-implementation-review.md`: Review des engen Account-Session-Foundation-Slices.
