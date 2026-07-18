@@ -1,6 +1,6 @@
 # Match-3bb14-Corp-KI-Remediation (2026-07-18)
 
-Status: P5 abgeschlossen, P6 lokale Integration ausstehend
+Status: P6 abgeschlossen
 
 ## Quelle und Gesamtziel
 
@@ -160,6 +160,12 @@ Der vollständige Abschlusslauf am 19.07.2026 bestand 402/402 Testdateien und
 grün. Evidence und Final-Review liegen unter `docs/reviews/ai/`. Punkt 4 der
 ursprünglichen Spielanalyse bleibt weiterhin explizites Nicht-Ziel dieses
 Prozesses.
+
+Nach konfliktfreiem Abgleich mit dem aktuellen `main` bestanden erneut
+117/117 relevante Tests und der AI-Typecheck. Der Arbeitsbranch wurde als
+`028082b42` per Fast-Forward lokal nach `main` integriert; Worktree und
+gemergter Arbeitsbranch wurden anschließend verifiziert entfernt. Es erfolgte
+kein Push.
 
 ## /Goal
 
