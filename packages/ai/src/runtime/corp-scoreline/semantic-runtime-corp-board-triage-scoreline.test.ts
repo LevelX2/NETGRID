@@ -10,6 +10,8 @@ import {
   semanticRuntimeCorpBoardTriageActionComponent,
   type CorpBoardTriageDependencies,
 } from "../semantic-runtime-corp-board-triage";
+import { existingReadyRemoteCanReceiveScoreline } from "./semantic-runtime-corp-board-triage-actions";
+import { existingScoreRemoteOutletExists } from "./semantic-runtime-corp-board-triage-policies";
 import type { CorpScoringWindowAssessment } from "../semantic-runtime-corp-scoring-window";
 import {
   agendaCard,
@@ -29,6 +31,34 @@ import {
 } from "../semantic-runtime-corp-board-triage.test-support";
 
 describe("semantic runtime corp board triage scoreline", () => {
+  it("keeps a legal agenda outlet ready when its root already has support", () => {
+    const agenda = agendaCard("hq-agenda", 2);
+    const installAgenda = corpAction(
+      "install-agenda-remote-1",
+      "install_card",
+      { placement: "root", serverId: "remote_1" },
+      agenda.instanceId,
+    );
+    const input = corpInput({
+      corpHq: [agenda],
+      legalActions: [installAgenda],
+      servers: [
+        centralServer("hq", []),
+        centralServer("rd", []),
+        remoteServer(
+          "remote_1",
+          [iceCard("remote-ice")],
+          [assetCard("visible-root-support")],
+        ),
+      ],
+    });
+
+    expect(existingReadyRemoteCanReceiveScoreline(input, "remote_1")).toBe(
+      true,
+    );
+    expect(existingScoreRemoteOutletExists(input)).toBe(true);
+  });
+
   it("treats end-turn as a mismatch while critical central protection is unresolved", () => {
     const endTurn = corpAction("end-turn", "end_turn");
     const rdIce = corpAction("install-rd-ice", "install_card", {
@@ -639,6 +669,72 @@ describe("semantic runtime corp board triage scoreline", () => {
     expect(creditComponent).toMatchObject({
       key: "corp_board_triage_mismatch",
     });
+  });
+
+  it("aligns same-remote ICE when its projected layer closes the access window", () => {
+    const agenda = agendaCard("hq-agenda", 2);
+    const remoteAgenda = corpAction(
+      "remote-scoreline",
+      "install_card",
+      { placement: "root", serverId: "remote_1" },
+      agenda.instanceId,
+    );
+    const remoteIceCard = iceCard("remote-second-ice");
+    const remoteIce = corpAction(
+      "install-second-remote-ice",
+      "install_card",
+      { placement: "ice", serverId: "remote_1" },
+      remoteIceCard.instanceId,
+    );
+    const gainCredit = corpAction("gain-credit", "gain_credit");
+    const input = corpInput({
+      corpHq: [agenda, remoteIceCard],
+      runnerAgendaPoints: 5,
+      legalActions: [remoteAgenda, remoteIce, gainCredit],
+      servers: [
+        centralServer("hq", [iceCard("hq-ice")]),
+        centralServer("rd", [iceCard("rd-ice")]),
+        remoteServer("remote_1", [iceCard("remote-first-ice")]),
+      ],
+    });
+    const dependencies = testDependencies({
+      scoringWindowByActionId: {
+        [remoteAgenda.actionId]: scoringWindow({
+          serverId: "remote_1",
+          windowKind: "unsafe",
+          agendaStealSeverity: "game_ending",
+          recommendedNextStep: "build_remote_ice",
+        }),
+        [remoteIce.actionId]: scoringWindow({
+          serverId: "remote_1",
+          windowKind: "durable",
+          runnerCanContestNow: false,
+          runnerCanReachAccessNow: false,
+          agendaStealRelevantNow: false,
+          runnerCanContestBeforeScore: false,
+          runnerCanReachAccessBeforeScore: false,
+          agendaStealRelevantBeforeScore: false,
+          agendaStealSeverity: "none",
+          affordableDurableRelevantIceCount: 2,
+          dynamicProtectionWeaknessCount: 0,
+          corpCanRezRelevantIce: true,
+          corpCanRezFullPathWithDynamicReserve: true,
+          recommendedNextStep: "build_remote_ice",
+        }),
+      },
+    });
+
+    expect(semanticRuntimeCorpBoardTriage(input, dependencies)).toMatchObject({
+      primary: "protect_score_remote",
+      targetServerId: "remote_1",
+    });
+    expect(
+      semanticRuntimeCorpBoardTriageActionComponent(
+        input,
+        remoteIce,
+        dependencies,
+      ),
+    ).toMatchObject({ key: "corp_board_triage_alignment" });
   });
 
   it("keeps funding triage on an existing score remote instead of a new-remote scoreline", () => {

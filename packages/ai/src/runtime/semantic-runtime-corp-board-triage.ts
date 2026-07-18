@@ -603,6 +603,23 @@ function corpBoardTriageActionAlignment<TConsumer extends string>(
         actionServerId === triage.targetServerId &&
         (triage.severity === "high" || triage.severity === "critical")
       ) {
+        const projectedProtection =
+          dependencies.corpScoringWindowAssessment?.(
+            input,
+            action,
+            dependencies.rolesForAction(input, action),
+          );
+        if (
+          projectedProtection &&
+          (projectedProtection.windowKind === "durable" ||
+            projectedProtection.windowKind === "temporary_safe") &&
+          !projectedProtection.runnerCanReachAccessBeforeScore &&
+          !projectedProtection.runnerCanContestBeforeScore &&
+          projectedProtection.corpCanRezRelevantIce !== false &&
+          projectedProtection.corpCanRezFullPathWithDynamicReserve !== false
+        ) {
+          return "match";
+        }
         return "mismatch";
       }
       if (

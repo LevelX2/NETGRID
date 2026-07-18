@@ -58,7 +58,31 @@ export function scoringWindowHorizon<TServer extends CorpServerLike>(
 ): CorpScoringWindowHorizon {
   if (action.type === "score_agenda") return "immediate";
   if (dependencies.advanceCompletesScore(input, action)) return "immediate";
-  if (action.type === "advance_card") return "next_turn";
+  if (action.type === "advance_card") {
+    const sourceCard = dependencies.actionSourceCard?.(input, action);
+    const requirement = scoringWindowAdvancementRequirement(sourceCard);
+    if (typeof requirement !== "number") return "unknown";
+    const currentCounters = Math.max(
+      0,
+      Math.floor(sourceCard?.advancementCounters ?? 0),
+    );
+    const advancesStillNeeded = Math.max(
+      0,
+      requirement - (currentCounters + 1),
+    );
+    const remainingCorpClicksAfterAction = Math.max(
+      0,
+      Math.floor(
+        (typeof input.playerView.own.clicks === "number"
+          ? input.playerView.own.clicks
+          : 3) - scoringWindowActionClickCost(action),
+      ),
+    );
+    if (advancesStillNeeded <= remainingCorpClicksAfterAction) {
+      return "immediate";
+    }
+    return advancesStillNeeded <= 3 ? "next_turn" : "slow";
+  }
   if (action.type !== "install_card" || action.payload?.placement === "ice") {
     return "unknown";
   }
@@ -73,7 +97,7 @@ export function scoringWindowHorizon<TServer extends CorpServerLike>(
         : 3) - scoringWindowActionClickCost(action),
     ),
   );
-  if (remainingCorpClicksAfterAction > requirement) return "immediate";
+  if (remainingCorpClicksAfterAction >= requirement) return "immediate";
   if (
     scoringWindowVisibleInTurnAdvancementBurstAvailable(
       input,

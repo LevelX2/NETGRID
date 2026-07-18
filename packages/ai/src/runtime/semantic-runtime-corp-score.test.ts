@@ -160,6 +160,36 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("does not treat advancing a trace agenda as resolving its scored ability", () => {
+    const advance = corpAction("advance-trace-agenda", "advance_card");
+    const input = corpInputWithGoals([], [advance]);
+    input.playerView.own.clicks = 1;
+
+    const components = semanticRuntimeCorpScoreComponents(
+      input,
+      advance,
+      "simple_score_advance",
+      testDependencies(),
+      semanticCandidate(
+        advance.actionId,
+        "score.trace_tag_source",
+        ["trace.source", "tag.source"],
+        "advance_card",
+      ),
+    );
+
+    expect(components).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_trace_without_conversion_window",
+        }),
+        expect.objectContaining({
+          key: "corp_last_click_trace_without_payoff",
+        }),
+      ]),
+    );
+  });
+
   it("includes visible purge impact in the actual Corp score breakdown", () => {
     const purge = {
       ...corpAction("purge", "purge_virus_counters"),

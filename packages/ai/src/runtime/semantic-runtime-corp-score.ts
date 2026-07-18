@@ -112,8 +112,11 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
     actionSemanticCandidate,
   );
   if (tacticalGoalFit) components.push(tacticalGoalFit);
+  const actionResolvesTrace =
+    corpActionCanResolveProfiledTrace(action) &&
+    candidateRequiresSuccessfulTrace(actionSemanticCandidate);
   if (
-    candidateRequiresSuccessfulTrace(actionSemanticCandidate) &&
+    actionResolvesTrace &&
     traceTagExpectedSuccessEstimate(input) === 0
   ) {
     components.push({
@@ -129,7 +132,7 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
     });
   }
   if (
-    candidateRequiresSuccessfulTrace(actionSemanticCandidate) &&
+    actionResolvesTrace &&
     !traceActionLeavesImmediatePunishWindow(input, actionSemanticCandidate)
   ) {
     components.push({
@@ -820,4 +823,15 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
     }
   }
   return components;
+}
+
+function corpActionCanResolveProfiledTrace(action: LegalAction): boolean {
+  return !(
+    action.type === "install_card" ||
+    action.type === "advance_card" ||
+    action.type === "score_agenda" ||
+    action.type === "gain_credit" ||
+    action.type === "draw_card" ||
+    action.type === "end_turn"
+  );
 }

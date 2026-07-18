@@ -44,8 +44,23 @@ export function existingReadyRemoteCanReceiveScoreline(
   return (
     server !== undefined &&
     server.id.startsWith("remote_") &&
-    server.root.length === 0 &&
-    server.ice.length > 0
+    server.ice.length > 0 &&
+    (server.root.length === 0 ||
+      corpLegalActions(input).some((action) => {
+        if (
+          action.type !== "install_card" ||
+          action.payload?.placement === "ice" ||
+          actionServerIdForAction(input, action) !== serverId
+        ) {
+          return false;
+        }
+        const source = semanticRuntimeVisibleSourceCard(input, action);
+        return (
+          source !== undefined &&
+          source.known !== false &&
+          corpTriageVisibleCardIsAgenda(source)
+        );
+      }))
   );
 }
 

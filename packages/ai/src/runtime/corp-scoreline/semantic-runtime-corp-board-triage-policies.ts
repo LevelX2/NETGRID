@@ -1449,7 +1449,7 @@ export function existingScoreRemoteOutletExists(
       (server.root.some(
         (card) => card.known !== false && corpTriageVisibleCardIsAgenda(card),
       ) ||
-        (server.root.length === 0 && server.ice.length > 0)),
+        existingReadyRemoteCanReceiveScoreline(input, server.id)),
   );
 }
 
