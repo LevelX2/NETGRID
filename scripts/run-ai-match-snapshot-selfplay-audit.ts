@@ -116,12 +116,6 @@ const actionAlternativeDecisionCount = summaries.reduce(
     ).length,
   0,
 );
-const sanitizedSummaries = summaries.map((summary) => ({
-  ...summary,
-  actionSequence: summary.actionSequence.map(
-    ({ actionAlternatives: _privateAlternatives, ...decision }) => decision,
-  ),
-}));
 const corpus = {
   schemaVersion: "ai-match-snapshot-selfplay-audit-corpus-v1",
   generatedAt: new Date().toISOString(),
@@ -140,7 +134,7 @@ const corpus = {
     runnerControllerMode: "current_candidate",
     corpControllerMode: "current_candidate",
     detailedActionAlternativesEvaluatedInMemory: true,
-    detailedActionAlternativesPersisted: false,
+    detailedActionAlternativesPersisted: true,
   },
   decks: {
     runner: publicDeckReference(runnerSnapshot),
@@ -186,7 +180,7 @@ const corpus = {
     fullTraceRedactionSafe: true,
   },
   findings: persistentFindings,
-  games: sanitizedSummaries,
+  games: summaries,
 };
 
 if (!isSelfplayTraceRedactionSafe(corpus)) {
