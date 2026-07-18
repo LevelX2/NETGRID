@@ -35,7 +35,7 @@ import { resolveAccessProgramInstallMemoryChoice } from "../access/access-flow";
 export function createPendingChoiceRuntimeHosts(
   deps: RuntimeDeps,
   links: ChoiceHiddenZoneRuntimeLinks,
-) {
+): import("./pending-choice-runtime-port").PendingChoiceRuntimePort {
   const {
     DAILY_CREDIT_RESOURCE_SOURCE,
     BUTCHER_BOY_ID,

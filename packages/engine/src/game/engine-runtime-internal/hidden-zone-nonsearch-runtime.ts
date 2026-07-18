@@ -25,11 +25,12 @@ import {
   type RunnerProgramInstallInstancePatch,
 } from "../install/runner-rig-install-finalization";
 import * as nonSearchMemory from "../install/nonsearch-program-install-memory";
+import { parseTemporaryInstallChoiceSource } from "./hidden-zone-nonsearch-choice-source";
 
 export function createHiddenZoneNonSearchRuntime(
   deps: RuntimeDeps,
   links: ChoiceHiddenZoneRuntimeLinks,
-) {
+): import("./hidden-zone-nonsearch-runtime-port").HiddenZoneNonSearchRuntimePort {
   const {
     DAILY_CREDIT_RESOURCE_SOURCE,
     COCKROACH_ID,
@@ -1158,22 +1159,6 @@ export function createHiddenZoneNonSearchRuntime(
     });
   }
 
-  function parsePro018ChoiceSource(source: string): {
-    sourceCardId: CardInstanceId;
-    sourceDefinitionId: CardDefinitionId;
-    value: string;
-  } {
-    const [, sourceCardId = "", sourceDefinitionId = "", value = ""] =
-      source.split(":");
-    if (!sourceCardId || !sourceDefinitionId)
-      throw new Error("Die PRO018-Choice ist ungueltig.");
-    return {
-      sourceCardId: sourceCardId as CardInstanceId,
-      sourceDefinitionId: sourceDefinitionId as CardDefinitionId,
-      value,
-    };
-  }
-
   function installRunnerGripCardWithTemporaryCredits(
     state: GameState,
     cardId: CardInstanceId,
@@ -1244,7 +1229,7 @@ export function createHiddenZoneNonSearchRuntime(
       )
     )
       throw new Error("Es ist keine PRO018-Grip-Install-Choice offen.");
-    const { sourceDefinitionId, value } = parsePro018ChoiceSource(
+    const { sourceDefinitionId, value } = parseTemporaryInstallChoiceSource(
       choice.source,
     );
     const temporaryCredits = Math.max(0, Math.floor(Number(value)));
@@ -1303,7 +1288,7 @@ export function createHiddenZoneNonSearchRuntime(
       sourceCardId,
       sourceDefinitionId,
       value: serverIdRaw,
-    } = parsePro018ChoiceSource(choice.source);
+    } = parseTemporaryInstallChoiceSource(choice.source);
     const selectedIds = selectedChoiceCardIdsForChoice(choice, playerAction);
     if (selectedIds.length !== 1)
       throw new Error("Genau ein Programm muss gewaehlt werden.");
@@ -1340,8 +1325,6 @@ export function createHiddenZoneNonSearchRuntime(
       undefined,
       1,
       {
-        bonusRunNoClick: true,
-        testSpinRun: true,
         testSpinTemporaryInstall: {
           cardId: selectedId,
           sourceCardId,
@@ -1367,11 +1350,15 @@ export function createHiddenZoneNonSearchRuntime(
     };
   }
 
-  const nonSearchProgramInstallMemoryHost: nonSearchMemory.NonSearchProgramInstallMemoryHost = {
-    definitionFor, runnerMemoryLimit, runnerProgramUsesMemory,
-    trashRunnerInstalledCardToHeap,
-    continueGripInstall: resolveGripInstallTemporaryCreditChoice,
-    continueStackInstall: resolveStackInstallRunCleanupChoice };
+  const nonSearchProgramInstallMemoryHost: nonSearchMemory.NonSearchProgramInstallMemoryHost =
+    {
+      definitionFor,
+      runnerMemoryLimit,
+      runnerProgramUsesMemory,
+      trashRunnerInstalledCardToHeap,
+      continueGripInstall: resolveGripInstallTemporaryCreditChoice,
+      continueStackInstall: resolveStackInstallRunCleanupChoice,
+    };
 
   function resolveRunnerInstalledConnectionTrashBadPublicityChoice(
     state: GameState,
@@ -1476,9 +1463,17 @@ export function createHiddenZoneNonSearchRuntime(
     resolveCorpChoiceRezOrTrashIceDecisionChoice,
     resolveCorpChoiceRezOrTrashIceTargetChoice,
     resolveGripInstallTemporaryCreditChoice,
-    resolveNonSearchProgramInstallMemoryChoice: (state: GameState, action: LegalAction, playerAction: PlayerAction) =>
+    resolveNonSearchProgramInstallMemoryChoice: (
+      state: GameState,
+      action: LegalAction,
+      playerAction: PlayerAction,
+    ) =>
       nonSearchMemory.resolveNonSearchProgramInstallMemoryChoice(
-        nonSearchProgramInstallMemoryHost, state, action, playerAction),
+        nonSearchProgramInstallMemoryHost,
+        state,
+        action,
+        playerAction,
+      ),
     resolveIncubatorTransformChoice,
     resolvePaidSourceReturnToGripChoice,
     resolveRunnerProgramReturnChoice,

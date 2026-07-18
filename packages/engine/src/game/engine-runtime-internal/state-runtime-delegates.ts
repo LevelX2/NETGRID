@@ -1,4 +1,4 @@
-import { runtimeDelegate, runtimeDelegates } from "./runtime-delegate-store";
+import { runtimeDelegates } from "./runtime-delegate-store";
 import type {
   StateClusterRuntimePortFunction,
   StateRuntimePortFunction,
@@ -531,277 +531,276 @@ export const spendRecurringTraceCreditPool: StateClusterRuntimePortFunction<
     ...args,
   );
 
-export function resolveTraceHardwareWreckerSuccess(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeResolvers",
-    "resolveTraceHardwareWreckerSuccess",
-  )(...args);
-}
+export const resolveTraceHardwareWreckerSuccess: StateClusterRuntimePortFunction<
+  "stateRuntimeResolvers",
+  "resolveTraceHardwareWreckerSuccess"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeResolvers.resolveTraceHardwareWreckerSuccess(
+    ...args,
+  );
 
-export function resolveTraceTrashRunnerResourceSuccess(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeResolvers",
-    "resolveTraceTrashRunnerResourceSuccess",
-  )(...args);
-}
+export const resolveTraceTrashRunnerResourceSuccess: StateClusterRuntimePortFunction<
+  "stateRuntimeResolvers",
+  "resolveTraceTrashRunnerResourceSuccess"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeResolvers.resolveTraceTrashRunnerResourceSuccess(
+    ...args,
+  );
 
-export function encounterTemporaryTraceCreditsAvailable(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeResolvers",
-    "encounterTemporaryTraceCreditsAvailable",
-  )(...args);
-}
+export const encounterTemporaryTraceCreditsAvailable: StateClusterRuntimePortFunction<
+  "stateRuntimeResolvers",
+  "encounterTemporaryTraceCreditsAvailable"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeResolvers.encounterTemporaryTraceCreditsAvailable(
+    ...args,
+  );
 
-export function spendEncounterTemporaryTraceCredits(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeResolvers",
-    "spendEncounterTemporaryTraceCredits",
-  )(...args);
-}
+export const spendEncounterTemporaryTraceCredits: StateClusterRuntimePortFunction<
+  "stateRuntimeResolvers",
+  "spendEncounterTemporaryTraceCredits"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeResolvers.spendEncounterTemporaryTraceCredits(
+    ...args,
+  );
 
-export function identityModifierAmount(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeResolvers",
-    "identityModifierAmount",
-  )(...args);
-}
+export const identityModifierAmount: StateClusterRuntimePortFunction<
+  "stateRuntimeResolvers",
+  "identityModifierAmount"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeResolvers.identityModifierAmount(...args);
 
-export function identityDefinition(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeResolvers",
-    "identityDefinition",
-  )(...args);
-}
+export const identityDefinition: StateClusterRuntimePortFunction<
+  "stateRuntimeResolvers",
+  "identityDefinition"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeResolvers.identityDefinition(...args);
 
-export function executeEffectCommands(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeResolvers",
-    "executeEffectCommands",
-  )(...args);
-}
+export const executeEffectCommands: StateClusterRuntimePortFunction<
+  "stateRuntimeResolvers",
+  "executeEffectCommands"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeResolvers.executeEffectCommands(...args);
 
-export function assertNonNegativeAmount(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeResolvers",
-    "assertNonNegativeAmount",
-  )(...args);
-}
+export const assertNonNegativeAmount: StateClusterRuntimePortFunction<
+  "stateRuntimeResolvers",
+  "assertNonNegativeAmount"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeResolvers.assertNonNegativeAmount(...args);
 
-export function assertPositiveIntegerAmount(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeResolvers",
-    "assertPositiveIntegerAmount",
-  )(...args);
-}
+export const assertPositiveIntegerAmount: StateClusterRuntimePortFunction<
+  "stateRuntimeResolvers",
+  "assertPositiveIntegerAmount"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeResolvers.assertPositiveIntegerAmount(...args);
 
-export function withoutVariableIceState(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeResolvers",
-    "withoutVariableIceState",
-  )(...args);
-}
+export const withoutVariableIceState: StateClusterRuntimePortFunction<
+  "stateRuntimeResolvers",
+  "withoutVariableIceState"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeResolvers.withoutVariableIceState(...args);
 
-export function clickCostForAction(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeResolvers",
-    "clickCostForAction",
-  )(...args);
-}
+export const clickCostForAction: StateClusterRuntimePortFunction<
+  "stateRuntimeResolvers",
+  "clickCostForAction"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeResolvers.clickCostForAction(...args);
 
-export function creditCostForAction(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeResolvers",
-    "creditCostForAction",
-  )(...args);
-}
+export const creditCostForAction: StateClusterRuntimePortFunction<
+  "stateRuntimeResolvers",
+  "creditCostForAction"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeResolvers.creditCostForAction(...args);
 
-export function runnerActionsPerTurn(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeResolvers",
-    "runnerActionsPerTurn",
-  )(...args);
-}
+export const runnerActionsPerTurn: StateClusterRuntimePortFunction<
+  "stateRuntimeResolvers",
+  "runnerActionsPerTurn"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeResolvers.runnerActionsPerTurn(...args);
 
-export function agendaPoints(...args: any[]): any {
-  return runtimeDelegate("stateRuntimeResolvers", "agendaPoints")(...args);
-}
+export const agendaPoints: StateClusterRuntimePortFunction<
+  "stateRuntimeResolvers",
+  "agendaPoints"
+> = (...args) => typedRuntimePorts.stateRuntimeResolvers.agendaPoints(...args);
 
-export function addVirusCounterWithCounterPrevention(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeResolvers",
-    "addVirusCounterWithCounterPrevention",
-  )(...args);
-}
+export const addVirusCounterWithCounterPrevention: StateClusterRuntimePortFunction<
+  "stateRuntimeResolvers",
+  "addVirusCounterWithCounterPrevention"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeResolvers.addVirusCounterWithCounterPrevention(
+    ...args,
+  );
 
-export function preventOneVirusCounterWithCounterPrevention(
-  ...args: any[]
-): any {
-  return runtimeDelegate(
-    "stateRuntimeResolvers",
-    "preventOneVirusCounterWithCounterPrevention",
-  )(...args);
-}
+export const preventOneVirusCounterWithCounterPrevention: StateClusterRuntimePortFunction<
+  "stateRuntimeResolvers",
+  "preventOneVirusCounterWithCounterPrevention"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeResolvers.preventOneVirusCounterWithCounterPrevention(
+    ...args,
+  );
 
-export function addVisibleCardCounter(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeResolvers",
-    "addVisibleCardCounter",
-  )(...args);
-}
+export const addVisibleCardCounter: StateClusterRuntimePortFunction<
+  "stateRuntimeResolvers",
+  "addVisibleCardCounter"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeResolvers.addVisibleCardCounter(...args);
 
-export function spendVisibleCardCounter(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeResolvers",
-    "spendVisibleCardCounter",
-  )(...args);
-}
+export const spendVisibleCardCounter: StateClusterRuntimePortFunction<
+  "stateRuntimeResolvers",
+  "spendVisibleCardCounter"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeResolvers.spendVisibleCardCounter(...args);
 
-export function totalCounters(...args: any[]): any {
-  return runtimeDelegate("stateRuntimeResolvers", "totalCounters")(...args);
-}
+export const totalCounters: StateClusterRuntimePortFunction<
+  "stateRuntimeResolvers",
+  "totalCounters"
+> = (...args) => typedRuntimePorts.stateRuntimeResolvers.totalCounters(...args);
 
-export function installedVirusCounterPurgePreserveSourceIds(
-  ...args: any[]
-): any {
-  return runtimeDelegate(
-    "stateRuntimeResolvers",
-    "installedVirusCounterPurgePreserveSourceIds",
-  )(...args);
-}
+export const installedVirusCounterPurgePreserveSourceIds: StateClusterRuntimePortFunction<
+  "stateRuntimeResolvers",
+  "installedVirusCounterPurgePreserveSourceIds"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeResolvers.installedVirusCounterPurgePreserveSourceIds(
+    ...args,
+  );
 
-export function virusCounterPurgePreserveTargets(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeResolvers",
-    "virusCounterPurgePreserveTargets",
-  )(...args);
-}
+export const virusCounterPurgePreserveTargets: StateClusterRuntimePortFunction<
+  "stateRuntimeResolvers",
+  "virusCounterPurgePreserveTargets"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeResolvers.virusCounterPurgePreserveTargets(
+    ...args,
+  );
 
-export function startVirusCounterPurgePreserveChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeResolvers",
-    "startVirusCounterPurgePreserveChoice",
-  )(...args);
-}
+export const startVirusCounterPurgePreserveChoice: StateClusterRuntimePortFunction<
+  "stateRuntimeResolvers",
+  "startVirusCounterPurgePreserveChoice"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeResolvers.startVirusCounterPurgePreserveChoice(
+    ...args,
+  );
 
-export function parseVirusCounterPurgePreserveOption(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeResolvers",
-    "parseVirusCounterPurgePreserveOption",
-  )(...args);
-}
+export const parseVirusCounterPurgePreserveOption: StateClusterRuntimePortFunction<
+  "stateRuntimeResolvers",
+  "parseVirusCounterPurgePreserveOption"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeResolvers.parseVirusCounterPurgePreserveOption(
+    ...args,
+  );
 
-export function restorePurgePreservedVirusCounters(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeResolvers",
-    "restorePurgePreservedVirusCounters",
-  )(...args);
-}
+export const restorePurgePreservedVirusCounters: StateClusterRuntimePortFunction<
+  "stateRuntimeResolvers",
+  "restorePurgePreservedVirusCounters"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeResolvers.restorePurgePreservedVirusCounters(
+    ...args,
+  );
 
-export function resolveVirusCounterPurgePreserveChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeResolvers",
-    "resolveVirusCounterPurgePreserveChoice",
-  )(...args);
-}
+export const resolveVirusCounterPurgePreserveChoice: StateClusterRuntimePortFunction<
+  "stateRuntimeResolvers",
+  "resolveVirusCounterPurgePreserveChoice"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeResolvers.resolveVirusCounterPurgePreserveChoice(
+    ...args,
+  );
 
-export function installedProgramTrashBackupHardwareIds(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeResolvers",
-    "installedProgramTrashBackupHardwareIds",
-  )(...args);
-}
+export const installedProgramTrashBackupHardwareIds: StateClusterRuntimePortFunction<
+  "stateRuntimeResolvers",
+  "installedProgramTrashBackupHardwareIds"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeResolvers.installedProgramTrashBackupHardwareIds(
+    ...args,
+  );
 
-export function availableRunnerProgramInstallCredits(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeResolvers",
-    "availableRunnerProgramInstallCredits",
-  )(...args);
-}
+export const availableRunnerProgramInstallCredits: StateClusterRuntimePortFunction<
+  "stateRuntimeResolvers",
+  "availableRunnerProgramInstallCredits"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeResolvers.availableRunnerProgramInstallCredits(
+    ...args,
+  );
 
-export function runnerCanPayInstallCost(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeResolvers",
-    "runnerCanPayInstallCost",
-  )(...args);
-}
+export const runnerCanPayInstallCost: StateClusterRuntimePortFunction<
+  "stateRuntimeResolvers",
+  "runnerCanPayInstallCost"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeResolvers.runnerCanPayInstallCost(...args);
 
-export function runnerCostPenaltySupportCreditCapacity(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeResolvers",
-    "runnerCostPenaltySupportCreditCapacity",
-  )(...args);
-}
+export const runnerCostPenaltySupportCreditCapacity: StateClusterRuntimePortFunction<
+  "stateRuntimeResolvers",
+  "runnerCostPenaltySupportCreditCapacity"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeResolvers.runnerCostPenaltySupportCreditCapacity(
+    ...args,
+  );
 
-export function openRunnerCostPenaltySupportWindow(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeResolvers",
-    "openRunnerCostPenaltySupportWindow",
-  )(...args);
-}
+export const openRunnerCostPenaltySupportWindow: StateClusterRuntimePortFunction<
+  "stateRuntimeResolvers",
+  "openRunnerCostPenaltySupportWindow"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeResolvers.openRunnerCostPenaltySupportWindow(
+    ...args,
+  );
 
-export function closeRunnerCostPenaltySupportWindowForPayment(
-  ...args: any[]
-): any {
-  return runtimeDelegate(
-    "stateRuntimeResolvers",
-    "closeRunnerCostPenaltySupportWindowForPayment",
-  )(...args);
-}
+export const closeRunnerCostPenaltySupportWindowForPayment: StateClusterRuntimePortFunction<
+  "stateRuntimeResolvers",
+  "closeRunnerCostPenaltySupportWindowForPayment"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeResolvers.closeRunnerCostPenaltySupportWindowForPayment(
+    ...args,
+  );
 
-export function runnerRecurringCredits(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeResolvers",
-    "runnerRecurringCredits",
-  )(...args);
-}
+export const runnerRecurringCredits: StateClusterRuntimePortFunction<
+  "stateRuntimeResolvers",
+  "runnerRecurringCredits"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeResolvers.runnerRecurringCredits(...args);
 
-export function runnerProgramInstallRecurringCreditSourceIds(
-  ...args: any[]
-): any {
-  return runtimeDelegate(
-    "stateRuntimeResolvers",
-    "runnerProgramInstallRecurringCreditSourceIds",
-  )(...args);
-}
+export const runnerProgramInstallRecurringCreditSourceIds: StateClusterRuntimePortFunction<
+  "stateRuntimeResolvers",
+  "runnerProgramInstallRecurringCreditSourceIds"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeResolvers.runnerProgramInstallRecurringCreditSourceIds(
+    ...args,
+  );
 
-export function spendRunnerInstallCredits(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeResolvers",
-    "spendRunnerInstallCredits",
-  )(...args);
-}
+export const spendRunnerInstallCredits: StateClusterRuntimePortFunction<
+  "stateRuntimeResolvers",
+  "spendRunnerInstallCredits"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeResolvers.spendRunnerInstallCredits(...args);
 
-export function runnerTagRemovalRecurringCreditSourceIds(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeResolvers",
-    "runnerTagRemovalRecurringCreditSourceIds",
-  )(...args);
-}
+export const runnerTagRemovalRecurringCreditSourceIds: StateClusterRuntimePortFunction<
+  "stateRuntimeResolvers",
+  "runnerTagRemovalRecurringCreditSourceIds"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeResolvers.runnerTagRemovalRecurringCreditSourceIds(
+    ...args,
+  );
 
-export function runnerTagRemovalRecurringCredits(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeResolvers",
-    "runnerTagRemovalRecurringCredits",
-  )(...args);
-}
+export const runnerTagRemovalRecurringCredits: StateClusterRuntimePortFunction<
+  "stateRuntimeResolvers",
+  "runnerTagRemovalRecurringCredits"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeResolvers.runnerTagRemovalRecurringCredits(
+    ...args,
+  );
 
-export function availableRunnerTagRemovalCredits(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeResolvers",
-    "availableRunnerTagRemovalCredits",
-  )(...args);
-}
+export const availableRunnerTagRemovalCredits: StateClusterRuntimePortFunction<
+  "stateRuntimeResolvers",
+  "availableRunnerTagRemovalCredits"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeResolvers.availableRunnerTagRemovalCredits(
+    ...args,
+  );
 
-export function spendRunnerTagRemovalCredits(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeResolvers",
-    "spendRunnerTagRemovalCredits",
-  )(...args);
-}
+export const spendRunnerTagRemovalCredits: StateClusterRuntimePortFunction<
+  "stateRuntimeResolvers",
+  "spendRunnerTagRemovalCredits"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeResolvers.spendRunnerTagRemovalCredits(...args);
 
-export function refreshRecurringCredits(...args: any[]): any {
-  return runtimeDelegate(
-    "stateRuntimeResolvers",
-    "refreshRecurringCredits",
-  )(...args);
-}
+export const refreshRecurringCredits: StateClusterRuntimePortFunction<
+  "stateRuntimeResolvers",
+  "refreshRecurringCredits"
+> = (...args) =>
+  typedRuntimePorts.stateRuntimeResolvers.refreshRecurringCredits(...args);

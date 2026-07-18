@@ -7,21 +7,13 @@ export type RuntimePortGroups = {
   actionRuntimeHosts: import("./action-runtime-port").ActionRuntimePort;
   cardRuntimeHosts: import("./card-runtime-host-port").CardRuntimeHostPort;
   cardRuntimeResolvers: import("./card-runtime-resolver-port").CardRuntimeResolverPort;
-  choiceHiddenZoneResolvers: ReturnType<
-    (typeof import("./choice-hidden-zone-resolvers"))["createChoiceHiddenZoneResolvers"]
-  >;
-  choiceHiddenZoneRuntime: ReturnType<
-    (typeof import("./choice-hidden-zone-runtime"))["createChoiceHiddenZoneRuntime"]
-  >;
+  choiceHiddenZoneResolvers: import("./choice-resolver-runtime-port").ChoiceResolverRuntimePort;
+  choiceHiddenZoneRuntime: import("./choice-hidden-zone-runtime-port").ChoiceHiddenZoneRuntimePort;
   corpRuntimeResolvers: import("./corp-runtime-port").CorpRuntimePort;
-  flowRuntimeHosts: ReturnType<
-    (typeof import("./flow-runtime-hosts"))["createFlowRuntimeHosts"]
-  >;
+  flowRuntimeHosts: import("./flow-runtime-port").FlowRuntimePort;
   lifecycleRuntime: import("./lifecycle-runtime-port").LifecycleRuntimePort;
   stateCorpRuntimeResolvers: import("./state-corp-runtime-port").StateCorpRuntimePort;
-  stateRuntimeResolvers: ReturnType<
-    (typeof import("./state-runtime-resolvers"))["createStateRuntimeResolvers"]
-  >;
+  stateRuntimeResolvers: import("./state-runtime-resolver-port").StateRuntimeResolverPort;
   stateRuntimeServices: import("./state-runtime-services").StateRuntimeServices;
   turnCorpRuntime: import("./turn-corp-runtime-port").TurnCorpRuntimePort;
   turnRuntimeResolvers: import("./turn-runtime-port").TurnRuntimePort;
@@ -32,17 +24,26 @@ export type RuntimePortSet = Partial<RuntimePortGroups>;
 export type StateRuntimePortGroups = {
   lifecycleRuntime: import("./lifecycle-runtime-port").LifecycleRuntimePort;
   stateCorpRuntimeResolvers: import("./state-corp-runtime-port").StateCorpRuntimePort;
+  stateRuntimeResolvers: import("./state-runtime-resolver-port").StateRuntimeResolverPort;
   stateRuntimeServices: import("./state-runtime-services").StateRuntimeServices;
 };
 
-export type StateClusterRuntimePortFunction<
-  Group extends keyof StateRuntimePortGroups,
-  Name extends keyof StateRuntimePortGroups[Group],
-> = StateRuntimePortGroups[Group][Name] extends (
+type RuntimeFunction<Port> = Port extends (
   ...args: infer Arguments
 ) => infer Result
   ? (...args: Arguments) => Result
   : never;
+
+type ClusterRuntimePortFunction<
+  Ports,
+  Group extends keyof Ports,
+  Name extends keyof Ports[Group],
+> = RuntimeFunction<Ports[Group][Name]>;
+
+export type StateClusterRuntimePortFunction<
+  Group extends keyof StateRuntimePortGroups,
+  Name extends keyof StateRuntimePortGroups[Group],
+> = ClusterRuntimePortFunction<StateRuntimePortGroups, Group, Name>;
 
 export type ActionRuntimePortGroups = Pick<
   RuntimePortGroups,
@@ -52,11 +53,7 @@ export type ActionRuntimePortGroups = Pick<
 export type ActionRuntimePortFunction<
   Group extends keyof ActionRuntimePortGroups,
   Name extends keyof ActionRuntimePortGroups[Group],
-> = ActionRuntimePortGroups[Group][Name] extends (
-  ...args: infer Arguments
-) => infer Result
-  ? (...args: Arguments) => Result
-  : never;
+> = ClusterRuntimePortFunction<ActionRuntimePortGroups, Group, Name>;
 
 export type CardRuntimePortGroups = Pick<
   RuntimePortGroups,
@@ -66,28 +63,36 @@ export type CardRuntimePortGroups = Pick<
 export type CardRuntimePortFunction<
   Group extends keyof CardRuntimePortGroups,
   Name extends keyof CardRuntimePortGroups[Group],
-> = CardRuntimePortGroups[Group][Name] extends (
-  ...args: infer Arguments
-) => infer Result
-  ? (...args: Arguments) => Result
-  : never;
+> = ClusterRuntimePortFunction<CardRuntimePortGroups, Group, Name>;
+
+export type ChoiceRuntimePortGroups = Pick<
+  RuntimePortGroups,
+  "choiceHiddenZoneResolvers" | "choiceHiddenZoneRuntime"
+>;
+
+export type ChoiceRuntimePortFunction<
+  Group extends keyof ChoiceRuntimePortGroups,
+  Name extends keyof ChoiceRuntimePortGroups[Group],
+> = ClusterRuntimePortFunction<ChoiceRuntimePortGroups, Group, Name>;
+
+export type FlowRuntimePortGroups = Pick<RuntimePortGroups, "flowRuntimeHosts">;
+
+export type FlowRuntimePortFunction<
+  Name extends keyof FlowRuntimePortGroups["flowRuntimeHosts"],
+> = ClusterRuntimePortFunction<FlowRuntimePortGroups, "flowRuntimeHosts", Name>;
 
 export type StateRuntimePortFunction<
   Name extends keyof StateRuntimePortGroups["stateRuntimeServices"],
-> = StateRuntimePortGroups["stateRuntimeServices"][Name] extends (
-  ...args: infer Arguments
-) => infer Result
-  ? (...args: Arguments) => Result
-  : never;
+> = ClusterRuntimePortFunction<
+  StateRuntimePortGroups,
+  "stateRuntimeServices",
+  Name
+>;
 
 export type RuntimePortFunction<
   Group extends keyof RuntimePortGroups,
   Name extends keyof RuntimePortGroups[Group],
-> = RuntimePortGroups[Group][Name] extends (
-  ...args: infer Arguments
-) => infer Result
-  ? (...args: Arguments) => Result
-  : never;
+> = ClusterRuntimePortFunction<RuntimePortGroups, Group, Name>;
 
 /**
  * Typed installation boundary for the staged delegate migration. Missing

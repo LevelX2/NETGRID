@@ -1725,7 +1725,10 @@ export function createCardRuntimeResolvers(
         },
       );
     } else {
-      shuffleRunnerStack(state);
+      shuffleRunnerStack(
+        state,
+        `runner_event_trash_grip_search:${sourceDefinitionId}:empty_search`,
+      );
     }
     legalAction.payload = {
       ...(legalAction.payload ?? {}),

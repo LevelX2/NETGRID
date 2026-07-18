@@ -23,7 +23,9 @@ type HiddenZoneNonSearchDiceLoopRuntimeDeps = RuntimeDeps & {
   ) => string[];
 };
 
-export function createHiddenZoneNonSearchDiceLoopRuntime(deps: RuntimeDeps) {
+export function createHiddenZoneNonSearchDiceLoopRuntime(
+  deps: RuntimeDeps,
+): import("./hidden-zone-dice-loop-runtime-port").HiddenZoneDiceLoopRuntimePort {
   const typedDeps = deps as HiddenZoneNonSearchDiceLoopRuntimeDeps;
   const {
     credits,

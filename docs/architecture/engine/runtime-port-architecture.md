@@ -1,6 +1,6 @@
 # Runtime Port Architecture
 
-Status: E06 action and lifecycle clusters migrated
+Status: E07 all delegate signatures migrated
 
 ## Problem
 
@@ -52,6 +52,19 @@ ihrer Erzeugung statisch abgesichert sind.
 Nach E06 verbleiben insgesamt 186 Altsignaturen: 89 im Choice-, 58 im Flow- und
 39 im State-Resolver-Cluster. Die beiden bekannten Importzyklen blieben erneut
 unverändert.
+
+E07 hat auch diese 186 Signaturen migriert. Alle fünf Delegate-Dateien sind nun
+ohne `any`; Choice/Hidden Zone und Flow sind dabei nicht als neue Großverträge
+stehen geblieben, sondern entlang ihrer konkreten Factories in sechs
+Choice-/Hidden-Zone- und fünf Flow-Teilports gegliedert. Der Strukturwächter
+prüft jeden dieser Ports als rein deklarativ und begrenzt seine Größe.
+
+Die statische Schließung hat vier zuvor verdeckte Abweichungen sichtbar
+gemacht und korrigiert: Trace-Ziele bilden ihre Optionalität nun korrekt ab,
+ein Stack-Shuffle besitzt einen deterministischen Zweckstring, wirkungslose
+Run-Options-Felder wurden entfernt und der Trace-Counter-Runtime-Typ wird aus
+dem fachlichen Implementierungsvertrag abgeleitet. E08 kann damit den
+dynamischen Delegate-Store und die nun funktionslosen Wrappergrenzen entfernen.
 
 ## Invarianten
 
