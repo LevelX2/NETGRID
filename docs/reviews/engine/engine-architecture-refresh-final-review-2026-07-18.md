@@ -47,8 +47,15 @@ geschützt.
 | Package Boundaries                         | grün                                    |
 | Testdiscovery                              | grün                                    |
 | Engine- und Root-Typecheck                 | grün                                    |
+| KI-Tests auf kombiniertem Stand            | 2.757/2.757 grün                        |
+| Server-Tests auf kombiniertem Stand        | 173/173 grün                            |
+| Root-Spezifikationstests                   | 8/8 grün                                |
 
 Die vollständigen Abschlussgates werden im Prozessartefakt E16 protokolliert.
+Die zwei bereits in E10 abgegrenzten Web-Katalog-Hint-Fehler bleiben mit
+633/635 grünen Webtests auf aktuellem `main` identisch reproduzierbar. Sie
+betreffen AI-Hint-Erwartungen außerhalb der Engine und wurden durch den Refresh
+nicht verschlechtert.
 
 ## Verbleibende Findings
 

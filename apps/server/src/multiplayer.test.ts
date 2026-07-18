@@ -6118,9 +6118,11 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(resolved.publicEvent?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       actor: "corp",
-      v1922RunnerEventAbility: "force_rez_or_trash_ice",
       corpDecision: "trash_ice"
     });
+    expect(resolved.publicEvent?.publicPayload).not.toHaveProperty(
+      "v1922RunnerEventAbility"
+    );
     expect(JSON.stringify(resolved.actorPayload)).not.toContain("cardInstances");
   });
 

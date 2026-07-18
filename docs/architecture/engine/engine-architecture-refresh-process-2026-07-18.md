@@ -289,6 +289,20 @@ Testdateien mit 1.741 Tests. Architekturziel, Card-Function-Abstraction,
 Package Boundaries, Strukturguard samt Selftest, Testdiscovery sowie Engine-,
 Shared- und Root-Typecheck sind grün.
 
+Der kombinierte Workspace-Lauf bestätigt zusätzlich 2.757/2.757 KI-Tests,
+173/173 Server-Tests und 8/8 Root-Spezifikationstests. Ein nach dem Main-Sync
+neu hinzugekommener Servertest prüft nun ausdrücklich, dass die fachliche
+Corp-Entscheidung öffentlich bleibt, der interne Ability-Discriminator aber
+nicht in `PublicEvents` leakt. Die bereits in E10 dokumentierten zwei
+Web-Katalog-Hint-Fehler bleiben mit 633/635 grünen Tests unverändert und sind
+auf aktuellem `main` identisch reproduzierbar; sie gehören nicht zum
+Engine-Refresh.
+
+Die E16-Dokumente entsprechen Prettier und `git diff --check` ist grün. Der
+bestehende 8.000-Zeilen-Servertest bleibt außerhalb einer rein mechanischen
+Gesamtformatierung: Eine fünfzeilige Vertragskorrektur rechtfertigt keinen
+8.500-Zeilen-Formatierungsdiff in einem fremden Monolithen.
+
 `public-context.ts`, der eingefrorene Runtime-Integrations-Fan-out, der knapp
 unter dem Gate liegende Per-Card-Longtail-Test und die manuelle
 Coverage-Source-Location-Karte sind im Final Review als begrenzte Folgepunkte
