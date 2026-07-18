@@ -70,17 +70,10 @@ export function scoringWindowHorizon<TServer extends CorpServerLike>(
       0,
       requirement - (currentCounters + 1),
     );
-    const remainingCorpClicksAfterAction = Math.max(
-      0,
-      Math.floor(
-        (typeof input.playerView.own.clicks === "number"
-          ? input.playerView.own.clicks
-          : 3) - scoringWindowActionClickCost(action),
-      ),
-    );
-    if (advancesStillNeeded <= remainingCorpClicksAfterAction) {
-      return "immediate";
-    }
+    // "immediate" is reserved for the current action completing the agenda.
+    // Same-turn multi-action closeouts have their own action-economy consumer;
+    // this projection asks whether the runner receives a contest window before
+    // a later scoring chance.
     return advancesStillNeeded <= 3 ? "next_turn" : "slow";
   }
   if (action.type !== "install_card" || action.payload?.placement === "ice") {
@@ -1501,8 +1494,7 @@ function visibleRunnerBreakerPathCandidates(
     creditsAfterStagedInstall: visibleRunnerContestCredits,
     stagedInstallCreditCost: 0,
     stagedBreakerCount: 0,
-    visibleIcebreakerCount:
-      visibleRunnerInstalledIcebreakerCount(installedRig),
+    visibleIcebreakerCount: visibleRunnerInstalledIcebreakerCount(installedRig),
   };
   if (!visibleRunnerHasPaidDelayedInstallSource(installedRig)) {
     return [baseCandidate];
@@ -1589,7 +1581,9 @@ function scoringWindowRunnerPathCandidateIsBetter(
     assessment: ReturnType<typeof assessKnownRezzedIcePath>;
   },
 ): boolean {
-  if (candidate.assessment.canReachAccess !== current.assessment.canReachAccess) {
+  if (
+    candidate.assessment.canReachAccess !== current.assessment.canReachAccess
+  ) {
     return candidate.assessment.canReachAccess;
   }
   if (

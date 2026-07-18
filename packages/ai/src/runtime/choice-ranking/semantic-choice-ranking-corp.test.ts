@@ -150,6 +150,7 @@ describe("tacticalPlanMappedChoice Corp overrides", () => {
     );
     const input = aiInput();
     input.side = "corp";
+    input.playerView.own.credits = 2;
     const result = tacticalPlanMappedChoice(
       input,
       [choice(protectRemote, 3000), advanceChoice],
@@ -160,6 +161,42 @@ describe("tacticalPlanMappedChoice Corp overrides", () => {
     expect(result.outcome).toBe("semantic_choice_selected");
     expect(result.choice?.action.actionId).toBe("advance-agenda");
     expect(result.overrideReason).toBe(
+      "corp_active_remote_agenda_advance_controller",
+    );
+  });
+
+  it("does not force an unsafe active agenda over the raw-score winner", () => {
+    const protectRemote = legalAction("protect-remote", "install_card");
+    const advanceAgenda = legalAction("advance-agenda", "advance_card");
+    const advanceChoice = choice(
+      advanceAgenda,
+      -500,
+      scoreComponentEvidence("corp_active_remote_agenda_advance_clock"),
+      {
+        key: "corp_active_remote_agenda_advance_clock",
+        value: 2600,
+        reason:
+          "active_remote_agenda:true|runner_cannot_contest_before_score:true",
+      },
+    );
+    advanceChoice.scoreBreakdown.push({
+      key: "corp_board_triage_alignment",
+      label: "Corp-Board-Triage",
+      value: 24,
+      reason: "triage_alignment:match|window_kind:unsafe",
+    });
+    const input = aiInput();
+    input.side = "corp";
+    input.playerView.own.credits = 2;
+    const result = tacticalPlanMappedChoice(
+      input,
+      [choice(protectRemote, 3000), advanceChoice],
+      scorelineSupportMapping([protectRemote]),
+      choice(protectRemote, 3000),
+    );
+
+    expect(result.choice?.action.actionId).toBe("protect-remote");
+    expect(result.overrideReason).not.toBe(
       "corp_active_remote_agenda_advance_controller",
     );
   });
@@ -189,9 +226,7 @@ describe("tacticalPlanMappedChoice Corp overrides", () => {
 
     expect(result.outcome).toBe("semantic_choice_selected");
     expect(result.choice?.action.actionId).toBe("score-agenda");
-    expect(result.overrideReason).toBe(
-      "corp_scoreable_agenda_controller",
-    );
+    expect(result.overrideReason).toBe("corp_scoreable_agenda_controller");
   });
 
   it("lets runner-matchpoint HQ protection interrupt remote support", () => {

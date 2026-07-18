@@ -326,14 +326,18 @@ export function corpIcePlacementScoreComponent<
     candidate.evidence.includes("first_ice:true") &&
     candidate.evidence.includes("dead_as_first_ice:true") &&
     candidate.evidence.includes("immediate_stop:false");
-  const value =
-    deadAsFirstIce
-      ? Math.min(candidate.score, -4200)
+  const deferredNewRemoteIce =
+    candidate.serverId === "new_remote" &&
+    candidate.recommendation === "hold_for_later";
+  const value = deadAsFirstIce
+    ? Math.min(candidate.score, -4200)
+    : deferredNewRemoteIce
+      ? Math.min(candidate.score, -1800)
       : candidate.recommendation === "install_now"
-      ? candidate.score
-      : badFirstIce
-        ? Math.min(candidate.score, -1800)
-        : Math.min(candidate.score, 0);
+        ? candidate.score
+        : badFirstIce
+          ? Math.min(candidate.score, -1800)
+          : Math.min(candidate.score, 0);
   return {
     key: "corp_ice_placement_evaluator",
     label: "ICE-Platzierung",

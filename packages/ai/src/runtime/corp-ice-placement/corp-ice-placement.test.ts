@@ -301,6 +301,35 @@ describe("corp ICE placement candidate scoring", () => {
     expect(layeredCandidate?.components.futureRunSynergy).toBeGreaterThan(0);
   });
 
+  it("penalizes opening a new remote with ICE marked hold for later", () => {
+    const fetch = corpIce("fetch", {
+      definitionId: "onr_v1_243_fetch-4-0-1",
+      rezCost: 0,
+    });
+    const input = corpInput({
+      credits: 5,
+      hq: [
+        fetch,
+        corpIce("other-ice-1"),
+        corpIce("other-ice-2"),
+        corpIce("other-ice-3"),
+      ],
+      servers: [server("hq", []), server("rd", [])],
+    });
+
+    const component = corpIcePlacementScoreComponent({
+      input,
+      action: installIceAction(fetch, "new_remote"),
+      serverId: "new_remote",
+      sourceCard: fetch,
+      actionCreditCost: 0,
+      iceRezCost: 0,
+    });
+
+    expect(component?.value).toBeLessThanOrEqual(-1800);
+    expect(component?.reason).toContain("recommendation:hold_for_later");
+  });
+
   it("hard-penalizes outside-scaling ICE as bad first remote protection", () => {
     const huntingPack = corpIce("hunting-pack", {
       title: "Hunting Pack",

@@ -68,6 +68,7 @@ export {
 } from "./choice-ranking/semantic-choice-ranking-support";
 
 const CORP_ACTIVE_REMOTE_ADVANCE_RUNNER_CREDIT_CEILING = 20;
+const CORP_ACTIVE_REMOTE_ADVANCE_CRITICAL_CREDIT_CEILING = 2;
 
 export function bestSemanticRuntimeChoice(
   choices: readonly SemanticRuntimeChoice[],
@@ -638,7 +639,11 @@ function urgentCorpSemanticChoice(
           "corp_last_click_trace_without_payoff",
         ]) &&
         !semanticRuntimeChoiceHasDeckoutAgendaFloodMismatch(choice) &&
-        !semanticRuntimeChoiceHasUnsafeScoringWindow(choice),
+        !(
+          input.playerView.own.credits <=
+            CORP_ACTIVE_REMOTE_ADVANCE_CRITICAL_CREDIT_CEILING &&
+          semanticRuntimeChoiceHasUnsafeScoringWindow(choice)
+        ),
     )
     .sort((left, right) => right.score - left.score)[0];
 }
@@ -659,7 +664,9 @@ function semanticRuntimeChoiceHasUnsafeScoringWindow(
 ): boolean {
   return choice.scoreBreakdown.some(
     (component) =>
-      component.key === "corp_scoring_window_assessment" &&
+      (component.key === "corp_scoring_window_assessment" ||
+        component.key === "corp_board_triage_alignment" ||
+        component.key === "corp_board_triage_mismatch") &&
       component.reason?.includes("window_kind:unsafe") === true &&
       !(
         component.reason.includes("runner_can_contest_before_score:false") &&

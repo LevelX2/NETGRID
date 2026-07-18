@@ -38,7 +38,7 @@ describe("scoringWindowHorizon", () => {
     );
   });
 
-  it("uses immediate when remaining clicks can finish the scoreline", () => {
+  it("keeps non-completing same-turn advance lines in the next-turn horizon", () => {
     const agenda = agendaCard("same-turn-agenda", {
       advancementCounters: 4,
       advancementRequirement: 6,
@@ -47,7 +47,7 @@ describe("scoringWindowHorizon", () => {
     const input = scorelineInput(agenda, 2);
 
     expect(scoringWindowHorizon(input, action, testDependencies())).toBe(
-      "immediate",
+      "next_turn",
     );
   });
 });
