@@ -38,6 +38,8 @@
     "check:card-asset-retention": "node scripts/check-card-asset-retention.mjs",
     "check:engine-cardimplementation-architecture-target": "node scripts/check-engine-cardimplementation-architecture-target.mjs",
     "check:engine-cardimplementation-architecture-target:selftest": "node scripts/check-engine-cardimplementation-architecture-target.mjs --self-test",
+    "check:engine-source-structure": "node scripts/check-engine-source-structure.mjs",
+    "check:engine-source-structure:selftest": "node scripts/check-engine-source-structure.mjs --self-test",
     "check:package-boundaries": "node scripts/check-package-boundaries.mjs",
     "check:package-boundaries:selftest": "node scripts/check-package-boundaries.mjs --self-test",
     "check:test-discovery": "node scripts/check-vitest-discovery.mjs",

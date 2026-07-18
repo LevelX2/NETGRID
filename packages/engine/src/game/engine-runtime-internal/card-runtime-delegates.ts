@@ -1,309 +1,359 @@
-import { runtimeDelegate } from "./runtime-delegate-store";
+import { runtimeDelegates } from "./runtime-delegate-store";
+import type {
+  CardRuntimePortFunction,
+  CardRuntimePortGroups,
+} from "./runtime-port-contracts";
 
-export function openPostMeatDamageReactionWindow(...args: any[]): any {
-  return (
-    runtimeDelegate("cardRuntimeResolvers", "openPostMeatDamageReactionWindow")
-  )(...args);
-}
+const typedRuntimePorts = runtimeDelegates as unknown as CardRuntimePortGroups;
 
-export function postMeatDamageHiddenResourceCandidates(...args: any[]): any {
-  return (
-    runtimeDelegate("cardRuntimeResolvers", "postMeatDamageHiddenResourceCandidates")
-  )(...args);
-}
-
-export function resolvePostMeatDamageHiddenResourceChoice(...args: any[]): any {
-  return (
-    runtimeDelegate("cardRuntimeResolvers", "resolvePostMeatDamageHiddenResourceChoice")
-  )(...args);
-}
-
-export function randomCorpHqDiscard(...args: any[]): any {
-  return (runtimeDelegate("cardRuntimeResolvers", "randomCorpHqDiscard"))(
+export const openPostMeatDamageReactionWindow: CardRuntimePortFunction<
+  "cardRuntimeResolvers",
+  "openPostMeatDamageReactionWindow"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeResolvers.openPostMeatDamageReactionWindow(
     ...args,
   );
-}
 
-export function installTargetBindingForDefinition(...args: any[]): any {
-  return (
-    runtimeDelegate("cardRuntimeResolvers", "installTargetBindingForDefinition")
-  )(...args);
-}
-
-export function requiresDataFortInstallTarget(...args: any[]): any {
-  return (
-    runtimeDelegate("cardRuntimeResolvers", "requiresDataFortInstallTarget")
-  )(...args);
-}
-
-export function runnerEventLongtailForDefinition(...args: any[]): any {
-  return (
-    runtimeDelegate("cardRuntimeResolvers", "runnerEventLongtailForDefinition")
-  )(...args);
-}
-
-export function variableRezForDefinition(...args: any[]): any {
-  return (
-    runtimeDelegate("cardRuntimeResolvers", "variableRezForDefinition")
-  )(...args);
-}
-
-export function runnerEventLongtailKindForDefinition(...args: any[]): any {
-  return (
-    runtimeDelegate("cardRuntimeResolvers", "runnerEventLongtailKindForDefinition")
-  )(...args);
-}
-
-export function hiddenReplacementLongtailForDefinition(...args: any[]): any {
-  return (
-    runtimeDelegate("cardRuntimeResolvers", "hiddenReplacementLongtailForDefinition")
-  )(...args);
-}
-
-export function cardImplementationRunnerEventResolver(...args: any[]): any {
-  return (
-    runtimeDelegate("cardRuntimeResolvers", "cardImplementationRunnerEventResolver")
-  )(...args);
-}
-
-export function printedCostCardImplementationMakeRunEffect(
-  ...args: any[]
-): any {
-  return (
-    runtimeDelegate("cardRuntimeResolvers", "printedCostCardImplementationMakeRunEffect")
-  )(...args);
-}
-
-export function scoredAgendaImplementationForDefinitionId(...args: any[]): any {
-  return (
-    runtimeDelegate("cardRuntimeResolvers", "scoredAgendaImplementationForDefinitionId")
-  )(...args);
-}
-
-export function scoredAgendaImplementationForDefinition(...args: any[]): any {
-  return (
-    runtimeDelegate("cardRuntimeResolvers", "scoredAgendaImplementationForDefinition")
-  )(...args);
-}
-
-export function scoredAgendaKindForDefinition(...args: any[]): any {
-  return (
-    runtimeDelegate("cardRuntimeResolvers", "scoredAgendaKindForDefinition")
-  )(...args);
-}
-
-export function emptyRunnerDrawSummary(...args: any[]): any {
-  return (runtimeDelegate("cardRuntimeResolvers", "emptyRunnerDrawSummary"))(
+export const postMeatDamageHiddenResourceCandidates: CardRuntimePortFunction<
+  "cardRuntimeResolvers",
+  "postMeatDamageHiddenResourceCandidates"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeResolvers.postMeatDamageHiddenResourceCandidates(
     ...args,
   );
-}
 
-export function mergeRunnerDrawSummary(...args: any[]): any {
-  return (runtimeDelegate("cardRuntimeResolvers", "mergeRunnerDrawSummary"))(
+export const resolvePostMeatDamageHiddenResourceChoice: CardRuntimePortFunction<
+  "cardRuntimeResolvers",
+  "resolvePostMeatDamageHiddenResourceChoice"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeResolvers.resolvePostMeatDamageHiddenResourceChoice(
     ...args,
   );
-}
 
-export function applyRunnerDrawSummaryPayload(...args: any[]): any {
-  return (
-    runtimeDelegate("cardRuntimeResolvers", "applyRunnerDrawSummaryPayload")
-  )(...args);
-}
+export const randomCorpHqDiscard: CardRuntimePortFunction<
+  "cardRuntimeResolvers",
+  "randomCorpHqDiscard"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeResolvers.randomCorpHqDiscard(...args);
 
-export function runnerDrawSummaryPublicPayload(...args: any[]): any {
-  return (
-    runtimeDelegate("cardRuntimeResolvers", "runnerDrawSummaryPublicPayload")
-  )(...args);
-}
-
-export function dupreStrengthCounterBonus(...args: any[]): any {
-  return (runtimeDelegate("cardRuntimeHosts", "dupreStrengthCounterBonus"))(
+export const installTargetBindingForDefinition: CardRuntimePortFunction<
+  "cardRuntimeResolvers",
+  "installTargetBindingForDefinition"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeResolvers.installTargetBindingForDefinition(
     ...args,
   );
-}
 
-export function permanentIcebreakerStrengthCounterBonus(...args: any[]): any {
-  return (
-    runtimeDelegate("cardRuntimeHosts", "permanentIcebreakerStrengthCounterBonus")
-  )(...args);
-}
+export const requiresDataFortInstallTarget: CardRuntimePortFunction<
+  "cardRuntimeResolvers",
+  "requiresDataFortInstallTarget"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeResolvers.requiresDataFortInstallTarget(...args);
 
-export function pumpAmountForLegalAction(...args: any[]): any {
-  return (runtimeDelegate("cardRuntimeHosts", "pumpAmountForLegalAction"))(
+export const runnerEventLongtailForDefinition: CardRuntimePortFunction<
+  "cardRuntimeResolvers",
+  "runnerEventLongtailForDefinition"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeResolvers.runnerEventLongtailForDefinition(
     ...args,
   );
-}
 
-export function pumpAbilityForLegalAction(...args: any[]): any {
-  return (runtimeDelegate("cardRuntimeHosts", "pumpAbilityForLegalAction"))(
+export const variableRezForDefinition: CardRuntimePortFunction<
+  "cardRuntimeResolvers",
+  "variableRezForDefinition"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeResolvers.variableRezForDefinition(...args);
+
+export const runnerEventLongtailKindForDefinition: CardRuntimePortFunction<
+  "cardRuntimeResolvers",
+  "runnerEventLongtailKindForDefinition"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeResolvers.runnerEventLongtailKindForDefinition(
     ...args,
   );
-}
 
-export function breakAbilityForLegalAction(...args: any[]): any {
-  return (runtimeDelegate("cardRuntimeHosts", "breakAbilityForLegalAction"))(
+export const hiddenReplacementLongtailForDefinition: CardRuntimePortFunction<
+  "cardRuntimeResolvers",
+  "hiddenReplacementLongtailForDefinition"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeResolvers.hiddenReplacementLongtailForDefinition(
     ...args,
   );
-}
 
-export function pumpDurationForLegalAction(...args: any[]): any {
-  return (runtimeDelegate("cardRuntimeHosts", "pumpDurationForLegalAction"))(
+export const cardImplementationRunnerEventResolver: CardRuntimePortFunction<
+  "cardRuntimeResolvers",
+  "cardImplementationRunnerEventResolver"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeResolvers.cardImplementationRunnerEventResolver(
     ...args,
   );
-}
 
-export function assertCurrentSubroutineMatchesLegalAction(...args: any[]): any {
-  return (
-    runtimeDelegate("cardRuntimeHosts", "assertCurrentSubroutineMatchesLegalAction")
-  )(...args);
-}
-
-export function resolveMultiBreakSubroutinesAction(...args: any[]): any {
-  return (
-    runtimeDelegate("cardRuntimeHosts", "resolveMultiBreakSubroutinesAction")
-  )(...args);
-}
-
-export function assertBreakSubroutineCostQuoteValid(...args: any[]): any {
-  return (
-    runtimeDelegate("cardRuntimeHosts", "assertBreakSubroutineCostQuoteValid")
-  )(...args);
-}
-
-export function subroutinesForCurrentEncounter(...args: any[]): any {
-  return (
-    runtimeDelegate("cardRuntimeHosts", "subroutinesForCurrentEncounter")
-  )(...args);
-}
-
-export function variableTraceSubroutineForCurrentEncounter(
-  ...args: any[]
-): any {
-  return (
-    runtimeDelegate("cardRuntimeHosts", "variableTraceSubroutineForCurrentEncounter")
-  )(...args);
-}
-
-export function relativeDamageSubroutineForCurrentEncounter(
-  ...args: any[]
-): any {
-  return (
-    runtimeDelegate("cardRuntimeHosts", "relativeDamageSubroutineForCurrentEncounter")
-  )(...args);
-}
-
-export function relativeTraceSubroutinesForCurrentEncounter(
-  ...args: any[]
-): any {
-  return (
-    runtimeDelegate("cardRuntimeHosts", "relativeTraceSubroutinesForCurrentEncounter")
-  )(...args);
-}
-
-export function runCardImplementationActionHost(...args: any[]): any {
-  return (
-    runtimeDelegate("cardRuntimeHosts", "runCardImplementationActionHost")
-  )(...args);
-}
-
-export function runStartTaxForServerUpgrades(...args: any[]): any {
-  return (
-    runtimeDelegate("cardRuntimeHosts", "runStartTaxForServerUpgrades")
-  )(...args);
-}
-
-export function runStartTaxForCorpRootAssets(...args: any[]): any {
-  return (
-    runtimeDelegate("cardRuntimeHosts", "runStartTaxForCorpRootAssets")
-  )(...args);
-}
-
-export function spendRunnerAccessTrashCredits(...args: any[]): any {
-  return (
-    runtimeDelegate("cardRuntimeHosts", "spendRunnerAccessTrashCredits")
-  )(...args);
-}
-
-export function runnerSpecialTriggerExecutionHost(...args: any[]): any {
-  return (
-    runtimeDelegate("cardRuntimeHosts", "runnerSpecialTriggerExecutionHost")
-  )(...args);
-}
-
-export function runFortTriggerExecutionHost(...args: any[]): any {
-  return (runtimeDelegate("cardRuntimeHosts", "runFortTriggerExecutionHost"))(
+export const printedCostCardImplementationMakeRunEffect: CardRuntimePortFunction<
+  "cardRuntimeResolvers",
+  "printedCostCardImplementationMakeRunEffect"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeResolvers.printedCostCardImplementationMakeRunEffect(
     ...args,
   );
-}
 
-export function counterUtilityTriggerExecutionHost(...args: any[]): any {
-  return (
-    runtimeDelegate("cardRuntimeHosts", "counterUtilityTriggerExecutionHost")
-  )(...args);
-}
-
-export function triggerAbilityExecutionHost(...args: any[]): any {
-  return (runtimeDelegate("cardRuntimeHosts", "triggerAbilityExecutionHost"))(
+export const scoredAgendaImplementationForDefinitionId: CardRuntimePortFunction<
+  "cardRuntimeResolvers",
+  "scoredAgendaImplementationForDefinitionId"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeResolvers.scoredAgendaImplementationForDefinitionId(
     ...args,
   );
-}
 
-export function installCardHost(...args: any[]): any {
-  return (runtimeDelegate("cardRuntimeHosts", "installCardHost"))(...args);
-}
-
-export function rezCardHost(...args: any[]): any {
-  return (runtimeDelegate("cardRuntimeHosts", "rezCardHost"))(...args);
-}
-
-export function traceOrchestrationHost(...args: any[]): any {
-  return (runtimeDelegate("cardRuntimeHosts", "traceOrchestrationHost"))(
+export const scoredAgendaImplementationForDefinition: CardRuntimePortFunction<
+  "cardRuntimeResolvers",
+  "scoredAgendaImplementationForDefinition"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeResolvers.scoredAgendaImplementationForDefinition(
     ...args,
   );
-}
 
-export function activatedCardImplementationExecutionHost(...args: any[]): any {
-  return (
-    runtimeDelegate("cardRuntimeHosts", "activatedCardImplementationExecutionHost")
-  )(...args);
-}
+export const scoredAgendaKindForDefinition: CardRuntimePortFunction<
+  "cardRuntimeResolvers",
+  "scoredAgendaKindForDefinition"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeResolvers.scoredAgendaKindForDefinition(...args);
 
-export function resolveRunnerTargetedEventImplementation(...args: any[]): any {
-  return (
-    runtimeDelegate("cardRuntimeHosts", "resolveRunnerTargetedEventImplementation")
-  )(...args);
-}
+export const emptyRunnerDrawSummary: CardRuntimePortFunction<
+  "cardRuntimeResolvers",
+  "emptyRunnerDrawSummary"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeResolvers.emptyRunnerDrawSummary(...args);
 
-export function resolvePostOnPlayGenericFollowups(...args: any[]): any {
-  return (
-    runtimeDelegate("cardRuntimeHosts", "resolvePostOnPlayGenericFollowups")
-  )(...args);
-}
+export const mergeRunnerDrawSummary: CardRuntimePortFunction<
+  "cardRuntimeResolvers",
+  "mergeRunnerDrawSummary"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeResolvers.mergeRunnerDrawSummary(...args);
 
-export function resolveRunnerGripHeapStackShuffleDrawEvent(...args: any[]): any {
-  return (runtimeDelegate("cardRuntimeHosts", "resolveRunnerGripHeapStackShuffleDrawEvent"))(...args);
-}
+export const applyRunnerDrawSummaryPayload: CardRuntimePortFunction<
+  "cardRuntimeResolvers",
+  "applyRunnerDrawSummaryPayload"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeResolvers.applyRunnerDrawSummaryPayload(...args);
 
-export function shuffleGripTrashAndStackThenDrawForCardImplementation(
-  ...args: any[]
-): any {
-  return (
-    runtimeDelegate("cardRuntimeHosts", "shuffleGripTrashAndStackThenDrawForCardImplementation")
-  )(...args);
-}
+export const runnerDrawSummaryPublicPayload: CardRuntimePortFunction<
+  "cardRuntimeResolvers",
+  "runnerDrawSummaryPublicPayload"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeResolvers.runnerDrawSummaryPublicPayload(
+    ...args,
+  );
 
-export function startRunnerProgramTrashBeforeInstallChoice(
-  ...args: any[]
-): any {
-  return (
-    runtimeDelegate("cardRuntimeHosts", "startRunnerProgramTrashBeforeInstallChoice")
-  )(...args);
-}
+export const selectedServerIcebreakerStrengthCounterBonus: CardRuntimePortFunction<
+  "cardRuntimeHosts",
+  "selectedServerIcebreakerStrengthCounterBonus"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeHosts.selectedServerIcebreakerStrengthCounterBonus(
+    ...args,
+  );
 
-export function resolveRunnerProgramTrashBeforeInstallChoice(
-  ...args: any[]
-): any {
-  return (
-    runtimeDelegate("cardRuntimeHosts", "resolveRunnerProgramTrashBeforeInstallChoice")
-  )(...args);
-}
+export const permanentIcebreakerStrengthCounterBonus: CardRuntimePortFunction<
+  "cardRuntimeHosts",
+  "permanentIcebreakerStrengthCounterBonus"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeHosts.permanentIcebreakerStrengthCounterBonus(
+    ...args,
+  );
+
+export const pumpAmountForLegalAction: CardRuntimePortFunction<
+  "cardRuntimeHosts",
+  "pumpAmountForLegalAction"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeHosts.pumpAmountForLegalAction(...args);
+
+export const pumpAbilityForLegalAction: CardRuntimePortFunction<
+  "cardRuntimeHosts",
+  "pumpAbilityForLegalAction"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeHosts.pumpAbilityForLegalAction(...args);
+
+export const breakAbilityForLegalAction: CardRuntimePortFunction<
+  "cardRuntimeHosts",
+  "breakAbilityForLegalAction"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeHosts.breakAbilityForLegalAction(...args);
+
+export const pumpDurationForLegalAction: CardRuntimePortFunction<
+  "cardRuntimeHosts",
+  "pumpDurationForLegalAction"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeHosts.pumpDurationForLegalAction(...args);
+
+export const assertCurrentSubroutineMatchesLegalAction: CardRuntimePortFunction<
+  "cardRuntimeHosts",
+  "assertCurrentSubroutineMatchesLegalAction"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeHosts.assertCurrentSubroutineMatchesLegalAction(
+    ...args,
+  );
+
+export const resolveMultiBreakSubroutinesAction: CardRuntimePortFunction<
+  "cardRuntimeHosts",
+  "resolveMultiBreakSubroutinesAction"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeHosts.resolveMultiBreakSubroutinesAction(
+    ...args,
+  );
+
+export const assertBreakSubroutineCostQuoteValid: CardRuntimePortFunction<
+  "cardRuntimeHosts",
+  "assertBreakSubroutineCostQuoteValid"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeHosts.assertBreakSubroutineCostQuoteValid(
+    ...args,
+  );
+
+export const subroutinesForCurrentEncounter: CardRuntimePortFunction<
+  "cardRuntimeHosts",
+  "subroutinesForCurrentEncounter"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeHosts.subroutinesForCurrentEncounter(...args);
+
+export const variableTraceSubroutineForCurrentEncounter: CardRuntimePortFunction<
+  "cardRuntimeHosts",
+  "variableTraceSubroutineForCurrentEncounter"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeHosts.variableTraceSubroutineForCurrentEncounter(
+    ...args,
+  );
+
+export const relativeDamageSubroutineForCurrentEncounter: CardRuntimePortFunction<
+  "cardRuntimeHosts",
+  "relativeDamageSubroutineForCurrentEncounter"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeHosts.relativeDamageSubroutineForCurrentEncounter(
+    ...args,
+  );
+
+export const relativeTraceSubroutinesForCurrentEncounter: CardRuntimePortFunction<
+  "cardRuntimeHosts",
+  "relativeTraceSubroutinesForCurrentEncounter"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeHosts.relativeTraceSubroutinesForCurrentEncounter(
+    ...args,
+  );
+
+export const runCardImplementationActionHost: CardRuntimePortFunction<
+  "cardRuntimeHosts",
+  "runCardImplementationActionHost"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeHosts.runCardImplementationActionHost(...args);
+
+export const runStartTaxForServerUpgrades: CardRuntimePortFunction<
+  "cardRuntimeHosts",
+  "runStartTaxForServerUpgrades"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeHosts.runStartTaxForServerUpgrades(...args);
+
+export const runStartTaxForCorpRootAssets: CardRuntimePortFunction<
+  "cardRuntimeHosts",
+  "runStartTaxForCorpRootAssets"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeHosts.runStartTaxForCorpRootAssets(...args);
+
+export const spendRunnerAccessTrashCredits: CardRuntimePortFunction<
+  "cardRuntimeHosts",
+  "spendRunnerAccessTrashCredits"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeHosts.spendRunnerAccessTrashCredits(...args);
+
+export const runnerSpecialTriggerExecutionHost: CardRuntimePortFunction<
+  "cardRuntimeHosts",
+  "runnerSpecialTriggerExecutionHost"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeHosts.runnerSpecialTriggerExecutionHost(...args);
+
+export const runFortTriggerExecutionHost: CardRuntimePortFunction<
+  "cardRuntimeHosts",
+  "runFortTriggerExecutionHost"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeHosts.runFortTriggerExecutionHost(...args);
+
+export const counterUtilityTriggerExecutionHost: CardRuntimePortFunction<
+  "cardRuntimeHosts",
+  "counterUtilityTriggerExecutionHost"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeHosts.counterUtilityTriggerExecutionHost(
+    ...args,
+  );
+
+export const triggerAbilityExecutionHost: CardRuntimePortFunction<
+  "cardRuntimeHosts",
+  "triggerAbilityExecutionHost"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeHosts.triggerAbilityExecutionHost(...args);
+
+export const installCardHost: CardRuntimePortFunction<
+  "cardRuntimeHosts",
+  "installCardHost"
+> = (...args) => typedRuntimePorts.cardRuntimeHosts.installCardHost(...args);
+
+export const rezCardHost: CardRuntimePortFunction<
+  "cardRuntimeHosts",
+  "rezCardHost"
+> = (...args) => typedRuntimePorts.cardRuntimeHosts.rezCardHost(...args);
+
+export const traceOrchestrationHost: CardRuntimePortFunction<
+  "cardRuntimeHosts",
+  "traceOrchestrationHost"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeHosts.traceOrchestrationHost(...args);
+
+export const activatedCardImplementationExecutionHost: CardRuntimePortFunction<
+  "cardRuntimeHosts",
+  "activatedCardImplementationExecutionHost"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeHosts.activatedCardImplementationExecutionHost(
+    ...args,
+  );
+
+export const resolveRunnerTargetedEventImplementation: CardRuntimePortFunction<
+  "cardRuntimeHosts",
+  "resolveRunnerTargetedEventImplementation"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeHosts.resolveRunnerTargetedEventImplementation(
+    ...args,
+  );
+
+export const resolvePostOnPlayGenericFollowups: CardRuntimePortFunction<
+  "cardRuntimeHosts",
+  "resolvePostOnPlayGenericFollowups"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeHosts.resolvePostOnPlayGenericFollowups(...args);
+
+export const resolveRunnerGripHeapStackShuffleDrawEvent: CardRuntimePortFunction<
+  "cardRuntimeHosts",
+  "resolveRunnerGripHeapStackShuffleDrawEvent"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeHosts.resolveRunnerGripHeapStackShuffleDrawEvent(
+    ...args,
+  );
+
+export const shuffleGripTrashAndStackThenDrawForCardImplementation: CardRuntimePortFunction<
+  "cardRuntimeHosts",
+  "shuffleGripTrashAndStackThenDrawForCardImplementation"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeHosts.shuffleGripTrashAndStackThenDrawForCardImplementation(
+    ...args,
+  );
+
+export const startRunnerProgramTrashBeforeInstallChoice: CardRuntimePortFunction<
+  "cardRuntimeHosts",
+  "startRunnerProgramTrashBeforeInstallChoice"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeHosts.startRunnerProgramTrashBeforeInstallChoice(
+    ...args,
+  );
+
+export const resolveRunnerProgramTrashBeforeInstallChoice: CardRuntimePortFunction<
+  "cardRuntimeHosts",
+  "resolveRunnerProgramTrashBeforeInstallChoice"
+> = (...args) =>
+  typedRuntimePorts.cardRuntimeHosts.resolveRunnerProgramTrashBeforeInstallChoice(
+    ...args,
+  );

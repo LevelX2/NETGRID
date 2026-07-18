@@ -204,7 +204,7 @@ function hostFor(calls: string[]): RunFlowHost {
     ice: {
       strengthForIce: () => 0,
       icebreakerHasSpecial: () => false,
-      dupreStrengthCounterBonus: () => 0,
+      selectedServerIcebreakerStrengthCounterBonus: () => 0,
       resetBreakerStrength: () => calls.push("resetBreakerStrength"),
       withoutVariableIceState: (card) => card,
     },

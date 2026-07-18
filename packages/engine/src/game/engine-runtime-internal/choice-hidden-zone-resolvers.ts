@@ -713,7 +713,9 @@ import type {
   RuntimeDeps,
 } from "./runtime-shared";
 
-export function createChoiceHiddenZoneResolvers(deps: RuntimeDeps) {
+export function createChoiceHiddenZoneResolvers(
+  deps: RuntimeDeps,
+): import("./choice-resolver-runtime-port").ChoiceResolverRuntimePort {
   const {
     DEFAULT_CONTROLLERS,
     INITIAL_HAND_SIZE,
@@ -832,7 +834,7 @@ export function createChoiceHiddenZoneResolvers(deps: RuntimeDeps) {
     discardRandomCorpHqCards,
     drawRunnerCard,
     drawRunnerCards,
-    dupreStrengthCounterBonus,
+    selectedServerIcebreakerStrengthCounterBonus,
     edgerunnerTempsInstallActionsRemaining,
     effectiveAgendaDifficultyDeps,
     effectiveSubtypesForCard,

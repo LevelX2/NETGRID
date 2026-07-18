@@ -354,9 +354,7 @@ export function resolvePendingChoice(
     );
     return;
   }
-  if (
-    state.pendingChoice.source.startsWith("v1912.shell_traders_start_turn:")
-  ) {
+  if (state.pendingChoice.source.startsWith("runner_start.delayed_install:")) {
     resolveDelayedInstallStartTurnChoice(state, legalAction, playerAction);
     return;
   }
@@ -533,11 +531,7 @@ export function resolvePendingChoice(
       "runner.program_install_memory:access:",
     )
   ) {
-    resolveAccessProgramInstallMemoryChoice(
-      state,
-      legalAction,
-      playerAction,
-    );
+    resolveAccessProgramInstallMemoryChoice(state, legalAction, playerAction);
     return;
   }
   if (

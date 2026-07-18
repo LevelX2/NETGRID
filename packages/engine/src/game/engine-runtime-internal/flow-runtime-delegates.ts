@@ -1,381 +1,326 @@
-import { runtimeDelegate } from "./runtime-delegate-store";
+import { runtimeDelegates } from "./runtime-delegate-store";
+import type {
+  FlowRuntimePortFunction,
+  FlowRuntimePortGroups,
+} from "./runtime-port-contracts";
 
-export function canInstallCorpRootCardInServer(...args: any[]): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "canInstallCorpRootCardInServer",
-  )(...args);
-}
+const typedRuntimePorts = runtimeDelegates as unknown as FlowRuntimePortGroups;
 
-export function corpRootAgendaOrNodeCapacityInServer(...args: any[]): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "corpRootAgendaOrNodeCapacityInServer",
-  )(...args);
-}
+export const canInstallCorpRootCardInServer: FlowRuntimePortFunction<
+  "canInstallCorpRootCardInServer"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.canInstallCorpRootCardInServer(...args);
 
-export function corpRegionUpgradeIdsInServer(...args: any[]): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "corpRegionUpgradeIdsInServer",
-  )(...args);
-}
+export const corpRootAgendaOrNodeCapacityInServer: FlowRuntimePortFunction<
+  "corpRootAgendaOrNodeCapacityInServer"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.corpRootAgendaOrNodeCapacityInServer(
+    ...args,
+  );
 
-export function startRun(...args: any[]): any {
-  return runtimeDelegate("flowRuntimeHosts", "startRun")(...args);
-}
+export const corpRegionUpgradeIdsInServer: FlowRuntimePortFunction<
+  "corpRegionUpgradeIdsInServer"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.corpRegionUpgradeIdsInServer(...args);
 
-export function runnerTraceCounterEffectDefinitions(...args: any[]): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "runnerTraceCounterEffectDefinitions",
-  )(...args);
-}
+export const startRun: FlowRuntimePortFunction<"startRun"> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.startRun(...args);
 
-export function runnerCounterDisplayName(...args: any[]): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "runnerCounterDisplayName",
-  )(...args);
-}
+export const runnerTraceCounterEffectDefinitions: FlowRuntimePortFunction<
+  "runnerTraceCounterEffectDefinitions"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.runnerTraceCounterEffectDefinitions(
+    ...args,
+  );
 
-export function traceCounterEffectDefinitionFor(...args: any[]): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "traceCounterEffectDefinitionFor",
-  )(...args);
-}
+export const runnerCounterDisplayName: FlowRuntimePortFunction<
+  "runnerCounterDisplayName"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.runnerCounterDisplayName(...args);
 
-export function runnerUtilityLongtailKindForDefinition(...args: any[]): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "runnerUtilityLongtailKindForDefinition",
-  )(...args);
-}
+export const traceCounterEffectDefinitionFor: FlowRuntimePortFunction<
+  "traceCounterEffectDefinitionFor"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.traceCounterEffectDefinitionFor(...args);
 
-export function runnerUtilityLongtailKindForCard(...args: any[]): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "runnerUtilityLongtailKindForCard",
-  )(...args);
-}
+export const runnerUtilityLongtailKindForDefinition: FlowRuntimePortFunction<
+  "runnerUtilityLongtailKindForDefinition"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.runnerUtilityLongtailKindForDefinition(
+    ...args,
+  );
 
-export function runnerUtilityLongtailImplementationForCard(
-  ...args: any[]
-): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "runnerUtilityLongtailImplementationForCard",
-  )(...args);
-}
+export const runnerUtilityLongtailKindForCard: FlowRuntimePortFunction<
+  "runnerUtilityLongtailKindForCard"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.runnerUtilityLongtailKindForCard(...args);
 
-export function uniqueDirectLongtailImplementationForDefinition(
-  ...args: any[]
-): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "uniqueDirectLongtailImplementationForDefinition",
-  )(...args);
-}
+export const runnerUtilityLongtailImplementationForCard: FlowRuntimePortFunction<
+  "runnerUtilityLongtailImplementationForCard"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.runnerUtilityLongtailImplementationForCard(
+    ...args,
+  );
 
-export function uniqueDirectLongtailKindForDefinition(...args: any[]): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "uniqueDirectLongtailKindForDefinition",
-  )(...args);
-}
+export const uniqueDirectLongtailImplementationForDefinition: FlowRuntimePortFunction<
+  "uniqueDirectLongtailImplementationForDefinition"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.uniqueDirectLongtailImplementationForDefinition(
+    ...args,
+  );
 
-export function uniqueDirectLongtailImplementationForCard(...args: any[]): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "uniqueDirectLongtailImplementationForCard",
-  )(...args);
-}
+export const uniqueDirectLongtailKindForDefinition: FlowRuntimePortFunction<
+  "uniqueDirectLongtailKindForDefinition"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.uniqueDirectLongtailKindForDefinition(
+    ...args,
+  );
 
-export function uniqueDirectLongtailKindForCard(...args: any[]): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "uniqueDirectLongtailKindForCard",
-  )(...args);
-}
+export const uniqueDirectLongtailImplementationForCard: FlowRuntimePortFunction<
+  "uniqueDirectLongtailImplementationForCard"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.uniqueDirectLongtailImplementationForCard(
+    ...args,
+  );
 
-export function remainingReplacementLongtailImplementationForDefinition(
-  ...args: any[]
-): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "remainingReplacementLongtailImplementationForDefinition",
-  )(...args);
-}
+export const uniqueDirectLongtailKindForCard: FlowRuntimePortFunction<
+  "uniqueDirectLongtailKindForCard"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.uniqueDirectLongtailKindForCard(...args);
 
-export function remainingReplacementLongtailKindForDefinition(
-  ...args: any[]
-): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "remainingReplacementLongtailKindForDefinition",
-  )(...args);
-}
+export const remainingReplacementLongtailImplementationForDefinition: FlowRuntimePortFunction<
+  "remainingReplacementLongtailImplementationForDefinition"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.remainingReplacementLongtailImplementationForDefinition(
+    ...args,
+  );
 
-export function remainingReplacementLongtailImplementationForCard(
-  ...args: any[]
-): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "remainingReplacementLongtailImplementationForCard",
-  )(...args);
-}
+export const remainingReplacementLongtailKindForDefinition: FlowRuntimePortFunction<
+  "remainingReplacementLongtailKindForDefinition"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.remainingReplacementLongtailKindForDefinition(
+    ...args,
+  );
 
-export function remainingReplacementLongtailKindForCard(...args: any[]): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "remainingReplacementLongtailKindForCard",
-  )(...args);
-}
+export const remainingReplacementLongtailImplementationForCard: FlowRuntimePortFunction<
+  "remainingReplacementLongtailImplementationForCard"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.remainingReplacementLongtailImplementationForCard(
+    ...args,
+  );
 
-export function isObligationDebtDefinition(...args: any[]): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "isObligationDebtDefinition",
-  )(...args);
-}
+export const remainingReplacementLongtailKindForCard: FlowRuntimePortFunction<
+  "remainingReplacementLongtailKindForCard"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.remainingReplacementLongtailKindForCard(
+    ...args,
+  );
 
-export function isDrawTaxSourceDefinition(...args: any[]): any {
-  return runtimeDelegate("flowRuntimeHosts", "isDrawTaxSourceDefinition")(...args);
-}
+export const isObligationDebtDefinition: FlowRuntimePortFunction<
+  "isObligationDebtDefinition"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.isObligationDebtDefinition(...args);
 
-export function isCorpInstalledEconomyCreditSource(...args: any[]): any {
-  return runtimeDelegate("flowRuntimeHosts", "isCorpInstalledEconomyCreditSource")(...args);
-}
+export const isDrawTaxSourceDefinition: FlowRuntimePortFunction<
+  "isDrawTaxSourceDefinition"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.isDrawTaxSourceDefinition(...args);
 
-export function isCorpTraceCounterPoolSource(...args: any[]): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "isCorpTraceCounterPoolSource",
-  )(...args);
-}
+export const isCorpInstalledEconomyCreditSource: FlowRuntimePortFunction<
+  "isCorpInstalledEconomyCreditSource"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.isCorpInstalledEconomyCreditSource(
+    ...args,
+  );
 
-export function applyRunnerTraceCounterRunStartEffects(...args: any[]): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "applyRunnerTraceCounterRunStartEffects",
-  )(...args);
-}
+export const isCorpTraceCounterPoolSource: FlowRuntimePortFunction<
+  "isCorpTraceCounterPoolSource"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.isCorpTraceCounterPoolSource(...args);
 
-export function applyRunStartRandomStrengthBonus(...args: any[]): any {
-  return runtimeDelegate("flowRuntimeHosts", "applyRunStartRandomStrengthBonus")(...args);
-}
+export const applyRunnerTraceCounterRunStartEffects: FlowRuntimePortFunction<
+  "applyRunnerTraceCounterRunStartEffects"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.applyRunnerTraceCounterRunStartEffects(
+    ...args,
+  );
 
-export function continueRun(...args: any[]): any {
-  return runtimeDelegate("flowRuntimeHosts", "continueRun")(...args);
-}
+export const applyRunStartRandomStrengthBonus: FlowRuntimePortFunction<
+  "applyRunStartRandomStrengthBonus"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.applyRunStartRandomStrengthBonus(...args);
 
-export function addCurrentRunAccessCount(...args: any[]): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "addCurrentRunAccessCount",
-  )(...args);
-}
+export const continueRun: FlowRuntimePortFunction<"continueRun"> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.continueRun(...args);
 
-export function passCurrentEncounteredIce(...args: any[]): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "passCurrentEncounteredIce",
-  )(...args);
-}
+export const addCurrentRunAccessCount: FlowRuntimePortFunction<
+  "addCurrentRunAccessCount"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.addCurrentRunAccessCount(...args);
 
-export function resolveBlinkBreakSubroutineAction(...args: any[]): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "resolveBlinkBreakSubroutineAction",
-  )(...args);
-}
+export const passCurrentEncounteredIce: FlowRuntimePortFunction<
+  "passCurrentEncounteredIce"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.passCurrentEncounteredIce(...args);
 
-export function recordBartmossEncounterUsage(...args: any[]): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "recordBartmossEncounterUsage",
-  )(...args);
-}
+export const resolveBlinkBreakSubroutineAction: FlowRuntimePortFunction<
+  "resolveBlinkBreakSubroutineAction"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.resolveBlinkBreakSubroutineAction(...args);
 
-export function recordSnowballBreakUsage(...args: any[]): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "recordSnowballBreakUsage",
-  )(...args);
-}
+export const recordBartmossEncounterUsage: FlowRuntimePortFunction<
+  "recordBartmossEncounterUsage"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.recordBartmossEncounterUsage(...args);
 
-export function icebreakerHasSpecial(...args: any[]): any {
-  return runtimeDelegate("flowRuntimeHosts", "icebreakerHasSpecial")(...args);
-}
+export const recordSnowballBreakUsage: FlowRuntimePortFunction<
+  "recordSnowballBreakUsage"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.recordSnowballBreakUsage(...args);
 
-export function corpTraceCounterPoolSourceIds(...args: any[]): any {
-  return runtimeDelegate("flowRuntimeHosts", "corpTraceCounterPoolSourceIds")(...args);
-}
+export const icebreakerHasSpecial: FlowRuntimePortFunction<
+  "icebreakerHasSpecial"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.icebreakerHasSpecial(...args);
 
-export function corpTraceCounterPoolCounterType(...args: any[]): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "corpTraceCounterPoolCounterType",
-  )(...args);
-}
+export const corpTraceCounterPoolSourceIds: FlowRuntimePortFunction<
+  "corpTraceCounterPoolSourceIds"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.corpTraceCounterPoolSourceIds(...args);
 
-export function corpTraceCounterPoolTotal(...args: any[]): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "corpTraceCounterPoolTotal",
-  )(...args);
-}
+export const corpTraceCounterPoolCounterType: FlowRuntimePortFunction<
+  "corpTraceCounterPoolCounterType"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.corpTraceCounterPoolCounterType(...args);
 
-export function spendCorpTraceCounterPoolCounters(...args: any[]): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "spendCorpTraceCounterPoolCounters",
-  )(...args);
-}
+export const corpTraceCounterPoolTotal: FlowRuntimePortFunction<
+  "corpTraceCounterPoolTotal"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.corpTraceCounterPoolTotal(...args);
 
-export function addCorpTraceCounterPoolCounters(...args: any[]): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "addCorpTraceCounterPoolCounters",
-  )(...args);
-}
+export const spendCorpTraceCounterPoolCounters: FlowRuntimePortFunction<
+  "spendCorpTraceCounterPoolCounters"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.spendCorpTraceCounterPoolCounters(...args);
 
-export function rabbitTraceLimitReductionForIceTrace(...args: any[]): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "rabbitTraceLimitReductionForIceTrace",
-  )(...args);
-}
+export const addCorpTraceCounterPoolCounters: FlowRuntimePortFunction<
+  "addCorpTraceCounterPoolCounters"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.addCorpTraceCounterPoolCounters(...args);
 
-export function archivesAccessRequiresDecisionOrEffect(...args: any[]): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "archivesAccessRequiresDecisionOrEffect",
-  )(...args);
-}
+export const rabbitTraceLimitReductionForIceTrace: FlowRuntimePortFunction<
+  "rabbitTraceLimitReductionForIceTrace"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.rabbitTraceLimitReductionForIceTrace(
+    ...args,
+  );
 
-export function runnerAccessActionHost(...args: any[]): any {
-  return runtimeDelegate("flowRuntimeHosts", "runnerAccessActionHost")(...args);
-}
+export const archivesAccessRequiresDecisionOrEffect: FlowRuntimePortFunction<
+  "archivesAccessRequiresDecisionOrEffect"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.archivesAccessRequiresDecisionOrEffect(
+    ...args,
+  );
 
-export function runnerEncounterActionHostForState(...args: any[]): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "runnerEncounterActionHostForState",
-  )(...args);
-}
+export const runnerAccessActionHost: FlowRuntimePortFunction<
+  "runnerAccessActionHost"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.runnerAccessActionHost(...args);
 
-export function runMovementHostForState(...args: any[]): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "runMovementHostForState",
-  )(...args);
-}
+export const runnerEncounterActionHostForState: FlowRuntimePortFunction<
+  "runnerEncounterActionHostForState"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.runnerEncounterActionHostForState(...args);
 
-export function runRezWindowHostForState(...args: any[]): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "runRezWindowHostForState",
-  )(...args);
-}
+export const runMovementHostForState: FlowRuntimePortFunction<
+  "runMovementHostForState"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.runMovementHostForState(...args);
 
-export function fortPassWindowHostForState(...args: any[]): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "fortPassWindowHostForState",
-  )(...args);
-}
+export const runRezWindowHostForState: FlowRuntimePortFunction<
+  "runRezWindowHostForState"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.runRezWindowHostForState(...args);
 
-export function fortRunSideFamiliesHostForState(...args: any[]): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "fortRunSideFamiliesHostForState",
-  )(...args);
-}
+export const fortPassWindowHostForState: FlowRuntimePortFunction<
+  "fortPassWindowHostForState"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.fortPassWindowHostForState(...args);
 
-export function encounterEntryHostForState(...args: any[]): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "encounterEntryHostForState",
-  )(...args);
-}
+export const fortRunSideFamiliesHostForState: FlowRuntimePortFunction<
+  "fortRunSideFamiliesHostForState"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.fortRunSideFamiliesHostForState(...args);
 
-export function successfulRunInterventionHost(...args: any[]): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "successfulRunInterventionHost",
-  )(...args);
-}
+export const encounterEntryHostForState: FlowRuntimePortFunction<
+  "encounterEntryHostForState"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.encounterEntryHostForState(...args);
 
-export function encounterResolutionHostForState(...args: any[]): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "encounterResolutionHostForState",
-  )(...args);
-}
+export const successfulRunInterventionHost: FlowRuntimePortFunction<
+  "successfulRunInterventionHost"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.successfulRunInterventionHost(...args);
 
-export function encounterSpecialWindowHostForState(...args: any[]): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "encounterSpecialWindowHostForState",
-  )(...args);
-}
+export const encounterResolutionHostForState: FlowRuntimePortFunction<
+  "encounterResolutionHostForState"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.encounterResolutionHostForState(...args);
 
-export function encounterPrintedEffectHostForState(...args: any[]): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "encounterPrintedEffectHostForState",
-  )(...args);
-}
+export const encounterSpecialWindowHostForState: FlowRuntimePortFunction<
+  "encounterSpecialWindowHostForState"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.encounterSpecialWindowHostForState(
+    ...args,
+  );
 
-export function encounterPrintedNonTraceHostForState(...args: any[]): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "encounterPrintedNonTraceHostForState",
-  )(...args);
-}
+export const encounterPrintedEffectHostForState: FlowRuntimePortFunction<
+  "encounterPrintedEffectHostForState"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.encounterPrintedEffectHostForState(
+    ...args,
+  );
 
-export function runEndCleanupHost(...args: any[]): any {
-  return runtimeDelegate("flowRuntimeHosts", "runEndCleanupHost")(...args);
-}
+export const encounterPrintedNonTraceHostForState: FlowRuntimePortFunction<
+  "encounterPrintedNonTraceHostForState"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.encounterPrintedNonTraceHostForState(
+    ...args,
+  );
 
-export function runnerBreakerActionExecutionHost(...args: any[]): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "runnerBreakerActionExecutionHost",
-  )(...args);
-}
+export const runEndCleanupHost: FlowRuntimePortFunction<"runEndCleanupHost"> = (
+  ...args
+) => typedRuntimePorts.flowRuntimeHosts.runEndCleanupHost(...args);
 
-export function startRunActionExecutionHost(...args: any[]): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "startRunActionExecutionHost",
-  )(...args);
-}
+export const runnerBreakerActionExecutionHost: FlowRuntimePortFunction<
+  "runnerBreakerActionExecutionHost"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.runnerBreakerActionExecutionHost(...args);
 
-export function rezActionExecutionHost(...args: any[]): any {
-  return runtimeDelegate("flowRuntimeHosts", "rezActionExecutionHost")(...args);
-}
+export const startRunActionExecutionHost: FlowRuntimePortFunction<
+  "startRunActionExecutionHost"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.startRunActionExecutionHost(...args);
 
-export function breachStateHost(...args: any[]): any {
-  return runtimeDelegate("flowRuntimeHosts", "breachStateHost")(...args);
-}
+export const rezActionExecutionHost: FlowRuntimePortFunction<
+  "rezActionExecutionHost"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.rezActionExecutionHost(...args);
 
-export function accessFlowHost(...args: any[]): any {
-  return runtimeDelegate("flowRuntimeHosts", "accessFlowHost")(...args);
-}
+export const breachStateHost: FlowRuntimePortFunction<"breachStateHost"> = (
+  ...args
+) => typedRuntimePorts.flowRuntimeHosts.breachStateHost(...args);
 
-export function runAccessTransitionHost(...args: any[]): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "runAccessTransitionHost",
-  )(...args);
-}
+export const accessFlowHost: FlowRuntimePortFunction<"accessFlowHost"> = (
+  ...args
+) => typedRuntimePorts.flowRuntimeHosts.accessFlowHost(...args);
 
-export function accessEffectHandlerHost(...args: any[]): any {
-  return runtimeDelegate(
-    "flowRuntimeHosts",
-    "accessEffectHandlerHost",
-  )(...args);
-}
+export const runAccessTransitionHost: FlowRuntimePortFunction<
+  "runAccessTransitionHost"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.runAccessTransitionHost(...args);
+
+export const accessEffectHandlerHost: FlowRuntimePortFunction<
+  "accessEffectHandlerHost"
+> = (...args) =>
+  typedRuntimePorts.flowRuntimeHosts.accessEffectHandlerHost(...args);

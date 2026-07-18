@@ -234,9 +234,7 @@ import {
   buildRunnerAgendaPointInstallAction,
   buildRunnerSelectedServerInstallAction,
 } from "../turn/runner-install-context-actions";
-import {
-  buildRunnerHostedProgramInstallAction,
-} from "../turn/runner-hosted-install-actions";
+import { buildRunnerHostedProgramInstallAction } from "../turn/runner-hosted-install-actions";
 import { buildRunnerProgramTrashBeforeInstallAction } from "../turn/runner-program-trash-install-actions";
 import { buildRunnerStackSearchProgramToGripAction } from "../turn/runner-hidden-zone-search-actions";
 import {
@@ -654,9 +652,7 @@ import {
   ACCESS_NET_DAMAGE_UPGRADE_SOURCE,
   ACCESS_TRACE_DAMAGE_UPGRADE_SOURCE,
 } from "../../mechanics/server-upgrades";
-import {
-  RUN_TAX_UPGRADE_SOURCES,
-} from "../../mechanics/trace-tags";
+import { RUN_TAX_UPGRADE_SOURCES } from "../../mechanics/trace-tags";
 import { snapshotPersistentStealCostModifiersForSource } from "../../ability-engine/steal-cost-modifiers";
 import { createCardImplementationEffectAdapters } from "../../ability-engine/card-implementation-effect-adapters";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
@@ -699,7 +695,9 @@ import type {
 } from "./runtime-shared";
 import { runnerProgramInstallMemoryReachable } from "../install/runner-program-install-memory";
 
-export function createCardRuntimeResolvers(deps: RuntimeDeps) {
+export function createCardRuntimeResolvers(
+  deps: RuntimeDeps,
+): import("./card-runtime-resolver-port").CardRuntimeResolverPort {
   const {
     DEFAULT_CONTROLLERS,
     INITIAL_HAND_SIZE,
@@ -817,7 +815,7 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
     discardRandomCorpHqCards,
     drawRunnerCard,
     drawRunnerCards,
-    dupreStrengthCounterBonus,
+    selectedServerIcebreakerStrengthCounterBonus,
     edgerunnerTempsInstallActionsRemaining,
     effectiveAgendaDifficultyDeps,
     effectiveSubtypesForCard,
@@ -1366,13 +1364,9 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
     return state.runner.grip.filter((cardId) => {
       if (cardId === sourceCardId) return false;
       const definition = definitionFor(state, cardId);
-      if (
-        definition.type !== "program" &&
-        definition.type !== "hardware"
-      )
+      if (definition.type !== "program" && definition.type !== "hardware")
         return false;
-      if (!longtail.allowedTypes.includes(definition.type))
-        return false;
+      if (!longtail.allowedTypes.includes(definition.type)) return false;
       if (
         isUniqueCard(definition) &&
         hasInstalledUniqueCardDefinition(state, "runner", definition.id)
@@ -1382,8 +1376,7 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
         const trashableMemoryCosts = state.runner.rig.programs
           .filter((installedId) => runnerProgramUsesMemory(state, installedId))
           .map(
-            (installedId) =>
-              definitionFor(state, installedId).memoryCost ?? 0,
+            (installedId) => definitionFor(state, installedId).memoryCost ?? 0,
           );
         if (
           !runnerProgramInstallMemoryReachable({
@@ -1530,7 +1523,11 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
           return {
             name: "card_implementation_runner_event_three_dice_gain_credits",
             resolve: (state, legalAction) =>
-              resolveThreeDiceGainCreditsEvent(state, legalAction, definition.id),
+              resolveThreeDiceGainCreditsEvent(
+                state,
+                legalAction,
+                definition.id,
+              ),
           };
         case "trash_installed_runner_connections_then_add_bad_publicity":
           return {
@@ -1651,7 +1648,9 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
             name: "card_implementation_runner_event_library_search_run",
             requiresServer: true,
             canPlayForServer: (_state, serverId) =>
-              longtail.allowedServers.includes(serverId as Extract<ServerId, "hq" | "rd">),
+              longtail.allowedServers.includes(
+                serverId as Extract<ServerId, "hq" | "rd">,
+              ),
             resolve: (state, legalAction) =>
               resolveLibrarySearchRunEvent(
                 state,
@@ -1726,7 +1725,10 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
         },
       );
     } else {
-      shuffleRunnerStack(state);
+      shuffleRunnerStack(
+        state,
+        `runner_event_trash_grip_search:${sourceDefinitionId}:empty_search`,
+      );
     }
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
@@ -1748,7 +1750,9 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
   }
 
   function runnerCorruptionAgendaIds(state: GameState): CardInstanceId[] {
-    const stolenIds = new Set(state.runnerTurnFlags?.stolenAgendaIdsThisTurn ?? []);
+    const stolenIds = new Set(
+      state.runnerTurnFlags?.stolenAgendaIdsThisTurn ?? [],
+    );
     return state.runner.scoreArea
       .filter((cardId) => stolenIds.has(cardId))
       .filter((cardId) => definitionFor(state, cardId).type === "agenda");
@@ -1780,7 +1784,8 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
       Math.max(0, Math.floor(state.corpBonusAgendaPoints ?? 0)) +
       agendaPointsLost;
     const gainedCredits =
-      agendaPointsLost * Math.max(0, Math.floor(longtail.creditsPerAgendaPoint));
+      agendaPointsLost *
+      Math.max(0, Math.floor(longtail.creditsPerAgendaPoint));
     if (gainedCredits > 0) credits(state, "runner", gainedCredits);
     const tagsBefore = state.runner.tags;
     if (longtail.tagRunner > 0)
@@ -1820,10 +1825,7 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
         ? 1
         : 0;
     const gripAfterPlay = state.runner.grip.length - sourceInGrip;
-    return Math.max(
-      0,
-      Math.min(gripAfterPlay, maxHandSize(state, "runner")),
-    );
+    return Math.max(0, Math.min(gripAfterPlay, maxHandSize(state, "runner")));
   }
 
   function resolveDoTheDrineEvent(
@@ -1887,23 +1889,32 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
     )
       throw new Error("Library Search kann nur auf HQ oder R&D laufen.");
     const sourceCardId = runnerEventSourceCardId(state, legalAction);
-    startRun(state, serverId, undefined, 1, {
-      successfulRunSourceCardId: sourceCardId,
-      successfulRunSourceDefinitionId: definition.id,
-      successfulRunSourceTitle: definition.title,
-      conditionalAccessBonus: {
-        kind: longtail.condition,
-        amount: longtail.accessBonus,
-        sourceDefinitionId: definition.id,
+    startRun(
+      state,
+      serverId,
+      undefined,
+      1,
+      {
+        successfulRunSourceCardId: sourceCardId,
+        successfulRunSourceDefinitionId: definition.id,
+        successfulRunSourceTitle: definition.title,
+        conditionalAccessBonus: {
+          kind: longtail.condition,
+          amount: longtail.accessBonus,
+          sourceDefinitionId: definition.id,
+        },
       },
-    }, legalAction);
+      legalAction,
+    );
   }
 
   function runnerEventSourceCardId(
     state: GameState,
     legalAction: LegalAction,
   ): CardInstanceId {
-    const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
+    const sourceCardId = String(
+      legalAction.payload?.cardId ?? "",
+    ) as CardInstanceId;
     if (!sourceCardId || !state.cardInstances[sourceCardId])
       throw new Error("Runner-Event braucht eine gueltige Quellenkarte.");
     return sourceCardId;

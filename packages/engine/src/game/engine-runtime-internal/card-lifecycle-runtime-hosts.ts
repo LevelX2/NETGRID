@@ -694,7 +694,17 @@ import type { RuntimeDeps } from "./runtime-shared";
 export function createCardLifecycleRuntimeHosts(
   deps: RuntimeDeps,
   runtime: RuntimeDeps,
-) {
+): Pick<
+  import("./card-runtime-host-port").CardRuntimeHostPort,
+  | "installCardHost"
+  | "rezCardHost"
+  | "resolveRunnerTargetedEventImplementation"
+  | "resolvePostOnPlayGenericFollowups"
+  | "resolveRunnerGripHeapStackShuffleDrawEvent"
+  | "shuffleGripTrashAndStackThenDrawForCardImplementation"
+  | "startRunnerProgramTrashBeforeInstallChoice"
+  | "resolveRunnerProgramTrashBeforeInstallChoice"
+> {
   const {
     PROTEUS_ARMAGEDDON_ID,
     activeObligationCount,

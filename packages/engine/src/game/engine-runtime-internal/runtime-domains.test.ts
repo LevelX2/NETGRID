@@ -151,15 +151,16 @@ describe("engine runtime internal domains", () => {
       typeof createCorpZoneRuntimeHosts(deps, links).corpZoneChoiceHandlerHost,
     ).toBe("function");
     expect(
-      typeof createCardRuntimeDepsHosts(deps, deps).subroutinesForCurrentEncounter,
+      typeof createCardRuntimeDepsHosts(deps, deps)
+        .subroutinesForCurrentEncounter,
     ).toBe("function");
     expect(
       typeof createTriggerAbilityRuntimeHosts(deps, deps)
         .triggerAbilityExecutionHost,
     ).toBe("function");
-    expect(typeof createCardLifecycleRuntimeHosts(deps, deps).installCardHost).toBe(
-      "function",
-    );
+    expect(
+      typeof createCardLifecycleRuntimeHosts(deps, deps).installCardHost,
+    ).toBe("function");
     expect(
       typeof createActivatedCardRuntimeHosts(deps, deps)
         .activatedCardImplementationExecutionHost,
@@ -167,26 +168,30 @@ describe("engine runtime internal domains", () => {
     expect(
       typeof createLifecycleRuntime(deps).trashRunnerInstalledCardToHeap,
     ).toBe("function");
-    expect(
-      typeof createTurnCorpRuntime(deps).advancementDistributionOptions,
-    ).toBe("function");
+    const turnCorpRuntime = createTurnCorpRuntime(deps);
+    expect(typeof turnCorpRuntime.advancementDistributionOptions).toBe(
+      "function",
+    );
     expect(typeof createActionRuntimeHosts(deps).scoredAgendaFlowHost).toBe(
       "function",
     );
-    expect(typeof createApplyActionRuntimeHosts(deps).turnBasicExecutionHost).toBe(
-      "function",
-    );
+    expect(
+      typeof createApplyActionRuntimeHosts(deps).turnBasicExecutionHost,
+    ).toBe("function");
     expect(
       typeof createLegalActionRuntimeHosts(deps, deps)
         .corpRunnerActionPaidWindowActions,
     ).toBe("function");
     expect(
-      typeof createScoredEconomyRuntimeHosts(deps, deps).scoredAgendaAbilityHost,
+      typeof createScoredEconomyRuntimeHosts(deps, deps)
+        .scoredAgendaAbilityHost,
     ).toBe("function");
     expect(typeof createPlayBoardRuntimeHosts(deps).playCardExecutionHost).toBe(
       "function",
     );
-    expect(typeof createCardRuntimeHosts(deps).installCardHost).toBe("function");
+    expect(typeof createCardRuntimeHosts(deps).installCardHost).toBe(
+      "function",
+    );
     expect(
       typeof createCardRuntimeResolvers(deps)
         .cardImplementationRunnerEventResolver,
@@ -195,14 +200,18 @@ describe("engine runtime internal domains", () => {
       typeof createChoiceHiddenZoneResolvers(deps).startRunnerPrivateLookChoice,
     ).toBe("function");
     expect(
-      typeof createCorpRuntimeResolvers(deps).resolveHardwareTrashByCounterOperation,
+      typeof createCorpRuntimeResolvers(deps, turnCorpRuntime)
+        .resolveHardwareTrashByCounterOperation,
     ).toBe("function");
     expect(typeof createFlowRuntimeHosts(deps).runMovementHostForState).toBe(
       "function",
     );
-    expect(typeof createRunFlowRuntimeHosts(deps, deps).startRun).toBe("function");
+    expect(typeof createRunFlowRuntimeHosts(deps, deps).startRun).toBe(
+      "function",
+    );
     expect(
-      typeof createDamageTraceRuntimeHosts(deps).traceCounterEffectDefinitionFor,
+      typeof createDamageTraceRuntimeHosts(deps)
+        .traceCounterEffectDefinitionFor,
     ).toBe("function");
     expect(
       typeof createInstallRezRuntimeHosts(deps).canInstallCorpRootCardInServer,
@@ -214,9 +223,10 @@ describe("engine runtime internal domains", () => {
     expect(typeof createAccessFlowRuntimeHosts(deps).accessFlowHost).toBe(
       "function",
     );
-    expect(typeof createStateCorpRuntimeResolvers(deps).spendRecurringTraceCreditPool).toBe(
-      "function",
-    );
+    expect(
+      typeof createStateCorpRuntimeResolvers(deps)
+        .spendRecurringTraceCreditPool,
+    ).toBe("function");
     expect(typeof createStateRuntimeResolvers(deps).executeEffectCommands).toBe(
       "function",
     );
@@ -224,11 +234,12 @@ describe("engine runtime internal domains", () => {
       "function",
     );
     expect(
-      typeof createEconomyRuntimeServices(deps).runnerInstallableProgramIdsForValuPak,
+      typeof createEconomyRuntimeServices(deps)
+        .runnerInstallableProgramIdsForValuPak,
     ).toBe("function");
-    expect(typeof createLookupRuntimeServices(deps).canHostProgramOnDaemon).toBe(
-      "function",
-    );
+    expect(
+      typeof createLookupRuntimeServices(deps).canHostProgramOnDaemon,
+    ).toBe("function");
     expect(
       typeof createCardStrengthCostRuntimeServices(deps, deps)
         .breakSubroutineCostBreakdown,

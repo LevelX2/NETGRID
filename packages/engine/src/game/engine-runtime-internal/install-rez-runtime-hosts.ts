@@ -710,7 +710,9 @@ import type {
 import type { RuntimeDeps } from "./runtime-shared";
 
 
-export function createInstallRezRuntimeHosts(deps: RuntimeDeps) {
+export function createInstallRezRuntimeHosts(
+  deps: RuntimeDeps,
+): import("./install-rez-runtime-port").InstallRezRuntimePort {
   const {
     cardInstallCapabilitiesForDefinition,
     cardHasSubtype,

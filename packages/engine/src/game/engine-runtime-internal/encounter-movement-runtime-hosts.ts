@@ -693,7 +693,7 @@ import type { RuntimeDeps } from "./runtime-shared";
 export function createEncounterMovementRuntimeHosts(
   deps: RuntimeDeps,
   runtime: RuntimeDeps,
-) {
+): import("./encounter-movement-runtime-port").EncounterMovementRuntimePort {
   const {
     accessFlow,
     addRunnerFutureActionDebt,

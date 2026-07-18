@@ -96,7 +96,7 @@ export function selectedChoicesForDecision(
   }
   if (
     choice.kind === "select_cards" &&
-    choice.source.startsWith("v1912.shell_traders_start_turn")
+    choice.source.startsWith("runner_start.delayed_install")
   ) {
     const selectedOptionId =
       selectedShellTradersStartTurnChoiceOptionId(choice);
@@ -314,12 +314,15 @@ function selectedCreditLossSpendOptionId(
   return selectableOptions
     .map((option) => ({ option, amount: choiceNumericValue(option) }))
     .filter(
-      (entry): entry is { option: PendingChoiceOptions[number]; amount: number } =>
+      (
+        entry,
+      ): entry is { option: PendingChoiceOptions[number]; amount: number } =>
         entry.amount !== undefined && entry.amount <= maximumUsefulSpend,
     )
     .sort(
       (left, right) =>
-        right.amount - left.amount || left.option.id.localeCompare(right.option.id),
+        right.amount - left.amount ||
+        left.option.id.localeCompare(right.option.id),
     )[0]?.option.id;
 }
 

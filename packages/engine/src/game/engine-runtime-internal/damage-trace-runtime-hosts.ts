@@ -711,7 +711,9 @@ import type {
 } from "./runtime-shared";
 
 
-export function createDamageTraceRuntimeHosts(deps: RuntimeDeps) {
+export function createDamageTraceRuntimeHosts(
+  deps: RuntimeDeps,
+): import("./damage-trace-runtime-port").DamageTraceRuntimePort {
   function runnerTraceCounterEffectDefinitions(): RunnerTraceCounterEffectRuntime[] {
     return CARD_IMPLEMENTATIONS.flatMap((implementation) =>
       (implementation.runnerCounterEffects ?? []).map((counterEffect) => ({

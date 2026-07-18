@@ -5,7 +5,9 @@ import { createEncounterMovementRuntimeHosts } from "./encounter-movement-runtim
 import { createInstallRezRuntimeHosts } from "./install-rez-runtime-hosts";
 import { createRunFlowRuntimeHosts } from "./run-flow-runtime-hosts";
 
-export function createFlowRuntimeHosts(deps: RuntimeDeps) {
+export function createFlowRuntimeHosts(
+  deps: RuntimeDeps,
+): import("./flow-runtime-port").FlowRuntimePort {
   const runtime = {} as RuntimeDeps;
   Object.assign(
     runtime,
