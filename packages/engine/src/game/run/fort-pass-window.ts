@@ -13,25 +13,11 @@ import { cardImplementationForDefinitionId } from "../../card-implementations/re
 import { buildLegalAction } from "../turn/action-builders";
 import { selectedChoiceCardIds } from "./encounter-resolution";
 import { afterPassingLastIceWindowContext } from "./windows/after-passing-last-ice-window";
+import type { FortPassWindowHost } from "./windows/fort-pass-window-contracts";
+
+export type { FortPassWindowHost } from "./windows/fort-pass-window-contracts";
 
 type ActiveRun = NonNullable<GameState["run"]>;
-
-export type FortPassWindowHost = {
-  state: GameState;
-  cards: {
-    definitionFor: (cardId: CardInstanceId) => CardDefinition;
-    cardInstanceFor: (cardId: CardInstanceId) => CardInstance;
-    publicInstalledCorpCardIdentityKnown: (cardId: CardInstanceId) => boolean;
-  };
-  servers: {
-    mustServer: (
-      serverId: Exclude<ServerId, "new_remote"> | string,
-    ) => CorpServer;
-  };
-  payment: {
-    spendCorpCredits: (amount: number) => void;
-  };
-};
 
 export type FortPassWindowActionBuildResult = {
   legalActions: LegalAction[];
@@ -231,41 +217,41 @@ export function buildStartRunIceRepositionActions(
       .map((sourceCardId, sourceIceIndex) => ({ sourceCardId, sourceIceIndex }))
       .filter(({ sourceCardId }) => !used.has(sourceCardId))
       .flatMap(({ sourceCardId, sourceIceIndex }) => {
-      const implementation = fortRunWindowImplementationForCard(
-        host,
-        sourceCardId,
-        "move_self_to_outermost_position_on_other_fort",
-      );
-      if (!implementation) return [];
-      const cost = Math.max(0, Math.floor(implementation.cost.amount));
-      if (host.state.corp.credits < cost) return [];
-      const definition = host.cards.definitionFor(sourceCardId);
-      return host.state.corp.servers
-        .filter((targetServer) => targetServer.id !== sourceServer.id)
-        .map((targetServer) =>
-          buildLegalAction(
-            host.state,
-            "corp",
-            "trigger_ability",
-            `${definition.title}: ICE nach ${targetServer.label} bewegen`,
-            sourceCardId,
-            cost > 0 ? [{ credits: cost }] : [],
-            {
-              cardId: sourceCardId,
-              sourceDefinitionId: definition.id,
-              serverId: sourceServer.id,
-              sourceServerId: sourceServer.id,
-              sourceServerLabel: sourceServer.label,
-              targetServerId: targetServer.id,
-              targetServerLabel: targetServer.label,
-              sourceIceIndex,
-              targetIceIndex: targetServer.ice.length,
-              creditCost: cost,
-              fortRunWindowAbility:
-                "move_self_to_outermost_position_on_other_fort",
-            },
-          ),
+        const implementation = fortRunWindowImplementationForCard(
+          host,
+          sourceCardId,
+          "move_self_to_outermost_position_on_other_fort",
         );
+        if (!implementation) return [];
+        const cost = Math.max(0, Math.floor(implementation.cost.amount));
+        if (host.state.corp.credits < cost) return [];
+        const definition = host.cards.definitionFor(sourceCardId);
+        return host.state.corp.servers
+          .filter((targetServer) => targetServer.id !== sourceServer.id)
+          .map((targetServer) =>
+            buildLegalAction(
+              host.state,
+              "corp",
+              "trigger_ability",
+              `${definition.title}: ICE nach ${targetServer.label} bewegen`,
+              sourceCardId,
+              cost > 0 ? [{ credits: cost }] : [],
+              {
+                cardId: sourceCardId,
+                sourceDefinitionId: definition.id,
+                serverId: sourceServer.id,
+                sourceServerId: sourceServer.id,
+                sourceServerLabel: sourceServer.label,
+                targetServerId: targetServer.id,
+                targetServerLabel: targetServer.label,
+                sourceIceIndex,
+                targetIceIndex: targetServer.ice.length,
+                creditCost: cost,
+                fortRunWindowAbility:
+                  "move_self_to_outermost_position_on_other_fort",
+              },
+            ),
+          );
       }),
   );
   return [...sameFortActions, ...otherFortActions];
@@ -491,14 +477,12 @@ function resolveStartRunOtherFortIceMove(
     run.position.iceIndex !== outermostIceIndex(attackedServer)
   )
     throw new Error("ICE-Bewegung ist nur am Start des Runs legal.");
-  const sourceServerId = String(legalAction.payload?.sourceServerId ?? "") as Exclude<
-    ServerId,
-    "new_remote"
-  >;
-  const targetServerId = String(legalAction.payload?.targetServerId ?? "") as Exclude<
-    ServerId,
-    "new_remote"
-  >;
+  const sourceServerId = String(
+    legalAction.payload?.sourceServerId ?? "",
+  ) as Exclude<ServerId, "new_remote">;
+  const targetServerId = String(
+    legalAction.payload?.targetServerId ?? "",
+  ) as Exclude<ServerId, "new_remote">;
   if (!sourceServerId || !targetServerId || sourceServerId === targetServerId)
     throw new Error("Die ICE-Bewegungsserver sind nicht legal.");
   const sourceServer = host.servers.mustServer(sourceServerId);
@@ -738,14 +722,10 @@ export function resolveHqIceSwapChoice(
   const iceIndex = Number(iceIndexRaw ?? -1);
   const run = mustRun(host.state);
   if (run.runId !== runId || run.attackedServerId !== serverId)
-    throw new Error(
-      "Die HQ-Ice-Swap-Choice gehoert nicht zu diesem Run.",
-    );
+    throw new Error("Die HQ-Ice-Swap-Choice gehoert nicht zu diesem Run.");
   const server = host.servers.mustServer(serverId);
   if (!server.root.includes(sourceCardId))
-    throw new Error(
-      "HQ Ice Swap ist nicht mehr im angegriffenen Remote.",
-    );
+    throw new Error("HQ Ice Swap ist nicht mehr im angegriffenen Remote.");
   if (
     !isFortIceSwapSource(host, sourceCardId) ||
     !host.cards.cardInstanceFor(sourceCardId).rezzed

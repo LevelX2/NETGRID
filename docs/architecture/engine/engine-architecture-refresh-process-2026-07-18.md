@@ -21,8 +21,9 @@ Primary agent: `architecture-review-agent`
 | E09     | integriert  | Commit `17efeb4f3`, Main-Abgleich `84f3e075b`; Turn-Runtime geteilt        |
 | E10     | integriert  | 1.736 Engine-, 2.723 KI- und 12 Shared-Tests; Web 633/635 nach Main-Sync   |
 | E11     | integriert  | Damage-Domäne in sechs Module geteilt; 1.736 Engine-Tests und Gates grün   |
-| E12     | verifiziert | Access-Domäne geteilt; Hidden-Info-/Breach-Verträge und 1.736 Tests grün   |
-| E13-E16 | ausstehend  | sequenziell nach E12                                                       |
+| E12     | integriert  | Access-Domäne geteilt; Hidden-Info-/Breach-Verträge und 1.736 Tests grün   |
+| E13     | verifiziert | Run-Hotspots geteilt; keine relativen Importzyklen; 1.736 Tests grün       |
+| E14-E16 | ausstehend  | sequenziell nach E13                                                       |
 
 ## Quelle und Vorgabe
 
@@ -215,6 +216,21 @@ Die Hidden-Info-Barriere am tatsächlichen Reveal und die Exklusivität zwischen
 CardImplementation und Legacy-Fallback sind am Code dokumentiert. Der
 Strukturguard verlangt die neuen Module und begrenzt ihre Größe. Engine-Suite
 mit 1.736 Tests und Engine-Typecheck sind auf dem Paketstand grün.
+
+### E13 Run-Domäne und Window-Zyklus
+
+Der letzte geduldete relative Importzyklus zwischen Fort-Pass-,
+After-Passing-Last-Ice- und Run-Window-Modulen ist durch einen niedrigeren
+gemeinsamen Port entfernt. Der Strukturguard meldet damit null relative
+Importzyklen und besitzt keine Cycle-Ausnahme mehr.
+
+Zusätzlich wurden die Run-Host-Komposition von 1.535 auf 1.168 Zeilen, der
+Run-End-Cleanup von 1.553 auf 796 Zeilen und die Successful-Run-Interventionen
+von 1.494 auf 898 Zeilen reduziert. Verträge, Counter-/Virus-Trigger und
+Followups liegen in klar gerichteten Modulen. Die regelrelevante
+Cleanup-Reihenfolge ist am Code dokumentiert; Modulgrenzen und Größen sind im
+Strukturguard ausführbar. Engine-Suite mit 1.736 Tests, Engine-Typecheck,
+Package Boundaries und Strukturguard sind grün.
 
 ### E14 Registry und Coverage
 

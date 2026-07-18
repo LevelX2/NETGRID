@@ -20,6 +20,7 @@ const runtimeRoot = path.join(engineRoot, "game", "engine-runtime-internal");
 const abilityRoot = path.join(engineRoot, "ability-engine");
 const damageRoot = path.join(engineRoot, "game", "damage");
 const accessRoot = path.join(engineRoot, "game", "access");
+const runRoot = path.join(engineRoot, "game", "run");
 
 const forbiddenRuntimeDelegateFiles = [
   "action-runtime-delegates.ts",
@@ -61,9 +62,7 @@ const runtimeImportFanoutDebt = new Map([
   ["game/engine-runtime-internal/trigger-ability-runtime-hosts.ts", 117],
   ["game/engine-runtime-internal/zone-runtime-services.ts", 118],
 ]);
-const allowedCycleSignatures = new Set([
-  "game/run/fort-pass-window.ts|game/run/windows/after-passing-last-ice-window.ts|game/run/windows/run-window-host.ts",
-]);
+const allowedCycleSignatures = new Set();
 const allowedLayerDebt = new Set([
   "ability-engine/active-modifiers.ts -> game/state/temporary-breaker-strength.ts",
   "ability-engine/card-implementation-runtime-activated-costs.ts -> game/payment/runner-payment-support.ts",
@@ -116,6 +115,17 @@ const accessDomainModuleLimits = new Map([
   ["access-effect-context.ts", 240],
   ["access-effect-execution.ts", 1250],
   ["access-effect-legacy.ts", 550],
+]);
+const runDomainModuleLimits = new Map([
+  ["run-flow-contracts.ts", 600],
+  ["run-flow-hosts.ts", 1300],
+  ["run-end-cleanup-contracts.ts", 300],
+  ["run-end-counter-triggers.ts", 800],
+  ["run-end-cleanup.ts", 950],
+  ["successful-run-contracts.ts", 220],
+  ["successful-run-followups.ts", 700],
+  ["successful-run-interventions.ts", 1050],
+  ["windows/fort-pass-window-contracts.ts", 100],
 ]);
 
 if (process.argv.includes("--self-test")) {
@@ -274,6 +284,19 @@ for (const [fileName, maximumLines] of accessDomainModuleLimits) {
   if (lineCount > maximumLines)
     findings.push(
       `game/access/${fileName} has ${lineCount} lines; allowed maximum is ${maximumLines}`,
+    );
+}
+
+for (const [fileName, maximumLines] of runDomainModuleLimits) {
+  const file = path.join(runRoot, ...fileName.split("/"));
+  if (!existsSync(file)) {
+    findings.push(`game/run/${fileName} is missing`);
+    continue;
+  }
+  const lineCount = sourceLineCount(file);
+  if (lineCount > maximumLines)
+    findings.push(
+      `game/run/${fileName} has ${lineCount} lines; allowed maximum is ${maximumLines}`,
     );
 }
 

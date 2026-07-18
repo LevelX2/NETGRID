@@ -8,7 +8,7 @@ import type {
   PlayerAction,
   ServerId,
 } from "@netgrid/shared";
-import type { FortPassWindowHost } from "../fort-pass-window";
+import type { FortPassWindowHost } from "./fort-pass-window-contracts";
 
 export type ActiveRun = NonNullable<GameState["run"]>;
 
