@@ -591,10 +591,12 @@ function urgentCorpSemanticChoice(
           choice,
           "corp_matchpoint_hq_protection_alignment",
         ) &&
-        !semanticRuntimeChoiceHasScoreBreakdownComponent(
-          choice,
+        !semanticRuntimeChoiceHasAnyScoreBreakdownComponent(choice, [
           "corp_matchpoint_hq_protection_mismatch",
-        ),
+          "corp_central_unrezzable_ice_install_stop",
+          "corp_active_scoreline_off_path_spend",
+          "corp_board_triage_mismatch",
+        ]),
     )
     .sort((left, right) => right.score - left.score)[0];
   if (matchpointProtection) return matchpointProtection;

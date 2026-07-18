@@ -4,6 +4,7 @@ import { dirname, resolve } from "node:path";
 
 import { hashGameState } from "../packages/engine/src/index";
 import type {
+  AiDifficulty,
   DeckDefinition,
   DeckPublicMetadata,
   Side,
@@ -42,6 +43,7 @@ let captured: AiSimulationDecisionCheckpointCapture | undefined;
 let capturedRuntime: AiRuntimeCheckpointV1 | undefined;
 const summary = simulateAiGame({
   seed: args.seed,
+  matchId: `selfplay:${args.seed}`,
   maxActions: args.actionIndex + 1,
   runnerDeck: deckDefinition(snapshots.runner),
   corpDeck: deckDefinition(snapshots.corp),
@@ -53,6 +55,8 @@ const summary = simulateAiGame({
     : {}),
   runnerControllerMode: "current_candidate",
   corpControllerMode: "current_candidate",
+  runnerDifficulty: args.runnerDifficulty,
+  corpDifficulty: args.corpDifficulty,
   testOnlyDecisionCheckpointCapture: {
     actionIndices: [args.actionIndex],
     capture: (snapshot) => {
@@ -119,6 +123,7 @@ function buildCheckpoint(
       findingId: args.findingId,
       capturedAt: new Date().toISOString(),
       matchId: snapshot.state.matchId,
+      decisionScopeId: snapshot.input.decisionId.split(":")[0],
       decisionIndex: snapshot.actionIndex,
       stateVersion: snapshot.state.stateVersion,
     },
@@ -163,7 +168,7 @@ function readDeckSnapshots(
 
 function deckDefinition(snapshot: StoredDeckSnapshot): DeckDefinition {
   return {
-    id: snapshot.sourceDeckId ?? snapshot.deckSnapshotId,
+    id: snapshot.deckSnapshotId,
     name: snapshot.name,
     side: snapshot.side,
     identity: snapshot.identityCardId,
@@ -183,6 +188,8 @@ function parseArgs(values: string[]): {
   findingId: string;
   expectationBase64: string;
   out: string;
+  runnerDifficulty: AiDifficulty;
+  corpDifficulty: AiDifficulty;
 } {
   const value = (name: string): string => {
     const index = values.indexOf(name);
@@ -194,6 +201,15 @@ function parseArgs(values: string[]): {
   if (!Number.isInteger(actionIndex) || actionIndex < 0) {
     throw new Error("invalid_argument:--action-index");
   }
+  const difficulty = (name: string): AiDifficulty => {
+    const index = values.indexOf(name);
+    const result = index >= 0 ? values[index + 1] : undefined;
+    if (!result) return "hard";
+    if (result !== "easy" && result !== "normal" && result !== "hard") {
+      throw new Error(`invalid_argument:${name}`);
+    }
+    return result;
+  };
   return {
     sqlite: value("--sqlite"),
     sourceMatchId: value("--source-match-id"),
@@ -203,5 +219,7 @@ function parseArgs(values: string[]): {
     findingId: value("--finding-id"),
     expectationBase64: value("--expectation-base64"),
     out: value("--out"),
+    runnerDifficulty: difficulty("--runner-difficulty"),
+    corpDifficulty: difficulty("--corp-difficulty"),
   };
 }

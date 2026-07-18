@@ -41,7 +41,7 @@ export function runAiDecisionCheckpoint(
   const options = {
     difficulty: fixture.difficulty,
     profileId: fixture.profileId,
-    decisionId: `${state.matchId}:${state.stateVersion}:${fixture.actor}`,
+    decisionId: `${fixture.source.decisionScopeId ?? state.matchId}:${state.stateVersion}:${fixture.actor}`,
     actionNumber: state.stateVersion,
     ownDeckSnapshot: fixture.deckSnapshot,
     eventTail: fixture.engine.eventPrefix,
