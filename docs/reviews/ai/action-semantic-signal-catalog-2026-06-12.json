@@ -47,7 +47,7 @@
     "coveredCards": 599,
     "deferredCards": 31,
     "noSignalCards": 19,
-    "targetProfileGapCards": 90,
+    "targetProfileGapCards": 97,
     "structuralSignalViolationCards": 0,
     "unknownSignalCards": 0,
     "byNoSignalReason": {
@@ -82,6 +82,12 @@
       "onr_proteus_004_fetal-ai",
       "onr_proteus_005_marked-accounts",
       "onr_proteus_009_viral-breeding-ground",
+      "onr_proteus_020_digiconda",
+      "onr_proteus_022_food-fight",
+      "onr_proteus_024_gatekeeper",
+      "onr_proteus_025_homing-missile",
+      "onr_proteus_034_riddler",
+      "onr_proteus_036_sandstorm",
       "onr_proteus_045_washed-up-solo-construct",
       "onr_proteus_056_department-of-misinformation",
       "onr_proteus_079_big-frackin-gun",
@@ -144,6 +150,7 @@
       "onr_v1_215_security-net-optimization",
       "onr_v1_216_security-purge",
       "onr_v1_219_superior-net-barriers",
+      "onr_v1_275_vacuum-link",
       "onr_v1_289_edgerunner-inc-temps",
       "onr_v1_292_management-shake-up",
       "onr_v1_296_off-site-backups",
@@ -171,7 +178,7 @@
       "coveredCards": 60,
       "deferredCards": -14,
       "noSignalCards": -6,
-      "targetProfileGapCards": 6
+      "targetProfileGapCards": 13
     }
   },
   "qualityGate": {
@@ -193,12 +200,6 @@
         "reason": "legacy_fallback_only",
         "side": "corp",
         "cardType": "identity"
-      },
-      {
-        "cardId": "onr_proteus_034_riddler",
-        "reason": "legacy_fallback_only",
-        "side": "corp",
-        "cardType": "ice"
       },
       {
         "cardId": "onr_proteus_074_siren",
@@ -223,6 +224,12 @@
         "reason": "no_function_signal",
         "side": "runner",
         "cardType": "resource"
+      },
+      {
+        "cardId": "onr_v1_220_tycho-extension",
+        "reason": "legacy_fallback_only",
+        "side": "corp",
+        "cardType": "agenda"
       },
       {
         "cardId": "runner_identity_001",
@@ -1964,10 +1971,11 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 4,
+      "signalCount": 5,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
         "economy.corp_credit_burst",
+        "economy.generic",
         "risk.bad_publicity_gain",
         "risk.bad_publicity_loss_condition",
         "score.economy_burst"
@@ -1981,7 +1989,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": ["legacy_fallback_only"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_proteus_003_corporate-headhunters",
@@ -1994,13 +2002,14 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 5,
+      "signalCount": 6,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
         "condition.requires_tagged_runner",
         "damage.corp_hand_size_pressure_on_successful_damage",
         "damage.corp_meat_damage_source",
         "damage.corp_tagged_meat_payoff",
+        "damage.payoff",
         "tag.corp_tagged_runner_payoff"
       ],
       "activeTacticSignals": [
@@ -2151,11 +2160,12 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 4,
+      "signalCount": 5,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
         "advance.overadvance_payoff",
         "economy.corp_recurring_credit",
+        "economy.start_of_turn",
         "score.overadvance_bonus",
         "score.overadvance_scaling"
       ],
@@ -2270,9 +2280,14 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 2,
+      "signalCount": 4,
       "targetProfileCount": 0,
-      "derivedFunctionSignals": ["corp_ice.end_run", "damage.payoff"],
+      "derivedFunctionSignals": [
+        "corp_ice.end_run",
+        "corp_ice.outer_ice_scaling",
+        "damage.payoff",
+        "ice.etr"
+      ],
       "activeTacticSignals": [
         "corp_ice.damage_source",
         "corp_ice.end_run",
@@ -2284,7 +2299,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": ["legacy_fallback_only"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_proteus_013_caryatid",
@@ -2297,11 +2312,12 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 2,
+      "signalCount": 3,
       "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "corp_ice.end_run",
-        "corp_ice.type_choice_or_mode_choice"
+        "corp_ice.type_choice_or_mode_choice",
+        "ice.etr"
       ],
       "activeTacticSignals": [
         "corp_ice.end_run",
@@ -2407,11 +2423,12 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 2,
+      "signalCount": 3,
       "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "corp_ice.end_run",
-        "corp_ice.type_choice_or_mode_choice"
+        "corp_ice.type_choice_or_mode_choice",
+        "ice.etr"
       ],
       "activeTacticSignals": [
         "corp_ice.end_run",
@@ -2490,10 +2507,17 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": false,
-      "signalCount": 2,
+      "target_profile_gap": true,
+      "signalCount": 6,
       "targetProfileCount": 0,
-      "derivedFunctionSignals": ["corp_ice.end_run", "damage.payoff"],
+      "derivedFunctionSignals": [
+        "corp_ice.end_run",
+        "corp_ice.net_damage",
+        "corp_ice.rez_paid_scaling",
+        "damage.payoff",
+        "ice.etr",
+        "ice.strength_modifier"
+      ],
       "activeTacticSignals": [
         "corp_ice.damage_source",
         "corp_ice.end_run",
@@ -2503,8 +2527,8 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [],
-      "warningCategories": ["legacy_fallback_only"]
+      "targetProfileExpectedBySignals": ["corp_ice.rez_paid_scaling"],
+      "warningCategories": []
     },
     {
       "cardId": "onr_proteus_021_dog-pile",
@@ -2517,9 +2541,15 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 2,
+      "signalCount": 5,
       "targetProfileCount": 0,
-      "derivedFunctionSignals": ["corp_ice.end_run", "damage.payoff"],
+      "derivedFunctionSignals": [
+        "corp_ice.end_run",
+        "corp_ice.outer_ice_scaling",
+        "damage.payoff",
+        "ice.etr",
+        "ice.strength_modifier"
+      ],
       "activeTacticSignals": [
         "corp_ice.damage_source",
         "corp_ice.end_run",
@@ -2532,7 +2562,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": ["legacy_fallback_only"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_proteus_022_food-fight",
@@ -2544,15 +2574,19 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": false,
-      "signalCount": 1,
+      "target_profile_gap": true,
+      "signalCount": 3,
       "targetProfileCount": 0,
-      "derivedFunctionSignals": ["corp_ice.end_run"],
+      "derivedFunctionSignals": [
+        "corp_ice.end_run",
+        "corp_ice.rez_paid_scaling",
+        "ice.etr"
+      ],
       "activeTacticSignals": ["corp_ice.end_run", "corp_ice.rez_paid_scaling"],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [],
-      "warningCategories": ["legacy_fallback_only"]
+      "targetProfileExpectedBySignals": ["corp_ice.rez_paid_scaling"],
+      "warningCategories": []
     },
     {
       "cardId": "onr_proteus_023_galatea",
@@ -2565,11 +2599,12 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 2,
+      "signalCount": 3,
       "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "corp_ice.end_run",
-        "corp_ice.type_choice_or_mode_choice"
+        "corp_ice.type_choice_or_mode_choice",
+        "ice.etr"
       ],
       "activeTacticSignals": [
         "corp_ice.end_run",
@@ -2590,15 +2625,19 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": false,
-      "signalCount": 1,
+      "target_profile_gap": true,
+      "signalCount": 3,
       "targetProfileCount": 0,
-      "derivedFunctionSignals": ["corp_ice.end_run"],
+      "derivedFunctionSignals": [
+        "corp_ice.end_run",
+        "corp_ice.rez_paid_scaling",
+        "ice.etr"
+      ],
       "activeTacticSignals": ["corp_ice.end_run", "corp_ice.rez_paid_scaling"],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [],
-      "warningCategories": ["legacy_fallback_only"]
+      "targetProfileExpectedBySignals": ["corp_ice.rez_paid_scaling"],
+      "warningCategories": []
     },
     {
       "cardId": "onr_proteus_025_homing-missile",
@@ -2610,12 +2649,16 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": false,
-      "signalCount": 2,
+      "target_profile_gap": true,
+      "signalCount": 6,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
         "corp_ice.conditional_end_run",
-        "corp_ice.trace_source"
+        "corp_ice.rez_paid_scaling",
+        "corp_ice.run_lock",
+        "corp_ice.trace_source",
+        "ice.etr",
+        "ice.strength_modifier"
       ],
       "activeTacticSignals": [
         "corp_ice.conditional_end_run",
@@ -2626,8 +2669,8 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [],
-      "warningCategories": ["legacy_fallback_only"]
+      "targetProfileExpectedBySignals": ["corp_ice.rez_paid_scaling"],
+      "warningCategories": []
     },
     {
       "cardId": "onr_proteus_026_hunting-pack",
@@ -2640,9 +2683,10 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 2,
+      "signalCount": 3,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
+        "corp_ice.outer_ice_scaling",
         "corp_ice.tag_source",
         "corp_ice.trace_source"
       ],
@@ -2657,7 +2701,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": ["legacy_fallback_only"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_proteus_027_iceberg",
@@ -2695,11 +2739,12 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 2,
+      "signalCount": 3,
       "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "corp_ice.end_run",
-        "corp_ice.type_choice_or_mode_choice"
+        "corp_ice.type_choice_or_mode_choice",
+        "ice.etr"
       ],
       "activeTacticSignals": [
         "corp_ice.end_run",
@@ -2749,9 +2794,15 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 2,
+      "signalCount": 5,
       "targetProfileCount": 0,
-      "derivedFunctionSignals": ["corp_ice.end_run", "damage.payoff"],
+      "derivedFunctionSignals": [
+        "corp_ice.end_run",
+        "corp_ice.outer_ice_scaling",
+        "damage.payoff",
+        "ice.etr",
+        "ice.strength_modifier"
+      ],
       "activeTacticSignals": [
         "corp_ice.brain_damage",
         "corp_ice.damage_source",
@@ -2764,7 +2815,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
-      "warningCategories": ["legacy_fallback_only"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_proteus_031_minotaur",
@@ -2850,20 +2901,25 @@
       "side": "corp",
       "cardType": "ice",
       "aiSupportStatus": "ai_supported",
-      "covered": false,
+      "covered": true,
       "deferred": false,
       "deferred_review_scope": "none",
       "deferred_owner": "none",
-      "no_signal_reason": "legacy_fallback_only",
-      "target_profile_gap": false,
-      "signalCount": 0,
+      "no_signal_reason": "none",
+      "target_profile_gap": true,
+      "signalCount": 2,
       "targetProfileCount": 0,
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "corp_ice.encounter_paid_subroutine_add",
+        "ice.etr"
+      ],
       "activeTacticSignals": ["corp_ice.encounter_paid_subroutine_add"],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [],
-      "warningCategories": ["legacy_fallback_only"]
+      "targetProfileExpectedBySignals": [
+        "corp_ice.encounter_paid_subroutine_add"
+      ],
+      "warningCategories": []
     },
     {
       "cardId": "onr_proteus_035_roadblock",
@@ -2904,15 +2960,19 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": false,
-      "signalCount": 1,
+      "target_profile_gap": true,
+      "signalCount": 3,
       "targetProfileCount": 0,
-      "derivedFunctionSignals": ["corp_ice.end_run"],
+      "derivedFunctionSignals": [
+        "corp_ice.end_run",
+        "corp_ice.rez_paid_scaling",
+        "ice.etr"
+      ],
       "activeTacticSignals": ["corp_ice.end_run", "corp_ice.rez_paid_scaling"],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [],
-      "warningCategories": ["legacy_fallback_only"]
+      "targetProfileExpectedBySignals": ["corp_ice.rez_paid_scaling"],
+      "warningCategories": []
     },
     {
       "cardId": "onr_proteus_037_scaffolding",
@@ -2976,11 +3036,12 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 2,
+      "signalCount": 3,
       "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "corp_ice.end_run",
-        "corp_ice.type_choice_or_mode_choice"
+        "corp_ice.type_choice_or_mode_choice",
+        "ice.etr"
       ],
       "activeTacticSignals": [
         "corp_ice.end_run",
@@ -3002,11 +3063,12 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 2,
+      "signalCount": 3,
       "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "corp_ice.end_run",
-        "corp_ice.type_choice_or_mode_choice"
+        "corp_ice.type_choice_or_mode_choice",
+        "ice.etr"
       ],
       "activeTacticSignals": [
         "corp_ice.end_run",
@@ -11618,22 +11680,16 @@
       "side": "corp",
       "cardType": "agenda",
       "aiSupportStatus": "ai_supported",
-      "covered": true,
+      "covered": false,
       "deferred": false,
       "deferred_review_scope": "none",
       "deferred_owner": "none",
-      "no_signal_reason": "none",
+      "no_signal_reason": "legacy_fallback_only",
       "target_profile_gap": false,
-      "signalCount": 2,
+      "signalCount": 0,
       "targetProfileCount": 0,
-      "derivedFunctionSignals": [
-        "score.high_agenda_value",
-        "score.vanilla_points"
-      ],
-      "activeTacticSignals": [
-        "score.high_agenda_value",
-        "score.vanilla_points"
-      ],
+      "derivedFunctionSignals": [],
+      "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": [],
@@ -12931,11 +12987,12 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 2,
+      "signalCount": 3,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
         "corp_ice.conditional_end_run",
-        "corp_ice.random_or_guessing"
+        "corp_ice.random_or_guessing",
+        "ice.etr"
       ],
       "activeTacticSignals": [
         "corp_ice.conditional_end_run",
@@ -13000,12 +13057,13 @@
       "deferred_review_scope": "none",
       "deferred_owner": "none",
       "no_signal_reason": "none",
-      "target_profile_gap": false,
-      "signalCount": 2,
+      "target_profile_gap": true,
+      "signalCount": 3,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
         "corp_ice.random_or_guessing",
-        "risk.random_outcome"
+        "risk.random_outcome",
+        "run.corp_run_rewind"
       ],
       "activeTacticSignals": [
         "corp_ice.encounter_tax",
@@ -13015,7 +13073,7 @@
       ],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": [],
+      "targetProfileExpectedBySignals": ["run.corp_run_rewind"],
       "warningCategories": []
     },
     {

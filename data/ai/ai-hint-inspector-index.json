@@ -14,18 +14,18 @@
   },
   "summary": {
     "cardCount": 618,
-    "cardsWithMechanicalFacts": 584,
-    "cardsWithGeneratedFacts": 324,
+    "cardsWithMechanicalFacts": 595,
+    "cardsWithGeneratedFacts": 321,
     "cardsWithOverlays": 6,
     "cardsWithFunctionSignals": 599,
-    "cardsWithStrategyAnchors": 255,
+    "cardsWithStrategyAnchors": 273,
     "cardsWithStrategySupportPairs": 198,
-    "cardsWithWarnings": 111,
+    "cardsWithWarnings": 100,
     "warningCategoryCounts": {
       "deferred_requires_human_review": 31,
       "descriptor_gap": 45,
       "function_signal_descriptor_gap": 25,
-      "legacy_fallback_only": 34
+      "legacy_fallback_only": 23
     }
   },
   "cards": [
@@ -6627,8 +6627,12 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions"
+        ],
         "compiledMechanicalFactFields": [
+          "effects",
           "conditions"
         ],
         "generatedFactFields": [
@@ -6653,14 +6657,15 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 1
+        "legacyFallbackOnly": false,
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "economy.corp_credit_burst",
+        "economy.generic",
         "risk.bad_publicity_gain",
         "risk.bad_publicity_loss_condition",
         "score.economy_burst"
@@ -6671,6 +6676,7 @@
       "reviewedStrategySupportPairs": [],
       "supportingEvidenceOnly": [
         "economy.corp_credit_burst",
+        "economy.generic",
         "risk.bad_publicity_gain",
         "risk.bad_publicity_loss_condition",
         "score.economy_burst"
@@ -6705,16 +6711,18 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "legacy_fallback_only"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
@@ -6742,6 +6750,7 @@
         "damage.corp_hand_size_pressure_on_successful_damage",
         "damage.corp_meat_damage_source",
         "damage.corp_tagged_meat_payoff",
+        "damage.payoff",
         "tag.corp_tagged_runner_payoff"
       ],
       "derivedStrategyAnchors": [],
@@ -6785,6 +6794,7 @@
         "condition.requires_tagged_runner",
         "damage.corp_hand_size_pressure_on_successful_damage",
         "damage.corp_meat_damage_source",
+        "damage.payoff",
         "tag.corp_tagged_runner_payoff"
       ],
       "lineSupportClassification": [
@@ -6842,8 +6852,12 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions"
+        ],
         "compiledMechanicalFactFields": [
+          "effects",
           "conditions"
         ],
         "generatedFactFields": [
@@ -7239,8 +7253,12 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions"
+        ],
         "compiledMechanicalFactFields": [
+          "effects",
           "conditions"
         ],
         "generatedFactFields": [
@@ -7375,8 +7393,12 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions"
+        ],
         "compiledMechanicalFactFields": [
+          "effects",
           "conditions"
         ],
         "generatedFactFields": [
@@ -7412,6 +7434,7 @@
       "derivedFunctionSignals": [
         "advance.overadvance_payoff",
         "economy.corp_recurring_credit",
+        "economy.start_of_turn",
         "score.overadvance_bonus",
         "score.overadvance_scaling"
       ],
@@ -7441,6 +7464,7 @@
       "supportingEvidenceOnly": [
         "advance.overadvance_payoff",
         "economy.corp_recurring_credit",
+        "economy.start_of_turn",
         "score.overadvance_bonus",
         "score.overadvance_scaling"
       ],
@@ -7490,8 +7514,12 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions"
+        ],
         "compiledMechanicalFactFields": [
+          "effects",
           "conditions"
         ],
         "generatedFactFields": [
@@ -7517,7 +7545,7 @@
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
         "mechanicalFactsFound": true,
-        "generatedFactsFound": true,
+        "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
         "warningCount": 0
@@ -7605,13 +7633,15 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions"
+        ],
         "compiledMechanicalFactFields": [
+          "effects",
           "conditions"
         ],
-        "generatedFactFields": [
-          "conditions"
-        ],
+        "generatedFactFields": [],
         "overlayFields": []
       },
       "strategicRoleStatus": {
@@ -7715,8 +7745,11 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
+          "effects",
           "conditions"
         ],
         "generatedFactFields": [
@@ -7863,22 +7896,28 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 1
+        "legacyFallbackOnly": false,
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "corp_ice.end_run",
-        "damage.payoff"
+        "corp_ice.outer_ice_scaling",
+        "damage.payoff",
+        "ice.etr"
       ],
-      "derivedStrategyAnchors": [],
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "cardLevelStrategyAnchors": [
         "corp.damage_kill",
         "corp.ice_tax_glacier"
       ],
-      "derivedPossibleStrategyAnchors": [],
+      "derivedPossibleStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "reviewedStrategySupportPairs": [
         {
           "strategyId": "corp.damage_kill",
@@ -7995,16 +8034,20 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "legacy_fallback_only"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects",
+          "conditions"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
@@ -8035,11 +8078,16 @@
       },
       "derivedFunctionSignals": [
         "corp_ice.end_run",
-        "corp_ice.type_choice_or_mode_choice"
+        "corp_ice.type_choice_or_mode_choice",
+        "ice.etr"
       ],
-      "derivedStrategyAnchors": [],
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "cardLevelStrategyAnchors": [],
-      "derivedPossibleStrategyAnchors": [],
+      "derivedPossibleStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "reviewedStrategySupportPairs": [],
       "supportingEvidenceOnly": [
         "corp_ice.end_run",
@@ -8105,9 +8153,13 @@
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
+          "effects",
+          "conditions",
           "targetProfiles"
         ],
         "compiledMechanicalFactFields": [
+          "effects",
+          "conditions",
           "targetProfiles"
         ],
         "generatedFactFields": [],
@@ -8495,11 +8547,16 @@
       },
       "derivedFunctionSignals": [
         "corp_ice.end_run",
-        "corp_ice.type_choice_or_mode_choice"
+        "corp_ice.type_choice_or_mode_choice",
+        "ice.etr"
       ],
-      "derivedStrategyAnchors": [],
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "cardLevelStrategyAnchors": [],
-      "derivedPossibleStrategyAnchors": [],
+      "derivedPossibleStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "reviewedStrategySupportPairs": [],
       "supportingEvidenceOnly": [
         "corp_ice.end_run",
@@ -8565,9 +8622,13 @@
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
+          "effects",
+          "conditions",
           "targetProfiles"
         ],
         "compiledMechanicalFactFields": [
+          "effects",
+          "conditions",
           "targetProfiles"
         ],
         "generatedFactFields": [],
@@ -8839,21 +8900,31 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 1
+        "legacyFallbackOnly": false,
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "corp_ice.end_run",
-        "damage.payoff"
+        "corp_ice.net_damage",
+        "corp_ice.rez_paid_scaling",
+        "damage.payoff",
+        "ice.etr",
+        "ice.strength_modifier"
       ],
-      "derivedStrategyAnchors": [],
+      "derivedStrategyAnchors": [
+        "corp.damage_kill",
+        "corp.ice_tax_glacier"
+      ],
       "cardLevelStrategyAnchors": [
         "corp.ice_tax_glacier"
       ],
-      "derivedPossibleStrategyAnchors": [],
+      "derivedPossibleStrategyAnchors": [
+        "corp.damage_kill",
+        "corp.ice_tax_glacier"
+      ],
       "reviewedStrategySupportPairs": [
         {
           "strategyId": "corp.ice_tax_glacier",
@@ -8943,16 +9014,20 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "legacy_fallback_only"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects",
+          "conditions"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
@@ -8973,22 +9048,29 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 1
+        "legacyFallbackOnly": false,
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "corp_ice.end_run",
-        "damage.payoff"
+        "corp_ice.outer_ice_scaling",
+        "damage.payoff",
+        "ice.etr",
+        "ice.strength_modifier"
       ],
-      "derivedStrategyAnchors": [],
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "cardLevelStrategyAnchors": [
         "corp.damage_kill",
         "corp.ice_tax_glacier"
       ],
-      "derivedPossibleStrategyAnchors": [],
+      "derivedPossibleStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "reviewedStrategySupportPairs": [
         {
           "strategyId": "corp.damage_kill",
@@ -9105,16 +9187,20 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "legacy_fallback_only"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects",
+          "conditions"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
@@ -9137,20 +9223,26 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 1
+        "legacyFallbackOnly": false,
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "corp_ice.end_run"
+        "corp_ice.end_run",
+        "corp_ice.rez_paid_scaling",
+        "ice.etr"
       ],
-      "derivedStrategyAnchors": [],
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "cardLevelStrategyAnchors": [
         "corp.ice_tax_glacier"
       ],
-      "derivedPossibleStrategyAnchors": [],
+      "derivedPossibleStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "reviewedStrategySupportPairs": [
         {
           "strategyId": "corp.ice_tax_glacier",
@@ -9232,16 +9324,20 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "legacy_fallback_only"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects",
+          "conditions"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
@@ -9270,11 +9366,16 @@
       },
       "derivedFunctionSignals": [
         "corp_ice.end_run",
-        "corp_ice.type_choice_or_mode_choice"
+        "corp_ice.type_choice_or_mode_choice",
+        "ice.etr"
       ],
-      "derivedStrategyAnchors": [],
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "cardLevelStrategyAnchors": [],
-      "derivedPossibleStrategyAnchors": [],
+      "derivedPossibleStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "reviewedStrategySupportPairs": [],
       "supportingEvidenceOnly": [
         "corp_ice.end_run",
@@ -9340,9 +9441,13 @@
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
+          "effects",
+          "conditions",
           "targetProfiles"
         ],
         "compiledMechanicalFactFields": [
+          "effects",
+          "conditions",
           "targetProfiles"
         ],
         "generatedFactFields": [],
@@ -9361,20 +9466,26 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 1
+        "legacyFallbackOnly": false,
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "corp_ice.end_run"
+        "corp_ice.end_run",
+        "corp_ice.rez_paid_scaling",
+        "ice.etr"
       ],
-      "derivedStrategyAnchors": [],
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "cardLevelStrategyAnchors": [
         "corp.ice_tax_glacier"
       ],
-      "derivedPossibleStrategyAnchors": [],
+      "derivedPossibleStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "reviewedStrategySupportPairs": [
         {
           "strategyId": "corp.ice_tax_glacier",
@@ -9456,16 +9567,20 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "legacy_fallback_only"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects",
+          "conditions"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
@@ -9486,21 +9601,29 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 1
+        "legacyFallbackOnly": false,
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "corp_ice.conditional_end_run",
-        "corp_ice.trace_source"
+        "corp_ice.rez_paid_scaling",
+        "corp_ice.run_lock",
+        "corp_ice.trace_source",
+        "ice.etr",
+        "ice.strength_modifier"
       ],
-      "derivedStrategyAnchors": [],
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "cardLevelStrategyAnchors": [
         "corp.ice_tax_glacier"
       ],
-      "derivedPossibleStrategyAnchors": [],
+      "derivedPossibleStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "reviewedStrategySupportPairs": [
         {
           "strategyId": "corp.ice_tax_glacier",
@@ -9593,16 +9716,20 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "legacy_fallback_only"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects",
+          "conditions"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
@@ -9623,22 +9750,27 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 1
+        "legacyFallbackOnly": false,
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.outer_ice_scaling",
         "corp_ice.tag_source",
         "corp_ice.trace_source"
       ],
-      "derivedStrategyAnchors": [],
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "cardLevelStrategyAnchors": [
         "corp.ice_tax_glacier",
         "corp.tag_trace_punish"
       ],
-      "derivedPossibleStrategyAnchors": [],
+      "derivedPossibleStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "reviewedStrategySupportPairs": [
         {
           "strategyId": "corp.ice_tax_glacier",
@@ -9751,16 +9883,20 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "legacy_fallback_only"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects",
+          "conditions"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
@@ -9932,11 +10068,16 @@
       },
       "derivedFunctionSignals": [
         "corp_ice.end_run",
-        "corp_ice.type_choice_or_mode_choice"
+        "corp_ice.type_choice_or_mode_choice",
+        "ice.etr"
       ],
-      "derivedStrategyAnchors": [],
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "cardLevelStrategyAnchors": [],
-      "derivedPossibleStrategyAnchors": [],
+      "derivedPossibleStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "reviewedStrategySupportPairs": [],
       "supportingEvidenceOnly": [
         "corp_ice.end_run",
@@ -10002,9 +10143,13 @@
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
+          "effects",
+          "conditions",
           "targetProfiles"
         ],
         "compiledMechanicalFactFields": [
+          "effects",
+          "conditions",
           "targetProfiles"
         ],
         "generatedFactFields": [],
@@ -10129,22 +10274,29 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 1
+        "legacyFallbackOnly": false,
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "corp_ice.end_run",
-        "damage.payoff"
+        "corp_ice.outer_ice_scaling",
+        "damage.payoff",
+        "ice.etr",
+        "ice.strength_modifier"
       ],
-      "derivedStrategyAnchors": [],
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "cardLevelStrategyAnchors": [
         "corp.damage_kill",
         "corp.ice_tax_glacier"
       ],
-      "derivedPossibleStrategyAnchors": [],
+      "derivedPossibleStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "reviewedStrategySupportPairs": [
         {
           "strategyId": "corp.damage_kill",
@@ -10260,16 +10412,20 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "legacy_fallback_only"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects",
+          "conditions"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
@@ -10678,18 +10834,25 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 1
+        "legacyFallbackOnly": false,
+        "warningCount": 0
       },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
+      "derivedFunctionSignals": [
+        "corp_ice.encounter_paid_subroutine_add",
+        "ice.etr"
+      ],
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "cardLevelStrategyAnchors": [
         "corp.ice_tax_glacier"
       ],
-      "derivedPossibleStrategyAnchors": [],
+      "derivedPossibleStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "reviewedStrategySupportPairs": [
         {
           "strategyId": "corp.ice_tax_glacier",
@@ -10769,16 +10932,20 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "legacy_fallback_only"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects",
+          "conditions"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
@@ -10907,20 +11074,26 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 1
+        "legacyFallbackOnly": false,
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "corp_ice.end_run"
+        "corp_ice.end_run",
+        "corp_ice.rez_paid_scaling",
+        "ice.etr"
       ],
-      "derivedStrategyAnchors": [],
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "cardLevelStrategyAnchors": [
         "corp.ice_tax_glacier"
       ],
-      "derivedPossibleStrategyAnchors": [],
+      "derivedPossibleStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "reviewedStrategySupportPairs": [
         {
           "strategyId": "corp.ice_tax_glacier",
@@ -11002,16 +11175,20 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "legacy_fallback_only"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects",
+          "conditions"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
@@ -11278,11 +11455,16 @@
       },
       "derivedFunctionSignals": [
         "corp_ice.end_run",
-        "corp_ice.type_choice_or_mode_choice"
+        "corp_ice.type_choice_or_mode_choice",
+        "ice.etr"
       ],
-      "derivedStrategyAnchors": [],
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "cardLevelStrategyAnchors": [],
-      "derivedPossibleStrategyAnchors": [],
+      "derivedPossibleStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "reviewedStrategySupportPairs": [],
       "supportingEvidenceOnly": [
         "corp_ice.end_run",
@@ -11348,9 +11530,13 @@
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
+          "effects",
+          "conditions",
           "targetProfiles"
         ],
         "compiledMechanicalFactFields": [
+          "effects",
+          "conditions",
           "targetProfiles"
         ],
         "generatedFactFields": [],
@@ -11377,11 +11563,16 @@
       },
       "derivedFunctionSignals": [
         "corp_ice.end_run",
-        "corp_ice.type_choice_or_mode_choice"
+        "corp_ice.type_choice_or_mode_choice",
+        "ice.etr"
       ],
-      "derivedStrategyAnchors": [],
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "cardLevelStrategyAnchors": [],
-      "derivedPossibleStrategyAnchors": [],
+      "derivedPossibleStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "reviewedStrategySupportPairs": [],
       "supportingEvidenceOnly": [
         "corp_ice.end_run",
@@ -11447,9 +11638,13 @@
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
+          "effects",
+          "conditions",
           "targetProfiles"
         ],
         "compiledMechanicalFactFields": [
+          "effects",
+          "conditions",
           "targetProfiles"
         ],
         "generatedFactFields": [],
@@ -44887,8 +45082,12 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions"
+        ],
         "compiledMechanicalFactFields": [
+          "effects",
           "conditions"
         ],
         "generatedFactFields": [
@@ -45674,18 +45873,12 @@
         "legacyFallbackOnly": true,
         "warningCount": 1
       },
-      "derivedFunctionSignals": [
-        "score.high_agenda_value",
-        "score.vanilla_points"
-      ],
+      "derivedFunctionSignals": [],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],
       "reviewedStrategySupportPairs": [],
-      "supportingEvidenceOnly": [
-        "score.high_agenda_value",
-        "score.vanilla_points"
-      ],
+      "supportingEvidenceOnly": [],
       "lineSupportClassification": [],
       "rolesClassification": [
         {
@@ -51951,18 +52144,23 @@
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
         "mechanicalFactsFound": true,
-        "generatedFactsFound": true,
+        "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
         "warningCount": 1
       },
       "derivedFunctionSignals": [
         "corp_ice.conditional_end_run",
-        "corp_ice.random_or_guessing"
+        "corp_ice.random_or_guessing",
+        "ice.etr"
       ],
-      "derivedStrategyAnchors": [],
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "cardLevelStrategyAnchors": [],
-      "derivedPossibleStrategyAnchors": [],
+      "derivedPossibleStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "reviewedStrategySupportPairs": [],
       "supportingEvidenceOnly": [
         "corp_ice.conditional_end_run",
@@ -52036,13 +52234,15 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions"
+        ],
         "compiledMechanicalFactFields": [
+          "effects",
           "conditions"
         ],
-        "generatedFactFields": [
-          "conditions"
-        ],
+        "generatedFactFields": [],
         "overlayFields": []
       },
       "strategicRoleStatus": {
@@ -52285,20 +52485,25 @@
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
         "mechanicalFactsFound": true,
-        "generatedFactsFound": true,
+        "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
       "derivedFunctionSignals": [
         "corp_ice.random_or_guessing",
-        "risk.random_outcome"
+        "risk.random_outcome",
+        "run.corp_run_rewind"
       ],
-      "derivedStrategyAnchors": [],
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "cardLevelStrategyAnchors": [
         "corp.ice_tax_glacier"
       ],
-      "derivedPossibleStrategyAnchors": [],
+      "derivedPossibleStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "reviewedStrategySupportPairs": [
         {
           "strategyId": "corp.ice_tax_glacier",
@@ -52387,13 +52592,15 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions"
+        ],
         "compiledMechanicalFactFields": [
+          "effects",
           "conditions"
         ],
-        "generatedFactFields": [
-          "conditions"
-        ],
+        "generatedFactFields": [],
         "overlayFields": []
       },
       "strategicRoleStatus": {

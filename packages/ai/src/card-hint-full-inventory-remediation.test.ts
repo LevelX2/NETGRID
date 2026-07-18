@@ -27,6 +27,7 @@ type HintCard = {
   effects?: HintEffect[];
   conditions?: Array<{ kind: string }>;
   breakerProfile?: { coverage?: string[] };
+  tacticSignals?: string[];
 };
 
 const hintSources = [
@@ -235,6 +236,118 @@ describe("AIH-01 compiled breaker coverage", () => {
     ).toEqual(["wall"]);
   });
 });
+
+describe.each(hintSources)(
+  "AIH-02 structured effect transport in %s",
+  (source) => {
+    const hints = readHints(source);
+
+    it.each([
+      [
+        "onr_v1_214_project-babylon",
+        "scored_agenda_action",
+        "score.overadvance_bonus",
+      ],
+      ["onr_v1_272_too-many-doors", "etr", "corp_ice.random_or_guessing"],
+      ["onr_v1_275_vacuum-link", "future_run_effect", "run.corp_run_rewind"],
+      [
+        "onr_proteus_001_ai-board-member",
+        "extra_action",
+        "action.corp_random_recurring_extra_action",
+      ],
+      [
+        "onr_proteus_002_charity-takeover",
+        "economy",
+        "economy.corp_credit_burst",
+      ],
+      [
+        "onr_proteus_003_corporate-headhunters",
+        "damage",
+        "damage.corp_tagged_meat_payoff",
+      ],
+      [
+        "onr_proteus_006_please-dont-choke-anyone",
+        "prevention_replacement",
+        "damage.corp_prevent_own_damage_for_counter",
+      ],
+      [
+        "onr_proteus_007_project-venice",
+        "extra_action",
+        "score.overadvance_scaling",
+      ],
+      [
+        "onr_proteus_008_project-zurich",
+        "start_of_turn_economy",
+        "score.overadvance_scaling",
+      ],
+      [
+        "onr_proteus_009_viral-breeding-ground",
+        "card_recovery",
+        "access.corp_runner_program_bounce",
+      ],
+      [
+        "onr_proteus_010_world-domination",
+        "scored_agenda_action",
+        "score.bonus_agenda_points",
+      ],
+      ["onr_proteus_012_bug-zapper", "damage", "corp_ice.outer_ice_scaling"],
+      [
+        "onr_proteus_013_caryatid",
+        "global_modifier",
+        "corp_ice.type_choice_or_mode_choice",
+      ],
+      [
+        "onr_proteus_017_credit-blocks",
+        "global_modifier",
+        "corp_ice.type_choice_or_mode_choice",
+      ],
+      ["onr_proteus_020_digiconda", "damage", "corp_ice.net_damage"],
+      ["onr_proteus_021_dog-pile", "damage", "corp_ice.outer_ice_scaling"],
+      ["onr_proteus_022_food-fight", "etr", "corp_ice.rez_paid_scaling"],
+      [
+        "onr_proteus_023_galatea",
+        "global_modifier",
+        "corp_ice.type_choice_or_mode_choice",
+      ],
+      ["onr_proteus_024_gatekeeper", "etr", "corp_ice.rez_paid_scaling"],
+      ["onr_proteus_025_homing-missile", "trace", "corp_ice.trace_source"],
+      ["onr_proteus_026_hunting-pack", "tag", "corp_ice.tag_source"],
+      [
+        "onr_proteus_028_lesser-arcana",
+        "global_modifier",
+        "corp_ice.type_choice_or_mode_choice",
+      ],
+      ["onr_proteus_030_mastermind", "damage", "corp_ice.outer_ice_scaling"],
+      [
+        "onr_proteus_034_riddler",
+        "etr",
+        "corp_ice.encounter_paid_subroutine_add",
+      ],
+      ["onr_proteus_036_sandstorm", "etr", "corp_ice.rez_paid_scaling"],
+      [
+        "onr_proteus_039_sphinx-2006",
+        "global_modifier",
+        "corp_ice.type_choice_or_mode_choice",
+      ],
+      [
+        "onr_proteus_040_sumo-2008",
+        "global_modifier",
+        "corp_ice.type_choice_or_mode_choice",
+      ],
+    ])("transports %s through %s", (cardId, kind, target) => {
+      expect(card(hints, cardId).effects).toEqual(
+        expect.arrayContaining([expect.objectContaining({ kind, target })]),
+      );
+    });
+
+    it("keeps vanilla Tycho Extension free of invented ability semantics", () => {
+      const tycho = card(hints, "onr_v1_220_tycho-extension");
+
+      expect(tycho.effects ?? []).toEqual([]);
+      expect(tycho.tacticSignals ?? []).toEqual([]);
+    });
+  },
+);
 
 function readHints(relativePath: string): HintCard[] {
   const artifact = JSON.parse(
