@@ -92,12 +92,22 @@ const findings = detectAiSelfplaySuspiciousDecisions(summaries, {
     Math.floor(args.maxActions * 0.75),
   ),
 });
+const persistentFindings = findings.filter(
+  (finding) => finding.category !== "hidden_info_marker",
+);
+const inMemoryAlternativeRedactionFindingCount =
+  findings.length - persistentFindings.length;
 const whyCoverage =
   buildSemanticRuntimeWhyCoverageReportFromSimulationSummaries(summaries);
 const decisionCount = summaries.reduce(
   (sum, summary) => sum + summary.actionSequence.length,
   0,
 );
+const rejectedDecisionAttemptCount = summaries.reduce(
+  (sum, summary) => sum + summary.errors.length,
+  0,
+);
+const decisionAttemptCount = decisionCount + rejectedDecisionAttemptCount;
 const actionAlternativeDecisionCount = summaries.reduce(
   (sum, summary) =>
     sum +
@@ -106,6 +116,12 @@ const actionAlternativeDecisionCount = summaries.reduce(
     ).length,
   0,
 );
+const sanitizedSummaries = summaries.map((summary) => ({
+  ...summary,
+  actionSequence: summary.actionSequence.map(
+    ({ actionAlternatives: _privateAlternatives, ...decision }) => decision,
+  ),
+}));
 const corpus = {
   schemaVersion: "ai-match-snapshot-selfplay-audit-corpus-v1",
   generatedAt: new Date().toISOString(),
@@ -123,7 +139,8 @@ const corpus = {
     corpDifficulty: "hard",
     runnerControllerMode: "current_candidate",
     corpControllerMode: "current_candidate",
-    detailedActionAlternatives: true,
+    detailedActionAlternativesEvaluatedInMemory: true,
+    detailedActionAlternativesPersisted: false,
   },
   decks: {
     runner: publicDeckReference(runnerSnapshot),
@@ -131,11 +148,12 @@ const corpus = {
   },
   coverage: {
     games: summaries.length,
-    expectedDecisions: decisionCount,
-    traceRows: decisionCount,
-    matchedDecisions: decisionCount,
+    expectedDecisionAttempts: decisionAttemptCount,
+    appliedDecisionTraces: decisionCount,
+    rejectedDecisionAttempts: rejectedDecisionAttemptCount,
+    matchedAppliedDecisions: decisionCount,
     actionAlternativeDecisionCount,
-    missingTraceRows: 0,
+    missingAppliedTraceRows: 0,
     whyCoverage,
   },
   integrity: {
@@ -143,21 +161,37 @@ const corpus = {
       (sum, summary) => sum + summary.metrics.illegalActions,
       0,
     ),
+    rejectedDecisionAttempts: rejectedDecisionAttemptCount,
     replayFailures: summaries.filter((summary) => !summary.replayOk).length,
     gamesWithErrors: summaries.filter((summary) => summary.errors.length > 0)
       .length,
+    engineAbortedGames: summaries.filter((summary) => summary.errors.length > 0)
+      .length,
+    regularlyCompletedGames: summaries.filter(
+      (summary) =>
+        summary.errors.length === 0 && summary.winner !== "action_limit_reached",
+    ).length,
     actionLimitReached: summaries.filter(
       (summary) => summary.winner === "action_limit_reached",
     ).length,
+    actionLimitReachedWithoutError: summaries.filter(
+      (summary) =>
+        summary.winner === "action_limit_reached" && summary.errors.length === 0,
+    ).length,
     findingsRedactionSafe: isSelfplayTraceRedactionSafe({
-      findings,
-      topFindings: findings,
+      findings: persistentFindings,
+      topFindings: persistentFindings,
     }),
+    inMemoryAlternativeRedactionFindingCount,
+    fullTraceRedactionSafe: true,
   },
-  findings,
-  games: summaries,
+  findings: persistentFindings,
+  games: sanitizedSummaries,
 };
 
+if (!isSelfplayTraceRedactionSafe(corpus)) {
+  throw new Error("Persisted selfplay corpus failed the full redaction gate");
+}
 const serializedCorpus = `${JSON.stringify(corpus, null, 2)}\n`;
 const forbiddenCorpusMarkers = forbiddenMarkers(serializedCorpus);
 if (forbiddenCorpusMarkers.length > 0) {
@@ -192,6 +226,12 @@ const manifest = {
   rerunCommand: command,
   results: summaries.map((summary) => ({
     seed: summary.seed,
+    runStatus:
+      summary.errors.length > 0
+        ? "engine_aborted"
+        : summary.winner === "action_limit_reached"
+          ? "action_limit_reached"
+          : "regularly_completed",
     winner: summary.winner,
     ...(summary.gameEndReason ? { gameEndReason: summary.gameEndReason } : {}),
     actions: summary.actions,
@@ -219,10 +259,12 @@ console.log(
   JSON.stringify(
     {
       games: summaries.length,
-      decisions: decisionCount,
+      decisionAttempts: decisionAttemptCount,
+      appliedDecisions: decisionCount,
+      rejectedDecisionAttempts: rejectedDecisionAttemptCount,
       results: manifest.results,
       integrity: manifest.integrity,
-      findingCount: findings.length,
+      findingCount: persistentFindings.length,
       corpusPath: outPath,
       manifestPath,
     },

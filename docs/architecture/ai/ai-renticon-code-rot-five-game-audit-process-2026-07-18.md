@@ -1,6 +1,6 @@
 # Rent-I-Con gegen CODE ROT: Fünf-Spiele-Audit vom 18.07.2026
 
-Status: aktiv, P0 abgeschlossen
+Status: Freigabepause nach abgeschlossenem P2-Review
 
 ## Quelle, Deckpaar und Ziel
 
@@ -99,3 +99,11 @@ Nutzerfreigabe Produktionsverhalten zu ändern.
 - Erst nach Nutzerfreigabe dürfen bestätigte Punkte über spielgleiche rote
   Checkpoints in weitere Umsetzungspakete überführt werden.
 
+## Ausführungsstand
+
+- P0 abgeschlossen und committed: `ca1da3cf3`.
+- P1 abgeschlossen und committed: `d1f740f5b`.
+- P2 abgeschlossen: fünf Seeds ausgeführt, 1.629/1.629
+  Entscheidungsversuche klassifiziert, beide Deck-Audits `status=ok`, Review
+  und redaktionssicheres Ledger erstellt.
+- P3 aktiv: keine Produktionsänderung; Freigabe des Nutzers ausstehend.

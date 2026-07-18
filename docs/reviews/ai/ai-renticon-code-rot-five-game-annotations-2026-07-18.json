@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "ai-selfplay-decision-annotations-v1",
+  "findings": [
+    {
+      "id": "corp_dead_first_position_ice",
+      "classification": "confirmed_gameplay_error",
+      "decisions": [
+        {
+          "seed": "ai-renticon-code-rot-20260718-002",
+          "stateVersionBefore": 5
+        },
+        {
+          "seed": "ai-renticon-code-rot-20260718-004",
+          "stateVersionBefore": 17
+        }
+      ]
+    },
+    {
+      "id": "corp_scoreline_conversion_stall",
+      "classification": "confirmed_gameplay_error",
+      "decisions": [
+        {
+          "seed": "ai-renticon-code-rot-20260718-003",
+          "stateVersionBefore": 208
+        },
+        {
+          "seed": "ai-renticon-code-rot-20260718-003",
+          "stateVersionBefore": 219
+        },
+        {
+          "seed": "ai-renticon-code-rot-20260718-004",
+          "stateVersionBefore": 55
+        },
+        {
+          "seed": "ai-renticon-code-rot-20260718-004",
+          "stateVersionBefore": 65
+        },
+        {
+          "seed": "ai-renticon-code-rot-20260718-004",
+          "stateVersionBefore": 247
+        }
+      ]
+    },
+    {
+      "id": "corp_matchpoint_plan_override",
+      "classification": "confirmed_gameplay_error",
+      "decisions": [
+        {
+          "seed": "ai-renticon-code-rot-20260718-004",
+          "stateVersionBefore": 295
+        }
+      ]
+    }
+  ]
+}

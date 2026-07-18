@@ -54,12 +54,14 @@
     "corpDifficulty": "hard",
     "runnerControllerMode": "current_candidate",
     "corpControllerMode": "current_candidate",
-    "detailedActionAlternatives": true
+    "detailedActionAlternativesEvaluatedInMemory": true,
+    "detailedActionAlternativesPersisted": false
   },
-  "rerunCommand": "corepack pnpm --filter @netgrid/server exec tsx ../../scripts/run-ai-match-snapshot-selfplay-audit.ts --source-repo \"C:\\Projekte\\NETGRID\" --match-id match_a7593a9bf8632052 --runner-name \"Rent-I-Con: Das Shellspiel\" --runner-hash fnv1a:ed5cbfb6 --corp-name \"CODE ROT: Bitte eintreten v2\" --corp-hash fnv1a:65883820 --seeds ai-renticon-code-rot-20260718-001,ai-renticon-code-rot-20260718-002,ai-renticon-code-rot-20260718-003,ai-renticon-code-rot-20260718-004,ai-renticon-code-rot-20260718-005 --max-actions 600 --out docs/reviews/ai/ai-renticon-code-rot-five-game-corpus-2026-07-18.json --manifest docs/reviews/ai/ai-renticon-code-rot-five-game-seeds-2026-07-18.json --audit-input-dir data/runtime/ai-selfplay-audit/renticon-code-rot-2026-07-18",
+  "rerunCommand": "corepack pnpm --filter @netgrid/server exec tsx ../../scripts/run-ai-match-snapshot-selfplay-audit.ts --source-repo \"C:\\Projekte\\NETGRID\" --match-id match_a7593a9bf8632052 --runner-name \"Rent-I-Con: Das Shellspiel\" --runner-hash fnv1a:ed5cbfb6 --corp-name \"CODE ROT: Bitte eintreten v2\" --corp-hash fnv1a:65883820 --seeds ai-renticon-code-rot-20260718-001,ai-renticon-code-rot-20260718-002,ai-renticon-code-rot-20260718-003,ai-renticon-code-rot-20260718-004,ai-renticon-code-rot-20260718-005 --max-actions 600 --out data/runtime/ai-selfplay-audit/renticon-code-rot-2026-07-18/sanitized-five-game-corpus.json --manifest docs/reviews/ai/ai-renticon-code-rot-five-game-seeds-2026-07-18.json --audit-input-dir data/runtime/ai-selfplay-audit/renticon-code-rot-2026-07-18",
   "results": [
     {
       "seed": "ai-renticon-code-rot-20260718-001",
+      "runStatus": "engine_aborted",
       "winner": "action_limit_reached",
       "actions": 246,
       "turns": 35,
@@ -76,6 +78,7 @@
     },
     {
       "seed": "ai-renticon-code-rot-20260718-002",
+      "runStatus": "regularly_completed",
       "winner": "runner",
       "gameEndReason": "corp_deck_empty",
       "actions": 398,
@@ -91,6 +94,7 @@
     },
     {
       "seed": "ai-renticon-code-rot-20260718-003",
+      "runStatus": "regularly_completed",
       "winner": "runner",
       "gameEndReason": "corp_deck_empty",
       "actions": 474,
@@ -106,6 +110,7 @@
     },
     {
       "seed": "ai-renticon-code-rot-20260718-004",
+      "runStatus": "regularly_completed",
       "winner": "runner",
       "gameEndReason": "agenda_points",
       "actions": 316,
@@ -121,6 +126,7 @@
     },
     {
       "seed": "ai-renticon-code-rot-20260718-005",
+      "runStatus": "engine_aborted",
       "winner": "action_limit_reached",
       "actions": 193,
       "turns": 25,
@@ -138,11 +144,12 @@
   ],
   "coverage": {
     "games": 5,
-    "expectedDecisions": 1627,
-    "traceRows": 1627,
-    "matchedDecisions": 1627,
+    "expectedDecisionAttempts": 1629,
+    "appliedDecisionTraces": 1627,
+    "rejectedDecisionAttempts": 2,
+    "matchedAppliedDecisions": 1627,
     "actionAlternativeDecisionCount": 1627,
-    "missingTraceRows": 0,
+    "missingAppliedTraceRows": 0,
     "whyCoverage": {
       "schemaVersion": "semantic-runtime-why-coverage-v1",
       "scope": "semantic_runtime_why_coverage_report_only",
@@ -186,11 +193,17 @@
   },
   "integrity": {
     "illegalActions": 2,
+    "rejectedDecisionAttempts": 2,
     "replayFailures": 0,
     "gamesWithErrors": 2,
     "actionLimitReached": 2,
+    "actionLimitReachedWithoutError": 0,
+    "regularlyCompletedGames": 3,
+    "engineAbortedGames": 2,
     "findingsRedactionSafe": true,
+    "inMemoryAlternativeRedactionFindingCount": 5,
+    "fullTraceRedactionSafe": true,
     "forbiddenCorpusMarkers": []
   },
-  "corpusPath": "docs/reviews/ai/ai-renticon-code-rot-five-game-corpus-2026-07-18.json"
+  "corpusPath": "data/runtime/ai-selfplay-audit/renticon-code-rot-2026-07-18/sanitized-five-game-corpus.json"
 }
