@@ -103,7 +103,7 @@ Nutzerfreigabe Produktionsverhalten zu ändern.
 
 - P0 abgeschlossen und committed: `ca1da3cf3`.
 - P1 abgeschlossen und committed: `d1f740f5b`.
-- P2 abgeschlossen: fünf Seeds ausgeführt, 1.629/1.629
-  Entscheidungsversuche klassifiziert, beide Deck-Audits `status=ok`, Review
-  und redaktionssicheres Ledger erstellt.
+- P2 abgeschlossen und committed: `9e2c82add`; fünf Seeds ausgeführt,
+  1.629/1.629 Entscheidungsversuche klassifiziert, beide Deck-Audits
+  `status=ok`, Review und redaktionssicheres Ledger erstellt.
 - P3 aktiv: keine Produktionsänderung; Freigabe des Nutzers ausstehend.
