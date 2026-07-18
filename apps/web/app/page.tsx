@@ -593,6 +593,9 @@ export default function Page() {
   const [session, setSession] = useState<SessionInfo | null>(null);
   const [payload, setPayload] = useState<ClientPayload | null>(null);
   const [lobby, setLobby] = useState<LobbyClientPayload | null>(null);
+  const [matchStartLogoMatchId, setMatchStartLogoMatchId] = useState<
+    string | null
+  >(null);
   const [matchClockNowMs, setMatchClockNowMs] = useState(() => Date.now());
   const [matchClockAnchor, setMatchClockAnchor] =
     useState<LocalMatchClockAnchor | null>(null);
@@ -843,6 +846,7 @@ export default function Page() {
   );
   const sessionRef = useRef<SessionInfo | null>(null);
   const lobbyRef = useRef<LobbyClientPayload | null>(null);
+  const lastAnimatedMatchIdRef = useRef<string | null>(null);
   const resultAudioPrimedRef = useRef(false);
   const lastAudioResultKeyRef = useRef<string | null>(null);
   const lastSeenCueEventIdRef = useRef<string | null>(null);
@@ -889,6 +893,21 @@ export default function Page() {
   const updatePlayMode = (nextPlayMode: PlayMode) => {
     setPlayMode(nextPlayMode);
   };
+
+  function presentMatchStartLogo(matchId: string) {
+    if (lastAnimatedMatchIdRef.current === matchId) return;
+    lastAnimatedMatchIdRef.current = matchId;
+    setMatchStartLogoMatchId(matchId);
+  }
+
+  useEffect(() => {
+    if (!matchStartLogoMatchId) return;
+    const timeout = window.setTimeout(
+      () => setMatchStartLogoMatchId(null),
+      2200,
+    );
+    return () => window.clearTimeout(timeout);
+  }, [matchStartLogoMatchId]);
 
   const updateCardPreviewCollapsed = (collapsed: boolean) => {
     setCardPreviewCollapsed(collapsed);
@@ -3558,6 +3577,7 @@ export default function Page() {
       setNotice(`Lobby erstellt. ${sideNotice}.${aiTraceNotice}`);
       return;
     }
+    presentMatchStartLogo(created.matchId);
     setPayload(fromInitialResponse(created, created.hostSide));
     setLobby(null);
     setNotice(
@@ -3600,6 +3620,7 @@ export default function Page() {
       };
       persistSession(nextSession);
       setSession(nextSession);
+      presentMatchStartLogo(next.matchId);
       setPayload(fromInitialResponse(next, next.hostSide));
       setLobby(null);
       setDismissedResultKey(null);
@@ -3948,6 +3969,8 @@ export default function Page() {
     remotePayload: ClientPayload | LobbyClientPayload,
   ) {
     if ("playerView" in remotePayload) {
+      if (lobbyRef.current?.matchId === remotePayload.matchId)
+        presentMatchStartLogo(remotePayload.matchId);
       setPayload(remotePayload);
       setLobby(null);
     } else {
@@ -4518,6 +4541,7 @@ export default function Page() {
       setPayload(null);
       setLobby(lobbyFromInitialResponse(recreated, recreated.hostSide));
     } else {
+      presentMatchStartLogo(recreated.matchId);
       setPayload(fromInitialResponse(recreated, recreated.hostSide));
       setLobby(null);
     }
@@ -5184,6 +5208,8 @@ export default function Page() {
     }
     if (message.type === "state_update") {
       pendingAiAdvanceKeyRef.current = null;
+      const activeLobby = lobbyRef.current;
+      if (activeLobby) presentMatchStartLogo(activeLobby.matchId);
       setPayload((current) => {
         if (!current) {
           const currentLobby = lobbyRef.current;
@@ -5881,6 +5907,27 @@ export default function Page() {
           }}
         >
           <main className={activeMatchClassName} data-theme={colorScheme}>
+            {matchStartLogoMatchId ? (
+              <div
+                className="matchStartLogoOverlay"
+                role="status"
+                aria-label="Match startet"
+                data-testid="match-start-logo-overlay"
+              >
+                <div className="matchStartLogoLockup">
+                  <img
+                    className="matchStartLogoIcon"
+                    src={APP_ICON_SRC}
+                    alt=""
+                  />
+                  <img
+                    className="matchStartLogoWordmark"
+                    src={APP_WORDMARK_SRC}
+                    alt=""
+                  />
+                </div>
+              </div>
+            ) : null}
             <ActiveMatchTopbar
               topbarRef={topbarRef}
               appName={APP_NAME}

@@ -15529,6 +15529,144 @@ select,
     animation: none;
   }
 }
+
+.matchStartLogoOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-match-start-logo-overlay);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at center, rgb(0 194 255 / 0.2), transparent 34%),
+    rgb(2 7 14 / 0.72);
+  animation: matchStartLogoBackdrop 2.1s ease-out both;
+}
+
+.matchStartLogoOverlay::before,
+.matchStartLogoOverlay::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.matchStartLogoOverlay::before {
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0,
+    transparent 4px,
+    rgb(83 222 255 / 0.08) 5px
+  );
+  mask-image: radial-gradient(circle at center, black, transparent 68%);
+}
+
+.matchStartLogoOverlay::after {
+  left: 50%;
+  width: min(900px, 92vw);
+  border-left: 1px solid rgb(58 218 255 / 0.34);
+  border-right: 1px solid rgb(58 218 255 / 0.34);
+  transform: translateX(-50%);
+  box-shadow: 0 0 80px rgb(0 189 255 / 0.2);
+  animation: matchStartLogoGate 2.1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.matchStartLogoLockup {
+  position: relative;
+  z-index: 1;
+  width: min(760px, 82vw);
+  display: grid;
+  justify-items: center;
+  gap: clamp(12px, 2.4vw, 24px);
+  animation: matchStartLogoPop 2.1s cubic-bezier(0.16, 0.82, 0.24, 1) both;
+}
+
+.matchStartLogoIcon {
+  width: clamp(96px, 18vw, 176px);
+  height: auto;
+  filter: drop-shadow(0 0 24px rgb(0 213 255 / 0.65));
+}
+
+.matchStartLogoWordmark {
+  width: 100%;
+  height: auto;
+  filter:
+    drop-shadow(0 0 16px rgb(0 213 255 / 0.7))
+    drop-shadow(0 0 42px rgb(0 119 255 / 0.38));
+}
+
+@keyframes matchStartLogoBackdrop {
+  0% {
+    opacity: 0;
+  }
+  12%,
+  74% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes matchStartLogoPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.56);
+    filter: blur(12px);
+  }
+  22% {
+    opacity: 1;
+    transform: scale(1.06);
+    filter: blur(0);
+  }
+  42%,
+  74% {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.08);
+    filter: blur(2px);
+  }
+}
+
+@keyframes matchStartLogoGate {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) scaleX(0.12);
+  }
+  24%,
+  72% {
+    opacity: 1;
+    transform: translateX(-50%) scaleX(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) scaleX(1.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .matchStartLogoOverlay,
+  .matchStartLogoOverlay::after,
+  .matchStartLogoLockup {
+    animation-name: matchStartLogoReducedMotion;
+    animation-duration: 900ms;
+  }
+}
+
+@keyframes matchStartLogoReducedMotion {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  18%,
+  72% {
+    opacity: 1;
+  }
+}
 /* Server-Zielkennzeichnung in Aktionsleisten. */
 .securityPurgeTargetButton .securityPurgeTargetServerIcon {
   flex: 0 0 auto;
