@@ -1,6 +1,6 @@
 # Match 74e2369: Corp-KI-Regressionsbehebung
 
-Status: P5 aktiv
+Status: P6 aktiv
 
 ## Quelle und Gesamtziel
 
@@ -123,7 +123,7 @@ Status: abgeschlossen
 
 ### P5 – Breite Verifikation und Wissenspflege
 
-Status: aktiv
+Status: abgeschlossen
 
 - fokussierte Checkpoints, Gegenproben, angrenzende Regressionen,
   AI-Testshards beziehungsweise vollständige AI-Suite und Typecheck;
@@ -181,3 +181,9 @@ Status: ausstehend
   Score-Ökonomie-Consumer bewertet `Corporate War` bei erfüllter Schwelle als
   +12-Credit-Burst und darunter mit dem tatsächlich verlorenen Creditbestand;
   der historische dringende Zwei-Credit-Score bleibt grün.
+- P5 abgeschlossen: 400/400 AI-Testdateien und 2.833/2.833 Tests, Typecheck,
+  alle funktionalen Hint-/Ontologie-Gates, fünf historische Checkpoints und
+  der vollständige 22-Karten-Audit sind grün. Das Source-Structure-Gate zeigt
+  ausschließlich dieselben vier vorab belegten Dateigrößenverstöße; die
+  geänderten übergroßen Dateien wurden gegenüber der Baseline nicht
+  vergrößert. Abschlussreport und Projektlog sind nachgezogen.
