@@ -623,9 +623,20 @@ function urgentCorpSemanticChoice(
           "corp_active_remote_agenda_underfunded_advance",
           "corp_contestable_remote_score_penalty",
           "corp_board_triage_mismatch",
-        ]),
+        ]) &&
+        !semanticRuntimeChoiceHasUnsafeScoringWindow(choice),
     )
     .sort((left, right) => right.score - left.score)[0];
+}
+
+function semanticRuntimeChoiceHasUnsafeScoringWindow(
+  choice: SemanticRuntimeChoice,
+): boolean {
+  return choice.scoreBreakdown.some(
+    (component) =>
+      component.key === "corp_scoring_window_assessment" &&
+      component.reason?.includes("window_kind:unsafe") === true,
+  );
 }
 
 function semanticRuntimeChoiceHasPositiveScoreBreakdownComponent(

@@ -80,6 +80,17 @@ export function tacticalPlanCorpScorelineSupportBlocksOffPlanOverride(
   if (
     mappedChoice.scoreBreakdown.some(
       (component) =>
+        component.key === "corp_passive_scoreline_available" &&
+        component.value < 0,
+    ) &&
+    overrideChoice.action.type === "advance_card" &&
+    overrideChoice.score > mappedChoice.score
+  ) {
+    return false;
+  }
+  if (
+    mappedChoice.scoreBreakdown.some(
+      (component) =>
         (component.key === "corp_non_agenda_root_blocks_score_remote" ||
           component.key ===
             "corp_remote_scoreline_unfunded_ice_install_penalty" ||
