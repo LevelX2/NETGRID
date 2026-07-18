@@ -5,6 +5,9 @@ import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
 import {
   buildDeckDoctrineV2Diagnostic,
   buildDeckStrategyProfile,
+  compareDeckStrategyRanking,
+  selectRankedStrategyIdsWithCutoffTies,
+  type DeckStrategyScore,
 } from "./deck-doctrine-strategy";
 
 const snapshots = snapshotsData08.snapshots as Array<{
@@ -24,6 +27,90 @@ const realDoctrineSnapshotIds = [
 ] as const;
 
 describe("DeckDoctrine strategy aggregation diagnostics", () => {
+  it("dampens duplicate metadata and additional copies of the same anchor card", () => {
+    const oneCopy = buildDeckStrategyProfile({
+      deckSnapshotId: "one-copy-recycle-anchor",
+      side: "corp",
+      cards: [{ cardId: "onr_v1_188_ai-chief-financial-officer", quantity: 1 }],
+    }).strategyScores["corp.deck_recycle_engine"];
+    const threeCopies = buildDeckStrategyProfile({
+      deckSnapshotId: "three-copy-recycle-anchor",
+      side: "corp",
+      cards: [{ cardId: "onr_v1_188_ai-chief-financial-officer", quantity: 3 }],
+    }).strategyScores["corp.deck_recycle_engine"];
+
+    expect(oneCopy?.anchorEvidence.length).toBeGreaterThan(1);
+    expect(oneCopy?.anchorScore).toBeLessThan(70);
+    expect(threeCopies?.anchorScore).toBeLessThan(100);
+    expect(threeCopies?.anchorScore ?? 0).toBeLessThan(
+      (oneCopy?.anchorScore ?? 0) * 3,
+    );
+  });
+
+  it("uses evidence diversity before lexical strategy ids for equal scores", () => {
+    const concentrated = rankingScore(["one"], ["support-one"]);
+    const diverse = rankingScore(
+      ["one", "two"],
+      ["support-one", "support-two"],
+    );
+    const ranked = [
+      ["aaa.concentrated", concentrated] as const,
+      ["zzz.diverse", diverse] as const,
+    ].sort(compareDeckStrategyRanking);
+
+    expect(ranked.map(([strategyId]) => strategyId)).toEqual([
+      "zzz.diverse",
+      "aaa.concentrated",
+    ]);
+  });
+
+  it("keeps every exactly tied strategy at the nominal primary cutoff", () => {
+    const tiedScore = rankingScore(["anchor"], ["support"]);
+    const ranked = [
+      ["corp.first", tiedScore],
+      ["corp.second", tiedScore],
+      ["corp.third", tiedScore],
+      ["corp.fourth", tiedScore],
+    ] as const;
+
+    expect(selectRankedStrategyIdsWithCutoffTies(ranked, 3)).toEqual([
+      "corp.first",
+      "corp.second",
+      "corp.third",
+      "corp.fourth",
+    ]);
+  });
+
+  it("reduces full anchor saturation across the active standard deck catalog", () => {
+    const profiles = standardDeckCatalog.decks.map((deck) =>
+      buildDeckStrategyProfile(standardDeckByName(deck.name)),
+    );
+    const profilesWithSaturatedAnchors = profiles.filter((profile) =>
+      profile.primaryStrategies.some(
+        (strategyId) => profile.strategyScores[strategyId]?.anchorScore === 100,
+      ),
+    );
+
+    expect(profiles).toHaveLength(40);
+    expect(profilesWithSaturatedAnchors.length).toBeLessThan(17);
+  });
+
+  it.each([
+    ["Chrome Rush Bureau", "corp.rush_score"],
+    ["Proteus Korp - Variable ICE Gauntlet", "corp.action_tempo"],
+    ["Classic Corp - Remote Lab Deflection", "corp.draw_engine"],
+    ["Siren Fortress", "corp.deck_recycle_engine"],
+  ] as const)(
+    "keeps the visible deck focus of %s in its selected strategy portfolio",
+    (deckName, expectedStrategyId) => {
+      const profile = buildDeckStrategyProfile(standardDeckByName(deckName));
+
+      expect([
+        ...profile.primaryStrategies,
+        ...profile.secondaryStrategies,
+      ]).toContain(expectedStrategyId);
+    },
+  );
   it("detects Runner R&D and interface pressure from normalized multiaccess evidence", () => {
     const profile = buildDeckStrategyProfile(
       snapshotById("onr_origin_runner_ai_snapshot_v1"),
@@ -533,6 +620,34 @@ function standardDeckByName(name: string): AiDeckStrategyDeckSnapshot {
     cards: deck.cards.map((card) => ({
       cardId: card.cardId,
       quantity: card.quantity,
+    })),
+  };
+}
+
+function rankingScore(
+  anchorCardIds: readonly string[],
+  supportCardIds: readonly string[],
+): DeckStrategyScore {
+  return {
+    anchorScore: 60,
+    supportScore: 60,
+    finalScore: 60,
+    confidence: "medium",
+    runtimeStatus: "productive",
+    runtimeBlockers: [],
+    supportGaps: [],
+    anchorEvidence: anchorCardIds.map((cardId) => ({
+      cardId,
+      quantity: 1,
+      source: "derivedStrategyAnchor",
+      reason: "test",
+    })),
+    supportEvidence: supportCardIds.map((cardId) => ({
+      cardId,
+      quantity: 1,
+      source: "functionSignal",
+      signal: "test.support",
+      reason: "test",
     })),
   };
 }

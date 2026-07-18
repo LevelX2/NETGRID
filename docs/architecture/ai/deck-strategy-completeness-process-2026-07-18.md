@@ -70,8 +70,9 @@ Bei Sicherheitsblocker: `package_active -> blocked_report`.
 
 - `DSC-00`: abgeschlossen und committed (`0f368b812`).
 - `DSC-01`: abgeschlossen und committed (`1a114def3`).
-- `DSC-02`: abgeschlossen; zentraler Runtime-Registry-Vertrag deckt alle 24 Taxonomie-IDs ab. Die vier neueren Corp-Strategien sind über Intent-Familie, Rollenstatus, Target/Reserve, CorpEnginePlan, TacticalGoal, Action-Fit und Discard-Fit angebunden. Reale Standarddeck-Regressionen sowie 74 fokussierte Tests und AI-Typecheck sind grün.
-- `DSC-03` bis `DSC-06`: ausstehend.
+- `DSC-02`: abgeschlossen und committed (`fb5dda338`); zentraler Runtime-Registry-Vertrag deckt alle 24 Taxonomie-IDs ab. Die vier neueren Corp-Strategien sind über Intent-Familie, Rollenstatus, Target/Reserve, CorpEnginePlan, TacticalGoal, Action-Fit und Discard-Fit angebunden. Reale Standarddeck-Regressionen sowie 75 fokussierte Tests und AI-Typecheck sind grün.
+- `DSC-03`: abgeschlossen; Anchor-Provenienz derselben Karte wird gedämpft zusammengeführt, Kopienzahl besitzt abnehmenden Grenznutzen, eine Sättigungskurve hält Rangunterschiede sichtbar, Evidenzvielfalt entscheidet vor lexikografischer Reihenfolge und exakte Cutoff-Ties bleiben vollständig erhalten. Alle 40 Standarddecks sowie 2.790 AI-Tests in drei Shards sind grün.
+- `DSC-04` bis `DSC-06`: ausstehend.
 
 ## Paketdetails
 

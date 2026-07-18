@@ -424,28 +424,25 @@ export function buildDeckStrategyProfile(
   }
 
   const rankedStrategies = Object.entries(strategyScores).sort(
-    (left, right) =>
-      right[1].finalScore - left[1].finalScore ||
-      right[1].anchorScore - left[1].anchorScore ||
-      left[0].localeCompare(right[0]),
+    compareDeckStrategyRanking,
   );
-  const primaryStrategies = rankedStrategies
-    .filter(
+  const primaryStrategies = selectRankedStrategyIdsWithCutoffTies(
+    rankedStrategies.filter(
       ([, score]) =>
         score.finalScore >= 45 && score.runtimeStatus === "productive",
-    )
-    .slice(0, 3)
-    .map(([strategyId]) => strategyId);
+    ),
+    3,
+  );
   const primaryStrategySet = new Set(primaryStrategies);
-  const secondaryStrategies = rankedStrategies
-    .filter(
+  const secondaryStrategies = selectRankedStrategyIdsWithCutoffTies(
+    rankedStrategies.filter(
       ([strategyId, score]) =>
         score.finalScore >= 30 &&
         score.runtimeStatus === "productive" &&
         !primaryStrategySet.has(strategyId),
-    )
-    .slice(0, 5)
-    .map(([strategyId]) => strategyId);
+    ),
+    5,
+  );
 
   return removeUndefined({
     schemaVersion: "ai-deck-strategy-profile-v1",
@@ -968,16 +965,96 @@ function lineSupportAnchorAllowed(
 }
 
 function scoreAnchors(evidence: DeckStrategyEvidence[]): number {
-  const points = evidence.reduce((sum, entry) => {
-    const base =
-      entry.source === "derivedStrategyAnchor"
-        ? 32
-        : entry.source === "lineSupport"
-          ? 28
-          : 12;
-    return sum + base * entry.quantity;
+  const evidenceByCard = new Map<string, DeckStrategyEvidence[]>();
+  for (const entry of evidence) {
+    const entries = evidenceByCard.get(entry.cardId) ?? [];
+    entries.push(entry);
+    evidenceByCard.set(entry.cardId, entries);
+  }
+  const points = [...evidenceByCard.values()].reduce((sum, entries) => {
+    const strongestBase = Math.max(
+      ...entries.map((entry) => anchorEvidenceBase(entry.source)),
+    );
+    const quantity = Math.max(...entries.map((entry) => entry.quantity));
+    const distinctSources = new Set(entries.map((entry) => entry.source)).size;
+    const provenanceReinforcement = Math.min(12, (distinctSources - 1) * 6);
+    return (
+      sum +
+      (strongestBase + provenanceReinforcement) *
+        diminishingCopyWeight(quantity)
+    );
   }, 0);
-  return clampRound(points, 0, 100);
+  if (points <= 0) return 0;
+  return clampRound((points / (points + 55)) * 100, 0, 100);
+}
+
+function anchorEvidenceBase(source: DeckStrategyEvidence["source"]): number {
+  switch (source) {
+    case "derivedStrategyAnchor":
+      return 32;
+    case "lineSupport":
+      return 28;
+    case "strategicRole":
+      return 12;
+    default:
+      return 0;
+  }
+}
+
+function diminishingCopyWeight(quantity: number): number {
+  let weight = 0;
+  for (let copy = 0; copy < Math.max(0, quantity); copy += 1) {
+    weight += Math.pow(0.55, copy);
+  }
+  return weight;
+}
+
+function strategyEvidenceDiversity(score: DeckStrategyScore): number {
+  const anchorCards = new Set(
+    score.anchorEvidence.map((evidence) => evidence.cardId),
+  ).size;
+  const anchorSources = new Set(
+    score.anchorEvidence.map((evidence) => evidence.source),
+  ).size;
+  const supportCards = new Set(
+    score.supportEvidence.map((evidence) => evidence.cardId),
+  ).size;
+  return anchorCards * 4 + anchorSources * 2 + supportCards;
+}
+
+export function compareDeckStrategyRanking(
+  left: readonly [string, DeckStrategyScore],
+  right: readonly [string, DeckStrategyScore],
+): number {
+  return (
+    right[1].finalScore - left[1].finalScore ||
+    right[1].anchorScore - left[1].anchorScore ||
+    strategyEvidenceDiversity(right[1]) - strategyEvidenceDiversity(left[1]) ||
+    left[0].localeCompare(right[0])
+  );
+}
+
+export function selectRankedStrategyIdsWithCutoffTies(
+  rankedStrategies: ReadonlyArray<readonly [string, DeckStrategyScore]>,
+  nominalLimit: number,
+): string[] {
+  if (nominalLimit <= 0 || rankedStrategies.length === 0) return [];
+  if (rankedStrategies.length <= nominalLimit) {
+    return rankedStrategies.map(([strategyId]) => strategyId);
+  }
+  const cutoff = rankedStrategies[nominalLimit - 1]?.[1];
+  if (!cutoff) return [];
+  const cutoffDiversity = strategyEvidenceDiversity(cutoff);
+  return rankedStrategies
+    .filter(([, score], index) => {
+      if (index < nominalLimit) return true;
+      return (
+        score.finalScore === cutoff.finalScore &&
+        score.anchorScore === cutoff.anchorScore &&
+        strategyEvidenceDiversity(score) === cutoffDiversity
+      );
+    })
+    .map(([strategyId]) => strategyId);
 }
 
 function adjustCorpWinConditionScore(
