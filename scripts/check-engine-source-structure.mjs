@@ -181,6 +181,27 @@ for (const fileName of definitionFamilyFiles) {
     );
 }
 
+const runtimePortContracts = path.join(
+  runtimeRoot,
+  "runtime-port-contracts.ts",
+);
+const runtimePortSource = parseSource(
+  runtimePortContracts,
+  readFileSync(runtimePortContracts, "utf8"),
+);
+const runtimePortAnyCount = countSyntaxKind(
+  runtimePortSource,
+  ts.SyntaxKind.AnyKeyword,
+);
+if (runtimePortAnyCount > 0)
+  findings.push(
+    `${runtimePath("runtime-port-contracts.ts")} contains ${runtimePortAnyCount} any type nodes`,
+  );
+if (sourceLineCount(runtimePortContracts) > 160)
+  findings.push(
+    `${runtimePath("runtime-port-contracts.ts")} exceeds 160 lines`,
+  );
+
 if (findings.length > 0) {
   console.error("ENGINE_SOURCE_STRUCTURE FAILED");
   for (const finding of findings.sort()) console.error(`- ${finding}`);
@@ -304,6 +325,14 @@ function isDeclarativeContractStatement(statement) {
 function sourceLineCount(file) {
   const text = readFileSync(file, "utf8");
   return text.replace(/\r?\n$/, "").split(/\r?\n/).length;
+}
+
+function countSyntaxKind(node, kind) {
+  let count = node.kind === kind ? 1 : 0;
+  ts.forEachChild(node, (child) => {
+    count += countSyntaxKind(child, kind);
+  });
+  return count;
 }
 
 function cyclicComponents(graph) {

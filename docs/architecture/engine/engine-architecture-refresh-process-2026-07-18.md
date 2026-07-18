@@ -12,8 +12,9 @@ Primary agent: `architecture-review-agent`
 | E00     | integriert                                 | Commit `6cfa0173e`, beidseitig mit `main` abgeglichen                      |
 | E01     | integriert                                 | Commit `a13cf8bc4`; Architektur-Target 0 Findings; 1.732 Engine-Tests grün |
 | E02     | integriert                                 | Commit `637c62a09`; Strukturguard und vier Fehlerklassen im Selftest grün  |
-| E03     | verifiziert, Commit/Integration ausstehend | 144 Verträge in sechs zyklusfreien Familien; Exportknoten 10 Zeilen        |
-| E04-E16 | ausstehend                                 | sequenziell nach E03                                                       |
+| E03     | integriert                                 | Commit `e9fbd63a5`; 144 Verträge in sechs zyklusfreien Familien            |
+| E04     | verifiziert, Commit/Integration ausstehend | 13 Factory-abgeleitete Portgruppen; Registry- und Strukturtests grün       |
+| E05-E16 | ausstehend                                 | sequenziell nach E04                                                       |
 
 ## Quelle und Vorgabe
 
