@@ -528,9 +528,20 @@ export function corpActiveRemoteAgendaAdvanceClockComponent<
     scoringWindow.runnerCanContestBeforeScore !== true &&
     scoringWindow.runnerCanReachAccessBeforeScore !== true &&
     scoringWindow.agendaStealRelevantBeforeScore !== true;
+  const runnerCannotContestBeforeScore =
+    scoringWindow?.runnerCanContestNow === false &&
+    scoringWindow?.runnerCanReachAccessNow === false &&
+    scoringWindow?.agendaStealRelevantNow === false &&
+    scoringWindow?.runnerCanContestBeforeScore === false &&
+    scoringWindow?.runnerCanReachAccessBeforeScore === false &&
+    scoringWindow?.agendaStealRelevantBeforeScore === false;
   const punishPrimaryUncontestedAdvanceRequiresReserve =
     corpScoreRuntimeIsPunishPrimary(input) &&
     scoringWindowRecommendsUncontestedAdvance;
+  const protectedRemoteAdvanceCanIgnoreFullRezReserve =
+    runnerCannotContestBeforeScore &&
+    scoringWindow?.recommendedNextStep === "build_remote_ice" &&
+    boardTriageState.primary === "fund_score_remote";
   const tempoAdvanceUnderClock =
     corpActiveRemoteAgendaCanTempoAdvanceUnderClock(
       input,
@@ -546,6 +557,7 @@ export function corpActiveRemoteAgendaAdvanceClockComponent<
     creditsAfterAction < state.reserveFloor &&
     (!scoringWindowRecommendsUncontestedAdvance ||
       punishPrimaryUncontestedAdvanceRequiresReserve) &&
+    !protectedRemoteAdvanceCanIgnoreFullRezReserve &&
     !tempoAdvanceUnderClock.allowed
   ) {
     return {
@@ -602,6 +614,9 @@ export function corpActiveRemoteAgendaAdvanceClockComponent<
     value: 2600 + severityBonus + tempoAdvanceBonus,
     reason: [
       "active_remote_agenda:true",
+      ...(runnerCannotContestBeforeScore
+        ? ["runner_cannot_contest_before_score:true"]
+        : []),
       ...(tempoAdvanceUnderClock.allowed
         ? ["tempo_advance_under_scoreline_clock:true"]
         : []),

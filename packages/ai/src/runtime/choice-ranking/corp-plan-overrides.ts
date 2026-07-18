@@ -8,9 +8,21 @@ import {
 
 export function tacticalPlanCorpScoreConversionBlocksOffPlanOverride(
   mapping: PlanStepMappingResult,
+  mappedChoice: SemanticRuntimeChoice,
   overrideChoice: SemanticRuntimeChoice,
   mappedActionIds: ReadonlySet<string>,
 ): boolean {
+  if (
+    mappedChoice.score < 0 &&
+    overrideChoice.score > 0 &&
+    mappedChoice.scoreBreakdown.some(
+      (component) =>
+        component.key === "corp_remote_sprawl_penalty" &&
+        component.value < 0,
+    )
+  ) {
+    return false;
+  }
   return (
     mapping.plan.side === "corp" &&
     mapping.plan.type === "corp.create_score_window" &&
@@ -66,9 +78,43 @@ export function tacticalPlanCorpScorelineSupportBlocksOffPlanOverride(
   mappedActionIds: ReadonlySet<string>,
 ): boolean {
   if (
+    mappedChoice.score < 0 &&
+    overrideChoice.score > 0 &&
     mappedChoice.scoreBreakdown.some(
       (component) =>
-        component.key === "corp_non_agenda_root_blocks_score_remote" &&
+        component.key === "corp_board_triage_mismatch" &&
+        component.value < 0,
+    ) &&
+    overrideChoice.scoreBreakdown.some(
+      (component) =>
+        component.key === "corp_ice_placement_evaluator" &&
+        component.value > 0 &&
+        component.reason?.includes("rez_affordable:true") &&
+        component.reason.includes("recommendation:install_now") &&
+        /server:(hq|rd)(?:\||$)/.test(component.reason),
+    )
+  ) {
+    return false;
+  }
+
+  if (
+    mappedChoice.scoreBreakdown.some(
+      (component) =>
+        component.key === "corp_passive_scoreline_available" &&
+        component.value < 0,
+    ) &&
+    overrideChoice.action.type === "advance_card" &&
+    overrideChoice.score > mappedChoice.score
+  ) {
+    return false;
+  }
+  if (
+    mappedChoice.scoreBreakdown.some(
+      (component) =>
+        (component.key === "corp_non_agenda_root_blocks_score_remote" ||
+          component.key ===
+            "corp_remote_scoreline_unfunded_ice_install_penalty" ||
+          component.key === "corp_remote_sprawl_penalty") &&
         component.value < 0,
     ) &&
     overrideChoice.score > mappedChoice.score

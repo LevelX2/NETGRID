@@ -319,6 +319,32 @@ describe("runner run plan path quote", () => {
     expect(quote.canReachAccess).toBe(true);
   });
 
+  it("uses bad-publicity run credits before cash in the remaining path quote", () => {
+    const input = runnerEncounterInput({
+      iceDefinitionId: "onr_v1_252_keeper",
+      iceTitle: "Keeper",
+      iceStrength: 4,
+      credits: 0,
+      legalActions: [
+        pumpAction({ costs: [{ credits: 1 }] }),
+        continueAction({
+          encounterWillEndRun: true,
+          unbrokenSubroutineCount: 1,
+        }),
+      ],
+    });
+    input.playerView.run!.badPublicityCredits = 4;
+
+    const quote = quoteRunnerRunPath(input, runPlan());
+    const sequence = quote.iceQuotes[0]?.cheapestAccessPreservingSequence;
+
+    expect(sequence?.totalCost).toBe(4);
+    expect(sequence?.cashCost).toBe(0);
+    expect(sequence?.restrictedCreditCost).toBe(4);
+    expect(quote.expectedRemainingCredits).toBe(0);
+    expect(quote.canReachAccess).toBe(true);
+  });
+
   it("does not re-quote passed outer ICE while breaking the inner ICE", () => {
     const passedKeeper = visibleIce({
       instanceId: "passed-keeper",

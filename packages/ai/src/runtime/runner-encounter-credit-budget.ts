@@ -7,7 +7,13 @@ import {
 import { actionCreditCost } from "./action-cost";
 import { breakerIdForEncounterAction } from "./encounter-action";
 
-type MutableEncounterCreditBudget = Required<RunnerRunPathCreditBudget>;
+type EncounterCreditBudget = RunnerRunPathCreditBudget & {
+  runOnlyCredits?: number;
+};
+
+type MutableEncounterCreditBudget = Required<RunnerRunPathCreditBudget> & {
+  runOnlyCredits: number;
+};
 
 export type RunnerEncounterPaymentProjection = {
   affordable: boolean;
@@ -26,6 +32,9 @@ export function runnerEncounterCreditBudgetForInput(
   );
   return {
     credits: normalizeCreditAmount(input.playerView.own.credits),
+    runOnlyCredits: normalizeCreditAmount(
+      input.playerView.run?.badPublicityCredits ?? 0,
+    ),
     icebreakerCredits: visiblePools.icebreakerCredits,
     nonNoisyIcebreakerCredits: visiblePools.nonNoisyIcebreakerCredits,
     killerCredits: visiblePools.killerCredits,
@@ -81,7 +90,7 @@ export function runnerEncounterPaymentForActions(
 export function spendRunnerEncounterActionCost(params: {
   input: AiDecisionInput;
   action: LegalAction;
-  budget: RunnerRunPathCreditBudget;
+  budget: EncounterCreditBudget;
   cost: number;
 }): RunnerEncounterPaymentProjection {
   return spendRunnerEncounterBreakerCost({
@@ -96,7 +105,7 @@ export function spendRunnerEncounterActionCost(params: {
 export function spendRunnerEncounterBreakerCost(params: {
   input: AiDecisionInput;
   breakerId: string | undefined;
-  budget: RunnerRunPathCreditBudget;
+  budget: EncounterCreditBudget;
   cost: number;
   actionType?: LegalAction["type"];
 }): RunnerEncounterPaymentProjection {
@@ -104,6 +113,10 @@ export function spendRunnerEncounterBreakerCost(params: {
   const totalCost = normalizeCreditAmount(params.cost);
   let remaining = totalCost;
   let restrictedSpent = 0;
+  const runOnlySpent = Math.min(budget.runOnlyCredits, remaining);
+  budget.runOnlyCredits -= runOnlySpent;
+  remaining -= runOnlySpent;
+  restrictedSpent += runOnlySpent;
   const breaker = params.breakerId
     ? encounterBreakerForId(params.input, params.breakerId)
     : undefined;
@@ -150,10 +163,11 @@ function encounterBreakerForId(
 }
 
 function normalizeBudget(
-  budget: RunnerRunPathCreditBudget,
+  budget: EncounterCreditBudget,
 ): MutableEncounterCreditBudget {
   return {
     credits: normalizeCreditAmount(budget.credits),
+    runOnlyCredits: normalizeCreditAmount(budget.runOnlyCredits ?? 0),
     icebreakerCredits: normalizeCreditAmount(budget.icebreakerCredits ?? 0),
     nonNoisyIcebreakerCredits: normalizeCreditAmount(
       budget.nonNoisyIcebreakerCredits ?? 0,

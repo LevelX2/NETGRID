@@ -18,6 +18,19 @@ export function tacticalPlanFundedDevelopmentContinuationBlocksOverride(
   mappedChoice: SemanticRuntimeChoice,
   overrideChoice: SemanticRuntimeChoice,
 ): boolean {
+  if (
+    mappedChoice.score < 0 &&
+    overrideChoice.score > 0 &&
+    mappedChoice.scoreBreakdown.some(
+      (component) =>
+        (component.key === "runner_goal_fit_coverage_search_no_need" ||
+          component.key === "runner_goal_fit_coverage_search_saturated") &&
+        component.value < 0,
+    )
+  ) {
+    return false;
+  }
+
   return (
     mapping.plan.type === "runner.develop_hand_card" &&
     (mapping.plan.evidence.includes(
@@ -71,6 +84,18 @@ export function tacticalPlanStepPriorityKeepsMappedChoice(
   mappedChoice: SemanticRuntimeChoice,
   overrideChoice: SemanticRuntimeChoice,
 ): boolean {
+  if (
+    mapping.plan.side === "corp" &&
+    mappedChoice.score < 0 &&
+    overrideChoice.score > 0 &&
+    mappedChoice.scoreBreakdown.some(
+      (component) =>
+        component.key === "corp_remote_sprawl_penalty" &&
+        component.value < 0,
+    )
+  ) {
+    return false;
+  }
   if (
     !mapping.legalActions.some(
       (action) => action.actionId === overrideChoice.action.actionId,

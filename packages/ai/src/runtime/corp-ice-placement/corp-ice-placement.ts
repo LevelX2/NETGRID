@@ -322,8 +322,14 @@ export function corpIcePlacementScoreComponent<
   const badFirstIce = candidate.evidence.includes(
     "defer_reason:bad_first_ice_wait_for_followup",
   );
+  const deadAsFirstIce =
+    candidate.evidence.includes("first_ice:true") &&
+    candidate.evidence.includes("dead_as_first_ice:true") &&
+    candidate.evidence.includes("immediate_stop:false");
   const value =
-    candidate.recommendation === "install_now"
+    deadAsFirstIce
+      ? Math.min(candidate.score, -4200)
+      : candidate.recommendation === "install_now"
       ? candidate.score
       : badFirstIce
         ? Math.min(candidate.score, -1800)

@@ -46,6 +46,7 @@ import {
 } from "./choice-ranking/runner-plan-overrides";
 import {
   roundScore,
+  semanticRuntimeChoiceHasScoreBreakdownComponent,
   semanticRuntimeChoiceStrategicFitLevel,
   semanticRuntimeChoiceWithAddedEvidence,
   tacticalPlanBlockedOverrideResult,
@@ -63,6 +64,8 @@ export {
   tacticalPlanMappingOverrideEvidence,
   tacticalPlanRuntimeAlignedToChoice,
 } from "./choice-ranking/semantic-choice-ranking-support";
+
+const CORP_ACTIVE_REMOTE_ADVANCE_RUNNER_CREDIT_CEILING = 20;
 
 export function bestSemanticRuntimeChoice(
   choices: readonly SemanticRuntimeChoice[],
@@ -103,6 +106,35 @@ export function tacticalPlanMappedChoice(
     .filter((choice): choice is SemanticRuntimeChoice => Boolean(choice));
   const mappedChoice = bestPlanCompatibleSemanticChoice(mappedChoices, mapping);
   if (!mappedChoice) return {};
+  const urgentCorpChoice = urgentCorpSemanticChoice(input, choices);
+  if (
+    urgentCorpChoice &&
+    urgentCorpChoice.action.actionId !== mappedChoice.action.actionId
+  ) {
+    const reason =
+      urgentCorpChoice.action.type === "score_agenda"
+        ? "corp_scoreable_agenda_controller"
+        : semanticRuntimeChoiceHasScoreBreakdownComponent(
+              urgentCorpChoice,
+              "corp_matchpoint_hq_protection_alignment",
+            )
+          ? "corp_matchpoint_central_protection_controller"
+          : "corp_active_remote_agenda_advance_controller";
+    const scoreGap = roundScore(urgentCorpChoice.score - mappedChoice.score);
+    return {
+      outcome: "semantic_choice_selected",
+      choice: semanticRuntimeChoiceWithAddedEvidence(urgentCorpChoice, [
+        "tactical_plan_mapping_outcome:semantic_choice_selected",
+        `tactical_plan_mapping_override_reason:${reason}`,
+        `tactical_plan_mapping_score_gap:${scoreGap}`,
+      ]),
+      overrideChoice: urgentCorpChoice,
+      overriddenMappedChoice: mappedChoice,
+      overrideReason: reason,
+      overrideThreshold: Number.NEGATIVE_INFINITY,
+      scoreGap,
+    };
+  }
   const mappedStrategicFit =
     semanticRuntimeChoiceStrategicFitLevel(mappedChoice);
   if (mappedStrategicFit === "none") {
@@ -279,6 +311,7 @@ export function tacticalPlanMappedChoice(
     if (
       tacticalPlanCorpScoreConversionBlocksOffPlanOverride(
         mapping,
+        mappedChoice,
         overrideChoice,
         mappedActionIds,
       )
@@ -393,6 +426,7 @@ export function tacticalPlanMappedChoice(
       );
     const lowValueRecoveryShouldYield =
       tacticalPlanLowValueRecoveryMappingShouldYield(
+        mapping,
         mappedChoice,
         overrideChoice,
         scoreGap,
@@ -538,4 +572,90 @@ export function tacticalPlanMappedChoice(
       tacticalPlanMappingSelectedEvidence(mapping, mappedChoice),
     ),
   };
+}
+
+function urgentCorpSemanticChoice(
+  input: AiDecisionInput,
+  choices: readonly SemanticRuntimeChoice[],
+): SemanticRuntimeChoice | undefined {
+  if (input.side !== "corp") return undefined;
+  const viableChoices = choices.filter((choice) => !choice.exclusion);
+  const scoreableAgenda = viableChoices
+    .filter((choice) => choice.action.type === "score_agenda")
+    .sort((left, right) => right.score - left.score)[0];
+  if (scoreableAgenda) return scoreableAgenda;
+  const matchpointProtection = viableChoices
+    .filter(
+      (choice) =>
+        semanticRuntimeChoiceHasPositiveScoreBreakdownComponent(
+          choice,
+          "corp_matchpoint_hq_protection_alignment",
+        ) &&
+        !semanticRuntimeChoiceHasAnyScoreBreakdownComponent(choice, [
+          "corp_matchpoint_hq_protection_mismatch",
+          "corp_central_unrezzable_ice_install_stop",
+          "corp_active_scoreline_off_path_spend",
+          "corp_board_triage_mismatch",
+        ]),
+    )
+    .sort((left, right) => right.score - left.score)[0];
+  if (matchpointProtection) return matchpointProtection;
+
+  const visibleRunnerCredits = input.playerView.opponent?.credits ?? 0;
+  if (
+    visibleRunnerCredits >=
+    CORP_ACTIVE_REMOTE_ADVANCE_RUNNER_CREDIT_CEILING
+  ) {
+    return undefined;
+  }
+
+  return viableChoices
+    .filter(
+      (choice) =>
+        choice.action.type === "advance_card" &&
+        choice.scoreBreakdown.some(
+          (component) =>
+            component.key === "corp_active_remote_agenda_advance_clock" &&
+            component.value > 0 &&
+            component.reason?.includes(
+              "runner_cannot_contest_before_score:true",
+            ) === true,
+        ) &&
+        !semanticRuntimeChoiceHasAnyScoreBreakdownComponent(choice, [
+          "corp_active_remote_agenda_unsafe_advance",
+          "corp_active_remote_agenda_underfunded_advance",
+          "corp_contestable_remote_score_penalty",
+          "corp_board_triage_mismatch",
+        ]) &&
+        !semanticRuntimeChoiceHasUnsafeScoringWindow(choice),
+    )
+    .sort((left, right) => right.score - left.score)[0];
+}
+
+function semanticRuntimeChoiceHasUnsafeScoringWindow(
+  choice: SemanticRuntimeChoice,
+): boolean {
+  return choice.scoreBreakdown.some(
+    (component) =>
+      component.key === "corp_scoring_window_assessment" &&
+      component.reason?.includes("window_kind:unsafe") === true,
+  );
+}
+
+function semanticRuntimeChoiceHasPositiveScoreBreakdownComponent(
+  choice: SemanticRuntimeChoice,
+  key: string,
+): boolean {
+  return choice.scoreBreakdown.some(
+    (component) => component.key === key && component.value > 0,
+  );
+}
+
+function semanticRuntimeChoiceHasAnyScoreBreakdownComponent(
+  choice: SemanticRuntimeChoice,
+  keys: readonly string[],
+): boolean {
+  return keys.some((key) =>
+    semanticRuntimeChoiceHasScoreBreakdownComponent(choice, key),
+  );
 }

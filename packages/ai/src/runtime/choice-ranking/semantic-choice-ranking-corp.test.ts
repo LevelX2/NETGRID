@@ -134,6 +134,95 @@ describe("tacticalPlanMappedChoice Corp overrides", () => {
     );
   });
 
+  it("lets a safe active agenda continue over a stale support mapping", () => {
+    const protectRemote = legalAction("protect-remote", "install_card");
+    const advanceAgenda = legalAction("advance-agenda", "advance_card");
+    const advanceChoice = choice(
+      advanceAgenda,
+      -500,
+      scoreComponentEvidence("corp_active_remote_agenda_advance_clock"),
+      {
+        key: "corp_active_remote_agenda_advance_clock",
+        value: 2600,
+        reason:
+          "active_remote_agenda:true|runner_cannot_contest_before_score:true",
+      },
+    );
+    const input = aiInput();
+    input.side = "corp";
+    const result = tacticalPlanMappedChoice(
+      input,
+      [choice(protectRemote, 3000), advanceChoice],
+      scorelineSupportMapping([protectRemote]),
+      choice(protectRemote, 3000),
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("advance-agenda");
+    expect(result.overrideReason).toBe(
+      "corp_active_remote_agenda_advance_controller",
+    );
+  });
+
+  it("scores a legal agenda before overadvancing the active scoreline", () => {
+    const advanceAgenda = legalAction("advance-agenda", "advance_card");
+    const scoreAgenda = legalAction("score-agenda", "score_agenda");
+    const advanceChoice = choice(
+      advanceAgenda,
+      -500,
+      scoreComponentEvidence("corp_active_remote_agenda_advance_clock"),
+      {
+        key: "corp_active_remote_agenda_advance_clock",
+        value: 2600,
+        reason:
+          "active_remote_agenda:true|runner_cannot_contest_before_score:true",
+      },
+    );
+    const input = aiInput();
+    input.side = "corp";
+    const result = tacticalPlanMappedChoice(
+      input,
+      [advanceChoice, choice(scoreAgenda, 2200)],
+      scorelineSupportMapping([advanceAgenda]),
+      choice(scoreAgenda, 2200),
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("score-agenda");
+    expect(result.overrideReason).toBe(
+      "corp_scoreable_agenda_controller",
+    );
+  });
+
+  it("lets runner-matchpoint HQ protection interrupt remote support", () => {
+    const protectRemote = legalAction("protect-remote", "install_card");
+    const protectHq = legalAction("protect-hq", "install_card");
+    const hqChoice = choice(
+      protectHq,
+      1000,
+      scoreComponentEvidence("corp_matchpoint_hq_protection_alignment"),
+      {
+        key: "corp_matchpoint_hq_protection_alignment",
+        value: 2200,
+        reason: "runner_at_matchpoint:true",
+      },
+    );
+    const input = aiInput();
+    input.side = "corp";
+    const result = tacticalPlanMappedChoice(
+      input,
+      [choice(protectRemote, 3000), hqChoice],
+      scorelineSupportMapping([protectRemote]),
+      choice(protectRemote, 3000),
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("protect-hq");
+    expect(result.overrideReason).toBe(
+      "corp_matchpoint_central_protection_controller",
+    );
+  });
+
   it("lets a better burst-economy operation build the progressing rez reserve", () => {
     const gain = legalAction("gain", "gain_credit");
     const burstEconomy = legalAction("burst-economy", "play_operation");

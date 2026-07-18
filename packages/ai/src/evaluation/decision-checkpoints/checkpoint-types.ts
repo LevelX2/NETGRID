@@ -86,6 +86,7 @@ export type AiDecisionCheckpointV1 = {
     findingId: string;
     capturedAt: string;
     matchId?: string;
+    decisionScopeId?: string;
     decisionIndex?: number;
     stateVersion?: number;
   };

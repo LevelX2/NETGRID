@@ -35,7 +35,8 @@ export function tacticalPlanDeferredDevelopmentInstallShouldYield(
       (component.key === "runner_bank_install_commitment" ||
         component.key === "runner_no_run_economy_install_commitment" ||
         (component.key === "runner_persistent_install_fit" &&
-          ((component.reason ?? "").includes("duplicate:redundant_duplicate") ||
+          (component.value <= -500 ||
+            (component.reason ?? "").includes("duplicate:redundant_duplicate") ||
             (component.reason ?? "").includes("duplicate:useful_backup") ||
             (component.reason ?? "").includes("delta:backup_only")))),
   );
@@ -93,7 +94,8 @@ export function tacticalPlanNoNeedSearchShouldYield(
     overrideChoice.score > 0 &&
     mappedChoice.scoreBreakdown.some(
       (component) =>
-        component.key === "runner_goal_fit_coverage_search_no_need" &&
+        (component.key === "runner_goal_fit_coverage_search_no_need" ||
+          component.key === "runner_goal_fit_coverage_search_saturated") &&
         component.value < 0,
     )
   );
@@ -544,21 +546,39 @@ export function semanticRuntimeChoiceIsProjectedRun(
 }
 
 export function tacticalPlanLowValueRecoveryMappingShouldYield(
+  mapping: PlanStepMappingResult,
   mappedChoice: SemanticRuntimeChoice,
   overrideChoice: SemanticRuntimeChoice,
   scoreGap: number,
 ): boolean {
   if (scoreGap <= 0 || overrideChoice.score <= 0) return false;
   if (
-    overrideChoice.action.type === "gain_credit" ||
-    overrideChoice.action.type === "draw_card"
+    mappedChoice.score > 0 &&
+    (overrideChoice.action.type === "gain_credit" ||
+      overrideChoice.action.type === "draw_card")
   )
     return false;
-  return semanticRuntimeChoiceHasAnyScoreComponent(mappedChoice, [
-    "runner_low_value_recovery_repeat",
-    "runner_late_no_funding_credit_repeat",
-    "runner_basic_setup_over_ready_pressure",
-  ]);
+  if (
+    semanticRuntimeChoiceHasAnyScoreComponent(mappedChoice, [
+      "runner_low_value_recovery_repeat",
+      "runner_late_no_funding_credit_repeat",
+      "runner_basic_setup_over_ready_pressure",
+    ]) ||
+    [
+      "runner_expected_draw_overflow",
+    ].some((key) =>
+      semanticRuntimeChoiceHasScoreBreakdownComponent(mappedChoice, key),
+    )
+  ) {
+    return true;
+  }
+  return (
+    mapping.plan.type !== "runner.survival_defense" &&
+    semanticRuntimeChoiceHasScoreBreakdownComponent(
+      mappedChoice,
+      "runner_rich_basic_credit_without_conversion",
+    )
+  );
 }
 
 export function tacticalPlanRemoteContestMappingBlocksRunOverride(

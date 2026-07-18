@@ -96,6 +96,9 @@ export function buildApplyAction(
     host.actions.afterPerformAction?.(next, legalAction);
     checkWinConditions(next);
     next.stateVersion = before + 1;
+    if (next.pendingChoice) {
+      next.pendingChoice.stateVersion = next.stateVersion;
+    }
     const validation = validateGameState(next);
     if (!validation.ok) {
       return fail(
