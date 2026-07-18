@@ -50,8 +50,8 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/state-runtime-bootstrap.ts:629` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/trigger-ability-runtime-hosts.ts:609` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
 - mechanics_constant_controls_behavior_by_card_id: `packages/engine/src/game/engine-runtime-internal/zone-runtime-services.ts:609` Code Viral Cache / `CODE_VIRAL_CACHE` -> `purge_replacement_with_runner_virus_counter_cleanup`
-- functional_kind_uses_card_name: `scripts/check-ai-derived-facts.mjs:1552` Silver Lining Recovery Protocol / `silver_lining` -> `recovery_protocol_after_runner_action`
-- functional_kind_uses_card_name: `scripts/check-ai-derived-facts.mjs:3767` Shell Traders / `shell_traders` -> `delayed_install_sequence`
+- functional_kind_uses_card_name: `scripts/check-ai-derived-facts.mjs:1555` Silver Lining Recovery Protocol / `silver_lining` -> `recovery_protocol_after_runner_action`
+- functional_kind_uses_card_name: `scripts/check-ai-derived-facts.mjs:3770` Shell Traders / `shell_traders` -> `delayed_install_sequence`
 
 ## Abstraktionsplan
 

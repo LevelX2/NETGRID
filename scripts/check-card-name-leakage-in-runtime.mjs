@@ -505,6 +505,10 @@ function isRegistryPath(path) {
   return path === "packages/engine/src/card-implementations/registry.ts";
 }
 
+function isAiDataNormalizationPath(path) {
+  return /^scripts\/normalize-ai-[^/]+\.mjs$/.test(path);
+}
+
 function isCommentOnly(line) {
   return line.startsWith("//") || line.startsWith("*") || line.startsWith("/*");
 }
@@ -512,6 +516,9 @@ function isCommentOnly(line) {
 function classify({ path, token, snippet, tokenSource }) {
   if (isTestFile(path)) return "test_only_card_name";
   if (isRegistryPath(path)) return "allowed_catalog_reference";
+  // Versioned data-maintenance scripts intentionally address concrete cards;
+  // they are not runtime dispatch or reusable engine mechanics.
+  if (isAiDataNormalizationPath(path)) return "allowed_catalog_reference";
   if (isCatalogPath(path)) {
     if (snippet.includes("cardDefinitionId") || isCommentOnly(snippet))
       return "allowed_catalog_reference";

@@ -19,7 +19,7 @@ Primary agent: `architecture-review-agent`
 | E07     | integriert  | Commit `7f7d8a163`; letzte 186 Signaturen typisiert; Delegate-Schuld null  |
 | E08     | integriert  | Commit `e24d17f39`, Main-Abgleich `e5d5a4f0d`; Runtime-Zyklus entfernt     |
 | E09     | integriert  | Commit `17efeb4f3`, Main-Abgleich `84f3e075b`; Turn-Runtime geteilt        |
-| E10     | verifiziert | 1.736 Engine-, 2.624 KI-, 635 Web- und 12 Shared-Tests grün                |
+| E10     | verifiziert | 1.736 Engine-, 2.723 KI- und 12 Shared-Tests; Web 633/635 nach Main-Sync   |
 | E11-E16 | ausstehend  | sequenziell nach E10                                                       |
 
 ## Quelle und Vorgabe
@@ -179,6 +179,12 @@ Sicherheitsgrenzen geteilt. Jede Extraktion erhält paketnahe Tests; fachliche
 Nur aktuelle Producer und Consumer werden erhalten. Versionierte Payloadfelder
 ohne aktuellen Nutzen entfallen. PublicEvent, Chronicle, Replay und AI erhalten
 einen gemeinsamen typisierten, side-sicheren Vertrag.
+
+Nach dem Abgleich mit `main` auf `b668e339a` bleiben zwei Web-Katalogtests rot.
+Beide Fehler sind auf diesem `main`-Stand identisch reproduzierbar und betreffen
+die dort neu integrierten AI-Hint-Erwartungen, nicht den E10-Payload-Vertrag.
+Engine, KI, Shared, Serverprojektionen und alle E10-fokussierten Webtests sind
+auf dem kombinierten Stand grün.
 
 ### E14 Registry und Coverage
 
