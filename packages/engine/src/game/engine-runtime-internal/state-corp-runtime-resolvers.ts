@@ -129,9 +129,7 @@ import {
   configureLegalActionHostComposition,
   type LegalActionHostCompositionHost,
 } from "../legal-action-hosts";
-import {
-  configureEventContextHostComposition,
-} from "../events/event-context-hosts";
+import { configureEventContextHostComposition } from "../events/event-context-hosts";
 import { BAD_PUBLICITY_LOSS_THRESHOLD } from "../win-conditions";
 import {
   calculateRunnerLink as calculateRunnerLinkInTrace,
@@ -210,10 +208,7 @@ import {
   installCard as executeInstallCard,
   type InstallCardHost,
 } from "../install/install-card";
-import {
-  rezCard as executeRezCard,
-  type RezCardHost,
-} from "../rez/rez-card";
+import { rezCard as executeRezCard, type RezCardHost } from "../rez/rez-card";
 import {
   addRunnerTagsWithPrevention,
   aggregateDamageSummaries,
@@ -244,12 +239,8 @@ import {
   buildRunnerAgendaPointInstallAction,
   buildRunnerSelectedServerInstallAction,
 } from "../turn/runner-install-context-actions";
-import {
-  buildRunnerHostedProgramInstallAction,
-} from "../turn/runner-hosted-install-actions";
-import {
-  buildRunnerProgramTrashBeforeInstallAction,
-} from "../turn/runner-program-trash-install-actions";
+import { buildRunnerHostedProgramInstallAction } from "../turn/runner-hosted-install-actions";
+import { buildRunnerProgramTrashBeforeInstallAction } from "../turn/runner-program-trash-install-actions";
 import { buildRunnerStackSearchProgramToGripAction } from "../turn/runner-hidden-zone-search-actions";
 import {
   buildRunnerDelayedInstallRemoveCounterAction,
@@ -405,9 +396,7 @@ import {
   isSupportedEncounterTraceSuccessEffect,
   type EncounterPrintedEffectHost,
 } from "../run/encounter-printed-effects";
-import {
-  type EncounterPrintedNonTraceHost,
-} from "../run/encounter-printed-nontrace-effects";
+import { type EncounterPrintedNonTraceHost } from "../run/encounter-printed-nontrace-effects";
 import {
   breakAbilityMatchesIce,
   breakAbilityMatchesSubroutine,
@@ -423,18 +412,10 @@ import {
   createGameCardImplementationRuntimeDeps,
   type GameCardImplementationRuntimeDepsHost,
 } from "../card-implementation/card-implementation-runtime-deps";
-import {
-  type HiddenZoneRuntimeDepsHost,
-} from "../card-implementation/hidden-zone-runtime-deps";
-import {
-  type InstallRezRuntimeDepsHost,
-} from "../card-implementation/install-rez-runtime-deps";
-import {
-  type CounterLifecycleRuntimeDepsHost,
-} from "../card-implementation/counter-lifecycle-runtime-deps";
-import {
-  type TraceRuntimeDepsHost,
-} from "../card-implementation/trace-runtime-deps";
+import { type HiddenZoneRuntimeDepsHost } from "../card-implementation/hidden-zone-runtime-deps";
+import { type InstallRezRuntimeDepsHost } from "../card-implementation/install-rez-runtime-deps";
+import { type CounterLifecycleRuntimeDepsHost } from "../card-implementation/counter-lifecycle-runtime-deps";
+import { type TraceRuntimeDepsHost } from "../card-implementation/trace-runtime-deps";
 import {
   beginEncounter,
   isApproachIceExposeViewingWindowOpen,
@@ -623,9 +604,7 @@ import {
   corpInstalledEconomyActionProfileForPayload,
   type EconomyActionProfile,
 } from "../../mechanics/payment-costs";
-import {
-  isP358HiddenReplacementCompatibilityChoiceSource,
-} from "../../compatibility/payload-compatibility";
+import { isP358HiddenReplacementCompatibilityChoiceSource } from "../../compatibility/payload-compatibility";
 import {
   ALL_NIGHTER_ID,
   ARMADILLO_ARMORED_ROAD_HOME_ID,
@@ -677,9 +656,7 @@ import {
   ACCESS_NET_DAMAGE_UPGRADE_SOURCE,
   ACCESS_TRACE_DAMAGE_UPGRADE_SOURCE,
 } from "../../mechanics/server-upgrades";
-import {
-  RUN_TAX_UPGRADE_SOURCES,
-} from "../../mechanics/trace-tags";
+import { RUN_TAX_UPGRADE_SOURCES } from "../../mechanics/trace-tags";
 import { snapshotPersistentStealCostModifiersForSource } from "../../ability-engine/steal-cost-modifiers";
 import { createCardImplementationEffectAdapters } from "../../ability-engine/card-implementation-effect-adapters";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
@@ -716,7 +693,9 @@ import type {
 } from "../../ability-engine/definition-types";
 import type { RuntimeDeps } from "./runtime-shared";
 
-export function createStateCorpRuntimeResolvers(deps: RuntimeDeps) {
+export function createStateCorpRuntimeResolvers(
+  deps: RuntimeDeps,
+): import("./state-corp-runtime-port").StateCorpRuntimePort {
   const {
     DEFAULT_CONTROLLERS,
     INITIAL_HAND_SIZE,
@@ -836,7 +815,7 @@ export function createStateCorpRuntimeResolvers(deps: RuntimeDeps) {
     discardRandomCorpHqCards,
     drawRunnerCard,
     drawRunnerCards,
-    dupreStrengthCounterBonus,
+    selectedServerIcebreakerStrengthCounterBonus,
     edgerunnerTempsInstallActionsRemaining,
     effectiveAgendaDifficultyDeps,
     effectiveSubtypesForCard,
@@ -1186,83 +1165,90 @@ export function createStateCorpRuntimeResolvers(deps: RuntimeDeps) {
     virusCounterImplementationForCard,
     virusCounterImplementationForDefinition,
     visibleVirusCounterTargetIds,
-    withoutVariableIceState
+    withoutVariableIceState,
   } = deps;
 
-function serverDifficultyIncreaseFromRunCounters(
-  state: GameState,
-  agendaId: CardInstanceId,
-): number {
-  const zone = mustInstance(state.cardInstances, agendaId).zone;
-  if (zone.side !== "corp" || zone.zone !== "serverRoot" || !zone.serverId)
-    return 0;
-  return Math.max(
-    0,
-    Math.floor(
-      Math.max(
-        0,
-        Math.floor(state.serverAgendaCostCountersByServer?.[zone.serverId] ?? 0),
-      ) / 2,
-    ),
-  );
-}
-
-function serverDifficultyReductionFromUpgrades(
-  state: GameState,
-  agendaId: CardInstanceId,
-): number {
-  const zone = mustInstance(state.cardInstances, agendaId).zone;
-  if (zone.side !== "corp" || zone.zone !== "serverRoot" || !zone.serverId)
-    return 0;
-  const server = mustServer(state, zone.serverId);
-  return server.root.reduce((sum, rootCardId) => {
-    if (rootCardId === agendaId) return sum;
-    const instance = mustInstance(state.cardInstances, rootCardId);
-    if (!instance.rezzed) return sum;
-    const definitionId = definitionFor(state, rootCardId).id;
-    return SERVER_DIFFICULTY_UPGRADE_SOURCES.has(definitionId) ? sum + 1 : sum;
-  }, 0);
-}
-
-function swapCorpHqAndRdTop(state: GameState): void {
-  const hqCardId = state.corp.hq[0];
-  const rdCardId = state.corp.rd[0];
-  if (!hqCardId || !rdCardId)
-    throw new Error("HQ und R&D brauchen je eine Karte fuer Swap.");
-  state.corp.hq[0] = rdCardId;
-  state.corp.rd[0] = hqCardId;
-  state.cardInstances[hqCardId] = {
-    ...mustInstance(state.cardInstances, hqCardId),
-    zone: { side: "corp", zone: "rd" },
-  };
-  state.cardInstances[rdCardId] = {
-    ...mustInstance(state.cardInstances, rdCardId),
-    zone: { side: "corp", zone: "hq" },
-  };
-}
-
-function spendRecurringTraceCreditPool(state: GameState, amount: number): number {
-  if (!Number.isInteger(amount) || amount < 0)
-    throw new Error("Recurring-Trace-Credit-Ausgabe ist ungueltig.");
-  let remaining = amount;
-  let spent = 0;
-  for (const cardId of recurringTraceCreditPoolSourceIds(state)) {
-    if (remaining <= 0) break;
-    const current = cardCounter(state, cardId, "bit");
-    const spend = Math.min(current, remaining);
-    spendCardCounter(state, cardId, "bit", spend);
-    remaining -= spend;
-    spent += spend;
+  function serverDifficultyIncreaseFromRunCounters(
+    state: GameState,
+    agendaId: CardInstanceId,
+  ): number {
+    const zone = mustInstance(state.cardInstances, agendaId).zone;
+    if (zone.side !== "corp" || zone.zone !== "serverRoot" || !zone.serverId)
+      return 0;
+    return Math.max(
+      0,
+      Math.floor(
+        Math.max(
+          0,
+          Math.floor(
+            state.serverAgendaCostCountersByServer?.[zone.serverId] ?? 0,
+          ),
+        ) / 2,
+      ),
+    );
   }
-  if (remaining > 0)
-    throw new Error("Der Recurring-Trace-Credit-Pool reicht nicht aus.");
-  return spent;
-}
+
+  function serverDifficultyReductionFromUpgrades(
+    state: GameState,
+    agendaId: CardInstanceId,
+  ): number {
+    const zone = mustInstance(state.cardInstances, agendaId).zone;
+    if (zone.side !== "corp" || zone.zone !== "serverRoot" || !zone.serverId)
+      return 0;
+    const server = mustServer(state, zone.serverId);
+    return server.root.reduce((sum, rootCardId) => {
+      if (rootCardId === agendaId) return sum;
+      const instance = mustInstance(state.cardInstances, rootCardId);
+      if (!instance.rezzed) return sum;
+      const definitionId = definitionFor(state, rootCardId).id;
+      return SERVER_DIFFICULTY_UPGRADE_SOURCES.has(definitionId)
+        ? sum + 1
+        : sum;
+    }, 0);
+  }
+
+  function swapCorpHqAndRdTop(state: GameState): void {
+    const hqCardId = state.corp.hq[0];
+    const rdCardId = state.corp.rd[0];
+    if (!hqCardId || !rdCardId)
+      throw new Error("HQ und R&D brauchen je eine Karte fuer Swap.");
+    state.corp.hq[0] = rdCardId;
+    state.corp.rd[0] = hqCardId;
+    state.cardInstances[hqCardId] = {
+      ...mustInstance(state.cardInstances, hqCardId),
+      zone: { side: "corp", zone: "rd" },
+    };
+    state.cardInstances[rdCardId] = {
+      ...mustInstance(state.cardInstances, rdCardId),
+      zone: { side: "corp", zone: "hq" },
+    };
+  }
+
+  function spendRecurringTraceCreditPool(
+    state: GameState,
+    amount: number,
+  ): number {
+    if (!Number.isInteger(amount) || amount < 0)
+      throw new Error("Recurring-Trace-Credit-Ausgabe ist ungueltig.");
+    let remaining = amount;
+    let spent = 0;
+    for (const cardId of recurringTraceCreditPoolSourceIds(state)) {
+      if (remaining <= 0) break;
+      const current = cardCounter(state, cardId, "bit");
+      const spend = Math.min(current, remaining);
+      spendCardCounter(state, cardId, "bit", spend);
+      remaining -= spend;
+      spent += spend;
+    }
+    if (remaining > 0)
+      throw new Error("Der Recurring-Trace-Credit-Pool reicht nicht aus.");
+    return spent;
+  }
 
   return {
     serverDifficultyIncreaseFromRunCounters,
     serverDifficultyReductionFromUpgrades,
     swapCorpHqAndRdTop,
-    spendRecurringTraceCreditPool
+    spendRecurringTraceCreditPool,
   };
 }

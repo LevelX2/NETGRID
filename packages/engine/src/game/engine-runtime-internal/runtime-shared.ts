@@ -27,9 +27,7 @@ import type { CardRunnerEventLongtailImplementation } from "../../ability-engine
 export type RuntimeDeps = ReturnType<
   (typeof import("./state-runtime-bootstrap"))["initializeStateRuntimeBootstrap"]
 > & {
-  turnCorpRuntime?: ReturnType<
-    (typeof import("./turn-corp-runtime"))["createTurnCorpRuntime"]
-  >;
+  turnCorpRuntime?: import("./turn-corp-runtime-port").TurnCorpRuntimePort;
 };
 export type {
   GameState,

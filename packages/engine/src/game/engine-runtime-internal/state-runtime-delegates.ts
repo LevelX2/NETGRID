@@ -1,5 +1,6 @@
 import { runtimeDelegate, runtimeDelegates } from "./runtime-delegate-store";
 import type {
+  StateClusterRuntimePortFunction,
   StateRuntimePortFunction,
   StateRuntimePortGroups,
 } from "./runtime-port-contracts";
@@ -398,147 +399,137 @@ export const assertCorpIceInstallCostValid: StateRuntimePortFunction<
 > = (...args) =>
   typedRuntimePorts.stateRuntimeServices.assertCorpIceInstallCostValid(...args);
 
-export function serverDifficultyIncreaseFromRunCounters(...args: any[]): any {
-  return runtimeDelegate(
-    "stateCorpRuntimeResolvers",
-    "serverDifficultyIncreaseFromRunCounters",
-  )(...args);
-}
+export const serverDifficultyIncreaseFromRunCounters: StateClusterRuntimePortFunction<
+  "stateCorpRuntimeResolvers",
+  "serverDifficultyIncreaseFromRunCounters"
+> = (...args) =>
+  typedRuntimePorts.stateCorpRuntimeResolvers.serverDifficultyIncreaseFromRunCounters(
+    ...args,
+  );
 
-export function serverDifficultyReductionFromUpgrades(...args: any[]): any {
-  return runtimeDelegate(
-    "stateCorpRuntimeResolvers",
-    "serverDifficultyReductionFromUpgrades",
-  )(...args);
-}
+export const serverDifficultyReductionFromUpgrades: StateClusterRuntimePortFunction<
+  "stateCorpRuntimeResolvers",
+  "serverDifficultyReductionFromUpgrades"
+> = (...args) =>
+  typedRuntimePorts.stateCorpRuntimeResolvers.serverDifficultyReductionFromUpgrades(
+    ...args,
+  );
 
-export function discardRandomCorpHqCards(...args: any[]): any {
-  return runtimeDelegate(
-    "lifecycleRuntime",
-    "discardRandomCorpHqCards",
-  )(...args);
-}
+export const discardRandomCorpHqCards: StateClusterRuntimePortFunction<
+  "lifecycleRuntime",
+  "discardRandomCorpHqCards"
+> = (...args) =>
+  typedRuntimePorts.lifecycleRuntime.discardRandomCorpHqCards(...args);
 
-export function trashRunnerInstalledProgram(...args: any[]): any {
-  return runtimeDelegate(
-    "lifecycleRuntime",
-    "trashRunnerInstalledProgram",
-  )(...args);
-}
+export const trashRunnerInstalledProgram: StateClusterRuntimePortFunction<
+  "lifecycleRuntime",
+  "trashRunnerInstalledProgram"
+> = (...args) =>
+  typedRuntimePorts.lifecycleRuntime.trashRunnerInstalledProgram(...args);
 
-export function backupProgramsOnTrashBackupHardwareBeforeTrash(
-  ...args: any[]
-): any {
-  return runtimeDelegate(
-    "lifecycleRuntime",
-    "backupProgramsOnTrashBackupHardwareBeforeTrash",
-  )(...args);
-}
+export const backupProgramsOnTrashBackupHardwareBeforeTrash: StateClusterRuntimePortFunction<
+  "lifecycleRuntime",
+  "backupProgramsOnTrashBackupHardwareBeforeTrash"
+> = (...args) =>
+  typedRuntimePorts.lifecycleRuntime.backupProgramsOnTrashBackupHardwareBeforeTrash(
+    ...args,
+  );
 
-export function runnerProgramUsesMemory(...args: any[]): any {
-  return runtimeDelegate(
-    "lifecycleRuntime",
-    "runnerProgramUsesMemory",
-  )(...args);
-}
+export const runnerProgramUsesMemory: StateClusterRuntimePortFunction<
+  "lifecycleRuntime",
+  "runnerProgramUsesMemory"
+> = (...args) =>
+  typedRuntimePorts.lifecycleRuntime.runnerProgramUsesMemory(...args);
 
-export function trashRunnerInstalledCardToHeap(...args: any[]): any {
-  return runtimeDelegate(
-    "lifecycleRuntime",
-    "trashRunnerInstalledCardToHeap",
-  )(...args);
-}
+export const trashRunnerInstalledCardToHeap: StateClusterRuntimePortFunction<
+  "lifecycleRuntime",
+  "trashRunnerInstalledCardToHeap"
+> = (...args) =>
+  typedRuntimePorts.lifecycleRuntime.trashRunnerInstalledCardToHeap(...args);
 
-export function returnRunnerInstalledCardToGrip(...args: any[]): any {
-  return runtimeDelegate(
-    "lifecycleRuntime",
-    "returnRunnerInstalledCardToGrip",
-  )(...args);
-}
+export const returnRunnerInstalledCardToGrip: StateClusterRuntimePortFunction<
+  "lifecycleRuntime",
+  "returnRunnerInstalledCardToGrip"
+> = (...args) =>
+  typedRuntimePorts.lifecycleRuntime.returnRunnerInstalledCardToGrip(...args);
 
-export function returnRunnerInstalledProgramsToGripForAccess(
-  ...args: any[]
-): any {
-  return runtimeDelegate(
-    "lifecycleRuntime",
-    "returnRunnerInstalledProgramsToGripForAccess",
-  )(...args);
-}
+export const returnRunnerInstalledProgramsToGripForAccess: StateClusterRuntimePortFunction<
+  "lifecycleRuntime",
+  "returnRunnerInstalledProgramsToGripForAccess"
+> = (...args) =>
+  typedRuntimePorts.lifecycleRuntime.returnRunnerInstalledProgramsToGripForAccess(
+    ...args,
+  );
 
-export function trashCorpInstalledCardToArchives(...args: any[]): any {
-  return runtimeDelegate(
-    "lifecycleRuntime",
-    "trashCorpInstalledCardToArchives",
-  )(...args);
-}
+export const trashCorpInstalledCardToArchives: StateClusterRuntimePortFunction<
+  "lifecycleRuntime",
+  "trashCorpInstalledCardToArchives"
+> = (...args) =>
+  typedRuntimePorts.lifecycleRuntime.trashCorpInstalledCardToArchives(...args);
 
-export function cleanupCorpRootAgendaOrNodeCapacityAfterLeavePlay(
-  ...args: any[]
-): any {
-  return runtimeDelegate(
-    "lifecycleRuntime",
-    "cleanupCorpRootAgendaOrNodeCapacityAfterLeavePlay",
-  )(...args);
-}
+export const cleanupCorpRootAgendaOrNodeCapacityAfterLeavePlay: StateClusterRuntimePortFunction<
+  "lifecycleRuntime",
+  "cleanupCorpRootAgendaOrNodeCapacityAfterLeavePlay"
+> = (...args) =>
+  typedRuntimePorts.lifecycleRuntime.cleanupCorpRootAgendaOrNodeCapacityAfterLeavePlay(
+    ...args,
+  );
 
-export function drawRunnerCard(...args: any[]): any {
-  return runtimeDelegate("lifecycleRuntime", "drawRunnerCard")(...args);
-}
+export const drawRunnerCard: StateClusterRuntimePortFunction<
+  "lifecycleRuntime",
+  "drawRunnerCard"
+> = (...args) => typedRuntimePorts.lifecycleRuntime.drawRunnerCard(...args);
 
-export function activeCrashEverettSourceId(...args: any[]): any {
-  return runtimeDelegate(
-    "lifecycleRuntime",
-    "activeCrashEverettSourceId",
-  )(...args);
-}
+export const activeCrashEverettSourceId: StateClusterRuntimePortFunction<
+  "lifecycleRuntime",
+  "activeCrashEverettSourceId"
+> = (...args) =>
+  typedRuntimePorts.lifecycleRuntime.activeCrashEverettSourceId(...args);
 
-export function startCrashEverettDrawChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "lifecycleRuntime",
-    "startCrashEverettDrawChoice",
-  )(...args);
-}
+export const startCrashEverettDrawChoice: StateClusterRuntimePortFunction<
+  "lifecycleRuntime",
+  "startCrashEverettDrawChoice"
+> = (...args) =>
+  typedRuntimePorts.lifecycleRuntime.startCrashEverettDrawChoice(...args);
 
-export function drawRunnerCards(...args: any[]): any {
-  return runtimeDelegate("lifecycleRuntime", "drawRunnerCards")(...args);
-}
+export const drawRunnerCards: StateClusterRuntimePortFunction<
+  "lifecycleRuntime",
+  "drawRunnerCards"
+> = (...args) => typedRuntimePorts.lifecycleRuntime.drawRunnerCards(...args);
 
-export function resolveCrashEverettDrawChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "lifecycleRuntime",
-    "resolveCrashEverettDrawChoice",
-  )(...args);
-}
+export const resolveCrashEverettDrawChoice: StateClusterRuntimePortFunction<
+  "lifecycleRuntime",
+  "resolveCrashEverettDrawChoice"
+> = (...args) =>
+  typedRuntimePorts.lifecycleRuntime.resolveCrashEverettDrawChoice(...args);
 
-export function resolveRunnerDrawSequenceChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "lifecycleRuntime",
-    "resolveRunnerDrawSequenceChoice",
-  )(...args);
-}
+export const resolveRunnerDrawSequenceChoice: StateClusterRuntimePortFunction<
+  "lifecycleRuntime",
+  "resolveRunnerDrawSequenceChoice"
+> = (...args) =>
+  typedRuntimePorts.lifecycleRuntime.resolveRunnerDrawSequenceChoice(...args);
 
-export function resumeRunnerDrawSequenceAfterTagPrevention(
-  ...args: any[]
-): any {
-  return runtimeDelegate(
-    "lifecycleRuntime",
-    "resumeRunnerDrawSequenceAfterTagPrevention",
-  )(...args);
-}
+export const resumeRunnerDrawSequenceAfterTagPrevention: StateClusterRuntimePortFunction<
+  "lifecycleRuntime",
+  "resumeRunnerDrawSequenceAfterTagPrevention"
+> = (...args) =>
+  typedRuntimePorts.lifecycleRuntime.resumeRunnerDrawSequenceAfterTagPrevention(
+    ...args,
+  );
 
-export function swapCorpHqAndRdTop(...args: any[]): any {
-  return runtimeDelegate(
-    "stateCorpRuntimeResolvers",
-    "swapCorpHqAndRdTop",
-  )(...args);
-}
+export const swapCorpHqAndRdTop: StateClusterRuntimePortFunction<
+  "stateCorpRuntimeResolvers",
+  "swapCorpHqAndRdTop"
+> = (...args) =>
+  typedRuntimePorts.stateCorpRuntimeResolvers.swapCorpHqAndRdTop(...args);
 
-export function spendRecurringTraceCreditPool(...args: any[]): any {
-  return runtimeDelegate(
-    "stateCorpRuntimeResolvers",
-    "spendRecurringTraceCreditPool",
-  )(...args);
-}
+export const spendRecurringTraceCreditPool: StateClusterRuntimePortFunction<
+  "stateCorpRuntimeResolvers",
+  "spendRecurringTraceCreditPool"
+> = (...args) =>
+  typedRuntimePorts.stateCorpRuntimeResolvers.spendRecurringTraceCreditPool(
+    ...args,
+  );
 
 export function resolveTraceHardwareWreckerSuccess(...args: any[]): any {
   return runtimeDelegate(

@@ -327,7 +327,7 @@ export type RunFlowHost = {
       breakerId: CardInstanceId,
       special: string,
     ) => boolean;
-    dupreStrengthCounterBonus: (
+    selectedServerIcebreakerStrengthCounterBonus: (
       state: GameState,
       breakerId: CardInstanceId,
     ) => number;
@@ -639,8 +639,11 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         strengthForIce: (iceId) => host.ice.strengthForIce(state, iceId),
       },
       breaker: {
-        dupreStrengthCounterBonus: (breakerId) =>
-          host.ice.dupreStrengthCounterBonus(state, breakerId),
+        selectedServerIcebreakerStrengthCounterBonus: (breakerId) =>
+          host.ice.selectedServerIcebreakerStrengthCounterBonus(
+            state,
+            breakerId,
+          ),
       },
       payment: {
         availableRunnerRunCredits: (breakerId) =>

@@ -722,7 +722,9 @@ import {
 } from "./turn-action-economy-runtime";
 import { createTurnStartTagContinuationResolver } from "./turn-start-tag-continuation";
 
-export function createTurnRuntimeResolvers(deps: RuntimeDeps) {
+export function createTurnRuntimeResolvers(
+  deps: RuntimeDeps,
+): import("./turn-runtime-port").TurnRuntimePort {
   const {
     DEFAULT_CONTROLLERS,
     INITIAL_HAND_SIZE,
@@ -826,7 +828,7 @@ export function createTurnRuntimeResolvers(deps: RuntimeDeps) {
     discardRandomCorpHqCards,
     drawRunnerCard,
     drawRunnerCards,
-    dupreStrengthCounterBonus,
+    selectedServerIcebreakerStrengthCounterBonus,
     edgerunnerTempsInstallActionsRemaining,
     effectiveAgendaDifficultyDeps,
     effectiveSubtypesForCard,

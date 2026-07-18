@@ -4,50 +4,73 @@
  * string lookup or a duplicate hand-written function contract.
  */
 export type RuntimePortGroups = {
-  actionRuntimeHosts: ReturnType<
-    (typeof import("./action-runtime-hosts"))["createActionRuntimeHosts"]
-  >;
-  cardRuntimeHosts: ReturnType<
-    (typeof import("./card-runtime-hosts"))["createCardRuntimeHosts"]
-  >;
-  cardRuntimeResolvers: ReturnType<
-    (typeof import("./card-runtime-resolvers"))["createCardRuntimeResolvers"]
-  >;
+  actionRuntimeHosts: import("./action-runtime-port").ActionRuntimePort;
+  cardRuntimeHosts: import("./card-runtime-host-port").CardRuntimeHostPort;
+  cardRuntimeResolvers: import("./card-runtime-resolver-port").CardRuntimeResolverPort;
   choiceHiddenZoneResolvers: ReturnType<
     (typeof import("./choice-hidden-zone-resolvers"))["createChoiceHiddenZoneResolvers"]
   >;
   choiceHiddenZoneRuntime: ReturnType<
     (typeof import("./choice-hidden-zone-runtime"))["createChoiceHiddenZoneRuntime"]
   >;
-  corpRuntimeResolvers: ReturnType<
-    (typeof import("./corp-runtime-resolvers"))["createCorpRuntimeResolvers"]
-  >;
+  corpRuntimeResolvers: import("./corp-runtime-port").CorpRuntimePort;
   flowRuntimeHosts: ReturnType<
     (typeof import("./flow-runtime-hosts"))["createFlowRuntimeHosts"]
   >;
-  lifecycleRuntime: ReturnType<
-    (typeof import("./lifecycle-runtime"))["createLifecycleRuntime"]
-  >;
-  stateCorpRuntimeResolvers: ReturnType<
-    (typeof import("./state-corp-runtime-resolvers"))["createStateCorpRuntimeResolvers"]
-  >;
+  lifecycleRuntime: import("./lifecycle-runtime-port").LifecycleRuntimePort;
+  stateCorpRuntimeResolvers: import("./state-corp-runtime-port").StateCorpRuntimePort;
   stateRuntimeResolvers: ReturnType<
     (typeof import("./state-runtime-resolvers"))["createStateRuntimeResolvers"]
   >;
   stateRuntimeServices: import("./state-runtime-services").StateRuntimeServices;
-  turnCorpRuntime: ReturnType<
-    (typeof import("./turn-corp-runtime"))["createTurnCorpRuntime"]
-  >;
-  turnRuntimeResolvers: ReturnType<
-    (typeof import("./turn-runtime-resolvers"))["createTurnRuntimeResolvers"]
-  >;
+  turnCorpRuntime: import("./turn-corp-runtime-port").TurnCorpRuntimePort;
+  turnRuntimeResolvers: import("./turn-runtime-port").TurnRuntimePort;
 };
 
 export type RuntimePortSet = Partial<RuntimePortGroups>;
 
 export type StateRuntimePortGroups = {
+  lifecycleRuntime: import("./lifecycle-runtime-port").LifecycleRuntimePort;
+  stateCorpRuntimeResolvers: import("./state-corp-runtime-port").StateCorpRuntimePort;
   stateRuntimeServices: import("./state-runtime-services").StateRuntimeServices;
 };
+
+export type StateClusterRuntimePortFunction<
+  Group extends keyof StateRuntimePortGroups,
+  Name extends keyof StateRuntimePortGroups[Group],
+> = StateRuntimePortGroups[Group][Name] extends (
+  ...args: infer Arguments
+) => infer Result
+  ? (...args: Arguments) => Result
+  : never;
+
+export type ActionRuntimePortGroups = Pick<
+  RuntimePortGroups,
+  "actionRuntimeHosts" | "corpRuntimeResolvers" | "turnRuntimeResolvers"
+>;
+
+export type ActionRuntimePortFunction<
+  Group extends keyof ActionRuntimePortGroups,
+  Name extends keyof ActionRuntimePortGroups[Group],
+> = ActionRuntimePortGroups[Group][Name] extends (
+  ...args: infer Arguments
+) => infer Result
+  ? (...args: Arguments) => Result
+  : never;
+
+export type CardRuntimePortGroups = Pick<
+  RuntimePortGroups,
+  "cardRuntimeHosts" | "cardRuntimeResolvers"
+>;
+
+export type CardRuntimePortFunction<
+  Group extends keyof CardRuntimePortGroups,
+  Name extends keyof CardRuntimePortGroups[Group],
+> = CardRuntimePortGroups[Group][Name] extends (
+  ...args: infer Arguments
+) => infer Result
+  ? (...args: Arguments) => Result
+  : never;
 
 export type StateRuntimePortFunction<
   Name extends keyof StateRuntimePortGroups["stateRuntimeServices"],

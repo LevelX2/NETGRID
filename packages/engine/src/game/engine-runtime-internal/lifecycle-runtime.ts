@@ -25,7 +25,9 @@ import type {
 } from "./runtime-shared";
 import type { CardLeavePlayCleanupImplementation } from "../../ability-engine/definition-types";
 
-export function createLifecycleRuntime(deps: RuntimeDeps) {
+export function createLifecycleRuntime(
+  deps: RuntimeDeps,
+): import("./lifecycle-runtime-port").LifecycleRuntimePort {
   const {
     HOST_RETURN_HARDWARE_SOURCE,
     NEVINYRRAL_ID,

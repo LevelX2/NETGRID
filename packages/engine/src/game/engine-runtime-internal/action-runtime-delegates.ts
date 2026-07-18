@@ -1,738 +1,757 @@
-import { runtimeDelegate } from "./runtime-delegate-store";
-
-export function corpRunnerActionPaidWindowActions(...args: any[]): any {
-  return runtimeDelegate(
-    "actionRuntimeHosts",
-    "corpRunnerActionPaidWindowActions",
-  )(...args);
-}
-
-export function specialZoneHarnessActions(...args: any[]): any {
-  return runtimeDelegate(
-    "actionRuntimeHosts",
-    "specialZoneHarnessActions",
-  )(...args);
-}
-
-export function turnBasicExecutionHost(...args: any[]): any {
-  return runtimeDelegate(
-    "actionRuntimeHosts",
-    "turnBasicExecutionHost",
-  )(...args);
-}
-
-export function creditEconomyExecutionHost(...args: any[]): any {
-  return runtimeDelegate(
-    "actionRuntimeHosts",
-    "creditEconomyExecutionHost",
-  )(...args);
-}
-
-export function resolveEndTurnTagIfRunnerReceivedTag(...args: any[]): any {
-  return runtimeDelegate(
-    "turnRuntimeResolvers",
-    "resolveEndTurnTagIfRunnerReceivedTag",
-  )(...args);
-}
-
-export function resumeEndTurnAfterTagPrevention(...args: any[]): any {
-  return runtimeDelegate(
-    "turnRuntimeResolvers",
-    "resumeEndTurnAfterTagPrevention",
-  )(...args);
-}
-
-export function resolveFieldReporterEndOfRunnerTurn(...args: any[]): any {
-  return runtimeDelegate(
-    "turnRuntimeResolvers",
-    "resolveFieldReporterEndOfRunnerTurn",
-  )(...args);
-}
-
-export function resolveDelayedEndTurnDamageEffects(...args: any[]): any {
-  return runtimeDelegate(
-    "turnRuntimeResolvers",
-    "resolveDelayedEndTurnDamageEffects",
-  )(...args);
-}
-
-export function endTurn(...args: any[]): any {
-  return runtimeDelegate("turnRuntimeResolvers", "endTurn")(...args);
-}
-
-export function resolveTemporaryProgramInstallReturns(
-  ...args: any[]
-): any {
-  return runtimeDelegate(
-    "turnRuntimeResolvers",
-    "resolveTemporaryProgramInstallReturns",
-  )(...args);
-}
-
-export function resolveCorpObligationEndOfTurn(...args: any[]): any {
-  return runtimeDelegate(
-    "turnRuntimeResolvers",
-    "resolveCorpObligationEndOfTurn",
-  )(...args);
-}
-
-export function startDiscardPhase(...args: any[]): any {
-  return runtimeDelegate("turnRuntimeResolvers", "startDiscardPhase")(...args);
-}
-
-export function processDiscardStep(...args: any[]): any {
-  return runtimeDelegate("turnRuntimeResolvers", "processDiscardStep")(...args);
-}
-
-export function completeDiscardPhase(...args: any[]): any {
-  return runtimeDelegate(
-    "turnRuntimeResolvers",
-    "completeDiscardPhase",
-  )(...args);
-}
-
-export function appendResolvedEffectsToPayload(...args: any[]): any {
-  return runtimeDelegate(
-    "turnRuntimeResolvers",
-    "appendResolvedEffectsToPayload",
-  )(...args);
-}
-
-export function automaticGainCreditsEffect(...args: any[]): any {
-  return runtimeDelegate(
-    "turnRuntimeResolvers",
-    "automaticGainCreditsEffect",
-  )(...args);
-}
-
-export function automaticLoseCreditsEffect(...args: any[]): any {
-  return runtimeDelegate(
-    "turnRuntimeResolvers",
-    "automaticLoseCreditsEffect",
-  )(...args);
-}
-
-export function automaticDrawCardsEffect(...args: any[]): any {
-  return runtimeDelegate(
-    "turnRuntimeResolvers",
-    "automaticDrawCardsEffect",
-  )(...args);
-}
-
-export function automaticTagEffect(...args: any[]): any {
-  return runtimeDelegate("turnRuntimeResolvers", "automaticTagEffect")(...args);
-}
-
-export function automaticTrashCardEffect(...args: any[]): any {
-  return runtimeDelegate(
-    "turnRuntimeResolvers",
-    "automaticTrashCardEffect",
-  )(...args);
-}
-
-export function automaticCounterChangeEffect(...args: any[]): any {
-  return runtimeDelegate(
-    "turnRuntimeResolvers",
-    "automaticCounterChangeEffect",
-  )(...args);
-}
-
-export function automaticStealAgendaEffect(...args: any[]): any {
-  return runtimeDelegate(
-    "turnRuntimeResolvers",
-    "automaticStealAgendaEffect",
-  )(...args);
-}
-
-export function publicCardTitle(...args: any[]): any {
-  return runtimeDelegate("turnRuntimeResolvers", "publicCardTitle")(...args);
-}
-
-export function applyRunnerForgoNextAction(...args: any[]): any {
-  return runtimeDelegate(
-    "turnRuntimeResolvers",
-    "applyRunnerForgoNextAction",
-  )(...args);
-}
-
-export function addRunnerFutureActionDebt(...args: any[]): any {
-  return runtimeDelegate(
-    "turnRuntimeResolvers",
-    "addRunnerFutureActionDebt",
-  )(...args);
-}
-
-export function consumeRunnerFutureActionDebt(...args: any[]): any {
-  return runtimeDelegate(
-    "turnRuntimeResolvers",
-    "consumeRunnerFutureActionDebt",
-  )(...args);
-}
-
-export function filterActionsForRestrictedExtraActions(...args: any[]): any {
-  return runtimeDelegate(
-    "turnRuntimeResolvers",
-    "filterActionsForRestrictedExtraActions",
-  )(...args);
-}
-
-export function consumeRestrictedExtraActionForAction(...args: any[]): any {
-  return runtimeDelegate(
-    "turnRuntimeResolvers",
-    "consumeRestrictedExtraActionForAction",
-  )(...args);
-}
-
-export function acceptExtraActionOffer(...args: any[]): any {
-  return runtimeDelegate(
-    "turnRuntimeResolvers",
-    "acceptExtraActionOffer",
-  )(...args);
-}
-
-export function declineExtraActionOffer(...args: any[]): any {
-  return runtimeDelegate(
-    "turnRuntimeResolvers",
-    "declineExtraActionOffer",
-  )(...args);
-}
-
-export function resolvePdcaCounterAction(...args: any[]): any {
-  return runtimeDelegate(
-    "turnRuntimeResolvers",
-    "resolvePdcaCounterAction",
-  )(...args);
-}
-
-export function resolveForcedActionNotPossible(...args: any[]): any {
-  return runtimeDelegate(
-    "turnRuntimeResolvers",
-    "resolveForcedActionNotPossible",
-  )(...args);
-}
-
-export function startCorpTurn(...args: any[]): any {
-  return runtimeDelegate("turnRuntimeResolvers", "startCorpTurn")(...args);
-}
-
-export function startRunnerTurn(...args: any[]): any {
-  return runtimeDelegate("turnRuntimeResolvers", "startRunnerTurn")(...args);
-}
-
-export function resumeStartOfTurnAfterTagPrevention(...args: any[]): any {
-  return runtimeDelegate(
-    "turnRuntimeResolvers",
-    "resumeStartOfTurnAfterTagPrevention",
-  )(...args);
-}
-
-export function untapRunnerCardsAtTurnStart(...args: any[]): any {
-  return runtimeDelegate(
-    "turnRuntimeResolvers",
-    "untapRunnerCardsAtTurnStart",
-  )(...args);
-}
-
-export function resolveDelayedAccessEffects(...args: any[]): any {
-  return runtimeDelegate(
-    "turnRuntimeResolvers",
-    "resolveDelayedAccessEffects",
-  )(...args);
-}
-
-export function applyCorpStartOfTurnEffects(...args: any[]): any {
-  return runtimeDelegate(
-    "turnRuntimeResolvers",
-    "applyCorpStartOfTurnEffects",
-  )(...args);
-}
-
-export function applyPurgeableRunnerVirusCorpStartEffects(...args: any[]): any {
-  return runtimeDelegate(
-    "turnRuntimeResolvers",
-    "applyPurgeableRunnerVirusCorpStartEffects",
-  )(...args);
-}
-
-export function virusCounterDrawsAtCorpStart(...args: any[]): any {
-  return runtimeDelegate(
-    "turnRuntimeResolvers",
-    "virusCounterDrawsAtCorpStart",
-  )(...args);
-}
-
-export function skivvissCounterTotal(...args: any[]): any {
-  return runtimeDelegate(
-    "turnRuntimeResolvers",
-    "skivvissCounterTotal",
-  )(...args);
-}
-
-export function virusCounterCascadeTrashAtCorpStart(...args: any[]): any {
-  return runtimeDelegate(
-    "turnRuntimeResolvers",
-    "virusCounterCascadeTrashAtCorpStart",
-  )(...args);
-}
-
-export function trashFaceupRdCardsForCascade(...args: any[]): any {
-  return runtimeDelegate(
-    "turnRuntimeResolvers",
-    "trashFaceupRdCardsForCascade",
-  )(...args);
-}
-
-export function applyRunnerStartOfTurnEffects(...args: any[]): any {
-  return runtimeDelegate(
-    "turnRuntimeResolvers",
-    "applyRunnerStartOfTurnEffects",
-  )(...args);
-}
-
-export function applyStartTurnRandomEffectTables(...args: any[]): any {
-  return runtimeDelegate(
-    "turnRuntimeResolvers",
-    "applyStartTurnRandomEffectTables",
-  )(...args);
-}
-
-export function virusCounterCreditsAtRunnerStart(...args: any[]): any {
-  return runtimeDelegate(
-    "turnRuntimeResolvers",
-    "virusCounterCreditsAtRunnerStart",
-  )(...args);
-}
-
-export function startVirusCounterRunnerPrivateLookAtStart(...args: any[]): any {
-  return runtimeDelegate(
-    "turnRuntimeResolvers",
-    "startVirusCounterRunnerPrivateLookAtStart",
-  )(...args);
-}
-
-export function randomCorpHqCardsWithoutReplacement(...args: any[]): any {
-  return runtimeDelegate(
-    "turnRuntimeResolvers",
-    "randomCorpHqCardsWithoutReplacement",
-  )(...args);
-}
-
-export function startRunnerPrivateLookAtSpecificCorpCards(...args: any[]): any {
-  return runtimeDelegate(
-    "turnRuntimeResolvers",
-    "startRunnerPrivateLookAtSpecificCorpCards",
-  )(...args);
-}
-
-export function queueIncubatorStartOfTurnTransforms(...args: any[]): any {
-  return runtimeDelegate(
-    "turnRuntimeResolvers",
-    "queueIncubatorStartOfTurnTransforms",
-  )(...args);
-}
-
-export function startIncubatorTransformChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "turnRuntimeResolvers",
-    "startIncubatorTransformChoice",
-  )(...args);
-}
-
-export function forfeitRunnerAgendaForPointCost(...args: any[]): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "forfeitRunnerAgendaForPointCost",
-  )(...args);
-}
-
-export function forfeitCorpAgendaForPointCost(...args: any[]): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "forfeitCorpAgendaForPointCost",
-  )(...args);
-}
-
-export function activeObligationCount(...args: any[]): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "activeObligationCount",
-  )(...args);
-}
-
-export function addActiveObligation(...args: any[]): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "addActiveObligation",
-  )(...args);
-}
-
-export function removeActiveObligation(...args: any[]): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "removeActiveObligation",
-  )(...args);
-}
-
-export function spendCorpAgendaPointCost(...args: any[]): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "spendCorpAgendaPointCost",
-  )(...args);
-}
-
-export function installedAgendaOperationTarget(...args: any[]): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "installedAgendaOperationTarget",
-  )(...args);
-}
-
-export function corpAgendaCounterOperationTarget(...args: any[]): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "corpAgendaCounterOperationTarget",
-  )(...args);
-}
-
-export function corpScoredAgendaForfeitTargets(...args: any[]): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "corpScoredAgendaForfeitTargets",
-  )(...args);
-}
-
-export function hardwareTrashByCounterEligibleHardwareIds(...args: any[]): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "hardwareTrashByCounterEligibleHardwareIds",
-  )(...args);
-}
-
-export function hardwareTrashByCounterLegalActions(...args: any[]): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "hardwareTrashByCounterLegalActions",
-  )(...args);
-}
-
-export function hardwareTrashByCounterTrashCountFromPayload(...args: any[]): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "hardwareTrashByCounterTrashCountFromPayload",
-  )(...args);
-}
-
-export function resolveHardwareTrashByCounterOperation(...args: any[]): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "resolveHardwareTrashByCounterOperation",
-  )(...args);
-}
-
-export function startHardwareTrashByCounterChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "startHardwareTrashByCounterChoice",
-  )(...args);
-}
-
-export function hardwareTrashByCounterTrashCountFromChoiceSource(
-  ...args: any[]
-): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "hardwareTrashByCounterTrashCountFromChoiceSource",
-  )(...args);
-}
-
-export function resolveHardwareTrashByCounterChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "resolveHardwareTrashByCounterChoice",
-  )(...args);
-}
-
-export function trashHardwareByCounter(...args: any[]): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "trashHardwareByCounter",
-  )(...args);
-}
-
-export function advancementPlacementLegalActions(...args: any[]): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "advancementPlacementLegalActions",
-  )(...args);
-}
-
-export function resolveAgendaCounterOperation(...args: any[]): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "resolveAgendaCounterOperation",
-  )(...args);
-}
-
-export function resolveAdvancementPlacementOperation(
-  ...args: any[]
-): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "resolveAdvancementPlacementOperation",
-  )(...args);
-}
-
-export function advancementPlacementOptions(...args: any[]): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "advancementPlacementOptions",
-  )(...args);
-}
-
-export function startAdvancementPlacementChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "startAdvancementPlacementChoice",
-  )(...args);
-}
-
-export function resolveAdvancementPlacementChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "resolveAdvancementPlacementChoice",
-  )(...args);
-}
-
-export function applyAdvancementCounterPlacement(
-  ...args: any[]
-): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "applyAdvancementCounterPlacement",
-  )(...args);
-}
-
-export function advanceableInstalledCardTargets(...args: any[]): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "advanceableInstalledCardTargets",
-  )(...args);
-}
-
-export function isInstalledCorpCardAdvanceable(...args: any[]): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "isInstalledCorpCardAdvanceable",
-  )(...args);
-}
-
-export function advancementDistributionOptions(...args: any[]): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "advancementDistributionOptions",
-  )(...args);
-}
-
-export function startCardImplementationAdvancementDistributionChoice(
-  ...args: any[]
-): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "startCardImplementationAdvancementDistributionChoice",
-  )(...args);
-}
-
-export function parseAdvancementDistributionValue(...args: any[]): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "parseAdvancementDistributionValue",
-  )(...args);
-}
-
-export function sourcePartsForP334Choice(...args: any[]): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "sourcePartsForP334Choice",
-  )(...args);
-}
-
-export function validateAdvancementDistribution(...args: any[]): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "validateAdvancementDistribution",
-  )(...args);
-}
-
-export function resolveCardImplementationAdvancementDistributionChoice(
-  ...args: any[]
-): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "resolveCardImplementationAdvancementDistributionChoice",
-  )(...args);
-}
-
-export function movableAdvancementSourceIds(...args: any[]): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "movableAdvancementSourceIds",
-  )(...args);
-}
-
-export function moveAdvancementOptions(...args: any[]): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "moveAdvancementOptions",
-  )(...args);
-}
-
-export function startCardImplementationMoveAdvancementChoice(
-  ...args: any[]
-): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "startCardImplementationMoveAdvancementChoice",
-  )(...args);
-}
-
-export function resolveCardImplementationMoveAdvancementChoice(
-  ...args: any[]
-): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "resolveCardImplementationMoveAdvancementChoice",
-  )(...args);
-}
-
-export function resolveCorpOperationAddAdvancementCounters(...args: any[]): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "resolveCorpOperationAddAdvancementCounters",
-  )(...args);
-}
-
-export function awardRunnerEventAgendaPoint(...args: any[]): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "awardRunnerEventAgendaPoint",
-  )(...args);
-}
-
-export function choiceAction(...args: any[]): any {
-  return runtimeDelegate("corpRuntimeResolvers", "choiceAction")(...args);
-}
-
-export function abilityMetadata(...args: any[]): any {
-  return runtimeDelegate("corpRuntimeResolvers", "abilityMetadata")(...args);
-}
-
-export function resolveCorpInstalledEconomyAction(...args: any[]): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "resolveCorpInstalledEconomyAction",
-  )(...args);
-}
-
-export function validateCorpInstalledEconomyAction(...args: any[]): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "validateCorpInstalledEconomyAction",
-  )(...args);
-}
-
-export function rezzedCorpInstalledEconomyCreditSourceIds(...args: any[]): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "rezzedCorpInstalledEconomyCreditSourceIds",
-  )(...args);
-}
-
-export function shouldOpenCorpInstalledEconomyCreditChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "shouldOpenCorpInstalledEconomyCreditChoice",
-  )(...args);
-}
-
-export function startCorpInstalledEconomyCreditChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "startCorpInstalledEconomyCreditChoice",
-  )(...args);
-}
-
-export function resolveCorpInstalledEconomyCreditChoice(...args: any[]): any {
-  return runtimeDelegate(
-    "corpRuntimeResolvers",
-    "resolveCorpInstalledEconomyCreditChoice",
-  )(...args);
-}
-
-export function corpInstallRezSequenceHandlerHost(...args: any[]): any {
-  return runtimeDelegate(
-    "actionRuntimeHosts",
-    "corpInstallRezSequenceHandlerHost",
-  )(...args);
-}
-
-export function scoredAgendaFlowHost(...args: any[]): any {
-  return runtimeDelegate("actionRuntimeHosts", "scoredAgendaFlowHost")(...args);
-}
-
-export function scoredAgendaAbilityHost(...args: any[]): any {
-  return runtimeDelegate(
-    "actionRuntimeHosts",
-    "scoredAgendaAbilityHost",
-  )(...args);
-}
-
-export function corpTraceDamageAbilityHost(...args: any[]): any {
-  return runtimeDelegate(
-    "actionRuntimeHosts",
-    "corpTraceDamageAbilityHost",
-  )(...args);
-}
-
-export function corpSpecialDamageAbilityHost(...args: any[]): any {
-  return runtimeDelegate(
-    "actionRuntimeHosts",
-    "corpSpecialDamageAbilityHost",
-  )(...args);
-}
-
-export function playCardExecutionHost(...args: any[]): any {
-  return runtimeDelegate(
-    "actionRuntimeHosts",
-    "playCardExecutionHost",
-  )(...args);
-}
-
-export function corpOperationResolutionHost(...args: any[]): any {
-  return runtimeDelegate(
-    "actionRuntimeHosts",
-    "corpOperationResolutionHost",
-  )(...args);
-}
-
-export function boardStateActionExecutionHost(...args: any[]): any {
-  return runtimeDelegate(
-    "actionRuntimeHosts",
-    "boardStateActionExecutionHost",
-  )(...args);
-}
-
-export function hasHiddenResourceAccessStartActions(...args: any[]): any {
-  return runtimeDelegate(
-    "actionRuntimeHosts",
-    "hasHiddenResourceAccessStartActions",
-  )(...args);
-}
-
-export function pushCorpTraceDamageOrCardImplementationActions(
-  ...args: any[]
-): any {
-  return runtimeDelegate(
-    "actionRuntimeHosts",
-    "pushCorpTraceDamageOrCardImplementationActions",
-  )(...args);
-}
+import { runtimeDelegates } from "./runtime-delegate-store";
+import type {
+  ActionRuntimePortFunction,
+  ActionRuntimePortGroups,
+} from "./runtime-port-contracts";
+
+const typedRuntimePorts =
+  runtimeDelegates as unknown as ActionRuntimePortGroups;
+
+export const corpRunnerActionPaidWindowActions: ActionRuntimePortFunction<
+  "actionRuntimeHosts",
+  "corpRunnerActionPaidWindowActions"
+> = (...args) =>
+  typedRuntimePorts.actionRuntimeHosts.corpRunnerActionPaidWindowActions(
+    ...args,
+  );
+
+export const specialZoneHarnessActions: ActionRuntimePortFunction<
+  "actionRuntimeHosts",
+  "specialZoneHarnessActions"
+> = (...args) =>
+  typedRuntimePorts.actionRuntimeHosts.specialZoneHarnessActions(...args);
+
+export const turnBasicExecutionHost: ActionRuntimePortFunction<
+  "actionRuntimeHosts",
+  "turnBasicExecutionHost"
+> = (...args) =>
+  typedRuntimePorts.actionRuntimeHosts.turnBasicExecutionHost(...args);
+
+export const creditEconomyExecutionHost: ActionRuntimePortFunction<
+  "actionRuntimeHosts",
+  "creditEconomyExecutionHost"
+> = (...args) =>
+  typedRuntimePorts.actionRuntimeHosts.creditEconomyExecutionHost(...args);
+
+export const resolveEndTurnTagIfRunnerReceivedTag: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "resolveEndTurnTagIfRunnerReceivedTag"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.resolveEndTurnTagIfRunnerReceivedTag(
+    ...args,
+  );
+
+export const resumeEndTurnAfterTagPrevention: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "resumeEndTurnAfterTagPrevention"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.resumeEndTurnAfterTagPrevention(
+    ...args,
+  );
+
+export const resolveFieldReporterEndOfRunnerTurn: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "resolveFieldReporterEndOfRunnerTurn"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.resolveFieldReporterEndOfRunnerTurn(
+    ...args,
+  );
+
+export const resolveDelayedEndTurnDamageEffects: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "resolveDelayedEndTurnDamageEffects"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.resolveDelayedEndTurnDamageEffects(
+    ...args,
+  );
+
+export const endTurn: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "endTurn"
+> = (...args) => typedRuntimePorts.turnRuntimeResolvers.endTurn(...args);
+
+export const resolveTemporaryProgramInstallReturns: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "resolveTemporaryProgramInstallReturns"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.resolveTemporaryProgramInstallReturns(
+    ...args,
+  );
+
+export const resolveCorpObligationEndOfTurn: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "resolveCorpObligationEndOfTurn"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.resolveCorpObligationEndOfTurn(
+    ...args,
+  );
+
+export const startDiscardPhase: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "startDiscardPhase"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.startDiscardPhase(...args);
+
+export const processDiscardStep: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "processDiscardStep"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.processDiscardStep(...args);
+
+export const completeDiscardPhase: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "completeDiscardPhase"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.completeDiscardPhase(...args);
+
+export const appendResolvedEffectsToPayload: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "appendResolvedEffectsToPayload"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.appendResolvedEffectsToPayload(
+    ...args,
+  );
+
+export const automaticGainCreditsEffect: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "automaticGainCreditsEffect"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.automaticGainCreditsEffect(...args);
+
+export const automaticLoseCreditsEffect: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "automaticLoseCreditsEffect"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.automaticLoseCreditsEffect(...args);
+
+export const automaticDrawCardsEffect: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "automaticDrawCardsEffect"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.automaticDrawCardsEffect(...args);
+
+export const automaticTagEffect: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "automaticTagEffect"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.automaticTagEffect(...args);
+
+export const automaticTrashCardEffect: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "automaticTrashCardEffect"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.automaticTrashCardEffect(...args);
+
+export const automaticCounterChangeEffect: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "automaticCounterChangeEffect"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.automaticCounterChangeEffect(...args);
+
+export const automaticStealAgendaEffect: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "automaticStealAgendaEffect"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.automaticStealAgendaEffect(...args);
+
+export const publicCardTitle: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "publicCardTitle"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.publicCardTitle(...args);
+
+export const applyRunnerForgoNextAction: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "applyRunnerForgoNextAction"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.applyRunnerForgoNextAction(...args);
+
+export const addRunnerFutureActionDebt: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "addRunnerFutureActionDebt"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.addRunnerFutureActionDebt(...args);
+
+export const consumeRunnerFutureActionDebt: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "consumeRunnerFutureActionDebt"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.consumeRunnerFutureActionDebt(...args);
+
+export const filterActionsForRestrictedExtraActions: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "filterActionsForRestrictedExtraActions"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.filterActionsForRestrictedExtraActions(
+    ...args,
+  );
+
+export const consumeRestrictedExtraActionForAction: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "consumeRestrictedExtraActionForAction"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.consumeRestrictedExtraActionForAction(
+    ...args,
+  );
+
+export const acceptExtraActionOffer: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "acceptExtraActionOffer"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.acceptExtraActionOffer(...args);
+
+export const declineExtraActionOffer: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "declineExtraActionOffer"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.declineExtraActionOffer(...args);
+
+export const resolvePdcaCounterAction: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "resolvePdcaCounterAction"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.resolvePdcaCounterAction(...args);
+
+export const resolveForcedActionNotPossible: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "resolveForcedActionNotPossible"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.resolveForcedActionNotPossible(
+    ...args,
+  );
+
+export const startCorpTurn: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "startCorpTurn"
+> = (...args) => typedRuntimePorts.turnRuntimeResolvers.startCorpTurn(...args);
+
+export const startRunnerTurn: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "startRunnerTurn"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.startRunnerTurn(...args);
+
+export const resumeStartOfTurnAfterTagPrevention: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "resumeStartOfTurnAfterTagPrevention"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.resumeStartOfTurnAfterTagPrevention(
+    ...args,
+  );
+
+export const untapRunnerCardsAtTurnStart: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "untapRunnerCardsAtTurnStart"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.untapRunnerCardsAtTurnStart(...args);
+
+export const resolveDelayedAccessEffects: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "resolveDelayedAccessEffects"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.resolveDelayedAccessEffects(...args);
+
+export const applyCorpStartOfTurnEffects: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "applyCorpStartOfTurnEffects"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.applyCorpStartOfTurnEffects(...args);
+
+export const applyPurgeableRunnerVirusCorpStartEffects: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "applyPurgeableRunnerVirusCorpStartEffects"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.applyPurgeableRunnerVirusCorpStartEffects(
+    ...args,
+  );
+
+export const virusCounterDrawsAtCorpStart: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "virusCounterDrawsAtCorpStart"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.virusCounterDrawsAtCorpStart(...args);
+
+export const skivvissCounterTotal: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "skivvissCounterTotal"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.skivvissCounterTotal(...args);
+
+export const virusCounterCascadeTrashAtCorpStart: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "virusCounterCascadeTrashAtCorpStart"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.virusCounterCascadeTrashAtCorpStart(
+    ...args,
+  );
+
+export const trashFaceupRdCardsForCascade: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "trashFaceupRdCardsForCascade"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.trashFaceupRdCardsForCascade(...args);
+
+export const applyRunnerStartOfTurnEffects: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "applyRunnerStartOfTurnEffects"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.applyRunnerStartOfTurnEffects(...args);
+
+export const applyStartTurnRandomEffectTables: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "applyStartTurnRandomEffectTables"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.applyStartTurnRandomEffectTables(
+    ...args,
+  );
+
+export const virusCounterCreditsAtRunnerStart: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "virusCounterCreditsAtRunnerStart"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.virusCounterCreditsAtRunnerStart(
+    ...args,
+  );
+
+export const startVirusCounterRunnerPrivateLookAtStart: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "startVirusCounterRunnerPrivateLookAtStart"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.startVirusCounterRunnerPrivateLookAtStart(
+    ...args,
+  );
+
+export const randomCorpHqCardsWithoutReplacement: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "randomCorpHqCardsWithoutReplacement"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.randomCorpHqCardsWithoutReplacement(
+    ...args,
+  );
+
+export const startRunnerPrivateLookAtSpecificCorpCards: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "startRunnerPrivateLookAtSpecificCorpCards"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.startRunnerPrivateLookAtSpecificCorpCards(
+    ...args,
+  );
+
+export const queueIncubatorStartOfTurnTransforms: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "queueIncubatorStartOfTurnTransforms"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.queueIncubatorStartOfTurnTransforms(
+    ...args,
+  );
+
+export const startIncubatorTransformChoice: ActionRuntimePortFunction<
+  "turnRuntimeResolvers",
+  "startIncubatorTransformChoice"
+> = (...args) =>
+  typedRuntimePorts.turnRuntimeResolvers.startIncubatorTransformChoice(...args);
+
+export const forfeitRunnerAgendaForPointCost: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "forfeitRunnerAgendaForPointCost"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.forfeitRunnerAgendaForPointCost(
+    ...args,
+  );
+
+export const forfeitCorpAgendaForPointCost: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "forfeitCorpAgendaForPointCost"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.forfeitCorpAgendaForPointCost(...args);
+
+export const activeObligationCount: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "activeObligationCount"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.activeObligationCount(...args);
+
+export const addActiveObligation: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "addActiveObligation"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.addActiveObligation(...args);
+
+export const removeActiveObligation: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "removeActiveObligation"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.removeActiveObligation(...args);
+
+export const spendCorpAgendaPointCost: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "spendCorpAgendaPointCost"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.spendCorpAgendaPointCost(...args);
+
+export const installedAgendaOperationTarget: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "installedAgendaOperationTarget"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.installedAgendaOperationTarget(
+    ...args,
+  );
+
+export const corpAgendaCounterOperationTarget: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "corpAgendaCounterOperationTarget"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.corpAgendaCounterOperationTarget(
+    ...args,
+  );
+
+export const corpScoredAgendaForfeitTargets: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "corpScoredAgendaForfeitTargets"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.corpScoredAgendaForfeitTargets(
+    ...args,
+  );
+
+export const hardwareTrashByCounterEligibleHardwareIds: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "hardwareTrashByCounterEligibleHardwareIds"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.hardwareTrashByCounterEligibleHardwareIds(
+    ...args,
+  );
+
+export const hardwareTrashByCounterLegalActions: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "hardwareTrashByCounterLegalActions"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.hardwareTrashByCounterLegalActions(
+    ...args,
+  );
+
+export const hardwareTrashByCounterTrashCountFromPayload: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "hardwareTrashByCounterTrashCountFromPayload"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.hardwareTrashByCounterTrashCountFromPayload(
+    ...args,
+  );
+
+export const resolveHardwareTrashByCounterOperation: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "resolveHardwareTrashByCounterOperation"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.resolveHardwareTrashByCounterOperation(
+    ...args,
+  );
+
+export const startHardwareTrashByCounterChoice: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "startHardwareTrashByCounterChoice"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.startHardwareTrashByCounterChoice(
+    ...args,
+  );
+
+export const hardwareTrashByCounterTrashCountFromChoiceSource: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "hardwareTrashByCounterTrashCountFromChoiceSource"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.hardwareTrashByCounterTrashCountFromChoiceSource(
+    ...args,
+  );
+
+export const resolveHardwareTrashByCounterChoice: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "resolveHardwareTrashByCounterChoice"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.resolveHardwareTrashByCounterChoice(
+    ...args,
+  );
+
+export const trashHardwareByCounter: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "trashHardwareByCounter"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.trashHardwareByCounter(...args);
+
+export const advancementPlacementLegalActions: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "advancementPlacementLegalActions"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.advancementPlacementLegalActions(
+    ...args,
+  );
+
+export const resolveAgendaCounterOperation: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "resolveAgendaCounterOperation"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.resolveAgendaCounterOperation(...args);
+
+export const resolveAdvancementPlacementOperation: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "resolveAdvancementPlacementOperation"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.resolveAdvancementPlacementOperation(
+    ...args,
+  );
+
+export const advancementPlacementOptions: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "advancementPlacementOptions"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.advancementPlacementOptions(...args);
+
+export const startAdvancementPlacementChoice: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "startAdvancementPlacementChoice"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.startAdvancementPlacementChoice(
+    ...args,
+  );
+
+export const resolveAdvancementPlacementChoice: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "resolveAdvancementPlacementChoice"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.resolveAdvancementPlacementChoice(
+    ...args,
+  );
+
+export const applyAdvancementCounterPlacement: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "applyAdvancementCounterPlacement"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.applyAdvancementCounterPlacement(
+    ...args,
+  );
+
+export const advanceableInstalledCardTargets: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "advanceableInstalledCardTargets"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.advanceableInstalledCardTargets(
+    ...args,
+  );
+
+export const isInstalledCorpCardAdvanceable: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "isInstalledCorpCardAdvanceable"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.isInstalledCorpCardAdvanceable(
+    ...args,
+  );
+
+export const advancementDistributionOptions: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "advancementDistributionOptions"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.advancementDistributionOptions(
+    ...args,
+  );
+
+export const startCardImplementationAdvancementDistributionChoice: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "startCardImplementationAdvancementDistributionChoice"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.startCardImplementationAdvancementDistributionChoice(
+    ...args,
+  );
+
+export const parseAdvancementDistributionValue: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "parseAdvancementDistributionValue"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.parseAdvancementDistributionValue(
+    ...args,
+  );
+
+export const sourcePartsForP334Choice: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "sourcePartsForP334Choice"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.sourcePartsForP334Choice(...args);
+
+export const validateAdvancementDistribution: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "validateAdvancementDistribution"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.validateAdvancementDistribution(
+    ...args,
+  );
+
+export const resolveCardImplementationAdvancementDistributionChoice: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "resolveCardImplementationAdvancementDistributionChoice"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.resolveCardImplementationAdvancementDistributionChoice(
+    ...args,
+  );
+
+export const movableAdvancementSourceIds: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "movableAdvancementSourceIds"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.movableAdvancementSourceIds(...args);
+
+export const moveAdvancementOptions: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "moveAdvancementOptions"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.moveAdvancementOptions(...args);
+
+export const startCardImplementationMoveAdvancementChoice: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "startCardImplementationMoveAdvancementChoice"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.startCardImplementationMoveAdvancementChoice(
+    ...args,
+  );
+
+export const resolveCardImplementationMoveAdvancementChoice: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "resolveCardImplementationMoveAdvancementChoice"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.resolveCardImplementationMoveAdvancementChoice(
+    ...args,
+  );
+
+export const resolveCorpOperationAddAdvancementCounters: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "resolveCorpOperationAddAdvancementCounters"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.resolveCorpOperationAddAdvancementCounters(
+    ...args,
+  );
+
+export const awardRunnerEventAgendaPoint: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "awardRunnerEventAgendaPoint"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.awardRunnerEventAgendaPoint(...args);
+
+export const choiceAction: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "choiceAction"
+> = (...args) => typedRuntimePorts.corpRuntimeResolvers.choiceAction(...args);
+
+export const abilityMetadata: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "abilityMetadata"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.abilityMetadata(...args);
+
+export const resolveCorpInstalledEconomyAction: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "resolveCorpInstalledEconomyAction"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.resolveCorpInstalledEconomyAction(
+    ...args,
+  );
+
+export const validateCorpInstalledEconomyAction: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "validateCorpInstalledEconomyAction"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.validateCorpInstalledEconomyAction(
+    ...args,
+  );
+
+export const rezzedCorpInstalledEconomyCreditSourceIds: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "rezzedCorpInstalledEconomyCreditSourceIds"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.rezzedCorpInstalledEconomyCreditSourceIds(
+    ...args,
+  );
+
+export const shouldOpenCorpInstalledEconomyCreditChoice: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "shouldOpenCorpInstalledEconomyCreditChoice"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.shouldOpenCorpInstalledEconomyCreditChoice(
+    ...args,
+  );
+
+export const startCorpInstalledEconomyCreditChoice: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "startCorpInstalledEconomyCreditChoice"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.startCorpInstalledEconomyCreditChoice(
+    ...args,
+  );
+
+export const resolveCorpInstalledEconomyCreditChoice: ActionRuntimePortFunction<
+  "corpRuntimeResolvers",
+  "resolveCorpInstalledEconomyCreditChoice"
+> = (...args) =>
+  typedRuntimePorts.corpRuntimeResolvers.resolveCorpInstalledEconomyCreditChoice(
+    ...args,
+  );
+
+export const corpInstallRezSequenceHandlerHost: ActionRuntimePortFunction<
+  "actionRuntimeHosts",
+  "corpInstallRezSequenceHandlerHost"
+> = (...args) =>
+  typedRuntimePorts.actionRuntimeHosts.corpInstallRezSequenceHandlerHost(
+    ...args,
+  );
+
+export const scoredAgendaFlowHost: ActionRuntimePortFunction<
+  "actionRuntimeHosts",
+  "scoredAgendaFlowHost"
+> = (...args) =>
+  typedRuntimePorts.actionRuntimeHosts.scoredAgendaFlowHost(...args);
+
+export const scoredAgendaAbilityHost: ActionRuntimePortFunction<
+  "actionRuntimeHosts",
+  "scoredAgendaAbilityHost"
+> = (...args) =>
+  typedRuntimePorts.actionRuntimeHosts.scoredAgendaAbilityHost(...args);
+
+export const corpTraceDamageAbilityHost: ActionRuntimePortFunction<
+  "actionRuntimeHosts",
+  "corpTraceDamageAbilityHost"
+> = (...args) =>
+  typedRuntimePorts.actionRuntimeHosts.corpTraceDamageAbilityHost(...args);
+
+export const corpSpecialDamageAbilityHost: ActionRuntimePortFunction<
+  "actionRuntimeHosts",
+  "corpSpecialDamageAbilityHost"
+> = (...args) =>
+  typedRuntimePorts.actionRuntimeHosts.corpSpecialDamageAbilityHost(...args);
+
+export const playCardExecutionHost: ActionRuntimePortFunction<
+  "actionRuntimeHosts",
+  "playCardExecutionHost"
+> = (...args) =>
+  typedRuntimePorts.actionRuntimeHosts.playCardExecutionHost(...args);
+
+export const corpOperationResolutionHost: ActionRuntimePortFunction<
+  "actionRuntimeHosts",
+  "corpOperationResolutionHost"
+> = (...args) =>
+  typedRuntimePorts.actionRuntimeHosts.corpOperationResolutionHost(...args);
+
+export const boardStateActionExecutionHost: ActionRuntimePortFunction<
+  "actionRuntimeHosts",
+  "boardStateActionExecutionHost"
+> = (...args) =>
+  typedRuntimePorts.actionRuntimeHosts.boardStateActionExecutionHost(...args);
+
+export const hasHiddenResourceAccessStartActions: ActionRuntimePortFunction<
+  "actionRuntimeHosts",
+  "hasHiddenResourceAccessStartActions"
+> = (...args) =>
+  typedRuntimePorts.actionRuntimeHosts.hasHiddenResourceAccessStartActions(
+    ...args,
+  );
+
+export const pushCorpTraceDamageOrCardImplementationActions: ActionRuntimePortFunction<
+  "actionRuntimeHosts",
+  "pushCorpTraceDamageOrCardImplementationActions"
+> = (...args) =>
+  typedRuntimePorts.actionRuntimeHosts.pushCorpTraceDamageOrCardImplementationActions(
+    ...args,
+  );

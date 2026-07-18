@@ -14,8 +14,9 @@ Primary agent: `architecture-review-agent`
 | E02     | integriert                                 | Commit `637c62a09`; Strukturguard und vier Fehlerklassen im Selftest grün  |
 | E03     | integriert                                 | Commit `e9fbd63a5`; 144 Verträge in sechs zyklusfreien Familien            |
 | E04     | integriert                                 | Commit `16928c90c`; 13 typisierte Portgruppen und Registry-Basis           |
-| E05     | verifiziert, Commit/Integration ausstehend | 67 State-Service-Delegates typisiert; 1.734 Engine-Tests grün              |
-| E06-E16 | ausstehend                                 | sequenziell nach E05                                                       |
+| E05     | integriert                                 | Commit `2a0c68d9e`; 67 State-Service-Delegates statisch typisiert          |
+| E06     | verifiziert, Commit/Integration ausstehend | weitere 177 Delegates typisiert; Restschuld 186                            |
+| E07-E16 | ausstehend                                 | sequenziell nach E06                                                       |
 
 ## Quelle und Vorgabe
 

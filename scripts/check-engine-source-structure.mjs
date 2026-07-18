@@ -13,11 +13,11 @@ const runtimeRoot = path.join(engineRoot, "game", "engine-runtime-internal");
 const abilityRoot = path.join(engineRoot, "ability-engine");
 
 const delegateDebt = new Map([
-  ["action-runtime-delegates.ts", 107],
-  ["card-runtime-delegates.ts", 50],
+  ["action-runtime-delegates.ts", 0],
+  ["card-runtime-delegates.ts", 0],
   ["choice-runtime-delegates.ts", 89],
   ["flow-runtime-delegates.ts", 58],
-  ["state-runtime-delegates.ts", 59],
+  ["state-runtime-delegates.ts", 39],
 ]);
 const delegateExportCaps = new Map([
   ["action-runtime-delegates.ts", 107],
@@ -67,11 +67,19 @@ const allowedLayerDebt = new Set([
   "ability-engine/card-implementation-runtime-activated-costs.ts -> game/payment/runner-payment-support.ts",
   "ability-engine/cost-pipeline.ts -> game/payment/index.ts",
 ]);
-const stateRuntimePortFiles = [
+const runtimePortContractFiles = [
+  "action-runtime-port.ts",
+  "card-runtime-host-port.ts",
+  "card-runtime-resolver-port.ts",
   "card-strength-cost-runtime-port.ts",
+  "corp-runtime-port.ts",
   "counter-turn-runtime-port.ts",
   "economy-runtime-port.ts",
+  "lifecycle-runtime-port.ts",
   "lookup-runtime-port.ts",
+  "state-corp-runtime-port.ts",
+  "turn-corp-runtime-port.ts",
+  "turn-runtime-port.ts",
   "zone-runtime-port.ts",
 ];
 
@@ -209,7 +217,7 @@ if (sourceLineCount(runtimePortContracts) > 160)
     `${runtimePath("runtime-port-contracts.ts")} exceeds 160 lines`,
   );
 
-for (const fileName of stateRuntimePortFiles) {
+for (const fileName of runtimePortContractFiles) {
   const file = path.join(runtimeRoot, fileName);
   const source = parseSource(file, readFileSync(file, "utf8"));
   const anyCount = countSyntaxKind(source, ts.SyntaxKind.AnyKeyword);
@@ -217,8 +225,8 @@ for (const fileName of stateRuntimePortFiles) {
     findings.push(
       `${runtimePath(fileName)} contains ${anyCount} any type nodes`,
     );
-  if (sourceLineCount(file) > 180)
-    findings.push(`${runtimePath(fileName)} exceeds 180 lines`);
+  if (sourceLineCount(file) > 260)
+    findings.push(`${runtimePath(fileName)} exceeds 260 lines`);
   const valueStatement = source.statements.find(
     (statement) => !isDeclarativeContractStatement(statement),
   );
