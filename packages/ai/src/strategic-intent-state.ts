@@ -694,6 +694,23 @@ function defaultTargetVector(
         targetId: primary.strategyId === "runner.hq_pressure" ? "hq" : "rd",
         evidence: [`target_from_strategy:${primary.strategyId}`],
       };
+    case "runner_tempo":
+      return {
+        kind: "none",
+        evidence: [
+          `target_from_strategy:${primary.strategyId}`,
+          "target_mode:tempo",
+        ],
+      };
+    case "corp_ice_tax":
+    case "corp_central_defense":
+      return {
+        kind: "none",
+        evidence: [
+          `target_from_strategy:${primary.strategyId}`,
+          "target_mode:board_control",
+        ],
+      };
     case "runner_remote_contest":
     case "runner_remote_trash":
       return {

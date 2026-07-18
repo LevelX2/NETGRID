@@ -91,8 +91,12 @@ type Ai006Report = {
 
 function main(): void {
   const snapshots = ANALYZED_DECK_IDS.map(snapshotById);
-  const firstProfiles = snapshots.map((snapshot) => buildDeckStrategyProfile(snapshot));
-  const secondProfiles = snapshots.map((snapshot) => buildDeckStrategyProfile(snapshot));
+  const firstProfiles = snapshots.map((snapshot) =>
+    buildDeckStrategyProfile(snapshot),
+  );
+  const secondProfiles = snapshots.map((snapshot) =>
+    buildDeckStrategyProfile(snapshot),
+  );
   assert(
     stableStringify(firstProfiles) === stableStringify(secondProfiles),
     "Deck strategy profile output is not deterministic",
@@ -105,7 +109,8 @@ function main(): void {
   validateNoForbiddenOutputKeys(firstProfiles);
 
   const reportCore = {
-    schemaVersion: "ai006-deck-doctrine-strategy-aggregation-report-v1" as const,
+    schemaVersion:
+      "ai006-deck-doctrine-strategy-aggregation-report-v1" as const,
     taskId: "AI006" as const,
     generatedAt: "2026-05-31" as const,
     source: {
@@ -125,7 +130,10 @@ function main(): void {
       deterministicOutputGuard: "pass" as const,
     },
   };
-  const deterministicSummary = deterministicSummaryFor(firstProfiles, reportCore);
+  const deterministicSummary = deterministicSummaryFor(
+    firstProfiles,
+    reportCore,
+  );
   const report: Ai006Report = {
     ...reportCore,
     deterministicSummary,
@@ -139,7 +147,10 @@ function main(): void {
 }
 
 function validateProfiles(profiles: AiDeckStrategyProfile[]): void {
-  assert(profiles.length === ANALYZED_DECK_IDS.length, "Unexpected profile count");
+  assert(
+    profiles.length === ANALYZED_DECK_IDS.length,
+    "Unexpected profile count",
+  );
   for (const profile of profiles) {
     assert(profile.taskId === "AI006", `${profile.deckId}: missing task id`);
     assert(
@@ -148,17 +159,32 @@ function validateProfiles(profiles: AiDeckStrategyProfile[]): void {
     );
     assert(profile.cardCount > 0, `${profile.deckId}: empty profile`);
     const strategyIds = Object.keys(profile.strategyScores);
-    assert(strategyIds.length > 0, `${profile.deckId}: missing side strategy scores`);
+    assert(
+      strategyIds.length > 0,
+      `${profile.deckId}: missing side strategy scores`,
+    );
     for (const strategyId of strategyIds) {
       assert(
         strategyId.startsWith(`${profile.side}.`),
         `${profile.deckId}: wrong-side strategy score ${strategyId}`,
       );
       const score = profile.strategyScores[strategyId];
-      assert(score !== undefined, `${profile.deckId}: missing score ${strategyId}`);
-      assert(score.anchorScore >= 0 && score.anchorScore <= 100, `${profile.deckId}: bad anchor score`);
-      assert(score.supportScore >= 0 && score.supportScore <= 100, `${profile.deckId}: bad support score`);
-      assert(score.finalScore >= 0 && score.finalScore <= 100, `${profile.deckId}: bad final score`);
+      assert(
+        score !== undefined,
+        `${profile.deckId}: missing score ${strategyId}`,
+      );
+      assert(
+        score.anchorScore >= 0 && score.anchorScore <= 100,
+        `${profile.deckId}: bad anchor score`,
+      );
+      assert(
+        score.supportScore >= 0 && score.supportScore <= 100,
+        `${profile.deckId}: bad support score`,
+      );
+      assert(
+        score.finalScore >= 0 && score.finalScore <= 100,
+        `${profile.deckId}: bad final score`,
+      );
     }
   }
 }
@@ -176,11 +202,26 @@ function validateNoLegacyDoctrineEffect(): void {
     ["public exports", indexSource],
     ["runtime ai decision input", runtimeInput],
   ] as const) {
-    assert(!source.includes("buildDeckDoctrineProfile"), `${label}: builds v1 doctrine profile`);
-    assert(!source.includes("AiDeckDoctrineProfile"), `${label}: references v1 doctrine type`);
-    assert(!/\bownDeckDoctrine\b/.test(source), `${label}: consumes v1 ownDeckDoctrine`);
-    assert(!source.includes("doctrinePlanWeight"), `${label}: exposes v1 doctrine plan weight`);
-    assert(!source.includes("doctrine_plan_weight"), `${label}: emits v1 doctrine plan weight evidence`);
+    assert(
+      !source.includes("buildDeckDoctrineProfile"),
+      `${label}: builds v1 doctrine profile`,
+    );
+    assert(
+      !source.includes("AiDeckDoctrineProfile"),
+      `${label}: references v1 doctrine type`,
+    );
+    assert(
+      !/\bownDeckDoctrine\b/.test(source),
+      `${label}: consumes v1 ownDeckDoctrine`,
+    );
+    assert(
+      !source.includes("doctrinePlanWeight"),
+      `${label}: exposes v1 doctrine plan weight`,
+    );
+    assert(
+      !source.includes("doctrine_plan_weight"),
+      `${label}: emits v1 doctrine plan weight evidence`,
+    );
   }
 }
 
@@ -188,7 +229,7 @@ function validateLegacyRolesDoNotAnchor(): void {
   const profile = buildDeckStrategyProfile({
     deckSnapshotId: "ai006-check-legacy-only-runner",
     side: "runner",
-    cards: [{ cardId: "simple_run_event", quantity: 3 }],
+    cards: [{ cardId: "onr_proteus_109_frame-up", quantity: 3 }],
   });
   assert(
     profile.legacySignalCounts["planRole:pressure_rnd"] === 3,
@@ -209,7 +250,8 @@ function validateStableAnchorSources(profiles: AiDeckStrategyProfile[]): void {
           `${profile.deckId}:${strategyId}: unstable anchor source ${evidence.source}`,
         );
         assert(
-          evidence.source !== "compiledHint" && evidence.source !== "functionSignal",
+          evidence.source !== "compiledHint" &&
+            evidence.source !== "functionSignal",
           `${profile.deckId}:${strategyId}: support source used as anchor`,
         );
       }
@@ -248,7 +290,8 @@ function deterministicSummaryFor(
   const warningCounts: Record<string, number> = {};
   for (const profile of profiles) {
     for (const strategyId of profile.primaryStrategies) {
-      primaryStrategyCounts[strategyId] = (primaryStrategyCounts[strategyId] ?? 0) + 1;
+      primaryStrategyCounts[strategyId] =
+        (primaryStrategyCounts[strategyId] ?? 0) + 1;
     }
     for (const warning of profile.warnings) {
       warningCounts[warning] = (warningCounts[warning] ?? 0) + 1;
@@ -256,7 +299,8 @@ function deterministicSummaryFor(
   }
   return {
     deckCount: profiles.length,
-    runnerDeckCount: profiles.filter((profile) => profile.side === "runner").length,
+    runnerDeckCount: profiles.filter((profile) => profile.side === "runner")
+      .length,
     corpDeckCount: profiles.filter((profile) => profile.side === "corp").length,
     deckIds: profiles.map((profile) => profile.deckId).sort(),
     primaryStrategyCounts: sortRecord(primaryStrategyCounts),
@@ -276,8 +320,12 @@ function snapshotById(snapshotId: string): AiDeckStrategyDeckSnapshot {
   return {
     deckSnapshotId: snapshot.deckSnapshotId,
     side: snapshot.side,
-    ...(snapshot.formatProfileId ? { formatProfileId: snapshot.formatProfileId } : {}),
-    ...(snapshot.publicMetadata ? { publicMetadata: snapshot.publicMetadata } : {}),
+    ...(snapshot.formatProfileId
+      ? { formatProfileId: snapshot.formatProfileId }
+      : {}),
+    ...(snapshot.publicMetadata
+      ? { publicMetadata: snapshot.publicMetadata }
+      : {}),
     cards: snapshot.cards.map((card) => ({
       cardId: card.cardId,
       quantity: card.quantity,

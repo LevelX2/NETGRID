@@ -53,6 +53,14 @@ Stand: 2026-07-18
 
 ## KI
 
+- Die Deckstrategie-Ableitung ist für 40 aktive Standarddecks, 21 versionierte
+  Snapshots und alle 24 Strategy-IDs vollständig gegatet. 39 aktive Decks
+  besitzen eine produktive Primärstrategie; Ghost Circuit bleibt wegen zwei
+  realer Breaker-Coverage-Lücken bewusst neutral. Runtime-, Target-/Reserve-,
+  Goal-, Action-Fit- und Metadaten-Consumerverträge sind geschlossen; ein
+  Deckstrategie-Run kann eine ausdrücklich höher bewertete begonnene
+  Broker-Bankaufladung nicht mehr blockieren. Führend ist das Abschlussreview
+  vom 18.07.2026 unter `docs/reviews/ai/`.
 - Die Vollbestandsremediation aller 618 aktiven Kartenhints ist umgesetzt und
   verifiziert. 17 konkrete Kartenfehler und 28 rohe Signaltransporte wurden
   korrigiert, alle coverage-pflichtigen Taktiksignale besitzen Consumer oder

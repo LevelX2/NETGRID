@@ -502,9 +502,7 @@ describe("catalog API filters", () => {
     expect(inspector.legacyRoles.roles).toEqual(
       expect.arrayContaining(["program", "random"]),
     );
-    expect(inspector.warnings.categories).toContain(
-      "deferred_requires_human_review",
-    );
+    expect(inspector.warnings.categories).toEqual([]);
   });
 
   it("exposes explicit Agenda strategy support pairs through the inspector API", () => {
@@ -770,7 +768,8 @@ describe("catalog API filters", () => {
       const response = catalogDetailResponse(expectation.cardId);
       expect(response.status, expectation.cardId).toBe(200);
       const body = response.body as { card: { text: string } };
-      const sharedText = CARD_DEFINITIONS_BY_ID[expectation.cardId]?.rulesText ?? "";
+      const sharedText =
+        CARD_DEFINITIONS_BY_ID[expectation.cardId]?.rulesText ?? "";
 
       for (const snippet of expectation.catalogContains) {
         expect(body.card.text, expectation.cardId).toContain(snippet);
@@ -882,7 +881,8 @@ describe("catalog API filters", () => {
       const response = catalogDetailResponse(expectation.cardId);
       expect(response.status, expectation.cardId).toBe(200);
       const body = response.body as { card: { text: string } };
-      const sharedText = CARD_DEFINITIONS_BY_ID[expectation.cardId]?.rulesText ?? "";
+      const sharedText =
+        CARD_DEFINITIONS_BY_ID[expectation.cardId]?.rulesText ?? "";
 
       for (const snippet of expectation.catalogContains) {
         expect(body.card.text, expectation.cardId).toContain(snippet);
@@ -1021,7 +1021,8 @@ describe("catalog API filters", () => {
       const response = catalogDetailResponse(expectation.cardId);
       expect(response.status, expectation.cardId).toBe(200);
       const body = response.body as { card: { text: string } };
-      const sharedText = CARD_DEFINITIONS_BY_ID[expectation.cardId]?.rulesText ?? "";
+      const sharedText =
+        CARD_DEFINITIONS_BY_ID[expectation.cardId]?.rulesText ?? "";
 
       for (const snippet of expectation.catalogContains) {
         expect(body.card.text, expectation.cardId).toContain(snippet);
@@ -1046,7 +1047,7 @@ describe("catalog API filters", () => {
     expectCatalogAiHints({
       title: "R&D Protocol top-card replacement",
       cardId: "onr_v1_050_r-and-d-protocol-files",
-      roles: ["rd_run", "access_replacement"],
+      roles: ["rd_pressure", "access_replacement"],
       requiredMechanics: ["top_rd_look"],
     });
     expectCatalogAiHints({
@@ -1103,7 +1104,8 @@ describe("catalog API filters", () => {
       const response = catalogDetailResponse(expectation.cardId);
       expect(response.status, expectation.cardId).toBe(200);
       const body = response.body as { card: { text: string } };
-      const sharedText = CARD_DEFINITIONS_BY_ID[expectation.cardId]?.rulesText ?? "";
+      const sharedText =
+        CARD_DEFINITIONS_BY_ID[expectation.cardId]?.rulesText ?? "";
 
       for (const snippet of expectation.catalogContains) {
         expect(body.card.text, expectation.cardId).toContain(snippet);

@@ -15,6 +15,7 @@ import {
 import {
   bestPlanCompatibleSemanticChoice,
   tacticalPlanBackgroundBankBuildShouldYield,
+  tacticalPlanCommittedBankBuildShouldYield,
   tacticalPlanFundedDevelopmentContinuationBlocksOverride,
   tacticalPlanInferiorRunTargetMappingShouldYield,
   tacticalPlanLowValueRunEventMappingShouldYield,
@@ -452,6 +453,13 @@ export function tacticalPlanMappedChoice(
         overrideChoice,
         scoreGap,
       );
+    const committedBankBuildShouldYield =
+      tacticalPlanCommittedBankBuildShouldYield(
+        mapping,
+        mappedChoice,
+        overrideChoice,
+        scoreGap,
+      );
     const unconvertibleFundingShouldYieldToBank =
       tacticalPlanUnconvertibleFundingShouldYieldToBank(
         mapping,
@@ -485,6 +493,7 @@ export function tacticalPlanMappedChoice(
           corpBoardTriageMismatchShouldYield,
           deferredDevelopmentInstallShouldYield,
           backgroundBankBuildShouldYield,
+          committedBankBuildShouldYield,
           noNeedSearchShouldYield,
           coverageProbeRunShouldYield,
           lowValueRunEventShouldYield,
@@ -511,6 +520,7 @@ export function tacticalPlanMappedChoice(
       inferiorRunTargetShouldYield ||
       corpBoardTriageMismatchShouldYield ||
       backgroundBankBuildShouldYield ||
+      committedBankBuildShouldYield ||
       deferredDevelopmentInstallShouldYield ||
       hardInterruptShouldYield ||
       noNeedSearchShouldYield ||
@@ -541,6 +551,7 @@ export function tacticalPlanMappedChoice(
           inferiorRunTargetShouldYield,
           corpBoardTriageMismatchShouldYield,
           backgroundBankBuildShouldYield,
+          committedBankBuildShouldYield,
           hardInterruptShouldYield,
           thresholdReason: threshold.reason,
         }),
@@ -602,8 +613,7 @@ function urgentCorpSemanticChoice(
 
   const visibleRunnerCredits = input.playerView.opponent?.credits ?? 0;
   if (
-    visibleRunnerCredits >=
-    CORP_ACTIVE_REMOTE_ADVANCE_RUNNER_CREDIT_CEILING
+    visibleRunnerCredits >= CORP_ACTIVE_REMOTE_ADVANCE_RUNNER_CREDIT_CEILING
   ) {
     return undefined;
   }
