@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
@@ -18,6 +18,7 @@ const abilityPayloadRegistryFile = path.join(
 );
 const runtimeRoot = path.join(engineRoot, "game", "engine-runtime-internal");
 const abilityRoot = path.join(engineRoot, "ability-engine");
+const damageRoot = path.join(engineRoot, "game", "damage");
 
 const forbiddenRuntimeDelegateFiles = [
   "action-runtime-delegates.ts",
@@ -97,6 +98,14 @@ const runtimePortContractFiles = [
   "turn-runtime-port.ts",
   "zone-runtime-port.ts",
 ];
+const damageDomainModuleLimits = new Map([
+  ["damage-core.ts", 220],
+  ["damage-runtime-context.ts", 500],
+  ["damage-event-resolution.ts", 750],
+  ["prevention-sources.ts", 1100],
+  ["prevention-window.ts", 950],
+  ["damage-replacement.ts", 750],
+]);
 
 if (process.argv.includes("--self-test")) {
   runSelfTest();
@@ -228,6 +237,19 @@ for (const fileName of definitionFamilyFiles) {
   if (valueStatement)
     findings.push(
       `ability-engine/${fileName} contains runtime statement kind ${ts.SyntaxKind[valueStatement.kind]}`,
+    );
+}
+
+for (const [fileName, maximumLines] of damageDomainModuleLimits) {
+  const file = path.join(damageRoot, fileName);
+  if (!existsSync(file)) {
+    findings.push(`game/damage/${fileName} is missing`);
+    continue;
+  }
+  const lineCount = sourceLineCount(file);
+  if (lineCount > maximumLines)
+    findings.push(
+      `game/damage/${fileName} has ${lineCount} lines; allowed maximum is ${maximumLines}`,
     );
 }
 

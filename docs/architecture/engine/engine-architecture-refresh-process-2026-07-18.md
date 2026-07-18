@@ -19,8 +19,9 @@ Primary agent: `architecture-review-agent`
 | E07     | integriert  | Commit `7f7d8a163`; letzte 186 Signaturen typisiert; Delegate-Schuld null  |
 | E08     | integriert  | Commit `e24d17f39`, Main-Abgleich `e5d5a4f0d`; Runtime-Zyklus entfernt     |
 | E09     | integriert  | Commit `17efeb4f3`, Main-Abgleich `84f3e075b`; Turn-Runtime geteilt        |
-| E10     | verifiziert | 1.736 Engine-, 2.723 KI- und 12 Shared-Tests; Web 633/635 nach Main-Sync   |
-| E11-E16 | ausstehend  | sequenziell nach E10                                                       |
+| E10     | integriert  | 1.736 Engine-, 2.723 KI- und 12 Shared-Tests; Web 633/635 nach Main-Sync   |
+| E11     | verifiziert | Damage-Domäne in sechs Module geteilt; 1.736 Engine-Tests und Gates grün   |
+| E12-E16 | ausstehend  | sequenziell nach E11                                                       |
 
 ## Quelle und Vorgabe
 
@@ -185,6 +186,20 @@ Beide Fehler sind auf diesem `main`-Stand identisch reproduzierbar und betreffen
 die dort neu integrierten AI-Hint-Erwartungen, nicht den E10-Payload-Vertrag.
 Engine, KI, Shared, Serverprojektionen und alle E10-fokussierten Webtests sind
 auf dem kombinierten Stand grün.
+
+### E11 Damage-Domäne
+
+Der 3.236-zeilige Damage-Monolith ist in sechs azyklisch gerichtete Module mit
+maximal 913 Zeilen geteilt. `damage-core.ts` bleibt als 158-zeilige öffentliche
+Fassade bestehen; bestehende Aufrufer müssen keine Unterdomänen kennen. Finale
+Mutation, Prevention-Quellen und -Kosten, Prevention-Fenster, Replacement sowie
+der typisierte Host-/Hilfskontext besitzen getrennte Verantwortlichkeiten.
+
+Die regelrelevante Fensterreihenfolge, der Zeitpunkt des ersten Zufallszugs und
+die persistierte Kandidatenreihenfolge sind unmittelbar am Code dokumentiert.
+Der Strukturguard verlangt alle sechs Module und begrenzt ihre Größe. Der
+vollständige Engine-Lauf mit 1.736 Tests, Engine-Typecheck, Package Boundaries,
+Strukturguard und dessen Selftest sind grün.
 
 ### E14 Registry und Coverage
 
