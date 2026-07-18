@@ -2,7 +2,7 @@
 
 Stand: 2026-07-18
 
-Status: P07 und Integration aktuellen `main` verifiziert – bereit zum lokalen Merge
+Status: Abgeschlossen – P01 bis P07 umgesetzt, lokal nach `main` integriert und aufgeräumt
 
 Quelle: `docs/releases/v2/v2-0-auth-privacy-cloud-decks/user-profiles-password-cloud-decks-staged-plan-2026-07-18.md`
 
@@ -467,3 +467,11 @@ Markiere das Goal erst danach als complete.
   Dateisystem.
 - Der vollständig gemergte Arbeitsbranch ist gelöscht.
 - Erst dann wird das `/Goal` als abgeschlossen markiert.
+
+## Abschlussabgleich
+
+Der Arbeitsstand wurde am 2026-07-18 vollständig nach `main` integriert und
+dort erneut verifiziert. Der Git-Worktree
+`C:\Projekte\NETGRID_V2_PASSWORD_ACCOUNTS_CLOUD_DECKS` wurde sowohl aus der
+Git-Worktree-Verwaltung als auch aus dem Dateisystem entfernt; der vollständig
+gemergte Branch `codex/v2-password-accounts-cloud-decks` wurde gelöscht.
