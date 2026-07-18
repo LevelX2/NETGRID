@@ -1,6 +1,6 @@
 # KI-Kartenhint-Vollbestandsremediation – Abschlussreview vom 18.07.2026
 
-Status: `verified_ready_for_main_integration`
+Status: `complete`
 
 ## Ergebnis
 
@@ -96,11 +96,12 @@ abgesichert.
 4. `7681656c0` – Taktiksignal-Consumerverträge
 5. `d673b62fb` – Metadaten-Ontologie
 6. `b6e7f7f3c` – Qualitäts-, Target- und Fixture-Backlog
-7. Abschlusscommit – Gesamtverifikation und Wissenspflege
+7. `b668e339a` – Gesamtverifikation und Wissenspflege
 
-Der Arbeitsbranch ist mit dem aktuellen lokalen `main` synchronisiert. Nach
-diesem Review sind nur noch lokaler Merge, Main-Sauberkeitsprüfung und die
-verifizierte Entfernung der beiden temporären Worktrees und Branches offen.
+Der Arbeitsbranch wurde per Fast-Forward in den lokalen `main` integriert.
+Main-Sauberkeitsprüfung, hashgleiche Übernahme der lokalen Baseline-Evidence
+sowie die verifizierte Entfernung beider temporären Worktrees und Branches
+sind abgeschlossen.
 
 ## Restrisiken
 

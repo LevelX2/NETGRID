@@ -1,6 +1,6 @@
 # KI-Kartenhint-Vollbestandsremediation – Prozess vom 18.07.2026
 
-Status: `verified_ready_for_main_integration`
+Status: `complete`
 
 Quelle:
 `docs/reviews/ai/ai-card-hint-full-inventory-audit-2026-07-18.md`
@@ -367,3 +367,13 @@ löschen und das Goal erst dann als complete markieren.`
 - Der Arbeitsbranch ist lokal nach `main` integriert.
 - Arbeits-Worktree und gemergter Branch sind nachweislich entfernt.
 - Das `/Goal` ist erst danach `complete`.
+
+## Integrationsabschluss
+
+Der Paketabschluss `b668e339a` wurde am 18.07.2026 per Fast-Forward in den
+lokalen `main` integriert. Die Branches
+`codex/ai-card-hint-full-inventory` und `codex/ai-card-hint-baseline` sowie
+ihre Worktrees sind gelöscht und in `git worktree list` nicht mehr vorhanden.
+Kompakte Baseline und vollständige redigierte Rohtraces liegen hashgeprüft im
+ignorierten `data/local/` des Hauptworkspaces. Der Hauptworktree war vor
+dieser Statusbuchung sauber.
