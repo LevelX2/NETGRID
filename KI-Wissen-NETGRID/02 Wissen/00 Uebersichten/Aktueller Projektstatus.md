@@ -53,14 +53,14 @@ Stand: 2026-07-18
 
 ## KI
 
-- Der Vollbestandsaudit aller 618 aktiven und kompilierten Kartenhints trennt
-  17 konkrete produktive Kartenkorrekturen, 28 Karten mit rohen
-  `tacticSignals` ohne strukturierte `effects`, 33 aktive Card-Signal-
-  Zuweisungen ohne Consumer/Policy sowie größere ungeklärte
-  `strategySupportPairs`- und `valueHints`-Flächen. Es wurde noch nichts
-  implementiert; die priorisierte Maßnahmenliste wartet auf Rücksprache und
-  anschließende Worktree-Umsetzung. Führend ist
-  `docs/reviews/ai/ai-card-hint-full-inventory-audit-2026-07-18.md`.
+- Die Vollbestandsremediation aller 618 aktiven Kartenhints ist umgesetzt und
+  verifiziert. 17 konkrete Kartenfehler und 28 rohe Signaltransporte wurden
+  korrigiert, alle coverage-pflichtigen Taktiksignale besitzen Consumer oder
+  explizite Policy, und Value-, Pair-, Mechanik- sowie Szenariometadaten sind
+  runtimewirksam oder ausdrücklich Evidence-only. Alle Hints sind geprüft;
+  Hint-Quality und Target-Profile-Gates stehen bei null offenen Fällen.
+  Führend sind der Vollbestandsaudit, der Remediationprozess und das
+  Abschlussreview vom 18.07.2026.
 - Die Semantic Runtime ist der einzige produktive Entscheidungsweg.
 - `@netgrid/ai` exportiert nur Live-Verträge; Simulation, Selfplay und
   Benchmarks liegen unter `@netgrid/ai/simulation`.
@@ -131,10 +131,13 @@ Stand: 2026-07-18
   leicht, gestiegene Bank-/Plan-Mismatch-Findings und eine Seed-Verschiebung
   bleiben offenes Review-Risiko. Führend:
   `docs/reviews/ai/ai-planportfolio-remote-doctrine-final-review-2026-07-12.md`.
-- Aktive AI-Gates: 618 Hints, 602 durch den Action-Signal-Katalog abgedeckt,
-  32 zurückgestellt, 89 Target-Profile-Gaps. Full Derived Facts: 528
-  CardImplementations, 391 generierte Facts und 137 aktuell noch nur über
-  kompilierte Hints abgedeckte Karten; 0 harte Fehler.
+- Aktive AI-Gates: 618 geprüfte Hints, 599 durch den Action-Signal-Katalog
+  abgedeckt, 0 zurückgestellt und 0 Target-Profile-Gaps. Der
+  Taktiksignalvertrag umfasst 671 Signale und 294 coverage-pflichtige
+  Einträge ohne offene Pflichtlücke; das Hint-Quality-Gate meldet 0 Fehler und
+  0 Warnungen. Full Derived Facts: 528 CardImplementations, 391 generierte
+  Facts und 137 aktuell noch nur über kompilierte Hints abgedeckte Karten; 0
+  harte Fehler.
 - Führende Artefakte:
   - `docs/architecture/ai/README.md`
   - `docs/architecture/ai/ai-current-state-cleanup-process-2026-07-09.md`

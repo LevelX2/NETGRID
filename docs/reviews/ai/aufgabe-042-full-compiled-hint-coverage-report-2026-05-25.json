@@ -12157,7 +12157,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/__missing__/corp_identity_001.ts",
       "implementationFound": false,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -12176,18 +12176,16 @@
           "corp_identity",
           "setup"
         ],
-        "planRoles": [
-          "build_scoring_remote"
-        ],
+        "planRoles": [],
         "effects": [],
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -12205,7 +12203,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -12221,7 +12219,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/__missing__/efficient_fracter.ts",
       "implementationFound": false,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -12257,11 +12255,11 @@
         },
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -12283,7 +12281,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -15452,9 +15450,9 @@
         "side": "runner",
         "cardType": "program",
         "roles": [
+          "breaker_fracter",
           "icebreaker",
-          "program",
-          "wall_breaker"
+          "program"
         ],
         "planRoles": [
           "break_ice"
@@ -15554,9 +15552,9 @@
         "side": "runner",
         "cardType": "program",
         "roles": [
+          "breaker_killer",
           "icebreaker",
-          "program",
-          "sentry_breaker"
+          "program"
         ],
         "planRoles": [
           "break_ice"
@@ -15656,10 +15654,10 @@
         "side": "runner",
         "cardType": "program",
         "roles": [
+          "breaker_killer",
           "icebreaker",
           "noisy",
-          "program",
-          "sentry_breaker"
+          "program"
         ],
         "planRoles": [
           "break_ice"
@@ -15813,7 +15811,7 @@
         "side": "runner",
         "cardType": "program",
         "roles": [
-          "code_gate_breaker",
+          "breaker_decoder",
           "icebreaker",
           "program"
         ],
@@ -16780,7 +16778,7 @@
           "agenda_pressure",
           "event",
           "rd_access_replacement",
-          "rd_run"
+          "rd_pressure"
         ],
         "planRoles": [
           "agenda_pressure",
@@ -27314,7 +27312,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/runner/programs/big-frackin-gun.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -27359,11 +27357,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -27385,7 +27383,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -27513,7 +27511,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/runner/programs/boring-bit.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -27556,11 +27554,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -27582,7 +27580,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -27714,7 +27712,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/runner/programs/corrosion.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -27757,11 +27755,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -27783,7 +27781,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -28200,7 +28198,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/runner/programs/forwards-legacy.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -28247,11 +28245,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -28273,10 +28271,6 @@
       ],
       "confidence": "medium",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence medium differs from manual confidence low."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -28841,7 +28835,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/runner/programs/redecorator.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -28886,11 +28880,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -28912,7 +28906,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -29055,7 +29049,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/runner/programs/skeleton-passkeys.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -29099,11 +29093,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -29125,7 +29119,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -29675,7 +29669,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/runner/programs/wrecking-ball.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -29723,11 +29717,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -29751,7 +29745,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -36673,7 +36667,7 @@
           "strategyCovered": false,
           "benchmarkCovered": false,
           "confidence": "medium",
-          "needsHumanReview": true
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -37257,7 +37251,7 @@
           "strategyCovered": false,
           "benchmarkCovered": true,
           "confidence": "medium",
-          "needsHumanReview": true
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -38051,7 +38045,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/codeslinger.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -38094,11 +38088,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -38120,7 +38114,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -38183,7 +38177,6 @@
         "cardType": "program",
         "roles": [
           "breaker_decoder",
-          "code_gate_breaker",
           "efficient_breaker",
           "icebreaker",
           "program"
@@ -38441,7 +38434,14 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "medium",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -38460,6 +38460,10 @@
       ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -38641,7 +38645,14 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "medium",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -38662,6 +38673,10 @@
       ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -39108,7 +39123,14 @@
         "conditions": [],
         "lineSupport": [
           "runner.survival_defense"
-        ]
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "medium",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -39143,6 +39165,10 @@
       ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -39528,7 +39554,14 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "medium",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -39547,6 +39580,10 @@
       ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -39912,7 +39949,7 @@
         "side": "runner",
         "cardType": "program",
         "roles": [
-          "barrier_breaker",
+          "breaker_fracter",
           "icebreaker",
           "program",
           "run_scaling"
@@ -39923,7 +39960,14 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "medium",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -39942,6 +39986,10 @@
       ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -40014,7 +40062,14 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "medium",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -40035,6 +40090,10 @@
       ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -40506,8 +40565,7 @@
           "breaker_fracter",
           "icebreaker",
           "noisy",
-          "program",
-          "wall_breaker"
+          "program"
         ],
         "planRoles": [
           "build_rig",
@@ -40515,7 +40573,14 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "medium",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -40536,6 +40601,10 @@
       ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -41726,8 +41795,7 @@
           "breaker_fracter",
           "icebreaker",
           "program",
-          "stealth_loss",
-          "wall_breaker"
+          "stealth_loss"
         ],
         "planRoles": [
           "break_walls",
@@ -42062,7 +42130,7 @@
           "access_replacement",
           "hidden_zone_tool",
           "program",
-          "rd_run"
+          "rd_pressure"
         ],
         "planRoles": [
           "information",
@@ -42290,7 +42358,6 @@
         "cardType": "program",
         "roles": [
           "breaker_decoder",
-          "code_gate_breaker",
           "efficient_breaker",
           "high_install_cost",
           "icebreaker",
@@ -42396,10 +42463,10 @@
         "side": "runner",
         "cardType": "program",
         "roles": [
+          "breaker_fracter",
           "icebreaker",
           "program",
-          "stealth_loss",
-          "wall_breaker"
+          "stealth_loss"
         ],
         "planRoles": [
           "break_walls",
@@ -42407,7 +42474,14 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "medium",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -42428,6 +42502,10 @@
       ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -42495,8 +42573,7 @@
           "breaker_killer",
           "icebreaker",
           "low_install_breaker",
-          "program",
-          "sentry_breaker"
+          "program"
         ],
         "planRoles": [
           "build_rig",
@@ -42634,8 +42711,8 @@
           "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -42652,7 +42729,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "text_pattern_derivation",
@@ -43116,8 +43193,7 @@
           "breaker_killer",
           "efficient_sentry_breaker",
           "icebreaker",
-          "program",
-          "sentry_breaker"
+          "program"
         ],
         "planRoles": [
           "build_rig",
@@ -44244,7 +44320,7 @@
           "strategyCovered": false,
           "benchmarkCovered": true,
           "confidence": "medium",
-          "needsHumanReview": true
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -45554,14 +45630,9 @@
         "cardType": "event",
         "roles": [
           "agenda_point_event",
-          "event",
-          "steal_reward"
+          "event"
         ],
-        "planRoles": [
-          "contest_remote",
-          "pressure_hq",
-          "pressure_rnd"
-        ],
+        "planRoles": [],
         "effects": [
           {
             "kind": "scored_agenda_action",
@@ -45689,7 +45760,7 @@
           "access_replacement",
           "economy",
           "event",
-          "hq_run",
+          "hq_pressure",
           "tag_self"
         ],
         "planRoles": [
@@ -46341,14 +46412,9 @@
         "cardType": "event",
         "roles": [
           "agenda_point_event",
-          "event",
-          "steal_reward"
+          "event"
         ],
-        "planRoles": [
-          "contest_remote",
-          "pressure_hq",
-          "pressure_rnd"
-        ],
+        "planRoles": [],
         "effects": [
           {
             "kind": "scored_agenda_action",
@@ -47918,7 +47984,7 @@
         "cardType": "event",
         "roles": [
           "event",
-          "hq_run",
+          "hq_pressure",
           "rd_success_replacement"
         ],
         "planRoles": [
@@ -48998,7 +49064,7 @@
         "cardType": "event",
         "roles": [
           "event",
-          "tag_remove"
+          "tag_removal"
         ],
         "planRoles": [
           "clear_tags"
@@ -50228,7 +50294,7 @@
         "cardType": "hardware",
         "roles": [
           "hardware",
-          "tag_remove"
+          "tag_removal"
         ],
         "planRoles": [
           "build_rig",
@@ -55680,7 +55746,7 @@
         "planRoles": [
           "avoid_tags",
           "build_rig",
-          "remove_tags"
+          "clear_tags"
         ],
         "effects": [
           {
@@ -81589,7 +81655,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/__missing__/runner_identity_001.ts",
       "implementationFound": false,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -81608,18 +81674,16 @@
           "runner_identity",
           "setup"
         ],
-        "planRoles": [
-          "build_rig"
-        ],
+        "planRoles": [],
         "effects": [],
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -81637,7 +81701,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -81844,7 +81908,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/__missing__/simple_decoder.ts",
       "implementationFound": false,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -81879,11 +81943,11 @@
         },
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -81905,7 +81969,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -81929,7 +81993,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/__missing__/simple_draw_event.ts",
       "implementationFound": false,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -81955,11 +82019,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -81977,7 +82041,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -82013,7 +82077,7 @@
           "setup"
         ],
         "planRoles": [
-          "recover_economy"
+          "draw_for_answers"
         ],
         "effects": [
           {
@@ -82152,7 +82216,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/__missing__/simple_economy_event.ts",
       "implementationFound": false,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -82178,11 +82242,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -82200,7 +82264,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -82294,7 +82358,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/__missing__/simple_fracter.ts",
       "implementationFound": false,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -82329,11 +82393,11 @@
         },
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -82355,7 +82419,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -82379,7 +82443,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/__missing__/simple_killer.ts",
       "implementationFound": false,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -82414,11 +82478,11 @@
         },
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -82440,7 +82504,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -82524,7 +82588,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/__missing__/simple_run_event.ts",
       "implementationFound": false,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -82543,18 +82607,16 @@
           "event",
           "run_pressure"
         ],
-        "planRoles": [
-          "pressure_rnd"
-        ],
+        "planRoles": [],
         "effects": [],
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -82572,7 +82634,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -82652,7 +82714,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/__missing__/simple_setup_hardware.ts",
       "implementationFound": false,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -82671,18 +82733,16 @@
           "memory",
           "setup"
         ],
-        "planRoles": [
-          "safe_probe_run"
-        ],
+        "planRoles": [],
         "effects": [],
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -82700,7 +82760,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -82801,7 +82861,7 @@
           "tag_punishment"
         ],
         "planRoles": [
-          "recover_economy"
+          "punish_tagged_runner"
         ],
         "effects": [
           {
@@ -82954,9 +83014,7 @@
           "remote_support",
           "upgrade"
         ],
-        "planRoles": [
-          "recover_economy"
-        ],
+        "planRoles": [],
         "effects": [],
         "conditions": [],
         "lineSupport": [],
@@ -82995,7 +83053,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/__missing__/v08_adaptive_killer.ts",
       "implementationFound": false,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -83030,11 +83088,11 @@
         },
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -83056,7 +83114,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -83100,7 +83158,7 @@
           "setup"
         ],
         "planRoles": [
-          "recover_economy"
+          "draw_for_answers"
         ],
         "effects": [
           {
@@ -83160,7 +83218,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/__missing__/v08_burst_credit_event.ts",
       "implementationFound": false,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -83186,11 +83244,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -83208,7 +83266,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -83383,7 +83441,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/__missing__/v08_deep_draw_event.ts",
       "implementationFound": false,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -83409,11 +83467,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -83431,7 +83489,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -83512,7 +83570,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/__missing__/v08_memory_chip.ts",
       "implementationFound": false,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -83531,18 +83589,16 @@
           "memory",
           "setup"
         ],
-        "planRoles": [
-          "safe_probe_run"
-        ],
+        "planRoles": [],
         "effects": [],
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -83560,7 +83616,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -83576,7 +83632,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/__missing__/v08_overclock_run_event.ts",
       "implementationFound": false,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -83596,18 +83652,17 @@
           "run_pressure"
         ],
         "planRoles": [
-          "pressure_rnd",
           "recover_economy"
         ],
         "effects": [],
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -83625,7 +83680,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -83641,7 +83696,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/__missing__/v08_precise_decoder.ts",
       "implementationFound": false,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -83676,11 +83731,11 @@
         },
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -83702,7 +83757,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -83786,7 +83841,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/__missing__/v08_steady_fracter.ts",
       "implementationFound": false,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -83821,11 +83876,11 @@
         },
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -83847,7 +83902,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",

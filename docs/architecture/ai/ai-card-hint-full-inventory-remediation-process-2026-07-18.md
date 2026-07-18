@@ -1,6 +1,6 @@
 # KI-Kartenhint-Vollbestandsremediation – Prozess vom 18.07.2026
 
-Status: `active`
+Status: `verified_ready_for_main_integration`
 
 Quelle:
 `docs/reviews/ai/ai-card-hint-full-inventory-audit-2026-07-18.md`
@@ -291,6 +291,25 @@ Arbeit:
 
 Done-Gate: Arbeitsbranch sauber, relevante Gates grün oder ein reproduzierbar
 fachfremder Baselinefehler präzise dokumentiert; Abschlussreview vollständig.
+
+Ergebnis:
+
+- aktive und kompilierte Hints, Derived Facts, Inspector sowie alle
+  Signal-/Metadatenreports sind synchron und ihre Driftchecks grün;
+- alle drei AI-Testshards sind mit zusammen 2.723 Tests grün, ebenso
+  `check:ai`, AI-Typecheck und die vollständigen Hint-Vertragsgates;
+- der kompatible Standard-Baselinevergleich umfasst sechs Slots, zehn Seeds,
+  60 Spiele und 12.201 Entscheidungen. Illegale Aktionen, Replayfehler,
+  Fallbacks, Timeouts, Runtimefehler, Hidden-Info-Funde und
+  `no_legal_action_failure` bleiben bei null; alle Traces sind redaction-safe;
+- zwei bereits in der Referenz identische Aktionslimit-Spiele halten das Hard
+  Gate rot. Hybrid Seed 07 endet nun regulär, sodass die Limitfälle von drei
+  auf zwei sinken. Die verbleibenden roten StateHashes sind gegenüber der
+  Referenz unverändert und damit nicht durch den Hint-Diff verursacht;
+- das Abschlussreview dokumentiert Maßnahmen, Consumer-Entscheidungen,
+  Baselineabgrenzung und Restrisiken. Workspace-Typecheck, vollständiger Build
+  und Engine-Public-Entry-Smoke sind auf dem final synchronisierten Branch
+  grün; nur die lokale `main`-Integration samt Worktree-Bereinigung ist offen.
 
 Commit: `docs(ai): close full card hint remediation`
 

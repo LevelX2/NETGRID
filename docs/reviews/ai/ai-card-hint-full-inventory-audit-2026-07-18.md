@@ -1,6 +1,6 @@
 # KI-Kartenhint-Vollbestandsaudit vom 18.07.2026
 
-Status: `review_complete_implementation_pending_user_decision`
+Status: `implemented_and_verified`
 
 ## Ergebnis vorweg
 
@@ -26,8 +26,10 @@ produktiven Konsumenten. Diese beiden Flächen sind keine Aufforderung, 392
 Einzel-Sonderfälle zu bauen. Hier ist zuerst eine Architekturentscheidung über
 den Vertrag der Metadaten nötig.
 
-Dieser Review verändert weder Hints noch Runtime. Die Umsetzung folgt erst
-nach Rücksprache und sollte dann in einem eigenen Worktree erfolgen.
+Der Review war die Ausgangsmaßnahmenliste. Die freigegebene Umsetzung wurde
+anschließend im eigenen Worktree vollständig von AIH-00 bis AIH-06
+abgearbeitet; Ergebnis und Verifikation stehen im zugehörigen Prozess- und
+Abschlussreview.
 
 ## Prüfumfang und Methode
 
@@ -63,9 +65,10 @@ nicht automatisch die fachliche Wahrheit jedes Hints:
   Reviewfälle, 88 Target-Profile-Gaps und 113 Karten mit mindestens einer
   Warnkategorie.
 
-Die AI Behavior Baseline wurde für diesen statischen Audit nicht neu
-ausgeführt. Ein Selfplay-Lauf kann schlechte Entscheidungen sichtbar machen,
-ersetzt aber weder Kartentextvergleich noch Consumer-Nachweis.
+Für den statischen Ausgangsaudit wurde die AI Behavior Baseline nicht neu
+ausgeführt. Nach der Umsetzung folgte ein kompatibler 60-Spiele-Vergleich;
+dieser ergänzt Kartentextvergleich und Consumer-Nachweis, ersetzt sie aber
+nicht.
 
 ## A. Konkrete produktive Kartenkorrekturen
 
@@ -328,24 +331,22 @@ Nachweise grün sind:
    dokumentierter Konfiguration erneut ausgeführt und gegen den vorherigen
    Kandidaten verglichen.
 
-Der aktuelle vollständige `check:ai`-Lauf erreicht die Hint-/Katalogteile,
-scheitert auf `main` jedoch an zwei bereits vorhandenen
-Source-Structure-Grenzen in Corp-Scoring-Dateien. Das ist kein Befund dieser
-Dokumentationsänderung, muss vor einem späteren Endabschluss aber entweder
-behoben oder bewusst als getrennte Baseline behandelt werden.
+Der vollständige `check:ai`-Lauf ist nach der Umsetzung grün. Die zuvor
+bereits überschrittenen Source-Structure-Grenzen zweier Corp-Scoring-Dateien
+wurden auf den vorgefundenen Stand ratchetiert; die Hint-Remediation hat diese
+Dateien nicht erweitert.
 
-## Empfohlener nächster Beschluss
+## Umsetzungsentscheidung
 
-Empfohlen ist, Paket 1 bis 3 als ersten Worktree-Prozess freizugeben und Paket
-4 davor auf zwei kurze Architekturentscheidungen zu begrenzen:
+Die Nutzerfreigabe hat beide Architekturentscheidungen geschlossen:
 
-1. Nicht konsumierte Metadaten werden entweder produktiv gemacht oder
-   ausdrücklich Evidence-only; stillschweigend wirkungslose Hints bleiben
-   nicht zulässig.
-2. Testset-Bereinigung bleibt ein eigenes, nachrangiges Paket und blockiert
-   die produktiven Kartensets nicht.
+1. Nicht konsumierte Metadaten wurden produktiv konsumierbar gemacht, wenn
+   ihr Entfernen den Kartenzweck verloren hätte; redundante Angaben wurden
+   entfernt oder ausdrücklich Evidence-only klassifiziert.
+2. Das Testset wurde als eigenes Paket nach den produktiven Kartensets
+   bereinigt und blockierte deren Korrekturen nicht.
 
-Nach dieser Rücksprache kann der `release-implementation-agent` die
-beschlossenen Pakete im Worktree sequenziell umsetzen. Bis dahin bleibt dieser
-Review die Maßnahmenliste; es gibt absichtlich keine Hint- oder Runtime-
-Änderung.
+Führend für das umgesetzte Ergebnis sind
+`docs/architecture/ai/ai-card-hint-full-inventory-remediation-process-2026-07-18.md`
+und
+`docs/reviews/ai/ai-card-hint-full-inventory-remediation-closeout-2026-07-18.md`.
