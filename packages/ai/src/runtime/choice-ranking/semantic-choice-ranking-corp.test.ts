@@ -164,6 +164,36 @@ describe("tacticalPlanMappedChoice Corp overrides", () => {
     );
   });
 
+  it("scores a legal agenda before overadvancing the active scoreline", () => {
+    const advanceAgenda = legalAction("advance-agenda", "advance_card");
+    const scoreAgenda = legalAction("score-agenda", "score_agenda");
+    const advanceChoice = choice(
+      advanceAgenda,
+      -500,
+      scoreComponentEvidence("corp_active_remote_agenda_advance_clock"),
+      {
+        key: "corp_active_remote_agenda_advance_clock",
+        value: 2600,
+        reason:
+          "active_remote_agenda:true|runner_cannot_contest_before_score:true",
+      },
+    );
+    const input = aiInput();
+    input.side = "corp";
+    const result = tacticalPlanMappedChoice(
+      input,
+      [advanceChoice, choice(scoreAgenda, 2200)],
+      scorelineSupportMapping([advanceAgenda]),
+      choice(scoreAgenda, 2200),
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("score-agenda");
+    expect(result.overrideReason).toBe(
+      "corp_scoreable_agenda_controller",
+    );
+  });
+
   it("lets runner-matchpoint HQ protection interrupt remote support", () => {
     const protectRemote = legalAction("protect-remote", "install_card");
     const protectHq = legalAction("protect-hq", "install_card");

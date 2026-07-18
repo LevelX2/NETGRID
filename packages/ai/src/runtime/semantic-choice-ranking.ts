@@ -111,12 +111,15 @@ export function tacticalPlanMappedChoice(
     urgentCorpChoice &&
     urgentCorpChoice.action.actionId !== mappedChoice.action.actionId
   ) {
-    const reason = semanticRuntimeChoiceHasScoreBreakdownComponent(
-      urgentCorpChoice,
-      "corp_matchpoint_hq_protection_alignment",
-    )
-      ? "corp_matchpoint_central_protection_controller"
-      : "corp_active_remote_agenda_advance_controller";
+    const reason =
+      urgentCorpChoice.action.type === "score_agenda"
+        ? "corp_scoreable_agenda_controller"
+        : semanticRuntimeChoiceHasScoreBreakdownComponent(
+              urgentCorpChoice,
+              "corp_matchpoint_hq_protection_alignment",
+            )
+          ? "corp_matchpoint_central_protection_controller"
+          : "corp_active_remote_agenda_advance_controller";
     const scoreGap = roundScore(urgentCorpChoice.score - mappedChoice.score);
     return {
       outcome: "semantic_choice_selected",
@@ -308,6 +311,7 @@ export function tacticalPlanMappedChoice(
     if (
       tacticalPlanCorpScoreConversionBlocksOffPlanOverride(
         mapping,
+        mappedChoice,
         overrideChoice,
         mappedActionIds,
       )
@@ -575,6 +579,10 @@ function urgentCorpSemanticChoice(
 ): SemanticRuntimeChoice | undefined {
   if (input.side !== "corp") return undefined;
   const viableChoices = choices.filter((choice) => !choice.exclusion);
+  const scoreableAgenda = viableChoices
+    .filter((choice) => choice.action.type === "score_agenda")
+    .sort((left, right) => right.score - left.score)[0];
+  if (scoreableAgenda) return scoreableAgenda;
   const matchpointProtection = viableChoices
     .filter(
       (choice) =>

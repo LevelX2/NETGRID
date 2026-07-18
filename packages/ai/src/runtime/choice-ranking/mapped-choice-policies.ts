@@ -72,6 +72,18 @@ export function tacticalPlanStepPriorityKeepsMappedChoice(
   overrideChoice: SemanticRuntimeChoice,
 ): boolean {
   if (
+    mapping.plan.side === "corp" &&
+    mappedChoice.score < 0 &&
+    overrideChoice.score > 0 &&
+    mappedChoice.scoreBreakdown.some(
+      (component) =>
+        component.key === "corp_remote_sprawl_penalty" &&
+        component.value < 0,
+    )
+  ) {
+    return false;
+  }
+  if (
     !mapping.legalActions.some(
       (action) => action.actionId === overrideChoice.action.actionId,
     )

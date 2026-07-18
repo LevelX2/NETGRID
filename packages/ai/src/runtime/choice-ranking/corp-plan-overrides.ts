@@ -8,9 +8,21 @@ import {
 
 export function tacticalPlanCorpScoreConversionBlocksOffPlanOverride(
   mapping: PlanStepMappingResult,
+  mappedChoice: SemanticRuntimeChoice,
   overrideChoice: SemanticRuntimeChoice,
   mappedActionIds: ReadonlySet<string>,
 ): boolean {
+  if (
+    mappedChoice.score < 0 &&
+    overrideChoice.score > 0 &&
+    mappedChoice.scoreBreakdown.some(
+      (component) =>
+        component.key === "corp_remote_sprawl_penalty" &&
+        component.value < 0,
+    )
+  ) {
+    return false;
+  }
   return (
     mapping.plan.side === "corp" &&
     mapping.plan.type === "corp.create_score_window" &&
@@ -70,7 +82,8 @@ export function tacticalPlanCorpScorelineSupportBlocksOffPlanOverride(
       (component) =>
         (component.key === "corp_non_agenda_root_blocks_score_remote" ||
           component.key ===
-            "corp_remote_scoreline_unfunded_ice_install_penalty") &&
+            "corp_remote_scoreline_unfunded_ice_install_penalty" ||
+          component.key === "corp_remote_sprawl_penalty") &&
         component.value < 0,
     ) &&
     overrideChoice.score > mappedChoice.score
