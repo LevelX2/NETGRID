@@ -149,6 +149,42 @@ describe("StrategicIntentState contract", () => {
     expect(continued.commitment.decisionsCommitted).toBe(2);
   });
 
+  it.each([
+    ["corp.action_tempo", "corp_action_tempo", "scoreline", 0],
+    ["corp.overadvance_value", "corp_overadvance", "scoreline", 5],
+    ["corp.draw_engine", "corp_draw_engine", "none", 0],
+    ["corp.deck_recycle_engine", "corp_recycle_engine", "none", 0],
+  ] as const)(
+    "models %s as a fully classified runtime intent",
+    (strategyId, family, targetKind, reserveRequired) => {
+      const state = buildStrategicIntentState({
+        side: "corp",
+        stateVersion: 24,
+        strategyProfile: profile("corp", {
+          primary: [strategyId],
+          scores: {
+            [strategyId]: score({
+              anchor: 80,
+              support: 80,
+              final: 80,
+              confidence: "high",
+            }),
+          },
+        }),
+        availableCredits: 8,
+      });
+
+      expect(state.primaryStrategy).toMatchObject({ strategyId, family });
+      expect(state.targetVector.kind).toBe(targetKind);
+      expect(state.targetVector.evidence).toContain(
+        `target_from_strategy:${strategyId}`,
+      );
+      expect(state.targetVector.evidence.join("|")).not.toContain("unknown");
+      expect(state.reserve.required).toBe(reserveRequired);
+      expect(state.phase).not.toBe("recover");
+    },
+  );
+
   it("holds the previous strategy until minimum commitment is met", () => {
     const first = buildStrategicIntentState({
       side: "runner",

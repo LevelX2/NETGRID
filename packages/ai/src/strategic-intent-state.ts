@@ -7,6 +7,12 @@ import type {
 } from "./deck-doctrine-strategy";
 import type { DeckCapabilityProfile } from "./deck-capabilities";
 import { assertSemanticObjectSideSafe } from "./diagnostics/semantic-redaction";
+import {
+  strategicFamilyForStrategyId,
+  type StrategicIntentFamily,
+} from "./strategy-runtime-registry";
+
+export type { StrategicIntentFamily } from "./strategy-runtime-registry";
 
 export const STRATEGIC_INTENT_STATE_SCHEMA_VERSION =
   "strategic-intent-state-v1" as const;
@@ -30,25 +36,6 @@ export type StrategicRoleStatus =
   | "unknown";
 
 export type StrategicIntentCompleteness = "none" | "partial" | "complete";
-
-export type StrategicIntentFamily =
-  | "neutral"
-  | "runner_setup"
-  | "runner_central_pressure"
-  | "runner_remote_contest"
-  | "runner_remote_trash"
-  | "runner_survival"
-  | "runner_tempo"
-  | "corp_scoreline"
-  | "corp_fast_advance"
-  | "corp_ice_tax"
-  | "corp_central_defense"
-  | "corp_asset_economy"
-  | "corp_tag_trace_punish"
-  | "corp_damage_kill"
-  | "corp_ambush"
-  | "corp_economy_reserve"
-  | "unknown";
 
 export type StrategicTargetVector = {
   kind:
@@ -190,29 +177,6 @@ export type BuildStrategicIntentStateParams = {
 
 const DEFAULT_SWITCH_MARGIN = 12;
 const DEFAULT_MIN_COMMITMENT_DECISIONS = 2;
-
-const FAMILY_BY_STRATEGY_ID: Record<string, StrategicIntentFamily> = {
-  "runner.rig_first": "runner_setup",
-  "runner.economy_first": "runner_setup",
-  "runner.search.breaker": "runner_setup",
-  "runner.rnd_pressure": "runner_central_pressure",
-  "runner.hq_pressure": "runner_central_pressure",
-  "runner.interface_closeout": "runner_central_pressure",
-  "runner.remote_contest": "runner_remote_contest",
-  "runner.remote_trash": "runner_remote_trash",
-  "runner.survival_defense": "runner_survival",
-  "runner.run_event_tempo": "runner_tempo",
-  "corp.remote_scoring": "corp_scoreline",
-  "corp.rush_score": "corp_scoreline",
-  "corp.fast_advance": "corp_fast_advance",
-  "corp.ice_tax_glacier": "corp_ice_tax",
-  "corp.central_stabilize": "corp_central_defense",
-  "corp.asset_economy": "corp_asset_economy",
-  "corp.tag_trace_punish": "corp_tag_trace_punish",
-  "corp.damage_kill": "corp_damage_kill",
-  "corp.ambush_bluff": "corp_ambush",
-  "corp.economy_rez_reserve": "corp_economy_reserve",
-};
 
 // This contract is the strategic runtime layer between deck analysis and
 // tactical goal/plan synthesis. It consumes side-safe deck profiles,
@@ -602,7 +566,7 @@ function completenessForScore(
 }
 
 function familyForStrategy(strategyId: string): StrategicIntentFamily {
-  return FAMILY_BY_STRATEGY_ID[strategyId] ?? "unknown";
+  return strategicFamilyForStrategyId(strategyId);
 }
 
 function defaultReserveRequirement(
@@ -641,6 +605,7 @@ function reserveCreditsForFamily(family: StrategicIntentFamily): number {
       return 4;
     case "corp_scoreline":
     case "corp_fast_advance":
+    case "corp_overadvance":
     case "corp_ice_tax":
       return 5;
     case "corp_tag_trace_punish":
@@ -733,6 +698,8 @@ function defaultTargetVector(
       };
     case "corp_scoreline":
     case "corp_fast_advance":
+    case "corp_action_tempo":
+    case "corp_overadvance":
       return {
         kind: "scoreline",
         evidence: [`target_from_strategy:${primary.strategyId}`],
@@ -754,6 +721,15 @@ function defaultTargetVector(
       return {
         kind: "economy",
         evidence: [`target_from_strategy:${primary.strategyId}`],
+      };
+    case "corp_draw_engine":
+    case "corp_recycle_engine":
+      return {
+        kind: "none",
+        evidence: [
+          `target_from_strategy:${primary.strategyId}`,
+          "target_mode:engine",
+        ],
       };
     case "runner_survival":
       return {

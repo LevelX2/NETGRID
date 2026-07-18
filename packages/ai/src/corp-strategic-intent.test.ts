@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
+import standardDeckCatalog from "../../../data/decks/standard-deck-catalog-1.0.0.json";
 import type { DeckCapabilityProfile } from "./deck-capabilities";
-import type { AiDeckStrategyProfile, DeckStrategyScore } from "./deck-doctrine-strategy";
+import type {
+  AiDeckStrategyProfile,
+  DeckStrategyScore,
+} from "./deck-doctrine-strategy";
+import { buildDeckStrategyProfile } from "./deck-doctrine-strategy";
 import { buildCorpStrategicIntentProfile } from "./corp-strategic-intent";
 import { buildStrategicIntentState } from "./strategic-intent-state";
 
@@ -168,7 +173,103 @@ describe("CorpStrategicIntentProfile", () => {
       ]),
     );
   });
+
+  it.each([
+    ["corp.action_tempo", "corp.action_tempo_engine"],
+    ["corp.overadvance_value", "corp.overadvance_engine"],
+    ["corp.draw_engine", "corp.draw_engine"],
+    ["corp.deck_recycle_engine", "corp.deck_recycle_engine"],
+  ] as const)(
+    "projects productive %s into an explicit Corp engine plan",
+    (strategyId, enginePlan) => {
+      const strategy = strategyProfile("corp", {
+        primary: [strategyId],
+        scores: {
+          [strategyId]: score({
+            anchor: 80,
+            support: 80,
+            final: 80,
+            runtimeStatus: "productive",
+            confidence: "high",
+          }),
+        },
+      });
+      const strategicIntentState = buildStrategicIntentState({
+        side: "corp",
+        stateVersion: 13,
+        strategyProfile: strategy,
+        availableCredits: 8,
+      });
+
+      const profile = buildCorpStrategicIntentProfile({
+        strategyProfile: strategy,
+        strategicIntentState,
+      });
+
+      expect(profile.enginePlan).toContain(enginePlan);
+      expect(profile.primaryWinIntent).toBe("corp.score_agendas");
+      expect(profile.riskProfile).not.toContain("corp.no_productive_anchor");
+      expect(profile.evidence).toContain(`engine_plan:${enginePlan}`);
+    },
+  );
+
+  it.each([
+    [
+      "Proteus Korp - Variable ICE Gauntlet",
+      "corp.action_tempo",
+      "corp.action_tempo_engine",
+    ],
+    ["Chrome Rush Bureau", "corp.overadvance_value", "corp.overadvance_engine"],
+    [
+      "Classic Corp - Remote Lab Deflection",
+      "corp.draw_engine",
+      "corp.draw_engine",
+    ],
+    ["Siren Fortress", "corp.deck_recycle_engine", "corp.deck_recycle_engine"],
+  ] as const)(
+    "carries real standard deck %s through the %s intent consumer",
+    (deckName, strategyId, enginePlan) => {
+      const strategy = buildDeckStrategyProfile(standardDeck(deckName));
+      const strategyScore = strategy.strategyScores[strategyId];
+      expect(strategyScore?.runtimeStatus).toBe("productive");
+
+      const strategicIntentState = buildStrategicIntentState({
+        side: "corp",
+        stateVersion: 14,
+        strategyProfile: strategy,
+        availableCredits: 8,
+        preferredStrategyId: strategyId,
+      });
+      const profile = buildCorpStrategicIntentProfile({
+        strategyProfile: strategy,
+        strategicIntentState,
+      });
+
+      expect(strategicIntentState.primaryStrategy).toMatchObject({
+        strategyId,
+      });
+      expect(profile.enginePlan).toContain(enginePlan);
+      expect(profile.evidence).toEqual(
+        expect.arrayContaining([expect.stringContaining(enginePlan)]),
+      );
+    },
+  );
 });
+
+function standardDeck(name: string) {
+  const deck = standardDeckCatalog.decks.find(
+    (candidate) => candidate.name === name,
+  );
+  if (!deck) throw new Error(`Missing standard deck fixture ${name}`);
+  return {
+    deckSnapshotId: `standard_${deck.standardDeckId}_${deck.version}`,
+    side: deck.side as "corp",
+    cards: deck.cards.map((card) => ({
+      cardId: card.cardId,
+      quantity: card.quantity,
+    })),
+  };
+}
 
 function strategyProfile(
   side: "runner" | "corp",
@@ -258,28 +359,30 @@ function score(params: {
     supportGaps: [],
     ...(params.runtimeStatus ? { runtimeStatus: params.runtimeStatus } : {}),
     ...(params.blockers ? { runtimeBlockers: params.blockers } : {}),
-    anchorEvidence: params.anchor > 0
-      ? [
-          {
-            cardId: "fixture-anchor",
-            quantity: 1,
-            source: "derivedStrategyAnchor",
-            strategyId: "fixture.strategy",
-            reason: "test",
-          },
-        ]
-      : [],
-    supportEvidence: params.support > 0
-      ? [
-          {
-            cardId: "fixture-support",
-            quantity: 1,
-            source: "functionSignal",
-            signal: "fixture.support",
-            reason: "test",
-          },
-        ]
-      : [],
+    anchorEvidence:
+      params.anchor > 0
+        ? [
+            {
+              cardId: "fixture-anchor",
+              quantity: 1,
+              source: "derivedStrategyAnchor",
+              strategyId: "fixture.strategy",
+              reason: "test",
+            },
+          ]
+        : [],
+    supportEvidence:
+      params.support > 0
+        ? [
+            {
+              cardId: "fixture-support",
+              quantity: 1,
+              source: "functionSignal",
+              signal: "fixture.support",
+              reason: "test",
+            },
+          ]
+        : [],
   };
 }
 

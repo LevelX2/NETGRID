@@ -119,6 +119,67 @@ describe("strategic runtime context", () => {
     );
   });
 
+  it.each([
+    [
+      "corp.action_tempo",
+      "corp_action_tempo",
+      "corp.score_window",
+      "scoreline",
+    ],
+    [
+      "corp.overadvance_value",
+      "corp_overadvance",
+      "corp.score_window",
+      "scoreline",
+    ],
+    ["corp.draw_engine", "corp_draw_engine", "corp.draw_engine", "none"],
+    [
+      "corp.deck_recycle_engine",
+      "corp_recycle_engine",
+      "corp.recycle_engine",
+      "none",
+    ],
+  ] as const)(
+    "builds a classified runtime context for %s",
+    (strategyId, family, roleId, targetKind) => {
+      const context = buildStrategicRuntimeContext({
+        side: "corp",
+        playerView: playerView("corp", { credits: 8 }),
+        legalActions: [
+          action("draw", "corp", "draw_card", 0),
+          action("trigger", "corp", "trigger_ability", 0, {
+            sourceDefinitionId:
+              strategyId === "corp.deck_recycle_engine"
+                ? "onr_v1_188_ai-chief-financial-officer"
+                : strategyId === "corp.action_tempo"
+                  ? "onr_proteus_001_ai-board-member"
+                  : "onr_classic_025_strategic-planning-group",
+          }),
+          action("advance", "corp", "advance_card", 1),
+        ],
+        strategyProfile: multiStrategyProfile("corp", {
+          primary: [strategyId],
+          scores: { [strategyId]: score(strategyId) },
+        }),
+      });
+
+      expect(context.strategyPortfolio.productiveCandidates[0]).toMatchObject({
+        strategyId,
+        family,
+      });
+      expect(context.roleStatuses).toContainEqual(
+        expect.objectContaining({ roleId }),
+      );
+      expect(context.targetVector.kind).toBe(targetKind);
+      expect(context.targetVector.evidence).toContain(
+        `target_strategy:${strategyId}`,
+      );
+      expect(context.targetVector.evidence.join("|")).not.toContain(
+        "target_unknown",
+      );
+    },
+  );
+
   it("selects a concrete board opportunity while retaining the strategy portfolio", () => {
     const context = buildStrategicRuntimeContext({
       side: "corp",

@@ -57,9 +57,10 @@ export function buildMergedTacticalGoals(
       .filter((goal) => !isReportOnlyDoctrineGoal(goal))
       .map((goal) => ({
         goal,
-        source: frame.side === "corp"
-          ? "corp_tactical_goal" as const
-          : "neutral" as const,
+        source:
+          frame.side === "corp"
+            ? ("corp_tactical_goal" as const)
+            : ("neutral" as const),
       })),
   ];
   return dedupeGoals(inputs).sort(compareGoals);
@@ -68,17 +69,19 @@ export function buildMergedTacticalGoals(
 export function redactedMergedTacticalGoalFacts(
   goals: readonly TacticalGoalLike[],
 ): string[] {
-  return goals.slice(0, 16).map((goal) =>
-    [
-      `tactical_goal:${goal.goalId}`,
-      `family:${goal.family}`,
-      `priority:${goal.priority}`,
-      `urgency:${goal.urgency ?? "unknown"}`,
-      `source:${goal.source ?? "unknown"}`,
-      ...(goal.targetServerId ? [`target:${goal.targetServerId}`] : []),
-      ...goalEvidenceByPrefix(goal, "merge_source:").slice(0, 4),
-    ].join("|"),
-  );
+  return goals
+    .slice(0, 16)
+    .map((goal) =>
+      [
+        `tactical_goal:${goal.goalId}`,
+        `family:${goal.family}`,
+        `priority:${goal.priority}`,
+        `urgency:${goal.urgency ?? "unknown"}`,
+        `source:${goal.source ?? "unknown"}`,
+        ...(goal.targetServerId ? [`target:${goal.targetServerId}`] : []),
+        ...goalEvidenceByPrefix(goal, "merge_source:").slice(0, 4),
+      ].join("|"),
+    );
 }
 
 function strategicIntentGoals(
@@ -106,7 +109,10 @@ function strategicIntentGoals(
       `strategic_blocker_count:${state.blockers.length}`,
       ...state.blockers
         .slice(0, 4)
-        .map((blocker) => `strategic_blocker:${blocker.reason}:${blocker.severity}`),
+        .map(
+          (blocker) =>
+            `strategic_blocker:${blocker.reason}:${blocker.severity}`,
+        ),
     ],
   });
   if (!state.reserve.satisfied && state.reserve.kind !== "none") {
@@ -134,24 +140,59 @@ function corpStrategicIntentGoals(
   if (!intent) return [];
   const goals: TacticalGoalLike[] = [];
   if (intent.scorePlan.length > 0) {
-    goals.push(corpIntentGoal("corp.intent.scoreline", "corp_scoreline", 835, "high", intent, [
-      `score_plan:${intent.scorePlan.join("|")}`,
-    ]));
+    goals.push(
+      corpIntentGoal(
+        "corp.intent.scoreline",
+        "corp_scoreline",
+        835,
+        "high",
+        intent,
+        [`score_plan:${intent.scorePlan.join("|")}`],
+      ),
+    );
   }
   if (intent.defensePlan.length > 0) {
-    goals.push(corpIntentGoal("corp.intent.defense", "corp_ice_defense", 760, "medium", intent, [
-      `defense_plan:${intent.defensePlan.join("|")}`,
-    ]));
+    goals.push(
+      corpIntentGoal(
+        "corp.intent.defense",
+        "corp_ice_defense",
+        760,
+        "medium",
+        intent,
+        [`defense_plan:${intent.defensePlan.join("|")}`],
+      ),
+    );
   }
   if (intent.economyPlan.length > 0) {
-    goals.push(corpIntentGoal("corp.intent.economy", "economy", 720, "medium", intent, [
-      `economy_plan:${intent.economyPlan.join("|")}`,
-    ]));
+    goals.push(
+      corpIntentGoal("corp.intent.economy", "economy", 720, "medium", intent, [
+        `economy_plan:${intent.economyPlan.join("|")}`,
+      ]),
+    );
+  }
+  if (intent.enginePlan.length > 0) {
+    goals.push(
+      corpIntentGoal(
+        "corp.intent.engine",
+        "corp_engine",
+        750,
+        "medium",
+        intent,
+        [`engine_plan:${intent.enginePlan.join("|")}`],
+      ),
+    );
   }
   if (intent.punishPlan.length > 0) {
-    goals.push(corpIntentGoal("corp.intent.punish", "tag_punish", 745, "medium", intent, [
-      `punish_plan:${intent.punishPlan.join("|")}`,
-    ]));
+    goals.push(
+      corpIntentGoal(
+        "corp.intent.punish",
+        "tag_punish",
+        745,
+        "medium",
+        intent,
+        [`punish_plan:${intent.punishPlan.join("|")}`],
+      ),
+    );
   }
   return goals;
 }
@@ -198,6 +239,8 @@ function strategicGoalId(
       return "runner.strategic.tempo";
     case "corp_scoreline":
     case "corp_fast_advance":
+    case "corp_action_tempo":
+    case "corp_overadvance":
       return "corp.strategic.scoreline";
     case "corp_ice_tax":
     case "corp_central_defense":
@@ -205,6 +248,9 @@ function strategicGoalId(
     case "corp_asset_economy":
     case "corp_economy_reserve":
       return "corp.strategic.economy";
+    case "corp_draw_engine":
+    case "corp_recycle_engine":
+      return "corp.strategic.engine";
     case "corp_tag_trace_punish":
       return "corp.strategic.tag_trace_punish";
     case "corp_damage_kill":
@@ -231,6 +277,8 @@ function tacticalFamilyForStrategicFamily(
       return "risk_control";
     case "corp_scoreline":
     case "corp_fast_advance":
+    case "corp_action_tempo":
+    case "corp_overadvance":
       return "corp_scoreline";
     case "corp_ice_tax":
     case "corp_central_defense":
@@ -238,6 +286,9 @@ function tacticalFamilyForStrategicFamily(
     case "corp_asset_economy":
     case "corp_economy_reserve":
       return "economy";
+    case "corp_draw_engine":
+    case "corp_recycle_engine":
+      return "corp_engine";
     case "corp_tag_trace_punish":
       return "tag_punish";
     case "corp_damage_kill":
@@ -251,9 +302,11 @@ function tacticalFamilyForStrategicFamily(
 function strategicGoalPriority(state: StrategicIntentState): number {
   const phaseBonus = strategicPhasePriorityBonus(state.phase);
   const completenessBonus =
-    state.primaryStrategy.completeness === "complete" ? 80 :
-      state.primaryStrategy.completeness === "partial" ? 35 :
-        0;
+    state.primaryStrategy.completeness === "complete"
+      ? 80
+      : state.primaryStrategy.completeness === "partial"
+        ? 35
+        : 0;
   const blockerPenalty = Math.min(160, state.blockers.length * 35);
   return Math.max(
     500,
@@ -370,7 +423,10 @@ function annotateGoalSource(
 ): TacticalGoalLike {
   return {
     ...goal,
-    evidence: sortedUnique([...(goal.evidence ?? []), `merge_source:${source}`]),
+    evidence: sortedUnique([
+      ...(goal.evidence ?? []),
+      `merge_source:${source}`,
+    ]),
   };
 }
 

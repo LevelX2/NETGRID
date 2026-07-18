@@ -66,6 +66,13 @@ Bei Sicherheitsblocker: `package_active -> blocked_report`.
 6. `DSC-05` Metadaten-Konsumenten und Profilbereinigung.
 7. `DSC-06` Katalogweites Liveness-/Plausibilitäts-Gate, Abschlussreview und Integration.
 
+## Fortschritt
+
+- `DSC-00`: abgeschlossen und committed (`0f368b812`).
+- `DSC-01`: abgeschlossen und committed (`1a114def3`).
+- `DSC-02`: abgeschlossen; zentraler Runtime-Registry-Vertrag deckt alle 24 Taxonomie-IDs ab. Die vier neueren Corp-Strategien sind über Intent-Familie, Rollenstatus, Target/Reserve, CorpEnginePlan, TacticalGoal, Action-Fit und Discard-Fit angebunden. Reale Standarddeck-Regressionen sowie 74 fokussierte Tests und AI-Typecheck sind grün.
+- `DSC-03` bis `DSC-06`: ausstehend.
+
 ## Paketdetails
 
 ### DSC-00 Prozess, Baseline und Bestandsmatrix
