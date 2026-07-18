@@ -1,6 +1,12 @@
 "use client";
 
-import { Keyboard, Link2, RotateCcw } from "lucide-react";
+import {
+  BadgeCheck,
+  Keyboard,
+  Link2,
+  RotateCcw,
+  UserRound,
+} from "lucide-react";
 
 import type { OpenMatchEntry } from "../../lib/client-api";
 import { DeckSlotSelect } from "../decks/DeckSelectionControls";
@@ -32,6 +38,7 @@ export function MatchJoinConsole({
   joinTokenTrimmed,
   joinLinkInput,
   displayName,
+  identityKind,
   runnerSnapshots,
   corpSnapshots,
   localDecks,
@@ -66,6 +73,7 @@ export function MatchJoinConsole({
   joinTokenTrimmed: string;
   joinLinkInput: string;
   displayName: string;
+  identityKind: "account" | "guest";
   runnerSnapshots: JoinDeckSnapshot[];
   corpSnapshots: JoinDeckSnapshot[];
   localDecks: JoinLocalDeck[];
@@ -160,13 +168,39 @@ export function MatchJoinConsole({
           data-testid="join-link-input"
         />
       </label>
-      <label>
-        Name
-        <input
-          value={displayName}
-          onChange={(event) => onDisplayName(event.target.value)}
-        />
-      </label>
+      <section
+        className={`matchStartIdentity ${identityKind}`}
+        aria-label="Spielerprofil"
+      >
+        <div className="matchStartIdentityIcon" aria-hidden="true">
+          {identityKind === "account" ? (
+            <BadgeCheck size={22} />
+          ) : (
+            <UserRound size={22} />
+          )}
+        </div>
+        <label>
+          <span className="matchStartIdentityLabel">
+            <span>
+              {identityKind === "account" ? "Account-Anzeigename" : "Gastname"}
+            </span>
+            <span className={`playerIdentityBadge ${identityKind}`}>
+              {identityKind === "account" ? "Account" : "Gast"}
+            </span>
+          </span>
+          <input
+            aria-label="Name"
+            value={displayName}
+            readOnly={identityKind === "account"}
+            onChange={(event) => onDisplayName(event.target.value)}
+          />
+          <small>
+            {identityKind === "account"
+              ? "Der Anzeigename deines Accounts wird für dieses Spiel verwendet."
+              : "Der frei gewählte Gastname wird für dieses Spiel verwendet."}
+          </small>
+        </label>
+      </section>
       <div className="deckSlotGrid">
         <DeckSlotSelect
           label="Dein Runner-Deck"

@@ -108,6 +108,20 @@ Ein Restore einzelner Accounttabellen ist kein unterstützter Betriebspfad.
   Gastdecks bleiben lokale Datei-Decks und werden nicht automatisch in ein
   späteres Konto importiert.
 
+## Anzeigename und Matchidentität
+
+- Angemeldete Spieler verwenden beim Erstellen und Beitreten immer den im
+  Account hinterlegten Anzeigenamen. Das Feld ist in der Startoberfläche
+  schreibgeschützt; der Server ignoriert zusätzlich abweichende Namen in
+  manipulierten Matchrequests.
+- Gäste können weiterhin pro Browserprofil einen freien Gastnamen setzen.
+- Matches speichern ausschließlich die öffentliche Kategorie `account` oder
+  `guest` je Teilnehmer. Account-ID, Anmeldename, Credential- oder
+  Sessiondaten werden weder in GameState und Replay noch in die öffentliche
+  Ergebnisliste übernommen.
+- „Letzte Spiele“ kennzeichnet Teilnehmer als `Account`, `Gast` oder `KI`.
+  Historische Matches ohne Identitätskategorie werden als Gast behandelt.
+
 ## Noch nicht enthalten
 
 Diese Alpha versendet keine E-Mails und besitzt weder E-Mail-Verifikation noch

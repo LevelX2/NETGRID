@@ -2284,8 +2284,17 @@ async function routeHttp(
         body.mode === "ai_vs_ai"
       )
         createInput.mode = body.mode;
-      if (typeof body.displayName === "string")
+      const accountIdentity = await optionalAccountIdentity(
+        request,
+        accountAuth,
+      );
+      if (accountIdentity) {
+        createInput.displayName = accountIdentity.displayName;
+        createInput.identityKind = "account";
+      } else if (typeof body.displayName === "string") {
         createInput.displayName = body.displayName;
+        createInput.identityKind = "guest";
+      }
       if (typeof body.seed === "string") createInput.seed = body.seed;
       if (typeof body.countdownSeconds === "number")
         createInput.countdownSeconds = body.countdownSeconds;
@@ -2534,8 +2543,17 @@ async function routeHttp(
           token: typeof body.token === "string" ? body.token : "",
           ...(deckPairFromBody(body) ?? {}),
         };
-        if (typeof body.displayName === "string")
+        const accountIdentity = await optionalAccountIdentity(
+          request,
+          accountAuth,
+        );
+        if (accountIdentity) {
+          joinInput.displayName = accountIdentity.displayName;
+          joinInput.identityKind = "account";
+        } else if (typeof body.displayName === "string") {
           joinInput.displayName = body.displayName;
+          joinInput.identityKind = "guest";
+        }
         const joined = await service.joinMatch(matchId, joinInput);
         if (!("error" in joined))
           void realtime.refreshSide(matchId, opposite(joined.side));
@@ -3109,6 +3127,17 @@ async function ensureAccountAuthenticated(
     return undefined;
   }
   return auth;
+}
+
+async function optionalAccountIdentity(
+  request: IncomingMessage,
+  accountAuth: AccountAuthService | undefined,
+): Promise<{ displayName: string } | undefined> {
+  if (!accountAuth) return undefined;
+  const sessionToken = accountSessionToken(request);
+  if (!sessionToken) return undefined;
+  const auth = await accountAuth.authenticateSession(sessionToken);
+  return auth.ok ? { displayName: auth.account.displayName } : undefined;
 }
 
 function ensureAccountOrigin(

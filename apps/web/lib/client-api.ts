@@ -280,6 +280,7 @@ export async function postJson<T>(path: string, body: unknown): Promise<T> {
     response = await fetch(`${SERVER_HTTP}${path}`, {
       method: "POST",
       headers: { "content-type": "application/json" },
+      credentials: "include",
       body: JSON.stringify(body)
     });
   } catch {

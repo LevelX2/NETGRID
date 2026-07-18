@@ -29,7 +29,7 @@ describe("recent match results", () => {
   it("lists the newest fully finished games without session tokens", async () => {
     const storage = new InMemoryMatchStorage();
     const service = new MultiplayerService(storage, { tokenSalt: "recent-results-test", now: () => "2026-05-27T12:00:00.000Z" });
-    await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", humanSide: "runner", displayName: "Ludwig", seed: "recent-results-finished" });
+    await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", humanSide: "runner", displayName: "Ludwig", identityKind: "account", seed: "recent-results-finished" });
     await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", humanSide: "runner", displayName: "Offen", seed: "recent-results-active" });
 
     const records = await storage.list();
@@ -50,8 +50,8 @@ describe("recent match results", () => {
       matchStatus: "finished",
       matchMode: "human_runner_vs_corp_ai",
       winner: "runner",
-      runner: { displayName: "Ludwig", matchPoints: 10 },
-      corp: { displayName: "Korp-KI", matchPoints: 0 }
+      runner: { displayName: "Ludwig", identityKind: "account", matchPoints: 10 },
+      corp: { displayName: "Korp-KI", identityKind: "ai", matchPoints: 0 }
     });
     const serialized = JSON.stringify(results[0]);
     expect(serialized).not.toContain("sessionToken");

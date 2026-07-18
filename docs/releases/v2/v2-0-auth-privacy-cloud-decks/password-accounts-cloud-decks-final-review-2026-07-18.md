@@ -147,3 +147,25 @@ Ein realer Browserlauf setzte die beiden eigenen sowie beide KI-Slots auf
 konkrete Standard-Snapshot-IDs und zeigte anschließend „Bit-Denial Lock“ gegen
 „Rent to Own War Engine“ als tatsächlich aktive Decks. Der Testmatch wurde
 danach regulär aufgegeben. Persistenz-, Resolver- und Typprüfungen sind grün.
+
+## Nachkorrektur: Account-Anzeigename und Ergebniskennzeichnung
+
+Ein angemeldeter Spieler kann seinen Namen am Matchstart nicht mehr wie einen
+Gast überschreiben. Erstellen und Beitreten senden die Account-Cookies mit;
+der Server authentifiziert sie optional, verwendet bei gültiger Sitzung den
+hinterlegten Anzeigenamen und ignoriert abweichende Namenswerte aus dem
+Request. Die Oberfläche zeigt dafür einen schreibgeschützten
+„Account-Anzeigename“ mit Account-Badge. Ohne Anmeldung bleibt der frei
+änderbare „Gastname“ erhalten.
+
+Am Match wird nur die öffentliche Identitätskategorie `account` oder `guest`
+je Teilnehmer persistiert. Account-ID, Anmeldename und Sessioninformationen
+bleiben außerhalb von Engine-State, PlayerViews, Replays und öffentlicher
+Ergebnis-API. „Letzte Spiele“ zeigt neben den Namen entsprechend `Account`,
+`Gast` oder `KI`; vorhandene historische Spiele ohne Kategorie gelten als
+Gast.
+
+Servertests bestätigen den autoritativen Account-Anzeigenamen sowohl beim
+Erstellen als auch beim Beitreten trotz manipulierter Requestnamen. Der reale
+Browserlauf bestätigt den getrennten Gastnamen am Matchstart sowie die
+Gast-/KI-Badges in der bestehenden Ergebnisliste.
