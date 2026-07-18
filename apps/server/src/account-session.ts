@@ -119,6 +119,7 @@ export type AccountStorage = {
   saveResetToken(reset: AccountResetTokenRecord): Promise<void>;
   loadResetTokenByHash(resetTokenHash: string): Promise<AccountResetTokenRecord | undefined>;
   claimResetToken(resetId: string, usedAt: string): Promise<boolean>;
+  deleteAccountPrivateData(account: AccountRecord): Promise<void>;
   close?(): void;
 };
 
@@ -237,6 +238,15 @@ export class InMemoryAccountStorage implements AccountStorage {
     if (!resetToken || resetToken.usedAt || resetToken.revokedAt || Date.parse(resetToken.expiresAt) <= Date.parse(usedAt)) return false;
     this.resetTokens.set(resetId, { ...resetToken, usedAt });
     return true;
+  }
+
+  async deleteAccountPrivateData(account: AccountRecord): Promise<void> {
+    this.passwordCredentials.delete(account.accountId);
+    for (const [credentialId, credential] of this.credentials) if (credential.accountId === account.accountId) this.credentials.delete(credentialId);
+    for (const [sessionId, session] of this.sessions) if (session.accountId === account.accountId) this.sessions.delete(sessionId);
+    for (const [inviteId, invite] of this.invites) if (invite.targetAccountId === account.accountId || invite.createdByAccountId === account.accountId) this.invites.delete(inviteId);
+    for (const [resetId, resetToken] of this.resetTokens) if (resetToken.targetAccountId === account.accountId || resetToken.createdByAccountId === account.accountId) this.resetTokens.delete(resetId);
+    this.accounts.set(account.accountId, clone(account));
   }
 }
 
@@ -487,6 +497,29 @@ export class SqliteAccountStorage implements AccountStorage {
     return Number(result.changes) === 1;
   }
 
+  async deleteAccountPrivateData(account: AccountRecord): Promise<void> {
+    this.db.exec("BEGIN IMMEDIATE");
+    try {
+      this.db.prepare("DELETE FROM account_decks WHERE owner_account_id = ?").run(account.accountId);
+      this.db.prepare("DELETE FROM account_invites WHERE target_account_id = ? OR created_by_account_id = ?").run(account.accountId, account.accountId);
+      this.db.prepare("DELETE FROM account_reset_tokens WHERE target_account_id = ? OR created_by_account_id = ?").run(account.accountId, account.accountId);
+      this.db.prepare("DELETE FROM account_sessions WHERE account_id = ?").run(account.accountId);
+      this.db.prepare("DELETE FROM account_credentials WHERE account_id = ?").run(account.accountId);
+      this.db.prepare("DELETE FROM account_password_credentials WHERE account_id = ?").run(account.accountId);
+      this.db.prepare(
+        `UPDATE accounts SET login_name = ?, login_name_normalized = ?, display_name = ?, status = ?,
+          credential_version = ?, updated_at = ?, deleted_at = ? WHERE account_id = ?`,
+      ).run(
+        account.loginName, account.loginNameNormalized, account.displayName, account.status,
+        account.credentialVersion, account.updatedAt, account.deletedAt ?? account.updatedAt, account.accountId,
+      );
+      this.db.exec("COMMIT");
+    } catch (error) {
+      this.db.exec("ROLLBACK");
+      throw error;
+    }
+  }
+
   close(): void {
     this.db.close();
   }
@@ -635,6 +668,12 @@ export class AccountSessionService {
 
   async listAccountSessions(accountId: string): Promise<AccountSessionSelfView[]> {
     return (await this.storage.listSessionsForAccount(accountId)).map(accountSessionSelfView);
+  }
+
+  async exportAccount(accountId: string): Promise<{ account: AccountSelfView; sessions: AccountSessionSelfView[] } | undefined> {
+    const account = await this.storage.loadAccount(accountId);
+    if (!account || account.status === "deleted") return undefined;
+    return { account: accountSelfView(account), sessions: await this.listAccountSessions(accountId) };
   }
 
   private hashSecret(purpose: "session" | "csrf", value: string): string {

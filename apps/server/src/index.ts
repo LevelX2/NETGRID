@@ -7,6 +7,7 @@ import { startNetgridServer } from "./http-server";
 
 export * from "./http-server";
 export * from "./account-password";
+export * from "./account-decks";
 export * from "./account-session";
 export * from "./connection-audit";
 export * from "./internet-hardening";

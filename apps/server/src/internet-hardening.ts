@@ -114,7 +114,7 @@ export type OriginDecision = "allowed" | "denied";
 export function applyCors(request: IncomingMessage, response: ServerResponse, config: DeploymentConfig): OriginDecision {
   const origin = request.headers.origin;
   response.setHeader("vary", "Origin");
-  response.setHeader("access-control-allow-methods", "GET,POST,OPTIONS");
+  response.setHeader("access-control-allow-methods", "GET,POST,PUT,DELETE,OPTIONS");
   response.setHeader("access-control-allow-headers", "content-type,authorization,x-netgrid-csrf");
   response.setHeader("access-control-max-age", "600");
   if (!origin) return "allowed";

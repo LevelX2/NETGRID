@@ -60,6 +60,13 @@ import {
 } from "./maintenance-auth";
 import { AccountAuthService } from "./account-password";
 import {
+  AccountDeckError,
+  AccountDeckService,
+  SqliteAccountDeckStorage,
+  type AccountDeckDraftInput,
+  type AccountDeckRecord,
+} from "./account-decks";
+import {
   ACCOUNT_SESSION_COOKIE_NAME,
   ACCOUNT_SESSION_MAX_AGE_DAYS,
   SqliteAccountStorage,
@@ -116,6 +123,7 @@ export type NetgridServerOptions = {
   connectionAudit?: ConnectionAuditLogger;
   maintenanceAuth?: MaintenanceAuthService;
   accountAuth?: AccountAuthService;
+  accountDecks?: AccountDeckService;
 };
 
 export class NetgridRealtimeServer {
@@ -524,8 +532,9 @@ export function createNetgridHttpServer(service?: MultiplayerService, options: N
   const connectionAudit = options.connectionAudit ?? createConnectionAuditLoggerFromEnv();
   const maintenanceAuth = options.maintenanceAuth ?? new MaintenanceAuthService(new JsonFileMaintenanceCredentialStore(maintenanceAuthPathFromEnv()));
   const accountAuth = options.accountAuth;
+  const accountDecks = options.accountDecks;
   const realtime = new NetgridRealtimeServer(activeService, deploymentConfig, rateLimiter, connectionAudit);
-  const server = createServer((request, response) => void routeHttp(activeService, realtime, deploymentConfig, rateLimiter, maintenanceAuth, accountAuth, request, response));
+  const server = createServer((request, response) => void routeHttp(activeService, realtime, deploymentConfig, rateLimiter, maintenanceAuth, accountAuth, accountDecks, request, response));
   realtime.attach(server);
   const cleanupTimer = deploymentConfig.profile === "local" ? startMaintenanceCleanupTimer(activeService) : undefined;
   return {
@@ -541,6 +550,7 @@ export function createNetgridHttpServer(service?: MultiplayerService, options: N
           .then(() =>
             server.close((error) => {
               if (cleanupTimer) clearInterval(cleanupTimer);
+              accountDecks?.close();
               accountAuth?.close();
               activeService.closeStorage();
               return error ? reject(error) : resolve();
@@ -551,8 +561,11 @@ export function createNetgridHttpServer(service?: MultiplayerService, options: N
   };
 }
 
-export async function startNetgridServer(options: { port?: number; host?: string; service?: MultiplayerService; accountAuth?: AccountAuthService } = {}): Promise<NetgridServerHandle & { url: string; bindUrl: string }> {
-  const handle = createNetgridHttpServer(options.service, { accountAuth: options.accountAuth ?? createConfiguredAccountAuth() });
+export async function startNetgridServer(options: { port?: number; host?: string; service?: MultiplayerService; accountAuth?: AccountAuthService; accountDecks?: AccountDeckService } = {}): Promise<NetgridServerHandle & { url: string; bindUrl: string }> {
+  const handle = createNetgridHttpServer(options.service, {
+    accountAuth: options.accountAuth ?? createConfiguredAccountAuth(),
+    accountDecks: options.accountDecks ?? createConfiguredAccountDecks(),
+  });
   const port = options.port ?? Number(process.env.PORT ?? 8787);
   const host = (options.host ?? process.env.HOST ?? "0.0.0.0").trim();
   await new Promise<void>((resolveListen) => handle.server.listen(port, host, resolveListen));
@@ -567,6 +580,12 @@ export function createConfiguredAccountAuth(env: NodeJS.ProcessEnv = process.env
   const dbPath = envValue(env, "NETGRID_ACCOUNT_SQLITE_PATH") ?? envValue(env, "NETGRID_SQLITE_STORAGE_PATH") ?? DEFAULT_SQLITE_STORAGE_PATH;
   const backupDir = envValue(env, "NETGRID_STORAGE_BACKUP_DIR") ?? DEFAULT_STORAGE_BACKUP_DIR;
   return new AccountAuthService(new SqliteAccountStorage({ dbPath, backupDir }));
+}
+
+export function createConfiguredAccountDecks(env: NodeJS.ProcessEnv = process.env): AccountDeckService {
+  const dbPath = envValue(env, "NETGRID_ACCOUNT_SQLITE_PATH") ?? envValue(env, "NETGRID_SQLITE_STORAGE_PATH") ?? DEFAULT_SQLITE_STORAGE_PATH;
+  const backupDir = envValue(env, "NETGRID_STORAGE_BACKUP_DIR") ?? DEFAULT_STORAGE_BACKUP_DIR;
+  return new AccountDeckService(new SqliteAccountDeckStorage({ dbPath, backupDir }));
 }
 
 function startMaintenanceCleanupTimer(service: MultiplayerService): ReturnType<typeof setInterval> | undefined {
@@ -588,6 +607,7 @@ async function routeHttp(
   rateLimiter: FixedWindowRateLimiter,
   maintenanceAuth: MaintenanceAuthService,
   accountAuth: AccountAuthService | undefined,
+  accountDecks: AccountDeckService | undefined,
   request: IncomingMessage,
   response: ServerResponse
 ): Promise<void> {
@@ -769,6 +789,128 @@ async function routeHttp(
       });
       if (!created) return sendJson(response, 404, accountOneTimeTokenInvalidPayload());
       sendJson(response, 201, created);
+      return;
+    }
+
+    if (url.pathname === "/api/account/export" && request.method === "GET") {
+      if (!accountAuth || !accountDecks) return sendJson(response, 503, accountDecksUnavailablePayload());
+      const auth = await ensureAccountAuthenticated(response, request, accountAuth);
+      if (!auth) return;
+      const account = await accountAuth.exportAccount(auth.account.accountId);
+      const decks = await accountDecks.list(auth.account.accountId);
+      sendJson(response, 200, {
+        schemaVersion: "netgrid-account-export-v1",
+        exportedAt: new Date().toISOString(),
+        account,
+        decks: decks.decks.map(accountDeckPublicView),
+      });
+      return;
+    }
+
+    if (url.pathname === "/api/account" && request.method === "DELETE") {
+      if (!accountAuth || !accountDecks) return sendJson(response, 503, accountDecksUnavailablePayload());
+      const auth = await ensureAccountMutationAccess(response, request, deploymentConfig, accountAuth);
+      if (!auth) return;
+      const body = await readJson(request);
+      const deleted = await accountAuth.deleteAccount({
+        accountId: auth.account.accountId,
+        currentPassword: typeof body.currentPassword === "string" ? body.currentPassword : "",
+      });
+      if (!deleted) return sendJson(response, 401, accountInvalidCredentialsPayload());
+      await accountDecks.deleteAll(auth.account.accountId);
+      response.setHeader("set-cookie", clearAccountSessionCookie(request, deploymentConfig));
+      sendJson(response, 200, { ok: true, accountDeleted: true });
+      return;
+    }
+
+    if (url.pathname === "/api/decks/standards" && request.method === "GET") {
+      if (!accountDecks) return sendJson(response, 503, accountDecksUnavailablePayload());
+      sendJson(response, 200, { catalog: { schemaVersion: "netgrid-standard-deck-catalog-v1", decks: accountDecks.listStandards() } });
+      return;
+    }
+
+    const standardSnapshotRoute = /^\/api\/decks\/standards\/([^/]+)\/snapshot$/.exec(url.pathname);
+    if (standardSnapshotRoute && request.method === "POST") {
+      if (!accountDecks) return sendJson(response, 503, accountDecksUnavailablePayload());
+      sendJson(response, 200, { snapshot: accountDecks.standardSnapshot(decodeURIComponent(standardSnapshotRoute[1] ?? "")) });
+      return;
+    }
+
+    if (url.pathname === "/api/account/decks" && request.method === "GET") {
+      if (!accountAuth || !accountDecks) return sendJson(response, 503, accountDecksUnavailablePayload());
+      const auth = await ensureAccountAuthenticated(response, request, accountAuth);
+      if (!auth) return;
+      const listed = await accountDecks.list(auth.account.accountId);
+      sendJson(response, 200, { decks: listed.decks.map(accountDeckPublicView), quota: listed.quota });
+      return;
+    }
+
+    if (url.pathname === "/api/account/decks" && request.method === "POST") {
+      if (!accountAuth || !accountDecks) return sendJson(response, 503, accountDecksUnavailablePayload());
+      const auth = await ensureAccountMutationAccess(response, request, deploymentConfig, accountAuth);
+      if (!auth) return;
+      const body = await readJson(request);
+      const created = await accountDecks.create(auth.account.accountId, accountDeckInputFromBody(body.deck ?? body));
+      sendJson(response, 201, { deck: accountDeckPublicView(created), quota: (await accountDecks.list(auth.account.accountId)).quota });
+      return;
+    }
+
+    if (url.pathname === "/api/account/decks/copy-standard" && request.method === "POST") {
+      if (!accountAuth || !accountDecks) return sendJson(response, 503, accountDecksUnavailablePayload());
+      const auth = await ensureAccountMutationAccess(response, request, deploymentConfig, accountAuth);
+      if (!auth) return;
+      const body = await readJson(request);
+      const copied = await accountDecks.copyStandard(
+        auth.account.accountId,
+        typeof body.standardDeckId === "string" ? body.standardDeckId : "",
+        typeof body.name === "string" ? body.name : undefined,
+      );
+      sendJson(response, 201, { deck: accountDeckPublicView(copied), quota: (await accountDecks.list(auth.account.accountId)).quota });
+      return;
+    }
+
+    const accountDeckSnapshotRoute = /^\/api\/account\/decks\/([^/]+)\/snapshot$/.exec(url.pathname);
+    if (accountDeckSnapshotRoute && request.method === "POST") {
+      if (!accountAuth || !accountDecks) return sendJson(response, 503, accountDecksUnavailablePayload());
+      const auth = await ensureAccountMutationAccess(response, request, deploymentConfig, accountAuth);
+      if (!auth) return;
+      const snapshot = await accountDecks.snapshot(auth.account.accountId, decodeURIComponent(accountDeckSnapshotRoute[1] ?? ""));
+      sendJson(response, 200, { snapshot });
+      return;
+    }
+
+    const accountDeckRoute = /^\/api\/account\/decks\/([^/]+)$/.exec(url.pathname);
+    if (accountDeckRoute && request.method === "GET") {
+      if (!accountAuth || !accountDecks) return sendJson(response, 503, accountDecksUnavailablePayload());
+      const auth = await ensureAccountAuthenticated(response, request, accountAuth);
+      if (!auth) return;
+      const deck = await accountDecks.get(auth.account.accountId, decodeURIComponent(accountDeckRoute[1] ?? ""));
+      sendJson(response, 200, { deck: accountDeckPublicView(deck) });
+      return;
+    }
+
+    if (accountDeckRoute && request.method === "PUT") {
+      if (!accountAuth || !accountDecks) return sendJson(response, 503, accountDecksUnavailablePayload());
+      const auth = await ensureAccountMutationAccess(response, request, deploymentConfig, accountAuth);
+      if (!auth) return;
+      const body = await readJson(request);
+      const expectedVersion = typeof body.expectedVersion === "number" ? body.expectedVersion : 0;
+      const deck = await accountDecks.update(
+        auth.account.accountId,
+        decodeURIComponent(accountDeckRoute[1] ?? ""),
+        expectedVersion,
+        accountDeckInputFromBody(body.deck ?? body),
+      );
+      sendJson(response, 200, { deck: accountDeckPublicView(deck) });
+      return;
+    }
+
+    if (accountDeckRoute && request.method === "DELETE") {
+      if (!accountAuth || !accountDecks) return sendJson(response, 503, accountDecksUnavailablePayload());
+      const auth = await ensureAccountMutationAccess(response, request, deploymentConfig, accountAuth);
+      if (!auth) return;
+      await accountDecks.delete(auth.account.accountId, decodeURIComponent(accountDeckRoute[1] ?? ""));
+      sendJson(response, 200, { ok: true, quota: (await accountDecks.list(auth.account.accountId)).quota });
       return;
     }
 
@@ -1380,6 +1522,11 @@ async function routeHttp(
       sendJson(response, 400, { error: { code: "bad_json", message: "Anfrage konnte nicht gelesen werden." } });
       return;
     }
+    if (error instanceof AccountDeckError) {
+      const mapped = accountDeckErrorPayload(error);
+      sendJson(response, mapped.status, mapped.payload);
+      return;
+    }
     sendJson(response, 500, { error: { code: "server_error", message: "Serverfehler." } });
   }
 }
@@ -1537,6 +1684,19 @@ async function ensureAccountMutationAccess(
   return auth;
 }
 
+async function ensureAccountAuthenticated(
+  response: ServerResponse,
+  request: IncomingMessage,
+  accountAuth: AccountAuthService,
+): Promise<Extract<AccountSessionAuthResult, { ok: true }> | undefined> {
+  const auth = await accountAuth.authenticateSession(accountSessionToken(request) ?? "");
+  if (!auth.ok) {
+    sendJson(response, 401, accountAuthRequiredPayload());
+    return undefined;
+  }
+  return auth;
+}
+
 function ensureAccountOrigin(response: ServerResponse, request: IncomingMessage, deploymentConfig: DeploymentConfig): boolean {
   const origin = firstHeaderValue(request.headers.origin);
   if (!origin || !isOriginAllowed(origin, deploymentConfig)) {
@@ -1601,6 +1761,51 @@ function accountInputErrorPayload(error: unknown): { error: { code: string; mess
   if (code === "login_name_invalid" || code === "display_name_invalid") return { error: { code, message: "Anmeldename oder Anzeigename ist ungültig." } };
   if (code === "login_name_unavailable" || code === "account_exists") return { error: { code: "login_name_unavailable", message: "Dieser Anmeldename ist nicht verfügbar." } };
   return undefined;
+}
+
+function accountDeckInputFromBody(value: unknown): AccountDeckDraftInput {
+  if (!value || typeof value !== "object") throw new AccountDeckError("account_deck_input_invalid");
+  const body = value as Record<string, unknown>;
+  if (body.side !== "runner" && body.side !== "corp") throw new AccountDeckError("account_deck_input_invalid");
+  return {
+    name: typeof body.name === "string" ? body.name : "",
+    side: body.side,
+    identityCardId: typeof body.identityCardId === "string" ? body.identityCardId : "",
+    cardPoolSnapshotId: typeof body.cardPoolSnapshotId === "string" ? body.cardPoolSnapshotId : "",
+    ...(typeof body.cardPoolVersion === "string" ? { cardPoolVersion: body.cardPoolVersion } : {}),
+    formatProfileId: typeof body.formatProfileId === "string" ? body.formatProfileId : "",
+    ...(typeof body.formatProfileVersion === "string" ? { formatProfileVersion: body.formatProfileVersion } : {}),
+    cards: Array.isArray(body.cards)
+      ? body.cards.map((entry) => {
+          const card = entry && typeof entry === "object" ? entry as Record<string, unknown> : {};
+          return { cardId: typeof card.cardId === "string" ? card.cardId : "", quantity: typeof card.quantity === "number" ? card.quantity : Number.NaN };
+        })
+      : [],
+    ...(typeof body.notes === "string" ? { notes: body.notes } : {}),
+  };
+}
+
+function accountDeckPublicView(record: AccountDeckRecord): Omit<AccountDeckRecord, "ownerAccountId" | "deletedAt"> {
+  return {
+    cloudDeckId: record.cloudDeckId,
+    deckVersion: record.deckVersion,
+    deck: record.deck,
+    validationStatus: record.validationStatus,
+    createdAt: record.createdAt,
+    updatedAt: record.updatedAt,
+  };
+}
+
+function accountDecksUnavailablePayload(): { error: { code: "account_decks_unavailable"; message: string } } {
+  return { error: { code: "account_decks_unavailable", message: "Die persönliche Deckbibliothek ist in diesem Serverprozess nicht aktiviert." } };
+}
+
+function accountDeckErrorPayload(error: AccountDeckError): { status: number; payload: { error: { code: string; message: string } } } {
+  if (error.code === "account_deck_limit_reached") return { status: 409, payload: { error: { code: error.code, message: "Das Limit persönlicher Decks ist erreicht." } } };
+  if (error.code === "account_deck_version_conflict") return { status: 409, payload: { error: { code: error.code, message: "Das Deck wurde inzwischen geändert. Bitte neu laden." } } };
+  if (error.code === "account_deck_not_found" || error.code === "standard_deck_not_found") return { status: 404, payload: { error: { code: error.code, message: "Deck nicht gefunden." } } };
+  if (error.code === "account_deck_invalid") return { status: 422, payload: { error: { code: error.code, message: "Dieser Deckentwurf ist noch nicht spielfähig." } } };
+  return { status: 400, payload: { error: { code: error.code, message: "Die Deckdaten sind ungültig." } } };
 }
 
 function ensureMaintenanceTransport(response: ServerResponse, request: IncomingMessage, deploymentConfig: DeploymentConfig): boolean {

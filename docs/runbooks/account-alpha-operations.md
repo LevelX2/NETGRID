@@ -59,3 +59,17 @@ Backup im konfigurierten Backupverzeichnis. Für manuelle Sicherung und Restore
 gelten dieselben konsistenten SQLite-Regeln wie im Storage-Runbook; die Tabellen
 `accounts`, `account_password_credentials`, `account_sessions`,
 `account_invites` und `account_reset_tokens` müssen gemeinsam gesichert werden.
+
+## Persönliche Decks
+
+- Das Standardlimit beträgt 50 aktive persönliche Decks. Eine abweichende
+  private Testquote kann über `NETGRID_ACCOUNT_DECK_LIMIT` gesetzt werden.
+- Anlegen und Standardkopie zählen die Quote in einer `BEGIN IMMEDIATE`-
+  Transaktion; das 51. Deck wird ohne Teilschreibvorgang abgewiesen.
+- Persönliche Decks dürfen als ungültiger Entwurf gespeichert werden. Erst der
+  Snapshot-Endpunkt validiert erneut und übergibt ausschließlich einen
+  gültigen immutable Snapshot an den Matchstart.
+- Account-Export enthält redigierte Account-/Sessiondaten und persönliche
+  Deckentwürfe. Accountlöschung entfernt Credentials, Sitzungen, Invite-/Reset-
+  Daten und persönliche Decks, verändert aber keine bereits in Matches
+  eingebetteten Snapshots.

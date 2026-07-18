@@ -287,6 +287,28 @@ export class AccountAuthService {
     return this.sessions.verifyCsrfToken(sessionToken, csrfToken);
   }
 
+  async exportAccount(accountId: string) {
+    return this.sessions.exportAccount(accountId);
+  }
+
+  async deleteAccount(input: { accountId: string; currentPassword: string }): Promise<boolean> {
+    const account = await this.storage.loadAccount(input.accountId);
+    const credential = account ? await this.storage.loadPasswordCredential(account.accountId) : undefined;
+    if (!account || account.status !== "active" || !credential || !(await verifyPasswordCredential(input.currentPassword, credential)).ok) return false;
+    const now = this.now();
+    await this.storage.deleteAccountPrivateData({
+      ...account,
+      loginName: `deleted_${account.accountId}`,
+      loginNameNormalized: `deleted_${account.accountId}`,
+      displayName: "Gelöschter Account",
+      status: "deleted",
+      credentialVersion: account.credentialVersion + 1,
+      updatedAt: now,
+      deletedAt: now,
+    });
+    return true;
+  }
+
   close(): void {
     this.storage.close?.();
   }

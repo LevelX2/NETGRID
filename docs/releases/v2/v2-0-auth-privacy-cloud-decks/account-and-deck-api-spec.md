@@ -18,6 +18,8 @@ Status: API-Freeze für die geschlossene Alpha
 | Reset einlösen | `POST /api/account/resets/:token/accept` | Reset-Token |
 | Einladung erzeugen | `POST /api/account/admin/invites` | Admin-Cookie + CSRF |
 | Reset erzeugen | `POST /api/account/admin/resets` | Admin-Cookie + CSRF |
+| Account exportieren | `GET /api/account/export` | Account-Cookie |
+| Account löschen | `DELETE /api/account` | Cookie + CSRF + aktuelles Passwort |
 
 Login und Einladungseinlösung setzen das Cookie und liefern
 `{ account, session, csrfToken }`. `csrfToken` wird nicht persistiert. Fehler
