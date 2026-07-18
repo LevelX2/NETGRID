@@ -6,7 +6,7 @@ import { hashState } from "@netgrid/engine";
 import type { GameEvent, GameState } from "@netgrid/shared";
 import type { AiDecisionTraceRecord, MatchMode, MatchStatus, MultiplayerStorage, StoredMatch } from "./multiplayer";
 
-export const SQLITE_STORAGE_SCHEMA_VERSION = 1;
+export const SQLITE_STORAGE_SCHEMA_VERSION = 2;
 export const SQLITE_STORAGE_FORMAT = "netgrid_multiplayer_sqlite";
 export const DEFAULT_SQLITE_STORAGE_PATH = "data/runtime/multiplayer/netgrid.sqlite";
 export const DEFAULT_JSON_STORAGE_PATH = "data/runtime/multiplayer/matches.json";
@@ -786,6 +786,104 @@ export class SqliteMatchStorage implements MultiplayerStorage {
           value TEXT NOT NULL,
           updated_at TEXT NOT NULL
         );
+        CREATE TABLE IF NOT EXISTS accounts (
+          account_id TEXT PRIMARY KEY,
+          login_name TEXT NOT NULL,
+          login_name_normalized TEXT NOT NULL UNIQUE,
+          display_name TEXT NOT NULL,
+          status TEXT NOT NULL,
+          role TEXT NOT NULL,
+          credential_version INTEGER NOT NULL DEFAULT 1,
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL,
+          deleted_at TEXT
+        );
+        CREATE TABLE IF NOT EXISTS account_password_credentials (
+          account_id TEXT PRIMARY KEY,
+          algorithm TEXT NOT NULL,
+          parameters_version INTEGER NOT NULL,
+          salt TEXT NOT NULL,
+          password_hash TEXT NOT NULL,
+          key_length INTEGER NOT NULL,
+          cost INTEGER NOT NULL,
+          block_size INTEGER NOT NULL,
+          parallelization INTEGER NOT NULL,
+          max_memory INTEGER NOT NULL,
+          changed_at TEXT NOT NULL,
+          must_change INTEGER NOT NULL DEFAULT 0,
+          FOREIGN KEY (account_id) REFERENCES accounts(account_id) ON DELETE CASCADE
+        );
+        CREATE TABLE IF NOT EXISTS account_credentials (
+          credential_id TEXT PRIMARY KEY,
+          account_id TEXT NOT NULL,
+          public_key TEXT NOT NULL,
+          sign_count INTEGER NOT NULL,
+          label TEXT,
+          created_at TEXT NOT NULL,
+          last_used_at TEXT,
+          revoked_at TEXT,
+          FOREIGN KEY (account_id) REFERENCES accounts(account_id) ON DELETE CASCADE
+        );
+        CREATE TABLE IF NOT EXISTS account_sessions (
+          session_id TEXT PRIMARY KEY,
+          account_id TEXT NOT NULL,
+          session_token_hash TEXT NOT NULL UNIQUE,
+          csrf_token_hash TEXT NOT NULL,
+          credential_version INTEGER NOT NULL,
+          auth_strength TEXT NOT NULL DEFAULT 'password',
+          created_at TEXT NOT NULL,
+          last_seen_at TEXT NOT NULL,
+          expires_at TEXT NOT NULL,
+          revoked_at TEXT,
+          device_label TEXT,
+          FOREIGN KEY (account_id) REFERENCES accounts(account_id) ON DELETE CASCADE
+        );
+        CREATE INDEX IF NOT EXISTS idx_account_sessions_account_active
+          ON account_sessions(account_id, revoked_at, expires_at);
+        CREATE TABLE IF NOT EXISTS account_invites (
+          invite_id TEXT PRIMARY KEY,
+          invite_token_hash TEXT NOT NULL UNIQUE,
+          target_account_id TEXT NOT NULL,
+          created_by_account_id TEXT,
+          created_at TEXT NOT NULL,
+          expires_at TEXT NOT NULL,
+          used_at TEXT,
+          revoked_at TEXT,
+          FOREIGN KEY (target_account_id) REFERENCES accounts(account_id) ON DELETE CASCADE,
+          FOREIGN KEY (created_by_account_id) REFERENCES accounts(account_id) ON DELETE SET NULL
+        );
+        CREATE TABLE IF NOT EXISTS account_reset_tokens (
+          reset_id TEXT PRIMARY KEY,
+          reset_token_hash TEXT NOT NULL UNIQUE,
+          target_account_id TEXT NOT NULL,
+          created_by_account_id TEXT,
+          created_at TEXT NOT NULL,
+          expires_at TEXT NOT NULL,
+          used_at TEXT,
+          revoked_at TEXT,
+          FOREIGN KEY (target_account_id) REFERENCES accounts(account_id) ON DELETE CASCADE,
+          FOREIGN KEY (created_by_account_id) REFERENCES accounts(account_id) ON DELETE SET NULL
+        );
+        CREATE TABLE IF NOT EXISTS account_decks (
+          cloud_deck_id TEXT PRIMARY KEY,
+          owner_account_id TEXT NOT NULL,
+          deck_version INTEGER NOT NULL,
+          name TEXT NOT NULL,
+          side TEXT NOT NULL,
+          identity_card_id TEXT NOT NULL,
+          card_pool_snapshot_id TEXT NOT NULL,
+          card_pool_version TEXT,
+          format_profile_id TEXT NOT NULL,
+          format_profile_version TEXT,
+          validation_status TEXT NOT NULL,
+          deck_json TEXT NOT NULL,
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL,
+          deleted_at TEXT,
+          FOREIGN KEY (owner_account_id) REFERENCES accounts(account_id) ON DELETE CASCADE
+        );
+        CREATE INDEX IF NOT EXISTS idx_account_decks_owner_active
+          ON account_decks(owner_account_id, deleted_at, updated_at);
         CREATE TABLE IF NOT EXISTS matches (
           match_id TEXT PRIMARY KEY,
           status TEXT NOT NULL,
@@ -938,16 +1036,33 @@ export class SqliteMatchStorage implements MultiplayerStorage {
   }
 
   private migrate(version: number): void {
-    if (version !== 0) throw new StorageError("schema_too_old", "Storage-Schema ist älter als die bekannten Migrationen.");
+    if (version !== 0 && version !== 1) throw new StorageError("schema_too_old", "Storage-Schema ist älter als die bekannten Migrationen.");
     createSqliteStorageBackup({
       dbPath: this.dbPath,
       backupDir: this.backupDir,
       schemaVersion: version,
-      matchCount: 0,
+      matchCount: this.tableExists("matches") ? this.matchCount() : 0,
       reason: "pre_migration",
       source: "configured_sqlite"
     });
-    this.createSchema();
+    if (version === 1) this.migrateAccountFoundationTables();
+  }
+
+  private migrateAccountFoundationTables(): void {
+    this.transaction(() => {
+      if (this.tableExists("accounts")) {
+        if (!this.columnExists("accounts", "login_name")) this.db.exec("ALTER TABLE accounts ADD COLUMN login_name TEXT");
+        if (!this.columnExists("accounts", "login_name_normalized")) this.db.exec("ALTER TABLE accounts ADD COLUMN login_name_normalized TEXT");
+        if (!this.columnExists("accounts", "credential_version")) this.db.exec("ALTER TABLE accounts ADD COLUMN credential_version INTEGER NOT NULL DEFAULT 1");
+        this.db.exec("UPDATE accounts SET login_name = COALESCE(login_name, account_id), login_name_normalized = COALESCE(login_name_normalized, lower(account_id))");
+        this.db.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_accounts_login_name_normalized ON accounts(login_name_normalized)");
+      }
+      if (this.tableExists("account_sessions")) {
+        if (!this.columnExists("account_sessions", "csrf_token_hash")) this.db.exec("ALTER TABLE account_sessions ADD COLUMN csrf_token_hash TEXT NOT NULL DEFAULT 'legacy-revoked'");
+        if (!this.columnExists("account_sessions", "credential_version")) this.db.exec("ALTER TABLE account_sessions ADD COLUMN credential_version INTEGER NOT NULL DEFAULT 0");
+        if (!this.columnExists("account_sessions", "auth_strength")) this.db.exec("ALTER TABLE account_sessions ADD COLUMN auth_strength TEXT NOT NULL DEFAULT 'password'");
+      }
+    });
   }
 
   private recordFromJson(matchId: string, recordJson: string, options: { includeStateSnapshots?: boolean } = {}): StoredMatch {
@@ -1371,6 +1486,10 @@ export class SqliteMatchStorage implements MultiplayerStorage {
   private tableExists(name: string): boolean {
     const row = this.db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?").get(name) as { name?: string } | undefined;
     return row?.name === name;
+  }
+
+  private columnExists(table: string, column: string): boolean {
+    return (this.db.prepare(`PRAGMA table_info(${table})`).all() as Array<{ name?: string }>).some((entry) => entry.name === column);
   }
 
   private userTableCount(): number {
