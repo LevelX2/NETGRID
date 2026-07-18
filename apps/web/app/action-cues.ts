@@ -7,6 +7,7 @@ import type {
 import {
   formatChronicleEffectItems,
   formatChronicleEvent,
+  isSocialEngineeringHiddenAmountSelectionEvent,
   tagGainAmountFromPublicPayload,
   type ChronicleContext,
   type ChronicleImportance,
@@ -177,6 +178,7 @@ export function deriveOpponentActionCues(
       stringValue(payload.hiddenZoneAction) === "p3_33_private_look"
     )
       return [];
+    if (isSocialEngineeringHiddenAmountSelectionEvent(event)) return [];
     if (
       !input.includeOwnActions &&
       !opponent &&

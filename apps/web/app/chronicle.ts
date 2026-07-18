@@ -482,10 +482,6 @@ export function formatChronicleEvent(
           chosenIcePosition !== undefined
             ? `ICE ${chosenIcePosition + 1}`
             : "das gewählte ICE";
-        const amountDetail = socialEngineeringAmountDetail(
-          hiddenAmount,
-          guessAmount,
-        );
         category = autoPassChosenIce
           ? "run"
           : guessCorrect === true
@@ -514,12 +510,19 @@ export function formatChronicleEvent(
           break;
         }
         if (guessCorrect === true) {
-          const lossText =
+          title = socialEngineeringGuessTitle(
+            side,
+            isAi,
+            hiddenAmount,
+            guessAmount,
+            true,
+          );
+          description = phrase(
+            subjectFor("runner", side, false),
             hiddenAmount !== undefined
-              ? `; Runner verliert ${creditText(hiddenAmount)}`
-              : "; Runner verliert den versteckten Betrag";
-          title = `Social Engineering: Korp hat richtig geraten${lossText}`;
-          description = amountDetail;
+              ? `${creditText(hiddenAmount)} verloren`
+              : "den gewählten Betrag verloren",
+          );
           chips.push(
             "Social Engineering",
             "Guess richtig",
@@ -532,12 +535,16 @@ export function formatChronicleEvent(
           break;
         }
         if (guessCorrect === false) {
-          title = noIceTarget
-            ? "Social Engineering: Korp hat falsch geraten; kein ICE-Ziel verfügbar"
-            : "Social Engineering: Korp hat falsch geraten; Runner wählt Server und ICE";
+          title = socialEngineeringGuessTitle(
+            side,
+            isAi,
+            hiddenAmount,
+            guessAmount,
+            false,
+          );
           description = noIceTarget
-            ? `${amountDetail} Es gibt kein installiertes ICE, das für den Auto-Pass gewählt werden kann.`
-            : `${amountDetail} Der Runner darf danach einen Server und ein ICE für den Auto-Pass-Run wählen.`;
+            ? "Es gibt kein installiertes ICE, das für den Auto-Pass gewählt werden kann."
+            : "Der Runner darf danach einen Server und ein ICE für den Auto-Pass-Run wählen.";
           chips.push(
             "Social Engineering",
             "Guess falsch",
@@ -1236,7 +1243,7 @@ export function formatChronicleEvent(
           cardDefinitionId ??
           sourceDefinitionId ??
           "onr_v1_113_synchronized-attack-on-hq";
-        title = `${subject} ${isYou ? "behältst" : "behält"} mit Synchronized Attack on HQ ${hqCardCountText(retainedCount)}, ${isYou ? "wirfst" : "wirft"} ${hqCardCountText(discardedCount)} verdeckt ab und ${isYou ? "bezahlst" : "bezahlt"} dafür ${creditText(creditsPaid)}.`;
+        title = `Synchronized Attack on HQ: ${subject} ${isYou ? "behältst" : "behält"} ${hqCardCountText(retainedCount)}, ${isYou ? "wirfst" : "wirft"} ${hqCardCountText(discardedCount)} verdeckt ab und ${isYou ? "bezahlst" : "bezahlt"} dafür ${creditText(creditsPaid)}.`;
         chips.push(
           "Synchronized Attack",
           `${retainedCount} behalten`,
@@ -4114,6 +4121,7 @@ export function shouldSuppressChronicleEventItem(
   const payload = event.publicPayload ?? {};
   const actionType = stringValue(payload.actionType) ?? event.type;
   if (actionType === "decline_rez") return true;
+  if (isSocialEngineeringHiddenAmountSelectionEvent(event)) return true;
   if (
     actionType === "resolve_choice" &&
     stringValue(payload.hiddenZoneAction) === "p3_33_private_look"
@@ -4127,6 +4135,29 @@ export function shouldSuppressChronicleEventItem(
     return false;
   return resolvedEffectsFromPayload(payload.resolvedEffects).some(
     (effect) => stringValue(effect.kind) === "resolve_subroutine",
+  );
+}
+
+export function isSocialEngineeringHiddenAmountSelectionEvent(
+  event: PublicGameEvent,
+): boolean {
+  const payload = event.publicPayload ?? {};
+  const actionType = stringValue(payload.actionType) ?? event.type;
+  if (
+    actionType !== "resolve_choice" ||
+    stringValue(payload.sourceDefinitionId) !== SOCIAL_ENGINEERING_ID ||
+    payload.hiddenZoneBarrier !== true
+  )
+    return false;
+  return (
+    payloadNumberValue(payload, "secretHiddenAmountRevealed") === undefined &&
+    payloadNumberValue(payload, "secretGuessAmount") === undefined &&
+    payloadBooleanValue(payload, "secretSpendGuessRunGuessCorrect") ===
+      undefined &&
+    payloadBooleanValue(payload, "socialEngineeringGuessCorrect") ===
+      undefined &&
+    payloadBooleanValue(payload, "autoPassChosenIce") !== true &&
+    payload.socialEngineeringRun !== true
   );
 }
 
@@ -6094,19 +6125,24 @@ function subtypeLabel(value: string): string {
   }
 }
 
-function socialEngineeringAmountDetail(
+function socialEngineeringGuessTitle(
+  side: Side,
+  corpIsAi: boolean,
   hiddenAmount: number | undefined,
   guessAmount: number | undefined,
+  correct: boolean,
 ): string {
-  const hiddenText =
+  const runnerChoice =
     hiddenAmount !== undefined
-      ? `Runner versteckte ${creditText(hiddenAmount)}`
-      : "Der versteckte Runner-Betrag wurde nicht öffentlich benannt";
-  const guessText =
+      ? `für Social Engineering ${creditText(hiddenAmount)} gewählt`
+      : "für Social Engineering einen Betrag gewählt";
+  const corpGuess =
     guessAmount !== undefined
-      ? `die Korp riet ${creditText(guessAmount)}`
-      : "die Korp gab einen Guess ab";
-  return `${hiddenText}; ${guessText}.`;
+      ? `${creditText(guessAmount)} gewählt und ${correct ? "richtig" : "falsch"} geraten`
+      : `${correct ? "richtig" : "falsch"} geraten`;
+  const runnerClause = phrase(subjectFor("runner", side, false), runnerChoice);
+  const corpClause = phrase(subjectFor("corp", side, corpIsAi), corpGuess);
+  return `${runnerClause} und ${corpClause.charAt(0).toLocaleLowerCase("de-DE")}${corpClause.slice(1)}`;
 }
 
 function hqCardCountText(amount: number): string {

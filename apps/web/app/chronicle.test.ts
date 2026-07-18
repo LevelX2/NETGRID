@@ -296,29 +296,38 @@ describe("formatChronicleEvent", () => {
   });
 
   it("describes the full Social Engineering choice chain and run start", () => {
-    const hiddenChoice = formatChronicleEvent(
-      makeEvent("resolve_choice", {
+    const played = formatChronicleEvent(
+      makeEvent("play_event", {
         actor: "runner",
-        aiReasonCode: "runner.social_engineering",
-        sourceDefinitionId: "onr_v1_111_social-engineering",
-        hiddenZoneBarrier: true,
+        cardDefinitionId: "onr_v1_111_social-engineering",
+        title: "Social Engineering",
       }),
-      "corp",
+      "runner",
+      { cardTitle: "Social Engineering", cardType: "event" },
     );
-    const wrongGuess = formatChronicleEvent(
-      makeEvent("resolve_choice", {
-        actor: "corp",
-        sourceDefinitionId: "onr_v1_111_social-engineering",
-        hiddenZoneBarrier: true,
-        amounts: {
-          secretHiddenAmountRevealed: 3,
-          secretGuessAmount: 4,
-        },
-        targets: {
-          secretSpendGuessRunGuessCorrect: false,
-        },
-      }),
-      "corp",
+    const hiddenChoiceEvent = makeEvent("resolve_choice", {
+      actor: "runner",
+      aiReasonCode: "runner.social_engineering",
+      sourceDefinitionId: "onr_v1_111_social-engineering",
+      hiddenZoneBarrier: true,
+    });
+    const hiddenChoice = formatChronicleEvent(hiddenChoiceEvent, "corp");
+    const wrongGuessEvent = makeEvent("resolve_choice", {
+      actor: "corp",
+      sourceDefinitionId: "onr_v1_111_social-engineering",
+      hiddenZoneBarrier: true,
+      amounts: {
+        secretHiddenAmountRevealed: 3,
+        secretGuessAmount: 4,
+      },
+      targets: {
+        secretSpendGuessRunGuessCorrect: false,
+      },
+    });
+    const wrongGuess = formatChronicleEvent(wrongGuessEvent, "corp");
+    const wrongGuessRunnerView = formatChronicleEvent(
+      wrongGuessEvent,
+      "runner",
     );
     const correctGuess = formatChronicleEvent(
       makeEvent("resolve_choice", {
@@ -369,6 +378,7 @@ describe("formatChronicleEvent", () => {
     });
     const targetChoice = formatChronicleEvent(targetChoiceEvent, "corp");
 
+    expect(played.title).toBe("Du hast Social Engineering gespielt.");
     expect(hiddenChoice.title).toBe(
       "Die Runner-KI hat für Social Engineering verdeckt Credits gewählt.",
     );
@@ -378,11 +388,15 @@ describe("formatChronicleEvent", () => {
     expect(hiddenChoice.chips).toEqual(
       expect.arrayContaining(["Social Engineering", "Verdeckte Wahl"]),
     );
+    expect(shouldSuppressChronicleEventItem(hiddenChoiceEvent)).toBe(true);
     expect(wrongGuess.title).toBe(
-      "Social Engineering: Korp hat falsch geraten; Runner wählt Server und ICE.",
+      "Der Runner hat für Social Engineering 3 Credits gewählt und du hast 4 Credits gewählt und falsch geraten.",
+    );
+    expect(wrongGuessRunnerView.title).toBe(
+      "Du hast für Social Engineering 3 Credits gewählt und die Korp hat 4 Credits gewählt und falsch geraten.",
     );
     expect(wrongGuess.description).toBe(
-      "Runner versteckte 3 Credits; die Korp riet 4 Credits. Der Runner darf danach einen Server und ein ICE für den Auto-Pass-Run wählen.",
+      "Der Runner darf danach einen Server und ein ICE für den Auto-Pass-Run wählen.",
     );
     expect(wrongGuess.chips).toEqual(
       expect.arrayContaining([
@@ -394,11 +408,9 @@ describe("formatChronicleEvent", () => {
       ]),
     );
     expect(correctGuess.title).toBe(
-      "Social Engineering: Korp hat richtig geraten; Runner verliert 3 Credits.",
+      "Der Runner hat für Social Engineering 3 Credits gewählt und du hast 3 Credits gewählt und richtig geraten.",
     );
-    expect(correctGuess.description).toBe(
-      "Runner versteckte 3 Credits; die Korp riet 3 Credits.",
-    );
+    expect(correctGuess.description).toBe("Der Runner hat 3 Credits verloren.");
     expect(correctGuess.chips).toEqual(
       expect.arrayContaining([
         "Social Engineering",
@@ -409,10 +421,10 @@ describe("formatChronicleEvent", () => {
       ]),
     );
     expect(noIceTarget.title).toBe(
-      "Social Engineering: Korp hat falsch geraten; kein ICE-Ziel verfügbar.",
+      "Der Runner hat für Social Engineering 2 Credits gewählt und du hast 4 Credits gewählt und falsch geraten.",
     );
     expect(noIceTarget.description).toBe(
-      "Runner versteckte 2 Credits; die Korp riet 4 Credits. Es gibt kein installiertes ICE, das für den Auto-Pass gewählt werden kann.",
+      "Es gibt kein installiertes ICE, das für den Auto-Pass gewählt werden kann.",
     );
     expect(noIceTarget.chips).toEqual(
       expect.arrayContaining([
@@ -3179,7 +3191,7 @@ describe("formatChronicleEvent", () => {
     );
 
     expect(aiChoice.title).toBe(
-      "Die Korp-KI behält mit Synchronized Attack on HQ 2 HQ-Karten, wirft 3 HQ-Karten verdeckt ab und bezahlt dafür 4 Credits.",
+      "Synchronized Attack on HQ: Die Korp-KI behält 2 HQ-Karten, wirft 3 HQ-Karten verdeckt ab und bezahlt dafür 4 Credits.",
     );
     expect(aiChoice.category).toBe("hidden");
     expect(aiChoice.visibility).toBe("public");
@@ -3197,7 +3209,7 @@ describe("formatChronicleEvent", () => {
     expect(JSON.stringify(aiChoice)).not.toContain("card-");
     expect(aiChoice.title).not.toContain("Entscheidung beantwortet");
     expect(humanChoice.title).toBe(
-      "Die Korp behält mit Synchronized Attack on HQ 1 HQ-Karte, wirft 1 HQ-Karte verdeckt ab und bezahlt dafür 2 Credits.",
+      "Synchronized Attack on HQ: Die Korp behält 1 HQ-Karte, wirft 1 HQ-Karte verdeckt ab und bezahlt dafür 2 Credits.",
     );
   });
 
