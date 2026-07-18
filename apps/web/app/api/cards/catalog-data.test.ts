@@ -36,12 +36,11 @@ type CatalogDetailAiInspector = {
       schemaVersion: string;
       supportStatus: {
         aiSupportStatus: string;
-        compiledHintFound: boolean;
+        hintFound: boolean;
         mechanicalFactsFound: boolean;
-        generatedFactsFound: boolean;
         warningCount: number;
       };
-      compiledHint: {
+      cardHint: {
         requiredMechanics: string[];
         valueHints: Record<string, number>;
       } | null;
@@ -460,7 +459,7 @@ describe("catalog API filters", () => {
     ).toMatchObject({ code: "uncommon", labelDe: "Ungewöhnlich" });
   });
 
-  it("exposes the AI005 card-catalog inspector from compiled hints", () => {
+  it("exposes the AI005 card-catalog inspector from Karten-Hints", () => {
     const response = catalogDetailResponse("onr_v1_002_ai-boon");
     expect(response.status).toBe(200);
     const body = response.body as CatalogDetailAiInspector;
@@ -472,7 +471,7 @@ describe("catalog API filters", () => {
     expect(inspector.schemaVersion).toBe("ai-hint-inspector-index-v1");
     expect(inspector.supportStatus).toMatchObject({
       aiSupportStatus: "ai_supported",
-      compiledHintFound: true,
+      hintFound: true,
       mechanicalFactsFound: true,
     });
     expect(inspector.mechanicalFacts?.effects).toEqual(
@@ -534,13 +533,13 @@ describe("catalog API filters", () => {
     );
   });
 
-  it("exposes generated remoteRole facts and descriptor-gap warnings in the inspector", () => {
+  it("exposes reviewed remoteRole facts and descriptor-gap warnings in the inspector", () => {
     const remoteResponse = catalogDetailResponse("onr_v1_012_clown");
     expect(remoteResponse.status).toBe(200);
     const remoteBody = remoteResponse.body as CatalogDetailAiInspector;
-    expect(remoteBody.card.aiInspector?.supportStatus.generatedFactsFound).toBe(
-      true,
-    );
+    expect(
+      remoteBody.card.aiInspector?.supportStatus.mechanicalFactsFound,
+    ).toBe(true);
     expect(
       remoteBody.card.aiInspector?.mechanicalFacts?.remoteRole,
     ).toMatchObject({ kind: "ice_modifier" });
@@ -573,7 +572,6 @@ describe("catalog API filters", () => {
         aiInspectorSummary?: {
           available: boolean;
           mechanicalFactsFound: boolean;
-          generatedFactsFound: boolean;
           hasClassifications: boolean;
           hasWarnings: boolean;
         } | null;
@@ -587,7 +585,6 @@ describe("catalog API filters", () => {
           aiInspectorSummary: expect.objectContaining({
             available: true,
             mechanicalFactsFound: true,
-            generatedFactsFound: true,
             hasClassifications: true,
             hasWarnings: false,
           }),

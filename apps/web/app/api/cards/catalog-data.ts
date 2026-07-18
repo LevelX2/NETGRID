@@ -9,7 +9,6 @@ import {
   type CatalogStatusKey,
 } from "@netgrid/catalog";
 import activeAiHintsData from "../../../../../data/ai/ai-card-hints-active.json";
-import compiledAiHintsData from "../../../../../data/ai/ai-card-hints-compiled.json";
 import aiHintInspectorIndexData from "../../../../../data/ai/ai-hint-inspector-index.json";
 import { createRuntimeCardPool } from "../card-pool-runtime";
 
@@ -24,7 +23,7 @@ type CatalogAiHint = {
   scenarioRefs: string[];
 };
 
-type CatalogCompiledAiHint = CatalogAiHint & {
+type CatalogAiCardHint = CatalogAiHint & {
   effects?: Array<Record<string, unknown>>;
   conditions?: Array<Record<string, unknown>>;
   costProfile?: Record<string, unknown>;
@@ -63,10 +62,8 @@ type AiInspectorIndexEntry = {
   cardId: string;
   supportStatus: {
     aiSupportStatus: CatalogAiHint["aiSupportStatus"];
-    compiledHintFound: boolean;
+    hintFound: boolean;
     mechanicalFactsFound: boolean;
-    generatedFactsFound: boolean;
-    overlayFields: string[];
     legacyFallbackOnly: boolean;
     warningCount: number;
   };
@@ -85,21 +82,14 @@ type AiInspectorIndexEntry = {
 type CatalogAiInspectorListSummary = {
   available: boolean;
   aiSupportStatus: CatalogAiHint["aiSupportStatus"];
-  compiledHintFound: boolean;
+  hintFound: boolean;
   mechanicalFactsFound: boolean;
-  generatedFactsFound: boolean;
   hasClassifications: boolean;
   hasWarnings: boolean;
 };
 
 const AI_HINTS_BY_CARD_ID = new Map(
-  (activeAiHintsData.cards as CatalogAiHint[]).map((hint) => [
-    hint.cardId,
-    hint,
-  ]),
-);
-const COMPILED_AI_HINTS_BY_CARD_ID = new Map(
-  (compiledAiHintsData.cards as CatalogCompiledAiHint[]).map((hint) => [
+  (activeAiHintsData.cards as CatalogAiCardHint[]).map((hint) => [
     hint.cardId,
     hint,
   ]),
@@ -238,20 +228,16 @@ function catalogSummaryWithAiInspector<T extends { catalogCardId: string }>(
 function catalogAiInspectorSummaryForCard(
   catalogCardId: string,
 ): CatalogAiInspectorListSummary | null {
-  const activeHint = AI_HINTS_BY_CARD_ID.get(catalogCardId) ?? null;
-  const compiledHint = COMPILED_AI_HINTS_BY_CARD_ID.get(catalogCardId) ?? null;
+  const cardHint = AI_HINTS_BY_CARD_ID.get(catalogCardId) ?? null;
   const inspector = AI_HINT_INSPECTOR_BY_CARD_ID.get(catalogCardId) ?? null;
-  if (!activeHint && !compiledHint && !inspector) return null;
+  if (!cardHint && !inspector) return null;
 
   const supportStatus = inspector?.supportStatus ?? {
-    aiSupportStatus:
-      compiledHint?.aiSupportStatus ?? activeHint?.aiSupportStatus ?? "none",
-    compiledHintFound: Boolean(compiledHint),
-    mechanicalFactsFound: hasMechanicalFacts(compiledHint),
-    generatedFactsFound: false,
-    overlayFields: [],
+    aiSupportStatus: cardHint?.aiSupportStatus ?? "none",
+    hintFound: Boolean(cardHint),
+    mechanicalFactsFound: hasMechanicalFacts(cardHint),
     legacyFallbackOnly: false,
-    warningCount: compiledHint ? 0 : 1,
+    warningCount: cardHint ? 0 : 1,
   };
   const classificationCount =
     (inspector?.lineSupportClassification.length ?? 0) +
@@ -265,78 +251,73 @@ function catalogAiInspectorSummaryForCard(
   return {
     available: Boolean(inspector),
     aiSupportStatus: supportStatus.aiSupportStatus,
-    compiledHintFound: supportStatus.compiledHintFound,
+    hintFound: supportStatus.hintFound,
     mechanicalFactsFound: supportStatus.mechanicalFactsFound,
-    generatedFactsFound: supportStatus.generatedFactsFound,
     hasClassifications: classificationCount > 0,
     hasWarnings: supportStatus.warningCount > 0 || warningCount > 0,
   };
 }
 
 function catalogAiInspectorForCard(catalogCardId: string) {
-  const activeHint = AI_HINTS_BY_CARD_ID.get(catalogCardId) ?? null;
-  const compiledHint = COMPILED_AI_HINTS_BY_CARD_ID.get(catalogCardId) ?? null;
+  const cardHint = AI_HINTS_BY_CARD_ID.get(catalogCardId) ?? null;
   const inspector = AI_HINT_INSPECTOR_BY_CARD_ID.get(catalogCardId) ?? null;
-  if (!activeHint && !compiledHint && !inspector) return null;
+  if (!cardHint && !inspector) return null;
 
   const supportStatus = inspector?.supportStatus ?? {
-    aiSupportStatus:
-      compiledHint?.aiSupportStatus ?? activeHint?.aiSupportStatus ?? "none",
-    compiledHintFound: Boolean(compiledHint),
-    mechanicalFactsFound: hasMechanicalFacts(compiledHint),
-    generatedFactsFound: false,
-    overlayFields: [],
+    aiSupportStatus: cardHint?.aiSupportStatus ?? "none",
+    hintFound: Boolean(cardHint),
+    mechanicalFactsFound: hasMechanicalFacts(cardHint),
     legacyFallbackOnly: false,
-    warningCount: compiledHint ? 0 : 1,
+    warningCount: cardHint ? 0 : 1,
   };
 
   return {
     schemaVersion: aiHintInspectorIndexData.schemaVersion,
     source: aiHintInspectorIndexData.source,
     supportStatus,
-    compiledHint: compiledHint
+    cardHint: cardHint
       ? {
-          aiSupportStatus: compiledHint.aiSupportStatus,
-          requiredMechanics: compiledHint.requiredMechanics ?? [],
-          valueHints: compiledHint.valueHints ?? {},
-          riskTags: compiledHint.riskTags ?? [],
-          scenarioRefs: compiledHint.scenarioRefs ?? [],
-          manualNotes: compiledHint.manualNotes ?? [],
-          strategicNotes: compiledHint.strategicNotes ?? [],
+          aiSupportStatus: cardHint.aiSupportStatus,
+          requiredMechanics: cardHint.requiredMechanics ?? [],
+          valueHints: cardHint.valueHints ?? {},
+          riskTags: cardHint.riskTags ?? [],
+          scenarioRefs: cardHint.scenarioRefs ?? [],
+          manualNotes: cardHint.manualNotes ?? [],
+          strategicNotes: cardHint.strategicNotes ?? [],
         }
       : null,
-    mechanicalFacts: compiledHint
+    mechanicalFacts: cardHint
       ? {
-          effects: compiledHint.effects ?? [],
-          conditions: compiledHint.conditions ?? [],
-          costProfile: compiledHint.costProfile ?? null,
-          breakerProfile: compiledHint.breakerProfile ?? null,
-          remoteRole: compiledHint.remoteRole ?? null,
-          targetProfiles: compiledHint.targetProfiles ?? [],
+          effects: cardHint.effects ?? [],
+          conditions: cardHint.conditions ?? [],
+          costProfile: cardHint.costProfile ?? null,
+          breakerProfile: cardHint.breakerProfile ?? null,
+          remoteRole: cardHint.remoteRole ?? null,
+          targetProfiles: cardHint.targetProfiles ?? [],
         }
       : null,
     functionSignals: inspector?.derivedFunctionSignals ?? [],
     strategyAnchors: inspector?.derivedStrategyAnchors ?? [],
     strategySupportPairs:
       inspector?.reviewedStrategySupportPairs ??
-      compiledHint?.strategySupportPairs ??
+      cardHint?.strategySupportPairs ??
       [],
     lineSupport: {
-      values: compiledHint?.lineSupport ?? [],
+      values: cardHint?.lineSupport ?? [],
       classification: inspector?.lineSupportClassification ?? [],
     },
-    strategicRole: compiledHint?.strategicRole ?? [],
-    quality: compiledHint?.quality ?? null,
+    strategicRole: cardHint?.strategicRole ?? [],
+    quality: cardHint?.quality ?? null,
     legacyRoles: {
-      roles: compiledHint?.roles ?? activeHint?.roles ?? [],
-      planRoles: compiledHint?.planRoles ?? activeHint?.planRoles ?? [],
+      roles: cardHint?.roles ?? [],
+      planRoles: cardHint?.planRoles ?? [],
       rolesClassification: inspector?.rolesClassification ?? [],
       planRolesClassification: inspector?.planRolesClassification ?? [],
     },
     warnings: {
       categories:
         inspector?.warningCategories ??
-        (compiledHint ? [] : ["missing_compiled_hint"]),
+        (cardHint ? [] : ["missing_active_hint"]),
       descriptorGaps: inspector?.descriptorGaps ?? [],
       legacyStatus: inspector?.legacyStatus ?? {},
       strategicRoleStatus: inspector?.strategicRoleStatus ?? {},
@@ -344,7 +325,7 @@ function catalogAiInspectorForCard(catalogCardId: string) {
   };
 }
 
-function hasMechanicalFacts(hint: CatalogCompiledAiHint | null): boolean {
+function hasMechanicalFacts(hint: CatalogAiCardHint | null): boolean {
   if (!hint) return false;
   return Boolean(
     hint.effects?.length ||

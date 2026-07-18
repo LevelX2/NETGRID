@@ -1,6 +1,6 @@
 {
   "schemaVersion": "ai-decision-checkpoint-v1",
-  "checkpointId": "cp-74e2369-04-retain-night-shift-discard-duplicate-tycho",
+  "checkpointId": "cp-74e2369-04-retain-night-shift-discard-liche",
   "source": {
     "kind": "captured_match",
     "findingId": "MATCH-74E2369-04",
@@ -12189,9 +12189,7 @@
       "selectedStepKind": "build_rez_reserve",
       "selectedActionId": "corp.gain_credit",
       "selectedActionType": "gain_credit",
-      "blockedBy": [
-        "score_window_contestable"
-      ],
+      "blockedBy": ["score_window_contestable"],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_plan_considered",
       "progressBaseline": {
@@ -12502,9 +12500,7 @@
               "support": 85,
               "final": 74
             },
-            "supportGaps": [
-              "low_ambush_support"
-            ],
+            "supportGaps": ["low_ambush_support"],
             "evidence": [
               "strategy:corp.damage_kill",
               "confidence:high",
@@ -12540,10 +12536,7 @@
           "kind": "none",
           "required": 0,
           "satisfied": true,
-          "evidence": [
-            "reserve_source:runtime_context",
-            "reserve:none"
-          ]
+          "evidence": ["reserve_source:runtime_context", "reserve:none"]
         },
         "blockers": [],
         "transition": {
@@ -12730,10 +12723,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -12885,9 +12875,7 @@
               "family": "corp_ice_tax",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 92,
@@ -12945,9 +12933,7 @@
               "family": "corp_asset_economy",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 69,
@@ -12978,10 +12964,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -13000,9 +12983,7 @@
               "family": "corp_central_defense",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 34,
@@ -13034,10 +13015,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -13092,10 +13070,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -13150,10 +13125,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -13345,10 +13317,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -13400,11 +13369,10 @@
   "expectation": {
     "discardChoice": {
       "mustRetainDefinitionIds": [
-        "onr_v1_295_night-shift"
-      ],
-      "mustDiscardDefinitionIds": [
+        "onr_v1_295_night-shift",
         "onr_v1_220_tycho-extension"
-      ]
+      ],
+      "mustDiscardDefinitionIds": ["onr_v1_254_liche"]
     }
   }
 }

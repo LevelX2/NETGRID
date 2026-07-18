@@ -11,18 +11,16 @@ import {
 const INSPECTOR_FIXTURE: CatalogAiInspector = {
   schemaVersion: "ai-hint-inspector-index-v1",
   source: {
-    compiledHintsPath: "data/ai/ai-card-hints-compiled.json",
+    activeHintsPath: "data/ai/ai-card-hints-active.json",
   },
   supportStatus: {
     aiSupportStatus: "ai_supported",
-    compiledHintFound: true,
+    hintFound: true,
     mechanicalFactsFound: true,
-    generatedFactsFound: true,
-    overlayFields: [],
     legacyFallbackOnly: false,
     warningCount: 2,
   },
-  compiledHint: {
+  cardHint: {
     aiSupportStatus: "ai_supported",
     requiredMechanics: ["restricted_breaker_targets"],
     valueHints: { scoring: 2 },
@@ -133,12 +131,11 @@ const LEGACY_ONLY_FIXTURE: CatalogAiInspector = {
   supportStatus: {
     ...INSPECTOR_FIXTURE.supportStatus,
     mechanicalFactsFound: false,
-    generatedFactsFound: false,
     legacyFallbackOnly: true,
     warningCount: 2,
   },
-  compiledHint: {
-    ...INSPECTOR_FIXTURE.compiledHint!,
+  cardHint: {
+    ...INSPECTOR_FIXTURE.cardHint!,
     requiredMechanics: [],
     valueHints: {},
     riskTags: [],
@@ -257,7 +254,7 @@ describe("AI hint inspector UI view model", () => {
     expect(mechanicalText).toContain("remoteRole kind: ice_modifier");
     expect(mechanicalText).toContain("targetProfiles");
     expect(mechanicalText).toContain(
-      "Compiled source data/ai/ai-card-hints-compiled.json",
+      "Hint-Quelle data/ai/ai-card-hints-active.json",
     );
     expect(qualityText).toContain("Reviewdaten hint reviewed: ja");
     expect(qualityText).toContain("Reviewdaten confidence: low");

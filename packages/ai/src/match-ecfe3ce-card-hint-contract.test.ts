@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import activeHints from "../../../data/ai/ai-card-hints-active.json";
-import compiledHints from "../../../data/ai/ai-card-hints-compiled.json";
 import inspectorIndex from "../../../data/ai/ai-hint-inspector-index.json";
 
 type Hint = {
@@ -20,10 +19,7 @@ type Hint = {
 };
 
 describe("match ECFE3CE card-hint contract", () => {
-  it.each([
-    ["active", activeHints.cards],
-    ["compiled", compiledHints.cards],
-  ])(
+  it.each([["active", activeHints.cards]])(
     "keeps the five reviewed cards mechanically honest in %s hints",
     (_source, cards) => {
       const hints = cards as Hint[];

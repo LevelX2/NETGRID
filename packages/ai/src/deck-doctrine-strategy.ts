@@ -1,5 +1,5 @@
 import type { Side } from "@netgrid/shared";
-import compiledAiHintsData from "../../../data/ai/ai-card-hints-compiled.json";
+import activeAiHintsData from "../../../data/ai/ai-card-hints-active.json";
 import inspectorIndexData from "../../../data/ai/ai-hint-inspector-index.json";
 import strategyGoalsData from "../../../data/ai/strategy-goals-v1.json";
 import { RUNTIME_CARDS } from "./ai-hints";
@@ -11,7 +11,7 @@ export type DeckStrategyEvidence = {
   cardId: string;
   quantity: number;
   source:
-    | "compiledHint"
+    | "cardHint"
     | "derivedStrategyAnchor"
     | "functionSignal"
     | "lineSupport"
@@ -208,7 +208,7 @@ export type AiDeckStrategyProfile = {
   source: {
     mode: "ai_internal_strategy_profile";
     strategyGoals: "data/ai/strategy-goals-v1.json";
-    compiledHints: "data/ai/ai-card-hints-compiled.json";
+    activeHints: "data/ai/ai-card-hints-active.json";
     inspectorIndex: "data/ai/ai-hint-inspector-index.json";
     plannerEffect: "strategic_intent_input";
   };
@@ -305,7 +305,7 @@ type StrategyGoal = {
   supportWeights?: Record<string, number>;
 };
 
-type CompiledAiHint = {
+type AiCardHint = {
   cardId: string;
   side: Side;
   cardType?: string;
@@ -394,11 +394,8 @@ const STRATEGY_GOALS = (
 const STRATEGY_GOALS_BY_ID = new Map(
   STRATEGY_GOALS.map((goal) => [goal.strategyId, goal]),
 );
-const COMPILED_HINTS_BY_CARD = new Map(
-  (compiledAiHintsData.cards as CompiledAiHint[]).map((hint) => [
-    hint.cardId,
-    hint,
-  ]),
+const AI_HINTS_BY_CARD = new Map(
+  (activeAiHintsData.cards as AiCardHint[]).map((hint) => [hint.cardId, hint]),
 );
 const INSPECTOR_BY_CARD = new Map(
   (inspectorIndexData.cards as InspectorCard[]).map((card) => [
@@ -547,7 +544,7 @@ export function buildDeckStrategyProfile(
     source: {
       mode: "ai_internal_strategy_profile",
       strategyGoals: "data/ai/strategy-goals-v1.json",
-      compiledHints: "data/ai/ai-card-hints-compiled.json",
+      activeHints: "data/ai/ai-card-hints-active.json",
       inspectorIndex: "data/ai/ai-hint-inspector-index.json",
       plannerEffect: "strategic_intent_input",
     },
@@ -577,7 +574,7 @@ export function buildNeutralDeckStrategyProfile(
     source: {
       mode: "ai_internal_strategy_profile",
       strategyGoals: "data/ai/strategy-goals-v1.json",
-      compiledHints: "data/ai/ai-card-hints-compiled.json",
+      activeHints: "data/ai/ai-card-hints-active.json",
       inspectorIndex: "data/ai/ai-hint-inspector-index.json",
       plannerEffect: "strategic_intent_input",
     },
@@ -674,7 +671,7 @@ function deckStrategyStats(
   for (const entry of sortedCards) {
     const quantity = Math.max(0, entry.quantity);
     if (quantity === 0) continue;
-    const hint = COMPILED_HINTS_BY_CARD.get(entry.cardId);
+    const hint = AI_HINTS_BY_CARD.get(entry.cardId);
     const inspector = INSPECTOR_BY_CARD.get(entry.cardId);
     const runtimeCard = RUNTIME_CARDS[entry.cardId] as
       | RuntimeCardForStrategy
@@ -770,7 +767,7 @@ function deckDoctrineV2CardRoles(
     .sort((left, right) => left.cardId.localeCompare(right.cardId))
     .filter((entry) => Math.max(0, entry.quantity) > 0)
     .map((entry) => {
-      const hint = COMPILED_HINTS_BY_CARD.get(entry.cardId);
+      const hint = AI_HINTS_BY_CARD.get(entry.cardId);
       const inspector = INSPECTOR_BY_CARD.get(entry.cardId);
       const roles = sortedUnique([
         ...(hint?.roles ?? []),
@@ -816,7 +813,7 @@ function deckDoctrineV2CardRoles(
         functionSignals,
         strategyAnchors,
         warnings: sortedUnique([
-          ...(hint === undefined ? ["missing_compiled_hint"] : []),
+          ...(hint === undefined ? ["missing_card_hint"] : []),
           ...(inspector === undefined ? ["missing_inspector_index"] : []),
           ...(inspector?.warningCategories ?? []),
         ]),
@@ -1030,7 +1027,7 @@ function lineSupportAnchorsForCard(
     anchors.push({
       strategyId: value,
       value,
-      reason: "compiled_lineSupport_strategy_goal",
+      reason: "card_hint_lineSupport_strategy_goal",
     });
   }
   return sortedUniqueObjects(
@@ -1534,7 +1531,7 @@ function evidenceFromCardType(
     .map((card) => ({
       cardId: card.cardId,
       quantity: card.quantity,
-      source: "compiledHint" as const,
+      source: "cardHint" as const,
       signal: `cardType:${cardType}`,
       reason: `support:${dimension}`,
     }));
@@ -1688,7 +1685,7 @@ function earlyIceSupport(
       earlyIce.map((card) => ({
         cardId: card.cardId,
         quantity: card.quantity,
-        source: "compiledHint" as const,
+        source: "cardHint" as const,
         signal: "cheap_ice",
         reason: `support:${dimension}`,
       })),
@@ -1745,7 +1742,7 @@ function memorySupport(
       cards.map((card) => ({
         cardId: card.cardId,
         quantity: card.quantity,
-        source: "compiledHint" as const,
+        source: "cardHint" as const,
         signal: "memory_or_hand_size",
         reason: `support:${dimension}`,
       })),
@@ -2251,9 +2248,9 @@ function cardIdHasTokenPhrase(
 function deckWarnings(stats: DeckStrategyStats): string[] {
   const warnings = new Set<string>();
   for (const card of stats.cards) {
-    const hint = COMPILED_HINTS_BY_CARD.get(card.cardId);
+    const hint = AI_HINTS_BY_CARD.get(card.cardId);
     const inspector = INSPECTOR_BY_CARD.get(card.cardId);
-    if (!hint) warnings.add(`missing_compiled_hint:${card.cardId}`);
+    if (!hint) warnings.add(`missing_card_hint:${card.cardId}`);
     if (!inspector) warnings.add(`missing_inspector_index:${card.cardId}`);
     if (hint?.side && hint.side !== stats.side) {
       warnings.add(`side_mismatch:${card.cardId}:${hint.side}`);

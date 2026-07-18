@@ -90,7 +90,7 @@ describe("corp ICE placement profile", () => {
     expect(profile.deadAsFirstIce).toBe(true);
   });
 
-  it("consumes compiled ICE-v2 tactic signals in placement profiles", () => {
+  it("consumes active ICE-v2 tactic signals in placement profiles", () => {
     const colonelFailure = buildCorpIceCardPlacementProfile(
       corpIce("colonel-failure", {
         definitionId: "onr_proteus_015_colonel-failure",

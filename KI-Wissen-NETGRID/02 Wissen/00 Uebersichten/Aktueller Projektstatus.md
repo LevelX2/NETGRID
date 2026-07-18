@@ -153,9 +153,10 @@ Stand: 2026-07-18
   abgedeckt, 0 zurückgestellt und 0 Target-Profile-Gaps. Der
   Taktiksignalvertrag umfasst 671 Signale und 294 coverage-pflichtige
   Einträge ohne offene Pflichtlücke; das Hint-Quality-Gate meldet 0 Fehler und
-  0 Warnungen. Full Derived Facts: 528 CardImplementations, 391 generierte
-  Facts und 137 aktuell noch nur über kompilierte Hints abgedeckte Karten; 0
-  harte Fehler.
+  0 Warnungen. `data/ai/ai-card-hints-active.json` ist die einzige statische
+  Karten-Hint-Quelle für Runtime, Deckstrategie und Inspector. Die frühere
+  Compile-/Derived-Facts-/Manual-Overlay-Pipeline ist entfernt; der Inspector
+  erzeugt nur noch seinen Such- und Diagnoseindex direkt aus dieser Quelle.
 - Führende Artefakte:
   - `docs/architecture/ai/README.md`
   - `docs/architecture/ai/ai-current-state-cleanup-process-2026-07-09.md`

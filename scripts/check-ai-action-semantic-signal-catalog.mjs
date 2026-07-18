@@ -9,7 +9,6 @@ const schemaVersion = "action-semantic-signal-catalog-gate-v1";
 const generatedAt = "2026-06-12";
 
 const activeHintsPath = "data/ai/ai-card-hints-active.json";
-const compiledHintsPath = "data/ai/ai-card-hints-compiled.json";
 const inspectorIndexPath = "data/ai/ai-hint-inspector-index.json";
 const tacticSignalCatalogPath = "data/ai/tactic-signals-v1.json";
 const jsonReportPath =
@@ -73,13 +72,9 @@ function parseArgs(args) {
 
 function buildReport() {
   const activeHints = readJson(activeHintsPath);
-  const compiledHints = readJson(compiledHintsPath);
   const inspectorIndex = readJson(inspectorIndexPath);
   const tacticSignalCatalog = readJson(tacticSignalCatalogPath);
 
-  const compiledByCardId = new Map(
-    (compiledHints.cards ?? []).map((card) => [card.cardId, card]),
-  );
   const inspectorByCardId = new Map(
     (inspectorIndex.cards ?? []).map((card) => [card.cardId, card]),
   );
@@ -94,13 +89,12 @@ function buildReport() {
   );
 
   const rows = (activeHints.cards ?? [])
-    .map((activeCard) =>
+    .map((cardHint) =>
       buildRow({
-        activeCard,
-        compiledCard: compiledByCardId.get(activeCard.cardId),
-        inspectorCard: inspectorByCardId.get(activeCard.cardId),
-      signalById,
-      targetProfileRequiredSignalIds,
+        cardHint,
+        inspectorCard: inspectorByCardId.get(cardHint.cardId),
+        signalById,
+        targetProfileRequiredSignalIds,
       }),
     )
     .sort((left, right) => left.cardId.localeCompare(right.cardId));
@@ -110,7 +104,6 @@ function buildReport() {
     generatedAt,
     source: {
       activeHintsPath,
-      compiledHintsPath,
       inspectorIndexPath,
       tacticSignalCatalogPath,
       mode: "diagnostic-only signal catalog report; no runtime input, no action selection, no planner score and no legality effect",
@@ -145,8 +138,7 @@ function buildReport() {
 }
 
 function buildRow({
-  activeCard,
-  compiledCard,
+  cardHint,
   inspectorCard,
   signalById,
   targetProfileRequiredSignalIds,
@@ -154,7 +146,7 @@ function buildRow({
   const derivedFunctionSignals = sortedUnique(
     inspectorCard?.derivedFunctionSignals ?? [],
   );
-  const activeTacticSignals = sortedUnique(activeCard.tacticSignals ?? []);
+  const activeTacticSignals = sortedUnique(cardHint.tacticSignals ?? []);
   const signalIds = sortedUnique([
     ...derivedFunctionSignals,
     ...activeTacticSignals,
@@ -168,17 +160,15 @@ function buildRow({
   const targetProfileExpectedBySignals = derivedFunctionSignals.filter(
     (signalId) => targetProfileRequiredSignalIds.has(signalId),
   );
-  const targetProfileCount =
-    arrayLength(activeCard.targetProfiles) +
-    arrayLength(compiledCard?.targetProfiles);
+  const targetProfileCount = arrayLength(cardHint.targetProfiles);
   const warningCategories = sortedUnique(
     inspectorCard?.warningCategories ?? [],
   );
   const deferred =
     warningCategories.includes("deferred_requires_human_review") ||
-    activeCard.quality?.needsHumanReview === true;
+    cardHint.quality?.needsHumanReview === true;
   const deferredScope = deferred
-    ? deferredReviewScope({ activeCard, warningCategories })
+    ? deferredReviewScope({ cardHint, warningCategories })
     : "none";
   const covered =
     derivedFunctionSignals.length > 0 &&
@@ -188,16 +178,16 @@ function buildRow({
     targetProfileExpectedBySignals.length > 0 && targetProfileCount === 0;
 
   return {
-    cardId: activeCard.cardId,
-    side: activeCard.side,
-    cardType: activeCard.cardType,
-    aiSupportStatus: activeCard.aiSupportStatus ?? "unknown",
+    cardId: cardHint.cardId,
+    side: cardHint.side,
+    cardType: cardHint.cardType,
+    aiSupportStatus: cardHint.aiSupportStatus ?? "unknown",
     covered,
     deferred,
     deferred_review_scope: deferredScope,
     deferred_owner: deferred ? "ai_semantic_catalog_review" : "none",
     no_signal_reason: noSignalReason({
-      activeCard,
+      cardHint,
       inspectorCard,
       warningCategories,
       derivedFunctionSignals,
@@ -214,11 +204,11 @@ function buildRow({
   };
 }
 
-function deferredReviewScope({ activeCard, warningCategories }) {
+function deferredReviewScope({ cardHint, warningCategories }) {
   const inspector =
     warningCategories.includes("deferred_requires_human_review") ||
     warningCategories.includes("legacy_fallback_only");
-  const activeHint = activeCard.quality?.needsHumanReview === true;
+  const activeHint = cardHint.quality?.needsHumanReview === true;
   if (inspector && activeHint)
     return "inspector_warning_and_active_hint_quality";
   if (inspector) return "inspector_warning";
@@ -226,7 +216,7 @@ function deferredReviewScope({ activeCard, warningCategories }) {
 }
 
 function noSignalReason({
-  activeCard,
+  cardHint,
   inspectorCard,
   warningCategories,
   derivedFunctionSignals,
@@ -237,11 +227,8 @@ function noSignalReason({
     return "legacy_fallback_only";
   if (warningCategories.includes("deferred_requires_human_review"))
     return "deferred_requires_human_review";
-  if (activeCard.cardType === "identity") return "identity_no_function_signal";
-  if (
-    activeCard.aiSupportStatus &&
-    activeCard.aiSupportStatus !== "ai_supported"
-  ) {
+  if (cardHint.cardType === "identity") return "identity_no_function_signal";
+  if (cardHint.aiSupportStatus && cardHint.aiSupportStatus !== "ai_supported") {
     return "not_ai_supported";
   }
   return "no_function_signal";
@@ -449,7 +436,7 @@ function renderMarkdownReport(reportToRender) {
   return [
     "# Action Semantic Signal Catalog Gate 2026-06-12",
     "",
-    "Diagnosebericht fuer aktive Karten. Der Bericht nutzt Active Hints, Compiled Hints, den Hint-Inspector-Index und den Tactic-Signal-Katalog.",
+    "Diagnosebericht fuer aktive Karten. Der Bericht nutzt Active Hints, Karten-Hints, den Hint-Inspector-Index und den Tactic-Signal-Katalog.",
     "",
     "Keine Runtime-Anbindung, keine Action-Auswahl, kein Scoring und keine Hidden-Info-Projektion.",
     "",

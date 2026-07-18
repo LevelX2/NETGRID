@@ -76,7 +76,10 @@ function loadStrategyTaxonomyReport(): CheckReport {
 }
 
 function loadMutatedStrategyTaxonomyReport(mutator: string): CheckReport {
-  const scriptPath = path.join(repoRoot, "scripts/check-ai-strategy-taxonomy.mjs");
+  const scriptPath = path.join(
+    repoRoot,
+    "scripts/check-ai-strategy-taxonomy.mjs",
+  );
   const checkerUrl = pathToFileURL(scriptPath).href;
   const script = `
     import fs from "node:fs";
@@ -86,7 +89,6 @@ function loadMutatedStrategyTaxonomyReport(mutator: string): CheckReport {
     const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "netgrid-ai-taxonomy-"));
     const files = [
       "data/ai/ai-card-hints-active.json",
-      "data/ai/ai-card-hints-compiled.json",
       "data/ai/strategy-goals-v1.json",
       "data/ai/strategic-roles-v1.json",
       "data/ai/function-signal-derivation-v1.json",
@@ -98,33 +100,24 @@ function loadMutatedStrategyTaxonomyReport(mutator: string): CheckReport {
       fs.copyFileSync(path.join(${JSON.stringify(repoRoot)}, relative), target);
     }
     const activePath = path.join(tempRoot, "data/ai/ai-card-hints-active.json");
-    const compiledPath = path.join(tempRoot, "data/ai/ai-card-hints-compiled.json");
     const active = JSON.parse(fs.readFileSync(activePath, "utf8"));
-    const compiled = JSON.parse(fs.readFileSync(compiledPath, "utf8"));
     function setLineSupport(cardId, lineSupport) {
-      for (const data of [active, compiled]) {
-        const card = data.cards.find((candidate) => candidate.cardId === cardId);
-        if (!card) throw new Error("Missing test card " + cardId);
-        card.lineSupport = lineSupport;
-      }
+      const card = active.cards.find((candidate) => candidate.cardId === cardId);
+      if (!card) throw new Error("Missing test card " + cardId);
+      card.lineSupport = lineSupport;
     }
     function setStrategicRole(cardId, strategicRole) {
-      for (const data of [active, compiled]) {
-        const card = data.cards.find((candidate) => candidate.cardId === cardId);
-        if (!card) throw new Error("Missing test card " + cardId);
-        card.strategicRole = strategicRole;
-      }
+      const card = active.cards.find((candidate) => candidate.cardId === cardId);
+      if (!card) throw new Error("Missing test card " + cardId);
+      card.strategicRole = strategicRole;
     }
     function setFunctionTags(cardId) {
-      for (const data of [active, compiled]) {
-        const card = data.cards.find((candidate) => candidate.cardId === cardId);
-        if (!card) throw new Error("Missing test card " + cardId);
-        card.functionTags = ["manual"];
-      }
+      const card = active.cards.find((candidate) => candidate.cardId === cardId);
+      if (!card) throw new Error("Missing test card " + cardId);
+      card.functionTags = ["manual"];
     }
     ${mutator}
     fs.writeFileSync(activePath, JSON.stringify(active, null, 2) + "\\n");
-    fs.writeFileSync(compiledPath, JSON.stringify(compiled, null, 2) + "\\n");
     const { report } = buildAiStrategyTaxonomyReport({ repoRoot: tempRoot });
     console.log(JSON.stringify(report));
   `;
@@ -209,9 +202,9 @@ describe("AI003 strategy goal taxonomy", () => {
 
     expect(runnerGoals).toHaveLength(10);
     expect(corpGoals).toHaveLength(14);
-    expect(runnerGoals.every((goal) => goal.strategyId.startsWith("runner."))).toBe(
-      true,
-    );
+    expect(
+      runnerGoals.every((goal) => goal.strategyId.startsWith("runner.")),
+    ).toBe(true);
     expect(corpGoals.every((goal) => goal.strategyId.startsWith("corp."))).toBe(
       true,
     );
@@ -248,7 +241,11 @@ describe("AI003 strategy goal taxonomy", () => {
       (signal) => signal.signalId,
     );
     const derivationSignalIds = [
-      ...new Set(functionSignalDerivationData.derivationRules.map((rule) => rule.signalId)),
+      ...new Set(
+        functionSignalDerivationData.derivationRules.map(
+          (rule) => rule.signalId,
+        ),
+      ),
     ].sort();
     const dormantTacticSignalIds =
       (report.warnings.find(
@@ -288,12 +285,16 @@ describe("AI003 strategy goal taxonomy", () => {
     }
 
     expect(
-      tacticSignalCatalogData.signals.filter((signal) => signal.targetProfileRelevant),
+      tacticSignalCatalogData.signals.filter(
+        (signal) => signal.targetProfileRelevant,
+      ),
     ).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ signalId: "breaker.targeted_ice_bonus" }),
         expect.objectContaining({ signalId: "breaker.multi_subroutine_break" }),
-        expect.objectContaining({ signalId: "breaker.search_during_encounter" }),
+        expect.objectContaining({
+          signalId: "breaker.search_during_encounter",
+        }),
         expect.objectContaining({ signalId: "setup.program_host" }),
       ]),
     );
@@ -375,23 +376,17 @@ describe("AI003 strategy goal taxonomy", () => {
       "runner.rnd_pressure",
     );
     expect(rndMultiaccess.signals).toContain("access.rnd_multiaccess");
-    expect(rndMultiaccess.anchorStrategyIds).toContain(
-      "runner.rnd_pressure",
-    );
+    expect(rndMultiaccess.anchorStrategyIds).toContain("runner.rnd_pressure");
     expect(rndMultiaccess.anchorStrategyIds).toContain(
       "runner.interface_closeout",
     );
     expect(hqMultiaccess.signals).toContain("access.hq_multiaccess");
-    expect(hqMultiaccess.anchorStrategyIds).toContain(
-      "runner.hq_pressure",
-    );
+    expect(hqMultiaccess.anchorStrategyIds).toContain("runner.hq_pressure");
     expect(hqMultiaccess.anchorStrategyIds).toContain(
       "runner.interface_closeout",
     );
     expect(normalBreaker.signals).toContain("breaker.wall");
-    expect(normalBreaker.anchorStrategyIds).not.toContain(
-      "runner.rig_first",
-    );
+    expect(normalBreaker.anchorStrategyIds).not.toContain("runner.rig_first");
     expect(corpTagPunishPayoff.signals).toContain("tag.payoff");
     expect(corpTagPunishPayoff.anchorStrategyIds).toContain(
       "corp.tag_trace_punish",
@@ -401,10 +396,7 @@ describe("AI003 strategy goal taxonomy", () => {
   it("prevents wrong-side strategy anchors for side-ambivalent effects", () => {
     const report = loadStrategyTaxonomyReport();
     const corpExtraAction = smokeTest(report, "corpExtraAction");
-    const corpIceFutureRunEffect = smokeTest(
-      report,
-      "corpIceFutureRunEffect",
-    );
+    const corpIceFutureRunEffect = smokeTest(report, "corpIceFutureRunEffect");
     const corpTopdeckInfo = smokeTest(report, "corpTopdeckInfo");
     const runnerTagSource = smokeTest(report, "runnerTagSource");
     const runnerDamage = smokeTest(report, "runnerDamage");
@@ -427,9 +419,9 @@ describe("AI003 strategy goal taxonomy", () => {
     );
     expect(runnerDamage.signals).not.toContain("damage.payoff");
     expect(runnerDamage.anchorStrategyIds).not.toContain("corp.damage_kill");
-    expect(report.sideAwareDerivation.preventedWrongSideAnchorCount).toBeGreaterThan(
-      0,
-    );
+    expect(
+      report.sideAwareDerivation.preventedWrongSideAnchorCount,
+    ).toBeGreaterThan(0);
     expect(report.sideAwareDerivation.wrongSideAnchorMatchCount).toBe(0);
   });
 
@@ -440,9 +432,7 @@ describe("AI003 strategy goal taxonomy", () => {
     const corpDamagePayoff = smokeTest(report, "corpDamagePayoff");
 
     expect(rndMultiaccess.signals).toContain("access.rnd_multiaccess");
-    expect(rndMultiaccess.anchorStrategyIds).toContain(
-      "runner.rnd_pressure",
-    );
+    expect(rndMultiaccess.anchorStrategyIds).toContain("runner.rnd_pressure");
     expect(corpTagPunishPayoff.signals).toContain("tag.payoff");
     expect(corpTagPunishPayoff.anchorStrategyIds).toContain(
       "corp.tag_trace_punish",
@@ -474,9 +464,7 @@ describe("AI003 strategy goal taxonomy", () => {
     expect(creditTagPunish.anchorStrategyIds).toContain(
       "corp.tag_trace_punish",
     );
-    expect(creditTagPunish.anchorStrategyIds).not.toContain(
-      "corp.damage_kill",
-    );
+    expect(creditTagPunish.anchorStrategyIds).not.toContain("corp.damage_kill");
 
     expect(scoredAgendaUtility.signals).toContain("score.agenda_action");
     expect(scoredAgendaUtility.anchorStrategyIds).not.toContain(
@@ -489,9 +477,7 @@ describe("AI003 strategy goal taxonomy", () => {
     expect(iceStrengthModifier.anchorStrategyIds).toContain(
       "corp.ice_tax_glacier",
     );
-    expect(iceSubroutineModifier.signals).toContain(
-      "ice.subroutine_modifier",
-    );
+    expect(iceSubroutineModifier.signals).toContain("ice.subroutine_modifier");
     expect(iceSubroutineModifier.anchorStrategyIds).toContain(
       "corp.ice_tax_glacier",
     );
@@ -499,9 +485,7 @@ describe("AI003 strategy goal taxonomy", () => {
     expect(runPathIceTax.anchorStrategyIds).toContain("corp.ice_tax_glacier");
 
     expect(persistentAccessPunish.signals).toContain("access.punish");
-    expect(persistentAccessPunish.signals).toContain(
-      "tax.runner_persistent",
-    );
+    expect(persistentAccessPunish.signals).toContain("tax.runner_persistent");
     expect(persistentAccessPunish.anchorStrategyIds).toContain(
       "corp.ambush_bluff",
     );
@@ -634,7 +618,9 @@ describe("AI003 strategy goal taxonomy", () => {
       "breaker.multi_subroutine_break",
     );
     expect(multiSubroutineBreaker.anchorStrategyIds).toEqual([]);
-    expect(oneTimeModeBreaker.signals).toContain("breaker.one_time_mode_choice");
+    expect(oneTimeModeBreaker.signals).toContain(
+      "breaker.one_time_mode_choice",
+    );
     expect(oneTimeModeBreaker.anchorStrategyIds).toEqual([]);
 
     expect(recurringBreakerCredit.signals).toEqual(
@@ -647,7 +633,9 @@ describe("AI003 strategy goal taxonomy", () => {
       "economy.trash_credit",
     );
     expect(recurringBreakerCredit.anchorStrategyIds).toEqual([]);
-    expect(scalingStrengthBreaker.signals).toContain("breaker.scaling_strength");
+    expect(scalingStrengthBreaker.signals).toContain(
+      "breaker.scaling_strength",
+    );
     expect(scalingStrengthBreaker.anchorStrategyIds).toEqual([]);
     expect(stealthLossBreaker.signals).toContain(
       "breaker.stealth_payment_loss",
@@ -761,7 +749,8 @@ describe("AI003 strategy goal taxonomy", () => {
     expect(explicitTriage).toHaveLength(48);
     expect(
       report.warnings.some(
-        (warning) => warning.kind === "unknown_role_or_planRole_values_warn_only",
+        (warning) =>
+          warning.kind === "unknown_role_or_planRole_values_warn_only",
       ),
     ).toBe(false);
     expect(
@@ -789,8 +778,9 @@ describe("AI003 strategy goal taxonomy", () => {
       ]),
     );
     expect(
-      explicitTriage.filter((entry) => entry.mappingCategory === "descriptor_gap")
-        .length,
+      explicitTriage.filter(
+        (entry) => entry.mappingCategory === "descriptor_gap",
+      ).length,
     ).toBeGreaterThan(0);
     expect(report.ai004Triage.descriptorGaps).toHaveLength(4);
     expect(report.ai004Triage.descriptorGaps).toEqual(

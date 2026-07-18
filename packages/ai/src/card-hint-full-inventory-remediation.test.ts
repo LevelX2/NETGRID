@@ -32,7 +32,7 @@ type HintCard = {
 
 const hintSources = [
   "data/ai/ai-card-hints-active.json",
-  "data/ai/ai-card-hints-compiled.json",
+  "data/ai/ai-card-hints-active.json",
 ] as const;
 
 describe.each(hintSources)("AIH-01 card semantics in %s", (source) => {
@@ -227,8 +227,8 @@ describe.each(hintSources)("AIH-01 card semantics in %s", (source) => {
   });
 });
 
-describe("AIH-01 compiled breaker coverage", () => {
-  const hints = readHints("data/ai/ai-card-hints-compiled.json");
+describe("AIH-01 active breaker coverage", () => {
+  const hints = readHints("data/ai/ai-card-hints-active.json");
 
   it("keeps Bulldozer coverage limited to walls", () => {
     expect(

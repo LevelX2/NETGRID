@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import activeAiHintsData from "../../../data/ai/ai-card-hints-active.json";
-import compiledAiHintsData from "../../../data/ai/ai-card-hints-compiled.json";
 import cardSupportAiSupportedScenarioData from "../../../data/scenarios/card-support-ai-supported-current.json";
 import {
   activeAiApprovedCardIds,
@@ -285,9 +284,6 @@ describe("card set support catalog source", () => {
     const activeHintsById = new Map(
       activeAiHintsData.cards.map((hint) => [hint.cardId, hint]),
     );
-    const compiledHintsById = new Map(
-      compiledAiHintsData.cards.map((hint) => [hint.cardId, hint]),
-    );
     const aiSupportedProteus = Object.values(cardsById).filter(
       (card) =>
         card.catalogCardId.startsWith("onr_proteus_") &&
@@ -298,7 +294,7 @@ describe("card set support catalog source", () => {
       expect(activeHintsById.get(cardId)?.aiSupportStatus, cardId).toBe(
         "ai_supported",
       );
-      expect(compiledHintsById.has(cardId), cardId).toBe(true);
+      expect(activeHintsById.has(cardId), cardId).toBe(true);
       expect(cardsById[cardId]?.implementationManifest, cardId).toBeDefined();
     }
   });
@@ -327,14 +323,11 @@ describe("card set support catalog source", () => {
     const activeHintsById = new Map(
       activeAiHintsData.cards.map((hint) => [hint.cardId, hint]),
     );
-    const compiledHintsById = new Map(
-      compiledAiHintsData.cards.map((hint) => [hint.cardId, hint]),
-    );
     for (const cardId of CLASSIC_CARD_IDS) {
       expect(activeHintsById.get(cardId)?.aiSupportStatus, cardId).toBe(
         "ai_supported",
       );
-      expect(compiledHintsById.has(cardId), cardId).toBe(true);
+      expect(activeHintsById.has(cardId), cardId).toBe(true);
     }
     expect(cardsById["onr_classic_001_data-fort-remapping"]?.rarity?.code).toBe(
       "common",

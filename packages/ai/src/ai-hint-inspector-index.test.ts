@@ -16,16 +16,12 @@ const activeHintsPath = path.join(
   repoRoot,
   "data/ai/ai-card-hints-active.json",
 );
-const compiledHintsPath = path.join(
-  repoRoot,
-  "data/ai/ai-card-hints-compiled.json",
-);
 const classicCardsPath = path.join(repoRoot, "data/cards/classic-cards.json");
 
 type AiHintInspectorIndex = {
   schemaVersion: string;
   source: {
-    compiledHintsPath: string;
+    activeHintsPath: string;
     functionSignalDerivationPath: string;
     tacticSignalCatalogPath?: string;
   };
@@ -38,9 +34,8 @@ type AiHintInspectorIndex = {
   cards: Array<{
     cardId: string;
     supportStatus: {
-      compiledHintFound: boolean;
+      hintFound: boolean;
       mechanicalFactsFound: boolean;
-      generatedFactsFound: boolean;
     };
     derivedFunctionSignals: string[];
     derivedStrategyAnchors: string[];
@@ -82,11 +77,11 @@ describe("AI005 hint inspector index", () => {
     );
   });
 
-  it("exposes compiled, mechanical, function-signal and warning classifications without runtime fields", () => {
+  it("exposes active, mechanical, function-signal and warning classifications without runtime fields", () => {
     const index = readIndex();
     expect(index.schemaVersion).toBe("ai-hint-inspector-index-v1");
-    expect(index.source.compiledHintsPath).toBe(
-      "data/ai/ai-card-hints-compiled.json",
+    expect(index.source.activeHintsPath).toBe(
+      "data/ai/ai-card-hints-active.json",
     );
     expect(index.source.functionSignalDerivationPath).toBe(
       "data/ai/function-signal-derivation-v1.json",
@@ -101,7 +96,7 @@ describe("AI005 hint inspector index", () => {
 
     const aiBoon = card(index, "onr_v1_002_ai-boon");
     expect(aiBoon.supportStatus).toMatchObject({
-      compiledHintFound: true,
+      hintFound: true,
       mechanicalFactsFound: true,
     });
     expect(aiBoon.derivedFunctionSignals).toContain("breaker.sentry");
@@ -112,7 +107,7 @@ describe("AI005 hint inspector index", () => {
     );
 
     const clown = card(index, "onr_v1_012_clown");
-    expect(clown.supportStatus.generatedFactsFound).toBe(true);
+    expect(clown.supportStatus.mechanicalFactsFound).toBe(true);
     expect(clown.rolesClassification).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -331,8 +326,8 @@ describe("AI005 hint inspector index", () => {
       "onr_v1_093_if-you-want-it-done-right",
     );
     const mantis = card(index, "onr_v1_099_mantis-fixer-at-large");
-    const compiledBlackWidow = compiledCard("onr_proteus_080_black-widow");
-    const compiledMorphingTool = compiledCard("onr_proteus_092_morphing-tool");
+    const activeBlackWidow = activeCard("onr_proteus_080_black-widow");
+    const activeMorphingTool = activeCard("onr_proteus_092_morphing-tool");
 
     expect(blackWidow.derivedFunctionSignals).toEqual(
       expect.arrayContaining([
@@ -512,7 +507,7 @@ describe("AI005 hint inspector index", () => {
     ]) {
       expect(genericSearchOrRecovery.derivedStrategyAnchors).toEqual([]);
     }
-    expect(compiledBlackWidow.targetProfiles).toEqual(
+    expect(activeBlackWidow.targetProfiles).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           schemaVersion: "target-profile-v1",
@@ -521,7 +516,7 @@ describe("AI005 hint inspector index", () => {
         }),
       ]),
     );
-    expect(compiledMorphingTool.targetProfiles).toEqual(
+    expect(activeMorphingTool.targetProfiles).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           schemaVersion: "target-profile-v1",
@@ -637,14 +632,14 @@ describe("AI005 hint inspector index", () => {
     const riddler = card(index, "onr_proteus_034_riddler");
     const caryatid = card(index, "onr_proteus_013_caryatid");
     const brainWash = card(index, "onr_proteus_011_brain-wash");
-    const compiledBugZapper = compiledCard("onr_proteus_012_bug-zapper");
-    const compiledCreditBlocks = compiledCard("onr_proteus_017_credit-blocks");
-    const compiledDogPile = compiledCard("onr_proteus_021_dog-pile");
-    const compiledHuntingPack = compiledCard("onr_proteus_026_hunting-pack");
-    const compiledMobileBarricade = compiledCard(
+    const activeBugZapper = activeCard("onr_proteus_012_bug-zapper");
+    const activeCreditBlocks = activeCard("onr_proteus_017_credit-blocks");
+    const activeDogPile = activeCard("onr_proteus_021_dog-pile");
+    const activeHuntingPack = activeCard("onr_proteus_026_hunting-pack");
+    const activeMobileBarricade = activeCard(
       "onr_proteus_033_mobile-barricade",
     );
-    const compiledRiddler = compiledCard("onr_proteus_034_riddler");
+    const activeRiddler = activeCard("onr_proteus_034_riddler");
 
     expect(caryatid.planRolesClassification).toEqual(
       expect.arrayContaining([
@@ -662,30 +657,30 @@ describe("AI005 hint inspector index", () => {
         expect.objectContaining({ value: "protect_remote" }),
       ]),
     );
-    expect(compiledDogPile.tacticSignals).toEqual(
+    expect(activeDogPile.tacticSignals).toEqual(
       expect.arrayContaining([
         "corp_ice.outer_ice_scaling",
         "corp_ice.position_scaling",
       ]),
     );
-    expect(compiledDogPile.riskTags).toContain("position_dependent_ice");
-    expect(compiledDogPile.manualNotes?.join(" ")).toContain(
+    expect(activeDogPile.riskTags).toContain("position_dependent_ice");
+    expect(activeDogPile.manualNotes?.join(" ")).toContain(
       "solo Dog Pile is only a temporary coverage window",
     );
-    expect(compiledBugZapper.riskTags).toContain("position_dependent_ice");
-    expect(compiledBugZapper.manualNotes?.join(" ")).toContain(
+    expect(activeBugZapper.riskTags).toContain("position_dependent_ice");
+    expect(activeBugZapper.manualNotes?.join(" ")).toContain(
       "solo Bug Zapper should not be treated as durable",
     );
-    expect(compiledHuntingPack.riskTags).toContain("position_dependent_ice");
-    expect(compiledHuntingPack.manualNotes?.join(" ")).toContain(
+    expect(activeHuntingPack.riskTags).toContain("position_dependent_ice");
+    expect(activeHuntingPack.manualNotes?.join(" ")).toContain(
       "solo Hunting Pack is setup",
     );
-    expect(compiledCreditBlocks.riskTags).toContain("credit_reserve");
-    expect(compiledCreditBlocks.manualNotes?.join(" ")).toContain(
+    expect(activeCreditBlocks.riskTags).toContain("credit_reserve");
+    expect(activeCreditBlocks.manualNotes?.join(" ")).toContain(
       "base rez plus 1",
     );
-    expect(compiledMobileBarricade.riskTags).toContain("same_fort_reposition");
-    expect(compiledMobileBarricade.manualNotes?.join(" ")).toContain(
+    expect(activeMobileBarricade.riskTags).toContain("same_fort_reposition");
+    expect(activeMobileBarricade.manualNotes?.join(" ")).toContain(
       "same data fort",
     );
 
@@ -694,13 +689,11 @@ describe("AI005 hint inspector index", () => {
         expect.objectContaining({ value: "protect_remote" }),
       ]),
     );
-    expect(compiledRiddler.riskTags).toContain(
-      "paid_etr_requires_corp_credits",
-    );
-    expect(compiledRiddler.tacticSignals).toEqual(
+    expect(activeRiddler.riskTags).toContain("paid_etr_requires_corp_credits");
+    expect(activeRiddler.tacticSignals).toEqual(
       expect.arrayContaining(["corp_ice.encounter_paid_subroutine_add"]),
     );
-    expect(compiledRiddler.manualNotes?.join(" ")).toContain(
+    expect(activeRiddler.manualNotes?.join(" ")).toContain(
       "value it only when Corp can pay",
     );
   });
@@ -716,12 +709,11 @@ describe("AI005 hint inspector index", () => {
     for (const cardId of classicCardIds) {
       const active = activeHints.cards.find((entry) => entry.cardId === cardId);
       const inspector = card(index, cardId);
-      const compiled = compiledCard(cardId);
 
       expect(active, cardId).toBeDefined();
       expect(active?.quality?.hintReviewed, cardId).toBe(true);
       expect(active?.quality?.needsHumanReview, cardId).toBe(false);
-      expect(compiled.aiSupportStatus, cardId).toBe("ai_supported");
+      expect(active?.aiSupportStatus, cardId).toBe("ai_supported");
       expect(inspector.derivedFunctionSignals.length, cardId).toBeGreaterThan(
         0,
       );
@@ -746,7 +738,7 @@ describe("AI005 hint inspector index", () => {
     );
 
     expect(
-      compiledCard("onr_classic_018_reclamation-project").tacticSignals,
+      activeCard("onr_classic_018_reclamation-project").tacticSignals,
     ).toEqual(
       expect.arrayContaining(["archives.corp_recovery", "ice.corp_recovery"]),
     );
@@ -772,6 +764,7 @@ function card(index: AiHintInspectorIndex, cardId: string) {
 function readActiveHints(): {
   cards: Array<{
     cardId: string;
+    aiSupportStatus?: string;
     quality?: {
       hintReviewed?: boolean;
       needsHumanReview?: boolean;
@@ -781,6 +774,7 @@ function readActiveHints(): {
   return JSON.parse(fs.readFileSync(activeHintsPath, "utf8")) as {
     cards: Array<{
       cardId: string;
+      aiSupportStatus?: string;
       quality?: {
         hintReviewed?: boolean;
         needsHumanReview?: boolean;
@@ -798,7 +792,7 @@ function readClassicCardIds(): string[] {
   return classicCards.cards.map((entry) => entry.cardId).sort();
 }
 
-function compiledCard(cardId: string): {
+function activeCard(cardId: string): {
   aiSupportStatus?: string;
   targetProfiles?: unknown[];
   planRoles?: string[];
@@ -806,7 +800,7 @@ function compiledCard(cardId: string): {
   tacticSignals?: string[];
   manualNotes?: string[];
 } {
-  const compiled = JSON.parse(fs.readFileSync(compiledHintsPath, "utf8")) as {
+  const active = JSON.parse(fs.readFileSync(activeHintsPath, "utf8")) as {
     cards: Array<{
       cardId: string;
       aiSupportStatus?: string;
@@ -817,7 +811,7 @@ function compiledCard(cardId: string): {
       manualNotes?: string[];
     }>;
   };
-  const found = compiled.cards.find((entry) => entry.cardId === cardId);
-  if (!found) throw new Error(`Missing compiled card ${cardId}`);
+  const found = active.cards.find((entry) => entry.cardId === cardId);
+  if (!found) throw new Error(`Missing active card ${cardId}`);
   return found;
 }

@@ -3,6 +3,10 @@
 ## Current State
 
 - `@netgrid/ai` ist die produktive Live-Fassade.
+- `data/ai/ai-card-hints-active.json` ist die einzige statische
+  Karten-Hint-Quelle. Runtime, Deckstrategie und Inspector greifen direkt auf
+  sie zu; es gibt keinen Hint-Compiler, keine Derived-Facts-Zwischenebene und
+  keine manuellen Overlay-Dateien mehr.
 - Match-Simulation, Selfplay und Benchmarks werden ausschließlich über
   `@netgrid/ai/simulation` importiert.
 - Die KI konsumiert nur side-sichere `PlayerView`, erlaubte `PublicEvents`,
@@ -220,10 +224,9 @@ Das Realitätsgate aus
 Engine-erzeugte Inputs mit dem produktiven Chooser. Unit-, synthetische Live-,
 Live-Engine- und Full-Simulation-Evidence bleiben getrennt.
 
-Die aktuelle vollständige Derived-Facts-Prüfung umfasst 618 aktive Hints, 528
-CardImplementations, 391 generierte Facts und 137 noch über kompilierte Hints
-abgedeckte Karten. Warnungen sind Qualitätsschuld, keine versteckten
-Runtime-Fallbacks.
+Die 618 Karten-Hints sind vollständig in der einzigen Quelle gepflegt. Der
+Hint-Inspector-Index wird daraus deterministisch als Such- und Diagnoseindex
+erzeugt; er ist kein eigener Semantik- oder Runtime-Layer.
 
 ## Historie und Retention
 

@@ -8,7 +8,6 @@ const [
   contract,
   manifest,
   activeHints,
-  compiledHints,
   aiDeckPool,
   familyScenarios,
   selectedPilot,
@@ -16,7 +15,6 @@ const [
   readJson("data/ai/card-set-ai-readiness-v1.json"),
   readJson("data/manifests/proteus-card-support.json"),
   readJson("data/ai/ai-card-hints-active.json"),
-  readJson("data/ai/ai-card-hints-compiled.json"),
   readJson("data/ai/ai-deck-pool-1.1.0.json"),
   readJson("data/scenarios/proteus-ai-family-decision-smokes-v1.json"),
   readJson("data/ai/proteus-ai-selected-pilot-v1.json"),
@@ -27,7 +25,6 @@ assert(readiness, "Proteus readiness entry is missing.");
 
 const manifestCards = manifest.cards ?? [];
 const activeProteusHints = (activeHints.cards ?? []).filter(isProteusCard);
-const compiledProteusHints = (compiledHints.cards ?? []).filter(isProteusCard);
 const scenarioRefs = new Set(
   activeProteusHints.flatMap((entry) => entry.scenarioRefs ?? []),
 );
@@ -40,8 +37,7 @@ const actualEvidence = {
   aiSupportedCardCount: manifestCards.filter(
     (entry) => entry.statuses?.ai_supported === true,
   ).length,
-  activeHintCount: activeProteusHints.length,
-  compiledHintCount: compiledProteusHints.length,
+  hintCount: activeProteusHints.length,
   uniqueScenarioRefCount: scenarioRefs.size,
   humanReviewedHintCount: activeProteusHints.filter(
     (entry) => entry.quality?.hintReviewed === true,
@@ -110,7 +106,7 @@ for (const relativePath of currentStatusFiles) {
 }
 
 console.log(
-  `Proteus AI readiness consistent: ${actualEvidence.cardCount} cards, ${actualEvidence.activeHintCount} active hints, stage ${readiness.highestApprovedStage}.`,
+  `Proteus AI readiness consistent: ${actualEvidence.cardCount} cards, ${actualEvidence.hintCount} hints, stage ${readiness.highestApprovedStage}.`,
 );
 
 function isProteusCard(entry) {

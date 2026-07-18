@@ -3,7 +3,6 @@
   "generatedAt": "2026-06-12",
   "source": {
     "activeHintsPath": "data/ai/ai-card-hints-active.json",
-    "compiledHintsPath": "data/ai/ai-card-hints-compiled.json",
     "inspectorIndexPath": "data/ai/ai-hint-inspector-index.json",
     "tacticSignalCatalogPath": "data/ai/tactic-signals-v1.json",
     "mode": "diagnostic-only signal catalog report; no runtime input, no action selection, no planner score and no legality effect"
@@ -348,7 +347,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 9,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "access.corp_agenda_steal_replacement",
         "access.corp_delayed_agenda_score",
@@ -489,7 +488,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 5,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "corp_ice.end_run",
         "corp_ice.program_trash",
@@ -519,7 +518,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 1,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": ["run.corp_redirect"],
       "activeTacticSignals": ["corp_ice.encounter_tax", "run.corp_redirect"],
       "unknownSignals": [],
@@ -539,7 +538,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 1,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": ["run.corp_redirect"],
       "activeTacticSignals": ["corp_ice.encounter_tax", "run.corp_redirect"],
       "unknownSignals": [],
@@ -559,7 +558,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 5,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "corp_ice.end_run",
         "corp_ice.mobile_position_change",
@@ -590,7 +589,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 5,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "corp_ice.end_run",
         "corp_ice.program_trash",
@@ -649,7 +648,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 1,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": ["run.corp_redirect"],
       "activeTacticSignals": ["corp_ice.encounter_tax", "run.corp_redirect"],
       "unknownSignals": [],
@@ -669,7 +668,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 1,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": ["run.corp_redirect"],
       "activeTacticSignals": ["corp_ice.encounter_tax", "run.corp_redirect"],
       "unknownSignals": [],
@@ -719,7 +718,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 4,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "draw.corp_draw",
         "hq.corp_hand_refresh",
@@ -749,7 +748,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "archives.corp_recovery",
         "info.reveal_recovered_cards_to_runner",
@@ -886,7 +885,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 6,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "access.corp_hardware_trash",
         "access.corp_program_trash",
@@ -923,7 +922,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "ice.corp_strength_support",
         "ice.corp_targeted_strength_boost",
@@ -1115,7 +1114,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 5,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "access.hq_full_reveal",
         "info.expose",
@@ -1141,7 +1140,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 1,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": ["ice.derez"],
       "activeTacticSignals": [],
       "unknownSignals": [],
@@ -1161,7 +1160,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 1,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": ["setup.search"],
       "activeTacticSignals": [],
       "unknownSignals": [],
@@ -1201,7 +1200,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 1,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": ["economy.generic"],
       "activeTacticSignals": [],
       "unknownSignals": [],
@@ -1241,7 +1240,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 2,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": ["info.rnd_topdeck", "run.event_tempo"],
       "activeTacticSignals": [],
       "unknownSignals": [],
@@ -1261,7 +1260,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 4,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "access.hq_multiaccess",
         "access.rnd_multiaccess",
@@ -1350,7 +1349,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 1,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": ["run.event_tempo"],
       "activeTacticSignals": [],
       "unknownSignals": [],
@@ -1418,7 +1417,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 1,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": ["info.hq"],
       "activeTacticSignals": [],
       "unknownSignals": [],
@@ -1519,7 +1518,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 1,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": ["info.rnd_topdeck"],
       "activeTacticSignals": [],
       "unknownSignals": [],
@@ -1878,7 +1877,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 5,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "access.agenda_ambush",
         "access.corp_program_disruption",
@@ -1999,7 +1998,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "corp_ice.end_run",
         "corp_ice.type_choice_or_mode_choice",
@@ -2110,7 +2109,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "corp_ice.end_run",
         "corp_ice.type_choice_or_mode_choice",
@@ -2286,7 +2285,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "corp_ice.end_run",
         "corp_ice.type_choice_or_mode_choice",
@@ -2426,7 +2425,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "corp_ice.end_run",
         "corp_ice.type_choice_or_mode_choice",
@@ -2563,7 +2562,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 4,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "corp_ice.end_run",
         "corp_ice.mobile_position_change",
@@ -2721,7 +2720,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "corp_ice.end_run",
         "corp_ice.type_choice_or_mode_choice",
@@ -2748,7 +2747,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "corp_ice.end_run",
         "corp_ice.type_choice_or_mode_choice",
@@ -2849,7 +2848,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "corp_ice.end_run",
         "corp_ice.mobile_position_change",
@@ -2982,7 +2981,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "ice.corp_temporary_rez",
         "risk.temporary_rez_liability",
@@ -3040,7 +3039,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "ice.corp_installment_rez",
         "risk.deferred_rez_payment_liability",
@@ -3295,7 +3294,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 1,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": ["ice.corp_reorder_fort"],
       "activeTacticSignals": ["ice.corp_reorder_fort"],
       "unknownSignals": [],
@@ -3343,7 +3342,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 4,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "advance.access_window_counter_support",
         "advance.corp_counter_placement",
@@ -3372,7 +3371,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 2,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "ice.corp_subroutine_repeat",
         "risk.random_discard_cost"
@@ -3398,7 +3397,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 2,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "ice.corp_subroutine_repeat",
         "risk.rnd_trash_cost"
@@ -3527,7 +3526,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "hq.corp_installed_card_bounce",
         "install.corp_uninstall_to_hq",
@@ -3583,7 +3582,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 5,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "advance.corp_counter_bank",
         "economy.corp_counter_cashout",
@@ -3798,7 +3797,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 2,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "breaker.multi_subroutine_break",
         "breaker.sentry"
@@ -3821,7 +3820,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "breaker.sentry",
         "breaker.strength_bonus_vs_chosen_ice",
@@ -3908,7 +3907,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 6,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "access.free_trash",
         "access.hq_trash_pressure",
@@ -3935,7 +3934,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "ice.derez",
         "run.ends_run_after_effect",
@@ -4003,7 +4002,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "breaker.configurable_coverage",
         "breaker.one_time_mode_choice",
@@ -4027,7 +4026,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 6,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "access.free_trash",
         "access.rnd_trash_pressure",
@@ -4079,7 +4078,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 2,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": ["breaker.support", "run.break_cost_support"],
       "activeTacticSignals": [],
       "unknownSignals": [],
@@ -4099,7 +4098,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 2,
-      "targetProfileCount": 4,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "breaker.configurable_coverage",
         "breaker.reconfigurable_type"
@@ -4122,7 +4121,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 2,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "breaker.multi_subroutine_break",
         "breaker.sentry"
@@ -4383,7 +4382,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 5,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "info.expose",
         "info.ice_approach_expose",
@@ -4435,7 +4434,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 5,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "ice.derez",
         "run.any_server",
@@ -4536,7 +4535,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 4,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "economy.generic",
         "setup.hardware_install",
@@ -4565,7 +4564,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 2,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": ["info.expose", "info.run_recon"],
       "activeTacticSignals": [],
       "unknownSignals": [],
@@ -4657,7 +4656,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 2,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": ["breaker.support", "run.break_cost_support"],
       "activeTacticSignals": [],
       "unknownSignals": [],
@@ -4768,7 +4767,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 7,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "economy.generic",
         "economy.run_restricted_credit",
@@ -4845,7 +4844,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 2,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "corp.bad_publicity_pressure",
         "ice.derez_black_ice"
@@ -4912,7 +4911,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 10,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "risk.meat_damage_shortfall",
         "risk.temporary_program_loss",
@@ -4974,7 +4973,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 13,
-      "targetProfileCount": 3,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "breaker.emergency_search",
         "breaker.search_during_encounter",
@@ -5243,7 +5242,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 11,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "access.remote_full_trash",
         "access.remote_sabotage_payoff",
@@ -5301,7 +5300,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 3,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "economy.recurring",
         "economy.recurring_breaker_credit",
@@ -5467,7 +5466,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 10,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "access.current_access_trash",
         "access.free_trash",
@@ -5498,7 +5497,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 2,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": ["fort.creation_lock", "resource.unique"],
       "activeTacticSignals": [],
       "unknownSignals": [],
@@ -5692,7 +5691,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 7,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "defense.resource_trash_prevention",
         "hidden.one_shot_resource",
@@ -6164,7 +6163,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 5,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "breaker.break_any_subroutine",
         "breaker.ends_run_after_use",
@@ -6339,7 +6338,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 2,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": ["corp.rez_tax_pressure", "ice.force_rez"],
       "activeTacticSignals": [],
       "unknownSignals": [],
@@ -6471,7 +6470,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "info.expose",
         "info.expose_fort",
@@ -6611,7 +6610,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "setup.program_protection",
         "setup.program_trash_prevention",
@@ -6701,7 +6700,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 2,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": ["info.expose", "info.expose_installed_card"],
       "activeTacticSignals": [],
       "unknownSignals": [],
@@ -6721,7 +6720,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 5,
-      "targetProfileCount": 3,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "setup.install_discount",
         "setup.install_during_run",
@@ -6750,7 +6749,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "ice.reorder_fort",
         "ice.reverse_fort",
@@ -6798,7 +6797,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 6,
-      "targetProfileCount": 4,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "breaker.support",
         "ice.strength_reduction",
@@ -6824,17 +6823,16 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 3,
-      "targetProfileCount": 2,
+      "signalCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
-        "breaker.multi_subroutine_break",
         "breaker.stealth_payment_loss",
         "breaker.wall"
       ],
       "activeTacticSignals": [],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["breaker.multi_subroutine_break"],
+      "targetProfileExpectedBySignals": [],
       "warningCategories": []
     },
     {
@@ -6848,13 +6846,12 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 4,
+      "signalCount": 3,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
         "economy.node_trash_credit",
         "economy.recurring",
-        "economy.recurring_trash_credit",
-        "economy.trash_credit"
+        "economy.recurring_trash_credit"
       ],
       "activeTacticSignals": [],
       "unknownSignals": [],
@@ -7055,12 +7052,11 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 4,
+      "signalCount": 3,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
         "economy.recurring",
         "economy.recurring_trash_credit",
-        "economy.trash_credit",
         "economy.upgrade_trash_credit"
       ],
       "activeTacticSignals": [],
@@ -7081,7 +7077,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 2,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": ["info.expose", "info.expose_installed_card"],
       "activeTacticSignals": [],
       "unknownSignals": [],
@@ -7101,7 +7097,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 5,
-      "targetProfileCount": 3,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "setup.install_during_run",
         "setup.install_support",
@@ -7245,7 +7241,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 4,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "info.expose",
         "info.ice_approach_expose",
@@ -7313,7 +7309,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 1,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": ["ice.trash_after_full_break"],
       "activeTacticSignals": [],
       "unknownSignals": [],
@@ -7460,7 +7456,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 4,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "economy.recurring",
         "economy.recurring_install_credit",
@@ -7514,7 +7510,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 1,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": ["ice.derez_black_ice"],
       "activeTacticSignals": [],
       "unknownSignals": [],
@@ -7582,7 +7578,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 1,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": ["ice.trash_rezzed"],
       "activeTacticSignals": [],
       "unknownSignals": [],
@@ -7716,7 +7712,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 1,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": ["ice.rez_or_trash_choice"],
       "activeTacticSignals": [],
       "unknownSignals": [],
@@ -7736,7 +7732,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 4,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "setup.program_recovery",
         "setup.recovery",
@@ -7761,7 +7757,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 2,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": ["fort.reorder_ice", "run.event_tempo"],
       "activeTacticSignals": [],
       "unknownSignals": [],
@@ -7781,7 +7777,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "setup.card_recovery",
         "setup.recovery",
@@ -7825,7 +7821,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 2,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": ["info.expose", "info.expose_multiple"],
       "activeTacticSignals": [],
       "unknownSignals": [],
@@ -7845,7 +7841,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 2,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": ["info.expose", "info.expose_outermost_ice"],
       "activeTacticSignals": [],
       "unknownSignals": [],
@@ -7865,7 +7861,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 4,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "setup.card_search",
         "setup.search",
@@ -8007,7 +8003,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 2,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": ["setup.card_search", "setup.search"],
       "activeTacticSignals": [],
       "unknownSignals": [],
@@ -8226,7 +8222,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 1,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": ["ice.trash_unrezzed"],
       "activeTacticSignals": [],
       "unknownSignals": [],
@@ -8246,7 +8242,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 6,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "setup.end_of_turn_bounce",
         "setup.install_discount",
@@ -8277,7 +8273,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 6,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "economy.hidden_bid_mindgame",
         "risk.opponent_guessing_game",
@@ -8350,7 +8346,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "setup.draw",
         "setup.program_search",
@@ -8418,7 +8414,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 5,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "economy.generic",
         "setup.install_action_burst",
@@ -8757,7 +8753,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 5,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "setup.program_backup",
         "setup.program_recovery",
@@ -9227,7 +9223,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 5,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "resource.bbs",
         "setup.program_search",
@@ -9381,7 +9377,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 5,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "resource.connection",
         "resource.unique",
@@ -9550,13 +9546,12 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 4,
+      "signalCount": 3,
       "targetProfileCount": 0,
       "derivedFunctionSignals": [
         "defense.trace_defense",
         "economy.generic",
-        "economy.recurring_link_credit",
-        "economy.trash_credit"
+        "economy.recurring_link_credit"
       ],
       "activeTacticSignals": [],
       "unknownSignals": [],
@@ -9576,7 +9571,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 4,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "resource.bbs",
         "setup.recovery",
@@ -9678,7 +9673,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 5,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "resource.bbs",
         "setup.prep_resource_search",
@@ -9784,7 +9779,7 @@
       "no_signal_reason": "no_function_signal",
       "target_profile_gap": false,
       "signalCount": 0,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [],
       "activeTacticSignals": [],
       "unknownSignals": [],
@@ -9828,7 +9823,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 6,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "info.expose",
         "resource.bbs",
@@ -9859,7 +9854,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 7,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "setup.delayed_install",
         "setup.hardware_install",
@@ -9892,7 +9887,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 5,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "resource.bbs",
         "setup.card_search",
@@ -9946,7 +9941,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 5,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "economy.action_credit",
         "economy.generic",
@@ -10116,7 +10111,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 4,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "defense.installed_card_trash_prevention",
         "setup.program_protection",
@@ -10200,7 +10195,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "score.advance_burst",
         "score.agenda_difficulty_discount",
@@ -10344,7 +10339,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 6,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "economy.corp_agenda_reveal_burst",
         "economy.generic",
@@ -10441,7 +10436,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 5,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "economy.corp_install_rez_budget",
         "economy.generic",
@@ -10569,7 +10564,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "score.advance_burst",
         "score.agenda_difficulty_discount",
@@ -10596,7 +10591,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "score.advance_burst",
         "score.agenda_difficulty_discount",
@@ -10650,7 +10645,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 6,
-      "targetProfileCount": 4,
+      "targetProfileCount": 2,
       "derivedFunctionSignals": [
         "ice.corp_strength_bonus_chosen",
         "ice.corp_subroutine_repeat",
@@ -10889,7 +10884,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "economy.rez_discount",
         "ice.corp_free_rez_on_score",
@@ -10981,7 +10976,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "ice.corp_fort_strength_bonus",
         "ice.corp_strength_bonus",
@@ -11009,7 +11004,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 6,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "economy.rez_discount",
         "ice.corp_free_rez",
@@ -12876,7 +12871,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "action.corp_install_only_action_bundle",
         "install.corp_action_bundle",
@@ -12959,7 +12954,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "condition.requires_installed_advanceable_card",
         "economy.burst",
@@ -13069,7 +13064,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 2,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "archives.corp_recovery",
         "hq.corp_card_recovery"
@@ -13123,7 +13118,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "info.corp_rnd_peek",
         "rnd.corp_topdeck_reorder",
@@ -13179,7 +13174,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "condition.requires_installed_advanceable_card",
         "economy.burst",
@@ -13296,7 +13291,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "condition.requires_installed_advanceable_card",
         "economy.burst",
@@ -13326,7 +13321,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "condition.requires_installed_advanceable_card",
         "economy.burst",
@@ -13524,7 +13519,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 1,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": ["score.advance_burst"],
       "activeTacticSignals": [
         "advance.corp_counter_placement",
@@ -13633,7 +13628,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 2,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "hq.corp_installed_card_bounce",
         "install.corp_uninstall_to_hq"
@@ -13659,7 +13654,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 2,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "economy.rez_discount",
         "ice.strength_modifier"
@@ -13737,7 +13732,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 2,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "economy.rez_discount",
         "remote.scoring_protection"
@@ -13833,7 +13828,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 1,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": ["setup.install_discount"],
       "activeTacticSignals": ["ice.corp_install_discount", "tax.ice"],
       "unknownSignals": [],
@@ -14279,7 +14274,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 1,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": ["economy.rez_discount"],
       "activeTacticSignals": ["ice.corp_rez_discount", "tax.ice"],
       "unknownSignals": [],
@@ -14517,7 +14512,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 1,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": ["run.corp_worm_lockout"],
       "activeTacticSignals": ["run.corp_worm_lockout"],
       "unknownSignals": [],
@@ -14537,7 +14532,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 1,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": ["ice.corp_strength_support"],
       "activeTacticSignals": ["ice.corp_strength_support"],
       "unknownSignals": [],
@@ -14584,7 +14579,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 2,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "ice.corp_install_discount",
         "setup.install_discount"
@@ -14607,7 +14602,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "access.corp_daemon_trash",
         "access.punish",
@@ -14757,7 +14752,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 4,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "ice.corp_hq_runpath_insert",
         "ice.corp_temporary_encounter",
@@ -14785,7 +14780,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "ice.corp_hq_runpath_insert",
         "ice.corp_install_during_run",
@@ -14813,7 +14808,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 4,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "economy.rez_discount",
         "ice.corp_rez_discount",
@@ -14889,7 +14884,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 5,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "economy.rez_discount",
         "ice.corp_rez_discount",
@@ -14919,7 +14914,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 2,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": ["ice.corp_ice_swap", "tax.remote"],
       "activeTacticSignals": ["ice.corp_ice_swap"],
       "unknownSignals": [],
@@ -15042,7 +15037,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 3,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "ice.corp_hq_runpath_insert",
         "ice.corp_ice_swap",
@@ -15066,7 +15061,7 @@
       "no_signal_reason": "none",
       "target_profile_gap": false,
       "signalCount": 4,
-      "targetProfileCount": 2,
+      "targetProfileCount": 1,
       "derivedFunctionSignals": [
         "ice.corp_subroutine_support",
         "remote.scoring_protection",

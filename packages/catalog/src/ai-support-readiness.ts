@@ -22,8 +22,7 @@ export type CardSetAiReadiness = {
   evidence: {
     cardCount: number;
     aiSupportedCardCount: number;
-    activeHintCount: number;
-    compiledHintCount: number;
+    hintCount: number;
     uniqueScenarioRefCount: number;
     humanReviewedHintCount: number;
     strategyCoveredHintCount: number;
@@ -136,8 +135,7 @@ function validateSetReadiness(value: unknown): CardSetAiReadiness {
   const evidenceKeys = [
     "cardCount",
     "aiSupportedCardCount",
-    "activeHintCount",
-    "compiledHintCount",
+    "hintCount",
     "uniqueScenarioRefCount",
     "humanReviewedHintCount",
     "strategyCoveredHintCount",

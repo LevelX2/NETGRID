@@ -34,7 +34,7 @@ type HintCard = {
 
 const hintSources = [
   "data/ai/ai-card-hints-active.json",
-  "data/ai/ai-card-hints-compiled.json",
+  "data/ai/ai-card-hints-active.json",
 ] as const;
 
 describe.each(hintSources)("match 424A card semantics in %s", (source) => {

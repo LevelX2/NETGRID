@@ -65,7 +65,7 @@ type Ai006Report = {
   source: {
     mode: "productive_strategy_profile";
     strategyGoals: string;
-    compiledHints: string;
+    activeHints: string;
     inspectorIndex: string;
     deckSnapshots: string;
     plannerEffect: "strategic_intent_input";
@@ -116,7 +116,7 @@ function main(): void {
     source: {
       mode: "productive_strategy_profile",
       strategyGoals: "data/ai/strategy-goals-v1.json",
-      compiledHints: "data/ai/ai-card-hints-compiled.json",
+      activeHints: "data/ai/ai-card-hints-active.json",
       inspectorIndex: "data/ai/ai-hint-inspector-index.json",
       deckSnapshots: "data/decks/deck-snapshots-0.8.json",
       plannerEffect: "strategic_intent_input" as const,
@@ -250,7 +250,7 @@ function validateStableAnchorSources(profiles: AiDeckStrategyProfile[]): void {
           `${profile.deckId}:${strategyId}: unstable anchor source ${evidence.source}`,
         );
         assert(
-          evidence.source !== "compiledHint" &&
+          evidence.source !== "cardHint" &&
             evidence.source !== "functionSignal",
           `${profile.deckId}:${strategyId}: support source used as anchor`,
         );

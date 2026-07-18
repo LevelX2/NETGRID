@@ -36,7 +36,7 @@ type HintCard = {
 
 const hintSources = [
   "data/ai/ai-card-hints-active.json",
-  "data/ai/ai-card-hints-compiled.json",
+  "data/ai/ai-card-hints-active.json",
 ] as const;
 
 describe.each(hintSources)("four-match card semantics in %s", (source) => {
@@ -46,7 +46,12 @@ describe.each(hintSources)("four-match card semantics in %s", (source) => {
     const hint = card(hints, "onr_proteus_106_disgruntled-ice-technician");
 
     expect(hint.roles).toEqual(
-      expect.arrayContaining(["event", "run_event", "derez", "fully_broken_ice"]),
+      expect.arrayContaining([
+        "event",
+        "run_event",
+        "derez",
+        "fully_broken_ice",
+      ]),
     );
     expect(hint.planRoles).not.toContain("pressure_rnd");
     expect(hint.effects).toEqual(
@@ -78,24 +83,29 @@ describe.each(hintSources)("four-match card semantics in %s", (source) => {
   it.each([
     ["Militech MRAM Chip", "onr_v1_133_militech-mram-chip", 3],
     ["MRAM Chip", "onr_v1_134_mram-chip", 2],
-  ])("keeps %s as hand-size support rather than memory", (_name, cardId, amount) => {
-    const hint = card(hints, cardId);
+  ])(
+    "keeps %s as hand-size support rather than memory",
+    (_name, cardId, amount) => {
+      const hint = card(hints, cardId);
 
-    expect(hint.roles).toEqual(expect.arrayContaining(["hardware", "handlimit"]));
-    expect(hint.roles).not.toContain("memory");
-    expect(hint.planRoles).not.toContain("remote_upgrade_modifier");
-    expect(hint.tacticSignals).toContain("setup.hand_size");
-    expect(hint.effects).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          kind: "hand_size_modifier",
-          scope: "runner",
-          resource: "hand_size",
-          amount,
-        }),
-      ]),
-    );
-  });
+      expect(hint.roles).toEqual(
+        expect.arrayContaining(["hardware", "handlimit"]),
+      );
+      expect(hint.roles).not.toContain("memory");
+      expect(hint.planRoles).not.toContain("remote_upgrade_modifier");
+      expect(hint.tacticSignals).toContain("setup.hand_size");
+      expect(hint.effects).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            kind: "hand_size_modifier",
+            scope: "runner",
+            resource: "hand_size",
+            amount,
+          }),
+        ]),
+      );
+    },
+  );
 
   it("keeps Mantis card search distinct from draw", () => {
     const hint = card(hints, "onr_v1_099_mantis-fixer-at-large");
@@ -137,10 +147,7 @@ describe.each(hintSources)("four-match card semantics in %s", (source) => {
 
     expect(hint.planRoles).not.toContain("protect_rnd");
     expect(hint.requiredMechanics).toEqual(
-      expect.arrayContaining([
-        "hq_agenda_reveal",
-        "hq_agenda_shuffle_into_rd",
-      ]),
+      expect.arrayContaining(["hq_agenda_reveal", "hq_agenda_shuffle_into_rd"]),
     );
     expect(hint.requiredMechanics).not.toContain("reveal_rd_top");
     expect(hint.tacticSignals).toEqual(

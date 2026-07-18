@@ -1,6 +1,6 @@
 import { createRuntimeCardsById } from "@netgrid/catalog";
 import cardRoleManifestData from "../../../data/ai/card-role-manifest-0.9.json";
-import compiledAiHintsData from "../../../data/ai/ai-card-hints-compiled.json";
+import activeAiHintsData from "../../../data/ai/ai-card-hints-active.json";
 import type { Side } from "@netgrid/shared";
 import type { AiHintOntologyExtension } from "./hint-ontology";
 
@@ -47,7 +47,7 @@ export const RUNTIME_CARDS = createRuntimeCardsById();
 
 export function createAiHintsByCard(): Map<string, AiCardHint> {
   return new Map(
-    (compiledAiHintsData.cards as AiCardHint[]).map((hint) => [
+    (activeAiHintsData.cards as AiCardHint[]).map((hint) => [
       hint.cardId,
       hint,
     ]),

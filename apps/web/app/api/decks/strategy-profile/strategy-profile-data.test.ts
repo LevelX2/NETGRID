@@ -244,7 +244,7 @@ describe("AI007 DeckDoctrine strategy profile view model", () => {
       source: {
         mode: "ai_internal_strategy_profile",
         strategyGoals: "data/ai/strategy-goals-v1.json",
-        compiledHints: "data/ai/ai-card-hints-compiled.json",
+        activeHints: "data/ai/ai-card-hints-active.json",
         inspectorIndex: "data/ai/ai-hint-inspector-index.json",
         plannerEffect: "strategic_intent_input",
       },
