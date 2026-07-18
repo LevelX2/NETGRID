@@ -613,6 +613,7 @@ function urgentCorpSemanticChoice(
         !semanticRuntimeChoiceHasAnyScoreBreakdownComponent(choice, [
           "corp_active_remote_agenda_unsafe_advance",
           "corp_active_remote_agenda_underfunded_advance",
+          "corp_contestable_remote_score_penalty",
         ]),
     )
     .sort((left, right) => right.score - left.score)[0];

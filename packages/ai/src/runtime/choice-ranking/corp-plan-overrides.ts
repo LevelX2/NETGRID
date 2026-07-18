@@ -68,7 +68,9 @@ export function tacticalPlanCorpScorelineSupportBlocksOffPlanOverride(
   if (
     mappedChoice.scoreBreakdown.some(
       (component) =>
-        component.key === "corp_non_agenda_root_blocks_score_remote" &&
+        (component.key === "corp_non_agenda_root_blocks_score_remote" ||
+          component.key ===
+            "corp_remote_scoreline_unfunded_ice_install_penalty") &&
         component.value < 0,
     ) &&
     overrideChoice.score > mappedChoice.score

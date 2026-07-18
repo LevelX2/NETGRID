@@ -45,6 +45,7 @@ import type {
   RunnerRunSubroutineThreatClass,
 } from "./runner-run-plan-types";
 import {
+  runnerEncounterCreditBudgetForInput,
   runnerEncounterPaymentForActions,
   spendRunnerEncounterBreakerCost,
 } from "./runner-encounter-credit-budget";
@@ -108,12 +109,12 @@ export function quoteRunnerRunPath(
   const iceQuotes = [currentQuote, ...otherIceQuotes].filter(
     (quote): quote is RunnerRunIceEncounterQuote => quote !== undefined,
   );
-  const totalKnownCost = iceQuotes.reduce(
+  const totalKnownGrossCost = iceQuotes.reduce(
     (sum, quote) =>
       sum +
       Math.max(
         0,
-        quote.cheapestAccessPreservingSequence?.cashCost ??
+        quote.cheapestAccessPreservingSequence?.totalCost ??
           quote.breakerCoverage
             .map((coverage) => coverage.estimatedCost)
             .filter((cost): cost is number => cost !== undefined)
@@ -121,6 +122,23 @@ export function quoteRunnerRunPath(
           0,
       ),
     0,
+  );
+  const encounterBudget = runnerEncounterCreditBudgetForInput(input);
+  const restrictedCreditPotential = iceQuotes.reduce(
+    (sum, quote) =>
+      sum +
+      (quote.cheapestAccessPreservingSequence?.restrictedCreditCost ?? 0),
+    0,
+  );
+  const availableRestrictedCredits =
+    encounterBudget.runOnlyCredits +
+    encounterBudget.icebreakerCredits +
+    encounterBudget.nonNoisyIcebreakerCredits +
+    encounterBudget.killerCredits;
+  const totalKnownCost = Math.max(
+    0,
+    totalKnownGrossCost -
+      Math.min(restrictedCreditPotential, availableRestrictedCredits),
   );
   const reserveTarget = runnerRunPlanReserveTarget(plan);
   const expectedRemainingCredits =
@@ -590,12 +608,9 @@ function sequenceForActions(params: {
       ? spendRunnerEncounterBreakerCost({
           input: params.input,
           breakerId: params.estimatedBreakBreakerId,
-          budget: payment?.budget ?? {
-            credits: params.input.playerView.own.credits,
-            icebreakerCredits: 0,
-            nonNoisyIcebreakerCredits: 0,
-            killerCredits: 0,
-          },
+          budget:
+            payment?.budget ??
+            runnerEncounterCreditBudgetForInput(params.input),
           cost: estimatedRemainingCost,
         })
       : undefined;
