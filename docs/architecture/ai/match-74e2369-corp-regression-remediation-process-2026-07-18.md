@@ -1,6 +1,6 @@
 # Match 74e2369: Corp-KI-Regressionsbehebung
 
-Status: P2 aktiv
+Status: P4 aktiv
 
 ## Quelle und Gesamtziel
 
@@ -85,7 +85,7 @@ Status: abgeschlossen
 
 ### P2 – Spielgleiche rote Evidence
 
-Status: aktiv
+Status: abgeschlossen
 
 - historische Decision-Checkpoints für R&D-Verteidigung, Agenda-Zielwahl,
   `Night Shift` und Abwurfentscheidung capturen;
@@ -99,7 +99,7 @@ Status: aktiv
 
 ### P3 – Plan-, Scorefenster- und Discard-Arbitration
 
-Status: ausstehend
+Status: abgeschlossen
 
 - positive Zentralverteidigung und überlegene Economy-Aktionen dürfen nicht
   von einem schlechteren Scorefenster-Schritt absolut verdrängt werden;
@@ -112,7 +112,7 @@ Status: ausstehend
 
 ### P4 – Hint-Kompilierung und Corporate-War-Consumer
 
-Status: ausstehend
+Status: aktiv
 
 - die drei blockierenden Effektkern-Überlappungen an ihrer gemeinsamen
   Ursache deduplizieren;
@@ -161,7 +161,15 @@ Status: ausstehend
   Dateigrößenüberschreitungen. Git-Historie und Consumer-Kette belegen eine
   Plan-Kompositionslücke bei Night Shift/R&D sowie seit Mai bestehende
   Compiled-Hint-Überlappungen hinter korrekt überarbeiteten Active Hints.
-- P2 aktiv: fünf strikte Checkpoints wurden mit null Warmup-Drifts capturt und
+- P2 abgeschlossen: fünf strikte Checkpoints wurden mit null Warmup-Drifts capturt und
   scheitern ausschließlich als `behavior_regression`; drei Hint-Verträge sind
   rot, während 43 angrenzende Gegenverträge und drei Hint-Erhaltungsproben grün
   bleiben.
+- P2 im Commit `2048aa9c9` rot gesichert.
+- P3 abgeschlossen: Eine stärkere R&D-Triage- oder Burst-Economy-Alternative
+  bleibt vor einer schwächeren strategischen Corp-Ersetzung erhalten, ohne
+  starke Tag-Punish-Unterbrechungen zu blockieren. Same-Turn-Konvertierungen
+  unterscheiden Agenda-Punkte, und nur die zum Sieg redundante Agenda-Kopie
+  erhält einen Discard-Abschlag. Vier historische Auswahlcheckpoints, der
+  frühere Night-Shift-Fall, 61 weitere fokussierte Plan-/Arbitration-/Discard-
+  Tests und der AI-Typecheck sind grün.

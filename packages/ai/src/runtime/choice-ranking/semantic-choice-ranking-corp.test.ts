@@ -308,6 +308,44 @@ describe("tacticalPlanMappedChoice Corp overrides", () => {
     expect(result.overrideReason).toBe("mapped_nonpositive_against_positive");
   });
 
+  it("does not replace a stronger board-triage override with a weaker strategic action", () => {
+    const remoteIce = legalAction("install-remote-ice", "install_card", {
+      serverId: "remote_1",
+      placement: "ice",
+    });
+    const rdIce = legalAction("install-rd-ice", "install_card", {
+      serverId: "rd",
+      placement: "ice",
+    });
+    const gain = legalAction("gain", "gain_credit");
+    const mapped = choice(
+      remoteIce,
+      -636,
+      scoreComponentEvidence("corp_board_triage_mismatch"),
+    );
+    const strongerOverride = choice(
+      rdIce,
+      4193,
+      scoreComponentEvidence("corp_board_triage_alignment"),
+      {
+        key: "corp_board_triage_alignment",
+        value: 24,
+        reason: "critical R&D pressure",
+      },
+    );
+    const weakerStrategicChoice = choice(gain, 1270, strategicEvidence("kind"));
+
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [strongerOverride, weakerStrategicChoice, mapped],
+      scorelineSupportMapping([remoteIce]),
+      strongerOverride,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("install-rd-ice");
+  });
+
   it("lets board triage stop score-window funding after its need is stale", () => {
     const gain = legalAction("gain", "gain_credit");
     const rdIce = legalAction("install-rd-ice", "install_card", {

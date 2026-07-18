@@ -82,6 +82,12 @@ export function discardKeepScore(
   const duplicateCount = input.playerView.own.gripOrHq.filter(
     (candidate) => candidate.definitionId === card.definitionId,
   ).length;
+  const corpRedundantWinningAgendaDuplicate =
+    input.side === "corp" &&
+    type === "agenda" &&
+    duplicateCount > 1 &&
+    input.playerView.own.agendaPoints + Math.max(0, card.agendaPoints ?? 0) >=
+      input.playerView.agendaPointsToWin;
   const installedSameDefinition =
     input.side === "runner" &&
     (input.playerView.own.rig ?? []).some(
@@ -189,6 +195,8 @@ export function discardKeepScore(
     baseValue += input.side === "runner" && runnerEconomyOrPayout ? 150 : 90;
   if (duplicateCount > 1 && type !== "agenda")
     baseValue -= (runnerNonAdditiveDuplicate ? 170 : 75) * (duplicateCount - 1);
+  if (corpRedundantWinningAgendaDuplicate)
+    baseValue -= 420 * (duplicateCount - 1);
   if (runnerNonAdditiveDuplicate && installedSameDefinition) baseValue -= 180;
   if (runnerRedundantBreakerDuplicate) {
     baseValue -= 220 + Math.max(0, duplicateCount - 1) * 180;
@@ -220,6 +228,9 @@ export function discardKeepScore(
       "discard_score:base",
       ...(corpAdvancementBurstSupportsVisibleAgenda
         ? ["discard_score:corp_visible_agenda_advancement_burst"]
+        : []),
+      ...(corpRedundantWinningAgendaDuplicate
+        ? ["discard_score:corp_redundant_winning_agenda_duplicate"]
         : []),
       ...(runnerMissingBreakerSearchAccess
         ? ["discard_score:runner_missing_breaker_search_access"]

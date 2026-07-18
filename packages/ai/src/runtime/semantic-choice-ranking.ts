@@ -150,9 +150,11 @@ export function tacticalPlanMappedChoice(
       strategicOverrideChoice &&
       strategicOverrideChoice.score > 0 &&
       strategicOverrideChoice.score > mappedChoice.score &&
-      (mapping.plan.side !== "runner" ||
-        strategicOverrideChoice.score >
-          (overrideChoice?.score ?? Number.NEGATIVE_INFINITY))
+      !strongerExistingOverrideMustBePreserved(
+        mapping,
+        overrideChoice,
+        strategicOverrideChoice,
+      )
     ) {
       overrideChoice = strategicOverrideChoice;
     }
@@ -584,6 +586,22 @@ export function tacticalPlanMappedChoice(
       tacticalPlanMappingSelectedEvidence(mapping, mappedChoice),
     ),
   };
+}
+
+function strongerExistingOverrideMustBePreserved(
+  mapping: PlanStepMappingResult,
+  existingOverride: SemanticRuntimeChoice | undefined,
+  strategicOverride: SemanticRuntimeChoice,
+): boolean {
+  if (!existingOverride || existingOverride.score < strategicOverride.score)
+    return false;
+  if (mapping.plan.side === "runner") return true;
+  return existingOverride.scoreBreakdown.some((component) =>
+    [
+      "corp_board_triage_alignment",
+      "corp_operation_burst_economy",
+    ].includes(component.key),
+  );
 }
 
 function urgentCorpSemanticChoice(

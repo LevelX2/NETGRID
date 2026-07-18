@@ -31,6 +31,7 @@ export type CorpScoreConversionStep = {
 
 export type CorpScoreConversionPath = {
   agendaCardId: string;
+  agendaPoints: number;
   targetServerId: string;
   advancementRequirement: number;
   initialAdvancementCounters: number;
@@ -543,6 +544,7 @@ function completedPath(
     : undefined;
   return {
     agendaCardId: target.card.instanceId,
+    agendaPoints: visibleAgendaPoints(target.card),
     targetServerId: target.serverId,
     advancementRequirement: requirement,
     initialAdvancementCounters: initialCounters,
@@ -560,6 +562,7 @@ function completedPath(
       "corp_score_conversion_path:true",
       "corp_score_conversion_same_turn_guaranteed:true",
       `corp_score_conversion_agenda:${target.card.instanceId}`,
+      `corp_score_conversion_agenda_points:${visibleAgendaPoints(target.card)}`,
       `corp_score_conversion_server:${target.serverId}`,
       `corp_score_conversion_requirement:${requirement}`,
       `corp_score_conversion_desired_counters:${
@@ -577,6 +580,13 @@ function completedPath(
     overadvance,
     rewardedOveradvance,
   };
+}
+
+function visibleAgendaPoints(card: VisibleCard): number {
+  const definition = card.definitionId
+    ? CARD_DEFINITIONS_BY_ID[card.definitionId]
+    : undefined;
+  return Math.max(0, card.agendaPoints ?? definition?.agendaPoints ?? 0);
 }
 
 function installTargetStep(
@@ -792,6 +802,7 @@ function comparePaths(
   const rightRewarded =
     "rewardedOveradvance" in right && right.rewardedOveradvance ? 1 : 0;
   return (
+    right.agendaPoints - left.agendaPoints ||
     left.steps.length - right.steps.length ||
     left.creditsRequired - right.creditsRequired ||
     leftNetClicks - rightNetClicks ||
