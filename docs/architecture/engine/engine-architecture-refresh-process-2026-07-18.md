@@ -22,8 +22,9 @@ Primary agent: `architecture-review-agent`
 | E10     | integriert  | 1.736 Engine-, 2.723 KI- und 12 Shared-Tests; Web 633/635 nach Main-Sync   |
 | E11     | integriert  | Damage-Domäne in sechs Module geteilt; 1.736 Engine-Tests und Gates grün   |
 | E12     | integriert  | Access-Domäne geteilt; Hidden-Info-/Breach-Verträge und 1.736 Tests grün   |
-| E13     | verifiziert | Run-Hotspots geteilt; keine relativen Importzyklen; 1.736 Tests grün       |
-| E14-E16 | ausstehend  | sequenziell nach E13                                                       |
+| E13     | integriert  | Run-Hotspots geteilt; keine relativen Importzyklen; 1.736 Tests grün       |
+| E14     | verifiziert | Registry nach Set/Seite/Typ; Coverage geteilt; 1.738 Engine-Tests grün     |
+| E15-E16 | ausstehend  | sequenziell nach E14                                                       |
 
 ## Quelle und Vorgabe
 
@@ -231,6 +232,20 @@ Followups liegen in klar gerichteten Modulen. Die regelrelevante
 Cleanup-Reihenfolge ist am Code dokumentiert; Modulgrenzen und Größen sind im
 Strukturguard ausführbar. Engine-Suite mit 1.736 Tests, Engine-Typecheck,
 Package Boundaries und Strukturguard sind grün.
+
+### E14 Registry und Coverage
+
+Die 27 nummerierten CardImplementation-Sammelgruppen sind durch 27 fachliche
+Subregistries nach Set, Seite und Kartentyp ersetzt. Der Katalog besitzt eine
+explizite deterministische Gruppenreihenfolge und erzeugt seine flache Registry
+aus genau dieser Quelle. 29 überholte Sammel-/Aggregatdateien wurden entfernt.
+
+Ein neuer Strukturtest beweist Gruppenreihenfolge, Flattening-Parität,
+Duplikatfreiheit sowie Set-/Seite-/Typ-Abgleich gegen die Shared CardDefinitions.
+Die Coverage-Regelableitung umfasst noch 528 Zeilen; die 855-zeilige explizite
+Source-Location-Ausnahmekarte liegt als reines Datenmodul separat. Der
+Strukturguard verbietet neue nummerierte Registry-Gruppen und begrenzt beide
+Coverage-Module. Die vollständige Engine-Suite umfasst nun 1.738 grüne Tests.
 
 ### E14 Registry und Coverage
 

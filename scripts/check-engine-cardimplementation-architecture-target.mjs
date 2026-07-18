@@ -142,7 +142,11 @@ function isCardImplementationFile(file) {
 function isCatalogOrAllowedCardContext(file, line) {
   if (isTestOrFixture(file)) return true;
   if (isCardImplementationFile(file)) return true;
-  if (file === "packages/engine/src/card-implementations/coverage.ts")
+  if (
+    file === "packages/engine/src/card-implementations/coverage.ts" ||
+    file ===
+      "packages/engine/src/card-implementations/coverage-source-locations.ts"
+  )
     return true;
   if (file === "packages/shared/src/card-definitions.ts") {
     return (

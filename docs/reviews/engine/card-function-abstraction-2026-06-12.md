@@ -14,8 +14,8 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 
 | Kategorie                                       | Anzahl |
 | ----------------------------------------------- | -----: |
-| test_only_card_name                             |     45 |
 | allowed_catalog_reference                       |     43 |
+| test_only_card_name                             |     45 |
 | mechanics_constant_controls_behavior_by_card_id |     28 |
 | functional_kind_uses_card_name                  |      2 |
 | false_positive                                  |     14 |
@@ -84,10 +84,10 @@ Die kompakte Fingerprint-Baseline dient nur als New-Leak-Detektor; das lesbare R
 
 ## Erlaubte Referenzen
 
-- `packages/engine/src/card-implementations/coverage.ts:182` Disinfectant / `disinfectant`
-- `packages/engine/src/card-implementations/coverage.ts:183` Disinfectant / `disinfectant`
-- `packages/engine/src/card-implementations/coverage.ts:196` Krumz / `krumz`
-- `packages/engine/src/card-implementations/coverage.ts:197` Krumz / `krumz`
+- `packages/engine/src/card-implementations/coverage-source-locations.ts:81` Disinfectant / `disinfectant`
+- `packages/engine/src/card-implementations/coverage-source-locations.ts:82` Disinfectant / `disinfectant`
+- `packages/engine/src/card-implementations/coverage-source-locations.ts:95` Krumz / `krumz`
+- `packages/engine/src/card-implementations/coverage-source-locations.ts:96` Krumz / `krumz`
 - `packages/engine/src/card-implementations/onr-v1/corp/assets/disinfectant-inc.ts:5` Disinfectant / `disinfectant`
 - `packages/engine/src/card-implementations/onr-v1/corp/assets/disinfectant-inc.ts:6` Disinfectant / `disinfectant`
 - `packages/engine/src/card-implementations/onr-v1/corp/assets/krumz.ts:4` Krumz / `Krumz`
@@ -106,24 +106,24 @@ Die kompakte Fingerprint-Baseline dient nur als New-Leak-Detektor; das lesbare R
 - `packages/engine/src/card-implementations/proteus/corp/assets/siren.ts:5` Siren / `Siren`
 - `packages/engine/src/card-implementations/proteus/corp/assets/siren.ts:6` Siren / `siren`
 - `packages/engine/src/card-implementations/proteus/runner/events/pirate-broadcast.ts:3` Pirate Broadcast / `pirateBroadcast`
-- `packages/engine/src/card-implementations/subregistries/card-implementation-group-006.ts:11` Startup Immolator / `startupImmolator`
-- `packages/engine/src/card-implementations/subregistries/card-implementation-group-006.ts:33` Startup Immolator / `startupImmolator`
-- `packages/engine/src/card-implementations/subregistries/card-implementation-group-008.ts:2` Preying Mantis / `preyingMantis`
-- `packages/engine/src/card-implementations/subregistries/card-implementation-group-008.ts:3` Quest for Cattekin / `questForCattekin`
-- `packages/engine/src/card-implementations/subregistries/card-implementation-group-008.ts:24` Preying Mantis / `preyingMantis`
-- `packages/engine/src/card-implementations/subregistries/card-implementation-group-008.ts:25` Quest for Cattekin / `questForCattekin`
-- `packages/engine/src/card-implementations/subregistries/card-implementation-group-013.ts:16` Disinfectant / `disinfectant`
-- `packages/engine/src/card-implementations/subregistries/card-implementation-group-013.ts:16` Disinfectant / `disinfectant`
-- `packages/engine/src/card-implementations/subregistries/card-implementation-group-013.ts:38` Disinfectant / `disinfectant`
-- `packages/engine/src/card-implementations/subregistries/card-implementation-group-014.ts:7` Krumz / `krumz`
-- `packages/engine/src/card-implementations/subregistries/card-implementation-group-014.ts:7` Krumz / `krumz`
-- `packages/engine/src/card-implementations/subregistries/card-implementation-group-014.ts:9` Newsgroup Taunting / `newsgroupTaunting`
-- `packages/engine/src/card-implementations/subregistries/card-implementation-group-014.ts:29` Krumz / `krumz`
-- `packages/engine/src/card-implementations/subregistries/card-implementation-group-014.ts:31` Newsgroup Taunting / `newsgroupTaunting`
-- `packages/engine/src/card-implementations/subregistries/card-implementation-group-018.ts:11` Bizarre Encryption Scheme / `bizarreEncryption`
-- `packages/engine/src/card-implementations/subregistries/card-implementation-group-018.ts:33` Bizarre Encryption Scheme / `bizarreEncryption`
-- `packages/engine/src/card-implementations/subregistries/card-implementation-group-022.ts:15` Siren / `siren`
-- `packages/engine/src/card-implementations/subregistries/card-implementation-group-022.ts:15` Siren / `Siren`
-- `packages/engine/src/card-implementations/subregistries/card-implementation-group-022.ts:37` Siren / `Siren`
-- `packages/engine/src/card-implementations/subregistries/card-implementation-group-024.ts:7` Pirate Broadcast / `pirateBroadcast`
-- `packages/engine/src/card-implementations/subregistries/card-implementation-group-024.ts:29` Pirate Broadcast / `pirateBroadcast`
+- `packages/engine/src/card-implementations/subregistries/onr-v1-corp-asset-acme-savings-and-loan-to-information-laundering.ts:13` Disinfectant / `disinfectant`
+- `packages/engine/src/card-implementations/subregistries/onr-v1-corp-asset-acme-savings-and-loan-to-information-laundering.ts:13` Disinfectant / `disinfectant`
+- `packages/engine/src/card-implementations/subregistries/onr-v1-corp-asset-acme-savings-and-loan-to-information-laundering.ts:36` Disinfectant / `disinfectant`
+- `packages/engine/src/card-implementations/subregistries/onr-v1-corp-asset-i-got-a-rock-to-south-african-mining-corp.ts:4` Krumz / `krumz`
+- `packages/engine/src/card-implementations/subregistries/onr-v1-corp-asset-i-got-a-rock-to-south-african-mining-corp.ts:4` Krumz / `krumz`
+- `packages/engine/src/card-implementations/subregistries/onr-v1-corp-asset-i-got-a-rock-to-south-african-mining-corp.ts:6` Newsgroup Taunting / `newsgroupTaunting`
+- `packages/engine/src/card-implementations/subregistries/onr-v1-corp-asset-i-got-a-rock-to-south-african-mining-corp.ts:27` Krumz / `krumz`
+- `packages/engine/src/card-implementations/subregistries/onr-v1-corp-asset-i-got-a-rock-to-south-african-mining-corp.ts:29` Newsgroup Taunting / `newsgroupTaunting`
+- `packages/engine/src/card-implementations/subregistries/onr-v1-corp-upgrade-aardvark-to-roving-submarine.ts:4` Bizarre Encryption Scheme / `bizarreEncryption`
+- `packages/engine/src/card-implementations/subregistries/onr-v1-corp-upgrade-aardvark-to-roving-submarine.ts:27` Bizarre Encryption Scheme / `bizarreEncryption`
+- `packages/engine/src/card-implementations/subregistries/onr-v1-runner-program-shield-to-zetatech-software-installer.ts:9` Startup Immolator / `startupImmolator`
+- `packages/engine/src/card-implementations/subregistries/onr-v1-runner-program-shield-to-zetatech-software-installer.ts:27` Startup Immolator / `startupImmolator`
+- `packages/engine/src/card-implementations/subregistries/onr-v1-runner-resource-loan-from-chiba-to-umbrella-policy.ts:5` Preying Mantis / `preyingMantis`
+- `packages/engine/src/card-implementations/subregistries/onr-v1-runner-resource-loan-from-chiba-to-umbrella-policy.ts:6` Quest for Cattekin / `questForCattekin`
+- `packages/engine/src/card-implementations/subregistries/onr-v1-runner-resource-loan-from-chiba-to-umbrella-policy.ts:28` Preying Mantis / `preyingMantis`
+- `packages/engine/src/card-implementations/subregistries/onr-v1-runner-resource-loan-from-chiba-to-umbrella-policy.ts:29` Quest for Cattekin / `questForCattekin`
+- `packages/engine/src/card-implementations/subregistries/proteus-corp-asset-implementations.ts:7` Siren / `siren`
+- `packages/engine/src/card-implementations/subregistries/proteus-corp-asset-implementations.ts:7` Siren / `Siren`
+- `packages/engine/src/card-implementations/subregistries/proteus-corp-asset-implementations.ts:20` Siren / `Siren`
+- `packages/engine/src/card-implementations/subregistries/proteus-runner-event-faked-hit-to-remote-detonator.ts:17` Pirate Broadcast / `pirateBroadcast`
+- `packages/engine/src/card-implementations/subregistries/proteus-runner-event-faked-hit-to-remote-detonator.ts:40` Pirate Broadcast / `pirateBroadcast`
