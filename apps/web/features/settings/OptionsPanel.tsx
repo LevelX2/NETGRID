@@ -67,6 +67,7 @@ export function OptionsPanel({
   cardZoneScalePercent,
   cardBoardScalePercent,
   cardRigScalePercent,
+  cardSpecialZoneScalePercent,
   cardDisplayMode,
   preferGermanCardImages,
   showSetBadges,
@@ -98,6 +99,7 @@ export function OptionsPanel({
   onCardZoneScalePercent,
   onCardBoardScalePercent,
   onCardRigScalePercent,
+  onCardSpecialZoneScalePercent,
   onCardDisplayMode,
   onPreferGermanCardImages,
   onShowSetBadges,
@@ -130,6 +132,7 @@ export function OptionsPanel({
   cardZoneScalePercent: number;
   cardBoardScalePercent: number;
   cardRigScalePercent: number;
+  cardSpecialZoneScalePercent: number;
   cardDisplayMode: CardDisplayMode;
   preferGermanCardImages: boolean;
   showSetBadges: boolean;
@@ -161,6 +164,7 @@ export function OptionsPanel({
   onCardZoneScalePercent(value: number): void;
   onCardBoardScalePercent(value: number): void;
   onCardRigScalePercent(value: number): void;
+  onCardSpecialZoneScalePercent(value: number): void;
   onCardDisplayMode(value: CardDisplayMode): void;
   onPreferGermanCardImages(value: boolean): void;
   onShowSetBadges(value: boolean): void;
@@ -218,12 +222,14 @@ export function OptionsPanel({
           zonePercent={cardZoneScalePercent}
           boardPercent={cardBoardScalePercent}
           rigPercent={cardRigScalePercent}
+          specialZonePercent={cardSpecialZoneScalePercent}
           onTooltipPercent={onCardTooltipScalePercent}
           onHandPercent={onCardHandScalePercent}
           onArchivePercent={onCardArchiveScalePercent}
           onZonePercent={onCardZoneScalePercent}
           onBoardPercent={onCardBoardScalePercent}
           onRigPercent={onCardRigScalePercent}
+          onSpecialZonePercent={onCardSpecialZoneScalePercent}
         />
         <GameplaySettings
           autoCorpMandatoryDrawEnabled={autoCorpMandatoryDrawEnabled}
@@ -636,12 +642,14 @@ function CardSizeSettings({
   zonePercent,
   boardPercent,
   rigPercent,
+  specialZonePercent,
   onTooltipPercent,
   onHandPercent,
   onArchivePercent,
   onZonePercent,
   onBoardPercent,
   onRigPercent,
+  onSpecialZonePercent,
 }: {
   tooltipPercent: number;
   handPercent: number;
@@ -649,12 +657,14 @@ function CardSizeSettings({
   zonePercent: number;
   boardPercent: number;
   rigPercent: number;
+  specialZonePercent: number;
   onTooltipPercent(value: number): void;
   onHandPercent(value: number): void;
   onArchivePercent(value: number): void;
   onZonePercent(value: number): void;
   onBoardPercent(value: number): void;
   onRigPercent(value: number): void;
+  onSpecialZonePercent(value: number): void;
 }) {
   return (
     <div className="cardSizeSettings">
@@ -703,6 +713,13 @@ function CardSizeSettings({
         min={CARD_SCALE_PERCENT_MIN}
         max={CARD_SCALE_PERCENT_MAX}
         onChange={onRigPercent}
+      />
+      <CardSizeSliderRow
+        label="Spezialzonen"
+        value={specialZonePercent}
+        min={CARD_SCALE_PERCENT_MIN}
+        max={CARD_SCALE_PERCENT_MAX}
+        onChange={onSpecialZonePercent}
       />
     </div>
   );

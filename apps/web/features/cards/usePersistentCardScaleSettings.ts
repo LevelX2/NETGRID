@@ -19,6 +19,7 @@ export function usePersistentCardScaleSettings() {
   const [cardZoneScalePercent, setCardZoneScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
   const [cardBoardScalePercent, setCardBoardScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
   const [cardRigScalePercent, setCardRigScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
+  const [cardSpecialZoneScalePercent, setCardSpecialZoneScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
   const [cardSizeSettingsLoaded, setCardSizeSettingsLoaded] = useState(false);
 
   useEffect(() => {
@@ -32,6 +33,7 @@ export function usePersistentCardScaleSettings() {
           zonePercent?: unknown;
           boardPercent?: unknown;
           rigPercent?: unknown;
+          specialZonePercent?: unknown;
           opponentPercent?: unknown;
         };
         setCardTooltipScalePercent(normalizeCardScalePercent(parsed.tooltipPercent));
@@ -40,6 +42,7 @@ export function usePersistentCardScaleSettings() {
         setCardZoneScalePercent(normalizeCardScalePercent(parsed.zonePercent));
         setCardBoardScalePercent(normalizeCardScalePercent(parsed.boardPercent));
         setCardRigScalePercent(normalizeCardScalePercent(parsed.rigPercent ?? parsed.opponentPercent));
+        setCardSpecialZoneScalePercent(normalizeCardScalePercent(parsed.specialZonePercent));
       } catch {
         removeLocalStorageKeys(CARD_SIZE_SETTINGS_STORAGE_KEY, LEGACY_CARD_SIZE_SETTINGS_STORAGE_KEY);
       }
@@ -57,10 +60,11 @@ export function usePersistentCardScaleSettings() {
         archivePercent: cardArchiveScalePercent,
         zonePercent: cardZoneScalePercent,
         boardPercent: cardBoardScalePercent,
-        rigPercent: cardRigScalePercent
+        rigPercent: cardRigScalePercent,
+        specialZonePercent: cardSpecialZoneScalePercent
       })
     );
-  }, [cardSizeSettingsLoaded, cardTooltipScalePercent, cardHandScalePercent, cardArchiveScalePercent, cardZoneScalePercent, cardBoardScalePercent, cardRigScalePercent]);
+  }, [cardSizeSettingsLoaded, cardTooltipScalePercent, cardHandScalePercent, cardArchiveScalePercent, cardZoneScalePercent, cardBoardScalePercent, cardRigScalePercent, cardSpecialZoneScalePercent]);
 
   return {
     cardTooltipScalePercent,
@@ -69,11 +73,13 @@ export function usePersistentCardScaleSettings() {
     cardZoneScalePercent,
     cardBoardScalePercent,
     cardRigScalePercent,
+    cardSpecialZoneScalePercent,
     setCardTooltipScalePercent,
     setCardHandScalePercent,
     setCardArchiveScalePercent,
     setCardZoneScalePercent,
     setCardBoardScalePercent,
-    setCardRigScalePercent
+    setCardRigScalePercent,
+    setCardSpecialZoneScalePercent
   };
 }

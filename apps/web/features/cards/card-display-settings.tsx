@@ -24,7 +24,8 @@ export const CardScaleSettingsContext = createContext<CardScaleSettings>({
   archivePercent: CARD_SCALE_DEFAULT_PERCENT,
   zonePercent: CARD_SCALE_DEFAULT_PERCENT,
   boardPercent: CARD_SCALE_DEFAULT_PERCENT,
-  rigPercent: CARD_SCALE_DEFAULT_PERCENT
+  rigPercent: CARD_SCALE_DEFAULT_PERCENT,
+  specialZonePercent: CARD_SCALE_DEFAULT_PERCENT
 });
 
 export const CardImagePreferenceContext = createContext<CardImagePreferenceSettings>({

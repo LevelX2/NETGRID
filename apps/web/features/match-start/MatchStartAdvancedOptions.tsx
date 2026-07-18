@@ -5,19 +5,23 @@ import { SlidersHorizontal } from "lucide-react";
 import {
   aiDeckReadinessLabel,
   type HumanAiSideSelection,
-  type MatchCardPoolSelection
+  type MatchCardPoolSelection,
 } from "../../app/match-start";
 import type {
   MatchStartPlayerClockGraceSeconds,
   MatchStartPlayerClockMinutes,
-  MatchStartPlayerClockMode
+  MatchStartPlayerClockMode,
 } from "../../app/match-start-storage";
 import { DeckSlotSelect } from "../decks/DeckSelectionControls";
 
 type AiDifficulty = "easy" | "normal" | "hard";
-type AiDeckPolicy = "fixed" | "selected" | "seeded_random" | "same_as_participant_a";
+type AiDeckPolicy =
+  | "fixed"
+  | "selected"
+  | "seeded_random"
+  | "same_as_participant_a";
 type AiTraceStartMode = "off" | "detailed";
-type DeckSlotSource = "snapshot" | "local";
+type DeckSlotSource = "snapshot" | "local" | "random_standard";
 
 type MatchStartDeckSnapshot = {
   deckSnapshotId: string;
@@ -76,7 +80,7 @@ export function MatchStartAdvancedOptions({
   onSelectedParticipantBRunnerSnapshotId,
   onSelectedParticipantBCorpSnapshotId,
   onSelectedParticipantBRunnerLocalDeckId,
-  onSelectedParticipantBCorpLocalDeckId
+  onSelectedParticipantBCorpLocalDeckId,
 }: {
   isHumanVsHuman: boolean;
   isHumanVsAi: boolean;
@@ -127,7 +131,10 @@ export function MatchStartAdvancedOptions({
 }) {
   const aiReadiness = aiDeckReadinessLabel(aiDeckPolicy, matchCardPool);
   return (
-    <details className="advancedMatchOptions" data-testid="advanced-match-options">
+    <details
+      className="advancedMatchOptions"
+      data-testid="advanced-match-options"
+    >
       <summary>
         <SlidersHorizontal size={15} />
         Erweiterte Optionen
@@ -136,7 +143,12 @@ export function MatchStartAdvancedOptions({
         {isHumanVsHuman ? (
           <label>
             Countdown
-            <select value={countdownSeconds} onChange={(event) => onCountdownSeconds(Number(event.target.value) as 3 | 5 | 10)}>
+            <select
+              value={countdownSeconds}
+              onChange={(event) =>
+                onCountdownSeconds(Number(event.target.value) as 3 | 5 | 10)
+              }
+            >
               <option value={3}>3 Sekunden</option>
               <option value={5}>5 Sekunden</option>
               <option value={10}>10 Sekunden</option>
@@ -144,22 +156,47 @@ export function MatchStartAdvancedOptions({
           </label>
         ) : null}
         {isHumanVsHuman ? (
-          <label className={`deckBuilderToggle ${discoverableInLan ? "checked" : ""}`}>
-            <input checked={discoverableInLan} onChange={(event) => onDiscoverableInLan(event.target.checked)} type="checkbox" />
+          <label
+            className={`deckBuilderToggle ${discoverableInLan ? "checked" : ""}`}
+          >
+            <input
+              checked={discoverableInLan}
+              onChange={(event) => onDiscoverableInLan(event.target.checked)}
+              type="checkbox"
+            />
             In LAN-Liste sichtbar
           </label>
         ) : null}
         <label>
           Spielerzeit
-          <select value={isAiVsAi ? "none" : playerClockMode} onChange={(event) => onPlayerClockMode(event.target.value as MatchStartPlayerClockMode)} disabled={isAiVsAi}>
+          <select
+            value={isAiVsAi ? "none" : playerClockMode}
+            onChange={(event) =>
+              onPlayerClockMode(event.target.value as MatchStartPlayerClockMode)
+            }
+            disabled={isAiVsAi}
+          >
             <option value="none">Keine Zeitbegrenzung</option>
             <option value="player_clock">Zeitbegrenzung aktiv</option>
           </select>
         </label>
-        {isAiVsAi ? <p className="meta">Beobachtete KI-Simulationen laufen ohne Spielerzeit und bis zu einem regulären Spielende.</p> : null}
+        {isAiVsAi ? (
+          <p className="meta">
+            Beobachtete KI-Simulationen laufen ohne Spielerzeit und bis zu einem
+            regulären Spielende.
+          </p>
+        ) : null}
         <label>
           Zeit pro Seite
-          <select value={playerClockMinutes} onChange={(event) => onPlayerClockMinutes(Number(event.target.value) as MatchStartPlayerClockMinutes)} disabled={playerClockDetailControlsDisabled}>
+          <select
+            value={playerClockMinutes}
+            onChange={(event) =>
+              onPlayerClockMinutes(
+                Number(event.target.value) as MatchStartPlayerClockMinutes,
+              )
+            }
+            disabled={playerClockDetailControlsDisabled}
+          >
             <option value={5}>5 Minuten</option>
             <option value={10}>10 Minuten</option>
             <option value={15}>15 Minuten</option>
@@ -170,7 +207,15 @@ export function MatchStartAdvancedOptions({
         </label>
         <label>
           Kulanz je Entscheidung
-          <select value={playerClockGraceSeconds} onChange={(event) => onPlayerClockGraceSeconds(Number(event.target.value) as MatchStartPlayerClockGraceSeconds)} disabled={playerClockDetailControlsDisabled}>
+          <select
+            value={playerClockGraceSeconds}
+            onChange={(event) =>
+              onPlayerClockGraceSeconds(
+                Number(event.target.value) as MatchStartPlayerClockGraceSeconds,
+              )
+            }
+            disabled={playerClockDetailControlsDisabled}
+          >
             <option value={0}>0 Sekunden</option>
             <option value={5}>5 Sekunden</option>
             <option value={10}>10 Sekunden</option>
@@ -180,29 +225,47 @@ export function MatchStartAdvancedOptions({
         </label>
         <label>
           Seed
-          <input value={seed} onChange={(event) => onSeed(event.target.value)} />
+          <input
+            value={seed}
+            onChange={(event) => onSeed(event.target.value)}
+          />
         </label>
         {isHumanVsAi ? (
-          <label className={`deckBuilderToggle matchStartTraceToggle ${aiTraceStartMode !== "off" ? "checked" : ""}`}>
+          <label
+            className={`deckBuilderToggle matchStartTraceToggle ${aiTraceStartMode !== "off" ? "checked" : ""}`}
+          >
             <input
               data-testid="match-start-ai-trace-toggle"
               checked={aiTraceStartMode !== "off"}
-              onChange={(event) => onAiTraceStartMode(event.target.checked ? "detailed" : "off")}
+              onChange={(event) =>
+                onAiTraceStartMode(event.target.checked ? "detailed" : "off")
+              }
               type="checkbox"
             />
             KI-Trace speichern
           </label>
         ) : null}
         {isHumanVsHuman ? (
-          <label className={`deckBuilderToggle ${testSetupMode ? "checked" : ""}`}>
-            <input checked={testSetupMode} onChange={(event) => onTestSetupMode(event.target.checked)} type="checkbox" />
+          <label
+            className={`deckBuilderToggle ${testSetupMode ? "checked" : ""}`}
+          >
+            <input
+              checked={testSetupMode}
+              onChange={(event) => onTestSetupMode(event.target.checked)}
+              type="checkbox"
+            />
             Testkonstellation · beide Teilnehmer festlegen
           </label>
         ) : null}
         {isHumanVsAi && humanAiSideSelection !== "runner" ? (
           <label>
             Runner-KI
-            <select value={runnerDifficulty} onChange={(event) => onRunnerDifficulty(event.target.value as AiDifficulty)}>
+            <select
+              value={runnerDifficulty}
+              onChange={(event) =>
+                onRunnerDifficulty(event.target.value as AiDifficulty)
+              }
+            >
               <option value="easy">Easy</option>
               <option value="normal">Normal</option>
               <option value="hard">Hard</option>
@@ -212,7 +275,12 @@ export function MatchStartAdvancedOptions({
         {isHumanVsAi && humanAiSideSelection !== "corp" ? (
           <label>
             Korp-KI
-            <select value={corpDifficulty} onChange={(event) => onCorpDifficulty(event.target.value as AiDifficulty)}>
+            <select
+              value={corpDifficulty}
+              onChange={(event) =>
+                onCorpDifficulty(event.target.value as AiDifficulty)
+              }
+            >
               <option value="easy">Easy</option>
               <option value="normal">Normal</option>
               <option value="hard">Hard</option>
@@ -222,24 +290,41 @@ export function MatchStartAdvancedOptions({
         {hasAiOpponent ? (
           <label>
             KI-Decks
-            <select value={aiDeckPolicy} onChange={(event) => onAiDeckPolicy(event.target.value as AiDeckPolicy)}>
+            <select
+              value={aiDeckPolicy}
+              onChange={(event) =>
+                onAiDeckPolicy(event.target.value as AiDeckPolicy)
+              }
+            >
               <option value="selected">Explizit gewählte KI-Decks</option>
-              <option value="same_as_participant_a">Gleiche Decks wie du</option>
+              <option value="same_as_participant_a">
+                Gleiche Decks wie du
+              </option>
               <option value="fixed">Feste Standard-Decks</option>
               <option value="seeded_random">Deterministisch zufällig</option>
             </select>
-            <small className={`aiDeckReadiness ${aiReadiness.ready ? "ready" : "blocked"}`} data-testid="ai-deck-readiness">
+            <small
+              className={`aiDeckReadiness ${aiReadiness.ready ? "ready" : "blocked"}`}
+              data-testid="ai-deck-readiness"
+            >
               <strong>{aiReadiness.title}</strong>
               <span>{aiReadiness.detail}</span>
             </small>
           </label>
         ) : null}
       </div>
-      {(isHumanVsHuman && testSetupMode) || ((isHumanVsAi || isAiVsAiSeries) && aiDeckPolicy === "selected") ? (
+      {(isHumanVsHuman && testSetupMode) ||
+      ((isHumanVsAi || isAiVsAiSeries) && aiDeckPolicy === "selected") ? (
         <div className="deckSlotGrid advancedDeckSlots">
           <>
             <DeckSlotSelect
-              label={isAiVsAiSeries ? "KI B · Runner-Deck" : hasAiOpponent ? "KI · Runner-Deck" : "Teilnehmer B · Runner-Deck"}
+              label={
+                isAiVsAiSeries
+                  ? "KI B · Runner-Deck"
+                  : hasAiOpponent
+                    ? "KI · Runner-Deck"
+                    : "Teilnehmer B · Runner-Deck"
+              }
               side="runner"
               snapshots={runnerSnapshots}
               localDecks={localDecks.filter((deck) => deck.side === "runner")}
@@ -252,7 +337,13 @@ export function MatchStartAdvancedOptions({
               onLocalDeck={onSelectedParticipantBRunnerLocalDeckId}
             />
             <DeckSlotSelect
-              label={isAiVsAiSeries ? "KI B · Korp-Deck" : hasAiOpponent ? "KI · Korp-Deck" : "Teilnehmer B · Korp-Deck"}
+              label={
+                isAiVsAiSeries
+                  ? "KI B · Korp-Deck"
+                  : hasAiOpponent
+                    ? "KI · Korp-Deck"
+                    : "Teilnehmer B · Korp-Deck"
+              }
               side="corp"
               snapshots={corpSnapshots}
               localDecks={localDecks.filter((deck) => deck.side === "corp")}

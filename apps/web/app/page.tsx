@@ -308,7 +308,12 @@ import {
   mergeVisibleGuestDecks,
   visibleGuestDecks,
 } from "../features/decks/deck-library-visibility";
-import { resolveDeckSlotSelection } from "../features/decks/deck-slot-selection";
+import {
+  RANDOM_STANDARD_DECK_SOURCE,
+  randomStandardSnapshotForSlot,
+  resolveDeckSlotSelection,
+  type DeckSlotSource,
+} from "../features/decks/deck-slot-selection";
 import {
   enrichVisibleCard,
   visibleCardFromCatalogDetail,
@@ -597,17 +602,14 @@ export default function Page() {
   const [undoNotice, setUndoNotice] = useState("");
   const [deckSnapshots, setDeckSnapshots] = useState<DeckSnapshot[]>([]);
   const [deckTemplates, setDeckTemplates] = useState<DeckTemplate[]>([]);
-  const [runnerDeckSource, setRunnerDeckSource] = useState<
-    "snapshot" | "local"
-  >("snapshot");
-  const [corpDeckSource, setCorpDeckSource] = useState<"snapshot" | "local">(
-    "snapshot",
-  );
+  const [runnerDeckSource, setRunnerDeckSource] =
+    useState<DeckSlotSource>("snapshot");
+  const [corpDeckSource, setCorpDeckSource] =
+    useState<DeckSlotSource>("snapshot");
   const [participantBRunnerDeckSource, setParticipantBRunnerDeckSource] =
-    useState<"snapshot" | "local">("snapshot");
-  const [participantBCorpDeckSource, setParticipantBCorpDeckSource] = useState<
-    "snapshot" | "local"
-  >("snapshot");
+    useState<DeckSlotSource>("snapshot");
+  const [participantBCorpDeckSource, setParticipantBCorpDeckSource] =
+    useState<DeckSlotSource>("snapshot");
   const [selectedRunnerSnapshotId, setSelectedRunnerSnapshotId] = useState(
     DEFAULT_RUNNER_SNAPSHOT_ID,
   );
@@ -819,12 +821,14 @@ export default function Page() {
     cardZoneScalePercent,
     cardBoardScalePercent,
     cardRigScalePercent,
+    cardSpecialZoneScalePercent,
     setCardTooltipScalePercent,
     setCardHandScalePercent,
     setCardArchiveScalePercent,
     setCardZoneScalePercent,
     setCardBoardScalePercent,
     setCardRigScalePercent,
+    setCardSpecialZoneScalePercent,
   } = usePersistentCardScaleSettings();
   const [selectedActionContext, setSelectedActionContext] =
     useState<ActionContext | null>(null);
@@ -1910,22 +1914,31 @@ export default function Page() {
         deck.deckId === selectedParticipantBCorpLocalDeckId &&
         deck.side === "corp",
     ) ?? null;
+  const randomStandardMetadata = { deckName: "Zufälliges Standard-Deck" };
   const participantARunnerMetadata =
-    runnerDeckSource === "local"
-      ? deckMetadataFromEditable(runnerLocalDeck)
-      : selectedRunnerSnapshot?.publicMetadata;
+    runnerDeckSource === RANDOM_STANDARD_DECK_SOURCE
+      ? randomStandardMetadata
+      : runnerDeckSource === "local"
+        ? deckMetadataFromEditable(runnerLocalDeck)
+        : selectedRunnerSnapshot?.publicMetadata;
   const participantACorpMetadata =
-    corpDeckSource === "local"
-      ? deckMetadataFromEditable(corpLocalDeck)
-      : selectedCorpSnapshot?.publicMetadata;
+    corpDeckSource === RANDOM_STANDARD_DECK_SOURCE
+      ? randomStandardMetadata
+      : corpDeckSource === "local"
+        ? deckMetadataFromEditable(corpLocalDeck)
+        : selectedCorpSnapshot?.publicMetadata;
   const participantBRunnerMetadata =
-    participantBRunnerDeckSource === "local"
-      ? deckMetadataFromEditable(participantBRunnerLocalDeck)
-      : selectedParticipantBRunnerSnapshot?.publicMetadata;
+    participantBRunnerDeckSource === RANDOM_STANDARD_DECK_SOURCE
+      ? randomStandardMetadata
+      : participantBRunnerDeckSource === "local"
+        ? deckMetadataFromEditable(participantBRunnerLocalDeck)
+        : selectedParticipantBRunnerSnapshot?.publicMetadata;
   const participantBCorpMetadata =
-    participantBCorpDeckSource === "local"
-      ? deckMetadataFromEditable(participantBCorpLocalDeck)
-      : selectedParticipantBCorpSnapshot?.publicMetadata;
+    participantBCorpDeckSource === RANDOM_STANDARD_DECK_SOURCE
+      ? randomStandardMetadata
+      : participantBCorpDeckSource === "local"
+        ? deckMetadataFromEditable(participantBCorpLocalDeck)
+        : selectedParticipantBCorpSnapshot?.publicMetadata;
   const matchStart = deriveMatchStart({
     playMode,
     humanSideSelection,
@@ -3457,9 +3470,11 @@ export default function Page() {
 
   const createMatch = async () => {
     setNotice("");
+    const matchSeed = normalizeMatchSeed(seed);
+    setSeed(matchSeed);
     let deckPayload: Record<string, unknown>;
     try {
-      deckPayload = await matchDeckPayload();
+      deckPayload = await matchDeckPayload(matchSeed);
     } catch (error) {
       setNotice(
         error instanceof Error
@@ -3468,8 +3483,6 @@ export default function Page() {
       );
       return;
     }
-    const matchSeed = normalizeMatchSeed(seed);
-    setSeed(matchSeed);
     let created: CreateMatchResponse;
     try {
       created = await postJson<CreateMatchResponse>("/api/matches", {
@@ -3532,6 +3545,9 @@ export default function Page() {
       hasAiOpponent && aiTraceStartMode !== "off"
         ? " KI-Trace läuft ab Start."
         : "";
+    const resolvedDeckNotice = created.playerView?.deckMetadata
+      ? ` Decks: ${created.playerView.deckMetadata.own.deckName} gegen ${created.playerView.deckMetadata.opponent.deckName}.`
+      : "";
     if (created.lobby || created.pendingDeckHandshake || !created.playerView) {
       setPayload(null);
       setLobby(lobbyFromInitialResponse(created, created.hostSide));
@@ -3546,8 +3562,8 @@ export default function Page() {
     setLobby(null);
     setNotice(
       created.mode === "ai_vs_ai"
-        ? `Simulation bereit. Beide KI-Seiten sind sichtbar; sie startet getaktet und kann jederzeit pausiert, schrittweise fortgesetzt oder abgebrochen werden.${aiTraceNotice}`
-        : `Match erstellt. Du startest als ${sideLabel(created.hostSide)}.${aiTraceNotice}`,
+        ? `Simulation bereit. Beide KI-Seiten sind sichtbar; sie startet getaktet und kann jederzeit pausiert, schrittweise fortgesetzt oder abgebrochen werden.${resolvedDeckNotice}${aiTraceNotice}`
+        : `Match erstellt. Du startest als ${sideLabel(created.hostSide)}.${resolvedDeckNotice}${aiTraceNotice}`,
     );
   };
 
@@ -3604,7 +3620,7 @@ export default function Page() {
     }
   };
 
-  async function matchDeckPayload() {
+  async function matchDeckPayload(matchSeed: string) {
     return {
       participantADecks: await deckPairPayload(
         runnerDeckSource,
@@ -3613,6 +3629,8 @@ export default function Page() {
         corpDeckSource,
         selectedCorpSnapshotId,
         selectedCorpLocalDeckId,
+        matchSeed,
+        "participant_a",
       ),
       ...((isHumanVsHuman && testSetupMode) ||
       ((isHumanVsAi || isAiVsAiStartSeries) && aiDeckPolicy === "selected")
@@ -3624,6 +3642,8 @@ export default function Page() {
               participantBCorpDeckSource,
               selectedParticipantBCorpSnapshotId,
               selectedParticipantBCorpLocalDeckId,
+              matchSeed,
+              "participant_b",
             ),
           }
         : {}),
@@ -3631,57 +3651,15 @@ export default function Page() {
     };
   }
 
-  async function currentSideDeckPayload() {
-    const runnerSlot =
-      gameMode === "human_corp_vs_runner_ai" ||
-      (isHumanVsHuman && humanSideSelection === "corp")
-        ? {
-            source: participantBRunnerDeckSource,
-            snapshotId: selectedParticipantBRunnerSnapshotId,
-            localDeckId: selectedParticipantBRunnerLocalDeckId,
-          }
-        : {
-            source: runnerDeckSource,
-            snapshotId: selectedRunnerSnapshotId,
-            localDeckId: selectedRunnerLocalDeckId,
-          };
-    const corpSlot =
-      gameMode === "human_runner_vs_corp_ai" ||
-      gameMode === "ai_vs_ai" ||
-      (isHumanVsHuman && humanSideSelection !== "corp")
-        ? {
-            source: participantBCorpDeckSource,
-            snapshotId: selectedParticipantBCorpSnapshotId,
-            localDeckId: selectedParticipantBCorpLocalDeckId,
-          }
-        : {
-            source: corpDeckSource,
-            snapshotId: selectedCorpSnapshotId,
-            localDeckId: selectedCorpLocalDeckId,
-          };
-    return {
-      ...(await deckSidePayload(
-        "runner",
-        runnerSlot.source,
-        runnerSlot.snapshotId,
-        runnerSlot.localDeckId,
-      )),
-      ...(await deckSidePayload(
-        "corp",
-        corpSlot.source,
-        corpSlot.snapshotId,
-        corpSlot.localDeckId,
-      )),
-    };
-  }
-
   async function deckPairPayload(
-    runnerSource: "snapshot" | "local",
+    runnerSource: DeckSlotSource,
     runnerSnapshotId: string,
     runnerLocalDeckId: string,
-    corpSource: "snapshot" | "local",
+    corpSource: DeckSlotSource,
     corpSnapshotId: string,
     corpLocalDeckId: string,
+    randomSeed: string,
+    slotOwner: "participant_a" | "participant_b",
   ) {
     return {
       ...(await deckSidePayload(
@@ -3689,21 +3667,27 @@ export default function Page() {
         runnerSource,
         runnerSnapshotId,
         runnerLocalDeckId,
+        randomSeed,
+        `${slotOwner}:runner`,
       )),
       ...(await deckSidePayload(
         "corp",
         corpSource,
         corpSnapshotId,
         corpLocalDeckId,
+        randomSeed,
+        `${slotOwner}:corp`,
       )),
     };
   }
 
   async function deckSidePayload(
     side: Side,
-    source: "snapshot" | "local",
+    source: DeckSlotSource,
     snapshotId: string,
     localDeckId: string,
+    randomSeed: string,
+    slotKey: string,
   ) {
     const snapshots = side === "runner" ? runnerSnapshots : corpSnapshots;
     const sideLocalDecks = matchStartLocalDecks.filter(
@@ -3720,6 +3704,20 @@ export default function Page() {
       throw new Error(
         `Kein matchstartfähiges ${sideLabel(side)}-Deck verfügbar.`,
       );
+    if (selection.source === RANDOM_STANDARD_DECK_SOURCE) {
+      const randomSnapshot = randomStandardSnapshotForSlot({
+        snapshots,
+        seed: randomSeed,
+        slotKey,
+      });
+      if (!randomSnapshot)
+        throw new Error(
+          `Kein zufälliges ${sideLabel(side)}-Standard-Deck verfügbar.`,
+        );
+      return side === "runner"
+        ? { runnerDeckSnapshotId: randomSnapshot.deckSnapshotId }
+        : { corpDeckSnapshotId: randomSnapshot.deckSnapshotId };
+    }
     if (selection.source === "local") {
       const deck = sideLocalDecks.find(
         (candidate) => candidate.deckId === selection.localDeckId,
@@ -3832,6 +3830,8 @@ export default function Page() {
         participantBCorpDeckSource,
         selectedParticipantBCorpSnapshotId,
         selectedParticipantBCorpLocalDeckId,
+        normalizeMatchSeed(seed),
+        "participant_b",
       );
     } catch (error) {
       setNotice(
@@ -5391,6 +5391,7 @@ export default function Page() {
           zonePercent: cardZoneScalePercent,
           boardPercent: cardBoardScalePercent,
           rigPercent: cardRigScalePercent,
+          specialZonePercent: cardSpecialZoneScalePercent,
         }}
       >
         <CardImagePreferenceContext.Provider
@@ -5794,6 +5795,7 @@ export default function Page() {
                       cardZoneScalePercent={cardZoneScalePercent}
                       cardBoardScalePercent={cardBoardScalePercent}
                       cardRigScalePercent={cardRigScalePercent}
+                      cardSpecialZoneScalePercent={cardSpecialZoneScalePercent}
                       cardDisplayMode={cardDisplayMode}
                       preferGermanCardImages={preferGermanCardImages}
                       showSetBadges={showSetBadges}
@@ -5833,6 +5835,9 @@ export default function Page() {
                       onCardZoneScalePercent={setCardZoneScalePercent}
                       onCardBoardScalePercent={setCardBoardScalePercent}
                       onCardRigScalePercent={setCardRigScalePercent}
+                      onCardSpecialZoneScalePercent={
+                        setCardSpecialZoneScalePercent
+                      }
                       onCardDisplayMode={setCardDisplayMode}
                       onPreferGermanCardImages={setPreferGermanCardImages}
                       onShowSetBadges={setShowSetBadges}
@@ -5863,6 +5868,7 @@ export default function Page() {
         zonePercent: cardZoneScalePercent,
         boardPercent: cardBoardScalePercent,
         rigPercent: cardRigScalePercent,
+        specialZonePercent: cardSpecialZoneScalePercent,
       }}
     >
       <CardImagePreferenceContext.Provider
@@ -6531,6 +6537,7 @@ export default function Page() {
                   cardZoneScalePercent,
                   cardBoardScalePercent,
                   cardRigScalePercent,
+                  cardSpecialZoneScalePercent,
                   cardDisplayMode,
                   preferGermanCardImages,
                   showSetBadges,
@@ -6563,6 +6570,7 @@ export default function Page() {
                   onCardZoneScalePercent: setCardZoneScalePercent,
                   onCardBoardScalePercent: setCardBoardScalePercent,
                   onCardRigScalePercent: setCardRigScalePercent,
+                  onCardSpecialZoneScalePercent: setCardSpecialZoneScalePercent,
                   onCardDisplayMode: setCardDisplayMode,
                   onPreferGermanCardImages: setPreferGermanCardImages,
                   onShowSetBadges: setShowSetBadges,
@@ -6670,6 +6678,7 @@ export default function Page() {
                   cardZoneScalePercent={cardZoneScalePercent}
                   cardBoardScalePercent={cardBoardScalePercent}
                   cardRigScalePercent={cardRigScalePercent}
+                  cardSpecialZoneScalePercent={cardSpecialZoneScalePercent}
                   cardDisplayMode={cardDisplayMode}
                   preferGermanCardImages={preferGermanCardImages}
                   showSetBadges={showSetBadges}
@@ -6705,6 +6714,7 @@ export default function Page() {
                   onCardZoneScalePercent={setCardZoneScalePercent}
                   onCardBoardScalePercent={setCardBoardScalePercent}
                   onCardRigScalePercent={setCardRigScalePercent}
+                  onCardSpecialZoneScalePercent={setCardSpecialZoneScalePercent}
                   onCardDisplayMode={setCardDisplayMode}
                   onPreferGermanCardImages={setPreferGermanCardImages}
                   onShowSetBadges={setShowSetBadges}

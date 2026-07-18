@@ -8,21 +8,28 @@ import {
   type MatchCardPoolSelection,
   type MatchFormatSelection,
   type MatchStartSeriesGames,
-  type PlayMode
+  type PlayMode,
 } from "../../app/match-start";
 import type {
   MatchStartPlayerClockGraceSeconds,
   MatchStartPlayerClockMinutes,
-  MatchStartPlayerClockMode
+  MatchStartPlayerClockMode,
 } from "../../app/match-start-storage";
-import { DeckMetadataLine, DeckSlotSelect } from "../decks/DeckSelectionControls";
+import {
+  DeckMetadataLine,
+  DeckSlotSelect,
+} from "../decks/DeckSelectionControls";
 import { MatchStartAdvancedOptions } from "./MatchStartAdvancedOptions";
 import { MatchStartChoiceSections } from "./MatchStartChoiceSections";
 
 type AiDifficulty = "easy" | "normal" | "hard";
-type AiDeckPolicy = "fixed" | "selected" | "seeded_random" | "same_as_participant_a";
+type AiDeckPolicy =
+  | "fixed"
+  | "selected"
+  | "seeded_random"
+  | "same_as_participant_a";
 type AiTraceStartMode = "off" | "detailed";
-type DeckSlotSource = "snapshot" | "local";
+type DeckSlotSource = "snapshot" | "local" | "random_standard";
 
 type MatchStartDeckSnapshot = {
   deckSnapshotId: string;
@@ -108,7 +115,7 @@ export function MatchHostConsole({
   onSelectedParticipantBRunnerSnapshotId,
   onSelectedParticipantBCorpSnapshotId,
   onSelectedParticipantBRunnerLocalDeckId,
-  onSelectedParticipantBCorpLocalDeckId
+  onSelectedParticipantBCorpLocalDeckId,
 }: {
   playMode: PlayMode;
   matchFormat: MatchFormatSelection;
@@ -151,7 +158,10 @@ export function MatchHostConsole({
   selectedParticipantBRunnerLocalDeckId: string;
   selectedParticipantBCorpLocalDeckId: string;
   aiSlotDisabled: boolean;
-  visibleDeckMetadataEntries: Array<{ label: string; metadata: { deckName: string } | undefined }>;
+  visibleDeckMetadataEntries: Array<{
+    label: string;
+    metadata: { deckName: string } | undefined;
+  }>;
   onPlayMode(mode: PlayMode): void;
   onMatchFormat(format: MatchFormatSelection): void;
   onSeriesGamesPlanned(games: MatchStartSeriesGames): void;
@@ -184,15 +194,23 @@ export function MatchHostConsole({
   onSelectedParticipantBRunnerLocalDeckId(deckId: string): void;
   onSelectedParticipantBCorpLocalDeckId(deckId: string): void;
 }) {
-  const isAiVsAiSeries = gameMode === "ai_vs_ai" && matchFormat === "two_game_side_swap";
+  const isAiVsAiSeries =
+    gameMode === "ai_vs_ai" && matchFormat === "two_game_side_swap";
   return (
     <div className="matchStartConsole">
-      <section className="matchStartIdentity" aria-label={gameMode === "ai_vs_ai" ? "Beobachterprofil" : "Spielerprofil"}>
+      <section
+        className="matchStartIdentity"
+        aria-label={
+          gameMode === "ai_vs_ai" ? "Beobachterprofil" : "Spielerprofil"
+        }
+      >
         <div className="matchStartIdentityIcon" aria-hidden="true">
           <UserRound size={22} />
         </div>
         <label>
-          <span>{gameMode === "ai_vs_ai" ? "Beobachtername" : "Dein Name"}</span>
+          <span>
+            {gameMode === "ai_vs_ai" ? "Beobachtername" : "Dein Name"}
+          </span>
           <input
             value={displayName}
             onChange={(event) => onDisplayName(event.target.value)}
@@ -200,7 +218,11 @@ export function MatchHostConsole({
             autoComplete="nickname"
             maxLength={80}
           />
-          <small>{gameMode === "ai_vs_ai" ? "Kennzeichnet deine lokale Beobachtersitzung." : "Erscheint in Lobby, Spiel und Ergebnis."}</small>
+          <small>
+            {gameMode === "ai_vs_ai"
+              ? "Kennzeichnet deine lokale Beobachtersitzung."
+              : "Erscheint in Lobby, Spiel und Ergebnis."}
+          </small>
         </label>
       </section>
       <MatchStartChoiceSections
@@ -227,7 +249,12 @@ export function MatchHostConsole({
         {gameMode === "ai_vs_ai" ? (
           <label>
             {isAiVsAiSeries ? "KI A · startet als Runner" : "Runner-KI"}
-            <select value={runnerDifficulty} onChange={(event) => onRunnerDifficulty(event.target.value as AiDifficulty)}>
+            <select
+              value={runnerDifficulty}
+              onChange={(event) =>
+                onRunnerDifficulty(event.target.value as AiDifficulty)
+              }
+            >
               <option value="easy">Easy</option>
               <option value="normal">Normal</option>
               <option value="hard">Hard</option>
@@ -237,7 +264,12 @@ export function MatchHostConsole({
         {gameMode === "ai_vs_ai" ? (
           <label>
             {isAiVsAiSeries ? "KI B · startet als Korp" : "Korp-KI"}
-            <select value={corpDifficulty} onChange={(event) => onCorpDifficulty(event.target.value as AiDifficulty)}>
+            <select
+              value={corpDifficulty}
+              onChange={(event) =>
+                onCorpDifficulty(event.target.value as AiDifficulty)
+              }
+            >
               <option value="easy">Easy</option>
               <option value="normal">Normal</option>
               <option value="hard">Hard</option>
@@ -248,7 +280,11 @@ export function MatchHostConsole({
       {gameMode !== "ai_vs_ai" || aiDeckPolicyUsesPrimaryDeckSlots ? (
         <div className="deckSlotGrid">
           <DeckSlotSelect
-            label={gameMode === "ai_vs_ai" ? `${isAiVsAiSeries ? "KI A" : "Runner-KI"} · Runner-Deck` : "Dein Runner-Deck"}
+            label={
+              gameMode === "ai_vs_ai"
+                ? `${isAiVsAiSeries ? "KI A" : "Runner-KI"} · Runner-Deck`
+                : "Dein Runner-Deck"
+            }
             side="runner"
             snapshots={runnerSnapshots}
             localDecks={localDecks.filter((deck) => deck.side === "runner")}
@@ -260,7 +296,11 @@ export function MatchHostConsole({
             onLocalDeck={onSelectedRunnerLocalDeckId}
           />
           <DeckSlotSelect
-            label={gameMode === "ai_vs_ai" ? `${isAiVsAiSeries ? "KI A" : "Korp-KI"} · Korp-Deck` : "Dein Korp-Deck"}
+            label={
+              gameMode === "ai_vs_ai"
+                ? `${isAiVsAiSeries ? "KI A" : "Korp-KI"} · Korp-Deck`
+                : "Dein Korp-Deck"
+            }
             side="corp"
             snapshots={corpSnapshots}
             localDecks={localDecks.filter((deck) => deck.side === "corp")}
@@ -272,7 +312,9 @@ export function MatchHostConsole({
             onLocalDeck={onSelectedCorpLocalDeckId}
           />
           {isHumanVsHuman && !testSetupMode ? (
-            <p className="deckHandshakeHint">Teilnehmer B wählt eigene Decks beim Beitritt.</p>
+            <p className="deckHandshakeHint">
+              Teilnehmer B wählt eigene Decks beim Beitritt.
+            </p>
           ) : null}
         </div>
       ) : null}
@@ -281,9 +323,17 @@ export function MatchHostConsole({
           <span key={item}>{item}</span>
         ))}
       </div>
-      <button className="button primary wide" onClick={onCreateMatch} data-testid="create-match">
+      <button
+        className="button primary wide"
+        onClick={onCreateMatch}
+        data-testid="create-match"
+      >
         {gameMode === "ai_vs_ai" ? <Bot size={16} /> : <UserPlus size={16} />}
-        {gameMode === "ai_vs_ai" ? "Simulation beobachten" : isHumanVsHuman ? "Lobby erstellen" : "Match erstellen"}
+        {gameMode === "ai_vs_ai"
+          ? "Simulation beobachten"
+          : isHumanVsHuman
+            ? "Lobby erstellen"
+            : "Match erstellen"}
       </button>
       <MatchStartAdvancedOptions
         isHumanVsHuman={isHumanVsHuman}
@@ -310,10 +360,16 @@ export function MatchHostConsole({
         localDecks={localDecks}
         participantBRunnerDeckSource={participantBRunnerDeckSource}
         participantBCorpDeckSource={participantBCorpDeckSource}
-        selectedParticipantBRunnerSnapshotId={selectedParticipantBRunnerSnapshotId}
+        selectedParticipantBRunnerSnapshotId={
+          selectedParticipantBRunnerSnapshotId
+        }
         selectedParticipantBCorpSnapshotId={selectedParticipantBCorpSnapshotId}
-        selectedParticipantBRunnerLocalDeckId={selectedParticipantBRunnerLocalDeckId}
-        selectedParticipantBCorpLocalDeckId={selectedParticipantBCorpLocalDeckId}
+        selectedParticipantBRunnerLocalDeckId={
+          selectedParticipantBRunnerLocalDeckId
+        }
+        selectedParticipantBCorpLocalDeckId={
+          selectedParticipantBCorpLocalDeckId
+        }
         aiSlotDisabled={aiSlotDisabled}
         onCountdownSeconds={onCountdownSeconds}
         onDiscoverableInLan={onDiscoverableInLan}
@@ -328,10 +384,18 @@ export function MatchHostConsole({
         onAiDeckPolicy={onAiDeckPolicy}
         onParticipantBRunnerDeckSource={onParticipantBRunnerDeckSource}
         onParticipantBCorpDeckSource={onParticipantBCorpDeckSource}
-        onSelectedParticipantBRunnerSnapshotId={onSelectedParticipantBRunnerSnapshotId}
-        onSelectedParticipantBCorpSnapshotId={onSelectedParticipantBCorpSnapshotId}
-        onSelectedParticipantBRunnerLocalDeckId={onSelectedParticipantBRunnerLocalDeckId}
-        onSelectedParticipantBCorpLocalDeckId={onSelectedParticipantBCorpLocalDeckId}
+        onSelectedParticipantBRunnerSnapshotId={
+          onSelectedParticipantBRunnerSnapshotId
+        }
+        onSelectedParticipantBCorpSnapshotId={
+          onSelectedParticipantBCorpSnapshotId
+        }
+        onSelectedParticipantBRunnerLocalDeckId={
+          onSelectedParticipantBRunnerLocalDeckId
+        }
+        onSelectedParticipantBCorpLocalDeckId={
+          onSelectedParticipantBCorpLocalDeckId
+        }
       />
       <DeckMetadataLine entries={visibleDeckMetadataEntries} />
     </div>
@@ -341,14 +405,19 @@ export function MatchHostConsole({
 function SideSelectionField({
   label,
   value,
-  onChange
+  onChange,
 }: {
   label: string;
   value: HumanSideSelection;
   onChange(selection: HumanSideSelection): void;
 }) {
   const Icon = value === "runner" ? Zap : value === "corp" ? Building2 : Dices;
-  const detail = value === "runner" ? "Du beginnst als Runner." : value === "corp" ? "Du beginnst als Korp." : "Die erste Seite wird beim Start ausgelost.";
+  const detail =
+    value === "runner"
+      ? "Du beginnst als Runner."
+      : value === "corp"
+        ? "Du beginnst als Korp."
+        : "Die erste Seite wird beim Start ausgelost.";
   return (
     <label className={`sideSelectionField side-${value}`}>
       <span>{label}</span>
@@ -356,7 +425,13 @@ function SideSelectionField({
         <span className="sideSelectionIcon" aria-hidden="true">
           <Icon size={19} />
         </span>
-        <select value={value} onChange={(event) => onChange(event.target.value as HumanSideSelection)} aria-label={label}>
+        <select
+          value={value}
+          onChange={(event) =>
+            onChange(event.target.value as HumanSideSelection)
+          }
+          aria-label={label}
+        >
           <option value="random">◆ Zufällig auslosen</option>
           <option value="runner">↗ Runner</option>
           <option value="corp">▣ Korp</option>

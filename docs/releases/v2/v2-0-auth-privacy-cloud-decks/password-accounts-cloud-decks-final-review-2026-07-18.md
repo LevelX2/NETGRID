@@ -124,3 +124,26 @@ Verifiziert wurde der reale Browserstart als Runner mit
 „Rent-I-Con: Das Shellspiel“ gegen „Cheap Bag of Tricks“ im kombinierten
 Classic-/Protheus-Pool bis zum erstellten Match (`HTTP 201`). Ergänzend sind
 Server-Resolver-, Client-Fallback- und Typprüfungen grün.
+
+## Erweiterung: Zufällige Standard-Decks je Matchslot
+
+Jeder Runner- und Korp-Deckslot am Matchstart bietet nun zusätzlich
+„Zufälliges Standard-Deck“ an. Das gilt sowohl für die eigenen Slots als auch
+für die explizit gewählten KI-Slots in den erweiterten Optionen. Die Auswahl
+wird lokal gespeichert, bleibt bis zum Start als Zufallswunsch sichtbar und
+wird erst beim Erstellen des Matches auf einen konkreten kuratierten
+Standard-Snapshot aufgelöst.
+
+Die Auflösung ist über Matchseed und Slotkennung deterministisch. Die
+Kandidaten werden zuvor nach Seite, Deckvalidierung und aktivem Kartenpool
+gefiltert und unabhängig von der API-Reihenfolge stabil sortiert. Der Server
+erhält weiterhin ausschließlich konkrete unveränderliche Snapshot-IDs; Replay,
+StateHash und autoritative Deckvalidierung bleiben dadurch unverändert. Nach
+dem erfolgreichen Start zeigt die Statusmeldung die tatsächlich verwendeten
+Decknamen aus den öffentlichen Servermetadaten.
+
+Ein realer Browserlauf setzte die beiden eigenen sowie beide KI-Slots auf
+„Zufälliges Standard-Deck“. Der Start endete mit `HTTP 201`, übertrug vier
+konkrete Standard-Snapshot-IDs und zeigte anschließend „Bit-Denial Lock“ gegen
+„Rent to Own War Engine“ als tatsächlich aktive Decks. Der Testmatch wurde
+danach regulär aufgegeben. Persistenz-, Resolver- und Typprüfungen sind grün.

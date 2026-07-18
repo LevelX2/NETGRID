@@ -32,6 +32,7 @@ export type CardScaleSettings = {
   zonePercent: number;
   boardPercent: number;
   rigPercent: number;
+  specialZonePercent: number;
 };
 
 export function normalizeCueAutoDismissMs(value: unknown): CueAutoDismissMs {
