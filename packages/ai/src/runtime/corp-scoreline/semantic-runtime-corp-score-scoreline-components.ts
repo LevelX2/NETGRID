@@ -542,6 +542,11 @@ export function corpActiveRemoteAgendaAdvanceClockComponent<
     runnerCannotContestBeforeScore &&
     scoringWindow?.recommendedNextStep === "build_remote_ice" &&
     boardTriageState.primary === "fund_score_remote";
+  const leavesUnsafeRemoteWithUnfundedIce =
+    !closesBeforeRunner &&
+    scoringWindow?.windowKind === "unsafe" &&
+    creditsAfterAction <= 0 &&
+    state.unrezzedRemoteRezCost > 0;
   const tempoAdvanceUnderClock =
     corpActiveRemoteAgendaCanTempoAdvanceUnderClock(
       input,
@@ -553,11 +558,13 @@ export function corpActiveRemoteAgendaAdvanceClockComponent<
     );
   if (
     !closesBeforeRunner &&
-    scoringWindowNeedsFunding &&
-    creditsAfterAction < state.reserveFloor &&
+    (leavesUnsafeRemoteWithUnfundedIce ||
+      (scoringWindowNeedsFunding &&
+        creditsAfterAction < state.reserveFloor)) &&
     (!scoringWindowRecommendsUncontestedAdvance ||
       punishPrimaryUncontestedAdvanceRequiresReserve) &&
-    !protectedRemoteAdvanceCanIgnoreFullRezReserve &&
+    (!protectedRemoteAdvanceCanIgnoreFullRezReserve ||
+      leavesUnsafeRemoteWithUnfundedIce) &&
     !tempoAdvanceUnderClock.allowed
   ) {
     return {
@@ -573,6 +580,9 @@ export function corpActiveRemoteAgendaAdvanceClockComponent<
         `reserve_floor:${state.reserveFloor}`,
         `advances_remaining:${state.advancesRemaining}`,
         `unrezzed_remote_rez_cost:${state.unrezzedRemoteRezCost}`,
+        ...(leavesUnsafeRemoteWithUnfundedIce
+          ? ["unsafe_remote_unrezzed_ice_left_unfunded:true"]
+          : []),
         ...(punishPrimaryUncontestedAdvanceRequiresReserve
           ? ["punish_primary_uncontested_advance_requires_reserve:true"]
           : []),
