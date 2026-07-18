@@ -1,6 +1,6 @@
 # Runner-Survival-Progress-Contract-Prozess
 
-Status: P4 abgeschlossen; P5 aktiv
+Status: P5 verifiziert; Integration und Cleanup ausstehend
 
 ## Quelle/Vorgabe
 
@@ -267,7 +267,7 @@ Commit: `fix(ai): detect stalled runner survival loops`
 
 ### P5: Benchmark, Review, Integration und Cleanup
 
-Status: aktiv
+Status: Verifikation abgeschlossen; Integration und Cleanup ausstehend
 
 Ziel: Zielregressionen und breite Gates verifizieren, den aktuellen
 AI-Behavior-Benchmark commit-rein ausführen, Ergebnis dokumentieren, aktuelles
@@ -291,6 +291,21 @@ Benchmark-Hard-Gates, `git diff --check`, Status- und Cleanup-Prüfungen.
 Done-Gate: Die bestätigte Survival-Credit-Schleife ist beseitigt, echte
 Survival-Gegenfälle bleiben grün, Main enthält alle Paketcommits, Hauptworkspace
 ist sauber und Worktree sowie Arbeitsbranch sind nachweislich entfernt.
+
+Verifikationsergebnis vor Integration: Der isolierte C-09-Lauf endet nach 421
+statt 480 Aktionen regulär per Flatline. Im vollständigen commit-reinen
+6-x-10-Panel sinken die Survival-Credits in Net-Damage-08/-09 und
+Hybrid-04/-07 von 45/30/17/74 jeweils auf null; die 13/13/6/9 echten
+Survival-Draws bleiben unverändert. Drei AI-Testshards mit insgesamt 392
+Dateien und 2.773 Tests, die vier ausgelagerten Zielregressionen, der
+AI-Typecheck, Format und Diff-Check sind grün. Replay-, Redaction-, Runtime-,
+Fallback-, Timeout-, IllegalAction- und Hidden-Info-Gates bleiben null/grün.
+Der Standardbenchmark enthält nur noch zwei bereits vorher identische,
+unabhängige Action-Limits in Net-Damage-07 und Hybrid-05; beide enthalten
+keine Survival-Credits. `check:ai` erreicht ausschließlich vier auf aktuellem
+`main` reproduzierbare Source-Structure-Pfade und keinen zusätzlichen Pfad aus
+diesem Paket. Führender Review ist
+`docs/reviews/ai/ai-behavior-baseline-v1-runner-survival-progress-2026-07-18.md`.
 
 Commit: `docs(ai): close runner survival progress remediation`
 
