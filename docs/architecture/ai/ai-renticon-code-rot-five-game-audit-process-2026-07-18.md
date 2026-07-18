@@ -165,3 +165,18 @@ Nutzerfreigabe Produktionsverhalten zu ändern.
 - Den sauberen Worktree entfernen, Entfernung doppelt verifizieren und den
   vollständig gemergten Arbeitsbranch löschen.
 - Done-Gate: `main` grün und sauber; Worktree und Branch entfernt.
+
+## Remediation-Zyklus 1
+
+### Rotes Gate
+
+- Acht `captured_selfplay`-KI-Checkpoints reproduzieren die drei
+  Fehlergruppen ausschließlich als `behavior_regression`.
+- Zwei weitere `captured_selfplay`-Zustände reproduzieren den
+  `PendingChoice.stateVersion`-Invariant der Seeds 001 und 005 beim
+  tatsächlichen `applyAction`.
+- Der vollständige Selfplay-Alternativtrace reproduziert den Redaction-Fehler.
+- Drei enge Gegenproben sind bereits grün: finanzierte äußere ICE-Schicht,
+  contestbare Scoreline und Lage unterhalb des Runner-Matchpoints.
+- Keine Fixture-, Runtime-, LegalAction- oder Redaction-Drift in den
+  versionierten Checkpoint-Oberflächen.
