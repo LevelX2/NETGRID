@@ -414,7 +414,7 @@
       "signalId": "access.hq_hidden_multiaccess",
       "source": "effects",
       "match": {
-        "kind": "access_replacement",
+        "kind": "multiaccess",
         "target": "access.hq_hidden_multiaccess"
       },
       "gates": {
@@ -546,7 +546,7 @@
       "signalId": "access.hq_sabotage_credit_loss",
       "source": "effects",
       "match": {
-        "kind": "access_replacement",
+        "kind": "counter_economy",
         "target": "access.hq_sabotage_credit_loss"
       },
       "gates": {
@@ -767,7 +767,7 @@
       "signalId": "access.rnd_hidden_multiaccess",
       "source": "effects",
       "match": {
-        "kind": "access_replacement",
+        "kind": "multiaccess",
         "target": "access.rnd_hidden_multiaccess"
       },
       "gates": {
@@ -2702,7 +2702,7 @@
       "signalId": "corp.bad_publicity_win_pressure",
       "source": "effects",
       "match": {
-        "kind": "run_tax",
+        "kind": "global_modifier",
         "target": "bad_publicity_win_pressure"
       },
       "gates": {
@@ -2754,24 +2754,12 @@
           "runner"
         ],
         "cardType": [
-          "program"
+          "program",
+          "resource"
         ],
         "effectScope": [
           "corp"
         ]
-      },
-      "strategyAnchorFor": []
-    },
-    {
-      "signalId": "corp.economy_pressure",
-      "source": "effects",
-      "match": {
-        "kind": "tag_punish_payoff",
-        "target": "corp.economy_pressure"
-      },
-      "gates": {
-        "side": "runner",
-        "cardType": "resource"
       },
       "strategyAnchorFor": []
     },
@@ -2827,24 +2815,12 @@
           "runner"
         ],
         "cardType": [
-          "program"
+          "program",
+          "resource"
         ],
         "target": [
           "random_discard"
         ]
-      },
-      "strategyAnchorFor": []
-    },
-    {
-      "signalId": "corp.random_discard_pressure",
-      "source": "effects",
-      "match": {
-        "kind": "tag_punish_payoff",
-        "target": "corp.random_discard_pressure"
-      },
-      "gates": {
-        "side": "runner",
-        "cardType": "resource"
       },
       "strategyAnchorFor": []
     },

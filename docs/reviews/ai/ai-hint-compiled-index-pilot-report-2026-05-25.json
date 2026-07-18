@@ -15,9 +15,9 @@
   "overlayCardCount": 6,
   "cardsWithoutOverlay": 187,
   "hardErrorCount": 0,
-  "warningCount": 734,
+  "warningCount": 736,
   "warningCountsByKind": {
-    "active_monolith_mechanical_duplication": 281,
+    "active_monolith_mechanical_duplication": 283,
     "generated_fact_missing_from_active_monolith": 317,
     "manual_overlay_strategy_field_missing_from_active": 8,
     "overlay_missing_for_manual_gap": 128
@@ -25,7 +25,7 @@
   "warningClassificationCounts": {
     "generated_fact_absent_from_monolith": 317,
     "manual_review_candidate": 128,
-    "monolith_mechanical_duplication_candidate": 281,
+    "monolith_mechanical_duplication_candidate": 283,
     "overlay_strategy_field_not_in_monolith": 8
   },
   "warningClassificationByCard": [
@@ -276,7 +276,7 @@
       "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
         "generated_fact_absent_from_monolith": 3,
-        "monolith_mechanical_duplication_candidate": 2,
+        "monolith_mechanical_duplication_candidate": 3,
         "overlay_strategy_field_not_in_monolith": 1
       },
       "info": ["overlay_present"]
@@ -412,7 +412,7 @@
       "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
         "generated_fact_absent_from_monolith": 3,
-        "monolith_mechanical_duplication_candidate": 2,
+        "monolith_mechanical_duplication_candidate": 3,
         "overlay_strategy_field_not_in_monolith": 1
       },
       "info": ["overlay_present"]
@@ -2454,7 +2454,11 @@
       "migrationReadiness": "needs_review",
       "generatedFields": ["conditions", "effects", "targetProfiles"],
       "generatedOnlyFields": ["effects", "conditions", "targetProfiles"],
-      "duplicatedActiveMechanicalFields": ["conditions", "effects"]
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects",
+        "targetProfiles"
+      ]
     },
     {
       "cardId": "onr_v1_045_newsgroup-filter",
@@ -2562,7 +2566,11 @@
       "migrationReadiness": "needs_review",
       "generatedFields": ["conditions", "effects", "targetProfiles"],
       "generatedOnlyFields": ["effects", "conditions", "targetProfiles"],
-      "duplicatedActiveMechanicalFields": ["conditions", "effects"]
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects",
+        "targetProfiles"
+      ]
     },
     {
       "cardId": "onr_v1_060_shaka",
@@ -9581,7 +9589,6 @@
         "cardType": "program",
         "roles": [
           "breaker_decoder",
-          "code_gate_breaker",
           "efficient_breaker",
           "icebreaker",
           "program"
@@ -10108,6 +10115,7 @@
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
         "lineSupport",
+        "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
@@ -11095,7 +11103,11 @@
       ],
       "generatedFields": ["conditions", "effects", "targetProfiles"],
       "strategyFieldsFromOverlay": ["lineSupport", "quality", "manualNotes"],
-      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects",
+        "targetProfiles"
+      ],
       "activeMonolithOnlyFields": [
         "costProfile",
         "requiredMechanics",
@@ -11123,6 +11135,14 @@
           "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
           "cardId": "onr_v1_043_mystery-box",
           "field": "effects"
+        },
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field targetProfiles; long-term source should be generated facts.",
+          "cardId": "onr_v1_043_mystery-box",
+          "field": "targetProfiles"
         },
         {
           "classification": "generated_fact_absent_from_monolith",
@@ -11253,13 +11273,7 @@
         "cardId": "onr_v1_047_pile-driver",
         "side": "runner",
         "cardType": "program",
-        "roles": [
-          "breaker_fracter",
-          "icebreaker",
-          "program",
-          "stealth_loss",
-          "wall_breaker"
-        ],
+        "roles": ["breaker_fracter", "icebreaker", "program", "stealth_loss"],
         "planRoles": ["break_walls", "build_rig", "run_support"],
         "aiSupportStatus": "ai_supported",
         "effects": [
@@ -11292,6 +11306,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "targetProfiles",
         "valueHints"
       ],
       "generatedOnlyFields": ["breakerProfile"],
@@ -11422,7 +11437,7 @@
           "access_replacement",
           "hidden_zone_tool",
           "program",
-          "rd_run"
+          "rd_pressure"
         ],
         "planRoles": ["information", "pressure_rnd"],
         "aiSupportStatus": "ai_supported",
@@ -11611,7 +11626,6 @@
         "cardType": "program",
         "roles": [
           "breaker_decoder",
-          "code_gate_breaker",
           "efficient_breaker",
           "high_install_cost",
           "icebreaker",
@@ -11699,8 +11713,7 @@
           "breaker_killer",
           "icebreaker",
           "low_install_breaker",
-          "program",
-          "sentry_breaker"
+          "program"
         ],
         "planRoles": ["build_rig", "safe_probe_run"],
         "aiSupportStatus": "ai_supported",
@@ -12131,7 +12144,11 @@
       ],
       "generatedFields": ["conditions", "effects", "targetProfiles"],
       "strategyFieldsFromOverlay": ["lineSupport", "quality", "manualNotes"],
-      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects",
+        "targetProfiles"
+      ],
       "activeMonolithOnlyFields": [
         "costProfile",
         "requiredMechanics",
@@ -12159,6 +12176,14 @@
           "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
           "cardId": "onr_v1_059_self-modifying-code",
           "field": "effects"
+        },
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field targetProfiles; long-term source should be generated facts.",
+          "cardId": "onr_v1_059_self-modifying-code",
+          "field": "targetProfiles"
         },
         {
           "classification": "generated_fact_absent_from_monolith",
@@ -12215,8 +12240,7 @@
           "breaker_killer",
           "efficient_sentry_breaker",
           "icebreaker",
-          "program",
-          "sentry_breaker"
+          "program"
         ],
         "planRoles": ["build_rig", "safe_probe_run"],
         "aiSupportStatus": "ai_supported",
@@ -13200,10 +13224,10 @@
           "access_replacement",
           "economy",
           "event",
-          "hq_run",
+          "hq_pressure",
           "tag_self"
         ],
-        "planRoles": ["contest_remote", "pressure_hq"],
+        "planRoles": ["pressure_hq"],
         "aiSupportStatus": "ai_supported",
         "effects": [
           {
@@ -14200,7 +14224,7 @@
         "cardId": "onr_v1_116_total-genetic-retrofit",
         "side": "runner",
         "cardType": "event",
-        "roles": ["event", "tag_remove"],
+        "roles": ["event", "tag_removal"],
         "planRoles": ["clear_tags"],
         "aiSupportStatus": "ai_supported",
         "effects": [
@@ -14829,6 +14853,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "targetProfiles",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -15580,6 +15605,7 @@
         "strategicRole",
         "strategySupportPairs",
         "tacticSignals",
+        "targetProfiles",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -16068,6 +16094,7 @@
         "strategicRole",
         "strategySupportPairs",
         "tacticSignals",
+        "targetProfiles",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -16399,6 +16426,7 @@
         "strategicRole",
         "strategySupportPairs",
         "tacticSignals",
+        "targetProfiles",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -16817,6 +16845,7 @@
         "strategicRole",
         "strategySupportPairs",
         "tacticSignals",
+        "targetProfiles",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -16900,6 +16929,7 @@
         "strategicRole",
         "strategySupportPairs",
         "tacticSignals",
+        "targetProfiles",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -17098,6 +17128,7 @@
         "strategicRole",
         "strategySupportPairs",
         "tacticSignals",
+        "targetProfiles",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -17817,6 +17848,7 @@
         "strategicRole",
         "strategySupportPairs",
         "tacticSignals",
+        "targetProfiles",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -18031,6 +18063,7 @@
         "strategicRole",
         "strategySupportPairs",
         "tacticSignals",
+        "targetProfiles",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -18153,6 +18186,7 @@
         "strategicRole",
         "strategySupportPairs",
         "tacticSignals",
+        "targetProfiles",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -18552,8 +18586,8 @@
         "cardId": "onr_v1_221_asp",
         "side": "corp",
         "cardType": "ice",
-        "roles": ["ice", "tag", "trace"],
-        "planRoles": ["defend_server", "tag_pressure"],
+        "roles": ["ice", "trace"],
+        "planRoles": ["defend_server"],
         "aiSupportStatus": "ai_supported",
         "effects": [
           {
@@ -20266,8 +20300,8 @@
         "cardId": "onr_v1_241_fang-2-0",
         "side": "corp",
         "cardType": "ice",
-        "roles": ["ice", "tag", "trace"],
-        "planRoles": ["defend_server", "tag_pressure"],
+        "roles": ["ice", "trace"],
+        "planRoles": ["defend_server"],
         "aiSupportStatus": "ai_supported",
         "effects": [
           {
@@ -20643,7 +20677,7 @@
         "cardId": "onr_v1_246_fragmentation-storm",
         "side": "corp",
         "cardType": "ice",
-        "roles": ["ice", "net_damage", "program_trash", "trace"],
+        "roles": ["ice", "program_trash", "trace"],
         "planRoles": ["defend_server", "program_pressure"],
         "aiSupportStatus": "ai_supported",
         "effects": [
@@ -21190,7 +21224,7 @@
         "side": "corp",
         "cardType": "ice",
         "roles": ["core_damage", "end_run", "ice", "trace"],
-        "planRoles": ["defend_server", "tag_pressure"],
+        "planRoles": ["defend_server"],
         "aiSupportStatus": "ai_supported",
         "effects": [
           {
@@ -22860,6 +22894,7 @@
         "strategicRole",
         "strategySupportPairs",
         "tacticSignals",
+        "targetProfiles",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -23038,6 +23073,7 @@
         "strategicRole",
         "strategySupportPairs",
         "tacticSignals",
+        "targetProfiles",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -23271,6 +23307,7 @@
         "strategicRole",
         "strategySupportPairs",
         "tacticSignals",
+        "targetProfiles",
         "valueHints"
       ],
       "generatedOnlyFields": [
@@ -23706,6 +23743,7 @@
         "strategicRole",
         "strategySupportPairs",
         "tacticSignals",
+        "targetProfiles",
         "valueHints"
       ],
       "generatedOnlyFields": [
@@ -23859,6 +23897,7 @@
         "strategicRole",
         "strategySupportPairs",
         "tacticSignals",
+        "targetProfiles",
         "valueHints"
       ],
       "generatedOnlyFields": [
@@ -24682,6 +24721,7 @@
         "strategicRole",
         "strategySupportPairs",
         "tacticSignals",
+        "targetProfiles",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "costProfile"],
@@ -25197,6 +25237,7 @@
         "strategicRole",
         "strategySupportPairs",
         "tacticSignals",
+        "targetProfiles",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -25308,6 +25349,7 @@
         "strategicRole",
         "strategySupportPairs",
         "tacticSignals",
+        "targetProfiles",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -25727,6 +25769,7 @@
         "strategicRole",
         "strategySupportPairs",
         "tacticSignals",
+        "targetProfiles",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -29223,7 +29266,7 @@
         "cardId": "onr_v1_364_omni-kismet-ph-d",
         "side": "corp",
         "cardType": "upgrade",
-        "roles": ["economy", "tag", "upgrade"],
+        "roles": ["upgrade"],
         "planRoles": ["remote_upgrade_tax"],
         "aiSupportStatus": "ai_supported",
         "effects": [
@@ -30490,6 +30533,14 @@
       "field": "effects"
     },
     {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field targetProfiles; long-term source should be generated facts.",
+      "cardId": "onr_v1_043_mystery-box",
+      "field": "targetProfiles"
+    },
+    {
       "classification": "generated_fact_absent_from_monolith",
       "blocking": false,
       "kind": "generated_fact_missing_from_active_monolith",
@@ -30789,6 +30840,14 @@
       "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
       "cardId": "onr_v1_059_self-modifying-code",
       "field": "effects"
+    },
+    {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field targetProfiles; long-term source should be generated facts.",
+      "cardId": "onr_v1_059_self-modifying-code",
+      "field": "targetProfiles"
     },
     {
       "classification": "generated_fact_absent_from_monolith",

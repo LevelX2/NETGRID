@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "ai-hint-metadata-contract-v1",
+  "valueHints": {
+    "runtimeKeys": [
+      "damage",
+      "economy",
+      "installCreditGain",
+      "leavePlayPayCost",
+      "remoteRootValue",
+      "startOfTurnCreditLoss"
+    ],
+    "remoteRootKey": "remoteRootValue",
+    "policy": "valueHints are runtime inputs only through a named key consumer; untyped purpose, priority and quality numbers are redundant with structured roles/effects and are forbidden"
+  },
+  "strategySupportPairs": {
+    "defaultMode": "evidence_only",
+    "runtimeConsumers": [
+      {
+        "id": "corp_opening_strategy",
+        "source": "packages/ai/src/deck-opening-hand.ts",
+        "policy": "fast-advance pairs plus tag/damage enabler and payoff pairs influence opening-line executability"
+      },
+      {
+        "id": "corp_upgrade_placement",
+        "source": "packages/ai/src/runtime/corp-upgrade-placement.ts",
+        "policy": "pairs on Corp upgrades are visible semantic placement inputs"
+      }
+    ],
+    "policy": "all other assignments are review and doctrine evidence only; they do not create action scores or planner anchors"
+  },
+  "requiredMechanics": {
+    "defaultMode": "evidence_only",
+    "runtimeKeys": ["memory"],
+    "runtimeConsumer": "packages/ai/src/deck-doctrine-strategy.ts",
+    "policy": "requiredMechanics documents implementation and gate requirements; only explicitly listed runtime keys may influence AI decisions"
+  },
+  "scenarioRefs": {
+    "mode": "evidence_only",
+    "policy": "scenarioRefs link review and readiness evidence and never influence runtime decisions"
+  }
+}

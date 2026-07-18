@@ -128,7 +128,7 @@
   "hardErrorCount": 0,
   "hardErrors": [],
   "hardConflicts": [],
-  "warningCount": 994,
+  "warningCount": 995,
   "warnings": [
     {
       "kind": "text_pattern_derivation",
@@ -284,6 +284,11 @@
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_022_emergency-self-construct"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence medium.",
+      "cardId": "onr_v1_023_evil-twin"
     },
     {
       "kind": "descriptor_or_overlay_gap",
@@ -632,7 +637,7 @@
     },
     {
       "kind": "confidence_mismatch",
-      "message": "Generated confidence high differs from manual confidence low.",
+      "message": "Generated confidence high differs from manual confidence medium.",
       "cardId": "onr_v1_055_reflector"
     },
     {
@@ -5188,7 +5193,7 @@
           "strategyCovered": false,
           "benchmarkCovered": false,
           "confidence": "medium",
-          "needsHumanReview": true
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -5645,7 +5650,7 @@
           "strategyCovered": false,
           "benchmarkCovered": true,
           "confidence": "medium",
-          "needsHumanReview": true
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -5934,7 +5939,6 @@
         "cardType": "program",
         "roles": [
           "breaker_decoder",
-          "code_gate_breaker",
           "efficient_breaker",
           "icebreaker",
           "program"
@@ -6573,7 +6577,14 @@
         "conditions": [],
         "lineSupport": [
           "runner.survival_defense"
-        ]
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "medium",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -6608,6 +6619,10 @@
       ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -7991,8 +8006,7 @@
           "breaker_fracter",
           "icebreaker",
           "program",
-          "stealth_loss",
-          "wall_breaker"
+          "stealth_loss"
         ],
         "planRoles": [
           "break_walls",
@@ -8206,7 +8220,7 @@
           "access_replacement",
           "hidden_zone_tool",
           "program",
-          "rd_run"
+          "rd_pressure"
         ],
         "planRoles": [
           "information",
@@ -8430,7 +8444,6 @@
         "cardType": "program",
         "roles": [
           "breaker_decoder",
-          "code_gate_breaker",
           "efficient_breaker",
           "high_install_cost",
           "icebreaker",
@@ -8535,8 +8548,7 @@
           "breaker_killer",
           "icebreaker",
           "low_install_breaker",
-          "program",
-          "sentry_breaker"
+          "program"
         ],
         "planRoles": [
           "build_rig",
@@ -8672,8 +8684,8 @@
           "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -8690,7 +8702,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "text_pattern_derivation",
@@ -9144,8 +9156,7 @@
           "breaker_killer",
           "efficient_sentry_breaker",
           "icebreaker",
-          "program",
-          "sentry_breaker"
+          "program"
         ],
         "planRoles": [
           "build_rig",
@@ -9775,7 +9786,7 @@
           "strategyCovered": false,
           "benchmarkCovered": true,
           "confidence": "medium",
-          "needsHumanReview": true
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -10364,11 +10375,10 @@
           "access_replacement",
           "economy",
           "event",
-          "hq_run",
+          "hq_pressure",
           "tag_self"
         ],
         "planRoles": [
-          "contest_remote",
           "pressure_hq"
         ],
         "effects": [
@@ -11607,7 +11617,7 @@
         "cardType": "event",
         "roles": [
           "event",
-          "tag_remove"
+          "tag_removal"
         ],
         "planRoles": [
           "clear_tags"
@@ -16987,12 +16997,10 @@
         "cardType": "ice",
         "roles": [
           "ice",
-          "tag",
           "trace"
         ],
         "planRoles": [
-          "defend_server",
-          "tag_pressure"
+          "defend_server"
         ],
         "effects": [],
         "conditions": [],
@@ -19045,12 +19053,10 @@
         "cardType": "ice",
         "roles": [
           "ice",
-          "tag",
           "trace"
         ],
         "planRoles": [
-          "defend_server",
-          "tag_pressure"
+          "defend_server"
         ],
         "effects": [],
         "conditions": [],
@@ -19499,7 +19505,6 @@
         "cardType": "ice",
         "roles": [
           "ice",
-          "net_damage",
           "program_trash",
           "trace"
         ],
@@ -20196,8 +20201,7 @@
           "trace"
         ],
         "planRoles": [
-          "defend_server",
-          "tag_pressure"
+          "defend_server"
         ],
         "effects": [],
         "conditions": [],
@@ -29012,8 +29016,6 @@
         "side": "corp",
         "cardType": "upgrade",
         "roles": [
-          "economy",
-          "tag",
           "upgrade"
         ],
         "planRoles": [

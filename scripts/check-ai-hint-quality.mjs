@@ -11,6 +11,7 @@ const DEFAULT_INVENTORY_PATH =
   "docs/reviews/ai/ai-hint-consumer-contract-inventory-2026-05-25.json";
 const DEFAULT_REPORT_PATH =
   "docs/reviews/ai/ai-hint-quality-gate-report-2026-05-25.json";
+const ROLE_CONTRACT_PATH = "data/ai/ai-hint-role-contract-v1.json";
 
 const CONSUMED_ROLE_EXPECTATIONS = [
   "agenda",
@@ -58,18 +59,6 @@ const DENYLIST_BY_CARD = {
   ],
 };
 
-const SYNONYM_GROUPS = [
-  ["rd_pressure", "pressure_rnd"],
-  ["rd_run", "pressure_rnd"],
-  ["hq_run", "pressure_hq"],
-  ["hq_pressure", "pressure_hq"],
-  ["wall_breaker", "breaker_fracter"],
-  ["barrier_breaker", "breaker_fracter"],
-  ["code_gate_breaker", "breaker_decoder"],
-  ["sentry_breaker", "breaker_killer"],
-  ["tag_remove", "tag_removal", "clear_tags", "remove_tags"],
-];
-
 const DIRECT_CLASSIFICATIONS = new Set([
   "direct_decision_effect",
   "direct_or_doctrine_effect",
@@ -90,6 +79,7 @@ export function analyzeAiHintQuality(options = {}) {
 
   const hintsData = readJson(hintsPath);
   const inventory = readJson(inventoryPath);
+  const roleContract = readJson(resolvePath(repoRoot, ROLE_CONTRACT_PATH));
   const hints = hintsData.cards ?? [];
   const hintByCard = new Map(hints.map((hint) => [hint.cardId, hint]));
   const activeRoleContract = new Set(
@@ -103,6 +93,20 @@ export function analyzeAiHintQuality(options = {}) {
       entry.value,
       entry.classification,
     ]),
+  );
+  const roleCounts = countValues(hints, "roles");
+  const planRoleCounts = countValues(hints, "planRoles");
+  const roleInventoryByValue = new Map(
+    inventory.roles.map((entry) => [entry.value, entry]),
+  );
+  const planRoleInventoryByValue = new Map(
+    inventory.planRoles.map((entry) => [entry.value, entry]),
+  );
+  const reviewedSingletonRoles = new Set(
+    roleContract.reviewedSingletonRoles ?? [],
+  );
+  const reviewedSingletonPlanRoles = new Set(
+    roleContract.reviewedSingletonPlanRoles ?? [],
   );
 
   const errors = [];
@@ -154,29 +158,38 @@ export function analyzeAiHintQuality(options = {}) {
       !CODE_ONLY_EXPECTATIONS.includes(role),
   );
 
-  const suspiciousSingletonRoles = inventory.roles
-    .filter(
-      (entry) =>
-        entry.count === 1 &&
-        entry.codeExactReference !== true &&
-        entry.codeSubstringReference !== true,
-    )
-    .map((entry) => entry.value);
-  const suspiciousSingletonPlanRoles = inventory.planRoles
-    .filter(
-      (entry) =>
-        entry.count === 1 &&
-        entry.codeExactReference !== true &&
-        entry.codeSubstringReference !== true,
-    )
-    .map((entry) => entry.value);
-  const synonymWarnings = SYNONYM_GROUPS.map((group) => {
-    const present = group.filter(
-      (role) =>
-        activeRoleContract.has(role) || activePlanRoleContract.has(role),
-    );
-    return present.length > 1 ? { group, present } : undefined;
-  }).filter(Boolean);
+  const suspiciousSingletonRoles = singletonWarnings(
+    roleCounts,
+    roleInventoryByValue,
+    reviewedSingletonRoles,
+  );
+  const suspiciousSingletonPlanRoles = singletonWarnings(
+    planRoleCounts,
+    planRoleInventoryByValue,
+    reviewedSingletonPlanRoles,
+  );
+  const synonymWarnings = [
+    ...deprecatedAliasesPresent(roleCounts, roleContract.roleAliases ?? {}),
+    ...deprecatedAliasesPresent(
+      planRoleCounts,
+      roleContract.planRoleAliases ?? {},
+    ),
+  ];
+  const staleReviewedSingletons = [
+    ...staleReviewedSingletonValues(roleCounts, reviewedSingletonRoles).map(
+      (value) => ({ field: "roles", value }),
+    ),
+    ...staleReviewedSingletonValues(
+      planRoleCounts,
+      reviewedSingletonPlanRoles,
+    ).map((value) => ({ field: "planRoles", value })),
+  ];
+  if (staleReviewedSingletons.length > 0) {
+    errors.push({
+      kind: "stale_reviewed_singleton_contract",
+      items: staleReviewedSingletons,
+    });
+  }
 
   const benchmarkCoverage = collectBenchmarkCoverage(
     repoRoot,
@@ -219,7 +232,7 @@ export function analyzeAiHintQuality(options = {}) {
       items: suspiciousSingletonPlanRoles,
     });
   if (synonymWarnings.length > 0)
-    warnings.push({ kind: "role_synonym_candidates", items: synonymWarnings });
+    warnings.push({ kind: "deprecated_role_aliases", items: synonymWarnings });
   if (benchmarkCoverage.riskCards.length > 0)
     warnings.push({
       kind: "benchmark_deck_cards_with_quality_risk",
@@ -248,6 +261,40 @@ export function analyzeAiHintQuality(options = {}) {
     },
     benchmarkCoverage,
   };
+}
+
+function countValues(hints, field) {
+  const counts = new Map();
+  for (const hint of hints) {
+    for (const value of hint[field] ?? []) {
+      counts.set(value, (counts.get(value) ?? 0) + 1);
+    }
+  }
+  return counts;
+}
+
+function singletonWarnings(counts, inventoryByValue, reviewed) {
+  return [...counts.entries()]
+    .filter(([value, count]) => {
+      if (count !== 1 || reviewed.has(value)) return false;
+      const inventoryEntry = inventoryByValue.get(value);
+      return (
+        inventoryEntry?.codeExactReference !== true &&
+        inventoryEntry?.codeSubstringReference !== true
+      );
+    })
+    .map(([value]) => value)
+    .sort();
+}
+
+function deprecatedAliasesPresent(counts, aliases) {
+  return Object.entries(aliases)
+    .filter(([alias]) => (counts.get(alias) ?? 0) > 0)
+    .map(([alias, canonical]) => ({ alias, canonical }));
+}
+
+function staleReviewedSingletonValues(counts, reviewed) {
+  return [...reviewed].filter((value) => counts.get(value) !== 1).sort();
 }
 
 function itemCount(entry) {

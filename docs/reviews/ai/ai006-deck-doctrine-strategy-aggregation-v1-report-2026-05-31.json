@@ -3604,7 +3604,6 @@
         "lineSupport:runner.hq_pressure": 3,
         "lineSupport:runner.interface_closeout": 2,
         "planRole:build_rig": 12,
-        "planRole:contest_remote": 1,
         "planRole:draw_for_answers": 4,
         "planRole:pressure_hq": 3,
         "planRole:recover_economy": 4,
@@ -3634,9 +3633,7 @@
         "role:tag_self": 1,
         "role:tempo": 2
       },
-      "warnings": [
-        "inspector:function_signal_descriptor_gap"
-      ],
+      "warnings": [],
       "runnerProfile": {
         "coverageProfile": {
           "wall": {
@@ -5082,10 +5079,8 @@
         "risk.requires_tagged_runner": 2,
         "score.conditional_bonus_agenda_points": 1,
         "score.economy_burst": 3,
-        "score.high_agenda_value": 1,
         "score.overadvance_bonus": 1,
         "score.overadvance_scaling": 1,
-        "score.vanilla_points": 1,
         "tag.payoff": 2,
         "tax.runner_credit": 1,
         "tempo.corp_action_burst": 2
@@ -6873,8 +6868,6 @@
         "ice.strength_modifier": 1,
         "risk.requires_tagged_runner": 4,
         "score.economy_burst": 3,
-        "score.high_agenda_value": 1,
-        "score.vanilla_points": 1,
         "tag.payoff": 4,
         "tag.source": 4,
         "tax.runner_credit": 2,
@@ -6993,9 +6986,8 @@
     },
     "warningCounts": {
       "inspector:deferred_requires_human_review": 2,
-      "inspector:function_signal_descriptor_gap": 1,
       "inspector:legacy_fallback_only": 2
     },
-    "contentSha256": "998cd704a1734af5ad509a37c2f27c99e876b4199ed9c4c0d86ee8a2c630627b"
+    "contentSha256": "fca63b657b82107a8473e5a1f20c776b40c013e7f9ee8e6cc29318043ec1b586"
   }
 }

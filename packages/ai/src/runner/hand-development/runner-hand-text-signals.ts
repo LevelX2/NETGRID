@@ -47,7 +47,6 @@ export function runnerHandTextHasTemporaryCounterSignal(text: string): boolean {
     "stored",
   ]);
 }
-
 export function runnerHandTextHasBreakerStrengthSupportSignal(
   text: string,
 ): boolean {
@@ -58,7 +57,6 @@ export function runnerHandTextHasBreakerStrengthSupportSignal(
     !runnerHandTokensIncludeInOrder(tokens, "break", "subroutine")
   );
 }
-
 export function runnerHandTextHasIceStrengthReductionSignal(
   text: string,
 ): boolean {
@@ -163,6 +161,8 @@ export function runnerHandTextHasDefenseSignal(text: string): boolean {
     runnerHandTokensIncludePhrase(tokens, ["damage", "prevention"]) ||
     runnerHandTokensIncludePhrase(tokens, ["net", "damage"]) ||
     runnerHandTokensIncludePhrase(tokens, ["meat", "damage"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["program", "trash", "prevention"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["program", "backup"]) ||
     runnerHandTokensIncludeInOrder(tokens, "remove", "tag") ||
     runnerHandTokensIncludePhrase(tokens, ["hand", "size"])
   );

@@ -13,7 +13,65 @@
     ],
     "prefixConvention": "The first segment is semantic domain unless a signal has a side prefix. sideScope is the acting/owning card side. corp.* on runner-side signals denotes the affected Corp state/zone, not Corp as the acting side.",
     "broadSignalPolicy": "Generic aggregation and legacy signals such as economy.generic, economy.recurring, setup.search, setup.recovery, setup.draw, defense.damage_prevention and run.make_run are broad_support/not_for_direct_scoring unless a precise signal or reviewed strategy evidence also exists.",
-    "supportOnlyAnchorPolicy": "supportOnly=true signals cannot cause strategy anchors; reports must distinguish card-level strategy anchors observed from signalMayAnchorStrategy."
+    "supportOnlyAnchorPolicy": "supportOnly=true signals cannot cause strategy anchors; reports must distinguish card-level strategy anchors observed from signalMayAnchorStrategy.",
+    "readOnlySemanticsSignalIds": [
+      "access.rnd_topdeck_setup",
+      "breaker.break_any_subroutine",
+      "breaker.configurable_coverage",
+      "breaker.emergency_coverage",
+      "breaker.emergency_search",
+      "breaker.hosted_strength_penalty",
+      "breaker.multi_subroutine_break",
+      "breaker.one_time_mode_choice",
+      "breaker.reconfigurable_type",
+      "breaker.scaling_strength",
+      "breaker.search_during_encounter",
+      "breaker.strength_bonus_vs_chosen_ice",
+      "breaker.targeted_ice_bonus",
+      "corp.archives_to_rnd_pressure",
+      "defense.encounter_threat_mitigation",
+      "encounter.emergency_subroutine_prevention",
+      "run.archives_replacement_access",
+      "setup.install_support",
+      "setup.program_backup",
+      "setup.program_host",
+      "setup.program_trash_replacement",
+      "setup.stored_program_reclaim"
+    ],
+    "targetProfileRequiredSignalIds": [
+      "access.corp_hardware_trash",
+      "access.corp_program_disruption",
+      "access.corp_program_trash",
+      "access.corp_runner_program_bounce",
+      "action.corp_install_only_action_bundle",
+      "archives.corp_recovery",
+      "breaker.multi_subroutine_break",
+      "fort.creation_lock",
+      "ice.corp_free_rez",
+      "ice.corp_subroutine_repeat",
+      "info.expose",
+      "install.corp_action_bundle",
+      "install.corp_new_remote_fort_from_hq",
+      "install.corp_uninstall_to_hq",
+      "rnd.corp_topdeck_reorder",
+      "rnd.corp_topdeck_setup",
+      "score.advance_burst",
+      "score.chosen_ice_strength_bonus",
+      "score.fort_ice_strength_bonus",
+      "score.free_install_and_rez_ice",
+      "score.free_rez_ice",
+      "score.hq_agenda_reveal",
+      "score.hq_agenda_shuffle",
+      "score.remote_fort_creation",
+      "score.repeat_ice_subroutines",
+      "setup.hardware_install",
+      "setup.install_credit",
+      "setup.install_discount",
+      "setup.program_install",
+      "setup.program_install_credit",
+      "setup.search",
+      "setup.stack_filter"
+    ]
   },
   "signals": [
     {
@@ -1762,23 +1820,6 @@
       ],
       "targetProfileRelevant": true,
       "notes": "The chosen ICE preference belongs in TargetProfile."
-    },
-    {
-      "signalId": "breaker.subroutine_prevention",
-      "group": "breaker_emergency",
-      "sideScope": "runner",
-      "description": "Prevents selected legal subroutines from resolving during an encounter.",
-      "supportOnly": true,
-      "mayAnchorStrategy": false,
-      "allowedStrategyAnchors": [],
-      "sourceKinds": [
-        "reviewed emergency breaker semantics"
-      ],
-      "examples": [
-        "Dropp"
-      ],
-      "targetProfileRelevant": true,
-      "notes": "Support-only encounter mitigation; it is not a generic run or access enabler."
     },
     {
       "signalId": "breaker.subtype.bloodhound",
@@ -5329,24 +5370,6 @@
       ],
       "targetProfileRelevant": false,
       "notes": "Does not imply Runner run-event tempo."
-    },
-    {
-      "signalId": "ice.recovery",
-      "group": "classic_corp_operation_zone_setup",
-      "sideScope": "corp",
-      "description": "Corp operation recovers ICE from Archives to HQ for rebuilt central or remote defense.",
-      "supportOnly": true,
-      "mayAnchorStrategy": false,
-      "allowedStrategyAnchors": [],
-      "sourceKinds": [
-        "effects.kind=card_recovery target=archives.corp_recovery",
-        "effects.kind=search target=ice_recovery"
-      ],
-      "examples": [
-        "Reclamation Project"
-      ],
-      "targetProfileRelevant": true,
-      "notes": "Classic read-only AI hint signal; it records ICE-specific Archives recovery without creating planner, engine, legality, targeting, action-score or plan-weight behavior."
     },
     {
       "signalId": "ice.reorder_fort",

@@ -114,15 +114,11 @@ describe("AI hint quality gates", () => {
     }
   });
 
-  it("keeps suspicious singleton roles as warnings instead of hard failures", () => {
+  it("accepts reviewed singletons and rejects deprecated aliases", () => {
     const result = runQualityGate();
     expect(result.status).toBe("ok");
     const report = JSON.parse(result.output);
-    expect(
-      report.warnings.some(
-        (entry: { kind?: string }) =>
-          entry.kind === "suspicious_singleton_roles",
-      ),
-    ).toBe(true);
+    expect(report.warningCount).toBe(0);
+    expect(report.warnings).toEqual([]);
   });
 });

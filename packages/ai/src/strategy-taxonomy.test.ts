@@ -260,12 +260,11 @@ describe("AI003 strategy goal taxonomy", () => {
 
     expect(report.hardErrorCount).toBe(0);
     expect(tacticSignalCatalogData.schemaVersion).toBe("ai-tactic-signals-v1");
-    expect(report.taxonomy.tacticSignalCatalogCount).toBe(673);
+    expect(report.taxonomy.tacticSignalCatalogCount).toBe(671);
     expect(new Set(signalIds).size).toBe(signalIds.length);
     expect(dormantTacticSignalIds).toEqual(
       expect.arrayContaining([
         "breaker.break_any_subroutine",
-        "breaker.subroutine_prevention",
         "defense.encounter_threat_mitigation",
         "encounter.emergency_subroutine_prevention",
         "tag.snowball_followup",
@@ -759,7 +758,7 @@ describe("AI003 strategy goal taxonomy", () => {
       ...report.ai004Triage.planRoles,
     ].filter((entry) => entry.triageSource === "ai004_explicit");
 
-    expect(explicitTriage).toHaveLength(49);
+    expect(explicitTriage).toHaveLength(48);
     expect(
       report.warnings.some(
         (warning) => warning.kind === "unknown_role_or_planRole_values_warn_only",
