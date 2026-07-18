@@ -273,14 +273,14 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
     expect(profile.strategyScores["corp.remote_scoring"]?.anchorScore).toBe(0);
   });
 
-  it("counts legacy roles and planRoles without using them alone as StrategyAnchor", () => {
+  it("does not invent legacy strategy evidence for a generic run event", () => {
     const profile = buildDeckStrategyProfile({
       deckSnapshotId: "ai006-runner-legacy-only-diagnostic",
       side: "runner",
       cards: [{ cardId: "simple_run_event", quantity: 3 }],
     });
 
-    expect(profile.legacySignalCounts["planRole:pressure_rnd"]).toBe(3);
+    expect(profile.legacySignalCounts["planRole:pressure_rnd"]).toBeUndefined();
     expect(profile.strategyScores["runner.rnd_pressure"]?.anchorScore).toBe(0);
     expect(
       profile.strategyScores["runner.rnd_pressure"]?.anchorEvidence,

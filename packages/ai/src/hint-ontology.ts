@@ -294,6 +294,7 @@ export const KNOWN_HINT_TARGET_PROFILE_TIMINGS = [
   "subroutine_resolution",
   "on_use",
   "after_successful_run",
+  "on_score",
   "hq_access",
   "rnd_access",
   "prevention_window",

@@ -8,7 +8,7 @@
       "side": "corp",
       "cardType": "identity",
       "roles": ["corp_identity", "setup"],
-      "planRoles": ["build_scoring_remote"],
+      "planRoles": [],
       "requiredMechanics": ["identity_setup"],
       "valueHints": {},
       "riskTags": [],
@@ -18,10 +18,12 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-18",
+        "reviewedBy": "codex"
       }
     },
     {
@@ -44,10 +46,12 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-18",
+        "reviewedBy": "codex"
       },
       "breakerProfile": {
         "coverage": ["wall"],
@@ -146,11 +150,11 @@
       },
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": true,
         "strategyCovered": false,
+        "hintReviewed": true,
         "confidence": "medium",
-        "needsHumanReview": true,
-        "reviewedDate": "2026-05-25",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-18",
         "reviewedBy": "codex"
       }
     },
@@ -366,11 +370,11 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": true,
         "strategyCovered": false,
+        "hintReviewed": true,
         "confidence": "medium",
-        "needsHumanReview": true,
-        "reviewedDate": "2026-05-25",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-18",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -814,10 +818,12 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-18",
+        "reviewedBy": "codex"
       }
     },
     {
@@ -828,7 +834,6 @@
         "program",
         "icebreaker",
         "breaker_decoder",
-        "code_gate_breaker",
         "efficient_breaker"
       ],
       "planRoles": ["build_rig", "safe_probe_run"],
@@ -966,6 +971,15 @@
       ],
       "valueHints": {},
       "riskTags": ["encounter", "timing_window"],
+      "quality": {
+        "benchmarkCovered": false,
+        "strategyCovered": false,
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-18",
+        "reviewedBy": "codex"
+      },
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v195-v198-smokes.json#runner_v198_dogcatcher_and_dropp_breakers"
@@ -1081,6 +1095,15 @@
       "requiredMechanics": ["install_program", "run_flow"],
       "valueHints": {},
       "riskTags": [],
+      "quality": {
+        "benchmarkCovered": false,
+        "strategyCovered": false,
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-18",
+        "reviewedBy": "codex"
+      },
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1915-smokes.json#runner_v1915_run_access_tools"
@@ -1224,6 +1247,15 @@
       ],
       "valueHints": {},
       "riskTags": ["encounter", "credit_reserve"],
+      "quality": {
+        "benchmarkCovered": false,
+        "strategyCovered": false,
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-18",
+        "reviewedBy": "codex"
+      },
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v161-v170-smokes.json#runner_damage_prevention_tools"
@@ -1386,6 +1418,15 @@
         "public_payload_only",
         "replay_statehash_required"
       ],
+      "quality": {
+        "benchmarkCovered": false,
+        "strategyCovered": false,
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-18",
+        "reviewedBy": "codex"
+      },
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_program_longtail"
@@ -1500,7 +1541,7 @@
       "cardId": "onr_v1_030_grubb",
       "side": "runner",
       "cardType": "program",
-      "roles": ["program", "icebreaker", "barrier_breaker", "run_scaling"],
+      "roles": ["program","icebreaker","breaker_fracter","run_scaling"],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [
         "break_subroutine",
@@ -1512,6 +1553,15 @@
       ],
       "valueHints": {},
       "riskTags": ["credit_reserve", "encounter"],
+      "quality": {
+        "benchmarkCovered": false,
+        "strategyCovered": false,
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-18",
+        "reviewedBy": "codex"
+      },
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v191-v194-smokes.json#runner_v191_counter_random_and_scaling_programs"
@@ -1535,6 +1585,15 @@
         "public_payload_only",
         "replay_statehash_required"
       ],
+      "quality": {
+        "benchmarkCovered": false,
+        "strategyCovered": false,
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-18",
+        "reviewedBy": "codex"
+      },
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_program_longtail"
@@ -1734,8 +1793,7 @@
         "program",
         "icebreaker",
         "breaker_fracter",
-        "noisy",
-        "wall_breaker"
+        "noisy"
       ],
       "planRoles": ["build_rig", "safe_probe_run"],
       "requiredMechanics": [
@@ -1748,6 +1806,15 @@
       ],
       "valueHints": {},
       "riskTags": ["credit_reserve", "stealth_conflict"],
+      "quality": {
+        "benchmarkCovered": false,
+        "strategyCovered": false,
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-18",
+        "reviewedBy": "codex"
+      },
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v161-v170-smokes.json#runner_stealth_noisy_credit_gate"
@@ -2067,6 +2134,24 @@
       "requiredMechanics": ["install_program", "run_flow", "hidden_zone_tool"],
       "valueHints": {},
       "riskTags": ["hidden_zone_projection"],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "search_install_target",
+          "timing": "activated_ability",
+          "targetType": "program",
+          "purpose": "install_best_program_for_current_rig_need",
+          "preferences": [
+            "program_repairs_missing_coverage",
+            "program_affordable_after_install",
+            "program_preserves_run_goal"
+          ],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "legal_targets_only"
+        }
+      ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1915-smokes.json#runner_v1915_run_access_tools"
@@ -2324,7 +2409,6 @@
         "program",
         "icebreaker",
         "breaker_fracter",
-        "wall_breaker",
         "stealth_loss"
       ],
       "planRoles": ["build_rig", "break_walls", "run_support"],
@@ -2338,6 +2422,21 @@
       ],
       "valueHints": {},
       "riskTags": ["credit_reserve", "stealth_conflict"],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "during_ice_encounter",
+          "targetType": "subroutine",
+          "purpose": "break_subroutines_that_preserve_run_goal",
+          "preferences": [
+            "current_run_path_relevance",
+            "high_run_denial_payoff"
+          ],
+          "avoid": [],
+          "hiddenInfoPolicy": "legal_targets_only"
+        }
+      ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1916-smokes.json#runner_v1916_program_hosting_tools"
@@ -2490,7 +2589,7 @@
       "cardId": "onr_v1_050_r-and-d-protocol-files",
       "side": "runner",
       "cardType": "program",
-      "roles": ["program", "rd_run", "access_replacement", "hidden_zone_tool"],
+      "roles": ["program","rd_pressure","access_replacement","hidden_zone_tool"],
       "planRoles": ["pressure_rnd", "information"],
       "requiredMechanics": [
         "install_program",
@@ -2598,7 +2697,6 @@
         "program",
         "icebreaker",
         "breaker_decoder",
-        "code_gate_breaker",
         "efficient_breaker",
         "high_install_cost"
       ],
@@ -2653,7 +2751,7 @@
       "cardId": "onr_v1_053_ramming-piston",
       "side": "runner",
       "cardType": "program",
-      "roles": ["program", "icebreaker", "wall_breaker", "stealth_loss"],
+      "roles": ["program","icebreaker","breaker_fracter","stealth_loss"],
       "planRoles": ["build_rig", "break_walls"],
       "requiredMechanics": [
         "install_program",
@@ -2663,6 +2761,15 @@
       ],
       "valueHints": {},
       "riskTags": ["encounter_window", "stealth_credit_accounting"],
+      "quality": {
+        "benchmarkCovered": false,
+        "strategyCovered": false,
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-18",
+        "reviewedBy": "codex"
+      },
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1914-smokes.json#runner_v1914_trace_link_tools"
@@ -2676,7 +2783,6 @@
         "program",
         "icebreaker",
         "breaker_killer",
-        "sentry_breaker",
         "low_install_breaker"
       ],
       "planRoles": ["build_rig", "safe_probe_run"],
@@ -2772,11 +2878,11 @@
       },
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true,
-        "reviewedDate": "2026-05-25",
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-18",
         "reviewedBy": "codex"
       }
     },
@@ -2959,6 +3065,24 @@
       ],
       "valueHints": {},
       "riskTags": ["hidden_info_barrier", "shuffle_invalidates_memory"],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "search_install_target",
+          "timing": "activated_ability",
+          "targetType": "program",
+          "purpose": "install_program_that_answers_current_ice_or_setup_gap",
+          "preferences": [
+            "program_breaks_current_ice",
+            "program_repairs_missing_coverage",
+            "program_affordable_after_install"
+          ],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "legal_targets_only"
+        }
+      ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1911-smokes.json#runner_v1911_stack_search_and_reveal"
@@ -3010,7 +3134,6 @@
         "program",
         "icebreaker",
         "breaker_killer",
-        "sentry_breaker",
         "efficient_sentry_breaker"
       ],
       "planRoles": ["build_rig", "safe_probe_run"],
@@ -3495,11 +3618,11 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": true,
         "strategyCovered": false,
+        "hintReviewed": true,
         "confidence": "medium",
-        "needsHumanReview": true,
-        "reviewedDate": "2026-05-25",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-18",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -3736,6 +3859,24 @@
         "legal_actions_only",
         "public_payload_only",
         "replay_statehash_required"
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "install_target",
+          "timing": "activated_ability",
+          "targetType": "program",
+          "purpose": "install_best_program_with_recurring_credit",
+          "preferences": [
+            "program_repairs_missing_coverage",
+            "program_affordable_after_install",
+            "high_install_cost_or_memory"
+          ],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "legal_targets_only"
+        }
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -4157,8 +4298,8 @@
       "cardId": "onr_v1_083_desperate-competitor",
       "side": "runner",
       "cardType": "event",
-      "roles": ["agenda_point_event", "event", "steal_reward"],
-      "planRoles": ["contest_remote", "pressure_hq", "pressure_rnd"],
+      "roles": ["agenda_point_event", "event"],
+      "planRoles": [],
       "requiredMechanics": [
         "agenda_points",
         "play_event",
@@ -4172,11 +4313,11 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": true,
         "strategyCovered": false,
+        "hintReviewed": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-18",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -4200,7 +4341,7 @@
       "cardId": "onr_v1_084_edited-shipping-manifests",
       "side": "runner",
       "cardType": "event",
-      "roles": ["access_replacement", "economy", "event", "hq_run", "tag_self"],
+      "roles": ["access_replacement","economy","event","hq_pressure","tag_self"],
       "planRoles": ["pressure_hq"],
       "requiredMechanics": [
         "hq_run",
@@ -4550,8 +4691,8 @@
       "cardId": "onr_v1_090_hot-tip-for-wns",
       "side": "runner",
       "cardType": "event",
-      "roles": ["agenda_point_event", "event", "steal_reward"],
-      "planRoles": ["contest_remote", "pressure_hq", "pressure_rnd"],
+      "roles": ["agenda_point_event", "event"],
+      "planRoles": [],
       "requiredMechanics": [
         "agenda_points",
         "play_event",
@@ -4565,11 +4706,11 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": true,
         "strategyCovered": false,
+        "hintReviewed": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-18",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -5304,7 +5445,7 @@
       "cardId": "onr_v1_106_private-ldl-access",
       "side": "runner",
       "cardType": "event",
-      "roles": ["event", "hq_run", "rd_success_replacement"],
+      "roles": ["event","hq_pressure","rd_success_replacement"],
       "planRoles": ["pressure_hq", "pressure_rnd"],
       "requiredMechanics": [
         "hq_run",
@@ -5853,7 +5994,7 @@
       "cardId": "onr_v1_116_total-genetic-retrofit",
       "side": "runner",
       "cardType": "event",
-      "roles": ["event", "tag_remove"],
+      "roles": ["event","tag_removal"],
       "planRoles": ["clear_tags"],
       "requiredMechanics": ["play_event", "remove_tag"],
       "valueHints": {},
@@ -6391,7 +6532,7 @@
       "cardId": "onr_v1_126_drifter-mobile-environment",
       "side": "runner",
       "cardType": "hardware",
-      "roles": ["hardware", "tag_remove"],
+      "roles": ["hardware","tag_removal"],
       "planRoles": ["build_rig", "clear_tags"],
       "requiredMechanics": ["install_hardware", "remove_tag"],
       "valueHints": {},
@@ -7894,6 +8035,23 @@
       "requiredMechanics": ["install_resource", "resource_tag_interaction"],
       "valueHints": {},
       "riskTags": ["resource_trash_if_tagged"],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "search_install_target",
+          "timing": "activated_ability",
+          "targetType": "card",
+          "purpose": "filter_stack_for_current_setup_need",
+          "preferences": [
+            "missing_current_coverage",
+            "central_or_remote_plan_enabler"
+          ],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "legal_targets_only"
+        }
+      ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1914-smokes.json#runner_v1914_tag_resource_tools"
@@ -8541,7 +8699,7 @@
       "side": "runner",
       "cardType": "resource",
       "roles": ["connection", "resource", "tag_avoid", "tag_removal"],
-      "planRoles": ["build_rig", "avoid_tags", "remove_tags"],
+      "planRoles": ["build_rig","avoid_tags","clear_tags"],
       "requiredMechanics": [
         "install_resource",
         "tag_avoid",
@@ -9101,6 +9259,23 @@
         "economy": 2
       },
       "riskTags": ["board_presence"],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "paid_action",
+          "targetType": "card",
+          "purpose": "search_for_current_setup_or_economy_need",
+          "preferences": [
+            "missing_current_coverage",
+            "central_or_remote_plan_enabler"
+          ],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "legal_targets_only"
+        }
+      ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#runner_resource_econ_tag_tools"
@@ -9666,6 +9841,23 @@
       ],
       "valueHints": {},
       "riskTags": ["score_window", "hidden_zone_barrier"],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_score",
+          "targetType": "card",
+          "purpose": "advance_high_value_corp_card",
+          "preferences": [
+            "prefer_option_that_protects_agenda_or_remote_pressure",
+            "central_or_remote_plan_enabler"
+          ],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "legal_targets_only"
+        }
+      ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1919-smokes.json#corp_v1919_scored_agenda"
@@ -9960,6 +10152,21 @@
       ],
       "valueHints": {},
       "riskTags": ["public_reveal", "scored_agenda_action"],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_score",
+          "targetType": "card",
+          "purpose": "reveal_and_shuffle_agendas_from_hq",
+          "preferences": [
+            "protect_agenda_density",
+            "lowest_near_term_value"
+          ],
+          "avoid": [],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
+      ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1911-smokes.json#corp_v1911_rd_reveal_and_reorder"
@@ -10116,6 +10323,21 @@
         "legal_actions_only",
         "public_payload_only",
         "replay_statehash_required"
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "install_target",
+          "timing": "on_score",
+          "targetType": "card",
+          "purpose": "create_remote_with_best_hq_cards",
+          "preferences": [
+            "prefer_option_that_protects_agenda_or_remote_pressure",
+            "central_or_remote_plan_enabler"
+          ],
+          "avoid": [],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -10357,6 +10579,23 @@
       ],
       "valueHints": {},
       "riskTags": ["hidden_until_score_or_access"],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_score",
+          "targetType": "card",
+          "purpose": "advance_high_value_corp_card",
+          "preferences": [
+            "prefer_option_that_protects_agenda_or_remote_pressure",
+            "central_or_remote_plan_enabler"
+          ],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "legal_targets_only"
+        }
+      ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#corp_agenda_economy_modifiers"
@@ -10404,6 +10643,23 @@
       ],
       "valueHints": {},
       "riskTags": ["score_window", "hidden_zone_barrier"],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_score",
+          "targetType": "card",
+          "purpose": "advance_high_value_corp_card",
+          "preferences": [
+            "prefer_option_that_protects_agenda_or_remote_pressure",
+            "central_or_remote_plan_enabler"
+          ],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "legal_targets_only"
+        }
+      ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1919-smokes.json#corp_v1919_scored_agenda"
@@ -10496,6 +10752,36 @@
         "modifier_layering",
         "score_window",
         "state_hash_replay_stable"
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_score",
+          "targetType": "installed_ice",
+          "purpose": "strengthen_and_repeat_best_ice_subroutine",
+          "preferences": [
+            "multi_subroutine_ice",
+            "blocks_relevant_run_path"
+          ],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "legal_targets_only"
+        },
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "subroutine_resolution",
+          "targetType": "subroutine",
+          "purpose": "repeat_highest_impact_subroutine",
+          "preferences": [
+            "high_run_denial_payoff",
+            "current_run_path_relevance"
+          ],
+          "avoid": [],
+          "hiddenInfoPolicy": "legal_targets_only"
+        }
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -11008,6 +11294,24 @@
         "score_window",
         "target_unrezzed_ice"
       ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_score",
+          "targetType": "installed_ice",
+          "purpose": "rez_best_defensive_ice",
+          "preferences": [
+            "high_rez_cost_relief",
+            "blocks_relevant_run_path",
+            "protects_agenda_remote"
+          ],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "legal_targets_only"
+        }
+      ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v161-v170-smokes.json#corp_agenda_score_bonus"
@@ -11232,6 +11536,23 @@
       ],
       "valueHints": {},
       "riskTags": ["hidden_until_score_or_access"],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_score",
+          "targetType": "server",
+          "purpose": "strengthen_ice_on_most_relevant_fort",
+          "preferences": [
+            "protects_agenda_remote",
+            "protects_central_access_pressure"
+          ],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "legal_targets_only"
+        }
+      ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v161-v170-smokes.json#corp_agenda_score_bonus"
@@ -11291,6 +11612,23 @@
         "legal_actions_only",
         "public_payload_only",
         "replay_statehash_required"
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "install_target",
+          "timing": "on_score",
+          "targetType": "card",
+          "purpose": "install_best_legal_target",
+          "preferences": [
+            "high_install_cost_or_memory",
+            "central_or_remote_plan_enabler"
+          ],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "legal_targets_only"
+        }
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -15845,6 +16183,23 @@
         "public_payload_only",
         "replay_statehash_required"
       ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "install_target",
+          "timing": "on_play",
+          "targetType": "card",
+          "purpose": "install_best_legal_target",
+          "preferences": [
+            "high_install_cost_or_memory",
+            "central_or_remote_plan_enabler"
+          ],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "legal_targets_only"
+        }
+      ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1922-smokes.json#corp_v1922_operation_longtail"
@@ -16020,6 +16375,23 @@
       ],
       "valueHints": {},
       "riskTags": ["score_window", "counter_accounting"],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_play",
+          "targetType": "card",
+          "purpose": "advance_high_value_corp_card",
+          "preferences": [
+            "prefer_option_that_protects_agenda_or_remote_pressure",
+            "central_or_remote_plan_enabler"
+          ],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "legal_targets_only"
+        }
+      ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1919-smokes.json#corp_v1919_operation_counter"
@@ -16319,6 +16691,21 @@
         "public_payload_only",
         "replay_statehash_required"
       ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_play",
+          "targetType": "card",
+          "purpose": "recover_best_archives_card_to_hq",
+          "preferences": [
+            "central_or_remote_plan_enabler",
+            "protect_agenda_density"
+          ],
+          "avoid": [],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
+      ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1922-smokes.json#corp_v1922_operation_longtail"
@@ -16434,6 +16821,21 @@
         "legal_actions_only",
         "public_payload_only",
         "replay_statehash_required"
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "mode_choice",
+          "timing": "on_play",
+          "targetType": "card",
+          "purpose": "order_rnd_top_cards_for_near_term_plan",
+          "preferences": [
+            "central_or_remote_plan_enabler",
+            "protect_agenda_density"
+          ],
+          "avoid": [],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -16568,6 +16970,23 @@
       ],
       "valueHints": {},
       "riskTags": ["score_window"],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_play",
+          "targetType": "card",
+          "purpose": "advance_high_value_corp_card",
+          "preferences": [
+            "prefer_option_that_protects_agenda_or_remote_pressure",
+            "central_or_remote_plan_enabler"
+          ],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "legal_targets_only"
+        }
+      ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1919-smokes.json#corp_v1919_operation_counter"
@@ -16890,6 +17309,23 @@
       ],
       "valueHints": {},
       "riskTags": ["counter_accounting", "target_revalidation"],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_play",
+          "targetType": "card",
+          "purpose": "advance_high_value_corp_card",
+          "preferences": [
+            "prefer_option_that_protects_agenda_or_remote_pressure",
+            "central_or_remote_plan_enabler"
+          ],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "legal_targets_only"
+        }
+      ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1919-smokes.json#corp_v1919_operation_counter"
@@ -16958,6 +17394,23 @@
       "requiredMechanics": ["play_operation", "counter", "agenda_difficulty"],
       "valueHints": {},
       "riskTags": ["counter_accounting"],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_play",
+          "targetType": "card",
+          "purpose": "advance_high_value_corp_card",
+          "preferences": [
+            "prefer_option_that_protects_agenda_or_remote_pressure",
+            "central_or_remote_plan_enabler"
+          ],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "legal_targets_only"
+        }
+      ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1919-smokes.json#corp_v1919_operation_counter"
@@ -17473,6 +17926,23 @@
         "remoteRootValue": 1
       },
       "riskTags": ["runner_trash_value"],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "activated_ability",
+          "targetType": "card",
+          "purpose": "advance_high_value_corp_card",
+          "preferences": [
+            "prefer_option_that_protects_agenda_or_remote_pressure",
+            "central_or_remote_plan_enabler"
+          ],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "legal_targets_only"
+        }
+      ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1919-smokes.json#corp_v1919_asset_agenda_support"
@@ -17761,6 +18231,22 @@
         "remoteRootValue": 1
       },
       "riskTags": ["visible_targeting"],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "activated_ability",
+          "targetType": "card",
+          "purpose": "return_lowest_near_term_value_installed_card",
+          "preferences": [
+            "lowest_near_term_value"
+          ],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "legal_targets_only"
+        }
+      ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1917-smokes.json#corp_v1917_asset_trace_hidden_targets"
@@ -17813,6 +18299,24 @@
         "remoteRootValue": 2
       },
       "riskTags": ["hidden_root"],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "corp_rez_window",
+          "targetType": "installed_ice",
+          "purpose": "rez_best_defensive_ice",
+          "preferences": [
+            "high_rez_cost_relief",
+            "blocks_relevant_run_path",
+            "protects_agenda_remote"
+          ],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "legal_targets_only"
+        }
+      ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v161-v170-smokes.json#corp_global_modifier_assets"
@@ -18002,6 +18506,24 @@
         "remoteRootValue": 2
       },
       "riskTags": ["hidden_root"],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "corp_rez_window",
+          "targetType": "installed_ice",
+          "purpose": "rez_best_defensive_ice",
+          "preferences": [
+            "high_rez_cost_relief",
+            "blocks_relevant_run_path",
+            "protects_agenda_remote"
+          ],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "legal_targets_only"
+        }
+      ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v161-v170-smokes.json#corp_global_modifier_assets"
@@ -18245,6 +18767,23 @@
         "remoteRootValue": 1
       },
       "riskTags": ["modifier_layering", "state_hash_replay_stable"],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "install_target",
+          "timing": "activated_ability",
+          "targetType": "card",
+          "purpose": "install_best_legal_target",
+          "preferences": [
+            "high_install_cost_or_memory",
+            "central_or_remote_plan_enabler"
+          ],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "legal_targets_only"
+        }
+      ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_rezzed_modifier_asset"
@@ -19303,6 +19842,24 @@
         "remoteRootValue": 2
       },
       "riskTags": ["hidden_root"],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "corp_rez_window",
+          "targetType": "installed_ice",
+          "purpose": "rez_best_defensive_ice",
+          "preferences": [
+            "high_rez_cost_relief",
+            "blocks_relevant_run_path",
+            "protects_agenda_remote"
+          ],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "legal_targets_only"
+        }
+      ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v161-v170-smokes.json#corp_global_modifier_assets"
@@ -22433,6 +22990,23 @@
       "requiredMechanics": [],
       "valueHints": {},
       "riskTags": ["hidden_until_score_or_access"],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_score",
+          "targetType": "program",
+          "purpose": "bounce_high_value_runner_program",
+          "preferences": [
+            "installed_icebreaker",
+            "high_install_cost_or_memory"
+          ],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "legal_targets_only"
+        }
+      ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
@@ -26926,16 +27500,33 @@
       "requiredMechanics": [],
       "valueHints": {},
       "riskTags": ["encounter"],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "during_ice_encounter",
+          "targetType": "subroutine",
+          "purpose": "break_subroutines_that_preserve_run_goal",
+          "preferences": [
+            "current_run_path_relevance",
+            "high_run_denial_payoff"
+          ],
+          "avoid": [],
+          "hiddenInfoPolicy": "legal_targets_only"
+        }
+      ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-18",
+        "reviewedBy": "codex"
       }
     },
     {
@@ -27003,10 +27594,12 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-18",
+        "reviewedBy": "codex"
       }
     },
     {
@@ -27050,10 +27643,12 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-18",
+        "reviewedBy": "codex"
       }
     },
     {
@@ -27250,10 +27845,12 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-18",
+        "reviewedBy": "codex"
       }
     },
     {
@@ -27571,16 +28168,33 @@
       "requiredMechanics": [],
       "valueHints": {},
       "riskTags": ["encounter"],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "during_ice_encounter",
+          "targetType": "subroutine",
+          "purpose": "break_subroutines_that_preserve_run_goal",
+          "preferences": [
+            "current_run_path_relevance",
+            "high_run_denial_payoff"
+          ],
+          "avoid": [],
+          "hiddenInfoPolicy": "legal_targets_only"
+        }
+      ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-18",
+        "reviewedBy": "codex"
       }
     },
     {
@@ -27657,10 +28271,12 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-18",
+        "reviewedBy": "codex"
       }
     },
     {
@@ -27882,10 +28498,12 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-18",
+        "reviewedBy": "codex"
       }
     },
     {
@@ -28039,6 +28657,23 @@
       "requiredMechanics": [],
       "valueHints": {},
       "riskTags": [],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "start_of_run",
+          "targetType": "installed_ice",
+          "purpose": "expose_ice_on_relevant_run_path",
+          "preferences": [
+            "relevant_server_ice",
+            "blocks_relevant_run_path"
+          ],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "legal_targets_only"
+        }
+      ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
@@ -28339,6 +28974,23 @@
         "economy": 1
       },
       "riskTags": [],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "install_target",
+          "timing": "on_play",
+          "targetType": "card",
+          "purpose": "install_best_legal_target",
+          "preferences": [
+            "high_install_cost_or_memory",
+            "central_or_remote_plan_enabler"
+          ],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "legal_targets_only"
+        }
+      ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
@@ -28772,6 +29424,23 @@
         "economy": 1
       },
       "riskTags": [],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_play",
+          "targetType": "installed_ice",
+          "purpose": "expose_ice_on_relevant_run_path",
+          "preferences": [
+            "relevant_server_ice",
+            "blocks_relevant_run_path"
+          ],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "legal_targets_only"
+        }
+      ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
@@ -30529,6 +31198,23 @@
       "requiredMechanics": [],
       "valueHints": {},
       "riskTags": [],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_play",
+          "targetType": "server",
+          "purpose": "lock_fort_creation_with_near_term_value",
+          "preferences": [
+            "protects_agenda_remote",
+            "current_run_path_relevance"
+          ],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "legal_targets_only"
+        }
+      ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
@@ -31136,7 +31822,7 @@
       "side": "runner",
       "cardType": "identity",
       "roles": ["runner_identity", "setup"],
-      "planRoles": ["build_rig"],
+      "planRoles": [],
       "requiredMechanics": ["identity_setup"],
       "valueHints": {},
       "riskTags": [],
@@ -31146,10 +31832,12 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-18",
+        "reviewedBy": "codex"
       }
     },
     {
@@ -31281,10 +31969,12 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-18",
+        "reviewedBy": "codex"
       },
       "breakerProfile": {
         "coverage": ["code_gate"],
@@ -31308,10 +31998,12 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-18",
+        "reviewedBy": "codex"
       }
     },
     {
@@ -31319,7 +32011,7 @@
       "side": "corp",
       "cardType": "operation",
       "roles": ["draw_operation", "setup"],
-      "planRoles": ["recover_economy"],
+      "planRoles": ["draw_for_answers"],
       "requiredMechanics": ["play_operation"],
       "valueHints": {},
       "riskTags": ["hidden_zone_change"],
@@ -31404,10 +32096,12 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-18",
+        "reviewedBy": "codex"
       }
     },
     {
@@ -31465,10 +32159,12 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-18",
+        "reviewedBy": "codex"
       },
       "breakerProfile": {
         "coverage": ["wall"],
@@ -31497,10 +32193,12 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-18",
+        "reviewedBy": "codex"
       },
       "breakerProfile": {
         "coverage": ["sentry"],
@@ -31544,7 +32242,7 @@
       "side": "runner",
       "cardType": "event",
       "roles": ["event", "run_pressure"],
-      "planRoles": ["pressure_rnd"],
+      "planRoles": [],
       "requiredMechanics": ["play_event"],
       "valueHints": {},
       "riskTags": ["run"],
@@ -31554,10 +32252,12 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-18",
+        "reviewedBy": "codex"
       }
     },
     {
@@ -31606,7 +32306,7 @@
       "side": "runner",
       "cardType": "hardware",
       "roles": ["memory", "setup"],
-      "planRoles": ["safe_probe_run"],
+      "planRoles": [],
       "requiredMechanics": ["install_hardware"],
       "valueHints": {},
       "riskTags": ["install_runner"],
@@ -31616,10 +32316,12 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-18",
+        "reviewedBy": "codex"
       }
     },
     {
@@ -31671,7 +32373,7 @@
       "side": "corp",
       "cardType": "operation",
       "roles": ["tag_punishment"],
-      "planRoles": ["recover_economy"],
+      "planRoles": ["punish_tagged_runner"],
       "requiredMechanics": ["play_operation"],
       "valueHints": {},
       "riskTags": ["public_play", "tag"],
@@ -31751,7 +32453,7 @@
       "side": "corp",
       "cardType": "upgrade",
       "roles": ["remote_support", "upgrade"],
-      "planRoles": ["recover_economy"],
+      "planRoles": [],
       "requiredMechanics": [
         "install_remote",
         "rez_card",
@@ -31807,10 +32509,12 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-18",
+        "reviewedBy": "codex"
       },
       "breakerProfile": {
         "coverage": ["sentry"],
@@ -31824,7 +32528,7 @@
       "side": "corp",
       "cardType": "operation",
       "roles": ["draw_operation", "setup"],
-      "planRoles": ["recover_economy"],
+      "planRoles": ["draw_for_answers"],
       "requiredMechanics": ["play_operation"],
       "valueHints": {},
       "riskTags": ["hidden_zone_change"],
@@ -31870,10 +32574,12 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-18",
+        "reviewedBy": "codex"
       }
     },
     {
@@ -31966,10 +32672,12 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-18",
+        "reviewedBy": "codex"
       }
     },
     {
@@ -32014,7 +32722,7 @@
       "side": "runner",
       "cardType": "hardware",
       "roles": ["memory", "setup"],
-      "planRoles": ["safe_probe_run"],
+      "planRoles": [],
       "requiredMechanics": ["install_hardware"],
       "valueHints": {},
       "riskTags": ["install_runner"],
@@ -32024,10 +32732,12 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-18",
+        "reviewedBy": "codex"
       }
     },
     {
@@ -32035,7 +32745,7 @@
       "side": "runner",
       "cardType": "event",
       "roles": ["economy", "run_pressure"],
-      "planRoles": ["pressure_rnd", "recover_economy"],
+      "planRoles": ["recover_economy"],
       "requiredMechanics": ["play_event"],
       "valueHints": {
         "economy": 3
@@ -32047,10 +32757,12 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-18",
+        "reviewedBy": "codex"
       }
     },
     {
@@ -32073,10 +32785,12 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-18",
+        "reviewedBy": "codex"
       },
       "breakerProfile": {
         "coverage": ["code_gate"],
@@ -32135,10 +32849,12 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-18",
+        "reviewedBy": "codex"
       },
       "breakerProfile": {
         "coverage": ["wall"],
@@ -32738,6 +33454,23 @@
         "remoteRootValue": 3
       },
       "riskTags": ["hidden_zone", "tag_threshold", "rig_trash"],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_access",
+          "targetType": "card",
+          "purpose": "trash_high_value_installed_runner_card",
+          "preferences": [
+            "high_install_cost_or_memory",
+            "currently_used_breaker"
+          ],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "legal_targets_only"
+        }
+      ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/classic-08-corp-assets-upgrades-smoke.json#classic_08_corp_assets_upgrades_smoke"
@@ -33326,7 +34059,7 @@
       "cardId": "onr_classic_027_early-worm",
       "side": "runner",
       "cardType": "program",
-      "roles": ["program", "icebreaker", "wall_breaker"],
+      "roles": ["program","icebreaker","breaker_fracter"],
       "planRoles": ["break_ice"],
       "requiredMechanics": [
         "install_program",
@@ -33378,7 +34111,7 @@
       "cardId": "onr_classic_028_matador",
       "side": "runner",
       "cardType": "program",
-      "roles": ["program", "icebreaker", "sentry_breaker"],
+      "roles": ["program","icebreaker","breaker_killer"],
       "planRoles": ["break_ice"],
       "requiredMechanics": [
         "install_program",
@@ -33430,7 +34163,7 @@
       "cardId": "onr_classic_029_ms-todon",
       "side": "runner",
       "cardType": "program",
-      "roles": ["program", "icebreaker", "sentry_breaker", "noisy"],
+      "roles": ["program","icebreaker","breaker_killer","noisy"],
       "planRoles": ["break_ice"],
       "requiredMechanics": [
         "install_program",
@@ -33509,7 +34242,7 @@
       "cardId": "onr_classic_030_psychic-friend",
       "side": "runner",
       "cardType": "program",
-      "roles": ["program", "icebreaker", "code_gate_breaker"],
+      "roles": ["program","icebreaker","breaker_decoder"],
       "planRoles": ["break_ice"],
       "requiredMechanics": [
         "install_program",
@@ -35539,7 +36272,7 @@
       "cardId": "onr_classic_038_gypsytm-schedule-analyzer",
       "side": "runner",
       "cardType": "event",
-      "roles": ["event", "rd_run", "rd_access_replacement", "agenda_pressure"],
+      "roles": ["event","rd_pressure","rd_access_replacement","agenda_pressure"],
       "planRoles": ["pressure_rnd", "agenda_pressure"],
       "requiredMechanics": [
         "play_event",

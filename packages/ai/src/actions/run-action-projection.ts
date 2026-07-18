@@ -243,6 +243,14 @@ function runActionRelevant(
     "hq_run",
   ]);
   if (concretePayloadServerId(action) && explicitRunSignals) return true;
+  if (
+    action.type === "play_event" &&
+    concretePayloadServerId(action) &&
+    runActionHasStructuredSignal(signals, ["effect:access_replacement"]) &&
+    runActionHasStructuredSignal(signals, ["timing:successful_run"])
+  ) {
+    return true;
+  }
   if (explicitRunSignals) return true;
   if (
     runActionHasStructuredSignal(signals, ["run"]) &&

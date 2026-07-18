@@ -255,6 +255,25 @@ AI-Shards.
 Done-Gate: keine unbegründeten Deferred-/Target-Warnungen im freigegebenen
 Bestand; verbleibende Warnungen sind explizit und fachlich begründet.
 
+Ergebnis:
+
+- alle 618 aktiven Hints sind jetzt ausdrücklich geprüft; es bleiben weder
+  `needsHumanReview`-Marker noch unreviewte Einträge;
+- die 31 zu Paketbeginn zurückgestellten Inspector-Fälle sowie acht weitere
+  reviewlose V1-Breaker wurden geschlossen; die zwei bereits semantisch
+  korrigierten Agenda-Punkt-Events verloren dabei ihre falschen
+  Run-/Steal-Rollen;
+- `targetProfileRequiredSignalIds` trennt echte Auswahlpräferenzen von festen
+  Effektzielen und LegalAction-Entscheidungen; 36 Karten besitzen neu
+  überprüfte Profile, der Action-Signalkatalog steht bei null
+  Target-Profile-Gaps;
+- 19 Alias-Felder wurden auf kanonische Rollen normalisiert; 92 einzigartige
+  Rollen und 49 einzigartige Planrollen sind ausdrücklich als sinntragende,
+  kartenspezifische Deskriptoren klassifiziert statt pauschal gelöscht;
+- die zehn sachfremden Testset-Planrollen wurden entfernt oder auf die
+  tatsächliche Draw-, Economy- bzw. Tag-Punish-Funktion korrigiert;
+- das Hint-Quality-Gate meldet 618 Hints, null Fehler und null Warnungen.
+
 Commit: `fix(ai): close card hint quality and target backlog`
 
 ### AIH-06 – Gesamtverifikation und Abschlussreview

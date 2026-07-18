@@ -758,7 +758,7 @@ describe("AI003 strategy goal taxonomy", () => {
       ...report.ai004Triage.planRoles,
     ].filter((entry) => entry.triageSource === "ai004_explicit");
 
-    expect(explicitTriage).toHaveLength(49);
+    expect(explicitTriage).toHaveLength(48);
     expect(
       report.warnings.some(
         (warning) => warning.kind === "unknown_role_or_planRole_values_warn_only",
