@@ -21,6 +21,7 @@ export type AiSelfplayTraceMiningDetectorId =
   | "recovery_low_value_loop"
   | "bank_over_target_without_funding_need"
   | "repeatable_action_no_progress_loop"
+  | "runner_survival_no_progress_loop"
   | "risky_self_damage_action"
   | "blink_low_hand_buffer_run"
   | "duplicate_low_delta_install"
@@ -226,6 +227,7 @@ export const DEFAULT_SELFPLAY_TRACE_MINING_DETECTORS: AiSelfplayTraceMiningDetec
     "recovery_low_value_loop",
     "bank_over_target_without_funding_need",
     "repeatable_action_no_progress_loop",
+    "runner_survival_no_progress_loop",
     "risky_self_damage_action",
     "blink_low_hand_buffer_run",
     "duplicate_low_delta_install",
@@ -1020,6 +1022,11 @@ function collectSelfplayFindingsForSummary(
       ...repeatableActionNoProgressLoopFindings(summary, summaryIndex),
     );
   }
+  if (enabled.has("runner_survival_no_progress_loop")) {
+    findings.push(
+      ...runnerSurvivalNoProgressLoopFindings(summary, summaryIndex),
+    );
+  }
   if (summary.actions >= longGameActionThreshold) {
     if (
       enabled.has("corp_never_scores_long_game") &&
@@ -1143,6 +1150,110 @@ function repeatableActionNoProgressLoopFindings(
     );
   }
   return findings;
+}
+
+function runnerSurvivalNoProgressLoopFindings(
+  summary: AiSimulationSummary,
+  summaryIndex: number,
+): AiSelfplaySuspiciousDecision[] {
+  const findings: AiSelfplaySuspiciousDecision[] = [];
+  let currentSignature: string | undefined;
+  let currentIndices: number[] = [];
+  const flush = (): void => {
+    if (currentIndices.length < 4) {
+      currentSignature = undefined;
+      currentIndices = [];
+      return;
+    }
+    const first = currentIndices[0];
+    const last = currentIndices.at(-1);
+    const entry = last === undefined ? undefined : summary.actionSequence[last];
+    if (first === undefined || last === undefined || !entry) return;
+    findings.push(
+      selfplayEntryFinding(
+        summary,
+        summaryIndex,
+        last,
+        "runner_survival_no_progress_loop",
+        "high",
+        "Runner repeated survival actions without improving hand, flatline risk, or the concrete reserve gap.",
+        [
+          `runner_survival_no_progress_count:${currentIndices.length}`,
+          `runner_survival_no_progress_first_index:${first}`,
+          `runner_survival_no_progress_last_index:${last}`,
+          `runner_survival_no_progress_signature:${currentSignature}`,
+        ],
+      ),
+    );
+    currentSignature = undefined;
+    currentIndices = [];
+  };
+  for (const [actionIndex, entry] of summary.actionSequence.entries()) {
+    if (entry.side !== "runner") continue;
+    const signature = runnerSurvivalNoProgressSignature(entry);
+    if (!signature) {
+      flush();
+      continue;
+    }
+    if (currentSignature !== signature) flush();
+    currentSignature = signature;
+    currentIndices.push(actionIndex);
+  }
+  flush();
+  return findings;
+}
+
+function runnerSurvivalNoProgressSignature(
+  entry: AiSimulationSummary["actionSequence"][number],
+): string | undefined {
+  if (
+    entry.planKind !== "runner.survival_defense" ||
+    (entry.actionType !== "gain_credit" && entry.actionType !== "draw_card")
+  ) {
+    return undefined;
+  }
+  const handCount = selfplayEntryFactValue(entry, "runner_hand_buffer_count:");
+  const flatlineRisk = selfplayEntryFactValue(
+    entry,
+    "runner_flatline_risk_level:",
+  );
+  const explicitReserveGap = selfplayEntryFactNumber(
+    entry,
+    "runner_survival_reserve_gap:",
+  );
+  const reserveGap =
+    explicitReserveGap ??
+    (typeof entry.runnerReserveTarget === "number" &&
+    typeof entry.runnerCreditsBefore === "number"
+      ? Math.max(0, entry.runnerReserveTarget - entry.runnerCreditsBefore)
+      : undefined);
+  if (
+    handCount === undefined ||
+    flatlineRisk === undefined ||
+    reserveGap === undefined
+  ) {
+    return undefined;
+  }
+  return `hand=${handCount}|risk=${flatlineRisk}|reserve_gap=${reserveGap}`;
+}
+
+function selfplayEntryFactNumber(
+  entry: AiSimulationSummary["actionSequence"][number],
+  prefix: string,
+): number | undefined {
+  const value = selfplayEntryFactValue(entry, prefix);
+  if (value === undefined) return undefined;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+function selfplayEntryFactValue(
+  entry: AiSimulationSummary["actionSequence"][number],
+  prefix: string,
+): string | undefined {
+  return [...(entry.evidence ?? []), ...(entry.debugFacts ?? [])]
+    .find((value) => value.startsWith(prefix))
+    ?.slice(prefix.length);
 }
 
 function selfplayErrorShowsNoLegalAction(error: string): boolean {

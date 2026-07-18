@@ -1,6 +1,6 @@
 # Runner-Survival-Progress-Contract-Prozess
 
-Status: P3 abgeschlossen; P4 aktiv
+Status: P4 abgeschlossen; P5 aktiv
 
 ## Quelle/Vorgabe
 
@@ -228,7 +228,7 @@ Commit: `fix(ai): yield stalled survival plan arbitration`
 
 ### P4: Diagnostik und Loop-Gate
 
-Status: aktiv
+Status: abgeschlossen
 
 Ziel: Diagnostics melden nur nachweisbare Coverage-Reparatur und erkennen
 wiederholte Survival-Aktionen ohne Fortschritt als High-Severity-Fund.
@@ -253,11 +253,21 @@ Checks: fokussierte Diagnostics-Vitests, AI-Typecheck, `git diff --check`.
 Done-Gate: C-09-artige Schleife wird erkannt; normale Economy-Folgen und echte
 Coverage-/Funding-Verbesserungen bleiben ohne Falschpositiv.
 
+Ergebnis: Coverage-Reparatur gilt nur noch bei Search/Recovery, einer
+rollenbelegten Coverage-Installation oder einer Credit-Aktion unter den
+sichtbaren Breakkosten eines bekannten Pfads. Reiner Draw und reiche Basic
+Credits bleiben als gewählte Aktivität sichtbar, erfüllen den Repair-Intent
+aber nicht. Der neue Standarddetektor
+`runner_survival_no_progress_loop` meldet ab vier stabilen Survival-Credits
+oder -Draws ohne Änderung von Hand, Flatline-Risiko und Reservelücke einen
+High-Severity-Fund; schrumpfende Reservelücken bleiben grün. 72 fokussierte
+Diagnostics-, Mining- und Reporttests sowie der AI-Typecheck sind grün.
+
 Commit: `fix(ai): detect stalled runner survival loops`
 
 ### P5: Benchmark, Review, Integration und Cleanup
 
-Status: ausstehend
+Status: aktiv
 
 Ziel: Zielregressionen und breite Gates verifizieren, den aktuellen
 AI-Behavior-Benchmark commit-rein ausführen, Ergebnis dokumentieren, aktuelles

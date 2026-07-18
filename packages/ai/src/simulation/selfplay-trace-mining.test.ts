@@ -328,6 +328,64 @@ describe("SelfplayTraceMining", () => {
     ).toBe(true);
   });
 
+  it("detects repeated survival credits above a stable concrete reserve", () => {
+    const summary = selfplaySummary(
+      Array.from({ length: 4 }, (_, index) =>
+        selfplayAction("runner", index + 1, "gain_credit", {
+          selectedActionId: `basic-credit-${index}`,
+          planKind: "runner.survival_defense",
+          runnerCreditsBefore: 6 + index,
+          runnerCreditsAfter: 7 + index,
+          runnerCreditDelta: 1,
+          runnerReserveTarget: 4,
+          debugFacts: [
+            "runner_hand_buffer_count:1",
+            "runner_flatline_risk_level:confirmed",
+          ],
+        }),
+      ),
+    );
+
+    const findings = detectAiSelfplaySuspiciousDecisions([summary], {
+      detectorIds: ["runner_survival_no_progress_loop"],
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]).toMatchObject({
+      detectorIds: ["runner_survival_no_progress_loop"],
+      severity: "high",
+      selectedActionId: "basic-credit-3",
+    });
+    expect(findings[0]?.relevantDebugFacts).toContain(
+      "runner_survival_no_progress_signature:hand=1|risk=confirmed|reserve_gap=0",
+    );
+  });
+
+  it("does not flag survival credits that visibly shrink the reserve gap", () => {
+    const summary = selfplaySummary(
+      Array.from({ length: 4 }, (_, index) =>
+        selfplayAction("runner", index + 1, "gain_credit", {
+          selectedActionId: `reserve-credit-${index}`,
+          planKind: "runner.survival_defense",
+          runnerCreditsBefore: index,
+          runnerCreditsAfter: index + 1,
+          runnerCreditDelta: 1,
+          runnerReserveTarget: 4,
+          debugFacts: [
+            "runner_hand_buffer_count:1",
+            "runner_flatline_risk_level:critical",
+          ],
+        }),
+      ),
+    );
+
+    expect(
+      detectAiSelfplaySuspiciousDecisions([summary], {
+        detectorIds: ["runner_survival_no_progress_loop"],
+      }),
+    ).toEqual([]);
+  });
+
   it("bounds risky self-damage signals to structured entries", () => {
     const positive = selfplaySummary([
       selfplayAction("runner", 1, "trigger_ability", {

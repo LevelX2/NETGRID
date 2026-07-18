@@ -611,8 +611,9 @@ export function runnerCoverageRepairDiagnostic(
     rolesForCardId: (definitionId: string | undefined) => string[];
   },
 ): RunnerCoverageRepairDiagnostic {
-  if (dependencies.runnerKnownNoAccessLegalRunTargets(input).length === 0)
-    return {};
+  const knownNoAccessTargets =
+    dependencies.runnerKnownNoAccessLegalRunTargets(input);
+  if (knownNoAccessTargets.length === 0) return {};
   const definitionId = dependencies.sourceDefinitionIdForAction(input, action);
   const roles = definitionId ? dependencies.rolesForCardId(definitionId) : [];
   const actionKind = action.type;
@@ -620,22 +621,43 @@ export function runnerCoverageRepairDiagnostic(
     rolesMatch(roles, ["search", "tutor", "recovery", "trash_recovery"]) ||
     actionKind === "resolve_choice";
   const isRecovery = rolesMatch(roles, ["recovery", "trash_recovery"]);
-  const isInstall = actionKind === "install_card";
+  const isCoverageInstall =
+    actionKind === "install_card" &&
+    rolesMatch(roles, [
+      "breaker",
+      "icebreaker",
+      "fracter",
+      "decoder",
+      "killer",
+      "interface",
+      "coverage",
+    ]);
   const isDrawOrEconomy =
     actionKind === "draw_card" ||
     actionKind === "gain_credit" ||
     (actionKind === "play_event" && roles.some((role) => role === "economy"));
+  const improvesKnownPathAffordability =
+    actionKind === "gain_credit" &&
+    knownNoAccessTargets.some(
+      ({ assessment }) =>
+        typeof assessment.visibleBreakCost === "number" &&
+        assessment.visibleBreakCost > input.playerView.own.credits,
+    );
+  const repairProgress =
+    isSearchOrRecovery || isCoverageInstall || improvesKnownPathAffordability;
   return {
     runnerCoverageRepairIntentCandidates: true,
     ...(isSearchOrRecovery && !isRecovery
       ? { runnerCoverageRepairIntentSearchTaken: true }
       : {}),
     ...(isRecovery ? { runnerCoverageRepairIntentRecoveryTaken: true } : {}),
-    ...(isInstall ? { runnerCoverageRepairIntentInstallTaken: true } : {}),
+    ...(isCoverageInstall
+      ? { runnerCoverageRepairIntentInstallTaken: true }
+      : {}),
     ...(isDrawOrEconomy
       ? { runnerCoverageRepairIntentDrawOrEconomyTaken: true }
       : {}),
-    ...(isSearchOrRecovery || isInstall || isDrawOrEconomy
+    ...(repairProgress
       ? { runnerCoverageRepairIntentSatisfied: true }
       : { runnerCoverageRepairIntentNoFollowup: true }),
   };

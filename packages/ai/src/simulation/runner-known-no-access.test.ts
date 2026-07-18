@@ -15,12 +15,66 @@ describe("runnerCoverageRepairDiagnostic", () => {
       runnerCoverageRepairIntentRecoveryTaken: true,
       runnerCoverageRepairIntentSatisfied: true,
     });
-    expect(diagnosticForRoles(["research_noise", "recoveryish_noise"]))
-      .toMatchObject({
-        runnerCoverageRepairIntentNoFollowup: true,
-      });
+    expect(
+      diagnosticForRoles(["research_noise", "recoveryish_noise"]),
+    ).toMatchObject({
+      runnerCoverageRepairIntentNoFollowup: true,
+    });
+  });
+
+  it("does not call rich basic credits a coverage repair", () => {
+    expect(
+      runnerCoverageRepairDiagnostic(
+        coverageInput(10),
+        baseAction("gain_credit"),
+        coverageDependencies(4),
+      ),
+    ).toMatchObject({
+      runnerCoverageRepairIntentDrawOrEconomyTaken: true,
+      runnerCoverageRepairIntentNoFollowup: true,
+    });
+    expect(
+      runnerCoverageRepairDiagnostic(
+        coverageInput(10),
+        baseAction("gain_credit"),
+        coverageDependencies(4),
+      ),
+    ).not.toHaveProperty("runnerCoverageRepairIntentSatisfied");
+  });
+
+  it("recognizes a credit that closes a visible path affordability gap", () => {
+    expect(
+      runnerCoverageRepairDiagnostic(
+        coverageInput(2),
+        baseAction("gain_credit"),
+        coverageDependencies(4),
+      ),
+    ).toMatchObject({
+      runnerCoverageRepairIntentDrawOrEconomyTaken: true,
+      runnerCoverageRepairIntentSatisfied: true,
+    });
   });
 });
+
+function coverageInput(credits: number): AiDecisionInput {
+  return {
+    side: "runner",
+    playerView: { own: { credits } },
+  } as AiDecisionInput;
+}
+
+function coverageDependencies(visibleBreakCost: number) {
+  return {
+    runnerKnownNoAccessLegalRunTargets: () => [
+      {
+        serverId: "remote_1",
+        assessment: { visibleBreakCost } as never,
+      },
+    ],
+    sourceDefinitionIdForAction: () => undefined,
+    rolesForCardId: () => [],
+  };
+}
 
 describe("runnerKnownPathDiagnosticsForAction", () => {
   it("matches positive probe roles by bounded role terms", () => {

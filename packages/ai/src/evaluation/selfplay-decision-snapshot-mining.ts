@@ -152,6 +152,10 @@ const DETECTOR_MISTAKE_CLASS_MAP: Record<
     "economy_starvation",
     "plan_step_mismatch",
   ],
+  runner_survival_no_progress_loop: [
+    "economy_starvation",
+    "plan_step_mismatch",
+  ],
   risky_self_damage_action: ["unsafe_run", "ignored_damage_risk"],
   blink_low_hand_buffer_run: ["unsafe_run", "ignored_damage_risk"],
   duplicate_low_delta_install: ["bad_install_redundancy"],
