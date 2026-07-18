@@ -289,7 +289,7 @@ Testdateien mit 1.741 Tests. Architekturziel, Card-Function-Abstraction,
 Package Boundaries, Strukturguard samt Selftest, Testdiscovery sowie Engine-,
 Shared- und Root-Typecheck sind grün.
 
-Der kombinierte Workspace-Lauf bestätigt zusätzlich 2.757/2.757 KI-Tests,
+Der kombinierte Workspace-Lauf bestätigt zusätzlich 2.760/2.760 KI-Tests,
 173/173 Server-Tests und 8/8 Root-Spezifikationstests. Ein nach dem Main-Sync
 neu hinzugekommener Servertest prüft nun ausdrücklich, dass die fachliche
 Corp-Entscheidung öffentlich bleibt, der interne Ability-Discriminator aber

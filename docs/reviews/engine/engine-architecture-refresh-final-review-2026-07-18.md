@@ -47,7 +47,7 @@ geschützt.
 | Package Boundaries                         | grün                                    |
 | Testdiscovery                              | grün                                    |
 | Engine- und Root-Typecheck                 | grün                                    |
-| KI-Tests auf kombiniertem Stand            | 2.757/2.757 grün                        |
+| KI-Tests auf kombiniertem Stand            | 2.760/2.760 grün                        |
 | Server-Tests auf kombiniertem Stand        | 173/173 grün                            |
 | Root-Spezifikationstests                   | 8/8 grün                                |
 
