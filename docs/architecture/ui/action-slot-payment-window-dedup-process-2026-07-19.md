@@ -2,14 +2,16 @@
 
 ## Status
 
-- Prozess: in Bearbeitung
-- Aktives Paket: P04
-- Paketstand: P01–P03 abgeschlossen; P04 aktiv
+- Prozess: abgeschlossen, Integrationsbereitschaft bestätigt
+- Aktives Paket: keines
+- Paketstand: P01–P04 abgeschlossen
 - Rote Evidence: fokussierter Web-Testlauf mit 653 grünen und genau einer
   roten Assertion (`expected 5 to be 4`) auf unverändertem Produktionscode.
 - Grüne P03-Evidence: 118 fokussierte Action-Board-Tests, Web-Typecheck und
   Prettier-Check bestanden; die Rückfalllogik ohne Ordinalmetadaten ist durch
   eine zusätzliche Positivprobe abgesichert.
+- Finale P04-Evidence: vollständiger Web-Testlauf mit 55 Testdateien und 655
+  Tests sowie erneuter Web-Typecheck bestanden; `git diff --check` ist grün.
 - Branch: `codex/ui-action-slot-dedup`
 - Worktree: `C:\Projekte\NETGRID_UI_ACTION_SLOT_DEDUP`
 
