@@ -205,9 +205,16 @@ export type RunnerCreditReservePolicy = {
   schemaVersion: 1;
   phase: RunnerCreditReservePhase;
   currentCredits: number;
+  convertibleBankCredits?: number;
+  availableCreditPool?: number;
   minimumCreditFloor: number;
   breakerUseReserve: number;
   contestReserve: number;
+  remotePressureReserve?: number;
+  remotePressureServerId?: string;
+  remotePressureReserveActive?: boolean;
+  rdPressureSpendTarget?: number;
+  pressureRunwayTarget?: number;
   developmentReserve: number;
   emergencyReserve: number;
   desiredCreditReserve: number;

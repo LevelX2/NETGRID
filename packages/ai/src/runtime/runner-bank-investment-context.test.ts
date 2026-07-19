@@ -286,7 +286,7 @@ describe("createRunnerBankInvestmentContext", () => {
     );
   });
 
-  it("cashes out a funded bank to convert a blocked matchpoint remote", () => {
+  it("cashes out a funded bank to convert a blocked remote score threat", () => {
     const context = createContext({
       hintEffectsForDefinition: (definitionId) =>
         definitionId === "custom-runner-credit-bank"
@@ -315,9 +315,8 @@ describe("createRunnerBankInvestmentContext", () => {
       clicks: 4,
       rig: [bank],
       legalActions: [cashOutAction, remoteRun],
+      remoteRoot: [advancedUnknownRemoteCard()],
     });
-    input.playerView.opponent.agendaPoints = 6;
-
     expect(context.runnerBankHasConcreteFundingNeed(input)).toBe(true);
     expect(context.runnerBankCashOutIsUsefulNow(input, cashOutAction)).toBe(
       true,
@@ -326,9 +325,48 @@ describe("createRunnerBankInvestmentContext", () => {
       context.runnerBankInvestmentCommitmentEvidence(input, cashOutAction),
     ).toEqual(
       expect.arrayContaining([
-        "bankTerminalContestFundingNeed:true",
+        "bankRemoteContestFundingNeed:true",
         "why_cashout_now:concrete_funding_need",
       ]),
+    );
+  });
+
+  it("cashes out on the last click so remote-threat liquidity is ready next turn", () => {
+    const context = createContext({
+      hintEffectsForDefinition: (definitionId) =>
+        definitionId === "custom-runner-credit-bank"
+          ? [{ kind: "economy", target: "economy.temporary_resource_bank" }]
+          : [],
+      runnerRunTargetEvaluation: () =>
+        ({
+          scoreThreat: true,
+          pathPassability: "blocked_unpayable",
+        }) as RunnerRunTargetEvaluation,
+    });
+    const bank = visibleRunnerCard("custom-runner-credit-bank", {
+      counters: { power: 6 },
+    });
+    const cashOutAction = runnerAction("trigger_ability", {
+      actionId: "last-click-cashout",
+      source: bank.instanceId,
+      cardImplementationTakesHostedCredits: true,
+    });
+    const input = runnerInput({
+      credits: 12,
+      clicks: 1,
+      rig: [bank],
+      remoteRoot: [advancedUnknownRemoteCard()],
+      legalActions: [
+        cashOutAction,
+        runnerAction("start_run", {
+          actionId: "remote-matchpoint-run",
+          serverId: "remote_1",
+        }),
+      ],
+    });
+    expect(context.runnerBankHasConcreteFundingNeed(input)).toBe(true);
+    expect(context.runnerBankCashOutIsUsefulNow(input, cashOutAction)).toBe(
+      true,
     );
   });
 
@@ -963,6 +1001,7 @@ function runnerInput(input: {
   publicEvents?: PublicGameEvent[];
   maxHandSize?: number;
   opponentAgendaPoints?: number;
+  remoteRoot?: VisibleCard[];
 }): AiDecisionInput {
   return {
     side: "runner",
@@ -1004,6 +1043,16 @@ function runnerInput(input: {
           ice: [],
           root: input.hqRoot ?? [],
         },
+        ...(input.remoteRoot
+          ? [
+              {
+                id: "remote_1",
+                label: "Remote 1",
+                ice: [],
+                root: input.remoteRoot,
+              },
+            ]
+          : []),
       ],
       publicEvents: input.publicEvents ?? [],
       legalActions: input.legalActions,
@@ -1018,6 +1067,15 @@ function runnerInput(input: {
     actionNumber: 1,
     profileId: "runner-bank-investment-context-test",
   } as AiDecisionInput;
+}
+
+function advancedUnknownRemoteCard(): VisibleCard {
+  return visibleRunnerCard("hidden-remote-card", {
+    known: false,
+    owner: "corp",
+    controller: "corp",
+    advancementCounters: 1,
+  });
 }
 
 function publicEvent(

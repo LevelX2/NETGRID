@@ -6,10 +6,11 @@ Das zuletzt beendete Spiel `match_d1532f829371a95f` ist vollständig über 190
 gespeicherte KI-Entscheidungen analysiert. Der Corp-Sieg war nicht durch einen
 Engine- oder LegalAction-Fehler verursacht. Entscheidend waren strategische
 Runner-Fehler: überalterter HQ-Druck, ein zu lange verfolgter Remote,
-unwirtschaftliche Run-Fortsetzung und verspätete Broker-Liquidität.
+unwirtschaftliche Run-Fortsetzung, verspätete Broker-Liquidität und eine
+fehlende Kreditreserve für die Doppelbedrohung aus R&D-Druck und Remote-Contest.
 
-Zwölf unveränderte spielgleiche Checkpoints bilden neun Fehler und drei
-positive Kontrollen ab. Alle bestehen auf dem finalen Stand.
+Zwölf unveränderte spielgleiche Checkpoints bilden acht Fehlerklassen und eine
+positive Kontrolle ab. Alle bestehen auf dem finalen Stand.
 
 ## Zugurteil
 
@@ -20,10 +21,6 @@ positive Kontrollen ab. Alle bestehen auf dem finalen Stand.
   als die Subroutine das Runende auslösen zu lassen.
 - **D61:** Der erstmalig mit ICE versehene HQ-Server war ein neues öffentliches
   Informationssignal. Dieser HQ-Facecheck bleibt ausdrücklich erlaubt.
-- **D161:** Der Archives-Run prüfte noch verdeckte Karten und war kein bereits
-  widerlegter Wiederholungsrun.
-- **D167:** R&D war bereits finanzierbar und die Topkarte unbekannt. Der direkte
-  R&D-Run war besser als ein unnötiger Broker-Cash-out.
 
 ### Nicht sinnvoll
 
@@ -37,6 +34,14 @@ positive Kontrollen ab. Alle bestehen auf dem finalen Stand.
   erreichbaren Ziel hängen und blockierte bessere Alternativen.
 - **D134:** `continue_run` hätte vier End-the-run-Subroutinen ausgelöst. Eine
   vorhandene und bezahlbare Pump-/Break-Sequenz musste zuerst beginnen.
+- **D161:** Der weitere Archives-Check war gegenüber dem Spielstand zu klein.
+  Im Remote lag bereits eine fünfmal avancierte verdeckte Karte hinter einem
+  geschätzten 24-Credit-Pfad. Der Runner hätte die tiefe Contest-Reserve weiter
+  aufbauen müssen.
+- **D167:** Ein sofortiger R&D-Run hätte den Kreditpolster unter die
+  Remote-Contest-Schwelle gedrückt. Bei einer sechsmal avancierten verdeckten
+  Remote-Karte und einem geschätzten 33-Credit-Pfad war Broker-Cash-out die
+  richtige Vorbereitung für den Remote-Run im Folgezug.
 - **D179 und D185:** Broker-Guthaben war zwar gespeichert, wurde aber nicht als
   unmittelbar konvertierbare Finanzierung des sonst unbezahlbaren R&D-Pfads
   erkannt. Damit fehlte genau die vom Spielstand verlangte dauerhafte
@@ -81,6 +86,29 @@ Build- und Cash-out-Schritte tragen exakte ActionCandidate-IDs aus dem
 Capability-Consumer. Dadurch kann Junkyard BBS nicht mehr als Bankaktion
 einspringen und zwei Broker-Instanzen bleiben korrekt getrennt.
 
+### Kreditpolster für die Doppelbedrohung
+
+Die Runner-Ökonomie unterscheidet nun zwischen dem Kreditkern für einen tiefen
+Remote-Contest und der darüberliegenden R&D-Ausgabeschicht. Für ein Remote mit
+mindestens zwei ICE wird die Reserve aus sichtbaren Pfadkosten, einem begrenzten
+Risikoaufschlag für unrezztes ICE und einem Restpolster nach dem Run berechnet.
+Ein R&D-Run ist erst freigegeben, wenn
+
+1. der gesamte verfügbare Pool die Remote-Reserve plus die Kosten eines
+   weiteren R&D-Runs deckt und
+2. nach dem aktuellen R&D-Run noch mindestens die Remote-Reserve übrig bleibt.
+
+Zum verfügbaren Pool zählen liquide Credits und über strukturierte, aktuell
+legale Broker-Payout-Aktionen mobilisierbare Credits. Broker-Einzahlungen gelten
+dagegen nicht als neues Einkommen: Sie verschieben nur Liquidität. Eine bereits
+avancierte unbekannte Remote-Karte aktiviert die Reserve sofort. Ohne akute
+Remote-Bedrohung darf terminaler Zentraldruck die Reserve übersteuern, damit die
+KI eine reale letzte Siegchance nicht durch endloses Sparen verpasst.
+
+Die Reserve ist bewusst begrenzt: maximal 36 Credits für den Remote-Kern, 20
+Credits für die R&D-Schicht und 56 Credits für die gesamte Runway. Damit entsteht
+glaubwürdiger Remote-Druck, ohne dass die KI grundsätzlich nur noch hortet.
+
 ## Hint- und Consumer-Audit
 
 Der wiederhergestellte Audit
@@ -94,8 +122,8 @@ Single-Source-Architektur. Er prüft für jede Deckkarte:
 5. source-gebundene ActionSemanticCandidates;
 6. exakte LegalAction-Bindings und die tatsächlich ausgewählte Entscheidung.
 
-Der Audit des D185-Checkpoints umfasst 19 eindeutige Karten mit 45 Kopien und
-meldet `status: ok`, null Blocker und null Warnungen. Bei Broker stimmen
+Die Audits der D185- und D167-Checkpoints umfassen jeweils 19 eindeutige Karten
+mit 45 Kopien und melden `status: ok`, null Blocker und null Warnungen. Bei Broker stimmen
 Engine-Effekte `add_hosted_credits:3` und `take_hosted_credits:all`, Hint,
 Capability, beide Build-Aktionen, die eine Cash-out-Aktion und der finale
 `runner_bank_cashout_gate` überein. Junkyard ist in keiner Bankbindung.
@@ -110,19 +138,19 @@ Maschinenlesbare Evidence:
 
 ## Verifikation
 
-| Check                                 | Ergebnis                           |
-| ------------------------------------- | ---------------------------------- |
-| D153-Entscheidungscheckpoints         | 12/12 grün                         |
-| gemeinsame Nachbarregressionen        | 77/77 grün                         |
-| AI-Shard 1                            | 137 Dateien, 993 Tests grün        |
-| AI-Shard 2                            | 137 Dateien, 989 Tests grün        |
-| AI-Shard 3                            | 136 Dateien, 826 Tests grün        |
-| AI-Gesamtabdeckung über Shards        | 410 Dateien, 2.808 Tests grün      |
-| AI-Typecheck                          | grün                               |
-| `check:ai`                            | grün, null Harderrors/Zyklen       |
-| Package-Boundaries und Test-Discovery | grün                               |
-| Hint-/Consumer-Audit v2               | 19 Karten, 45 Kopien, 0/0 Findings |
-| `git diff --check`                    | grün                               |
+| Check                                  | Ergebnis                           |
+| -------------------------------------- | ---------------------------------- |
+| D153-Entscheidungscheckpoints          | 12/12 grün                         |
+| fokussierte Taktik-/Entscheidungstests | 211/211 grün                       |
+| AI-Shard 1                             | 137 Dateien, 994 Tests grün        |
+| AI-Shard 2                             | 137 Dateien, 993 Tests grün        |
+| AI-Shard 3                             | 136 Dateien, 826 Tests grün        |
+| AI-Gesamtabdeckung über Shards         | 410 Dateien, 2.813 Tests grün      |
+| AI-Typecheck                           | grün                               |
+| `check:ai`                             | grün, null Harderrors/Zyklen       |
+| Package-Boundaries und Test-Discovery  | grün                               |
+| D167 Hint-/Consumer-Audit v2           | 19 Karten, 45 Kopien, 0/0 Findings |
+| `git diff --check`                     | grün                               |
 
 Engine-Regeln, Hidden-Info-Redaktion, Replay, StateHash, Randomness und
 Kartenpool wurden nicht verändert. Es gibt keine Match-ID-, Karten-ID- oder
