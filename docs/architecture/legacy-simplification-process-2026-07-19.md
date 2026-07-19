@@ -2,10 +2,10 @@
 
 ## Status
 
-P0 bis P6 sind abgeschlossen und verifiziert. Der committed `main`-Stand ist
-defensiv integriert und auf dem gemeinsamen Stand vollständig geprüft. Offen
-sind nur der lokale Fast-Forward nach `main` und das anschließende
-Worktree-/Branch-Cleanup.
+P0 bis P6 sind abgeschlossen und verifiziert. Der Arbeitsstand ist defensiv
+mit `main` abgeglichen, lokal per Fast-Forward integriert und auf dem
+gemeinsamen Stand vollständig geprüft. Arbeitsbranch und Worktree sind
+entfernt; der Prozess ist abgeschlossen.
 
 ## Fortschritt
 
