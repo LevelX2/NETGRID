@@ -1,6 +1,6 @@
 # MU-Checkpoint nach Verlust von Runner-Memory
 
-Status: in Umsetzung
+Status: abgeschlossen
 
 ## Quelle und Zielprüfung
 
@@ -154,3 +154,22 @@ erst dann als complete markieren.`
 - Visibility, Replay, StateHash, stale und illegal actions sind geschützt.
 - Alle Pakete sind committed, lokal nach `main` gemergt und Worktree sowie
   Arbeitsbranch verifiziert entfernt.
+
+## Umsetzungsergebnis
+
+- P0 bis P4 sind fachlich abgeschlossen und als getrennte Paket-Commits
+  nachvollziehbar.
+- Der Checkpoint öffnet nach nachträglichem Memory-Verlust eine private,
+  verpflichtende Runner-Choice und akzeptiert ausschließlich ausreichende,
+  einschlussminimale Programmmengen.
+- Die Runner-KI verwendet eine eigene deterministische Auswahl, berücksichtigt
+  den bestehenden Programmsacrifice-Wert und bleibt auch auflösbar, wenn nur
+  kritische Programme verfügbar sind.
+- Das Root-Rez-Fenster schließt nach dem letzten tatsächlichen Rez automatisch;
+  weitere legale Root-Rez-Aktionen halten es weiterhin offen.
+- Der gespeicherte Zustand `match_c34a3b1bd4f5e697` wurde read-only gegen den
+  neuen Engine-Stand geprüft: Der zuvor abgelehnte Zugriff erzeugt bei 5/4 MU
+  die Runner-Choice mit vier Optionen; die Corp-PlayerView sieht sie nicht.
+- Engine-Gesamtsuite, offizielle KI-Shards, beide Typechecks,
+  Paketgrenzen, Formatprüfung und `git diff --check` sind grün. Details stehen
+  im Final Review.
