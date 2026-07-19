@@ -2,7 +2,7 @@
 
 ## Status
 
-`planned`
+`regression_reproduced`
 
 ## Quelle und Vorgabe
 
@@ -105,6 +105,14 @@ Lifecycle-Einstieg nach erfolgreicher Shell-Traders-Installation.
 `preflight -> process_committed -> regression_reproduced -> lifecycle_fixed -> final_review -> main_sync -> main_merge -> cleanup -> complete`
 
 Bei einem nicht erfüllten Done-Gate bleibt der Prozess im aktuellen Zustand.
+
+## Paketfortschritt
+
+- STIL-00: abgeschlossen mit Prozessartefakt, Goal, Branch und Worktree.
+- STIL-01: Der fokussierte Lauf umfasst 33 Tests. 30 bestehende Tests sind
+  grün; genau die drei neuen Lifecycle-Verträge reproduzieren den Defekt mit
+  `Cloak`-Credits `0` statt `3`. Startzug mit zwei Shell-Traders-Kopien,
+  bezahlter letzter Counter und MU-Choice sind gleichermaßen betroffen.
 
 ## Paketfolge
 
