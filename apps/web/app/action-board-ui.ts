@@ -971,6 +971,8 @@ export function automaticCorpRunPassAction(
 }
 
 export function isContextualLegalAction(action: LegalAction): boolean {
+  if (action.payload?.runnerCostPenaltySupportContinuation === true)
+    return false;
   if (action.type === "start_run" && action.payload?.bonusRunNoClick === true)
     return false;
   if (

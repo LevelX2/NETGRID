@@ -1,19 +1,28 @@
 ---
 activityId: act-2026-07-19-hidden-bank-continuation-central-action
-status: inbox
+status: done
 kind: fix
 area: web
 priority: hotfix
 primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-07-19
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-07-19
+completedAt: 2026-07-19
+branch: codex/hidden-bank-continuation-ui
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/engine/src/game/legal-actions.ts
+  - packages/engine/src/index-tests/proteus/hidden-resource-hardening.test.ts
+  - apps/web/app/action-board-ui.ts
+  - apps/web/app/action-board-ui.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/web exec vitest run app/action-board-ui.test.ts
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/proteus/hidden-resource-hardening.test.ts
+  - corepack pnpm --filter @netgrid/web typecheck
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - git diff --check
 ---
 
 # Hidden-Bank-Fortsetzung zentral und gleichrangig anzeigen
@@ -78,26 +87,26 @@ kostenpflichtigen Karte oder eines anderen Spielobjekts verborgen werden.
 
 ## Akzeptanzkriterien
 
-- [ ] Nach `Running Interference` mit nutzbarer `Swiss Bank Account` zeigt die
+- [x] Nach `Running Interference` mit nutzbarer `Swiss Bank Account` zeigt die
   zentrale Aktionsliste gleichzeitig `Swiss Bank Account: 6 Credits nehmen`
   und `Ohne weiteren Bank-Support fortfahren: Running Interference auf …`.
-- [ ] Der Runner kann die Fortsetzungsaktion ohne erneute Auswahl einer der
+- [x] Der Runner kann die Fortsetzungsaktion ohne erneute Auswahl einer der
   gleichnamigen Karten im Grip ausführen.
-- [ ] Eine Engine-seitige strukturierte Payload- oder Vertragsmarkierung bindet
+- [x] Eine Engine-seitige strukturierte Payload- oder Vertragsmarkierung bindet
   die Fortsetzungsaktion an das aktive Payment-Support-Fenster; der Webclient
   koppelt die Sichtbarkeit nicht an das deutsche Labelpräfix.
-- [ ] Dieselbe zentrale Darstellung funktioniert für eine ansonsten
+- [x] Dieselbe zentrale Darstellung funktioniert für eine ansonsten
   kartenkontextuelle Pump- oder Break-Fortsetzung.
-- [ ] Gewöhnliche `play_event`-, Pump-, Break-, Installations- und
+- [x] Gewöhnliche `play_event`-, Pump-, Break-, Installations- und
   Access-Aktionen außerhalb eines Payment-Support-Fensters behalten ihre
   bisherige Kontextzuordnung.
-- [ ] Fortsetzen bezahlt und resolvt die ursprüngliche Aktion genau einmal;
+- [x] Fortsetzen bezahlt und resolvt die ursprüngliche Aktion genau einmal;
   Bankaktivierung und Fortsetzung bleiben zwei getrennte, freiwillige
   Entscheidungen.
-- [ ] Web-Unit-Tests decken die Action-Aufteilung für Bankaktivierung plus
+- [x] Web-Unit-Tests decken die Action-Aufteilung für Bankaktivierung plus
   Fortsetzung ab; der bestehende Engine-Regressionstest für die gebundene
   Originalaktion bleibt grün.
-- [ ] Web-Typecheck beziehungsweise die projektnahen Checks und
+- [x] Web-Typecheck beziehungsweise die projektnahen Checks und
   `git diff --check` sind grün.
 
 ## Umsetzungshinweise
@@ -118,4 +127,16 @@ kostenpflichtigen Karte oder eines anderen Spielobjekts verborgen werden.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Die Engine kennzeichnet die bereits gebundene Originalaktion im aktiven
+Runner-Payment-Support-Fenster nun strukturiert mit
+`runnerCostPenaltySupportContinuation` und der zugehörigen Window-ID. Der
+Webclient behandelt genau diese Fortsetzungsaktion als primäre Entscheidung;
+die Einordnung hängt weder vom deutschen Label noch von einer erneuten Auswahl
+der Eventkarte oder des Icebreakers ab.
+
+Der konkrete Fall `Running Interference` mit `Swiss Bank Account` ist im
+Engine-Test abgesichert. Webtests prüfen Event- und Break-Fortsetzungen im
+zentralen Aktionsbereich sowie die unveränderte Kontextzuordnung gleichartiger
+Aktionen außerhalb eines Payment-Support-Fensters. Die vorhandene
+Zahlungsauflösung und ihre Exactly-once-/Replay-Tests wurden nicht verändert und
+bleiben grün.

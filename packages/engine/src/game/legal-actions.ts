@@ -135,7 +135,9 @@ export function buildLegalActions(
 ): LegalAction[] {
   const { state } = host;
   if (state.winner || state.phase === "game_over") return [];
-  if (state.runnerCostPenaltySupportWindow)
+  const runnerCostPenaltySupportWindow =
+    state.runnerCostPenaltySupportWindow;
+  if (runnerCostPenaltySupportWindow)
     return side === "runner"
       ? [
           ...buildRunnerCostPenaltySupportCardImplementationActions(
@@ -145,12 +147,18 @@ export function buildLegalActions(
             .filter(
               (action) =>
                 action.actionId ===
-                  state.runnerCostPenaltySupportWindow?.originalActionId &&
+                  runnerCostPenaltySupportWindow.originalActionId &&
                 runnerCostPenaltySupportOriginalActionReady(state),
             )
             .map((action) => ({
               ...action,
               label: `Ohne weiteren Bank-Support fortfahren: ${action.label}`,
+              payload: {
+                ...(action.payload ?? {}),
+                runnerCostPenaltySupportContinuation: true,
+                runnerCostPenaltySupportWindowId:
+                  runnerCostPenaltySupportWindow.windowId,
+              },
             })),
         ]
       : [];

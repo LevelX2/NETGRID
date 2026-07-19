@@ -501,8 +501,62 @@ describe("PRO011 hidden resource timing hardening", () => {
       expect(continuation?.label).toContain(
         "Ohne weiteren Bank-Support fortfahren",
       );
+      expect(continuation?.payload).toMatchObject({
+        runnerCostPenaltySupportContinuation: true,
+        runnerCostPenaltySupportWindowId:
+          state.runnerCostPenaltySupportWindow?.windowId,
+      });
     },
   );
+
+  it("marks Running Interference continuation beside voluntary Swiss support", () => {
+    let state = runnerState("voluntary-running-interference-swiss");
+    state.runner.credits = 8;
+    const swissId = installHiddenResource(
+      state,
+      "onr_proteus_152_swiss-bank-account",
+      "voluntary_running_interference_swiss",
+    );
+    const runningInterferenceId = addRunnerGripCard(
+      state,
+      "onr_classic_043_running-interference",
+      "voluntary_running_interference",
+    );
+    const playRunningInterference = getLegalActions(state, "runner").find(
+      (candidate) =>
+        candidate.type === "play_event" &&
+        candidate.payload?.cardId === runningInterferenceId &&
+        candidate.payload?.serverId === "hq",
+    );
+    expect(playRunningInterference).toBeDefined();
+
+    const opened = applyLegal(state, "runner", playRunningInterference!);
+    expect(opened.ok).toBe(true);
+    state = opened.state;
+
+    const paymentActions = getLegalActions(state, "runner");
+    expect(
+      paymentActions.find(
+        (candidate) =>
+          candidate.source === swissId &&
+          candidate.label === "Swiss Bank Account: 6 Credits nehmen",
+      ),
+    ).toBeDefined();
+    const continuation = paymentActions.find(
+      (candidate) => candidate.actionId === playRunningInterference!.actionId,
+    );
+    expect(continuation).toMatchObject({
+      type: "play_event",
+      source: runningInterferenceId,
+      label:
+        "Ohne weiteren Bank-Support fortfahren: Running Interference auf HQ",
+      payload: {
+        runnerCostPenaltySupportContinuation: true,
+        runnerCostPenaltySupportWindowId:
+          state.runnerCostPenaltySupportWindow?.windowId,
+      },
+    });
+  });
 
   it("offers and resolves voluntary Chiba support before a payable icebreaker pump", () => {
     let { state, breakerId, chibaId } = payableBreakerEncounter(
@@ -546,6 +600,11 @@ describe("PRO011 hidden resource timing hardening", () => {
     expect(continuation?.label).toContain(
       "Ohne weiteren Bank-Support fortfahren",
     );
+    expect(continuation?.payload).toMatchObject({
+      runnerCostPenaltySupportContinuation: true,
+      runnerCostPenaltySupportWindowId:
+        state.runnerCostPenaltySupportWindow?.windowId,
+    });
     const resolved = applyLegal(state, "runner", continuation!);
     expect(resolved.ok).toBe(true);
     state = resolved.state;
@@ -576,6 +635,11 @@ describe("PRO011 hidden resource timing hardening", () => {
     expect(continuation?.label).toContain(
       "Ohne weiteren Bank-Support fortfahren",
     );
+    expect(continuation?.payload).toMatchObject({
+      runnerCostPenaltySupportContinuation: true,
+      runnerCostPenaltySupportWindowId:
+        state.runnerCostPenaltySupportWindow?.windowId,
+    });
 
     const resolved = applyLegal(state, "runner", continuation!);
     expect(resolved.ok).toBe(true);
