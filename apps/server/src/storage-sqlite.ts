@@ -2267,8 +2267,9 @@ function hydrateSnapshotGameState(state: GameState, eventLog: GameEvent[] | unde
 }
 
 function compactRecordForStorage(record: StoredMatch): StoredMatch {
+  const { actionPersistenceBaseline: _actionPersistenceBaseline, ...persistedRecord } = record;
   return {
-    ...record,
+    ...persistedRecord,
     gameState: gameStateForStorage(record.gameState),
     eventLog: [],
     actionReceipts: [],

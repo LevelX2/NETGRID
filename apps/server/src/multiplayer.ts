@@ -313,6 +313,22 @@ export type UndoSnapshot = {
 
 export type PendingUndoRequest = ApiPendingUndoRequest;
 
+export type ActionPersistenceBaseline = {
+  expectedMatchVersion: number;
+  expectedStateVersion: number;
+  publicEventCount: number;
+  engineEventCount: number;
+  actionReceiptCount: number;
+  aiDecisionTraceCount: number;
+  loadedActionReceiptCount: number;
+  loadedAiDecisionTraceCount: number;
+};
+
+export type ActionPersistenceLoadInput = {
+  side: Side;
+  idempotencyKey?: string;
+};
+
 export type StoredMatch = {
   match: MatchRecord;
   sessions: SessionRecord[];
@@ -329,6 +345,7 @@ export type StoredMatch = {
   stateSnapshots: StateSnapshot[];
   aiDecisionTraces?: AiDecisionTraceRecord[];
   pendingUndo?: PendingUndoRequest;
+  actionPersistenceBaseline?: ActionPersistenceBaseline;
 };
 
 export type AiDecisionTraceRecord = {
@@ -353,6 +370,8 @@ export type AiDecisionTraceRecord = {
 export type MultiplayerStorage = {
   load(matchId: string, options?: { includeStateSnapshots?: boolean }): Promise<StoredMatch | undefined>;
   save(record: StoredMatch): Promise<void>;
+  loadForAction?(matchId: string, input: ActionPersistenceLoadInput): Promise<StoredMatch | undefined>;
+  saveActionDelta?(record: StoredMatch): Promise<void>;
   list?(): Promise<StoredMatch[]>;
   listOpenMatchCandidates?(): Promise<StoredMatch[]>;
   health?(): Promise<StorageHealth>;
@@ -718,6 +737,15 @@ export class MultiplayerService {
 
   private async persist(record: StoredMatch): Promise<void> {
     await this.storage.save(record);
+    for (const observer of this.persistenceObservers) await observer(record);
+  }
+
+  private async persistAction(record: StoredMatch): Promise<void> {
+    if (record.actionPersistenceBaseline && this.storage.saveActionDelta) {
+      await this.storage.saveActionDelta(record);
+    } else {
+      await this.storage.save(record);
+    }
     for (const observer of this.persistenceObservers) await observer(record);
   }
 
@@ -1525,7 +1553,7 @@ export class MultiplayerService {
     selectedChoices?: Record<string, unknown>;
   }): Promise<SubmitActionResult> {
     return this.withMatchLock(input.matchId, async () => {
-      const record = await this.mustLoad(input.matchId, { includeStateSnapshots: false });
+      const record = await this.mustLoadForAction(input.matchId, { side: input.side, idempotencyKey: input.idempotencyKey });
       if (!record) return { ok: false, error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
       const session = this.authenticate(record, input.side, input.sessionToken);
       if (!session) return { ok: false, error: safeError("unauthorized", "Die Session ist nicht gültig.") };
@@ -1546,7 +1574,7 @@ export class MultiplayerService {
       }
       if (!record.gameState) return { ok: false, error: safeError("match_not_active", "Das Match wartet noch auf vollständige Deckauswahl.") };
       if (this.syncPlayerClock(record)) {
-        await this.persist(record);
+        await this.persistAction(record);
         return {
           ok: false,
           error: safeError("time_expired", "Die Spielerzeit ist abgelaufen.", record.gameState, input.side),
@@ -1567,7 +1595,7 @@ export class MultiplayerService {
       if (input.clientKnownStateVersion !== record.gameState.stateVersion) {
         const receipt = this.receiptFor(record, input.side, input.idempotencyKey, false, "stale_state");
         record.actionReceipts.push(receipt);
-        await this.persist(record);
+        await this.persistAction(record);
         return {
           ok: false,
           receipt,
@@ -1590,7 +1618,7 @@ export class MultiplayerService {
       if (!result.ok) {
         const receipt = this.receiptFor(record, input.side, input.idempotencyKey, false, result.error.code);
         record.actionReceipts.push(receipt);
-        await this.persist(record);
+        await this.persistAction(record);
         return {
           ok: false,
           receipt,
@@ -1621,7 +1649,7 @@ export class MultiplayerService {
       }
       this.maybeRunAiAfterTransition(record);
       this.syncPlayerClock(record);
-      await this.persist(record);
+      await this.persistAction(record);
       const success: SubmitActionResult = {
         ok: true,
         receipt,
@@ -1643,7 +1671,7 @@ export class MultiplayerService {
     mode?: "single_step" | "until_human";
   }): Promise<AdvanceAiResult> {
     return this.withMatchLock(input.matchId, async () => {
-      const record = await this.mustLoad(input.matchId, { includeStateSnapshots: false });
+      const record = await this.mustLoadForAction(input.matchId, { side: input.side });
       if (!record) return { ok: false, error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
       const session = this.authenticate(record, input.side, input.sessionToken);
       if (!session) return { ok: false, error: safeError("unauthorized", "Die Session ist nicht gültig.") };
@@ -1651,7 +1679,7 @@ export class MultiplayerService {
       if (record.match.mode === "ai_vs_ai" && !isHostSession(record, session)) return { ok: false, error: safeError("host_required", "Nur die Beobachtersession darf die Simulation fortsetzen.") };
       if (record.match.status !== "active" || !record.gameState) return { ok: false, error: safeError("match_not_active", "Das Match ist noch nicht aktiv.") };
       if (this.syncPlayerClock(record)) {
-        await this.persist(record);
+        await this.persistAction(record);
         return { ok: false, error: safeError("time_expired", "Die Spielerzeit ist abgelaufen.", record.gameState, input.side), payload: this.payloadFor(record, input.side) };
       }
       const activeAiSide = this.aiControllableSide(record);
@@ -1672,7 +1700,7 @@ export class MultiplayerService {
       this.syncPlayerClock(record);
 
       if (!aiStepResult.ok && aiStepResult.code === "ai_decision_action_not_legal") {
-        await this.persist(record);
+        await this.persistAction(record);
         return {
           ok: false,
           error: safeError("ai_decision_action_not_legal", "Die KI wählte keine aktuell legale Aktion.", record.gameState, input.side),
@@ -1680,7 +1708,7 @@ export class MultiplayerService {
         };
       }
       if (!aiStepResult.ok && aiStepResult.code === "ai_engine_action_rejected") {
-        await this.persist(record);
+        await this.persistAction(record);
         const engineErrorSuffix = aiStepResult.engineErrorCode
           ? ` (${aiStepResult.engineErrorCode})`
           : "";
@@ -1696,7 +1724,7 @@ export class MultiplayerService {
         };
       }
       if (!aiStepResult.ok && isAiDeckSnapshotErrorCode(aiStepResult.code)) {
-        await this.persist(record);
+        await this.persistAction(record);
         return {
           ok: false,
           error: safeError(aiStepResult.code, aiDeckSnapshotErrorMessage(aiStepResult.code), record.gameState, input.side),
@@ -1705,11 +1733,11 @@ export class MultiplayerService {
       }
 
       if (record.eventLog.length === beforeEventCount) {
-        await this.persist(record);
+        await this.persistAction(record);
         return { ok: false, error: safeError("ai_no_action", "Die KI konnte aktuell keine Aktion ausführen.", record.gameState, input.side), payload: this.payloadFor(record, input.side) };
       }
 
-      await this.persist(record);
+      await this.persistAction(record);
       const result: AdvanceAiResult = {
         ok: true,
         requesterPayload: this.payloadFor(record, input.side),
@@ -2851,6 +2879,14 @@ export class MultiplayerService {
 
   private async mustLoad(matchId: string, options?: { includeStateSnapshots?: boolean }): Promise<StoredMatch | undefined> {
     return this.storage.load(matchId, options);
+  }
+
+  private async mustLoadForAction(matchId: string, input: ActionPersistenceLoadInput): Promise<StoredMatch | undefined> {
+    if (this.storage.loadForAction && this.storage.saveActionDelta) {
+      const record = await this.storage.loadForAction(matchId, input);
+      if (!record || record.actionPersistenceBaseline) return record;
+    }
+    return this.storage.load(matchId, { includeStateSnapshots: false });
   }
 
   private authenticate(record: StoredMatch, side: Side, sessionToken: string): SessionRecord | undefined {

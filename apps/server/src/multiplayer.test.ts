@@ -16,7 +16,7 @@ import { createConfiguredStorage, createNetgridHttpServer, isMaintenanceClientAd
 import { InMemoryMaintenanceCredentialStore, MaintenanceAuthService } from "./maintenance-auth";
 import { assertInviteLobbyPayloadRedacted, findInviteLobbyPayloadRedactionLeaks } from "./invite-lobby-redaction.test-helper";
 import { FixedWindowRateLimiter, createRateLimiter, loadDeploymentConfig, redactSensitiveText, redactedJoinUrl, type DeploymentConfig } from "./internet-hardening";
-import { InMemoryMatchStorage, MultiplayerService, type EventRecord, type JoinMatchResult, type MatchSettings, type MultiplayerStorage, type SidePayload, type StateSnapshot, type StoredMatch } from "./multiplayer";
+import { InMemoryMatchStorage, MultiplayerService, type ActionPersistenceLoadInput, type EventRecord, type JoinMatchResult, type MatchSettings, type MultiplayerStorage, type SidePayload, type StateSnapshot, type StoredMatch } from "./multiplayer";
 import { SqliteMatchStorage, StorageError, inspectSqliteStorage, restoreSqliteStorageBackup } from "./storage-sqlite";
 import { AI_DECISION_CHAIN_DEBUG_SCHEMA_VERSION, AI_DECISION_DEBUG_SCHEMA_VERSION, CURRENT_RULES_BASELINE, type AiDecision, type ApiCreateMatchResponse, type CardInstanceId, type ChoiceRequest, type DeckDefinition, type GameEvent, type GameState, type LegalAction, type PublicGameEvent, type Side } from "@netgrid/shared";
 
@@ -1848,6 +1848,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     if ("error" in payload) throw new Error(payload.error.message);
     const action = payload.legalActions[0];
     if (!action) throw new Error("Missing legal action");
+    storage.resetCounters();
     storage.failNextSave = true;
     await expect(
       service.submitAction({
@@ -1859,6 +1860,46 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
         idempotencyKey: "persist-fails"
       })
     ).rejects.toThrow("forced_storage_failure");
+    expect(storage.loadCount).toBe(1);
+    expect(storage.saveCount).toBe(1);
+  });
+
+  it("uses the optional action delta capability and notifies observers after persistence", async () => {
+    const order: string[] = [];
+    const storage = new ActionDeltaTrackingStorage(order);
+    const service = new MultiplayerService(storage, { tokenSalt: "v108-action-delta-capability" });
+    const created = await service.createMatch({ hostSide: "runner", seed: "v108-action-delta-capability" });
+    const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+    if (!joinToken) throw new Error("Missing join token");
+    const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Corp" });
+    if ("error" in joined) throw new Error(joined.error.message);
+    await forceSetupComplete(service, created.matchId);
+    const activeSide = (await service.loadForTest(created.matchId))?.gameState.activeSide ?? "runner";
+    const sessionToken = activeSide === "runner" ? created.hostSessionToken : joined.sessionToken;
+    const payload = await service.bootstrap(created.matchId, activeSide, sessionToken);
+    if ("error" in payload) throw new Error(payload.error.message);
+    const action = payload.legalActions[0];
+    if (!action) throw new Error("Missing legal action");
+    storage.resetCounters();
+    service.addPersistenceObserver(async () => {
+      order.push("observer");
+    });
+
+    const result = await service.submitAction({
+      matchId: created.matchId,
+      side: activeSide,
+      sessionToken,
+      actionId: action.actionId,
+      clientKnownStateVersion: payload.playerView.stateVersion,
+      idempotencyKey: "delta-capability"
+    });
+
+    if (!result.ok) throw new Error(`Unexpected delta capability result: ${JSON.stringify(result.error)}`);
+    expect(result.ok).toBe(true);
+    expect(storage.actionLoadCount).toBe(1);
+    expect(storage.deltaSaveCount).toBe(1);
+    expect(storage.fullSaveCount).toBe(0);
+    expect(order).toEqual(["delta-save", "observer"]);
   });
 });
 
@@ -8516,12 +8557,16 @@ function deckSnapshotByIdForTest(snapshotId: string): DeckSnapshot {
 class FailingStorage implements MultiplayerStorage {
   private readonly inner = new InMemoryMatchStorage();
   failNextSave = false;
+  loadCount = 0;
+  saveCount = 0;
 
   load(matchId: string): Promise<StoredMatch | undefined> {
+    this.loadCount += 1;
     return this.inner.load(matchId);
   }
 
   async save(record: StoredMatch): Promise<void> {
+    this.saveCount += 1;
     if (this.failNextSave) {
       this.failNextSave = false;
       throw new Error("forced_storage_failure");
@@ -8531,5 +8576,63 @@ class FailingStorage implements MultiplayerStorage {
 
   list(): Promise<StoredMatch[]> {
     return this.inner.list();
+  }
+
+  resetCounters(): void {
+    this.loadCount = 0;
+    this.saveCount = 0;
+  }
+}
+
+class ActionDeltaTrackingStorage implements MultiplayerStorage {
+  private readonly inner = new InMemoryMatchStorage();
+  actionLoadCount = 0;
+  deltaSaveCount = 0;
+  fullSaveCount = 0;
+
+  constructor(private readonly order: string[]) {}
+
+  load(matchId: string, options?: { includeStateSnapshots?: boolean }): Promise<StoredMatch | undefined> {
+    return this.inner.load(matchId, options);
+  }
+
+  async save(record: StoredMatch): Promise<void> {
+    this.fullSaveCount += 1;
+    await this.inner.save(record);
+  }
+
+  async loadForAction(matchId: string, _input: ActionPersistenceLoadInput): Promise<StoredMatch | undefined> {
+    this.actionLoadCount += 1;
+    const record = await this.inner.load(matchId, { includeStateSnapshots: false });
+    if (!record) return undefined;
+    record.actionPersistenceBaseline = {
+      expectedMatchVersion: record.match.matchVersion,
+      expectedStateVersion: record.gameState.stateVersion,
+      publicEventCount: record.eventLog.length,
+      engineEventCount: record.gameState.eventLog.length,
+      actionReceiptCount: record.actionReceipts.length,
+      aiDecisionTraceCount: record.aiDecisionTraces?.length ?? 0,
+      loadedActionReceiptCount: record.actionReceipts.length,
+      loadedAiDecisionTraceCount: record.aiDecisionTraces?.length ?? 0
+    };
+    return record;
+  }
+
+  async saveActionDelta(record: StoredMatch): Promise<void> {
+    this.deltaSaveCount += 1;
+    const { actionPersistenceBaseline: _actionPersistenceBaseline, ...persistedRecord } = record;
+    await this.inner.save(persistedRecord as StoredMatch);
+    this.order.push("delta-save");
+  }
+
+  list(): Promise<StoredMatch[]> {
+    return this.inner.list();
+  }
+
+  resetCounters(): void {
+    this.actionLoadCount = 0;
+    this.deltaSaveCount = 0;
+    this.fullSaveCount = 0;
+    this.order.length = 0;
   }
 }
