@@ -92,15 +92,25 @@ for (const missing of [...expectedTypeCycleSignatures].filter(
 
 const productionLineCaps = new Map([
   ["belief-state.ts", 2548],
-  ["runtime/semantic-runtime-corp-score.ts", 828],
-  ["runtime/semantic-runtime-corp-board-triage.ts", 793],
+  ["runtime/semantic-runtime-corp-score.ts", 492],
+  [
+    "runtime/corp-scoreline/semantic-runtime-corp-score-action-families.ts",
+    391,
+  ],
+  ["runtime/semantic-runtime-corp-board-triage.ts", 364],
+  [
+    "runtime/corp-scoreline/semantic-runtime-corp-board-triage-alignment.ts",
+    463,
+  ],
   ["runner-hand-development.ts", 936],
   ["runner/hand-development/runner-hand-text-signals.ts", 431],
   ["runner/hand-development/runner-persistent-install-evaluation.ts", 1450],
   ["visible-run-analysis.ts", 629],
   ["run-analysis/visible-run-breaker-path.ts", 838],
   ["run-analysis/visible-run-hazards.ts", 753],
-  ["runtime/semantic-choice-ranking.ts", 543],
+  ["runtime/semantic-choice-ranking.ts", 10],
+  ["runtime/choice-ranking/mapped-choice-orchestrator.ts", 482],
+  ["runtime/choice-ranking/mapped-choice-initial-overrides.ts", 128],
   ["runtime/semantic-runtime-corp-scoring-window.ts", 249],
   [
     "runtime/corp-scoreline/semantic-runtime-corp-board-triage-policies.ts",
@@ -109,11 +119,20 @@ const productionLineCaps = new Map([
   ["runtime/corp-scoreline/semantic-runtime-corp-score-action-economy.ts", 885],
   [
     "runtime/corp-scoreline/semantic-runtime-corp-score-scoreline-components.ts",
-    997,
+    526,
   ],
+  ["runtime/corp-scoreline/semantic-runtime-corp-score-active-remote.ts", 505],
   [
     "runtime/corp-scoreline/semantic-runtime-corp-scoring-window-projection.ts",
-    1445,
+    1189,
+  ],
+  [
+    "runtime/corp-scoreline/semantic-runtime-corp-scoring-window-runner-pressure.ts",
+    448,
+  ],
+  [
+    "runtime/corp-scoreline/semantic-runtime-corp-scoring-window-card-data.ts",
+    4,
   ],
 ]);
 for (const file of productionFiles) {
@@ -130,9 +149,15 @@ for (const file of productionFiles) {
 const testLineCaps = new Map([
   ["runner-hand-development.test.ts", 655],
   ["runner/hand-development/runner-persistent-install-evaluation.test.ts", 912],
-  ["runtime/semantic-runtime-corp-score.test.ts", 3797],
+  ["runtime/semantic-runtime-corp-score-active-remote.test.ts", 1606],
+  ["runtime/semantic-runtime-corp-score-economy-and-trace.test.ts", 1067],
+  ["runtime/semantic-runtime-corp-score-pressure.test.ts", 1183],
   ["tactical-plans.test.ts", 4308],
-  ["semantic-ai-runtime-cutover.test.ts", 4261],
+  ["semantic-ai-runtime-cutover-boundaries.test.ts", 255],
+  ["semantic-ai-runtime-cutover-corp.test.ts", 1443],
+  ["semantic-ai-runtime-cutover-runner-plans.test.ts", 1602],
+  ["semantic-ai-runtime-cutover-runner-safety.test.ts", 710],
+  ["semantic-ai-runtime-cutover.test-support.ts", 433],
   ["runtime/semantic-runtime-corp-board-triage.test.ts", 1764],
   ["runtime/semantic-runtime-corp-scoring-window.test.ts", 812],
   [
@@ -140,8 +165,16 @@ const testLineCaps = new Map([
     3314,
   ],
   [
-    "runtime/corp-scoreline/semantic-runtime-corp-board-triage-scoreline.test.ts",
-    1373,
+    "runtime/corp-scoreline/semantic-runtime-corp-board-triage-central.test.ts",
+    517,
+  ],
+  [
+    "runtime/corp-scoreline/semantic-runtime-corp-board-triage-clock.test.ts",
+    368,
+  ],
+  [
+    "runtime/corp-scoreline/semantic-runtime-corp-board-triage-remote-funding.test.ts",
+    613,
   ],
   [
     "runtime/corp-scoreline/semantic-runtime-corp-scoring-window-protection.test.ts",
@@ -149,7 +182,11 @@ const testLineCaps = new Map([
   ],
   ["runner-run-target-evaluation.test.ts", 3150],
   ["runtime/semantic-choice-ranking.test.ts", 1218],
-  ["runtime/choice-ranking/semantic-choice-ranking-corp.test.ts", 299],
+  [
+    "runtime/choice-ranking/semantic-choice-ranking-corp-scoreline.test.ts",
+    230,
+  ],
+  ["runtime/choice-ranking/semantic-choice-ranking-corp-triage.test.ts", 206],
   ["runtime/choice-ranking/semantic-choice-ranking-mapping.test.ts", 102],
 ]);
 for (const [relative, cap] of testLineCaps) {

@@ -1,6 +1,6 @@
 # CODEX_STATUS
 
-Stand: 2026-07-18
+Stand: 2026-07-19
 
 ## Einstieg
 
@@ -35,6 +35,14 @@ beobachtbar; diese Observability verändert weder Scoring noch Planpriorität.
 Der vorhandene SQLite-KI-Trace persistiert die Kette im normalen
 `summary`-Modus kompakt und im erweiterten `detailed`-Modus vollständig unter
 demselben `trace_json`-Pfad.
+
+Das AI-Source-Structure-Gate ist nach der Remediation aller neun am 19.07.2026
+reproduzierten Größenverstöße wieder grün. Choice-Ranking, Scoring-Window,
+Corp-Score, Board-Triage und Cutover-Tests besitzen fachliche Owner- oder
+Vertragsgrenzen; der produktive Importgraph bleibt frei von Laufzeit- und
+Typzyklen. `check:ai`, `check:ai:full` und 406 AI-Testdateien mit 2.793 Tests
+sind grün. Führend ist
+`docs/reviews/ai/ai-source-structure-gate-remediation-final-review-2026-07-19.md`.
 
 Das jüngste Runner-Endgame-Review aus Match 424A ist spielgleich geschlossen:
 Tag-Vermeidung, projizierte Run-Events, terminale Remote-Vorbereitung,
@@ -100,6 +108,7 @@ corepack pnpm typecheck
 corepack pnpm test:contracts
 corepack pnpm test:ai:shards
 corepack pnpm check:package-boundaries
+corepack pnpm check:ai-source-structure
 corepack pnpm check:card-asset-retention
 corepack pnpm check:ai:full
 corepack pnpm check:proteus-ai-readiness
@@ -141,9 +150,10 @@ und
 
 ## Offene technische Schwerpunkte
 
-- `apps/web/app/page.tsx`, `apps/web/app/chronicle.ts`,
-  `apps/server/src/multiplayer.test.ts` und Teile des Corp-AI-Scorings sind
-  weiterhin groß.
+- `apps/web/app/page.tsx`, `apps/web/app/chronicle.ts` und
+  `apps/server/src/multiplayer.test.ts` sind weiterhin groß. Die priorisierten
+  Corp-AI-Scoring-, Choice- und Triage-Owner liegen wieder innerhalb ihrer
+  geratcheten Grenzen.
 - Das Engine-Architektur-Zielgate ist ohne Baseline-Ausnahme grün;
   Mark-Counter-Anzeigen sind datengetrieben. 430 Runtime-Port-Bindings sind
   statisch typisiert; der produktive relative Importgraph ist zyklenfrei.

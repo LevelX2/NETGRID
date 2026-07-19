@@ -1,7 +1,13 @@
-import type { PlanStepMappingResult } from "../../tactical-plans";
+import type {
+  PlanStepMappingResult,
+  TacticalPlanRuntimeResult,
+} from "../../tactical-plans";
 import type { SemanticRuntimeChoice } from "../semantic-runtime-types";
 import { semanticRuntimeServerId } from "../semantic-runtime-scope";
-import { semanticRuntimeChoiceHasScoreComponent } from "./semantic-choice-ranking-support";
+import {
+  semanticRuntimeChoiceHasScoreComponent,
+  tacticalPlanBlocksSemanticChoice,
+} from "./semantic-choice-ranking-support";
 import {
   mappedPlanHasImmediateVisibleRunPayoff,
   runnerSurvivalMappingHasProgressPriority,
@@ -323,4 +329,23 @@ export function tacticalPlanInferiorRunTargetMappingShouldYield(
       (component) => component.key === "runner_rnd_fresh_memory",
     )
   );
+}
+
+export function bestSemanticRuntimeChoice(
+  choices: readonly SemanticRuntimeChoice[],
+): SemanticRuntimeChoice | undefined {
+  return (
+    choices.find((candidate) => !candidate.exclusion && candidate.score > 0) ??
+    choices.find((candidate) => !candidate.exclusion)
+  );
+}
+
+export function bestSemanticRuntimeChoiceForTacticalPlanOverride(
+  choices: readonly SemanticRuntimeChoice[],
+  planRuntime: TacticalPlanRuntimeResult,
+): SemanticRuntimeChoice | undefined {
+  const viableChoices = choices.filter(
+    (choice) => !tacticalPlanBlocksSemanticChoice(planRuntime, choice),
+  );
+  return bestSemanticRuntimeChoice(viableChoices);
 }

@@ -98,7 +98,10 @@
   `current_candidate`.
 - Der produktive AI-Importgraph ist frei von Laufzeit- und Typzyklen. Das
   ausführbare Source-Structure-Gate schützt diese Nullbaseline sowie die
-  erreichten Größen der priorisierten Produktions- und Testmodule.
+  erreichten Größen der priorisierten Produktions- und Testmodule. Die neun
+  am 19.07.2026 reproduzierten Größenverstöße sind fachlich geschnitten; ein
+  rotes `check:ai-source-structure` ist seitdem kein akzeptierter Vorzustand
+  für weitere AI-Integrationen.
 - Volatile Entscheidungsfamilien besitzen fachliche Modulgruppen:
   Choice-Overrides unter `runtime/choice-ranking/`, Corp-Scoreline unter
   `runtime/corp-scoreline/`, sichtbare Run-Projektion unter `run-analysis/`
@@ -157,8 +160,11 @@
   den produktiven Semantic-Runtime-Auswahlweg.
 - `ai-source-structure-optimization-process-2026-07-17.md` und
   `docs/reviews/ai/ai-source-structure-optimization-final-review-2026-07-17.md`:
-  aktueller Source-Placement-, Zyklen-, Größenratchet- und
+  ursprünglicher Source-Placement-, Zyklen-, Größenratchet- und
   Public-/Simulation-Grenzstand.
+- `ai-source-structure-gate-remediation-plan-2026-07-19.md` und
+  `docs/reviews/ai/ai-source-structure-gate-remediation-final-review-2026-07-19.md`:
+  aktuelle grüne Größen-, Zyklen-, Runtime-Root- und Full-Gate-Nullbaseline.
 - `ai-seed03-seed05-loop-remediation-process-2026-07-14.md` und
   `docs/reviews/ai/ai-behavior-baseline-v1-seed03-seed05-remediation-final-2026-07-14.md`:
   spielgleiche Verträge und vollständige Seed-03/05-Evidence für marginale

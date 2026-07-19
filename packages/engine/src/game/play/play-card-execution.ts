@@ -112,7 +112,6 @@ function executePlayEventAction(
         ? restrictedHostedCredits(host.state, "play_events")
         : 0);
     if (
-      availableWithoutSupport < creditCost &&
       openRunnerCostPenaltySupportWindow(host.state, legalAction, {
         amount: creditCost,
         availableWithoutSupport,

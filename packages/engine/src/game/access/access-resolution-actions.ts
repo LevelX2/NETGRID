@@ -65,7 +65,6 @@ export function handleAccessExecution(
       const paidCredits = revalidateStealAgendaCost(host, legalAction);
       if (paidCredits > 0) {
         if (
-          host.state.runner.credits < paidCredits &&
           openRunnerCostPenaltySupportWindow(host.state, legalAction, {
             amount: paidCredits,
             availableWithoutSupport: host.state.runner.credits,
@@ -547,7 +546,6 @@ export function trashAccessedCard(
       );
     if (
       expectedCost > 0 &&
-      host.state.runner.credits < expectedCost &&
       openRunnerCostPenaltySupportWindow(host.state, legalAction!, {
         amount: expectedCost,
         availableWithoutSupport: host.state.runner.credits,
@@ -583,7 +581,6 @@ export function trashAccessedCard(
   );
   if (
     trashCost > 0 &&
-    availableWithoutSupport < trashCost &&
     legalAction &&
     openRunnerCostPenaltySupportWindow(host.state, legalAction, {
       amount: trashCost,

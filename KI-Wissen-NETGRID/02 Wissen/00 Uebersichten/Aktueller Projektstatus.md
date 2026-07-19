@@ -157,6 +157,15 @@ Stand: 2026-07-19
   Karten-Hint-Quelle für Runtime, Deckstrategie und Inspector. Die frühere
   Compile-/Derived-Facts-/Manual-Overlay-Pipeline ist entfernt; der Inspector
   erzeugt nur noch seinen Such- und Diagnoseindex direkt aus dieser Quelle.
+- Das AI-Source-Structure-Gate besitzt wieder eine grüne Null-Baseline. Die
+  neun am 19.07.2026 reproduzierten Größenverstöße in Cutover-Tests,
+  Choice-Ranking, Scoring-Window, Corp-Score und Board-Triage wurden durch
+  fachliche Owner- und Testsuite-Schnitte entfernt, ohne bestehende Caps
+  anzuheben. Der produktive Importgraph bleibt mit 677 Dateien frei von
+  Laufzeit- und Typzyklen; der Runtime-Root steht bei 289 Dateien.
+  `check:ai`, `check:ai:full` und 406 AI-Testdateien mit 2.793 Tests sind
+  grün. Führend ist
+  `docs/reviews/ai/ai-source-structure-gate-remediation-final-review-2026-07-19.md`.
 - Führende Artefakte:
   - `docs/architecture/ai/README.md`
   - `docs/architecture/ai/ai-current-state-cleanup-process-2026-07-09.md`
