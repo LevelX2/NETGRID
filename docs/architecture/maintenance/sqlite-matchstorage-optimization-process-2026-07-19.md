@@ -255,3 +255,19 @@ complete.`
   Optimize-/Vacuum-Ablauf von SMO-03.
 - Fokussierte Trace-/Replay-/Redactiontests: 8/8 grün.
 - Server-Typecheck und `git diff --check`: grün.
+
+### SMO-03 – abgeschlossen
+
+- SQLite-Backups werden über `VACUUM INTO` aus der geöffneten Datenbank
+  konsistent und ohne Freelist-Ballast erzeugt und vor der Erfolgsmeldung per
+  `integrity_check` validiert.
+- SHA-256-Prüfsummen lesen große Datenbanken in begrenzten 1-MiB-Blöcken statt
+  die gesamte Datei in den Node-Arbeitsspeicher zu laden.
+- `corepack pnpm storage:optimize` erzeugt zuerst ein kompaktes
+  `pre_optimization`-Backup, normalisiert historische doppelte
+  `aiDecisionDebug`-Eventpayloads, führt `VACUUM` und `PRAGMA optimize` aus und
+  prüft anschließend die Integrität.
+- Bestehende Backups werden nicht automatisch gelöscht; das Runbook verlangt
+  exklusiven Zugriff bei beendeter NETGRID-App.
+- Fokussierte Backup-/Restore-/Kompaktions-/Optimize-Tests: 4/4 grün.
+- Server-Typecheck und `git diff --check`: grün.

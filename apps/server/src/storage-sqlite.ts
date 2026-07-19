@@ -1,5 +1,5 @@
 import { createHash, randomBytes } from "node:crypto";
-import { copyFileSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { closeSync, copyFileSync, existsSync, mkdirSync, openSync, readFileSync, readSync, statSync, writeFileSync } from "node:fs";
 import { dirname, basename, join, resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { hashState } from "@netgrid/engine";
@@ -43,7 +43,7 @@ export type BackupManifest = {
   source: "default_sqlite" | "configured_sqlite" | "pre_restore_sqlite";
   files: Array<{ name: string; sizeBytes: number; sha256: string }>;
   matchCount?: number;
-  reason?: "manual" | "pre_restore" | "pre_cleanup" | "pre_compaction";
+  reason?: "manual" | "pre_restore" | "pre_cleanup" | "pre_compaction" | "pre_optimization";
 };
 
 export type StorageMaintenanceParticipant = {
@@ -212,6 +212,27 @@ export type StorageMaintenanceSnapshotCompactionResult = {
   };
 };
 
+export type StorageMaintenanceOptimizeResult = {
+  backendOpsVersion: "Backend 0.5";
+  generatedAt: string;
+  backup: {
+    backupDir: string;
+    backupId: string;
+    createdAt: string;
+  };
+  backupCreated: true;
+  normalizedAiDebugEventRows: number;
+  integrityCheck: "ok";
+  database: {
+    beforeBytes: number;
+    afterBytes: number;
+    reclaimedBytes: number;
+    pageSize: number;
+    freelistPagesBefore: number;
+    freelistPagesAfter: number;
+  };
+};
+
 export type StorageMaintenanceSummary = {
   backendOpsVersion: "Backend 0.5";
   generatedAt: string;
@@ -368,6 +389,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
   async backup(reason: BackupManifest["reason"] = "manual"): Promise<{ backupDir: string; manifest: BackupManifest }> {
     return createSqliteStorageBackup({
       dbPath: this.dbPath,
+      database: this.db,
       backupDir: this.backupDir,
       schemaVersion: Number(this.meta("schema_version") ?? SQLITE_STORAGE_SCHEMA_VERSION),
       matchCount: this.matchCount(),
@@ -646,6 +668,51 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         afterRewriteBytes: this.databaseSizeBytes(),
         beforePayloadBytes,
         afterPayloadBytes: this.compactionPayloadBytes()
+      }
+    };
+  }
+
+  async maintenanceOptimize(now = new Date()): Promise<StorageMaintenanceOptimizeResult> {
+    const generatedAt = now.toISOString();
+    const beforeBytes = this.databaseSizeBytes();
+    const pageSize = this.pragmaNumber("page_size");
+    const freelistPagesBefore = this.pragmaNumber("freelist_count");
+    const backup = await this.backup("pre_optimization");
+
+    const normalizedAiDebugEventRows = this.transaction(() => {
+      const result = this.db
+        .prepare(
+          `UPDATE events
+           SET public_payload_json = json_remove(public_payload_json, '$.publicPayload.aiDecisionDebug')
+           WHERE json_type(public_payload_json, '$.publicPayload.aiDecisionDebug') IS NOT NULL`
+        )
+        .run();
+      return Number(result.changes);
+    });
+
+    this.db.exec("VACUUM");
+    this.db.exec("PRAGMA optimize");
+    const integrityCheck = this.integrityCheck();
+    const afterBytes = this.databaseSizeBytes();
+
+    return {
+      backendOpsVersion: "Backend 0.5",
+      generatedAt,
+      backup: {
+        backupDir: backup.backupDir,
+        backupId: backup.manifest.backupId,
+        createdAt: backup.manifest.createdAt
+      },
+      backupCreated: true,
+      normalizedAiDebugEventRows,
+      integrityCheck,
+      database: {
+        beforeBytes,
+        afterBytes,
+        reclaimedBytes: Math.max(0, beforeBytes - afterBytes),
+        pageSize,
+        freelistPagesBefore,
+        freelistPagesAfter: this.pragmaNumber("freelist_count")
       }
     };
   }
@@ -1835,11 +1902,12 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     return Number(row[name] ?? 0);
   }
 
-  private transaction(work: () => void): void {
+  private transaction<T>(work: () => T): T {
     this.db.exec("BEGIN IMMEDIATE");
     try {
-      work();
+      const result = work();
       this.db.exec("COMMIT");
+      return result;
     } catch (error) {
       this.db.exec("ROLLBACK");
       throw error;
@@ -1964,6 +2032,7 @@ function dedupeStateSnapshots(record: StoredMatch): void {
 
 export function createSqliteStorageBackup(input: {
   dbPath?: string;
+  database?: DatabaseSync;
   backupDir: string;
   schemaVersion: number;
   matchCount?: number;
@@ -1978,7 +2047,16 @@ export function createSqliteStorageBackup(input: {
   const files: BackupManifest["files"] = [];
   if (input.dbPath && existsSync(input.dbPath)) {
     const targetName = "netgrid.sqlite";
-    copyFileSync(input.dbPath, join(targetDir, targetName));
+    const targetPath = join(targetDir, targetName);
+    let database = input.database;
+    const ownsDatabase = !database;
+    try {
+      database ??= new DatabaseSync(resolve(input.dbPath));
+      database.prepare("VACUUM INTO ?").run(targetPath);
+    } finally {
+      if (ownsDatabase) database?.close();
+    }
+    assertSqliteBackupUsable(targetPath);
     files.push(fileManifestEntry(targetDir, targetName));
   }
   if (files.length === 0) throw new StorageError("backup_invalid", "Backup konnte keine gültigen Storage-Dateien sichern.");
@@ -2143,7 +2221,19 @@ function fileManifestEntry(dir: string, name: string): BackupManifest["files"][n
 }
 
 function sha256File(path: string): string {
-  return createHash("sha256").update(readFileSync(path)).digest("hex");
+  const hash = createHash("sha256");
+  const buffer = Buffer.allocUnsafe(1024 * 1024);
+  const file = openSync(path, "r");
+  try {
+    let bytesRead = 0;
+    do {
+      bytesRead = readSync(file, buffer, 0, buffer.length, null);
+      if (bytesRead > 0) hash.update(buffer.subarray(0, bytesRead));
+    } while (bytesRead > 0);
+  } finally {
+    closeSync(file);
+  }
+  return hash.digest("hex");
 }
 
 function timestampId(): string {

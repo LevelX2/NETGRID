@@ -97,6 +97,7 @@ import type {
   StorageMaintenanceMatchDetail,
   StorageMaintenanceMatchEntry,
   StorageMaintenanceMatchFilters,
+  StorageMaintenanceOptimizeResult,
   StorageMaintenanceSnapshotCompactionResult,
   StorageMaintenanceSummary
 } from "./storage-sqlite";
@@ -368,6 +369,7 @@ export type MultiplayerStorage = {
   setMaintenanceCleanupPolicy?(policy: StorageMaintenanceCleanupPolicyInput): Promise<StorageMaintenanceCleanupPolicy>;
   runMaintenanceCleanupPolicy?(): Promise<StorageMaintenanceCleanupPolicyRunResult>;
   maintenanceCompactSnapshots?(): Promise<StorageMaintenanceSnapshotCompactionResult>;
+  maintenanceOptimize?(): Promise<StorageMaintenanceOptimizeResult>;
   maintenanceSetRetentionProtection?(matchId: string, protectedValue: boolean): Promise<StorageMaintenanceMatchDetail | undefined>;
   close?(): void;
 };
@@ -2093,6 +2095,10 @@ export class MultiplayerService {
 
   async storageMaintenanceCompactSnapshots(): Promise<StorageMaintenanceSnapshotCompactionResult | undefined> {
     return this.storage.maintenanceCompactSnapshots?.();
+  }
+
+  async storageMaintenanceOptimize(): Promise<StorageMaintenanceOptimizeResult | undefined> {
+    return this.storage.maintenanceOptimize?.();
   }
 
   async storageMaintenanceSetRetentionProtection(matchId: string, protectedValue: boolean): Promise<StorageMaintenanceMatchDetail | undefined> {

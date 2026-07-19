@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
@@ -1745,6 +1745,80 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     const manifestText = await readFile(join(backup.backupDir, "manifest.json"), "utf8");
     expect(manifestText).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|cardInstances|privateDeckSnapshots|decklist/i);
     reopened.close();
+  });
+
+  it("creates compact backups and safely optimizes historical SQLite payloads", async () => {
+    const dir = await tempStorageDir();
+    const dbPath = join(dir, "netgrid.sqlite");
+    const backupDir = join(dir, "backups");
+    const storage = new SqliteMatchStorage({ dbPath, backupDir });
+    const service = new MultiplayerService(storage, { tokenSalt: "v108-storage-optimize" });
+    const created = await service.createMatch({ hostSide: "runner", seed: "v108-storage-optimize" });
+
+    const setupDb = new DatabaseSync(dbPath);
+    try {
+      const legacyDebug = JSON.stringify({ schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION, aiLevel: 2, summary: "legacy duplicate" });
+      const updated = setupDb
+        .prepare(
+          `UPDATE events
+           SET public_payload_json = json_set(public_payload_json, '$.publicPayload.aiDecisionDebug', json(?))
+           WHERE event_id = (SELECT event_id FROM events WHERE match_id = ? ORDER BY event_index ASC LIMIT 1)`
+        )
+        .run(legacyDebug, created.matchId);
+      expect(Number(updated.changes)).toBe(1);
+
+      setupDb.exec("CREATE TABLE optimize_padding (payload TEXT NOT NULL)");
+      const insertPadding = setupDb.prepare("INSERT INTO optimize_padding (payload) VALUES (?)");
+      const padding = "x".repeat(16 * 1024);
+      for (let index = 0; index < 320; index += 1) insertPadding.run(padding);
+      setupDb.exec("DROP TABLE optimize_padding");
+      const freelist = setupDb.prepare("PRAGMA freelist_count").get() as { freelist_count: number };
+      expect(Number(freelist.freelist_count)).toBeGreaterThan(0);
+    } finally {
+      setupDb.close();
+    }
+
+    const beforeBytes = (await stat(dbPath)).size;
+    const result = await service.storageMaintenanceOptimize();
+    expect(result).toBeDefined();
+    if (!result) throw new Error("Missing SQLite optimize result");
+    expect(result).toMatchObject({
+      backupCreated: true,
+      normalizedAiDebugEventRows: 1,
+      integrityCheck: "ok",
+      database: { beforeBytes, freelistPagesAfter: 0 }
+    });
+    expect(result.database.afterBytes).toBeLessThan(result.database.beforeBytes);
+    expect(result.database.reclaimedBytes).toBe(result.database.beforeBytes - result.database.afterBytes);
+
+    const manifest = JSON.parse(await readFile(join(result.backup.backupDir, "manifest.json"), "utf8")) as { reason?: string; files: Array<{ name: string; sizeBytes: number }> };
+    expect(manifest.reason).toBe("pre_optimization");
+    expect(manifest.files.find((file) => file.name === "netgrid.sqlite")?.sizeBytes).toBeLessThan(beforeBytes);
+
+    const optimizedDb = new DatabaseSync(dbPath, { readOnly: true });
+    try {
+      const row = optimizedDb
+        .prepare("SELECT COUNT(*) AS count FROM events WHERE json_type(public_payload_json, '$.publicPayload.aiDecisionDebug') IS NOT NULL")
+        .get() as { count: number };
+      expect(Number(row.count)).toBe(0);
+      expect((optimizedDb.prepare("PRAGMA integrity_check").get() as { integrity_check: string }).integrity_check).toBe("ok");
+    } finally {
+      optimizedDb.close();
+      service.closeStorage();
+    }
+
+    const restoredPath = join(dir, "restored.sqlite");
+    restoreSqliteStorageBackup({ backupDir: result.backup.backupDir, targetPath: restoredPath, backupRootDir: backupDir });
+    expect(inspectSqliteStorage(restoredPath)).toMatchObject({ kind: "sqlite", schemaVersion: 3, matchCount: 1 });
+    const restoredDb = new DatabaseSync(restoredPath, { readOnly: true });
+    try {
+      const restoredLegacyRows = restoredDb
+        .prepare("SELECT COUNT(*) AS count FROM events WHERE json_type(public_payload_json, '$.publicPayload.aiDecisionDebug') IS NOT NULL")
+        .get() as { count: number };
+      expect(Number(restoredLegacyRows.count)).toBe(1);
+    } finally {
+      restoredDb.close();
+    }
   });
 
   it("rejects manipulated backups before restore", async () => {
