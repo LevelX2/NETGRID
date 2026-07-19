@@ -1354,8 +1354,9 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     await storage.save(record);
 
     const full = await storage.load(record.match.matchId);
+    const legacyPartial = await storage.load(record.match.matchId, { includeStateSnapshots: false });
     const bounded = await storage.loadForAction(record.match.matchId, { side: "runner", idempotencyKey: "receipt-4" });
-    if (!full || !bounded) throw new Error("Missing bounded-load fixture");
+    if (!full || !legacyPartial || !bounded) throw new Error("Missing bounded-load fixture");
 
     expect(bounded.eventLog).toHaveLength(full.eventLog.length);
     expect(bounded.eventLog.slice(-SIDE_PAYLOAD_EVENT_TAIL_LIMIT)).toEqual(full.eventLog.slice(-SIDE_PAYLOAD_EVENT_TAIL_LIMIT));
@@ -1370,6 +1371,19 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     expect(JSON.stringify(bounded.aiDecisionTraces)).not.toContain("EARLY_TRACE_SENTINEL");
     expect(bounded.actionReceipts.map((receipt) => receipt.idempotencyKey)).toEqual(["receipt-4"]);
     expect(bounded.stateSnapshots).toEqual([]);
+    const previousActionHistoryBytes = JSON.stringify({
+      events: legacyPartial.eventLog,
+      traces: legacyPartial.aiDecisionTraces,
+      receipts: legacyPartial.actionReceipts,
+      snapshots: legacyPartial.stateSnapshots
+    }).length;
+    const boundedHistoryBytes = JSON.stringify({
+      events: bounded.eventLog,
+      traces: bounded.aiDecisionTraces,
+      receipts: bounded.actionReceipts,
+      snapshots: bounded.stateSnapshots
+    }).length;
+    expect(boundedHistoryBytes).toBeLessThan(previousActionHistoryBytes);
     expect(bounded.actionPersistenceBaseline).toMatchObject({
       expectedMatchVersion: record.match.matchVersion,
       expectedStateVersion: record.gameState.stateVersion,
@@ -1380,6 +1394,24 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       loadedActionReceiptCount: 1,
       loadedAiDecisionTraceCount: SIDE_PAYLOAD_EVENT_TAIL_LIMIT
     });
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "fixture-v108-bounded-action-load",
+      now: () => "2026-07-19T12:00:00.000Z"
+    });
+    const fullPayload = await service.bootstrap(record.match.matchId, "runner", fixture.hostSessionToken);
+    if ("error" in fullPayload) throw new Error(fullPayload.error.message);
+    const duplicate = await service.submitAction({
+      matchId: record.match.matchId,
+      side: "runner",
+      sessionToken: fixture.hostSessionToken,
+      actionId: fullPayload.legalActions[0]?.actionId ?? "duplicate-short-circuit",
+      clientKnownStateVersion: fullPayload.playerView.stateVersion,
+      idempotencyKey: "receipt-4"
+    });
+    if (!duplicate.ok) throw new Error(duplicate.error.message);
+    expect(duplicate.actorPayload.eventTail).toEqual(fullPayload.eventTail);
+    expect(JSON.stringify(duplicate.actorPayload)).not.toMatch(/EARLY_PUBLIC_PAYLOAD_SENTINEL|EARLY_TRACE_SENTINEL/);
+    console.info(`[delta-action-history-probe] ${JSON.stringify({ previousActionHistoryBytes, boundedHistoryBytes })}`);
     storage.close();
   });
 
@@ -1525,6 +1557,60 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     const reopened = await storage.load(fixture.record.match.matchId);
     expect(reopened?.actionReceipts.map((receipt) => receipt.idempotencyKey)).toContain("concurrent-receipt");
     expect(reopened?.actionReceipts.map((receipt) => receipt.idempotencyKey)).not.toContain("drift-target");
+    storage.close();
+  });
+
+  it("processes synthetic 1, 10 and 25 match action bursts through SQLite", async () => {
+    const dir = await tempStorageDir();
+    const dbPath = join(dir, "netgrid.sqlite");
+    const storage = new SqliteMatchStorage({ dbPath, backupDir: join(dir, "backups") });
+    const service = new MultiplayerService(storage, { tokenSalt: "v108-delta-load-probe" });
+    const matches: Array<{ matchId: string; sessionToken: string }> = [];
+    for (let index = 0; index < 25; index += 1) {
+      const created = await service.createMatch({ hostSide: "corp", seed: `v108-delta-load-probe-${index}` });
+      const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+      if (!joinToken) throw new Error("Missing join token");
+      const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: `Runner ${index}` });
+      if ("error" in joined) throw new Error(joined.error.message);
+      await forceSetupComplete(service, created.matchId);
+      matches.push({ matchId: created.matchId, sessionToken: created.hostSessionToken });
+    }
+
+    const probe = async (size: 1 | 10 | 25, round: number): Promise<number> => {
+      const startedAt = performance.now();
+      const results = await Promise.all(matches.slice(0, size).map(async (match) => {
+        const payload = await service.bootstrap(match.matchId, "corp", match.sessionToken);
+        if ("error" in payload) throw new Error(payload.error.message);
+        const action = payload.legalActions.find((candidate) =>
+          candidate.type !== "end_turn" &&
+          candidate.targetRequirements.length === 0 &&
+          (candidate.choiceRequirements?.length ?? 0) === 0
+        );
+        if (!action) throw new Error("Missing probe action");
+        return service.submitAction({
+          matchId: match.matchId,
+          side: "corp",
+          sessionToken: match.sessionToken,
+          actionId: action.actionId,
+          clientKnownStateVersion: payload.playerView.stateVersion,
+          idempotencyKey: `delta-load-probe-${round}-${match.matchId}`
+        });
+      }));
+      expect(results.every((result) => result.ok)).toBe(true);
+      return performance.now() - startedAt;
+    };
+
+    const timings = {
+      oneMatchMs: await probe(1, 1),
+      tenMatchesMs: await probe(10, 2),
+      twentyFiveMatchesMs: await probe(25, 3)
+    };
+    expect(Object.values(timings).every((duration) => Number.isFinite(duration) && duration >= 0)).toBe(true);
+    const database = new DatabaseSync(dbPath, { readOnly: true });
+    const receiptCount = database.prepare("SELECT COUNT(*) AS count FROM action_receipts").get() as { count: number };
+    expect(Number(receiptCount.count)).toBe(36);
+    database.close();
+    console.info(`[delta-action-load-probe] ${JSON.stringify(timings)}`);
     storage.close();
   });
 
