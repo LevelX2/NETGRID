@@ -3071,6 +3071,48 @@ describe("formatChronicleEvent", () => {
     );
   });
 
+  it("shows the Runner action skipped by TKO 2.0 as its own chronicle line", () => {
+    const items = formatChronicleEffectItems(
+      makeEvent("continue_run", {
+        encounterContinue: true,
+        resolvedEffects: [
+          {
+            effectId: "subroutine_1",
+            kind: "resolve_subroutine",
+            visibility: "public",
+            side: "runner",
+            reason: "ice_subroutine",
+            sourceDefinitionId: "onr_v1_271_tko-2-0",
+            sourceTitle: "TKO 2.0",
+            subroutineIndex: 0,
+            subroutineType: "set_runner_forgo_next_action",
+            runnerForgoneActionOrdinal: 2,
+          },
+          {
+            effectId: "subroutine_2",
+            kind: "resolve_subroutine",
+            visibility: "public",
+            side: "runner",
+            reason: "ice_subroutine",
+            sourceDefinitionId: "onr_v1_271_tko-2-0",
+            sourceTitle: "TKO 2.0",
+            subroutineIndex: 1,
+            subroutineType: "end_the_run",
+            endedRun: true,
+          },
+        ],
+      }),
+      "corp",
+    );
+
+    expect(items.map((item) => item.title)).toContain(
+      "Aktion 2: Der Runner überspringt diese Aktion (TKO 2.0).",
+    );
+    expect(
+      items.find((item) => item.id.includes("runner-forgone-action"))?.chips,
+    ).toEqual(["Runner", "Aktion 2", "Übersprungen", "TKO 2.0"]);
+  });
+
   it("suppresses redundant Encounter summaries when concrete subroutine lines exist", () => {
     const event = makeEvent("continue_run", {
       actor: "runner",

@@ -454,6 +454,7 @@ export type ResolvedGameEffect = {
   permanentActionGain?: boolean;
   sourceTrashed?: boolean;
   runnerClicksAfter?: number;
+  runnerForgoneActionOrdinal?: number;
   damageCannotBePrevented?: boolean;
   damageType?: DamageType;
   cardsTrashed?: number;

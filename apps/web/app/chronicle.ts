@@ -3824,6 +3824,10 @@ export function formatChronicleEffectItems(
   const aiBoonRunStrengthItem = aiBoonRunStrengthChronicleItem(event);
   const insideJobAutoPassItem = insideJobAutoPassChronicleItem(event, side);
   const encounterTaxItem = encounterTaxChronicleItem(event, side);
+  const runnerForgoneActionItem = runnerForgoneActionChronicleItem(
+    event,
+    effects,
+  );
   return [
     ...(aiBoonRunStrengthItem ? [aiBoonRunStrengthItem] : []),
     ...(insideJobAutoPassItem ? [insideJobAutoPassItem] : []),
@@ -3832,7 +3836,44 @@ export function formatChronicleEffectItems(
     ...(traceHardwareWreckerItem ? [traceHardwareWreckerItem] : []),
     ...(tagGainItem ? [tagGainItem] : []),
     ...effectItems,
+    ...(runnerForgoneActionItem ? [runnerForgoneActionItem] : []),
   ];
+}
+
+function runnerForgoneActionChronicleItem(
+  event: PublicGameEvent,
+  effects: ResolvedGameEffect[],
+): ChronicleItem | undefined {
+  const effect = effects.find(
+    (candidate) =>
+      stringValue(candidate.subroutineType) ===
+        "set_runner_forgo_next_action" &&
+      positiveIntegerValue(candidate.runnerForgoneActionOrdinal) !== undefined,
+  );
+  if (!effect) return undefined;
+  const actionOrdinal = positiveIntegerValue(effect.runnerForgoneActionOrdinal);
+  if (actionOrdinal === undefined) return undefined;
+  const sourceTitle = stringValue(effect.sourceTitle) ?? "ICE";
+  const sourceDefinitionId = stringValue(effect.sourceDefinitionId);
+  return {
+    id: `${event.eventId}:runner-forgone-action:${actionOrdinal}`,
+    category: "danger",
+    importance: "important",
+    visibility: "public",
+    actor: "runner",
+    title: `Aktion ${actionOrdinal}: Der Runner überspringt diese Aktion (${sourceTitle}).`,
+    chips: ["Runner", `Aktion ${actionOrdinal}`, "Übersprungen", sourceTitle],
+    ...(sourceDefinitionId ? { cardDefinitionId: sourceDefinitionId } : {}),
+    cardTitle: sourceTitle,
+    cardDetailLines: [],
+    groupLabel: groupLabelFor(
+      "danger",
+      "runner",
+      undefined,
+      undefined,
+      undefined,
+    ),
+  };
 }
 
 function shouldSuppressPaymentSupportCreditEffect(

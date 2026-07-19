@@ -126,6 +126,10 @@ export function continueRun(
       ended
     )
       continue;
+    const runnerForgoneActionOrdinal =
+      subroutine.type === "set_runner_forgo_next_action"
+        ? currentRunnerForgoneActionOrdinal(state)
+        : undefined;
     if (subroutine.requiresSuccessfulTraceSubroutineIndex !== undefined) {
       const traceIndex = subroutine.requiresSuccessfulTraceSubroutineIndex;
       if (run.traceSuccessBySubroutineIndex?.[traceIndex] !== true) {
@@ -142,6 +146,16 @@ export function continueRun(
       undefined,
       subroutine.amount !== undefined ? { amount: subroutine.amount } : {},
     );
+    if (runnerForgoneActionOrdinal !== undefined && legalAction) {
+      const resolvedEffect = legalAction.resolvedEffects?.find(
+        (effect) =>
+          effect.kind === "resolve_subroutine" &&
+          effect.sourceDefinitionId === definition.id &&
+          effect.subroutineIndex === index,
+      );
+      if (resolvedEffect)
+        resolvedEffect.runnerForgoneActionOrdinal = runnerForgoneActionOrdinal;
+    }
     if (subroutine.type === "initiate_trace") {
       startTraceFromPrintedSubroutine(
         host.encounter.printedEffectHost(legalAction),
@@ -250,6 +264,19 @@ export function continueRun(
       legalAction,
     );
   movePastCurrentIce(host.movement.host(), legalAction);
+}
+
+function currentRunnerForgoneActionOrdinal(
+  state: GameState,
+): number | undefined {
+  const clicksBefore = Math.max(0, Math.floor(state.runner.clicks));
+  if (clicksBefore <= 0) return undefined;
+  const baseActionCount = Math.max(
+    0,
+    Math.floor(state.runnerActionsPerTurnOverride ?? 4),
+  );
+  const turnActionCapacity = Math.max(baseActionCount, clicksBefore);
+  return turnActionCapacity - clicksBefore + 1;
 }
 
 function applyBartmossPostEncounterTrigger(

@@ -689,6 +689,18 @@ describe("V1.9.3 Mechanikpaket L", () => {
     expect(tkoState.runner.clicks).toBe(
       Math.max(0, clicksBeforeTkoSubroutine - 1),
     );
+    expect(
+      getPlayerView(tkoState, "corp")
+        .publicEvents.at(-1)
+        ?.publicPayload.resolvedEffects?.find(
+          (effect) => effect.subroutineType === "set_runner_forgo_next_action",
+        ),
+    ).toEqual(
+      expect.objectContaining({
+        sourceDefinitionId: "onr_v1_271_tko-2-0",
+        runnerForgoneActionOrdinal: 2,
+      }),
+    );
   });
 });
 
