@@ -14,17 +14,26 @@ als `behavior_regression` rot. Der MRAM-Zielpunkt war auf aktuellem Code bereits
 grün und blieb deshalb eine Gegenprobe statt eines künstlich erzeugten Fixes.
 Nach der Umsetzung sind alle Match-424A-Verträge unverändert grün.
 
+Nachtrag vom 19.07.2026: Der spätere Doppelbedrohungs-Reservevertrag ersetzt
+bei D154 ausschließlich die damalige Aktionskontrolle `draw_card`. Hinter dem
+Remote liegen zwei öffentliche Advancement-Counter, die Corp steht bei sechs
+Agenda-Punkten und der Runner kann mit seinem letzten Click sechs gespeicherte
+Broker-Credits für den nächsten Zug mobilisieren. Diese Auszahlung ist die
+konkretere Vorbereitung des 20-Credit-Remote-Pfads. Der eigentliche
+F06-Vertrag – Krash-Coverage vorhanden, Pfad aber `blocked_unpayable` mit Kosten
+14 – bleibt unverändert geprüft.
+
 ## Spielgleiche Verträge
 
-| Finding | Zustand | Roter Ausgang | Finaler Vertrag |
-| --- | --- | --- | --- |
-| 424A-F01 | D111 / sv202 | negatives zweites Force Shield verdrängt Krash | negative Backup-Installation darf einen sichtbaren Coverage-Gewinn nicht planbedingt blockieren |
-| 424A-F02 | D134 / sv245 | Inside Job auf bekannt wertlose Archives | Run-Events übernehmen Ausschlüsse und sichtbaren Zielkontext ihres projizierten Runs |
-| 424A-F03 | D143 / sv265 | auf aktuellem Code bereits kein zweites MRAM | Handgrößen-Hardware wird nicht über Titelheuristik als MU-Support behandelt |
+| Finding  | Zustand      | Roter Ausgang                                   | Finaler Vertrag                                                                                            |
+| -------- | ------------ | ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| 424A-F01 | D111 / sv202 | negatives zweites Force Shield verdrängt Krash  | negative Backup-Installation darf einen sichtbaren Coverage-Gewinn nicht planbedingt blockieren            |
+| 424A-F02 | D134 / sv245 | Inside Job auf bekannt wertlose Archives        | Run-Events übernehmen Ausschlüsse und sichtbaren Zielkontext ihres projizierten Runs                       |
+| 424A-F03 | D143 / sv265 | auf aktuellem Code bereits kein zweites MRAM    | Handgrößen-Hardware wird nicht über Titelheuristik als MU-Support behandelt                                |
 | 424A-F04 | D146 / sv273 | Broker-Aufbau vor Matchpoint-Remote-Information | SeeYa und vergleichbare Werkzeuge erhalten nur bei sichtbarer terminaler Remote-Gefahr ihren Kontextnutzen |
-| 424A-F05 | D151 / sv283 | Ziehen statt Pfadöffnung oder Funding | verbesserbarer Matchpoint-Pfad erzeugt eine kurze sichtbare Vorbereitungssequenz |
-| 424A-F06 | D154 / sv286 | installierter Krash als fehlende Wall-Coverage | vorhandene Coverage plus zu geringe Gesamtkasse ergibt `blocked_unpayable` mit vollständiger Pfadquote |
-| 424A-F10 | D69 / sv122 | `pass` trotz legalem Fall Guy | sichtbare Tag-Vermeidung wird im exakten Event-Modification-Fenster gegenüber `pass` gewählt |
+| 424A-F05 | D151 / sv283 | Ziehen statt Pfadöffnung oder Funding           | verbesserbarer Matchpoint-Pfad erzeugt eine kurze sichtbare Vorbereitungssequenz                           |
+| 424A-F06 | D154 / sv286 | installierter Krash als fehlende Wall-Coverage  | vorhandene Coverage plus zu geringe Gesamtkasse ergibt `blocked_unpayable` mit vollständiger Pfadquote     |
+| 424A-F10 | D69 / sv122  | `pass` trotz legalem Fall Guy                   | sichtbare Tag-Vermeidung wird im exakten Event-Modification-Fenster gegenüber `pass` gewählt               |
 
 Die Capture-Rebases ab D146 und bei D69 sind in der Red-Evidence dokumentiert.
 Sie behalten Engine-State, PlayerView, LegalActions und öffentliches Eventpräfix

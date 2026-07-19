@@ -189,7 +189,7 @@ export function createRunnerBankInvestmentContext(
       `bankBuildLegal:${assessment.buildActionLegal}`,
       `bankCashOutLegal:${assessment.cashOutActionLegal}`,
       `bankConcreteFundingNeed:${assessment.concreteFundingNeed}`,
-      `bankTerminalContestFundingNeed:${runnerBankHasTerminalContestFundingNeed(input)}`,
+      `bankRemoteContestFundingNeed:${runnerBankHasRemoteContestFundingNeed(input)}`,
       `bankCriticalReserve:${assessment.criticalReserve}`,
       `bankCashOutThreshold:${assessment.cashOutThresholdMet}`,
       `bankBackgroundActionsThisTurn:${assessment.backgroundActionsUsedThisTurn}`,
@@ -940,7 +940,7 @@ export function createRunnerBankInvestmentContext(
   }
 
   function runnerBankHasConcreteFundingNeed(input: AiDecisionInput): boolean {
-    if (runnerBankHasTerminalContestFundingNeed(input)) return true;
+    if (runnerBankHasRemoteContestFundingNeed(input)) return true;
     if (input.playerView.own.clicks < 2) return false;
     const largestCashOut = runnerBankLargestLegalCashOut(input);
     if (largestCashOut < RUNNER_BANK_URGENT_CASHOUT_TARGET) return false;
@@ -978,19 +978,19 @@ export function createRunnerBankInvestmentContext(
     const convertibleRunFundingNeed =
       !readyPressureAvailable &&
       runEvaluations.some((evaluation) => {
-      if (
-        evaluation.pathPassability !== "blocked_unpayable" ||
-        evaluation.pathCost <= credits ||
-        evaluation.pathCost > credits + largestCashOut
-      ) {
-        return false;
-      }
-      return (
-        evaluation.scoreThreat ||
-        dependencies.runnerRunTargetHighPayoff(evaluation) ||
-        (evaluation.targetServerId === "rd" &&
-          evaluation.knownAccessState === "unknown")
-      );
+        if (
+          evaluation.pathPassability !== "blocked_unpayable" ||
+          evaluation.pathCost <= credits ||
+          evaluation.pathCost > credits + largestCashOut
+        ) {
+          return false;
+        }
+        return (
+          evaluation.scoreThreat ||
+          dependencies.runnerRunTargetHighPayoff(evaluation) ||
+          (evaluation.targetServerId === "rd" &&
+            evaluation.knownAccessState === "unknown")
+        );
       });
     if (convertibleRunFundingNeed) return true;
     return input.legalActions.some((action) => {
@@ -1019,14 +1019,10 @@ export function createRunnerBankInvestmentContext(
     return payouts.length > 0 ? Math.max(...payouts) : 0;
   }
 
-  function runnerBankHasTerminalContestFundingNeed(
+  function runnerBankHasRemoteContestFundingNeed(
     input: AiDecisionInput,
   ): boolean {
-    if (
-      input.playerView.opponent.agendaPoints <
-        input.playerView.agendaPointsToWin - 1 ||
-      input.playerView.own.clicks < 2
-    ) {
+    if (input.playerView.own.clicks < 1) {
       return false;
     }
     const cashOutAction = input.legalActions.find((action) =>
@@ -1043,6 +1039,16 @@ export function createRunnerBankInvestmentContext(
       if (action.type !== "start_run") return false;
       const serverId = dependencies.serverId(action);
       if (!serverId?.startsWith("remote_")) return false;
+      const server = input.playerView.servers.find(
+        (candidate) => candidate.id === serverId,
+      );
+      const immediateScoreThreat =
+        server?.root.some(
+          (card) =>
+            (card.known === false && (card.advancementCounters ?? 0) > 0) ||
+            (card.known && card.type === "agenda"),
+        ) === true;
+      if (!immediateScoreThreat) return false;
       const evaluation = dependencies.runnerRunTargetEvaluation(
         input,
         action,

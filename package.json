@@ -38,6 +38,7 @@
     "storage:backup": "corepack pnpm --filter @netgrid/server exec tsx src/storage-cli.ts backup",
     "storage:restore": "corepack pnpm --filter @netgrid/server exec tsx src/storage-cli.ts restore",
     "storage:inspect": "corepack pnpm --filter @netgrid/server exec tsx src/storage-cli.ts inspect",
+    "storage:optimize": "corepack pnpm --filter @netgrid/server exec tsx src/storage-cli.ts optimize",
     "maintenance:auth": "corepack pnpm --filter @netgrid/server exec tsx src/maintenance-auth-cli.ts",
     "account:auth": "corepack pnpm --filter @netgrid/server exec tsx src/account-auth-cli.ts",
     "local-transfer:export": "powershell -ExecutionPolicy Bypass -File scripts/export-local-transfer.ps1",

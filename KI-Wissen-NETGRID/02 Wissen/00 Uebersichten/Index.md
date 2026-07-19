@@ -87,7 +87,9 @@
   `scripts/export-local-transfer.ps1` und `scripts/import-local-transfer.ps1`.
 - SQLite-Wartung: authentifizierte Maintenance-Control-Plane unter
   `/maintenance`, `docs/runbooks/maintenance-control-plane.md` sowie
-  `storage:inspect`, `storage:backup` und `storage:restore`.
+  `storage:inspect`, `storage:backup`, `storage:restore` und
+  `storage:optimize`. Speicher- und Performance-Endstand:
+  `docs/reviews/architecture/sqlite-matchstorage-optimization-final-review-2026-07-19.md`.
 - Geschlossene Account-Alpha: `docs/runbooks/account-alpha-operations.md` für
   Admin-Bootstrap, Invite/Reset, Backup/Restore und Deckquote.
 - Browser-E2E: `scripts/run-e2e.mjs` und `tests/e2e/`.

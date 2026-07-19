@@ -1,10 +1,10 @@
 import { createHash, randomBytes } from "node:crypto";
-import { copyFileSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { closeSync, copyFileSync, existsSync, mkdirSync, openSync, readFileSync, readSync, statSync, writeFileSync } from "node:fs";
 import { dirname, basename, join, resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { hashState } from "@netgrid/engine";
 import type { GameEvent, GameState } from "@netgrid/shared";
-import type { AiDecisionTraceRecord, MatchMode, MatchStatus, MultiplayerStorage, StoredMatch } from "./multiplayer";
+import { replayDecisionDebugFromTrace, type AiDecisionTraceRecord, type MatchMode, type MatchStatus, type MultiplayerStorage, type StoredMatch } from "./multiplayer";
 
 export const SQLITE_STORAGE_SCHEMA_VERSION = 3;
 export const SQLITE_STORAGE_FORMAT = "netgrid_multiplayer_sqlite";
@@ -43,7 +43,7 @@ export type BackupManifest = {
   source: "default_sqlite" | "configured_sqlite" | "pre_restore_sqlite";
   files: Array<{ name: string; sizeBytes: number; sha256: string }>;
   matchCount?: number;
-  reason?: "manual" | "pre_restore" | "pre_cleanup" | "pre_compaction";
+  reason?: "manual" | "pre_restore" | "pre_cleanup" | "pre_compaction" | "pre_optimization";
 };
 
 export type StorageMaintenanceParticipant = {
@@ -212,6 +212,27 @@ export type StorageMaintenanceSnapshotCompactionResult = {
   };
 };
 
+export type StorageMaintenanceOptimizeResult = {
+  backendOpsVersion: "Backend 0.5";
+  generatedAt: string;
+  backup: {
+    backupDir: string;
+    backupId: string;
+    createdAt: string;
+  };
+  backupCreated: true;
+  normalizedAiDebugEventRows: number;
+  integrityCheck: "ok";
+  database: {
+    beforeBytes: number;
+    afterBytes: number;
+    reclaimedBytes: number;
+    pageSize: number;
+    freelistPagesBefore: number;
+    freelistPagesAfter: number;
+  };
+};
+
 export type StorageMaintenanceSummary = {
   backendOpsVersion: "Backend 0.5";
   generatedAt: string;
@@ -368,6 +389,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
   async backup(reason: BackupManifest["reason"] = "manual"): Promise<{ backupDir: string; manifest: BackupManifest }> {
     return createSqliteStorageBackup({
       dbPath: this.dbPath,
+      database: this.db,
       backupDir: this.backupDir,
       schemaVersion: Number(this.meta("schema_version") ?? SQLITE_STORAGE_SCHEMA_VERSION),
       matchCount: this.matchCount(),
@@ -646,6 +668,51 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         afterRewriteBytes: this.databaseSizeBytes(),
         beforePayloadBytes,
         afterPayloadBytes: this.compactionPayloadBytes()
+      }
+    };
+  }
+
+  async maintenanceOptimize(now = new Date()): Promise<StorageMaintenanceOptimizeResult> {
+    const generatedAt = now.toISOString();
+    const beforeBytes = this.databaseSizeBytes();
+    const pageSize = this.pragmaNumber("page_size");
+    const freelistPagesBefore = this.pragmaNumber("freelist_count");
+    const backup = await this.backup("pre_optimization");
+
+    const normalizedAiDebugEventRows = this.transaction(() => {
+      const result = this.db
+        .prepare(
+          `UPDATE events
+           SET public_payload_json = json_remove(public_payload_json, '$.publicPayload.aiDecisionDebug')
+           WHERE json_type(public_payload_json, '$.publicPayload.aiDecisionDebug') IS NOT NULL`
+        )
+        .run();
+      return Number(result.changes);
+    });
+
+    this.db.exec("VACUUM");
+    this.db.exec("PRAGMA optimize");
+    const integrityCheck = this.integrityCheck();
+    const afterBytes = this.databaseSizeBytes();
+
+    return {
+      backendOpsVersion: "Backend 0.5",
+      generatedAt,
+      backup: {
+        backupDir: backup.backupDir,
+        backupId: backup.manifest.backupId,
+        createdAt: backup.manifest.createdAt
+      },
+      backupCreated: true,
+      normalizedAiDebugEventRows,
+      integrityCheck,
+      database: {
+        beforeBytes,
+        afterBytes,
+        reclaimedBytes: Math.max(0, beforeBytes - afterBytes),
+        pageSize,
+        freelistPagesBefore,
+        freelistPagesAfter: this.pragmaNumber("freelist_count")
       }
     };
   }
@@ -990,6 +1057,8 @@ export class SqliteMatchStorage implements MultiplayerStorage {
           PRIMARY KEY (match_id, event_id),
           FOREIGN KEY (match_id) REFERENCES matches(match_id) ON DELETE CASCADE
         );
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_events_match_event_index
+          ON events(match_id, event_index);
         CREATE TABLE IF NOT EXISTS engine_events (
           match_id TEXT NOT NULL,
           event_id TEXT NOT NULL,
@@ -998,6 +1067,8 @@ export class SqliteMatchStorage implements MultiplayerStorage {
           PRIMARY KEY (match_id, event_id),
           FOREIGN KEY (match_id) REFERENCES matches(match_id) ON DELETE CASCADE
         );
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_engine_events_match_event_index
+          ON engine_events(match_id, event_index);
         CREATE TABLE IF NOT EXISTS ai_decision_traces (
           match_id TEXT NOT NULL,
           trace_id TEXT NOT NULL,
@@ -1045,6 +1116,8 @@ export class SqliteMatchStorage implements MultiplayerStorage {
           PRIMARY KEY (match_id, snapshot_id),
           FOREIGN KEY (match_id) REFERENCES matches(match_id) ON DELETE CASCADE
         );
+        CREATE INDEX IF NOT EXISTS idx_state_snapshots_match_state
+          ON state_snapshots(match_id, state_version, snapshot_id);
         CREATE TABLE IF NOT EXISTS undo_snapshots (
           match_id TEXT NOT NULL,
           undo_request_id TEXT NOT NULL,
@@ -1158,6 +1231,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
 
     if (this.tableExists("ai_decision_traces")) {
       record.aiDecisionTraces = this.aiDecisionTraceRecords(matchId);
+      this.hydrateAiDecisionDebug(record.eventLog, record.aiDecisionTraces);
     }
 
     if (this.tableExists("action_receipts")) {
@@ -1297,7 +1371,6 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     for (const table of [
       "sessions",
       "tokens",
-      "action_receipts",
       "undo_snapshots",
       "pending_undo",
       "private_deck_snapshots",
@@ -1336,14 +1409,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     this.syncPublicEvents(matchId, record.eventLog);
     this.syncEngineEvents(matchId, record.gameState?.eventLog ?? []);
     this.syncAiDecisionTraces(matchId, record.aiDecisionTraces ?? []);
-
-    const insertReceipt = this.db.prepare(
-      `INSERT INTO action_receipts (match_id, idempotency_key, side, accepted, state_version_before, state_version_after, state_hash_after, error_code)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-    );
-    for (const receipt of record.actionReceipts) {
-      insertReceipt.run(matchId, receipt.idempotencyKey, receipt.side, receipt.accepted ? 1 : 0, receipt.stateVersionBefore, receipt.stateVersionAfter, receipt.stateHashAfter, receipt.errorCode ?? null);
-    }
+    this.syncActionReceipts(matchId, record.actionReceipts);
 
     const insertStateSnapshot = this.db.prepare(
       `INSERT INTO state_snapshots (match_id, snapshot_id, state_version, match_version, state_hash, game_state_json, created_at, hidden_info_barrier)
@@ -1384,7 +1450,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     );
     events.slice(prefixLength).forEach((event, offset) => {
       const index = prefixLength + offset;
-      insertEvent.run(matchId, event.eventId, index, event.stateVersionBefore, event.stateVersionAfter, event.stateHashAfter, JSON.stringify(event.publicPayload), event.privatePayloadLocalOnly ? 1 : 0, event.hiddenInfoBarrier ? 1 : 0);
+      insertEvent.run(matchId, event.eventId, index, event.stateVersionBefore, event.stateVersionAfter, event.stateHashAfter, JSON.stringify(publicEventForStorage(event.publicPayload)), event.privatePayloadLocalOnly ? 1 : 0, event.hiddenInfoBarrier ? 1 : 0);
     });
   }
 
@@ -1404,7 +1470,14 @@ export class SqliteMatchStorage implements MultiplayerStorage {
   }
 
   private syncAiDecisionTraces(matchId: string, traces: AiDecisionTraceRecord[]): void {
-    this.db.prepare("DELETE FROM ai_decision_traces WHERE match_id = ?").run(matchId);
+    const traceIds = new Set(traces.map((trace) => trace.traceId));
+    const existingTraceIds = new Set(
+      (this.db.prepare("SELECT trace_id AS traceId FROM ai_decision_traces WHERE match_id = ?").all(matchId) as Array<{ traceId: string }>).map((row) => row.traceId)
+    );
+    const deleteTrace = this.db.prepare("DELETE FROM ai_decision_traces WHERE match_id = ? AND trace_id = ?");
+    for (const traceId of existingTraceIds) {
+      if (!traceIds.has(traceId)) deleteTrace.run(matchId, traceId);
+    }
     if (traces.length === 0) return;
     const insertTrace = this.db.prepare(
       `INSERT INTO ai_decision_traces
@@ -1412,6 +1485,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     );
     for (const trace of traces) {
+      if (existingTraceIds.has(trace.traceId)) continue;
       insertTrace.run(
         matchId,
         trace.traceId,
@@ -1433,6 +1507,46 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     }
   }
 
+  private syncActionReceipts(matchId: string, receipts: StoredMatch["actionReceipts"]): void {
+    const receiptKey = (receipt: { idempotencyKey: string; side: string }): string => `${receipt.side}\u0000${receipt.idempotencyKey}`;
+    const receiptKeys = new Set(receipts.map(receiptKey));
+    const existingReceipts = this.db
+      .prepare("SELECT idempotency_key AS idempotencyKey, side FROM action_receipts WHERE match_id = ?")
+      .all(matchId) as Array<{ idempotencyKey: string; side: string }>;
+    const existingReceiptKeys = new Set(existingReceipts.map(receiptKey));
+    const deleteReceipt = this.db.prepare("DELETE FROM action_receipts WHERE match_id = ? AND idempotency_key = ? AND side = ?");
+    for (const receipt of existingReceipts) {
+      if (!receiptKeys.has(receiptKey(receipt))) deleteReceipt.run(matchId, receipt.idempotencyKey, receipt.side);
+    }
+
+    const insertReceipt = this.db.prepare(
+      `INSERT INTO action_receipts (match_id, idempotency_key, side, accepted, state_version_before, state_version_after, state_hash_after, error_code)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+    );
+    for (const receipt of receipts) {
+      if (existingReceiptKeys.has(receiptKey(receipt))) continue;
+      insertReceipt.run(matchId, receipt.idempotencyKey, receipt.side, receipt.accepted ? 1 : 0, receipt.stateVersionBefore, receipt.stateVersionAfter, receipt.stateHashAfter, receipt.errorCode ?? null);
+    }
+  }
+
+  private hydrateAiDecisionDebug(events: StoredMatch["eventLog"], traces: AiDecisionTraceRecord[]): void {
+    const tracesByEventId = new Map(traces.map((trace) => [trace.eventId, trace]));
+    for (const event of events) {
+      if (event.publicPayload.publicPayload.aiDecisionDebug !== undefined) continue;
+      const trace = tracesByEventId.get(event.eventId);
+      if (!trace) continue;
+      const debug = replayDecisionDebugFromTrace(trace);
+      if (!debug) continue;
+      event.publicPayload = {
+        ...event.publicPayload,
+        publicPayload: {
+          ...event.publicPayload.publicPayload,
+          aiDecisionDebug: debug
+        }
+      };
+    }
+  }
+
   private aiDecisionTraceRecords(matchId: string, filters: { afterDecisionIndex?: number } = {}): AiDecisionTraceRecord[] {
     if (!this.tableExists("ai_decision_traces")) return [];
     const afterDecisionIndex = Number.isFinite(filters.afterDecisionIndex) ? Math.floor(filters.afterDecisionIndex!) : undefined;
@@ -1444,7 +1558,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
          FROM ai_decision_traces
          WHERE match_id = ?
            AND (? IS NULL OR decision_index > ?)
-         ORDER BY decision_index ASC, created_at ASC`
+         ORDER BY decision_index ASC`
       )
       .all(matchId, afterDecisionIndex ?? null, afterDecisionIndex ?? null) as Array<{
       traceId: string;
@@ -1788,11 +1902,12 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     return Number(row[name] ?? 0);
   }
 
-  private transaction(work: () => void): void {
+  private transaction<T>(work: () => T): T {
     this.db.exec("BEGIN IMMEDIATE");
     try {
-      work();
+      const result = work();
       this.db.exec("COMMIT");
+      return result;
     } catch (error) {
       this.db.exec("ROLLBACK");
       throw error;
@@ -1917,6 +2032,7 @@ function dedupeStateSnapshots(record: StoredMatch): void {
 
 export function createSqliteStorageBackup(input: {
   dbPath?: string;
+  database?: DatabaseSync;
   backupDir: string;
   schemaVersion: number;
   matchCount?: number;
@@ -1931,7 +2047,16 @@ export function createSqliteStorageBackup(input: {
   const files: BackupManifest["files"] = [];
   if (input.dbPath && existsSync(input.dbPath)) {
     const targetName = "netgrid.sqlite";
-    copyFileSync(input.dbPath, join(targetDir, targetName));
+    const targetPath = join(targetDir, targetName);
+    let database = input.database;
+    const ownsDatabase = !database;
+    try {
+      database ??= new DatabaseSync(resolve(input.dbPath));
+      database.prepare("VACUUM INTO ?").run(targetPath);
+    } finally {
+      if (ownsDatabase) database?.close();
+    }
+    assertSqliteBackupUsable(targetPath);
     files.push(fileManifestEntry(targetDir, targetName));
   }
   if (files.length === 0) throw new StorageError("backup_invalid", "Backup konnte keine gültigen Storage-Dateien sichern.");
@@ -2096,7 +2221,19 @@ function fileManifestEntry(dir: string, name: string): BackupManifest["files"][n
 }
 
 function sha256File(path: string): string {
-  return createHash("sha256").update(readFileSync(path)).digest("hex");
+  const hash = createHash("sha256");
+  const buffer = Buffer.allocUnsafe(1024 * 1024);
+  const file = openSync(path, "r");
+  try {
+    let bytesRead = 0;
+    do {
+      bytesRead = readSync(file, buffer, 0, buffer.length, null);
+      if (bytesRead > 0) hash.update(buffer.subarray(0, bytesRead));
+    } while (bytesRead > 0);
+  } finally {
+    closeSync(file);
+  }
+  return hash.digest("hex");
 }
 
 function timestampId(): string {
@@ -2107,6 +2244,13 @@ function timestampId(): string {
 
 function toJson(value: unknown): string | null {
   return value === undefined ? null : JSON.stringify(value);
+}
+
+function publicEventForStorage(event: StoredMatch["eventLog"][number]["publicPayload"]): StoredMatch["eventLog"][number]["publicPayload"] {
+  if (event.publicPayload.aiDecisionDebug === undefined) return event;
+  const publicPayload = { ...event.publicPayload };
+  delete publicPayload.aiDecisionDebug;
+  return { ...event, publicPayload };
 }
 
 function gameStateForStorage<T extends GameState | undefined>(state: T): T {

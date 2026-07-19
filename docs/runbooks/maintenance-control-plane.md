@@ -115,6 +115,18 @@ admin.netgrid.example {
 
 Caddy setzt den HTTPS-Forwarding-Kontext selbst. Bei anderen Proxies muss `X-Forwarded-Proto` kontrolliert überschrieben werden.
 
+## Lokale SQLite-Optimierung
+
+Die lokale Datenbank kann kontrolliert kompaktiert werden. Vor dem Lauf die NETGRID-App beenden, damit der Wartungsvorgang exklusiven Zugriff auf SQLite erhält. Danach im Projektwurzelverzeichnis ausführen:
+
+```powershell
+corepack pnpm storage:optimize
+```
+
+Der Befehl erstellt zuerst ein geprüftes, bereits kompaktes Backup mit dem Grund `pre_optimization`. Anschließend entfernt er historische, doppelt gespeicherte `aiDecisionDebug`-Payloads aus öffentlichen Eventzeilen, führt `VACUUM` und `PRAGMA optimize` aus und beendet den Lauf nur bei erfolgreichem `integrity_check`. Die JSON-Ausgabe nennt Backup-ID, normalisierte Zeilen, Dateigrößen und freigegebene Seiten. Bestehende Backups werden nicht automatisch gelöscht.
+
+Nach dem Lauf die App wieder ausschließlich über `scripts/start-netgrid.ps1` starten.
+
 ## Betriebsprüfung
 
 1. Ohne Passwortdatei liefert Maintenance nur `maintenance_auth_uninitialized`.

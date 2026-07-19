@@ -353,6 +353,27 @@ function evaluateRunnerRunTarget(
       `run_action_credit_cost:${actionCreditCost}`,
       `credits_after_run_action:${creditsAfterAction}`,
       `credits_after_run:${creditsAfterRun}`,
+      ...(economyPosture.creditReservePolicy.remotePressureReserveActive ===
+      true
+        ? [
+            `remote_pressure_credit_pool_after_run:${creditsAfterRun + (economyPosture.creditReservePolicy.convertibleBankCredits ?? 0)}`,
+            `rd_pressure_runway_ready:${
+              (economyPosture.creditReservePolicy.availableCreditPool ?? 0) >=
+              (economyPosture.creditReservePolicy.pressureRunwayTarget ?? 0)
+            }`,
+            `rd_preserves_remote_pressure_reserve:${
+              accessTargetKind !== "rd" ||
+              ((economyPosture.creditReservePolicy.availableCreditPool ?? 0) >=
+                (economyPosture.creditReservePolicy.pressureRunwayTarget ??
+                  0) &&
+                creditsAfterRun +
+                  (economyPosture.creditReservePolicy.convertibleBankCredits ??
+                    0) >=
+                  (economyPosture.creditReservePolicy.remotePressureReserve ??
+                    0))
+            }`,
+          ]
+        : []),
       `unknown_unrezzed_ice_count:${unknownUnrezzedIceCount}`,
       `run_commitment:${runCommitment}`,
       `unrezzed_ice_risk:${unrezzedIceRisk}`,
@@ -928,6 +949,12 @@ function recommendationForRunTarget(params: {
       : "do_not_run_now";
   }
   if (
+    params.accessPayoff !== "agenda" &&
+    runnerRdRunBurnsRemotePressureReserve(params)
+  ) {
+    return "gain_credits_first";
+  }
+  if (
     params.accessPayoff === "score_threat" &&
     params.creditsAfterRun <
       params.economyPosture.creditReservePolicy.contestReserve
@@ -993,7 +1020,10 @@ function scoreRunTargetEvaluation(params: {
   const reservePenalty =
     params.creditsAfterRun < params.economyPosture.minimumCreditFloor
       ? -160
-      : 0;
+      : runnerRdRunBurnsRemotePressureReserve(params) &&
+          params.accessPayoff !== "agenda"
+        ? -480
+        : 0;
   const multiaccessBonus = params.multiaccessAvailable ? 80 : 0;
   const installedRunPayoffBonus = params.installedRunPayoffScore;
   const scoreThreatBonus = params.scoreThreat ? 180 : 0;
@@ -1018,6 +1048,29 @@ function scoreRunTargetEvaluation(params: {
     blinkRiskPenalty +
     accessOutcomeMemoryPenalty +
     recommendationScore
+  );
+}
+
+function runnerRdRunBurnsRemotePressureReserve(params: {
+  targetKind: RunnerRunTargetKind;
+  pathPassability: RunnerPathPassability;
+  creditsAfterRun: number;
+  economyPosture: RunnerEconomyPosture;
+}): boolean {
+  const policy = params.economyPosture.creditReservePolicy;
+  if (
+    params.targetKind !== "rd" ||
+    params.pathPassability !== "reachable" ||
+    policy.remotePressureReserveActive !== true ||
+    policy.reserveOverrides.includes("terminal_central_pressure")
+  ) {
+    return false;
+  }
+  const availableAfterRun =
+    params.creditsAfterRun + (policy.convertibleBankCredits ?? 0);
+  return (
+    (policy.availableCreditPool ?? 0) < (policy.pressureRunwayTarget ?? 0) ||
+    availableAfterRun < (policy.remotePressureReserve ?? 0)
   );
 }
 

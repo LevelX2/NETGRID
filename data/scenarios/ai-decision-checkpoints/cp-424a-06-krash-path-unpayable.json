@@ -865,9 +865,7 @@
               "corp_onr_v1_242_fatal-attractor_1",
               "corp_onr_v1_238_data-wall-2-0_1"
             ],
-            "root": [
-              "corp_onr_v1_367_rio-de-janeiro-city-grid_1"
-            ]
+            "root": ["corp_onr_v1_367_rio-de-janeiro-city-grid_1"]
           },
           {
             "id": "archives",
@@ -885,9 +883,7 @@
               "corp_onr_v1_271_tko-2-0_1",
               "corp_onr_v1_225_canis-major_1"
             ],
-            "root": [
-              "corp_onr_v1_207_netwatch-operations-office_1"
-            ]
+            "root": ["corp_onr_v1_207_netwatch-operations-office_1"]
           }
         ]
       },
@@ -907,9 +903,7 @@
           "runner_onr_v1_080_core-command-jettison-ice_3",
           "runner_onr_v1_161_fall-guy_3"
         ],
-        "stack": [
-          "runner_onr_v1_099_mantis-fixer-at-large_2"
-        ],
+        "stack": ["runner_onr_v1_099_mantis-fixer-at-large_2"],
         "heap": [
           "runner_onr_v1_080_core-command-jettison-ice_1",
           "runner_onr_v1_108_score_1",
@@ -10469,10 +10463,7 @@
           "kind": "none",
           "required": 0,
           "satisfied": true,
-          "evidence": [
-            "reserve_source:runtime_context",
-            "reserve:none"
-          ]
+          "evidence": ["reserve_source:runtime_context", "reserve:none"]
         },
         "blockers": [],
         "transition": {
@@ -10667,10 +10658,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -10750,10 +10738,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -10775,9 +10760,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -10837,10 +10820,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -10859,9 +10839,7 @@
               "family": "runner_survival",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.survival_defense"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.survival_defense"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -10892,10 +10870,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -11159,10 +11134,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -11393,7 +11365,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "draw_card"
+        "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.1"
       }
     ],
     "runTargets": [

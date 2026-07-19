@@ -97,6 +97,7 @@ import type {
   StorageMaintenanceMatchDetail,
   StorageMaintenanceMatchEntry,
   StorageMaintenanceMatchFilters,
+  StorageMaintenanceOptimizeResult,
   StorageMaintenanceSnapshotCompactionResult,
   StorageMaintenanceSummary
 } from "./storage-sqlite";
@@ -368,6 +369,7 @@ export type MultiplayerStorage = {
   setMaintenanceCleanupPolicy?(policy: StorageMaintenanceCleanupPolicyInput): Promise<StorageMaintenanceCleanupPolicy>;
   runMaintenanceCleanupPolicy?(): Promise<StorageMaintenanceCleanupPolicyRunResult>;
   maintenanceCompactSnapshots?(): Promise<StorageMaintenanceSnapshotCompactionResult>;
+  maintenanceOptimize?(): Promise<StorageMaintenanceOptimizeResult>;
   maintenanceSetRetentionProtection?(matchId: string, protectedValue: boolean): Promise<StorageMaintenanceMatchDetail | undefined>;
   close?(): void;
 };
@@ -2095,6 +2097,10 @@ export class MultiplayerService {
     return this.storage.maintenanceCompactSnapshots?.();
   }
 
+  async storageMaintenanceOptimize(): Promise<StorageMaintenanceOptimizeResult | undefined> {
+    return this.storage.maintenanceOptimize?.();
+  }
+
   async storageMaintenanceSetRetentionProtection(matchId: string, protectedValue: boolean): Promise<StorageMaintenanceMatchDetail | undefined> {
     return this.storage.maintenanceSetRetentionProtection?.(matchId, protectedValue);
   }
@@ -3281,6 +3287,18 @@ function replayDecisionDebug(debug: unknown, actor: Side | undefined): Record<st
   if (typeof safeDebug.confidence === "number") result.confidence = safeDebug.confidence;
   if (actor) result.actor = actor;
   return result;
+}
+
+export function replayDecisionDebugFromTrace(trace: AiDecisionTraceRecord): Record<string, unknown> | undefined {
+  const debugSchemaVersion = trace.traceJson.debugSchemaVersion;
+  if (typeof debugSchemaVersion !== "string") return undefined;
+  return replayDecisionDebug(
+    {
+      ...trace.traceJson,
+      schemaVersion: debugSchemaVersion
+    },
+    trace.side
+  );
 }
 
 function aiDecisionTraceFor(record: StoredMatch, event: GameEvent, side: Side, legalAction: LegalAction, decision: AiDecision, mode: AiDecisionTraceMode, createdAt: string): AiDecisionTraceRecord | undefined {

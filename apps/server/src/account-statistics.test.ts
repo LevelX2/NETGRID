@@ -107,6 +107,91 @@ describe("AccountMatchStatisticsService participant binding", () => {
     expect(second.entries.map((entry) => entry.resultId)).toEqual(["result_2"]);
   });
 
+  it("aggregates and keyset-paginates a large SQLite ledger without loading the full account history", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "netgrid-account-statistics-query-"));
+    const dbPath = join(dir, "accounts.sqlite");
+    const backupDir = join(dir, "backups");
+    const accounts = new SqliteAccountStorage({ dbPath, backupDir });
+    const sessions = new AccountSessionService(accounts);
+    const owner = await sessions.createAccount({ loginName: "query_owner", displayName: "Query Owner" });
+    const other = await sessions.createAccount({ loginName: "query_other", displayName: "Query Other" });
+    const sqliteStorage = new SqliteAccountStatisticsStorage({ dbPath, backupDir });
+    const memoryStorage = new InMemoryAccountStatisticsStorage();
+    const now = "2026-07-19T12:00:00.000Z";
+    try {
+      for (let index = 0; index < 240; index += 1) {
+        const abandoned = index % 19 === 0;
+        const selfPlay = !abandoned && index % 23 === 0;
+        const draft = gameRecord({
+          accountGameResultId: `result_${String(index).padStart(4, "0")}`,
+          accountId: owner.accountId,
+          originMatchId: `match_${String(index).padStart(4, "0")}`,
+          completedAt: new Date(Date.parse(now) - index * 6 * 60 * 60 * 1000).toISOString(),
+          side: index % 2 === 0 ? "runner" : "corp",
+          outcome: abandoned ? "abandoned" : index % 3 === 0 ? "win" : index % 3 === 1 ? "loss" : "draw",
+          finishKind: index % 11 === 0 ? "forfeit" : "regular",
+          opponentKind: index % 3 === 0 ? "ai" : index % 3 === 1 ? "account" : "guest",
+          matchMode: index % 2 === 0 ? "human_runner_vs_corp_ai" : "human_vs_human",
+          agendaPointsFor: index % 8,
+          agendaPointsAgainst: (index + 3) % 8,
+          statisticsEligible: !abandoned && !selfPlay,
+          ...(selfPlay ? { exclusionReason: "self_play" as const } : {}),
+        });
+        const record = selfPlay
+          ? (({ recordedAt, ...fields }) => ({ ...fields, exclusionReason: "self_play" as const, recordedAt }))(draft)
+          : draft;
+        await sqliteStorage.recordGameResult(record);
+        await memoryStorage.recordGameResult(record);
+      }
+      await sqliteStorage.recordGameResult(gameRecord({
+        accountGameResultId: "other_result",
+        accountId: other.accountId,
+        originMatchId: "other_match",
+        completedAt: now,
+        outcome: "win",
+      }));
+
+      sqliteStorage.listGameResultsForAccount = async () => {
+        throw new Error("full_account_game_ledger_must_not_be_loaded");
+      };
+      sqliteStorage.listSeriesResultsForAccount = async () => {
+        throw new Error("full_account_series_ledger_must_not_be_loaded");
+      };
+      const sqliteService = new AccountMatchStatisticsService(sqliteStorage, { now: () => now });
+      const memoryService = new AccountMatchStatisticsService(memoryStorage, { now: () => now });
+      const query = { period: "30d" as const, side: "runner" as const, opponentKind: "ai" as const };
+      const sqliteStatistics = await sqliteService.statisticsForAccount(owner.accountId, query);
+      const memoryStatistics = await memoryService.statisticsForAccount(owner.accountId, query);
+      expect({ ...sqliteStatistics, statisticsSince: undefined }).toEqual({ ...memoryStatistics, statisticsSince: undefined });
+
+      const firstSqlitePage = await sqliteService.matchHistoryForAccount(owner.accountId, { ...query, limit: 7 });
+      const firstMemoryPage = await memoryService.matchHistoryForAccount(owner.accountId, { ...query, limit: 7 });
+      expect({ ...firstSqlitePage, statisticsSince: undefined }).toEqual({ ...firstMemoryPage, statisticsSince: undefined });
+      expect(firstSqlitePage.entries).toHaveLength(7);
+      expect(firstSqlitePage.nextCursor).toBeTruthy();
+      if (!firstSqlitePage.nextCursor || !firstMemoryPage.nextCursor) throw new Error("Missing keyset cursor");
+
+      const secondSqlitePage = await sqliteService.matchHistoryForAccount(owner.accountId, { ...query, limit: 7, cursor: firstSqlitePage.nextCursor });
+      const secondMemoryPage = await memoryService.matchHistoryForAccount(owner.accountId, { ...query, limit: 7, cursor: firstMemoryPage.nextCursor });
+      expect({ ...secondSqlitePage, statisticsSince: undefined }).toEqual({ ...secondMemoryPage, statisticsSince: undefined });
+      expect(new Set([...firstSqlitePage.entries, ...secondSqlitePage.entries].map((entry) => entry.resultId)).size).toBe(14);
+
+      const queryDb = new DatabaseSync(dbPath, { readOnly: true });
+      try {
+        const plan = (queryDb
+          .prepare("EXPLAIN QUERY PLAN SELECT account_game_result_id FROM account_game_results WHERE account_id = ? ORDER BY completed_at DESC, account_game_result_id DESC LIMIT 8")
+          .all(owner.accountId) as Array<{ detail: string }>).map((row) => row.detail).join("\n");
+        expect(plan).toContain("idx_account_game_results_account_completed");
+      } finally {
+        queryDb.close();
+      }
+    } finally {
+      try { sqliteStorage.close(); } catch {}
+      try { accounts.close(); } catch {}
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
   it("marks same-account two-slot games as self-play and writes a finished series once", async () => {
     const matchStorage = new InMemoryMatchStorage();
     const matches = new MultiplayerService(matchStorage, { tokenSalt: "account-statistics-series" });

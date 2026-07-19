@@ -90,9 +90,21 @@ export type AccountStatisticsStorage = {
   recordSeriesResult(record: AccountSeriesResultRecord): Promise<void>;
   listGameResultsForAccount(accountId: string): Promise<AccountGameResultRecord[]>;
   listSeriesResultsForAccount(accountId: string): Promise<AccountSeriesResultRecord[]>;
+  aggregateStatisticsForAccount?(accountId: string, query: AccountStatisticsQuery, now: string): Promise<AccountStatisticsAggregation>;
+  listGameResultsPageForAccount?(accountId: string, query: AccountMatchHistoryQuery, now: string, limit: number): Promise<{ records: AccountGameResultRecord[]; hasMore: boolean }>;
   statisticsSince(): Promise<string>;
   deleteAccountData(accountId: string): Promise<void>;
   close?(): void;
+};
+
+export type AccountStatisticsAggregation = {
+  totals: ApiAccountStatisticsBucket;
+  selfPlay: number;
+  bySide: Record<Side, ApiAccountStatisticsBucket>;
+  byOpponentKind: Record<ApiPlayerIdentityKind, ApiAccountStatisticsBucket>;
+  byMode: Partial<Record<ApiMatchMode, ApiAccountStatisticsBucket>>;
+  byMatchFormat: Partial<Record<ApiMatchFormat, ApiAccountStatisticsBucket>>;
+  series: ApiAccountSeriesStatistics;
 };
 
 export class AccountStatisticsError extends Error {
@@ -231,6 +243,55 @@ export class SqliteAccountStatisticsStorage implements AccountStatisticsStorage 
     ).all(accountId) as AccountSeriesResultRow[]).map(seriesResultFromRow);
   }
 
+  async aggregateStatisticsForAccount(accountId: string, query: AccountStatisticsQuery, now: string): Promise<AccountStatisticsAggregation> {
+    const filter = sqliteGameFilter(accountId, query, now);
+    const totals = aggregateBucket(this.db, filter);
+    const bySide = aggregateBucketsBy<Side>(this.db, filter, "side");
+    const byOpponentKind = aggregateBucketsBy<ApiPlayerIdentityKind>(this.db, filter, "opponent_kind");
+    const byMode = aggregateBucketsBy<ApiMatchMode>(this.db, filter, "match_mode");
+    const byMatchFormat = aggregateBucketsBy<ApiMatchFormat>(this.db, filter, "match_format");
+    const selfPlayRow = this.db
+      .prepare(`SELECT COUNT(DISTINCT origin_match_id) AS count FROM account_game_results WHERE ${filter.where} AND exclusion_reason = 'self_play'`)
+      .get(...filter.params) as { count: number };
+    return {
+      totals,
+      selfPlay: Number(selfPlayRow.count),
+      bySide: { runner: bySide.runner ?? statisticsBucket(), corp: bySide.corp ?? statisticsBucket() },
+      byOpponentKind: {
+        account: byOpponentKind.account ?? statisticsBucket(),
+        guest: byOpponentKind.guest ?? statisticsBucket(),
+        ai: byOpponentKind.ai ?? statisticsBucket(),
+      },
+      byMode,
+      byMatchFormat,
+      series: query.side || query.matchMode ? emptySeriesStatistics() : aggregateSeriesStatistics(this.db, accountId, query, now),
+    };
+  }
+
+  async listGameResultsPageForAccount(accountId: string, query: AccountMatchHistoryQuery, now: string, limit: number): Promise<{ records: AccountGameResultRecord[]; hasMore: boolean }> {
+    const filter = sqliteGameFilter(accountId, query, now);
+    let cursorClause = "";
+    const params = [...filter.params];
+    if (query.cursor) {
+      const cursor = this.db
+        .prepare(`SELECT completed_at AS completedAt, account_game_result_id AS resultId FROM account_game_results WHERE ${filter.where} AND account_game_result_id = ? LIMIT 1`)
+        .get(...filter.params, query.cursor) as { completedAt: string; resultId: string } | undefined;
+      if (cursor) {
+        cursorClause = " AND (completed_at < ? OR (completed_at = ? AND account_game_result_id < ?))";
+        params.push(cursor.completedAt, cursor.completedAt, cursor.resultId);
+      }
+    }
+    const rows = this.db
+      .prepare(
+        `SELECT * FROM account_game_results
+         WHERE ${filter.where}${cursorClause}
+         ORDER BY completed_at DESC, account_game_result_id DESC
+         LIMIT ?`,
+      )
+      .all(...params, limit + 1) as AccountGameResultRow[];
+    return { records: rows.slice(0, limit).map(gameResultFromRow), hasMore: rows.length > limit };
+  }
+
   async statisticsSince(): Promise<string> {
     const row = this.db.prepare("SELECT value FROM storage_meta WHERE key = 'account_statistics_since'").get() as { value?: string } | undefined;
     return row?.value ?? new Date(0).toISOString();
@@ -338,66 +399,42 @@ export class AccountMatchStatisticsService {
 
   async statisticsForAccount(accountId: string, query: AccountStatisticsQuery = {}): Promise<ApiAccountStatistics> {
     const period = query.period ?? "all";
+    const generatedAt = this.now();
     const filters = {
       ...(query.side ? { side: query.side } : {}),
       ...(query.opponentKind ? { opponentKind: query.opponentKind } : {}),
       ...(query.matchMode ? { matchMode: query.matchMode } : {}),
     };
-    const games = (await this.storage.listGameResultsForAccount(accountId)).filter((record) => gameMatchesQuery(record, query, this.now()));
-    const eligibleGames = games.filter((record) => record.statisticsEligible);
-    const selfPlay = new Set(games.filter((record) => record.exclusionReason === "self_play").map((record) => record.originMatchId)).size;
-    const bySide = { runner: statisticsBucket(), corp: statisticsBucket() };
-    const byOpponentKind = { account: statisticsBucket(), guest: statisticsBucket(), ai: statisticsBucket() };
-    const byMode: Partial<Record<ApiMatchMode, ApiAccountStatisticsBucket>> = {};
-    const byMatchFormat: Partial<Record<ApiMatchFormat, ApiAccountStatisticsBucket>> = {};
-    for (const record of eligibleGames) {
-      addGameToBucket(bySide[record.side], record);
-      addGameToBucket(byOpponentKind[record.opponentKind], record);
-      addGameToBucket(byMode[record.matchMode] ??= statisticsBucket(), record);
-      addGameToBucket(byMatchFormat[record.matchFormat] ??= statisticsBucket(), record);
-    }
-    const totals = statisticsBucket();
-    for (const record of eligibleGames) addGameToBucket(totals, record);
-    for (const record of games.filter((candidate) => candidate.outcome === "abandoned")) {
-      totals.abandoned += 1;
-      bySide[record.side].abandoned += 1;
-      byOpponentKind[record.opponentKind].abandoned += 1;
-      (byMode[record.matchMode] ??= statisticsBucket()).abandoned += 1;
-      (byMatchFormat[record.matchFormat] ??= statisticsBucket()).abandoned += 1;
-    }
-    const series = query.side || query.matchMode
-      ? emptySeriesStatistics()
-      : seriesStatistics((await this.storage.listSeriesResultsForAccount(accountId)).filter((record) => seriesMatchesQuery(record, query, this.now())));
+    const aggregation = this.storage.aggregateStatisticsForAccount
+      ? await this.storage.aggregateStatisticsForAccount(accountId, query, generatedAt)
+      : await aggregateStatisticsInMemory(this.storage, accountId, query, generatedAt);
     return {
       schemaVersion: "netgrid-account-statistics-v1",
       statisticsSince: await this.storage.statisticsSince(),
-      generatedAt: this.now(),
+      generatedAt,
       period,
       filters,
-      totals: { ...totals, selfPlay },
-      bySide,
-      byOpponentKind,
-      byMode,
-      byMatchFormat,
-      series,
+      totals: { ...aggregation.totals, selfPlay: aggregation.selfPlay },
+      bySide: aggregation.bySide,
+      byOpponentKind: aggregation.byOpponentKind,
+      byMode: aggregation.byMode,
+      byMatchFormat: aggregation.byMatchFormat,
+      series: aggregation.series,
     };
   }
 
   async matchHistoryForAccount(accountId: string, query: AccountMatchHistoryQuery = {}): Promise<ApiAccountMatchHistory> {
     const limit = Math.max(1, Math.min(50, Math.floor(query.limit ?? 20)));
-    const all = (await this.storage.listGameResultsForAccount(accountId))
-      .filter((record) => gameMatchesQuery(record, query, this.now()))
-      .sort((left, right) => right.completedAt.localeCompare(left.completedAt) || right.accountGameResultId.localeCompare(left.accountGameResultId));
-    const cursorIndex = query.cursor ? all.findIndex((record) => record.accountGameResultId === query.cursor) : -1;
-    const start = cursorIndex >= 0 ? cursorIndex + 1 : 0;
-    const page = all.slice(start, start + limit);
-    const next = all[start + limit];
+    const generatedAt = this.now();
+    const result = this.storage.listGameResultsPageForAccount
+      ? await this.storage.listGameResultsPageForAccount(accountId, query, generatedAt, limit)
+      : await gameResultsPageInMemory(this.storage, accountId, query, generatedAt, limit);
     return {
       schemaVersion: "netgrid-account-match-history-v1",
       statisticsSince: await this.storage.statisticsSince(),
-      generatedAt: this.now(),
-      entries: page.map(historyEntry),
-      ...(next && page.length > 0 ? { nextCursor: page.at(-1)!.accountGameResultId } : {}),
+      generatedAt,
+      entries: result.records.map(historyEntry),
+      ...(result.hasMore && result.records.length > 0 ? { nextCursor: result.records.at(-1)!.accountGameResultId } : {}),
     };
   }
 
@@ -607,6 +644,158 @@ function recordIdempotently<T>(records: Map<string, T>, key: string, record: T):
 
 function stableRecord(value: unknown): string {
   return JSON.stringify(value);
+}
+
+type SqliteStatisticsFilter = { where: string; params: Array<string | number> };
+
+type SqliteStatisticsBucketRow = {
+  games_played: number | bigint;
+  wins: number | bigint;
+  losses: number | bigint;
+  draws: number | bigint;
+  forfeits_won: number | bigint;
+  forfeits_lost: number | bigint;
+  abandoned: number | bigint;
+  agenda_points_for: number | bigint;
+  agenda_points_against: number | bigint;
+};
+
+const SQLITE_STATISTICS_BUCKET_COLUMNS = `
+  COALESCE(SUM(CASE WHEN statistics_eligible = 1 AND outcome <> 'abandoned' THEN 1 ELSE 0 END), 0) AS games_played,
+  COALESCE(SUM(CASE WHEN statistics_eligible = 1 AND outcome = 'win' THEN 1 ELSE 0 END), 0) AS wins,
+  COALESCE(SUM(CASE WHEN statistics_eligible = 1 AND outcome = 'loss' THEN 1 ELSE 0 END), 0) AS losses,
+  COALESCE(SUM(CASE WHEN statistics_eligible = 1 AND outcome = 'draw' THEN 1 ELSE 0 END), 0) AS draws,
+  COALESCE(SUM(CASE WHEN statistics_eligible = 1 AND outcome = 'win' AND finish_kind = 'forfeit' THEN 1 ELSE 0 END), 0) AS forfeits_won,
+  COALESCE(SUM(CASE WHEN statistics_eligible = 1 AND outcome = 'loss' AND finish_kind = 'forfeit' THEN 1 ELSE 0 END), 0) AS forfeits_lost,
+  COALESCE(SUM(CASE WHEN outcome = 'abandoned' THEN 1 ELSE 0 END), 0) AS abandoned,
+  COALESCE(SUM(CASE WHEN statistics_eligible = 1 AND outcome <> 'abandoned' THEN agenda_points_for ELSE 0 END), 0) AS agenda_points_for,
+  COALESCE(SUM(CASE WHEN statistics_eligible = 1 AND outcome <> 'abandoned' THEN agenda_points_against ELSE 0 END), 0) AS agenda_points_against`;
+
+function sqliteGameFilter(accountId: string, query: AccountStatisticsQuery, now: string): SqliteStatisticsFilter {
+  const clauses = ["account_id = ?"];
+  const params: Array<string | number> = [accountId];
+  const completedSince = periodStart(query.period ?? "all", now);
+  if (completedSince) {
+    clauses.push("completed_at >= ?");
+    params.push(completedSince);
+  }
+  if (query.side) {
+    clauses.push("side = ?");
+    params.push(query.side);
+  }
+  if (query.opponentKind) {
+    clauses.push("opponent_kind = ?");
+    params.push(query.opponentKind);
+  }
+  if (query.matchMode) {
+    clauses.push("match_mode = ?");
+    params.push(query.matchMode);
+  }
+  return { where: clauses.join(" AND "), params };
+}
+
+function aggregateBucket(db: DatabaseSync, filter: SqliteStatisticsFilter): ApiAccountStatisticsBucket {
+  const row = db.prepare(`SELECT ${SQLITE_STATISTICS_BUCKET_COLUMNS} FROM account_game_results WHERE ${filter.where}`).get(...filter.params) as SqliteStatisticsBucketRow;
+  return statisticsBucketFromRow(row);
+}
+
+function aggregateBucketsBy<Key extends string>(db: DatabaseSync, filter: SqliteStatisticsFilter, column: "side" | "opponent_kind" | "match_mode" | "match_format"): Partial<Record<Key, ApiAccountStatisticsBucket>> {
+  const rows = db
+    .prepare(`SELECT ${column} AS bucket_key, ${SQLITE_STATISTICS_BUCKET_COLUMNS} FROM account_game_results WHERE ${filter.where} GROUP BY ${column}`)
+    .all(...filter.params) as Array<SqliteStatisticsBucketRow & { bucket_key: Key }>;
+  return Object.fromEntries(rows.map((row) => [row.bucket_key, statisticsBucketFromRow(row)])) as Partial<Record<Key, ApiAccountStatisticsBucket>>;
+}
+
+function statisticsBucketFromRow(row: SqliteStatisticsBucketRow): ApiAccountStatisticsBucket {
+  return {
+    gamesPlayed: Number(row.games_played),
+    wins: Number(row.wins),
+    losses: Number(row.losses),
+    draws: Number(row.draws),
+    forfeitsWon: Number(row.forfeits_won),
+    forfeitsLost: Number(row.forfeits_lost),
+    abandoned: Number(row.abandoned),
+    agendaPointsFor: Number(row.agenda_points_for),
+    agendaPointsAgainst: Number(row.agenda_points_against),
+  };
+}
+
+function aggregateSeriesStatistics(db: DatabaseSync, accountId: string, query: AccountStatisticsQuery, now: string): ApiAccountSeriesStatistics {
+  const clauses = ["account_id = ?"];
+  const params: Array<string | number> = [accountId];
+  const completedSince = periodStart(query.period ?? "all", now);
+  if (completedSince) {
+    clauses.push("completed_at >= ?");
+    params.push(completedSince);
+  }
+  if (query.opponentKind) {
+    clauses.push("opponent_kind = ?");
+    params.push(query.opponentKind);
+  }
+  const row = db
+    .prepare(
+      `SELECT
+        COALESCE(SUM(CASE WHEN statistics_eligible = 1 THEN 1 ELSE 0 END), 0) AS series_played,
+        COALESCE(SUM(CASE WHEN statistics_eligible = 1 AND outcome = 'win' THEN 1 ELSE 0 END), 0) AS series_won,
+        COALESCE(SUM(CASE WHEN statistics_eligible = 1 AND outcome = 'loss' THEN 1 ELSE 0 END), 0) AS series_lost,
+        COALESCE(SUM(CASE WHEN statistics_eligible = 1 AND outcome = 'draw' THEN 1 ELSE 0 END), 0) AS series_drawn,
+        COALESCE(SUM(CASE WHEN statistics_eligible = 1 THEN match_points_for ELSE 0 END), 0) AS match_points_for,
+        COALESCE(SUM(CASE WHEN statistics_eligible = 1 THEN match_points_against ELSE 0 END), 0) AS match_points_against
+       FROM account_series_results WHERE ${clauses.join(" AND ")}`,
+    )
+    .get(...params) as Record<string, number | bigint>;
+  return {
+    seriesPlayed: Number(row.series_played),
+    seriesWon: Number(row.series_won),
+    seriesLost: Number(row.series_lost),
+    seriesDrawn: Number(row.series_drawn),
+    matchPointsFor: Number(row.match_points_for),
+    matchPointsAgainst: Number(row.match_points_against),
+  };
+}
+
+async function aggregateStatisticsInMemory(storage: AccountStatisticsStorage, accountId: string, query: AccountStatisticsQuery, now: string): Promise<AccountStatisticsAggregation> {
+  const games = (await storage.listGameResultsForAccount(accountId)).filter((record) => gameMatchesQuery(record, query, now));
+  const eligibleGames = games.filter((record) => record.statisticsEligible);
+  const selfPlay = new Set(games.filter((record) => record.exclusionReason === "self_play").map((record) => record.originMatchId)).size;
+  const bySide = { runner: statisticsBucket(), corp: statisticsBucket() };
+  const byOpponentKind = { account: statisticsBucket(), guest: statisticsBucket(), ai: statisticsBucket() };
+  const byMode: Partial<Record<ApiMatchMode, ApiAccountStatisticsBucket>> = {};
+  const byMatchFormat: Partial<Record<ApiMatchFormat, ApiAccountStatisticsBucket>> = {};
+  for (const record of eligibleGames) {
+    addGameToBucket(bySide[record.side], record);
+    addGameToBucket(byOpponentKind[record.opponentKind], record);
+    addGameToBucket(byMode[record.matchMode] ??= statisticsBucket(), record);
+    addGameToBucket(byMatchFormat[record.matchFormat] ??= statisticsBucket(), record);
+  }
+  const totals = statisticsBucket();
+  for (const record of eligibleGames) addGameToBucket(totals, record);
+  for (const record of games.filter((candidate) => candidate.outcome === "abandoned")) {
+    totals.abandoned += 1;
+    bySide[record.side].abandoned += 1;
+    byOpponentKind[record.opponentKind].abandoned += 1;
+    (byMode[record.matchMode] ??= statisticsBucket()).abandoned += 1;
+    (byMatchFormat[record.matchFormat] ??= statisticsBucket()).abandoned += 1;
+  }
+  const series = query.side || query.matchMode
+    ? emptySeriesStatistics()
+    : seriesStatistics((await storage.listSeriesResultsForAccount(accountId)).filter((record) => seriesMatchesQuery(record, query, now)));
+  return { totals, selfPlay, bySide, byOpponentKind, byMode, byMatchFormat, series };
+}
+
+async function gameResultsPageInMemory(storage: AccountStatisticsStorage, accountId: string, query: AccountMatchHistoryQuery, now: string, limit: number): Promise<{ records: AccountGameResultRecord[]; hasMore: boolean }> {
+  const all = (await storage.listGameResultsForAccount(accountId))
+    .filter((record) => gameMatchesQuery(record, query, now))
+    .sort((left, right) => right.completedAt.localeCompare(left.completedAt) || right.accountGameResultId.localeCompare(left.accountGameResultId));
+  const cursorIndex = query.cursor ? all.findIndex((record) => record.accountGameResultId === query.cursor) : -1;
+  const start = cursorIndex >= 0 ? cursorIndex + 1 : 0;
+  return { records: all.slice(start, start + limit), hasMore: all.length > start + limit };
+}
+
+function periodStart(period: ApiAccountStatisticsPeriod, now: string): string | undefined {
+  if (period === "all") return undefined;
+  const days = period === "30d" ? 30 : 90;
+  return new Date(Date.parse(now) - days * 24 * 60 * 60 * 1000).toISOString();
 }
 
 function statisticsBucket(): ApiAccountStatisticsBucket {

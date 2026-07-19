@@ -2582,10 +2582,130 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       recommendation: "gain_credits_first",
     });
   });
+
+  it("builds a deep-remote threat reserve before the installed card is advanced", () => {
+    const input = pressureReserveInput(20);
+
+    const posture = buildRunnerEconomyPosture({ input });
+    const rd = evaluateRunnerRunTargets({ input }).find(
+      (evaluation) => evaluation.targetServerId === "rd",
+    );
+
+    expect(posture.creditReservePolicy).toMatchObject({
+      remoteScoreThreat: "possible",
+      remotePressureReserveActive: true,
+      remotePressureServerId: "remote_1",
+      remotePressureReserve: 17,
+      rdPressureSpendTarget: 4,
+      pressureRunwayTarget: 21,
+      availableCreditPool: 20,
+      desiredCreditReserve: 21,
+      belowReserveNow: true,
+    });
+    expect(rd).toMatchObject({
+      pathCost: 4,
+      creditsAfterRun: 16,
+      recommendation: "gain_credits_first",
+    });
+    expect(rd?.evidence).toEqual(
+      expect.arrayContaining([
+        "remote_pressure_credit_pool_after_run:16",
+        "rd_pressure_runway_ready:false",
+        "rd_preserves_remote_pressure_reserve:false",
+      ]),
+    );
+  });
+
+  it("spends only the credit layer above the deep-remote threat reserve on R&D", () => {
+    const input = pressureReserveInput(22);
+
+    const posture = buildRunnerEconomyPosture({ input });
+    const rd = evaluateRunnerRunTargets({ input }).find(
+      (evaluation) => evaluation.targetServerId === "rd",
+    );
+
+    expect(posture.creditReservePolicy).toMatchObject({
+      remotePressureReserve: 17,
+      pressureRunwayTarget: 21,
+      availableCreditPool: 22,
+      belowReserveNow: false,
+    });
+    expect(rd).toMatchObject({
+      pathCost: 4,
+      creditsAfterRun: 18,
+      recommendation: "run_now",
+    });
+    expect(rd?.evidence).toEqual(
+      expect.arrayContaining([
+        "remote_pressure_credit_pool_after_run:18",
+        "rd_pressure_runway_ready:true",
+        "rd_preserves_remote_pressure_reserve:true",
+      ]),
+    );
+  });
+
+  it("counts a structured Broker payout as convertible threat-reserve liquidity", () => {
+    const broker = visibleCard("runner-bank-source", {
+      definitionId: "onr_v1_154_broker",
+      title: "Broker",
+      type: "resource",
+      counters: { bit: 12 },
+    });
+    const input = pressureReserveInput(9, {
+      additionalRig: [broker],
+      additionalActions: [
+        bankPayoutAction("broker-payout", "Broker payout", {
+          cardId: broker.instanceId,
+          cardImplementationTakesHostedCredits: true,
+        }),
+      ],
+    });
+
+    const posture = buildRunnerEconomyPosture({ input });
+    const rd = evaluateRunnerRunTargets({ input }).find(
+      (evaluation) => evaluation.targetServerId === "rd",
+    );
+
+    expect(posture.creditReservePolicy).toMatchObject({
+      convertibleBankCredits: 12,
+      availableCreditPool: 21,
+      remotePressureReserve: 17,
+      pressureRunwayTarget: 21,
+    });
+    expect(rd).toMatchObject({
+      creditsAfterRun: 5,
+      recommendation: "run_now",
+    });
+  });
+
+  it("uses the prepared reserve when the deep remote becomes an urgent score threat", () => {
+    const input = pressureReserveInput(20, { advancedRemote: true });
+
+    const posture = buildRunnerEconomyPosture({ input });
+    const remote = evaluateRunnerRunTargets({ input }).find(
+      (evaluation) => evaluation.targetServerId === "remote_1",
+    );
+
+    expect(posture.creditReservePolicy).toMatchObject({
+      remoteScoreThreat: "urgent",
+      contestReserve: 8,
+      remotePressureReserve: 20,
+      rdPressureSpendTarget: 0,
+      pressureRunwayTarget: 20,
+      availableCreditPool: 20,
+    });
+    expect(remote).toMatchObject({
+      scoreThreat: true,
+      pathCost: 12,
+      creditsAfterRun: 8,
+      recommendation: "run_now",
+    });
+  });
 });
 
 function aiInput(params: {
   credits: number;
+  stateVersion?: number;
   opponentCredits?: number;
   opponentHandCount?: number;
   servers: PlayerView["servers"];
@@ -2595,7 +2715,7 @@ function aiInput(params: {
   eventTail?: PublicGameEvent[];
 }): AiDecisionInput {
   const playerView: PlayerView = {
-    stateVersion: 1,
+    stateVersion: params.stateVersion ?? 1,
     side: "runner",
     activeSide: "runner",
     phase: "runner_action_phase",
@@ -2642,6 +2762,50 @@ function aiInput(params: {
     actionNumber: 1,
     profileId: "runner-ai-test",
   };
+}
+
+function pressureReserveInput(
+  credits: number,
+  options: {
+    advancedRemote?: boolean;
+    additionalRig?: VisibleCard[];
+    additionalActions?: LegalAction[];
+  } = {},
+): AiDecisionInput {
+  const fracter = visibleCard("runner-efficient-fracter", {
+    definitionId: "efficient_fracter",
+    title: "Efficient Fracter",
+    type: "program",
+    subtypes: ["icebreaker", "fracter"],
+    strength: 3,
+  });
+  return aiInput({
+    credits,
+    stateVersion: 20,
+    rig: [fracter, ...(options.additionalRig ?? [])],
+    servers: [
+      server("rd", { ice: [expensiveBarrierIce("rd-tax")] }),
+      server("remote_1", {
+        ice: [
+          expensiveBarrierIce("remote-tax-1"),
+          expensiveBarrierIce("remote-tax-2"),
+          expensiveBarrierIce("remote-tax-3"),
+        ],
+        root: [
+          visibleCard("remote-hidden-card", {
+            known: false,
+            advancementCounters: options.advancedRemote ? 2 : 0,
+          }),
+        ],
+      }),
+    ],
+    legalActions: [
+      runAction("run-rd", "rd"),
+      runAction("run-remote-1", "remote_1"),
+      gainCreditAction("gain-credit"),
+      ...(options.additionalActions ?? []),
+    ],
+  });
 }
 
 function syntheticPublicEvent(

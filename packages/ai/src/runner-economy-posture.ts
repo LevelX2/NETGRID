@@ -3,7 +3,10 @@ import type { DeckCapabilityProfile } from "./deck-capabilities";
 import type { RunnerHandDevelopmentEvaluation } from "./runner/hand-development/runner-hand-development-types";
 import type { RunnerStrategicIntentProfile } from "./runner-strategic-intent";
 import { runnerDamageThreatAssessment } from "./runner-damage-threat-assessment";
-import { assessKnownRezzedIcePath } from "./visible-run-analysis";
+import {
+  assessKnownRezzedIcePath,
+  runnerRunPathCreditBudgetWithVisiblePools,
+} from "./visible-run-analysis";
 import type {
   EvaluateRunnerRunTargetsParams,
   RunnerCreditBasePlan,
@@ -24,6 +27,18 @@ const RUNNER_CREDIT_BASE_PLAN_SCHEMA_VERSION =
 type EconomyPostureParams = EvaluateRunnerRunTargetsParams & {
   strategicIntent?: RunnerStrategicIntentProfile;
   deckCapabilities?: DeckCapabilityProfile;
+};
+
+type RunnerRemotePressureReserveAssessment = {
+  active: boolean;
+  reserve: number;
+  rdPressureSpendTarget: number;
+  runwayTarget: number;
+  reserveOverrides: string[];
+  serverId?: string;
+  visiblePathCost: number;
+  unrezzedIceRiskBuffer: number;
+  postRunReserve: number;
 };
 
 export function buildRunnerEconomyPosture(
@@ -56,6 +71,15 @@ export function buildRunnerEconomyPosture(
         ? 5
         : 4,
   );
+  const convertibleBankCredits = runnerConvertibleBankCredits(params.input);
+  const availableCreditPool = credits + convertibleBankCredits;
+  const remotePressureReserve = runnerRemotePressureReserveAssessment({
+    input: params.input,
+    phase,
+    remoteScoreThreat,
+    economyCanSustainPressure:
+      runnerCanGrowPressureEconomy(params.input) || availableCreditPool >= 10,
+  });
   const creditReservePolicy = buildRunnerCreditReservePolicy({
     input: params.input,
     phase,
@@ -65,12 +89,16 @@ export function buildRunnerEconomyPosture(
     riskAdjustedRunReserve,
     bankToolsRelevant,
     remoteScoreThreat,
+    convertibleBankCredits,
+    availableCreditPool,
+    remotePressureReserve,
     handDevelopmentEvaluations: params.handDevelopmentEvaluations ?? [],
   });
   const creditBasePlan = buildRunnerCreditBasePlan({
     currentCredits: credits,
     minimumCreditFloor,
     creditReservePolicy,
+    reserveAvailableCredits: availableCreditPool,
     riskAdjustedRunReserve,
     handDevelopmentEvaluations: params.handDevelopmentEvaluations ?? [],
     canDraw: params.input.legalActions.some(
@@ -88,11 +116,11 @@ export function buildRunnerEconomyPosture(
   const buildEconomyBeforePressure =
     credits <= 2 ||
     (creditBasePlan.economyPriority === "high" &&
-      credits < creditBasePlan.desiredCreditReserve) ||
+      availableCreditPool < creditBasePlan.desiredCreditReserve) ||
     (transition.phase === "economy_transition" &&
       transition.commitment !== "none") ||
     (setupEngine.has("runner.economy_setup_before_pressure") &&
-      credits < creditBasePlan.desiredCreditReserve);
+      availableCreditPool < creditBasePlan.desiredCreditReserve);
   const recommendation =
     fundingNeed && hasCashOut
       ? "cash_out_bank"
@@ -121,6 +149,8 @@ export function buildRunnerEconomyPosture(
     recommendation,
     evidence: [
       `runner_credits:${credits}`,
+      `runner_convertible_bank_credits:${convertibleBankCredits}`,
+      `runner_available_credit_pool:${availableCreditPool}`,
       `minimum_credit_floor:${minimumCreditFloor}`,
       `flatline_risk_level:${flatlineRisk.level}`,
       `damage_threat_credit_floor:${damageThreatFloor}`,
@@ -221,6 +251,35 @@ function runnerHasInstalledActionEconomy(input: AiDecisionInput): boolean {
   );
 }
 
+function runnerCanGrowPressureEconomy(input: AiDecisionInput): boolean {
+  if (
+    input.legalActions.some(
+      (action) =>
+        !isBankPayoutAction(action) &&
+        (action.type === "activated_card_ability" ||
+          action.type === "trigger_ability" ||
+          action.type === "play_event") &&
+        runnerLegalActionPayloadCreditGain(action) > 1,
+    )
+  ) {
+    return true;
+  }
+  return (input.playerView.own.rig ?? []).some((card) => {
+    const text = `${card.rulesText ?? ""}`.toLowerCase();
+    const renewableGrowth =
+      text.includes("recurring credit") ||
+      text.includes("recurring credits") ||
+      (text.includes("gain credits") &&
+        (text.includes("start of your turn") ||
+          text.includes("once per turn")));
+    const runRestricted =
+      text.includes("only during a run") ||
+      text.includes("only to pay for using icebreakers") ||
+      text.includes("run credits");
+    return renewableGrowth && !runRestricted;
+  });
+}
+
 function runnerHasBurstEconomyEvent(input: AiDecisionInput): boolean {
   return input.legalActions.some(
     (action) =>
@@ -248,6 +307,7 @@ function runnerLegalActionNumberPayload(
 
 function buildRunnerCreditBasePlan(params: {
   currentCredits: number;
+  reserveAvailableCredits: number;
   minimumCreditFloor: number;
   creditReservePolicy: RunnerCreditReservePolicy;
   riskAdjustedRunReserve: boolean;
@@ -275,11 +335,15 @@ function buildRunnerCreditBasePlan(params: {
   const fundingNeed =
     params.currentCredits < params.minimumCreditFloor ||
     (params.creditReservePolicy.remoteScoreThreat !== "none" &&
-      params.currentCredits < params.creditReservePolicy.contestReserve) ||
+      params.reserveAvailableCredits <
+        params.creditReservePolicy.contestReserve) ||
+    (params.creditReservePolicy.remotePressureReserveActive &&
+      params.reserveAvailableCredits < desiredCreditReserve) ||
     (topBlockedCandidate !== undefined &&
       params.currentCredits < topBlockedCandidate.installOrPlayCost);
   const recommendation = creditBaseRecommendation({
     currentCredits: params.currentCredits,
+    reserveAvailableCredits: params.reserveAvailableCredits,
     desiredCreditReserve,
     fundingNeed,
     remoteScoreThreat: params.creditReservePolicy.remoteScoreThreat,
@@ -292,6 +356,7 @@ function buildRunnerCreditBasePlan(params: {
   });
   const economyPriority = creditBaseEconomyPriority({
     currentCredits: params.currentCredits,
+    reserveAvailableCredits: params.reserveAvailableCredits,
     desiredCreditReserve,
     fundingNeed,
     remoteScoreThreat: params.creditReservePolicy.remoteScoreThreat,
@@ -348,6 +413,9 @@ function buildRunnerCreditReservePolicy(params: {
   riskAdjustedRunReserve: boolean;
   bankToolsRelevant: boolean;
   remoteScoreThreat: RunnerRemoteScoreThreat;
+  convertibleBankCredits: number;
+  availableCreditPool: number;
+  remotePressureReserve: RunnerRemotePressureReserveAssessment;
   handDevelopmentEvaluations: readonly RunnerHandDevelopmentEvaluation[];
 }): RunnerCreditReservePolicy {
   const developmentReserve = runnerDevelopmentReserve(
@@ -370,6 +438,7 @@ function buildRunnerCreditReservePolicy(params: {
     params.baseDesiredCreditReserve,
     breakerUseReserve,
     contestReserve,
+    params.remotePressureReserve.runwayTarget,
     developmentReserve,
     emergencyReserve,
   );
@@ -380,19 +449,26 @@ function buildRunnerCreditReservePolicy(params: {
     ...(params.remoteScoreThreat !== "none"
       ? [`remote_score_threat:${params.remoteScoreThreat}`]
       : []),
+    ...(params.remotePressureReserve.active
+      ? [
+          `remote_pressure_reserve:${params.remotePressureReserve.serverId ?? "unknown"}`,
+        ]
+      : []),
     ...(developmentReserve > params.baseDesiredCreditReserve
       ? ["development_reserve"]
       : []),
     ...(emergencyReserve > 0 ? ["emergency_reserve"] : []),
   ];
-  const belowReserveNow = params.currentCredits < desiredCreditReserve;
+  const belowReserveNow = params.availableCreditPool < desiredCreditReserve;
   const spendingWouldDropBelowReserve = params.input.legalActions.some(
     (action) => {
       const cost = action.costs.reduce(
         (sum, entry) => sum + Math.max(0, entry.credits ?? 0),
         0,
       );
-      return cost > 0 && params.currentCredits - cost < desiredCreditReserve;
+      return (
+        cost > 0 && params.availableCreditPool - cost < desiredCreditReserve
+      );
     },
   );
 
@@ -400,9 +476,18 @@ function buildRunnerCreditReservePolicy(params: {
     schemaVersion: 1,
     phase: params.phase,
     currentCredits: params.currentCredits,
+    convertibleBankCredits: params.convertibleBankCredits,
+    availableCreditPool: params.availableCreditPool,
     minimumCreditFloor: params.minimumCreditFloor,
     breakerUseReserve,
     contestReserve,
+    remotePressureReserve: params.remotePressureReserve.reserve,
+    ...(params.remotePressureReserve.serverId
+      ? { remotePressureServerId: params.remotePressureReserve.serverId }
+      : {}),
+    remotePressureReserveActive: params.remotePressureReserve.active,
+    rdPressureSpendTarget: params.remotePressureReserve.rdPressureSpendTarget,
+    pressureRunwayTarget: params.remotePressureReserve.runwayTarget,
     developmentReserve,
     emergencyReserve,
     desiredCreditReserve,
@@ -411,20 +496,30 @@ function buildRunnerCreditReservePolicy(params: {
     belowReserveNow,
     spendingWouldDropBelowReserve,
     reserveDrivers,
-    reserveOverrides: [],
+    reserveOverrides: params.remotePressureReserve.reserveOverrides,
     evidence: [
       `credit_reserve_phase:${params.phase}`,
       `current_credits:${params.currentCredits}`,
       `minimum_credit_floor:${params.minimumCreditFloor}`,
       `breaker_use_reserve:${breakerUseReserve}`,
       `contest_reserve:${contestReserve}`,
-      `development_reserve:${developmentReserve}`,
-      `emergency_reserve:${emergencyReserve}`,
       `desired_credit_reserve:${desiredCreditReserve}`,
       `remote_score_threat:${params.remoteScoreThreat}`,
       `can_contest_if_funded:${canContestIfFunded}`,
+      `convertible_bank_credits:${params.convertibleBankCredits}`,
+      `available_credit_pool:${params.availableCreditPool}`,
+      `remote_pressure_reserve:${params.remotePressureReserve.reserve}`,
+      `remote_pressure_server:${params.remotePressureReserve.serverId ?? "none"}`,
+      `remote_pressure_reserve_active:${params.remotePressureReserve.active}`,
+      `rd_pressure_spend_target:${params.remotePressureReserve.rdPressureSpendTarget}`,
+      `pressure_runway_target:${params.remotePressureReserve.runwayTarget}`,
+      `development_reserve:${developmentReserve}`,
+      `emergency_reserve:${emergencyReserve}`,
       `below_reserve_now:${belowReserveNow}`,
       `spending_would_drop_below_reserve:${spendingWouldDropBelowReserve}`,
+      ...params.remotePressureReserve.reserveOverrides.map(
+        (override) => `reserve_override:${override}`,
+      ),
       ...reserveDrivers.map((driver) => `reserve_driver:${driver}`),
     ],
   };
@@ -532,6 +627,7 @@ function needRank(
 
 function creditBaseRecommendation(params: {
   currentCredits: number;
+  reserveAvailableCredits: number;
   desiredCreditReserve: number;
   fundingNeed: boolean;
   remoteScoreThreat: RunnerRemoteScoreThreat;
@@ -559,8 +655,12 @@ function creditBaseRecommendation(params: {
   ) {
     return "allow_setup_spend";
   }
-  if (params.currentCredits >= 6) return "allow_pressure";
-  if (params.currentCredits < params.desiredCreditReserve)
+  if (
+    params.currentCredits >= 6 &&
+    params.reserveAvailableCredits >= params.desiredCreditReserve
+  )
+    return "allow_pressure";
+  if (params.reserveAvailableCredits < params.desiredCreditReserve)
     return "preserve_reserve";
   if (params.currentCredits < 6) return "preserve_reserve";
   return "allow_pressure";
@@ -701,6 +801,7 @@ function runnerHasInstalledSustainableEconomy(
 
 function creditBaseEconomyPriority(params: {
   currentCredits: number;
+  reserveAvailableCredits: number;
   desiredCreditReserve: number;
   fundingNeed: boolean;
   remoteScoreThreat: RunnerRemoteScoreThreat;
@@ -708,10 +809,11 @@ function creditBaseEconomyPriority(params: {
   if (params.fundingNeed || params.currentCredits <= 2) return "high";
   if (
     params.remoteScoreThreat !== "none" &&
-    params.currentCredits < params.desiredCreditReserve
+    params.reserveAvailableCredits < params.desiredCreditReserve
   )
     return "high";
-  if (params.currentCredits < params.desiredCreditReserve) return "medium";
+  if (params.reserveAvailableCredits < params.desiredCreditReserve)
+    return "medium";
   return "low";
 }
 
@@ -725,6 +827,191 @@ function hasRiskyUniversalPressure(params: EconomyPostureParams): boolean {
     }) ??
       false)
   );
+}
+
+function runnerRemotePressureReserveAssessment(params: {
+  input: AiDecisionInput;
+  phase: RunnerCreditReservePhase;
+  remoteScoreThreat: RunnerRemoteScoreThreat;
+  economyCanSustainPressure: boolean;
+}): RunnerRemotePressureReserveAssessment {
+  const inactive: RunnerRemotePressureReserveAssessment = {
+    active: false,
+    reserve: 0,
+    rdPressureSpendTarget: 0,
+    runwayTarget: 0,
+    reserveOverrides: [],
+    visiblePathCost: 0,
+    unrezzedIceRiskBuffer: 0,
+    postRunReserve: 0,
+  };
+  const immediateThreat = runnerHasImmediateRemoteScoreThreat(params.input);
+  if (
+    params.input.side !== "runner" ||
+    (!params.economyCanSustainPressure && !immediateThreat) ||
+    (params.phase === "opening" && !immediateThreat)
+  ) {
+    return inactive;
+  }
+
+  const postRunReserve =
+    params.remoteScoreThreat === "urgent"
+      ? 8
+      : params.phase === "late_contest"
+        ? 6
+        : 5;
+  const candidates = params.input.playerView.servers.flatMap((server) => {
+    if (!server.id.startsWith("remote_") || server.ice.length < 2) return [];
+    const hasLegalRun = params.input.legalActions.some(
+      (action) =>
+        action.type === "start_run" && actionServerId(action) === server.id,
+    );
+    if (!hasLegalRun) return [];
+    const path = assessKnownRezzedIcePath(
+      server.ice,
+      params.input.playerView.own.rig ?? [],
+      runnerRunPathCreditBudgetWithVisiblePools(
+        params.input.playerView.own.credits,
+        params.input.playerView.own.rig ?? [],
+      ),
+      server.root,
+    );
+    if (
+      path.knownPathBlockedByMissingCoverage ||
+      path.knownPathBlockedByUnbreakableIce
+    ) {
+      return [];
+    }
+    const visiblePathCost = Math.max(0, path.visibleBreakCost ?? 0);
+    const unrezzedIceCount = server.ice.filter(
+      (ice) => ice.known === false || ice.rezzed !== true,
+    ).length;
+    const unrezzedIceRiskBuffer = Math.min(9, unrezzedIceCount * 3);
+    const estimatedContestCost = visiblePathCost + unrezzedIceRiskBuffer;
+    if (estimatedContestCost < 6) return [];
+    return [
+      {
+        active: true,
+        reserve: Math.min(36, estimatedContestCost + postRunReserve),
+        rdPressureSpendTarget: 0,
+        runwayTarget: 0,
+        reserveOverrides: [],
+        serverId: server.id,
+        visiblePathCost,
+        unrezzedIceRiskBuffer,
+        postRunReserve,
+      } satisfies RunnerRemotePressureReserveAssessment,
+    ];
+  });
+  const selected = candidates.sort(
+    (left, right) =>
+      right.reserve - left.reserve ||
+      (left.serverId ?? "").localeCompare(right.serverId ?? ""),
+  )[0];
+  if (!selected) return inactive;
+  const terminalCentralPressure =
+    !immediateThreat &&
+    (params.input.playerView.opponent.agendaPoints >=
+      params.input.playerView.agendaPointsToWin - 1 ||
+      params.input.playerView.own.agendaPoints >=
+        params.input.playerView.agendaPointsToWin - 2);
+  const rdPressureSpendTarget =
+    terminalCentralPressure || immediateThreat
+      ? 0
+      : runnerRdPressureSpendTarget(params.input);
+  return {
+    ...selected,
+    rdPressureSpendTarget,
+    runwayTarget: Math.min(56, selected.reserve + rdPressureSpendTarget),
+    reserveOverrides: terminalCentralPressure
+      ? ["terminal_central_pressure"]
+      : [],
+  };
+}
+
+function runnerRdPressureSpendTarget(input: AiDecisionInput): number {
+  const rd = input.playerView.servers.find((server) => server.id === "rd");
+  if (
+    !rd ||
+    !input.legalActions.some(
+      (action) =>
+        action.type === "start_run" && actionServerId(action) === "rd",
+    )
+  ) {
+    return 0;
+  }
+  const path = assessKnownRezzedIcePath(
+    rd.ice,
+    input.playerView.own.rig ?? [],
+    runnerRunPathCreditBudgetWithVisiblePools(
+      input.playerView.own.credits,
+      input.playerView.own.rig ?? [],
+    ),
+    rd.root,
+  );
+  if (
+    path.knownPathBlockedByMissingCoverage ||
+    path.knownPathBlockedByUnbreakableIce
+  ) {
+    return 0;
+  }
+  const unrezzedIceRisk = Math.min(
+    6,
+    rd.ice.filter((ice) => ice.known === false || ice.rezzed !== true).length *
+      3,
+  );
+  return Math.min(
+    20,
+    Math.max(0, path.visibleBreakCost ?? 0) + unrezzedIceRisk,
+  );
+}
+
+function runnerHasImmediateRemoteScoreThreat(input: AiDecisionInput): boolean {
+  return input.playerView.servers.some(
+    (server) =>
+      server.id.startsWith("remote_") &&
+      server.root.some(
+        (card) =>
+          (card.known === false && (card.advancementCounters ?? 0) > 0) ||
+          (card.known && card.type === "agenda"),
+      ),
+  );
+}
+
+function runnerConvertibleBankCredits(input: AiDecisionInput): number {
+  const payoutCards = new Map<string, number>();
+  for (const action of input.legalActions) {
+    if (!isBankPayoutAction(action)) continue;
+    const sourceIds = [
+      action.source,
+      typeof action.payload?.cardId === "string"
+        ? action.payload.cardId
+        : undefined,
+      typeof action.payload?.sourceCardId === "string"
+        ? action.payload.sourceCardId
+        : undefined,
+    ].filter((value): value is string => Boolean(value));
+    const card = (input.playerView.own.rig ?? []).find((candidate) =>
+      sourceIds.includes(candidate.instanceId),
+    );
+    if (!card) continue;
+    const storedCredits = Math.max(
+      0,
+      card.counters?.bit ?? 0,
+      card.counters?.power ?? 0,
+      card.counters?.recurring_credit ?? 0,
+      typeof action.payload?.gainCreditsAmount === "number"
+        ? action.payload.gainCreditsAmount
+        : 0,
+    );
+    if (storedCredits > 0) {
+      payoutCards.set(card.instanceId, Math.floor(storedCredits));
+    }
+  }
+  return [...payoutCards.values()]
+    .sort((left, right) => right - left)
+    .slice(0, 3)
+    .reduce((sum, amount) => sum + amount, 0);
 }
 
 function runnerCreditReservePhase(

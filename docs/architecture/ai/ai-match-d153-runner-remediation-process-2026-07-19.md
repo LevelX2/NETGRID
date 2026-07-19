@@ -2,8 +2,8 @@
 
 ## Status
 
-Umsetzung und Verifikation abgeschlossen; lokale Integration nach `main` steht
-noch aus.
+Umsetzung und Verifikation einschließlich des Nachtrags zur
+Doppelbedrohungsreserve abgeschlossen.
 
 ## Quelle und Ziel
 
@@ -17,7 +17,9 @@ Ziel ist eine generische Verbesserung ohne Match-, Karteninstanz- oder
 Decksonderregel. Die KI soll öffentliche Gegenindizien für leeres HQ nutzen,
 schlechte Runs und stale Pläne aufgeben, Broker-Guthaben als konvertierbare
 Run-Finanzierung erkennen und wertvolle Informations- und Closeout-Runs
-ausdrücklich erhalten.
+ausdrücklich erhalten. Der Nachtrag verlangt außerdem einen ausreichend hohen
+Kreditpolster, sodass R&D-Druck nur aus dem Überschuss finanziert wird und ein
+tief geschütztes, avanciertes Remote im Folgezug glaubwürdig contestbar bleibt.
 
 ## Invarianten
 
@@ -30,6 +32,9 @@ ausdrücklich erhalten.
   konvertierbares Erfolgsfenster bleiben positive Gegenbeispiele.
 - Broker-Build und -Cash-out werden an exakte strukturierte LegalAction-IDs
   gebunden; Label- oder Kartennamen-Fallbacks sind unzulässig.
+- Broker-Guthaben zählt als konvertierbare Liquidität, aber eine Einzahlung
+  nicht als Einkommenszuwachs. R&D darf den geschätzten Remote-Kern nicht
+  verbrauchen.
 - `data/ai/ai-card-hints-active.json` bleibt die einzige statische
   Hint-Semantikquelle.
 
@@ -44,16 +49,19 @@ ausdrücklich erhalten.
 5. `875dcb446` – Hint-/Consumer-Audit v2 und Entfernung der falschen
    Broker-Kapazitätsaussage.
 6. `0d99a9e90` – Gegenbeispiele aus den vollständigen AI-Shards präzisiert.
+7. Nachtrag vom 19.07.2026 – tiefe Remote-Contest-Reserve, darüberliegende
+   R&D-Ausgabeschicht und Last-Click-Broker-Liquidierung für sichtbare
+   Score-Gefahr. D161, D167 und die 424A-D154-Gegenprobe sichern den Vertrag.
 
 ## Abschlussgates
 
 - 12/12 D153-Checkpoints grün.
-- 77/77 gemeinsame Match-, Bank-, Hint- und Choice-Regressionen grün.
-- drei AI-Shards mit 410 Testdateien und 2.808 Tests grün.
+- 211/211 fokussierte Taktik- und Entscheidungsregressionen grün.
+- drei AI-Shards mit 410 Testdateien und 2.813 Tests grün.
 - AI-Typecheck, `check:ai`, Package-Boundaries, Test-Discovery und
   `git diff --check` grün.
 - Deck-Hint-/Consumer-Audit: 19 eindeutige Karten, 45 Kopien, null Blocker,
-  null Warnungen.
+  null Warnungen, auch auf der neuen D167-Broker-Auswahl.
 
 Der monolithische AI-Testaufruf überschritt zunächst die lokale
 Fünf-Minuten-Grenze ohne Ergebnis. Die drei offiziellen Shards deckten danach
