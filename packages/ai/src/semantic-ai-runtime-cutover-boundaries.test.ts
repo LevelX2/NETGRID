@@ -12,15 +12,29 @@ import {
   AI_PLAY_STRENGTH_LOCAL_DEFAULT_ENV,
 } from "./decision/pilot-scope-registry";
 import { resetTacticalPlanMemory } from "./tactical-plans";
-import { chooseSemanticRuntimeAction } from "./runtime/semantic-runtime";
+import {
+  chooseSemanticRuntimeAction,
+  type SemanticRuntimeDependencies,
+} from "./runtime/semantic-runtime";
 import type { LegalAction } from "@netgrid/shared";
 import {
   aiInput,
   legalAction,
-  semanticRuntimeDependencies,
+  semanticRuntimeDependenciesWithoutRunTargetEvaluation,
   server,
   visibleCard,
 } from "./semantic-ai-runtime-cutover.test-support";
+
+function semanticRuntimeDependencies(
+  ...args: Parameters<
+    typeof semanticRuntimeDependenciesWithoutRunTargetEvaluation
+  >
+): SemanticRuntimeDependencies {
+  return {
+    ...semanticRuntimeDependenciesWithoutRunTargetEvaluation(...args),
+    evaluateRunnerRunTargets: () => [],
+  } as SemanticRuntimeDependencies;
+}
 
 describe("Semantic AI runtime cutover — fallback and diagnostic boundaries", () => {
   const originalRuntimeMode = process.env.NETGRID_SEMANTIC_AI_RUNTIME;

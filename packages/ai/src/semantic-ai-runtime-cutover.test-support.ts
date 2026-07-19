@@ -288,7 +288,7 @@ export function runtimeRunnerStrategyProfile(): AiDeckStrategyProfile {
   };
 }
 
-export function semanticRuntimeDependencies(
+export function semanticRuntimeDependenciesWithoutRunTargetEvaluation(
   choices: SemanticRuntimeChoice[],
   options: {
     initiallySelectedActionId: string;
@@ -301,10 +301,9 @@ export function semanticRuntimeDependencies(
       evidence: string[];
     };
     rememberedActions?: string[];
-    runTargets?: unknown[];
     observedTacticalGoals?: string[];
   },
-): SemanticRuntimeDependencies {
+): Partial<SemanticRuntimeDependencies> {
   return {
     semanticRuntimeChoices: () => choices,
     semanticRuntimeChoiceIsReactive: () => false,
@@ -319,7 +318,6 @@ export function semanticRuntimeDependencies(
         fundingNeed: "credits",
         evidence: ["test_economy_posture"],
       }) as any,
-    evaluateRunnerRunTargets: () => (options.runTargets ?? []) as any[],
     buildRunnerTacticalGoals: () =>
       [
         options.goal ?? {

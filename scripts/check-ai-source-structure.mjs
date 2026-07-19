@@ -153,10 +153,11 @@ const testLineCaps = new Map([
   ["runtime/semantic-runtime-corp-score-economy-and-trace.test.ts", 1067],
   ["runtime/semantic-runtime-corp-score-pressure.test.ts", 1183],
   ["tactical-plans.test.ts", 4308],
-  ["semantic-ai-runtime-cutover-boundaries.test.ts", 241],
-  ["semantic-ai-runtime-cutover-corp.test.ts", 1429],
+  ["semantic-ai-runtime-cutover-boundaries.test.ts", 255],
+  ["semantic-ai-runtime-cutover-corp.test.ts", 1443],
   ["semantic-ai-runtime-cutover-runner-plans.test.ts", 1602],
   ["semantic-ai-runtime-cutover-runner-safety.test.ts", 710],
+  ["semantic-ai-runtime-cutover.test-support.ts", 433],
   ["runtime/semantic-runtime-corp-board-triage.test.ts", 1764],
   ["runtime/semantic-runtime-corp-scoring-window.test.ts", 812],
   [

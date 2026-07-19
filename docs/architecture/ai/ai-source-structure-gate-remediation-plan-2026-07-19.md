@@ -1,6 +1,6 @@
 # AI-Source-Structure-Gate-Remediation – Plan 2026-07-19
 
-Status: `active`
+Status: `implementation_complete_pending_integration`
 
 ## Quelle und Vorgabe
 
@@ -237,7 +237,18 @@ dokumentiertem Sicherheitsblocker und Removal Condition zulässig.
   Score-/Choice-/Central-Pressure-Tests, Structure-Selftest und Diff-Hygiene
   sind grün. Die Removal List steht bei null; das Source-Structure-Gate meldet
   677 produktive Dateien, null Laufzeit-/Typzyklen und Runtime-Root 289.
-- Aktives Paket: ASSG-6.
+- ASSG-6 abgeschlossen: Alle neun Ausgangstreffer sind entfernt und die
+  geänderten sowie neuen Owner- und Testsuite-Dateien besitzen kleinere,
+  explizite Endstand-Caps. Eine zunächst im gemeinsamen Cutover-Test-Support
+  platzierte `evaluateRunnerRunTargets`-Abhängigkeit wurde durch das
+  Module-Boundary-Gate erkannt und ohne Allowlist in die beiden tatsächlichen
+  Testconsumer zurückverlegt. Der vollständige Abschlusslauf ist grün:
+  `check:ai`, `check:ai:full`, Package-Boundaries, Structure-Selftest, AI- und
+  Server-Typecheck sowie 406 AI-Testdateien mit 2.793 Tests. Das
+  Source-Structure-Gate meldet weiterhin 677 produktive Dateien, null
+  Laufzeit-/Typzyklen und Runtime-Root 289.
+- Aktiver Schritt: defensiver `main`-Abgleich, lokaler Merge und verifizierter
+  Worktree-/Branch-Cleanup.
 
 ## Paketfolge
 

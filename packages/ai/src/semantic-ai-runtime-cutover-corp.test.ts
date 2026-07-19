@@ -8,7 +8,10 @@ import {
 } from "./decision/pilot-scope-registry";
 import { resetTacticalPlanMemory } from "./tactical-plans";
 import { getStrategicIntentMemorySnapshot } from "./strategic-intent-memory";
-import { chooseSemanticRuntimeAction } from "./runtime/semantic-runtime";
+import {
+  chooseSemanticRuntimeAction,
+  type SemanticRuntimeDependencies,
+} from "./runtime/semantic-runtime";
 import type { AiDecisionInput } from "@netgrid/shared";
 import {
   aiInput,
@@ -16,10 +19,21 @@ import {
   publicEvent,
   runtimeRunnerStrategyProfile,
   semanticRuntimeChoice,
-  semanticRuntimeDependencies,
+  semanticRuntimeDependenciesWithoutRunTargetEvaluation,
   server,
   visibleCard,
 } from "./semantic-ai-runtime-cutover.test-support";
+
+function semanticRuntimeDependencies(
+  ...args: Parameters<
+    typeof semanticRuntimeDependenciesWithoutRunTargetEvaluation
+  >
+): SemanticRuntimeDependencies {
+  return {
+    ...semanticRuntimeDependenciesWithoutRunTargetEvaluation(...args),
+    evaluateRunnerRunTargets: () => [],
+  } as SemanticRuntimeDependencies;
+}
 
 describe("Semantic AI runtime cutover — live and Corp contracts", () => {
   const originalRuntimeMode = process.env.NETGRID_SEMANTIC_AI_RUNTIME;
