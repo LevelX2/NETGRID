@@ -5,6 +5,7 @@ import type {
 } from "@netgrid/shared";
 import { createAiHintsByCard } from "../ai-hints";
 import { assessKnownRezzedIcePath } from "../visible-run-analysis";
+import { runnerHqSaturationScoreComponent } from "./runner-hq-saturation-score";
 
 const AI_HINTS_BY_CARD = createAiHintsByCard();
 
@@ -144,7 +145,16 @@ export function runnerStartRunScoreComponents(
       value: 480,
       reason: "central:hq",
     });
-    components.push(...dependencies.hqMemoryComponents(input, action));
+    const hqMemoryComponents = dependencies.hqMemoryComponents(input, action);
+    components.push(...hqMemoryComponents);
+    if (
+      !hqMemoryComponents.some(
+        (component) => component.key === "runner_hq_known_agenda",
+      )
+    ) {
+      const saturation = runnerHqSaturationScoreComponent(input);
+      if (saturation) components.push(saturation);
+    }
     const successWindowSetup = runnerHqSuccessWindowSetupAssessment(
       input,
       action,

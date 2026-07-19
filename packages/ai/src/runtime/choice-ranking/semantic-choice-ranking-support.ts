@@ -17,6 +17,7 @@ const STRATEGIC_EXACT_OVERRIDE_SCORE_GAP = 320;
 const STRATEGIC_KIND_OVERRIDE_SCORE_GAP = 480;
 const STRATEGIC_EXACT_MAPPING_PROTECTION_SCORE_GAP = 900;
 const STRATEGIC_KIND_MAPPING_PROTECTION_SCORE_GAP = 720;
+const RUNNER_LOW_VALUE_RUN_OVERRIDE_SCORE_GAP = 400;
 
 export function tacticalPlanOverrideReason(input: {
   urgentRunNowDevelopmentShouldYield: boolean;
@@ -235,6 +236,17 @@ export function tacticalPlanOverrideScoreGapThreshold(
   mappedChoice: SemanticRuntimeChoice,
   overrideChoice: SemanticRuntimeChoice,
 ): { scoreGap: number; reason: string } {
+  if (
+    mappedChoice.action.type === "start_run" &&
+    mappedChoice.score <= -500 &&
+    overrideChoice.score >=
+      mappedChoice.score + RUNNER_LOW_VALUE_RUN_OVERRIDE_SCORE_GAP
+  ) {
+    return {
+      scoreGap: RUNNER_LOW_VALUE_RUN_OVERRIDE_SCORE_GAP,
+      reason: "runner_low_value_run_score_gap",
+    };
+  }
   const mappedStrategic = semanticRuntimeChoiceStrategicFitLevel(mappedChoice);
   const overrideStrategic =
     semanticRuntimeChoiceStrategicFitLevel(overrideChoice);

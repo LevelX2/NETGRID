@@ -248,6 +248,15 @@ export function runnerPlanOverrideIsHardInterrupt(
   overrideChoice: SemanticRuntimeChoice,
 ): boolean {
   if (
+    semanticRuntimeChoiceHasScoreBreakdownComponent(
+      mappedChoice,
+      "runner_hq_defense_neglect_saturation",
+    ) &&
+    overrideChoice.score >= mappedChoice.score + 300
+  ) {
+    return true;
+  }
+  if (
     semanticRuntimeChoiceHasScoreComponent(
       overrideChoice,
       "runner_activated_agenda_score",
@@ -511,11 +520,15 @@ export function tacticalPlanNonPositiveProjectedRunShouldYield(
   mappedChoice: SemanticRuntimeChoice,
   overrideChoice: SemanticRuntimeChoice,
 ): boolean {
+  const materiallyBetterRemoteFallback =
+    mapping.plan.type === "runner.contest_remote" &&
+    mappedChoice.score <= -500 &&
+    overrideChoice.score >= mappedChoice.score + 400;
   if (
     mapping.plan.side !== "runner" ||
     !semanticRuntimeChoiceIsProjectedRun(mappedChoice) ||
     mappedChoice.score > 0 ||
-    overrideChoice.score <= 0
+    (overrideChoice.score <= 0 && !materiallyBetterRemoteFallback)
   ) {
     return false;
   }
@@ -525,7 +538,6 @@ export function tacticalPlanNonPositiveProjectedRunShouldYield(
   return !semanticRuntimeChoiceHasAnyScoreComponent(mappedChoice, [
     "runner_hq_known_agenda",
     "runner_rnd_fresh_memory",
-    "runner_goal_fit_tactical_goal_run_target",
   ]);
 }
 
