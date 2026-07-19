@@ -1,6 +1,6 @@
 # Aktueller Projektstatus
 
-Stand: 2026-07-18
+Stand: 2026-07-19
 
 ## Führender Produktstand
 
@@ -253,6 +253,13 @@ Stand: 2026-07-18
 - `apps/web/app/page.tsx`, `apps/web/app/chronicle.ts`,
   `apps/server/src/multiplayer.test.ts` und mehrere Corp-AI-Scoringdateien sind
   verbleibende Komplexitätsschwerpunkte.
+- Das allgemeine AI-Source-Structure-Gate ist auf dem sauberen `main`-Stand
+  `52ac68d19` wegen neun Dateigrößenverstößen rot. Vier davon waren bereits
+  auf dem integrierten Stand `d5199cdb0` vorhanden; fünf weitere betreffen
+  nachfolgend gewachsene Scoring-Window-, Board-Triage- und Corp-Score-Pfade.
+  Laufzeit- und Typimportgraph bleiben zyklenfrei. Der verbindliche
+  Null-Baseline-Remediationsplan liegt unter
+  `docs/architecture/ai/ai-source-structure-gate-remediation-plan-2026-07-19.md`.
 - Das Engine-Architektur-Zielgate ist grün. Mark-Counter-Anzeigen werden über
   generische Kartendefinitionsmetadaten statt direkter Karten-ID-Verzweigungen
   projiziert.
