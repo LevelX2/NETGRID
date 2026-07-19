@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import activeAiHintsData from "../../../data/ai/ai-card-hints-active.json";
+import type { AiHintStructuredEffect } from "./hint-ontology";
 
 type ActiveHint = (typeof activeAiHintsData.cards)[number];
 
@@ -111,6 +112,21 @@ describe("Corp score-conversion hint audit", () => {
       ]),
     );
     expect(hint.requiredMechanics).toContain("advancement_counter_transfer");
+  });
+
+  it("caps Team Restructuring at one advancement counter per target", () => {
+    const hint = requiredHint("onr_v1_305_team-restructuring");
+    const effects = (hint.effects ?? []) as AiHintStructuredEffect[];
+    const perTargetAmounts = effects
+      .filter(
+        (effect) =>
+          effect.resource === "advancement_counters" &&
+          (effect.kind === "advance_burst" ||
+            effect.kind === "score_acceleration"),
+      )
+      .map((effect) => effect.amount);
+
+    expect(perTargetAmounts).toEqual([1, 1]);
   });
 
   it("classifies Chicago Branch as score acceleration, never asset economy", () => {

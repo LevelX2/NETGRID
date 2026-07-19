@@ -1,8 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { strongerExistingCorpOverrideMustBePreserved } from "./corp-plan-overrides";
+import {
+  strongerExistingCorpOverrideMustBePreserved,
+  tacticalPlanCorpScoreConversionBlocksOffPlanOverride,
+} from "./corp-plan-overrides";
 import {
   choice,
   legalAction,
+  scoreConversionMapping,
   scoreComponentEvidence,
   scorelineSupportMapping,
   strategicEvidence,
@@ -32,5 +36,25 @@ describe("Corp plan override preservation", () => {
         weakerStrategicChoice,
       ),
     ).toBe(true);
+  });
+
+  it("yields a claimed same-turn conversion to a positive action when the scoreline is game-ending unsafe", () => {
+    const unsafeAgenda = legalAction("install-unsafe-agenda", "install_card");
+    const protectRd = legalAction("protect-rd", "install_card");
+    const mappedChoice = choice(unsafeAgenda, -4600, [], {
+      key: "corp_game_ending_scoreline_exposure_penalty",
+      value: -4600,
+      reason: "runner would win before the agenda can score",
+    });
+    const overrideChoice = choice(protectRd, 2100);
+
+    expect(
+      tacticalPlanCorpScoreConversionBlocksOffPlanOverride(
+        scoreConversionMapping([unsafeAgenda]),
+        mappedChoice,
+        overrideChoice,
+        new Set([unsafeAgenda.actionId]),
+      ),
+    ).toBe(false);
   });
 });

@@ -129,6 +129,17 @@ Stand: 2026-07-19
   Nicht-ICE-Rezzes verwenden durchgängig `rez_card`; beide Match-Deck-Audits
   melden null Hint-Blocker und null Warnungen. Führend ist
   `docs/reviews/ai/latest-two-corp-match-remediation-final-review-2026-07-17.md`.
+- Das vollständig analysierte Corp-KI-Spiel
+  `match_e653f50ac25eed22` ist mit 128/128 Decisions behoben. Verteiltes
+  Advancement projiziert pro Ziel statt als Gesamtmenge, riskante
+  Agenda-Installationen können eine fälschlich garantierte Same-Turn-Bindung
+  nicht mehr absolut durchsetzen, und Synchronized Attack bezahlt
+  HQ-Retain-Choices wertbasiert oberhalb einer Fünf-Credit-Reserve. Leere
+  Scoring-Remotes bleiben erlaubte Hintergrundprojekte, stehen ohne
+  unmittelbaren Scorepfad aber hinter R&D-Grundschutz; kritischer direkter
+  Scoreline-Schutz bleibt erhalten. Der 55-Karten-Deckaudit meldet null
+  Hint-/Runtime-Lücken und null Strategiewarnungen. Führend ist
+  `docs/reviews/ai/match-e653f50a-corp-remediation-final-review-2026-07-19.md`.
 - Die Planebene besitzt zusätzlich ein begrenztes Planportfolio: kurzfristige
   Score- und Gefahrenpläne bleiben Vordergrund beziehungsweise Interrupt,
   während Broker-/Bank-Zyklen und langfristige Corp-Scoring-Remotes mit

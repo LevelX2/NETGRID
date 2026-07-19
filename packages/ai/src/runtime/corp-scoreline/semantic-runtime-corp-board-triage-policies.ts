@@ -1971,6 +1971,7 @@ export function actionProtectsServer<TConsumer extends string>(
           action,
           triage.targetServerId,
           dependencies,
+          { urgentScoreline: triage.severity === "critical" },
         )
       );
     }
@@ -2072,6 +2073,7 @@ export function installedIceProvidesConcreteRemoteScoreProtection(
   action: LegalAction,
   serverId: string,
   dependencies: CorpBoardTriageDependencies<string>,
+  options: { urgentScoreline?: boolean } = {},
 ): boolean {
   if (serverId !== "new_remote" && !serverId.startsWith("remote_")) {
     return false;
@@ -2087,6 +2089,7 @@ export function installedIceProvidesConcreteRemoteScoreProtection(
     sourceCard: source,
     actionCreditCost: dependencies.actionCreditCost(action),
     iceRezCost: source.rezCost,
+    hasUrgentScoreline: options.urgentScoreline === true,
   });
   const placementIsConcrete =
     placementCandidate?.recommendation === "install_now" &&

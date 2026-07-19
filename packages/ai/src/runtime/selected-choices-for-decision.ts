@@ -8,6 +8,7 @@ import {
 import { selectedBidChoiceOptionId } from "./bid-choice-option";
 import { selectableChoiceOptions } from "./choice-option";
 import { selectedCorpAdvancementCounterChoiceOptionId } from "./corp-advancement-counter-choice";
+import { selectedCorpHqRetainPaymentOptionIds } from "./corp-hq-retain-payment-choice";
 import { selectedDiscardChoiceOptionIds } from "./discard-choice-selection";
 import { selectedRunnerDamagePreventionChoiceOptionId } from "./damage-prevention-choice-option";
 import { selectedPlayfulAiChoiceOptionId } from "./playful-ai-choice-option";
@@ -198,6 +199,18 @@ export function selectedChoicesForDecision(
     };
   }
   if (choice.kind === "select_cards") {
+    const retainedHqCards = selectedCorpHqRetainPaymentOptionIds(
+      input,
+      choice,
+      selectableOptions,
+      dependencies.discardKeepScore,
+    );
+    if (retainedHqCards) {
+      return {
+        choiceId: choice.choiceId,
+        selectedOptionIds: retainedHqCards,
+      };
+    }
     const exposeSelected = selectedRunnerExposeInstalledCardChoiceOptionIds(
       input,
       choice,

@@ -304,6 +304,7 @@ export function corpIcePlacementCandidateForAction<
       `component_visible_zero_effect:${components.visibleZeroEffect}`,
       `component_post_install_reserve:${components.postInstallReserve}`,
       `component_marginal_layer_value:${components.marginalLayerValue}`,
+      `component_opportunity_cost:${components.opportunityCost}`,
       ...serverNeed.evidence,
       ...profile.evidence,
       ...visibleDefenseFit.evidence,
@@ -493,6 +494,30 @@ export function buildCorpServerNeedProfile<
     if (!rootHasAgendaOrScoreline && hqAgendaRisk) {
       serverNeed += serverKind === "new_remote" ? 450 : 550;
       evidence.push("score_remote_setup_need:true");
+    }
+    const rdIceCount =
+      input.playerView.servers.find((candidate) => candidate.id === "rd")?.ice
+        .length ?? 0;
+    if (
+      !rootHasAgendaOrScoreline &&
+      options.hasUrgentScoreline !== true &&
+      rdIceCount === 0
+    ) {
+      serverNeed = Math.max(0, serverNeed - 900);
+      evidence.push("background_remote_before_rd_floor:true");
+    }
+    if (
+      !rootHasAgendaOrScoreline &&
+      options.hasUrgentScoreline !== true &&
+      serverKind === "remote" &&
+      iceCount > rdIceCount
+    ) {
+      serverNeed = Math.max(0, serverNeed - 900);
+      evidence.push(
+        "background_remote_ahead_of_rd:true",
+        `background_remote_ice:${iceCount}`,
+        `background_remote_rd_ice:${rdIceCount}`,
+      );
     }
   }
   if (options.immediateServerNeedBonus) {
@@ -1004,6 +1029,24 @@ function corpPlacementOpportunityCostValue(params: {
   creditsAfterInstall: number;
   hasBetterImmediateIceAlternative: boolean;
 }): number {
+  if (
+    params.serverNeed.serverKind === "archives" &&
+    params.serverNeed.serverNeed === 0
+  ) {
+    return -1200;
+  }
+  if (
+    params.serverNeed.evidence.includes(
+      "background_remote_before_rd_floor:true",
+    )
+  ) {
+    return -650;
+  }
+  if (
+    params.serverNeed.evidence.includes("background_remote_ahead_of_rd:true")
+  ) {
+    return -1500;
+  }
   if (
     params.hasBetterImmediateIceAlternative &&
     params.profile.deadAsFirstIce

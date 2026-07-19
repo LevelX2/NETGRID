@@ -28105,14 +28105,14 @@
           "timing": "action"
         },
         {
-          "amount": 2,
+          "amount": 1,
           "kind": "advance_burst",
           "resource": "advancement_counters",
           "scope": "installed_card",
           "timing": "action"
         },
         {
-          "amount": 2,
+          "amount": 1,
           "kind": "score_acceleration",
           "resource": "advancement_counters",
           "scope": "installed_card",
@@ -28125,6 +28125,7 @@
       "manualNotes": [
         "OPS-V2: ändern; priority=high; bucket=distributed_advancement / fast_advance.",
         "OPS-V2: Target/Constraints: TargetProfile nötig: je ein Counter auf bis zu zwei installierte Karten, die advanced werden können.",
+        "Runtime-Semantik: amount ist der Ertrag pro Einzelziel; Team Restructuring liefert deshalb höchstens 1 Counter auf dieselbe Karte.",
         "OPS-V2: Taxonomy follow-up: requires_score_window entfernen; optional schwaches advance.overadvance_support nur als supporting signal prüfen.",
         "OPS-V2: Data/effect follow-up: Spoiler-Kosten: 1; Report zeigt variabel/nicht numerisch. Datenmodell prüfen."
       ],

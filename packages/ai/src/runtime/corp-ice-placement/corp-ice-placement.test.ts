@@ -159,9 +159,83 @@ describe("corp ICE placement server need and density", () => {
     expect(density.knownIceSeen).toBe(3);
     expect(density.iceDensityClass).toBe("high");
   });
+
+  it("keeps an empty scoring remote below the missing R&D floor", () => {
+    const input = corpInput({
+      hq: [agenda("agenda-in-hq")],
+      servers: [server("hq", [corpIce("hq-ice")]), server("rd", [])],
+    });
+
+    const profile = buildCorpServerNeedProfile(input, "new_remote");
+
+    expect(profile.evidence).toContain(
+      "background_remote_before_rd_floor:true",
+    );
+    expect(profile.serverNeed).toBe(0);
+  });
+
+  it("keeps further empty-remote layers below the thinner R&D central", () => {
+    const input = corpInput({
+      hq: [agenda("agenda-in-hq")],
+      servers: [
+        server("hq", [corpIce("hq-ice")]),
+        server("rd", [corpIce("rd-ice")]),
+        server("remote_1", [corpIce("remote-ice-1"), corpIce("remote-ice-2")]),
+      ],
+    });
+    const remote = input.playerView.servers[2];
+
+    const profile = buildCorpServerNeedProfile(input, "remote_1", remote);
+
+    expect(profile.evidence).toContain("background_remote_ahead_of_rd:true");
+    expect(profile.serverNeed).toBe(0);
+  });
+
+  it("does not demote direct critical score-remote protection", () => {
+    const input = corpInput({
+      hq: [agenda("agenda-in-hq")],
+      servers: [
+        server("hq", [corpIce("hq-ice")]),
+        server("rd", []),
+        server("remote_1", [corpIce("remote-ice")]),
+      ],
+    });
+    const remote = input.playerView.servers[2];
+
+    const profile = buildCorpServerNeedProfile(input, "remote_1", remote, {
+      hasUrgentScoreline: true,
+    });
+
+    expect(profile.evidence).not.toContain(
+      "background_remote_before_rd_floor:true",
+    );
+    expect(profile.evidence).not.toContain(
+      "background_remote_ahead_of_rd:true",
+    );
+  });
 });
 
 describe("corp ICE placement candidate scoring", () => {
+  it("charges an opportunity cost for zero-need Archives ICE", () => {
+    const wall = corpIce("archives-wall", {
+      definitionId: "simple_barrier_ice",
+      rulesText: "*End the run.",
+      rezCost: 2,
+    });
+    const input = corpInput({
+      credits: 5,
+      hq: [wall],
+      servers: [server("hq", []), server("rd", []), server("archives", [])],
+    });
+
+    const candidate = candidateFor(input, wall, "archives", {
+      actionCreditCost: 0,
+      iceRezCost: 2,
+    });
+
+    expect(candidate?.components.opportunityCost).toBe(-1200);
+    expect(candidate?.evidence).toContain("raw_server_need:0");
+  });
   it("scores affordable direct HQ stop ICE above a dead first future-run ICE", () => {
     const dataWall = corpIce("data-wall", {
       definitionId: "simple_barrier_ice",

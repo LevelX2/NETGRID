@@ -30,6 +30,19 @@ export function tacticalPlanCorpScoreConversionBlocksOffPlanOverride(
   mappedActionIds: ReadonlySet<string>,
 ): boolean {
   if (
+    mappedChoice.action.type === "install_card" &&
+    mappedChoice.score < 0 &&
+    overrideChoice.score > 0 &&
+    mappedChoice.scoreBreakdown.some(
+      (component) =>
+        component.value < 0 &&
+        (component.key === "corp_game_ending_scoreline_exposure_penalty" ||
+          component.key === "corp_unsafe_delayed_scoreline_exposure"),
+    )
+  ) {
+    return false;
+  }
+  if (
     mappedChoice.score < 0 &&
     overrideChoice.score > 0 &&
     mappedChoice.scoreBreakdown.some(

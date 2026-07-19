@@ -201,6 +201,11 @@
   vollständiger 98/98-Matchaudit, Strict-Warmup-Grenze für spätere Findings
   und spielgleicher Opening-Hand-Vertrag für bezahlbaren Breaker-Zugriff über
   einen eigenen Programmsucher.
+- `docs/reviews/ai/match-e653f50a-corp-remediation-final-review-2026-07-19.md`:
+  vollständiger 128/128-Matchaudit und spielgleiche Verträge für korrekte
+  Einzelziel-Advancement-Projektion, wertbasierte HQ-Retain-Zahlung,
+  bedarfsabhängige ICE-Platzierung und R&D-Priorität vor leeren
+  Hintergrund-Remotes bei erhaltener kritischer Scoreline-Sicherheit.
 - `match-c6eedf46-runner-risk-economy-remediation-process-2026-07-16.md` und
   `docs/reviews/ai/match-c6eedf46-runner-risk-economy-remediation-final-2026-07-16.md`:
   aktionsbezogener Reservevertrag für verzögerte Ökonomie, side-safe

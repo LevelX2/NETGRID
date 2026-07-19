@@ -259,6 +259,7 @@ export function corpActionFamilyScoreComponents<TConsumer extends string>(
       action,
       dependencies,
       actionSemanticCandidate,
+      boardTriageState,
     );
     if (icePlacement) components.push(icePlacement);
     const matchpointHqProtection = corpMatchpointHqProtectionComponent(

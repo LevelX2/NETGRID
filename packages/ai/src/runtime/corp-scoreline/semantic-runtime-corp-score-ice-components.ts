@@ -7,10 +7,7 @@ import type {
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate";
 import { corpPurgeImpactScoreComponent } from "../corp-purge-impact";
 import { semanticRuntimeCorpEffectiveDefenseContext } from "../semantic-runtime-corp-effective-defense";
-import {
-  semanticRuntimeCorpBoardTriage,
-  type CorpBoardTriage,
-} from "../semantic-runtime-corp-board-triage";
+import type { CorpBoardTriage } from "../semantic-runtime-corp-board-triage";
 import {
   corpIcePlacementCandidateForAction,
   corpIcePlacementScoreComponent,
@@ -44,6 +41,7 @@ export function corpIcePlacementComponent<TConsumer extends string>(
   action: LegalAction,
   dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
   actionSemanticCandidate: ActionSemanticCandidate | undefined,
+  boardTriageState: CorpBoardTriage,
 ): AiDecisionScoreComponent | undefined {
   if (action.type !== "install_card" || action.payload?.placement !== "ice") {
     return undefined;
@@ -59,6 +57,10 @@ export function corpIcePlacementComponent<TConsumer extends string>(
     action,
     dependencies.rolesForAction(input, action),
   );
+  const directlyProtectsCriticalScoreRemote =
+    boardTriageState.primary === "protect_score_remote" &&
+    boardTriageState.severity === "critical" &&
+    boardTriageState.targetServerId === serverId;
   return corpIcePlacementScoreComponent({
     input,
     action,
@@ -73,7 +75,8 @@ export function corpIcePlacementComponent<TConsumer extends string>(
     iceRezCost: sourceCard?.rezCost,
     hasUrgentScoreline:
       scoringWindow?.recommendedNextStep === "build_remote_ice" ||
-      scoringWindow?.agendaStealSeverity === "game_ending",
+      scoringWindow?.agendaStealSeverity === "game_ending" ||
+      directlyProtectsCriticalScoreRemote,
   });
 }
 
