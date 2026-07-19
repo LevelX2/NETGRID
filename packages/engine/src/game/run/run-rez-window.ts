@@ -274,8 +274,7 @@ export function isCorpRunRootRezWindowOpen(host: RunRezWindowHost): boolean {
   }
   if (host.state.timingPoint !== "run.movement_rez_window") return false;
   const key = corpRunRootRezWindowKey(run);
-  if (run.rootRezWindowPassedKeys?.includes(key))
-    return false;
+  if (run.rootRezWindowPassedKeys?.includes(key)) return false;
   if (run.rootRezWindowPendingPassKeys?.includes(key)) return true;
   return buildCorpRunRootRezActions(host).length > 0;
 }
@@ -373,6 +372,7 @@ export function handleRunRootRezPostRez(
       stateChanged: true,
     };
   }
+  closeEmptyMovementRootRezWindowAfterRez(host);
   if (rootEffect.handled) {
     host.callbacks.continueAfterRootRez(legalAction);
     return { ...rootEffect, continueAfterRez: true };
@@ -385,6 +385,25 @@ export function handleRunRootRezPostRez(
     resolvedPayload: legalAction?.payload,
     stateChanged: true,
   };
+}
+
+function closeEmptyMovementRootRezWindowAfterRez(host: RunRezWindowHost): void {
+  const run = host.state.run;
+  if (
+    host.state.timingPoint !== "run.movement_rez_window" ||
+    !run ||
+    buildCorpRunRootRezActions(host).length > 0
+  )
+    return;
+  const key = corpRunRootRezWindowKey(run);
+  run.rootRezWindowPassedKeys = Array.from(
+    new Set([...(run.rootRezWindowPassedKeys ?? []), key]),
+  ).sort();
+  run.rootRezWindowPendingPassKeys = (
+    run.rootRezWindowPendingPassKeys ?? []
+  ).filter((candidate) => candidate !== key);
+  if (run.rootRezWindowPendingPassKeys.length === 0)
+    delete run.rootRezWindowPendingPassKeys;
 }
 
 export function resolveCorpRootRezEffect(

@@ -340,6 +340,9 @@ function pendingChoiceHost(
       resolveRunnerProgramTrashBeforeInstallChoice: unexpected(
         "resolveRunnerProgramTrashBeforeInstallChoice",
       ),
+      resolveRunnerMemoryCheckpointChoice: unexpected(
+        "resolveRunnerMemoryCheckpointChoice",
+      ),
       resolveDelayedInstallStartTurnChoice: unexpected(
         "resolveDelayedInstallStartTurnChoice",
       ),

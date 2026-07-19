@@ -3361,6 +3361,8 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       ...state.cardInstances[shatteredId]!,
       advancementCounters: 1,
     };
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
     state = apply(
       state,
       "runner",
@@ -3376,6 +3378,12 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
         sourceDefinition(state, action) ===
           "onr_v1_315_corprunners-shattered-remains",
     );
+    expect(state.timingPoint).toBe("access.resolve_card");
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) => action.type === "decline_rez",
+      ),
+    ).toBe(false);
     state = passRootRezWindowBeforeAccessIfOpen(state);
 
     const accessAction = mustAction(
@@ -3418,6 +3426,46 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
     );
     const selectedOptionIds =
       state.pendingChoice?.options.map((option) => option.id) ?? [];
+    const wrongSideResult = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: choiceAction.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "shattered-remains-wutech-wrong-side",
+    });
+    expect(wrongSideResult.ok).toBe(false);
+    if (!wrongSideResult.ok)
+      expect(wrongSideResult.error.code).toBe("ERR_WRONG_SIDE");
+
+    const staleResult = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: choiceAction.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      selectedChoices: {
+        choiceId: state.pendingChoice?.choiceId,
+        selectedOptionIds: selectedOptionIds.slice(0, 1),
+      },
+      idempotencyKey: "shattered-remains-wutech-stale",
+    });
+    expect(staleResult.ok).toBe(false);
+    if (!staleResult.ok) expect(staleResult.error.code).toBe("ERR_STALE_STATE");
+
+    const insufficientResult = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: choiceAction.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      selectedChoices: {
+        choiceId: state.pendingChoice?.choiceId,
+        selectedOptionIds: [],
+      },
+      idempotencyKey: "shattered-remains-wutech-insufficient",
+    });
+    expect(insufficientResult.ok).toBe(false);
+    if (!insufficientResult.ok)
+      expect(insufficientResult.error.code).toBe("ERR_INVALID_CHOICE");
+
     const nonMinimalResult = applyAction(state, {
       matchId: state.matchId,
       side: "runner",
@@ -3451,6 +3499,9 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       ),
     ).toBe(true);
     expect(validateGameState(state).ok).toBe(true);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
   });
 
   it("keeps Ball and Chain tax and Tokyo-Chiba Infighting run bonus scoped to the current run/server", () => {

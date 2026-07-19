@@ -31,6 +31,7 @@ import {
   resumeStartOfTurnAfterTagPrevention,
 } from "./runtime-port-bindings";
 import { resolveAccessProgramInstallMemoryChoice } from "../access/access-flow";
+import { resolveRunnerMemoryCheckpointChoice } from "../checkpoints/runner-memory-checkpoint";
 
 export function createPendingChoiceRuntimeHosts(
   deps: RuntimeDeps,
@@ -633,6 +634,24 @@ export function createPendingChoiceRuntimeHosts(
       runner: {
         resolveRunnerProgramTrashBeforeInstallChoice:
           deps.resolveRunnerProgramTrashBeforeInstallChoice,
+        resolveRunnerMemoryCheckpointChoice: (
+          _state,
+          legalAction,
+          playerAction,
+        ) =>
+          resolveRunnerMemoryCheckpointChoice(
+            {
+              state,
+              runnerMemoryLimit: () => deps.runnerMemoryLimit(state),
+              runnerProgramUsesMemory: (cardId) =>
+                deps.runnerProgramUsesMemory(state, cardId),
+              definitionFor: (cardId) => deps.definitionFor(state, cardId),
+              trashRunnerInstalledCardToHeap: (cardId, action) =>
+                deps.trashRunnerInstalledCardToHeap(state, cardId, action),
+            },
+            legalAction,
+            playerAction,
+          ),
         resolveDelayedInstallMemoryChoice: (
           _state,
           legalAction,

@@ -13,6 +13,7 @@ import {
 } from "@netgrid/shared";
 import { runnerMemoryLimit } from "../ability-engine/effective-values";
 import { CARD_IMPLEMENTATIONS } from "../card-implementations/registry";
+import { runnerMemoryCheckpointChoiceStateIsValid } from "./checkpoints/runner-memory-checkpoint";
 
 export function validateGameState(state: GameState): ValidationResult {
   const errors: string[] = [];
@@ -120,7 +121,10 @@ export function validateGameState(state: GameState): ValidationResult {
     errors.push("Runner memory limit must be a non-negative integer.");
   if (!Number.isInteger(state.runner.memoryUsed) || state.runner.memoryUsed < 0)
     errors.push("Runner memory used must be a non-negative integer.");
-  if (state.runner.memoryUsed > runnerMemoryLimit(state))
+  if (
+    state.runner.memoryUsed > runnerMemoryLimit(state) &&
+    !runnerMemoryCheckpointChoiceStateIsValid(state)
+  )
     errors.push("Runner memory limit exceeded.");
   for (const id of state.runner.rig.programs) {
     const instance = state.cardInstances[id];
