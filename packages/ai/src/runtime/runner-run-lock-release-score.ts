@@ -97,14 +97,17 @@ export function runnerRunLockReleaseScoreComponent(
 
 function installedBreakerAvailable(input: AiDecisionInput): boolean {
   return (input.playerView.own.rig ?? []).some((card) => {
-    const roles = card.definitionId
-      ? (AI_HINTS_BY_CARD.get(card.definitionId)?.roles ?? [])
-      : [];
+    const hint = card.definitionId
+      ? AI_HINTS_BY_CARD.get(card.definitionId)
+      : undefined;
     return (
       (card.subtypes ?? []).some((subtype) =>
         subtype.toLowerCase().includes("icebreaker"),
       ) ||
-      roles.some((role) => role === "icebreaker" || role.includes("breaker"))
+      hint?.breakerProfile !== undefined ||
+      (hint?.roles ?? []).some(
+        (role) => role === "icebreaker" || role.startsWith("breaker_"),
+      )
     );
   });
 }

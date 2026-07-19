@@ -55,6 +55,38 @@ describe("runnerHostedInstallScoreComponent", () => {
       value: 900,
     });
   });
+
+  it("does not treat icebreaker support as a hostable breaker", () => {
+    const hostInstall = installAction("eurocorpse", 6);
+    const supportInstall = installAction("cortical", 3);
+    const current = {
+      side: "runner",
+      legalActions: [hostInstall, supportInstall],
+      playerView: {
+        own: {
+          credits: 20,
+          clicks: 2,
+          gripOrHq: [
+            {
+              instanceId: "eurocorpse",
+              definitionId: "onr_proteus_139_eurocorpse-tm-spin-chip",
+              known: true,
+            },
+            {
+              instanceId: "cortical",
+              definitionId: "onr_proteus_134_cortical-cybermodem",
+              known: true,
+            },
+          ],
+          rig: [],
+        },
+      },
+    } as unknown as AiDecisionInput;
+
+    expect(
+      runnerHostedInstallScoreComponent(current, hostInstall),
+    ).toBeUndefined();
+  });
 });
 
 function input(): AiDecisionInput {
