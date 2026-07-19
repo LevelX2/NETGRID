@@ -141,12 +141,17 @@ export function buildLegalActions(
           ...buildRunnerCostPenaltySupportCardImplementationActions(
             host.hosts.runCardImplementationActionHost(),
           ).legalActions,
-          ...buildRunnerActionsForCostPenaltySupportWindow(host).filter(
-            (action) =>
-              action.actionId ===
-                state.runnerCostPenaltySupportWindow?.originalActionId &&
-              runnerCostPenaltySupportOriginalActionReady(state),
-          ),
+          ...buildRunnerActionsForCostPenaltySupportWindow(host)
+            .filter(
+              (action) =>
+                action.actionId ===
+                  state.runnerCostPenaltySupportWindow?.originalActionId &&
+                runnerCostPenaltySupportOriginalActionReady(state),
+            )
+            .map((action) => ({
+              ...action,
+              label: `Ohne weiteren Bank-Support fortfahren: ${action.label}`,
+            })),
         ]
       : [];
   if (state.run?.hiddenRunnerResourceAccessStartServerId)

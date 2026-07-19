@@ -1,19 +1,33 @@
 ---
 activityId: act-2026-07-18-hidden-bank-voluntary-payment-support
-status: inbox
+status: done
 kind: fix
 area: engine
 priority: hotfix
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-07-18
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-07-19
+completedAt: 2026-07-19
+branch: codex/hidden-bank-voluntary-payment-support
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/engine/src/game/payment/runner-payment-support.ts
+  - packages/engine/src/game/legal-actions.ts
+  - packages/engine/src/game/run/run-duration-payment.ts
+  - packages/engine/src/game/install/install-card.ts
+  - packages/engine/src/game/play/play-card-execution.ts
+  - packages/engine/src/game/access/access-resolution-actions.ts
+  - packages/engine/src/game/abilities/trigger-ability-execution.ts
+  - packages/engine/src/game/economy/credit-economy-execution.ts
+  - packages/engine/src/game/trace/trace-orchestration.ts
+  - packages/engine/src/index-tests/proteus/hidden-resource-hardening.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/proteus/hidden-resource-hardening.test.ts src/game/run/run-duration-payment.test.ts src/game/run/runner-breaker-action-execution.test.ts src/game/trace/trace-orchestration.test.ts src/game/install/install-card.test.ts
+  - corepack pnpm --filter @netgrid/engine test
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - git diff --check
 ---
 
 # Hidden Bank Resources bei freiwillig bezahlbaren Kosten anbieten
@@ -77,27 +91,27 @@ können.
 
 ## Akzeptanzkriterien
 
-- [ ] Bei einer bezahlbaren positiven Icebreaker-Pump-Kostenaktion erhält der
+- [x] Bei einer bezahlbaren positiven Icebreaker-Pump-Kostenaktion erhält der
   Runner vor der endgültigen Zahlung eine legale Chiba-Support-Option und eine
   eindeutige Option, ohne Support fortzufahren.
-- [ ] Dasselbe Verhalten ist für eine bezahlbare Break-Subroutine-Kostenaktion
+- [x] Dasselbe Verhalten ist für eine bezahlbare Break-Subroutine-Kostenaktion
   abgesichert.
-- [ ] Nach Auswahl von Chiba werden 1 Credit bezahlt, Chiba aufgedeckt in den
+- [x] Nach Auswahl von Chiba werden 1 Credit bezahlt, Chiba aufgedeckt in den
   Runner-Heap gelegt, 4 Credits gewonnen und die ursprüngliche Zahlung danach
   erneut vollständig validiert und genau einmal ausgeführt.
-- [ ] Nach Ablehnung des Supports wird die ursprüngliche Aktion genau einmal aus
+- [x] Nach Ablehnung des Supports wird die ursprüngliche Aktion genau einmal aus
   den zulässigen Runner-Zahlungspools bezahlt und normal aufgelöst.
-- [ ] Außerhalb einer angekündigten positiven Kosten-/Penalty-Zahlung erscheint
+- [x] Außerhalb einer angekündigten positiven Kosten-/Penalty-Zahlung erscheint
   keine Chiba-Aktion.
-- [ ] Getappte, bereits geopferte, nicht bezahlbare oder stale Bankkarten werden
+- [x] Getappte, bereits geopferte, nicht bezahlbare oder stale Bankkarten werden
   nicht angeboten beziehungsweise von `applyAction` zurückgewiesen.
-- [ ] Mehrere nutzbare Bankkarten erzeugen keine kombinatorische Explosion der
+- [x] Mehrere nutzbare Bankkarten erzeugen keine kombinatorische Explosion der
   ursprünglichen LegalAction und können nur innerhalb desselben gebundenen
   Zahlungsfensters eingesetzt werden.
-- [ ] Runner- und Korp-PlayerViews, PublicEvents, Replay und StateHash bleiben
+- [x] Runner- und Korp-PlayerViews, PublicEvents, Replay und StateHash bleiben
   deterministisch und leaken vor der gewählten Aktivierung keine verdeckte
   Kartenidentität.
-- [ ] Paketnahe Engine-Tests für den generischen Support-Core sowie Pump- und
+- [x] Paketnahe Engine-Tests für den generischen Support-Core sowie Pump- und
   Break-Zahlungen sind grün; Engine-Typecheck und `git diff --check` sind grün.
 
 ## Umsetzungshinweise
@@ -120,4 +134,13 @@ können.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Das gemeinsame Runner-Kostenfenster wird bei jeder positiven, mit vorhandenem
+Bank-Support bezahlbaren Zahlung freiwillig geöffnet, auch wenn die normalen
+Zahlungspools bereits ausreichen. Die ursprüngliche LegalAction bleibt als
+explizit beschriftete Fortsetzen-Option gebunden; beim erneuten Einreichen wird
+das Fenster geschlossen und die Zahlung genau einmal revalidiert und ausgeführt.
+
+Die Defizitfilter wurden an allen vorhandenen Einstiegspunkten entfernt, sodass
+Pump, Break, Run-Start, Installationen, Events, Abilities, Access-Zahlungen und
+Trace denselben Vertrag verwenden. Regressionen prüfen Chiba, Liberated und
+Swiss sowie den Support- und Ablehnen-Pfad bei bezahlbaren Pump-/Break-Aktionen.
