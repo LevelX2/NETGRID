@@ -1750,7 +1750,10 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       { key: "undo_snapshots", label: "Undo Snapshots", table: "undo_snapshots", expression: "COUNT(*) * 64" },
       { key: "pending_undo", label: "Pending Undo", table: "pending_undo", expression: "COALESCE(SUM(LENGTH(pending_undo_json)), 0)" },
       { key: "deck_snapshots_redacted", label: "Deck-Snapshots (Inhalt redigiert)", table: "private_deck_snapshots", expression: "COALESCE(SUM(LENGTH(private_deck_snapshots_json)), 0)" },
-      { key: "start_lobbies", label: "Start-Lobbys", table: "start_lobbies", expression: "COALESCE(SUM(LENGTH(start_lobby_json)), 0)" }
+      { key: "start_lobbies", label: "Start-Lobbys", table: "start_lobbies", expression: "COALESCE(SUM(LENGTH(start_lobby_json)), 0)" },
+      { key: "account_match_participants", label: "Account-Matchbindungen (redigiert)", table: "account_match_participants", expression: "COUNT(*) * 64" },
+      { key: "account_game_results", label: "Account-Spielergebnisse (redigiert)", table: "account_game_results", expression: "COUNT(*) * 160" },
+      { key: "account_series_results", label: "Account-Serienergebnisse (redigiert)", table: "account_series_results", expression: "COUNT(*) * 160" }
     ] as const;
     return definitions
       .filter((definition) => this.tableExists(definition.table))

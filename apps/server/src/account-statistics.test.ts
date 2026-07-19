@@ -85,6 +85,28 @@ describe("AccountMatchStatisticsService participant binding", () => {
     expect(await statistics.gameResultsForAccount("account_reconcile")).toHaveLength(1);
   });
 
+  it("aggregates owner-scoped filters and paginates the private history", async () => {
+    const storage = new InMemoryAccountStatisticsStorage("2026-07-01T00:00:00.000Z");
+    const statistics = new AccountMatchStatisticsService(storage, { now: () => "2026-07-19T12:00:00.000Z" });
+    await storage.recordGameResult(gameRecord({ accountGameResultId: "result_3", originMatchId: "match_3", completedAt: "2026-07-18T12:00:00.000Z", side: "runner", outcome: "win", opponentKind: "ai", agendaPointsFor: 7, matchPoints: 10 }));
+    await storage.recordGameResult(gameRecord({ accountGameResultId: "result_2", originMatchId: "match_2", completedAt: "2026-07-10T12:00:00.000Z", side: "corp", outcome: "loss", opponentKind: "account", finishKind: "forfeit", agendaPointsAgainst: 7 }));
+    await storage.recordGameResult(gameRecord({ accountGameResultId: "result_1", originMatchId: "match_1", completedAt: "2026-01-01T12:00:00.000Z", side: "runner", outcome: "draw", opponentKind: "guest" }));
+    await storage.recordGameResult(gameRecord({ accountGameResultId: "other", accountId: "other_account", originMatchId: "other_match", completedAt: "2026-07-18T12:00:00.000Z", outcome: "win" }));
+
+    expect(await statistics.statisticsForAccount("account_owner", { period: "30d" })).toMatchObject({
+      totals: { gamesPlayed: 2, wins: 1, losses: 1, draws: 0, forfeitsLost: 1 },
+      bySide: { runner: { gamesPlayed: 1, wins: 1 }, corp: { gamesPlayed: 1, losses: 1 } },
+      byOpponentKind: { ai: { gamesPlayed: 1 }, account: { gamesPlayed: 1 }, guest: { gamesPlayed: 0 } },
+    });
+    expect((await statistics.statisticsForAccount("account_owner", { side: "runner", opponentKind: "ai" })).totals.gamesPlayed).toBe(1);
+
+    const first = await statistics.matchHistoryForAccount("account_owner", { limit: 1 });
+    expect(first.entries.map((entry) => entry.resultId)).toEqual(["result_3"]);
+    expect(first.nextCursor).toBe("result_3");
+    const second = await statistics.matchHistoryForAccount("account_owner", { limit: 1, cursor: first.nextCursor! });
+    expect(second.entries.map((entry) => entry.resultId)).toEqual(["result_2"]);
+  });
+
   it("marks same-account two-slot games as self-play and writes a finished series once", async () => {
     const matchStorage = new InMemoryMatchStorage();
     const matches = new MultiplayerService(matchStorage, { tokenSalt: "account-statistics-series" });
@@ -181,6 +203,10 @@ describe("AccountMatchStatisticsService participant binding", () => {
       await statistics.bindAuthenticatedParticipant({ matchId: created.matchId, participantSlot: "player_a", accountId: account.accountId, bindingSource: "authenticated_create" });
       await matches.forfeitMatch({ matchId: created.matchId, side: "runner", sessionToken: created.hostSessionToken });
       expect(await statistics.gameResultsForAccount(account.accountId)).toHaveLength(1);
+      expect((await matchStorage.maintenanceSummary()).tableSizes).toEqual(expect.arrayContaining([
+        expect.objectContaining({ key: "account_match_participants", rowCount: 1 }),
+        expect.objectContaining({ key: "account_game_results", rowCount: 1 }),
+      ]));
 
       statistics.close();
       accounts.close();
@@ -206,3 +232,26 @@ describe("AccountMatchStatisticsService participant binding", () => {
     }
   });
 });
+
+function gameRecord(overrides: Partial<import("./account-statistics").AccountGameResultRecord> = {}): import("./account-statistics").AccountGameResultRecord {
+  return {
+    accountGameResultId: "result_default",
+    accountId: "account_owner",
+    originMatchId: "match_default",
+    participantSlot: "player_a",
+    completedAt: "2026-07-19T00:00:00.000Z",
+    side: "runner",
+    outcome: "loss",
+    finishKind: "regular",
+    opponentKind: "ai",
+    matchMode: "human_runner_vs_corp_ai",
+    matchFormat: "rules_match",
+    cardPool: "originalset",
+    agendaPointsFor: 0,
+    agendaPointsAgainst: 0,
+    matchPoints: 0,
+    statisticsEligible: true,
+    recordedAt: "2026-07-19T00:00:00.000Z",
+    ...overrides,
+  };
+}

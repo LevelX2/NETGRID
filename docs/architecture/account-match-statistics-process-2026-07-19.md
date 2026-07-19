@@ -1,6 +1,6 @@
 # Account-Matchstatistik – kontrollierter Paketprozess
 
-Status: `AMS-03 completed; AMS-04 pending`
+Status: `AMS-04 completed; AMS-05 pending`
 
 ## Quelle und Vorgabe
 
@@ -128,7 +128,7 @@ cleanup_failed -> diagnose_cleanup -> cleanup_pending
 | AMS-01 Verträge und SQLite-Schema v3 | completed | dieser Paketcommit |
 | AMS-02 Sichere Account-Matchbindung | completed | dieser Paketcommit |
 | AMS-03 Ergebnisledger und Reconciliation | completed | dieser Paketcommit |
-| AMS-04 Private API und Betrieb | pending | – |
+| AMS-04 Private API und Betrieb | completed | dieser Paketcommit |
 | AMS-05 Account-Statistik-UI | pending | – |
 | AMS-06 Final Review und Integration | pending | – |
 
@@ -427,3 +427,17 @@ gemergten Arbeitsbranch löschen. Markiere das Goal erst dann als complete.
   und der vollständige Multiplayerlauf mit 125 Tests.
 - Nicht ausgeführt: Webgates und vollständige Account-API-Tests; sie folgen in
   AMS-04 und AMS-05.
+
+### AMS-04
+
+- Authentifizierte Endpunkte liefern private Aggregate und cursorpaginierte
+  Matchhistorie mit Zeitraum-, Seiten-, Gegnerart- und Modusfiltern.
+- Eigener Read-Rate-Limit-Bucket und `Cache-Control: no-store` schützen die
+  Kontoantworten; es existiert kein fremder Account-ID-Lookup.
+- Account-Export v2 enthält redigierte Statistikdaten. Accountlöschung entfernt
+  Bindungen, Spiel- und Serienledger auch bei getrenntem Accountstorage.
+- Der reguläre Serverstart reconciliert persistierte Matches vor dem Listen;
+  Maintenance zeigt nur redigierte Tabellenanzahlen und Größen.
+- Grün: Server-Typecheck und 136 Tests aus Accountstatistik, HTTP, Sessions und
+  vollständigem Multiplayerlauf.
+- Nicht ausgeführt: Webclient- und Browsergates; sie sind Gegenstand von AMS-05.

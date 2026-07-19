@@ -395,6 +395,7 @@ describe("V1.0.9 private internet hardening", () => {
     const wsLimiter = new FixedWindowRateLimiter({
       create_match: undefined,
       token_probe: undefined,
+      account_read: undefined,
       lifecycle: undefined,
       ai_advance: undefined,
       ws_handshake: { limit: 10, windowMs: 60_000 },

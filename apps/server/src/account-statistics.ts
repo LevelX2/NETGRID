@@ -6,7 +6,13 @@ import { getPlayerView } from "@netgrid/engine";
 import type {
   ApiAccountStatisticsExclusionReason,
   ApiAccountStatisticsFinishKind,
+  ApiAccountMatchHistory,
+  ApiAccountMatchHistoryEntry,
+  ApiAccountSeriesStatistics,
+  ApiAccountStatistics,
+  ApiAccountStatisticsBucket,
   ApiAccountStatisticsOutcome,
+  ApiAccountStatisticsPeriod,
   ApiMatchCardPool,
   ApiMatchFormat,
   ApiMatchMode,
@@ -85,6 +91,7 @@ export type AccountStatisticsStorage = {
   listGameResultsForAccount(accountId: string): Promise<AccountGameResultRecord[]>;
   listSeriesResultsForAccount(accountId: string): Promise<AccountSeriesResultRecord[]>;
   statisticsSince(): Promise<string>;
+  deleteAccountData(accountId: string): Promise<void>;
   close?(): void;
 };
 
@@ -134,6 +141,12 @@ export class InMemoryAccountStatisticsStorage implements AccountStatisticsStorag
 
   async statisticsSince(): Promise<string> {
     return this.since;
+  }
+
+  async deleteAccountData(accountId: string): Promise<void> {
+    for (const [key, binding] of this.bindings) if (binding.accountId === accountId) this.bindings.delete(key);
+    for (const [key, record] of this.gameResults) if (record.accountId === accountId) this.gameResults.delete(key);
+    for (const [key, record] of this.seriesResults) if (record.accountId === accountId) this.seriesResults.delete(key);
   }
 }
 
@@ -223,6 +236,19 @@ export class SqliteAccountStatisticsStorage implements AccountStatisticsStorage 
     return row?.value ?? new Date(0).toISOString();
   }
 
+  async deleteAccountData(accountId: string): Promise<void> {
+    this.db.exec("BEGIN IMMEDIATE");
+    try {
+      this.db.prepare("DELETE FROM account_series_results WHERE account_id = ?").run(accountId);
+      this.db.prepare("DELETE FROM account_game_results WHERE account_id = ?").run(accountId);
+      this.db.prepare("DELETE FROM account_match_participants WHERE account_id = ?").run(accountId);
+      this.db.exec("COMMIT");
+    } catch (error) {
+      this.db.exec("ROLLBACK");
+      throw error;
+    }
+  }
+
   private gameResult(accountId: string, matchId: string, participantSlot: ApiSeriesPlayerSlot): AccountGameResultRecord | undefined {
     const row = this.db.prepare(
       "SELECT * FROM account_game_results WHERE account_id = ? AND origin_match_id = ? AND participant_slot = ?",
@@ -310,10 +336,107 @@ export class AccountMatchStatisticsService {
     return this.storage.statisticsSince();
   }
 
+  async statisticsForAccount(accountId: string, query: AccountStatisticsQuery = {}): Promise<ApiAccountStatistics> {
+    const period = query.period ?? "all";
+    const filters = {
+      ...(query.side ? { side: query.side } : {}),
+      ...(query.opponentKind ? { opponentKind: query.opponentKind } : {}),
+      ...(query.matchMode ? { matchMode: query.matchMode } : {}),
+    };
+    const games = (await this.storage.listGameResultsForAccount(accountId)).filter((record) => gameMatchesQuery(record, query, this.now()));
+    const eligibleGames = games.filter((record) => record.statisticsEligible);
+    const selfPlay = new Set(games.filter((record) => record.exclusionReason === "self_play").map((record) => record.originMatchId)).size;
+    const bySide = { runner: statisticsBucket(), corp: statisticsBucket() };
+    const byOpponentKind = { account: statisticsBucket(), guest: statisticsBucket(), ai: statisticsBucket() };
+    const byMode: Partial<Record<ApiMatchMode, ApiAccountStatisticsBucket>> = {};
+    const byMatchFormat: Partial<Record<ApiMatchFormat, ApiAccountStatisticsBucket>> = {};
+    for (const record of eligibleGames) {
+      addGameToBucket(bySide[record.side], record);
+      addGameToBucket(byOpponentKind[record.opponentKind], record);
+      addGameToBucket(byMode[record.matchMode] ??= statisticsBucket(), record);
+      addGameToBucket(byMatchFormat[record.matchFormat] ??= statisticsBucket(), record);
+    }
+    const totals = statisticsBucket();
+    for (const record of eligibleGames) addGameToBucket(totals, record);
+    for (const record of games.filter((candidate) => candidate.outcome === "abandoned")) {
+      totals.abandoned += 1;
+      bySide[record.side].abandoned += 1;
+      byOpponentKind[record.opponentKind].abandoned += 1;
+      (byMode[record.matchMode] ??= statisticsBucket()).abandoned += 1;
+      (byMatchFormat[record.matchFormat] ??= statisticsBucket()).abandoned += 1;
+    }
+    const series = query.side || query.matchMode
+      ? emptySeriesStatistics()
+      : seriesStatistics((await this.storage.listSeriesResultsForAccount(accountId)).filter((record) => seriesMatchesQuery(record, query, this.now())));
+    return {
+      schemaVersion: "netgrid-account-statistics-v1",
+      statisticsSince: await this.storage.statisticsSince(),
+      generatedAt: this.now(),
+      period,
+      filters,
+      totals: { ...totals, selfPlay },
+      bySide,
+      byOpponentKind,
+      byMode,
+      byMatchFormat,
+      series,
+    };
+  }
+
+  async matchHistoryForAccount(accountId: string, query: AccountMatchHistoryQuery = {}): Promise<ApiAccountMatchHistory> {
+    const limit = Math.max(1, Math.min(50, Math.floor(query.limit ?? 20)));
+    const all = (await this.storage.listGameResultsForAccount(accountId))
+      .filter((record) => gameMatchesQuery(record, query, this.now()))
+      .sort((left, right) => right.completedAt.localeCompare(left.completedAt) || right.accountGameResultId.localeCompare(left.accountGameResultId));
+    const cursorIndex = query.cursor ? all.findIndex((record) => record.accountGameResultId === query.cursor) : -1;
+    const start = cursorIndex >= 0 ? cursorIndex + 1 : 0;
+    const page = all.slice(start, start + limit);
+    const next = all[start + limit];
+    return {
+      schemaVersion: "netgrid-account-match-history-v1",
+      statisticsSince: await this.storage.statisticsSince(),
+      generatedAt: this.now(),
+      entries: page.map(historyEntry),
+      ...(next && page.length > 0 ? { nextCursor: page.at(-1)!.accountGameResultId } : {}),
+    };
+  }
+
+  async exportForAccount(accountId: string): Promise<{
+    schemaVersion: "netgrid-account-statistics-export-v1";
+    statistics: ApiAccountStatistics;
+    games: ApiAccountMatchHistoryEntry[];
+    series: Array<Omit<AccountSeriesResultRecord, "accountId">>;
+  }> {
+    const games = await this.storage.listGameResultsForAccount(accountId);
+    const series = await this.storage.listSeriesResultsForAccount(accountId);
+    return {
+      schemaVersion: "netgrid-account-statistics-export-v1",
+      statistics: await this.statisticsForAccount(accountId),
+      games: games.map(historyEntry),
+      series: series.map(({ accountId: _accountId, ...record }) => record),
+    };
+  }
+
+  deleteAccountData(accountId: string): Promise<void> {
+    return this.storage.deleteAccountData(accountId);
+  }
+
   close(): void {
     this.storage.close?.();
   }
 }
+
+export type AccountStatisticsQuery = {
+  period?: ApiAccountStatisticsPeriod;
+  side?: Side;
+  opponentKind?: ApiPlayerIdentityKind;
+  matchMode?: ApiMatchMode;
+};
+
+export type AccountMatchHistoryQuery = AccountStatisticsQuery & {
+  cursor?: string;
+  limit?: number;
+};
 
 function bindingKey(matchId: string, participantSlot: ApiSeriesPlayerSlot): string {
   return `${matchId}:${participantSlot}`;
@@ -484,6 +607,78 @@ function recordIdempotently<T>(records: Map<string, T>, key: string, record: T):
 
 function stableRecord(value: unknown): string {
   return JSON.stringify(value);
+}
+
+function statisticsBucket(): ApiAccountStatisticsBucket {
+  return { gamesPlayed: 0, wins: 0, losses: 0, draws: 0, forfeitsWon: 0, forfeitsLost: 0, abandoned: 0, agendaPointsFor: 0, agendaPointsAgainst: 0 };
+}
+
+function addGameToBucket(bucket: ApiAccountStatisticsBucket, record: AccountGameResultRecord): void {
+  if (record.outcome === "abandoned") return;
+  bucket.gamesPlayed += 1;
+  if (record.outcome === "win") bucket.wins += 1;
+  else if (record.outcome === "loss") bucket.losses += 1;
+  else bucket.draws += 1;
+  if (record.finishKind === "forfeit" && record.outcome === "win") bucket.forfeitsWon += 1;
+  if (record.finishKind === "forfeit" && record.outcome === "loss") bucket.forfeitsLost += 1;
+  bucket.agendaPointsFor += record.agendaPointsFor;
+  bucket.agendaPointsAgainst += record.agendaPointsAgainst;
+}
+
+function emptySeriesStatistics(): ApiAccountSeriesStatistics {
+  return { seriesPlayed: 0, seriesWon: 0, seriesLost: 0, seriesDrawn: 0, matchPointsFor: 0, matchPointsAgainst: 0 };
+}
+
+function seriesStatistics(records: AccountSeriesResultRecord[]): ApiAccountSeriesStatistics {
+  const result = emptySeriesStatistics();
+  for (const record of records.filter((candidate) => candidate.statisticsEligible)) {
+    result.seriesPlayed += 1;
+    if (record.outcome === "win") result.seriesWon += 1;
+    else if (record.outcome === "loss") result.seriesLost += 1;
+    else result.seriesDrawn += 1;
+    result.matchPointsFor += record.matchPointsFor;
+    result.matchPointsAgainst += record.matchPointsAgainst;
+  }
+  return result;
+}
+
+function gameMatchesQuery(record: AccountGameResultRecord, query: AccountStatisticsQuery, now: string): boolean {
+  if (!withinPeriod(record.completedAt, query.period ?? "all", now)) return false;
+  if (query.side && record.side !== query.side) return false;
+  if (query.opponentKind && record.opponentKind !== query.opponentKind) return false;
+  return !query.matchMode || record.matchMode === query.matchMode;
+}
+
+function seriesMatchesQuery(record: AccountSeriesResultRecord, query: AccountStatisticsQuery, now: string): boolean {
+  if (!withinPeriod(record.completedAt, query.period ?? "all", now)) return false;
+  return !query.opponentKind || record.opponentKind === query.opponentKind;
+}
+
+function withinPeriod(completedAt: string, period: ApiAccountStatisticsPeriod, now: string): boolean {
+  if (period === "all") return true;
+  const days = period === "30d" ? 30 : 90;
+  return Date.parse(completedAt) >= Date.parse(now) - days * 24 * 60 * 60 * 1000;
+}
+
+function historyEntry(record: AccountGameResultRecord): ApiAccountMatchHistoryEntry {
+  return {
+    resultId: record.accountGameResultId,
+    matchId: record.originMatchId,
+    completedAt: record.completedAt,
+    side: record.side,
+    outcome: record.outcome,
+    finishKind: record.finishKind,
+    opponentKind: record.opponentKind,
+    matchMode: record.matchMode,
+    matchFormat: record.matchFormat,
+    cardPool: record.cardPool,
+    agendaPointsFor: record.agendaPointsFor,
+    agendaPointsAgainst: record.agendaPointsAgainst,
+    matchPoints: record.matchPoints,
+    statisticsEligible: record.statisticsEligible,
+    ...(record.exclusionReason ? { exclusionReason: record.exclusionReason } : {}),
+    ...(record.seriesId && record.gameNumber ? { series: { seriesId: record.seriesId, gameNumber: record.gameNumber } } : {}),
+  };
 }
 
 function gameResultFromRow(row: AccountGameResultRow): AccountGameResultRecord {

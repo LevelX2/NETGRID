@@ -141,7 +141,7 @@ export function clientIdentity(request: IncomingMessage, config: DeploymentConfi
   return request.socket.remoteAddress ?? "unknown-client";
 }
 
-export type RateLimitCategory = "create_match" | "token_probe" | "lifecycle" | "ai_advance" | "ws_handshake" | "ws_join";
+export type RateLimitCategory = "create_match" | "token_probe" | "account_read" | "lifecycle" | "ai_advance" | "ws_handshake" | "ws_join";
 
 export type RateLimitResult = {
   allowed: boolean;
@@ -191,6 +191,7 @@ export function createRateLimiter(profile: RateLimitProfile, now?: () => number)
       {
         create_match: { limit: 2, windowMs: 60_000 },
         token_probe: { limit: 2, windowMs: 60_000 },
+        account_read: { limit: 2, windowMs: 60_000 },
         lifecycle: { limit: 2, windowMs: 60_000 },
         ai_advance: { limit: 2, windowMs: 60_000 },
         ws_handshake: { limit: 2, windowMs: 60_000 },
@@ -202,6 +203,7 @@ export function createRateLimiter(profile: RateLimitProfile, now?: () => number)
   const privateRules: Record<RateLimitCategory, RateRule> = {
     create_match: { limit: profile === "private_internet" ? 20 : 200, windowMs: 60_000 },
     token_probe: { limit: profile === "private_internet" ? 60 : 300, windowMs: 60_000 },
+    account_read: { limit: profile === "private_internet" ? 120 : 600, windowMs: 60_000 },
     lifecycle: { limit: profile === "private_internet" ? 60 : 300, windowMs: 60_000 },
     ai_advance: { limit: profile === "private_internet" ? 120 : 600, windowMs: 60_000 },
     ws_handshake: { limit: profile === "private_internet" ? 80 : 400, windowMs: 60_000 },
@@ -332,6 +334,7 @@ function emptyRules(): Record<RateLimitCategory, undefined> {
   return {
     create_match: undefined,
     token_probe: undefined,
+    account_read: undefined,
     lifecycle: undefined,
     ai_advance: undefined,
     ws_handshake: undefined,
