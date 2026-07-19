@@ -1,6 +1,6 @@
 # Zentrale Credit-Gain-Pipeline: Umsetzungsprozess
 
-Status: in-progress
+Status: CGP-06 abgeschlossen; bereit für lokalen Main-Sync
 
 Stand: 2026-07-19
 
@@ -307,3 +307,23 @@ erst danach als complete markieren.
 - Arbeits-Worktree ist in Git und Dateisystem entfernt;
 - gemergter Arbeitsbranch ist gelöscht;
 - keine Remote-Integration wurde ausgeführt.
+
+## Umsetzungsergebnis CGP-01 bis CGP-06
+
+Die sechs fachlichen Pakete sind vollständig abgeschlossen. Der Branch enthält
+die Paketcommits `b99c21466`, `133874e38`, `6daf3c7c2`, `b16c4e01e`,
+`5e31d691c` sowie den nachfolgenden CGP-06-Dokumentationscommit. Der
+verbindliche Main-Sync, finale Verify-Lauf, lokale Merge und Cleanup folgen als
+Integrationsphase außerhalb der fachlichen Paketfolge.
+
+Erreichte Gates:
+
+- alle normalen produktiven Pool-Gains laufen über `applyCreditGain` oder den
+  vollständig delegierenden `credits`-Host;
+- nur Kern und Setup enthalten noch direkte `credits +=`-Mutationen;
+- Elena + Finders Keepers ist mit exakt 7 Start-Credits, Würfelsumme +1,
+  öffentlicher Attribution, Replay und StateHash geschützt;
+- der separate Elena-Post-Follow-up ist entfernt;
+- Engine-Typecheck, 203 Engine-Testdateien mit 1.754 Tests, 20 Shared-/Root-
+  Contracttests, Format und Diff-Hygiene waren im Paketstand grün;
+- `check:engine-credit-gain-boundary` schützt die zentrale Mutationsgrenze.

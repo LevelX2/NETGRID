@@ -28,6 +28,15 @@ Stand: 2026-07-19
   Promotion getrennt.
 - Kartenimplementierungen, PlayerViews, PublicEvents, Replay und StateHash
   werden durch paketnahe Engine- und Visibilitytests abgesichert.
+- Normale Creditgewinne von Runner und Korp verwenden eine zentrale,
+  typisierte Gain-Pipeline. Sie unterscheidet Grundbetrag, zusätzliche
+  Regelcredits, abgefangene Credits und tatsächliche Gutschrift; deklarative
+  Effekte, Resolver, Access, Run, Trace, Subroutinen, Turneffekte,
+  gehostete Entnahme und temporäre Pool-Gutschriften sind angebunden. Setup,
+  Setzen, Bezahlen und Verlust bleiben getrennte Semantiken. Elena Laskova
+  modifiziert dadurch auch Resolver wie Finders Keepers korrekt innerhalb
+  derselben Gain-Auflösung. Führend ist
+  `docs/reviews/engine/central-credit-gain-pipeline-final-review-2026-07-19.md`.
 - Allgemeine Asset-/Upgrade-Rezfenster während Runs gelten über alle
   Corp-Server. ICE-Rez und fortgebundene Sonderfenster bleiben am Runziel;
   Encounter und laufende Trace-Versuche öffnen kein zusätzliches normales
