@@ -1,8 +1,8 @@
 # AI Behavior Baseline v1
 
 Status: attention_required
-Git head: 46734be25
-Generated: 2026-07-19T06:12:00.401Z
+Git head: c605cafe7
+Generated: 2026-07-19T06:49:27.912Z
 
 ## Contract
 
@@ -66,7 +66,7 @@ Hard failures: action_limit_games:3
 
 Comparable: yes
 Baseline git head: ce65b4aae
-Candidate git head: 46734be25
+Candidate git head: c605cafe7
 Incompatibilities: none
 
 | Metric | Candidate minus baseline |
@@ -88,8 +88,9 @@ Incompatibilities: none
 
 ## Reviewentscheidung für Match 3bb14
 
-Der Lauf ist mit der Referenz `ce65b4aae` vollständig vergleichbar. Slots,
-zehn Seeds, Deck-Fingerprints, Controller und das Limit von 480 Aktionen sind
+Der Lauf gehört zum final abgeglichenen Integrationskandidaten `c605cafe7`
+und ist mit der Referenz `ce65b4aae` vollständig vergleichbar. Slots, zehn
+Seeds, Deck-Fingerprints, Controller und das Limit von 480 Aktionen sind
 unverändert. Die technischen Gates verschlechtern sich in der Anzahl nicht:
 weiterhin drei Action-Limit-Spiele, ansonsten überall null Fehler und
 `redactionSafe: yes`.

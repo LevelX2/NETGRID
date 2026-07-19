@@ -1,6 +1,6 @@
 # Match-3bb14-Corp-Draw-Near-Tie-Prozess (2026-07-19)
 
-Status: P3 abgeschlossen, P4 aktiv; Vollsuite und Baseline ausgewertet
+Status: P4 abgeschlossen, P5 aktiv
 
 ## Quelle und Zielprüfung
 
@@ -139,13 +139,16 @@ Der Endzustand ist hinreichend bestimmt:
 ## Mindestverifikation
 
 ```powershell
-corepack pnpm exec vitest run `
-  packages/ai/src/evaluation/decision-checkpoints/match-3bb14-corp-draw-near-tie-decision-checkpoints.test.ts `
-  packages/ai/src/runtime/semantic-runtime-corp-score.test.ts `
-  packages/ai/src/runtime/semantic-choice-ranking.test.ts `
-  --maxWorkers=1 --testTimeout=30000 --reporter=dot
+corepack pnpm --filter @netgrid/ai exec vitest run `
+  src/runtime/corp-economy/corp-defensive-draw.test.ts `
+  src/runtime/corp-economy/corp-basic-economy-near-tie.test.ts `
+  src/evaluation/decision-checkpoints/match-3bb14-corp-draw-near-tie-decision-checkpoints.test.ts `
+  src/evaluation/decision-checkpoints/latest-two-corp-match-remediation-decision-checkpoints.test.ts `
+  src/runtime/choice-ranking/semantic-choice-ranking-mapping.test.ts `
+  --reporter=dot
 corepack pnpm --filter @netgrid/ai typecheck
 corepack pnpm check:ai:full
+corepack pnpm check:package-boundaries
 git diff --check
 ```
 
@@ -175,8 +178,9 @@ verifiziertem Worktree- und Branch-Cleanup als abgeschlossen.
   klare Sieger und D9-D11 bleiben unverändert; produktiver Chooser und
   Raw-Score-Debug sind kontrolliert verifiziert. Fokussiert 108/108 Tests und
   AI-Typecheck grün.
-- P4 Zwischenstand: alle drei AI-Testshards sind grün (134/946, 134/1008 und
-  133/857). Der vollständige kompatible Behavior-Baseline-Lauf umfasst sechs
+- P4: nach dem defensiven `main`-Abgleich sind alle drei AI-Testshards grün
+  (137/999, 136/985 und 136/827; zusammen 409 Dateien und 2.811 Tests). Der
+  finale kompatible Behavior-Baseline-Lauf auf `c605cafe7` umfasst sechs
   Slots, zehn Seeds und 60 Spiele. Er bleibt mit unverändert drei
   Action-Limit-Spielen `attention_required`; alle übrigen technischen Gates
   sind null und Redaction ist sicher. Near-Tie-Variation wurde 19-mal in
@@ -184,8 +188,7 @@ verifiziertem Worktree- und Branch-Cleanup als abgeschlossen.
   bereits geschützten Score-Remote ist durch einen generischen Existing-
   Remote-Guard samt Gegenprobe geschlossen.
 - Strukturhygiene: die neuen Produktionsmodule liegen unter
-  `runtime/corp-economy/`; die Runtime-Root-Dateizahl steigt gegenüber
-  `52ac68d19` nicht. Die auf diesem Ausgangsstand bereits roten neun
-  Source-Structure-Ratchets werden durch das Paket nicht erweitert oder
-  verschärft; nach dem defensiven Abgleich mit aktuellem `main` wird das Gate
-  erneut verbindlich ausgeführt.
+  `runtime/corp-economy/`. Nach Integration der aktuellen
+  Source-Structure-Schnitte sind `check:ai:full`, Source-Structure mit 679
+  Produktionsdateien, null Importzyklen und 289 Runtime-Root-Dateien,
+  Package-Boundaries sowie AI-Typecheck grün.
