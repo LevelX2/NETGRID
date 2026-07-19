@@ -16,52 +16,89 @@ const webUrl = `http://127.0.0.1:${webPort}`;
 const runtimeDir = path.join(root, "tmp", `e2e-runtime-${Date.now()}`);
 const runtimePath = path.join(runtimeDir, "netgrid.sqlite");
 const backupDir = path.join(runtimeDir, "backups");
+const webDistDirName = `.next-e2e-${Date.now()}`;
+const webDistDir = path.join(root, "apps", "web", webDistDirName);
 
 await rm(runtimeDir, { recursive: true, force: true });
 await mkdir(runtimeDir, { recursive: true });
 
 try {
-  start("server", ["pnpm", "--filter", "@netgrid/server", "exec", "tsx", "src/index.ts"], {
-    PORT: String(serverPort),
-    HOST: "127.0.0.1",
-    NETGRID_SQLITE_STORAGE_PATH: runtimePath,
-    NETGRID_STORAGE_BACKUP_DIR: backupDir,
-    NETGRID_TOKEN_SALT: "v1-0-7-e2e-token-salt",
-    NETGRID_DEPLOYMENT_PROFILE: "local",
-    NETGRID_WEB_BASE_URL: webUrl,
-    NETGRID_SERVER_BASE_URL: serverUrl,
-    NETGRID_ALLOWED_ORIGINS: webUrl,
-    NETGRID_RATE_LIMIT_PROFILE: "local"
-  });
+  start(
+    "server",
+    ["pnpm", "--filter", "@netgrid/server", "exec", "tsx", "src/index.ts"],
+    {
+      PORT: String(serverPort),
+      HOST: "127.0.0.1",
+      NETGRID_SQLITE_STORAGE_PATH: runtimePath,
+      NETGRID_STORAGE_BACKUP_DIR: backupDir,
+      NETGRID_TOKEN_SALT: "v1-0-7-e2e-token-salt",
+      NETGRID_DEPLOYMENT_PROFILE: "local",
+      NETGRID_WEB_BASE_URL: webUrl,
+      NETGRID_SERVER_BASE_URL: serverUrl,
+      NETGRID_ALLOWED_ORIGINS: webUrl,
+      NETGRID_RATE_LIMIT_PROFILE: "local",
+    },
+  );
   await waitForUrl(`${serverUrl}/health`, "server");
 
   const accountBootstrap = await run(
     corepack,
-    ["pnpm", "account:auth", "--", "bootstrap", "stats_alpha", "Statistik Alpha"],
+    [
+      "pnpm",
+      "account:auth",
+      "--",
+      "bootstrap",
+      "stats_alpha",
+      "Statistik Alpha",
+    ],
     {
       NETGRID_STORAGE_KIND: "sqlite",
       NETGRID_SQLITE_STORAGE_PATH: runtimePath,
       NETGRID_STORAGE_BACKUP_DIR: backupDir,
       NETGRID_TOKEN_SALT: "v1-0-7-e2e-token-salt",
-      NETGRID_ACCOUNT_BOOTSTRAP_PASSWORD: "Statistik Browser Alpha 2026!"
-    }
+      NETGRID_ACCOUNT_BOOTSTRAP_PASSWORD: "Statistik Browser Alpha 2026!",
+    },
   );
-  if (accountBootstrap !== 0) throw new Error("Could not bootstrap the E2E account");
+  if (accountBootstrap !== 0)
+    throw new Error("Could not bootstrap the E2E account");
 
-  start("web", ["pnpm", "--filter", "@netgrid/web", "exec", "next", "dev", "--hostname", "127.0.0.1", "--port", String(webPort)], {
-    NEXT_PUBLIC_NETGRID_SERVER_URL: serverUrl
-  });
+  start(
+    "web",
+    [
+      "pnpm",
+      "--filter",
+      "@netgrid/web",
+      "exec",
+      "next",
+      "dev",
+      "--hostname",
+      "127.0.0.1",
+      "--port",
+      String(webPort),
+    ],
+    {
+      NEXT_PUBLIC_NETGRID_SERVER_URL: serverUrl,
+      NETGRID_NEXT_DIST_DIR: webDistDirName,
+    },
+  );
   await waitForUrl(webUrl, "web");
 
-  const result = await run(corepack, ["pnpm", "exec", "playwright", "test", ...process.argv.slice(2)], {
-    PLAYWRIGHT_BASE_URL: webUrl,
-    NETGRID_E2E_SERVER_URL: serverUrl,
-    NETGRID_E2E_RUNTIME_PATH: runtimePath
-  });
+  const result = await run(
+    corepack,
+    ["pnpm", "exec", "playwright", "test", ...process.argv.slice(2)],
+    {
+      PLAYWRIGHT_BASE_URL: webUrl,
+      NETGRID_E2E_SERVER_URL: serverUrl,
+      NETGRID_E2E_RUNTIME_PATH: runtimePath,
+    },
+  );
   process.exitCode = result;
 } finally {
-  await Promise.allSettled(started.reverse().map((child) => stopProcessTree(child)));
+  await Promise.allSettled(
+    started.reverse().map((child) => stopProcessTree(child)),
+  );
   await rm(runtimeDir, { recursive: true, force: true });
+  await rm(webDistDir, { recursive: true, force: true });
 }
 
 function start(label, args, env) {
@@ -69,13 +106,19 @@ function start(label, args, env) {
     cwd: root,
     env: { ...process.env, ...env },
     stdio: ["ignore", "pipe", "pipe"],
-    shell: useShell
+    shell: useShell,
   });
-  child.stdout.on("data", (chunk) => process.stdout.write(`[${label}] ${redactLogChunk(chunk)}`));
-  child.stderr.on("data", (chunk) => process.stderr.write(`[${label}] ${redactLogChunk(chunk)}`));
+  child.stdout.on("data", (chunk) =>
+    process.stdout.write(`[${label}] ${redactLogChunk(chunk)}`),
+  );
+  child.stderr.on("data", (chunk) =>
+    process.stderr.write(`[${label}] ${redactLogChunk(chunk)}`),
+  );
   child.on("exit", (code, signal) => {
     if (process.exitCode === undefined && code !== null && code !== 0) {
-      process.stderr.write(`[${label}] exited with code ${code}${signal ? ` (${signal})` : ""}\n`);
+      process.stderr.write(
+        `[${label}] exited with code ${code}${signal ? ` (${signal})` : ""}\n`,
+      );
       process.exitCode = code;
     }
   });
@@ -86,9 +129,15 @@ function start(label, args, env) {
 function redactLogChunk(chunk) {
   return String(chunk)
     .replace(/(joinToken=)[A-Za-z0-9_-]+/g, "$1[redacted]")
-    .replace(/("(?:hostSessionToken|hostReconnectToken|sessionToken|reconnectToken|joinToken|tokenHash)"\s*:\s*")[^"]+(")/g, "$1[redacted]$2")
+    .replace(
+      /("(?:hostSessionToken|hostReconnectToken|sessionToken|reconnectToken|joinToken|tokenHash)"\s*:\s*")[^"]+(")/g,
+      "$1[redacted]$2",
+    )
     .replace(/sha256:[a-f0-9]{64}/gi, "sha256:[redacted]")
-    .replace(/privateDeckSnapshots|privatePayload|cardInstances|decklist/gi, "[redacted-field]");
+    .replace(
+      /privateDeckSnapshots|privatePayload|cardInstances|decklist/gi,
+      "[redacted-field]",
+    );
 }
 
 function run(command, args, env) {
@@ -97,7 +146,7 @@ function run(command, args, env) {
       cwd: root,
       env: { ...process.env, ...env },
       stdio: "inherit",
-      shell: useShell
+      shell: useShell,
     });
     child.on("exit", (code) => resolve(code ?? 1));
   });
@@ -148,7 +197,11 @@ function stopProcessTree(child) {
       return;
     }
     if (process.platform === "win32") {
-      const killer = spawn("taskkill.exe", ["/pid", String(child.pid), "/T", "/F"], { stdio: "ignore" });
+      const killer = spawn(
+        "taskkill.exe",
+        ["/pid", String(child.pid), "/T", "/F"],
+        { stdio: "ignore" },
+      );
       killer.on("exit", () => resolve());
       killer.on("error", () => resolve());
       return;

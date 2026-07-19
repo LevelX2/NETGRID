@@ -818,7 +818,9 @@ export function createNetgridHttpServer(
     : undefined;
   const accountStatisticsReady = accountStatistics
     ? activeService
-        .reconcilePersistedMatches((record) => accountStatistics.recordTerminalMatch(record))
+        .reconcilePersistedMatches((record) =>
+          accountStatistics.recordTerminalMatch(record),
+        )
         .then(() => undefined)
     : Promise.resolve();
   const realtime = new NetgridRealtimeServer(
@@ -1059,7 +1061,7 @@ async function routeHttp(
       );
       if (!auth.ok)
         return sendJson(response, 401, accountAuthRequiredPayload());
-      const csrfToken = await accountAuth.sessions.rotateCsrfToken(
+      const csrfToken = await accountAuth.sessions.restoreCsrfToken(
         accountSessionToken(request) ?? "",
       );
       if (!csrfToken)
@@ -1340,25 +1342,73 @@ async function routeHttp(
       return;
     }
 
-    if (url.pathname === "/api/account/statistics" && request.method === "GET") {
+    if (
+      url.pathname === "/api/account/statistics" &&
+      request.method === "GET"
+    ) {
       if (!accountAuth || !accountStatistics)
         return sendJson(response, 503, accountUnavailablePayload());
-      if (!checkRateLimit(response, rateLimiter, "account_read", request, deploymentConfig, "account-statistics")) return;
-      const auth = await ensureAccountAuthenticated(response, request, accountAuth);
+      if (
+        !checkRateLimit(
+          response,
+          rateLimiter,
+          "account_read",
+          request,
+          deploymentConfig,
+          "account-statistics",
+        )
+      )
+        return;
+      const auth = await ensureAccountAuthenticated(
+        response,
+        request,
+        accountAuth,
+      );
       if (!auth) return;
       response.setHeader("cache-control", "no-store");
-      sendJson(response, 200, await accountStatistics.statisticsForAccount(auth.account.accountId, accountStatisticsQueryFromUrl(url)));
+      sendJson(
+        response,
+        200,
+        await accountStatistics.statisticsForAccount(
+          auth.account.accountId,
+          accountStatisticsQueryFromUrl(url),
+        ),
+      );
       return;
     }
 
-    if (url.pathname === "/api/account/match-history" && request.method === "GET") {
+    if (
+      url.pathname === "/api/account/match-history" &&
+      request.method === "GET"
+    ) {
       if (!accountAuth || !accountStatistics)
         return sendJson(response, 503, accountUnavailablePayload());
-      if (!checkRateLimit(response, rateLimiter, "account_read", request, deploymentConfig, "account-match-history")) return;
-      const auth = await ensureAccountAuthenticated(response, request, accountAuth);
+      if (
+        !checkRateLimit(
+          response,
+          rateLimiter,
+          "account_read",
+          request,
+          deploymentConfig,
+          "account-match-history",
+        )
+      )
+        return;
+      const auth = await ensureAccountAuthenticated(
+        response,
+        request,
+        accountAuth,
+      );
       if (!auth) return;
       response.setHeader("cache-control", "no-store");
-      sendJson(response, 200, await accountStatistics.matchHistoryForAccount(auth.account.accountId, accountMatchHistoryQueryFromUrl(url)));
+      sendJson(
+        response,
+        200,
+        await accountStatistics.matchHistoryForAccount(
+          auth.account.accountId,
+          accountMatchHistoryQueryFromUrl(url),
+        ),
+      );
       return;
     }
 
@@ -2409,7 +2459,11 @@ async function routeHttp(
       }
       try {
         const created = await service.createMatch(createInput);
-        if (accountIdentity && accountStatistics && created.mode !== "ai_vs_ai") {
+        if (
+          accountIdentity &&
+          accountStatistics &&
+          created.mode !== "ai_vs_ai"
+        ) {
           await accountStatistics.bindAuthenticatedParticipant({
             matchId: created.matchId,
             participantSlot: "player_a",
@@ -3219,7 +3273,10 @@ async function optionalAccountIdentity(
   if (!sessionToken) return undefined;
   const auth = await accountAuth.authenticateSession(sessionToken);
   return auth.ok
-    ? { accountId: auth.account.accountId, displayName: auth.account.displayName }
+    ? {
+        accountId: auth.account.accountId,
+        displayName: auth.account.displayName,
+      }
     : undefined;
 }
 
@@ -3229,10 +3286,21 @@ function accountStatisticsQueryFromUrl(url: URL): AccountStatisticsQuery {
   const opponentKind = url.searchParams.get("opponentKind");
   const matchMode = url.searchParams.get("matchMode");
   return {
-    ...(period === "30d" || period === "90d" || period === "all" ? { period } : {}),
+    ...(period === "30d" || period === "90d" || period === "all"
+      ? { period }
+      : {}),
     ...(side === "runner" || side === "corp" ? { side } : {}),
-    ...(opponentKind === "account" || opponentKind === "guest" || opponentKind === "ai" ? { opponentKind } : {}),
-    ...(matchMode === "human_vs_human" || matchMode === "human_runner_vs_corp_ai" || matchMode === "human_corp_vs_runner_ai" || matchMode === "ai_vs_ai" ? { matchMode } : {}),
+    ...(opponentKind === "account" ||
+    opponentKind === "guest" ||
+    opponentKind === "ai"
+      ? { opponentKind }
+      : {}),
+    ...(matchMode === "human_vs_human" ||
+    matchMode === "human_runner_vs_corp_ai" ||
+    matchMode === "human_corp_vs_runner_ai" ||
+    matchMode === "ai_vs_ai"
+      ? { matchMode }
+      : {}),
   };
 }
 

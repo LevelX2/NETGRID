@@ -144,8 +144,18 @@ export function useAccountSession() {
     setState((current) => ({ ...current, busy: true, error: "" }));
     try {
       await logoutAccount(csrfToken);
-    } finally {
       becomeGuest();
+      return true;
+    } catch (error) {
+      setState((current) => ({
+        ...current,
+        busy: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : "Das Abmelden ist fehlgeschlagen.",
+      }));
+      return false;
     }
   }, [becomeGuest, csrfToken]);
 
@@ -153,8 +163,18 @@ export function useAccountSession() {
     setState((current) => ({ ...current, busy: true, error: "" }));
     try {
       await revokeAllAccountSessions(csrfToken);
-    } finally {
       becomeGuest();
+      return true;
+    } catch (error) {
+      setState((current) => ({
+        ...current,
+        busy: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : "Das Abmelden aller Geräte ist fehlgeschlagen.",
+      }));
+      return false;
     }
   }, [becomeGuest, csrfToken]);
 

@@ -15881,7 +15881,8 @@ select,
 }
 
 .accountPanelHeader,
-.accountActions {
+.accountActions,
+.accountHeaderActions {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -15948,7 +15949,11 @@ select,
   padding: 18px;
   border: 1px solid rgb(83 218 168 / 0.34);
   border-radius: 12px;
-  background: linear-gradient(145deg, rgb(18 42 45 / 0.72), rgb(12 24 33 / 0.92));
+  background: linear-gradient(
+    145deg,
+    rgb(18 42 45 / 0.72),
+    rgb(12 24 33 / 0.92)
+  );
 }
 
 .accountStatisticsHeader {
