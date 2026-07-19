@@ -15,9 +15,6 @@ if (process.argv.includes("--self-test")) {
 }
 
 const productionFiles = collectSourceFiles(srcRoot, false);
-const testFiles = collectSourceFiles(srcRoot, true).filter((file) =>
-  isTestFile(file),
-);
 const productionFileSet = new Set(productionFiles);
 const allGraph = new Map(productionFiles.map((file) => [file, new Set()]));
 const valueGraph = new Map(productionFiles.map((file) => [file, new Set()]));
@@ -90,88 +87,6 @@ for (const missing of [...expectedTypeCycleSignatures].filter(
   );
 }
 
-const productionLineCaps = new Map([
-  ["belief-state.ts", 2548],
-  ["runtime/semantic-runtime-corp-score.ts", 828],
-  ["runtime/semantic-runtime-corp-board-triage.ts", 793],
-  ["runner-hand-development.ts", 936],
-  ["runner/hand-development/runner-hand-text-signals.ts", 431],
-  ["runner/hand-development/runner-persistent-install-evaluation.ts", 1450],
-  ["visible-run-analysis.ts", 629],
-  ["run-analysis/visible-run-breaker-path.ts", 838],
-  ["run-analysis/visible-run-hazards.ts", 753],
-  ["runtime/semantic-choice-ranking.ts", 543],
-  ["runtime/semantic-runtime-corp-scoring-window.ts", 249],
-  [
-    "runtime/corp-scoreline/semantic-runtime-corp-board-triage-policies.ts",
-    2276,
-  ],
-  ["runtime/corp-scoreline/semantic-runtime-corp-score-action-economy.ts", 885],
-  [
-    "runtime/corp-scoreline/semantic-runtime-corp-score-scoreline-components.ts",
-    997,
-  ],
-  [
-    "runtime/corp-scoreline/semantic-runtime-corp-scoring-window-projection.ts",
-    1445,
-  ],
-]);
-for (const file of productionFiles) {
-  const relative = relativeSourcePath(file);
-  const lineCount = sourceLineCount(file);
-  const cap = productionLineCaps.get(relative) ?? 2500;
-  if (lineCount > cap) {
-    findings.push(
-      `${relative} has ${lineCount} lines; allowed maximum is ${cap}`,
-    );
-  }
-}
-
-const testLineCaps = new Map([
-  ["runner-hand-development.test.ts", 655],
-  ["runner/hand-development/runner-persistent-install-evaluation.test.ts", 912],
-  ["runtime/semantic-runtime-corp-score.test.ts", 3797],
-  ["tactical-plans.test.ts", 4308],
-  ["semantic-ai-runtime-cutover.test.ts", 4261],
-  ["runtime/semantic-runtime-corp-board-triage.test.ts", 1764],
-  ["runtime/semantic-runtime-corp-scoring-window.test.ts", 812],
-  [
-    "runtime/corp-scoreline/semantic-runtime-corp-score-scoreline-and-install.test.ts",
-    3314,
-  ],
-  [
-    "runtime/corp-scoreline/semantic-runtime-corp-board-triage-scoreline.test.ts",
-    1373,
-  ],
-  [
-    "runtime/corp-scoreline/semantic-runtime-corp-scoring-window-protection.test.ts",
-    877,
-  ],
-  ["runner-run-target-evaluation.test.ts", 3150],
-  ["runtime/semantic-choice-ranking.test.ts", 1218],
-  ["runtime/choice-ranking/semantic-choice-ranking-corp.test.ts", 299],
-  ["runtime/choice-ranking/semantic-choice-ranking-mapping.test.ts", 102],
-]);
-for (const [relative, cap] of testLineCaps) {
-  const file = path.join(srcRoot, ...relative.split("/"));
-  const lineCount = sourceLineCount(file);
-  if (lineCount > cap) {
-    findings.push(
-      `${relative} has ${lineCount} lines; allowed maximum is ${cap}`,
-    );
-  }
-}
-
-const runtimeRootProductionFiles = productionFiles.filter(
-  (file) => path.dirname(file) === path.join(srcRoot, "runtime"),
-);
-const runtimeRootCap = 289;
-if (runtimeRootProductionFiles.length > runtimeRootCap) {
-  findings.push(
-    `runtime root has ${runtimeRootProductionFiles.length} production files; allowed maximum is ${runtimeRootCap}`,
-  );
-}
-
 if (findings.length > 0) {
   console.error("AI_SOURCE_STRUCTURE FAILED");
   for (const finding of findings) console.error(`- ${finding}`);
@@ -179,7 +94,7 @@ if (findings.length > 0) {
 }
 
 console.log(
-  `AI_SOURCE_STRUCTURE OK production=${productionFiles.length} runtimeCycles=${valueCycles.length} allowedTypeCycles=${actualTypeCycles.length} runtimeRootProduction=${runtimeRootProductionFiles.length}`,
+  `AI_SOURCE_STRUCTURE OK production=${productionFiles.length} runtimeCycles=${valueCycles.length} allowedTypeCycles=${actualTypeCycles.length}`,
 );
 
 function collectSourceFiles(root, includeTests) {
@@ -288,10 +203,6 @@ function relativeSourcePath(file) {
 
 function signature(entries) {
   return entries.slice().sort().join("|");
-}
-
-function sourceLineCount(file) {
-  return readFileSync(file, "utf8").split(/\r?\n/).length;
 }
 
 function currentSimulationHasHistoricalMarker(relative, source) {

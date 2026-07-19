@@ -22,12 +22,17 @@ jedem Paket in diesem Dokument aktualisiert.
   CardImplementation-Accesspfad. Geprüft mit AI-/Engine-/Web-Typechecks,
   61 gezielten AI-Tests, 101 Access-/CardImplementation-Engine-Tests,
   16 Catalogtests und 15 Inspector-UI-Tests.
-- P3 Aussagekräftige Architekturgates: als Nächstes.
+- P3 Aussagekräftige Architekturgates: abgeschlossen. AI- und Engine-Checks
+  schützen weiterhin Zyklen, Schichtgrenzen, Registry-Eigentum und verbotene
+  Laufzeitabhängigkeiten; historische Zeilen-, Datei-, Testgrößen-, Fanout-
+  und exakte Binding-Grenzwerte sowie der doppelte `check:ai:full`-Alias sind
+  entfernt. Geprüft mit allen sechs betroffenen Checks/Selbsttests und dem
+  vollständigen Workspace-Typecheck.
+- P4 Kanonischer Server-Storage und Deck-Snapshot: als Nächstes.
 
 ## Quelle/Vorgabe
 
-Die Umsetzung folgt dem Architektur-Audit aus der Spielanalyse-Nacharbeit vom
-19. Juli 2026 und dem Nutzerauftrag, die dort empfohlenen Legacy-, Compiler-,
+Die Umsetzung folgt dem Architektur-Audit aus der Spielanalyse-Nacharbeit vom 19. Juli 2026 und dem Nutzerauftrag, die dort empfohlenen Legacy-, Compiler-,
 Fallback- und Moving-Target-Schichten direkt zu entfernen.
 
 ## Zielprüfung

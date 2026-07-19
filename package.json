@@ -11,7 +11,6 @@
     "e2e": "node scripts/run-e2e.mjs",
     "test:e2e": "node scripts/run-e2e.mjs",
     "check:ai": "corepack pnpm check:ai-hint-metadata-contracts && corepack pnpm check:ai-source-structure",
-    "check:ai:full": "corepack pnpm check:ai",
     "build:proteus-ai-readiness-inventory": "node scripts/build-proteus-ai-readiness-inventory.mjs --write",
     "build:proteus-ai-family-scenarios": "node scripts/build-proteus-ai-family-scenarios.mjs --write",
     "build:proteus-ai-selected-pilot": "corepack pnpm --filter @netgrid/server exec tsx ../../scripts/run-proteus-ai-selected-pilot.ts --write",

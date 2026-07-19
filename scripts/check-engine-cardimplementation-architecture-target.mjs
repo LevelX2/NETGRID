@@ -49,20 +49,6 @@ const knownCardSpecificRuntimeTokens = [
   "some_card_name_special",
 ];
 
-const roleLineLimits = [
-  {
-    name: "registry aggregator",
-    match: (file) =>
-      file.includes("/card-implementations/") && file.includes("registr"),
-    limit: 220,
-  },
-  {
-    name: "effect family",
-    match: (file) => file.includes("/ability-engine/effect-families/"),
-    limit: 360,
-  },
-];
-
 function toRepoPath(path) {
   return relative(repoRoot, path).split(sep).join("/");
 }
@@ -601,40 +587,6 @@ function collectRegistryFindings(sources) {
         basename,
       );
     }
-    const directCardImports = [
-      ...text.matchAll(
-        /from\s+["'](?:\.\.\/)*((?:classic|onr-v1|proteus)\/[^"']+)["']/g,
-      ),
-    ].filter((match) => match[1].split("/").length >= 4);
-    if (directCardImports.length > 20) {
-      pushFinding(
-        findings,
-        file,
-        1,
-        "registry aggregator imports too many individual card implementations",
-        `${directCardImports.length} direct card imports`,
-      );
-    }
-  }
-  return findings;
-}
-
-function collectReplacementMonolithFindings(sources) {
-  const findings = [];
-  for (const { file, text } of sources) {
-    if (isTestOrFixture(file)) continue;
-    const role = roleLineLimits.find((candidate) => candidate.match(file));
-    if (!role) continue;
-    const lines = text.split(/\r?\n/).length;
-    if (lines > role.limit) {
-      pushFinding(
-        findings,
-        file,
-        1,
-        `${role.name} module exceeds role limit`,
-        `${lines} lines > ${role.limit}`,
-      );
-    }
   }
   return findings;
 }
@@ -664,10 +616,6 @@ function analyzeSources(sources) {
     {
       name: "registry uses real grouped registries",
       findings: collectRegistryFindings(sources),
-    },
-    {
-      name: "no replacement monoliths",
-      findings: collectReplacementMonolithFindings(sources),
     },
   ];
 }
