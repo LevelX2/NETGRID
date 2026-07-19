@@ -60,7 +60,7 @@ Die State-Validierung ist grün und die Corp-PlayerView enthält keine Choice.
 - Vollständige Engine-Suite: 202 Testdateien, 1.757 Tests grün.
 - Fokussierter KI-Abschluss: 3 Testdateien, 28 Tests grün.
 - Vollständige KI-Suite über die drei offiziellen Shards: 411 Testdateien,
-  2.813 Tests grün.
+  nach dem Abgleich mit dem weitergelaufenen `main` 2.818 Tests grün.
 - Engine- und KI-Typecheck: grün.
 - `check:package-boundaries`: grün, 1.893 geprüfte Dateien.
 - `format:changed`: grün, 17 geänderte Dateien geprüft.
