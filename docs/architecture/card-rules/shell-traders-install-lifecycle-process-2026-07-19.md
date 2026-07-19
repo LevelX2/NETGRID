@@ -2,12 +2,12 @@
 
 ## Status
 
-`regression_reproduced`
+`lifecycle_fixed`
 
 ## Quelle und Vorgabe
 
 - Nutzerbefund vom 2026-07-19: Zwei installierte Kopien von `The Shell
-  Traders` entfernen zu Beginn des Runner-Zuges die letzten zwei
+Traders` entfernen zu Beginn des Runner-Zuges die letzten zwei
   Shell-Counter von `Cloak`. `Cloak` wird als Programmeinheit installiert,
   erhält aber nicht die drei aufgedruckten Credits.
 - Aktiver Kartenvertrag:
@@ -113,15 +113,21 @@ Bei einem nicht erfüllten Done-Gate bleibt der Prozess im aktuellen Zustand.
   grün; genau die drei neuen Lifecycle-Verträge reproduzieren den Defekt mit
   `Cloak`-Credits `0` statt `3`. Startzug mit zwei Shell-Traders-Kopien,
   bezahlter letzter Counter und MU-Choice sind gleichermaßen betroffen.
+- STIL-02: Der Shell-Traders-Abschluss ruft nach erfolgreicher
+  Rig-Installation den bestehenden deklarativen `on_install`-Interpreter auf.
+  Der automatische Startzugpfad übernimmt dessen sichtbare Effekte in den
+  bestehenden Collector; Paid- und Choice-Pfade dokumentieren sie auf ihrer
+  LegalAction. 43 fokussierte Tests, Engine-Typecheck, Paketgrenzen, Format und
+  Diff-Check sind grün.
 
 ## Paketfolge
 
-| Paket  | Titel                         | Ergebnis |
-| ------ | ----------------------------- | -------- |
-| STIL-00 | Prozess und Worktree          | Verbindliches Artefakt, Goal, eigener Branch und Worktree |
+| Paket   | Titel                         | Ergebnis                                                                                 |
+| ------- | ----------------------------- | ---------------------------------------------------------------------------------------- |
+| STIL-00 | Prozess und Worktree          | Verbindliches Artefakt, Goal, eigener Branch und Worktree                                |
 | STIL-01 | Regelvertrag und Regressionen | Reproduzierter Cloak-Fehler für Startzug- und Paid-Pfad sowie Schutz des MU-Choice-Pfads |
-| STIL-02 | Lifecycle-Korrektur            | Erfolgreiche Shell-Traders-Installationen führen genau einmal `on_install` aus |
-| STIL-03 | Abschluss und Dokumentation    | Final Review, Wissenslog und breite Verifikation sind abgeschlossen |
+| STIL-02 | Lifecycle-Korrektur           | Erfolgreiche Shell-Traders-Installationen führen genau einmal `on_install` aus           |
+| STIL-03 | Abschluss und Dokumentation   | Final Review, Wissenslog und breite Verifikation sind abgeschlossen                      |
 
 ## Paketdetails
 

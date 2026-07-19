@@ -87,6 +87,14 @@ export type RunnerSpecialTriggerExecutionHost = {
       legalAction: LegalAction,
     ) => void;
   };
+  lifecycle: {
+    executeOnInstall: (
+      legalAction: LegalAction | undefined,
+      definition: CardDefinition,
+      cardId: CardInstanceId,
+      effects?: ResolvedGameEffect[],
+    ) => void;
+  };
   constants: {
     BUTCHER_BOY_ID: string;
     JUNKYARD_BBS_ID: string;
@@ -222,9 +230,11 @@ export function applyDelayedInstallStartOfTurn(
     }
     const targetCardId = targetCardIds[0]!;
     resolvedSourceIds.push(sourceCardId);
+    const installEffects: ResolvedGameEffect[] = [];
     const result = removeShellCounterAndMaybeInstall(host, targetCardId, {
       sourceCardId,
       reason: "start_turn",
+      effects: installEffects,
     });
     if (result.memoryChoiceOpened) return;
     effects?.push(
@@ -234,6 +244,7 @@ export function applyDelayedInstallStartOfTurn(
         targetCardId,
         result,
       ),
+      ...installEffects,
     );
   }
 }
@@ -289,6 +300,7 @@ export function resolveDelayedInstallStartTurnChoice(
   const result = removeShellCounterAndMaybeInstall(host, targetCardId, {
     sourceCardId,
     reason: "start_turn",
+    legalAction,
   });
   if (!result.memoryChoiceOpened) {
     effects?.push(
@@ -398,7 +410,7 @@ export function resolveDelayedInstallMemoryChoice(
     host.zones.trashRunnerInstalledCardToHeap(state, cardId);
   delete state.pendingChoice;
   host.counters.spendCardCounter(state, targetCardId, "shell", 1);
-  installDelayedPreparedCardForFree(host, targetCardId);
+  installDelayedPreparedCardForFree(host, targetCardId, legalAction);
   const result = { remainingCounters: 0, installed: true };
   if (reason === "start_turn") {
     effects?.push(
@@ -662,6 +674,7 @@ function resolveDelayedInstallRemoveCounter(
   const result = removeShellCounterAndMaybeInstall(host, targetCardId, {
     sourceCardId,
     reason: "paid",
+    legalAction,
   });
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
@@ -683,6 +696,8 @@ function removeShellCounterAndMaybeInstall(
   context: {
     sourceCardId: CardInstanceId;
     reason: "paid" | "start_turn";
+    legalAction?: LegalAction;
+    effects?: ResolvedGameEffect[];
   },
 ): {
   remainingCounters: number;
@@ -719,7 +734,12 @@ function removeShellCounterAndMaybeInstall(
   );
   if (remainingCounters > 0)
     return { remainingCounters, installed: false, memoryChoiceOpened: false };
-  installDelayedPreparedCardForFree(host, targetCardId);
+  installDelayedPreparedCardForFree(
+    host,
+    targetCardId,
+    context.legalAction,
+    context.effects,
+  );
   return { remainingCounters, installed: true, memoryChoiceOpened: false };
 }
 
@@ -766,6 +786,8 @@ function startDelayedInstallMemoryChoice(
 function installDelayedPreparedCardForFree(
   host: RunnerSpecialTriggerExecutionHost,
   cardId: CardInstanceId,
+  legalAction?: LegalAction,
+  effects?: ResolvedGameEffect[],
 ): void {
   const { state } = host;
   const definition = host.cards.definitionFor(state, cardId);
@@ -837,6 +859,7 @@ function installDelayedPreparedCardForFree(
       "recurring_credit",
       definition.recurringCredits ?? 0,
     );
+  host.lifecycle.executeOnInstall(legalAction, definition, cardId, effects);
 }
 
 function delayedInstallCanInstallPreparedCardForFree(

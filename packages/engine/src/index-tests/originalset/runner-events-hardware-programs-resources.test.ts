@@ -3005,8 +3005,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
         state,
         "runner",
         (action) =>
-          action.type === "install_card" &&
-          action.payload?.cardId === shellId,
+          action.type === "install_card" && action.payload?.cardId === shellId,
       );
     }
     const cloakId = moveRunnerCardToGrip(state, "onr_v1_011_cloak");
@@ -3031,6 +3030,18 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
     expect(state.runner.rig.programs).toContain(cloakId);
     expect(cardCounterAmount(state, cloakId, "shell")).toBe(0);
     expect(cardCounterAmount(state, cloakId, "bit")).toBe(3);
+    expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "add_hosted_credits",
+          side: "runner",
+          counterType: "bit",
+          addedCounterAmount: 3,
+          remainingCounters: 3,
+          sourceDefinitionId: "onr_v1_011_cloak",
+        }),
+      ]),
+    );
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
@@ -3046,8 +3057,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) ===
-          "onr_v1_176_the-shell-traders",
+        sourceDefinition(state, action) === "onr_v1_176_the-shell-traders",
     );
     const cloakId = moveRunnerCardToGrip(state, "onr_v1_011_cloak");
     state = apply(
@@ -3084,8 +3094,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) ===
-          "onr_v1_176_the-shell-traders",
+        sourceDefinition(state, action) === "onr_v1_176_the-shell-traders",
     );
     const installedProgramId = installRunnerProgramForTest(
       state,
@@ -3121,8 +3130,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
     const trashOption = state.pendingChoice?.options.find(
       (option) => option.value === installedProgramId,
     );
-    if (!trashOption)
-      throw new Error("Shell-Traders-Cloak-MU-Option fehlt.");
+    if (!trashOption) throw new Error("Shell-Traders-Cloak-MU-Option fehlt.");
 
     state = applyChoice(state, "runner", trashOption.id);
 

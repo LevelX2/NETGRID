@@ -713,6 +713,9 @@ function testHost(
       startHiddenStackProgramInstallActivation:
         overrides.startHiddenStackProgramInstallActivation ?? (() => undefined),
     },
+    lifecycle: {
+      executeOnInstall: () => undefined,
+    },
     constants: {
       BUTCHER_BOY_ID: "successful_hq_run_pair_credit",
       JUNKYARD_BBS_ID,

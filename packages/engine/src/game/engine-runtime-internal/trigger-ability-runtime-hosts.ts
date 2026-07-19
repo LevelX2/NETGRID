@@ -737,6 +737,18 @@ export function createTriggerAbilityRuntimeHosts(
             sourceCardId,
           ),
       },
+      lifecycle: {
+        executeOnInstall: (legalAction, definition, cardId, effects) =>
+          executeCardImplementationLifecycleEffects(
+            deps.cardImplementationRuntimeDeps,
+            state,
+            legalAction,
+            definition,
+            cardId,
+            "on_install",
+            effects,
+          ),
+      },
       constants: {
         BUTCHER_BOY_ID,
         JUNKYARD_BBS_ID,
