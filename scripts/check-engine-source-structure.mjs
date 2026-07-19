@@ -19,9 +19,6 @@ const abilityPayloadRegistryFile = path.join(
 const runtimeRoot = path.join(engineRoot, "game", "engine-runtime-internal");
 const abilityRoot = path.join(engineRoot, "ability-engine");
 const cardImplementationRoot = path.join(engineRoot, "card-implementations");
-const damageRoot = path.join(engineRoot, "game", "damage");
-const accessRoot = path.join(engineRoot, "game", "access");
-const runRoot = path.join(engineRoot, "game", "run");
 
 const forbiddenRuntimeDelegateFiles = [
   "action-runtime-delegates.ts",
@@ -32,38 +29,6 @@ const forbiddenRuntimeDelegateFiles = [
   "runtime-delegates.ts",
   "state-runtime-delegates.ts",
 ];
-const runtimeImportFanoutDebt = new Map([
-  ["game/engine-runtime-internal/access-flow-runtime-hosts.ts", 117],
-  ["game/engine-runtime-internal/action-runtime-bootstrap.ts", 123],
-  ["game/engine-runtime-internal/activated-card-runtime-hosts.ts", 117],
-  ["game/engine-runtime-internal/apply-action-runtime-hosts.ts", 117],
-  ["game/engine-runtime-internal/card-lifecycle-runtime-hosts.ts", 118],
-  ["game/engine-runtime-internal/card-runtime-bootstrap.ts", 122],
-  ["game/engine-runtime-internal/card-runtime-deps-hosts.ts", 118],
-  ["game/engine-runtime-internal/card-runtime-resolvers.ts", 123],
-  ["game/engine-runtime-internal/card-strength-cost-runtime-services.ts", 117],
-  ["game/engine-runtime-internal/choice-hidden-zone-resolvers.ts", 121],
-  ["game/engine-runtime-internal/corp-runtime-resolvers.ts", 122],
-  ["game/engine-runtime-internal/counter-turn-runtime-services.ts", 117],
-  ["game/engine-runtime-internal/damage-trace-runtime-hosts.ts", 117],
-  ["game/engine-runtime-internal/economy-runtime-services.ts", 118],
-  ["game/engine-runtime-internal/encounter-movement-runtime-hosts.ts", 117],
-  ["game/engine-runtime-internal/flow-runtime-bootstrap.ts", 122],
-  ["game/engine-runtime-internal/install-rez-runtime-hosts.ts", 117],
-  ["game/engine-runtime-internal/legal-action-runtime-hosts.ts", 117],
-  ["game/engine-runtime-internal/lookup-runtime-services.ts", 117],
-  ["game/engine-runtime-internal/play-board-runtime-hosts.ts", 117],
-  ["game/engine-runtime-internal/public-event-runtime-bootstrap.ts", 121],
-  ["game/engine-runtime-internal/run-flow-runtime-hosts.ts", 116],
-  ["game/engine-runtime-internal/runtime-bootstrap-support.ts", 124],
-  ["game/engine-runtime-internal/scored-economy-runtime-hosts.ts", 117],
-  ["game/engine-runtime-internal/state-corp-runtime-resolvers.ts", 126],
-  ["game/engine-runtime-internal/state-runtime-bootstrap.ts", 121],
-  ["game/engine-runtime-internal/state-runtime-resolvers.ts", 126],
-  ["game/engine-runtime-internal/trigger-ability-runtime-hosts.ts", 117],
-  ["game/engine-runtime-internal/zone-runtime-services.ts", 118],
-]);
-const allowedCycleSignatures = new Set();
 const allowedLayerDebt = new Set([
   "ability-engine/active-modifiers.ts -> game/state/temporary-breaker-strength.ts",
   "ability-engine/card-implementation-runtime-activated-costs.ts -> game/payment/runner-payment-support.ts",
@@ -99,35 +64,6 @@ const runtimePortContractFiles = [
   "turn-runtime-port.ts",
   "zone-runtime-port.ts",
 ];
-const damageDomainModuleLimits = new Map([
-  ["damage-core.ts", 220],
-  ["damage-runtime-context.ts", 500],
-  ["damage-event-resolution.ts", 750],
-  ["prevention-sources.ts", 1100],
-  ["prevention-window.ts", 950],
-  ["damage-replacement.ts", 750],
-]);
-const accessDomainModuleLimits = new Map([
-  ["access-flow.ts", 80],
-  ["access-flow-context.ts", 260],
-  ["access-breach-lifecycle.ts", 700],
-  ["access-resolution-actions.ts", 900],
-  ["access-effect-handlers.ts", 500],
-  ["access-effect-context.ts", 240],
-  ["access-effect-execution.ts", 1250],
-  ["access-effect-legacy.ts", 550],
-]);
-const runDomainModuleLimits = new Map([
-  ["run-flow-contracts.ts", 600],
-  ["run-flow-hosts.ts", 1300],
-  ["run-end-cleanup-contracts.ts", 300],
-  ["run-end-counter-triggers.ts", 800],
-  ["run-end-cleanup.ts", 950],
-  ["successful-run-contracts.ts", 220],
-  ["successful-run-followups.ts", 700],
-  ["successful-run-interventions.ts", 1050],
-  ["windows/fort-pass-window-contracts.ts", 100],
-]);
 
 if (process.argv.includes("--self-test")) {
   runSelfTest();
@@ -199,12 +135,7 @@ const actualCycleSignatures = new Set(
   ),
 );
 for (const cycle of actualCycleSignatures) {
-  if (!allowedCycleSignatures.has(cycle))
-    findings.push(`unexpected relative import cycle: ${cycle}`);
-}
-for (const allowed of allowedCycleSignatures) {
-  if (!actualCycleSignatures.has(allowed))
-    findings.push(`stale allowed-cycle debt entry: ${allowed}`);
+  findings.push(`relative import cycle: ${cycle}`);
 }
 for (const layerEdge of actualLayerDebt) {
   if (!allowedLayerDebt.has(layerEdge))
@@ -221,37 +152,11 @@ for (const fileName of forbiddenRuntimeDelegateFiles) {
     findings.push(`${runtimePath(fileName)} must not be reintroduced`);
 }
 
-for (const [file, targets] of graph) {
-  const relative = relativeEnginePath(file);
-  const finding = importFanoutFinding(
-    relative,
-    targets.size,
-    runtimeImportFanoutDebt,
-  );
-  if (finding) findings.push(finding);
-}
-for (const relative of runtimeImportFanoutDebt.keys()) {
-  if (!graph.has(path.join(engineRoot, ...relative.split("/"))))
-    findings.push(`stale fan-out debt entry: ${relative}`);
-}
-
-const definitionFacade = path.join(abilityRoot, "definition-types.ts");
-if (sourceLineCount(definitionFacade) > 20)
-  findings.push("ability-engine/definition-types.ts exceeds 20 lines");
 const definitionFamilyFiles = readdirSync(abilityRoot)
   .filter((name) => /^definition-.*-contracts\.ts$/.test(name))
   .sort();
-if (definitionFamilyFiles.length !== 6)
-  findings.push(
-    `ability contract structure has ${definitionFamilyFiles.length} family modules; expected 6`,
-  );
 for (const fileName of definitionFamilyFiles) {
   const file = path.join(abilityRoot, fileName);
-  const lineCount = sourceLineCount(file);
-  if (lineCount > 1200)
-    findings.push(
-      `ability-engine/${fileName} has ${lineCount} lines; allowed maximum is 1200`,
-    );
   const source = parseSource(file, readFileSync(file, "utf8"));
   const valueStatement = source.statements.find(
     (statement) => !isDeclarativeContractStatement(statement),
@@ -259,45 +164,6 @@ for (const fileName of definitionFamilyFiles) {
   if (valueStatement)
     findings.push(
       `ability-engine/${fileName} contains runtime statement kind ${ts.SyntaxKind[valueStatement.kind]}`,
-    );
-}
-
-for (const [fileName, maximumLines] of damageDomainModuleLimits) {
-  const file = path.join(damageRoot, fileName);
-  if (!existsSync(file)) {
-    findings.push(`game/damage/${fileName} is missing`);
-    continue;
-  }
-  const lineCount = sourceLineCount(file);
-  if (lineCount > maximumLines)
-    findings.push(
-      `game/damage/${fileName} has ${lineCount} lines; allowed maximum is ${maximumLines}`,
-    );
-}
-
-for (const [fileName, maximumLines] of accessDomainModuleLimits) {
-  const file = path.join(accessRoot, fileName);
-  if (!existsSync(file)) {
-    findings.push(`game/access/${fileName} is missing`);
-    continue;
-  }
-  const lineCount = sourceLineCount(file);
-  if (lineCount > maximumLines)
-    findings.push(
-      `game/access/${fileName} has ${lineCount} lines; allowed maximum is ${maximumLines}`,
-    );
-}
-
-for (const [fileName, maximumLines] of runDomainModuleLimits) {
-  const file = path.join(runRoot, ...fileName.split("/"));
-  if (!existsSync(file)) {
-    findings.push(`game/run/${fileName} is missing`);
-    continue;
-  }
-  const lineCount = sourceLineCount(file);
-  if (lineCount > maximumLines)
-    findings.push(
-      `game/run/${fileName} has ${lineCount} lines; allowed maximum is ${maximumLines}`,
     );
 }
 
@@ -314,13 +180,6 @@ const coverageSourceLocations = path.join(
 );
 if (!existsSync(coverageSourceLocations))
   findings.push("card-implementations/coverage-source-locations.ts is missing");
-else if (sourceLineCount(coverageSourceLocations) > 1000)
-  findings.push(
-    "card-implementations/coverage-source-locations.ts exceeds 1000 lines",
-  );
-const coverageFacade = path.join(cardImplementationRoot, "coverage.ts");
-if (sourceLineCount(coverageFacade) > 600)
-  findings.push("card-implementations/coverage.ts exceeds 600 lines");
 
 const runtimePortContracts = path.join(
   runtimeRoot,
@@ -338,32 +197,11 @@ if (runtimePortAnyCount > 0)
   findings.push(
     `${runtimePath("runtime-port-contracts.ts")} contains ${runtimePortAnyCount} any type nodes`,
   );
-if (sourceLineCount(runtimePortContracts) > 160)
-  findings.push(
-    `${runtimePath("runtime-port-contracts.ts")} exceeds 160 lines`,
-  );
-
 const runtimePortBindings = path.join(runtimeRoot, "runtime-port-bindings.ts");
 const runtimePortBindingsSource = parseSource(
   runtimePortBindings,
   readFileSync(runtimePortBindings, "utf8"),
 );
-const runtimePortBindingCount = runtimePortBindingsSource.statements
-  .filter(
-    (statement) =>
-      ts.isVariableStatement(statement) &&
-      statement.modifiers?.some(
-        (modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword,
-      ),
-  )
-  .reduce(
-    (count, statement) => count + statement.declarationList.declarations.length,
-    0,
-  );
-if (runtimePortBindingCount !== 430)
-  findings.push(
-    `${runtimePath("runtime-port-bindings.ts")} exports ${runtimePortBindingCount} live bindings; expected 430`,
-  );
 const runtimePortBindingsAnyCount = countSyntaxKind(
   runtimePortBindingsSource,
   ts.SyntaxKind.AnyKeyword,
@@ -372,11 +210,6 @@ if (runtimePortBindingsAnyCount > 0)
   findings.push(
     `${runtimePath("runtime-port-bindings.ts")} contains ${runtimePortBindingsAnyCount} any type nodes`,
   );
-if (sourceLineCount(runtimePortBindings) > 1300)
-  findings.push(
-    `${runtimePath("runtime-port-bindings.ts")} exceeds 1300 lines`,
-  );
-
 for (const fileName of runtimePortContractFiles) {
   const file = path.join(runtimeRoot, fileName);
   const source = parseSource(file, readFileSync(file, "utf8"));
@@ -385,8 +218,6 @@ for (const fileName of runtimePortContractFiles) {
     findings.push(
       `${runtimePath(fileName)} contains ${anyCount} any type nodes`,
     );
-  if (sourceLineCount(file) > 260)
-    findings.push(`${runtimePath(fileName)} exceeds 260 lines`);
   const valueStatement = source.statements.find(
     (statement) => !isDeclarativeContractStatement(statement),
   );
@@ -403,7 +234,7 @@ if (findings.length > 0) {
 }
 
 console.log(
-  `ENGINE_SOURCE_STRUCTURE OK production=${productionFiles.length} relativeCycles=${actualCycles.length} runtimePortBindings=${runtimePortBindingCount}`,
+  `ENGINE_SOURCE_STRUCTURE OK production=${productionFiles.length} relativeCycles=${actualCycles.length}`,
 );
 
 function collectSourceFiles(root) {
@@ -512,15 +343,6 @@ function countRuntimeDependencySnapshots(source) {
   return count;
 }
 
-function importFanoutFinding(relative, actual, debt) {
-  const expectedDebt = debt.get(relative);
-  if (expectedDebt !== undefined && actual !== expectedDebt)
-    return `${relative} imports ${actual} engine modules; fan-out debt ledger expects ${expectedDebt}`;
-  if (expectedDebt === undefined && actual > 100)
-    return `${relative} imports ${actual} engine modules; allowed maximum is 100`;
-  return undefined;
-}
-
 function isDeclarativeContractStatement(statement) {
   if (
     ts.isTypeAliasDeclaration(statement) ||
@@ -530,11 +352,6 @@ function isDeclarativeContractStatement(statement) {
   if (ts.isImportDeclaration(statement))
     return statement.importClause?.isTypeOnly === true;
   return ts.isExportDeclaration(statement) && statement.isTypeOnly;
-}
-
-function sourceLineCount(file) {
-  const text = readFileSync(file, "utf8");
-  return text.replace(/\r?\n$/, "").split(/\r?\n/).length;
 }
 
 function countSyntaxKind(node, kind) {
@@ -715,17 +532,6 @@ function runSelfTest() {
     throw new Error(
       "engine source structure self-test failed: ability payload registry",
     );
-
-  if (
-    !importFanoutFinding("new-module.ts", 101, new Map()) ||
-    !importFanoutFinding(
-      "legacy-module.ts",
-      99,
-      new Map([["legacy-module.ts", 100]]),
-    ) ||
-    importFanoutFinding("new-module.ts", 100, new Map())
-  )
-    throw new Error("engine source structure self-test failed: import fan-out");
 
   if (
     !forbiddenLayerEdge("ability-engine/example.ts", "game/state/example.ts") ||

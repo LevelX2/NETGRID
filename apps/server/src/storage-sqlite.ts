@@ -9,7 +9,6 @@ import type { AiDecisionTraceRecord, MatchMode, MatchStatus, MultiplayerStorage,
 export const SQLITE_STORAGE_SCHEMA_VERSION = 3;
 export const SQLITE_STORAGE_FORMAT = "netgrid_multiplayer_sqlite";
 export const DEFAULT_SQLITE_STORAGE_PATH = "data/runtime/multiplayer/netgrid.sqlite";
-export const DEFAULT_JSON_STORAGE_PATH = "data/runtime/multiplayer/matches.json";
 export const DEFAULT_STORAGE_BACKUP_DIR = "data/runtime/backups";
 const PARTIAL_STATE_SNAPSHOTS = Symbol("partialStateSnapshots");
 
@@ -17,7 +16,7 @@ type StoredMatchWithStorageFlags = StoredMatch & {
   [PARTIAL_STATE_SNAPSHOTS]?: boolean;
 };
 
-export type StorageKind = "memory" | "json" | "sqlite";
+export type StorageKind = "memory" | "sqlite";
 
 export type StorageHealth = {
   ok: true;
@@ -44,7 +43,7 @@ export type BackupManifest = {
   source: "default_sqlite" | "configured_sqlite" | "pre_restore_sqlite";
   files: Array<{ name: string; sizeBytes: number; sha256: string }>;
   matchCount?: number;
-  reason?: "manual" | "pre_migration" | "pre_restore" | "pre_cleanup" | "pre_compaction";
+  reason?: "manual" | "pre_restore" | "pre_cleanup" | "pre_compaction";
 };
 
 export type StorageMaintenanceParticipant = {
@@ -201,7 +200,6 @@ export type StorageMaintenanceSnapshotCompactionResult = {
   backupCreated: true;
   matchesScanned: number;
   compactedMatchCount: number;
-  engineEventsBackfilled: number;
   recordRowsCompacted: number;
   gameStateRowsCompacted: number;
   stateSnapshotRowsCompacted: number;
@@ -295,7 +293,6 @@ export class StorageError extends Error {
     readonly code:
       | "storage_corrupt"
       | "schema_too_new"
-      | "schema_too_old"
       | "schema_missing"
       | "stored_match_invalid"
       | "backup_invalid"
@@ -318,12 +315,15 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     this.backupDir = resolve(options.backupDir ?? DEFAULT_STORAGE_BACKUP_DIR);
     mkdirSync(dirname(this.dbPath), { recursive: true });
     mkdirSync(this.backupDir, { recursive: true });
+    let openedDb: DatabaseSync | undefined;
     try {
-      this.db = new DatabaseSync(this.dbPath);
+      openedDb = new DatabaseSync(this.dbPath);
+      this.db = openedDb;
       this.db.exec("PRAGMA foreign_keys = ON");
       this.db.exec("PRAGMA journal_mode = DELETE");
       this.ensureSchema();
     } catch (error) {
+      openedDb?.close();
       if (error instanceof StorageError) throw error;
       throw new StorageError("storage_corrupt", "Storage konnte nicht geöffnet werden. Bitte aus einem lokalen Backup wiederherstellen.");
     }
@@ -575,7 +575,6 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     const rows = this.db.prepare("SELECT match_id AS matchId, record_json AS recordJson FROM matches ORDER BY created_at ASC").all() as Array<{ matchId: string; recordJson: string }>;
     const result = {
       compactedMatchIds: new Set<string>(),
-      engineEventsBackfilled: 0,
       recordRowsCompacted: 0,
       gameStateRowsCompacted: 0,
       stateSnapshotRowsCompacted: 0
@@ -585,11 +584,6 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       const updateMatch = this.db.prepare("UPDATE matches SET record_json = ? WHERE match_id = ?");
       const updateGameState = this.db.prepare("UPDATE game_states SET game_state_json = ? WHERE match_id = ?");
       const updateSnapshot = this.db.prepare("UPDATE state_snapshots SET game_state_json = ? WHERE match_id = ? AND snapshot_id = ?");
-      const insertEngineEvent = this.db.prepare(
-        `INSERT OR IGNORE INTO engine_events (match_id, event_id, event_index, event_json)
-         VALUES (?, ?, ?, ?)`
-      );
-
       for (const row of rows) {
         const record = JSON.parse(row.recordJson) as StoredMatch;
         const gameStateRow = this.db.prepare("SELECT game_state_json AS gameStateJson FROM game_states WHERE match_id = ?").get(row.matchId) as { gameStateJson?: string | null } | undefined;
@@ -601,15 +595,6 @@ export class SqliteMatchStorage implements MultiplayerStorage {
           snapshotId: snapshot.snapshotId,
           gameState: JSON.parse(snapshot.gameStateJson) as GameState
         }));
-
-        const engineEventCount = Number((this.db.prepare("SELECT COUNT(*) AS count FROM engine_events WHERE match_id = ?").get(row.matchId) as { count: number }).count);
-        if (engineEventCount === 0) {
-          const engineEvents = collectLegacyEngineEvents(record, gameState, snapshots.map((snapshot) => snapshot.gameState));
-          engineEvents.forEach((event, index) => {
-            insertEngineEvent.run(row.matchId, event.eventId, index, JSON.stringify(event));
-          });
-          result.engineEventsBackfilled += engineEvents.length;
-        }
 
         const compactRecordJson = JSON.stringify(compactRecordForStorage(record));
         if (compactRecordJson !== row.recordJson) {
@@ -652,7 +637,6 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       backupCreated: true,
       matchesScanned: rows.length,
       compactedMatchCount: result.compactedMatchIds.size,
-      engineEventsBackfilled: result.engineEventsBackfilled,
       recordRowsCompacted: result.recordRowsCompacted,
       gameStateRowsCompacted: result.gameStateRowsCompacted,
       stateSnapshotRowsCompacted: result.stateSnapshotRowsCompacted,
@@ -774,7 +758,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     const version = Number(this.meta("schema_version") ?? 0);
     if (!Number.isInteger(version)) throw new StorageError("schema_missing", "Storage-Schema konnte nicht sicher erkannt werden.");
     if (version > SQLITE_STORAGE_SCHEMA_VERSION) throw new StorageError("schema_too_new", "Storage ist neuer als dieser Servercode.");
-    if (version < SQLITE_STORAGE_SCHEMA_VERSION) this.migrate(version);
+    if (version < SQLITE_STORAGE_SCHEMA_VERSION) throw new StorageError("schema_missing", "Storage nutzt nicht das aktuelle Schema.");
     this.createSchema();
   }
 
@@ -1094,36 +1078,6 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       if (!this.meta("created_at")) this.setMeta("created_at", now, now);
       if (!this.meta("last_migration_at")) this.setMeta("last_migration_at", now, now);
       if (!this.meta("account_statistics_since")) this.setMeta("account_statistics_since", now, now);
-    });
-  }
-
-  private migrate(version: number): void {
-    if (version !== 0 && version !== 1 && version !== 2) throw new StorageError("schema_too_old", "Storage-Schema ist älter als die bekannten Migrationen.");
-    createSqliteStorageBackup({
-      dbPath: this.dbPath,
-      backupDir: this.backupDir,
-      schemaVersion: version,
-      matchCount: this.tableExists("matches") ? this.matchCount() : 0,
-      reason: "pre_migration",
-      source: "configured_sqlite"
-    });
-    if (version === 1) this.migrateAccountFoundationTables();
-  }
-
-  private migrateAccountFoundationTables(): void {
-    this.transaction(() => {
-      if (this.tableExists("accounts")) {
-        if (!this.columnExists("accounts", "login_name")) this.db.exec("ALTER TABLE accounts ADD COLUMN login_name TEXT");
-        if (!this.columnExists("accounts", "login_name_normalized")) this.db.exec("ALTER TABLE accounts ADD COLUMN login_name_normalized TEXT");
-        if (!this.columnExists("accounts", "credential_version")) this.db.exec("ALTER TABLE accounts ADD COLUMN credential_version INTEGER NOT NULL DEFAULT 1");
-        this.db.exec("UPDATE accounts SET login_name = COALESCE(login_name, account_id), login_name_normalized = COALESCE(login_name_normalized, lower(account_id))");
-        this.db.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_accounts_login_name_normalized ON accounts(login_name_normalized)");
-      }
-      if (this.tableExists("account_sessions")) {
-        if (!this.columnExists("account_sessions", "csrf_token_hash")) this.db.exec("ALTER TABLE account_sessions ADD COLUMN csrf_token_hash TEXT NOT NULL DEFAULT 'legacy-revoked'");
-        if (!this.columnExists("account_sessions", "credential_version")) this.db.exec("ALTER TABLE account_sessions ADD COLUMN credential_version INTEGER NOT NULL DEFAULT 0");
-        if (!this.columnExists("account_sessions", "auth_strength")) this.db.exec("ALTER TABLE account_sessions ADD COLUMN auth_strength TEXT NOT NULL DEFAULT 'password'");
-      }
     });
   }
 
@@ -1548,10 +1502,6 @@ export class SqliteMatchStorage implements MultiplayerStorage {
   private tableExists(name: string): boolean {
     const row = this.db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?").get(name) as { name?: string } | undefined;
     return row?.name === name;
-  }
-
-  private columnExists(table: string, column: string): boolean {
-    return (this.db.prepare(`PRAGMA table_info(${table})`).all() as Array<{ name?: string }>).some((entry) => entry.name === column);
   }
 
   private userTableCount(): number {
@@ -2074,6 +2024,18 @@ export function validateStoredMatch(value: unknown): asserts value is StoredMatc
     if (event.matchId !== match.matchId || "privatePayload" in (event as Record<string, unknown>)) throw new StorageError("stored_match_invalid", "Match-Record ist strukturell ungültig.");
   }
   if (record.gameState && record.gameState.matchId !== match.matchId) throw new StorageError("stored_match_invalid", "Match-Record ist strukturell ungültig.");
+  const privateDeckSnapshots = record.privateDeckSnapshots as
+    | { participants?: Partial<Record<"player_a" | "player_b", Partial<Record<"runner" | "corp", unknown>>>> }
+    | undefined;
+  if (
+    privateDeckSnapshots &&
+    (!privateDeckSnapshots.participants?.player_a?.runner ||
+      !privateDeckSnapshots.participants.player_a.corp ||
+      !privateDeckSnapshots.participants.player_b?.runner ||
+      !privateDeckSnapshots.participants.player_b.corp)
+  ) {
+    throw new StorageError("stored_match_invalid", "Match-Record ist strukturell ungültig.");
+  }
   rejectClearTokenKeys(record);
 }
 
@@ -2158,19 +2120,6 @@ function hydrateSnapshotGameState(state: GameState, eventLog: GameEvent[] | unde
     ...state,
     eventLog: eventLog.filter((event) => event.stateVersionAfter <= state.stateVersion)
   };
-}
-
-function collectLegacyEngineEvents(record: StoredMatch, gameState: GameState | undefined, snapshots: GameState[]): GameEvent[] {
-  const events = new Map<string, GameEvent>();
-  const add = (eventLog: GameEvent[] | undefined): void => {
-    for (const event of eventLog ?? []) {
-      if (typeof event.eventId === "string" && !events.has(event.eventId)) events.set(event.eventId, event);
-    }
-  };
-  add(record.gameState?.eventLog);
-  add(gameState?.eventLog);
-  for (const snapshot of snapshots) add(snapshot.eventLog);
-  return [...events.values()].sort((left, right) => left.stateVersionAfter - right.stateVersionAfter || left.eventId.localeCompare(right.eventId));
 }
 
 function compactRecordForStorage(record: StoredMatch): StoredMatch {

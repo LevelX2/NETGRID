@@ -52,7 +52,6 @@ export type PendingChoiceResolutionHost = {
     resolveRunnerHostingChoice: HostFn<void>;
     resolveIncubatorTransformChoice: HostFn<void>;
     resolveVirusCounterPurgePreserveChoice: HostFn<void>;
-    resolveChimeraDaemonTrashChoice: HostFn<void>;
     resolveRunnerProgramReturnChoice: HostFn<void>;
     resolveRunnerPrivateLookChoice: HostFn<void>;
     resolveExposePreventionChoice: HostFn<void>;
@@ -182,8 +181,6 @@ export function resolvePendingChoice(
     host.hiddenZone.resolveIncubatorTransformChoice;
   const resolveVirusCounterPurgePreserveChoice =
     host.hiddenZone.resolveVirusCounterPurgePreserveChoice;
-  const resolveChimeraDaemonTrashChoice =
-    host.hiddenZone.resolveChimeraDaemonTrashChoice;
   const resolveRunnerProgramReturnChoice =
     host.hiddenZone.resolveRunnerProgramReturnChoice;
   const resolveRunnerPrivateLookChoice =
@@ -656,10 +653,6 @@ export function resolvePendingChoice(
       legalAction,
       playerAction,
     );
-    return;
-  }
-  if (state.pendingChoice.source.startsWith("v199.chimera_daemon_trash")) {
-    resolveChimeraDaemonTrashChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("proteus.return_runner_programs")) {

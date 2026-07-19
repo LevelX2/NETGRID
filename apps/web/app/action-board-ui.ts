@@ -21,8 +21,6 @@ export {
 } from "../features/actions/cue-position";
 
 export const ACTION_CUE_POSITION_STORAGE_KEY = "netgrid.actionCuePosition.v1";
-export const LEGACY_ACTION_CUE_POSITION_STORAGE_KEY =
-  "netgrid.actionCuePosition.v1";
 
 export type ActionContext = {
   kind: "card" | "server";

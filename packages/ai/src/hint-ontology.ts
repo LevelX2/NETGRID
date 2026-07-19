@@ -456,6 +456,7 @@ export const KNOWN_HINT_OPPONENT_SIGNAL_KINDS = [
 export const KNOWN_HINT_QUALITY_CONFIDENCE = ["low", "medium", "high"] as const;
 
 export const KNOWN_HINT_STRATEGY_SUPPORT_PAIR_ROLES = [
+  "anchor_evidence",
   "payoff_anchor",
   "engine_anchor",
   "enabler",
@@ -624,6 +625,10 @@ export type AiHintStrategySupportPair = {
 
 export type AiHintOntologyExtension = {
   effects?: AiHintStructuredEffect[];
+  functionSignals?: string[];
+  tacticSignals?: string[];
+  actionTacticSignals?: string[];
+  strategyAnchors?: string[];
   conditions?: AiHintCondition[];
   costProfile?: AiHintCostProfile;
   breakerProfile?: AiHintBreakerProfile;
@@ -631,6 +636,7 @@ export type AiHintOntologyExtension = {
   targetProfiles?: Array<AiHintEffectTargetProfile | AiHintTargetProfileV1>;
   lineSupport?: KnownHintLineSupport[];
   strategySupportPairs?: AiHintStrategySupportPair[];
+  actionStrategySupportPairs?: AiHintStrategySupportPair[];
   opponentSignals?: AiHintOpponentSignal[];
   quality?: AiHintQuality;
 };
@@ -726,6 +732,11 @@ function validateExtensionFields(
   validateStrategySupportPairs(
     input.strategySupportPairs,
     `${path}.strategySupportPairs`,
+    issues,
+  );
+  validateStrategySupportPairs(
+    input.actionStrategySupportPairs,
+    `${path}.actionStrategySupportPairs`,
     issues,
   );
   validateOpponentSignals(

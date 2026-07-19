@@ -54,6 +54,23 @@ describe("runnerRunLockReleaseScoreComponent", () => {
     ).toBeUndefined();
   });
 
+  it("does not mistake icebreaker support for an installed breaker", () => {
+    const current = input();
+    current.playerView.opponent.agendaPoints = 4;
+    current.playerView.own.credits = 12;
+    current.playerView.own.rig = [
+      {
+        instanceId: "cortical-cybermodem",
+        definitionId: "onr_proteus_134_cortical-cybermodem",
+        known: true,
+      },
+    ];
+
+    expect(
+      runnerRunLockReleaseScoreComponent(current, releaseAction()),
+    ).toBeUndefined();
+  });
+
   it("does not release for a thin speculative path below Corp matchpoint", () => {
     const current = input();
     current.playerView.opponent.agendaPoints = 4;

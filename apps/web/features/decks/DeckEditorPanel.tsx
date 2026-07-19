@@ -22,11 +22,8 @@ import {
   type CatalogTypeFilterKey,
   type CatalogTypeFilterState
 } from "../catalog/catalog-model";
-import {
-  DECK_TABLE_VIEW_SETTINGS_STORAGE_KEY,
-  LEGACY_DECK_TABLE_VIEW_SETTINGS_STORAGE_KEY
-} from "../../lib/storage-keys";
-import { readLocalStorageWithLegacy } from "../../lib/local-storage";
+import { DECK_TABLE_VIEW_SETTINGS_STORAGE_KEY } from "../../lib/storage-keys";
+import { readLocalStorage } from "../../lib/local-storage";
 import { neededDevelopmentLabel } from "../cards/card-detail-lines";
 import { DeckAgendaStatusBadge } from "./DeckAgendaStatusBadge";
 import {
@@ -523,7 +520,7 @@ export function DeckEditorPanel({
     setTableSelectionAnchor(null);
   }, [deckEditorMode, selectedDeck?.deckId]);
   useEffect(() => {
-    const settings = parseDeckTableViewSettings(readLocalStorageWithLegacy(DECK_TABLE_VIEW_SETTINGS_STORAGE_KEY, LEGACY_DECK_TABLE_VIEW_SETTINGS_STORAGE_KEY));
+    const settings = parseDeckTableViewSettings(readLocalStorage(DECK_TABLE_VIEW_SETTINGS_STORAGE_KEY));
     setTableCardWidth(settings.cardWidth);
     setTableOverlapPercent(settings.overlapPercent);
     setTableLibraryWidth(settings.libraryWidth);

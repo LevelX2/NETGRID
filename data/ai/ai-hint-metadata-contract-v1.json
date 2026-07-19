@@ -1,5 +1,17 @@
 {
   "schemaVersion": "ai-hint-metadata-contract-v1",
+  "staticSemantics": {
+    "source": "data/ai/ai-card-hints-active.json",
+    "fields": [
+      "functionSignals",
+      "tacticSignals",
+      "actionTacticSignals",
+      "strategyAnchors",
+      "strategySupportPairs",
+      "actionStrategySupportPairs"
+    ],
+    "policy": "reviewed card semantics are stored directly on each active hint; runtime consumers and the inspector must not derive a second semantic representation"
+  },
   "valueHints": {
     "runtimeKeys": [
       "damage",

@@ -56,32 +56,6 @@ export type {
   ProteusSpoilerParseResult,
 } from "./proteus-spoiler";
 
-export type SourceRegistryV2 = {
-  schemaVersion: "card-source-registry-v1.3.1";
-  registryId: string;
-  createdAt: string;
-  sources: CardSourceEntryV2[];
-};
-
-export type CardSourceEntryV2 = {
-  sourceId: string;
-  sourceType:
-    | "project_file"
-    | "local_private_file"
-    | "manual_review"
-    | "external_snapshot";
-  scope: "versioned_project" | "private_local" | "reference_only";
-  pathOrReference: string;
-  provenance: string;
-  usageDecision:
-    | "allowed_project_data"
-    | "private_display_only"
-    | "reference_only"
-    | "blocked";
-  reviewStatus: "unreviewed" | "reviewed" | "blocked";
-  notes?: string;
-};
-
 export type RuntimeCardPool = {
   snapshot: CardSnapshot;
   snapshotHash: string;
@@ -116,7 +90,6 @@ export const FORBIDDEN_CATALOG_PAYLOAD_KEYS = [
   "undoSnapshots",
 ] as const;
 
-export * from "./catalog-pipeline";
 export * from "./ai-support-readiness";
 export * from "./card-set-loader";
 export * from "./rarity";
@@ -349,108 +322,6 @@ export function assertCatalogPayloadSafe(
   const errors = FORBIDDEN_CATALOG_PAYLOAD_KEYS.filter((key) =>
     serialized.includes(key),
   ).map((key) => `Catalog payload contains forbidden key ${key}.`);
-  return { ok: errors.length === 0, errors };
-}
-
-export function createSourceRegistryV2(
-  createdAt = "2026-05-08T00:00:00.000+02:00",
-): SourceRegistryV2 {
-  return {
-    schemaVersion: "card-source-registry-v1.3.1",
-    registryId: "source-registry-1.3.1",
-    createdAt,
-    sources: [
-      {
-        sourceId: "v131-versioned-card-snapshot-0.8",
-        sourceType: "project_file",
-        scope: "versioned_project",
-        pathOrReference: "data/card-import/card-snapshot-0.8.json",
-        provenance:
-          "Versioned NETGRID demo and catalog snapshot carried forward from V0.8.",
-        usageDecision: "allowed_project_data",
-        reviewStatus: "reviewed",
-        notes:
-          "Snapshot text remains display-only and cannot grant playability.",
-      },
-      {
-        sourceId: "v131-card-set-support",
-        sourceType: "manual_review",
-        scope: "versioned_project",
-        pathOrReference:
-          "data/cards/*-cards.json + data/manifests/*-card-support.json",
-        provenance: "Active card data and support status split by set.",
-        usageDecision: "allowed_project_data",
-        reviewStatus: "reviewed",
-        notes:
-          "Resolvers, mechanics and tests are reviewed support evidence only.",
-      },
-      {
-        sourceId: "v131-ai-card-role-manifest-0.9",
-        sourceType: "manual_review",
-        scope: "versioned_project",
-        pathOrReference: "data/ai/card-role-manifest-0.9.json",
-        provenance: "Manual AI role data from the V0.9 AI quality gate.",
-        usageDecision: "allowed_project_data",
-        reviewStatus: "reviewed",
-        notes: "Roles and AI hints do not set ai_supported.",
-      },
-      {
-        sourceId: "v131-private-local-onr-v1-overlay",
-        sourceType: "local_private_file",
-        scope: "private_local",
-        pathOrReference: "private-local-onr-v1-overlay",
-        provenance:
-          "Optional private local card import overlay available only on the operator machine.",
-        usageDecision: "private_display_only",
-        reviewStatus: "reviewed",
-        notes:
-          "The registry stores a logical reference only; private local paths and assets are not versioned.",
-      },
-    ],
-  };
-}
-
-export function validateSourceRegistryV2(
-  registry: SourceRegistryV2,
-): CatalogValidationResult {
-  const errors: string[] = [];
-  if (registry.schemaVersion !== "card-source-registry-v1.3.1")
-    errors.push(
-      "Source registry schemaVersion must be card-source-registry-v1.3.1.",
-    );
-  if (!registry.registryId)
-    errors.push("Source registry is missing registryId.");
-  const seen = new Set<string>();
-  for (const source of registry.sources) {
-    if (!source.sourceId) errors.push("Source entry is missing sourceId.");
-    if (seen.has(source.sourceId))
-      errors.push(`Duplicate sourceId ${source.sourceId}.`);
-    seen.add(source.sourceId);
-    if (!source.pathOrReference)
-      errors.push(`Source ${source.sourceId} is missing pathOrReference.`);
-    if (
-      source.scope === "private_local" &&
-      /[A-Za-z]:\\|data[\\/]local|%APPDATA%/i.test(source.pathOrReference)
-    ) {
-      errors.push(`Source ${source.sourceId} exposes a private local path.`);
-    }
-    if (
-      source.usageDecision === "allowed_project_data" &&
-      source.scope !== "versioned_project"
-    ) {
-      errors.push(
-        `Source ${source.sourceId} grants project data use outside versioned_project scope.`,
-      );
-    }
-    if (
-      source.reviewStatus === "blocked" &&
-      source.usageDecision !== "blocked"
-    ) {
-      errors.push(
-        `Source ${source.sourceId} is blocked without blocked usageDecision.`,
-      );
-    }
-  }
   return { ok: errors.length === 0, errors };
 }
 

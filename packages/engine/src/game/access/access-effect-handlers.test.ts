@@ -11,7 +11,6 @@ import type { CardAccessEffectImplementation } from "../../ability-engine/defini
 import {
   handleAccessEffectsForCard,
   resolveAccessPaymentChoice,
-  resolveChimeraDaemonTrashChoice,
   type AccessEffectHandlerHost,
 } from "./access-effect-handlers";
 
@@ -26,7 +25,11 @@ function definition(
 function instance(
   id: string,
   definitionId: string,
-  zone: CardInstance["zone"] = { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+  zone: CardInstance["zone"] = {
+    side: "corp",
+    zone: "serverRoot",
+    serverId: "remote_1",
+  },
 ): CardInstance {
   return {
     id: id as CardInstanceId,
@@ -43,12 +46,22 @@ function makeHost(legalAction: LegalAction) {
   const definitions: Record<string, CardDefinition> = {
     setup: definition("onr_v1_340_setup", "Setup!"),
     trap: definition("onr_v1_345_trap", "TRAP!"),
-    dedicated: definition("onr_v1_356_dedicated-response-team", "Dedicated Response Team", "upgrade"),
+    dedicated: definition(
+      "onr_v1_356_dedicated-response-team",
+      "Dedicated Response Team",
+      "upgrade",
+    ),
     dieter: definition("onr_v1_357_dieter-esslin", "Dieter Esslin", "upgrade"),
-    chimera: definition("onr_v1_309_chimera", "Chimera"),
     crybaby: definition("onr_v1_352_crybaby", "Crybaby", "upgrade"),
-    turbeau: definition("onr_v1_361_turbeau-delacroix", "Turbeau Delacroix", "upgrade"),
-    remains: definition("onr_v1_346_corprunners-shattered-remains", "Corprunner's Shattered Remains"),
+    turbeau: definition(
+      "onr_v1_361_turbeau-delacroix",
+      "Turbeau Delacroix",
+      "upgrade",
+    ),
+    remains: definition(
+      "onr_v1_346_corprunners-shattered-remains",
+      "Corprunner's Shattered Remains",
+    ),
     daemon: definition("daemon", "Daemon", "program"),
   };
   const cardInstances: Record<string, CardInstance> = {
@@ -56,7 +69,6 @@ function makeHost(legalAction: LegalAction) {
     trap: instance("trap", definitions.trap!.id, { side: "corp", zone: "rd" }),
     dedicated: instance("dedicated", definitions.dedicated!.id),
     dieter: instance("dieter", definitions.dieter!.id),
-    chimera: instance("chimera", definitions.chimera!.id),
     crybaby: instance("crybaby", definitions.crybaby!.id),
     turbeau: instance("turbeau", definitions.turbeau!.id),
     remains: instance("remains", definitions.remains!.id),
@@ -65,7 +77,10 @@ function makeHost(legalAction: LegalAction) {
       zone: "rig",
     } as CardInstance["zone"]),
   };
-  const accessEffects: Record<string, readonly CardAccessEffectImplementation[]> = {
+  const accessEffects: Record<
+    string,
+    readonly CardAccessEffectImplementation[]
+  > = {
     [definitions.setup!.id]: [
       {
         kind: "on_access",
@@ -106,6 +121,41 @@ function makeHost(legalAction: LegalAction) {
             kind: "add_tags",
             recipient: "runner",
             amount: 1,
+            visibility: "hidden_info_barrier",
+          },
+        ],
+      },
+    ],
+    [definitions.dedicated!.id]: [
+      {
+        kind: "on_access",
+        sourceZones: ["installed"],
+        condition: { kind: "runner_is_tagged" },
+        visibility: "hidden_info_barrier",
+        effects: [
+          {
+            kind: "damage",
+            recipient: "runner",
+            damageType: "meat",
+            amount: 3,
+            preventable: true,
+            visibility: "hidden_info_barrier",
+          },
+        ],
+      },
+    ],
+    [definitions.dieter!.id]: [
+      {
+        kind: "on_access",
+        sourceZones: ["installed"],
+        visibility: "hidden_info_barrier",
+        effects: [
+          {
+            kind: "damage",
+            recipient: "runner",
+            damageType: "net",
+            amount: 1,
+            preventable: true,
             visibility: "hidden_info_barrier",
           },
         ],
@@ -189,7 +239,11 @@ function makeHost(legalAction: LegalAction) {
   const calls = {
     damages: [] as Array<{ type: string; amount: number; source: string }>,
     traces: [] as Array<{ base: number; source: string }>,
-    counters: [] as Array<{ cardId: string; counterType: string; amount: number }>,
+    counters: [] as Array<{
+      cardId: string;
+      counterType: string;
+      amount: number;
+    }>,
     trashed: [] as CardInstanceId[],
     spentCredits: [] as number[],
   };
@@ -207,14 +261,14 @@ function makeHost(legalAction: LegalAction) {
       programTrashByAdvancementAsset: "experimental" as CardDefinitionId,
       advancementCoreDamageAsset: "soulkiller" as CardDefinitionId,
       advancementNetDamageAsset: "virus" as CardDefinitionId,
-      chimera: definitions.chimera!.id,
     },
     cards: {
       definitionFor: (cardId) => definitions[cardId]!,
       mustInstance: (cardId) => cardInstances[cardId]!,
       cardHasSubtype: (cardDefinition, subtype) =>
         cardDefinition.id === definitions.daemon!.id && subtype === "daemon",
-      accessEffectsForDefinition: (definitionId) => accessEffects[definitionId] ?? [],
+      accessEffectsForDefinition: (definitionId) =>
+        accessEffects[definitionId] ?? [],
       hiddenReplacementLongtailKindForDefinition: () => undefined,
     },
     damage: {
@@ -229,7 +283,12 @@ function makeHost(legalAction: LegalAction) {
       },
       doDamage: (_id, type, amount, source) => {
         calls.damages.push({ type, amount, source });
-        return { damageType: type, amount, cardsTrashed: amount, flatline: false };
+        return {
+          damageType: type,
+          amount,
+          cardsTrashed: amount,
+          flatline: false,
+        };
       },
       setDamagePayload: (summary) => {
         legalAction.payload = {
@@ -252,7 +311,10 @@ function makeHost(legalAction: LegalAction) {
       startTraceFromOperation: (source, base) => {
         calls.traces.push({ source, base });
       },
-      traceSuccessEffectForCardImplementation: () => ({ type: "add_tag", amount: 1 }),
+      traceSuccessEffectForCardImplementation: () => ({
+        type: "add_tag",
+        amount: 1,
+      }),
     },
     counters: {
       cardCounter: (cardId, counterType) =>
@@ -323,7 +385,11 @@ describe("access effect handlers", () => {
   it("dispatches Setup damage through the damage callback", () => {
     const action = accessAction("setup", "remote_1");
     const { host, calls, state } = makeHost(action);
-    state.run = { ...state.run!, accessedCardId: "setup", attackedServerId: "remote_1" };
+    state.run = {
+      ...state.run!,
+      accessedCardId: "setup",
+      attackedServerId: "remote_1",
+    };
 
     const result = handleAccessEffectsForCard(host, "setup" as CardInstanceId);
 
@@ -341,7 +407,11 @@ describe("access effect handlers", () => {
   it("does not dispatch an installed access effect from an unrezzed source", () => {
     const action = accessAction("setup", "remote_1");
     const { host, calls, state } = makeHost(action);
-    state.run = { ...state.run!, accessedCardId: "setup", attackedServerId: "remote_1" };
+    state.run = {
+      ...state.run!,
+      accessedCardId: "setup",
+      attackedServerId: "remote_1",
+    };
     state.cardInstances.setup = {
       ...state.cardInstances.setup!,
       rezzed: false,
@@ -384,7 +454,11 @@ describe("access effect handlers", () => {
   it("revalidates the installed source rez state before resolving payment", () => {
     const action = accessAction("trap", "remote_1");
     const { host, state } = makeHost(action);
-    state.run = { ...state.run!, accessedCardId: "trap", attackedServerId: "remote_1" };
+    state.run = {
+      ...state.run!,
+      accessedCardId: "trap",
+      attackedServerId: "remote_1",
+    };
     state.cardInstances.trap = {
       ...state.cardInstances.trap!,
       rezzed: true,
@@ -479,32 +553,6 @@ describe("access effect handlers", () => {
       hiddenZoneAction: "v1919_access_ambush_trash_installed",
       trashedCount: 1,
       trashedCardDefinitionIds: "daemon",
-    });
-  });
-
-  it("starts and resolves Chimera daemon trash choices", () => {
-    const action = accessAction("chimera", "remote_1");
-    const { host, calls, state } = makeHost(action);
-    state.run = {
-      ...state.run!,
-      accessedCardId: "chimera",
-      attackedServerId: "remote_1",
-    };
-
-    handleAccessEffectsForCard(host, "chimera" as CardInstanceId);
-    expect(state.pendingChoice).toMatchObject({
-      choiceId: "v199_chimera_8",
-      source: "v199.chimera_daemon_trash:chimera:8",
-    });
-
-    resolveChimeraDaemonTrashChoice(host, "card_daemon");
-
-    expect(calls.trashed).toEqual(["daemon"]);
-    expect(action.payload).toMatchObject({
-      chimeraAccessed: true,
-      chimeraDaemonCandidateCount: 1,
-      chimeraDaemonTrashed: true,
-      chimeraDaemonDefinitionId: "daemon",
     });
   });
 });

@@ -316,9 +316,6 @@ function pendingChoiceHost(
       resolveVirusCounterPurgePreserveChoice: unexpected(
         "resolveVirusCounterPurgePreserveChoice",
       ),
-      resolveChimeraDaemonTrashChoice: unexpected(
-        "resolveChimeraDaemonTrashChoice",
-      ),
       resolveRunnerProgramReturnChoice: unexpected(
         "resolveRunnerProgramReturnChoice",
       ),

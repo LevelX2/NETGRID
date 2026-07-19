@@ -1,6 +1,6 @@
 # Zentrale Credit-Gain-Pipeline – Final Review 2026-07-19
 
-Status: vollständig umgesetzt; bereit für lokale Integration nach `main`
+Status: vollständig umgesetzt und auf aktuellem `main`-Kombinationsstand final verifiziert
 
 ## Ergebnis
 
@@ -55,16 +55,17 @@ CardInstanceIds oder Hidden-Zone-Informationen werden neu veröffentlicht.
 | Exakter Elena-/Finders-Fall                 | grün, einschließlich Replay/Hash |
 | Zentrale Kern-Unit-Tests                    | grün                             |
 | Engine-Typecheck                            | grün                             |
-| Engine-Gesamttests                          | 203 Dateien, 1.754/1.754 grün    |
+| Engine-Gesamttests                          | 202 Dateien, 1.752/1.752 grün    |
 | Shared-/Root-Contracttests                  | 4 Dateien, 20/20 grün            |
 | Credit-Gain-Architekturguard                | grün                             |
 | Produktive direkte `credits +=`-Fundstellen | nur zentraler Kern und Setup     |
 | Format und `git diff --check`               | grün                             |
+| Testdiscovery, Package-/Source-Boundaries   | grün, 0 relative Importzyklen    |
 
-Die finale Integrationsphase synchronisiert den Arbeitsbranch noch mit dem
-aktuellen lokalen `main`, wiederholt die Abschlussgates und entfernt danach
-Worktree und Arbeitsbranch. Eine Remote-Integration ist nicht Teil dieses
-Prozesses.
+Der Arbeitsbranch ist mit dem aktuellen lokalen `main` synchronisiert und auf
+dem kombinierten Stand final verifiziert. Nach dem lokalen Merge werden
+Worktree und Arbeitsbranch entfernt. Eine Remote-Integration ist nicht Teil
+dieses Prozesses.
 
 ## Führende Artefakte
 

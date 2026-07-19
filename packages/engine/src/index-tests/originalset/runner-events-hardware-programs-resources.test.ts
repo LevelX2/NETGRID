@@ -2198,7 +2198,13 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
     "onr_v1_176_the-shell-traders",
   ] as const;
 
-  function resourceContactState(seed: string): GameState {
+  function resourceContactState(
+    seed: string,
+    options?: {
+      shellTraderQuantity?: number;
+      includeCloak?: boolean;
+    },
+  ): GameState {
     const state = toRunnerTurn(
       createGameAfterSetup({
         seed,
@@ -2209,7 +2215,16 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
           side: "runner",
           identity: "runner_identity_001",
           cards: [
-            ...resourceDefinitions.map((id) => ({ id, quantity: 1 })),
+            ...resourceDefinitions.map((id) => ({
+              id,
+              quantity:
+                id === "onr_v1_176_the-shell-traders"
+                  ? (options?.shellTraderQuantity ?? 1)
+                  : 1,
+            })),
+            ...(options?.includeCloak
+              ? [{ id: "onr_v1_011_cloak", quantity: 1 }]
+              : []),
             { id: "onr_classic_031_rent-i-con", quantity: 1 },
             { id: "simple_fracter", quantity: 2 },
             { id: "simple_setup_hardware", quantity: 1 },
@@ -2974,6 +2989,156 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("runs Cloak install lifecycle when two Shell Traders remove the last counters at start of turn", () => {
+    let state = resourceContactState("shell-cloak-start-turn-lifecycle", {
+      shellTraderQuantity: 2,
+      includeCloak: true,
+    });
+    for (let index = 0; index < 2; index += 1) {
+      const shellId = moveRunnerCardCopyToGrip(
+        state,
+        "onr_v1_176_the-shell-traders",
+      );
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "install_card" && action.payload?.cardId === shellId,
+      );
+    }
+    const cloakId = moveRunnerCardToGrip(state, "onr_v1_011_cloak");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.delayedInstallAbility === "set_aside_from_grip" &&
+        action.payload?.targetCardId === cloakId,
+    );
+    setCardCounterForTest(state, cloakId, "shell", 2);
+    expect(cardCounterAmount(state, cloakId, "bit")).toBe(0);
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+
+    expect(state.specialZones?.setAside).not.toContain(cloakId);
+    expect(state.runner.rig.programs).toContain(cloakId);
+    expect(cardCounterAmount(state, cloakId, "shell")).toBe(0);
+    expect(cardCounterAmount(state, cloakId, "bit")).toBe(3);
+    expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "add_hosted_credits",
+          side: "runner",
+          counterType: "bit",
+          addedCounterAmount: 3,
+          remainingCounters: 3,
+          sourceDefinitionId: "onr_v1_011_cloak",
+        }),
+      ]),
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("runs Cloak install lifecycle when the paid Shell Traders ability removes the last counter", () => {
+    let state = resourceContactState("shell-cloak-paid-lifecycle", {
+      includeCloak: true,
+    });
+    moveRunnerCardToGrip(state, "onr_v1_176_the-shell-traders");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_176_the-shell-traders",
+    );
+    const cloakId = moveRunnerCardToGrip(state, "onr_v1_011_cloak");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.delayedInstallAbility === "set_aside_from_grip" &&
+        action.payload?.targetCardId === cloakId,
+    );
+    setCardCounterForTest(state, cloakId, "shell", 1);
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.delayedInstallAbility === "remove_shell_counter" &&
+        action.payload?.targetCardId === cloakId,
+    );
+
+    expect(state.runner.rig.programs).toContain(cloakId);
+    expect(cardCounterAmount(state, cloakId, "shell")).toBe(0);
+    expect(cardCounterAmount(state, cloakId, "bit")).toBe(3);
+  });
+
+  it("defers Cloak install lifecycle until the Shell Traders MU choice resolves", () => {
+    let state = resourceContactState("shell-cloak-memory-lifecycle", {
+      includeCloak: true,
+    });
+    moveRunnerCardToGrip(state, "onr_v1_176_the-shell-traders");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_176_the-shell-traders",
+    );
+    const installedProgramId = installRunnerProgramForTest(
+      state,
+      "simple_fracter",
+    );
+    state.runner.memoryLimit = state.runner.memoryUsed;
+    const cloakId = moveRunnerCardToGrip(state, "onr_v1_011_cloak");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.delayedInstallAbility === "set_aside_from_grip" &&
+        action.payload?.targetCardId === cloakId,
+    );
+    setCardCounterForTest(state, cloakId, "shell", 1);
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.delayedInstallAbility === "remove_shell_counter" &&
+        action.payload?.targetCardId === cloakId,
+    );
+
+    expect(state.pendingChoice?.source).toMatch(
+      /^v1912\.delayed_install_memory:/,
+    );
+    expect(state.specialZones?.setAside).toContain(cloakId);
+    expect(cardCounterAmount(state, cloakId, "shell")).toBe(1);
+    expect(cardCounterAmount(state, cloakId, "bit")).toBe(0);
+    const trashOption = state.pendingChoice?.options.find(
+      (option) => option.value === installedProgramId,
+    );
+    if (!trashOption) throw new Error("Shell-Traders-Cloak-MU-Option fehlt.");
+
+    state = applyChoice(state, "runner", trashOption.id);
+
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.runner.rig.programs).toContain(cloakId);
+    expect(state.runner.rig.programs).not.toContain(installedProgramId);
+    expect(cardCounterAmount(state, cloakId, "shell")).toBe(0);
+    expect(cardCounterAmount(state, cloakId, "bit")).toBe(3);
   });
 
   it("removes Shell counters through paid and start-of-turn paths and installs the prepared card", () => {

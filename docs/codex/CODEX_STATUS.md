@@ -36,13 +36,13 @@ Der vorhandene SQLite-KI-Trace persistiert die Kette im normalen
 `summary`-Modus kompakt und im erweiterten `detailed`-Modus vollständig unter
 demselben `trace_json`-Pfad.
 
-Das AI-Source-Structure-Gate ist nach der Remediation aller neun am 19.07.2026
-reproduzierten Größenverstöße wieder grün. Choice-Ranking, Scoring-Window,
-Corp-Score, Board-Triage und Cutover-Tests besitzen fachliche Owner- oder
-Vertragsgrenzen; der produktive Importgraph bleibt frei von Laufzeit- und
-Typzyklen. `check:ai`, `check:ai:full` und 406 AI-Testdateien mit 2.793 Tests
-sind grün. Führend ist
-`docs/reviews/ai/ai-source-structure-gate-remediation-final-review-2026-07-19.md`.
+Choice-Ranking, Scoring-Window, Corp-Score, Board-Triage und Cutover-Tests
+besitzen fachliche Owner- oder Vertragsgrenzen; der produktive Importgraph
+bleibt frei von Laufzeit- und Typzyklen. Das AI-Source-Structure-Gate schützt
+diese qualitativen Grenzen ohne Datei-, Zeilen-, Testgrößen-, Fanout- oder
+Runtime-Root-Caps. Führend sind
+`docs/architecture/legacy-simplification-process-2026-07-19.md` und
+`docs/reviews/architecture/legacy-simplification-final-review-2026-07-19.md`.
 
 Das jüngste Runner-Endgame-Review aus Match 424A ist spielgleich geschlossen:
 Tag-Vermeidung, projizierte Run-Events, terminale Remote-Vorbereitung,
@@ -110,7 +110,6 @@ corepack pnpm test:ai:shards
 corepack pnpm check:package-boundaries
 corepack pnpm check:ai-source-structure
 corepack pnpm check:card-asset-retention
-corepack pnpm check:ai:full
 corepack pnpm check:proteus-ai-readiness
 corepack pnpm build
 ```

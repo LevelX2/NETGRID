@@ -65,11 +65,6 @@ export type HiddenZoneNonSearchRuntimePort = {
     legalAction: LegalAction,
     playerAction: PlayerAction,
   ) => void;
-  resolveChimeraDaemonTrashChoice: (
-    state: GameState,
-    legalAction: LegalAction,
-    playerAction: PlayerAction,
-  ) => void;
   resolvePayRezCostToTrashRezzedIceChoice: (
     state: GameState,
     legalAction: LegalAction,

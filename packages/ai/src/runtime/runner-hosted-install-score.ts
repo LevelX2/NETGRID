@@ -5,9 +5,7 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 
-import { CARD_ROLES_BY_CARD, createAiHintsByCard } from "../ai-hints";
-
-const AI_HINTS = createAiHintsByCard();
+import { AI_HINTS_BY_CARD } from "../ai-hints";
 
 export function runnerHostedInstallScoreComponent(
   input: AiDecisionInput,
@@ -95,13 +93,17 @@ function hostableBreakerAfterSetup(
 }
 
 function cardIsBreaker(card: VisibleCard): boolean {
-  const roles = card.definitionId
-    ? (CARD_ROLES_BY_CARD.get(card.definitionId)?.roles ?? [])
-    : [];
+  const hint = card.definitionId
+    ? AI_HINTS_BY_CARD.get(card.definitionId)
+    : undefined;
   return (
     (card.subtypes ?? []).some((subtype) =>
       subtype.toLowerCase().includes("icebreaker"),
-    ) || roles.some((role) => role === "icebreaker" || role.includes("breaker"))
+    ) ||
+    hint?.breakerProfile !== undefined ||
+    (hint?.roles ?? []).some(
+      (role) => role === "icebreaker" || role.startsWith("breaker_"),
+    )
   );
 }
 
@@ -115,7 +117,9 @@ function actionTargetsInstalledHost(
 }
 
 function hostSupportsHostedBreakerEconomy(host: VisibleCard): boolean {
-  const hint = host.definitionId ? AI_HINTS.get(host.definitionId) : undefined;
+  const hint = host.definitionId
+    ? AI_HINTS_BY_CARD.get(host.definitionId)
+    : undefined;
   if (!hint) return false;
   const hostsIcebreaker =
     (hint.effects ?? []).some((effect) => {

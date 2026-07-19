@@ -1,5 +1,11 @@
-import type { AiDecisionInput, LegalAction, PlayerView, Side, VisibleCard } from "@netgrid/shared";
-import { CARD_ROLES_BY_CARD, RUNTIME_CARDS, createAiHintsByCard } from "./ai-hints";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  PlayerView,
+  Side,
+  VisibleCard,
+} from "@netgrid/shared";
+import { AI_HINTS_BY_CARD, RUNTIME_CARDS } from "./ai-hints";
 import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
 import { rolesMatch } from "./runtime/role-match";
 import {
@@ -198,7 +204,6 @@ type CardCapabilityRecord = {
   visibleCards: VisibleCard[];
 };
 
-const AI_HINTS = createAiHintsByCard();
 const CAPABILITY_SOURCE_PRIORITY =
   "capability_source_priority:structured>roles>visible_board>text_fallback";
 const BREAKER_COVERAGES: BreakerCoverageKind[] = [
@@ -251,12 +256,13 @@ export function redactedDeckCapabilityFacts(
               : "missing";
       return `breaker.${coverage}=${status}`;
     });
-    const bankFacts = profile.runner.economyBankTools.length > 0
-      ? [
-          `bank_tool_count:${profile.runner.economyBankTools.length}`,
-          `bank_tool_legal:${profile.runner.economyBankTools.some((tool) => tool.buildActionLegal || tool.cashOutActionLegal)}`,
-        ]
-      : ["bank_tool_count:0"];
+    const bankFacts =
+      profile.runner.economyBankTools.length > 0
+        ? [
+            `bank_tool_count:${profile.runner.economyBankTools.length}`,
+            `bank_tool_legal:${profile.runner.economyBankTools.some((tool) => tool.buildActionLegal || tool.cashOutActionLegal)}`,
+          ]
+        : ["bank_tool_count:0"];
     return [
       ...breakerFacts,
       ...bankFacts,
@@ -289,7 +295,9 @@ function buildRunnerDeckCapabilityProfile(
 ): DeckCapabilityProfile {
   const breakerInventory = records
     .map(breakerCapabilityFromRecord)
-    .filter((capability): capability is BreakerCapability => capability !== undefined)
+    .filter(
+      (capability): capability is BreakerCapability => capability !== undefined,
+    )
     .sort(compareBreakerCapabilities);
   const searchAccess = buildSearchAccessProfile(params, records);
   const breakerCoverageMatrix = buildBreakerCoverageMatrix(
@@ -297,18 +305,29 @@ function buildRunnerDeckCapabilityProfile(
     searchAccess,
   );
   const economyBankTools = buildEconomyBankTools(params, records);
-  const memoryProfile = buildMemoryCapabilityProfile(params.playerView, records);
+  const memoryProfile = buildMemoryCapabilityProfile(
+    params.playerView,
+    records,
+  );
   const attackPlanProfile = buildRunnerAttackPlanProfile(records);
-  const missingCapabilities = BREAKER_COVERAGES
-    .filter((coverage) => breakerCoverageMatrix[coverage].missing)
-    .map((coverage) => ({
-      capabilityId: `runner.${coverage}_coverage`,
-      kind: `${coverage}_coverage`,
-      severity: coverage === "special" || coverage === "subtype_limited" ? "soft" : "hard",
-      evidence: [`coverage_state:${coverage}:missing`],
-    } satisfies MissingCapability));
+  const missingCapabilities = BREAKER_COVERAGES.filter(
+    (coverage) => breakerCoverageMatrix[coverage].missing,
+  ).map(
+    (coverage) =>
+      ({
+        capabilityId: `runner.${coverage}_coverage`,
+        kind: `${coverage}_coverage`,
+        severity:
+          coverage === "special" || coverage === "subtype_limited"
+            ? "soft"
+            : "hard",
+        evidence: [`coverage_state:${coverage}:missing`],
+      }) satisfies MissingCapability,
+  );
   const confidence = params.deckSnapshot
-    ? missingCapabilities.length === 0 ? "high" : "medium"
+    ? missingCapabilities.length === 0
+      ? "high"
+      : "medium"
     : "low";
   return {
     schemaVersion: DECK_CAPABILITY_PROFILE_SCHEMA_VERSION,
@@ -369,13 +388,18 @@ function buildCardCapabilityRecords(
   const visibleRecords = visibleCardRecords(params.playerView, params.side);
   const byId = new Map<string, CardCapabilityRecord>();
   for (const entry of params.deckSnapshot?.cards ?? []) {
-    const record = recordFromDefinition(entry.cardId, params.side, entry.quantity);
+    const record = recordFromDefinition(
+      entry.cardId,
+      params.side,
+      entry.quantity,
+    );
     if (record) byId.set(entry.cardId, record);
   }
   for (const visible of visibleRecords) {
     const cardId = visible.card.definitionId;
     if (!cardId) continue;
-    const current = byId.get(cardId) ?? recordFromVisibleCard(visible.card, params.side);
+    const current =
+      byId.get(cardId) ?? recordFromVisibleCard(visible.card, params.side);
     if (!current) continue;
     byId.set(cardId, {
       ...current,
@@ -383,7 +407,9 @@ function buildCardCapabilityRecords(
       visibleCards: [...current.visibleCards, visible.card],
     });
   }
-  return [...byId.values()].sort((left, right) => left.cardId.localeCompare(right.cardId));
+  return [...byId.values()].sort((left, right) =>
+    left.cardId.localeCompare(right.cardId),
+  );
 }
 
 function recordFromDefinition(
@@ -393,7 +419,7 @@ function recordFromDefinition(
 ): CardCapabilityRecord | undefined {
   const definition = RUNTIME_CARDS[cardId];
   if (!definition || definition.side !== side) return undefined;
-  const hint = AI_HINTS.get(cardId);
+  const hint = AI_HINTS_BY_CARD.get(cardId);
   return {
     cardId,
     title: definition.title,
@@ -401,7 +427,7 @@ function recordFromDefinition(
     type: definition.type,
     subtypes: [...definition.subtypes],
     text: definition.text,
-    roles: [...(CARD_ROLES_BY_CARD.get(cardId)?.roles ?? []), ...(hint?.roles ?? [])],
+    roles: [...(hint?.roles ?? [])],
     planRoles: [...(hint?.planRoles ?? [])],
     effects: [...(hint?.effects ?? [])],
     quantityKnownInDeck: Math.max(0, quantityKnownInDeck),
@@ -417,7 +443,7 @@ function recordFromVisibleCard(
   const cardId = card.definitionId;
   if (!cardId) return undefined;
   const definition = RUNTIME_CARDS[cardId];
-  const hint = AI_HINTS.get(cardId);
+  const hint = AI_HINTS_BY_CARD.get(cardId);
   const ownerSide = definition?.side ?? card.owner ?? card.controller ?? side;
   if (ownerSide !== side) return undefined;
   const type = definition?.type ?? card.type;
@@ -428,7 +454,7 @@ function recordFromVisibleCard(
     ...(type ? { type } : {}),
     subtypes: [...(definition?.subtypes ?? card.subtypes ?? [])],
     text: definition?.text ?? card.rulesText ?? "",
-    roles: [...(CARD_ROLES_BY_CARD.get(cardId)?.roles ?? []), ...(hint?.roles ?? [])],
+    roles: [...(hint?.roles ?? [])],
     planRoles: [...(hint?.planRoles ?? [])],
     effects: [...(hint?.effects ?? [])],
     quantityKnownInDeck: 0,
@@ -442,21 +468,40 @@ function visibleCardRecords(
   side: Side,
 ): Array<{ card: VisibleCard; location: CapabilityCardStatus }> {
   if (!playerView || playerView.side !== side) return [];
-  const records: Array<{ card: VisibleCard; location: CapabilityCardStatus }> = [
-    ...playerView.own.gripOrHq.map((card) => ({ card, location: "in_hand" as const })),
-    ...(playerView.own.rig ?? []).map((card) => ({ card, location: "installed" as const })),
-    ...playerView.own.heapOrArchives.map((card) => ({ card, location: "discarded" as const })),
-    ...playerView.own.scoreArea.map((card) => ({ card, location: "scored" as const })),
-  ];
+  const records: Array<{ card: VisibleCard; location: CapabilityCardStatus }> =
+    [
+      ...playerView.own.gripOrHq.map((card) => ({
+        card,
+        location: "in_hand" as const,
+      })),
+      ...(playerView.own.rig ?? []).map((card) => ({
+        card,
+        location: "installed" as const,
+      })),
+      ...playerView.own.heapOrArchives.map((card) => ({
+        card,
+        location: "discarded" as const,
+      })),
+      ...playerView.own.scoreArea.map((card) => ({
+        card,
+        location: "scored" as const,
+      })),
+    ];
   if (side === "corp") {
     records.push(
       ...playerView.servers.flatMap((server) => [
         ...server.ice.map((card) => ({ card, location: "installed" as const })),
-        ...server.root.map((card) => ({ card, location: "installed" as const })),
+        ...server.root.map((card) => ({
+          card,
+          location: "installed" as const,
+        })),
       ]),
     );
   }
-  return records.filter(({ card }) => card.known !== false || card.owner === side || card.controller === side);
+  return records.filter(
+    ({ card }) =>
+      card.known !== false || card.owner === side || card.controller === side,
+  );
 }
 
 function breakerCapabilityFromRecord(
@@ -502,31 +547,46 @@ function breakerCapabilityFromRecord(
       : visible?.strength !== undefined
         ? { baseStrength: visible.strength }
         : runtimeNumber(record.cardId, "strength")),
-    ...(breakerProfile?.breakCost !== undefined ? { breakCost: breakerProfile.breakCost } : {}),
-    ...(breakerProfile?.pumpCost !== undefined ? { pumpCost: breakerProfile.pumpCost } : {}),
+    ...(breakerProfile?.breakCost !== undefined
+      ? { breakCost: breakerProfile.breakCost }
+      : {}),
+    ...(breakerProfile?.pumpCost !== undefined
+      ? { pumpCost: breakerProfile.pumpCost }
+      : {}),
     risks: sortedUnique([
       ...(breakerProfile?.sideEffects ?? []),
-      ...(costProfile && costProfile.sideEffectPenalty > 0 ? ["side_effect_penalty"] : []),
+      ...(costProfile && costProfile.sideEffectPenalty > 0
+        ? ["side_effect_penalty"]
+        : []),
     ]),
     restrictions: sortedUnique([...(breakerProfile?.restrictions ?? [])]),
     quantityKnownInDeck: record.quantityKnownInDeck,
-    locations: sortedUnique(record.locations.length > 0 ? record.locations : ["unavailable"]),
+    locations: sortedUnique(
+      record.locations.length > 0 ? record.locations : ["unavailable"],
+    ),
     confidence,
     evidence: [
       ...capabilitySourceEvidence({
         structured: Boolean(breakerProfile),
         roleBased: roleBasedBreaker,
       }),
-      breakerProfile ? "breaker_profile:structured" : `breaker_profile:${confidence}`,
+      breakerProfile
+        ? "breaker_profile:structured"
+        : `breaker_profile:${confidence}`,
       ...coverage.map((entry) => `coverage:${entry}`),
     ],
   };
 }
 
-function breakerCoverageForRecord(record: CardCapabilityRecord): BreakerCoverageKind[] {
-  const hintCoverage = getStructuredBreakerProfileForCard(record.cardId)?.coverage ?? [];
+function breakerCoverageForRecord(
+  record: CardCapabilityRecord,
+): BreakerCoverageKind[] {
+  const hintCoverage =
+    getStructuredBreakerProfileForCard(record.cardId)?.coverage ?? [];
   const coverage = new Set<BreakerCoverageKind>(
-    hintCoverage.map(mapHintCoverage).filter((entry): entry is BreakerCoverageKind => Boolean(entry)),
+    hintCoverage
+      .map(mapHintCoverage)
+      .filter((entry): entry is BreakerCoverageKind => Boolean(entry)),
   );
   const haystack = normalizedRecordText(record);
   const tokens = deckCapabilityTextTokens(haystack);
@@ -594,9 +654,10 @@ function buildBreakerCoverageMatrix(
 ): BreakerCoverageMatrix {
   return Object.fromEntries(
     BREAKER_COVERAGES.map((coverage) => {
-      const matching = breakerInventory.filter((breaker) =>
-        breakerHasCoverage(breaker, coverage) ||
-        breakerHasCoverage(breaker, "universal"),
+      const matching = breakerInventory.filter(
+        (breaker) =>
+          breakerHasCoverage(breaker, coverage) ||
+          breakerHasCoverage(breaker, "universal"),
       );
       const installed = matching.some((breaker) =>
         breakerHasLocation(breaker, "installed"),
@@ -607,12 +668,14 @@ function buildBreakerCoverageMatrix(
       const inHeapOrArchives = matching.some((breaker) =>
         breakerHasLocation(breaker, "discarded"),
       );
-      const inDeckKnown = matching.some((breaker) =>
-        breaker.quantityKnownInDeck > visibleKnownCopyCount(breaker),
+      const inDeckKnown = matching.some(
+        (breaker) =>
+          breaker.quantityKnownInDeck > visibleKnownCopyCount(breaker),
       );
       const searchableNow =
         inDeckKnown &&
-        (searchAccess.canSearchBreakersNow || searchAccess.canSearchProgramsNow);
+        (searchAccess.canSearchBreakersNow ||
+          searchAccess.canSearchProgramsNow);
       const state: CoverageState = {
         coverage,
         inDeckKnown,
@@ -641,7 +704,10 @@ function buildBreakerCoverageMatrix(
 
 function coverageBlockers(
   coverage: BreakerCoverageKind,
-  state: Pick<CoverageState, "installed" | "inHand" | "inDeckKnown" | "searchableNow">,
+  state: Pick<
+    CoverageState,
+    "installed" | "inHand" | "inDeckKnown" | "searchableNow"
+  >,
 ): string[] {
   if (state.installed) return [];
   if (state.inHand) return ["not_installed"];
@@ -652,7 +718,11 @@ function coverageBlockers(
 
 function visibleKnownCopyCount(breaker: BreakerCapability): number {
   return breaker.locations.reduce((sum, location) => {
-    if (location === "in_hand" || location === "installed" || location === "discarded") {
+    if (
+      location === "in_hand" ||
+      location === "installed" ||
+      location === "discarded"
+    ) {
       return sum + 1;
     }
     return sum;
@@ -669,8 +739,12 @@ function buildSearchAccessProfile(
     .sort((left, right) => left.cardId.localeCompare(right.cardId));
   return {
     tools,
-    canSearchProgramsNow: tools.some((tool) => tool.canSearchPrograms && tool.legalNow),
-    canSearchBreakersNow: tools.some((tool) => tool.canSearchBreakers && tool.legalNow),
+    canSearchProgramsNow: tools.some(
+      (tool) => tool.canSearchPrograms && tool.legalNow,
+    ),
+    canSearchBreakersNow: tools.some(
+      (tool) => tool.canSearchBreakers && tool.legalNow,
+    ),
     evidence: tools.flatMap((tool) =>
       tool.legalNow ? [`search_tool_legal:${tool.status}`] : [],
     ),
@@ -697,13 +771,12 @@ function searchAccessToolForRecord(
     rolesMatch(roleSignals, ["breaker_search"]);
   if (!canSearchPrograms && !canSearchBreakers) return undefined;
   const status = primaryStatus(record.locations);
-  const structuredSearch =
-    rolesMatch(roleSignals, [
-      "program_search",
-      "breaker_search",
-      "stack_search",
-      "search",
-    ]);
+  const structuredSearch = rolesMatch(roleSignals, [
+    "program_search",
+    "breaker_search",
+    "stack_search",
+    "search",
+  ]);
   return {
     cardId: record.cardId,
     title: record.title,
@@ -714,10 +787,10 @@ function searchAccessToolForRecord(
       params.legalActions?.some((action) =>
         actionSourceMatchesRecord(action, record),
       ) ?? false,
-    confidence: deckCapabilityTextHasHighConfidenceSearchSignal(text) ||
-      structuredSearch
-      ? "high"
-      : "medium",
+    confidence:
+      deckCapabilityTextHasHighConfidenceSearchSignal(text) || structuredSearch
+        ? "high"
+        : "medium",
     evidence: [
       ...capabilitySourceEvidence({
         structured: structuredSearch,
@@ -730,22 +803,24 @@ function searchAccessToolForRecord(
   };
 }
 
-function normalizedRecordTextWithoutRoles(record: CardCapabilityRecord): string {
+function normalizedRecordTextWithoutRoles(
+  record: CardCapabilityRecord,
+): string {
   return [
     record.cardId,
     record.title,
     record.type,
     ...record.subtypes,
     record.text,
-  ].join(" ").toLowerCase();
+  ]
+    .join(" ")
+    .toLowerCase();
 }
 
 function normalizedRecordRulesTextWithoutRoles(
   record: CardCapabilityRecord,
 ): string {
-  return [record.type, ...record.subtypes, record.text]
-    .join(" ")
-    .toLowerCase();
+  return [record.type, ...record.subtypes, record.text].join(" ").toLowerCase();
 }
 
 function buildEconomyBankTools(
@@ -763,7 +838,9 @@ function economyBankToolForRecord(
   record: CardCapabilityRecord,
 ): EconomyBankTool | undefined {
   const text = normalizedRecordText(record);
-  const signals = [...record.roles, ...record.planRoles].join(" ").toLowerCase();
+  const signals = [...record.roles, ...record.planRoles]
+    .join(" ")
+    .toLowerCase();
   if (!deckCapabilityTextHasBankToolSignal(`${text} ${signals}`)) {
     return undefined;
   }
@@ -778,12 +855,12 @@ function economyBankToolForRecord(
   const buildActionLegal = buildActionIds.length > 0;
   const cashOutActionLegal = cashOutActionIds.length > 0;
   const currentBankAmounts = currentVisibleBankAmounts(record.visibleCards);
-  const currentBankAmount = currentBankAmounts.length > 0
-    ? Math.max(...currentBankAmounts)
-    : undefined;
-  const portfolioStoredAmount = currentBankAmounts.length > 0
-    ? currentBankAmounts.reduce((sum, amount) => sum + amount, 0)
-    : undefined;
+  const currentBankAmount =
+    currentBankAmounts.length > 0 ? Math.max(...currentBankAmounts) : undefined;
+  const portfolioStoredAmount =
+    currentBankAmounts.length > 0
+      ? currentBankAmounts.reduce((sum, amount) => sum + amount, 0)
+      : undefined;
   const structuredBank =
     deckCapabilityTextHasStructuredBankRoleSignal(signals) ||
     currentBankAmount !== undefined;
@@ -803,7 +880,9 @@ function economyBankToolForRecord(
     ...(cashOutActionLegal && currentBankAmount !== undefined
       ? { estimatedPayout: currentBankAmount }
       : {}),
-    confidence: deckCapabilityTextHasHighConfidenceBankSignal(`${text} ${signals}`)
+    confidence: deckCapabilityTextHasHighConfidenceBankSignal(
+      `${text} ${signals}`,
+    )
       ? "high"
       : "medium",
     evidence: [
@@ -813,7 +892,9 @@ function economyBankToolForRecord(
       }),
       `bank_status:${primaryStatus(record.locations)}`,
       buildActionLegal ? "bank_build_legal:true" : "bank_build_legal:false",
-      cashOutActionLegal ? "bank_cashout_legal:true" : "bank_cashout_legal:false",
+      cashOutActionLegal
+        ? "bank_cashout_legal:true"
+        : "bank_cashout_legal:false",
     ],
   };
 }
@@ -844,9 +925,12 @@ function buildMemoryCapabilityProfile(
     ...(memoryLimit !== undefined ? { memoryLimit } : {}),
     ...(memoryAvailable !== undefined ? { memoryAvailable } : {}),
     memoryToolsKnown,
-    missingMemoryPressure: memoryAvailable !== undefined && memoryAvailable <= 0,
+    missingMemoryPressure:
+      memoryAvailable !== undefined && memoryAvailable <= 0,
     evidence: [
-      ...(memoryAvailable !== undefined ? [`memory_available:${memoryAvailable}`] : []),
+      ...(memoryAvailable !== undefined
+        ? [`memory_available:${memoryAvailable}`]
+        : []),
       `memory_tools_known:${memoryToolsKnown}`,
     ],
   };
@@ -856,28 +940,27 @@ function buildRunnerAttackPlanProfile(
   records: readonly CardCapabilityRecord[],
 ): RunnerAttackPlanProfile {
   const centralPressureToolsKnown = records.filter((record) =>
-    rolesMatch(record.roles, [
-    "pressure_rnd",
-    "pressure_hq",
-    "multiaccess",
-    ]),
+    rolesMatch(record.roles, ["pressure_rnd", "pressure_hq", "multiaccess"]),
   ).length;
-  const remoteContestToolsKnown = records.filter((record) =>
-    rolesMatch(record.roles, ["remote_contest", "trash_support"]) ||
-    (rolesMatch(record.planRoles, ["contest_remote"]) &&
-      record.effects.some((effect) => {
-        const target = (effect as AiHintStructuredEffect & { target?: string })
-          .target;
-        return (
-          effect.kind === "future_run_effect" &&
-          effect.scope === "server" &&
-          target === "make_run"
-        );
-      })),
+  const remoteContestToolsKnown = records.filter(
+    (record) =>
+      rolesMatch(record.roles, ["remote_contest", "trash_support"]) ||
+      (rolesMatch(record.planRoles, ["contest_remote"]) &&
+        record.effects.some((effect) => {
+          const target = (
+            effect as AiHintStructuredEffect & { target?: string }
+          ).target;
+          return (
+            effect.kind === "future_run_effect" &&
+            effect.scope === "server" &&
+            target === "make_run"
+          );
+        })),
   ).length;
-  const setupToolsKnown = records.filter((record) =>
-    rolesMatch(record.roles, ["setup"]) ||
-    record.roles.some((role) => role === "runner_program"),
+  const setupToolsKnown = records.filter(
+    (record) =>
+      rolesMatch(record.roles, ["setup"]) ||
+      record.roles.some((role) => role === "runner_program"),
   ).length;
   return {
     centralPressureToolsKnown,
@@ -894,13 +977,18 @@ function buildRunnerAttackPlanProfile(
 function buildCorpScorePlanProfile(
   records: readonly CardCapabilityRecord[],
 ): CorpScorePlanProfile {
-  const agendaToolsKnown = records.filter((record) => record.type === "agenda").length;
+  const agendaToolsKnown = records.filter(
+    (record) => record.type === "agenda",
+  ).length;
   const advanceToolsKnown = records.filter((record) =>
     deckCapabilityTextHasCorpAdvanceSignal(normalizedRecordText(record)),
   ).length;
-  const scoreSupportToolsKnown = records.filter((record) =>
-    rolesMatch(record.roles, ["score"]) ||
-    deckCapabilityTextHasCorpScoreSignal(normalizedRecordTextWithoutRoles(record)),
+  const scoreSupportToolsKnown = records.filter(
+    (record) =>
+      rolesMatch(record.roles, ["score"]) ||
+      deckCapabilityTextHasCorpScoreSignal(
+        normalizedRecordTextWithoutRoles(record),
+      ),
   ).length;
   return {
     agendaToolsKnown,
@@ -917,10 +1005,13 @@ function buildCorpScorePlanProfile(
 function buildCorpRezReserveProfile(
   records: readonly CardCapabilityRecord[],
 ): CorpRezReserveProfile {
-  const iceKnownInDeck = records.filter((record) => record.type === "ice").length;
-  const rezEconomyToolsKnown = records.filter((record) =>
-    deckCapabilityTextHasCorpRezEconomySignal(normalizedRecordText(record)) &&
-    (record.type === "operation" || record.type === "asset"),
+  const iceKnownInDeck = records.filter(
+    (record) => record.type === "ice",
+  ).length;
+  const rezEconomyToolsKnown = records.filter(
+    (record) =>
+      deckCapabilityTextHasCorpRezEconomySignal(normalizedRecordText(record)) &&
+      (record.type === "operation" || record.type === "asset"),
   ).length;
   return {
     iceKnownInDeck,
@@ -937,9 +1028,15 @@ function buildCorpIceTaxProfile(
 ): CorpIceTaxProfile {
   const iceRecords = records.filter((record) => record.type === "ice");
   return {
-    barrierIceKnown: iceRecords.filter((record) => subtypeOrText(record, "wall", "barrier")).length,
-    codeGateIceKnown: iceRecords.filter((record) => subtypeOrText(record, "code_gate", "code gate")).length,
-    sentryIceKnown: iceRecords.filter((record) => subtypeOrText(record, "sentry")).length,
+    barrierIceKnown: iceRecords.filter((record) =>
+      subtypeOrText(record, "wall", "barrier"),
+    ).length,
+    codeGateIceKnown: iceRecords.filter((record) =>
+      subtypeOrText(record, "code_gate", "code gate"),
+    ).length,
+    sentryIceKnown: iceRecords.filter((record) =>
+      subtypeOrText(record, "sentry"),
+    ).length,
     taxingIceKnown: iceRecords.filter((record) =>
       deckCapabilityTextHasCorpTaxingIceSignal(normalizedRecordText(record)),
     ).length,
@@ -951,20 +1048,22 @@ function buildCorpRemotePlanProfile(
   records: readonly CardCapabilityRecord[],
 ): CorpRemotePlanProfile {
   return {
-    remoteProtectionToolsKnown: records.filter((record) =>
-      rolesMatch(record.roles, ["remote", "ice"]) ||
-      record.type === "ice",
+    remoteProtectionToolsKnown: records.filter(
+      (record) =>
+        rolesMatch(record.roles, ["remote", "ice"]) || record.type === "ice",
     ).length,
-    remoteEconomyToolsKnown: records.filter((record) =>
-      rolesMatch(record.roles, ["economy_asset"]) ||
-      deckCapabilityTextHasCorpRemoteEconomySignal(
-        normalizedRecordTextWithoutRoles(record),
-        record.type,
-      ),
+    remoteEconomyToolsKnown: records.filter(
+      (record) =>
+        rolesMatch(record.roles, ["economy_asset"]) ||
+        deckCapabilityTextHasCorpRemoteEconomySignal(
+          normalizedRecordTextWithoutRoles(record),
+          record.type,
+        ),
     ).length,
-    ambushToolsKnown: records.filter((record) =>
-      rolesMatch(record.roles, ["ambush"]) ||
-      record.subtypes.some((subtype) => subtype.toLowerCase() === "ambush"),
+    ambushToolsKnown: records.filter(
+      (record) =>
+        rolesMatch(record.roles, ["ambush"]) ||
+        record.subtypes.some((subtype) => subtype.toLowerCase() === "ambush"),
     ).length,
     evidence: ["corp_remote_profile:conservative"],
   };
@@ -979,7 +1078,9 @@ function normalizedRecordText(record: CardCapabilityRecord): string {
     record.text,
     ...record.roles,
     ...record.planRoles,
-  ].join(" ").toLowerCase();
+  ]
+    .join(" ")
+    .toLowerCase();
 }
 
 function deckCapabilityTextTokens(text: string): string[] {
@@ -1026,11 +1127,7 @@ function deckCapabilityTextHasProgramSearchSignal(text: string): boolean {
   const tokens = deckCapabilityTextTokens(text);
   return (
     deckCapabilityTokensIncludePhrase(tokens, ["program", "search"]) ||
-    deckCapabilityTokensIncludePhrase(tokens, [
-      "setup",
-      "program",
-      "search",
-    ]) ||
+    deckCapabilityTokensIncludePhrase(tokens, ["setup", "program", "search"]) ||
     deckCapabilityTokensIncludeInOrder(tokens, "search", "program") ||
     deckCapabilityTokensIncludePhrase(tokens, [
       "search",
@@ -1059,7 +1156,9 @@ function deckCapabilityTextHasBreakerSearchSignal(text: string): boolean {
   );
 }
 
-function deckCapabilityTextHasHighConfidenceSearchSignal(text: string): boolean {
+function deckCapabilityTextHasHighConfidenceSearchSignal(
+  text: string,
+): boolean {
   const tokens = deckCapabilityTextTokens(text);
   return (
     deckCapabilityTokensIncludePhrase(tokens, ["program", "search"]) ||
@@ -1183,12 +1282,14 @@ function actionSourceMatchesRecord(
     typeof action.payload?.cardId === "string"
       ? action.payload.cardId
       : undefined;
-  return record.visibleCards.some(
-    (card) => card.instanceId === source || card.instanceId === payloadCardId,
-  ) ||
+  return (
+    record.visibleCards.some(
+      (card) => card.instanceId === source || card.instanceId === payloadCardId,
+    ) ||
     source === record.cardId ||
     payloadCardId === record.cardId ||
-    action.payload?.sourceCardId === record.cardId;
+    action.payload?.sourceCardId === record.cardId
+  );
 }
 
 function actionMatchesBankBuild(
@@ -1212,11 +1313,12 @@ function currentVisibleBankAmounts(cards: readonly VisibleCard[]): number[] {
     .map((card) => {
       const values = [
         ...(card.counterDisplays ?? [])
-          .filter((counter) =>
-            counter.creditPool?.kind === "stored_credit" ||
-            counter.creditPool?.kind === "recurring_credit" ||
-            counter.displayKind === "stored_credits" ||
-            counter.displayKind === "recurring_credit",
+          .filter(
+            (counter) =>
+              counter.creditPool?.kind === "stored_credit" ||
+              counter.creditPool?.kind === "recurring_credit" ||
+              counter.displayKind === "stored_credits" ||
+              counter.displayKind === "recurring_credit",
           )
           .map((counter) => counter.amount),
         ...(card.counters?.recurring_credit !== undefined
@@ -1229,7 +1331,9 @@ function currentVisibleBankAmounts(cards: readonly VisibleCard[]): number[] {
     .sort((left, right) => right - left);
 }
 
-function maxKnownBankCapacity(text: string): Pick<EconomyBankTool, "maxKnownCapacity"> {
+function maxKnownBankCapacity(
+  text: string,
+): Pick<EconomyBankTool, "maxKnownCapacity"> {
   const tokens = deckCapabilityTextTokens(text);
   for (const [index, token] of tokens.entries()) {
     if (token !== "put") continue;
@@ -1239,7 +1343,9 @@ function maxKnownBankCapacity(text: string): Pick<EconomyBankTool, "maxKnownCapa
   return {};
 }
 
-function positiveIntegerTokenValue(token: string | undefined): number | undefined {
+function positiveIntegerTokenValue(
+  token: string | undefined,
+): number | undefined {
   if (!token || !deckCapabilityTokenIsDigits(token)) return undefined;
   const value = Number.parseInt(token, 10);
   return value > 0 ? value : undefined;
@@ -1263,7 +1369,9 @@ function runtimeNumber(
   return typeof value === "number" ? { [key]: value } : {};
 }
 
-function primaryStatus(locations: readonly CapabilityCardStatus[]): CapabilityCardStatus {
+function primaryStatus(
+  locations: readonly CapabilityCardStatus[],
+): CapabilityCardStatus {
   const locationSet = new Set(locations);
   if (locationSet.has("installed")) return "installed";
   if (locationSet.has("in_hand")) return "in_hand";
@@ -1287,14 +1395,18 @@ function breakerHasLocation(
   return new Set(breaker.locations).has(location);
 }
 
-function subtypeOrText(record: CardCapabilityRecord, ...needles: string[]): boolean {
+function subtypeOrText(
+  record: CardCapabilityRecord,
+  ...needles: string[]
+): boolean {
   const textTokens = deckCapabilityTextTokens(normalizedRecordText(record));
-  return needles.some((needle) =>
-    record.subtypes.some((subtype) => subtype.toLowerCase() === needle) ||
-    deckCapabilityTokensIncludePhrase(
-      textTokens,
-      deckCapabilityTextTokens(needle),
-    ),
+  return needles.some(
+    (needle) =>
+      record.subtypes.some((subtype) => subtype.toLowerCase() === needle) ||
+      deckCapabilityTokensIncludePhrase(
+        textTokens,
+        deckCapabilityTextTokens(needle),
+      ),
   );
 }
 
@@ -1302,9 +1414,11 @@ function compareBreakerCapabilities(
   left: BreakerCapability,
   right: BreakerCapability,
 ): number {
-  return confidenceRank(right.confidence) - confidenceRank(left.confidence) ||
+  return (
+    confidenceRank(right.confidence) - confidenceRank(left.confidence) ||
     right.coverage.length - left.coverage.length ||
-    left.cardId.localeCompare(right.cardId);
+    left.cardId.localeCompare(right.cardId)
+  );
 }
 
 function confidenceRank(confidence: DeckCapabilityConfidence): number {

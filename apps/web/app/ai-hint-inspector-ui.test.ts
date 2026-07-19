@@ -9,7 +9,7 @@ import {
 } from "./ai-hint-inspector-ui";
 
 const INSPECTOR_FIXTURE: CatalogAiInspector = {
-  schemaVersion: "ai-hint-inspector-index-v1",
+  schemaVersion: "ai-card-hints-active-v1",
   source: {
     activeHintsPath: "data/ai/ai-card-hints-active.json",
   },
@@ -287,7 +287,6 @@ describe("AI hint inspector UI view model", () => {
     expect(text).toContain(
       "Hinweis: Legacy-Rollen werden intern noch teilweise von der KI verwendet.",
     );
-    expect(text).toContain("card-role-manifest Runtime-Legacy");
     expect(text).toContain("Legacy roles breaker");
     expect(text).toContain("Legacy planRoles build_rig");
     expect(text).toContain(

@@ -1,6 +1,6 @@
 # Zentrale Credit-Gain-Pipeline: Umsetzungsprozess
 
-Status: CGP-06 abgeschlossen; bereit für lokalen Main-Sync
+Status: CGP-06, Main-Sync und Final Verify abgeschlossen; bereit für lokalen Merge
 
 Stand: 2026-07-19
 
@@ -324,6 +324,10 @@ Erreichte Gates:
 - Elena + Finders Keepers ist mit exakt 7 Start-Credits, Würfelsumme +1,
   öffentlicher Attribution, Replay und StateHash geschützt;
 - der separate Elena-Post-Follow-up ist entfernt;
-- Engine-Typecheck, 203 Engine-Testdateien mit 1.754 Tests, 20 Shared-/Root-
+- Engine-Typecheck, 202 Engine-Testdateien mit 1.752 Tests, 20 Shared-/Root-
   Contracttests, Format und Diff-Hygiene waren im Paketstand grün;
 - `check:engine-credit-gain-boundary` schützt die zentrale Mutationsgrenze.
+
+Nach Integration des aktuellen `main` sind zusätzlich Testdiscovery, Package-
+Boundaries, Engine-Source-Structure mit 998 produktiven Dateien und null
+relativen Importzyklen sowie alle vorgenannten Tests erneut grün.

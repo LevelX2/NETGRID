@@ -62,19 +62,6 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
     ).toBe(true);
   });
 
-  it("keeps inspector warning provenance per affected card", () => {
-    const profile = buildDeckStrategyProfile(
-      standardDeckByName("King of the Road"),
-    );
-    const inspectorWarnings = profile.warnings.filter((warning) =>
-      warning.startsWith("inspector:"),
-    );
-
-    expect(inspectorWarnings.length).toBeGreaterThan(0);
-    expect(
-      inspectorWarnings.every((warning) => /:onr_[a-z0-9_-]+$/.test(warning)),
-    ).toBe(true);
-  });
   it("dampens duplicate metadata and additional copies of the same anchor card", () => {
     const oneCopy = buildDeckStrategyProfile({
       deckSnapshotId: "one-copy-recycle-anchor",

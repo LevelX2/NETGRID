@@ -3,8 +3,6 @@ import {
   type AbilityDefinition,
   type CardDefinitionId,
 } from "@netgrid/shared";
-import functionSignalDerivationData from "../../../../data/ai/function-signal-derivation-v1.json";
-import tacticSignalCatalogData from "../../../../data/ai/tactic-signals-v1.json";
 import { createAiHintsByCard, type AiCardHint } from "../ai-hints";
 import type {
   ActionCardAbilitySemanticProfile,
@@ -31,45 +29,8 @@ type ExtendedAiCardHint = AiCardHint & {
   strategicRole?: string[];
   riskTags?: string[];
   tacticSignals?: string[];
+  actionTacticSignals?: string[];
 };
-
-type TacticSignalCatalogEntry = {
-  signalId: string;
-  supportOnly?: boolean;
-  mayAnchorStrategy?: boolean;
-  allowedStrategyAnchors?: string[];
-};
-
-type EffectFunctionSignalDerivationRule = {
-  signalId: string;
-  source: string;
-  match?: Readonly<Record<string, unknown>>;
-  gates?: {
-    side?: string | readonly string[];
-    cardType?: string | readonly string[];
-    effectScope?: string | readonly string[];
-  };
-};
-
-const TACTIC_SIGNAL_CATALOG_BY_ID = new Map(
-  (
-    tacticSignalCatalogData as { signals: TacticSignalCatalogEntry[] }
-  ).signals.map((signal) => [signal.signalId, signal]),
-);
-
-const EFFECT_FUNCTION_SIGNAL_DERIVATION_RULES = (
-  functionSignalDerivationData as {
-    derivationRules: EffectFunctionSignalDerivationRule[];
-  }
-).derivationRules.filter((rule) => rule.source === "effects");
-
-const BROAD_SUPPORT_ONLY_ACTION_ANCHOR_SIGNALS = new Set([
-  "access.payoff",
-  "draw.card",
-  "economy.card",
-  "setup.search",
-  "survival.defense",
-]);
 
 export function buildActionCardSemanticProfilesByDefinitionId(): Readonly<
   Record<CardDefinitionId, ActionCardSemanticProfile>
@@ -100,9 +61,6 @@ function actionCardSemanticProfileFromHint(
   hint: AiCardHint,
 ): ActionCardSemanticProfile | undefined {
   const extendedHint = hint as ExtendedAiCardHint;
-  const effectSignals = (hint.effects ?? []).flatMap((effect) =>
-    effectTacticSignals(effect, hint),
-  );
   const abilitySemantics = (
     CARD_DEFINITIONS_BY_ID[cardId]?.abilities ?? []
   ).map(abilitySemanticProfile);
@@ -122,10 +80,7 @@ function actionCardSemanticProfileFromHint(
         .map(hintEffectTarget)
         .filter((target): target is string => target !== undefined),
     ),
-    tacticSignals: uniqueStrings([
-      ...effectSignals,
-      ...(hint.remoteRole ? [`remote_role:${hint.remoteRole.kind}`] : []),
-    ]),
+    tacticSignals: uniqueStrings(extendedHint.actionTacticSignals ?? []),
     ...(compatibilitySignals.length > 0 ? { compatibilitySignals } : {}),
     strategySupport: strategySupportFromHint(hint),
     conditions: (hint.conditions ?? []).map(conditionFromHint),
@@ -143,56 +98,14 @@ function hintEffectTarget(effect: AiHintStructuredEffect): string | undefined {
 }
 
 function strategySupportFromHint(hint: AiCardHint): StrategySupportPair[] {
-  const pairs = (hint.effects ?? []).flatMap((effect) =>
-    effectTacticSignals(effect, hint).flatMap((signal) =>
-      strategySupportFromTacticSignal(signal, hint),
-    ),
+  return uniqueStrategySupportPairs(
+    (hint.actionStrategySupportPairs ?? []).map((pair) => ({
+      strategyId: pair.strategyId,
+      role: pair.role,
+      confidence: pair.confidence,
+      evidence: pair.evidence.join("|"),
+    })),
   );
-  return uniqueStrategySupportPairs(pairs);
-}
-
-function strategySupportFromTacticSignal(
-  signal: string,
-  hint: AiCardHint,
-): StrategySupportPair[] {
-  if (BROAD_SUPPORT_ONLY_ACTION_ANCHOR_SIGNALS.has(signal)) {
-    return [];
-  }
-  const catalogEntry = TACTIC_SIGNAL_CATALOG_BY_ID.get(signal);
-  if (
-    catalogEntry === undefined ||
-    catalogEntry.supportOnly === true ||
-    catalogEntry.mayAnchorStrategy !== true ||
-    (catalogEntry.allowedStrategyAnchors?.length ?? 0) === 0
-  ) {
-    return [];
-  }
-  return (catalogEntry.allowedStrategyAnchors ?? []).map((strategyId) => ({
-    strategyId,
-    role: strategySupportRoleForSignal(signal),
-    confidence: hint.quality?.confidence ?? "medium",
-    evidence: `tactic_signal_anchor:${signal}`,
-  }));
-}
-
-export function strategySupportRoleForSignal(signal: string): string {
-  if (
-    tacticSignalHasSegment(signal, "multiaccess") ||
-    tacticSignalHasSegment(signal, "payoff")
-  ) {
-    return "payoff_anchor";
-  }
-  if (signal.startsWith("corp.score_")) {
-    return "win_condition_anchor";
-  }
-  return "anchor_evidence";
-}
-
-function tacticSignalHasSegment(signal: string, expected: string): boolean {
-  const segmentSet = new Set(
-    signal.toLocaleLowerCase("en-US").split(/[._:-]+/),
-  );
-  return segmentSet.has(expected);
 }
 
 function conditionFromHint(condition: AiHintCondition): SemanticCondition {
@@ -261,155 +174,6 @@ function targetProfileMatch(
   };
 }
 
-function effectTacticSignals(
-  effect: AiHintStructuredEffect,
-  hint: AiCardHint,
-): string[] {
-  const scopeSuffix = effect.scope ? `.${effect.scope}` : "";
-  const base = [
-    `effect:${effect.kind}`,
-    `effect_timing:${effect.timing}`,
-    `effect_scope:${effect.scope}`,
-  ];
-  switch (effect.kind) {
-    case "economy":
-    case "action_economy":
-    case "start_of_turn_economy":
-    case "recurring_economy":
-    case "counter_economy":
-    case "advanceable_economy":
-    case "finite_economy_pool":
-      return [...base, "economy.card"];
-    case "draw":
-    case "shuffle_draw":
-      return [...base, "draw.card"];
-    case "search":
-      return [...base, "setup.search"];
-    case "breaker":
-      return [...base, "coverage.breaker"];
-    case "tag":
-    case "tag_source":
-      return [...base, "tag.source"];
-    case "trace":
-      return [
-        ...base,
-        ...(effectFunctionSignalAllowedByDerivation(
-          "trace.source",
-          effect,
-          hint,
-        )
-          ? ["trace.source"]
-          : []),
-      ];
-    case "trace_credit":
-      return [...base, "trace.credit_support"];
-    case "tag_punish_payoff":
-      return [...base, "tag.payoff", "punish.payoff"];
-    case "damage":
-      return [
-        ...base,
-        effect.resource === "meat_damage"
-          ? "damage.corp_tagged_meat_payoff"
-          : `damage.payoff${scopeSuffix}`,
-      ];
-    case "program_trash":
-      return [...base, "target.runner_program_trash"];
-    case "hardware_trash":
-      return [...base, "target.runner_hardware_trash"];
-    case "resource_trash":
-      return [...base, "target.runner_resource_trash"];
-    case "access_punish":
-      return [...base, "access.corp_access_punish", "punish.payoff"];
-    case "ambush":
-      return [...base, "access.corp_ambush", "punish.payoff"];
-    case "score_acceleration":
-    case "advance":
-    case "advance_burst":
-      return [...base, "corp.score_progress", "corp.score_closeout"];
-    case "scored_agenda_action":
-      return [
-        ...base,
-        hint.side === "runner"
-          ? "runner.agenda_point_conversion"
-          : "corp.score_progress",
-      ];
-    case "remote_protection":
-    case "remote_build":
-    case "remote_tax":
-      return [...base, "corp.remote_protection"];
-    case "etr":
-    case "run_tax":
-      return [...base, "corp.ice_protection"];
-    case "action_penalty":
-      return [
-        ...base,
-        ...(effectFunctionSignalAllowedByDerivation(
-          "corp_ice.runner_action_loss",
-          effect,
-          hint,
-        )
-          ? ["corp_ice.runner_action_loss"]
-          : []),
-      ];
-    case "multiaccess":
-      return [...base, "access.payoff", ...multiaccessSignals(effect)];
-    case "topdeck_info":
-    case "hq_info":
-      return [...base, "access.payoff"];
-    case "damage_prevention":
-    case "flatline_prevention":
-    case "tag_prevention":
-    case "trace_defense":
-    case "survival_payoff":
-      return [...base, "survival.defense"];
-    default:
-      return base;
-  }
-}
-
-function effectFunctionSignalAllowedByDerivation(
-  signalId: string,
-  effect: AiHintStructuredEffect,
-  hint: AiCardHint,
-): boolean {
-  const rules = EFFECT_FUNCTION_SIGNAL_DERIVATION_RULES.filter(
-    (rule) => rule.signalId === signalId,
-  );
-  if (rules.length === 0) return false;
-  return rules.some(
-    (rule) =>
-      recordMatchesDerivation(rule.match, effect) &&
-      valueAllowedByGate(rule.gates?.side, hint.side) &&
-      valueAllowedByGate(rule.gates?.cardType, hint.cardType) &&
-      valueAllowedByGate(rule.gates?.effectScope, effect.scope),
-  );
-}
-
-function recordMatchesDerivation(
-  match: Readonly<Record<string, unknown>> | undefined,
-  value: AiHintStructuredEffect,
-): boolean {
-  if (match === undefined) return true;
-  const record = value as unknown as Readonly<Record<string, unknown>>;
-  return Object.entries(match).every(([key, expected]) => {
-    const actual = record[key];
-    return Array.isArray(expected)
-      ? expected.includes(actual)
-      : actual === expected;
-  });
-}
-
-function valueAllowedByGate(
-  allowed: string | readonly string[] | undefined,
-  value: string | undefined,
-): boolean {
-  if (allowed === undefined) return true;
-  if (value === undefined) return false;
-  return typeof allowed === "string"
-    ? allowed === value
-    : allowed.includes(value);
-}
-
 function uniqueStrings(values: readonly string[]): string[] {
   return [...new Set(values.filter((value) => value.length > 0))];
 }
@@ -426,15 +190,4 @@ function uniqueStrategySupportPairs(
     result.push(pair);
   }
   return result;
-}
-
-function multiaccessSignals(effect: AiHintStructuredEffect): string[] {
-  switch (effect.scope) {
-    case "hq":
-      return ["access.hq_multiaccess"];
-    case "rnd":
-      return ["access.rnd_multiaccess"];
-    default:
-      return [];
-  }
 }

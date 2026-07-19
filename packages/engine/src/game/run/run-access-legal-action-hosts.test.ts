@@ -182,7 +182,6 @@ function hostFor(calls: string[]): RunAccessLegalActionHostCompositionHost {
       programTrashByAdvancementAsset: "experimental",
       advancementCoreDamageAsset: "soulkiller",
       advancementNetDamageAsset: "virus",
-      chimera: "chimera",
     },
     callbacks: {
       rules: {

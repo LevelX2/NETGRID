@@ -327,7 +327,6 @@ import {
 import {
   resolveAccessInstalledRunnerProgramReturnChoice,
   resolveAccessPaymentChoice,
-  resolveChimeraDaemonTrashChoice as resolveAccessChimeraDaemonTrashChoice,
   type AccessEffectHandlerHost,
 } from "../access/access-effect-handlers";
 import {
@@ -853,7 +852,6 @@ export function initializeStateRuntimeBootstrap(
     recordStateRandomMarkers,
     removeFromAllZones,
     resolveAardvarkInterceptionChoice,
-    resolveAccessChimeraDaemonTrashChoice,
     resolveAccessInstalledRunnerProgramReturnChoice,
     resolveAccessPaymentChoice,
     resolveEventModificationChoice,

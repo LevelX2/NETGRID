@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  buildActionCardSemanticProfilesByDefinitionId,
-  strategySupportRoleForSignal,
-} from "./action-card-semantic-profiles";
+import { buildActionCardSemanticProfilesByDefinitionId } from "./action-card-semantic-profiles";
 
 describe("ActionCardSemanticProfiles", () => {
   it("keeps legacy hint role fields as compatibility signals", () => {
@@ -20,7 +17,7 @@ describe("ActionCardSemanticProfiles", () => {
     expect(compatibilitySignals.some(legacyCompatibilitySignal)).toBe(true);
   });
 
-  it("retains reviewed hint tactic signals as compatibility evidence", () => {
+  it("keeps card-wide static hint signals separate from action signals", () => {
     const profiles = buildActionCardSemanticProfilesByDefinitionId();
     const researchBunker = profiles["onr_proteus_072_research-bunker"];
 
@@ -138,22 +135,11 @@ describe("ActionCardSemanticProfiles", () => {
   it("retains delayed credit destinations as structured effect targets", () => {
     const profiles = buildActionCardSemanticProfilesByDefinitionId();
 
-    expect(
-      profiles["onr_v1_174_rigged-investments"]?.effectTargets,
-    ).toEqual(
+    expect(profiles["onr_v1_174_rigged-investments"]?.effectTargets).toEqual(
       expect.arrayContaining([
         "economy.installment_credit",
         "economy.turn_start_credit",
       ]),
-    );
-  });
-
-  it("matches StrategySupportPair payoff roles by bounded signal segments", () => {
-    expect(strategySupportRoleForSignal("access.hq_multiaccess")).toBe(
-      "payoff_anchor",
-    );
-    expect(strategySupportRoleForSignal("access.hq_multiaccessory_noise")).toBe(
-      "anchor_evidence",
     );
   });
 });

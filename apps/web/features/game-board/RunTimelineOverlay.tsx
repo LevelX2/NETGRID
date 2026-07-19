@@ -29,11 +29,8 @@ import {
 } from "../../app/action-board-ui";
 import { enrichVisibleCard } from "../cards/card-view-model";
 import { OverflowAwareActionButton } from "../actions/ActionControls";
-import {
-  LEGACY_RUN_OVERLAY_POSITION_STORAGE_KEY,
-  RUN_OVERLAY_POSITION_STORAGE_KEY,
-} from "../../lib/storage-keys";
-import { readLocalStorageWithLegacy } from "../../lib/local-storage";
+import { RUN_OVERLAY_POSITION_STORAGE_KEY } from "../../lib/storage-keys";
+import { readLocalStorage } from "../../lib/local-storage";
 import {
   clampOverlayPosition,
   parseOverlayPositionPreference,
@@ -76,10 +73,7 @@ export function RunTimelineOverlay({
     typeof window === "undefined"
       ? { kind: "default" }
       : parseOverlayPositionPreference(
-          readLocalStorageWithLegacy(
-            RUN_OVERLAY_POSITION_STORAGE_KEY,
-            LEGACY_RUN_OVERLAY_POSITION_STORAGE_KEY,
-          ),
+          readLocalStorage(RUN_OVERLAY_POSITION_STORAGE_KEY),
         ),
   );
   useEffect(() => {

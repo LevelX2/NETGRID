@@ -324,7 +324,6 @@ import {
 import {
   resolveAccessInstalledRunnerProgramReturnChoice,
   resolveAccessPaymentChoice,
-  resolveChimeraDaemonTrashChoice as resolveAccessChimeraDaemonTrashChoice,
   type AccessEffectHandlerHost,
 } from "../access/access-effect-handlers";
 import {
@@ -618,7 +617,6 @@ import {
   BLINK_ID,
   BODYWEIGHT_DATA_CRECHE_ID,
   BUTCHER_BOY_ID,
-  CHIMERA_ID,
   COCKROACH_ID,
   CODE_VIRAL_CACHE_ID,
   DANSHIS_SECOND_ID,
@@ -1193,9 +1191,12 @@ export function configureFlowRuntimeBootstrap({
         runnerInstalledCardIds,
         publicInstalledCorpCardIdentityKnown,
         effectiveSubtypesForCard: runtimePorts.effectiveSubtypesForCard,
-        hostedProgramStrengthModifier: runtimePorts.hostedProgramStrengthModifier,
-        icebreakerEncounterStrengthBonus: runtimePorts.icebreakerEncounterStrengthBonus,
-        permanentIcebreakerStrengthCounterBonus: runtimePorts.permanentIcebreakerStrengthCounterBonus,
+        hostedProgramStrengthModifier:
+          runtimePorts.hostedProgramStrengthModifier,
+        icebreakerEncounterStrengthBonus:
+          runtimePorts.icebreakerEncounterStrengthBonus,
+        permanentIcebreakerStrengthCounterBonus:
+          runtimePorts.permanentIcebreakerStrengthCounterBonus,
         canReplaceFortCardsFromHq,
       },
       servers: {
@@ -1204,13 +1205,15 @@ export function configureFlowRuntimeBootstrap({
         randomHqAccess,
       },
       access: {
-        hasHiddenResourceAccessStartActions: runtimePorts.hasHiddenResourceAccessStartActions,
+        hasHiddenResourceAccessStartActions:
+          runtimePorts.hasHiddenResourceAccessStartActions,
         advanceArchivesBreachPastNonDecisionCards,
         startRunnerPrivateLookChoice: runtimePorts.startRunnerPrivateLookChoice,
       },
       run: {
         currentRun: mustRun,
-        currentEncounterSubroutines: runtimePorts.subroutinesForCurrentEncounter,
+        currentEncounterSubroutines:
+          runtimePorts.subroutinesForCurrentEncounter,
         runRemainderStrengthBonusForBreaker:
           runtimePorts.runRemainderStrengthBonusForBreaker,
         executeCardImplementationRunnerRunStartEffects: (
@@ -1274,7 +1277,6 @@ export function configureFlowRuntimeBootstrap({
         programTrashByAdvancementAsset: ACCESS_PROGRAM_TRASH_ASSET_SOURCE,
         advancementCoreDamageAsset: ACCESS_CORE_DAMAGE_ASSET_SOURCE,
         advancementNetDamageAsset: ACCESS_NET_DAMAGE_ASSET_SOURCE,
-        chimera: CHIMERA_ID,
       },
       callbacks: {
         rules: {

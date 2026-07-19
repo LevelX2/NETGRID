@@ -15,12 +15,6 @@ import {
   setAccessEffectBasePayload,
 } from "./access-effect-execution";
 import {
-  resolveAccessAmbushAssetEffect,
-  resolveAssetAccessEffect,
-  resolveUpgradeAccessEffect,
-  resolveV199AccessEffect,
-} from "./access-effect-legacy";
-import {
   requireLegalAction,
   type AccessPayload,
   type AccessEffectHandlerHost,
@@ -35,12 +29,6 @@ export function handleAccessEffectsForCard(
   const beforePayload = host.legalAction?.payload;
   const suspended = resolveCardImplementationAccessEffects(host, cardId);
   if (suspended) return accessEffectHandlerResult(host, cardId, beforePayload);
-  // Diese Fallbacks gelten nur für noch nicht deklarativ migrierte Karten.
-  // Eine CardImplementation darf nicht zusätzlich den Legacy-Pfad ausführen.
-  resolveAccessAmbushAssetEffect(host, cardId);
-  resolveUpgradeAccessEffect(host, cardId);
-  resolveAssetAccessEffect(host, cardId);
-  resolveV199AccessEffect(host, cardId);
   return accessEffectHandlerResult(host, cardId, beforePayload);
 }
 
@@ -240,54 +228,6 @@ export function resumeAccessEffectAfterTagPrevention(
     continuation.effectIndex,
     continuation.nextStepIndex,
   );
-}
-
-export function resolveChimeraDaemonTrashChoice(
-  host: AccessEffectHandlerHost,
-  selectedOptionId: string,
-): AccessEffectHandlerResult {
-  const legalAction = requireLegalAction(host);
-  const choice = host.state.pendingChoice;
-  if (!choice || !choice.source.startsWith("v199.chimera_daemon_trash"))
-    throw new Error("Es ist keine Chimera-Choice offen.");
-  const [, sourceCardId = ""] = choice.source.split(":");
-  if (
-    !sourceCardId ||
-    host.state.run?.accessedCardId !== sourceCardId ||
-    !host.state.cardInstances[sourceCardId] ||
-    host.state.cardInstances[sourceCardId]?.zone.zone === "archives" ||
-    host.cards.definitionFor(sourceCardId as CardInstanceId).id !==
-      host.definitions.chimera
-  ) {
-    throw new Error("Chimera ist nicht mehr die gueltige Access-Quelle.");
-  }
-  const option = choice.options.find(
-    (candidate) => candidate.id === selectedOptionId,
-  );
-  const daemonId = typeof option?.value === "string" ? option.value : "";
-  if (!daemonId || !host.state.runner.rig.programs.includes(daemonId))
-    throw new Error("Der gewaehlte Daemon ist nicht installiert.");
-  const definition = host.cards.definitionFor(daemonId as CardInstanceId);
-  if (
-    definition.type !== "program" ||
-    !host.cards.cardHasSubtype(definition, "daemon")
-  )
-    throw new Error("Chimera darf nur einen Daemon trashen.");
-  host.trash.trashRunnerInstalledCardToHeap(daemonId as CardInstanceId);
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    chimeraDaemonTrashed: true,
-    chimeraDaemonDefinitionId: definition.id,
-  };
-  delete host.state.pendingChoice;
-  return {
-    handled: true,
-    sourceCardId: sourceCardId as CardInstanceId,
-    sourceDefinitionId: host.definitions.chimera,
-    resolvedPayload: legalAction.payload as AccessPayload,
-    deletePendingChoice: true,
-    stateChanged: true,
-  };
 }
 
 export function resolveAccessInstalledRunnerProgramReturnChoice(

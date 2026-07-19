@@ -6,7 +6,6 @@ import type {
 import { describe, expect, it } from "vitest";
 
 import activeHints from "../../../data/ai/ai-card-hints-active.json";
-import inspectorIndex from "../../../data/ai/ai-hint-inspector-index.json";
 import { buildActionSemanticCandidates } from "./action-semantic-candidate";
 import { buildActionCardSemanticProfilesByDefinitionId } from "./actions/action-card-semantic-profiles";
 import { createAiHintsByCard } from "./ai-hints";
@@ -22,6 +21,7 @@ type Hint = {
   planRoles?: string[];
   requiredMechanics?: string[];
   tacticSignals?: string[];
+  strategyAnchors?: string[];
   strategySupportPairs?: Array<{ strategyId: string }>;
 };
 
@@ -79,15 +79,11 @@ describe("match FD7671 card-hint contract", () => {
       damage: false,
     });
 
-    const rexInspector = inspectorIndex.cards.find(
+    const rexHint = (activeHints.cards as Hint[]).find(
       (entry) => entry.cardId === "onr_v1_264_rex",
     );
-    expect(rexInspector?.derivedStrategyAnchors).toContain(
-      "corp.ice_tax_glacier",
-    );
-    expect(rexInspector?.planRolesClassification).toEqual([
-      expect.objectContaining({ value: "defend_server" }),
-    ]);
+    expect(rexHint?.strategyAnchors).toContain("corp.ice_tax_glacier");
+    expect(rexHint?.planRoles).toEqual(["defend_server"]);
   });
 
   it("does not project Rex install or rez actions as productive trace-punish actions", () => {

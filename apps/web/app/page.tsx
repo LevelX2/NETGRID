@@ -104,7 +104,6 @@ import { latestSuccessfulRunOutcomePresentation } from "./successful-run-outcome
 import {
   ACTION_CUE_POSITION_STORAGE_KEY,
   DEFAULT_CUE_POSITION,
-  LEGACY_ACTION_CUE_POSITION_STORAGE_KEY,
   actionConsumesClick,
   actionContextStillVisible,
   actionCostChips,
@@ -217,29 +216,15 @@ import {
   CARD_TOOLTIP_SETTINGS_STORAGE_KEY,
   CHRONICLE_DETAIL_MODE_STORAGE_KEY,
   COLOR_SCHEME_STORAGE_KEY,
-  DECK_STORAGE_KEY,
   DISPLAY_NAME_STORAGE_KEY,
   GAMEPLAY_SETTINGS_STORAGE_KEY,
-  LEGACY_ACTION_CUE_SETTINGS_STORAGE_KEY,
-  LEGACY_ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY,
-  LEGACY_AI_DECISION_DEBUG_OVERLAY_POSITION_STORAGE_KEY,
-  LEGACY_AI_PACING_MODE_STORAGE_KEY,
-  LEGACY_AUDIO_STORAGE_KEY,
-  LEGACY_CARD_DISPLAY_MODE_STORAGE_KEY,
-  LEGACY_CARD_IMAGE_SKIN_SETTINGS_STORAGE_KEY,
-  LEGACY_CARD_TOOLTIP_SETTINGS_STORAGE_KEY,
-  LEGACY_CHRONICLE_DETAIL_MODE_STORAGE_KEY,
-  LEGACY_DECK_STORAGE_KEY,
-  LEGACY_DISPLAY_NAME_STORAGE_KEY,
-  LEGACY_GAMEPLAY_SETTINGS_STORAGE_KEY,
-  LEGACY_MATCH_START_SETTINGS_STORAGE_KEY,
   MATCH_START_SETTINGS_STORAGE_KEY,
   cardPreviewCollapsedStorageKeyFor,
 } from "../lib/storage-keys";
 import {
-  readLocalStorageWithLegacy,
+  readLocalStorage,
   rememberDisplayName,
-  removeLocalStorageKeys,
+  removeLocalStorageKey,
 } from "../lib/local-storage";
 import { copyTextToClipboard } from "../lib/clipboard";
 import { downloadTextFile } from "../lib/download";
@@ -788,10 +773,7 @@ export default function Page() {
       typeof window === "undefined"
         ? { kind: "default" }
         : parseOverlayPositionPreference(
-            readLocalStorageWithLegacy(
-              ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY,
-              LEGACY_ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY,
-            ),
+            readLocalStorage(ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY),
           ),
     );
   const [aiDecisionDebugOverlayPosition, setAiDecisionDebugOverlayPosition] =
@@ -799,10 +781,7 @@ export default function Page() {
       typeof window === "undefined"
         ? { kind: "default" }
         : parseOverlayPositionPreference(
-            readLocalStorageWithLegacy(
-              AI_DECISION_DEBUG_OVERLAY_POSITION_STORAGE_KEY,
-              LEGACY_AI_DECISION_DEBUG_OVERLAY_POSITION_STORAGE_KEY,
-            ),
+            readLocalStorage(AI_DECISION_DEBUG_OVERLAY_POSITION_STORAGE_KEY),
           ),
     );
   const [aiDecisionDebugStatus, setAiDecisionDebugStatus] =
@@ -972,22 +951,13 @@ export default function Page() {
     const token = params.get("joinToken");
     const reconnectToken = params.get("reconnectToken");
     const reconnectSide = params.get("side");
-    const storedDisplayName = readLocalStorageWithLegacy(
-      DISPLAY_NAME_STORAGE_KEY,
-      LEGACY_DISPLAY_NAME_STORAGE_KEY,
-    )?.trim();
-    const rawMatchStartSettings = readLocalStorageWithLegacy(
-      MATCH_START_SETTINGS_STORAGE_KEY,
-      LEGACY_MATCH_START_SETTINGS_STORAGE_KEY,
-    );
+    const storedDisplayName = readLocalStorage(DISPLAY_NAME_STORAGE_KEY)?.trim();
+    const rawMatchStartSettings = readLocalStorage(MATCH_START_SETTINGS_STORAGE_KEY);
     const storedMatchStartSettings = parseMatchStartSettingsFromStorage(
       rawMatchStartSettings,
     );
     if (rawMatchStartSettings && !storedMatchStartSettings)
-      removeLocalStorageKeys(
-        MATCH_START_SETTINGS_STORAGE_KEY,
-        LEGACY_MATCH_START_SETTINGS_STORAGE_KEY,
-      );
+      removeLocalStorageKey(MATCH_START_SETTINGS_STORAGE_KEY);
     if (storedMatchStartSettings) {
       hasStoredMatchStartSettingsRef.current = true;
       if (storedMatchStartSettings.mode) setMode(storedMatchStartSettings.mode);
@@ -1214,10 +1184,7 @@ export default function Page() {
   }, [colorScheme, colorSchemeLoaded]);
 
   useEffect(() => {
-    const stored = readLocalStorageWithLegacy(
-      CARD_DISPLAY_MODE_STORAGE_KEY,
-      LEGACY_CARD_DISPLAY_MODE_STORAGE_KEY,
-    );
+    const stored = readLocalStorage(CARD_DISPLAY_MODE_STORAGE_KEY);
     if (stored !== null) setCardDisplayMode(normalizeCardDisplayMode(stored));
     setCardDisplayModeLoaded(true);
   }, []);
@@ -1228,10 +1195,7 @@ export default function Page() {
   }, [cardDisplayModeLoaded, cardDisplayMode]);
 
   useEffect(() => {
-    const stored = readLocalStorageWithLegacy(
-      CARD_IMAGE_SKIN_SETTINGS_STORAGE_KEY,
-      LEGACY_CARD_IMAGE_SKIN_SETTINGS_STORAGE_KEY,
-    );
+    const stored = readLocalStorage(CARD_IMAGE_SKIN_SETTINGS_STORAGE_KEY);
     if (stored) {
       try {
         const parsed = JSON.parse(stored) as {
@@ -1243,10 +1207,7 @@ export default function Page() {
         if (typeof parsed.showSetBadges === "boolean")
           setShowSetBadges(parsed.showSetBadges);
       } catch {
-        removeLocalStorageKeys(
-          CARD_IMAGE_SKIN_SETTINGS_STORAGE_KEY,
-          LEGACY_CARD_IMAGE_SKIN_SETTINGS_STORAGE_KEY,
-        );
+        removeLocalStorageKey(CARD_IMAGE_SKIN_SETTINGS_STORAGE_KEY);
       }
     }
     setCardImageSkinSettingsLoaded(true);
@@ -1263,10 +1224,7 @@ export default function Page() {
   useEffect(() => {
     setChronicleDetailMode(
       normalizeChronicleDetailMode(
-        readLocalStorageWithLegacy(
-          CHRONICLE_DETAIL_MODE_STORAGE_KEY,
-          LEGACY_CHRONICLE_DETAIL_MODE_STORAGE_KEY,
-        ),
+        readLocalStorage(CHRONICLE_DETAIL_MODE_STORAGE_KEY),
       ),
     );
     setChronicleDetailModeLoaded(true);
@@ -1296,10 +1254,7 @@ export default function Page() {
   }, [cardPreviewCollapsedStorageKey]);
 
   useEffect(() => {
-    const stored = readLocalStorageWithLegacy(
-      AI_PACING_MODE_STORAGE_KEY,
-      LEGACY_AI_PACING_MODE_STORAGE_KEY,
-    );
+    const stored = readLocalStorage(AI_PACING_MODE_STORAGE_KEY);
     if (stored !== null) setLocalAiPacingMode(normalizeAiPacingMode(stored));
     setAiPacingModeLoaded(true);
   }, []);
@@ -1337,7 +1292,6 @@ export default function Page() {
         }
         return;
       }
-      const legacyDecks = readLegacyBrowserDecks();
       try {
         const response = await fetch("/api/decks/library", {
           cache: "no-store",
@@ -1345,29 +1299,22 @@ export default function Page() {
         const data = (await response.json()) as DeckLibraryResponse;
         if (!response.ok || data.error)
           throw new Error(data.error?.message ?? "deck_library_load_failed");
-        let decks = data.decks ?? [];
-        if (decks.length === 0 && legacyDecks.length > 0) {
-          const migrated = await persistDeckLibrary(legacyDecks);
-          decks = migrated.decks;
-          if (!cancelled)
-            setNotice(
-              "Bisherige Browser-Decks wurden in die lokale Datei-Deckbibliothek übernommen.",
-            );
-        }
+        const decks = data.decks ?? [];
         if (cancelled) return;
         setAccountDeckRecords([]);
         setAccountDeckQuota(null);
         setGuestDeckBacking(decks);
         setDeckLibraryStoragePath(data.storagePath ?? "");
         applyLoadedDecks(visibleGuestDecks(decks));
-      } catch {
+      } catch (error) {
         if (!cancelled) {
-          setGuestDeckBacking(legacyDecks);
-          applyLoadedDecks(visibleGuestDecks(legacyDecks));
-          if (legacyDecks.length > 0)
-            setNotice(
-              "Datei-Deckbibliothek nicht erreichbar; Browser-Decks wurden nur als Übergang geladen.",
-            );
+          setGuestDeckBacking([]);
+          applyLoadedDecks([]);
+          setNotice(
+            error instanceof Error
+              ? error.message
+              : "Datei-Deckbibliothek nicht erreichbar.",
+          );
         }
       } finally {
         if (!cancelled) setLocalDecksLoaded(true);
@@ -1485,10 +1432,7 @@ export default function Page() {
   ]);
 
   useEffect(() => {
-    const storedAudio = readLocalStorageWithLegacy(
-      AUDIO_STORAGE_KEY,
-      LEGACY_AUDIO_STORAGE_KEY,
-    );
+    const storedAudio = readLocalStorage(AUDIO_STORAGE_KEY);
     if (storedAudio) {
       try {
         const parsed = JSON.parse(storedAudio) as {
@@ -1499,7 +1443,7 @@ export default function Page() {
         if (typeof parsed.volume === "number")
           setAudioVolume(Math.min(1, Math.max(0, parsed.volume)));
       } catch {
-        removeLocalStorageKeys(AUDIO_STORAGE_KEY, LEGACY_AUDIO_STORAGE_KEY);
+        removeLocalStorageKey(AUDIO_STORAGE_KEY);
       }
     }
     setAudioSettingsLoaded(true);
@@ -1514,10 +1458,7 @@ export default function Page() {
   }, [audioSettingsLoaded, audioEnabled, audioVolume]);
 
   useEffect(() => {
-    const stored = readLocalStorageWithLegacy(
-      ACTION_CUE_SETTINGS_STORAGE_KEY,
-      LEGACY_ACTION_CUE_SETTINGS_STORAGE_KEY,
-    );
+    const stored = readLocalStorage(ACTION_CUE_SETTINGS_STORAGE_KEY);
     if (stored) {
       try {
         const parsed = JSON.parse(stored) as {
@@ -1533,10 +1474,7 @@ export default function Page() {
           normalizeCueAutoDismissMs(parsed.autoDismissMs),
         );
       } catch {
-        removeLocalStorageKeys(
-          ACTION_CUE_SETTINGS_STORAGE_KEY,
-          LEGACY_ACTION_CUE_SETTINGS_STORAGE_KEY,
-        );
+        removeLocalStorageKey(ACTION_CUE_SETTINGS_STORAGE_KEY);
       }
     }
     setActionCueSettingsLoaded(true);
@@ -1560,10 +1498,7 @@ export default function Page() {
   ]);
 
   useEffect(() => {
-    const stored = readLocalStorageWithLegacy(
-      GAMEPLAY_SETTINGS_STORAGE_KEY,
-      LEGACY_GAMEPLAY_SETTINGS_STORAGE_KEY,
-    );
+    const stored = readLocalStorage(GAMEPLAY_SETTINGS_STORAGE_KEY);
     if (stored) {
       try {
         const parsed = JSON.parse(stored) as {
@@ -1601,10 +1536,7 @@ export default function Page() {
         );
         setActionPanelMode(normalizeActionPanelMode(parsed.actionPanelMode));
       } catch {
-        removeLocalStorageKeys(
-          GAMEPLAY_SETTINGS_STORAGE_KEY,
-          LEGACY_GAMEPLAY_SETTINGS_STORAGE_KEY,
-        );
+        removeLocalStorageKey(GAMEPLAY_SETTINGS_STORAGE_KEY);
       }
     }
     setGameplaySettingsLoaded(true);
@@ -1656,10 +1588,7 @@ export default function Page() {
   }, [aiDecisionDebugOverlayPosition]);
 
   useEffect(() => {
-    const stored = readLocalStorageWithLegacy(
-      CARD_TOOLTIP_SETTINGS_STORAGE_KEY,
-      LEGACY_CARD_TOOLTIP_SETTINGS_STORAGE_KEY,
-    );
+    const stored = readLocalStorage(CARD_TOOLTIP_SETTINGS_STORAGE_KEY);
     if (stored) {
       try {
         const parsed = JSON.parse(stored) as {
@@ -1671,10 +1600,7 @@ export default function Page() {
         );
         setCardTooltipMode(normalizeCardTooltipMode(parsed.mode));
       } catch {
-        removeLocalStorageKeys(
-          CARD_TOOLTIP_SETTINGS_STORAGE_KEY,
-          LEGACY_CARD_TOOLTIP_SETTINGS_STORAGE_KEY,
-        );
+        removeLocalStorageKey(CARD_TOOLTIP_SETTINGS_STORAGE_KEY);
       }
     }
     setCardTooltipSettingsLoaded(true);
@@ -1694,10 +1620,7 @@ export default function Page() {
   useEffect(() => {
     setCuePosition(
       parseCuePositionPreference(
-        readLocalStorageWithLegacy(
-          ACTION_CUE_POSITION_STORAGE_KEY,
-          LEGACY_ACTION_CUE_POSITION_STORAGE_KEY,
-        ),
+        readLocalStorage(ACTION_CUE_POSITION_STORAGE_KEY),
       ),
     );
     setCuePositionLoaded(true);
@@ -5325,21 +5248,6 @@ export default function Page() {
     if (!hasStoredMatchStartSettingsRef.current) {
       if (hasRunnerDeck) setRunnerDeckSource("local");
       if (hasCorpDeck) setCorpDeckSource("local");
-    }
-  }
-
-  function readLegacyBrowserDecks(): EditableDeck[] {
-    const storedDecks = readLocalStorageWithLegacy(
-      DECK_STORAGE_KEY,
-      LEGACY_DECK_STORAGE_KEY,
-    );
-    if (!storedDecks) return [];
-    try {
-      const parsed = JSON.parse(storedDecks) as EditableDeck[];
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      removeLocalStorageKeys(DECK_STORAGE_KEY, LEGACY_DECK_STORAGE_KEY);
-      return [];
     }
   }
 

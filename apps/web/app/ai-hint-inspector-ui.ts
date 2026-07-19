@@ -115,8 +115,6 @@ const RUNTIME_LEGACY_NOTICE =
   "Hinweis: Legacy-Rollen werden intern noch teilweise von der KI verwendet.";
 const LEGACY_MIGRATION_NOTICE =
   "Diese Felder gehören zum bisherigen KI-Pfad und werden noch nicht vollständig entfernt, solange Teile der KI darauf angewiesen sind. Sie sind nicht die neue Zielsemantik.";
-const CARD_ROLE_MANIFEST_NOTICE =
-  "`card-role-manifest-0.9` bleibt Runtime-/DeckDoctrine-Altbestand und ist nicht Teil der neuen Zielsemantik.";
 
 export function aiInspectorSections(
   inspector: CatalogAiInspector,
@@ -369,12 +367,6 @@ function legacyMigrationSection(
             label: "Runtime-Legacy",
             value: "KI nutzt Legacy teilweise",
             detail: RUNTIME_LEGACY_NOTICE,
-            tone: "legacy" as const,
-          },
-          {
-            label: "card-role-manifest",
-            value: "Runtime-Legacy",
-            detail: CARD_ROLE_MANIFEST_NOTICE,
             tone: "legacy" as const,
           },
         ]

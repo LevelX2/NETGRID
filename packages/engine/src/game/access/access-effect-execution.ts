@@ -222,7 +222,10 @@ export function resolveCardImplementationAccessEffects(
   const legalAction = requireLegalAction(host);
   const definition = host.cards.definitionFor(cardId);
   const accessEffects = host.cards.accessEffectsForDefinition(definition.id);
-  if (accessEffects.length === 0) return false;
+  const hiddenReplacementLongtail =
+    host.cards.hiddenReplacementLongtailKindForDefinition(definition.id);
+  if (accessEffects.length === 0 && hiddenReplacementLongtail === undefined)
+    return false;
   if (
     legalAction.side !== "runner" ||
     legalAction.type !== "access_card" ||
@@ -231,6 +234,37 @@ export function resolveCardImplementationAccessEffects(
     throw new Error(
       "CardImplementation-Access-Effekt darf nur aus einem legalen Access-Fenster ausloesen.",
     );
+  }
+  if (
+    hiddenReplacementLongtail === "delayed_agenda_access_replacement" &&
+    host.state.run
+  ) {
+    const run = host.state.run;
+    const serverId = run.breach?.serverId ?? run.attackedServerId;
+    const existing = run.runDurationEffects ?? [];
+    if (
+      !existing.some(
+        (effect) =>
+          effect.kind === "delayed_agenda_access_replacement" &&
+          effect.sourceCardInstanceId === cardId,
+      )
+    ) {
+      run.runDurationEffects = [
+        ...existing,
+        {
+          kind: "delayed_agenda_access_replacement",
+          sourceCardInstanceId: cardId,
+          sourceDefinitionId: definition.id,
+          serverId,
+          replacementWindow: "agenda_access",
+          delayUntil: "runner_next_turn_start",
+        },
+      ];
+    }
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      delayedAgendaAccessReplacementActive: true,
+    };
   }
   const accessZone = cardImplementationAccessZone(host, cardId);
   for (const [effectIndex, effect] of accessEffects.entries()) {

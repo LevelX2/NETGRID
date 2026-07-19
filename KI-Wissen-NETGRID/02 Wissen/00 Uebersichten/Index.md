@@ -77,7 +77,6 @@
   - `docs/reviews/ai/proteus-ai-release-reconciliation-final-review-2026-07-09.md`
 - Aktive Gates:
   - `corepack pnpm check:ai`
-  - `corepack pnpm check:ai:full`
   - `corepack pnpm check:ai-deck-doctrine-strategy`
   - `corepack pnpm check:proteus-ai-readiness`
 

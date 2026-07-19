@@ -2,11 +2,8 @@
 
 import { useEffect, useState } from "react";
 
-import {
-  CARD_SIZE_SETTINGS_STORAGE_KEY,
-  LEGACY_CARD_SIZE_SETTINGS_STORAGE_KEY
-} from "../../lib/storage-keys";
-import { readLocalStorageWithLegacy, removeLocalStorageKeys } from "../../lib/local-storage";
+import { CARD_SIZE_SETTINGS_STORAGE_KEY } from "../../lib/storage-keys";
+import { readLocalStorage, removeLocalStorageKey } from "../../lib/local-storage";
 import {
   CARD_SCALE_DEFAULT_PERCENT,
   normalizeCardScalePercent
@@ -23,7 +20,7 @@ export function usePersistentCardScaleSettings() {
   const [cardSizeSettingsLoaded, setCardSizeSettingsLoaded] = useState(false);
 
   useEffect(() => {
-    const stored = readLocalStorageWithLegacy(CARD_SIZE_SETTINGS_STORAGE_KEY, LEGACY_CARD_SIZE_SETTINGS_STORAGE_KEY);
+    const stored = readLocalStorage(CARD_SIZE_SETTINGS_STORAGE_KEY);
     if (stored) {
       try {
         const parsed = JSON.parse(stored) as {
@@ -44,7 +41,7 @@ export function usePersistentCardScaleSettings() {
         setCardRigScalePercent(normalizeCardScalePercent(parsed.rigPercent ?? parsed.opponentPercent));
         setCardSpecialZoneScalePercent(normalizeCardScalePercent(parsed.specialZonePercent));
       } catch {
-        removeLocalStorageKeys(CARD_SIZE_SETTINGS_STORAGE_KEY, LEGACY_CARD_SIZE_SETTINGS_STORAGE_KEY);
+        removeLocalStorageKey(CARD_SIZE_SETTINGS_STORAGE_KEY);
       }
     }
     setCardSizeSettingsLoaded(true);

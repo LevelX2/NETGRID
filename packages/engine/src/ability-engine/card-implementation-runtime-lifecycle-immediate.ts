@@ -7,6 +7,7 @@ import type {
 import { cardImplementationForDefinitionId } from "../card-implementations/registry";
 import { executeCardImplementationEffects } from "./effect-interpreter";
 import type { CardImplementationRuntimeDependencies } from "./card-implementation-runtime-dependency-types";
+import type { RuntimeEffectCollector } from "./card-implementation-runtime-core-deps";
 import type {
   CardEffectImplementation,
   CardLifecycleImplementation,
@@ -51,6 +52,7 @@ export function executeCardImplementationLifecycleEffects(
   definition: CardDefinition,
   cardId: CardInstanceId,
   lifecycle: ImmediateLifecycle,
+  effectCollector?: RuntimeEffectCollector,
 ): void {
   const effects = cardImplementationLifecycleEffects(definition, lifecycle);
   if (effects.length === 0) return;
@@ -112,11 +114,13 @@ export function executeCardImplementationLifecycleEffects(
     },
     effects,
   );
+  effectCollector?.push(...result.resolvedEffects);
   if (!legalAction) return;
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     sourceDefinitionId: definition.id,
     ...result.publicPayload,
   };
-  deps.appendResolvedEffectsToPayload(legalAction, result.resolvedEffects);
+  if (!effectCollector)
+    deps.appendResolvedEffectsToPayload(legalAction, result.resolvedEffects);
 }

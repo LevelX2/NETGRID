@@ -319,7 +319,6 @@ import {
 import {
   resolveAccessInstalledRunnerProgramReturnChoice,
   resolveAccessPaymentChoice,
-  resolveChimeraDaemonTrashChoice as resolveAccessChimeraDaemonTrashChoice,
   type AccessEffectHandlerHost,
 } from "../access/access-effect-handlers";
 import {
@@ -736,6 +735,18 @@ export function createTriggerAbilityRuntimeHosts(
           startHiddenStackProgramInstallActivation(
             deps.hiddenZoneSearchActivationHandlerHost(state, legalAction),
             sourceCardId,
+          ),
+      },
+      lifecycle: {
+        executeOnInstall: (legalAction, definition, cardId, effects) =>
+          executeCardImplementationLifecycleEffects(
+            deps.cardImplementationRuntimeDeps,
+            state,
+            legalAction,
+            definition,
+            cardId,
+            "on_install",
+            effects,
           ),
       },
       constants: {
