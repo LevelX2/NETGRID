@@ -2,7 +2,7 @@
 
 ## Status
 
-`lifecycle_fixed`
+`packages_complete_ready_for_main_integration`
 
 ## Quelle und Vorgabe
 
@@ -119,6 +119,33 @@ Bei einem nicht erfüllten Done-Gate bleibt der Prozess im aktuellen Zustand.
   bestehenden Collector; Paid- und Choice-Pfade dokumentieren sie auf ihrer
   LegalAction. 43 fokussierte Tests, Engine-Typecheck, Paketgrenzen, Format und
   Diff-Check sind grün.
+- STIL-03: Final Review und Wissenslog dokumentieren den korrigierten Vertrag.
+  Die vollständige Engine-Suite ist mit 201 Testdateien und 1.747 Tests grün;
+  Engine-Typecheck, Paketgrenzen, Format und Diff-Check sind ebenfalls grün.
+
+## Umsetzungsergebnis
+
+- `RunnerSpecialTriggerExecutionHost` besitzt einen engen
+  `executeOnInstall`-Port zur bestehenden Immediate-Lifecycle-Runtime.
+- `installDelayedPreparedCardForFree` führt den Lifecycle erst nach der
+  erfolgreichen Rig-Installation aus. Dadurch bleiben offene MU-Choices frei
+  von vorgezogenen Installationseffekten.
+- Bezahlte und Choice-basierte Auflösungen dokumentieren Lifecycle-Effekte auf
+  der auflösenden LegalAction. Der automatische Startzugpfad sammelt sie im
+  bestehenden öffentlichen Effect-Collector nach dem Shell-Counter-Effekt.
+- Die Runtime enthält keine Cloak-Sonderbehandlung; alle über Shell Traders
+  erfolgreich installierten Programme und Hardwarekarten erhalten denselben
+  allgemeinen Lifecycle-Vertrag.
+
+## Verifikationsergebnis
+
+- Erwartete Test-first-Reproduktion: 30 bestehende Tests grün und genau drei
+  neue Cloak-Lifecycle-Regressionen rot mit `0` statt `3` Credits.
+- Fokussierter Abschluss: 2 Testdateien, 43 Tests grün.
+- Engine-Gesamtlauf: 201 Testdateien, 1.747 Tests grün.
+- Engine-Typecheck: grün.
+- Package-Boundaries: grün, 1.889 geprüfte Dateien.
+- `format:changed` und `git diff --check`: grün.
 
 ## Paketfolge
 
