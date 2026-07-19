@@ -1777,7 +1777,6 @@ export function normalizeVisibleTerms(value: string): string {
     .replace(/\bArchives\b/g, "Archive")
     .replace(/\bApproach\b/g, "Annäherung")
     .replace(/\bEncounter\b/g, "Begegnung")
-    .replace(/\bAccess\b/g, "Zugriff")
     .replace(/\bBreach\b/g, "Zugriffsphase")
     .replace(/\bBreak\b/g, "Brechen");
 }

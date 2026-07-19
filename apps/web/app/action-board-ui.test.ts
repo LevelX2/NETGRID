@@ -336,6 +336,31 @@ describe("V1.0.5 action board UI helpers", () => {
     );
   });
 
+  it("preserves English card names containing Access in action labels", () => {
+    const rezMisleadingAccessMenus = legalAction(
+      "corp",
+      "rez_ice",
+      "misleading_access_menus_1",
+      "Misleading Access Menus rezzen",
+      { cardId: "misleading_access_menus_1" },
+      "run.approach_ice",
+    );
+    const useAccessToKiribati = legalAction(
+      "runner",
+      "activated_card_ability",
+      "access_to_kiribati_1",
+      "Access to Kiribati: Base Link 1 nutzen",
+      { cardId: "access_to_kiribati_1" },
+    );
+
+    expect(actionButtonLabel(rezMisleadingAccessMenus)).toBe(
+      "Misleading Access Menus rezzen",
+    );
+    expect(actionButtonLabel(useAccessToKiribati)).toBe(
+      "Access to Kiribati: Base Link 1 nutzen",
+    );
+  });
+
   it("keeps Corp Spy-counter removal visible in the main action panel", () => {
     const removeSpyCounter = legalAction(
       "corp",
