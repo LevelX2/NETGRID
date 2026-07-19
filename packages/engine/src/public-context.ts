@@ -600,6 +600,23 @@ export function publicContextForAction(
       const value = legalAction.payload?.[key];
       if (value !== undefined) context[key] = value;
     }
+    if (legalAction.payload?.runnerMemoryCheckpointResolved === true) {
+      context.runnerMemoryCheckpointResolved = true;
+      for (const key of [
+        "runnerMemoryDeficit",
+        "memoryFreed",
+        "trashedProgramCount",
+        "runnerMemoryUsedAfter",
+        "runnerMemoryLimitAfter",
+      ]) {
+        const value = legalAction.payload[key];
+        if (typeof value === "number") context[key] = value;
+      }
+      if (typeof legalAction.payload.trashedCardDefinitionIds === "string") {
+        context.trashedCardDefinitionIds =
+          legalAction.payload.trashedCardDefinitionIds;
+      }
+    }
   }
   if (legalAction.type === "continue_run") {
     context.result = state.run ? "continued" : "ended";

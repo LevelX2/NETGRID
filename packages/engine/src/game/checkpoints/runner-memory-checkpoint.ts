@@ -159,6 +159,9 @@ export function resolveRunnerMemoryCheckpointChoice(
     throw new Error("Die MU-Checkpoint-Auswahl ist nicht minimal.");
 
   const sortedCardIds = selectedCardIds.slice().sort();
+  const trashedCardDefinitionIds = sortedCardIds
+    .map((cardId) => host.definitionFor(cardId).id)
+    .sort();
   for (const cardId of sortedCardIds)
     host.trashRunnerInstalledCardToHeap(cardId, legalAction);
   delete host.state.pendingChoice;
@@ -168,6 +171,7 @@ export function resolveRunnerMemoryCheckpointChoice(
     runnerMemoryDeficit: currentDeficit,
     memoryFreed: freedMemory,
     trashedProgramCount: sortedCardIds.length,
+    trashedCardDefinitionIds: trashedCardDefinitionIds.join(","),
     runnerMemoryUsedAfter: host.state.runner.memoryUsed,
     runnerMemoryLimitAfter: host.runnerMemoryLimit(),
   };

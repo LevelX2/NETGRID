@@ -1936,6 +1936,41 @@ describe("formatChronicleEvent", () => {
     expect(item.title).not.toContain("Entscheidung beantwortet");
   });
 
+  it("shows post-access MU-checkpoint program trash with its public title", () => {
+    const item = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        aiReasonCode: "runner_memory_checkpoint_cleanup",
+        runnerMemoryCheckpointResolved: true,
+        runnerMemoryDeficit: 1,
+        memoryFreed: 1,
+        trashedProgramCount: 1,
+        trashedCardDefinitionIds: "simple_decoder",
+        runnerMemoryUsedAfter: 4,
+        runnerMemoryLimitAfter: 4,
+      }),
+      "corp",
+    );
+
+    expect(item.title).toBe(
+      "Die Runner-KI hat Simple Decoder für das MU-Limit getrasht.",
+    );
+    expect(item.description).toBe("MU danach: 4/4; 1 MU freigemacht.");
+    expect(item.category).toBe("run");
+    expect(item.importance).toBe("important");
+    expect(item.visibility).toBe("public");
+    expect(item.chips).toEqual(
+      expect.arrayContaining([
+        "Runner",
+        "KI",
+        "Simple Decoder",
+        "Programm getrasht",
+        "MU 4/4",
+      ]),
+    );
+    expect(item.title).not.toContain("Entscheidung beantwortet");
+  });
+
   it("shows access ambush payment choices in the chronicle", () => {
     const paid = formatChronicleEvent(
       makeEvent("resolve_choice", {

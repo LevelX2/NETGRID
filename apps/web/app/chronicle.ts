@@ -620,6 +620,51 @@ export function formatChronicleEvent(
         );
         break;
       }
+      if (payload.runnerMemoryCheckpointResolved === true) {
+        const trashedDefinitionIds = definitionIdsFromCsv(
+          stringValue(payload.trashedCardDefinitionIds),
+        );
+        const trashedTitles = titlesForDefinitionIds(
+          stringValue(payload.trashedCardDefinitionIds),
+        );
+        const trashedCount =
+          numberValue(payload.trashedProgramCount) ?? trashedTitles.length;
+        const trashedText =
+          trashedTitles.length > 0
+            ? joinChronicleParts(trashedTitles)
+            : `${trashedCount} Programm${trashedCount === 1 ? "" : "e"}`;
+        const memoryFreed = numberValue(payload.memoryFreed);
+        const memoryUsedAfter = numberValue(payload.runnerMemoryUsedAfter);
+        const memoryLimitAfter = numberValue(payload.runnerMemoryLimitAfter);
+        const descriptionParts = [
+          memoryUsedAfter !== undefined && memoryLimitAfter !== undefined
+            ? `MU danach: ${memoryUsedAfter}/${memoryLimitAfter}`
+            : undefined,
+          memoryFreed !== undefined
+            ? `${memoryFreed} MU freigemacht`
+            : undefined,
+        ].filter((part): part is string => part !== undefined);
+        category = "run";
+        importance = "important";
+        visibility = "public";
+        cardDefinitionId = trashedDefinitionIds[0] ?? cardDefinitionId;
+        cardTitle = trashedTitles.length === 1 ? trashedTitles[0] : cardTitle;
+        title = phrase(subject, `${trashedText} für das MU-Limit getrasht`);
+        description =
+          descriptionParts.length > 0
+            ? `${descriptionParts.join("; ")}.`
+            : undefined;
+        chips.push(
+          "MU-Checkpoint",
+          "Programm getrasht",
+          `${trashedCount} Trash`,
+          ...trashedTitles,
+          ...(memoryUsedAfter !== undefined && memoryLimitAfter !== undefined
+            ? [`MU ${memoryUsedAfter}/${memoryLimitAfter}`]
+            : []),
+        );
+        break;
+      }
       {
         const hiddenZoneAction = stringValue(payload.hiddenZoneAction);
         const programTrashCount = numberValue(payload.programTrashCount);

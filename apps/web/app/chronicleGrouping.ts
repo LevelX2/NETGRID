@@ -123,6 +123,7 @@ export function chronicleResolveChoiceBelongsToRunPayload(
     payload.accessEffectSourceDefinitionId ||
     payload.ambushPaidCost !== undefined ||
     payload.ambushPaymentDeclined === true ||
+    payload.runnerMemoryCheckpointResolved === true ||
     payload.hiddenZoneAction ===
       "proteus_breaker_strength_penalty_access_counters" ||
     payload.hiddenZoneAction === "successful_run_temporary_encounter" ||
@@ -141,6 +142,27 @@ export function chronicleResolveChoiceBelongsToRunPayload(
         (effect as Record<string, unknown>).counterType ===
           "breaker_strength_penalty"),
   );
+}
+
+const CHRONICLE_RUN_CONTEXT_ACTION_TYPES = new Set([
+  "start_run",
+  "rez_ice",
+  "rez_card",
+  "decline_rez",
+  "pump_breaker",
+  "break_subroutine",
+  "continue_run",
+  "jack_out",
+  "access_card",
+  "trash_accessed_card",
+  "steal_agenda",
+  "decline_trash",
+]);
+
+export function chronicleActionTypeBelongsToRunContext(
+  actionType: string,
+): boolean {
+  return CHRONICLE_RUN_CONTEXT_ACTION_TYPES.has(actionType);
 }
 
 export function chroniclePaymentSupportBelongsToRunPayload(

@@ -27,8 +27,10 @@ Root das zusätzliche, inhaltlich leere „Nichts rezzen“.
   gültige Checkpoint-Choice offen ist.
 - Falsche Seite, stale Choice, unbekannte oder doppelte Ziele, ungenügende
   Freigabe und nicht minimale Auswahl werden abgelehnt.
-- PublicEvents enthalten nur Mengen und MU-Werte; die Corp-PlayerView sieht
-  weder Choice noch Zielidentitäten.
+- PublicEvents enthalten Mengen, MU-Werte und nach der Auflösung die
+  Definitionen der bereits öffentlich installierten, getrashten Programme.
+  Choice-Ziele und Karten-Instanz-IDs bleiben privat; die Corp-PlayerView sieht
+  die offene Choice nicht.
 - Replay und StateHash bleiben deterministisch.
 
 ## Rez-Fenster und KI
@@ -42,6 +44,9 @@ Root das zusätzliche, inhaltlich leere „Nichts rezzen“.
   Programmkombination anhand der bestehenden Programmsacrifice-Bewertung.
 - Die Auswahl bleibt zwingend auflösbar, wenn ausschließlich als kritisch
   bewertete Programme verfügbar sind; sie trasht nicht pauschal alle Optionen.
+- Die Chronik ordnet das Rez einer Root-Karte demselben aktiven Run zu. Nach
+  der MU-Auflösung nennt sie die getrashten Programme und den resultierenden
+  MU-Stand in einem eigenen Eintrag innerhalb dieses Runs.
 
 ## Livefall-Prüfung
 
@@ -62,6 +67,8 @@ Die State-Validierung ist grün und die Corp-PlayerView enthält keine Choice.
 - Vollständige KI-Suite über die drei offiziellen Shards: 411 Testdateien,
   nach dem Abgleich mit dem weitergelaufenen `main` 2.818 Tests grün.
 - Engine- und KI-Typecheck: grün.
+- Chronik-Nachhärtung: 57 Web-Testdateien mit 668 Tests sowie Web-Typecheck
+  grün; vollständige Engine-Suite weiterhin 202 Testdateien mit 1.757 Tests.
 - `check:package-boundaries`: grün, 1.893 geprüfte Dateien.
 - `format:changed`: grün, 17 geänderte Dateien geprüft.
 - `git diff --check`: grün.

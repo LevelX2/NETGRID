@@ -21,6 +21,7 @@ import {
 } from "../../app/chronicle";
 import { localizedDeCardTitle } from "../../app/card-image-manifest";
 import {
+  chronicleActionTypeBelongsToRunContext,
   chroniclePaymentSupportBelongsToRunPayload,
   chroniclePaymentSupportFollowingRunGroupLabel,
   chronicleResolveChoiceBelongsToRunPayload,
@@ -493,11 +494,12 @@ function chronicleEntriesWithRunGroups(
     const eventGroupLabel =
       followingRunGroupLabel ??
       (belongsToActiveRun ? activeRunGroupLabel : null);
-    const eventGroupInstanceKey = followingRunGroupLabel && followingEvent
-      ? `run:${followingEvent.eventId}`
-      : eventGroupLabel
-        ? activeRunGroupKey
-        : null;
+    const eventGroupInstanceKey =
+      followingRunGroupLabel && followingEvent
+        ? `run:${followingEvent.eventId}`
+        : eventGroupLabel
+          ? activeRunGroupKey
+          : null;
     for (const item of items) {
       const card = item.cardDefinitionId
         ? (cardDetailsById[item.cardDefinitionId] ?? null)
@@ -589,27 +591,13 @@ function chronicleEventBelongsToActiveRun(
     );
   }
   return (
-    chronicleRunContextActionTypes.has(actionType) ||
+    chronicleActionTypeBelongsToRunContext(actionType) ||
     items.some(
       (item) =>
         chronicleGroupLabel(item).startsWith("Run") || item.category === "run",
     )
   );
 }
-
-const chronicleRunContextActionTypes = new Set([
-  "start_run",
-  "rez_ice",
-  "decline_rez",
-  "pump_breaker",
-  "break_subroutine",
-  "continue_run",
-  "jack_out",
-  "access_card",
-  "trash_accessed_card",
-  "steal_agenda",
-  "decline_trash",
-]);
 
 function chronicleActionContinuesCompletedRun(
   event: PublicGameEvent,

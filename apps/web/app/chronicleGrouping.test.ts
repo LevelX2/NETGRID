@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  chronicleActionTypeBelongsToRunContext,
   chroniclePaymentSupportBelongsToRunPayload,
   chroniclePaymentSupportFollowingRunGroupLabel,
   chronicleResolveChoiceBelongsToRunPayload,
@@ -45,6 +46,21 @@ function debtEntry(
 }
 
 describe("groupChronicleEntriesForRender", () => {
+  it("keeps root-card rez actions inside the active run group", () => {
+    expect(chronicleActionTypeBelongsToRunContext("rez_card")).toBe(true);
+    expect(chronicleActionTypeBelongsToRunContext("install_card")).toBe(false);
+  });
+
+  it("keeps MU-checkpoint cleanup inside the completed access run", () => {
+    expect(
+      chronicleResolveChoiceBelongsToRunPayload({
+        runnerMemoryCheckpointResolved: true,
+        trashedProgramCount: 1,
+        trashedCardDefinitionIds: "simple_decoder",
+      }),
+    ).toBe(true);
+  });
+
   it("keeps Fall Guy tag avoidance eligible for the active run group", () => {
     expect(
       chronicleResolveChoiceBelongsToRunPayload({

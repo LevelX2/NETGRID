@@ -3485,12 +3485,27 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
     const selectedOption = state.pendingChoice?.options[0];
     expect(selectedOption).toBeDefined();
     const trashedProgramId = selectedOption?.value as CardInstanceId;
+    const trashedProgramDefinitionId =
+      state.cardInstances[trashedProgramId]?.definitionId;
+    expect(trashedProgramDefinitionId).toBeDefined();
     state = applyChoice(state, "runner", selectedOption?.id ?? "");
 
     expect(state.pendingChoice).toBeUndefined();
     expect(state.runner.memoryUsed).toBe(4);
     expect(state.runner.heap).toContain(trashedProgramId);
     expect(getPlayerView(state, "runner").own.memoryLimit).toBe(4);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      runnerMemoryCheckpointResolved: true,
+      runnerMemoryDeficit: 1,
+      memoryFreed: 1,
+      trashedProgramCount: 1,
+      trashedCardDefinitionIds: trashedProgramDefinitionId,
+      runnerMemoryUsedAfter: 4,
+      runnerMemoryLimitAfter: 4,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
+      trashedProgramId,
+    );
     expect(
       getLegalActions(state, "runner").some(
         (action) =>
