@@ -82,9 +82,10 @@ nicht auf beliebige Matches hochzurechnen.
 - Die fokussierte Semantik-/Lastsuite ist 6/6 grün; Server-Typecheck und
   `git diff --check` sind grün.
 - Der projektweite Typecheck ist grün. Shared- und Contracttests sind 20/20
-  grün, Test-Discovery ist vollständig und Package-Boundaries sind mit 1.892
+  grün, Test-Discovery ist vollständig und Package-Boundaries sind mit 1.893
   geprüften Dateien grün.
-- Der vollständige Serverlauf ist 130/131 grün. Der einzige rote Test
+- Der vollständige Serverlauf nach dem Abgleich mit aktuellem `main` ist
+  191/192 grün; `multiplayer.test.ts` ist 131/132 grün. Der einzige rote Test
   `advances Corp AI in a root-rez window even when activeSide is runner`
   erwartet weiterhin den früheren Zustand ohne Runner-Aktionen, obwohl der
   aktuelle Enginevertrag im Jack-out-Fenster `jack_out` und `continue_run`
