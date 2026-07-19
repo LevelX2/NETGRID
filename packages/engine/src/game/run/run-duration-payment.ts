@@ -315,7 +315,6 @@ function spendRunnerRunStartCredits(
   const availableWithoutSupport =
     availableRunnerRunStartCreditsWithoutSupport(host);
   if (
-    availableWithoutSupport < amount &&
     openRunnerCostPenaltySupportWindow(host.state, legalAction, {
       amount,
       availableWithoutSupport,
@@ -364,7 +363,6 @@ export function spendRunnerRunCredits(
     breakerId,
   );
   if (
-    availableWithoutSupport < amount &&
     legalAction &&
     openRunnerCostPenaltySupportWindow(host.state, legalAction, {
       amount,

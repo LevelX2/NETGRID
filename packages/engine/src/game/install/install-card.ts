@@ -225,15 +225,15 @@ export function installCard(
     legalAction.payload?.runnerProgramTrashBeforeInstallCostsPrepaid === true;
   if (legalAction.side === "runner" && !runnerInstallCostsPrepaid) {
     const installCost = definition.installCost ?? 0;
-    if (!host.payment.runnerCanPayInstallCost(installCost, definition.type)) {
-      if (
-        host.payment.openRunnerCostPenaltySupportWindow(
-          legalAction,
-          installCost,
-          definition.type,
-        )
+    if (
+      host.payment.openRunnerCostPenaltySupportWindow(
+        legalAction,
+        installCost,
+        definition.type,
       )
-        return;
+    )
+      return;
+    if (!host.payment.runnerCanPayInstallCost(installCost, definition.type)) {
       throw new Error(
         "Der Runner kann die Installationskosten nicht bezahlen.",
       );
