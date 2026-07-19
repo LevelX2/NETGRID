@@ -198,7 +198,13 @@ dokumentiertem Sicherheitsblocker und Removal Condition zulässig.
 - Baseline: neun exakt reproduzierte Größenverstöße, null Laufzeit-/Typzyklen,
   Runtime-Root 289. Structure-Selftest, AI-Typecheck, Diff-Hygiene und 39/39
   Public-Export-/Module-Boundary-/Action-Entrypoint-Tests sind grün.
-- Aktives Paket: ASSG-1.
+- ASSG-1 abgeschlossen: Der Cutover-Monolith wurde in vier Vertragsfamilien
+  mit 240/1.428/1.601/709 physischen Zeilen und einen gemeinsamen
+  434-Zeilen-Test-Support geteilt. Alle 76 vorhandenen Testfälle und ihre
+  Assertions bleiben erhalten. AI-Typecheck, 76/76 Cutover-Tests,
+  Structure-Selftest und Diff-Hygiene sind grün; die Removal List sinkt von
+  neun auf acht Treffer.
+- Aktives Paket: ASSG-2.
 
 ## Paketfolge
 
