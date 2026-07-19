@@ -3,8 +3,7 @@
 ## Status
 
 Umsetzung und Verifikation einschließlich des Nachtrags zur
-Doppelbedrohungsreserve abgeschlossen; lokale Integration nach `main` steht
-noch aus.
+Doppelbedrohungsreserve abgeschlossen.
 
 ## Quelle und Ziel
 
