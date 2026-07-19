@@ -1383,6 +1383,151 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     storage.close();
   });
 
+  it("appends action deltas without updating or deleting persisted history prefixes", async () => {
+    const dir = await tempStorageDir();
+    const dbPath = join(dir, "netgrid.sqlite");
+    const storage = new SqliteMatchStorage({ dbPath, backupDir: join(dir, "backups") });
+    const service = new MultiplayerService(storage, { tokenSalt: "v108-delta-append-only" });
+    const created = await service.createMatch({ hostSide: "corp", seed: "v108-delta-append-only" });
+    const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+    if (!joinToken) throw new Error("Missing join token");
+    const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+    if ("error" in joined) throw new Error(joined.error.message);
+    await forceSetupComplete(service, created.matchId);
+    const beforePayload = await service.bootstrap(created.matchId, "corp", created.hostSessionToken);
+    if ("error" in beforePayload) throw new Error(beforePayload.error.message);
+    const action = beforePayload.legalActions.find((candidate) => candidate.type === "mandatory_draw");
+    if (!action) throw new Error("Missing mandatory draw");
+    const auditDb = new DatabaseSync(dbPath);
+    auditDb.exec(`
+      CREATE TRIGGER reject_event_update BEFORE UPDATE ON events BEGIN SELECT RAISE(ABORT, 'event_update_forbidden'); END;
+      CREATE TRIGGER reject_event_delete BEFORE DELETE ON events BEGIN SELECT RAISE(ABORT, 'event_delete_forbidden'); END;
+      CREATE TRIGGER reject_engine_event_update BEFORE UPDATE ON engine_events BEGIN SELECT RAISE(ABORT, 'engine_event_update_forbidden'); END;
+      CREATE TRIGGER reject_engine_event_delete BEFORE DELETE ON engine_events BEGIN SELECT RAISE(ABORT, 'engine_event_delete_forbidden'); END;
+      CREATE TRIGGER reject_receipt_update BEFORE UPDATE ON action_receipts BEGIN SELECT RAISE(ABORT, 'receipt_update_forbidden'); END;
+      CREATE TRIGGER reject_receipt_delete BEFORE DELETE ON action_receipts BEGIN SELECT RAISE(ABORT, 'receipt_delete_forbidden'); END;
+      CREATE TRIGGER reject_trace_update BEFORE UPDATE ON ai_decision_traces BEGIN SELECT RAISE(ABORT, 'trace_update_forbidden'); END;
+      CREATE TRIGGER reject_trace_delete BEFORE DELETE ON ai_decision_traces BEGIN SELECT RAISE(ABORT, 'trace_delete_forbidden'); END;
+      CREATE TRIGGER reject_snapshot_update BEFORE UPDATE ON state_snapshots BEGIN SELECT RAISE(ABORT, 'snapshot_update_forbidden'); END;
+      CREATE TRIGGER reject_snapshot_delete BEFORE DELETE ON state_snapshots BEGIN SELECT RAISE(ABORT, 'snapshot_delete_forbidden'); END;
+    `);
+    const countsBefore = actionHistoryCountsForTest(auditDb, created.matchId);
+
+    const first = await service.submitAction({
+      matchId: created.matchId,
+      side: "corp",
+      sessionToken: created.hostSessionToken,
+      actionId: action.actionId,
+      clientKnownStateVersion: beforePayload.playerView.stateVersion,
+      idempotencyKey: "delta-append-only"
+    });
+    if (!first.ok) throw new Error(first.error.message);
+    const duplicate = await service.submitAction({
+      matchId: created.matchId,
+      side: "corp",
+      sessionToken: created.hostSessionToken,
+      actionId: action.actionId,
+      clientKnownStateVersion: beforePayload.playerView.stateVersion,
+      idempotencyKey: "delta-append-only"
+    });
+    if (!duplicate.ok) throw new Error(duplicate.error.message);
+
+    expect(duplicate.receipt).toEqual(first.receipt);
+    expect(actionHistoryCountsForTest(auditDb, created.matchId)).toEqual({
+      events: countsBefore.events + 1,
+      engineEvents: countsBefore.engineEvents + 1,
+      receipts: countsBefore.receipts + 1,
+      snapshots: countsBefore.snapshots + 1,
+      traces: countsBefore.traces
+    });
+    const reopened = await storage.load(created.matchId);
+    expect(reopened?.actionReceipts.filter((receipt) => receipt.idempotencyKey === "delta-append-only")).toHaveLength(1);
+    expect(reopened?.gameState.stateVersion).toBe(first.receipt.stateVersionAfter);
+    auditDb.close();
+    storage.close();
+  });
+
+  it("rolls back the complete action delta when a late history insert fails", async () => {
+    const dir = await tempStorageDir();
+    const dbPath = join(dir, "netgrid.sqlite");
+    const storage = new SqliteMatchStorage({ dbPath, backupDir: join(dir, "backups") });
+    const service = new MultiplayerService(storage, { tokenSalt: "v108-delta-rollback" });
+    const created = await service.createMatch({ hostSide: "corp", seed: "v108-delta-rollback" });
+    const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+    if (!joinToken) throw new Error("Missing join token");
+    const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+    if ("error" in joined) throw new Error(joined.error.message);
+    await forceSetupComplete(service, created.matchId);
+    const payload = await service.bootstrap(created.matchId, "corp", created.hostSessionToken);
+    if ("error" in payload) throw new Error(payload.error.message);
+    const action = payload.legalActions.find((candidate) => candidate.type === "mandatory_draw");
+    if (!action) throw new Error("Missing mandatory draw");
+    const auditDb = new DatabaseSync(dbPath);
+    const before = {
+      counts: actionHistoryCountsForTest(auditDb, created.matchId),
+      match: auditDb.prepare("SELECT match_version AS matchVersion, state_version AS stateVersion FROM matches WHERE match_id = ?").get(created.matchId)
+    };
+    auditDb.exec(`CREATE TRIGGER fail_delta_receipt BEFORE INSERT ON action_receipts
+      WHEN NEW.idempotency_key = 'forced-delta-rollback'
+      BEGIN SELECT RAISE(ABORT, 'forced_delta_receipt'); END;`);
+    let observerCalls = 0;
+    service.addPersistenceObserver(async () => {
+      observerCalls += 1;
+    });
+
+    await expect(service.submitAction({
+      matchId: created.matchId,
+      side: "corp",
+      sessionToken: created.hostSessionToken,
+      actionId: action.actionId,
+      clientKnownStateVersion: payload.playerView.stateVersion,
+      idempotencyKey: "forced-delta-rollback"
+    })).rejects.toThrow("forced_delta_receipt");
+
+    expect(actionHistoryCountsForTest(auditDb, created.matchId)).toEqual(before.counts);
+    expect(auditDb.prepare("SELECT match_version AS matchVersion, state_version AS stateVersion FROM matches WHERE match_id = ?").get(created.matchId)).toEqual(before.match);
+    expect(observerCalls).toBe(0);
+    auditDb.close();
+    storage.close();
+  });
+
+  it("rejects a delta baseline after concurrent history drift without partial writes", async () => {
+    const fixture = await storedMatchFixture("v108-delta-drift");
+    const dir = await tempStorageDir();
+    const storage = new SqliteMatchStorage({ dbPath: join(dir, "netgrid.sqlite"), backupDir: join(dir, "backups") });
+    await storage.save(fixture.record);
+    const bounded = await storage.loadForAction(fixture.record.match.matchId, { side: "runner", idempotencyKey: "drift-target" });
+    const concurrent = await storage.load(fixture.record.match.matchId);
+    if (!bounded || !concurrent) throw new Error("Missing drift fixture");
+    concurrent.actionReceipts.push({
+      idempotencyKey: "concurrent-receipt",
+      matchId: concurrent.match.matchId,
+      side: "corp",
+      accepted: false,
+      stateVersionBefore: concurrent.gameState.stateVersion,
+      stateVersionAfter: concurrent.gameState.stateVersion,
+      stateHashAfter: hashState(concurrent.gameState),
+      errorCode: "stale_state"
+    });
+    await storage.save(concurrent);
+    bounded.actionReceipts.push({
+      idempotencyKey: "drift-target",
+      matchId: bounded.match.matchId,
+      side: "runner",
+      accepted: false,
+      stateVersionBefore: bounded.gameState.stateVersion,
+      stateVersionAfter: bounded.gameState.stateVersion,
+      stateHashAfter: hashState(bounded.gameState),
+      errorCode: "stale_state"
+    });
+
+    await expect(storage.saveActionDelta(bounded)).rejects.toMatchObject({ code: "action_persistence_conflict" });
+    const reopened = await storage.load(fixture.record.match.matchId);
+    expect(reopened?.actionReceipts.map((receipt) => receipt.idempotencyKey)).toContain("concurrent-receipt");
+    expect(reopened?.actionReceipts.map((receipt) => receipt.idempotencyKey)).not.toContain("drift-target");
+    storage.close();
+  });
+
   it("deduplicates repeated state snapshots before writing SQLite mirror tables", async () => {
     const fixture = await storedMatchFixture("v108-duplicate-state-snapshot");
     const dir = await tempStorageDir();
@@ -8647,6 +8792,32 @@ async function listBackupManifests(backupDir: string) {
 function restoreEnv(key: string, value: string | undefined): void {
   if (value === undefined) delete process.env[key];
   else process.env[key] = value;
+}
+
+function actionHistoryCountsForTest(database: DatabaseSync, matchId: string): {
+  events: number;
+  engineEvents: number;
+  receipts: number;
+  snapshots: number;
+  traces: number;
+} {
+  const row = database
+    .prepare(
+      `SELECT
+        (SELECT COUNT(*) FROM events WHERE match_id = ?) AS events,
+        (SELECT COUNT(*) FROM engine_events WHERE match_id = ?) AS engineEvents,
+        (SELECT COUNT(*) FROM action_receipts WHERE match_id = ?) AS receipts,
+        (SELECT COUNT(*) FROM state_snapshots WHERE match_id = ?) AS snapshots,
+        (SELECT COUNT(*) FROM ai_decision_traces WHERE match_id = ?) AS traces`
+    )
+    .get(matchId, matchId, matchId, matchId, matchId) as Record<string, number | bigint>;
+  return {
+    events: Number(row.events),
+    engineEvents: Number(row.engineEvents),
+    receipts: Number(row.receipts),
+    snapshots: Number(row.snapshots),
+    traces: Number(row.traces)
+  };
 }
 
 function deckSnapshotByIdForTest(snapshotId: string): DeckSnapshot {

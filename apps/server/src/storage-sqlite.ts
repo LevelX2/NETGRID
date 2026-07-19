@@ -340,6 +340,7 @@ export class StorageError extends Error {
       | "schema_too_new"
       | "schema_missing"
       | "stored_match_invalid"
+      | "action_persistence_conflict"
       | "backup_invalid"
       | "backup_checksum_mismatch"
       | "backup_schema_unsupported",
@@ -389,6 +390,14 @@ export class SqliteMatchStorage implements MultiplayerStorage {
   async save(record: StoredMatch): Promise<void> {
     validateStoredMatch(record);
     this.transaction(() => this.saveRecord(record));
+  }
+
+  async saveActionDelta(record: StoredMatch): Promise<void> {
+    validateStoredMatch(record);
+    if (!record.actionPersistenceBaseline) {
+      throw new StorageError("stored_match_invalid", "Delta-Persistenz benötigt eine verifizierte Lade-Baseline.");
+    }
+    this.transaction(() => this.saveActionDeltaRecord(record));
   }
 
   async list(): Promise<StoredMatch[]> {
@@ -1307,7 +1316,16 @@ export class SqliteMatchStorage implements MultiplayerStorage {
             stateHashAfter: string;
             errorCode?: string;
           };
-          return { ...row, matchId, accepted: row.accepted === 1 };
+          return {
+            idempotencyKey: row.idempotencyKey,
+            matchId,
+            side: row.side,
+            accepted: row.accepted === 1,
+            stateVersionBefore: Number(row.stateVersionBefore),
+            stateVersionAfter: Number(row.stateVersionAfter),
+            stateHashAfter: row.stateHashAfter,
+            ...(row.errorCode ? { errorCode: row.errorCode } : {})
+          };
         });
     }
 
@@ -1522,6 +1540,145 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     if (record.pendingUndo) this.db.prepare("INSERT INTO pending_undo (match_id, pending_undo_json) VALUES (?, ?)").run(matchId, JSON.stringify(record.pendingUndo));
     if (record.privateDeckSnapshots) this.db.prepare("INSERT INTO private_deck_snapshots (match_id, private_deck_snapshots_json) VALUES (?, ?)").run(matchId, JSON.stringify(record.privateDeckSnapshots));
     if (record.startLobby) this.db.prepare("INSERT INTO start_lobbies (match_id, start_lobby_json) VALUES (?, ?)").run(matchId, JSON.stringify(record.startLobby));
+  }
+
+  private saveActionDeltaRecord(record: StoredMatch): void {
+    dedupeStateSnapshots(record);
+    const baseline = record.actionPersistenceBaseline;
+    if (!baseline) throw new StorageError("stored_match_invalid", "Delta-Persistenz benötigt eine verifizierte Lade-Baseline.");
+    const matchId = record.match.matchId;
+    const engineEvents = record.gameState.eventLog;
+    const traces = record.aiDecisionTraces ?? [];
+    if (
+      record.eventLog.length < baseline.publicEventCount ||
+      engineEvents.length < baseline.engineEventCount ||
+      record.actionReceipts.length < baseline.loadedActionReceiptCount ||
+      traces.length < baseline.loadedAiDecisionTraceCount
+    ) {
+      throw new StorageError("stored_match_invalid", "Delta-Persistenz darf bestehende Historie nicht verkürzen.");
+    }
+
+    const persisted = this.db
+      .prepare(
+        `SELECT m.match_version AS matchVersion, m.state_version AS stateVersion,
+           (SELECT COUNT(*) FROM events WHERE match_id = m.match_id) AS publicEventCount,
+           (SELECT COUNT(*) FROM engine_events WHERE match_id = m.match_id) AS engineEventCount,
+           (SELECT COUNT(*) FROM action_receipts WHERE match_id = m.match_id) AS actionReceiptCount,
+           (SELECT COUNT(*) FROM ai_decision_traces WHERE match_id = m.match_id) AS aiDecisionTraceCount
+         FROM matches m WHERE m.match_id = ?`
+      )
+      .get(matchId) as {
+        matchVersion: number;
+        stateVersion: number;
+        publicEventCount: number;
+        engineEventCount: number;
+        actionReceiptCount: number;
+        aiDecisionTraceCount: number;
+      } | undefined;
+    if (
+      !persisted ||
+      Number(persisted.matchVersion) !== baseline.expectedMatchVersion ||
+      Number(persisted.stateVersion) !== baseline.expectedStateVersion ||
+      Number(persisted.publicEventCount) !== baseline.publicEventCount ||
+      Number(persisted.engineEventCount) !== baseline.engineEventCount ||
+      Number(persisted.actionReceiptCount) !== baseline.actionReceiptCount ||
+      Number(persisted.aiDecisionTraceCount) !== baseline.aiDecisionTraceCount
+    ) {
+      throw new StorageError("action_persistence_conflict", "Matchhistorie wurde seit dem Aktionsload verändert.");
+    }
+
+    const stateVersion = record.gameState.stateVersion;
+    const stateHash = hashState(record.gameState);
+    const matchUpdate = this.db
+      .prepare(
+        `UPDATE matches SET
+           status = ?, mode = ?, match_version = ?, seed = ?, baseline_json = ?, settings_json = ?, lifecycle_json = ?,
+           record_json = ?, state_version = ?, state_hash = ?, updated_at = ?
+         WHERE match_id = ? AND match_version = ? AND state_version = ?`
+      )
+      .run(
+        record.match.status,
+        record.match.mode,
+        record.match.matchVersion,
+        record.match.seed ?? null,
+        JSON.stringify(record.match.baseline),
+        JSON.stringify(record.match.settings),
+        toJson(record.lifecycleResult),
+        JSON.stringify(compactRecordForStorage(record)),
+        stateVersion,
+        stateHash,
+        record.match.updatedAt,
+        matchId,
+        baseline.expectedMatchVersion,
+        baseline.expectedStateVersion
+      ) as { changes?: number | bigint };
+    if (Number(matchUpdate.changes ?? 0) !== 1) {
+      throw new StorageError("action_persistence_conflict", "Matchzustand wurde seit dem Aktionsload verändert.");
+    }
+    const gameStateUpdate = this.db
+      .prepare(
+        `UPDATE game_states SET state_version = ?, state_hash = ?, game_state_json = ?
+         WHERE match_id = ? AND state_version = ?`
+      )
+      .run(stateVersion, stateHash, JSON.stringify(gameStateForStorage(record.gameState)), matchId, baseline.expectedStateVersion) as { changes?: number | bigint };
+    if (Number(gameStateUpdate.changes ?? 0) !== 1) {
+      throw new StorageError("action_persistence_conflict", "Engine-Zustand wurde seit dem Aktionsload verändert.");
+    }
+
+    const insertEvent = this.db.prepare(
+      `INSERT INTO events
+       (match_id, event_id, event_index, state_version_before, state_version_after, state_hash_after, public_payload_json, private_payload_local_only, hidden_info_barrier)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    );
+    record.eventLog.slice(baseline.publicEventCount).forEach((event, offset) => {
+      insertEvent.run(matchId, event.eventId, baseline.publicEventCount + offset, event.stateVersionBefore, event.stateVersionAfter, event.stateHashAfter, JSON.stringify(publicEventForStorage(event.publicPayload)), event.privatePayloadLocalOnly ? 1 : 0, event.hiddenInfoBarrier ? 1 : 0);
+    });
+
+    const insertEngineEvent = this.db.prepare(
+      "INSERT INTO engine_events (match_id, event_id, event_index, event_json) VALUES (?, ?, ?, ?)"
+    );
+    engineEvents.slice(baseline.engineEventCount).forEach((event, offset) => {
+      insertEngineEvent.run(matchId, event.eventId, baseline.engineEventCount + offset, JSON.stringify(event));
+    });
+
+    const insertTrace = this.db.prepare(
+      `INSERT INTO ai_decision_traces
+       (match_id, trace_id, event_id, state_version, match_version, side, turn, decision_index, selected_action_id, selected_action_type, plan_kind, score, confidence, created_at, schema_version, trace_json)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    );
+    for (const trace of traces.slice(baseline.loadedAiDecisionTraceCount)) {
+      insertTrace.run(matchId, trace.traceId, trace.eventId, trace.stateVersion, trace.matchVersion, trace.side, trace.turn, trace.decisionIndex, trace.selectedActionId ?? null, trace.selectedActionType ?? null, trace.planKind ?? null, trace.score ?? null, trace.confidence ?? null, trace.createdAt, trace.schemaVersion, JSON.stringify(trace.traceJson));
+    }
+
+    const insertReceipt = this.db.prepare(
+      `INSERT INTO action_receipts (match_id, idempotency_key, side, accepted, state_version_before, state_version_after, state_hash_after, error_code)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+    );
+    for (const receipt of record.actionReceipts.slice(baseline.loadedActionReceiptCount)) {
+      insertReceipt.run(matchId, receipt.idempotencyKey, receipt.side, receipt.accepted ? 1 : 0, receipt.stateVersionBefore, receipt.stateVersionAfter, receipt.stateHashAfter, receipt.errorCode ?? null);
+    }
+
+    const insertStateSnapshot = this.db.prepare(
+      `INSERT INTO state_snapshots (match_id, snapshot_id, state_version, match_version, state_hash, game_state_json, created_at, hidden_info_barrier)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+    );
+    for (const snapshot of record.stateSnapshots) {
+      insertStateSnapshot.run(matchId, snapshot.snapshotId, snapshot.stateVersion, snapshot.matchVersion, snapshot.stateHash, JSON.stringify(gameStateForStorage(snapshot.gameState)), snapshot.createdAt, snapshot.hiddenInfoBarrier ? 1 : 0);
+    }
+
+    const updateToken = this.db.prepare(
+      `UPDATE tokens SET kind = ?, allowed_side = ?, token_hash = ?, created_at = ?, expires_at = ?, revoked_at = ?, used_at = ?
+       WHERE match_id = ? AND token_id = ?`
+    );
+    for (const token of record.tokens) {
+      const result = updateToken.run(token.kind, token.allowedSide, token.tokenHash, token.createdAt, token.expiresAt ?? null, token.revokedAt ?? null, token.usedAt ?? null, matchId, token.tokenId) as { changes?: number | bigint };
+      if (Number(result.changes ?? 0) !== 1) throw new StorageError("action_persistence_conflict", "Match-Tokenbestand ist nicht mehr konsistent.");
+    }
+
+    this.db.prepare("DELETE FROM pending_undo WHERE match_id = ?").run(matchId);
+    if (record.pendingUndo) {
+      this.db.prepare("INSERT INTO pending_undo (match_id, pending_undo_json) VALUES (?, ?)").run(matchId, JSON.stringify(record.pendingUndo));
+    }
   }
 
   private syncPublicEvents(matchId: string, events: StoredMatch["eventLog"]): void {
