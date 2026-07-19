@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { PlayerView, PublicGameEvent, Side } from "@netgrid/shared";
 
@@ -29,6 +29,7 @@ import type {
   CatalogCardSummary,
   CatalogListResponse,
 } from "./catalog-types";
+import { CatalogDetailRequestCoordinator } from "./catalog-detail-loader";
 
 const ALL_CATALOG_TYPE_FILTERS: CatalogTypeFilterState = {
   ice: true,
@@ -79,8 +80,9 @@ export function useCatalogWorkspace(payload: CatalogWorkspacePayload | null) {
   const [catalogAiHintFilter, setCatalogAiHintFilter] =
     useState<CatalogAiHintFilterKey>("all");
   const [catalogCards, setCatalogCards] = useState<CatalogCardSummary[]>([]);
-  const [catalogFilters, setCatalogFilters] =
-    useState<CatalogListResponse["filters"] | null>(null);
+  const [catalogFilters, setCatalogFilters] = useState<
+    CatalogListResponse["filters"] | null
+  >(null);
   const [selectedCatalogId, setSelectedCatalogId] = useState<string | null>(
     null,
   );
@@ -93,9 +95,14 @@ export function useCatalogWorkspace(payload: CatalogWorkspacePayload | null) {
   const [catalogDetailsById, setCatalogDetailsById] = useState<
     Record<string, CatalogCardDetail>
   >({});
+  const catalogDetailsByIdRef = useRef(catalogDetailsById);
+  const catalogDetailRequestCoordinatorRef = useRef(
+    new CatalogDetailRequestCoordinator(),
+  );
 
   const blockStatusFilteredCatalogCards = useMemo(
-    () => filterCatalogCardsByBlockStatus(catalogCards, catalogBlockStatusFilter),
+    () =>
+      filterCatalogCardsByBlockStatus(catalogCards, catalogBlockStatusFilter),
     [catalogBlockStatusFilter, catalogCards],
   );
   const catalogBlockStatusCounts = useMemo(
@@ -107,19 +114,29 @@ export function useCatalogWorkspace(payload: CatalogWorkspacePayload | null) {
     [blockStatusFilteredCatalogCards],
   );
   const setFilteredCatalogCards = useMemo(
-    () => filterCatalogCardsBySetId(blockStatusFilteredCatalogCards, catalogSetFilter),
+    () =>
+      filterCatalogCardsBySetId(
+        blockStatusFilteredCatalogCards,
+        catalogSetFilter,
+      ),
     [blockStatusFilteredCatalogCards, catalogSetFilter],
   );
   const aiHintFilteredCatalogCards = useMemo(
-    () => filterCatalogCardsByAiHint(setFilteredCatalogCards, catalogAiHintFilter),
+    () =>
+      filterCatalogCardsByAiHint(setFilteredCatalogCards, catalogAiHintFilter),
     [setFilteredCatalogCards, catalogAiHintFilter],
   );
   const rarityFilteredCatalogCards = useMemo(
-    () => filterCatalogCardsByRarity(aiHintFilteredCatalogCards, catalogRarityFilter),
+    () =>
+      filterCatalogCardsByRarity(
+        aiHintFilteredCatalogCards,
+        catalogRarityFilter,
+      ),
     [aiHintFilteredCatalogCards, catalogRarityFilter],
   );
   const filteredCatalogCards = useMemo(
-    () => filterCatalogCardsByType(rarityFilteredCatalogCards, catalogTypeFilters),
+    () =>
+      filterCatalogCardsByType(rarityFilteredCatalogCards, catalogTypeFilters),
     [catalogTypeFilters, rarityFilteredCatalogCards],
   );
   const filteredCatalogSummary = useMemo(
@@ -141,29 +158,29 @@ export function useCatalogWorkspace(payload: CatalogWorkspacePayload | null) {
 
   const ensureCatalogDetails = useCallback(
     async (cardIds: readonly string[]) => {
-      const missingIds = Array.from(new Set(cardIds)).filter(
-        (cardId) => !catalogDetailsById[cardId],
+      await catalogDetailRequestCoordinatorRef.current.ensure(
+        cardIds,
+        (cardId) => Boolean(catalogDetailsByIdRef.current[cardId]),
+        async (cardId) => {
+          const response = await fetch(
+            `/api/cards/catalog/${encodeURIComponent(cardId)}`,
+            { cache: "no-store" },
+          );
+          if (!response.ok) return null;
+          const data = (await response.json()) as { card?: CatalogCardDetail };
+          return data.card ?? null;
+        },
+        (detail) => {
+          setCatalogDetailsById((current) => {
+            if (current[detail.catalogCardId]) return current;
+            const next = { ...current, [detail.catalogCardId]: detail };
+            catalogDetailsByIdRef.current = next;
+            return next;
+          });
+        },
       );
-      if (missingIds.length === 0) return;
-      const details = await Promise.all(
-        missingIds.map((cardId) =>
-          fetch(`/api/cards/catalog/${encodeURIComponent(cardId)}`, {
-            cache: "no-store",
-          })
-            .then((response) => response.json() as Promise<{ card?: CatalogCardDetail }>)
-            .then((data) => data.card)
-            .catch(() => null),
-        ),
-      );
-      setCatalogDetailsById((current) => {
-        const next = { ...current };
-        details.forEach((detail) => {
-          if (detail) next[detail.catalogCardId] = detail;
-        });
-        return next;
-      });
     },
-    [catalogDetailsById],
+    [],
   );
 
   useEffect(() => {
@@ -199,7 +216,7 @@ export function useCatalogWorkspace(payload: CatalogWorkspacePayload | null) {
       current &&
       filteredCatalogCards.some((card) => card.catalogCardId === current)
         ? current
-        : filteredCatalogCards[0]?.catalogCardId ?? null,
+        : (filteredCatalogCards[0]?.catalogCardId ?? null),
     );
   }, [filteredCatalogCards]);
 
@@ -212,7 +229,9 @@ export function useCatalogWorkspace(payload: CatalogWorkspacePayload | null) {
     void fetch(`/api/cards/catalog/${encodeURIComponent(selectedCatalogId)}`, {
       cache: "no-store",
     })
-      .then((response) => response.json() as Promise<{ card?: CatalogCardDetail }>)
+      .then(
+        (response) => response.json() as Promise<{ card?: CatalogCardDetail }>,
+      )
       .then((data) => {
         if (!ignore) setCatalogDetail(data.card ?? null);
       })

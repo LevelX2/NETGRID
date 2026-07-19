@@ -951,8 +951,12 @@ export default function Page() {
     const token = params.get("joinToken");
     const reconnectToken = params.get("reconnectToken");
     const reconnectSide = params.get("side");
-    const storedDisplayName = readLocalStorage(DISPLAY_NAME_STORAGE_KEY)?.trim();
-    const rawMatchStartSettings = readLocalStorage(MATCH_START_SETTINGS_STORAGE_KEY);
+    const storedDisplayName = readLocalStorage(
+      DISPLAY_NAME_STORAGE_KEY,
+    )?.trim();
+    const rawMatchStartSettings = readLocalStorage(
+      MATCH_START_SETTINGS_STORAGE_KEY,
+    );
     const storedMatchStartSettings = parseMatchStartSettingsFromStorage(
       rawMatchStartSettings,
     );
@@ -2579,7 +2583,9 @@ export default function Page() {
     if (!next) return;
     setPaymentSupportPreselection(next);
     paymentSupportSubmittedKeyRef.current = null;
-    setNotice(`${ability.label} ist für die nächste passende Zahlung vorgemerkt.`);
+    setNotice(
+      `${ability.label} ist für die nächste passende Zahlung vorgemerkt.`,
+    );
   };
   const runActionForServer = (serverId: string): LegalAction | null => {
     const serverContext = {
@@ -2947,24 +2953,11 @@ export default function Page() {
 
   useEffect(() => {
     if (entryTab !== "decks" || !selectedLocalDeck) return;
-    const catalogCardById = new Map(
-      allCatalogCards.map((card) => [card.catalogCardId, card]),
-    );
     const missingIds = selectedLocalDeck.cards
       .map((entry) => entry.cardId)
-      .filter((cardId) => {
-        if (catalogDetailsById[cardId]) return false;
-        const catalogCard = catalogCardById.get(cardId);
-        return !catalogCard || catalogCard.type === "agenda";
-      });
+      .filter((cardId) => !catalogDetailsById[cardId]);
     void ensureCatalogDetails(missingIds);
-  }, [
-    entryTab,
-    selectedLocalDeck,
-    allCatalogCards,
-    catalogDetailsById,
-    ensureCatalogDetails,
-  ]);
+  }, [entryTab, selectedLocalDeck, catalogDetailsById, ensureCatalogDetails]);
 
   useEffect(() => {
     if (entryTab !== "decks" || playableCatalogCards.length === 0) return;
@@ -4179,13 +4172,7 @@ export default function Page() {
       setPaymentSupportPreselection(null);
       setNotice(`${resolution.action.label} wird für diese Zahlung verwendet.`);
     }
-  }, [
-    paymentSupportPreselection,
-    session,
-    payload,
-    connection,
-    submitAction,
-  ]);
+  }, [paymentSupportPreselection, session, payload, connection, submitAction]);
 
   useEffect(() => {
     if (!paymentSupportContinuation) return;

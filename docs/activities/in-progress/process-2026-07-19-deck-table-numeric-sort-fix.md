@@ -1,6 +1,7 @@
 ---
 processId: process-2026-07-19-deck-table-numeric-sort-fix
 status: in_progress
+currentState: P1_DATA_PATH
 sourceActivity: act-2026-07-19-decktable-corp-cost-sort-clarity
 primaryAgent: release-implementation-agent
 branch: codex/deck-table-numeric-sort-fix
@@ -184,3 +185,19 @@ dann als complete markieren.`
 - Kostenoptionen sind side-gerecht und während fehlender Details eindeutig.
 - Alle Paketcommits sind lokal nach `main` integriert.
 - Arbeits-Worktree und Arbeitsbranch sind nachweislich entfernt.
+
+## Fortschritt
+
+### P1_DATA_PATH – abgeschlossen
+
+- Dauerursache bestätigt: `ensureCatalogDetails` übernahm Ergebnisse erst nach
+  Abschluss eines gemeinsamen `Promise.all`; ein einzelner hängender Abruf
+  blockierte dadurch sämtliche erfolgreich geladenen Zahlenwerte unbegrenzt.
+- Der ausgewählte-Deck-Effekt forderte bekannte Nicht-Agenda-Karten, also auch
+  ICE, nicht gezielt an und war damit vollständig vom globalen Katalog-Prefetch
+  abhängig.
+- Erfolgreiche Details werden nun einzeln übernommen, parallele Abrufe pro
+  Karten-ID dedupliziert und fehlgeschlagene IDs bei einem späteren Aufruf
+  erneut versucht. Alle fehlenden Karten des aktuellen Decks werden priorisiert.
+- Checks: fünf fokussierte Vitest-Tests grün; Web-Typecheck grün;
+  `git diff --check` grün.
