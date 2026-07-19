@@ -3320,6 +3320,190 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
     ).toBe(true);
   });
 
+  it("opens a minimal Runner MU checkpoint after Shattered Remains trashes WuTech", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "regression-shattered-remains-wutech-memory-checkpoint",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.agendaScoring.runner,
+          cards: [
+            { id: "onr_v1_145_wutech-mem-chip", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.agendaScoring.runner.cards.filter(
+              (card) => card.id !== "simple_setup_hardware",
+            ),
+          ],
+        },
+        corpDeck: MECHANIC_SMOKE_DECKS.agendaScoring.corp,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 20;
+    const wuTechId = installRunnerHardwareForTest(
+      state,
+      "onr_v1_145_wutech-mem-chip",
+    );
+    const installedProgramIds = [
+      installRunnerProgramForTest(state, "simple_decoder"),
+      installRunnerProgramCopyForTest(state, "simple_decoder"),
+      installRunnerProgramForTest(state, "simple_fracter"),
+      installRunnerProgramCopyForTest(state, "simple_fracter"),
+      installRunnerProgramForTest(state, "simple_killer"),
+    ];
+    expect(state.runner.memoryUsed).toBe(5);
+    expect(getPlayerView(state, "runner").own.memoryLimit).toBe(5);
+
+    const shatteredId = putCorpRootInRemote(
+      state,
+      "onr_v1_315_corprunners-shattered-remains",
+    );
+    state.cardInstances[shatteredId] = {
+      ...state.cardInstances[shatteredId]!,
+      advancementCounters: 1,
+    };
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_card" &&
+        sourceDefinition(state, action) ===
+          "onr_v1_315_corprunners-shattered-remains",
+    );
+    expect(state.timingPoint).toBe("access.resolve_card");
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) => action.type === "decline_rez",
+      ),
+    ).toBe(false);
+    state = passRootRezWindowBeforeAccessIfOpen(state);
+
+    const accessAction = mustAction(
+      state,
+      "runner",
+      (action) => action.type === "access_card",
+    );
+    const accessResult = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: accessAction.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "shattered-remains-wutech-access",
+    });
+    expect(accessResult.ok).toBe(true);
+    if (!accessResult.ok) throw new Error(accessResult.error.message);
+    state = accessResult.state;
+
+    expect(state.runner.heap).toContain(wuTechId);
+    expect(state.runner.memoryUsed).toBe(5);
+    expect(getPlayerView(state, "runner").own.memoryLimit).toBe(4);
+    expect(state.pendingChoice).toMatchObject({
+      side: "runner",
+      source: expect.stringMatching(/^runner\.checkpoint_memory_cleanup:/),
+      prompt: "Programme für das MU-Limit trashen",
+      kind: "select_cards",
+      minSelections: 1,
+      maxSelections: installedProgramIds.length,
+      visibility: "hidden_info_barrier",
+    });
+    expect(
+      state.pendingChoice?.options.map((option) => option.value).sort(),
+    ).toEqual(installedProgramIds.slice().sort());
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+
+    const choiceAction = mustAction(
+      state,
+      "runner",
+      (action) => action.type === "resolve_choice",
+    );
+    const selectedOptionIds =
+      state.pendingChoice?.options.map((option) => option.id) ?? [];
+    const wrongSideResult = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: choiceAction.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "shattered-remains-wutech-wrong-side",
+    });
+    expect(wrongSideResult.ok).toBe(false);
+    if (!wrongSideResult.ok)
+      expect(wrongSideResult.error.code).toBe("ERR_WRONG_SIDE");
+
+    const staleResult = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: choiceAction.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      selectedChoices: {
+        choiceId: state.pendingChoice?.choiceId,
+        selectedOptionIds: selectedOptionIds.slice(0, 1),
+      },
+      idempotencyKey: "shattered-remains-wutech-stale",
+    });
+    expect(staleResult.ok).toBe(false);
+    if (!staleResult.ok) expect(staleResult.error.code).toBe("ERR_STALE_STATE");
+
+    const insufficientResult = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: choiceAction.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      selectedChoices: {
+        choiceId: state.pendingChoice?.choiceId,
+        selectedOptionIds: [],
+      },
+      idempotencyKey: "shattered-remains-wutech-insufficient",
+    });
+    expect(insufficientResult.ok).toBe(false);
+    if (!insufficientResult.ok)
+      expect(insufficientResult.error.code).toBe("ERR_INVALID_CHOICE");
+
+    const nonMinimalResult = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: choiceAction.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      selectedChoices: {
+        choiceId: state.pendingChoice?.choiceId,
+        selectedOptionIds: selectedOptionIds.slice(0, 2),
+      },
+      idempotencyKey: "shattered-remains-wutech-non-minimal",
+    });
+    expect(nonMinimalResult.ok).toBe(false);
+    if (!nonMinimalResult.ok) {
+      expect(nonMinimalResult.error.message).toContain("nicht minimal");
+    }
+
+    const selectedOption = state.pendingChoice?.options[0];
+    expect(selectedOption).toBeDefined();
+    const trashedProgramId = selectedOption?.value as CardInstanceId;
+    state = applyChoice(state, "runner", selectedOption?.id ?? "");
+
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.runner.memoryUsed).toBe(4);
+    expect(state.runner.heap).toContain(trashedProgramId);
+    expect(getPlayerView(state, "runner").own.memoryLimit).toBe(4);
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "trash_accessed_card" ||
+          action.type === "decline_trash",
+      ),
+    ).toBe(true);
+    expect(validateGameState(state).ok).toBe(true);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("keeps Ball and Chain tax and Tokyo-Chiba Infighting run bonus scoped to the current run/server", () => {
     let taxState = toRunnerTurn(
       v181CardReleaseGame("spotcheck-ball-chain-tax"),

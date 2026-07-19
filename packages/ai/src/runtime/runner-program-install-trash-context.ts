@@ -1,17 +1,24 @@
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 import {
   programSacrificeCandidate as buildProgramSacrificeCandidate,
   programSacrificeCandidateIsRedundant as buildProgramSacrificeCandidateIsRedundant,
   runnerProgramInstallDisplacementPenalty as buildRunnerProgramInstallDisplacementPenalty,
   runnerProgramInstallTrashAssessmentFromCards as buildRunnerProgramInstallTrashAssessmentFromCards,
   sacrificeCandidateLabel,
+  selectedMinimalProgramSacrificeCandidates,
   type ProgramSacrificeCandidate,
   type RunnerProgramInstallTrashAssessment,
 } from "./runner-program-install-trash-policy";
 import { runnerProgramSacrificeExclusion as buildRunnerProgramSacrificeExclusion } from "./runner-program-sacrifice-exclusion";
 import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
 
-type PendingChoice = NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>;
+type PendingChoice = NonNullable<
+  AiDecisionInput["playerView"]["pendingChoice"]
+>;
 type PendingChoiceOptions = PendingChoice["options"];
 type PendingChoiceOption = PendingChoiceOptions[number];
 
@@ -39,6 +46,10 @@ export type RunnerProgramInstallTrashContext = {
     selectableOptions: PendingChoiceOptions,
   ) => string[];
   selectedRunnerForcedProgramTrashOptionIds: (
+    input: AiDecisionInput,
+    selectableOptions: PendingChoiceOptions,
+  ) => string[];
+  selectedRunnerMemoryCheckpointTrashOptionIds: (
     input: AiDecisionInput,
     selectableOptions: PendingChoiceOptions,
   ) => string[];
@@ -114,6 +125,23 @@ export function createRunnerProgramInstallTrashContext(
           ),
       )[0];
     return selected?.option?.id ? [selected.option.id] : [];
+  }
+
+  function selectedRunnerMemoryCheckpointTrashOptionIds(
+    input: AiDecisionInput,
+    selectableOptions: PendingChoiceOptions,
+  ): string[] {
+    const assessment = runnerProgramInstallTrashAssessmentFromCards(
+      input,
+      undefined,
+      selectableOptions,
+    );
+    return selectedMinimalProgramSacrificeCandidates(
+      assessment.candidates,
+      assessment.requiredMemoryToFree,
+    )
+      .map((candidate) => candidate.option?.id)
+      .filter((id): id is string => typeof id === "string");
   }
 
   function runnerProgramInstallTrashAssessment(
@@ -262,6 +290,7 @@ export function createRunnerProgramInstallTrashContext(
   return {
     selectedRunnerProgramInstallTrashOptionIds,
     selectedRunnerForcedProgramTrashOptionIds,
+    selectedRunnerMemoryCheckpointTrashOptionIds,
     runnerProgramInstallTrashAssessment,
     runnerProgramInstallTrashAssessmentForAction,
     runnerProgramInstallDisplacementPenalty,

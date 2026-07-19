@@ -451,6 +451,49 @@ describe("run rez window", () => {
     expect(calls.continued).toEqual([action]);
   });
 
+  it("closes the movement root rez window after the last real rez action", () => {
+    const state = makeState({ rootRezzed: true });
+    const { host, calls } = hostFor(state);
+    const action = legalAction(state, "corp", "rez_card", {
+      cardId: "root_1",
+      rootRez: true,
+    });
+
+    handleRunRootRezPostRez(host, "root_1" as CardInstanceId, action);
+
+    expect(state.run?.rootRezWindowPassedKeys).toEqual(["run_1:ice:rd:0"]);
+    expect(state.run?.rootRezWindowPendingPassKeys).toBeUndefined();
+    expect(buildCorpRunRootRezWindowActions(host)).toEqual([]);
+    expect(calls.continued).toEqual([action]);
+  });
+
+  it("keeps the movement root rez window open when another root can be rezzed", () => {
+    const state = makeState({ rootRezzed: true });
+    const secondRootId = "root_2" as CardInstanceId;
+    state.cardInstances[secondRootId] = instance(
+      secondRootId,
+      "simple_economy_asset",
+      {
+        zone: { side: "corp", zone: "serverRoot", serverId: "rd" },
+      },
+    );
+    state.corp.servers[0]!.root.push(secondRootId);
+    const { host, calls } = hostFor(state);
+    const action = legalAction(state, "corp", "rez_card", {
+      cardId: "root_1",
+      rootRez: true,
+    });
+
+    handleRunRootRezPostRez(host, "root_1" as CardInstanceId, action);
+
+    expect(state.run?.rootRezWindowPassedKeys).toBeUndefined();
+    expect(state.run?.rootRezWindowPendingPassKeys).toEqual(["run_1:ice:rd:0"]);
+    expect(
+      buildCorpRunRootRezWindowActions(host).map((entry) => entry.type),
+    ).toEqual(["rez_card", "decline_rez"]);
+    expect(calls.continued).toEqual([action]);
+  });
+
   it("opens and resolves Speed Trap root-rez interrupt through the run rez window", () => {
     const state = makeState({
       runnerProgramDefinitionId: "onr_v1_067_speed-trap",

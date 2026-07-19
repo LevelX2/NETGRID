@@ -838,21 +838,17 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     );
 
     expect(state.cardInstances[setupId]?.rezzed).toBe(true);
-    expect(state.timingPoint).toBe("run.movement_rez_window");
-    expect(
-      getLegalActions(state, "runner").map((action) => action.type),
-    ).not.toContain("jack_out");
-    state = apply(
-      state,
-      "corp",
-      (action) =>
-        action.type === "decline_rez" &&
-        action.payload?.runRootRezPass === true,
-    );
     expect(state.timingPoint).toBe("access.resolve_card");
     expect(
       getLegalActions(state, "runner").map((action) => action.type),
     ).not.toContain("jack_out");
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) =>
+          action.type === "decline_rez" &&
+          action.payload?.runRootRezPass === true,
+      ),
+    ).toBe(false);
 
     state = apply(state, "runner", (action) => action.type === "access_card");
 

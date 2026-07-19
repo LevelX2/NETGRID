@@ -66,6 +66,7 @@ export type PendingChoiceResolutionHost = {
   };
   runner: {
     resolveRunnerProgramTrashBeforeInstallChoice: HostFn<void>;
+    resolveRunnerMemoryCheckpointChoice: HostFn<void>;
     resolveDelayedInstallStartTurnChoice: HostFn<void>;
     resolveDelayedInstallMemoryChoice: HostFn<void>;
   };
@@ -199,6 +200,8 @@ export function resolvePendingChoice(
   const scoredAgendaFlowHost = host.corp.scoredAgendaFlowHost;
   const resolveRunnerProgramTrashBeforeInstallChoice =
     host.runner.resolveRunnerProgramTrashBeforeInstallChoice;
+  const resolveRunnerMemoryCheckpointChoice =
+    host.runner.resolveRunnerMemoryCheckpointChoice;
   const resolveDelayedInstallStartTurnChoice =
     host.runner.resolveDelayedInstallStartTurnChoice;
   const resolveDelayedInstallMemoryChoice =
@@ -349,6 +352,12 @@ export function resolvePendingChoice(
       legalAction,
       playerAction,
     );
+    return;
+  }
+  if (
+    state.pendingChoice.source.startsWith("runner.checkpoint_memory_cleanup:")
+  ) {
+    resolveRunnerMemoryCheckpointChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("runner_start.delayed_install:")) {

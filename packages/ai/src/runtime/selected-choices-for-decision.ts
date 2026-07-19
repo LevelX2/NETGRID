@@ -58,6 +58,10 @@ export type SelectedChoicesForDecisionDependencies = {
     input: AiDecisionInput,
     selectableOptions: PendingChoiceOptions,
   ) => string[];
+  readonly selectedRunnerMemoryCheckpointTrashOptionIds: (
+    input: AiDecisionInput,
+    selectableOptions: PendingChoiceOptions,
+  ) => string[];
   readonly extractAiFeatures: (
     input: AiDecisionInput,
   ) => SearchChoiceFeatureSnapshot;
@@ -93,6 +97,19 @@ export function selectedChoicesForDecision(
       dependencies.discardKeepScore,
     );
     return { choiceId: choice.choiceId, selectedOptionIds: selected };
+  }
+  if (
+    choice.kind === "select_cards" &&
+    choice.source.startsWith("runner.checkpoint_memory_cleanup:")
+  ) {
+    return {
+      choiceId: choice.choiceId,
+      selectedOptionIds:
+        dependencies.selectedRunnerMemoryCheckpointTrashOptionIds(
+          input,
+          selectableOptions,
+        ),
+    };
   }
   if (
     choice.kind === "select_cards" &&

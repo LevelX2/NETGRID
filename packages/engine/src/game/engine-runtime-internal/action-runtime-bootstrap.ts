@@ -63,6 +63,7 @@ import {
   type PendingChoiceResolutionHost,
 } from "../choices/pending-choice-resolution";
 import { selectedChoiceIds } from "../choices/choice-validation";
+import { startRunnerMemoryCheckpointChoice } from "../checkpoints/runner-memory-checkpoint";
 import {
   corpInstalledCardIds,
   corpRootAssetIdsInServer,
@@ -978,6 +979,15 @@ export function configureActionRuntimeBootstrap({
             state,
             legalAction,
           );
+        startRunnerMemoryCheckpointChoice({
+          state,
+          runnerMemoryLimit: () => runnerMemoryLimit(state),
+          runnerProgramUsesMemory: (cardId) =>
+            runtimePorts.runnerProgramUsesMemory(state, cardId),
+          definitionFor: (cardId) => definitionFor(state, cardId),
+          trashRunnerInstalledCardToHeap: (cardId, action) =>
+            runtimePorts.trashRunnerInstalledCardToHeap(state, cardId, action),
+        });
       },
     },
     perform: {

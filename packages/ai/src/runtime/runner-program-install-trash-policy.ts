@@ -59,6 +59,94 @@ export function selectedProgramSacrificeCandidates(
   };
 }
 
+type ProgramSacrificeSelection = {
+  candidates: ProgramSacrificeCandidate[];
+  memoryFreed: number;
+  minimumMemoryCost: number;
+  score: number;
+  sacrificePenalty: number;
+};
+
+export function selectedMinimalProgramSacrificeCandidates(
+  candidates: readonly ProgramSacrificeCandidate[],
+  requiredMemoryToFree: number,
+): ProgramSacrificeCandidate[] {
+  if (requiredMemoryToFree <= 0) return [];
+  const eligible = [...candidates]
+    .filter(
+      (candidate) =>
+        candidate.memoryCost > 0 && candidate.option?.id !== undefined,
+    )
+    .sort((left, right) =>
+      sacrificeCandidateLabel(left).localeCompare(
+        sacrificeCandidateLabel(right),
+        "de",
+      ),
+    );
+  const selections = new Map<string, ProgramSacrificeSelection>();
+  selections.set("0:0", {
+    candidates: [],
+    memoryFreed: 0,
+    minimumMemoryCost: 0,
+    score: 0,
+    sacrificePenalty: 0,
+  });
+
+  for (const candidate of eligible) {
+    for (const selection of [...selections.values()]) {
+      const memoryFreed = selection.memoryFreed + candidate.memoryCost;
+      const minimumMemoryCost =
+        selection.candidates.length === 0
+          ? candidate.memoryCost
+          : Math.min(selection.minimumMemoryCost, candidate.memoryCost);
+      const next: ProgramSacrificeSelection = {
+        candidates: [...selection.candidates, candidate],
+        memoryFreed,
+        minimumMemoryCost,
+        score: selection.score + candidate.score,
+        sacrificePenalty:
+          selection.sacrificePenalty + candidate.sacrificePenalty,
+      };
+      const key = `${memoryFreed}:${minimumMemoryCost}`;
+      const current = selections.get(key);
+      if (!current || compareProgramSacrificeSelections(next, current) < 0) {
+        selections.set(key, next);
+      }
+    }
+  }
+
+  return (
+    [...selections.values()]
+      .filter(
+        (selection) =>
+          selection.memoryFreed >= requiredMemoryToFree &&
+          selection.memoryFreed - selection.minimumMemoryCost <
+            requiredMemoryToFree,
+      )
+      .sort(compareProgramSacrificeSelections)[0]?.candidates ?? []
+  );
+}
+
+function compareProgramSacrificeSelections(
+  left: ProgramSacrificeSelection,
+  right: ProgramSacrificeSelection,
+): number {
+  return (
+    right.score - left.score ||
+    left.sacrificePenalty - right.sacrificePenalty ||
+    left.memoryFreed - right.memoryFreed ||
+    left.candidates.length - right.candidates.length ||
+    left.candidates
+      .map((candidate) => candidate.option?.id ?? "")
+      .join("\u0000")
+      .localeCompare(
+        right.candidates
+          .map((candidate) => candidate.option?.id ?? "")
+          .join("\u0000"),
+      )
+  );
+}
+
 export function runnerProgramInstallTrashAssessmentEvidence(params: {
   requiredMemoryToFree: number;
   candidates: readonly ProgramSacrificeCandidate[];
@@ -229,10 +317,7 @@ export function programSacrificeCandidate(
   if (protectedRole) {
     sacrificePenalty += 1500;
     reasonCategories.push("unique_breaker_coverage");
-  } else if (
-    breakerRoles.length > 0 ||
-    rolesHaveBreakerRole(roles)
-  ) {
+  } else if (breakerRoles.length > 0 || rolesHaveBreakerRole(roles)) {
     sacrificePenalty += 420;
     reasonCategories.push("breaker_coverage");
   }
@@ -298,7 +383,5 @@ export function programSacrificeCandidate(
 }
 
 function sortedUnique(values: string[]): string[] {
-  return [...new Set(values)].sort((left, right) =>
-    left.localeCompare(right),
-  );
+  return [...new Set(values)].sort((left, right) => left.localeCompare(right));
 }

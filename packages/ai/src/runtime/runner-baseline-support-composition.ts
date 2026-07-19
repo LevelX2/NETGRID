@@ -38,6 +38,7 @@ export type RunnerBaselineSupportCompositionDependencies =
       | "rolesForCardId"
       | "selectedRunnerProgramInstallTrashOptionIds"
       | "selectedRunnerForcedProgramTrashOptionIds"
+      | "selectedRunnerMemoryCheckpointTrashOptionIds"
     > &
     RunnerProgramPressureCompositionDependencies &
     Omit<
@@ -87,6 +88,7 @@ export function createRunnerBaselineSupportComposition(
   const {
     selectedRunnerProgramInstallTrashOptionIds,
     selectedRunnerForcedProgramTrashOptionIds,
+    selectedRunnerMemoryCheckpointTrashOptionIds,
     runnerProgramInstallTrashAssessment,
     runnerProgramInstallTrashAssessmentForAction,
     runnerProgramInstallDisplacementPenalty,
@@ -120,6 +122,8 @@ export function createRunnerBaselineSupportComposition(
       selectedRunnerProgramInstallTrashOptionIds,
     selectedRunnerForcedProgramTrashOptionIds:
       selectedRunnerForcedProgramTrashOptionIds,
+    selectedRunnerMemoryCheckpointTrashOptionIds:
+      selectedRunnerMemoryCheckpointTrashOptionIds,
     extractAiFeatures: dependencies.extractAiFeatures,
     rolesForCardId: dependencies.rolesForCardId,
   };
