@@ -273,11 +273,47 @@ function runnerRunPlanAbortChoice(params: {
         choice.action.type === "continue_run" &&
         choice.action.payload?.encounterContinue === true,
     );
+    const accessPreservingPaymentChoice = [...params.choices]
+      .filter(
+        (choice) =>
+          !choice.exclusion &&
+          choice.action.type === "continue_run" &&
+          choice.action.payload?.encounterContinue === true &&
+          choice.action.payload?.encounterWillEndRun !== true &&
+          actionCreditCost(choice.action) > 0 &&
+          actionCreditCost(choice.action) <= params.plan.budget.availableCredits,
+      )
+      .sort(
+        (left, right) =>
+          right.score - left.score ||
+          left.action.actionId.localeCompare(right.action.actionId),
+      )[0];
+    if (
+      continueChoice?.action.payload?.encounterWillEndRun === true &&
+      accessPreservingPaymentChoice &&
+      runnerRunPlanCheapAccessPaymentWorthwhile(
+        params.input,
+        params.plan,
+        accessPreservingPaymentChoice,
+      )
+    ) {
+      return annotateRunnerRunPlanChoice({
+        choice: accessPreservingPaymentChoice,
+        plan: params.plan,
+        explanation:
+          "RunnerRunPlan bezahlt eine kleine sichtbare Subroutinenkosten, um den unbekannten Remote-Zugriff zu erhalten.",
+        extraEvidence: [
+          "runner_run_plan_access_preserving_payment:true",
+          `runner_run_plan_access_preserving_payment_cost:${actionCreditCost(accessPreservingPaymentChoice.action)}`,
+        ],
+      });
+    }
     const affordableBreakChoice = [...params.choices]
       .filter(
         (choice) =>
           !choice.exclusion &&
-          choice.action.type === "break_subroutine" &&
+          (choice.action.type === "break_subroutine" ||
+            choice.action.type === "pump_breaker") &&
           actionCreditCost(choice.action) <=
             params.plan.budget.availableCredits,
       )
@@ -471,7 +507,8 @@ function runnerRunPlanConserveCreditsChoice(params: {
   const affordableBreakChoice = params.choices.some(
     (choice) =>
       !choice.exclusion &&
-      choice.action.type === "break_subroutine" &&
+      (choice.action.type === "break_subroutine" ||
+        choice.action.type === "pump_breaker") &&
       actionCreditCost(choice.action) <= params.input.playerView.own.credits,
   );
   if (
@@ -493,6 +530,28 @@ function runnerRunPlanConserveCreditsChoice(params: {
       `runner_run_plan_conserve_expected_remaining:${pathQuote.expectedRemainingCredits}`,
     ],
   });
+}
+
+function runnerRunPlanCheapAccessPaymentWorthwhile(
+  input: AiDecisionInput,
+  plan: RunnerRunPlan,
+  choice: SemanticRuntimeChoice,
+): boolean {
+  const cost = actionCreditCost(choice.action);
+  if (cost <= 0 || cost > 1) return false;
+  if (!plan.targetServer.id.startsWith("remote_")) return false;
+  const target = input.playerView.servers.find(
+    (server) => server.id === plan.targetServer.id,
+  );
+  if (!target || target.root.length === 0) return false;
+  if ((plan.accessIntent?.expectedAccessCount ?? 0) <= 0) return false;
+  return (
+    input.playerView.own.credits - cost >=
+    Math.max(
+      plan.reserve.minimumCreditsAfterRun,
+      plan.budget.reservedCreditsAfterRun,
+    )
+  );
 }
 
 function runnerRunPlanContinueHasBreakAvailablePenalty(

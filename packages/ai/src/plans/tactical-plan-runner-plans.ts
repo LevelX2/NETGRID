@@ -787,6 +787,9 @@ export function buildRunnerTacticalPlans(
         currentStep: createPlanStep({
           stepId: "build_bank_counter:runner",
           kind: "build_bank_counter",
+          actionCandidateIds: runnerBankAssessment.buildActions.map(
+            (action) => action.actionId,
+          ),
           desiredActionSemantics: [
             "card_ability.trigger",
             "card_ability.unknown",
@@ -836,6 +839,9 @@ export function buildRunnerTacticalPlans(
         currentStep: createPlanStep({
           stepId: "cash_out_bank:runner",
           kind: "cash_out_bank",
+          actionCandidateIds: runnerBankAssessment.payoutActions.map(
+            (action) => action.actionId,
+          ),
           desiredActionSemantics: [
             "card_ability.trigger",
             "card_ability.unknown",

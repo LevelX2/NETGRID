@@ -113,6 +113,12 @@ export function candidateMatchesStep(
   if (step.actionCandidateIds.length > 0) {
     return step.actionCandidateIds.includes(action.actionId);
   }
+  if (
+    (step.kind === "build_bank_counter" || step.kind === "cash_out_bank") &&
+    !bankStepMatchesCandidate(step, candidate, action)
+  ) {
+    return false;
+  }
   if (isCoverageAnswerStep(step)) {
     const fit = coverageSearchActionFit(
       plan,
