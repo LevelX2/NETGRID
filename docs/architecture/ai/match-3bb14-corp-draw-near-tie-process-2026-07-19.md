@@ -1,6 +1,6 @@
 # Match-3bb14-Corp-Draw-Near-Tie-Prozess (2026-07-19)
 
-Status: P1 abgeschlossen, P2 aktiv
+Status: P2 abgeschlossen, P3 aktiv
 
 ## Quelle und Zielprüfung
 
@@ -163,3 +163,8 @@ verifiziertem Worktree- und Branch-Cleanup als abgeschlossen.
 - P0: `ad7cdaa06` (`docs(ai): plan corp draw near-tie refinement`)
 - P1: drei Strict-Captures ohne Warmup-Drift; drei rote
   `behavior_regression`-Zieltests und zwei grüne Gegenproben.
+- P2: dynamische Draw-Kapazität aus aktueller maximaler Handgröße und
+  projiziertem Draw-Umfang; side-safe Verteidigungs-Draw für eine leere
+  zentrale ICE-Lage ohne konkrete Installationsalternative bei positivem
+  Deck-ICE-Schätzwert. D9-D11 und Gegenproben sind grün; fokussiert 66/66
+  Tests und AI-Typecheck grün.

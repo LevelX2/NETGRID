@@ -3868,6 +3868,15 @@
       {
         "type": "gain_credit"
       }
-    ]
+    ],
+    "selectedScoreBreakdown": {
+      "requiredComponentKeys": [
+        "corp_safe_draw_capacity",
+        "corp_missing_concrete_defense_draw"
+      ],
+      "forbiddenComponentKeys": [
+        "corp_low_hand"
+      ]
+    }
   }
 }
