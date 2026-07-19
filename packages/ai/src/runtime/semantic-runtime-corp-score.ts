@@ -746,7 +746,11 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
   if (preparedScoreRemoteAgendaSearch) {
     components.push(preparedScoreRemoteAgendaSearch);
   }
-  const optionalDrawComponents = corpOptionalDrawScoreComponents(input, action);
+  const optionalDrawComponents = corpOptionalDrawScoreComponents(
+    input,
+    action,
+    boardTriageState,
+  );
   components.push(...optionalDrawComponents);
   if (
     optionalDrawComponents.some(

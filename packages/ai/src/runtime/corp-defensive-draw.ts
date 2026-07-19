@@ -12,6 +12,7 @@ import {
   semanticRuntimeCorpCentralPressureAssessment,
   type CorpCentralServerId,
 } from "./semantic-runtime-corp-central-pressure";
+import type { CorpBoardTriage } from "./semantic-runtime-corp-board-triage";
 
 const CORP_SAFE_DRAW_CAPACITY_VALUE = 100;
 const CORP_LOW_HAND_VALUE = 450;
@@ -55,9 +56,15 @@ export function corpOptionalDrawCapacity(
 export function corpOptionalDrawScoreComponents(
   input: AiDecisionInput,
   action: LegalAction,
+  boardTriage?: CorpBoardTriage,
 ): AiDecisionScoreComponent[] {
   const capacity = corpOptionalDrawCapacity(input, action);
-  if (!capacity.eligible) return [];
+  if (
+    !capacity.eligible ||
+    corpOptionalDrawWouldDelayProtectedScoreRemote(boardTriage)
+  ) {
+    return [];
+  }
   const evidence = corpOptionalDrawCapacityEvidence(capacity);
   const components: AiDecisionScoreComponent[] = [
     {
@@ -82,6 +89,16 @@ export function corpOptionalDrawScoreComponents(
   );
   if (defensiveDraw) components.push(defensiveDraw);
   return components;
+}
+
+function corpOptionalDrawWouldDelayProtectedScoreRemote(
+  boardTriage: CorpBoardTriage | undefined,
+): boolean {
+  if (boardTriage?.primary !== "protect_score_remote") return false;
+  if (boardTriage.severity !== "high" && boardTriage.severity !== "critical") {
+    return false;
+  }
+  return boardTriage.scoreRemoteServerId?.startsWith("remote_") === true;
 }
 
 export function corpMissingConcreteDefenseDrawComponent(

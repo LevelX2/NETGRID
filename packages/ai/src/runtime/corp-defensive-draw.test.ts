@@ -69,6 +69,32 @@ describe("Corp defensive draw context", () => {
     ).toContain("corp_safe_draw_capacity");
   });
 
+  it("does not reward optional draw while an existing protected score remote is urgent", () => {
+    const components = corpOptionalDrawScoreComponents(drawInput(5, 4), draw, {
+      primary: "protect_score_remote",
+      severity: "high",
+      targetServerId: "remote_1",
+      scoreRemoteServerId: "remote_1",
+      evidence: ["test_existing_protected_score_remote"],
+    });
+
+    expect(components).toEqual([]);
+  });
+
+  it("keeps draw eligible for speculative new-remote protection triage", () => {
+    const components = corpOptionalDrawScoreComponents(drawInput(5, 4), draw, {
+      primary: "protect_score_remote",
+      severity: "high",
+      targetServerId: "new_remote",
+      scoreRemoteServerId: "new_remote",
+      evidence: ["test_speculative_new_remote"],
+    });
+
+    expect(components.map((component) => component.key)).toContain(
+      "corp_safe_draw_capacity",
+    );
+  });
+
   it("does not invent a defense draw need when both centrals have ICE", () => {
     const input = drawInput(5, 4, [centralIce("hq-ice"), centralIce("rd-ice")]);
 
