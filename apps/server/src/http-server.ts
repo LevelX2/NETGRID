@@ -90,6 +90,10 @@ import {
   SqliteAccountStorage,
   type AccountSessionAuthResult,
 } from "./account-session";
+import {
+  AccountMatchStatisticsService,
+  SqliteAccountStatisticsStorage,
+} from "./account-statistics";
 
 type ClientWsMessage =
   | {
@@ -155,6 +159,7 @@ export type NetgridServerOptions = {
   maintenanceAuth?: MaintenanceAuthService;
   accountAuth?: AccountAuthService;
   accountDecks?: AccountDeckService;
+  accountStatistics?: AccountMatchStatisticsService;
 };
 
 export class NetgridRealtimeServer {
@@ -806,6 +811,7 @@ export function createNetgridHttpServer(
     );
   const accountAuth = options.accountAuth;
   const accountDecks = options.accountDecks;
+  const accountStatistics = options.accountStatistics;
   const realtime = new NetgridRealtimeServer(
     activeService,
     deploymentConfig,
@@ -822,6 +828,7 @@ export function createNetgridHttpServer(
         maintenanceAuth,
         accountAuth,
         accountDecks,
+        accountStatistics,
         request,
         response,
       ),
@@ -848,6 +855,7 @@ export function createNetgridHttpServer(
             server.close((error) => {
               if (cleanupTimer) clearInterval(cleanupTimer);
               accountDecks?.close();
+              accountStatistics?.close();
               accountAuth?.close();
               activeService.closeStorage();
               return error ? reject(error) : resolve();
@@ -865,11 +873,14 @@ export async function startNetgridServer(
     service?: MultiplayerService;
     accountAuth?: AccountAuthService;
     accountDecks?: AccountDeckService;
+    accountStatistics?: AccountMatchStatisticsService;
   } = {},
 ): Promise<NetgridServerHandle & { url: string; bindUrl: string }> {
   const handle = createNetgridHttpServer(options.service, {
     accountAuth: options.accountAuth ?? createConfiguredAccountAuth(),
     accountDecks: options.accountDecks ?? createConfiguredAccountDecks(),
+    accountStatistics:
+      options.accountStatistics ?? createConfiguredAccountStatistics(),
   });
   const port = options.port ?? Number(process.env.PORT ?? 8787);
   const host = (options.host ?? process.env.HOST ?? "0.0.0.0").trim();
@@ -911,6 +922,20 @@ export function createConfiguredAccountDecks(
   );
 }
 
+export function createConfiguredAccountStatistics(
+  env: NodeJS.ProcessEnv = process.env,
+): AccountMatchStatisticsService {
+  const dbPath =
+    envValue(env, "NETGRID_ACCOUNT_SQLITE_PATH") ??
+    envValue(env, "NETGRID_SQLITE_STORAGE_PATH") ??
+    DEFAULT_SQLITE_STORAGE_PATH;
+  const backupDir =
+    envValue(env, "NETGRID_STORAGE_BACKUP_DIR") ?? DEFAULT_STORAGE_BACKUP_DIR;
+  return new AccountMatchStatisticsService(
+    new SqliteAccountStatisticsStorage({ dbPath, backupDir }),
+  );
+}
+
 function startMaintenanceCleanupTimer(
   service: MultiplayerService,
 ): ReturnType<typeof setInterval> | undefined {
@@ -939,6 +964,7 @@ async function routeHttp(
   maintenanceAuth: MaintenanceAuthService,
   accountAuth: AccountAuthService | undefined,
   accountDecks: AccountDeckService | undefined,
+  accountStatistics: AccountMatchStatisticsService | undefined,
   request: IncomingMessage,
   response: ServerResponse,
 ): Promise<void> {
@@ -2341,6 +2367,14 @@ async function routeHttp(
       }
       try {
         const created = await service.createMatch(createInput);
+        if (accountIdentity && accountStatistics && created.mode !== "ai_vs_ai") {
+          await accountStatistics.bindAuthenticatedParticipant({
+            matchId: created.matchId,
+            participantSlot: "player_a",
+            accountId: accountIdentity.accountId,
+            bindingSource: "authenticated_create",
+          });
+        }
         sendJson(response, 201, created);
       } catch (error) {
         sendJson(response, 400, {
@@ -2555,6 +2589,14 @@ async function routeHttp(
           joinInput.identityKind = "guest";
         }
         const joined = await service.joinMatch(matchId, joinInput);
+        if (!("error" in joined) && accountIdentity && accountStatistics) {
+          await accountStatistics.bindAuthenticatedParticipant({
+            matchId,
+            participantSlot: "player_b",
+            accountId: accountIdentity.accountId,
+            bindingSource: "authenticated_join",
+          });
+        }
         if (!("error" in joined))
           void realtime.refreshSide(matchId, opposite(joined.side));
         sendJson(response, "error" in joined ? 403 : 200, joined);
@@ -2689,6 +2731,13 @@ async function routeHttp(
             ? { displayName: body.displayName }
             : {}),
         });
+        if (result.ok && result.newMatch && accountStatistics) {
+          await accountStatistics.inheritMatchParticipants({
+            sourceMatchId: matchId,
+            targetMatchId: result.newMatch.matchId,
+            bindingSource: "inherited_recreate",
+          });
+        }
         realtime.broadcastLifecycle(result);
         sendJson(
           response,
@@ -2772,6 +2821,13 @@ async function routeHttp(
             ? { displayName: body.displayName }
             : {}),
         });
+        if (!("error" in next) && accountStatistics) {
+          await accountStatistics.inheritMatchParticipants({
+            sourceMatchId: matchId,
+            targetMatchId: next.matchId,
+            bindingSource: "inherited_series_next",
+          });
+        }
         sendJson(response, "error" in next ? 409 : 201, next);
         return;
       }
@@ -3132,12 +3188,14 @@ async function ensureAccountAuthenticated(
 async function optionalAccountIdentity(
   request: IncomingMessage,
   accountAuth: AccountAuthService | undefined,
-): Promise<{ displayName: string } | undefined> {
+): Promise<{ accountId: string; displayName: string } | undefined> {
   if (!accountAuth) return undefined;
   const sessionToken = accountSessionToken(request);
   if (!sessionToken) return undefined;
   const auth = await accountAuth.authenticateSession(sessionToken);
-  return auth.ok ? { displayName: auth.account.displayName } : undefined;
+  return auth.ok
+    ? { accountId: auth.account.accountId, displayName: auth.account.displayName }
+    : undefined;
 }
 
 function ensureAccountOrigin(

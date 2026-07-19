@@ -904,9 +904,8 @@ export class SqliteMatchStorage implements MultiplayerStorage {
           participant_slot TEXT NOT NULL CHECK (participant_slot IN ('player_a', 'player_b')),
           account_id TEXT NOT NULL,
           bound_at TEXT NOT NULL,
-          binding_source TEXT NOT NULL CHECK (binding_source IN ('authenticated_create', 'authenticated_join')),
+          binding_source TEXT NOT NULL CHECK (binding_source IN ('authenticated_create', 'authenticated_join', 'inherited_recreate', 'inherited_series_next')),
           PRIMARY KEY (match_id, participant_slot),
-          FOREIGN KEY (match_id) REFERENCES matches(match_id) ON DELETE CASCADE,
           FOREIGN KEY (account_id) REFERENCES accounts(account_id) ON DELETE CASCADE
         );
         CREATE INDEX IF NOT EXISTS idx_account_match_participants_account_bound

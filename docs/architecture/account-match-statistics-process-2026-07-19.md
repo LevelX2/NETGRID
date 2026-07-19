@@ -1,6 +1,6 @@
 # Account-Matchstatistik – kontrollierter Paketprozess
 
-Status: `AMS-01 completed; AMS-02 pending`
+Status: `AMS-02 completed; AMS-03 pending`
 
 ## Quelle und Vorgabe
 
@@ -126,7 +126,7 @@ cleanup_failed -> diagnose_cleanup -> cleanup_pending
 |---|---|---|
 | AMS-00 Prozess und Controller | completed | dieser Paketcommit |
 | AMS-01 Verträge und SQLite-Schema v3 | completed | dieser Paketcommit |
-| AMS-02 Sichere Account-Matchbindung | pending | – |
+| AMS-02 Sichere Account-Matchbindung | completed | dieser Paketcommit |
 | AMS-03 Ergebnisledger und Reconciliation | pending | – |
 | AMS-04 Private API und Betrieb | pending | – |
 | AMS-05 Account-Statistik-UI | pending | – |
@@ -395,3 +395,18 @@ gemergten Arbeitsbranch löschen. Markiere das Goal erst dann als complete.
   (9) und Package Boundaries.
 - Nicht ausgeführt: breite Server-/Webgates; sie sind für die späteren
   Integrationspakete und AMS-06 vorgesehen.
+
+### AMS-02
+
+- Authentifizierte Create-/Join-Flows binden ausschließlich die serverseitig
+  authentifizierte Account-ID an `player_a` beziehungsweise `player_b`.
+- Recreate und Serienfortsetzung erben Bindungen kontrolliert auf die neue
+  Match-ID; Gast und KI-Beobachter erzeugen keine Accountbindung.
+- Die Bindung bleibt außerhalb von Matchrecord, Engine und Replay. Weil
+  `NETGRID_ACCOUNT_SQLITE_PATH` Match- und Accountstorage trennen darf, besitzt
+  die Account-Bindung bewusst keinen datenbankübergreifend unmöglichen
+  Foreign Key auf `matches`; Accountlöschung bleibt per Foreign Key kaskadiert.
+- Grün: Server-Typecheck, sechs fokussierte Account-/HTTP-/Schema-Tests und
+  Package Boundaries.
+- Nicht ausgeführt: vollständiger Multiplayerlauf und breite Webgates; sie
+  folgen mit Ledgerintegration beziehungsweise im Finalgate.
