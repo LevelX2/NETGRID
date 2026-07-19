@@ -1,21 +1,27 @@
 ---
 activityId: act-2026-07-19-mobile-barricade-target-position-labels
-status: inbox
+status: done
 kind: fix
 area: ui
 priority: high
 primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-07-19
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-07-19
+completedAt: 2026-07-19
+branch: codex/act-2026-07-19-mobile-barricade-target-labels
 releaseTarget:
 blockedBy: []
 relatedActivities:
   - act-2026-05-24-proteus-phase-3e-ice-repositioning
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/engine/src/game/run/fort-pass-window.ts
+  - packages/engine/src/game/run/fort-pass-window.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/game/run/fort-pass-window.test.ts
+  - corepack pnpm --filter @netgrid/engine test
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - git diff --check
 ---
 
 # Zielpositionen bei Mobile-Barricade-Bewegungen eindeutig beschriften
@@ -78,22 +84,22 @@ damit die Corp die kostenpflichtige Bewegung bewusst auswählen kann.
 
 ## Akzeptanzkriterien
 
-- [ ] Bei vier ICE mit äußerster `Mobile Barricade` werden die drei legalen
+- [x] Bei vier ICE mit äußerster `Mobile Barricade` werden die drei legalen
       Zielaktionen im Start-of-run-Fenster mit den Zielpositionen 1, 2 und 3
       eindeutig beschriftet.
-- [ ] Kein Paar gleichzeitig sichtbarer Bewegungsaktionen derselben Quellkarte
+- [x] Kein Paar gleichzeitig sichtbarer Bewegungsaktionen derselben Quellkarte
       besitzt bei unterschiedlichen `targetIceIndex`-Werten dasselbe Label.
-- [ ] Kartenname, angegriffener Server, Zielposition und Credit-Kosten bleiben
+- [x] Kartenname, angegriffener Server, Zielposition und Credit-Kosten bleiben
       in der zentralen Aktionsliste gemeinsam verständlich; die Kostenanzeige
       darf weiterhin über das bestehende Kosten-Badge erfolgen.
-- [ ] Die gewählte Beschriftung verwendet dieselbe Positionszählung wie die
+- [x] Die gewählte Beschriftung verwendet dieselbe Positionszählung wie die
       sichtbaren ICE-Positionsmarker und bildet den internen nullbasierten
       `targetIceIndex` korrekt auf die einsbasierte Anzeige ab.
-- [ ] `Walking Wall` und weitere Nutzer desselben Ability-Kinds erhalten ohne
+- [x] `Walking Wall` und weitere Nutzer desselben Ability-Kinds erhalten ohne
       kartenspezifischen Sonderfall ebenfalls eindeutige Zielpositionslabels.
-- [ ] Hidden-Info-, LegalAction-, Replay- und StateHash-Verträge bleiben
+- [x] Hidden-Info-, LegalAction-, Replay- und StateHash-Verträge bleiben
       unverändert.
-- [ ] Ein fokussierter automatisierter Test deckt mehrere gleichzeitig
+- [x] Ein fokussierter automatisierter Test deckt mehrere gleichzeitig
       angebotene Zielpositionen und deren Labels ab.
 
 ## Umsetzungshinweise
@@ -114,4 +120,18 @@ damit die Corp die kostenpflichtige Bewegung bewusst auswählen kann.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt am 2026-07-19. Die generische Erzeugung der Start-of-run-Aktionen für
+`move_self_to_different_position_on_same_fort` ergänzt nun die öffentliche,
+einsbasierte Zielposition im kanonischen Label. Im beobachteten Vier-ICE-Fall
+entstehen dadurch drei unterscheidbare Aktionen für Position 1, 2 und 3. Die
+Änderung ist nicht auf `Mobile Barricade` zugeschnitten und gilt damit ebenso
+für `Walking Wall` sowie künftige Nutzer desselben Ability-Kinds.
+
+Der fokussierte Regressionstest modelliert vier ICE und prüft getrennte
+Payload-Ziele, Labels und Action-IDs, unveränderte Kosten sowie den Schutz der
+Identitäten der verdeckten Ziel-ICE. Der Web-Label-Pfad wurde geprüft und reicht
+das kanonische Trigger-Ability-Label in der zentralen Run-Aktionsliste ohne eine
+positionsentfernende Sonderkürzung durch. Alle Engine-Tests (202 Testdateien,
+1753 Tests), Engine-Typecheck und `git diff --check` bestehen. Der neue
+Testblock wurde mit dem Workspace-Formatter formatiert; sachfremde
+Bestandsformatierungen blieben bewusst unverändert.

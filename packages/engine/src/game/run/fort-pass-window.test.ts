@@ -410,6 +410,63 @@ describe("fort pass window", () => {
     });
   });
 
+  it("labels every same-fort ICE reposition target with its public one-based position", () => {
+    const iceInner = "ice_inner" as CardInstanceId;
+    const iceMiddleOne = "ice_middle_one" as CardInstanceId;
+    const iceMiddleTwo = "ice_middle_two" as CardInstanceId;
+    const iceOuter = "ice_outer" as CardInstanceId;
+    const state = makeState({
+      timingPoint: "run.approach_ice",
+      phase: "approach_ice",
+      positionKind: "ice",
+      positionIceIndex: 3,
+      serverIce: [iceInner, iceMiddleOne, iceMiddleTwo, iceOuter],
+    });
+    state.cardInstances[iceMiddleOne] = instance(iceMiddleOne, "simple_ice", {
+      zone: { side: "corp", zone: "serverIce", serverId: "rd" },
+      faceup: false,
+      rezzed: false,
+    });
+    state.cardInstances[iceMiddleTwo] = instance(iceMiddleTwo, "simple_ice", {
+      zone: { side: "corp", zone: "serverIce", serverId: "rd" },
+      faceup: false,
+      rezzed: false,
+    });
+    const host = hostFor(state);
+    const server = host.servers.mustServer("rd");
+
+    const actions = buildStartRunIceRepositionActions(host, state.run!, server);
+
+    expect(actions).toHaveLength(3);
+    expect(
+      actions.map((candidate) => ({
+        label: candidate.label,
+        targetIceIndex: candidate.payload?.targetIceIndex,
+      })),
+    ).toEqual([
+      {
+        label: "Mobile Barricade: ICE in R&D an Position 1 bewegen",
+        targetIceIndex: 0,
+      },
+      {
+        label: "Mobile Barricade: ICE in R&D an Position 2 bewegen",
+        targetIceIndex: 1,
+      },
+      {
+        label: "Mobile Barricade: ICE in R&D an Position 3 bewegen",
+        targetIceIndex: 2,
+      },
+    ]);
+    expect(new Set(actions.map((candidate) => candidate.actionId)).size).toBe(
+      3,
+    );
+    expect(new Set(actions.map((candidate) => candidate.label)).size).toBe(3);
+    expect(
+      actions.every((candidate) => candidate.costs[0]?.credits === 1),
+    ).toBe(true);
+    expect(JSON.stringify(actions)).not.toContain("Simple ICE");
+  });
+
   it("moves unrezzed Glacier to the outermost position of another fort at run start", () => {
     const state = makeState({
       timingPoint: "run.approach_ice",

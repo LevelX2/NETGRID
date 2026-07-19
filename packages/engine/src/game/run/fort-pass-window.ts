@@ -195,7 +195,7 @@ export function buildStartRunIceRepositionActions(
                   host.state,
                   "corp",
                   "trigger_ability",
-                  `${definition.title}: ICE in ${server.label} bewegen`,
+                  `${definition.title}: ICE in ${server.label} an Position ${targetIceIndex + 1} bewegen`,
                   sourceCardId,
                   cost > 0 ? [{ credits: cost }] : [],
                   {
