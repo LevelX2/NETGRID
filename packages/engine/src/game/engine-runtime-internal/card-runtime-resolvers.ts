@@ -98,6 +98,7 @@ import {
   spendClicks,
   spendCredits,
 } from "../state/economy-mutation";
+import { creditGainPublicPayload } from "../economy/credit-gain";
 import {
   addCardCounter,
   cardCounter,
@@ -1333,7 +1334,12 @@ export function createCardRuntimeResolvers(
     const gainedCredits =
       agendaPointsLost *
       Math.max(0, Math.floor(longtail.creditsPerAgendaPoint));
-    if (gainedCredits > 0) credits(state, "runner", gainedCredits);
+    const gain = gainRunnerEventCredits(
+      state,
+      legalAction,
+      sourceDefinitionId,
+      gainedCredits,
+    );
     const tagsBefore = state.runner.tags;
     if (longtail.tagRunner > 0)
       addRunnerTagsWithPrevention(
@@ -1356,8 +1362,7 @@ export function createCardRuntimeResolvers(
       spentAgendaDefinitionIds,
       agendaPointsLost,
       corpBonusAgendaPointsAfter: state.corpBonusAgendaPoints,
-      gainedCredits,
-      runnerCreditsAfter: state.runner.credits,
+      ...creditGainPublicPayload(gain),
       tagsAdded: Math.max(0, state.runner.tags - tagsBefore),
       runnerTagsAfter: state.runner.tags,
     };
@@ -1396,7 +1401,12 @@ export function createCardRuntimeResolvers(
     });
     const gainedCredits =
       amount * Math.max(0, Math.floor(longtail.creditsPerDamage));
-    if (gainedCredits > 0) credits(state, "runner", gainedCredits);
+    const gain = gainRunnerEventCredits(
+      state,
+      legalAction,
+      sourceDefinitionId,
+      gainedCredits,
+    );
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       runnerEventAbility: "do_the_drine_unpreventable_core_damage_for_credits",
@@ -1411,8 +1421,7 @@ export function createCardRuntimeResolvers(
         ? { runnerMaxHandSizeAfter: summary.runnerMaxHandSizeAfter }
         : {}),
       flatline: summary.flatline,
-      gainedCredits,
-      runnerCreditsAfter: state.runner.credits,
+      ...creditGainPublicPayload(gain),
     };
   }
 
@@ -1479,7 +1488,12 @@ export function createCardRuntimeResolvers(
       ),
     );
     const gainedCredits = rolls.reduce((sum, roll) => sum + roll, 0);
-    credits(state, "runner", gainedCredits);
+    const gain = gainRunnerEventCredits(
+      state,
+      legalAction,
+      sourceDefinitionId,
+      gainedCredits,
+    );
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       v1921RunnerEventAbility: "three_dice_gain_credits",
@@ -1487,10 +1501,28 @@ export function createCardRuntimeResolvers(
       randomDiceLoopRolls: rolls.join(","),
       randomDiceLoopRolledDice: rolls.length,
       randomDiceLoopComplete: true,
-      gainedCredits,
-      runnerCreditsAfter: state.runner.credits,
+      ...creditGainPublicPayload(gain),
       randomCounterAfter: state.randomCounter,
     };
+  }
+
+  function gainRunnerEventCredits(
+    state: GameState,
+    legalAction: LegalAction,
+    sourceDefinitionId: CardDefinitionId,
+    amount: number,
+  ) {
+    const sourceCardId =
+      typeof legalAction.payload?.cardId === "string"
+        ? (legalAction.payload.cardId as CardInstanceId)
+        : undefined;
+    return credits(state, "runner", amount, {
+      kind: "card_effect",
+      sourceDefinitionId,
+      ...(sourceCardId ? { sourceCardId } : {}),
+      gainOrdinal: 1,
+      reason: "runner_event_resolver",
+    });
   }
 
   function printedCostCardImplementationMakeRunEffect(

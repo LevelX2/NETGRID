@@ -110,7 +110,12 @@ export function createTurnCorpStartRuntimeResolvers(
         continue;
       const amount = cardCounter(state, cardId, "mark");
       if (amount <= 0) continue;
-      state.corp.credits += amount;
+      credits(state, "corp", amount, {
+        kind: "turn_effect",
+        sourceDefinitionId: definition.id,
+        sourceCardId: cardId,
+        reason: "scored_agenda_start_of_corp_turn",
+      });
       effects?.push(
         links.automaticGainCreditsEffect(
           `corp.start.scored_agenda.credit.${cardId}`,
@@ -409,7 +414,12 @@ export function createTurnCorpStartRuntimeResolvers(
       if (deps.isCorpInstalledEconomyCreditSource(state, cardId)) {
         if (cardCounter(state, cardId, "recurring_credit") > 0) {
           spendCardCounter(state, cardId, "recurring_credit", 1);
-          credits(state, "corp", 1);
+          credits(state, "corp", 1, {
+            kind: "turn_effect",
+            sourceDefinitionId: definitionId,
+            sourceCardId: cardId,
+            reason: "installed_economy_start_of_corp_turn",
+          });
           const remainingCounters = cardCounter(
             state,
             cardId,

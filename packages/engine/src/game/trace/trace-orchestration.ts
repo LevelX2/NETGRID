@@ -17,6 +17,7 @@ import type {
 } from "../../ability-engine/definition-types";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { selectedChoiceIds } from "../choices/choice-validation";
+import { credits } from "../state/economy-mutation";
 import {
   assertPostBidLinkPaymentValid,
   assertCorpTraceBidPaymentValid,
@@ -1219,7 +1220,12 @@ function applyTraceAvoidRewardsForOperation(
     amount += reward.amount;
     sourceDefinitionIds.push(reward.sourceDefinitionId);
   }
-  if (amount > 0) state.runner.credits += amount;
+  if (amount > 0)
+    credits(state, "runner", amount, {
+      kind: "trace_effect",
+      sourceDefinitionIds: sourceDefinitionIds as CardDefinitionId[],
+      reason: "trace_avoid_rewards",
+    });
   return { amount, sourceDefinitionIds };
 }
 

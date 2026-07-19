@@ -313,7 +313,11 @@ export function createTurnRunnerStartRuntimeResolvers(
       if (virusCredits.amount > 0) {
         if (!virusCredits.sourceDefinitionId)
           throw new Error("Virus-Credit-Quelle fehlt.");
-        credits(state, "runner", virusCredits.amount);
+        credits(state, "runner", virusCredits.amount, {
+          kind: "turn_effect",
+          sourceDefinitionId: virusCredits.sourceDefinitionId,
+          reason: "virus_counter_start_of_runner_turn",
+        });
         effects?.push(
           links.automaticGainCreditsEffect(
             "runner.start.virus_counter_credits",

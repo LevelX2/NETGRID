@@ -92,6 +92,7 @@ import {
   spendClicks,
   spendCredits,
 } from "../state/economy-mutation";
+import { creditGainPublicPayload } from "../economy/credit-gain";
 import {
   addCardCounter,
   cardCounter,
@@ -717,8 +718,20 @@ type RunnerEventResolver = {
 export const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
   simple_economy_event: {
     name: "runner_event_gain_credits_4",
-    resolve: (state) => {
-      state.runner.credits += 4;
+    resolve: (state, legalAction) => {
+      const gain = credits(state, "runner", 4, {
+        kind: "card_effect",
+        sourceDefinitionId: "simple_economy_event" as CardDefinitionId,
+        ...(typeof legalAction.payload?.cardId === "string"
+          ? { sourceCardId: legalAction.payload.cardId as CardInstanceId }
+          : {}),
+        gainOrdinal: 1,
+        reason: "runner_event_resolver",
+      });
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        ...creditGainPublicPayload(gain),
+      };
     },
   },
   simple_draw_event: {
@@ -745,8 +758,20 @@ export const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
   },
   v08_burst_credit_event: {
     name: "runner_event_gain_credits_6",
-    resolve: (state) => {
-      state.runner.credits += 6;
+    resolve: (state, legalAction) => {
+      const gain = credits(state, "runner", 6, {
+        kind: "card_effect",
+        sourceDefinitionId: "v08_burst_credit_event" as CardDefinitionId,
+        ...(typeof legalAction.payload?.cardId === "string"
+          ? { sourceCardId: legalAction.payload.cardId as CardInstanceId }
+          : {}),
+        gainOrdinal: 1,
+        reason: "runner_event_resolver",
+      });
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        ...creditGainPublicPayload(gain),
+      };
     },
   },
   v08_deep_draw_event: {

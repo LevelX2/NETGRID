@@ -8,11 +8,11 @@ import type {
   LegalAction,
   PlayerAction,
   RuntimeDeps,
-  Side,
 } from "./runtime-shared";
+import { creditGainPublicPayload } from "../economy/credit-gain";
 
 type HiddenZoneNonSearchDiceLoopRuntimeDeps = RuntimeDeps & {
-  credits: (state: GameState, side: Side, amount: number) => void;
+  credits: typeof import("../state/economy-mutation").credits;
   definitionFor: (state: GameState, cardId: CardInstanceId) => CardDefinition;
   rollDeterministicDie: (state: GameState, purpose: string) => number;
   runnerEventLongtailKindForDefinition: (
@@ -77,6 +77,7 @@ export function createHiddenZoneNonSearchDiceLoopRuntime(
     dieRoll: number,
     remainingDice: number,
     rollIndex: number,
+    creditGainOrdinal = 0,
   ): void {
     if (state.pendingChoice)
       throw new Error("Es ist bereits eine Choice offen.");
@@ -100,6 +101,7 @@ export function createHiddenZoneNonSearchDiceLoopRuntime(
         String(dieRoll),
         String(remainingDice),
         String(rollIndex),
+        String(creditGainOrdinal),
         String(choiceStateVersion),
       ].join(":"),
       prompt:
@@ -141,9 +143,11 @@ export function createHiddenZoneNonSearchDiceLoopRuntime(
     dieRoll: number;
     remainingDice: number;
     rollIndex: number;
+    creditGainOrdinal: number;
   } {
+    const parts = source.split(":");
     const [, sourceCardId = "", dieRollRaw = "", fourth = "", fifth = ""] =
-      source.split(":");
+      parts;
     const dieRoll = Number(dieRollRaw);
     if (!Number.isInteger(dieRoll) || dieRoll < 1 || dieRoll > 6)
       throw new Error("Playful-AI-Wurf ist ungültig.");
@@ -155,7 +159,15 @@ export function createHiddenZoneNonSearchDiceLoopRuntime(
       Number.isInteger(rollIndex) &&
       rollIndex >= 1
     ) {
-      return { sourceCardId, dieRoll, remainingDice, rollIndex };
+      const creditGainOrdinal =
+        parts.length >= 7 ? Math.max(0, Math.floor(Number(parts[5]) || 0)) : 0;
+      return {
+        sourceCardId,
+        dieRoll,
+        remainingDice,
+        rollIndex,
+        creditGainOrdinal,
+      };
     }
     const oldRolls = fourth
       .split(",")
@@ -171,6 +183,7 @@ export function createHiddenZoneNonSearchDiceLoopRuntime(
       dieRoll,
       remainingDice: 0,
       rollIndex: oldRolls.length,
+      creditGainOrdinal: 0,
     };
   }
 
@@ -208,12 +221,14 @@ export function createHiddenZoneNonSearchDiceLoopRuntime(
     sourceDefinitionId: CardDefinitionId,
     queuedDice: number,
     rollIndex: number,
+    creditGainOrdinal = 0,
   ): {
     rolledDice: number[];
     remainingDice: number;
     rollIndex: number;
     choiceOpened: boolean;
     complete: boolean;
+    creditGainOrdinal: number;
   } {
     if (!Number.isInteger(queuedDice) || queuedDice < 0)
       throw new Error("Die offenen Playful-AI-Würfel sind ungültig.");
@@ -237,6 +252,7 @@ export function createHiddenZoneNonSearchDiceLoopRuntime(
           nextRoll,
           remainingDice,
           nextRollIndex,
+          creditGainOrdinal,
         );
         return {
           rolledDice,
@@ -244,6 +260,7 @@ export function createHiddenZoneNonSearchDiceLoopRuntime(
           rollIndex: nextRollIndex,
           choiceOpened: true,
           complete: false,
+          creditGainOrdinal,
         };
       }
     }
@@ -253,6 +270,7 @@ export function createHiddenZoneNonSearchDiceLoopRuntime(
       rollIndex: nextRollIndex,
       choiceOpened: false,
       complete: true,
+      creditGainOrdinal,
     };
   }
 
@@ -268,7 +286,13 @@ export function createHiddenZoneNonSearchDiceLoopRuntime(
     )
       throw new Error("Es ist keine Playful-AI-Choice offen.");
     const choiceState = parseRandomDiceSplitChoiceSource(choice.source);
-    const { sourceCardId, dieRoll, remainingDice, rollIndex } = choiceState;
+    const {
+      sourceCardId,
+      dieRoll,
+      remainingDice,
+      rollIndex,
+      creditGainOrdinal,
+    } = choiceState;
     if (
       !sourceCardId ||
       !state.runner.heap.includes(sourceCardId) ||
@@ -294,12 +318,25 @@ export function createHiddenZoneNonSearchDiceLoopRuntime(
       rollIndex,
       choiceOpened: false,
       complete: true,
+      creditGainOrdinal,
     };
+    let gainPayload: Record<string, string | number | boolean> = {};
+    let nextCreditGainOrdinal = creditGainOrdinal;
     if (dieRoll <= 3) {
       const split = parseRandomDiceSplit(choice, selectedOptionId, dieRoll);
       gainedCredits = split.gainedCredits;
       setAsideDice = split.setAsideDice;
-      if (gainedCredits > 0) typedDeps.credits(state, "runner", gainedCredits);
+      if (gainedCredits > 0) {
+        nextCreditGainOrdinal += 1;
+        const gain = typedDeps.credits(state, "runner", gainedCredits, {
+          kind: "card_effect",
+          sourceDefinitionId,
+          sourceCardId,
+          gainOrdinal: nextCreditGainOrdinal,
+          reason: "random_dice_loop_split",
+        });
+        gainPayload = creditGainPublicPayload(gain);
+      }
       queuedDiceBeforeRolls = remainingDice + setAsideDice;
       progress = continueRandomDiceLoop(
         state,
@@ -307,11 +344,13 @@ export function createHiddenZoneNonSearchDiceLoopRuntime(
         sourceDefinitionId,
         queuedDiceBeforeRolls,
         rollIndex,
+        nextCreditGainOrdinal,
       );
     }
 
     const payload: NonNullable<LegalAction["payload"]> = {
       ...(legalAction.payload ?? {}),
+      ...gainPayload,
       v1921RunnerEventAbility: "random_dice_loop",
       sourceDefinitionId,
       randomDiceLoopRolls: progress.rolledDice.join(","),

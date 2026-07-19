@@ -18,6 +18,7 @@ import {
   type EncounterResolutionHost,
   resolveRunDurationMarkerSubroutine,
 } from "./encounter-resolution";
+import { credits } from "../state/economy-mutation";
 
 type ActiveRun = NonNullable<GameState["run"]>;
 type DeflectorTarget = NonNullable<SubroutineDefinition["deflectorTarget"]>;
@@ -167,7 +168,12 @@ export function resolveEncounterPrintedNonTraceEffect(
   const source = sourceMetadata(run, definition, subroutine);
 
   if (subroutine.type === "corp_gain_credit") {
-    host.state.corp.credits += subroutine.amount ?? 1;
+    credits(host.state, "corp", subroutine.amount ?? 1, {
+      kind: "subroutine",
+      sourceDefinitionId: definition.id,
+      ...(source.sourceCardId ? { sourceCardId: source.sourceCardId } : {}),
+      reason: "corp_gain_credit_subroutine",
+    });
     return { handled: true, ...source, stateChanged: true };
   }
   if (subroutine.type === "runner_lose_credits") {

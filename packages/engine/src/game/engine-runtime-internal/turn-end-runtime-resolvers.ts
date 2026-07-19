@@ -87,14 +87,21 @@ export function createTurnEndRuntimeResolvers(
       gained += rezzedIceCount * implementation.amountPerRezzedIce;
     }
     if (gained <= 0) return;
-    credits(state, "runner", gained);
+    const sourceDefinitionIds = sourceIds.map(
+      (sourceId) => definitionFor(state, sourceId).id,
+    );
+    const gain = credits(state, "runner", gained, {
+      kind: "turn_effect",
+      sourceDefinitionIds,
+      reason: "field_reporter_end_turn_payout",
+    });
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       runnerUtilityAbility: "field_reporter_end_turn_rezzed_ice_payout",
       corpRezzedIceThisTurnCount: rezzedIceCount,
-      gainedCredits: gained,
-      runnerCreditsAfter: state.runner.credits,
-      sourceDefinitionId: definitionFor(state, sourceIds[0]!).id,
+      gainedCredits: gain.creditedAmount,
+      runnerCreditsAfter: gain.creditsAfter,
+      sourceDefinitionId: sourceDefinitionIds[0]!,
       sourceCount: sourceIds.length,
     };
   }

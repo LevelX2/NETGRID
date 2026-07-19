@@ -13,6 +13,7 @@ import {
   buildBreachState,
   type BreachStateHost,
 } from "../access/breach-state";
+import { credits } from "../state/economy-mutation";
 
 type ActiveRun = NonNullable<GameState["run"]>;
 type SuccessfulRunTagContinuation = Extract<
@@ -561,10 +562,7 @@ function applySuccessfulRunAccessReplacement(
     Math.floor(run.successfulRunRunnerTagGain ?? 0),
   );
   let resolvedRunnerTagGain = tagContinuation
-    ? Math.max(
-        0,
-        host.state.runner.tags - tagContinuation.runnerTagsBefore,
-      )
+    ? Math.max(0, host.state.runner.tags - tagContinuation.runnerTagsBefore)
     : runnerTagGain;
   if (!resumeAfterTag && runnerTagGain > 0) {
     if (!legalAction)
@@ -608,7 +606,28 @@ function applySuccessfulRunAccessReplacement(
     0,
     Math.floor(run.successfulRunRunnerCreditGain ?? 0),
   );
-  if (runnerCreditGain > 0) host.state.runner.credits += runnerCreditGain;
+  const runnerCreditGainResult =
+    runnerCreditGain > 0
+      ? credits(
+          host.state,
+          "runner",
+          runnerCreditGain,
+          run.successfulRunSourceDefinitionId
+            ? {
+                kind: "card_effect",
+                sourceDefinitionId: run.successfulRunSourceDefinitionId,
+                ...(run.successfulRunSourceCardId
+                  ? { sourceCardId: run.successfulRunSourceCardId }
+                  : {}),
+                gainOrdinal: 1,
+                reason: "successful_run_runner_credit_gain",
+              }
+            : {
+                kind: "run_effect",
+                reason: "successful_run_runner_credit_gain",
+              },
+        )
+      : undefined;
   if (run.successfulRunAccessReplacement === "runner_gain_agenda_point") {
     const sourceCardId = run.successfulRunSourceCardId;
     const sourceDefinitionId = run.successfulRunSourceDefinitionId;
@@ -651,8 +670,9 @@ function applySuccessfulRunAccessReplacement(
       tagsAdded: resolvedRunnerTagGain,
       runnerTagsAfter: host.state.runner.tags,
       corpDrawnCount: corpDraw,
-      gainedCredits: runnerCreditGain,
-      runnerCreditsAfter: host.state.runner.credits,
+      gainedCredits: runnerCreditGainResult?.creditedAmount ?? 0,
+      runnerCreditsAfter:
+        runnerCreditGainResult?.creditsAfter ?? host.state.runner.credits,
       trashedRezzedIceCount,
       trashedCount: trashedRezzedIceCount,
       ...(trashedRezzedIceDefinitionIds.length > 0

@@ -1,12 +1,24 @@
 import { type GameState, type Side } from "@netgrid/shared";
 import {
+  applyCreditGain,
+  type CreditGainRequest,
+  type CreditGainResult,
+} from "../economy/credit-gain";
+import {
   ensureRunnerTurnFlags,
   recordRunnerActionSpent,
 } from "./turn-flags-counters";
 
-export function credits(state: GameState, side: Side, amount: number): void {
-  if (side === "corp") state.corp.credits += amount;
-  else state.runner.credits += amount;
+export function credits(
+  state: GameState,
+  side: Side,
+  amount: number,
+  source: CreditGainRequest["source"] = {
+    kind: "rule_effect",
+    reason: "economy_mutation_credit_gain",
+  },
+): CreditGainResult {
+  return applyCreditGain(state, { side, baseAmount: amount, source });
 }
 
 export function spendCredits(

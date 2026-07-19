@@ -1,6 +1,6 @@
 # Zentrale Credit-Gain-Pipeline: Audit
 
-Status: CGP-01 abgeschlossen
+Status: CGP-04 abgeschlossen
 
 Stand: 2026-07-19
 
@@ -197,3 +197,35 @@ Payment-/Loss-Tests geschützt.
   Grenzen;
 - Elena wird als Modifier derselben Gain-Auflösung statt als separater Gain
   festgelegt.
+
+## CGP-04 Migrationsnachweis
+
+Der erneute produktive Suchlauf nach `state.(corp|runner).credits +=` findet
+nur noch zwei erlaubte Mutationsgrenzen:
+
+- `game/economy/credit-gain.ts` als einzige normale Pool-Gain-Mutation;
+- `game/create-game.ts::addCredits` als dokumentierte Setup-Anpassung.
+
+Der frühere `ability-engine/effect-runtime-helpers.ts::gainCredits`-Mutator ist
+entfernt. `game/state/economy-mutation.ts::credits` delegiert vollständig an
+`applyCreditGain`; dadurch laufen auch ältere Host-Ports, deren schmaler
+Vertrag bislang nur Empfänger und Betrag trägt, durch den autoritativen Kern.
+Resolver mit verfügbarem Regelkontext übergeben zusätzlich typisierte
+Karten-, Access-, Run-, Trace-, Subroutine-, Turn- oder temporäre Quellen.
+
+Migriert und fokussiert geprüft sind insbesondere:
+
+- deklarative Credit-Effekte einschließlich temporärer Pool-Gutschriften;
+- `EffectCommand.gain_credits` und gehostete Creditentnahme;
+- Runner-Prep-Resolver einschließlich `Finders Keepers`, `Do the Drine`,
+  `Corruption`, einfacher Economy-Events und mehrstufiger
+  Playful-AI-Choices;
+- Korp-Operations-, Rez-, installierte Economy- und Scored-Area-Pfade;
+- Access-, Damage-Replacement-, Run-, Trace-, Subroutine- und
+  Run-End-Pfade;
+- Start-/End-of-turn- und Virus-/Counter-Pfade.
+
+Der alte separate Elena-Post-Follow-up ist entfernt. Elenas zusätzlicher
+Credit wird ausschließlich als Bestandteil derselben zentralen Gain-Auflösung
+berechnet und kann daher weder Resolver-Returns verfehlen noch doppelt
+ausgelöst werden.

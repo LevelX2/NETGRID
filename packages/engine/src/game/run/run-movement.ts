@@ -10,6 +10,7 @@ import type {
 } from "@netgrid/shared";
 import type { CardFortRunWindowImplementation } from "../../ability-engine/definition-types";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
+import { credits } from "../state/economy-mutation";
 import {
   applyPassedIceRunEndTrigger,
   type EncounterSpecialWindowHost,
@@ -764,14 +765,23 @@ function resolveCorpPostPassIceReturnToHq(
   if (decision === "return_to_hq") {
     returnPassedIceToHq(host, pending.passedIceId);
     const gain = Math.max(0, Math.floor(pending.gainCredits ?? 0));
-    if (gain > 0) host.state.corp.credits += gain;
+    const gainResult =
+      gain > 0
+        ? credits(host.state, "corp", gain, {
+            kind: "card_effect",
+            sourceDefinitionId: pending.sourceDefinitionId,
+            sourceCardId: pending.passedIceId,
+            gainOrdinal: 1,
+            reason: "passed_ice_return_to_hq",
+          })
+        : undefined;
     delete run.corpPostPassIceReturnToHq;
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       returnedToHq: true,
       returnedCardDefinitionId: pending.sourceDefinitionId,
-      ...(gain > 0 ? { gainedCredits: gain } : {}),
-      corpCreditsAfter: host.state.corp.credits,
+      ...(gainResult ? { gainedCredits: gainResult.creditedAmount } : {}),
+      corpCreditsAfter: gainResult?.creditsAfter ?? host.state.corp.credits,
     };
     host.state.activeSide = "runner";
     return { handled: true, runContinues: true, stateChanged: true };

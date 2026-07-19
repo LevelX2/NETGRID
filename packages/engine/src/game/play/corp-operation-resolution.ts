@@ -159,7 +159,7 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
   simple_economy_operation: {
     name: "corp_operation_gain_credits_4",
     resolve: (host) => {
-      host.state.corp.credits += 4;
+      host.economy.gainCorpCredits(4);
     },
   },
   v111_core_damage_operation: {
@@ -192,7 +192,7 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
   v08_credit_surge_operation: {
     name: "corp_operation_gain_credits_7",
     resolve: (host) => {
-      host.state.corp.credits += 7;
+      host.economy.gainCorpCredits(7);
     },
   },
   v08_archive_planning_operation: {
@@ -214,7 +214,7 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
   v099_bad_publicity_operation: {
     name: "corp_operation_bad_publicity_credit",
     resolve: (host) => {
-      host.state.corp.credits += 3;
+      host.economy.gainCorpCredits(3);
       host.state.corp.badPublicity += 1;
     },
   },

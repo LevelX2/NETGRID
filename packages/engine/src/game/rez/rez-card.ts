@@ -13,6 +13,7 @@ import type {
   CardVariableRezImplementation,
 } from "../../ability-engine/definition-types";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
+import { credits } from "../state/economy-mutation";
 
 type CorpAgendaPointCostResult = {
   paidPoints: number;
@@ -44,10 +45,7 @@ export type RezCardHost = {
       cardId: CardInstanceId,
       legalAction?: LegalAction,
     ) => boolean;
-    beginEncounter: (
-      cardId: CardInstanceId,
-      legalAction?: LegalAction,
-    ) => void;
+    beginEncounter: (cardId: CardInstanceId, legalAction?: LegalAction) => void;
   };
   payment: {
     rezCostForCard: (cardId: CardInstanceId) => number;
@@ -168,8 +166,7 @@ export function rezCard(
       agendaPointCost: agendaCost,
       agendaPointCostPaid: costResult.paidPoints,
       obligationDebtAbility: "rez_with_agenda_point_cost",
-      obligationDebtCountBefore:
-        host.corp.activeObligationCount(),
+      obligationDebtCountBefore: host.corp.activeObligationCount(),
       ...(costResult.bonusPointsSpent > 0
         ? { corpBonusAgendaPointsSpent: costResult.bonusPointsSpent }
         : {}),
@@ -184,7 +181,9 @@ export function rezCard(
   const selfAgendaPointCost = selfRezAgendaPointCostForDefinition(definition);
   if (selfAgendaPointCost > 0) {
     if (!legalAction)
-      throw new Error("Self-Rez-Agenda-Punkt-Kosten brauchen eine LegalAction.");
+      throw new Error(
+        "Self-Rez-Agenda-Punkt-Kosten brauchen eine LegalAction.",
+      );
     const agendaCost = Number(legalAction.payload?.agendaPointCost ?? 0);
     if (!Number.isInteger(agendaCost) || agendaCost !== selfAgendaPointCost)
       throw new Error("Self-Rez-Agenda-Punkt-Kosten sind nicht mehr gueltig.");
@@ -227,10 +226,7 @@ export function rezCard(
       }
     }
   }
-  if (
-    state.run &&
-    hasSubtype(definition, "black_ops")
-  ) {
+  if (state.run && hasSubtype(definition, "black_ops")) {
     state.run.rezzedBlackOpsCount =
       Math.max(0, Math.floor(state.run.rezzedBlackOpsCount ?? 0)) + 1;
   }
@@ -239,13 +235,19 @@ export function rezCard(
     Math.floor(state.run?.runnerCreditGainOnCorpRez ?? 0),
   );
   if (runRezReward > 0) {
-    state.runner.credits += runRezReward;
+    const gain = credits(state, "runner", runRezReward, {
+      kind: "run_effect",
+      ...(state.run?.successfulRunSourceDefinitionId
+        ? { sourceDefinitionId: state.run.successfulRunSourceDefinitionId }
+        : {}),
+      reason: "runner_credit_gain_on_corp_rez",
+    });
     if (legalAction) {
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
         runnerCreditGainOnCorpRez: runRezReward,
-        gainedCredits: runRezReward,
-        runnerCreditsAfter: state.runner.credits,
+        gainedCredits: gain.creditedAmount,
+        runnerCreditsAfter: gain.creditsAfter,
       };
     }
   }
@@ -267,8 +269,7 @@ export function rezCard(
     host.run.handleRunRootRezPostRez(cardId, legalAction);
     return;
   }
-  if (host.run.handlePostIceRezContinuation?.(cardId, legalAction))
-    return;
+  if (host.run.handlePostIceRezContinuation?.(cardId, legalAction)) return;
   host.run.beginEncounter(cardId, legalAction);
 }
 
@@ -276,13 +277,19 @@ function selfRezAdditionalCostsForDefinition(
   definition: CardDefinition,
 ): readonly CardSelfRezAdditionalCostImplementation[] {
   if (definition.type !== "ice") return [];
-  return cardImplementationForDefinitionId(definition.id)
-    ?.selfRezAdditionalCosts ?? [];
+  return (
+    cardImplementationForDefinitionId(definition.id)?.selfRezAdditionalCosts ??
+    []
+  );
 }
 
-function selfRezAgendaPointCostForDefinition(definition: CardDefinition): number {
+function selfRezAgendaPointCostForDefinition(
+  definition: CardDefinition,
+): number {
   return selfRezAdditionalCostsForDefinition(definition)
-    .filter((cost) => cost.kind === "agenda_point" && cost.visibility === "public")
+    .filter(
+      (cost) => cost.kind === "agenda_point" && cost.visibility === "public",
+    )
     .reduce((sum, cost) => sum + Math.max(0, Math.floor(cost.amount)), 0);
 }
 
@@ -298,9 +305,11 @@ function hasSubtype(
   subtype: string,
 ): boolean {
   const target = normalizeSubtypeLabel(subtype);
-  return definition.subtypes?.some(
-    (candidate) => normalizeSubtypeLabel(candidate) === target,
-  ) ?? false;
+  return (
+    definition.subtypes?.some(
+      (candidate) => normalizeSubtypeLabel(candidate) === target,
+    ) ?? false
+  );
 }
 
 function variableIceStateForRezAction(
@@ -312,8 +321,7 @@ function variableIceStateForRezAction(
 ): CardInstance["variableIceState"] | undefined {
   const variableRez = host.cards.variableRezForDefinition(definition);
   if (!variableRez) return undefined;
-  if (!legalAction)
-    throw new Error("Variable ICE brauchen eine LegalAction.");
+  if (!legalAction) throw new Error("Variable ICE brauchen eine LegalAction.");
   if (legalAction.payload?.cardId !== cardId)
     throw new Error("Variable Rez-Zielkarte ist ungueltig.");
   const additionalCost = Number(legalAction.payload.variableRezAdditionalCost);

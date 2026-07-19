@@ -21,6 +21,7 @@ import {
   quoteCorpRootRezCost,
 } from "../payment";
 import { buildLegalAction } from "../turn/action-builders";
+import { credits } from "../state/economy-mutation";
 import { buildRegisteredRunWindowActions } from "./windows/run-window-registry";
 import { stateIsAtServerAfterPassingLastIceWindow } from "./windows/after-passing-last-ice-window";
 import type {
@@ -42,13 +43,23 @@ const CORP_ROOT_REZ_RESOLVERS: Record<string, CorpRootRezResolver> = {
   simple_economy_asset: {
     name: "corp_asset_rez_gain_3",
     resolve: (state) => {
-      state.corp.credits += 3;
+      credits(state, "corp", 3, {
+        kind: "card_effect",
+        sourceDefinitionId: "simple_economy_asset" as CardDefinition["id"],
+        gainOrdinal: 1,
+        reason: "corp_root_rez",
+      });
     },
   },
   v08_cashout_asset: {
     name: "corp_asset_rez_gain_4",
     resolve: (state) => {
-      state.corp.credits += 4;
+      credits(state, "corp", 4, {
+        kind: "card_effect",
+        sourceDefinitionId: "v08_cashout_asset" as CardDefinition["id"],
+        gainOrdinal: 1,
+        reason: "corp_root_rez",
+      });
     },
   },
 };
@@ -344,8 +355,7 @@ export function resolveCorpRootRezEffect(
         gainedCredits,
         selfTrashed: true,
         obligationDebtActive: host.callbacks.activeObligationCount() > 0,
-        obligationDebtCountAfter:
-          host.callbacks.activeObligationCount(),
+        obligationDebtCountAfter: host.callbacks.activeObligationCount(),
         corpCreditsAfter: host.state.corp.credits,
       };
     }
@@ -412,7 +422,8 @@ export function startRezInterruptJackOutChoice(
   host.state.activeSide = "runner";
   if (legalAction) {
     const serverLabel = host.servers.publicServerLabel(run.attackedServerId);
-    const rezInterruptSourceDefinitionId = host.cards.definitionFor(rezInterruptSourceId).id;
+    const rezInterruptSourceDefinitionId =
+      host.cards.definitionFor(rezInterruptSourceId).id;
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       v1922RunnerProgramAbility: "rez_interrupt_jack_out_choice",
@@ -451,7 +462,9 @@ export function resolveRezInterruptJackOutChoice(
   )
     throw new Error("Die Rez-Interrupt-Quelle ist nicht mehr installiert.");
   const rezInterruptSourceCardId = rezInterruptSourceId as CardInstanceId;
-  const rezInterruptSourceDefinitionId = host.cards.definitionFor(rezInterruptSourceCardId).id;
+  const rezInterruptSourceDefinitionId = host.cards.definitionFor(
+    rezInterruptSourceCardId,
+  ).id;
   if (
     !hasRunEncounterInterventionKind(
       host,
@@ -706,7 +719,12 @@ function cardImplementationCorpRootRezResolver(
     return {
       name: "card_implementation_corp_root_rez_obligation_debt",
       resolve: (state) => {
-        state.corp.credits += longtail.gainCreditsOnRez;
+        credits(state, "corp", longtail.gainCreditsOnRez, {
+          kind: "card_effect",
+          sourceDefinitionId: definition.id,
+          gainOrdinal: 1,
+          reason: "corp_root_rez",
+        });
       },
     };
   }
@@ -727,7 +745,9 @@ function isObligationDebtDefinition(definitionId: string): boolean {
   );
 }
 
-function installedRezInterruptJackOutSourceIds(host: RunRezWindowHost): CardInstanceId[] {
+function installedRezInterruptJackOutSourceIds(
+  host: RunRezWindowHost,
+): CardInstanceId[] {
   return host.cards
     .runnerInstalledProgramIds()
     .filter((cardId) => {

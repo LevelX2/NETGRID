@@ -15,6 +15,7 @@ import type {
   TraceSuccessEffect,
 } from "@netgrid/shared";
 import { selectedChoiceIds } from "../choices/choice-validation";
+import { credits } from "../state/economy-mutation";
 import {
   addRunnerTagsWithPrevention,
   createDamageImminentEvent,
@@ -900,10 +901,16 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       },
       credits: {
         gainRunner: (amount) => {
-          state.runner.credits += amount;
+          credits(state, "runner", amount, {
+            kind: "run_effect",
+            reason: "run_end_credit_gain",
+          });
         },
         gainCorp: (amount) => {
-          state.corp.credits += amount;
+          credits(state, "corp", amount, {
+            kind: "run_effect",
+            reason: "run_end_credit_gain",
+          });
         },
       },
       damage: {

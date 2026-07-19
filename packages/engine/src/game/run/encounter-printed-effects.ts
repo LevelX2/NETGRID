@@ -13,6 +13,7 @@ import {
 } from "@netgrid/shared";
 import { MICROTECH_TRODE_SET_ID } from "../../compatibility/runtime-compatibility";
 import { describeTraceResultFromTrace } from "../trace/trace-result";
+import { credits } from "../state/economy-mutation";
 import {
   appendResolvedSubroutineEffect,
   type DamageSummary,
@@ -716,7 +717,12 @@ function applyTraceAvoidRewards(
     amount += reward.amount;
     sourceDefinitionIds.push(reward.sourceDefinitionId);
   }
-  if (amount > 0) host.state.runner.credits += amount;
+  if (amount > 0)
+    credits(host.state, "runner", amount, {
+      kind: "trace_effect",
+      sourceDefinitionIds: sourceDefinitionIds as CardDefinition["id"][],
+      reason: "trace_avoid_rewards",
+    });
   return { amount, sourceDefinitionIds };
 }
 

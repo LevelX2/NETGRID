@@ -7,6 +7,7 @@ import type {
 import { canFreeTrashCurrentAccessCard } from "./access-actions";
 import { accessCountPayloadForBreach } from "./breach-state";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
+import { credits } from "../state/economy-mutation";
 import {
   accessFlowBreachStateHost,
   accessQueueZone,
@@ -168,12 +169,16 @@ export function applyPrearrangedDropAgendaAccess(
   if (!flags?.nextAgendaAccessCreditGainPending || definition.type !== "agenda")
     return;
   flags.nextAgendaAccessCreditGainPending = false;
-  host.state.runner.credits += 6;
+  const gain = credits(host.state, "runner", 6, {
+    kind: "access_effect",
+    reason: "next_agenda_access_credit_gain",
+  });
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     nextAgendaAccessCreditGainResolved: true,
-    gainedCredits: Number(legalAction.payload?.gainedCredits ?? 0) + 6,
-    runnerCreditsAfter: host.state.runner.credits,
+    gainedCredits:
+      Number(legalAction.payload?.gainedCredits ?? 0) + gain.creditedAmount,
+    runnerCreditsAfter: gain.creditsAfter,
   };
 }
 

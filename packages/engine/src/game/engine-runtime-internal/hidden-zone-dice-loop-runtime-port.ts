@@ -16,12 +16,14 @@ export type HiddenZoneDiceLoopRuntimePort = {
     sourceDefinitionId: CardDefinitionId,
     queuedDice: number,
     rollIndex: number,
+    creditGainOrdinal?: number,
   ) => {
     rolledDice: number[];
     remainingDice: number;
     rollIndex: number;
     choiceOpened: boolean;
     complete: boolean;
+    creditGainOrdinal: number;
   };
   creditTextForPrompt: (amount: number) => string;
   diePromptText: (amount: number) => string;
@@ -30,6 +32,7 @@ export type HiddenZoneDiceLoopRuntimePort = {
     dieRoll: number;
     remainingDice: number;
     rollIndex: number;
+    creditGainOrdinal: number;
   };
   parseRandomDiceSplit: (
     choice: ChoiceRequest,
@@ -57,5 +60,6 @@ export type HiddenZoneDiceLoopRuntimePort = {
     dieRoll: number,
     remainingDice: number,
     rollIndex: number,
+    creditGainOrdinal?: number,
   ) => void;
 };

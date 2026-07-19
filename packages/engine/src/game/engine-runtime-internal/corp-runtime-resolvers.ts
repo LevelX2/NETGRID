@@ -1360,15 +1360,21 @@ export function createCorpRuntimeResolvers(
       spendClick(state, "corp");
     }
     if (profile.creditCost > 0) spendCredits(state, "corp", profile.creditCost);
-    credits(state, "corp", profile.creditGain);
+    const gain = credits(state, "corp", profile.creditGain, {
+      kind: "card_effect",
+      sourceDefinitionId: profile.sourceDefinitionId,
+      sourceCardId,
+      gainOrdinal: 1,
+      reason: "corp_installed_economy_action",
+    });
     if (profile.trashSource)
       deps.trashCorpInstalledCardToArchives(state, sourceCardId);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       sourceDefinitionId: profile.sourceDefinitionId,
-      gainedCredits: profile.creditGain,
+      gainedCredits: gain.creditedAmount,
       ...(profile.trashSource ? { selfTrashed: true } : {}),
-      corpCreditsAfter: state.corp.credits,
+      corpCreditsAfter: gain.creditsAfter,
     };
     return true;
   }
@@ -1497,19 +1503,23 @@ export function createCorpRuntimeResolvers(
       throw new Error("Nur die Korp darf diese Economy-Credit-Choice nutzen.");
     const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
     if (selected === "take_credit") {
-      const sourceDefinitionId = definitionFor(
-        state,
-        rezzedCorpInstalledEconomyCreditSourceIds(state)[0]!,
-      ).id;
-      credits(state, "corp", 1);
+      const sourceCardId = rezzedCorpInstalledEconomyCreditSourceIds(state)[0]!;
+      const sourceDefinitionId = definitionFor(state, sourceCardId).id;
+      const gain = credits(state, "corp", 1, {
+        kind: "card_effect",
+        sourceDefinitionId,
+        sourceCardId,
+        gainOrdinal: 1,
+        reason: "corp_installed_economy_credit_choice",
+      });
       delete state.pendingChoice;
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
         choiceVisibility: "public",
         sourceDefinitionId,
         gainCreditsAmount: 1,
-        gainedCredits: 1,
-        corpCreditsAfter: state.corp.credits,
+        gainedCredits: gain.creditedAmount,
+        corpCreditsAfter: gain.creditsAfter,
       };
       return;
     }
