@@ -953,6 +953,46 @@ export function createRunnerBankInvestmentContext(
       return true;
     }
     const credits = input.playerView.own.credits;
+    const runEvaluations = input.legalActions.flatMap((action) => {
+      if (action.side !== "runner" || action.type !== "start_run") {
+        return [];
+      }
+      const serverId = dependencies.serverId(action);
+      if (!serverId) return [];
+      const evaluation = dependencies.runnerRunTargetEvaluation(
+        input,
+        action,
+        serverId,
+      );
+      return evaluation ? [evaluation] : [];
+    });
+    const readyPressureAvailable = runEvaluations.some(
+      (evaluation) =>
+        evaluation.pathPassability === "reachable" &&
+        evaluation.creditsAfterRun >= 0 &&
+        (evaluation.scoreThreat ||
+          dependencies.runnerRunTargetHighPayoff(evaluation) ||
+          (evaluation.targetServerId === "rd" &&
+            evaluation.knownAccessState === "unknown")),
+    );
+    const convertibleRunFundingNeed =
+      !readyPressureAvailable &&
+      runEvaluations.some((evaluation) => {
+      if (
+        evaluation.pathPassability !== "blocked_unpayable" ||
+        evaluation.pathCost <= credits ||
+        evaluation.pathCost > credits + largestCashOut
+      ) {
+        return false;
+      }
+      return (
+        evaluation.scoreThreat ||
+        dependencies.runnerRunTargetHighPayoff(evaluation) ||
+        (evaluation.targetServerId === "rd" &&
+          evaluation.knownAccessState === "unknown")
+      );
+      });
+    if (convertibleRunFundingNeed) return true;
     return input.legalActions.some((action) => {
       if (action.side !== "runner") return false;
       if (isRunnerBankCashOutAction(input, action)) return false;

@@ -108,6 +108,43 @@ export function largestBankPayout(
   return Math.max(...payouts);
 }
 
+export function runnerHasConvertibleBankRunFundingNeed(
+  context: TacticalPlanBuildContext,
+): boolean {
+  if (context.input.side !== "runner") return false;
+  if (context.input.playerView.own.clicks < 2) return false;
+  const largestPayout = largestBankPayout(context, "runner") ?? 0;
+  if (largestPayout <= 0) return false;
+  const credits = context.input.playerView.own.credits;
+  const evaluations = context.runnerRunTargetEvaluations ?? [];
+  const readyPressureAvailable = evaluations.some(
+    (evaluation) =>
+      evaluation.pathPassability === "reachable" &&
+      evaluation.creditsAfterRun >= 0 &&
+      (evaluation.scoreThreat ||
+        ["agenda", "score_threat", "trash_affordable", "fresh"].includes(
+          evaluation.accessPayoff,
+        ) ||
+        (evaluation.targetServerId === "rd" &&
+          evaluation.knownAccessState === "unknown")),
+  );
+  if (readyPressureAvailable) return false;
+  return Boolean(
+    evaluations.some(
+      (evaluation) =>
+        evaluation.pathPassability === "blocked_unpayable" &&
+        evaluation.pathCost > credits &&
+        evaluation.pathCost <= credits + largestPayout &&
+        (evaluation.scoreThreat ||
+          ["agenda", "score_threat", "trash_affordable", "fresh"].includes(
+            evaluation.accessPayoff,
+          ) ||
+          (evaluation.targetServerId === "rd" &&
+            evaluation.knownAccessState === "unknown")),
+    ),
+  );
+}
+
 export function bankBuildActions(
   context: TacticalPlanBuildContext,
   side: Side,

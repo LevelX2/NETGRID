@@ -5,6 +5,7 @@ import { evaluateKnownRemoteAccessPayoff } from "../known-remote-access-payoff";
 import {
   bankToolEvidence,
   runnerCreditBankAssessment,
+  runnerHasConvertibleBankRunFundingNeed,
 } from "./tactical-plan-bank-tools";
 import { accessCommitmentPlanEvidence } from "./tactical-plan-access-commitment";
 import { createPlanStep, createTacticalPlan } from "./tactical-plan-builders";
@@ -765,10 +766,11 @@ export function buildRunnerTacticalPlans(
     ),
   );
   const runnerBankToolEvidence = bankToolEvidence(context, "runner");
-  const runnerFundingNeed = runnerHasConcretePlanFundingNeed(input, [
-    ...blockedRemoteRuns,
-    ...blockedCentralRuns,
-  ]);
+  const runnerFundingNeed =
+    runnerHasConcretePlanFundingNeed(input, [
+      ...blockedRemoteRuns,
+      ...blockedCentralRuns,
+    ]) || runnerHasConvertibleBankRunFundingNeed(context);
   const runnerBankAssessment = runnerCreditBankAssessment(
     context,
     input.legalActions,
