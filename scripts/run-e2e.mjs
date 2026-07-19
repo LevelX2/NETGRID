@@ -36,12 +36,25 @@ try {
   });
   await waitForUrl(`${serverUrl}/health`, "server");
 
+  const accountBootstrap = await run(
+    corepack,
+    ["pnpm", "account:auth", "--", "bootstrap", "stats_alpha", "Statistik Alpha"],
+    {
+      NETGRID_STORAGE_KIND: "sqlite",
+      NETGRID_SQLITE_STORAGE_PATH: runtimePath,
+      NETGRID_STORAGE_BACKUP_DIR: backupDir,
+      NETGRID_TOKEN_SALT: "v1-0-7-e2e-token-salt",
+      NETGRID_ACCOUNT_BOOTSTRAP_PASSWORD: "Statistik Browser Alpha 2026!"
+    }
+  );
+  if (accountBootstrap !== 0) throw new Error("Could not bootstrap the E2E account");
+
   start("web", ["pnpm", "--filter", "@netgrid/web", "exec", "next", "dev", "--hostname", "127.0.0.1", "--port", String(webPort)], {
     NEXT_PUBLIC_NETGRID_SERVER_URL: serverUrl
   });
   await waitForUrl(webUrl, "web");
 
-  const result = await run(corepack, ["pnpm", "exec", "playwright", "test"], {
+  const result = await run(corepack, ["pnpm", "exec", "playwright", "test", ...process.argv.slice(2)], {
     PLAYWRIGHT_BASE_URL: webUrl,
     NETGRID_E2E_SERVER_URL: serverUrl,
     NETGRID_E2E_RUNTIME_PATH: runtimePath
@@ -49,6 +62,7 @@ try {
   process.exitCode = result;
 } finally {
   await Promise.allSettled(started.reverse().map((child) => stopProcessTree(child)));
+  await rm(runtimeDir, { recursive: true, force: true });
 }
 
 function start(label, args, env) {

@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 import { stat } from "node:fs/promises";
 import path from "node:path";
 import {
+  BASE_URL,
   createHumanVsAiGame,
   createHumanVsHumanLobby,
   exerciseCardDisplayModes,
@@ -68,6 +69,56 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
     } finally {
       await host.context.close();
       await joiner.context.close();
+    }
+  });
+
+  test("Private Account-Matchstatistik zeigt Account-gegen-KI und zwei getrennte Accounts", async ({ browser }) => {
+    const passwordA = "Statistik Browser Alpha 2026!";
+    const passwordB = "Statistik Browser Beta 2026!";
+
+    const alpha = await newContextPage(browser, "desktop");
+    const beta = await newContextPage(browser, "narrow");
+    const guest = await newContextPage(browser, "desktop");
+    try {
+      await loginBrowserAccount(alpha.page, "stats_alpha", passwordA, "Statistik Alpha");
+      const betaInvite = await createBrowserAccountInvite(alpha.page, "stats_beta", "Statistik Beta");
+      await activateBrowserAccount(beta.page, betaInvite, passwordB, "Statistik Beta");
+
+      await createHumanVsAiGame(alpha.page, "account-statistics-ai-e2e");
+      await forfeitAndReturnToStart(alpha.page);
+      await openAccountStatistics(alpha.page);
+      await expect(statisticCard(alpha.page, "Spiele")).toContainText("1");
+      await expect(breakdownCard(alpha.page, "Gegen KI")).toContainText("1");
+      await expect(alpha.page.getByText("Durch Aufgabe entschieden", { exact: true })).toBeVisible();
+
+      const joinUrl = await createHumanVsHumanLobby(alpha.page, "account-statistics-hvh-e2e", "runner");
+      await joinHumanVsHumanLobby(beta.page, joinUrl);
+      await readyAndWaitForActive(alpha.page, beta.page);
+      await forfeitAndReturnToStart(alpha.page);
+      await returnToStartAfterOpponentForfeit(beta.page);
+
+      await openAccountStatistics(alpha.page);
+      await expect(statisticCard(alpha.page, "Spiele")).toContainText("2");
+      await expect(statisticCard(alpha.page, "Niederlagen")).toContainText("2");
+      await expect(breakdownCard(alpha.page, "Gegen Account")).toContainText("1");
+      await expect(breakdownCard(alpha.page, "Gegen KI")).toContainText("1");
+
+      await openAccountStatistics(beta.page);
+      await expect(statisticCard(beta.page, "Spiele")).toContainText("1");
+      await expect(statisticCard(beta.page, "Siege")).toContainText("1");
+      await expect(breakdownCard(beta.page, "Gegen Account")).toContainText("1");
+      await expect(
+        beta.page.getByRole("article").getByText("Mensch gegen Mensch", { exact: true }),
+      ).toBeVisible();
+      await expectNoCriticalLayoutOverflow(beta.page);
+
+      await guest.page.goto(BASE_URL);
+      await guest.page.getByRole("button", { name: "Account", exact: true }).click();
+      await expect(guest.page.getByRole("region", { name: "Deine Matchstatistik" })).toHaveCount(0);
+    } finally {
+      await alpha.context.close();
+      await beta.context.close();
+      await guest.context.close();
     }
   });
 
@@ -222,3 +273,61 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
     expect(JSON.stringify(invalidBody)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|cardInstances|privateDeckSnapshots|privatePayload|decklist/i);
   });
 });
+
+async function loginBrowserAccount(page: import("@playwright/test").Page, loginName: string, password: string, displayName: string): Promise<void> {
+  await page.goto(BASE_URL);
+  await page.getByRole("button", { name: "Account", exact: true }).click();
+  await page.getByLabel("Anmeldename", { exact: true }).fill(loginName);
+  await page.getByLabel("Passwort", { exact: true }).fill(password);
+  await page.getByRole("button", { name: "Anmelden", exact: true }).click();
+  await expect(page.getByRole("heading", { name: displayName, exact: true })).toBeVisible();
+}
+
+async function createBrowserAccountInvite(page: import("@playwright/test").Page, loginName: string, displayName: string): Promise<string> {
+  const form = page.locator("form").filter({ has: page.getByRole("heading", { name: "Account einladen", exact: true }) });
+  await form.getByLabel("Anmeldename", { exact: true }).fill(loginName);
+  await form.getByLabel("Anzeigename", { exact: true }).fill(displayName);
+  await form.getByRole("button", { name: "Einladungslink erzeugen", exact: true }).click();
+  const invite = page.getByLabel("Einmaliger Link", { exact: true });
+  await expect(invite).toHaveValue(/\?invite=/);
+  return invite.inputValue();
+}
+
+async function activateBrowserAccount(page: import("@playwright/test").Page, inviteUrl: string, password: string, displayName: string): Promise<void> {
+  await page.goto(inviteUrl);
+  await page.getByRole("button", { name: "Account", exact: true }).click();
+  await page.getByLabel("Neues Passwort", { exact: true }).fill(password);
+  await page.getByRole("button", { name: "Account aktivieren", exact: true }).click();
+  await expect(page.getByRole("heading", { name: displayName, exact: true })).toBeVisible();
+}
+
+async function openAccountStatistics(page: import("@playwright/test").Page): Promise<void> {
+  await expect(page.getByTestId("setup-screen")).toBeVisible();
+  await page.getByRole("button", { name: "Profil", exact: true }).click();
+  await expect(page.getByRole("region", { name: "Deine Matchstatistik" })).toBeVisible();
+  await expect(page.getByText("Matchstatistik wird geladen …", { exact: true })).toBeHidden();
+}
+
+function statisticCard(page: import("@playwright/test").Page, label: string) {
+  return page.locator(".accountStatisticsKpi").filter({ has: page.getByText(label, { exact: true }) });
+}
+
+function breakdownCard(page: import("@playwright/test").Page, title: string) {
+  return page.locator(".accountStatisticsBreakdown").filter({ has: page.getByRole("heading", { name: title, exact: true }) });
+}
+
+async function forfeitAndReturnToStart(page: import("@playwright/test").Page): Promise<void> {
+  await page.getByRole("button", { name: "Aufgeben", exact: true }).click();
+  await page.getByRole("alertdialog", { name: "Spiel aufgeben?" }).getByRole("button", { name: "Aufgeben", exact: true }).click();
+  await expect(page.getByText(/Spiel aufgegeben|gewinnt/i).first()).toBeVisible();
+  await page.getByRole("button", { name: "Board ansehen", exact: true }).click();
+  await page.getByRole("button", { name: "Startbildschirm", exact: true }).click();
+  await expect(page.getByTestId("setup-screen")).toBeVisible();
+}
+
+async function returnToStartAfterOpponentForfeit(page: import("@playwright/test").Page): Promise<void> {
+  await expect(page.getByText(/Spiel aufgegeben|gewinnt/i).first()).toBeVisible();
+  await page.getByRole("button", { name: "Board ansehen", exact: true }).click();
+  await page.getByRole("button", { name: "Startbildschirm", exact: true }).click();
+  await expect(page.getByTestId("setup-screen")).toBeVisible();
+}

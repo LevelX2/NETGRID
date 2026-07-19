@@ -395,6 +395,7 @@ describe("V1.0.9 private internet hardening", () => {
     const wsLimiter = new FixedWindowRateLimiter({
       create_match: undefined,
       token_probe: undefined,
+      account_read: undefined,
       lifecycle: undefined,
       ai_advance: undefined,
       ws_handshake: { limit: 10, windowMs: 60_000 },
@@ -1193,7 +1194,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       const service = new MultiplayerService(storage, { tokenSalt: "v108-default-storage" });
       const health = await service.storageHealth();
       expect(health.kind).toBe("sqlite");
-      expect(health.schemaVersion).toBe(2);
+      expect(health.schemaVersion).toBe(3);
       expect(health.storageFormat).toBe("netgrid_multiplayer_sqlite");
       expect(JSON.stringify(health)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|cardInstances|privateDeckSnapshots|decklist/i);
       service.closeStorage();
@@ -1689,7 +1690,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     const reopened = new SqliteMatchStorage({ dbPath, backupDir });
     expect((await reopened.list()).map((record) => record.match.matchId)).toEqual([first.matchId]);
     const health = inspectSqliteStorage(dbPath);
-    expect(health).toMatchObject({ kind: "sqlite", schemaVersion: 2, matchCount: 1 });
+    expect(health).toMatchObject({ kind: "sqlite", schemaVersion: 3, matchCount: 1 });
     const manifestText = await readFile(join(backup.backupDir, "manifest.json"), "utf8");
     expect(manifestText).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|cardInstances|privateDeckSnapshots|decklist/i);
     reopened.close();

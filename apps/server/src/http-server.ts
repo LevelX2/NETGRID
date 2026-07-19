@@ -90,6 +90,12 @@ import {
   SqliteAccountStorage,
   type AccountSessionAuthResult,
 } from "./account-session";
+import {
+  AccountMatchStatisticsService,
+  SqliteAccountStatisticsStorage,
+  type AccountMatchHistoryQuery,
+  type AccountStatisticsQuery,
+} from "./account-statistics";
 
 type ClientWsMessage =
   | {
@@ -145,6 +151,7 @@ export type NetgridServerHandle = {
   service: MultiplayerService;
   realtime: NetgridRealtimeServer;
   deploymentConfig: DeploymentConfig;
+  accountStatisticsReady: Promise<void>;
   close(): Promise<void>;
 };
 
@@ -155,6 +162,7 @@ export type NetgridServerOptions = {
   maintenanceAuth?: MaintenanceAuthService;
   accountAuth?: AccountAuthService;
   accountDecks?: AccountDeckService;
+  accountStatistics?: AccountMatchStatisticsService;
 };
 
 export class NetgridRealtimeServer {
@@ -806,6 +814,17 @@ export function createNetgridHttpServer(
     );
   const accountAuth = options.accountAuth;
   const accountDecks = options.accountDecks;
+  const accountStatistics = options.accountStatistics;
+  const removeAccountStatisticsObserver = accountStatistics
+    ? activeService.addPersistenceObserver((record) =>
+        accountStatistics.recordTerminalMatch(record),
+      )
+    : undefined;
+  const accountStatisticsReady = accountStatistics
+    ? activeService
+        .reconcilePersistedMatches((record) => accountStatistics.recordTerminalMatch(record))
+        .then(() => undefined)
+    : Promise.resolve();
   const realtime = new NetgridRealtimeServer(
     activeService,
     deploymentConfig,
@@ -822,6 +841,7 @@ export function createNetgridHttpServer(
         maintenanceAuth,
         accountAuth,
         accountDecks,
+        accountStatistics,
         request,
         response,
       ),
@@ -836,6 +856,7 @@ export function createNetgridHttpServer(
     service: activeService,
     realtime,
     deploymentConfig,
+    accountStatisticsReady,
     close: () =>
       new Promise<void>((resolve, reject) => {
         connectionAudit.record({
@@ -847,7 +868,9 @@ export function createNetgridHttpServer(
           .then(() =>
             server.close((error) => {
               if (cleanupTimer) clearInterval(cleanupTimer);
+              removeAccountStatisticsObserver?.();
               accountDecks?.close();
+              accountStatistics?.close();
               accountAuth?.close();
               activeService.closeStorage();
               return error ? reject(error) : resolve();
@@ -865,12 +888,16 @@ export async function startNetgridServer(
     service?: MultiplayerService;
     accountAuth?: AccountAuthService;
     accountDecks?: AccountDeckService;
+    accountStatistics?: AccountMatchStatisticsService;
   } = {},
 ): Promise<NetgridServerHandle & { url: string; bindUrl: string }> {
   const handle = createNetgridHttpServer(options.service, {
     accountAuth: options.accountAuth ?? createConfiguredAccountAuth(),
     accountDecks: options.accountDecks ?? createConfiguredAccountDecks(),
+    accountStatistics:
+      options.accountStatistics ?? createConfiguredAccountStatistics(),
   });
+  await handle.accountStatisticsReady;
   const port = options.port ?? Number(process.env.PORT ?? 8787);
   const host = (options.host ?? process.env.HOST ?? "0.0.0.0").trim();
   await new Promise<void>((resolveListen) =>
@@ -911,6 +938,20 @@ export function createConfiguredAccountDecks(
   );
 }
 
+export function createConfiguredAccountStatistics(
+  env: NodeJS.ProcessEnv = process.env,
+): AccountMatchStatisticsService {
+  const dbPath =
+    envValue(env, "NETGRID_ACCOUNT_SQLITE_PATH") ??
+    envValue(env, "NETGRID_SQLITE_STORAGE_PATH") ??
+    DEFAULT_SQLITE_STORAGE_PATH;
+  const backupDir =
+    envValue(env, "NETGRID_STORAGE_BACKUP_DIR") ?? DEFAULT_STORAGE_BACKUP_DIR;
+  return new AccountMatchStatisticsService(
+    new SqliteAccountStatisticsStorage({ dbPath, backupDir }),
+  );
+}
+
 function startMaintenanceCleanupTimer(
   service: MultiplayerService,
 ): ReturnType<typeof setInterval> | undefined {
@@ -939,6 +980,7 @@ async function routeHttp(
   maintenanceAuth: MaintenanceAuthService,
   accountAuth: AccountAuthService | undefined,
   accountDecks: AccountDeckService | undefined,
+  accountStatistics: AccountMatchStatisticsService | undefined,
   request: IncomingMessage,
   response: ServerResponse,
 ): Promise<void> {
@@ -1302,6 +1344,28 @@ async function routeHttp(
       return;
     }
 
+    if (url.pathname === "/api/account/statistics" && request.method === "GET") {
+      if (!accountAuth || !accountStatistics)
+        return sendJson(response, 503, accountUnavailablePayload());
+      if (!checkRateLimit(response, rateLimiter, "account_read", request, deploymentConfig, "account-statistics")) return;
+      const auth = await ensureAccountAuthenticated(response, request, accountAuth);
+      if (!auth) return;
+      response.setHeader("cache-control", "no-store");
+      sendJson(response, 200, await accountStatistics.statisticsForAccount(auth.account.accountId, accountStatisticsQueryFromUrl(url)));
+      return;
+    }
+
+    if (url.pathname === "/api/account/match-history" && request.method === "GET") {
+      if (!accountAuth || !accountStatistics)
+        return sendJson(response, 503, accountUnavailablePayload());
+      if (!checkRateLimit(response, rateLimiter, "account_read", request, deploymentConfig, "account-match-history")) return;
+      const auth = await ensureAccountAuthenticated(response, request, accountAuth);
+      if (!auth) return;
+      response.setHeader("cache-control", "no-store");
+      sendJson(response, 200, await accountStatistics.matchHistoryForAccount(auth.account.accountId, accountMatchHistoryQueryFromUrl(url)));
+      return;
+    }
+
     if (url.pathname === "/api/account/export" && request.method === "GET") {
       if (!accountAuth || !accountDecks)
         return sendJson(response, 503, accountDecksUnavailablePayload());
@@ -1313,11 +1377,18 @@ async function routeHttp(
       if (!auth) return;
       const account = await accountAuth.exportAccount(auth.account.accountId);
       const decks = await accountDecks.list(auth.account.accountId);
+      const statistics = accountStatistics
+        ? await accountStatistics.exportForAccount(auth.account.accountId)
+        : undefined;
+      response.setHeader("cache-control", "no-store");
       sendJson(response, 200, {
-        schemaVersion: "netgrid-account-export-v1",
+        schemaVersion: statistics
+          ? "netgrid-account-export-v2"
+          : "netgrid-account-export-v1",
         exportedAt: new Date().toISOString(),
         account,
         decks: decks.decks.map(accountDeckPublicView),
+        ...(statistics ? { statistics } : {}),
       });
       return;
     }
@@ -1341,6 +1412,7 @@ async function routeHttp(
       if (!deleted)
         return sendJson(response, 401, accountInvalidCredentialsPayload());
       await accountDecks.deleteAll(auth.account.accountId);
+      await accountStatistics?.deleteAccountData(auth.account.accountId);
       response.setHeader(
         "set-cookie",
         clearAccountSessionCookie(request, deploymentConfig),
@@ -2341,6 +2413,14 @@ async function routeHttp(
       }
       try {
         const created = await service.createMatch(createInput);
+        if (accountIdentity && accountStatistics && created.mode !== "ai_vs_ai") {
+          await accountStatistics.bindAuthenticatedParticipant({
+            matchId: created.matchId,
+            participantSlot: "player_a",
+            accountId: accountIdentity.accountId,
+            bindingSource: "authenticated_create",
+          });
+        }
         sendJson(response, 201, created);
       } catch (error) {
         sendJson(response, 400, {
@@ -2555,6 +2635,14 @@ async function routeHttp(
           joinInput.identityKind = "guest";
         }
         const joined = await service.joinMatch(matchId, joinInput);
+        if (!("error" in joined) && accountIdentity && accountStatistics) {
+          await accountStatistics.bindAuthenticatedParticipant({
+            matchId,
+            participantSlot: "player_b",
+            accountId: accountIdentity.accountId,
+            bindingSource: "authenticated_join",
+          });
+        }
         if (!("error" in joined))
           void realtime.refreshSide(matchId, opposite(joined.side));
         sendJson(response, "error" in joined ? 403 : 200, joined);
@@ -2689,6 +2777,13 @@ async function routeHttp(
             ? { displayName: body.displayName }
             : {}),
         });
+        if (result.ok && result.newMatch && accountStatistics) {
+          await accountStatistics.inheritMatchParticipants({
+            sourceMatchId: matchId,
+            targetMatchId: result.newMatch.matchId,
+            bindingSource: "inherited_recreate",
+          });
+        }
         realtime.broadcastLifecycle(result);
         sendJson(
           response,
@@ -2772,6 +2867,13 @@ async function routeHttp(
             ? { displayName: body.displayName }
             : {}),
         });
+        if (!("error" in next) && accountStatistics) {
+          await accountStatistics.inheritMatchParticipants({
+            sourceMatchId: matchId,
+            targetMatchId: next.matchId,
+            bindingSource: "inherited_series_next",
+          });
+        }
         sendJson(response, "error" in next ? 409 : 201, next);
         return;
       }
@@ -3132,12 +3234,38 @@ async function ensureAccountAuthenticated(
 async function optionalAccountIdentity(
   request: IncomingMessage,
   accountAuth: AccountAuthService | undefined,
-): Promise<{ displayName: string } | undefined> {
+): Promise<{ accountId: string; displayName: string } | undefined> {
   if (!accountAuth) return undefined;
   const sessionToken = accountSessionToken(request);
   if (!sessionToken) return undefined;
   const auth = await accountAuth.authenticateSession(sessionToken);
-  return auth.ok ? { displayName: auth.account.displayName } : undefined;
+  return auth.ok
+    ? { accountId: auth.account.accountId, displayName: auth.account.displayName }
+    : undefined;
+}
+
+function accountStatisticsQueryFromUrl(url: URL): AccountStatisticsQuery {
+  const period = url.searchParams.get("period");
+  const side = url.searchParams.get("side");
+  const opponentKind = url.searchParams.get("opponentKind");
+  const matchMode = url.searchParams.get("matchMode");
+  return {
+    ...(period === "30d" || period === "90d" || period === "all" ? { period } : {}),
+    ...(side === "runner" || side === "corp" ? { side } : {}),
+    ...(opponentKind === "account" || opponentKind === "guest" || opponentKind === "ai" ? { opponentKind } : {}),
+    ...(matchMode === "human_vs_human" || matchMode === "human_runner_vs_corp_ai" || matchMode === "human_corp_vs_runner_ai" || matchMode === "ai_vs_ai" ? { matchMode } : {}),
+  };
+}
+
+function accountMatchHistoryQueryFromUrl(url: URL): AccountMatchHistoryQuery {
+  const base = accountStatisticsQueryFromUrl(url);
+  const limit = Number(url.searchParams.get("limit") ?? 20);
+  const cursor = url.searchParams.get("cursor")?.trim();
+  return {
+    ...base,
+    limit: Number.isFinite(limit) ? limit : 20,
+    ...(cursor ? { cursor } : {}),
+  };
 }
 
 function ensureAccountOrigin(

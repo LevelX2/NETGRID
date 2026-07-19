@@ -50,6 +50,7 @@ import {
   corpUnsafeDelayedScorelineExposureComponent,
 } from "./corp-scoreline/semantic-runtime-corp-score-scoreline-components";
 import { corpPreparedScoreRemoteAgendaSearchComponent } from "./corp-scoreline/semantic-runtime-corp-score-state";
+import { corpOptionalDrawScoreComponents } from "./corp-economy/corp-defensive-draw";
 import {
   corpActionCanResolveProfiledTrace,
   corpActionFamilyScoreComponents,
@@ -405,13 +406,9 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
   if (preparedScoreRemoteAgendaSearch) {
     components.push(preparedScoreRemoteAgendaSearch);
   }
-  if (action.type === "draw_card" && input.playerView.own.gripOrHq.length < 4) {
-    components.push({
-      key: "corp_low_hand",
-      label: "Handkarten-Bedarf",
-      value: 450,
-      reason: `hand:${input.playerView.own.gripOrHq.length}`,
-    });
+  const optionalDrawComponents = corpOptionalDrawScoreComponents(input, action, boardTriageState);
+  components.push(...optionalDrawComponents);
+  if (optionalDrawComponents.some((component) => component.key === "corp_low_hand")) {
     if (dependencies.corpHasRemoteInstability(input)) {
       components.push({
         key: "corp_remote_instability_draw",

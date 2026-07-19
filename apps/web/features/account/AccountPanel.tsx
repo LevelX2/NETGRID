@@ -3,6 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { inviteTokenFromLocation, resetTokenFromLocation } from "./account-client";
 import type { ReturnTypeOfUseAccountSession } from "./account-types";
+import { AccountStatisticsPanel } from "./AccountStatisticsPanel";
 
 export function AccountPanel({ accountSession }: { accountSession: ReturnTypeOfUseAccountSession }) {
   const [loginName, setLoginName] = useState("");
@@ -47,6 +48,7 @@ export function AccountPanel({ accountSession }: { accountSession: ReturnTypeOfU
           <div><dt>Anmeldung</dt><dd>{accountSession.session?.authStrength === "password" ? "Passwort" : accountSession.session?.authStrength}</dd></div>
           <div><dt>Sitzung gültig bis</dt><dd>{formatDate(accountSession.session?.expiresAt)}</dd></div>
         </dl>
+        <AccountStatisticsPanel accountId={accountSession.account.accountId} />
         {accountSession.error ? <p className="notice">{accountSession.error}</p> : null}
         <div className="accountActions">
           <button className="button" disabled={accountSession.busy} onClick={() => void accountSession.logout()} type="button">Abmelden</button>

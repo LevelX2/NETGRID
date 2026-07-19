@@ -1,8 +1,10 @@
+import type { AiDecisionInput } from "@netgrid/shared";
 import type {
   PlanStepMappingResult,
   TacticalPlanRuntimeResult,
 } from "../../tactical-plans";
 import type { SemanticRuntimeChoice } from "../semantic-runtime-types";
+import { replayStableCorpBasicEconomyNearTieChoiceOrUndefined } from "../corp-economy/corp-basic-economy-near-tie";
 import { semanticRuntimeServerId } from "../semantic-runtime-scope";
 import {
   semanticRuntimeChoiceHasScoreComponent,
@@ -343,9 +345,17 @@ export function bestSemanticRuntimeChoice(
 export function bestSemanticRuntimeChoiceForTacticalPlanOverride(
   choices: readonly SemanticRuntimeChoice[],
   planRuntime: TacticalPlanRuntimeResult,
+  input?: AiDecisionInput,
 ): SemanticRuntimeChoice | undefined {
   const viableChoices = choices.filter(
     (choice) => !tacticalPlanBlocksSemanticChoice(planRuntime, choice),
   );
-  return bestSemanticRuntimeChoice(viableChoices);
+  const baseline = bestSemanticRuntimeChoice(viableChoices);
+  return input
+    ? replayStableCorpBasicEconomyNearTieChoiceOrUndefined(
+        input,
+        viableChoices,
+        baseline,
+      )
+    : baseline;
 }
