@@ -67,23 +67,10 @@ if (valueCycles.length > 0) {
   );
 }
 
-const expectedTypeCycleSignatures = new Set();
 const actualTypeCycles = cyclicComponents(allGraph);
-const actualTypeCycleSignatures = new Set(
-  actualTypeCycles.map((component) =>
-    signature(component.map(relativeSourcePath)),
-  ),
-);
-for (const unexpected of [...actualTypeCycleSignatures].filter(
-  (entry) => !expectedTypeCycleSignatures.has(entry),
-)) {
-  findings.push(`unexpected type import cycle: ${unexpected}`);
-}
-for (const missing of [...expectedTypeCycleSignatures].filter(
-  (entry) => !actualTypeCycleSignatures.has(entry),
-)) {
+for (const component of actualTypeCycles) {
   findings.push(
-    `type-cycle ratchet is stale because the allowed cycle disappeared: ${missing}`,
+    `type import cycle: ${component.map(relativeSourcePath).join(" -> ")}`,
   );
 }
 
@@ -94,7 +81,7 @@ if (findings.length > 0) {
 }
 
 console.log(
-  `AI_SOURCE_STRUCTURE OK production=${productionFiles.length} runtimeCycles=${valueCycles.length} allowedTypeCycles=${actualTypeCycles.length}`,
+  `AI_SOURCE_STRUCTURE OK production=${productionFiles.length} runtimeCycles=${valueCycles.length} typeCycles=${actualTypeCycles.length}`,
 );
 
 function collectSourceFiles(root, includeTests) {

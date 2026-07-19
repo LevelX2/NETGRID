@@ -29,7 +29,6 @@ const forbiddenRuntimeDelegateFiles = [
   "runtime-delegates.ts",
   "state-runtime-delegates.ts",
 ];
-const allowedCycleSignatures = new Set();
 const allowedLayerDebt = new Set([
   "ability-engine/active-modifiers.ts -> game/state/temporary-breaker-strength.ts",
   "ability-engine/card-implementation-runtime-activated-costs.ts -> game/payment/runner-payment-support.ts",
@@ -136,12 +135,7 @@ const actualCycleSignatures = new Set(
   ),
 );
 for (const cycle of actualCycleSignatures) {
-  if (!allowedCycleSignatures.has(cycle))
-    findings.push(`unexpected relative import cycle: ${cycle}`);
-}
-for (const allowed of allowedCycleSignatures) {
-  if (!actualCycleSignatures.has(allowed))
-    findings.push(`stale allowed-cycle debt entry: ${allowed}`);
+  findings.push(`relative import cycle: ${cycle}`);
 }
 for (const layerEdge of actualLayerDebt) {
   if (!allowedLayerDebt.has(layerEdge))

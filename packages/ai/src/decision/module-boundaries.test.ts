@@ -538,7 +538,6 @@ describe("AI module boundaries", () => {
   it("keeps tactical plans as a thin plan facade", () => {
     const tacticalPlans = path.join(srcDir, "tactical-plans.ts");
     const content = readFileSync(tacticalPlans, "utf8");
-    const lineCount = content.split(/\r?\n/).length;
     const forbiddenPatterns = [
       {
         pattern: /^\s*function\s/m,
@@ -557,9 +556,6 @@ describe("AI module boundaries", () => {
       "./plans/tactical-plan-progression",
     ];
     const violations = [
-      ...(lineCount > 450
-        ? [`tactical-plans.ts has ${lineCount} lines; expected <= 450`]
-        : []),
       ...forbiddenPatterns
         .filter(({ pattern }) => pattern.test(content))
         .map(({ reason }) => `tactical-plans.ts ${reason}`),

@@ -37,17 +37,17 @@ describe("session recovery storage", () => {
     expect(parseRecoverableSessionFromStorage(JSON.stringify({ v: 1, m: "match", s: "runner" }))).toBeNull();
   });
 
-  it("migrates legacy recent-session storage to the NETGRID key", () => {
+  it("loads and normalizes recent-session storage", () => {
     const localStorage = memoryStorage({
-      "netgrid.recentSessions": JSON.stringify([{ matchId: "match_legacy_recent", side: "runner", displayName: "Alt", savedAt: "2026-05-07T00:00:00.000Z" }])
+      "netgrid.recentSessions": JSON.stringify([{ matchId: "match_recent", side: "runner", displayName: "Runner", savedAt: "2026-05-07T00:00:00.000Z" }])
     });
     stubWindow(localStorage, memoryStorage());
 
-    expect(loadRecentSessions()).toEqual([{ matchId: "match_legacy_recent", side: "runner", displayName: "Alt", savedAt: "2026-05-07T00:00:00.000Z" }]);
+    expect(loadRecentSessions()).toEqual([{ matchId: "match_recent", side: "runner", displayName: "Runner", savedAt: "2026-05-07T00:00:00.000Z" }]);
     expect(localStorage.getItem("netgrid.recentSessions")).toBeTruthy();
   });
 
-  it("migrates legacy session and recovery storage to NETGRID keys", () => {
+  it("falls back from tab storage to recoverable local storage", () => {
     const serializedSession = JSON.stringify(session);
     const serializedRecovery = serializeRecoverableSessionForStorage(session);
     const sessionStorage = memoryStorage({ "netgrid-mvp-0-3-session": serializedSession });
@@ -57,7 +57,6 @@ describe("session recovery storage", () => {
     expect(loadStoredSession()).toEqual(session);
     expect(sessionStorage.getItem("netgrid-mvp-0-3-session")).toBe(serializedSession);
 
-    sessionStorage.removeItem("netgrid-mvp-0-3-session");
     sessionStorage.removeItem("netgrid-mvp-0-3-session");
     expect(loadStoredSession()).toEqual(session);
     expect(localStorage.getItem("netgrid.recovery.v1")).toBe(serializedRecovery);

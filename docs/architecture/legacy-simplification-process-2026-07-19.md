@@ -33,7 +33,15 @@ jedem Paket in diesem Dokument aktualisiert.
   Schema-0/1-Migration und Eventlog-Backfill sind entfernt. Private Decks
   werden ausschließlich je Teilnehmer gespeichert und ohne Top-Level- oder
   ID-Fallback gelesen. Geprüft mit Server-Typecheck und allen 174 Servertests.
-- P5 Tote Artefakte, Browser-Aliase und Importreste: als Nächstes.
+- P5 Tote Artefakte, Browser-Aliase und Importreste: abgeschlossen. Entfernt
+  sind fünf alte AI-Profile/Snapshots, die tote V1.3.1-Katalogpipeline samt
+  Daten/Reports, 71 archivierte Card-Gates, sechs verwaiste Generatorreports,
+  der Chronicle-Fallback-Audit und identische Browser-Storage-Aliase samt
+  Browser-Deck-Migration. Quantitative Testgrößen-Gates wurden entfernt;
+  echte Runtime-Grenztests blieben bestehen. Der TypeScript-Import-Organizer
+  bestätigte null unbenutzte Runtime-Internal-Imports. Geprüft mit vier
+  Paket-Typechecks, 250 gezielten Tests und den Architektur-/Discovery-Checks.
+- P6 Gesamtabschluss und Wissenspflege: als Nächstes.
 
 ## Quelle/Vorgabe
 

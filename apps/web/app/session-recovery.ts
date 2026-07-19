@@ -54,11 +54,8 @@ type RecoverableSessionRecord = {
 };
 
 export const SESSION_STORAGE_KEY = "netgrid-mvp-0-3-session";
-export const LEGACY_SESSION_STORAGE_KEY = "netgrid-mvp-0-3-session";
 export const RECENT_SESSIONS_KEY = "netgrid.recentSessions";
-export const LEGACY_RECENT_SESSIONS_KEY = "netgrid.recentSessions";
 const RECOVERY_STORAGE_KEY = "netgrid.recovery.v1";
-const LEGACY_RECOVERY_STORAGE_KEY = "netgrid.recovery.v1";
 
 export function persistSession(session: SessionInfo, remotePayload?: RemoteSessionSummary) {
   window.sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
@@ -67,10 +64,10 @@ export function persistSession(session: SessionInfo, remotePayload?: RemoteSessi
 }
 
 export function clearStoredSession(session?: Pick<SessionInfo, "matchId" | "side">): void {
-  removeStorageKeys(window.sessionStorage, SESSION_STORAGE_KEY, LEGACY_SESSION_STORAGE_KEY);
+  removeStorageKey(window.sessionStorage, SESSION_STORAGE_KEY);
   const recoverable = loadRecoverableSession();
   if (!session || !recoverable || (recoverable.matchId === session.matchId && recoverable.side === session.side)) {
-    removeStorageKeys(window.localStorage, RECOVERY_STORAGE_KEY, LEGACY_RECOVERY_STORAGE_KEY);
+    removeStorageKey(window.localStorage, RECOVERY_STORAGE_KEY);
   }
 }
 
@@ -86,17 +83,17 @@ export function loadRecentSession(): RecentSessionInfo | null {
 
 export function loadRecentSessions(): RecentSessionInfo[] {
   try {
-    const parsed = JSON.parse(readStorageWithLegacy(window.localStorage, RECENT_SESSIONS_KEY, LEGACY_RECENT_SESSIONS_KEY) ?? "[]") as unknown[];
+    const parsed = JSON.parse(readStorage(window.localStorage, RECENT_SESSIONS_KEY) ?? "[]") as unknown[];
     const sanitized = parsed
       .map(sanitizeRecentSession)
       .filter((session): session is RecentSessionInfo => Boolean(session))
       .sort((left, right) => right.savedAt.localeCompare(left.savedAt))
       .slice(0, 4);
     if (sanitized.length > 0) window.localStorage.setItem(RECENT_SESSIONS_KEY, JSON.stringify(sanitized));
-    else removeStorageKeys(window.localStorage, RECENT_SESSIONS_KEY, LEGACY_RECENT_SESSIONS_KEY);
+    else removeStorageKey(window.localStorage, RECENT_SESSIONS_KEY);
     return sanitized;
   } catch {
-    removeStorageKeys(window.localStorage, RECENT_SESSIONS_KEY, LEGACY_RECENT_SESSIONS_KEY);
+    removeStorageKey(window.localStorage, RECENT_SESSIONS_KEY);
     return [];
   }
 }
@@ -120,7 +117,7 @@ export function storedSessionMatches(recent: RecentSessionInfo | null): boolean 
 export function removeRecentSession(session: Pick<RecentSessionInfo | SessionInfo, "matchId" | "side">): void {
   const next = loadRecentSessions().filter((candidate) => !(candidate.matchId === session.matchId && candidate.side === session.side));
   if (next.length > 0) window.localStorage.setItem(RECENT_SESSIONS_KEY, JSON.stringify(next));
-  else removeStorageKeys(window.localStorage, RECENT_SESSIONS_KEY, LEGACY_RECENT_SESSIONS_KEY);
+  else removeStorageKey(window.localStorage, RECENT_SESSIONS_KEY);
 }
 
 export function serializeRecoverableSessionForStorage(session: SessionInfo): string {
@@ -173,35 +170,30 @@ function persistRecoverableSession(session: SessionInfo): void {
 }
 
 function loadRecoverableSession(): SessionInfo | null {
-  const parsed = parseRecoverableSessionFromStorage(readStorageWithLegacy(window.localStorage, RECOVERY_STORAGE_KEY, LEGACY_RECOVERY_STORAGE_KEY));
-  if (!parsed) removeStorageKeys(window.localStorage, RECOVERY_STORAGE_KEY, LEGACY_RECOVERY_STORAGE_KEY);
+  const parsed = parseRecoverableSessionFromStorage(readStorage(window.localStorage, RECOVERY_STORAGE_KEY));
+  if (!parsed) removeStorageKey(window.localStorage, RECOVERY_STORAGE_KEY);
   return parsed;
 }
 
 function loadSessionStorageSession(): SessionInfo | null {
   try {
-    const stored = readStorageWithLegacy(window.sessionStorage, SESSION_STORAGE_KEY, LEGACY_SESSION_STORAGE_KEY);
+    const stored = readStorage(window.sessionStorage, SESSION_STORAGE_KEY);
     if (!stored) return null;
     const parsed = JSON.parse(stored) as SessionInfo;
     if (!parsed.matchId || !parsed.sessionToken || !parsed.reconnectToken || (parsed.side !== "runner" && parsed.side !== "corp")) return null;
     return parsed;
   } catch {
-    removeStorageKeys(window.sessionStorage, SESSION_STORAGE_KEY, LEGACY_SESSION_STORAGE_KEY);
+    removeStorageKey(window.sessionStorage, SESSION_STORAGE_KEY);
     return null;
   }
 }
 
-function readStorageWithLegacy(storage: Storage, key: string, legacyKey: string): string | null {
-  const current = storage.getItem(key);
-  if (current !== null) return current;
-  const legacy = storage.getItem(legacyKey);
-  if (legacy !== null) storage.setItem(key, legacy);
-  return legacy;
+function readStorage(storage: Storage, key: string): string | null {
+  return storage.getItem(key);
 }
 
-function removeStorageKeys(storage: Storage, key: string, legacyKey: string): void {
+function removeStorageKey(storage: Storage, key: string): void {
   storage.removeItem(key);
-  storage.removeItem(legacyKey);
 }
 
 function safeRecentSession(session: SessionInfo, remotePayload?: RemoteSessionSummary): RecentSessionInfo {
