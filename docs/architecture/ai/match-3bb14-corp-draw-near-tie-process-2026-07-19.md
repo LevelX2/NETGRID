@@ -1,6 +1,6 @@
 # Match-3bb14-Corp-Draw-Near-Tie-Prozess (2026-07-19)
 
-Status: P0 aktiv
+Status: P1 abgeschlossen, P2 aktiv
 
 ## Quelle und Zielprüfung
 
@@ -48,9 +48,10 @@ Der Endzustand ist hinreichend bestimmt:
 
 - Rules Engine und `LegalActions` bleiben alleinige Regelautorität.
 - Variation greift erst nach fachlichem Scoring und nur innerhalb einer
-  explizit begrenzten Near-Tie-Menge.
-- Ausschlüsse, nicht positive Kandidaten, akute Score-/Schutz-Controller und
-  TacticalPlan-Mapping dürfen durch Variation nicht umgangen werden.
+  explizit begrenzten Near-Tie-Menge derselben Viability-Stufe: positive
+  Kandidaten, falls vorhanden, sonst die nicht ausgeschlossenen Fallbacks.
+- Ausschlüsse, akute Score-/Schutz-Controller und TacticalPlan-Mapping dürfen
+  durch Variation nicht umgangen werden.
 - Derselbe AI-Entscheidungskontext erzeugt dieselbe Auswahl und dieselbe
   Debug-Evidence.
 - Der Draw-Bonus darf weder Handüberlauf noch Agenda-Flood oder bereits
@@ -106,8 +107,8 @@ Der Endzustand ist hinreichend bestimmt:
 ### P3 - Begrenzte replay-stabile Near-Tie-Variation
 
 - Nach der fachlichen Rangfolge eine stabile, seedabhängige Auswahl nur aus
-  positiven, nicht ausgeschlossenen und innerhalb der engen Toleranz
-  liegenden Kandidaten einführen.
+  nicht ausgeschlossenen Kandidaten derselben Viability-Stufe und innerhalb
+  der engen Toleranz einführen.
 - Action-Typ-Tiebreaker bleibt Ordnungsmetadatum, darf die Near-Tie-Menge aber
   nicht künstlich strategisch trennen.
 - Debug-Evidence dokumentiert Eligibility, Toleranz, Kandidaten und Bucket.
@@ -156,3 +157,9 @@ LegalActions. Stelle keine Zwischenfragen, solange konservative automatische
 Fortsetzung möglich ist. Nutze den Hauptworkspace nur für den finalen lokalen
 Merge. Markiere das Ziel erst nach erfolgreicher Main-Verifikation sowie
 verifiziertem Worktree- und Branch-Cleanup als abgeschlossen.
+
+## Paketstatus
+
+- P0: `ad7cdaa06` (`docs(ai): plan corp draw near-tie refinement`)
+- P1: drei Strict-Captures ohne Warmup-Drift; drei rote
+  `behavior_regression`-Zieltests und zwei grüne Gegenproben.
