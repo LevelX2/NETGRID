@@ -229,7 +229,15 @@ dokumentiertem Sicherheitsblocker und Removal Condition zulässig.
   1.606/1.067/1.183 Zeilen verteilt. AI-Typecheck, Package-Boundaries, 139/139
   Corp-Score-/Scoreline-/Choice-Tests, Structure-Selftest und Diff-Hygiene sind
   grün; die Removal List sinkt von fünf auf zwei Treffer.
-- Aktives Paket: ASSG-5.
+- ASSG-5 abgeschlossen: Der reine Board-Triage-Orchestrator sinkt von 810 auf
+  364 Zeilen; das Action-Alignment liegt zyklusfrei in einem eigenen
+  463-Zeilen-Owner. Die 20 vorhandenen Scoreline-Triage-Tests sind vollständig
+  auf Central-, Remote-Funding- und Clock-Suiten mit 517/613/368 Zeilen
+  verteilt. AI-Typecheck, Package-Boundaries, 121/121 Board-Triage-/Corp-
+  Score-/Choice-/Central-Pressure-Tests, Structure-Selftest und Diff-Hygiene
+  sind grün. Die Removal List steht bei null; das Source-Structure-Gate meldet
+  677 produktive Dateien, null Laufzeit-/Typzyklen und Runtime-Root 289.
+- Aktives Paket: ASSG-6.
 
 ## Paketfolge
 

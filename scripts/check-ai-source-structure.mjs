@@ -97,7 +97,11 @@ const productionLineCaps = new Map([
     "runtime/corp-scoreline/semantic-runtime-corp-score-action-families.ts",
     391,
   ],
-  ["runtime/semantic-runtime-corp-board-triage.ts", 793],
+  ["runtime/semantic-runtime-corp-board-triage.ts", 364],
+  [
+    "runtime/corp-scoreline/semantic-runtime-corp-board-triage-alignment.ts",
+    463,
+  ],
   ["runner-hand-development.ts", 936],
   ["runner/hand-development/runner-hand-text-signals.ts", 431],
   ["runner/hand-development/runner-persistent-install-evaluation.ts", 1450],
@@ -160,8 +164,16 @@ const testLineCaps = new Map([
     3314,
   ],
   [
-    "runtime/corp-scoreline/semantic-runtime-corp-board-triage-scoreline.test.ts",
-    1373,
+    "runtime/corp-scoreline/semantic-runtime-corp-board-triage-central.test.ts",
+    517,
+  ],
+  [
+    "runtime/corp-scoreline/semantic-runtime-corp-board-triage-clock.test.ts",
+    368,
+  ],
+  [
+    "runtime/corp-scoreline/semantic-runtime-corp-board-triage-remote-funding.test.ts",
+    613,
   ],
   [
     "runtime/corp-scoreline/semantic-runtime-corp-scoring-window-protection.test.ts",
