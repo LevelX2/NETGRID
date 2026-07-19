@@ -21,7 +21,11 @@ export function executeOnPlayCardImplementationAbility(
   legalAction: LegalAction,
   definition: CardDefinition,
   cardId: CardInstanceId,
-  continuation?: { startEffectIndex: number; skipLegalityCheck: true },
+  continuation?: {
+    startEffectIndex: number;
+    creditGainOrdinal: number;
+    skipLegalityCheck: true;
+  },
 ): void {
   const ability = printedCostOnPlayImplementation(definition);
   if (!ability)
@@ -41,6 +45,17 @@ export function executeOnPlayCardImplementationAbility(
       sourceTitle: definition.title,
       controller: deps.mustInstance(state.cardInstances, cardId).controller,
       effectIndexOffset: startEffectIndex,
+      creditGainOrdinalOffset: continuation?.creditGainOrdinal ?? 0,
+      gainCredits: (side, amount, gainOrdinal, kind) =>
+        deps.gainCredits(state, {
+          side,
+          amount,
+          sourceCardId: cardId,
+          sourceDefinitionId: definition.id,
+          gainOrdinal,
+          kind,
+          reason: "card_resolver",
+        }),
       addRunnerTagsWithPrevention: (amount) => {
         runnerTagsBeforeSuspendedEffect = state.runner.tags;
         effectSuspended = deps.addRunnerTagsWithPrevention(
@@ -352,6 +367,7 @@ export function executeOnPlayCardImplementationAbility(
       sourceDefinitionId: definition.id,
       tagEffectIndex: result.suspendedAtEffectIndex,
       nextEffectIndex: result.suspendedAtEffectIndex + 1,
+      creditGainOrdinal: result.creditGainOrdinal,
       runnerTagsBefore: runnerTagsBeforeSuspendedEffect,
     };
   }
@@ -401,6 +417,7 @@ export function resumeOnPlayCardImplementationAfterTagPrevention(
     continuation.sourceCardId,
     {
       startEffectIndex: continuation.nextEffectIndex,
+      creditGainOrdinal: continuation.creditGainOrdinal,
       skipLegalityCheck: true,
     },
   );

@@ -69,6 +69,16 @@ export function executeCardImplementationLifecycleEffects(
         Number(legalAction?.payload?.targetRezCost ?? 0),
       ),
       controller: deps.mustInstance(state.cardInstances, cardId).controller,
+      gainCredits: (side, amount, gainOrdinal, kind) =>
+        deps.gainCredits(state, {
+          side,
+          amount,
+          sourceCardId: cardId,
+          sourceDefinitionId: definition.id,
+          gainOrdinal,
+          kind,
+          reason: reason ?? "card_lifecycle",
+        }),
       addHostedCredits: (sourceCardId, amount) =>
         deps.addHostedCredits(state, sourceCardId, amount),
       addCountersToSource: (sourceCardId, counterType, amount) =>

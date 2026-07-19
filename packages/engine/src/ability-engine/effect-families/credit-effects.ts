@@ -15,18 +15,14 @@ export function executeCreditEffect(input: CardEffectFamilyInput): boolean {
     case "gain_credits": {
       runtime.assertPositiveIntegerAmount("gain_credits", effect.amount);
       const side = runtime.recipientSide(context, effect.recipient);
-      runtime.gainCredits(state, side, effect.amount);
-      publicPayload.gainedCredits =
-        Number(publicPayload.gainedCredits ?? 0) + effect.amount;
-      publicPayload[
-        side === "corp" ? "corpCreditsAfter" : "runnerCreditsAfter"
-      ] = side === "corp" ? state.corp.credits : state.runner.credits;
+      const gain = runtime.gainCredits(state, side, effect.amount);
+      runtime.mergePublicPayload(publicPayload, gain.publicPayload);
       resolvedEffects.push({
         effectId: runtime.publicEffectId(context, index, "gain_credits"),
         kind: "gain_credits",
         visibility: effect.visibility,
         side,
-        amount: effect.amount,
+        amount: gain.creditedAmount,
         reason: runtime.effectReason(context),
         ...(context.sourceDefinitionId
           ? { sourceDefinitionId: context.sourceDefinitionId }
@@ -50,16 +46,14 @@ export function executeCreditEffect(input: CardEffectFamilyInput): boolean {
         "gain_credits_for_runner_trash_history",
         amount,
       );
-      runtime.gainCredits(state, context.controller, amount);
-      publicPayload.gainedCredits =
-        Number(publicPayload.gainedCredits ?? 0) + amount;
-      publicPayload.runnerCreditsAfter = state.runner.credits;
+      const gain = runtime.gainCredits(state, context.controller, amount);
+      runtime.mergePublicPayload(publicPayload, gain.publicPayload);
       resolvedEffects.push({
         effectId: runtime.publicEffectId(context, index, "gain_credits"),
         kind: "gain_credits",
         visibility: effect.visibility,
         side: context.controller,
-        amount,
+        amount: gain.creditedAmount,
         reason: runtime.effectReason(context),
         ...(context.sourceDefinitionId
           ? { sourceDefinitionId: context.sourceDefinitionId }
@@ -88,13 +82,9 @@ export function executeCreditEffect(input: CardEffectFamilyInput): boolean {
       );
       const amount = advancementCounterCount * effect.amountPerCounter;
       const side = runtime.recipientSide(context, effect.recipient);
-      runtime.gainCredits(state, side, amount);
+      const gain = runtime.gainCredits(state, side, amount);
+      runtime.mergePublicPayload(publicPayload, gain.publicPayload);
       publicPayload.advancementCounterCount = advancementCounterCount;
-      publicPayload.gainedCredits =
-        Number(publicPayload.gainedCredits ?? 0) + amount;
-      publicPayload[
-        side === "corp" ? "corpCreditsAfter" : "runnerCreditsAfter"
-      ] = side === "corp" ? state.corp.credits : state.runner.credits;
       resolvedEffects.push({
         effectId: runtime.publicEffectId(
           context,
@@ -104,7 +94,7 @@ export function executeCreditEffect(input: CardEffectFamilyInput): boolean {
         kind: "gain_credits",
         visibility: effect.visibility,
         side,
-        amount,
+        amount: gain.creditedAmount,
         reason: runtime.effectReason(context),
         ...(context.sourceDefinitionId
           ? { sourceDefinitionId: context.sourceDefinitionId }
@@ -163,18 +153,15 @@ export function executeCreditEffect(input: CardEffectFamilyInput): boolean {
         );
       const payer = runtime.recipientSide(context, effect.payer);
       const loseSide = runtime.recipientSide(context, effect.loseSide);
-      const paid = runtime.spendCreditsIfAvailable(
-        state,
-        payer,
-        effect.amount,
-      );
+      const paid = runtime.spendCreditsIfAvailable(state, payer, effect.amount);
       const winner = paid ? undefined : runtime.loseGame(state, loseSide);
       publicPayload.creditsPaid =
         Number(publicPayload.creditsPaid ?? 0) + (paid ? effect.amount : 0);
       publicPayload.payCreditsOrLoseGameAmount = effect.amount;
       publicPayload.payCreditsOrLoseGamePaid = paid;
-      publicPayload[payer === "corp" ? "corpCreditsAfter" : "runnerCreditsAfter"] =
-        runtime.creditsForSide(state, payer);
+      publicPayload[
+        payer === "corp" ? "corpCreditsAfter" : "runnerCreditsAfter"
+      ] = runtime.creditsForSide(state, payer);
       if (!paid) {
         publicPayload.gameLost = true;
         publicPayload.winner = winner ?? "";

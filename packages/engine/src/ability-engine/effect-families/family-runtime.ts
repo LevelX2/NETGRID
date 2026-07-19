@@ -6,7 +6,10 @@ import type {
   Winner,
 } from "@netgrid/shared";
 import type { CardEffectImplementation } from "../definition-types";
-import type { CardEffectExecutionContext } from "../effect-execution-types";
+import type {
+  CardEffectCreditGainResult,
+  CardEffectExecutionContext,
+} from "../effect-execution-types";
 
 export type CardEffectPublicPayload = Record<string, string | number | boolean>;
 
@@ -15,7 +18,12 @@ export type CardEffectFamilyRuntime = {
     context: CardEffectExecutionContext,
     recipient: "controller" | "runner" | "corp",
   ) => Side;
-  gainCredits: (state: GameState, side: Side, amount: number) => void;
+  gainCredits: (
+    state: GameState,
+    side: Side,
+    amount: number,
+    kind?: "standard" | "temporary_grant",
+  ) => CardEffectCreditGainResult;
   creditsForSide: (state: GameState, side: Side) => number;
   loseCredits: (state: GameState, side: Side, amount: number) => void;
   spendCreditsIfAvailable: (

@@ -120,6 +120,16 @@ export function resolveCardImplementationEndOfRunnerTurnAction(
       ),
       controller: deps.mustInstance(state.cardInstances, cardId).controller,
       reason: "end_of_turn",
+      gainCredits: (side, amount, gainOrdinal, kind) =>
+        deps.gainCredits(state, {
+          side,
+          amount,
+          sourceCardId: cardId,
+          sourceDefinitionId: definition.id,
+          gainOrdinal,
+          kind,
+          reason: "end_of_turn",
+        }),
       addHostedCredits: (sourceCardId, amount) =>
         deps.addHostedCredits(state, sourceCardId, amount),
       addCountersToSource: (sourceCardId, counterType, amount) =>

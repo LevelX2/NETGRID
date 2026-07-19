@@ -52,6 +52,16 @@ export function resolveActivatedCardImplementationAbility(
       ),
       controller: deps.mustInstance(state.cardInstances, match.cardId)
         .controller,
+      gainCredits: (side, amount, gainOrdinal, kind) =>
+        deps.gainCredits(state, {
+          side,
+          amount,
+          sourceCardId: match.cardId,
+          sourceDefinitionId: match.definition.id,
+          gainOrdinal,
+          kind,
+          reason: "card_resolver",
+        }),
       drawCards: (side, amount) => deps.drawCards(state, side, amount),
       damageRunner: (damageType, amount) =>
         deps.damageRunner(
@@ -81,8 +91,7 @@ export function resolveActivatedCardImplementationAbility(
       }),
       startRun: (serverId, options) =>
         deps.startRun(state, legalAction, serverId, options),
-      endRun: (successful) =>
-        deps.finishRun(state, legalAction, successful),
+      endRun: (successful) => deps.finishRun(state, legalAction, successful),
       chosenRunServerId: () =>
         String(legalAction.payload?.serverId ?? "") as Exclude<
           ServerId,

@@ -16,6 +16,7 @@ import type {
 } from "@netgrid/shared";
 import type {
   CardEffectDrawCardsResult,
+  CardEffectCreditGainResult,
   CardEffectHostedCreditsResult,
   CardEffectCounterResult,
   CardEffectTrashSourceResult,
@@ -60,7 +61,12 @@ export type CardImplementationEffectAdapterHost = {
     counterType: CounterType,
     amount: number,
   ) => void;
-  credits: (state: GameState, side: Side, amount: number) => void;
+  gainCredits: (
+    state: GameState,
+    side: Side,
+    amount: number,
+    sourceCardId: CardInstanceId,
+  ) => CardEffectCreditGainResult;
   mustInstance: (
     source: Record<CardInstanceId, CardInstance>,
     cardId: CardInstanceId,
@@ -182,7 +188,7 @@ export function createCardImplementationEffectAdapters(
     if (available <= 0) throw new Error("Auf der Quelle liegen keine Credits.");
     const taken = amount === "all" ? available : Math.min(available, amount);
     host.spendCardCounter(state, sourceCardId, "bit", taken);
-    host.credits(state, side, taken);
+    const gain = host.gainCredits(state, side, taken, sourceCardId);
     const hostedCreditsAfter = host.cardCounter(state, sourceCardId, "bit");
     return {
       amount: taken,
@@ -193,9 +199,7 @@ export function createCardImplementationEffectAdapters(
         hostedCreditsAfter,
         removedCounterAmount: taken,
         remainingCounters: hostedCreditsAfter,
-        gainedCredits: taken,
-        [side === "corp" ? "corpCreditsAfter" : "runnerCreditsAfter"]:
-          side === "corp" ? state.corp.credits : state.runner.credits,
+        ...gain.publicPayload,
       },
     };
   }

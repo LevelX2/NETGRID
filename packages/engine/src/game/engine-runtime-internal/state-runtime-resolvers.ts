@@ -98,11 +98,11 @@ import {
   recordStateRandomMarkers,
 } from "../state/draw-random";
 import {
-  credits,
   spendClick,
   spendClicks,
   spendCredits,
 } from "../state/economy-mutation";
+import { applyCreditGain } from "../economy/credit-gain";
 import {
   abilityUsageSourceUsed,
   markAbilityUsageSourceUsed,
@@ -854,7 +854,14 @@ export function createStateRuntimeResolvers(
       switch (command.type) {
         case "gain_credits":
           assertNonNegativeAmount(command.amount);
-          credits(state, command.side, command.amount);
+          applyCreditGain(state, {
+            side: command.side,
+            baseAmount: command.amount,
+            source: {
+              kind: "rule_effect",
+              reason: "effect_command",
+            },
+          });
           break;
         case "spend_credits":
           assertNonNegativeAmount(command.amount);

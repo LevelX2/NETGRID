@@ -142,6 +142,16 @@ export function executeCardImplementationStartOfCorpTurnEffects(
           sourceTitle: definition.title,
           controller: instance.controller,
           reason: "start_of_turn",
+          gainCredits: (side, amount, gainOrdinal, kind) =>
+            deps.gainCredits(state, {
+              side,
+              amount,
+              sourceCardId: cardId,
+              sourceDefinitionId: definition.id,
+              gainOrdinal,
+              kind,
+              reason: "start_of_turn",
+            }),
           drawCards: (side, amount) => deps.drawCards(state, side, amount),
           addHostedCredits: (sourceCardId, amount) =>
             deps.addHostedCredits(state, sourceCardId, amount),
@@ -208,6 +218,16 @@ export function executeCardImplementationStartOfRunnerTurnEffects(
           sourceTitle: definition.title,
           controller: instance.controller,
           reason: "start_of_turn",
+          gainCredits: (side, amount, gainOrdinal, kind) =>
+            deps.gainCredits(state, {
+              side,
+              amount,
+              sourceCardId: cardId,
+              sourceDefinitionId: definition.id,
+              gainOrdinal,
+              kind,
+              reason: "start_of_turn",
+            }),
           addHostedCredits: (sourceCardId, amount) =>
             deps.addHostedCredits(state, sourceCardId, amount),
           takeHostedCredits: (sourceCardId, side, amount) =>
@@ -262,6 +282,16 @@ export function executeCardImplementationRunnerRunStartEffects(
           sourceTitle: definition.title,
           controller: instance.controller,
           reason: "run_start",
+          gainCredits: (side, amount, gainOrdinal, kind) =>
+            deps.gainCredits(state, {
+              side,
+              amount,
+              sourceCardId: cardId,
+              sourceDefinitionId: definition.id,
+              gainOrdinal,
+              kind,
+              reason: "run_start",
+            }),
           addHostedCredits: (sourceCardId, amount) =>
             deps.addHostedCredits(state, sourceCardId, amount),
           takeHostedCredits: (sourceCardId, side, amount) =>

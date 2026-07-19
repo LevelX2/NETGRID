@@ -14,6 +14,7 @@ import type {
 import type {
   CardEffectDamageResult,
   CardEffectDrawCardsResult,
+  CardEffectCreditGainResult,
   CardEffectMakeRunOptions,
   CardEffectMakeRunResult,
 } from "./effect-execution-types";
@@ -55,6 +56,18 @@ export type CardImplementationRuntimeCoreDependencies = {
   ) => boolean;
   spendClick: (state: GameState, side: Side) => void;
   spendCredits: (state: GameState, side: Side, amount: number) => void;
+  gainCredits: (
+    state: GameState,
+    input: {
+      side: Side;
+      amount: number;
+      sourceCardId: CardInstanceId;
+      sourceDefinitionId: CardDefinition["id"];
+      gainOrdinal: number;
+      kind: "standard" | "temporary_grant";
+      reason: string;
+    },
+  ) => CardEffectCreditGainResult;
   createAction: (
     state: GameState,
     side: Side,

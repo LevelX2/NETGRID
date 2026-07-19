@@ -1452,6 +1452,7 @@ export type PendingAddTagContinuation =
       sourceDefinitionId: CardDefinitionId;
       tagEffectIndex: number;
       nextEffectIndex: number;
+      creditGainOrdinal: number;
       runnerTagsBefore: number;
     }
   | {

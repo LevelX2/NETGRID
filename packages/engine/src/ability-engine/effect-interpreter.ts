@@ -30,7 +30,6 @@ import {
   creditsForSide,
   dataFortServerIds,
   effectReason,
-  gainCredits,
   loseCredits,
   loseGame,
   mergePublicPayload,
@@ -73,9 +72,17 @@ export function executeCardImplementationEffects(
 ): CardEffectExecutionResult {
   const publicPayload: Record<string, string | number | boolean> = {};
   const resolvedEffects: ResolvedGameEffect[] = [];
+  let creditGainOrdinal = context.creditGainOrdinalOffset ?? 0;
   const familyRuntime: CardEffectFamilyRuntime = {
     recipientSide,
-    gainCredits,
+    gainCredits: (_state, side, amount, kind = "standard") => {
+      if (!context.gainCredits)
+        throw new Error(
+          "Credit-Gain-Effekt braucht eine zentrale Gain-Runtime.",
+        );
+      if (kind === "standard" && amount > 0) creditGainOrdinal += 1;
+      return context.gainCredits(side, amount, creditGainOrdinal, kind);
+    },
     creditsForSide,
     loseCredits,
     spendCreditsIfAvailable,
@@ -114,7 +121,12 @@ export function executeCardImplementationEffects(
       executeDamageEffect(familyInput);
     if (handled) {
       if (context.isEffectSuspended?.())
-        return { publicPayload, resolvedEffects, suspendedAtEffectIndex: index };
+        return {
+          publicPayload,
+          resolvedEffects,
+          creditGainOrdinal,
+          suspendedAtEffectIndex: index,
+        };
       continue;
     }
 
@@ -122,8 +134,13 @@ export function executeCardImplementationEffects(
 
     executeContextualEffect(familyInput);
     if (context.isEffectSuspended?.())
-      return { publicPayload, resolvedEffects, suspendedAtEffectIndex: index };
+      return {
+        publicPayload,
+        resolvedEffects,
+        creditGainOrdinal,
+        suspendedAtEffectIndex: index,
+      };
   }
 
-  return { publicPayload, resolvedEffects };
+  return { publicPayload, resolvedEffects, creditGainOrdinal };
 }

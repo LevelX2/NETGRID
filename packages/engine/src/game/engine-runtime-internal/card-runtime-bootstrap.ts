@@ -89,6 +89,10 @@ import {
   spendCredits,
 } from "../state/economy-mutation";
 import {
+  applyCreditGain,
+  creditGainPublicPayload,
+} from "../economy/credit-gain";
+import {
   addCardCounter,
   cardCounter,
   cardInstanceWithoutCounters,
@@ -715,7 +719,24 @@ export function configureCardRuntimeBootstrap() {
       addCardCounter,
       cardCounter,
       spendCardCounter,
-      credits,
+      gainCredits: (state, side, amount, sourceCardId) => {
+        const sourceDefinitionId = definitionFor(state, sourceCardId).id;
+        const result = applyCreditGain(state, {
+          side,
+          baseAmount: amount,
+          source: {
+            kind: "hosted_credit_take",
+            sourceCardId,
+            sourceDefinitionId,
+            reason: "take_hosted_credits",
+          },
+        });
+        return {
+          creditedAmount: result.creditedAmount,
+          creditsAfter: result.creditsAfter,
+          publicPayload: creditGainPublicPayload(result),
+        };
+      },
       mustInstance,
       definitionFor,
       runnerInstalledCardIds,
@@ -1164,6 +1185,32 @@ export function configureCardRuntimeBootstrap() {
       credits: {
         spendClick,
         spendCredits: spendCardImplementationCredits,
+        gainCredits: (state, input) => {
+          const result = applyCreditGain(state, {
+            side: input.side,
+            baseAmount: input.amount,
+            source:
+              input.kind === "temporary_grant"
+                ? {
+                    kind: "temporary_grant",
+                    sourceCardId: input.sourceCardId,
+                    sourceDefinitionId: input.sourceDefinitionId,
+                    reason: input.reason,
+                  }
+                : {
+                    kind: "card_effect",
+                    sourceCardId: input.sourceCardId,
+                    sourceDefinitionId: input.sourceDefinitionId,
+                    gainOrdinal: input.gainOrdinal,
+                    reason: input.reason,
+                  },
+          });
+          return {
+            creditedAmount: result.creditedAmount,
+            creditsAfter: result.creditsAfter,
+            publicPayload: creditGainPublicPayload(result),
+          };
+        },
       },
       actions: {
         createAction: action,

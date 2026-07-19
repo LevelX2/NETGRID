@@ -20,6 +20,13 @@ export type CardEffectExecutionContext = {
   controller: Side;
   reason?: string;
   effectIndexOffset?: number;
+  creditGainOrdinalOffset?: number;
+  gainCredits?: (
+    side: Side,
+    amount: number,
+    gainOrdinal: number,
+    kind: "standard" | "temporary_grant",
+  ) => CardEffectCreditGainResult;
   addRunnerTagsWithPrevention?: (amount: number) => boolean;
   isEffectSuspended?: () => boolean;
   drawCards?: (side: Side, amount: number) => CardEffectDrawCardsResult;
@@ -202,7 +209,14 @@ export type CardEffectExecutionContext = {
 export type CardEffectExecutionResult = {
   publicPayload: Record<string, string | number | boolean>;
   resolvedEffects: ResolvedGameEffect[];
+  creditGainOrdinal: number;
   suspendedAtEffectIndex?: number;
+};
+
+export type CardEffectCreditGainResult = {
+  creditedAmount: number;
+  creditsAfter: number;
+  publicPayload?: Record<string, string | number | boolean>;
 };
 
 export type CardEffectDrawCardsResult = {
@@ -299,7 +313,9 @@ export type CardEffectMakeRunOptions = {
   eventApproachIceExposeBeforeRez?: boolean;
   runnerCreditGainOnCorpRez?: number;
   damagePreventionPool?: number;
-  badPublicityRunAftermath?: "successful_run_draw_event" | "bad_publicity_run_replacement";
+  badPublicityRunAftermath?:
+    | "successful_run_draw_event"
+    | "bad_publicity_run_replacement";
   activeSequence?: MultiServerSuccessSequenceState;
 };
 

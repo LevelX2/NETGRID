@@ -66,6 +66,7 @@ export type GameCardImplementationRuntimeDepsHost = {
   credits: {
     spendClick: CardImplementationRuntimeDependencies["spendClick"];
     spendCredits: CardImplementationRuntimeDependencies["spendCredits"];
+    gainCredits: CardImplementationRuntimeDependencies["gainCredits"];
   };
   actions: {
     createAction: (

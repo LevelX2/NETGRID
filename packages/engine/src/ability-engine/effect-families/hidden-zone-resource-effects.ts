@@ -193,7 +193,12 @@ export function executeHiddenZoneResourceEffect(
         throw new Error("gain_temporary_corp_credits profile is invalid.");
       if (!context.sourceDefinitionId)
         throw new Error("Temporary Corp Credits brauchen eine Quellenkarte.");
-      state.corp.credits += effect.amount;
+      const gain = runtime.gainCredits(
+        state,
+        "corp",
+        effect.amount,
+        "temporary_grant",
+      );
       state.corpTemporaryInstallRezCredits = {
         sourceCardInstanceId: context.sourceCardId,
         sourceDefinitionId: context.sourceDefinitionId,
@@ -209,7 +214,7 @@ export function executeHiddenZoneResourceEffect(
         temporaryCreditsProvided: effect.amount,
         temporaryCreditsRemaining:
           state.corpTemporaryInstallRezCredits.remaining,
-        corpCreditsAfter: state.corp.credits,
+        corpCreditsAfter: gain.creditsAfter,
       });
       return true;
     }
@@ -232,7 +237,12 @@ export function executeHiddenZoneResourceEffect(
         throw new Error("Run-Credits brauchen einen laufenden Run.");
       if (!context.sourceDefinitionId)
         throw new Error("Run-Credits brauchen eine Quellenkarte.");
-      state.corp.credits += effect.amount;
+      const gain = runtime.gainCredits(
+        state,
+        "corp",
+        effect.amount,
+        "temporary_grant",
+      );
       state.run.corpRunTemporaryCredits = {
         sourceCardInstanceId: context.sourceCardId,
         sourceDefinitionId: context.sourceDefinitionId,
@@ -248,7 +258,7 @@ export function executeHiddenZoneResourceEffect(
         temporaryRunCredits: effect.amount,
         temporaryRunCreditsRemaining:
           state.run.corpRunTemporaryCredits.remaining,
-        corpCreditsAfter: state.corp.credits,
+        corpCreditsAfter: gain.creditsAfter,
       });
       return true;
     }

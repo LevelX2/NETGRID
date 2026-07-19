@@ -108,6 +108,18 @@ function host(calls: string[] = []): GameCardImplementationRuntimeDepsHost {
     credits: {
       spendClick: () => undefined,
       spendCredits: () => undefined,
+      gainCredits: (gameState, input) => {
+        if (input.side === "corp") gameState.corp.credits += input.amount;
+        else gameState.runner.credits += input.amount;
+        return {
+          creditedAmount: input.amount,
+          creditsAfter:
+            input.side === "corp"
+              ? gameState.corp.credits
+              : gameState.runner.credits,
+          publicPayload: { gainedCredits: input.amount },
+        };
+      },
     },
     actions: {
       createAction: () => action(),
@@ -124,7 +136,7 @@ function host(calls: string[] = []): GameCardImplementationRuntimeDepsHost {
       },
       finishRun: (gameState, _legalAction, successful) => {
         calls.push(`finish_run:${successful}`);
-          delete gameState.run;
+        delete gameState.run;
         return {
           publicPayload: {
             runEnded: true,
@@ -140,11 +152,11 @@ function host(calls: string[] = []): GameCardImplementationRuntimeDepsHost {
           topRunnerHeapCardId: () => undefined,
         },
         hiddenZone: {
-          searchActivationTargetHost: () => ({} as never),
-          searchActivationHandlerHost: () => ({} as never),
-          arrangeChoiceHandlerHost: () => ({} as never),
-          nonSearchChoiceHandlerHost: () => ({} as never),
-          corpZoneChoiceHandlerHost: () => ({} as never),
+          searchActivationTargetHost: () => ({}) as never,
+          searchActivationHandlerHost: () => ({}) as never,
+          arrangeChoiceHandlerHost: () => ({}) as never,
+          nonSearchChoiceHandlerHost: () => ({}) as never,
+          corpZoneChoiceHandlerHost: () => ({}) as never,
         },
         callbacks: {
           startRunnerPrivateLookChoice: () => true,
@@ -162,7 +174,10 @@ function host(calls: string[] = []): GameCardImplementationRuntimeDepsHost {
     },
     install: {
       runtimeDepsHost: {
-        cards: { definitionFor: (_state, cardId) => definition(`${cardId}_def` as CardDefinitionId) },
+        cards: {
+          definitionFor: (_state, cardId) =>
+            definition(`${cardId}_def` as CardDefinitionId),
+        },
         install: { runnerInstallableProgramIdsForValuPak: () => [] },
         rez: {
           affordableRezzedInstalledIceIdsForRunner: () => [],
@@ -185,7 +200,7 @@ function host(calls: string[] = []): GameCardImplementationRuntimeDepsHost {
     },
     trace: {
       trace: {
-        orchestrationHost: () => ({} as never),
+        orchestrationHost: () => ({}) as never,
         resolveRunnerLastTurnInstalledResourceTargetId: () => undefined,
       },
     },
@@ -258,8 +273,9 @@ function host(calls: string[] = []): GameCardImplementationRuntimeDepsHost {
         return { publicPayload: legalAction.payload };
       },
       discardRandomCorpHqCards: (_state, _sourceDefinitionId, count) =>
-        Array.from({ length: count }, (_, index) =>
-          `discarded_${index}` as CardInstanceId,
+        Array.from(
+          { length: count },
+          (_, index) => `discarded_${index}` as CardInstanceId,
         ),
       startDistributeAdvancementCounters: () => ({
         publicPayload: { advancementCounterChoiceOpened: true },
@@ -321,6 +337,7 @@ describe("game card implementation runtime deps root", () => {
         "startTrace",
         "startRun",
         "finishRun",
+        "gainCredits",
         "startPrivateLook",
         "exposeInstalledCorpCardTargets",
         "exposeInstalledCorpCard",
@@ -445,15 +462,16 @@ describe("game card implementation runtime deps root", () => {
       hiddenZoneAction: "hq_random_discard",
       discardedCardsCount: 2,
     });
-    expect(deps.returnSourceToGripIfPaid(gameState, legalAction, sourceCardId, 2))
-      .toEqual({
-        choiceOpened: true,
-        publicPayload: {
-          v1922RunnerEventAbility: "remove_tag_optional_return",
-          returnToGripCost: 2,
-          returnToGripChoiceOpened: true,
-        },
-      });
+    expect(
+      deps.returnSourceToGripIfPaid(gameState, legalAction, sourceCardId, 2),
+    ).toEqual({
+      choiceOpened: true,
+      publicPayload: {
+        v1922RunnerEventAbility: "remove_tag_optional_return",
+        returnToGripCost: 2,
+        returnToGripChoiceOpened: true,
+      },
+    });
     expect(calls).toContain("return_choice");
   });
 
@@ -486,8 +504,10 @@ describe("game card implementation runtime deps root", () => {
     ]);
     expect(result.publicPayload).toEqual({
       currentEncounterAdditionalSubroutines: 1,
-      currentEncounterAdditionalSubroutineKind: "end_the_run_unless_runner_pays",
-      currentEncounterAdditionalSubroutineSourceDefinitionId: sourceDefinitionId,
+      currentEncounterAdditionalSubroutineKind:
+        "end_the_run_unless_runner_pays",
+      currentEncounterAdditionalSubroutineSourceDefinitionId:
+        sourceDefinitionId,
     });
   });
 

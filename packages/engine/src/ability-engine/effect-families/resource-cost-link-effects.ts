@@ -64,7 +64,12 @@ export function executeResourceCostLinkEffect(
       const gained = removed * effect.creditsPerCounter;
       if (!context.sourceDefinitionId)
         throw new Error("Run-Credits brauchen eine Quellenkarte.");
-      state.corp.credits += gained;
+      const gain = runtime.gainCredits(
+        state,
+        "corp",
+        gained,
+        "temporary_grant",
+      );
       state.run.corpRunTemporaryCredits = {
         sourceCardInstanceId: context.sourceCardId,
         sourceDefinitionId: context.sourceDefinitionId,
@@ -81,7 +86,7 @@ export function executeResourceCostLinkEffect(
         temporaryRunCredits: gained,
         temporaryRunCreditsRemaining:
           state.run.corpRunTemporaryCredits.remaining,
-        corpCreditsAfter: state.corp.credits,
+        corpCreditsAfter: gain.creditsAfter,
         serverId,
       });
       return true;
@@ -121,12 +126,11 @@ export function executeResourceCostLinkEffect(
         faceup: true,
         rezzed: true,
       };
-      state.corp.credits += effect.gainCredits;
+      const gain = runtime.gainCredits(state, "corp", effect.gainCredits);
       mergePublicPayload(publicPayload, {
         targetCardDefinitionId: instance.definitionId,
         trashedIceCount: 1,
-        gainedCredits: effect.gainCredits,
-        corpCreditsAfter: state.corp.credits,
+        ...gain.publicPayload,
         serverId,
       });
       return true;
