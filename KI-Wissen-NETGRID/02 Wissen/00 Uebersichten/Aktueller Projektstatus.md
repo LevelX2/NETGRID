@@ -207,6 +207,13 @@ Stand: 2026-07-19
   aktuellen SQLite-Datenbank. JSON-Storage und Alt-Schema-Migrationen sind
   entfernt; private Matchdecks werden ausschließlich je Teilnehmer
   gespeichert.
+- Wachsende Matchtabellen werden append-or-truncate persistiert; ausführlicher
+  KI-Debug liegt dauerhaft nur im Trace-Ledger. Backups sind über
+  `VACUUM INTO` konsistent und kompakt, und `storage:optimize` sichert,
+  normalisiert, vakuumiert und prüft die Datenbank kontrolliert. Private
+  Accountstatistiken verwenden SQL-Aggregate und indexgestützte
+  Keyset-Pagination. Führend ist
+  `docs/reviews/architecture/sqlite-matchstorage-optimization-final-review-2026-07-19.md`.
 - Die geschlossene V2.0-Passwort-Account-Alpha ist umgesetzt. Accounts werden
   nur durch lokalen Admin-Bootstrap oder einmalige Einladung angelegt;
   widerrufbare Account-Sessions laufen über ein `HttpOnly`-Cookie und bleiben

@@ -1,7 +1,7 @@
 # SQLite-Matchstorage-Optimierung – Paketprozess
 
 Stand: 2026-07-19  
-Status: in Umsetzung  
+Status: technisch abgeschlossen, vor finalem Main-Abgleich
 Arbeitsbranch: `codex/sqlite-matchstorage-optimization`  
 Worktree: `C:\Projekte\NETGRID_SQLITE_MATCHSTORAGE_OPTIMIZATION`
 
@@ -288,3 +288,17 @@ complete.`
   `idx_account_game_results_account_completed` für die geordnete Ownerseite.
 - Accountstatistik- und HTTP-Tests: 10/10 grün.
 - Server-Typecheck und `git diff --check`: grün.
+
+### SMO-05 – abgeschlossen
+
+- Read-only Bestandsmessung und synthetische Write-/Freelist-/Ledgerproben
+  sind im Abschlussreview konsolidiert; die aktive Runtime-Datenbank blieb
+  unverändert.
+- Final Review, Wissensindex, aktueller Projektstatus, Codex-Status und
+  Juli-Log sind auf den neuen führenden Storagevertrag nachgezogen.
+- Projektweiter Typecheck, Contracttests, Test-Discovery und
+  Package-Boundaries sind grün.
+- Der vollständige Serverlauf steht bei 185/186. Der einzige rote Test ist die
+  bereits auf Ausgangs-`main` reproduzierte fachfremde Jack-out-Erwartung aus
+  SMO-01; sämtliche neuen und betroffenen Storage-/Accounttests sind grün.
+- `git diff --check`: grün.
