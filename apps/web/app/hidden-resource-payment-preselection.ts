@@ -21,6 +21,18 @@ export type PaymentSupportPreselectionResolution =
   | { kind: "invalid"; windowId: string }
   | { kind: "match"; windowId: string; action: LegalAction };
 
+export type PendingPaymentSupportContinuation = {
+  matchId: string;
+  windowId: string;
+  originalActionId: string;
+  supportSubmittedAtStateVersion: number;
+};
+
+export type PaymentSupportContinuationResolution =
+  | { kind: "waiting" }
+  | { kind: "invalid" }
+  | { kind: "match"; action: LegalAction };
+
 export function createHiddenResourcePaymentPreselection(input: {
   matchId: string;
   view: PlayerView;
@@ -55,7 +67,7 @@ export function hiddenResourcePaymentPreselectionEquals(
 ): boolean {
   return Boolean(
     selection?.sourceCardId === cardId &&
-      selection.abilityIndex === abilityIndex,
+    selection.abilityIndex === abilityIndex,
   );
 }
 
@@ -129,6 +141,54 @@ export function shouldSubmitPaymentSupportAction(
   return lastSubmittedKey !== nextSubmitKey;
 }
 
+export function pendingPaymentSupportContinuation(
+  matchId: string,
+  supportAction: LegalAction,
+  stateVersion: number,
+): PendingPaymentSupportContinuation | null {
+  const windowId = supportAction.payload?.costPenaltySupportWindowId;
+  const originalActionId =
+    supportAction.payload?.costPenaltySupportOriginalActionId;
+  if (
+    supportAction.type !== "activated_card_ability" ||
+    supportAction.payload?.cardImplementationAbilityTiming !==
+      "runner_cost_penalty_support" ||
+    typeof windowId !== "string" ||
+    windowId.length === 0 ||
+    typeof originalActionId !== "string" ||
+    originalActionId.length === 0
+  )
+    return null;
+  return {
+    matchId,
+    windowId,
+    originalActionId,
+    supportSubmittedAtStateVersion: stateVersion,
+  };
+}
+
+export function resolvePaymentSupportContinuation(
+  pending: PendingPaymentSupportContinuation,
+  currentStateVersion: number,
+  legalActions: readonly LegalAction[],
+): PaymentSupportContinuationResolution {
+  if (currentStateVersion <= pending.supportSubmittedAtStateVersion)
+    return { kind: "waiting" };
+  const currentActions = legalActions.filter(
+    (action) => action.expiresAtStateVersion === currentStateVersion,
+  );
+  if (currentActions.length === 0) return { kind: "waiting" };
+  const matches = currentActions.filter(
+    (action) =>
+      action.actionId === pending.originalActionId &&
+      action.payload?.runnerCostPenaltySupportContinuation === true &&
+      action.payload?.runnerCostPenaltySupportWindowId === pending.windowId,
+  );
+  return matches.length === 1
+    ? { kind: "match", action: matches[0]! }
+    : { kind: "invalid" };
+}
+
 export function actionBelongsToRunnerPaymentSupportWindow(
   action: LegalAction,
 ): boolean {
@@ -139,8 +199,7 @@ function paymentSupportWindowId(action: LegalAction): string | null {
   const supportWindowId = action.payload?.costPenaltySupportWindowId;
   if (typeof supportWindowId === "string" && supportWindowId.length > 0)
     return supportWindowId;
-  const continuationWindowId =
-    action.payload?.runnerCostPenaltySupportWindowId;
+  const continuationWindowId = action.payload?.runnerCostPenaltySupportWindowId;
   return typeof continuationWindowId === "string" &&
     continuationWindowId.length > 0
     ? continuationWindowId

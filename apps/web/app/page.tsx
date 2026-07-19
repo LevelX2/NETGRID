@@ -181,9 +181,12 @@ import {
   hiddenResourcePaymentPreselectionEquals,
   hiddenResourcePaymentPreselectionIsAvailable,
   paymentSupportSubmitKey,
+  pendingPaymentSupportContinuation,
   resolveHiddenResourcePaymentPreselection,
+  resolvePaymentSupportContinuation,
   shouldSubmitPaymentSupportAction,
   type HiddenResourcePaymentPreselection,
+  type PendingPaymentSupportContinuation,
 } from "./hidden-resource-payment-preselection";
 import { actionNeedsRegionReplacementConfirmation } from "./action-payload";
 import {
@@ -763,6 +766,8 @@ export default function Page() {
     useState(false);
   const [paymentSupportPreselection, setPaymentSupportPreselection] =
     useState<HiddenResourcePaymentPreselection | null>(null);
+  const [paymentSupportContinuation, setPaymentSupportContinuation] =
+    useState<PendingPaymentSupportContinuation | null>(null);
   const [topbarStickyEnabled, setTopbarStickyEnabled] = useState(true);
   const [cyberspaceBackgroundEnabled, setCyberspaceBackgroundEnabled] =
     useState(true);
@@ -876,6 +881,7 @@ export default function Page() {
   const autoDiscardSubmittedKeyRef = useRef<string | null>(null);
   const corpRunAutoPassSubmittedKeyRef = useRef<string | null>(null);
   const paymentSupportSubmittedKeyRef = useRef<string | null>(null);
+  const paymentSupportContinuationSubmittedKeyRef = useRef<string | null>(null);
   const pendingAiAdvanceKeyRef = useRef<string | null>(null);
   const aiDecisionDebugEnabledMatchRef = useRef<string | null>(null);
   const aiDecisionDebugTraceIdRef = useRef<string | null>(null);
@@ -4159,6 +4165,8 @@ export default function Page() {
     if (actionBelongsToRunnerPaymentSupportWindow(action)) {
       setPaymentSupportPreselection(null);
       paymentSupportSubmittedKeyRef.current = null;
+      setPaymentSupportContinuation(null);
+      paymentSupportContinuationSubmittedKeyRef.current = null;
     }
     sendSocketMessage("submit_action", {
       matchId: session.matchId,
@@ -4236,6 +4244,13 @@ export default function Page() {
       return;
     if (submitAction(resolution.action, { immediateAudio: false })) {
       paymentSupportSubmittedKeyRef.current = submitKey;
+      setPaymentSupportContinuation(
+        pendingPaymentSupportContinuation(
+          session.matchId,
+          resolution.action,
+          payload.playerView.stateVersion,
+        ),
+      );
       setPaymentSupportPreselection(null);
       setNotice(`${resolution.action.label} wird für diese Zahlung verwendet.`);
     }
@@ -4246,6 +4261,54 @@ export default function Page() {
     connection,
     submitAction,
   ]);
+
+  useEffect(() => {
+    if (!paymentSupportContinuation) return;
+    if (
+      !session ||
+      !payload ||
+      session.side !== "runner" ||
+      session.matchId !== paymentSupportContinuation.matchId
+    ) {
+      setPaymentSupportContinuation(null);
+      paymentSupportContinuationSubmittedKeyRef.current = null;
+      return;
+    }
+    if (connection !== "online") return;
+    const resolution = resolvePaymentSupportContinuation(
+      paymentSupportContinuation,
+      payload.playerView.stateVersion,
+      payload.legalActions,
+    );
+    if (resolution.kind === "waiting") return;
+    if (resolution.kind === "invalid") {
+      setPaymentSupportContinuation(null);
+      paymentSupportContinuationSubmittedKeyRef.current = null;
+      setNotice(
+        "Die Zahlung braucht eine weitere Entscheidung. Bitte wähle im Zahlungsfenster.",
+      );
+      return;
+    }
+    const submitKey = paymentSupportSubmitKey(
+      session.matchId,
+      paymentSupportContinuation.windowId,
+      resolution.action,
+    );
+    if (
+      !shouldSubmitPaymentSupportAction(
+        paymentSupportContinuationSubmittedKeyRef.current,
+        submitKey,
+      )
+    )
+      return;
+    if (submitAction(resolution.action, { immediateAudio: false })) {
+      paymentSupportContinuationSubmittedKeyRef.current = submitKey;
+      setPaymentSupportContinuation(null);
+      setNotice(
+        "Die vorgemerkte Bankfähigkeit wurde genutzt; die Zahlung wird fortgesetzt.",
+      );
+    }
+  }, [paymentSupportContinuation, session, payload, connection, submitAction]);
 
   const currentCorpRunAutoPassKey =
     session && payload?.playerView.run?.runId
@@ -4724,6 +4787,8 @@ export default function Page() {
     if (!latestEventId || !ensureSocketConnected()) return;
     setPaymentSupportPreselection(null);
     paymentSupportSubmittedKeyRef.current = null;
+    setPaymentSupportContinuation(null);
+    paymentSupportContinuationSubmittedKeyRef.current = null;
     setUndoNotice("");
     sendSocketMessage("request_undo", { targetEventId: latestEventId });
   };
@@ -4733,6 +4798,8 @@ export default function Page() {
     if (accepted) {
       setPaymentSupportPreselection(null);
       paymentSupportSubmittedKeyRef.current = null;
+      setPaymentSupportContinuation(null);
+      paymentSupportContinuationSubmittedKeyRef.current = null;
     }
     setUndoNotice("");
     sendSocketMessage(accepted ? "accept_undo" : "decline_undo", {
@@ -5429,6 +5496,8 @@ export default function Page() {
     if (message.type === "undo_request") {
       setPaymentSupportPreselection(null);
       paymentSupportSubmittedKeyRef.current = null;
+      setPaymentSupportContinuation(null);
+      paymentSupportContinuationSubmittedKeyRef.current = null;
       setPayload((current) =>
         current ? { ...current, pendingUndo: message.payload } : current,
       );
@@ -5461,6 +5530,8 @@ export default function Page() {
     }
     if (message.type === "error") {
       pendingAiAdvanceKeyRef.current = null;
+      setPaymentSupportContinuation(null);
+      paymentSupportContinuationSubmittedKeyRef.current = null;
       setNotice(message.payload.message);
       if (message.payload.code.startsWith("undo_")) {
         setUndoNotice(message.payload.message);

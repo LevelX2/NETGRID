@@ -53,7 +53,8 @@ auf Basis einer exakt passenden aktuellen Engine-`LegalAction` ein.
   benötigt eine Auswahl nach Karteninstanz und Ability-Index.
 - Die zentrale Fortsetzungsaktion wurde mit
   `act-2026-07-19-hidden-bank-continuation-central-action` sichtbar gemacht und
-  bleibt nach automatischer Support-Nutzung manuell.
+  kann nach automatischer Support-Nutzung anhand frischer `LegalActions`
+  eindeutig fortgesetzt werden.
 
 ## Scope
 
@@ -65,6 +66,9 @@ auf Basis einer exakt passenden aktuellen Engine-`LegalAction` ein.
 - Beim echten Support-Fenster nur bei exakt einem Treffer nach Quelle,
   Ability-Index, Timing und Window-ID die aktuelle LegalAction über den normalen
   Submit-Pfad genau einmal einreichen.
+- Nach bestätigter Support-Nutzung nur bei exakt einer frischen LegalAction mit
+  ursprünglicher Action-ID und derselben Window-ID die Zahlung automatisch
+  fortsetzen.
 - Bei fehlender oder mehrdeutiger LegalAction sicher auf das zentrale Fenster
   zurückfallen und die Vormerkung mit lokalem Hinweis entfernen.
 - Vormerkung bei Nutzung, Ablehnung, Fortsetzen ohne Support, Quellenverlust,
@@ -76,8 +80,6 @@ auf Basis einer exakt passenden aktuellen Engine-`LegalAction` ein.
 
 - Keine PlayerAction aus Kartentext oder UI-Hardcodes erzeugen.
 - Keine private Absicht im autoritativen GameState, StateHash oder Replay.
-- Kein automatisches Fortsetzen der ursprünglichen Zahlung nach der
-  Bankaktivierung.
 - Keine geräte- oder browserübergreifende Synchronisierung.
 - Keine KI-Sonderbehandlung und kein UI-Redesign außerhalb der
   Resource-Fähigkeitssteuerung.
@@ -85,19 +87,20 @@ auf Basis einer exakt passenden aktuellen Engine-`LegalAction` ein.
 ## Akzeptanzkriterien
 
 - [x] Nur der Runner-Eigentümer erhält Deskriptoren seiner vormerkbaren Hidden-
-  Resource-Fähigkeiten; Korp-Ansicht und öffentliche Verträge leaken nichts.
+      Resource-Fähigkeiten; Korp-Ansicht und öffentliche Verträge leaken nichts.
 - [x] Chiba kann eindeutig markiert und beim nächsten passenden
-  Zahlungsfenster über genau eine aktuelle LegalAction aktiviert werden.
+      Zahlungsfenster über genau eine aktuelle LegalAction aktiviert werden.
 - [x] Bei Swiss sind Karteninstanz und eine der beiden Fähigkeiten eindeutig
-  auswählbar; ein pauschales Karten-Häkchen existiert nicht.
+      auswählbar; ein pauschales Karten-Häkchen existiert nicht.
 - [x] Rerender oder erneut empfangene Ansicht übermitteln dieselbe Support-
-  LegalAction nicht doppelt.
+      LegalAction nicht doppelt.
 - [x] Fehlende, mehrdeutige, stale oder abgelehnte Treffer führen ohne
-  Regelaktion in das sichtbare zentrale Zahlungsfenster zurück.
-- [x] Nach automatischer Support-Aktivierung bleibt die Fortsetzung der
-  ursprünglichen Zahlung eine getrennte manuelle Entscheidung.
+      Regelaktion in das sichtbare zentrale Zahlungsfenster zurück.
+- [x] Nach automatischer Support-Aktivierung wird ausschließlich eine exakt
+      passende, frische Fortsetzungs-LegalAction automatisch eingereicht; andernfalls
+      bleibt das zentrale Zahlungsfenster sichtbar.
 - [x] Lebenszyklus-Bereinigung und Hidden-Info-Grenzen sind durch paketnahe
-  Tests abgesichert.
+      Tests abgesichert.
 - [x] Engine-/Web-Typechecks, fokussierte Tests und `git diff --check` sind grün.
 
 ## Ergebnisnotiz
@@ -114,5 +117,9 @@ Timing und Window-ID ein. Match-, Window- und Action-ID bilden den
 Deduplizierungsschlüssel. Fehlende oder mehrdeutige Treffer, Quellenverlust,
 Run-/Zugende, Matchwechsel und Undo löschen die Absicht konservativ. Manuelle
 Support- oder Fortsetzungsentscheidungen löschen sie ebenfalls. Nach einer
-automatischen Bankaktivierung bleibt die ursprüngliche Zahlung als getrennte
-zentrale Aktion stehen.
+automatischen Bankaktivierung wartet der Client auf die bestätigte höhere
+StateVersion. Eine exakt zur ursprünglichen Aktion und Window-ID gehörende
+Fortsetzungs-LegalAction reicht er automatisch ein; stale, fehlende oder
+mehrdeutige Folgezustände fallen auf das sichtbare zentrale Zahlungsfenster
+zurück. Die Chronik unterdrückt dabei den redundanten generischen verdeckten
+Credit-Effekt und ordnet die konkrete Banknutzung dem aktiven Run zu.

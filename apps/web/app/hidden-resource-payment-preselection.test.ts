@@ -10,7 +10,9 @@ import {
   createHiddenResourcePaymentPreselection,
   hiddenResourcePaymentPreselectionIsAvailable,
   paymentSupportSubmitKey,
+  pendingPaymentSupportContinuation,
   resolveHiddenResourcePaymentPreselection,
+  resolvePaymentSupportContinuation,
   shouldSubmitPaymentSupportAction,
 } from "./hidden-resource-payment-preselection";
 
@@ -115,6 +117,46 @@ describe("hidden resource payment preselection", () => {
     ).toEqual({ kind: "invalid", windowId: "window-1" });
   });
 
+  it("continues the original action only after bank support reached a fresh state", () => {
+    const support = supportAction("support-1", "swiss-a", 1, "window-1");
+    support.payload = {
+      ...support.payload,
+      costPenaltySupportOriginalActionId: "running-interference",
+    };
+    const pending = pendingPaymentSupportContinuation("match-1", support, 12);
+    expect(pending).toEqual({
+      matchId: "match-1",
+      windowId: "window-1",
+      originalActionId: "running-interference",
+      supportSubmittedAtStateVersion: 12,
+    });
+
+    const staleContinuation = continuation(
+      "running-interference",
+      "window-1",
+      12,
+    );
+    const freshContinuation = continuation(
+      "running-interference",
+      "window-1",
+      13,
+    );
+    expect(
+      resolvePaymentSupportContinuation(pending!, 12, [staleContinuation]),
+    ).toEqual({ kind: "waiting" });
+    expect(
+      resolvePaymentSupportContinuation(pending!, 13, [staleContinuation]),
+    ).toEqual({ kind: "waiting" });
+    expect(
+      resolvePaymentSupportContinuation(pending!, 13, [freshContinuation]),
+    ).toEqual({ kind: "match", action: freshContinuation });
+    expect(
+      resolvePaymentSupportContinuation(pending!, 13, [
+        supportAction("more-support-needed", "chiba-a", 0, "window-1", 13),
+      ]),
+    ).toEqual({ kind: "invalid" });
+  });
+
   it("invalidates the local intent after turn, run, or source changes", () => {
     const swiss = card("swiss-a", [ability]);
     const selection = createHiddenResourcePaymentPreselection({
@@ -124,7 +166,11 @@ describe("hidden resource payment preselection", () => {
       ability,
     })!;
     expect(
-      hiddenResourcePaymentPreselectionIsAvailable(selection, "match-2", view([swiss])),
+      hiddenResourcePaymentPreselectionIsAvailable(
+        selection,
+        "match-2",
+        view([swiss]),
+      ),
     ).toBe(false);
     expect(
       hiddenResourcePaymentPreselectionIsAvailable(
@@ -156,7 +202,7 @@ describe("hidden resource payment preselection", () => {
     );
 
     expect(cardSource).toContain("paymentSupportShortcuts.map((shortcut)");
-    expect(cardSource).toContain('aria-pressed={shortcut.selected}');
+    expect(cardSource).toContain("aria-pressed={shortcut.selected}");
     expect(cardSource).toContain(
       "data-testid={`payment-support-shortcut-${shortcut.abilityIndex}`}",
     );
@@ -243,20 +289,37 @@ function supportAction(
   source: string,
   abilityIndex: number,
   windowId: string,
+  stateVersion = 12,
 ): LegalAction {
-  return action(actionId, "activated_card_ability", source, {
-    cardId: source,
-    cardImplementationAbilityIndex: abilityIndex,
-    cardImplementationAbilityTiming: "runner_cost_penalty_support",
-    costPenaltySupportWindowId: windowId,
-  });
+  return action(
+    actionId,
+    "activated_card_ability",
+    source,
+    {
+      cardId: source,
+      cardImplementationAbilityIndex: abilityIndex,
+      cardImplementationAbilityTiming: "runner_cost_penalty_support",
+      costPenaltySupportWindowId: windowId,
+    },
+    stateVersion,
+  );
 }
 
-function continuation(actionId: string, windowId: string): LegalAction {
-  return action(actionId, "play_event", "event-a", {
-    runnerCostPenaltySupportContinuation: true,
-    runnerCostPenaltySupportWindowId: windowId,
-  });
+function continuation(
+  actionId: string,
+  windowId: string,
+  stateVersion = 12,
+): LegalAction {
+  return action(
+    actionId,
+    "play_event",
+    "event-a",
+    {
+      runnerCostPenaltySupportContinuation: true,
+      runnerCostPenaltySupportWindowId: windowId,
+    },
+    stateVersion,
+  );
 }
 
 function action(
@@ -264,6 +327,7 @@ function action(
   type: LegalAction["type"],
   source: string,
   payload: NonNullable<LegalAction["payload"]>,
+  stateVersion = 12,
 ): LegalAction {
   return {
     actionId,
@@ -275,7 +339,7 @@ function action(
     costs: [],
     targetRequirements: [],
     visibility: "private_to_actor",
-    expiresAtStateVersion: 12,
+    expiresAtStateVersion: stateVersion,
     payload,
   };
 }

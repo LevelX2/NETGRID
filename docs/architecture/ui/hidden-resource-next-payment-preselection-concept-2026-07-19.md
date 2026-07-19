@@ -19,10 +19,12 @@ vorbereitbare Zahlungsfähigkeit einen eigenen Marker
 und Credit-Erträge haben.
 
 Der Marker ergänzt das zentrale Zahlungsfenster, ersetzt es aber nicht. Nach
-einer automatisch eingereichten Support-Fähigkeit bleibt
-`Ohne weiteren Bank-Support fortfahren` zunächst eine sichtbare, manuelle
-Entscheidung. Eine stille Kette aus Resource-Aktivierung und Fortsetzung ist
-nicht Teil des ersten Umsetzungsschritts.
+einer automatisch eingereichten Support-Fähigkeit wartet der Client auf den
+bestätigten neuen Zustand. Bietet dessen frische `LegalActions` genau die zur
+ursprünglichen Zahlung und zur Window-ID gehörende Fortsetzungsaktion an, reicht
+er auch diese über den normalen Action-Submit-Pfad ein. So umfasst die bewusst
+gesetzte Vormerkung den vollständigen Zahlungsvorgang, ohne dass der Client
+eine eigene Regelaktion konstruiert.
 
 ## Verantwortungsgrenzen
 
@@ -75,8 +77,9 @@ Action-Submit-Pfad eingereicht werden.
    `LegalAction` einmal ein.
 5. Die Engine validiert Window-ID, StateVersion, Quelle, Kosten und Timing. Nach
    erfolgreicher Nutzung wird die Vormerkung entfernt.
-6. Das zentrale Fenster zeigt anschließend die verbleibenden Support-Optionen
-   und die manuelle Fortsetzung der ursprünglichen Zahlung.
+6. Sobald der bestätigte Folgezustand genau die passende Fortsetzungsaktion
+   anbietet, reicht der Client sie automatisch ein und die ursprüngliche
+   Zahlung wird abgeschlossen.
 
 ### Swiss Bank Account
 
@@ -96,6 +99,11 @@ Vormerkung und zeigt einen lokalen Hinweis wie
 `Die vorgemerkte Bankfähigkeit ist hier nicht verfügbar. Bitte wähle im Zahlungsfenster.`
 Das normale zentrale Fenster bleibt vollständig bedienbar. Die Vormerkung wird
 nicht still auf eine noch spätere Zahlung übertragen.
+
+Ist die Support-Fähigkeit bereits akzeptiert, aber die zugehörige
+Fortsetzungsaktion im bestätigten Folgezustand nicht genau einmal vorhanden,
+reicht der Client ebenfalls nichts Erfundenes ein. Das zentrale Fenster bleibt
+mit den aktuellen Engine-Aktionen sichtbar und bedienbar.
 
 Öffnet die Engine trotz einer begonnenen Zahlung kein Support-Fenster, weil die
 Quelle inzwischen unbrauchbar ist oder die Zahlung keinen Support zulässt,
@@ -165,8 +173,8 @@ Schnitt um:
 5. Engine-/View-Vertragstests sowie Webtests für Chiba, beide Swiss-Fähigkeiten,
    Stale State, Reconnect-Deduplizierung und Hidden-Info-Grenzen.
 
-Automatisches Fortsetzen nach der Resource-Aktivierung sowie geräteübergreifende
-Synchronisierung bleiben bewusst außerhalb dieses ersten Pakets.
+Geräteübergreifende Synchronisierung bleibt bewusst außerhalb dieses ersten
+Pakets.
 
 ## Umsetzungsstand 2026-07-19
 
@@ -179,6 +187,11 @@ Der Webclient zeigt je Fähigkeit einen eigenen `+Credits`-Marker und hält nur
 eine lokale Vormerkung. Im offenen Payment-Support-Fenster wird sie exakt gegen
 Quelle, Ability-Index, Timing und Window-ID abgeglichen. Die Einreichung nutzt
 den normalen LegalAction-Pfad und einen stabilen Deduplizierungsschlüssel. Bei
-Abweichung wird nichts eingereicht; die zentrale Auswahl bleibt sichtbar. Die
-ursprüngliche Zahlung wird nach einer Bankaktivierung weiterhin manuell
-fortgesetzt.
+Abweichung wird nichts eingereicht; die zentrale Auswahl bleibt sichtbar. Nach
+einer akzeptierten Bankaktivierung wartet der Client auf eine höhere
+StateVersion und frische `LegalActions`. Genau eine zur ursprünglichen Aktion
+und zur Window-ID passende Fortsetzungsaktion wird anschließend automatisch
+eingereicht. Dadurch werden beispielsweise die Kosten von `Running
+Interference` vollständig abgeschlossen und das Run-Fenster geöffnet; bei
+stalen, fehlenden oder mehrdeutigen Daten bleibt die Engine-Auswahl manuell
+bedienbar.

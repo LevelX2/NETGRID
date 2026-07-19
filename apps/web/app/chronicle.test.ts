@@ -5303,6 +5303,37 @@ describe("formatChronicleEvent", () => {
     }
   });
 
+  it("does not repeat a Hidden-Bank activation as a generic redacted effect", () => {
+    const event = makeEvent("activated_card_ability", {
+      actor: "runner",
+      title: "Swiss Bank Account",
+      cardDefinitionId: "onr_proteus_152_swiss-bank-account",
+      cardImplementationAbility: "activated",
+      cardImplementationAbilityTiming: "runner_cost_penalty_support",
+      costPenaltySupportWindowId: "runner_cost_penalty_support.217",
+      resolvedEffects: [
+        {
+          effectId: "swiss-bank.effect.0.gain_credits",
+          kind: "gain_credits",
+          visibility: "hidden_info_barrier",
+          side: "runner",
+          amount: 6,
+          sourceDefinitionId: "onr_proteus_152_swiss-bank-account",
+          sourceTitle: "Swiss Bank Account",
+          reason: "card_resolver",
+        },
+      ],
+    });
+
+    const item = formatChronicleEvent(event, "runner", {
+      cardTitle: "Swiss Bank Account",
+    });
+    const effects = formatChronicleEffectItems(event, "runner");
+
+    expect(item.title).toBe("Du hast Swiss Bank Account genutzt.");
+    expect(effects).toEqual([]);
+  });
+
   it("merges Spinn Public Relations hosted-credit loading into activated ability entries", () => {
     const event = makeEvent("activated_card_ability", {
       actor: "corp",

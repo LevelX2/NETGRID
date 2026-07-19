@@ -21,6 +21,8 @@ import {
 } from "../../app/chronicle";
 import { localizedDeCardTitle } from "../../app/card-image-manifest";
 import {
+  chroniclePaymentSupportBelongsToRunPayload,
+  chroniclePaymentSupportFollowingRunGroupLabel,
   chronicleResolveChoiceBelongsToRunPayload,
   groupChronicleEntriesForRender,
   orderChronicleEntriesForDisplay,
@@ -438,7 +440,7 @@ function chronicleEntriesWithRunGroups(
   let activeRunGroupKey: string | null = null;
   let runEndPending = false;
 
-  for (const event of events) {
+  for (const [eventIndex, event] of events.entries()) {
     const actionType =
       payloadString(event.publicPayload, "actionType") ?? event.type;
     const actor = payloadSide(event.publicPayload, "actor");
@@ -471,17 +473,31 @@ function chronicleEntriesWithRunGroups(
     const items = shouldSuppressChronicleEventItem(event)
       ? effectItems
       : [eventItem, ...effectItems];
-    const eventGroupLabel =
+    const followingEvent = events[eventIndex + 1];
+    const followingRunGroupLabel = !activeRunGroupLabel
+      ? chroniclePaymentSupportFollowingRunGroupLabel(
+          event.publicPayload,
+          followingEvent
+            ? chronicleRunGroupLabelFromEvent(followingEvent)
+            : null,
+        )
+      : null;
+    const belongsToActiveRun =
       activeRunGroupLabel &&
       chronicleEventBelongsToActiveRun(
         event,
         actionType,
         items,
         cardDetailsById,
-      )
-        ? activeRunGroupLabel
+      );
+    const eventGroupLabel =
+      followingRunGroupLabel ??
+      (belongsToActiveRun ? activeRunGroupLabel : null);
+    const eventGroupInstanceKey = followingRunGroupLabel && followingEvent
+      ? `run:${followingEvent.eventId}`
+      : eventGroupLabel
+        ? activeRunGroupKey
         : null;
-    const eventGroupInstanceKey = eventGroupLabel ? activeRunGroupKey : null;
     for (const item of items) {
       const card = item.cardDefinitionId
         ? (cardDetailsById[item.cardDefinitionId] ?? null)
@@ -562,6 +578,8 @@ function chronicleEventBelongsToActiveRun(
   ) {
     const card = eventCardDetail(event, cardDetailsById);
     return (
+      (actionType === "activated_card_ability" &&
+        chroniclePaymentSupportBelongsToRunPayload(event.publicPayload)) ||
       card?.type === "ice" ||
       items.some(
         (item) =>

@@ -143,6 +143,25 @@ export function chronicleResolveChoiceBelongsToRunPayload(
   );
 }
 
+export function chroniclePaymentSupportBelongsToRunPayload(
+  payload: Record<string, unknown>,
+): boolean {
+  return (
+    payload.cardImplementationAbility === "activated" &&
+    payload.cardImplementationAbilityTiming === "runner_cost_penalty_support"
+  );
+}
+
+export function chroniclePaymentSupportFollowingRunGroupLabel(
+  payload: Record<string, unknown>,
+  followingRunGroupLabel: string | null,
+): string | null {
+  return followingRunGroupLabel &&
+    chroniclePaymentSupportBelongsToRunPayload(payload)
+    ? followingRunGroupLabel
+    : null;
+}
+
 function chronicleEntriesShareRenderGroup<T extends ChronicleGroupableEntry>(
   currentGroup: ChronicleRenderGroup<T>,
   entry: T,

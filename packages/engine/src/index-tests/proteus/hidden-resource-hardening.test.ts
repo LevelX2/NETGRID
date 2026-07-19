@@ -454,6 +454,7 @@ describe("PRO011 hidden resource timing hardening", () => {
       hiddenRunnerResourceRevealed: true,
       publicRevealDefinitionId: "onr_proteus_133_chiba-bank-account",
       sourceTrashed: true,
+      cardImplementationAbilityTiming: "runner_cost_penalty_support",
     });
     const continuedInstall = getLegalActions(state, "runner").find(
       (candidate) => candidate.actionId === installAction!.actionId,

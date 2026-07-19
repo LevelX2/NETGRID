@@ -3809,7 +3809,11 @@ export function formatChronicleEffectItems(
     event.publicPayload.resolvedEffects,
   );
   const effectItems = effects
-    .filter((effect) => !shouldMergeCardResolverEffect(event, effect))
+    .filter(
+      (effect) =>
+        !shouldMergeCardResolverEffect(event, effect) &&
+        !shouldSuppressPaymentSupportCreditEffect(event, effect),
+    )
     .map((effect, index) => formatChronicleEffect(event, effect, index, side));
   const payloadItem = endTurnCreditPayoutChronicleItem(event, side);
   const traceHardwareWreckerItem = traceHardwareWreckerChronicleItem(
@@ -3829,6 +3833,23 @@ export function formatChronicleEffectItems(
     ...(tagGainItem ? [tagGainItem] : []),
     ...effectItems,
   ];
+}
+
+function shouldSuppressPaymentSupportCreditEffect(
+  event: PublicGameEvent,
+  effect: ResolvedGameEffect,
+): boolean {
+  const payload = event.publicPayload ?? {};
+  const actionType = stringValue(payload.actionType) ?? event.type;
+  return (
+    actionType === "activated_card_ability" &&
+    stringValue(payload.cardImplementationAbility) === "activated" &&
+    stringValue(payload.cardImplementationAbilityTiming) ===
+      "runner_cost_penalty_support" &&
+    effect.kind === "gain_credits" &&
+    effect.reason === "card_resolver" &&
+    effect.visibility === "hidden_info_barrier"
+  );
 }
 
 function encounterTaxChronicleItem(
