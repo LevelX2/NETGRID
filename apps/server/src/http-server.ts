@@ -1367,7 +1367,7 @@ async function routeHttp(
     }
 
     if (url.pathname === "/api/account/export" && request.method === "GET") {
-      if (!accountAuth || !accountDecks || !accountStatistics)
+      if (!accountAuth || !accountDecks)
         return sendJson(response, 503, accountDecksUnavailablePayload());
       const auth = await ensureAccountAuthenticated(
         response,
@@ -1377,20 +1377,24 @@ async function routeHttp(
       if (!auth) return;
       const account = await accountAuth.exportAccount(auth.account.accountId);
       const decks = await accountDecks.list(auth.account.accountId);
-      const statistics = await accountStatistics.exportForAccount(auth.account.accountId);
+      const statistics = accountStatistics
+        ? await accountStatistics.exportForAccount(auth.account.accountId)
+        : undefined;
       response.setHeader("cache-control", "no-store");
       sendJson(response, 200, {
-        schemaVersion: "netgrid-account-export-v2",
+        schemaVersion: statistics
+          ? "netgrid-account-export-v2"
+          : "netgrid-account-export-v1",
         exportedAt: new Date().toISOString(),
         account,
         decks: decks.decks.map(accountDeckPublicView),
-        statistics,
+        ...(statistics ? { statistics } : {}),
       });
       return;
     }
 
     if (url.pathname === "/api/account" && request.method === "DELETE") {
-      if (!accountAuth || !accountDecks || !accountStatistics)
+      if (!accountAuth || !accountDecks)
         return sendJson(response, 503, accountDecksUnavailablePayload());
       const auth = await ensureAccountMutationAccess(
         response,
@@ -1408,7 +1412,7 @@ async function routeHttp(
       if (!deleted)
         return sendJson(response, 401, accountInvalidCredentialsPayload());
       await accountDecks.deleteAll(auth.account.accountId);
-      await accountStatistics.deleteAccountData(auth.account.accountId);
+      await accountStatistics?.deleteAccountData(auth.account.accountId);
       response.setHeader(
         "set-cookie",
         clearAccountSessionCookie(request, deploymentConfig),

@@ -59,6 +59,16 @@ StateHash und KI. Führend sind
 `docs/releases/v2/v2-0-auth-privacy-cloud-decks/password-accounts-cloud-decks-final-review-2026-07-18.md`
 und `docs/runbooks/account-alpha-operations.md`.
 
+Angemeldete Accounts besitzen außerdem eine private Matchstatistik mit
+sicherer, rein serverseitiger Teilnehmerbindung, idempotentem Spiel- und
+Serienledger, Runner-/Korp- und Gegnerart-Aufschlüsselung sowie paginierter
+redigierter Historie. Schema 3, Export-Schema 2, Accountlöschung,
+Backup/Restore, Retention-Unabhängigkeit und Start-Reconciliation sind
+abgedeckt. Gäste erhalten keine Statistikansicht; öffentliche Profile,
+Ranking, Elo und Leaderboards bleiben bewusst außerhalb der Closed Alpha.
+Führend ist
+`docs/releases/v2/account-match-statistics-final-review-2026-07-19.md`.
+
 ## Current-State-Cleanup
 
 Der Prozess

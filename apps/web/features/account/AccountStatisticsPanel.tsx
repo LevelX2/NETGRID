@@ -119,6 +119,15 @@ export function AccountStatisticsPanel({ accountId }: { accountId: string }) {
             </div>
           </div>
 
+          <div className="accountStatisticsSection">
+            <h4>Nach Gegnerart</h4>
+            <div className="accountStatisticsBreakdowns">
+              <Breakdown title="Gegen Account" bucket={statistics.byOpponentKind.account} />
+              <Breakdown title="Gegen Gast" bucket={statistics.byOpponentKind.guest} />
+              <Breakdown title="Gegen KI" bucket={statistics.byOpponentKind.ai} />
+            </div>
+          </div>
+
           <div className="accountStatisticsHistory">
             <div><h4>Deine Matchhistorie</h4><p className="muted">Nur redigierte Ergebnisdaten; keine gegnerischen Account-IDs oder Decklisten.</p></div>
             {history.length === 0 ? <p className="muted">Für diese Auswahl gibt es noch keine Ergebnisse.</p> : (

@@ -2,8 +2,8 @@ import { expect, type Browser, type BrowserContext, type Locator, type Page, typ
 import { VIEWPORTS, type ViewportName } from "./viewports";
 
 export const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:3100";
-const E2E_RUNNER_SNAPSHOT_ID = "demo_runner_008_snapshot_v0_8";
-const E2E_CORP_SNAPSHOT_ID = "demo_corp_008_snapshot_v0_8";
+const E2E_RUNNER_SNAPSHOT_ID = "standard_standard_runner_bit_denial_lock_1.0.0";
+const E2E_CORP_SNAPSHOT_ID = "standard_standard_corp_cheap_bag_tricks_1.0.0";
 const MATCH_START_SETTINGS_STORAGE_KEY = "netgrid.matchStartSettings.v1";
 
 export async function newContextPage(browser: Browser, viewport: ViewportName): Promise<{ context: BrowserContext; page: Page }> {
@@ -22,6 +22,7 @@ export async function createHumanVsAiGame(page: Page, seed: string): Promise<voi
   await openApp(page);
   await page.getByTestId("play-mode-human-vs-ai").click();
   await page.getByLabel("Deine Seite").selectOption("runner");
+  await selectE2eDecks(page, "Dein Runner-Deck", "Dein Korp-Deck");
   await page.getByTestId("advanced-match-options").locator("summary").click();
   await page.getByLabel("Seed").fill(seed);
   await page.getByLabel("KI-Decks").selectOption("fixed");
@@ -35,12 +36,15 @@ export async function createHumanVsHumanLobby(page: Page, seed: string, side: "r
   await openApp(page);
   await page.getByTestId("play-mode-human-vs-human").click();
   await page.getByTestId("match-format-rules-match").click();
-  await selectE2eDecks(page, "Teilnehmer A · Runner-Deck", "Teilnehmer A · Korp-Deck");
+  await selectE2eDecks(page, "Dein Runner-Deck", "Dein Korp-Deck");
   await page.getByTestId("advanced-match-options").locator("summary").click();
   await page.getByLabel("Deine Startseite").selectOption(side);
   await page.getByLabel("Countdown").selectOption("3");
   await page.getByLabel("Seed").fill(seed);
-  await page.getByLabel("Name").fill(side === "corp" ? "Host Corp V107" : "Host Runner V107");
+  const name = page.getByLabel("Name");
+  if (/^Teilnehmer [AB]$/.test((await name.inputValue()).trim())) {
+    await name.fill(side === "corp" ? "Host Corp V107" : "Host Runner V107");
+  }
   await page.getByTestId("create-match").click();
   await expect(page.getByTestId("start-lobby")).toBeVisible({ timeout: 20_000 });
   await expect(page.getByRole("heading", { name: /Du startest als/ })).toBeVisible();
@@ -54,7 +58,8 @@ export async function joinHumanVsHumanLobby(page: Page, joinUrl: string): Promis
   await installE2eMatchStartSettings(page);
   await page.goto(joinUrl);
   await expect(page.getByTestId("setup-screen")).toBeVisible();
-  await page.getByLabel("Name").fill("Joiner V107");
+  const name = page.getByLabel("Name");
+  if (/^Teilnehmer [AB]$/.test((await name.inputValue()).trim())) await name.fill("Joiner V107");
   await selectE2eDecks(page, "Dein Runner-Deck", "Dein Korp-Deck");
   await expect(page.getByTestId("join-link-input")).toHaveValue(/joinToken=/);
   await page.getByTestId("join-match").click();

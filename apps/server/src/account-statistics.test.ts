@@ -5,7 +5,7 @@ import { DatabaseSync } from "node:sqlite";
 import { describe, expect, it } from "vitest";
 import { AccountSessionService, SqliteAccountStorage } from "./account-session";
 import { InMemoryMatchStorage, MultiplayerService } from "./multiplayer";
-import { SqliteMatchStorage } from "./storage-sqlite";
+import { restoreSqliteStorageBackup, SqliteMatchStorage } from "./storage-sqlite";
 import {
   AccountMatchStatisticsService,
   InMemoryAccountStatisticsStorage,
@@ -228,6 +228,49 @@ describe("AccountMatchStatisticsService participant binding", () => {
       try { statistics.close(); } catch {}
       try { accounts.close(); } catch {}
       try { matches.closeStorage(); } catch {}
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("preserves and restores the account statistics ledger through SQLite backups", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "netgrid-account-statistics-backup-"));
+    const dbPath = join(dir, "netgrid.sqlite");
+    const backupDir = join(dir, "backups");
+    const accounts = new SqliteAccountStorage({ dbPath, backupDir });
+    const sessions = new AccountSessionService(accounts);
+    const account = await sessions.createAccount({ loginName: "backup_stats", displayName: "Backup Stats" });
+    const statisticsStorage = new SqliteAccountStatisticsStorage({ dbPath, backupDir });
+    const matchStorage = new SqliteMatchStorage({ dbPath, backupDir });
+    try {
+      await statisticsStorage.recordGameResult(gameRecord({
+        accountGameResultId: "result_before_backup",
+        accountId: account.accountId,
+        originMatchId: "match_before_backup",
+      }));
+      const backup = await matchStorage.backup("manual");
+      await statisticsStorage.recordGameResult(gameRecord({
+        accountGameResultId: "result_after_backup",
+        accountId: account.accountId,
+        originMatchId: "match_after_backup",
+      }));
+
+      statisticsStorage.close();
+      accounts.close();
+      matchStorage.close();
+      restoreSqliteStorageBackup({ backupDir: backup.backupDir, targetPath: dbPath, backupRootDir: backupDir });
+
+      const restored = new AccountMatchStatisticsService(new SqliteAccountStatisticsStorage({ dbPath, backupDir }));
+      try {
+        expect(await restored.gameResultsForAccount(account.accountId)).toEqual([
+          expect.objectContaining({ accountGameResultId: "result_before_backup", originMatchId: "match_before_backup" }),
+        ]);
+      } finally {
+        restored.close();
+      }
+    } finally {
+      try { statisticsStorage.close(); } catch {}
+      try { accounts.close(); } catch {}
+      try { matchStorage.close(); } catch {}
       await rm(dir, { recursive: true, force: true });
     }
   });

@@ -79,6 +79,7 @@ describe("account deck HTTP API", () => {
       const exported = await fetch(`${baseUrl}/api/account/export`, { headers: { cookie: alpha.cookie } });
       const exportText = await exported.text();
       expect(exported.status).toBe(200);
+      expect(JSON.parse(exportText)).toMatchObject({ schemaVersion: "netgrid-account-export-v1" });
       expect(exportText).toContain("Exportiertes Deck");
       expect(exportText).not.toMatch(/passwordHash|sessionTokenHash|csrfTokenHash|inviteTokenHash/);
 

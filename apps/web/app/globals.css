@@ -15965,6 +15965,15 @@ select,
   gap: 10px;
 }
 
+.accountStatisticsSection {
+  display: grid;
+  gap: 10px;
+}
+
+.accountStatisticsSection > h4 {
+  margin: 0;
+}
+
 .accountStatisticsBreakdown {
   display: grid;
   gap: 5px;

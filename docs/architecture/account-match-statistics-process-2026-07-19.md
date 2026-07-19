@@ -1,6 +1,6 @@
 # Account-Matchstatistik – kontrollierter Paketprozess
 
-Status: `AMS-05 completed; AMS-06 pending`
+Status: `AMS-06 review completed; integration pending`
 
 ## Quelle und Vorgabe
 
@@ -130,7 +130,7 @@ cleanup_failed -> diagnose_cleanup -> cleanup_pending
 | AMS-03 Ergebnisledger und Reconciliation | completed | dieser Paketcommit |
 | AMS-04 Private API und Betrieb | completed | dieser Paketcommit |
 | AMS-05 Account-Statistik-UI | completed | dieser Paketcommit |
-| AMS-06 Final Review und Integration | pending | – |
+| AMS-06 Final Review und Integration | review completed | dieser Paketcommit |
 
 ## Paketdetails
 
@@ -456,3 +456,25 @@ gemergten Arbeitsbranch löschen. Markiere das Goal erst dann als complete.
   die einspaltige 560-Pixel-Ansicht ohne horizontalen Überlauf.
 - Der temporäre Browser-Testaccount wurde anschließend über den regulären
   Accountlösch-Endpunkt vollständig entfernt.
+
+### AMS-06
+
+- Die UI weist nun neben Runner/Korp auch Account, Gast und KI ausdrücklich
+  aus. Der isolierte Browserlauf erzeugt seine Accountdaten in einer
+  temporären SQLite-Datei und entfernt die gesamte Runtime nach dem Lauf.
+- Ein realer Browserfall spielt zunächst Account gegen KI und danach zwei
+  getrennte Accounts gegeneinander. Beide Ergebnisansichten, Gast-Abschirmung,
+  responsive Darstellung sowie die bestehenden Leak-, Lifecycle- und
+  Deckvalidierungsflüsse sind belegt.
+- Ein eigener Restore-Test bestätigt, dass das Account-Ergebnisledger mit der
+  SQLite-Gesamtsicherung auf den gesicherten Stand zurückkehrt.
+- Der breite Serverlauf deckte einen optionalen In-Memory-Server ohne
+  Statistikdienst auf. Dessen Export bleibt nun beim bisherigen Schema 1 und
+  die Löschung funktioniert ohne nicht vorhandenen Statistikstorage;
+  vollständig konfigurierte Server liefern weiterhin Export-Schema 2.
+- Grün: Shared 12/12, fokussierte Statistik-/Exporttests 11/11, vollständige
+  Servertests 184/184, vollständige Webtests 643/643, projektweiter
+  Typecheck, Contracttests 8/8 plus Shared 12/12, Package Boundaries für
+  1.881 Dateien, Produktionsbuild und Browser-E2E 9/9.
+- `git diff --check`, Paketcommit, aktueller Main-Abgleich, Integration und
+  Cleanup folgen unmittelbar nach diesem Protokollstand.
