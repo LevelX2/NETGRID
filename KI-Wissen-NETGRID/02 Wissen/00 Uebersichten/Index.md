@@ -33,6 +33,9 @@
   `docs/architecture/deck-library/local-file-deck-library-2026-05-07.md`.
 - Passwort-Accounts, persönliche Server-Decks und Standard-Deck-Kuration:
   `docs/releases/v2/v2-0-auth-privacy-cloud-decks/password-accounts-cloud-decks-final-review-2026-07-18.md`.
+- Private Account-Matchstatistik mit sicherer Teilnehmerbindung,
+  Ergebnisledger und Retention-Vertrag:
+  `docs/releases/v2/account-match-statistics-plan-2026-07-19.md`.
 - Wiederverwendbare Funktionsnamen:
   [[../Architektur/Abstrakte Funktionsnamen und Wiederverwendung]].
 - Projektweiter Cleanup:
