@@ -1,13 +1,13 @@
 ---
 processId: process-2026-07-19-deck-table-numeric-sort-fix
-status: in_progress
-currentState: P2_UI_CONTRACT
+status: completed
+currentState: P3_CLOSEOUT
 sourceActivity: act-2026-07-19-decktable-corp-cost-sort-clarity
 primaryAgent: release-implementation-agent
 branch: codex/deck-table-numeric-sort-fix
 worktree: C:\Projekte\NETGRID_DECK_TABLE_NUMERIC_SORT_FIX
 startedAt: 2026-07-19
-completedAt:
+completedAt: 2026-07-19
 ---
 
 # Zahlenbasierte Decktisch-Sortierung dauerhaft instand setzen
@@ -224,3 +224,14 @@ dann als complete markieren.`
   vorgenommene, ungespeicherte Kartenänderungen überschreiben.
 - Checks: acht fokussierte Vitest-Tests grün; Web-Typecheck grün; Browser-Repro
   grün; `git diff --check` grün.
+
+### P3_CLOSEOUT – abgeschlossen
+
+- Die Quell-Activity und dieses Prozessartefakt liegen unter
+  `docs/activities/done/`; die wiederverwendbare Ursache ist im Projektlog
+  verdichtet.
+- Finale Checks: 57 Web-Testdateien mit 663 Tests grün, Web-Typecheck grün,
+  Test-Discovery-Gate grün und `git diff --check` grün.
+- Der Controller führt nach diesem Abschlusscommit den Abgleich mit aktuellem
+  `main`, den lokalen Fast-Forward-Merge sowie den verifizierten Worktree- und
+  Branch-Cleanup aus.

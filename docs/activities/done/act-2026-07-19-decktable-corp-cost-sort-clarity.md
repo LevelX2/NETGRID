@@ -1,19 +1,27 @@
 ---
 activityId: act-2026-07-19-decktable-corp-cost-sort-clarity
-status: inbox
+status: done
 kind: fix
 area: ui
 priority: normal
-primaryAgent: small-adjustments-agent
+primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-07-19
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-07-19
+completedAt: 2026-07-19
+branch: codex/deck-table-numeric-sort-fix
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/features/catalog/catalog-detail-loader.ts
+  - apps/web/features/catalog/catalog-detail-loader.test.ts
+  - apps/web/features/decks/deck-table-model.test.ts
+  - docs/activities/done/process-2026-07-19-deck-table-numeric-sort-fix.md
+checks:
+  - corepack pnpm --filter @netgrid/web test
+  - corepack pnpm --filter @netgrid/web typecheck
+  - corepack pnpm check:test-discovery
+  - browser-repro-rez-strength-global
 ---
 
 # Corp-/ICE-Kostensortierung im Decktisch korrigieren und eindeutig machen
@@ -57,17 +65,17 @@ Die Kostensortierung im Decktisch soll Corp-Karten, insbesondere ICE, zuverläss
 
 ## Akzeptanzkriterien
 
-- [ ] ICE werden über eine im Corp-Deck eindeutig benannte Option aufsteigend nach `numeric.rezCost` sortiert.
-- [ ] Das Acht-ICE-Muster ergibt exakt die Kostenfolge `0, 1, 1, 2, 2, 3, 4, 4`; Mehrfachkopien bleiben innerhalb ihres Kosten-/Namensblocks zusammen.
-- [ ] Die Reihenfolge stimmt sowohl unmittelbar nach Öffnen des Decktischs als auch nach Abschluss eines noch laufenden Detail-Ladevorgangs.
-- [ ] Eine Zahlen-Sortierung kann bei fehlenden erforderlichen Kartendetails nicht still in eine scheinbar zufällige Namenssortierung fallen.
-- [ ] Die Corp-Oberfläche bietet keine irreführende Installkosten-Sortierung an, die für ICE nur alphabetisch fällt.
-- [ ] Gleichstände werden deterministisch nach Kartengruppe und Name aufgelöst; fehlende Zahlenwerte werden stabil ans Ende gesetzt.
-- [ ] Runner-Karten mit `numeric.installCost` bleiben korrekt nach Installkosten sortierbar.
-- [ ] Globale Sortierung und Sortierung eines einzelnen Stapels folgen demselben Kostenvertrag.
-- [ ] Der im Stapel verwendete Kostenwert oder Sortierstatus ist sichtbar beziehungsweise über einen stabilen Accessibility-/Testvertrag überprüfbar.
-- [ ] Gezielte Tests decken ICE-Rez-Kosten, fehlende/verspätete Details, Runner-Installkosten und die side-gerechten UI-Optionen ab.
-- [ ] Engine, Kartendaten, LegalActions, Hidden-Info, Replay und StateHash bleiben unverändert.
+- [x] ICE werden über eine im Corp-Deck eindeutig benannte Option aufsteigend nach `numeric.rezCost` sortiert.
+- [x] Das Acht-ICE-Muster ergibt exakt die Kostenfolge `0, 1, 1, 2, 2, 3, 4, 4`; Mehrfachkopien bleiben innerhalb ihres Kosten-/Namensblocks zusammen.
+- [x] Die Reihenfolge stimmt sowohl unmittelbar nach Öffnen des Decktischs als auch nach Abschluss eines noch laufenden Detail-Ladevorgangs.
+- [x] Eine Zahlen-Sortierung kann bei fehlenden erforderlichen Kartendetails nicht still in eine scheinbar zufällige Namenssortierung fallen.
+- [x] Die Corp-Oberfläche bietet keine irreführende Installkosten-Sortierung an, die für ICE nur alphabetisch fällt.
+- [x] Gleichstände werden deterministisch nach Kartengruppe und Name aufgelöst; fehlende Zahlenwerte werden stabil ans Ende gesetzt.
+- [x] Runner-Karten mit `numeric.installCost` bleiben korrekt nach Installkosten sortierbar.
+- [x] Globale Sortierung und Sortierung eines einzelnen Stapels folgen demselben Kostenvertrag.
+- [x] Der im Stapel verwendete Kostenwert oder Sortierstatus ist sichtbar beziehungsweise über einen stabilen Accessibility-/Testvertrag überprüfbar.
+- [x] Gezielte Tests decken ICE-Rez-Kosten, fehlende/verspätete Details, Runner-Installkosten und die side-gerechten UI-Optionen ab.
+- [x] Engine, Kartendaten, LegalActions, Hidden-Info, Replay und StateHash bleiben unverändert.
 
 ## Umsetzungshinweise
 
@@ -79,4 +87,20 @@ Die Kostensortierung im Decktisch soll Corp-Karten, insbesondere ICE, zuverläss
 
 ## Ergebnisnotiz
 
-Noch offen.
+Der dauerhafte Namens-Fallback entstand nicht im Comparator, sondern im
+Detail-Ladepfad: Kartendetails wurden erst nach Abschluss eines gemeinsamen
+`Promise.all` veröffentlicht, sodass ein einziger hängender Abruf sämtliche
+Rez-/Stärkewerte unbegrenzt zurückhielt. Außerdem forderte der Effekt für das
+aktuelle Deck bekannte Nicht-Agenda-Karten nicht direkt an.
+
+Erfolgreiche Details werden nun fortschreitend übernommen, parallele Abrufe
+dedupliziert und alle fehlenden Karten des ausgewählten Decks priorisiert.
+Numerische Sortierungen sind bis zur benötigten Detailbereitschaft eindeutig
+als ladend gesperrt. Korp zeigt keine Installkosten-Sortierung mehr, Runner
+behält sie. Der aktive Zahlenwert erscheint pro Karte als zugängliches Badge.
+
+Der Browser-Repro mit zehn ICE ergab für Rez-Kosten
+`0, 2, 2, 4, 5, 5, 6, 6, 8, 9` und für Stärke
+`0, 1, 2, 2, 4, 4, 5, 5, 5, 6`; die globale Rez-Sortierung war identisch.
+57 Web-Testdateien mit 663 Tests, Web-Typecheck und Test-Discovery-Gate sind
+grün.
