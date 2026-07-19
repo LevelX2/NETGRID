@@ -92,7 +92,11 @@ for (const missing of [...expectedTypeCycleSignatures].filter(
 
 const productionLineCaps = new Map([
   ["belief-state.ts", 2548],
-  ["runtime/semantic-runtime-corp-score.ts", 828],
+  ["runtime/semantic-runtime-corp-score.ts", 492],
+  [
+    "runtime/corp-scoreline/semantic-runtime-corp-score-action-families.ts",
+    391,
+  ],
   ["runtime/semantic-runtime-corp-board-triage.ts", 793],
   ["runner-hand-development.ts", 936],
   ["runner/hand-development/runner-hand-text-signals.ts", 431],
@@ -111,8 +115,9 @@ const productionLineCaps = new Map([
   ["runtime/corp-scoreline/semantic-runtime-corp-score-action-economy.ts", 885],
   [
     "runtime/corp-scoreline/semantic-runtime-corp-score-scoreline-components.ts",
-    997,
+    526,
   ],
+  ["runtime/corp-scoreline/semantic-runtime-corp-score-active-remote.ts", 505],
   [
     "runtime/corp-scoreline/semantic-runtime-corp-scoring-window-projection.ts",
     1189,
@@ -140,7 +145,9 @@ for (const file of productionFiles) {
 const testLineCaps = new Map([
   ["runner-hand-development.test.ts", 655],
   ["runner/hand-development/runner-persistent-install-evaluation.test.ts", 912],
-  ["runtime/semantic-runtime-corp-score.test.ts", 3797],
+  ["runtime/semantic-runtime-corp-score-active-remote.test.ts", 1606],
+  ["runtime/semantic-runtime-corp-score-economy-and-trace.test.ts", 1067],
+  ["runtime/semantic-runtime-corp-score-pressure.test.ts", 1183],
   ["tactical-plans.test.ts", 4308],
   ["semantic-ai-runtime-cutover-boundaries.test.ts", 241],
   ["semantic-ai-runtime-cutover-corp.test.ts", 1429],

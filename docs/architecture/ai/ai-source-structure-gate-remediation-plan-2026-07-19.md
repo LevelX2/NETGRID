@@ -220,7 +220,16 @@ dokumentiertem Sicherheitsblocker und Removal Condition zulässig.
   106/106 Window-/Protection-/Central-Pressure-/Match-3bb14-/Corp-Score-Tests,
   Structure-Selftest und Diff-Hygiene sind grün; die Removal List sinkt von
   sechs auf fünf Treffer.
-- Aktives Paket: ASSG-4.
+- ASSG-4 abgeschlossen: Die aktive Remote-Familie liegt in einem eigenen
+  505-Zeilen-Owner; die übrigen Scoreline-Komponenten sinken von 1.022 auf 526
+  Zeilen. Score-/Advance-/Rez-/Install-Action-Familien sind als
+  391-Zeilen-Collector getrennt, der reihenfolgetreue öffentliche
+  Corp-Score-Orchestrator sinkt von 838 auf 492 Zeilen. Die 56 vorhandenen
+  Corp-Score-Tests sind vollständig auf drei Suiten mit
+  1.606/1.067/1.183 Zeilen verteilt. AI-Typecheck, Package-Boundaries, 139/139
+  Corp-Score-/Scoreline-/Choice-Tests, Structure-Selftest und Diff-Hygiene sind
+  grün; die Removal List sinkt von fünf auf zwei Treffer.
+- Aktives Paket: ASSG-5.
 
 ## Paketfolge
 
