@@ -1324,6 +1324,13 @@ export function publicContextForAction(
   // general counter-engine policy layer.
   for (const key of [
     "gainedCredits",
+    "creditGainBaseAmount",
+    "creditGainBonusAmount",
+    "creditGainModifierSourceDefinitionIds",
+    "creditGainRequestedAmount",
+    "creditGainInterceptedAmount",
+    "firstPrepCreditGainBonus",
+    "firstPrepCreditGainBonusSourceDefinitionIds",
     "runnerCreditsAfter",
     "corpCreditsAfter",
     "paidCredits",

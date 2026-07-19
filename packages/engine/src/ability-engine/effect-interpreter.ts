@@ -80,8 +80,11 @@ export function executeCardImplementationEffects(
         throw new Error(
           "Credit-Gain-Effekt braucht eine zentrale Gain-Runtime.",
         );
-      if (kind === "standard" && amount > 0) creditGainOrdinal += 1;
-      return context.gainCredits(side, amount, creditGainOrdinal, kind);
+      const gainOrdinal =
+        kind === "standard" && amount > 0
+          ? (creditGainOrdinal += 1)
+          : creditGainOrdinal + 1;
+      return context.gainCredits(side, amount, gainOrdinal, kind);
     },
     creditsForSide,
     loseCredits,

@@ -181,6 +181,7 @@ import {
   type ServerId,
   type Side,
 } from "@netgrid/shared";
+
 import {
   expectCurrentRulesBaseline,
   continueRunAction,
@@ -195,6 +196,22 @@ import {
   addRezzedCorpIceForTest,
   addInstalledRunnerProgramForTest,
 } from "../../test-fixtures/index-test-helpers";
+
+function testCreditGain(state: GameState) {
+  return (side: Side, amount: number) => {
+    if (side === "corp") state.corp.credits += amount;
+    else state.runner.credits += amount;
+    return {
+      creditedAmount: amount,
+      creditsAfter: side === "corp" ? state.corp.credits : state.runner.credits,
+      publicPayload: {
+        gainedCredits: amount,
+        [side === "corp" ? "corpCreditsAfter" : "runnerCreditsAfter"]:
+          side === "corp" ? state.corp.credits : state.runner.credits,
+      },
+    };
+  };
+}
 
 describe("V1.6.2 Mechanikpaket B", () => {
   it("adds a controlled V1.6.2 core card set without opening deferred mechanics", () => {
@@ -349,7 +366,11 @@ describe("V1.6.2 Mechanikpaket B", () => {
 
     executeCardImplementationEffects(
       state,
-      { sourceCardId: state.runner.identity, controller: "runner" },
+      {
+        sourceCardId: state.runner.identity,
+        controller: "runner",
+        gainCredits: testCreditGain(state),
+      },
       [
         {
           kind: "gain_credits",
@@ -363,7 +384,11 @@ describe("V1.6.2 Mechanikpaket B", () => {
 
     executeCardImplementationEffects(
       state,
-      { sourceCardId: state.corp.identity, controller: "corp" },
+      {
+        sourceCardId: state.corp.identity,
+        controller: "corp",
+        gainCredits: testCreditGain(state),
+      },
       [
         {
           kind: "gain_credits",
@@ -377,7 +402,11 @@ describe("V1.6.2 Mechanikpaket B", () => {
 
     const result = executeCardImplementationEffects(
       state,
-      { sourceCardId: state.runner.identity, controller: "runner" },
+      {
+        sourceCardId: state.runner.identity,
+        controller: "runner",
+        gainCredits: testCreditGain(state),
+      },
       [
         {
           kind: "gain_credits",
@@ -1037,6 +1066,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
       {
         sourceCardId: state.corp.identity,
         controller: "corp",
+        gainCredits: testCreditGain(state),
         drawCards: (side, amount) => {
           order.push(`${side}-draw-after-${state.corp.credits}`);
           return drawCards(side, amount);

@@ -280,6 +280,7 @@ describe("corp-operation-resolution", () => {
     );
 
     expect(calls).toEqual([
+      "gainCorpCredits:4",
       "drawCorpCard",
       "drawCorpCard",
       "damage:core:1:v111_core_damage_operation",

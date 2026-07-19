@@ -513,6 +513,46 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
     expectValid(state);
   });
 
+  it("applies Elena Laskova to Finders Keepers through the resolver pipeline", () => {
+    let state = toRunnerClassic09Game("classic-09-elena-finders-keepers");
+    emptyRunnerGripForTest(state);
+    installRunnerResourceForTest(state, ELENA_LASKOVA);
+    const eventId = moveRunnerCardCopyToGrip(state, FINDERS_KEEPERS);
+    state.runner.credits = 7;
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "play_event" && action.payload?.cardId === eventId,
+    );
+
+    const payload = state.eventLog.at(-1)?.publicPayload ?? {};
+    const rolls = String(payload.randomDiceLoopRolls ?? "")
+      .split(",")
+      .map(Number);
+    const baseGain = rolls.reduce((sum, roll) => sum + roll, 0);
+    expect(rolls).toHaveLength(3);
+    expect(state.runner.credits).toBe(baseGain + 1);
+    expect(payload).toMatchObject({
+      cardDefinitionId: FINDERS_KEEPERS,
+      gainedCredits: baseGain + 1,
+      runnerCreditsAfter: baseGain + 1,
+      creditGainBaseAmount: baseGain,
+      creditGainBonusAmount: 1,
+      firstPrepCreditGainBonus: 1,
+      firstPrepCreditGainBonusSourceDefinitionIds: ELENA_LASKOVA,
+    });
+
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    if (!replay.ok) throw new Error(replay.errors.join("; "));
+    expect(hashState(replay.state)).toBe(hashState(state));
+    expectValid(state);
+  });
+
   it("reveals R&D through Gypsy Schedule Analyzer until an agenda and stores it in HQ", () => {
     let state = toRunnerClassic09Game("classic-09-gypsy-reveal-agenda");
     emptyRunnerGripForTest(state);
