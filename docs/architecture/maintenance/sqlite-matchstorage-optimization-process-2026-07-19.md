@@ -1,7 +1,7 @@
 # SQLite-Matchstorage-Optimierung – Paketprozess
 
 Stand: 2026-07-19  
-Status: technisch abgeschlossen, vor finalem Main-Abgleich
+Status: abgeschlossen und auf lokalem `main` verifiziert
 Arbeitsbranch: `codex/sqlite-matchstorage-optimization`  
 Worktree: `C:\Projekte\NETGRID_SQLITE_MATCHSTORAGE_OPTIMIZATION`
 
@@ -301,4 +301,8 @@ complete.`
 - Der vollständige Serverlauf steht bei 185/186. Der einzige rote Test ist die
   bereits auf Ausgangs-`main` reproduzierte fachfremde Jack-out-Erwartung aus
   SMO-01; sämtliche neuen und betroffenen Storage-/Accounttests sind grün.
+- Lokales `main` mit Stand `3a608e288` wurde konfliktfrei integriert. Der
+  anschließende Reverify bestätigt Typecheck, Contracttests, Test-Discovery
+  und Package-Boundaries; der vollständige Serverlauf bleibt unverändert bei
+  185/186 mit derselben vorbestehenden Jack-out-Testschuld.
 - `git diff --check`: grün.
