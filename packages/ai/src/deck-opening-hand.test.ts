@@ -1,7 +1,7 @@
 import type { AiDecisionInput, Side } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
-import { CARD_ROLES_BY_CARD } from "./ai-hints";
+import { AI_HINTS_BY_CARD, type AiCardHint } from "./ai-hints";
 import {
   evaluateCorpOpeningHand,
   evaluateRunnerOpeningHand,
@@ -17,11 +17,7 @@ describe("deck opening hand role classification", () => {
         "onr_v1_302_scorched-earth",
         "onr_v1_304_systematic-layoffs",
       ],
-      [
-        "corp.fast_advance",
-        "corp.tag_trace_punish",
-        "corp.damage_kill",
-      ],
+      ["corp.fast_advance", "corp.tag_trace_punish", "corp.damage_kill"],
     );
 
     const evaluation = evaluateCorpOpeningHand(historical);
@@ -81,27 +77,27 @@ describe("deck opening hand role classification", () => {
   });
 
   it("counts each opening card once per role family", () => {
-    CARD_ROLES_BY_CARD.set("local_multi_agenda", {
+    setTestCardRoles("local_multi_agenda", {
       cardId: "local_multi_agenda",
       side: "corp",
       roles: ["agenda", "corp_score_agenda", "agenda_rush"],
     });
-    CARD_ROLES_BY_CARD.set("local_multi_ice", {
+    setTestCardRoles("local_multi_ice", {
       cardId: "local_multi_ice",
       side: "corp",
       roles: ["corp_install_ice", "barrier_ice", "etr_ice", "taxing_ice"],
     });
-    CARD_ROLES_BY_CARD.set("local_multi_economy", {
+    setTestCardRoles("local_multi_economy", {
       cardId: "local_multi_economy",
       side: "corp",
       roles: ["economy_asset", "economy_operation", "draw_operation"],
     });
-    CARD_ROLES_BY_CARD.set("local_multi_breaker", {
+    setTestCardRoles("local_multi_breaker", {
       cardId: "local_multi_breaker",
       side: "runner",
       roles: ["breaker_fracter", "breaker_decoder", "runner_program"],
     });
-    CARD_ROLES_BY_CARD.set("local_runner_economy", {
+    setTestCardRoles("local_runner_economy", {
       cardId: "local_runner_economy",
       side: "runner",
       roles: ["draw_event"],
@@ -124,31 +120,31 @@ describe("deck opening hand role classification", () => {
       expect(runner.evidence).toContain("opening_breakers:1");
       expect(runner.evidence).toContain("opening_setup:1");
     } finally {
-      CARD_ROLES_BY_CARD.delete("local_multi_agenda");
-      CARD_ROLES_BY_CARD.delete("local_multi_ice");
-      CARD_ROLES_BY_CARD.delete("local_multi_economy");
-      CARD_ROLES_BY_CARD.delete("local_multi_breaker");
-      CARD_ROLES_BY_CARD.delete("local_runner_economy");
+      AI_HINTS_BY_CARD.delete("local_multi_agenda");
+      AI_HINTS_BY_CARD.delete("local_multi_ice");
+      AI_HINTS_BY_CARD.delete("local_multi_economy");
+      AI_HINTS_BY_CARD.delete("local_multi_breaker");
+      AI_HINTS_BY_CARD.delete("local_runner_economy");
     }
   });
 
   it("counts opening economy roles by bounded role terms", () => {
-    CARD_ROLES_BY_CARD.set("local_opening_economy", {
+    setTestCardRoles("local_opening_economy", {
       cardId: "local_opening_economy",
       side: "corp",
       roles: ["economy_asset"],
     });
-    CARD_ROLES_BY_CARD.set("local_opening_noise", {
+    setTestCardRoles("local_opening_noise", {
       cardId: "local_opening_noise",
       side: "corp",
       roles: ["uneconomy_noise", "drawish_noise"],
     });
-    CARD_ROLES_BY_CARD.set("local_runner_economy", {
+    setTestCardRoles("local_runner_economy", {
       cardId: "local_runner_economy",
       side: "runner",
       roles: ["draw_event"],
     });
-    CARD_ROLES_BY_CARD.set("local_runner_noise", {
+    setTestCardRoles("local_runner_noise", {
       cardId: "local_runner_noise",
       side: "runner",
       roles: ["economyish_noise", "withdraw_noise"],
@@ -165,20 +161,20 @@ describe("deck opening hand role classification", () => {
         ).evidence,
       ).toContain("opening_economy:1");
     } finally {
-      CARD_ROLES_BY_CARD.delete("local_opening_economy");
-      CARD_ROLES_BY_CARD.delete("local_opening_noise");
-      CARD_ROLES_BY_CARD.delete("local_runner_economy");
-      CARD_ROLES_BY_CARD.delete("local_runner_noise");
+      AI_HINTS_BY_CARD.delete("local_opening_economy");
+      AI_HINTS_BY_CARD.delete("local_opening_noise");
+      AI_HINTS_BY_CARD.delete("local_runner_economy");
+      AI_HINTS_BY_CARD.delete("local_runner_noise");
     }
   });
 
   it("counts Corp remote-root opening support by bounded role terms", () => {
-    CARD_ROLES_BY_CARD.set("local_remote_support", {
+    setTestCardRoles("local_remote_support", {
       cardId: "local_remote_support",
       side: "corp",
       roles: ["remote_support"],
     });
-    CARD_ROLES_BY_CARD.set("local_remote_support_noise", {
+    setTestCardRoles("local_remote_support_noise", {
       cardId: "local_remote_support_noise",
       side: "corp",
       roles: ["remote_supportish_noise", "classet_noise", "upgradeish_noise"],
@@ -201,8 +197,8 @@ describe("deck opening hand role classification", () => {
 
       expect(protectedRemoteSupport.score).toBe(noiseOnly.score + 10);
     } finally {
-      CARD_ROLES_BY_CARD.delete("local_remote_support");
-      CARD_ROLES_BY_CARD.delete("local_remote_support_noise");
+      AI_HINTS_BY_CARD.delete("local_remote_support");
+      AI_HINTS_BY_CARD.delete("local_remote_support_noise");
     }
   });
 
@@ -252,17 +248,17 @@ describe("deck opening hand role classification", () => {
 });
 
 function registerRunnerSearchOpeningRoles(): void {
-  CARD_ROLES_BY_CARD.set("local_opening_search", {
+  setTestCardRoles("local_opening_search", {
     cardId: "local_opening_search",
     side: "runner",
     roles: ["program_search", "run_pressure"],
   });
-  CARD_ROLES_BY_CARD.set("local_opening_economy", {
+  setTestCardRoles("local_opening_economy", {
     cardId: "local_opening_economy",
     side: "runner",
     roles: ["economy_event", "run_pressure"],
   });
-  CARD_ROLES_BY_CARD.set("local_opening_setup", {
+  setTestCardRoles("local_opening_setup", {
     cardId: "local_opening_setup",
     side: "runner",
     roles: ["runner_program"],
@@ -270,9 +266,9 @@ function registerRunnerSearchOpeningRoles(): void {
 }
 
 function unregisterRunnerSearchOpeningRoles(): void {
-  CARD_ROLES_BY_CARD.delete("local_opening_search");
-  CARD_ROLES_BY_CARD.delete("local_opening_economy");
-  CARD_ROLES_BY_CARD.delete("local_opening_setup");
+  AI_HINTS_BY_CARD.delete("local_opening_search");
+  AI_HINTS_BY_CARD.delete("local_opening_economy");
+  AI_HINTS_BY_CARD.delete("local_opening_setup");
 }
 
 function runnerSearchOpeningInput(
@@ -374,4 +370,15 @@ function corpOpeningInput(
   });
   result.playerView.own.credits = 5;
   return result;
+}
+
+function setTestCardRoles(
+  cardId: string,
+  hint: Pick<AiCardHint, "cardId" | "side" | "roles"> & Partial<AiCardHint>,
+): void {
+  AI_HINTS_BY_CARD.set(cardId, {
+    planRoles: [],
+    aiSupportStatus: "hinted_only",
+    ...hint,
+  });
 }

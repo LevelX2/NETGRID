@@ -63,7 +63,6 @@ export function createHiddenZoneSearchRuntime(
     publicIceSelectionLabelForCard,
     resolveDerezRezzedBlackIceChoice,
     resolveCardImplementationAccessPaymentChoice,
-    resolveChimeraDaemonTrashChoice,
     resolvePayRezCostToTrashRezzedIceChoice,
     resolveRunnerIcebreakerCounterEvent,
     resolveDiscardChoice,

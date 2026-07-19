@@ -10,11 +10,7 @@ import type {
   DeckCapabilityProfile,
 } from "../../deck-capabilities";
 import type { RunnerStrategicIntentProfile } from "../../runner-strategic-intent";
-import {
-  CARD_ROLES_BY_CARD,
-  RUNTIME_CARDS,
-  createAiHintsByCard,
-} from "../../ai-hints";
+import { AI_HINTS_BY_CARD, RUNTIME_CARDS } from "../../ai-hints";
 import { randomBreakOrDamageRiskProfileForDefinitionId } from "../../actions/risk-action-projection";
 import { persistentDevelopmentActionProjection } from "../../actions/persistent-development-action";
 import { actionClickCost } from "../../runtime/action-cost";
@@ -72,8 +68,6 @@ import {
   runnerHandTokensIncludeInOrder,
 } from "./runner-hand-text-signals";
 
-const AI_HINTS = createAiHintsByCard();
-
 export function signalsForCard(
   card: VisibleCard,
   candidates: readonly ActionSemanticCandidate[],
@@ -81,14 +75,10 @@ export function signalsForCard(
   const definition = card.definitionId
     ? runtimeDefinition(card.definitionId)
     : undefined;
-  const hint = card.definitionId ? AI_HINTS.get(card.definitionId) : undefined;
-  const roleRecord = card.definitionId
-    ? CARD_ROLES_BY_CARD.get(card.definitionId)
+  const hint = card.definitionId
+    ? AI_HINTS_BY_CARD.get(card.definitionId)
     : undefined;
-  const roles = sortedUnique([
-    ...(roleRecord?.roles ?? []),
-    ...(hint?.roles ?? []),
-  ]);
+  const roles = sortedUnique([...(hint?.roles ?? [])]);
   const planRoles = sortedUnique([...(hint?.planRoles ?? [])]);
   const hintSignals = hint ? structuredHintSignals(hint) : [];
   const candidateSignals = sortedUnique(

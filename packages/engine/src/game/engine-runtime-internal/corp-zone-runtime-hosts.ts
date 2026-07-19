@@ -53,7 +53,6 @@ export function createCorpZoneRuntimeHosts(
     publicIceSelectionLabelForCard,
     resolveDerezRezzedBlackIceChoice,
     resolveCardImplementationAccessPaymentChoice,
-    resolveChimeraDaemonTrashChoice,
     resolvePayRezCostToTrashRezzedIceChoice,
     resolveDiscardChoice,
     resolveCorpChoiceRezOrTrashIceDecisionChoice,

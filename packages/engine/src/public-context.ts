@@ -1634,12 +1634,6 @@ export function publicContextForAction(
       if (value !== undefined) context[key] = value;
     }
   }
-  if (legalAction.payload?.chimeraDaemonTrashed === true) {
-    context.chimeraDaemonTrashed = true;
-    if (typeof legalAction.payload.chimeraDaemonDefinitionId === "string")
-      context.chimeraDaemonDefinitionId =
-        legalAction.payload.chimeraDaemonDefinitionId;
-  }
   if (typeof legalAction.payload?.obligationDebtAbility === "string") {
     context.obligationDebtAbility = legalAction.payload.obligationDebtAbility;
     for (const key of [

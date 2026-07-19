@@ -108,7 +108,6 @@ function createChoiceHiddenZoneRuntimeLinks(
     resolveCardImplementationAccessPaymentChoice: link(
       "resolveCardImplementationAccessPaymentChoice",
     ),
-    resolveChimeraDaemonTrashChoice: link("resolveChimeraDaemonTrashChoice"),
     resolvePayRezCostToTrashRezzedIceChoice: link(
       "resolvePayRezCostToTrashRezzedIceChoice",
     ),

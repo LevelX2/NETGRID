@@ -328,7 +328,6 @@ import {
 import {
   resolveAccessInstalledRunnerProgramReturnChoice,
   resolveAccessPaymentChoice,
-  resolveChimeraDaemonTrashChoice as resolveAccessChimeraDaemonTrashChoice,
   type AccessEffectHandlerHost,
 } from "../access/access-effect-handlers";
 import {

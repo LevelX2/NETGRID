@@ -80,7 +80,6 @@ export function createPendingChoiceRuntimeHosts(
     publicIceSelectionLabelForCard,
     resolveDerezRezzedBlackIceChoice,
     resolveCardImplementationAccessPaymentChoice,
-    resolveChimeraDaemonTrashChoice,
     resolvePayRezCostToTrashRezzedIceChoice,
     resolveRunnerIcebreakerCounterEvent,
     resolveExposeInstalledCorpCardsChoice,
@@ -618,7 +617,6 @@ export function createPendingChoiceRuntimeHosts(
         resolveIncubatorTransformChoice,
         resolveVirusCounterPurgePreserveChoice:
           deps.resolveVirusCounterPurgePreserveChoice,
-        resolveChimeraDaemonTrashChoice,
         resolveRunnerProgramReturnChoice,
         resolveRunnerPrivateLookChoice: deps.resolveRunnerPrivateLookChoice,
         resolveSenatorialFieldTripChoice: deps.resolveSenatorialFieldTripChoice,

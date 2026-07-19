@@ -845,17 +845,6 @@ export function createHiddenZoneNonSearchRuntime(
     deps.applyRunnerStartOfTurnEffects(state);
   }
 
-  function resolveChimeraDaemonTrashChoice(
-    state: GameState,
-    legalAction: LegalAction,
-    playerAction: PlayerAction,
-  ): void {
-    deps.resolveAccessChimeraDaemonTrashChoice(
-      deps.accessEffectHandlerHost(state, legalAction),
-      deps.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "",
-    );
-  }
-
   function resolveCardImplementationAccessPaymentChoice(
     state: GameState,
     legalAction: LegalAction,
@@ -1346,7 +1335,6 @@ export function createHiddenZoneNonSearchRuntime(
     publicIceSelectionLabelForCard,
     resolveDerezRezzedBlackIceChoice,
     resolveCardImplementationAccessPaymentChoice,
-    resolveChimeraDaemonTrashChoice,
     resolvePayRezCostToTrashRezzedIceChoice,
     resolveCorpChoiceRezOrTrashIceDecisionChoice,
     resolveCorpChoiceRezOrTrashIceTargetChoice,

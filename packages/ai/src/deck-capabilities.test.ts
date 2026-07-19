@@ -4,7 +4,7 @@ import {
   buildDeckCapabilityProfile,
   redactedDeckCapabilityFacts,
 } from "./deck-capabilities";
-import { CARD_ROLES_BY_CARD } from "./ai-hints";
+import { AI_HINTS_BY_CARD, type AiCardHint } from "./ai-hints";
 import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
 import match9d15Checkpoint from "../../../data/scenarios/ai-decision-checkpoints/cp-9d15-01-urgent-remote-inside-job.json";
 import type {
@@ -20,15 +20,27 @@ describe("DeckCapabilityProfile", () => {
     inputView.own.memoryUsed = 3;
     inputView.own.memoryLimit = 4;
     inputView.own.rig = [
-      visibleCard("codecracker-1", "onr_v1_014_codecracker", "runner", "program", {
-        title: "Codecracker",
-        subtypes: ["icebreaker"],
-        memoryCost: 1,
-      }),
-      visibleCard("smc-1", "onr_v1_059_self-modifying-code", "runner", "program", {
-        title: "Self-Modifying Code",
-        memoryCost: 2,
-      }),
+      visibleCard(
+        "codecracker-1",
+        "onr_v1_014_codecracker",
+        "runner",
+        "program",
+        {
+          title: "Codecracker",
+          subtypes: ["icebreaker"],
+          memoryCost: 1,
+        },
+      ),
+      visibleCard(
+        "smc-1",
+        "onr_v1_059_self-modifying-code",
+        "runner",
+        "program",
+        {
+          title: "Self-Modifying Code",
+          memoryCost: 2,
+        },
+      ),
       visibleCard("broker-1", "onr_v1_154_broker", "runner", "resource", {
         title: "Broker",
         counterDisplays: [
@@ -44,7 +56,13 @@ describe("DeckCapabilityProfile", () => {
       }),
     ];
     const legalActions = [
-      legalAction("smc-search", "runner", "trigger_ability", "smc-1", "Self-Modifying Code: search your stack for a program"),
+      legalAction(
+        "smc-search",
+        "runner",
+        "trigger_ability",
+        "smc-1",
+        "Self-Modifying Code: search your stack for a program",
+      ),
       legalAction(
         "broker-build",
         "runner",
@@ -75,11 +93,12 @@ describe("DeckCapabilityProfile", () => {
       ]),
     });
 
-    expect(profile.runner?.breakerInventory.map((entry) => entry.cardId)).toEqual([
-      "onr_v1_014_codecracker",
-      "onr_v1_021_dwarf",
-    ]);
-    expect(profile.runner?.breakerCoverageMatrix.code_gate.installed).toBe(true);
+    expect(
+      profile.runner?.breakerInventory.map((entry) => entry.cardId),
+    ).toEqual(["onr_v1_014_codecracker", "onr_v1_021_dwarf"]);
+    expect(profile.runner?.breakerCoverageMatrix.code_gate.installed).toBe(
+      true,
+    );
     expect(profile.runner?.breakerCoverageMatrix.wall.inDeckKnown).toBe(true);
     expect(profile.runner?.breakerCoverageMatrix.wall.searchableNow).toBe(true);
     expect(profile.runner?.searchAccess.canSearchProgramsNow).toBe(true);
@@ -105,10 +124,16 @@ describe("DeckCapabilityProfile", () => {
       visibleCard("memory-1", "local_memory_tool", "runner", "hardware", {
         title: "Memory Tool",
       }),
-      visibleCard("municipal-1", "local_municipal_noise", "runner", "hardware", {
-        title: "Municipal Tool",
-        rulesText: "MUish support.",
-      }),
+      visibleCard(
+        "municipal-1",
+        "local_municipal_noise",
+        "runner",
+        "hardware",
+        {
+          title: "Municipal Tool",
+          rulesText: "MUish support.",
+        },
+      ),
     ];
 
     const profile = buildDeckCapabilityProfile({
@@ -142,8 +167,20 @@ describe("DeckCapabilityProfile", () => {
       side: "runner",
       playerView: inputView,
       legalActions: [
-        legalAction("label-build", "runner", "trigger_ability", "broker-1", "Auf Broker legen"),
-        legalAction("label-cash", "runner", "trigger_ability", "broker-1", "Von Broker nehmen"),
+        legalAction(
+          "label-build",
+          "runner",
+          "trigger_ability",
+          "broker-1",
+          "Auf Broker legen",
+        ),
+        legalAction(
+          "label-cash",
+          "runner",
+          "trigger_ability",
+          "broker-1",
+          "Von Broker nehmen",
+        ),
       ],
       deckSnapshot: runnerSnapshot([["onr_v1_154_broker", 1]]),
     });
@@ -192,40 +229,72 @@ describe("DeckCapabilityProfile", () => {
     inputView.own.rig = [
       visibleCard("broker-1", "onr_v1_154_broker", "runner", "resource", {
         title: "Broker",
-        counterDisplays: [{
-          id: "broker-bank-1",
-          amount: 12,
-          displayKind: "stored_credits",
-          label: "12",
-          ariaLabel: "12 gespeicherte Credits",
-          usageHint: "spendable",
-        }],
+        counterDisplays: [
+          {
+            id: "broker-bank-1",
+            amount: 12,
+            displayKind: "stored_credits",
+            label: "12",
+            ariaLabel: "12 gespeicherte Credits",
+            usageHint: "spendable",
+          },
+        ],
       }),
       visibleCard("broker-2", "onr_v1_154_broker", "runner", "resource", {
         title: "Broker",
-        counterDisplays: [{
-          id: "broker-bank-2",
-          amount: 3,
-          displayKind: "stored_credits",
-          label: "3",
-          ariaLabel: "3 gespeicherte Credits",
-          usageHint: "spendable",
-        }],
+        counterDisplays: [
+          {
+            id: "broker-bank-2",
+            amount: 3,
+            displayKind: "stored_credits",
+            label: "3",
+            ariaLabel: "3 gespeicherte Credits",
+            usageHint: "spendable",
+          },
+        ],
       }),
     ];
     const legalActions = [
-      legalAction("broker-1-build", "runner", "trigger_ability", "broker-1", "Use ability", {
-        cardImplementationAddsHostedCredits: true,
-      }),
-      legalAction("broker-2-build", "runner", "trigger_ability", "broker-2", "Use ability", {
-        cardImplementationAddsHostedCredits: true,
-      }),
-      legalAction("broker-1-cash", "runner", "trigger_ability", "broker-1", "Use ability", {
-        cardImplementationTakesHostedCredits: true,
-      }),
-      legalAction("broker-2-cash", "runner", "trigger_ability", "broker-2", "Use ability", {
-        cardImplementationTakesHostedCredits: true,
-      }),
+      legalAction(
+        "broker-1-build",
+        "runner",
+        "trigger_ability",
+        "broker-1",
+        "Use ability",
+        {
+          cardImplementationAddsHostedCredits: true,
+        },
+      ),
+      legalAction(
+        "broker-2-build",
+        "runner",
+        "trigger_ability",
+        "broker-2",
+        "Use ability",
+        {
+          cardImplementationAddsHostedCredits: true,
+        },
+      ),
+      legalAction(
+        "broker-1-cash",
+        "runner",
+        "trigger_ability",
+        "broker-1",
+        "Use ability",
+        {
+          cardImplementationTakesHostedCredits: true,
+        },
+      ),
+      legalAction(
+        "broker-2-cash",
+        "runner",
+        "trigger_ability",
+        "broker-2",
+        "Use ability",
+        {
+          cardImplementationTakesHostedCredits: true,
+        },
+      ),
     ];
     const profile = buildDeckCapabilityProfile({
       side: "runner",
@@ -245,12 +314,24 @@ describe("DeckCapabilityProfile", () => {
   it("bounds text-only bank tool signals to exact tokens", () => {
     const inputView = playerView("runner");
     inputView.own.rig = [
-      visibleCard("stored-credits-1", "local_stored_credits_tool", "runner", "resource", {
-        title: "Stored Credits Tool",
-      }),
-      visibleCard("stored-noise-1", "local_stored_noise_tool", "runner", "resource", {
-        title: "Stored Creditsish Tool",
-      }),
+      visibleCard(
+        "stored-credits-1",
+        "local_stored_credits_tool",
+        "runner",
+        "resource",
+        {
+          title: "Stored Credits Tool",
+        },
+      ),
+      visibleCard(
+        "stored-noise-1",
+        "local_stored_noise_tool",
+        "runner",
+        "resource",
+        {
+          title: "Stored Creditsish Tool",
+        },
+      ),
     ];
 
     const profile = buildDeckCapabilityProfile({
@@ -259,8 +340,9 @@ describe("DeckCapabilityProfile", () => {
       legalActions: [],
     });
 
-    expect(profile.runner?.economyBankTools.map((tool) => tool.cardId))
-      .toEqual(["local_stored_credits_tool"]);
+    expect(profile.runner?.economyBankTools.map((tool) => tool.cardId)).toEqual(
+      ["local_stored_credits_tool"],
+    );
   });
 
   it("bounds bank capacity put amounts to exact tokens", () => {
@@ -270,10 +352,16 @@ describe("DeckCapabilityProfile", () => {
         title: "Bank",
         rulesText: "Put [3] credits on this card.",
       }),
-      visibleCard("capacity-noise-1", "local_capacity_noise", "runner", "resource", {
-        title: "Bank",
-        rulesText: "Putty [3] credits on this card.",
-      }),
+      visibleCard(
+        "capacity-noise-1",
+        "local_capacity_noise",
+        "runner",
+        "resource",
+        {
+          title: "Bank",
+          rulesText: "Putty [3] credits on this card.",
+        },
+      ),
     ];
 
     const profile = buildDeckCapabilityProfile({
@@ -296,10 +384,16 @@ describe("DeckCapabilityProfile", () => {
   it("requires source evidence before marking search tools legal now", () => {
     const inputView = playerView("runner");
     inputView.own.rig = [
-      visibleCard("smc-1", "onr_v1_059_self-modifying-code", "runner", "program", {
-        title: "Self-Modifying Code",
-        memoryCost: 2,
-      }),
+      visibleCard(
+        "smc-1",
+        "onr_v1_059_self-modifying-code",
+        "runner",
+        "program",
+        {
+          title: "Self-Modifying Code",
+          memoryCost: 2,
+        },
+      ),
     ];
 
     const labelOnly = buildDeckCapabilityProfile({
@@ -346,12 +440,12 @@ describe("DeckCapabilityProfile", () => {
   });
 
   it("matches search access roles by bounded role terms", () => {
-    CARD_ROLES_BY_CARD.set("local_structured_search", {
+    setTestCardRoles("local_structured_search", {
       cardId: "local_structured_search",
       side: "runner",
       roles: ["setup_program_search"],
     });
-    CARD_ROLES_BY_CARD.set("local_noise_tool", {
+    setTestCardRoles("local_noise_tool", {
       cardId: "local_noise_tool",
       side: "runner",
       roles: ["program_searchish_noise", "searchlight_noise"],
@@ -359,9 +453,15 @@ describe("DeckCapabilityProfile", () => {
     try {
       const inputView = playerView("runner");
       inputView.own.gripOrHq = [
-        visibleCard("search-1", "local_structured_search", "runner", "program", {
-          title: "Structured Search",
-        }),
+        visibleCard(
+          "search-1",
+          "local_structured_search",
+          "runner",
+          "program",
+          {
+            title: "Structured Search",
+          },
+        ),
         visibleCard("noise-1", "local_noise_tool", "runner", "program", {
           title: "Noise Tool",
         }),
@@ -373,14 +473,15 @@ describe("DeckCapabilityProfile", () => {
         legalActions: [],
       });
 
-      expect(profile.runner?.searchAccess.tools.map((tool) => tool.cardId))
-        .toEqual(["local_structured_search"]);
+      expect(
+        profile.runner?.searchAccess.tools.map((tool) => tool.cardId),
+      ).toEqual(["local_structured_search"]);
       expect(profile.runner?.searchAccess.tools[0]?.evidence).toContain(
         "capability_source:structured",
       );
     } finally {
-      CARD_ROLES_BY_CARD.delete("local_structured_search");
-      CARD_ROLES_BY_CARD.delete("local_noise_tool");
+      AI_HINTS_BY_CARD.delete("local_structured_search");
+      AI_HINTS_BY_CARD.delete("local_noise_tool");
     }
   });
 
@@ -391,10 +492,16 @@ describe("DeckCapabilityProfile", () => {
         title: "Local Text Search",
         rulesText: "Search your stack for a program.",
       }),
-      visibleCard("searchlight-1", "local_searchlight_noise", "runner", "program", {
-        title: "Searchlight Noise",
-        rulesText: "Searchlight your stack for a programmer.",
-      }),
+      visibleCard(
+        "searchlight-1",
+        "local_searchlight_noise",
+        "runner",
+        "program",
+        {
+          title: "Searchlight Noise",
+          rulesText: "Searchlight your stack for a programmer.",
+        },
+      ),
     ];
 
     const profile = buildDeckCapabilityProfile({
@@ -403,8 +510,9 @@ describe("DeckCapabilityProfile", () => {
       legalActions: [],
     });
 
-    expect(profile.runner?.searchAccess.tools.map((tool) => tool.cardId))
-      .toEqual(["local_text_search"]);
+    expect(
+      profile.runner?.searchAccess.tools.map((tool) => tool.cardId),
+    ).toEqual(["local_text_search"]);
     expect(profile.runner?.searchAccess.tools[0]).toMatchObject({
       canSearchPrograms: true,
       canSearchBreakers: true,
@@ -460,12 +568,12 @@ describe("DeckCapabilityProfile", () => {
   });
 
   it("matches breaker capability roles by bounded role prefixes", () => {
-    CARD_ROLES_BY_CARD.set("local_structured_breaker", {
+    setTestCardRoles("local_structured_breaker", {
       cardId: "local_structured_breaker",
       side: "runner",
       roles: ["breaker_fracter"],
     });
-    CARD_ROLES_BY_CARD.set("local_noise_breaker", {
+    setTestCardRoles("local_noise_breaker", {
       cardId: "local_noise_breaker",
       side: "runner",
       roles: ["breakerish_fracter"],
@@ -473,13 +581,25 @@ describe("DeckCapabilityProfile", () => {
     try {
       const inputView = playerView("runner");
       inputView.own.gripOrHq = [
-        visibleCard("structured-breaker-1", "local_structured_breaker", "runner", "program", {
-          title: "Structured Breaker",
-        }),
-        visibleCard("noise-breaker-1", "local_noise_breaker", "runner", "program", {
-          title: "Noise Breaker",
-          rulesText: "Break one ice subroutine.",
-        }),
+        visibleCard(
+          "structured-breaker-1",
+          "local_structured_breaker",
+          "runner",
+          "program",
+          {
+            title: "Structured Breaker",
+          },
+        ),
+        visibleCard(
+          "noise-breaker-1",
+          "local_noise_breaker",
+          "runner",
+          "program",
+          {
+            title: "Noise Breaker",
+            rulesText: "Break one ice subroutine.",
+          },
+        ),
       ];
 
       const profile = buildDeckCapabilityProfile({
@@ -493,7 +613,9 @@ describe("DeckCapabilityProfile", () => {
           expect.objectContaining({
             cardId: "local_structured_breaker",
             confidence: "medium",
-            evidence: expect.arrayContaining(["capability_source:role_or_subtype"]),
+            evidence: expect.arrayContaining([
+              "capability_source:role_or_subtype",
+            ]),
           }),
           expect.objectContaining({
             cardId: "local_noise_breaker",
@@ -506,8 +628,8 @@ describe("DeckCapabilityProfile", () => {
         ]),
       );
     } finally {
-      CARD_ROLES_BY_CARD.delete("local_structured_breaker");
-      CARD_ROLES_BY_CARD.delete("local_noise_breaker");
+      AI_HINTS_BY_CARD.delete("local_structured_breaker");
+      AI_HINTS_BY_CARD.delete("local_noise_breaker");
     }
   });
 
@@ -518,10 +640,16 @@ describe("DeckCapabilityProfile", () => {
         title: "Local Text Fracter",
         rulesText: "Break one ice subroutine.",
       }),
-      visibleCard("fracteroid-1", "local_fracteroid_noise", "runner", "program", {
-        title: "Local Fracteroid",
-        rulesText: "Fracteroid barrierish helper.",
-      }),
+      visibleCard(
+        "fracteroid-1",
+        "local_fracteroid_noise",
+        "runner",
+        "program",
+        {
+          title: "Local Fracteroid",
+          rulesText: "Fracteroid barrierish helper.",
+        },
+      ),
       visibleCard(
         "icebreakerish-1",
         "local_icebreakerish_noise",
@@ -540,8 +668,9 @@ describe("DeckCapabilityProfile", () => {
       legalActions: [],
     });
 
-    expect(profile.runner?.breakerInventory.map((entry) => entry.cardId))
-      .toEqual(["local_text_fracter"]);
+    expect(
+      profile.runner?.breakerInventory.map((entry) => entry.cardId),
+    ).toEqual(["local_text_fracter"]);
     expect(profile.runner?.breakerInventory[0]?.coverage).toEqual([
       "subtype_limited",
       "wall",
@@ -549,27 +678,27 @@ describe("DeckCapabilityProfile", () => {
   });
 
   it("matches corp plan roles by bounded role terms", () => {
-    CARD_ROLES_BY_CARD.set("local_plan_a", {
+    setTestCardRoles("local_plan_a", {
       cardId: "local_plan_a",
       side: "corp",
       roles: ["remote_score_support"],
     });
-    CARD_ROLES_BY_CARD.set("local_plan_b", {
+    setTestCardRoles("local_plan_b", {
       cardId: "local_plan_b",
       side: "corp",
       roles: ["protect_remote"],
     });
-    CARD_ROLES_BY_CARD.set("local_plan_c", {
+    setTestCardRoles("local_plan_c", {
       cardId: "local_plan_c",
       side: "corp",
       roles: ["remote_economy_asset"],
     });
-    CARD_ROLES_BY_CARD.set("local_plan_d", {
+    setTestCardRoles("local_plan_d", {
       cardId: "local_plan_d",
       side: "corp",
       roles: ["remote_ambush"],
     });
-    CARD_ROLES_BY_CARD.set("local_plan_e", {
+    setTestCardRoles("local_plan_e", {
       cardId: "local_plan_e",
       side: "corp",
       roles: [
@@ -622,11 +751,11 @@ describe("DeckCapabilityProfile", () => {
         ambushToolsKnown: 2,
       });
     } finally {
-      CARD_ROLES_BY_CARD.delete("local_plan_a");
-      CARD_ROLES_BY_CARD.delete("local_plan_b");
-      CARD_ROLES_BY_CARD.delete("local_plan_c");
-      CARD_ROLES_BY_CARD.delete("local_plan_d");
-      CARD_ROLES_BY_CARD.delete("local_plan_e");
+      AI_HINTS_BY_CARD.delete("local_plan_a");
+      AI_HINTS_BY_CARD.delete("local_plan_b");
+      AI_HINTS_BY_CARD.delete("local_plan_c");
+      AI_HINTS_BY_CARD.delete("local_plan_d");
+      AI_HINTS_BY_CARD.delete("local_plan_e");
     }
   });
 
@@ -634,9 +763,15 @@ describe("DeckCapabilityProfile", () => {
     const inputView = playerView("corp");
     inputView.servers = [
       server("remote_1", [
-        visibleCard("corp-advance", "local_alpha_advance", "corp", "operation", {
-          title: "Advance Tool",
-        }),
+        visibleCard(
+          "corp-advance",
+          "local_alpha_advance",
+          "corp",
+          "operation",
+          {
+            title: "Advance Tool",
+          },
+        ),
         visibleCard("corp-score", "local_alpha_score", "corp", "operation", {
           title: "Score Support",
         }),
@@ -664,12 +799,24 @@ describe("DeckCapabilityProfile", () => {
         visibleCard("corp-tax-noise", "local_alpha_noise_ice", "corp", "ice", {
           title: "Taxi Traceish Payee Loser",
         }),
-        visibleCard("corp-ice-type-noise", "local_alpha_ice_type_noise", "corp", "ice", {
-          title: "Barrierish code gateish sentryish",
-        }),
-        visibleCard("corp-remote-noise", "local_alpha_remote_noise", "corp", "asset", {
-          title: "Campaignish Bankish Creditsish",
-        }),
+        visibleCard(
+          "corp-ice-type-noise",
+          "local_alpha_ice_type_noise",
+          "corp",
+          "ice",
+          {
+            title: "Barrierish code gateish sentryish",
+          },
+        ),
+        visibleCard(
+          "corp-remote-noise",
+          "local_alpha_remote_noise",
+          "corp",
+          "asset",
+          {
+            title: "Campaignish Bankish Creditsish",
+          },
+        ),
       ]),
     ];
 
@@ -694,22 +841,22 @@ describe("DeckCapabilityProfile", () => {
   });
 
   it("matches runner attack plan roles by bounded role terms", () => {
-    CARD_ROLES_BY_CARD.set("local_runner_attack_a", {
+    setTestCardRoles("local_runner_attack_a", {
       cardId: "local_runner_attack_a",
       side: "runner",
       roles: ["interface_multiaccess"],
     });
-    CARD_ROLES_BY_CARD.set("local_runner_attack_b", {
+    setTestCardRoles("local_runner_attack_b", {
       cardId: "local_runner_attack_b",
       side: "runner",
       roles: ["remote_contest_tool"],
     });
-    CARD_ROLES_BY_CARD.set("local_runner_attack_c", {
+    setTestCardRoles("local_runner_attack_c", {
       cardId: "local_runner_attack_c",
       side: "runner",
       roles: ["early_setup"],
     });
-    CARD_ROLES_BY_CARD.set("local_runner_attack_noise", {
+    setTestCardRoles("local_runner_attack_noise", {
       cardId: "local_runner_attack_noise",
       side: "runner",
       roles: [
@@ -730,9 +877,15 @@ describe("DeckCapabilityProfile", () => {
         visibleCard("attack-c", "local_runner_attack_c", "runner", "hardware", {
           title: "Attack Plan C",
         }),
-        visibleCard("attack-noise", "local_runner_attack_noise", "runner", "event", {
-          title: "Attack Noise",
-        }),
+        visibleCard(
+          "attack-noise",
+          "local_runner_attack_noise",
+          "runner",
+          "event",
+          {
+            title: "Attack Noise",
+          },
+        ),
       ];
 
       const profile = buildDeckCapabilityProfile({
@@ -747,10 +900,10 @@ describe("DeckCapabilityProfile", () => {
         setupToolsKnown: 1,
       });
     } finally {
-      CARD_ROLES_BY_CARD.delete("local_runner_attack_a");
-      CARD_ROLES_BY_CARD.delete("local_runner_attack_b");
-      CARD_ROLES_BY_CARD.delete("local_runner_attack_c");
-      CARD_ROLES_BY_CARD.delete("local_runner_attack_noise");
+      AI_HINTS_BY_CARD.delete("local_runner_attack_a");
+      AI_HINTS_BY_CARD.delete("local_runner_attack_b");
+      AI_HINTS_BY_CARD.delete("local_runner_attack_c");
+      AI_HINTS_BY_CARD.delete("local_runner_attack_noise");
     }
   });
 
@@ -770,9 +923,9 @@ describe("DeckCapabilityProfile", () => {
       legalActions: [],
     });
 
-    expect(profile.runner?.searchAccess.tools.map((tool) => tool.cardId)).toEqual([
-      "onr_v1_114_temple-microcode-outlet",
-    ]);
+    expect(
+      profile.runner?.searchAccess.tools.map((tool) => tool.cardId),
+    ).toEqual(["onr_v1_114_temple-microcode-outlet"]);
     expect(profile.runner?.attackPlanProfile).toMatchObject({
       remoteContestToolsKnown: 2,
       evidence: expect.arrayContaining(["remote_contest_tools:2"]),
@@ -783,7 +936,9 @@ describe("DeckCapabilityProfile", () => {
     const profile = buildDeckCapabilityProfile({
       side: "runner",
       playerView: playerView("runner"),
-      legalActions: [legalAction("draw", "runner", "draw_card", "basic_action", "Draw")],
+      legalActions: [
+        legalAction("draw", "runner", "draw_card", "basic_action", "Draw"),
+      ],
       deckSnapshot: runnerSnapshot([["onr_v1_021_dwarf", 1]]),
     });
 
@@ -845,10 +1000,16 @@ describe("DeckCapabilityProfile", () => {
   it("marks text-only capability detection as transition fallback evidence", () => {
     const inputView = playerView("runner");
     inputView.own.rig = [
-      visibleCard("fallback-breaker-1", "local_text_only_breaker", "runner", "program", {
-        title: "Local Text Breaker",
-        rulesText: "Break one ice subroutine.",
-      }),
+      visibleCard(
+        "fallback-breaker-1",
+        "local_text_only_breaker",
+        "runner",
+        "program",
+        {
+          title: "Local Text Breaker",
+          rulesText: "Break one ice subroutine.",
+        },
+      ),
     ];
 
     const profile = buildDeckCapabilityProfile({
@@ -1010,4 +1171,15 @@ function legalAction(
   };
   if (payload) action.payload = payload;
   return action;
+}
+
+function setTestCardRoles(
+  cardId: string,
+  hint: Pick<AiCardHint, "cardId" | "side" | "roles"> & Partial<AiCardHint>,
+): void {
+  AI_HINTS_BY_CARD.set(cardId, {
+    planRoles: [],
+    aiSupportStatus: "hinted_only",
+    ...hint,
+  });
 }

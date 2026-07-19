@@ -34,7 +34,6 @@ export interface ChoiceHiddenZoneRuntimeLinks {
   publicIceSelectionLabelForCard: ChoiceHiddenZoneRuntimePort["publicIceSelectionLabelForCard"];
   resolveDerezRezzedBlackIceChoice: ChoiceHiddenZoneRuntimePort["resolveDerezRezzedBlackIceChoice"];
   resolveCardImplementationAccessPaymentChoice: ChoiceHiddenZoneRuntimePort["resolveCardImplementationAccessPaymentChoice"];
-  resolveChimeraDaemonTrashChoice: ChoiceHiddenZoneRuntimePort["resolveChimeraDaemonTrashChoice"];
   resolvePayRezCostToTrashRezzedIceChoice: ChoiceHiddenZoneRuntimePort["resolvePayRezCostToTrashRezzedIceChoice"];
   resolveCorpChoiceRezOrTrashIceDecisionChoice: ChoiceHiddenZoneRuntimePort["resolveCorpChoiceRezOrTrashIceDecisionChoice"];
   resolveCorpChoiceRezOrTrashIceTargetChoice: ChoiceHiddenZoneRuntimePort["resolveCorpChoiceRezOrTrashIceTargetChoice"];

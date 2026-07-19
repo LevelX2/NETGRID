@@ -11,7 +11,7 @@ import {
   runnerTerminalContestThreat,
   type RunnerTerminalContestThreat,
 } from "./runner-terminal-contest-threat";
-import { CARD_ROLES_BY_CARD } from "../ai-hints";
+import { AI_HINTS_BY_CARD } from "../ai-hints";
 
 type FollowUp = {
   serverId: string;
@@ -98,7 +98,7 @@ export function runnerRunLockReleaseScoreComponent(
 function installedBreakerAvailable(input: AiDecisionInput): boolean {
   return (input.playerView.own.rig ?? []).some((card) => {
     const roles = card.definitionId
-      ? (CARD_ROLES_BY_CARD.get(card.definitionId)?.roles ?? [])
+      ? (AI_HINTS_BY_CARD.get(card.definitionId)?.roles ?? [])
       : [];
     return (
       (card.subtypes ?? []).some((subtype) =>

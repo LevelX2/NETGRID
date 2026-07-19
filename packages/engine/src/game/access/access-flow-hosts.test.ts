@@ -207,7 +207,6 @@ function hostFor(calls: string[]): AccessFlowCompositionHost {
       programTrashByAdvancementAsset: "experimental",
       advancementCoreDamageAsset: "soulkiller",
       advancementNetDamageAsset: "virus",
-      chimera: "chimera",
     },
   } as AccessFlowCompositionHost;
 }
@@ -246,7 +245,9 @@ describe("access-flow-hosts", () => {
     adapters.runnerAccessActionHost(targetState).servers.mustServer("hq");
     adapters.accessFlowHost(targetState).servers.randomHqAccess();
     adapters.accessFlowHost(targetState).runner.ensureTurnFlags();
-    adapters.accessEffectHandlerHost(targetState, legalAction).payment.spendCorpCredits(2);
+    adapters
+      .accessEffectHandlerHost(targetState, legalAction)
+      .payment.spendCorpCredits(2);
 
     expect(calls).toEqual([
       "mustServer:hq",
@@ -258,8 +259,8 @@ describe("access-flow-hosts", () => {
   });
 
   it("fails clearly when required host groups are absent", () => {
-    expect(() => createAccessFlowAdapters({} as AccessFlowCompositionHost)).toThrow(
-      "AccessFlowCompositionHost missing group: cards",
-    );
+    expect(() =>
+      createAccessFlowAdapters({} as AccessFlowCompositionHost),
+    ).toThrow("AccessFlowCompositionHost missing group: cards");
   });
 });

@@ -204,7 +204,6 @@ export let chooseCorpAgendasForPointCost: RuntimePortGroups["choiceHiddenZoneRun
 export let startRunnerHostingChoice: RuntimePortGroups["choiceHiddenZoneRuntime"]["startRunnerHostingChoice"];
 export let resolveRunnerHostingChoice: RuntimePortGroups["choiceHiddenZoneRuntime"]["resolveRunnerHostingChoice"];
 export let resolveIncubatorTransformChoice: RuntimePortGroups["choiceHiddenZoneRuntime"]["resolveIncubatorTransformChoice"];
-export let resolveChimeraDaemonTrashChoice: RuntimePortGroups["choiceHiddenZoneRuntime"]["resolveChimeraDaemonTrashChoice"];
 export let resolveCardImplementationAccessPaymentChoice: RuntimePortGroups["choiceHiddenZoneRuntime"]["resolveCardImplementationAccessPaymentChoice"];
 export let resolveRunnerProgramReturnChoice: RuntimePortGroups["choiceHiddenZoneRuntime"]["resolveRunnerProgramReturnChoice"];
 export let selectedChoiceCardIds: RuntimePortGroups["choiceHiddenZoneRuntime"]["selectedChoiceCardIds"];
@@ -804,8 +803,6 @@ export function installRuntimePortBindings(ports: RuntimePortGroups): void {
     ports.choiceHiddenZoneRuntime.resolveRunnerHostingChoice;
   resolveIncubatorTransformChoice =
     ports.choiceHiddenZoneRuntime.resolveIncubatorTransformChoice;
-  resolveChimeraDaemonTrashChoice =
-    ports.choiceHiddenZoneRuntime.resolveChimeraDaemonTrashChoice;
   resolveCardImplementationAccessPaymentChoice =
     ports.choiceHiddenZoneRuntime.resolveCardImplementationAccessPaymentChoice;
   resolveRunnerProgramReturnChoice =

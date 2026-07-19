@@ -15,7 +15,14 @@ jedem Paket in diesem Dokument aktualisiert.
   mit AI-/Web-Typecheck, 67 gezielten AI-Tests, 52 Webtests und einem
   AI-Gesamtlauf mit 2.769 grünen Tests; dessen zwei Befunde wurden danach
   gezielt korrigiert und grün nachgetestet.
-- P2 Kartenrollen-/Access-Legacy: als Nächstes.
+- P2 Kartenrollen-/Access-Legacy: abgeschlossen. Die 34 Manifestrollen waren
+  vollständig in den Active-Hints vorhanden. Manifest, Doppel-Lookups,
+  Access-Legacy-Datei und alte Chimera-Choice-Verkabelung sind entfernt; die
+  deklarative Bizarre-Encryption-Longtail-Wirkung läuft nun direkt im
+  CardImplementation-Accesspfad. Geprüft mit AI-/Engine-/Web-Typechecks,
+  61 gezielten AI-Tests, 101 Access-/CardImplementation-Engine-Tests,
+  16 Catalogtests und 15 Inspector-UI-Tests.
+- P3 Aussagekräftige Architekturgates: als Nächstes.
 
 ## Quelle/Vorgabe
 

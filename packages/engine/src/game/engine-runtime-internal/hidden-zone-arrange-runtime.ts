@@ -68,7 +68,6 @@ export function createHiddenZoneArrangeRuntime(
     publicIceSelectionLabelForCard,
     resolveDerezRezzedBlackIceChoice,
     resolveCardImplementationAccessPaymentChoice,
-    resolveChimeraDaemonTrashChoice,
     resolvePayRezCostToTrashRezzedIceChoice,
     resolveRunnerIcebreakerCounterEvent,
     resolveDiscardChoice,

@@ -385,16 +385,6 @@ export function createSourceRegistryV2(
           "Resolvers, mechanics and tests are reviewed support evidence only.",
       },
       {
-        sourceId: "v131-ai-card-role-manifest-0.9",
-        sourceType: "manual_review",
-        scope: "versioned_project",
-        pathOrReference: "data/ai/card-role-manifest-0.9.json",
-        provenance: "Manual AI role data from the V0.9 AI quality gate.",
-        usageDecision: "allowed_project_data",
-        reviewStatus: "reviewed",
-        notes: "Roles and AI hints do not set ai_supported.",
-      },
-      {
         sourceId: "v131-private-local-onr-v1-overlay",
         sourceType: "local_private_file",
         scope: "private_local",
