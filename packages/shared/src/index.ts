@@ -1925,6 +1925,15 @@ export type VisibleCardLifecycleMarker = {
   detail: string;
 };
 
+export type VisibleRunnerPaymentSupportAbility = {
+  abilityIndex: number;
+  timing: "runner_cost_penalty_support";
+  label: string;
+  creditCost: number;
+  gainCredits: number;
+  trashesSource: boolean;
+};
+
 export type VisibleCard = {
   instanceId: CardInstanceId;
   known: boolean;
@@ -1968,6 +1977,7 @@ export type VisibleCard = {
   owner?: Side;
   controller?: Side;
   lifecycleMarkers?: VisibleCardLifecycleMarker[];
+  runnerPaymentSupportAbilities?: VisibleRunnerPaymentSupportAbility[];
   effectiveRunQuote?: VisibleEffectiveIceRunQuote;
 };
 

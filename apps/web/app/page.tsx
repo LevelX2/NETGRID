@@ -68,6 +68,7 @@ import type {
   PublicGameEvent,
   Side,
   VisibleCard,
+  VisibleRunnerPaymentSupportAbility,
   Winner,
 } from "@netgrid/shared";
 import { formatChronicleEvent } from "./chronicle";
@@ -173,6 +174,19 @@ import {
 } from "./catalog-ui";
 import { type DeckStrategyProfileViewerResponse } from "./deck-strategy-profile-ui";
 import { isCardActionSurfaceTarget } from "./card-action-menu-ui";
+import {
+  actionBelongsToRunnerPaymentSupportWindow,
+  createHiddenResourcePaymentPreselection,
+  hiddenResourcePaymentPreselectionEquals,
+  hiddenResourcePaymentPreselectionIsAvailable,
+  paymentSupportSubmitKey,
+  pendingPaymentSupportContinuation,
+  resolveHiddenResourcePaymentPreselection,
+  resolvePaymentSupportContinuation,
+  shouldSubmitPaymentSupportAction,
+  type HiddenResourcePaymentPreselection,
+  type PendingPaymentSupportContinuation,
+} from "./hidden-resource-payment-preselection";
 import { actionNeedsRegionReplacementConfirmation } from "./action-payload";
 import {
   clearStoredSession,
@@ -236,6 +250,7 @@ import {
 } from "../lib/client-api";
 import {
   playActionCueSound,
+  playMatchStartJingle,
   playResultSound,
   primeAudio,
   seriesAudioOutcome,
@@ -735,6 +750,10 @@ export default function Page() {
   );
   const [priorityWindowHoldEnabled, setPriorityWindowHoldEnabled] =
     useState(false);
+  const [paymentSupportPreselection, setPaymentSupportPreselection] =
+    useState<HiddenResourcePaymentPreselection | null>(null);
+  const [paymentSupportContinuation, setPaymentSupportContinuation] =
+    useState<PendingPaymentSupportContinuation | null>(null);
   const [topbarStickyEnabled, setTopbarStickyEnabled] = useState(true);
   const [cyberspaceBackgroundEnabled, setCyberspaceBackgroundEnabled] =
     useState(true);
@@ -841,6 +860,8 @@ export default function Page() {
   const autoCorpMandatoryDrawSubmittedKeyRef = useRef<string | null>(null);
   const autoDiscardSubmittedKeyRef = useRef<string | null>(null);
   const corpRunAutoPassSubmittedKeyRef = useRef<string | null>(null);
+  const paymentSupportSubmittedKeyRef = useRef<string | null>(null);
+  const paymentSupportContinuationSubmittedKeyRef = useRef<string | null>(null);
   const pendingAiAdvanceKeyRef = useRef<string | null>(null);
   const aiDecisionDebugEnabledMatchRef = useRef<string | null>(null);
   const aiDecisionDebugTraceIdRef = useRef<string | null>(null);
@@ -876,6 +897,7 @@ export default function Page() {
   function presentMatchStartLogo(matchId: string) {
     if (lastAnimatedMatchIdRef.current === matchId) return;
     lastAnimatedMatchIdRef.current = matchId;
+    if (audioEnabled) playMatchStartJingle(audioVolume);
     setMatchStartLogoMatchId(matchId);
   }
 
@@ -2531,6 +2553,34 @@ export default function Page() {
       ),
     );
   };
+  const togglePaymentSupportAbility = (
+    card: VisibleCard,
+    ability: VisibleRunnerPaymentSupportAbility,
+  ) => {
+    if (!payload || !activeView || activeView.side !== "runner") return;
+    if (
+      hiddenResourcePaymentPreselectionEquals(
+        paymentSupportPreselection,
+        card.instanceId,
+        ability.abilityIndex,
+      )
+    ) {
+      setPaymentSupportPreselection(null);
+      paymentSupportSubmittedKeyRef.current = null;
+      setNotice(`${ability.label}: Vormerkung aufgehoben.`);
+      return;
+    }
+    const next = createHiddenResourcePaymentPreselection({
+      matchId: payload.matchId,
+      view: activeView,
+      card,
+      ability,
+    });
+    if (!next) return;
+    setPaymentSupportPreselection(next);
+    paymentSupportSubmittedKeyRef.current = null;
+    setNotice(`${ability.label} ist für die nächste passende Zahlung vorgemerkt.`);
+  };
   const runActionForServer = (serverId: string): LegalAction | null => {
     const serverContext = {
       kind: "server" as const,
@@ -4037,6 +4087,12 @@ export default function Page() {
       actionMatchesContext(action, selectedActionContext)
     )
       setSelectedActionContext(null);
+    if (actionBelongsToRunnerPaymentSupportWindow(action)) {
+      setPaymentSupportPreselection(null);
+      paymentSupportSubmittedKeyRef.current = null;
+      setPaymentSupportContinuation(null);
+      paymentSupportContinuationSubmittedKeyRef.current = null;
+    }
     sendSocketMessage("submit_action", {
       matchId: session.matchId,
       side: session.side,
@@ -4046,6 +4102,138 @@ export default function Page() {
     });
     return true;
   };
+
+  useEffect(() => {
+    if (!paymentSupportPreselection) return;
+    if (!session || !payload || session.side !== "runner") {
+      setPaymentSupportPreselection(null);
+      paymentSupportSubmittedKeyRef.current = null;
+      return;
+    }
+    if (
+      !hiddenResourcePaymentPreselectionIsAvailable(
+        paymentSupportPreselection,
+        session.matchId,
+        payload.playerView,
+      )
+    ) {
+      setPaymentSupportPreselection(null);
+      paymentSupportSubmittedKeyRef.current = null;
+      setNotice("Die vorgemerkte Bankfähigkeit ist nicht mehr verfügbar.");
+      return;
+    }
+    if (
+      paymentSupportPreselection.selectedRunId === undefined &&
+      payload.playerView.run?.runId
+    ) {
+      setPaymentSupportPreselection({
+        ...paymentSupportPreselection,
+        selectedRunId: payload.playerView.run.runId,
+      });
+    }
+  }, [paymentSupportPreselection, session, payload]);
+
+  useEffect(() => {
+    if (
+      !paymentSupportPreselection ||
+      !session ||
+      !payload ||
+      session.side !== "runner" ||
+      connection !== "online"
+    )
+      return;
+    const resolution = resolveHiddenResourcePaymentPreselection(
+      paymentSupportPreselection,
+      payload.legalActions,
+    );
+    if (resolution.kind === "waiting") return;
+    if (resolution.kind === "invalid") {
+      setPaymentSupportPreselection(null);
+      paymentSupportSubmittedKeyRef.current = null;
+      setNotice(
+        "Die vorgemerkte Bankfähigkeit ist hier nicht verfügbar. Bitte wähle im Zahlungsfenster.",
+      );
+      return;
+    }
+    const submitKey = paymentSupportSubmitKey(
+      session.matchId,
+      resolution.windowId,
+      resolution.action,
+    );
+    if (
+      !shouldSubmitPaymentSupportAction(
+        paymentSupportSubmittedKeyRef.current,
+        submitKey,
+      )
+    )
+      return;
+    if (submitAction(resolution.action, { immediateAudio: false })) {
+      paymentSupportSubmittedKeyRef.current = submitKey;
+      setPaymentSupportContinuation(
+        pendingPaymentSupportContinuation(
+          session.matchId,
+          resolution.action,
+          payload.playerView.stateVersion,
+        ),
+      );
+      setPaymentSupportPreselection(null);
+      setNotice(`${resolution.action.label} wird für diese Zahlung verwendet.`);
+    }
+  }, [
+    paymentSupportPreselection,
+    session,
+    payload,
+    connection,
+    submitAction,
+  ]);
+
+  useEffect(() => {
+    if (!paymentSupportContinuation) return;
+    if (
+      !session ||
+      !payload ||
+      session.side !== "runner" ||
+      session.matchId !== paymentSupportContinuation.matchId
+    ) {
+      setPaymentSupportContinuation(null);
+      paymentSupportContinuationSubmittedKeyRef.current = null;
+      return;
+    }
+    if (connection !== "online") return;
+    const resolution = resolvePaymentSupportContinuation(
+      paymentSupportContinuation,
+      payload.playerView.stateVersion,
+      payload.legalActions,
+    );
+    if (resolution.kind === "waiting") return;
+    if (resolution.kind === "invalid") {
+      setPaymentSupportContinuation(null);
+      paymentSupportContinuationSubmittedKeyRef.current = null;
+      setNotice(
+        "Die Zahlung braucht eine weitere Entscheidung. Bitte wähle im Zahlungsfenster.",
+      );
+      return;
+    }
+    const submitKey = paymentSupportSubmitKey(
+      session.matchId,
+      paymentSupportContinuation.windowId,
+      resolution.action,
+    );
+    if (
+      !shouldSubmitPaymentSupportAction(
+        paymentSupportContinuationSubmittedKeyRef.current,
+        submitKey,
+      )
+    )
+      return;
+    if (submitAction(resolution.action, { immediateAudio: false })) {
+      paymentSupportContinuationSubmittedKeyRef.current = submitKey;
+      setPaymentSupportContinuation(null);
+      setNotice(
+        "Die vorgemerkte Bankfähigkeit wurde genutzt; die Zahlung wird fortgesetzt.",
+      );
+    }
+  }, [paymentSupportContinuation, session, payload, connection, submitAction]);
 
   const currentCorpRunAutoPassKey =
     session && payload?.playerView.run?.runId
@@ -4522,12 +4710,22 @@ export default function Page() {
 
   const requestUndo = () => {
     if (!latestEventId || !ensureSocketConnected()) return;
+    setPaymentSupportPreselection(null);
+    paymentSupportSubmittedKeyRef.current = null;
+    setPaymentSupportContinuation(null);
+    paymentSupportContinuationSubmittedKeyRef.current = null;
     setUndoNotice("");
     sendSocketMessage("request_undo", { targetEventId: latestEventId });
   };
 
   const resolveUndo = (accepted: boolean) => {
     if (!payload?.pendingUndo || !ensureSocketConnected()) return;
+    if (accepted) {
+      setPaymentSupportPreselection(null);
+      paymentSupportSubmittedKeyRef.current = null;
+      setPaymentSupportContinuation(null);
+      paymentSupportContinuationSubmittedKeyRef.current = null;
+    }
     setUndoNotice("");
     sendSocketMessage(accepted ? "accept_undo" : "decline_undo", {
       undoRequestId: payload.pendingUndo.undoRequestId,
@@ -5206,6 +5404,10 @@ export default function Page() {
       return;
     }
     if (message.type === "undo_request") {
+      setPaymentSupportPreselection(null);
+      paymentSupportSubmittedKeyRef.current = null;
+      setPaymentSupportContinuation(null);
+      paymentSupportContinuationSubmittedKeyRef.current = null;
       setPayload((current) =>
         current ? { ...current, pendingUndo: message.payload } : current,
       );
@@ -5238,6 +5440,8 @@ export default function Page() {
     }
     if (message.type === "error") {
       pendingAiAdvanceKeyRef.current = null;
+      setPaymentSupportContinuation(null);
+      paymentSupportContinuationSubmittedKeyRef.current = null;
       setNotice(message.payload.message);
       if (message.payload.code.startsWith("undo_")) {
         setUndoNotice(message.payload.message);
@@ -6390,9 +6594,13 @@ export default function Page() {
                       discardOptionForCard={discardOptionForCard}
                       toggleDiscardOption={toggleDiscardOption}
                       fieldChoiceCardProps={fieldChoiceCardProps}
+                      paymentSupportPreselection={paymentSupportPreselection}
                       onAction={submitAction}
                       onFocus={focusCard}
                       onActionContextSelect={selectActionCard}
+                      onTogglePaymentSupportAbility={
+                        togglePaymentSupportAbility
+                      }
                     />
                   </section>
                 </section>

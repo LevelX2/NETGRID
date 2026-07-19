@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  chroniclePaymentSupportBelongsToRunPayload,
+  chroniclePaymentSupportFollowingRunGroupLabel,
   chronicleResolveChoiceBelongsToRunPayload,
   groupChronicleEntriesForRender,
   orderChronicleEntriesForDisplay,
@@ -53,6 +55,39 @@ describe("groupChronicleEntriesForRender", () => {
         sourceDefinitionId: "onr_v1_161_fall-guy",
       }),
     ).toBe(true);
+  });
+
+  it("keeps Hidden-Bank payment support in the active run group", () => {
+    expect(
+      chroniclePaymentSupportBelongsToRunPayload({
+        cardImplementationAbility: "activated",
+        cardImplementationAbilityTiming: "runner_cost_penalty_support",
+      }),
+    ).toBe(true);
+    expect(
+      chroniclePaymentSupportBelongsToRunPayload({
+        cardImplementationAbility: "activated",
+        cardImplementationAbilityTiming: "runner_main",
+      }),
+    ).toBe(false);
+    expect(
+      chroniclePaymentSupportFollowingRunGroupLabel(
+        {
+          cardImplementationAbility: "activated",
+          cardImplementationAbilityTiming: "runner_cost_penalty_support",
+        },
+        "Run auf HQ",
+      ),
+    ).toBe("Run auf HQ");
+    expect(
+      chroniclePaymentSupportFollowingRunGroupLabel(
+        {
+          cardImplementationAbility: "activated",
+          cardImplementationAbilityTiming: "runner_cost_penalty_support",
+        },
+        null,
+      ),
+    ).toBeNull();
   });
 
   it("keeps consecutive runs on the same target as separate render groups", () => {

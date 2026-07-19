@@ -281,6 +281,72 @@ function accessStartActionFor(
 }
 
 describe("PRO011 hidden resource timing hardening", () => {
+  it("projects preparable Chiba and Swiss abilities only to the owning runner", () => {
+    const state = runnerState("hidden-bank-preselection-view");
+    const chibaId = installHiddenResource(
+      state,
+      "onr_proteus_133_chiba-bank-account",
+      "preselection_chiba",
+    );
+    const swissId = installHiddenResource(
+      state,
+      "onr_proteus_152_swiss-bank-account",
+      "preselection_swiss",
+    );
+
+    const runnerRig = getPlayerView(state, "runner").own.rig ?? [];
+    expect(
+      runnerRig.find((card) => card.instanceId === chibaId)
+        ?.runnerPaymentSupportAbilities,
+    ).toEqual([
+      {
+        abilityIndex: 0,
+        timing: "runner_cost_penalty_support",
+        label: "Chiba Bank Account: 4 Credits nehmen",
+        creditCost: 1,
+        gainCredits: 4,
+        trashesSource: true,
+      },
+    ]);
+    expect(
+      runnerRig.find((card) => card.instanceId === swissId)
+        ?.runnerPaymentSupportAbilities,
+    ).toEqual([
+      {
+        abilityIndex: 0,
+        timing: "runner_cost_penalty_support",
+        label: "Swiss Bank Account: 2 Credits nehmen",
+        creditCost: 0,
+        gainCredits: 2,
+        trashesSource: true,
+      },
+      {
+        abilityIndex: 1,
+        timing: "runner_cost_penalty_support",
+        label: "Swiss Bank Account: 6 Credits nehmen",
+        creditCost: 3,
+        gainCredits: 6,
+        trashesSource: true,
+      },
+    ]);
+
+    const corpRig = getPlayerView(state, "corp").opponent.rig ?? [];
+    expect(corpRig).toHaveLength(2);
+    expect(
+      corpRig.every(
+        (card) =>
+          card.known === false &&
+          card.runnerPaymentSupportAbilities === undefined,
+      ),
+    ).toBe(true);
+    expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain(
+      "runnerPaymentSupportAbilities",
+    );
+    expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain(
+      "Swiss Bank Account",
+    );
+  });
+
   it("removes a dominated lower-net bank action when both would trash the same source", () => {
     const state = runnerState("pro011-bank-dominance");
     state.runner.credits = 3;
@@ -388,6 +454,7 @@ describe("PRO011 hidden resource timing hardening", () => {
       hiddenRunnerResourceRevealed: true,
       publicRevealDefinitionId: "onr_proteus_133_chiba-bank-account",
       sourceTrashed: true,
+      cardImplementationAbilityTiming: "runner_cost_penalty_support",
     });
     const continuedInstall = getLegalActions(state, "runner").find(
       (candidate) => candidate.actionId === installAction!.actionId,
@@ -501,8 +568,62 @@ describe("PRO011 hidden resource timing hardening", () => {
       expect(continuation?.label).toContain(
         "Ohne weiteren Bank-Support fortfahren",
       );
+      expect(continuation?.payload).toMatchObject({
+        runnerCostPenaltySupportContinuation: true,
+        runnerCostPenaltySupportWindowId:
+          state.runnerCostPenaltySupportWindow?.windowId,
+      });
     },
   );
+
+  it("marks Running Interference continuation beside voluntary Swiss support", () => {
+    let state = runnerState("voluntary-running-interference-swiss");
+    state.runner.credits = 8;
+    const swissId = installHiddenResource(
+      state,
+      "onr_proteus_152_swiss-bank-account",
+      "voluntary_running_interference_swiss",
+    );
+    const runningInterferenceId = addRunnerGripCard(
+      state,
+      "onr_classic_043_running-interference",
+      "voluntary_running_interference",
+    );
+    const playRunningInterference = getLegalActions(state, "runner").find(
+      (candidate) =>
+        candidate.type === "play_event" &&
+        candidate.payload?.cardId === runningInterferenceId &&
+        candidate.payload?.serverId === "hq",
+    );
+    expect(playRunningInterference).toBeDefined();
+
+    const opened = applyLegal(state, "runner", playRunningInterference!);
+    expect(opened.ok).toBe(true);
+    state = opened.state;
+
+    const paymentActions = getLegalActions(state, "runner");
+    expect(
+      paymentActions.find(
+        (candidate) =>
+          candidate.source === swissId &&
+          candidate.label === "Swiss Bank Account: 6 Credits nehmen",
+      ),
+    ).toBeDefined();
+    const continuation = paymentActions.find(
+      (candidate) => candidate.actionId === playRunningInterference!.actionId,
+    );
+    expect(continuation).toMatchObject({
+      type: "play_event",
+      source: runningInterferenceId,
+      label:
+        "Ohne weiteren Bank-Support fortfahren: Running Interference auf HQ",
+      payload: {
+        runnerCostPenaltySupportContinuation: true,
+        runnerCostPenaltySupportWindowId:
+          state.runnerCostPenaltySupportWindow?.windowId,
+      },
+    });
+  });
 
   it("offers and resolves voluntary Chiba support before a payable icebreaker pump", () => {
     let { state, breakerId, chibaId } = payableBreakerEncounter(
@@ -546,6 +667,11 @@ describe("PRO011 hidden resource timing hardening", () => {
     expect(continuation?.label).toContain(
       "Ohne weiteren Bank-Support fortfahren",
     );
+    expect(continuation?.payload).toMatchObject({
+      runnerCostPenaltySupportContinuation: true,
+      runnerCostPenaltySupportWindowId:
+        state.runnerCostPenaltySupportWindow?.windowId,
+    });
     const resolved = applyLegal(state, "runner", continuation!);
     expect(resolved.ok).toBe(true);
     state = resolved.state;
@@ -576,6 +702,11 @@ describe("PRO011 hidden resource timing hardening", () => {
     expect(continuation?.label).toContain(
       "Ohne weiteren Bank-Support fortfahren",
     );
+    expect(continuation?.payload).toMatchObject({
+      runnerCostPenaltySupportContinuation: true,
+      runnerCostPenaltySupportWindowId:
+        state.runnerCostPenaltySupportWindow?.windowId,
+    });
 
     const resolved = applyLegal(state, "runner", continuation!);
     expect(resolved.ok).toBe(true);

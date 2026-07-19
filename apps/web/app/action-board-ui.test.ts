@@ -187,24 +187,82 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(actionButtonLabel(actions[1]!)).toBe("Run auf R&D");
   });
 
-  it("keeps runner payment-support abilities directly visible in the main panel", () => {
-    const chibaSupport = legalAction(
+  it("keeps payment-support abilities and bound continuations directly visible in the main panel", () => {
+    const swissSupport = legalAction(
       "runner",
       "activated_card_ability",
-      "runner_chiba_1",
-      "Chiba Bank Account: 4 Credits nehmen",
+      "runner_swiss_1",
+      "Swiss Bank Account: 6 Credits nehmen",
       {
-        cardId: "runner_chiba_1",
+        cardId: "runner_swiss_1",
         cardImplementationAbilityTiming: "runner_cost_penalty_support",
         costPenaltySupportWindowId: "runner_cost_penalty_support.217",
       },
       "runner_action.main",
     );
+    const runningInterferenceContinuation = legalAction(
+      "runner",
+      "play_event",
+      "running_interference_1",
+      "Ohne weiteren Bank-Support fortfahren: Running Interference auf HQ",
+      {
+        cardId: "running_interference_1",
+        serverId: "hq",
+        runnerCostPenaltySupportContinuation: true,
+        runnerCostPenaltySupportWindowId: "runner_cost_penalty_support.217",
+      },
+      "runner_action.main",
+    );
+    const breakerContinuation = legalAction(
+      "runner",
+      "break_subroutine",
+      "runner_breaker_1",
+      "Ohne weiteren Bank-Support fortfahren: Subroutine brechen",
+      {
+        breakerId: "runner_breaker_1",
+        subroutineIndex: 0,
+        runnerCostPenaltySupportContinuation: true,
+        runnerCostPenaltySupportWindowId: "runner_cost_penalty_support.218",
+      },
+      "run.encounter_ice",
+    );
 
-    const split = splitLegalActions([chibaSupport]);
+    const split = splitLegalActions([
+      swissSupport,
+      runningInterferenceContinuation,
+      breakerContinuation,
+    ]);
 
-    expect(split.primaryActions).toEqual([chibaSupport]);
+    expect(split.primaryActions).toEqual([
+      swissSupport,
+      runningInterferenceContinuation,
+      breakerContinuation,
+    ]);
     expect(split.contextualActions).toEqual([]);
+  });
+
+  it("keeps equivalent card-bound actions contextual outside payment support", () => {
+    const ordinaryEvent = legalAction(
+      "runner",
+      "play_event",
+      "running_interference_1",
+      "Running Interference auf HQ",
+      { cardId: "running_interference_1", serverId: "hq" },
+      "runner_action.main",
+    );
+    const ordinaryBreak = legalAction(
+      "runner",
+      "break_subroutine",
+      "runner_breaker_1",
+      "Subroutine brechen",
+      { breakerId: "runner_breaker_1", subroutineIndex: 0 },
+      "run.encounter_ice",
+    );
+
+    const split = splitLegalActions([ordinaryEvent, ordinaryBreak]);
+
+    expect(split.primaryActions).toEqual([]);
+    expect(split.contextualActions).toEqual([ordinaryEvent, ordinaryBreak]);
   });
 
   it("does not show the empty-action message while contextual actions are available", () => {

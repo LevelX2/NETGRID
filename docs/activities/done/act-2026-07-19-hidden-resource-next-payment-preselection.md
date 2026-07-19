@@ -1,20 +1,23 @@
 ---
 activityId: act-2026-07-19-hidden-resource-next-payment-preselection
-status: inbox
+status: done
 kind: concept
 area: web
 priority: normal
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: false
 createdAt: 2026-07-19
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-07-19
+completedAt: 2026-07-19
+branch: codex/hidden-bank-continuation-ui
 releaseTarget:
 blockedBy:
   - act-2026-07-19-hidden-bank-continuation-central-action
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - docs/architecture/ui/hidden-resource-next-payment-preselection-concept-2026-07-19.md
+  - docs/activities/inbox/act-2026-07-19-hidden-resource-payment-preselection-implementation.md
+checks:
+  - git diff --check
 ---
 
 # Hidden Resource für die nächste passende Zahlung vormerken
@@ -73,18 +76,18 @@ Engine-Revalidierung zu ersetzen.
 
 ## Akzeptanzkriterien
 
-- [ ] Das Konzept trennt klar zwischen unverbindlicher Vorwahl und tatsächlicher
+- [x] Das Konzept trennt klar zwischen unverbindlicher Vorwahl und tatsächlicher
   regelwirksamer Aktivierung im Payment-Support-Fenster.
-- [ ] Für `Chiba Bank Account` ist ein eindeutiger Ablauf vom Vormerken über eine
+- [x] Für `Chiba Bank Account` ist ein eindeutiger Ablauf vom Vormerken über eine
   Pump-/Break-Zahlung bis zur validierten Aktivierung beschrieben.
-- [ ] Für `Swiss Bank Account` ist die Auswahl zwischen den verschiedenen
+- [x] Für `Swiss Bank Account` ist die Auswahl zwischen den verschiedenen
   Fähigkeiten eindeutig gelöst.
-- [ ] Ist die vorgemerkte Fähigkeit beim nächsten Zahlungsfenster nicht legal,
+- [x] Ist die vorgemerkte Fähigkeit beim nächsten Zahlungsfenster nicht legal,
   wird sie nicht ausgeführt; der Runner erhält stattdessen das normale zentrale
   Entscheidungsfenster mit verständlichem Hinweis.
-- [ ] Reconnect-, Undo-, StateVersion-, Replay-, StateHash- und
+- [x] Reconnect-, Undo-, StateVersion-, Replay-, StateHash- und
   Hidden-Info-Auswirkungen sind bewertet.
-- [ ] Das Konzept entscheidet explizit, ob nach positiver Bewertung ein kleines
+- [x] Das Konzept entscheidet explizit, ob nach positiver Bewertung ein kleines
   Umsetzungs-Folgepaket für Engine/Web und passende Tests angelegt wird.
 
 ## Umsetzungshinweise
@@ -104,4 +107,16 @@ Engine-Revalidierung zu ersetzen.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Die Bewertung ist positiv: Eine konkrete Hidden-Resource-Fähigkeit kann als
+runner-private UI-Absicht vorgemerkt werden, ohne den Engine-Vertrag zu
+schwächen. Der Client darf sie erst im echten Support-Fenster und nur bei einem
+eindeutigen Treffer auf Quelle, Ability-Index, Timing und Window-ID automatisch
+einreichen. Swiss erhält deshalb getrennte Marker je Fähigkeit; bei jeder
+Abweichung bleibt das zentrale Zahlungsfenster als sicherer Fallback sichtbar.
+
+Die Vormerkung bleibt außerhalb von GameState, StateHash, Replay und
+KI-Eingaben. Reconnect im selben Browser kann sie nach erneuter Prüfung
+erhalten; Undo und andere unsichere Zustandswechsel löschen sie konservativ.
+Das kleine Umsetzungs-Folgepaket
+`act-2026-07-19-hidden-resource-payment-preselection-implementation` wurde
+angelegt.

@@ -49,6 +49,47 @@ export function playResultSound(outcome: GameResultSummary["viewerOutcome"], vol
   });
 }
 
+export function playMatchStartJingle(volume: number): void {
+  const context = audioContext();
+  if (!context) return;
+  const safeVolume = Math.min(1, Math.max(0, volume));
+  const now = context.currentTime;
+
+  scheduleJingleTone(context, {
+    start: now,
+    frequency: 146.83,
+    endFrequency: 73.42,
+    duration: 0.3,
+    gain: safeVolume * 0.055,
+    type: "sawtooth",
+  });
+
+  [
+    { offset: 0.05, frequency: 293.66, type: "triangle" as const },
+    { offset: 0.18, frequency: 440, type: "sine" as const },
+    { offset: 0.31, frequency: 587.33, type: "triangle" as const },
+    { offset: 0.46, frequency: 880, type: "sine" as const },
+  ].forEach((note, index) => {
+    scheduleJingleTone(context, {
+      start: now + note.offset,
+      frequency: note.frequency,
+      duration: index === 3 ? 0.34 : 0.2,
+      gain: safeVolume * (index === 3 ? 0.075 : 0.065),
+      type: note.type,
+    });
+  });
+
+  [293.66, 440, 587.33, 880].forEach((frequency, index) => {
+    scheduleJingleTone(context, {
+      start: now + 0.74,
+      frequency,
+      duration: 0.58,
+      gain: safeVolume * (index === 3 ? 0.04 : 0.052),
+      type: index % 2 === 0 ? "triangle" : "sine",
+    });
+  });
+}
+
 export function playActionCueSound(kind: ActionSoundKind, volume: number, repeatCount = 1): void {
   const context = audioContext();
   if (!context) return;
@@ -76,6 +117,41 @@ export function playActionCueSound(kind: ActionSoundKind, volume: number, repeat
     oscillator.start(start);
     oscillator.stop(start + note.duration + 0.02);
   });
+}
+
+function scheduleJingleTone(
+  context: AudioContext,
+  tone: {
+    start: number;
+    frequency: number;
+    endFrequency?: number;
+    duration: number;
+    gain: number;
+    type: OscillatorType;
+  },
+): void {
+  const oscillator = context.createOscillator();
+  const gain = context.createGain();
+  oscillator.type = tone.type;
+  oscillator.frequency.setValueAtTime(tone.frequency, tone.start);
+  if (tone.endFrequency)
+    oscillator.frequency.exponentialRampToValueAtTime(
+      tone.endFrequency,
+      tone.start + tone.duration,
+    );
+  gain.gain.setValueAtTime(0.0001, tone.start);
+  gain.gain.exponentialRampToValueAtTime(
+    Math.max(0.0001, tone.gain),
+    tone.start + 0.018,
+  );
+  gain.gain.exponentialRampToValueAtTime(
+    0.0001,
+    tone.start + tone.duration,
+  );
+  oscillator.connect(gain);
+  gain.connect(context.destination);
+  oscillator.start(tone.start);
+  oscillator.stop(tone.start + tone.duration + 0.02);
 }
 
 function playDamageLaserBursts(

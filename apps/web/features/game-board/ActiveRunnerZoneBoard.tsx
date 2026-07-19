@@ -1,7 +1,13 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import type { LegalAction, PlayerView, Side, VisibleCard } from "@netgrid/shared";
+import type {
+  LegalAction,
+  PlayerView,
+  Side,
+  VisibleCard,
+  VisibleRunnerPaymentSupportAbility,
+} from "@netgrid/shared";
 
 import type { BoardHighlight } from "../../app/action-cues";
 import { runnerHostedCardsForHost, runnerRigCardInstanceMarker, type ActionContext } from "../../app/action-board-ui";
@@ -12,6 +18,10 @@ import type { FieldChoiceCardProps } from "./RunnerBoardStrips";
 import { RunnerHostedCardCluster } from "./RunnerHostedCardCluster";
 import { HandCardsRow, SideZoneFrame, zoneSideClass } from "./ZoneFrame";
 import { formatCardCount, formatHandLimitCount, zoneHighlighted } from "./board-view-helpers";
+import {
+  hiddenResourcePaymentPreselectionEquals,
+  type HiddenResourcePaymentPreselection,
+} from "../../app/hidden-resource-payment-preselection";
 
 type RigGroup = {
   key: string;
@@ -41,9 +51,11 @@ export function ActiveRunnerZoneBoard({
   discardOptionForCard,
   toggleDiscardOption,
   fieldChoiceCardProps,
+  paymentSupportPreselection,
   onAction,
   onFocus,
-  onActionContextSelect
+  onActionContextSelect,
+  onTogglePaymentSupportAbility,
 }: {
   view: PlayerView;
   actionDisabled: boolean;
@@ -62,9 +74,14 @@ export function ActiveRunnerZoneBoard({
   discardOptionForCard(card: VisibleCard): DiscardOption | null;
   toggleDiscardOption(optionId: string): void;
   fieldChoiceCardProps(card: VisibleCard): FieldChoiceCardProps;
+  paymentSupportPreselection: HiddenResourcePaymentPreselection | null;
   onAction(action: LegalAction): void;
   onFocus(card: DisplayVisibleCard, hiddenSide?: Side): void;
   onActionContextSelect(card: DisplayVisibleCard, hiddenSide?: Side): void;
+  onTogglePaymentSupportAbility(
+    card: VisibleCard,
+    ability: VisibleRunnerPaymentSupportAbility,
+  ): void;
 }) {
   if (view.side !== "runner") return null;
   const runnerRig = view.own.rig ?? [];
@@ -219,6 +236,26 @@ export function ActiveRunnerZoneBoard({
                                   selected={selectedActionContext?.kind === "card" && selectedActionContext.id === rigCard.instanceId}
                                   actions={cardActionsFor(rigCard)}
                                   actionDisabled={actionDisabled}
+                                  paymentSupportShortcuts={(
+                                    rigCard.runnerPaymentSupportAbilities ?? []
+                                  ).map((ability) => ({
+                                    abilityIndex: ability.abilityIndex,
+                                    selected:
+                                      hiddenResourcePaymentPreselectionEquals(
+                                        paymentSupportPreselection,
+                                        rigCard.instanceId,
+                                        ability.abilityIndex,
+                                      ),
+                                    disabled: actionDisabled,
+                                    label: `${ability.label} für die nächste passende Zahlung vormerken`,
+                                    selectedLabel: `${ability.label}: Vormerkung aufheben`,
+                                    gainCredits: ability.gainCredits,
+                                    onToggle: () =>
+                                      onTogglePaymentSupportAbility(
+                                        rigCard,
+                                        ability,
+                                      ),
+                                  }))}
                                   {...fieldChoiceCardProps(rigCard)}
                                   onAction={onAction}
                                   onFocus={onFocus}
