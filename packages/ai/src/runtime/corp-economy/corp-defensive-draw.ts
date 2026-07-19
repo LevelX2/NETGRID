@@ -7,12 +7,12 @@ import type {
 import {
   buildCorpIceDensityProfile,
   corpIcePlacementCandidateForAction,
-} from "./corp-ice-placement/corp-ice-placement";
+} from "../corp-ice-placement/corp-ice-placement";
 import {
   semanticRuntimeCorpCentralPressureAssessment,
   type CorpCentralServerId,
-} from "./semantic-runtime-corp-central-pressure";
-import type { CorpBoardTriage } from "./semantic-runtime-corp-board-triage";
+} from "../semantic-runtime-corp-central-pressure";
+import type { CorpBoardTriage } from "../semantic-runtime-corp-board-triage";
 
 const CORP_SAFE_DRAW_CAPACITY_VALUE = 100;
 const CORP_LOW_HAND_VALUE = 450;

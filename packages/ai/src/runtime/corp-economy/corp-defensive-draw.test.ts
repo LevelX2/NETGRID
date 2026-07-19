@@ -9,7 +9,7 @@ import {
   corpAction,
   corpCard,
   corpInputWithHqCardsAndServers,
-} from "./semantic-runtime-corp-score.test-support";
+} from "../semantic-runtime-corp-score.test-support";
 
 const draw = corpAction("corp.draw_card", "draw_card", {}, "basic_action");
 

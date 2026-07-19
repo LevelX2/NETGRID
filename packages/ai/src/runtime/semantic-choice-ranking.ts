@@ -61,7 +61,7 @@ import {
   tacticalPlanOverrideReason,
   tacticalPlanOverrideScoreGapThreshold,
 } from "./choice-ranking/semantic-choice-ranking-support";
-import { replayStableCorpBasicEconomyNearTieChoice } from "./corp-basic-economy-near-tie";
+import { replayStableCorpBasicEconomyNearTieChoiceOrUndefined } from "./corp-economy/corp-basic-economy-near-tie";
 
 export {
   tacticalPlanMappingOverrideEvidence,
@@ -82,16 +82,10 @@ export function bestSemanticRuntimeChoice(
 
 export function bestSemanticRuntimeChoiceForTacticalPlanOverride(
   choices: readonly SemanticRuntimeChoice[],
-  planRuntime: TacticalPlanRuntimeResult,
-  input?: AiDecisionInput,
+  planRuntime: TacticalPlanRuntimeResult, input?: AiDecisionInput,
 ): SemanticRuntimeChoice | undefined {
-  const viableChoices = choices.filter(
-    (choice) => !tacticalPlanBlocksSemanticChoice(planRuntime, choice),
-  );
-  const baseline = bestSemanticRuntimeChoice(viableChoices);
-  return input && baseline
-    ? replayStableCorpBasicEconomyNearTieChoice(input, viableChoices, baseline)
-    : baseline;
+  const viableChoices = choices.filter((choice) => !tacticalPlanBlocksSemanticChoice(planRuntime, choice));
+  return input ? replayStableCorpBasicEconomyNearTieChoiceOrUndefined(input, viableChoices, bestSemanticRuntimeChoice(viableChoices)) : bestSemanticRuntimeChoice(viableChoices);
 }
 
 export function tacticalPlanMappedChoice(

@@ -1,8 +1,8 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 
-import { fnv1a } from "./stable-hash";
+import { fnv1a } from "../stable-hash";
 import { corpOptionalDrawCapacity } from "./corp-defensive-draw";
-import type { SemanticRuntimeChoice } from "./semantic-runtime-types";
+import type { SemanticRuntimeChoice } from "../semantic-runtime-types";
 
 export const CORP_BASIC_ECONOMY_NEAR_TIE_WINDOW = 100;
 
@@ -58,6 +58,16 @@ export function replayStableCorpBasicEconomyNearTieChoice(
       ...reason.split("|").map((entry) => `corp_near_tie_${entry}`),
     ],
   };
+}
+
+export function replayStableCorpBasicEconomyNearTieChoiceOrUndefined(
+  input: AiDecisionInput,
+  choices: readonly SemanticRuntimeChoice[],
+  baseline: SemanticRuntimeChoice | undefined,
+): SemanticRuntimeChoice | undefined {
+  return baseline
+    ? replayStableCorpBasicEconomyNearTieChoice(input, choices, baseline)
+    : undefined;
 }
 
 export function assessCorpBasicEconomyNearTie(

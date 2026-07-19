@@ -5,7 +5,7 @@ import {
   assessCorpBasicEconomyNearTie,
   replayStableCorpBasicEconomyNearTieChoice,
 } from "./corp-basic-economy-near-tie";
-import type { SemanticRuntimeChoice } from "./semantic-runtime-types";
+import type { SemanticRuntimeChoice } from "../semantic-runtime-types";
 
 describe("Corp replay-stable basic economy near ties", () => {
   it("repeats the same selection for the same AI decision context", () => {

@@ -1,9 +1,4 @@
-import type {
-  AiDecisionInput,
-  AiDecisionScoreComponent,
-  LegalAction,
-  VisibleCard,
-} from "@netgrid/shared";
+import type { AiDecisionInput, AiDecisionScoreComponent, LegalAction, VisibleCard } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import { corpPurgeImpactScoreComponent } from "./corp-purge-impact";
 import { actionProvidesCredits } from "../actions/action-effect-classification";
@@ -90,7 +85,7 @@ import {
   corpUnsafeDelayedScorelineExposureComponent,
 } from "./corp-scoreline/semantic-runtime-corp-score-scoreline-components";
 import { corpPreparedScoreRemoteAgendaSearchComponent } from "./corp-scoreline/semantic-runtime-corp-score-state";
-import { corpOptionalDrawScoreComponents } from "./corp-defensive-draw";
+import { corpOptionalDrawScoreComponents } from "./corp-economy/corp-defensive-draw";
 
 export { corpActionCandidateHasVisibleSignal } from "./corp-scoreline/semantic-runtime-corp-score-action-economy";
 export { normalizedCorpReserveScoreValue } from "./corp-scoreline/semantic-runtime-corp-score-scoreline-components";
@@ -121,7 +116,10 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
   const actionResolvesTrace =
     corpActionCanResolveProfiledTrace(action) &&
     candidateRequiresSuccessfulTrace(actionSemanticCandidate);
-  if (actionResolvesTrace && traceTagExpectedSuccessEstimate(input) === 0) {
+  if (
+    actionResolvesTrace &&
+    traceTagExpectedSuccessEstimate(input) === 0
+  ) {
     components.push({
       key: "corp_trace_without_conversion_window",
       label: "Trace ohne Conversion-Fenster",
@@ -232,10 +230,7 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
       value: 1200,
       reason: "score_agenda",
     });
-    const conditionalScoreEconomy = corpConditionalScoreEconomyComponent(
-      input,
-      action,
-    );
+    const conditionalScoreEconomy = corpConditionalScoreEconomyComponent(input, action);
     if (conditionalScoreEconomy) components.push(conditionalScoreEconomy);
     const safetyGate = dependencies.corpScoreNowSafetyGate(input, action);
     if (!safetyGate.allowed) {
@@ -746,17 +741,9 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
   if (preparedScoreRemoteAgendaSearch) {
     components.push(preparedScoreRemoteAgendaSearch);
   }
-  const optionalDrawComponents = corpOptionalDrawScoreComponents(
-    input,
-    action,
-    boardTriageState,
-  );
+  const optionalDrawComponents = corpOptionalDrawScoreComponents(input, action, boardTriageState);
   components.push(...optionalDrawComponents);
-  if (
-    optionalDrawComponents.some(
-      (component) => component.key === "corp_low_hand",
-    )
-  ) {
+  if (optionalDrawComponents.some((component) => component.key === "corp_low_hand")) {
     if (dependencies.corpHasRemoteInstability(input)) {
       components.push({
         key: "corp_remote_instability_draw",
