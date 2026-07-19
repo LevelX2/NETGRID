@@ -85,6 +85,7 @@ import {
   runWindowInteractionAmbience,
   runnerProgramInstallTrashChoiceInfo,
   runPositionStatusLabel,
+  runPhaseOpportunityKinds,
   runTargetServerIds,
   runWindowActionButtonLabel,
   runWindowActionInstanceDetail,
@@ -669,6 +670,42 @@ describe("V1.0.5 action board UI helpers", () => {
       "Aktuell: vor ICE 3 (1 von 3)",
     );
     expect(runWindowStatusLabel(running)).toBe("ICE 3 (1 von 3)");
+    expect(
+      runPhaseOpportunityKinds([
+        legalAction(
+          "corp",
+          "rez_card",
+          "root_1",
+          "Node rezzen",
+          undefined,
+          "run.movement_rez_window",
+        ),
+        legalAction(
+          "runner",
+          "continue_run",
+          "game_rule",
+          "Run fortsetzen",
+          undefined,
+          "run.jack_out_window",
+        ),
+        legalAction(
+          "runner",
+          "jack_out",
+          "game_rule",
+          "Jack-out",
+          undefined,
+          "run.jack_out_window",
+        ),
+        legalAction(
+          "corp",
+          "decline_rez",
+          "game_rule",
+          "Nichts rezzen / Weiter",
+          undefined,
+          "run.movement_rez_window",
+        ),
+      ]),
+    ).toEqual(["rez", "continue", "jack_out", "pass"]);
     expect(
       runAwareActionButtonLabel(
         running,

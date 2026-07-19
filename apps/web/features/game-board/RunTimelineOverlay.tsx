@@ -1,6 +1,19 @@
 "use client";
 
-import { CheckCircle2, FastForward, Move, Route } from "lucide-react";
+import {
+  Check,
+  CheckCircle2,
+  CircleHelp,
+  FastForward,
+  Hammer,
+  Power,
+  Route,
+  Search,
+  Sparkles,
+  X,
+  Move,
+  type LucideIcon,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
@@ -23,6 +36,7 @@ import {
   runWindowActionButtonLabel,
   runWindowActionInstanceDetail,
   runWindowStatusLabel,
+  runPhaseOpportunityKinds,
   serverDisplayLabel,
   serverTargetIdForChoiceOption,
   splitRunWindowActionsByServer,
@@ -161,8 +175,7 @@ export function RunTimelineOverlay({
     view.side === "corp" &&
     regularRunActions.some(isAutomaticCorpRunPassAction);
   const showCorpRunAutoPassControl =
-    view.side === "corp" &&
-    (corpRunAutoPassActive || canEnableCorpRunAutoPass);
+    view.side === "corp" && (corpRunAutoPassActive || canEnableCorpRunAutoPass);
   const runChoice =
     view.pendingChoice &&
     choiceAction &&
@@ -173,6 +186,10 @@ export function RunTimelineOverlay({
   const runChoiceStatus = runChoice
     ? runChoiceStatusLabel(view, runChoice)
     : null;
+  const phaseOpportunities = runPhaseOpportunityKinds(runActions);
+  const phaseOpportunityLabel = phaseOpportunities
+    .map((kind) => RUN_PHASE_OPPORTUNITY_META[kind].label)
+    .join(", ");
 
   const overlay = (
     <div
@@ -204,14 +221,39 @@ export function RunTimelineOverlay({
           <Move size={15} aria-hidden="true" />
         </div>
         <div className="runSteps">
-          {verticalSteps.map((step) => (
-            <span
-              className={currentStep === step.id ? "current" : ""}
-              key={step.id}
-            >
-              {step.label}
-            </span>
-          ))}
+          {verticalSteps.map((step) => {
+            const current = currentStep === step.id;
+            return (
+              <span className={current ? "current" : ""} key={step.id}>
+                {step.label}
+                {current && phaseOpportunities.length > 0 ? (
+                  <small
+                    className="runStepOpportunities"
+                    aria-label={`Aktuell möglich: ${phaseOpportunityLabel}`}
+                    data-testid="run-phase-opportunities"
+                  >
+                    {phaseOpportunities.map((kind) => {
+                      const opportunity = RUN_PHASE_OPPORTUNITY_META[kind];
+                      const Icon = opportunity.icon;
+                      return (
+                        <i
+                          className={`runStepOpportunity ${kind}`}
+                          title={opportunity.label}
+                          key={kind}
+                        >
+                          <Icon
+                            size={14}
+                            strokeWidth={2.2}
+                            aria-hidden="true"
+                          />
+                        </i>
+                      );
+                    })}
+                  </small>
+                ) : null}
+              </span>
+            );
+          })}
         </div>
         {runChoice && choiceAction ? (
           <div
@@ -267,7 +309,10 @@ export function RunTimelineOverlay({
                 compactLabel.startsWith("SMC:") && action.label
                   ? normalizeVisibleTerms(action.label)
                   : runAwareActionButtonLabel(view, action);
-              const instanceDetail = runWindowActionInstanceDetail(view, action);
+              const instanceDetail = runWindowActionInstanceDetail(
+                view,
+                action,
+              );
               const fullLabel = instanceDetail
                 ? `${baseFullLabel}. ${instanceDetail}`
                 : baseFullLabel;
@@ -382,6 +427,20 @@ export function RunTimelineOverlay({
   if (typeof document === "undefined") return null;
   return createPortal(overlay, document.body);
 }
+
+const RUN_PHASE_OPPORTUNITY_META: Record<
+  ReturnType<typeof runPhaseOpportunityKinds>[number],
+  { label: string; icon: LucideIcon }
+> = {
+  choice: { label: "Entscheidung", icon: CircleHelp },
+  rez: { label: "Rezzen", icon: Power },
+  breaker: { label: "Stärke erhöhen oder brechen", icon: Hammer },
+  ability: { label: "Kartenfähigkeit", icon: Sparkles },
+  access: { label: "Zugriff", icon: Search },
+  continue: { label: "Weiter", icon: Route },
+  jack_out: { label: "Jack-out", icon: X },
+  pass: { label: "Passen", icon: Check },
+};
 
 function runChoiceStatusLabel(
   view: PlayerView,
