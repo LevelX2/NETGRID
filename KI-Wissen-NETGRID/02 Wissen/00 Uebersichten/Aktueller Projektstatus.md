@@ -1,6 +1,6 @@
 # Aktueller Projektstatus
 
-Stand: 2026-07-18
+Stand: 2026-07-19
 
 ## Führender Produktstand
 
@@ -157,6 +157,15 @@ Stand: 2026-07-18
   Karten-Hint-Quelle für Runtime, Deckstrategie und Inspector. Die frühere
   Compile-/Derived-Facts-/Manual-Overlay-Pipeline ist entfernt; der Inspector
   erzeugt nur noch seinen Such- und Diagnoseindex direkt aus dieser Quelle.
+- Das AI-Source-Structure-Gate besitzt wieder eine grüne Null-Baseline. Die
+  neun am 19.07.2026 reproduzierten Größenverstöße in Cutover-Tests,
+  Choice-Ranking, Scoring-Window, Corp-Score und Board-Triage wurden durch
+  fachliche Owner- und Testsuite-Schnitte entfernt, ohne bestehende Caps
+  anzuheben. Der produktive Importgraph bleibt mit 677 Dateien frei von
+  Laufzeit- und Typzyklen; der Runtime-Root steht bei 289 Dateien.
+  `check:ai`, `check:ai:full` und 406 AI-Testdateien mit 2.793 Tests sind
+  grün. Führend ist
+  `docs/reviews/ai/ai-source-structure-gate-remediation-final-review-2026-07-19.md`.
 - Führende Artefakte:
   - `docs/architecture/ai/README.md`
   - `docs/architecture/ai/ai-current-state-cleanup-process-2026-07-09.md`
@@ -253,6 +262,13 @@ Stand: 2026-07-18
 - `apps/web/app/page.tsx`, `apps/web/app/chronicle.ts`,
   `apps/server/src/multiplayer.test.ts` und mehrere Corp-AI-Scoringdateien sind
   verbleibende Komplexitätsschwerpunkte.
+- Das allgemeine AI-Source-Structure-Gate ist auf dem sauberen `main`-Stand
+  `52ac68d19` wegen neun Dateigrößenverstößen rot. Vier davon waren bereits
+  auf dem integrierten Stand `d5199cdb0` vorhanden; fünf weitere betreffen
+  nachfolgend gewachsene Scoring-Window-, Board-Triage- und Corp-Score-Pfade.
+  Laufzeit- und Typimportgraph bleiben zyklenfrei. Der verbindliche
+  Null-Baseline-Remediationsplan liegt unter
+  `docs/architecture/ai/ai-source-structure-gate-remediation-plan-2026-07-19.md`.
 - Das Engine-Architektur-Zielgate ist grün. Mark-Counter-Anzeigen werden über
   generische Kartendefinitionsmetadaten statt direkter Karten-ID-Verzweigungen
   projiziert.

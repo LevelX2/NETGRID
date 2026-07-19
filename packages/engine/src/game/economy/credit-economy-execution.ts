@@ -183,7 +183,6 @@ export function handleCreditEconomyExecution(
   const runnerCreditCost = legalAction.costs[0]?.credits ?? 0;
   if (legalAction.side === "runner" && runnerCreditCost > 0) {
     if (
-      state.runner.credits < runnerCreditCost &&
       openRunnerCostPenaltySupportWindow(state, legalAction, {
         amount: runnerCreditCost,
         availableWithoutSupport: state.runner.credits,
