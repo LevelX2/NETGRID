@@ -44,10 +44,12 @@ Worktree-/Branch-Cleanup.
   bestätigte null unbenutzte Runtime-Internal-Imports. Geprüft mit vier
   Paket-Typechecks, 250 gezielten Tests und den Architektur-/Discovery-Checks.
 - P6 Gesamtabschluss und Wissenspflege: abgeschlossen. Der vollständige
-  integrierte Workspace-Lauf umfasst 687 grüne Testdateien mit 5.414 Tests. Lint,
+  integrierte Workspace-Lauf umfasst 689 grüne Testdateien mit 5.426 Tests. Lint,
   Typecheck, Produktions-Build, AI-/Engine-Source-Structure samt Selftests und
-  das Engine-CardImplementation-Zielgate sind grün. Die Wissensbasis und das
-  Abschlussreview bilden den vereinfachten Stand ab.
+  das Engine-CardImplementation-Zielgate sind grün. Die frühere
+  Vitest-Verzeichnis-Allowlist ist durch einen allgemeinen Test-/Spec-Glob
+  ersetzt; Test-Discovery deckt alle physischen Pakettests ab. Die
+  Wissensbasis und das Abschlussreview bilden den vereinfachten Stand ab.
 
 ## Quelle/Vorgabe
 

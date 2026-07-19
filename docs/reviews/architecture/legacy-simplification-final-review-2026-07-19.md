@@ -24,6 +24,8 @@ Sicherheitsgrenzen wurden nicht abgeschwächt.
   Deck-Snapshot-Formen sind entfernt.
 - Tote Katalogpipeline, alte AI-Profile, archivierte Card-Gates, verwaiste
   Generatorreports sowie identische Browser-Storage-Aliase sind entfernt.
+- Vitest verwendet einen allgemeinen Test-/Spec-Glob statt einer
+  Verzeichnis-Allowlist; neue Testordner werden automatisch entdeckt.
 
 ## Befund aus der Gesamtprüfung
 
@@ -52,13 +54,14 @@ Entscheidungs-Checkpoints wurden nicht verändert.
 
 - `pnpm lint`: grün;
 - `pnpm typecheck`: grün;
-- `pnpm test`: 687 Testdateien, 5.414 Tests, vollständig grün;
+- Paket- und Root-Tests: 689 Testdateien, 5.426 Tests, vollständig grün;
 - `pnpm build`: grün, einschließlich optimiertem Next-Produktions-Build;
 - `check:ai` und AI-Source-Structure-Selftest: grün, 0 Laufzeit- und 0
   Typzyklen;
 - Engine-Source-Structure und Selftest: grün, 0 relative Zyklen;
 - Engine-CardImplementation-Architekturziel und Selftest: grün;
 - gezielte Bank-/Breaker-Regression: 3 Testdateien mit 24 Tests grün;
+- Test-Discovery: alle physischen Pakettests erfasst;
 - `git diff --check`: grün.
 
 ## Bewusst verbleibend
