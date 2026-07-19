@@ -22,7 +22,7 @@ describe("runnerHqSaturationAssessment", () => {
     expect(assessment.applies).toBe(true);
     expect(assessment.agendaFreeAccesses).toBe(4);
     expect(assessment.repeatedDefinitionAccesses).toBe(1);
-    expect(assessment.penalty).toBeGreaterThanOrEqual(1500);
+    expect(assessment.penalty).toBe(1000);
   });
 
   it("does not suppress a newly defended HQ information run", () => {
@@ -38,6 +38,25 @@ describe("runnerHqSaturationAssessment", () => {
         ],
       }),
     );
+
+    expect(assessment.applies).toBe(false);
+    expect(assessment.penalty).toBe(0);
+  });
+
+  it("does not suppress a two-point closeout chance", () => {
+    const input = runnerInput({
+      hqIce: 0,
+      rdIce: 1,
+      remoteIce: 3,
+      accessedDefinitions: [
+        "onr_v1_297_overtime-incentives",
+        "onr_v1_296_off-site-backups",
+        "onr_v1_290_efficiency-experts",
+      ],
+    });
+    input.playerView.own.agendaPoints = 5;
+
+    const assessment = runnerHqSaturationAssessment(input);
 
     expect(assessment.applies).toBe(false);
     expect(assessment.penalty).toBe(0);
@@ -59,8 +78,9 @@ function runnerInput(params: {
     eventTail: events,
     playerView: {
       stateVersion: 20,
+      agendaPointsToWin: 7,
       publicEvents: events,
-      own: { credits: 5, clicks: 4 },
+      own: { credits: 5, clicks: 4, agendaPoints: 0 },
       opponent: { handCount: 5 },
       servers: [
         server("hq", params.hqIce),

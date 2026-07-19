@@ -535,9 +535,11 @@ export function tacticalPlanNonPositiveProjectedRunShouldYield(
   if (mapping.plan.evidence.includes("runner_run_target_payoff:score_threat")) {
     return false;
   }
+  if (materiallyBetterRemoteFallback) return true;
   return !semanticRuntimeChoiceHasAnyScoreComponent(mappedChoice, [
     "runner_hq_known_agenda",
     "runner_rnd_fresh_memory",
+    "runner_goal_fit_tactical_goal_run_target",
   ]);
 }
 

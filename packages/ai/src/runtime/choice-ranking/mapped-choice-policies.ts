@@ -298,7 +298,9 @@ export function tacticalPlanInferiorRunTargetMappingShouldYield(
     return !mappedChoice.scoreBreakdown.some(
       (component) =>
         component.key === "runner_hq_known_agenda" ||
-        component.key === "runner_rnd_fresh_memory",
+        component.key === "runner_rnd_fresh_memory" ||
+        (component.key === "runner_goal_fit_tactical_goal_run_target" &&
+          mappedChoice.score >= 200),
     );
   }
   if (scoreGap <= threshold) return false;

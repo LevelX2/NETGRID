@@ -147,19 +147,20 @@ export function runnerStartRunScoreComponents(
     });
     const hqMemoryComponents = dependencies.hqMemoryComponents(input, action);
     components.push(...hqMemoryComponents);
-    if (
-      !hqMemoryComponents.some(
-        (component) => component.key === "runner_hq_known_agenda",
-      )
-    ) {
-      const saturation = runnerHqSaturationScoreComponent(input);
-      if (saturation) components.push(saturation);
-    }
     const successWindowSetup = runnerHqSuccessWindowSetupAssessment(
       input,
       action,
       serverId,
     );
+    if (
+      !hqMemoryComponents.some(
+        (component) => component.key === "runner_hq_known_agenda",
+      ) &&
+      (successWindowSetup?.minimumIceTrashCost ?? Number.POSITIVE_INFINITY) > 3
+    ) {
+      const saturation = runnerHqSaturationScoreComponent(input);
+      if (saturation) components.push(saturation);
+    }
     if (successWindowSetup) {
       components.push({
         key: "runner_hq_success_window_setup",

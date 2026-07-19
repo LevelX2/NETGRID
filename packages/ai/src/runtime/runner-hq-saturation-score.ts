@@ -53,13 +53,18 @@ export function runnerHqSaturationAssessment(
     0,
   );
   const agendaFreeAccesses = accessedDefinitions.length;
+  const agendaPointsNeeded = Math.max(
+    0,
+    input.playerView.agendaPointsToWin - input.playerView.own.agendaPoints,
+  );
   const applies =
     hqIceCount === 0 &&
     otherServerIceCount >= 2 &&
-    agendaFreeAccesses >= 3;
+    agendaFreeAccesses >= 3 &&
+    agendaPointsNeeded > 2;
   const penalty = applies
     ? Math.min(
-        3000,
+        1000,
         900 +
           Math.max(0, agendaFreeAccesses - 3) * 350 +
           repeatedDefinitionAccesses * 250 +
@@ -78,6 +83,7 @@ export function runnerHqSaturationAssessment(
       `hq_repeated_definition_accesses:${repeatedDefinitionAccesses}`,
       `hq_ice_count:${hqIceCount}`,
       `other_server_ice_count:${otherServerIceCount}`,
+      `runner_agenda_points_needed:${agendaPointsNeeded}`,
       `corp_hq_defense_neglect:${hqIceCount === 0 && otherServerIceCount >= 2}`,
       "hq_saturation_uses_runner_visible_history:true",
     ],

@@ -281,7 +281,8 @@ function runnerRunPlanAbortChoice(params: {
           choice.action.payload?.encounterContinue === true &&
           choice.action.payload?.encounterWillEndRun !== true &&
           actionCreditCost(choice.action) > 0 &&
-          actionCreditCost(choice.action) <= params.plan.budget.availableCredits,
+          actionCreditCost(choice.action) <=
+            params.plan.budget.availableCredits,
       )
       .sort(
         (left, right) =>
@@ -308,12 +309,19 @@ function runnerRunPlanAbortChoice(params: {
         ],
       });
     }
+    const currentEncounterSequence = runnerRunPlanCurrentEncounterSequence({
+      input: params.input,
+      plan: params.plan,
+    });
+    const currentEncounterSequenceActionId =
+      currentEncounterSequence?.steps[0]?.actionId;
     const affordableBreakChoice = [...params.choices]
       .filter(
         (choice) =>
           !choice.exclusion &&
           (choice.action.type === "break_subroutine" ||
-            choice.action.type === "pump_breaker") &&
+            (choice.action.type === "pump_breaker" &&
+              choice.action.actionId === currentEncounterSequenceActionId)) &&
           actionCreditCost(choice.action) <=
             params.plan.budget.availableCredits,
       )
@@ -504,11 +512,18 @@ function runnerRunPlanConserveCreditsChoice(params: {
       choice.action.payload?.encounterWillEndRun === true,
   );
   if (!continueChoice) return undefined;
+  const currentEncounterSequence = runnerRunPlanCurrentEncounterSequence({
+    input: params.input,
+    plan: params.plan,
+  });
+  const currentEncounterSequenceActionId =
+    currentEncounterSequence?.steps[0]?.actionId;
   const affordableBreakChoice = params.choices.some(
     (choice) =>
       !choice.exclusion &&
       (choice.action.type === "break_subroutine" ||
-        choice.action.type === "pump_breaker") &&
+        (choice.action.type === "pump_breaker" &&
+          choice.action.actionId === currentEncounterSequenceActionId)) &&
       actionCreditCost(choice.action) <= params.input.playerView.own.credits,
   );
   if (
