@@ -265,6 +265,7 @@ import {
 } from "../lib/client-api";
 import {
   playActionCueSound,
+  playMatchStartJingle,
   playResultSound,
   primeAudio,
   seriesAudioOutcome,
@@ -917,6 +918,7 @@ export default function Page() {
   function presentMatchStartLogo(matchId: string) {
     if (lastAnimatedMatchIdRef.current === matchId) return;
     lastAnimatedMatchIdRef.current = matchId;
+    if (audioEnabled) playMatchStartJingle(audioVolume);
     setMatchStartLogoMatchId(matchId);
   }
 
