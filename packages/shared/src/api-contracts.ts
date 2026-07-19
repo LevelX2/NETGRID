@@ -110,6 +110,82 @@ export type ApiGameResultSummary = {
 
 export type ApiPlayerIdentityKind = "account" | "guest" | "ai";
 
+export type ApiAccountStatisticsOutcome = "win" | "loss" | "draw" | "abandoned";
+export type ApiAccountStatisticsFinishKind = "regular" | "forfeit" | "time_expired" | "leave" | "abandon";
+export type ApiAccountStatisticsExclusionReason = "self_play";
+export type ApiAccountStatisticsPeriod = "all" | "30d" | "90d";
+
+export type ApiAccountStatisticsBucket = {
+  gamesPlayed: number;
+  wins: number;
+  losses: number;
+  draws: number;
+  forfeitsWon: number;
+  forfeitsLost: number;
+  abandoned: number;
+  agendaPointsFor: number;
+  agendaPointsAgainst: number;
+};
+
+export type ApiAccountSeriesStatistics = {
+  seriesPlayed: number;
+  seriesWon: number;
+  seriesLost: number;
+  seriesDrawn: number;
+  matchPointsFor: number;
+  matchPointsAgainst: number;
+};
+
+export type ApiAccountStatistics = {
+  schemaVersion: "netgrid-account-statistics-v1";
+  statisticsSince: string;
+  generatedAt: string;
+  period: ApiAccountStatisticsPeriod;
+  filters: {
+    side?: Side;
+    opponentKind?: ApiPlayerIdentityKind;
+    matchMode?: ApiMatchMode;
+  };
+  totals: ApiAccountStatisticsBucket & {
+    selfPlay: number;
+  };
+  bySide: Record<Side, ApiAccountStatisticsBucket>;
+  byOpponentKind: Record<ApiPlayerIdentityKind, ApiAccountStatisticsBucket>;
+  byMode: Partial<Record<ApiMatchMode, ApiAccountStatisticsBucket>>;
+  byMatchFormat: Partial<Record<ApiMatchFormat, ApiAccountStatisticsBucket>>;
+  series: ApiAccountSeriesStatistics;
+};
+
+export type ApiAccountMatchHistoryEntry = {
+  resultId: string;
+  matchId: string;
+  completedAt: string;
+  side: Side;
+  outcome: ApiAccountStatisticsOutcome;
+  finishKind: ApiAccountStatisticsFinishKind;
+  opponentKind: ApiPlayerIdentityKind;
+  matchMode: ApiMatchMode;
+  matchFormat: ApiMatchFormat;
+  cardPool: ApiMatchCardPool;
+  agendaPointsFor: number;
+  agendaPointsAgainst: number;
+  matchPoints: number;
+  statisticsEligible: boolean;
+  exclusionReason?: ApiAccountStatisticsExclusionReason;
+  series?: {
+    seriesId: string;
+    gameNumber: number;
+  };
+};
+
+export type ApiAccountMatchHistory = {
+  schemaVersion: "netgrid-account-match-history-v1";
+  statisticsSince: string;
+  generatedAt: string;
+  entries: ApiAccountMatchHistoryEntry[];
+  nextCursor?: string;
+};
+
 export type ApiRecentGameResult = {
   entryType?: "single_game";
   resultId?: string;

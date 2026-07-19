@@ -1,6 +1,6 @@
 # Account-Matchstatistik – kontrollierter Paketprozess
 
-Status: `AMS-00 completed; AMS-01 pending`
+Status: `AMS-01 completed; AMS-02 pending`
 
 ## Quelle und Vorgabe
 
@@ -125,7 +125,7 @@ cleanup_failed -> diagnose_cleanup -> cleanup_pending
 | Paket | Status | Commit |
 |---|---|---|
 | AMS-00 Prozess und Controller | completed | dieser Paketcommit |
-| AMS-01 Verträge und SQLite-Schema v3 | pending | – |
+| AMS-01 Verträge und SQLite-Schema v3 | completed | dieser Paketcommit |
 | AMS-02 Sichere Account-Matchbindung | pending | – |
 | AMS-03 Ergebnisledger und Reconciliation | pending | – |
 | AMS-04 Private API und Betrieb | pending | – |
@@ -382,3 +382,16 @@ gemergten Arbeitsbranch löschen. Markiere das Goal erst dann als complete.
 - Worktree in Git und Dateisystem entfernt;
 - Arbeitsbranch regulär gelöscht;
 - `/Goal` als complete markiert.
+
+## Paketabschlussprotokoll
+
+### AMS-01
+
+- Shared-Verträge für Aggregat, Serienstatistik und Matchhistorie ergänzt.
+- SQLite-Schema 3 führt sichere Bindungs-, Spiel- und Serienledgertabellen ein.
+- Schema-1- und Schema-2-Migration erzeugen Pre-Migration-Backup; historische
+  Matches bleiben ohne automatische Zuordnung.
+- Grün: Shared-Tests (12), Server-Typecheck, fokussierte Storage-/Accounttests
+  (9) und Package Boundaries.
+- Nicht ausgeführt: breite Server-/Webgates; sie sind für die späteren
+  Integrationspakete und AMS-06 vorgesehen.
