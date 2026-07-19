@@ -24,7 +24,7 @@ import {
   removeFromAllZones,
   uninstallCorpInstalledCardToHq,
 } from "../state/zone-mutation";
-import { stateIsAtServerAfterPassingLastIceWindow } from "../run/windows/after-passing-last-ice-window";
+import { runIsAtServerAfterPassingLastIce } from "../run/windows/after-passing-last-ice-window";
 import { orderedFortRebuildPublicPayload } from "../run/windows/ordered-fort-rebuild-sequence";
 import { applyRunWindowPayloadPatch } from "../run/windows/run-window-sequence-types";
 
@@ -49,7 +49,11 @@ export function replaceFortCardsFromHq(
     ServerId,
     "hq" | "rd" | "archives" | "new_remote"
   >;
-  if (!stateIsAtServerAfterPassingLastIceWindow(state, server))
+  if (
+    state.timingPoint !== "run.movement_rez_window" ||
+    !state.run ||
+    !runIsAtServerAfterPassingLastIce(state.run, server)
+  )
     throw new Error(
       "Fort-Ersatz darf nur nach der letzten ICE dieses Forts ausloesen.",
     );

@@ -144,6 +144,7 @@ function hostFor(
   options: {
     v097?: boolean;
     corpRootRezActionsAvailable?: boolean;
+    corpRootRezWindowOpen?: boolean;
     approachExposeAvailable?: boolean;
   } = {},
 ): {
@@ -189,6 +190,7 @@ function hostFor(
       isV097OrLater: () => options.v097 ?? true,
       corpRunRootRezActionsAvailable: () =>
         options.corpRootRezActionsAvailable ?? false,
+      corpRunRootRezWindowOpen: () => options.corpRootRezWindowOpen ?? false,
       approachIceExposeCanBeOfferedForCurrentIce: () =>
         options.approachExposeAvailable ?? false,
     },

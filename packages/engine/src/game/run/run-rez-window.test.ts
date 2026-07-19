@@ -93,7 +93,7 @@ function makeState(
     stateVersion: 11,
     activeSide: options.activeSide ?? "corp",
     phase: "run",
-    timingPoint: options.timingPoint ?? "run.jack_out_window",
+    timingPoint: options.timingPoint ?? "run.movement_rez_window",
     baseline: { engineSchemaVersion: "0.99.0" },
     runner: {
       credits: 5,
@@ -215,7 +215,7 @@ function hostFor(state: GameState): {
           publicInstalledCorpCardIdentityKnown: (cardId) =>
             Boolean(
               state.cardInstances[cardId]?.faceup ||
-                state.cardInstances[cardId]?.rezzed,
+              state.cardInstances[cardId]?.rezzed,
             ),
         },
         servers: {
@@ -324,7 +324,7 @@ describe("run rez window", () => {
 
   it("opens and passes the root rez window without changing action ids or payload shape", () => {
     const state = makeState({ rootRezzed: false });
-    const { host } = hostFor(state);
+    const { host, calls } = hostFor(state);
 
     const actions = buildCorpRunRootRezWindowActions(host);
     expect(actions.map((action) => action.type)).toEqual([
@@ -344,8 +344,9 @@ describe("run rez window", () => {
       continueAfterRez: true,
       serverId: "rd",
     });
-    expect(state.activeSide).toBe("runner");
+    expect(state.activeSide).toBe("corp");
     expect(state.run?.rootRezWindowPassedKeys).toEqual(["run_1:ice:rd:0"]);
+    expect(calls.continued).toEqual([actions[1]]);
   });
 
   it("opens a run rez window for an affordable root card in another server", () => {
@@ -462,11 +463,7 @@ describe("run rez window", () => {
       rootRez: true,
     });
 
-    const startResult = startRezInterruptJackOutChoice(
-      host,
-      "root_1",
-      action,
-    );
+    const startResult = startRezInterruptJackOutChoice(host, "root_1", action);
 
     expect(startResult).toMatchObject({
       handled: true,
@@ -476,7 +473,9 @@ describe("run rez window", () => {
     });
     expect(state.pendingChoice).toMatchObject({
       side: "runner",
-      source: expect.stringContaining("rez_interrupt.jack_out:program_1:root_1"),
+      source: expect.stringContaining(
+        "rez_interrupt.jack_out:program_1:root_1",
+      ),
       kind: "select_option",
       visibility: "public",
     });

@@ -286,7 +286,7 @@ function forceRunAtServer(
     accessCount: 2,
   };
   state.phase = "run";
-  state.timingPoint = "run.jack_out_window";
+  state.timingPoint = "run.movement_rez_window";
   state.activeSide = "corp";
 }
 
@@ -773,6 +773,7 @@ describe("PRO019 rule-contract baseline utilities", () => {
       minSelections: 2,
       maxSelections: 2,
     });
+    expect(state.timingPoint).toBe("run.movement_rez_window");
     const runnerViewWithPavitChoice = JSON.stringify(
       getPlayerView(state, "runner"),
     );

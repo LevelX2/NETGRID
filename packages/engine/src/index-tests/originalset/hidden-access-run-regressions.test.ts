@@ -267,17 +267,19 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
     );
     rezzedRemoteState = apply(
       rezzedRemoteState,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
+    rezzedRemoteState = apply(
+      rezzedRemoteState,
       "corp",
       (action) =>
         action.type === "rez_card" &&
         sourceDefinition(rezzedRemoteState, action) ===
           "onr_v1_348_virus-test-site",
     );
-    rezzedRemoteState = apply(
-      rezzedRemoteState,
-      "runner",
-      (action) => action.type === "continue_run",
-    );
+    rezzedRemoteState =
+      passRootRezWindowBeforeAccessIfOpen(rezzedRemoteState);
     rezzedRemoteState = apply(
       rezzedRemoteState,
       "runner",
@@ -2964,12 +2966,17 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       );
       state = apply(
         state,
+        "runner",
+        (action) => action.type === "continue_run",
+      );
+      state = apply(
+        state,
         "corp",
         (action) =>
           action.type === "rez_card" &&
           sourceDefinition(state, action) === "onr_v1_346_vacant-soulkiller",
       );
-      state = apply(state, "runner", (action) => action.type === "continue_run");
+      state = passRootRezWindowBeforeAccessIfOpen(state);
       state = apply(state, "runner", (action) => action.type === "access_card");
       expect(state.runner.coreDamage).toBe(advancementCounters);
       const expectedPayload: Record<string, unknown> = {
@@ -3023,12 +3030,17 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     );
     state = apply(
       state,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
+    state = apply(
+      state,
       "corp",
       (action) =>
         action.type === "rez_card" &&
         sourceDefinition(state, action) === "onr_v1_346_vacant-soulkiller",
     );
-    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = passRootRezWindowBeforeAccessIfOpen(state);
     state = apply(state, "runner", (action) => action.type === "access_card");
 
     const preventionOptionId = getPlayerView(

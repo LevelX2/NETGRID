@@ -203,6 +203,7 @@ export function isTimingPointId(value: unknown): value is TimingPointId {
     value === "run.approach_ice" ||
     value === "run.encounter_ice" ||
     value === "run.jack_out_window" ||
+    value === "run.movement_rez_window" ||
     value === "access.resolve_card" ||
     value === "game.checkpoint"
   );

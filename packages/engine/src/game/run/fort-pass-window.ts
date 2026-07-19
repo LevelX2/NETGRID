@@ -313,10 +313,10 @@ export function resolveFortPassAdvancementWindow(
   const amount = Math.max(0, Math.floor(implementation.amount));
   host.cards.cardInstanceFor(targetCardId).advancementCounters += amount;
   run.fortPassWindowUsedSourceIdsThisRun = [...used, sourceCardId];
-  run.rootRezWindowPassedKeys = Array.from(
+  run.fortPassWindowPassedKeys = Array.from(
     new Set([
-      ...(run.rootRezWindowPassedKeys ?? []),
-      corpRunRootRezWindowKey(run),
+      ...(run.fortPassWindowPassedKeys ?? []),
+      corpRunFortPassWindowKey(run),
     ]),
   ).sort();
   host.state.activeSide = "runner";
@@ -855,12 +855,12 @@ function isFortIceSwapSource(
   );
 }
 
-function corpRunRootRezWindowKey(run: ActiveRun): string {
+function corpRunFortPassWindowKey(run: ActiveRun): string {
   const position =
     run.position.kind === "ice"
       ? `ice:${run.position.serverId}:${run.position.iceIndex}`
       : `server:${run.position.serverId}`;
-  return `${run.runId}:${position}`;
+  return `fort-pass:${run.runId}:${position}`;
 }
 
 function creditCostForAction(legalAction: LegalAction): number {

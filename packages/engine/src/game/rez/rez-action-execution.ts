@@ -42,7 +42,8 @@ function executeRezIceAction(
 ): void {
   host.rez.executeRezCard(
     String(legalAction.payload?.cardId) as CardInstanceId,
-    legalAction.payload?.rootRez === true || legalAction.payload?.assetRez === true,
+    legalAction.payload?.rootRez === true ||
+      legalAction.payload?.assetRez === true,
     legalAction,
   );
   host.rez.expireScoredAgendaInstallRezCreditAbilities();
@@ -52,7 +53,10 @@ function executeDeclineRezAction(
   host: RezActionExecutionHost,
   legalAction: LegalAction,
 ): void {
-  if (legalAction.payload?.runRootRezPass === true) {
+  if (
+    legalAction.payload?.runRootRezPass === true ||
+    legalAction.payload?.runFortPassPass === true
+  ) {
     host.run.passCorpRunRootRezWindow(legalAction);
     return;
   }

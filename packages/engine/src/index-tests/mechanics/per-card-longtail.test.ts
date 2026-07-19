@@ -3471,6 +3471,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
     state = apply(state, "corp", (action) => action.type === "decline_rez");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
     state = apply(
       state,
       "corp",
@@ -3478,8 +3479,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         action.type === "decline_rez" &&
         action.payload?.runRootRezPass === true,
     );
-    state = apply(state, "runner", (action) => action.type === "continue_run");
     state = apply(state, "corp", (action) => action.type === "decline_rez");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
     state = apply(
       state,
       "corp",
@@ -3487,7 +3488,6 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         action.type === "decline_rez" &&
         action.payload?.runRootRezPass === true,
     );
-    state = apply(state, "runner", (action) => action.type === "continue_run");
 
     expect(state.run?.successful).toBe(true);
     const accessState = structuredClone(state);
@@ -4044,6 +4044,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     state = apply(state, "corp", (action) => action.type === "decline_rez");
     expect(state.timingPoint).toBe("run.jack_out_window");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(state.timingPoint).toBe("run.movement_rez_window");
     state = apply(
       state,
       "corp",
@@ -4118,6 +4120,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
     state = apply(state, "corp", (action) => action.type === "decline_rez");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
     state = apply(
       state,
       "corp",
@@ -4128,8 +4131,19 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     state = applyChoice(state, "runner", "pass");
     expect(state.run).toBeDefined();
-    expect(state.timingPoint).toBe("run.jack_out_window");
-    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(state.timingPoint).toBe("run.movement_rez_window");
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) => action.type === "jack_out",
+      ),
+    ).toBe(false);
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "decline_rez" &&
+        action.payload?.runRootRezPass === true,
+    );
     expect(state.timingPoint).toBe("access.resolve_card");
     expect(
       getLegalActions(state, "runner").some(
@@ -4209,13 +4223,6 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         sourceDefinition(state, action) === "simple_fracter",
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
-    state = apply(
-      state,
-      "corp",
-      (action) =>
-        action.type === "decline_rez" &&
-        action.payload?.runRootRezPass === true,
-    );
     const startupAction = mustAction(
       state,
       "runner",

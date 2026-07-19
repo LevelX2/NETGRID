@@ -9,7 +9,9 @@ import {
 import { getLegalActions } from "../index";
 import { apply } from "./mechanic-smoke-fixtures";
 
-export function expectCurrentRulesBaseline(state: Pick<GameState, "baseline">): void {
+export function expectCurrentRulesBaseline(
+  state: Pick<GameState, "baseline">,
+): void {
   expect(state.baseline).toStrictEqual(CURRENT_RULES_BASELINE);
   expect(state.baseline.engineSchemaVersion).toBe(
     CURRENT_RULES_BASELINE.engineSchemaVersion,
@@ -32,7 +34,10 @@ export function continueRunThroughMovementWindow(state: GameState): GameState {
 }
 
 export function enterEncounterFromMovementWindow(state: GameState): GameState {
-  if (state.timingPoint !== "run.jack_out_window" || state.run?.phase !== "movement")
+  if (
+    state.timingPoint !== "run.jack_out_window" ||
+    state.run?.phase !== "movement"
+  )
     return state;
   return continueRunAction(state);
 }
@@ -48,24 +53,39 @@ export function passCorpApproachRezWindowIfOpen(state: GameState): GameState {
   if (!approachedIceId || !state.cardInstances[approachedIceId]?.rezzed)
     return state;
   const legalActions = getLegalActions(state, "corp");
-  const passAction = legalActions.find((action) => action.type === "decline_rez");
+  const passAction = legalActions.find(
+    (action) => action.type === "decline_rez",
+  );
   if (!passAction) return state;
-  return apply(state, "corp", (action) => action.actionId === passAction.actionId);
+  return apply(
+    state,
+    "corp",
+    (action) => action.actionId === passAction.actionId,
+  );
 }
 
-export function passRootRezWindowBeforeAccessIfOpen(state: GameState): GameState {
-  const passAction = getLegalActions(state, "corp").find(
+export function passRootRezWindowBeforeAccessIfOpen(
+  state: GameState,
+): GameState {
+  let next = state;
+  if (
+    next.timingPoint === "run.jack_out_window" &&
+    getLegalActions(next, "runner").some(
+      (action) => action.type === "continue_run",
+    )
+  ) {
+    next = apply(next, "runner", (action) => action.type === "continue_run");
+  }
+  const passAction = getLegalActions(next, "corp").find(
     (action) =>
       action.type === "decline_rez" && action.payload?.runRootRezPass === true,
   );
-  if (!passAction) return state;
-  let next = apply(state, "corp", (action) => action.actionId === passAction.actionId);
-  const continueAction = getLegalActions(next, "runner").find(
-    (action) => action.type === "continue_run",
+  if (!passAction) return next;
+  return apply(
+    next,
+    "corp",
+    (action) => action.actionId === passAction.actionId,
   );
-  if (!continueAction) return next;
-  next = apply(next, "runner", (action) => action.actionId === continueAction.actionId);
-  return next;
 }
 
 export function traceChoiceOptionIdForDefinition(
@@ -79,7 +99,8 @@ export function traceChoiceOptionIdForDefinition(
       typeof candidate.value === "string" &&
       state.cardInstances[candidate.value]?.definitionId === definitionId,
   );
-  if (!option) throw new Error(`Missing trace choice option for ${definitionId}`);
+  if (!option)
+    throw new Error(`Missing trace choice option for ${definitionId}`);
   return option.id;
 }
 
@@ -111,7 +132,9 @@ export function addRezzedCorpRootForTest(
   suffix: string,
 ): CardInstanceId {
   const cardId = `p354_${suffix}_${definitionId}` as CardInstanceId;
-  let server = state.corp.servers.find((candidate) => candidate.id === serverId);
+  let server = state.corp.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
   if (!server) {
     server = {
       id: serverId,
@@ -144,7 +167,9 @@ export function addRezzedCorpIceForTest(
   suffix: string,
 ): CardInstanceId {
   const cardId = `p354_${suffix}_${definitionId}` as CardInstanceId;
-  let server = state.corp.servers.find((candidate) => candidate.id === serverId);
+  let server = state.corp.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
   if (!server) {
     server = {
       id: serverId,

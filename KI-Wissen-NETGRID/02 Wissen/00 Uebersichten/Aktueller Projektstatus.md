@@ -40,9 +40,14 @@ Stand: 2026-07-19
 - Allgemeine Asset-/Upgrade-Rezfenster während Runs gelten über alle
   Corp-Server. ICE-Rez und fortgebundene Sonderfenster bleiben am Runziel;
   Encounter und laufende Trace-Versuche öffnen kein zusätzliches normales
-  Rezfenster. Der konkrete Hacker-Tracker-Fall rezzt die Karte in Remote 2
+  Rezfenster. Im Movement entscheidet der Runner zuerst über das normale
+  Jack-out; erst nach „Weiter“ öffnet die Engine das blockierende
+  Nicht-ICE-Rezfenster. Danach gibt es vor Approach beziehungsweise Access
+  kein zweites normales Jack-out. Kartenspezifische Rez-Interrupts bleiben
+  davon getrennt. Der konkrete Hacker-Tracker-Fall rezzt die Karte in Remote 2
   während eines Runs auf Remote 1 und führt sie anschließend regelkonform in
-  den Trace. Führend ist
+  den Trace. Führend sind die abgeschlossene Activity
+  `act-2026-07-19-post-jack-out-root-rez-window` und
   `docs/reviews/engine/global-run-rez-windows-final-review-2026-07-16.md`.
 - Installierte Corp-Assets mit semantischem Zugriffseffekt wirken
   standardmäßig nur gerezzt. Der aktive Pool umfasst zehn Access-Nodes unter

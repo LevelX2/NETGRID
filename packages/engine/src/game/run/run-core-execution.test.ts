@@ -190,6 +190,7 @@ function hostFor(state: GameState): {
           rules: {
             isV097OrLater: () => true,
             corpRunRootRezActionsAvailable: () => false,
+            corpRunRootRezWindowOpen: () => false,
             approachIceExposeCanBeOfferedForCurrentIce: () => false,
           },
           encounter: {

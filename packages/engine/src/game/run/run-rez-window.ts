@@ -23,7 +23,7 @@ import {
 import { buildLegalAction } from "../turn/action-builders";
 import { credits } from "../state/economy-mutation";
 import { buildRegisteredRunWindowActions } from "./windows/run-window-registry";
-import { stateIsAtServerAfterPassingLastIceWindow } from "./windows/after-passing-last-ice-window";
+import { runIsAtServerAfterPassingLastIce } from "./windows/after-passing-last-ice-window";
 import type {
   RootRezContinuationResult,
   RootRezEffectResult,
@@ -205,8 +205,8 @@ function rootRezLifecycleIsSolvable(
     )
   )
     return true;
-  if (!stateIsAtServerAfterPassingLastIceWindow(host.state, server))
-    return false;
+  const run = host.state.run;
+  if (!run || !runIsAtServerAfterPassingLastIce(run, server)) return false;
   return host.callbacks.canReplaceFortCardsFromHq(server.id);
 }
 
@@ -216,27 +216,33 @@ export function buildCorpRunRootRezWindowActions(
   const run = host.state.run;
   if (!run) return [];
   const server = host.servers.mustServer(run.attackedServerId);
-  const actions = [
-    ...buildCorpRunRootRezActions(host),
-    ...buildRegisteredRunWindowActions(
-      host.fortPass,
-      run,
-      server,
-      "corp_fort_pass_window",
-    ),
-  ];
-  if (actions.length === 0 || !isCorpRunRootRezWindowOpen(host)) return [];
+  const isFortPassWindow = host.state.timingPoint === "run.jack_out_window";
+  const actions = isFortPassWindow
+    ? buildRegisteredRunWindowActions(
+        host.fortPass,
+        run,
+        server,
+        "corp_fort_pass_window",
+      )
+    : host.state.timingPoint === "run.movement_rez_window"
+      ? buildCorpRunRootRezActions(host)
+      : [];
+  if (!isCorpRunRootRezWindowOpen(host)) return [];
   return [
     ...actions,
     buildLegalAction(
       host.state,
       "corp",
       "decline_rez",
-      "Nichts rezzen / Weiter",
+      isFortPassWindow
+        ? "Keine Fort-Aktion / Weiter"
+        : "Nichts rezzen / Weiter",
       "game_rule",
       [],
       {
-        runRootRezPass: true,
+        ...(isFortPassWindow
+          ? { runFortPassPass: true }
+          : { runRootRezPass: true }),
         serverId: server.id,
         serverLabel: server.label,
       },
@@ -251,21 +257,31 @@ export function corpRunRootRezActionsAvailable(
 }
 
 export function isCorpRunRootRezWindowOpen(host: RunRezWindowHost): boolean {
-  if (host.state.timingPoint !== "run.jack_out_window") return false;
   const run = host.state.run;
   if (!run) return false;
-  if (run.rootRezWindowPassedKeys?.includes(corpRunRootRezWindowKey(run)))
-    return false;
   const server = host.servers.mustServer(run.attackedServerId);
-  return (
-    buildCorpRunRootRezActions(host).length > 0 ||
-    buildRegisteredRunWindowActions(
-      host.fortPass,
-      run,
-      server,
-      "corp_fort_pass_window",
-    ).length > 0
-  );
+  if (host.state.timingPoint === "run.jack_out_window") {
+    if (run.fortPassWindowPassedKeys?.includes(corpRunFortPassWindowKey(run)))
+      return false;
+    return (
+      buildRegisteredRunWindowActions(
+        host.fortPass,
+        run,
+        server,
+        "corp_fort_pass_window",
+      ).length > 0
+    );
+  }
+  if (host.state.timingPoint !== "run.movement_rez_window") return false;
+  const key = corpRunRootRezWindowKey(run);
+  if (run.rootRezWindowPassedKeys?.includes(key))
+    return false;
+  if (run.rootRezWindowPendingPassKeys?.includes(key)) return true;
+  return buildCorpRunRootRezActions(host).length > 0;
+}
+
+export function corpRunFortPassWindowKey(run: ActiveRun): string {
+  return `fort-pass:${corpRunRootRezWindowKey(run)}`;
 }
 
 export function corpRunRootRezWindowKey(run: ActiveRun): string {
@@ -280,23 +296,45 @@ export function passCorpRunRootRezWindow(
   host: RunRezWindowHost,
   legalAction: LegalAction,
 ): RunRezWindowResult {
-  if (host.state.timingPoint !== "run.jack_out_window")
+  const timingPoint = host.state.timingPoint;
+  if (
+    timingPoint !== "run.jack_out_window" &&
+    timingPoint !== "run.movement_rez_window"
+  )
     throw new Error("Root-Rez-Fenster ist nicht offen.");
   const run = mustRun(host.state);
   if (!isCorpRunRootRezWindowOpen(host))
     throw new Error("Root-Rez-Fenster wurde bereits geschlossen.");
   const server = host.servers.mustServer(run.attackedServerId);
-  const key = corpRunRootRezWindowKey(run);
-  run.rootRezWindowPassedKeys = Array.from(
-    new Set([...(run.rootRezWindowPassedKeys ?? []), key]),
-  ).sort();
-  host.state.activeSide = "runner";
+  const isFortPassWindow = timingPoint === "run.jack_out_window";
+  if (isFortPassWindow) {
+    run.fortPassWindowPassedKeys = Array.from(
+      new Set([
+        ...(run.fortPassWindowPassedKeys ?? []),
+        corpRunFortPassWindowKey(run),
+      ]),
+    ).sort();
+  } else {
+    const key = corpRunRootRezWindowKey(run);
+    run.rootRezWindowPassedKeys = Array.from(
+      new Set([...(run.rootRezWindowPassedKeys ?? []), key]),
+    ).sort();
+    run.rootRezWindowPendingPassKeys = (
+      run.rootRezWindowPendingPassKeys ?? []
+    ).filter((candidate) => candidate !== key);
+    if (run.rootRezWindowPendingPassKeys.length === 0)
+      delete run.rootRezWindowPendingPassKeys;
+  }
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
-    runRootRezPass: true,
+    ...(isFortPassWindow
+      ? { runFortPassPass: true }
+      : { runRootRezPass: true }),
     serverId: server.id,
     serverLabel: server.label,
   };
+  if (isFortPassWindow) host.state.activeSide = "runner";
+  else host.callbacks.continueAfterRootRez(legalAction);
   return {
     handled: true,
     serverId: server.id,
@@ -311,6 +349,15 @@ export function handleRunRootRezPostRez(
   rezzedCardId: CardInstanceId,
   legalAction?: LegalAction,
 ): RootRezContinuationResult {
+  const run = host.state.run;
+  if (host.state.timingPoint === "run.movement_rez_window" && run) {
+    run.rootRezWindowPendingPassKeys = Array.from(
+      new Set([
+        ...(run.rootRezWindowPendingPassKeys ?? []),
+        corpRunRootRezWindowKey(run),
+      ]),
+    ).sort();
+  }
   const rezInterruptResult = startRezInterruptJackOutChoice(
     host,
     rezzedCardId,
@@ -318,7 +365,18 @@ export function handleRunRootRezPostRez(
   );
   if (rezInterruptResult.handled) return rezInterruptResult;
   const rootEffect = resolveCorpRootRezEffect(host, rezzedCardId, legalAction);
-  if (rootEffect.handled) return rootEffect;
+  if (host.state.pendingChoice) {
+    return {
+      handled: true,
+      rezzedCardId,
+      resolvedPayload: legalAction?.payload,
+      stateChanged: true,
+    };
+  }
+  if (rootEffect.handled) {
+    host.callbacks.continueAfterRootRez(legalAction);
+    return { ...rootEffect, continueAfterRez: true };
+  }
   host.callbacks.continueAfterRootRez(legalAction);
   return {
     handled: true,
@@ -538,6 +596,7 @@ export function resolveRezInterruptJackOutChoice(
       (pendingTimingPoint as GameState["timingPoint"] | undefined) ??
       "run.jack_out_window";
     host.state.activeSide = pendingActiveSide ?? "runner";
+    host.callbacks.continueAfterRootRez(legalAction);
   }
   return {
     handled: true,

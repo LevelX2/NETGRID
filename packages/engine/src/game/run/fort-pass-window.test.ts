@@ -286,7 +286,9 @@ describe("fort pass window", () => {
     expect(state.run?.fortPassWindowUsedSourceIdsThisRun).toEqual([
       "source_root",
     ]);
-    expect(state.run?.rootRezWindowPassedKeys).toEqual(["run_1:server:rd"]);
+    expect(state.run?.fortPassWindowPassedKeys).toEqual([
+      "fort-pass:run_1:server:rd",
+    ]);
   });
 
   it("starts and resolves HQ Ice Swap as a hidden-info-safe HQ ICE swap", () => {

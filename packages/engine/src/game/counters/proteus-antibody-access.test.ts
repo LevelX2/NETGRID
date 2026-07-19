@@ -326,7 +326,7 @@ describe("Proteus Phase 8b Corp Antibody access", () => {
     server.root.push(belId);
     state.activeSide = "corp";
     state.phase = "run";
-    state.timingPoint = "run.jack_out_window";
+    state.timingPoint = "run.movement_rez_window";
     state.run = {
       runId: "run_1",
       attackedServerId: serverId,

@@ -1,19 +1,33 @@
 ---
 activityId: act-2026-07-19-post-jack-out-root-rez-window
-status: inbox
+status: done
 kind: fix
 area: engine
 priority: hotfix
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-07-19
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-07-19
+completedAt: 2026-07-19
+branch: codex/post-jack-out-root-rez-window
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/shared/src/index.ts
+  - packages/engine/src/game/run/run-movement.ts
+  - packages/engine/src/game/run/run-rez-window.ts
+  - packages/engine/src/game/run/run-flow-hosts.ts
+  - packages/engine/src/game/legal-actions.ts
+  - packages/engine/src/index-tests/mechanics/run-access-multiaccess.test.ts
+  - KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md
+  - KI-Wissen-NETGRID/03 Betrieb/Log 2026-07.md
+checks:
+  - corepack pnpm --filter @netgrid/engine test
+  - corepack pnpm --filter @netgrid/shared typecheck
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - corepack pnpm test:contracts
+  - corepack pnpm typecheck
+  - git diff --check
 ---
 
 # Root-Rezfenster nach der Jack-out-Entscheidung öffnen
@@ -89,24 +103,24 @@ Jack-out anzubieten.
 
 ## Akzeptanzkriterien
 
-- [ ] Vor der Runner-Entscheidung „Weiter/Auschecken“ bietet die Engine kein
+- [x] Vor der Runner-Entscheidung „Weiter/Auschecken“ bietet die Engine kein
   Root-Rez als Ersatz für das spätere Nicht-ICE-Rezfenster an.
-- [ ] Wählt der Runner im Movement „Weiter“, wird danach ein blockierendes
+- [x] Wählt der Runner im Movement „Weiter“, wird danach ein blockierendes
   Korp-Rez-/Pass-Fenster für legal rezbare Nicht-ICE-Karten angeboten.
-- [ ] Rezzt die Korp nach dem letzten ICE einen Ambush-Node und schließt das
+- [x] Rezzt die Korp nach dem letzten ICE einen Ambush-Node und schließt das
   Root-Rezfenster, kann der Runner nicht noch einmal über das normale
   Movement-Jack-out auschecken; der Run geht in Serveransatz, Success und
   Access über.
-- [ ] Passt die Korp im post-Jack-out Root-Rezfenster, geht der Run ohne
+- [x] Passt die Korp im post-Jack-out Root-Rezfenster, geht der Run ohne
   zusätzliches Runner-Jack-out regelkonform weiter.
-- [ ] Zwischen zwei ICE-Positionen folgt nach dem post-Jack-out Root-Rezfenster
+- [x] Zwischen zwei ICE-Positionen folgt nach dem post-Jack-out Root-Rezfenster
   der Approach des nächsten ICE; die vorhandenen ICE-Rezfenster bleiben
   korrekt.
-- [ ] Ein vorhandener kartenspezifischer Rez-Interrupt kann weiterhin genau
+- [x] Ein vorhandener kartenspezifischer Rez-Interrupt kann weiterhin genau
   nach seinem Kartentext ein separates Jack-out eröffnen.
-- [ ] Runner-PlayerViews verraten weder rezbare verdeckte Root-Karten noch
+- [x] Runner-PlayerViews verraten weder rezbare verdeckte Root-Karten noch
   Kartennamen; PublicEvents bleiben side-safe.
-- [ ] Fokussierte Engine-Regressionen sowie Replay- und StateHash-Prüfungen
+- [x] Fokussierte Engine-Regressionen sowie Replay- und StateHash-Prüfungen
   sind grün.
 
 ## Umsetzungshinweise
@@ -125,4 +139,14 @@ Jack-out anzubieten.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Die Run-State-Machine besitzt mit `run.movement_rez_window` nun einen eigenen
+post-Jack-out-Timingpunkt. Normale Root-Rez-Aktionen sind aus dem vorherigen
+Jack-out-Fenster entfernt; dort verbleiben ausschließlich regel- oder
+kartengebundene Fort-Pass-Aktionen. Nach `continue_run` blockiert die Korp mit
+Rez- oder expliziter Pass-Entscheidung, danach geht der Run direkt in den
+nächsten ICE-Approach oder in den Zugriff.
+
+Die Regression deckt sowohl Pass als auch einen real gerezzten `Setup!`-
+Ambush mit anschließendem Zugriff ab. Runner-PlayerView, PublicEvent, Replay
+und StateHash bleiben side-safe und deterministisch; der kartenspezifische
+Speed-Trap-Rez-Interrupt sowie Pavit-Auswahlfolgen bleiben funktionsfähig.

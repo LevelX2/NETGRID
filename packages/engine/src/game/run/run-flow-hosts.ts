@@ -97,6 +97,7 @@ import {
 } from "./encounter-entry";
 import {
   corpRunRootRezActionsAvailable,
+  isCorpRunRootRezWindowOpen,
   passCorpRunRootRezWindow,
   type RunRezWindowHost,
 } from "./run-rez-window";
@@ -110,6 +111,7 @@ import {
 } from "./fort-run-side-families";
 import {
   approachOrEncounterIce,
+  continueAfterMovementRezWindow,
   passApproachedIce,
   type RunMovementHost,
 } from "./run-movement";
@@ -334,6 +336,8 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         isV097OrLater: () => host.rules.isV097OrLater(state),
         corpRunRootRezActionsAvailable: () =>
           corpRunRootRezActionsAvailable(runRezWindowHostForState(state)),
+        corpRunRootRezWindowOpen: () =>
+          isCorpRunRootRezWindowOpen(runRezWindowHostForState(state)),
         approachIceExposeCanBeOfferedForCurrentIce: () =>
           approachIceExposeCanBeOfferedForCurrentIce(
             encounterEntryHostForState(state),
@@ -385,6 +389,17 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       callbacks: {
         continueAfterRootRez: (legalAction) => {
           const run = state.run;
+          if (
+            state.timingPoint === "run.movement_rez_window" &&
+            run?.phase === "movement" &&
+            !isCorpRunRootRezWindowOpen(runRezWindowHostForState(state))
+          ) {
+            continueAfterMovementRezWindow(
+              runMovementHostForState(state),
+              legalAction,
+            );
+            return;
+          }
           const approachedIceId = run?.approachedIceId;
           if (
             state.timingPoint === "run.approach_ice" &&
