@@ -3342,7 +3342,11 @@ function aiDecisionTraceFor(record: StoredMatch, event: GameEvent, side: Side, l
   const safeDebug = sanitizeAiDecisionDebug(decision.decisionDebug);
   if (!safeDebug) return undefined;
   const traceJson = aiDecisionTraceJson(safeDebug, side, legalAction, mode);
-  const decisionIndex = (record.aiDecisionTraces?.length ?? 0) + 1;
+  const baseline = record.actionPersistenceBaseline;
+  const newTraceCount = baseline
+    ? Math.max(0, (record.aiDecisionTraces?.length ?? 0) - baseline.loadedAiDecisionTraceCount)
+    : 0;
+  const decisionIndex = (baseline?.aiDecisionTraceCount ?? record.aiDecisionTraces?.length ?? 0) + newTraceCount + 1;
   const selectedActionType = legalAction.type;
   const planKind = typeof traceJson.planKind === "string" ? traceJson.planKind : undefined;
   const score = typeof traceJson.score === "number" ? traceJson.score : undefined;

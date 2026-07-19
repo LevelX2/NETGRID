@@ -13,10 +13,12 @@ import { computeDeckHash, createDeckSnapshot, type DeckFormatProfile, type DeckS
 import { applyAction, applyEffectCommands, checkWinConditions, createGameAfterSetup, CARD_DEFINITIONS_BY_ID, DEMO_DECKS, getLegalActions, hashState } from "@netgrid/engine";
 import type { ConnectionAuditEvent } from "./connection-audit";
 import { createConfiguredStorage, createNetgridHttpServer, isMaintenanceClientAddressAllowed, startNetgridServer } from "./http-server";
+import { chronicleTurnContextByEventId } from "./chronicle-turn-context";
 import { InMemoryMaintenanceCredentialStore, MaintenanceAuthService } from "./maintenance-auth";
 import { assertInviteLobbyPayloadRedacted, findInviteLobbyPayloadRedactionLeaks } from "./invite-lobby-redaction.test-helper";
 import { FixedWindowRateLimiter, createRateLimiter, loadDeploymentConfig, redactSensitiveText, redactedJoinUrl, type DeploymentConfig } from "./internet-hardening";
 import { InMemoryMatchStorage, MultiplayerService, type ActionPersistenceLoadInput, type EventRecord, type JoinMatchResult, type MatchSettings, type MultiplayerStorage, type SidePayload, type StateSnapshot, type StoredMatch } from "./multiplayer";
+import { SIDE_PAYLOAD_EVENT_TAIL_LIMIT } from "./multiplayer-payload";
 import { SqliteMatchStorage, StorageError, inspectSqliteStorage, restoreSqliteStorageBackup } from "./storage-sqlite";
 import { AI_DECISION_CHAIN_DEBUG_SCHEMA_VERSION, AI_DECISION_DEBUG_SCHEMA_VERSION, CURRENT_RULES_BASELINE, type AiDecision, type ApiCreateMatchResponse, type CardInstanceId, type ChoiceRequest, type DeckDefinition, type GameEvent, type GameState, type LegalAction, type PublicGameEvent, type Side } from "@netgrid/shared";
 
@@ -1278,6 +1280,107 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     expect(raw.toString("utf8")).not.toContain(created.hostReconnectToken);
     expect(raw.toString("utf8")).not.toContain(joinToken);
     reopenedStorage.close();
+  });
+
+  it("loads only bounded public payloads, tail traces and the requested action receipt", async () => {
+    const fixture = await storedMatchFixture("v108-bounded-action-load");
+    const dir = await tempStorageDir();
+    const dbPath = join(dir, "netgrid.sqlite");
+    const storage = new SqliteMatchStorage({ dbPath, backupDir: join(dir, "backups") });
+    const record = structuredClone(fixture.record) as StoredMatch;
+    const firstPublicEvent = record.eventLog[0];
+    const firstEngineEvent = record.gameState.eventLog[0];
+    if (!firstPublicEvent || !firstEngineEvent) throw new Error("Missing initial event");
+    const addedPublicEvents: EventRecord[] = [];
+    const addedEngineEvents: GameEvent[] = [];
+    const traces: NonNullable<StoredMatch["aiDecisionTraces"]> = [];
+    for (let index = 1; index <= 120; index += 1) {
+      const eventId = `evt_bounded_${index}`;
+      const actor: Side = index % 2 === 0 ? "corp" : "runner";
+      const actionType = index % 10 === 0 ? "end_turn" : "gain_credit";
+      const publicPayload = {
+        ...firstPublicEvent.publicPayload,
+        eventId,
+        type: "action_applied" as const,
+        stateVersionBefore: index - 1,
+        stateVersionAfter: index,
+        publicPayload: {
+          actor,
+          actionType,
+          marker: index === 1 ? "EARLY_PUBLIC_PAYLOAD_SENTINEL" : `event-${index}`
+        }
+      };
+      addedPublicEvents.push({
+        ...firstPublicEvent,
+        eventId,
+        stateVersionBefore: index - 1,
+        stateVersionAfter: index,
+        publicPayload
+      });
+      addedEngineEvents.push({
+        ...firstEngineEvent,
+        eventId,
+        type: "action_applied",
+        stateVersionBefore: index - 1,
+        stateVersionAfter: index,
+        publicPayload: { actor, actionType }
+      } as GameEvent);
+      traces.push({
+        traceId: `trace_bounded_${index}`,
+        matchId: record.match.matchId,
+        eventId,
+        stateVersion: index,
+        matchVersion: record.match.matchVersion,
+        side: actor,
+        turn: Math.ceil(index / 2),
+        decisionIndex: index,
+        createdAt: `2026-07-19T00:00:${String(index % 60).padStart(2, "0")}.000Z`,
+        schemaVersion: "ai-decision-trace-v1",
+        traceJson: { marker: index === 1 ? "EARLY_TRACE_SENTINEL" : `trace-${index}` }
+      });
+    }
+    record.eventLog = [firstPublicEvent, ...addedPublicEvents];
+    record.gameState.eventLog = [firstEngineEvent, ...addedEngineEvents];
+    record.aiDecisionTraces = traces;
+    record.actionReceipts = Array.from({ length: 12 }, (_, index) => ({
+      idempotencyKey: `receipt-${index}`,
+      matchId: record.match.matchId,
+      side: index % 2 === 0 ? "runner" as const : "corp" as const,
+      accepted: true,
+      stateVersionBefore: index,
+      stateVersionAfter: index + 1,
+      stateHashAfter: `hash-${index}`
+    }));
+    await storage.save(record);
+
+    const full = await storage.load(record.match.matchId);
+    const bounded = await storage.loadForAction(record.match.matchId, { side: "runner", idempotencyKey: "receipt-4" });
+    if (!full || !bounded) throw new Error("Missing bounded-load fixture");
+
+    expect(bounded.eventLog).toHaveLength(full.eventLog.length);
+    expect(bounded.eventLog.slice(-SIDE_PAYLOAD_EVENT_TAIL_LIMIT)).toEqual(full.eventLog.slice(-SIDE_PAYLOAD_EVENT_TAIL_LIMIT));
+    const fullChronicle = chronicleTurnContextByEventId(full.eventLog.map((event) => event.publicPayload));
+    const boundedChronicle = chronicleTurnContextByEventId(bounded.eventLog.map((event) => event.publicPayload));
+    for (const event of bounded.eventLog.slice(-SIDE_PAYLOAD_EVENT_TAIL_LIMIT)) {
+      expect(boundedChronicle[event.eventId]).toEqual(fullChronicle[event.eventId]);
+    }
+    expect(JSON.stringify(bounded.eventLog.slice(0, -SIDE_PAYLOAD_EVENT_TAIL_LIMIT))).not.toContain("EARLY_PUBLIC_PAYLOAD_SENTINEL");
+    expect(bounded.gameState.eventLog).toEqual(full.gameState.eventLog);
+    expect(bounded.aiDecisionTraces).toHaveLength(SIDE_PAYLOAD_EVENT_TAIL_LIMIT);
+    expect(JSON.stringify(bounded.aiDecisionTraces)).not.toContain("EARLY_TRACE_SENTINEL");
+    expect(bounded.actionReceipts.map((receipt) => receipt.idempotencyKey)).toEqual(["receipt-4"]);
+    expect(bounded.stateSnapshots).toEqual([]);
+    expect(bounded.actionPersistenceBaseline).toMatchObject({
+      expectedMatchVersion: record.match.matchVersion,
+      expectedStateVersion: record.gameState.stateVersion,
+      publicEventCount: 121,
+      engineEventCount: 121,
+      actionReceiptCount: 12,
+      aiDecisionTraceCount: 120,
+      loadedActionReceiptCount: 1,
+      loadedAiDecisionTraceCount: SIDE_PAYLOAD_EVENT_TAIL_LIMIT
+    });
+    storage.close();
   });
 
   it("deduplicates repeated state snapshots before writing SQLite mirror tables", async () => {
