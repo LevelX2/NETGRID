@@ -149,14 +149,15 @@ Stand: 2026-07-19
   leicht, gestiegene Bank-/Plan-Mismatch-Findings und eine Seed-Verschiebung
   bleiben offenes Review-Risiko. Führend:
   `docs/reviews/ai/ai-planportfolio-remote-doctrine-final-review-2026-07-12.md`.
-- Aktive AI-Gates: 618 geprüfte Hints, 599 durch den Action-Signal-Katalog
-  abgedeckt, 0 zurückgestellt und 0 Target-Profile-Gaps. Der
+- Aktive AI-Gates: 618 geprüfte Hints, 599 Karten mit statisch gepflegten
+  Action-Signalen, 0 zurückgestellt und 0 Target-Profile-Gaps. Der
   Taktiksignalvertrag umfasst 671 Signale und 294 coverage-pflichtige
   Einträge ohne offene Pflichtlücke; das Hint-Quality-Gate meldet 0 Fehler und
   0 Warnungen. `data/ai/ai-card-hints-active.json` ist die einzige statische
   Karten-Hint-Quelle für Runtime, Deckstrategie und Inspector. Die frühere
   Compile-/Derived-Facts-/Manual-Overlay-Pipeline ist entfernt; der Inspector
-  erzeugt nur noch seinen Such- und Diagnoseindex direkt aus dieser Quelle.
+  baut seine Darstellung direkt aus dieser Quelle auf und besitzt keinen
+  zweiten Semantikindex.
 - Führende Artefakte:
   - `docs/architecture/ai/README.md`
   - `docs/architecture/ai/ai-current-state-cleanup-process-2026-07-09.md`
@@ -179,9 +180,11 @@ Stand: 2026-07-19
   Führend sind
   `docs/architecture/ai/ai-vs-ai-observer-process-2026-07-13.md` und
   `docs/reviews/ai/ai-vs-ai-observer-implementation-review-2026-07-13.md`.
-- SQLite ist der aktuelle Standardstorage. Backup, Restore, Inspect,
-  Maintenance, Retention-Schutz und Cleanup arbeiten auf der aktuellen
-  SQLite-Datenbank.
+- SQLite ist der einzige konfigurierbare Laufzeitstorage. Backup, Restore,
+  Inspect, Maintenance, Retention-Schutz und Cleanup arbeiten auf der
+  aktuellen SQLite-Datenbank. JSON-Storage und Alt-Schema-Migrationen sind
+  entfernt; private Matchdecks werden ausschließlich je Teilnehmer
+  gespeichert.
 - Die geschlossene V2.0-Passwort-Account-Alpha ist umgesetzt. Accounts werden
   nur durch lokalen Admin-Bootstrap oder einmalige Einladung angelegt;
   widerrufbare Account-Sessions laufen über ein `HttpOnly`-Cookie und bleiben
@@ -241,40 +244,27 @@ Stand: 2026-07-19
 
 ## Aktuelle Risiken und offene Gates
 
-- Für eine erste Benutzerverwaltung im privaten Internetbetrieb liegt seit
-  2026-07-18 ein stufenweiser V2.0-Planungsentwurf vor. Er schlägt eine
-  geschlossene Passwort-Account-Alpha, accountgebundene SQLite-Decks mit einem
-  Defaultlimit von 50, kuratierte Standard-Decks sowie nachgelagerte E-Mail-,
-  Passkey- und MFA-Stufen vor. Die vorhandene Account-Session-Foundation ist
-  noch nicht an HTTP-Server oder Weboberfläche angebunden. Vor Umsetzung muss
-  der Wechsel vom älteren Passkey-first-Vertrag zu Passwort-first ausdrücklich
-  freigegeben werden. Führend für diesen Entwurf ist
-  `docs/releases/v2/v2-0-auth-privacy-cloud-decks/user-profiles-password-cloud-decks-staged-plan-2026-07-18.md`.
 - `apps/web/app/page.tsx`, `apps/web/app/chronicle.ts`,
   `apps/server/src/multiplayer.test.ts` und mehrere Corp-AI-Scoringdateien sind
   verbleibende Komplexitätsschwerpunkte.
-- Das allgemeine AI-Source-Structure-Gate ist auf dem sauberen `main`-Stand
-  `52ac68d19` wegen neun Dateigrößenverstößen rot. Vier davon waren bereits
-  auf dem integrierten Stand `d5199cdb0` vorhanden; fünf weitere betreffen
-  nachfolgend gewachsene Scoring-Window-, Board-Triage- und Corp-Score-Pfade.
-  Laufzeit- und Typimportgraph bleiben zyklenfrei. Der verbindliche
-  Null-Baseline-Remediationsplan liegt unter
-  `docs/architecture/ai/ai-source-structure-gate-remediation-plan-2026-07-19.md`.
+- Das AI-Source-Structure-Gate ist grün und schützt den zyklenfreien Laufzeit-
+  und Typimportgraph sowie qualitative Modulgrenzen. Historische Datei-,
+  Zeilen-, Testgrößen- und Fanout-Ratchets sind keine Architektur-Gates mehr.
 - Das Engine-Architektur-Zielgate ist grün. Mark-Counter-Anzeigen werden über
   generische Kartendefinitionsmetadaten statt direkter Karten-ID-Verzweigungen
   projiziert.
 - Der Engine Architecture Refresh vom 18.07.2026 ist vollständig umgesetzt:
-  430 Runtime-Port-Bindings sind statisch typisiert, der produktive relative
+  Runtime-Port-Verträge sind statisch typisiert, der produktive relative
   Importgraph ist zyklenfrei und Turn-, Damage-, Access- sowie Run-Domänen sind
   fachlich geteilt. CardImplementations werden deterministisch nach Set, Seite
-  und Typ registriert. 202 Engine-Testdateien mit 1.741 Tests sind grün.
+  und Typ registriert.
 - Interne Ability-Payload-Discriminatorfelder sind normalisiert und werden
   nicht in PublicEvents weitergereicht. Einzelne historisch benannte
   Präsentations-/Mechanikfelder bleiben nur dort bestehen, wo aktuelle
   Producer und Consumer sie noch verwenden; führend ist das Final Review
   `docs/reviews/engine/engine-architecture-refresh-final-review-2026-07-18.md`.
-- `public-context.ts`, eingefrorener Runtime-Integrations-Fan-out und der große
-  Per-Card-Longtail-Test bleiben als begrenzte nächste Architekturpunkte
+- `public-context.ts` und der große Per-Card-Longtail-Test bleiben als
+  begrenzte nächste Architekturpunkte
   dokumentiert; sie sind keine roten Korrektheits- oder Release-Gates.
 - Umfangreiche Benchmark-Rohdaten gehören nach `data/local/`; versioniert
   werden nur kleine aktuelle Summaries und reproduzierbare Fixtures.

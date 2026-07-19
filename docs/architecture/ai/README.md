@@ -97,8 +97,8 @@
 - Ausführbare Benchmarkprofile sind `random_legal_bot` und
   `current_candidate`.
 - Der produktive AI-Importgraph ist frei von Laufzeit- und Typzyklen. Das
-  ausführbare Source-Structure-Gate schützt diese Nullbaseline sowie die
-  erreichten Größen der priorisierten Produktions- und Testmodule.
+  ausführbare Source-Structure-Gate schützt diese Nullbaseline und qualitative
+  Modulgrenzen. Datei-, Zeilen-, Testgrößen- und Fanout-Ratchets sind entfernt.
 - Volatile Entscheidungsfamilien besitzen fachliche Modulgruppen:
   Choice-Overrides unter `runtime/choice-ranking/`, Corp-Scoreline unter
   `runtime/corp-scoreline/`, sichtbare Run-Projektion unter `run-analysis/`
@@ -155,10 +155,8 @@
 - `semantic-decision-chain-observability-contract-2026-07-14.md`: aktueller
   verhaltensneutraler Debug-, Arbitration- und Decision-Checkpoint-Vertrag für
   den produktiven Semantic-Runtime-Auswahlweg.
-- `ai-source-structure-optimization-process-2026-07-17.md` und
-  `docs/reviews/ai/ai-source-structure-optimization-final-review-2026-07-17.md`:
-  aktueller Source-Placement-, Zyklen-, Größenratchet- und
-  Public-/Simulation-Grenzstand.
+- `../legacy-simplification-process-2026-07-19.md`: aktueller Abschlussstand
+  der Hint-Single-Source-, Source-Gate- und Legacy-Bereinigung.
 - `ai-seed03-seed05-loop-remediation-process-2026-07-14.md` und
   `docs/reviews/ai/ai-behavior-baseline-v1-seed03-seed05-remediation-final-2026-07-14.md`:
   spielgleiche Verträge und vollständige Seed-03/05-Evidence für marginale

@@ -2,8 +2,9 @@
 
 ## Status
 
-Aktiv. Genau ein Paket wird gleichzeitig bearbeitet. Der Fortschritt wird nach
-jedem Paket in diesem Dokument aktualisiert.
+P0 bis P6 sind abgeschlossen und verifiziert. Der Arbeitsstand ist bereit für
+den defensiven Abgleich mit `main`, den lokalen Fast-Forward-Merge und das
+anschließende Worktree-/Branch-Cleanup.
 
 ## Fortschritt
 
@@ -41,7 +42,11 @@ jedem Paket in diesem Dokument aktualisiert.
   echte Runtime-Grenztests blieben bestehen. Der TypeScript-Import-Organizer
   bestätigte null unbenutzte Runtime-Internal-Imports. Geprüft mit vier
   Paket-Typechecks, 250 gezielten Tests und den Architektur-/Discovery-Checks.
-- P6 Gesamtabschluss und Wissenspflege: als Nächstes.
+- P6 Gesamtabschluss und Wissenspflege: abgeschlossen. Der vollständige
+  Workspace-Lauf umfasst 673 grüne Testdateien mit 5.380 Tests. Lint,
+  Typecheck, Produktions-Build, AI-/Engine-Source-Structure samt Selftests und
+  das Engine-CardImplementation-Zielgate sind grün. Die Wissensbasis und das
+  Abschlussreview bilden den vereinfachten Stand ab.
 
 ## Quelle/Vorgabe
 
