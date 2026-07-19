@@ -2333,6 +2333,49 @@ describe("V1.0.6 resource and card-display helpers", () => {
     ]);
   });
 
+  it("counts a continued payment-support action only once", () => {
+    const events = [
+      publicEvent("evt_1", "draw_card", {
+        actor: "runner",
+        actionType: "draw_card",
+        actionCostClicks: 1,
+        turnActionOrdinalStart: 1,
+        turnActionOrdinalEnd: 1,
+      }),
+      publicEvent("evt_2", "install_card", {
+        actor: "runner",
+        actionType: "install_card",
+        actionCostClicks: 1,
+        turnActionOrdinalStart: 2,
+        turnActionOrdinalEnd: 2,
+      }),
+      publicEvent("evt_3", "play_event", {
+        actor: "runner",
+        actionType: "play_event",
+        actionCostClicks: 1,
+        turnActionOrdinalStart: 3,
+        turnActionOrdinalEnd: 3,
+        costPenaltySupportWindowId: "runner_cost_penalty_support.227",
+      }),
+      publicEvent("evt_4", "activated_card_ability", {
+        actor: "runner",
+        actionType: "activated_card_ability",
+        costPenaltySupportWindowId: "runner_cost_penalty_support.227",
+      }),
+      publicEvent("evt_5", "play_event", {
+        actor: "runner",
+        actionType: "play_event",
+        actionCostClicks: 1,
+        turnActionOrdinalStart: 3,
+        turnActionOrdinalEnd: 3,
+        runnerCostPenaltySupportContinuation: true,
+        costPenaltySupportWindowId: "runner_cost_penalty_support.227",
+      }),
+    ];
+
+    expect(actionSlotCapacityForTurn("runner", 1, events)).toBe(4);
+  });
+
   it("formats action and credit costs as user-facing chips", () => {
     expect(actionCostChips({ costs: [{ clicks: 1, credits: 2 }] })).toEqual([
       { kind: "action", amount: 1, label: "1 Aktion" },
