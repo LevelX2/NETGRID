@@ -100,7 +100,9 @@ const productionLineCaps = new Map([
   ["visible-run-analysis.ts", 629],
   ["run-analysis/visible-run-breaker-path.ts", 838],
   ["run-analysis/visible-run-hazards.ts", 753],
-  ["runtime/semantic-choice-ranking.ts", 543],
+  ["runtime/semantic-choice-ranking.ts", 10],
+  ["runtime/choice-ranking/mapped-choice-orchestrator.ts", 482],
+  ["runtime/choice-ranking/mapped-choice-initial-overrides.ts", 128],
   ["runtime/semantic-runtime-corp-scoring-window.ts", 249],
   [
     "runtime/corp-scoreline/semantic-runtime-corp-board-triage-policies.ts",
@@ -152,7 +154,11 @@ const testLineCaps = new Map([
   ],
   ["runner-run-target-evaluation.test.ts", 3150],
   ["runtime/semantic-choice-ranking.test.ts", 1218],
-  ["runtime/choice-ranking/semantic-choice-ranking-corp.test.ts", 299],
+  [
+    "runtime/choice-ranking/semantic-choice-ranking-corp-scoreline.test.ts",
+    230,
+  ],
+  ["runtime/choice-ranking/semantic-choice-ranking-corp-triage.test.ts", 206],
   ["runtime/choice-ranking/semantic-choice-ranking-mapping.test.ts", 102],
 ]);
 for (const [relative, cap] of testLineCaps) {

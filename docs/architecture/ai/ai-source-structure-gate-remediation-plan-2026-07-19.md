@@ -204,7 +204,15 @@ dokumentiertem Sicherheitsblocker und Removal Condition zulässig.
   Assertions bleiben erhalten. AI-Typecheck, 76/76 Cutover-Tests,
   Structure-Selftest und Diff-Hygiene sind grün; die Removal List sinkt von
   neun auf acht Treffer.
-- Aktives Paket: ASSG-2.
+- ASSG-2 abgeschlossen: `semantic-choice-ranking.ts` ist eine 10-zeilige
+  öffentliche Fassade. Die Mapping-Orchestration liegt mit 482 Zeilen unter
+  `choice-ranking/`; initiale Urgency-/Strategic-Fit-/Hand-Overrides sind als
+  eigener 128-Zeilen-Schritt getrennt. Corp-Urgency liegt beim vorhandenen
+  Corp-Policy-Owner. Die Corp-Suite ist in 230/206 Zeilen große Scoreline- und
+  Board-Triage-Verträge geteilt. AI-Typecheck, Package-Boundaries, 105/105
+  Choice-/Plan-/Decision-Chain-Tests, Structure-Selftest und Diff-Hygiene sind
+  grün; die Removal List sinkt von acht auf sechs Treffer.
+- Aktives Paket: ASSG-3.
 
 ## Paketfolge
 
