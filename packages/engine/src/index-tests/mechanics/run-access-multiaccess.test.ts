@@ -19,12 +19,8 @@ import {
 } from "../../index";
 import { collectActiveModifiers } from "../../ability-engine/active-modifiers";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
-import {
-  cardImplementationCoverageForDefinitionId,
-} from "../../card-implementations/coverage";
-import {
-  cardImplementationForDefinitionId,
-} from "../../card-implementations/registry";
+import { cardImplementationCoverageForDefinitionId } from "../../card-implementations/coverage";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { buildPublicAbilitySchemaContext } from "../../mechanics/public-payload-schema";
 import { publicContextForAction } from "../../public-context";
 import {
@@ -213,8 +209,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]
-        ?.implementationStatus,
+      CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus,
     ).toBe("playable_mvp");
   });
 
@@ -288,7 +283,9 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
         action.payload?.serverId === "hq",
     );
 
-    expect(state.pendingChoice?.source).toContain("successful_run.credit_loss_spend");
+    expect(state.pendingChoice?.source).toContain(
+      "successful_run.credit_loss_spend",
+    );
     expect(state.run?.breach).toBeUndefined();
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
       "Simple Economy Operation",
@@ -401,7 +398,9 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
         action.type === "start_run" && action.payload?.serverId === "rd",
     );
 
-    expect(dupreId ? (state.cardInstances[dupreId]?.counters?.power ?? 0) : 0).toBe(0);
+    expect(
+      dupreId ? (state.cardInstances[dupreId]?.counters?.power ?? 0) : 0,
+    ).toBe(0);
     expect(state.run?.breach?.queue).toHaveLength(1);
     expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
       "Simple Agenda",
@@ -526,7 +525,9 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
   });
 
   it("opens Smarteye before the Corp can rez approached unrezzed ICE", () => {
-    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.runAccess("v1915-smarteye-before-rez"));
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.runAccess("v1915-smarteye-before-rez"),
+    );
     state.runner.credits = 10;
     state.corp.credits = 100;
     installRunnerProgramForTest(state, "onr_v1_065_smarteye");
@@ -633,7 +634,9 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
   });
 
   it("does not spend Smarteye when declined and does not reopen it for the same ICE", () => {
-    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.runAccess("v1915-smarteye-decline"));
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.runAccess("v1915-smarteye-decline"),
+    );
     state.runner.credits = 10;
     state.corp.credits = 0;
     installRunnerProgramForTest(state, "onr_v1_065_smarteye");
@@ -678,7 +681,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     ).toBe(true);
   });
 
-  it("blocks Runner movement while Corp has a root rez decision during a run", () => {
+  it("opens root rez only after Runner declines jack out and then blocks movement", () => {
     let state = toRunnerTurn(v199CardReleaseGame("root-rez-window"));
     state.corp.credits = 10;
     const aardvarkId = putCorpRootInRemote(state, "onr_v1_349_aardvark");
@@ -704,6 +707,24 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     );
 
     expect(state.timingPoint).toBe("run.jack_out_window");
+    expect(
+      getLegalActions(state, "runner").map((action) => action.type),
+    ).toEqual(["jack_out", "continue_run"]);
+    expect(
+      getLegalActions(state, "corp").filter(
+        (action) => action.type === "rez_card",
+      ),
+    ).toEqual([]);
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
+      "Aardvark",
+    );
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
+      "Bizarre Encryption Scheme",
+    );
+
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+
+    expect(state.timingPoint).toBe("run.movement_rez_window");
     expect(getLegalActions(state, "runner")).toEqual([]);
     expect(getPlayerView(state, "runner").legalActions).toEqual([]);
     expect(
@@ -719,12 +740,6 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
           action.payload?.serverLabel === "Remote 1",
       ),
     ).toBe(true);
-    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
-      "Aardvark",
-    );
-    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
-      "Bizarre Encryption Scheme",
-    );
 
     state = apply(
       state,
@@ -736,7 +751,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     );
 
     expect(state.cardInstances[aardvarkId]?.rezzed).toBe(true);
-    expect(state.timingPoint).toBe("run.jack_out_window");
+    expect(state.timingPoint).toBe("run.movement_rez_window");
     expect(getLegalActions(state, "runner")).toEqual([]);
     expect(
       getLegalActions(state, "corp").some(
@@ -754,14 +769,14 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
         action.payload?.runRootRezPass === true,
     );
 
-    expect(state.timingPoint).toBe("run.jack_out_window");
+    expect(state.timingPoint).toBe("access.resolve_card");
     expect(state.activeSide).toBe("runner");
     expect(
       getLegalActions(state, "runner").map((action) => action.type),
-    ).toEqual(["jack_out", "continue_run"]);
-    expect(
-      getLegalActions(state, "corp").map((action) => action.type),
-    ).toEqual([]);
+    ).not.toContain("jack_out");
+    expect(getLegalActions(state, "corp").map((action) => action.type)).toEqual(
+      [],
+    );
     expect(state.eventLog.at(-1)).toMatchObject({
       type: "decline_rez",
       visibilityClass: "public",
@@ -780,12 +795,85 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     expect(replay.actualFinalStateHash).toBe(hashState(state));
   });
 
+  it("rezzes and accesses Setup! after the final jack-out decision", () => {
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.assetNodeEffects("post-jack-out-setup"),
+    );
+    state.corp.credits = 10;
+    const setupId = putCorpRootInRemote(state, "onr_v1_340_setup");
+    const iceId = addRezzedCorpIceForTest(
+      state,
+      "simple_barrier_ice",
+      "remote_1",
+      "post_jack_out_setup",
+    );
+    state.cardInstances[iceId]!.rezzed = false;
+    state.cardInstances[iceId]!.faceup = false;
+    const initial = structuredClone(state);
+    const gripBefore = state.runner.grip.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(state, "corp", (action) => action.type === "decline_rez");
+
+    expect(state.timingPoint).toBe("run.jack_out_window");
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) => action.type === "rez_card",
+      ),
+    ).toBe(false);
+
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+
+    expect(state.timingPoint).toBe("run.movement_rez_window");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_card" && action.payload?.cardId === setupId,
+    );
+
+    expect(state.cardInstances[setupId]?.rezzed).toBe(true);
+    expect(state.timingPoint).toBe("run.movement_rez_window");
+    expect(
+      getLegalActions(state, "runner").map((action) => action.type),
+    ).not.toContain("jack_out");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "decline_rez" &&
+        action.payload?.runRootRezPass === true,
+    );
+    expect(state.timingPoint).toBe("access.resolve_card");
+    expect(
+      getLegalActions(state, "runner").map((action) => action.type),
+    ).not.toContain("jack_out");
+
+    state = apply(state, "runner", (action) => action.type === "access_card");
+
+    expect(state.run?.accessedCardId).toBe(setupId);
+    expect(state.runner.grip.length).toBe(Math.max(0, gripBefore - 2));
+    const replay = replayEvents(
+      initial,
+      state.eventLog.slice(initial.eventLog.length),
+    );
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
+  });
+
   it("keeps V1.9.15 ICE overlaps side-safe through trace and damage windows", () => {
     for (const [definitionId, baseTraceStrength] of [
       ["onr_v1_227_cerberus", 5],
       ["onr_v1_255_mastiff", 5],
     ] as const) {
-      let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.runAccess(`v1915-ice-${definitionId}`));
+      let state = toRunnerTurn(
+        MECHANIC_SMOKE_GAMES.runAccess(`v1915-ice-${definitionId}`),
+      );
       putCorpIceOnServer(state, "rd", definitionId);
       state.corp.credits = 12;
       state.runner.credits = 5;
@@ -823,7 +911,9 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
   });
 
   it("applies Cerberus 3 net damage and does not give a false tag on trace success", () => {
-    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.runAccess("spotcheck-cerberus-damage"));
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.runAccess("spotcheck-cerberus-damage"),
+    );
     drawRunnerCardsForTest(state, 5);
     putCorpIceOnServer(state, "rd", "onr_v1_227_cerberus");
     state.corp.credits = 12;
@@ -914,7 +1004,10 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       damageAmount: 4,
       cardsTrashed: 4,
     });
-    const replay = replayEvents(initial, state.eventLog.slice(initial.eventLog.length));
+    const replay = replayEvents(
+      initial,
+      state.eventLog.slice(initial.eventLog.length),
+    );
     expect(replay.ok).toBe(true);
     expect(replay.actualFinalStateHash).toBe(hashState(state));
   });
@@ -970,7 +1063,9 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
         action.payload?.cardId === operationId,
     );
     expect(state.cardInstances[firstIceId]?.faceup).toBe(false);
-    expect(state.pendingChoice?.source).toContain("hidden_zone.conceal_and_reorder_installed_ice");
+    expect(state.pendingChoice?.source).toContain(
+      "hidden_zone.conceal_and_reorder_installed_ice",
+    );
     expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneBarrier: true,
@@ -979,13 +1074,16 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       targets: expect.objectContaining({ hiddenOrderChoice: true }),
     });
 
-    state = applyChoices(state, "corp", [`card_${firstIceId}`, `card_${secondIceId}`]);
-    expect(state.corp.servers.find((server) => server.id === "rd")?.ice[0]).toBe(
-      secondIceId,
-    );
-    expect(state.corp.servers.find((server) => server.id === "hq")?.ice[0]).toBe(
-      firstIceId,
-    );
+    state = applyChoices(state, "corp", [
+      `card_${firstIceId}`,
+      `card_${secondIceId}`,
+    ]);
+    expect(
+      state.corp.servers.find((server) => server.id === "rd")?.ice[0],
+    ).toBe(secondIceId);
+    expect(
+      state.corp.servers.find((server) => server.id === "hq")?.ice[0],
+    ).toBe(firstIceId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneBarrier: true,
       hiddenZoneAction: "conceal_and_reorder_installed_ice",

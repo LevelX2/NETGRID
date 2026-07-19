@@ -737,12 +737,13 @@ describe("V1.9.9 Mechanikpaket R", () => {
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
     state = apply(
       state,
       "corp",
       (action) => action.type === "rez_card" && action.source === chimeraId,
     );
-    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = passRootRezWindowBeforeAccessIfOpen(state);
     state = apply(state, "runner", (action) => action.type === "access_card");
     expect(state.pendingChoice).toBeUndefined();
     expect(state.runner.heap).toContain(afreetId);

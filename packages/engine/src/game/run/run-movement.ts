@@ -49,6 +49,7 @@ export type RunMovementHost = {
   rules: {
     isV097OrLater: () => boolean;
     corpRunRootRezActionsAvailable: () => boolean;
+    corpRunRootRezWindowOpen: () => boolean;
     approachIceExposeCanBeOfferedForCurrentIce: () => boolean;
   };
   actions?: {
@@ -555,6 +556,21 @@ export function continueFromMovement(
   clearFullyBrokenPassedIcePostPassMarker(
     host.encounter.encounterResolutionHost(),
   );
+  state.timingPoint = "run.movement_rez_window";
+  state.activeSide = "corp";
+  if (host.rules.corpRunRootRezWindowOpen())
+    return { handled: true, runContinues: true, stateChanged: true };
+  return continueAfterMovementRezWindow(host, legalAction);
+}
+
+export function continueAfterMovementRezWindow(
+  host: RunMovementHost,
+  legalAction?: LegalAction,
+): PostPassIceResult {
+  const state = host.state;
+  const run = mustRun(state);
+  if (state.timingPoint !== "run.movement_rez_window")
+    throw new Error("Das Movement-Rezfenster ist nicht offen.");
   if (run.position.kind === "ice") {
     const server = host.servers.mustServer(run.position.serverId);
     const approachedIceId =

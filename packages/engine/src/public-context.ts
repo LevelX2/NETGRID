@@ -150,6 +150,7 @@ export function publicContextForAction(
     "rezzedIceRewindTargetIceIndex",
     "temporaryDiscountedRunEndDerez",
     "derezzedCount",
+    "runFortPassPass",
     "runRootRezPass",
     "highlighterCounterCount",
     "highlighterAccessBonus",

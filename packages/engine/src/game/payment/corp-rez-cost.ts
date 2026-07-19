@@ -718,7 +718,7 @@ export function assertCorpRootRezCostQuoteValid(
     : runWindow
       ? Boolean(state.run) &&
         (state.timingPoint === "run.approach_ice" ||
-          state.timingPoint === "run.jack_out_window")
+          state.timingPoint === "run.movement_rez_window")
       : state.timingPoint === "corp_action.main";
   if (!timingIsValid)
     throw new Error(

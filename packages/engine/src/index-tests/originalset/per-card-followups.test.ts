@@ -963,6 +963,14 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       kind: "server",
       serverId: "remote_1",
     });
+    expect(
+      getLegalActions(state, "runner").map((action) => action.type),
+    ).toEqual(["jack_out", "continue_run"]);
+    expect(getLegalActions(state, "corp")).toEqual([]);
+
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+
+    expect(state.timingPoint).toBe("run.movement_rez_window");
     expect(getLegalActions(state, "runner")).toEqual([]);
     const corpActions = getLegalActions(state, "corp");
     expect(corpActions).toEqual(
@@ -993,7 +1001,6 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     expect(state.cardInstances[programTrashByAdvancementAssetId]?.rezzed).toBe(
       false,
     );
-    state = apply(state, "runner", (action) => action.type === "continue_run");
     expect(state.timingPoint).toBe("access.resolve_card");
     state = apply(state, "runner", (action) => action.type === "access_card");
 
@@ -1040,6 +1047,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
     state = apply(
       state,
       "corp",
@@ -1047,7 +1055,6 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
         action.type === "rez_card" &&
         sourceDefinition(state, action) === "onr_v1_323_experimental-ai",
     );
-
     expect(state.cardInstances[programTrashByAdvancementAssetId]?.rezzed).toBe(
       true,
     );
@@ -1055,7 +1062,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       actionType: "rez_card",
       cardDefinitionId: "onr_v1_323_experimental-ai",
     });
-    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = passRootRezWindowBeforeAccessIfOpen(state);
     state = apply(state, "runner", (action) => action.type === "access_card");
     expect(state.runner.heap).toContain(blinkId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -1097,6 +1104,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
     state = apply(
       state,
       "corp",
@@ -1104,7 +1112,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
         action.type === "rez_card" &&
         sourceDefinition(state, action) === "onr_v1_323_experimental-ai",
     );
-    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = passRootRezWindowBeforeAccessIfOpen(state);
     state = apply(state, "runner", (action) => action.type === "access_card");
     expect(
       state.runner.heap.map((id) => state.cardInstances[id]?.definitionId),
@@ -3285,17 +3293,18 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
     );
     access = apply(
       access,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
+    access = apply(
+      access,
       "corp",
       (action) =>
         action.type === "rez_card" &&
         sourceDefinition(access, action) ===
           "onr_v1_315_corprunners-shattered-remains",
     );
-    access = apply(
-      access,
-      "runner",
-      (action) => action.type === "continue_run",
-    );
+    access = passRootRezWindowBeforeAccessIfOpen(access);
     access = apply(access, "runner", (action) => action.type === "access_card");
     expect(access.runner.heap).toEqual(
       expect.arrayContaining([firstHardware, secondHardware]),

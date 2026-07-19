@@ -419,16 +419,17 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     );
     accessState = apply(
       accessState,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
+    accessState = apply(
+      accessState,
       "corp",
       (action) =>
         action.type === "rez_card" &&
         sourceDefinition(accessState, action) === "onr_v1_323_experimental-ai",
     );
-    accessState = apply(
-      accessState,
-      "runner",
-      (action) => action.type === "continue_run",
-    );
+    accessState = passRootRezWindowBeforeAccessIfOpen(accessState);
     accessState = apply(
       accessState,
       "runner",
@@ -734,17 +735,18 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     );
     hardwareState = apply(
       hardwareState,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
+    hardwareState = apply(
+      hardwareState,
       "corp",
       (action) =>
         action.type === "rez_card" &&
         sourceDefinition(hardwareState, action) ===
           "onr_v1_315_corprunners-shattered-remains",
     );
-    hardwareState = apply(
-      hardwareState,
-      "runner",
-      (action) => action.type === "continue_run",
-    );
+    hardwareState = passRootRezWindowBeforeAccessIfOpen(hardwareState);
     hardwareState = apply(
       hardwareState,
       "runner",
@@ -777,17 +779,18 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     );
     coreDamageState = apply(
       coreDamageState,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
+    coreDamageState = apply(
+      coreDamageState,
       "corp",
       (action) =>
         action.type === "rez_card" &&
         sourceDefinition(coreDamageState, action) ===
           "onr_v1_346_vacant-soulkiller",
     );
-    coreDamageState = apply(
-      coreDamageState,
-      "runner",
-      (action) => action.type === "continue_run",
-    );
+    coreDamageState = passRootRezWindowBeforeAccessIfOpen(coreDamageState);
     coreDamageState = apply(
       coreDamageState,
       "runner",

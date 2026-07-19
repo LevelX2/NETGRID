@@ -85,6 +85,7 @@ export type TimingPointId =
   | "run.approach_ice"
   | "run.encounter_ice"
   | "run.jack_out_window"
+  | "run.movement_rez_window"
   | "access.resolve_card"
   | "game.checkpoint";
 
@@ -1279,6 +1280,8 @@ export type RunState = {
   };
   breach?: BreachState;
   successfulRunAbilityUsedSourceIds?: CardInstanceId[];
+  fortPassWindowPassedKeys?: string[];
+  rootRezWindowPendingPassKeys?: string[];
   rootRezWindowPassedKeys?: string[];
   rezInterruptPendingRezCardId?: CardInstanceId;
   rezInterruptPendingRezTimingPoint?: string;

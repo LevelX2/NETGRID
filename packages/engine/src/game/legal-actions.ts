@@ -1,4 +1,9 @@
-import type { ChoiceRequest, GameState, LegalAction, Side } from "@netgrid/shared";
+import type {
+  ChoiceRequest,
+  GameState,
+  LegalAction,
+  Side,
+} from "@netgrid/shared";
 import {
   isApproachIceExposeViewingWindowOpen,
   isApproachIceExposeWindowOpen,
@@ -22,7 +27,10 @@ import {
   isCorpRunRootRezWindowOpen,
   type RunRezWindowHost,
 } from "./run/run-rez-window";
-import { buildRunnerAccessActions, type RunnerAccessActionHost } from "./access/access-actions";
+import {
+  buildRunnerAccessActions,
+  type RunnerAccessActionHost,
+} from "./access/access-actions";
 import {
   buildRunnerAccessStartCardImplementationActions,
   buildCorpDuringRunCardImplementationActions,
@@ -99,11 +107,12 @@ function buildRunnerActionsForCostPenaltySupportWindow(
       ? [host.actions.buildChoiceAction(state.pendingChoice)]
       : [];
   if (state.run?.postPassCancellableFutureIceStrength)
-    return buildRunnerPostPassFutureStrengthActions(host.hosts.runMovementHost());
+    return buildRunnerPostPassFutureStrengthActions(
+      host.hosts.runMovementHost(),
+    );
   if (state.run?.postPassPayOrEndRun)
-    return buildRunnerMovementActions(
-      host.hosts.runnerEncounterActionHost(),
-    ).legalActions;
+    return buildRunnerMovementActions(host.hosts.runnerEncounterActionHost())
+      .legalActions;
   if (state.timingPoint === "runner_action.main")
     return buildRunnerMainActions(host.hosts.runnerMainActionGenerationHost());
   if (state.timingPoint === "run.approach_ice") {
@@ -115,17 +124,17 @@ function buildRunnerActionsForCostPenaltySupportWindow(
     return [];
   }
   if (state.timingPoint === "run.encounter_ice")
-    return buildRunnerEncounterActions(
-      host.hosts.runnerEncounterActionHost(),
-    ).legalActions;
+    return buildRunnerEncounterActions(host.hosts.runnerEncounterActionHost())
+      .legalActions;
   if (state.timingPoint === "run.jack_out_window") {
     if (isCorpRunRootRezWindowOpen(host.hosts.runRezWindowHost())) return [];
-    return buildRunnerMovementActions(
-      host.hosts.runnerEncounterActionHost(),
-    ).legalActions;
+    return buildRunnerMovementActions(host.hosts.runnerEncounterActionHost())
+      .legalActions;
   }
+  if (state.timingPoint === "run.movement_rez_window") return [];
   if (state.timingPoint === "access.resolve_card")
-    return buildRunnerAccessActions(host.hosts.runnerAccessActionHost()).legalActions;
+    return buildRunnerAccessActions(host.hosts.runnerAccessActionHost())
+      .legalActions;
   return [];
 }
 
@@ -135,8 +144,7 @@ export function buildLegalActions(
 ): LegalAction[] {
   const { state } = host;
   if (state.winner || state.phase === "game_over") return [];
-  const runnerCostPenaltySupportWindow =
-    state.runnerCostPenaltySupportWindow;
+  const runnerCostPenaltySupportWindow = state.runnerCostPenaltySupportWindow;
   if (runnerCostPenaltySupportWindow)
     return side === "runner"
       ? [
@@ -194,17 +202,18 @@ export function buildLegalActions(
       : [];
   if (state.run?.postPassPayOrEndRun)
     return side === "runner"
-      ? buildRunnerMovementActions(
-          host.hosts.runnerEncounterActionHost(),
-        ).legalActions
+      ? buildRunnerMovementActions(host.hosts.runnerEncounterActionHost())
+          .legalActions
       : [];
   if (state.runnerVirusPurgeWindow)
-    return side === "corp" && host.counters.purgeableRunnerVirusCounterTotal() > 0
+    return side === "corp" &&
+      host.counters.purgeableRunnerVirusCounterTotal() > 0
       ? [host.actions.buildPurgeableRunnerVirusPurgeAction()]
       : [];
   const sharedRunWindow =
     state.timingPoint === "run.approach_ice" ||
-    state.timingPoint === "run.jack_out_window";
+    state.timingPoint === "run.jack_out_window" ||
+    state.timingPoint === "run.movement_rez_window";
   const inactiveCorpRunnerActionPaidWindow =
     state.timingPoint === "runner_action.main" && side === "corp";
   const inactiveCorpEncounterPaidWindow =
@@ -227,7 +236,9 @@ export function buildLegalActions(
       : [];
   if (state.timingPoint === "runner_action.main") {
     if (side === "runner")
-      return buildRunnerMainActions(host.hosts.runnerMainActionGenerationHost());
+      return buildRunnerMainActions(
+        host.hosts.runnerMainActionGenerationHost(),
+      );
     return side === "corp"
       ? host.actions.corpRunnerActionPaidWindowActions()
       : [];
@@ -248,9 +259,8 @@ export function buildLegalActions(
   }
   if (state.timingPoint === "run.encounter_ice") {
     if (side === "runner")
-      return buildRunnerEncounterActions(
-        host.hosts.runnerEncounterActionHost(),
-      ).legalActions;
+      return buildRunnerEncounterActions(host.hosts.runnerEncounterActionHost())
+        .legalActions;
     return side === "corp"
       ? buildCorpEncounterCardImplementationActions(
           host.hosts.runCardImplementationActionHost(),
@@ -267,14 +277,23 @@ export function buildLegalActions(
       ];
     if (isCorpRunRootRezWindowOpen(host.hosts.runRezWindowHost())) return [];
     return side === "runner"
-      ? buildRunnerMovementActions(
-          host.hosts.runnerEncounterActionHost(),
-        ).legalActions
+      ? buildRunnerMovementActions(host.hosts.runnerEncounterActionHost())
+          .legalActions
       : [];
+  }
+  if (state.timingPoint === "run.movement_rez_window") {
+    if (side === "runner") return [];
+    return [
+      ...buildCorpRunRootRezWindowActions(host.hosts.runRezWindowHost()),
+      ...buildCorpDuringRunCardImplementationActions(
+        host.hosts.runCardImplementationActionHost(),
+      ).legalActions,
+    ];
   }
   if (state.timingPoint === "access.resolve_card")
     return side === "runner"
-      ? buildRunnerAccessActions(host.hosts.runnerAccessActionHost()).legalActions
+      ? buildRunnerAccessActions(host.hosts.runnerAccessActionHost())
+          .legalActions
       : [];
   return [];
 }
