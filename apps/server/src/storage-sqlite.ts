@@ -4,7 +4,7 @@ import { dirname, basename, join, resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { hashState } from "@netgrid/engine";
 import type { GameEvent, GameState } from "@netgrid/shared";
-import type { AiDecisionTraceRecord, MatchMode, MatchStatus, MultiplayerStorage, StoredMatch } from "./multiplayer";
+import { replayDecisionDebugFromTrace, type AiDecisionTraceRecord, type MatchMode, type MatchStatus, type MultiplayerStorage, type StoredMatch } from "./multiplayer";
 
 export const SQLITE_STORAGE_SCHEMA_VERSION = 3;
 export const SQLITE_STORAGE_FORMAT = "netgrid_multiplayer_sqlite";
@@ -1164,6 +1164,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
 
     if (this.tableExists("ai_decision_traces")) {
       record.aiDecisionTraces = this.aiDecisionTraceRecords(matchId);
+      this.hydrateAiDecisionDebug(record.eventLog, record.aiDecisionTraces);
     }
 
     if (this.tableExists("action_receipts")) {
@@ -1382,7 +1383,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     );
     events.slice(prefixLength).forEach((event, offset) => {
       const index = prefixLength + offset;
-      insertEvent.run(matchId, event.eventId, index, event.stateVersionBefore, event.stateVersionAfter, event.stateHashAfter, JSON.stringify(event.publicPayload), event.privatePayloadLocalOnly ? 1 : 0, event.hiddenInfoBarrier ? 1 : 0);
+      insertEvent.run(matchId, event.eventId, index, event.stateVersionBefore, event.stateVersionAfter, event.stateHashAfter, JSON.stringify(publicEventForStorage(event.publicPayload)), event.privatePayloadLocalOnly ? 1 : 0, event.hiddenInfoBarrier ? 1 : 0);
     });
   }
 
@@ -1458,6 +1459,24 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     for (const receipt of receipts) {
       if (existingReceiptKeys.has(receiptKey(receipt))) continue;
       insertReceipt.run(matchId, receipt.idempotencyKey, receipt.side, receipt.accepted ? 1 : 0, receipt.stateVersionBefore, receipt.stateVersionAfter, receipt.stateHashAfter, receipt.errorCode ?? null);
+    }
+  }
+
+  private hydrateAiDecisionDebug(events: StoredMatch["eventLog"], traces: AiDecisionTraceRecord[]): void {
+    const tracesByEventId = new Map(traces.map((trace) => [trace.eventId, trace]));
+    for (const event of events) {
+      if (event.publicPayload.publicPayload.aiDecisionDebug !== undefined) continue;
+      const trace = tracesByEventId.get(event.eventId);
+      if (!trace) continue;
+      const debug = replayDecisionDebugFromTrace(trace);
+      if (!debug) continue;
+      event.publicPayload = {
+        ...event.publicPayload,
+        publicPayload: {
+          ...event.publicPayload.publicPayload,
+          aiDecisionDebug: debug
+        }
+      };
     }
   }
 
@@ -2135,6 +2154,13 @@ function timestampId(): string {
 
 function toJson(value: unknown): string | null {
   return value === undefined ? null : JSON.stringify(value);
+}
+
+function publicEventForStorage(event: StoredMatch["eventLog"][number]["publicPayload"]): StoredMatch["eventLog"][number]["publicPayload"] {
+  if (event.publicPayload.aiDecisionDebug === undefined) return event;
+  const publicPayload = { ...event.publicPayload };
+  delete publicPayload.aiDecisionDebug;
+  return { ...event, publicPayload };
 }
 
 function gameStateForStorage<T extends GameState | undefined>(state: T): T {

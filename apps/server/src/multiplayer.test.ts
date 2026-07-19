@@ -810,7 +810,7 @@ describe("Backend 0.5 private storage maintenance", () => {
     });
 
     const createAndAdvance = async (
-      aiTraceMode: "summary" | "detailed",
+      aiTraceMode: "off" | "summary" | "detailed",
     ): Promise<string> => {
       const created = await service.createMatch({
         mode: "human_runner_vs_corp_ai",
@@ -843,6 +843,18 @@ describe("Backend 0.5 private storage maintenance", () => {
 
     const summaryMatchId = await createAndAdvance("summary");
     const detailedMatchId = await createAndAdvance("detailed");
+    const untracedMatchId = await createAndAdvance("off");
+
+    const detailedCorpReplay = await service.loadReplayView(detailedMatchId, "corp");
+    const detailedRunnerReplay = await service.loadReplayView(detailedMatchId, "runner");
+    const untracedReplay = await service.loadReplayView(untracedMatchId, "corp");
+    expect(detailedCorpReplay.ok).toBe(true);
+    expect(detailedRunnerReplay.ok).toBe(true);
+    expect(untracedReplay.ok).toBe(true);
+    if (!detailedCorpReplay.ok || !detailedRunnerReplay.ok || !untracedReplay.ok) throw new Error("Missing SQLite replay view");
+    expect(detailedCorpReplay.replay.timeline.find((step) => step.decisionDebug)?.decisionDebug).toMatchObject({ schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION, actor: "corp" });
+    expect(detailedRunnerReplay.replay.timeline.find((step) => step.decisionDebug)?.decisionDebug).toMatchObject({ schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION, redacted: true });
+    expect(untracedReplay.replay.timeline.some((step) => step.decisionDebug)).toBe(false);
     storage.close?.();
 
     const database = new DatabaseSync(dbPath);
@@ -859,6 +871,12 @@ describe("Backend 0.5 private storage maintenance", () => {
         if (!row) throw new Error(`Missing persisted AI trace for ${matchId}`);
         return JSON.parse(row.traceJson) as Record<string, unknown>;
       };
+      const persistedDebugEvents = database
+        .prepare("SELECT COUNT(*) AS count FROM events WHERE json_type(public_payload_json, '$.publicPayload.aiDecisionDebug') IS NOT NULL")
+        .get() as { count: number };
+      const untracedRows = database.prepare("SELECT COUNT(*) AS count FROM ai_decision_traces WHERE match_id = ?").get(untracedMatchId) as { count: number };
+      expect(Number(persistedDebugEvents.count)).toBe(0);
+      expect(Number(untracedRows.count)).toBe(0);
 
       const summaryTrace = traceFor(summaryMatchId);
       expect(summaryTrace).toMatchObject({

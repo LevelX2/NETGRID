@@ -240,3 +240,18 @@ complete.`
   Runner-LegalActions erwartet, während `jack_out` und `continue_run`
   inzwischen legal sind. Das ist als vorbestehende fachfremde Baseline
   klassifiziert und wird nicht in den Storage-Scope gezogen.
+
+### SMO-02 – abgeschlossen
+
+- Neue SQLite-Eventzeilen speichern keinen eingebetteten ausführlichen
+  `aiDecisionDebug` mehr. Das versionierte Trace-Ledger ist der kanonische
+  dauerhafte Speicherort.
+- Autorisierte Actor- und `local_analysis`-Replays hydrieren ihren
+  sanitizierten Debug aus `trace_json`; die Gegenseite erhält weiterhin nur
+  die redigierte Markierung.
+- `aiTraceMode: off` hinterlässt weder Tracezeile noch dauerhaften Replay-Debug.
+- Bestehende historische Eventzeilen werden nicht ungeprüft beim Serverstart
+  umgeschrieben. Ihre kontrollierte Normalisierung erfolgt im gesicherten
+  Optimize-/Vacuum-Ablauf von SMO-03.
+- Fokussierte Trace-/Replay-/Redactiontests: 8/8 grün.
+- Server-Typecheck und `git diff --check`: grün.

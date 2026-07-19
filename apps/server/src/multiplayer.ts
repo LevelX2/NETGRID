@@ -3283,6 +3283,18 @@ function replayDecisionDebug(debug: unknown, actor: Side | undefined): Record<st
   return result;
 }
 
+export function replayDecisionDebugFromTrace(trace: AiDecisionTraceRecord): Record<string, unknown> | undefined {
+  const debugSchemaVersion = trace.traceJson.debugSchemaVersion;
+  if (typeof debugSchemaVersion !== "string") return undefined;
+  return replayDecisionDebug(
+    {
+      ...trace.traceJson,
+      schemaVersion: debugSchemaVersion
+    },
+    trace.side
+  );
+}
+
 function aiDecisionTraceFor(record: StoredMatch, event: GameEvent, side: Side, legalAction: LegalAction, decision: AiDecision, mode: AiDecisionTraceMode, createdAt: string): AiDecisionTraceRecord | undefined {
   if (mode === "off" || !decision.decisionDebug) return undefined;
   const safeDebug = sanitizeAiDecisionDebug(decision.decisionDebug);
