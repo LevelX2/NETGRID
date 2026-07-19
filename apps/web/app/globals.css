@@ -15871,6 +15871,166 @@ select,
   gap: 6px;
 }
 
+.accountStatisticsPanel {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid rgb(83 218 168 / 0.34);
+  border-radius: 12px;
+  background: linear-gradient(145deg, rgb(18 42 45 / 0.72), rgb(12 24 33 / 0.92));
+}
+
+.accountStatisticsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.accountStatisticsHeader h3,
+.accountStatisticsHistory h4,
+.accountStatisticsBreakdown h4 {
+  margin: 0;
+}
+
+.accountStatisticsSelfPlay {
+  padding: 6px 10px;
+  border: 1px solid rgb(255 199 92 / 0.42);
+  border-radius: 999px;
+  color: #ffd487;
+  font-size: 0.78rem;
+}
+
+.accountStatisticsFilters {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.accountStatisticsFilters label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.accountStatisticsFilters select {
+  width: 100%;
+}
+
+.accountStatisticsKpis {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(100px, 1fr));
+  gap: 10px;
+}
+
+.accountStatisticsKpi,
+.accountStatisticsBreakdown,
+.accountStatisticsHistoryEntry {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgb(8 18 28 / 0.68);
+}
+
+.accountStatisticsKpi {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+}
+
+.accountStatisticsKpi > span,
+.accountStatisticsKpi small,
+.accountStatisticsBreakdown span,
+.accountStatisticsBreakdown small {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.accountStatisticsKpi strong {
+  font-size: 1.42rem;
+}
+
+.accountStatisticsKpi.positive strong {
+  color: #79e8b4;
+}
+
+.accountStatisticsKpi.negative strong {
+  color: #ff8997;
+}
+
+.accountStatisticsBreakdowns {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.accountStatisticsBreakdown {
+  display: grid;
+  gap: 5px;
+  padding: 14px;
+}
+
+.accountStatisticsBreakdown > strong {
+  font-size: 1.25rem;
+}
+
+.accountStatisticsHistory {
+  display: grid;
+  gap: 12px;
+}
+
+.accountStatisticsHistoryList {
+  display: grid;
+  gap: 8px;
+}
+
+.accountStatisticsHistoryEntry {
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+}
+
+.accountStatisticsHistoryEntry > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.accountStatisticsHistoryEntry > div span,
+.accountStatisticsHistoryEntry small {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.accountStatisticsHistoryEntry.excluded {
+  border-style: dashed;
+  opacity: 0.78;
+}
+
+@media (max-width: 900px) {
+  .accountStatisticsFilters,
+  .accountStatisticsKpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .accountStatisticsBreakdowns {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .accountStatisticsPanel {
+    padding: 14px;
+  }
+
+  .accountStatisticsFilters,
+  .accountStatisticsKpis {
+    grid-template-columns: 1fr;
+  }
+}
+
 .accountDeckLibraryHeader {
   display: grid;
   gap: 14px;

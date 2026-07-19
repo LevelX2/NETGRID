@@ -1,6 +1,6 @@
 # Account-Matchstatistik – kontrollierter Paketprozess
 
-Status: `AMS-04 completed; AMS-05 pending`
+Status: `AMS-05 completed; AMS-06 pending`
 
 ## Quelle und Vorgabe
 
@@ -129,7 +129,7 @@ cleanup_failed -> diagnose_cleanup -> cleanup_pending
 | AMS-02 Sichere Account-Matchbindung | completed | dieser Paketcommit |
 | AMS-03 Ergebnisledger und Reconciliation | completed | dieser Paketcommit |
 | AMS-04 Private API und Betrieb | completed | dieser Paketcommit |
-| AMS-05 Account-Statistik-UI | pending | – |
+| AMS-05 Account-Statistik-UI | completed | dieser Paketcommit |
 | AMS-06 Final Review und Integration | pending | – |
 
 ## Paketdetails
@@ -441,3 +441,18 @@ gemergten Arbeitsbranch löschen. Markiere das Goal erst dann als complete.
 - Grün: Server-Typecheck und 136 Tests aus Accountstatistik, HTTP, Sessions und
   vollständigem Multiplayerlauf.
 - Nicht ausgeführt: Webclient- und Browsergates; sie sind Gegenstand von AMS-05.
+
+### AMS-05
+
+- Die eingeloggte Accountansicht zeigt private Gesamtwerte, Siegquote,
+  Runner-/Korp-Aufteilung, Serienstand und eine redigierte Matchhistorie.
+- Zeitraum, Seite, Gegnerart und Matchmodus sind clientseitig bedienbare
+  Serverfilter; weitere Historieneinträge werden cursorpaginiert geladen.
+- Gastansichten erhalten die Komponente nicht. Fehler-, Lade- und Leerzustände
+  bleiben explizit und verraten keine fremden Account- oder Deckdaten.
+- Grün: Web-Typecheck, vollständiger Webtestlauf mit 643 Tests und Browser-Gate
+  über den regulären Startpfad. Geprüft wurden Accountaktivierung, same-site
+  Login, private Leerstatistik, Filterinteraktion, fehlende Browserfehler und
+  die einspaltige 560-Pixel-Ansicht ohne horizontalen Überlauf.
+- Der temporäre Browser-Testaccount wurde anschließend über den regulären
+  Accountlösch-Endpunkt vollständig entfernt.
