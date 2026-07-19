@@ -115,7 +115,15 @@ const productionLineCaps = new Map([
   ],
   [
     "runtime/corp-scoreline/semantic-runtime-corp-scoring-window-projection.ts",
-    1445,
+    1189,
+  ],
+  [
+    "runtime/corp-scoreline/semantic-runtime-corp-scoring-window-runner-pressure.ts",
+    448,
+  ],
+  [
+    "runtime/corp-scoreline/semantic-runtime-corp-scoring-window-card-data.ts",
+    4,
   ],
 ]);
 for (const file of productionFiles) {

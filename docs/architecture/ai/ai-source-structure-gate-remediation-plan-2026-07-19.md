@@ -212,7 +212,15 @@ dokumentiertem Sicherheitsblocker und Removal Condition zulässig.
   Board-Triage-Verträge geteilt. AI-Typecheck, Package-Boundaries, 105/105
   Choice-/Plan-/Decision-Chain-Tests, Structure-Selftest und Diff-Hygiene sind
   grün; die Removal List sinkt von acht auf sechs Treffer.
-- Aktives Paket: ASSG-3.
+- ASSG-3 abgeschlossen: Die Scoring-Window-Projektion sinkt von 1.619 auf
+  1.189 Zeilen. Sichtbare Runner-Credits, Staged Breaker, Memory-Fit und
+  bekannte ICE-Pfadbewertung liegen in einem 448-Zeilen-Runner-Pressure-Owner;
+  beide Seiten teilen eine einzige kleine AI-Hint-Datenquelle. Der bestehende
+  Projection-Export bleibt kompatibel. AI-Typecheck, Package-Boundaries,
+  106/106 Window-/Protection-/Central-Pressure-/Match-3bb14-/Corp-Score-Tests,
+  Structure-Selftest und Diff-Hygiene sind grün; die Removal List sinkt von
+  sechs auf fünf Treffer.
+- Aktives Paket: ASSG-4.
 
 ## Paketfolge
 
