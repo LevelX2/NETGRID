@@ -4,6 +4,7 @@ import { hashGameState } from "@netgrid/engine";
 import defensiveDrawD9Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-3bb14-03-defensive-draw-d9.json";
 import defensiveDrawD10Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-3bb14-04-defensive-draw-d10.json";
 import defensiveDrawD11Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-3bb14-05-defensive-draw-d11.json";
+import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
@@ -58,6 +59,56 @@ describe("match 3bb14 Corp draw near-tie decision checkpoints", () => {
     const result = runAiDecisionCheckpoint(checkpoint);
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
+  });
+
+  it("wires seeded variation through the productive chooser for a controlled near tie", () => {
+    const checkpoint = runAiDecisionCheckpoint(fixture(defensiveDrawD9Json));
+    expect(checkpoint.ok, `${checkpoint.code}: ${checkpoint.message}`).toBe(
+      true,
+    );
+    const input = structuredClone(checkpoint.input);
+    const hq = input.playerView.servers.find((server) => server.id === "hq");
+    const rd = input.playerView.servers.find((server) => server.id === "rd");
+    const existingCentralIce = hq?.ice[0];
+    if (!rd || !existingCentralIce) {
+      throw new Error("Missing captured central test context");
+    }
+    rd.ice = [
+      {
+        ...structuredClone(existingCentralIce),
+        instanceId: "controlled-rd-ice",
+      },
+    ];
+    const basicEconomyActions = input.legalActions.filter(
+      (action) => action.type === "gain_credit" || action.type === "draw_card",
+    );
+    input.legalActions = basicEconomyActions;
+    input.playerView.legalActions = basicEconomyActions;
+    input.decisionId = "controlled-corp-basic-economy-near-tie";
+
+    const decisions = Array.from({ length: 32 }, (_, index) =>
+      chooseAiAction(
+        { ...structuredClone(input), seed: `controlled-seed-${index}` },
+        { persistTacticalPlanMemory: false },
+      ),
+    );
+    const selected = new Set(decisions.map((decision) => decision.actionId));
+
+    expect(selected).toEqual(new Set(["corp.draw_card", "corp.gain_credit"]));
+    expect(
+      decisions.every((decision) =>
+        decision.decisionDebug?.scoreBreakdown?.some(
+          (component) => component.key === "corp_seeded_near_tie_variation",
+        ),
+      ),
+    ).toBe(true);
+    expect(
+      decisions.every(
+        (decision) =>
+          decision.decisionDebug?.decisionChain?.rawScoreWinner?.actionId ===
+          "corp.draw_card",
+      ),
+    ).toBe(true);
   });
 });
 

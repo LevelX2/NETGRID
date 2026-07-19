@@ -3899,7 +3899,8 @@
         "corp_missing_concrete_defense_draw"
       ],
       "forbiddenComponentKeys": [
-        "corp_low_hand"
+        "corp_low_hand",
+        "corp_seeded_near_tie_variation"
       ]
     }
   }

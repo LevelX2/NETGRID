@@ -1,6 +1,6 @@
 # Match-3bb14-Corp-Draw-Near-Tie-Prozess (2026-07-19)
 
-Status: P2 abgeschlossen, P3 aktiv
+Status: P3 abgeschlossen, P4 aktiv
 
 ## Quelle und Zielprüfung
 
@@ -168,3 +168,10 @@ verifiziertem Worktree- und Branch-Cleanup als abgeschlossen.
   zentrale ICE-Lage ohne konkrete Installationsalternative bei positivem
   Deck-ICE-Schätzwert. D9-D11 und Gegenproben sind grün; fokussiert 66/66
   Tests und AI-Typecheck grün.
+- P3: replay-stabile Corp-Variation innerhalb eines strategischen
+  100-Punkte-Fensters, begrenzt auf Basic Credit/Draw derselben Scope und
+  Viability-Stufe. Seed, Decision-ID, Action-Nummer, StateVersion, Profil und
+  stabil sortierte Kandidaten bilden den Hashkontext. Full-Hand, Ausschlüsse,
+  klare Sieger und D9-D11 bleiben unverändert; produktiver Chooser und
+  Raw-Score-Debug sind kontrolliert verifiziert. Fokussiert 108/108 Tests und
+  AI-Typecheck grün.
