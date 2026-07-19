@@ -222,3 +222,21 @@ complete.`
 - Arbeits-Worktree existiert weder in Git noch im Dateisystem.
 - Der gemergte Arbeitsbranch ist gelöscht.
 - Das verbindliche Goal ist erst danach `complete`.
+
+## Fortschrittsnachweis
+
+### SMO-01 – abgeschlossen
+
+- KI-Traces und Action Receipts werden append-or-truncate synchronisiert;
+  unverändertes erneutes Speichern erzeugt keine Tabellenwrites.
+- Undo entfernt nur nicht mehr gültige Event-, Trace- und Receipt-Tails.
+- Additive Indizes ordnen PublicEvents, EngineEvents und StateSnapshots ohne
+  Schemaformatänderung; deshalb war keine datenverändernde Migration nötig.
+- Fokussierte Write-Audit-/Undo-/Query-Plan-Tests: 2/2 grün.
+- Server-Typecheck: grün.
+- Vollständiger Serverlauf: 183/184 grün. Der einzige rote Test
+  `advances Corp AI in a root-rez window even when activeSide is runner`
+  scheitert identisch auf dem unveränderten `main`, weil er noch leere
+  Runner-LegalActions erwartet, während `jack_out` und `continue_run`
+  inzwischen legal sind. Das ist als vorbestehende fachfremde Baseline
+  klassifiziert und wird nicht in den Storage-Scope gezogen.

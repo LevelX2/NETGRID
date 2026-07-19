@@ -990,6 +990,8 @@ export class SqliteMatchStorage implements MultiplayerStorage {
           PRIMARY KEY (match_id, event_id),
           FOREIGN KEY (match_id) REFERENCES matches(match_id) ON DELETE CASCADE
         );
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_events_match_event_index
+          ON events(match_id, event_index);
         CREATE TABLE IF NOT EXISTS engine_events (
           match_id TEXT NOT NULL,
           event_id TEXT NOT NULL,
@@ -998,6 +1000,8 @@ export class SqliteMatchStorage implements MultiplayerStorage {
           PRIMARY KEY (match_id, event_id),
           FOREIGN KEY (match_id) REFERENCES matches(match_id) ON DELETE CASCADE
         );
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_engine_events_match_event_index
+          ON engine_events(match_id, event_index);
         CREATE TABLE IF NOT EXISTS ai_decision_traces (
           match_id TEXT NOT NULL,
           trace_id TEXT NOT NULL,
@@ -1045,6 +1049,8 @@ export class SqliteMatchStorage implements MultiplayerStorage {
           PRIMARY KEY (match_id, snapshot_id),
           FOREIGN KEY (match_id) REFERENCES matches(match_id) ON DELETE CASCADE
         );
+        CREATE INDEX IF NOT EXISTS idx_state_snapshots_match_state
+          ON state_snapshots(match_id, state_version, snapshot_id);
         CREATE TABLE IF NOT EXISTS undo_snapshots (
           match_id TEXT NOT NULL,
           undo_request_id TEXT NOT NULL,
@@ -1297,7 +1303,6 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     for (const table of [
       "sessions",
       "tokens",
-      "action_receipts",
       "undo_snapshots",
       "pending_undo",
       "private_deck_snapshots",
@@ -1336,14 +1341,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     this.syncPublicEvents(matchId, record.eventLog);
     this.syncEngineEvents(matchId, record.gameState?.eventLog ?? []);
     this.syncAiDecisionTraces(matchId, record.aiDecisionTraces ?? []);
-
-    const insertReceipt = this.db.prepare(
-      `INSERT INTO action_receipts (match_id, idempotency_key, side, accepted, state_version_before, state_version_after, state_hash_after, error_code)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-    );
-    for (const receipt of record.actionReceipts) {
-      insertReceipt.run(matchId, receipt.idempotencyKey, receipt.side, receipt.accepted ? 1 : 0, receipt.stateVersionBefore, receipt.stateVersionAfter, receipt.stateHashAfter, receipt.errorCode ?? null);
-    }
+    this.syncActionReceipts(matchId, record.actionReceipts);
 
     const insertStateSnapshot = this.db.prepare(
       `INSERT INTO state_snapshots (match_id, snapshot_id, state_version, match_version, state_hash, game_state_json, created_at, hidden_info_barrier)
@@ -1404,7 +1402,14 @@ export class SqliteMatchStorage implements MultiplayerStorage {
   }
 
   private syncAiDecisionTraces(matchId: string, traces: AiDecisionTraceRecord[]): void {
-    this.db.prepare("DELETE FROM ai_decision_traces WHERE match_id = ?").run(matchId);
+    const traceIds = new Set(traces.map((trace) => trace.traceId));
+    const existingTraceIds = new Set(
+      (this.db.prepare("SELECT trace_id AS traceId FROM ai_decision_traces WHERE match_id = ?").all(matchId) as Array<{ traceId: string }>).map((row) => row.traceId)
+    );
+    const deleteTrace = this.db.prepare("DELETE FROM ai_decision_traces WHERE match_id = ? AND trace_id = ?");
+    for (const traceId of existingTraceIds) {
+      if (!traceIds.has(traceId)) deleteTrace.run(matchId, traceId);
+    }
     if (traces.length === 0) return;
     const insertTrace = this.db.prepare(
       `INSERT INTO ai_decision_traces
@@ -1412,6 +1417,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     );
     for (const trace of traces) {
+      if (existingTraceIds.has(trace.traceId)) continue;
       insertTrace.run(
         matchId,
         trace.traceId,
@@ -1433,6 +1439,28 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     }
   }
 
+  private syncActionReceipts(matchId: string, receipts: StoredMatch["actionReceipts"]): void {
+    const receiptKey = (receipt: { idempotencyKey: string; side: string }): string => `${receipt.side}\u0000${receipt.idempotencyKey}`;
+    const receiptKeys = new Set(receipts.map(receiptKey));
+    const existingReceipts = this.db
+      .prepare("SELECT idempotency_key AS idempotencyKey, side FROM action_receipts WHERE match_id = ?")
+      .all(matchId) as Array<{ idempotencyKey: string; side: string }>;
+    const existingReceiptKeys = new Set(existingReceipts.map(receiptKey));
+    const deleteReceipt = this.db.prepare("DELETE FROM action_receipts WHERE match_id = ? AND idempotency_key = ? AND side = ?");
+    for (const receipt of existingReceipts) {
+      if (!receiptKeys.has(receiptKey(receipt))) deleteReceipt.run(matchId, receipt.idempotencyKey, receipt.side);
+    }
+
+    const insertReceipt = this.db.prepare(
+      `INSERT INTO action_receipts (match_id, idempotency_key, side, accepted, state_version_before, state_version_after, state_hash_after, error_code)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+    );
+    for (const receipt of receipts) {
+      if (existingReceiptKeys.has(receiptKey(receipt))) continue;
+      insertReceipt.run(matchId, receipt.idempotencyKey, receipt.side, receipt.accepted ? 1 : 0, receipt.stateVersionBefore, receipt.stateVersionAfter, receipt.stateHashAfter, receipt.errorCode ?? null);
+    }
+  }
+
   private aiDecisionTraceRecords(matchId: string, filters: { afterDecisionIndex?: number } = {}): AiDecisionTraceRecord[] {
     if (!this.tableExists("ai_decision_traces")) return [];
     const afterDecisionIndex = Number.isFinite(filters.afterDecisionIndex) ? Math.floor(filters.afterDecisionIndex!) : undefined;
@@ -1444,7 +1472,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
          FROM ai_decision_traces
          WHERE match_id = ?
            AND (? IS NULL OR decision_index > ?)
-         ORDER BY decision_index ASC, created_at ASC`
+         ORDER BY decision_index ASC`
       )
       .all(matchId, afterDecisionIndex ?? null, afterDecisionIndex ?? null) as Array<{
       traceId: string;
