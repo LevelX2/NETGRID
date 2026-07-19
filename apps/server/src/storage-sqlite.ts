@@ -6,7 +6,7 @@ import { hashState } from "@netgrid/engine";
 import type { GameEvent, GameState } from "@netgrid/shared";
 import type { AiDecisionTraceRecord, MatchMode, MatchStatus, MultiplayerStorage, StoredMatch } from "./multiplayer";
 
-export const SQLITE_STORAGE_SCHEMA_VERSION = 2;
+export const SQLITE_STORAGE_SCHEMA_VERSION = 3;
 export const SQLITE_STORAGE_FORMAT = "netgrid_multiplayer_sqlite";
 export const DEFAULT_SQLITE_STORAGE_PATH = "data/runtime/multiplayer/netgrid.sqlite";
 export const DEFAULT_JSON_STORAGE_PATH = "data/runtime/multiplayer/matches.json";
@@ -899,6 +899,67 @@ export class SqliteMatchStorage implements MultiplayerStorage {
           created_at TEXT NOT NULL,
           updated_at TEXT NOT NULL
         );
+        CREATE TABLE IF NOT EXISTS account_match_participants (
+          match_id TEXT NOT NULL,
+          participant_slot TEXT NOT NULL CHECK (participant_slot IN ('player_a', 'player_b')),
+          account_id TEXT NOT NULL,
+          bound_at TEXT NOT NULL,
+          binding_source TEXT NOT NULL CHECK (binding_source IN ('authenticated_create', 'authenticated_join', 'inherited_recreate', 'inherited_series_next')),
+          PRIMARY KEY (match_id, participant_slot),
+          FOREIGN KEY (account_id) REFERENCES accounts(account_id) ON DELETE CASCADE
+        );
+        CREATE INDEX IF NOT EXISTS idx_account_match_participants_account_bound
+          ON account_match_participants(account_id, bound_at);
+        CREATE TABLE IF NOT EXISTS account_game_results (
+          account_game_result_id TEXT PRIMARY KEY,
+          account_id TEXT NOT NULL,
+          origin_match_id TEXT NOT NULL,
+          participant_slot TEXT NOT NULL CHECK (participant_slot IN ('player_a', 'player_b')),
+          series_id TEXT,
+          game_number INTEGER,
+          completed_at TEXT NOT NULL,
+          side TEXT NOT NULL CHECK (side IN ('runner', 'corp')),
+          outcome TEXT NOT NULL CHECK (outcome IN ('win', 'loss', 'draw', 'abandoned')),
+          finish_kind TEXT NOT NULL CHECK (finish_kind IN ('regular', 'forfeit', 'time_expired', 'leave', 'abandon')),
+          opponent_kind TEXT NOT NULL CHECK (opponent_kind IN ('account', 'guest', 'ai')),
+          match_mode TEXT NOT NULL,
+          match_format TEXT NOT NULL,
+          card_pool TEXT NOT NULL,
+          agenda_points_for INTEGER NOT NULL,
+          agenda_points_against INTEGER NOT NULL,
+          match_points INTEGER NOT NULL,
+          statistics_eligible INTEGER NOT NULL CHECK (statistics_eligible IN (0, 1)),
+          exclusion_reason TEXT CHECK (exclusion_reason IS NULL OR exclusion_reason IN ('self_play')),
+          recorded_at TEXT NOT NULL,
+          UNIQUE (account_id, origin_match_id, participant_slot),
+          FOREIGN KEY (account_id) REFERENCES accounts(account_id) ON DELETE CASCADE
+        );
+        CREATE INDEX IF NOT EXISTS idx_account_game_results_account_completed
+          ON account_game_results(account_id, completed_at DESC, account_game_result_id DESC);
+        CREATE TABLE IF NOT EXISTS account_series_results (
+          account_series_result_id TEXT PRIMARY KEY,
+          account_id TEXT NOT NULL,
+          series_id TEXT NOT NULL,
+          participant_slot TEXT NOT NULL CHECK (participant_slot IN ('player_a', 'player_b')),
+          completed_at TEXT NOT NULL,
+          outcome TEXT NOT NULL CHECK (outcome IN ('win', 'loss', 'draw')),
+          opponent_kind TEXT NOT NULL CHECK (opponent_kind IN ('account', 'guest', 'ai')),
+          games_played INTEGER NOT NULL,
+          wins INTEGER NOT NULL,
+          losses INTEGER NOT NULL,
+          draws INTEGER NOT NULL,
+          match_points_for INTEGER NOT NULL,
+          match_points_against INTEGER NOT NULL,
+          agenda_points_for INTEGER NOT NULL,
+          agenda_points_against INTEGER NOT NULL,
+          statistics_eligible INTEGER NOT NULL CHECK (statistics_eligible IN (0, 1)),
+          exclusion_reason TEXT CHECK (exclusion_reason IS NULL OR exclusion_reason IN ('self_play')),
+          recorded_at TEXT NOT NULL,
+          UNIQUE (account_id, series_id, participant_slot),
+          FOREIGN KEY (account_id) REFERENCES accounts(account_id) ON DELETE CASCADE
+        );
+        CREATE INDEX IF NOT EXISTS idx_account_series_results_account_completed
+          ON account_series_results(account_id, completed_at DESC, account_series_result_id DESC);
         CREATE TABLE IF NOT EXISTS sessions (
           match_id TEXT NOT NULL,
           session_id TEXT NOT NULL,
@@ -1032,11 +1093,12 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       this.setMeta("storage_format", SQLITE_STORAGE_FORMAT, now);
       if (!this.meta("created_at")) this.setMeta("created_at", now, now);
       if (!this.meta("last_migration_at")) this.setMeta("last_migration_at", now, now);
+      if (!this.meta("account_statistics_since")) this.setMeta("account_statistics_since", now, now);
     });
   }
 
   private migrate(version: number): void {
-    if (version !== 0 && version !== 1) throw new StorageError("schema_too_old", "Storage-Schema ist älter als die bekannten Migrationen.");
+    if (version !== 0 && version !== 1 && version !== 2) throw new StorageError("schema_too_old", "Storage-Schema ist älter als die bekannten Migrationen.");
     createSqliteStorageBackup({
       dbPath: this.dbPath,
       backupDir: this.backupDir,
@@ -1688,7 +1750,10 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       { key: "undo_snapshots", label: "Undo Snapshots", table: "undo_snapshots", expression: "COUNT(*) * 64" },
       { key: "pending_undo", label: "Pending Undo", table: "pending_undo", expression: "COALESCE(SUM(LENGTH(pending_undo_json)), 0)" },
       { key: "deck_snapshots_redacted", label: "Deck-Snapshots (Inhalt redigiert)", table: "private_deck_snapshots", expression: "COALESCE(SUM(LENGTH(private_deck_snapshots_json)), 0)" },
-      { key: "start_lobbies", label: "Start-Lobbys", table: "start_lobbies", expression: "COALESCE(SUM(LENGTH(start_lobby_json)), 0)" }
+      { key: "start_lobbies", label: "Start-Lobbys", table: "start_lobbies", expression: "COALESCE(SUM(LENGTH(start_lobby_json)), 0)" },
+      { key: "account_match_participants", label: "Account-Matchbindungen (redigiert)", table: "account_match_participants", expression: "COUNT(*) * 64" },
+      { key: "account_game_results", label: "Account-Spielergebnisse (redigiert)", table: "account_game_results", expression: "COUNT(*) * 160" },
+      { key: "account_series_results", label: "Account-Serienergebnisse (redigiert)", table: "account_series_results", expression: "COUNT(*) * 160" }
     ] as const;
     return definitions
       .filter((definition) => this.tableExists(definition.table))
