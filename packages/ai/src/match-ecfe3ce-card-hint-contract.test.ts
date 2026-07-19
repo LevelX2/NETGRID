@@ -1,13 +1,14 @@
 import { describe, expect, it } from "vitest";
 
 import activeHints from "../../../data/ai/ai-card-hints-active.json";
-import inspectorIndex from "../../../data/ai/ai-hint-inspector-index.json";
 
 type Hint = {
   cardId: string;
   roles?: string[];
   planRoles?: string[];
   requiredMechanics?: string[];
+  functionSignals?: string[];
+  tacticSignals?: string[];
   effects?: Array<{
     kind: string;
     timing?: string;
@@ -67,13 +68,11 @@ describe("match ECFE3CE card-hint contract", () => {
     },
   );
 
-  it("publishes TKO's action loss as a derived function signal", () => {
-    const tko = inspectorIndex.cards.find(
+  it("publishes TKO's action loss as a static tactic signal", () => {
+    const tko = (activeHints.cards as Hint[]).find(
       (entry) => entry.cardId === "onr_v1_271_tko-2-0",
     );
-    expect(tko?.derivedFunctionSignals).toContain(
-      "corp_ice.runner_action_loss",
-    );
+    expect(tko?.functionSignals).toContain("corp_ice.runner_action_loss");
   });
 });
 

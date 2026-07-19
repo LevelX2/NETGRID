@@ -170,7 +170,6 @@ function strategyProfile(
       mode: "ai_internal_strategy_profile",
       strategyGoals: "data/ai/strategy-goals-v1.json",
       activeHints: "data/ai/ai-card-hints-active.json",
-      inspectorIndex: "data/ai/ai-hint-inspector-index.json",
       plannerEffect: "strategic_intent_input",
     },
   };

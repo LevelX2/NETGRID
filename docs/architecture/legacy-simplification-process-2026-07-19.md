@@ -5,6 +5,18 @@
 Aktiv. Genau ein Paket wird gleichzeitig bearbeitet. Der Fortschritt wird nach
 jedem Paket in diesem Dokument aktualisiert.
 
+## Fortschritt
+
+- P0 Prozessbasis: abgeschlossen, Commit `1a8c0ba29`.
+- P1 Statische Hint-Semantik: abgeschlossen. Alle produktiven Ableitungen sind
+  als verbraucherspezifische statische Felder in
+  `ai-card-hints-active.json` übernommen; Inspector-Index,
+  Ableitungskataloge und Compiler-/Taxonomie-Skripte sind entfernt. Geprüft
+  mit AI-/Web-Typecheck, 67 gezielten AI-Tests, 52 Webtests und einem
+  AI-Gesamtlauf mit 2.769 grünen Tests; dessen zwei Befunde wurden danach
+  gezielt korrigiert und grün nachgetestet.
+- P2 Kartenrollen-/Access-Legacy: als Nächstes.
+
 ## Quelle/Vorgabe
 
 Die Umsetzung folgt dem Architektur-Audit aus der Spielanalyse-Nacharbeit vom

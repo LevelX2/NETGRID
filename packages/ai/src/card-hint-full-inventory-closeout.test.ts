@@ -17,9 +17,7 @@ const repoRoot = path.resolve(
 );
 
 function readJson(relativePath: string): any {
-  return JSON.parse(
-    fs.readFileSync(path.join(repoRoot, relativePath), "utf8"),
-  );
+  return JSON.parse(fs.readFileSync(path.join(repoRoot, relativePath), "utf8"));
 }
 
 function hintById(): Map<string, Hint> {
@@ -61,28 +59,6 @@ describe("AI card hint full-inventory closeout", () => {
       "punish_tagged_runner",
     ]);
     expect(plans("simple_upgrade")).toEqual([]);
-  });
-
-  it("has profiles for every signal that requires a target preference", () => {
-    const hints = hintById();
-    const inspector = readJson("data/ai/ai-hint-inspector-index.json");
-    const signalCatalog = readJson("data/ai/tactic-signals-v1.json");
-    const required = new Set<string>(
-      signalCatalog.signalPolicy.targetProfileRequiredSignalIds,
-    );
-    const missing = inspector.cards
-      .filter((card: any) =>
-        card.derivedFunctionSignals.some((signal: string) =>
-          required.has(signal),
-        ),
-      )
-      .filter(
-        (card: any) => (hints.get(card.cardId)?.targetProfiles?.length ?? 0) === 0,
-      )
-      .map((card: any) => card.cardId);
-
-    expect(required.size).toBeGreaterThan(0);
-    expect(missing).toEqual([]);
   });
 
   it("contains neither deprecated aliases nor unclassified singleton noise", () => {

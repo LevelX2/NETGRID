@@ -9,7 +9,6 @@ import {
   type CatalogStatusKey,
 } from "@netgrid/catalog";
 import activeAiHintsData from "../../../../../data/ai/ai-card-hints-active.json";
-import aiHintInspectorIndexData from "../../../../../data/ai/ai-hint-inspector-index.json";
 import { createRuntimeCardPool } from "../card-pool-runtime";
 
 type CatalogAiHint = {
@@ -32,18 +31,14 @@ type CatalogAiCardHint = CatalogAiHint & {
   targetProfiles?: Array<Record<string, unknown>>;
   lineSupport?: string[];
   strategicRole?: string[];
+  functionSignals?: string[];
+  tacticSignals?: string[];
+  strategyAnchors?: string[];
   strategySupportPairs?: CatalogStrategySupportPair[];
   quality?: Record<string, unknown>;
+  descriptorGaps?: Array<Record<string, unknown>>;
   manualNotes?: string[];
   strategicNotes?: string[];
-};
-
-type AiInspectorClassification = {
-  value: string;
-  category: string;
-  triageCategory: string;
-  mapsTo: string[];
-  rationale: string;
 };
 
 type CatalogStrategySupportPair = {
@@ -56,27 +51,6 @@ type CatalogStrategySupportPair = {
   sourceValue?: string;
   triageCategory?: string;
   rationale?: string;
-};
-
-type AiInspectorIndexEntry = {
-  cardId: string;
-  supportStatus: {
-    aiSupportStatus: CatalogAiHint["aiSupportStatus"];
-    hintFound: boolean;
-    mechanicalFactsFound: boolean;
-    legacyFallbackOnly: boolean;
-    warningCount: number;
-  };
-  derivedFunctionSignals: string[];
-  derivedStrategyAnchors: string[];
-  reviewedStrategySupportPairs: CatalogStrategySupportPair[];
-  lineSupportClassification: AiInspectorClassification[];
-  rolesClassification: AiInspectorClassification[];
-  planRolesClassification: AiInspectorClassification[];
-  warningCategories: string[];
-  descriptorGaps: Array<Record<string, unknown>>;
-  legacyStatus: Record<string, unknown>;
-  strategicRoleStatus: Record<string, unknown>;
 };
 
 type CatalogAiInspectorListSummary = {
@@ -92,12 +66,6 @@ const AI_HINTS_BY_CARD_ID = new Map(
   (activeAiHintsData.cards as CatalogAiCardHint[]).map((hint) => [
     hint.cardId,
     hint,
-  ]),
-);
-const AI_HINT_INSPECTOR_BY_CARD_ID = new Map(
-  (aiHintInspectorIndexData.cards as AiInspectorIndexEntry[]).map((entry) => [
-    entry.cardId,
-    entry,
   ]),
 );
 
@@ -229,98 +197,93 @@ function catalogAiInspectorSummaryForCard(
   catalogCardId: string,
 ): CatalogAiInspectorListSummary | null {
   const cardHint = AI_HINTS_BY_CARD_ID.get(catalogCardId) ?? null;
-  const inspector = AI_HINT_INSPECTOR_BY_CARD_ID.get(catalogCardId) ?? null;
-  if (!cardHint && !inspector) return null;
-
-  const supportStatus = inspector?.supportStatus ?? {
-    aiSupportStatus: cardHint?.aiSupportStatus ?? "none",
-    hintFound: Boolean(cardHint),
-    mechanicalFactsFound: hasMechanicalFacts(cardHint),
-    legacyFallbackOnly: false,
-    warningCount: cardHint ? 0 : 1,
-  };
-  const classificationCount =
-    (inspector?.lineSupportClassification.length ?? 0) +
-    (inspector?.rolesClassification.length ?? 0) +
-    (inspector?.planRolesClassification.length ?? 0) +
-    (inspector?.reviewedStrategySupportPairs.length ?? 0);
-  const warningCount =
-    (inspector?.warningCategories.length ?? 0) +
-    (inspector?.descriptorGaps.length ?? 0);
+  if (!cardHint) return null;
 
   return {
-    available: Boolean(inspector),
-    aiSupportStatus: supportStatus.aiSupportStatus,
-    hintFound: supportStatus.hintFound,
-    mechanicalFactsFound: supportStatus.mechanicalFactsFound,
-    hasClassifications: classificationCount > 0,
-    hasWarnings: supportStatus.warningCount > 0 || warningCount > 0,
+    available: true,
+    aiSupportStatus: cardHint.aiSupportStatus,
+    hintFound: true,
+    mechanicalFactsFound: hasMechanicalFacts(cardHint),
+    hasClassifications: Boolean(
+      cardHint.functionSignals?.length ||
+      cardHint.strategyAnchors?.length ||
+      cardHint.strategySupportPairs?.length ||
+      cardHint.lineSupport?.length,
+    ),
+    hasWarnings: Boolean(
+      cardHint.quality?.needsHumanReview || cardHint.descriptorGaps?.length,
+    ),
   };
 }
 
 function catalogAiInspectorForCard(catalogCardId: string) {
   const cardHint = AI_HINTS_BY_CARD_ID.get(catalogCardId) ?? null;
-  const inspector = AI_HINT_INSPECTOR_BY_CARD_ID.get(catalogCardId) ?? null;
-  if (!cardHint && !inspector) return null;
-
-  const supportStatus = inspector?.supportStatus ?? {
-    aiSupportStatus: cardHint?.aiSupportStatus ?? "none",
-    hintFound: Boolean(cardHint),
-    mechanicalFactsFound: hasMechanicalFacts(cardHint),
-    legacyFallbackOnly: false,
-    warningCount: cardHint ? 0 : 1,
-  };
+  if (!cardHint) return null;
+  const needsHumanReview = cardHint.quality?.needsHumanReview === true;
+  const strategySupportPairs = (cardHint.strategySupportPairs ?? []).map(
+    (pair) => ({
+      ...pair,
+      sourceField: "strategySupportPairs",
+      sourceValue: pair.strategyId,
+      triageCategory: "explicit_strategy_support_pair",
+    }),
+  );
 
   return {
-    schemaVersion: aiHintInspectorIndexData.schemaVersion,
-    source: aiHintInspectorIndexData.source,
-    supportStatus,
-    cardHint: cardHint
-      ? {
-          aiSupportStatus: cardHint.aiSupportStatus,
-          requiredMechanics: cardHint.requiredMechanics ?? [],
-          valueHints: cardHint.valueHints ?? {},
-          riskTags: cardHint.riskTags ?? [],
-          scenarioRefs: cardHint.scenarioRefs ?? [],
-          manualNotes: cardHint.manualNotes ?? [],
-          strategicNotes: cardHint.strategicNotes ?? [],
-        }
-      : null,
-    mechanicalFacts: cardHint
-      ? {
-          effects: cardHint.effects ?? [],
-          conditions: cardHint.conditions ?? [],
-          costProfile: cardHint.costProfile ?? null,
-          breakerProfile: cardHint.breakerProfile ?? null,
-          remoteRole: cardHint.remoteRole ?? null,
-          targetProfiles: cardHint.targetProfiles ?? [],
-        }
-      : null,
-    functionSignals: inspector?.derivedFunctionSignals ?? [],
-    strategyAnchors: inspector?.derivedStrategyAnchors ?? [],
-    strategySupportPairs:
-      inspector?.reviewedStrategySupportPairs ??
-      cardHint?.strategySupportPairs ??
-      [],
-    lineSupport: {
-      values: cardHint?.lineSupport ?? [],
-      classification: inspector?.lineSupportClassification ?? [],
+    schemaVersion: "ai-card-hints-active-v1",
+    source: {
+      activeHintsPath: "data/ai/ai-card-hints-active.json",
+      mode: "single static AI hint source",
     },
-    strategicRole: cardHint?.strategicRole ?? [],
-    quality: cardHint?.quality ?? null,
+    supportStatus: {
+      aiSupportStatus: cardHint.aiSupportStatus,
+      hintFound: true,
+      mechanicalFactsFound: hasMechanicalFacts(cardHint),
+      legacyFallbackOnly: false,
+      warningCount:
+        (needsHumanReview ? 1 : 0) + (cardHint.descriptorGaps?.length ?? 0),
+    },
+    cardHint: {
+      aiSupportStatus: cardHint.aiSupportStatus,
+      requiredMechanics: cardHint.requiredMechanics ?? [],
+      valueHints: cardHint.valueHints ?? {},
+      riskTags: cardHint.riskTags ?? [],
+      scenarioRefs: cardHint.scenarioRefs ?? [],
+      manualNotes: cardHint.manualNotes ?? [],
+      strategicNotes: cardHint.strategicNotes ?? [],
+    },
+    mechanicalFacts: {
+      effects: cardHint.effects ?? [],
+      conditions: cardHint.conditions ?? [],
+      costProfile: cardHint.costProfile ?? null,
+      breakerProfile: cardHint.breakerProfile ?? null,
+      remoteRole: cardHint.remoteRole ?? null,
+      targetProfiles: cardHint.targetProfiles ?? [],
+    },
+    functionSignals: cardHint.functionSignals ?? [],
+    strategyAnchors: cardHint.strategyAnchors ?? [],
+    strategySupportPairs,
+    lineSupport: {
+      values: cardHint.lineSupport ?? [],
+      classification: [],
+    },
+    strategicRole: cardHint.strategicRole ?? [],
+    quality: cardHint.quality ?? null,
     legacyRoles: {
-      roles: cardHint?.roles ?? [],
-      planRoles: cardHint?.planRoles ?? [],
-      rolesClassification: inspector?.rolesClassification ?? [],
-      planRolesClassification: inspector?.planRolesClassification ?? [],
+      roles: cardHint.roles ?? [],
+      planRoles: cardHint.planRoles ?? [],
+      rolesClassification: [],
+      planRolesClassification: [],
     },
     warnings: {
-      categories:
-        inspector?.warningCategories ??
-        (cardHint ? [] : ["missing_active_hint"]),
-      descriptorGaps: inspector?.descriptorGaps ?? [],
-      legacyStatus: inspector?.legacyStatus ?? {},
-      strategicRoleStatus: inspector?.strategicRoleStatus ?? {},
+      categories: needsHumanReview ? ["needs_human_review"] : [],
+      descriptorGaps: cardHint.descriptorGaps ?? [],
+      legacyStatus: {},
+      strategicRoleStatus: {
+        values: cardHint.strategicRole ?? [],
+        validValues: cardHint.strategicRole ?? [],
+        unknownValues: [],
+      },
     },
   };
 }

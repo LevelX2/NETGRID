@@ -1,6 +1,5 @@
 import type { Side } from "@netgrid/shared";
 import activeAiHintsData from "../../../data/ai/ai-card-hints-active.json";
-import inspectorIndexData from "../../../data/ai/ai-hint-inspector-index.json";
 import strategyGoalsData from "../../../data/ai/strategy-goals-v1.json";
 import { RUNTIME_CARDS } from "./ai-hints";
 import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
@@ -209,7 +208,6 @@ export type AiDeckStrategyProfile = {
     mode: "ai_internal_strategy_profile";
     strategyGoals: "data/ai/strategy-goals-v1.json";
     activeHints: "data/ai/ai-card-hints-active.json";
-    inspectorIndex: "data/ai/ai-hint-inspector-index.json";
     plannerEffect: "strategic_intent_input";
   };
 };
@@ -313,6 +311,9 @@ type AiCardHint = {
   planRoles?: string[];
   lineSupport?: string[];
   strategicRole?: string[];
+  functionSignals?: string[];
+  tacticSignals?: string[];
+  strategyAnchors?: string[];
   requiredMechanics?: string[];
   riskTags?: string[];
   effects?: Array<{ kind?: string; scope?: string; timing?: string }>;
@@ -321,26 +322,6 @@ type AiCardHint = {
   breakerProfile?: {
     sideEffects?: string[];
     restrictions?: string[];
-  };
-};
-
-type InspectorClassification = {
-  value: string;
-  category?: string;
-  triageCategory?: string;
-  mapsTo?: string[];
-};
-
-type InspectorCard = {
-  cardId: string;
-  side: Side;
-  cardType?: string;
-  derivedFunctionSignals?: string[];
-  derivedStrategyAnchors?: string[];
-  lineSupportClassification?: InspectorClassification[];
-  warningCategories?: string[];
-  strategicRoleStatus?: {
-    validValues?: string[];
   };
 };
 
@@ -368,7 +349,6 @@ type DeckCardStrategyFacts = {
   planRoles: string[];
   lineSupport: string[];
   strategicRoles: string[];
-  warningCategories: string[];
   requiredMechanics: string[];
   riskTags: string[];
   accessBreakerCoverageBlocked: boolean;
@@ -397,12 +377,6 @@ const STRATEGY_GOALS_BY_ID = new Map(
 const AI_HINTS_BY_CARD = new Map(
   (activeAiHintsData.cards as AiCardHint[]).map((hint) => [hint.cardId, hint]),
 );
-const INSPECTOR_BY_CARD = new Map(
-  (inspectorIndexData.cards as InspectorCard[]).map((card) => [
-    card.cardId,
-    card,
-  ]),
-);
 const ANCHOR_STRATEGIC_ROLES = new Set([
   "engine_anchor",
   "payoff_anchor",
@@ -410,10 +384,6 @@ const ANCHOR_STRATEGIC_ROLES = new Set([
   "scoring_tool",
   "tax_tool",
   "win_condition",
-]);
-const ALLOWED_LINE_SUPPORT_TRIAGE = new Set([
-  "normalized_strategy_id",
-  "safe_strategy_anchor_alias",
 ]);
 const ACCESS_BLOCKING_BREAKER_RESTRICTIONS = new Set([
   "not_access_enabling_breaker",
@@ -545,7 +515,6 @@ export function buildDeckStrategyProfile(
       mode: "ai_internal_strategy_profile",
       strategyGoals: "data/ai/strategy-goals-v1.json",
       activeHints: "data/ai/ai-card-hints-active.json",
-      inspectorIndex: "data/ai/ai-hint-inspector-index.json",
       plannerEffect: "strategic_intent_input",
     },
   });
@@ -575,7 +544,6 @@ export function buildNeutralDeckStrategyProfile(
       mode: "ai_internal_strategy_profile",
       strategyGoals: "data/ai/strategy-goals-v1.json",
       activeHints: "data/ai/ai-card-hints-active.json",
-      inspectorIndex: "data/ai/ai-hint-inspector-index.json",
       plannerEffect: "strategic_intent_input",
     },
   };
@@ -672,26 +640,20 @@ function deckStrategyStats(
     const quantity = Math.max(0, entry.quantity);
     if (quantity === 0) continue;
     const hint = AI_HINTS_BY_CARD.get(entry.cardId);
-    const inspector = INSPECTOR_BY_CARD.get(entry.cardId);
     const runtimeCard = RUNTIME_CARDS[entry.cardId] as
       | RuntimeCardForStrategy
       | undefined;
-    const cardType = hint?.cardType ?? inspector?.cardType ?? runtimeCard?.type;
-    const functionSignals = sortedUnique(
-      inspector?.derivedFunctionSignals ?? [],
-    );
+    const cardType = hint?.cardType ?? runtimeCard?.type;
+    const functionSignals = sortedUnique(hint?.functionSignals ?? []);
     const derivedStrategyAnchors = sortedUnique(
-      (inspector?.derivedStrategyAnchors ?? []).filter((strategyId) =>
+      (hint?.strategyAnchors ?? []).filter((strategyId) =>
         strategyMatchesSide(strategyId, snapshot.side),
       ),
     );
     const roles = sortedUnique(hint?.roles ?? []);
     const planRoles = sortedUnique(hint?.planRoles ?? []);
     const lineSupport = sortedUnique(hint?.lineSupport ?? []);
-    const strategicRoles = sortedUnique([
-      ...(hint?.strategicRole ?? []),
-      ...(inspector?.strategicRoleStatus?.validValues ?? []),
-    ]);
+    const strategicRoles = sortedUnique(hint?.strategicRole ?? []);
     const accessBreakerCoverageBlocked = breakerProfileBlocksAccessCoverage(
       hint?.breakerProfile,
     );
@@ -717,7 +679,7 @@ function deckStrategyStats(
       removeUndefined({
         cardId: entry.cardId,
         quantity,
-        side: hint?.side ?? inspector?.side ?? snapshot.side,
+        side: hint?.side ?? snapshot.side,
         ...(cardType ? { cardType } : {}),
         functionSignals,
         derivedStrategyAnchors,
@@ -725,7 +687,6 @@ function deckStrategyStats(
         planRoles,
         lineSupport,
         strategicRoles,
-        warningCategories: sortedUnique(inspector?.warningCategories ?? []),
         requiredMechanics: sortedUnique(hint?.requiredMechanics ?? []),
         riskTags: sortedUnique(hint?.riskTags ?? []),
         accessBreakerCoverageBlocked,
@@ -768,30 +729,19 @@ function deckDoctrineV2CardRoles(
     .filter((entry) => Math.max(0, entry.quantity) > 0)
     .map((entry) => {
       const hint = AI_HINTS_BY_CARD.get(entry.cardId);
-      const inspector = INSPECTOR_BY_CARD.get(entry.cardId);
       const roles = sortedUnique([
         ...(hint?.roles ?? []),
         ...(hint?.planRoles ?? []),
         ...(hint?.lineSupport ?? []),
         ...(hint?.strategicRole ?? []),
-        ...(inspector?.strategicRoleStatus?.validValues ?? []),
       ]);
-      const functionSignals = sortedUnique(
-        inspector?.derivedFunctionSignals ?? [],
-      );
+      const functionSignals = sortedUnique(hint?.functionSignals ?? []);
       const strategyAnchors = sortedUnique([
-        ...(inspector?.derivedStrategyAnchors ?? []).filter((strategyId) =>
+        ...(hint?.strategyAnchors ?? []).filter((strategyId) =>
           strategyMatchesSide(strategyId, snapshot.side),
         ),
-        ...(inspector?.lineSupportClassification ?? []).flatMap(
-          (classification) => [
-            ...(strategyMatchesSide(classification.value, snapshot.side)
-              ? [classification.value]
-              : []),
-            ...(classification.mapsTo ?? []).filter((strategyId) =>
-              strategyMatchesSide(strategyId, snapshot.side),
-            ),
-          ],
+        ...(hint?.lineSupport ?? []).filter((strategyId) =>
+          strategyMatchesSide(strategyId, snapshot.side),
         ),
       ]);
       const status =
@@ -814,8 +764,6 @@ function deckDoctrineV2CardRoles(
         strategyAnchors,
         warnings: sortedUnique([
           ...(hint === undefined ? ["missing_card_hint"] : []),
-          ...(inspector === undefined ? ["missing_inspector_index"] : []),
-          ...(inspector?.warningCategories ?? []),
         ]),
       };
     });
@@ -991,36 +939,8 @@ function lineSupportAnchorsForCard(
   card: DeckCardStrategyFacts,
   side: Side,
 ): Array<{ strategyId: string; value: string; reason: string }> {
-  const inspector = INSPECTOR_BY_CARD.get(card.cardId);
   const anchors: Array<{ strategyId: string; value: string; reason: string }> =
     [];
-  for (const classification of inspector?.lineSupportClassification ?? []) {
-    const triage = classification.triageCategory;
-    const exactStrategy = strategyMatchesSide(classification.value, side)
-      ? classification.value
-      : undefined;
-    const mappedStrategies = sortedUnique([
-      ...(exactStrategy ? [exactStrategy] : []),
-      ...(classification.mapsTo ?? []),
-    ]).filter((strategyId) => strategyMatchesSide(strategyId, side));
-    if (mappedStrategies.length === 0) continue;
-    if (
-      exactStrategy ||
-      (triage !== undefined && ALLOWED_LINE_SUPPORT_TRIAGE.has(triage))
-    ) {
-      for (const strategyId of mappedStrategies) {
-        if (!lineSupportAnchorAllowed(card, strategyId)) continue;
-        anchors.push({
-          strategyId,
-          value: classification.value,
-          reason:
-            exactStrategy === classification.value
-              ? "normalized_lineSupport_strategy_goal"
-              : "safe_lineSupport_strategy_alias_from_inspector_index",
-        });
-      }
-    }
-  }
   for (const value of card.lineSupport) {
     if (!strategyMatchesSide(value, side)) continue;
     if (!lineSupportAnchorAllowed(card, value)) continue;
@@ -2249,14 +2169,9 @@ function deckWarnings(stats: DeckStrategyStats): string[] {
   const warnings = new Set<string>();
   for (const card of stats.cards) {
     const hint = AI_HINTS_BY_CARD.get(card.cardId);
-    const inspector = INSPECTOR_BY_CARD.get(card.cardId);
     if (!hint) warnings.add(`missing_card_hint:${card.cardId}`);
-    if (!inspector) warnings.add(`missing_inspector_index:${card.cardId}`);
     if (hint?.side && hint.side !== stats.side) {
       warnings.add(`side_mismatch:${card.cardId}:${hint.side}`);
-    }
-    for (const category of card.warningCategories) {
-      warnings.add(`inspector:${category}:${card.cardId}`);
     }
   }
   return [...warnings].sort();

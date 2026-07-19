@@ -468,7 +468,7 @@ describe("catalog API filters", () => {
     expect(inspector).not.toBeNull();
     if (!inspector)
       throw new Error("Missing AI inspector for onr_v1_002_ai-boon");
-    expect(inspector.schemaVersion).toBe("ai-hint-inspector-index-v1");
+    expect(inspector.schemaVersion).toBe("ai-card-hints-active-v1");
     expect(inspector.supportStatus).toMatchObject({
       aiSupportStatus: "ai_supported",
       hintFound: true,
@@ -484,15 +484,7 @@ describe("catalog API filters", () => {
     expect(inspector.strategySupportPairs).toEqual([]);
     expect(inspector.lineSupport.values).toEqual([]);
     expect(inspector.lineSupport.classification).toEqual([]);
-    expect(inspector.legacyRoles.planRolesClassification).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          value: "runner_install_program",
-          triageCategory: "strategy_alias",
-          mapsTo: ["runner.rig_first"],
-        }),
-      ]),
-    );
+    expect(inspector.legacyRoles.planRolesClassification).toEqual([]);
     expect(inspector.strategicRole).toEqual([]);
     expect(inspector.quality).toMatchObject({ hintReviewed: true });
     expect(Object.keys(inspector.quality ?? {})).not.toContain(
@@ -533,7 +525,7 @@ describe("catalog API filters", () => {
     );
   });
 
-  it("exposes reviewed remoteRole facts and descriptor-gap warnings in the inspector", () => {
+  it("exposes reviewed remoteRole facts without derived warning taxonomy", () => {
     const remoteResponse = catalogDetailResponse("onr_v1_012_clown");
     expect(remoteResponse.status).toBe(200);
     const remoteBody = remoteResponse.body as CatalogDetailAiInspector;
@@ -547,16 +539,9 @@ describe("catalog API filters", () => {
     const gapResponse = catalogDetailResponse("onr_v1_017_deep-thought");
     expect(gapResponse.status).toBe(200);
     const gapBody = gapResponse.body as CatalogDetailAiInspector;
-    expect(gapBody.card.aiInspector?.warnings.categories).toContain(
-      "descriptor_gap",
-    );
+    expect(gapBody.card.aiInspector?.warnings.categories).toEqual([]);
     expect(gapBody.card.aiInspector?.legacyRoles.rolesClassification).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          value: "hidden_zone_tool",
-          triageCategory: "descriptor_gap",
-        }),
-      ]),
+      [],
     );
     expect(gapBody.card.aiInspector?.warnings.descriptorGaps).toEqual([]);
   });

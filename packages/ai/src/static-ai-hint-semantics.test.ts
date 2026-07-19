@@ -1,0 +1,69 @@
+import { describe, expect, it } from "vitest";
+
+import activeHintsData from "../../../data/ai/ai-card-hints-active.json";
+import { buildActionCardSemanticProfilesByDefinitionId } from "./actions/action-card-semantic-profiles";
+
+type StaticHint = {
+  cardId: string;
+  side: "runner" | "corp";
+  functionSignals?: string[];
+  tacticSignals?: string[];
+  actionTacticSignals?: string[];
+  strategyAnchors?: string[];
+  strategySupportPairs?: Array<{
+    strategyId: string;
+    role: string;
+    evidence: string[];
+  }>;
+};
+
+const hints = activeHintsData.cards as StaticHint[];
+const hintById = new Map(hints.map((hint) => [hint.cardId, hint]));
+
+describe("static AI hint semantics", () => {
+  it("keeps one unique static record per active card", () => {
+    expect(hints).toHaveLength(618);
+    expect(hintById.size).toBe(hints.length);
+  });
+
+  it("stores tactic signals and strategy anchors directly on the card", () => {
+    const hqInterface = hintById.get("onr_v1_129_hq-interface");
+    const rex = hintById.get("onr_v1_264_rex");
+
+    expect(hqInterface?.functionSignals).toContain("access.hq_multiaccess");
+    expect(hqInterface?.strategyAnchors).toContain("runner.hq_pressure");
+    expect(rex?.functionSignals).toContain("corp_ice.trace_source");
+    expect(rex?.strategyAnchors).toContain("corp.ice_tax_glacier");
+  });
+
+  it("feeds action semantics from the same static fields", () => {
+    const profiles = buildActionCardSemanticProfilesByDefinitionId();
+    const hqInterface = profiles["onr_v1_129_hq-interface"];
+
+    expect(hqInterface?.tacticSignals).toEqual(
+      hintById.get("onr_v1_129_hq-interface")?.actionTacticSignals,
+    );
+    expect(hqInterface?.strategySupport).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          strategyId: "runner.hq_pressure",
+          role: "payoff_anchor",
+        }),
+      ]),
+    );
+  });
+
+  it("keeps every stored semantic array duplicate-free", () => {
+    for (const hint of hints) {
+      expect(new Set(hint.tacticSignals ?? []).size, hint.cardId).toBe(
+        hint.tacticSignals?.length ?? 0,
+      );
+      expect(new Set(hint.functionSignals ?? []).size, hint.cardId).toBe(
+        hint.functionSignals?.length ?? 0,
+      );
+      expect(new Set(hint.strategyAnchors ?? []).size, hint.cardId).toBe(
+        hint.strategyAnchors?.length ?? 0,
+      );
+    }
+  });
+});
