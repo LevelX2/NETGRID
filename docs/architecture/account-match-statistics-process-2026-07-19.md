@@ -1,6 +1,6 @@
 # Account-Matchstatistik – kontrollierter Paketprozess
 
-Status: `AMS-06 review completed; integration pending`
+Status: `complete`
 
 ## Quelle und Vorgabe
 
@@ -130,7 +130,7 @@ cleanup_failed -> diagnose_cleanup -> cleanup_pending
 | AMS-03 Ergebnisledger und Reconciliation | completed | dieser Paketcommit |
 | AMS-04 Private API und Betrieb | completed | dieser Paketcommit |
 | AMS-05 Account-Statistik-UI | completed | dieser Paketcommit |
-| AMS-06 Final Review und Integration | review completed | dieser Paketcommit |
+| AMS-06 Final Review und Integration | completed | `1fbd19fc2`, Integration `24dfaf793` |
 
 ## Paketdetails
 
@@ -476,5 +476,17 @@ gemergten Arbeitsbranch löschen. Markiere das Goal erst dann als complete.
   Servertests 184/184, vollständige Webtests 643/643, projektweiter
   Typecheck, Contracttests 8/8 plus Shared 12/12, Package Boundaries für
   1.881 Dateien, Produktionsbuild und Browser-E2E 9/9.
-- `git diff --check`, Paketcommit, aktueller Main-Abgleich, Integration und
-  Cleanup folgen unmittelbar nach diesem Protokollstand.
+- `main` wurde im Merge-Commit `24dfaf793` in den Arbeitsbranch integriert;
+  der Monatslogkonflikt bewahrt beide unabhängigen Abschlussmeldungen.
+- Auf dem kombinierten Stand waren Typecheck, Contracts, Package Boundaries,
+  Server 184/184, Web 643/643 und Browser-E2E 9/9 erneut grün. Der lokale
+  `main` wurde anschließend per Fast-Forward auf `24dfaf793` aktualisiert.
+- Worktree und Arbeitsbranch sind aus Git entfernt. Ignorierte Buildreste des
+  ehemaligen Worktree-Pfads wurden wegen der lokalen Löschrichtlinie
+  wiederherstellbar nach
+  `tmp/removed-worktrees/NETGRID_ACCOUNT_MATCH_STATISTICS-20260719-24dfaf793`
+  verschoben; der ursprüngliche Pfad existiert nicht mehr.
+- Drei bereits vor der Integration vorhandene, fachfremde Änderungen an
+  `apps/web/app/page.tsx`, `apps/web/lib/audio.ts` und
+  `apps/web/lib/audio.test.ts` blieben unverändert und uncommitted im
+  Hauptworkspace. Keine davon überschneidet sich mit den Statistikdateien.
