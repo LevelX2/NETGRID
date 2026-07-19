@@ -271,3 +271,20 @@ complete.`
   exklusiven Zugriff bei beendeter NETGRID-App.
 - Fokussierte Backup-/Restore-/Kompaktions-/Optimize-Tests: 4/4 grün.
 - Server-Typecheck und `git diff --check`: grün.
+
+### SMO-04 – abgeschlossen
+
+- SQLite berechnet gefilterte Gesamt-, Seiten-, Gegner-, Modus- und
+  Formatstatistiken direkt per bedingter Aggregation; Serienaggregate bleiben
+  vertragstreu und ownergebunden.
+- Die Matchhistorie nutzt `LIMIT + 1` und einen Keyset-Cursor über
+  `(completed_at, account_game_result_id)` statt das vollständige Accountledger
+  zu laden und in JavaScript zu sortieren.
+- Der In-Memory-Adapter behält den bisherigen Referenzpfad. Eine synthetische
+  Probe mit 240 Owner-Ergebnissen vergleicht beide Adapter inhaltlich und lässt
+  den SQLite-Test scheitern, sobald dessen Full-Ledger-Methoden aufgerufen
+  werden.
+- `EXPLAIN QUERY PLAN` bestätigt die Nutzung von
+  `idx_account_game_results_account_completed` für die geordnete Ownerseite.
+- Accountstatistik- und HTTP-Tests: 10/10 grün.
+- Server-Typecheck und `git diff --check`: grün.
