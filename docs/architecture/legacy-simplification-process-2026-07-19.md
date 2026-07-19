@@ -2,9 +2,10 @@
 
 ## Status
 
-P0 bis P6 sind abgeschlossen und verifiziert. Der Arbeitsstand ist bereit für
-den defensiven Abgleich mit `main`, den lokalen Fast-Forward-Merge und das
-anschließende Worktree-/Branch-Cleanup.
+P0 bis P6 sind abgeschlossen und verifiziert. Der committed `main`-Stand ist
+defensiv integriert und auf dem gemeinsamen Stand vollständig geprüft. Offen
+sind nur der lokale Fast-Forward nach `main` und das anschließende
+Worktree-/Branch-Cleanup.
 
 ## Fortschritt
 
@@ -43,7 +44,7 @@ anschließende Worktree-/Branch-Cleanup.
   bestätigte null unbenutzte Runtime-Internal-Imports. Geprüft mit vier
   Paket-Typechecks, 250 gezielten Tests und den Architektur-/Discovery-Checks.
 - P6 Gesamtabschluss und Wissenspflege: abgeschlossen. Der vollständige
-  Workspace-Lauf umfasst 673 grüne Testdateien mit 5.380 Tests. Lint,
+  integrierte Workspace-Lauf umfasst 687 grüne Testdateien mit 5.414 Tests. Lint,
   Typecheck, Produktions-Build, AI-/Engine-Source-Structure samt Selftests und
   das Engine-CardImplementation-Zielgate sind grün. Die Wissensbasis und das
   Abschlussreview bilden den vereinfachten Stand ab.

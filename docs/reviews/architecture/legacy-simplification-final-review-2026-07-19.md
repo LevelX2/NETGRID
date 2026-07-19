@@ -52,7 +52,7 @@ Entscheidungs-Checkpoints wurden nicht verändert.
 
 - `pnpm lint`: grün;
 - `pnpm typecheck`: grün;
-- `pnpm test`: 673 Testdateien, 5.380 Tests, vollständig grün;
+- `pnpm test`: 687 Testdateien, 5.414 Tests, vollständig grün;
 - `pnpm build`: grün, einschließlich optimiertem Next-Produktions-Build;
 - `check:ai` und AI-Source-Structure-Selftest: grün, 0 Laufzeit- und 0
   Typzyklen;
