@@ -85,6 +85,14 @@ side-sicher hydriert. Backups sind kompakt und konsistent, der lokale
 Accountstatistik verwendet SQL-Aggregate sowie Keyset-Pagination. Führend ist
 `docs/reviews/architecture/sqlite-matchstorage-optimization-final-review-2026-07-19.md`.
 
+Normale Human- und KI-Aktionen verwenden zusätzlich einen bounded SQLite-
+Load und einen atomaren Delta-Save mit Match-/StateVersion- und
+Historyzähler-Prüfung. Event-Tail, Chronicle, Hidden-Info, Idempotenz, Undo,
+Replay und StateHash bleiben stabil; klassische Storage-Adapter behalten den
+Vollpfad. Die synthetische 1-/10-/25-Match-Probe war mit 36 genau einmal
+persistierten Aktionen grün. Führend ist
+`docs/reviews/architecture/delta-action-persistence-final-review-2026-07-19.md`.
+
 ## Current-State-Cleanup
 
 Der Prozess

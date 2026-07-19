@@ -4,7 +4,8 @@ import { dirname, basename, join, resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { hashState } from "@netgrid/engine";
 import type { GameEvent, GameState } from "@netgrid/shared";
-import { replayDecisionDebugFromTrace, type AiDecisionTraceRecord, type MatchMode, type MatchStatus, type MultiplayerStorage, type StoredMatch } from "./multiplayer";
+import { replayDecisionDebugFromTrace, type ActionPersistenceLoadInput, type AiDecisionTraceRecord, type MatchMode, type MatchStatus, type MultiplayerStorage, type StoredMatch } from "./multiplayer";
+import { SIDE_PAYLOAD_EVENT_TAIL_LIMIT } from "./multiplayer-payload";
 
 export const SQLITE_STORAGE_SCHEMA_VERSION = 3;
 export const SQLITE_STORAGE_FORMAT = "netgrid_multiplayer_sqlite";
@@ -14,6 +15,29 @@ const PARTIAL_STATE_SNAPSHOTS = Symbol("partialStateSnapshots");
 
 type StoredMatchWithStorageFlags = StoredMatch & {
   [PARTIAL_STATE_SNAPSHOTS]?: boolean;
+};
+
+type RecordLoadOptions = {
+  includeStateSnapshots?: boolean;
+  actionPersistence?: ActionPersistenceLoadInput;
+};
+
+type AiDecisionTraceRow = {
+  traceId: string;
+  eventId: string;
+  stateVersion: number;
+  matchVersion: number;
+  side: "runner" | "corp";
+  turn: number;
+  decisionIndex: number;
+  selectedActionId?: string | null;
+  selectedActionType?: string | null;
+  planKind?: string | null;
+  score?: number | null;
+  confidence?: number | null;
+  createdAt: string;
+  schemaVersion: string;
+  traceJson: string;
 };
 
 export type StorageKind = "memory" | "sqlite";
@@ -316,6 +340,7 @@ export class StorageError extends Error {
       | "schema_too_new"
       | "schema_missing"
       | "stored_match_invalid"
+      | "action_persistence_conflict"
       | "backup_invalid"
       | "backup_checksum_mismatch"
       | "backup_schema_unsupported",
@@ -356,9 +381,23 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     return this.recordFromJson(matchId, row.record_json, options);
   }
 
+  async loadForAction(matchId: string, input: ActionPersistenceLoadInput): Promise<StoredMatch | undefined> {
+    const row = this.db.prepare("SELECT record_json FROM matches WHERE match_id = ?").get(matchId) as { record_json?: string } | undefined;
+    if (!row?.record_json) return undefined;
+    return this.recordFromJson(matchId, row.record_json, { includeStateSnapshots: false, actionPersistence: input });
+  }
+
   async save(record: StoredMatch): Promise<void> {
     validateStoredMatch(record);
     this.transaction(() => this.saveRecord(record));
+  }
+
+  async saveActionDelta(record: StoredMatch): Promise<void> {
+    validateStoredMatch(record);
+    if (!record.actionPersistenceBaseline) {
+      throw new StorageError("stored_match_invalid", "Delta-Persistenz benötigt eine verifizierte Lade-Baseline.");
+    }
+    this.transaction(() => this.saveActionDeltaRecord(record));
   }
 
   async list(): Promise<StoredMatch[]> {
@@ -1154,14 +1193,14 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     });
   }
 
-  private recordFromJson(matchId: string, recordJson: string, options: { includeStateSnapshots?: boolean } = {}): StoredMatch {
+  private recordFromJson(matchId: string, recordJson: string, options: RecordLoadOptions = {}): StoredMatch {
     const record = JSON.parse(recordJson) as StoredMatchWithStorageFlags;
     this.hydrateRecordFromTables(matchId, record, options);
     validateStoredMatch(record);
     return record;
   }
 
-  private hydrateRecordFromTables(matchId: string, record: StoredMatchWithStorageFlags, options: { includeStateSnapshots?: boolean } = {}): void {
+  private hydrateRecordFromTables(matchId: string, record: StoredMatchWithStorageFlags, options: RecordLoadOptions = {}): void {
     if (!this.tableExists("matches")) return;
     let engineEventLog: GameEvent[] | undefined;
 
@@ -1195,13 +1234,34 @@ export class SqliteMatchStorage implements MultiplayerStorage {
 
     if (this.tableExists("events")) {
       const events = this.db
-        .prepare("SELECT event_id AS eventId, state_version_before AS stateVersionBefore, state_version_after AS stateVersionAfter, state_hash_after AS stateHashAfter, public_payload_json AS publicPayloadJson, private_payload_local_only AS privatePayloadLocalOnly, hidden_info_barrier AS hiddenInfoBarrier FROM events WHERE match_id = ? ORDER BY event_index ASC")
-        .all(matchId) as Array<{
+        .prepare(
+          options.actionPersistence
+            ? `WITH event_total AS (
+                 SELECT COUNT(*) AS total FROM events WHERE match_id = ?
+               )
+               SELECT event_id AS eventId, state_version_before AS stateVersionBefore, state_version_after AS stateVersionAfter,
+                 state_hash_after AS stateHashAfter,
+                 CASE WHEN event_index >= event_total.total - ? THEN public_payload_json ELSE NULL END AS publicPayloadJson,
+                 json_extract(public_payload_json, '$.type') AS eventType,
+                 json_extract(public_payload_json, '$.publicPayload.actor') AS actor,
+                 json_extract(public_payload_json, '$.publicPayload.actionType') AS actionType,
+                 json_extract(public_payload_json, '$.publicPayload.discardResolved') AS discardResolved,
+                 json_extract(public_payload_json, '$.publicPayload.hiddenZoneAction') AS hiddenZoneAction,
+                 private_payload_local_only AS privatePayloadLocalOnly, hidden_info_barrier AS hiddenInfoBarrier
+               FROM events, event_total WHERE match_id = ? ORDER BY event_index ASC`
+            : "SELECT event_id AS eventId, state_version_before AS stateVersionBefore, state_version_after AS stateVersionAfter, state_hash_after AS stateHashAfter, public_payload_json AS publicPayloadJson, NULL AS eventType, NULL AS actor, NULL AS actionType, NULL AS discardResolved, NULL AS hiddenZoneAction, private_payload_local_only AS privatePayloadLocalOnly, hidden_info_barrier AS hiddenInfoBarrier FROM events WHERE match_id = ? ORDER BY event_index ASC"
+        )
+        .all(...(options.actionPersistence ? [matchId, SIDE_PAYLOAD_EVENT_TAIL_LIMIT, matchId] : [matchId])) as Array<{
         eventId: string;
         stateVersionBefore: number;
         stateVersionAfter: number;
         stateHashAfter: string;
-        publicPayloadJson: string;
+        publicPayloadJson: string | null;
+        eventType?: string | null;
+        actor?: string | null;
+        actionType?: string | null;
+        discardResolved?: number | null;
+        hiddenZoneAction?: string | null;
         privatePayloadLocalOnly: number;
         hiddenInfoBarrier: number;
       }>;
@@ -1212,7 +1272,9 @@ export class SqliteMatchStorage implements MultiplayerStorage {
           stateVersionBefore: Number(event.stateVersionBefore),
           stateVersionAfter: Number(event.stateVersionAfter),
           stateHashAfter: event.stateHashAfter,
-          publicPayload: JSON.parse(event.publicPayloadJson) as StoredMatch["eventLog"][number]["publicPayload"],
+          publicPayload: event.publicPayloadJson
+            ? JSON.parse(event.publicPayloadJson) as StoredMatch["eventLog"][number]["publicPayload"]
+            : actionContextPublicEvent(event),
           privatePayloadLocalOnly: event.privatePayloadLocalOnly === 1,
           hiddenInfoBarrier: event.hiddenInfoBarrier === 1
         }));
@@ -1230,14 +1292,20 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     }
 
     if (this.tableExists("ai_decision_traces")) {
-      record.aiDecisionTraces = this.aiDecisionTraceRecords(matchId);
+      record.aiDecisionTraces = options.actionPersistence
+        ? this.aiDecisionTraceRecordsForAction(matchId)
+        : this.aiDecisionTraceRecords(matchId);
       this.hydrateAiDecisionDebug(record.eventLog, record.aiDecisionTraces);
     }
 
     if (this.tableExists("action_receipts")) {
       record.actionReceipts = this.db
-        .prepare("SELECT idempotency_key AS idempotencyKey, side, accepted, state_version_before AS stateVersionBefore, state_version_after AS stateVersionAfter, state_hash_after AS stateHashAfter, error_code AS errorCode FROM action_receipts WHERE match_id = ? ORDER BY state_version_after ASC")
-        .all(matchId)
+        .prepare(
+          options.actionPersistence
+            ? "SELECT idempotency_key AS idempotencyKey, side, accepted, state_version_before AS stateVersionBefore, state_version_after AS stateVersionAfter, state_hash_after AS stateHashAfter, error_code AS errorCode FROM action_receipts WHERE match_id = ? AND side = ? AND idempotency_key = ? ORDER BY state_version_after ASC"
+            : "SELECT idempotency_key AS idempotencyKey, side, accepted, state_version_before AS stateVersionBefore, state_version_after AS stateVersionAfter, state_hash_after AS stateHashAfter, error_code AS errorCode FROM action_receipts WHERE match_id = ? ORDER BY state_version_after ASC"
+        )
+        .all(...(options.actionPersistence?.idempotencyKey ? [matchId, options.actionPersistence.side, options.actionPersistence.idempotencyKey] : options.actionPersistence ? [matchId, options.actionPersistence.side, null] : [matchId]))
         .map((receipt) => {
           const row = receipt as {
             idempotencyKey: string;
@@ -1248,7 +1316,16 @@ export class SqliteMatchStorage implements MultiplayerStorage {
             stateHashAfter: string;
             errorCode?: string;
           };
-          return { ...row, matchId, accepted: row.accepted === 1 };
+          return {
+            idempotencyKey: row.idempotencyKey,
+            matchId,
+            side: row.side,
+            accepted: row.accepted === 1,
+            stateVersionBefore: Number(row.stateVersionBefore),
+            stateVersionAfter: Number(row.stateVersionAfter),
+            stateHashAfter: row.stateHashAfter,
+            ...(row.errorCode ? { errorCode: row.errorCode } : {})
+          };
         });
     }
 
@@ -1325,6 +1402,33 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         else delete record.startLobby;
       }
       else delete record.startLobby;
+    }
+
+    if (options.actionPersistence) {
+      const counts = this.db
+        .prepare(
+          `SELECT
+             (SELECT COUNT(*) FROM events WHERE match_id = ?) AS publicEventCount,
+             (SELECT COUNT(*) FROM engine_events WHERE match_id = ?) AS engineEventCount,
+             (SELECT COUNT(*) FROM action_receipts WHERE match_id = ?) AS actionReceiptCount,
+             (SELECT COUNT(*) FROM ai_decision_traces WHERE match_id = ?) AS aiDecisionTraceCount`
+        )
+        .get(matchId, matchId, matchId, matchId) as {
+          publicEventCount: number;
+          engineEventCount: number;
+          actionReceiptCount: number;
+          aiDecisionTraceCount: number;
+        };
+      record.actionPersistenceBaseline = {
+        expectedMatchVersion: record.match.matchVersion,
+        expectedStateVersion: record.gameState.stateVersion,
+        publicEventCount: Number(counts.publicEventCount),
+        engineEventCount: Number(counts.engineEventCount),
+        actionReceiptCount: Number(counts.actionReceiptCount),
+        aiDecisionTraceCount: Number(counts.aiDecisionTraceCount),
+        loadedActionReceiptCount: record.actionReceipts.length,
+        loadedAiDecisionTraceCount: record.aiDecisionTraces?.length ?? 0
+      };
     }
   }
 
@@ -1436,6 +1540,145 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     if (record.pendingUndo) this.db.prepare("INSERT INTO pending_undo (match_id, pending_undo_json) VALUES (?, ?)").run(matchId, JSON.stringify(record.pendingUndo));
     if (record.privateDeckSnapshots) this.db.prepare("INSERT INTO private_deck_snapshots (match_id, private_deck_snapshots_json) VALUES (?, ?)").run(matchId, JSON.stringify(record.privateDeckSnapshots));
     if (record.startLobby) this.db.prepare("INSERT INTO start_lobbies (match_id, start_lobby_json) VALUES (?, ?)").run(matchId, JSON.stringify(record.startLobby));
+  }
+
+  private saveActionDeltaRecord(record: StoredMatch): void {
+    dedupeStateSnapshots(record);
+    const baseline = record.actionPersistenceBaseline;
+    if (!baseline) throw new StorageError("stored_match_invalid", "Delta-Persistenz benötigt eine verifizierte Lade-Baseline.");
+    const matchId = record.match.matchId;
+    const engineEvents = record.gameState.eventLog;
+    const traces = record.aiDecisionTraces ?? [];
+    if (
+      record.eventLog.length < baseline.publicEventCount ||
+      engineEvents.length < baseline.engineEventCount ||
+      record.actionReceipts.length < baseline.loadedActionReceiptCount ||
+      traces.length < baseline.loadedAiDecisionTraceCount
+    ) {
+      throw new StorageError("stored_match_invalid", "Delta-Persistenz darf bestehende Historie nicht verkürzen.");
+    }
+
+    const persisted = this.db
+      .prepare(
+        `SELECT m.match_version AS matchVersion, m.state_version AS stateVersion,
+           (SELECT COUNT(*) FROM events WHERE match_id = m.match_id) AS publicEventCount,
+           (SELECT COUNT(*) FROM engine_events WHERE match_id = m.match_id) AS engineEventCount,
+           (SELECT COUNT(*) FROM action_receipts WHERE match_id = m.match_id) AS actionReceiptCount,
+           (SELECT COUNT(*) FROM ai_decision_traces WHERE match_id = m.match_id) AS aiDecisionTraceCount
+         FROM matches m WHERE m.match_id = ?`
+      )
+      .get(matchId) as {
+        matchVersion: number;
+        stateVersion: number;
+        publicEventCount: number;
+        engineEventCount: number;
+        actionReceiptCount: number;
+        aiDecisionTraceCount: number;
+      } | undefined;
+    if (
+      !persisted ||
+      Number(persisted.matchVersion) !== baseline.expectedMatchVersion ||
+      Number(persisted.stateVersion) !== baseline.expectedStateVersion ||
+      Number(persisted.publicEventCount) !== baseline.publicEventCount ||
+      Number(persisted.engineEventCount) !== baseline.engineEventCount ||
+      Number(persisted.actionReceiptCount) !== baseline.actionReceiptCount ||
+      Number(persisted.aiDecisionTraceCount) !== baseline.aiDecisionTraceCount
+    ) {
+      throw new StorageError("action_persistence_conflict", "Matchhistorie wurde seit dem Aktionsload verändert.");
+    }
+
+    const stateVersion = record.gameState.stateVersion;
+    const stateHash = hashState(record.gameState);
+    const matchUpdate = this.db
+      .prepare(
+        `UPDATE matches SET
+           status = ?, mode = ?, match_version = ?, seed = ?, baseline_json = ?, settings_json = ?, lifecycle_json = ?,
+           record_json = ?, state_version = ?, state_hash = ?, updated_at = ?
+         WHERE match_id = ? AND match_version = ? AND state_version = ?`
+      )
+      .run(
+        record.match.status,
+        record.match.mode,
+        record.match.matchVersion,
+        record.match.seed ?? null,
+        JSON.stringify(record.match.baseline),
+        JSON.stringify(record.match.settings),
+        toJson(record.lifecycleResult),
+        JSON.stringify(compactRecordForStorage(record)),
+        stateVersion,
+        stateHash,
+        record.match.updatedAt,
+        matchId,
+        baseline.expectedMatchVersion,
+        baseline.expectedStateVersion
+      ) as { changes?: number | bigint };
+    if (Number(matchUpdate.changes ?? 0) !== 1) {
+      throw new StorageError("action_persistence_conflict", "Matchzustand wurde seit dem Aktionsload verändert.");
+    }
+    const gameStateUpdate = this.db
+      .prepare(
+        `UPDATE game_states SET state_version = ?, state_hash = ?, game_state_json = ?
+         WHERE match_id = ? AND state_version = ?`
+      )
+      .run(stateVersion, stateHash, JSON.stringify(gameStateForStorage(record.gameState)), matchId, baseline.expectedStateVersion) as { changes?: number | bigint };
+    if (Number(gameStateUpdate.changes ?? 0) !== 1) {
+      throw new StorageError("action_persistence_conflict", "Engine-Zustand wurde seit dem Aktionsload verändert.");
+    }
+
+    const insertEvent = this.db.prepare(
+      `INSERT INTO events
+       (match_id, event_id, event_index, state_version_before, state_version_after, state_hash_after, public_payload_json, private_payload_local_only, hidden_info_barrier)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    );
+    record.eventLog.slice(baseline.publicEventCount).forEach((event, offset) => {
+      insertEvent.run(matchId, event.eventId, baseline.publicEventCount + offset, event.stateVersionBefore, event.stateVersionAfter, event.stateHashAfter, JSON.stringify(publicEventForStorage(event.publicPayload)), event.privatePayloadLocalOnly ? 1 : 0, event.hiddenInfoBarrier ? 1 : 0);
+    });
+
+    const insertEngineEvent = this.db.prepare(
+      "INSERT INTO engine_events (match_id, event_id, event_index, event_json) VALUES (?, ?, ?, ?)"
+    );
+    engineEvents.slice(baseline.engineEventCount).forEach((event, offset) => {
+      insertEngineEvent.run(matchId, event.eventId, baseline.engineEventCount + offset, JSON.stringify(event));
+    });
+
+    const insertTrace = this.db.prepare(
+      `INSERT INTO ai_decision_traces
+       (match_id, trace_id, event_id, state_version, match_version, side, turn, decision_index, selected_action_id, selected_action_type, plan_kind, score, confidence, created_at, schema_version, trace_json)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    );
+    for (const trace of traces.slice(baseline.loadedAiDecisionTraceCount)) {
+      insertTrace.run(matchId, trace.traceId, trace.eventId, trace.stateVersion, trace.matchVersion, trace.side, trace.turn, trace.decisionIndex, trace.selectedActionId ?? null, trace.selectedActionType ?? null, trace.planKind ?? null, trace.score ?? null, trace.confidence ?? null, trace.createdAt, trace.schemaVersion, JSON.stringify(trace.traceJson));
+    }
+
+    const insertReceipt = this.db.prepare(
+      `INSERT INTO action_receipts (match_id, idempotency_key, side, accepted, state_version_before, state_version_after, state_hash_after, error_code)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+    );
+    for (const receipt of record.actionReceipts.slice(baseline.loadedActionReceiptCount)) {
+      insertReceipt.run(matchId, receipt.idempotencyKey, receipt.side, receipt.accepted ? 1 : 0, receipt.stateVersionBefore, receipt.stateVersionAfter, receipt.stateHashAfter, receipt.errorCode ?? null);
+    }
+
+    const insertStateSnapshot = this.db.prepare(
+      `INSERT INTO state_snapshots (match_id, snapshot_id, state_version, match_version, state_hash, game_state_json, created_at, hidden_info_barrier)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+    );
+    for (const snapshot of record.stateSnapshots) {
+      insertStateSnapshot.run(matchId, snapshot.snapshotId, snapshot.stateVersion, snapshot.matchVersion, snapshot.stateHash, JSON.stringify(gameStateForStorage(snapshot.gameState)), snapshot.createdAt, snapshot.hiddenInfoBarrier ? 1 : 0);
+    }
+
+    const updateToken = this.db.prepare(
+      `UPDATE tokens SET kind = ?, allowed_side = ?, token_hash = ?, created_at = ?, expires_at = ?, revoked_at = ?, used_at = ?
+       WHERE match_id = ? AND token_id = ?`
+    );
+    for (const token of record.tokens) {
+      const result = updateToken.run(token.kind, token.allowedSide, token.tokenHash, token.createdAt, token.expiresAt ?? null, token.revokedAt ?? null, token.usedAt ?? null, matchId, token.tokenId) as { changes?: number | bigint };
+      if (Number(result.changes ?? 0) !== 1) throw new StorageError("action_persistence_conflict", "Match-Tokenbestand ist nicht mehr konsistent.");
+    }
+
+    this.db.prepare("DELETE FROM pending_undo WHERE match_id = ?").run(matchId);
+    if (record.pendingUndo) {
+      this.db.prepare("INSERT INTO pending_undo (match_id, pending_undo_json) VALUES (?, ?)").run(matchId, JSON.stringify(record.pendingUndo));
+    }
   }
 
   private syncPublicEvents(matchId: string, events: StoredMatch["eventLog"]): void {
@@ -1560,41 +1803,25 @@ export class SqliteMatchStorage implements MultiplayerStorage {
            AND (? IS NULL OR decision_index > ?)
          ORDER BY decision_index ASC`
       )
-      .all(matchId, afterDecisionIndex ?? null, afterDecisionIndex ?? null) as Array<{
-      traceId: string;
-      eventId: string;
-      stateVersion: number;
-      matchVersion: number;
-      side: "runner" | "corp";
-      turn: number;
-      decisionIndex: number;
-      selectedActionId?: string | null;
-      selectedActionType?: string | null;
-      planKind?: string | null;
-      score?: number | null;
-      confidence?: number | null;
-      createdAt: string;
-      schemaVersion: string;
-      traceJson: string;
-    }>;
-    return rows.map((row) => ({
-      traceId: row.traceId,
-      matchId,
-      eventId: row.eventId,
-      stateVersion: Number(row.stateVersion),
-      matchVersion: Number(row.matchVersion),
-      side: row.side,
-      turn: Number(row.turn),
-      decisionIndex: Number(row.decisionIndex),
-      ...(row.selectedActionId ? { selectedActionId: row.selectedActionId } : {}),
-      ...(row.selectedActionType ? { selectedActionType: row.selectedActionType } : {}),
-      ...(row.planKind ? { planKind: row.planKind } : {}),
-      ...(typeof row.score === "number" ? { score: row.score } : {}),
-      ...(typeof row.confidence === "number" ? { confidence: row.confidence } : {}),
-      createdAt: row.createdAt,
-      schemaVersion: row.schemaVersion,
-      traceJson: JSON.parse(row.traceJson) as Record<string, unknown>
-    }));
+      .all(matchId, afterDecisionIndex ?? null, afterDecisionIndex ?? null) as AiDecisionTraceRow[];
+    return rows.map((row) => aiDecisionTraceRecordFromRow(matchId, row));
+  }
+
+  private aiDecisionTraceRecordsForAction(matchId: string): AiDecisionTraceRecord[] {
+    const rows = this.db
+      .prepare(
+        `SELECT trace_id AS traceId, event_id AS eventId, state_version AS stateVersion, match_version AS matchVersion, side, turn, decision_index AS decisionIndex,
+          selected_action_id AS selectedActionId, selected_action_type AS selectedActionType, plan_kind AS planKind, score, confidence, created_at AS createdAt,
+          schema_version AS schemaVersion, trace_json AS traceJson
+         FROM ai_decision_traces
+         WHERE match_id = ?
+           AND event_id IN (
+             SELECT event_id FROM events WHERE match_id = ? ORDER BY event_index DESC LIMIT ?
+           )
+         ORDER BY decision_index ASC`
+      )
+      .all(matchId, matchId, SIDE_PAYLOAD_EVENT_TAIL_LIMIT) as AiDecisionTraceRow[];
+    return rows.map((row) => aiDecisionTraceRecordFromRow(matchId, row));
   }
 
   private truncateEventTable(table: "events" | "engine_events", matchId: string, eventIds: string[]): void {
@@ -2258,6 +2485,53 @@ function gameStateForStorage<T extends GameState | undefined>(state: T): T {
   return { ...state, eventLog: [] } as T;
 }
 
+function actionContextPublicEvent(event: {
+  eventId: string;
+  stateVersionBefore: number;
+  stateVersionAfter: number;
+  stateHashAfter: string;
+  eventType?: string | null;
+  actor?: string | null;
+  actionType?: string | null;
+  discardResolved?: number | null;
+  hiddenZoneAction?: string | null;
+}): StoredMatch["eventLog"][number]["publicPayload"] {
+  const context: Record<string, unknown> = {};
+  if (event.actor === "runner" || event.actor === "corp") context.actor = event.actor;
+  if (event.actionType) context.actionType = event.actionType;
+  if (event.discardResolved !== null && event.discardResolved !== undefined) context.discardResolved = event.discardResolved === 1;
+  if (event.hiddenZoneAction) context.hiddenZoneAction = event.hiddenZoneAction;
+  return {
+    eventId: event.eventId,
+    type: event.eventType ?? "action_applied",
+    stateVersionBefore: Number(event.stateVersionBefore),
+    stateVersionAfter: Number(event.stateVersionAfter),
+    stateHashAfter: event.stateHashAfter,
+    publicPayload: context
+  } as StoredMatch["eventLog"][number]["publicPayload"];
+}
+
+function aiDecisionTraceRecordFromRow(matchId: string, row: AiDecisionTraceRow): AiDecisionTraceRecord {
+  return {
+    traceId: row.traceId,
+    matchId,
+    eventId: row.eventId,
+    stateVersion: Number(row.stateVersion),
+    matchVersion: Number(row.matchVersion),
+    side: row.side,
+    turn: Number(row.turn),
+    decisionIndex: Number(row.decisionIndex),
+    ...(row.selectedActionId ? { selectedActionId: row.selectedActionId } : {}),
+    ...(row.selectedActionType ? { selectedActionType: row.selectedActionType } : {}),
+    ...(row.planKind ? { planKind: row.planKind } : {}),
+    ...(typeof row.score === "number" ? { score: row.score } : {}),
+    ...(typeof row.confidence === "number" ? { confidence: row.confidence } : {}),
+    createdAt: row.createdAt,
+    schemaVersion: row.schemaVersion,
+    traceJson: JSON.parse(row.traceJson) as Record<string, unknown>
+  };
+}
+
 function hydrateSnapshotGameState(state: GameState, eventLog: GameEvent[] | undefined): GameState {
   if (!eventLog) return state;
   return {
@@ -2267,8 +2541,9 @@ function hydrateSnapshotGameState(state: GameState, eventLog: GameEvent[] | unde
 }
 
 function compactRecordForStorage(record: StoredMatch): StoredMatch {
+  const { actionPersistenceBaseline: _actionPersistenceBaseline, ...persistedRecord } = record;
   return {
-    ...record,
+    ...persistedRecord,
     gameState: gameStateForStorage(record.gameState),
     eventLog: [],
     actionReceipts: [],
