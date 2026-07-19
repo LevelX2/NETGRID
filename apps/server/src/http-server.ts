@@ -17,8 +17,6 @@ import {
   type ConnectionAuditLogger,
 } from "./connection-audit";
 import {
-  JsonFileMatchStorage,
-  InMemoryMatchStorage,
   MultiplayerService,
   type MatchMode,
   type MatchStatus,
@@ -31,12 +29,10 @@ import {
   type UndoResult,
 } from "./multiplayer";
 import {
-  DEFAULT_JSON_STORAGE_PATH,
   DEFAULT_SQLITE_STORAGE_PATH,
   DEFAULT_STORAGE_BACKUP_DIR,
   SqliteMatchStorage,
   StorageError,
-  type StorageKind,
 } from "./storage-sqlite";
 import type {
   StorageMaintenanceCleanupApplyInput,
@@ -2893,17 +2889,6 @@ function defaultService(
 
 export function createConfiguredStorage() {
   const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-  const storageKind = storageKindFromEnv(
-    envValue(process.env, "NETGRID_STORAGE_KIND"),
-  );
-  if (storageKind === "memory") return new InMemoryMatchStorage();
-  if (storageKind === "json") {
-    const configuredPath = envValue(process.env, "NETGRID_MATCH_STORAGE_PATH");
-    const storagePath = configuredPath
-      ? resolve(configuredPath)
-      : resolve(root, DEFAULT_JSON_STORAGE_PATH);
-    return new JsonFileMatchStorage(storagePath);
-  }
   const configuredSqlitePath = envValue(
     process.env,
     "NETGRID_SQLITE_STORAGE_PATH",
@@ -2926,12 +2911,6 @@ export function createConfiguredStorage() {
       "Storage konnte nicht geöffnet werden. Bitte aus einem lokalen Backup wiederherstellen.",
     );
   }
-}
-
-function storageKindFromEnv(value: string | undefined): StorageKind {
-  if (value === "json" || value === "memory" || value === "sqlite")
-    return value;
-  return "sqlite";
 }
 
 function advertisedServerHost(bindHost: string): string {

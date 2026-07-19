@@ -24,7 +24,6 @@ try {
   start("server", ["pnpm", "--filter", "@netgrid/server", "exec", "tsx", "src/index.ts"], {
     PORT: String(serverPort),
     HOST: "127.0.0.1",
-    NETGRID_STORAGE_KIND: "sqlite",
     NETGRID_SQLITE_STORAGE_PATH: runtimePath,
     NETGRID_STORAGE_BACKUP_DIR: backupDir,
     NETGRID_TOKEN_SALT: "v1-0-7-e2e-token-salt",

@@ -1182,10 +1182,8 @@ describe("Backend 0.5 private storage maintenance", () => {
 describe("V1.0.8 SQLite storage and backup hardening", () => {
   it("uses SQLite as configurable default storage and reports only redacted health signals", async () => {
     const dir = await tempStorageDir();
-    const previousKind = process.env.NETGRID_STORAGE_KIND;
     const previousSqlite = process.env.NETGRID_SQLITE_STORAGE_PATH;
     const previousBackup = process.env.NETGRID_STORAGE_BACKUP_DIR;
-    process.env.NETGRID_STORAGE_KIND = "";
     process.env.NETGRID_SQLITE_STORAGE_PATH = join(dir, "configured.sqlite");
     process.env.NETGRID_STORAGE_BACKUP_DIR = join(dir, "backups");
     try {
@@ -1198,7 +1196,6 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       expect(JSON.stringify(health)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|cardInstances|privateDeckSnapshots|decklist/i);
       service.closeStorage();
     } finally {
-      restoreEnv("NETGRID_STORAGE_KIND", previousKind);
       restoreEnv("NETGRID_SQLITE_STORAGE_PATH", previousSqlite);
       restoreEnv("NETGRID_STORAGE_BACKUP_DIR", previousBackup);
     }
@@ -1216,7 +1213,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Corp" });
     expect("error" in joined).toBe(false);
     const before = await service.loadForTest(created.matchId);
-    expect(before?.privateDeckSnapshots?.runner.cards.length).toBeGreaterThan(0);
+    expect(before?.privateDeckSnapshots?.participants.player_a.runner.cards.length).toBeGreaterThan(0);
     service.closeStorage();
 
     const reopenedStorage = new SqliteMatchStorage({ dbPath, backupDir });
@@ -1224,7 +1221,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     expect(reopened?.match.matchId).toBe(created.matchId);
     expect(reopened?.tokens.every((token) => token.tokenHash.startsWith("sha256:"))).toBe(true);
     expect(reopened?.sessions.every((session) => session.sessionTokenHash.startsWith("sha256:"))).toBe(true);
-    expect(reopened?.privateDeckSnapshots?.corp.cards.length).toBeGreaterThan(0);
+    expect(reopened?.privateDeckSnapshots?.participants.player_b.corp.cards.length).toBeGreaterThan(0);
     expect(reopened?.eventLog.at(0)?.publicPayload.type).toBe("game_created");
     const raw = await readFile(dbPath);
     expect(raw.toString("utf8")).not.toContain(created.hostSessionToken);
@@ -1347,7 +1344,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     replayService.closeStorage();
   });
 
-  it("compacts legacy SQLite snapshots without losing private replay events, partial loads or undo", async () => {
+  it("compacts SQLite snapshots without losing private replay events, partial loads or undo", async () => {
     const dir = await tempStorageDir();
     const dbPath = join(dir, "netgrid.sqlite");
     const backupDir = join(dir, "backups");
@@ -1387,7 +1384,6 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
 
     const db = new DatabaseSync(dbPath);
     try {
-      db.prepare("DELETE FROM engine_events WHERE match_id = ?").run(created.matchId);
       db.prepare("UPDATE matches SET record_json = ? WHERE match_id = ?").run(JSON.stringify(legacyRecord), created.matchId);
       db.prepare("UPDATE game_states SET game_state_json = ? WHERE match_id = ?").run(JSON.stringify(legacyRecord.gameState), created.matchId);
       db.prepare("DELETE FROM state_snapshots WHERE match_id = ?").run(created.matchId);
@@ -1407,7 +1403,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
             (SELECT LENGTH(game_state_json) FROM game_states WHERE match_id = ?) AS gameStateBytes`
         )
         .get(created.matchId, created.matchId, created.matchId) as { engineEventCount: number; embeddedSnapshotCount: number; gameStateBytes: number };
-      expect(Number(legacyStats.engineEventCount)).toBe(0);
+      expect(Number(legacyStats.engineEventCount)).toBeGreaterThan(0);
       expect(Number(legacyStats.embeddedSnapshotCount)).toBe(legacyRecord.stateSnapshots.length);
       expect(Number(legacyStats.gameStateBytes)).toBeGreaterThan(10_000);
     } finally {
@@ -1424,7 +1420,6 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
         backup?: { backupId?: string; backupDir?: string };
         matchesScanned?: number;
         compactedMatchCount?: number;
-        engineEventsBackfilled?: number;
         gameStateRowsCompacted?: number;
         stateSnapshotRowsCompacted?: number;
         integrityCheck?: string;
@@ -1436,7 +1431,6 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       expect(result.backup?.backupDir).toContain(backupDir);
       expect(result.matchesScanned).toBe(1);
       expect(result.compactedMatchCount).toBe(1);
-      expect(result.engineEventsBackfilled).toBeGreaterThan(0);
       expect(result.gameStateRowsCompacted).toBe(1);
       expect(result.stateSnapshotRowsCompacted).toBe(legacyRecord.stateSnapshots.length);
       expect(result.integrityCheck).toBe("ok");
@@ -5483,8 +5477,8 @@ describe("MVP 0.2 multiplayer service", () => {
 
     const stored = await service.loadForTest(created.matchId);
     expect(stored?.match.aiControllers?.corp?.type).toBe("ai");
-    expect(stored?.privateDeckSnapshots?.corp.deckSnapshotId).toBe(stored?.match.deckSetup.corpSnapshotId);
-    expect(stored?.privateDeckSnapshots?.corp.cards.length).toBeGreaterThan(0);
+    expect(stored?.privateDeckSnapshots?.participants.player_b.corp.deckSnapshotId).toBe(stored?.match.deckSetup.corpSnapshotId);
+    expect(stored?.privateDeckSnapshots?.participants.player_b.corp.cards.length).toBeGreaterThan(0);
     expect(JSON.stringify(created)).not.toContain("cardInstances");
     expect(JSON.stringify(created)).not.toContain("Simple Agenda");
 
@@ -5796,7 +5790,7 @@ describe("MVP 0.2 multiplayer service", () => {
     if (!record?.privateDeckSnapshots || !record.gameState) throw new Error("Missing stored AI match");
     const beforeEventCount = record.eventLog.length;
     const beforeStateVersion = record.gameState.stateVersion;
-    delete (record.privateDeckSnapshots as Partial<typeof record.privateDeckSnapshots>).corp;
+    delete (record.privateDeckSnapshots.participants.player_b as Partial<typeof record.privateDeckSnapshots.participants.player_b>).corp;
     await storage.save(record);
 
     const advanced = await service.advanceAi({
@@ -5832,10 +5826,10 @@ describe("MVP 0.2 multiplayer service", () => {
       "ai-stale-runtime-snapshot-setup"
     );
     const record = await storage.load(created.matchId);
-    if (!record?.privateDeckSnapshots?.corp || !record.gameState) throw new Error("Missing stored AI match");
+    if (!record?.privateDeckSnapshots?.participants.player_b.corp || !record.gameState) throw new Error("Missing stored AI match");
     const beforeEventCount = record.eventLog.length;
     const beforeStateVersion = record.gameState.stateVersion;
-    record.privateDeckSnapshots.corp.deckSnapshotId = `${record.privateDeckSnapshots.corp.deckSnapshotId}:stale`;
+    record.privateDeckSnapshots.participants.player_b.corp.deckSnapshotId = `${record.privateDeckSnapshots.participants.player_b.corp.deckSnapshotId}:stale`;
     await storage.save(record);
 
     const advanced = await service.advanceAi({

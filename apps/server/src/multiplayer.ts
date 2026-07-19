@@ -1,6 +1,4 @@
 import { createHash, randomBytes } from "node:crypto";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname } from "node:path";
 import {
   assertValidAiDeckSnapshotForRuntime,
   buildAiDecisionInput,
@@ -322,9 +320,7 @@ export type StoredMatch = {
   lifecycleResult?: LifecycleResultSummary;
   startLobby?: MatchStartLobbyState;
   privateDeckSnapshots?: {
-    runner: DeckSnapshot;
-    corp: DeckSnapshot;
-    participants?: Record<SeriesPlayerSlot, { runner: DeckSnapshot; corp: DeckSnapshot }>;
+    participants: Record<SeriesPlayerSlot, { runner: DeckSnapshot; corp: DeckSnapshot }>;
   };
   eventLog: EventRecord[];
   actionReceipts: ActionReceipt[];
@@ -672,54 +668,6 @@ export class InMemoryMatchStorage implements MultiplayerStorage {
   }
 }
 
-export class JsonFileMatchStorage implements MultiplayerStorage {
-  private readonly records = new Map<string, StoredMatch>();
-  private readonly ready: Promise<void>;
-
-  constructor(private readonly filePath: string) {
-    this.ready = this.loadFromDisk();
-  }
-
-  async load(matchId: string, _options: { includeStateSnapshots?: boolean } = {}): Promise<StoredMatch | undefined> {
-    await this.ready;
-    const record = this.records.get(matchId);
-    return record ? clone(record) : undefined;
-  }
-
-  async save(record: StoredMatch): Promise<void> {
-    await this.ready;
-    this.records.set(record.match.matchId, clone(record));
-    await this.flush();
-  }
-
-  async list(): Promise<StoredMatch[]> {
-    await this.ready;
-    return [...this.records.values()].map((record) => clone(record));
-  }
-
-  async health(): Promise<StorageHealth> {
-    await this.ready;
-    return { ok: true, kind: "json", matchCount: this.records.size };
-  }
-
-  private async loadFromDisk(): Promise<void> {
-    try {
-      const content = await readFile(this.filePath, "utf8");
-      const parsed = JSON.parse(content) as { matches?: StoredMatch[] };
-      for (const record of parsed.matches ?? []) this.records.set(record.match.matchId, record);
-    } catch (error) {
-      if (!isNodeError(error) || error.code !== "ENOENT") throw error;
-      await mkdir(dirname(this.filePath), { recursive: true });
-      await this.flush();
-    }
-  }
-
-  private async flush(): Promise<void> {
-    await mkdir(dirname(this.filePath), { recursive: true });
-    await writeFile(this.filePath, `${JSON.stringify({ matches: [...this.records.values()] }, null, 2)}\n`, "utf8");
-  }
-}
-
 export class MultiplayerService {
   private readonly locks = new Map<string, Promise<void>>();
   private readonly tokenSalt: string;
@@ -731,7 +679,7 @@ export class MultiplayerService {
   private readonly applyEngineAction: EngineActionApplier;
 
   constructor(
-    private readonly storage: MultiplayerStorage = new InMemoryMatchStorage(),
+    private readonly storage: MultiplayerStorage,
     options: {
       tokenSalt?: string;
       publicWebBaseUrl?: string;
@@ -874,8 +822,6 @@ export class MultiplayerService {
           ...(joinToken ? [this.tokenRecord(matchId, joinSide, "join", joinToken, now)] : [])
         ],
         privateDeckSnapshots: {
-          runner: clone(hostDeckPair.runnerSnapshot),
-          corp: clone(hostDeckPair.corpSnapshot),
           participants: {
             player_a: { runner: clone(hostDeckPair.runnerSnapshot), corp: clone(hostDeckPair.corpSnapshot) },
             player_b: { runner: clone(hostDeckPair.runnerSnapshot), corp: clone(hostDeckPair.corpSnapshot) }
@@ -1036,8 +982,6 @@ export class MultiplayerService {
       ],
       gameState,
       privateDeckSnapshots: {
-        runner: clone(deckSetup.runnerSnapshot),
-        corp: clone(deckSetup.corpSnapshot),
         participants: privateParticipantDeckSetup(participantDecks)
       },
       eventLog: gameState.eventLog.map((event) => toEventRecord(matchId, event, false)),
@@ -2388,8 +2332,6 @@ export class MultiplayerService {
       record.match.series.corpPlayer = corpPlayer;
     }
     record.privateDeckSnapshots = {
-      runner: clone(deckSetup.runnerSnapshot),
-      corp: clone(deckSetup.corpSnapshot),
       participants: privateParticipantDeckSetup(participants)
     };
     record.startLobby = {
@@ -4017,23 +3959,10 @@ function deckErrorMessage(error: unknown): string {
 
 function participantDeckInputsForRecord(record: StoredMatch): Record<SeriesPlayerSlot, ParticipantDeckPairInput> {
   const participants = record.privateDeckSnapshots?.participants;
-  if (participants?.player_a && participants.player_b) {
-    return {
-      player_a: { runnerDeckSnapshot: clone(participants.player_a.runner), corpDeckSnapshot: clone(participants.player_a.corp) },
-      player_b: { runnerDeckSnapshot: clone(participants.player_b.runner), corpDeckSnapshot: clone(participants.player_b.corp) }
-    };
-  }
-  const fallbackRunner = record.privateDeckSnapshots?.runner;
-  const fallbackCorp = record.privateDeckSnapshots?.corp;
-  if (fallbackRunner && fallbackCorp) {
-    return {
-      player_a: { runnerDeckSnapshot: clone(fallbackRunner), corpDeckSnapshot: clone(fallbackCorp) },
-      player_b: { runnerDeckSnapshot: clone(fallbackRunner), corpDeckSnapshot: clone(fallbackCorp) }
-    };
-  }
+  if (!participants) throw new Error("participant_deck_snapshots_missing");
   return {
-    player_a: { runnerDeckSnapshotId: record.match.deckSetup.runnerSnapshotId, corpDeckSnapshotId: record.match.deckSetup.corpSnapshotId },
-    player_b: { runnerDeckSnapshotId: record.match.deckSetup.runnerSnapshotId, corpDeckSnapshotId: record.match.deckSetup.corpSnapshotId }
+    player_a: { runnerDeckSnapshot: clone(participants.player_a.runner), corpDeckSnapshot: clone(participants.player_a.corp) },
+    player_b: { runnerDeckSnapshot: clone(participants.player_b.runner), corpDeckSnapshot: clone(participants.player_b.corp) }
   };
 }
 
@@ -4075,7 +4004,10 @@ function assertValidAiDeckSnapshotsForControllers(
 }
 
 function assertRecordAiDeckSnapshotForRuntime(record: StoredMatch, side: Side): DeckSnapshot {
-  return assertValidAiDeckSnapshotForRuntime(record.privateDeckSnapshots?.[side], {
+  const assignment = record.match.deckSetup.assignment;
+  if (!assignment) throw new Error("deck_assignment_missing");
+  const player = side === "runner" ? assignment.runnerPlayer : assignment.corpPlayer;
+  return assertValidAiDeckSnapshotForRuntime(record.privateDeckSnapshots?.participants[player][side], {
     side,
     ...aiDeckSnapshotExpectationFor(record, side)
   }) as DeckSnapshot;
@@ -4232,8 +4164,4 @@ function cloneGameStateWithoutEventLog(gameState: GameState): GameState {
 
 function trimTrailingSlash(value: string): string {
   return value.trim().replace(/\/+$/, "");
-}
-
-function isNodeError(error: unknown): error is NodeJS.ErrnoException {
-  return error instanceof Error && "code" in error;
 }

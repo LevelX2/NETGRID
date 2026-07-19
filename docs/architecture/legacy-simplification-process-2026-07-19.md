@@ -28,7 +28,12 @@ jedem Paket in diesem Dokument aktualisiert.
   und exakte Binding-Grenzwerte sowie der doppelte `check:ai:full`-Alias sind
   entfernt. Geprüft mit allen sechs betroffenen Checks/Selbsttests und dem
   vollständigen Workspace-Typecheck.
-- P4 Kanonischer Server-Storage und Deck-Snapshot: als Nächstes.
+- P4 Kanonischer Server-Storage und Deck-Snapshot: abgeschlossen. Der
+  konfigurierbare Serverpfad erzeugt nur noch SQLite; JSON-Storage,
+  Schema-0/1-Migration und Eventlog-Backfill sind entfernt. Private Decks
+  werden ausschließlich je Teilnehmer gespeichert und ohne Top-Level- oder
+  ID-Fallback gelesen. Geprüft mit Server-Typecheck und allen 174 Servertests.
+- P5 Tote Artefakte, Browser-Aliase und Importreste: als Nächstes.
 
 ## Quelle/Vorgabe
 

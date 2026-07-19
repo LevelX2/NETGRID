@@ -204,8 +204,16 @@ function spectatorFixture(): { record: StoredMatch; secrets: string[] } {
     ],
     gameState: futureState,
     privateDeckSnapshots: {
-      runner: { deckSnapshotId: "private_runner_snapshot_secret" } as never,
-      corp: { deckSnapshotId: "private_corp_snapshot_secret" } as never,
+      participants: {
+        player_a: {
+          runner: { deckSnapshotId: "private_runner_snapshot_secret" } as never,
+          corp: { deckSnapshotId: "private_corp_snapshot_secret" } as never,
+        },
+        player_b: {
+          runner: { deckSnapshotId: "private_runner_snapshot_secret" } as never,
+          corp: { deckSnapshotId: "private_corp_snapshot_secret" } as never,
+        },
+      },
     },
     eventLog,
     actionReceipts: [],
