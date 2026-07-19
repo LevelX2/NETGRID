@@ -35,7 +35,8 @@
   `docs/releases/v2/v2-0-auth-privacy-cloud-decks/password-accounts-cloud-decks-final-review-2026-07-18.md`.
 - Private Account-Matchstatistik mit sicherer Teilnehmerbindung,
   Ergebnisledger und Retention-Vertrag:
-  `docs/releases/v2/account-match-statistics-plan-2026-07-19.md`.
+  `docs/releases/v2/account-match-statistics-final-review-2026-07-19.md`
+  (Quellplan: `docs/releases/v2/account-match-statistics-plan-2026-07-19.md`).
 - Wiederverwendbare Funktionsnamen:
   [[../Architektur/Abstrakte Funktionsnamen und Wiederverwendung]].
 - Projektweiter Cleanup:
@@ -76,7 +77,6 @@
   - `docs/reviews/ai/proteus-ai-release-reconciliation-final-review-2026-07-09.md`
 - Aktive Gates:
   - `corepack pnpm check:ai`
-  - `corepack pnpm check:ai:full`
   - `corepack pnpm check:ai-deck-doctrine-strategy`
   - `corepack pnpm check:proteus-ai-readiness`
 

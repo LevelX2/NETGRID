@@ -4,6 +4,7 @@ import { InMemoryAccountStorage } from "./account-session";
 import { createNetgridHttpServer } from "./http-server";
 import { loadDeploymentConfig } from "./internet-hardening";
 import { InMemoryMatchStorage, MultiplayerService } from "./multiplayer";
+import { AccountMatchStatisticsService, InMemoryAccountStatisticsStorage } from "./account-statistics";
 
 const ORIGIN = "http://127.0.0.1:3100";
 const ADMIN_PASSWORD = "Eine starke Admin-Passphrase 2026";
@@ -16,9 +17,10 @@ describe("closed account HTTP API", () => {
     });
     await accountAuth.bootstrapAdmin({ loginName: "admin", displayName: "Admin", password: ADMIN_PASSWORD });
     const matchStorage = new InMemoryMatchStorage();
+    const accountStatistics = new AccountMatchStatisticsService(new InMemoryAccountStatisticsStorage(), { now: () => "2026-07-19T00:00:00.000Z" });
     const handle = createNetgridHttpServer(
       new MultiplayerService(matchStorage, { tokenSalt: "account-http-match-salt" }),
-      { deploymentConfig: loadDeploymentConfig({} as NodeJS.ProcessEnv), accountAuth },
+      { deploymentConfig: loadDeploymentConfig({} as NodeJS.ProcessEnv), accountAuth, accountStatistics },
     );
     const baseUrl = await listen(handle);
     try {
@@ -84,6 +86,10 @@ describe("closed account HTTP API", () => {
       const storedMatch = (await matchStorage.list()).find((record) => record.match.seed === "account-name-is-authoritative");
       expect(storedMatch?.sessions[0]?.displayName).toBe("Admin");
       expect(storedMatch?.match.participantIdentities).toEqual({ player_a: "account" });
+      expect(await accountStatistics.bindingsForMatch(storedMatch?.match.matchId ?? "")).toEqual([
+        expect.objectContaining({ participantSlot: "player_a", accountId: signedInPayload.account.accountId, bindingSource: "authenticated_create" }),
+      ]);
+      expect(JSON.stringify(storedMatch)).not.toContain(signedInPayload.account.accountId);
 
       const guestLobby = await fetch(`${baseUrl}/api/matches`, {
         method: "POST",
@@ -102,6 +108,9 @@ describe("closed account HTTP API", () => {
       const joinedMatch = (await matchStorage.list()).find((record) => record.match.seed === "account-join-name-is-authoritative");
       expect(joinedMatch?.sessions[1]?.displayName).toBe("Admin");
       expect(joinedMatch?.match.participantIdentities).toEqual({ player_a: "guest", player_b: "account" });
+      expect(await accountStatistics.bindingsForMatch(joinedMatch?.match.matchId ?? "")).toEqual([
+        expect.objectContaining({ participantSlot: "player_b", accountId: signedInPayload.account.accountId, bindingSource: "authenticated_join" }),
+      ]);
     } finally {
       await handle.close();
     }

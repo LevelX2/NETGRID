@@ -39,6 +39,7 @@ import {
   buildSemanticDecisionChainDebug,
   selectSemanticRuntimeInitialChoice,
 } from "./semantic-decision-chain";
+import { replayStableCorpBasicEconomyNearTieChoiceOrUndefined } from "./corp-economy/corp-basic-economy-near-tie";
 import type {
   SemanticRuntimeChoice,
   SemanticRuntimeCoverageSelectionDebug,
@@ -122,6 +123,7 @@ export type SemanticRuntimeDependencies = {
   bestSemanticRuntimeChoiceForTacticalPlanOverride: (
     choices: readonly SemanticRuntimeChoice[],
     planRuntime: TacticalPlanRuntimeResult,
+    input?: AiDecisionInput,
   ) => SemanticRuntimeChoice | undefined;
   tacticalPlanMappedChoice: (
     input: AiDecisionInput,
@@ -378,11 +380,17 @@ export function chooseSemanticRuntimeAction(
           : {}),
         candidates: actionSemanticCandidates,
       });
-  const bestChoice = dependencies.bestSemanticRuntimeChoice(choices);
+  const rawBestChoice = dependencies.bestSemanticRuntimeChoice(choices);
+  const bestChoice = replayStableCorpBasicEconomyNearTieChoiceOrUndefined(
+    input,
+    choices,
+    rawBestChoice,
+  );
   const bestPlanOverrideChoice =
     dependencies.bestSemanticRuntimeChoiceForTacticalPlanOverride(
       choices,
       planRuntime,
+      input,
     );
   const mappedChoice = dependencies.tacticalPlanMappedChoice(
     input,
@@ -454,7 +462,7 @@ export function chooseSemanticRuntimeAction(
   const decisionChain = buildSemanticDecisionChainDebug({
     input,
     choices,
-    ...(bestChoice ? { bestChoice } : {}),
+    ...(rawBestChoice ? { bestChoice: rawBestChoice } : {}),
     planRuntime,
     mappedChoice,
     initialSelection,

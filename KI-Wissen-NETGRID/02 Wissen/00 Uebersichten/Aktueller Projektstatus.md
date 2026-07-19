@@ -158,6 +158,14 @@ Stand: 2026-07-19
   Compile-/Derived-Facts-/Manual-Overlay-Pipeline ist entfernt; der Inspector
   baut seine Darstellung direkt aus dieser Quelle auf und besitzt keinen
   zweiten Semantikindex.
+- Die neun am 19.07.2026 identifizierten AI-Komplexitätsschwerpunkte wurden
+  durch fachliche Owner- und Testsuite-Schnitte aufgeteilt. Der produktive
+  Importgraph bleibt frei von Laufzeit- und Typzyklen. Die damalige
+  Größen-Gate-Remediation ist als historische Umsetzungsevidence dokumentiert;
+  aktuelle Gates verwenden keine Datei-, Zeilen-, Testgrößen- oder
+  Runtime-Root-Caps. Führend sind
+  `docs/architecture/legacy-simplification-process-2026-07-19.md` und
+  `docs/reviews/ai/ai-source-structure-gate-remediation-final-review-2026-07-19.md`.
 - Führende Artefakte:
   - `docs/architecture/ai/README.md`
   - `docs/architecture/ai/ai-current-state-cleanup-process-2026-07-09.md`

@@ -67,7 +67,6 @@ Szenarioerwartung keine strategisch richtige Einzelentscheidung.
 - `corepack pnpm --filter @netgrid/ai test`
 - `corepack pnpm test:ai:shards`
 - `corepack pnpm check:ai`
-- `corepack pnpm check:ai:full`
 - `corepack pnpm check:ai-deck-doctrine-strategy`
 - `corepack pnpm check:proteus-ai-readiness`
 - `corepack pnpm --filter @netgrid/server test`

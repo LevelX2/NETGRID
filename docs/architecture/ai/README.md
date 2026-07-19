@@ -157,6 +157,14 @@
   den produktiven Semantic-Runtime-Auswahlweg.
 - `../legacy-simplification-process-2026-07-19.md`: aktueller Abschlussstand
   der Hint-Single-Source-, Source-Gate- und Legacy-Bereinigung.
+- `ai-source-structure-optimization-process-2026-07-17.md` und
+  `docs/reviews/ai/ai-source-structure-optimization-final-review-2026-07-17.md`:
+  historischer Source-Placement-, Zyklen-, Größenratchet- und
+  Public-/Simulation-Grenzstand.
+- `ai-source-structure-gate-remediation-plan-2026-07-19.md` und
+  `docs/reviews/ai/ai-source-structure-gate-remediation-final-review-2026-07-19.md`:
+  historische Evidence der fachlichen Modul- und Testsuite-Schnitte; die dort
+  verwendeten Größenratchets sind nicht mehr aktiv.
 - `ai-seed03-seed05-loop-remediation-process-2026-07-14.md` und
   `docs/reviews/ai/ai-behavior-baseline-v1-seed03-seed05-remediation-final-2026-07-14.md`:
   spielgleiche Verträge und vollständige Seed-03/05-Evidence für marginale
@@ -208,7 +216,6 @@
 
 ```text
 corepack pnpm check:ai
-corepack pnpm check:ai:full
 corepack pnpm check:ai-source-structure
 corepack pnpm check:proteus-ai-readiness
 corepack pnpm check:ai-deck-doctrine-strategy
@@ -223,8 +230,8 @@ Engine-erzeugte Inputs mit dem produktiven Chooser. Unit-, synthetische Live-,
 Live-Engine- und Full-Simulation-Evidence bleiben getrennt.
 
 Die 618 Karten-Hints sind vollständig in der einzigen Quelle gepflegt. Der
-Hint-Inspector-Index wird daraus deterministisch als Such- und Diagnoseindex
-erzeugt; er ist kein eigener Semantik- oder Runtime-Layer.
+Hint-Inspector baut seine Darstellung direkt daraus auf und besitzt keinen
+eigenen Semantik- oder Runtime-Index.
 
 ## Historie und Retention
 

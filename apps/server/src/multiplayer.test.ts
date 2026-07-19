@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, readdir, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
@@ -135,16 +135,25 @@ describe("recent match results", () => {
 
 describe("V1.0.9 private internet hardening", () => {
   it("uses a LAN-capable default bind address for direct server starts", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "netgrid-direct-server-start-"));
     const previousPublicHost = process.env.NETGRID_PUBLIC_HOST;
+    const previousAccountStorage = process.env.NETGRID_ACCOUNT_SQLITE_PATH;
+    const previousBackupDir = process.env.NETGRID_STORAGE_BACKUP_DIR;
     process.env.NETGRID_PUBLIC_HOST = "192.0.2.10";
+    process.env.NETGRID_ACCOUNT_SQLITE_PATH = join(dir, "netgrid.sqlite");
+    process.env.NETGRID_STORAGE_BACKUP_DIR = join(dir, "backups");
     const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "lan-default-bind" });
-    const handle = await startNetgridServer({ port: 0, host: "0.0.0.0 ", service });
+    let handle: Awaited<ReturnType<typeof startNetgridServer>> | undefined;
     try {
+      handle = await startNetgridServer({ port: 0, host: "0.0.0.0 ", service });
       expect(handle.bindUrl).toMatch(/^http:\/\/0\.0\.0\.0:\d+$/);
       expect(handle.url).toMatch(/^http:\/\/192\.0\.2\.10:\d+$/);
     } finally {
-      await handle.close();
+      await handle?.close();
       restoreEnv("NETGRID_PUBLIC_HOST", previousPublicHost);
+      restoreEnv("NETGRID_ACCOUNT_SQLITE_PATH", previousAccountStorage);
+      restoreEnv("NETGRID_STORAGE_BACKUP_DIR", previousBackupDir);
+      await rm(dir, { recursive: true, force: true });
     }
   });
 
@@ -395,6 +404,7 @@ describe("V1.0.9 private internet hardening", () => {
     const wsLimiter = new FixedWindowRateLimiter({
       create_match: undefined,
       token_probe: undefined,
+      account_read: undefined,
       lifecycle: undefined,
       ai_advance: undefined,
       ws_handshake: { limit: 10, windowMs: 60_000 },
@@ -1191,7 +1201,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       const service = new MultiplayerService(storage, { tokenSalt: "v108-default-storage" });
       const health = await service.storageHealth();
       expect(health.kind).toBe("sqlite");
-      expect(health.schemaVersion).toBe(2);
+      expect(health.schemaVersion).toBe(3);
       expect(health.storageFormat).toBe("netgrid_multiplayer_sqlite");
       expect(JSON.stringify(health)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|cardInstances|privateDeckSnapshots|decklist/i);
       service.closeStorage();
@@ -1683,7 +1693,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     const reopened = new SqliteMatchStorage({ dbPath, backupDir });
     expect((await reopened.list()).map((record) => record.match.matchId)).toEqual([first.matchId]);
     const health = inspectSqliteStorage(dbPath);
-    expect(health).toMatchObject({ kind: "sqlite", schemaVersion: 2, matchCount: 1 });
+    expect(health).toMatchObject({ kind: "sqlite", schemaVersion: 3, matchCount: 1 });
     const manifestText = await readFile(join(backup.backupDir, "manifest.json"), "utf8");
     expect(manifestText).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|cardInstances|privateDeckSnapshots|decklist/i);
     reopened.close();

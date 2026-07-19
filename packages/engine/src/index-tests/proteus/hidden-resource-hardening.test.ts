@@ -214,6 +214,61 @@ function supportActionFor(
   );
 }
 
+function payableBreakerEncounter(seed: string): {
+  state: GameState;
+  breakerId: CardInstanceId;
+  iceId: CardInstanceId;
+  chibaId: CardInstanceId;
+} {
+  let state = runnerState(seed);
+  const breakerId = addRunnerGripCard(
+    state,
+    "onr_v1_021_dwarf",
+    `${seed}_dwarf`,
+  );
+  const installBreaker = getLegalActions(state, "runner").find(
+    (candidate) =>
+      candidate.type === "install_card" &&
+      candidate.payload?.cardId === breakerId,
+  );
+  expect(installBreaker).toBeDefined();
+  state = applyLegal(state, "runner", installBreaker!).state;
+  const chibaId = installHiddenResource(
+    state,
+    "onr_proteus_133_chiba-bank-account",
+    `${seed}_chiba`,
+  );
+  const iceId = addCorpServerCard(
+    state,
+    "onr_v1_232_crystal-wall",
+    `${seed}_crystal_wall`,
+    "hq",
+    "ice",
+  );
+  state.cardInstances[iceId] = {
+    ...state.cardInstances[iceId]!,
+    faceup: true,
+    rezzed: true,
+  };
+  state.runner.credits = 10;
+  state.phase = "run";
+  state.timingPoint = "run.encounter_ice";
+  state.activeSide = "runner";
+  state.run = {
+    runId: `${seed}_run`,
+    attackedServerId: "hq",
+    phase: "encounter_ice",
+    position: { kind: "ice", serverId: "hq", iceIndex: 0 },
+    approachedIceId: iceId,
+    encounteredIceId: iceId,
+    brokenSubroutineIndexes: [],
+    resolvedSubroutineIndexes: [],
+    successful: false,
+    accessCount: 1,
+  };
+  return { state, breakerId, iceId, chibaId };
+}
+
 function accessStartActionFor(
   state: GameState,
   cardId: CardInstanceId,
@@ -395,6 +450,142 @@ describe("PRO011 hidden resource timing hardening", () => {
     expect(state.runner.heap).toContain(scoreId);
     expect(state.runner.credits).toBe(9);
     expect(state.runner.clicks).toBe(3);
+  });
+
+  it.each([
+    ["Chiba Bank Account", "onr_proteus_133_chiba-bank-account", 1],
+    [
+      "Liberated Savings Account",
+      "onr_proteus_143_liberated-savings-account",
+      7,
+    ],
+    ["Swiss Bank Account", "onr_proteus_152_swiss-bank-account", 3],
+  ] as const)(
+    "offers voluntary %s support for an already payable event",
+    (_title, definitionId, expectedCreditCost) => {
+      let state = runnerState(`voluntary-bank-${definitionId}`);
+      state.runner.credits = 20;
+      const bankId = installHiddenResource(
+        state,
+        definitionId,
+        `voluntary_${definitionId}`,
+      );
+      const scoreId = addRunnerGripCard(
+        state,
+        "onr_v1_108_score",
+        `voluntary_score_${definitionId}`,
+      );
+      const playScore = getLegalActions(state, "runner").find(
+        (candidate) =>
+          candidate.type === "play_event" &&
+          candidate.payload?.cardId === scoreId,
+      );
+      expect(playScore).toBeDefined();
+
+      const opened = applyLegal(state, "runner", playScore!);
+      expect(opened.ok).toBe(true);
+      state = opened.state;
+
+      expect(state.runnerCostPenaltySupportWindow).toMatchObject({
+        originalActionId: playScore!.actionId,
+        amountDue: 5,
+        paymentContext: "runner_pool",
+      });
+      expect(state.runner.credits).toBe(20);
+      const support = supportActionFor(state, bankId);
+      expect(support).toBeDefined();
+      expect(support?.costs[0]?.credits ?? 0).toBe(expectedCreditCost);
+      const continuation = getLegalActions(state, "runner").find(
+        (candidate) => candidate.actionId === playScore!.actionId,
+      );
+      expect(continuation?.label).toContain(
+        "Ohne weiteren Bank-Support fortfahren",
+      );
+    },
+  );
+
+  it("offers and resolves voluntary Chiba support before a payable icebreaker pump", () => {
+    let { state, breakerId, chibaId } = payableBreakerEncounter(
+      "voluntary-breaker-pump",
+    );
+    const initial = structuredClone(state);
+    const pump = getLegalActions(state, "runner").find(
+      (candidate) =>
+        candidate.type === "pump_breaker" &&
+        candidate.payload?.breakerId === breakerId,
+    );
+    expect(pump).toBeDefined();
+
+    const opened = applyLegal(state, "runner", pump!);
+    expect(opened.ok).toBe(true);
+    state = opened.state;
+    expect(state.runnerCostPenaltySupportWindow).toMatchObject({
+      originalActionId: pump!.actionId,
+      amountDue: 1,
+      paymentContext: "runner_run",
+    });
+    expect(state.runner.credits).toBe(10);
+    expect(state.cardInstances[breakerId]?.strengthModifier).toBe(0);
+    expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain(
+      "Chiba Bank Account",
+    );
+
+    const support = supportActionFor(state, chibaId);
+    expect(support).toBeDefined();
+    state = applyLegal(state, "runner", support!).state;
+    expect(state.runner.credits).toBe(13);
+    expectHiddenResourceTrashed(
+      state,
+      chibaId,
+      "onr_proteus_133_chiba-bank-account",
+    );
+
+    const continuation = getLegalActions(state, "runner").find(
+      (candidate) => candidate.actionId === pump!.actionId,
+    );
+    expect(continuation?.label).toContain(
+      "Ohne weiteren Bank-Support fortfahren",
+    );
+    const resolved = applyLegal(state, "runner", continuation!);
+    expect(resolved.ok).toBe(true);
+    state = resolved.state;
+    expect(state.runnerCostPenaltySupportWindow).toBeUndefined();
+    expect(state.runner.credits).toBe(12);
+    expect(state.cardInstances[breakerId]?.strengthModifier).toBe(1);
+    expectReplayStable(initial, state);
+  });
+
+  it("continues a payable icebreaker break without voluntary bank support exactly once", () => {
+    let { state, breakerId, chibaId } = payableBreakerEncounter(
+      "voluntary-breaker-break",
+    );
+    const initial = structuredClone(state);
+    const breakAction = getLegalActions(state, "runner").find(
+      (candidate) =>
+        candidate.type === "break_subroutine" &&
+        candidate.payload?.breakerId === breakerId &&
+        candidate.payload?.subroutineIndex === 0,
+    );
+    expect(breakAction).toBeDefined();
+
+    state = applyLegal(state, "runner", breakAction!).state;
+    expect(supportActionFor(state, chibaId)).toBeDefined();
+    const continuation = getLegalActions(state, "runner").find(
+      (candidate) => candidate.actionId === breakAction!.actionId,
+    );
+    expect(continuation?.label).toContain(
+      "Ohne weiteren Bank-Support fortfahren",
+    );
+
+    const resolved = applyLegal(state, "runner", continuation!);
+    expect(resolved.ok).toBe(true);
+    state = resolved.state;
+    expect(state.runnerCostPenaltySupportWindow).toBeUndefined();
+    expect(state.runner.credits).toBe(9);
+    expect(state.run?.brokenSubroutineIndexes).toEqual([0]);
+    expect(state.runner.rig.resources).toContain(chibaId);
+    expect(state.runner.heap).not.toContain(chibaId);
+    expectReplayStable(initial, state);
   });
 
   it("opens cost support for accessed card trash costs", () => {

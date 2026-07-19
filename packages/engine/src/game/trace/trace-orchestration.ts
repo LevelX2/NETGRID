@@ -831,7 +831,6 @@ function maybeOpenRunnerTraceBidSupportWindow(
     0,
     Math.floor(bid) - Math.max(0, Math.floor(traceLinkCreditsToPay)),
   );
-  if (host.state.runner.credits >= normalCreditsRequired) return false;
   return openRunnerCostPenaltySupportWindow(host.state, legalAction, {
     amount: normalCreditsRequired,
     availableWithoutSupport: host.state.runner.credits,

@@ -1,6 +1,6 @@
 # AI-Source-Structure-Gate-Remediation – Plan 2026-07-19
 
-Status: `active`
+Status: `complete`
 
 ## Quelle und Vorgabe
 
@@ -182,6 +182,78 @@ prepared
 Zu jedem Zeitpunkt ist genau ein Paket aktiv. `blocked` ist nur mit
 dokumentiertem Sicherheitsblocker und Removal Condition zulässig.
 
+## Ausführungsstand
+
+- Prozessvorbereitung auf `main` im Commit `6abdd1576` abgeschlossen.
+- Arbeitsbranch: `codex/ai-source-structure-gate-remediation`
+- Arbeits-Worktree:
+  `C:\Projekte\NETGRID_AI_SOURCE_STRUCTURE_GATE_REMEDIATION`
+- ASSG-0 abgeschlossen: Der Worktree wurde exklusiv vom vorbereitenden
+  `main`-Stand angelegt. Vier weitere registrierte Worktrees gehören klar
+  getrennten Activity-/AI-Prozessen und überschneiden die neun Removal-List-
+  Dateien nicht.
+- Das unveränderte Lockfile wurde mit `corepack pnpm install
+--frozen-lockfile` materialisiert; dabei entstanden nur ignorierte lokale
+  pnpm-Artefakte.
+- Baseline: neun exakt reproduzierte Größenverstöße, null Laufzeit-/Typzyklen,
+  Runtime-Root 289. Structure-Selftest, AI-Typecheck, Diff-Hygiene und 39/39
+  Public-Export-/Module-Boundary-/Action-Entrypoint-Tests sind grün.
+- ASSG-1 abgeschlossen: Der Cutover-Monolith wurde in vier Vertragsfamilien
+  mit 240/1.428/1.601/709 physischen Zeilen und einen gemeinsamen
+  434-Zeilen-Test-Support geteilt. Alle 76 vorhandenen Testfälle und ihre
+  Assertions bleiben erhalten. AI-Typecheck, 76/76 Cutover-Tests,
+  Structure-Selftest und Diff-Hygiene sind grün; die Removal List sinkt von
+  neun auf acht Treffer.
+- ASSG-2 abgeschlossen: `semantic-choice-ranking.ts` ist eine 10-zeilige
+  öffentliche Fassade. Die Mapping-Orchestration liegt mit 482 Zeilen unter
+  `choice-ranking/`; initiale Urgency-/Strategic-Fit-/Hand-Overrides sind als
+  eigener 128-Zeilen-Schritt getrennt. Corp-Urgency liegt beim vorhandenen
+  Corp-Policy-Owner. Die Corp-Suite ist in 230/206 Zeilen große Scoreline- und
+  Board-Triage-Verträge geteilt. AI-Typecheck, Package-Boundaries, 105/105
+  Choice-/Plan-/Decision-Chain-Tests, Structure-Selftest und Diff-Hygiene sind
+  grün; die Removal List sinkt von acht auf sechs Treffer.
+- ASSG-3 abgeschlossen: Die Scoring-Window-Projektion sinkt von 1.619 auf
+  1.189 Zeilen. Sichtbare Runner-Credits, Staged Breaker, Memory-Fit und
+  bekannte ICE-Pfadbewertung liegen in einem 448-Zeilen-Runner-Pressure-Owner;
+  beide Seiten teilen eine einzige kleine AI-Hint-Datenquelle. Der bestehende
+  Projection-Export bleibt kompatibel. AI-Typecheck, Package-Boundaries,
+  106/106 Window-/Protection-/Central-Pressure-/Match-3bb14-/Corp-Score-Tests,
+  Structure-Selftest und Diff-Hygiene sind grün; die Removal List sinkt von
+  sechs auf fünf Treffer.
+- ASSG-4 abgeschlossen: Die aktive Remote-Familie liegt in einem eigenen
+  505-Zeilen-Owner; die übrigen Scoreline-Komponenten sinken von 1.022 auf 526
+  Zeilen. Score-/Advance-/Rez-/Install-Action-Familien sind als
+  391-Zeilen-Collector getrennt, der reihenfolgetreue öffentliche
+  Corp-Score-Orchestrator sinkt von 838 auf 492 Zeilen. Die 56 vorhandenen
+  Corp-Score-Tests sind vollständig auf drei Suiten mit
+  1.606/1.067/1.183 Zeilen verteilt. AI-Typecheck, Package-Boundaries, 139/139
+  Corp-Score-/Scoreline-/Choice-Tests, Structure-Selftest und Diff-Hygiene sind
+  grün; die Removal List sinkt von fünf auf zwei Treffer.
+- ASSG-5 abgeschlossen: Der reine Board-Triage-Orchestrator sinkt von 810 auf
+  364 Zeilen; das Action-Alignment liegt zyklusfrei in einem eigenen
+  463-Zeilen-Owner. Die 20 vorhandenen Scoreline-Triage-Tests sind vollständig
+  auf Central-, Remote-Funding- und Clock-Suiten mit 517/613/368 Zeilen
+  verteilt. AI-Typecheck, Package-Boundaries, 121/121 Board-Triage-/Corp-
+  Score-/Choice-/Central-Pressure-Tests, Structure-Selftest und Diff-Hygiene
+  sind grün. Die Removal List steht bei null; das Source-Structure-Gate meldet
+  677 produktive Dateien, null Laufzeit-/Typzyklen und Runtime-Root 289.
+- ASSG-6 abgeschlossen: Alle neun Ausgangstreffer sind entfernt und die
+  geänderten sowie neuen Owner- und Testsuite-Dateien besitzen kleinere,
+  explizite Endstand-Caps. Eine zunächst im gemeinsamen Cutover-Test-Support
+  platzierte `evaluateRunnerRunTargets`-Abhängigkeit wurde durch das
+  Module-Boundary-Gate erkannt und ohne Allowlist in die beiden tatsächlichen
+  Testconsumer zurückverlegt. Der vollständige Abschlusslauf ist grün:
+  `check:ai`, `check:ai:full`, Package-Boundaries, Structure-Selftest, AI- und
+  Server-Typecheck sowie 406 AI-Testdateien mit 2.793 Tests. Das
+  Source-Structure-Gate meldet weiterhin 677 produktive Dateien, null
+  Laufzeit-/Typzyklen und Runtime-Root 289.
+- Der aktuelle `main`-Stand `7d986f9a2` wurde konfliktfrei in den
+  Arbeitsbranch integriert. Der vollständige Abschlusslauf blieb auf diesem
+  kombinierten Stand grün; anschließend wurde der Arbeitsbranch per
+  Fast-Forward lokal nach `main` integriert. Worktree- und Branch-Cleanup
+  folgen als letzter, nicht inhaltlicher Prozessschritt und werden extern
+  verifiziert.
+
 ## Paketfolge
 
 ### ASSG-0 – Preflight, Null-Baseline-Vertrag und Kollisionsschutz
@@ -195,6 +267,7 @@ dokumentiertem Sicherheitsblocker und Removal Condition zulässig.
   werden.
 - Done-Gate: reproduzierbare Baseline, sauberer Worktree und unveränderte
   fachliche Fokus-Suiten.
+- Commit: `docs(ai): record source structure gate preflight`
 
 ### ASSG-1 – Cutover-Tests nach Live-Vertragsfamilien teilen
 
@@ -208,6 +281,7 @@ dokumentiertem Sicherheitsblocker und Removal Condition zulässig.
 - Ziel: keine neue Testdatei über 2.500 Zeilen; die Teilgrenzen werden explizit
   geratcheted.
 - Done-Gate: identische Cutover-Testmenge grün, ein Größenverstoß entfernt.
+- Commit: `test(ai): split semantic runtime cutover contracts`
 
 ### ASSG-2 – Choice-Ranking-Fassade und Corp-Policy erneut trennen
 
@@ -225,6 +299,7 @@ dokumentiertem Sicherheitsblocker und Removal Condition zulässig.
   oder Testdatei über 600 beziehungsweise 300 Zeilen.
 - Done-Gate: Choice-, Plan-Portfolio-, Decision-Chain- und betroffene
   Decision-Checkpoint-Suiten wählen exakt dieselben Actions und Choices.
+- Commit: `refactor(ai): separate choice ranking policy owners`
 
 ### ASSG-3 – Sichtbare Runner-Konkurrenz aus der Scoring-Window-Projektion lösen
 
@@ -242,6 +317,7 @@ dokumentiertem Sicherheitsblocker und Removal Condition zulässig.
   unter 500 Zeilen.
 - Done-Gate: Scoring-Window-, Protection-, Staged-Breaker-, Central-Pressure-
   und spielgleiche Match-3bb14-Regressionen unverändert grün.
+- Commit: `refactor(ai): extract scoring window runner pressure`
 
 ### ASSG-4 – Corp-Score-Komposition nach Action-Familien schneiden
 
@@ -261,6 +337,7 @@ dokumentiertem Sicherheitsblocker und Removal Condition zulässig.
 - Done-Gate: Corp-Score-, Conditional-Economy-, Scoreline-, Install-,
   Rez-Reserve- und Matchpoint-Regressionen liefern dieselben Komponenten,
   Werte und Evidence in derselben Reihenfolge.
+- Commit: `refactor(ai): split corp score action families`
 
 ### ASSG-5 – Board-Triage-Entscheidung und Action-Alignment trennen
 
@@ -276,6 +353,7 @@ dokumentiertem Sicherheitsblocker und Removal Condition zulässig.
   Zeilen und keine Testsuite über 900 Zeilen.
 - Done-Gate: Board-Triage-, Corp-Score-, Choice-Ranking- und Central-Pressure-
   Regressionen bleiben verhaltensidentisch.
+- Commit: `refactor(ai): separate board triage action alignment`
 
 ### ASSG-6 – Ratchet härten, Full Gate und Current-State-Abschluss
 
@@ -293,6 +371,7 @@ dokumentiertem Sicherheitsblocker und Removal Condition zulässig.
   tatsächlich verifizierten Endstand aktualisieren.
 - Done-Gate: alle fokussierten und vollständigen Gates grün; aktuelles `main`
   ist defensiv integriert und erzeugt keinen neuen Strukturtreffer.
+- Commit: `docs(ai): close source structure gate remediation`
 
 ## Verifikation
 

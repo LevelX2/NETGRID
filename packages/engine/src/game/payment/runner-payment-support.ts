@@ -113,7 +113,8 @@ export function openRunnerCostPenaltySupportWindow(
   if (
     legalAction.side !== "runner" ||
     amount <= 0 ||
-    availableWithoutSupport >= amount ||
+    state.runnerCostPenaltySupportWindow !== undefined ||
+    runnerCostPenaltySupportCreditCapacity(state) <= 0 ||
     !runnerCanPayWithCostPenaltySupport(state, amount, availableWithoutSupport)
   )
     return false;

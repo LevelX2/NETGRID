@@ -1,6 +1,6 @@
 # CODEX_STATUS
 
-Stand: 2026-07-18
+Stand: 2026-07-19
 
 ## Einstieg
 
@@ -36,6 +36,14 @@ Der vorhandene SQLite-KI-Trace persistiert die Kette im normalen
 `summary`-Modus kompakt und im erweiterten `detailed`-Modus vollständig unter
 demselben `trace_json`-Pfad.
 
+Choice-Ranking, Scoring-Window, Corp-Score, Board-Triage und Cutover-Tests
+besitzen fachliche Owner- oder Vertragsgrenzen; der produktive Importgraph
+bleibt frei von Laufzeit- und Typzyklen. Das AI-Source-Structure-Gate schützt
+diese qualitativen Grenzen ohne Datei-, Zeilen-, Testgrößen-, Fanout- oder
+Runtime-Root-Caps. Führend sind
+`docs/architecture/legacy-simplification-process-2026-07-19.md` und
+`docs/reviews/architecture/legacy-simplification-final-review-2026-07-19.md`.
+
 Das jüngste Runner-Endgame-Review aus Match 424A ist spielgleich geschlossen:
 Tag-Vermeidung, projizierte Run-Events, terminale Remote-Vorbereitung,
 Bank-/Plan-Arbitration und Mehr-ICE-Bezahlbarkeit besitzen unveränderte
@@ -58,6 +66,16 @@ neu validierten immutable Snapshot und bleibt accountfrei in Engine, Replay,
 StateHash und KI. Führend sind
 `docs/releases/v2/v2-0-auth-privacy-cloud-decks/password-accounts-cloud-decks-final-review-2026-07-18.md`
 und `docs/runbooks/account-alpha-operations.md`.
+
+Angemeldete Accounts besitzen außerdem eine private Matchstatistik mit
+sicherer, rein serverseitiger Teilnehmerbindung, idempotentem Spiel- und
+Serienledger, Runner-/Korp- und Gegnerart-Aufschlüsselung sowie paginierter
+redigierter Historie. Schema 3, Export-Schema 2, Accountlöschung,
+Backup/Restore, Retention-Unabhängigkeit und Start-Reconciliation sind
+abgedeckt. Gäste erhalten keine Statistikansicht; öffentliche Profile,
+Ranking, Elo und Leaderboards bleiben bewusst außerhalb der Closed Alpha.
+Führend ist
+`docs/releases/v2/account-match-statistics-final-review-2026-07-19.md`.
 
 ## Current-State-Cleanup
 
@@ -90,8 +108,8 @@ corepack pnpm typecheck
 corepack pnpm test:contracts
 corepack pnpm test:ai:shards
 corepack pnpm check:package-boundaries
+corepack pnpm check:ai-source-structure
 corepack pnpm check:card-asset-retention
-corepack pnpm check:ai:full
 corepack pnpm check:proteus-ai-readiness
 corepack pnpm build
 ```
@@ -131,9 +149,10 @@ und
 
 ## Offene technische Schwerpunkte
 
-- `apps/web/app/page.tsx`, `apps/web/app/chronicle.ts`,
-  `apps/server/src/multiplayer.test.ts` und Teile des Corp-AI-Scorings sind
-  weiterhin groß.
+- `apps/web/app/page.tsx`, `apps/web/app/chronicle.ts` und
+  `apps/server/src/multiplayer.test.ts` sind weiterhin groß. Die priorisierten
+  Corp-AI-Scoring-, Choice- und Triage-Owner liegen wieder innerhalb ihrer
+  geratcheten Grenzen.
 - Das Engine-Architektur-Zielgate ist ohne Baseline-Ausnahme grün;
   Mark-Counter-Anzeigen sind datengetrieben. 430 Runtime-Port-Bindings sind
   statisch typisiert; der produktive relative Importgraph ist zyklenfrei.

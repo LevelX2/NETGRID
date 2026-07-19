@@ -2,7 +2,7 @@
 
 Stand: 2026-07-19
 Zielstufe: V2.0 Closed Accounts Alpha – Folgepaket
-Status: umsetzungsreifer Plan, noch nicht implementiert
+Status: umgesetzt und im Final Review abgenommen
 
 ## 1. Ziel und Ausgangslage
 
@@ -417,3 +417,17 @@ falls vom empfohlenen Default abgewichen werden soll:
 
 Empfohlener Default: Self-Play separat kennzeichnen und die private,
 paginierte Matchhistorie bereits in der ersten Stufe mitliefern.
+
+## 14. Umsetzungsergebnis
+
+Die Pakete A bis F wurden als AMS-01 bis AMS-06 sequenziell umgesetzt. Der
+verbindliche Abschlussnachweis liegt in
+`docs/releases/v2/account-match-statistics-final-review-2026-07-19.md`.
+
+Eine dokumentierte Architekturabweichung betrifft ausschließlich den im
+Entwurf vorgesehenen Foreign Key von `account_match_participants.match_id`
+auf `matches`: Da `NETGRID_ACCOUNT_SQLITE_PATH` eine getrennte
+Accountdatenbank unterstützt, wäre dieser Foreign Key nicht in allen gültigen
+Betriebsarten herstellbar. Die Accountreferenz bleibt kaskadiert; Match-ID und
+Teilnehmerslot werden als opake, idempotent gebundene Control-Plane-Schlüssel
+geführt. Alle Datenschutz-, Retention- und Löschziele bleiben dadurch erfüllt.

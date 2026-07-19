@@ -1,6 +1,6 @@
 # Account-Alpha betreiben
 
-Stand: 2026-07-18
+Stand: 2026-07-19
 
 ## Voraussetzungen
 
@@ -62,8 +62,9 @@ Vor einer SQLite-Schemamigration erzeugt die autoritative Storage-Kette ein
 Backup im konfigurierten Backupverzeichnis. Für manuelle Sicherung und Restore
 gelten dieselben konsistenten SQLite-Regeln wie im Storage-Runbook; die Tabellen
 `accounts`, `account_password_credentials`, `account_sessions`,
-`account_invites`, `account_reset_tokens` und `account_decks` müssen gemeinsam
-gesichert werden.
+`account_invites`, `account_reset_tokens`, `account_decks`,
+`account_match_participants`, `account_game_results` und
+`account_series_results` müssen gemeinsam gesichert werden.
 
 ```powershell
 corepack pnpm storage:inspect
@@ -74,6 +75,36 @@ corepack pnpm storage:inspect
 
 Nach einem Restore müssen `integrity_check` und `foreign_key_check` grün sein.
 Ein Restore einzelner Accounttabellen ist kein unterstützter Betriebspfad.
+
+Die Statistikmigration hebt SQLite auf Schema 3 an und erzeugt davor ein
+Pre-Migration-Backup. Der Restore-Probelauf muss zusätzlich bestätigen, dass
+Bindungs- und Ergebnisledger auf dem Sicherungsstand wiederhergestellt werden.
+
+## Private Matchstatistik
+
+- Nur eine gültige Account-Session bindet einen Matchslot an einen Account.
+  Account-ID und Anmeldename bleiben außerhalb von Matchrecord, Engine,
+  PlayerView, Replay, StateHash und KI-Input.
+- `GET /api/account/statistics` liefert ausschließlich die Aggregate des
+  angemeldeten Accounts. `GET /api/account/match-history` liefert dessen
+  cursorpaginierte, redigierte Historie. Beide Antworten sind `no-store` und
+  besitzen einen eigenen Read-Rate-Limit-Bucket.
+- Die Statistik beginnt am in der API ausgewiesenen `statisticsSince`.
+  Historische Spiele werden nicht über Anzeigenamen nachträglich zugeordnet.
+- Spiel- und Serienzeilen sind idempotent. Beim Serverstart gleicht ein
+  Reconciliation-Lauf noch vorhandene terminale Matches mit dem Ledger ab.
+- Self-Play desselben Accounts wird gespeichert und gekennzeichnet, aber nicht
+  in Siege, Niederlagen oder Winrate eingerechnet. KI-gegen-KI zählt nicht.
+- Match-Retention darf Rohmatches löschen, ohne die schmalen persönlichen
+  Ergebnisledger zu entfernen.
+- Account-Export-Schema 2 enthält eigene Bindungs-, Spiel- und Serienfakten
+  sowie die private Zusammenfassung. Accountlöschung entfernt alle
+  persönlichen Statistikzeilen; anonyme Ergebniszeilen anderer Accounts
+  enthalten keine Gegner-Account-ID und bleiben unverändert.
+
+Für die Betriebsprüfung müssen `storage:inspect` beziehungsweise die
+Maintenance-Ansicht die drei Statistiktabellen nur als redigierte Zeilen- und
+Größenwerte ausweisen. Vollständige Statistikantworten gehören nicht in Logs.
 
 ## Persönliche Decks
 

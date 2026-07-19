@@ -372,6 +372,8 @@ export type MultiplayerStorage = {
   close?(): void;
 };
 
+export type MatchPersistenceObserver = (record: StoredMatch) => Promise<void>;
+
 export type SidePayload = ApiSidePayload;
 export type AiTurnPresentationState = ApiAiTurnPresentationState;
 export type LobbyPayload = ApiLobbyPayload;
@@ -677,6 +679,7 @@ export class MultiplayerService {
   private readonly now: () => string;
   private readonly chooseAiAction: AiDecisionChooser;
   private readonly applyEngineAction: EngineActionApplier;
+  private readonly persistenceObservers = new Set<MatchPersistenceObserver>();
 
   constructor(
     private readonly storage: MultiplayerStorage,
@@ -697,6 +700,23 @@ export class MultiplayerService {
     this.now = options.now ?? (() => new Date().toISOString());
     this.chooseAiAction = options.chooseAiAction ?? chooseAiAction;
     this.applyEngineAction = options.applyAction ?? applyAction;
+  }
+
+  addPersistenceObserver(observer: MatchPersistenceObserver): () => void {
+    this.persistenceObservers.add(observer);
+    return () => this.persistenceObservers.delete(observer);
+  }
+
+  async reconcilePersistedMatches(observer: MatchPersistenceObserver): Promise<number> {
+    if (!this.storage.list) return 0;
+    const records = await this.storage.list();
+    for (const record of records) await observer(record);
+    return records.length;
+  }
+
+  private async persist(record: StoredMatch): Promise<void> {
+    await this.storage.save(record);
+    for (const observer of this.persistenceObservers) await observer(record);
   }
 
   async createMatch(input: {
@@ -845,7 +865,7 @@ export class MultiplayerService {
         undoSnapshots: [],
         stateSnapshots: []
       };
-      await this.storage.save(record);
+      await this.persist(record);
       const lobbyPayload = this.lobbyPayloadFor(record, hostSide);
       return {
         matchId,
@@ -992,7 +1012,7 @@ export class MultiplayerService {
 
     if (mode !== "ai_vs_ai") this.maybeRunAiAfterTransition(record);
     this.syncPlayerClock(record, now);
-    await this.storage.save(record);
+    await this.persist(record);
     const payload = this.payloadFor(record, hostSide);
     return {
       matchId,
@@ -1035,11 +1055,11 @@ export class MultiplayerService {
 
       this.finalizeSeriesGame(record);
       if (series.status === "finished" || series.results.length >= series.gamesPlanned) {
-        await this.storage.save(record);
+        await this.persist(record);
         return { error: safeError("series_finished", "Die private Matchserie ist bereits abgeschlossen.") };
       }
       if (series.nextMatchId) {
-        await this.storage.save(record);
+        await this.persist(record);
         return { error: safeError("series_next_exists", "Das nächste Serienspiel wurde bereits erstellt.") };
       }
 
@@ -1084,7 +1104,7 @@ export class MultiplayerService {
       });
       series.nextMatchId = next.matchId;
       record.match.updatedAt = this.now();
-      await this.storage.save(record);
+      await this.persist(record);
       return next;
     });
   }
@@ -1153,7 +1173,7 @@ export class MultiplayerService {
     record.match.matchVersion += 1;
     record.match.updatedAt = now;
     if (record.match.status === "active") this.maybeRunAiAfterTransition(record);
-    await this.storage.save(record);
+    await this.persist(record);
 
     const currentStatus = record.match.status as MatchStatus;
     if (currentStatus === "ready_check" || currentStatus === "countdown" || currentStatus === "pending" || !record.gameState) {
@@ -1221,7 +1241,7 @@ export class MultiplayerService {
     this.syncPlayerClock(record, now);
     record.match.matchVersion += 1;
     record.match.updatedAt = now;
-    await this.storage.save(record);
+    await this.persist(record);
 
     const payload = this.shouldUseLobbyPayload(record) ? this.lobbyPayloadFor(record, input.side) : this.payloadFor(record, input.side);
     return {
@@ -1256,7 +1276,7 @@ export class MultiplayerService {
       if (!session) return { error: safeError("unauthorized", "Die Session ist nicht gültig.") };
       session.lastSeenAt = this.now();
       this.syncPlayerClock(record);
-      if (this.storage instanceof InMemoryMatchStorage) await this.storage.save(record);
+      if (this.storage instanceof InMemoryMatchStorage) await this.persist(record);
       if (this.shouldUseLobbyPayload(record)) {
         const lobby = this.lobbyPayloadFor(record, side);
         return options?.allowLobby ? lobby : ({ error: safeError("match_pending", "Das Match ist noch nicht aktiv.") } as { error: SafeErrorPayload });
@@ -1283,7 +1303,7 @@ export class MultiplayerService {
       if (persistentLifecycleChange || persistTransientConnectionState) {
         record.match.matchVersion += 1;
         record.match.updatedAt = this.now();
-        await this.storage.save(record);
+        await this.persist(record);
       }
       if (this.shouldUseLobbyPayload(record)) return this.lobbyPayloadFor(record, side);
       return this.payloadFor(record, side);
@@ -1307,7 +1327,7 @@ export class MultiplayerService {
       }
       record.match.matchVersion += 1;
       record.match.updatedAt = this.now();
-      await this.storage.save(record);
+      await this.persist(record);
       return this.lobbyResultFor(record, input.side);
     });
   }
@@ -1326,7 +1346,7 @@ export class MultiplayerService {
       this.clearCountdown(record);
       record.match.matchVersion += 1;
       record.match.updatedAt = this.now();
-      await this.storage.save(record);
+      await this.persist(record);
       return this.lobbyResultFor(record, input.side);
     });
   }
@@ -1345,7 +1365,7 @@ export class MultiplayerService {
       }
 
       this.terminalizeLifecycle(record, "cancelled", "cancel", input.side);
-      await this.storage.save(record);
+      await this.persist(record);
       return this.lifecycleResultFor(record, input.side);
     });
   }
@@ -1367,7 +1387,7 @@ export class MultiplayerService {
         record.match.status === "countdown"
       ) {
         this.removeJoinerFromOpenLobby(record, session);
-        await this.storage.save(record);
+        await this.persist(record);
         return this.lifecycleResultFor(record, input.side);
       }
       return { ok: false, error: safeError("match_not_leavable", "Dieses Match kann nicht als Lobby verlassen werden."), payload: this.safePayloadFor(record, input.side) };
@@ -1404,7 +1424,7 @@ export class MultiplayerService {
       };
       delete record.pendingUndo;
       this.finalizeSeriesGame(record);
-      await this.storage.save(record);
+      await this.persist(record);
       return this.lifecycleResultFor(record, input.side);
     });
   }
@@ -1425,7 +1445,7 @@ export class MultiplayerService {
       const recreateInput = this.recreateInputFor(record, session, input.displayName);
       if (!isTerminalStatus(record.match.status)) this.terminalizeLifecycle(record, "cancelled", "cancel", input.side);
       else this.revokeAllTokens(record, this.now());
-      await this.storage.save(record);
+      await this.persist(record);
       const newMatch = await this.createMatch(recreateInput);
       return {
         ok: true,
@@ -1461,7 +1481,7 @@ export class MultiplayerService {
       ];
       record.match.matchVersion += 1;
       record.match.updatedAt = this.now();
-      await this.storage.save(record);
+      await this.persist(record);
       return this.lobbyResultFor(record, input.side);
     });
   }
@@ -1478,7 +1498,7 @@ export class MultiplayerService {
       }
       if (!record.startLobby.hostReady || !record.startLobby.joinerReady) {
         this.clearCountdown(record);
-        await this.storage.save(record);
+        await this.persist(record);
         return { ok: false, error: safeError("lobby_not_ready", "Beide Personen müssen bereit sein."), payload: this.lobbyPayloadFor(record, record.sessions[0]?.side ?? "runner") };
       }
 
@@ -1487,7 +1507,7 @@ export class MultiplayerService {
       record.match.updatedAt = this.now();
       this.maybeRunAiAfterTransition(record);
       this.syncPlayerClock(record);
-      await this.storage.save(record);
+      await this.persist(record);
       return this.lobbyResultFor(record, record.sessions[0]?.side ?? "runner", true);
     });
   }
@@ -1524,7 +1544,7 @@ export class MultiplayerService {
       }
       if (!record.gameState) return { ok: false, error: safeError("match_not_active", "Das Match wartet noch auf vollständige Deckauswahl.") };
       if (this.syncPlayerClock(record)) {
-        await this.storage.save(record);
+        await this.persist(record);
         return {
           ok: false,
           error: safeError("time_expired", "Die Spielerzeit ist abgelaufen.", record.gameState, input.side),
@@ -1545,7 +1565,7 @@ export class MultiplayerService {
       if (input.clientKnownStateVersion !== record.gameState.stateVersion) {
         const receipt = this.receiptFor(record, input.side, input.idempotencyKey, false, "stale_state");
         record.actionReceipts.push(receipt);
-        await this.storage.save(record);
+        await this.persist(record);
         return {
           ok: false,
           receipt,
@@ -1568,7 +1588,7 @@ export class MultiplayerService {
       if (!result.ok) {
         const receipt = this.receiptFor(record, input.side, input.idempotencyKey, false, result.error.code);
         record.actionReceipts.push(receipt);
-        await this.storage.save(record);
+        await this.persist(record);
         return {
           ok: false,
           receipt,
@@ -1599,7 +1619,7 @@ export class MultiplayerService {
       }
       this.maybeRunAiAfterTransition(record);
       this.syncPlayerClock(record);
-      await this.storage.save(record);
+      await this.persist(record);
       const success: SubmitActionResult = {
         ok: true,
         receipt,
@@ -1629,7 +1649,7 @@ export class MultiplayerService {
       if (record.match.mode === "ai_vs_ai" && !isHostSession(record, session)) return { ok: false, error: safeError("host_required", "Nur die Beobachtersession darf die Simulation fortsetzen.") };
       if (record.match.status !== "active" || !record.gameState) return { ok: false, error: safeError("match_not_active", "Das Match ist noch nicht aktiv.") };
       if (this.syncPlayerClock(record)) {
-        await this.storage.save(record);
+        await this.persist(record);
         return { ok: false, error: safeError("time_expired", "Die Spielerzeit ist abgelaufen.", record.gameState, input.side), payload: this.payloadFor(record, input.side) };
       }
       const activeAiSide = this.aiControllableSide(record);
@@ -1650,7 +1670,7 @@ export class MultiplayerService {
       this.syncPlayerClock(record);
 
       if (!aiStepResult.ok && aiStepResult.code === "ai_decision_action_not_legal") {
-        await this.storage.save(record);
+        await this.persist(record);
         return {
           ok: false,
           error: safeError("ai_decision_action_not_legal", "Die KI wählte keine aktuell legale Aktion.", record.gameState, input.side),
@@ -1658,7 +1678,7 @@ export class MultiplayerService {
         };
       }
       if (!aiStepResult.ok && aiStepResult.code === "ai_engine_action_rejected") {
-        await this.storage.save(record);
+        await this.persist(record);
         const engineErrorSuffix = aiStepResult.engineErrorCode
           ? ` (${aiStepResult.engineErrorCode})`
           : "";
@@ -1674,7 +1694,7 @@ export class MultiplayerService {
         };
       }
       if (!aiStepResult.ok && isAiDeckSnapshotErrorCode(aiStepResult.code)) {
-        await this.storage.save(record);
+        await this.persist(record);
         return {
           ok: false,
           error: safeError(aiStepResult.code, aiDeckSnapshotErrorMessage(aiStepResult.code), record.gameState, input.side),
@@ -1683,11 +1703,11 @@ export class MultiplayerService {
       }
 
       if (record.eventLog.length === beforeEventCount) {
-        await this.storage.save(record);
+        await this.persist(record);
         return { ok: false, error: safeError("ai_no_action", "Die KI konnte aktuell keine Aktion ausführen.", record.gameState, input.side), payload: this.payloadFor(record, input.side) };
       }
 
-      await this.storage.save(record);
+      await this.persist(record);
       const result: AdvanceAiResult = {
         ok: true,
         requesterPayload: this.payloadFor(record, input.side),
@@ -1809,7 +1829,7 @@ export class MultiplayerService {
           hiddenInfoSafe: false
         };
         record.undoSnapshots.push(blockedSnapshot);
-        await this.storage.save(record);
+        await this.persist(record);
         return { ok: false, error: safeError("undo_blocked", "Undo ist nach verdeckter Information nicht möglich."), payload: this.payloadFor(record, input.side) };
       }
       const snapshot = record.stateSnapshots.find((candidate) => candidate.snapshotId === `snap_before_${record.eventLog[targetIndex]?.stateVersionAfter}`);
@@ -1839,7 +1859,7 @@ export class MultiplayerService {
         if (!restored) return { ok: false, error: safeError("undo_not_available", "Undo ist aktuell nicht möglich."), payload: this.payloadFor(record, input.side) };
         record.match.matchVersion += 1;
         record.match.updatedAt = this.now();
-        await this.storage.save(record);
+        await this.persist(record);
         return {
           ok: true,
           requesterPayload: this.payloadFor(record, input.side),
@@ -1851,7 +1871,7 @@ export class MultiplayerService {
       record.pendingUndo = undoRequest;
       record.match.matchVersion += 1;
       record.match.updatedAt = this.now();
-      await this.storage.save(record);
+      await this.persist(record);
       return {
         ok: true,
         requesterPayload: this.payloadFor(record, input.side),
@@ -2035,7 +2055,7 @@ export class MultiplayerService {
       const now = this.now();
       record.match.aiTraceMode = mode;
       record.match.updatedAt = now;
-      await this.storage.save(record);
+      await this.persist(record);
       const matches = await this.storageMaintenanceAiDecisionTraceMatches();
       return (
         matches?.find((match) => match.matchId === matchId) ?? {
@@ -2105,7 +2125,7 @@ export class MultiplayerService {
       record.tokens.push(this.tokenRecord(matchId, input.side, "reconnect", access, now));
       record.match.matchVersion += 1;
       record.match.updatedAt = now;
-      await this.storage.save(record);
+      await this.persist(record);
 
       return {
         matchId,
@@ -2136,7 +2156,7 @@ export class MultiplayerService {
         : { protected: false };
       record.match.updatedAt = now;
       record.match.matchVersion += 1;
-      await this.storage.save(record);
+      await this.persist(record);
       return { ok: true, payload: this.safePayloadFor(record, input.side) };
     });
   }
@@ -2161,7 +2181,7 @@ export class MultiplayerService {
         delete record.pendingUndo;
         record.match.matchVersion += 1;
         record.match.updatedAt = this.now();
-        await this.storage.save(record);
+        await this.persist(record);
         return { ok: false, error: safeError("undo_not_available", "Undo ist aktuell nicht möglich."), payload: this.payloadFor(record, input.side) };
       }
       undoRecord.status = status;
@@ -2171,13 +2191,13 @@ export class MultiplayerService {
         if (!restored) {
           record.match.matchVersion += 1;
           record.match.updatedAt = this.now();
-          await this.storage.save(record);
+          await this.persist(record);
           return { ok: false, error: safeError("undo_not_available", "Undo ist aktuell nicht möglich."), payload: this.payloadFor(record, input.side) };
         }
       }
       record.match.matchVersion += 1;
       record.match.updatedAt = this.now();
-      await this.storage.save(record);
+      await this.persist(record);
       return {
         ok: true,
         requesterPayload: this.payloadFor(record, pending.requestedBy),

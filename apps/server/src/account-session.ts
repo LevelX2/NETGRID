@@ -500,6 +500,9 @@ export class SqliteAccountStorage implements AccountStorage {
   async deleteAccountPrivateData(account: AccountRecord): Promise<void> {
     this.db.exec("BEGIN IMMEDIATE");
     try {
+      this.db.prepare("DELETE FROM account_series_results WHERE account_id = ?").run(account.accountId);
+      this.db.prepare("DELETE FROM account_game_results WHERE account_id = ?").run(account.accountId);
+      this.db.prepare("DELETE FROM account_match_participants WHERE account_id = ?").run(account.accountId);
       this.db.prepare("DELETE FROM account_decks WHERE owner_account_id = ?").run(account.accountId);
       this.db.prepare("DELETE FROM account_invites WHERE target_account_id = ? OR created_by_account_id = ?").run(account.accountId, account.accountId);
       this.db.prepare("DELETE FROM account_reset_tokens WHERE target_account_id = ? OR created_by_account_id = ?").run(account.accountId, account.accountId);

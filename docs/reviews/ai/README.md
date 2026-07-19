@@ -11,9 +11,8 @@
 
 ## Aktive Root-Kommandos
 
-- `corepack pnpm check:ai`: kompakter Basislauf für stabile read-only AI-Gates.
-- `corepack pnpm check:ai:full`: Basislauf plus Full-Derived-Facts-Scan.
-- `corepack pnpm build:ai`: kompakter Alias zum Neubauen der compiled AI-Hints.
+- `corepack pnpm check:ai`: Hint-Metadatenverträge und qualitative
+  AI-Source-Struktur.
 - Direkte Spezialskripte unter `scripts/check-ai-*.mjs` bleiben nur dann relevant, wenn ein aktueller Review, Test oder Gate sie ausdrücklich nutzt.
 
 ## Führender aktueller AI-Stand
