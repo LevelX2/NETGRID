@@ -20,6 +20,7 @@ export function createRunnerProgramPressureComposition(
   const {
     selectedRunnerProgramInstallTrashOptionIds,
     selectedRunnerForcedProgramTrashOptionIds,
+    selectedRunnerMemoryCheckpointTrashOptionIds,
     runnerProgramInstallTrashAssessment,
     runnerProgramInstallTrashAssessmentForAction,
     runnerProgramInstallDisplacementPenalty,
@@ -60,6 +61,7 @@ export function createRunnerProgramPressureComposition(
   return {
     selectedRunnerProgramInstallTrashOptionIds,
     selectedRunnerForcedProgramTrashOptionIds,
+    selectedRunnerMemoryCheckpointTrashOptionIds,
     runnerProgramInstallTrashAssessment,
     runnerProgramInstallTrashAssessmentForAction,
     runnerProgramInstallDisplacementPenalty,

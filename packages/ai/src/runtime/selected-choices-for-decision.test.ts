@@ -4,6 +4,34 @@ import { describe, expect, it } from "vitest";
 import { selectedChoicesForDecision } from "./selected-choices-for-decision";
 
 describe("selectedChoicesForDecision", () => {
+  it("routes checkpoint memory cleanup to the dedicated minimal selector", () => {
+    const decision = selectedChoicesForDecision(
+      inputWithChoice(
+        {
+          kind: "select_cards",
+          source: "runner.checkpoint_memory_cleanup:1:318",
+          minSelections: 1,
+          maxSelections: 4,
+          options: [
+            { id: "program_a", label: "Program A", value: "program_a" },
+            { id: "program_b", label: "Program B", value: "program_b" },
+          ],
+        },
+        { side: "runner" },
+      ),
+      resolveChoiceAction("runner"),
+      {
+        ...unusedDependencies(),
+        selectedRunnerMemoryCheckpointTrashOptionIds: () => ["program_b"],
+      },
+    );
+
+    expect(decision).toEqual({
+      choiceId: "choice_multi",
+      selectedOptionIds: ["program_b"],
+    });
+  });
+
   it("spends a useful Priority Wreck amount while keeping a small reserve", () => {
     const decision = selectedChoicesForDecision(
       inputWithChoice(
@@ -713,6 +741,7 @@ function unusedDependencies(): Parameters<
     discardKeepScore: () => ({ total: 0 }),
     selectedRunnerProgramInstallTrashOptionIds: () => [],
     selectedRunnerForcedProgramTrashOptionIds: () => [],
+    selectedRunnerMemoryCheckpointTrashOptionIds: () => [],
     extractAiFeatures: () => ({}) as never,
     rolesForCardId: () => [],
   };
