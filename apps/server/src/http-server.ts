@@ -812,6 +812,11 @@ export function createNetgridHttpServer(
   const accountAuth = options.accountAuth;
   const accountDecks = options.accountDecks;
   const accountStatistics = options.accountStatistics;
+  const removeAccountStatisticsObserver = accountStatistics
+    ? activeService.addPersistenceObserver((record) =>
+        accountStatistics.recordTerminalMatch(record),
+      )
+    : undefined;
   const realtime = new NetgridRealtimeServer(
     activeService,
     deploymentConfig,
@@ -854,6 +859,7 @@ export function createNetgridHttpServer(
           .then(() =>
             server.close((error) => {
               if (cleanupTimer) clearInterval(cleanupTimer);
+              removeAccountStatisticsObserver?.();
               accountDecks?.close();
               accountStatistics?.close();
               accountAuth?.close();

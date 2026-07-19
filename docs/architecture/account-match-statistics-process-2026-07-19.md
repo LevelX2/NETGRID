@@ -1,6 +1,6 @@
 # Account-Matchstatistik – kontrollierter Paketprozess
 
-Status: `AMS-02 completed; AMS-03 pending`
+Status: `AMS-03 completed; AMS-04 pending`
 
 ## Quelle und Vorgabe
 
@@ -127,7 +127,7 @@ cleanup_failed -> diagnose_cleanup -> cleanup_pending
 | AMS-00 Prozess und Controller | completed | dieser Paketcommit |
 | AMS-01 Verträge und SQLite-Schema v3 | completed | dieser Paketcommit |
 | AMS-02 Sichere Account-Matchbindung | completed | dieser Paketcommit |
-| AMS-03 Ergebnisledger und Reconciliation | pending | – |
+| AMS-03 Ergebnisledger und Reconciliation | completed | dieser Paketcommit |
 | AMS-04 Private API und Betrieb | pending | – |
 | AMS-05 Account-Statistik-UI | pending | – |
 | AMS-06 Final Review und Integration | pending | – |
@@ -410,3 +410,20 @@ gemergten Arbeitsbranch löschen. Markiere das Goal erst dann als complete.
   Package Boundaries.
 - Nicht ausgeführt: vollständiger Multiplayerlauf und breite Webgates; sie
   folgen mit Ledgerintegration beziehungsweise im Finalgate.
+
+### AMS-03
+
+- Jede Matchpersistenz benachrichtigt den accountseitigen Statistikprojektor;
+  bestehende Storage- und Matchverträge bleiben unverändert.
+- Spiel- und Serienledger erfassen nur terminale Ergebnisfakten und behandeln
+  regulär, Draw, Forfeit, Time Expired, Abbruch, KI, Gast, Account und
+  Self-Play getrennt.
+- Deterministische IDs, Unique Constraints und Inhaltsvergleich verhindern
+  Doppelzählung beziehungsweise stilles Überschreiben widersprüchlicher
+  Ergebnisse.
+- `reconcilePersistedMatches` repariert verpasste Projektionen aus dauerhaft
+  gespeicherten Matches; Ledgerzeilen bleiben nach Rohmatch-Löschung erhalten.
+- Grün: Server-Typecheck, fokussierte Ledger-/Schema-Tests, Account-HTTP-Tests
+  und der vollständige Multiplayerlauf mit 125 Tests.
+- Nicht ausgeführt: Webgates und vollständige Account-API-Tests; sie folgen in
+  AMS-04 und AMS-05.
