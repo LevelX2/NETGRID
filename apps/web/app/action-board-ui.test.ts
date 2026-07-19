@@ -2376,6 +2376,18 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(actionSlotCapacityForTurn("runner", 1, events)).toBe(4);
   });
 
+  it("keeps action-cost history additive when ordinal metadata is absent", () => {
+    const events = [
+      publicEvent("evt_1", "play_event", {
+        actor: "runner",
+        actionType: "play_event",
+        actionCostClicks: 2,
+      }),
+    ];
+
+    expect(actionSlotCapacityForTurn("runner", 3, events)).toBe(5);
+  });
+
   it("formats action and credit costs as user-facing chips", () => {
     expect(actionCostChips({ costs: [{ clicks: 1, credits: 2 }] })).toEqual([
       { kind: "action", amount: 1, label: "1 Aktion" },

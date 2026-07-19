@@ -1589,13 +1589,34 @@ function spentActionClicksThisTurn(
   side: Side,
   events: PublicGameEvent[],
 ): number {
-  let spent = 0;
+  const eventsThisTurn: PublicGameEvent[] = [];
   for (let index = events.length - 1; index >= 0; index -= 1) {
     const event = events[index];
-    const payload = event?.publicPayload ?? {};
+    if (!event) continue;
+    const payload = event.publicPayload ?? {};
     if (payload.actor !== side) continue;
     if ((payload.actionType ?? event?.type) === "end_turn") break;
-    spent += positiveInteger(payload.actionCostClicks);
+    eventsThisTurn.push(event);
+  }
+
+  let spent = 0;
+  for (let index = eventsThisTurn.length - 1; index >= 0; index -= 1) {
+    const event = eventsThisTurn[index];
+    const payload = event?.publicPayload ?? {};
+    const clicks = positiveInteger(payload.actionCostClicks);
+    if (clicks === 0) continue;
+
+    const ordinalStart = positiveInteger(payload.turnActionOrdinalStart);
+    if (ordinalStart === 0) {
+      spent += clicks;
+      continue;
+    }
+
+    const ordinalEnd = Math.max(
+      ordinalStart + clicks - 1,
+      positiveInteger(payload.turnActionOrdinalEnd),
+    );
+    spent = Math.max(spent, ordinalEnd);
   }
   return spent;
 }
