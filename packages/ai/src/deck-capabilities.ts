@@ -98,7 +98,6 @@ export type EconomyBankTool = {
   currentBankAmount?: number;
   currentBankAmounts?: number[];
   portfolioStoredAmount?: number;
-  maxKnownCapacity?: number;
   buildActionLegal: boolean;
   cashOutActionLegal: boolean;
   buildActionIds: string[];
@@ -872,7 +871,6 @@ function economyBankToolForRecord(
     ...(currentBankAmount !== undefined ? { currentBankAmount } : {}),
     ...(currentBankAmounts.length > 0 ? { currentBankAmounts } : {}),
     ...(portfolioStoredAmount !== undefined ? { portfolioStoredAmount } : {}),
-    ...maxKnownBankCapacity(record.text),
     buildActionLegal,
     cashOutActionLegal,
     buildActionIds,
@@ -1329,33 +1327,6 @@ function currentVisibleBankAmounts(cards: readonly VisibleCard[]): number[] {
     })
     .filter((value): value is number => value !== undefined)
     .sort((left, right) => right - left);
-}
-
-function maxKnownBankCapacity(
-  text: string,
-): Pick<EconomyBankTool, "maxKnownCapacity"> {
-  const tokens = deckCapabilityTextTokens(text);
-  for (const [index, token] of tokens.entries()) {
-    if (token !== "put") continue;
-    const value = positiveIntegerTokenValue(tokens[index + 1]);
-    if (value !== undefined) return { maxKnownCapacity: value };
-  }
-  return {};
-}
-
-function positiveIntegerTokenValue(
-  token: string | undefined,
-): number | undefined {
-  if (!token || !deckCapabilityTokenIsDigits(token)) return undefined;
-  const value = Number.parseInt(token, 10);
-  return value > 0 ? value : undefined;
-}
-
-function deckCapabilityTokenIsDigits(token: string): boolean {
-  for (const character of token) {
-    if (character < "0" || character > "9") return false;
-  }
-  return token.length > 0;
 }
 
 function runtimeNumber(

@@ -69,13 +69,10 @@ function runnerInput(params: {
         server("remote_1", params.remoteIce),
       ],
     },
-  } as AiDecisionInput;
+  } as unknown as AiDecisionInput;
 }
 
-function accessEvent(
-  cardDefinitionId: string,
-  index: number,
-): PublicGameEvent {
+function accessEvent(cardDefinitionId: string, index: number): PublicGameEvent {
   return {
     eventId: `event-${index}`,
     type: "access_card",
@@ -87,7 +84,7 @@ function accessEvent(
       serverLabel: "HQ",
       cardDefinitionId,
     },
-  } as PublicGameEvent;
+  } as unknown as PublicGameEvent;
 }
 
 function server(id: string, iceCount: number) {

@@ -345,7 +345,7 @@ describe("DeckCapabilityProfile", () => {
     );
   });
 
-  it("bounds bank capacity put amounts to exact tokens", () => {
+  it("does not mistake a bank deposit amount for a capacity limit", () => {
     const inputView = playerView("runner");
     inputView.own.rig = [
       visibleCard("capacity-1", "local_capacity_tool", "runner", "resource", {
@@ -371,14 +371,11 @@ describe("DeckCapabilityProfile", () => {
     });
 
     const tools = profile.runner?.economyBankTools ?? [];
-    expect(
-      tools.find((tool) => tool.cardId === "local_capacity_tool")
-        ?.maxKnownCapacity,
-    ).toBe(3);
-    expect(
-      tools.find((tool) => tool.cardId === "local_capacity_noise")
-        ?.maxKnownCapacity,
-    ).toBeUndefined();
+    expect(tools.map((tool) => tool.cardId)).toEqual([
+      "local_capacity_noise",
+      "local_capacity_tool",
+    ]);
+    expect(tools.every((tool) => !("maxKnownCapacity" in tool))).toBe(true);
   });
 
   it("requires source evidence before marking search tools legal now", () => {
