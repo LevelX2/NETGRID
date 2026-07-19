@@ -206,7 +206,9 @@ Stand: 2026-07-19
   nur durch lokalen Admin-Bootstrap oder einmalige Einladung angelegt;
   widerrufbare Account-Sessions laufen über ein `HttpOnly`-Cookie und bleiben
   von Maintenance- und Match-Capabilities getrennt. E-Mail, Passkeys, MFA und
-  öffentliche Registrierung sind noch nicht enthalten.
+  öffentliche Registrierung sind noch nicht enthalten. Der CSRF-Nachweis ist
+  stabil an die einzelne Session gebunden; Session-Restore, Reload und mehrere
+  Tabs invalidieren einander nicht.
 - Ein Account kann bis zu 50 ownergebundene persönliche Server-Decks halten.
   40 kuratierte Standard-Decks sind direkt spielbar oder kopierbar; interne
   KI-, Test- und ausgemusterte Decks sind in der normalen UI unsichtbar.

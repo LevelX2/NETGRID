@@ -51,6 +51,11 @@ liegt nur sein HMAC-Hash. Ein Invite ist standardmäßig 72 Stunden, ein Reset
 - Browser erhalten den Session-Rohwert ausschließlich als `HttpOnly`-Cookie.
 - Login-, Invite- und Resetmutationen verlangen eine erlaubte Origin;
   eingeloggte Mutationen zusätzlich `X-NETGRID-CSRF`.
+- Der CSRF-Nachweis ist per HMAC an die jeweilige Account-Session gebunden.
+  `GET /api/account/session` liefert für dieselbe gültige Session stabil
+  denselben Nachweis; Reloads und mehrere Tabs dürfen sich deshalb nicht
+  gegenseitig invalidieren. Eine neue Anmeldung beziehungsweise Session
+  erzeugt weiterhin einen neuen Nachweis.
 - Passwortwechsel und Reset erhöhen die Credential-Version und widerrufen alle
   Account-Sessions.
 - Account-Cookies autorisieren keine Matchaktion. Match-Join-, Session- und
@@ -138,6 +143,10 @@ Größenwerte ausweisen. Vollständige Statistikantworten gehören nicht in Logs
   Projekt-, KI- und Testquelldecks sind dort unsichtbar; neu angelegte eigene
   Gastdecks bleiben lokale Datei-Decks und werden nicht automatisch in ein
   späteres Konto importiert.
+- Im Profilkopf steht die normale Aktion `Abmelden`; `Alle Geräte abmelden`
+  bleibt als getrennte stärkere Aktion im Profil. Scheitert der Serveraufruf,
+  darf der Client nicht nur lokal in den Gastzustand wechseln, sondern zeigt
+  den Fehler bei weiterhin angemeldeter Sitzung an.
 
 ## Anzeigename und Matchidentität
 

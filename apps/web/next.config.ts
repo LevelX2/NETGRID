@@ -22,6 +22,7 @@ const allowedDevOrigins = (process.env.NETGRID_ALLOWED_DEV_ORIGINS ?? "")
   .filter((entry) => entry.length > 0);
 
 const nextConfig: NextConfig = {
+  distDir: process.env.NETGRID_NEXT_DIST_DIR ?? ".next",
   transpilePackages: ["@netgrid/shared", "@netgrid/engine", "@netgrid/ai"],
   env: {
     NEXT_PUBLIC_NETGRID_BUILD_NUMBER: gitValue(

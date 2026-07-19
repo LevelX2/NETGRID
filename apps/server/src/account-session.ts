@@ -87,14 +87,27 @@ export type AccountSessionRecord = {
   deviceLabel?: string;
 };
 
-export type AccountSessionSelfView = Omit<AccountSessionRecord, "sessionTokenHash" | "csrfTokenHash">;
+export type AccountSessionSelfView = Omit<
+  AccountSessionRecord,
+  "sessionTokenHash" | "csrfTokenHash"
+>;
 
 export type AccountSelfView = Pick<
   AccountRecord,
-  "accountId" | "loginName" | "displayName" | "status" | "role" | "createdAt" | "updatedAt"
+  | "accountId"
+  | "loginName"
+  | "displayName"
+  | "status"
+  | "role"
+  | "createdAt"
+  | "updatedAt"
 >;
 
-export type AccountSessionAuthErrorCode = "invalid_session" | "session_revoked" | "session_expired" | "account_unavailable";
+export type AccountSessionAuthErrorCode =
+  | "invalid_session"
+  | "session_revoked"
+  | "session_expired"
+  | "account_unavailable";
 
 export type AccountSessionAuthResult =
   | { ok: true; account: AccountSelfView; session: AccountSessionSelfView }
@@ -103,21 +116,35 @@ export type AccountSessionAuthResult =
 export type AccountStorage = {
   saveAccount(account: AccountRecord): Promise<void>;
   loadAccount(accountId: string): Promise<AccountRecord | undefined>;
-  loadAccountByLoginNameNormalized(loginNameNormalized: string): Promise<AccountRecord | undefined>;
+  loadAccountByLoginNameNormalized(
+    loginNameNormalized: string,
+  ): Promise<AccountRecord | undefined>;
   countAccounts(): Promise<number>;
-  savePasswordCredential(credential: AccountPasswordCredentialRecord): Promise<void>;
-  loadPasswordCredential(accountId: string): Promise<AccountPasswordCredentialRecord | undefined>;
+  savePasswordCredential(
+    credential: AccountPasswordCredentialRecord,
+  ): Promise<void>;
+  loadPasswordCredential(
+    accountId: string,
+  ): Promise<AccountPasswordCredentialRecord | undefined>;
   saveCredential(credential: AccountCredentialRecord): Promise<void>;
-  loadCredential(credentialId: string): Promise<AccountCredentialRecord | undefined>;
+  loadCredential(
+    credentialId: string,
+  ): Promise<AccountCredentialRecord | undefined>;
   saveSession(session: AccountSessionRecord): Promise<void>;
   loadSession(sessionId: string): Promise<AccountSessionRecord | undefined>;
-  loadSessionByTokenHash(sessionTokenHash: string): Promise<AccountSessionRecord | undefined>;
+  loadSessionByTokenHash(
+    sessionTokenHash: string,
+  ): Promise<AccountSessionRecord | undefined>;
   listSessionsForAccount(accountId: string): Promise<AccountSessionRecord[]>;
   saveInvite(invite: AccountInviteRecord): Promise<void>;
-  loadInviteByTokenHash(inviteTokenHash: string): Promise<AccountInviteRecord | undefined>;
+  loadInviteByTokenHash(
+    inviteTokenHash: string,
+  ): Promise<AccountInviteRecord | undefined>;
   claimInvite(inviteId: string, usedAt: string): Promise<boolean>;
   saveResetToken(reset: AccountResetTokenRecord): Promise<void>;
-  loadResetTokenByHash(resetTokenHash: string): Promise<AccountResetTokenRecord | undefined>;
+  loadResetTokenByHash(
+    resetTokenHash: string,
+  ): Promise<AccountResetTokenRecord | undefined>;
   claimResetToken(resetId: string, usedAt: string): Promise<boolean>;
   deleteAccountPrivateData(account: AccountRecord): Promise<void>;
   close?(): void;
@@ -148,7 +175,10 @@ export type CreateAccountSessionResult = {
 
 export class InMemoryAccountStorage implements AccountStorage {
   private readonly accounts = new Map<string, AccountRecord>();
-  private readonly passwordCredentials = new Map<string, AccountPasswordCredentialRecord>();
+  private readonly passwordCredentials = new Map<
+    string,
+    AccountPasswordCredentialRecord
+  >();
   private readonly credentials = new Map<string, AccountCredentialRecord>();
   private readonly sessions = new Map<string, AccountSessionRecord>();
   private readonly invites = new Map<string, AccountInviteRecord>();
@@ -163,8 +193,12 @@ export class InMemoryAccountStorage implements AccountStorage {
     return account ? clone(account) : undefined;
   }
 
-  async loadAccountByLoginNameNormalized(loginNameNormalized: string): Promise<AccountRecord | undefined> {
-    const account = [...this.accounts.values()].find((candidate) => candidate.loginNameNormalized === loginNameNormalized);
+  async loadAccountByLoginNameNormalized(
+    loginNameNormalized: string,
+  ): Promise<AccountRecord | undefined> {
+    const account = [...this.accounts.values()].find(
+      (candidate) => candidate.loginNameNormalized === loginNameNormalized,
+    );
     return account ? clone(account) : undefined;
   }
 
@@ -172,11 +206,15 @@ export class InMemoryAccountStorage implements AccountStorage {
     return this.accounts.size;
   }
 
-  async savePasswordCredential(credential: AccountPasswordCredentialRecord): Promise<void> {
+  async savePasswordCredential(
+    credential: AccountPasswordCredentialRecord,
+  ): Promise<void> {
     this.passwordCredentials.set(credential.accountId, clone(credential));
   }
 
-  async loadPasswordCredential(accountId: string): Promise<AccountPasswordCredentialRecord | undefined> {
+  async loadPasswordCredential(
+    accountId: string,
+  ): Promise<AccountPasswordCredentialRecord | undefined> {
     const credential = this.passwordCredentials.get(accountId);
     return credential ? clone(credential) : undefined;
   }
@@ -185,7 +223,9 @@ export class InMemoryAccountStorage implements AccountStorage {
     this.credentials.set(credential.credentialId, clone(credential));
   }
 
-  async loadCredential(credentialId: string): Promise<AccountCredentialRecord | undefined> {
+  async loadCredential(
+    credentialId: string,
+  ): Promise<AccountCredentialRecord | undefined> {
     const credential = this.credentials.get(credentialId);
     return credential ? clone(credential) : undefined;
   }
@@ -194,32 +234,52 @@ export class InMemoryAccountStorage implements AccountStorage {
     this.sessions.set(session.sessionId, clone(session));
   }
 
-  async loadSession(sessionId: string): Promise<AccountSessionRecord | undefined> {
+  async loadSession(
+    sessionId: string,
+  ): Promise<AccountSessionRecord | undefined> {
     const session = this.sessions.get(sessionId);
     return session ? clone(session) : undefined;
   }
 
-  async loadSessionByTokenHash(sessionTokenHash: string): Promise<AccountSessionRecord | undefined> {
-    const session = [...this.sessions.values()].find((candidate) => candidate.sessionTokenHash === sessionTokenHash);
+  async loadSessionByTokenHash(
+    sessionTokenHash: string,
+  ): Promise<AccountSessionRecord | undefined> {
+    const session = [...this.sessions.values()].find(
+      (candidate) => candidate.sessionTokenHash === sessionTokenHash,
+    );
     return session ? clone(session) : undefined;
   }
 
-  async listSessionsForAccount(accountId: string): Promise<AccountSessionRecord[]> {
-    return [...this.sessions.values()].filter((session) => session.accountId === accountId).map((session) => clone(session));
+  async listSessionsForAccount(
+    accountId: string,
+  ): Promise<AccountSessionRecord[]> {
+    return [...this.sessions.values()]
+      .filter((session) => session.accountId === accountId)
+      .map((session) => clone(session));
   }
 
   async saveInvite(invite: AccountInviteRecord): Promise<void> {
     this.invites.set(invite.inviteId, clone(invite));
   }
 
-  async loadInviteByTokenHash(inviteTokenHash: string): Promise<AccountInviteRecord | undefined> {
-    const invite = [...this.invites.values()].find((candidate) => candidate.inviteTokenHash === inviteTokenHash);
+  async loadInviteByTokenHash(
+    inviteTokenHash: string,
+  ): Promise<AccountInviteRecord | undefined> {
+    const invite = [...this.invites.values()].find(
+      (candidate) => candidate.inviteTokenHash === inviteTokenHash,
+    );
     return invite ? clone(invite) : undefined;
   }
 
   async claimInvite(inviteId: string, usedAt: string): Promise<boolean> {
     const invite = this.invites.get(inviteId);
-    if (!invite || invite.usedAt || invite.revokedAt || Date.parse(invite.expiresAt) <= Date.parse(usedAt)) return false;
+    if (
+      !invite ||
+      invite.usedAt ||
+      invite.revokedAt ||
+      Date.parse(invite.expiresAt) <= Date.parse(usedAt)
+    )
+      return false;
     this.invites.set(inviteId, { ...invite, usedAt });
     return true;
   }
@@ -228,24 +288,48 @@ export class InMemoryAccountStorage implements AccountStorage {
     this.resetTokens.set(resetToken.resetId, clone(resetToken));
   }
 
-  async loadResetTokenByHash(resetTokenHash: string): Promise<AccountResetTokenRecord | undefined> {
-    const resetToken = [...this.resetTokens.values()].find((candidate) => candidate.resetTokenHash === resetTokenHash);
+  async loadResetTokenByHash(
+    resetTokenHash: string,
+  ): Promise<AccountResetTokenRecord | undefined> {
+    const resetToken = [...this.resetTokens.values()].find(
+      (candidate) => candidate.resetTokenHash === resetTokenHash,
+    );
     return resetToken ? clone(resetToken) : undefined;
   }
 
   async claimResetToken(resetId: string, usedAt: string): Promise<boolean> {
     const resetToken = this.resetTokens.get(resetId);
-    if (!resetToken || resetToken.usedAt || resetToken.revokedAt || Date.parse(resetToken.expiresAt) <= Date.parse(usedAt)) return false;
+    if (
+      !resetToken ||
+      resetToken.usedAt ||
+      resetToken.revokedAt ||
+      Date.parse(resetToken.expiresAt) <= Date.parse(usedAt)
+    )
+      return false;
     this.resetTokens.set(resetId, { ...resetToken, usedAt });
     return true;
   }
 
   async deleteAccountPrivateData(account: AccountRecord): Promise<void> {
     this.passwordCredentials.delete(account.accountId);
-    for (const [credentialId, credential] of this.credentials) if (credential.accountId === account.accountId) this.credentials.delete(credentialId);
-    for (const [sessionId, session] of this.sessions) if (session.accountId === account.accountId) this.sessions.delete(sessionId);
-    for (const [inviteId, invite] of this.invites) if (invite.targetAccountId === account.accountId || invite.createdByAccountId === account.accountId) this.invites.delete(inviteId);
-    for (const [resetId, resetToken] of this.resetTokens) if (resetToken.targetAccountId === account.accountId || resetToken.createdByAccountId === account.accountId) this.resetTokens.delete(resetId);
+    for (const [credentialId, credential] of this.credentials)
+      if (credential.accountId === account.accountId)
+        this.credentials.delete(credentialId);
+    for (const [sessionId, session] of this.sessions)
+      if (session.accountId === account.accountId)
+        this.sessions.delete(sessionId);
+    for (const [inviteId, invite] of this.invites)
+      if (
+        invite.targetAccountId === account.accountId ||
+        invite.createdByAccountId === account.accountId
+      )
+        this.invites.delete(inviteId);
+    for (const [resetId, resetToken] of this.resetTokens)
+      if (
+        resetToken.targetAccountId === account.accountId ||
+        resetToken.createdByAccountId === account.accountId
+      )
+        this.resetTokens.delete(resetId);
     this.accounts.set(account.accountId, clone(account));
   }
 }
@@ -253,7 +337,9 @@ export class InMemoryAccountStorage implements AccountStorage {
 export class SqliteAccountStorage implements AccountStorage {
   private readonly db: DatabaseSync;
 
-  constructor(private readonly options: { dbPath: string; backupDir?: string }) {
+  constructor(
+    private readonly options: { dbPath: string; backupDir?: string },
+  ) {
     const dbPath = resolve(options.dbPath);
     mkdirSync(dirname(dbPath), { recursive: true });
     const schemaOwner = new SqliteMatchStorage({
@@ -280,7 +366,7 @@ export class SqliteAccountStorage implements AccountStorage {
           role = excluded.role,
           credential_version = excluded.credential_version,
           updated_at = excluded.updated_at,
-          deleted_at = excluded.deleted_at`
+          deleted_at = excluded.deleted_at`,
       )
       .run(
         account.accountId,
@@ -297,20 +383,34 @@ export class SqliteAccountStorage implements AccountStorage {
   }
 
   async loadAccount(accountId: string): Promise<AccountRecord | undefined> {
-    const row = this.db.prepare("SELECT * FROM accounts WHERE account_id = ?").get(accountId) as AccountRow | undefined;
+    const row = this.db
+      .prepare("SELECT * FROM accounts WHERE account_id = ?")
+      .get(accountId) as AccountRow | undefined;
     return row ? accountFromRow(row) : undefined;
   }
 
-  async loadAccountByLoginNameNormalized(loginNameNormalized: string): Promise<AccountRecord | undefined> {
-    const row = this.db.prepare("SELECT * FROM accounts WHERE login_name_normalized = ?").get(loginNameNormalized) as AccountRow | undefined;
+  async loadAccountByLoginNameNormalized(
+    loginNameNormalized: string,
+  ): Promise<AccountRecord | undefined> {
+    const row = this.db
+      .prepare("SELECT * FROM accounts WHERE login_name_normalized = ?")
+      .get(loginNameNormalized) as AccountRow | undefined;
     return row ? accountFromRow(row) : undefined;
   }
 
   async countAccounts(): Promise<number> {
-    return Number((this.db.prepare("SELECT COUNT(*) AS count FROM accounts").get() as { count: number }).count);
+    return Number(
+      (
+        this.db.prepare("SELECT COUNT(*) AS count FROM accounts").get() as {
+          count: number;
+        }
+      ).count,
+    );
   }
 
-  async savePasswordCredential(credential: AccountPasswordCredentialRecord): Promise<void> {
+  async savePasswordCredential(
+    credential: AccountPasswordCredentialRecord,
+  ): Promise<void> {
     this.db
       .prepare(
         `INSERT INTO account_password_credentials (
@@ -328,7 +428,7 @@ export class SqliteAccountStorage implements AccountStorage {
           parallelization = excluded.parallelization,
           max_memory = excluded.max_memory,
           changed_at = excluded.changed_at,
-          must_change = excluded.must_change`
+          must_change = excluded.must_change`,
       )
       .run(
         credential.accountId,
@@ -346,8 +446,14 @@ export class SqliteAccountStorage implements AccountStorage {
       );
   }
 
-  async loadPasswordCredential(accountId: string): Promise<AccountPasswordCredentialRecord | undefined> {
-    const row = this.db.prepare("SELECT * FROM account_password_credentials WHERE account_id = ?").get(accountId) as AccountPasswordCredentialRow | undefined;
+  async loadPasswordCredential(
+    accountId: string,
+  ): Promise<AccountPasswordCredentialRecord | undefined> {
+    const row = this.db
+      .prepare(
+        "SELECT * FROM account_password_credentials WHERE account_id = ?",
+      )
+      .get(accountId) as AccountPasswordCredentialRow | undefined;
     return row ? passwordCredentialFromRow(row) : undefined;
   }
 
@@ -362,7 +468,7 @@ export class SqliteAccountStorage implements AccountStorage {
           sign_count = excluded.sign_count,
           label = excluded.label,
           last_used_at = excluded.last_used_at,
-          revoked_at = excluded.revoked_at`
+          revoked_at = excluded.revoked_at`,
       )
       .run(
         credential.credentialId,
@@ -376,8 +482,12 @@ export class SqliteAccountStorage implements AccountStorage {
       );
   }
 
-  async loadCredential(credentialId: string): Promise<AccountCredentialRecord | undefined> {
-    const row = this.db.prepare("SELECT * FROM account_credentials WHERE credential_id = ?").get(credentialId) as AccountCredentialRow | undefined;
+  async loadCredential(
+    credentialId: string,
+  ): Promise<AccountCredentialRecord | undefined> {
+    const row = this.db
+      .prepare("SELECT * FROM account_credentials WHERE credential_id = ?")
+      .get(credentialId) as AccountCredentialRow | undefined;
     return row ? credentialFromRow(row) : undefined;
   }
 
@@ -396,7 +506,7 @@ export class SqliteAccountStorage implements AccountStorage {
           last_seen_at = excluded.last_seen_at,
           expires_at = excluded.expires_at,
           revoked_at = excluded.revoked_at,
-          device_label = excluded.device_label`
+          device_label = excluded.device_label`,
       )
       .run(
         session.sessionId,
@@ -413,23 +523,40 @@ export class SqliteAccountStorage implements AccountStorage {
       );
   }
 
-  async loadSession(sessionId: string): Promise<AccountSessionRecord | undefined> {
-    const row = this.db.prepare("SELECT * FROM account_sessions WHERE session_id = ?").get(sessionId) as AccountSessionRow | undefined;
+  async loadSession(
+    sessionId: string,
+  ): Promise<AccountSessionRecord | undefined> {
+    const row = this.db
+      .prepare("SELECT * FROM account_sessions WHERE session_id = ?")
+      .get(sessionId) as AccountSessionRow | undefined;
     return row ? sessionFromRow(row) : undefined;
   }
 
-  async loadSessionByTokenHash(sessionTokenHash: string): Promise<AccountSessionRecord | undefined> {
-    const row = this.db.prepare("SELECT * FROM account_sessions WHERE session_token_hash = ?").get(sessionTokenHash) as AccountSessionRow | undefined;
+  async loadSessionByTokenHash(
+    sessionTokenHash: string,
+  ): Promise<AccountSessionRecord | undefined> {
+    const row = this.db
+      .prepare("SELECT * FROM account_sessions WHERE session_token_hash = ?")
+      .get(sessionTokenHash) as AccountSessionRow | undefined;
     return row ? sessionFromRow(row) : undefined;
   }
 
-  async listSessionsForAccount(accountId: string): Promise<AccountSessionRecord[]> {
-    return (this.db.prepare("SELECT * FROM account_sessions WHERE account_id = ? ORDER BY created_at ASC").all(accountId) as AccountSessionRow[]).map(sessionFromRow);
+  async listSessionsForAccount(
+    accountId: string,
+  ): Promise<AccountSessionRecord[]> {
+    return (
+      this.db
+        .prepare(
+          "SELECT * FROM account_sessions WHERE account_id = ? ORDER BY created_at ASC",
+        )
+        .all(accountId) as AccountSessionRow[]
+    ).map(sessionFromRow);
   }
 
   async saveInvite(invite: AccountInviteRecord): Promise<void> {
-    this.db.prepare(
-      `INSERT INTO account_invites (
+    this.db
+      .prepare(
+        `INSERT INTO account_invites (
         invite_id, invite_token_hash, target_account_id, created_by_account_id,
         created_at, expires_at, used_at, revoked_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -438,33 +565,41 @@ export class SqliteAccountStorage implements AccountStorage {
         expires_at = excluded.expires_at,
         used_at = excluded.used_at,
         revoked_at = excluded.revoked_at`,
-    ).run(
-      invite.inviteId,
-      invite.inviteTokenHash,
-      invite.targetAccountId,
-      invite.createdByAccountId ?? null,
-      invite.createdAt,
-      invite.expiresAt,
-      invite.usedAt ?? null,
-      invite.revokedAt ?? null,
-    );
+      )
+      .run(
+        invite.inviteId,
+        invite.inviteTokenHash,
+        invite.targetAccountId,
+        invite.createdByAccountId ?? null,
+        invite.createdAt,
+        invite.expiresAt,
+        invite.usedAt ?? null,
+        invite.revokedAt ?? null,
+      );
   }
 
-  async loadInviteByTokenHash(inviteTokenHash: string): Promise<AccountInviteRecord | undefined> {
-    const row = this.db.prepare("SELECT * FROM account_invites WHERE invite_token_hash = ?").get(inviteTokenHash) as AccountInviteRow | undefined;
+  async loadInviteByTokenHash(
+    inviteTokenHash: string,
+  ): Promise<AccountInviteRecord | undefined> {
+    const row = this.db
+      .prepare("SELECT * FROM account_invites WHERE invite_token_hash = ?")
+      .get(inviteTokenHash) as AccountInviteRow | undefined;
     return row ? inviteFromRow(row) : undefined;
   }
 
   async claimInvite(inviteId: string, usedAt: string): Promise<boolean> {
-    const result = this.db.prepare(
-      "UPDATE account_invites SET used_at = ? WHERE invite_id = ? AND used_at IS NULL AND revoked_at IS NULL AND expires_at > ?",
-    ).run(usedAt, inviteId, usedAt);
+    const result = this.db
+      .prepare(
+        "UPDATE account_invites SET used_at = ? WHERE invite_id = ? AND used_at IS NULL AND revoked_at IS NULL AND expires_at > ?",
+      )
+      .run(usedAt, inviteId, usedAt);
     return Number(result.changes) === 1;
   }
 
   async saveResetToken(resetToken: AccountResetTokenRecord): Promise<void> {
-    this.db.prepare(
-      `INSERT INTO account_reset_tokens (
+    this.db
+      .prepare(
+        `INSERT INTO account_reset_tokens (
         reset_id, reset_token_hash, target_account_id, created_by_account_id,
         created_at, expires_at, used_at, revoked_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -473,49 +608,88 @@ export class SqliteAccountStorage implements AccountStorage {
         expires_at = excluded.expires_at,
         used_at = excluded.used_at,
         revoked_at = excluded.revoked_at`,
-    ).run(
-      resetToken.resetId,
-      resetToken.resetTokenHash,
-      resetToken.targetAccountId,
-      resetToken.createdByAccountId ?? null,
-      resetToken.createdAt,
-      resetToken.expiresAt,
-      resetToken.usedAt ?? null,
-      resetToken.revokedAt ?? null,
-    );
+      )
+      .run(
+        resetToken.resetId,
+        resetToken.resetTokenHash,
+        resetToken.targetAccountId,
+        resetToken.createdByAccountId ?? null,
+        resetToken.createdAt,
+        resetToken.expiresAt,
+        resetToken.usedAt ?? null,
+        resetToken.revokedAt ?? null,
+      );
   }
 
-  async loadResetTokenByHash(resetTokenHash: string): Promise<AccountResetTokenRecord | undefined> {
-    const row = this.db.prepare("SELECT * FROM account_reset_tokens WHERE reset_token_hash = ?").get(resetTokenHash) as AccountResetTokenRow | undefined;
+  async loadResetTokenByHash(
+    resetTokenHash: string,
+  ): Promise<AccountResetTokenRecord | undefined> {
+    const row = this.db
+      .prepare("SELECT * FROM account_reset_tokens WHERE reset_token_hash = ?")
+      .get(resetTokenHash) as AccountResetTokenRow | undefined;
     return row ? resetTokenFromRow(row) : undefined;
   }
 
   async claimResetToken(resetId: string, usedAt: string): Promise<boolean> {
-    const result = this.db.prepare(
-      "UPDATE account_reset_tokens SET used_at = ? WHERE reset_id = ? AND used_at IS NULL AND revoked_at IS NULL AND expires_at > ?",
-    ).run(usedAt, resetId, usedAt);
+    const result = this.db
+      .prepare(
+        "UPDATE account_reset_tokens SET used_at = ? WHERE reset_id = ? AND used_at IS NULL AND revoked_at IS NULL AND expires_at > ?",
+      )
+      .run(usedAt, resetId, usedAt);
     return Number(result.changes) === 1;
   }
 
   async deleteAccountPrivateData(account: AccountRecord): Promise<void> {
     this.db.exec("BEGIN IMMEDIATE");
     try {
-      this.db.prepare("DELETE FROM account_series_results WHERE account_id = ?").run(account.accountId);
-      this.db.prepare("DELETE FROM account_game_results WHERE account_id = ?").run(account.accountId);
-      this.db.prepare("DELETE FROM account_match_participants WHERE account_id = ?").run(account.accountId);
-      this.db.prepare("DELETE FROM account_decks WHERE owner_account_id = ?").run(account.accountId);
-      this.db.prepare("DELETE FROM account_invites WHERE target_account_id = ? OR created_by_account_id = ?").run(account.accountId, account.accountId);
-      this.db.prepare("DELETE FROM account_reset_tokens WHERE target_account_id = ? OR created_by_account_id = ?").run(account.accountId, account.accountId);
-      this.db.prepare("DELETE FROM account_sessions WHERE account_id = ?").run(account.accountId);
-      this.db.prepare("DELETE FROM account_credentials WHERE account_id = ?").run(account.accountId);
-      this.db.prepare("DELETE FROM account_password_credentials WHERE account_id = ?").run(account.accountId);
-      this.db.prepare(
-        `UPDATE accounts SET login_name = ?, login_name_normalized = ?, display_name = ?, status = ?,
+      this.db
+        .prepare("DELETE FROM account_series_results WHERE account_id = ?")
+        .run(account.accountId);
+      this.db
+        .prepare("DELETE FROM account_game_results WHERE account_id = ?")
+        .run(account.accountId);
+      this.db
+        .prepare("DELETE FROM account_match_participants WHERE account_id = ?")
+        .run(account.accountId);
+      this.db
+        .prepare("DELETE FROM account_decks WHERE owner_account_id = ?")
+        .run(account.accountId);
+      this.db
+        .prepare(
+          "DELETE FROM account_invites WHERE target_account_id = ? OR created_by_account_id = ?",
+        )
+        .run(account.accountId, account.accountId);
+      this.db
+        .prepare(
+          "DELETE FROM account_reset_tokens WHERE target_account_id = ? OR created_by_account_id = ?",
+        )
+        .run(account.accountId, account.accountId);
+      this.db
+        .prepare("DELETE FROM account_sessions WHERE account_id = ?")
+        .run(account.accountId);
+      this.db
+        .prepare("DELETE FROM account_credentials WHERE account_id = ?")
+        .run(account.accountId);
+      this.db
+        .prepare(
+          "DELETE FROM account_password_credentials WHERE account_id = ?",
+        )
+        .run(account.accountId);
+      this.db
+        .prepare(
+          `UPDATE accounts SET login_name = ?, login_name_normalized = ?, display_name = ?, status = ?,
           credential_version = ?, updated_at = ?, deleted_at = ? WHERE account_id = ?`,
-      ).run(
-        account.loginName, account.loginNameNormalized, account.displayName, account.status,
-        account.credentialVersion, account.updatedAt, account.deletedAt ?? account.updatedAt, account.accountId,
-      );
+        )
+        .run(
+          account.loginName,
+          account.loginNameNormalized,
+          account.displayName,
+          account.status,
+          account.credentialVersion,
+          account.updatedAt,
+          account.deletedAt ?? account.updatedAt,
+          account.accountId,
+        );
       this.db.exec("COMMIT");
     } catch (error) {
       this.db.exec("ROLLBACK");
@@ -535,11 +709,20 @@ export class AccountSessionService {
 
   constructor(
     private readonly storage: AccountStorage = new InMemoryAccountStorage(),
-    options: { tokenSalt?: string; now?: () => string; maxSessionAgeDays?: number } = {},
+    options: {
+      tokenSalt?: string;
+      now?: () => string;
+      maxSessionAgeDays?: number;
+    } = {},
   ) {
-    this.tokenSalt = options.tokenSalt ?? envValue(process.env, "NETGRID_ACCOUNT_TOKEN_SALT") ?? envValue(process.env, "NETGRID_TOKEN_SALT") ?? LOCAL_DEFAULT_TOKEN_SALT;
+    this.tokenSalt =
+      options.tokenSalt ??
+      envValue(process.env, "NETGRID_ACCOUNT_TOKEN_SALT") ??
+      envValue(process.env, "NETGRID_TOKEN_SALT") ??
+      LOCAL_DEFAULT_TOKEN_SALT;
     this.now = options.now ?? (() => new Date().toISOString());
-    this.maxSessionAgeDays = options.maxSessionAgeDays ?? ACCOUNT_SESSION_MAX_AGE_DAYS;
+    this.maxSessionAgeDays =
+      options.maxSessionAgeDays ?? ACCOUNT_SESSION_MAX_AGE_DAYS;
   }
 
   hashSessionToken(sessionToken: string): string {
@@ -556,8 +739,12 @@ export class AccountSessionService {
     const loginName = normalizeLoginName(input.loginName ?? accountId);
     validateLoginName(loginName);
     validateDisplayName(input.displayName);
-    if (await this.storage.loadAccount(accountId)) throw new Error("account_exists");
-    if (await this.storage.loadAccountByLoginNameNormalized(loginName.normalized)) throw new Error("login_name_unavailable");
+    if (await this.storage.loadAccount(accountId))
+      throw new Error("account_exists");
+    if (
+      await this.storage.loadAccountByLoginNameNormalized(loginName.normalized)
+    )
+      throw new Error("login_name_unavailable");
     const account: AccountRecord = {
       accountId,
       loginName: loginName.display,
@@ -573,7 +760,9 @@ export class AccountSessionService {
     return accountSelfView(account);
   }
 
-  async saveCredential(input: Omit<AccountCredentialRecord, "createdAt"> & { createdAt?: string }): Promise<AccountCredentialRecord> {
+  async saveCredential(
+    input: Omit<AccountCredentialRecord, "createdAt"> & { createdAt?: string },
+  ): Promise<AccountCredentialRecord> {
     const credential: AccountCredentialRecord = {
       credentialId: input.credentialId,
       accountId: input.accountId,
@@ -588,12 +777,16 @@ export class AccountSessionService {
     return clone(credential);
   }
 
-  async createSession(input: CreateAccountSessionInput): Promise<CreateAccountSessionResult> {
+  async createSession(
+    input: CreateAccountSessionInput,
+  ): Promise<CreateAccountSessionResult> {
     const account = await this.storage.loadAccount(input.accountId);
-    if (!account || account.status !== "active") throw new Error("account_unavailable");
+    if (!account || account.status !== "active")
+      throw new Error("account_unavailable");
     const now = this.now();
-    const sessionToken = input.sessionToken ?? randomBytes(32).toString("base64url");
-    const csrfToken = input.csrfToken ?? randomBytes(32).toString("base64url");
+    const sessionToken =
+      input.sessionToken ?? randomBytes(32).toString("base64url");
+    const csrfToken = input.csrfToken ?? this.csrfTokenForSession(sessionToken);
     const session: AccountSessionRecord = {
       sessionId: randomId("acct_sess"),
       accountId: input.accountId,
@@ -607,57 +800,96 @@ export class AccountSessionService {
       ...(input.deviceLabel ? { deviceLabel: input.deviceLabel } : {}),
     };
     await this.storage.saveSession(session);
-    return { sessionToken, csrfToken, session: accountSessionSelfView(session) };
+    return {
+      sessionToken,
+      csrfToken,
+      session: accountSessionSelfView(session),
+    };
   }
 
-  async authenticateSessionToken(sessionToken: string): Promise<AccountSessionAuthResult> {
-    const session = await this.storage.loadSessionByTokenHash(this.hashSessionToken(sessionToken));
+  async authenticateSessionToken(
+    sessionToken: string,
+  ): Promise<AccountSessionAuthResult> {
+    const session = await this.storage.loadSessionByTokenHash(
+      this.hashSessionToken(sessionToken),
+    );
     if (!session) return { ok: false, errorCode: "invalid_session" };
     if (session.revokedAt) return { ok: false, errorCode: "session_revoked" };
     const now = this.now();
-    if (Date.parse(session.expiresAt) <= Date.parse(now)) return { ok: false, errorCode: "session_expired" };
+    if (Date.parse(session.expiresAt) <= Date.parse(now))
+      return { ok: false, errorCode: "session_expired" };
     const account = await this.storage.loadAccount(session.accountId);
-    if (!account || account.status !== "active" || session.credentialVersion !== account.credentialVersion) {
+    if (
+      !account ||
+      account.status !== "active" ||
+      session.credentialVersion !== account.credentialVersion
+    ) {
       return { ok: false, errorCode: "account_unavailable" };
     }
     const nextSession: AccountSessionRecord = { ...session, lastSeenAt: now };
     await this.storage.saveSession(nextSession);
-    return { ok: true, account: accountSelfView(account), session: accountSessionSelfView(nextSession) };
+    return {
+      ok: true,
+      account: accountSelfView(account),
+      session: accountSessionSelfView(nextSession),
+    };
   }
 
-  async verifyCsrfToken(sessionToken: string, csrfToken: string): Promise<boolean> {
-    const session = await this.storage.loadSessionByTokenHash(this.hashSessionToken(sessionToken));
+  async verifyCsrfToken(
+    sessionToken: string,
+    csrfToken: string,
+  ): Promise<boolean> {
+    const session = await this.storage.loadSessionByTokenHash(
+      this.hashSessionToken(sessionToken),
+    );
     if (!session || session.revokedAt) return false;
     const authenticated = await this.authenticateSessionToken(sessionToken);
     if (!authenticated.ok) return false;
     return safeEqual(session.csrfTokenHash, this.hashCsrfToken(csrfToken));
   }
 
-  async rotateCsrfToken(sessionToken: string): Promise<string | undefined> {
+  async restoreCsrfToken(sessionToken: string): Promise<string | undefined> {
     const authenticated = await this.authenticateSessionToken(sessionToken);
     if (!authenticated.ok) return undefined;
-    const session = await this.storage.loadSession(authenticated.session.sessionId);
+    const session = await this.storage.loadSession(
+      authenticated.session.sessionId,
+    );
     if (!session || session.revokedAt) return undefined;
-    const csrfToken = randomBytes(32).toString("base64url");
-    await this.storage.saveSession({ ...session, csrfTokenHash: this.hashCsrfToken(csrfToken), lastSeenAt: this.now() });
+    const csrfToken = this.csrfTokenForSession(sessionToken);
+    await this.storage.saveSession({
+      ...session,
+      csrfTokenHash: this.hashCsrfToken(csrfToken),
+      lastSeenAt: this.now(),
+    });
     return csrfToken;
   }
 
   async revokeSessionByToken(sessionToken: string): Promise<boolean> {
-    const session = await this.storage.loadSessionByTokenHash(this.hashSessionToken(sessionToken));
+    const session = await this.storage.loadSessionByTokenHash(
+      this.hashSessionToken(sessionToken),
+    );
     if (!session) return false;
-    await this.storage.saveSession({ ...session, revokedAt: session.revokedAt ?? this.now() });
+    await this.storage.saveSession({
+      ...session,
+      revokedAt: session.revokedAt ?? this.now(),
+    });
     return true;
   }
 
   async revokeSession(sessionId: string): Promise<boolean> {
     const session = await this.storage.loadSession(sessionId);
     if (!session) return false;
-    await this.storage.saveSession({ ...session, revokedAt: session.revokedAt ?? this.now() });
+    await this.storage.saveSession({
+      ...session,
+      revokedAt: session.revokedAt ?? this.now(),
+    });
     return true;
   }
 
-  async revokeAllAccountSessions(accountId: string, exceptSessionId?: string): Promise<number> {
+  async revokeAllAccountSessions(
+    accountId: string,
+    exceptSessionId?: string,
+  ): Promise<number> {
     const sessions = await this.storage.listSessionsForAccount(accountId);
     let revoked = 0;
     const now = this.now();
@@ -669,18 +901,35 @@ export class AccountSessionService {
     return revoked;
   }
 
-  async listAccountSessions(accountId: string): Promise<AccountSessionSelfView[]> {
-    return (await this.storage.listSessionsForAccount(accountId)).map(accountSessionSelfView);
+  async listAccountSessions(
+    accountId: string,
+  ): Promise<AccountSessionSelfView[]> {
+    return (await this.storage.listSessionsForAccount(accountId)).map(
+      accountSessionSelfView,
+    );
   }
 
-  async exportAccount(accountId: string): Promise<{ account: AccountSelfView; sessions: AccountSessionSelfView[] } | undefined> {
+  async exportAccount(
+    accountId: string,
+  ): Promise<
+    { account: AccountSelfView; sessions: AccountSessionSelfView[] } | undefined
+  > {
     const account = await this.storage.loadAccount(accountId);
     if (!account || account.status === "deleted") return undefined;
-    return { account: accountSelfView(account), sessions: await this.listAccountSessions(accountId) };
+    return {
+      account: accountSelfView(account),
+      sessions: await this.listAccountSessions(accountId),
+    };
   }
 
   private hashSecret(purpose: "session" | "csrf", value: string): string {
     return `sha256:${createHmac("sha256", this.tokenSalt).update(`account-${purpose}:${value}`).digest("hex")}`;
+  }
+
+  private csrfTokenForSession(sessionToken: string): string {
+    return createHmac("sha256", this.tokenSalt)
+      .update(`account-csrf-token:${sessionToken}`)
+      .digest("base64url");
   }
 
   hashOneTimeToken(purpose: "invite" | "reset", value: string): string {
@@ -688,7 +937,9 @@ export class AccountSessionService {
   }
 
   private expiresAt(now: string): string {
-    return new Date(Date.parse(now) + this.maxSessionAgeDays * 24 * 60 * 60 * 1000).toISOString();
+    return new Date(
+      Date.parse(now) + this.maxSessionAgeDays * 24 * 60 * 60 * 1000,
+    ).toISOString();
   }
 }
 
@@ -782,7 +1033,9 @@ function accountFromRow(row: AccountRow): AccountRecord {
   };
 }
 
-function passwordCredentialFromRow(row: AccountPasswordCredentialRow): AccountPasswordCredentialRecord {
+function passwordCredentialFromRow(
+  row: AccountPasswordCredentialRow,
+): AccountPasswordCredentialRecord {
   return {
     accountId: row.account_id,
     algorithm: row.algorithm,
@@ -835,7 +1088,9 @@ function inviteFromRow(row: AccountInviteRow): AccountInviteRecord {
     targetAccountId: row.target_account_id,
     createdAt: row.created_at,
     expiresAt: row.expires_at,
-    ...(row.created_by_account_id ? { createdByAccountId: row.created_by_account_id } : {}),
+    ...(row.created_by_account_id
+      ? { createdByAccountId: row.created_by_account_id }
+      : {}),
     ...(row.used_at ? { usedAt: row.used_at } : {}),
     ...(row.revoked_at ? { revokedAt: row.revoked_at } : {}),
   };
@@ -848,7 +1103,9 @@ function resetTokenFromRow(row: AccountResetTokenRow): AccountResetTokenRecord {
     targetAccountId: row.target_account_id,
     createdAt: row.created_at,
     expiresAt: row.expires_at,
-    ...(row.created_by_account_id ? { createdByAccountId: row.created_by_account_id } : {}),
+    ...(row.created_by_account_id
+      ? { createdByAccountId: row.created_by_account_id }
+      : {}),
     ...(row.used_at ? { usedAt: row.used_at } : {}),
     ...(row.revoked_at ? { revokedAt: row.revoked_at } : {}),
   };
@@ -866,7 +1123,9 @@ function accountSelfView(account: AccountRecord): AccountSelfView {
   };
 }
 
-function accountSessionSelfView(session: AccountSessionRecord): AccountSessionSelfView {
+function accountSessionSelfView(
+  session: AccountSessionRecord,
+): AccountSessionSelfView {
   return {
     sessionId: session.sessionId,
     accountId: session.accountId,
@@ -880,14 +1139,21 @@ function accountSessionSelfView(session: AccountSessionRecord): AccountSessionSe
   };
 }
 
-export function normalizeLoginName(value: string): { display: string; normalized: string } {
+export function normalizeLoginName(value: string): {
+  display: string;
+  normalized: string;
+} {
   const display = value.trim().normalize("NFKC");
   return { display, normalized: display.toLocaleLowerCase("en-US") };
 }
 
-export function validateLoginName(value: { display: string; normalized: string }): void {
+export function validateLoginName(value: {
+  display: string;
+  normalized: string;
+}): void {
   const length = Array.from(value.display).length;
-  if (length < 3 || length > 32 || !/^[\p{L}\p{N}._-]+$/u.test(value.display)) throw new Error("login_name_invalid");
+  if (length < 3 || length > 32 || !/^[\p{L}\p{N}._-]+$/u.test(value.display))
+    throw new Error("login_name_invalid");
 }
 
 export function validateDisplayName(value: string): void {
@@ -902,7 +1168,10 @@ function randomId(prefix: string): string {
 function safeEqual(left: string, right: string): boolean {
   const leftBuffer = Buffer.from(left);
   const rightBuffer = Buffer.from(right);
-  return leftBuffer.length === rightBuffer.length && timingSafeEqual(leftBuffer, rightBuffer);
+  return (
+    leftBuffer.length === rightBuffer.length &&
+    timingSafeEqual(leftBuffer, rightBuffer)
+  );
 }
 
 function clone<T>(value: T): T {
