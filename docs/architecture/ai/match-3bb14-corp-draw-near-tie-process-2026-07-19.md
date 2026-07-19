@@ -1,6 +1,6 @@
 # Match-3bb14-Corp-Draw-Near-Tie-Prozess (2026-07-19)
 
-Status: P3 abgeschlossen, P4 aktiv
+Status: P3 abgeschlossen, P4 aktiv; Vollsuite und Baseline ausgewertet
 
 ## Quelle und Zielprüfung
 
@@ -175,3 +175,17 @@ verifiziertem Worktree- und Branch-Cleanup als abgeschlossen.
   klare Sieger und D9-D11 bleiben unverändert; produktiver Chooser und
   Raw-Score-Debug sind kontrolliert verifiziert. Fokussiert 108/108 Tests und
   AI-Typecheck grün.
+- P4 Zwischenstand: alle drei AI-Testshards sind grün (134/946, 134/1008 und
+  133/857). Der vollständige kompatible Behavior-Baseline-Lauf umfasst sechs
+  Slots, zehn Seeds und 60 Spiele. Er bleibt mit unverändert drei
+  Action-Limit-Spielen `attention_required`; alle übrigen technischen Gates
+  sind null und Redaction ist sicher. Near-Tie-Variation wurde 19-mal in
+  12.272 Entscheidungen beobachtet. Der anfängliche Vollsuite-Befund an einer
+  bereits geschützten Score-Remote ist durch einen generischen Existing-
+  Remote-Guard samt Gegenprobe geschlossen.
+- Strukturhygiene: die neuen Produktionsmodule liegen unter
+  `runtime/corp-economy/`; die Runtime-Root-Dateizahl steigt gegenüber
+  `52ac68d19` nicht. Die auf diesem Ausgangsstand bereits roten neun
+  Source-Structure-Ratchets werden durch das Paket nicht erweitert oder
+  verschärft; nach dem defensiven Abgleich mit aktuellem `main` wird das Gate
+  erneut verbindlich ausgeführt.
