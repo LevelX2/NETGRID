@@ -89,6 +89,8 @@
   `/maintenance`, `docs/runbooks/maintenance-control-plane.md` sowie
   `storage:inspect`, `storage:backup`, `storage:restore` und
   `storage:optimize`. Speicher- und Performance-Endstand:
+  `docs/reviews/architecture/delta-action-persistence-final-review-2026-07-19.md`
+  sowie der vorgelagerte Bestands-/Optimize-Stand
   `docs/reviews/architecture/sqlite-matchstorage-optimization-final-review-2026-07-19.md`.
 - Geschlossene Account-Alpha: `docs/runbooks/account-alpha-operations.md` für
   Admin-Bootstrap, Invite/Reset, Backup/Restore und Deckquote.

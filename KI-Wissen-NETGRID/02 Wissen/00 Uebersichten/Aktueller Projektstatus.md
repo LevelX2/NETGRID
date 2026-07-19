@@ -214,6 +214,14 @@ Stand: 2026-07-19
   Accountstatistiken verwenden SQL-Aggregate und indexgestützte
   Keyset-Pagination. Führend ist
   `docs/reviews/architecture/sqlite-matchstorage-optimization-final-review-2026-07-19.md`.
+- Normale Spieler- und KI-Aktionen verwenden auf SQLite einen bounded
+  Aktionsload und einen atomaren Delta-Save. Der PublicEvent-Tail bleibt mit
+  Chronicle-Kontext identisch, Receipts und KI-Traces werden gezielt geladen,
+  und Versions- oder Historydrift verhindert jeden Teilcommit. Vollständige
+  Undo-, Replay-, Maintenance- und Lifecycle-Pfade bleiben unverändert.
+  Die lokale 1-/10-/25-Match-Probe blieb mit 36 exakt einmal persistierten
+  Receipts grün. Führend ist
+  `docs/reviews/architecture/delta-action-persistence-final-review-2026-07-19.md`.
 - Die geschlossene V2.0-Passwort-Account-Alpha ist umgesetzt. Accounts werden
   nur durch lokalen Admin-Bootstrap oder einmalige Einladung angelegt;
   widerrufbare Account-Sessions laufen über ein `HttpOnly`-Cookie und bleiben

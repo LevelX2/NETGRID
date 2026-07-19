@@ -81,6 +81,14 @@ Bei einem Blocker stoppt der Prozess mit dokumentierter Removal Condition.
 
 `preflight -> DAP-00 -> DAP-01 -> DAP-02 -> DAP-03 -> DAP-04 -> DAP-05 -> final_verify -> main_sync -> main_merge -> cleanup -> complete`
 
+## Ausführungsstand
+
+- DAP-00 bis DAP-05: abgeschlossen und jeweils paketweise verifiziert.
+- Final Review:
+  `docs/reviews/architecture/delta-action-persistence-final-review-2026-07-19.md`.
+- Verbleibend nach DAP-05: finaler Verify-Lauf, Abgleich mit aktuellem `main`,
+  lokaler Merge und verifizierte Entfernung von Worktree und Arbeitsbranch.
+
 ## Paketfolge
 
 ### DAP-00 – Prozessvertrag und Baseline
