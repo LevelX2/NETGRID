@@ -100,6 +100,13 @@ function visibleKnownCardWithReferenceViewer(
     id,
     referenceViewer,
   );
+  const runnerPaymentSupportAbilities =
+    visibleRunnerPaymentSupportAbilities(
+      state,
+      id,
+      definition,
+      referenceViewer,
+    );
   return {
     instanceId: id,
     known: true,
@@ -200,7 +207,64 @@ function visibleKnownCardWithReferenceViewer(
     owner: instance.owner,
     controller: instance.controller,
     ...(lifecycleMarkers.length > 0 ? { lifecycleMarkers } : {}),
+    ...(runnerPaymentSupportAbilities.length > 0
+      ? { runnerPaymentSupportAbilities }
+      : {}),
   };
+}
+
+function visibleRunnerPaymentSupportAbilities(
+  state: GameState,
+  id: CardInstanceId,
+  definition: CardDefinition,
+  referenceViewer: Side | "own",
+): NonNullable<VisibleCard["runnerPaymentSupportAbilities"]> {
+  const instance = state.cardInstances[id];
+  if (
+    referenceViewer === "corp" ||
+    instance?.owner !== "runner" ||
+    instance.controller !== "runner" ||
+    instance.zone.side !== "runner" ||
+    instance.zone.zone !== "rig" ||
+    definition.type !== "resource" ||
+    !cardHasSubtype(definition, "hidden")
+  )
+    return [];
+  const implementation = cardImplementationForDefinitionId(definition.id);
+  return (
+    implementation?.abilities?.flatMap((ability, abilityIndex) => {
+      if (
+        ability.kind !== "activated" ||
+        ability.timing !== "runner_cost_penalty_support"
+      )
+        return [];
+      const creditCost = ability.costs.reduce(
+        (sum, cost) =>
+          cost.kind === "credit" ? sum + Math.max(0, cost.amount) : sum,
+        0,
+      );
+      const gainCredits = ability.effects.reduce(
+        (sum, effect) =>
+          effect.kind === "gain_credits" &&
+          (effect.recipient === "runner" || effect.recipient === "controller")
+            ? sum + Math.max(0, effect.amount)
+            : sum,
+        0,
+      );
+      return [
+        {
+          abilityIndex,
+          timing: ability.timing,
+          label: ability.label ?? `${definition.title}: Fähigkeit nutzen`,
+          creditCost,
+          gainCredits,
+          trashesSource: ability.costs.some(
+            (cost) => cost.kind === "trash_source",
+          ),
+        },
+      ];
+    }) ?? []
+  );
 }
 
 function visibleCardLifecycleMarkers(

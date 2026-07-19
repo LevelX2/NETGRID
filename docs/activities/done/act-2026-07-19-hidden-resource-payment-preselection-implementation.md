@@ -1,20 +1,36 @@
 ---
 activityId: act-2026-07-19-hidden-resource-payment-preselection-implementation
-status: inbox
+status: done
 kind: implementation
 area: shared
 priority: normal
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-07-19
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-07-19
+completedAt: 2026-07-19
+branch: codex/hidden-bank-continuation-ui
 releaseTarget:
 blockedBy:
   - act-2026-07-19-hidden-resource-next-payment-preselection
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/shared/src/index.ts
+  - packages/engine/src/game/view/card-view.ts
+  - packages/engine/src/index-tests/proteus/hidden-resource-hardening.test.ts
+  - apps/web/app/hidden-resource-payment-preselection.ts
+  - apps/web/app/hidden-resource-payment-preselection.test.ts
+  - apps/web/app/page.tsx
+  - apps/web/features/cards/CardView.tsx
+  - apps/web/features/game-board/ActiveRunnerZoneBoard.tsx
+  - apps/web/app/globals.css
+  - docs/architecture/ui/hidden-resource-next-payment-preselection-concept-2026-07-19.md
+checks:
+  - corepack pnpm --filter @netgrid/web exec vitest run app/hidden-resource-payment-preselection.test.ts app/action-board-ui.test.ts
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/proteus/hidden-resource-hardening.test.ts
+  - corepack pnpm --filter @netgrid/shared typecheck
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - corepack pnpm --filter @netgrid/web typecheck
+  - git diff --check
 ---
 
 # Hidden-Resource-Zahlungsfähigkeit sicher vormerken
@@ -68,22 +84,35 @@ auf Basis einer exakt passenden aktuellen Engine-`LegalAction` ein.
 
 ## Akzeptanzkriterien
 
-- [ ] Nur der Runner-Eigentümer erhält Deskriptoren seiner vormerkbaren Hidden-
+- [x] Nur der Runner-Eigentümer erhält Deskriptoren seiner vormerkbaren Hidden-
   Resource-Fähigkeiten; Korp-Ansicht und öffentliche Verträge leaken nichts.
-- [ ] Chiba kann eindeutig markiert und beim nächsten passenden
+- [x] Chiba kann eindeutig markiert und beim nächsten passenden
   Zahlungsfenster über genau eine aktuelle LegalAction aktiviert werden.
-- [ ] Bei Swiss sind Karteninstanz und eine der beiden Fähigkeiten eindeutig
+- [x] Bei Swiss sind Karteninstanz und eine der beiden Fähigkeiten eindeutig
   auswählbar; ein pauschales Karten-Häkchen existiert nicht.
-- [ ] Rerender oder erneut empfangene Ansicht übermitteln dieselbe Support-
+- [x] Rerender oder erneut empfangene Ansicht übermitteln dieselbe Support-
   LegalAction nicht doppelt.
-- [ ] Fehlende, mehrdeutige, stale oder abgelehnte Treffer führen ohne
+- [x] Fehlende, mehrdeutige, stale oder abgelehnte Treffer führen ohne
   Regelaktion in das sichtbare zentrale Zahlungsfenster zurück.
-- [ ] Nach automatischer Support-Aktivierung bleibt die Fortsetzung der
+- [x] Nach automatischer Support-Aktivierung bleibt die Fortsetzung der
   ursprünglichen Zahlung eine getrennte manuelle Entscheidung.
-- [ ] Lebenszyklus-Bereinigung und Hidden-Info-Grenzen sind durch paketnahe
+- [x] Lebenszyklus-Bereinigung und Hidden-Info-Grenzen sind durch paketnahe
   Tests abgesichert.
-- [ ] Engine-/Web-Typechecks, fokussierte Tests und `git diff --check` sind grün.
+- [x] Engine-/Web-Typechecks, fokussierte Tests und `git diff --check` sind grün.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Die private Runner-PlayerView enthält nun ausschließlich an den eigenen
+installierten Hidden Resources engine-abgeleitete Deskriptoren je
+Payment-Support-Fähigkeit. Chiba erhält einen Marker, Swiss zwei getrennte
+Marker nach Ability-Index. In der Korp-Ansicht bleiben die Karten verdeckt und
+die Deskriptoren vollständig aus.
+
+Der Client hält nur eine lokale Vormerkung und reicht im echten Zahlungsfenster
+genau eine aktuelle LegalAction mit passender Karteninstanz, Ability-Index,
+Timing und Window-ID ein. Match-, Window- und Action-ID bilden den
+Deduplizierungsschlüssel. Fehlende oder mehrdeutige Treffer, Quellenverlust,
+Run-/Zugende, Matchwechsel und Undo löschen die Absicht konservativ. Manuelle
+Support- oder Fortsetzungsentscheidungen löschen sie ebenfalls. Nach einer
+automatischen Bankaktivierung bleibt die ursprüngliche Zahlung als getrennte
+zentrale Aktion stehen.

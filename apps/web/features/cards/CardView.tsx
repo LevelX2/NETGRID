@@ -63,6 +63,16 @@ type CardChoiceShortcut = {
   icon?: "add" | "eye";
 };
 
+export type PaymentSupportShortcut = {
+  abilityIndex: number;
+  selected: boolean;
+  disabled: boolean;
+  label: string;
+  selectedLabel: string;
+  gainCredits: number;
+  onToggle(): void;
+};
+
 export function CardView({
   card,
   compact = false,
@@ -91,6 +101,7 @@ export function CardView({
   allowTooltipPinOnSelect = false,
   choiceShortcut,
   discardShortcut,
+  paymentSupportShortcuts = [],
   onFocus,
   onSelect,
   onActionContextSelect,
@@ -123,6 +134,7 @@ export function CardView({
   allowTooltipPinOnSelect?: boolean;
   choiceShortcut?: CardChoiceShortcut;
   discardShortcut?: { selected: boolean; disabled: boolean; onToggle(): void };
+  paymentSupportShortcuts?: PaymentSupportShortcut[];
   onFocus?(card: DisplayVisibleCard, hiddenSide?: Side): void;
   onSelect?(card: DisplayVisibleCard, hiddenSide?: Side): void;
   onActionContextSelect?(card: DisplayVisibleCard, hiddenSide?: Side): void;
@@ -749,6 +761,37 @@ export function CardView({
             <Plus size={11} strokeWidth={2.35} />
           )}
         </button>
+      ) : null}
+      {paymentSupportShortcuts.length > 0 ? (
+        <span
+          className="cardPaymentSupportShortcuts"
+          aria-label="Bankfähigkeit vormerken"
+        >
+          {paymentSupportShortcuts.map((shortcut) => (
+            <button
+              key={shortcut.abilityIndex}
+              className={`cardPaymentSupportShortcut${shortcut.selected ? " active" : ""}`}
+              type="button"
+              aria-label={shortcut.selected ? shortcut.selectedLabel : shortcut.label}
+              aria-pressed={shortcut.selected}
+              title={shortcut.selected ? shortcut.selectedLabel : shortcut.label}
+              data-testid={`payment-support-shortcut-${shortcut.abilityIndex}`}
+              disabled={shortcut.disabled}
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                setSuppressCardTooltip(true);
+                shortcut.onToggle();
+              }}
+            >
+              {shortcut.selected ? (
+                <Check size={10} strokeWidth={2.6} />
+              ) : (
+                <span aria-hidden="true">+{shortcut.gainCredits}</span>
+              )}
+            </button>
+          ))}
+        </span>
       ) : null}
       {tooltipElement && typeof document !== "undefined" ? createPortal(tooltipElement, document.body) : null}
       {hasCardActions ? (

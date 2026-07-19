@@ -8721,6 +8721,52 @@ select {
   opacity: 0.55;
 }
 
+.cardPaymentSupportShortcuts {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  z-index: 97;
+  display: inline-flex;
+  flex-direction: column-reverse;
+  gap: 3px;
+}
+
+.cardPaymentSupportShortcut {
+  min-width: 25px;
+  height: 19px;
+  padding: 0 5px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--credit), var(--line) 30%);
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--panel), var(--credit) 14%);
+  color: color-mix(in srgb, var(--credit), white 26%);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.06);
+  cursor: pointer;
+  font-size: 9px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.cardPaymentSupportShortcut:hover,
+.cardPaymentSupportShortcut:focus-visible,
+.cardPaymentSupportShortcut.active {
+  border-color: color-mix(in srgb, var(--credit), white 28%);
+  background: color-mix(in srgb, var(--credit), var(--panel) 48%);
+  color: var(--text);
+}
+
+.cardPaymentSupportShortcut.active {
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--credit), transparent 35%),
+    0 0 10px color-mix(in srgb, var(--credit), transparent 55%);
+}
+
+.cardPaymentSupportShortcut:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 .cardActionsPopover {
   position: absolute;
   left: 0;

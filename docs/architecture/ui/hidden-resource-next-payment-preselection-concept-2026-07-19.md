@@ -1,6 +1,6 @@
 # Hidden Resource für die nächste Zahlung vormerken
 
-Status: zur Umsetzung freigegeben
+Status: erster sicherer Umsetzungsschnitt abgeschlossen
 Quelle/Vorgabe: Nutzeridee und Playtest-Fund vom 2026-07-19
 
 ## Entscheidung
@@ -167,3 +167,18 @@ Schnitt um:
 
 Automatisches Fortsetzen nach der Resource-Aktivierung sowie geräteübergreifende
 Synchronisierung bleiben bewusst außerhalb dieses ersten Pakets.
+
+## Umsetzungsstand 2026-07-19
+
+Der erste Schnitt ist umgesetzt. Eigene Hidden Resources projizieren die
+vormerkbaren Fähigkeiten mit Karteninstanz, Ability-Index, UI-Label, Credit-
+Kosten, Credit-Ertrag und Trash-Kennzeichnung. Die Korp erhält diese Felder in
+ihrer verdeckten Runner-Rig-Ansicht nicht.
+
+Der Webclient zeigt je Fähigkeit einen eigenen `+Credits`-Marker und hält nur
+eine lokale Vormerkung. Im offenen Payment-Support-Fenster wird sie exakt gegen
+Quelle, Ability-Index, Timing und Window-ID abgeglichen. Die Einreichung nutzt
+den normalen LegalAction-Pfad und einen stabilen Deduplizierungsschlüssel. Bei
+Abweichung wird nichts eingereicht; die zentrale Auswahl bleibt sichtbar. Die
+ursprüngliche Zahlung wird nach einer Bankaktivierung weiterhin manuell
+fortgesetzt.

@@ -281,6 +281,72 @@ function accessStartActionFor(
 }
 
 describe("PRO011 hidden resource timing hardening", () => {
+  it("projects preparable Chiba and Swiss abilities only to the owning runner", () => {
+    const state = runnerState("hidden-bank-preselection-view");
+    const chibaId = installHiddenResource(
+      state,
+      "onr_proteus_133_chiba-bank-account",
+      "preselection_chiba",
+    );
+    const swissId = installHiddenResource(
+      state,
+      "onr_proteus_152_swiss-bank-account",
+      "preselection_swiss",
+    );
+
+    const runnerRig = getPlayerView(state, "runner").own.rig ?? [];
+    expect(
+      runnerRig.find((card) => card.instanceId === chibaId)
+        ?.runnerPaymentSupportAbilities,
+    ).toEqual([
+      {
+        abilityIndex: 0,
+        timing: "runner_cost_penalty_support",
+        label: "Chiba Bank Account: 4 Credits nehmen",
+        creditCost: 1,
+        gainCredits: 4,
+        trashesSource: true,
+      },
+    ]);
+    expect(
+      runnerRig.find((card) => card.instanceId === swissId)
+        ?.runnerPaymentSupportAbilities,
+    ).toEqual([
+      {
+        abilityIndex: 0,
+        timing: "runner_cost_penalty_support",
+        label: "Swiss Bank Account: 2 Credits nehmen",
+        creditCost: 0,
+        gainCredits: 2,
+        trashesSource: true,
+      },
+      {
+        abilityIndex: 1,
+        timing: "runner_cost_penalty_support",
+        label: "Swiss Bank Account: 6 Credits nehmen",
+        creditCost: 3,
+        gainCredits: 6,
+        trashesSource: true,
+      },
+    ]);
+
+    const corpRig = getPlayerView(state, "corp").opponent.rig ?? [];
+    expect(corpRig).toHaveLength(2);
+    expect(
+      corpRig.every(
+        (card) =>
+          card.known === false &&
+          card.runnerPaymentSupportAbilities === undefined,
+      ),
+    ).toBe(true);
+    expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain(
+      "runnerPaymentSupportAbilities",
+    );
+    expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain(
+      "Swiss Bank Account",
+    );
+  });
+
   it("removes a dominated lower-net bank action when both would trash the same source", () => {
     const state = runnerState("pro011-bank-dominance");
     state.runner.credits = 3;
