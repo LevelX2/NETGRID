@@ -535,4 +535,53 @@ describe("hidden-zone nonsearch choice handlers", () => {
       chosenIcePosition: 0,
     });
   });
+
+  it("keeps fort and position in visible Social Engineering ICE labels without revealing hidden ICE", () => {
+    const hiddenIce = "hidden_ice" as CardInstanceId;
+    const firstQuandary = "quandary_1" as CardInstanceId;
+    const secondQuandary = "quandary_2" as CardInstanceId;
+    const server = {
+      id: "hq",
+      kind: "hq",
+      label: "HQ",
+      ice: [hiddenIce, firstQuandary, secondQuandary],
+      root: [],
+    } as CorpServer;
+    const host = makeHost({
+      servers: [server],
+      definitions: { [sourceId]: definition(socialId, "event", "Social") },
+    });
+    host.servers.publicServerLabel = () => "HQ";
+    host.servers.iceChoiceLabelForSide = (cardId, _side, fallback) =>
+      cardId === hiddenIce
+        ? { label: fallback, publicLabel: fallback }
+        : { label: "Quandary", publicLabel: "Quandary" };
+
+    startSecretSpendGuessThenTargetedBypassRunHideChoice(host, sourceId);
+    host.playerAction = playerAction(["hide_3"]);
+    handleHiddenZoneNonSearchChoice(host);
+    host.playerAction = playerAction(["guess_1"]);
+    handleHiddenZoneNonSearchChoice(host);
+
+    expect(host.state.pendingChoice?.options).toEqual([
+      {
+        id: `ice_${hiddenIce}`,
+        label: "HQ ICE 1",
+        publicLabel: "HQ ICE 1",
+        value: `hq|${hiddenIce}`,
+      },
+      {
+        id: `ice_${firstQuandary}`,
+        label: "Quandary (HQ ICE 2)",
+        publicLabel: "HQ ICE 2",
+        value: `hq|${firstQuandary}`,
+      },
+      {
+        id: `ice_${secondQuandary}`,
+        label: "Quandary (HQ ICE 3)",
+        publicLabel: "HQ ICE 3",
+        value: `hq|${secondQuandary}`,
+      },
+    ]);
+  });
 });

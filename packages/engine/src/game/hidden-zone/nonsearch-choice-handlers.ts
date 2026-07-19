@@ -897,7 +897,10 @@ function startSecretSpendGuessTargetedBypassRunTargetChoice(
       );
       return {
         id: `ice_${slot.cardId}`,
-        label: labels.label,
+        label:
+          labels.label === fallback
+            ? fallback
+            : `${labels.label} (${fallback})`,
         publicLabel: fallback,
         value: `${slot.serverId}|${slot.cardId}`,
       };

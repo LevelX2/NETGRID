@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-07-19-social-engineering-ice-choice-label
-status: in_progress
+status: done
 kind: implementation
 area: engine-ui-contract
 priority: normal
@@ -8,12 +8,19 @@ primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-07-19
 startedAt: 2026-07-19
-completedAt:
+completedAt: 2026-07-19
 branch: codex/social-engineering-ice-choice-label
 releaseTarget: current-state
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/engine/src/game/hidden-zone/nonsearch-choice-handlers.ts
+  - packages/engine/src/game/hidden-zone/nonsearch-choice-handlers.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/game/hidden-zone/nonsearch-choice-handlers.test.ts
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/releases/card-release-smokes-v123.test.ts
+  - corepack pnpm --filter @netgrid/web exec vitest run app/action-board-ui.test.ts
+  - git diff --check
 ---
 
 # Social-Engineering-ICE-Auswahl eindeutig beschriften
@@ -160,13 +167,24 @@ Branch-Cleanup als vollständig.
 
 ## Abschlusskriterien
 
-- [ ] `P1` und `P2` sind jeweils geprüft und committed.
-- [ ] Die eindeutige sichtbare Beschriftung und das verdeckte Fallback sind
+- [x] `P1` und `P2` sind jeweils geprüft; der `P2`-Commit folgt nach dieser
+  Ergebnisaktualisierung.
+- [x] Die eindeutige sichtbare Beschriftung und das verdeckte Fallback sind
   regressionsgesichert.
 - [ ] Der Arbeitsbranch ist lokal nach `main` integriert.
 - [ ] `main` ist sauber und geprüft.
 - [ ] Arbeits-Worktree und gemergter Arbeitsbranch sind verifiziert entfernt.
 
+Die drei letzten Controller-Abschlusskriterien können erst nach dem
+Activity-Commit erfüllt werden. Ihr Ergebnis wird deshalb im finalen
+`/Goal`-Status und im Chatabschluss dokumentiert, nicht vorweggenommen.
+
 ## Ergebnisnotiz
 
-Noch offen.
+Umgesetzt. Der Social-Engineering-Zielwahlpfad ergänzt für bereits sichtbare
+ICE das vorhandene Fort-/Positionslabel in der Form `Quandary (HQ ICE 2)`.
+Verdeckte ICE bleiben bei `HQ ICE 1`; Options-ID, instanzgebundener Wert und
+öffentliche Fallback-Beschriftung ändern sich nicht. Der Regressionstest deckt
+zwei gleichnamige sichtbare ICE an unterschiedlichen Positionen sowie ein
+verdecktes ICE ab. Handler-Test, Engine-Typecheck, V1.2.3-Release-Smoke und der
+bestehende Web-Action-Board-Test sind grün.
