@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
@@ -810,7 +810,7 @@ describe("Backend 0.5 private storage maintenance", () => {
     });
 
     const createAndAdvance = async (
-      aiTraceMode: "summary" | "detailed",
+      aiTraceMode: "off" | "summary" | "detailed",
     ): Promise<string> => {
       const created = await service.createMatch({
         mode: "human_runner_vs_corp_ai",
@@ -843,6 +843,18 @@ describe("Backend 0.5 private storage maintenance", () => {
 
     const summaryMatchId = await createAndAdvance("summary");
     const detailedMatchId = await createAndAdvance("detailed");
+    const untracedMatchId = await createAndAdvance("off");
+
+    const detailedCorpReplay = await service.loadReplayView(detailedMatchId, "corp");
+    const detailedRunnerReplay = await service.loadReplayView(detailedMatchId, "runner");
+    const untracedReplay = await service.loadReplayView(untracedMatchId, "corp");
+    expect(detailedCorpReplay.ok).toBe(true);
+    expect(detailedRunnerReplay.ok).toBe(true);
+    expect(untracedReplay.ok).toBe(true);
+    if (!detailedCorpReplay.ok || !detailedRunnerReplay.ok || !untracedReplay.ok) throw new Error("Missing SQLite replay view");
+    expect(detailedCorpReplay.replay.timeline.find((step) => step.decisionDebug)?.decisionDebug).toMatchObject({ schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION, actor: "corp" });
+    expect(detailedRunnerReplay.replay.timeline.find((step) => step.decisionDebug)?.decisionDebug).toMatchObject({ schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION, redacted: true });
+    expect(untracedReplay.replay.timeline.some((step) => step.decisionDebug)).toBe(false);
     storage.close?.();
 
     const database = new DatabaseSync(dbPath);
@@ -859,6 +871,12 @@ describe("Backend 0.5 private storage maintenance", () => {
         if (!row) throw new Error(`Missing persisted AI trace for ${matchId}`);
         return JSON.parse(row.traceJson) as Record<string, unknown>;
       };
+      const persistedDebugEvents = database
+        .prepare("SELECT COUNT(*) AS count FROM events WHERE json_type(public_payload_json, '$.publicPayload.aiDecisionDebug') IS NOT NULL")
+        .get() as { count: number };
+      const untracedRows = database.prepare("SELECT COUNT(*) AS count FROM ai_decision_traces WHERE match_id = ?").get(untracedMatchId) as { count: number };
+      expect(Number(persistedDebugEvents.count)).toBe(0);
+      expect(Number(untracedRows.count)).toBe(0);
 
       const summaryTrace = traceFor(summaryMatchId);
       expect(summaryTrace).toMatchObject({
@@ -913,6 +931,7 @@ describe("Backend 0.5 private storage maintenance", () => {
     const backupDir = join(dir, "backups");
     const storage = new SqliteMatchStorage({ dbPath, backupDir });
     const service = new MultiplayerService(storage, { tokenSalt: "sqlite-ai-undo-trace-prune" });
+    let traceAuditDb: DatabaseSync | undefined;
     try {
       const created = await service.createMatch({
         mode: "human_corp_vs_runner_ai",
@@ -929,6 +948,20 @@ describe("Backend 0.5 private storage maintenance", () => {
         ? await submitFirstChoice(service, created.matchId, corp, "sqlite-ai-undo-trace-discard")
         : endTurn.actorPayload;
 
+      traceAuditDb = new DatabaseSync(dbPath);
+      traceAuditDb.exec(`
+        CREATE TABLE trace_write_audit (op TEXT NOT NULL, trace_id TEXT NOT NULL);
+        CREATE TRIGGER audit_ai_traces_insert AFTER INSERT ON ai_decision_traces BEGIN INSERT INTO trace_write_audit VALUES ('insert', NEW.trace_id); END;
+        CREATE TRIGGER audit_ai_traces_update AFTER UPDATE ON ai_decision_traces BEGIN INSERT INTO trace_write_audit VALUES ('update', NEW.trace_id); END;
+        CREATE TRIGGER audit_ai_traces_delete AFTER DELETE ON ai_decision_traces BEGIN INSERT INTO trace_write_audit VALUES ('delete', OLD.trace_id); END;
+      `);
+      const traceAuditCounts = (): Record<string, number> => Object.fromEntries(
+        (traceAuditDb!.prepare("SELECT op, COUNT(*) AS count FROM trace_write_audit GROUP BY op ORDER BY op").all() as Array<{ op: string; count: number }>).map((row) => [row.op, Number(row.count)])
+      );
+      const clearTraceAudit = (): void => {
+        traceAuditDb!.prepare("DELETE FROM trace_write_audit").run();
+      };
+
       const advanced = await service.advanceAi({
         matchId: created.matchId,
         side: "corp",
@@ -941,9 +974,14 @@ describe("Backend 0.5 private storage maintenance", () => {
       const aiEventId = advanced.publicEvent?.eventId;
       expect(aiEventId).toBeTruthy();
       if (!aiEventId) throw new Error("Missing AI event id");
+      expect(traceAuditCounts()).toEqual({ insert: 1 });
+      clearTraceAudit();
       const beforeUndo = await storage.load(created.matchId);
       expect(beforeUndo?.eventLog.some((event) => event.eventId === aiEventId)).toBe(true);
       expect(beforeUndo?.aiDecisionTraces?.some((trace) => trace.eventId === aiEventId)).toBe(true);
+      if (!beforeUndo) throw new Error("Missing AI trace record before undo");
+      await storage.save(beforeUndo);
+      expect(traceAuditCounts()).toEqual({});
 
       const undo = await service.requestUndo({
         matchId: created.matchId,
@@ -959,6 +997,7 @@ describe("Backend 0.5 private storage maintenance", () => {
       expect(afterUndo?.eventLog.some((event) => event.eventId === aiEventId)).toBe(false);
       expect(afterUndo?.aiDecisionTraces?.some((trace) => trace.eventId === aiEventId)).toBe(false);
       expect(afterUndo?.aiDecisionTraces?.every((trace) => afterUndo.eventLog.some((event) => event.eventId === trace.eventId))).toBe(true);
+      expect(traceAuditCounts()).toEqual({ delete: 1 });
 
       const db = new DatabaseSync(dbPath, { readOnly: true });
       try {
@@ -984,6 +1023,7 @@ describe("Backend 0.5 private storage maintenance", () => {
         db.close();
       }
     } finally {
+      traceAuditDb?.close();
       service.closeStorage();
     }
   });
@@ -1549,6 +1589,9 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
         CREATE TRIGGER audit_engine_events_insert AFTER INSERT ON engine_events BEGIN INSERT INTO event_write_audit VALUES ('engine_events', 'insert', NEW.event_id); END;
         CREATE TRIGGER audit_engine_events_update AFTER UPDATE ON engine_events BEGIN INSERT INTO event_write_audit VALUES ('engine_events', 'update', NEW.event_id); END;
         CREATE TRIGGER audit_engine_events_delete AFTER DELETE ON engine_events BEGIN INSERT INTO event_write_audit VALUES ('engine_events', 'delete', OLD.event_id); END;
+        CREATE TRIGGER audit_action_receipts_insert AFTER INSERT ON action_receipts BEGIN INSERT INTO event_write_audit VALUES ('action_receipts', 'insert', NEW.idempotency_key); END;
+        CREATE TRIGGER audit_action_receipts_update AFTER UPDATE ON action_receipts BEGIN INSERT INTO event_write_audit VALUES ('action_receipts', 'update', NEW.idempotency_key); END;
+        CREATE TRIGGER audit_action_receipts_delete AFTER DELETE ON action_receipts BEGIN INSERT INTO event_write_audit VALUES ('action_receipts', 'delete', OLD.idempotency_key); END;
       `);
       clearAudit();
 
@@ -1565,7 +1608,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
         (action) => action.type === "gain_credit",
         "v108-sqlite-incremental-credit"
       );
-      expect(auditCounts()).toEqual({ "engine_events:insert": 1, "events:insert": 1 });
+      expect(auditCounts()).toEqual({ "action_receipts:insert": 1, "engine_events:insert": 1, "events:insert": 1 });
 
       clearAudit();
       const undo = await service.requestUndo({
@@ -1588,8 +1631,13 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       });
       expect(accepted.ok).toBe(true);
       if (!accepted.ok) throw new Error(accepted.error.message);
-      expect(auditCounts()).toEqual({ "engine_events:delete": 1, "events:delete": 1 });
+      expect(auditCounts()).toEqual({ "action_receipts:delete": 1, "engine_events:delete": 1, "events:delete": 1 });
       expect((await service.replayMatch(created.matchId)).ok).toBe(true);
+
+      const queryPlan = (sql: string): string => (auditDb.prepare(`EXPLAIN QUERY PLAN ${sql}`).all(created.matchId) as Array<{ detail: string }>).map((row) => row.detail).join("\n");
+      expect(queryPlan("SELECT event_id FROM events WHERE match_id = ? ORDER BY event_index ASC")).toContain("idx_events_match_event_index");
+      expect(queryPlan("SELECT event_id FROM engine_events WHERE match_id = ? ORDER BY event_index ASC")).toContain("idx_engine_events_match_event_index");
+      expect(queryPlan("SELECT snapshot_id FROM state_snapshots WHERE match_id = ? ORDER BY state_version ASC")).toContain("idx_state_snapshots_match_state");
     } finally {
       auditDb.close();
       service.closeStorage();
@@ -1697,6 +1745,80 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     const manifestText = await readFile(join(backup.backupDir, "manifest.json"), "utf8");
     expect(manifestText).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|cardInstances|privateDeckSnapshots|decklist/i);
     reopened.close();
+  });
+
+  it("creates compact backups and safely optimizes historical SQLite payloads", async () => {
+    const dir = await tempStorageDir();
+    const dbPath = join(dir, "netgrid.sqlite");
+    const backupDir = join(dir, "backups");
+    const storage = new SqliteMatchStorage({ dbPath, backupDir });
+    const service = new MultiplayerService(storage, { tokenSalt: "v108-storage-optimize" });
+    const created = await service.createMatch({ hostSide: "runner", seed: "v108-storage-optimize" });
+
+    const setupDb = new DatabaseSync(dbPath);
+    try {
+      const legacyDebug = JSON.stringify({ schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION, aiLevel: 2, summary: "legacy duplicate" });
+      const updated = setupDb
+        .prepare(
+          `UPDATE events
+           SET public_payload_json = json_set(public_payload_json, '$.publicPayload.aiDecisionDebug', json(?))
+           WHERE event_id = (SELECT event_id FROM events WHERE match_id = ? ORDER BY event_index ASC LIMIT 1)`
+        )
+        .run(legacyDebug, created.matchId);
+      expect(Number(updated.changes)).toBe(1);
+
+      setupDb.exec("CREATE TABLE optimize_padding (payload TEXT NOT NULL)");
+      const insertPadding = setupDb.prepare("INSERT INTO optimize_padding (payload) VALUES (?)");
+      const padding = "x".repeat(16 * 1024);
+      for (let index = 0; index < 320; index += 1) insertPadding.run(padding);
+      setupDb.exec("DROP TABLE optimize_padding");
+      const freelist = setupDb.prepare("PRAGMA freelist_count").get() as { freelist_count: number };
+      expect(Number(freelist.freelist_count)).toBeGreaterThan(0);
+    } finally {
+      setupDb.close();
+    }
+
+    const beforeBytes = (await stat(dbPath)).size;
+    const result = await service.storageMaintenanceOptimize();
+    expect(result).toBeDefined();
+    if (!result) throw new Error("Missing SQLite optimize result");
+    expect(result).toMatchObject({
+      backupCreated: true,
+      normalizedAiDebugEventRows: 1,
+      integrityCheck: "ok",
+      database: { beforeBytes, freelistPagesAfter: 0 }
+    });
+    expect(result.database.afterBytes).toBeLessThan(result.database.beforeBytes);
+    expect(result.database.reclaimedBytes).toBe(result.database.beforeBytes - result.database.afterBytes);
+
+    const manifest = JSON.parse(await readFile(join(result.backup.backupDir, "manifest.json"), "utf8")) as { reason?: string; files: Array<{ name: string; sizeBytes: number }> };
+    expect(manifest.reason).toBe("pre_optimization");
+    expect(manifest.files.find((file) => file.name === "netgrid.sqlite")?.sizeBytes).toBeLessThan(beforeBytes);
+
+    const optimizedDb = new DatabaseSync(dbPath, { readOnly: true });
+    try {
+      const row = optimizedDb
+        .prepare("SELECT COUNT(*) AS count FROM events WHERE json_type(public_payload_json, '$.publicPayload.aiDecisionDebug') IS NOT NULL")
+        .get() as { count: number };
+      expect(Number(row.count)).toBe(0);
+      expect((optimizedDb.prepare("PRAGMA integrity_check").get() as { integrity_check: string }).integrity_check).toBe("ok");
+    } finally {
+      optimizedDb.close();
+      service.closeStorage();
+    }
+
+    const restoredPath = join(dir, "restored.sqlite");
+    restoreSqliteStorageBackup({ backupDir: result.backup.backupDir, targetPath: restoredPath, backupRootDir: backupDir });
+    expect(inspectSqliteStorage(restoredPath)).toMatchObject({ kind: "sqlite", schemaVersion: 3, matchCount: 1 });
+    const restoredDb = new DatabaseSync(restoredPath, { readOnly: true });
+    try {
+      const restoredLegacyRows = restoredDb
+        .prepare("SELECT COUNT(*) AS count FROM events WHERE json_type(public_payload_json, '$.publicPayload.aiDecisionDebug') IS NOT NULL")
+        .get() as { count: number };
+      expect(Number(restoredLegacyRows.count)).toBe(1);
+    } finally {
+      restoredDb.close();
+    }
   });
 
   it("rejects manipulated backups before restore", async () => {

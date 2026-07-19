@@ -120,6 +120,68 @@ export const RUN_TIMELINE_STEPS = [
 
 export type RunTimelineStepId = (typeof RUN_TIMELINE_STEPS)[number]["id"];
 
+export type RunPhaseOpportunityKind =
+  | "choice"
+  | "rez"
+  | "breaker"
+  | "ability"
+  | "access"
+  | "continue"
+  | "jack_out"
+  | "pass";
+
+const RUN_PHASE_OPPORTUNITY_ORDER: readonly RunPhaseOpportunityKind[] = [
+  "choice",
+  "rez",
+  "breaker",
+  "ability",
+  "access",
+  "continue",
+  "jack_out",
+  "pass",
+];
+
+export function runPhaseOpportunityKinds(
+  actions: readonly Pick<LegalAction, "type">[],
+): RunPhaseOpportunityKind[] {
+  const available = new Set<RunPhaseOpportunityKind>();
+  for (const action of actions) {
+    switch (action.type) {
+      case "resolve_choice":
+        available.add("choice");
+        break;
+      case "rez_ice":
+      case "rez_card":
+        available.add("rez");
+        break;
+      case "pump_breaker":
+      case "break_subroutine":
+        available.add("breaker");
+        break;
+      case "activated_card_ability":
+      case "trigger_ability":
+        available.add("ability");
+        break;
+      case "access_card":
+      case "steal_agenda":
+      case "trash_accessed_card":
+      case "decline_trash":
+        available.add("access");
+        break;
+      case "continue_run":
+        available.add("continue");
+        break;
+      case "jack_out":
+        available.add("jack_out");
+        break;
+      case "decline_rez":
+        available.add("pass");
+        break;
+    }
+  }
+  return RUN_PHASE_OPPORTUNITY_ORDER.filter((kind) => available.has(kind));
+}
+
 export type ActionSlotVisual = {
   index: number;
   state: "available" | "spent";

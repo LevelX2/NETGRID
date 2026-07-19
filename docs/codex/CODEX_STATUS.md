@@ -77,6 +77,14 @@ Ranking, Elo und Leaderboards bleiben bewusst außerhalb der Closed Alpha.
 Führend ist
 `docs/releases/v2/account-match-statistics-final-review-2026-07-19.md`.
 
+Der SQLite-Persistenzpfad schreibt wachsende Event-, Receipt- und
+KI-Trace-Tabellen inkrementell. Ausführlicher KI-Debug besitzt mit dem
+Trace-Ledger nur eine dauerhafte Quelle; Replayperspektiven werden daraus
+side-sicher hydriert. Backups sind kompakt und konsistent, der lokale
+`storage:optimize`-Lauf sichert vor der Normalisierung und dem `VACUUM`, und
+Accountstatistik verwendet SQL-Aggregate sowie Keyset-Pagination. Führend ist
+`docs/reviews/architecture/sqlite-matchstorage-optimization-final-review-2026-07-19.md`.
+
 ## Current-State-Cleanup
 
 Der Prozess
