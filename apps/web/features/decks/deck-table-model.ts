@@ -205,6 +205,16 @@ export function normalizeDeckTablePileSortMode(value: unknown): DeckTablePileSor
   return value === "name" || value === "type" || value === "install" || value === "rez" || value === "trash" || value === "cost" || value === "strength" || value === "agenda" ? value : "free";
 }
 
+export function deckTableSortKeysForSide(side: Side): DeckTableSortKey[] {
+  return side === "corp"
+    ? ["name", "type", "rez", "trash", "cost", "strength", "agenda"]
+    : ["name", "type", "install", "cost", "strength"];
+}
+
+export function deckTableSortRequiresDetails(sortMode: DeckTablePileSortMode): boolean {
+  return sortMode !== "free" && deckTableNumericKey(sortMode) !== null;
+}
+
 export function normalizeDeckTableLayout(deck: EditableDeck, cardLookup?: Map<string, CatalogCardSummary>, detailsById: Record<string, CatalogCardDetail> = {}): DeckTableLayout {
   const desired = new Map<string, number>();
   for (const entry of deck.cards) {
@@ -221,7 +231,7 @@ export function normalizeDeckTableLayout(deck: EditableDeck, cardLookup?: Map<st
       id: source?.id || `pile-${index + 1}`,
       name: typeof source?.name === "string" ? source.name.slice(0, 40) : defaultDeckTablePileName(deck.side, index),
       order: index,
-      sortMode: normalizeDeckTablePileSortMode(source?.sortMode),
+      sortMode: normalizeDeckTableSortModeForSide(source?.sortMode, deck.side),
       entries: []
     };
   });
@@ -319,7 +329,7 @@ export function deckTableSortLabel(sortBy: DeckTableSortKey): string {
   }
 }
 
-function deckTableNumericKey(sortBy: DeckTableSortKey): string | null {
+export function deckTableNumericKey(sortBy: DeckTableSortKey): string | null {
   if (sortBy === "install") return "installCost";
   if (sortBy === "rez") return "rezCost";
   if (sortBy === "trash") return "trashCost";
@@ -327,6 +337,14 @@ function deckTableNumericKey(sortBy: DeckTableSortKey): string | null {
   if (sortBy === "strength") return "strength";
   if (sortBy === "agenda") return "agendaPoints";
   return null;
+}
+
+export function deckTableNumericSortValue(sortMode: DeckTablePileSortMode, detail: CatalogCardDetail | undefined): number | null {
+  if (sortMode === "free") return null;
+  const numericKey = deckTableNumericKey(sortMode);
+  if (!numericKey) return null;
+  const value = detail?.numeric[numericKey];
+  return value === null || value === undefined ? null : value;
 }
 
 function sortDeckTableEntries(entries: DeckTableLayoutEntry[], cardLookup: Map<string, CatalogCardSummary>, detailsById: Record<string, CatalogCardDetail>, sortBy: DeckTableSortKey): DeckTableLayoutEntry[] {
@@ -353,6 +371,12 @@ export function deckTablePileSortModeLabel(sortMode: DeckTablePileSortMode): str
 export function applyDeckTablePileSort(pile: DeckTablePile, cardLookup: Map<string, CatalogCardSummary>, detailsById: Record<string, CatalogCardDetail>): DeckTablePile {
   if (pile.sortMode === "free") return { ...pile, entries: reorderDeckTableEntries(pile.entries) };
   return { ...pile, entries: sortDeckTableEntries(pile.entries, cardLookup, detailsById, pile.sortMode) };
+}
+
+function normalizeDeckTableSortModeForSide(value: unknown, side: Side): DeckTablePileSortMode {
+  const sortMode = normalizeDeckTablePileSortMode(value);
+  if (sortMode === "free") return sortMode;
+  return deckTableSortKeysForSide(side).includes(sortMode) ? sortMode : "name";
 }
 
 function deckTableEntryNumericValue(entry: DeckTableLayoutEntry, detailsById: Record<string, CatalogCardDetail>, key: string): number | null {

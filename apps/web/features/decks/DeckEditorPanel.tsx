@@ -369,7 +369,7 @@ export function DeckEditorPanel({
         .sort((left, right) => deckBuilderCardGroup(left.card).localeCompare(deckBuilderCardGroup(right.card)) || (left.card?.title ?? left.entry.cardId).localeCompare(right.card?.title ?? right.entry.cardId)),
     [cardLookup, selectedDeck?.cards]
   );
-  const deckTableCostDetailsReady = useMemo(() => (selectedDeck?.cards ?? []).every((entry) => Boolean(cardDetailsById[entry.cardId])), [cardDetailsById, selectedDeck?.cards]);
+  const deckTableNumericDetailsReady = useMemo(() => (selectedDeck?.cards ?? []).every((entry) => Boolean(cardDetailsById[entry.cardId])), [cardDetailsById, selectedDeck?.cards]);
   const tableLibraryColumnCount = Math.max(1, Math.floor((tableLibraryWidth - 18) / Math.max(70, tableLibraryCardWidth + 12)));
   const selectedTableCardKeySet = useMemo(() => new Set(selectedTableCardKeys), [selectedTableCardKeys]);
   const selectedTableCardIndexes = useMemo(() => {
@@ -821,7 +821,7 @@ export function DeckEditorPanel({
       return;
     }
     if (mode === "install-piles") {
-      if (!deckTableCostDetailsReady) return;
+      if (!deckTableNumericDetailsReady) return;
       updateTableLayout(distributeDeckTableByInstallCost(tableLayout, selectedDeck.side, cardLookup, cardDetailsById));
       return;
     }
@@ -1120,12 +1120,13 @@ export function DeckEditorPanel({
                     <DeckTableBoard
                       layout={tableLayout}
                       deckName={selectedDeck.name}
+                      deckSide={selectedDeck.side}
                       cardLookup={cardLookup}
                       cardDetailsById={cardDetailsById}
                       activeMenuKey={tableCardMenuKey}
                       cardWidth={tableCardWidth}
                       controlsOpen={tableControlsOpen}
-                      costDetailsReady={deckTableCostDetailsReady}
+                      numericDetailsReady={deckTableNumericDetailsReady}
                       overlapPercent={tableOverlapPercent}
                       tableWidth={tableWidthControlValue}
                       dirty={selectedDeckDirty}

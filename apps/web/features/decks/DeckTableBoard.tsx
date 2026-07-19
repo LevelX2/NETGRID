@@ -3,6 +3,8 @@
 import { Check, Move, Plus, Save, SlidersHorizontal, X } from "lucide-react";
 import type { CSSProperties, DragEvent as ReactDragEvent, MouseEvent as ReactMouseEvent } from "react";
 
+import type { Side } from "@netgrid/shared";
+
 import { type DeckAgendaStatus } from "./deck-editor-model";
 import { DeckAgendaStatusBadge } from "./DeckAgendaStatusBadge";
 import {
@@ -18,16 +20,18 @@ import {
   DECK_TABLE_OVERLAP_STEP,
   MAX_DECK_TABLE_PILE_COUNT,
   MIN_DECK_TABLE_PILE_COUNT,
+  deckTableNumericSortValue,
   deckTablePileSortModeLabel,
   deckTableSelectionKey,
+  deckTableSortKeysForSide,
   deckTableSortLabel,
+  deckTableSortRequiresDetails,
   type DeckTableArrangeMode,
   type DeckTableLayout,
   type DeckTableLayoutEntry,
   type DeckTablePile,
   type DeckTablePileSortMode,
   type DeckTableSelectionEntry,
-  type DeckTableSortKey,
 } from "./deck-table-model";
 import { DeckCardThumb } from "./DeckCardThumb";
 import { DeckCardTooltipTrigger } from "./DeckCardTooltipTrigger";
@@ -52,12 +56,13 @@ type CatalogCardDetail = CatalogCardSummary & {
 export function DeckTableBoard({
   layout,
   deckName,
+  deckSide,
   cardLookup,
   cardDetailsById,
   activeMenuKey,
   cardWidth,
   controlsOpen,
-  costDetailsReady,
+  numericDetailsReady,
   overlapPercent,
   tableWidth,
   dirty,
@@ -89,12 +94,13 @@ export function DeckTableBoard({
 }: {
   layout: DeckTableLayout;
   deckName: string;
+  deckSide: Side;
   cardLookup: Map<string, CatalogCardSummary>;
   cardDetailsById: Record<string, CatalogCardDetail>;
   activeMenuKey: string | null;
   cardWidth: number;
   controlsOpen: boolean;
-  costDetailsReady: boolean;
+  numericDetailsReady: boolean;
   overlapPercent: number;
   tableWidth: number;
   dirty: boolean;
@@ -198,17 +204,17 @@ export function DeckTableBoard({
             >
               <option value="">Auswählen</option>
               <option value="type">Nach Typen auf Stapel verteilen</option>
-              <option value="install-piles" disabled={!costDetailsReady}>
-                {costDetailsReady ? "Nach Kartenkosten auf Stapel verteilen" : "Kartenkosten werden geladen"}
+              <option value="install-piles" disabled={!numericDetailsReady}>
+                {numericDetailsReady ? "Nach Kartenkosten auf Stapel verteilen" : "Kartenwerte werden geladen"}
               </option>
-              <option value="name">Alle Stapel nach Name</option>
-              <option value="install">Alle Stapel nach Installkosten</option>
-              <option value="rez">Alle Stapel nach Rez-Kosten</option>
-              <option value="trash">Alle Stapel nach Trashkosten</option>
-              <option value="cost">Alle Stapel nach Kosten</option>
-              <option value="strength">Alle Stapel nach Stärke</option>
-              <option value="agenda">Alle Stapel nach Agenda-Punkten</option>
+              {deckTableSortKeysForSide(deckSide).map((sortBy) => (
+                <option disabled={deckTableSortRequiresDetails(sortBy) && !numericDetailsReady} key={sortBy} value={sortBy}>
+                  Alle Stapel nach {deckTableSortLabel(sortBy)}
+                  {deckTableSortRequiresDetails(sortBy) && !numericDetailsReady ? " (Werte werden geladen)" : ""}
+                </option>
+              ))}
             </select>
+            {!numericDetailsReady ? <small className="deckTableSortStatus" role="status">Zahlensortierungen werden verfügbar, sobald die Kartenwerte des Decks geladen sind.</small> : null}
           </label>
         </div>
       ) : null}
@@ -218,6 +224,7 @@ export function DeckTableBoard({
             activeMenuKey={activeMenuKey}
             cardDetailsById={cardDetailsById}
             cardLookup={cardLookup}
+            deckSide={deckSide}
             key={pile.id}
             selectedCardIndexes={selectedCardIndexes}
             selectedCardKeys={selectedCardKeys}
@@ -247,6 +254,7 @@ function DeckTablePileView({
   showName,
   cardLookup,
   cardDetailsById,
+  deckSide,
   activeMenuKey,
   selectedCardIndexes,
   selectedCardKeys,
@@ -267,6 +275,7 @@ function DeckTablePileView({
   showName: boolean;
   cardLookup: Map<string, CatalogCardSummary>;
   cardDetailsById: Record<string, CatalogCardDetail>;
+  deckSide: Side;
   activeMenuKey: string | null;
   selectedCardIndexes: Map<string, number>;
   selectedCardKeys: Set<string>;
@@ -286,6 +295,9 @@ function DeckTablePileView({
   const cardCount = pile.entries.reduce((sum, entry) => sum + entry.quantity, 0);
   const pileSelectionKeys = pile.entries.map((entry) => deckTableSelectionKey(pile.id, entry.cardId, entry.order));
   const pileSelected = pileSelectionKeys.length > 0 && pileSelectionKeys.every((key) => selectedCardKeys.has(key));
+  const numericDetailsReady = pile.entries.every((entry) => Boolean(cardDetailsById[entry.cardId]));
+  const numericSortWaiting = deckTableSortRequiresDetails(pile.sortMode) && !numericDetailsReady;
+  const sortStatusId = `deck-table-sort-status-${pile.id}`;
   return (
     <section
       className="deckTablePile"
@@ -330,6 +342,7 @@ function DeckTablePileView({
         </div>
         <select
           aria-label={`Sortierung für ${pile.name || `Stapel ${pile.order + 1}`}`}
+          aria-describedby={numericSortWaiting ? sortStatusId : undefined}
           value={pile.sortMode}
           onChange={(event) => {
             const sortMode = event.currentTarget.value as DeckTablePileSortMode;
@@ -337,17 +350,20 @@ function DeckTablePileView({
           }}
         >
           <option value="free">{deckTablePileSortModeLabel("free")}</option>
-          {(["name", "type", "install", "rez", "trash", "cost", "strength", "agenda"] as DeckTableSortKey[]).map((sortBy) => (
-            <option value={sortBy} key={sortBy}>
+          {deckTableSortKeysForSide(deckSide).map((sortBy) => (
+            <option disabled={deckTableSortRequiresDetails(sortBy) && !numericDetailsReady} value={sortBy} key={sortBy}>
               {deckTableSortLabel(sortBy)}
+              {deckTableSortRequiresDetails(sortBy) && !numericDetailsReady ? " (Werte werden geladen)" : ""}
             </option>
           ))}
         </select>
+        {numericSortWaiting ? <small className="deckTableSortStatus" id={sortStatusId} role="status">Kartenwerte werden geladen; die Sortierung wird danach automatisch angewendet.</small> : null}
       </div>
       <div className="deckTablePileCards">
         {pile.entries.map((entry, index) => {
           const card = cardLookup.get(entry.cardId) ?? null;
           const detail = cardDetailsById[entry.cardId];
+          const numericSortValue = deckTableNumericSortValue(pile.sortMode, detail);
           const menuKey = `${pile.id}:${entry.cardId}:${entry.order}`;
           const selectionKey = deckTableSelectionKey(pile.id, entry.cardId, entry.order);
           const selected = selectedCardKeys.has(selectionKey);
@@ -395,6 +411,7 @@ function DeckTablePileView({
                   <span className="deckTableMissingCard">{entry.cardId}</span>
                 )}
                 <span className="deckTableCardCaption">{card?.title ?? entry.cardId}</span>
+                {numericSortValue !== null ? <span aria-label={`${deckTablePileSortModeLabel(pile.sortMode)}: ${numericSortValue}`} className="deckTableSortValue">{numericSortValue}</span> : null}
                 {selectedIndex ? <span className="deckTableSelectionBadge">{selectedIndex}</span> : null}
                 {activeMenuKey === menuKey ? (
                   <span className="deckTableCardMenu" onClick={(event) => event.stopPropagation()}>

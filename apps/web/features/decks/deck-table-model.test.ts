@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  deckTableNumericSortValue,
+  deckTableSortKeysForSide,
+  deckTableSortRequiresDetails,
   normalizeDeckTableLayout,
   type DeckTableSortKey,
   type EditableDeck,
@@ -124,5 +127,22 @@ describe("deck table numeric sorting", () => {
       "asp",
       "keeper",
     ]);
+  });
+
+  it("offers side-appropriate numeric sort fields", () => {
+    expect(deckTableSortKeysForSide("corp")).toEqual(["name", "type", "rez", "trash", "cost", "strength", "agenda"]);
+    expect(deckTableSortKeysForSide("runner")).toEqual(["name", "type", "install", "cost", "strength"]);
+  });
+
+  it("marks numeric sorts as detail-dependent and exposes their active value", () => {
+    expect(deckTableSortRequiresDetails("name")).toBe(false);
+    expect(deckTableSortRequiresDetails("rez")).toBe(true);
+    expect(deckTableNumericSortValue("rez", detailsById.filter)).toBe(0);
+    expect(deckTableNumericSortValue("install", detailsById.filter)).toBeNull();
+  });
+
+  it("normalizes a misleading Corp install sort to name", () => {
+    const layout = normalizeDeckTableLayout(deck("install"), cardLookup, detailsById);
+    expect(layout.piles[0]!.sortMode).toBe("name");
   });
 });

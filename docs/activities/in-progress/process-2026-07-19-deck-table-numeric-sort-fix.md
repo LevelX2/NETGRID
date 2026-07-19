@@ -1,7 +1,7 @@
 ---
 processId: process-2026-07-19-deck-table-numeric-sort-fix
 status: in_progress
-currentState: P1_DATA_PATH
+currentState: P2_UI_CONTRACT
 sourceActivity: act-2026-07-19-decktable-corp-cost-sort-clarity
 primaryAgent: release-implementation-agent
 branch: codex/deck-table-numeric-sort-fix
@@ -201,3 +201,26 @@ dann als complete markieren.`
   erneut versucht. Alle fehlenden Karten des aktuellen Decks werden priorisiert.
 - Checks: fünf fokussierte Vitest-Tests grün; Web-Typecheck grün;
   `git diff --check` grün.
+
+### P2_UI_CONTRACT – abgeschlossen
+
+- Korp zeigt `Rez-Kosten`, `Trashkosten`, `Kosten`, `Stärke` und
+  `Agenda-Punkte`, aber keine irreführende `Installkosten`-Sortierung. Runner
+  behält `Installkosten`, `Kosten` und `Stärke`; unpassende gespeicherte Modi
+  werden auf `Name` normalisiert.
+- Numerische Optionen sind bis zum vollständigen Deck- beziehungsweise
+  Stapeldetailstand deaktiviert und als „Werte werden geladen“ erklärt. Ein
+  bereits gespeicherter numerischer Modus kündigt an, dass die Sortierung nach
+  dem Laden automatisch angewendet wird.
+- Der aktive numerische Sortierwert wird pro Karte als zugängliches Badge
+  angezeigt.
+- Browser-Repro mit zehn ICE: Rez-Kosten
+  `0, 2, 2, 4, 5, 5, 6, 6, 8, 9`; Stärke
+  `0, 1, 2, 2, 4, 4, 5, 5, 5, 6`. Globale Rez-Sortierung ergab dieselbe
+  Reihenfolge. Das diagnostische Deck wurde gelöscht und der Main-Webclient
+  anschließend wieder gestartet.
+- Separater Follow-up-Fund, nicht Teil dieses Fixes: Die asynchrone
+  Erstspeicherung eines gerade erzeugten Gastdecks kann extrem schnell danach
+  vorgenommene, ungespeicherte Kartenänderungen überschreiben.
+- Checks: acht fokussierte Vitest-Tests grün; Web-Typecheck grün; Browser-Repro
+  grün; `git diff --check` grün.
