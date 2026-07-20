@@ -1,6 +1,6 @@
 # KI-Verhalten für Seed 01, Seed 09 und Seed 02 härten
 
-Status: in Umsetzung
+Status: Paket 4 abgeschlossen, Main-Abgleich und Cleanup offen
 
 ## Quelle und Zielprüfung
 
@@ -278,5 +278,22 @@ Commit: `docs(ai): close seed01 seed09 seed02 hardening`
   - 146 fokussierte Tests einschließlich normaler sicherer Scoreline,
     Last-Draw-Fenster, Same-Turn-Closeout, Planinvalidierung und bestehender
     Board-Triage-Gegenproben sowie AI-Typecheck grün.
-- Paket 4: in Arbeit
+- Paket 4: abgeschlossen
+  - drei vollständige AI-Shards mit 421 Testdateien und 2.909 Tests sowie die
+    Engine-Suite mit 202 Testdateien und 1.758 Tests grün;
+  - vollständiger Workspace-Typecheck, Hint-Metadatenvertrag,
+    AI-Source-Structure, `format:changed` und `git diff --check` grün;
+  - breite Gegenproben haben drei zu eng fixierte historische Runner-
+    Checkpoints auf ihren eigentlichen semantischen Vertrag zurückgeführt,
+    die Entfernung persistenter Trace-Counter als Hard Interrupt bewahrt und
+    nicht konvertierbares Advancement gegen den Remote-Advance-Override
+    geschlossen;
+  - vollständiger, zur Referenz `de15e599f` kompatibler Baselinevergleich auf
+    `4fb5d7044`: 60 Spiele, 11.836 Entscheidungen, `accepted: true`, null Hard
+    Failures; Finding-Rate minus 0,726, No-Progress-Rate minus 0,018 und
+    mittlere Aktionszahl minus 8,116 gegenüber der Referenz;
+  - im betroffenen Net-Damage-Slot sinken Findings von 318 auf 260,
+    Finding-Rate von 12,48 auf 10,30 und Remote-Contest-Skip-Rate von 0,86 auf
+    0,78; die leicht niedrigere Plan-Conversion von 0,72 auf 0,70 erzeugt
+    keine dominierte Auswahl und keinen Hard Failure.
 - Main-Merge und Cleanup: offen

@@ -180,6 +180,18 @@ Stand: 2026-07-20
   zwei Aktionslimits im Hybrid-Score/Punish-Slot sind grün. Führend sind
   `docs/architecture/ai/ai-behavior-baseline-v1-process-2026-07-12.md` und
   `docs/reviews/ai/ai-behavior-baseline-v1-initial-run-review-2026-07-12.md`.
+- Run-produzierende Kartenfähigkeiten werden inzwischen vor der Auswahl über
+  dieselbe Ziel-, Route-, Release- und Commitment-Prüfung wie normale Runs
+  geführt. Privates Topdeck-Wissen bleibt als geordnete Sequenz erhalten,
+  wandert bei einem bekannten Draw positionsgenau nach HQ und wird bei
+  Shuffle oder Reorder invalidiert. Effekt-Consumer prüfen zusätzlich den
+  tatsächlichen Zonen-/Aktivzustand; Strategic Runtime, Board-Triage und
+  Plan-Memory teilen eine Punkte- und Deadline-Feasibility. Der feste
+  Vergleich über 60 Spiele und 11.836 Entscheidungen ist ohne Hard Failure
+  akzeptiert. Führend sind
+  `docs/architecture/ai/ai-seed01-seed09-seed02-behavior-hardening-process-2026-07-20.md`
+  und
+  `docs/reviews/ai/ai-behavior-baseline-v1-seed01-seed09-seed02-hardening-candidate-2026-07-20.md`.
 - Selfplay- und Testspiel-Laufzeiten sind ohne fachliche Abstriche gehärtet:
   semantische Ableitungen werden nur innerhalb einer Entscheidung
   wiederverwendet, Vollhistorie und echter 80-Ereignis-Tail teilen bereinigte
