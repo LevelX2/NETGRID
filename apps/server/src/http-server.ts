@@ -93,6 +93,40 @@ import {
   type AccountStatisticsQuery,
 } from "./account-statistics";
 
+const NETGRID_REPOSITORY_ROOT = resolve(
+  dirname(fileURLToPath(import.meta.url)),
+  "../../..",
+);
+
+function resolveRepositoryStoragePath(path: string): string {
+  return resolve(NETGRID_REPOSITORY_ROOT, path);
+}
+
+export function resolveConfiguredMatchSqlitePath(
+  env: NodeJS.ProcessEnv = process.env,
+): string {
+  return resolveRepositoryStoragePath(
+    envValue(env, "NETGRID_SQLITE_STORAGE_PATH") ?? DEFAULT_SQLITE_STORAGE_PATH,
+  );
+}
+
+export function resolveConfiguredAccountSqlitePath(
+  env: NodeJS.ProcessEnv = process.env,
+): string {
+  const accountPath = envValue(env, "NETGRID_ACCOUNT_SQLITE_PATH");
+  return accountPath
+    ? resolveRepositoryStoragePath(accountPath)
+    : resolveConfiguredMatchSqlitePath(env);
+}
+
+function resolveConfiguredStorageBackupDir(
+  env: NodeJS.ProcessEnv = process.env,
+): string {
+  return resolveRepositoryStoragePath(
+    envValue(env, "NETGRID_STORAGE_BACKUP_DIR") ?? DEFAULT_STORAGE_BACKUP_DIR,
+  );
+}
+
 type ClientWsMessage =
   | {
       type: "join_match";
@@ -911,12 +945,8 @@ export async function startNetgridServer(
 export function createConfiguredAccountAuth(
   env: NodeJS.ProcessEnv = process.env,
 ): AccountAuthService {
-  const dbPath =
-    envValue(env, "NETGRID_ACCOUNT_SQLITE_PATH") ??
-    envValue(env, "NETGRID_SQLITE_STORAGE_PATH") ??
-    DEFAULT_SQLITE_STORAGE_PATH;
-  const backupDir =
-    envValue(env, "NETGRID_STORAGE_BACKUP_DIR") ?? DEFAULT_STORAGE_BACKUP_DIR;
+  const dbPath = resolveConfiguredAccountSqlitePath(env);
+  const backupDir = resolveConfiguredStorageBackupDir(env);
   return new AccountAuthService(
     new SqliteAccountStorage({ dbPath, backupDir }),
   );
@@ -925,12 +955,8 @@ export function createConfiguredAccountAuth(
 export function createConfiguredAccountDecks(
   env: NodeJS.ProcessEnv = process.env,
 ): AccountDeckService {
-  const dbPath =
-    envValue(env, "NETGRID_ACCOUNT_SQLITE_PATH") ??
-    envValue(env, "NETGRID_SQLITE_STORAGE_PATH") ??
-    DEFAULT_SQLITE_STORAGE_PATH;
-  const backupDir =
-    envValue(env, "NETGRID_STORAGE_BACKUP_DIR") ?? DEFAULT_STORAGE_BACKUP_DIR;
+  const dbPath = resolveConfiguredAccountSqlitePath(env);
+  const backupDir = resolveConfiguredStorageBackupDir(env);
   return new AccountDeckService(
     new SqliteAccountDeckStorage({ dbPath, backupDir }),
   );
@@ -939,12 +965,8 @@ export function createConfiguredAccountDecks(
 export function createConfiguredAccountStatistics(
   env: NodeJS.ProcessEnv = process.env,
 ): AccountMatchStatisticsService {
-  const dbPath =
-    envValue(env, "NETGRID_ACCOUNT_SQLITE_PATH") ??
-    envValue(env, "NETGRID_SQLITE_STORAGE_PATH") ??
-    DEFAULT_SQLITE_STORAGE_PATH;
-  const backupDir =
-    envValue(env, "NETGRID_STORAGE_BACKUP_DIR") ?? DEFAULT_STORAGE_BACKUP_DIR;
+  const dbPath = resolveConfiguredAccountSqlitePath(env);
+  const backupDir = resolveConfiguredStorageBackupDir(env);
   return new AccountMatchStatisticsService(
     new SqliteAccountStatisticsStorage({ dbPath, backupDir }),
   );
@@ -3144,22 +3166,13 @@ function defaultService(
   });
 }
 
-export function createConfiguredStorage() {
-  const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-  const configuredSqlitePath = envValue(
-    process.env,
-    "NETGRID_SQLITE_STORAGE_PATH",
-  );
-  const sqlitePath = configuredSqlitePath
-    ? resolve(configuredSqlitePath)
-    : resolve(root, DEFAULT_SQLITE_STORAGE_PATH);
-  const backupDir =
-    envValue(process.env, "NETGRID_STORAGE_BACKUP_DIR") ??
-    resolve(root, DEFAULT_STORAGE_BACKUP_DIR);
+export function createConfiguredStorage(env: NodeJS.ProcessEnv = process.env) {
+  const sqlitePath = resolveConfiguredMatchSqlitePath(env);
+  const backupDir = resolveConfiguredStorageBackupDir(env);
   try {
     return new SqliteMatchStorage({
       dbPath: sqlitePath,
-      backupDir: resolve(backupDir),
+      backupDir,
     });
   } catch (error) {
     if (error instanceof StorageError) throw error;

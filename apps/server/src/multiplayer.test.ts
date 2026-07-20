@@ -7,8 +7,9 @@ import {
   writeFile,
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { WebSocket } from "ws";
 import snapshotsData from "../../../data/decks/deck-snapshots-0.6.json";
@@ -43,6 +44,8 @@ import {
   createConfiguredStorage,
   createNetgridHttpServer,
   isMaintenanceClientAddressAllowed,
+  resolveConfiguredAccountSqlitePath,
+  resolveConfiguredMatchSqlitePath,
   startNetgridServer,
 } from "./http-server";
 import { chronicleTurnContextByEventId } from "./chronicle-turn-context";
@@ -2184,6 +2187,33 @@ describe("Backend 0.5 private storage maintenance", () => {
 });
 
 describe("V1.0.8 SQLite storage and backup hardening", () => {
+  it("resolves default match and account storage to the same repository database", () => {
+    const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
+    const env = {} as NodeJS.ProcessEnv;
+
+    expect(resolveConfiguredMatchSqlitePath(env)).toBe(
+      join(root, "data", "runtime", "multiplayer", "netgrid.sqlite"),
+    );
+    expect(resolveConfiguredAccountSqlitePath(env)).toBe(
+      resolveConfiguredMatchSqlitePath(env),
+    );
+  });
+
+  it("resolves relative storage overrides from the repository root", () => {
+    const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
+    const env = {
+      NETGRID_SQLITE_STORAGE_PATH: "data/runtime/custom-match.sqlite",
+      NETGRID_ACCOUNT_SQLITE_PATH: "data/runtime/custom-account.sqlite",
+    } as NodeJS.ProcessEnv;
+
+    expect(resolveConfiguredMatchSqlitePath(env)).toBe(
+      join(root, "data", "runtime", "custom-match.sqlite"),
+    );
+    expect(resolveConfiguredAccountSqlitePath(env)).toBe(
+      join(root, "data", "runtime", "custom-account.sqlite"),
+    );
+  });
+
   it("uses SQLite as configurable default storage and reports only redacted health signals", async () => {
     const dir = await tempStorageDir();
     const previousSqlite = process.env.NETGRID_SQLITE_STORAGE_PATH;

@@ -9,6 +9,8 @@ Stand: 2026-07-19
 - Account- und Matchdaten verwenden standardmäßig dieselbe SQLite-Datei aus
   `NETGRID_SQLITE_STORAGE_PATH`. Optional kann
   `NETGRID_ACCOUNT_SQLITE_PATH` eine eigene Account-Datenbank benennen.
+  Relative Pfade beider Variablen sowie des Backupverzeichnisses werden
+  einheitlich vom Repository-Root aus aufgelöst.
 - Im Profil `private_internet` gelten die vorhandenen HTTPS-, Origin- und
   Token-Salt-Gates. Account-Cookies sind dort immer `Secure`.
 - Web und Account-API müssen im Browser same-site erreichbar sein. Beim
