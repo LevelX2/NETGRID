@@ -1,6 +1,6 @@
 # ICE-Run-Quote-Reconciliation für die Runner-KI
 
-Status: aktiv – Paket `IRQR-4` in Arbeit
+Status: abgeschlossen – lokaler Merge nach `main` steht noch aus
 
 ## Quelle und Zielprüfung
 
@@ -202,12 +202,22 @@ dann als complete markieren.`
 - `IRQR-3`: abgeschlossen – die öffentliche ICE-Quote weist nun deklarierte
   Corp-Zahlungen für zusätzliche Encounter-ETR und Roadblocks
   Zufallsprofil separat aus. Bekannte Corp-Credit-Gewinne auf dem zuvor
-  durchlaufenen Pfad erhöhen nur die sichtbare spätere Corp-Kapazität. Die
-  KI markiert echte Corp-Wahl, Zufallsschaden, Zufallsstärke und zufälliges
-  Zurücksetzen des Runs als konditional, statt sie als sichere Kosten oder
-  sichere Sperre auszugeben. Für Glacier, Mobile Barricade und Walking Wall
-  wurde die vorhandene Revalidierung nach jedem neuen öffentlichen
-  PlayerView als richtige Reaktion bestätigt; sie wird nicht durch eine
-  zweite Vorab-Prognose ersetzt. Fokustests (42 Engine, 70 AI) und beide
-  Typechecks sind grün.
-- `IRQR-4`: aktiv.
+  durchlaufenen Pfad erhöhen nur die sichtbare spätere Corp-Kapazität.
+  Echte Corp-Wahl, Zufallsstärke und zufälliges Zurücksetzen des Runs bleiben
+  Zugriffsbedingungen; Zufallsschaden wird als separates, nicht pauschal
+  zugriffsverhinderndes Risiko geführt. Für Glacier, Mobile Barricade und
+  Walking Wall wurde die vorhandene Revalidierung nach jedem neuen
+  öffentlichen PlayerView als richtige Reaktion bestätigt; sie wird nicht
+  durch eine zweite Vorab-Prognose ersetzt. Fokustests (42 Engine, 70 AI) und
+  beide Typechecks sind grün.
+- `IRQR-4`: abgeschlossen – der vollständige AI-Lauf umfasst 421 Dateien
+  und 2.915 Tests; `check:ai`, Contracts, beide Typechecks sowie 72 gezielte
+  Redaktions-/Hidden-Info-Tests sind grün. Zwei Abschlussregressionen wurden
+  fachlich korrigiert: Brain Drain macht bei nicht tödlichem Zufallsschaden
+  den Zugang nicht unsicher, und eine unbezahlbare sichtbare Tag-Trace darf
+  nur für frisches R&D beim Runner-Matchpoint eine unmittelbare Gewinnchance
+  nicht pauschal sperren. Der vergleichbare Standard-Baseline-Lauf auf
+  `c6e1d4d72` umfasst 60 Spiele und 11.836 Entscheidungen, hat keine
+  Hard-Failures und keine Metrikänderung gegenüber `0397c1d5a`. Führender
+  Nachweis ist
+  `docs/reviews/ai/ai-behavior-baseline-v1-ice-run-quote-reconciliation-2026-07-20.md`.
