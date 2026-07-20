@@ -10,6 +10,7 @@ import {
 } from "./runner-multi-run-event-assessment";
 import { runnerMultiRunEventExclusion } from "./runner-multi-run-event-exclusion";
 import { runnerMultiRunEventScoreComponent as buildRunnerMultiRunEventScoreComponent } from "./runner-multi-run-event-score";
+import { decisionDerivedValue } from "./decision-derived-cache";
 import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
 
 export type RunnerMultiRunContextDependencies<
@@ -79,6 +80,37 @@ export function createRunnerMultiRunContext<
     TStrategicIntent
   >,
 ): RunnerMultiRunContext {
+  const targetEvaluationCacheKey = {};
+  const actionWithoutTargetCacheKey = Symbol("action_without_target");
+
+  function cachedTargetEvaluation(
+    input: AiDecisionInput,
+    action: LegalAction,
+    targetKey: string | symbol,
+    create: () => RunnerRunTargetEvaluation | undefined,
+  ): RunnerRunTargetEvaluation | undefined {
+    const cache = decisionDerivedValue(
+      input,
+      targetEvaluationCacheKey,
+      () =>
+        new WeakMap<
+          LegalAction,
+          Map<string | symbol, RunnerRunTargetEvaluation | undefined>
+        >(),
+    );
+    let evaluationsByTarget = cache.get(action);
+    if (!evaluationsByTarget) {
+      evaluationsByTarget = new Map();
+      cache.set(action, evaluationsByTarget);
+    }
+    if (evaluationsByTarget.has(targetKey)) {
+      return evaluationsByTarget.get(targetKey);
+    }
+    const evaluation = create();
+    evaluationsByTarget.set(targetKey, evaluation);
+    return evaluation;
+  }
+
   function assessment(
     input: AiDecisionInput,
     action: LegalAction,
@@ -99,31 +131,33 @@ export function createRunnerMultiRunContext<
     action: LegalAction,
     targetServerId: string,
   ): RunnerRunTargetEvaluation | undefined {
-    const runAction: LegalAction = {
-      ...action,
-      payload: {
-        ...(action.payload ?? {}),
-        serverId: targetServerId,
-      },
-    };
-    const scopedInput: AiDecisionInput = {
-      ...input,
-      legalActions: [runAction],
-      playerView: {
-        ...input.playerView,
+    return cachedTargetEvaluation(input, action, targetServerId, () => {
+      const runAction: LegalAction = {
+        ...action,
+        payload: {
+          ...(action.payload ?? {}),
+          serverId: targetServerId,
+        },
+      };
+      const scopedInput: AiDecisionInput = {
+        ...input,
         legalActions: [runAction],
-      },
-    };
-    const deckCapabilities = dependencies.deckCapabilitiesForInput(input);
-    const strategicIntent = dependencies.strategicIntentForInput(
-      input,
-      deckCapabilities,
-    );
-    return dependencies.runTargets({
-      input: scopedInput,
-      deckCapabilities,
-      strategicIntent,
-    })[0];
+        playerView: {
+          ...input.playerView,
+          legalActions: [runAction],
+        },
+      };
+      const deckCapabilities = dependencies.deckCapabilitiesForInput(input);
+      const strategicIntent = dependencies.strategicIntentForInput(
+        input,
+        deckCapabilities,
+      );
+      return dependencies.runTargets({
+        input: scopedInput,
+        deckCapabilities,
+        strategicIntent,
+      })[0];
+    });
   }
 
   function semanticRuntimeRunnerRunTargetEvaluation(
@@ -148,24 +182,31 @@ export function createRunnerMultiRunContext<
         targetServerId,
       );
     }
-    const scopedInput: AiDecisionInput = {
-      ...input,
-      legalActions: [action],
-      playerView: {
-        ...input.playerView,
-        legalActions: [action],
-      },
-    };
-    const deckCapabilities = dependencies.deckCapabilitiesForInput(input);
-    const strategicIntent = dependencies.strategicIntentForInput(
+    return cachedTargetEvaluation(
       input,
-      deckCapabilities,
+      action,
+      actionWithoutTargetCacheKey,
+      () => {
+        const scopedInput: AiDecisionInput = {
+          ...input,
+          legalActions: [action],
+          playerView: {
+            ...input.playerView,
+            legalActions: [action],
+          },
+        };
+        const deckCapabilities = dependencies.deckCapabilitiesForInput(input);
+        const strategicIntent = dependencies.strategicIntentForInput(
+          input,
+          deckCapabilities,
+        );
+        return dependencies.runTargets({
+          input: scopedInput,
+          deckCapabilities,
+          strategicIntent,
+        })[0];
+      },
     );
-    return dependencies.runTargets({
-      input: scopedInput,
-      deckCapabilities,
-      strategicIntent,
-    })[0];
   }
 
   return {
