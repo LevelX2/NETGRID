@@ -1774,6 +1774,34 @@ describe("Backend 0.5 private storage maintenance", () => {
       } finally {
         db.close();
       }
+
+      clearTraceAudit();
+      const replayed = await service.advanceAi({
+        matchId: created.matchId,
+        side: "corp",
+        sessionToken: created.hostSessionToken,
+        knownStateVersion: undo.requesterPayload.playerView.stateVersion,
+        mode: "single_step",
+      });
+      expect(replayed.ok).toBe(true);
+      if (!replayed.ok) throw new Error(replayed.error.message);
+      expect(replayed.publicEvent?.eventId).toBe(aiEventId);
+      expect(traceAuditCounts()).toEqual({ insert: 1 });
+      const replayAuditDb = new DatabaseSync(dbPath, { readOnly: true });
+      try {
+        expect(
+          replayAuditDb
+            .prepare(
+              "SELECT COUNT(*) AS count FROM state_snapshots WHERE match_id = ? AND snapshot_id = ?",
+            )
+            .get(
+              created.matchId,
+              `snap_before_${undo.requesterPayload.playerView.stateVersion + 1}`,
+            ),
+        ).toMatchObject({ count: 1 });
+      } finally {
+        replayAuditDb.close();
+      }
     } finally {
       traceAuditDb?.close();
       service.closeStorage();

@@ -2200,7 +2200,17 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       `INSERT INTO state_snapshots (match_id, snapshot_id, state_version, match_version, state_hash, game_state_json, created_at, hidden_info_barrier)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
     );
+    const existingSnapshotIds = new Set(
+      (
+        this.db
+          .prepare(
+            "SELECT snapshot_id AS snapshotId FROM state_snapshots WHERE match_id = ?",
+          )
+          .all(matchId) as Array<{ snapshotId: string }>
+      ).map((row) => row.snapshotId),
+    );
     for (const snapshot of record.stateSnapshots) {
+      if (existingSnapshotIds.has(snapshot.snapshotId)) continue;
       insertStateSnapshot.run(
         matchId,
         snapshot.snapshotId,
