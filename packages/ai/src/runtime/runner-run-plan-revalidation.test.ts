@@ -1,10 +1,94 @@
 import { describe, expect, it } from "vitest";
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 
 import { revalidateRunnerRunPlan } from "./runner-run-plan-revalidation";
+import { quoteRunnerRunPath } from "./runner-run-plan-path-quote";
+import { createRunnerRunCommitment } from "./runner-run-commitment";
 import type { RunnerRunPlan } from "./runner-run-plan-types";
 
 describe("runner run plan revalidation", () => {
+  it("keeps the same material commitment valid across a stateVersion advance", () => {
+    const input = runnerEncounterInput({
+      iceDefinitionId: "onr_v1_261_quandary",
+      iceTitle: "Quandary",
+      iceStrength: 2,
+      legalActions: [
+        pumpAction({ costs: [{ credits: 1 }] }),
+        continueAction({
+          encounterWillEndRun: true,
+          unbrokenSubroutineCount: 1,
+        }),
+      ],
+    });
+    const basePlan = runPlan();
+    basePlan.currentEncounter = {
+      server: "rd",
+      phase: "encounter_ice",
+      iceIndex: 0,
+      iceInstanceId: "ice-1",
+    };
+    basePlan.pathQuote = quoteRunnerRunPath(input, basePlan);
+    basePlan.commitment = createRunnerRunCommitment({
+      input,
+      plan: basePlan,
+      selectedAction: input.legalActions[0]!,
+    });
+    const next = structuredClone(input);
+    next.playerView.stateVersion += 1;
+
+    const revalidated = revalidateRunnerRunPlan(next, basePlan);
+
+    expect(revalidated.revalidation.status).toBe("valid");
+    expect(revalidated.revalidation.reasons).not.toContain(
+      "run_state_fingerprint_changed",
+    );
+    expect(revalidated.commitment?.decisionFingerprint.value).toBe(
+      basePlan.commitment.decisionFingerprint.value,
+    );
+  });
+
+  it("recalculates when visible Corp resources materially change", () => {
+    const input = runnerEncounterInput({
+      iceDefinitionId: "onr_v1_261_quandary",
+      iceTitle: "Quandary",
+      iceStrength: 2,
+      legalActions: [
+        pumpAction({ costs: [{ credits: 1 }] }),
+        continueAction({
+          encounterWillEndRun: true,
+          unbrokenSubroutineCount: 1,
+        }),
+      ],
+    });
+    const basePlan = runPlan();
+    basePlan.currentEncounter = {
+      server: "rd",
+      phase: "encounter_ice",
+      iceIndex: 0,
+      iceInstanceId: "ice-1",
+    };
+    basePlan.pathQuote = quoteRunnerRunPath(input, basePlan);
+    basePlan.commitment = createRunnerRunCommitment({
+      input,
+      plan: basePlan,
+      selectedAction: input.legalActions[0]!,
+    });
+    const changed = structuredClone(input);
+    changed.playerView.stateVersion += 1;
+    changed.playerView.opponent.credits += 1;
+
+    const revalidated = revalidateRunnerRunPlan(changed, basePlan);
+
+    expect(revalidated.revalidation.status).toBe("adjusted");
+    expect(revalidated.revalidation.reasons).toContain(
+      "run_state_fingerprint_changed",
+    );
+  });
+
   it("adjusts the active plan when the current known path quote changes", () => {
     const input = runnerEncounterInput({
       iceDefinitionId: "onr_v1_261_quandary",
@@ -12,7 +96,10 @@ describe("runner run plan revalidation", () => {
       iceStrength: 2,
       legalActions: [
         pumpAction({ costs: [{ credits: 1 }] }),
-        continueAction({ encounterWillEndRun: true, unbrokenSubroutineCount: 1 }),
+        continueAction({
+          encounterWillEndRun: true,
+          unbrokenSubroutineCount: 1,
+        }),
       ],
     });
     const plan = runPlan({
@@ -39,7 +126,10 @@ describe("runner run plan revalidation", () => {
       iceStrength: 2,
       legalActions: [
         pumpAction({ costs: [{ credits: 1 }] }),
-        continueAction({ encounterWillEndRun: true, unbrokenSubroutineCount: 1 }),
+        continueAction({
+          encounterWillEndRun: true,
+          unbrokenSubroutineCount: 1,
+        }),
         action("jack_out", {
           actionId: "jack-out",
           source: "game_rule",
@@ -87,8 +177,7 @@ describe("runner run plan revalidation", () => {
       iceStrength: 2,
       legalActions: [],
     });
-    const { encounteredIce: _encounteredIce, ...run } =
-      input.playerView.run!;
+    const { encounteredIce: _encounteredIce, ...run } = input.playerView.run!;
     input.playerView.run = {
       ...run,
       phase: "movement",
@@ -145,7 +234,10 @@ function remoteServerMovementInput(credits: number): AiDecisionInput {
         costs: [],
         payload: {},
       }),
-      continueAction({ encounterWillEndRun: false, unbrokenSubroutineCount: 0 }),
+      continueAction({
+        encounterWillEndRun: false,
+        unbrokenSubroutineCount: 0,
+      }),
     ],
   });
   input.playerView.timingPoint = "run.jack_out_window";

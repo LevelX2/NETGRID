@@ -16,6 +16,7 @@ import {
 } from "./runner-run-plan-memory";
 import { runnerRunPlanSemanticChoice } from "./runner-run-plan-policy";
 import { createRunnerRunPlanForSelectedAction } from "./runner-run-plan-start";
+import { createRunnerRunDecisionFingerprint } from "./runner-run-commitment";
 import type { RunnerRunPlan } from "./runner-run-plan-types";
 import type { SemanticRuntimeChoice } from "./semantic-runtime-types";
 import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
@@ -131,6 +132,120 @@ describe("runner run plan memory", () => {
     );
     expect(plan?.pathQuote.totalKnownCost).toBe(2);
     expect(plan?.accessIntent?.trashPolicy).toBe("trash_if_value_positive");
+    expect(plan?.commitment).toMatchObject({
+      targetServer: "rd",
+      goal: "access_rnd_top",
+      route: {
+        reachability: "guaranteed_access",
+        guaranteedKnownCost: 2,
+      },
+      costs: { path: 2, access: 0 },
+    });
+    expect(plan?.commitment?.decisionFingerprint.evidence).toContain(
+      "fingerprint_excludes_state_version:true",
+    );
+  });
+
+  it("fingerprints decision facts without coupling the run to stateVersion or phase", () => {
+    const input = runnerInput({
+      activeRun: true,
+      servers: [
+        {
+          id: "rd",
+          label: "R&D",
+          ice: [
+            {
+              instanceId: "unknown-ice",
+              known: false,
+              rezzed: false,
+              definitionId: "hidden-a",
+            },
+          ],
+          root: [],
+        },
+      ],
+    });
+    const plan = runPlan();
+    const baseline = createRunnerRunDecisionFingerprint(input, plan);
+    const progressionOnly = structuredClone(input);
+    progressionOnly.playerView.stateVersion += 10;
+    progressionOnly.playerView.run!.phase = "approach_ice";
+    progressionOnly.playerView.run!.position = {
+      kind: "ice",
+      serverId: "rd",
+      iceIndex: 0,
+    };
+    progressionOnly.playerView.servers[0]!.ice[0]!.definitionId = "hidden-b";
+
+    expect(
+      createRunnerRunDecisionFingerprint(progressionOnly, plan).value,
+    ).toBe(baseline.value);
+  });
+
+  it.each([
+    {
+      label: "runner credits",
+      mutate: (input: AiDecisionInput) => {
+        input.playerView.own.credits += 1;
+      },
+    },
+    {
+      label: "visible Corp credits",
+      mutate: (input: AiDecisionInput) => {
+        input.playerView.opponent.credits += 1;
+      },
+    },
+    {
+      label: "new Runner card",
+      mutate: (input: AiDecisionInput) => {
+        input.playerView.own.gripOrHq.push({
+          instanceId: "new-breaker",
+          definitionId: "onr_v1_014_codecracker",
+          known: true,
+          type: "program",
+        });
+      },
+    },
+    {
+      label: "newly rezzed ICE",
+      mutate: (input: AiDecisionInput) => {
+        input.playerView.servers[0]!.ice[0]!.rezzed = true;
+      },
+    },
+    {
+      label: "tags",
+      mutate: (input: AiDecisionInput) => {
+        input.playerView.own.tags += 1;
+      },
+    },
+  ])("changes the decision fingerprint for $label", ({ mutate }) => {
+    const input = runnerInput({
+      activeRun: true,
+      servers: [
+        {
+          id: "rd",
+          label: "R&D",
+          ice: [
+            {
+              instanceId: "known-ice",
+              known: true,
+              rezzed: false,
+              definitionId: "onr_v1_261_quandary",
+              type: "ice",
+            },
+          ],
+          root: [],
+        },
+      ],
+    });
+    const plan = runPlan();
+    const baseline = createRunnerRunDecisionFingerprint(input, plan).value;
+    const changed = structuredClone(input);
+    mutate(changed);
+
+    expect(createRunnerRunDecisionFingerprint(changed, plan).value).not.toBe(
+      baseline,
+    );
   });
 
   it("records specialized run credits in the run plan budget", () => {

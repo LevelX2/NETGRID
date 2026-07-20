@@ -22,6 +22,7 @@ import type {
   RunnerRunPlanServerId,
 } from "./runner-run-plan-types";
 import { quoteRunnerRunPath } from "./runner-run-plan-path-quote";
+import { createRunnerRunCommitment } from "./runner-run-commitment";
 
 export function createRunnerRunPlanForSelectedAction(params: {
   input: AiDecisionInput;
@@ -162,6 +163,16 @@ export function createRunnerRunPlanForSelectedAction(params: {
       expectedRemainingCredits: creditsAfterRun,
       reserveViolation: creditsAfterRun < 0,
       canReachAccess: matchingTargetEvaluation?.pathPassability === "reachable",
+      ...(matchingTargetEvaluation?.routeQuote
+        ? {
+            accessStatus: matchingTargetEvaluation.routeQuote.reachability,
+            guaranteedKnownCost:
+              matchingTargetEvaluation.routeQuote.guaranteedKnownCost,
+            routeEffects: matchingTargetEvaluation.routeQuote.effects,
+            conditionalReasons:
+              matchingTargetEvaluation.routeQuote.conditionalReasons,
+          }
+        : {}),
       ...(matchingTargetEvaluation &&
       matchingTargetEvaluation.pathPassability !== "reachable"
         ? { cannotReachReason: matchingTargetEvaluation.pathPassability }
@@ -209,9 +220,20 @@ export function createRunnerRunPlanForSelectedAction(params: {
     createdAtStateVersion: now,
     updatedAtStateVersion: now,
   };
-  return {
+  const quotedPlan: RunnerRunPlan = {
     ...plan,
     pathQuote: quoteRunnerRunPath(input, plan),
+  };
+  return {
+    ...quotedPlan,
+    commitment: createRunnerRunCommitment({
+      input,
+      plan: quotedPlan,
+      selectedAction,
+      ...(matchingTargetEvaluation
+        ? { evaluation: matchingTargetEvaluation }
+        : {}),
+    }),
   };
 }
 
@@ -534,7 +556,8 @@ function cardDefinitionType(
 ): string | undefined {
   if (!definitionId) return undefined;
   return (
-    RUNTIME_CARDS[definitionId]?.type ?? CARD_DEFINITIONS_BY_ID[definitionId]?.type
+    RUNTIME_CARDS[definitionId]?.type ??
+    CARD_DEFINITIONS_BY_ID[definitionId]?.type
   );
 }
 

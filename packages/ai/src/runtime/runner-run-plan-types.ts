@@ -268,6 +268,44 @@ export type RunnerRunPlanDebugInfo = {
   items: string[];
 };
 
+export type RunnerRunDecisionFingerprint = {
+  schemaVersion: 1;
+  value: string;
+  evidence: string[];
+};
+
+export type RunnerRunCommitment = {
+  targetServer: RunnerRunPlanServerId;
+  goal: RunnerRunObjective["kind"];
+  route: {
+    reachability: RunnerRunRouteReachability;
+    knownCost: number;
+    guaranteedKnownCost: number;
+    unknownIceCount: number;
+    conditionalReasons: string[];
+  };
+  costs: {
+    runAction: number;
+    path: number;
+    access: number;
+  };
+  reserves: {
+    creditsAfterRun: number;
+    gripAfterRun: number;
+    stealOrTrash: number;
+  };
+  acceptedRisks: string[];
+  expectedUtility: number;
+  terminalConditions: {
+    runnerAgendaPoints: number;
+    agendaPointsToWin: number;
+    pointsNeeded: number;
+    objectiveCanEndGame: boolean;
+  };
+  decisionFingerprint: RunnerRunDecisionFingerprint;
+  evidence: string[];
+};
+
 export type RunnerRunPlan = {
   id: string;
   side: Extract<Side, "runner">;
@@ -287,6 +325,7 @@ export type RunnerRunPlan = {
   revalidation: RunnerRunPlanRevalidationState;
   abortPolicy: RunnerRunAbortPolicy;
   visibilityEvidence: RunnerRunVisibleEvidenceRef[];
+  commitment?: RunnerRunCommitment;
   debug: RunnerRunPlanDebugInfo;
   createdAtStateVersion: number;
   updatedAtStateVersion: number;

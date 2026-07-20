@@ -1,6 +1,6 @@
 # Seed-7-Run-Verhalten der KI härten
 
-Status: aktiv – Paket 1 abgeschlossen
+Status: aktiv – Paket 2 abgeschlossen
 
 ## Quelle und Zielprüfung
 
@@ -224,7 +224,7 @@ Commit: `test(ai): harden seed7 run execution regressions`
 
 - Preflight: abgeschlossen (`e51431570`)
 - Paket 1: abgeschlossen
-- Paket 2: ausstehend
+- Paket 2: abgeschlossen
 - Paket 3: ausstehend
 - Paket 4: ausstehend
 - Final Verify, Merge und Cleanup: ausstehend
@@ -251,4 +251,28 @@ Commit: `test(ai): harden seed7 run execution regressions`
   konditional; unvermeidbare Tags blockieren Access nicht pauschal; tödlicher
   Trace-Schaden bleibt vor Access konditional.
 - Verifikation: vier fokussierte Testdateien mit 132 Tests, AI-Typecheck und
+  `git diff --check` grün.
+
+### Paket 2
+
+- Jeder neu erzeugte Runner-Run-Plan besitzt ein `RunCommitment` mit Ziel,
+  Zweck, Route, garantierten bekannten Kosten, unbekannten ICE-Anteilen,
+  Access-Reserve, akzeptierten konditionalen Risiken, Nutzen und sichtbarer
+  terminaler Agenda-Lage.
+- Der kompakte `RunDecisionFingerprint` wird ausschließlich aus
+  entscheidungsrelevanten side-sicheren Fakten aufgebaut: sichtbare
+  Server-/ICE-/Root-Struktur, Credits und Run-Pools, Corp-Credits, Runner-Hand,
+  Rig/Breaker/Link-/Prevention-Counter, Tags, Agenda-Lage und Access-Absicht.
+  `stateVersion`, Run-Phase und Position sind ausdrücklich kein Bestandteil.
+- Unbekannte gegnerische Karten tragen nur Instanz-, Known- und Rez-Status bei;
+  versehentlich vorhandene verdeckte Definitionen beeinflussen den
+  Fingerprint nicht.
+- Revalidation vergleicht strukturelle Encounter-Referenzen feldweise statt
+  über JSON-Property-Reihenfolge. Reine Zustandsfortschreibung hält die
+  Verpflichtung gültig; Credits, Corp-Ressourcen, neue Runner-Karten, Rez,
+  Tags und vergleichbare materielle Änderungen lösen eine Neuberechnung aus.
+- Es wurde kein Abbruch-Cooldown oder Repeat-Run-Memory ergänzt. Rebasierte
+  Verpflichtungen übernehmen die aktuelle Route und bewahren die bewusst
+  akzeptierten Risiken.
+- Verifikation: fünf fokussierte Testdateien mit 70 Tests, AI-Typecheck und
   `git diff --check` grün.

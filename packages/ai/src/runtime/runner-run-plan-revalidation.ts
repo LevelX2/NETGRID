@@ -1,6 +1,10 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 
 import { projectKnownRemoteTrashCommitment } from "../decision/known-remote-access-commitment";
+import {
+  createRunnerRunDecisionFingerprint,
+  rebaseRunnerRunCommitment,
+} from "./runner-run-commitment";
 import { quoteRunnerRunPath } from "./runner-run-plan-path-quote";
 import type {
   RunnerRunEncounterStateRef,
@@ -31,15 +35,19 @@ export function revalidateRunnerRunPlan(
     pathQuote.expectedRemainingCredits,
   );
   const nextEncounter = currentEncounterRef(input, currentPlan.targetServer.id);
-  const previousFingerprint = plan.revalidation.reasons.find((reason) =>
-    reason.startsWith("fingerprint:"),
-  );
-  const nextFingerprint = `fingerprint:${runnerRunPlanRevalidationFingerprint(
+  const previousFingerprint =
+    currentPlan.commitment?.decisionFingerprint.value ??
+    plan.revalidation.reasons
+      .find((reason) => reason.startsWith("fingerprint:"))
+      ?.slice("fingerprint:".length);
+  const nextDecisionFingerprint = createRunnerRunDecisionFingerprint(
     input,
-    currentPlan.targetServer.id,
-  )}`;
+    currentPlan,
+  );
+  const nextFingerprint = `fingerprint:${nextDecisionFingerprint.value}`;
   const fingerprintChanged =
-    previousFingerprint !== undefined && previousFingerprint !== nextFingerprint;
+    previousFingerprint !== undefined &&
+    previousFingerprint !== nextDecisionFingerprint.value;
   const pathQuoteChanged =
     pathQuote.totalKnownCost !== plan.pathQuote.totalKnownCost ||
     pathQuote.expectedRemainingCredits !==
@@ -47,9 +55,10 @@ export function revalidateRunnerRunPlan(
     pathQuote.reserveViolation !== plan.pathQuote.reserveViolation ||
     pathQuote.canReachAccess !== plan.pathQuote.canReachAccess ||
     pathQuote.cannotReachReason !== plan.pathQuote.cannotReachReason;
-  const encounterChanged =
-    JSON.stringify(nextEncounter ?? null) !==
-    JSON.stringify(plan.currentEncounter ?? null);
+  const encounterChanged = !sameEncounterRef(
+    nextEncounter,
+    plan.currentEncounter,
+  );
   const reasons = [
     ...(targetChanged
       ? [
@@ -86,13 +95,18 @@ export function revalidateRunnerRunPlan(
     encounterChanged,
     fingerprintChanged,
     canReachAccess: pathQuote.canReachAccess,
-    knownNoCurrentPayoff:
-      currentAccessPayoff?.knownNoCurrentPayoff === true,
+    knownNoCurrentPayoff: currentAccessPayoff?.knownNoCurrentPayoff === true,
+  });
+  const nextCommitment = rebaseRunnerRunCommitment({
+    input,
+    plan: currentPlan,
+    pathQuote,
   });
   return {
     ...currentPlan,
     lifecycle: lifecycleForRevalidation(status, plan.lifecycle),
     pathQuote,
+    ...(nextCommitment ? { commitment: nextCommitment } : {}),
     ...(nextEncounter ? { currentEncounter: nextEncounter } : {}),
     revalidation: {
       status,
@@ -236,50 +250,32 @@ function currentEncounterRef(
     server: serverId,
     phase,
     ...(iceInstanceId ? { iceInstanceId } : {}),
-    ...(run.position?.kind === "ice" ? { iceIndex: run.position.iceIndex } : {}),
+    ...(run.position?.kind === "ice"
+      ? { iceIndex: run.position.iceIndex }
+      : {}),
   };
 }
 
-function runnerRunPlanRevalidationFingerprint(
-  input: AiDecisionInput,
-  serverId: RunnerRunPlanServerId,
-): string {
-  const run = input.playerView.run;
-  const server = input.playerView.servers.find(
-    (candidate) => candidate.id === serverId,
+function sameEncounterRef(
+  left: RunnerRunEncounterStateRef | undefined,
+  right: RunnerRunEncounterStateRef | undefined,
+): boolean {
+  if (!left || !right) return left === right;
+  return (
+    left.server === right.server &&
+    left.phase === right.phase &&
+    left.iceInstanceId === right.iceInstanceId &&
+    left.iceIndex === right.iceIndex
   );
-  const ice = (server?.ice ?? []).map((card) =>
-    [
-      card.instanceId,
-      card.known,
-      card.rezzed,
-      card.definitionId ?? "unknown",
-      card.strength ?? "na",
-      card.effectiveRunQuote?.effectiveStrength ?? "na",
-      card.effectiveRunQuote?.subroutines.length ?? "na",
-    ].join("/"),
-  );
-  const root = (server?.root ?? []).map((card) =>
-    [
-      card.instanceId,
-      card.known,
-      card.rezzed,
-      card.definitionId ?? "unknown",
-      card.trashCost ?? "na",
-      card.advancementCounters ?? "na",
-    ].join("/"),
-  );
-  return [
-    `state:${input.playerView.stateVersion}`,
-    `credits:${input.playerView.own.credits}`,
-    `server:${serverId}`,
-    `phase:${run?.phase ?? "none"}`,
-    `position:${run?.position ? JSON.stringify(run.position) : "none"}`,
-    `ice:${ice.join(",")}`,
-    `root:${root.join(",")}`,
-  ].join("|");
 }
 
-function isRunnerRunPlanServerId(value: string): value is RunnerRunPlanServerId {
-  return value === "hq" || value === "rd" || value === "archives" || /^remote_\d+$/.test(value);
+function isRunnerRunPlanServerId(
+  value: string,
+): value is RunnerRunPlanServerId {
+  return (
+    value === "hq" ||
+    value === "rd" ||
+    value === "archives" ||
+    /^remote_\d+$/.test(value)
+  );
 }
