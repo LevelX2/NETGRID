@@ -1,6 +1,6 @@
 # ICE-Run-Quote-Reconciliation für die Runner-KI
 
-Status: aktiv – Paket `IRQR-1` in Arbeit
+Status: aktiv – Paket `IRQR-2` in Arbeit
 
 ## Quelle und Zielprüfung
 
@@ -186,5 +186,10 @@ dann als complete markieren.`
 - Preflight: abgeschlossen – Worktree und Branch sind sauber angelegt.
 - `IRQR-0`: abgeschlossen – Scope, Invarianten, Testmatrix und
   Paketgrenzen sind dokumentiert.
-- `IRQR-1`: aktiv.
-- `IRQR-2` bis `IRQR-4`: offen.
+- `IRQR-1`: abgeschlossen – die gemeinsame Engine-Ableitung projiziert
+  bezahlte ETR-Subroutinen, relative Damage-/Trace-Werte, Trace-Basis/-Limit
+  und zweckgebundene Encounter-Trace-Credits in die öffentliche Quote.
+  Quote- und Encounter-Regressionen sowie Engine-/AI-Typechecks und das
+  Engine-Source-Structure-Gate sind grün.
+- `IRQR-2`: aktiv.
+- `IRQR-3` bis `IRQR-4`: offen.

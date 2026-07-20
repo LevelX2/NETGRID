@@ -1915,6 +1915,14 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
 
     state = encounterIce(state, "rd", "onr_v1_260_pocket-virtual-reality");
     state.corp.credits = 0;
+    const pocketVirtualReality = getPlayerView(state, "runner")
+      .servers.find((server) => server.id === "rd")
+      ?.ice.find(
+        (card) => card.definitionId === "onr_v1_260_pocket-virtual-reality",
+      );
+    expect(pocketVirtualReality?.effectiveRunQuote).toMatchObject({
+      encounterTemporaryTraceCredits: 4,
+    });
     expect(state.run?.encounterTemporaryTraceCredits).toMatchObject({
       sourceDefinitionId: "onr_v1_260_pocket-virtual-reality",
       remaining: 4,

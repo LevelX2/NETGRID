@@ -1897,6 +1897,7 @@ export type VisibleEffectiveSubroutine = {
   type: SubroutineType;
   amount?: number;
   baseTraceStrength?: number;
+  traceBidLimit?: number;
   traceSuccessEffect?: TraceSuccessEffect;
   deflectorTarget?: "archives" | "any_data_fort" | "subsidiary_data_fort";
   deflectorCost?: number;
@@ -1927,6 +1928,7 @@ export type VisibleEffectiveIceRunQuote = {
   breakSubroutineAdditionalCostPerSubroutine?: number;
   breakSubroutineCostSourceDefinitionIds?: CardDefinitionId[];
   breakSubroutineCostSourceTitles?: string[];
+  encounterTemporaryTraceCredits?: number;
 };
 
 export type VisibleCardLifecycleMarker = {

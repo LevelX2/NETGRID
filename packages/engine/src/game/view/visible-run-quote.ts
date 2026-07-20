@@ -15,6 +15,10 @@ import {
 } from "../../ability-engine/additional-subroutine-modifiers";
 import { quoteBreakSubroutineCostModifiers } from "../../ability-engine/break-subroutine-cost-modifiers";
 import { printedSubroutinesForCardImplementation } from "../../ability-engine/printed-subroutine-implementations";
+import {
+  publicEncounterTemporaryTraceCreditsForIce,
+  publicIceRunSubroutineDerivation,
+} from "../run/public-ice-run-derivation";
 
 export function visibleEffectiveIceRunQuote(
   state: GameState,
@@ -29,13 +33,24 @@ export function visibleEffectiveIceRunQuote(
     printedSubroutinesForCardImplementation(definition) ??
     definition.subroutines ??
     [];
+  const publicDerivation = publicIceRunSubroutineDerivation(
+    state,
+    iceId,
+    printedSubroutines,
+  );
   const subroutines = [
-    ...printedSubroutines.flatMap((subroutine) => [
+    ...publicDerivation.printedSubroutines.flatMap((subroutine) => [
       subroutine,
       ...copiedRunSubroutinesForIceAfterOriginal(state, iceId, subroutine.id),
     ]),
     ...runDurationAdditionalSubroutinesForIce(state, iceId),
+    ...publicDerivation.appendedSubroutines.filter(
+      (subroutine) => subroutine.type === "end_the_run",
+    ),
     ...currentEncounterAdditionalSubroutinesForIce(state, iceId),
+    ...publicDerivation.appendedSubroutines.filter(
+      (subroutine) => subroutine.type === "initiate_trace",
+    ),
     ...additionalSubroutinesForIce(state, iceId),
   ].map(visibleEffectiveSubroutine);
   const breakCostQuote = quoteBreakSubroutineCostModifiers(state, iceId, 1);
@@ -44,6 +59,8 @@ export function visibleEffectiveIceRunQuote(
     : 0;
   const breakSubroutineAdditionalCostPerSubroutine =
     runBreakCost + breakCostQuote.perSubroutineAdditionalCost;
+  const encounterTemporaryTraceCredits =
+    publicEncounterTemporaryTraceCreditsForIce(state, iceId);
 
   return {
     iceInstanceId: visibleIce.instanceId,
@@ -61,6 +78,11 @@ export function visibleEffectiveIceRunQuote(
           breakSubroutineCostSourceTitles: breakCostQuote.modifiers.map(
             (modifier) => modifier.sourceTitle,
           ),
+        }
+      : {}),
+    ...(encounterTemporaryTraceCredits
+      ? {
+          encounterTemporaryTraceCredits,
         }
       : {}),
   };
@@ -123,6 +145,9 @@ function visibleEffectiveSubroutine(
     ...(subroutine.amount !== undefined ? { amount: subroutine.amount } : {}),
     ...(subroutine.baseTraceStrength !== undefined
       ? { baseTraceStrength: subroutine.baseTraceStrength }
+      : {}),
+    ...(subroutine.traceBidLimit !== undefined
+      ? { traceBidLimit: subroutine.traceBidLimit }
       : {}),
     ...(subroutine.traceSuccessEffect
       ? { traceSuccessEffect: subroutine.traceSuccessEffect }

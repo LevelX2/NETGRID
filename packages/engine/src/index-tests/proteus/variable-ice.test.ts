@@ -195,6 +195,16 @@ import {
   addInstalledRunnerProgramForTest,
 } from "../../test-fixtures/index-test-helpers";
 
+function effectiveRunQuoteFor(
+  state: GameState,
+  serverId: Exclude<ServerId, "new_remote">,
+  iceId: CardInstanceId,
+) {
+  return getPlayerView(state, "runner")
+    .servers.find((server) => server.id === serverId)
+    ?.ice.find((card) => card.instanceId === iceId)?.effectiveRunQuote;
+}
+
 describe("Proteus Phase 3a Variable ICE Foundation", () => {
   const DIGICONDA = "onr_proteus_020_digiconda";
   const FOOD_FIGHT = "onr_proteus_022_food-fight";
@@ -393,6 +403,11 @@ describe("Proteus Phase 3a Variable ICE Foundation", () => {
         rezCostPaid: 4 + additionalCost,
         effectiveSubroutineCountAfterRez: subroutineCount,
       });
+      expect(
+        effectiveRunQuoteFor(state, "rd", iceId)?.subroutines.filter(
+          (subroutine) => subroutine.type === "end_the_run",
+        ),
+      ).toHaveLength(subroutineCount);
       expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
         DIGICONDA,
       );
@@ -666,6 +681,11 @@ describe("Proteus Phase 3b Variable Cost/Strength/Subtype ICE", () => {
           ? "7 Credits insgesamt"
           : "8 Credits insgesamt",
       );
+      expect(
+        effectiveRunQuoteFor(state, "rd", iceId)?.subroutines.filter(
+          (subroutine) => subroutine.type === "end_the_run",
+        ),
+      ).toHaveLength(2);
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
       expect(replay.ok).toBe(true);
       expect(hashState(replay.state)).toBe(hashState(state));
@@ -712,6 +732,13 @@ describe("Proteus Phase 3b Variable Cost/Strength/Subtype ICE", () => {
       definitionId: "onr_proteus_025_homing-missile",
       strength: 5,
     });
+    expect(effectiveRunQuoteFor(state, "rd", iceId)?.subroutines).toEqual([
+      expect.objectContaining({
+        type: "initiate_trace",
+        baseTraceStrength: 5,
+        traceBidLimit: 5,
+      }),
+    ]);
     state = apply(state, "runner", (action) => action.type === "continue_run");
     expect(state.trace).toMatchObject({
       sourceCardInstanceId: iceId,
@@ -863,6 +890,11 @@ describe("Proteus Phase 3c Relative Board-Count ICE", () => {
         expect(encounteredIce?.strength).toBe(2);
         expect(encounteredIce?.strengthModifier).toBe(2);
       }
+      expect(
+        effectiveRunQuoteFor(state, "rd", setup.targetId)?.subroutines.find(
+          (subroutine) => subroutine.type === "do_damage",
+        )?.amount,
+      ).toBe(definitionId === BUG_ZAPPER ? 4 : 2);
       const initial = structuredClone(state);
       const replayStart = state.eventLog.length;
       state = apply(
@@ -941,6 +973,20 @@ describe("Proteus Phase 3c Relative Board-Count ICE", () => {
     let state = proteusPhase3cGame("proteus-phase-3c-hunting-pack");
     const setup = encounterInnerRelativeIce(state, HUNTING_PACK);
     state = setup.state;
+    const quotedTraceSubroutines = effectiveRunQuoteFor(
+      state,
+      "rd",
+      setup.targetId,
+    )?.subroutines.filter((subroutine) => subroutine.type === "initiate_trace");
+    expect(quotedTraceSubroutines).toHaveLength(2);
+    expect(quotedTraceSubroutines).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          baseTraceStrength: 5,
+          traceSuccessEffect: { type: "add_tag", amount: 1 },
+        }),
+      ]),
+    );
     const continueAction = mustAction(
       state,
       "runner",
