@@ -59,7 +59,7 @@ Aktionslimits, Fallbacks, Timeouts, Runtimefehler, Hidden-Info-Marker oder
 corepack pnpm benchmark:ai-behavior -- `
   --out-json data/local/ai-behavior-baseline-v1-YYYY-MM-DD.json `
   --out-md docs/reviews/ai/ai-behavior-baseline-v1-YYYY-MM-DD.md `
-  --raw-out data/local/ai-behavior-baseline-v1-YYYY-MM-DD-raw.json
+  --raw-out data/local/ai-behavior-baseline-v1-YYYY-MM-DD-raw.json.gz
 ```
 
 Für einen Vorher-/Nachher-Vergleich wird die vorherige kompakte JSON-Datei
@@ -70,8 +70,20 @@ corepack pnpm benchmark:ai-behavior -- `
   --baseline data/local/ai-behavior-baseline-v1-YYYY-MM-DD.json `
   --out-json data/local/ai-behavior-baseline-v1-candidate.json `
   --out-md docs/reviews/ai/ai-behavior-baseline-v1-candidate.md `
-  --raw-out data/local/ai-behavior-baseline-v1-candidate-raw.json
+  --raw-out data/local/ai-behavior-baseline-v1-candidate-raw.json.gz
 ```
+
+Ab vier angeforderten Slots verteilt der Runner die Slots standardmäßig auf
+bis zu vier isolierte Node-Prozesse. Kleinere Läufe bleiben seriell und zahlen
+keinen Prozessstart. `--workers 1` erzwingt den seriellen Referenzpfad;
+`--workers 2` bis `--workers 32` überschreiben die Automatik bewusst. Die
+Zusammenführung bleibt unabhängig von der Fertigstellungsreihenfolge in der
+angeforderten Slot-Reihenfolge deterministisch.
+
+`--raw-out` schreibt atomar. Die Endung `.gz` aktiviert die empfohlene
+verlustfreie Gzip-Kompression; `.json` bleibt als unkomprimierter kompatibler
+Pfad verfügbar. Beide Formate enthalten dasselbe
+`ai-behavior-baseline-v1-raw`-Schema und die vollständige redigierte Evidence.
 
 Der Vergleich verweigert eine Bewertung bei abweichender Version, Seeds,
 Slot-Reihenfolge, Aktionslimit oder Deck-Fingerprints. Ein anderer Git-Stand ist

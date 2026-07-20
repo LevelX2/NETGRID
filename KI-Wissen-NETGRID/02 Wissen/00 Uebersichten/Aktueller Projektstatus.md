@@ -165,6 +165,17 @@ Stand: 2026-07-20
   zwei Aktionslimits im Hybrid-Score/Punish-Slot sind grün. Führend sind
   `docs/architecture/ai/ai-behavior-baseline-v1-process-2026-07-12.md` und
   `docs/reviews/ai/ai-behavior-baseline-v1-initial-run-review-2026-07-12.md`.
+- Selfplay- und Testspiel-Laufzeiten sind ohne fachliche Abstriche gehärtet:
+  semantische Ableitungen werden nur innerhalb einer Entscheidung
+  wiederverwendet, Vollhistorie und echter 80-Ereignis-Tail teilen bereinigte
+  Eventobjekte, und Side-Safety arbeitet strukturell ohne Vollstringkopie. Der
+  feste 240-Aktionen-Fall sank bei bitgleicher Summary, ActionSequence und
+  StateHash um 21,8 Prozent. Baseline-Slots laufen ab vier Slots konservativ in
+  isolierten Prozessen; vollständige Raw-Evidence wird atomar gestreamt und
+  optional verlustfrei als `.gz` geschrieben. Führend sind
+  `docs/architecture/ai/ai-selfplay-performance-optimization-process-2026-07-20.md`
+  und
+  `docs/reviews/ai/ai-selfplay-performance-optimization-final-review-2026-07-20.md`.
 - Der Runner-Survival-Progress-Vertrag bindet Basic Credits jetzt an eine
   sichtbare konkrete Reaktions- oder Prevention-Lücke. Ohne Handgewinn,
   Risikoreduktion oder verringerte Reservelücke verliert der Plan seine TTL

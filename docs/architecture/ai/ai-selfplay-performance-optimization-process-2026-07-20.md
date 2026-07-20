@@ -1,6 +1,6 @@
 # AI-Selfplay-Performanceoptimierung ohne Informationsverlust
 
-Status: in Arbeit
+Status: abgeschlossen
 
 ## Quelle und Zielprüfung
 
@@ -246,6 +246,23 @@ Bei einem fehlgeschlagenen Done-Gate bleibt der Zustand beim aktuellen Paket.
   91,9 Prozent.
 - Verifikation: drei Roundtrip-, Kompressions- und Abbruchtests grün, realer
   JSON/Gzip-Simulationsvergleich bitgleich und `git diff --check` ohne Befund.
+
+### P5 – abgeschlossen am 20. Juli 2026
+
+- Die vollständige `@netgrid/ai`-Suite ist mit 415 Testdateien und 2.845 Tests
+  in 412,75 s grün; AI- und Server-Typecheck sind grün.
+- Der beobachtbare Server-AI-vs-AI-Langtest endet nach mehr als 120 Aktionen
+  regulär, besitzt für jede Aktion Event- und Decision-Trace-Evidence und
+  replayt mit korrektem finalem StateHash. Seine Wallclock beträgt 46,559 s
+  und bleibt damit innerhalb des festen 60-Sekunden-Testbudgets.
+- `check:ai` meldet null Laufzeit- und Typzyklen sowie null harte
+  Hint-Metadatenfehler. Die sechs neuen Pool-, Roundtrip-, Kompressions- und
+  Abbruchtests sind grün.
+- Ausführungsrunbook, aktueller Projektstatus und Monatslog dokumentieren den
+  neuen Vertrag. Der Abschlussreview liegt unter
+  `docs/reviews/ai/ai-selfplay-performance-optimization-final-review-2026-07-20.md`.
+- Keine Engine-, LegalAction-, `applyAction`-, Replay-, StateHash-, Seed-,
+  Randomness-, Kartenpool- oder Hidden-Info-Vertragsänderung.
 
 ## Verifikationsregeln
 
