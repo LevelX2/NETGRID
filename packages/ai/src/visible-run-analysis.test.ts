@@ -350,7 +350,7 @@ describe("visible run analysis runner run credit pools", () => {
     });
   });
 
-  it("does not move restricted credits from a paid break to a later Trace", () => {
+  it("does not move restricted credits from a paid break to a later Trace and includes visible Corp credit gain", () => {
     const rig = [
       codecrackerBreaker("runner-codecracker"),
       nonNoisyBreakerCreditPool("runner-cloak", 2),
@@ -378,8 +378,8 @@ describe("visible run analysis runner run credit pools", () => {
       }),
     ).toMatchObject({
       reachability: "conditional_access",
-      guaranteedKnownCost: 6,
-      fundingGap: 4,
+      guaranteedKnownCost: 7,
+      fundingGap: 5,
     });
   });
 
@@ -874,7 +874,163 @@ describe("shared runner run route quote", () => {
       canEndGameBeforeAccess: true,
     });
   });
+
+  it("treats Puzzle's visible hard end-run subroutines as access blockers", () => {
+    const path = assessKnownRezzedIcePath(
+      [
+        quotedSpecialIce("rd-puzzle", "Puzzle", [
+          {
+            id: "rd-puzzle-first",
+            type: "end_the_run_and_trash_source_at_end_of_turn",
+          },
+          {
+            id: "rd-puzzle-second",
+            type: "end_the_run_and_trash_source_at_end_of_turn",
+          },
+        ]),
+      ],
+      [],
+      5,
+    );
+
+    expect(path).toMatchObject({
+      blocked: true,
+      canReachAccess: false,
+      knownPathBlockedByUnbreakableIce: true,
+    });
+  });
+
+  it("pays a visible Too Many Doors bid only when the Corp cannot force a tie", () => {
+    const ice = quotedSpecialIce("rd-too-many-doors", "Too Many Doors", [
+      {
+        id: "rd-too-many-doors-secret-bid",
+        type: "secret_spend_compare_end_run_unless_corp_spent_at_least_runner",
+      },
+    ]);
+    const payablePath = assessKnownRezzedIcePath([ice], [], 1, [], 0);
+    const conditionalPath = assessKnownRezzedIcePath([ice], [], 2, [], 2);
+
+    expect(payablePath).toMatchObject({
+      blocked: false,
+      canReachAccess: true,
+      visibleBreakCost: 1,
+      creditsAfterPath: 0,
+    });
+    expect(conditionalPath).toMatchObject({
+      blocked: false,
+      canReachAccess: true,
+      creditsAfterPath: 2,
+      conditionalAccessReasons: ["visible_secret_spend_end_run"],
+    });
+    expect(
+      quoteRunnerRunRoute({
+        path: conditionalPath,
+        availableCredits: 2,
+      }),
+    ).toMatchObject({
+      reachability: "conditional_access",
+      conditionalReasons: ["visible_secret_spend_end_run"],
+    });
+  });
+
+  it("keeps visible Corp encounter ETR and random ICE effects conditional", () => {
+    const paidEncounterEtr = quotedSpecialIce("rd-riddler", "Riddler", []);
+    paidEncounterEtr.effectiveRunQuote!.conditionalEncounterEffects = [
+      {
+        kind: "corp_paid_add_end_the_run_subroutine",
+        creditCost: 2,
+      },
+    ];
+    const outerCorpCredit = quotedSpecialIce("rd-credit", "Credit ICE", [
+      { id: "rd-credit-gain", type: "corp_gain_credit", amount: 1 },
+    ]);
+    const randomIce = quotedSpecialIce("rd-random", "Random ICE", [
+      { id: "rd-random-damage", type: "random_damage", amount: 3 },
+      {
+        id: "rd-random-rewind",
+        type: "rewind_run_to_rezzed_ice_by_die",
+      },
+    ]);
+    randomIce.effectiveRunQuote!.conditionalEncounterEffects = [
+      {
+        kind: "random_strength_or_derez_auto_pass",
+        dieFaces: 6,
+        autoPassResult: 6,
+        maxStrengthBonus: 5,
+      },
+    ];
+
+    const paidPath = assessKnownRezzedIcePath(
+      [paidEncounterEtr, outerCorpCredit],
+      [],
+      5,
+      [],
+      1,
+    );
+    const randomPath = assessKnownRezzedIcePath([randomIce], [], 5);
+
+    expect(paidPath.conditionalAccessReasons).toEqual([
+      "visible_corp_paid_encounter_etr",
+    ]);
+    expect(randomPath.conditionalAccessReasons).toEqual([
+      "visible_random_encounter_strength",
+      "visible_random_rewind",
+    ]);
+    expect(randomPath.conditionalRiskReasons).toEqual([
+      "visible_random_damage",
+    ]);
+    expect(
+      quoteRunnerRunRoute({ path: randomPath, availableCredits: 5 }),
+    ).toMatchObject({
+      reachability: "conditional_access",
+      conditionalReasons: [
+        "visible_random_encounter_strength",
+        "visible_random_rewind",
+      ],
+      conditionalRiskReasons: ["visible_random_damage"],
+    });
+
+    const randomDamageOnlyPath = assessKnownRezzedIcePath(
+      [
+        quotedSpecialIce("rd-random-damage", "Random Damage", [
+          { id: "rd-random-damage", type: "random_damage", amount: 3 },
+        ]),
+      ],
+      [],
+      5,
+    );
+    expect(
+      quoteRunnerRunRoute({ path: randomDamageOnlyPath, availableCredits: 5 }),
+    ).toMatchObject({
+      reachability: "guaranteed_access",
+      conditionalReasons: [],
+      conditionalRiskReasons: ["visible_random_damage"],
+    });
+  });
 });
+
+function quotedSpecialIce(
+  instanceId: string,
+  title: string,
+  subroutines: NonNullable<VisibleCard["effectiveRunQuote"]>["subroutines"],
+): VisibleCard {
+  return {
+    instanceId,
+    definitionId: `test_${instanceId}`,
+    title,
+    type: "ice",
+    subtypes: ["sentry"],
+    known: true,
+    rezzed: true,
+    strength: 3,
+    effectiveRunQuote: {
+      iceInstanceId: instanceId,
+      iceDefinitionId: `test_${instanceId}`,
+      effectiveStrength: 3,
+      subroutines,
+    },
+  };
+}
 
 function classicWallIce(instanceId: string): VisibleCard {
   return {

@@ -154,6 +154,19 @@ describe("selectedBidChoiceOptionId", () => {
     ).toBe("guess_8");
   });
 
+  it("uses the highest legal Runner bid against a hidden secret-spend comparison", () => {
+    expect(
+      selectedBidChoiceOptionId(
+        input("runner", "normal"),
+        bidChoice(
+          "card_implementation.secret_spend_compare:run:ice:0",
+          range(0, 2),
+        ),
+        {},
+      ),
+    ).toBe("bid_2");
+  });
+
   it("pays the exact visible Seed-7 trace guarantee when the Corp cannot bid", () => {
     expect(
       selectedBidChoiceOptionId(

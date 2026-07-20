@@ -119,9 +119,10 @@ export function visibleIceRunHazardsForQuote(params: {
       traceBaseStrength === undefined
         ? undefined
         : visibleTraceAvoidanceForBaseStrength(traceBaseStrength, traceSupport);
-    const visibleCorpBidCapacity = Math.max(
-      0,
-      Math.floor(params.visibleCorpBidCapacity),
+    const visibleCorpBidCapacity = visibleCorpTraceBidCapacity(
+      params.quote!,
+      subroutine,
+      params.visibleCorpBidCapacity,
     );
     const visibleCorpMaxTraceAvoidance =
       traceBaseStrength === undefined
@@ -311,6 +312,19 @@ export function visibleIceRunHazardsForQuote(params: {
     }
   });
   return hazards;
+}
+
+function visibleCorpTraceBidCapacity(
+  quote: VisibleEffectiveIceRunQuote,
+  subroutine: VisibleEffectiveSubroutine,
+  visibleCorpCredits: number,
+): number {
+  const available =
+    Math.max(0, Math.floor(visibleCorpCredits)) +
+    Math.max(0, Math.floor(quote.encounterTemporaryTraceCredits ?? 0));
+  return subroutine.traceBidLimit === undefined
+    ? available
+    : Math.min(available, Math.max(0, Math.floor(subroutine.traceBidLimit)));
 }
 
 export function visibleIceRunHazardForTraceEffect(

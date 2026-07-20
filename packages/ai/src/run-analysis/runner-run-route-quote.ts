@@ -32,6 +32,7 @@ export type RunnerRunRouteQuote = {
   unknownIceCount: number;
   effects: RunnerRunRouteEffect[];
   conditionalReasons: string[];
+  conditionalRiskReasons?: string[];
   noAccessReason?: string;
   evidence: string[];
 };
@@ -90,11 +91,15 @@ export function quoteRunnerRunRoute(params: {
     (effect) => effect.canEndGameBeforeAccess,
   );
   const conditionalReasons = [
+    ...(params.path.conditionalAccessReasons ?? []),
     ...(accessPreventingConditionalHazard
       ? ["visible_access_preventing_effect_not_guaranteed"]
       : []),
     ...(lethalConditionalHazard ? ["visible_flatline_risk_before_access"] : []),
     ...(unknownIceCount > 0 ? ["unknown_ice_on_route"] : []),
+  ];
+  const conditionalRiskReasons = [
+    ...(params.path.conditionalRiskReasons ?? []),
   ];
   const traceConditionalBlock =
     params.path.blocked &&
@@ -123,6 +128,7 @@ export function quoteRunnerRunRoute(params: {
     unknownIceCount,
     effects,
     conditionalReasons,
+    ...(conditionalRiskReasons.length > 0 ? { conditionalRiskReasons } : {}),
     ...(reachability === "no_access"
       ? {
           noAccessReason:
@@ -140,6 +146,9 @@ export function quoteRunnerRunRoute(params: {
       `route_funding_gap:${fundingGap}`,
       `route_unknown_ice_count:${unknownIceCount}`,
       ...conditionalReasons.map((reason) => `route_conditional:${reason}`),
+      ...conditionalRiskReasons.map(
+        (reason) => `route_conditional_risk:${reason}`,
+      ),
     ],
   };
 }

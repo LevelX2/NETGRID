@@ -62,6 +62,12 @@ export function projectIceForRunPathEffects(
           ...(subroutine.traceSuccessEffect
             ? { traceSuccessEffect: subroutine.traceSuccessEffect }
             : {}),
+          ...(subroutine.runFutureStrengthCancelPaymentAmount !== undefined
+            ? {
+                runFutureStrengthCancelPaymentAmount:
+                  subroutine.runFutureStrengthCancelPaymentAmount,
+              }
+            : {}),
           ...(subroutine.breakTags
             ? { breakTags: subroutine.breakTags.slice() }
             : {}),
@@ -338,7 +344,6 @@ export function fallbackUnbrokenRunEffectForSubroutine(subroutine: {
     case "set_run_active_ice_program_trash":
     case "do_damage":
     case "trash_installed_program":
-    case "trash_installed_program_unless_runner_pays":
       return { causesDamageOrProgramTrash: true };
     case "set_runner_run_lock_actions":
       return { createsRunLockOrActionTax: Math.max(1, amount) };

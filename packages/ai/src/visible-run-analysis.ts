@@ -79,6 +79,13 @@ import {
   visibleIceRunHazardsForQuote,
   visibleIceRunHazardSummary,
 } from "./run-analysis/visible-run-hazards";
+import {
+  isVisibleHardEndRunSubroutine,
+  isVisiblePayEndRunSubroutine,
+  isVisibleRunnerCreditLossSubroutine,
+  isVisibleSecretSpendEndRunSubroutine,
+  secretSpendAccessPaymentForVisibleCorpCredits,
+} from "./run-analysis/visible-subroutine-semantics";
 
 export {
   runnerRunPathCreditBudgetWithVisiblePools,
@@ -176,6 +183,9 @@ function assessKnownRezzedIcePathInternal(
   let assessedKnownIceCount = 0;
   let firstKnownIceBreakable = false;
   let activeRunPathEffects = initialRunPathEffects.slice();
+  const conditionalAccessReasons = new Set<string>();
+  const conditionalRiskReasons = new Set<string>();
+  let visibleCorpCreditsThroughPath = visibleCorpBidCapacity;
   const breakerStrengths = new Map(
     rigCards.map((card) => [card.instanceId, card.strength ?? 0]),
   );
@@ -197,10 +207,27 @@ function assessKnownRezzedIcePathInternal(
     const pathCostBeforeIce = visibleBreakCost;
     assessedKnownIceCount += 1;
     const quote = runQuoteForIce(effectiveIce, iceIndex);
+    for (const effect of quote?.conditionalEncounterEffects ?? []) {
+      if (
+        effect.kind === "corp_paid_add_end_the_run_subroutine" &&
+        visibleCorpCreditsThroughPath >= effect.creditCost
+      ) {
+        conditionalAccessReasons.add("visible_corp_paid_encounter_etr");
+      }
+      if (effect.kind === "random_strength_or_derez_auto_pass") {
+        conditionalAccessReasons.add("visible_random_encounter_strength");
+      }
+    }
+    for (const subroutine of quote?.subroutines ?? []) {
+      if (subroutine.type === "random_damage") {
+        conditionalRiskReasons.add("visible_random_damage");
+      }
+      if (subroutine.type === "rewind_run_to_rezzed_ice_by_die") {
+        conditionalAccessReasons.add("visible_random_rewind");
+      }
+    }
     const endTheRunCount = quote
-      ? quote.subroutines.filter(
-          (subroutine) => subroutine.type === "end_the_run",
-        ).length
+      ? quote.subroutines.filter(isVisibleHardEndRunSubroutine).length
       : endTheRunSubroutineCount(iceDefinitionId);
     const deflectorCount =
       quote?.subroutines.filter((subroutine) =>
@@ -233,6 +260,43 @@ function assessKnownRezzedIcePathInternal(
       }
       visibleBreakCost += encounterTax;
       spendGeneralCredits(creditBudget, encounterTax);
+      creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
+    }
+    for (const subroutine of quote?.subroutines ?? []) {
+      if (!isVisibleRunnerCreditLossSubroutine(subroutine)) continue;
+      const lossAmount = Math.min(
+        creditBudget.credits,
+        Math.max(0, Math.floor(subroutine.amount ?? 0)),
+      );
+      if (lossAmount <= 0) continue;
+      const breakAssessment = minimumCreditsToBreakVisibleSubroutines(
+        effectiveIceForQuote(effectiveIce, quote),
+        rigCards,
+        [subroutine],
+        breakerStrengths,
+        additionalBreakCostPerSubroutine,
+      );
+      const breakPayment = breakAssessment
+        ? projectBreakerCreditPayment(creditBudget, breakAssessment)
+        : undefined;
+      if (
+        breakAssessment &&
+        breakPayment?.affordable &&
+        breakAssessment.cost < lossAmount
+      ) {
+        visibleBreakCost += breakAssessment.cost;
+        spendBreakerCreditsAndApplySideEffects(creditBudget, breakAssessment);
+        firstKnownIceBreakable = true;
+        if (breakAssessment.carriesStrengthAcrossIce) {
+          breakerStrengths.set(
+            breakAssessment.breakerInstanceId,
+            breakAssessment.endingStrength,
+          );
+        }
+      } else {
+        visibleBreakCost += lossAmount;
+        spendGeneralCredits(creditBudget, lossAmount);
+      }
       creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
     }
     if (accessPreservingBreakCount > 0) {
@@ -291,9 +355,7 @@ function assessKnownRezzedIcePathInternal(
       }
     }
     const payOrEndSubroutines =
-      quote?.subroutines.filter(
-        (subroutine) => subroutine.type === "end_the_run_unless_runner_pays",
-      ) ?? [];
+      quote?.subroutines.filter(isVisiblePayEndRunSubroutine) ?? [];
     for (const subroutine of payOrEndSubroutines) {
       const payCost = Math.max(0, Math.floor(subroutine.amount ?? 0));
       const breakAssessment = runPathEffectsPreventFutureBreaking(
@@ -345,13 +407,88 @@ function assessKnownRezzedIcePathInternal(
         );
       }
     }
+    const secretSpendEndRunSubroutines =
+      quote?.subroutines.filter(isVisibleSecretSpendEndRunSubroutine) ?? [];
+    for (const subroutine of secretSpendEndRunSubroutines) {
+      const payCost = secretSpendAccessPaymentForVisibleCorpCredits(
+        visibleCorpCreditsThroughPath,
+      );
+      const breakAssessment = runPathEffectsPreventFutureBreaking(
+        activeRunPathEffects,
+      )
+        ? undefined
+        : minimumCreditsToBreakVisibleSubroutines(
+            effectiveIceForQuote(effectiveIce, quote),
+            rigCards,
+            [subroutine],
+            breakerStrengths,
+            additionalBreakCostPerSubroutine,
+          );
+      if (payCost === undefined) {
+        const breakPayment = breakAssessment
+          ? projectBreakerCreditPayment(creditBudget, breakAssessment)
+          : undefined;
+        if (breakAssessment && breakPayment?.affordable) {
+          visibleBreakCost += breakAssessment.cost;
+          spendBreakerCreditsAndApplySideEffects(creditBudget, breakAssessment);
+          creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
+          firstKnownIceBreakable = true;
+          if (breakAssessment.carriesStrengthAcrossIce) {
+            breakerStrengths.set(
+              breakAssessment.breakerInstanceId,
+              breakAssessment.endingStrength,
+            );
+          }
+          continue;
+        }
+        conditionalAccessReasons.add("visible_secret_spend_end_run");
+        continue;
+      }
+      const payment = bestAccessPreservingPayment(
+        creditBudget,
+        payCost,
+        breakAssessment,
+      );
+      if (!payment.affordable) {
+        return blockedPathAssessment(
+          visibleBreakCost + payment.cost,
+          payment.creditsAfterPath,
+          iceIndex,
+          effectiveIce.definitionId,
+          effectiveIce.subtypes,
+          pathCostBeforeIce,
+          firstKnownIceBreakable,
+          assessedKnownIceCount,
+          pathCostBeforeIce > 0
+            ? "later_ice_unaffordable_after_prior_ice_cost"
+            : "ice_unaffordable",
+        );
+      }
+      visibleBreakCost += payment.cost;
+      if (payment.breakAssessment) {
+        spendBreakerCreditsAndApplySideEffects(
+          creditBudget,
+          payment.breakAssessment,
+        );
+        if (payment.breakAssessment.carriesStrengthAcrossIce) {
+          breakerStrengths.set(
+            payment.breakAssessment.breakerInstanceId,
+            payment.breakAssessment.endingStrength,
+          );
+        }
+      } else {
+        spendGeneralCredits(creditBudget, payment.cost);
+      }
+      creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
+      firstKnownIceBreakable = true;
+    }
     const visibleHazardProjections = visibleIceRunHazardsForQuote({
       quote,
       ice: effectiveIce,
       iceIndex,
       rigCards,
       availableCredits: Math.max(0, creditsAfterAvoidingVisibleIceHazards),
-      visibleCorpBidCapacity,
+      visibleCorpBidCapacity: visibleCorpCreditsThroughPath,
       breakerStrengths,
       additionalBreakCostPerSubroutine,
     });
@@ -484,7 +621,7 @@ function assessKnownRezzedIcePathInternal(
             rigCards,
             rootCards,
             creditBudget,
-            visibleCorpBidCapacity,
+            visibleCorpBidCapacity: visibleCorpCreditsThroughPath,
             deflectorContext,
             breakerStrengths,
             additionalBreakCostPerSubroutine,
@@ -505,10 +642,23 @@ function assessKnownRezzedIcePathInternal(
         activeRunPathEffects = [...activeRunPathEffects, effect];
       }
     }
+    visibleCorpCreditsThroughPath += (quote?.subroutines ?? [])
+      .filter((subroutine) => subroutine.type === "corp_gain_credit")
+      .reduce(
+        (sum, subroutine) =>
+          sum + Math.max(0, Math.floor(subroutine.amount ?? 0)),
+        0,
+      );
   }
   return {
     blocked: false,
     ...(visibleBreakCost > 0 ? { visibleBreakCost } : {}),
+    ...(conditionalAccessReasons.size > 0
+      ? { conditionalAccessReasons: [...conditionalAccessReasons].sort() }
+      : {}),
+    ...(conditionalRiskReasons.size > 0
+      ? { conditionalRiskReasons: [...conditionalRiskReasons].sort() }
+      : {}),
     ...visibleIceRunHazardSummary(
       visibleIceRunHazards,
       creditsAfterAvoidingVisibleIceHazards,

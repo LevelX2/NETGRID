@@ -77,6 +77,123 @@ describe("runner run plan path quote", () => {
     });
   });
 
+  it("uses visible public ICE trace caps and encounter-only trace credits", () => {
+    const cappedTrace = quoteRunnerRunPath(
+      runnerEncounterInput({
+        iceDefinitionId: "onr_proteus_024_homing-missile",
+        iceTitle: "Homing Missile",
+        iceStrength: 5,
+        credits: 10,
+        opponentCredits: 10,
+        rig: [],
+        subroutines: [
+          {
+            ...fragmentationStormTraceSubroutine(),
+            id: "homing-missile-trace",
+            amount: 5,
+            baseTraceStrength: 5,
+            traceBidLimit: 5,
+          },
+        ],
+        legalActions: [
+          continueAction({
+            encounterWillEndRun: false,
+            unbrokenSubroutineCount: 1,
+          }),
+        ],
+      }),
+      runPlan(),
+    );
+    const temporaryPoolTrace = quoteRunnerRunPath(
+      runnerEncounterInput({
+        iceDefinitionId: "onr_v1_290_pocket-v-r",
+        iceTitle: "Pocket V.R.",
+        iceStrength: 4,
+        credits: 8,
+        opponentCredits: 0,
+        encounterTemporaryTraceCredits: 4,
+        rig: [],
+        subroutines: [
+          {
+            ...fragmentationStormTraceSubroutine(),
+            id: "pocket-vr-trace",
+          },
+        ],
+        legalActions: [
+          continueAction({
+            encounterWillEndRun: false,
+            unbrokenSubroutineCount: 1,
+          }),
+        ],
+      }),
+      runPlan(),
+    );
+
+    expect(
+      cappedTrace.iceQuotes[0]?.cheapestAccessPreservingSequence,
+    ).toMatchObject({ totalCost: 10, usesTrace: true });
+    expect(
+      temporaryPoolTrace.iceQuotes[0]?.cheapestAccessPreservingSequence,
+    ).toMatchObject({ totalCost: 8, usesTrace: true });
+  });
+
+  it("keeps special visible payment choices distinct from unavoidable threats", () => {
+    const puzzle = quoteRunnerRunPath(
+      runnerEncounterInput({
+        iceDefinitionId: "onr_proteus_030_puzzle",
+        iceTitle: "Puzzle",
+        iceStrength: 3,
+        rig: [],
+        subroutines: [
+          {
+            id: "puzzle-hard-end-run",
+            type: "end_the_run_and_trash_source_at_end_of_turn",
+          },
+        ],
+        legalActions: [
+          continueAction({
+            encounterWillEndRun: true,
+            unbrokenSubroutineCount: 1,
+          }),
+        ],
+      }),
+      runPlan(),
+    );
+    const washedUp = quoteRunnerRunPath(
+      runnerEncounterInput({
+        iceDefinitionId: "onr_proteus_039_washed-up-solo-construct",
+        iceTitle: "Washed-Up Solo Construct",
+        iceStrength: 2,
+        credits: 1,
+        subroutines: [
+          {
+            id: "washed-up-pay-or-trash",
+            type: "trash_installed_program_unless_runner_pays",
+            amount: 1,
+          },
+        ],
+        legalActions: [
+          continueAction({
+            encounterWillEndRun: false,
+            unbrokenSubroutineCount: 1,
+          }),
+        ],
+      }),
+      runPlan(),
+    );
+
+    expect(puzzle).toMatchObject({
+      canReachAccess: false,
+      cannotReachReason: "known_ice_unbreakable",
+    });
+    expect(
+      washedUp.iceQuotes[0]?.cheapestAccessPreservingSequence?.steps.map(
+        (step) => step.actionType,
+      ),
+    ).toEqual(["continue_run"]);
+    expect(washedUp.canReachAccess).toBe(true);
+  });
+
   it("prefers a cheaper legal break over the guaranteed Trace bid", () => {
     const input = runnerEncounterInput({
       iceDefinitionId: "onr_v1_246_fragmentation-storm",
@@ -670,6 +787,7 @@ function runnerEncounterInput(params: {
   iceStrength: number;
   credits?: number;
   opponentCredits?: number;
+  encounterTemporaryTraceCredits?: number;
   rig?: VisibleCard[];
   breaker?: VisibleCard;
   extraRig?: VisibleCard[];
@@ -837,6 +955,7 @@ function visibleIce(params: {
   iceDefinitionId: string;
   iceTitle: string;
   iceStrength: number;
+  encounterTemporaryTraceCredits?: number;
   subroutines?: NonNullable<VisibleCard["effectiveRunQuote"]>["subroutines"];
 }): VisibleCard {
   return {
@@ -855,6 +974,12 @@ function visibleIce(params: {
       iceInstanceId: "ice-1",
       iceDefinitionId: params.iceDefinitionId,
       effectiveStrength: params.iceStrength,
+      ...(params.encounterTemporaryTraceCredits !== undefined
+        ? {
+            encounterTemporaryTraceCredits:
+              params.encounterTemporaryTraceCredits,
+          }
+        : {}),
       subroutines: params.subroutines ?? [
         {
           id: `${params.iceDefinitionId}:etr`,

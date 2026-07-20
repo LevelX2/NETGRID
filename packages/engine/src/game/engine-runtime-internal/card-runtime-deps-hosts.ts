@@ -94,6 +94,7 @@ import {
   spendClicks,
   spendCredits,
 } from "../state/economy-mutation";
+import { publicIceRunSubroutineDerivation } from "../run/public-ice-run-derivation";
 import {
   addCardCounter,
   cardCounter,
@@ -1100,7 +1101,14 @@ export function createCardRuntimeDepsHosts(
       printedSubroutinesForCardImplementation(iceDefinition) ??
       iceDefinition.subroutines ??
       [];
-    const subroutines = printedSubroutines.flatMap((subroutine) => {
+    const publicDerivation = run?.encounteredIceId
+      ? publicIceRunSubroutineDerivation(
+          state,
+          run.encounteredIceId,
+          printedSubroutines,
+        )
+      : { printedSubroutines: [...printedSubroutines], appendedSubroutines: [] };
+    const subroutines = publicDerivation.printedSubroutines.flatMap((subroutine) => {
       const copies = [subroutine];
       for (let index = 0; index < transmutationCopies; index += 1) {
         copies.push({
@@ -1108,17 +1116,7 @@ export function createCardRuntimeDepsHosts(
           id: `${subroutine.id}.scored_rezzed_ice_mark_modifier.${index + 1}`,
         });
       }
-      return copies.map((copy) =>
-        relativeDamageSubroutineForCurrentEncounter(
-          state,
-          run?.encounteredIceId,
-          variableTraceSubroutineForCurrentEncounter(
-            state,
-            run?.encounteredIceId,
-            copy,
-          ),
-        ),
-      );
+      return copies;
     });
     if (
       run?.encounteredIceId &&
@@ -1131,20 +1129,11 @@ export function createCardRuntimeDepsHosts(
       });
     }
     if (run?.encounteredIceId) {
-      const variableIceState =
-        state.cardInstances[run.encounteredIceId]?.variableIceState;
-      if (variableIceState?.family === "paid_end_the_run_subroutines") {
-        const subroutineCount = Math.max(
-          0,
-          Math.floor(variableIceState.subroutineCount ?? 0),
-        );
-        for (let index = 0; index < subroutineCount; index += 1) {
-          subroutines.push({
-            id: `variable_ice_paid_end_the_run_${index + 1}`,
-            type: "end_the_run",
-          });
-        }
-      }
+      subroutines.push(
+        ...publicDerivation.appendedSubroutines.filter(
+          (subroutine) => subroutine.type === "end_the_run",
+        ),
+      );
       subroutines.push(
         ...currentEncounterAdditionalSubroutinesForIce(
           state,
@@ -1152,9 +1141,8 @@ export function createCardRuntimeDepsHosts(
         ),
       );
       subroutines.push(
-        ...relativeTraceSubroutinesForCurrentEncounter(
-          state,
-          run.encounteredIceId,
+        ...publicDerivation.appendedSubroutines.filter(
+          (subroutine) => subroutine.type === "initiate_trace",
         ),
       );
       subroutines.push(
@@ -1170,22 +1158,10 @@ export function createCardRuntimeDepsHosts(
     subroutine: NonNullable<CardDefinition["subroutines"]>[number],
   ): NonNullable<CardDefinition["subroutines"]>[number] {
     if (!iceId || subroutine.type !== "initiate_trace") return subroutine;
-    const instance = state.cardInstances[iceId];
-    const variableRez = cardImplementationForDefinitionId(
-      instance?.definitionId ?? "",
-    )?.variableRez;
-    const variableIceState = instance?.variableIceState;
-    if (
-      variableRez?.kind !== "x_strength" ||
-      variableIceState?.family !== "x_strength"
-    )
-      return subroutine;
-    const value = Math.max(0, Math.floor(variableIceState.value));
-    return {
-      ...subroutine,
-      ...(variableRez.traceBaseFromValue ? { baseTraceStrength: value } : {}),
-      ...(variableRez.traceBidLimitFromValue ? { traceBidLimit: value } : {}),
-    };
+    return publicIceRunSubroutineDerivation(state, iceId, [subroutine])
+      .printedSubroutines[0] as NonNullable<
+      CardDefinition["subroutines"]
+    >[number];
   }
 
   function relativeDamageSubroutineForCurrentEncounter(
@@ -1194,35 +1170,20 @@ export function createCardRuntimeDepsHosts(
     subroutine: NonNullable<CardDefinition["subroutines"]>[number],
   ): NonNullable<CardDefinition["subroutines"]>[number] {
     if (!iceId || subroutine.type !== "do_damage") return subroutine;
-    const relativeIce = cardImplementationForDefinitionId(
-      definitionFor(state, iceId).id,
-    )?.relativeIce;
-    const dynamicDamage = relativeIce?.dynamicDamageSubroutine;
-    if (!dynamicDamage || dynamicDamage.subroutineId !== subroutine.id)
-      return subroutine;
-    return {
-      ...subroutine,
-      amount:
-        deps.rezzedIceOutsideThisIceCount(state, iceId) *
-        dynamicDamage.amountPerCount,
-    };
+    return publicIceRunSubroutineDerivation(state, iceId, [subroutine])
+      .printedSubroutines[0] as NonNullable<
+      CardDefinition["subroutines"]
+    >[number];
   }
 
   function relativeTraceSubroutinesForCurrentEncounter(
     state: GameState,
     iceId: CardInstanceId,
   ): NonNullable<CardDefinition["subroutines"]> {
-    const definition = definitionFor(state, iceId);
-    const dynamicTrace = cardImplementationForDefinitionId(definition.id)
-      ?.relativeIce?.dynamicTraceSubroutines;
-    if (!dynamicTrace) return [];
-    const count = deps.rezzedIceOutsideThisIceCount(state, iceId);
-    return Array.from({ length: count }, (_, index) => ({
-      id: `relative_ice_outside_${definition.id}.trace.${index + 1}`,
-      type: "initiate_trace",
-      baseTraceStrength: dynamicTrace.baseTraceStrength,
-      traceSuccessEffect: dynamicTrace.traceSuccessEffect,
-    }));
+    return publicIceRunSubroutineDerivation(state, iceId, [])
+      .appendedSubroutines.filter(
+        (subroutine) => subroutine.type === "initiate_trace",
+      ) as NonNullable<CardDefinition["subroutines"]>;
   }
 
   function runCardImplementationActionHost(state: GameState) {
