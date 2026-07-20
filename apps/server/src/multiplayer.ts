@@ -3308,6 +3308,8 @@ function participantNamesForReplay(record: StoredMatch): ReplayIndexEntry["parti
     if (session.side === "runner" && !bySide.runner) bySide.runner = session.displayName;
     if (session.side === "corp" && !bySide.corp) bySide.corp = session.displayName;
   }
+  if (record.match.aiControllers?.runner) bySide.runner = "Runner-KI";
+  if (record.match.aiControllers?.corp) bySide.corp = "Corp-KI";
   return bySide;
 }
 
