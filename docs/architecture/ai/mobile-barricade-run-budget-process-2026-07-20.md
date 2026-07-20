@@ -2,7 +2,8 @@
 
 ## Status
 
-In Arbeit seit 2026-07-20.
+Umsetzung und Verifikation im Worktree am 2026-07-20 abgeschlossen. Die lokale
+Integration nach `main` folgt nach dem Abschlusscommit.
 
 ## Quelle und Gesamtziel
 
@@ -122,3 +123,39 @@ Mindestens:
 - Evidence, Consumer-Kette, Grenzen und Checks sind dokumentiert.
 - Arbeitsbranch ist lokal in `main` integriert; Worktree und Branch sind
   anschließend verifiziert entfernt.
+
+## Ausführungsstand
+
+- Paket A ist mit Commit `60f509e1e` abgeschlossen.
+- Paket B ist mit Commit `f6fc53bd5` abgeschlossen. Die historischen
+  Decisions 72, 73 und 76 wurden mit strengem, driftfreiem Suffix-Warmup ab
+  Decision 70 konserviert. Vor dem Fix waren die drei Zielentscheidungen als
+  `behavior_regression` rot; Low-Corp- und korrekt-gehostete Kontrollen waren
+  grün.
+- Paket C ist mit Commit `d07d4f3a7` abgeschlossen. PlayerView und AI-DTO
+  transportieren die Engine-Berechtigung `requireHostedBreakerForIcebreakerUse`.
+  RunBudget, Pfadquote, Pump- und Encounter-Zahlung führen hosted-only Credits
+  breaker-spezifisch. Ein Score-Remote-Probe darf bei null oder einem
+  sichtbaren Corp-Credit und finanzierter bekannter Route weiter starten. Bei
+  hohem Corp-Creditstand, null/äußerst knapper Reserve oder bereits
+  unbezahlbarer bekannter Route wird zuerst finanziert. Gewöhnliche
+  Informationsprobes mit vorhandenem Restpolster bleiben erhalten.
+- Paket D ist mit Commit `a72472d17` abgeschlossen. Nichtpermanenter Schaden
+  wird nur dann als zwingender Safety-Break klassifiziert, wenn er den Runner
+  flatlinen würde. Core-/Brain-Damage, Programmtrash und andere unmittelbare
+  Gefahren bleiben unverändert geschützt. Endet der Run ohnehin, darf die KI
+  nichttödlichen Net-/Meat-Damage akzeptieren; ein danach legales
+  Prevention-Fenster wird weiterhin vom bestehenden Prevention-Chooser
+  bedient.
+- Paket E ist fachlich abgeschlossen. Die acht historischen und synthetischen
+  Checkpoints, 125 fokussierte/angrenzende KI-Tests, Engine-View-Test und alle
+  drei AI-Shards sind grün. Die Shards umfassen 423 Testdateien und 2.927
+  Tests. Shared-, Engine- und AI-Typecheck sowie Format- und Diff-Gate sind
+  grün.
+- Der deckweite Audit bestätigt das Zielverhalten und 20/20 eindeutige Karten,
+  bleibt aber wegen fünf vorbestehenden, nicht kausalen Hint-Consumer-Blockern
+  rot: Disgruntled Ice Technician, Streetware Distributor, Cloak, Clown und
+  Vewy Vewy Quiet. Diese Blocker wurden gemäß Scope nicht mit diesem Fix
+  vermischt.
+- Paket F steht bis zum Abschlusscommit, defensiven Main-Abgleich, lokalen
+  Merge und verifizierten Cleanup aus.

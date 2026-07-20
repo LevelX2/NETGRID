@@ -21,8 +21,7 @@ export function runnerBasicActionPenaltyScoreComponents(
   input: AiDecisionInput,
   action: LegalAction,
   scopeId: string,
-  dependencies: RunnerBasicActionPenaltyScoreDependencies =
-    DEFAULT_DEPENDENCIES,
+  dependencies: RunnerBasicActionPenaltyScoreDependencies = DEFAULT_DEPENDENCIES,
 ): AiDecisionScoreComponent[] {
   const components: AiDecisionScoreComponent[] = [];
   if (action.type === "jack_out" && scopeId === "simple_run_choice") {

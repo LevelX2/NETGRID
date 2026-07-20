@@ -1,4 +1,8 @@
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 
 import {
   type RunnerRunPathCreditBudget,
@@ -207,7 +211,10 @@ function normalizeBudget(
     hostedIcebreakerCreditsByBreakerInstanceId: Object.fromEntries(
       Object.entries(
         budget.hostedIcebreakerCreditsByBreakerInstanceId ?? {},
-      ).map(([breakerId, amount]) => [breakerId, normalizeCreditAmount(amount)]),
+      ).map(([breakerId, amount]) => [
+        breakerId,
+        normalizeCreditAmount(amount),
+      ]),
     ),
   };
 }

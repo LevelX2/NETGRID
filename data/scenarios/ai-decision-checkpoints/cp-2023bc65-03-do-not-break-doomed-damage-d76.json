@@ -926,26 +926,20 @@
           "corp_onr_v1_290_efficiency-experts_1",
           "corp_onr_v1_290_efficiency-experts_3"
         ],
-        "scoreArea": [
-          "corp_onr_v1_189_artificial-security-directors_1"
-        ],
+        "scoreArea": ["corp_onr_v1_189_artificial-security-directors_1"],
         "servers": [
           {
             "id": "hq",
             "kind": "hq",
             "label": "HQ",
-            "ice": [
-              "corp_onr_v1_237_data-wall_1"
-            ],
+            "ice": ["corp_onr_v1_237_data-wall_1"],
             "root": []
           },
           {
             "id": "rd",
             "kind": "rd",
             "label": "R&D",
-            "ice": [
-              "corp_onr_proteus_024_gatekeeper_1"
-            ],
+            "ice": ["corp_onr_proteus_024_gatekeeper_1"],
             "root": []
           },
           {
@@ -964,9 +958,7 @@
               "corp_onr_proteus_032_misleading-access-menus_2",
               "corp_onr_proteus_033_mobile-barricade_1"
             ],
-            "root": [
-              "corp_onr_v1_347_vapor-ops_2"
-            ]
+            "root": ["corp_onr_v1_347_vapor-ops_2"]
           }
         ]
       },
@@ -1033,9 +1025,7 @@
             "runner_onr_v1_039_krash_1",
             "runner_onr_v1_071_vewy-vewy-quiet_1"
           ],
-          "hardware": [
-            "runner_onr_proteus_139_eurocorpse-tm-spin-chip_1"
-          ],
+          "hardware": ["runner_onr_proteus_139_eurocorpse-tm-spin-chip_1"],
           "resources": []
         }
       },
@@ -6183,9 +6173,7 @@
               "support": 90,
               "final": 64
             },
-            "supportGaps": [
-              "weak_tag_damage_defense"
-            ],
+            "supportGaps": ["weak_tag_damage_defense"],
             "evidence": [
               "strategy:runner.run_event_tempo",
               "confidence:medium",
@@ -6253,19 +6241,14 @@
           "kind": "none",
           "required": 0,
           "satisfied": true,
-          "evidence": [
-            "reserve_source:runtime_context",
-            "reserve:none"
-          ]
+          "evidence": ["reserve_source:runtime_context", "reserve:none"]
         },
         "blockers": [],
         "transition": {
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "runner.search.breaker",
-          "evidence": [
-            "continued:runner.search.breaker"
-          ]
+          "evidence": ["continued:runner.search.breaker"]
         },
         "commitment": {
           "strategyId": "runner.search.breaker",
@@ -6350,10 +6333,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6436,10 +6416,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6524,10 +6501,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6549,9 +6523,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -6614,10 +6586,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -7140,10 +7109,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -7275,26 +7241,20 @@
             "known": true,
             "rezzed": true,
             "visibleName": "Mobile Barricade",
-            "visibleSubtypes": [
-              "wall"
-            ],
+            "visibleSubtypes": ["wall"],
             "effectiveStrength": 3,
             "subroutineQuotes": [
               {
                 "index": 0,
                 "threatClass": "must_break_for_survival",
                 "broken": false,
-                "evidence": [
-                  "subroutine_type:do_damage"
-                ]
+                "evidence": ["subroutine_type:do_damage"]
               },
               {
                 "index": 1,
                 "threatClass": "must_break_for_access",
                 "broken": false,
-                "evidence": [
-                  "subroutine_type:end_the_run"
-                ]
+                "evidence": ["subroutine_type:end_the_run"]
               }
             ],
             "breakerCoverage": [
@@ -7352,9 +7312,7 @@
               "usesPrevention": false,
               "preservesAccessObjective": true,
               "violatesReserve": false,
-              "riskTags": [
-                "break_action_expected_after_pump"
-              ],
+              "riskTags": ["break_action_expected_after_pump"],
               "evidence": [
                 "current_encounter_future_path_modifier_required:true",
                 "run_remainder_subroutine_effect:true",
@@ -7399,9 +7357,7 @@
               "usesPrevention": false,
               "preservesAccessObjective": false,
               "violatesReserve": false,
-              "riskTags": [
-                "break_action_expected_after_pump"
-              ],
+              "riskTags": ["break_action_expected_after_pump"],
               "evidence": [
                 "current_encounter_safety_break_sequence:true",
                 "current_encounter_pump_break_sequence:true",
@@ -7437,26 +7393,20 @@
             "known": true,
             "rezzed": true,
             "visibleName": "Gatekeeper",
-            "visibleSubtypes": [
-              "code_gate"
-            ],
+            "visibleSubtypes": ["code_gate"],
             "effectiveStrength": 4,
             "subroutineQuotes": [
               {
                 "index": 0,
                 "threatClass": "must_break_for_access",
                 "broken": false,
-                "evidence": [
-                  "subroutine_type:end_the_run"
-                ]
+                "evidence": ["subroutine_type:end_the_run"]
               },
               {
                 "index": 1,
                 "threatClass": "must_break_for_access",
                 "broken": false,
-                "evidence": [
-                  "subroutine_type:end_the_run"
-                ]
+                "evidence": ["subroutine_type:end_the_run"]
               }
             ],
             "breakerCoverage": [
@@ -7544,9 +7494,7 @@
         "accessStatus": "no_access",
         "guaranteedKnownCost": 12,
         "routeEffects": [],
-        "conditionalReasons": [
-          "unknown_ice_on_route"
-        ],
+        "conditionalReasons": ["unknown_ice_on_route"],
         "cannotReachReason": "insufficient_credits_after_reserve",
         "requiredSequences": [
           {
@@ -7568,9 +7516,7 @@
             "usesPrevention": false,
             "preservesAccessObjective": true,
             "violatesReserve": false,
-            "riskTags": [
-              "break_action_expected_after_pump"
-            ],
+            "riskTags": ["break_action_expected_after_pump"],
             "evidence": [
               "current_encounter_future_path_modifier_required:true",
               "run_remainder_subroutine_effect:true",
@@ -7673,9 +7619,7 @@
           "knownCost": 12,
           "guaranteedKnownCost": 12,
           "unknownIceCount": 1,
-          "conditionalReasons": [
-            "unknown_ice_on_route"
-          ]
+          "conditionalReasons": ["unknown_ice_on_route"]
         },
         "costs": {
           "runAction": 0,
@@ -7687,9 +7631,7 @@
           "gripAfterRun": 0,
           "stealOrTrash": 0
         },
-        "acceptedRisks": [
-          "conditional:unknown_ice_on_route"
-        ],
+        "acceptedRisks": ["conditional:unknown_ice_on_route"],
         "expectedUtility": 340,
         "terminalConditions": {
           "runnerAgendaPoints": 0,

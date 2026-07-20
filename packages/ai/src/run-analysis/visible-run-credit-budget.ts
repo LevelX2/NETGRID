@@ -129,7 +129,10 @@ export function normalizeRunnerRunPathCreditBudget(
     hostedIcebreakerCreditsByBreakerInstanceId: Object.fromEntries(
       Object.entries(
         budget.hostedIcebreakerCreditsByBreakerInstanceId ?? {},
-      ).map(([breakerId, amount]) => [breakerId, normalizeCreditAmount(amount)]),
+      ).map(([breakerId, amount]) => [
+        breakerId,
+        normalizeCreditAmount(amount),
+      ]),
     ),
   };
 }

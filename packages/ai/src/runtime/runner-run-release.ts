@@ -156,9 +156,7 @@ function visibleCorpCredits(input: AiDecisionInput): number {
   return Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0;
 }
 
-function highValueUnknownProbe(
-  evaluation: RunnerRunTargetEvaluation,
-): boolean {
+function highValueUnknownProbe(evaluation: RunnerRunTargetEvaluation): boolean {
   return (
     evaluation.scoreThreat === true ||
     evaluation.accessPayoff === "score_threat" ||

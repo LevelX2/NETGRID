@@ -2,9 +2,7 @@ import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { RunnerRunPlan } from "./runner-run-plan-types";
 import { actionCreditCost } from "./action-cost";
 import { currentEncounteredIceCard } from "./current-encounter";
-import {
-  isUnacceptableImmediateSafetyThreatSubroutine,
-} from "./encounter-subroutine";
+import { isUnacceptableImmediateSafetyThreatSubroutine } from "./encounter-subroutine";
 import {
   quoteRunnerRunPath,
   runnerRunPlanCurrentEncounterRequiresBreak,

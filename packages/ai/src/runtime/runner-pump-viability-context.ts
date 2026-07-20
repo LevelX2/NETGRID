@@ -1,4 +1,8 @@
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 
 import {
   canBreakerDefinitionBreakIce,
@@ -137,8 +141,7 @@ export function createRunnerPumpViabilityContext(
       currentQuote?.subroutines.filter((subroutine) =>
         visibleDeflectorSubroutineCanResolve(subroutine, deflectorContext),
       ).length ?? 0;
-    const runEffect =
-      dependencies.encounterRunRemainderEffectAssessment(input);
+    const runEffect = dependencies.encounterRunRemainderEffectAssessment(input);
     const hasUsefulRunRemainderEffect =
       runEffect.hasRunRemainderEffect &&
       (runEffect.mustBreak ||
@@ -199,10 +202,7 @@ export function createRunnerPumpViabilityContext(
       currentQuote?.subroutines.filter(
         (subroutine) =>
           isImmediateSafetyThreatSubroutine(subroutine) ||
-          visibleDeflectorSubroutineCanResolve(
-            subroutine,
-            deflectorContext,
-          ) ||
+          visibleDeflectorSubroutineCanResolve(subroutine, deflectorContext) ||
           (encounterContinue?.payload?.encounterWillEndRun === true &&
             isEndRunSubroutine(subroutine)),
       ).length ??
@@ -220,11 +220,8 @@ export function createRunnerPumpViabilityContext(
         : dependencies.estimatedEncounterBreakCost(input, action);
     if (
       estimatedBreakCost === undefined ||
-      !spendIcebreakerCredits(
-        pumpPayment.budget,
-        breaker,
-        estimatedBreakCost,
-      ).affordable
+      !spendIcebreakerCredits(pumpPayment.budget, breaker, estimatedBreakCost)
+        .affordable
     )
       return {
         canLeadToBreak: false,
