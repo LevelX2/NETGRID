@@ -4403,6 +4403,10 @@ describe("MVP 0.2 multiplayer service", () => {
       displayName: "Offener Host",
       seed: "public-directory-open",
       isPublic: true,
+      settings: {
+        matchFormat: "two_game_side_swap",
+        cardPool: "originalset_classic_proteus",
+      },
     });
     const active = await service.createMatch({
       hostSide: "runner",
@@ -4433,17 +4437,39 @@ describe("MVP 0.2 multiplayer service", () => {
 
     const entries = await service.listPublicMatches();
 
+    expect(entries.map((entry) => entry.status)).toEqual([
+      "open",
+      "active",
+      "finished",
+    ]);
     expect(entries).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ matchId: open.matchId, status: "open" }),
+        expect.objectContaining({
+          matchId: open.matchId,
+          status: "open",
+          hostDisplayName: "Offener Host",
+          hostSide: "runner",
+          availableSide: "corp",
+          matchFormat: "two_game_side_swap",
+          cardPool: "originalset_classic_proteus",
+          seriesGamesPlanned: 2,
+        }),
         expect.objectContaining({ matchId: active.matchId, status: "active" }),
         expect.objectContaining({
           matchId: finished.matchId,
           status: "finished",
           winner: "corp",
+          result: expect.objectContaining({
+            schemaVersion: "netgrid-match-result-v1",
+            matchId: finished.matchId,
+            winner: "corp",
+          }),
         }),
       ]),
     );
+    expect(
+      (await storage.load(finished.matchId))?.resultSnapshot,
+    ).toBeDefined();
     expect(
       entries.some((entry) => entry.matchId === privateMatch.matchId),
     ).toBe(false);

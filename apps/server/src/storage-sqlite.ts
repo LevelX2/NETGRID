@@ -475,12 +475,14 @@ export class SqliteMatchStorage implements MultiplayerStorage {
   async listPublicMatchCandidates(): Promise<StoredMatch[]> {
     const rows = this.db
       .prepare(
-        "SELECT record_json AS recordJson FROM matches ORDER BY updated_at DESC",
+        `SELECT record_json AS recordJson
+         FROM matches
+         WHERE json_extract(record_json, '$.match.isPublic') = 1
+           AND status IN ('pending', 'active', 'finished', 'forfeited')
+         ORDER BY updated_at DESC`,
       )
       .all() as Array<{ recordJson: string }>;
-    return rows
-      .map((row) => JSON.parse(row.recordJson) as StoredMatch)
-      .filter((record) => record.match.isPublic);
+    return rows.map((row) => JSON.parse(row.recordJson) as StoredMatch);
   }
 
   async listResultSnapshotCandidates(): Promise<StoredMatch[]> {

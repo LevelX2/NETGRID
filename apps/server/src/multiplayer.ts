@@ -839,6 +839,26 @@ export class MultiplayerService {
     for (const observer of this.persistenceObservers) await observer(record);
   }
 
+  private async ensurePersistedResultSnapshots(
+    candidates: StoredMatch[],
+  ): Promise<StoredMatch[]> {
+    const records: StoredMatch[] = [];
+    for (const candidate of candidates) {
+      if (
+        !isCompletedGameStatus(candidate.match.status) ||
+        candidate.resultSnapshot
+      ) {
+        records.push(candidate);
+        continue;
+      }
+      const record = await this.storage.load(candidate.match.matchId);
+      if (!record) continue;
+      if (ensureMatchResultSnapshot(record)) await this.storage.save(record);
+      records.push(record);
+    }
+    return records;
+  }
+
   async createMatch(
     input: {
       hostSide: HostSideSelection;
@@ -3157,13 +3177,15 @@ export class MultiplayerService {
   }
 
   async listPublicMatches(): Promise<PublicMatchListEntry[]> {
-    const records = this.storage.listPublicMatchCandidates
+    const candidates = this.storage.listPublicMatchCandidates
       ? await this.storage.listPublicMatchCandidates()
       : this.storage.list
         ? await this.storage.list()
         : [];
+    const records = await this.ensurePersistedResultSnapshots(
+      candidates.filter((record) => record.match.isPublic),
+    );
     return records
-      .filter((record) => record.match.isPublic)
       .map((record): PublicMatchListEntry | undefined => {
         let status: PublicMatchListEntry["status"] | undefined;
         if (
@@ -3174,7 +3196,10 @@ export class MultiplayerService {
           status = "open";
         } else if (record.match.status === "active") {
           status = "active";
-        } else if (isTerminalStatus(record.match.status) && record.gameState) {
+        } else if (
+          isCompletedGameStatus(record.match.status) &&
+          record.gameState
+        ) {
           status = "finished";
         }
         if (!status) return undefined;
@@ -3194,6 +3219,7 @@ export class MultiplayerService {
         ) {
           participantNames.corp = "Corp-KI";
         }
+        const host = record.sessions[0];
         return {
           matchId: record.match.matchId,
           status,
@@ -3203,13 +3229,34 @@ export class MultiplayerService {
           createdAt: record.match.createdAt,
           updatedAt: record.match.updatedAt,
           participantNames,
-          ...(record.gameState.winner
-            ? { winner: record.gameState.winner }
+          ...(status === "open" && host
+            ? {
+                hostDisplayName: host.displayName?.trim() || "Teilnehmer A",
+                hostSide: host.side,
+                availableSide: opposite(host.side),
+              }
+            : {}),
+          ...(record.match.series
+            ? { seriesGamesPlanned: record.match.series.gamesPlanned }
+            : {}),
+          ...(record.resultSnapshot?.winner
+            ? { winner: record.resultSnapshot.winner }
+            : record.gameState.winner
+              ? { winner: record.gameState.winner }
+              : {}),
+          ...(status === "finished" && record.resultSnapshot
+            ? { result: record.resultSnapshot }
             : {}),
         };
       })
       .filter((entry): entry is PublicMatchListEntry => Boolean(entry))
-      .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
+      .sort(
+        (left, right) =>
+          publicMatchStatusPriority(left.status) -
+            publicMatchStatusPriority(right.status) ||
+          right.updatedAt.localeCompare(left.updatedAt) ||
+          left.matchId.localeCompare(right.matchId),
+      );
   }
 
   async loadPublicSpectatorView(
@@ -3249,17 +3296,7 @@ export class MultiplayerService {
       : this.storage.list
         ? await this.storage.list()
         : [];
-    const records: StoredMatch[] = [];
-    for (const candidate of candidates) {
-      if (candidate.resultSnapshot) {
-        records.push(candidate);
-        continue;
-      }
-      const record = await this.storage.load(candidate.match.matchId);
-      if (!record || !ensureMatchResultSnapshot(record)) continue;
-      await this.storage.save(record);
-      records.push(record);
-    }
+    const records = await this.ensurePersistedResultSnapshots(candidates);
     const normalizedLimit = Number.isFinite(limit) ? Math.floor(limit) : 20;
     const cappedLimit = Math.max(1, Math.min(50, normalizedLimit));
     const seriesGroups = new Map<string, StoredMatch[]>();
@@ -4951,6 +4988,20 @@ function isTerminalStatus(status: MatchStatus): boolean {
     status === "forfeited" ||
     status === "finished"
   );
+}
+
+function isCompletedGameStatus(
+  status: MatchStatus,
+): status is Extract<MatchStatus, "finished" | "forfeited"> {
+  return status === "finished" || status === "forfeited";
+}
+
+function publicMatchStatusPriority(
+  status: PublicMatchListEntry["status"],
+): number {
+  if (status === "open") return 0;
+  if (status === "active") return 1;
+  return 2;
 }
 
 function isSeriesGameCompleteForNext(record: StoredMatch): boolean {
