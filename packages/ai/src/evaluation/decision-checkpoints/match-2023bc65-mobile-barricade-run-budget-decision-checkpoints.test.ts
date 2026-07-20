@@ -87,6 +87,31 @@ describe("match 2023BC65 Mobile Barricade run-budget checkpoints", () => {
   it("does not break Mobile Barricades damage after access is already lost", () => {
     expectCheckpointToPass(fixture(doNotBreakDoomedDamageJson));
   });
+
+  it("still starts the safety sequence when Mobile Barricades damage would flatline", () => {
+    const lethalDamage = mutateFixture(
+      allowNonlethalDamageJson,
+      (checkpoint) => {
+        const state = checkpoint.engine.testOnlyGameState;
+        for (const cardId of state.runner.grip) {
+          state.runner.heap.push(cardId);
+          state.cardInstances[cardId] = {
+            ...state.cardInstances[cardId]!,
+            zone: { side: "runner", zone: "heap" },
+          };
+        }
+        state.runner.grip = [];
+        checkpoint.source.kind = "synthetic_companion";
+        checkpoint.source.findingId = "2023BC65-C05-LETHAL-NET-DAMAGE";
+        checkpoint.expectation = {
+          acceptableActions: [{ type: "pump_breaker" }],
+          forbiddenActions: [{ type: "continue_run" }],
+        };
+      },
+    );
+
+    expectCheckpointToPass(lethalDamage);
+  });
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {

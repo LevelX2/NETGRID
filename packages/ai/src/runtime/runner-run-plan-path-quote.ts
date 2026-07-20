@@ -31,6 +31,7 @@ import {
 import {
   isEndRunSubroutine,
   isImmediateSafetyThreatSubroutine,
+  isUnacceptableImmediateSafetyThreatSubroutine,
   isProgramTrashThreatSubroutine,
 } from "./encounter-subroutine";
 import {
@@ -1140,7 +1141,7 @@ function threatClassForSubroutine(
   ) {
     return "irrelevant_to_current_plan";
   }
-  if (isImmediateSafetyThreatSubroutine(subroutine)) {
+  if (isUnacceptableImmediateSafetyThreatSubroutine(input, subroutine)) {
     return "must_break_for_survival";
   }
   if (

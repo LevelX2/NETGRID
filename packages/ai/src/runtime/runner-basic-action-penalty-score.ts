@@ -4,6 +4,7 @@ import type {
   LegalAction,
 } from "@netgrid/shared";
 import { runnerHasMeaningfulCreditConversionAlternative } from "./runner-marginal-credit-value";
+import { encounterContinueAcceptsOnlyNonlethalDamageThreats } from "./encounter-subroutine";
 
 export type RunnerBasicActionPenaltyScoreDependencies = {
   encounterActionIsViable: (
@@ -37,6 +38,7 @@ export function runnerBasicActionPenaltyScoreComponents(
     scopeId === "simple_run_choice" &&
     action.payload?.encounterWillEndRun === true &&
     action.payload?.encounterSourceWillTrashAtEndOfTurn !== true &&
+    !encounterContinueAcceptsOnlyNonlethalDamageThreats(input) &&
     input.legalActions.some(
       (candidate) =>
         (candidate.type === "break_subroutine" ||
