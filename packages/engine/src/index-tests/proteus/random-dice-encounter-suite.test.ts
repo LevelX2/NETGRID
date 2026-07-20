@@ -281,6 +281,20 @@ describe("Proteus PRO016 random dice encounter suite", () => {
       "remote_1",
       true,
     );
+    expect(
+      getPlayerView(state, "runner")
+        .servers.find((server) => server.id === "remote_1")
+        ?.ice.find((ice) => ice.instanceId === roadblock)?.effectiveRunQuote,
+    ).toMatchObject({
+      conditionalEncounterEffects: [
+        {
+          kind: "random_strength_or_derez_auto_pass",
+          dieFaces: 6,
+          autoPassResult: 6,
+          maxStrengthBonus: 5,
+        },
+      ],
+    });
     state = encounterIce(state, "remote_1", roadblock);
     const payload = state.eventLog.at(-1)?.publicPayload;
     const dieRoll = payloadNumber(payload, "dieRoll");

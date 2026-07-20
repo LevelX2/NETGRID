@@ -1,6 +1,6 @@
 # ICE-Run-Quote-Reconciliation für die Runner-KI
 
-Status: aktiv – Paket `IRQR-3` in Arbeit
+Status: aktiv – Paket `IRQR-4` in Arbeit
 
 ## Quelle und Zielprüfung
 
@@ -199,5 +199,15 @@ dann als complete markieren.`
   Jack-out-Schutzmodell eine differenzierte, aber keine pauschale
   Zugangssperre. Fokustests (73 AI, 33 Engine) und beide Typechecks sind
   grün.
-- `IRQR-3`: aktiv.
-- `IRQR-4`: offen.
+- `IRQR-3`: abgeschlossen – die öffentliche ICE-Quote weist nun deklarierte
+  Corp-Zahlungen für zusätzliche Encounter-ETR und Roadblocks
+  Zufallsprofil separat aus. Bekannte Corp-Credit-Gewinne auf dem zuvor
+  durchlaufenen Pfad erhöhen nur die sichtbare spätere Corp-Kapazität. Die
+  KI markiert echte Corp-Wahl, Zufallsschaden, Zufallsstärke und zufälliges
+  Zurücksetzen des Runs als konditional, statt sie als sichere Kosten oder
+  sichere Sperre auszugeben. Für Glacier, Mobile Barricade und Walking Wall
+  wurde die vorhandene Revalidierung nach jedem neuen öffentlichen
+  PlayerView als richtige Reaktion bestätigt; sie wird nicht durch eine
+  zweite Vorab-Prognose ersetzt. Fokustests (42 Engine, 70 AI) und beide
+  Typechecks sind grün.
+- `IRQR-4`: aktiv.

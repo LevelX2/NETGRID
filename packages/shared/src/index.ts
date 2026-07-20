@@ -1921,6 +1921,18 @@ export type VisibleEffectiveSubroutine = {
   };
 };
 
+export type VisibleConditionalEncounterEffect =
+  | {
+      kind: "corp_paid_add_end_the_run_subroutine";
+      creditCost: number;
+    }
+  | {
+      kind: "random_strength_or_derez_auto_pass";
+      dieFaces: 6;
+      autoPassResult: 6;
+      maxStrengthBonus: number;
+    };
+
 export type VisibleEffectiveIceRunQuote = {
   iceInstanceId: CardInstanceId;
   iceDefinitionId: CardDefinitionId;
@@ -1930,6 +1942,7 @@ export type VisibleEffectiveIceRunQuote = {
   breakSubroutineCostSourceDefinitionIds?: CardDefinitionId[];
   breakSubroutineCostSourceTitles?: string[];
   encounterTemporaryTraceCredits?: number;
+  conditionalEncounterEffects?: VisibleConditionalEncounterEffect[];
 };
 
 export type VisibleCardLifecycleMarker = {

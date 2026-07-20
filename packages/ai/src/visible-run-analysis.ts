@@ -184,6 +184,7 @@ function assessKnownRezzedIcePathInternal(
   let firstKnownIceBreakable = false;
   let activeRunPathEffects = initialRunPathEffects.slice();
   const conditionalAccessReasons = new Set<string>();
+  let visibleCorpCreditsThroughPath = visibleCorpBidCapacity;
   const breakerStrengths = new Map(
     rigCards.map((card) => [card.instanceId, card.strength ?? 0]),
   );
@@ -205,6 +206,25 @@ function assessKnownRezzedIcePathInternal(
     const pathCostBeforeIce = visibleBreakCost;
     assessedKnownIceCount += 1;
     const quote = runQuoteForIce(effectiveIce, iceIndex);
+    for (const effect of quote?.conditionalEncounterEffects ?? []) {
+      if (
+        effect.kind === "corp_paid_add_end_the_run_subroutine" &&
+        visibleCorpCreditsThroughPath >= effect.creditCost
+      ) {
+        conditionalAccessReasons.add("visible_corp_paid_encounter_etr");
+      }
+      if (effect.kind === "random_strength_or_derez_auto_pass") {
+        conditionalAccessReasons.add("visible_random_encounter_strength");
+      }
+    }
+    for (const subroutine of quote?.subroutines ?? []) {
+      if (subroutine.type === "random_damage") {
+        conditionalAccessReasons.add("visible_random_damage");
+      }
+      if (subroutine.type === "rewind_run_to_rezzed_ice_by_die") {
+        conditionalAccessReasons.add("visible_random_rewind");
+      }
+    }
     const endTheRunCount = quote
       ? quote.subroutines.filter(isVisibleHardEndRunSubroutine).length
       : endTheRunSubroutineCount(iceDefinitionId);
@@ -390,7 +410,7 @@ function assessKnownRezzedIcePathInternal(
       quote?.subroutines.filter(isVisibleSecretSpendEndRunSubroutine) ?? [];
     for (const subroutine of secretSpendEndRunSubroutines) {
       const payCost = secretSpendAccessPaymentForVisibleCorpCredits(
-        visibleCorpBidCapacity,
+        visibleCorpCreditsThroughPath,
       );
       const breakAssessment = runPathEffectsPreventFutureBreaking(
         activeRunPathEffects,
@@ -467,7 +487,7 @@ function assessKnownRezzedIcePathInternal(
       iceIndex,
       rigCards,
       availableCredits: Math.max(0, creditsAfterAvoidingVisibleIceHazards),
-      visibleCorpBidCapacity,
+      visibleCorpBidCapacity: visibleCorpCreditsThroughPath,
       breakerStrengths,
       additionalBreakCostPerSubroutine,
     });
@@ -600,7 +620,7 @@ function assessKnownRezzedIcePathInternal(
             rigCards,
             rootCards,
             creditBudget,
-            visibleCorpBidCapacity,
+            visibleCorpBidCapacity: visibleCorpCreditsThroughPath,
             deflectorContext,
             breakerStrengths,
             additionalBreakCostPerSubroutine,
@@ -621,6 +641,13 @@ function assessKnownRezzedIcePathInternal(
         activeRunPathEffects = [...activeRunPathEffects, effect];
       }
     }
+    visibleCorpCreditsThroughPath += (quote?.subroutines ?? [])
+      .filter((subroutine) => subroutine.type === "corp_gain_credit")
+      .reduce(
+        (sum, subroutine) =>
+          sum + Math.max(0, Math.floor(subroutine.amount ?? 0)),
+        0,
+      );
   }
   return {
     blocked: false,

@@ -1434,6 +1434,14 @@ describe("Proteus Dynamic Public ETR ICE", () => {
     const riddlerId = putCorpIceOnServer(state, "rd", RIDDLER);
     setRezzed(state, riddlerId);
     state = startEncounterWithRezzedIce(state, "rd");
+    expect(effectiveRunQuoteFor(state, "rd", riddlerId)).toMatchObject({
+      conditionalEncounterEffects: [
+        {
+          kind: "corp_paid_add_end_the_run_subroutine",
+          creditCost: 2,
+        },
+      ],
+    });
 
     const addAction = mustAction(
       state,
