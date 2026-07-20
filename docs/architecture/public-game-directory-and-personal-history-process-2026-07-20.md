@@ -125,14 +125,14 @@ prepared
 
 ## Paketfolge
 
-| Paket | Titel | Commit-Vorschlag |
-| --- | --- | --- |
-| GAME-001 | Listen- und Ergebnisverträge | `docs: define game directory and result snapshot contracts` |
-| GAME-002 | Persistierte Endergebnisse und Backfill | `feat(server): persist immutable match result snapshots` |
-| GAME-003 | Schnelle öffentliche Spieleübersicht | `feat(server): enrich public game directory` |
-| GAME-004 | Persönliche Spielhistorie | `feat(account): scope match history to participants` |
-| GAME-005 | Spielebereich und direkte Aktionen | `feat(web): add public games workspace` |
-| GAME-006 | End-to-End-, Performance- und Abschlussreview | `test(games): verify directory and cached histories` |
+| Paket    | Titel                                         | Commit-Vorschlag                                            |
+| -------- | --------------------------------------------- | ----------------------------------------------------------- |
+| GAME-001 | Listen- und Ergebnisverträge                  | `docs: define game directory and result snapshot contracts` |
+| GAME-002 | Persistierte Endergebnisse und Backfill       | `feat(server): persist immutable match result snapshots`    |
+| GAME-003 | Schnelle öffentliche Spieleübersicht          | `feat(server): enrich public game directory`                |
+| GAME-004 | Persönliche Spielhistorie                     | `feat(account): scope match history to participants`        |
+| GAME-005 | Spielebereich und direkte Aktionen            | `feat(web): add public games workspace`                     |
+| GAME-006 | End-to-End-, Performance- und Abschlussreview | `test(games): verify directory and cached histories`        |
 
 ## Paketdetails
 

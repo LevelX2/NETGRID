@@ -12,6 +12,7 @@ function entry(status: PublicMatchEntry["status"]): PublicMatchEntry {
     status,
     matchMode: "human_vs_human",
     matchFormat: "single_game",
+    cardPool: "originalset",
     createdAt: "2026-07-20T10:00:00.000Z",
     updatedAt: "2026-07-20T10:01:00.000Z",
     participantNames: { runner: "Ada", corp: "Grace" },

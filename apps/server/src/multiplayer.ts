@@ -3194,6 +3194,7 @@ export class MultiplayerService {
           status,
           matchMode: record.match.mode,
           matchFormat: record.match.settings.matchFormat,
+          cardPool: record.match.settings.cardPool ?? "originalset",
           createdAt: record.match.createdAt,
           updatedAt: record.match.updatedAt,
           participantNames,
@@ -6183,6 +6184,7 @@ function recentGameResultEntryFor(
     corpAgendaPoints,
   );
   return {
+    schemaVersion: "netgrid-match-result-v1",
     entryType: "single_game",
     resultId: `match:${record.match.matchId}`,
     matchId: record.match.matchId,

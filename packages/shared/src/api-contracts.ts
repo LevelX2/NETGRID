@@ -33,13 +33,19 @@ export type ApiPublicMatchListEntry = {
   status: ApiPublicMatchStatus;
   matchMode: ApiMatchMode;
   matchFormat: ApiMatchFormat;
+  cardPool: ApiMatchCardPool;
   createdAt: string;
   updatedAt: string;
+  hostDisplayName?: string;
+  hostSide?: Side;
+  availableSide?: Side;
+  seriesGamesPlanned?: number;
   participantNames: {
     runner?: string;
     corp?: string;
   };
   winner?: Winner;
+  result?: ApiMatchResultSnapshot;
 };
 
 export type ApiReplayAnalysisCard = {
@@ -272,12 +278,10 @@ export type ApiAccountMatchHistory = {
   nextCursor?: string;
 };
 
-export type ApiRecentGameResult = {
-  entryType?: "single_game";
-  resultId?: string;
+export type ApiMatchResultSnapshot = {
+  schemaVersion: "netgrid-match-result-v1";
   matchId: string;
-  isPublic: boolean;
-  matchStatus: Extract<ApiMatchStatus, "finished">;
+  matchStatus: Extract<ApiMatchStatus, "finished" | "forfeited">;
   matchMode: ApiMatchMode;
   matchFormat: ApiMatchFormat;
   finishedAt: string;
@@ -308,6 +312,12 @@ export type ApiRecentGameResult = {
     gamesPlanned: number;
     status: ApiSeriesStatus;
   };
+};
+
+export type ApiRecentGameResult = ApiMatchResultSnapshot & {
+  entryType?: "single_game";
+  resultId?: string;
+  isPublic: boolean;
 };
 
 export type ApiRecentSeriesGameResult = {
@@ -359,6 +369,12 @@ export type ApiRecentSeriesResult = {
 };
 
 export type ApiRecentResultEntry = ApiRecentGameResult | ApiRecentSeriesResult;
+
+export type ApiPersonalRecentResults = {
+  schemaVersion: "netgrid-personal-recent-results-v1";
+  generatedAt: string;
+  results: ApiRecentResultEntry[];
+};
 
 export type ApiLifecycleResultSummary = {
   status: Extract<
