@@ -413,6 +413,9 @@ export type MultiplayerStorage = {
   listOpenMatchCandidates?(): Promise<StoredMatch[]>;
   listPublicMatchCandidates?(): Promise<StoredMatch[]>;
   listResultSnapshotCandidates?(): Promise<StoredMatch[]>;
+  listResultSnapshotCandidatesByMatchIds?(
+    matchIds: readonly string[],
+  ): Promise<StoredMatch[]>;
   health?(): Promise<StorageHealth>;
   backup?(
     reason?: BackupManifest["reason"],
@@ -3296,32 +3299,33 @@ export class MultiplayerService {
       : this.storage.list
         ? await this.storage.list()
         : [];
+    const records = await this.ensurePersistedResultSnapshots(
+      candidates.filter((record) => record.match.isPublic),
+    );
+    return recentGameResultEntriesFor(records, limit);
+  }
+
+  async listPersonalRecentGameResults(
+    matchIds: readonly string[],
+    limit = 20,
+  ): Promise<RecentGameResultEntry[]> {
+    const uniqueMatchIds = [...new Set(matchIds)];
+    if (uniqueMatchIds.length === 0) return [];
+    const candidates = this.storage.listResultSnapshotCandidatesByMatchIds
+      ? await this.storage.listResultSnapshotCandidatesByMatchIds(
+          uniqueMatchIds,
+        )
+      : this.storage.listResultSnapshotCandidates
+        ? (await this.storage.listResultSnapshotCandidates()).filter((record) =>
+            uniqueMatchIds.includes(record.match.matchId),
+          )
+        : this.storage.list
+          ? (await this.storage.list()).filter((record) =>
+              uniqueMatchIds.includes(record.match.matchId),
+            )
+          : [];
     const records = await this.ensurePersistedResultSnapshots(candidates);
-    const normalizedLimit = Number.isFinite(limit) ? Math.floor(limit) : 20;
-    const cappedLimit = Math.max(1, Math.min(50, normalizedLimit));
-    const seriesGroups = new Map<string, StoredMatch[]>();
-    const entries: RecentGameResultEntry[] = [];
-    for (const record of records.filter((candidate) =>
-      Boolean(candidate.resultSnapshot),
-    )) {
-      const seriesId = record.match.series?.seriesId;
-      if (seriesId)
-        seriesGroups.set(seriesId, [
-          ...(seriesGroups.get(seriesId) ?? []),
-          record,
-        ]);
-      else {
-        const entry = recentGameResultEntryFor(record);
-        if (entry) entries.push(entry);
-      }
-    }
-    for (const group of seriesGroups.values()) {
-      const entry = recentSeriesResultEntryFor(group);
-      if (entry) entries.push(entry);
-    }
-    return entries
-      .sort((left, right) => right.finishedAt.localeCompare(left.finishedAt))
-      .slice(0, cappedLimit);
+    return recentGameResultEntriesFor(records, limit);
   }
 
   async loadReplayDiagnostics(
@@ -6303,6 +6307,37 @@ function resultSummaryFor(
       ? { series: seriesSummaryFor(record, viewerSide) }
       : {}),
   };
+}
+
+function recentGameResultEntriesFor(
+  records: StoredMatch[],
+  limit: number,
+): RecentGameResultEntry[] {
+  const normalizedLimit = Number.isFinite(limit) ? Math.floor(limit) : 20;
+  const cappedLimit = Math.max(1, Math.min(50, normalizedLimit));
+  const seriesGroups = new Map<string, StoredMatch[]>();
+  const entries: RecentGameResultEntry[] = [];
+  for (const record of records.filter((candidate) =>
+    Boolean(candidate.resultSnapshot),
+  )) {
+    const seriesId = record.match.series?.seriesId;
+    if (seriesId)
+      seriesGroups.set(seriesId, [
+        ...(seriesGroups.get(seriesId) ?? []),
+        record,
+      ]);
+    else {
+      const entry = recentGameResultEntryFor(record);
+      if (entry) entries.push(entry);
+    }
+  }
+  for (const group of seriesGroups.values()) {
+    const entry = recentSeriesResultEntryFor(group);
+    if (entry) entries.push(entry);
+  }
+  return entries
+    .sort((left, right) => right.finishedAt.localeCompare(left.finishedAt))
+    .slice(0, cappedLimit);
 }
 
 function recentGameResultEntryFor(

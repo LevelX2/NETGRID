@@ -1378,6 +1378,43 @@ async function routeHttp(
     }
 
     if (
+      url.pathname === "/api/account/recent-results" &&
+      request.method === "GET"
+    ) {
+      if (!accountAuth || !accountStatistics)
+        return sendJson(response, 503, accountUnavailablePayload());
+      if (
+        !checkRateLimit(
+          response,
+          rateLimiter,
+          "account_read",
+          request,
+          deploymentConfig,
+          "account-recent-results",
+        )
+      )
+        return;
+      const auth = await ensureAccountAuthenticated(
+        response,
+        request,
+        accountAuth,
+      );
+      if (!auth) return;
+      const gameResults = await accountStatistics.gameResultsForAccount(
+        auth.account.accountId,
+      );
+      const matchIds = gameResults.map((result) => result.originMatchId);
+      const limit = Number(url.searchParams.get("limit") ?? 20);
+      response.setHeader("cache-control", "no-store");
+      sendJson(response, 200, {
+        schemaVersion: "netgrid-personal-recent-results-v1",
+        generatedAt: new Date().toISOString(),
+        results: await service.listPersonalRecentGameResults(matchIds, limit),
+      });
+      return;
+    }
+
+    if (
       url.pathname === "/api/account/match-history" &&
       request.method === "GET"
     ) {

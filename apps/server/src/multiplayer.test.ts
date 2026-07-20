@@ -223,6 +223,16 @@ describe("recent match results", () => {
         winner: "runner",
       });
       expect(compact?.eventLog).toEqual([]);
+      expect(
+        await storage.listResultSnapshotCandidatesByMatchIds(["unknown"]),
+      ).toEqual([]);
+      expect(
+        (
+          await storage.listResultSnapshotCandidatesByMatchIds([
+            created.matchId,
+          ])
+        )[0]?.match.matchId,
+      ).toBe(created.matchId);
 
       let fullLoadCount = 0;
       const cachedStorage: MultiplayerStorage = {

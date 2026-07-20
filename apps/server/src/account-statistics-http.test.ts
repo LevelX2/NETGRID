@@ -36,7 +36,7 @@ describe("private account statistics HTTP API", () => {
       const createdResponse = await fetch(`${baseUrl}/api/matches`, {
         method: "POST",
         headers: { "content-type": "application/json", origin: ORIGIN, cookie },
-        body: JSON.stringify({ hostSide: "runner", playMode: "human_vs_ai", humanSide: "runner", seed: "account-statistics-http" }),
+        body: JSON.stringify({ hostSide: "runner", playMode: "human_vs_ai", humanSide: "runner", seed: "account-statistics-http", isPublic: false }),
       });
       const created = await createdResponse.json() as { matchId: string; hostSessionToken: string; hostSide: "runner" | "corp" };
       expect(createdResponse.status).toBe(201);
@@ -48,6 +48,36 @@ describe("private account statistics HTTP API", () => {
         body: JSON.stringify({ side: created.hostSide, sessionToken: created.hostSessionToken }),
       });
       expect(forfeited.status).toBe(200);
+
+      expect(
+        (await fetch(`${baseUrl}/api/account/recent-results`)).status,
+      ).toBe(401);
+      const recentResultsResponse = await fetch(
+        `${baseUrl}/api/account/recent-results?limit=20`,
+        { headers: { cookie } },
+      );
+      const recentResultsText = await recentResultsResponse.text();
+      expect(recentResultsResponse.status).toBe(200);
+      expect(recentResultsResponse.headers.get("cache-control")).toBe(
+        "no-store",
+      );
+      expect(JSON.parse(recentResultsText)).toMatchObject({
+        schemaVersion: "netgrid-personal-recent-results-v1",
+        results: [
+          {
+            matchId: created.matchId,
+            matchStatus: "forfeited",
+            isPublic: false,
+          },
+        ],
+      });
+      expect(recentResultsText).not.toMatch(
+        /sessionToken|reconnectToken|tokenHash|cardInstances|privateDeck/i,
+      );
+      const publicRecentText = await (
+        await fetch(`${baseUrl}/api/matches/recent-results?limit=20`)
+      ).text();
+      expect(publicRecentText).not.toContain(created.matchId);
 
       const statisticsResponse = await fetch(`${baseUrl}/api/account/statistics?period=all&opponentKind=ai`, { headers: { cookie } });
       expect(statisticsResponse.status).toBe(200);

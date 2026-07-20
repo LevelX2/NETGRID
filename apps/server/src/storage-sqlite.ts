@@ -494,6 +494,23 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     return rows.map((row) => JSON.parse(row.recordJson) as StoredMatch);
   }
 
+  async listResultSnapshotCandidatesByMatchIds(
+    matchIds: readonly string[],
+  ): Promise<StoredMatch[]> {
+    if (matchIds.length === 0) return [];
+    const placeholders = matchIds.map(() => "?").join(", ");
+    const rows = this.db
+      .prepare(
+        `SELECT record_json AS recordJson
+         FROM matches
+         WHERE match_id IN (${placeholders})
+           AND status IN ('finished', 'forfeited')
+         ORDER BY updated_at DESC`,
+      )
+      .all(...matchIds) as Array<{ recordJson: string }>;
+    return rows.map((row) => JSON.parse(row.recordJson) as StoredMatch);
+  }
+
   async health(): Promise<StorageHealth> {
     const schemaVersion = Number(
       this.meta("schema_version") ?? SQLITE_STORAGE_SCHEMA_VERSION,
