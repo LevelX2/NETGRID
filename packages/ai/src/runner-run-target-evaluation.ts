@@ -286,6 +286,11 @@ function evaluateRunnerRunTarget(
     path.unavoidableVisibleIceHazardCount ?? 0;
   const visibleTraceTagHazardUnavoidable =
     path.visibleTraceTagHazardUnavoidable === true;
+  const runnerMatchpointCentralAccess =
+    accessTargetKind === "rd" &&
+    payoff.knownAccessState !== "known_no_current_payoff" &&
+    params.input.playerView.own.agendaPoints >=
+      params.input.playerView.agendaPointsToWin - 2;
   const recommendation = recommendationForRunTarget({
     targetKind: accessTargetKind,
     accessPayoff,
@@ -302,6 +307,7 @@ function evaluateRunnerRunTarget(
     expectedTagsFromVisibleIce,
     unavoidableVisibleIceHazardCount,
     visibleTraceTagHazardUnavoidable,
+    runnerMatchpointCentralAccess,
     routeQuote,
     unrezzedIceRiskUnderfunded,
     ...(accessOutcomeMemory ? { accessOutcomeMemory } : {}),
@@ -417,6 +423,7 @@ function evaluateRunnerRunTarget(
       `expected_tags_from_visible_ice:${expectedTagsFromVisibleIce}`,
       `unavoidable_visible_ice_hazard_count:${unavoidableVisibleIceHazardCount}`,
       `visible_trace_tag_hazard_unavoidable:${visibleTraceTagHazardUnavoidable}`,
+      `runner_matchpoint_central_access:${runnerMatchpointCentralAccess}`,
       ...(path.visibleIceRunHazards ?? [])
         .flatMap((hazard) => hazard.evidence)
         .slice(0, 16),
@@ -948,6 +955,7 @@ function recommendationForRunTarget(params: {
   expectedTagsFromVisibleIce: number;
   unavoidableVisibleIceHazardCount: number;
   visibleTraceTagHazardUnavoidable: boolean;
+  runnerMatchpointCentralAccess: boolean;
   routeQuote: NonNullable<RunnerRunTargetEvaluation["routeQuote"]>;
   unrezzedIceRiskUnderfunded: boolean;
   accessOutcomeMemory?: AccessOutcomeMemoryStatus;
@@ -990,14 +998,16 @@ function recommendationForRunTarget(params: {
   if (
     params.visibleTraceTagHazardUnavoidable &&
     !highValuePayoff(params.accessPayoff) &&
-    !params.scoreThreat
+    !params.scoreThreat &&
+    !params.runnerMatchpointCentralAccess
   ) {
     return "gain_credits_first";
   }
   if (
     params.unavoidableVisibleIceHazardCount > 0 &&
     !highValuePayoff(params.accessPayoff) &&
-    !params.scoreThreat
+    !params.scoreThreat &&
+    !params.runnerMatchpointCentralAccess
   ) {
     return params.expectedTagsFromVisibleIce > 0
       ? "gain_credits_first"

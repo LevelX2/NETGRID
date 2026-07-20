@@ -81,8 +81,10 @@ export function publicIceRunSubroutineDerivation(
       appendedSubroutines.push({
         id: `relative_ice_outside_${instance?.definitionId}.trace.${index + 1}`,
         type: "initiate_trace",
-        baseTraceStrength: relativeIce.dynamicTraceSubroutines.baseTraceStrength,
-        traceSuccessEffect: relativeIce.dynamicTraceSubroutines.traceSuccessEffect,
+        baseTraceStrength:
+          relativeIce.dynamicTraceSubroutines.baseTraceStrength,
+        traceSuccessEffect:
+          relativeIce.dynamicTraceSubroutines.traceSuccessEffect,
       });
     }
   }
@@ -118,8 +120,7 @@ function rezzedIceOutsideThisIceCount(
 ): number {
   const instance = state.cardInstances[iceId];
   const zone = instance?.zone;
-  if (!zone || zone.side !== "corp" || zone.zone !== "serverIce")
-    return 0;
+  if (!zone || zone.side !== "corp" || zone.zone !== "serverIce") return 0;
   const server = state.corp.servers.find(
     (candidate) => candidate.id === zone.serverId,
   );

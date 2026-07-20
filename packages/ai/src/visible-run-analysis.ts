@@ -184,6 +184,7 @@ function assessKnownRezzedIcePathInternal(
   let firstKnownIceBreakable = false;
   let activeRunPathEffects = initialRunPathEffects.slice();
   const conditionalAccessReasons = new Set<string>();
+  const conditionalRiskReasons = new Set<string>();
   let visibleCorpCreditsThroughPath = visibleCorpBidCapacity;
   const breakerStrengths = new Map(
     rigCards.map((card) => [card.instanceId, card.strength ?? 0]),
@@ -219,7 +220,7 @@ function assessKnownRezzedIcePathInternal(
     }
     for (const subroutine of quote?.subroutines ?? []) {
       if (subroutine.type === "random_damage") {
-        conditionalAccessReasons.add("visible_random_damage");
+        conditionalRiskReasons.add("visible_random_damage");
       }
       if (subroutine.type === "rewind_run_to_rezzed_ice_by_die") {
         conditionalAccessReasons.add("visible_random_rewind");
@@ -654,6 +655,9 @@ function assessKnownRezzedIcePathInternal(
     ...(visibleBreakCost > 0 ? { visibleBreakCost } : {}),
     ...(conditionalAccessReasons.size > 0
       ? { conditionalAccessReasons: [...conditionalAccessReasons].sort() }
+      : {}),
+    ...(conditionalRiskReasons.size > 0
+      ? { conditionalRiskReasons: [...conditionalRiskReasons].sort() }
       : {}),
     ...visibleIceRunHazardSummary(
       visibleIceRunHazards,

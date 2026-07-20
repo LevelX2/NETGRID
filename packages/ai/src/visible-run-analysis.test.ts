@@ -973,19 +973,38 @@ describe("shared runner run route quote", () => {
       "visible_corp_paid_encounter_etr",
     ]);
     expect(randomPath.conditionalAccessReasons).toEqual([
-      "visible_random_damage",
       "visible_random_encounter_strength",
       "visible_random_rewind",
+    ]);
+    expect(randomPath.conditionalRiskReasons).toEqual([
+      "visible_random_damage",
     ]);
     expect(
       quoteRunnerRunRoute({ path: randomPath, availableCredits: 5 }),
     ).toMatchObject({
       reachability: "conditional_access",
       conditionalReasons: [
-        "visible_random_damage",
         "visible_random_encounter_strength",
         "visible_random_rewind",
       ],
+      conditionalRiskReasons: ["visible_random_damage"],
+    });
+
+    const randomDamageOnlyPath = assessKnownRezzedIcePath(
+      [
+        quotedSpecialIce("rd-random-damage", "Random Damage", [
+          { id: "rd-random-damage", type: "random_damage", amount: 3 },
+        ]),
+      ],
+      [],
+      5,
+    );
+    expect(
+      quoteRunnerRunRoute({ path: randomDamageOnlyPath, availableCredits: 5 }),
+    ).toMatchObject({
+      reachability: "guaranteed_access",
+      conditionalReasons: [],
+      conditionalRiskReasons: ["visible_random_damage"],
     });
   });
 });
