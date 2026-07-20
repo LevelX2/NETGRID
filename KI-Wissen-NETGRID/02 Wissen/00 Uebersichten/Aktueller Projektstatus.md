@@ -20,10 +20,12 @@ Stand: 2026-07-20
   unveränderlichen Erstellungsflag `isPublic`. Öffentliche offene Matches sind
   beitretbar, aktive Matches über eine Hidden-Info-sichere read-only
   Projektion zuschaubar und beendete Matches als Full-Information-Lern-Replay
-  aus Sicht von Teilnehmer A oder B abspielbar. Das optionale mitlaufende
-  Gegnerhandfenster zeigt im Replay die jeweils andere Hand. Alle vorhandenen
-  Matches werden einmalig rückwirkend öffentlich normalisiert; der Auditstand
-  beträgt 21/21 öffentliche und 19/19 replayfähige terminale Matches.
+  in derselben Oberfläche wie die laufende Partie abspielbar. Oben wird
+  zwischen Runner und Korp gewechselt; die jeweilige eigene Hand erscheint
+  normal im Board. Eine künstliche Analysefläche oder ein separates
+  Gegnerhandfenster gibt es nicht. Alle vorhandenen Matches werden einmalig
+  rückwirkend öffentlich normalisiert; der Auditstand beträgt 21/21
+  öffentliche und 19/19 replayfähige terminale Matches.
 - Der globale Bereich `Spiele` ordnet diese öffentlichen Matches als offen,
   laufend und abgeschlossen, filtert nach diesen Zuständen und führt direkt
   zu Beitritt, Zuschaueransicht oder Replay. `Meine Spiele` ist davon getrennt

@@ -12182,10 +12182,17 @@ describe("MVP 0.2 multiplayer service", () => {
         timeline?: Array<{ hiddenInfoBarrier?: boolean }>;
         frames?: Array<{
           stateHashVerified?: boolean;
-          corp?: { hand?: Array<{ title?: string }> };
-          participants?: {
-            player_a?: { hand?: Array<{ title?: string }> };
-            player_b?: { hand?: Array<{ title?: string }> };
+          playerViews?: {
+            runner?: {
+              side?: Side;
+              own?: { gripOrHq?: Array<{ title?: string }> };
+              legalActions?: unknown[];
+            };
+            corp?: {
+              side?: Side;
+              own?: { gripOrHq?: Array<{ title?: string }> };
+              legalActions?: unknown[];
+            };
           };
         }>;
       };
@@ -12202,15 +12209,29 @@ describe("MVP 0.2 multiplayer service", () => {
       expect(
         replayPayload.frames?.every((frame) => frame.stateHashVerified),
       ).toBe(true);
+      expect(replayPayload.frames?.[0]?.playerViews?.runner?.side).toBe(
+        "runner",
+      );
+      expect(replayPayload.frames?.[0]?.playerViews?.corp?.side).toBe("corp");
       expect(
-        replayPayload.frames?.[0]?.participants?.player_a?.hand?.length,
+        replayPayload.frames?.[0]?.playerViews?.runner?.own?.gripOrHq?.length,
       ).toBeGreaterThan(0);
       expect(
-        replayPayload.frames?.[0]?.participants?.player_b?.hand?.length,
+        replayPayload.frames?.[0]?.playerViews?.corp?.own?.gripOrHq?.length,
       ).toBeGreaterThan(0);
       expect(
-        new Set(replayPayload.frames?.map((frame) => frame.corp?.hand?.length))
-          .size,
+        replayPayload.frames?.every(
+          (frame) =>
+            frame.playerViews?.runner?.legalActions?.length === 0 &&
+            frame.playerViews?.corp?.legalActions?.length === 0,
+        ),
+      ).toBe(true);
+      expect(
+        new Set(
+          replayPayload.frames?.map(
+            (frame) => frame.playerViews?.corp?.own?.gripOrHq?.length,
+          ),
+        ).size,
       ).toBeGreaterThan(1);
       expect(JSON.stringify(replayPayload)).not.toMatch(
         /sessionToken|reconnectToken|joinToken|tokenHash|privatePayload|cardInstances|decklist/i,
@@ -12306,17 +12327,19 @@ describe("MVP 0.2 multiplayer service", () => {
       expect(participantResponse.status).toBe(200);
       const participantPayload = (await participantResponse.json()) as {
         frames?: Array<{
-          participants?: {
-            player_a?: { hand?: unknown[] };
-            player_b?: { hand?: unknown[] };
+          playerViews?: {
+            runner?: { own?: { gripOrHq?: unknown[] } };
+            corp?: { own?: { gripOrHq?: unknown[] } };
           };
         }>;
       };
       expect(
-        participantPayload.frames?.[0]?.participants?.player_a?.hand?.length,
+        participantPayload.frames?.[0]?.playerViews?.runner?.own?.gripOrHq
+          ?.length,
       ).toBeGreaterThan(0);
       expect(
-        participantPayload.frames?.[0]?.participants?.player_b?.hand?.length,
+        participantPayload.frames?.[0]?.playerViews?.corp?.own?.gripOrHq
+          ?.length,
       ).toBeGreaterThan(0);
     } finally {
       await handle.close();

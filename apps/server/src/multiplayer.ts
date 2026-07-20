@@ -52,7 +52,6 @@ import {
   type ApiPendingUndoRequest,
   type ApiPlayerIdentityKind,
   type ApiPublicMatchListEntry,
-  type ApiReplayAnalysisCard,
   type ApiReplayAnalysisFrame,
   type AiDecision,
   type AiDifficulty,
@@ -5369,7 +5368,7 @@ function replayAnalysisFrames(record: StoredMatch): ApiReplayAnalysisFrame[] {
     .map(({ state, persistedHash }, index) => {
       const event = eventByStateVersion.get(state.stateVersion);
       const actualHash = hashState(state);
-      return replayAnalysisFrameFor(record, state, {
+      return replayAnalysisFrameFor(state, {
         index,
         ...(event ? { sourceEventId: event.eventId } : {}),
         stateHashVerified:
@@ -5380,32 +5379,9 @@ function replayAnalysisFrames(record: StoredMatch): ApiReplayAnalysisFrame[] {
 }
 
 function replayAnalysisFrameFor(
-  record: StoredMatch,
   state: GameState,
   input: { index: number; sourceEventId?: string; stateHashVerified: boolean },
 ): ApiReplayAnalysisFrame {
-  const participantSides = replayParticipantSides(record);
-  const names = participantNamesForReplay(record);
-  const runnerHand = replayCards(state, state.runner.grip);
-  const corpHand = replayCards(state, state.corp.hq);
-
-  const participant = (player: SeriesPlayerSlot) => {
-    const side = participantSides[player];
-    return {
-      side,
-      displayName:
-        names[side] ??
-        (record.match.aiControllers?.[side]
-          ? side === "runner"
-            ? "Runner-KI"
-            : "Corp-KI"
-          : player === "player_a"
-            ? "Teilnehmer A"
-            : "Teilnehmer B"),
-      hand: side === "runner" ? runnerHand : corpHand,
-    };
-  };
-
   return {
     index: input.index,
     ...(input.sourceEventId ? { sourceEventId: input.sourceEventId } : {}),
@@ -5415,64 +5391,20 @@ function replayAnalysisFrameFor(
     activeSide: state.activeSide,
     phase: state.phase,
     timingPoint: state.timingPoint,
-    participants: {
-      player_a: participant("player_a"),
-      player_b: participant("player_b"),
-    },
-    runner: {
-      credits: state.runner.credits,
-      clicks: state.runner.clicks,
-      tags: state.runner.tags,
-      deckCount: state.runner.stack.length,
-      hand: runnerHand,
-      discard: replayCards(state, state.runner.heap),
-      scored: replayCards(state, state.runner.scoreArea),
-      rig: {
-        programs: replayCards(state, state.runner.rig.programs),
-        hardware: replayCards(state, state.runner.rig.hardware),
-        resources: replayCards(state, state.runner.rig.resources),
-      },
-    },
-    corp: {
-      credits: state.corp.credits,
-      clicks: state.corp.clicks,
-      badPublicity: state.corp.badPublicity,
-      deckCount: state.corp.rd.length,
-      hand: corpHand,
-      discard: replayCards(state, state.corp.archives),
-      scored: replayCards(state, state.corp.scoreArea),
-      servers: state.corp.servers.map((server) => ({
-        id: server.id,
-        label: server.label,
-        ice: replayCards(state, server.ice),
-        root: replayCards(state, server.root),
-      })),
+    playerViews: {
+      runner: replayPlayerViewFor(state, "runner"),
+      corp: replayPlayerViewFor(state, "corp"),
     },
   };
 }
 
-function replayCards(
-  state: GameState,
-  cardIds: readonly string[],
-): ApiReplayAnalysisCard[] {
-  return cardIds.map((cardId) => {
-    const instance = state.cardInstances[cardId];
-    if (!instance) throw new Error(`replay_card_instance_missing:${cardId}`);
-    const definition = CARD_DEFINITIONS_BY_ID[instance.definitionId];
-    if (!definition)
-      throw new Error(
-        `replay_card_definition_missing:${instance.definitionId}`,
-      );
-    return {
-      instanceId: instance.instanceId,
-      definitionId: instance.definitionId,
-      title: definition.title,
-      cardType: definition.type,
-      faceup: instance.faceup,
-      rezzed: instance.rezzed,
-      advancementCounters: instance.advancementCounters,
-    };
-  });
+function replayPlayerViewFor(state: GameState, side: Side): PlayerView {
+  const { pendingChoice: _pendingChoice, ...view } = getPlayerView(state, side);
+  return {
+    ...view,
+    publicEvents: [],
+    legalActions: [],
+  };
 }
 
 function replayActionFromEvent(event: GameEvent): PlayerAction | undefined {

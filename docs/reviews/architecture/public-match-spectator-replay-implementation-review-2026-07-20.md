@@ -1,4 +1,4 @@
-# Implementation Review: öffentliche Matches, Zuschauer und Analyse-Replay
+# Implementation Review: öffentliche Matches, Zuschauer und Replay
 
 Stand: 2026-07-20
 Ergebnis: bestanden
@@ -12,9 +12,9 @@ Ergebnis: bestanden
 - Schreibgeschützte Live-Zuschaueransicht ohne Hände, verdeckte
   Kartenidentitäten, private Choices oder LegalActions.
 - Full-Information-Replay erst nach Matchende, mit StateHash-verifizierten
-  Frames, Teilnehmer-A/B-Zuordnung und beiden Händen.
-- Visueller Replay-Player mit A/B-Perspektive, Seek, Playback und dauerhaft
-  zuschaltbarer Gegnerhand.
+  Frames und je einer normalen read-only PlayerView für Runner und Korp.
+- Replay in der normalen Spieloberfläche mit Runner/Korp-Perspektive, Seek
+  und Playback.
 - Direkte Replay-Einstiege aus Ergebnisdialog und Matchhistorie.
 
 ## Architektururteil
@@ -28,7 +28,9 @@ Der Live- und der Replaypfad sind absichtlich getrennt:
 
 - `public_live_v1` projiziert nur allgemein sichtbaren Zustand und kann keine
   Aktion einreichen.
-- Replay-Analyseframes werden ausschließlich für terminale Matches erzeugt.
+- Replay-Frames werden ausschließlich für terminale Matches erzeugt. Sie
+  verwenden die normale PlayerView-Projektion beider Seiten, entfernen aber
+  LegalActions und die steuerbare Choice-Ebene.
   Öffentliche terminale Matches sind anonym abrufbar; private terminale
   Matches nur durch einen Matchteilnehmer.
 
@@ -64,24 +66,23 @@ entfernt.
   LegalActions oder Zugangstoken.
 - Ein anonym angefordertes privates Replay sowie ein Aufruf mit falschem
   Teilnehmertoken liefern `404`.
-- Zuschauer- und Replayoberfläche besitzen keinen mutierenden Matchpfad.
+- Zuschauer- und Replayoberfläche besitzen keinen mutierenden Matchpfad. Die
+  Replayseite verwendet dieselben Board-, Server-, Rig-, Hand-, Status- und
+  Kartenvorschau-Komponenten wie das aktive Spiel.
 
 ## Verifikation
 
 - `corepack pnpm typecheck`: grün.
 - `corepack pnpm test:contracts`: 20 Tests grün.
-- Gezielte Serverregressionen für Default, Backfill, öffentliche Liste,
-  Live-Redaktion und Replayzugriff: 7/7 grün.
-- `@netgrid/web test`: 59 Dateien, 674 Tests grün.
+- `@netgrid/server test`: 18 Dateien, 198 Tests grün.
+- `@netgrid/web test`: 61 Dateien, 679 Tests grün.
 - `corepack pnpm build`: grün, einschließlich Next-Produktionsbuild.
 - `corepack pnpm format:changed`: grün.
 - `git diff --check`: grün.
-- Browser-Smoke: 9-Schritt-Replay, A/B-Wechsel ohne Schrittverlust,
-  Gegnerhand bleibt bei Seek und 2x-Playback offen und wechselt mit der
-  Perspektive; keine Browserfehler oder -warnungen.
+- Browser-Smoke: normales Spielbrett aus realem Bestandsreplay,
+  Runner/Korp-Wechsel ohne Schrittverlust, Einzelschritt und Playback;
+  Runner-Grip beziehungsweise Korp-HQ erscheinen als normale eigene Hand.
+  Die alte Analysefläche und das Gegnerhandfenster fehlen; keine
+  Browserfehler.
 
-Der breite Serverlauf enthält weiterhin genau einen fachfremden vorhandenen
-Fehler in `advances Corp AI in a root-rez window even when activeSide is
-runner`: Der Test erwartet keine Runner-LegalActions, die Engine liefert im
-Jack-out-Fenster `jack_out` und `continue_run`. 196 weitere Servertests sind
-grün; die Replayumsetzung verändert diese Regelspur nicht.
+Der vollständige aktuelle Serverlauf ist ohne Abweichung grün.

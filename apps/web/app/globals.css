@@ -32,6 +32,121 @@
     cover no-repeat;
 }
 
+.replayTopbar {
+  flex-wrap: wrap;
+}
+
+.replayTopbarIdentity,
+.replayTopbarControls,
+.replayPerspectiveSwitch {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.replayTopbarIdentity {
+  min-width: min(100%, 300px);
+}
+
+.replayTopbarIdentity label,
+.replayTopbarIdentity select {
+  min-width: 0;
+  max-width: min(520px, 56vw);
+}
+
+.replayTopbarControls {
+  justify-content: flex-end;
+  margin-left: auto;
+}
+
+.replayPerspectiveSwitch {
+  padding-right: 4px;
+  border-right: 1px solid var(--line);
+}
+
+.replayPerspectiveSwitch .button[aria-pressed="true"] {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--panel), var(--accent) 13%);
+}
+
+.replayPlayButton {
+  min-width: 108px;
+}
+
+.replayStepCount {
+  min-width: 62px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.replayTimelineStrip {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) minmax(200px, auto) auto;
+  align-items: center;
+  gap: 10px 18px;
+}
+
+.replayScrubberLabel {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.replayScrubberLabel input {
+  width: 100%;
+}
+
+.replayLearningHint {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.replaySpeedLabel {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.replayReadOnlyPanel,
+.replayStatePanel {
+  display: grid;
+  gap: 5px;
+}
+
+.replayReadOnlyPanel span,
+.replayStatePanel small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.replayStatePanel h2,
+.replayStatePanel p {
+  margin: 0;
+}
+
+.replayError {
+  color: var(--danger);
+}
+
+@media (max-width: 1050px) {
+  .replayTopbarControls {
+    justify-content: flex-start;
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .replayTimelineStrip {
+    grid-template-columns: 1fr auto;
+  }
+
+  .replayLearningHint {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
+
 .activeMatchWorkspace {
   flex: 1 1 auto;
   width: 100%;

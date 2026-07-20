@@ -69,10 +69,11 @@ Zuschauerprojektion sichtbar, die weder Hände noch andere verdeckte
 Kartenidentitäten, private Choices oder LegalActions enthält.
 
 Nach Matchende liefert ein öffentliches Match ein anonym abrufbares,
-StateHash-verifiziertes Full-Information-Replay. Der visuelle Player wechselt
-zwischen Teilnehmer A und B, spielt und sucht durch die gespeicherten
-Zustände und kann die jeweils gegnerische Hand in einem mitlaufenden Fenster
-anzeigen. Private Matches bleiben aus öffentlichen Listen und anonymen
+StateHash-verifiziertes Full-Information-Replay. Es verwendet dieselbe
+Spieloberfläche wie eine laufende Partie und wechselt ohne Schrittverlust
+zwischen Runner- und Korp-Perspektive. Die jeweils eigene Hand erscheint im
+normalen Board; eine getrennte Analysefläche und ein Gegnerhandfenster
+existieren nicht. Private Matches bleiben aus öffentlichen Listen und anonymen
 Replaypfaden ausgeschlossen. Eine einmalige SQLite-Normalisierung markiert
 alle vorhandenen Matches rückwirkend öffentlich; der Bestandsaudit bestätigte
 21/21 öffentliche Matches und 19/19 replayfähige terminale Matches mit 4.218
