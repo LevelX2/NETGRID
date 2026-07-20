@@ -206,6 +206,29 @@ Bei einem fehlgeschlagenen Done-Gate bleibt der Zustand beim aktuellen Paket.
   und Redaction-Tests grün, `@netgrid/ai`-Typecheck grün und
   `git diff --check` ohne Befund.
 
+### P3 – abgeschlossen am 20. Juli 2026
+
+- Baseline-Slots können über einen begrenzten Pool isolierter Node-Prozesse
+  laufen. Die Ergebniszusammenführung folgt unabhängig von der tatsächlichen
+  Fertigstellungsreihenfolge strikt der angeforderten Slot-Reihenfolge.
+- Ein effektiver Worker läuft ohne Prozessstart lokal. Die Automatik aktiviert
+  Parallelität erst ab vier Slots; `--workers 1..32` erlaubt eine bewusste
+  Abweichung. Damit vermeiden kleine Läufe den nachgewiesenen Cold-Start- und
+  Cache-Nachteil mehrerer Prozesse.
+- Der Sechs-Slot-Mix mit Seed `ai-behavior-baseline-v1-07` und 120 Aktionen
+  sank von 35,506 s mit einem Worker auf 32,844 s mit vier Workern, also um
+  7,5 Prozent. Raw-Slots, normalisierte Baseline und alle sechs StateHashes
+  waren identisch.
+- Gegenprobe: zwei identische 240-Aktionen-Slots waren seriell mit 35,384 s
+  schneller als zwei kalte Prozesse mit 38,943 s. Dieser Fall begründet die
+  konservative Automatik statt einer pauschalen Parallelisierung.
+- Der einzelne feste 240-Aktionen-Fall blieb nach der Runner-Auslagerung
+  vollständig bitgleich zu P2. Workerfehler stoppen neue Tasks, laufende Tasks
+  werden abgewartet und temporäre Worker-Verzeichnisse werden auch bei Fehlern
+  fail-closed entfernt.
+- Verifikation: drei Pool-/Fehlerpfadtests grün, `check:ai` grün,
+  seriell/parallel identische Raw-Evidence und `git diff --check` ohne Befund.
+
 ## Verifikationsregeln
 
 - Parität wird über ActionSequence, finalen StateHash, Replaystatus,
