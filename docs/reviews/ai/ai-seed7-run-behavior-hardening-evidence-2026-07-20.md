@@ -1,6 +1,6 @@
 # Seed-7-Run-Verhalten – Umsetzungsevidence
 
-Status: Final Verify einschließlich aktuellem `main` grün, lokaler Main-Merge und Cleanup ausstehend
+Status: abgeschlossen – Final Verify grün, lokal in `main` integriert und Cleanup verifiziert
 
 ## Geprüfter Fehlerkorridor
 
@@ -135,5 +135,7 @@ und unversioniert:
 - Zehn-Seed-Vergleich nach Integration des aktuellen `main`:
   `C:\Projekte\NETGRID_AI_SEED7_RUN_BEHAVIOR_HARDENING\data\local\ai-behavior-baseline-v1-seed7-hardening-post-main-raw.json`
 
-Die Worktree-lokalen Rohartefakte werden beim verbindlichen Cleanup entfernt;
-die belastbaren Ergebnisse sind in diesem Review dokumentiert.
+Die Worktree-lokalen Rohartefakte wurden beim verbindlichen Cleanup entfernt;
+die belastbaren Ergebnisse sind in diesem Review dokumentiert. Der Branch-Tip
+`de491c434` ist Bestandteil von `main`; Umsetzungs-Worktree und gemergter
+Branch sind entfernt.

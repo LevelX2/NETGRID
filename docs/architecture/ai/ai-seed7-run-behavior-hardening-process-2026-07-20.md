@@ -1,6 +1,6 @@
 # Seed-7-Run-Verhalten der KI härten
 
-Status: aktiv – Final Verify einschließlich aktuellem `main` grün, lokaler Main-Merge und Cleanup ausstehend
+Status: abgeschlossen – Final Verify grün, lokal in `main` integriert und Cleanup verifiziert
 
 ## Quelle und Zielprüfung
 
@@ -228,7 +228,8 @@ Commit: `test(ai): harden seed7 run execution regressions`
 - Paket 3: abgeschlossen
 - Paket 4: abgeschlossen
 - Final Verify: abgeschlossen
-- Main-Merge und Cleanup: ausstehend
+- Main-Merge und Cleanup: abgeschlossen; Branch-Tip `de491c434` ist Bestandteil
+  von `main`, Umsetzungs-Worktree und gemergter Branch sind entfernt.
 
 ## Paketnachweis
 
