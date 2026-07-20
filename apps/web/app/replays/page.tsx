@@ -14,12 +14,25 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
+import {
+  CardImagePreferenceContext,
+  CardScaleSettingsContext,
+  CardTooltipSettingsContext,
+} from "../../features/cards/card-display-settings";
+import { usePersistentCardScaleSettings } from "../../features/cards/usePersistentCardScaleSettings";
 import { ReplayBoard } from "../../features/replay/ReplayBoard";
+import {
+  DEFAULT_REPLAY_BOARD_SETTINGS,
+  loadReplayBoardSettings,
+} from "../../features/replay/replay-board-settings";
 import {
   clampReplayFrame,
   nextReplayFrame,
   playbackDelayMs,
 } from "../../features/replay/replay-player-model";
+import { readLocalStorage } from "../../lib/local-storage";
+import { CARD_DISPLAY_MODE_STORAGE_KEY } from "../../lib/storage-keys";
+import type { CardDisplayMode } from "../../features/settings/settings-model";
 
 const SERVER_HTTP =
   process.env.NEXT_PUBLIC_NETGRID_SERVER_URL ?? "http://127.0.0.1:8787";
@@ -71,6 +84,18 @@ export default function ReplayPage() {
   const [speed, setSpeed] = useState(1);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [boardSettings, setBoardSettings] = useState(
+    DEFAULT_REPLAY_BOARD_SETTINGS,
+  );
+  const cardScaleSettings = usePersistentCardScaleSettings();
+
+  useEffect(() => {
+    setBoardSettings(loadReplayBoardSettings(readLocalStorage));
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = boardSettings.colorScheme;
+  }, [boardSettings.colorScheme]);
 
   useEffect(() => {
     const requestedMatchId = new URLSearchParams(window.location.search).get(
@@ -164,12 +189,27 @@ export default function ReplayPage() {
     if (frameIndex >= frames.length - 1) setFrameIndex(0);
     setPlaying(true);
   };
+  const updateCardDisplayMode = (cardDisplayMode: CardDisplayMode) => {
+    setBoardSettings((current) => ({ ...current, cardDisplayMode }));
+    window.localStorage.setItem(CARD_DISPLAY_MODE_STORAGE_KEY, cardDisplayMode);
+  };
+  const resourceStripVisible = boardSettings.resourceStripMode === "on";
+  const replayClassName = [
+    "app",
+    "activeMatch",
+    "replayApp",
+    boardSettings.topbarStickyEnabled ? "" : "topbarStickyDisabled",
+    boardSettings.cyberspaceBackgroundEnabled
+      ? "cyberspaceBackgroundEnabled"
+      : "",
+    `resourceStrip-${boardSettings.resourceStripMode}`,
+    resourceStripVisible ? "resourceStripVisible" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
-    <main
-      className="app activeMatch cyberspaceBackgroundEnabled resourceStrip-on resourceStripVisible replayApp"
-      data-theme="black"
-    >
+    <main className={replayClassName} data-theme={boardSettings.colorScheme}>
       <header className="topbar replayTopbar">
         <div className="replayTopbarIdentity">
           <button
@@ -287,12 +327,41 @@ export default function ReplayPage() {
       ) : null}
 
       {currentFrame ? (
-        <ReplayBoard
-          frame={currentFrame}
-          perspective={perspective}
-          displayNames={replay?.metadata.participantNames ?? {}}
-          publicEvents={currentPublicEvents}
-        />
+        <CardScaleSettingsContext.Provider
+          value={{
+            tooltipPercent: cardScaleSettings.cardTooltipScalePercent,
+            handPercent: cardScaleSettings.cardHandScalePercent,
+            archivePercent: cardScaleSettings.cardArchiveScalePercent,
+            zonePercent: cardScaleSettings.cardZoneScalePercent,
+            boardPercent: cardScaleSettings.cardBoardScalePercent,
+            rigPercent: cardScaleSettings.cardRigScalePercent,
+            specialZonePercent: cardScaleSettings.cardSpecialZoneScalePercent,
+          }}
+        >
+          <CardImagePreferenceContext.Provider
+            value={{
+              preferGermanCardImages: boardSettings.preferGermanCardImages,
+              showSetBadges: boardSettings.showSetBadges,
+            }}
+          >
+            <CardTooltipSettingsContext.Provider
+              value={{
+                hoverOpenDelayMs: boardSettings.cardTooltipHoverDelayMs,
+                mode: boardSettings.cardTooltipMode,
+              }}
+            >
+              <ReplayBoard
+                frame={currentFrame}
+                perspective={perspective}
+                displayNames={replay?.metadata.participantNames ?? {}}
+                publicEvents={currentPublicEvents}
+                cardDisplayMode={boardSettings.cardDisplayMode}
+                chronicleDetailMode={boardSettings.chronicleDetailMode}
+                onCardDisplayMode={updateCardDisplayMode}
+              />
+            </CardTooltipSettingsContext.Provider>
+          </CardImagePreferenceContext.Provider>
+        </CardScaleSettingsContext.Provider>
       ) : null}
     </main>
   );
