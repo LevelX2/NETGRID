@@ -89,6 +89,33 @@ Der Vergleich verweigert eine Bewertung bei abweichender Version, Seeds,
 Slot-Reihenfolge, Aktionslimit oder Deck-Fingerprints. Ein anderer Git-Stand ist
 erwartet und wird im Bericht als Kandidat ausgewiesen.
 
+## Automatische Laufzeitwirkung und neue Benchmarks
+
+Die aktuellen Laufzeitoptimierungen greifen automatisch für den Standardlauf
+und für neue Benchmarks, wenn sie den öffentlichen Entscheidungsweg über
+`buildAiDecisionInput` und `chooseAiAction` beziehungsweise die vorhandenen
+APIs unter `@netgrid/ai/simulation` verwenden. Es gibt keinen Performance-Flag
+und keinen Cache, den ein Benchmark selbst initialisieren oder leeren muss.
+
+Wichtig für neue Benchmarkwerkzeuge:
+
+- `AiDecisionInput` innerhalb eines synchronen Entscheidungsaufrufs nicht
+  mutieren;
+- keine produktiven Runtime-Interna direkt aufrufen und den öffentlichen
+  `chooseAiAction`-Entrypoint nicht umgehen;
+- für serielle Vorher-/Nachher-Messungen `--workers 1`, identische Seeds,
+  Slots, Aktionslimits und Deck-Fingerprints verwenden;
+- neben der Wallclock immer ActionSequence, StateHash, kompakte Baseline und
+  vollständige Raw-Slots vergleichen;
+- Workerparallelität nur als eigene Wallclock-Messung betrachten, nicht als
+  Ersatz für den seriellen Paritätslauf.
+
+Ein eigenes Werkzeug, das nur interne Scoringfunktionen isoliert aufruft,
+profitiert nicht zwingend von entscheidungslokalen Ableitungscaches und ist
+nicht automatisch mit dem Standard-Benchmark vergleichbar. Das aktuelle
+Profilingverfahren und die Hotspotwerte stehen in
+`ai-core-runtime-performance-followup-process-2026-07-20.md`.
+
 ## Artefakte und Interpretation
 
 - Die kompakte Baseline und der vollständige redigierte Tracebestand gehören

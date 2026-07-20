@@ -1,6 +1,6 @@
 # KI-Kernlaufzeit: Post-Optimization-Profiling und Folgeoptimierung
 
-Status: in Umsetzung
+Status: abgeschlossen
 
 ## Ziel und Messbasis
 
@@ -82,15 +82,15 @@ addiert werden. Sie dienen der Priorisierung, nicht als fragile CI-Grenzwerte.
 
 ## Testmatrix
 
-| Gate | Nachweis |
-| --- | --- |
-| Cache-Korrektheit | gleiche Eingabe/Aktion wird einmal berechnet; neue Entscheidung berechnet neu |
-| Schlüsselvollständigkeit | andere Aktion oder anderes Run-Ziel erhält eigene Auswertung |
-| Redaction | alle verbotenen Marker in Schlüssel und Werten bleiben erkennbar |
-| Shared References | vollständige einmalige Traversierung ohne Informationsverlust |
-| Entscheidungsparität | ActionSequence, StateHash und vollständige Baseline-Felder bitgleich |
-| Laufzeit | gleiche 240-Aktionen-Last vor/nach Änderung, ein Worker |
-| Regression | AI-Typecheck, `check:ai`, AI-Suite und Server-KI-Langlauf grün |
+| Gate                     | Nachweis                                                                      |
+| ------------------------ | ----------------------------------------------------------------------------- |
+| Cache-Korrektheit        | gleiche Eingabe/Aktion wird einmal berechnet; neue Entscheidung berechnet neu |
+| Schlüsselvollständigkeit | andere Aktion oder anderes Run-Ziel erhält eigene Auswertung                  |
+| Redaction                | alle verbotenen Marker in Schlüssel und Werten bleiben erkennbar              |
+| Shared References        | vollständige einmalige Traversierung ohne Informationsverlust                 |
+| Entscheidungsparität     | ActionSequence, StateHash und vollständige Baseline-Felder bitgleich          |
+| Laufzeit                 | gleiche 240-Aktionen-Last vor/nach Änderung, ein Worker                       |
+| Regression               | AI-Typecheck, `check:ai`, AI-Suite und Server-KI-Langlauf grün                |
 
 ## Arbeitsstand
 
@@ -98,3 +98,29 @@ addiert werden. Sie dienen der Priorisierung, nicht als fragile CI-Grenzwerte.
 - Branch: `codex/ai-core-performance`
 - Basis: lokales `main` auf `763e85b45`
 - Remote-Push und Pull Request sind nicht Bestandteil der Aufgabe.
+
+## Abschlussstand
+
+- Run-Target-Auswertungen werden innerhalb einer Entscheidung nach
+  Inputidentität, Actionidentität und Zielserver wiederverwendet. Ein anderer
+  Zielserver und die nächste Entscheidung erzeugen zwingend eine neue
+  Auswertung.
+- Persistent-Install-Auswertungen werden nach Actionidentität, die zugrunde
+  liegende Handentwicklung nach Inputidentität wiederverwendet. Außerhalb des
+  synchronen Entscheidungszyklus existiert kein Cache.
+- Semantic-Redaction und Side-Safety erkennen dieselben exakten ASCII-Tokens
+  jetzt über eine vorgebaute Grenzprüfung statt über Token-Arrays und
+  temporäre Sets. Vollständig geprüfte geteilte Objekte werden nur einmal
+  traversiert.
+- Der feste unprofilierte 240-Aktionen-Lauf sank gegenüber dem Stand nach der
+  ersten Performanceoptimierung von 22,854 auf 18,512 Sekunden, also um
+  weitere 19,0 Prozent. Gegenüber der ursprünglichen Messung von 29,228
+  Sekunden sind es insgesamt 36,7 Prozent.
+- Unter identischem Node-CPU-Profiling sank die Wallclock von 27,706 auf
+  16,508 Sekunden. Die inklusive KI-Entscheidungszeit sank von 11,664 auf
+  5,051 Sekunden, Kandidatenbewertung von 8,560 auf 3,258 Sekunden,
+  Run-Target-Auswertung von 4,009 auf 0,847 Sekunden und semantische
+  Redaction von 4,791 auf 0,820 Sekunden.
+- Kompakte Konfiguration, Slots, Aggregate und Gate sowie alle vollständigen
+  Raw-Slots sind bitgleich. Die 416 AI-Testdateien mit 2.848 Tests,
+  AI-Typecheck, `check:ai` und der replayfähige Server-Langlauf sind grün.
