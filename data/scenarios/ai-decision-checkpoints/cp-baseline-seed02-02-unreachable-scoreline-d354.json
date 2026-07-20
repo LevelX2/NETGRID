@@ -33733,8 +33733,13 @@
     }
   },
   "expectation": {
-    "contractKind": "equivalence_only",
+    "contractKind": "correctness",
     "acceptableActions": [
+      {
+        "actionId": "corp.install_card.corp_onr_v1_213_private-cybernet-police_1.remote_1.corp_onr_v1_213_private-cybernet-police_1"
+      }
+    ],
+    "forbiddenActions": [
       {
         "actionId": "corp.gain_credit"
       }

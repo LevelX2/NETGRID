@@ -40,6 +40,10 @@ import {
   triageSeverityFromScoringWindow,
 } from "./corp-scoreline/semantic-runtime-corp-board-triage-policies";
 import { semanticRuntimeCorpBoardTriageActionComponentForTriage } from "./corp-scoreline/semantic-runtime-corp-board-triage-alignment";
+import {
+  corpScorelineAllowsMultiTurnDevelopment,
+  corpScorelineFeasibilityForDecisionInput,
+} from "./corp-scoreline-feasibility";
 import { decisionDerivedValue } from "./decision-derived-cache";
 
 export type {
@@ -78,6 +82,9 @@ function buildSemanticRuntimeCorpBoardTriage<TConsumer extends string>(
     scoredLegalAction(input, action, dependencies),
   );
   const currentCredits = input.playerView.own.credits;
+  const scorelineFeasibility = corpScorelineFeasibilityForDecisionInput(input);
+  const scorelineDevelopmentAllowed =
+    corpScorelineAllowsMultiTurnDevelopment(scorelineFeasibility);
 
   const scoreNow = actions.find(
     (entry) =>
@@ -106,12 +113,14 @@ function buildSemanticRuntimeCorpBoardTriage<TConsumer extends string>(
     };
   }
 
-  const preScoreCentralProtection = preScoreCentralProtectionTriage(
-    input,
-    actions,
-    currentCredits,
-    dependencies,
-  );
+  const preScoreCentralProtection = scorelineDevelopmentAllowed
+    ? preScoreCentralProtectionTriage(
+        input,
+        actions,
+        currentCredits,
+        dependencies,
+      )
+    : undefined;
   if (preScoreCentralProtection) return preScoreCentralProtection;
 
   const openingCentralBaseline = openingCentralBaselineTriage(
@@ -179,11 +188,13 @@ function buildSemanticRuntimeCorpBoardTriage<TConsumer extends string>(
     }
   }
 
-  const remoteFunding = highestPriorityScoreRemoteEntry(
-    actions.filter((entry) =>
-      scoreRemoteNeedsFunding(input, entry, actions, dependencies),
-    ),
-  );
+  const remoteFunding = scorelineDevelopmentAllowed
+    ? highestPriorityScoreRemoteEntry(
+        actions.filter((entry) =>
+          scoreRemoteNeedsFunding(input, entry, actions, dependencies),
+        ),
+      )
+    : undefined;
   if (remoteFunding?.scoringWindow) {
     const requiredRezFloor = scoreRemoteRequiredRezFloor(
       input,
@@ -210,11 +221,13 @@ function buildSemanticRuntimeCorpBoardTriage<TConsumer extends string>(
     };
   }
 
-  const remoteProtection = highestPriorityScoreRemoteEntry(
-    actions.filter((entry) =>
-      scoreRemoteNeedsProtection(input, entry, dependencies),
-    ),
-  );
+  const remoteProtection = scorelineDevelopmentAllowed
+    ? highestPriorityScoreRemoteEntry(
+        actions.filter((entry) =>
+          scoreRemoteNeedsProtection(input, entry, dependencies),
+        ),
+      )
+    : undefined;
   if (remoteProtection?.scoringWindow) {
     return {
       primary: "protect_score_remote",
@@ -289,8 +302,9 @@ function buildSemanticRuntimeCorpBoardTriage<TConsumer extends string>(
   }
 
   const setupRemote =
-    !corpTriageIsPunishPrimary(input) ||
-    corpRemoteScoringStrategyWantsRemoteDevelopment(input)
+    scorelineDevelopmentAllowed &&
+    (!corpTriageIsPunishPrimary(input) ||
+      corpRemoteScoringStrategyWantsRemoteDevelopment(input))
       ? actions.find((entry) => actionBuildsScoreRemote(entry))
       : undefined;
   if (setupRemote) {
@@ -312,7 +326,15 @@ function buildSemanticRuntimeCorpBoardTriage<TConsumer extends string>(
     primary: "low_value",
     severity: "low",
     currentCredits,
-    evidence: ["corp_board_triage_primary:low_value"],
+    evidence: [
+      "corp_board_triage_primary:low_value",
+      ...(scorelineFeasibility && !scorelineDevelopmentAllowed
+        ? [
+            ...scorelineFeasibility.evidence,
+            "corp_board_triage_scoreline_development:false",
+          ]
+        : []),
+    ],
   };
 }
 

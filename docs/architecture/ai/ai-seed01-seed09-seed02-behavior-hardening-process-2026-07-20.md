@@ -259,6 +259,24 @@ Commit: `docs(ai): close seed01 seed09 seed02 hardening`
   - Seed 02/181 sowie ungescorte/gescorte Agenda-, Upgrade-, On-Access- und
     Advancement-Gegenproben grün; 146 fokussierte Tests,
     Hint-Metadatenvertrag und AI-Typecheck grün.
-- Paket 3: in Arbeit
-- Paket 4: offen
+- Paket 3: abgeschlossen
+  - ein gemeinsamer Scoreline-Feasibility-Vertrag liefert Deck-Gesamtpunkte,
+    eigene und gegnerische Punkte, maximal erreichbare Punkte, Punkte bis zum
+    Sieg, verbleibende Mandatory Draws, aktuelle Aktionen, legale und
+    finanzierbare Score-Schritte sowie Same-Turn-Closeouts;
+  - Strategic Runtime, Board-Triage, TacticalPlans, TacticalPlan-Memory und
+    Plan-Portfolio konsumieren denselben Vertrag; mathematisch unerreichbare
+    oder nach R&D-Leerstand nicht mehr mehrzügig ausführbare Scoreline-Projekte
+    werden nicht erzeugt beziehungsweise aus Memory entfernt;
+  - bei leerem R&D erhalten nicht mehr fristgerecht konvertierbare Agenda-/ICE-
+    Installationen einen eng begrenzten Deadline-Malus; aktivierbare
+    Non-Scoreline-Punish-Pfade bleiben unberührt;
+  - Seed 02/354 verwirft den alten Credit-/Score-Window-Plan und installiert
+    Private Cybernet Police ausdrücklich über `corp.apply_punish_pressure` als
+    Tag-Linien-Unterstützung; Seed 02/413 verwirft den vierten Mastiff und
+    beginnt stattdessen die noch im laufenden Zug aktivierbare Blood-Cat-Linie;
+  - 146 fokussierte Tests einschließlich normaler sicherer Scoreline,
+    Last-Draw-Fenster, Same-Turn-Closeout, Planinvalidierung und bestehender
+    Board-Triage-Gegenproben sowie AI-Typecheck grün.
+- Paket 4: in Arbeit
 - Main-Merge und Cleanup: offen

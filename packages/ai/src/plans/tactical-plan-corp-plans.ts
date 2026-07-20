@@ -30,6 +30,11 @@ import { buildCorpScoreConversionPlans } from "./tactical-plan-corp-score-conver
 import { buildCorpFiniteEconomyPlans } from "./tactical-plan-corp-finite-economy";
 import { buildCorpPersistentEconomyPlans } from "./tactical-plan-corp-persistent-economy";
 import { buildCorpRemoteProjectPlans } from "./tactical-plan-corp-remote-project";
+import {
+  corpScorelineActionCanCloseThisTurn,
+  corpScorelineAllowsMultiTurnDevelopment,
+  corpScorelineFeasibilityForDecisionInput,
+} from "../runtime/corp-scoreline-feasibility";
 
 export function buildCorpTacticalPlans(
   context: TacticalPlanBuildContext,
@@ -37,18 +42,32 @@ export function buildCorpTacticalPlans(
   const input = context.input;
   const stateVersion = input.playerView.stateVersion;
   const plans: TacticalPlan[] = [];
+  const scorelineFeasibility = corpScorelineFeasibilityForDecisionInput(input);
+  const scorelinePointsReachable = scorelineFeasibility?.feasible !== false;
+  const scorelineMultiTurnDevelopmentAllowed =
+    corpScorelineAllowsMultiTurnDevelopment(scorelineFeasibility);
+  const scorelinePlanAllowedForAction = (actionId: string): boolean =>
+    scorelinePointsReachable &&
+    (scorelineMultiTurnDevelopmentAllowed ||
+      corpScorelineActionCanCloseThisTurn(scorelineFeasibility, actionId));
   const scorelineGoal = corpGoalForFamily(context, "corp_scoreline");
   const defenseGoal = corpGoalForFamily(context, "corp_ice_defense");
   const economyGoal = corpGoalForFamily(context, "economy");
   const punishGoal =
     corpGoalForFamily(context, "tag_punish") ??
     corpGoalForFamily(context, "damage_pressure");
-  plans.push(...buildCorpScoreConversionPlans(context, scorelineGoal));
+  if (scorelineMultiTurnDevelopmentAllowed) {
+    plans.push(...buildCorpScoreConversionPlans(context, scorelineGoal));
+  }
   plans.push(...buildCorpFiniteEconomyPlans(context));
   plans.push(...buildCorpPersistentEconomyPlans(context));
-  plans.push(...buildCorpRemoteProjectPlans(context));
+  if (scorelineMultiTurnDevelopmentAllowed) {
+    plans.push(...buildCorpRemoteProjectPlans(context));
+  }
   for (const action of input.legalActions.filter(
-    (candidate) => candidate.type === "score_agenda",
+    (candidate) =>
+      candidate.type === "score_agenda" &&
+      scorelinePlanAllowedForAction(candidate.actionId),
   )) {
     const strategicBoost = tacticalGoalPriorityBoost(scorelineGoal);
     plans.push(
@@ -81,7 +100,9 @@ export function buildCorpTacticalPlans(
     );
   }
   for (const action of input.legalActions.filter(
-    (candidate) => candidate.type === "advance_card",
+    (candidate) =>
+      candidate.type === "advance_card" &&
+      scorelinePlanAllowedForAction(candidate.actionId),
   )) {
     const serverId =
       actionServerId(action) ?? visibleSourceServerId(input.playerView, action);
@@ -150,7 +171,8 @@ export function buildCorpTacticalPlans(
     (candidate) =>
       candidate.type === "install_card" &&
       candidate.payload?.placement !== "ice" &&
-      scorelineInstallActionIds.has(candidate.actionId),
+      scorelineInstallActionIds.has(candidate.actionId) &&
+      scorelinePlanAllowedForAction(candidate.actionId),
   )) {
     const serverId =
       actionServerId(action) ?? visibleSourceServerId(input.playerView, action);

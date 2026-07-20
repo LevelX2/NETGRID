@@ -1,6 +1,10 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { TacticalPlan, TacticalPlanType } from "./tactical-plan-types";
 import {
+  corpScorelineAllowsMultiTurnDevelopment,
+  corpScorelineFeasibilityForDecisionInput,
+} from "../runtime/corp-scoreline-feasibility";
+import {
   PLAN_PORTFOLIO_SCHEMA_VERSION,
   type PlanActionContribution,
   type PlanActionContributionKind,
@@ -68,7 +72,8 @@ export function buildPlanPortfolio(
           (current) => current.portfolioEntryId === entry.portfolioEntryId,
         ) &&
         entry.lifecycle !== "completed" &&
-        entry.lifecycle !== "abandoned",
+        entry.lifecycle !== "abandoned" &&
+        previousBackgroundStillViable(params.input, entry),
     )
     .map((entry) => carryDormantBackground(entry, turnKey));
   const rankedBackgrounds = [...currentBackgrounds, ...carriedBackgrounds].sort(
@@ -110,6 +115,16 @@ export function buildPlanPortfolio(
     ],
   };
   return snapshot;
+}
+
+function previousBackgroundStillViable(
+  input: AiDecisionInput,
+  entry: PlanPortfolioEntry,
+): boolean {
+  if (entry.planType !== "corp.establish_scoring_remote") return true;
+  return corpScorelineAllowsMultiTurnDevelopment(
+    corpScorelineFeasibilityForDecisionInput(input),
+  );
 }
 
 export function planPortfolioTurnKey(input: AiDecisionInput): string {

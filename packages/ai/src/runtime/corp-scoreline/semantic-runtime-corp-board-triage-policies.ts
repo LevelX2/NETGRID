@@ -22,6 +22,10 @@ import type {
 } from "../semantic-runtime-corp-scoring-window";
 import { semanticRuntimeVisibleSourceCard } from "../visible-card-lookup";
 import { corpStrategicKillLineFundingActive } from "../corp-visible-kill-line";
+import {
+  corpScorelineAllowsMultiTurnDevelopment,
+  corpScorelineFeasibilityForDecisionInput,
+} from "../corp-scoreline-feasibility";
 import type {
   CorpBoardTriage,
   CorpBoardTriageDependencies,
@@ -77,6 +81,8 @@ export function corpForcedScorelineClockPressure<TConsumer extends string>(
   actions: readonly ScoredLegalAction[],
   dependencies: CorpBoardTriageDependencies<TConsumer>,
 ): ForcedScorelineClockPressure | undefined {
+  const feasibility = corpScorelineFeasibilityForDecisionInput(input);
+  if (!corpScorelineAllowsMultiTurnDevelopment(feasibility)) return undefined;
   return (
     corpDeckoutAgendaFloodPressure(input, actions, dependencies) ??
     corpHqAgendaFloodScorelinePressure(input, actions, dependencies)
@@ -88,6 +94,8 @@ export function corpActiveScorelineClockPressure<TConsumer extends string>(
   actions: readonly ScoredLegalAction[],
   dependencies: CorpBoardTriageDependencies<TConsumer>,
 ): ForcedScorelineClockPressure | undefined {
+  const feasibility = corpScorelineFeasibilityForDecisionInput(input);
+  if (!corpScorelineAllowsMultiTurnDevelopment(feasibility)) return undefined;
   const entries = actions.filter(
     (entry) =>
       activeScorelineClockEntryIsPlayable(
@@ -259,6 +267,8 @@ export function corpDeckoutAgendaFloodPressure<TConsumer extends string>(
   actions: readonly ScoredLegalAction[],
   dependencies: CorpBoardTriageDependencies<TConsumer>,
 ): ForcedScorelineClockPressure | undefined {
+  const feasibility = corpScorelineFeasibilityForDecisionInput(input);
+  if (!corpScorelineAllowsMultiTurnDevelopment(feasibility)) return undefined;
   const rdCount = corpTriagePositiveNumber(input.playerView.own.stackOrRdCount);
   if (rdCount === undefined || rdCount > 6) return undefined;
 
@@ -350,6 +360,8 @@ export function corpHqAgendaFloodScorelinePressure<TConsumer extends string>(
   actions: readonly ScoredLegalAction[],
   dependencies: CorpBoardTriageDependencies<TConsumer>,
 ): ForcedScorelineClockPressure | undefined {
+  const feasibility = corpScorelineFeasibilityForDecisionInput(input);
+  if (!corpScorelineAllowsMultiTurnDevelopment(feasibility)) return undefined;
   const hqAgendaCards = input.playerView.own.gripOrHq.filter(
     corpTriageVisibleCardIsAgenda,
   );

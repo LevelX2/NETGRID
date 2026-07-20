@@ -23,6 +23,10 @@ import {
   runnerSurvivalFlatlineRiskLevelFromPlan,
   runnerSurvivalMinimumCreditsForPlan,
 } from "./tactical-plan-runner-survival-progress";
+import {
+  corpScorelineAllowsMultiTurnDevelopment,
+  corpScorelineFeasibilityForDecisionInput,
+} from "../runtime/corp-scoreline-feasibility";
 
 export type PlanContinuityMemorySnapshot = {
   type?: string;
@@ -37,11 +41,17 @@ const tacticalPlanMemoryByKey = new Map<string, TacticalPlanMemorySnapshot>();
 export function getTacticalPlanMemorySnapshot(
   input: AiDecisionInput,
 ): TacticalPlanMemorySnapshot | undefined {
+  const key = tacticalPlanMemoryKey(input);
   if (input.playerView.winner !== null) {
-    tacticalPlanMemoryByKey.delete(tacticalPlanMemoryKey(input));
+    tacticalPlanMemoryByKey.delete(key);
     return undefined;
   }
-  return tacticalPlanMemoryByKey.get(tacticalPlanMemoryKey(input));
+  const snapshot = tacticalPlanMemoryByKey.get(key);
+  if (snapshot && corpScorelinePlanNeedsInvalidation(input, snapshot)) {
+    tacticalPlanMemoryByKey.delete(key);
+    return undefined;
+  }
+  return snapshot;
 }
 
 export function rememberTacticalPlanRuntime(
@@ -164,6 +174,21 @@ export function getPlanContinuityMemorySnapshot(
 
 function tacticalPlanMemoryKey(input: AiDecisionInput): string {
   return `${tacticalPlanMemoryContextId(input)}:${input.side}:${input.profileId}`;
+}
+
+function corpScorelinePlanNeedsInvalidation(
+  input: AiDecisionInput,
+  snapshot: TacticalPlanMemorySnapshot,
+): boolean {
+  if (
+    snapshot.type !== "corp.create_score_window" &&
+    snapshot.type !== "corp.establish_scoring_remote"
+  ) {
+    return false;
+  }
+  return !corpScorelineAllowsMultiTurnDevelopment(
+    corpScorelineFeasibilityForDecisionInput(input),
+  );
 }
 
 function tacticalPlanMemoryContextId(input: AiDecisionInput): string {

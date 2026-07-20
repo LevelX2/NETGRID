@@ -55,6 +55,11 @@ import {
   corpActionCanResolveProfiledTrace,
   corpActionFamilyScoreComponents,
 } from "./corp-scoreline/semantic-runtime-corp-score-action-families";
+import {
+  corpScorelineActionCanCloseThisTurn,
+  corpScorelineFeasibilityForDecisionInput,
+} from "./corp-scoreline-feasibility";
+import { semanticRuntimeVisibleSourceCard } from "./visible-card-lookup";
 
 export type { SemanticRuntimeCorpScoreDependencies } from "./corp-scoreline/semantic-runtime-corp-score-contracts";
 
@@ -72,6 +77,11 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
   const components: AiDecisionScoreComponent[] = [];
   const credits = input.playerView.own.credits;
   const boardTriageState = semanticRuntimeCorpBoardTriage(input, dependencies);
+  const deadlineInstall = corpDeadlineUnconvertibleInstallComponent(
+    input,
+    action,
+  );
+  if (deadlineInstall) components.push(deadlineInstall);
   const purgeImpact = corpPurgeImpactScoreComponent(
     input,
     action,
@@ -406,9 +416,17 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
   if (preparedScoreRemoteAgendaSearch) {
     components.push(preparedScoreRemoteAgendaSearch);
   }
-  const optionalDrawComponents = corpOptionalDrawScoreComponents(input, action, boardTriageState);
+  const optionalDrawComponents = corpOptionalDrawScoreComponents(
+    input,
+    action,
+    boardTriageState,
+  );
   components.push(...optionalDrawComponents);
-  if (optionalDrawComponents.some((component) => component.key === "corp_low_hand")) {
+  if (
+    optionalDrawComponents.some(
+      (component) => component.key === "corp_low_hand",
+    )
+  ) {
     if (dependencies.corpHasRemoteInstability(input)) {
       components.push({
         key: "corp_remote_instability_draw",
@@ -485,4 +503,29 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
     }
   }
   return components;
+}
+
+function corpDeadlineUnconvertibleInstallComponent(
+  input: AiDecisionInput,
+  action: LegalAction,
+): AiDecisionScoreComponent | undefined {
+  if (action.type !== "install_card") return undefined;
+  const feasibility = corpScorelineFeasibilityForDecisionInput(input);
+  if (feasibility?.deadline !== "current_turn_only") return undefined;
+  if (corpScorelineActionCanCloseThisTurn(feasibility, action.actionId)) {
+    return undefined;
+  }
+  const source = semanticRuntimeVisibleSourceCard(input, action);
+  if (source?.type !== "ice" && source?.type !== "agenda") return undefined;
+  return {
+    key: "corp_deadline_unconvertible_install",
+    label: "Installation ohne Conversion vor Deckout",
+    value: -3600,
+    reason: [
+      `card_type:${source.type}`,
+      `action:${action.actionId}`,
+      ...feasibility.evidence,
+      "deadline_conversion:false",
+    ].join("|"),
+  };
 }

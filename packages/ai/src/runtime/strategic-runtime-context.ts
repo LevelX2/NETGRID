@@ -12,7 +12,6 @@ import type {
 } from "../deck-capabilities";
 import type { AiDeckStrategyProfile } from "../deck-doctrine-strategy";
 import type { AiDeckStrategyDeckSnapshot } from "../deck-strategy-snapshot";
-import { RUNTIME_CARDS } from "../ai-hints";
 import { actionProvidesCredits } from "../actions/action-effect-classification";
 import type {
   StrategicIntentFamily,
@@ -31,6 +30,7 @@ import { visibleSourceDefinitionsByInstanceId } from "./visible-source-definitio
 import { assessRunnerBreakerDevelopment } from "../runner-breaker-development";
 import { strategicFamilyForStrategyId } from "../strategy-runtime-registry";
 import { buildActionCardSemanticProfilesByDefinitionId } from "../actions/action-card-semantic-profiles";
+import { assessCorpScorelineFeasibility } from "./corp-scoreline-feasibility";
 
 export type StrategicRuntimeContext = {
   roleStatuses: StrategicRoleStatusSnapshot[];
@@ -245,7 +245,7 @@ function runtimePortfolioCandidate(
   const roleStatuses = roleStatusesForFamily(params, family);
   const targetVector = targetVectorForFamily(params, family, strategyId);
   const reserve = reserveRequirementForFamily(params, family);
-  const scorelineFeasibility = corpScorelineFeasibility(params, family);
+  const scorelineFeasibility = scorelineFeasibilityForFamily(params, family);
   const scorelineUnreachable = scorelineFeasibility?.feasible === false;
   const runtimeStatus = scorelineUnreachable
     ? "blocked"
@@ -777,7 +777,7 @@ function corpTargetVector(
     family === "corp_action_tempo" ||
     family === "corp_overadvance"
   ) {
-    const feasibility = corpScorelineFeasibility(params, family);
+    const feasibility = scorelineFeasibilityForFamily(params, family);
     return {
       kind: "scoreline",
       evidence: [
@@ -897,16 +897,10 @@ function corpTargetVector(
   };
 }
 
-function corpScorelineFeasibility(
+function scorelineFeasibilityForFamily(
   params: BuildStrategicRuntimeContextParams,
   family: StrategicIntentFamily,
-):
-  | {
-      feasible: boolean;
-      totalAgendaPoints: number;
-      maxReachablePoints: number;
-    }
-  | undefined {
+): ReturnType<typeof assessCorpScorelineFeasibility> {
   if (
     params.side !== "corp" ||
     ![
@@ -919,23 +913,7 @@ function corpScorelineFeasibility(
   ) {
     return undefined;
   }
-  const totalAgendaPoints = params.deckSnapshot.cards.reduce((sum, entry) => {
-    const agendaPoints = RUNTIME_CARDS[entry.cardId]?.numeric.agendaPoints;
-    return (
-      sum +
-      (typeof agendaPoints === "number" ? agendaPoints * entry.quantity : 0)
-    );
-  }, 0);
-  if (totalAgendaPoints <= 0) return undefined;
-  const maxReachablePoints = Math.max(
-    params.playerView.own.agendaPoints,
-    totalAgendaPoints - params.playerView.opponent.agendaPoints,
-  );
-  return {
-    feasible: maxReachablePoints >= params.playerView.agendaPointsToWin,
-    totalAgendaPoints,
-    maxReachablePoints,
-  };
+  return assessCorpScorelineFeasibility(params);
 }
 
 function reserveRequirementForFamily(

@@ -38987,11 +38987,21 @@
     }
   },
   "expectation": {
-    "contractKind": "equivalence_only",
+    "contractKind": "correctness",
     "acceptableActions": [
       {
-        "actionId": "corp.install_card.corp_onr_v1_255_mastiff_1.remote_1.corp_onr_v1_255_mastiff_1.3"
+        "actionId": "corp.install_card.corp_onr_v1_310_blood-cat_2.remote_1.corp_onr_v1_310_blood-cat_2"
       }
-    ]
+    ],
+    "forbiddenActions": [
+      {
+        "sourceDefinitionId": "onr_v1_255_mastiff"
+      }
+    ],
+    "selectedScoreBreakdown": {
+      "requiredComponentKeys": [
+        "corp_persistent_tag_engine_activation_pressure"
+      ]
+    }
   }
 }
