@@ -5,6 +5,10 @@ const SIDE_SAFE_AI_INPUT_MARKERS = new Set(
   FORBIDDEN_AI_INPUT_FIELDS.map((field) => field.toLowerCase()),
 );
 
+const SIDE_SAFE_AI_INPUT_MARKER_PATTERN = new RegExp(
+  `(?:^|[^a-z0-9])(?:${[...SIDE_SAFE_AI_INPUT_MARKERS].join("|")})(?=$|[^a-z0-9])`,
+);
+
 export function assertAiInputIsSideSafe(input: AiDecisionInput): boolean {
   return !sideSafeInputContainsForbiddenMarker(
     input,
@@ -65,22 +69,5 @@ function sideSafeInputContainsForbiddenMarker(
 }
 
 function stringContainsForbiddenMarker(value: string): boolean {
-  let current = "";
-  for (const character of value) {
-    if (isAsciiLetterOrDigit(character)) {
-      current += character.toLowerCase();
-    } else {
-      if (SIDE_SAFE_AI_INPUT_MARKERS.has(current)) return true;
-      current = "";
-    }
-  }
-  return SIDE_SAFE_AI_INPUT_MARKERS.has(current);
-}
-
-function isAsciiLetterOrDigit(character: string): boolean {
-  return (
-    (character >= "a" && character <= "z") ||
-    (character >= "A" && character <= "Z") ||
-    (character >= "0" && character <= "9")
-  );
+  return SIDE_SAFE_AI_INPUT_MARKER_PATTERN.test(value.toLowerCase());
 }
