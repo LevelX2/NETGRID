@@ -602,8 +602,11 @@ export function runnerRunTargetCurrentStep(
     probeOnly && evaluation?.scoreThreat === true && evaluation.pathCost === 0;
   const probeFundingRequired =
     probeOnly &&
+    evaluation?.scoreThreat === true &&
     (evaluation?.pathPassability === "blocked_unpayable" ||
-      evaluation?.unrezzedIceRiskUnderfunded === true);
+      (evaluation?.unrezzedIceRiskUnderfunded === true &&
+        context.input.playerView.opponent.credits > 1 &&
+        evaluation.creditsAfterRun <= 1));
   const usefulNonFundingActionAvailable =
     (context.input.legalActions ?? []).some(
       (candidate) => candidate.type === "draw_card",
@@ -627,7 +630,9 @@ export function runnerRunTargetCurrentStep(
   }
   if (
     evaluation?.recommendation === "gain_credits_first" &&
-    (!probeOnly || scoreThreatProbeWithoutVisibleCost || probeFundingRequired) &&
+    (!probeOnly ||
+      scoreThreatProbeWithoutVisibleCost ||
+      probeFundingRequired) &&
     !preserveLastClickForScoreThreat &&
     !preserveReachableMatchpointRun &&
     (concreteEconomyFunding ||

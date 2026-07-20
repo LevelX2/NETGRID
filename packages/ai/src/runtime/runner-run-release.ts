@@ -53,7 +53,8 @@ export function runnerRunReleaseForEvaluation(
     evaluation.knownAccessState !== "known_no_current_payoff" &&
     evaluation.creditsAfterRun >= 0 &&
     (evaluation.unrezzedIceRiskUnderfunded !== true ||
-      visibleCorpCredits(input) <= 1);
+      evaluation.creditsAfterRun > 1 ||
+      (visibleCorpCredits(input) <= 1 && highValueUnknownProbe(evaluation)));
   if (!unknownOnlyProbe && !runRecommendationReleasesNow(evaluation)) {
     return blocked(`recommendation_${evaluation.recommendation}`, baseEvidence);
   }
@@ -153,4 +154,14 @@ function visibleRunnerAgendaPoints(input: AiDecisionInput): number {
 function visibleCorpCredits(input: AiDecisionInput): number {
   const value = input.playerView.opponent.credits;
   return Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0;
+}
+
+function highValueUnknownProbe(
+  evaluation: RunnerRunTargetEvaluation,
+): boolean {
+  return (
+    evaluation.scoreThreat === true ||
+    evaluation.accessPayoff === "score_threat" ||
+    evaluation.accessPayoff === "agenda"
+  );
 }

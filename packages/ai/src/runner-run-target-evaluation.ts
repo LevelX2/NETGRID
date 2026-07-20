@@ -264,7 +264,7 @@ function evaluateRunnerRunTarget(
     unrezzedIceRiskModel.find((entry) => entry.serverId === targetServerId)
       ?.risk ?? 0;
   const unrezzedIceRiskCreditBuffer =
-    unknownUnrezzedIceCount > 0 && params.input.playerView.opponent.credits > 1
+    unknownUnrezzedIceCount > 0 && params.input.playerView.opponent.credits > 0
       ? Math.max(1, Math.ceil(unrezzedIceRisk * 4))
       : 0;
   const unrezzedIceRiskUnderfunded =

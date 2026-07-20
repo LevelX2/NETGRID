@@ -16,18 +16,21 @@ describe("match 2023BC65 Mobile Barricade run-budget checkpoints", () => {
     expectCheckpointToPass(fixture(fundedRemoteContestJson));
   });
 
-  it("keeps a funded score contest available when the Corp cannot credibly rez unknown ICE", () => {
-    const lowCorpCredits = mutateFixture(fundedRemoteContestJson, (checkpoint) => {
-      const state = checkpoint.engine.testOnlyGameState;
-      state.runner.credits = 10;
-      state.corp.credits = 0;
-      state.cardInstances[SPIN_CHIP_INSTANCE_ID]!.counters = { bit: 0 };
-      checkpoint.source.kind = "synthetic_companion";
-      checkpoint.source.findingId = "2023BC65-C01-LOW-CORP-REZ-CAPACITY";
-      checkpoint.expectation = {
-        acceptableActions: [{ actionId: "runner.start_run.remote_1" }],
-      };
-    });
+  it("keeps a funded score contest available at one visible Corp credit", () => {
+    const lowCorpCredits = mutateFixture(
+      fundedRemoteContestJson,
+      (checkpoint) => {
+        const state = checkpoint.engine.testOnlyGameState;
+        state.runner.credits = 10;
+        state.corp.credits = 0;
+        state.cardInstances[SPIN_CHIP_INSTANCE_ID]!.counters = { bit: 0 };
+        checkpoint.source.kind = "synthetic_companion";
+        checkpoint.source.findingId = "2023BC65-C01-LOW-CORP-REZ-CAPACITY";
+        checkpoint.expectation = {
+          acceptableActions: [{ actionId: "runner.start_run.remote_1" }],
+        };
+      },
+    );
 
     expectCheckpointToPass(lowCorpCredits);
   });
@@ -68,7 +71,7 @@ describe("match 2023BC65 Mobile Barricade run-budget checkpoints", () => {
   it("counts Spin Chip credits when Krash is actually hosted on it", () => {
     const hosted = mutateFixture(fundedRemoteContestJson, (checkpoint) => {
       const state = checkpoint.engine.testOnlyGameState;
-      state.corp.credits = 0;
+      state.corp.credits = 1;
       state.cardInstances[KRASH_INSTANCE_ID]!.hostedOn = SPIN_CHIP_INSTANCE_ID;
       checkpoint.source.kind = "synthetic_companion";
       checkpoint.source.findingId = "2023BC65-C04-HOSTED-SPIN-CHIP";

@@ -36,6 +36,7 @@ describe("runner run release", () => {
         pathPassability: "blocked_unpayable",
         recommendation: "gain_credits_first",
         unrezzedIceRiskUnderfunded: true,
+        creditsAfterRun: 0,
       }),
     );
 
@@ -56,6 +57,7 @@ describe("runner run release", () => {
         accessPayoff: "score_threat",
         recommendation: "gain_credits_first",
         unrezzedIceRiskUnderfunded: true,
+        creditsAfterRun: 0,
       }),
     );
 
@@ -122,6 +124,7 @@ function evaluation(params: {
   pathPassability?: RunnerRunTargetEvaluation["pathPassability"];
   recommendation?: RunnerRunTargetEvaluation["recommendation"];
   unrezzedIceRiskUnderfunded?: boolean;
+  creditsAfterRun?: number;
 }): RunnerRunTargetEvaluation {
   return {
     targetServerId: "rd",
@@ -132,7 +135,7 @@ function evaluation(params: {
     accessPayoff: params.accessPayoff,
     knownAccessState: "unknown",
     pathPassability: params.pathPassability ?? "reachable",
-    creditsAfterRun: 3,
+    creditsAfterRun: params.creditsAfterRun ?? 3,
     unrezzedIceRiskUnderfunded: params.unrezzedIceRiskUnderfunded ?? false,
     scoreThreat: false,
     recommendation: params.recommendation ?? "run_now",
